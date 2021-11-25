@@ -333,6 +333,21 @@ SELinuxLog(int type, const char *fmt, ...)
     return 0;
 }
 
+static int
+SELinuxPolicyLoad(int seqno)
+{
+    LogMessage(X_INFO, "SELinux: PolicyLoad (%d) detected, remapping security classes\n", seqno);
+
+    if (selinux_set_mapping(map) < 0) {
+        if (errno == EINVAL)
+            ErrorF("SELinux: Invalid object class mapping\n");
+        else
+            ErrorF("SELinux: Failed to set up security class mapping\n");
+    }
+
+    return 0;
+}
+
 /*
  * XACE Callbacks
  */
@@ -877,9 +892,9 @@ SELinuxFlaskInit(void)
     }
 
     /* Set up SELinux stuff */
-    selinux_set_callback(SELINUX_CB_LOG, (union selinux_callback) SELinuxLog);
-    selinux_set_callback(SELINUX_CB_AUDIT,
-                         (union selinux_callback) SELinuxAudit);
+    selinux_set_callback(SELINUX_CB_LOG, (union selinux_callback) { .func_log = SELinuxLog });
+    selinux_set_callback(SELINUX_CB_AUDIT, (union selinux_callback) { .func_audit = SELinuxAudit });
+    selinux_set_callback(SELINUX_CB_POLICYLOAD, (union selinux_callback) { .func_policyload = SELinuxPolicyLoad });
 
     if (selinux_set_mapping(map) < 0) {
         if (errno == EINVAL) {
