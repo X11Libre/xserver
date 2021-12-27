@@ -452,7 +452,7 @@ The default log file name when running as root is
 .RE
 and for non root it is
 .RS 11
-.RI $XDG_DATA_HOME/xorg/Xorg. <n> .log
+.RI $XDG_STATE_HOME/xorg/Xorg. <n> .log
 .RE
 .PP
 .RS 7

@@ -271,7 +271,7 @@ as the
 server log file.  The default log file when running as root is
 .BI @logdir@/Xorg. n .log
 and for non root it is
-.BI $XDG_DATA_HOME/xorg/Xorg. n .log
+.BI $XDG_STATE_HOME/xorg/Xorg. n .log
 where
 .I n
 is the display number of the
