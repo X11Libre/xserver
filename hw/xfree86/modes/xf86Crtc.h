@@ -842,7 +842,7 @@ xf86CompatOutput(ScrnInfoPtr pScrn)
     if (xf86CrtcConfigPrivateIndex == -1)
         return NULL;
     config = XF86_CRTC_CONFIG_PTR(pScrn);
-    if (config->compat_output < 0)
+    if ((config == NULL) || (config->compat_output < 0))
         return NULL;
     return config->output[config->compat_output];
 }
