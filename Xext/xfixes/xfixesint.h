@@ -201,6 +201,13 @@ int
 Bool
  XFixesShouldDisconnectClient(ClientPtr client);
 
+Bool
+ XFixesMustTerminateServerOnDisconnect(ClientPtr client);
+
+#ifndef XFixesClientDisconnectFlagForceTerminate
+#define XFixesClientDisconnectFlagForceTerminate (1L << 1)
+#endif
+
 /* Xinerama */
 #ifdef XINERAMA
 void PanoramiXFixesInit(void);
