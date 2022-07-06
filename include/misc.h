@@ -303,4 +303,10 @@ typedef unsigned long x_server_generation_t;
 extern _X_EXPORT unsigned long globalSerialNumber;
 extern _X_EXPORT x_server_generation_t serverGeneration;
 
+/* Stop all event delivery to clients effective immediately. */
+extern Bool stopAllEventDelivery;
+
+/* Allow clients to force the X server to terminate */
+extern Bool allowForceTerminate;
+
 #endif                          /* MISC_H */
