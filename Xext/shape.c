@@ -65,10 +65,10 @@ static void SShapeNotifyEvent(xShapeNotifyEvent * /* from */ ,
  * externally by the Xfixes extension and are now defined in window.h
  */
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
-#endif
+#endif /* XINERAMA */
 
 Bool noShapeExtension = FALSE;
 
@@ -297,7 +297,7 @@ ProcShapeRectangles(ClientPtr client)
     REQUEST(xShapeRectanglesReq);
     REQUEST_AT_LEAST_SIZE(xShapeRectanglesReq);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (noPanoramiXExtension)
         return ShapeRectangles(client, stuff);
 
@@ -393,7 +393,7 @@ ProcShapeMask(ClientPtr client)
     REQUEST(xShapeMaskReq);
     REQUEST_SIZE_MATCH(xShapeMaskReq);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (noPanoramiXExtension)
         return ShapeMask(client, stuff);
 
@@ -519,7 +519,7 @@ ProcShapeCombine(ClientPtr client)
     REQUEST(xShapeCombineReq);
     REQUEST_AT_LEAST_SIZE(xShapeCombineReq);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (noPanoramiXExtension)
         return ShapeCombine(client, stuff);
 
@@ -588,7 +588,7 @@ ProcShapeOffset(ClientPtr client)
     REQUEST(xShapeOffsetReq);
     REQUEST_AT_LEAST_SIZE(xShapeOffsetReq);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     PanoramiXRes *win;
     int j, result;
 

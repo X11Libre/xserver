@@ -302,9 +302,9 @@ Bool
  XFixesShouldDisconnectClient(ClientPtr client);
 
 /* Xinerama */
-#ifdef PANORAMIX
+#ifdef XINERAMA
 void PanoramiXFixesInit(void);
 void PanoramiXFixesReset(void);
-#endif
+#endif /* XINERAMA */
 
 #endif                          /* _XFIXESINT_H_ */

@@ -1333,9 +1333,9 @@ doPolyText(ClientPtr client, PTclosurePtr c)
     if (c->err != Success)
         err = c->err;
     if (err != Success && c->client != serverClient) {
-#ifdef PANORAMIX
+#ifdef XINERAMA
         if (noPanoramiXExtension || !c->pGC->pScreen->myNum)
-#endif
+#endif /* XINERAMA */
             SendErrorToClient(c->client, c->reqType, 0, 0, err);
     }
     if (ClientIsAsleep(client)) {
