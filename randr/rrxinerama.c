@@ -389,10 +389,10 @@ SProcRRXineramaDispatch(ClientPtr client)
 void
 RRXineramaExtensionInit(void)
 {
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (!noPanoramiXExtension)
         return;
-#endif
+#endif /* XINERAMA */
 
     if (noRRXineramaExtension)
       return;

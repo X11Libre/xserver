@@ -178,11 +178,11 @@ DGAInit(ScreenPtr pScreen, DGAFunctionPtr funcs, DGAModePtr modes, int num)
     for (i = 0; i < num; i++)
         modes[i].num = i + 1;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (!noPanoramiXExtension)
         for (i = 0; i < num; i++)
             modes[i].flags &= ~DGA_PIXMAP_AVAILABLE;
-#endif
+#endif /* XINERAMA */
 
     return TRUE;
 }
@@ -227,11 +227,11 @@ DGAReInitModes(ScreenPtr pScreen, DGAModePtr modes, int num)
     for (i = 0; i < num; i++)
         modes[i].num = i + 1;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (!noPanoramiXExtension)
         for (i = 0; i < num; i++)
             modes[i].flags &= ~DGA_PIXMAP_AVAILABLE;
-#endif
+#endif /* XINERAMA */
 
     return TRUE;
 }

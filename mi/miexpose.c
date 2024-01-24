@@ -93,10 +93,10 @@ Equipment Corporation.
 
 #include "globals.h"
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
-#endif
+#endif /* XINERAMA */
 
 /*
     machine-independent graphics exposure code.  any device that uses
@@ -323,7 +323,7 @@ miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy)
         pe->u.expose.count = i;
     }
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (!noPanoramiXExtension) {
         int scrnum = pWin->drawable.pScreen->myNum;
         int x = 0, y = 0;
@@ -354,7 +354,7 @@ miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy)
                 pEvent[i].u.expose.y += y;
             }
     }
-#endif
+#endif /* XINERAMA */
 
     DeliverEvents(pWin, pEvent, numRects, NullWindow);
 
