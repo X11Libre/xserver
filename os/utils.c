@@ -121,9 +121,9 @@ Bool enableIndirectGLX = FALSE;
 
 Bool AllowByteSwappedClients = FALSE;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 Bool PanoramiXExtensionDisabledHack = FALSE;
-#endif
+#endif /* XINERAMA */
 
 char *SeatId = NULL;
 
@@ -323,10 +323,10 @@ UseMsg(void)
     ErrorF("-v                     screen-saver without video blanking\n");
     ErrorF("-wr                    create root window with white background\n");
     ErrorF("-maxbigreqsize         set maximal bigrequest size \n");
-#ifdef PANORAMIX
+#ifdef XINERAMA
     ErrorF("+xinerama              Enable XINERAMA extension\n");
     ErrorF("-xinerama              Disable XINERAMA extension\n");
-#endif
+#endif /* XINERAMA */
     ErrorF("-dumbSched             Disable smart scheduling and threaded input, enable old behavior\n");
     ErrorF("-schedInterval int     Set scheduler interval in msec\n");
     ErrorF("-sigstop               Enable SIGSTOP based startup\n");
@@ -722,7 +722,7 @@ ProcessCommandLine(int argc, char *argv[])
                 UseMsg();
             }
         }
-#ifdef PANORAMIX
+#ifdef XINERAMA
         else if (strcmp(argv[i], "+xinerama") == 0) {
             noPanoramiXExtension = FALSE;
         }
@@ -732,7 +732,7 @@ ProcessCommandLine(int argc, char *argv[])
         else if (strcmp(argv[i], "-disablexineramaextension") == 0) {
             PanoramiXExtensionDisabledHack = TRUE;
         }
-#endif
+#endif /* XINERAMA */
         else if (strcmp(argv[i], "-I") == 0) {
             /* ignore all remaining arguments */
             break;
