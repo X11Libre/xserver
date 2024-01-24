@@ -50,12 +50,12 @@ and Jim Haggerty of Metheus.
 #include "inputstr.h"
 #include "scrnintstr.h"
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 #include "globals.h"
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
 #include "cursor.h"
-#endif
+#endif /* XINERAMA */
 
 #include "protocol-versions.h"
 
@@ -714,7 +714,7 @@ RecordSendProtocolEvents(RecordClientsAndProtocolPtr pRCAP,
             xEvent swappedEvent;
             xEvent *pEvToRecord = pev;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
             xEvent shiftedEvent;
 
             if (!noPanoramiXExtension &&
@@ -731,7 +731,7 @@ RecordSendProtocolEvents(RecordClientsAndProtocolPtr pRCAP,
                     screenInfo.screens[scr]->y - screenInfo.screens[0]->y;
                 pEvToRecord = &shiftedEvent;
             }
-#endif                          /* PANORAMIX */
+#endif /* XINERAMA */
 
             if (pContext->pRecordingClient->swapped) {
                 (*EventSwapVector[pEvToRecord->u.u.type & 0177])

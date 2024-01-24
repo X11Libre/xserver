@@ -223,13 +223,13 @@ typedef struct _SpriteRec {
     WindowPtr win;              /* window of logical position */
     HotSpot hot;                /* logical pointer position */
     HotSpot hotPhys;            /* physical pointer position */
-#ifdef PANORAMIX
+#ifdef XINERAMA
     ScreenPtr screen;           /* all others are in Screen 0 coordinates */
     RegionRec Reg1;             /* Region 1 for confining motion */
     RegionRec Reg2;             /* Region 2 for confining virtual motion */
     WindowPtr windows[MAXSCREENS];
     WindowPtr confineWin;       /* confine window */
-#endif
+#endif /* XINERAMA */
     /* The window trace information is used at dix/events.c to avoid having
      * to compute all the windows between the root and the current pointer
      * window each time a button or key goes down. The grabs on each of those

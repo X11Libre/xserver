@@ -29,8 +29,8 @@ extern _X_EXPORT char *SeatId;
 extern _X_EXPORT char *ConnectionInfo;
 extern _X_EXPORT sig_atomic_t inSignalContext;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 extern _X_EXPORT Bool PanoramiXExtensionDisabledHack;
-#endif
+#endif /* XINERAMA */
 
 #endif                          /* !_XSERV_GLOBAL_H_ */

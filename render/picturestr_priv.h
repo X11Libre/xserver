@@ -38,9 +38,9 @@ Bool AnimCurInit(ScreenPtr pScreen);
 int AnimCursorCreate(CursorPtr *cursors, CARD32 *deltas, int ncursor,
                      CursorPtr *ppCursor, ClientPtr client, XID cid);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 void PanoramiXRenderInit(void);
 void PanoramiXRenderReset(void);
-#endif /* PANORAMIX */
+#endif /* XINERAMA */
 
 #endif /* _XSERVER_PICTURESTR_PRIV_H_ */

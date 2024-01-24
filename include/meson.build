@@ -212,7 +212,7 @@ if build_glx
     conf_data.set_quoted('DRI_DRIVER_PATH', dri_dep.get_variable(pkgconfig : 'dridriverdir'))
 endif
 conf_data.set('MITSHM', build_mitshm ? '1' : false)
-conf_data.set('PANORAMIX', build_xinerama ? '1' : false)
+conf_data.set('XINERAMA', build_xinerama ? '1' : false)
 conf_data.set('PRESENT', '1')
 conf_data.set('RANDR', '1')
 conf_data.set('RES', build_res ? '1' : false)
