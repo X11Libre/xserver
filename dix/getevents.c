@@ -60,10 +60,10 @@
 
 #include "xkbsrv.h"
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
-#endif
+#endif /* XINERAMA */
 
 #include "exglobals.h"
 #include "exevents.h"
@@ -2140,7 +2140,7 @@ PostSyntheticMotion(DeviceIntPtr pDev,
 {
     DeviceEvent ev;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     /* Translate back to the sprite screen since processInputProc
        will translate from sprite screen to screen 0 upon reentry
        to the DIX layer. */
@@ -2148,7 +2148,7 @@ PostSyntheticMotion(DeviceIntPtr pDev,
         x += screenInfo.screens[0]->x - screenInfo.screens[screen]->x;
         y += screenInfo.screens[0]->y - screenInfo.screens[screen]->y;
     }
-#endif
+#endif /* XINERAMA */
 
     memset(&ev, 0, sizeof(DeviceEvent));
     init_device_event(&ev, pDev, time, EVENT_SOURCE_NORMAL);

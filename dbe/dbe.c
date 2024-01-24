@@ -1274,10 +1274,10 @@ DbeExtensionInit(void)
     int nStubbedScreens = 0;
     Bool ddxInitSuccess;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (!noPanoramiXExtension)
         return;
-#endif
+#endif /* XINERAMA */
 
     /* Create the resource types. */
     dbeDrawableResType =

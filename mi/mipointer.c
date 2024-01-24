@@ -402,9 +402,9 @@ miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
      * updated to the second screen, and we never receive any events.
      * (FDO bug #18668) */
     if (changedScreen
-#ifdef PANORAMIX
+#ifdef XINERAMA
         && noPanoramiXExtension
-#endif
+#endif /* XINERAMA */
         ) {
             DeviceIntPtr master = GetMaster(pDev, MASTER_POINTER);
             /* Hack for CVE-2023-5380: if we're moving

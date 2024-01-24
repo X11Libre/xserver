@@ -96,10 +96,10 @@ SOFTWARE.
 #include "opaque.h"
 #include "input.h"
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
-#endif
+#endif /* XINERAMA */
 #include "xvdisp.h"
 
 #define SCREEN_PROLOGUE(pScreen, field) ((pScreen)->field = ((XvScreenPtr) \
@@ -175,9 +175,9 @@ XvExtensionInit(void)
             ErrorF("XvExtensionInit: Unable to allocate resource types\n");
             return;
         }
-#ifdef PANORAMIX
+#ifdef XINERAMA
         XineramaRegisterConnectionBlockCallback(XineramifyXv);
-#endif
+#endif /* XINERAMA */
         XvScreenGeneration = serverGeneration;
     }
 
@@ -278,9 +278,9 @@ XvScreenInit(ScreenPtr pScreen)
             ErrorF("XvScreenInit: Unable to allocate resource types\n");
             return BadAlloc;
         }
-#ifdef PANORAMIX
+#ifdef XINERAMA
         XineramaRegisterConnectionBlockCallback(XineramifyXv);
-#endif
+#endif /* XINERAMA */
         XvScreenGeneration = serverGeneration;
     }
 

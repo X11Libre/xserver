@@ -69,7 +69,7 @@
 #mesondefine MITSHM
 
 /* Internal define for Xinerama */
-#mesondefine PANORAMIX
+#mesondefine XINERAMA
 
 /* Support Present extension */
 #mesondefine PRESENT

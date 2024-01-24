@@ -89,10 +89,10 @@ in this Software without prior written authorization from The Open Group.
 #define SHMPERM_MODE(p)		p->mode
 #endif
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
-#endif
+#endif /* XINERAMA */
 
 typedef struct _ShmScrPrivateRec {
     ShmFuncsPtr shmFuncs;
@@ -718,7 +718,7 @@ ProcShmPutImage(ClientPtr client)
     if (!client->local)
         return BadRequest;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     int j, result, orig_x, orig_y;
     PanoramiXRes *draw, *gc;
     Bool sendEvent, isRoot;
@@ -758,7 +758,7 @@ ProcShmPutImage(ClientPtr client)
     return result;
 #else
     return ShmPutImage(client, stuff);
-#endif /* PANORAMIX */
+#endif /* XINERAMA */
 }
 
 static int
@@ -770,7 +770,7 @@ ProcShmGetImage(ClientPtr client)
     if (!client->local)
         return BadRequest;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     PanoramiXRes *draw;
     DrawablePtr *drawables;
     DrawablePtr pDraw;
@@ -908,7 +908,7 @@ ProcShmGetImage(ClientPtr client)
     return Success;
 #else
     return ShmGetImage(client, stuff);
-#endif /* PANORAMIX */
+#endif /* XINERAMA */
 }
 
 static int
@@ -920,7 +920,7 @@ ProcShmCreatePixmap(ClientPtr client)
     if (!client->local)
         return BadRequest;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (noPanoramiXExtension)
         return ShmCreatePixmap(client, stuff);
 
@@ -1031,7 +1031,7 @@ ProcShmCreatePixmap(ClientPtr client)
     return result;
 #else
     return ShmCreatePixmap(client, stuff);
-#endif /* PANORAMIX */
+#endif /* XINERAMA */
 }
 
 static PixmapPtr
