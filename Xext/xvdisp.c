@@ -48,12 +48,12 @@ SOFTWARE.
 
 #include "xvdisp.h"
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
 
 unsigned long XvXRTPort;
-#endif
+#endif /* XINERAMA */
 
 static int
 SWriteQueryExtensionReply(ClientPtr client, xvQueryExtensionReply * rep)
@@ -485,7 +485,7 @@ static int XineramaXvPutVideo(ClientPtr client);
 static int
 ProcXvPutVideo(ClientPtr client)
 {
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvPutVideo(client);
 #endif
@@ -527,7 +527,7 @@ static int XineramaXvPutStill(ClientPtr client);
 static int
 ProcXvPutStill(ClientPtr client)
 {
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvPutStill(client);
 #endif
@@ -688,7 +688,7 @@ static int XineramaXvStopVideo(ClientPtr client);
 static int
 ProcXvStopVideo(ClientPtr client)
 {
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvStopVideo(client);
 #endif
@@ -727,7 +727,7 @@ static int XineramaXvSetPortAttribute(ClientPtr client);
 static int
 ProcXvSetPortAttribute(ClientPtr client)
 {
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvSetPortAttribute(client);
 #endif
@@ -905,7 +905,7 @@ XineramaXvPutImage(ClientPtr client);
 static int
 ProcXvPutImage(ClientPtr client)
 {
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvPutImage(client);
 #endif
@@ -997,7 +997,7 @@ static int
 ProcXvShmPutImage(ClientPtr client)
 {
 #ifdef MITSHM
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvShmPutImage(client);
 #endif
@@ -1496,7 +1496,7 @@ SProcXvDispatch(ClientPtr client)
     }
 }
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 static int
 XineramaXvStopVideo(ClientPtr client)
 {
@@ -1604,7 +1604,7 @@ XineramaXvShmPutImage(ClientPtr client)
 }
 #else
 #define XineramaXvShmPutImage ProcXvShmPutImage
-#endif
+#endif /* MITSHM */
 
 static int
 XineramaXvPutImage(ClientPtr client)
@@ -1853,4 +1853,4 @@ XineramifyXv(void)
 
     xvUseXinerama = 1;
 }
-#endif                          /* PANORAMIX */
+#endif /* XINERAMA */

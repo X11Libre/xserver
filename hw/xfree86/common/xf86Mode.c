@@ -1627,10 +1627,10 @@ xf86ValidateModes(ScrnInfoPtr scrp, DisplayModePtr availModes,
     }
 
     /* Lookup each mode */
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (noPanoramiXExtension)
         validateAllDefaultModes = TRUE;
-#endif
+#endif /* XINERAMA */
 
     for (p = scrp->modes;; p = p->next) {
         Bool repeat;

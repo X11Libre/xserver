@@ -682,10 +682,10 @@ DRI2ExtensionInit(void)
 {
     ExtensionEntry *dri2Extension;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (!noPanoramiXExtension)
         return;
-#endif
+#endif /* XINERAMA */
 
     dri2Extension = AddExtension(DRI2_NAME,
                                  DRI2NumberEvents,
