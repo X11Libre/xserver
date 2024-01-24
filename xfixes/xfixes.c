@@ -340,7 +340,7 @@ XFixesExtensionInit(void)
     }
 }
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 
 int XFixesUseXinerama = 0;
 
@@ -356,4 +356,4 @@ PanoramiXFixesReset(void)
     XFixesUseXinerama = 0;
 }
 
-#endif
+#endif /* XINERAMA */

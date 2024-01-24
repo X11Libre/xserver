@@ -246,10 +246,10 @@ present_extension_init(void)
     ExtensionEntry *extension;
     int i;
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (!noPanoramiXExtension)
         return;
-#endif
+#endif /* XINERAMA */
 
     extension = AddExtension(PRESENT_NAME, PresentNumberEvents, PresentNumberErrors,
                              proc_present_dispatch, sproc_present_dispatch,

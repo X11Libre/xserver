@@ -59,7 +59,7 @@ SOFTWARE.
 #include "swaprep.h"
 #include "xace.h"
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #endif
@@ -129,7 +129,7 @@ notifyVRRMode(ClientPtr pClient, WindowPtr pWindow, int state, PropertyPtr pProp
 
     WindowVRRMode mode = (WindowVRRMode)(state == PropertyNewValue ? (*((uint32_t*)pProp->data)) : 0);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (!noPanoramiXExtension) {
         PanoramiXRes *win;
         int rc, j;
