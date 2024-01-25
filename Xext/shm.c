@@ -28,9 +28,7 @@ in this Software without prior written authorization from The Open Group.
 
 #define SHM
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <sys/types.h>
 #include <sys/ipc.h>

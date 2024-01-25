@@ -48,9 +48,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #ifdef __CYGWIN__
 #include <stdlib.h>

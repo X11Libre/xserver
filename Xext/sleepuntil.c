@@ -27,9 +27,7 @@ in this Software without prior written authorization from The Open Group.
 
 /* dixsleep.c - implement millisecond timeouts for X clients */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include "sleepuntil.h"
 #include <X11/X.h>

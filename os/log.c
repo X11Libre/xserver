@@ -77,9 +77,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #define _POSIX_THREAD_SAFE_FUNCTIONS // for localtime_r on mingw32
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <errno.h>
 #include <stdio.h>
