@@ -28,9 +28,7 @@
  * use or other dealings in this Software without prior written authorization.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <sys/stat.h>
 #include <X11/X.h>
