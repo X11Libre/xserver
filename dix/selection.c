@@ -44,9 +44,7 @@ SOFTWARE.
 
 ********************************************************/
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include "dix/dix_priv.h"
 #include "dix/selection_priv.h"

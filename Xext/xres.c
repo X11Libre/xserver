@@ -2,9 +2,7 @@
    Copyright (c) 2002  XFree86 Inc
 */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <assert.h>
 #include <stdio.h>

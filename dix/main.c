@@ -73,10 +73,8 @@ Equipment Corporation.
 
 ******************************************************************/
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #include <version-config.h>
-#endif
 
 #include <pixman.h>
 #include <X11/X.h>

@@ -60,9 +60,7 @@ SOFTWARE.
  *
  *****************************************************************/
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>

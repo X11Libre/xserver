@@ -51,9 +51,7 @@ SOFTWARE.
  */
 #define	 NUMTYPES 15
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>

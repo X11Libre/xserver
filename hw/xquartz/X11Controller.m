@@ -30,9 +30,7 @@
 
 #include "sanitizedCarbon.h"
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #import "X11Controller.h"
 #import "X11Application.h"
