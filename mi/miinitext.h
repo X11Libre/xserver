@@ -80,4 +80,8 @@ SOFTWARE.
 
 void ListStaticExtensions(void);
 
+#ifdef CONFIG_MIEXT_NAMESPACE
+void NamespaceExtensionInit(void);
+#endif
+
 #endif /* MIINITEXT_H */

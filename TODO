@@ -1,0 +1,4 @@
+cleanups:
+    * replace RegisterResourceName() by static table
+    * factor out dixFreeObjectWithPrivates() to dedicated memory management micro-lib
+    * include/exitinit.h --> move out non-public stuff

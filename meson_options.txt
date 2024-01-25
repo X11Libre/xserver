@@ -93,6 +93,10 @@ option('xace', type: 'boolean', value: true,
        description: 'X-ACE extension')
 option('xselinux', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'XSELINUX extension')
+option('xcontainer', type: 'boolean', value: true,
+       description: 'Container extension')
+option('namespace', type: 'boolean', value: true,
+       description: 'Container/namespace extension')
 option('xinerama', type: 'boolean', value: true,
        description: 'Xinerama extension')
 option('xcsecurity', type: 'boolean', value: false,

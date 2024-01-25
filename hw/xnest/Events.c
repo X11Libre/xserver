@@ -208,10 +208,11 @@ xnestCollectEvents(void)
         case MapNotify:
         case ReparentNotify:
         case UnmapNotify:
+        case NoExpose:
             break;
 
         default:
-            ErrorF("xnest warning: unhandled event\n");
+            ErrorF("xnest warning: unhandled event: %d\n", X.type);
             break;
         }
     }
