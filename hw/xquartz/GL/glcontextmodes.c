@@ -34,9 +34,7 @@
 #if defined(IN_MINI_GLX)
 #include <GL/gl.h>
 #else
-#if defined(HAVE_DIX_CONFIG_H)
 #include <dix-config.h>
-#endif
 #include <X11/X.h>
 #include <GL/glx.h>
 #include "GL/glxint.h"

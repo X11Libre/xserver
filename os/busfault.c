@@ -20,9 +20,7 @@
  * OF THIS SOFTWARE.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <X11/Xos.h>
 #include <X11/Xdefs.h>

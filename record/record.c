@@ -32,9 +32,7 @@ and Jim Haggerty of Metheus.
 
 */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <stdio.h>
 #include <assert.h>

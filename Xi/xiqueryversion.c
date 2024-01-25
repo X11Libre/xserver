@@ -29,9 +29,7 @@
  * Protocol handling for the XIQueryVersion request/reply.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include "inputstr.h"
 

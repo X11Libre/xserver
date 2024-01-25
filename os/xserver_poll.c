@@ -73,9 +73,7 @@
 				 Includes
 \*---------------------------------------------------------------------------*/
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <unistd.h>			     /* standard Unix definitions */
 #include <sys/types.h>                       /* system types */

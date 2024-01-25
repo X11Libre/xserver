@@ -26,9 +26,7 @@
  * prior written authorization.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include "xpr.h"
 
