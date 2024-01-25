@@ -33,9 +33,7 @@
    Equipment Corporation.
  ******************************************************************/
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <X11/Xfuncproto.h>
 #include <X11/Xmd.h>

@@ -35,9 +35,7 @@ of the copyright holder.
 
 */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>
