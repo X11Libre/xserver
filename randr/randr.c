@@ -26,9 +26,7 @@
  *	    Keith Packard, Intel Corporation
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include "miext/extinit_priv.h"
 

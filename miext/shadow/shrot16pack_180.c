@@ -24,8 +24,6 @@
 #define Data	CARD16
 #define ROTATE	180
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include "shrotpack.h"

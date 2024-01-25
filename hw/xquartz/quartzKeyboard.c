@@ -33,9 +33,7 @@
 
 #include "sanitizedCarbon.h"
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #define HACK_MISSING   1
 #define HACK_KEYPAD    1
