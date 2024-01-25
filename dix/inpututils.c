@@ -23,9 +23,7 @@
  * Author: Daniel Stone <daniel@fooishbar.org>
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include "dix-config.h"
-#endif
 
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"

@@ -23,9 +23,7 @@
  * Author: Julien Cristau <jcristau@debian.org>
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <libudev.h>
 #include <ctype.h>

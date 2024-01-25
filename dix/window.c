@@ -96,9 +96,7 @@ Equipment Corporation.
 
 ******************************************************************/
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"

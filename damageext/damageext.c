@@ -21,9 +21,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"

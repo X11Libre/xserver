@@ -23,9 +23,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #include <xcb/xcb_keysyms.h>
 #include <X11/keysym.h>

@@ -96,10 +96,8 @@ Equipment Corporation.
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #include <version-config.h>
-#endif
 
 #include <stddef.h>
 #include <X11/fonts/fontstruct.h>

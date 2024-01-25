@@ -29,9 +29,7 @@ from Kaleb S. KEITHLEY
 */
 /* THIS IS NOT AN X CONSORTIUM STANDARD OR AN X PROJECT TEAM SPECIFICATION */
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #ifdef XF86VIDMODE
 
