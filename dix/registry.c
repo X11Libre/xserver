@@ -260,6 +260,49 @@ LookupErrorName(int error)
 }
 #endif /* X_REGISTRY_REQUEST */
 
+static inline void __accbit(Mask val, int mask, const char* name, char *buf, int sz) {
+    if ((val && mask) == mask) {
+        if (buf[0])
+            strncat(buf, ",", sz);
+        strncat(buf, name, sz);
+    }
+}
+
+void
+LookupDixAccessName(Mask acc, char *buf, int sz) {
+    buf[0] = 0;
+    __accbit(acc, DixReadAccess,      "Read",      buf, sz);
+    __accbit(acc, DixWriteAccess,     "Write",     buf, sz);
+    __accbit(acc, DixDestroyAccess,   "Destroy",   buf, sz);
+    __accbit(acc, DixCreateAccess,    "Create",    buf, sz);
+    __accbit(acc, DixGetAttrAccess,   "GetAttr",   buf, sz);
+    __accbit(acc, DixSetAttrAccess,   "SetAttr",   buf, sz);
+    __accbit(acc, DixListPropAccess,  "ListProp",  buf, sz);
+    __accbit(acc, DixGetPropAccess,   "GetProp",   buf, sz);
+    __accbit(acc, DixSetPropAccess,   "SetProp",   buf, sz);
+    __accbit(acc, DixGetFocusAccess,  "GetFocus",  buf, sz);
+    __accbit(acc, DixSetFocusAccess,  "SetFocus",  buf, sz);
+    __accbit(acc, DixListAccess,      "List",      buf, sz);
+    __accbit(acc, DixAddAccess,       "Add",       buf, sz);
+    __accbit(acc, DixRemoveAccess,    "Remove",    buf, sz);
+    __accbit(acc, DixHideAccess,      "Hide",      buf, sz);
+    __accbit(acc, DixShowAccess,      "Show",      buf, sz);
+    __accbit(acc, DixBlendAccess,     "Blend",     buf, sz);
+    __accbit(acc, DixGrabAccess,      "Grab",      buf, sz);
+    __accbit(acc, DixFreezeAccess,    "Freeze",    buf, sz);
+    __accbit(acc, DixForceAccess,     "Force",     buf, sz);
+    __accbit(acc, DixInstallAccess,   "Install",   buf, sz);
+    __accbit(acc, DixUninstallAccess, "Uninstall", buf, sz);
+    __accbit(acc, DixSendAccess,      "Send",      buf, sz);
+    __accbit(acc, DixReceiveAccess,   "Receive",   buf, sz);
+    __accbit(acc, DixUseAccess,       "Use",       buf, sz);
+    __accbit(acc, DixManageAccess,    "Manage",    buf, sz);
+    __accbit(acc, DixDebugAccess,     "Debug",     buf, sz);
+    __accbit(acc, DixBellAccess,      "Bell",      buf, sz);
+    __accbit(acc, DixPostAccess,      "Post",      buf, sz);
+    buf[sz-1] = 0;
+}
+
 #ifdef X_REGISTRY_RESOURCE
 /*
  * Resource registry functions

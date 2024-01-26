@@ -40,6 +40,8 @@ extern _X_EXPORT const char *LookupEventName(int event);
 extern _X_EXPORT const char *LookupErrorName(int error);
 #endif
 
+extern void LookupDixAccessName(Mask acc, char *buf, int sz);
+
 /*
  * Setup and teardown
  */
