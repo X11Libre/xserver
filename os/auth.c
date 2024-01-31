@@ -302,17 +302,3 @@ GenerateAuthorization(unsigned name_length,
 }
 
 #endif                          /* XCSECURITY */
-
-void
-GenerateRandomData(int len, char *buf)
-{
-#ifdef HAVE_ARC4RANDOM_BUF
-    arc4random_buf(buf, len);
-#else
-    int fd;
-
-    fd = open("/dev/urandom", O_RDONLY);
-    read(fd, buf, len);
-    close(fd);
-#endif
-}
