@@ -147,7 +147,7 @@ MitGenerateCookie(unsigned data_length,
         if (i >= sizeof(cookie))
             i = 0;
     }
-    GenerateRandomData(sizeof(cookie), cookie);
+    arc4random_buf(cookie, sizeof(cookie));
     status = MitAddCookie(sizeof(cookie), cookie, id);
     if (!status) {
         id = -1;
