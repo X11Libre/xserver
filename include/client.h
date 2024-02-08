@@ -29,22 +29,12 @@
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif                          /* HAVE_DIX_CONFIG_H */
-#include <X11/Xfuncproto.h>
-#include <sys/types.h>
 
-/* Client IDs. Use GetClientPid, GetClientCmdName and GetClientCmdArgs
- * instead of accessing the fields directly. */
-typedef struct {
-    pid_t pid;                  /* process ID, -1 if not available */
-    const char *cmdname;        /* process name, NULL if not available */
-    const char *cmdargs;        /* process arguments, NULL if not available */
-} ClientIdRec, *ClientIdPtr;
+#include <sys/types.h>
+#include <X11/Xfuncproto.h>
 
 struct _Client;
-
-/* Initialize and clean up. */
-void ReserveClientIds(struct _Client *client);
-void ReleaseClientIds(struct _Client *client);
+typedef struct _ClientId *ClientIdPtr;
 
 /* Determine client IDs for caching. Exported on purpose for
  * extensions such as SELinux. */
