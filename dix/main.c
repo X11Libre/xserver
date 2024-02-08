@@ -94,6 +94,7 @@ Equipment Corporation.
 #include "dix/selection_priv.h"
 #include "os/audit.h"
 #include "os/auth.h"
+#include "os/client_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
@@ -115,7 +116,6 @@ Equipment Corporation.
 #include "dixfont.h"
 #include "extnsionst.h"
 #include "privates.h"
-#include "client.h"
 #include "exevents.h"
 #ifdef PANORAMIX
 #include "panoramiXsrv.h"
