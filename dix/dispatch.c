@@ -114,6 +114,7 @@ Equipment Corporation.
 #include "include/resource.h"
 #include "miext/extinit_priv.h"
 #include "os/auth.h"
+#include "os/client_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 
@@ -134,7 +135,6 @@ Equipment Corporation.
 #include "xace.h"
 #include "inputstr.h"
 #include "xkbsrv.h"
-#include "client.h"
 #include "xfixesint.h"
 #include "dixstruct_priv.h"
 
