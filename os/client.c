@@ -50,12 +50,14 @@
  *
  * Author: Rami Ylimäki <rami.ylimaki@vincit.fi>
  */
+#include <dix-config.h>
 
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "client.h"
+#include "os/client_priv.h"
+
 #include "os.h"
 #include "dixstruct.h"
 
@@ -452,7 +454,7 @@ ReserveClientIds(struct _Client *client)
         return;
 
     assert(!client->clientIds);
-    client->clientIds = calloc(1, sizeof(ClientIdRec));
+    client->clientIds = calloc(1, sizeof(struct _ClientId));
     if (!client->clientIds)
         return;
 

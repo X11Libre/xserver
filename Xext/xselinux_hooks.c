@@ -36,6 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dix/registry_priv.h"
 #include "dix/selection_priv.h"
+#include "os/client_priv.h"
 
 #include "inputstr.h"
 #include "scrnintstr.h"
@@ -43,7 +44,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "propertyst.h"
 #include "extnsionst.h"
 #include "xacestr.h"
-#include "client.h"
 #define _XSELINUX_NEED_FLASK_MAP
 #include "xselinuxint.h"
 
