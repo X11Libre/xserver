@@ -56,7 +56,7 @@
 #endif
 
 #include "os.h"
-#include "xf86Parser.h"
+#include "xf86Parser_priv.h"
 #include "xf86tokens.h"
 #include "Configint.h"
 
