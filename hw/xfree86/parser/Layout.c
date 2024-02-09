@@ -56,7 +56,7 @@
 #include <xorg-config.h>
 #endif
 
-#include "xf86Parser.h"
+#include "xf86Parser_priv.h"
 #include "xf86tokens.h"
 #include "Configint.h"
 #include <string.h>

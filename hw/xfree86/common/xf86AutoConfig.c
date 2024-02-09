@@ -34,7 +34,7 @@
 #endif
 
 #include "xf86.h"
-#include "xf86Parser.h"
+#include "xf86Parser_priv.h"
 #include "xf86tokens.h"
 #include "xf86Config.h"
 #include "xf86MatchDrivers.h"
