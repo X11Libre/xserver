@@ -35,6 +35,7 @@
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
+#include "dix/dixgrabs_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
@@ -44,7 +45,6 @@
 #include "windowstr.h"
 #include "inputstr.h"
 #include "exglobals.h"
-#include "dixgrabs.h"
 #include "eventstr.h"
 #include "inpututils.h"
 #include "mi.h"
