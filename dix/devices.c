@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/dixgrabs_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/ptrveloc_priv.h"
@@ -77,7 +78,6 @@ SOFTWARE.
 #include "dixevents.h"
 #include "mipointer.h"
 #include "eventstr.h"
-#include "dixgrabs.h"
 #include "exglobals.h"
 #include "xiquerydevice.h"      /* for SizeDeviceClasses */
 #include "xiproperty.h"

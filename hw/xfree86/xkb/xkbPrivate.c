@@ -10,7 +10,6 @@
 #include "windowstr.h"
 #include <xkbsrv.h>
 
-#include "dixgrabs.h"
 #include "os.h"
 #include "xf86.h"
 
