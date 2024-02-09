@@ -31,67 +31,7 @@ struct xf86_platform_device {
     int flags;
 };
 
-/* xf86_platform_device flags */
-#define XF86_PDEV_UNOWNED       0x01
-#define XF86_PDEV_SERVER_FD     0x02
-#define XF86_PDEV_PAUSED        0x04
-
-#ifdef XSERVER_PLATFORM_BUS
-static inline struct OdevAttributes *
-xf86_platform_device_odev_attributes(struct xf86_platform_device *device)
-{
-    return device->attribs;
-}
-
-/*
- * Define the legacy API only for external builds
- */
-
-/* path to kernel device node - Linux e.g. /dev/dri/card0 */
-#define ODEV_ATTRIB_PATH        1
-/* system device path - Linux e.g. /sys/devices/pci0000:00/0000:00:01.0/0000:01:00.0/drm/card1 */
-#define ODEV_ATTRIB_SYSPATH     2
-/* DRI-style bus id */
-#define ODEV_ATTRIB_BUSID       3
-/* Server managed FD */
-#define ODEV_ATTRIB_FD          4
-/* Major number of the device node pointed to by ODEV_ATTRIB_PATH */
-#define ODEV_ATTRIB_MAJOR       5
-/* Minor number of the device node pointed to by ODEV_ATTRIB_PATH */
-#define ODEV_ATTRIB_MINOR       6
-/* kernel driver name */
-#define ODEV_ATTRIB_DRIVER      7
-
-_X_EXPORT char *
-_xf86_get_platform_device_attrib(struct xf86_platform_device *device, int attrib, int (*fake)[0]);
-
-_X_EXPORT int
-_xf86_get_platform_device_int_attrib(struct xf86_platform_device *device, int attrib, int (*fake)[0]);
-
-/* Protect against a mismatch attribute type by generating a compiler
- * error using a negative array size when an incorrect attribute is
- * passed
- */
-
-#define _ODEV_ATTRIB_IS_STRING(x)       ((x) == ODEV_ATTRIB_PATH ||     \
-                                         (x) == ODEV_ATTRIB_SYSPATH ||  \
-                                         (x) == ODEV_ATTRIB_BUSID ||    \
-                                         (x) == ODEV_ATTRIB_DRIVER)
-
-#define _ODEV_ATTRIB_STRING_CHECK(x)    ((int (*)[_ODEV_ATTRIB_IS_STRING(x)-1]) 0)
-
-#define xf86_get_platform_device_attrib(device, attrib) _xf86_get_platform_device_attrib(device,attrib,_ODEV_ATTRIB_STRING_CHECK(attrib))
-
-#define _ODEV_ATTRIB_IS_INT(x)                  ((x) == ODEV_ATTRIB_FD || (x) == ODEV_ATTRIB_MAJOR || (x) == ODEV_ATTRIB_MINOR)
-#define _ODEV_ATTRIB_INT_DEFAULT(x)             ((x) == ODEV_ATTRIB_FD ? -1 : 0)
-#define _ODEV_ATTRIB_DEFAULT_CHECK(x,def)       (_ODEV_ATTRIB_INT_DEFAULT(x) == (def))
-#define _ODEV_ATTRIB_INT_CHECK(x,def)           ((int (*)[_ODEV_ATTRIB_IS_INT(x)*_ODEV_ATTRIB_DEFAULT_CHECK(x,def)-1]) 0)
-
-#define xf86_get_platform_device_int_attrib(device, attrib, def) _xf86_get_platform_device_int_attrib(device,attrib,_ODEV_ATTRIB_INT_CHECK(attrib,def))
-
 extern _X_EXPORT Bool
 xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *busid);
-
-#endif
 
 #endif
