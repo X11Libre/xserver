@@ -34,6 +34,7 @@
 #define _XF86_PCI_BUS_H
 
 #include "xf86MatchDrivers.h"
+#include "xf86platformBus_priv.h"
 
 void xf86PciProbe(void);
 Bool xf86PciAddMatchingDev(DriverPtr drvp);

@@ -44,7 +44,7 @@
 #include "xf86Xinput.h"
 #include "xf86Optrec.h"
 #include "xf86Parser.h"
-#include "xf86platformBus.h" /* For OutputClass functions */
+#include "xf86platformBus_priv.h"
 #include "optionstr.h"
 
 static Bool ParseOptionValue(int scrnIndex, XF86OptionPtr options,
