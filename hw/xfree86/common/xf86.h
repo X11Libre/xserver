@@ -128,13 +128,7 @@ extern _X_EXPORT ScrnInfoPtr xf86ConfigPciEntity(ScrnInfoPtr pScrn,
                                                  EntityProc leave,
                                                  void *private);
 #else
-#define xf86VGAarbiterInit() do {} while (0)
-#define xf86VGAarbiterFini() do {} while (0)
-#define xf86VGAarbiterLock(x) do {} while (0)
-#define xf86VGAarbiterUnlock(x) do {} while (0)
-#define xf86VGAarbiterScrnInit(x) do {} while (0)
 #define xf86VGAarbiterDeviceDecodes() do {} while (0)
-#define xf86VGAarbiterWrapFunctions() do {} while (0)
 #endif
 
 /* xf86Bus.c */
