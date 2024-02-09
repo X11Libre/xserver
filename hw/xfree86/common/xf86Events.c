@@ -77,7 +77,7 @@
 #endif
 
 #include "inputstr.h"
-#include "xf86Xinput.h"
+#include "xf86Xinput_priv.h"
 #include "mipointer.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
