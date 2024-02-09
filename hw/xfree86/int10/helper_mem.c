@@ -18,7 +18,7 @@
 #if 0
 #include "int10Defines.h"
 #endif
-#include "xf86int10.h"
+#include "xf86int10_priv.h"
 
 #define REG pInt
 
