@@ -44,7 +44,7 @@
 #include "dpmsproc.h"
 #endif
 #ifdef XSERVER_LIBPCIACCESS
-#include "xf86VGAarbiter.h"
+#include "xf86VGAarbiter_priv.h"
 #endif
 
 #ifdef DPMSExtension
