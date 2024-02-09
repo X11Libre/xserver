@@ -58,11 +58,11 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/dixgrabs_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"
-#include "dixgrabs.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
 #include "ungrdevk.h"

@@ -236,7 +236,6 @@ cat > sdksyms.c << EOF
 #define _FONTPROTO_H
 #include "dixfont.h"
 #include "dixfontstr.h"
-#include "dixgrabs.h"
 #include "dixstruct.h"
 #include "exevents.h"
 #include "extension.h"
