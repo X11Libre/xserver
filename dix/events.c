@@ -114,6 +114,7 @@ Equipment Corporation.
 
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/dixgrabs_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"

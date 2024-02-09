@@ -35,6 +35,7 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/dixgrabs_priv.h"
 #include "dix/exevents_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
