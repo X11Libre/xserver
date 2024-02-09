@@ -30,14 +30,6 @@
 #include "misc.h"
 #include "xf86.h"
 
-/* Functions */
-extern void xf86VGAarbiterInit(void);
-extern void xf86VGAarbiterFini(void);
-void xf86VGAarbiterScrnInit(ScrnInfoPtr pScrn);
-extern Bool xf86VGAarbiterWrapFunctions(void);
-extern void xf86VGAarbiterLock(ScrnInfoPtr pScrn);
-extern void xf86VGAarbiterUnlock(ScrnInfoPtr pScrn);
-
 /* allow a driver to remove itself from arbiter - really should be
  * done in the kernel though */
 extern _X_EXPORT void xf86VGAarbiterDeviceDecodes(ScrnInfoPtr pScrn, int rsrc);

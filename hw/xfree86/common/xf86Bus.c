@@ -47,7 +47,7 @@
 
 #include "xf86_OSproc.h"
 #ifdef XSERVER_LIBPCIACCESS
-#include "xf86VGAarbiter.h"
+#include "xf86VGAarbiter_priv.h"
 #endif
 /* Entity data */
 EntityPtr *xf86Entities = NULL; /* Bus slots claimed by drivers */

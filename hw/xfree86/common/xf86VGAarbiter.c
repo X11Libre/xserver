@@ -30,7 +30,7 @@
 
 #include "xorg-config.h"
 
-#include "xf86VGAarbiter.h"
+#include "xf86VGAarbiter_priv.h"
 #include "xf86VGAarbiterPriv.h"
 #include "xf86Bus.h"
 #include "xf86Priv.h"

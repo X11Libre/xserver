@@ -61,6 +61,7 @@
 #include "scrnintstr.h"
 #include "mi.h"
 #include "systemd-logind.h"
+#include "xf86VGAarbiter_priv.h"
 #include "loaderProcs.h"
 
 #include "xf86.h"
