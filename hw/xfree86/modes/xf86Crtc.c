@@ -30,7 +30,7 @@
 #include <stdio.h>
 
 #include "xf86.h"
-#include "xf86DDC.h"
+#include "xf86DDC_priv.h"
 #include "xf86Crtc.h"
 #include "xf86Modes.h"
 #include "xf86Priv.h"

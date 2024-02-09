@@ -38,7 +38,7 @@
 #include "xf86Priv.h"
 #define IN_XSERVER
 #include "Configint.h"
-#include "xf86DDC.h"
+#include "xf86DDC_priv.h"
 #include "xf86pciBus.h"
 #if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
 #include "xf86Bus.h"
