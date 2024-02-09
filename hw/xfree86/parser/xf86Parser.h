@@ -442,17 +442,6 @@ typedef struct {
 /*
  * prototypes for public functions
  */
-extern void xf86initConfigFiles(void);
-extern char *xf86openConfigFile(const char *path, const char *cmdline,
-                                const char *projroot);
-extern char *xf86openConfigDirFiles(const char *path, const char *cmdline,
-                                    const char *projroot);
-extern void xf86setBuiltinConfig(const char *config[]);
-extern XF86ConfigPtr xf86readConfigFile(void);
-extern void xf86closeConfigFile(void);
-extern XF86ConfigPtr xf86allocateConfig(void);
-extern void xf86freeConfig(XF86ConfigPtr p);
-extern int xf86writeConfigFile(const char *, XF86ConfigPtr);
 extern _X_EXPORT XF86ConfDevicePtr xf86findDevice(const char *ident,
                                                   XF86ConfDevicePtr p);
 extern _X_EXPORT XF86ConfLayoutPtr xf86findLayout(const char *name,
@@ -472,14 +461,10 @@ extern _X_EXPORT XF86ConfInputPtr xf86findInputByDriver(const char *driver,
 extern _X_EXPORT XF86ConfVideoAdaptorPtr xf86findVideoAdaptor(const char *ident,
                                                               XF86ConfVideoAdaptorPtr
                                                               p);
-extern int xf86layoutAddInputDevices(XF86ConfigPtr config,
-                                     XF86ConfLayoutPtr layout);
-
 extern _X_EXPORT GenericListPtr xf86addListItem(GenericListPtr head,
                                                 GenericListPtr c_new);
 extern _X_EXPORT int xf86itemNotSublist(GenericListPtr list_1,
                                         GenericListPtr list_2);
-
 extern _X_EXPORT int xf86pathIsAbsolute(const char *path);
 extern _X_EXPORT int xf86pathIsSafe(const char *path);
 extern _X_EXPORT char *xf86addComment(char *cur, const char *add);
