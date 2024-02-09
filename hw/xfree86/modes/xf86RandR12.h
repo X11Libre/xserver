@@ -40,9 +40,4 @@ extern _X_EXPORT void xf86RandR12GetOriginalVirtualSize(ScrnInfoPtr pScrn,
 extern _X_EXPORT Bool xf86RandR12PreInit(ScrnInfoPtr pScrn);
 extern _X_EXPORT void xf86RandR12TellChanged(ScreenPtr pScreen);
 
-extern void xf86RandR12LoadPalette(ScrnInfoPtr pScrn, int numColors,
-                                   int *indices, LOCO *colors,
-                                   VisualPtr pVisual);
-extern Bool xf86RandR12InitGamma(ScrnInfoPtr pScrn, unsigned gammaSize);
-
 #endif                          /* _XF86_RANDR_H_ */
