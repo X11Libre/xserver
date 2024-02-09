@@ -30,7 +30,7 @@
 #include "compiler.h"
 #define _INT10_PRIVATE
 #include "int10Defines.h"
-#include "xf86int10.h"
+#include "xf86int10_priv.h"
 #include "Pci.h"
 #ifdef _X86EMU
 #include "x86emu/x86emui.h"
