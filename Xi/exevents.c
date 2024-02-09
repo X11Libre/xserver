@@ -91,6 +91,7 @@ SOFTWARE.
 #include <X11/extensions/XKBproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/dixgrabs_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
@@ -103,7 +104,7 @@ SOFTWARE.
 #include "exglobals.h"
 #include "eventstr.h"
 #include "dixevents.h"          /* DeliverFocusedEvent */
-#include "dixgrabs.h"           /* CreateGrab() */
+#include "dixgrabs.h"
 #include "scrnintstr.h"
 #include "listdev.h"            /* for CopySwapXXXClass */
 #include "xace.h"
