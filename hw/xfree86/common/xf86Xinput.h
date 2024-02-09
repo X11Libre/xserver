@@ -114,9 +114,6 @@ struct _InputInfoRec {
     InputAttributes *attrs;
 };
 
-/* xf86Globals.c */
-extern InputInfoPtr xf86InputDevs;
-
 /* xf86Xinput.c */
 extern _X_EXPORT void xf86PostMotionEvent(DeviceIntPtr device, int is_absolute,
                                           int first_valuator, int num_valuators,
@@ -189,10 +186,6 @@ extern _X_EXPORT void xf86RemoveEnabledDevice(InputInfoPtr pInfo);
 extern _X_EXPORT void xf86DisableDevice(DeviceIntPtr dev, Bool panic);
 extern _X_EXPORT void xf86EnableDevice(DeviceIntPtr dev);
 extern _X_EXPORT void xf86InputEnableVTProbe(void);
-
-/* not exported */
-int xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL is_auto);
-InputInfoPtr xf86AllocateInput(void);
 
 /* xf86Helper.c */
 extern _X_EXPORT void xf86AddInputDriver(InputDriverPtr driver, void *module,

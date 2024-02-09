@@ -57,7 +57,7 @@
 #include "xf86_OSlib.h"
 #include "micmap.h"
 #include "xf86DDC.h"
-#include "xf86Xinput.h"
+#include "xf86Xinput_priv.h"
 #include "xf86InPriv.h"
 #include "mivalidate.h"
 
