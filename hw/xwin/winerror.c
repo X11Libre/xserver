@@ -37,6 +37,8 @@
 #include <../xfree86/common/xorgVersion.h>
 #include "win.h"
 
+#include "dix/input_priv.h"
+
 void
 OsVendorVErrorF(const char *pszFormat, va_list va_args)
 {

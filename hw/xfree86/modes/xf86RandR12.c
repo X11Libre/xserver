@@ -24,6 +24,9 @@
 #include <xorg-config.h>
 #endif
 
+#include <X11/extensions/render.h>
+
+#include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
 
 #include "xf86.h"
@@ -36,7 +39,6 @@
 #include "windowstr.h"
 #include "inputstr.h"
 #include "randrstr_priv.h"
-#include <X11/extensions/render.h>
 
 #include "xf86cmap.h"
 #include "xf86Crtc.h"

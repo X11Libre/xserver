@@ -55,6 +55,7 @@ in this Software without prior written authorization from The Open Group.
 #include   <X11/Xproto.h>
 
 #include   "dix/dix_priv.h"
+#include   "dix/input_priv.h"
 
 #include   "misc.h"
 #include   "windowstr.h"
