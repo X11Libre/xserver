@@ -22,6 +22,7 @@
 
 #include <dix-config.h>
 
+#include "config/hotplug_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
@@ -48,10 +49,6 @@
 
 #ifdef HAVE_EXECINFO_H
 #include <execinfo.h>
-#endif
-
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-#include <hotplug.h>
 #endif
 
 /* This stub can be safely removed once we can
