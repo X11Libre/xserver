@@ -42,7 +42,7 @@
 #include "xf86Xinput_priv.h"
 #include "xf86Priv.h"
 #include "globals.h"
-
+#include "hotplug_priv.h"
 #include "systemd-logind.h"
 
 struct systemd_logind_info {

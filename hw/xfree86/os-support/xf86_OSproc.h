@@ -150,5 +150,17 @@ extern _X_EXPORT Bool xf86GARTCloseScreen(int screenNum);
 extern _X_EXPORT int xf86InstallSIGIOHandler(int fd, void (*f) (int, void *),
                                              void *);
 
+#ifdef XSERVER_PLATFORM_BUS
+#include "hotplug.h"
+
+struct OdevAttributes;
+
+void
+xf86PlatformDeviceProbe(struct OdevAttributes *attribs);
+
+void
+xf86PlatformReprobeDevice(int index, struct OdevAttributes *attribs);
+#endif
+
 _XFUNCPROTOEND
 #endif                          /* _XF86_OSPROC_H */

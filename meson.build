@@ -679,6 +679,7 @@ inc = include_directories(
     'miext/damage',
     'miext/shadow',
     'miext/sync',
+    'config',
     'dbe',
     'dix',
     'dri3',

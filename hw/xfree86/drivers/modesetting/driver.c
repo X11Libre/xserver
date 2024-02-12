@@ -67,6 +67,7 @@
 #include <pciaccess.h>
 #endif
 #include "driver.h"
+#include "hotplug_priv.h"
 
 static void AdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 static Bool CloseScreen(ScreenPtr pScreen);

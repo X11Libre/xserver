@@ -43,6 +43,7 @@
 #include "os.h"
 #include "xf86.h"
 #include "xf86Priv.h"
+#include "hotplug_priv.h"
 
 /* Bus-specific headers */
 
