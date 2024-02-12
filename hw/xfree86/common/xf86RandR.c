@@ -26,6 +26,9 @@
 #endif
 
 #include <X11/X.h>
+
+#include "dix/input_priv.h"
+
 #include "os.h"
 #include "globals.h"
 #include "xf86.h"

@@ -38,6 +38,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/keysym.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/input_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
 #include "exglobals.h"

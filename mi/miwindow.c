@@ -50,6 +50,9 @@ SOFTWARE.
 
 #include <X11/X.h>
 #include <X11/extensions/shapeconst.h>
+
+#include "dix/input_priv.h"
+
 #include "regionstr.h"
 #include "region.h"
 #include "mi.h"

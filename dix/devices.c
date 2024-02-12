@@ -59,6 +59,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/input_priv.h"
 #include "dix/ptrveloc_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
