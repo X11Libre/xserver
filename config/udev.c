@@ -29,9 +29,10 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include "config/hotplug_priv.h"
+
 #include "input.h"
 #include "inputstr.h"
-#include "hotplug.h"
 #include "config-backends.h"
 #include "os.h"
 #include "globals.h"
