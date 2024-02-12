@@ -37,6 +37,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <X11/X.h>
+
+#include "config/hotplug_priv.h"
+
 #include "os.h"
 #include "xf86.h"
 #include "xf86Priv.h"
