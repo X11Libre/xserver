@@ -24,7 +24,6 @@
 #ifndef XF86_PLATFORM_BUS_H
 #define XF86_PLATFORM_BUS_H
 
-#include "hotplug.h"
 #include "xf86MatchDrivers.h"
 
 struct xf86_platform_device {
