@@ -53,6 +53,9 @@ void xf86OSInitVidMem(VidMemInfoPtr);
 
 #ifdef XSERVER_PLATFORM_BUS
 #include "hotplug.h"
+
+struct OdevAttributes;
+
 void
 xf86PlatformDeviceProbe(struct OdevAttributes *attribs);
 
