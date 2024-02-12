@@ -40,6 +40,7 @@ from The Open Group.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/exevents_priv.h"
+#include "dix/input_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */

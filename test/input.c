@@ -37,6 +37,7 @@
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
+#include "dix/input_priv.h"
 
 #include "misc.h"
 #include "resource.h"

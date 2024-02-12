@@ -31,11 +31,18 @@
 #include <dix-config.h>
 #endif
 
+#include <math.h>
+#include <limits.h>
+#include <pixman.h>
 #include <X11/X.h>
 #include <X11/keysym.h>
 #include <X11/Xproto.h>
-#include <math.h>
-#include <limits.h>
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XI2.h>
+#include <X11/extensions/XIproto.h>
+#include <X11/extensions/XKBproto.h>
+
+#include "dix/input_priv.h"
 
 #include "misc.h"
 #include "resource.h"
@@ -52,7 +59,6 @@
 #include "mi.h"
 #include "windowstr.h"
 
-#include <X11/extensions/XKBproto.h>
 #include "xkbsrv.h"
 
 #ifdef PANORAMIX
@@ -60,10 +66,6 @@
 #include "panoramiXsrv.h"
 #endif
 
-#include <X11/extensions/XI.h>
-#include <X11/extensions/XI2.h>
-#include <X11/extensions/XIproto.h>
-#include <pixman.h>
 #include "exglobals.h"
 #include "exevents.h"
 #include "extnsionst.h"

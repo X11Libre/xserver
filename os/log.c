@@ -89,12 +89,12 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/Xos.h>
 
 #include "dix/dix_priv.h"
+#include "dix/input_priv.h"
 #include "os/audit.h"
 #include "os/ddx_priv.h"
 #include "os/fmt.h"
 #include "os/osdep.h"
 
-#include "input.h"
 #include "opaque.h"
 
 #ifdef WIN32

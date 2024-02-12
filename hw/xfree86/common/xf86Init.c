@@ -50,12 +50,12 @@
 #include <X11/Xatom.h>
 
 #include "config/dbus-core.h"
+#include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 
-#include "input.h"
 #include "servermd.h"
 #include "windowstr.h"
 #include "scrnintstr.h"

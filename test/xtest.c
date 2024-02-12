@@ -31,6 +31,7 @@
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
+#include "dix/input_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "input.h"
@@ -41,7 +42,6 @@
 #include "xkbsrv.h"
 #include "xserver-properties.h"
 #include "syncsrv.h"
-
 #include "tests-common.h"
 
 /**

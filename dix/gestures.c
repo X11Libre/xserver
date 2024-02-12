@@ -29,6 +29,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
+#include "dix/input_priv.h"
 
 #include "inputstr.h"
 #include "scrnintstr.h"

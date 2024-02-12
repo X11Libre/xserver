@@ -29,11 +29,13 @@
 #endif
 
 #include <stdint.h>
+
+#include "dix/input_priv.h"
+
 #include "misc.h"
 #include "scrnintstr.h"
 #include "dix.h"
 #include "dixstruct.h"
-
 #include "tests-common.h"
 
 static void

@@ -58,6 +58,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>     /* control constants */
 
 #include "dix/exevents_priv.h"
+#include "dix/input_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"

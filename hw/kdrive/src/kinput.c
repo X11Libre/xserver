@@ -36,10 +36,12 @@
 #include <stdio.h>
 #include <sys/file.h>           /* needed for FNONBLOCK & FASYNC */
 
-#include "xkbsrv.h"
-
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/input_priv.h"
+
+#include "xkbsrv.h"
 #include "XIstubs.h"            /* even though we don't use stubs.  cute, no? */
 #include "exevents.h"
 #include "exglobals.h"

@@ -28,10 +28,10 @@
 #endif
 
 #include "dix/exevents_priv.h"
+#include "dix/input_priv.h"
 
 #include "exglobals.h"
 #include "misc.h"
-#include "input.h"
 #include "inputstr.h"
 #include "xace.h"
 #include "xkbsrv.h"

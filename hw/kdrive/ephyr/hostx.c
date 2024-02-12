@@ -27,9 +27,6 @@
 #include <dix-config.h>
 #endif
 
-#include "hostx.h"
-#include "input.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -37,11 +34,14 @@
 #include <errno.h>
 #include <time.h>
 #include <err.h>
-
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/time.h>
 #include <sys/mman.h>
+
+#include "dix/input_priv.h"
+
+#include "hostx.h"
 
 #define X_INCLUDE_STRING_H
 #include <X11/Xos_r.h>
