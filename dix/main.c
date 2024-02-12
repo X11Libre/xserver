@@ -84,6 +84,7 @@ Equipment Corporation.
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
+#include "config/hotplug_priv.h"
 #include "dix/callback_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
@@ -110,7 +111,6 @@ Equipment Corporation.
 #include "colormapst.h"
 #include "cursorstr.h"
 #include "servermd.h"
-#include "hotplug.h"
 #include "dixfont.h"
 #include "extnsionst.h"
 #include "privates.h"

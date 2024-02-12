@@ -48,8 +48,11 @@
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
 
 #include "config/dbus-core.h"
+#include "config/hotplug_priv.h"
 #include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/cmdline.h"
@@ -72,8 +75,6 @@
 #include "xf86cmap.h"
 #include "xorgVersion.h"
 #include "mipointer.h"
-#include <X11/extensions/XI.h>
-#include <X11/extensions/XIproto.h>
 #include "xf86Extensions.h"
 #include "xf86DDC.h"
 #include "xf86Xinput.h"
@@ -97,7 +98,6 @@
 #include <linux/major.h>
 #include <sys/sysmacros.h>
 #endif
-#include <hotplug.h>
 
 void (*xf86OSPMClose) (void) = NULL;
 static Bool xorgHWOpenConsole = FALSE;

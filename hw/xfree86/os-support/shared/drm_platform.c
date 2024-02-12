@@ -10,6 +10,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "config/hotplug_priv.h"
+
 /* Linux platform device support */
 #include "xf86_OSproc.h"
 
@@ -18,7 +20,6 @@
 #include "xf86platformBus.h"
 #include "xf86Bus.h"
 
-#include "hotplug.h"
 #include "systemd-logind.h"
 
 static Bool

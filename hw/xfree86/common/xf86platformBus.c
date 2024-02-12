@@ -37,10 +37,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "config/hotplug_priv.h"
 #include "dix/screenint_priv.h"
 
 #include "os.h"
-#include "hotplug.h"
 #include "systemd-logind.h"
 
 #include "loaderProcs.h"
