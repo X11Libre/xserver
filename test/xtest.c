@@ -27,17 +27,18 @@
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
+
 #include <stdint.h>
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
+#include "mi/extinit_priv.h"
 
 #include "input.h"
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "exevents.h"
-#include "extinit_priv.h"
 #include "xkbsrv.h"
 #include "xserver-properties.h"
 #include "syncsrv.h"

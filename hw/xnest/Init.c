@@ -16,12 +16,14 @@ is" without express or implied warranty.
 #include <xnest-config.h>
 #endif
 
+#include <stddef.h>
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 #include <X11/fonts/fontstruct.h>
 
 #include "dix/screenint_priv.h"
+#include "mi/extinit_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 
@@ -33,7 +35,6 @@ is" without express or implied warranty.
 #include "servermd.h"
 #include "mi.h"
 #include "dixfontstr.h"
-#include "extinit_priv.h"
 #include "Xnest.h"
 
 #include "Display.h"

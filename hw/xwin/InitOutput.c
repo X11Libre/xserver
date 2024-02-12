@@ -36,6 +36,7 @@ from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
+#include "mi/extinit_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 
@@ -65,7 +66,6 @@ typedef WINAPI HRESULT(*SHGETFOLDERPATHPROC) (HWND hwndOwner,
 
 #include "winmonitors.h"
 #include "nonsdk_extinit.h"
-#include "extinit_priv.h"
 #include "pseudoramiX/pseudoramiX.h"
 
 #include "dix/dix_priv.h"

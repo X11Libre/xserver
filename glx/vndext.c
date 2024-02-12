@@ -26,16 +26,19 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
  */
+#include <dix-config.h>
+
+#include <string.h>
+
+#include "mi/extinit_priv.h"
 
 #include "vndserver_priv.h"
 
-#include <string.h>
 #include <scrnintstr.h>
 #include <windowstr.h>
 #include <dixstruct.h>
 #include <extnsionst.h>
 #include <glx_extinit.h>
-#include "extinit_priv.h"
 
 #include <GL/glxproto.h>
 #include "vndservervendor.h"

@@ -46,9 +46,10 @@
 #include <dix-config.h>
 #endif
 
+#include "mi/extinit_priv.h"
+
 #include "xfixesint.h"
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 static unsigned char XFixesReqCode;
 int XFixesEventBase;

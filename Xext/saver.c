@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/extensions/saverproto.h>
 
 #include "dix/dix_priv.h"
+#include "mi/extinit_priv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -55,11 +56,9 @@ in this Software without prior written authorization from the X Consortium.
 #include "panoramiXsrv.h"
 #endif
 #ifdef DPMSExtension
-#include <X11/extensions/dpmsconst.h>
 #include "dpmsproc.h"
 #endif
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 static int ScreenSaverEventBase = 0;
 

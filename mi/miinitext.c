@@ -86,13 +86,13 @@ SOFTWARE.
 #undef DPMSExtension
 #endif
 
+#include "mi/extinit_priv.h"
+
 #include "misc.h"
 #include "extension.h"
-#include "extinit_priv.h"
 #include "micmap.h"
 #include "os.h"
 #include "globals.h"
-
 #include "miinitext.h"
 
 /* List of built-in (statically linked) extensions */

@@ -33,6 +33,8 @@
 #include <dix-config.h>
 #endif
 
+#include "mi/extinit_priv.h"
+
 #include "inputstr.h"
 #include "quartz.h"
 #include "quartzRandR.h"
@@ -54,7 +56,6 @@
 #endif
 
 #include "nonsdk_extinit.h"
-#include "extinit_priv.h"
 
 /* 10.4's deferred update makes X slower.. have to live with the tearing
  * for now.. */
