@@ -195,8 +195,6 @@ extern _X_EXPORT Bool DRIScreenInit(ScreenPtr pScreen,
 
 extern _X_EXPORT void DRICloseScreen(ScreenPtr pScreen);
 
-extern Bool DRIExtensionInit(void);
-
 extern _X_EXPORT void DRIReset(void);
 
 extern _X_EXPORT Bool DRIQueryDirectRenderingCapable(ScreenPtr pScreen,
