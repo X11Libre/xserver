@@ -26,8 +26,6 @@ is" without express or implied warranty.
 #include "region.h"
 #include "servermd.h"
 
-#include "Xnest.h"
-
 #include "Display.h"
 #include "Screen.h"
 #include "XNGC.h"
