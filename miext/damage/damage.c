@@ -627,7 +627,7 @@ damageAddTraps(PicturePtr pPicture,
 
 static void
 damageFillSpans(DrawablePtr pDrawable,
-                GC * pGC, int npt, DDXPointPtr ppt, int *pwidth, int fSorted)
+                GCPtr pGC, int npt, DDXPointPtr ppt, int *pwidth, int fSorted)
 {
     DAMAGE_GC_OP_PROLOGUE(pGC, pDrawable);
 
@@ -746,7 +746,7 @@ damagePutImage(DrawablePtr pDrawable,
 static RegionPtr
 damageCopyArea(DrawablePtr pSrc,
                DrawablePtr pDst,
-               GC * pGC,
+               GCPtr pGC,
                int srcx, int srcy, int width, int height, int dstx, int dsty)
 {
     RegionPtr ret;

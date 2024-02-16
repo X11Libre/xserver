@@ -564,7 +564,7 @@ static const int offsets[] = {
     -1,                                 /* X11_RESTYPE_NONE */
     offsetof(WindowRec, devPrivates),   /* X11_RESTYPE_WINDOW */
     offsetof(PixmapRec, devPrivates),   /* X11_RESTYPE_PIXMAP */
-    offsetof(GC, devPrivates),          /* X11_RESTYPE_GC */
+    offsetof(GCRec, devPrivates),       /* X11_RESTYPE_GC */
     -1,                                 /* X11_RESTYPE_FONT */
     offsetof(CursorRec, devPrivates),   /* X11_RESTYPE_CURSOR */
     offsetof(ColormapRec, devPrivates), /* X11_RESTYPE_COLORMAP */

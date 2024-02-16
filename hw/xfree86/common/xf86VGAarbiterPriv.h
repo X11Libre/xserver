@@ -202,7 +202,7 @@ static void VGAarbiterDestroyClip(GCPtr pGC);
 static void VGAarbiterCopyClip(GCPtr pgcDst, GCPtr pgcSrc);
 
 /* GC ops */
-static void VGAarbiterFillSpans(DrawablePtr pDraw, GC * pGC, int nInit,
+static void VGAarbiterFillSpans(DrawablePtr pDraw, GCPtr pGC, int nInit,
                                 DDXPointPtr pptInit, int *pwidthInit,
                                 int fSorted);
 static void VGAarbiterSetSpans(DrawablePtr pDraw, GCPtr pGC, char *pcharsrc,
@@ -212,7 +212,7 @@ static void VGAarbiterPutImage(DrawablePtr pDraw, GCPtr pGC, int depth, int x,
                                int y, int w, int h, int leftPad, int format,
                                char *pImage);
 static RegionPtr VGAarbiterCopyArea(DrawablePtr pSrc, DrawablePtr pDst,
-                                    GC * pGC, int srcx, int srcy, int width,
+                                    GCPtr pGC, int srcx, int srcy, int width,
                                     int height, int dstx, int dsty);
 static RegionPtr VGAarbiterCopyPlane(DrawablePtr pSrc, DrawablePtr pDst,
                                      GCPtr pGC, int srcx, int srcy, int width,
