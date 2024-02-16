@@ -612,7 +612,7 @@ VGAarbiterDestroyClip(GCPtr pGC)
 /* GC Ops */
 static void
 VGAarbiterFillSpans(DrawablePtr pDraw,
-                    GC * pGC,
+                    GCPtr pGC,
                     int nInit,
                     DDXPointPtr pptInit, int *pwidthInit, int fSorted)
 {
@@ -661,7 +661,7 @@ VGAarbiterPutImage(DrawablePtr pDraw,
 static RegionPtr
 VGAarbiterCopyArea(DrawablePtr pSrc,
                    DrawablePtr pDst,
-                   GC * pGC,
+                   GCPtr pGC,
                    int srcx, int srcy,
                    int width, int height, int dstx, int dsty)
 {
