@@ -1103,7 +1103,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
     int err = Success, lgerr;   /* err is in X error, not font error, space */
     enum { NEVER_SLEPT, START_SLEEP, SLEEPING } client_state = NEVER_SLEPT;
     FontPathElementPtr fpe;
-    GC *origGC = NULL;
+    GCPtr origGC = NULL;
     int itemSize = c->reqType == X_PolyText8 ? 1 : 2;
 
     if (client->clientGone) {
@@ -1213,7 +1213,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
             if (lgerr == Suspended) {
                 if (!ClientIsAsleep(client)) {
                     int len;
-                    GC *pGC;
+                    GCPtr pGC;
                     PTclosurePtr new_closure;
 
                     /*  We're putting the client to sleep.  We need to do a few things
@@ -1354,7 +1354,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
 }
 
 int
-PolyText(ClientPtr client, DrawablePtr pDraw, GC * pGC, unsigned char *pElt,
+PolyText(ClientPtr client, DrawablePtr pDraw, GCPtr pGC, unsigned char *pElt,
          unsigned char *endReq, int xorg, int yorg, int reqType, XID did)
 {
     PTclosureRec local_closure;
@@ -1409,7 +1409,7 @@ doImageText(ClientPtr client, ITclosurePtr c)
     lgerr = LoadGlyphs(client, c->pGC->font, c->nChars, itemSize, c->data);
     if (lgerr == Suspended) {
         if (!ClientIsAsleep(client)) {
-            GC *pGC;
+            GCPtr pGC;
             unsigned char *data;
             ITclosurePtr new_closure;
             ITclosurePtr old_closure;
@@ -1500,7 +1500,7 @@ doImageText(ClientPtr client, ITclosurePtr c)
 }
 
 int
-ImageText(ClientPtr client, DrawablePtr pDraw, GC * pGC, int nChars,
+ImageText(ClientPtr client, DrawablePtr pDraw, GCPtr pGC, int nChars,
           unsigned char *data, int xorg, int yorg, int reqType, XID did)
 {
     ITclosureRec local_closure;
