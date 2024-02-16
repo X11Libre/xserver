@@ -99,7 +99,7 @@ typedef struct _LFclosure {
 typedef struct _PTclosure {
     ClientPtr client;
     DrawablePtr pDraw;
-    GC *pGC;
+    GCPtr pGC;
     unsigned char *pElt;
     unsigned char *endReq;
     unsigned char *data;
@@ -115,7 +115,7 @@ typedef struct _PTclosure {
 typedef struct _ITclosure {
     ClientPtr client;
     DrawablePtr pDraw;
-    GC *pGC;
+    GCPtr pGC;
     BYTE nChars;
     unsigned char *data;
     int xorg;
