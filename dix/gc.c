@@ -72,7 +72,7 @@ static Bool CreateDefaultTile(GCPtr pGC);
 static unsigned char DefaultDash[2] = { 4, 4 };
 
 void
-ValidateGC(DrawablePtr pDraw, GC * pGC)
+ValidateGC(DrawablePtr pDraw, GCPtr pGC)
 {
     (*pGC->funcs->ValidateGC) (pGC, pGC->stateChanges, pDraw);
     pGC->stateChanges = 0;
@@ -120,7 +120,7 @@ ValidateGC(DrawablePtr pDraw, GC * pGC)
     _var = (_type)pUnion->ptr; pUnion++; }
 
 int
-ChangeGC(ClientPtr client, GC * pGC, BITS32 mask, ChangeGCValPtr pUnion)
+ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
 {
     BITS32 index2;
     int error = 0;
@@ -428,7 +428,7 @@ static const struct {
 };
 
 int
-ChangeGCXIDs(ClientPtr client, GC * pGC, BITS32 mask, CARD32 *pC32)
+ChangeGCXIDs(ClientPtr client, GCPtr pGC, BITS32 mask, CARD32 *pC32)
 {
     ChangeGCVal vals[GCLastBit + 1];
     int i;
@@ -465,7 +465,7 @@ NewGCObject(ScreenPtr pScreen, int depth)
 {
     GCPtr pGC;
 
-    pGC = dixAllocateScreenObjectWithPrivates(pScreen, GC, PRIVATE_GC);
+    pGC = dixAllocateScreenObjectWithPrivates(pScreen, GCRec, PRIVATE_GC);
     if (!pGC) {
         return (GCPtr) NULL;
     }
@@ -614,7 +614,7 @@ CreateDefaultTile(GCPtr pGC)
 }
 
 int
-CopyGC(GC * pgcSrc, GC * pgcDst, BITS32 mask)
+CopyGC(GCPtr pgcSrc, GCPtr pgcDst, BITS32 mask)
 {
     BITS32 index2;
     BITS32 maskQ;
