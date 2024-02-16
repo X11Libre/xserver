@@ -25,8 +25,6 @@ is" without express or implied warranty.
 #include "servermd.h"
 #include "mipointrst.h"
 
-#include "Xnest.h"
-
 #include "Display.h"
 #include "Screen.h"
 #include "XNCursor.h"

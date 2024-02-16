@@ -23,8 +23,6 @@ is" without express or implied warranty.
 #include "servermd.h"
 #include "mipointer.h"
 
-#include "Xnest.h"
-
 #include "Display.h"
 #include "Screen.h"
 #include "Pointer.h"

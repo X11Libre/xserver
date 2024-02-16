@@ -20,7 +20,7 @@ is" without express or implied warranty.
 /* This file uses the GC definition form Xlib.h as XlibGC. */
 
 typedef struct {
-    XlibGC gc;
+    GC gc;
 } xnestPrivGC;
 
 extern DevPrivateKeyRec xnestGCPrivateKeyRec;
