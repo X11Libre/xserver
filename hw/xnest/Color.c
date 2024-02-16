@@ -216,22 +216,8 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
     if (!xnestSameInstalledColormapWindows(icws.windows, icws.numWindows)) {
         free(xnestOldInstalledColormapWindows);
 
-#ifdef _XSERVER64
-        {
-            int i;
-            Window64 *windows = xallocarray(numWindows, sizeof(Window64));
-
-            for (i = 0; i < numWindows; ++i)
-                windows[i] = icws.windows[i];
-            XSetWMColormapWindows(xnestDisplay,
-                                  xnestDefaultWindows[pScreen->myNum], windows,
-                                  numWindows);
-            free(windows);
-        }
-#else
         XSetWMColormapWindows(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
                               icws.windows, numWindows);
-#endif
 
         xnestOldInstalledColormapWindows = icws.windows;
         xnestNumOldInstalledColormapWindows = icws.numWindows;
@@ -273,19 +259,8 @@ xnestSetScreenSaverColormapWindow(ScreenPtr pScreen)
 {
     free(xnestOldInstalledColormapWindows);
 
-#ifdef _XSERVER64
-    {
-        Window64 window;
-
-        window = xnestScreenSaverWindows[pScreen->myNum];
-        XSetWMColormapWindows(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
-                              &window, 1);
-        xnestScreenSaverWindows[pScreen->myNum] = window;
-    }
-#else
     XSetWMColormapWindows(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
                           &xnestScreenSaverWindows[pScreen->myNum], 1);
-#endif                          /* _XSERVER64 */
 
     xnestOldInstalledColormapWindows = NULL;
     xnestNumOldInstalledColormapWindows = 0;
@@ -388,25 +363,8 @@ void
 xnestStoreColors(ColormapPtr pCmap, int nColors, xColorItem * pColors)
 {
     if (pCmap->pVisual->class & DynamicClass)
-#ifdef _XSERVER64
-    {
-        int i;
-        XColor *pColors64 = xallocarray(nColors, sizeof(XColor));
-
-        for (i = 0; i < nColors; ++i) {
-            pColors64[i].pixel = pColors[i].pixel;
-            pColors64[i].red = pColors[i].red;
-            pColors64[i].green = pColors[i].green;
-            pColors64[i].blue = pColors[i].blue;
-            pColors64[i].flags = pColors[i].flags;
-        }
-        XStoreColors(xnestDisplay, xnestColormap(pCmap), pColors64, nColors);
-        free(pColors64);
-    }
-#else
         XStoreColors(xnestDisplay, xnestColormap(pCmap),
                      (XColor *) pColors, nColors);
-#endif
 }
 
 void
