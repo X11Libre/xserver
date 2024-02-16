@@ -126,26 +126,9 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
     switch (onoff) {
     case DEVICE_INIT:
         XDisplayKeycodes(xnestDisplay, &min_keycode, &max_keycode);
-#ifdef _XSERVER64
-        {
-            KeySym64 *keymap64;
-            int len;
-
-            keymap64 = XGetKeyboardMapping(xnestDisplay,
-                                           min_keycode,
-                                           max_keycode - min_keycode + 1,
-                                           &mapWidth);
-            len = (max_keycode - min_keycode + 1) * mapWidth;
-            keymap = xallocarray(len, sizeof(KeySym));
-            for (i = 0; i < len; ++i)
-                keymap[i] = keymap64[i];
-            XFree(keymap64);
-        }
-#else
         keymap = XGetKeyboardMapping(xnestDisplay,
                                      min_keycode,
                                      max_keycode - min_keycode + 1, &mapWidth);
-#endif
 
         memset(modmap, 0, sizeof(modmap));
         modifier_keymap = XGetModifierMapping(xnestDisplay);
