@@ -202,7 +202,7 @@ int
 dixLookupFontable(FontPtr *pFont, XID id, ClientPtr client, Mask access)
 {
     int rc;
-    GC *pGC;
+    GCPtr pGC;
 
     client->errorValue = id;    /* EITHER font or gc */
     rc = dixLookupResourceByType((void **) pFont, id, X11_RESTYPE_FONT, client,
