@@ -302,9 +302,7 @@ CreateWellKnownSockets(void)
 
     InitParentProcess();
 
-#ifdef XDMCP
     XdmcpInit();
-#endif
 }
 
 void
@@ -350,9 +348,7 @@ ResetWellKnownSockets(void)
     /*
      * restart XDMCP
      */
-#ifdef XDMCP
     XdmcpReset();
-#endif
 }
 
 void
