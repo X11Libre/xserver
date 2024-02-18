@@ -305,9 +305,7 @@ CreateWellKnownSockets(void)
 
     InitParentProcess();
 
-#ifdef XDMCP
     XdmcpInit();
-#endif
 }
 
 void
