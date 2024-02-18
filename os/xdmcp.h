@@ -11,6 +11,8 @@ typedef Bool (*AddAuthorFunc) (unsigned name_length, const char *name,
                                unsigned data_length, char *data);
 
 /* in xdmcp.c */
+#ifdef XDMCP
+
 void XdmcpUseMsg(void);
 int XdmcpOptions(int argc, char **argv, int i);
 void XdmcpRegisterConnection(int type, const char *address, int addrlen);
@@ -29,5 +31,14 @@ void XdmcpRegisterAuthentication(const char *name,
 
 struct sockaddr_in;
 void XdmcpRegisterBroadcastAddress(const struct sockaddr_in *addr);
+
+#else
+
+static inline void XdmcpUseMsg(void) {}
+static inline XdmcpOptions(int argc, char **argv, int i) { return i; }
+static inline void XdmcpInit(void) {}
+static inline XdmcpReset(void) {}
+
+#endif /* XDMCP */
 
 #endif /* _XSERVER_OS_XDMCP_H */
