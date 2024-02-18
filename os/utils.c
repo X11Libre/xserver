@@ -326,9 +326,7 @@ UseMsg(void)
     ErrorF("+extension name        Enable extension\n");
     ErrorF("-extension name        Disable extension\n");
     ListStaticExtensions();
-#ifdef XDMCP
     XdmcpUseMsg();
-#endif
     XkbUseMsg();
     ddxUseMsg();
 }
@@ -731,11 +729,9 @@ ProcessCommandLine(int argc, char *argv[])
         else if (strncmp(argv[i], "tty", 3) == 0) {
             /* init supplies us with this useless information */
         }
-#ifdef XDMCP
         else if ((skip = XdmcpOptions(argc, argv, i)) != i) {
             i = skip - 1;
         }
-#endif
         else if (strcmp(argv[i], "-dumbSched") == 0) {
             InputThreadEnable = FALSE;
 #ifdef HAVE_SETITIMER
