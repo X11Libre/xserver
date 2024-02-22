@@ -27,6 +27,7 @@ is" without express or implied warranty.
 #include "os/log_priv.h"
 #include "os/osdep.h"
 
+#include "ddx.h"
 #include "screenint.h"
 #include "input.h"
 #include "misc.h"
