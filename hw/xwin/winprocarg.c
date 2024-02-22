@@ -47,6 +47,7 @@ from The Open Group.
 #include "winprefs.h"
 
 #include "winclipboard/winclipboard.h"
+#include "ddx.h"
 
 /*
  * Function prototypes

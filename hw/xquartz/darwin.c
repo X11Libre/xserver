@@ -50,6 +50,7 @@
 #include "micmap.h"             // mi colormap code
 #include "fb.h"                 // fb framebuffer code
 #include "globals.h"
+#include "ddx.h"
 #include "dix.h"
 #include "xkbsrv.h"
 
