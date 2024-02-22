@@ -30,6 +30,7 @@
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 
+#include "ddx.h"
 #include "ephyr.h"
 #include "ephyrlog.h"
 #include "glx_extinit.h"
