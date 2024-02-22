@@ -661,6 +661,7 @@ inc = include_directories(
     'dix',
     'dri3',
     'include',
+    'os',
     'present',
     'randr',
     'render',

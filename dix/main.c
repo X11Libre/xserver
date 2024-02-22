@@ -111,6 +111,7 @@ Equipment Corporation.
 #include "colormapst.h"
 #include "cursorstr.h"
 #include "servermd.h"
+#include "ddx.h"
 #include "dixfont.h"
 #include "extnsionst.h"
 #include "privates.h"

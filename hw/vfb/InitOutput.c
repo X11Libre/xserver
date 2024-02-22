@@ -69,6 +69,7 @@ from The Open Group.
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #endif                          /* MITSHM */
+#include "ddx.h"
 #include "dix.h"
 #include "miline.h"
 #include "glx_extinit.h"
