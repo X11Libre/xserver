@@ -29,7 +29,8 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include "../../../../os/cmdline.h"
+#include "os/cmdline.h"
+#include "os/osdep.h"
 
 #include "xf86.h"
 #include "xf86Priv.h"
@@ -38,8 +39,6 @@
 #ifdef HAVE_SYS_KD_H
 #include <sys/kd.h>
 #endif
-
-#include "os/osdep.h"
 
 /*
  * Applications see VT number as consecutive integers starting from 1.
