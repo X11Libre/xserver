@@ -41,6 +41,8 @@
 #include <dix-config.h>
 #endif
 
+#include <X11/Xfuncproto.h>
+
 #include "xf86str.h"
 #include "xf86Opt.h"
 #include <X11/Xfuncproto.h>
