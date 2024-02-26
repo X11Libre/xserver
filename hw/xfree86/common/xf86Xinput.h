@@ -58,7 +58,6 @@
 #include "inputstr.h"
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
-#include "XIstubs.h"
 
 /* Input device flags */
 #define XI86_ALWAYS_CORE	0x04    /* device always controls the pointer */

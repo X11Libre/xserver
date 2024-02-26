@@ -65,6 +65,7 @@
 #include "xf86Priv.h"
 #include "xf86Config.h"
 #include "xf86Xinput_priv.h"
+#include "XIstubs.h"
 #include "xf86Optrec.h"
 #include "mipointer.h"
 #include "loaderProcs.h"
