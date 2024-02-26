@@ -36,6 +36,8 @@
 #include <dix-config.h>
 
 #include <X11/Xfuncproto.h>
+#include <X11/Xmd.h>
+#include <X11/extensions/panoramiXproto.h>
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
@@ -45,7 +47,6 @@
 #include "extnsionst.h"
 #include "dixstruct.h"
 #include "window.h"
-#include <X11/extensions/panoramiXproto.h>
 #include "globals.h"
 
 #define TRACE LogMessageVerb(X_NONE, 10, "TRACE " __FILE__ ":%s", __func__)
