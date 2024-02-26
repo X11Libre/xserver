@@ -225,7 +225,6 @@ cat > sdksyms.c << EOF
 
 
 /* include/Makefile.am */
-#include "XIstubs.h"
 #include "Xprintf.h"
 #include "closure.h"
 #include "colormap.h"
