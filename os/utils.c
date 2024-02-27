@@ -116,7 +116,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "xkbsrv.h"
 #include "picture.h"
 #include "miinitext.h"
-#include "ddx.h"
 #include "present.h"
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"

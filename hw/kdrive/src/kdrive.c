@@ -26,7 +26,6 @@
 #include "dix/screenint_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
-
 #include "os/osdep.h"
 
 #include "kdrive.h"
