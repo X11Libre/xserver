@@ -51,7 +51,6 @@
 #include <glx_extinit.h>
 #include <opaque.h>
 #include <os.h>
-#include "ddx.h"
 #include <propertyst.h>
 #include <version-config.h>
 
