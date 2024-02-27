@@ -97,7 +97,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/osdep.h"
 
 #include "opaque.h"
-#include "ddx.h"
 
 #ifdef XF86BIGFONT
 #include "xf86bigfontsrv.h"
