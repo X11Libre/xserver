@@ -117,6 +117,7 @@ Equipment Corporation.
 #include "os/client_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
+#include "os/screensaver.h"
 
 #include "windowstr.h"
 #include "dixfontstr.h"

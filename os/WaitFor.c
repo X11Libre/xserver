@@ -64,6 +64,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "os/busfault.h"
+#include "os/screensaver.h"
 
 #include "misc.h"
 #include "osdep.h"
