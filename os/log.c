@@ -94,7 +94,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/osdep.h"
 
 #include "opaque.h"
-#include "ddx.h"
 
 #ifdef WIN32
 #include <process.h>
