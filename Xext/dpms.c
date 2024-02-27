@@ -33,6 +33,7 @@ Equipment Corporation.
 #include <X11/extensions/dpmsproto.h>
 
 #include "miext/extinit_priv.h"
+#include "os/screensaver.h"
 
 #include "misc.h"
 #include "os.h"

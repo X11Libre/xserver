@@ -98,6 +98,7 @@ Equipment Corporation.
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
+#include "os/screensaver.h"
 
 #include "scrnintstr.h"
 #include "misc.h"
