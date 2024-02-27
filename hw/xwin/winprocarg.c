@@ -36,6 +36,7 @@ from The Open Group.
 #endif
 
 #include "os/cmdline.h"
+#include "os/ddx_priv.h"
 #include "os/osdep.h"
 #include "os/ddx_priv.h"
 
@@ -47,7 +48,6 @@ from The Open Group.
 #include "winprefs.h"
 
 #include "winclipboard/winclipboard.h"
-#include "ddx.h"
 
 /*
  * Function prototypes
