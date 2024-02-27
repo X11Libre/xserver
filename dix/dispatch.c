@@ -129,7 +129,6 @@ Equipment Corporation.
 #include "os/screensaver.h"
 
 #include "windowstr.h"
-#include "ddx.h"
 #include "dixfontstr.h"
 #include "gcstruct.h"
 #include "cursorstr.h"
