@@ -119,7 +119,6 @@ Equipment Corporation.
 #include "os/osdep.h"
 
 #include "windowstr.h"
-#include "ddx.h"
 #include "dixfontstr.h"
 #include "gcstruct.h"
 #include "colormapst.h"
