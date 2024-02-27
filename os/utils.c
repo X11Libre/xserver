@@ -114,7 +114,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "dixstruct.h"
 #include "picture.h"
 #include "miinitext.h"
-#include "ddx.h"
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
 
