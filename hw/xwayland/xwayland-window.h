@@ -34,6 +34,9 @@
 #include <unistd.h>
 
 #include <X11/X.h>
+
+#include "dix/property_priv.h"
+
 #include <dix.h>
 #include <propertyst.h>
 #include <validate.h>
