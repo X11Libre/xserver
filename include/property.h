@@ -51,14 +51,6 @@ SOFTWARE.
 
 typedef struct _Property *PropertyPtr;
 
-typedef struct _PropertyStateRec {
-    WindowPtr win;
-    PropertyPtr prop;
-    int state;
-} PropertyStateRec;
-
-extern CallbackListPtr PropertyStateCallback;
-
 extern _X_EXPORT int dixLookupProperty(PropertyPtr * /*result */ ,
                                        WindowPtr /*pWin */ ,
                                        Atom /*proprty */ ,
