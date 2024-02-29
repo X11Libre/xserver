@@ -10,8 +10,10 @@
 #include <X11/Xdefs.h>
 #include <X11/Xmd.h>
 
+#include "dix/screenint_priv.h"
 #include "include/cursor.h"
 #include "include/dix.h"
+#include "include/input.h"
 #include "include/window.h"
 
 extern CursorPtr rootCursor;
@@ -61,5 +63,10 @@ Bool CursorMetricsFromGlyph(FontPtr pfont,
                             CursorMetricPtr cm);
 
 void CheckCursorConfinement(WindowPtr pWin);
+
+void NewCurrentScreen(DeviceIntPtr pDev,
+                      ScreenPtr newScreen,
+                      int x,
+                      int y);
 
 #endif /* _XSERVER_DIX_CURSOR_PRIV_H */
