@@ -65,36 +65,6 @@ typedef struct _CursorMetric *CursorMetricPtr;
 extern _X_EXPORT int FreeCursor(void *pCurs,
                                 XID cid);
 
-extern _X_EXPORT int AllocARGBCursor(unsigned char * /*psrcbits */ ,
-                                     unsigned char * /*pmaskbits */ ,
-                                     CARD32 * /*argb */ ,
-                                     CursorMetricPtr /*cm */ ,
-                                     unsigned /*foreRed */ ,
-                                     unsigned /*foreGreen */ ,
-                                     unsigned /*foreBlue */ ,
-                                     unsigned /*backRed */ ,
-                                     unsigned /*backGreen */ ,
-                                     unsigned /*backBlue */ ,
-                                     CursorPtr * /*ppCurs */ ,
-                                     ClientPtr /*client */ ,
-                                     XID /*cid */ );
-
-extern _X_EXPORT int AllocGlyphCursor(Font /*source */ ,
-                                      unsigned int /*sourceChar */ ,
-                                      Font /*mask */ ,
-                                      unsigned int /*maskChar */ ,
-                                      unsigned /*foreRed */ ,
-                                      unsigned /*foreGreen */ ,
-                                      unsigned /*foreBlue */ ,
-                                      unsigned /*backRed */ ,
-                                      unsigned /*backGreen */ ,
-                                      unsigned /*backBlue */ ,
-                                      CursorPtr * /*ppCurs */ ,
-                                      ClientPtr /*client */ ,
-                                      XID /*cid */ );
-
-extern _X_EXPORT CursorPtr CreateRootCursor(void);
-
 extern _X_EXPORT int ServerBitsFromGlyph(FontPtr /*pfont */ ,
                                          unsigned int /*ch */ ,
                                          CursorMetricPtr /*cm */ ,

@@ -26,12 +26,14 @@
 #include <dix-config.h>
 #endif
 
+#include <stdint.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/render.h>
 #include <X11/extensions/renderproto.h>
 #include <X11/Xfuncproto.h>
 
+#include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 
@@ -55,8 +57,6 @@
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
 #endif
-
-#include <stdint.h>
 
 Bool noRenderExtension = FALSE;
 
