@@ -34,20 +34,21 @@ and Jim Haggerty of Metheus.
 
 #include <dix-config.h>
 
+#include <stdio.h>
+#include <assert.h>
+#include <X11/Xmd.h>
+#include <X11/extensions/recordproto.h>
+
 #include "dix/cursor_priv.h"
 #include "dix/eventconvert.h"
 #include "miext/extinit_priv.h"
 
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include <X11/extensions/recordproto.h>
 #include "set.h"
 #include "swaprep.h"
 #include "inputstr.h"
 #include "scrnintstr.h"
-
-#include <stdio.h>
-#include <assert.h>
 
 #ifdef XINERAMA
 #include "globals.h"
