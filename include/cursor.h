@@ -57,16 +57,10 @@ SOFTWARE.
 /* Provide support for alpha composited cursors */
 #define ARGB_CURSOR
 
-struct _DeviceIntRec;
-
 typedef struct _Cursor *CursorPtr;
 typedef struct _CursorMetric *CursorMetricPtr;
 
 extern _X_EXPORT int FreeCursor(void *pCurs,
                                 XID cid);
-
-#ifdef PANORAMIX
-extern _X_EXPORT int XineramaGetCursorScreen(struct _DeviceIntRec *pDev);
-#endif                          /* PANORAMIX */
 
 #endif                          /* CURSOR_H */
