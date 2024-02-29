@@ -36,19 +36,21 @@ and Jim Haggerty of Metheus.
 #include <dix-config.h>
 #endif
 
+#include <stdio.h>
+#include <assert.h>
+#include <X11/Xmd.h>
+#include <X11/extensions/recordproto.h>
+
+#include "dix/cursor_priv.h"
 #include "dix/eventconvert.h"
 #include "miext/extinit_priv.h"
 
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include <X11/extensions/recordproto.h>
 #include "set.h"
 #include "swaprep.h"
 #include "inputstr.h"
 #include "scrnintstr.h"
-
-#include <stdio.h>
-#include <assert.h>
 
 #ifdef PANORAMIX
 #include "globals.h"
@@ -722,7 +724,7 @@ RecordSendProtocolEvents(RecordClientsAndProtocolPtr pRCAP,
                  pev->u.u.type == ButtonPress ||
                  pev->u.u.type == ButtonRelease ||
                  pev->u.u.type == KeyPress || pev->u.u.type == KeyRelease)) {
-                int scr = XineramaGetCursorScreen(inputInfo.pointer);
+                int scr = inputInfo.pointer->spriteInfo->sprite->screen->myNum;
 
                 memcpy(&shiftedEvent, pev, sizeof(xEvent));
                 shiftedEvent.u.keyButtonPointer.rootX +=

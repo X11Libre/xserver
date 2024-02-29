@@ -1050,19 +1050,6 @@ GetSpritePosition(DeviceIntPtr pDev, int *px, int *py)
     *py = pSprite->hotPhys.y;
 }
 
-#ifdef PANORAMIX
-int
-XineramaGetCursorScreen(DeviceIntPtr pDev)
-{
-    if (!noPanoramiXExtension) {
-        return pDev->spriteInfo->sprite->screen->myNum;
-    }
-    else {
-        return 0;
-    }
-}
-#endif                          /* PANORAMIX */
-
 #define TIMESLOP (5 * 60 * 1000)        /* 5 minutes */
 
 static void
