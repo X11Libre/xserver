@@ -65,10 +65,6 @@ typedef struct _CursorMetric *CursorMetricPtr;
 extern _X_EXPORT int FreeCursor(void *pCurs,
                                 XID cid);
 
-extern _X_EXPORT Bool CursorMetricsFromGlyph(FontPtr /*pfont */ ,
-                                             unsigned /*ch */ ,
-                                             CursorMetricPtr /*cm */ );
-
 extern _X_EXPORT void CheckCursorConfinement(WindowPtr /*pWin */ );
 
 extern _X_EXPORT void NewCurrentScreen(struct _DeviceIntRec * /*pDev */ ,
