@@ -3,6 +3,8 @@
 #include <xorg-config.h>
 #endif
 
+#include "dix/cursor_priv.h"
+
 #include "xf86.h"
 #include "xf86CursorPriv.h"
 #include "colormapst.h"
