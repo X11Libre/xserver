@@ -101,6 +101,7 @@ Equipment Corporation.
 #endif
 
 #include "dix/colormap_priv.h"
+#include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
