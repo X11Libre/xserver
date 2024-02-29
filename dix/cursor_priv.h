@@ -7,6 +7,7 @@
 
 #include <X11/fonts/font.h>
 #include <X11/X.h>
+#include <X11/Xdefs.h>
 #include <X11/Xmd.h>
 
 #include "include/cursor.h"
@@ -53,5 +54,9 @@ int ServerBitsFromGlyph(FontPtr pfont,
                         unsigned int ch,
                         CursorMetricPtr cm,
                         unsigned char **ppbits);
+
+Bool CursorMetricsFromGlyph(FontPtr pfont,
+                            unsigned ch,
+                            CursorMetricPtr cm);
 
 #endif /* _XSERVER_DIX_CURSOR_PRIV_H */
