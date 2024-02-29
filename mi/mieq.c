@@ -40,6 +40,7 @@ in this Software without prior written authorization from The Open Group.
 #include   <X11/Xmd.h>
 #include   <X11/Xproto.h>
 
+#include   "dix/cursor_priv.h"
 #include   "os/screensaver.h"
 
 #include   "misc.h"
