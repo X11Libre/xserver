@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/extensions/saverproto.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 
