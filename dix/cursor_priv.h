@@ -9,4 +9,9 @@
 
 extern CursorPtr rootCursor;
 
+/* reference counting */
+CursorPtr RefCursor(CursorPtr cursor);
+CursorPtr UnrefCursor(CursorPtr cursor);
+int CursorRefCount(const CursorPtr cursor);
+
 #endif /* _XSERVER_DIX_CURSOR_PRIV_H */
