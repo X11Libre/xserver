@@ -65,9 +65,6 @@ typedef struct _CursorMetric *CursorMetricPtr;
 extern _X_EXPORT int FreeCursor(void *pCurs,
                                 XID cid);
 
-extern _X_EXPORT Bool PointerConfinedToScreen(struct _DeviceIntRec * /* pDev */
-                                              );
-
 extern _X_EXPORT void GetSpritePosition(struct _DeviceIntRec * /* pDev */ ,
                                         int * /*px */ ,
                                         int * /*py */ );
