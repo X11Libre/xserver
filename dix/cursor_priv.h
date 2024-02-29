@@ -12,6 +12,7 @@
 
 #include "include/cursor.h"
 #include "include/dix.h"
+#include "include/window.h"
 
 extern CursorPtr rootCursor;
 
@@ -58,5 +59,7 @@ int ServerBitsFromGlyph(FontPtr pfont,
 Bool CursorMetricsFromGlyph(FontPtr pfont,
                             unsigned ch,
                             CursorMetricPtr cm);
+
+void CheckCursorConfinement(WindowPtr pWin);
 
 #endif /* _XSERVER_DIX_CURSOR_PRIV_H */
