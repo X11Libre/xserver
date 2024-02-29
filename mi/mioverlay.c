@@ -4,6 +4,9 @@
 #endif
 
 #include <X11/X.h>
+
+#include "dix/cursor_priv.h"
+
 #include "scrnintstr.h"
 #include <X11/extensions/shapeproto.h>
 #include "validate.h"
