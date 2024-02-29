@@ -19,6 +19,9 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
+#include <dix-config.h>
+
+#include "dix/cursor_priv.h"
 
 #include "randrstr.h"
 #include "inputstr.h"
