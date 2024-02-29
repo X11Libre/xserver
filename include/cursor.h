@@ -65,11 +65,6 @@ typedef struct _CursorMetric *CursorMetricPtr;
 extern _X_EXPORT int FreeCursor(void *pCurs,
                                 XID cid);
 
-extern _X_EXPORT int ServerBitsFromGlyph(FontPtr /*pfont */ ,
-                                         unsigned int /*ch */ ,
-                                         CursorMetricPtr /*cm */ ,
-                                         unsigned char ** /*ppbits */ );
-
 extern _X_EXPORT Bool CursorMetricsFromGlyph(FontPtr /*pfont */ ,
                                              unsigned /*ch */ ,
                                              CursorMetricPtr /*cm */ );
