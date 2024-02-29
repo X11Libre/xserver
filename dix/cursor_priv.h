@@ -69,4 +69,6 @@ void NewCurrentScreen(DeviceIntPtr pDev,
                       int x,
                       int y);
 
+Bool PointerConfinedToScreen(DeviceIntPtr pDev);
+
 #endif /* _XSERVER_DIX_CURSOR_PRIV_H */
