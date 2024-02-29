@@ -35,6 +35,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/Xproto.h>
 #include <X11/keysym.h>
 
+#include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "xkb/xkbsrv_priv.h"
