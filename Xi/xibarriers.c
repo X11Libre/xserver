@@ -45,6 +45,7 @@
 #include <dix-config.h>
 #endif
 
+#include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 
