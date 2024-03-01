@@ -146,6 +146,9 @@ cat > sdksyms.c << EOF
 # include "xf86sbusBus.h"
 #endif
 
+// needed for various graphics drivers
+#include "dgaproc.h"
+#include "xf86MatchDrivers.h"
 
 /* hw/xfree86/ramdac/Makefile.am */
 #include "xf86Cursor.h"
