@@ -58,6 +58,8 @@
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>
 
+#include "dix/dix_priv.h"
+
 #include "misc.h"
 #include "xf86.h"
 #include "xf86Priv.h"

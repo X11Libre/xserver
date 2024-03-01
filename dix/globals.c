@@ -110,7 +110,7 @@ FontPtr defaultFont;            /* not declared in dix.h to avoid including font
                                    every compilation of dix code */
 CursorPtr rootCursor;
 bool party_like_its_1989 = FALSE;
-Bool whiteRoot = FALSE;
+bool whiteRoot = FALSE;
 
 TimeStamp currentTime;
 
@@ -119,5 +119,5 @@ int monitorResolution = 0;
 
 const char *display;
 int displayfd = -1;
-Bool explicit_display = FALSE;
+bool explicit_display = FALSE;
 char *ConnectionInfo;

@@ -68,7 +68,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "dixstruct.h"
 #include "pixmapstr.h"
 #include "resource.h"
-#include "opaque.h"
 #include "syncsrv.h"
 #include "syncsdk.h"
 #include "protocol-versions.h"

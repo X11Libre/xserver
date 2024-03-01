@@ -82,4 +82,26 @@ int dixLookupClient(ClientPtr *result,
  /* -retro mode */
 extern bool party_like_its_1989;
 
+extern bool whiteRoot;
+
+extern volatile char isItTimeToYield;
+
+/* bit values for dispatchException */
+#define DE_RESET     1
+#define DE_TERMINATE 2
+#define DE_PRIORITYCHANGE 4     /* set when a client's priority changes */
+
+extern volatile char dispatchException;
+
+extern int ScreenSaverBlanking;
+extern int ScreenSaverAllowExposures;
+extern int defaultScreenSaverBlanking;
+extern int defaultScreenSaverAllowExposures;
+extern const char *display;
+extern int displayfd;
+extern bool explicit_display;
+
+extern bool disableBackingStore;
+extern bool enableBackingStore;
+
 #endif /* _XSERVER_DIX_PRIV_H */

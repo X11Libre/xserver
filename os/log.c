@@ -89,6 +89,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "os/osdep.h"
 
+#include "dix/dix_priv.h"
 #include "os/audit.h"
 #include "os/fmt.h"
 

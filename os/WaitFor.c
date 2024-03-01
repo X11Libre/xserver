@@ -70,7 +70,7 @@ SOFTWARE.
 #include "misc.h"
 #include "osdep.h"
 #include "dixstruct.h"
-#include "opaque.h"
+#include "globals.h"
 #ifdef DPMSExtension
 #include "dpmsproc.h"
 #endif

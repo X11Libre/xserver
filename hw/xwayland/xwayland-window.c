@@ -34,6 +34,8 @@
 #include <X11/X.h>
 #include <X11/Xatom.h>
 
+#include "dix/dix_priv.h"
+
 #include "compositeext.h"
 #include "compint.h"
 #include "inputstr.h"

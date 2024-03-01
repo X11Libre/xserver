@@ -472,8 +472,8 @@ WalkTree(ScreenPtr pScreen, VisitWindowProcPtr func, void *data)
 }
 
 /* hack to force no backing store */
-Bool disableBackingStore = FALSE;
-Bool enableBackingStore = FALSE;
+bool disableBackingStore = FALSE;
+bool enableBackingStore = FALSE;
 
 static void
 SetWindowToDefaults(WindowPtr pWin)

@@ -40,6 +40,7 @@
 #include <X11/X.h>
 #include <X11/Xmd.h>
 
+#include "dix/dix_priv.h"
 #include "os/auth.h"
 
 #include "misc.h"
@@ -48,7 +49,6 @@
 #include "xdmauth.h"
 #include "input.h"
 #include "dixstruct.h"
-#include "opaque.h"
 
 #define XSERV_t
 #define TRANS_SERVER

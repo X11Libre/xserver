@@ -40,6 +40,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XKM.h>
 
+#include "dix/dix_priv.h"
 #include "os/osdep.h"
 
 #include "inputstr.h"
