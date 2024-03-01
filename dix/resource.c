@@ -125,6 +125,7 @@ Equipment Corporation.
 
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "os.h"

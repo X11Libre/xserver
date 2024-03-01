@@ -33,27 +33,8 @@ from The Open Group.
 
 #include "globals.h"
 
-extern _X_EXPORT int LimitClients;
-
+// needed by libglx and libglamor (server modules)
 extern _X_EXPORT Bool enableIndirectGLX;
-extern _X_EXPORT Bool PartialNetwork;
-extern _X_EXPORT Bool RunFromSigStopParent;
-
-#ifdef RLIMIT_DATA
-extern _X_EXPORT int limitDataSpace;
-#endif
-#ifdef RLIMIT_STACK
-extern _X_EXPORT int limitStackSpace;
-#endif
-#ifdef RLIMIT_NOFILE
-extern _X_EXPORT int limitNoFile;
-#endif
-extern _X_EXPORT Bool defeatAccessControl;
 extern _X_EXPORT Bool bgNoneRoot;
-
-extern _X_EXPORT Bool CoreDump;
-extern _X_EXPORT Bool NoListenAll;
-
-extern _X_EXPORT Bool AllowByteSwappedClients;
 
 #endif                          /* OPAQUE_H */

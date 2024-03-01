@@ -196,7 +196,7 @@ SOFTWARE.
 #include "rpcauth.h"
 #include "xdmcp.h"
 
-Bool defeatAccessControl = FALSE;
+bool defeatAccessControl = FALSE;
 
 #define addrEqual(fam, address, length, host) \
 			 ((fam) == (host)->family &&\

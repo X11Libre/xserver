@@ -50,6 +50,8 @@
 #include <sys/types.h>
 #include <grp.h>
 
+#include "os/osdep.h"
+
 #include "xf86.h"
 #include "xf86Modes.h"
 #include "xf86Parser.h"

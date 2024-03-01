@@ -1,6 +1,7 @@
 #ifndef _XSERVER_OS_AUTH_H
 #define _XSERVER_OS_AUTH_H
 
+#include <stdbool.h>
 #include <X11/X.h>
 
 #include "dix.h"
@@ -110,5 +111,7 @@ void AugmentSelf(void *from, int len);
 int ChangeAccessControl(ClientPtr client, int fEnabled);
 
 void AccessUsingXdmcp(void);
+
+extern bool defeatAccessControl;
 
 #endif /* _XSERVER_OS_AUTH_H */
