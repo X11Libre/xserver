@@ -5,6 +5,7 @@
 #ifndef _XSERVER_DIX_PRIV_H
 #define _XSERVER_DIX_PRIV_H
 
+#include <stdbool.h>
 #include <X11/Xdefs.h>
 
 /* This file holds global DIX settings to be used inside the Xserver,
@@ -77,5 +78,8 @@ int dixLookupClient(ClientPtr *result,
                     XID id,
                     ClientPtr client,
                     Mask access_mode);
+
+ /* -retro mode */
+extern bool party_like_its_1989;
 
 #endif /* _XSERVER_DIX_PRIV_H */

@@ -109,7 +109,7 @@ const char *defaultFontPath = COMPILEDDEFAULTFONTPATH;
 FontPtr defaultFont;            /* not declared in dix.h to avoid including font.h in
                                    every compilation of dix code */
 CursorPtr rootCursor;
-Bool party_like_its_1989 = FALSE;
+bool party_like_its_1989 = FALSE;
 Bool whiteRoot = FALSE;
 
 TimeStamp currentTime;

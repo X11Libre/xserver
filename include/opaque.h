@@ -74,6 +74,4 @@ extern _X_EXPORT Bool NoListenAll;
 
 extern _X_EXPORT Bool AllowByteSwappedClients;
 
-extern Bool party_like_its_1989; /* -retro mode */
-
 #endif                          /* OPAQUE_H */
