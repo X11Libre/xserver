@@ -107,8 +107,7 @@ static void FreeCell(ColormapPtr /*pmap */ ,
                      int        /*channel */
     );
 
-static void UpdateColors(ColormapPtr    /*pmap */
-    );
+static void dixUpdateColors(ColormapPtr pmap);
 
 static int AllocDirect(int /*client */ ,
                        ColormapPtr /*pmap */ ,
@@ -558,7 +557,7 @@ CopyColormapAndFree(Colormap mid, ColormapPtr pSrc, int client)
         }
         pSrc->flags &= ~AllAllocated;
         FreePixels(pSrc, client);
-        UpdateColors(pmap);
+        dixUpdateColors(pmap);
         return Success;
     }
 
@@ -568,7 +567,7 @@ CopyColormapAndFree(Colormap mid, ColormapPtr pSrc, int client)
         CopyFree(BLUEMAP, client, pSrc, pmap);
     }
     if (pmap->class & DynamicClass)
-        UpdateColors(pmap);
+        dixUpdateColors(pmap);
     /* XXX should worry about removing any X11_RESTYPE_CMAPENTRY resource */
     return Success;
 }
@@ -698,7 +697,7 @@ FreeCell(ColormapPtr pmap, Pixel i, int channel)
 }
 
 static void
-UpdateColors(ColormapPtr pmap)
+dixUpdateColors(ColormapPtr pmap)
 {
     xColorItem *defs;
     xColorItem *pdef;
