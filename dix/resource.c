@@ -136,7 +136,6 @@ Equipment Corporation.
 #include "dixfont.h"
 #include "colormap.h"
 #include "inputstr.h"
-#include "dixgrabs.h"
 #include "cursor.h"
 #ifdef PANORAMIX
 #include "panoramiX.h"
