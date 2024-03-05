@@ -59,4 +59,6 @@ void DeleteGPUDeviceRequest(struct OdevAttributes *attribs);
 struct xf86_platform_device *
 xf86_find_platform_device_by_devnum(int major, int minor);
 
+void config_pre_init(void);
+
 #endif /* _XSERVER_HOTPLUG_PRIV_H */
