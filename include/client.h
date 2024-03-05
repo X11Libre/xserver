@@ -36,12 +36,6 @@
 struct _Client;
 typedef struct _ClientId *ClientIdPtr;
 
-/* Determine client IDs for caching. Exported on purpose for
- * extensions such as SELinux. */
-extern _X_EXPORT pid_t DetermineClientPid(struct _Client *client);
-extern _X_EXPORT void DetermineClientCmd(pid_t, const char **cmdname,
-                                         const char **cmdargs);
-
 /* Query cached client IDs. Exported on purpose for drivers. */
 extern _X_EXPORT pid_t GetClientPid(struct _Client *client);
 extern _X_EXPORT const char *GetClientCmdName(struct _Client *client);

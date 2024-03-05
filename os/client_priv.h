@@ -24,4 +24,9 @@ struct _Client;
 void ReserveClientIds(struct _Client *client);
 void ReleaseClientIds(struct _Client *client);
 
+/* Determine client IDs for caching. Exported on purpose for
+ * extensions such as SELinux. */
+pid_t DetermineClientPid(struct _Client *client);
+void DetermineClientCmd(pid_t, const char **cmdname, const char **cmdargs);
+
 #endif /* _XSERVER_DIX_CLIENT_PRIV_H */
