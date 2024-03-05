@@ -186,6 +186,7 @@ SOFTWARE.
 #include <X11/Xos_r.h>
 
 #include "os/auth.h"
+#include "os/client_priv.h"
 
 #include "dixstruct.h"
 #include "osdep.h"

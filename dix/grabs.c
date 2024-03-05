@@ -56,6 +56,7 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "os/auth.h"
+#include "os/client_priv.h"
 
 #include "misc.h"
 #include "windowstr.h"
@@ -65,7 +66,6 @@ SOFTWARE.
 #include "xace.h"
 #include "exglobals.h"
 #include "inpututils.h"
-#include "client.h"
 
 #define BITMASK(i) (((Mask)1) << ((i) & 31))
 #define MASKIDX(i) ((i) >> 5)
