@@ -8,8 +8,6 @@
 
 #include <sys/types.h>
 
-#include "client.h"
-
 /* Client IDs. Use GetClientPid, GetClientCmdName and GetClientCmdArgs
  * instead of accessing the fields directly. */
 struct _ClientId {
