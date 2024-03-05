@@ -30,15 +30,7 @@
 #include <dix-config.h>
 #endif                          /* HAVE_DIX_CONFIG_H */
 
-#include <sys/types.h>
-#include <X11/Xfuncproto.h>
-
 struct _Client;
 typedef struct _ClientId *ClientIdPtr;
-
-/* Query cached client IDs. Exported on purpose for drivers. */
-extern _X_EXPORT pid_t GetClientPid(struct _Client *client);
-extern _X_EXPORT const char *GetClientCmdName(struct _Client *client);
-extern _X_EXPORT const char *GetClientCmdArgs(struct _Client *client);
 
 #endif                          /* CLIENT_H */
