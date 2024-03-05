@@ -39,4 +39,8 @@ Bool GrabIsGestureGrab(GrabPtr grab);
 
 int DeletePassiveGrab(void *value, XID id);
 
+Bool GrabMatchesSecond(GrabPtr pFirstGrab,
+                       GrabPtr pSecondGrab,
+                       Bool ignoreDevice);
+
 #endif /* _XSERVER_DIXGRABS_PRIV_H */
