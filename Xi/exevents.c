@@ -104,7 +104,6 @@ SOFTWARE.
 #include "exglobals.h"
 #include "eventstr.h"
 #include "dixevents.h"          /* DeliverFocusedEvent */
-#include "dixgrabs.h"
 #include "scrnintstr.h"
 #include "listdev.h"            /* for CopySwapXXXClass */
 #include "xace.h"
