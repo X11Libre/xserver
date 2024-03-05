@@ -29,4 +29,9 @@ void ReleaseClientIds(struct _Client *client);
 pid_t DetermineClientPid(struct _Client *client);
 void DetermineClientCmd(pid_t, const char **cmdname, const char **cmdargs);
 
+/* Query cached client IDs. Exported on purpose for drivers. */
+pid_t GetClientPid(struct _Client *client);
+const char *GetClientCmdName(struct _Client *client);
+const char *GetClientCmdArgs(struct _Client *client);
+
 #endif /* _XSERVER_DIX_CLIENT_PRIV_H */
