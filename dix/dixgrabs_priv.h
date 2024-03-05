@@ -37,4 +37,6 @@ Bool GrabIsPointerGrab(GrabPtr grab);
 Bool GrabIsKeyboardGrab(GrabPtr grab);
 Bool GrabIsGestureGrab(GrabPtr grab);
 
+int DeletePassiveGrab(void *value, XID id);
+
 #endif /* _XSERVER_DIXGRABS_PRIV_H */
