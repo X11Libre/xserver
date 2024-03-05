@@ -62,7 +62,6 @@ SOFTWARE.
 #include "windowstr.h"
 #include "inputstr.h"
 #include "cursorstr.h"
-#include "dixgrabs.h"
 #include "xace.h"
 #include "exglobals.h"
 #include "inpututils.h"

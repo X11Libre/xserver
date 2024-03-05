@@ -43,7 +43,6 @@
 #include "swaprep.h"
 #include "exglobals.h"          /* BadDevice */
 #include "xipassivegrab.h"
-#include "dixgrabs.h"
 #include "misc.h"
 #include "inpututils.h"
 

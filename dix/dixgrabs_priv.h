@@ -45,4 +45,6 @@ Bool GrabMatchesSecond(GrabPtr pFirstGrab,
 
 int AddPassiveGrabToList(ClientPtr client, GrabPtr pGrab);
 
+Bool DeletePassiveGrabFromList(GrabPtr pMinuendGrab);
+
 #endif /* _XSERVER_DIXGRABS_PRIV_H */

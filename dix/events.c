@@ -138,7 +138,6 @@ Equipment Corporation.
 #include "exglobals.h"
 #include "extnsionst.h"
 #include "dixevents.h"
-#include "dixgrabs.h"
 #include "dispatch.h"
 #include "geext.h"
 #include "geint.h"
