@@ -43,4 +43,6 @@ Bool GrabMatchesSecond(GrabPtr pFirstGrab,
                        GrabPtr pSecondGrab,
                        Bool ignoreDevice);
 
+int AddPassiveGrabToList(ClientPtr client, GrabPtr pGrab);
+
 #endif /* _XSERVER_DIXGRABS_PRIV_H */

@@ -28,9 +28,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 struct _GrabParameters;
 
-extern _X_EXPORT int AddPassiveGrabToList(ClientPtr /* client */ ,
-                                          GrabPtr /* pGrab */ );
-
 extern _X_EXPORT Bool DeletePassiveGrabFromList(GrabPtr /* pMinuendGrab */ );
 
 #endif                          /* DIXGRABS_H */
