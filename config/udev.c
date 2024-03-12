@@ -37,7 +37,8 @@
 #include "config-backends.h"
 #include "os.h"
 #include "globals.h"
-#include "systemd-logind.h"
+
+#include "../hw/xfree86/os-support/linux/systemd-logind.h"
 
 #ifdef HAVE_SYS_SYSMACROS_H
 #include <sys/sysmacros.h>
