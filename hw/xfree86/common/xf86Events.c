@@ -89,7 +89,8 @@
 #endif
 
 #include "xf86platformBus.h"
-#include "systemd-logind.h"
+
+#include "../os-support/linux/systemd-logind.h"
 
 extern void (*xf86OSPMClose) (void);
 

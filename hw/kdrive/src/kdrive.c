@@ -54,7 +54,7 @@
 
 /* This stub can be safely removed once we can
  * split input and GPU parts in hotplug.h et al. */
-#include <systemd-logind.h>
+#include "../../xfree86/os-support/linux/systemd-logind.h"
 
 typedef struct _kdDepths {
     CARD8 depth;
