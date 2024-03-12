@@ -63,7 +63,7 @@
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "mi.h"
-#include "systemd-logind.h"
+#include "../os-support/linux/systemd-logind.h"
 #include "xf86VGAarbiter_priv.h"
 #include "loaderProcs.h"
 
