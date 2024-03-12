@@ -41,7 +41,7 @@
 #include "dix/screenint_priv.h"
 
 #include "os.h"
-#include "systemd-logind.h"
+#include "../os-support/linux/systemd-logind.h"
 
 #include "loaderProcs.h"
 #include "xf86.h"
