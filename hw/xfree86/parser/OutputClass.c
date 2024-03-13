@@ -109,7 +109,7 @@ xf86parseOutputClassSection(void)
             xf86_lex_val.str = NULL;
             break;
         case IDENTIFIER:
-            if (xf86getSubToken(&(ptr->comment)) != STRING)
+            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Identifier");
             if (has_ident == TRUE)
                 Error(MULTIPLE_MSG, "Identifier");
@@ -117,13 +117,13 @@ xf86parseOutputClassSection(void)
             has_ident = TRUE;
             break;
         case DRIVER:
-            if (xf86getSubToken(&(ptr->comment)) != STRING)
+            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Driver");
             else
                 ptr->driver = xf86_lex_val.str;
             break;
         case MODULEPATH:
-            if (xf86getSubToken(&(ptr->comment)) != STRING)
+            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "ModulePath");
             if (ptr->modulepath) {
                 char *path;
@@ -139,7 +139,7 @@ xf86parseOutputClassSection(void)
             ptr->option_lst = xf86parseOption(ptr->option_lst);
             break;
         case MATCH_DRIVER:
-            if (xf86getSubToken(&(ptr->comment)) != STRING)
+            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "MatchDriver");
             add_group_entry(&ptr->match_driver,
                             xstrtokenize(xf86_lex_val.str, TOKEN_SEP));
