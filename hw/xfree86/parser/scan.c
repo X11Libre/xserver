@@ -394,7 +394,7 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
             configRBuf[i] = '\0';
             xf86_lex_val.str = malloc(strlen(configRBuf) + 1);
             strcpy(xf86_lex_val.str, configRBuf);        /* private copy ! */
-            return STRING;
+            return XF86_TOKEN_STRING;
         }
 
         /*
@@ -427,7 +427,7 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
 
         if (temp == COMMA || temp == DASH)
             return temp;
-        if (temp == NUMBER || temp == STRING)
+        if (temp == NUMBER || temp == XF86_TOKEN_STRING)
             return temp;
     }
 

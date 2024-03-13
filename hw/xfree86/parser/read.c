@@ -102,7 +102,7 @@ xf86readConfigFile(void)
             ptr->conf_comment = xf86addComment(ptr->conf_comment, xf86_lex_val.str);
             break;
         case SECTION:
-            if (xf86getSubToken(&(ptr->conf_comment)) != STRING) {
+            if (xf86getSubToken(&(ptr->conf_comment)) != XF86_TOKEN_STRING) {
                 xf86parseError(QUOTE_MSG, "Section");
                 CLEANUP(ptr);
                 return NULL;
