@@ -101,7 +101,7 @@ xf86parseVideoPortSubSection(void)
             xf86_lex_val.str = NULL;
             break;
         case IDENTIFIER:
-            if (xf86getSubToken(&(ptr->vp_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->vp_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Identifier");
             if (has_ident == TRUE)
                 Error(MULTIPLE_MSG, "Identifier");
@@ -160,7 +160,7 @@ xf86parseVideoAdaptorSection(void)
             xf86_lex_val.str = NULL;
             break;
         case IDENTIFIER:
-            if (xf86getSubToken(&(ptr->va_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->va_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Identifier");
             ptr->va_identifier = xf86_lex_val.str;
             if (has_ident == TRUE)
@@ -168,22 +168,22 @@ xf86parseVideoAdaptorSection(void)
             has_ident = TRUE;
             break;
         case VENDOR:
-            if (xf86getSubToken(&(ptr->va_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->va_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Vendor");
             ptr->va_vendor = xf86_lex_val.str;
             break;
         case BOARD:
-            if (xf86getSubToken(&(ptr->va_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->va_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Board");
             ptr->va_board = xf86_lex_val.str;
             break;
         case BUSID:
-            if (xf86getSubToken(&(ptr->va_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->va_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "BusID");
             ptr->va_busid = xf86_lex_val.str;
             break;
         case DRIVER:
-            if (xf86getSubToken(&(ptr->va_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->va_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Driver");
             ptr->va_driver = xf86_lex_val.str;
             break;
@@ -191,7 +191,7 @@ xf86parseVideoAdaptorSection(void)
             ptr->va_option_lst = xf86parseOption(ptr->va_option_lst);
             break;
         case SUBSECTION:
-            if (xf86getSubToken(&(ptr->va_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->va_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "SubSection");
             {
                 HANDLE_LIST(va_port_lst, xf86parseVideoPortSubSection,
