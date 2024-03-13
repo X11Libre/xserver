@@ -73,7 +73,7 @@ typedef enum {
 
     /* value type tokens */
     NUMBER = 1,
-    STRING,
+    XF86_TOKEN_STRING,
 
     /* Tokens that can appear in many sections */
     SECTION,

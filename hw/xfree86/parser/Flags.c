@@ -134,7 +134,7 @@ xf86parseFlagsSection(void)
                     if (hasvalue) {
                         tokentype = xf86getSubToken(&(ptr->flg_comment));
                         if (strvalue) {
-                            if (tokentype != STRING)
+                            if (tokentype != XF86_TOKEN_STRING)
                                 Error(QUOTE_MSG, tmp);
                             valstr = xf86_lex_val.str;
                         }
@@ -431,14 +431,14 @@ xf86parseOption(XF86OptionPtr head)
     char *name, *comment = NULL;
     int token;
 
-    if ((token = xf86getSubToken(&comment)) != STRING) {
+    if ((token = xf86getSubToken(&comment)) != XF86_TOKEN_STRING) {
         xf86parseError(BAD_OPTION_MSG);
         free(comment);
         return head;
     }
 
     name = xf86_lex_val.str;
-    if ((token = xf86getSubToken(&comment)) == STRING) {
+    if ((token = xf86getSubToken(&comment)) == XF86_TOKEN_STRING) {
         option = xf86newOption(name, xf86_lex_val.str);
         assert(option);
         option->opt_comment = comment;

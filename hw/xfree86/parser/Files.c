@@ -95,7 +95,7 @@ xf86parseFilesSection(void)
             xf86_lex_val.str = NULL;
             break;
         case FONTPATH:
-            if (xf86getSubToken(&(ptr->file_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->file_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "FontPath");
             j = FALSE;
             str = xf86_lex_val.str;
@@ -118,7 +118,7 @@ xf86parseFilesSection(void)
             free(xf86_lex_val.str);
             break;
         case MODULEPATH:
-            if (xf86getSubToken(&(ptr->file_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->file_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "ModulePath");
             l = FALSE;
             str = xf86_lex_val.str;
@@ -145,12 +145,12 @@ xf86parseFilesSection(void)
             free(xf86_lex_val.str);
             break;
         case LOGFILEPATH:
-            if (xf86getSubToken(&(ptr->file_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->file_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "LogFile");
             ptr->file_logfile = xf86_lex_val.str;
             break;
         case XKBDIR:
-            if (xf86getSubToken(&(ptr->file_xkbdir)) != STRING)
+            if (xf86getSubToken(&(ptr->file_xkbdir)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "XkbDir");
             ptr->file_xkbdir = xf86_lex_val.str;
             break;

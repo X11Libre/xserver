@@ -58,7 +58,7 @@ xf86parseDRISection(void)
     while ((token = xf86getToken(DRITab)) != ENDSECTION) {
         switch (token) {
         case GROUP:
-            if ((token = xf86getSubToken(&(ptr->dri_comment))) == STRING)
+            if ((token = xf86getSubToken(&(ptr->dri_comment))) == XF86_TOKEN_STRING)
                 ptr->dri_group_name = xf86_lex_val.str;
             else if (token == NUMBER)
                 ptr->dri_group = xf86_lex_val.num;
