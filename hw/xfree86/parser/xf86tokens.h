@@ -91,11 +91,6 @@ typedef enum {
     OPTION,
     COMMENT,
 
-    /* Frequency units */
-    HRZ,
-    KHZ,
-    MHZ,
-
     /* File tokens */
     FONTPATH,
     MODULEPATH,
@@ -125,9 +120,6 @@ typedef enum {
     MODE,
     GAMMA,
     USEMODES,
-
-    /* Modes tokens */
-    /* no new ones */
 
     /* Mode tokens */
     DOTCLOCK,
@@ -188,37 +180,6 @@ typedef enum {
     CARD,
     BUSID,
     IRQ,
-
-    /* Keyboard tokens */
-    AUTOREPEAT,
-    XLEDS,
-    KPROTOCOL,
-    XKBKEYMAP,
-    XKBCOMPAT,
-    XKBTYPES,
-    XKBKEYCODES,
-    XKBGEOMETRY,
-    XKBSYMBOLS,
-    XKBDISABLE,
-    PANIX106,
-    XKBRULES,
-    XKBMODEL,
-    XKBLAYOUT,
-    XKBVARIANT,
-    XKBOPTIONS,
-    /* Obsolete keyboard tokens */
-    SERVERNUM,
-    LEFTALT,
-    RIGHTALT,
-    SCROLLLOCK_TOK,
-    RIGHTCTL,
-    /* arguments for the above obsolete tokens */
-    CONF_KM_META,
-    CONF_KM_COMPOSE,
-    CONF_KM_MODESHIFT,
-    CONF_KM_MODELOCK,
-    CONF_KM_SCROLLLOCK,
-    CONF_KM_CONTROL,
 
     /* Pointer tokens */
     EMULATE3,
