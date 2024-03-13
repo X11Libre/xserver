@@ -108,13 +108,13 @@ xf86parsePointerSection(void)
             xf86_lex_val.str = NULL;
             break;
         case PROTOCOL:
-            if (xf86getSubToken(&(ptr->inp_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->inp_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Protocol");
             ptr->inp_option_lst = xf86addNewOption(ptr->inp_option_lst,
                                                    strdup("Protocol"), xf86_lex_val.str);
             break;
         case PDEVICE:
-            if (xf86getSubToken(&(ptr->inp_comment)) != STRING)
+            if (xf86getSubToken(&(ptr->inp_comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "Device");
             ptr->inp_option_lst = xf86addNewOption(ptr->inp_option_lst,
                                                    strdup("Device"), xf86_lex_val.str);
