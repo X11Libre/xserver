@@ -40,13 +40,7 @@
 #include <machine/sysarch.h>
 #endif
 
-#define DEV_MEM "/dev/pmem"
-
-#if defined(__NetBSD__) && !defined(MAP_FILE)
-#define MAP_FLAGS MAP_SHARED
-#else
-#define MAP_FLAGS (MAP_FILE | MAP_SHARED)
-#endif
+#include "xf86_bsd_priv.h"
 
 #ifndef CONSOLE_X_TV_ON
 #define CONSOLE_X_TV_ON _IOW('t',155,int)
@@ -72,10 +66,6 @@
 
 static Bool useDevMem = FALSE;
 static int devMemFd = -1;
-
-#ifdef HAS_APERTURE_DRV
-#define DEV_APERTURE "/dev/xf86"
-#endif
 
 /*
  * Check if /dev/mem can be mmap'd.  If it can't print a warning when
