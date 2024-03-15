@@ -38,6 +38,10 @@
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
 
+#ifndef CONSOLE_X_BELL
+#define CONSOLE_X_BELL _IOW('t',123,int[2])
+#endif
+
 void
 xf86OSRingBell(int loudness, int pitch, int duration)
 {
