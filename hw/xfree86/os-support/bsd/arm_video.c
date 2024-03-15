@@ -70,6 +70,8 @@
 #include "xf86_OSlib.h"
 #include "compiler.h"
 
+#define DEV_MEM "/dev/pmem"
+
 #if defined(__NetBSD__) && !defined(MAP_FILE)
 #define MAP_FLAGS MAP_SHARED
 #else

@@ -40,6 +40,8 @@
 #include <machine/sysarch.h>
 #endif
 
+#define DEV_MEM "/dev/pmem"
+
 #if defined(__NetBSD__) && !defined(MAP_FILE)
 #define MAP_FLAGS MAP_SHARED
 #else
