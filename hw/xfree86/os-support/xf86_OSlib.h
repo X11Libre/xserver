@@ -228,15 +228,6 @@ struct pcvtid {
 #ifndef CONSOLE_X_TV_OFF
 #define CONSOLE_X_TV_OFF _IO('t',156)
 #endif
-#ifndef CONSOLE_GET_LINEAR_INFO
-#define CONSOLE_GET_LINEAR_INFO         _IOR('t',157,struct map_info)
-#endif
-#ifndef CONSOLE_GET_IO_INFO
-#define CONSOLE_GET_IO_INFO             _IOR('t',158,struct map_info)
-#endif
-#ifndef CONSOLE_GET_MEM_INFO
-#define CONSOLE_GET_MEM_INFO            _IOR('t',159,struct map_info)
-#endif
 
 #if defined(USE_I386_IOPL) || defined(USE_AMD64_IOPL)
 #include <machine/sysarch.h>
