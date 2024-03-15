@@ -154,7 +154,7 @@ static ShmFuncs fbFuncs = { fbShmCreatePixmap, NULL };
     } \
 }
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 
 static Bool badSysCall = FALSE;
 
