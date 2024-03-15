@@ -37,9 +37,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifdef __CYGWIN__
-#include <sys/select.h>
-#endif
 #include <fcntl.h>
 #include <setjmp.h>
 #define HANDLE void *
@@ -87,9 +84,6 @@ extern void winUpdateRgnMultiWindow(WindowPtr pWin);
 
 #define WIN_CONNECT_RETRIES	5
 #define WIN_CONNECT_DELAY	5
-#ifdef HAS_DEVWINDOWS
-#define WIN_MSG_QUEUE_FNAME	"/dev/windows"
-#endif
 
 /*
  * Local structures

@@ -35,10 +35,6 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef __CYGWIN__
-#include <sys/resource.h>
-#include <sys/cygwin.h>
-#endif
 #include "win.h"
 
 #include <X11/Xwindows.h>
@@ -313,28 +309,6 @@ HandleCustomWM_COMMAND(HWND hwnd, WORD command, winPrivScreenPtr pScreenPriv)
             if (command == m->menuItem[j].commandID) {
                 /* Match! */
                 switch (m->menuItem[j].cmd) {
-#ifdef __CYGWIN__
-                case CMD_EXEC:
-                    if (fork() == 0) {
-                        struct rlimit rl;
-                        int fd;
-
-                        /* Close any open descriptors except for STD* */
-                        getrlimit(RLIMIT_NOFILE, &rl);
-                        for (fd = STDERR_FILENO + 1; fd < rl.rlim_cur; fd++)
-                            close(fd);
-
-                        /* Disassociate any TTYs */
-                        setsid();
-
-                        execl("/bin/sh",
-                              "/bin/sh", "-c", m->menuItem[j].param, NULL);
-                        exit(0);
-                    }
-                    else
-                        return TRUE;
-                    break;
-#else
                 case CMD_EXEC:
                 {
                     /* Start process without console window */
@@ -360,7 +334,6 @@ HandleCustomWM_COMMAND(HWND hwnd, WORD command, winPrivScreenPtr pScreenPriv)
                                    MB_OK | MB_ICONEXCLAMATION);
                 }
                     return TRUE;
-#endif
                 case CMD_ALWAYSONTOP:
                     if (!hwnd)
                         return FALSE;
@@ -542,9 +515,6 @@ LoadImageComma(char *fname, char *iconDirectory, int sx, int sy, int flags)
     }
     else {
         char *file = calloc(1, PATH_MAX + NAME_MAX + 2);
-#ifdef  __CYGWIN__
-        Bool convert = FALSE;
-#endif
 
         if (!file)
             return NULL;
@@ -553,14 +523,6 @@ LoadImageComma(char *fname, char *iconDirectory, int sx, int sy, int flags)
 
         /* If fname starts 'X:\', it's an absolute Windows path, do nothing */
         if (!(fname[0] && fname[1] == ':' && fname[2] == '\\')) {
-#ifdef  __CYGWIN__
-            /* If fname starts with '/', it's an absolute cygwin path, we'll
-               need to convert it */
-            if (fname[0] == '/') {
-                convert = TRUE;
-            }
-            else
-#endif
             if (iconDirectory) {
                 /* Otherwise, prepend the default icon directory, which
                    currently must be in absolute Windows path form */
@@ -580,17 +542,6 @@ LoadImageComma(char *fname, char *iconDirectory, int sx, int sy, int flags)
         else {
             i = -1;
         }
-
-#ifdef  __CYGWIN__
-        /* Convert from Cygwin path to Windows path */
-        if (convert) {
-            char *converted_file = cygwin_create_path(CCP_POSIX_TO_WIN_A | CCP_ABSOLUTE, file);
-            if (converted_file) {
-                free(file);
-                file = converted_file;
-            }
-        }
-#endif
 
         if (i >= 0) {
             /* Specified as <fname>,<index> */
@@ -669,19 +620,6 @@ winPrefsLoadPreferences(const char *path)
 
     if (path)
         prefFile = fopen(path, "r");
-#ifdef __CYGWIN__
-    else {
-        char defaultPrefs[] =
-            "MENU rmenu {\n"
-            "  \"How to customize this menu\" EXEC \"xterm +tb -e man XWinrc\"\n"
-            "  \"Launch xterm\" EXEC xterm\n"
-            "  \"Load .XWinrc\" RELOAD\n"
-            "  SEPARATOR\n" "}\n" "\n" "ROOTMENU rmenu\n";
-
-        path = "built-in default";
-        prefFile = fmemopen(defaultPrefs, strlen(defaultPrefs), "r");
-    }
-#endif
 
     if (!prefFile) {
         ErrorF("LoadPreferences: %s not found\n", path);

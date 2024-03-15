@@ -191,15 +191,9 @@ static const char *stdSubdirs[] = {
  * to port this DDX to, say, Darwin, we'll need to fix this.
  */
 static PatternRec stdPatterns[] = {
-#ifdef __CYGWIN__
-    {"^cyg(.*)\\.dll$",},
-    {"(.*)_drv\\.dll$",},
-    {"(.*)\\.dll$",},
-#else
     {"^lib(.*)\\.so$",},
     {"(.*)_drv\\.so$",},
     {"(.*)\\.so$",},
-#endif
     {NULL,}
 };
 
@@ -288,33 +282,21 @@ FindModuleInSubdir(const char *dirpath, const char *module)
             continue;
         }
 
-#ifdef __CYGWIN__
-        snprintf(tmpBuf, PATH_MAX, "cyg%s.dll", module);
-#else
         snprintf(tmpBuf, PATH_MAX, "lib%s.so", module);
-#endif
         if (strcmp(direntry->d_name, tmpBuf) == 0) {
             if (asprintf(&ret, "%s%s", dirpath, tmpBuf) == -1)
                 ret = NULL;
             break;
         }
 
-#ifdef __CYGWIN__
-        snprintf(tmpBuf, PATH_MAX, "%s_drv.dll", module);
-#else
         snprintf(tmpBuf, PATH_MAX, "%s_drv.so", module);
-#endif
         if (strcmp(direntry->d_name, tmpBuf) == 0) {
             if (asprintf(&ret, "%s%s", dirpath, tmpBuf) == -1)
                 ret = NULL;
             break;
         }
 
-#ifdef __CYGWIN__
-        snprintf(tmpBuf, PATH_MAX, "%s.dll", module);
-#else
         snprintf(tmpBuf, PATH_MAX, "%s.so", module);
-#endif
         if (strcmp(direntry->d_name, tmpBuf) == 0) {
             if (asprintf(&ret, "%s%s", dirpath, tmpBuf) == -1)
                 ret = NULL;
