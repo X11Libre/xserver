@@ -31,7 +31,7 @@
 #include "indirect_size.h"
 #include "indirect_reqsize.h"
 
-#if defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(__MINGW32__)
 #undef HAVE_ALIAS
 #endif
 #ifdef HAVE_ALIAS
