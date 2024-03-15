@@ -61,9 +61,6 @@
 
 #define WIN_CLIPBOARD_WINDOW_CLASS		"xwinclip"
 #define WIN_CLIPBOARD_WINDOW_TITLE		"xwinclip"
-#ifdef HAS_DEVWINDOWS
-#define WIN_MSG_QUEUE_FNAME "/dev/windows"
-#endif
 
 /*
  * Global variables
@@ -110,11 +107,7 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
     int iReturn;
     HWND hwnd = NULL;
     int iConnectionNumber = 0;
-#ifdef HAS_DEVWINDOWS
-    int fdMessageQueue = 0;
-#else
     struct timeval tvTimeout;
-#endif
     fd_set fdsRead;
     int iMaxDescriptor;
     xcb_connection_t *conn;
@@ -139,19 +132,7 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
     /* Get our connection number */
     iConnectionNumber = xcb_get_file_descriptor(conn);
 
-#ifdef HAS_DEVWINDOWS
-    /* Open a file descriptor for the windows message queue */
-    fdMessageQueue = open(WIN_MSG_QUEUE_FNAME, O_RDONLY);
-    if (fdMessageQueue == -1) {
-        ErrorF("winClipboardProc - Failed opening %s\n", WIN_MSG_QUEUE_FNAME);
-        goto winClipboardProc_Done;
-    }
-
-    /* Find max of our file descriptors */
-    iMaxDescriptor = MAX(fdMessageQueue, iConnectionNumber) + 1;
-#else
     iMaxDescriptor = iConnectionNumber + 1;
-#endif
 
     const xcb_query_extension_reply_t *xfixes_query;
     xfixes_query = xcb_get_extension_data(conn, &xcb_xfixes_id);
@@ -272,23 +253,15 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
          */
         FD_ZERO(&fdsRead);
         FD_SET(iConnectionNumber, &fdsRead);
-#ifdef HAS_DEVWINDOWS
-        FD_SET(fdMessageQueue, &fdsRead);
-#else
         tvTimeout.tv_sec = 0;
         tvTimeout.tv_usec = 100;
-#endif
 
         /* Wait for a Windows event or an X event */
         iReturn = select(iMaxDescriptor,        /* Highest fds number */
                          &fdsRead,      /* Read mask */
                          NULL,  /* No write mask */
                          NULL,  /* No exception mask */
-#ifdef HAS_DEVWINDOWS
-                         NULL   /* No timeout */
-#else
                          &tvTimeout     /* Set timeout */
-#endif
             );
 
 #ifndef HAS_WINSOCK
@@ -314,24 +287,6 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
             winDebug
                 ("winClipboardProc - X connection ready, pumping X event queue\n");
         }
-
-#ifdef HAS_DEVWINDOWS
-        /* Check for Windows event ready */
-        if (FD_ISSET(fdMessageQueue, &fdsRead))
-#else
-        if (1)
-#endif
-        {
-            winDebug
-                ("winClipboardProc - /dev/windows ready, pumping Windows message queue\n");
-        }
-
-#ifdef HAS_DEVWINDOWS
-        if (!(FD_ISSET(iConnectionNumber, &fdsRead)) &&
-            !(FD_ISSET(fdMessageQueue, &fdsRead))) {
-            winDebug("winClipboardProc - Spurious wake, select() returned %d\n", iReturn);
-        }
-#endif
     }
 
     /* broke out of while loop on a shutdown message */
@@ -352,12 +307,6 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
             ErrorF("winClipboardProc - XDestroyWindow succeeded.\n");
         free(error);
     }
-
-#ifdef HAS_DEVWINDOWS
-    /* Close our Win32 message handle */
-    if (fdMessageQueue)
-        close(fdMessageQueue);
-#endif
 
     /*
      * xcb_disconnect() does not sync, so is safe to call even when we are built

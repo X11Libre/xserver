@@ -9,9 +9,6 @@
 /* Winsock networking */
 #mesondefine HAS_WINSOCK
 
-/* Cygwin has /dev/windows for signaling new win32 messages */
-#mesondefine HAS_DEVWINDOWS
-
 /* Switch on debug messages */
 #mesondefine ENABLE_DEBUG
 

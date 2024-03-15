@@ -470,12 +470,6 @@ winKeybdReleaseKeys(void)
 {
     int i;
 
-#ifdef HAS_DEVWINDOWS
-    /* Verify that the mi input system has been initialized */
-    if (g_fdMessageQueue == WIN_FD_INVALID)
-        return;
-#endif
-
     /* Loop through all keys */
     for (i = 0; i < NUM_KEYCODES; ++i) {
         /* Pop key if pressed */
