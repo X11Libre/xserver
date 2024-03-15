@@ -212,13 +212,6 @@ struct pcvtid {
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
 #include <sys/mouse.h>
 #endif
-    /* Include these definitions in case ioctl_pc.h didn't get included */
-#ifndef CONSOLE_X_TV_ON
-#define CONSOLE_X_TV_ON _IOW('t',155,int)
-#endif
-#ifndef CONSOLE_X_TV_OFF
-#define CONSOLE_X_TV_OFF _IO('t',156)
-#endif
 
 #if defined(USE_I386_IOPL) || defined(USE_AMD64_IOPL)
 #include <machine/sysarch.h>
