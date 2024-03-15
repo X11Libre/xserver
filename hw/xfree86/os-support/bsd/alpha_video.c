@@ -42,13 +42,7 @@
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
 
-#define DEV_MEM "/dev/pmem"
-
-#if defined(__NetBSD__) && !defined(MAP_FILE)
-#define MAP_FLAGS MAP_SHARED
-#else
-#define MAP_FLAGS (MAP_FILE | MAP_SHARED)
-#endif
+#include "xf86_bsd_priv.h"
 
 #ifndef __NetBSD__
 extern unsigned long dense_base(void);
@@ -92,10 +86,6 @@ dense_base(void)
 #endif
 
 static int devMemFd = -1;
-
-#ifdef HAS_APERTURE_DRV
-#define DEV_APERTURE "/dev/xf86"
-#endif
 
 /*
  * Check if /dev/mem can be mmap'd.  If it can't print a warning when
