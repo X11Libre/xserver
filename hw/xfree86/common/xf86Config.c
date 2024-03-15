@@ -118,11 +118,6 @@ static ModuleDefault ModuleDefaults[] = {
 #ifdef GLXEXT
     {.name = "glx",.toLoad = TRUE,.load_opt = NULL},
 #endif
-#ifdef __CYGWIN__
-    /* load DIX modules used by drivers first */
-    {.name = "fb",.toLoad = TRUE,.load_opt = NULL},
-    {.name = "shadow",.toLoad = TRUE,.load_opt = NULL},
-#endif
     {.name = NULL,.toLoad = FALSE,.load_opt = NULL}
 };
 

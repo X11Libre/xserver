@@ -37,14 +37,14 @@
 #define PURE
 #endif
 
-#if defined(__i386__) && defined(__GNUC__) && !defined(__CYGWIN__) && !defined(__MINGW32__)
+#if defined(__i386__) && defined(__GNUC__) && !defined(__MINGW32__)
 #define FASTCALL __attribute__((fastcall))
 #else
 #define FASTCALL
 #endif
 
 
-#if defined(__CYGWIN__) || defined(__MINGW32__) || defined(GLX_USE_APPLEGL)
+#if defined(__MINGW32__) || defined(GLX_USE_APPLEGL)
 #undef HAVE_ALIAS
 #endif
 #ifdef HAVE_ALIAS

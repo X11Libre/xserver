@@ -345,7 +345,7 @@ xorg_backtrace(void);
 
 #include <signal.h>
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#if defined(WIN32)
 typedef _sigset_t sigset_t;
 #endif
 

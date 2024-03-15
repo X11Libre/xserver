@@ -106,7 +106,7 @@
 /**************************************************************************/
 /* Linux or Glibc-based system                                            */
 /**************************************************************************/
-#if defined(__linux__) || defined(__GLIBC__) || defined(__CYGWIN__)
+#if defined(__linux__) || defined(__GLIBC__)
 #include <sys/ioctl.h>
 #include <signal.h>
 #include <stdlib.h>

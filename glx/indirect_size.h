@@ -44,7 +44,7 @@
 #define PURE
 #endif
 
-#if defined(__i386__) && defined(__GNUC__) && !defined(__CYGWIN__) && !defined(__MINGW32__)
+#if defined(__i386__) && defined(__GNUC__) && !defined(__MINGW32__)
 #define FASTCALL __attribute__((fastcall))
 #else
 #define FASTCALL

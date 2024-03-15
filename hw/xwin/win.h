@@ -522,9 +522,6 @@ extern winScreenInfo *g_ScreenInfo;
 extern miPointerScreenFuncRec g_winPointerCursorFuncs;
 extern DWORD g_dwEvents;
 
-#ifdef HAS_DEVWINDOWS
-extern int g_fdMessageQueue;
-#endif
 extern DevPrivateKeyRec g_iScreenPrivateKeyRec;
 
 #define g_iScreenPrivateKey  	(&g_iScreenPrivateKeyRec)

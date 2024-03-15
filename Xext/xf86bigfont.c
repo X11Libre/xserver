@@ -41,10 +41,6 @@
 #ifdef SVR4
 #include <sys/sysmacros.h>
 #endif
-#if defined(__CYGWIN__)
-#include <sys/param.h>
-#include <sys/sysmacros.h>
-#endif
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
@@ -88,7 +84,7 @@ static unsigned int pagesize;
 
 static Bool badSysCall = FALSE;
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 
 static void
 SigSysHandler(int signo)
@@ -707,7 +703,7 @@ XFree86BigfontExtensionInit(void)
 
         FontShmdescIndex = xfont2_allocate_font_private_index();
 
-#if !defined(CSRG_BASED) && !defined(__CYGWIN__)
+#if !defined(CSRG_BASED)
         pagesize = SHMLBA;
 #else
 #ifdef _SC_PAGESIZE
