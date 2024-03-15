@@ -203,9 +203,6 @@ struct pcvtid {
 #ifndef CONSOLE_X_MODE_OFF
 #define CONSOLE_X_MODE_OFF _IO('t',122)
 #endif
-#ifndef CONSOLE_X_BELL
-#define CONSOLE_X_BELL _IOW('t',123,int[2])
-#endif
 #ifndef CONSOLE_X_TV_ON
 #define CONSOLE_X_TV_ON _IOW('t',155,int)
 #endif
