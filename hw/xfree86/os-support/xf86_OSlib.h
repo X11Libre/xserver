@@ -111,9 +111,6 @@
 #endif                          /* !VT_ACKACQ */
 
 #if defined(SVR4)
-#if !(defined(__sun) && defined (SVR4))
-#define DEV_MEM "/dev/pmem"
-#endif
 #define CLEARDTR_SUPPORT
 #endif                          /* SVR4 */
 
@@ -241,10 +238,6 @@ struct pcvtid {
 #endif                          /* !MAXHOSTNAMELEN */
 
 #include <limits.h>
-
-#ifndef DEV_MEM
-#define DEV_MEM "/dev/mem"
-#endif
 
 #ifndef MAP_FAILED
 #define MAP_FAILED ((void *)-1)
