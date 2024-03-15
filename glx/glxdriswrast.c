@@ -48,13 +48,6 @@
 
 #include "extension_string.h"
 
-/* RTLD_LOCAL is not defined on Cygwin */
-#ifdef __CYGWIN__
-#ifndef RTLD_LOCAL
-#define RTLD_LOCAL 0
-#endif
-#endif
-
 typedef struct __GLXDRIscreen __GLXDRIscreen;
 typedef struct __GLXDRIcontext __GLXDRIcontext;
 typedef struct __GLXDRIdrawable __GLXDRIdrawable;

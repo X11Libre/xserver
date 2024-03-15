@@ -75,18 +75,6 @@ DDXRingBell(int volume, int pitch, int duration)
     return;
 }
 
-
-#ifdef HAS_DEVWINDOWS
-static void
-xwinDevWindowsHandlerNotify(int fd, int ready, void *data)
-{
-    /* This should process Windows messages, but instead all of that is delayed
-     * until the wakeup handler is called.
-     */
-    ;
-}
-#endif
-
 /* See Porting Layer Definition - p. 17 */
 void
 InitInput(int argc, char *argv[])
