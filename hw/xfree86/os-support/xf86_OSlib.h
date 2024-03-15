@@ -226,10 +226,6 @@ struct pcvtid {
 
 #include <limits.h>
 
-#ifndef DEV_MEM
-#define DEV_MEM "/dev/mem"
-#endif
-
 #ifndef MAP_FAILED
 #define MAP_FAILED ((void *)-1)
 #endif
