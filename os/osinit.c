@@ -106,7 +106,7 @@ OsRegisterSigWrapper(OsSigWrapperPtr newSigWrapper)
  * OsSigHandler --
  *    Catch unexpected signals and exit or continue cleanly.
  */
-#if !defined(WIN32) || defined(__CYGWIN__)
+#if !defined(WIN32)
 static void
 #ifdef SA_SIGINFO
 OsSigHandler(int signo, siginfo_t * sip, void *unused)
@@ -158,7 +158,7 @@ OsSigHandler(int signo)
     FatalError("Caught signal %d (%s). Server aborting\n",
                signo, strsignal(signo));
 }
-#endif /* !WIN32 || __CYGWIN__ */
+#endif /* !WIN32 */
 
 void
 OsInit(void)
@@ -170,7 +170,7 @@ OsInit(void)
 #endif
 
     if (!been_here) {
-#if !defined(WIN32) || defined(__CYGWIN__)
+#if !defined(WIN32)
         struct sigaction act, oact;
         int i;
 
@@ -198,7 +198,7 @@ OsInit(void)
                        siglist[i], strerror(errno));
             }
         }
-#endif /* !WIN32 || __CYGWIN__ */
+#endif /* !WIN32 */
         busfault_init();
         server_poll = ospoll_create();
         if (!server_poll)
@@ -252,7 +252,7 @@ OsInit(void)
                 dup2(fileno(err), 2);
                 fclose(err);
             }
-#if defined(SYSV) || defined(SVR4) || defined(WIN32) || defined(__CYGWIN__)
+#if defined(SYSV) || defined(SVR4) || defined(WIN32)
             {
                 static char buf[BUFSIZ];
 
@@ -264,7 +264,7 @@ OsInit(void)
         }
 #endif /* !XQUARTZ */
 
-#if !defined(WIN32) || defined(__CYGWIN__)
+#if !defined(WIN32)
         if (getpgrp() == 0)
             setpgid(0, 0);
 #endif
