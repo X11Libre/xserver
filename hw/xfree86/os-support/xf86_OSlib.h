@@ -197,10 +197,6 @@ struct pcvtid {
 #include <sys/mouse.h>
 #endif
 
-#if defined(USE_I386_IOPL) || defined(USE_AMD64_IOPL)
-#include <machine/sysarch.h>
-#endif
-
 #define CLEARDTR_SUPPORT
 
 #endif                          /* __FreeBSD__ || __NetBSD__ || __OpenBSD__ || __DragonFly__ */
