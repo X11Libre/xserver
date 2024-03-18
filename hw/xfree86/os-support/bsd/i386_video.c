@@ -36,6 +36,10 @@
 #include "xf86Priv.h"
 #include "xf86_OSlib.h"
 
+#if defined(USE_I386_IOPL) || defined(USE_AMD64_IOPL)
+#include <machine/sysarch.h>
+#endif
+
 #if defined(__NetBSD__) && !defined(MAP_FILE)
 #define MAP_FLAGS MAP_SHARED
 #else
