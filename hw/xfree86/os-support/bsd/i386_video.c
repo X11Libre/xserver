@@ -42,6 +42,14 @@
 
 #include "xf86_bsd_priv.h"
 
+#ifndef CONSOLE_X_TV_ON
+#define CONSOLE_X_TV_ON _IOW('t',155,int)
+#endif
+
+#ifndef CONSOLE_X_TV_OFF
+#define CONSOLE_X_TV_OFF _IO('t',156)
+#endif
+
 #ifdef __OpenBSD__
 #define SYSCTL_MSG "\tCheck that you have set 'machdep.allowaperture=1'\n"\
 		   "\tin /etc/sysctl.conf and reboot your machine\n" \
