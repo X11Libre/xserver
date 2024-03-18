@@ -42,6 +42,10 @@
 
 #include "xf86_bsd_priv.h"
 
+#if defined(USE_I386_IOPL) || defined(USE_AMD64_IOPL)
+#include <machine/sysarch.h>
+#endif
+
 #ifndef CONSOLE_X_TV_ON
 #define CONSOLE_X_TV_ON _IOW('t',155,int)
 #endif
