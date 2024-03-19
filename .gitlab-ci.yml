@@ -16,17 +16,22 @@
 # gcc/clang or other packages, which might break the build with older commits
 # using the same tag.
 variables:
-    FDO_UPSTREAM_REPO: xorg/xserver
-    FDO_DISTRIBUTION_VERSION: bullseye-slim
-    FDO_DISTRIBUTION_EXEC: 'env FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT} bash .gitlab-ci/debian-install.sh'
-    FDO_DISTRIBUTION_TAG: "2024-08-23-fix-cross"
-    MESON_BUILDDIR: "build"
+    FDO_UPSTREAM_REPO:    xorg/xserver
+    MESON_BUILDDIR:       "build"
+    REPO_URL_XORGPROTO:   'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git'
+    XORG_DEBIAN_VERSION:  'bullseye-slim'
+    XORG_DEBIAN_EXEC:     'env FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT} bash .gitlab-ci/debian-install.sh'
+    XORG_DEBIAN_TAG:      '2024-08-23-freebsd-02'
+    XORG_FREEBSD_VERSION: '14.0'
+    XORG_FREEBSD_EXEC:    ''
+    XORG_FREEBSD_TAG:     '2024-06-10.0'
 
 include:
   - project: 'freedesktop/ci-templates'
     ref: *template_sha
     file:
       - '/templates/debian.yml'
+      - '/templates/freebsd.yml'
       - '/templates/ci-fairy.yml'
   - template: Security/SAST.gitlab-ci.yml
 
@@ -93,17 +98,52 @@ stages:
 .all_ddx_paths:
   - hw/**/*
 
+.debian:
+    variables:
+        FDO_DISTRIBUTION_VERSION:   "$XORG_DEBIAN_VERSION"
+        FDO_DISTRIBUTION_EXEC:      "$XORG_DEBIAN_EXEC"
+        FDO_DISTRIBUTION_TAG:       "$XORG_DEBIAN_TAG"
+
+.freebsd:
+    variables:
+        FDO_DISTRIBUTION_TAG:       "$XORG_FREEBSD_TAG"
+        FDO_DISTRIBUTION_VERSION:   "$XORG_FREEBSD_VERSION"
+        FDO_DISTRIBUTION_EXEC:      ''
+        FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim'
+
 debian-bullseye:
   extends:
     - .fdo.container-build@debian
     - .ci-run-policy
+    - .debian
   stage: docker-image
   variables:
     GIT_STRATEGY: none
 
-.common-build-and-test:
+freebsd-image:
+    extends:
+        - .fdo.qemu-build@freebsd@x86_64
+        - .freebsd
+    stage: docker-image
+    variables:
+        GIT_STRATEGY:               none
+
+.xorg-image@debian:
     extends:
         - .fdo.distribution-image@debian
+        - .debian
+
+.xorg-image@freebsd:
+    extends:
+        - .fdo.distribution-image@freebsd
+        - .freebsd
+    variables:
+        GIT_DEPTH:                1
+        PKG_CONFIG_PATH:          /usr/share/pkgconfig:/usr/lib/pkgconfig:/usr/pkg/share/pkgconfig:/usr/pkg/lib/pkgconfig:/usr/local/libdata/pkgconfig
+
+.common-build-and-test:
+    extends:
+        - .xorg-image@debian
         - .ci-run-policy
     stage: build-and-test
     artifacts:
@@ -153,6 +193,29 @@ mingw-cross-build:
     variables:
       MESON_ARGS: --cross-file=.gitlab-ci/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true
 
+freebsd:
+    stage: build-and-test
+    extends:
+        - .xorg-image@freebsd
+    variables:
+        MESON_ARGS: -Dglx=false -Dglamor=false -Dudev=false -Dudev_kms=false
+    script:
+# running of of disk space without this
+# needed until https://gitlab.freedesktop.org/freedesktop/ci-templates/-/issues/67 is fixed
+      - git gc
+      - git clone --depth=1 $REPO_URL_XORGPROTO dep.xorgproto
+      - /app/vmctl start
+      - set +e
+      - scp -r $PWD "vm:"
+# need to install newer xorgproto
+      - /app/vmctl exec "cd $CI_PROJECT_NAME/dep.xorgproto && ./autogen.sh --prefix=/usr && make && make install"
+      - /app/vmctl exec "cd $CI_PROJECT_NAME && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" MESON_ARGS=\"$MESON_ARGS\" MESON_BUILDDIR=\"$MESON_BUILDDIR\" .gitlab-ci/meson-build.sh --skip-test" && touch .success
+# test not working yet, so skipped
+#     - scp -r vm:$CI_PROJECT_NAME/test-results.xml .
+      - /app/vmctl stop
+      - set -e
+      - test -e .success || exit 1
+
 meson-dist:
     extends: .common-build-and-test
     artifacts:
@@ -171,7 +234,7 @@ meson-dist:
 
 xf86-driver-build-test:
     extends:
-        - .fdo.distribution-image@debian
+        - .xorg-image@debian
         - .ci-run-policy
     stage: drivers
     parallel:
