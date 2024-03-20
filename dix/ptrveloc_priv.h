@@ -18,11 +18,11 @@ struct _DeviceVelocityRec;
  * calc mean velocity and decide which motion was along
  * a more or less straight line
  */
-typedef struct _MotionTracker {
+struct _MotionTracker {
     double dx, dy;              /* accumulated delta for each axis */
     int time;                   /* time of creation */
     int dir;                    /* initial direction bitfield */
-} MotionTracker, *MotionTrackerPtr;
+};
 
 /**
  * contains the run-time data for the predictable scheme, that is, a
