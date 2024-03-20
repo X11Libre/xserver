@@ -14,14 +14,6 @@
 struct _DeviceVelocityRec;
 
 /**
- * profile
- * returns actual acceleration depending on velocity, acceleration control,...
- */
-typedef double (*PointerAccelerationProfileFunc)
- (DeviceIntPtr dev, struct _DeviceVelocityRec * vel,
-  double velocity, double threshold, double accelCoeff);
-
-/**
  * a motion history, with just enough information to
  * calc mean velocity and decide which motion was along
  * a more or less straight line
