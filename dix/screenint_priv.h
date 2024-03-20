@@ -8,7 +8,7 @@
 
 #include <X11/Xdefs.h>
 
-typedef struct _Screen *ScreenPtr;
+#include "screenint.h"
 
 typedef Bool (*ScreenInitProcPtr)(ScreenPtr pScreen, int argc, char **argv);
 
