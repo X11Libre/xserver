@@ -7,8 +7,6 @@
 
 #include "callback.h"
 
-typedef struct _CallbackList *CallbackListPtr;
-
 void InitCallbackManager(void);
 void DeleteCallbackManager(void);
 
