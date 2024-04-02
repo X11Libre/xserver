@@ -379,7 +379,7 @@ VerifyDisplayName(const char *d)
        for digits, or exception of :0.0 and similar (two decimal points max)
        */
     for (i = 0; i < strlen(d); i++) {
-        if (!isdigit(d[i])) {
+        if (!isdigit((unsigned char)d[i])) {
             if (d[i] != '.' || period_found)
                 return 0;
             period_found = TRUE;
@@ -695,7 +695,7 @@ ProcessCommandLine(int argc, char *argv[])
         else if (strcmp(argv[i], "-terminate") == 0) {
             dispatchExceptionAtReset = DE_TERMINATE;
             terminateDelay = -1;
-            if ((i + 1 < argc) && (isdigit(*argv[i + 1])))
+            if ((i + 1 < argc) && (isdigit((unsigned char)*argv[i + 1])))
                terminateDelay = atoi(argv[++i]);
             terminateDelay = max(0, terminateDelay);
         }
