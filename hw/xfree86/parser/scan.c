@@ -341,10 +341,10 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
         }
 
         /* GJA -- handle '-' and ','  * Be careful: "-hsync" is a keyword. */
-        else if ((c == ',') && !isalpha(configBuf[configPos])) {
+        else if ((c == ',') && !isalpha((unsigned char)configBuf[configPos])) {
             return COMMA;
         }
-        else if ((c == '-') && !isalpha(configBuf[configPos])) {
+        else if ((c == '-') && !isalpha((unsigned char)configBuf[configPos])) {
             return DASH;
         }
 
@@ -1029,8 +1029,8 @@ xf86nameCompare(const char *s1, const char *s2)
         s1++;
     while (*s2 == '_' || *s2 == ' ' || *s2 == '\t')
         s2++;
-    c1 = (isupper(*s1) ? tolower(*s1) : *s1);
-    c2 = (isupper(*s2) ? tolower(*s2) : *s2);
+    c1 = (isupper((unsigned char)*s1) ? tolower((unsigned char)*s1) : *s1);
+    c2 = (isupper((unsigned char)*s2) ? tolower((unsigned char)*s2) : *s2);
     while (c1 == c2) {
         if (c1 == '\0')
             return 0;
@@ -1040,8 +1040,8 @@ xf86nameCompare(const char *s1, const char *s2)
             s1++;
         while (*s2 == '_' || *s2 == ' ' || *s2 == '\t')
             s2++;
-        c1 = (isupper(*s1) ? tolower(*s1) : *s1);
-        c2 = (isupper(*s2) ? tolower(*s2) : *s2);
+        c1 = (isupper((unsigned char)*s1) ? tolower((unsigned char)*s1) : *s1);
+        c2 = (isupper((unsigned char)*s2) ? tolower((unsigned char)*s2) : *s2);
     }
     return c1 - c2;
 }
