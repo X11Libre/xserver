@@ -893,8 +893,8 @@ void
 ResetHosts(const char *display)
 {
     register HOST *host;
-    char lhostname[120], ohostname[120];
-    char *hostname = ohostname;
+    unsigned char lhostname[120], ohostname[120];
+    unsigned char *hostname = ohostname;
     char fname[PATH_MAX + 1];
     int fnamelen;
     FILE *fd;
@@ -926,41 +926,41 @@ ResetHosts(const char *display)
              display);
 
     if ((fd = fopen(fname, "r")) != 0) {
-        while (fgets(ohostname, sizeof(ohostname), fd)) {
+        while (fgets((char*)ohostname, sizeof(ohostname), fd)) {
             family = FamilyWild;
             if (*ohostname == '#')
                 continue;
-            if ((ptr = strchr(ohostname, '\n')) != 0)
+            if ((ptr = strchr((char*)ohostname, '\n')) != 0)
                 *ptr = 0;
-            hostlen = strlen(ohostname) + 1;
+            hostlen = strlen((char*)ohostname) + 1;
             for (i = 0; i < hostlen; i++)
                 lhostname[i] = tolower((unsigned char)ohostname[i]);
             hostname = ohostname;
-            if (!strncmp("local:", lhostname, 6)) {
+            if (!strncmp("local:", (char*)lhostname, 6)) {
                 family = FamilyLocalHost;
                 NewHost(family, "", 0, FALSE);
                 LocalHostRequested = TRUE;      /* Fix for XFree86 bug #156 */
             }
 #if defined(TCPCONN)
-            else if (!strncmp("inet:", lhostname, 5)) {
+            else if (!strncmp("inet:", (char*)lhostname, 5)) {
                 family = FamilyInternet;
                 hostname = ohostname + 5;
             }
 #if defined(IPv6)
-            else if (!strncmp("inet6:", lhostname, 6)) {
+            else if (!strncmp("inet6:", (char*)lhostname, 6)) {
                 family = FamilyInternet6;
                 hostname = ohostname + 6;
             }
 #endif
 #endif
-            else if (!strncmp("si:", lhostname, 3)) {
+            else if (!strncmp("si:", (char*)lhostname, 3)) {
                 family = FamilyServerInterpreted;
                 hostname = ohostname + 3;
                 hostlen -= 3;
             }
 
             if (family == FamilyServerInterpreted) {
-                len = siCheckAddr(hostname, hostlen);
+                len = siCheckAddr((char*)hostname, hostlen);
                 if (len >= 0) {
                     NewHost(family, hostname, len, FALSE);
                 }
@@ -978,7 +978,7 @@ ResetHosts(const char *display)
                     struct addrinfo *a;
                     int f;
 
-                    if (getaddrinfo(hostname, NULL, NULL, &addresses) == 0) {
+                    if (getaddrinfo((char*)hostname, NULL, NULL, &addresses) == 0) {
                         for (a = addresses; a != NULL; a = a->ai_next) {
                             len = a->ai_addrlen;
                             f = ConvertAddr(a->ai_addr, &len,
