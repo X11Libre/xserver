@@ -269,7 +269,7 @@ StringToBusType(const char *busID, const char **retID)
     BusType ret = BUS_NONE;
 
     /* If no type field, Default to PCI */
-    if (isdigit(busID[0])) {
+    if (isdigit((unsigned char)busID[0])) {
         if (retID)
             *retID = busID;
         return BUS_PCI;
