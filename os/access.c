@@ -936,7 +936,7 @@ ResetHosts(const char *display)
                 *ptr = 0;
             hostlen = strlen(ohostname) + 1;
             for (i = 0; i < hostlen; i++)
-                lhostname[i] = tolower(ohostname[i]);
+                lhostname[i] = tolower((unsigned char)ohostname[i]);
             hostname = ohostname;
             if (!strncmp("local:", lhostname, 6)) {
                 family = FamilyLocalHost;
