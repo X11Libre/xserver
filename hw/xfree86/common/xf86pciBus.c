@@ -267,7 +267,7 @@ xf86ParsePciBusString(const char *busID, int *bus, int *device, int *func)
 
     char *p, *s, *d;
     const char *id;
-    int i;
+    unsigned int i;
 
     if (StringToBusType(busID, &id) != BUS_PCI)
         return FALSE;
