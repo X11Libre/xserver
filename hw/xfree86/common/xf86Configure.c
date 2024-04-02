@@ -89,7 +89,8 @@ GDevPtr
 xf86AddBusDeviceToConfigure(const char *driver, BusType bus, void *busData,
                             int chipset)
 {
-    int ret, i, j;
+    int ret;
+    unsigned int i, j;
     char *lower_driver;
 
     if (!xf86DoConfigure || !xf86DoConfigurePass1)
