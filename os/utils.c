@@ -336,7 +336,7 @@ UseMsg(void)
 static int
 VerifyDisplayName(const char *d)
 {
-    int i;
+    unsigned int i;
     int period_found = FALSE;
     int after_period = 0;
 
