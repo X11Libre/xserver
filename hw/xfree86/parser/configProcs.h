@@ -111,7 +111,7 @@ int xf86getToken(const xf86ConfigSymTabRec * tab);
 int xf86getSubToken(char **comment);
 int xf86getSubTokenWithTab(char **comment, const xf86ConfigSymTabRec * tab);
 void xf86unGetToken(int token);
-char *xf86tokenString(void);
+unsigned char *xf86tokenString(void);
 void
 xf86parseError(const char *format, ...)
 _X_ATTRIBUTE_PRINTF(1, 2);

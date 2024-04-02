@@ -86,10 +86,10 @@ static struct {
 } configFiles[CONFIG_MAX_FILES];
 static const char **builtinConfig = NULL;
 static int builtinIndex = 0;
-static int configPos = 0;       /* current readers position */
+static unsigned int configPos = 0;       /* current readers position */
 static int configLineNo = 0;    /* linenumber */
-static char *configBuf, *configRBuf;    /* buffer for lines */
-static char *configSection = NULL;      /* name of current section being parsed */
+static unsigned char *configBuf, *configRBuf;    /* buffer for lines */
+static unsigned char *configSection = NULL;      /* name of current section being parsed */
 static int numFiles = 0;        /* number of config files */
 static int curFileIndex = 0;    /* index of current config file */
 static int pushToken = LOCK_TOKEN;
@@ -107,13 +107,13 @@ LexRec xf86_lex_val;
  *  support that.
  */
 
-static char *
+static unsigned char *
 xf86getNextLine(void)
 {
     static int configBufLen = CONFIG_BUF_LEN;
-    char *tmpConfigBuf, *tmpConfigRBuf;
+    unsigned char *tmpConfigBuf, *tmpConfigRBuf;
     int c, i, pos = 0, eolFound = 0;
-    char *ret = NULL;
+    unsigned char *ret = NULL;
 
     /*
      * reallocate the string if it was grown last time (i.e., is no
@@ -158,7 +158,7 @@ xf86getNextLine(void)
     /* read in another block of chars */
 
     do {
-        ret = fgets(configBuf + pos, configBufLen - pos - 1,
+        ret = (unsigned char*)fgets((char*)configBuf + pos, configBufLen - pos - 1,
                     configFiles[curFileIndex].file);
 
         if (!ret) {
@@ -167,7 +167,7 @@ xf86getNextLine(void)
              * and trigger another read
              */
             if (pos != 0) {
-                strcpy(&configBuf[pos], "\n");
+                strcpy((char*)&configBuf[pos], "\n");
                 ret = configBuf;
             }
             else
@@ -276,7 +276,7 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
 
  again:
         if (!c) {
-            char *ret;
+            unsigned char *ret;
 
             if (numFiles > 0)
                 ret = xf86getNextLine();
@@ -284,7 +284,7 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
                 if (builtinConfig[builtinIndex] == NULL)
                     ret = NULL;
                 else {
-                    strlcpy(configBuf,
+                    strlcpy((char*)configBuf,
                             builtinConfig[builtinIndex], CONFIG_BUF_LEN);
                     ret = configBuf;
                     builtinIndex++;
@@ -377,8 +377,8 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
                 configRBuf[i++] = c;
             configPos--;        /* GJA -- one too far */
             configRBuf[i] = '\0';
-            xf86_lex_val.num = strtoul(configRBuf, NULL, 0);
-            xf86_lex_val.realnum = atof(configRBuf);
+            xf86_lex_val.num = strtoul((char*)configRBuf, NULL, 0);
+            xf86_lex_val.realnum = atof((char*)configRBuf);
             return NUMBER;
         }
 
@@ -392,8 +392,8 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
             }
             while ((c != '\"') && (c != '\n') && (c != '\r') && (c != '\0'));
             configRBuf[i] = '\0';
-            xf86_lex_val.str = calloc(1, strlen(configRBuf) + 1);
-            strcpy(xf86_lex_val.str, configRBuf);        /* private copy ! */
+            xf86_lex_val.str = calloc(1, strlen((char*)configRBuf) + 1);
+            strcpy(xf86_lex_val.str, (char*)configRBuf);        /* private copy ! */
             return XF86_TOKEN_STRING;
         }
 
@@ -435,7 +435,7 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
      * Joop, at last we have to lookup the token ...
      */
     if (tab)
-        return StringToToken(configRBuf, tab);
+        return StringToToken((char*)configRBuf, tab);
 
     return ERROR_TOKEN;         /* Error catcher */
 }
@@ -484,7 +484,7 @@ xf86unGetToken(int token)
     pushToken = token;
 }
 
-char *
+unsigned char *
 xf86tokenString(void)
 {
     return configRBuf;
@@ -994,7 +994,7 @@ void
 xf86setSection(const char *section)
 {
     free(configSection);
-    configSection = strdup(section);
+    configSection = (unsigned char*)strdup(section);
 }
 
 /*
@@ -1012,9 +1012,11 @@ xf86getStringToken(const xf86ConfigSymTabRec * tab)
  * in the comparison.
  */
 int
-xf86nameCompare(const char *s1, const char *s2)
+xf86nameCompare(const char *xs1, const char *xs2)
 {
-    char c1, c2;
+    unsigned char* s1 = (unsigned char*)xs1;
+    unsigned char* s2 = (unsigned char*)xs2;
+    unsigned char c1, c2;
 
     if (!s1 || *s1 == 0) {
         if (!s2 || *s2 == 0)
