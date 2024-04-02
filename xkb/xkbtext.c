@@ -90,9 +90,9 @@ XkbAtomText(Atom atm, unsigned format)
     }
     if (format == XkbCFile) {
         for (tmp = rtrn; *tmp != '\0'; tmp++) {
-            if ((tmp == rtrn) && (!isalpha(*tmp)))
+            if ((tmp == rtrn) && (!isalpha((unsigned char)*tmp)))
                 *tmp = '_';
-            else if (!isalnum(*tmp))
+            else if (!isalnum((unsigned char)*tmp))
                 *tmp = '_';
         }
     }
@@ -466,7 +466,7 @@ XkbIMWhichStateMaskText(unsigned use_which, unsigned format)
                 if (len != 0)
                     buf[len++] = '|';
                 sprintf(&buf[len], "XkbIM_Use%s", imWhichNames[i]);
-                buf[len + 9] = toupper(buf[len + 9]);
+                buf[len + 9] = toupper((unsigned char)buf[len + 9]);
             }
             else {
                 if (len != 0)
@@ -528,7 +528,7 @@ XkbControlsMaskText(unsigned ctrls, unsigned format)
                 if (len != 0)
                     buf[len++] = '|';
                 sprintf(&buf[len], "Xkb%sMask", ctrlNames[i]);
-                buf[len + 3] = toupper(buf[len + 3]);
+                buf[len + 3] = toupper((unsigned char)buf[len + 3]);
             }
             else {
                 if (len != 0)
@@ -559,7 +559,7 @@ XkbStringText(char *str, unsigned format)
     else if (format == XkbXKMFile)
         return str;
     for (ok = TRUE, len = 0, in = str; *in != '\0'; in++, len++) {
-        if (!isprint(*in)) {
+        if (!isprint((unsigned char)*in)) {
             ok = FALSE;
             switch (*in) {
             case '\n':
@@ -580,7 +580,7 @@ XkbStringText(char *str, unsigned format)
         return str;
     buf = tbGetBuffer(len + 1);
     for (in = str, out = buf; *in != '\0'; in++) {
-        if (isprint(*in))
+        if (isprint((unsigned char)*in))
             *out++ = *in;
         else {
             *out++ = '\\';
