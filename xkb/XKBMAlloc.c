@@ -29,14 +29,16 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/keysym.h>
+
+#include "xkb/xkbsrv_priv.h"
+
 #include "misc.h"
 #include "inputstr.h"
-#include <X11/keysym.h>
-#include <xkbsrv.h>
 
 /***====================================================================***/
 
-Status
+int
 XkbAllocClientMap(XkbDescPtr xkb, unsigned which, unsigned nTotalTypes)
 {
     XkbClientMapPtr map;
@@ -119,7 +121,7 @@ XkbAllocClientMap(XkbDescPtr xkb, unsigned which, unsigned nTotalTypes)
     return Success;
 }
 
-Status
+int
 XkbAllocServerMap(XkbDescPtr xkb, unsigned which, unsigned nNewActions)
 {
     register int i;

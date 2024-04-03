@@ -27,12 +27,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef _XKBSRV_H_
 #define	_XKBSRV_H_
 
-#define XkbAllocClientMap		SrvXkbAllocClientMap
-#define XkbAllocServerMap		SrvXkbAllocServerMap
 #define XkbChangeTypesOfKey		SrvXkbChangeTypesOfKey
 #define XkbCopyKeyTypes			SrvXkbCopyKeyTypes
-#define XkbFreeClientMap		SrvXkbFreeClientMap
-#define XkbFreeServerMap		SrvXkbFreeServerMap
 #define	XkbKeyTypesForCoreSymbols	SrvXkbKeyTypesForCoreSymbols
 #define	XkbApplyCompatMapToKey		SrvXkbApplyCompatMapToKey
 #define XkbResizeKeyActions		SrvXkbResizeKeyActions
@@ -237,26 +233,6 @@ extern _X_EXPORT void XkbFreeNames(XkbDescPtr /* xkb */ ,
     );
 
 extern _X_EXPORT XkbDescPtr XkbAllocKeyboard(void
-    );
-
-extern _X_EXPORT Status XkbAllocClientMap(XkbDescPtr /* xkb */ ,
-                                          unsigned int /* which */ ,
-                                          unsigned int  /* nTypes */
-    );
-
-extern _X_EXPORT Status XkbAllocServerMap(XkbDescPtr /* xkb */ ,
-                                          unsigned int /* which */ ,
-                                          unsigned int  /* nNewActions */
-    );
-
-extern _X_EXPORT void XkbFreeClientMap(XkbDescPtr /* xkb */ ,
-                                       unsigned int /* what */ ,
-                                       Bool     /* freeMap */
-    );
-
-extern _X_EXPORT void XkbFreeServerMap(XkbDescPtr /* xkb */ ,
-                                       unsigned int /* what */ ,
-                                       Bool     /* freeMap */
     );
 
 extern _X_EXPORT Status XkbAllocIndicatorMaps(XkbDescPtr        /* xkb */
