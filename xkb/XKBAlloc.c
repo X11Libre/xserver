@@ -118,7 +118,7 @@ XkbFreeCompatMap(XkbDescPtr xkb, unsigned which, Bool freeMap)
 
 /***===================================================================***/
 
-Status
+int
 XkbAllocNames(XkbDescPtr xkb, unsigned which, int nTotalRG, int nTotalAliases)
 {
     XkbNamesPtr names;

@@ -35,7 +35,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define XkbResizeKeySyms		SrvXkbResizeKeySyms
 #define XkbResizeKeyType		SrvXkbResizeKeyType
 #define XkbAllocControls		SrvXkbAllocControls
-#define XkbAllocNames			SrvXkbAllocNames
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
 #define XkbVirtualModsToReal		SrvXkbVirtualModsToReal
 #define	XkbChangeKeycodeRange		SrvXkbChangeKeycodeRange
@@ -203,12 +202,6 @@ typedef struct {
 /***====================================================================***/
 
 #define	Status		int
-
-extern _X_EXPORT Status XkbAllocNames(XkbDescPtr /* xkb */ ,
-                                      unsigned int /* which */ ,
-                                      int /* nTotalRG */ ,
-                                      int       /* nTotalAliases */
-    );
 
 extern _X_EXPORT Status XkbAllocControls(XkbDescPtr /* xkb */ ,
                                          unsigned int   /* which */
