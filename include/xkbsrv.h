@@ -277,9 +277,7 @@ typedef struct {
 
 extern _X_EXPORT DevPrivateKeyRec xkbDevicePrivateKeyRec;
 
-#define xkbDevicePrivateKey (&xkbDevicePrivateKeyRec)
-
-#define XKBDEVICEINFO(dev) ((xkbDeviceInfoPtr)dixLookupPrivate(&(dev)->devPrivates, xkbDevicePrivateKey))
+#define XKBDEVICEINFO(dev) ((xkbDeviceInfoPtr)dixLookupPrivate(&(dev)->devPrivates, &xkbDevicePrivateKeyRec))
 
 /***====================================================================***/
 
