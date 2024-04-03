@@ -44,6 +44,13 @@
 #define XkbSLI_IsDefault        (1L<<0)
 #define XkbSLI_HasOwnState      (1L<<1)
 
+/*
+ * Settings for xkbClientFlags field (used by DIX)
+ * These flags _must_ not overlap with XkbPCF_*
+ */
+#define _XkbClientInitialized           (1<<7)
+#define _XkbClientIsAncient             (1<<6)
+
 void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
 void XkbForceUpdateDeviceLEDs(DeviceIntPtr keybd);
