@@ -126,6 +126,7 @@ int XkbAllocControls(XkbDescPtr xkb, unsigned int which);
 int XkbCopyKeyTypes(XkbKeyTypePtr from, XkbKeyTypePtr into, int num_types);
 int XkbResizeKeyType(XkbDescPtr xkb, int type_ndx, int map_count,
                      Bool want_preserve, int new_num_lvls);
+void XkbFreeComponentNames(XkbComponentNamesPtr names, Bool freeNames);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
