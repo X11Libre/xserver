@@ -205,11 +205,6 @@ extern _X_EXPORT void XkbFreeKeyboard(XkbDescPtr /* xkb */ ,
                                       Bool      /* freeDesc */
     );
 
-extern _X_EXPORT void XkbSetActionKeyMods(XkbDescPtr /* xkb */ ,
-                                          XkbAction * /* act */ ,
-                                          unsigned int  /* mods */
-    );
-
 extern _X_EXPORT unsigned int XkbMaskForVMask(XkbDescPtr /* xkb */ ,
                                               unsigned int      /* vmask */
     );
