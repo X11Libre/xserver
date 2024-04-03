@@ -168,9 +168,6 @@ typedef struct _XkbSrvInfo {
     char overlay_perkey_state[256/8]; /* bitfield */
 } XkbSrvInfoRec, *XkbSrvInfoPtr;
 
-#define	XkbSLI_IsDefault	(1L<<0)
-#define	XkbSLI_HasOwnState	(1L<<1)
-
 typedef struct _XkbSrvLedInfo {
     CARD16 flags;
     CARD16 class;
