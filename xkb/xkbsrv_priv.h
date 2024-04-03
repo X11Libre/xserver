@@ -171,4 +171,16 @@ void XkbSendExtensionDeviceNotify(DeviceIntPtr kbd, ClientPtr client,
 void XkbSendNotification(DeviceIntPtr kbd, XkbChangesPtr pChanges,
                          XkbEventCausePtr cause);
 
+/* device lookup */
+int _XkbLookupAnyDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
+                        Mask access_mode, int *xkb_err);
+int _XkbLookupKeyboard(DeviceIntPtr *pDev, int id, ClientPtr client,
+                       Mask access_mode, int *xkb_err);
+int _XkbLookupBellDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
+                         Mask access_mode, int *xkb_err);
+int _XkbLookupLedDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
+                        Mask access_mode, int *xkb_err);
+int _XkbLookupButtonDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
+                           Mask access_mode, int *xkb_err);
+
 #endif /* _XSERVER_XKBSRV_PRIV_H_ */
