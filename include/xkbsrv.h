@@ -204,10 +204,6 @@ extern _X_EXPORT void XkbFreeKeyboard(XkbDescPtr /* xkb */ ,
                                       Bool      /* freeDesc */
     );
 
-extern _X_EXPORT unsigned int XkbAdjustGroup(int /* group */ ,
-                                             XkbControlsPtr     /* ctrls */
-    );
-
 extern _X_EXPORT KeySym *XkbResizeKeySyms(XkbDescPtr /* xkb */ ,
                                           int /* key */ ,
                                           int   /* needed */

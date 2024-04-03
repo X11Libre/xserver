@@ -131,6 +131,7 @@ void XkbSetActionKeyMods(XkbDescPtr xkb, XkbAction *act, unsigned int mods);
 unsigned int XkbMaskForVMask(XkbDescPtr xkb, unsigned int vmask);
 Bool XkbVirtualModsToReal(XkbDescPtr xkb, unsigned int virtua_mask,
                           unsigned int *mask_rtrn);
+unsigned int XkbAdjustGroup(int group, XkbControlsPtr ctrls);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
