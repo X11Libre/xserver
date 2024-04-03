@@ -198,13 +198,6 @@ typedef struct _XkbSrvLedInfo {
 } XkbSrvLedInfoRec, *XkbSrvLedInfoPtr;
 
 /*
- * Settings for xkbClientFlags field (used by DIX)
- * These flags _must_ not overlap with XkbPCF_*
- */
-#define _XkbClientInitialized           (1<<7)
-#define _XkbClientIsAncient             (1<<6)
-
-/*
  * Settings for flags field
  */
 #define	_XkbStateNotifyInProgress	(1<<0)
