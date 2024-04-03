@@ -209,9 +209,6 @@ typedef struct {
 
 #define	Status		int
 
-extern _X_EXPORT void XkbUseMsg(void
-    );
-
 extern _X_EXPORT int XkbProcessArguments(int /* argc */ ,
                                          char ** /* argv */ ,
                                          int    /* i */
