@@ -33,7 +33,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define XkbResizeKeyActions		SrvXkbResizeKeyActions
 #define XkbResizeKeySyms		SrvXkbResizeKeySyms
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
-#define XkbVirtualModsToReal		SrvXkbVirtualModsToReal
 #define	XkbChangeKeycodeRange		SrvXkbChangeKeycodeRange
 #define	XkbApplyVirtualModChanges	SrvXkbApplyVirtualModChanges
 
@@ -203,11 +202,6 @@ typedef struct {
 extern _X_EXPORT void XkbFreeKeyboard(XkbDescPtr /* xkb */ ,
                                       unsigned int /* which */ ,
                                       Bool      /* freeDesc */
-    );
-
-extern _X_EXPORT Bool XkbVirtualModsToReal(XkbDescPtr /* xkb */ ,
-                                           unsigned int /* virtua_mask */ ,
-                                           unsigned int *       /* mask_rtrn */
     );
 
 extern _X_EXPORT unsigned int XkbAdjustGroup(int /* group */ ,
