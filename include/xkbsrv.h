@@ -32,7 +32,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	XkbApplyCompatMapToKey		SrvXkbApplyCompatMapToKey
 #define XkbResizeKeyActions		SrvXkbResizeKeyActions
 #define XkbResizeKeySyms		SrvXkbResizeKeySyms
-#define XkbResizeKeyType		SrvXkbResizeKeyType
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
 #define XkbVirtualModsToReal		SrvXkbVirtualModsToReal
 #define	XkbChangeKeycodeRange		SrvXkbChangeKeycodeRange
@@ -200,13 +199,6 @@ typedef struct {
 /***====================================================================***/
 
 #define	Status		int
-
-extern _X_EXPORT Status XkbResizeKeyType(XkbDescPtr /* xkb */ ,
-                                         int /* type_ndx */ ,
-                                         int /* map_count */ ,
-                                         Bool /* want_preserve */ ,
-                                         int    /* new_num_lvls */
-    );
 
 extern _X_EXPORT void XkbFreeKeyboard(XkbDescPtr /* xkb */ ,
                                       unsigned int /* which */ ,
