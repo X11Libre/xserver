@@ -98,6 +98,7 @@ SOFTWARE.
 #include "dix/input_priv.h"
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
+#include "xkb/xkbsrv_priv.h"
 
 #include "inputstr.h"
 #include "windowstr.h"
@@ -112,7 +113,6 @@ SOFTWARE.
 #include "xiquerydevice.h"      /* For List*Info */
 #include "eventstr.h"
 #include "inpututils.h"
-#include "xkbsrv.h"
 
 #define WID(w) ((w) ? ((w)->drawable.id) : 0)
 #define AllModifiersMask ( \

@@ -41,6 +41,9 @@
 #define XkbSetCauseXkbReq(c,e,cl)  XkbSetCauseReq(c,XkbReqCode,e,cl)
 #define XkbSetCauseUnknown(c)      XkbSetCauseKey(c,0,0)
 
+#define XkbSLI_IsDefault        (1L<<0)
+#define XkbSLI_HasOwnState      (1L<<1)
+
 void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
 void XkbForceUpdateDeviceLEDs(DeviceIntPtr keybd);
