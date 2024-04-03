@@ -52,7 +52,9 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	XkbChangeKeycodeRange		SrvXkbChangeKeycodeRange
 #define	XkbApplyVirtualModChanges	SrvXkbApplyVirtualModChanges
 
+#include <X11/Xdefs.h>
 #include <X11/extensions/XKBproto.h>
+
 #include "xkbstr.h"
 #include "xkbrules.h"
 #include "inputstr.h"
@@ -103,23 +105,6 @@ typedef struct _XkbEventCause {
 #define	XkbSetCauseCoreReq(c,e,cl) XkbSetCauseReq(c,e,0,cl)
 #define	XkbSetCauseXkbReq(c,e,cl)  XkbSetCauseReq(c,XkbReqCode,e,cl)
 #define	XkbSetCauseUnknown(c)	   XkbSetCauseKey(c,0,0)
-
-#define	_BEEP_NONE		0
-#define	_BEEP_FEATURE_ON	1
-#define	_BEEP_FEATURE_OFF	2
-#define	_BEEP_FEATURE_CHANGE	3
-#define	_BEEP_SLOW_WARN		4
-#define	_BEEP_SLOW_PRESS	5
-#define	_BEEP_SLOW_ACCEPT	6
-#define	_BEEP_SLOW_REJECT	7
-#define	_BEEP_SLOW_RELEASE	8
-#define	_BEEP_STICKY_LATCH	9
-#define	_BEEP_STICKY_LOCK	10
-#define	_BEEP_STICKY_UNLOCK	11
-#define	_BEEP_LED_ON		12
-#define	_BEEP_LED_OFF		13
-#define	_BEEP_LED_CHANGE	14
-#define	_BEEP_BOUNCE_REJECT	15
 
 typedef struct _XkbFilter {
     CARD16 keycode;
