@@ -219,14 +219,6 @@ extern _X_EXPORT DevPrivateKeyRec xkbDevicePrivateKeyRec;
 
 /***====================================================================***/
 
-/***====================================================================***/
-
-#define XkbAX_KRGMask	 (XkbSlowKeysMask|XkbBounceKeysMask)
-#define	XkbAllFilteredEventsMask \
-	(XkbAccessXKeysMask|XkbRepeatKeysMask|XkbMouseKeysAccelMask|XkbAX_KRGMask)
-
-/***====================================================================***/
-
 extern _X_EXPORT int XkbReqCode;
 extern _X_EXPORT int XkbEventBase;
 extern _X_EXPORT int XkbKeyboardErrorCode;

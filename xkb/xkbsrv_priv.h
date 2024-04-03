@@ -44,6 +44,10 @@
 #define XkbSLI_IsDefault        (1L<<0)
 #define XkbSLI_HasOwnState      (1L<<1)
 
+#define XkbAX_KRGMask    (XkbSlowKeysMask|XkbBounceKeysMask)
+#define XkbAllFilteredEventsMask \
+        (XkbAccessXKeysMask|XkbRepeatKeysMask|XkbMouseKeysAccelMask|XkbAX_KRGMask)
+
 /*
  * Settings for xkbClientFlags field (used by DIX)
  * These flags _must_ not overlap with XkbPCF_*
