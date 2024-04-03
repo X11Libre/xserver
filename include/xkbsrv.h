@@ -37,7 +37,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define XkbAllocCompatMap		SrvXkbAllocCompatMap
 #define XkbAllocControls		SrvXkbAllocControls
 #define XkbAllocIndicatorMaps		SrvXkbAllocIndicatorMaps
-#define XkbAllocKeyboard		SrvXkbAllocKeyboard
 #define XkbAllocNames			SrvXkbAllocNames
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
 #define XkbVirtualModsToReal		SrvXkbVirtualModsToReal
@@ -206,9 +205,6 @@ typedef struct {
 /***====================================================================***/
 
 #define	Status		int
-
-extern _X_EXPORT XkbDescPtr XkbAllocKeyboard(void
-    );
 
 extern _X_EXPORT Status XkbAllocIndicatorMaps(XkbDescPtr        /* xkb */
     );

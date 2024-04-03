@@ -117,6 +117,7 @@ Bool XkbInitPrivates(void);
 void XkbSetExtension(DeviceIntPtr device, ProcessInputProc proc);
 void XkbFreeCompatMap(XkbDescPtr xkb, unsigned int which, Bool freeMap);
 void XkbFreeNames(XkbDescPtr xkb, unsigned int which, Bool freeMap);
+XkbDescPtr XkbAllocKeyboard(void);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
