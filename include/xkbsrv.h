@@ -34,7 +34,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define XkbResizeKeyActions		SrvXkbResizeKeyActions
 #define XkbResizeKeySyms		SrvXkbResizeKeySyms
 #define XkbResizeKeyType		SrvXkbResizeKeyType
-#define XkbAllocCompatMap		SrvXkbAllocCompatMap
 #define XkbAllocControls		SrvXkbAllocControls
 #define XkbAllocNames			SrvXkbAllocNames
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
@@ -204,11 +203,6 @@ typedef struct {
 /***====================================================================***/
 
 #define	Status		int
-
-extern _X_EXPORT Status XkbAllocCompatMap(XkbDescPtr /* xkb */ ,
-                                          unsigned int /* which */ ,
-                                          unsigned int  /* nInterpret */
-    );
 
 extern _X_EXPORT Status XkbAllocNames(XkbDescPtr /* xkb */ ,
                                       unsigned int /* which */ ,

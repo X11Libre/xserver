@@ -119,6 +119,7 @@ void XkbFreeCompatMap(XkbDescPtr xkb, unsigned int which, Bool freeMap);
 void XkbFreeNames(XkbDescPtr xkb, unsigned int which, Bool freeMap);
 XkbDescPtr XkbAllocKeyboard(void);
 int XkbAllocIndicatorMaps(XkbDescPtr xkb);
+int XkbAllocCompatMap(XkbDescPtr xkb, unsigned int which, unsigned int nInterpret);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
