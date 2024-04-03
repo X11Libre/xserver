@@ -197,11 +197,6 @@ typedef struct _XkbSrvLedInfo {
     CARD32 usedComponents;
 } XkbSrvLedInfoRec, *XkbSrvLedInfoPtr;
 
-/*
- * Settings for flags field
- */
-#define	_XkbStateNotifyInProgress	(1<<0)
-
 typedef struct {
     ProcessInputProc processInputProc;
     /* If processInputProc is set to something different than realInputProc,
