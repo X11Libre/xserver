@@ -251,7 +251,7 @@ XkbFreeNames(XkbDescPtr xkb, unsigned which, Bool freeMap)
 
 /***===================================================================***/
 
- /*ARGSUSED*/ Status
+ /*ARGSUSED*/ int
 XkbAllocControls(XkbDescPtr xkb, unsigned which)
 {
     if (xkb == NULL)
