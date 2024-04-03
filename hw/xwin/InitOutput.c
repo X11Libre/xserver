@@ -38,6 +38,7 @@ from The Open Group.
 #include "dix/screenint_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
+#include "xkb/xkbsrv_priv.h"
 
 #include "winmsg.h"
 #include "winconfig.h"
@@ -47,9 +48,6 @@ from The Open Group.
 #endif
 #ifdef __CYGWIN__
 #include <mntent.h>
-#endif
-#if defined(WIN32)
-#include "xkbsrv.h"
 #endif
 #ifdef RELOCATE_PROJECTROOT
 #pragma push_macro("Status")
