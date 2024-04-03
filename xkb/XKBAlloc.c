@@ -42,7 +42,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /***===================================================================***/
 
- /*ARGSUSED*/ Status
+/*ARGSUSED*/ int
 XkbAllocCompatMap(XkbDescPtr xkb, unsigned which, unsigned nSI)
 {
     XkbCompatMapPtr compat;
