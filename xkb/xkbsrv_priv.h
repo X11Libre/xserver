@@ -31,6 +31,16 @@
 #define _BEEP_LED_CHANGE        14
 #define _BEEP_BOUNCE_REJECT     15
 
+#define XkbSetCauseKey(c,k,e)   { (c)->kc= (k),(c)->event= (e),\
+                                  (c)->mjr= (c)->mnr= 0; \
+                                  (c)->client= NULL; }
+#define XkbSetCauseReq(c,j,n,cl) { (c)->kc= (c)->event= 0,\
+                                  (c)->mjr= (j),(c)->mnr= (n);\
+                                  (c)->client= (cl); }
+#define XkbSetCauseCoreReq(c,e,cl) XkbSetCauseReq(c,e,0,cl)
+#define XkbSetCauseXkbReq(c,e,cl)  XkbSetCauseReq(c,XkbReqCode,e,cl)
+#define XkbSetCauseUnknown(c)      XkbSetCauseKey(c,0,0)
+
 void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
 void XkbForceUpdateDeviceLEDs(DeviceIntPtr keybd);
