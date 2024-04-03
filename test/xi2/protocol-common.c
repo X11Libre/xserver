@@ -32,13 +32,12 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "xkb/xkbsrv_priv.h"    /* for XkbInitPrivates */
 
 #include "extinit_priv.h"
 #include "exglobals.h"
-#include "xkbsrv.h"             /* for XkbInitPrivates */
 #include "xserver-properties.h"
 #include "syncsrv.h"
-
 #include "protocol-common.h"
 
 struct devices devices;
