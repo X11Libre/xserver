@@ -31,7 +31,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	XkbKeyTypesForCoreSymbols	SrvXkbKeyTypesForCoreSymbols
 #define	XkbApplyCompatMapToKey		SrvXkbApplyCompatMapToKey
 #define XkbResizeKeyActions		SrvXkbResizeKeyActions
-#define XkbResizeKeySyms		SrvXkbResizeKeySyms
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
 #define	XkbChangeKeycodeRange		SrvXkbChangeKeycodeRange
 #define	XkbApplyVirtualModChanges	SrvXkbApplyVirtualModChanges
@@ -202,11 +201,6 @@ typedef struct {
 extern _X_EXPORT void XkbFreeKeyboard(XkbDescPtr /* xkb */ ,
                                       unsigned int /* which */ ,
                                       Bool      /* freeDesc */
-    );
-
-extern _X_EXPORT KeySym *XkbResizeKeySyms(XkbDescPtr /* xkb */ ,
-                                          int /* key */ ,
-                                          int   /* needed */
     );
 
 extern _X_EXPORT XkbAction *XkbResizeKeyActions(XkbDescPtr /* xkb */ ,
