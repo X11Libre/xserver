@@ -56,6 +56,8 @@
  */
 #define _XkbStateNotifyInProgress       (1<<0)
 
+#define _XkbLibError(c,l,d)     /* Epoch fail */
+
 void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
 void XkbForceUpdateDeviceLEDs(DeviceIntPtr keybd);
