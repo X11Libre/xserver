@@ -123,6 +123,7 @@ int XkbAllocCompatMap(XkbDescPtr xkb, unsigned int which, unsigned int nInterpre
 int XkbAllocNames(XkbDescPtr xkb, unsigned int which, int nTotalRG,
                   int nTotalAliases);
 int XkbAllocControls(XkbDescPtr xkb, unsigned int which);
+int XkbCopyKeyTypes(XkbKeyTypePtr from, XkbKeyTypePtr into, int num_types);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;

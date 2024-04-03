@@ -28,7 +28,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	_XKBSRV_H_
 
 #define XkbChangeTypesOfKey		SrvXkbChangeTypesOfKey
-#define XkbCopyKeyTypes			SrvXkbCopyKeyTypes
 #define	XkbKeyTypesForCoreSymbols	SrvXkbKeyTypesForCoreSymbols
 #define	XkbApplyCompatMapToKey		SrvXkbApplyCompatMapToKey
 #define XkbResizeKeyActions		SrvXkbResizeKeyActions
@@ -201,11 +200,6 @@ typedef struct {
 /***====================================================================***/
 
 #define	Status		int
-
-extern _X_EXPORT Status XkbCopyKeyTypes(XkbKeyTypePtr /* from */ ,
-                                        XkbKeyTypePtr /* into */ ,
-                                        int     /* num_types */
-    );
 
 extern _X_EXPORT Status XkbResizeKeyType(XkbDescPtr /* xkb */ ,
                                          int /* type_ndx */ ,
