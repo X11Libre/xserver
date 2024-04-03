@@ -45,6 +45,12 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "xkb-procs.h"
 #include "protocol-versions.h"
 
+/* "a" is a "unique" numeric identifier that just defines which error
+ * code statement it is. _XkbErrCode2(4, foo) means "this is the 4th error
+ * statement in this function". lovely.
+ */
+#define _XkbErrCode3(a,b,c)   _XkbErrCode2(a,(((unsigned int)(b))<<16)|(c))
+#define _XkbErrCode4(a,b,c,d) _XkbErrCode3(a,b,((((unsigned int)(c))<<8)|(d)))
 
 int XkbEventBase;
 static int XkbErrorBase;
