@@ -51,6 +51,7 @@
 #include <grp.h>
 
 #include "os/osdep.h"
+#include "xkb/xkbsrv_priv.h"
 
 #include "xf86.h"
 #include "xf86Modes.h"
@@ -67,7 +68,6 @@
 #include "loaderProcs.h"
 #include "xf86Xinput_priv.h"
 
-#include "xkbsrv.h"
 #include "picture.h"
 #ifdef DPMSExtension
 #include "dpmsproc.h"

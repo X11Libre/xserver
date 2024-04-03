@@ -42,11 +42,11 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/osdep.h"
 #include "xkb/xkbfile_priv.h"
 #include "xkb/xkbfmisc_priv.h"
+#include "xkb/xkbsrv_priv.h"
 
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
-#include <xkbsrv.h>
 
 #define	PRE_ERROR_MSG "\"The XKEYBOARD keymap compiler (xkbcomp) reports:\""
 #define	ERROR_PREFIX	"\"> \""
