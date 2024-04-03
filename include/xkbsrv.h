@@ -209,8 +209,6 @@ typedef struct {
 
 #define	Status		int
 
-extern _X_EXPORT Bool XkbInitPrivates(void);
-
 extern _X_EXPORT void XkbSetExtension(DeviceIntPtr device,
                                       ProcessInputProc proc);
 
