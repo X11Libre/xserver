@@ -263,7 +263,7 @@ XkbCopyKeyTypes(XkbKeyTypePtr from, XkbKeyTypePtr into, int num_types)
     return Success;
 }
 
-Status
+int
 XkbResizeKeyType(XkbDescPtr xkb,
                  int type_ndx,
                  int map_count, Bool want_preserve, int new_num_lvls)
