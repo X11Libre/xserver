@@ -14,6 +14,23 @@
 #include "xkbsrv.h"
 #include "xkbstr.h"
 
+#define _BEEP_NONE              0
+#define _BEEP_FEATURE_ON        1
+#define _BEEP_FEATURE_OFF       2
+#define _BEEP_FEATURE_CHANGE    3
+#define _BEEP_SLOW_WARN         4
+#define _BEEP_SLOW_PRESS        5
+#define _BEEP_SLOW_ACCEPT       6
+#define _BEEP_SLOW_REJECT       7
+#define _BEEP_SLOW_RELEASE      8
+#define _BEEP_STICKY_LATCH      9
+#define _BEEP_STICKY_LOCK       10
+#define _BEEP_STICKY_UNLOCK     11
+#define _BEEP_LED_ON            12
+#define _BEEP_LED_OFF           13
+#define _BEEP_LED_CHANGE        14
+#define _BEEP_BOUNCE_REJECT     15
+
 void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
 void XkbForceUpdateDeviceLEDs(DeviceIntPtr keybd);
