@@ -36,6 +36,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <os.h>
 #include <string.h>
 
+#include "xkb/xkbsrv_priv.h"
+
 /***===================================================================***/
 
  /*ARGSUSED*/ Status
