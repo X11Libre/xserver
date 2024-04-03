@@ -112,6 +112,7 @@ void XkbMergeLockedPtrBtns(DeviceIntPtr master);
 
 void XkbFakeDeviceButton(DeviceIntPtr dev, int press, int button);
 void XkbUseMsg(void);
+int XkbProcessArguments(int argc, char **argv, int i);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;

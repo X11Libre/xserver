@@ -209,11 +209,6 @@ typedef struct {
 
 #define	Status		int
 
-extern _X_EXPORT int XkbProcessArguments(int /* argc */ ,
-                                         char ** /* argv */ ,
-                                         int    /* i */
-    );
-
 extern _X_EXPORT Bool XkbInitPrivates(void);
 
 extern _X_EXPORT void XkbSetExtension(DeviceIntPtr device,
