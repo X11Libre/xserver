@@ -211,12 +211,6 @@ typedef struct {
     DeviceUnwrapProc unwrapProc;
 } xkbDeviceInfoRec, *xkbDeviceInfoPtr;
 
-extern _X_EXPORT DevPrivateKeyRec xkbDevicePrivateKeyRec;
-
-#define xkbDevicePrivateKey (&xkbDevicePrivateKeyRec)
-
-#define XKBDEVICEINFO(dev) ((xkbDeviceInfoPtr)dixLookupPrivate(&(dev)->devPrivates, xkbDevicePrivateKey))
-
 /***====================================================================***/
 
 extern _X_EXPORT int XkbReqCode;
