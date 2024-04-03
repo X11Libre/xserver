@@ -34,11 +34,11 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/exevents_priv.h"
+#include "xkb/xkbsrv_priv.h"
 
 #include "inputstr.h"
 #include "exglobals.h"
 #include "windowstr.h"
-#include "xkbsrv_priv.h"
 
 /***====================================================================***/
 
