@@ -249,7 +249,7 @@ XkbCopyKeyType(XkbKeyTypePtr from, XkbKeyTypePtr into)
     return Success;
 }
 
-Status
+int
 XkbCopyKeyTypes(XkbKeyTypePtr from, XkbKeyTypePtr into, int num_types)
 {
     register int i, rtrn;
