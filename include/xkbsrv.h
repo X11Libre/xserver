@@ -40,7 +40,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define XkbAllocKeyboard		SrvXkbAllocKeyboard
 #define XkbAllocNames			SrvXkbAllocNames
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
-#define XkbFreeNames			SrvXkbFreeNames
 #define XkbVirtualModsToReal		SrvXkbVirtualModsToReal
 #define	XkbChangeKeycodeRange		SrvXkbChangeKeycodeRange
 #define	XkbApplyVirtualModChanges	SrvXkbApplyVirtualModChanges
@@ -207,11 +206,6 @@ typedef struct {
 /***====================================================================***/
 
 #define	Status		int
-
-extern _X_EXPORT void XkbFreeNames(XkbDescPtr /* xkb */ ,
-                                   unsigned int /* which */ ,
-                                   Bool /* freeMap */
-    );
 
 extern _X_EXPORT XkbDescPtr XkbAllocKeyboard(void
     );
