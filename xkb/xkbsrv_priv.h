@@ -122,6 +122,7 @@ int XkbAllocIndicatorMaps(XkbDescPtr xkb);
 int XkbAllocCompatMap(XkbDescPtr xkb, unsigned int which, unsigned int nInterpret);
 int XkbAllocNames(XkbDescPtr xkb, unsigned int which, int nTotalRG,
                   int nTotalAliases);
+int XkbAllocControls(XkbDescPtr xkb, unsigned int which);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
