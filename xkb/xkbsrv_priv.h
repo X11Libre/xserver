@@ -115,6 +115,7 @@ void XkbUseMsg(void);
 int XkbProcessArguments(int argc, char **argv, int i);
 Bool XkbInitPrivates(void);
 void XkbSetExtension(DeviceIntPtr device, ProcessInputProc proc);
+void XkbFreeCompatMap(XkbDescPtr xkb, unsigned int which, Bool freeMap);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
