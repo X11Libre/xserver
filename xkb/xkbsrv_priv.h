@@ -11,6 +11,7 @@
 
 #include "dix.h"
 #include "input.h"
+#include "misc.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
 
