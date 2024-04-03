@@ -51,6 +51,11 @@
 #define _XkbClientInitialized           (1<<7)
 #define _XkbClientIsAncient             (1<<6)
 
+/*
+ * Settings for flags field
+ */
+#define _XkbStateNotifyInProgress       (1<<0)
+
 void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
 void XkbForceUpdateDeviceLEDs(DeviceIntPtr keybd);
