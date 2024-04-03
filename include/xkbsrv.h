@@ -236,31 +236,6 @@ extern _X_EXPORT void XkbFreeNames(XkbDescPtr /* xkb */ ,
                                    Bool /* freeMap */
     );
 
-extern _X_EXPORT int _XkbLookupAnyDevice(DeviceIntPtr *pDev,
-                                         int id,
-                                         ClientPtr client,
-                                         Mask access_mode, int *xkb_err);
-
-extern _X_EXPORT int _XkbLookupKeyboard(DeviceIntPtr *pDev,
-                                        int id,
-                                        ClientPtr client,
-                                        Mask access_mode, int *xkb_err);
-
-extern _X_EXPORT int _XkbLookupBellDevice(DeviceIntPtr *pDev,
-                                          int id,
-                                          ClientPtr client,
-                                          Mask access_mode, int *xkb_err);
-
-extern _X_EXPORT int _XkbLookupLedDevice(DeviceIntPtr *pDev,
-                                         int id,
-                                         ClientPtr client,
-                                         Mask access_mode, int *xkb_err);
-
-extern _X_EXPORT int _XkbLookupButtonDevice(DeviceIntPtr *pDev,
-                                            int id,
-                                            ClientPtr client,
-                                            Mask access_mode, int *xkb_err);
-
 extern _X_EXPORT XkbDescPtr XkbAllocKeyboard(void
     );
 
