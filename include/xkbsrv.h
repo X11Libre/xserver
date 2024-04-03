@@ -209,9 +209,6 @@ typedef struct {
 
 #define	Status		int
 
-extern _X_EXPORT void XkbSetExtension(DeviceIntPtr device,
-                                      ProcessInputProc proc);
-
 extern _X_EXPORT void XkbFreeCompatMap(XkbDescPtr /* xkb */ ,
                                        unsigned int /* which */ ,
                                        Bool     /* freeMap */
