@@ -211,30 +211,6 @@ typedef struct {
     DeviceUnwrapProc unwrapProc;
 } xkbDeviceInfoRec, *xkbDeviceInfoPtr;
 
-#define WRAP_PROCESS_INPUT_PROC(device, oldprocs, proc, unwrapproc) \
-	device->public.processInputProc = proc; \
-	oldprocs->processInputProc = \
-	oldprocs->realInputProc = device->public.realInputProc; \
-	device->public.realInputProc = proc; \
-	oldprocs->unwrapProc = device->unwrapProc; \
-	device->unwrapProc = unwrapproc;
-
-#define COND_WRAP_PROCESS_INPUT_PROC(device, oldprocs, proc, unwrapproc) \
-	if (device->public.processInputProc == device->public.realInputProc)\
-	    device->public.processInputProc = proc; \
-	oldprocs->processInputProc = \
-	oldprocs->realInputProc = device->public.realInputProc; \
-	device->public.realInputProc = proc; \
-	oldprocs->unwrapProc = device->unwrapProc; \
-	device->unwrapProc = unwrapproc;
-
-#define UNWRAP_PROCESS_INPUT_PROC(device, oldprocs, backupproc) \
-        backupproc = device->public.realInputProc; \
-	if (device->public.processInputProc == device->public.realInputProc)\
-	    device->public.processInputProc = oldprocs->realInputProc; \
-	device->public.realInputProc = oldprocs->realInputProc; \
-	device->unwrapProc = oldprocs->unwrapProc;
-
 extern _X_EXPORT DevPrivateKeyRec xkbDevicePrivateKeyRec;
 
 #define xkbDevicePrivateKey (&xkbDevicePrivateKeyRec)
