@@ -128,6 +128,7 @@ int XkbResizeKeyType(XkbDescPtr xkb, int type_ndx, int map_count,
                      Bool want_preserve, int new_num_lvls);
 void XkbFreeComponentNames(XkbComponentNamesPtr names, Bool freeNames);
 void XkbSetActionKeyMods(XkbDescPtr xkb, XkbAction *act, unsigned int mods);
+unsigned int XkbMaskForVMask(XkbDescPtr xkb, unsigned int vmask);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
