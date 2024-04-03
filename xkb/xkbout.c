@@ -37,14 +37,13 @@
 
 #include "xkb/xkbfmisc_priv.h"
 #include "xkb/xkbout_priv.h"
+#include "xkb/xkbsrv_priv.h"
 #include "xkb/xkbtext_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"
 #include "dix.h"
 #include "xkbstr.h"
-#include <xkbsrv.h>
-
 #include "xkbgeom.h"
 
 #define	VMOD_HIDE_VALUE	0
