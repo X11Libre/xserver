@@ -111,6 +111,7 @@ int XkbGetEffectiveGroup(XkbSrvInfoPtr xkbi, XkbStatePtr xkbstate, CARD8 keycode
 void XkbMergeLockedPtrBtns(DeviceIntPtr master);
 
 void XkbFakeDeviceButton(DeviceIntPtr dev, int press, int button);
+void XkbUseMsg(void);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
