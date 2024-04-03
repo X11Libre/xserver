@@ -304,8 +304,6 @@ extern _X_EXPORT CARD32 xkbDebugFlags;
  * statement in this function". lovely.
  */
 #define	_XkbErrCode2(a,b) ((XID)((((unsigned int)(a))<<24)|((b)&0xffffff)))
-#define	_XkbErrCode3(a,b,c)	_XkbErrCode2(a,(((unsigned int)(b))<<16)|(c))
-#define	_XkbErrCode4(a,b,c,d) _XkbErrCode3(a,b,((((unsigned int)(c))<<8)|(d)))
 
 #define	Status		int
 
