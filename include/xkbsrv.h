@@ -540,19 +540,6 @@ extern _X_EXPORT Bool XkbEnableDisableControls(XkbSrvInfoPtr /* xkbi */ ,
                                                XkbEventCausePtr /* cause */
     );
 
-extern _X_EXPORT XkbInterestPtr XkbFindClientResource(DevicePtr /* inDev */ ,
-                                                      ClientPtr /* client */
-    );
-
-extern _X_EXPORT XkbInterestPtr XkbAddClientResource(DevicePtr /* inDev */ ,
-                                                     ClientPtr /* client */ ,
-                                                     XID        /* id */
-    );
-
-extern _X_EXPORT int XkbRemoveResourceClient(DevicePtr /* inDev */ ,
-                                             XID        /* id */
-    );
-
 extern _X_EXPORT int XkbDDXUsesSoftRepeat(DeviceIntPtr  /* dev */
     );
 

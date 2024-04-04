@@ -132,4 +132,9 @@ void AccessXCancelRepeatKey(XkbSrvInfoPtr xkbi, KeyCode key);
 void AccessXComputeCurveFactor(XkbSrvInfoPtr xkbi, XkbControlsPtr ctrls);
 int XkbDDXAccessXBeep(DeviceIntPtr dev, unsigned int what, unsigned int which);
 
+/* client resources */
+XkbInterestPtr XkbFindClientResource(DevicePtr inDev, ClientPtr client);
+XkbInterestPtr XkbAddClientResource(DevicePtr inDev, ClientPtr client, XID id);
+int XkbRemoveResourceClient(DevicePtr inDev, XID id);
+
 #endif /* _XSERVER_XKBSRV_PRIV_H_ */
