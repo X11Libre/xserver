@@ -156,6 +156,9 @@ void XkbHandleBell(BOOL force, BOOL eventOnly, DeviceIntPtr kbd, CARD8 percent,
                    ClientPtr pClient);
 void XkbHandleActions(DeviceIntPtr dev, DeviceIntPtr kbd, DeviceEvent *event);
 void XkbProcessKeyboardEvent(DeviceEvent *event, DeviceIntPtr keybd);
+Bool XkbEnableDisableControls(XkbSrvInfoPtr xkbi, unsigned long change,
+                              unsigned long newValues, XkbChangesPtr changes,
+                              XkbEventCausePtr cause);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
