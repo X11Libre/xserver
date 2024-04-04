@@ -132,6 +132,11 @@ void AccessXCancelRepeatKey(XkbSrvInfoPtr xkbi, KeyCode key);
 void AccessXComputeCurveFactor(XkbSrvInfoPtr xkbi, XkbControlsPtr ctrls);
 int XkbDDXAccessXBeep(DeviceIntPtr dev, unsigned int what, unsigned int which);
 
+/* DDX entry points - DDX needs to implement these */
+int XkbDDXTerminateServer(DeviceIntPtr dev, KeyCode key, XkbAction *act);
+int XkbDDXSwitchScreen(DeviceIntPtr dev, KeyCode key, XkbAction *act);
+int XkbDDXPrivate(DeviceIntPtr dev, KeyCode key, XkbAction *act);
+
 /* client resources */
 XkbInterestPtr XkbFindClientResource(DevicePtr inDev, ClientPtr client);
 XkbInterestPtr XkbAddClientResource(DevicePtr inDev, ClientPtr client, XID id);
