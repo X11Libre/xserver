@@ -213,17 +213,6 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             ClientPtr   /* client */
     );
 
-extern _X_EXPORT void XkbHandleBell(BOOL force,
-                                    BOOL eventOnly,
-                                    DeviceIntPtr kbd,
-                                    CARD8 percent,
-                                    void *ctrl,
-                                    CARD8 class,
-                                    Atom name,
-                                    WindowPtr pWin,
-                                    ClientPtr pClient
-    );
-
 extern _X_EXPORT void XkbProcessKeyboardEvent(DeviceEvent * /* event */ ,
                                               DeviceIntPtr      /* keybd */
     );
