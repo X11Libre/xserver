@@ -148,4 +148,12 @@ int XkbLatchGroup(DeviceIntPtr pXDev, int group);
 void XkbClearAllLatchesAndLocks(DeviceIntPtr dev, XkbSrvInfoPtr xkbi,
                                 Bool genEv, XkbEventCausePtr cause);
 
+/* xkb rules */
+void XkbInitRules(XkbRMLVOSet *rmlvo, const char *rules,
+                  const char *model, const char *layout,
+                  const char *variant, const char *options);
+void XkbSetRulesDflts(XkbRMLVOSet *rmlvo);
+void XkbDeleteRulesDflts(void);
+void XkbDeleteRulesUsed(void);
+
 #endif /* _XSERVER_XKBSRV_PRIV_H_ */
