@@ -213,10 +213,6 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             ClientPtr   /* client */
     );
 
-extern _X_EXPORT unsigned int XkbStateChangedFlags(XkbStatePtr /* old */ ,
-                                                   XkbStatePtr  /* new */
-    );
-
 extern _X_EXPORT void XkbHandleBell(BOOL force,
                                     BOOL eventOnly,
                                     DeviceIntPtr kbd,
