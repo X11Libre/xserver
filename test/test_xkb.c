@@ -37,11 +37,13 @@
 #include <X11/Xproto.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
+
+#include "xkb/xkbsrv_priv.h"
+
 #include "misc.h"
 #include "inputstr.h"
 #include "opaque.h"
 #include "property.h"
-#include <xkbsrv.h>
 #include "../xkb/xkbgeom.h"
 #include <X11/extensions/XKMformat.h>
 #include <assert.h>
