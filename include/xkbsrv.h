@@ -46,8 +46,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define XkbFreeCompatMap		SrvXkbFreeCompatMap
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
 #define XkbFreeNames			SrvXkbFreeNames
-#define XkbLatchModifiers		SrvXkbLatchModifiers
-#define XkbLatchGroup			SrvXkbLatchGroup
 #define XkbVirtualModsToReal		SrvXkbVirtualModsToReal
 #define	XkbChangeKeycodeRange		SrvXkbChangeKeycodeRange
 #define	XkbApplyVirtualModChanges	SrvXkbApplyVirtualModChanges
@@ -564,21 +562,6 @@ extern _X_EXPORT void XkbDisableComputedAutoRepeats(DeviceIntPtr /* pXDev */ ,
 extern _X_EXPORT void XkbSetRepeatKeys(DeviceIntPtr /* pXDev */ ,
                                        int /* key */ ,
                                        int      /* onoff */
-    );
-
-extern _X_EXPORT int XkbLatchModifiers(DeviceIntPtr /* pXDev */ ,
-                                       CARD8 /* mask */ ,
-                                       CARD8    /* latches */
-    );
-
-extern _X_EXPORT int XkbLatchGroup(DeviceIntPtr /* pXDev */ ,
-                                   int  /* group */
-    );
-
-extern _X_EXPORT void XkbClearAllLatchesAndLocks(DeviceIntPtr /* dev */ ,
-                                                 XkbSrvInfoPtr /* xkbi */ ,
-                                                 Bool /* genEv */ ,
-                                                 XkbEventCausePtr       /* cause */
     );
 
 extern _X_EXPORT void XkbInitRules(XkbRMLVOSet * /* rmlvo   */,
