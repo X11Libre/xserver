@@ -146,6 +146,8 @@ void XkbUpdateAllDeviceIndicators(XkbChangesPtr changes, XkbEventCausePtr cause)
 unsigned int XkbIndicatorsToUpdate(DeviceIntPtr dev, unsigned long state_changes,
                                    Bool enabled_ctrl_changes);
 void XkbComputeDerivedState(XkbSrvInfoPtr xkbi);
+void XkbCheckSecondaryEffects(XkbSrvInfoPtr xkbi, unsigned int which,
+                              XkbChangesPtr changes, XkbEventCausePtr cause);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
