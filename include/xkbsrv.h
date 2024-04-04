@@ -564,28 +564,11 @@ extern _X_EXPORT void XkbSetRepeatKeys(DeviceIntPtr /* pXDev */ ,
                                        int      /* onoff */
     );
 
-extern _X_EXPORT void XkbInitRules(XkbRMLVOSet * /* rmlvo   */,
-                                   const char *  /* rules   */,
-                                   const char *  /* model   */,
-                                   const char *  /* layout  */,
-                                   const char *  /* variant */,
-                                   const char *  /* options */
-    ) ;
-
 extern _X_EXPORT void XkbGetRulesDflts(XkbRMLVOSet *    /* rmlvo */
     );
 
 extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
                                       Bool      /* freeRMLVO */
-    );
-
-extern _X_EXPORT void XkbSetRulesDflts(XkbRMLVOSet *    /* rmlvo */
-    );
-
-extern _X_EXPORT void XkbDeleteRulesDflts(void
-    );
-
-extern _X_EXPORT void XkbDeleteRulesUsed(void
     );
 
 extern _X_EXPORT XkbGeometryPtr XkbLookupNamedGeometry(DeviceIntPtr /* dev */ ,
