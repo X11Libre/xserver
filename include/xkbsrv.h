@@ -213,12 +213,6 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             ClientPtr   /* client */
     );
 
-extern _X_EXPORT void XkbSetIndicators(DeviceIntPtr /* pXDev */ ,
-                                       CARD32 /* affect */ ,
-                                       CARD32 /* values */ ,
-                                       XkbEventCausePtr /* cause */
-    );
-
 extern _X_EXPORT void XkbUpdateIndicators(DeviceIntPtr /* keybd */ ,
                                           CARD32 /* changed */ ,
                                           Bool /* check_edevs */ ,
