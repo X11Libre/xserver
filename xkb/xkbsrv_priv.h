@@ -151,6 +151,9 @@ void XkbCheckSecondaryEffects(XkbSrvInfoPtr xkbi, unsigned int which,
 void XkbCheckIndicatorMaps(DeviceIntPtr dev, XkbSrvLedInfoPtr sli,
                            unsigned int which);
 unsigned int XkbStateChangedFlags(XkbStatePtr old, XkbStatePtr new);
+void XkbHandleBell(BOOL force, BOOL eventOnly, DeviceIntPtr kbd, CARD8 percent,
+                   void *ctrl, CARD8 class, Atom name, WindowPtr pWin,
+                   ClientPtr pClient);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
