@@ -213,12 +213,6 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             ClientPtr   /* client */
     );
 
-extern _X_EXPORT void XkbCheckSecondaryEffects(XkbSrvInfoPtr /* xkbi */ ,
-                                               unsigned int /* which */ ,
-                                               XkbChangesPtr /* changes */ ,
-                                               XkbEventCausePtr /* cause */
-    );
-
 extern _X_EXPORT void XkbCheckIndicatorMaps(DeviceIntPtr /* dev */ ,
                                             XkbSrvLedInfoPtr /* sli */ ,
                                             unsigned int        /* which */
