@@ -213,13 +213,6 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             ClientPtr   /* client */
     );
 
-extern _X_EXPORT Bool XkbEnableDisableControls(XkbSrvInfoPtr /* xkbi */ ,
-                                               unsigned long /* change */ ,
-                                               unsigned long /* newValues */ ,
-                                               XkbChangesPtr /* changes */ ,
-                                               XkbEventCausePtr /* cause */
-    );
-
 extern _X_EXPORT void XkbDDXChangeControls(DeviceIntPtr /* dev */ ,
                                            XkbControlsPtr /* old */ ,
                                            XkbControlsPtr       /* new */
