@@ -218,10 +218,6 @@ extern _X_EXPORT void XkbDDXChangeControls(DeviceIntPtr /* dev */ ,
                                            XkbControlsPtr       /* new */
     );
 
-extern _X_EXPORT void XkbDisableComputedAutoRepeats(DeviceIntPtr /* pXDev */ ,
-                                                    unsigned int        /* key */
-    );
-
 extern _X_EXPORT void XkbSetRepeatKeys(DeviceIntPtr /* pXDev */ ,
                                        int /* key */ ,
                                        int      /* onoff */
