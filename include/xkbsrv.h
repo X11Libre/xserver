@@ -202,14 +202,6 @@ extern _X_EXPORT void XkbFreeKeyboard(XkbDescPtr /* xkb */ ,
                                       Bool      /* freeDesc */
     );
 
-extern _X_EXPORT void XkbUpdateActions(DeviceIntPtr /* pXDev */ ,
-                                       KeyCode /* first */ ,
-                                       CARD8 /* num */ ,
-                                       XkbChangesPtr /* pChanges */ ,
-                                       unsigned int * /* needChecksRtrn */ ,
-                                       XkbEventCausePtr /* cause */
-    );
-
 extern _X_EXPORT KeySymsPtr XkbGetCoreMap(DeviceIntPtr  /* keybd */
     );
 
