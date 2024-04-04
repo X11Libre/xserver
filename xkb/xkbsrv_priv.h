@@ -145,6 +145,7 @@ void XkbUpdateIndicators(DeviceIntPtr keybd, CARD32 changed, Bool check_edevs,
 void XkbUpdateAllDeviceIndicators(XkbChangesPtr changes, XkbEventCausePtr cause);
 unsigned int XkbIndicatorsToUpdate(DeviceIntPtr dev, unsigned long state_changes,
                                    Bool enabled_ctrl_changes);
+void XkbComputeDerivedState(XkbSrvInfoPtr xkbi);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
