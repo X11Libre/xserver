@@ -368,24 +368,6 @@ extern _X_EXPORT void XkbUpdateAllDeviceIndicators(XkbChangesPtr /* changes */,
                                                    XkbEventCausePtr /* cause */
     );
 
-extern _X_EXPORT XkbSrvLedInfoPtr XkbAllocSrvLedInfo(DeviceIntPtr /* dev */ ,
-                                                     KbdFeedbackPtr /* kf */ ,
-                                                     LedFeedbackPtr /* lf */ ,
-                                                     unsigned int       /* needed_parts */
-    );
-
-extern _X_EXPORT XkbSrvLedInfoPtr XkbCopySrvLedInfo(DeviceIntPtr /* dev */ ,
-                                                    XkbSrvLedInfoPtr /* src */ ,
-                                                    KbdFeedbackPtr /* kf */ ,
-                                                    LedFeedbackPtr      /* lf */
-    );
-
-extern _X_EXPORT XkbSrvLedInfoPtr XkbFindSrvLedInfo(DeviceIntPtr /* dev */ ,
-                                                    unsigned int /* class */ ,
-                                                    unsigned int /* id */ ,
-                                                    unsigned int        /* needed_parts */
-    );
-
 extern _X_EXPORT void XkbApplyLedNameChanges(DeviceIntPtr /* dev */ ,
                                              XkbSrvLedInfoPtr /* sli */ ,
                                              unsigned int /* changed_names */ ,
@@ -519,9 +501,6 @@ extern _X_EXPORT Status XkbChangeKeycodeRange(XkbDescPtr /* xkb */ ,
                                               int /* minKC */ ,
                                               int /* maxKC */ ,
                                               XkbChangesPtr     /* changes */
-    );
-
-extern _X_EXPORT void XkbFreeSrvLedInfo(XkbSrvLedInfoPtr        /* sli */
     );
 
 extern _X_EXPORT void XkbFreeInfo(XkbSrvInfoPtr /* xkbi */
