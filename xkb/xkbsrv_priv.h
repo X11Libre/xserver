@@ -206,4 +206,19 @@ void XkbFreeClientMap(XkbDescPtr xkb, unsigned int what, Bool freeMap);
 int XkbAllocServerMap(XkbDescPtr xkb, unsigned int which, unsigned int nNewActions);
 void XkbFreeServerMap(XkbDescPtr xkb, unsigned int what, Bool freeMap);
 
+/* led functions */
+void XkbApplyLedNameChanges(DeviceIntPtr dev, XkbSrvLedInfoPtr sli,
+                            unsigned int changed_names, xkbExtensionDeviceNotify *ed,
+                            XkbChangesPtr changes, XkbEventCausePtr cause);
+void XkbApplyLedMapChanges(DeviceIntPtr dev, XkbSrvLedInfoPtr sli,
+                           unsigned int changed_maps, xkbExtensionDeviceNotify *ed,
+                           XkbChangesPtr changes, XkbEventCausePtr cause);
+void XkbApplyLedStateChanges(DeviceIntPtr dev, XkbSrvLedInfoPtr sli,
+                             unsigned int changed_leds,
+                             xkbExtensionDeviceNotify *ed,
+                             XkbChangesPtr changes, XkbEventCausePtr cause);
+void XkbFlushLedEvents(DeviceIntPtr dev, DeviceIntPtr kbd, XkbSrvLedInfoPtr sli,
+                       xkbExtensionDeviceNotify *ed, XkbChangesPtr changes,
+                       XkbEventCausePtr cause);
+
 #endif /* _XSERVER_XKBSRV_PRIV_H_ */

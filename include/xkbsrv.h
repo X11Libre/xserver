@@ -344,41 +344,6 @@ extern _X_EXPORT void XkbUpdateAllDeviceIndicators(XkbChangesPtr /* changes */,
                                                    XkbEventCausePtr /* cause */
     );
 
-extern _X_EXPORT void XkbApplyLedNameChanges(DeviceIntPtr /* dev */ ,
-                                             XkbSrvLedInfoPtr /* sli */ ,
-                                             unsigned int /* changed_names */ ,
-                                             xkbExtensionDeviceNotify * /* ed */
-                                             ,
-                                             XkbChangesPtr /* changes */ ,
-                                             XkbEventCausePtr   /* cause */
-    );
-
-extern _X_EXPORT void XkbApplyLedMapChanges(DeviceIntPtr /* dev */ ,
-                                            XkbSrvLedInfoPtr /* sli */ ,
-                                            unsigned int /* changed_maps */ ,
-                                            xkbExtensionDeviceNotify * /* ed */
-                                            ,
-                                            XkbChangesPtr /* changes */ ,
-                                            XkbEventCausePtr    /* cause */
-    );
-
-extern _X_EXPORT void XkbApplyLedStateChanges(DeviceIntPtr /* dev */ ,
-                                              XkbSrvLedInfoPtr /* sli */ ,
-                                              unsigned int /* changed_leds */ ,
-                                              xkbExtensionDeviceNotify *
-                                              /* ed */ ,
-                                              XkbChangesPtr /* changes */ ,
-                                              XkbEventCausePtr  /* cause */
-    );
-
-extern _X_EXPORT void XkbFlushLedEvents(DeviceIntPtr /* dev */ ,
-                                        DeviceIntPtr /* kbd */ ,
-                                        XkbSrvLedInfoPtr /* sli */ ,
-                                        xkbExtensionDeviceNotify * /* ed */ ,
-                                        XkbChangesPtr /* changes */ ,
-                                        XkbEventCausePtr        /* cause */
-    );
-
 extern _X_EXPORT unsigned int XkbIndicatorsToUpdate(DeviceIntPtr /* dev */ ,
                                                     unsigned long
                                                     /* state_changes */ ,
