@@ -161,6 +161,7 @@ Bool XkbEnableDisableControls(XkbSrvInfoPtr xkbi, unsigned long change,
                               unsigned long newValues, XkbChangesPtr changes,
                               XkbEventCausePtr cause);
 void XkbDisableComputedAutoRepeats(DeviceIntPtr pXDev, unsigned int key);
+void XkbSetRepeatKeys(DeviceIntPtr pXDev, int key, int onoff);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;

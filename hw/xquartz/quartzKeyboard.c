@@ -56,7 +56,8 @@
 #include <assert.h>
 #include <pthread.h>
 
-#include "xkbsrv.h"
+#include "xkb/xkbsrv_priv.h"
+
 #include "exevents.h"
 #include "X11/keysym.h"
 #include "keysym2ucs.h"

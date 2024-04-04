@@ -215,11 +215,6 @@ extern _X_EXPORT void XkbDDXChangeControls(DeviceIntPtr /* dev */ ,
                                            XkbControlsPtr       /* new */
     );
 
-extern _X_EXPORT void XkbSetRepeatKeys(DeviceIntPtr /* pXDev */ ,
-                                       int /* key */ ,
-                                       int      /* onoff */
-    );
-
 extern _X_EXPORT void XkbGetRulesDflts(XkbRMLVOSet *    /* rmlvo */
     );
 
