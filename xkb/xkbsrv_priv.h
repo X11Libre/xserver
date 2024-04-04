@@ -151,6 +151,7 @@ void XkbCheckSecondaryEffects(XkbSrvInfoPtr xkbi, unsigned int which,
                               XkbChangesPtr changes, XkbEventCausePtr cause);
 void XkbCheckIndicatorMaps(DeviceIntPtr dev, XkbSrvLedInfoPtr sli,
                            unsigned int which);
+unsigned int XkbStateChangedFlags(XkbStatePtr old, XkbStatePtr new);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
