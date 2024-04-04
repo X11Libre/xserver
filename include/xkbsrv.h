@@ -213,12 +213,6 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             ClientPtr   /* client */
     );
 
-extern _X_EXPORT unsigned int XkbIndicatorsToUpdate(DeviceIntPtr /* dev */ ,
-                                                    unsigned long
-                                                    /* state_changes */ ,
-                                                    Bool        /* enabled_ctrl_changes */
-    );
-
 extern _X_EXPORT void XkbComputeDerivedState(XkbSrvInfoPtr      /* xkbi */
     );
 
