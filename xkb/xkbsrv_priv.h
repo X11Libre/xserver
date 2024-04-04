@@ -148,6 +148,8 @@ unsigned int XkbIndicatorsToUpdate(DeviceIntPtr dev, unsigned long state_changes
 void XkbComputeDerivedState(XkbSrvInfoPtr xkbi);
 void XkbCheckSecondaryEffects(XkbSrvInfoPtr xkbi, unsigned int which,
                               XkbChangesPtr changes, XkbEventCausePtr cause);
+void XkbCheckIndicatorMaps(DeviceIntPtr dev, XkbSrvLedInfoPtr sli,
+                           unsigned int which);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;

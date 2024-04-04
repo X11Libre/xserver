@@ -213,11 +213,6 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             ClientPtr   /* client */
     );
 
-extern _X_EXPORT void XkbCheckIndicatorMaps(DeviceIntPtr /* dev */ ,
-                                            XkbSrvLedInfoPtr /* sli */ ,
-                                            unsigned int        /* which */
-    );
-
 extern _X_EXPORT unsigned int XkbStateChangedFlags(XkbStatePtr /* old */ ,
                                                    XkbStatePtr  /* new */
     );
