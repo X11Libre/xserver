@@ -52,14 +52,15 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "xkb/xkbsrv_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 #include "swaprep.h"
-#include "xkbsrv.h"
 #include "xkbstr.h"
-
 #include "getkmap.h"
 
 /***********************************************************************

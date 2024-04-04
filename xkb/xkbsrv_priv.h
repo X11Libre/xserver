@@ -138,6 +138,7 @@ void XkbUpdateDescActions(XkbDescPtr xkb, KeyCode first, CARD8 num, XkbChangesPt
 void XkbUpdateActions(DeviceIntPtr pXDev, KeyCode first, CARD8 num,
                       XkbChangesPtr pChanges, unsigned int *needChecksRtrn,
                       XkbEventCausePtr);
+KeySymsPtr XkbGetCoreMap(DeviceIntPtr keybd);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
