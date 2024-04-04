@@ -470,29 +470,6 @@ extern _X_EXPORT unsigned int XkbStateChangedFlags(XkbStatePtr /* old */ ,
                                                    XkbStatePtr  /* new */
     );
 
-extern _X_EXPORT void XkbSendStateNotify(DeviceIntPtr /* kbd */ ,
-                                         xkbStateNotify *       /* pSN */
-    );
-
-extern _X_EXPORT void XkbSendMapNotify(DeviceIntPtr /* kbd */ ,
-                                       xkbMapNotify *   /* ev */
-    );
-
-extern _X_EXPORT int XkbComputeControlsNotify(DeviceIntPtr /* kbd */ ,
-                                              XkbControlsPtr /* old */ ,
-                                              XkbControlsPtr /* new */ ,
-                                              xkbControlsNotify * /* pCN */ ,
-                                              Bool      /* forceCtrlProc */
-    );
-
-extern _X_EXPORT void XkbSendControlsNotify(DeviceIntPtr /* kbd */ ,
-                                            xkbControlsNotify * /* ev */
-    );
-
-extern _X_EXPORT void XkbSendCompatMapNotify(DeviceIntPtr /* kbd */ ,
-                                             xkbCompatMapNotify *       /* ev */
-    );
-
 extern _X_EXPORT void XkbHandleBell(BOOL force,
                                     BOOL eventOnly,
                                     DeviceIntPtr kbd,
@@ -502,24 +479,6 @@ extern _X_EXPORT void XkbHandleBell(BOOL force,
                                     Atom name,
                                     WindowPtr pWin,
                                     ClientPtr pClient
-    );
-
-extern _X_EXPORT void XkbSendNamesNotify(DeviceIntPtr /* kbd */ ,
-                                         xkbNamesNotify *       /* ev */
-    );
-
-extern _X_EXPORT void XkbSendActionMessage(DeviceIntPtr /* kbd */ ,
-                                           xkbActionMessage *   /* ev */
-    );
-
-extern _X_EXPORT void XkbSendExtensionDeviceNotify(DeviceIntPtr /* kbd */ ,
-                                                   ClientPtr /* client */ ,
-                                                   xkbExtensionDeviceNotify *   /* ev */
-    );
-
-extern _X_EXPORT void XkbSendNotification(DeviceIntPtr /* kbd */ ,
-                                          XkbChangesPtr /* pChanges */ ,
-                                          XkbEventCausePtr      /* cause */
     );
 
 extern _X_EXPORT void XkbProcessKeyboardEvent(DeviceEvent * /* event */ ,
