@@ -140,6 +140,8 @@ void XkbUpdateActions(DeviceIntPtr pXDev, KeyCode first, CARD8 num,
                       XkbEventCausePtr);
 void XkbSetIndicators(DeviceIntPtr pXDev, CARD32 affect, CARD32 values,
                       XkbEventCausePtr cause);
+void XkbUpdateIndicators(DeviceIntPtr keybd, CARD32 changed, Bool check_edevs,
+                         XkbChangesPtr pChanges, XkbEventCausePtr cause);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
