@@ -221,4 +221,18 @@ void XkbFlushLedEvents(DeviceIntPtr dev, DeviceIntPtr kbd, XkbSrvLedInfoPtr sli,
                        xkbExtensionDeviceNotify *ed, XkbChangesPtr changes,
                        XkbEventCausePtr cause);
 
+/* XkbDDX* functions */
+unsigned int XkbDDXLoadKeymapByNames(DeviceIntPtr keybd,
+                                     XkbComponentNamesPtr names,
+                                     unsigned int want,
+                                     unsigned int need,
+                                     XkbDescPtr *finfoRtrn,
+                                     char *keymapNameRtrn,
+                                     int keymapNameRtrnLen);
+Bool XkbDDXNamesFromRules(DeviceIntPtr keybd, const char *rules,
+                          XkbRF_VarDefsPtr defs, XkbComponentNamesPtr names);
+int XkbDDXUsesSoftRepeat(DeviceIntPtr dev);
+void XkbDDXKeybdCtrlProc(DeviceIntPtr dev, KeybdCtrl *ctrl);
+void XkbDDXUpdateDeviceIndicators(DeviceIntPtr dev, XkbSrvLedInfoPtr sli,
+                                  CARD32 newState);
 #endif /* _XSERVER_XKBSRV_PRIV_H_ */

@@ -395,21 +395,9 @@ extern _X_EXPORT Bool XkbEnableDisableControls(XkbSrvInfoPtr /* xkbi */ ,
                                                XkbEventCausePtr /* cause */
     );
 
-extern _X_EXPORT int XkbDDXUsesSoftRepeat(DeviceIntPtr  /* dev */
-    );
-
-extern _X_EXPORT void XkbDDXKeybdCtrlProc(DeviceIntPtr /* dev */ ,
-                                          KeybdCtrl *   /* ctrl */
-    );
-
 extern _X_EXPORT void XkbDDXChangeControls(DeviceIntPtr /* dev */ ,
                                            XkbControlsPtr /* old */ ,
                                            XkbControlsPtr       /* new */
-    );
-
-extern _X_EXPORT void XkbDDXUpdateDeviceIndicators(DeviceIntPtr /* dev */ ,
-                                                   XkbSrvLedInfoPtr /* sli */ ,
-                                                   CARD32       /* newState */
     );
 
 extern _X_EXPORT void XkbDisableComputedAutoRepeats(DeviceIntPtr /* pXDev */ ,
@@ -488,23 +476,5 @@ extern _X_EXPORT void XkbCopyControls(XkbDescPtr /* dst */ ,
 
 #include "xkbstr.h"
 #include "xkbrules.h"
-
-extern _X_EXPORT unsigned int XkbDDXLoadKeymapByNames(DeviceIntPtr /* keybd */ ,
-                                                      XkbComponentNamesPtr
-                                                      /* names */ ,
-                                                      unsigned int /* want */ ,
-                                                      unsigned int /* need */ ,
-                                                      XkbDescPtr *
-                                                      /* finfoRtrn */ ,
-                                                      char *
-                                                      /* keymapNameRtrn */ ,
-                                                      int       /* keymapNameRtrnLen */
-    );
-
-extern _X_EXPORT Bool XkbDDXNamesFromRules(DeviceIntPtr /* keybd */ ,
-                                           const char * /* rules */ ,
-                                           XkbRF_VarDefsPtr /* defs */ ,
-                                           XkbComponentNamesPtr /* names */
-    );
 
 #endif                          /* _XKBSRV_H_ */
