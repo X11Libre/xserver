@@ -156,4 +156,19 @@ void XkbSetRulesDflts(XkbRMLVOSet *rmlvo);
 void XkbDeleteRulesDflts(void);
 void XkbDeleteRulesUsed(void);
 
+/* notification sending */
+void XkbSendStateNotify(DeviceIntPtr kbd, xkbStateNotify *pSN);
+void XkbSendMapNotify(DeviceIntPtr kbd, xkbMapNotify *ev);
+int XkbComputeControlsNotify(DeviceIntPtr kbd, XkbControlsPtr old,
+                             XkbControlsPtr new, xkbControlsNotify *pCN,
+                             Bool forceCtrlProc);
+void XkbSendControlsNotify(DeviceIntPtr kbd, xkbControlsNotify *ev);
+void XkbSendCompatMapNotify(DeviceIntPtr kbd, xkbCompatMapNotify *ev);
+void XkbSendNamesNotify(DeviceIntPtr kbd, xkbNamesNotify *ev);
+void XkbSendActionMessage(DeviceIntPtr kbd, xkbActionMessage *ev);
+void XkbSendExtensionDeviceNotify(DeviceIntPtr kbd, ClientPtr client,
+                                  xkbExtensionDeviceNotify *ev);
+void XkbSendNotification(DeviceIntPtr kbd, XkbChangesPtr pChanges,
+                         XkbEventCausePtr cause);
+
 #endif /* _XSERVER_XKBSRV_PRIV_H_ */
