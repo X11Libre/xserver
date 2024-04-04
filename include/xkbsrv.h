@@ -506,10 +506,6 @@ extern _X_EXPORT void XkbHandleBell(BOOL force,
                                     ClientPtr pClient
     );
 
-extern _X_EXPORT void XkbSendAccessXNotify(DeviceIntPtr /* kbd */ ,
-                                           xkbAccessXNotify *   /* pEv */
-    );
-
 extern _X_EXPORT void XkbSendNamesNotify(DeviceIntPtr /* kbd */ ,
                                          xkbNamesNotify *       /* ev */
     );
@@ -544,25 +540,6 @@ extern _X_EXPORT Bool XkbEnableDisableControls(XkbSrvInfoPtr /* xkbi */ ,
                                                XkbEventCausePtr /* cause */
     );
 
-extern _X_EXPORT void AccessXInit(DeviceIntPtr  /* dev */
-    );
-
-extern _X_EXPORT Bool AccessXFilterPressEvent(DeviceEvent * /* event */ ,
-                                              DeviceIntPtr      /* keybd */
-    );
-
-extern _X_EXPORT Bool AccessXFilterReleaseEvent(DeviceEvent * /* event */ ,
-                                                DeviceIntPtr    /* keybd */
-    );
-
-extern _X_EXPORT void AccessXCancelRepeatKey(XkbSrvInfoPtr /* xkbi */ ,
-                                             KeyCode    /* key */
-    );
-
-extern _X_EXPORT void AccessXComputeCurveFactor(XkbSrvInfoPtr /* xkbi */ ,
-                                                XkbControlsPtr  /* ctrls */
-    );
-
 extern _X_EXPORT XkbInterestPtr XkbFindClientResource(DevicePtr /* inDev */ ,
                                                       ClientPtr /* client */
     );
@@ -574,11 +551,6 @@ extern _X_EXPORT XkbInterestPtr XkbAddClientResource(DevicePtr /* inDev */ ,
 
 extern _X_EXPORT int XkbRemoveResourceClient(DevicePtr /* inDev */ ,
                                              XID        /* id */
-    );
-
-extern _X_EXPORT int XkbDDXAccessXBeep(DeviceIntPtr /* dev */ ,
-                                       unsigned int /* what */ ,
-                                       unsigned int     /* which */
     );
 
 extern _X_EXPORT int XkbDDXUsesSoftRepeat(DeviceIntPtr  /* dev */
