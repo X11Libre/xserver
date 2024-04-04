@@ -154,6 +154,7 @@ unsigned int XkbStateChangedFlags(XkbStatePtr old, XkbStatePtr new);
 void XkbHandleBell(BOOL force, BOOL eventOnly, DeviceIntPtr kbd, CARD8 percent,
                    void *ctrl, CARD8 class, Atom name, WindowPtr pWin,
                    ClientPtr pClient);
+void XkbHandleActions(DeviceIntPtr dev, DeviceIntPtr kbd, DeviceEvent *event);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
