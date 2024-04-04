@@ -139,6 +139,8 @@ void XkbUpdateActions(DeviceIntPtr pXDev, KeyCode first, CARD8 num,
                       XkbChangesPtr pChanges, unsigned int *needChecksRtrn,
                       XkbEventCausePtr);
 KeySymsPtr XkbGetCoreMap(DeviceIntPtr keybd);
+void XkbSetIndicators(DeviceIntPtr pXDev, CARD32 affect, CARD32 values,
+                      XkbEventCausePtr cause);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
