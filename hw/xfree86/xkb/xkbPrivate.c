@@ -7,9 +7,10 @@
 
 #include <stdio.h>
 #include <X11/X.h>
-#include "windowstr.h"
-#include <xkbsrv.h>
 
+#include "xkb/xkbsrv_priv.h"
+
+#include "windowstr.h"
 #include "os.h"
 #include "xf86.h"
 

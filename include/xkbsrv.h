@@ -557,21 +557,6 @@ extern _X_EXPORT void XkbDDXUpdateDeviceIndicators(DeviceIntPtr /* dev */ ,
                                                    CARD32       /* newState */
     );
 
-extern _X_EXPORT int XkbDDXTerminateServer(DeviceIntPtr /* dev */ ,
-                                           KeyCode /* key */ ,
-                                           XkbAction *  /* act */
-    );
-
-extern _X_EXPORT int XkbDDXSwitchScreen(DeviceIntPtr /* dev */ ,
-                                        KeyCode /* key */ ,
-                                        XkbAction *     /* act */
-    );
-
-extern _X_EXPORT int XkbDDXPrivate(DeviceIntPtr /* dev */ ,
-                                   KeyCode /* key */ ,
-                                   XkbAction *  /* act */
-    );
-
 extern _X_EXPORT void XkbDisableComputedAutoRepeats(DeviceIntPtr /* pXDev */ ,
                                                     unsigned int        /* key */
     );
