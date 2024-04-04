@@ -213,10 +213,6 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             ClientPtr   /* client */
     );
 
-extern _X_EXPORT void XkbProcessKeyboardEvent(DeviceEvent * /* event */ ,
-                                              DeviceIntPtr      /* keybd */
-    );
-
 extern _X_EXPORT Bool XkbEnableDisableControls(XkbSrvInfoPtr /* xkbi */ ,
                                                unsigned long /* change */ ,
                                                unsigned long /* newValues */ ,
