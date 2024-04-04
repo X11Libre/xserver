@@ -123,4 +123,13 @@ extern const char *XkbBaseDirectory;
 extern const char *XkbBinDirectory;
 extern CARD32 xkbDebugFlags;
 
+/* AccessX functions */
+void XkbSendAccessXNotify(DeviceIntPtr kbd, xkbAccessXNotify *pEv);
+void AccessXInit(DeviceIntPtr dev);
+Bool AccessXFilterPressEvent(DeviceEvent *event, DeviceIntPtr keybd);
+Bool AccessXFilterReleaseEvent(DeviceEvent *event, DeviceIntPtr keybd);
+void AccessXCancelRepeatKey(XkbSrvInfoPtr xkbi, KeyCode key);
+void AccessXComputeCurveFactor(XkbSrvInfoPtr xkbi, XkbControlsPtr ctrls);
+int XkbDDXAccessXBeep(DeviceIntPtr dev, unsigned int what, unsigned int which);
+
 #endif /* _XSERVER_XKBSRV_PRIV_H_ */
