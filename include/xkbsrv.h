@@ -217,11 +217,6 @@ extern _X_EXPORT void XkbProcessKeyboardEvent(DeviceEvent * /* event */ ,
                                               DeviceIntPtr      /* keybd */
     );
 
-extern _X_EXPORT void XkbHandleActions(DeviceIntPtr /* dev */ ,
-                                       DeviceIntPtr /* kbd */ ,
-                                       DeviceEvent *    /* event */
-    );
-
 extern _X_EXPORT Bool XkbEnableDisableControls(XkbSrvInfoPtr /* xkbi */ ,
                                                unsigned long /* change */ ,
                                                unsigned long /* newValues */ ,
