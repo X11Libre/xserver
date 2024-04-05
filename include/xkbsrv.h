@@ -27,7 +27,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef _XKBSRV_H_
 #define	_XKBSRV_H_
 
-#define XkbChangeTypesOfKey		SrvXkbChangeTypesOfKey
 #define	XkbKeyTypesForCoreSymbols	SrvXkbKeyTypesForCoreSymbols
 #define	XkbApplyCompatMapToKey		SrvXkbApplyCompatMapToKey
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
@@ -227,14 +226,6 @@ extern _X_EXPORT void XkbGetRulesDflts(XkbRMLVOSet *    /* rmlvo */
 
 extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
                                       Bool      /* freeRMLVO */
-    );
-
-extern _X_EXPORT Status XkbChangeTypesOfKey(XkbDescPtr /* xkb */ ,
-                                            int /* key */ ,
-                                            int /* nGroups */ ,
-                                            unsigned int /* groups */ ,
-                                            int * /* newTypesIn */ ,
-                                            XkbMapChangesPtr    /* changes */
     );
 
 extern _X_EXPORT int XkbKeyTypesForCoreSymbols(XkbDescPtr /* xkb */ ,
