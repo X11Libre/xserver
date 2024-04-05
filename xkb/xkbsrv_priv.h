@@ -193,4 +193,9 @@ XkbSrvLedInfoPtr XkbFindSrvLedInfo(DeviceIntPtr dev, unsigned int class,
                                    unsigned int id, unsigned int needed_parts);
 void XkbFreeSrvLedInfo(XkbSrvLedInfoPtr sli);
 
+/* keymap compile */
+XkbDescPtr XkbCompileKeymap(DeviceIntPtr dev, XkbRMLVOSet *rmlvo);
+XkbDescPtr XkbCompileKeymapFromString(DeviceIntPtr dev, const char *keymap,
+                                      int keymap_length);
+
 #endif /* _XSERVER_XKBSRV_PRIV_H_ */
