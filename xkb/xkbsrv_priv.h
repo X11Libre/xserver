@@ -164,6 +164,8 @@ XkbGeometryPtr XkbLookupNamedGeometry(DeviceIntPtr dev, Atom name, Bool *shouldF
 void XkbConvertCase(KeySym sym, KeySym *lower, KeySym *upper);
 int XkbChangeKeycodeRange(XkbDescPtr xkb, int minKC, int maxKC, XkbChangesPtr changes);
 void XkbFreeInfo(XkbSrvInfoPtr xkbi);
+int XkbChangeTypesOfKey(XkbDescPtr xkb, int key, int nGroups, unsigned int groups,
+                        int *newTypesIn, XkbMapChangesPtr changes);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
