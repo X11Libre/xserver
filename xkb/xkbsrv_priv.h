@@ -170,6 +170,8 @@ int XkbKeyTypesForCoreSymbols(XkbDescPtr xkb, int map_width, KeySym *core_syms,
                               unsigned int protected, int *types_inout,
                               KeySym *xkb_syms_rtrn);
 Bool XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes);
+Bool XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned int changed,
+                               XkbChangesPtr changes);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
