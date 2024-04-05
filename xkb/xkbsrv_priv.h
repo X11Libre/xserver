@@ -165,6 +165,7 @@ void XkbSetRepeatKeys(DeviceIntPtr pXDev, int key, int onoff);
 XkbGeometryPtr XkbLookupNamedGeometry(DeviceIntPtr dev, Atom name, Bool *shouldFree);
 void XkbConvertCase(KeySym sym, KeySym *lower, KeySym *upper);
 int XkbChangeKeycodeRange(XkbDescPtr xkb, int minKC, int maxKC, XkbChangesPtr changes);
+void XkbFreeInfo(XkbSrvInfoPtr xkbi);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
