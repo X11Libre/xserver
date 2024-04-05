@@ -28,7 +28,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	_XKBSRV_H_
 
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
-#define	XkbApplyVirtualModChanges	SrvXkbApplyVirtualModChanges
 
 #include <X11/Xdefs.h>
 #include <X11/extensions/XKBproto.h>
@@ -224,11 +223,6 @@ extern _X_EXPORT void XkbGetRulesDflts(XkbRMLVOSet *    /* rmlvo */
 
 extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
                                       Bool      /* freeRMLVO */
-    );
-
-extern _X_EXPORT Bool XkbApplyVirtualModChanges(XkbDescPtr /* xkb */ ,
-                                                unsigned int /* changed */ ,
-                                                XkbChangesPtr   /* changes */
     );
 
 extern _X_EXPORT void XkbSendNewKeyboardNotify(DeviceIntPtr /* kbd */ ,
