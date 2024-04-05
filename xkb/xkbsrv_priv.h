@@ -169,6 +169,7 @@ int XkbChangeTypesOfKey(XkbDescPtr xkb, int key, int nGroups, unsigned int group
 int XkbKeyTypesForCoreSymbols(XkbDescPtr xkb, int map_width, KeySym *core_syms,
                               unsigned int protected, int *types_inout,
                               KeySym *xkb_syms_rtrn);
+Bool XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;

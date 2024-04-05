@@ -27,7 +27,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef _XKBSRV_H_
 #define	_XKBSRV_H_
 
-#define	XkbApplyCompatMapToKey		SrvXkbApplyCompatMapToKey
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
 #define	XkbApplyVirtualModChanges	SrvXkbApplyVirtualModChanges
 
@@ -225,11 +224,6 @@ extern _X_EXPORT void XkbGetRulesDflts(XkbRMLVOSet *    /* rmlvo */
 
 extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
                                       Bool      /* freeRMLVO */
-    );
-
-extern _X_EXPORT Bool XkbApplyCompatMapToKey(XkbDescPtr /* xkb */ ,
-                                             KeyCode /* key */ ,
-                                             XkbChangesPtr      /* changes */
     );
 
 extern _X_EXPORT Bool XkbApplyVirtualModChanges(XkbDescPtr /* xkb */ ,
