@@ -160,6 +160,7 @@ Bool XkbEnableDisableControls(XkbSrvInfoPtr xkbi, unsigned long change,
                               unsigned long newValues, XkbChangesPtr changes,
                               XkbEventCausePtr cause);
 void XkbDisableComputedAutoRepeats(DeviceIntPtr pXDev, unsigned int key);
+XkbGeometryPtr XkbLookupNamedGeometry(DeviceIntPtr dev, Atom name, Bool *shouldFree);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
