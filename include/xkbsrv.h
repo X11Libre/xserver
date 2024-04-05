@@ -230,11 +230,6 @@ extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
                                       Bool      /* freeRMLVO */
     );
 
-extern _X_EXPORT void XkbConvertCase(KeySym /* sym */ ,
-                                     KeySym * /* lower */ ,
-                                     KeySym *   /* upper */
-    );
-
 extern _X_EXPORT Status XkbChangeKeycodeRange(XkbDescPtr /* xkb */ ,
                                               int /* minKC */ ,
                                               int /* maxKC */ ,
