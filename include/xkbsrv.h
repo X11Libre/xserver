@@ -229,9 +229,6 @@ extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
                                       Bool      /* freeRMLVO */
     );
 
-extern _X_EXPORT void XkbFreeInfo(XkbSrvInfoPtr /* xkbi */
-    );
-
 extern _X_EXPORT Status XkbChangeTypesOfKey(XkbDescPtr /* xkb */ ,
                                             int /* key */ ,
                                             int /* nGroups */ ,
