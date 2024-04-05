@@ -163,6 +163,7 @@ Bool XkbEnableDisableControls(XkbSrvInfoPtr xkbi, unsigned long change,
 void XkbDisableComputedAutoRepeats(DeviceIntPtr pXDev, unsigned int key);
 void XkbSetRepeatKeys(DeviceIntPtr pXDev, int key, int onoff);
 XkbGeometryPtr XkbLookupNamedGeometry(DeviceIntPtr dev, Atom name, Bool *shouldFree);
+void XkbConvertCase(KeySym sym, KeySym *lower, KeySym *upper);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
