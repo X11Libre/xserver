@@ -173,6 +173,7 @@ Bool XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes);
 Bool XkbApplyVirtualModChanges(XkbDescPtr xkb, unsigned int changed,
                                XkbChangesPtr changes);
 Bool XkbDeviceApplyKeymap(DeviceIntPtr dst, XkbDescPtr src);
+void XkbCopyControls(XkbDescPtr dst, XkbDescPtr src);
 
 
 extern DevPrivateKeyRec xkbDevicePrivateKeyRec;
