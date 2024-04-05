@@ -232,6 +232,7 @@ void XkbSendExtensionDeviceNotify(DeviceIntPtr kbd, ClientPtr client,
                                   xkbExtensionDeviceNotify *ev);
 void XkbSendNotification(DeviceIntPtr kbd, XkbChangesPtr pChanges,
                          XkbEventCausePtr cause);
+void XkbSendNewKeyboardNotify(DeviceIntPtr kbd, xkbNewKeyboardNotify *pNKN);
 
 /* device lookup */
 int _XkbLookupAnyDevice(DeviceIntPtr *pDev, int id, ClientPtr client,

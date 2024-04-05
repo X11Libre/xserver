@@ -225,10 +225,6 @@ extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
                                       Bool      /* freeRMLVO */
     );
 
-extern _X_EXPORT void XkbSendNewKeyboardNotify(DeviceIntPtr /* kbd */ ,
-                                               xkbNewKeyboardNotify *   /* pNKN */
-    );
-
 extern _X_EXPORT Bool XkbCopyDeviceKeymap(DeviceIntPtr /* dst */,
 					  DeviceIntPtr /* src */);
 
