@@ -548,7 +548,7 @@ _ExtendRange(unsigned int old_flags,
     return old_flags;
 }
 
-Status
+int
 XkbChangeKeycodeRange(XkbDescPtr xkb,
                       int minKC, int maxKC, XkbChangesPtr changes)
 {
