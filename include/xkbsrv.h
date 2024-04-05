@@ -220,9 +220,6 @@ extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
 extern _X_EXPORT Bool XkbCopyDeviceKeymap(DeviceIntPtr /* dst */,
 					  DeviceIntPtr /* src */);
 
-extern _X_EXPORT Bool XkbDeviceApplyKeymap(DeviceIntPtr /* dst */ ,
-                                           XkbDescPtr /* src */ );
-
 extern _X_EXPORT void XkbCopyControls(XkbDescPtr /* dst */ ,
                                       XkbDescPtr /* src */ );
 
