@@ -31,7 +31,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define	XkbKeyTypesForCoreSymbols	SrvXkbKeyTypesForCoreSymbols
 #define	XkbApplyCompatMapToKey		SrvXkbApplyCompatMapToKey
 #define XkbFreeKeyboard			SrvXkbFreeKeyboard
-#define	XkbChangeKeycodeRange		SrvXkbChangeKeycodeRange
 #define	XkbApplyVirtualModChanges	SrvXkbApplyVirtualModChanges
 
 #include <X11/Xdefs.h>
@@ -228,12 +227,6 @@ extern _X_EXPORT void XkbGetRulesDflts(XkbRMLVOSet *    /* rmlvo */
 
 extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
                                       Bool      /* freeRMLVO */
-    );
-
-extern _X_EXPORT Status XkbChangeKeycodeRange(XkbDescPtr /* xkb */ ,
-                                              int /* minKC */ ,
-                                              int /* maxKC */ ,
-                                              XkbChangesPtr     /* changes */
     );
 
 extern _X_EXPORT void XkbFreeInfo(XkbSrvInfoPtr /* xkbi */
