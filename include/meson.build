@@ -200,7 +200,6 @@ conf_data.set('TCPCONN', '1')
 conf_data.set('UNIXCONN', host_machine.system() != 'windows' ? '1' : false)
 conf_data.set('IPv6', build_ipv6 ? '1' : false)
 
-conf_data.set('BIGREQS', '1')
 conf_data.set('COMPOSITE', '1')
 conf_data.set('DAMAGE', '1')
 conf_data.set('DBE', '1')
