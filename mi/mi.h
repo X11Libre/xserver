@@ -113,14 +113,6 @@ miDoCopy(DrawablePtr pSrcDrawable,
          int xOut,
          int yOut, miCopyProc copyProc, Pixel bitplane, void *closure);
 
-/* micursor.c */
-
-extern _X_EXPORT void miRecolorCursor(DeviceIntPtr /* pDev */ ,
-                                      ScreenPtr /*pScr */ ,
-                                      CursorPtr /*pCurs */ ,
-                                      Bool      /*displayed */
-    );
-
 /* midash.c */
 
 extern _X_EXPORT void miStepDash(int /*dist */ ,
