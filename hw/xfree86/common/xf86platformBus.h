@@ -76,7 +76,6 @@ xf86_platform_odev_attributes(int index)
     return device->attribs;
 }
 
-#ifndef _XORG_CONFIG_H_
 /*
  * Define the legacy API only for external builds
  */
@@ -96,6 +95,14 @@ xf86_platform_odev_attributes(int index)
 /* kernel driver name */
 #define ODEV_ATTRIB_DRIVER      7
 
+_X_EXPORT char *
+_xf86_get_platform_device_attrib(struct xf86_platform_device *device, int attrib, int (*fake)[0]);
+
+_X_EXPORT int
+_xf86_get_platform_device_int_attrib(struct xf86_platform_device *device, int attrib, int (*fake)[0]);
+
+#ifndef _XORG_CONFIG_H_
+
 /* Protect against a mismatch attribute type by generating a compiler
  * error using a negative array size when an incorrect attribute is
  * passed
@@ -108,46 +115,12 @@ xf86_platform_odev_attributes(int index)
 
 #define _ODEV_ATTRIB_STRING_CHECK(x)    ((int (*)[_ODEV_ATTRIB_IS_STRING(x)-1]) 0)
 
-static inline char *
-_xf86_get_platform_device_attrib(struct xf86_platform_device *device, int attrib, int (*fake)[0])
-{
-    switch (attrib) {
-    case ODEV_ATTRIB_PATH:
-        return xf86_platform_device_odev_attributes(device)->path;
-    case ODEV_ATTRIB_SYSPATH:
-        return xf86_platform_device_odev_attributes(device)->syspath;
-    case ODEV_ATTRIB_BUSID:
-        return xf86_platform_device_odev_attributes(device)->busid;
-    case ODEV_ATTRIB_DRIVER:
-        return xf86_platform_device_odev_attributes(device)->driver;
-    default:
-        assert(FALSE);
-        return NULL;
-    }
-}
-
 #define xf86_get_platform_device_attrib(device, attrib) _xf86_get_platform_device_attrib(device,attrib,_ODEV_ATTRIB_STRING_CHECK(attrib))
 
 #define _ODEV_ATTRIB_IS_INT(x)                  ((x) == ODEV_ATTRIB_FD || (x) == ODEV_ATTRIB_MAJOR || (x) == ODEV_ATTRIB_MINOR)
 #define _ODEV_ATTRIB_INT_DEFAULT(x)             ((x) == ODEV_ATTRIB_FD ? -1 : 0)
 #define _ODEV_ATTRIB_DEFAULT_CHECK(x,def)       (_ODEV_ATTRIB_INT_DEFAULT(x) == (def))
 #define _ODEV_ATTRIB_INT_CHECK(x,def)           ((int (*)[_ODEV_ATTRIB_IS_INT(x)*_ODEV_ATTRIB_DEFAULT_CHECK(x,def)-1]) 0)
-
-static inline int
-_xf86_get_platform_device_int_attrib(struct xf86_platform_device *device, int attrib, int (*fake)[0])
-{
-    switch (attrib) {
-    case ODEV_ATTRIB_FD:
-        return xf86_platform_device_odev_attributes(device)->fd;
-    case ODEV_ATTRIB_MAJOR:
-        return xf86_platform_device_odev_attributes(device)->major;
-    case ODEV_ATTRIB_MINOR:
-        return xf86_platform_device_odev_attributes(device)->minor;
-    default:
-        assert(FALSE);
-        return 0;
-    }
-}
 
 #define xf86_get_platform_device_int_attrib(device, attrib, def) _xf86_get_platform_device_int_attrib(device,attrib,_ODEV_ATTRIB_INT_CHECK(attrib,def))
 
