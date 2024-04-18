@@ -1497,11 +1497,9 @@ xf86SetBackingStore(ScreenPtr pScreen)
     else {
         if (xf86GetOptValBool(options, OPTION_BACKING_STORE, &useBS))
             from = X_CONFIG;
-#ifdef COMPOSITE
         if (from != X_CONFIG)
             useBS = xf86ReturnOptValBool(options, OPTION_BACKING_STORE,
                                          !noCompositeExtension);
-#endif
     }
     free(options);
     pScreen->backingStoreSupport = useBS ? WhenMapped : NotUseful;
