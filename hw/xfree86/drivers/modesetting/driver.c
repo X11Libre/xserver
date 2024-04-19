@@ -221,6 +221,7 @@ get_passed_fd(void)
 static int
 open_hw(const char *dev)
 {
+    char drm_name[] = "/dev/dri/card0";
     int fd;
 
     if ((fd = get_passed_fd()) != -1)
@@ -231,8 +232,22 @@ open_hw(const char *dev)
     else {
         dev = getenv("KMSDEVICE");
         if ((NULL == dev) || ((fd = open(dev, O_RDWR | O_CLOEXEC, 0)) == -1)) {
-            dev = "/dev/dri/card0";
-            fd = open(dev, O_RDWR | O_CLOEXEC, 0);
+            int i;
+
+            for (i = 0, dev=drm_name; i < 8; i++) {
+                drm_name[13] = '0' + i;
+
+                if ((fd = open(drm_name, O_RDWR | O_CLOEXEC, 0)) >= 0) {
+                    uint64_t check_dumb = 0;
+
+                    if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &check_dumb) >= 0 && check_dumb)
+                        break;
+
+                    close(fd);
+
+                    fd = -1;
+                }
+            }
         }
     }
     if (fd == -1)
