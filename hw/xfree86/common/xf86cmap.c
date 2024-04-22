@@ -36,9 +36,11 @@
 #include "misc.h"
 
 #include "dix/colormap_priv.h"
+#include "mi/mi_priv.h"
+
+#include "misc.h"
 #include "colormapst.h"
 #include "scrnintstr.h"
-
 #include "resource.h"
 
 #include "xf86.h"
