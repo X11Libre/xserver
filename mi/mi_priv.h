@@ -64,5 +64,6 @@ void miMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pNextSib, VTKind kind)
 void miResizeWindow(WindowPtr pWin, int x, int y, unsigned int w,
                     unsigned int h, WindowPtr pSib);
 WindowPtr miGetLayerWindow(WindowPtr pWin);
+void miSetShape(WindowPtr pWin, int kind);
 
 #endif /* _XSERVER_MI_PRIV_H */

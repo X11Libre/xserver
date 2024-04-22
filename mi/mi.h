@@ -280,10 +280,6 @@ extern _X_EXPORT void miPolylines(DrawablePtr pDrawable,
 
 /* miwindow.c */
 
-extern _X_EXPORT void miSetShape(WindowPtr /*pWin */ ,
-                                 int    /*kind */
-    );
-
 extern _X_EXPORT void miChangeBorderWidth(WindowPtr /*pWin */ ,
                                           unsigned int  /*width */
     );
