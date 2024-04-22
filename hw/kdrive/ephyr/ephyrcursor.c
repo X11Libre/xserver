@@ -25,12 +25,16 @@
  */
 
 #include <dix-config.h>
+
+#include <xcb/render.h>
+#include <xcb/xcb_renderutil.h>
+
+#include "mi/mipointer_priv.h"
+
 #include "ephyr.h"
 #include "ephyrlog.h"
 #include "hostx.h"
 #include "cursorstr.h"
-#include <xcb/render.h>
-#include <xcb/xcb_renderutil.h>
 
 static DevPrivateKeyRec ephyrCursorPrivateKey;
 

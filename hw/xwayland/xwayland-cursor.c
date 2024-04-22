@@ -26,6 +26,8 @@
 
 #include <xwayland-config.h>
 
+#include "mi/mipointer_priv.h"
+
 #include "scrnintstr.h"
 #include "servermd.h"
 #include "cursorstr.h"

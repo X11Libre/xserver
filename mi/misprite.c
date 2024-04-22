@@ -38,6 +38,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include   "dix/colormap_priv.h"
 #include   "dix/dix_priv.h"
+#include   "mi/mipointer_priv.h"
 
 #include   "misc.h"
 #include   "pixmapstr.h"
