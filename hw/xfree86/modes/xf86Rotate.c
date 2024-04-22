@@ -33,8 +33,8 @@
 #include <X11/extensions/dpmsconst.h>
 
 #include "dix/dix_priv.h"
+#include "mi/mi_priv.h"
 
-#include "mi.h"
 #include "xf86.h"
 #include "xf86DDC.h"
 #include "windowstr.h"

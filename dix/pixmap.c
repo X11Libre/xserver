@@ -29,8 +29,11 @@ from The Open Group.
 #include <dix-config.h>
 
 #include <X11/X.h>
+#include <X11/extensions/render.h>
+
+#include "mi/mi_priv.h"
+
 #include "scrnintstr.h"
-#include "mi.h"
 #include "misc.h"
 #include "os.h"
 #include "windowstr.h"
@@ -38,7 +41,6 @@ from The Open Group.
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "servermd.h"
-#include "X11/extensions/render.h"
 #include "picturestr.h"
 #include "randrstr.h"
 /*
