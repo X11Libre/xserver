@@ -280,14 +280,6 @@ extern _X_EXPORT void miPolylines(DrawablePtr pDrawable,
 
 /* miwindow.c */
 
-extern _X_EXPORT void miClearToBackground(WindowPtr /*pWin */ ,
-                                          int /*x */ ,
-                                          int /*y */ ,
-                                          int /*w */ ,
-                                          int /*h */ ,
-                                          Bool  /*generateExposures */
-    );
-
 extern _X_EXPORT void miMarkWindow(WindowPtr    /*pWin */
     );
 
