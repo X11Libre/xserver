@@ -65,5 +65,6 @@ void miResizeWindow(WindowPtr pWin, int x, int y, unsigned int w,
                     unsigned int h, WindowPtr pSib);
 WindowPtr miGetLayerWindow(WindowPtr pWin);
 void miSetShape(WindowPtr pWin, int kind);
+void miChangeBorderWidth(WindowPtr pWin, unsigned int width);
 
 #endif /* _XSERVER_MI_PRIV_H */
