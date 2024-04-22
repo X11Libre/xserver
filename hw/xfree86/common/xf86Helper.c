@@ -43,8 +43,8 @@
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "mi/mi_priv.h"
 
-#include "mi.h"
 #include "os.h"
 #include "servermd.h"
 #include "pixmapstr.h"
