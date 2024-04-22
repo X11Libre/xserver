@@ -385,7 +385,7 @@ FixUpEventForMaster(DeviceIntPtr mdev, DeviceIntPtr sdev,
  * @param copy The event after being copied
  * @return The master device or NULL if the device is a floating slave.
  */
-DeviceIntPtr
+static DeviceIntPtr
 CopyGetMasterEvent(DeviceIntPtr sdev,
                    InternalEvent *original, InternalEvent *copy)
 {
