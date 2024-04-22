@@ -28,6 +28,7 @@
 #include <xcb/xcb_keysyms.h>
 #include <X11/keysym.h>
 
+#include "mi/mipointer_priv.h"
 #include "os/osdep.h"
 
 #include "ephyr.h"

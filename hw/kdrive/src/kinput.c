@@ -49,6 +49,7 @@
 #include "inpututils.h"
 #include "optionstr.h"
 
+#include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)

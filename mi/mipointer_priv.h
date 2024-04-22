@@ -8,9 +8,11 @@
 #include <X11/Xdefs.h>
 
 #include "dix/screenint_priv.h"
+#include "include/input.h"
 #include "mi/mipointer.h"
 
 Bool miPointerInitialize(ScreenPtr pScreen, miPointerSpriteFuncPtr spriteFuncs,
                          miPointerScreenFuncPtr screenFuncs, Bool waitForUpdate);
+void miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y);
 
 #endif /* _XSERVER_MI_MIPOINTER_PRIV_H */

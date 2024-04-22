@@ -38,6 +38,8 @@
 #include "darwinEvents.h"
 #include <Xplugin.h>
 
+#include "mi/mipointer_priv.h"
+
 #include "mi.h"
 #include "scrnintstr.h"
 #include "cursorstr.h"

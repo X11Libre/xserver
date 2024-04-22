@@ -4,6 +4,7 @@
 #endif
 
 #include "dix/cursor_priv.h"
+#include "mi/mipointer_priv.h"
 
 #include "xf86.h"
 #include "xf86CursorPriv.h"

@@ -77,12 +77,6 @@ extern _X_EXPORT Bool miDCInitialize(ScreenPtr /*pScreen */ ,
                                      miPointerScreenFuncPtr     /*screenFuncs */
     );
 
-extern _X_EXPORT void miPointerWarpCursor(DeviceIntPtr /*pDev */ ,
-                                          ScreenPtr /*pScreen */ ,
-                                          int /*x */ ,
-                                          int   /*y */
-    );
-
 extern _X_EXPORT ScreenPtr
 miPointerGetScreen(DeviceIntPtr pDev);
 extern _X_EXPORT void
