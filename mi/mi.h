@@ -114,10 +114,6 @@ miDoCopy(DrawablePtr pSrcDrawable,
 typedef struct _DeviceRec *DevicePtr;
 #endif
 
-extern _X_EXPORT void mieqEnqueue(DeviceIntPtr /*pDev */ ,
-                                  InternalEvent *       /*e */
-    );
-
 extern _X_EXPORT void mieqSwitchScreen(DeviceIntPtr /* pDev */ ,
                                        ScreenPtr /*pScreen */ ,
                                        Bool     /*set_dequeue_screen */

@@ -8,6 +8,7 @@
 #include <X11/Xdefs.h>
 #include <X11/Xprotostr.h>
 
+#include "include/events.h"
 #include "include/gc.h"
 #include "include/pixmap.h"
 #include "include/screenint.h"
@@ -18,7 +19,9 @@ void miScreenClose(ScreenPtr pScreen);
 void miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs);
 void miStepDash(int dist, int * pDashIndex, unsigned char * pDash,
                 int numInDashList, int *pDashOffset);
+
 Bool mieqInit(void);
 void mieqFini(void);
+void mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e);
 
 #endif /* _XSERVER_MI_PRIV_H */
