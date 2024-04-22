@@ -280,8 +280,6 @@ extern _X_EXPORT void miPolylines(DrawablePtr pDrawable,
 
 /* miwindow.c */
 
-extern _X_EXPORT WindowPtr miSpriteTrace(SpritePtr pSprite, int x, int y);
-
 extern _X_EXPORT WindowPtr miXYToWindow(ScreenPtr pScreen, SpritePtr pSprite, int x, int y);
 
 /* mizerarc.c */
