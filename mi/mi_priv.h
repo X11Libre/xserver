@@ -19,5 +19,6 @@ void miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs);
 void miStepDash(int dist, int * pDashIndex, unsigned char * pDash,
                 int numInDashList, int *pDashOffset);
 Bool mieqInit(void);
+void mieqFini(void);
 
 #endif /* _XSERVER_MI_PRIV_H */
