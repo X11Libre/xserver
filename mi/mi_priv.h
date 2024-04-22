@@ -29,5 +29,6 @@ void mieqSwitchScreen(DeviceIntPtr pDev, ScreenPtr pScreen, Bool set_dequeue_scr
 void mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen);
 void mieqProcessInputEvents(void);
 void mieqAddCallbackOnDrained(CallbackProcPtr callback, void *param);
+void mieqRemoveCallbackOnDrained(CallbackProcPtr callback, void *param);
 
 #endif /* _XSERVER_MI_PRIV_H */

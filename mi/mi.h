@@ -114,9 +114,6 @@ miDoCopy(DrawablePtr pSrcDrawable,
 typedef struct _DeviceRec *DevicePtr;
 #endif
 
-extern _X_EXPORT void mieqRemoveCallbackOnDrained(CallbackProcPtr callback,
-                                                  void *param);
-
 /**
  * Custom input event handler. If you need to process input events in some
  * other way than the default path, register an input event handler for the
