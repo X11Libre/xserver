@@ -59,6 +59,8 @@ typedef struct {
     int ysize;
 } miScreenInitParmsRec, *miScreenInitParmsPtr;
 
+#define DEFAULTZEROLINEBIAS (OCTANT2 | OCTANT3 | OCTANT4 | OCTANT5)
+
 /* this plugs into pScreen->ModifyPixmapHeader */
 Bool
 miModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,

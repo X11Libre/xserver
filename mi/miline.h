@@ -49,8 +49,6 @@ in this Software without prior written authorization from The Open Group.
 #define OCTANT7		(1 << (YMAJOR))
 #define OCTANT8		(1 << (0))
 
-#define DEFAULTZEROLINEBIAS	(OCTANT2 | OCTANT3 | OCTANT4 | OCTANT5)
-
 /*
  * Devices can configure the rendering of routines in mi, mfb, and cfb*
  * by specifying a thin line bias to be applied to a particular screen
