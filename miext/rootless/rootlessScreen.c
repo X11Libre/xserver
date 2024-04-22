@@ -37,8 +37,8 @@
 #include <string.h>
 
 #include "dix/colormap_priv.h"
+#include "mi/mi_priv.h"
 
-#include "mi.h"
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
