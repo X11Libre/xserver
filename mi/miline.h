@@ -106,14 +106,6 @@ extern _X_EXPORT void miSetZeroLineBias(ScreenPtr /* pScreen */ ,
      if (y > ymax) outcode |= OUT_BELOW;\
 }
 
-#define SWAPINT(i, j) \
-{  int _t = i;  i = j;  j = _t; }
-
-#define SWAPINT_PAIR(x1, y1, x2, y2)\
-{   int t = x1;  x1 = x2;  x2 = t;\
-        t = y1;  y1 = y2;  y2 = t;\
-}
-
 #define miGetZeroLineBias(_pScreen) ((unsigned long) (unsigned long*)\
     dixLookupPrivate(&(_pScreen)->devPrivates, miZeroLineScreenKey))
 
@@ -136,11 +128,6 @@ extern _X_EXPORT void miSetZeroLineBias(ScreenPtr /* pScreen */ ,
 
 #define FIXUP_ERROR(_e, _octant, _bias) \
     (_e) -= (((_bias) >> (_octant)) & 1)
-
-#define IsXMajorOctant(_octant)		(!((_octant) & YMAJOR))
-#define IsYMajorOctant(_octant)		((_octant) & YMAJOR)
-#define IsXDecreasingOctant(_octant)	((_octant) & XDECREASING)
-#define IsYDecreasingOctant(_octant)	((_octant) & YDECREASING)
 
 extern _X_EXPORT DevPrivateKeyRec miZeroLineScreenKeyRec;
 

@@ -395,6 +395,19 @@ the numerator is therefore (2^32 - 1), which does not overflow an unsigned
 #define EQN8	(T_2NDX | T_ADDDY | T_BIASSUBONE | T_DIV2DY)
 #define EQN8B	(T_2NDX | T_ADDDY | T_BIASSUBONE | T_DIV2DY)
 
+#define SWAPINT(i, j) \
+{  int _t = i;  i = j;  j = _t; }
+
+#define SWAPINT_PAIR(x1, y1, x2, y2)\
+{   int t = x1;  x1 = x2;  x2 = t;\
+        t = y1;  y1 = y2;  y2 = t;\
+}
+
+#define IsXMajorOctant(_octant)         (!((_octant) & YMAJOR))
+#define IsYMajorOctant(_octant)         ((_octant) & YMAJOR)
+#define IsXDecreasingOctant(_octant)    ((_octant) & XDECREASING)
+#define IsYDecreasingOctant(_octant)    ((_octant) & YDECREASING)
+
 /* miZeroClipLine
  *
  * returns:  1 for partially clipped line
