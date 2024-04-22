@@ -6,6 +6,7 @@
 #define _XSERVER_MI_PRIV_H
 
 #include <X11/Xdefs.h>
+#include <X11/Xproto.h>
 #include <X11/Xprotostr.h>
 
 #include "dix/screenint_priv.h"
@@ -69,5 +70,7 @@ void miChangeBorderWidth(WindowPtr pWin, unsigned int width);
 void miMarkUnrealizedWindow(WindowPtr pChild, WindowPtr pWin, Bool fromConfigure);
 WindowPtr miSpriteTrace(SpritePtr pSprite, int x, int y);
 WindowPtr miXYToWindow(ScreenPtr pScreen, SpritePtr pSprite, int x, int y);
+
+int miExpandDirectColors(ColormapPtr, int, xColorItem *, xColorItem *);
 
 #endif /* _XSERVER_MI_PRIV_H */

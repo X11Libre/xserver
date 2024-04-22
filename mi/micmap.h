@@ -25,8 +25,6 @@ extern _X_EXPORT void miUninstallColormap(ColormapPtr pmap);
 extern _X_EXPORT void miResolveColor(unsigned short *, unsigned short *,
                                      unsigned short *, VisualPtr);
 extern _X_EXPORT Bool miInitializeColormap(ColormapPtr);
-extern _X_EXPORT int miExpandDirectColors(ColormapPtr, int, xColorItem *,
-                                          xColorItem *);
 extern _X_EXPORT Bool miCreateDefColormap(ScreenPtr);
 extern _X_EXPORT void miClearVisualTypes(void);
 extern _X_EXPORT Bool miSetVisualTypes(int, int, int, int);
