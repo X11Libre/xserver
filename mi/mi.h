@@ -278,10 +278,6 @@ extern _X_EXPORT void miPolylines(DrawablePtr pDrawable,
                                   int npt,
                                   DDXPointPtr pPts);
 
-/* miwindow.c */
-
-extern _X_EXPORT WindowPtr miXYToWindow(ScreenPtr pScreen, SpritePtr pSprite, int x, int y);
-
 /* mizerarc.c */
 
 extern _X_EXPORT void miZeroPolyArc(DrawablePtr /*pDraw */ ,
