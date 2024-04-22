@@ -127,11 +127,6 @@ extern _X_EXPORT RegionPtr miHandleExposures(DrawablePtr /*pSrcDrawable */ ,
                                              int /*dsty */
     );
 
-extern _X_EXPORT void miPaintWindow(WindowPtr /*pWin */ ,
-                                    RegionPtr /*prgn */ ,
-                                    int /*what */
-    );
-
 extern _X_EXPORT void miClearDrawable(DrawablePtr /*pDraw */ ,
                                       GCPtr     /*pGC */
     );
