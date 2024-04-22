@@ -15,5 +15,7 @@
 void miScreenClose(ScreenPtr pScreen);
 
 void miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs);
+void miStepDash(int dist, int * pDashIndex, unsigned char * pDash,
+                int numInDashList, int *pDashOffset);
 
 #endif /* _XSERVER_MI_PRIV_H */

@@ -63,11 +63,13 @@ SOFTWARE.
 #undef _XOPEN_SOURCE
 #endif
 #include <X11/X.h>
+
+#include "mi/mi_priv.h"
+
 #include "windowstr.h"
 #include "gcstruct.h"
 #include "regionstr.h"
 #include "miwideline.h"
-#include "mi.h"
 
 typedef struct {
     int count;                  /* number of spans                  */
