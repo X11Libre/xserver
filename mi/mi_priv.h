@@ -43,5 +43,6 @@ typedef void (*mieqHandler) (int screen, InternalEvent *event,
 void mieqSetHandler(int event, mieqHandler handler);
 
 void miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy);
+void miWindowExposures(WindowPtr pWin, RegionPtr prgn);
 
 #endif /* _XSERVER_MI_PRIV_H */

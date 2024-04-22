@@ -34,7 +34,6 @@ from The Open Group.
 
 #include "servermd.h"
 #include "misc.h"
-#include "mi.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "dix.h"
