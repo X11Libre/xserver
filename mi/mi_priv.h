@@ -58,5 +58,6 @@ void miClearToBackground(WindowPtr pWin, int x, int y, int w, int h,
 void miMarkWindow(WindowPtr pWin);
 Bool miMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst,
                              WindowPtr *ppLayerWin);
+void miHandleValidateExposures(WindowPtr pWin);
 
 #endif /* _XSERVER_MI_PRIV_H */

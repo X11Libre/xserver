@@ -280,9 +280,6 @@ extern _X_EXPORT void miPolylines(DrawablePtr pDrawable,
 
 /* miwindow.c */
 
-extern _X_EXPORT void miHandleValidateExposures(WindowPtr       /*pWin */
-    );
-
 extern _X_EXPORT void miMoveWindow(WindowPtr /*pWin */ ,
                                    int /*x */ ,
                                    int /*y */ ,
