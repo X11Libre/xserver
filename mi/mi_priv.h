@@ -31,4 +31,13 @@ void mieqProcessInputEvents(void);
 void mieqAddCallbackOnDrained(CallbackProcPtr callback, void *param);
 void mieqRemoveCallbackOnDrained(CallbackProcPtr callback, void *param);
 
+/**
+ * Custom input event handler. If you need to process input events in some
+ * other way than the default path, register an input event handler for the
+ * given internal event type.
+ */
+typedef void (*mieqHandler) (int screen, InternalEvent *event,
+                             DeviceIntPtr dev);
+void mieqSetHandler(int event, mieqHandler handler);
+
 #endif /* _XSERVER_MI_PRIV_H */
