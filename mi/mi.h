@@ -258,11 +258,6 @@ extern _X_EXPORT Bool miScreenInit(ScreenPtr pScreen,
 
 /* mivaltree.c */
 
-extern _X_EXPORT int miValidateTree(WindowPtr /*pParent */ ,
-                                    WindowPtr /*pChild */ ,
-                                    VTKind      /*kind */
-    );
-
 extern _X_EXPORT void miWideLine(DrawablePtr /*pDrawable */ ,
                                  GCPtr /*pGC */ ,
                                  int /*mode */ ,
