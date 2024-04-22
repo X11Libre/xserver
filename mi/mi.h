@@ -114,9 +114,6 @@ miDoCopy(DrawablePtr pSrcDrawable,
 typedef struct _DeviceRec *DevicePtr;
 #endif
 
-extern _X_EXPORT void mieqProcessInputEvents(void
-    );
-
 extern _X_EXPORT void mieqAddCallbackOnDrained(CallbackProcPtr callback,
                                                void *param);
 
