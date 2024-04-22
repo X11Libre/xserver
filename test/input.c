@@ -37,6 +37,7 @@
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "mi/mi_priv.h"
 
 #include "misc.h"
 #include "resource.h"
@@ -45,7 +46,6 @@
 #include "exglobals.h"
 #include "eventstr.h"
 #include "inpututils.h"
-#include "mi.h"
 #include "assert.h"
 
 #include "tests-common.h"

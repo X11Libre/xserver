@@ -114,9 +114,6 @@ miDoCopy(DrawablePtr pSrcDrawable,
 typedef struct _DeviceRec *DevicePtr;
 #endif
 
-extern _X_EXPORT Bool mieqInit(void
-    );
-
 extern _X_EXPORT void mieqFini(void);
 
 extern _X_EXPORT void mieqEnqueue(DeviceIntPtr /*pDev */ ,
