@@ -46,8 +46,8 @@ void miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy);
 void miWindowExposures(WindowPtr pWin, RegionPtr prgn);
 
 void miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what);
-
 void miSourceValidate(DrawablePtr pDrawable, int x, int y, int w, int h,
                       unsigned int subWindowMode);
+Bool miCreateScreenResources(ScreenPtr pScreen);
 
 #endif /* _XSERVER_MI_PRIV_H */
