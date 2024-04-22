@@ -25,5 +25,6 @@ Bool mieqInit(void);
 void mieqFini(void);
 void mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e);
 void mieqSwitchScreen(DeviceIntPtr pDev, ScreenPtr pScreen, Bool set_dequeue_screen);
+void mieqProcessDeviceEvent(DeviceIntPtr dev, InternalEvent *event, ScreenPtr screen);
 
 #endif /* _XSERVER_MI_PRIV_H */
