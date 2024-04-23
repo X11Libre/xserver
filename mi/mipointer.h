@@ -90,9 +90,6 @@ extern _X_EXPORT ScreenPtr
 miPointerSetPosition(DeviceIntPtr pDev, int mode, double *x, double *y,
                      int *nevents, InternalEvent *events);
 
-extern _X_EXPORT void
-miPointerUpdateSprite(DeviceIntPtr pDev);
-
 /* Invalidate current sprite, forcing reload on next
  * sprite setting (window crossing, grab action, etc)
  */

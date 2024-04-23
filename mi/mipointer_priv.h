@@ -15,5 +15,6 @@ Bool miPointerInitialize(ScreenPtr pScreen, miPointerSpriteFuncPtr spriteFuncs,
                          miPointerScreenFuncPtr screenFuncs, Bool waitForUpdate);
 void miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y);
 void miPointerSetScreen(DeviceIntPtr pDev, int screen_num, int x, int y);
+void miPointerUpdateSprite(DeviceIntPtr pDev);
 
 #endif /* _XSERVER_MI_MIPOINTER_PRIV_H */
