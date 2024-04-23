@@ -90,10 +90,6 @@ extern _X_EXPORT ScreenPtr
 miPointerSetPosition(DeviceIntPtr pDev, int mode, double *x, double *y,
                      int *nevents, InternalEvent *events);
 
-extern _X_EXPORT DevPrivateKeyRec miPointerPrivKeyRec;
-
-#define miPointerPrivKey (&miPointerPrivKeyRec)
-
 extern _X_EXPORT DevPrivateKeyRec miPointerScreenKeyRec;
 
 #define miPointerScreenKey (&miPointerScreenKeyRec)
