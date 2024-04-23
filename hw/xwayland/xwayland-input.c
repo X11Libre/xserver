@@ -32,6 +32,7 @@
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "mi/mipointer_priv.h"
 
 #include <inputstr.h>
 #include <xkbsrv.h>

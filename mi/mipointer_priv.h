@@ -17,4 +17,9 @@ void miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y);
 void miPointerSetScreen(DeviceIntPtr pDev, int screen_num, int x, int y);
 void miPointerUpdateSprite(DeviceIntPtr pDev);
 
+ /* Invalidate current sprite, forcing reload on next
+  * sprite setting (window crossing, grab action, etc)
+  */
+void miPointerInvalidateSprite(DeviceIntPtr pDev);
+
 #endif /* _XSERVER_MI_MIPOINTER_PRIV_H */
