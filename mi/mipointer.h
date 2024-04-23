@@ -79,8 +79,6 @@ extern _X_EXPORT Bool miDCInitialize(ScreenPtr /*pScreen */ ,
 
 extern _X_EXPORT ScreenPtr
 miPointerGetScreen(DeviceIntPtr pDev);
-extern _X_EXPORT void
-miPointerSetScreen(DeviceIntPtr pDev, int screen_num, int x, int y);
 
 /* Returns the current cursor position. */
 extern _X_EXPORT void

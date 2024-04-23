@@ -37,6 +37,9 @@
 #endif
 #include "win.h"
 #include <commctrl.h>
+
+#include "mi/mipointer_priv.h"
+
 #include "winprefs.h"
 #include "winconfig.h"
 #include "winmsg.h"
