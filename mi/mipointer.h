@@ -90,10 +90,6 @@ extern _X_EXPORT ScreenPtr
 miPointerSetPosition(DeviceIntPtr pDev, int mode, double *x, double *y,
                      int *nevents, InternalEvent *events);
 
-/* Sets whether the sprite should be updated immediately on pointer moves */
-extern _X_EXPORT Bool
-miPointerSetWaitForUpdate(ScreenPtr pScreen, Bool wait);
-
 extern _X_EXPORT DevPrivateKeyRec miPointerPrivKeyRec;
 
 #define miPointerPrivKey (&miPointerPrivKeyRec)
