@@ -27,7 +27,6 @@ is" without express or implied warranty.
 
 #include "scrnintstr.h"
 #include "dix.h"
-#include "mi.h"
 #include "micmap.h"
 #include "colormapst.h"
 #include "resource.h"
