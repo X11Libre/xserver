@@ -75,7 +75,7 @@ static const xf86ConfigSymTabRec DeviceTab[] = {
     {VIDEORAM, "videoram"},
     {BIOSBASE, "biosbase"},
     {MEMBASE, "membase"},
-    {IOBASE, "iobase"},
+    {XF86_TOKEN_IOBASE, "iobase"},
     {CLOCKCHIP, "clockchip"},
     {CHIPID, "chipid"},
     {CHIPREV, "chiprev"},
@@ -181,7 +181,7 @@ xf86parseDeviceSection(void)
                 Error(NUMBER_MSG, "MemBase");
             ptr->dev_mem_base = xf86_lex_val.num;
             break;
-        case IOBASE:
+        case XF86_TOKEN_IOBASE:
             if (xf86getSubToken(&(ptr->dev_comment)) != NUMBER)
                 Error(NUMBER_MSG, "IOBase");
             ptr->dev_io_base = xf86_lex_val.num;
