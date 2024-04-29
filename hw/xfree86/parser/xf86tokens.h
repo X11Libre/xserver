@@ -59,9 +59,6 @@
 #ifndef _xf86_tokens_h
 #define _xf86_tokens_h
 
-/* Undefine symbols that some OSs might define */
-#undef IOBASE
-
 /*
  * Each token should have a unique value regardless of the section
  * it is used in.
@@ -169,7 +166,7 @@ typedef enum {
     CLOCKS,
     VIDEORAM,
     BOARD,
-    IOBASE,
+    XF86_TOKEN_IOBASE,
     RAMDAC,
     DACSPEED,
     BIOSBASE,
