@@ -134,9 +134,6 @@ Bool noShapeExtension = FALSE;
 #ifdef XCSECURITY
 Bool noSecurityExtension = FALSE;
 #endif
-#ifdef RES
-Bool noResExtension = FALSE;
-#endif
 #ifdef XF86BIGFONT
 Bool noXFree86BigfontExtension = FALSE;
 #endif
