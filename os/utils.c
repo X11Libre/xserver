@@ -339,8 +339,7 @@ UseMsg(void)
     ErrorF("+xinerama              Enable XINERAMA extension\n");
     ErrorF("-xinerama              Disable XINERAMA extension\n");
 #endif
-    ErrorF
-        ("-dumbSched             Disable smart scheduling and threaded input, enable old behavior\n");
+    ErrorF("-dumbSched             Disable smart scheduling and threaded input, enable old behavior\n");
     ErrorF("-schedInterval int     Set scheduler interval in msec\n");
     ErrorF("-sigstop               Enable SIGSTOP based startup\n");
     ErrorF("+extension name        Enable extension\n");
@@ -617,21 +616,21 @@ ProcessCommandLine(int argc, char *argv[])
                 DisableServerLock();
         }
 #endif
-	else if ( strcmp( argv[i], "-maxclients") == 0)
-	{
-	    if (++i < argc) {
-		LimitClients = atoi(argv[i]);
-		if (LimitClients != 64 &&
-		    LimitClients != 128 &&
-		    LimitClients != 256 &&
-		    LimitClients != 512 &&
+        else if ( strcmp( argv[i], "-maxclients") == 0)
+        {
+            if (++i < argc) {
+                LimitClients = atoi(argv[i]);
+                if (LimitClients != 64 &&
+                    LimitClients != 128 &&
+                    LimitClients != 256 &&
+                    LimitClients != 512 &&
                     LimitClients != 1024 &&
                     LimitClients != 2048) {
-		    FatalError("maxclients must be one of 64, 128, 256, 512, 1024 or 2048\n");
-		}
-	    } else
-		UseMsg();
-	}
+                    FatalError("maxclients must be one of 64, 128, 256, 512, 1024 or 2048\n");
+                }
+            } else
+                UseMsg();
+        }
         else if (strcmp(argv[i], "-nolisten") == 0) {
             if (++i < argc) {
                 if (_XSERVTransNoListen(argv[i]))
