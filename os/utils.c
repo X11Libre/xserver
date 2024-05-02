@@ -125,9 +125,6 @@ Bool noTestExtensions;
 #ifdef COMPOSITE
 Bool noCompositeExtension = FALSE;
 #endif
-#ifdef DBE
-Bool noDbeExtension = FALSE;
-#endif
 #ifdef DPMSExtension
 #include "dpmsproc.h"
 Bool noDPMSExtension = FALSE;
