@@ -62,8 +62,6 @@ extern _X_EXPORT Bool noCompositeExtension;
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif
 
-extern _X_EXPORT Bool noRenderExtension;
-
 #if defined(RES)
 extern _X_EXPORT Bool noResExtension;
 #endif
