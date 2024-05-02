@@ -8,6 +8,7 @@
 
 #include "extinit.h"
 
+extern Bool noDamageExtension;
 extern Bool noGEExtension;
 
 void CompositeExtensionInit(void);
