@@ -35,6 +35,8 @@
 #include "compint.h"
 #endif
 
+Bool noResExtension = FALSE;
+
 /** @brief Holds fragments of responses for ConstructClientIds.
  *
  *  note: there is no consideration for data alignment */
