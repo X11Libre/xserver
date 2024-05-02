@@ -62,10 +62,6 @@ extern _X_EXPORT Bool noCompositeExtension;
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif
 
-#if defined(RES)
-extern _X_EXPORT Bool noResExtension;
-#endif
-
 #if defined(SCREENSAVER)
 extern _X_EXPORT Bool noScreenSaverExtension;
 #endif
