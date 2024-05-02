@@ -130,9 +130,6 @@ Bool noScreenSaverExtension = FALSE;
 #ifdef MITSHM
 Bool noMITShmExtension = FALSE;
 #endif
-#ifdef RANDR
-Bool noRRExtension = FALSE;
-#endif
 Bool noRenderExtension = FALSE;
 Bool noShapeExtension = FALSE;
 
