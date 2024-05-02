@@ -13,6 +13,7 @@ extern Bool noDbeExtension;
 extern Bool noDPMSExtension;
 extern Bool noGEExtension;
 extern Bool noGlxExtension;
+extern Bool noRenderExtension;
 extern Bool noRRExtension;
 extern Bool noTestExtensions;
 
