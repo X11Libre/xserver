@@ -127,9 +127,6 @@ Bool noTestExtensions;
 #ifdef COMPOSITE
 Bool noCompositeExtension = FALSE;
 #endif
-#ifdef GLXEXT
-Bool noGlxExtension = FALSE;
-#endif
 #ifdef SCREENSAVER
 Bool noScreenSaverExtension = FALSE;
 #endif
