@@ -60,6 +60,8 @@
 #include "inpututils.h"
 #include "extinit_priv.h"
 
+Bool noTestExtensions = FALSE;
+
 /* XTest events are sent during request processing and may be interrupted by
  * a SIGIO. We need a separate event list to avoid events overwriting each
  * other's memory.
