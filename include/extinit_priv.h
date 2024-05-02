@@ -14,6 +14,7 @@ extern Bool noDPMSExtension;
 extern Bool noGEExtension;
 extern Bool noGlxExtension;
 extern Bool noRenderExtension;
+extern Bool noResExtension;
 extern Bool noRRExtension;
 extern Bool noTestExtensions;
 
