@@ -56,6 +56,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifdef COMPOSITE
 extern _X_EXPORT Bool noCompositeExtension;
 #endif
+
+/* required by: several video drivers (eg. vmware and sis) */
 #ifdef PANORAMIX
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif
