@@ -56,10 +56,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifdef COMPOSITE
 extern _X_EXPORT Bool noCompositeExtension;
 #endif
-#ifdef GLXEXT
-extern _X_EXPORT Bool noGlxExtension;
-#endif
-
 #ifdef PANORAMIX
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif

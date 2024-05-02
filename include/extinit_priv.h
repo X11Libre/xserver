@@ -12,6 +12,7 @@ extern Bool noDamageExtension;
 extern Bool noDbeExtension;
 extern Bool noDPMSExtension;
 extern Bool noGEExtension;
+extern Bool noGlxExtension;
 
 void CompositeExtensionInit(void);
 void DamageExtensionInit(void);
