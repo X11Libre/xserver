@@ -118,66 +118,7 @@ __stdcall unsigned long GetTickCount(void);
 #include "miinitext.h"
 #include "present.h"
 #include "dixstruct_priv.h"
-
-Bool noTestExtensions;
-
-#ifdef COMPOSITE
-Bool noCompositeExtension = FALSE;
-#endif
-
-#ifdef DAMAGE
-Bool noDamageExtension = FALSE;
-#endif
-#ifdef DBE
-Bool noDbeExtension = FALSE;
-#endif
-#ifdef DPMSExtension
 #include "dpmsproc.h"
-Bool noDPMSExtension = FALSE;
-#endif
-#ifdef GLXEXT
-Bool noGlxExtension = FALSE;
-#endif
-#ifdef SCREENSAVER
-Bool noScreenSaverExtension = FALSE;
-#endif
-#ifdef MITSHM
-Bool noMITShmExtension = FALSE;
-#endif
-#ifdef RANDR
-Bool noRRExtension = FALSE;
-#endif
-Bool noRenderExtension = FALSE;
-Bool noShapeExtension = FALSE;
-
-#ifdef XCSECURITY
-Bool noSecurityExtension = FALSE;
-#endif
-#ifdef RES
-Bool noResExtension = FALSE;
-#endif
-#ifdef XF86BIGFONT
-Bool noXFree86BigfontExtension = FALSE;
-#endif
-#ifdef XFreeXDGA
-Bool noXFree86DGAExtension = FALSE;
-#endif
-#ifdef XF86DRI
-Bool noXFree86DRIExtension = FALSE;
-#endif
-#ifdef XF86VIDMODE
-Bool noXFree86VidModeExtension = FALSE;
-#endif
-Bool noXFixesExtension = FALSE;
-#ifdef PANORAMIX
-/* Xinerama is disabled by default unless enabled via +xinerama */
-Bool noPanoramiXExtension = TRUE;
-#endif
-#ifdef DRI2
-Bool noDRI2Extension = FALSE;
-#endif
-
-Bool noGEExtension = FALSE;
 
 #define X_INCLUDE_NETDB_H
 #include <X11/Xos_r.h>

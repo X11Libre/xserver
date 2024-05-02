@@ -53,11 +53,15 @@ is" without express or implied warranty.
 
 Bool xnestDoFullGeneration = True;
 
+/* Xnest doesn't support GLX yet, so we don't link it, but still have
+   satisfy DIX's symbol requirements */
 #ifdef GLXEXT
 void
 GlxExtensionInit(void)
 {
 }
+
+Bool noGlxExtension = FALSE;
 #endif
 
 void

@@ -50,6 +50,8 @@ in this Software without prior written authorization from The Open Group.
 #include "extinit_priv.h"
 #include "protocol-versions.h"
 
+Bool noShapeExtension = FALSE;
+
 typedef RegionPtr (*CreateDftPtr) (WindowPtr    /* pWin */
     );
 

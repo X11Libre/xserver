@@ -49,6 +49,8 @@ in this Software without prior written authorization from The Open Group.
 #include "extinit.h"
 #include "protocol-versions.h"
 
+Bool noSecurityExtension = FALSE;
+
 /* Extension stuff */
 static int SecurityErrorBase;   /* first Security error number */
 static int SecurityEventBase;   /* first Security event number */
