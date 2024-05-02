@@ -1368,16 +1368,6 @@ PrivsElevated(void)
 #define REMOVE_LONG_ENV 1
 #endif
 
-/*
- * Disallow stdout or stderr as pipes?  It's possible to block the X server
- * when piping stdout+stderr to a pipe.
- *
- * Don't enable this because it looks like it's going to cause problems.
- */
-#ifndef NO_OUTPUT_PIPES
-#define NO_OUTPUT_PIPES 0
-#endif
-
 /* Check args and env only if running setuid (euid == 0 && euid != uid) ? */
 #ifndef CHECK_EUID
 #ifndef WIN32
@@ -1412,7 +1402,6 @@ enum BadCode {
     ArgTooLong,
     UnprintableArg,
     EnvTooLong,
-    OutputIsPipe,
     InternalError
 };
 
@@ -1509,16 +1498,6 @@ CheckUserParameters(int argc, char **argv, char **envp)
                 }
             }
         }
-#if NO_OUTPUT_PIPES
-        if (!bad) {
-            struct stat buf;
-
-            if (fstat(fileno(stdout), &buf) == 0 && S_ISFIFO(buf.st_mode))
-                bad = OutputIsPipe;
-            if (fstat(fileno(stderr), &buf) == 0 && S_ISFIFO(buf.st_mode))
-                bad = OutputIsPipe;
-        }
-#endif
     }
     switch (bad) {
     case NotBad:
@@ -1535,9 +1514,6 @@ CheckUserParameters(int argc, char **argv, char **envp)
         break;
     case EnvTooLong:
         ErrorF("Environment variable `%s' is too long\n", e);
-        break;
-    case OutputIsPipe:
-        ErrorF("Stdout and/or stderr is a pipe\n");
         break;
     case InternalError:
         ErrorF("Internal Error\n");
