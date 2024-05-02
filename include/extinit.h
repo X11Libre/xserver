@@ -53,14 +53,17 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "extnsionst.h"
 
+/* required by: libglx */
 #ifdef COMPOSITE
 extern _X_EXPORT Bool noCompositeExtension;
 #endif
 
+/* required by: several video drivers (eg. vmware and sis) */
 #ifdef XINERAMA
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif /* XINERAMA */
 
+/* required by: intel_drv */
 #if defined(XV)
 extern _X_EXPORT Bool noXvExtension;
 #endif
