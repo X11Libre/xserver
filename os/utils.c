@@ -1405,9 +1405,7 @@ enum BadCode {
     InternalError
 };
 
-#if defined(VENDORSUPPORT)
-#define BUGADDRESS VENDORSUPPORT
-#elif defined(BUILDERADDR)
+#if defined(BUILDERADDR)
 #define BUGADDRESS BUILDERADDR
 #else
 #define BUGADDRESS "xorg@freedesktop.org"
