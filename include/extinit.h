@@ -56,10 +56,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifdef COMPOSITE
 extern _X_EXPORT Bool noCompositeExtension;
 #endif
-#if defined(DPMSExtension)
-extern _X_EXPORT Bool noDPMSExtension;
-#endif
-
 #ifdef GLXEXT
 extern _X_EXPORT Bool noGlxExtension;
 #endif
