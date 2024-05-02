@@ -42,6 +42,8 @@
 
 #include "dix/dix_priv.h"
 
+Bool noGlxExtension = FALSE;
+
 ExtensionEntry *GlxExtensionEntry;
 int GlxErrorBase = 0;
 static CallbackListRec vndInitCallbackList;
