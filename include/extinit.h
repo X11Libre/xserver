@@ -62,10 +62,6 @@ extern _X_EXPORT Bool noCompositeExtension;
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif
 
-#ifdef RANDR
-extern _X_EXPORT Bool noRRExtension;
-#endif
-
 extern _X_EXPORT Bool noRenderExtension;
 
 #if defined(RES)
