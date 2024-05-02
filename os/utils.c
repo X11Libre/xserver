@@ -121,8 +121,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
 
-Bool noGEExtension = FALSE;
-
 #define X_INCLUDE_NETDB_H
 #include <X11/Xos_r.h>
 
