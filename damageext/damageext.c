@@ -55,6 +55,8 @@ static DevPrivateKeyRec DamageClientPrivateKeyRec;
 
 #define DamageClientPrivateKey (&DamageClientPrivateKeyRec)
 
+Bool noDamageExtension = FALSE;
+
 static void
 DamageNoteCritical(ClientPtr pClient)
 {
