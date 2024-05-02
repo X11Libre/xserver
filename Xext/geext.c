@@ -37,6 +37,8 @@
 #include "geext.h"
 #include "protocol-versions.h"
 
+Bool noGEExtension = FALSE;
+
 DevPrivateKeyRec GEClientPrivateKeyRec;
 
 GEExtension GEExtensions[MAXEXTENSIONS];
