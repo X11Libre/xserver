@@ -86,8 +86,6 @@ static dispatch_queue_t eventTranslationQueue;
 #define APPKIT_APPFLAGS_HACK 1
 #endif
 
-extern Bool noRenderExtension;
-
 static TISInputSourceRef last_key_layout;
 
 /* This preference is only tested on Lion or later as it's not relevant to
