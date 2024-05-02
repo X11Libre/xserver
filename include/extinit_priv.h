@@ -8,7 +8,22 @@
 
 #include "extinit.h"
 
+extern Bool noDamageExtension;
+extern Bool noDbeExtension;
+extern Bool noDPMSExtension;
 extern Bool noGEExtension;
+extern Bool noGlxExtension;
+extern Bool noMITShmExtension;
+extern Bool noRenderExtension;
+extern Bool noResExtension;
+extern Bool noRRExtension;
+extern Bool noScreenSaverExtension;
+extern Bool noSecurityExtension;
+extern Bool noSELinuxExtension;
+extern Bool noShapeExtension;
+extern Bool noTestExtensions;
+extern Bool noXFixesExtension;
+extern Bool noXFree86BigfontExtension;
 
 void CompositeExtensionInit(void);
 void DamageExtensionInit(void);
