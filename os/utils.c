@@ -125,10 +125,6 @@ Bool noTestExtensions;
 #ifdef COMPOSITE
 Bool noCompositeExtension = FALSE;
 #endif
-
-#ifdef DAMAGE
-Bool noDamageExtension = FALSE;
-#endif
 #ifdef DBE
 Bool noDbeExtension = FALSE;
 #endif

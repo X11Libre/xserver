@@ -57,10 +57,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 extern _X_EXPORT Bool noCompositeExtension;
 #endif
 
-#ifdef DAMAGE
-extern _X_EXPORT Bool noDamageExtension;
-#endif
-
 #if defined(DBE)
 extern _X_EXPORT Bool noDbeExtension;
 #endif
