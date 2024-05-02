@@ -35,6 +35,8 @@
 #import "X11Application.h"
 #import "NSUserDefaults+XQuartzDefaults.h"
 
+#include "include/extinit_priv.h"
+
 #include "darwin.h"
 #include "quartz.h"
 #include "darwinEvents.h"
@@ -78,7 +80,6 @@ static dispatch_queue_t eventTranslationQueue;
 #define APPKIT_APPFLAGS_HACK 1
 #endif
 
-extern Bool noTestExtensions;
 extern Bool noRenderExtension;
 
 static TISInputSourceRef last_key_layout;
