@@ -6,7 +6,13 @@
 #ifndef _XSERVER_XKBSRV_PRIV_H_
 #define _XSERVER_XKBSRV_PRIV_H_
 
+#include <X11/Xdefs.h>
+#include <X11/Xmd.h>
+
+#include "dix.h"
+#include "input.h"
 #include "xkbsrv.h"
+#include "xkbstr.h"
 
 void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
