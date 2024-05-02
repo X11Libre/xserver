@@ -106,6 +106,7 @@ __stdcall unsigned long GetTickCount(void);
 #endif
 
 #include "dix/dix_priv.h"
+#include "include/extinit_priv.h"
 #include "os/auth.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
@@ -118,15 +119,12 @@ __stdcall unsigned long GetTickCount(void);
 #include "miinitext.h"
 #include "present.h"
 #include "dixstruct_priv.h"
+#include "dpmsproc.h"
 
 Bool noTestExtensions;
 
 #ifdef COMPOSITE
 Bool noCompositeExtension = FALSE;
-#endif
-#ifdef DPMSExtension
-#include "dpmsproc.h"
-Bool noDPMSExtension = FALSE;
 #endif
 #ifdef GLXEXT
 Bool noGlxExtension = FALSE;

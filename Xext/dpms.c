@@ -44,6 +44,8 @@ Equipment Corporation.
 #include "windowstr.h"
 #include "protocol-versions.h"
 
+Bool noDPMSExtension = FALSE;
+
 CARD16 DPMSPowerLevel = 0;
 Bool DPMSDisabledSwitch = FALSE;
 CARD32 DPMSStandbyTime = -1;
