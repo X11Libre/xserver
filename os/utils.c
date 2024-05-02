@@ -122,8 +122,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
 
-Bool noTestExtensions;
-
 #ifdef COMPOSITE
 Bool noCompositeExtension = FALSE;
 #endif
