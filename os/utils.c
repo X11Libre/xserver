@@ -1372,24 +1372,11 @@ PrivsElevated(void)
 #endif
 #endif
 
-/*
- * Maybe the locale can be faked to make isprint(3) report that everything
- * is printable?  Avoid it by default.
- */
-#ifndef USE_ISPRINT
-#define USE_ISPRINT 0
-#endif
-
 #define MAX_ARG_LENGTH          128
 #define MAX_ENV_LENGTH          256
 #define MAX_ENV_PATH_LENGTH     2048    /* Limit for *PATH and TERMCAP */
 
-#if USE_ISPRINT
-#include <ctype.h>
-#define checkPrintable(c) isprint(c)
-#else
 #define checkPrintable(c) (((c) & 0x7f) >= 0x20 && ((c) & 0x7f) != 0x7f)
-#endif
 
 enum BadCode {
     NotBad = 0,
