@@ -1358,11 +1358,6 @@ PrivsElevated(void)
  * external wrapper utility.
  */
 
-/* Consider LD* variables insecure? */
-#ifndef REMOVE_ENV_LD
-#define REMOVE_ENV_LD 1
-#endif
-
 /* Check args and env only if running setuid (euid == 0 && euid != uid) ? */
 #ifndef CHECK_EUID
 #ifndef WIN32
@@ -1432,13 +1427,11 @@ CheckUserParameters(int argc, char **argv, char **envp)
             for (i = 0; envp[i]; i++) {
 
                 /* Check for bad environment variables and values */
-#if REMOVE_ENV_LD
                 while (envp[i] && (strncmp(envp[i], "LD", 2) == 0)) {
                     for (j = i; envp[j]; j++) {
                         envp[j] = envp[j + 1];
                     }
                 }
-#endif
                 if (envp[i] && (strlen(envp[i]) > MAX_ENV_LENGTH)) {
                     for (j = i; envp[j]; j++) {
                         envp[j] = envp[j + 1];
