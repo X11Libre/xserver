@@ -343,33 +343,6 @@ attach(__GLXAquaContext *context, __GLXAquaDrawable *draw)
     return FALSE;
 }
 
-#if 0     // unused
-static void
-unattach(__GLXAquaContext *context)
-{
-    x_list *lst;
-    GLAQUA_DEBUG_MSG("unattach\n");
-    if (context == NULL) {
-        ErrorF("Tried to unattach a null context\n");
-        return;
-    }
-    if (context->isAttached) {
-        GLAQUA_DEBUG_MSG("unattaching\n");
-
-        if (surface_hash != NULL) {
-            lst = x_hash_table_lookup(surface_hash, (void *)context->sid,
-                                      NULL);
-            lst = x_list_remove(lst, context);
-            x_hash_table_insert(surface_hash, (void *)context->sid, lst);
-        }
-
-        CGLClearDrawable(context->ctx);
-        context->isAttached = FALSE;
-        context->sid = 0;
-    }
-}
-#endif
-
 static int
 __glXAquaContextMakeCurrent(__GLXcontext *baseContext)
 {
@@ -542,15 +515,6 @@ __glXAquaScreenProbe(ScreenPtr pScreen)
 
     return &screen->base;
 }
-
-#if 0 // unused
-static void
-__glXAquaDrawableCopySubBuffer(__GLXdrawable *drawable,
-                               int x, int y, int w, int h)
-{
-    /*TODO finish me*/
-}
-#endif
 
 static void
 __glXAquaDrawableDestroy(__GLXdrawable *base)
