@@ -65,6 +65,4 @@ extern _X_EXPORT int DeleteProperty(ClientPtr /*client */ ,
                                     WindowPtr /*pWin */ ,
                                     Atom /*propName */ );
 
-extern _X_EXPORT void DeleteAllWindowProperties(WindowPtr /*pWin */ );
-
 #endif                          /* PROPERTY_H */
