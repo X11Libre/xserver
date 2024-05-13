@@ -103,6 +103,7 @@ Equipment Corporation.
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/property_priv.h"
 #include "dix/selection_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
