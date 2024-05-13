@@ -51,12 +51,6 @@ SOFTWARE.
 
 typedef struct _Property *PropertyPtr;
 
-extern _X_EXPORT int dixLookupProperty(PropertyPtr * /*result */ ,
-                                       WindowPtr /*pWin */ ,
-                                       Atom /*proprty */ ,
-                                       ClientPtr /*pClient */ ,
-                                       Mask /*access_mode */ );
-
 extern _X_EXPORT int dixChangeWindowProperty(ClientPtr pClient,
                                              WindowPtr pWin,
                                              Atom property,
