@@ -134,9 +134,7 @@ static const ExtensionModule staticExtensions[] = {
 #ifndef DISABLE_EXT_COMPOSITE
     {CompositeExtensionInit, "COMPOSITE", &noCompositeExtension},
 #endif
-#ifdef DAMAGE
     {DamageExtensionInit, "DAMAGE", &noDamageExtension},
-#endif
 #ifdef SCREENSAVER
     {ScreenSaverExtensionInit, "MIT-SCREEN-SAVER", &noScreenSaverExtension},
 #endif

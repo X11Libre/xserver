@@ -212,8 +212,6 @@ conf_data.set('CONFIG_LEGACY_NVIDIA_PADDING', legacy_nvidia_padding ? '1' : fals
 
 # some drivers (eg. xf86-video-intel) still relying on this symbol being set
 conf_data.set('COMPOSITE', '1')
-
-conf_data.set('DAMAGE', '1')
 conf_data.set('DBE', '1')
 conf_data.set('DGA', build_dga ? '1' : false)
 conf_data.set('DPMSExtension', build_dpms ? '1' : false)

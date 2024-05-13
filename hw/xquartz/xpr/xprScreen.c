@@ -49,10 +49,7 @@
 #include "micmap.h"
 
 #include "rootlessCommon.h"
-
-#ifdef DAMAGE
 #include "damage.h"
-#endif
 
 /* 10.4's deferred update makes X slower.. have to live with the tearing
  * for now.. */
@@ -436,12 +433,10 @@ have_depth:
 static Bool
 xprSetupScreen(int index, ScreenPtr pScreen)
 {
-#ifdef DAMAGE
     // The Damage extension needs to wrap underneath the
     // generic rootless layer, so do it now.
     if (!DamageSetup(pScreen))
         return FALSE;
-#endif
 
     // Initialize generic rootless code
     if (!xprInit(pScreen))

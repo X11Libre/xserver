@@ -55,6 +55,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 /* required by: libglx */
 extern _X_EXPORT Bool noCompositeExtension;
+extern _X_EXPORT Bool noDamageExtension;
 
 /* required by: several video drivers (eg. vmware, sis and nvidia proprietary) */
 #ifdef XINERAMA
