@@ -5671,7 +5671,7 @@ ProcGrabKey(ClientPtr client)
 
     mask.core = (KeyPressMask | KeyReleaseMask);
 
-    grab = CreateGrab(client->index, keybd, keybd, pWin, CORE, &mask,
+    grab = CreateGrab(client, keybd, keybd, pWin, CORE, &mask,
                       &param, KeyPress, stuff->key, NullWindow, NullCursor);
     if (!grab)
         return BadAlloc;
@@ -5765,7 +5765,7 @@ ProcGrabButton(ClientPtr client)
 
     mask.core = stuff->eventMask;
 
-    grab = CreateGrab(client->index, ptr, modifierDevice, pWin,
+    grab = CreateGrab(client, ptr, modifierDevice, pWin,
                       CORE, &mask, &param, ButtonPress,
                       stuff->button, confineTo, cursor);
     if (!grab)

@@ -2530,7 +2530,7 @@ GrabButton(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
     else if (grabtype == XI2)
         type = XI_ButtonPress;
 
-    grab = CreateGrab(client->index, dev, modifier_device, pWin, grabtype,
+    grab = CreateGrab(client, dev, modifier_device, pWin, grabtype,
                       mask, param, type, button, confineTo, cursor);
     if (!grab)
         return BadAlloc;
@@ -2578,7 +2578,7 @@ GrabKey(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
     if (rc != Success)
         return rc;
 
-    grab = CreateGrab(client->index, dev, modifier_device, pWin, grabtype,
+    grab = CreateGrab(client, dev, modifier_device, pWin, grabtype,
                       mask, param, type, key, NULL, NULL);
     if (!grab)
         return BadAlloc;
@@ -2621,7 +2621,7 @@ GrabWindow(ClientPtr client, DeviceIntPtr dev, int type,
     if (rc != Success)
         return rc;
 
-    grab = CreateGrab(client->index, dev, dev, pWin, XI2,
+    grab = CreateGrab(client, dev, dev, pWin, XI2,
                       mask, param,
                       (type == XIGrabtypeEnter) ? XI_Enter : XI_FocusIn, 0,
                       NULL, cursor);
@@ -2652,7 +2652,7 @@ GrabTouchOrGesture(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr mod_dev,
     if (rc != Success)
         return rc;
 
-    grab = CreateGrab(client->index, dev, mod_dev, pWin, XI2,
+    grab = CreateGrab(client, dev, mod_dev, pWin, XI2,
                       mask, param, type, 0, NullWindow, NullCursor);
     if (!grab)
         return BadAlloc;
