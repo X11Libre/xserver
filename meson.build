@@ -847,6 +847,8 @@ if build_xorg
 
     sdk_required_modules = [
       'pixman-1 >= 0.27.2',
+      'xfont2 >= 2.0',
+      'xproto',
     ]
 
     # XXX this isn't trying very hard, but hard enough.
