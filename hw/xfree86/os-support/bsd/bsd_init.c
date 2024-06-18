@@ -44,29 +44,11 @@
 
 #include "os/osdep.h"
 
-#ifndef CONSOLE_X_MODE_ON
-#define CONSOLE_X_MODE_ON _IO('t',121)
-#endif
-
-#ifndef CONSOLE_X_MODE_OFF
-#define CONSOLE_X_MODE_OFF _IO('t',122)
-#endif
-
 static Bool KeepTty = FALSE;
 
-#ifdef PCCONS_SUPPORT
-static int devConsoleFd = -1;
-#endif
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
 static int VTnum = -1;
 static int initialVT = -1;
-#endif
-
-#ifdef PCCONS_SUPPORT
-/* Stock 0.1 386bsd pccons console driver interface */
-#define PCCONS_CONSOLE_DEV1 "/dev/ttyv0"
-#define PCCONS_CONSOLE_DEV2 "/dev/vga"
-#define PCCONS_CONSOLE_MODE O_RDWR|O_NDELAY
 #endif
 
 #ifdef SYSCONS_SUPPORT
@@ -99,9 +81,6 @@ static int initialVT = -1;
   "Check your kernel's console driver configuration and /dev entries"
 
 static const char *supported_drivers[] = {
-#ifdef PCCONS_SUPPORT
-    "pccons (with X support)",
-#endif
 #ifdef SYSCONS_SUPPORT
     "syscons",
 #endif
@@ -122,10 +101,6 @@ static const char *supported_drivers[] = {
  */
 
 typedef int (*xf86ConsOpen_t) (void);
-
-#ifdef PCCONS_SUPPORT
-static int xf86OpenPccons(void);
-#endif                          /* PCCONS_SUPPORT */
 
 #ifdef SYSCONS_SUPPORT
 static int xf86OpenSyscons(void);
@@ -151,9 +126,6 @@ static xf86ConsOpen_t xf86ConsTab[] = {
 #endif
 #ifdef SYSCONS_SUPPORT
     xf86OpenSyscons,
-#endif
-#ifdef PCCONS_SUPPORT
-    xf86OpenPccons,
 #endif
 #ifdef WSCONS_SUPPORT
     xf86OpenWScons,
@@ -217,24 +189,6 @@ xf86OpenConsole(void)
         xf86Info.consoleFd = fd;
 
         switch (xf86Info.consType) {
-#ifdef PCCONS_SUPPORT
-        case PCCONS:
-            if (ioctl(xf86Info.consoleFd, CONSOLE_X_MODE_ON, 0) < 0) {
-                FatalError("%s: CONSOLE_X_MODE_ON failed (%s)\n%s",
-                           "xf86OpenConsole", strerror(errno),
-                           CHECK_DRIVER_MSG);
-            }
-            /*
-             * Hack to prevent keyboard hanging when syslogd closes
-             * /dev/console
-             */
-            if ((devConsoleFd = open("/dev/console", O_WRONLY, 0)) < 0) {
-                xf86Msg(X_WARNING,
-                        "xf86OpenConsole: couldn't open /dev/console (%s)\n",
-                        strerror(errno));
-            }
-            break;
-#endif
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
         case SYSCONS:
             /* as of FreeBSD 2.2.8, syscons driver does not need the #1 vt
@@ -327,31 +281,6 @@ xf86OpenConsole(void)
     }
     return;
 }
-
-#ifdef PCCONS_SUPPORT
-
-static int
-xf86OpenPccons(void)
-{
-    int fd = -1;
-
-    if ((fd = open(PCCONS_CONSOLE_DEV1, PCCONS_CONSOLE_MODE, 0))
-        >= 0 || (fd = open(PCCONS_CONSOLE_DEV2, PCCONS_CONSOLE_MODE, 0))
-        >= 0) {
-        if (ioctl(fd, CONSOLE_X_MODE_OFF, 0) < 0) {
-            FatalError("%s: CONSOLE_X_MODE_OFF failed (%s)\n%s\n%s",
-                       "xf86OpenPccons",
-                       strerror(errno),
-                       "Was expecting pccons driver with X support",
-                       CHECK_DRIVER_MSG);
-        }
-        xf86Info.consType = PCCONS;
-        xf86Msg(X_PROBED, "Using pccons driver with X support\n");
-    }
-    return fd;
-}
-
-#endif                          /* PCCONS_SUPPORT */
 
 #ifdef SYSCONS_SUPPORT
 
@@ -616,11 +545,6 @@ xf86CloseConsole(void)
         return;
 
     switch (xf86Info.consType) {
-#ifdef PCCONS_SUPPORT
-    case PCCONS:
-        ioctl(xf86Info.consoleFd, CONSOLE_X_MODE_OFF, 0);
-        break;
-#endif                          /* PCCONS_SUPPORT */
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
     case SYSCONS:
     case PCVT:
@@ -651,10 +575,6 @@ xf86CloseConsole(void)
     }
 
     close(xf86Info.consoleFd);
-#ifdef PCCONS_SUPPORT
-    if (devConsoleFd >= 0)
-        close(devConsoleFd);
-#endif
     return;
 }
 
