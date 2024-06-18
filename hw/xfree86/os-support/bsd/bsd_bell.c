@@ -46,19 +46,7 @@ xf86OSRingBell(int loudness, int pitch, int duration)
 #endif
 
     if (loudness && pitch) {
-#ifdef PCCONS_SUPPORT
-        int data[2];
-#endif
-
         switch (xf86Info.consType) {
-
-#ifdef PCCONS_SUPPORT
-        case PCCONS:
-            data[0] = pitch;
-            data[1] = (duration * loudness) / 50;
-            ioctl(xf86Info.consoleFd, CONSOLE_X_BELL, data);
-            break;
-#endif
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
         case SYSCONS:
         case PCVT:
