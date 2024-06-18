@@ -46,14 +46,6 @@
 #include <machine/sysarch.h>
 #endif
 
-#ifndef CONSOLE_X_TV_ON
-#define CONSOLE_X_TV_ON _IOW('t',155,int)
-#endif
-
-#ifndef CONSOLE_X_TV_OFF
-#define CONSOLE_X_TV_OFF _IO('t',156)
-#endif
-
 #ifdef __OpenBSD__
 #define SYSCTL_MSG "\tCheck that you have set 'machdep.allowaperture=1'\n"\
 		   "\tin /etc/sysctl.conf and reboot your machine\n" \
@@ -294,18 +286,6 @@ void
 xf86SetTVOut(int mode)
 {
     switch (xf86Info.consType) {
-#ifdef PCCONS_SUPPORT
-    case PCCONS:{
-
-        if (ioctl(xf86Info.consoleFd, CONSOLE_X_TV_ON, &mode) < 0) {
-            xf86Msg(X_WARNING,
-                    "xf86SetTVOut: Could not set console to TV output, %s\n",
-                    strerror(errno));
-        }
-    }
-        break;
-#endif                          /* PCCONS_SUPPORT */
-
     default:
         FatalError("Xf86SetTVOut: Unsupported console");
         break;
@@ -317,18 +297,6 @@ void
 xf86SetRGBOut(void)
 {
     switch (xf86Info.consType) {
-#ifdef PCCONS_SUPPORT
-    case PCCONS:{
-
-        if (ioctl(xf86Info.consoleFd, CONSOLE_X_TV_OFF, 0) < 0) {
-            xf86Msg(X_WARNING,
-                    "xf86SetTVOut: Could not set console to RGB output, %s\n",
-                    strerror(errno));
-        }
-    }
-        break;
-#endif                          /* PCCONS_SUPPORT */
-
     default:
         FatalError("Xf86SetTVOut: Unsupported console");
         break;
