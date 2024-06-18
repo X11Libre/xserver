@@ -171,9 +171,6 @@
 /* System is BSD-like */
 #mesondefine CSRG_BASED
 
-/* System has PC console */
-#mesondefine PCCONS_SUPPORT
-
 /* System has PCVT console */
 #mesondefine PCVT_SUPPORT
 

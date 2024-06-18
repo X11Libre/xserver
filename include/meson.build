@@ -283,21 +283,18 @@ defines_svr4 = '''#if !defined(SVR4) && !defined(__svr4__) && !defined(__SVR4)
 '''
 
 # BSD specifics
-supports_pccons = false
 supports_pcvt = false
 supports_syscons = false
 supports_wscons = false
 csrg_based = false
 
 if host_machine.system() == 'freebsd' or host_machine.system() == 'dragonfly'
-  supports_pccons = true
   supports_pcvt = true
   supports_syscons = true
   csrg_based = true
 endif
 
 if host_machine.system() == 'kfreebsd'
-  supports_pccons = true
   supports_pcvt = true
   supports_syscons = true
 endif
@@ -325,7 +322,6 @@ conf_data.set_quoted('XCONFIGFILE', 'xorg.conf')
 conf_data.set_quoted('__XSERVERNAME__', 'Xorg')
 conf_data.set('WITH_VGAHW', build_vgahw ? '1' : false)
 conf_data.set('CSRG_BASED', csrg_based ? '1' : false)
-conf_data.set('PCCONS_SUPPORT', supports_pccons ? '1' : false)
 conf_data.set('PCVT_SUPPORT', supports_pcvt ? '1' : false)
 conf_data.set('SYSCONS_SUPPORT', supports_syscons ? '1' : false)
 conf_data.set('WSCONS_SUPPORT', supports_wscons ? '1' : false)
