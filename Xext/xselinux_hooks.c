@@ -35,9 +35,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dix/input_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/selection_priv.h"
 #include "os/client_priv.h"
 
-#include "selection.h"
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
