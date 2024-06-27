@@ -37,12 +37,13 @@
 
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/selection_priv.h"
+#include "os/auth.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 #include "os/xserver_poll.h"
 
-#include <selection.h>
 #include <micmap.h>
 #include <misyncshm.h>
 #include <compositeext.h>
@@ -52,8 +53,6 @@
 #include <os.h>
 #include <propertyst.h>
 #include <version-config.h>
-
-#include "os/auth.h"
 
 #include "xwayland-screen.h"
 #include "xwayland-vidmode.h"
