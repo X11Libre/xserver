@@ -25,12 +25,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define XACE_MAJOR_VERSION		2
 #define XACE_MINOR_VERSION		0
 
+#include "dix/selection_priv.h"
+
 #include "extnsionst.h"
 #include "pixmap.h"
 #include "region.h"
 #include "window.h"
 #include "property.h"
-#include "selection.h"
 
 /* Default window background */
 #define XaceBackgroundNoneState(w) ((w)->forcedBG ? BackgroundPixel : None)
