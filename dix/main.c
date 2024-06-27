@@ -78,15 +78,19 @@ Equipment Corporation.
 #include <version-config.h>
 #endif
 
+#include <pixman.h>
 #include <X11/X.h>
 #include <X11/Xos.h>            /* for unistd.h  */
 #include <X11/Xproto.h>
-#include <pixman.h>
+#include <X11/fonts/font.h>
+#include <X11/fonts/fontstruct.h>
+#include <X11/fonts/libxfont2.h>
 
 #include "dix/callback_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/selection_priv.h"
 #include "os/audit.h"
 #include "os/auth.h"
 #include "os/cmdline.h"
@@ -104,10 +108,6 @@ Equipment Corporation.
 #include "colormap.h"
 #include "colormapst.h"
 #include "cursorstr.h"
-#include "selection.h"
-#include <X11/fonts/font.h>
-#include <X11/fonts/fontstruct.h>
-#include <X11/fonts/libxfont2.h>
 #include "servermd.h"
 #include "hotplug.h"
 #include "dixfont.h"
