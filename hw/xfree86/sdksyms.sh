@@ -267,7 +267,6 @@ cat > sdksyms.c << EOF
 #include "rgb.h"
 #include "screenint.h"
 #include "scrnintstr.h"
-#include "selection.h"
 #include "servermd.h"
 #include "validate.h"
 #include "window.h"
