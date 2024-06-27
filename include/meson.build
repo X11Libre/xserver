@@ -485,7 +485,6 @@ if build_xorg
             'rgb.h',
             'screenint.h',
             'scrnintstr.h',
-            'selection.h',
             'servermd.h',
             'validate.h',
             'displaymode.h',
