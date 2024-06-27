@@ -21,9 +21,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
+#include "dix/selection_priv.h"
 #include "miext/extinit_priv.h"
 
-#include "selection.h"
 #include "inputstr.h"
 #include "windowstr.h"
 #include "propertyst.h"
