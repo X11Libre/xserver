@@ -56,6 +56,7 @@
 
 static int DRI2EventBase;
 
+Bool noDRI2Extension = FALSE;
 
 static Bool
 validDrawable(ClientPtr client, XID drawable, Mask access_mode,
