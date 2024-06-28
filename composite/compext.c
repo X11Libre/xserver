@@ -50,6 +50,8 @@
 #include "protocol-versions.h"
 #include "extinit_priv.h"
 
+Bool noCompositeExtension = FALSE;
+
 static CARD8 CompositeReqCode;
 static DevPrivateKeyRec CompositeClientPrivateKeyRec;
 

@@ -122,9 +122,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
 
-#ifdef COMPOSITE
-Bool noCompositeExtension = FALSE;
-#endif
 #ifdef XFreeXDGA
 Bool noXFree86DGAExtension = FALSE;
 #endif
