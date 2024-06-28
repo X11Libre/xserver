@@ -34,6 +34,7 @@ Equipment Corporation.
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -55,7 +56,6 @@ Equipment Corporation.
 #include "xfixesint.h"
 #include "damageextint.h"
 #include "compint.h"
-#include "extinit_priv.h"
 #include "protocol-versions.h"
 
 #ifdef GLXPROXY

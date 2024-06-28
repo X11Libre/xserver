@@ -24,6 +24,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -31,7 +32,6 @@
 #include "damageextint.h"
 #include "damagestr.h"
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 #include "dixstruct_priv.h"
 
 #ifdef XINERAMA

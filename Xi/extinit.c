@@ -63,6 +63,7 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
+#include "miext/extinit_priv.h"
 #include "Xext/geext_priv.h"
 
 #include "inputstr.h"
@@ -70,7 +71,6 @@ SOFTWARE.
 #include "extnsionst.h"         /* extension entry   */
 #include "geext.h"              /* extension interfaces for ge */
 #include "dixevents.h"
-#include "extinit_priv.h"
 #include "exglobals.h"
 #include "swaprep.h"
 #include "privates.h"

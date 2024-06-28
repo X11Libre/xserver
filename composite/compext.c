@@ -44,12 +44,12 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 #include "Xext/panoramiXsrv.h"
 
 #include "compint.h"
 #include "xace.h"
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 static CARD8 CompositeReqCode;
 static DevPrivateKeyRec CompositeClientPrivateKeyRec;

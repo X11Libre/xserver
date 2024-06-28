@@ -3,9 +3,14 @@
 
 #include <string.h>
 #include <X11/X.h>
+#include <X11/Xfuncproto.h>
 #include <X11/Xproto.h>
+#include <X11/extensions/XvMC.h>
+#include <X11/extensions/Xvproto.h>
+#include <X11/extensions/XvMCproto.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "miext/extinit_priv.h"
 #include "Xext/xvdix_priv.h"
 
 #include "misc.h"
@@ -14,12 +19,7 @@
 #include "resource.h"
 #include "scrnintstr.h"
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include "servermd.h"
-#include <X11/Xfuncproto.h>
-#include <X11/extensions/XvMC.h>
-#include <X11/extensions/Xvproto.h>
-#include <X11/extensions/XvMCproto.h>
 #include "xvmcext.h"
 
 #ifdef HAS_XVMCSHM

@@ -33,13 +33,13 @@ from The Open Group.
 #include <X11/extensions/bigreqsproto.h>
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "opaque.h"
-#include "extinit_priv.h"
 
 static int
 ProcBigReqDispatch(ClientPtr client)

@@ -40,7 +40,7 @@
 #include "dix/input_priv.h"
 #include "dix/property_priv.h"
 #include "dix/screen_hooks_priv.h"
-#include "include/extinit_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/bug_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"

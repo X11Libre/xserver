@@ -36,12 +36,12 @@
 #include <dixstruct.h>
 #include <extnsionst.h>
 #include <glx_extinit.h>
-#include "extinit_priv.h"
 
 #include <GL/glxproto.h>
 #include "vndservervendor.h"
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 
 Bool noGlxExtension = FALSE;
 

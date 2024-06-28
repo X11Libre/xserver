@@ -33,6 +33,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -47,7 +48,6 @@ in this Software without prior written authorization from The Open Group.
 #include "opaque.h"
 #include "regionstr.h"
 #include "gcstruct.h"
-#include "extinit_priv.h"
 #include "protocol-versions.h"
 
 Bool noShapeExtension = FALSE;

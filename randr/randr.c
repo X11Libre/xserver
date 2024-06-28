@@ -29,9 +29,9 @@
 #include <dix-config.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "randrstr_priv.h"
-#include "extinit_priv.h"
 
 /* From render.h */
 #ifndef SubPixelUnknown
