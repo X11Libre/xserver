@@ -49,6 +49,8 @@
 #include "xf86Extensions.h"
 #include "xf86cmap.h"
 
+Bool noXFree86VidModeExtension = FALSE;
+
 static vidMonitorValue
 xf86VidModeGetMonitorValue(ScreenPtr pScreen, int valtyp, int indx)
 {
