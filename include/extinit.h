@@ -62,10 +62,6 @@ extern _X_EXPORT Bool noCompositeExtension;
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif
 
-#ifdef XF86BIGFONT
-extern _X_EXPORT Bool noXFree86BigfontExtension;
-#endif
-
 extern _X_EXPORT Bool noXFixesExtension;
 
 #if defined(XSELINUX)
