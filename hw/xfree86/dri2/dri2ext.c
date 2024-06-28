@@ -56,7 +56,6 @@
 
 static int DRI2EventBase;
 
-
 static Bool
 validDrawable(ClientPtr client, XID drawable, Mask access_mode,
               DrawablePtr *pDrawable, int *status)
