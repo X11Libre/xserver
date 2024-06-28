@@ -28,7 +28,6 @@
 #endif
 
 #include "extension.h"
-#include "extinit.h"
 #include "globals.h"
 
 #include "xf86.h"
