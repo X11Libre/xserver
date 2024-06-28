@@ -4,12 +4,13 @@
 #endif
 
 #include <string.h>
+#include <X11/X.h>
+
+#include "dix/colormap_priv.h"
 
 #include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
-
-#include <X11/X.h>
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "windowstr.h"
@@ -19,7 +20,6 @@
 #include "mipointer.h"
 #include "randrstr.h"
 #include "xf86CursorPriv.h"
-
 #include "servermd.h"
 
 static void

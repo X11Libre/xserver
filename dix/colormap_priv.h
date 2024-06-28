@@ -6,6 +6,7 @@
 #define _XSERVER_DIX_COLORMAP_PRIV_H
 
 #include <X11/Xdefs.h>
+#include <X11/Xproto.h>
 
 #include "dix/screenint_priv.h"
 #include "include/colormap.h"
@@ -27,5 +28,7 @@ int CopyColormapAndFree(Colormap mid, ColormapPtr pSrc, int client);
 
 int AllocColor(ColormapPtr pmap, unsigned short *pred, unsigned short *pgreen,
                unsigned short *pblue, Pixel *pPix, int client );
+
+void FakeAllocColor(ColormapPtr pmap, xColorItem *item);
 
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
