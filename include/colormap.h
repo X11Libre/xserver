@@ -51,13 +51,6 @@ SOFTWARE.
 #include "screenint.h"
 #include "window.h"
 
-/* Passed internally in colormap.c */
-#define REDMAP 0
-#define GREENMAP 1
-#define BLUEMAP 2
-#define PSEUDOMAP 3
-#define AllocPrivate (-1)
-#define AllocTemporary (-2)
 #define DynamicClass  1
 
 /* Values for the flags field of a colormap. These should have 1 bit set
