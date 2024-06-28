@@ -38,6 +38,7 @@ from The Open Group.
 #include <X11/Xproto.h>
 #include <X11/Xos.h>
 
+#include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/cmdline.h"

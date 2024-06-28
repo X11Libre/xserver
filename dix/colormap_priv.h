@@ -10,6 +10,7 @@
 
 #include "dix/screenint_priv.h"
 #include "include/colormap.h"
+#include "include/dix.h"
 #include "include/window.h"
 
 typedef struct _CMEntry *EntryPtr;
@@ -32,5 +33,8 @@ int AllocColor(ColormapPtr pmap, unsigned short *pred, unsigned short *pgreen,
 void FakeAllocColor(ColormapPtr pmap, xColorItem *item);
 
 void FakeFreeColor(ColormapPtr pmap, Pixel pixel);
+
+int QueryColors(ColormapPtr pmap, int count, Pixel *ppixIn,
+                xrgb *prgbList, ClientPtr client);
 
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
