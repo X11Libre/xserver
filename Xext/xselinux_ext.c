@@ -21,13 +21,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "selection.h"
 #include "inputstr.h"
 #include "windowstr.h"
 #include "propertyst.h"
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include "xselinuxint.h"
 
 #define CTX_DEV offsetof(SELinuxSubjectRec, dev_create_sid)

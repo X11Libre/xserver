@@ -91,9 +91,10 @@ SOFTWARE.
 #undef MITSHM
 #endif
 
+#include "miext/extinit_priv.h"
+
 #include "misc.h"
 #include "extension.h"
-#include "extinit_priv.h"
 #include "micmap.h"
 #include "os.h"
 #include "globals.h"

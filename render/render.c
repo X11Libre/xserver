@@ -33,6 +33,7 @@
 
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/osdep.h"
 
 #include "misc.h"
@@ -44,7 +45,6 @@
 #include "pixmapstr.h"
 #include "colormapst.h"
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include "servermd.h"
 #include "picturestr_priv.h"
 #include "glyphstr_priv.h"

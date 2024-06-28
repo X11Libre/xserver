@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
 
@@ -61,7 +62,6 @@ in this Software without prior written authorization from the X Consortium.
 #include "dpmsproc.h"
 #endif
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 // temporary workaround for win32/mingw32 name clash
 // see: https://gitlab.freedesktop.org/xorg/xserver/-/merge_requests/1355

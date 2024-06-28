@@ -24,12 +24,14 @@
  */
 
 #include <dix-config.h>
-#include "windowstr.h"
+
 #include <X11/extensions/ge.h>
 
+#include "miext/extinit_priv.h"
+
+#include "windowstr.h"
 #include "geext.h"
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 DevPrivateKeyRec GEClientPrivateKeyRec;
 
