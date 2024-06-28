@@ -49,4 +49,6 @@ int AllocColorPlanes(int client, ColormapPtr pmap, int colors, int r, int g,
 
 int FreeColors(ColormapPtr pmap, int client, int count, Pixel *pixels, Pixel mask);
 
+int StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client);
+
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
