@@ -29,8 +29,8 @@
 #include "extnsionst.h"
 
 #ifdef XF86DRI
-extern _X_EXPORT Bool noXFree86DRIExtension;
-extern void XFree86DRIExtensionInit(void);
+extern Bool noXFree86DRIExtension;
+void XFree86DRIExtensionInit(void);
 #endif
 
 #ifdef DRI2
