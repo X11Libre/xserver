@@ -53,12 +53,6 @@ SOFTWARE.
 
 #define DynamicClass  1
 
-/* Values for the flags field of a colormap. These should have 1 bit set
- * and not overlap */
-#define IsDefault 1
-#define AllAllocated 2
-#define BeingCreated 4
-
 typedef CARD32 Pixel;
 
 extern _X_EXPORT Bool ResizeVisualArray(ScreenPtr /* pScreen */ ,
