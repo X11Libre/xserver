@@ -38,6 +38,7 @@
 #include <X11/Xfuncproto.h>
 
 #include "dix/input_priv.h"
+#include "include/extinit_priv.h"
 #include "os/osdep.h"
 #include "os/xserver_poll.h"
 
