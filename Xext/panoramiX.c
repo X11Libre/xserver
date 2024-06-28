@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/extensions/panoramiXproto.h>
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "misc.h"
 #include "cursor.h"
@@ -55,7 +56,6 @@ Equipment Corporation.
 #ifdef COMPOSITE
 #include "compint.h"
 #endif
-#include "extinit_priv.h"
 #include "protocol-versions.h"
 
 #ifdef GLXPROXY

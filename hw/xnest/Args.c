@@ -17,7 +17,7 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 
-#include "include/extinit_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
 
 #include "screenint.h"

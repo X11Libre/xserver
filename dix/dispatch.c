@@ -111,6 +111,7 @@ Equipment Corporation.
 #include "dix/registry_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/resource.h"
+#include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
 #include "os/ddx_priv.h"

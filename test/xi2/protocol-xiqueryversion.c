@@ -43,9 +43,9 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/exevents_priv.h"
+#include "miext/extinit_priv.h"            /* for XInputExtensionInit */
 
 #include "inputstr.h"
-#include "extinit_priv.h"            /* for XInputExtensionInit */
 #include "scrnintstr.h"
 #include "xiqueryversion.h"
 #include "protocol-common.h"

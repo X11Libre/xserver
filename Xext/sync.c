@@ -59,6 +59,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/syncproto.h>
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/bug_priv.h"
 #include "os/osdep.h"
 
@@ -77,8 +78,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #if !defined(WIN32)
 #include <sys/time.h>
 #endif
-
-#include "extinit_priv.h"
 
 /*
  * Local Global Variables

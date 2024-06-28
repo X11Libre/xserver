@@ -25,7 +25,7 @@
 
 #include "present_priv.h"
 
-#include "extinit_priv.h"
+#include "miext/extinit_priv.h"
 
 int present_request;
 DevPrivateKeyRec present_screen_private_key;

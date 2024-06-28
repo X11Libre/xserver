@@ -37,11 +37,11 @@ and Jim Haggerty of Metheus.
 #include "dix/cursor_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/input_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include <X11/extensions/recordproto.h>
 #include "set.h"
 #include "swaprep.h"
