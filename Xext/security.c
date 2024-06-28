@@ -46,7 +46,7 @@ in this Software without prior written authorization from The Open Group.
 #include "privates.h"
 #include "xacestr.h"
 #include "securitysrv.h"
-#include "extinit.h"
+#include "extinit_priv.h"
 #include "protocol-versions.h"
 
 Bool noSecurityExtension = FALSE;
