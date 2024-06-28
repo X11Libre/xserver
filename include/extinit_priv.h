@@ -16,6 +16,7 @@ extern Bool noGlxExtension;
 extern Bool noRenderExtension;
 extern Bool noResExtension;
 extern Bool noRRExtension;
+extern Bool noShapeExtension;
 extern Bool noTestExtensions;
 
 void CompositeExtensionInit(void);

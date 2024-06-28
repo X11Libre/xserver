@@ -72,6 +72,8 @@ static void SShapeNotifyEvent(xShapeNotifyEvent * /* from */ ,
 #include "panoramiXsrv.h"
 #endif
 
+Bool noShapeExtension = FALSE;
+
 static int ShapeEventBase = 0;
 static RESTYPE ClientType, ShapeEventType;      /* resource types for event masks */
 
