@@ -68,8 +68,4 @@ extern _X_EXPORT Bool noPanoramiXExtension;
 extern _X_EXPORT Bool noXvExtension;
 #endif
 
-#if defined(PRESENT)
-#include "presentext.h"
-#endif
-
 #endif
