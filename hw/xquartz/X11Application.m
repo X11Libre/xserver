@@ -35,7 +35,7 @@
 #import "X11Application.h"
 #import "NSUserDefaults+XQuartzDefaults.h"
 
-#include "include/extinit_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "darwin.h"
 #include "quartz.h"

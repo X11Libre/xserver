@@ -58,13 +58,14 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86bigfproto.h>
 
+#include "miext/extinit_priv.h"
+
 #include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "dixfontstr.h"
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include "protocol-versions.h"
 
 #include "xf86bigfontsrv.h"
