@@ -30,7 +30,9 @@ Equipment Corporation.
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/extensions/dpmsproto.h>
 
+#include "miext/extinit_priv.h"
 #include "os/screensaver.h"
 #include "Xext/geext_priv.h"
 
@@ -39,9 +41,7 @@ Equipment Corporation.
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "opaque.h"
-#include <X11/extensions/dpmsproto.h>
 #include "dpmsproc.h"
-#include "extinit_priv.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "protocol-versions.h"

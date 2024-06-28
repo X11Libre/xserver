@@ -60,6 +60,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "miext/extinit_priv.h"
 #include "Xext/geext_priv.h"
 
 #include "inputstr.h"

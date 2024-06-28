@@ -34,6 +34,7 @@ in this Software without prior written authorization from The Open Group.
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "include/extinit_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/audit.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
@@ -47,7 +48,6 @@ in this Software without prior written authorization from The Open Group.
 #include "privates.h"
 #include "xacestr.h"
 #include "securitysrv.h"
-#include "extinit_priv.h"
 #include "protocol-versions.h"
 
 Bool noSecurityExtension = FALSE;
