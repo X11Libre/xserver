@@ -62,10 +62,6 @@ extern _X_EXPORT Bool noCompositeExtension;
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif
 
-#ifdef XCSECURITY
-extern _X_EXPORT Bool noSecurityExtension;
-#endif
-
 #ifdef XF86BIGFONT
 extern _X_EXPORT Bool noXFree86BigfontExtension;
 #endif
