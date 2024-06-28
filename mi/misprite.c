@@ -35,7 +35,10 @@ in this Software without prior written authorization from The Open Group.
 
 #include   <X11/X.h>
 #include   <X11/Xproto.h>
+#include   <X11/fonts/font.h>
+#include   <X11/fonts/fontstruct.h>
 
+#include   "dix/colormap_priv.h"
 #include   "dix/dix_priv.h"
 
 #include   "misc.h"
@@ -43,7 +46,6 @@ in this Software without prior written authorization from The Open Group.
 #include   "input.h"
 #include   "mi.h"
 #include   "cursorstr.h"
-#include   <X11/fonts/font.h>
 #include   "scrnintstr.h"
 #include   "colormapst.h"
 #include   "windowstr.h"
@@ -51,7 +53,6 @@ in this Software without prior written authorization from The Open Group.
 #include   "mipointer.h"
 #include   "misprite.h"
 #include   "dixfontstr.h"
-#include   <X11/fonts/fontstruct.h>
 #include   "inputstr.h"
 #include   "damage.h"
 
