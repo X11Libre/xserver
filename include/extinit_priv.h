@@ -21,6 +21,7 @@ extern Bool noScreenSaverExtension;
 extern Bool noSecurityExtension;
 extern Bool noShapeExtension;
 extern Bool noTestExtensions;
+extern Bool noXFixesExtension;
 extern Bool noXFree86BigfontExtension;
 
 void CompositeExtensionInit(void);
