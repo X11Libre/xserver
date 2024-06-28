@@ -38,7 +38,6 @@
 #include <os.h>
 #include <colormapst.h>
 
-#include "extinit.h"
 #include "privates.h"
 #include "glxserver.h"
 #include "glxutil.h"

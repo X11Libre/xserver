@@ -48,7 +48,7 @@
 
 #include "inputstr.h"
 #include "windowstr.h"
-#include "extinit.h"            /* for XInputExtensionInit */
+#include "extinit_priv.h"            /* for XInputExtensionInit */
 #include "scrnintstr.h"
 #include "xiselectev.h"
 
