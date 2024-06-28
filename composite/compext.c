@@ -43,10 +43,11 @@
 
 #include <dix-config.h>
 
+#include "miext/extinit_priv.h"
+
 #include "compint.h"
 #include "xace.h"
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 static CARD8 CompositeReqCode;
 static DevPrivateKeyRec CompositeClientPrivateKeyRec;

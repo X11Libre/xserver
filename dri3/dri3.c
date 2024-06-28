@@ -19,9 +19,11 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
+#include <dix-config.h>
+
+#include "miext/extinit_priv.h"
 
 #include "dri3_priv.h"
-#include "extinit_priv.h"
 #include <drm_fourcc.h>
 
 static int dri3_request;

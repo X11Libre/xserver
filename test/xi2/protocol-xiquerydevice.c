@@ -31,8 +31,10 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2proto.h>
 #include <X11/Xatom.h>
+
+#include "miext/extinit_priv.h"
+
 #include "inputstr.h"
-#include "extinit_priv.h"
 #include "exglobals.h"
 #include "scrnintstr.h"
 #include "xkbsrv.h"

@@ -106,6 +106,7 @@ __stdcall unsigned long GetTickCount(void);
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/bug_priv.h"
 #include "os/cmdline.h"
@@ -120,7 +121,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "present.h"
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
-#include "extinit_priv.h"
 
 #define X_INCLUDE_NETDB_H
 #include <X11/Xos_r.h>

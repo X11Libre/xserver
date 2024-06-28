@@ -31,13 +31,13 @@
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "input.h"
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "exevents.h"
-#include "extinit_priv.h"
 #include "xkbsrv.h"
 #include "xserver-properties.h"
 #include "syncsrv.h"

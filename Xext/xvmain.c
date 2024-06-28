@@ -83,6 +83,8 @@ SOFTWARE.
 
 #include "Xext/xvdix_priv.h"
 
+#include "miext/extinit_priv.h"
+
 #include "misc.h"
 #include "os.h"
 #include "scrnintstr.h"
@@ -90,7 +92,6 @@ SOFTWARE.
 #include "pixmapstr.h"
 #include "gcstruct.h"
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"
