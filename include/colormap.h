@@ -74,13 +74,6 @@ typedef CARD32 Pixel;
 /* moved to screenint.h: typedef struct _ColormapRec *ColormapPtr */
 typedef struct _colorResource *colorResourcePtr;
 
-extern _X_EXPORT int AllocColor(ColormapPtr /*pmap */ ,
-                                unsigned short * /*pred */ ,
-                                unsigned short * /*pgreen */ ,
-                                unsigned short * /*pblue */ ,
-                                Pixel * /*pPix */ ,
-                                int /*client */ );
-
 extern _X_EXPORT void FakeAllocColor(ColormapPtr /*pmap */ ,
                                      xColorItem * /*item */ );
 
