@@ -46,6 +46,7 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86dgaproto.h>
 
+#include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
