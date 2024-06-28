@@ -37,7 +37,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xfuncproto.h>
 
-#include "include/extinit_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "os/xserver_poll.h"
 
