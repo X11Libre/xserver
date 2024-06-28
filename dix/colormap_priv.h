@@ -13,6 +13,12 @@
 #include "include/dix.h"
 #include "include/window.h"
 
+/* Values for the flags field of a colormap. These should have 1 bit set
+ * and not overlap */
+#define CM_IsDefault 1
+#define CM_AllAllocated 2
+#define CM_BeingCreated 4
+
 typedef struct _CMEntry *EntryPtr;
 
 int CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,

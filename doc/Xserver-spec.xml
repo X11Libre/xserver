@@ -2736,7 +2736,7 @@ If the colormap is static, which you can tell by looking at the class field,
 you will want to fill in each color cell to match the hardwares notion of the
 color for that pixel.
 If the colormap is the default for the screen, which you can tell by looking
-at the IsDefault bit in the flags field, you should allocate BlackPixel
+at the CM_IsDefault bit in the flags field, you should allocate BlackPixel
 and WhitePixel to match the values you set in the pScreen structure.
 (Of course, you picked those values to begin with.)</para>
 <para>
