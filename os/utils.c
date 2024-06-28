@@ -123,9 +123,6 @@ __stdcall unsigned long GetTickCount(void);
 #ifdef XFreeXDGA
 Bool noXFree86DGAExtension = FALSE;
 #endif
-#ifdef XF86DRI
-Bool noXFree86DRIExtension = FALSE;
-#endif
 #ifdef XF86VIDMODE
 Bool noXFree86VidModeExtension = FALSE;
 #endif

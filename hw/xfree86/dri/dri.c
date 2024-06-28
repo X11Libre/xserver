@@ -74,6 +74,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xf86VGAarbiter.h"
 #include "xf86Extensions.h"
 
+Bool noXFree86DRIExtension = FALSE;
+
 static int DRIEntPrivIndex = -1;
 static DevPrivateKeyRec DRIScreenPrivKeyRec;
 
