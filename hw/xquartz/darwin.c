@@ -36,6 +36,7 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
+#include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 
@@ -53,7 +54,6 @@
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 #include "exevents.h"
-#include "extinit_priv.h"
 #include "glx_extinit.h"
 #include "xserver-properties.h"
 
