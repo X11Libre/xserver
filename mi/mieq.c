@@ -56,7 +56,6 @@ in this Software without prior written authorization from The Open Group.
 #include   "inpututils.h"
 #include   "mipointer.h"
 #include   "scrnintstr.h"
-#include   "extinit.h"
 #include   "exglobals.h"
 #include   "eventstr.h"
 

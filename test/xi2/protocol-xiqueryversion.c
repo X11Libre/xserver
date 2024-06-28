@@ -45,7 +45,7 @@
 #include "dix/exevents_priv.h"
 
 #include "inputstr.h"
-#include "extinit.h"            /* for XInputExtensionInit */
+#include "extinit_priv.h"            /* for XInputExtensionInit */
 #include "scrnintstr.h"
 #include "xiqueryversion.h"
 #include "protocol-common.h"

@@ -41,7 +41,6 @@ from The Open Group.
 #include "xkbsrv.h"
 #include "xserver-properties.h"
 #include "exevents.h"
-#include "extinit.h"
 
 void
 ProcessInputEvents(void)

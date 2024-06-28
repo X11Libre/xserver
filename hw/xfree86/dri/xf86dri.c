@@ -48,7 +48,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "extinit.h"
 #include "colormapst.h"
 #include "cursorstr.h"
 #include "scrnintstr.h"
