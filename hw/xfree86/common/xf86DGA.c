@@ -78,6 +78,8 @@
 #include "dgaproc.h"
 #include "protocol-versions.h"
 
+Bool noXFree86DGAExtension = FALSE;
+
 #define DGA_PROTOCOL_OLD_SUPPORT 1
 
 static DevPrivateKeyRec DGAScreenKeyRec;
