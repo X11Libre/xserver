@@ -54,7 +54,6 @@ in this Software without prior written authorization from The Open Group.
 #include   <X11/extensions/XI.h>
 #include   <X11/extensions/XIproto.h>
 #include   <X11/extensions/geproto.h>
-#include   "extinit.h"
 #include   "exglobals.h"
 #include   "eventstr.h"
 
