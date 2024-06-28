@@ -66,8 +66,6 @@ extern _X_EXPORT Bool noPanoramiXExtension;
 extern _X_EXPORT Bool noScreenSaverExtension;
 #endif
 
-extern _X_EXPORT Bool noShapeExtension;
-
 #ifdef MITSHM
 extern _X_EXPORT Bool noMITShmExtension;
 #endif
