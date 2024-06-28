@@ -47,5 +47,6 @@ void XvExtensionInit(void);
 void XvMCExtensionInit(void);
 void dri3_extension_init(void);
 void PseudoramiXExtensionInit(void);
+void present_extension_init(void);
 
 #endif /* _XSERVER_EXTINIT_PRIV_H */
