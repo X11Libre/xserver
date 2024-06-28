@@ -51,9 +51,6 @@ SOFTWARE.
 #include "screenint.h"
 #include "window.h"
 
-/* these follow X.h's AllocNone and AllocAll */
-#define CM_PSCREEN 2
-#define CM_PWIN	   3
 /* Passed internally in colormap.c */
 #define REDMAP 0
 #define GREENMAP 1
