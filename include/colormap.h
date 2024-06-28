@@ -71,9 +71,6 @@ SOFTWARE.
 
 typedef CARD32 Pixel;
 
-/* moved to screenint.h: typedef struct _ColormapRec *ColormapPtr */
-typedef struct _colorResource *colorResourcePtr;
-
 extern _X_EXPORT Bool ResizeVisualArray(ScreenPtr /* pScreen */ ,
                                         int /* new_vis_count */ ,
                                         DepthPtr /* depth */ );
