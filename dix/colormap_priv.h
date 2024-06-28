@@ -31,4 +31,6 @@ int AllocColor(ColormapPtr pmap, unsigned short *pred, unsigned short *pgreen,
 
 void FakeAllocColor(ColormapPtr pmap, xColorItem *item);
 
+void FakeFreeColor(ColormapPtr pmap, Pixel pixel);
+
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
