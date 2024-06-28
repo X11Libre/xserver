@@ -35,8 +35,8 @@ void XFree86DRIExtensionInit(void);
 
 #ifdef DRI2
 #include <X11/extensions/dri2proto.h>
-extern _X_EXPORT Bool noDRI2Extension;
-extern void DRI2ExtensionInit(void);
+extern Bool noDRI2Extension;
+void DRI2ExtensionInit(void);
 #endif
 
 #ifdef XF86VIDMODE
