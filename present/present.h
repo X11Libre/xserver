@@ -27,7 +27,6 @@
 #include <X11/extensions/presentproto.h>
 
 #include "randrstr.h"
-#include "presentext.h"
 
 typedef enum {
     PRESENT_FLIP_REASON_UNKNOWN,
