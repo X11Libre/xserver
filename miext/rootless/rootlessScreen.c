@@ -33,6 +33,13 @@
 #include <dix-config.h>
 #endif
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+
+#include "dix/colormap_priv.h"
+
 #include "mi.h"
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -42,11 +49,6 @@
 #include "mivalidate.h"
 #include "picturestr.h"
 #include "colormapst.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
 
 #include "rootlessCommon.h"
 #include "rootlessWindow.h"
