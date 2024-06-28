@@ -51,4 +51,6 @@ int FreeColors(ColormapPtr pmap, int client, int count, Pixel *pixels, Pixel mas
 
 int StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client);
 
+int IsMapInstalled(Colormap map, WindowPtr pWin);
+
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
