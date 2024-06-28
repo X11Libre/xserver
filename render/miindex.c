@@ -28,6 +28,8 @@
 #ifndef _MIINDEX_H_
 #define _MIINDEX_H_
 
+#include "dix/colormap_priv.h"
+
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
