@@ -40,6 +40,7 @@
 #include "dix/input_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/osdep.h"
 
 #include "misc.h"
@@ -59,7 +60,6 @@
 #include "xserver-properties.h"
 #include "eventstr.h"
 #include "inpututils.h"
-#include "extinit_priv.h"
 
 Bool noTestExtensions = FALSE;
 

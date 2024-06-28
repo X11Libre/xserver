@@ -34,8 +34,8 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "miext/extinit_priv.h"
 
-#include "extinit_priv.h"
 #include "exglobals.h"
 #include "xkbsrv.h"             /* for XkbInitPrivates */
 #include "xserver-properties.h"

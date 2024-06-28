@@ -26,13 +26,16 @@
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-#include "windowstr.h"
+
 #include <X11/extensions/ge.h>
+
+#include "windowstr.h"
+
+#include "miext/extinit_priv.h"
 
 #include "geint.h"
 #include "geext.h"
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 DevPrivateKeyRec GEClientPrivateKeyRec;
 
