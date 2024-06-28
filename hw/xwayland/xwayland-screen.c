@@ -40,12 +40,12 @@
 #include "dix/input_priv.h"
 #include "dix/property_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "include/extinit_priv.h"
 #include "os/bug_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
 #include "os/xserver_poll.h"
 
-#include "extinit_priv.h"
 #include <micmap.h>
 #include <misyncshm.h>
 #include <os.h>
