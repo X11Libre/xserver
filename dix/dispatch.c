@@ -2489,7 +2489,7 @@ ProcFreeColormap(ClientPtr client)
                                  client, DixDestroyAccess);
     if (rc == Success) {
         /* Freeing a default colormap is a no-op */
-        if (!(pmap->flags & IsDefault))
+        if (!(pmap->flags & CM_IsDefault))
             FreeResource(stuff->id, X11_RESTYPE_NONE);
         return Success;
     }
@@ -2835,7 +2835,7 @@ ProcFreeColors(ClientPtr client)
     if (rc == Success) {
         int count;
 
-        if (pcmp->flags & AllAllocated)
+        if (pcmp->flags & CM_AllAllocated)
             return BadAccess;
         count = bytes_to_int32((client->req_len << 2) - sizeof(xFreeColorsReq));
         return FreeColors(pcmp, client->index, count,
