@@ -33,6 +33,8 @@
 #endif
 #include "win.h"
 
+#include "dix/colormap_priv.h"
+
 /*
  * Local function prototypes
  */
@@ -1209,7 +1211,7 @@ winDestroyColormapShadowGDI(ColormapPtr pColormap)
      * will not have had winUninstallColormap called on it.  Thus,
      * we need to handle the default colormap in a special way.
      */
-    if (pColormap->flags & IsDefault) {
+    if (pColormap->flags & CM_IsDefault) {
 #if ENABLE_DEBUG
         winDebug("winDestroyColormapShadowGDI - Destroying default "
                  "colormap\n");
