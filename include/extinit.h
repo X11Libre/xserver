@@ -62,10 +62,6 @@ extern _X_EXPORT Bool noCompositeExtension;
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif
 
-#if defined(XSELINUX)
-extern _X_EXPORT Bool noSELinuxExtension;
-#endif
-
 #if defined(XV)
 extern _X_EXPORT Bool noXvExtension;
 #endif
