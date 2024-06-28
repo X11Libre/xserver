@@ -13,7 +13,6 @@ srcs_present = [
 
 hdrs_present = [
     'present.h',
-    'presentext.h',
 ]
 
 if host_machine.system() in ['freebsd', 'openbsd']
