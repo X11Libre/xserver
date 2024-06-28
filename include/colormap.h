@@ -74,13 +74,6 @@ typedef CARD32 Pixel;
 /* moved to screenint.h: typedef struct _ColormapRec *ColormapPtr */
 typedef struct _colorResource *colorResourcePtr;
 
-extern _X_EXPORT int CreateColormap(Colormap /*mid */ ,
-                                    ScreenPtr /*pScreen */ ,
-                                    VisualPtr /*pVisual */ ,
-                                    ColormapPtr * /*ppcmap */ ,
-                                    int /*alloc */ ,
-                                    int /*client */ );
-
 extern _X_EXPORT int FreeColormap(void *pmap,
                                   XID mid);
 
