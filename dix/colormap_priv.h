@@ -43,4 +43,8 @@ int FreeClientPixels(void *pcr, XID fakeid);
 int AllocColorCells(int client, ColormapPtr pmap, int colors, int planes,
                     Bool contig, Pixel *ppix, Pixel *masks);
 
+int AllocColorPlanes(int client, ColormapPtr pmap, int colors, int r, int g,
+                     int b, Bool contig, Pixel *pixels, Pixel *prmask,
+                     Pixel *pgmask, Pixel *pbmask);
+
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
