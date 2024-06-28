@@ -40,4 +40,7 @@ int QueryColors(ColormapPtr pmap, int count, Pixel *ppixIn,
 /* should only be called via resource type's destructor */
 int FreeClientPixels(void *pcr, XID fakeid);
 
+int AllocColorCells(int client, ColormapPtr pmap, int colors, int planes,
+                    Bool contig, Pixel *ppix, Pixel *masks);
+
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
