@@ -41,7 +41,7 @@ void DRI2ExtensionInit(void);
 
 #ifdef XF86VIDMODE
 #include <X11/extensions/xf86vmproto.h>
-extern _X_EXPORT Bool noXFree86VidModeExtension;
+extern Bool noXFree86VidModeExtension;
 extern void XFree86VidModeExtensionInit(void);
 #endif
 
