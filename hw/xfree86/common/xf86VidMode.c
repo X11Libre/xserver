@@ -42,7 +42,6 @@
 #include "os.h"
 #include "xf86.h"
 #include "xf86Priv.h"
-#include "extinit.h"
 
 #ifdef XF86VIDMODE
 #include "vidmodestr.h"
