@@ -128,9 +128,6 @@ Bool noXFree86DGAExtension = FALSE;
 #ifdef XF86VIDMODE
 Bool noXFree86VidModeExtension = FALSE;
 #endif
-#ifdef DRI2
-Bool noDRI2Extension = FALSE;
-#endif
 
 Bool noGEExtension = FALSE;
 
