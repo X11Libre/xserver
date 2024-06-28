@@ -55,7 +55,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "extinit.h"
 #include "cursorstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"

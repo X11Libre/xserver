@@ -68,7 +68,6 @@
 #include "XIstubs.h"
 #include "xf86Optrec.h"
 #include "mipointer.h"
-#include "extinit.h"
 #include "loaderProcs.h"
 #include "systemd-logind.h"
 #include "exevents.h"           /* AddInputDevice */
