@@ -23,4 +23,6 @@ int TellLostMap(WindowPtr pwin, void *value);
 
 int TellGainedMap(WindowPtr pwin, void *value);
 
+int CopyColormapAndFree(Colormap mid, ColormapPtr pSrc, int client);
+
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
