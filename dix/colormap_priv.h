@@ -37,4 +37,7 @@ void FakeFreeColor(ColormapPtr pmap, Pixel pixel);
 int QueryColors(ColormapPtr pmap, int count, Pixel *ppixIn,
                 xrgb *prgbList, ClientPtr client);
 
+/* should only be called via resource type's destructor */
+int FreeClientPixels(void *pcr, XID fakeid);
+
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
