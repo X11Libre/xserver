@@ -25,6 +25,8 @@
 #endif
 #include "kdrive.h"
 
+#include "dix/colormap_priv.h"
+
 /*
  * Put the entire colormap into the DAC
  */
