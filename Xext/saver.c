@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/extensions/saverproto.h>
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/screensaver.h"
 
 #include "misc.h"
@@ -60,7 +61,6 @@ in this Software without prior written authorization from the X Consortium.
 #include "dpmsproc.h"
 #endif
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 Bool noScreenSaverExtension = FALSE;
 

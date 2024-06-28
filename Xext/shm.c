@@ -45,6 +45,7 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/Xfuncproto.h>
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/busfault.h"
 #include "os/osdep.h"
@@ -61,7 +62,6 @@ in this Software without prior written authorization from The Open Group.
 #include "servermd.h"
 #include "shmint.h"
 #include "xace.h"
-#include "extinit_priv.h"
 #include "protocol-versions.h"
 
 /* Needed for Solaris cross-zone shared memory extension */
