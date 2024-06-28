@@ -130,7 +130,6 @@ Bool noScreenSaverExtension = FALSE;
 #ifdef MITSHM
 Bool noMITShmExtension = FALSE;
 #endif
-Bool noShapeExtension = FALSE;
 
 #ifdef XCSECURITY
 Bool noSecurityExtension = FALSE;
