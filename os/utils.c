@@ -120,10 +120,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
 
-#ifdef XF86VIDMODE
-Bool noXFree86VidModeExtension = FALSE;
-#endif
-
 Bool noGEExtension = FALSE;
 
 #define X_INCLUDE_NETDB_H
