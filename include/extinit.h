@@ -62,10 +62,6 @@ extern _X_EXPORT Bool noCompositeExtension;
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif
 
-#ifdef MITSHM
-extern _X_EXPORT Bool noMITShmExtension;
-#endif
-
 #ifdef XCSECURITY
 extern _X_EXPORT Bool noSecurityExtension;
 #endif

@@ -124,10 +124,6 @@ __stdcall unsigned long GetTickCount(void);
 #ifdef COMPOSITE
 Bool noCompositeExtension = FALSE;
 #endif
-#ifdef MITSHM
-Bool noMITShmExtension = FALSE;
-#endif
-
 #ifdef XCSECURITY
 Bool noSecurityExtension = FALSE;
 #endif
