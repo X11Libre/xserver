@@ -106,6 +106,8 @@ static void SShmCompletionEvent(xShmCompletionEvent *from,
 
 static int ShmCreatePixmap(ClientPtr client, xShmCreatePixmapReq *stuff);
 
+Bool noMITShmExtension = FALSE;
+
 static unsigned char ShmReqCode;
 int ShmCompletionCode;
 int BadShmSegCode;
