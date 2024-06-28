@@ -35,12 +35,12 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XKMformat.h>
 
 #include "dix/dix_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "misc.h"
 #include "inputstr.h"
 #include <xkbsrv.h>
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include "xace.h"
 #include "xkb-procs.h"
 #include "protocol-versions.h"
