@@ -17,6 +17,8 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 
+#include "dix/colormap_priv.h"
+
 #include "scrnintstr.h"
 #include "window.h"
 #include "windowstr.h"

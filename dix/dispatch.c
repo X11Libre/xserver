@@ -105,6 +105,7 @@ Equipment Corporation.
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
+#include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/gc_priv.h"
