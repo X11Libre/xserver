@@ -48,6 +48,8 @@
 #include "protocol-versions.h"
 #include "extinit_priv.h"
 
+Bool noXFixesExtension = FALSE;
+
 static unsigned char XFixesReqCode;
 int XFixesEventBase;
 int XFixesErrorBase;
