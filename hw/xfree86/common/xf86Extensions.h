@@ -47,9 +47,9 @@ extern void XFree86VidModeExtensionInit(void);
 
 #ifdef XFreeXDGA
 #include <X11/extensions/xf86dgaproto.h>
-extern _X_EXPORT Bool noXFree86DGAExtension;
-extern void XFree86DGAExtensionInit(void);
-extern void XFree86DGARegister(void);
+extern Bool noXFree86DGAExtension;
+void XFree86DGAExtensionInit(void);
+void XFree86DGARegister(void);
 #endif
 
 #endif
