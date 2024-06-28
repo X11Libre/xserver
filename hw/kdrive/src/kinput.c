@@ -42,7 +42,6 @@
 #include <X11/extensions/XIproto.h>
 #include "XIstubs.h"            /* even though we don't use stubs.  cute, no? */
 #include "exevents.h"
-#include "extinit.h"
 #include "exglobals.h"
 #include "eventstr.h"
 #include "xserver-properties.h"

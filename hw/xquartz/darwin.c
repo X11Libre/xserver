@@ -53,7 +53,7 @@
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 #include "exevents.h"
-#include "extinit.h"
+#include "extinit_priv.h"
 #include "glx_extinit.h"
 #include "xserver-properties.h"
 
