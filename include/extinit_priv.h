@@ -18,6 +18,7 @@ extern Bool noRenderExtension;
 extern Bool noResExtension;
 extern Bool noRRExtension;
 extern Bool noScreenSaverExtension;
+extern Bool noSecurityExtension;
 extern Bool noShapeExtension;
 extern Bool noTestExtensions;
 

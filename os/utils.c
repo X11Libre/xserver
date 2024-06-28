@@ -125,9 +125,6 @@ __stdcall unsigned long GetTickCount(void);
 #ifdef COMPOSITE
 Bool noCompositeExtension = FALSE;
 #endif
-#ifdef XCSECURITY
-Bool noSecurityExtension = FALSE;
-#endif
 #ifdef XF86BIGFONT
 Bool noXFree86BigfontExtension = FALSE;
 #endif
