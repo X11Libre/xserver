@@ -14,6 +14,7 @@
 #include <X11/extensions/XResproto.h>
 
 #include "dix/registry_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -23,7 +24,6 @@
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "gcstruct.h"
-#include "extinit_priv.h"
 #include "protocol-versions.h"
 #include "client.h"
 #include "list.h"
