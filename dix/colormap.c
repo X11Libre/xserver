@@ -68,6 +68,14 @@ SOFTWARE.
 #include "privates.h"
 #include "xace.h"
 
+#define REDMAP 0
+#define GREENMAP 1
+#define BLUEMAP 2
+#define PSEUDOMAP 3
+
+#define AllocPrivate (-1)
+#define AllocTemporary (-2)
+
 typedef int (*ColorCompareProcPtr) (EntryPtr /*pent */ ,
                                     xrgb * /*prgb */ );
 
