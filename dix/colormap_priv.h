@@ -9,6 +9,7 @@
 
 #include "dix/screenint_priv.h"
 #include "include/colormap.h"
+#include "include/window.h"
 
 typedef struct _CMEntry *EntryPtr;
 
@@ -17,5 +18,7 @@ int CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
 
 /* should only be called via resource type's destructor */
 int FreeColormap(void *pmap, XID mid);
+
+int TellLostMap(WindowPtr pwin, void *value);
 
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
