@@ -64,10 +64,12 @@
 #include "gcstruct.h"
 #include "dixfontstr.h"
 #include "extnsionst.h"
-#include "extinit.h"
+#include "extinit_priv.h"
 #include "protocol-versions.h"
 
 #include "xf86bigfontsrv.h"
+
+Bool noXFree86BigfontExtension = FALSE;
 
 static void XF86BigfontResetProc(ExtensionEntry *extEntry );
 
