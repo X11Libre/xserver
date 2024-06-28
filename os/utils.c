@@ -134,7 +134,6 @@ Bool noXFree86DRIExtension = FALSE;
 #ifdef XF86VIDMODE
 Bool noXFree86VidModeExtension = FALSE;
 #endif
-Bool noXFixesExtension = FALSE;
 #ifdef DRI2
 Bool noDRI2Extension = FALSE;
 #endif
