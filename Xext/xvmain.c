@@ -81,6 +81,7 @@ SOFTWARE.
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>
 
+#include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #include "Xext/xvdix_priv.h"
@@ -92,7 +93,6 @@ SOFTWARE.
 #include "pixmapstr.h"
 #include "gcstruct.h"
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"

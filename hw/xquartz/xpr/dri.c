@@ -45,10 +45,12 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#include "miext/extinit_priv.h"
+
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "extinit_priv.h"
 #include "cursorstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"

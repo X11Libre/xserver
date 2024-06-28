@@ -22,6 +22,7 @@ is" without express or implied warranty.
 
 #include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
+#include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 
@@ -32,7 +33,6 @@ is" without express or implied warranty.
 #include "windowstr.h"
 #include "servermd.h"
 #include "dixfontstr.h"
-#include "extinit_priv.h"
 
 #include "xnest-xcb.h"
 #include "Display.h"

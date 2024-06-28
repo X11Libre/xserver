@@ -44,11 +44,11 @@
 
 #include <dix-config.h>
 
+#include "miext/extinit_priv.h"
 #include "os/fmt.h"
 
 #include "xfixesint.h"
 #include "protocol-versions.h"
-#include "extinit_priv.h"
 
 Bool noXFixesExtension = FALSE;
 
