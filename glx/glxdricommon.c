@@ -34,7 +34,7 @@
 #include <GL/glxtokens.h>
 #include <GL/internal/dri_interface.h>
 #include <os.h>
-#include "extinit.h"
+#include "extinit_priv.h"
 #include "glxserver.h"
 #include "glxext.h"
 #include "glxcontext.h"
