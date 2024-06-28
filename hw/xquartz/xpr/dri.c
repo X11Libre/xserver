@@ -48,7 +48,7 @@
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "extinit.h"
+#include "extinit_priv.h"
 #include "cursorstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"

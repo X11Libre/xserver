@@ -33,7 +33,6 @@
 
 #include "misc.h"
 #include "os.h"
-#include "extinit.h"
 
 #ifdef XF86VIDMODE
 
