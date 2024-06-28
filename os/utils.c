@@ -120,9 +120,6 @@ __stdcall unsigned long GetTickCount(void);
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
 
-#ifdef XFreeXDGA
-Bool noXFree86DGAExtension = FALSE;
-#endif
 #ifdef XF86VIDMODE
 Bool noXFree86VidModeExtension = FALSE;
 #endif
