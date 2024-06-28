@@ -54,7 +54,7 @@
 #include <X11/extensions/XI2proto.h>
 #include "inputstr.h"
 #include "windowstr.h"
-#include "extinit.h"            /* for XInputExtensionInit */
+#include "extinit_priv.h"            /* for XInputExtensionInit */
 #include "scrnintstr.h"
 #include "exglobals.h"
 #include "xiselectev.h"
