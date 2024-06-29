@@ -295,7 +295,6 @@ if host_machine.system() == 'kfreebsd'
 endif
 
 if host_machine.system() == 'netbsd'
-  supports_pccons = true
   supports_pcvt = true
   supports_wscons = true
   csrg_based = true
