@@ -1,6 +1,7 @@
 #!/bin/bash
 
-protodir=$(pkg-config --variable=xcbincludedir xcb-proto)
+#protodir=$(pkg-config --variable=xcbincludedir xcb-proto)
+protodir=$(realpath xml)
 
 protos="xproto"
 
