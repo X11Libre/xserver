@@ -1,0 +1,10 @@
+#!/bin/bash
+
+protodir=$(pkg-config --variable=xcbincludedir xcb-proto)
+
+protos="xproto"
+
+mkdir -p output
+for p in $protos ; do
+    ( cd output && ../c_client.py -s '3x' -c 'foo_center_footer' -l 'foo_left_footer' $protodir/$p.xml )
+done
