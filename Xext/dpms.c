@@ -301,20 +301,13 @@ ProcDPMSGetVersion(ClientPtr client)
     REQUEST_FIELD_CARD16(minorVersion);
 
     xDPMSGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_DPMS_MAJOR_VERSION,
         .minorVersion = SERVER_DPMS_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-    }
-    WriteToClient(client, sizeof(xDPMSGetVersionReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static int
@@ -323,17 +316,10 @@ ProcDPMSCapable(ClientPtr client)
     REQUEST_HEAD_STRUCT(xDPMSCapableReq);
 
     xDPMSCapableReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .capable = TRUE
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xDPMSCapableReply), &rep);
-    return Success;
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static int
@@ -342,22 +328,15 @@ ProcDPMSGetTimeouts(ClientPtr client)
     REQUEST_HEAD_STRUCT(xDPMSGetTimeoutsReq);
 
     xDPMSGetTimeoutsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .standby = DPMSStandbyTime / MILLI_PER_SECOND,
         .suspend = DPMSSuspendTime / MILLI_PER_SECOND,
         .off = DPMSOffTime / MILLI_PER_SECOND
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.standby);
-        swaps(&rep.suspend);
-        swaps(&rep.off);
-    }
-    WriteToClient(client, sizeof(xDPMSGetTimeoutsReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD16(standby);
+    REPLY_FIELD_CARD16(suspend);
+    REPLY_FIELD_CARD16(off);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static int
@@ -444,19 +423,12 @@ ProcDPMSInfo(ClientPtr client)
     REQUEST_HEAD_STRUCT(xDPMSInfoReq);
 
     xDPMSInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .power_level = DPMSPowerLevel,
         .state = DPMSEnabled
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.power_level);
-    }
-    WriteToClient(client, sizeof(xDPMSInfoReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD16(power_level);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static int
