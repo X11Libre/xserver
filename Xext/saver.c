@@ -703,9 +703,8 @@ ProcScreenSaverSelectInput(ClientPtr client)
 }
 
 static int
-ScreenSaverSetAttributes(ClientPtr client)
+ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
 {
-    REQUEST(xScreenSaverSetAttributesReq);
     DrawablePtr pDraw;
     WindowPtr pParent;
     ScreenPtr pScreen;
@@ -728,7 +727,6 @@ ScreenSaverSetAttributes(ClientPtr client)
     Colormap cmap;
     ColormapPtr pCmap;
 
-    REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
     ret = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                             DixGetAttrAccess);
     if (ret != Success)
@@ -1045,16 +1043,13 @@ ScreenSaverSetAttributes(ClientPtr client)
 }
 
 static int
-ScreenSaverUnsetAttributes(ClientPtr client)
+ScreenSaverUnsetAttributes(ClientPtr client, Drawable drawable)
 {
-    REQUEST(xScreenSaverSetAttributesReq);
     DrawablePtr pDraw;
     ScreenSaverScreenPrivatePtr pPriv;
     int rc;
 
-    REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
-    rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
-                           DixGetAttrAccess);
+    rc = dixLookupDrawable(&pDraw, drawable, client, 0, DixGetAttrAccess);
     if (rc != Success)
         return rc;
     pPriv = GetScreenPrivate(pDraw->pScreen);
@@ -1070,9 +1065,11 @@ ScreenSaverUnsetAttributes(ClientPtr client)
 static int
 ProcScreenSaverSetAttributes(ClientPtr client)
 {
+    REQUEST(xScreenSaverSetAttributesReq);
+    REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
+
 #ifdef PANORAMIX
     if (!noPanoramiXExtension) {
-        REQUEST(xScreenSaverSetAttributesReq);
         PanoramiXRes *draw;
         PanoramiXRes *backPix = NULL;
         PanoramiXRes *bordPix = NULL;
@@ -1080,8 +1077,6 @@ ProcScreenSaverSetAttributes(ClientPtr client)
         int i, status, len;
         int pback_offset = 0, pbord_offset = 0, cmap_offset = 0;
         XID orig_visual, tmp;
-
-        REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
 
         status = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                           XRC_DRAWABLE, client, DixWriteAccess);
@@ -1144,26 +1139,27 @@ ProcScreenSaverSetAttributes(ClientPtr client)
             if (orig_visual != CopyFromParent)
                 stuff->visualID = PanoramiXTranslateVisualID(i, orig_visual);
 
-            status = ScreenSaverSetAttributes(client);
+            status = ScreenSaverSetAttributes(client, stuff);
         }
 
         return status;
     }
 #endif
 
-    return ScreenSaverSetAttributes(client);
+    return ScreenSaverSetAttributes(client, stuff);
 }
 
 static int
 ProcScreenSaverUnsetAttributes(ClientPtr client)
 {
+    REQUEST(xScreenSaverUnsetAttributesReq);
+    REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
+
 #ifdef PANORAMIX
     if (!noPanoramiXExtension) {
-        REQUEST(xScreenSaverUnsetAttributesReq);
         PanoramiXRes *draw;
         int rc, i;
 
-        REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
 
         rc = dixLookupResourceByClass((void **) &draw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
@@ -1171,15 +1167,14 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
             return (rc == BadValue) ? BadDrawable : rc;
 
         for (i = PanoramiXNumScreens - 1; i > 0; i--) {
-            stuff->drawable = draw->info[i].id;
-            ScreenSaverUnsetAttributes(client);
+            ScreenSaverUnsetAttributes(client, draw->info[i].id);
         }
 
         stuff->drawable = draw->info[0].id;
     }
 #endif
 
-    return ScreenSaverUnsetAttributes(client);
+    return ScreenSaverUnsetAttributes(client, stuff->drawable);
 }
 
 static int
