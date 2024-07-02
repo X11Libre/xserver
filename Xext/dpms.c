@@ -33,6 +33,7 @@ Equipment Corporation.
 #include <X11/extensions/dpmsproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/screensaver.h"
 #include "Xext/geext_priv.h"
@@ -127,9 +128,7 @@ ProcDPMSSelectInput(register ClientPtr client)
 {
     REQUEST(xDPMSSelectInputReq);
     REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
-
-    if (client->swapped)
-        swapl(&stuff->eventMask);
+    REQUEST_FIELD_CARD32(eventMask);
 
     DPMSEventPtr pEvent, pNewEvent, *pHead;
     XID clientResource;
@@ -308,13 +307,9 @@ ProcDPMSGetVersion(ClientPtr client)
 {
     REQUEST(xDPMSGetVersionReq);
     REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
+    REQUEST_FIELD_CARD16(majorVersion);
+    REQUEST_FIELD_CARD16(minorVersion);
 
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
-
-    /* REQUEST(xDPMSGetVersionReq); */
     xDPMSGetVersionReply reply = {
         .majorVersion = SERVER_DPMS_MAJOR_VERSION,
         .minorVersion = SERVER_DPMS_MINOR_VERSION
@@ -331,12 +326,15 @@ ProcDPMSGetVersion(ClientPtr client)
 static int
 ProcDPMSCapable(ClientPtr client)
 {
-    /* REQUEST(xDPMSCapableReq); */
+    REQUEST_HEAD_STRUCT(xDPMSCapableReq);
+
     xDPMSCapableReply reply = {
         .capable = TRUE
     };
 
-    REQUEST_SIZE_MATCH(xDPMSCapableReq);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+    }
 
     X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
@@ -345,14 +343,13 @@ ProcDPMSCapable(ClientPtr client)
 static int
 ProcDPMSGetTimeouts(ClientPtr client)
 {
-    /* REQUEST(xDPMSGetTimeoutsReq); */
+    REQUEST_HEAD_STRUCT(xDPMSGetTimeoutsReq);
+
     xDPMSGetTimeoutsReply reply = {
         .standby = DPMSStandbyTime / MILLI_PER_SECOND,
         .suspend = DPMSSuspendTime / MILLI_PER_SECOND,
         .off = DPMSOffTime / MILLI_PER_SECOND
     };
-
-    REQUEST_SIZE_MATCH(xDPMSGetTimeoutsReq);
 
     if (client->swapped) {
         swaps(&reply.standby);
@@ -368,12 +365,9 @@ ProcDPMSSetTimeouts(ClientPtr client)
 {
     REQUEST(xDPMSSetTimeoutsReq);
     REQUEST_SIZE_MATCH(xDPMSSetTimeoutsReq);
-
-    if (client->swapped) {
-        swaps(&stuff->standby);
-        swaps(&stuff->suspend);
-        swaps(&stuff->off);
-    }
+    REQUEST_FIELD_CARD16(standby);
+    REQUEST_FIELD_CARD16(suspend);
+    REQUEST_FIELD_CARD16(off);
 
     if ((stuff->off != 0) && (stuff->off < stuff->suspend)) {
         client->errorValue = stuff->off;
@@ -395,9 +389,9 @@ ProcDPMSSetTimeouts(ClientPtr client)
 static int
 ProcDPMSEnable(ClientPtr client)
 {
-    Bool was_enabled = DPMSEnabled;
+    REQUEST_HEAD_STRUCT(xDPMSEnableReq);
 
-    REQUEST_SIZE_MATCH(xDPMSEnableReq);
+    Bool was_enabled = DPMSEnabled;
 
     DPMSEnabled = TRUE;
     if (!was_enabled) {
@@ -411,11 +405,9 @@ ProcDPMSEnable(ClientPtr client)
 static int
 ProcDPMSDisable(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xDPMSDisableReq);
+
     Bool was_enabled = DPMSEnabled;
-
-    /* REQUEST(xDPMSDisableReq); */
-
-    REQUEST_SIZE_MATCH(xDPMSDisableReq);
 
     DPMSSet(client, DPMSModeOn);
 
@@ -431,6 +423,7 @@ ProcDPMSForceLevel(ClientPtr client)
 {
     REQUEST(xDPMSForceLevelReq);
     REQUEST_SIZE_MATCH(xDPMSForceLevelReq);
+    REQUEST_FIELD_CARD16(level);
 
     if (!DPMSEnabled)
         return BadMatch;
@@ -454,13 +447,12 @@ ProcDPMSForceLevel(ClientPtr client)
 static int
 ProcDPMSInfo(ClientPtr client)
 {
-    /* REQUEST(xDPMSInfoReq); */
+    REQUEST_HEAD_STRUCT(xDPMSInfoReq);
+
     xDPMSInfoReply reply = {
         .power_level = DPMSPowerLevel,
         .state = DPMSEnabled
     };
-
-    REQUEST_SIZE_MATCH(xDPMSInfoReq);
 
     if (client->swapped) {
         swaps(&reply.power_level);
