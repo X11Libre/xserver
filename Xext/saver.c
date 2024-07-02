@@ -605,6 +605,8 @@ ProcScreenSaverQueryVersion(ClientPtr client)
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
+        swaps(&rep.majorVersion);
+        swaps(&rep.minorVersion);
     }
     WriteToClient(client, sizeof(xScreenSaverQueryVersionReply), &rep);
     return Success;
