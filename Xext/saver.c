@@ -598,10 +598,8 @@ ProcScreenSaverQueryVersion(ClientPtr client)
         .minorVersion = SERVER_SAVER_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -658,12 +656,11 @@ ProcScreenSaverQueryInfo(ClientPtr client)
         reply.kind = ScreenSaverBlanked;
     else
         reply.kind = ScreenSaverInternal;
-    if (client->swapped) {
-        swapl(&reply.window);
-        swapl(&reply.tilOrSince);
-        swapl(&reply.idle);
-        swapl(&reply.eventMask);
-    }
+
+    X_REPLY_FIELD_CARD32(window);
+    X_REPLY_FIELD_CARD32(tilOrSince);
+    X_REPLY_FIELD_CARD32(idle);
+    X_REPLY_FIELD_CARD32(eventMask);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
