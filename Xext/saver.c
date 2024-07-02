@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include <X11/extensions/saverproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -592,14 +593,14 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 static int
 ProcScreenSaverQueryVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xScreenSaverQueryVersionReq);
+
     xScreenSaverQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .majorVersion = SERVER_SAVER_MAJOR_VERSION,
         .minorVersion = SERVER_SAVER_MINOR_VERSION
     };
-
-    REQUEST_SIZE_MATCH(xScreenSaverQueryVersionReq);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -613,14 +614,15 @@ ProcScreenSaverQueryVersion(ClientPtr client)
 static int
 ProcScreenSaverQueryInfo(ClientPtr client)
 {
-    REQUEST(xScreenSaverQueryInfoReq);
+    REQUEST_HEAD_STRUCT(xScreenSaverQueryInfoReq);
+    REQUEST_FIELD_CARD32(drawable);
+
     int rc;
     ScreenSaverStuffPtr pSaver;
     DrawablePtr pDraw;
     CARD32 lastInput;
     ScreenSaverScreenPrivatePtr pPriv;
 
-    REQUEST_SIZE_MATCH(xScreenSaverQueryInfoReq);
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success)
@@ -677,11 +679,12 @@ ProcScreenSaverQueryInfo(ClientPtr client)
 static int
 ProcScreenSaverSelectInput(ClientPtr client)
 {
-    REQUEST(xScreenSaverSelectInputReq);
+    REQUEST_HEAD_STRUCT(xScreenSaverSelectInputReq);
+    REQUEST_FIELD_CARD32(drawable);
+    REQUEST_FIELD_CARD32(eventMask);
+
     DrawablePtr pDraw;
     int rc;
-
-    REQUEST_SIZE_MATCH(xScreenSaverSelectInputReq);
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success)
@@ -1059,8 +1062,16 @@ ScreenSaverUnsetAttributes(ClientPtr client, Drawable drawable)
 static int
 ProcScreenSaverSetAttributes(ClientPtr client)
 {
-    REQUEST(xScreenSaverSetAttributesReq);
-    REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
+    REQUEST_HEAD_AT_LEAST(xScreenSaverSetAttributesReq);
+    REQUEST_FIELD_CARD32(drawable);
+    REQUEST_FIELD_CARD16(x);
+    REQUEST_FIELD_CARD16(y);
+    REQUEST_FIELD_CARD16(width);
+    REQUEST_FIELD_CARD16(height);
+    REQUEST_FIELD_CARD16(borderWidth);
+    REQUEST_FIELD_CARD32(visualID);
+    REQUEST_FIELD_CARD32(mask);
+    REQUEST_REST_CARD32();
 
 #ifdef PANORAMIX
     if (!noPanoramiXExtension) {
@@ -1146,8 +1157,8 @@ ProcScreenSaverSetAttributes(ClientPtr client)
 static int
 ProcScreenSaverUnsetAttributes(ClientPtr client)
 {
-    REQUEST(xScreenSaverUnsetAttributesReq);
-    REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
+    REQUEST_HEAD_STRUCT(xScreenSaverUnsetAttributesReq);
+    REQUEST_FIELD_CARD32(drawable);
 
 #ifdef PANORAMIX
     if (!noPanoramiXExtension) {
@@ -1174,12 +1185,11 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
 static int
 ProcScreenSaverSuspend(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xScreenSaverSuspendReq);
+    REQUEST_FIELD_CARD32(suspend);
+
     ScreenSaverSuspensionPtr *prev, this;
     BOOL suspend;
-
-    REQUEST(xScreenSaverSuspendReq);
-    REQUEST_SIZE_MATCH(xScreenSaverSuspendReq);
-
     /*
      * Old versions of XCB encode suspend as 1 byte followed by three
      * pad bytes (which are always cleared), instead of a 4 byte
@@ -1258,97 +1268,6 @@ ProcScreenSaverDispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcScreenSaverQueryVersion(ClientPtr client)
-{
-    REQUEST(xScreenSaverQueryVersionReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xScreenSaverQueryVersionReq);
-    return ProcScreenSaverQueryVersion(client);
-}
-
-static int _X_COLD
-SProcScreenSaverQueryInfo(ClientPtr client)
-{
-    REQUEST(xScreenSaverQueryInfoReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xScreenSaverQueryInfoReq);
-    swapl(&stuff->drawable);
-    return ProcScreenSaverQueryInfo(client);
-}
-
-static int _X_COLD
-SProcScreenSaverSelectInput(ClientPtr client)
-{
-    REQUEST(xScreenSaverSelectInputReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xScreenSaverSelectInputReq);
-    swapl(&stuff->drawable);
-    swapl(&stuff->eventMask);
-    return ProcScreenSaverSelectInput(client);
-}
-
-static int _X_COLD
-SProcScreenSaverSetAttributes(ClientPtr client)
-{
-    REQUEST(xScreenSaverSetAttributesReq);
-    swaps(&stuff->length);
-    REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
-    swapl(&stuff->drawable);
-    swaps(&stuff->x);
-    swaps(&stuff->y);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    swaps(&stuff->borderWidth);
-    swapl(&stuff->visualID);
-    swapl(&stuff->mask);
-    SwapRestL(stuff);
-    return ProcScreenSaverSetAttributes(client);
-}
-
-static int _X_COLD
-SProcScreenSaverUnsetAttributes(ClientPtr client)
-{
-    REQUEST(xScreenSaverUnsetAttributesReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
-    swapl(&stuff->drawable);
-    return ProcScreenSaverUnsetAttributes(client);
-}
-
-static int _X_COLD
-SProcScreenSaverSuspend(ClientPtr client)
-{
-    REQUEST(xScreenSaverSuspendReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xScreenSaverSuspendReq);
-    swapl(&stuff->suspend);
-    return ProcScreenSaverSuspend(client);
-}
-
-static int _X_COLD
-SProcScreenSaverDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-        case X_ScreenSaverQueryVersion:
-            return SProcScreenSaverQueryVersion(client);
-        case X_ScreenSaverQueryInfo:
-            return SProcScreenSaverQueryInfo(client);
-        case X_ScreenSaverSelectInput:
-            return SProcScreenSaverSelectInput(client);
-        case X_ScreenSaverSetAttributes:
-            return SProcScreenSaverSetAttributes(client);
-        case X_ScreenSaverUnsetAttributes:
-            return SProcScreenSaverUnsetAttributes(client);
-        case X_ScreenSaverSuspend:
-            return SProcScreenSaverSuspend(client);
-        default:
-            return BadRequest;
-    }
-}
-
 void
 ScreenSaverExtensionInit(void)
 {
@@ -1370,7 +1289,7 @@ ScreenSaverExtensionInit(void)
     if (AttrType && SaverEventType && SuspendType &&
         (extEntry = AddExtension(ScreenSaverName, ScreenSaverNumberEvents, 0,
                                  ProcScreenSaverDispatch,
-                                 SProcScreenSaverDispatch, NULL,
+                                 ProcScreenSaverDispatch, NULL,
                                  StandardMinorOpcode))) {
         ScreenSaverEventBase = extEntry->eventBase;
         EventSwapVector[ScreenSaverEventBase] =
