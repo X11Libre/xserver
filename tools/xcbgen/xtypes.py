@@ -211,12 +211,31 @@ class SimpleType(PrimitiveType):
 
     out = __main__.output['simple']
 
+class ExistingType(PrimitiveType):
+    '''
+    Derived class which represents a cardinal type like CARD32 or char.
+    Any type which is typedef'ed to cardinal will be one of these.
+
+    Public fields added:
+    xml_type is the original string describing the type in the XML
+    '''
+    def __init__(self, name, size, xml_type=None):
+        PrimitiveType.__init__(self, name, size)
+        self.is_simple = True
+        self.xml_type = xml_type
+
+    def resolve(self, module):
+        self.resolved = True
+
+    out = __main__.output['simple']
+
 
 # Cardinal datatype globals.  See module __init__ method.
 tcard8 = SimpleType(('uint8_t',), 1, 'CARD8')
 tcard16 = SimpleType(('uint16_t',), 2, 'CARD16')
-tcard32 = SimpleType(('uint32_t',), 4, 'CARD32')
-tcard64 = SimpleType(('uint64_t',), 8, 'CARD64')
+tcard32 = SimpleType(('CARD32',), 4, 'CARD32')
+txid = SimpleType(('XID',), 4, 'XID')
+tcard64 = SimpleType(('CARD64',), 8, 'CARD64')
 tint8 =  SimpleType(('int8_t',), 1, 'INT8')
 tint16 = SimpleType(('int16_t',), 2, 'INT16')
 tint32 = SimpleType(('int32_t',), 4, 'INT32')

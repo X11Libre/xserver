@@ -97,10 +97,11 @@ class Module(object):
         self.namespaces[self.namespace.ext_name] = self.namespace
 
         # Register some common types
-        self.add_type('CARD8', '', ('uint8_t',), tcard8)
-        self.add_type('CARD16', '', ('uint16_t',), tcard16)
-        self.add_type('CARD32', '', ('uint32_t',), tcard32)
-        self.add_type('CARD64', '', ('uint64_t',), tcard64)
+        self.add_type('CARD8', '', ('CARD8',), tcard8)
+        self.add_type('CARD16', '', ('CARD16',), tcard16)
+        self.add_type('CARD32', '', ('CARD32',), tcard32)
+        self.add_type('XID', '', ('XID',), txid)
+        self.add_type('CARD64', '', ('CARD64',), tcard64)
         self.add_type('INT8', '', ('int8_t',), tint8)
         self.add_type('INT16', '', ('int16_t',), tint16)
         self.add_type('INT32', '', ('int32_t',), tint32)
@@ -155,6 +156,7 @@ class Module(object):
             self.all.append((name, item))
 
     def get_type_impl(self, id, idx):
+        print("get_type_impl id=%s" % id)
         key = id
         if key in self.types:
             return self.types[key][idx]

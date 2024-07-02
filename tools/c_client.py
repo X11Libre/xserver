@@ -242,7 +242,7 @@ def _t(list):
         parts = [list[0], _ext(list[1])] + [_n_item(i) for i in list[2:]] + ['t']
     else:
         parts = [list[0]] + [_n_item(i) for i in list[1:]] + ['t']
-    return '_'.join(parts).lower()
+    return '_'.join(parts).lower() # fixme
 
 
 def c_open(self):
@@ -2083,6 +2083,25 @@ def _c_accessors(self, name, base):
                 elif _c_field_needs_field_accessor(field):
                     _c_accessors_field(self, field)
 
+#def c_existing(self, name)
+#    '''
+#    These types are treated as already existing
+#    '''
+#    _c_type_setup(self, name, ())
+#
+#    if (self.name != name):
+#        # Typedef
+#        _h_setlevel(0)
+#        my_name = _t(name)
+#        _h('')
+#        _h('typedef %s %s;', _t(self.name), my_name)
+#
+#        # Iterator
+#        _c_iterator(self, name)
+
+def c_null(self, name):
+    pass
+
 def c_simple(self, name):
     '''
     Exported function that handles cardinal type declarations.
@@ -2099,6 +2118,8 @@ def c_simple(self, name):
 
         # Iterator
         _c_iterator(self, name)
+
+
 
 def _c_complex(self, force_packed = False):
     '''
@@ -3278,10 +3299,11 @@ def c_event(self, name):
 
     if self.name == name:
         # Structure definition
+        _h('// Ev: %s', self.name)
         _c_complex(self, force_packed)
     else:
         # Typedef
-        _h('')
+        _h('// Event: %s', self.name)
         _h('typedef %s %s;', _t(self.name + ('event',)), _t(name + ('event',)))
 
         # Create sizeof-function for eventcopies for compatibility reasons
@@ -3323,16 +3345,28 @@ def c_error(self, name):
 # Main routine starts here
 
 # Must create an "output" dictionary before any xcbgen imports.
+#xoutput = {'open'    : c_open,
+#          'close'   : c_close,
+#          'simple'  : c_simple,
+#          'enum'    : c_enum,
+#          'struct'  : c_struct,
+#          'union'   : c_union,
+#          'request' : c_request,
+#          'eventstruct' : c_eventstruct,
+#          'event'   : c_event,
+#          'error'   : c_error,
+#          }
+
 output = {'open'    : c_open,
           'close'   : c_close,
-          'simple'  : c_simple,
-          'enum'    : c_enum,
-          'struct'  : c_struct,
-          'union'   : c_union,
+          'simple'  : c_null,
+          'enum'    : c_null,
+          'struct'  : c_null,
+          'union'   : c_null,
           'request' : c_request,
-          'eventstruct' : c_eventstruct,
-          'event'   : c_event,
-          'error'   : c_error,
+          'eventstruct' : c_null,
+          'event'   : c_null,
+          'error'   : c_null,
           }
 
 # Boilerplate below this point

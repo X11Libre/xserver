@@ -41,7 +41,7 @@ def typedef(node, module, namespace):
 def xidtype(node, module, namespace):
     id = node.get('name')
     name = namespace.prefix + (id,)
-    type = module.get_type('CARD32')
+    type = module.get_type('XID')
     module.add_type(id, namespace.ns, name, type)
 
 def xidunion(node, module, namespace):
