@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
@@ -588,12 +589,12 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 static int
 ProcScreenSaverQueryVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xScreenSaverQueryVersionReq);
+
     xScreenSaverQueryVersionReply reply = {
         .majorVersion = SERVER_SAVER_MAJOR_VERSION,
         .minorVersion = SERVER_SAVER_MINOR_VERSION
     };
-
-    REQUEST_SIZE_MATCH(xScreenSaverQueryVersionReq);
 
     if (client->swapped) {
         swaps(&reply.majorVersion);
@@ -608,9 +609,7 @@ ProcScreenSaverQueryInfo(ClientPtr client)
 {
     REQUEST(xScreenSaverQueryInfoReq);
     REQUEST_SIZE_MATCH(xScreenSaverQueryInfoReq);
-
-    if (client->swapped)
-        swapl(&stuff->drawable);
+    REQUEST_FIELD_CARD32(drawable);
 
     int rc;
     ScreenSaverStuffPtr pSaver;
@@ -671,17 +670,12 @@ ProcScreenSaverQueryInfo(ClientPtr client)
 static int
 ProcScreenSaverSelectInput(ClientPtr client)
 {
-    REQUEST(xScreenSaverSelectInputReq);
+    REQUEST_HEAD_STRUCT(xScreenSaverSelectInputReq);
+    REQUEST_FIELD_CARD32(drawable);
+    REQUEST_FIELD_CARD32(eventMask);
+
     DrawablePtr pDraw;
     int rc;
-
-    REQUEST_SIZE_MATCH(xScreenSaverSelectInputReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->eventMask);
-    }
-
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success)
@@ -1059,8 +1053,16 @@ ScreenSaverUnsetAttributes(ClientPtr client, Drawable drawable)
 static int
 ProcScreenSaverSetAttributes(ClientPtr client)
 {
-    REQUEST(xScreenSaverSetAttributesReq);
-    REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
+    REQUEST_HEAD_AT_LEAST(xScreenSaverSetAttributesReq);
+    REQUEST_FIELD_CARD32(drawable);
+    REQUEST_FIELD_CARD16(x);
+    REQUEST_FIELD_CARD16(y);
+    REQUEST_FIELD_CARD16(width);
+    REQUEST_FIELD_CARD16(height);
+    REQUEST_FIELD_CARD16(borderWidth);
+    REQUEST_FIELD_CARD32(visualID);
+    REQUEST_FIELD_CARD32(mask);
+    REQUEST_REST_CARD32();
 
     if (client->swapped) {
         swapl(&stuff->drawable);
@@ -1158,8 +1160,8 @@ ProcScreenSaverSetAttributes(ClientPtr client)
 static int
 ProcScreenSaverUnsetAttributes(ClientPtr client)
 {
-    REQUEST(xScreenSaverUnsetAttributesReq);
-    REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
+    REQUEST_HEAD_STRUCT(xScreenSaverUnsetAttributesReq);
+    REQUEST_FIELD_CARD32(drawable);
 
     if (client->swapped)
         swapl(&stuff->drawable);
@@ -1189,15 +1191,11 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
 static int
 ProcScreenSaverSuspend(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xScreenSaverSuspendReq);
+    REQUEST_FIELD_CARD32(suspend);
+
     ScreenSaverSuspensionPtr *prev, this;
     BOOL suspend;
-
-    REQUEST(xScreenSaverSuspendReq);
-    REQUEST_SIZE_MATCH(xScreenSaverSuspendReq);
-
-    if (client->swapped)
-        swapl(&stuff->suspend);
-
     /*
      * Old versions of XCB encode suspend as 1 byte followed by three
      * pad bytes (which are always cleared), instead of a 4 byte
