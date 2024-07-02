@@ -596,11 +596,17 @@ ProcScreenSaverQueryVersion(ClientPtr client)
         .minorVersion = SERVER_SAVER_MINOR_VERSION
     };
 
+<<<<<<< HEAD
     if (client->swapped) {
         swaps(&rep.majorVersion);
         swaps(&rep.minorVersion);
     }
     X_SEND_REPLY_SIMPLE(client, rep);
+=======
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_SEND();
+>>>>>>> 8d5d751981 (Xext: saver: use REPLY_*() macros for preparing / sending replies)
     return Success;
 }
 
@@ -631,8 +637,11 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     lastInput = GetTimeInMillis() - LastEventTime(XIAllDevices).milliseconds;
 
     xScreenSaverQueryInfoReply rep = {
-        .window = pSaver->wid
+        .window = pSaver->wid,
+        .idle = lastInput,
+        .eventMask = getEventMask(pDraw->pScreen, client),
     };
+
     if (screenIsSaved != SCREEN_SAVER_OFF) {
         rep.state = ScreenSaverOn;
         if (ScreenSaverTime)
@@ -648,22 +657,19 @@ ProcScreenSaverQueryInfo(ClientPtr client)
             rep.state = ScreenSaverDisabled;
         }
     }
-    rep.idle = lastInput;
-    rep.eventMask = getEventMask(pDraw->pScreen, client);
+
     if (pPriv && pPriv->attr)
         rep.kind = ScreenSaverExternal;
     else if (ScreenSaverBlanking != DontPreferBlanking)
         rep.kind = ScreenSaverBlanked;
     else
         rep.kind = ScreenSaverInternal;
-    if (client->swapped) {
-        swapl(&rep.window);
-        swapl(&rep.tilOrSince);
-        swapl(&rep.idle);
-        swapl(&rep.eventMask);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    REPLY_FIELD_CARD32(window);
+    REPLY_FIELD_CARD32(tilOrSince);
+    REPLY_FIELD_CARD32(idle);
+    REPLY_FIELD_CARD32(eventMask);
+    return REPLY_SEND();
 }
 
 static int
