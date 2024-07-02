@@ -315,12 +315,9 @@ ProcDPMSGetVersion(ClientPtr client)
         .minorVersion = SERVER_DPMS_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    return REPLY_SEND();
 }
 
 static int
@@ -332,12 +329,7 @@ ProcDPMSCapable(ClientPtr client)
         .capable = TRUE
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 static int
@@ -351,13 +343,10 @@ ProcDPMSGetTimeouts(ClientPtr client)
         .off = DPMSOffTime / MILLI_PER_SECOND
     };
 
-    if (client->swapped) {
-        swaps(&rep.standby);
-        swaps(&rep.suspend);
-        swaps(&rep.off);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(standby);
+    REPLY_FIELD_CARD16(suspend);
+    REPLY_FIELD_CARD16(off);
+    return REPLY_SEND();
 }
 
 static int
@@ -448,11 +437,8 @@ ProcDPMSInfo(ClientPtr client)
         .state = DPMSEnabled
     };
 
-    if (client->swapped) {
-        swaps(&rep.power_level);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(power_level);
+    return REPLY_SEND();
 }
 
 static int
