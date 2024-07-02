@@ -677,7 +677,9 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     lastInput = GetTimeInMillis() - LastEventTime(XIAllDevices).milliseconds;
 
     xScreenSaverQueryInfoReply reply = {
-        .window = pSaver->wid
+        .window = pSaver->wid,
+        .idle = lastInput,
+        .eventMask = getEventMask(pDraw->pScreen, client),
     };
     if (screenIsSaved != SCREEN_SAVER_OFF) {
         reply.state = ScreenSaverOn;
@@ -694,8 +696,6 @@ ProcScreenSaverQueryInfo(ClientPtr client)
             reply.state = ScreenSaverDisabled;
         }
     }
-    reply.idle = lastInput;
-    reply.eventMask = getEventMask(pDraw->pScreen, client);
     if (pPriv && pPriv->attr) {
         reply.kind = ScreenSaverExternal;
     } else if (ScreenSaverBlanking != DontPreferBlanking) {
