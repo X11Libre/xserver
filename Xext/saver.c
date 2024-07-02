@@ -655,11 +655,7 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xScreenSaverQueryInfoReq);
     X_REQUEST_FIELD_CARD32(drawable);
 
-    ScreenSaverStuffPtr pSaver;
     DrawablePtr pDraw;
-    CARD32 lastInput;
-    ScreenSaverScreenPrivatePtr pPriv;
-
     int rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success) {
@@ -670,17 +666,18 @@ ProcScreenSaverQueryInfo(ClientPtr client)
         return rc;
     }
 
-    pSaver = &pDraw->pScreen->screensaver;
-    pPriv = GetScreenPrivate(pDraw->pScreen);
+    ScreenSaverStuffPtr pSaver = &pDraw->pScreen->screensaver;
+    ScreenSaverScreenPrivatePtr pPriv = GetScreenPrivate(pDraw->pScreen);
 
     UpdateCurrentTime();
-    lastInput = GetTimeInMillis() - LastEventTime(XIAllDevices).milliseconds;
+    CARD32 lastInput = GetTimeInMillis() - LastEventTime(XIAllDevices).milliseconds;
 
     xScreenSaverQueryInfoReply reply = {
         .window = pSaver->wid,
         .idle = lastInput,
         .eventMask = getEventMask(pDraw->pScreen, client),
     };
+
     if (screenIsSaved != SCREEN_SAVER_OFF) {
         reply.state = ScreenSaverOn;
         if (ScreenSaverTime) {
