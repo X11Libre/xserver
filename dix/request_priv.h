@@ -101,4 +101,60 @@ static inline int __write_reply_hdr_simple(
 #define X_SEND_REPLY_SIMPLE(client, hdrstruct) \
     __write_reply_hdr_simple(client, &(hdrstruct), sizeof(hdrstruct));
 
+/*
+ * macros for request handlers
+ *
+ * these are handling request packet checking and swapping of multi-byte
+ * values, if necessary. (length field is already swapped earlier)
+ */
+
+/* declare request struct and check size */
+#define X_REQUEST_HEAD_STRUCT(type) \
+    REQUEST(type); \
+    if (stuff == NULL) return (BadLength); \
+    REQUEST_SIZE_MATCH(type);
+
+/* declare request struct and check size (at least as big) */
+#define X_REQUEST_HEAD_AT_LEAST(type) \
+    REQUEST(type); \
+    if (stuff == NULL) return (BadLength); \
+    REQUEST_AT_LEAST_SIZE(type); \
+
+/* declare request struct, do NOT check size !*/
+#define X_REQUEST_HEAD_NO_CHECK(type) \
+    REQUEST(type); \
+    if (stuff == NULL) return (BadLength); \
+
+/* swap a CARD16 request struct field if necessary */
+#define X_REQUEST_FIELD_CARD16(field) \
+    do { if (client->swapped) swaps(&stuff->field); } while (0)
+
+/* swap a CARD32 request struct field if necessary */
+#define X_REQUEST_FIELD_CARD32(field) \
+    do { if (client->swapped) swapl(&stuff->field); } while (0)
+
+/* swap a CARD64 request struct field if necessary */
+#define X_REQUEST_FIELD_CARD64(field) \
+    do { if (client->swapped) swapll(&stuff->field); } while (0)
+
+/* swap CARD16 rest of request (after the struct) */
+#define X_REQUEST_REST_CARD16() \
+    do { if (client->swapped) SwapRestS(stuff); } while (0)
+
+/* swap CARD32 rest of request (after the struct) */
+#define X_REQUEST_REST_CARD32() \
+    do { if (client->swapped) SwapRestL(stuff); } while (0)
+
+/* swap CARD16 rest of request (after the struct) - check fixed count */
+#define X_REQUEST_REST_COUNT_CARD16(count) \
+    REQUEST_FIXED_SIZE(*stuff, count * sizeof(CARD16)); \
+    CARD32 *request_rest = (CARD16 *) (&stuff[1]); \
+    do { if (client->swapped) SwapShorts(request_rest, count); } while (0)
+
+/* swap CARD32 rest of request (after the struct) - check fixed count */
+#define X_REQUEST_REST_COUNT_CARD32(count) \
+    REQUEST_FIXED_SIZE(*stuff, count * sizeof(CARD32)); \
+    CARD32 *request_rest = (CARD32 *) (&stuff[1]); \
+    do { if (client->swapped) SwapLongs(request_rest, count); } while (0) \
+
 #endif /* _XSERVER_DIX_REQUEST_PRIV_H */
