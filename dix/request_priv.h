@@ -175,4 +175,91 @@ static inline int __write_reply_hdr_simple(
 #define X_REPLY_FIELD_CARD64(field) \
     do { if (client->swapped) swapll(&reply.field); } while (0)
 
+#define CLIENT_STRUCT_CARD16_1(buf, a) \
+    do { if (client->swapped) { \
+        cpswaps((buf)->a, (buf)->a); \
+    } } while (0)
+
+#define CLIENT_STRUCT_CARD16_2(buf, a, b) \
+    do { if (client->swapped) { \
+        cpswaps((buf)->a, (buf)->a); \
+        cpswaps((buf)->b, (buf)->b); \
+    } } while (0)
+
+#define CLIENT_STRUCT_CARD16_3(buf, a, b, c) \
+    do { if (client->swapped) { \
+        cpswaps((buf)->a, (buf)->a); \
+        cpswaps((buf)->b, (buf)->b); \
+        cpswaps((buf)->c, (buf)->c); \
+    } } while (0)
+
+#define CLIENT_STRUCT_CARD16_4(buf, a, b, c, d) \
+    do { if (client->swapped) { \
+        cpswaps((buf)->a, (buf)->a); \
+        cpswaps((buf)->b, (buf)->b); \
+        cpswaps((buf)->c, (buf)->c); \
+        cpswaps((buf)->d, (buf)->d); \
+    } } while (0)
+
+#define CLIENT_STRUCT_CARD16_5(buf, a, b, c, d, e) \
+    do { if (client->swapped) { \
+        cpswaps((buf)->a, (buf)->a); \
+        cpswaps((buf)->b, (buf)->b); \
+        cpswaps((buf)->c, (buf)->c); \
+        cpswaps((buf)->d, (buf)->d); \
+        cpswaps((buf)->e, (buf)->e); \
+    } } while (0)
+
+#define CLIENT_STRUCT_CARD32_1(buf, a) \
+    do { if (client->swapped) { \
+        cpswapl((buf)->a, (buf)->a); \
+    } } while (0)
+
+#define CLIENT_STRUCT_CARD32_2(buf, a, b) \
+    do { if (client->swapped) { \
+        cpswapl((buf)->a, (buf)->a); \
+        cpswapl((buf)->b, (buf)->b); \
+    } } while (0)
+
+#define CLIENT_STRUCT_CARD32_3(buf, a, b, c) \
+    do { if (client->swapped) { \
+        cpswapl((buf)->a, (buf)->a); \
+        cpswapl((buf)->b, (buf)->b); \
+        cpswapl((buf)->c, (buf)->c); \
+    } } while (0)
+
+/*
+ * macros for request handlers
+ *
+ * these are handling request packet checking and swapping of multi-byte
+ * values, if necessary.
+ */
+
+/* swap CARD32 rest of request (after the struct) */
+#define X_REQUEST_REST_CARD32() \
+    do { if (client->swapped) SwapRestL(stuff); } while (0)
+
+/* swap a buffer of CARD16's */
+#define X_REQUEST_BUF_CARD16(buf, count) \
+    do { if (client->swapped) SwapShorts((short*) buf, count); } while (0)
+
+/* swap a buffer of CARD32's */
+#define X_REQUEST_BUF_CARD32(buf, count) \
+    do { if (client->swapped) SwapLongs((CARD32*) buf, count); } while (0)
+
+/* swap a buffer of CARD16's */
+#define X_REPLY_BUF_CARD16(buf, count) \
+    do { if (client->swapped) SwapShorts((short*) buf, count); } while (0)
+
+/* swap a buffer of CARD32's */
+#define X_REPLY_BUF_CARD32(buf, count) \
+    do { if (client->swapped) SwapLongs((CARD32*) buf, count); } while (0)
+
+/* swap a buffer of CARD64's */
+#define X_REPLY_BUF_CARD64(buf, count) \
+    do { if (client->swapped) { \
+        CARD64* ____b = (CARD64*)buf; \
+        for (int ____i=0; ____i<count; ____i++) { \
+            swapll(&____b[____i]); } } } while (0)
+
 #endif /* _XSERVER_DIX_REQUEST_PRIV_H */
