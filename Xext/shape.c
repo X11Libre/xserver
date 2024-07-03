@@ -232,10 +232,8 @@ ProcShapeQueryVersion(ClientPtr client)
         .minorVersion = SERVER_SHAPE_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -651,6 +649,9 @@ ProcShapeQueryExtents(ClientPtr client)
     X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
+    BoxRec extents, *pExtents;
+    RegionPtr region;
+
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
