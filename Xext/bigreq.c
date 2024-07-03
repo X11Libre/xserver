@@ -47,24 +47,17 @@ ProcBigReqDispatch(ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xBigReqEnableReq);
 
-    xBigReqEnableReply rep;
-
     if (stuff->brReqType != X_BigReqEnable)
         return BadRequest;
 
     client->big_requests = TRUE;
-    rep = (xBigReqEnableReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+
+    xBigReqEnableReply rep = {
         .max_request_size = maxBigRequestSize
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.max_request_size);
-    }
-    WriteToClient(client, sizeof(xBigReqEnableReply), &rep);
-    return Success;
+
+    REPLY_FIELD_CARD32(max_request_size);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 void
