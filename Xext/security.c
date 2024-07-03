@@ -357,13 +357,11 @@ ProcSecurityQueryVersion(ClientPtr client)
         .minorVersion = SERVER_SECURITY_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
     X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
-}                               /* ProcSecurityQueryVersion */
+}
 
 static int
 SecurityEventSelectForAuthorization(SecurityAuthorizationPtr pAuth,
@@ -558,20 +556,19 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_binary_pad(&rpcbuf, pAuthdata, authdata_len);
 
+    /* tell client the auth id and data */
     xSecurityGenerateAuthorizationReply reply = {
         .authId = authId,
         .dataLength = authdata_len
     };
 
-    if (client->swapped) {
-        swapl(&reply.authId);
-        swaps(&reply.dataLength);
-    }
-
     SecurityAudit
         ("client %d generated authorization %lu trust %d timeout %lu group %lu events %lu\n",
          client->index, (unsigned long)pAuth->id, pAuth->trustLevel, (unsigned long)pAuth->timeout,
          (unsigned long)pAuth->group, (unsigned long)eventMask);
+
+    REPLY_FIELD_CARD32(authId);
+    REPLY_FIELD_CARD16(dataLength);
 
     /* the request succeeded; don't call RemoveAuthorization or free pAuth */
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
