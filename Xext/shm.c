@@ -346,12 +346,15 @@ shm_access(ClientPtr client, SHMPERM_TYPE * perm, int readonly)
 static int
 ProcShmAttach(ClientPtr client)
 {
+    REQUEST(xShmAttachReq);
+    REQUEST_SIZE_MATCH(xShmAttachReq);
+
+    if (!client->local)
+        return BadRequest;
+
     SHMSTAT_TYPE buf;
     ShmDescPtr shmdesc;
 
-    REQUEST(xShmAttachReq);
-
-    REQUEST_SIZE_MATCH(xShmAttachReq);
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
         client->errorValue = stuff->readOnly;
@@ -431,11 +434,14 @@ ShmDetachSegment(void *value, /* must conform to DeleteType */
 static int
 ProcShmDetach(ClientPtr client)
 {
+    REQUEST(xShmDetachReq);
+    REQUEST_SIZE_MATCH(xShmDetachReq);
+
+    if (!client->local)
+        return BadRequest;
+
     ShmDescPtr shmdesc;
 
-    REQUEST(xShmDetachReq);
-
-    REQUEST_SIZE_MATCH(xShmDetachReq);
     VERIFY_SHMSEG(stuff->shmseg, shmdesc, client);
     FreeResource(stuff->shmseg, X11_RESTYPE_NONE);
     return Success;
@@ -709,6 +715,9 @@ ProcShmPutImage(ClientPtr client)
     REQUEST(xShmPutImageReq);
     REQUEST_SIZE_MATCH(xShmPutImageReq);
 
+    if (!client->local)
+        return BadRequest;
+
 #ifdef XINERAMA
     int j, result, orig_x, orig_y;
     PanoramiXRes *draw, *gc;
@@ -757,6 +766,9 @@ ProcShmGetImage(ClientPtr client)
 {
     REQUEST(xShmGetImageReq);
     REQUEST_SIZE_MATCH(xShmGetImageReq);
+
+    if (!client->local)
+        return BadRequest;
 
 #ifdef XINERAMA
     PanoramiXRes *draw;
@@ -903,6 +915,9 @@ ProcShmCreatePixmap(ClientPtr client)
 {
     REQUEST(xShmCreatePixmapReq);
     REQUEST_SIZE_MATCH(xShmCreatePixmapReq);
+
+    if (!client->local)
+        return BadRequest;
 
 #ifdef XINERAMA
     if (noPanoramiXExtension)
@@ -1131,13 +1146,17 @@ ShmBusfaultNotify(void *context)
 static int
 ProcShmAttachFd(ClientPtr client)
 {
+    REQUEST(xShmAttachFdReq);
+    REQUEST_SIZE_MATCH(xShmAttachFdReq);
+
+    if (!client->local)
+        return BadRequest;
+
     int fd;
     ShmDescPtr shmdesc;
-    REQUEST(xShmAttachFdReq);
     struct stat statb;
 
     SetReqFds(client, 1);
-    REQUEST_SIZE_MATCH(xShmAttachFdReq);
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
         client->errorValue = stuff->readOnly;
@@ -1246,9 +1265,14 @@ shm_tmpfile(void)
 static int
 ProcShmCreateSegment(ClientPtr client)
 {
+    REQUEST(xShmCreateSegmentReq);
+    REQUEST_SIZE_MATCH(xShmCreateSegmentReq);
+
+    if (!client->local)
+        return BadRequest;
+
     int fd;
     ShmDescPtr shmdesc;
-    REQUEST(xShmCreateSegmentReq);
     xShmCreateSegmentReply rep = {
         .type = X_Reply,
         .nfd = 1,
@@ -1256,7 +1280,6 @@ ProcShmCreateSegment(ClientPtr client)
         .length = 0,
     };
 
-    REQUEST_SIZE_MATCH(xShmCreateSegmentReq);
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
         client->errorValue = stuff->readOnly;
@@ -1321,13 +1344,9 @@ ProcShmDispatch(ClientPtr client)
 {
     REQUEST(xReq);
 
-    if (stuff->data == X_ShmQueryVersion)
-        return ProcShmQueryVersion(client);
-
-    if (!client->local)
-        return BadRequest;
-
     switch (stuff->data) {
+    case X_ShmQueryVersion:
+        return ProcShmQueryVersion(client);
     case X_ShmAttach:
         return ProcShmAttach(client);
     case X_ShmDetach:
@@ -1457,13 +1476,9 @@ SProcShmDispatch(ClientPtr client)
 {
     REQUEST(xReq);
 
-    if (stuff->data == X_ShmQueryVersion)
-        return ProcShmQueryVersion(client);
-
-    if (!client->local)
-        return BadRequest;
-
     switch (stuff->data) {
+    case X_ShmQueryVersion:
+        return ProcShmQueryVersion(client);
     case X_ShmAttach:
         return SProcShmAttach(client);
     case X_ShmDetach:
