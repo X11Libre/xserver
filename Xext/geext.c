@@ -84,10 +84,8 @@ ProcGEQueryVersion(ClientPtr client)
     pGEClient->major_version = stuff->majorVersion;
     pGEClient->minor_version = stuff->minorVersion;
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
