@@ -56,9 +56,8 @@ ProcBigReqDispatch(ClientPtr client)
     xBigReqEnableReply reply = {
         .max_request_size = maxBigRequestSize
     };
-    if (client->swapped) {
-        swapl(&reply.max_request_size);
-    }
+
+    X_REPLY_FIELD_CARD32(max_request_size);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
