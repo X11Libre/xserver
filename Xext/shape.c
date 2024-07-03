@@ -33,6 +33,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "dix/request_priv.h"
 #include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
@@ -205,24 +206,16 @@ CreateClipShape(WindowPtr pWin)
 static int
 ProcShapeQueryVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xShapeQueryVersionReq);
+
     xShapeQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_SHAPE_MAJOR_VERSION,
         .minorVersion = SERVER_SHAPE_MINOR_VERSION
     };
 
-    REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-    }
-    WriteToClient(client, sizeof(xShapeQueryVersionReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static int
@@ -293,8 +286,11 @@ ShapeRectangles(ClientPtr client, xShapeRectanglesReq *stuff)
 static int
 ProcShapeRectangles(ClientPtr client)
 {
-    REQUEST(xShapeRectanglesReq);
-    REQUEST_AT_LEAST_SIZE(xShapeRectanglesReq);
+    REQUEST_HEAD_AT_LEAST(xShapeRectanglesReq);
+    REQUEST_FIELD_CARD32(dest);
+    REQUEST_FIELD_CARD16(xOff);
+    REQUEST_FIELD_CARD16(yOff);
+    REQUEST_REST_CARD16();
 
 #ifdef XINERAMA
     if (noPanoramiXExtension)
@@ -390,8 +386,11 @@ ShapeMask(ClientPtr client, xShapeMaskReq *stuff)
 static int
 ProcShapeMask(ClientPtr client)
 {
-    REQUEST(xShapeMaskReq);
-    REQUEST_SIZE_MATCH(xShapeMaskReq);
+    REQUEST_HEAD_STRUCT(xShapeMaskReq);
+    REQUEST_FIELD_CARD32(dest);
+    REQUEST_FIELD_CARD16(xOff);
+    REQUEST_FIELD_CARD16(yOff);
+    REQUEST_FIELD_CARD32(src);
 
 #ifdef XINERAMA
     if (noPanoramiXExtension)
@@ -518,8 +517,11 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
 static int
 ProcShapeCombine(ClientPtr client)
 {
-    REQUEST(xShapeCombineReq);
-    REQUEST_AT_LEAST_SIZE(xShapeCombineReq);
+    REQUEST_HEAD_STRUCT(xShapeCombineReq);
+    REQUEST_FIELD_CARD32(dest);
+    REQUEST_FIELD_CARD16(xOff);
+    REQUEST_FIELD_CARD16(yOff);
+    REQUEST_FIELD_CARD32(src);
 
 #ifdef XINERAMA
     if (noPanoramiXExtension)
@@ -587,8 +589,10 @@ ShapeOffset(ClientPtr client, xShapeOffsetReq *stuff)
 static int
 ProcShapeOffset(ClientPtr client)
 {
-    REQUEST(xShapeOffsetReq);
-    REQUEST_AT_LEAST_SIZE(xShapeOffsetReq);
+    REQUEST_HEAD_AT_LEAST(xShapeOffsetReq);
+    REQUEST_FIELD_CARD32(dest);
+    REQUEST_FIELD_CARD16(yOff);
+    REQUEST_FIELD_CARD16(yOff);
 
 #ifdef XINERAMA
     PanoramiXRes *win;
@@ -617,14 +621,15 @@ ProcShapeOffset(ClientPtr client)
 static int
 ProcShapeQueryExtents(ClientPtr client)
 {
-    REQUEST(xShapeQueryExtentsReq);
+    REQUEST_HEAD_STRUCT(xShapeQueryExtentsReq);
+    REQUEST_FIELD_CARD32(window);
+
     WindowPtr pWin;
     xShapeQueryExtentsReply rep;
     BoxRec extents, *pExtents;
     int rc;
     RegionPtr region;
 
-    REQUEST_SIZE_MATCH(xShapeQueryExtentsReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -726,13 +731,14 @@ ShapeFreeEvents(void *data, XID id)
 static int
 ProcShapeSelectInput(ClientPtr client)
 {
-    REQUEST(xShapeSelectInputReq);
+    REQUEST_HEAD_STRUCT(xShapeSelectInputReq);
+    REQUEST_FIELD_CARD32(window);
+
     WindowPtr pWin;
     ShapeEventPtr pShapeEvent, pNewShapeEvent, *pHead;
     XID clientResource;
     int rc;
 
-    REQUEST_SIZE_MATCH(xShapeSelectInputReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (rc != Success)
         return rc;
@@ -897,13 +903,14 @@ SendShapeNotify(WindowPtr pWin, int which)
 static int
 ProcShapeInputSelected(ClientPtr client)
 {
-    REQUEST(xShapeInputSelectedReq);
+    REQUEST_HEAD_STRUCT(xShapeInputSelectedReq);
+    REQUEST_FIELD_CARD32(window);
+
     WindowPtr pWin;
     ShapeEventPtr pShapeEvent, *pHead;
     int enabled, rc;
     xShapeInputSelectedReply rep;
 
-    REQUEST_SIZE_MATCH(xShapeInputSelectedReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -937,14 +944,15 @@ ProcShapeInputSelected(ClientPtr client)
 static int
 ProcShapeGetRectangles(ClientPtr client)
 {
-    REQUEST(xShapeGetRectanglesReq);
+    REQUEST_HEAD_STRUCT(xShapeGetRectanglesReq);
+    REQUEST_FIELD_CARD32(window);
+
     WindowPtr pWin;
     xShapeGetRectanglesReply rep;
     xRectangle *rects = NULL;
     int nrects, i, rc;
     RegionPtr region;
 
-    REQUEST_SIZE_MATCH(xShapeGetRectanglesReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -1067,117 +1075,6 @@ SShapeNotifyEvent(xShapeNotifyEvent * from, xShapeNotifyEvent * to)
     to->shaped = from->shaped;
 }
 
-static int _X_COLD
-SProcShapeRectangles(ClientPtr client)
-{
-    REQUEST(xShapeRectanglesReq);
-    REQUEST_AT_LEAST_SIZE(xShapeRectanglesReq);
-    swapl(&stuff->dest);
-    swaps(&stuff->xOff);
-    swaps(&stuff->yOff);
-    SwapRestS(stuff);
-    return ProcShapeRectangles(client);
-}
-
-static int _X_COLD
-SProcShapeMask(ClientPtr client)
-{
-    REQUEST(xShapeMaskReq);
-    REQUEST_SIZE_MATCH(xShapeMaskReq);
-    swapl(&stuff->dest);
-    swaps(&stuff->xOff);
-    swaps(&stuff->yOff);
-    swapl(&stuff->src);
-    return ProcShapeMask(client);
-}
-
-static int _X_COLD
-SProcShapeCombine(ClientPtr client)
-{
-    REQUEST(xShapeCombineReq);
-    REQUEST_SIZE_MATCH(xShapeCombineReq);
-    swapl(&stuff->dest);
-    swaps(&stuff->xOff);
-    swaps(&stuff->yOff);
-    swapl(&stuff->src);
-    return ProcShapeCombine(client);
-}
-
-static int _X_COLD
-SProcShapeOffset(ClientPtr client)
-{
-    REQUEST(xShapeOffsetReq);
-    REQUEST_SIZE_MATCH(xShapeOffsetReq);
-    swapl(&stuff->dest);
-    swaps(&stuff->xOff);
-    swaps(&stuff->yOff);
-    return ProcShapeOffset(client);
-}
-
-static int _X_COLD
-SProcShapeQueryExtents(ClientPtr client)
-{
-    REQUEST(xShapeQueryExtentsReq);
-    REQUEST_SIZE_MATCH(xShapeQueryExtentsReq);
-    swapl(&stuff->window);
-    return ProcShapeQueryExtents(client);
-}
-
-static int _X_COLD
-SProcShapeSelectInput(ClientPtr client)
-{
-    REQUEST(xShapeSelectInputReq);
-    REQUEST_SIZE_MATCH(xShapeSelectInputReq);
-    swapl(&stuff->window);
-    return ProcShapeSelectInput(client);
-}
-
-static int _X_COLD
-SProcShapeInputSelected(ClientPtr client)
-{
-    REQUEST(xShapeInputSelectedReq);
-    REQUEST_SIZE_MATCH(xShapeInputSelectedReq);
-    swapl(&stuff->window);
-    return ProcShapeInputSelected(client);
-}
-
-static int _X_COLD
-SProcShapeGetRectangles(ClientPtr client)
-{
-    REQUEST(xShapeGetRectanglesReq);
-    REQUEST_SIZE_MATCH(xShapeGetRectanglesReq);
-    swapl(&stuff->window);
-    return ProcShapeGetRectangles(client);
-}
-
-static int _X_COLD
-SProcShapeDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-    case X_ShapeQueryVersion:
-        return ProcShapeQueryVersion(client);
-    case X_ShapeRectangles:
-        return SProcShapeRectangles(client);
-    case X_ShapeMask:
-        return SProcShapeMask(client);
-    case X_ShapeCombine:
-        return SProcShapeCombine(client);
-    case X_ShapeOffset:
-        return SProcShapeOffset(client);
-    case X_ShapeQueryExtents:
-        return SProcShapeQueryExtents(client);
-    case X_ShapeSelectInput:
-        return SProcShapeSelectInput(client);
-    case X_ShapeInputSelected:
-        return SProcShapeInputSelected(client);
-    case X_ShapeGetRectangles:
-        return SProcShapeGetRectangles(client);
-    default:
-        return BadRequest;
-    }
-}
-
 void
 ShapeExtensionInit(void)
 {
@@ -1187,7 +1084,7 @@ ShapeExtensionInit(void)
     ShapeEventType = CreateNewResourceType(ShapeFreeEvents, "ShapeEvent");
     if (ClientType && ShapeEventType &&
         (extEntry = AddExtension(SHAPENAME, ShapeNumberEvents, 0,
-                                 ProcShapeDispatch, SProcShapeDispatch,
+                                 ProcShapeDispatch, ProcShapeDispatch,
                                  NULL, StandardMinorOpcode))) {
         ShapeEventBase = extEntry->eventBase;
         EventSwapVector[ShapeEventBase] = (EventSwapPtr) SShapeNotifyEvent;
