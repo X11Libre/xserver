@@ -36,12 +36,6 @@ DevPrivateKeyRec GEClientPrivateKeyRec;
 
 GEExtension GEExtensions[MAXEXTENSIONS];
 
-/* Major available requests */
-static const int version_requests[] = {
-    X_GEQueryVersion,           /* before client sends QueryVersion */
-    X_GEQueryVersion,           /* must be set to last request in version 1 */
-};
-
 /* Forward declarations */
 static void SGEGenericEvent(xEvent *from, xEvent *to);
 
@@ -87,11 +81,6 @@ ProcGEQueryVersion(ClientPtr client)
     return Success;
 }
 
-static int (*ProcGEVector[GENumberRequests]) (ClientPtr) = {
-    /* Version 1.0 */
-    ProcGEQueryVersion,
-};
-
 /************************************************************/
 /*                swapped request handlers                  */
 /************************************************************/
@@ -99,18 +88,11 @@ static int _X_COLD
 SProcGEQueryVersion(ClientPtr client)
 {
     REQUEST(xGEQueryVersionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xGEQueryVersionReq);
     swaps(&stuff->majorVersion);
     swaps(&stuff->minorVersion);
-    return (*ProcGEVector[stuff->ReqType]) (client);
+    return SProcGEQueryVersion(client);
 }
-
-static int (*SProcGEVector[GENumberRequests]) (ClientPtr) = {
-    /* Version 1.0 */
-    SProcGEQueryVersion
-};
 
 /************************************************************/
 /*                callbacks                                 */
@@ -120,32 +102,29 @@ static int (*SProcGEVector[GENumberRequests]) (ClientPtr) = {
 static int
 ProcGEDispatch(ClientPtr client)
 {
-    GEClientInfoPtr pGEClient = GEGetClient(client);
+    REQUEST(xReq);
 
-    REQUEST(xGEReq);
-
-    if (pGEClient->major_version >= ARRAY_SIZE(version_requests))
+    switch (stuff->data) {
+    case X_GEQueryVersion:
+        return ProcGEQueryVersion(client);
+    default:
         return BadRequest;
-    if (stuff->ReqType > version_requests[pGEClient->major_version])
-        return BadRequest;
-
-    return (ProcGEVector[stuff->ReqType]) (client);
+    }
 }
 
 /* dispatch swapped requests */
 static int _X_COLD
 SProcGEDispatch(ClientPtr client)
 {
-    GEClientInfoPtr pGEClient = GEGetClient(client);
+    REQUEST(xReq);
+    swaps(&stuff->length);
 
-    REQUEST(xGEReq);
-
-    if (pGEClient->major_version >= ARRAY_SIZE(version_requests))
+    switch (stuff->data) {
+    case X_GEQueryVersion:
+        return SProcGEQueryVersion(client);
+    default:
         return BadRequest;
-    if (stuff->ReqType > version_requests[pGEClient->major_version])
-        return BadRequest;
-
-    return (*SProcGEVector[stuff->ReqType]) (client);
+    }
 }
 
 /* Reset extension. Called on server shutdown. */
