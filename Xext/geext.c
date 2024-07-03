@@ -73,15 +73,9 @@ ProcGEQueryVersion(ClientPtr client)
     REQUEST_FIELD_CARD16(minorVersion);
 
     GEClientInfoPtr pGEClient = GEGetClient(client);
-    xGEQueryVersionReply rep;
 
-    rep = (xGEQueryVersionReply) {
-        .repType = X_Reply,
+    xGEQueryVersionReply rep = {
         .RepType = X_GEQueryVersion,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-
-        /* return the supported version by the server */
         .majorVersion = SERVER_GE_MAJOR_VERSION,
         .minorVersion = SERVER_GE_MINOR_VERSION
     };
@@ -90,14 +84,9 @@ ProcGEQueryVersion(ClientPtr client)
     pGEClient->major_version = stuff->majorVersion;
     pGEClient->minor_version = stuff->minorVersion;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-    }
-
-    WriteToClient(client, sizeof(xGEQueryVersionReply), &rep);
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_SEND();
     return Success;
 }
 
