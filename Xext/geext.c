@@ -184,24 +184,16 @@ SGEGenericEvent(xEvent *from, xEvent *to)
 void
 GEExtensionInit(void)
 {
-    ExtensionEntry *extEntry;
-
     if (!dixRegisterPrivateKey
         (&GEClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(GEClientInfoRec)))
         FatalError("GEExtensionInit: GE private request failed.\n");
 
-    if ((extEntry = AddExtension(GE_NAME,
-                                 0, GENumberErrors,
-                                 ProcGEDispatch, SProcGEDispatch,
-                                 GEResetProc, StandardMinorOpcode)) != 0) {
-        memset(GEExtensions, 0, sizeof(GEExtensions));
-
-        EventSwapVector[GenericEvent] = (EventSwapPtr) SGEGenericEvent;
-    }
-    else {
+    if (!AddExtension(GE_NAME, 0, GENumberErrors, ProcGEDispatch, SProcGEDispatch,
+                      GEResetProc, StandardMinorOpcode))
         FatalError("GEInit: AddExtensions failed.\n");
-    }
 
+    memset(GEExtensions, 0, sizeof(GEExtensions));
+    EventSwapVector[GenericEvent] = (EventSwapPtr) SGEGenericEvent;
 }
 
 /************************************************************/
