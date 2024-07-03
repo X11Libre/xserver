@@ -29,6 +29,7 @@
 #include <X11/extensions/geproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/geext_priv.h"
 
@@ -66,6 +67,10 @@ static void SGEGenericEvent(xEvent *from, xEvent *to);
 static int
 ProcGEQueryVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xGEQueryVersionReq);
+    REQUEST_FIELD_CARD16(majorVersion);
+    REQUEST_FIELD_CARD16(minorVersion);
+
     GEClientInfoPtr pGEClient = GEGetClient(client);
 
     REQUEST(xGEQueryVersionReq);
