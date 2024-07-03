@@ -29,6 +29,8 @@
 #include "windowstr.h"
 #include <X11/extensions/ge.h>
 
+#include "dix/request_priv.h"
+
 #include "geint.h"
 #include "geext.h"
 #include "protocol-versions.h"
@@ -50,12 +52,12 @@ static void SGEGenericEvent(xEvent *from, xEvent *to);
 static int
 ProcGEQueryVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xGEQueryVersionReq);
+    REQUEST_FIELD_CARD16(majorVersion);
+    REQUEST_FIELD_CARD16(minorVersion);
+
     GEClientInfoPtr pGEClient = GEGetClient(client);
     xGEQueryVersionReply rep;
-
-    REQUEST(xGEQueryVersionReq);
-
-    REQUEST_SIZE_MATCH(xGEQueryVersionReq);
 
     rep = (xGEQueryVersionReply) {
         .repType = X_Reply,
@@ -84,19 +86,6 @@ ProcGEQueryVersion(ClientPtr client)
 }
 
 /************************************************************/
-/*                swapped request handlers                  */
-/************************************************************/
-static int _X_COLD
-SProcGEQueryVersion(ClientPtr client)
-{
-    REQUEST(xGEQueryVersionReq);
-    REQUEST_SIZE_MATCH(xGEQueryVersionReq);
-    swaps(&stuff->majorVersion);
-    swaps(&stuff->minorVersion);
-    return SProcGEQueryVersion(client);
-}
-
-/************************************************************/
 /*                callbacks                                 */
 /************************************************************/
 
@@ -109,21 +98,6 @@ ProcGEDispatch(ClientPtr client)
     switch (stuff->data) {
     case X_GEQueryVersion:
         return ProcGEQueryVersion(client);
-    default:
-        return BadRequest;
-    }
-}
-
-/* dispatch swapped requests */
-static int _X_COLD
-SProcGEDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    swaps(&stuff->length);
-
-    switch (stuff->data) {
-    case X_GEQueryVersion:
-        return SProcGEQueryVersion(client);
     default:
         return BadRequest;
     }
@@ -169,7 +143,7 @@ GEExtensionInit(void)
         (&GEClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(GEClientInfoRec)))
         FatalError("GEExtensionInit: GE private request failed.\n");
 
-    if (!AddExtension(GE_NAME, 0, GENumberErrors, ProcGEDispatch, SProcGEDispatch,
+    if (!AddExtension(GE_NAME, 0, GENumberErrors, ProcGEDispatch, ProcGEDispatch,
                       GEResetProc, StandardMinorOpcode))
         FatalError("GEInit: AddExtensions failed.\n");
 
