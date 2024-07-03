@@ -409,6 +409,20 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     X_REQUEST_FIELD_CARD16(nbytesAuthData);
     X_REQUEST_FIELD_CARD32(valueMask);
 
+    int values_offset = bytes_to_int32(stuff->nbytesAuthProto) +
+            bytes_to_int32(stuff->nbytesAuthData);
+
+    if (values_offset > stuff->length - bytes_to_int32(sz_xSecurityGenerateAuthorizationReq))
+        return BadLength;
+
+    CARD32 *values = (CARD32 *) (&stuff[1]) + values_offset;
+
+    if (client->swapped) {
+        unsigned long nvalues;
+        nvalues = (((CARD32 *) stuff) + stuff->length) - values;
+        SwapLongs(values, nvalues);
+    }
+
     int len;                    /* request length in CARD32s */
     Bool removeAuth = FALSE;    /* if bailout, call RemoveAuthorization? */
     int err;                    /* error to return from this function */
@@ -416,7 +430,6 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     unsigned int trustLevel;    /* trust level of new auth */
     XID group;                  /* group of new auth */
     CARD32 timeout;             /* timeout of new auth */
-    CARD32 *values;             /* list of supplied attributes */
     char *protoname;            /* auth proto name sent in request */
     char *protodata;            /* auth proto data sent in request */
     unsigned int authdata_len;  /* # bytes of generated auth data */
