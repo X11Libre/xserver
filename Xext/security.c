@@ -348,21 +348,14 @@ ProcSecurityQueryVersion(ClientPtr client)
     REQUEST_FIELD_CARD16(minorVersion);
 
     xSecurityQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_SECURITY_MAJOR_VERSION,
         .minorVersion = SERVER_SECURITY_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-    }
-    WriteToClient(client, SIZEOF(xSecurityQueryVersionReply), &rep);
-    return Success;
-}                               /* ProcSecurityQueryVersion */
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_SEND_RET_SUCCESS();
+}
 
 static int
 SecurityEventSelectForAuthorization(SecurityAuthorizationPtr pAuth,
@@ -423,7 +416,6 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     SecurityAuthorizationPtr pAuth = NULL;      /* auth we are creating */
     int err;                    /* error to return from this function */
     XID authId;                 /* authorization ID assigned by os layer */
-    xSecurityGenerateAuthorizationReply rep;    /* reply struct */
     unsigned int trustLevel;    /* trust level of new auth */
     XID group;                  /* group of new auth */
     CARD32 timeout;             /* timeout of new auth */
@@ -548,30 +540,21 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     if (pAuth->timeout != 0)
         SecurityStartAuthorizationTimer(pAuth);
 
-    /* tell client the auth id and data */
-
-    rep = (xSecurityGenerateAuthorizationReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(authdata_len),
-        .authId = authId,
-        .dataLength = authdata_len
-    };
-
-    if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.authId);
-        swaps(&rep.dataLength);
-    }
-
-    WriteToClient(client, SIZEOF(xSecurityGenerateAuthorizationReply), &rep);
-    WriteToClient(client, authdata_len, pAuthdata);
 
     SecurityAudit
         ("client %d generated authorization %lu trust %d timeout %lu group %lu events %lu\n",
          client->index, (unsigned long)pAuth->id, pAuth->trustLevel, (unsigned long)pAuth->timeout,
          (unsigned long)pAuth->group, (unsigned long)eventMask);
+
+    /* tell client the auth id and data */
+    xSecurityGenerateAuthorizationReply rep = {
+        .authId = authId,
+        .dataLength = authdata_len
+    };
+
+    REPLY_FIELD_CARD32(authId);
+    REPLY_FIELD_CARD16(dataLength);
+    REPLY_SEND_EXTRA(pAuthdata, authdata_len);
 
     /* the request succeeded; don't call RemoveAuthorization or free pAuth */
     return Success;
