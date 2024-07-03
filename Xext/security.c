@@ -361,10 +361,8 @@ ProcSecurityQueryVersion(ClientPtr client)
         .minorVersion = SERVER_SECURITY_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }                               /* ProcSecurityQueryVersion */
@@ -554,15 +552,13 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
         .dataLength = authdata_len
     };
 
-    if (client->swapped) {
-        swapl(&reply.authId);
-        swaps(&reply.dataLength);
-    }
-
     SecurityAudit
         ("client %d generated authorization %lu trust %d timeout %lu group %lu events %lu\n",
          client->index, (unsigned long)pAuth->id, pAuth->trustLevel, (unsigned long)pAuth->timeout,
          (unsigned long)pAuth->group, (unsigned long)eventMask);
+
+    X_REPLY_FIELD_CARD32(authId);
+    X_REPLY_FIELD_CARD16(dataLength);
 
     /* the request succeeded; don't call RemoveAuthorization or free pAuth */
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
