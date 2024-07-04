@@ -449,6 +449,10 @@ ProcVidModeAddModeLine(ClientPtr client)
     int dotClock;
     int ver;
 
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
+
     DEBUG_P("XF86VidModeAddModeline");
 
     ver = ClientMajorVersion(client);
@@ -619,6 +623,10 @@ ProcVidModeDeleteModeLine(ClientPtr client)
     int len, dotClock;
     int ver;
 
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
+
     DEBUG_P("XF86VidModeDeleteModeline");
 
     ver = ClientMajorVersion(client);
@@ -742,6 +750,10 @@ ProcVidModeModModeLine(ClientPtr client)
     DisplayModePtr mode, modetmp;
     int len, dotClock;
     int ver;
+
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
 
     DEBUG_P("XF86VidModeModModeline");
 
@@ -1004,6 +1016,10 @@ ProcVidModeSwitchMode(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXF86VidModeSwitchModeReq);
 
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
+
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
     pScreen = screenInfo.screens[stuff->screen];
@@ -1031,6 +1047,10 @@ ProcVidModeSwitchToMode(ClientPtr client)
     int ver;
 
     DEBUG_P("XF86VidModeSwitchToMode");
+
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
 
     ver = ClientMajorVersion(client);
 
@@ -1135,6 +1155,10 @@ ProcVidModeLockModeSwitch(ClientPtr client)
     REQUEST_SIZE_MATCH(xXF86VidModeLockModeSwitchReq);
 
     DEBUG_P("XF86VidModeLockModeSwitch");
+
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
 
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
@@ -1299,6 +1323,10 @@ ProcVidModeSetViewPort(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXF86VidModeSetViewPortReq);
 
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
+
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
     pScreen = screenInfo.screens[stuff->screen];
@@ -1397,6 +1425,10 @@ ProcVidModeSetGamma(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXF86VidModeSetGammaReq);
 
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
+
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
     pScreen = screenInfo.screens[stuff->screen];
@@ -1463,6 +1495,10 @@ ProcVidModeSetGammaRamp(ClientPtr client)
     int length;
     ScreenPtr pScreen;
     VidModePtr pVidMode;
+
+    /* limited to local-only connections */
+    if (!VidModeAllowNonLocal && !client->local)
+        return VidModeErrorBase + XF86VidModeClientNotLocal;
 
     REQUEST(xXF86VidModeSetGammaRampReq);
     REQUEST_AT_LEAST_SIZE(xXF86VidModeSetGammaRampReq);
@@ -1671,33 +1707,26 @@ ProcVidModeDispatch(ClientPtr client)
         return ProcVidModeGetGammaRampSize(client);
     case X_XF86VidModeGetPermissions:
         return ProcVidModeGetPermissions(client);
+    case X_XF86VidModeAddModeLine:
+        return ProcVidModeAddModeLine(client);
+    case X_XF86VidModeDeleteModeLine:
+        return ProcVidModeDeleteModeLine(client);
+    case X_XF86VidModeModModeLine:
+        return ProcVidModeModModeLine(client);
+    case X_XF86VidModeSwitchMode:
+        return ProcVidModeSwitchMode(client);
+    case X_XF86VidModeSwitchToMode:
+        return ProcVidModeSwitchToMode(client);
+    case X_XF86VidModeLockModeSwitch:
+        return ProcVidModeLockModeSwitch(client);
+    case X_XF86VidModeSetViewPort:
+        return ProcVidModeSetViewPort(client);
+    case X_XF86VidModeSetGamma:
+        return ProcVidModeSetGamma(client);
+    case X_XF86VidModeSetGammaRamp:
+        return ProcVidModeSetGammaRamp(client);
     default:
-        if (VidModeAllowNonLocal || client->local) {
-            switch (stuff->data) {
-            case X_XF86VidModeAddModeLine:
-                return ProcVidModeAddModeLine(client);
-            case X_XF86VidModeDeleteModeLine:
-                return ProcVidModeDeleteModeLine(client);
-            case X_XF86VidModeModModeLine:
-                return ProcVidModeModModeLine(client);
-            case X_XF86VidModeSwitchMode:
-                return ProcVidModeSwitchMode(client);
-            case X_XF86VidModeSwitchToMode:
-                return ProcVidModeSwitchToMode(client);
-            case X_XF86VidModeLockModeSwitch:
-                return ProcVidModeLockModeSwitch(client);
-            case X_XF86VidModeSetViewPort:
-                return ProcVidModeSetViewPort(client);
-            case X_XF86VidModeSetGamma:
-                return ProcVidModeSetGamma(client);
-            case X_XF86VidModeSetGammaRamp:
-                return ProcVidModeSetGammaRamp(client);
-            default:
-                return BadRequest;
-            }
-        }
-        else
-            return VidModeErrorBase + XF86VidModeClientNotLocal;
+        return BadRequest;
     }
 }
 
@@ -2061,33 +2090,26 @@ SProcVidModeDispatch(ClientPtr client)
         return SProcVidModeGetGammaRampSize(client);
     case X_XF86VidModeGetPermissions:
         return SProcVidModeGetPermissions(client);
+    case X_XF86VidModeAddModeLine:
+        return SProcVidModeAddModeLine(client);
+    case X_XF86VidModeDeleteModeLine:
+        return SProcVidModeDeleteModeLine(client);
+    case X_XF86VidModeModModeLine:
+        return SProcVidModeModModeLine(client);
+    case X_XF86VidModeSwitchMode:
+        return SProcVidModeSwitchMode(client);
+    case X_XF86VidModeSwitchToMode:
+        return SProcVidModeSwitchToMode(client);
+    case X_XF86VidModeLockModeSwitch:
+        return SProcVidModeLockModeSwitch(client);
+    case X_XF86VidModeSetViewPort:
+        return SProcVidModeSetViewPort(client);
+    case X_XF86VidModeSetGamma:
+        return SProcVidModeSetGamma(client);
+    case X_XF86VidModeSetGammaRamp:
+        return SProcVidModeSetGammaRamp(client);
     default:
-        if (VidModeAllowNonLocal || client->local) {
-            switch (stuff->data) {
-            case X_XF86VidModeAddModeLine:
-                return SProcVidModeAddModeLine(client);
-            case X_XF86VidModeDeleteModeLine:
-                return SProcVidModeDeleteModeLine(client);
-            case X_XF86VidModeModModeLine:
-                return SProcVidModeModModeLine(client);
-            case X_XF86VidModeSwitchMode:
-                return SProcVidModeSwitchMode(client);
-            case X_XF86VidModeSwitchToMode:
-                return SProcVidModeSwitchToMode(client);
-            case X_XF86VidModeLockModeSwitch:
-                return SProcVidModeLockModeSwitch(client);
-            case X_XF86VidModeSetViewPort:
-                return SProcVidModeSetViewPort(client);
-            case X_XF86VidModeSetGamma:
-                return SProcVidModeSetGamma(client);
-            case X_XF86VidModeSetGammaRamp:
-                return SProcVidModeSetGammaRamp(client);
-            default:
-                return BadRequest;
-            }
-        }
-        else
-            return VidModeErrorBase + XF86VidModeClientNotLocal;
+        return BadRequest;
     }
 }
 
