@@ -1364,12 +1364,11 @@ ProcSyncGetPriority(ClientPtr client)
     X_REQUEST_FIELD_CARD32(id);
 
     ClientPtr priorityclient;
-    int rc;
 
     if (stuff->id == None)
         priorityclient = client;
     else {
-        rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
+        int rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
                              DixGetAttrAccess);
         if (rc != Success)
             return rc;
