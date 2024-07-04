@@ -675,18 +675,15 @@ ProcShapeQueryExtents(ClientPtr client)
         .heightClipShape = shapeBox.y2 - shapeBox.y1,
     };
 
-    if (client->swapped) {
-        swaps(&rep.xBoundingShape);
-        swaps(&rep.yBoundingShape);
-        swaps(&rep.widthBoundingShape);
-        swaps(&rep.heightBoundingShape);
-        swaps(&rep.xClipShape);
-        swaps(&rep.yClipShape);
-        swaps(&rep.widthClipShape);
-        swaps(&rep.heightClipShape);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(xBoundingShape);
+    REPLY_FIELD_CARD16(yBoundingShape);
+    REPLY_FIELD_CARD16(widthBoundingShape);
+    REPLY_FIELD_CARD16(heightBoundingShape);
+    REPLY_FIELD_CARD16(xClipShape);
+    REPLY_FIELD_CARD16(yClipShape);
+    REPLY_FIELD_CARD16(widthClipShape);
+    REPLY_FIELD_CARD16(heightClipShape);
+    return REPLY_SEND();
 }
 
  /*ARGSUSED*/ static int
@@ -934,8 +931,7 @@ ProcShapeInputSelected(ClientPtr client)
         .enabled = enabled,
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 static int
@@ -1015,12 +1011,8 @@ ProcShapeGetRectangles(ClientPtr client)
         .nrects = nrects
     };
 
-    if (client->swapped) {
-        swapl(&rep.nrects);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD32(nrects);
+    return REPLY_SEND_RPCBUF();
 }
 
 static int
