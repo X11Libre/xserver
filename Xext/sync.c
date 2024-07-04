@@ -1312,9 +1312,7 @@ ProcSyncListSystemCounters(ClientPtr client)
         .nCounters = nCounters
     };
 
-    if (client->swapped) {
-        swapl(&reply.nCounters);
-    }
+    X_REPLY_FIELD_CARD32(nCounters);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1381,9 +1379,7 @@ ProcSyncGetPriority(ClientPtr client)
         .priority = priorityclient->priority
     };
 
-    if (client->swapped) {
-        swapl(&reply.priority);
-    }
+    X_REPLY_FIELD_CARD32(priority);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1667,10 +1663,8 @@ ProcSyncQueryCounter(ClientPtr client)
         .value_lo = pCounter->value
     };
 
-    if (client->swapped) {
-        swapl(&reply.value_hi);
-        swapl(&reply.value_lo);
-    }
+    X_REPLY_FIELD_CARD32(value_hi);
+    X_REPLY_FIELD_CARD32(value_lo);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1846,15 +1840,13 @@ ProcSyncQueryAlarm(ClientPtr client)
         .state = pAlarm->state
     };
 
-    if (client->swapped) {
-        swapl(&reply.counter);
-        swapl(&reply.value_type);
-        swapl(&reply.wait_value_hi);
-        swapl(&reply.wait_value_lo);
-        swapl(&reply.test_type);
-        swapl(&reply.delta_hi);
-        swapl(&reply.delta_lo);
-    }
+    X_REPLY_FIELD_CARD32(counter);
+    X_REPLY_FIELD_CARD32(value_type);
+    X_REPLY_FIELD_CARD32(wait_value_hi);
+    X_REPLY_FIELD_CARD32(wait_value_lo);
+    X_REPLY_FIELD_CARD32(test_type);
+    X_REPLY_FIELD_CARD32(delta_hi);
+    X_REPLY_FIELD_CARD32(delta_lo);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
