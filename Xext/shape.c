@@ -623,7 +623,6 @@ ProcShapeQueryExtents(ClientPtr client)
     REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    xShapeQueryExtentsReply rep;
     BoxRec extents, *pExtents;
     int rc;
     RegionPtr region;
@@ -631,13 +630,12 @@ ProcShapeQueryExtents(ClientPtr client)
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
-    rep = (xShapeQueryExtentsReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+
+    xShapeQueryExtentsReply rep = {
         .boundingShaped = (wBoundingShape(pWin) != 0),
         .clipShaped = (wClipShape(pWin) != 0)
     };
+
     if ((region = wBoundingShape(pWin))) {
         /* this is done in two steps because of a compiler bug on SunOS 4.1.3 */
         pExtents = RegionExtents(region);
@@ -668,20 +666,16 @@ ProcShapeQueryExtents(ClientPtr client)
     rep.yClipShape = extents.y1;
     rep.widthClipShape = extents.x2 - extents.x1;
     rep.heightClipShape = extents.y2 - extents.y1;
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.xBoundingShape);
-        swaps(&rep.yBoundingShape);
-        swaps(&rep.widthBoundingShape);
-        swaps(&rep.heightBoundingShape);
-        swaps(&rep.xClipShape);
-        swaps(&rep.yClipShape);
-        swaps(&rep.widthClipShape);
-        swaps(&rep.heightClipShape);
-    }
-    WriteToClient(client, sizeof(xShapeQueryExtentsReply), &rep);
-    return Success;
+
+    REPLY_FIELD_CARD16(xBoundingShape);
+    REPLY_FIELD_CARD16(yBoundingShape);
+    REPLY_FIELD_CARD16(widthBoundingShape);
+    REPLY_FIELD_CARD16(heightBoundingShape);
+    REPLY_FIELD_CARD16(xClipShape);
+    REPLY_FIELD_CARD16(yClipShape);
+    REPLY_FIELD_CARD16(widthClipShape);
+    REPLY_FIELD_CARD16(heightClipShape);
+    REPLY_SEND_RET_SUCCESS();
 }
 
  /*ARGSUSED*/ static int
@@ -907,7 +901,6 @@ ProcShapeInputSelected(ClientPtr client)
     WindowPtr pWin;
     ShapeEventPtr pShapeEvent, *pHead;
     int enabled, rc;
-    xShapeInputSelectedReply rep;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
@@ -925,18 +918,12 @@ ProcShapeInputSelected(ClientPtr client)
             }
         }
     }
-    rep = (xShapeInputSelectedReply) {
-        .type = X_Reply,
+
+    xShapeInputSelectedReply rep = {
         .enabled = enabled,
-        .sequenceNumber = client->sequence,
-        .length = 0
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xShapeInputSelectedReply), &rep);
-    return Success;
+
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static int
@@ -946,7 +933,6 @@ ProcShapeGetRectangles(ClientPtr client)
     REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    xShapeGetRectanglesReply rep;
     xRectangle *rects;
     int nrects, i, rc;
     RegionPtr region;
@@ -1009,21 +995,15 @@ ProcShapeGetRectangles(ClientPtr client)
             rects[i].height = box->y2 - box->y1;
         }
     }
-    rep = (xShapeGetRectanglesReply) {
-        .type = X_Reply,
+
+    xShapeGetRectanglesReply rep = {
         .ordering = YXBanded,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(nrects * sizeof(xRectangle)),
         .nrects = nrects
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.nrects);
-        SwapShorts((short *) rects, (unsigned long) nrects * 4);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, nrects * sizeof(xRectangle), rects);
+
+    REPLY_BUF_CARD16(rects, (unsigned long) nrects * 4);
+    REPLY_FIELD_CARD32(nrects);
+    REPLY_SEND_EXTRA(rects, nrects * sizeof(xRectangle));
     free(rects);
     return Success;
 }
