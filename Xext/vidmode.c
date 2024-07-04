@@ -438,12 +438,7 @@ static int VidModeAddModeLine(ClientPtr client, xXF86VidModeAddModeLineReq* stuf
 static int
 ProcVidModeAddModeLine(ClientPtr client)
 {
-    REQUEST(xXF86VidModeAddModeLineReq);
-    xXF86OldVidModeAddModeLineReq *oldstuff =
-        (xXF86OldVidModeAddModeLineReq *) client->requestBuffer;
-    xXF86VidModeAddModeLineReq newstuff;
     int len;
-    int ver;
 
     /* limited to local-only connections */
     if (!VidModeAllowNonLocal && !client->local)
@@ -451,55 +446,54 @@ ProcVidModeAddModeLine(ClientPtr client)
 
     DEBUG_P("XF86VidModeAddModeline");
 
-    ver = ClientMajorVersion(client);
-
-    if (ver < 2) {
+    if (ClientMajorVersion(client) < 2) {
+        REQUEST(xXF86OldVidModeAddModeLineReq);
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeAddModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeAddModeLineReq));
-        if (len != oldstuff->privsize)
+        if (len != stuff->privsize)
             return BadLength;
+
+        xXF86VidModeAddModeLineReq newstuff = {
+            .length = client->req_len,
+            .screen = stuff->screen,
+            .dotclock = stuff->dotclock,
+            .hdisplay = stuff->hdisplay,
+            .hsyncstart = stuff->hsyncstart,
+            .hsyncend = stuff->hsyncend,
+            .htotal = stuff->htotal,
+            .hskew = 0,
+            .vdisplay = stuff->vdisplay,
+            .vsyncstart = stuff->vsyncstart,
+            .vsyncend = stuff->vsyncend,
+            .vtotal = stuff->vtotal,
+            .flags = stuff->flags,
+            .privsize = stuff->privsize,
+            .after_dotclock = stuff->after_dotclock,
+            .after_hdisplay = stuff->after_hdisplay,
+            .after_hsyncstart = stuff->after_hsyncstart,
+            .after_hsyncend = stuff->after_hsyncend,
+            .after_htotal = stuff->after_htotal,
+            .after_hskew = 0,
+            .after_vdisplay = stuff->after_vdisplay,
+            .after_vsyncstart = stuff->after_vsyncstart,
+            .after_vsyncend = stuff->after_vsyncend,
+            .after_vtotal = stuff->after_vtotal,
+            .after_flags = stuff->after_flags,
+        };
+        return VidModeAddModeLine(client, &newstuff);
     }
     else {
+        REQUEST(xXF86VidModeAddModeLineReq);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeAddModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeAddModeLineReq));
         if (len != stuff->privsize)
             return BadLength;
+        return VidModeAddModeLine(client, stuff);
     }
-
-    if (ver < 2) {
-        /* convert from old format */
-        stuff = &newstuff;
-        stuff->length = client->req_len;
-        stuff->screen = oldstuff->screen;
-        stuff->dotclock = oldstuff->dotclock;
-        stuff->hdisplay = oldstuff->hdisplay;
-        stuff->hsyncstart = oldstuff->hsyncstart;
-        stuff->hsyncend = oldstuff->hsyncend;
-        stuff->htotal = oldstuff->htotal;
-        stuff->hskew = 0;
-        stuff->vdisplay = oldstuff->vdisplay;
-        stuff->vsyncstart = oldstuff->vsyncstart;
-        stuff->vsyncend = oldstuff->vsyncend;
-        stuff->vtotal = oldstuff->vtotal;
-        stuff->flags = oldstuff->flags;
-        stuff->privsize = oldstuff->privsize;
-        stuff->after_dotclock = oldstuff->after_dotclock;
-        stuff->after_hdisplay = oldstuff->after_hdisplay;
-        stuff->after_hsyncstart = oldstuff->after_hsyncstart;
-        stuff->after_hsyncend = oldstuff->after_hsyncend;
-        stuff->after_htotal = oldstuff->after_htotal;
-        stuff->after_hskew = 0;
-        stuff->after_vdisplay = oldstuff->after_vdisplay;
-        stuff->after_vsyncstart = oldstuff->after_vsyncstart;
-        stuff->after_vsyncend = oldstuff->after_vsyncend;
-        stuff->after_vtotal = oldstuff->after_vtotal;
-        stuff->after_flags = oldstuff->after_flags;
-    }
-    return VidModeAddModeLine(client, stuff);
 }
 
 static int VidModeAddModeLine(ClientPtr client, xXF86VidModeAddModeLineReq* stuff)
@@ -623,12 +617,7 @@ VidModeDeleteModeLine(ClientPtr client, xXF86VidModeDeleteModeLineReq* stuff);
 static int
 ProcVidModeDeleteModeLine(ClientPtr client)
 {
-    REQUEST(xXF86VidModeDeleteModeLineReq);
-    xXF86OldVidModeDeleteModeLineReq *oldstuff =
-        (xXF86OldVidModeDeleteModeLineReq *) client->requestBuffer;
-    xXF86VidModeDeleteModeLineReq newstuff;
     int len;
-    int ver;
 
     /* limited to local-only connections */
     if (!VidModeAllowNonLocal && !client->local)
@@ -636,14 +625,13 @@ ProcVidModeDeleteModeLine(ClientPtr client)
 
     DEBUG_P("XF86VidModeDeleteModeline");
 
-    ver = ClientMajorVersion(client);
-
-    if (ver < 2) {
+    if (ClientMajorVersion(client) < 2) {
+        REQUEST(xXF86OldVidModeDeleteModeLineReq);
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeDeleteModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeDeleteModeLineReq));
-        if (len != oldstuff->privsize) {
+        if (len != stuff->privsize) {
             DebugF("req_len = %ld, sizeof(Req) = %d, privsize = %ld, "
                    "len = %d, length = %d\n",
                    (unsigned long) client->req_len,
@@ -651,8 +639,28 @@ ProcVidModeDeleteModeLine(ClientPtr client)
                    (unsigned long) stuff->privsize, len, client->req_len);
             return BadLength;
         }
+
+        /* convert from old format */
+        xXF86VidModeDeleteModeLineReq newstuff = {
+            .length = client->req_len,
+            .screen = stuff->screen,
+            .dotclock = stuff->dotclock,
+            .hdisplay = stuff->hdisplay,
+            .hsyncstart = stuff->hsyncstart,
+            .hsyncend = stuff->hsyncend,
+            .htotal = stuff->htotal,
+            .hskew = 0,
+            .vdisplay = stuff->vdisplay,
+            .vsyncstart = stuff->vsyncstart,
+            .vsyncend = stuff->vsyncend,
+            .vtotal = stuff->vtotal,
+            .flags = stuff->flags,
+            .privsize = stuff->privsize,
+        };
+        return VidModeDeleteModeLine(client, &newstuff);
     }
     else {
+        REQUEST(xXF86VidModeDeleteModeLineReq);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeDeleteModeLineReq);
         len =
             client->req_len -
@@ -665,27 +673,8 @@ ProcVidModeDeleteModeLine(ClientPtr client)
                    (unsigned long) stuff->privsize, len, client->req_len);
             return BadLength;
         }
+        return VidModeDeleteModeLine(client, stuff);
     }
-
-    if (ver < 2) {
-        /* convert from old format */
-        stuff = &newstuff;
-        stuff->length = client->req_len;
-        stuff->screen = oldstuff->screen;
-        stuff->dotclock = oldstuff->dotclock;
-        stuff->hdisplay = oldstuff->hdisplay;
-        stuff->hsyncstart = oldstuff->hsyncstart;
-        stuff->hsyncend = oldstuff->hsyncend;
-        stuff->htotal = oldstuff->htotal;
-        stuff->hskew = 0;
-        stuff->vdisplay = oldstuff->vdisplay;
-        stuff->vsyncstart = oldstuff->vsyncstart;
-        stuff->vsyncend = oldstuff->vsyncend;
-        stuff->vtotal = oldstuff->vtotal;
-        stuff->flags = oldstuff->flags;
-        stuff->privsize = oldstuff->privsize;
-    }
-    return VidModeDeleteModeLine(client, stuff);
 }
 
 static int
@@ -769,12 +758,7 @@ VidModeModModeLine(ClientPtr client, xXF86VidModeModModeLineReq *stuff);
 static int
 ProcVidModeModModeLine(ClientPtr client)
 {
-    REQUEST(xXF86VidModeModModeLineReq);
-    xXF86OldVidModeModModeLineReq *oldstuff =
-        (xXF86OldVidModeModModeLineReq *) client->requestBuffer;
-    xXF86VidModeModModeLineReq newstuff;
     int len;
-    int ver;
 
     /* limited to local-only connections */
     if (!VidModeAllowNonLocal && !client->local)
@@ -782,43 +766,43 @@ ProcVidModeModModeLine(ClientPtr client)
 
     DEBUG_P("XF86VidModeModModeline");
 
-    ver = ClientMajorVersion(client);
-
-    if (ver < 2) {
+    if (ClientMajorVersion(client) < 2) {
+        REQUEST(xXF86OldVidModeModModeLineReq)
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeModModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeModModeLineReq));
-        if (len != oldstuff->privsize)
+        if (len != stuff->privsize)
             return BadLength;
+
+        /* convert from old format */
+        xXF86VidModeModModeLineReq newstuff = {
+            .length = client->req_len,
+            .screen = stuff->screen,
+            .hdisplay = stuff->hdisplay,
+            .hsyncstart = stuff->hsyncstart,
+            .hsyncend = stuff->hsyncend,
+            .htotal = stuff->htotal,
+            .hskew = 0,
+            .vdisplay = stuff->vdisplay,
+            .vsyncstart = stuff->vsyncstart,
+            .vsyncend = stuff->vsyncend,
+            .vtotal = stuff->vtotal,
+            .flags = stuff->flags,
+            .privsize = stuff->privsize,
+        };
+        return VidModeModModeLine(client, &newstuff);
     }
     else {
+        REQUEST(xXF86VidModeModModeLineReq);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeModModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeModModeLineReq));
         if (len != stuff->privsize)
             return BadLength;
+        return VidModeModModeLine(client, stuff);
     }
-
-    if (ver < 2) {
-        /* convert from old format */
-        stuff = &newstuff;
-        stuff->length = client->req_len;
-        stuff->screen = oldstuff->screen;
-        stuff->hdisplay = oldstuff->hdisplay;
-        stuff->hsyncstart = oldstuff->hsyncstart;
-        stuff->hsyncend = oldstuff->hsyncend;
-        stuff->htotal = oldstuff->htotal;
-        stuff->hskew = 0;
-        stuff->vdisplay = oldstuff->vdisplay;
-        stuff->vsyncstart = oldstuff->vsyncstart;
-        stuff->vsyncend = oldstuff->vsyncend;
-        stuff->vtotal = oldstuff->vtotal;
-        stuff->flags = oldstuff->flags;
-        stuff->privsize = oldstuff->privsize;
-    }
-    return VidModeModModeLine(client, stuff);
 }
 
 static int
@@ -922,52 +906,46 @@ VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff
 static int
 ProcVidModeValidateModeLine(ClientPtr client)
 {
-    REQUEST(xXF86VidModeValidateModeLineReq);
-    xXF86OldVidModeValidateModeLineReq *oldstuff =
-        (xXF86OldVidModeValidateModeLineReq *) client->requestBuffer;
-    xXF86VidModeValidateModeLineReq newstuff;
     int len;
-    int ver;
 
     DEBUG_P("XF86VidModeValidateModeline");
 
-    ver = ClientMajorVersion(client);
-
-    if (ver < 2) {
+    if (ClientMajorVersion(client) < 2) {
+        REQUEST(xXF86OldVidModeValidateModeLineReq);
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeValidateModeLineReq);
         len = client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeValidateModeLineReq));
-        if (len != oldstuff->privsize)
+        if (len != stuff->privsize)
             return BadLength;
+
+        xXF86VidModeValidateModeLineReq newstuff = {
+            .length = client->req_len,
+            .screen = stuff->screen,
+            .dotclock = stuff->dotclock,
+            .hdisplay = stuff->hdisplay,
+            .hsyncstart = stuff->hsyncstart,
+            .hsyncend = stuff->hsyncend,
+            .htotal = stuff->htotal,
+            .hskew = 0,
+            .vdisplay = stuff->vdisplay,
+            .vsyncstart = stuff->vsyncstart,
+            .vsyncend = stuff->vsyncend,
+            .vtotal = stuff->vtotal,
+            .flags = stuff->flags,
+            .privsize = stuff->privsize,
+        };
+        return VidModeValidateModeLine(client, &newstuff);
     }
     else {
+        REQUEST(xXF86VidModeValidateModeLineReq);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeValidateModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeValidateModeLineReq));
         if (len != stuff->privsize)
             return BadLength;
+        return VidModeValidateModeLine(client, stuff);
     }
-
-    if (ver < 2) {
-        /* convert from old format */
-        stuff = &newstuff;
-        stuff->length = client->req_len;
-        stuff->screen = oldstuff->screen;
-        stuff->dotclock = oldstuff->dotclock;
-        stuff->hdisplay = oldstuff->hdisplay;
-        stuff->hsyncstart = oldstuff->hsyncstart;
-        stuff->hsyncend = oldstuff->hsyncend;
-        stuff->htotal = oldstuff->htotal;
-        stuff->hskew = 0;
-        stuff->vdisplay = oldstuff->vdisplay;
-        stuff->vsyncstart = oldstuff->vsyncstart;
-        stuff->vsyncend = oldstuff->vsyncend;
-        stuff->vtotal = oldstuff->vtotal;
-        stuff->flags = oldstuff->flags;
-        stuff->privsize = oldstuff->privsize;
-    }
-    return VidModeValidateModeLine(client, stuff);
 }
 
 static int
@@ -1093,12 +1071,7 @@ VidModeSwitchToMode(ClientPtr client, xXF86VidModeSwitchToModeReq *stuff);
 static int
 ProcVidModeSwitchToMode(ClientPtr client)
 {
-    REQUEST(xXF86VidModeSwitchToModeReq);
-    xXF86OldVidModeSwitchToModeReq *oldstuff =
-        (xXF86OldVidModeSwitchToModeReq *) client->requestBuffer;
-    xXF86VidModeSwitchToModeReq newstuff;
     int len;
-    int ver;
 
     DEBUG_P("XF86VidModeSwitchToMode");
 
@@ -1106,44 +1079,44 @@ ProcVidModeSwitchToMode(ClientPtr client)
     if (!VidModeAllowNonLocal && !client->local)
         return VidModeErrorBase + XF86VidModeClientNotLocal;
 
-    ver = ClientMajorVersion(client);
-
-    if (ver < 2) {
+    if (ClientMajorVersion(client) < 2) {
+        REQUEST(xXF86OldVidModeSwitchToModeReq);
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeSwitchToModeReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeSwitchToModeReq));
         if (len != stuff->privsize)
             return BadLength;
+
+        /* convert from old format */
+        xXF86VidModeSwitchToModeReq newstuff = {
+            .length = client->req_len,
+            .screen = stuff->screen,
+            .dotclock = stuff->dotclock,
+            .hdisplay = stuff->hdisplay,
+            .hsyncstart = stuff->hsyncstart,
+            .hsyncend = stuff->hsyncend,
+            .htotal = stuff->htotal,
+            .hskew = 0,
+            .vdisplay = stuff->vdisplay,
+            .vsyncstart = stuff->vsyncstart,
+            .vsyncend = stuff->vsyncend,
+            .vtotal = stuff->vtotal,
+            .flags = stuff->flags,
+            .privsize = stuff->privsize,
+        };
+        return VidModeSwitchToMode(client, &newstuff);
     }
     else {
+        REQUEST(xXF86VidModeSwitchToModeReq);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeSwitchToModeReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeSwitchToModeReq));
         if (len != stuff->privsize)
             return BadLength;
+        return VidModeSwitchToMode(client, stuff);
     }
-
-    if (ver < 2) {
-        /* convert from old format */
-        stuff = &newstuff;
-        stuff->length = client->req_len;
-        stuff->screen = oldstuff->screen;
-        stuff->dotclock = oldstuff->dotclock;
-        stuff->hdisplay = oldstuff->hdisplay;
-        stuff->hsyncstart = oldstuff->hsyncstart;
-        stuff->hsyncend = oldstuff->hsyncend;
-        stuff->htotal = oldstuff->htotal;
-        stuff->hskew = 0;
-        stuff->vdisplay = oldstuff->vdisplay;
-        stuff->vsyncstart = oldstuff->vsyncstart;
-        stuff->vsyncend = oldstuff->vsyncend;
-        stuff->vtotal = oldstuff->vtotal;
-        stuff->flags = oldstuff->flags;
-        stuff->privsize = oldstuff->privsize;
-    }
-    return VidModeSwitchToMode(client, stuff);
 }
 
 static int
