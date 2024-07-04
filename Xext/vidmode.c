@@ -433,6 +433,8 @@ ProcVidModeGetAllModeLines(ClientPtr client)
      && VidModeGetModeValue(mode, VIDMODE_V_TOTAL)  == stuff->vtotal \
      && VidModeGetModeValue(mode, VIDMODE_FLAGS)  == stuff->flags )
 
+static int VidModeAddModeLine(ClientPtr client, xXF86VidModeAddModeLineReq* stuff);
+
 static int
 ProcVidModeAddModeLine(ClientPtr client)
 {
@@ -440,11 +442,7 @@ ProcVidModeAddModeLine(ClientPtr client)
     xXF86OldVidModeAddModeLineReq *oldstuff =
         (xXF86OldVidModeAddModeLineReq *) client->requestBuffer;
     xXF86VidModeAddModeLineReq newstuff;
-    ScreenPtr pScreen;
-    VidModePtr pVidMode;
-    DisplayModePtr mode;
     int len;
-    int dotClock;
     int ver;
 
     /* limited to local-only connections */
@@ -501,6 +499,16 @@ ProcVidModeAddModeLine(ClientPtr client)
         stuff->after_vtotal = oldstuff->after_vtotal;
         stuff->after_flags = oldstuff->after_flags;
     }
+    return VidModeAddModeLine(client, stuff);
+}
+
+static int VidModeAddModeLine(ClientPtr client, xXF86VidModeAddModeLineReq* stuff)
+{
+    ScreenPtr pScreen;
+    DisplayModePtr mode;
+    VidModePtr pVidMode;
+    int dotClock;
+
     DebugF("AddModeLine - scrn: %d clock: %ld\n",
            (int) stuff->screen, (unsigned long) stuff->dotclock);
     DebugF("AddModeLine - hdsp: %d hbeg: %d hend: %d httl: %d\n",
@@ -610,16 +618,16 @@ ProcVidModeAddModeLine(ClientPtr client)
 }
 
 static int
+VidModeDeleteModeLine(ClientPtr client, xXF86VidModeDeleteModeLineReq* stuff);
+
+static int
 ProcVidModeDeleteModeLine(ClientPtr client)
 {
     REQUEST(xXF86VidModeDeleteModeLineReq);
     xXF86OldVidModeDeleteModeLineReq *oldstuff =
         (xXF86OldVidModeDeleteModeLineReq *) client->requestBuffer;
     xXF86VidModeDeleteModeLineReq newstuff;
-    ScreenPtr pScreen;
-    VidModePtr pVidMode;
-    DisplayModePtr mode;
-    int len, dotClock;
+    int len;
     int ver;
 
     /* limited to local-only connections */
@@ -677,6 +685,17 @@ ProcVidModeDeleteModeLine(ClientPtr client)
         stuff->flags = oldstuff->flags;
         stuff->privsize = oldstuff->privsize;
     }
+    return VidModeDeleteModeLine(client, stuff);
+}
+
+static int
+VidModeDeleteModeLine(ClientPtr client, xXF86VidModeDeleteModeLineReq* stuff)
+{
+    int dotClock;
+    DisplayModePtr mode;
+    VidModePtr pVidMode;
+    ScreenPtr pScreen;
+
     DebugF("DeleteModeLine - scrn: %d clock: %ld\n",
            (int) stuff->screen, (unsigned long) stuff->dotclock);
     DebugF("                 hdsp: %d hbeg: %d hend: %d httl: %d\n",
@@ -745,16 +764,16 @@ ProcVidModeDeleteModeLine(ClientPtr client)
 }
 
 static int
+VidModeModModeLine(ClientPtr client, xXF86VidModeModModeLineReq *stuff);
+
+static int
 ProcVidModeModModeLine(ClientPtr client)
 {
     REQUEST(xXF86VidModeModModeLineReq);
     xXF86OldVidModeModModeLineReq *oldstuff =
         (xXF86OldVidModeModModeLineReq *) client->requestBuffer;
     xXF86VidModeModModeLineReq newstuff;
-    ScreenPtr pScreen;
-    VidModePtr pVidMode;
-    DisplayModePtr mode;
-    int len, dotClock;
+    int len;
     int ver;
 
     /* limited to local-only connections */
@@ -799,6 +818,17 @@ ProcVidModeModModeLine(ClientPtr client)
         stuff->flags = oldstuff->flags;
         stuff->privsize = oldstuff->privsize;
     }
+    return VidModeModModeLine(client, stuff);
+}
+
+static int
+VidModeModModeLine(ClientPtr client, xXF86VidModeModModeLineReq *stuff)
+{
+    ScreenPtr pScreen;
+    VidModePtr pVidMode;
+    DisplayModePtr mode, modetmp;
+    int dotClock;
+
     DebugF("ModModeLine - scrn: %d hdsp: %d hbeg: %d hend: %d httl: %d\n",
            (int) stuff->screen, stuff->hdisplay, stuff->hsyncstart,
            stuff->hsyncend, stuff->htotal);
@@ -887,17 +917,16 @@ ProcVidModeModModeLine(ClientPtr client)
 }
 
 static int
+VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff);
+
+static int
 ProcVidModeValidateModeLine(ClientPtr client)
 {
     REQUEST(xXF86VidModeValidateModeLineReq);
     xXF86OldVidModeValidateModeLineReq *oldstuff =
         (xXF86OldVidModeValidateModeLineReq *) client->requestBuffer;
     xXF86VidModeValidateModeLineReq newstuff;
-    xXF86VidModeValidateModeLineReply rep;
-    ScreenPtr pScreen;
-    VidModePtr pVidMode;
-    DisplayModePtr mode, modetmp = NULL;
-    int len, status, dotClock;
+    int len;
     int ver;
 
     DEBUG_P("XF86VidModeValidateModeline");
@@ -938,6 +967,17 @@ ProcVidModeValidateModeLine(ClientPtr client)
         stuff->flags = oldstuff->flags;
         stuff->privsize = oldstuff->privsize;
     }
+    return VidModeValidateModeLine(client, stuff);
+}
+
+static int
+VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff)
+{
+    ScreenPtr pScreen;
+    VidModePtr pVidMode;
+    DisplayModePtr mode, modetmp = NULL;
+    int status, dotClock;
+    xXF86VidModeValidateModeLineReply rep = { 0 };
 
     DebugF("ValidateModeLine - scrn: %d clock: %ld\n",
            (int) stuff->screen, (unsigned long) stuff->dotclock);
@@ -947,9 +987,6 @@ ProcVidModeValidateModeLine(ClientPtr client)
     DebugF("                   vdsp: %d vbeg: %d vend: %d vttl: %d flags: %ld\n",
            stuff->vdisplay, stuff->vsyncstart, stuff->vsyncend, stuff->vtotal,
            (unsigned long) stuff->flags);
-
-    if (len != stuff->privsize)
-        return BadLength;
 
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
@@ -1051,16 +1088,16 @@ ProcVidModeSwitchMode(ClientPtr client)
 }
 
 static int
+VidModeSwitchToMode(ClientPtr client, xXF86VidModeSwitchToModeReq *stuff);
+
+static int
 ProcVidModeSwitchToMode(ClientPtr client)
 {
     REQUEST(xXF86VidModeSwitchToModeReq);
     xXF86OldVidModeSwitchToModeReq *oldstuff =
         (xXF86OldVidModeSwitchToModeReq *) client->requestBuffer;
     xXF86VidModeSwitchToModeReq newstuff;
-    ScreenPtr pScreen;
-    VidModePtr pVidMode;
-    DisplayModePtr mode;
-    int len, dotClock;
+    int len;
     int ver;
 
     DEBUG_P("XF86VidModeSwitchToMode");
@@ -1106,6 +1143,16 @@ ProcVidModeSwitchToMode(ClientPtr client)
         stuff->flags = oldstuff->flags;
         stuff->privsize = oldstuff->privsize;
     }
+    return VidModeSwitchToMode(client, stuff);
+}
+
+static int
+VidModeSwitchToMode(ClientPtr client, xXF86VidModeSwitchToModeReq *stuff)
+{
+    ScreenPtr pScreen;
+    VidModePtr pVidMode;
+    DisplayModePtr mode;
+    int dotClock;
 
     DebugF("SwitchToMode - scrn: %d clock: %ld\n",
            (int) stuff->screen, (unsigned long) stuff->dotclock);
