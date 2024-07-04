@@ -1270,8 +1270,7 @@ ProcSyncInitialize(ClientPtr client)
         .minorVersion = SERVER_SYNC_MINOR_VERSION,
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 /*
@@ -1312,9 +1311,7 @@ ProcSyncListSystemCounters(ClientPtr client)
         .nCounters = nCounters
     };
 
-    if (client->swapped) {
-        swapl(&rep.nCounters);
-    }
+    REPLY_FIELD_CARD32(nCounters);
 
     X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
@@ -1367,12 +1364,11 @@ ProcSyncGetPriority(ClientPtr client)
     REQUEST_FIELD_CARD32(id);
 
     ClientPtr priorityclient;
-    int rc;
 
     if (stuff->id == None)
         priorityclient = client;
     else {
-        rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
+        int rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
                              DixGetAttrAccess);
         if (rc != Success)
             return rc;
@@ -1382,12 +1378,8 @@ ProcSyncGetPriority(ClientPtr client)
         .priority = priorityclient->priority
     };
 
-    if (client->swapped) {
-        swapl(&rep.priority);
-    }
-
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(priority);
+    return REPLY_SEND();
 }
 
 /*
@@ -1669,12 +1661,9 @@ ProcSyncQueryCounter(ClientPtr client)
         .value_lo = pCounter->value
     };
 
-    if (client->swapped) {
-        swapl(&rep.value_hi);
-        swapl(&rep.value_lo);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(value_hi);
+    REPLY_FIELD_CARD32(value_lo);
+    return REPLY_SEND();
 }
 
 /*
@@ -1824,7 +1813,6 @@ ProcSyncQueryAlarm(ClientPtr client)
         return rc;
 
     pTrigger = &pAlarm->trigger;
-
     xSyncQueryAlarmReply rep = {
         .counter = (pTrigger->pSync) ? pTrigger->pSync->id : None,
 
@@ -1848,17 +1836,13 @@ ProcSyncQueryAlarm(ClientPtr client)
         .state = pAlarm->state
     };
 
-    if (client->swapped) {
-        swapl(&rep.counter);
-        swapl(&rep.wait_value_hi);
-        swapl(&rep.wait_value_lo);
-        swapl(&rep.test_type);
-        swapl(&rep.delta_hi);
-        swapl(&rep.delta_lo);
-    }
-
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(counter);
+    REPLY_FIELD_CARD32(wait_value_hi);
+    REPLY_FIELD_CARD32(wait_value_lo);
+    REPLY_FIELD_CARD32(test_type);
+    REPLY_FIELD_CARD32(delta_hi);
+    REPLY_FIELD_CARD32(delta_lo);
+    return REPLY_SEND();
 }
 
 static int
@@ -1999,12 +1983,11 @@ ProcSyncQueryFence(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xSyncQueryFenceReply rep = {
+    xSyncQueryFenceReply rep = (xSyncQueryFenceReply) {
         .triggered = pFence->funcs.CheckTriggered(pFence)
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 static int
