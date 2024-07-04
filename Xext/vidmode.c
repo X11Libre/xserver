@@ -462,12 +462,16 @@ ProcVidModeAddModeLine(ClientPtr client)
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeAddModeLineReq));
+        if (len != oldstuff->privsize)
+            return BadLength;
     }
     else {
         REQUEST_AT_LEAST_SIZE(xXF86VidModeAddModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeAddModeLineReq));
+        if (len != stuff->privsize)
+            return BadLength;
     }
 
     if (ver < 2) {
@@ -516,9 +520,6 @@ ProcVidModeAddModeLine(ClientPtr client)
            stuff->after_vdisplay, stuff->after_vsyncstart,
            stuff->after_vsyncend, stuff->after_vtotal,
            (unsigned long) stuff->after_flags);
-
-    if (len != stuff->privsize)
-        return BadLength;
 
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
@@ -636,12 +637,28 @@ ProcVidModeDeleteModeLine(ClientPtr client)
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeDeleteModeLineReq));
+        if (len != oldstuff->privsize) {
+            DebugF("req_len = %ld, sizeof(Req) = %d, privsize = %ld, "
+                   "len = %d, length = %d\n",
+                   (unsigned long) client->req_len,
+                   (int) sizeof(xXF86VidModeDeleteModeLineReq) >> 2,
+                   (unsigned long) stuff->privsize, len, client->req_len);
+            return BadLength;
+        }
     }
     else {
         REQUEST_AT_LEAST_SIZE(xXF86VidModeDeleteModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeDeleteModeLineReq));
+        if (len != stuff->privsize) {
+            DebugF("req_len = %ld, sizeof(Req) = %d, privsize = %ld, "
+                   "len = %d, length = %d\n",
+                   (unsigned long) client->req_len,
+                   (int) sizeof(xXF86VidModeDeleteModeLineReq) >> 2,
+                   (unsigned long) stuff->privsize, len, client->req_len);
+            return BadLength;
+        }
     }
 
     if (ver < 2) {
@@ -670,15 +687,6 @@ ProcVidModeDeleteModeLine(ClientPtr client)
     DebugF("                 vdsp: %d vbeg: %d vend: %d vttl: %d flags: %ld\n",
            stuff->vdisplay, stuff->vsyncstart, stuff->vsyncend, stuff->vtotal,
            (unsigned long) stuff->flags);
-
-    if (len != stuff->privsize) {
-        DebugF("req_len = %ld, sizeof(Req) = %d, privsize = %ld, "
-               "len = %d, length = %d\n",
-               (unsigned long) client->req_len,
-               (int) sizeof(xXF86VidModeDeleteModeLineReq) >> 2,
-               (unsigned long) stuff->privsize, len, client->req_len);
-        return BadLength;
-    }
 
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
@@ -764,12 +772,16 @@ ProcVidModeModModeLine(ClientPtr client)
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeModModeLineReq));
+        if (len != oldstuff->privsize)
+            return BadLength;
     }
     else {
         REQUEST_AT_LEAST_SIZE(xXF86VidModeModModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeModModeLineReq));
+        if (len != stuff->privsize)
+            return BadLength;
     }
 
     if (ver < 2) {
@@ -795,9 +807,6 @@ ProcVidModeModModeLine(ClientPtr client)
     DebugF("              vdsp: %d vbeg: %d vend: %d vttl: %d flags: %ld\n",
            stuff->vdisplay, stuff->vsyncstart, stuff->vsyncend,
            stuff->vtotal, (unsigned long) stuff->flags);
-
-    if (len != stuff->privsize)
-        return BadLength;
 
     if (stuff->hsyncstart < stuff->hdisplay ||
         stuff->hsyncend < stuff->hsyncstart ||
@@ -898,12 +907,16 @@ ProcVidModeValidateModeLine(ClientPtr client)
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeValidateModeLineReq);
         len = client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeValidateModeLineReq));
+        if (len != oldstuff->privsize)
+            return BadLength;
     }
     else {
         REQUEST_AT_LEAST_SIZE(xXF86VidModeValidateModeLineReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeValidateModeLineReq));
+        if (len != stuff->privsize)
+            return BadLength;
     }
 
     if (ver < 2) {
@@ -1059,12 +1072,16 @@ ProcVidModeSwitchToMode(ClientPtr client)
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeSwitchToModeReq));
+        if (len != stuff->privsize)
+            return BadLength;
     }
     else {
         REQUEST_AT_LEAST_SIZE(xXF86VidModeSwitchToModeReq);
         len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeSwitchToModeReq));
+        if (len != stuff->privsize)
+            return BadLength;
     }
 
     if (ver < 2) {
@@ -1094,9 +1111,6 @@ ProcVidModeSwitchToMode(ClientPtr client)
     DebugF("               vdsp: %d vbeg: %d vend: %d vttl: %d flags: %ld\n",
            stuff->vdisplay, stuff->vsyncstart, stuff->vsyncend, stuff->vtotal,
            (unsigned long) stuff->flags);
-
-    if (len != stuff->privsize)
-        return BadLength;
 
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
