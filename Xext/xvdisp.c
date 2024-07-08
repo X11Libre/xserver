@@ -1131,26 +1131,6 @@ ProcXvListImageFormats(ClientPtr client)
     return Success;
 }
 
-static int (*XvProcVector[xvNumRequests]) (ClientPtr) = {
-ProcXvQueryExtension,
-        ProcXvQueryAdaptors,
-        ProcXvQueryEncodings,
-        ProcXvGrabPort,
-        ProcXvUngrabPort,
-        ProcXvPutVideo,
-        ProcXvPutStill,
-        ProcXvGetVideo,
-        ProcXvGetStill,
-        ProcXvStopVideo,
-        ProcXvSelectVideoNotify,
-        ProcXvSelectPortNotify,
-        ProcXvQueryBestSize,
-        ProcXvSetPortAttribute,
-        ProcXvGetPortAttribute,
-        ProcXvQueryPortAttributes,
-        ProcXvListImageFormats,
-        ProcXvQueryImageAttributes, ProcXvPutImage, ProcXvShmPutImage,};
-
 int
 ProcXvDispatch(ClientPtr client)
 {
@@ -1158,11 +1138,50 @@ ProcXvDispatch(ClientPtr client)
 
     UpdateCurrentTime();
 
-    if (stuff->data >= xvNumRequests) {
-        return BadRequest;
+    switch (stuff->data) {
+        case xv_QueryExtension:
+            return ProcXvQueryExtension(client);
+        case xv_QueryAdaptors:
+            return ProcXvQueryAdaptors(client);
+        case xv_QueryEncodings:
+            return ProcXvQueryEncodings(client);
+        case xv_GrabPort:
+            return ProcXvGrabPort(client);
+        case xv_UngrabPort:
+            return ProcXvUngrabPort(client);
+        case xv_PutVideo:
+            return ProcXvPutVideo(client);
+        case xv_PutStill:
+            return ProcXvPutStill(client);
+        case xv_GetVideo:
+            return ProcXvGetVideo(client);
+        case xv_GetStill:
+            return ProcXvGetStill(client);
+        case xv_StopVideo:
+            return ProcXvStopVideo(client);
+        case xv_SelectVideoNotify:
+            return ProcXvSelectVideoNotify(client);
+        case xv_SelectPortNotify:
+            return ProcXvSelectPortNotify(client);
+        case xv_QueryBestSize:
+            return ProcXvQueryBestSize(client);
+        case xv_SetPortAttribute:
+            return ProcXvSetPortAttribute(client);
+        case xv_GetPortAttribute:
+            return ProcXvGetPortAttribute(client);
+        case xv_QueryPortAttributes:
+            return ProcXvQueryPortAttributes(client);
+        case xv_ListImageFormats:
+            return ProcXvListImageFormats(client);
+        case xv_QueryImageAttributes:
+            return ProcXvQueryImageAttributes(client);
+        case xv_PutImage:
+            return ProcXvPutImage(client);
+        case xv_ShmPutImage:
+            return ProcXvShmPutImage(client);
+        default:
+            return BadRequest;
     }
-
-    return XvProcVector[stuff->data] (client);
 }
 
 /* Swapped Procs */
@@ -1173,7 +1192,7 @@ SProcXvQueryExtension(ClientPtr client)
     REQUEST(xvQueryExtensionReq);
     REQUEST_SIZE_MATCH(xvQueryExtensionReq);
     swaps(&stuff->length);
-    return XvProcVector[xv_QueryExtension] (client);
+    return ProcXvQueryExtension(client);
 }
 
 static int _X_COLD
@@ -1183,7 +1202,7 @@ SProcXvQueryAdaptors(ClientPtr client)
     REQUEST_SIZE_MATCH(xvQueryAdaptorsReq);
     swaps(&stuff->length);
     swapl(&stuff->window);
-    return XvProcVector[xv_QueryAdaptors] (client);
+    return ProcXvQueryAdaptors(client);
 }
 
 static int _X_COLD
@@ -1193,7 +1212,7 @@ SProcXvQueryEncodings(ClientPtr client)
     REQUEST_SIZE_MATCH(xvQueryEncodingsReq);
     swaps(&stuff->length);
     swapl(&stuff->port);
-    return XvProcVector[xv_QueryEncodings] (client);
+    return ProcXvQueryEncodings(client);
 }
 
 static int _X_COLD
@@ -1204,7 +1223,7 @@ SProcXvGrabPort(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->port);
     swapl(&stuff->time);
-    return XvProcVector[xv_GrabPort] (client);
+    return ProcXvGrabPort(client);
 }
 
 static int _X_COLD
@@ -1215,7 +1234,7 @@ SProcXvUngrabPort(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->port);
     swapl(&stuff->time);
-    return XvProcVector[xv_UngrabPort] (client);
+    return ProcXvUngrabPort(client);
 }
 
 static int _X_COLD
@@ -1235,7 +1254,7 @@ SProcXvPutVideo(ClientPtr client)
     swaps(&stuff->drw_y);
     swaps(&stuff->drw_w);
     swaps(&stuff->drw_h);
-    return XvProcVector[xv_PutVideo] (client);
+    return ProcXvPutVideo(client);
 }
 
 static int _X_COLD
@@ -1255,7 +1274,7 @@ SProcXvPutStill(ClientPtr client)
     swaps(&stuff->drw_y);
     swaps(&stuff->drw_w);
     swaps(&stuff->drw_h);
-    return XvProcVector[xv_PutStill] (client);
+    return ProcXvPutStill(client);
 }
 
 static int _X_COLD
@@ -1275,7 +1294,7 @@ SProcXvGetVideo(ClientPtr client)
     swaps(&stuff->drw_y);
     swaps(&stuff->drw_w);
     swaps(&stuff->drw_h);
-    return XvProcVector[xv_GetVideo] (client);
+    return ProcXvGetVideo(client);
 }
 
 static int _X_COLD
@@ -1295,7 +1314,7 @@ SProcXvGetStill(ClientPtr client)
     swaps(&stuff->drw_y);
     swaps(&stuff->drw_w);
     swaps(&stuff->drw_h);
-    return XvProcVector[xv_GetStill] (client);
+    return ProcXvGetStill(client);
 }
 
 static int _X_COLD
@@ -1318,7 +1337,7 @@ SProcXvPutImage(ClientPtr client)
     swaps(&stuff->drw_h);
     swaps(&stuff->width);
     swaps(&stuff->height);
-    return XvProcVector[xv_PutImage] (client);
+    return ProcXvPutImage(client);
 }
 
 #ifdef MITSHM
@@ -1344,7 +1363,7 @@ SProcXvShmPutImage(ClientPtr client)
     swaps(&stuff->drw_h);
     swaps(&stuff->width);
     swaps(&stuff->height);
-    return XvProcVector[xv_ShmPutImage] (client);
+    return ProcXvShmPutImage(client);
 }
 #else                           /* MITSHM */
 #define SProcXvShmPutImage ProcXvShmPutImage
@@ -1357,7 +1376,7 @@ SProcXvSelectVideoNotify(ClientPtr client)
     REQUEST_SIZE_MATCH(xvSelectVideoNotifyReq);
     swaps(&stuff->length);
     swapl(&stuff->drawable);
-    return XvProcVector[xv_SelectVideoNotify] (client);
+    return ProcXvSelectVideoNotify(client);
 }
 
 static int _X_COLD
@@ -1367,7 +1386,7 @@ SProcXvSelectPortNotify(ClientPtr client)
     REQUEST_SIZE_MATCH(xvSelectPortNotifyReq);
     swaps(&stuff->length);
     swapl(&stuff->port);
-    return XvProcVector[xv_SelectPortNotify] (client);
+    return ProcXvSelectPortNotify(client);
 }
 
 static int _X_COLD
@@ -1378,7 +1397,7 @@ SProcXvStopVideo(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->port);
     swapl(&stuff->drawable);
-    return XvProcVector[xv_StopVideo] (client);
+    return ProcXvStopVideo(client);
 }
 
 static int _X_COLD
@@ -1390,7 +1409,7 @@ SProcXvSetPortAttribute(ClientPtr client)
     swapl(&stuff->port);
     swapl(&stuff->attribute);
     swapl(&stuff->value);
-    return XvProcVector[xv_SetPortAttribute] (client);
+    return ProcXvSetPortAttribute(client);
 }
 
 static int _X_COLD
@@ -1401,7 +1420,7 @@ SProcXvGetPortAttribute(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->port);
     swapl(&stuff->attribute);
-    return XvProcVector[xv_GetPortAttribute] (client);
+    return ProcXvGetPortAttribute(client);
 }
 
 static int _X_COLD
@@ -1415,7 +1434,7 @@ SProcXvQueryBestSize(ClientPtr client)
     swaps(&stuff->vid_h);
     swaps(&stuff->drw_w);
     swaps(&stuff->drw_h);
-    return XvProcVector[xv_QueryBestSize] (client);
+    return ProcXvQueryBestSize(client);
 }
 
 static int _X_COLD
@@ -1425,7 +1444,7 @@ SProcXvQueryPortAttributes(ClientPtr client)
     REQUEST_SIZE_MATCH(xvQueryPortAttributesReq);
     swaps(&stuff->length);
     swapl(&stuff->port);
-    return XvProcVector[xv_QueryPortAttributes] (client);
+    return ProcXvQueryPortAttributes(client);
 }
 
 static int _X_COLD
@@ -1438,7 +1457,7 @@ SProcXvQueryImageAttributes(ClientPtr client)
     swapl(&stuff->id);
     swaps(&stuff->width);
     swaps(&stuff->height);
-    return XvProcVector[xv_QueryImageAttributes] (client);
+    return ProcXvQueryImageAttributes(client);
 }
 
 static int _X_COLD
@@ -1448,28 +1467,8 @@ SProcXvListImageFormats(ClientPtr client)
     REQUEST_SIZE_MATCH(xvListImageFormatsReq);
     swaps(&stuff->length);
     swapl(&stuff->port);
-    return XvProcVector[xv_ListImageFormats] (client);
+    return ProcXvListImageFormats(client);
 }
-
-static int (*SXvProcVector[xvNumRequests]) (ClientPtr) = {
-SProcXvQueryExtension,
-        SProcXvQueryAdaptors,
-        SProcXvQueryEncodings,
-        SProcXvGrabPort,
-        SProcXvUngrabPort,
-        SProcXvPutVideo,
-        SProcXvPutStill,
-        SProcXvGetVideo,
-        SProcXvGetStill,
-        SProcXvStopVideo,
-        SProcXvSelectVideoNotify,
-        SProcXvSelectPortNotify,
-        SProcXvQueryBestSize,
-        SProcXvSetPortAttribute,
-        SProcXvGetPortAttribute,
-        SProcXvQueryPortAttributes,
-        SProcXvListImageFormats,
-        SProcXvQueryImageAttributes, SProcXvPutImage, SProcXvShmPutImage,};
 
 int _X_COLD
 SProcXvDispatch(ClientPtr client)
@@ -1478,11 +1477,50 @@ SProcXvDispatch(ClientPtr client)
 
     UpdateCurrentTime();
 
-    if (stuff->data >= xvNumRequests) {
-        return BadRequest;
+    switch (stuff->data) {
+        case xv_QueryExtension:
+            return SProcXvQueryExtension(client);
+        case xv_QueryAdaptors:
+            return SProcXvQueryAdaptors(client);
+        case xv_QueryEncodings:
+            return SProcXvQueryEncodings(client);
+        case xv_GrabPort:
+            return SProcXvGrabPort(client);
+        case xv_UngrabPort:
+            return SProcXvUngrabPort(client);
+        case xv_PutVideo:
+            return SProcXvPutVideo(client);
+        case xv_PutStill:
+            return SProcXvPutStill(client);
+        case xv_GetVideo:
+            return SProcXvGetVideo(client);
+        case xv_GetStill:
+            return SProcXvGetStill(client);
+        case xv_StopVideo:
+            return SProcXvStopVideo(client);
+        case xv_SelectVideoNotify:
+            return SProcXvSelectVideoNotify(client);
+        case xv_SelectPortNotify:
+            return SProcXvSelectPortNotify(client);
+        case xv_QueryBestSize:
+            return SProcXvQueryBestSize(client);
+        case xv_SetPortAttribute:
+            return SProcXvSetPortAttribute(client);
+        case xv_GetPortAttribute:
+            return SProcXvGetPortAttribute(client);
+        case xv_QueryPortAttributes:
+            return SProcXvQueryPortAttributes(client);
+        case xv_ListImageFormats:
+            return SProcXvListImageFormats(client);
+        case xv_QueryImageAttributes:
+            return SProcXvQueryImageAttributes(client);
+        case xv_PutImage:
+            return SProcXvPutImage(client);
+        case xv_ShmPutImage:
+            return SProcXvShmPutImage(client);
+        default:
+            return BadRequest;
     }
-
-    return SXvProcVector[stuff->data] (client);
 }
 
 #ifdef PANORAMIX
