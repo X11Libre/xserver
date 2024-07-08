@@ -117,6 +117,8 @@ int XvReqCode;
 int XvEventBase;
 int XvErrorBase;
 
+int xvUseXinerama = 0;
+
 RESTYPE XvRTPort;
 RESTYPE XvRTEncoding;
 RESTYPE XvRTGrab;
@@ -312,7 +314,7 @@ XvCloseScreen(ScreenPtr pScreen)
 static void
 XvResetProc(ExtensionEntry * extEntry)
 {
-    XvResetProcVector();
+    xvUseXinerama = 0;
 }
 
 DevPrivateKey
