@@ -13,6 +13,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "os/client_priv.h"
 #include "miext/extinit_priv.h"
@@ -199,7 +200,7 @@ ProcXResQueryVersion(ClientPtr client)
 static int
 ProcXResQueryClients(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xXResQueryClientsReq);
+    REQUEST_HEAD_STRUCT(xXResQueryClientsReq);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -255,8 +256,8 @@ resourceTypeAtom(int i)
 static int
 ProcXResQueryClientResources(ClientPtr client)
 {
-    REQUEST(xXResQueryClientResourcesReq);
-    REQUEST_SIZE_MATCH(xXResQueryClientResourcesReq);
+    REQUEST_HEAD_STRUCT(xXResQueryClientResourcesReq);
+    REQUEST_FIELD_CARD32(xid);
 
     ClientPtr resClient = dixClientForXID(stuff->xid);
 
@@ -329,8 +330,8 @@ ResFindResourcePixmaps(void *value, XID id, RESTYPE type, void *cdata)
 static int
 ProcXResQueryClientPixmapBytes(ClientPtr client)
 {
-    REQUEST(xXResQueryClientPixmapBytesReq);
-    REQUEST_SIZE_MATCH(xXResQueryClientPixmapBytesReq);
+    REQUEST_HEAD_STRUCT(xXResQueryClientPixmapBytesReq);
+    REQUEST_FIELD_CARD32(xid);
 
     ClientPtr owner = dixClientForXID(stuff->xid);
     if ((!owner) ||
@@ -514,14 +515,14 @@ ConstructClientIds(ClientPtr client,
 static int
 ProcXResQueryClientIds (ClientPtr client)
 {
-    REQUEST(xXResQueryClientIdsReq);
+    REQUEST_HEAD_AT_LEAST(xXResQueryClientIdsReq);
+    REQUEST_FIELD_CARD32(numSpecs);
 
     xXResClientIdSpec        *specs = (void*) ((char*) stuff + sizeof(*stuff));
     ConstructClientIdCtx      ctx;
 
     InitConstructClientIdCtx(&ctx);
 
-    REQUEST_AT_LEAST_SIZE(xXResQueryClientIdsReq);
     REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
                        stuff->numSpecs * sizeof(specs[0]));
 
@@ -894,8 +895,8 @@ ConstructResourceBytes(XID aboutClient,
 static int
 ProcXResQueryResourceBytes (ClientPtr client)
 {
-    REQUEST(xXResQueryResourceBytesReq);
-    REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
+    REQUEST_HEAD_AT_LEAST(xXResQueryResourceBytesReq);
+    REQUEST_FIELD_CARD32(numSpecs);
 
     ConstructResourceBytesCtx ctx;
     if (stuff->numSpecs > UINT32_MAX / sizeof(ctx.specs[0]))
@@ -974,91 +975,10 @@ ProcResDispatch(ClientPtr client)
     return BadRequest;
 }
 
-static int _X_COLD
-SProcXResQueryVersion(ClientPtr client)
-{
-    REQUEST_SIZE_MATCH(xXResQueryVersionReq);
-    return ProcXResQueryVersion(client);
-}
-
-static int _X_COLD
-SProcXResQueryClientResources(ClientPtr client)
-{
-    REQUEST(xXResQueryClientResourcesReq);
-    REQUEST_SIZE_MATCH(xXResQueryClientResourcesReq);
-    swapl(&stuff->xid);
-    return ProcXResQueryClientResources(client);
-}
-
-static int _X_COLD
-SProcXResQueryClientPixmapBytes(ClientPtr client)
-{
-    REQUEST(xXResQueryClientPixmapBytesReq);
-    REQUEST_SIZE_MATCH(xXResQueryClientPixmapBytesReq);
-    swapl(&stuff->xid);
-    return ProcXResQueryClientPixmapBytes(client);
-}
-
-static int _X_COLD
-SProcXResQueryClientIds (ClientPtr client)
-{
-    REQUEST(xXResQueryClientIdsReq);
-
-    REQUEST_AT_LEAST_SIZE (xXResQueryClientIdsReq);
-    swapl(&stuff->numSpecs);
-    return ProcXResQueryClientIds(client);
-}
-
-/** @brief Implements the XResQueryResourceBytes of XResProto v1.2.
-    This variant byteswaps request contents before issuing the
-    rest of the work to ProcXResQueryResourceBytes */
-static int _X_COLD
-SProcXResQueryResourceBytes (ClientPtr client)
-{
-    REQUEST(xXResQueryResourceBytesReq);
-    int c;
-    xXResResourceIdSpec *specs = (void*) ((char*) stuff + sizeof(*stuff));
-
-    REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
-    swapl(&stuff->numSpecs);
-    REQUEST_FIXED_SIZE(xXResQueryResourceBytesReq,
-                       stuff->numSpecs * sizeof(specs[0]));
-
-    for (c = 0; c < stuff->numSpecs; ++c) {
-        SwapXResResourceIdSpec(specs + c);
-    }
-
-    return ProcXResQueryResourceBytes(client);
-}
-
-static int _X_COLD
-SProcResDispatch (ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_XResQueryVersion:
-        return SProcXResQueryVersion(client);
-    case X_XResQueryClients:   /* nothing to swap */
-        return ProcXResQueryClients(client);
-    case X_XResQueryClientResources:
-        return SProcXResQueryClientResources(client);
-    case X_XResQueryClientPixmapBytes:
-        return SProcXResQueryClientPixmapBytes(client);
-    case X_XResQueryClientIds:
-        return SProcXResQueryClientIds(client);
-    case X_XResQueryResourceBytes:
-        return SProcXResQueryResourceBytes(client);
-    default: break;
-    }
-
-    return BadRequest;
-}
-
 void
 ResExtensionInit(void)
 {
     (void) AddExtension(XRES_NAME, 0, 0,
-                        ProcResDispatch, SProcResDispatch,
+                        ProcResDispatch, ProcResDispatch,
                         NULL, StandardMinorOpcode);
 }
