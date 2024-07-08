@@ -70,26 +70,18 @@ static int
 ProcSELinuxQueryVersion(ClientPtr client)
 {
     SELinuxQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .server_major = SELINUX_MAJOR_VERSION,
         .server_minor = SELINUX_MINOR_VERSION
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.server_major);
-        swaps(&rep.server_minor);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-    return Success;
+
+    REPLY_FIELD_CARD16(server_major);
+    REPLY_FIELD_CARD16(server_minor);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static int
 SELinuxSendContextReply(ClientPtr client, security_id_t sid)
 {
-    SELinuxGetContextReply rep;
     char *ctx = NULL;
     int len = 0;
 
@@ -99,20 +91,13 @@ SELinuxSendContextReply(ClientPtr client, security_id_t sid)
         len = strlen(ctx) + 1;
     }
 
-    rep = (SELinuxGetContextReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    SELinuxGetContextReply rep = {
         .length = bytes_to_int32(len),
         .context_len = len
     };
 
-    if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.context_len);
-    }
-
-    WriteToClient(client, sizeof(SELinuxGetContextReply), &rep);
+    REPLY_FIELD_CARD32(context_len);
+    REPLY_SEND();
     WriteToClient(client, len, ctx);
     freecon(ctx);
     return Success;
@@ -351,7 +336,6 @@ SELinuxSendItemsToClient(ClientPtr client, SELinuxListItemRec * items,
                          int size, int count)
 {
     int rc, k, pos = 0;
-    SELinuxListItemsReply rep;
     CARD32 *buf;
 
     buf = calloc(size, sizeof(CARD32));
@@ -384,20 +368,14 @@ SELinuxSendItemsToClient(ClientPtr client, SELinuxListItemRec * items,
     }
 
     /* Send reply to client */
-    rep = (SELinuxListItemsReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    SELinuxListItemsReply rep = {
         .length = size,
         .count = count
     };
 
-    if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.count);
-    }
+    REPLY_FIELD_CARD32(count);
+    REPLY_SEND();
 
-    WriteToClient(client, sizeof(SELinuxListItemsReply), &rep);
     WriteToClient(client, size * 4, buf);
 
     /* Free stuff and return */
