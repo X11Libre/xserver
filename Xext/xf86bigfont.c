@@ -264,7 +264,7 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xXF86BigfontQueryVersionReq);
 
-    xXF86BigfontQueryVersionReply reply = {
+    xXF86BigfontQueryVersionReply rep = {
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
         .minorVersion = SERVER_XF86BIGFONT_MINOR_VERSION,
         .uid = geteuid(),
@@ -275,15 +275,12 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
                          ? XF86Bigfont_CAP_LocalShm : 0
 #endif /* CONFIG_MITSHM */
     };
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-        swapl(&reply.uid);
-        swapl(&reply.gid);
-        swapl(&reply.signature);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_FIELD_CARD32(uid);
+    REPLY_FIELD_CARD32(gid);
+    REPLY_FIELD_CARD32(signature);
+    return REPLY_SEND();
 }
 
 static void
@@ -547,19 +544,20 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             .shmid = shmid,
         };
 
+        REPLY_FIELD_CARD16(minCharOrByte2);
+        REPLY_FIELD_CARD16(maxCharOrByte2);
+        REPLY_FIELD_CARD16(defaultChar);
+        REPLY_FIELD_CARD16(nFontProps);
+        REPLY_FIELD_CARD16(fontAscent);
+        REPLY_FIELD_CARD16(fontDescent);
+        REPLY_FIELD_CARD32(nCharInfos);
+        REPLY_FIELD_CARD32(nUniqCharInfos);
+        REPLY_FIELD_CARD32(shmid);
+        REPLY_FIELD_CARD32(shmsegoffset);
+
         if (client->swapped) {
             swapCharInfo(&rep.minBounds);
             swapCharInfo(&rep.maxBounds);
-            swaps(&rep.minCharOrByte2);
-            swaps(&rep.maxCharOrByte2);
-            swaps(&rep.defaultChar);
-            swaps(&rep.nFontProps);
-            swaps(&rep.fontAscent);
-            swaps(&rep.fontDescent);
-            swapl(&rep.nCharInfos);
-            swapl(&rep.nUniqCharInfos);
-            swapl(&rep.shmid);
-            swapl(&rep.shmsegoffset);
         }
 
         int rc = Success;
@@ -582,7 +580,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             goto out;
         }
 
-        X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+        rc = REPLY_SEND_RPCBUF();
 out:
         if (nCharInfos > 0) {
             if (shmid == -1)
