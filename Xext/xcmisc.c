@@ -48,23 +48,14 @@ from The Open Group.
 static int
 ProcXCMiscGetVersion(ClientPtr client)
 {
-    REQUEST(xXCMiscGetVersionReq);
-    REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
-
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
+    X_REQUEST_HEAD_STRUCT(xXCMiscGetVersionReq);
+    X_REQUEST_FIELD_CARD16(majorVersion);
+    X_REQUEST_FIELD_CARD16(minorVersion);
 
     xXCMiscGetVersionReply reply = {
         .majorVersion = XCMiscMajorVersion,
         .minorVersion = XCMiscMinorVersion
     };
-
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -72,7 +63,7 @@ ProcXCMiscGetVersion(ClientPtr client)
 static int
 ProcXCMiscGetXIDRange(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xXCMiscGetXIDRangeReq);
+    X_REQUEST_HEAD_STRUCT(xXCMiscGetXIDRangeReq);
 
     XID min_id, max_id;
     GetXIDRange(client->index, FALSE, &min_id, &max_id);
@@ -92,11 +83,8 @@ ProcXCMiscGetXIDRange(ClientPtr client)
 static int
 ProcXCMiscGetXIDList(ClientPtr client)
 {
-    REQUEST(xXCMiscGetXIDListReq);
-    REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
-
-    if (client->swapped)
-        swapl(&stuff->count);
+    X_REQUEST_HEAD_STRUCT(xXCMiscGetXIDListReq);
+    X_REQUEST_FIELD_CARD32(count);
 
     if (stuff->count > UINT32_MAX / sizeof(XID))
         return BadAlloc;
