@@ -32,6 +32,7 @@ SOFTWARE.
 #include <X11/extensions/shmproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
@@ -185,7 +186,7 @@ SingleXvPutVideo(ClientPtr client)
     GCPtr pGC;
     int status;
 
-    REQUEST(xvPutVideoReq);
+    REQUEST_HEAD_STRUCT(xvPutVideoReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -236,12 +237,12 @@ ProcXvPutVideo(ClientPtr client)
 static int
 SingleXvPutStill(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvPutStillReq);
+
     DrawablePtr pDraw;
     XvPortPtr pPort;
     GCPtr pGC;
     int status;
-
-    REQUEST(xvPutStillReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -438,11 +439,13 @@ ProcXvUngrabPort(ClientPtr client)
 static int
 SingleXvStopVideo(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvStopVideoReq);
+    REQUEST_FIELD_CARD32(port);
+    REQUEST_FIELD_CARD32(drawable);
+
     int ret;
     DrawablePtr pDraw;
     XvPortPtr pPort;
-
-    REQUEST(xvStopVideoReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -474,11 +477,13 @@ ProcXvStopVideo(ClientPtr client)
 static int
 SingleXvSetPortAttribute(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvSetPortAttributeReq);
+    REQUEST_FIELD_CARD32(port);
+    REQUEST_FIELD_CARD32(attribute);
+    REQUEST_FIELD_CARD32(value);
+
     int status;
     XvPortPtr pPort;
-
-    REQUEST(xvSetPortAttributeReq);
-
     VALIDATE_XV_PORT(stuff->port, pPort, DixSetAttrAccess);
 
     if (!ValidAtom(stuff->attribute)) {
@@ -625,14 +630,14 @@ ProcXvQueryPortAttributes(ClientPtr client)
 static int
 SingleXvPutImage(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xvPutImageReq);
+
     DrawablePtr pDraw;
     XvPortPtr pPort;
     XvImagePtr pImage = NULL;
     GCPtr pGC;
     int status, i, size;
     CARD16 width, height;
-
-    REQUEST(xvPutImageReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
@@ -714,6 +719,8 @@ ProcXvPutImage(ClientPtr client)
 static int
 SingleXvShmPutImage(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvShmPutImageReq);
+
     ShmDescPtr shmdesc;
     DrawablePtr pDraw;
     XvPortPtr pPort;
@@ -721,8 +728,6 @@ SingleXvShmPutImage(ClientPtr client)
     GCPtr pGC;
     int status, size_needed, i;
     CARD16 width, height;
-
-    REQUEST(xvShmPutImageReq);
 
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
