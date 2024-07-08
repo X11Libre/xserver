@@ -265,13 +265,11 @@ XF86BigfontResetProc(ExtensionEntry * extEntry)
 static int
 ProcXF86BigfontQueryVersion(ClientPtr client)
 {
-    xXF86BigfontQueryVersionReply reply;
-
     REQUEST_SIZE_MATCH(xXF86BigfontQueryVersionReq);
-    reply = (xXF86BigfontQueryVersionReply) {
+
+    xXF86BigfontQueryVersionReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
         .minorVersion = SERVER_XF86BIGFONT_MINOR_VERSION,
         .uid = geteuid(),
@@ -280,9 +278,6 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
         .signature = signature,
         .capabilities = (client->local && !client->swapped)
                          ? XF86Bigfont_CAP_LocalShm : 0
-#else
-        .signature = 0,
-        .capabilities = 0
 #endif
     };
     if (client->swapped) {
