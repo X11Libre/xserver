@@ -30,21 +30,30 @@ from The Open Group.
 #include <dix-config.h>
 #endif
 
+#include <stdint.h>
+
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/extensions/xcmiscproto.h>
+
+#include "dix/request_priv.h"
+
 #include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "swaprep.h"
-#include <X11/extensions/xcmiscproto.h>
 #include "extinit_priv.h"
 
-#include <stdint.h>
 
 static int
 ProcXCMiscGetVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXCMiscGetVersionReq);
+    REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
+    REQUEST_FIELD_CARD16(majorVersion);
+    REQUEST_FIELD_CARD16(minorVersion);
+
     xXCMiscGetVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -52,8 +61,6 @@ ProcXCMiscGetVersion(ClientPtr client)
         .majorVersion = XCMiscMajorVersion,
         .minorVersion = XCMiscMinorVersion
     };
-
-    REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -67,10 +74,10 @@ ProcXCMiscGetVersion(ClientPtr client)
 static int
 ProcXCMiscGetXIDRange(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXCMiscGetXIDRangeReq);
+
     xXCMiscGetXIDRangeReply rep;
     XID min_id, max_id;
-
-    REQUEST_SIZE_MATCH(xXCMiscGetXIDRangeReq);
     GetXIDRange(client->index, FALSE, &min_id, &max_id);
     rep = (xXCMiscGetXIDRangeReply) {
         .type = X_Reply,
@@ -91,12 +98,13 @@ ProcXCMiscGetXIDRange(ClientPtr client)
 static int
 ProcXCMiscGetXIDList(ClientPtr client)
 {
-    REQUEST(xXCMiscGetXIDListReq);
+    REQUEST_HEAD_STRUCT(xXCMiscGetXIDListReq);
+    REQUEST_FIELD_CARD16(length);
+    REQUEST_FIELD_CARD32(count);
+
     xXCMiscGetXIDListReply rep;
     XID *pids;
     unsigned int count;
-
-    REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
 
     if (stuff->count > UINT32_MAX / sizeof(XID))
         return BadAlloc;
@@ -142,58 +150,10 @@ ProcXCMiscDispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcXCMiscGetVersion(ClientPtr client)
-{
-    REQUEST(xXCMiscGetVersionReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
-    swaps(&stuff->majorVersion);
-    swaps(&stuff->minorVersion);
-    return ProcXCMiscGetVersion(client);
-}
-
-static int _X_COLD
-SProcXCMiscGetXIDRange(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    swaps(&stuff->length);
-    return ProcXCMiscGetXIDRange(client);
-}
-
-static int _X_COLD
-SProcXCMiscGetXIDList(ClientPtr client)
-{
-    REQUEST(xXCMiscGetXIDListReq);
-    REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
-
-    swaps(&stuff->length);
-    swapl(&stuff->count);
-    return ProcXCMiscGetXIDList(client);
-}
-
-static int _X_COLD
-SProcXCMiscDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-    case X_XCMiscGetVersion:
-        return SProcXCMiscGetVersion(client);
-    case X_XCMiscGetXIDRange:
-        return SProcXCMiscGetXIDRange(client);
-    case X_XCMiscGetXIDList:
-        return SProcXCMiscGetXIDList(client);
-    default:
-        return BadRequest;
-    }
-}
-
 void
 XCMiscExtensionInit(void)
 {
     AddExtension(XCMiscExtensionName, 0, 0,
-                 ProcXCMiscDispatch, SProcXCMiscDispatch,
+                 ProcXCMiscDispatch, ProcXCMiscDispatch,
                  NULL, StandardMinorOpcode);
 }
