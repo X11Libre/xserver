@@ -1,2 +1,2 @@
 extern void XineramifyXv(void);
-extern void XvResetProcVector(void);
+extern int xvUseXinerama;
