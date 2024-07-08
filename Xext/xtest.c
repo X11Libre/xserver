@@ -94,20 +94,12 @@ ProcXTestGetVersion(ClientPtr client)
     REQUEST_FIELD_CARD16(minorVersion);
 
     xXTestGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = XTestMajorVersion,
         .minorVersion = XTestMinorVersion
     };
 
-    REQUEST_SIZE_MATCH(xXTestGetVersionReq);
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.minorVersion);
-    }
-    WriteToClient(client, sizeof(xXTestGetVersionReply), &rep);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_SEND();
     return Success;
 }
 
@@ -118,7 +110,6 @@ ProcXTestCompareCursor(ClientPtr client)
     REQUEST_FIELD_CARD32(window);
     REQUEST_FIELD_CARD32(cursor);
 
-    xXTestCompareCursorReply rep;
     WindowPtr pWin;
     CursorPtr pCursor;
     int rc;
@@ -143,16 +134,11 @@ ProcXTestCompareCursor(ClientPtr client)
             return rc;
         }
     }
-    rep = (xXTestCompareCursorReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+
+    xXTestCompareCursorReply rep = {
         .same = (wCursor(pWin) == pCursor)
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xXTestCompareCursorReply), &rep);
+    REPLY_SEND();
     return Success;
 }
 
