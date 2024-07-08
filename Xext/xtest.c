@@ -38,6 +38,7 @@
 #include "dix/input_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 #include "dix/inpututils_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
@@ -89,11 +90,8 @@ static int XTestSwapFakeInput(ClientPtr /* client */ ,
 static int
 ProcXTestGetVersion(ClientPtr client)
 {
-    REQUEST(xXTestGetVersionReq);
-    REQUEST_SIZE_MATCH(xXTestGetVersionReq);
-
-    if (client->swapped)
-        swaps(&stuff->minorVersion);
+    REQUEST_HEAD_STRUCT(xXTestGetVersionReq);
+    REQUEST_FIELD_CARD16(minorVersion);
 
     xXTestGetVersionReply reply = {
         .majorVersion = XTestMajorVersion,
@@ -109,13 +107,9 @@ ProcXTestGetVersion(ClientPtr client)
 static int
 ProcXTestCompareCursor(ClientPtr client)
 {
-    REQUEST(xXTestCompareCursorReq);
-    REQUEST_SIZE_MATCH(xXTestCompareCursorReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->cursor);
-    }
+    REQUEST_HEAD_STRUCT(xXTestCompareCursorReq);
+    REQUEST_FIELD_CARD32(window);
+    REQUEST_FIELD_CARD32(cursor);
 
     WindowPtr pWin;
     CursorPtr pCursor;
@@ -181,14 +175,14 @@ XTestDeviceSendEvents(DeviceIntPtr dev,
 static int
 ProcXTestFakeInput(ClientPtr client)
 {
+    REQUEST_HEAD_NO_CHECK(xXTestFakeInputReq);
+
     if (client->swapped) {
-        REQUEST(xReq);
-        int n = XTestSwapFakeInput(client, stuff);
+        int n = XTestSwapFakeInput(client, (xReq *)stuff);
         if (n != Success)
             return n;
     }
 
-    REQUEST(xXTestFakeInputReq);
     int nev, n, type, rc;
     xEvent *ev;
     DeviceIntPtr dev = NULL;
@@ -378,6 +372,7 @@ ProcXTestFakeInput(ClientPtr client)
         /* swap the request back so we can simply re-execute it */
         if (client->swapped) {
             (void) XTestSwapFakeInput(client, (xReq *) stuff);
+            REQUEST_FIELD_CARD16(length);
         }
         ResetCurrentRequest(client);
         client->sequence--;
@@ -455,9 +450,8 @@ ProcXTestFakeInput(ClientPtr client)
 static int
 ProcXTestGrabControl(ClientPtr client)
 {
-    REQUEST(xXTestGrabControlReq);
+    REQUEST_HEAD_STRUCT(xXTestGrabControlReq);
 
-    REQUEST_SIZE_MATCH(xXTestGrabControlReq);
     if ((stuff->impervious != xTrue) && (stuff->impervious != xFalse)) {
         client->errorValue = stuff->impervious;
         return BadValue;
