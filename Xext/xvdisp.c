@@ -66,13 +66,9 @@ ProcXvQueryExtension(ClientPtr client)
         .revision = XvRevision
     };
 
-    if (client->swapped) {
-        swaps(&rep.version);
-        swaps(&rep.revision);
-    }
-
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(version);
+    REPLY_FIELD_CARD16(revision);
+    return REPLY_SEND();
 }
 
 static int
@@ -131,12 +127,8 @@ ProcXvQueryAdaptors(ClientPtr client)
         .num_adaptors = numAdaptors,
     };
 
-    if (client->swapped) {
-        swaps(&rep.num_adaptors);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD16(num_adaptors);
+    return REPLY_SEND_RPCBUF(payload, totalSize);
 }
 
 static int
@@ -173,12 +165,8 @@ ProcXvQueryEncodings(ClientPtr client)
         .num_encodings = pPort->pAdaptor->nEncodings,
     };
 
-    if (client->swapped) {
-        swaps(&rep.num_encodings);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD16(num_encodings);
+    return REPLY_SEND_RPCBUF();
 }
 
 static int
@@ -420,8 +408,7 @@ ProcXvGrabPort(ClientPtr client)
         .result = result
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 static int
@@ -539,12 +526,8 @@ ProcXvGetPortAttribute(ClientPtr client)
         .value = value
     };
 
-    if (client->swapped) {
-        swapl(&rep.value);
-    }
-
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(value);
+    return REPLY_SEND();
 }
 
 static int
@@ -572,13 +555,9 @@ ProcXvQueryBestSize(ClientPtr client)
         .actual_height = actual_height
     };
 
-    if (client->swapped) {
-        swaps(&rep.actual_width);
-        swaps(&rep.actual_height);
-    }
-
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(actual_width);
+    REPLY_FIELD_CARD16(actual_height);
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
@@ -606,21 +585,14 @@ ProcXvQueryPortAttributes(ClientPtr client)
         x_rpcbuf_write_string_0t_pad(&rpcbuf, pAtt->name);
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xvQueryPortAttributesReply rep = {
         .num_attributes = pPort->pAdaptor->nAttributes,
         .text_size = textSize,
     };
 
-    if (client->swapped) {
-        swapl(&rep.num_attributes);
-        swapl(&rep.text_size);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD32(num_attributes);
+    REPLY_FIELD_CARD32(text_size);
+    return REPLY_SEND_RPCBUF();
 }
 
 static int
@@ -880,18 +852,12 @@ ProcXvQueryImageAttributes(ClientPtr client)
         .data_size = size
     };
 
-    if (client->swapped) {
-        swapl(&rep.num_planes);
-        swapl(&rep.data_size);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        /* needed here, because ddQueryImageAttributes() directly wrote into
-           our rpcbuf area */
-        SwapLongs((CARD32 *) offsets, x_rpcbuf_wsize_units(&rpcbuf));
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD32(num_planes);
+    REPLY_FIELD_CARD32(data_size);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_BUF_CARD32(offsets, num_planes * 2);
+    return REPLY_SEND_RPCBUF();
 }
 
 static int
@@ -957,12 +923,8 @@ ProcXvListImageFormats(ClientPtr client)
         .num_formats = pPort->pAdaptor->nImages,
     };
 
-    if (client->swapped) {
-        swapl(&rep.num_formats);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD32(num_formats);
+    return REPLY_SEND_RPCBUF();
 }
 
 int
