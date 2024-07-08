@@ -57,11 +57,6 @@ ProcXCMiscGetVersion(ClientPtr client)
         .minorVersion = XCMiscMinorVersion
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
-
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
