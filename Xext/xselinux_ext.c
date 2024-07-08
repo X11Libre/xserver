@@ -72,10 +72,9 @@ ProcSELinuxQueryVersion(ClientPtr client)
         .server_major = SELINUX_MAJOR_VERSION,
         .server_minor = SELINUX_MINOR_VERSION
     };
-    if (client->swapped) {
-        swaps(&reply.server_major);
-        swaps(&reply.server_minor);
-    }
+
+    REPLY_FIELD_CARD16(server_major);
+    REPLY_FIELD_CARD16(server_minor);
     X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
@@ -99,9 +98,7 @@ SELinuxSendContextReply(ClientPtr client, security_id_t sid)
         .context_len = len
     };
 
-    if (client->swapped) {
-        swapl(&reply.context_len);
-    }
+    REPLY_FIELD_CARD32(context_len);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -359,9 +356,7 @@ SELinuxSendItemsToClient(ClientPtr client, SELinuxListItemRec * items,
         .count = count
     };
 
-    if (client->swapped) {
-        swapl(&reply.count);
-    }
+    REPLY_FIELD_CARD32(count);
 
     SELinuxFreeItems(items, count);
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
