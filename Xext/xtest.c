@@ -38,6 +38,7 @@
 #include "dix/input_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 #include "dix/inpututils_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
@@ -89,6 +90,9 @@ static int XTestSwapFakeInput(ClientPtr /* client */ ,
 static int
 ProcXTestGetVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXTestGetVersionReq);
+    REQUEST_FIELD_CARD16(minorVersion);
+
     xXTestGetVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -110,14 +114,16 @@ ProcXTestGetVersion(ClientPtr client)
 static int
 ProcXTestCompareCursor(ClientPtr client)
 {
-    REQUEST(xXTestCompareCursorReq);
+    REQUEST_HEAD_STRUCT(xXTestCompareCursorReq);
+    REQUEST_FIELD_CARD32(window);
+    REQUEST_FIELD_CARD32(cursor);
+
     xXTestCompareCursorReply rep;
     WindowPtr pWin;
     CursorPtr pCursor;
     int rc;
     DeviceIntPtr ptr = PickPointer(client);
 
-    REQUEST_SIZE_MATCH(xXTestCompareCursorReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -182,7 +188,14 @@ XTestDeviceSendEvents(DeviceIntPtr dev,
 static int
 ProcXTestFakeInput(ClientPtr client)
 {
-    REQUEST(xXTestFakeInputReq);
+    REQUEST_HEAD_NO_CHECK(xXTestFakeInputReq);
+
+    if (client->swapped) {
+        int n = XTestSwapFakeInput(client, (xReq *)stuff);
+        if (n != Success)
+            return n;
+    }
+
     int nev, n, type, rc;
     xEvent *ev;
     DeviceIntPtr dev = NULL;
@@ -372,6 +385,7 @@ ProcXTestFakeInput(ClientPtr client)
         /* swap the request back so we can simply re-execute it */
         if (client->swapped) {
             (void) XTestSwapFakeInput(client, (xReq *) stuff);
+            REQUEST_FIELD_CARD16(length);
         }
         ResetCurrentRequest(client);
         client->sequence--;
@@ -449,9 +463,8 @@ ProcXTestFakeInput(ClientPtr client)
 static int
 ProcXTestGrabControl(ClientPtr client)
 {
-    REQUEST(xXTestGrabControlReq);
+    REQUEST_HEAD_STRUCT(xXTestGrabControlReq);
 
-    REQUEST_SIZE_MATCH(xXTestGrabControlReq);
     if ((stuff->impervious != xTrue) && (stuff->impervious != xFalse)) {
         client->errorValue = stuff->impervious;
         return BadValue;
@@ -482,25 +495,6 @@ ProcXTestDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXTestGetVersion(ClientPtr client)
-{
-    REQUEST(xXTestGetVersionReq);
-    REQUEST_SIZE_MATCH(xXTestGetVersionReq);
-    swaps(&stuff->minorVersion);
-    return ProcXTestGetVersion(client);
-}
-
-static int _X_COLD
-SProcXTestCompareCursor(ClientPtr client)
-{
-    REQUEST(xXTestCompareCursorReq);
-    REQUEST_SIZE_MATCH(xXTestCompareCursorReq);
-    swapl(&stuff->window);
-    swapl(&stuff->cursor);
-    return ProcXTestCompareCursor(client);
-}
-
-static int _X_COLD
 XTestSwapFakeInput(ClientPtr client, xReq * req)
 {
     int nev;
@@ -522,37 +516,6 @@ XTestSwapFakeInput(ClientPtr client, xReq * req)
         *ev = sev;
     }
     return Success;
-}
-
-static int _X_COLD
-SProcXTestFakeInput(ClientPtr client)
-{
-    int n;
-
-    REQUEST(xReq);
-
-    n = XTestSwapFakeInput(client, stuff);
-    if (n != Success)
-        return n;
-    return ProcXTestFakeInput(client);
-}
-
-static int _X_COLD
-SProcXTestDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-    case X_XTestGetVersion:
-        return SProcXTestGetVersion(client);
-    case X_XTestCompareCursor:
-        return SProcXTestCompareCursor(client);
-    case X_XTestFakeInput:
-        return SProcXTestFakeInput(client);
-    case X_XTestGrabControl:
-        return ProcXTestGrabControl(client);
-    default:
-        return BadRequest;
-    }
 }
 
 /**
@@ -686,7 +649,7 @@ void
 XTestExtensionInit(void)
 {
     AddExtension(XTestExtensionName, 0, 0,
-                 ProcXTestDispatch, SProcXTestDispatch,
+                 ProcXTestDispatch, ProcXTestDispatch,
                  XTestExtensionTearDown, StandardMinorOpcode);
 
     xtest_evlist = InitEventList(GetMaximumEventsNum());
