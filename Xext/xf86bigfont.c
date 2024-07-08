@@ -56,6 +56,7 @@
 #include <X11/fonts/libxfont2.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "misc.h"
@@ -261,7 +262,7 @@ XF86BigfontResetProc(ExtensionEntry * extEntry)
 static int
 ProcXF86BigfontQueryVersion(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xXF86BigfontQueryVersionReq);
+    REQUEST_HEAD_STRUCT(xXF86BigfontQueryVersionReq);
 
     xXF86BigfontQueryVersionReply reply = {
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
@@ -314,14 +315,10 @@ static inline void writeCharInfo(x_rpcbuf_t *rpcbuf, xCharInfo CI) {
 static int
 ProcXF86BigfontQueryFont(ClientPtr client)
 {
-    REQUEST(xXF86BigfontQueryFontReq);
-    REQUEST_SIZE_MATCH(xXF86BigfontQueryFontReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    REQUEST_HEAD_NO_CHECK(xXF86BigfontQueryFontReq);
+    REQUEST_FIELD_CARD32(id);
 
     FontPtr pFont;
-
     CARD32 stuff_flags;
     xCharInfo *pmax;
     xCharInfo *pmin;
