@@ -98,11 +98,7 @@ ProcXTestGetVersion(ClientPtr client)
         .minorVersion = XTestMinorVersion
     };
 
-    REQUEST_SIZE_MATCH(xXTestGetVersionReq);
-
-    if (client->swapped) {
-        swaps(&reply.minorVersion);
-    }
+    REPLY_FIELD_CARD16(minorVersion);
     X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
