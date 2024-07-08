@@ -280,13 +280,13 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
                          ? XF86Bigfont_CAP_LocalShm : 0
 #endif /* CONFIG_MITSHM */
     };
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-        swapl(&reply.uid);
-        swapl(&reply.gid);
-        swapl(&reply.signature);
-    }
+
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
+    X_REPLY_FIELD_CARD32(uid);
+    X_REPLY_FIELD_CARD32(gid);
+    X_REPLY_FIELD_CARD32(signature);
+
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
@@ -551,19 +551,20 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             .shmid = shmid,
         };
 
+        X_REPLY_FIELD_CARD16(minCharOrByte2);
+        X_REPLY_FIELD_CARD16(maxCharOrByte2);
+        X_REPLY_FIELD_CARD16(defaultChar);
+        X_REPLY_FIELD_CARD16(nFontProps);
+        X_REPLY_FIELD_CARD16(fontAscent);
+        X_REPLY_FIELD_CARD16(fontDescent);
+        X_REPLY_FIELD_CARD32(nCharInfos);
+        X_REPLY_FIELD_CARD32(nUniqCharInfos);
+        X_REPLY_FIELD_CARD32(shmid);
+        X_REPLY_FIELD_CARD32(shmsegoffset);
+
         if (client->swapped) {
             swapCharInfo(&reply.minBounds);
             swapCharInfo(&reply.maxBounds);
-            swaps(&reply.minCharOrByte2);
-            swaps(&reply.maxCharOrByte2);
-            swaps(&reply.defaultChar);
-            swaps(&reply.nFontProps);
-            swaps(&reply.fontAscent);
-            swaps(&reply.fontDescent);
-            swapl(&reply.nCharInfos);
-            swapl(&reply.nUniqCharInfos);
-            swapl(&reply.shmid);
-            swapl(&reply.shmsegoffset);
         }
 
         int rc = Success;
