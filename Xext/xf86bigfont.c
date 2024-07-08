@@ -262,7 +262,7 @@ XF86BigfontResetProc(ExtensionEntry * extEntry)
 static int
 ProcXF86BigfontQueryVersion(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xXF86BigfontQueryVersionReq);
+    X_REQUEST_HEAD_STRUCT(xXF86BigfontQueryVersionReq);
 
     xXF86BigfontQueryVersionReply reply = {
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
@@ -315,14 +315,10 @@ static inline void writeCharInfo(x_rpcbuf_t *rpcbuf, xCharInfo CI) {
 static int
 ProcXF86BigfontQueryFont(ClientPtr client)
 {
-    REQUEST(xXF86BigfontQueryFontReq);
-    REQUEST_SIZE_MATCH(xXF86BigfontQueryFontReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_NO_CHECK(xXF86BigfontQueryFontReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     FontPtr pFont;
-
     CARD32 stuff_flags;
     xCharInfo *pmax;
     xCharInfo *pmin;
