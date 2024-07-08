@@ -98,13 +98,8 @@ ProcXTestGetVersion(ClientPtr client)
         .minorVersion = XTestMinorVersion
     };
 
-    REQUEST_SIZE_MATCH(xXTestGetVersionReq);
-
-    if (client->swapped) {
-        swaps(&rep.minorVersion);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(minorVersion);
+    return REPLY_SEND();
 }
 
 static int
@@ -143,8 +138,7 @@ ProcXTestCompareCursor(ClientPtr client)
         .same = (wCursor(pWin) == pCursor)
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 void
