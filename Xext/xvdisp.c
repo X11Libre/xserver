@@ -321,7 +321,6 @@ ProcXvQueryAdaptors(ClientPtr client)
 {
     xvFormat format;
     xvAdaptorInfo ainfo;
-    xvQueryAdaptorsReply rep;
     int totalSize, na, nf, rc;
     int nameSize;
     XvAdaptorPtr pa;
@@ -337,27 +336,20 @@ ProcXvQueryAdaptors(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    xvQueryAdaptorsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+    };
+
     pScreen = pWin->drawable.pScreen;
     pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
                                           XvGetScreenKey());
     if (!pxvs) {
-        rep = (xvQueryAdaptorsReply) {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
-            .length = 0,
-            .num_adaptors = 0
-        };
-
         _WriteQueryAdaptorsReply(client, &rep);
-
         return Success;
     }
 
-    rep = (xvQueryAdaptorsReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .num_adaptors = pxvs->nAdaptors
-    };
+    rep.num_adaptors = pxvs->nAdaptors;
 
     /* CALCULATE THE TOTAL SIZE OF THE REPLY IN BYTES */
 
@@ -411,7 +403,6 @@ static int
 ProcXvQueryEncodings(ClientPtr client)
 {
     xvEncodingInfo einfo;
-    xvQueryEncodingsReply rep;
     int totalSize;
     int nameSize;
     XvPortPtr pPort;
@@ -423,12 +414,6 @@ ProcXvQueryEncodings(ClientPtr client)
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
-    rep = (xvQueryEncodingsReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .num_encodings = pPort->pAdaptor->nEncodings
-    };
-
     /* FOR EACH ENCODING ADD UP THE BYTES FOR ENCODING NAMES */
 
     ne = pPort->pAdaptor->nEncodings;
@@ -439,7 +424,12 @@ ProcXvQueryEncodings(ClientPtr client)
         pe++;
     }
 
-    rep.length = bytes_to_int32(totalSize);
+    xvQueryEncodingsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .num_encodings = pPort->pAdaptor->nEncodings,
+        .length = bytes_to_int32(totalSize),
+    };
 
     _WriteQueryEncodingsReply(client, &rep);
 
@@ -615,7 +605,6 @@ ProcXvGrabPort(ClientPtr client)
 {
     int result, status;
     XvPortPtr pPort;
-    xvGrabPortReply rep;
 
     REQUEST(xvGrabPortReq);
     REQUEST_SIZE_MATCH(xvGrabPortReq);
@@ -627,10 +616,9 @@ ProcXvGrabPort(ClientPtr client)
     if (status != Success) {
         return status;
     }
-    rep = (xvGrabPortReply) {
+    xvGrabPortReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .result = result
     };
 
@@ -704,7 +692,6 @@ ProcXvGetPortAttribute(ClientPtr client)
     INT32 value;
     int status;
     XvPortPtr pPort;
-    xvGetPortAttributeReply rep;
 
     REQUEST(xvGetPortAttributeReq);
     REQUEST_SIZE_MATCH(xvGetPortAttributeReq);
@@ -722,10 +709,9 @@ ProcXvGetPortAttribute(ClientPtr client)
         return status;
     }
 
-    rep = (xvGetPortAttributeReply) {
+    xvGetPortAttributeReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .value = value
     };
 
@@ -739,7 +725,6 @@ ProcXvQueryBestSize(ClientPtr client)
 {
     unsigned int actual_width, actual_height;
     XvPortPtr pPort;
-    xvQueryBestSizeReply rep;
 
     REQUEST(xvQueryBestSizeReq);
     REQUEST_SIZE_MATCH(xvQueryBestSizeReq);
@@ -751,10 +736,9 @@ ProcXvQueryBestSize(ClientPtr client)
                                          stuff->drw_w, stuff->drw_h,
                                          &actual_width, &actual_height);
 
-    rep = (xvQueryBestSizeReply) {
+    xvQueryBestSizeReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .actual_width = actual_width,
         .actual_height = actual_height
     };
@@ -770,7 +754,6 @@ ProcXvQueryPortAttributes(ClientPtr client)
     int size, i;
     XvPortPtr pPort;
     XvAttributePtr pAtt;
-    xvQueryPortAttributesReply rep;
     xvAttributeInfo Info;
 
     REQUEST(xvQueryPortAttributesReq);
@@ -778,11 +761,10 @@ ProcXvQueryPortAttributes(ClientPtr client)
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixGetAttrAccess);
 
-    rep = (xvQueryPortAttributesReply) {
+    xvQueryPortAttributesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_attributes = pPort->pAdaptor->nAttributes,
-        .text_size = 0
     };
 
     for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
@@ -1029,7 +1011,6 @@ ProcXvListImageFormats(ClientPtr client)
     XvPortPtr pPort;
     XvImagePtr pImage;
     int i;
-    xvListImageFormatsReply rep;
     xvImageFormatInfo info;
 
     REQUEST(xvListImageFormatsReq);
@@ -1038,7 +1019,7 @@ ProcXvListImageFormats(ClientPtr client)
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
-    rep = (xvListImageFormatsReply) {
+    xvListImageFormatsReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_formats = pPort->pAdaptor->nImages,
