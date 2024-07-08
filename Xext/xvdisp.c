@@ -874,16 +874,11 @@ ProcXvQueryImageAttributes(ClientPtr client)
         .data_size = size
     };
 
-    if (client->swapped) {
-        /* needed here, because ddQueryImageAttributes() directly wrote into
-           our rpcbuf area */
-        SwapLongs((CARD32 *) offsets, x_rpcbuf_wsize_units(&rpcbuf));
-    }
-
     X_REPLY_FIELD_CARD32(num_planes);
     X_REPLY_FIELD_CARD32(data_size);
     X_REPLY_FIELD_CARD16(width);
     X_REPLY_FIELD_CARD16(height);
+    X_REPLY_BUF_CARD32(offsets, num_planes * 2);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
