@@ -453,7 +453,7 @@ ProcXvQueryEncodings(ClientPtr client)
 }
 
 static int
-ProcXvPutVideo(ClientPtr client)
+SingleXvPutVideo(ClientPtr client)
 {
     DrawablePtr pDraw;
     XvPortPtr pPort;
@@ -482,8 +482,20 @@ ProcXvPutVideo(ClientPtr client)
                         stuff->drw_w, stuff->drw_h);
 }
 
+static int XineramaXvPutVideo(ClientPtr client);
+
 static int
-ProcXvPutStill(ClientPtr client)
+ProcXvPutVideo(ClientPtr client)
+{
+#ifdef PANORAMIX
+    if (xvUseXinerama)
+        return XineramaXvPutVideo(client);
+#endif
+    return SingleXvPutVideo(client);
+}
+
+static int
+SingleXvPutStill(ClientPtr client)
 {
     DrawablePtr pDraw;
     XvPortPtr pPort;
@@ -510,6 +522,18 @@ ProcXvPutStill(ClientPtr client)
     return XvdiPutStill(client, pDraw, pPort, pGC, stuff->vid_x, stuff->vid_y,
                         stuff->vid_w, stuff->vid_h, stuff->drw_x, stuff->drw_y,
                         stuff->drw_w, stuff->drw_h);
+}
+
+static int XineramaXvPutStill(ClientPtr client);
+
+static int
+ProcXvPutStill(ClientPtr client)
+{
+#ifdef PANORAMIX
+    if (xvUseXinerama)
+        return XineramaXvPutStill(client);
+#endif
+    return SingleXvPutStill(client);
 }
 
 static int
@@ -643,7 +667,7 @@ ProcXvUngrabPort(ClientPtr client)
 }
 
 static int
-ProcXvStopVideo(ClientPtr client)
+SingleXvStopVideo(ClientPtr client)
 {
     int ret;
     DrawablePtr pDraw;
@@ -661,8 +685,20 @@ ProcXvStopVideo(ClientPtr client)
     return XvdiStopVideo(client, pPort, pDraw);
 }
 
+static int XineramaXvStopVideo(ClientPtr client);
+
 static int
-ProcXvSetPortAttribute(ClientPtr client)
+ProcXvStopVideo(ClientPtr client)
+{
+#ifdef PANORAMIX
+    if (xvUseXinerama)
+        return XineramaXvStopVideo(client);
+#endif
+    return SingleXvStopVideo(client);
+}
+
+static int
+SingleXvSetPortAttribute(ClientPtr client)
 {
     int status;
     XvPortPtr pPort;
@@ -686,6 +722,18 @@ ProcXvSetPortAttribute(ClientPtr client)
         client->errorValue = stuff->value;
 
     return status;
+}
+
+static int XineramaXvSetPortAttribute(ClientPtr client);
+
+static int
+ProcXvSetPortAttribute(ClientPtr client)
+{
+#ifdef PANORAMIX
+    if (xvUseXinerama)
+        return XineramaXvSetPortAttribute(client);
+#endif
+    return SingleXvSetPortAttribute(client);
 }
 
 static int
@@ -797,7 +845,7 @@ ProcXvQueryPortAttributes(ClientPtr client)
 }
 
 static int
-ProcXvPutImage(ClientPtr client)
+SingleXvPutImage(ClientPtr client)
 {
     DrawablePtr pDraw;
     XvPortPtr pPort;
@@ -853,10 +901,23 @@ ProcXvPutImage(ClientPtr client)
                         stuff->width, stuff->height);
 }
 
+static int
+XineramaXvPutImage(ClientPtr client);
+
+static int
+ProcXvPutImage(ClientPtr client)
+{
+#ifdef PANORAMIX
+    if (xvUseXinerama)
+        return XineramaXvPutImage(client);
+#endif
+    return SingleXvPutImage(client);
+}
+
 #ifdef MITSHM
 
 static int
-ProcXvShmPutImage(ClientPtr client)
+SingleXvShmPutImage(ClientPtr client)
 {
     ShmDescPtr shmdesc;
     DrawablePtr pDraw;
@@ -929,13 +990,24 @@ ProcXvShmPutImage(ClientPtr client)
 
     return status;
 }
-#else                           /* !MITSHM */
+
+static int XineramaXvShmPutImage(ClientPtr client);
+
+#endif /* MITSHM */
+
 static int
 ProcXvShmPutImage(ClientPtr client)
 {
-    return BadImplementation;
-}
+#ifdef MITSHM
+#ifdef PANORAMIX
+    if (xvUseXinerama)
+        return XineramaXvShmPutImage(client);
 #endif
+    return SingleXvShmPutImage(client);
+#else
+    return BadImplementation;
+#endif
+}
 
 #ifdef XvMCExtension
 #include "xvmcext.h"
@@ -1412,7 +1484,7 @@ XineramaXvStopVideo(ClientPtr client)
         if (port->info[i].id) {
             stuff->drawable = draw->info[i].id;
             stuff->port = port->info[i].id;
-            result = ProcXvStopVideo(client);
+            result = SingleXvStopVideo(client);
         }
     }
 
@@ -1436,7 +1508,7 @@ XineramaXvSetPortAttribute(ClientPtr client)
     FOR_NSCREENS_BACKWARD(i) {
         if (port->info[i].id) {
             stuff->port = port->info[i].id;
-            result = ProcXvSetPortAttribute(client);
+            result = SingleXvSetPortAttribute(client);
         }
     }
     return result;
@@ -1489,7 +1561,7 @@ XineramaXvShmPutImage(ClientPtr client)
             }
             stuff->send_event = (send_event && !i) ? 1 : 0;
 
-            result = ProcXvShmPutImage(client);
+            result = SingleXvShmPutImage(client);
         }
     }
     return result;
@@ -1540,7 +1612,7 @@ XineramaXvPutImage(ClientPtr client)
                 stuff->drw_y -= screenInfo.screens[i]->y;
             }
 
-            result = ProcXvPutImage(client);
+            result = SingleXvPutImage(client);
         }
     }
     return result;
@@ -1588,7 +1660,7 @@ XineramaXvPutVideo(ClientPtr client)
                 stuff->drw_y -= screenInfo.screens[i]->y;
             }
 
-            result = ProcXvPutVideo(client);
+            result = SingleXvPutVideo(client);
         }
     }
     return result;
@@ -1636,7 +1708,7 @@ XineramaXvPutStill(ClientPtr client)
                 stuff->drw_y -= screenInfo.screens[i]->y;
             }
 
-            result = ProcXvPutStill(client);
+            result = SingleXvPutStill(client);
         }
     }
     return result;
@@ -1743,25 +1815,6 @@ XineramifyXv(void)
         }
     }
 
-    /* munge the dispatch vector */
-    XvProcVector[xv_PutVideo] = XineramaXvPutVideo;
-    XvProcVector[xv_PutStill] = XineramaXvPutStill;
-    XvProcVector[xv_StopVideo] = XineramaXvStopVideo;
-    XvProcVector[xv_SetPortAttribute] = XineramaXvSetPortAttribute;
-    XvProcVector[xv_PutImage] = XineramaXvPutImage;
-    XvProcVector[xv_ShmPutImage] = XineramaXvShmPutImage;
+    xvUseXinerama = 1;
 }
 #endif                          /* PANORAMIX */
-
-void
-XvResetProcVector(void)
-{
-#ifdef PANORAMIX
-    XvProcVector[xv_PutVideo] = ProcXvPutVideo;
-    XvProcVector[xv_PutStill] = ProcXvPutStill;
-    XvProcVector[xv_StopVideo] = ProcXvStopVideo;
-    XvProcVector[xv_SetPortAttribute] = ProcXvSetPortAttribute;
-    XvProcVector[xv_PutImage] = ProcXvPutImage;
-    XvProcVector[xv_ShmPutImage] = ProcXvShmPutImage;
-#endif
-}
