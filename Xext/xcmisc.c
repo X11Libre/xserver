@@ -57,6 +57,9 @@ ProcXCMiscGetVersion(ClientPtr client)
         .minorVersion = XCMiscMinorVersion
     };
 
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
@@ -72,10 +75,9 @@ ProcXCMiscGetXIDRange(ClientPtr client)
         .start_id = min_id,
         .count = max_id - min_id + 1
     };
-    if (client->swapped) {
-        swapl(&reply.start_id);
-        swapl(&reply.count);
-    }
+
+    REPLY_FIELD_CARD32(start_id);
+    REPLY_FIELD_CARD32(count);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -104,9 +106,8 @@ ProcXCMiscGetXIDList(ClientPtr client)
     xXCMiscGetXIDListReply reply = {
         .count = count
     };
-    if (client->swapped) {
-        swapl(&reply.count);
-    }
+
+    REPLY_FIELD_CARD32(count);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
