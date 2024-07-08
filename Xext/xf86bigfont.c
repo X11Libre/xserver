@@ -267,9 +267,7 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xXF86BigfontQueryVersionReq);
 
-    xXF86BigfontQueryVersionReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xXF86BigfontQueryVersionReply rep = {
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
         .minorVersion = SERVER_XF86BIGFONT_MINOR_VERSION,
         .uid = geteuid(),
@@ -280,16 +278,12 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
                          ? XF86Bigfont_CAP_LocalShm : 0
 #endif
     };
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-        swapl(&reply.uid);
-        swapl(&reply.gid);
-        swapl(&reply.signature);
-    }
-    WriteToClient(client, sizeof(xXF86BigfontQueryVersionReply), &reply);
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_FIELD_CARD32(uid);
+    REPLY_FIELD_CARD32(gid);
+    REPLY_FIELD_CARD32(signature);
+    REPLY_SEND();
     return Success;
 }
 
@@ -534,10 +528,6 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                : 0);
 
         xXF86BigfontQueryFontReply rep = {
-            .type = X_Reply,
-            .length = bytes_to_int32(sizeof(xXF86BigfontQueryFontReply)
-                                     - sizeof(xGenericReply) + rlength),
-            .sequenceNumber = client->sequence,
             .minBounds = pFont->info.ink_minbounds,
             .maxBounds = pFont->info.ink_maxbounds,
             .minCharOrByte2 = pFont->info.firstCol,
@@ -555,21 +545,20 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             .shmid = shmid,
         };
 
+        REPLY_FIELD_CARD16(minCharOrByte2);
+        REPLY_FIELD_CARD16(maxCharOrByte2);
+        REPLY_FIELD_CARD16(defaultChar);
+        REPLY_FIELD_CARD16(nFontProps);
+        REPLY_FIELD_CARD16(fontAscent);
+        REPLY_FIELD_CARD16(fontDescent);
+        REPLY_FIELD_CARD32(nCharInfos);
+        REPLY_FIELD_CARD32(nUniqCharInfos);
+        REPLY_FIELD_CARD32(shmid);
+        REPLY_FIELD_CARD32(shmsegoffset);
+
         if (client->swapped) {
-            swaps(&rep.sequenceNumber);
-            swapl(&rep.length);
             swapCharInfo(&rep.minBounds);
             swapCharInfo(&rep.maxBounds);
-            swaps(&rep.minCharOrByte2);
-            swaps(&rep.maxCharOrByte2);
-            swaps(&rep.defaultChar);
-            swaps(&rep.nFontProps);
-            swaps(&rep.fontAscent);
-            swaps(&rep.fontDescent);
-            swapl(&rep.nCharInfos);
-            swapl(&rep.nUniqCharInfos);
-            swapl(&rep.shmid);
-            swapl(&rep.shmsegoffset);
         }
 
         int rc = Success;
@@ -590,10 +579,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                  i < nfontprops; i++, pFP++, prFP++) {
                 prFP->name = pFP->name;
                 prFP->value = pFP->value;
-                if (client->swapped) {
-                    swapl(&prFP->name);
-                    swapl(&prFP->value);
-                }
+                CLIENT_STRUCT_CARD32_2(prFP, name, value);
             }
             p = (char *) prFP;
         }
@@ -611,14 +597,11 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             ps = (CARD16 *) pci;
             for (j = 0; j < nCharInfos; j++, ps++) {
                 *ps = pIndex2UniqIndex[j];
-                if (client->swapped) {
-                    swaps(ps);
-                }
+                REPLY_BUF_CARD16(ps, 1);
             }
         }
 
-        WriteToClient(client, sizeof(xXF86BigfontQueryFontReply), &rep);
-        WriteToClient(client, rlength, buf);
+        REPLY_SEND_EXTRA(buf, rlength);
         free(buf);
 out:
         if (nCharInfos > 0) {
