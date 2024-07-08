@@ -110,12 +110,8 @@ SELinuxSendContextReply(ClientPtr client, security_id_t sid)
 static int
 ProcSELinuxSetCreateContext(ClientPtr client, unsigned offset)
 {
-    REQUEST(SELinuxSetCreateContextReq);
-    REQUEST_AT_LEAST_SIZE(SELinuxSetCreateContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->context_len);
-
+    X_REQUEST_HEAD_AT_LEAST(SELinuxSetCreateContextReq);
+    X_REQUEST_FIELD_CARD32(context_len);
     REQUEST_FIXED_SIZE(SELinuxSetCreateContextReq, stuff->context_len);
 
     PrivateRec **privPtr = &client->devPrivates;
@@ -151,7 +147,7 @@ ProcSELinuxGetCreateContext(ClientPtr client, unsigned offset)
     security_id_t *pSid;
     char *ptr;
 
-    REQUEST_SIZE_MATCH(SELinuxGetCreateContextReq);
+    X_REQUEST_HEAD_STRUCT(SELinuxGetCreateContextReq);
 
     if (offset == CTX_DEV)
         ptr = dixLookupPrivate(&serverClient->devPrivates, subjectKey);
@@ -165,13 +161,9 @@ ProcSELinuxGetCreateContext(ClientPtr client, unsigned offset)
 static int
 ProcSELinuxSetDeviceContext(ClientPtr client)
 {
-    REQUEST(SELinuxSetContextReq);
-    REQUEST_AT_LEAST_SIZE(SELinuxSetContextReq);
-
-    if (client->swapped) {
-        swapl(&stuff->id);
-        swapl(&stuff->context_len);
-    }
+    X_REQUEST_HEAD_AT_LEAST(SELinuxSetContextReq);
+    X_REQUEST_FIELD_CARD32(id);
+    X_REQUEST_FIELD_CARD32(context_len);
 
     REQUEST_FIXED_SIZE(SELinuxSetContextReq, stuff->context_len);
 
@@ -212,12 +204,8 @@ ProcSELinuxSetDeviceContext(ClientPtr client)
 static int
 ProcSELinuxGetDeviceContext(ClientPtr client)
 {
-    REQUEST(SELinuxGetContextReq);
-    REQUEST_SIZE_MATCH(SELinuxGetContextReq);
-
-    if (client->swapped) {
-        swapl(&stuff->id);
-    }
+    X_REQUEST_HEAD_STRUCT(SELinuxGetContextReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     DeviceIntPtr dev;
     SELinuxSubjectRec *subj;
@@ -234,11 +222,8 @@ ProcSELinuxGetDeviceContext(ClientPtr client)
 static int
 ProcSELinuxGetDrawableContext(ClientPtr client)
 {
-    REQUEST(SELinuxGetContextReq);
-    REQUEST_SIZE_MATCH(SELinuxGetContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(SELinuxGetContextReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     DrawablePtr pDraw;
     PrivateRec **privatePtr;
@@ -261,13 +246,9 @@ ProcSELinuxGetDrawableContext(ClientPtr client)
 static int
 ProcSELinuxGetPropertyContext(ClientPtr client, void *privKey)
 {
-    REQUEST(SELinuxGetPropertyContextReq);
-    REQUEST_SIZE_MATCH(SELinuxGetPropertyContextReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->property);
-    }
+    X_REQUEST_HEAD_STRUCT(SELinuxGetPropertyContextReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(property);
 
     WindowPtr pWin;
     PropertyPtr pProp;
@@ -290,11 +271,8 @@ ProcSELinuxGetPropertyContext(ClientPtr client, void *privKey)
 static int
 ProcSELinuxGetSelectionContext(ClientPtr client, void *privKey)
 {
-    REQUEST(SELinuxGetContextReq);
-    REQUEST_SIZE_MATCH(SELinuxGetContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(SELinuxGetContextReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     Selection *pSel;
     SELinuxObjectRec *obj;
@@ -311,11 +289,8 @@ ProcSELinuxGetSelectionContext(ClientPtr client, void *privKey)
 static int
 ProcSELinuxGetClientContext(ClientPtr client)
 {
-    REQUEST(SELinuxGetContextReq);
-    REQUEST_SIZE_MATCH(SELinuxGetContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(SELinuxGetContextReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     ClientPtr target;
     SELinuxSubjectRec *subj;
@@ -397,11 +372,8 @@ SELinuxSendItemsToClient(ClientPtr client, SELinuxListItemRec * items,
 static int
 ProcSELinuxListProperties(ClientPtr client)
 {
-    REQUEST(SELinuxGetContextReq);
-    REQUEST_SIZE_MATCH(SELinuxGetContextReq);
-
-    if (client->swapped)
-        swapl(&stuff->id);
+    X_REQUEST_HEAD_STRUCT(SELinuxGetContextReq);
+    X_REQUEST_FIELD_CARD32(id);
 
     WindowPtr pWin;
     PropertyPtr pProp;
@@ -440,12 +412,12 @@ ProcSELinuxListProperties(ClientPtr client)
 static int
 ProcSELinuxListSelections(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(SELinuxGetCreateContextReq);
+
     Selection *pSel;
     SELinuxListItemRec *items;
     int rc, count, size, i;
     CARD32 id;
-
-    REQUEST_SIZE_MATCH(SELinuxGetCreateContextReq);
 
     /* Count the number of selections and allocate items */
     count = 0;
