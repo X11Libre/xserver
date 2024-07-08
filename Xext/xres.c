@@ -171,10 +171,8 @@ ProcXResQueryVersion(ClientPtr client)
         .server_minor = SERVER_XRES_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.server_major);
-        swaps(&reply.server_minor);
-    }
+    X_REPLY_FIELD_CARD16(server_major);
+    X_REPLY_FIELD_CARD16(server_minor);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -201,9 +199,7 @@ ProcXResQueryClients(ClientPtr client)
         .num_clients = num_clients
     };
 
-    if (client->swapped) {
-        swapl(&reply.num_clients);
-    }
+    X_REPLY_FIELD_CARD32(num_clients);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -276,9 +272,7 @@ ProcXResQueryClientResources(ClientPtr client)
         .num_types = num_types
     };
 
-    if (client->swapped) {
-        swapl(&reply.num_types);
-    }
+    X_REPLY_FIELD_CARD32(num_types);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -318,10 +312,9 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
         .bytes_overflow = bytes >> 32
 #endif
     };
-    if (client->swapped) {
-        swapl(&reply.bytes);
-        swapl(&reply.bytes_overflow);
-    }
+
+    X_REPLY_FIELD_CARD32(bytes);
+    X_REPLY_FIELD_CARD32(bytes_overflow);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -377,6 +370,7 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
             .spec.mask = X_XResClientXIDMask
         };
 
+        /* can't used REPLY_FIELD_*() here, because we're looking at sendClient */
         if (sendClient->swapped) {
             swapl (&reply.spec.mask);
             swapl (&reply.spec.client);
@@ -492,9 +486,7 @@ ProcXResQueryClientIds (ClientPtr client)
             .numIds = ctx.numIds
         };
 
-        if (client->swapped) {
-            swapl (&reply.numIds);
-        }
+        X_REPLY_FIELD_CARD32(numIds);
 
         rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, ctx.rpcbuf);
     }
@@ -861,8 +853,9 @@ ProcXResQueryResourceBytes (ClientPtr client)
             .numSizes = ctx.numSizes
         };
 
+        X_REPLY_FIELD_CARD32(numSizes);
+
         if (client->swapped) {
-            swapl (&reply.numSizes);
             SwapXResQueryResourceBytes(&ctx.response);
         }
 
