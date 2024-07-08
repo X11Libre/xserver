@@ -190,10 +190,8 @@ ProcXResQueryVersion(ClientPtr client)
         .server_minor = SERVER_XRES_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.server_major);
-        swaps(&reply.server_minor);
-    }
+    REPLY_FIELD_CARD16(server_major);
+    REPLY_FIELD_CARD16(server_minor);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -220,10 +218,7 @@ ProcXResQueryClients(ClientPtr client)
         .num_clients = num_clients
     };
 
-    if (client->swapped) {
-        swapl(&reply.num_clients);
-    }
-
+    REPLY_FIELD_CARD32(num_clients);
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
@@ -295,9 +290,7 @@ ProcXResQueryClientResources(ClientPtr client)
         .num_types = num_types
     };
 
-    if (client->swapped) {
-        swapl(&reply.num_types);
-    }
+    REPLY_FIELD_CARD32(num_types);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -337,10 +330,9 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
         .bytes_overflow = bytes >> 32
 #endif
     };
-    if (client->swapped) {
-        swapl(&reply.bytes);
-        swapl(&reply.bytes_overflow);
-    }
+
+    REPLY_FIELD_CARD32(bytes);
+    REPLY_FIELD_CARD32(bytes_overflow);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -394,9 +386,7 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
         .spec.client = client->clientAsMask,
     };
 
-    if (client->swapped) {
-        swapl (&reply.spec.client);
-    }
+    REPLY_FIELD_CARD32(spec.client);
 
     if (WillConstructMask(client, mask, ctx, X_XResClientXIDMask)) {
         void *ptr = AddFragment(&ctx->response, sizeof(reply));
@@ -404,11 +394,8 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
             return FALSE;
         }
 
-        reply.spec.mask = X_XResClientXIDMask;
-        if (sendClient->swapped) {
-            swapl (&reply.spec.mask);
-            /* swapl (&reply.length, n); - not required for reply.length = 0 */
-        }
+        rep.spec.mask = X_XResClientXIDMask;
+        REPLY_FIELD_CARD32(spec.mask);
 
         memcpy(ptr, &reply, sizeof(reply));
 
@@ -430,12 +417,12 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
             reply.spec.mask = X_XResLocalClientPIDMask;
             reply.length = 4;
 
-            if (sendClient->swapped) {
-                swapl (&reply.spec.mask);
-                swapl (&reply.length);
-                swapl (value);
-            }
-            memcpy(ptr, &reply, sizeof(reply));
+            REPLY_FIELD_CARD32(spec.mask);
+            REPLY_FIELD_CARD32(length);    // need to do it, since not calling REPLY_SEND()
+
+            if (sendClient->swapped) swapl (value);
+
+            memcpy(ptr, &rep, sizeof(rep));
             *value = pid;
 
             ctx->resultBytes += sizeof(reply) + sizeof(CARD32);
@@ -529,9 +516,7 @@ ProcXResQueryClientIds (ClientPtr client)
             .numIds = ctx.numIds
         };
 
-        if (client->swapped) {
-            swapl (&reply.numIds);
-        }
+        REPLY_FIELD_CARD32(numIds);
 
         rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }
@@ -898,10 +883,7 @@ ProcXResQueryResourceBytes (ClientPtr client)
             .numSizes = ctx.numSizes
         };
 
-        if (client->swapped) {
-            swapl (&reply.numSizes);
-            SwapXResQueryResourceBytes(&ctx.response);
-        }
+        REPLY_FIELD_CARD32(numSizes);
 
         FragmentList *it;
         xorg_list_for_each_entry(it, &ctx.response, l) {
