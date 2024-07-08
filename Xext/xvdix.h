@@ -223,8 +223,7 @@ typedef struct {
 #define _XvBadPort (XvBadPort+XvErrorBase)
 #define _XvBadEncoding (XvBadEncoding+XvErrorBase)
 
-extern _X_EXPORT int ProcXvDispatch(ClientPtr);
-extern _X_EXPORT int SProcXvDispatch(ClientPtr);
+int ProcXvDispatch(ClientPtr);
 
 extern _X_EXPORT int XvScreenInit(ScreenPtr);
 extern _X_EXPORT DevPrivateKey XvGetScreenKey(void);
