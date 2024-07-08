@@ -183,7 +183,7 @@ XvExtensionInit(void)
         XvExtensionGeneration = serverGeneration;
 
         extEntry = AddExtension(XvName, XvNumEvents, XvNumErrors,
-                                ProcXvDispatch, SProcXvDispatch,
+                                ProcXvDispatch, ProcXvDispatch,
                                 XvResetProc, StandardMinorOpcode);
         if (!extEntry) {
             FatalError("XvExtensionInit: AddExtensions failed\n");
