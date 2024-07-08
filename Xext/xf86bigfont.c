@@ -269,8 +269,6 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
     REQUEST_HEAD_STRUCT(xXF86BigfontQueryVersionReq);
 
     xXF86BigfontQueryVersionReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
         .minorVersion = SERVER_XF86BIGFONT_MINOR_VERSION,
         .uid = geteuid(),
@@ -281,17 +279,12 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
                          ? XF86Bigfont_CAP_LocalShm : 0
 #endif
     };
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-        swapl(&reply.uid);
-        swapl(&reply.gid);
-        swapl(&reply.signature);
-    }
-    WriteToClient(client, sizeof(xXF86BigfontQueryVersionReply), &reply);
-    return Success;
+    REPLY_FIELD_CARD16(&reply.majorVersion);
+    REPLY_FIELD_CARD16(&reply.minorVersion);
+    REPLY_FIELD_CARD32(&reply.uid);
+    REPLY_FIELD_CARD32(&reply.gid);
+    REPLY_FIELD_CARD32(&reply.signature);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static void
@@ -546,7 +539,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             }
             return BadAlloc;
         }
-        reply->type = X_Reply;
+
         reply->length = bytes_to_int32(rlength - sizeof(xGenericReply));
         reply->sequenceNumber = client->sequence;
         reply->minBounds = pFont->info.ink_minbounds;
@@ -564,22 +557,25 @@ ProcXF86BigfontQueryFont(ClientPtr client)
         reply->nCharInfos = nCharInfos;
         reply->nUniqCharInfos = nUniqCharInfos;
         reply->shmid = shmid;
+
+        ClientReplyPrepare(client, (xGenericReply*)reply);
+
+        REPLY_FIELD_CARD16(minCharOrByte2);
+        REPLY_FIELD_CARD16(maxCharOrByte2);
+        REPLY_FIELD_CARD16(defaultChar);
+        REPLY_FIELD_CARD16(nFontProps);
+        REPLY_FIELD_CARD16(fontAscent);
+        REPLY_FIELD_CARD16(fontDescent);
+        REPLY_FIELD_CARD32(nCharInfos);
+        REPLY_FIELD_CARD32(nUniqCharInfos);
+        REPLY_FIELD_CARD32(shmid);
+        REPLY_FIELD_CARD32(shmsegoffset);
+
         if (client->swapped) {
-            swaps(&reply->sequenceNumber);
-            swapl(&reply->length);
             swapCharInfo(&reply->minBounds);
             swapCharInfo(&reply->maxBounds);
-            swaps(&reply->minCharOrByte2);
-            swaps(&reply->maxCharOrByte2);
-            swaps(&reply->defaultChar);
-            swaps(&reply->nFontProps);
-            swaps(&reply->fontAscent);
-            swaps(&reply->fontDescent);
-            swapl(&reply->nCharInfos);
-            swapl(&reply->nUniqCharInfos);
-            swapl(&reply->shmid);
-            swapl(&reply->shmsegoffset);
         }
+
         p = (char *) &reply[1];
         {
             FontPropPtr pFP;
