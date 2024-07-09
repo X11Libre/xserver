@@ -27,7 +27,6 @@
 
 #include <dix-config.h>
 
-int SProcXIQueryPointer(ClientPtr /* client */ );
 int ProcXIQueryPointer(ClientPtr /* client */ );
 
 #endif                          /* QUERYDP_H */

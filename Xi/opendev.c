@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
@@ -81,8 +82,7 @@ ProcXOpenDevice(ClientPtr client)
     int status = Success;
     DeviceIntPtr dev;
 
-    REQUEST(xOpenDeviceReq);
-    REQUEST_SIZE_MATCH(xOpenDeviceReq);
+    REQUEST_HEAD_STRUCT(xOpenDeviceReq);
 
     status = dixLookupDevice(&dev, stuff->deviceid, client, DixUseAccess);
 

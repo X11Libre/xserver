@@ -30,7 +30,6 @@
 
 #include <X11/extensions/XI2proto.h>
 
-int SProcXIQueryVersion(ClientPtr client);
 int ProcXIQueryVersion(ClientPtr client);
 
 #endif                          /* QUERYVERSION_H */

@@ -55,6 +55,7 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -63,21 +64,6 @@ SOFTWARE.
 #include "swaprep.h"
 #include "getprop.h"
 #include "getselev.h"
-
-/***********************************************************************
- *
- * This procedure gets the current selected extension events.
- *
- */
-
-int _X_COLD
-SProcXGetSelectedExtensionEvents(ClientPtr client)
-{
-    REQUEST(xGetSelectedExtensionEventsReq);
-    REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
-    swapl(&stuff->window);
-    return (ProcXGetSelectedExtensionEvents(client));
-}
 
 /***********************************************************************
  *
@@ -97,8 +83,8 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     OtherInputMasks *pOthers;
     InputClientsPtr others;
 
-    REQUEST(xGetSelectedExtensionEventsReq);
-    REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
+    REQUEST_HEAD_STRUCT(xGetSelectedExtensionEventsReq);
+    REQUEST_FIELD_CARD32(window);
 
     xGetSelectedExtensionEventsReply rep = {
         .repType = X_Reply,

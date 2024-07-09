@@ -27,7 +27,6 @@
 
 #include <dix-config.h>
 
-int SProcXISetClientPointer(ClientPtr /* client */ );
 int ProcXISetClientPointer(ClientPtr /* client */ );
 
 #endif                          /* SETCPTR_H */

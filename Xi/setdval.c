@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -75,8 +76,7 @@ ProcXSetDeviceValuators(ClientPtr client)
     DeviceIntPtr dev;
     int rc;
 
-    REQUEST(xSetDeviceValuatorsReq);
-    REQUEST_AT_LEAST_SIZE(xSetDeviceValuatorsReq);
+    REQUEST_HEAD_AT_LEAST(xSetDeviceValuatorsReq);
 
     xSetDeviceValuatorsReply rep = {
         .repType = X_Reply,

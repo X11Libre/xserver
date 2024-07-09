@@ -27,7 +27,6 @@
 
 #include <dix-config.h>
 
-int SProcXIWarpPointer(ClientPtr /* client */ );
 int ProcXIWarpPointer(ClientPtr /* client */ );
 
 #endif                          /* WARPDEVP_H */

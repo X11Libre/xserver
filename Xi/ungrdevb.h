@@ -27,9 +27,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
-int SProcXUngrabDeviceButton(ClientPtr  /* client */
-    );
-
 int ProcXUngrabDeviceButton(ClientPtr   /* client */
     );
 

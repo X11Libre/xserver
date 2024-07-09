@@ -27,7 +27,6 @@
 
 #include <dix-config.h>
 
-int SProcXIChangeCursor(ClientPtr /* client */ );
 int ProcXIChangeCursor(ClientPtr /* client */ );
 
 #endif                          /* CHDEVCUR_H */

@@ -30,7 +30,6 @@
 
 #include <X11/extensions/XI2proto.h>
 
-int SProcXIQueryDevice(ClientPtr client);
 int ProcXIQueryDevice(ClientPtr client);
 int SizeDeviceClasses(DeviceIntPtr dev);
 int ListDeviceClasses(ClientPtr client, DeviceIntPtr dev,

@@ -27,10 +27,7 @@
 
 #include <dix-config.h>
 
-int SProcXISetFocus(ClientPtr client);
 int ProcXISetFocus(ClientPtr client);
-
-int SProcXIGetFocus(ClientPtr client);
 int ProcXIGetFocus(ClientPtr client);
 
 #endif                          /* XISETDEVFOCUS_H */

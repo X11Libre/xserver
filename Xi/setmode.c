@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -75,8 +76,7 @@ ProcXSetDeviceMode(ClientPtr client)
     DeviceIntPtr dev;
     int rc;
 
-    REQUEST(xSetDeviceModeReq);
-    REQUEST_SIZE_MATCH(xSetDeviceModeReq);
+    REQUEST_HEAD_STRUCT(xSetDeviceModeReq);
 
     xSetDeviceModeReply rep = {
         .repType = X_Reply,

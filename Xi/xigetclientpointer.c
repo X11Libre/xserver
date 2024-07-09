@@ -31,6 +31,7 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -40,29 +41,14 @@
 #include "exglobals.h"
 #include "xigetclientpointer.h"
 
-/***********************************************************************
- * This procedure allows a client to query another client's client pointer
- * setting.
- */
-
-int _X_COLD
-SProcXIGetClientPointer(ClientPtr client)
-{
-    REQUEST(xXIGetClientPointerReq);
-    REQUEST_SIZE_MATCH(xXIGetClientPointerReq);
-
-    swapl(&stuff->win);
-    return ProcXIGetClientPointer(client);
-}
-
 int
 ProcXIGetClientPointer(ClientPtr client)
 {
     int rc;
     ClientPtr winclient;
 
-    REQUEST(xXIGetClientPointerReq);
-    REQUEST_SIZE_MATCH(xXIGetClientPointerReq);
+    REQUEST_HEAD_STRUCT(xXIGetClientPointerReq);
+    REQUEST_FIELD_CARD32(win);
 
     if (stuff->win != None) {
         rc = dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess);

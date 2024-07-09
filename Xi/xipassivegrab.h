@@ -27,9 +27,7 @@
 
 #include <dix-config.h>
 
-int SProcXIPassiveUngrabDevice(ClientPtr client);
 int ProcXIPassiveUngrabDevice(ClientPtr client);
 int ProcXIPassiveGrabDevice(ClientPtr client);
-int SProcXIPassiveGrabDevice(ClientPtr client);
 
 #endif                          /* XIPASSIVEGRAB_H */

@@ -52,30 +52,18 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exevents.h"
 #include "exglobals.h"
 
 #include "getvers.h"
 
 XExtensionVersion XIVersion;
-
-/***********************************************************************
- *
- * Handle a request from a client with a different byte order than us.
- *
- */
-
-int _X_COLD
-SProcXGetExtensionVersion(ClientPtr client)
-{
-    REQUEST(xGetExtensionVersionReq);
-    REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
-    swaps(&stuff->nbytes);
-    return (ProcXGetExtensionVersion(client));
-}
 
 /***********************************************************************
  *
@@ -86,8 +74,8 @@ SProcXGetExtensionVersion(ClientPtr client)
 int
 ProcXGetExtensionVersion(ClientPtr client)
 {
-    REQUEST(xGetExtensionVersionReq);
-    REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
+    REQUEST_HEAD_STRUCT(xGetExtensionVersionReq);
+    REQUEST_FIELD_CARD16(nbytes);
 
     if (client->req_len != bytes_to_int32(sizeof(xGetExtensionVersionReq) +
                                         stuff->nbytes))

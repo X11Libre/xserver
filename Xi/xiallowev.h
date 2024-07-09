@@ -28,6 +28,5 @@
 #include <dix-config.h>
 
 int ProcXIAllowEvents(ClientPtr client);
-int SProcXIAllowEvents(ClientPtr client);
 
 #endif                          /* XIALLOWEV_H */

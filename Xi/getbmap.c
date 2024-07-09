@@ -52,9 +52,12 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 
 #include "getbmap.h"
@@ -72,8 +75,7 @@ ProcXGetDeviceButtonMapping(ClientPtr client)
     ButtonClassPtr b;
     int rc;
 
-    REQUEST(xGetDeviceButtonMappingReq);
-    REQUEST_SIZE_MATCH(xGetDeviceButtonMappingReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceButtonMappingReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)

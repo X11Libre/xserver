@@ -34,44 +34,23 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"          /* BadDevice */
 #include "xisetdevfocus.h"
 
-int _X_COLD
-SProcXISetFocus(ClientPtr client)
-{
-    REQUEST(xXISetFocusReq);
-    REQUEST_AT_LEAST_SIZE(xXISetFocusReq);
-
-    swaps(&stuff->deviceid);
-    swapl(&stuff->focus);
-    swapl(&stuff->time);
-
-    return ProcXISetFocus(client);
-}
-
-int _X_COLD
-SProcXIGetFocus(ClientPtr client)
-{
-    REQUEST(xXIGetFocusReq);
-    REQUEST_AT_LEAST_SIZE(xXIGetFocusReq);
-
-    swaps(&stuff->deviceid);
-
-    return ProcXIGetFocus(client);
-}
-
 int
 ProcXISetFocus(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xXISetFocusReq);
+    REQUEST_FIELD_CARD16(deviceid);
+    REQUEST_FIELD_CARD32(focus);
+    REQUEST_FIELD_CARD32(time);
+
     DeviceIntPtr dev;
     int ret;
-
-    REQUEST(xXISetFocusReq);
-    REQUEST_AT_LEAST_SIZE(xXISetFocusReq);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixSetFocusAccess);
     if (ret != Success)
@@ -86,11 +65,11 @@ ProcXISetFocus(ClientPtr client)
 int
 ProcXIGetFocus(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xXIGetFocusReq);
+    REQUEST_FIELD_CARD16(deviceid);
+
     DeviceIntPtr dev;
     int ret;
-
-    REQUEST(xXIGetFocusReq);
-    REQUEST_AT_LEAST_SIZE(xXIGetFocusReq);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetFocusAccess);
     if (ret != Success)
