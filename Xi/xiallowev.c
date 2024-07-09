@@ -37,6 +37,7 @@
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "os/fmt.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -45,25 +46,6 @@
 #include "eventstr.h"
 #include "exglobals.h"          /* BadDevice */
 #include "xiallowev.h"
-
-int _X_COLD
-SProcXIAllowEvents(ClientPtr client)
-{
-    REQUEST(xXIAllowEventsReq);
-    REQUEST_AT_LEAST_SIZE(xXIAllowEventsReq);
-
-    swaps(&stuff->deviceid);
-    swapl(&stuff->time);
-    if (client->req_len > 3) {
-        xXI2_2AllowEventsReq *req_xi22 = (xXI2_2AllowEventsReq *) stuff;
-
-        REQUEST_AT_LEAST_SIZE(xXI2_2AllowEventsReq);
-        swapl(&req_xi22->touchid);
-        swapl(&req_xi22->grab_window);
-    }
-
-    return ProcXIAllowEvents(client);
-}
 
 int
 ProcXIAllowEvents(ClientPtr client)
@@ -84,6 +66,11 @@ ProcXIAllowEvents(ClientPtr client)
         // Xi >= v2.2 request
         REQUEST(xXI2_2AllowEventsReq);
         REQUEST_AT_LEAST_SIZE(xXI2_2AllowEventsReq);
+        REQUEST_FIELD_CARD16(deviceid);
+        REQUEST_FIELD_CARD32(time);
+        REQUEST_FIELD_CARD32(touchid);
+        REQUEST_FIELD_CARD32(grab_window);
+
         have_xi22 = TRUE;
         clientTime = stuff->time;
         deviceId = stuff->deviceid;
@@ -95,6 +82,9 @@ ProcXIAllowEvents(ClientPtr client)
         // Xi < v2.2 request
         REQUEST(xXIAllowEventsReq);
         REQUEST_AT_LEAST_SIZE(xXIAllowEventsReq);
+        REQUEST_FIELD_CARD16(deviceid);
+        REQUEST_FIELD_CARD32(time);
+
         clientTime = stuff->time;
         deviceId = stuff->deviceid;
         mode = stuff->mode;

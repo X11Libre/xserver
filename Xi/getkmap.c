@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -79,8 +80,7 @@ ProcXGetDeviceKeyMapping(ClientPtr client)
     KeySymsPtr syms;
     int rc;
 
-    REQUEST(xGetDeviceKeyMappingReq);
-    REQUEST_SIZE_MATCH(xGetDeviceKeyMappingReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceKeyMappingReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)

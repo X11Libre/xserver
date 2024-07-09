@@ -25,7 +25,6 @@
 #ifndef QUERYDP_H
 #define QUERYDP_H 1
 
-int SProcXIQueryPointer(ClientPtr /* client */ );
 int ProcXIQueryPointer(ClientPtr /* client */ );
 
 #endif                          /* QUERYDP_H */
