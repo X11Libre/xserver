@@ -6,11 +6,12 @@
 #include <dix-config.h>
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#include <assert.h>
+#include <X11/extensions/XResproto.h>
 
 #include "dix/registry_priv.h"
 
@@ -19,7 +20,6 @@
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "swaprep.h"
-#include <X11/extensions/XResproto.h>
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "gcstruct.h"
@@ -28,7 +28,6 @@
 #include "client.h"
 #include "list.h"
 #include "misc.h"
-#include <string.h>
 #include "hashtable.h"
 #include "picturestr.h"
 
