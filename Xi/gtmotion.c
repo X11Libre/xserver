@@ -71,13 +71,11 @@ SOFTWARE.
 int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
-    INT32 *coords = NULL, *bufptr;
-    unsigned long i;
-    int rc, num_events, axes, size = 0;
-    unsigned long nEvents;
+    INT32 *coords = NULL;
+    int rc, num_events = 0, axes, size = 0;
+    unsigned long nEvents = 0;
     DeviceIntPtr dev;
     TimeStamp start, stop;
-    int length = 0;
     ValuatorClassPtr v;
 
     REQUEST_HEAD_STRUCT(xGetDeviceMotionEventsReq);
@@ -95,11 +93,7 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     axes = v->numAxes;
 
     xGetDeviceMotionEventsReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceMotionEvents,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .nEvents = 0,
         .axes = axes,
         .mode = Absolute        /* XXX we don't do relative at the moment */
     };
@@ -107,51 +101,26 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     stop = ClientTimeToServerTime(stuff->stop);
     if (CompareTimeStamps(start, stop) == LATER ||
         CompareTimeStamps(start, currentTime) == LATER) {
-        WriteReplyToClient(client, sizeof(xGetDeviceMotionEventsReply), &rep);
-        return Success;
+        REPLY_SEND_RET_SUCCESS();
     }
     if (CompareTimeStamps(stop, currentTime) == LATER)
         stop = currentTime;
     num_events = v->numMotionEvents;
     if (num_events) {
         size = sizeof(Time) + (axes * sizeof(INT32));
-        rep.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
+        nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
                                        start.milliseconds, stop.milliseconds,
                                        (ScreenPtr) NULL, FALSE);
     }
-    if (rep.nEvents > 0) {
-        length = bytes_to_int32(rep.nEvents * size);
-        rep.length = length;
-    }
-    nEvents = rep.nEvents;
-    WriteReplyToClient(client, sizeof(xGetDeviceMotionEventsReply), &rep);
-    if (nEvents) {
-        if (client->swapped) {
-            bufptr = coords;
-            for (i = 0; i < nEvents * (axes + 1); i++) {
-                swapl(bufptr);
-                bufptr++;
-            }
-        }
-        WriteToClient(client, length * 4, coords);
-    }
+    if (nEvents < 0)
+        nEvents = 0;
+
+    rep.nEvents = nEvents;
+
+    REPLY_BUF_CARD32(coords, nEvents * (axes + 1));
+    REPLY_FIELD_CARD32(nEvents);
+    REPLY_SEND_EXTRA(coords, nEvents * size);
+
     free(coords);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGetDeviceMotionEvents function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetDeviceMotionEvents(ClientPtr client, int size,
-                           xGetDeviceMotionEventsReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->nEvents);
-    WriteToClient(client, size, rep);
 }

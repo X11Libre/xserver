@@ -87,9 +87,7 @@ ProcXGetDeviceFocus(ClientPtr client)
     focus = dev->focus;
 
     xGetDeviceFocusReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceFocus,
-        .sequenceNumber = client->sequence,
         .time = focus->time.milliseconds,
         .revertTo = focus->revert,
     };
@@ -103,23 +101,7 @@ ProcXGetDeviceFocus(ClientPtr client)
     else
         rep.focus = focus->win->drawable.id;
 
-    WriteReplyToClient(client, sizeof(xGetDeviceFocusReply), &rep);
-    return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the GetDeviceFocus function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetDeviceFocus(ClientPtr client, int size, xGetDeviceFocusReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->focus);
-    swapl(&rep->time);
-    WriteToClient(client, size, rep);
+    REPLY_FIELD_CARD32(focus);
+    REPLY_FIELD_CARD32(time);
+    REPLY_SEND_RET_SUCCESS();
 }

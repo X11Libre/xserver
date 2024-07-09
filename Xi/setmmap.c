@@ -83,9 +83,7 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
         return BadLength;
 
     xSetDeviceModifierMappingReply rep = {
-        .repType = X_Reply,
         .RepType = X_SetDeviceModifierMapping,
-        .sequenceNumber = client->sequence,
     };
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
@@ -99,8 +97,7 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
 
     if (ret == MappingSuccess || ret == MappingBusy || ret == MappingFailed) {
         rep.success = ret;
-        WriteReplyToClient(client, sizeof(xSetDeviceModifierMappingReply),
-                           &rep);
+        REPLY_SEND();
     }
     else if (ret == -1) {
         return BadValue;
@@ -110,20 +107,4 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     }
 
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XSetDeviceModifierMapping function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXSetDeviceModifierMapping(ClientPtr client, int size,
-                              xSetDeviceModifierMappingReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }

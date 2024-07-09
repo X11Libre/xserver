@@ -33,9 +33,4 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 int ProcXGetDeviceControl(ClientPtr     /* client */
     );
 
-void SRepXGetDeviceControl(ClientPtr /* client */ ,
-                           int /* size */ ,
-                           xGetDeviceControlReply *     /* rep */
-    );
-
 #endif                          /* GETDCTL_H */

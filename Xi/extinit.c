@@ -379,98 +379,6 @@ ProcIDispatch(ClientPtr client)
     }
 }
 
-/**********************************************************************
- *
- * SReplyIDispatch
- * Swap any replies defined in this extension.
- *
- */
-
-static void _X_COLD
-SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
-{
-    /* All we look at is the type field */
-    /* This is common to all replies    */
-    if (rep->RepType == X_GetExtensionVersion)
-        SRepXGetExtensionVersion(client, len,
-                                 (xGetExtensionVersionReply *) rep);
-    else if (rep->RepType == X_ListInputDevices)
-        SRepXListInputDevices(client, len, (xListInputDevicesReply *) rep);
-    else if (rep->RepType == X_OpenDevice)
-        SRepXOpenDevice(client, len, (xOpenDeviceReply *) rep);
-    else if (rep->RepType == X_SetDeviceMode)
-        SRepXSetDeviceMode(client, len, (xSetDeviceModeReply *) rep);
-    else if (rep->RepType == X_GetSelectedExtensionEvents)
-        SRepXGetSelectedExtensionEvents(client, len,
-                                        (xGetSelectedExtensionEventsReply *)
-                                        rep);
-    else if (rep->RepType == X_GetDeviceDontPropagateList)
-        SRepXGetDeviceDontPropagateList(client, len,
-                                        (xGetDeviceDontPropagateListReply *)
-                                        rep);
-    else if (rep->RepType == X_GetDeviceMotionEvents)
-        SRepXGetDeviceMotionEvents(client, len,
-                                   (xGetDeviceMotionEventsReply *) rep);
-    else if (rep->RepType == X_GrabDevice)
-        SRepXGrabDevice(client, len, (xGrabDeviceReply *) rep);
-    else if (rep->RepType == X_GetDeviceFocus)
-        SRepXGetDeviceFocus(client, len, (xGetDeviceFocusReply *) rep);
-    else if (rep->RepType == X_GetFeedbackControl)
-        SRepXGetFeedbackControl(client, len, (xGetFeedbackControlReply *) rep);
-    else if (rep->RepType == X_GetDeviceKeyMapping)
-        SRepXGetDeviceKeyMapping(client, len,
-                                 (xGetDeviceKeyMappingReply *) rep);
-    else if (rep->RepType == X_GetDeviceModifierMapping)
-        SRepXGetDeviceModifierMapping(client, len,
-                                      (xGetDeviceModifierMappingReply *) rep);
-    else if (rep->RepType == X_SetDeviceModifierMapping)
-        SRepXSetDeviceModifierMapping(client, len,
-                                      (xSetDeviceModifierMappingReply *) rep);
-    else if (rep->RepType == X_GetDeviceButtonMapping)
-        SRepXGetDeviceButtonMapping(client, len,
-                                    (xGetDeviceButtonMappingReply *) rep);
-    else if (rep->RepType == X_SetDeviceButtonMapping)
-        SRepXSetDeviceButtonMapping(client, len,
-                                    (xSetDeviceButtonMappingReply *) rep);
-    else if (rep->RepType == X_QueryDeviceState)
-        SRepXQueryDeviceState(client, len, (xQueryDeviceStateReply *) rep);
-    else if (rep->RepType == X_SetDeviceValuators)
-        SRepXSetDeviceValuators(client, len, (xSetDeviceValuatorsReply *) rep);
-    else if (rep->RepType == X_GetDeviceControl)
-        SRepXGetDeviceControl(client, len, (xGetDeviceControlReply *) rep);
-    else if (rep->RepType == X_ChangeDeviceControl)
-        SRepXChangeDeviceControl(client, len,
-                                 (xChangeDeviceControlReply *) rep);
-    else if (rep->RepType == X_ListDeviceProperties)
-        SRepXListDeviceProperties(client, len,
-                                  (xListDevicePropertiesReply *) rep);
-    else if (rep->RepType == X_GetDeviceProperty)
-        SRepXGetDeviceProperty(client, len, (xGetDevicePropertyReply *) rep);
-    else if (rep->RepType == X_XIQueryPointer)
-        SRepXIQueryPointer(client, len, (xXIQueryPointerReply *) rep);
-    else if (rep->RepType == X_XIGetClientPointer)
-        SRepXIGetClientPointer(client, len, (xXIGetClientPointerReply *) rep);
-    else if (rep->RepType == X_XIQueryVersion)
-        SRepXIQueryVersion(client, len, (xXIQueryVersionReply *) rep);
-    else if (rep->RepType == X_XIQueryDevice)
-        SRepXIQueryDevice(client, len, (xXIQueryDeviceReply *) rep);
-    else if (rep->RepType == X_XIGrabDevice)
-        SRepXIGrabDevice(client, len, (xXIGrabDeviceReply *) rep);
-    else if (rep->RepType == X_XIPassiveGrabDevice)
-        SRepXIPassiveGrabDevice(client, len, (xXIPassiveGrabDeviceReply *) rep);
-    else if (rep->RepType == X_XIListProperties)
-        SRepXIListProperties(client, len, (xXIListPropertiesReply *) rep);
-    else if (rep->RepType == X_XIGetProperty)
-        SRepXIGetProperty(client, len, (xXIGetPropertyReply *) rep);
-    else if (rep->RepType == X_XIGetSelectedEvents)
-        SRepXIGetSelectedEvents(client, len, (xXIGetSelectedEventsReply *) rep);
-    else if (rep->RepType == X_XIGetFocus)
-        SRepXIGetFocus(client, len, (xXIGetFocusReply *) rep);
-    else {
-        FatalError("XINPUT confused sending swapped reply");
-    }
-}
-
 /************************************************************************
  *
  * This function swaps the DeviceValuator event.
@@ -1140,7 +1048,6 @@ RestoreExtensionEvents(void)
 static void
 IResetProc(ExtensionEntry * unused)
 {
-    ReplySwapVector[IReqCode] = ReplyNotSwappd;
     EventSwapVector[DeviceValuator] = NotImplemented;
     EventSwapVector[DeviceKeyPress] = NotImplemented;
     EventSwapVector[DeviceKeyRelease] = NotImplemented;
@@ -1302,7 +1209,6 @@ XInputExtensionInit(void)
         if (!RT_INPUTCLIENT)
             FatalError("Failed to add resource type for XI.\n");
         FixExtensionEvents(extEntry);
-        ReplySwapVector[IReqCode] = (ReplySwapPtr) SReplyIDispatch;
         EventSwapVector[DeviceValuator] = SEventIDispatch;
         EventSwapVector[DeviceKeyPress] = SEventIDispatch;
         EventSwapVector[DeviceKeyRelease] = SEventIDispatch;

@@ -35,21 +35,11 @@ int ProcXChangeDeviceProperty(ClientPtr client);
 int ProcXDeleteDeviceProperty(ClientPtr client);
 int ProcXGetDeviceProperty(ClientPtr client);
 
-/* reply swapping */
-void SRepXListDeviceProperties(ClientPtr client, int size,
-                               xListDevicePropertiesReply * rep);
-void SRepXGetDeviceProperty(ClientPtr client, int size,
-                            xGetDevicePropertyReply * rep);
-
 /* XI2 request/reply handling  */
 int ProcXIListProperties(ClientPtr client);
 int ProcXIChangeProperty(ClientPtr client);
 int ProcXIDeleteProperty(ClientPtr client);
 int ProcXIGetProperty(ClientPtr client);
-
-void SRepXIListProperties(ClientPtr client, int size,
-                          xXIListPropertiesReply * rep);
-void SRepXIGetProperty(ClientPtr client, int size, xXIGetPropertyReply * rep);
 
 void XIResetProperties(void);
 

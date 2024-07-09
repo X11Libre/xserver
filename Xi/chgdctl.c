@@ -99,7 +99,6 @@ ProcXChangeDeviceControl(ClientPtr client)
 
     xChangeDeviceControlReply rep = {
         .RepType = X_ChangeDeviceControl,
-        .sequenceNumber = client->sequence,
         .status = Success,
     };
 
@@ -201,24 +200,8 @@ ProcXChangeDeviceControl(ClientPtr client)
         SendEventToAllWindows(dev, DevicePresenceNotifyMask,
                               (xEvent *) &dpn, 1);
 
-        WriteReplyToClient(client, sizeof(xChangeDeviceControlReply), &rep);
+        REPLY_SEND();
     }
 
     return ret;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the xChangeDeviceControl function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXChangeDeviceControl(ClientPtr client, int size,
-                         xChangeDeviceControlReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }

@@ -31,8 +31,5 @@
 #define QUERYDP_H 1
 
 int ProcXIQueryPointer(ClientPtr /* client */ );
-void SRepXIQueryPointer(ClientPtr /* client */ ,
-                        int /* size */ ,
-                        xXIQueryPointerReply * /* rep */ );
 
 #endif                          /* QUERYDP_H */

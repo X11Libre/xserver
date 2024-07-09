@@ -78,9 +78,7 @@ ProcXSetDeviceMode(ClientPtr client)
     REQUEST_HEAD_STRUCT(xSetDeviceModeReq);
 
     xSetDeviceModeReply rep = {
-        .repType = X_Reply,
         .RepType = X_SetDeviceMode,
-        .sequenceNumber = client->sequence,
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixSetAttrAccess);
@@ -111,21 +109,5 @@ ProcXSetDeviceMode(ClientPtr client)
         return rep.status;
     }
 
-    WriteReplyToClient(client, sizeof(xSetDeviceModeReply), &rep);
-    return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XSetDeviceMode function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXSetDeviceMode(ClientPtr client, int size, xSetDeviceModeReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
+    REPLY_SEND_RET_SUCCESS();
 }

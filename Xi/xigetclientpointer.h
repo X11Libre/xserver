@@ -31,8 +31,5 @@
 #define GETCPTR_H 1
 
 int ProcXIGetClientPointer(ClientPtr /* client */ );
-void SRepXIGetClientPointer(ClientPtr /* client */ ,
-                            int /* size */ ,
-                            xXIGetClientPointerReply * /* rep */ );
 
 #endif                          /* GETCPTR_H */

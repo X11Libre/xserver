@@ -116,10 +116,7 @@ ProcXIQueryPointer(ClientPtr client)
     pSprite = pDev->spriteInfo->sprite;
 
     xXIQueryPointerReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIQueryPointer,
-        .sequenceNumber = client->sequence,
-        .length = 6,
         .root = (GetCurrentRootWindow(pDev))->drawable.id,
         .root_x = double_to_fp1616(pSprite->hot.x),
         .root_y = double_to_fp1616(pSprite->hot.y),
@@ -184,34 +181,16 @@ ProcXIQueryPointer(ClientPtr client)
     }
 #endif
 
-    WriteReplyToClient(client, sizeof(xXIQueryPointerReply), &rep);
-    if (buttons)
-        WriteToClient(client, buttons_size, buttons);
+    REPLY_FIELD_CARD32(root);
+    REPLY_FIELD_CARD32(child);
+    REPLY_FIELD_CARD32(root_x);
+    REPLY_FIELD_CARD32(root_y);
+    REPLY_FIELD_CARD32(win_x);
+    REPLY_FIELD_CARD32(win_y);
+    REPLY_FIELD_CARD16(buttons_len);
+    REPLY_SEND_EXTRA(buttons, buttons_size);
 
     free(buttons);
 
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XIQueryPointer function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void
-SRepXIQueryPointer(ClientPtr client, int size, xXIQueryPointerReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->root);
-    swapl(&rep->child);
-    swapl(&rep->root_x);
-    swapl(&rep->root_y);
-    swapl(&rep->win_x);
-    swapl(&rep->win_y);
-    swaps(&rep->buttons_len);
-
-    WriteToClient(client, size, rep);
 }

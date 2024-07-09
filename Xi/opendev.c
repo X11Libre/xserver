@@ -130,28 +130,10 @@ ProcXOpenDevice(ClientPtr client)
     evbase[j++].event_type_base = event_base[OtherClass];
 
     xOpenDeviceReply rep = {
-        .repType = X_Reply,
         .RepType = X_OpenDevice,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(j * sizeof(xInputClassInfo)),
         .num_classes = j
     };
-    WriteReplyToClient(client, sizeof(xOpenDeviceReply), &rep);
-    WriteToClient(client, j * sizeof(xInputClassInfo), evbase);
+
+    REPLY_SEND_EXTRA(evbase, j * sizeof(xInputClassInfo));
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XOpenDevice function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXOpenDevice(ClientPtr client, int size, xOpenDeviceReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }

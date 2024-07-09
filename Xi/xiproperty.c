@@ -867,14 +867,15 @@ ProcXListDeviceProperties(ClientPtr client)
         return rc;
 
     xListDevicePropertiesReply rep = {
-        .repType = X_Reply,
         .RepType = X_ListDeviceProperties,
         .sequenceNumber = client->sequence,
         .length = natoms,
         .nAtoms = natoms
     };
 
-    WriteReplyToClient(client, sizeof(xListDevicePropertiesReply), &rep);
+    REPLY_FIELD_CARD16(nAtoms);
+    REPLY_SEND();
+
     if (natoms) {
         client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
         WriteSwappedDataToClient(client, natoms * sizeof(Atom), atoms);
@@ -972,9 +973,7 @@ ProcXGetDeviceProperty(ClientPtr client)
         return rc;
 
     xGetDevicePropertyReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceProperty,
-        .sequenceNumber = client->sequence,
         .length = bytes_to_int32(length),
         .propertyType = type,
         .bytesAfter = bytes_after,
@@ -986,7 +985,10 @@ ProcXGetDeviceProperty(ClientPtr client)
     if (stuff->delete && (rep.bytesAfter == 0))
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
-    WriteReplyToClient(client, sizeof(xGenericReply), &rep);
+    REPLY_FIELD_CARD32(propertyType);
+    REPLY_FIELD_CARD32(bytesAfter);
+    REPLY_FIELD_CARD32(nItems);
+    REPLY_SEND();
 
     if (length) {
         switch (rep.format) {
@@ -1019,32 +1021,6 @@ ProcXGetDeviceProperty(ClientPtr client)
     return Success;
 }
 
-/* Reply swapping */
-
-void _X_COLD
-SRepXListDeviceProperties(ClientPtr client, int size,
-                          xListDevicePropertiesReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->nAtoms);
-    /* properties will be swapped later, see ProcXListDeviceProperties */
-    WriteToClient(client, size, rep);
-}
-
-void _X_COLD
-SRepXGetDeviceProperty(ClientPtr client, int size,
-                       xGetDevicePropertyReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->propertyType);
-    swapl(&rep->bytesAfter);
-    swapl(&rep->nItems);
-    /* data will be swapped, see ProcXGetDeviceProperty */
-    WriteToClient(client, size, rep);
-}
-
 /* XI2 Request/reply handling */
 int
 ProcXIListProperties(ClientPtr client)
@@ -1066,14 +1042,14 @@ ProcXIListProperties(ClientPtr client)
         return rc;
 
     xXIListPropertiesReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIListProperties,
-        .sequenceNumber = client->sequence,
         .length = natoms,
         .num_properties = natoms
     };
 
-    WriteReplyToClient(client, sizeof(xXIListPropertiesReply), &rep);
+    REPLY_FIELD_CARD16(num_properties);
+    REPLY_SEND();
+
     if (natoms) {
         client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
         WriteSwappedDataToClient(client, natoms * sizeof(Atom), atoms);
@@ -1175,9 +1151,7 @@ ProcXIGetProperty(ClientPtr client)
         return rc;
 
     xXIGetPropertyReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIGetProperty,
-        .sequenceNumber = client->sequence,
         .length = bytes_to_int32(length),
         .type = type,
         .bytes_after = bytes_after,
@@ -1188,7 +1162,10 @@ ProcXIGetProperty(ClientPtr client)
     if (length && stuff->delete && (rep.bytes_after == 0))
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
-    WriteReplyToClient(client, sizeof(xXIGetPropertyReply), &rep);
+    REPLY_FIELD_CARD32(type);
+    REPLY_FIELD_CARD32(bytes_after);
+    REPLY_FIELD_CARD32(num_items);
+    REPLY_SEND();
 
     if (length) {
         switch (rep.format) {
@@ -1220,26 +1197,4 @@ ProcXIGetProperty(ClientPtr client)
     }
 
     return Success;
-}
-
-void _X_COLD
-SRepXIListProperties(ClientPtr client, int size, xXIListPropertiesReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_properties);
-    /* properties will be swapped later, see ProcXIListProperties */
-    WriteToClient(client, size, rep);
-}
-
-void _X_COLD
-SRepXIGetProperty(ClientPtr client, int size, xXIGetPropertyReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->type);
-    swapl(&rep->bytes_after);
-    swapl(&rep->num_items);
-    /* data will be swapped, see ProcXIGetProperty */
-    WriteToClient(client, size, rep);
 }

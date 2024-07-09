@@ -100,11 +100,10 @@ ProcXIQueryDevice(ClientPtr client)
     }
 
     xXIQueryDeviceReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIQueryDevice,
-        .sequenceNumber = client->sequence,
-        .length = len / 4,
     };
+
+    int buf_len = len;
 
     ptr = info;
     if (dev) {
@@ -137,24 +136,12 @@ ProcXIQueryDevice(ClientPtr client)
         }
     }
 
-    len = rep.length * 4;
-    WriteReplyToClient(client, sizeof(xXIQueryDeviceReply), &rep);
-    WriteToClient(client, len, ptr);
+    REPLY_FIELD_CARD16(num_devices);
+    REPLY_SEND_EXTRA(ptr, buf_len);
+
     free(ptr);
     free(skip);
     return rc;
-}
-
-void
-SRepXIQueryDevice(ClientPtr client, int size, xXIQueryDeviceReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_devices);
-
-    /* Device info is already swapped, see ProcXIQueryDevice */
-
-    WriteToClient(client, size, rep);
 }
 
 /**

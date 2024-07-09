@@ -86,9 +86,7 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
         return ret;
 
     xSetDeviceButtonMappingReply rep = {
-        .repType = X_Reply,
         .RepType = X_SetDeviceButtonMapping,
-        .sequenceNumber = client->sequence,
         .status = MappingSuccess
     };
 
@@ -102,23 +100,5 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
     else if (ret != Success)
         return ret;
 
-    WriteReplyToClient(client, sizeof(xSetDeviceButtonMappingReply), &rep);
-
-    return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XSetDeviceButtonMapping function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXSetDeviceButtonMapping(ClientPtr client, int size,
-                            xSetDeviceButtonMappingReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
+    REPLY_SEND_RET_SUCCESS();
 }

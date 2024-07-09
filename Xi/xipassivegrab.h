@@ -31,8 +31,6 @@
 #define XIPASSIVEGRAB_H 1
 
 int ProcXIPassiveUngrabDevice(ClientPtr client);
-void SRepXIPassiveGrabDevice(ClientPtr client, int size,
-                             xXIPassiveGrabDeviceReply * rep);
 int ProcXIPassiveGrabDevice(ClientPtr client);
 
 #endif                          /* XIPASSIVEGRAB_H */

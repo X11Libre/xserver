@@ -51,13 +51,6 @@ int
 ProcXIPassiveGrabDevice(ClientPtr client)
 {
     DeviceIntPtr dev, mod_dev;
-    xXIPassiveGrabDeviceReply rep = {
-        .repType = X_Reply,
-        .RepType = X_XIPassiveGrabDevice,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .num_modifiers = 0
-    };
     int i, ret = Success;
     uint32_t *modifiers;
     xXIGrabModifierInfo *modifiers_failed = NULL;
@@ -65,7 +58,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     GrabParameters param;
     void *tmp;
     int mask_len;
-    uint32_t length;
 
     REQUEST_HEAD_AT_LEAST(xXIPassiveGrabDeviceReq);
     REQUEST_FIELD_CARD16(deviceid);
@@ -186,6 +178,8 @@ ProcXIPassiveGrabDevice(ClientPtr client)
 
     mod_dev = (IsFloating(dev)) ? dev : GetMaster(dev, MASTER_KEYBOARD);
 
+    int num_mod = 0;
+
     for (i = 0; i < stuff->num_modifiers; i++, modifiers++) {
         uint8_t status = Success;
 
@@ -222,39 +216,27 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         }
 
         if (status != GrabSuccess) {
-            xXIGrabModifierInfo *info = modifiers_failed + rep.num_modifiers;
+            xXIGrabModifierInfo *info = modifiers_failed + num_mod;
 
             info->status = status;
             info->modifiers = *modifiers;
-            if (client->swapped)
-                swapl(&info->modifiers);
-
-            rep.num_modifiers++;
-            rep.length += bytes_to_int32(sizeof(xXIGrabModifierInfo));
+            CLIENT_STRUCT_CARD32_1(info, modifiers);
+            num_mod++;
         }
     }
 
-    /* save the value before SRepXIPassiveGrabDevice swaps it */
-    length = rep.length;
-    WriteReplyToClient(client, sizeof(rep), &rep);
-    if (rep.num_modifiers)
-        WriteToClient(client, length * 4, modifiers_failed);
+    xXIPassiveGrabDeviceReply rep = {
+        .RepType = X_XIPassiveGrabDevice,
+        .num_modifiers = num_mod,
+    };
+
+    REPLY_FIELD_CARD16(num_modifiers);
+    REPLY_SEND_EXTRA(modifiers_failed, num_mod * sizeof(xXIGrabModifierInfo));
 
  out:
     free(modifiers_failed);
     xi2mask_free(&mask.xi2mask);
     return ret;
-}
-
-void _X_COLD
-SRepXIPassiveGrabDevice(ClientPtr client, int size,
-                        xXIPassiveGrabDeviceReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_modifiers);
-
-    WriteToClient(client, size, rep);
 }
 
 int

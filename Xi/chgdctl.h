@@ -33,9 +33,4 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 int ProcXChangeDeviceControl(ClientPtr  /* client */
     );
 
-void SRepXChangeDeviceControl(ClientPtr /* client */ ,
-                              int /* size */ ,
-                              xChangeDeviceControlReply *       /* rep */
-    );
-
 #endif                          /* CHGDCTL_H */

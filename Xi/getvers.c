@@ -74,7 +74,6 @@ XExtensionVersion XIVersion;
 int
 ProcXGetExtensionVersion(ClientPtr client)
 {
-
     REQUEST_HEAD_STRUCT(xGetExtensionVersionReq);
     REQUEST_FIELD_CARD16(nbytes);
 
@@ -83,33 +82,13 @@ ProcXGetExtensionVersion(ClientPtr client)
         return BadLength;
 
     xGetExtensionVersionReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetExtensionVersion,
-        .sequenceNumber = client->sequence,
         .major_version = XIVersion.major_version,
         .minor_version = XIVersion.minor_version,
         .present = TRUE
     };
 
-    WriteReplyToClient(client, sizeof(xGetExtensionVersionReply), &rep);
-
-    return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGetExtensionVersion function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetExtensionVersion(ClientPtr client, int size,
-                         xGetExtensionVersionReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->major_version);
-    swaps(&rep->minor_version);
-    WriteToClient(client, size, rep);
+    REPLY_FIELD_CARD16(major_version);
+    REPLY_FIELD_CARD16(minor_version);
+    REPLY_SEND_RET_SUCCESS();
 }

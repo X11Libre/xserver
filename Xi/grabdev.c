@@ -93,9 +93,7 @@ ProcXGrabDevice(ClientPtr client)
     REQUEST_BUF_CARD32(&stuff[1], stuff->event_count);
 
     xGrabDeviceReply rep = {
-        .repType = X_Reply,
         .RepType = X_GrabDevice,
-        .sequenceNumber = client->sequence,
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
@@ -117,8 +115,7 @@ ProcXGrabDevice(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    WriteReplyToClient(client, sizeof(xGrabDeviceReply), &rep);
-    return Success;
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /***********************************************************************
@@ -174,19 +171,4 @@ CreateMaskFromList(ClientPtr client, XEventClass * list, int count,
             }
     }
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGrabDevice function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGrabDevice(ClientPtr client, int size, xGrabDeviceReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }

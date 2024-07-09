@@ -61,30 +61,11 @@ ProcXIGetClientPointer(ClientPtr client)
         winclient = client;
 
     xXIGetClientPointerReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIGetClientPointer,
-        .sequenceNumber = client->sequence,
         .set = (winclient->clientPtr != NULL),
         .deviceid = (winclient->clientPtr) ? winclient->clientPtr->id : 0
     };
 
-    WriteReplyToClient(client, sizeof(xXIGetClientPointerReply), &rep);
-    return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGetClientPointer function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXIGetClientPointer(ClientPtr client, int size,
-                       xXIGetClientPointerReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->deviceid);
-    WriteToClient(client, size, rep);
+    REPLY_FIELD_CARD16(deviceid);
+    REPLY_SEND_RET_SUCCESS();
 }

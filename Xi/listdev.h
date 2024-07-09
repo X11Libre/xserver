@@ -35,9 +35,4 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 int ProcXListInputDevices(ClientPtr     /* client */
     );
 
-void SRepXListInputDevices(ClientPtr /* client */ ,
-                           int /* size */ ,
-                           xListInputDevicesReply *     /* rep */
-    );
-
 #endif                          /* LISTDEV_H */

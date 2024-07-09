@@ -86,30 +86,11 @@ ProcXGetDeviceButtonMapping(ClientPtr client)
         return BadMatch;
 
     xGetDeviceButtonMappingReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceButtonMapping,
-        .sequenceNumber = client->sequence,
         .nElts = b->numButtons,
         .length = bytes_to_int32(rep.nElts),
     };
 
-    WriteReplyToClient(client, sizeof(xGetDeviceButtonMappingReply), &rep);
-    WriteToClient(client, rep.nElts, &b->map[1]);
+    REPLY_SEND_EXTRA(&b->map[1], rep.nElts);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGetDeviceButtonMapping function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetDeviceButtonMapping(ClientPtr client, int size,
-                            xGetDeviceButtonMappingReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }

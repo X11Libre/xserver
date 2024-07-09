@@ -33,9 +33,4 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 int ProcXGetSelectedExtensionEvents(ClientPtr   /* client */
     );
 
-void SRepXGetSelectedExtensionEvents(ClientPtr /* client */ ,
-                                     int /* size */ ,
-                                     xGetSelectedExtensionEventsReply * /* rep */
-    );
-
 #endif                          /* GETSELEV_H */
