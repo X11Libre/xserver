@@ -56,27 +56,12 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 #include "getdctl.h"
-
-/***********************************************************************
- *
- * This procedure gets the control attributes for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceControl(ClientPtr client)
-{
-    REQUEST(xGetDeviceControlReq);
-    REQUEST_SIZE_MATCH(xGetDeviceControlReq);
-    swaps(&stuff->control);
-    return (ProcXGetDeviceControl(client));
-}
 
 /***********************************************************************
  *
@@ -158,8 +143,8 @@ ProcXGetDeviceControl(ClientPtr client)
     int rc, total_length = 0;
     DeviceIntPtr dev;
 
-    REQUEST(xGetDeviceControlReq);
-    REQUEST_SIZE_MATCH(xGetDeviceControlReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceControlReq);
+    REQUEST_FIELD_CARD16(control);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)

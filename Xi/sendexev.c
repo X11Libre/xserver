@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* Window            */
@@ -65,53 +66,6 @@ SOFTWARE.
 #include "sendexev.h"
 
 extern int lastEvent;           /* Defined in extension.c */
-
-/***********************************************************************
- *
- * Handle requests from clients with a different byte order than us.
- *
- */
-
-int _X_COLD
-SProcXSendExtensionEvent(ClientPtr client)
-{
-    CARD32 *p;
-    int i;
-    xEvent eventT = { .u.u.type = 0 };
-    xEvent *eventP;
-    EventSwapPtr proc;
-
-    REQUEST(xSendExtensionEventReq);
-    REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
-    swapl(&stuff->destination);
-    swaps(&stuff->count);
-
-    if (client->req_len !=
-        bytes_to_int32(sizeof(xSendExtensionEventReq)) + stuff->count +
-        bytes_to_int32(stuff->num_events * sizeof(xEvent)))
-        return BadLength;
-
-    eventP = (xEvent *) &stuff[1];
-    for (i = 0; i < stuff->num_events; i++, eventP++) {
-        if (eventP->u.u.type == GenericEvent) {
-            client->errorValue = eventP->u.u.type;
-            return BadValue;
-        }
-
-        proc = EventSwapVector[eventP->u.u.type & 0177];
-        /* no swapping proc; invalid event type? */
-        if (proc == NotImplemented) {
-            client->errorValue = eventP->u.u.type;
-            return BadValue;
-        }
-        (*proc) (eventP, &eventT);
-        *eventP = eventT;
-    }
-
-    p = (CARD32 *) (((xEvent *) &stuff[1]) + stuff->num_events);
-    SwapLongs(p, stuff->count);
-    return (ProcXSendExtensionEvent(client));
-}
 
 /***********************************************************************
  *
@@ -129,13 +83,41 @@ ProcXSendExtensionEvent(ClientPtr client)
     XEventClass *list;
     struct tmask tmp[EMASKSIZE];
 
-    REQUEST(xSendExtensionEventReq);
-    REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
+    REQUEST_HEAD_AT_LEAST(xSendExtensionEventReq);
+    REQUEST_FIELD_CARD32(destination);
+    REQUEST_FIELD_CARD16(count);
 
     if (client->req_len !=
         bytes_to_int32(sizeof(xSendExtensionEventReq)) + stuff->count +
-        (stuff->num_events * bytes_to_int32(sizeof(xEvent))))
+        bytes_to_int32(stuff->num_events * sizeof(xEvent)))
         return BadLength;
+
+    if (client->swapped) {
+        CARD32 *p;
+        xEvent eventT = { .u.u.type = 0 };
+        xEvent *eventP;
+        EventSwapPtr proc;
+
+        eventP = (xEvent *) &stuff[1];
+        for (i = 0; i < stuff->num_events; i++, eventP++) {
+            if (eventP->u.u.type == GenericEvent) {
+                client->errorValue = eventP->u.u.type;
+                return BadValue;
+            }
+
+            proc = EventSwapVector[eventP->u.u.type & 0177];
+            /* no swapping proc; invalid event type? */
+            if (proc == NotImplemented) {
+                client->errorValue = eventP->u.u.type;
+                return BadValue;
+            }
+            (*proc) (eventP, &eventT);
+            *eventP = eventT;
+        }
+
+        p = (CARD32 *) (((xEvent *) &stuff[1]) + stuff->num_events);
+        SwapLongs(p, stuff->count);
+    }
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixWriteAccess);
     if (ret != Success)

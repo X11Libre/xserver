@@ -34,39 +34,31 @@
 
 #include <X11/X.h>              /* for inputstr.h    */
 #include <X11/Xproto.h>         /* Request macro     */
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "scrnintstr.h"         /* screen structure  */
-#include <X11/extensions/XI.h>
-#include <X11/extensions/XI2proto.h>
 #include "extnsionst.h"
 #include "exevents.h"
 #include "exglobals.h"
 #include "xisetclientpointer.h"
 
-int _X_COLD
-SProcXISetClientPointer(ClientPtr client)
-{
-    REQUEST(xXISetClientPointerReq);
-    REQUEST_SIZE_MATCH(xXISetClientPointerReq);
-
-    swapl(&stuff->win);
-    swaps(&stuff->deviceid);
-    return (ProcXISetClientPointer(client));
-}
-
 int
 ProcXISetClientPointer(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXISetClientPointerReq);
+
+    REQUEST_FIELD_CARD32(win);
+    REQUEST_FIELD_CARD16(deviceid);
+
     DeviceIntPtr pDev;
     ClientPtr targetClient;
     int rc;
-
-    REQUEST(xXISetClientPointerReq);
-    REQUEST_SIZE_MATCH(xXISetClientPointerReq);
 
     rc = dixLookupDevice(&pDev, stuff->deviceid, client, DixManageAccess);
     if (rc != Success) {

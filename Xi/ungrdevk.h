@@ -25,9 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef UNGRDEVK_H
 #define UNGRDEVK_H 1
 
-int SProcXUngrabDeviceKey(ClientPtr     /* client */
-    );
-
 int ProcXUngrabDeviceKey(ClientPtr      /* client */
     );
 

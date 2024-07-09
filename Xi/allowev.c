@@ -58,24 +58,10 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 
 #include "exglobals.h"
 #include "allowev.h"
-
-/***********************************************************************
- *
- * This procedure allows frozen events to be routed.
- *
- */
-
-int _X_COLD
-SProcXAllowDeviceEvents(ClientPtr client)
-{
-    REQUEST(xAllowDeviceEventsReq);
-    REQUEST_SIZE_MATCH(xAllowDeviceEventsReq);
-    swapl(&stuff->time);
-    return (ProcXAllowDeviceEvents(client));
-}
 
 /***********************************************************************
  *
@@ -90,8 +76,8 @@ ProcXAllowDeviceEvents(ClientPtr client)
     DeviceIntPtr thisdev;
     int rc;
 
-    REQUEST(xAllowDeviceEventsReq);
-    REQUEST_SIZE_MATCH(xAllowDeviceEventsReq);
+    REQUEST_HEAD_STRUCT(xAllowDeviceEventsReq);
+    REQUEST_FIELD_CARD32(time);
 
     rc = dixLookupDevice(&thisdev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)

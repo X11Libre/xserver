@@ -39,6 +39,7 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "mi/mipointer_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -56,27 +57,20 @@
  *
  */
 
-int _X_COLD
-SProcXIWarpPointer(ClientPtr client)
-{
-    REQUEST(xXIWarpPointerReq);
-    REQUEST_SIZE_MATCH(xXIWarpPointerReq);
-
-    swapl(&stuff->src_win);
-    swapl(&stuff->dst_win);
-    swapl(&stuff->src_x);
-    swapl(&stuff->src_y);
-    swaps(&stuff->src_width);
-    swaps(&stuff->src_height);
-    swapl(&stuff->dst_x);
-    swapl(&stuff->dst_y);
-    swaps(&stuff->deviceid);
-    return (ProcXIWarpPointer(client));
-}
-
 int
 ProcXIWarpPointer(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXIWarpPointerReq);
+    REQUEST_FIELD_CARD32(src_win);
+    REQUEST_FIELD_CARD32(dst_win);
+    REQUEST_FIELD_CARD32(src_x);
+    REQUEST_FIELD_CARD32(src_y);
+    REQUEST_FIELD_CARD16(src_width);
+    REQUEST_FIELD_CARD16(src_height);
+    REQUEST_FIELD_CARD32(dst_x);
+    REQUEST_FIELD_CARD32(dst_y);
+    REQUEST_FIELD_CARD16(deviceid);
+
     int rc;
     int x, y;
     WindowPtr dest = NULL;
@@ -85,9 +79,6 @@ ProcXIWarpPointer(ClientPtr client)
     ScreenPtr newScreen;
     int src_x, src_y;
     int dst_x, dst_y;
-
-    REQUEST(xXIWarpPointerReq);
-    REQUEST_SIZE_MATCH(xXIWarpPointerReq);
 
     /* FIXME: panoramix stuff is missing, look at ProcWarpPointer */
 

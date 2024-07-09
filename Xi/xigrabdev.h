@@ -28,9 +28,7 @@
 #include <dix-config.h>
 
 int ProcXIGrabDevice(ClientPtr client);
-int SProcXIGrabDevice(ClientPtr client);
 
 int ProcXIUngrabDevice(ClientPtr client);
-int SProcXIUngrabDevice(ClientPtr client);
 
 #endif                          /* XIGRABDEV_H */

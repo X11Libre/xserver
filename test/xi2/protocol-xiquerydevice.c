@@ -306,7 +306,7 @@ request_XIQueryDevice(struct test_data *querydata, int deviceid, int error)
     client.swapped = TRUE;
     swaps(&request.length);
     swaps(&request.deviceid);
-    rc = SProcXIQueryDevice(&client);
+    rc = ProcXIQueryDevice(&client);
     assert(rc == error);
 
     if (rc != Success)
