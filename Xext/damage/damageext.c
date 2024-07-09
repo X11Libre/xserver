@@ -27,6 +27,7 @@
 #include <X11/extensions/damageproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "include/pixmapstr.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
@@ -210,13 +211,9 @@ DamageExtSetCritical(ClientPtr pClient, Bool critical)
 static int
 ProcDamageQueryVersion(ClientPtr client)
 {
-    REQUEST(xDamageQueryVersionReq);
-    REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->majorVersion);
-        swapl(&stuff->minorVersion);
-    }
+    REQUEST_HEAD_STRUCT(xDamageQueryVersionReq);
+    REQUEST_FIELD_CARD32(majorVersion);
+    REQUEST_FIELD_CARD32(minorVersion);
 
     DamageClientPtr pDamageClient = GetDamageClient(client);
 
@@ -328,13 +325,9 @@ doDamageCreate(ClientPtr client, int *rc, xDamageCreateReq *stuff)
 static int
 ProcDamageCreate(ClientPtr client)
 {
-    REQUEST(xDamageCreateReq);
-    REQUEST_SIZE_MATCH(xDamageCreateReq);
-
-    if (client->swapped) {
-        swapl(&stuff->damage);
-        swapl(&stuff->drawable);
-    }
+    REQUEST_HEAD_STRUCT(xDamageCreateReq);
+    REQUEST_FIELD_CARD32(damage);
+    REQUEST_FIELD_CARD32(drawable);
 
     int rc;
 
@@ -351,8 +344,10 @@ ProcDamageCreate(ClientPtr client)
 static int
 ProcDamageDestroy(ClientPtr client)
 {
-    REQUEST(xDamageDestroyReq);
-    REQUEST_SIZE_MATCH(xDamageDestroyReq);
+    REQUEST_HEAD_STRUCT(xDamageDestroyReq);
+    REQUEST_FIELD_CARD32(damage);
+
+    DamageExtPtr pDamageExt;
 
     if (client->swapped)
         swapl(&stuff->damage);
@@ -447,14 +442,10 @@ DamageExtSubtract(DamageExtPtr pDamageExt, const RegionPtr pRegion)
 static int
 ProcDamageSubtract(ClientPtr client)
 {
-    REQUEST(xDamageSubtractReq);
-    REQUEST_SIZE_MATCH(xDamageSubtractReq);
-
-    if (client->swapped) {
-        swapl(&stuff->damage);
-        swapl(&stuff->repair);
-        swapl(&stuff->parts);
-    }
+    REQUEST_HEAD_STRUCT(xDamageSubtractReq);
+    REQUEST_FIELD_CARD32(damage);
+    REQUEST_FIELD_CARD32(repair);
+    REQUEST_FIELD_CARD32(parts);
 
     DamageExtPtr pDamageExt;
     RegionPtr pRepair;
@@ -487,13 +478,9 @@ ProcDamageSubtract(ClientPtr client)
 static int
 ProcDamageAdd(ClientPtr client)
 {
-    REQUEST(xDamageAddReq);
-    REQUEST_SIZE_MATCH(xDamageSubtractReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->region);
-    }
+    REQUEST_HEAD_STRUCT(xDamageAddReq);
+    REQUEST_FIELD_CARD32(drawable);
+    REQUEST_FIELD_CARD32(region);
 
     DrawablePtr pDrawable;
     RegionPtr pRegion;
