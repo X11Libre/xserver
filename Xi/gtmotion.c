@@ -88,11 +88,7 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
         MaybeStopDeviceHint(dev, client);
 
     xGetDeviceMotionEventsReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceMotionEvents,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .nEvents = 0,
         .axes = v->numAxes,
         .mode = Absolute        /* XXX we don't do relative at the moment */
     };
@@ -111,8 +107,10 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
             rep.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
                                            start.milliseconds, stop.milliseconds,
                                            (ScreenPtr) NULL, FALSE);
+            if (rep.nEvents < 0)
+                rep.nEvents = 0;
+
             length = rep.nEvents * size;
-            rep.length = bytes_to_int32(length);
         }
     }
 
@@ -123,8 +121,9 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
         swapl(&rep.nEvents);
     }
 
-    WriteToClient(client, sizeof(xGetDeviceMotionEventsReply), &rep);
-    WriteToClient(client, length, coords);
+    REPLY_BUF_CARD32(coords, bytes_to_int32(length));
+    REPLY_FIELD_CARD32(nEvents);
+    REPLY_SEND_EXTRA(coords, length);
     free(coords);
     return Success;
 }

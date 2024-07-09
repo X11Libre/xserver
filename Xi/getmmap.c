@@ -86,21 +86,12 @@ ProcXGetDeviceModifierMapping(ClientPtr client)
         return ret;
 
     xGetDeviceModifierMappingReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceModifierMapping,
-        .sequenceNumber = client->sequence,
         .numKeyPerModifier = max_keys_per_mod,
-        /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
-        .length = max_keys_per_mod << 1
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xGetDeviceModifierMappingReply), &rep);
-    WriteToClient(client, max_keys_per_mod * 8, modkeymap);
-
+    /* 8 modifiers per key, each CARD8 */
+    REPLY_SEND_EXTRA(modkeymap, max_keys_per_mod * 8);
     free(modkeymap);
 
     return Success;
