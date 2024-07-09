@@ -222,9 +222,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
 
     xi2mask_free(&mask.xi2mask);
 
-    if (client->swapped) {
-        swaps(&reply.num_modifiers);
-    }
+    X_REPLY_FIELD_CARD16(num_modifiers);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 

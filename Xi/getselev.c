@@ -137,10 +137,8 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
         free(buf);
     }
 
-    if (client->swapped) {
-        swaps(&reply.this_client_count);
-        swaps(&reply.all_clients_count);
-    }
+    X_REPLY_FIELD_CARD16(this_client_count);
+    X_REPLY_FIELD_CARD16(all_clients_count);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
