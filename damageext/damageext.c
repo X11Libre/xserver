@@ -43,7 +43,9 @@ typedef struct {
 } PanoramiXDamageRes;
 
 static RESTYPE XRT_DAMAGE;
-static int (*PanoramiXSaveDamageCreate) (ClientPtr);
+static int damageUseXinerama = 0;
+
+static int PanoramiXDamageCreate(ClientPtr client);
 
 #endif
 
@@ -302,6 +304,12 @@ ProcDamageCreate(ClientPtr client)
     int rc;
     REQUEST(xDamageCreateReq);
     REQUEST_SIZE_MATCH(xDamageCreateReq);
+
+#ifdef PANORAMIX
+    if (damageUseXinerama)
+        return PanoramiXDamageCreate(client);
+#endif
+
     LEGAL_NEW_RESOURCE(stuff->damage, client);
     doDamageCreate(client, &rc);
     return rc;
@@ -703,14 +711,13 @@ PanoramiXDamageInit(void)
     if (!XRT_DAMAGE)
         FatalError("Couldn't Xineramify Damage extension\n");
 
-    PanoramiXSaveDamageCreate = ProcDamageVector[X_DamageCreate];
-    ProcDamageVector[X_DamageCreate] = PanoramiXDamageCreate;
+    damageUseXinerama = 1;
 }
 
 void
 PanoramiXDamageReset(void)
 {
-    ProcDamageVector[X_DamageCreate] = PanoramiXSaveDamageCreate;
+    damageUseXinerama = 0;
 }
 
 #endif /* PANORAMIX */
