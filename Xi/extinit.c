@@ -179,143 +179,6 @@ XExtEventInfo EventInfo[32];
 static DeviceIntRec xi_all_devices;
 static DeviceIntRec xi_all_master_devices;
 
-/**
- * Dispatch vector. Functions defined in here will be called when the matching
- * request arrives.
- */
-static int (*ProcIVector[]) (ClientPtr) = {
-    NULL,                       /*  0 */
-        ProcXGetExtensionVersion,       /*  1 */
-        ProcXListInputDevices,  /*  2 */
-        ProcXOpenDevice,        /*  3 */
-        ProcXCloseDevice,       /*  4 */
-        ProcXSetDeviceMode,     /*  5 */
-        ProcXSelectExtensionEvent,      /*  6 */
-        ProcXGetSelectedExtensionEvents,        /*  7 */
-        ProcXChangeDeviceDontPropagateList,     /*  8 */
-        ProcXGetDeviceDontPropagateList,        /*  9 */
-        ProcXGetDeviceMotionEvents,     /* 10 */
-        ProcXChangeKeyboardDevice,      /* 11 */
-        ProcXChangePointerDevice,       /* 12 */
-        ProcXGrabDevice,        /* 13 */
-        ProcXUngrabDevice,      /* 14 */
-        ProcXGrabDeviceKey,     /* 15 */
-        ProcXUngrabDeviceKey,   /* 16 */
-        ProcXGrabDeviceButton,  /* 17 */
-        ProcXUngrabDeviceButton,        /* 18 */
-        ProcXAllowDeviceEvents, /* 19 */
-        ProcXGetDeviceFocus,    /* 20 */
-        ProcXSetDeviceFocus,    /* 21 */
-        ProcXGetFeedbackControl,        /* 22 */
-        ProcXChangeFeedbackControl,     /* 23 */
-        ProcXGetDeviceKeyMapping,       /* 24 */
-        ProcXChangeDeviceKeyMapping,    /* 25 */
-        ProcXGetDeviceModifierMapping,  /* 26 */
-        ProcXSetDeviceModifierMapping,  /* 27 */
-        ProcXGetDeviceButtonMapping,    /* 28 */
-        ProcXSetDeviceButtonMapping,    /* 29 */
-        ProcXQueryDeviceState,  /* 30 */
-        ProcXSendExtensionEvent,        /* 31 */
-        ProcXDeviceBell,        /* 32 */
-        ProcXSetDeviceValuators,        /* 33 */
-        ProcXGetDeviceControl,  /* 34 */
-        ProcXChangeDeviceControl,       /* 35 */
-        /* XI 1.5 */
-        ProcXListDeviceProperties,      /* 36 */
-        ProcXChangeDeviceProperty,      /* 37 */
-        ProcXDeleteDeviceProperty,      /* 38 */
-        ProcXGetDeviceProperty, /* 39 */
-        /* XI 2 */
-        ProcXIQueryPointer,     /* 40 */
-        ProcXIWarpPointer,      /* 41 */
-        ProcXIChangeCursor,     /* 42 */
-        ProcXIChangeHierarchy,  /* 43 */
-        ProcXISetClientPointer, /* 44 */
-        ProcXIGetClientPointer, /* 45 */
-        ProcXISelectEvents,     /* 46 */
-        ProcXIQueryVersion,     /* 47 */
-        ProcXIQueryDevice,      /* 48 */
-        ProcXISetFocus,         /* 49 */
-        ProcXIGetFocus,         /* 50 */
-        ProcXIGrabDevice,       /* 51 */
-        ProcXIUngrabDevice,     /* 52 */
-        ProcXIAllowEvents,      /* 53 */
-        ProcXIPassiveGrabDevice,        /* 54 */
-        ProcXIPassiveUngrabDevice,      /* 55 */
-        ProcXIListProperties,   /* 56 */
-        ProcXIChangeProperty,   /* 57 */
-        ProcXIDeleteProperty,   /* 58 */
-        ProcXIGetProperty,      /* 59 */
-        ProcXIGetSelectedEvents, /* 60 */
-        ProcXIBarrierReleasePointer /* 61 */
-};
-
-/* For swapped clients */
-static int (*SProcIVector[]) (ClientPtr) = {
-        NULL,                       /*  0 */
-        SProcXGetExtensionVersion,      /*  1 */
-        ProcXListInputDevices, /*  2 */
-        ProcXOpenDevice,       /*  3 */
-        ProcXCloseDevice,      /*  4 */
-        ProcXSetDeviceMode,    /*  5 */
-        SProcXSelectExtensionEvent,     /*  6 */
-        SProcXGetSelectedExtensionEvents,       /*  7 */
-        SProcXChangeDeviceDontPropagateList,    /*  8 */
-        SProcXGetDeviceDontPropagateList,       /*  9 */
-        SProcXGetDeviceMotionEvents,    /* 10 */
-        ProcXChangeKeyboardDevice,     /* 11 */
-        ProcXChangePointerDevice,      /* 12 */
-        SProcXGrabDevice,       /* 13 */
-        SProcXUngrabDevice,     /* 14 */
-        SProcXGrabDeviceKey,    /* 15 */
-        SProcXUngrabDeviceKey,  /* 16 */
-        SProcXGrabDeviceButton, /* 17 */
-        SProcXUngrabDeviceButton,       /* 18 */
-        SProcXAllowDeviceEvents,        /* 19 */
-        ProcXGetDeviceFocus,   /* 20 */
-        SProcXSetDeviceFocus,   /* 21 */
-        ProcXGetFeedbackControl,       /* 22 */
-        SProcXChangeFeedbackControl,    /* 23 */
-        ProcXGetDeviceKeyMapping,      /* 24 */
-        SProcXChangeDeviceKeyMapping,   /* 25 */
-        ProcXGetDeviceModifierMapping, /* 26 */
-        ProcXSetDeviceModifierMapping, /* 27 */
-        ProcXGetDeviceButtonMapping,   /* 28 */
-        ProcXSetDeviceButtonMapping,   /* 29 */
-        ProcXQueryDeviceState, /* 30 */
-        SProcXSendExtensionEvent,       /* 31 */
-        ProcXDeviceBell,       /* 32 */
-        ProcXSetDeviceValuators,       /* 33 */
-        SProcXGetDeviceControl, /* 34 */
-        SProcXChangeDeviceControl,      /* 35 */
-        ProcXListDeviceProperties,     /* 36 */
-        SProcXChangeDeviceProperty,     /* 37 */
-        SProcXDeleteDeviceProperty,     /* 38 */
-        SProcXGetDeviceProperty,        /* 39 */
-        SProcXIQueryPointer,    /* 40 */
-        SProcXIWarpPointer,     /* 41 */
-        SProcXIChangeCursor,    /* 42 */
-        ProcXIChangeHierarchy, /* 43 */
-        SProcXISetClientPointer,        /* 44 */
-        SProcXIGetClientPointer,        /* 45 */
-        SProcXISelectEvents,    /* 46 */
-        SProcXIQueryVersion,    /* 47 */
-        SProcXIQueryDevice,     /* 48 */
-        SProcXISetFocus,        /* 49 */
-        SProcXIGetFocus,        /* 50 */
-        SProcXIGrabDevice,      /* 51 */
-        SProcXIUngrabDevice,    /* 52 */
-        SProcXIAllowEvents,     /* 53 */
-        SProcXIPassiveGrabDevice,       /* 54 */
-        SProcXIPassiveUngrabDevice,     /* 55 */
-        SProcXIListProperties,  /* 56 */
-        SProcXIChangeProperty,  /* 57 */
-        SProcXIDeleteProperty,  /* 58 */
-        SProcXIGetProperty,     /* 59 */
-        SProcXIGetSelectedEvents,       /* 60 */
-        SProcXIBarrierReleasePointer /* 61 */
-};
-
 /*****************************************************************
  *
  * Globals referenced elsewhere in the server.
@@ -383,11 +246,137 @@ static int
 ProcIDispatch(ClientPtr client)
 {
     REQUEST(xReq);
-    if (stuff->data >= ARRAY_SIZE(ProcIVector) || !ProcIVector[stuff->data])
-        return BadRequest;
 
     UpdateCurrentTimeIf();
-    return (*ProcIVector[stuff->data]) (client);
+
+    switch (stuff->data) {
+        case X_GetExtensionVersion:
+            return ProcXGetExtensionVersion(client);
+        case X_ListInputDevices:
+            return ProcXListInputDevices(client);
+        case X_OpenDevice:
+            return ProcXOpenDevice(client);
+        case X_CloseDevice:
+            return ProcXCloseDevice(client);
+        case X_SetDeviceMode:
+            return ProcXSetDeviceMode(client);
+        case X_SelectExtensionEvent:
+            return ProcXSelectExtensionEvent(client);
+        case X_GetSelectedExtensionEvents:
+            return ProcXGetSelectedExtensionEvents(client);
+        case X_ChangeDeviceDontPropagateList:
+            return ProcXChangeDeviceDontPropagateList(client);
+        case X_GetDeviceDontPropagateList:
+            return ProcXGetDeviceDontPropagateList(client);
+        case X_GetDeviceMotionEvents:
+            return ProcXGetDeviceMotionEvents(client);
+        case X_ChangeKeyboardDevice:
+            return ProcXChangeKeyboardDevice(client);
+        case X_ChangePointerDevice:
+            return ProcXChangePointerDevice(client);
+        case X_GrabDevice:
+            return ProcXGrabDevice(client);
+        case X_UngrabDevice:
+            return ProcXUngrabDevice(client);
+        case X_GrabDeviceKey:
+            return ProcXGrabDeviceKey(client);
+        case X_UngrabDeviceKey:
+            return ProcXUngrabDeviceKey(client);
+        case X_GrabDeviceButton:
+            return ProcXGrabDeviceButton(client);
+        case X_UngrabDeviceButton:
+            return ProcXUngrabDeviceButton(client);
+        case X_AllowDeviceEvents:
+            return ProcXAllowDeviceEvents(client);
+        case X_GetDeviceFocus:
+            return ProcXGetDeviceFocus(client);
+        case X_SetDeviceFocus:
+            return ProcXSetDeviceFocus(client);
+        case X_GetFeedbackControl:
+            return ProcXGetFeedbackControl(client);
+        case X_ChangeFeedbackControl:
+            return ProcXChangeFeedbackControl(client);
+        case X_GetDeviceKeyMapping:
+            return ProcXGetDeviceKeyMapping(client);
+        case X_ChangeDeviceKeyMapping:
+            return ProcXChangeDeviceKeyMapping(client);
+        case X_GetDeviceModifierMapping:
+            return ProcXGetDeviceModifierMapping(client);
+        case X_SetDeviceModifierMapping:
+            return ProcXSetDeviceModifierMapping(client);
+        case X_GetDeviceButtonMapping:
+            return ProcXGetDeviceButtonMapping(client);
+        case X_SetDeviceButtonMapping:
+            return ProcXSetDeviceButtonMapping(client);
+        case X_QueryDeviceState:
+            return ProcXQueryDeviceState(client);
+        case X_SendExtensionEvent:
+            return ProcXSendExtensionEvent(client);
+        case X_DeviceBell:
+            return ProcXDeviceBell(client);
+        case X_SetDeviceValuators:
+            return ProcXSetDeviceValuators(client);
+        case X_GetDeviceControl:
+            return ProcXGetDeviceControl(client);
+        case X_ChangeDeviceControl:
+            return ProcXChangeDeviceControl(client);
+        /* XI 1.5 */
+        case X_ListDeviceProperties:
+            return ProcXListDeviceProperties(client);
+        case X_ChangeDeviceProperty:
+            return ProcXChangeDeviceProperty(client);
+        case X_DeleteDeviceProperty:
+            return ProcXDeleteDeviceProperty(client);
+        case X_GetDeviceProperty:
+            return ProcXGetDeviceProperty(client);
+        /* XI 2 */
+        case X_XIQueryPointer:
+            return ProcXIQueryPointer(client);
+        case X_XIWarpPointer:
+            return ProcXIWarpPointer(client);
+        case X_XIChangeCursor:
+            return ProcXIChangeCursor(client);
+        case X_XIChangeHierarchy:
+            return ProcXIChangeHierarchy(client);
+        case X_XISetClientPointer:
+            return ProcXISetClientPointer(client);
+        case X_XIGetClientPointer:
+            return ProcXIGetClientPointer(client);
+        case X_XISelectEvents:
+            return ProcXISelectEvents(client);
+        case X_XIQueryVersion:
+            return ProcXIQueryVersion(client);
+        case X_XIQueryDevice:
+            return ProcXIQueryDevice(client);
+        case X_XISetFocus:
+            return ProcXISetFocus(client);
+        case X_XIGetFocus:
+            return ProcXIGetFocus(client);
+        case X_XIGrabDevice:
+            return ProcXIGrabDevice(client);
+        case X_XIUngrabDevice:
+            return ProcXIUngrabDevice(client);
+        case X_XIAllowEvents:
+            return ProcXIAllowEvents(client);
+        case X_XIPassiveGrabDevice:
+            return ProcXIPassiveGrabDevice(client);
+        case X_XIPassiveUngrabDevice:
+            return ProcXIPassiveUngrabDevice(client);
+        case X_XIListProperties:
+            return ProcXIListProperties(client);
+        case X_XIChangeProperty:
+            return ProcXIChangeProperty(client);
+        case X_XIDeleteProperty:
+            return ProcXIDeleteProperty(client);
+        case X_XIGetProperty:
+            return ProcXIGetProperty(client);
+        case X_XIGetSelectedEvents:
+            return ProcXIGetSelectedEvents(client);
+        case X_XIBarrierReleasePointer:
+            return ProcXIBarrierReleasePointer(client);
+        default:
+            return BadRequest;
+    }
 }
 
 /*******************************************************************************
@@ -403,11 +392,137 @@ static int _X_COLD
 SProcIDispatch(ClientPtr client)
 {
     REQUEST(xReq);
-    if (stuff->data >= ARRAY_SIZE(SProcIVector) || !SProcIVector[stuff->data])
-        return BadRequest;
 
     UpdateCurrentTimeIf();
-    return (*SProcIVector[stuff->data]) (client);
+
+    switch (stuff->data) {
+        case X_GetExtensionVersion:
+            return SProcXGetExtensionVersion(client);
+        case X_ListInputDevices:
+            return ProcXListInputDevices(client);
+        case X_OpenDevice:
+            return ProcXOpenDevice(client);
+        case X_CloseDevice:
+            return ProcXCloseDevice(client);
+        case X_SetDeviceMode:
+            return ProcXSetDeviceMode(client);
+        case X_SelectExtensionEvent:
+            return SProcXSelectExtensionEvent(client);
+        case X_GetSelectedExtensionEvents:
+            return SProcXGetSelectedExtensionEvents(client);
+        case X_ChangeDeviceDontPropagateList:
+            return SProcXChangeDeviceDontPropagateList(client);
+        case X_GetDeviceDontPropagateList:
+            return SProcXGetDeviceDontPropagateList(client);
+        case X_GetDeviceMotionEvents:
+            return SProcXGetDeviceMotionEvents(client);
+        case X_ChangeKeyboardDevice:
+            return ProcXChangeKeyboardDevice(client);
+        case X_ChangePointerDevice:
+            return ProcXChangePointerDevice(client);
+        case X_GrabDevice:
+            return SProcXGrabDevice(client);
+        case X_UngrabDevice:
+            return SProcXUngrabDevice(client);
+        case X_GrabDeviceKey:
+            return SProcXGrabDeviceKey(client);
+        case X_UngrabDeviceKey:
+            return SProcXUngrabDeviceKey(client);
+        case X_GrabDeviceButton:
+            return SProcXGrabDeviceButton(client);
+        case X_UngrabDeviceButton:
+            return SProcXUngrabDeviceButton(client);
+        case X_AllowDeviceEvents:
+            return SProcXAllowDeviceEvents(client);
+        case X_GetDeviceFocus:
+            return ProcXGetDeviceFocus(client);
+        case X_SetDeviceFocus:
+            return SProcXSetDeviceFocus(client);
+        case X_GetFeedbackControl:
+            return ProcXGetFeedbackControl(client);
+        case X_ChangeFeedbackControl:
+            return SProcXChangeFeedbackControl(client);
+        case X_GetDeviceKeyMapping:
+            return ProcXGetDeviceKeyMapping(client);
+        case X_ChangeDeviceKeyMapping:
+            return SProcXChangeDeviceKeyMapping(client);
+        case X_GetDeviceModifierMapping:
+            return ProcXGetDeviceModifierMapping(client);
+        case X_SetDeviceModifierMapping:
+            return ProcXSetDeviceModifierMapping(client);
+        case X_GetDeviceButtonMapping:
+            return ProcXGetDeviceButtonMapping(client);
+        case X_SetDeviceButtonMapping:
+            return ProcXSetDeviceButtonMapping(client);
+        case X_QueryDeviceState:
+            return ProcXQueryDeviceState(client);
+        case X_SendExtensionEvent:
+            return SProcXSendExtensionEvent(client);
+        case X_DeviceBell:
+            return ProcXDeviceBell(client);
+        case X_SetDeviceValuators:
+            return ProcXSetDeviceValuators(client);
+        case X_GetDeviceControl:
+            return SProcXGetDeviceControl(client);
+        case X_ChangeDeviceControl:
+            return SProcXChangeDeviceControl(client);
+        /* XI 1.5 */
+        case X_ListDeviceProperties:
+            return ProcXListDeviceProperties(client);
+        case X_ChangeDeviceProperty:
+            return SProcXChangeDeviceProperty(client);
+        case X_DeleteDeviceProperty:
+            return SProcXDeleteDeviceProperty(client);
+        case X_GetDeviceProperty:
+            return SProcXGetDeviceProperty(client);
+        /* XI 2 */
+        case X_XIQueryPointer:
+            return SProcXIQueryPointer(client);
+        case X_XIWarpPointer:
+            return SProcXIWarpPointer(client);
+        case X_XIChangeCursor:
+            return SProcXIChangeCursor(client);
+        case X_XIChangeHierarchy:
+            return ProcXIChangeHierarchy(client);
+        case X_XISetClientPointer:
+            return SProcXISetClientPointer(client);
+        case X_XIGetClientPointer:
+            return SProcXIGetClientPointer(client);
+        case X_XISelectEvents:
+            return SProcXISelectEvents(client);
+        case X_XIQueryVersion:
+            return SProcXIQueryVersion(client);
+        case X_XIQueryDevice:
+            return SProcXIQueryDevice(client);
+        case X_XISetFocus:
+            return SProcXISetFocus(client);
+        case X_XIGetFocus:
+            return SProcXIGetFocus(client);
+        case X_XIGrabDevice:
+            return SProcXIGrabDevice(client);
+        case X_XIUngrabDevice:
+            return SProcXIUngrabDevice(client);
+        case X_XIAllowEvents:
+            return SProcXIAllowEvents(client);
+        case X_XIPassiveGrabDevice:
+            return SProcXIPassiveGrabDevice(client);
+        case X_XIPassiveUngrabDevice:
+            return SProcXIPassiveUngrabDevice(client);
+        case X_XIListProperties:
+            return SProcXIListProperties(client);
+        case X_XIChangeProperty:
+            return SProcXIChangeProperty(client);
+        case X_XIDeleteProperty:
+            return SProcXIDeleteProperty(client);
+        case X_XIGetProperty:
+            return SProcXIGetProperty(client);
+        case X_XIGetSelectedEvents:
+            return SProcXIGetSelectedEvents(client);
+        case X_XIBarrierReleasePointer:
+            return SProcXIBarrierReleasePointer(client);
+        default:
+            return BadRequest;
+    }
 }
 
 /**********************************************************************
