@@ -44,7 +44,7 @@ typedef struct {
 static RESTYPE XRT_DAMAGE;
 static int damageUseXinerama = 0;
 
-static int PanoramiXDamageCreate(ClientPtr client);
+static int PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff);
 
 #endif /* XINERAMA */
 
@@ -259,13 +259,11 @@ DamageExtCreate(DrawablePtr pDrawable, DamageReportLevel level,
 }
 
 static DamageExtPtr
-doDamageCreate(ClientPtr client, int *rc)
+doDamageCreate(ClientPtr client, int *rc, xDamageCreateReq *stuff)
 {
     DrawablePtr pDrawable;
     DamageExtPtr pDamageExt;
     DamageReportLevel level;
-
-    REQUEST(xDamageCreateReq);
 
     *rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                             DixGetAttrAccess | DixReadAccess);
@@ -308,11 +306,11 @@ ProcDamageCreate(ClientPtr client)
 
 #ifdef XINERAMA
     if (damageUseXinerama)
-        return PanoramiXDamageCreate(client);
+        return PanoramiXDamageCreate(client, stuff);
 #endif
 
     LEGAL_NEW_RESOURCE(stuff->damage, client);
-    doDamageCreate(client, &rc);
+    doDamageCreate(client, &rc, stuff);
     return rc;
 }
 
@@ -628,15 +626,12 @@ PanoramiXDamageExtDestroy(DamagePtr pDamage, void *closure)
 }
 
 static int
-PanoramiXDamageCreate(ClientPtr client)
+PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
 {
     PanoramiXDamageRes *damage;
     PanoramiXRes *draw;
     int i, rc;
 
-    REQUEST(xDamageCreateReq);
-
-    REQUEST_SIZE_MATCH(xDamageCreateReq);
     LEGAL_NEW_RESOURCE(stuff->damage, client);
     rc = dixLookupResourceByClass((void **)&draw, stuff->drawable, XRC_DRAWABLE,
                                   client, DixGetAttrAccess | DixReadAccess);
@@ -649,7 +644,7 @@ PanoramiXDamageCreate(ClientPtr client)
     if (!AddResource(stuff->damage, XRT_DAMAGE, damage))
         return BadAlloc;
 
-    damage->ext = doDamageCreate(client, &rc);
+    damage->ext = doDamageCreate(client, &rc, stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
         FOR_NSCREENS_FORWARD(i) {
             DrawablePtr pDrawable;
