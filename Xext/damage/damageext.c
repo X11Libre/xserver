@@ -231,12 +231,12 @@ ProcDamageQueryVersion(ClientPtr client)
         else
             reply.minorVersion = SERVER_DAMAGE_MINOR_VERSION;
     }
+
     pDamageClient->major_version = reply.majorVersion;
     pDamageClient->minor_version = reply.minorVersion;
-    if (client->swapped) {
-        swapl(&reply.majorVersion);
-        swapl(&reply.minorVersion);
-    }
+
+    REPLY_FIELD_CARD32(majorVersion);
+    REPLY_FIELD_CARD32(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
