@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>     /* control constants */
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "include/inputstr.h"           /* DeviceIntPtr      */
 #include "Xi/handlers.h"
 
@@ -405,11 +406,8 @@ ChangeLedFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
 int
 ProcXChangeFeedbackControl(ClientPtr client)
 {
-    REQUEST(xChangeFeedbackControlReq);
-    REQUEST_AT_LEAST_SIZE(xChangeFeedbackControlReq);
-
-    if (client->swapped)
-        swapl(&stuff->mask);
+    X_REQUEST_HEAD_AT_LEAST(xChangeFeedbackControlReq);
+    X_REQUEST_FIELD_CARD32(mask);
 
     unsigned len;
     DeviceIntPtr dev;

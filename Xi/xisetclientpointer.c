@@ -38,6 +38,7 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -50,17 +51,13 @@
 int
 ProcXISetClientPointer(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xXISetClientPointerReq);
+    X_REQUEST_FIELD_CARD32(win);
+    X_REQUEST_FIELD_CARD16(deviceid);
+
     DeviceIntPtr pDev;
     ClientPtr targetClient;
     int rc;
-
-    REQUEST(xXISetClientPointerReq);
-    REQUEST_SIZE_MATCH(xXISetClientPointerReq);
-
-    if (client->swapped) {
-        swapl(&stuff->win);
-        swaps(&stuff->deviceid);
-    }
 
     rc = dixLookupDevice(&pDev, stuff->deviceid, client, DixManageAccess);
     if (rc != Success) {

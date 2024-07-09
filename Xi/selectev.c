@@ -58,6 +58,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -120,18 +121,10 @@ HandleDevicePresenceMask(ClientPtr client, WindowPtr win,
 int
 ProcXSelectExtensionEvent(ClientPtr client)
 {
-    REQUEST(xSelectExtensionEventReq);
-    REQUEST_AT_LEAST_SIZE(xSelectExtensionEventReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swaps(&stuff->count);
-    }
-
-    REQUEST_FIXED_SIZE(xSelectExtensionEventReq, stuff->count * sizeof(CARD32));
-
-    if (client->swapped)
-        SwapLongs((CARD32 *) (&stuff[1]), stuff->count);
+    X_REQUEST_HEAD_AT_LEAST(xSelectExtensionEventReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(count);
+    X_REQUEST_REST_COUNT_CARD32(stuff->count);
 
     int ret;
     int i;

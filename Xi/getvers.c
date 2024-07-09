@@ -73,11 +73,8 @@ XExtensionVersion XIVersion;
 int
 ProcXGetExtensionVersion(ClientPtr client)
 {
-    REQUEST(xGetExtensionVersionReq);
-    REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
-
-    if (client->swapped)
-        swaps(&stuff->nbytes);
+    X_REQUEST_HEAD_STRUCT(xGetExtensionVersionReq);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     if (client->req_len != bytes_to_int32(sizeof(xGetExtensionVersionReq) +
                                         stuff->nbytes))

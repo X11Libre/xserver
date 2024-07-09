@@ -72,13 +72,9 @@ SOFTWARE.
 int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
-    REQUEST(xGetDeviceMotionEventsReq);
-    REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->start);
-        swapl(&stuff->stop);
-    }
+    X_REQUEST_HEAD_STRUCT(xGetDeviceMotionEventsReq);
+    X_REQUEST_FIELD_CARD32(start);
+    X_REQUEST_FIELD_CARD32(stop);
 
     DeviceIntPtr dev;
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
