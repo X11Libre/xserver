@@ -55,11 +55,8 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
-<<<<<<< HEAD
 #include "dix/dix_priv.h"
-=======
 #include "dix/request_priv.h"
->>>>>>> 247da4e473 (Xi: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
@@ -91,11 +88,7 @@ ProcXGetExtensionVersion(ClientPtr client)
         .present = TRUE
     };
 
-    if (client->swapped) {
-        swaps(&rep.major_version);
-        swaps(&rep.minor_version);
-    }
-
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(major_version);
+    REPLY_FIELD_CARD16(minor_version);
+    return REPLY_SEND();
 }

@@ -140,9 +140,9 @@ CopySwapButtonClass(ClientPtr client, ButtonClassPtr b, char **buf)
     b2->class = ButtonClass;
     b2->length = sizeof(xButtonInfo);
     b2->num_buttons = b->numButtons;
-    if (client && client->swapped) {
-        swaps(&b2->num_buttons);
-    }
+
+    CLIENT_STRUCT_CARD16_1(b2, num_buttons);
+
     *buf += sizeof(xButtonInfo);
 }
 
@@ -173,9 +173,8 @@ CopySwapDevice(ClientPtr client, DeviceIntPtr d, int num_classes, char **buf)
     else
         dev->use = IsXExtensionDevice;
 
-    if (client->swapped) {
-        swapl(&dev->type);
-    }
+    CLIENT_STRUCT_CARD32_1(dev, type);
+
     *buf += sizeof(xDeviceInfo);
 }
 
@@ -196,9 +195,9 @@ CopySwapKeyClass(ClientPtr client, KeyClassPtr k, char **buf)
     k2->min_keycode = k->xkbInfo->desc->min_key_code;
     k2->max_keycode = k->xkbInfo->desc->max_key_code;
     k2->num_keys = k2->max_keycode - k2->min_keycode + 1;
-    if (client && client->swapped) {
-        swaps(&k2->num_keys);
-    }
+
+    CLIENT_STRUCT_CARD16_1(k2, num_keys);
+
     *buf += sizeof(xKeyInfo);
 }
 
@@ -234,9 +233,7 @@ CopySwapValuatorClass(ClientPtr client, DeviceIntPtr dev, char **buf)
         v2->num_axes = t_axes;
         v2->mode = valuator_get_mode(dev, 0);
         v2->motion_buffer_size = v->numMotionEvents;
-        if (client && client->swapped) {
-            swapl(&v2->motion_buffer_size);
-        }
+        CLIENT_STRUCT_CARD32_1(v2, motion_buffer_size);
         *buf += sizeof(xValuatorInfo);
         a = v->axes + (VPC * i);
         a2 = (xAxisInfoPtr) * buf;
@@ -244,11 +241,7 @@ CopySwapValuatorClass(ClientPtr client, DeviceIntPtr dev, char **buf)
             a2->min_value = a->min_value;
             a2->max_value = a->max_value;
             a2->resolution = a->resolution;
-            if (client && client->swapped) {
-                swapl(&a2->min_value);
-                swapl(&a2->max_value);
-                swapl(&a2->resolution);
-            }
+            CLIENT_STRUCT_CARD32_3(a2, min_value, max_value, resolution);
             a2++;
             a++;
             *buf += sizeof(xAxisInfo);
