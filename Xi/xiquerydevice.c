@@ -38,6 +38,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/fmt.h"
 
@@ -55,28 +56,18 @@ static int
  ListDeviceInfo(ClientPtr client, DeviceIntPtr dev, xXIDeviceInfo * info);
 static int SizeDeviceInfo(DeviceIntPtr dev);
 static void SwapDeviceInfo(DeviceIntPtr dev, xXIDeviceInfo * info);
-int _X_COLD
-SProcXIQueryDevice(ClientPtr client)
-{
-    REQUEST(xXIQueryDeviceReq);
-    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
-
-    swaps(&stuff->deviceid);
-
-    return ProcXIQueryDevice(client);
-}
 
 int
 ProcXIQueryDevice(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXIQueryDeviceReq);
+    REQUEST_FIELD_CARD16(deviceid);
+
     DeviceIntPtr dev = NULL;
     int rc = Success;
     int i = 0, len = 0;
     char *info;
     Bool *skip = NULL;
-
-    REQUEST(xXIQueryDeviceReq);
-    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
 
     if (stuff->deviceid != XIAllDevices &&
         stuff->deviceid != XIAllMasterDevices) {

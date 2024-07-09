@@ -172,7 +172,7 @@ request_XIPassiveGrabDevice(ClientPtr client, xXIPassiveGrabDeviceReq * req,
         swapl(mod);
     }
 
-    rc = SProcXIPassiveGrabDevice(&client_request);
+    rc = ProcXIPassiveGrabDevice(&client_request);
     assert(rc == error);
 
     if (rc != Success)

@@ -57,6 +57,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exevents.h"
@@ -75,8 +76,7 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
     int ret;
     DeviceIntPtr dev;
 
-    REQUEST(xSetDeviceButtonMappingReq);
-    REQUEST_AT_LEAST_SIZE(xSetDeviceButtonMappingReq);
+    REQUEST_HEAD_AT_LEAST(xSetDeviceButtonMappingReq);
 
     if (client->req_len !=
         bytes_to_int32(sizeof(xSetDeviceButtonMappingReq) + stuff->map_length))

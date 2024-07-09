@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -66,21 +67,6 @@ SOFTWARE.
 
 extern XExtEventInfo EventInfo[];
 extern int ExtEventIndex;
-
-/***********************************************************************
- *
- * Handle a request from a client with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceDontPropagateList(ClientPtr client)
-{
-    REQUEST(xGetDeviceDontPropagateListReq);
-    REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
-    swapl(&stuff->window);
-    return (ProcXGetDeviceDontPropagateList(client));
-}
 
 /***********************************************************************
  *
@@ -97,8 +83,8 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     WindowPtr pWin;
     OtherInputMasks *others;
 
-    REQUEST(xGetDeviceDontPropagateListReq);
-    REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceDontPropagateListReq);
+    REQUEST_FIELD_CARD32(window);
 
     xGetDeviceDontPropagateListReply rep = {
         .RepType = X_GetDeviceDontPropagateList,

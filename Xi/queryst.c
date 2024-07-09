@@ -40,6 +40,7 @@ from The Open Group.
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -70,8 +71,7 @@ ProcXQueryDeviceState(ClientPtr client)
     DeviceIntPtr dev;
     double *values;
 
-    REQUEST(xQueryDeviceStateReq);
-    REQUEST_SIZE_MATCH(xQueryDeviceStateReq);
+    REQUEST_HEAD_STRUCT(xQueryDeviceStateReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
     if (rc != Success && rc != BadAccess)
