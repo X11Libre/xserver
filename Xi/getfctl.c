@@ -87,13 +87,10 @@ CopySwapKbdFeedback(ClientPtr client, KbdFeedbackPtr k, char **buf)
     k2->global_auto_repeat = k->ctrl.autoRepeat;
     for (i = 0; i < 32; i++)
         k2->auto_repeats[i] = k->ctrl.autoRepeats[i];
-    if (client->swapped) {
-        swaps(&k2->length);
-        swaps(&k2->pitch);
-        swaps(&k2->duration);
-        swapl(&k2->led_mask);
-        swapl(&k2->led_values);
-    }
+
+    CLIENT_STRUCT_CARD16_3(k2, length, pitch, duration);
+    CLIENT_STRUCT_CARD32_2(k2, led_mask, led_values);
+
     *buf += sizeof(xKbdFeedbackState);
 }
 
@@ -115,12 +112,9 @@ CopySwapPtrFeedback(ClientPtr client, PtrFeedbackPtr p, char **buf)
     p2->accelNum = p->ctrl.num;
     p2->accelDenom = p->ctrl.den;
     p2->threshold = p->ctrl.threshold;
-    if (client->swapped) {
-        swaps(&p2->length);
-        swaps(&p2->accelNum);
-        swaps(&p2->accelDenom);
-        swaps(&p2->threshold);
-    }
+
+    CLIENT_STRUCT_CARD16_4(p2, length, accelNum, accelDenom, threshold);
+
     *buf += sizeof(xPtrFeedbackState);
 }
 
@@ -142,12 +136,10 @@ CopySwapIntegerFeedback(ClientPtr client, IntegerFeedbackPtr i, char **buf)
     i2->resolution = i->ctrl.resolution;
     i2->min_value = i->ctrl.min_value;
     i2->max_value = i->ctrl.max_value;
-    if (client->swapped) {
-        swaps(&i2->length);
-        swapl(&i2->resolution);
-        swapl(&i2->min_value);
-        swapl(&i2->max_value);
-    }
+
+    CLIENT_STRUCT_CARD16_1(i2, length);
+    CLIENT_STRUCT_CARD32_3(i2, resolution, min_value, max_value);
+
     *buf += sizeof(xIntegerFeedbackState);
 }
 
@@ -175,15 +167,10 @@ CopySwapStringFeedback(ClientPtr client, StringFeedbackPtr s, char **buf)
     kptr = (KeySym *) (*buf);
     for (i = 0; i < s->ctrl.num_symbols_supported; i++)
         *kptr++ = *(s->ctrl.symbols_supported + i);
-    if (client->swapped) {
-        swaps(&s2->length);
-        swaps(&s2->max_symbols);
-        swaps(&s2->num_syms_supported);
-        kptr = (KeySym *) (*buf);
-        for (i = 0; i < s->ctrl.num_symbols_supported; i++, kptr++) {
-            swapl(kptr);
-        }
-    }
+
+    CLIENT_STRUCT_CARD16_3(s2, length, max_symbols, num_syms_supported);
+    REPLY_BUF_CARD32((CARD32*)buf, s->ctrl.num_symbols_supported);
+
     *buf += (s->ctrl.num_symbols_supported * sizeof(KeySym));
 }
 
@@ -204,11 +191,10 @@ CopySwapLedFeedback(ClientPtr client, LedFeedbackPtr l, char **buf)
     l2->id = l->ctrl.id;
     l2->led_values = l->ctrl.led_values;
     l2->led_mask = l->ctrl.led_mask;
-    if (client->swapped) {
-        swaps(&l2->length);
-        swapl(&l2->led_values);
-        swapl(&l2->led_mask);
-    }
+
+    CLIENT_STRUCT_CARD16_1(l2, length);
+    CLIENT_STRUCT_CARD32_2(l2, led_values, led_mask);
+
     *buf += sizeof(xLedFeedbackState);
 }
 
@@ -230,11 +216,9 @@ CopySwapBellFeedback(ClientPtr client, BellFeedbackPtr b, char **buf)
     b2->percent = b->ctrl.percent;
     b2->pitch = b->ctrl.pitch;
     b2->duration = b->ctrl.duration;
-    if (client->swapped) {
-        swaps(&b2->length);
-        swaps(&b2->pitch);
-        swaps(&b2->duration);
-    }
+
+    CLIENT_STRUCT_CARD16_3(b2, length, pitch, duration);
+
     *buf += sizeof(xBellFeedbackState);
 }
 
@@ -311,8 +295,7 @@ ProcXGetFeedbackControl(ClientPtr client)
     for (b = dev->bell; b; b = b->next)
         CopySwapBellFeedback(client, b, &buf);
 
-    if (client->swapped) {
-        swaps(&reply.num_feedbacks);
-    }
+    REPLY_FIELD_CARD16(num_feedbacks);
+
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

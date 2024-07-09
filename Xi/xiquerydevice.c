@@ -141,9 +141,7 @@ ProcXIQueryDevice(ClientPtr client)
 
     free(skip);
 
-    if (client->swapped) {
-        swaps(&reply.num_devices);
-    }
+    REPLY_FIELD_CARD16(num_devices);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

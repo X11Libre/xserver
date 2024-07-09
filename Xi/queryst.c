@@ -68,7 +68,6 @@ ProcXQueryDeviceState(ClientPtr client)
     ValuatorClassPtr v;
     xValuatorState *tv;
     DeviceIntPtr dev;
-    double *values;
 
     X_REQUEST_HEAD_STRUCT(xQueryDeviceStateReq);
 
@@ -108,9 +107,8 @@ ProcXQueryDeviceState(ClientPtr client)
         tk->length = sizeof(xKeyState);
         tk->num_keys = k->xkbInfo->desc->max_key_code -
             k->xkbInfo->desc->min_key_code + 1;
-        if (rc != BadAccess)
-            for (i = 0; i < 32; i++)
-                tk->keys[i] = k->down[i];
+        for (i = 0; i < 32; i++)
+            tk->keys[i] = k->down[i];
         buf += sizeof(xKeyState);
     }
 
@@ -133,15 +131,12 @@ ProcXQueryDeviceState(ClientPtr client)
         tv->mode |= (dev->proximity &&
                      !dev->proximity->in_proximity) ? OutOfProximity : 0;
         buf += sizeof(xValuatorState);
-        for (i = 0, values = v->axisVal; i < v->numAxes; i++) {
+        int *buf2 = (int *)buf;
+        for (i = 0; i < v->numAxes; i++) {
             if (rc != BadAccess)
-                *((int *) buf) = *values;
-            values++;
-            if (client->swapped) {
-                swapl((int *) buf);
-            }
-            buf += sizeof(int);
+                buf2[i] = v->axisVal[i];
         }
+        REPLY_BUF_CARD32(buf2, v->numAxes);
     }
 
     xQueryDeviceStateReply reply = {

@@ -174,6 +174,8 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     modifiers = (uint32_t *) &stuff[1] + stuff->mask_len;
     mod_dev = (InputDevIsFloating(dev)) ? dev : GetMaster(dev, MASTER_KEYBOARD);
 
+    int num_mod = 0;
+
     for (i = 0; i < stuff->num_modifiers; i++, modifiers++) {
         uint8_t status = Success;
 
@@ -221,6 +223,8 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     }
 
     xi2mask_free(&mask.xi2mask);
+
+    REPLY_FIELD_CARD16(num_modifiers);
 
     if (client->swapped) {
         swaps(&reply.num_modifiers);

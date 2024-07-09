@@ -174,15 +174,13 @@ ProcXIQueryPointer(ClientPtr client)
     }
 #endif /* XINERAMA */
 
-    if (client->swapped) {
-        swapl(&reply.root);
-        swapl(&reply.child);
-        swapl(&reply.root_x);
-        swapl(&reply.root_y);
-        swapl(&reply.win_x);
-        swapl(&reply.win_y);
-        swaps(&reply.buttons_len);
-    }
+    REPLY_FIELD_CARD32(root);
+    REPLY_FIELD_CARD32(child);
+    REPLY_FIELD_CARD32(root_x);
+    REPLY_FIELD_CARD32(root_y);
+    REPLY_FIELD_CARD32(win_x);
+    REPLY_FIELD_CARD32(win_y);
+    REPLY_FIELD_CARD16(buttons_len);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

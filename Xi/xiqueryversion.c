@@ -120,10 +120,8 @@ ProcXIQueryVersion(ClientPtr client)
         .minor_version = minor
     };
 
-    if (client->swapped) {
-        swaps(&reply.major_version);
-        swaps(&reply.minor_version);
-    }
+    REPLY_FIELD_CARD16(major_version);
+    REPLY_FIELD_CARD16(minor_version);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
