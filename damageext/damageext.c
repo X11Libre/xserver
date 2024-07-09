@@ -465,12 +465,6 @@ ProcDamageAdd(ClientPtr client)
     return Success;
 }
 
-/* Major version controls available requests */
-static const int version_requests[] = {
-    X_DamageQueryVersion,       /* before client sends QueryVersion */
-    X_DamageAdd,                /* Version 1 */
-};
-
 static int (*ProcDamageVector[XDamageNumberRequests]) (ClientPtr) = {
     /*************** Version 1 ******************/
     ProcDamageQueryVersion,
@@ -484,14 +478,12 @@ static int (*ProcDamageVector[XDamageNumberRequests]) (ClientPtr) = {
 static int
 ProcDamageDispatch(ClientPtr client)
 {
-    REQUEST(xDamageReq);
-    DamageClientPtr pDamageClient = GetDamageClient(client);
+    REQUEST(xReq);
 
-    if (pDamageClient->major_version >= ARRAY_SIZE(version_requests))
+    if (stuff->data >= ARRAY_SIZE(ProcDamageVector))
         return BadRequest;
-    if (stuff->damageReqType > version_requests[pDamageClient->major_version])
-        return BadRequest;
-    return (*ProcDamageVector[stuff->damageReqType]) (client);
+
+    return (*ProcDamageVector[stuff->data]) (client);
 }
 
 static int _X_COLD
@@ -557,14 +549,12 @@ static int (*SProcDamageVector[XDamageNumberRequests]) (ClientPtr) = {
 static int _X_COLD
 SProcDamageDispatch(ClientPtr client)
 {
-    REQUEST(xDamageReq);
-    DamageClientPtr pDamageClient = GetDamageClient(client);
+    REQUEST(xReq);
 
-    if (pDamageClient->major_version >= ARRAY_SIZE(version_requests))
+    if (stuff->data >= ARRAY_SIZE(ProcDamageVector))
         return BadRequest;
-    if (stuff->damageReqType > version_requests[pDamageClient->major_version])
-        return BadRequest;
-    return (*SProcDamageVector[stuff->damageReqType]) (client);
+
+    return (*SProcDamageVector[stuff->data]) (client);
 }
 
 static int
