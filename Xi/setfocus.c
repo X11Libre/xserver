@@ -77,16 +77,14 @@ ProcXSetDeviceFocus(ClientPtr client)
     X_REQUEST_FIELD_CARD32(focus);
     X_REQUEST_FIELD_CARD32(time);
 
-    int ret;
     DeviceIntPtr dev;
     int ret = dixLookupDevice(&dev, stuff->device, client, DixSetFocusAccess);
     if (ret != Success)
         return ret;
+
     if (!dev->focus)
         return BadDevice;
 
-    ret = SetInputFocus(client, dev, stuff->focus, stuff->revertTo,
-                        stuff->time, TRUE);
-
-    return ret;
+    return = SetInputFocus(client, dev, stuff->focus, stuff->revertTo,
+                           stuff->time, TRUE);
 }

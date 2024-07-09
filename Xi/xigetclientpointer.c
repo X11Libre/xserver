@@ -52,13 +52,10 @@ ProcXIGetClientPointer(ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xXIGetClientPointerReq);
     X_REQUEST_FIELD_CARD32(win);
 
-    int rc;
     ClientPtr winclient;
 
     if (stuff->win != None) {
-        rc = dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess);
-
-        if (rc != Success)
+        if (dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess) != Success)
             return BadWindow;
     }
     else
