@@ -141,6 +141,23 @@ ProcXISelectEvents(ClientPtr client)
     if (stuff->num_masks == 0)
         return BadValue;
 
+    if (client->swapped) {
+        int len = stuff->length - bytes_to_int32(sizeof(xXISelectEventsReq));
+        xXIEventMask *evmask = (xXIEventMask *) &stuff[1];
+        for (int i = 0; i < stuff->num_masks; i++) {
+            if (len < bytes_to_int32(sizeof(xXIEventMask)))
+                return BadLength;
+            len -= bytes_to_int32(sizeof(xXIEventMask));
+            swaps(&evmask->deviceid);
+            swaps(&evmask->mask_len);
+            if (len < evmask->mask_len)
+                return BadLength;
+            len -= evmask->mask_len;
+            evmask =
+                (xXIEventMask *) (((char *) &evmask[1]) + evmask->mask_len * 4);
+        }
+    }
+
     WindowPtr win;
     int rc = dixLookupWindow(&win, stuff->win, client, DixReceiveAccess);
 
