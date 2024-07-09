@@ -92,9 +92,7 @@ ProcXGrabDevice(ClientPtr client)
     REQUEST_BUF_CARD32(&stuff[1], stuff->event_count);
 
     xGrabDeviceReply rep = {
-        .repType = X_Reply,
         .RepType = X_GrabDevice,
-        .sequenceNumber = client->sequence,
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
@@ -116,11 +114,7 @@ ProcXGrabDevice(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xGrabDeviceReply), &rep);
+    REPLY_SEND();
     return Success;
 }
 

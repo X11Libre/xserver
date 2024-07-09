@@ -110,17 +110,12 @@ ProcXIGrabDevice(ClientPtr client)
         return ret;
 
     xXIGrabDeviceReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIGrabDevice,
-        .sequenceNumber = client->sequence,
         .status = status
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-    return ret;
+    REPLY_SEND();
+    return Success;
 }
 
 int

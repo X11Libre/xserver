@@ -101,9 +101,6 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
         .success = ret,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xSetDeviceModifierMappingReply), &rep);
+    REPLY_SEND();
     return Success;
 }

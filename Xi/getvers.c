@@ -82,22 +82,14 @@ ProcXGetExtensionVersion(ClientPtr client)
         return BadLength;
 
     xGetExtensionVersionReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetExtensionVersion,
-        .sequenceNumber = client->sequence,
         .major_version = XIVersion.major_version,
         .minor_version = XIVersion.minor_version,
         .present = TRUE
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.major_version);
-        swaps(&rep.minor_version);
-    }
-
-    WriteToClient(client, sizeof(xGetExtensionVersionReply), &rep);
-
+    REPLY_FIELD_CARD16(major_version);
+    REPLY_FIELD_CARD16(minor_version);
+    REPLY_SEND();
     return Success;
 }

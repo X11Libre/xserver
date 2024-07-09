@@ -101,10 +101,6 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
         .status = (ret == Success ? MappingSuccess : MappingBusy),
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xSetDeviceButtonMappingReply), &rep);
-
+    REPLY_SEND();
     return Success;
 }

@@ -86,18 +86,11 @@ ProcXGetDeviceButtonMapping(ClientPtr client)
         return BadMatch;
 
     xGetDeviceButtonMappingReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceButtonMapping,
-        .sequenceNumber = client->sequence,
         .nElts = b->numButtons,
         .length = bytes_to_int32(b->numButtons),
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xGetDeviceButtonMappingReply), &rep);
-    WriteToClient(client, rep.nElts, &b->map[1]);
+    REPLY_SEND_EXTRA(&b->map[1], rep.nElts);
     return Success;
 }

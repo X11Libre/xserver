@@ -115,9 +115,7 @@ ProcXIQueryPointer(ClientPtr client)
     pSprite = pDev->spriteInfo->sprite;
 
     xXIQueryPointerReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIQueryPointer,
-        .sequenceNumber = client->sequence,
         .length = 6,
         .root = (InputDevCurrentRootWindow(pDev))->drawable.id,
         .root_x = double_to_fp1616(pSprite->hot.x),
@@ -183,19 +181,14 @@ ProcXIQueryPointer(ClientPtr client)
     }
 #endif /* XINERAMA */
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.root);
-        swapl(&rep.child);
-        swapl(&rep.root_x);
-        swapl(&rep.root_y);
-        swapl(&rep.win_x);
-        swapl(&rep.win_y);
-        swaps(&rep.buttons_len);
-    }
-    WriteToClient(client, sizeof(xXIQueryPointerReply), &rep);
-    WriteToClient(client, buttons_size, buttons);
+    REPLY_FIELD_CARD32(root);
+    REPLY_FIELD_CARD32(child);
+    REPLY_FIELD_CARD32(root_x);
+    REPLY_FIELD_CARD32(root_y);
+    REPLY_FIELD_CARD32(win_x);
+    REPLY_FIELD_CARD32(win_y);
+    REPLY_FIELD_CARD16(buttons_len);
+    REPLY_SEND_EXTRA(buttons, buttons_size);
 
     free(buttons);
 

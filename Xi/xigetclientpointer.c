@@ -44,34 +44,24 @@
 int
 ProcXIGetClientPointer(ClientPtr client)
 {
-    int rc;
-    ClientPtr winclient;
-
     REQUEST_HEAD_STRUCT(xXIGetClientPointerReq);
     REQUEST_FIELD_CARD32(win);
 
+    ClientPtr winclient;
     if (stuff->win != None) {
-        rc = dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess);
-
-        if (rc != Success)
+        if (dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess) != Success)
             return BadWindow;
     }
     else
         winclient = client;
 
     xXIGetClientPointerReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIGetClientPointer,
-        .sequenceNumber = client->sequence,
         .set = (winclient->clientPtr != NULL),
         .deviceid = (winclient->clientPtr) ? winclient->clientPtr->id : 0
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.deviceid);
-    }
-    WriteToClient(client, sizeof(xXIGetClientPointerReply), &rep);
+    REPLY_FIELD_CARD16(deviceid);
+    REPLY_SEND();
     return Success;
 }

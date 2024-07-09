@@ -79,9 +79,7 @@ ProcXSetDeviceValuators(ClientPtr client)
     REQUEST_HEAD_AT_LEAST(xSetDeviceValuatorsReq);
 
     xSetDeviceValuatorsReply rep = {
-        .repType = X_Reply,
         .RepType = X_SetDeviceValuators,
-        .sequenceNumber = client->sequence,
         .status = Success
     };
 
@@ -111,9 +109,6 @@ ProcXSetDeviceValuators(ClientPtr client)
     if (rep.status != Success && rep.status != AlreadyGrabbed)
         return rep.status;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xSetDeviceValuatorsReply), &rep);
+    REPLY_SEND();
     return Success;
 }

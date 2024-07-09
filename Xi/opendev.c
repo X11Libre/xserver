@@ -131,19 +131,10 @@ ProcXOpenDevice(ClientPtr client)
     evbase[j++].event_type_base = event_base[OtherClass];
 
     xOpenDeviceReply rep = {
-        .repType = X_Reply,
         .RepType = X_OpenDevice,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(j * sizeof(xInputClassInfo)),
         .num_classes = j
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(xOpenDeviceReply), &rep);
-    WriteToClient(client, j * sizeof(xInputClassInfo), evbase);
+    REPLY_SEND_EXTRA(evbase, j * sizeof(xInputClassInfo));
     return Success;
 }

@@ -79,9 +79,7 @@ ProcXSetDeviceMode(ClientPtr client)
     REQUEST_HEAD_STRUCT(xSetDeviceModeReq);
 
     xSetDeviceModeReply rep = {
-        .repType = X_Reply,
         .RepType = X_SetDeviceMode,
-        .sequenceNumber = client->sequence,
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixSetAttrAccess);
@@ -112,11 +110,6 @@ ProcXSetDeviceMode(ClientPtr client)
         return rep.status;
     }
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(xSetDeviceModeReply), &rep);
+    REPLY_SEND();
     return Success;
 }

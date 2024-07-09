@@ -100,7 +100,6 @@ ProcXChangeDeviceControl(ClientPtr client)
 
     xChangeDeviceControlReply rep = {
         .RepType = X_ChangeDeviceControl,
-        .sequenceNumber = client->sequence,
         .status = Success,
     };
 
@@ -202,10 +201,7 @@ ProcXChangeDeviceControl(ClientPtr client)
         SendEventToAllWindows(dev, DevicePresenceNotifyMask,
                               (xEvent *) &dpn, 1);
 
-        if (client->swapped) {
-            swaps(&rep.sequenceNumber);
-        }
-        WriteToClient(client, sizeof(xChangeDeviceControlReply), &rep);
+        REPLY_SEND();
     }
 
     return ret;
