@@ -339,9 +339,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
     CARD16 *pUniqIndex2Index;
     CARD32 nUniqCharInfos;
 
-#if 0
-    REQUEST_SIZE_MATCH(xXF86BigfontQueryFontReq);
-#else
+    /* protocol version is decided based on request packet size */
     switch (client->req_len) {
     case 2:                    /* client with version 1.0 libX11 */
         stuff_flags = (client->local &&
@@ -353,7 +351,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
     default:
         return BadLength;
     }
-#endif
+
     if (dixLookupFontable(&pFont, stuff->id, client, DixGetAttrAccess) !=
         Success)
         return BadFont;         /* procotol spec says only error is BadFont */
