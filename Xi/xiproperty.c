@@ -855,11 +855,8 @@ ProcXListDeviceProperties(ClientPtr client)
         .nAtoms = natoms
     };
 
-    if (client->swapped) {
-        swaps(&rep.nAtoms);
-    }
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD16(nAtoms);
+    return REPLY_SEND_RPCBUF();
 }
 
 int
@@ -962,12 +959,6 @@ ProcXGetDeviceProperty(ClientPtr client)
     if (stuff->delete && (rep.bytesAfter == 0))
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
-    if (client->swapped) {
-        swapl(&rep.propertyType);
-        swapl(&rep.bytesAfter);
-        swapl(&rep.nItems);
-    }
-
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (length) {
@@ -1001,8 +992,10 @@ ProcXGetDeviceProperty(ClientPtr client)
         }
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD32(propertyType);
+    REPLY_FIELD_CARD32(bytesAfter);
+    REPLY_FIELD_CARD32(nItems);
+    return REPLY_SEND_RPCBUF();
 }
 
 /* XI2 Request/reply handling */
@@ -1037,8 +1030,8 @@ ProcXIListProperties(ClientPtr client)
         swaps(&rep.num_properties);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD16(num_properties);
+    return REPLY_SEND_RPCBUF();
 }
 
 int
@@ -1144,12 +1137,6 @@ ProcXIGetProperty(ClientPtr client)
     if (length && stuff->delete && (rep.bytes_after == 0))
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
-    if (client->swapped) {
-        swapl(&rep.type);
-        swapl(&rep.bytes_after);
-        swapl(&rep.num_items);
-    }
-
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (length) {
@@ -1169,7 +1156,10 @@ ProcXIGetProperty(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    REPLY_FIELD_CARD32(type);
+    REPLY_FIELD_CARD32(bytes_after);
+    REPLY_FIELD_CARD32(num_items);
+    REPLY_SEND_RPCBUF();
 
     /* delete the Property */
     if (stuff->delete && (rep.bytes_after == 0)) {

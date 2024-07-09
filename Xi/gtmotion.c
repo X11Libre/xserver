@@ -115,9 +115,7 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
         }
     }
 
-    if (client->swapped) {
-        swapl(&rep.nEvents);
-    }
+    REPLY_FIELD_CARD32(nEvents);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
