@@ -124,13 +124,6 @@ XISendDeviceHierarchyEvent(int flags[MAXDEVICES])
     free(ev);
 }
 
-/***********************************************************************
- *
- * This procedure allows a client to change the device hierarchy through
- * adding new master devices, removing them, etc.
- *
- */
-
 static int
 add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
 {
@@ -452,10 +445,7 @@ ProcXIChangeHierarchy(ClientPtr client)
             goto unwind;
         }
 
-        if (client->swapped) {
-            swaps(&any->type);
-            swaps(&any->length);
-        }
+        CLIENT_STRUCT_CARD16_2(any, type, length);
 
         if (len < ((size_t)any->length << 2))
             return BadLength;
@@ -479,8 +469,7 @@ ProcXIChangeHierarchy(ClientPtr client)
                 goto unwind;
             }
 
-            if (client->swapped)
-                swaps(&c->name_len);
+            CLIENT_STRUCT_CARD16_1(c, name_len);
 
             if (c->name_len > (len - sizeof(xXIAddMasterInfo))) {
                 rc = BadLength;

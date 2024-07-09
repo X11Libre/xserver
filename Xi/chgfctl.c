@@ -76,13 +76,8 @@ ChangeKbdFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
     int t;
     int key = DO_ALL;
 
-    if (client->swapped) {
-        swaps(&f->length);
-        swaps(&f->pitch);
-        swaps(&f->duration);
-        swapl(&f->led_mask);
-        swapl(&f->led_values);
-    }
+    CLIENT_STRUCT_CARD16_3(f, length, pitch, duration);
+    CLIENT_STRUCT_CARD32_2(f, led_mask, led_values);
 
     kctrl = k->ctrl;
     if (mask & DvKeyClickPercent) {
@@ -193,12 +188,7 @@ ChangePtrFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
 {
     PtrCtrl pctrl;              /* might get BadValue part way through */
 
-    if (client->swapped) {
-        swaps(&f->length);
-        swaps(&f->num);
-        swaps(&f->denom);
-        swaps(&f->thresh);
-    }
+    CLIENT_STRUCT_CARD16_4(f, length, num, denom, thresh);
 
     pctrl = p->ctrl;
     if (mask & DvAccelNum) {
@@ -259,10 +249,8 @@ ChangeIntegerFeedback(ClientPtr client, DeviceIntPtr dev,
                       long unsigned int mask, IntegerFeedbackPtr i,
                       xIntegerFeedbackCtl * f)
 {
-    if (client->swapped) {
-        swaps(&f->length);
-        swapl(&f->int_to_display);
-    }
+    CLIENT_STRUCT_CARD16_1(f, length);
+    CLIENT_STRUCT_CARD32_1(f, int_to_display);
 
     i->ctrl.integer_displayed = f->int_to_display;
     (*i->CtrlProc) (dev, &i->ctrl);
@@ -284,10 +272,9 @@ ChangeStringFeedback(ClientPtr client, DeviceIntPtr dev,
     KeySym *syms, *sup_syms;
 
     syms = (KeySym *) (f + 1);
-    if (client->swapped) {
-        swaps(&f->length);      /* swapped num_keysyms in calling proc */
-        SwapLongs((CARD32 *) syms, f->num_keysyms);
-    }
+
+    CLIENT_STRUCT_CARD16_1(f, length);      /* swapped num_keysyms in calling proc */
+    REQUEST_BUF_CARD32((CARD32 *) syms, f->num_keysyms);
 
     if (f->num_keysyms > s->ctrl.max_symbols)
         return BadValue;
@@ -322,11 +309,7 @@ ChangeBellFeedback(ClientPtr client, DeviceIntPtr dev,
     int t;
     BellCtrl bctrl;             /* might get BadValue part way through */
 
-    if (client->swapped) {
-        swaps(&f->length);
-        swaps(&f->pitch);
-        swaps(&f->duration);
-    }
+    CLIENT_STRUCT_CARD16_3(f, length, pitch, duration);
 
     bctrl = b->ctrl;
     if (mask & DvPercent) {
@@ -378,11 +361,8 @@ ChangeLedFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
 {
     LedCtrl lctrl;              /* might get BadValue part way through */
 
-    if (client->swapped) {
-        swaps(&f->length);
-        swapl(&f->led_values);
-        swapl(&f->led_mask);
-    }
+    CLIENT_STRUCT_CARD16_1(f, length);
+    CLIENT_STRUCT_CARD32_2(f, led_values, led_mask);
 
     f->led_mask &= l->ctrl.led_mask;    /* set only supported leds */
     f->led_values &= l->ctrl.led_mask;  /* set only supported leds */
@@ -450,11 +430,7 @@ ProcXChangeFeedbackControl(ClientPtr client)
         REQUEST_AT_LEAST_EXTRA_SIZE(xChangeFeedbackControlReq,
                                     sizeof(xStringFeedbackCtl));
         f = ((xStringFeedbackCtl *) &stuff[1]);
-        if (client->swapped) {
-            if (len < bytes_to_int32(sizeof(xStringFeedbackCtl)))
-                return BadLength;
-            swaps(&f->num_keysyms);
-        }
+        CLIENT_STRUCT_CARD16_1(f, num_keysyms);
         if (len !=
             (bytes_to_int32(sizeof(xStringFeedbackCtl)) + f->num_keysyms))
             return BadLength;

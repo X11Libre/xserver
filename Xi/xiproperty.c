@@ -1011,6 +1011,15 @@ ProcXIListProperties(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
+    Atom *atoms;
+    int natoms;
+    DeviceIntPtr dev;
+    int rc = Success;
+
+    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixListPropAccess);
+    if (rc != Success)
+        return rc;
+
     size_t natoms = 0;
     int rc = _writeDevProps(&rpcbuf, stuff->deviceid, client, &natoms);
     if (rc != Success)
