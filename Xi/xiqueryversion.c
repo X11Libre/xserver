@@ -38,6 +38,7 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 
 #include "exglobals.h"
 #include "xiqueryversion.h"
@@ -54,11 +55,12 @@ extern XExtensionVersion XIVersion;     /* defined in getvers.c */
 int
 ProcXIQueryVersion(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xXIQueryVersionReq);
+    REQUEST_FIELD_CARD16(major_version);
+    REQUEST_FIELD_CARD16(minor_version);
+
     XIClientPtr pXIClient;
     int major, minor;
-
-    REQUEST(xXIQueryVersionReq);
-    REQUEST_SIZE_MATCH(xXIQueryVersionReq);
 
     /* This request only exists after XI2 */
     if (stuff->major_version < 2) {
@@ -126,17 +128,6 @@ ProcXIQueryVersion(ClientPtr client)
 }
 
 /* Swapping routines */
-
-int _X_COLD
-SProcXIQueryVersion(ClientPtr client)
-{
-    REQUEST(xXIQueryVersionReq);
-    swaps(&stuff->length);
-    REQUEST_AT_LEAST_SIZE(xXIQueryVersionReq);
-    swaps(&stuff->major_version);
-    swaps(&stuff->minor_version);
-    return (ProcXIQueryVersion(client));
-}
 
 void _X_COLD
 SRepXIQueryVersion(ClientPtr client, int size, xXIQueryVersionReply * rep)

@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETDCTL_H
 #define GETDCTL_H 1
 
-int SProcXGetDeviceControl(ClientPtr    /* client */
-    );
-
 int ProcXGetDeviceControl(ClientPtr     /* client */
     );
 

@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETMMAP_H
 #define GETMMAP_H 1
 
-int SProcXGetDeviceModifierMapping(ClientPtr    /* client */
-    );
-
 int ProcXGetDeviceModifierMapping(ClientPtr     /* client */
     );
 

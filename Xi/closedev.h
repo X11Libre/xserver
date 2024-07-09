@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef CLOSEDEV_H
 #define CLOSEDEV_H 1
 
-int SProcXCloseDevice(ClientPtr /* client */
-    );
-
 int ProcXCloseDevice(ClientPtr  /* client */
     );
 

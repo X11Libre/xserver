@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef CHGKMAP_H
 #define CHGKMAP_H 1
 
-int SProcXChangeDeviceKeyMapping(ClientPtr      /* client */
-    );
-
 int ProcXChangeDeviceKeyMapping(ClientPtr       /* client */
     );
 

@@ -52,27 +52,16 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "windowstr.h"          /* focus struct      */
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "windowstr.h"          /* focus struct      */
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 
 #include "getfocus.h"
-
-/***********************************************************************
- *
- * This procedure gets the focus for a device.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceFocus(ClientPtr client)
-{
-    REQUEST(xGetDeviceFocusReq);
-    swaps(&stuff->length);
-    return (ProcXGetDeviceFocus(client));
-}
 
 /***********************************************************************
  *
@@ -87,8 +76,7 @@ ProcXGetDeviceFocus(ClientPtr client)
     FocusClassPtr focus;
     int rc;
 
-    REQUEST(xGetDeviceFocusReq);
-    REQUEST_SIZE_MATCH(xGetDeviceFocusReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceFocusReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetFocusAccess);
     if (rc != Success)

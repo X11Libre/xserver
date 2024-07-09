@@ -147,7 +147,7 @@ request_XIQueryVersion(int smaj, int smin, int cmaj, int cmin, int error)
     swaps(&request.major_version);
     swaps(&request.minor_version);
 
-    rc = SProcXIQueryVersion(&client);
+    rc = ProcXIQueryVersion(&client);
     assert(rc == error);
 }
 

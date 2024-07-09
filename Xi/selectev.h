@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SELECTEV_H
 #define SELECTEV_H 1
 
-int SProcXSelectExtensionEvent(ClientPtr        /* client */
-    );
-
 int ProcXSelectExtensionEvent(ClientPtr /* client */
     );
 

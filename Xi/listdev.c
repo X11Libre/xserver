@@ -58,6 +58,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
@@ -67,20 +68,6 @@ SOFTWARE.
 #include "xkbsrv.h"
 #include "xkbstr.h"
 #include "listdev.h"
-
-/***********************************************************************
- *
- * This procedure lists the input devices available to the server.
- *
- */
-
-int _X_COLD
-SProcXListInputDevices(ClientPtr client)
-{
-    REQUEST(xListInputDevicesReq);
-    swaps(&stuff->length);
-    return (ProcXListInputDevices(client));
-}
 
 /***********************************************************************
  *
@@ -339,7 +326,7 @@ ProcXListInputDevices(ClientPtr client)
     xDeviceInfo *dev;
     DeviceIntPtr d;
 
-    REQUEST_SIZE_MATCH(xListInputDevicesReq);
+    REQUEST_HEAD_STRUCT(xListInputDevicesReq);
 
     /* allocate space for saving skip value */
     skip = calloc(inputInfo.numDevices, sizeof(Bool));

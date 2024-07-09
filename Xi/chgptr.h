@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef CHGPTR_H
 #define CHGPTR_H 1
 
-int SProcXChangePointerDevice(ClientPtr /* client */
-    );
-
 int ProcXChangePointerDevice(ClientPtr  /* client */
     );
 

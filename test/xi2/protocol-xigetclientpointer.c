@@ -91,7 +91,7 @@ request_XIGetClientPointer(ClientPtr client, xXIGetClientPointerReq * req,
     client_request.swapped = TRUE;
     swapl(&req->win);
     swaps(&req->length);
-    rc = SProcXIGetClientPointer(&client_request);
+    rc = ProcXIGetClientPointer(&client_request);
     assert(rc == error);
 
     if (rc == BadWindow)

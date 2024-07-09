@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef UNGRDEV_H
 #define UNGRDEV_H 1
 
-int SProcXUngrabDevice(ClientPtr        /* client */
-    );
-
 int ProcXUngrabDevice(ClientPtr /* client */
     );
 

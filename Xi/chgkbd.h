@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef CHGKBD_H
 #define CHGKBD_H 1
 
-int SProcXChangeKeyboardDevice(ClientPtr        /* client */
-    );
-
 int ProcXChangeKeyboardDevice(ClientPtr /* client */
     );
 

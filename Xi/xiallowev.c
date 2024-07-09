@@ -37,6 +37,7 @@
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -45,97 +46,81 @@
 #include "exglobals.h"          /* BadDevice */
 #include "xiallowev.h"
 
-int _X_COLD
-SProcXIAllowEvents(ClientPtr client)
+static int allowEvents(ClientPtr client, xXIAllowEventsReq *stuff)
 {
-    REQUEST(xXIAllowEventsReq);
-    REQUEST_AT_LEAST_SIZE(xXIAllowEventsReq);
+    DeviceIntPtr dev;
 
-    swaps(&stuff->length);
-    swaps(&stuff->deviceid);
-    swapl(&stuff->time);
-    if (stuff->length > 3) {
-        xXI2_2AllowEventsReq *req_xi22 = (xXI2_2AllowEventsReq *) stuff;
+    int ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
+    if (ret != Success)
+        return ret;
 
-        REQUEST_AT_LEAST_SIZE(xXI2_2AllowEventsReq);
-        swapl(&req_xi22->touchid);
-        swapl(&req_xi22->grab_window);
+    TimeStamp time = ClientTimeToServerTime(stuff->time);
+
+    switch (stuff->mode) {
+        case XIReplayDevice:
+            AllowSome(client, time, dev, NOT_GRABBED);
+            break;
+        case XISyncDevice:
+            AllowSome(client, time, dev, FREEZE_NEXT_EVENT);
+            break;
+        case XIAsyncDevice:
+            AllowSome(client, time, dev, THAWED);
+            break;
+        case XIAsyncPairedDevice:
+            if (IsMaster(dev))
+                AllowSome(client, time, dev, THAW_OTHERS);
+            break;
+        case XISyncPair:
+            if (IsMaster(dev))
+                AllowSome(client, time, dev, FREEZE_BOTH_NEXT_EVENT);
+            break;
+        case XIAsyncPair:
+            if (IsMaster(dev))
+                AllowSome(client, time, dev, THAWED_BOTH);
+            break;
+        default:
+            client->errorValue = stuff->mode;
+            ret = BadValue;
     }
-
-    return ProcXIAllowEvents(client);
+    return ret;
 }
 
 int
 ProcXIAllowEvents(ClientPtr client)
 {
-    TimeStamp time;
-    DeviceIntPtr dev;
-    int ret = Success;
-    XIClientPtr xi_client;
-    Bool have_xi22 = FALSE;
-
-    REQUEST(xXI2_2AllowEventsReq);
-
-    xi_client = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr xi_client = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
 
     if (version_compare(xi_client->major_version,
                         xi_client->minor_version, 2, 2) >= 0) {
-        REQUEST_AT_LEAST_SIZE(xXI2_2AllowEventsReq);
-        have_xi22 = TRUE;
+        REQUEST_HEAD_AT_LEAST(xXI2_2AllowEventsReq);
+        REQUEST_FIELD_CARD16(length);
+        REQUEST_FIELD_CARD16(deviceid);
+        REQUEST_FIELD_CARD32(time);
+        REQUEST_FIELD_CARD32(touchid);
+        REQUEST_FIELD_CARD32(grab_window);
+
+        if ((stuff->mode == XIRejectTouch) || (stuff->mode == XIAcceptTouch)) {
+            DeviceIntPtr dev;
+            int rc;
+            WindowPtr win;
+
+            int ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
+            if (ret != Success)
+                return ret;
+
+            rc = dixLookupWindow(&win, stuff->grab_window, client, DixReadAccess);
+            if (rc != Success)
+                return rc;
+
+            return TouchAcceptReject(client, dev, stuff->mode, stuff->touchid,
+                                     stuff->grab_window, &client->errorValue);
+        }
+        return allowEvents(client, (xXIAllowEventsReq*)stuff);
+    } else {
+        REQUEST_HEAD_AT_LEAST(xXIAllowEventsReq);
+        REQUEST_FIELD_CARD16(length);
+        REQUEST_FIELD_CARD16(deviceid);
+        REQUEST_FIELD_CARD32(time);
+        return allowEvents(client, stuff);
     }
-    else {
-        REQUEST_AT_LEAST_SIZE(xXIAllowEventsReq);
-    }
-
-    ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
-    if (ret != Success)
-        return ret;
-
-    time = ClientTimeToServerTime(stuff->time);
-
-    switch (stuff->mode) {
-    case XIReplayDevice:
-        AllowSome(client, time, dev, NOT_GRABBED);
-        break;
-    case XISyncDevice:
-        AllowSome(client, time, dev, FREEZE_NEXT_EVENT);
-        break;
-    case XIAsyncDevice:
-        AllowSome(client, time, dev, THAWED);
-        break;
-    case XIAsyncPairedDevice:
-        if (IsMaster(dev))
-            AllowSome(client, time, dev, THAW_OTHERS);
-        break;
-    case XISyncPair:
-        if (IsMaster(dev))
-            AllowSome(client, time, dev, FREEZE_BOTH_NEXT_EVENT);
-        break;
-    case XIAsyncPair:
-        if (IsMaster(dev))
-            AllowSome(client, time, dev, THAWED_BOTH);
-        break;
-    case XIRejectTouch:
-    case XIAcceptTouch:
-    {
-        int rc;
-        WindowPtr win;
-
-        if (!have_xi22)
-            return BadValue;
-
-        rc = dixLookupWindow(&win, stuff->grab_window, client, DixReadAccess);
-        if (rc != Success)
-            return rc;
-
-        ret = TouchAcceptReject(client, dev, stuff->mode, stuff->touchid,
-                                stuff->grab_window, &client->errorValue);
-    }
-        break;
-    default:
-        client->errorValue = stuff->mode;
-        ret = BadValue;
-    }
-
-    return ret;
 }

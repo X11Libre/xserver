@@ -33,7 +33,6 @@
 #ifndef QUERYVERSION_H
 #define QUERYVERSION_H 1
 
-int SProcXIQueryVersion(ClientPtr client);
 int ProcXIQueryVersion(ClientPtr client);
 void SRepXIQueryVersion(ClientPtr client, int size, xXIQueryVersionReply * rep);
 

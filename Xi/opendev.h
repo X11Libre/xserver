@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef OPENDEV_H
 #define OPENDEV_H 1
 
-int SProcXOpenDevice(ClientPtr  /* client */
-    );
-
 int ProcXOpenDevice(ClientPtr   /* client */
     );
 

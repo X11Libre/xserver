@@ -30,9 +30,7 @@
 #ifndef XISELECTEVENTS_H
 #define XISELECTEVENTS_H 1
 
-int SProcXISelectEvents(ClientPtr client);
 int ProcXISelectEvents(ClientPtr client);
-int SProcXIGetSelectedEvents(ClientPtr client);
 int ProcXIGetSelectedEvents(ClientPtr client);
 void SRepXIGetSelectedEvents(ClientPtr client,
                              int len, xXIGetSelectedEventsReply * rep);

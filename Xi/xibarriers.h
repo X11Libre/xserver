@@ -39,7 +39,6 @@ XIDestroyPointerBarrier(ClientPtr client,
 Bool XIBarrierInit(void);
 void XIBarrierReset(void);
 
-int SProcXIBarrierReleasePointer(ClientPtr client);
 int ProcXIBarrierReleasePointer(ClientPtr client);
 
 void XIBarrierNewMasterDevice(ClientPtr client, int deviceid);

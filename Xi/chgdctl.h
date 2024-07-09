@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef CHGDCTL_H
 #define CHGDCTL_H 1
 
-int SProcXChangeDeviceControl(ClientPtr /* client */
-    );
-
 int ProcXChangeDeviceControl(ClientPtr  /* client */
     );
 

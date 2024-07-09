@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETPROP_H
 #define GETPROP_H 1
 
-int SProcXGetDeviceDontPropagateList(ClientPtr  /* client */
-    );
-
 int ProcXGetDeviceDontPropagateList(ClientPtr   /* client */
     );
 

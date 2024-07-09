@@ -52,27 +52,15 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>     /* Request macro     */
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 
 #include "getmmap.h"
-
-/***********************************************************************
- *
- * This procedure gets the modifier mapping for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceModifierMapping(ClientPtr client)
-{
-    REQUEST(xGetDeviceModifierMappingReq);
-    swaps(&stuff->length);
-    return (ProcXGetDeviceModifierMapping(client));
-}
 
 /***********************************************************************
  *
@@ -87,8 +75,7 @@ ProcXGetDeviceModifierMapping(ClientPtr client)
     KeyCode *modkeymap = NULL;
     int ret, max_keys_per_mod;
 
-    REQUEST(xGetDeviceModifierMappingReq);
-    REQUEST_SIZE_MATCH(xGetDeviceModifierMappingReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceModifierMappingReq);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (ret != Success)

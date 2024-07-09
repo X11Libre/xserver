@@ -52,12 +52,14 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "globals.h"
-
 #include "exevents.h"
 #include "exglobals.h"
 
@@ -70,27 +72,10 @@ SOFTWARE.
  *
  */
 
-int _X_COLD
-SProcXChangeKeyboardDevice(ClientPtr client)
-{
-    REQUEST(xChangeKeyboardDeviceReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xChangeKeyboardDeviceReq);
-    return (ProcXChangeKeyboardDevice(client));
-}
-
-/***********************************************************************
- *
- * This procedure is invoked to swap the request bytes if the server and
- * client have a different byte order.
- *
- */
-
 int
 ProcXChangeKeyboardDevice(ClientPtr client)
 {
-    /* REQUEST(xChangeKeyboardDeviceReq); */
-    REQUEST_SIZE_MATCH(xChangeKeyboardDeviceReq);
+    REQUEST_HEAD_STRUCT(xChangeKeyboardDeviceReq);
 
     return BadDevice;
 }

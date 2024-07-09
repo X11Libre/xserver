@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GRABDEVB_H
 #define GRABDEVB_H 1
 
-int SProcXGrabDeviceButton(ClientPtr    /* client */
-    );
-
 int ProcXGrabDeviceButton(ClientPtr     /* client */
     );
 

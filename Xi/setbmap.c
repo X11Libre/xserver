@@ -56,25 +56,12 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exevents.h"
 #include "exglobals.h"
 #include "setbmap.h"
-
-/***********************************************************************
- *
- * This procedure changes the button mapping.
- *
- */
-
-int _X_COLD
-SProcXSetDeviceButtonMapping(ClientPtr client)
-{
-    REQUEST(xSetDeviceButtonMappingReq);
-    swaps(&stuff->length);
-    return (ProcXSetDeviceButtonMapping(client));
-}
 
 /***********************************************************************
  *
@@ -88,8 +75,7 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
     int ret;
     DeviceIntPtr dev;
 
-    REQUEST(xSetDeviceButtonMappingReq);
-    REQUEST_AT_LEAST_SIZE(xSetDeviceButtonMappingReq);
+    REQUEST_HEAD_AT_LEAST(xSetDeviceButtonMappingReq);
 
     if (stuff->length !=
         bytes_to_int32(sizeof(xSetDeviceButtonMappingReq) + stuff->map_length))
