@@ -57,6 +57,8 @@ int
 ProcXIQueryVersion(ClientPtr client)
 {
     X_REQUEST_HEAD_AT_LEAST(xXIQueryVersionReq);
+    X_REQUEST_FIELD_CARD16(major_version);
+    X_REQUEST_FIELD_CARD16(minor_version);
 
     int major, minor;
 

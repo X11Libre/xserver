@@ -79,8 +79,7 @@ ProcXSetDeviceFocus(ClientPtr client)
 
     int ret;
     DeviceIntPtr dev;
-
-    ret = dixLookupDevice(&dev, stuff->device, client, DixSetFocusAccess);
+    int ret = dixLookupDevice(&dev, stuff->device, client, DixSetFocusAccess);
     if (ret != Success)
         return ret;
     if (!dev->focus)

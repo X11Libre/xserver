@@ -859,29 +859,24 @@ ProcXIBarrierReleasePointer(ClientPtr client)
 
     if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
         return BadLength;
-    REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
 
-    if (client->swapped) {
-        xXIBarrierReleasePointerInfo *info = (xXIBarrierReleasePointerInfo*) &stuff[1];
-        for (int i = 0; i < stuff->num_barriers; i++, info++) {
-            swaps(&info->deviceid);
-            swapl(&info->barrier);
-            swapl(&info->eventid);
-        }
-    }
+    REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
 
     int i;
     int err;
     struct PointerBarrierClient *barrier;
     struct PointerBarrier *b;
-    xXIBarrierReleasePointerInfo *info;
 
-    info = (xXIBarrierReleasePointerInfo*) &stuff[1];
+    xXIBarrierReleasePointerInfo *info = (xXIBarrierReleasePointerInfo*) &stuff[1];
+
     for (i = 0; i < stuff->num_barriers; i++, info++) {
         struct PointerBarrierDevice *pbd;
         DeviceIntPtr dev;
         CARD32 barrier_id, event_id;
         _X_UNUSED CARD32 device_id;
+
+        CLIENT_STRUCT_CARD16_1(info, deviceid);
+        CLIENT_STRUCT_CARD32_2(info, barrier, eventid);
 
         barrier_id = info->barrier;
         event_id = info->eventid;
