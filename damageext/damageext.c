@@ -186,10 +186,7 @@ ProcDamageQueryVersion(ClientPtr client)
     REQUEST_FIELD_CARD32(minorVersion);
 
     DamageClientPtr pDamageClient = GetDamageClient(client);
-    xDamageQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xDamageQueryVersionReply rep = { 0 };
 
     if (stuff->majorVersion < SERVER_DAMAGE_MAJOR_VERSION) {
         rep.majorVersion = stuff->majorVersion;
@@ -205,14 +202,10 @@ ProcDamageQueryVersion(ClientPtr client)
     }
     pDamageClient->major_version = rep.majorVersion;
     pDamageClient->minor_version = rep.minorVersion;
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
-    }
-    WriteToClient(client, sizeof(xDamageQueryVersionReply), &rep);
-    return Success;
+
+    REPLY_FIELD_CARD32(majorVersion);
+    REPLY_FIELD_CARD32(minorVersion);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static void
