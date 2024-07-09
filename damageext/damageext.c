@@ -468,25 +468,26 @@ ProcDamageAdd(ClientPtr client)
     return Success;
 }
 
-static int (*ProcDamageVector[XDamageNumberRequests]) (ClientPtr) = {
-    /*************** Version 1 ******************/
-    ProcDamageQueryVersion,
-    ProcDamageCreate,
-    ProcDamageDestroy,
-    ProcDamageSubtract,
-    /*************** Version 1.1 ****************/
-    ProcDamageAdd,
-};
-
 static int
 ProcDamageDispatch(ClientPtr client)
 {
     REQUEST(xReq);
-
-    if (stuff->data >= ARRAY_SIZE(ProcDamageVector))
-        return BadRequest;
-
-    return (*ProcDamageVector[stuff->data]) (client);
+    switch (stuff->data) {
+        /* version 1 */
+        case X_DamageQueryVersion:
+            return ProcDamageQueryVersion(client);
+        case X_DamageCreate:
+            return ProcDamageCreate(client);
+        case X_DamageDestroy:
+            return ProcDamageDestroy(client);
+        case X_DamageSubtract:
+            return ProcDamageSubtract(client);
+        /* version 1.1 */
+        case X_DamageAdd:
+            return ProcDamageAdd(client);
+        default:
+            return BadRequest;
+    }
 }
 
 static int _X_COLD
@@ -496,7 +497,7 @@ SProcDamageQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
     swapl(&stuff->majorVersion);
     swapl(&stuff->minorVersion);
-    return (*ProcDamageVector[stuff->damageReqType]) (client);
+    return ProcDamageQueryVersion(client);
 }
 
 static int _X_COLD
@@ -506,7 +507,7 @@ SProcDamageCreate(ClientPtr client)
     REQUEST_SIZE_MATCH(xDamageCreateReq);
     swapl(&stuff->damage);
     swapl(&stuff->drawable);
-    return (*ProcDamageVector[stuff->damageReqType]) (client);
+    return ProcDamageCreate(client);
 }
 
 static int _X_COLD
@@ -515,7 +516,7 @@ SProcDamageDestroy(ClientPtr client)
     REQUEST(xDamageDestroyReq);
     REQUEST_SIZE_MATCH(xDamageDestroyReq);
     swapl(&stuff->damage);
-    return (*ProcDamageVector[stuff->damageReqType]) (client);
+    return ProcDamageDestroy(client);
 }
 
 static int _X_COLD
@@ -526,7 +527,7 @@ SProcDamageSubtract(ClientPtr client)
     swapl(&stuff->damage);
     swapl(&stuff->repair);
     swapl(&stuff->parts);
-    return (*ProcDamageVector[stuff->damageReqType]) (client);
+    return ProcDamageSubtract(client);
 }
 
 static int _X_COLD
@@ -536,28 +537,29 @@ SProcDamageAdd(ClientPtr client)
     REQUEST_SIZE_MATCH(xDamageSubtractReq);
     swapl(&stuff->drawable);
     swapl(&stuff->region);
-    return (*ProcDamageVector[stuff->damageReqType]) (client);
+    return ProcDamageAdd(client);
 }
-
-static int (*SProcDamageVector[XDamageNumberRequests]) (ClientPtr) = {
-    /*************** Version 1 ******************/
-    SProcDamageQueryVersion,
-    SProcDamageCreate,
-    SProcDamageDestroy,
-    SProcDamageSubtract,
-    /*************** Version 1.1 ****************/
-    SProcDamageAdd,
-};
 
 static int _X_COLD
 SProcDamageDispatch(ClientPtr client)
 {
     REQUEST(xReq);
-
-    if (stuff->data >= ARRAY_SIZE(ProcDamageVector))
-        return BadRequest;
-
-    return (*SProcDamageVector[stuff->data]) (client);
+    switch (stuff->data) {
+        /* version 1 */
+        case X_DamageQueryVersion:
+            return SProcDamageQueryVersion(client);
+        case X_DamageCreate:
+            return SProcDamageCreate(client);
+        case X_DamageDestroy:
+            return SProcDamageDestroy(client);
+        case X_DamageSubtract:
+            return SProcDamageSubtract(client);
+        /* version 1.1 */
+        case X_DamageAdd:
+            return SProcDamageAdd(client);
+        default:
+            return BadRequest;
+    }
 }
 
 static int
