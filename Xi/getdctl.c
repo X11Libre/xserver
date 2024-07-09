@@ -50,6 +50,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "Xi/handlers.h"
 
@@ -108,8 +109,8 @@ ProcXGetDeviceControl(ClientPtr client)
 {
     DeviceIntPtr dev;
 
-    REQUEST(xGetDeviceControlReq);
-    REQUEST_SIZE_MATCH(xGetDeviceControlReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceControlReq);
+    REQUEST_FIELD_CARD16(control);
 
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)

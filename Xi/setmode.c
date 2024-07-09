@@ -57,6 +57,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "Xi/handlers.h"
 
@@ -76,8 +77,7 @@ ProcXSetDeviceMode(ClientPtr client)
     DeviceIntPtr dev;
     int rc;
 
-    REQUEST(xSetDeviceModeReq);
-    REQUEST_SIZE_MATCH(xSetDeviceModeReq);
+    REQUEST_HEAD_STRUCT(xSetDeviceModeReq);
 
     xSetDeviceModeReply rep = {
         .RepType = X_SetDeviceMode,

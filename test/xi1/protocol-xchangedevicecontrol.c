@@ -78,7 +78,7 @@ request_ChangeDeviceControl(ClientPtr client, xChangeDeviceControlReq * req,
     swaps(&ctl->length);
     swaps(&ctl->control);
     /* XXX: swap other contents of ctl, depending on type */
-    rc = SProcXChangeDeviceControl(&client_request);
+    rc = ProcXChangeDeviceControl(&client_request);
     assert(rc == error);
 }
 

@@ -58,6 +58,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -75,8 +76,7 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     int ret;
     DeviceIntPtr dev;
 
-    REQUEST(xSetDeviceModifierMappingReq);
-    REQUEST_AT_LEAST_SIZE(xSetDeviceModifierMappingReq);
+    REQUEST_HEAD_AT_LEAST(xSetDeviceModifierMappingReq);
 
     if (client->req_len != bytes_to_int32(sizeof(xSetDeviceModifierMappingReq)) +
         (stuff->numKeyPerModifier << 1))

@@ -59,6 +59,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "Xi/handlers.h"
 
@@ -329,7 +330,7 @@ ProcXListInputDevices(ClientPtr client)
     xDeviceInfo *dev;
     DeviceIntPtr d;
 
-    REQUEST_SIZE_MATCH(xListInputDevicesReq);
+    REQUEST_HEAD_STRUCT(xListInputDevicesReq);
 
     /* allocate space for saving skip value */
     skip = calloc(inputInfo.numDevices, sizeof(Bool));
