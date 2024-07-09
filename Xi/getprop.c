@@ -115,10 +115,7 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         }
     }
 
-    if (client->swapped) {
-        swaps(&rep.count);
-    }
-
+    REPLY_FIELD_CARD16(count);
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 

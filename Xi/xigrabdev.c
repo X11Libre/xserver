@@ -114,8 +114,7 @@ ProcXIGrabDevice(ClientPtr client)
         .status = status
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return ret;
+    return REPLY_SEND();
 }
 
 int

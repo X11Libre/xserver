@@ -130,8 +130,7 @@ ProcXISelectEvents(ClientPtr client)
             if (len < bytes_to_int32(sizeof(xXIEventMask)))
                 return BadLength;
             len -= bytes_to_int32(sizeof(xXIEventMask));
-            swaps(&evmask->deviceid);
-            swaps(&evmask->mask_len);
+            CLIENT_STRUCT_CARD16_2(evmask, deviceid, mask_len);
             if (len < evmask->mask_len)
                 return BadLength;
             len -= evmask->mask_len;
@@ -385,9 +384,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
 
 finish: ;
 
-    if (client->swapped) {
-        swaps(&rep.num_masks);
-    }
+    REPLY_FIELD_CARD16(num_masks);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }

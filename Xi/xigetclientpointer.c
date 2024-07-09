@@ -44,16 +44,12 @@
 int
 ProcXIGetClientPointer(ClientPtr client)
 {
-    int rc;
-    ClientPtr winclient;
-
     REQUEST_HEAD_STRUCT(xXIGetClientPointerReq);
     REQUEST_FIELD_CARD32(win);
 
+    ClientPtr winclient;
     if (stuff->win != None) {
-        rc = dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess);
-
-        if (rc != Success)
+        if (dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess) != Success)
             return BadWindow;
     }
     else
@@ -65,9 +61,6 @@ ProcXIGetClientPointer(ClientPtr client)
         .deviceid = (winclient->clientPtr) ? winclient->clientPtr->id : 0
     };
 
-    if (client->swapped) {
-        swaps(&rep.deviceid);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD16(deviceid);
+    return REPLY_SEND();
 }
