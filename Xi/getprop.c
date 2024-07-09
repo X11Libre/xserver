@@ -115,14 +115,8 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         }
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
-    if (client->swapped) {
-        swaps(&rep.count);
-    }
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD16(count);
+    return REPLY_SEND_RPCBUF();
 }
 
 /***********************************************************************

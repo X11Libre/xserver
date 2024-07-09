@@ -114,8 +114,7 @@ ProcXGrabDevice(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 /***********************************************************************

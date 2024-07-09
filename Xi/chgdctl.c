@@ -202,7 +202,8 @@ ProcXChangeDeviceControl(ClientPtr client)
         SendEventToAllWindows(dev, DevicePresenceNotifyMask,
                               (xEvent *) &dpn, 1);
 
-        X_SEND_REPLY_SIMPLE(client, rep);
+        if (REPLY_SEND() != Success)
+            return BadAlloc;
     }
 
     return ret;

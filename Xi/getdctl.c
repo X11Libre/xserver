@@ -89,15 +89,10 @@ CopySwapDeviceResolution(ClientPtr client, ValuatorClassPtr v, char *buf,
         *iptr++ = a->min_resolution;
     for (i = 0, a = v->axes; i < v->numAxes; i++, a++)
         *iptr++ = a->max_resolution;
-    if (client->swapped) {
-        swaps(&r->control);
-        swaps(&r->length);
-        swapl(&r->num_valuators);
-        iptr = (int *) buf;
-        for (i = 0; i < (3 * v->numAxes); i++, iptr++) {
-            swapl(iptr);
-        }
-    }
+
+    CLIENT_STRUCT_CARD16_2(r, control, length);
+    CLIENT_STRUCT_CARD32_1(r, num_valuators);
+    REPLY_BUF_CARD32(buf, (3 * v->numAxes));
 }
 
 static void
@@ -110,10 +105,7 @@ CopySwapDeviceCore(ClientPtr client, DeviceIntPtr dev, char *buf)
     c->status = dev->coreEvents;
     c->iscore = (dev == inputInfo.keyboard || dev == inputInfo.pointer);
 
-    if (client->swapped) {
-        swaps(&c->control);
-        swaps(&c->length);
-    }
+    CLIENT_STRUCT_CARD16_2(c, control, length);
 }
 
 static void
@@ -125,10 +117,7 @@ CopySwapDeviceEnable(ClientPtr client, DeviceIntPtr dev, char *buf)
     e->length = sizeof(xDeviceEnableState);
     e->enable = dev->enabled;
 
-    if (client->swapped) {
-        swaps(&e->control);
-        swaps(&e->length);
-    }
+    CLIENT_STRUCT_CARD16_2(e, control, length);
 }
 
 /***********************************************************************
