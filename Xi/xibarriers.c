@@ -46,6 +46,7 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
@@ -849,51 +850,32 @@ XIDestroyPointerBarrier(ClientPtr client,
     return Success;
 }
 
-int _X_COLD
-SProcXIBarrierReleasePointer(ClientPtr client)
-{
-    xXIBarrierReleasePointerInfo *info;
-    REQUEST(xXIBarrierReleasePointerReq);
-    int i;
-
-    REQUEST_AT_LEAST_SIZE(xXIBarrierReleasePointerReq);
-
-    swapl(&stuff->num_barriers);
-    if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
-        return BadLength;
-    REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
-
-    info = (xXIBarrierReleasePointerInfo*) &stuff[1];
-    for (i = 0; i < stuff->num_barriers; i++, info++) {
-        swaps(&info->deviceid);
-        swapl(&info->barrier);
-        swapl(&info->eventid);
-    }
-
-    return (ProcXIBarrierReleasePointer(client));
-}
-
 int
 ProcXIBarrierReleasePointer(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xXIBarrierReleasePointerReq);
+    REQUEST_FIELD_CARD32(num_barriers);
+
+    if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
+        return BadLength;
+
+    REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
+
     int i;
     int err;
     struct PointerBarrierClient *barrier;
     struct PointerBarrier *b;
-    xXIBarrierReleasePointerInfo *info;
 
-    REQUEST(xXIBarrierReleasePointerReq);
-    REQUEST_AT_LEAST_SIZE(xXIBarrierReleasePointerReq);
-    if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
-        return BadLength;
-    REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
+    xXIBarrierReleasePointerInfo *info = (xXIBarrierReleasePointerInfo*) &stuff[1];
 
-    info = (xXIBarrierReleasePointerInfo*) &stuff[1];
     for (i = 0; i < stuff->num_barriers; i++, info++) {
         struct PointerBarrierDevice *pbd;
         DeviceIntPtr dev;
         CARD32 barrier_id, event_id;
         _X_UNUSED CARD32 device_id;
+
+        CLIENT_STRUCT_CARD16_1(info, deviceid);
+        CLIENT_STRUCT_CARD32_2(info, barrier, eventid);
 
         barrier_id = info->barrier;
         event_id = info->eventid;

@@ -131,7 +131,7 @@ request_XIQueryPointer(ClientPtr client, xXIQueryPointerReq * req, int error)
     swaps(&req->deviceid);
     swapl(&req->win);
     swaps(&req->length);
-    rc = SProcXIQueryPointer(&client_request);
+    rc = ProcXIQueryPointer(&client_request);
     assert(rc == error);
 
     if (rc == BadDevice)

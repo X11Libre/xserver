@@ -57,6 +57,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -68,22 +69,6 @@ SOFTWARE.
 #define AllModifiersMask ( \
 	ShiftMask | LockMask | ControlMask | Mod1Mask | Mod2Mask | \
 	Mod3Mask | Mod4Mask | Mod5Mask )
-
-/***********************************************************************
- *
- * Handle requests from a client with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXUngrabDeviceKey(ClientPtr client)
-{
-    REQUEST(xUngrabDeviceKeyReq);
-    REQUEST_SIZE_MATCH(xUngrabDeviceKeyReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->modifiers);
-    return (ProcXUngrabDeviceKey(client));
-}
 
 /***********************************************************************
  *
@@ -100,8 +85,9 @@ ProcXUngrabDeviceKey(ClientPtr client)
     GrabPtr temporaryGrab;
     int rc;
 
-    REQUEST(xUngrabDeviceKeyReq);
-    REQUEST_SIZE_MATCH(xUngrabDeviceKeyReq);
+    REQUEST_HEAD_STRUCT(xUngrabDeviceKeyReq);
+    REQUEST_FIELD_CARD32(grabWindow);
+    REQUEST_FIELD_CARD16(modifiers);
 
     rc = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
     if (rc != Success)

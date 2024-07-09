@@ -25,9 +25,7 @@
 #ifndef XIPASSIVEGRAB_H
 #define XIPASSIVEGRAB_H 1
 
-int SProcXIPassiveUngrabDevice(ClientPtr client);
 int ProcXIPassiveUngrabDevice(ClientPtr client);
 int ProcXIPassiveGrabDevice(ClientPtr client);
-int SProcXIPassiveGrabDevice(ClientPtr client);
 
 #endif                          /* XIPASSIVEGRAB_H */

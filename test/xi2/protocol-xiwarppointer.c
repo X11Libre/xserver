@@ -86,7 +86,7 @@ request_XIWarpPointer(ClientPtr client, xXIWarpPointerReq * req, int error)
     swaps(&req->src_height);
     swaps(&req->deviceid);
 
-    rc = SProcXIWarpPointer(client);
+    rc = ProcXIWarpPointer(client);
     assert(rc == error);
 
     if (rc == BadDevice)

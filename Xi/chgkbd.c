@@ -52,12 +52,14 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "globals.h"
-
 #include "exevents.h"
 #include "exglobals.h"
 
@@ -72,8 +74,7 @@ SOFTWARE.
 int
 ProcXChangeKeyboardDevice(ClientPtr client)
 {
-    /* REQUEST(xChangeKeyboardDeviceReq); */
-    REQUEST_SIZE_MATCH(xChangeKeyboardDeviceReq);
+    REQUEST_HEAD_STRUCT(xChangeKeyboardDeviceReq);
 
     return BadDevice;
 }

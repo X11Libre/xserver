@@ -52,9 +52,12 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 
 #include "getfctl.h"
@@ -253,8 +256,7 @@ ProcXGetFeedbackControl(ClientPtr client)
     BellFeedbackPtr b;
     LedFeedbackPtr l;
 
-    REQUEST(xGetFeedbackControlReq);
-    REQUEST_SIZE_MATCH(xGetFeedbackControlReq);
+    REQUEST_HEAD_STRUCT(xGetFeedbackControlReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
