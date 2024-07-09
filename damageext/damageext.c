@@ -95,13 +95,12 @@ DamageExtNotify(DamageExtPtr pDamageExt, BoxPtr pBoxes, int nBoxes)
 {
     ClientPtr pClient = pDamageExt->pClient;
     DrawablePtr pDrawable = pDamageExt->pDrawable;
-    xDamageNotifyEvent ev;
     int i, x, y, w, h;
 
     damageGetGeometry(pDrawable, &x, &y, &w, &h);
 
     UpdateCurrentTimeIf();
-    ev = (xDamageNotifyEvent) {
+    xDamageNotifyEvent ev = {
         .type = DamageEventBase + XDamageNotify,
         .level = pDamageExt->level,
         .drawable = pDamageExt->drawable,
@@ -183,7 +182,6 @@ ProcDamageQueryVersion(ClientPtr client)
     xDamageQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
 
     REQUEST(xDamageQueryVersionReq);
