@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETFCTL_H
 #define GETFCTL_H 1
 
-int SProcXGetFeedbackControl(ClientPtr  /* client */
-    );
-
 int ProcXGetFeedbackControl(ClientPtr   /* client */
     );
 

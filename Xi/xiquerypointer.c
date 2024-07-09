@@ -41,6 +41,7 @@
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -62,21 +63,13 @@
  *
  */
 
-int _X_COLD
-SProcXIQueryPointer(ClientPtr client)
-{
-    REQUEST(xXIQueryPointerReq);
-    REQUEST_SIZE_MATCH(xXIQueryPointerReq);
-
-    swaps(&stuff->length);
-    swaps(&stuff->deviceid);
-    swapl(&stuff->win);
-    return (ProcXIQueryPointer(client));
-}
-
 int
 ProcXIQueryPointer(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXIQueryPointerReq);
+    REQUEST_FIELD_CARD16(deviceid);
+    REQUEST_FIELD_CARD32(win);
+
     int rc;
     DeviceIntPtr pDev, kbd;
     WindowPtr pWin, t;
@@ -86,9 +79,6 @@ ProcXIQueryPointer(ClientPtr client)
     int buttons_size = 0;       /* size of buttons array */
     XIClientPtr xi_client;
     Bool have_xi22 = FALSE;
-
-    REQUEST(xXIQueryPointerReq);
-    REQUEST_SIZE_MATCH(xXIQueryPointerReq);
 
     /* Check if client is compliant with XInput 2.2 or later. Earlier clients
      * do not know about touches, so we must report emulated button presses. 2.2

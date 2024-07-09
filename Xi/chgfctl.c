@@ -54,32 +54,17 @@ SOFTWARE.
 #include <dix-config.h>
 #endif
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>     /* control constants */
 
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 
 #include "chgfctl.h"
 
 #define DO_ALL    (-1)
-
-/***********************************************************************
- *
- * This procedure changes the control attributes for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXChangeFeedbackControl(ClientPtr client)
-{
-    REQUEST(xChangeFeedbackControlReq);
-    swaps(&stuff->length);
-    REQUEST_AT_LEAST_SIZE(xChangeFeedbackControlReq);
-    swapl(&stuff->mask);
-    return (ProcXChangeFeedbackControl(client));
-}
 
 /******************************************************************************
  *
@@ -435,8 +420,8 @@ ProcXChangeFeedbackControl(ClientPtr client)
     LedFeedbackPtr l;
     int rc;
 
-    REQUEST(xChangeFeedbackControlReq);
-    REQUEST_AT_LEAST_SIZE(xChangeFeedbackControlReq);
+    REQUEST_HEAD_AT_LEAST(xChangeFeedbackControlReq);
+    REQUEST_FIELD_CARD32(mask);
 
     len = stuff->length - bytes_to_int32(sizeof(xChangeFeedbackControlReq));
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);

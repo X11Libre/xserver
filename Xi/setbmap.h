@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SETBMAP_H
 #define SETBMAP_H 1
 
-int SProcXSetDeviceButtonMapping(ClientPtr      /* client */
-    );
-
 int ProcXSetDeviceButtonMapping(ClientPtr       /* client */
     );
 

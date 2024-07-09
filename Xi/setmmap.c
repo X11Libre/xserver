@@ -54,29 +54,17 @@ SOFTWARE.
 #include <dix-config.h>
 #endif
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XI2.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exevents.h"
 #include "exglobals.h"
 
 #include "setmmap.h"
-
-/***********************************************************************
- *
- * This procedure sets the modifier mapping for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXSetDeviceModifierMapping(ClientPtr client)
-{
-    REQUEST(xSetDeviceModifierMappingReq);
-    swaps(&stuff->length);
-    return (ProcXSetDeviceModifierMapping(client));
-}
 
 /***********************************************************************
  *
@@ -90,8 +78,7 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     int ret;
     DeviceIntPtr dev;
 
-    REQUEST(xSetDeviceModifierMappingReq);
-    REQUEST_AT_LEAST_SIZE(xSetDeviceModifierMappingReq);
+    REQUEST_HEAD_AT_LEAST(xSetDeviceModifierMappingReq);
 
     if (stuff->length != bytes_to_int32(sizeof(xSetDeviceModifierMappingReq)) +
         (stuff->numKeyPerModifier << 1))

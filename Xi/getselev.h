@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETSELEV_H
 #define GETSELEV_H 1
 
-int SProcXGetSelectedExtensionEvents(ClientPtr  /* client */
-    );
-
 int ProcXGetSelectedExtensionEvents(ClientPtr   /* client */
     );
 

@@ -58,6 +58,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -67,31 +68,6 @@ SOFTWARE.
 
 extern XExtEventInfo EventInfo[];
 extern int ExtEventIndex;
-
-/***********************************************************************
- *
- * Swap the request if the requestor has a different byte order than us.
- *
- */
-
-int _X_COLD
-SProcXGrabDevice(ClientPtr client)
-{
-    REQUEST(xGrabDeviceReq);
-    swaps(&stuff->length);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceReq);
-    swapl(&stuff->grabWindow);
-    swapl(&stuff->time);
-    swaps(&stuff->event_count);
-
-    if (stuff->length !=
-        bytes_to_int32(sizeof(xGrabDeviceReq)) + stuff->event_count)
-        return BadLength;
-
-    SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
-
-    return (ProcXGrabDevice(client));
-}
 
 /***********************************************************************
  *
@@ -107,12 +83,17 @@ ProcXGrabDevice(ClientPtr client)
     GrabMask mask;
     struct tmask tmp[EMASKSIZE];
 
-    REQUEST(xGrabDeviceReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceReq);
+    REQUEST_HEAD_AT_LEAST(xGrabDeviceReq);
+    REQUEST_FIELD_CARD32(grabWindow);
+    REQUEST_FIELD_CARD32(time);
+    REQUEST_FIELD_CARD16(event_count);
 
     if (stuff->length !=
         bytes_to_int32(sizeof(xGrabDeviceReq)) + stuff->event_count)
         return BadLength;
+
+    if (client->swapped)
+        SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
 
     xGrabDeviceReply rep = {
         .repType = X_Reply,

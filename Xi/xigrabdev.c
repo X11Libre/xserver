@@ -38,32 +38,13 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"          /* BadDevice */
 #include "xigrabdev.h"
 #include "inpututils.h"
-
-int _X_COLD
-SProcXIGrabDevice(ClientPtr client)
-{
-    REQUEST(xXIGrabDeviceReq);
-    /*
-     * Check here for at least the length of the struct we swap, then
-     * let ProcXIGrabDevice check the full size after we swap mask_len.
-     */
-    REQUEST_AT_LEAST_SIZE(xXIGrabDeviceReq);
-
-    swaps(&stuff->length);
-    swaps(&stuff->deviceid);
-    swapl(&stuff->grab_window);
-    swapl(&stuff->cursor);
-    swapl(&stuff->time);
-    swaps(&stuff->mask_len);
-
-    return ProcXIGrabDevice(client);
-}
 
 int
 ProcXIGrabDevice(ClientPtr client)
@@ -76,7 +57,12 @@ ProcXIGrabDevice(ClientPtr client)
     unsigned int keyboard_mode;
     unsigned int pointer_mode;
 
-    REQUEST(xXIGrabDeviceReq);
+    REQUEST_HEAD_AT_LEAST(xXIGrabDeviceReq);
+    REQUEST_FIELD_CARD16(deviceid);
+    REQUEST_FIELD_CARD32(grab_window);
+    REQUEST_FIELD_CARD32(cursor);
+    REQUEST_FIELD_CARD32(time);
+    REQUEST_FIELD_CARD16(mask_len);
     REQUEST_FIXED_SIZE(xXIGrabDeviceReq, ((size_t) stuff->mask_len) * 4);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
@@ -132,19 +118,6 @@ ProcXIGrabDevice(ClientPtr client)
     return ret;
 }
 
-int _X_COLD
-SProcXIUngrabDevice(ClientPtr client)
-{
-    REQUEST(xXIUngrabDeviceReq);
-    REQUEST_SIZE_MATCH(xXIUngrabDeviceReq);
-
-    swaps(&stuff->length);
-    swaps(&stuff->deviceid);
-    swapl(&stuff->time);
-
-    return ProcXIUngrabDevice(client);
-}
-
 int
 ProcXIUngrabDevice(ClientPtr client)
 {
@@ -153,8 +126,9 @@ ProcXIUngrabDevice(ClientPtr client)
     int ret = Success;
     TimeStamp time;
 
-    REQUEST(xXIUngrabDeviceReq);
-    REQUEST_SIZE_MATCH(xXIUngrabDeviceReq);
+    REQUEST_HEAD_STRUCT(xXIUngrabDeviceReq);
+    REQUEST_FIELD_CARD16(deviceid);
+    REQUEST_FIELD_CARD32(time);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (ret != Success)

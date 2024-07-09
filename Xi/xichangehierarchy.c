@@ -42,6 +42,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -119,21 +120,6 @@ XISendDeviceHierarchyEvent(int flags[MAXDEVICES])
     SendEventToAllWindows(&dummyDev, (XI_HierarchyChangedMask >> 8),
                           (xEvent *) ev, 1);
     free(ev);
-}
-
-/***********************************************************************
- *
- * This procedure allows a client to change the device hierarchy through
- * adding new master devices, removing them, etc.
- *
- */
-
-int _X_COLD
-SProcXIChangeHierarchy(ClientPtr client)
-{
-    REQUEST(xXIChangeHierarchyReq);
-    swaps(&stuff->length);
-    return (ProcXIChangeHierarchy(client));
 }
 
 static int
@@ -410,6 +396,13 @@ attach_slave(ClientPtr client, xXIAttachSlaveInfo * c, int flags[MAXDEVICES])
 
 #define SWAPIF(cmd) if (client->swapped) { cmd; }
 
+/***********************************************************************
+ *
+ * This procedure allows a client to change the device hierarchy through
+ * adding new master devices, removing them, etc.
+ *
+ */
+
 int
 ProcXIChangeHierarchy(ClientPtr client)
 {
@@ -423,8 +416,7 @@ ProcXIChangeHierarchy(ClientPtr client)
         CHANGED,
     } changes = NO_CHANGE;
 
-    REQUEST(xXIChangeHierarchyReq);
-    REQUEST_AT_LEAST_SIZE(xXIChangeHierarchyReq);
+    REQUEST_HEAD_AT_LEAST(xXIChangeHierarchyReq);
 
     if (!stuff->num_changes)
         return rc;

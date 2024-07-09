@@ -33,7 +33,6 @@
 
 #include <X11/extensions/XI2proto.h>
 
-int SProcXIQueryDevice(ClientPtr client);
 int ProcXIQueryDevice(ClientPtr client);
 void SRepXIQueryDevice(ClientPtr client, int size, xXIQueryDeviceReply * rep);
 int SizeDeviceClasses(DeviceIntPtr dev);

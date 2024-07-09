@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETVERS_H
 #define GETVERS_H 1
 
-int SProcXGetExtensionVersion(ClientPtr /* client */
-    );
-
 int ProcXGetExtensionVersion(ClientPtr  /* client */
     );
 

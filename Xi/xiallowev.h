@@ -31,6 +31,5 @@
 #define XIALLOWEV_H 1
 
 int ProcXIAllowEvents(ClientPtr client);
-int SProcXIAllowEvents(ClientPtr client);
 
 #endif                          /* XIALLOWEV_H */

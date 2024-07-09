@@ -54,30 +54,18 @@ SOFTWARE.
 #include <dix-config.h>
 #endif
 
+#include <X11/extensions/XI.h>
+#include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "scrnintstr.h"         /* screen structure  */
-#include <X11/extensions/XI.h>
-#include <X11/extensions/XIproto.h>
 #include "XIstubs.h"
 #include "exglobals.h"
 
 #include "closedev.h"
-
-/***********************************************************************
- *
- * This procedure closes an input device.
- *
- */
-
-int _X_COLD
-SProcXCloseDevice(ClientPtr client)
-{
-    REQUEST(xCloseDeviceReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xCloseDeviceReq);
-    return (ProcXCloseDevice(client));
-}
 
 /***********************************************************************
  *
@@ -139,8 +127,7 @@ ProcXCloseDevice(ClientPtr client)
     WindowPtr pWin, p1;
     DeviceIntPtr d;
 
-    REQUEST(xCloseDeviceReq);
-    REQUEST_SIZE_MATCH(xCloseDeviceReq);
+    REQUEST_HEAD_STRUCT(xCloseDeviceReq);
 
     rc = dixLookupDevice(&d, stuff->deviceid, client, DixUseAccess);
     if (rc != Success)

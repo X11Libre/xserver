@@ -58,27 +58,11 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 #include "gtmotion.h"
-
-/***********************************************************************
- *
- * Swap the request if server and client have different byte ordering.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceMotionEvents(ClientPtr client)
-{
-    REQUEST(xGetDeviceMotionEventsReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
-    swapl(&stuff->start);
-    swapl(&stuff->stop);
-    return (ProcXGetDeviceMotionEvents(client));
-}
 
 /****************************************************************************
  *
@@ -98,9 +82,10 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     int length = 0;
     ValuatorClassPtr v;
 
-    REQUEST(xGetDeviceMotionEventsReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceMotionEventsReq);
+    REQUEST_FIELD_CARD32(start);
+    REQUEST_FIELD_CARD32(stop);
 
-    REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
     if (rc != Success)
         return rc;

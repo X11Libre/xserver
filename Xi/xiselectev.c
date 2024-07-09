@@ -31,6 +31,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 
 #include "dixstruct.h"
 #include "windowstr.h"
@@ -114,40 +115,37 @@ XICheckInvalidMaskBits(ClientPtr client, unsigned char *mask, int len)
     return Success;
 }
 
-int _X_COLD
-SProcXISelectEvents(ClientPtr client)
-{
-    int i;
-    int len;
-    xXIEventMask *evmask;
-
-    REQUEST(xXISelectEventsReq);
-    swaps(&stuff->length);
-    REQUEST_AT_LEAST_SIZE(xXISelectEventsReq);
-    swapl(&stuff->win);
-    swaps(&stuff->num_masks);
-
-    len = stuff->length - bytes_to_int32(sizeof(xXISelectEventsReq));
-    evmask = (xXIEventMask *) &stuff[1];
-    for (i = 0; i < stuff->num_masks; i++) {
-        if (len < bytes_to_int32(sizeof(xXIEventMask)))
-            return BadLength;
-        len -= bytes_to_int32(sizeof(xXIEventMask));
-        swaps(&evmask->deviceid);
-        swaps(&evmask->mask_len);
-        if (len < evmask->mask_len)
-            return BadLength;
-        len -= evmask->mask_len;
-        evmask =
-            (xXIEventMask *) (((char *) &evmask[1]) + evmask->mask_len * 4);
-    }
-
-    return (ProcXISelectEvents(client));
-}
-
 int
 ProcXISelectEvents(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xXISelectEventsReq);
+    REQUEST_FIELD_CARD32(win);
+    REQUEST_FIELD_CARD16(num_masks);
+
+    if (stuff->num_masks == 0)
+        return BadValue;
+
+    if (client->swapped) {
+        int i;
+        int len;
+        xXIEventMask *evmask;
+
+        len = stuff->length - bytes_to_int32(sizeof(xXISelectEventsReq));
+        evmask = (xXIEventMask *) &stuff[1];
+        for (i = 0; i < stuff->num_masks; i++) {
+            if (len < bytes_to_int32(sizeof(xXIEventMask)))
+                return BadLength;
+            len -= bytes_to_int32(sizeof(xXIEventMask));
+            swaps(&evmask->deviceid);
+            swaps(&evmask->mask_len);
+            if (len < evmask->mask_len)
+                return BadLength;
+            len -= evmask->mask_len;
+            evmask =
+                (xXIEventMask *) (((char *) &evmask[1]) + evmask->mask_len * 4);
+        }
+    }
+
     int rc, num_masks;
     WindowPtr win;
     DeviceIntPtr dev;
@@ -155,12 +153,6 @@ ProcXISelectEvents(ClientPtr client)
     xXIEventMask *evmask;
     int *types = NULL;
     int len;
-
-    REQUEST(xXISelectEventsReq);
-    REQUEST_AT_LEAST_SIZE(xXISelectEventsReq);
-
-    if (stuff->num_masks == 0)
-        return BadValue;
 
     rc = dixLookupWindow(&win, stuff->win, client, DixReceiveAccess);
     if (rc != Success)
@@ -329,20 +321,12 @@ ProcXISelectEvents(ClientPtr client)
     return Success;
 }
 
-int _X_COLD
-SProcXIGetSelectedEvents(ClientPtr client)
-{
-    REQUEST(xXIGetSelectedEventsReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xXIGetSelectedEventsReq);
-    swapl(&stuff->win);
-
-    return (ProcXIGetSelectedEvents(client));
-}
-
 int
 ProcXIGetSelectedEvents(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXIGetSelectedEventsReq);
+    REQUEST_FIELD_CARD32(win);
+
     int rc, i;
     WindowPtr win;
     char *buffer = NULL;
@@ -351,9 +335,6 @@ ProcXIGetSelectedEvents(ClientPtr client)
     xXIEventMask *evmask = NULL;
     DeviceIntPtr dev;
     uint32_t length;
-
-    REQUEST(xXIGetSelectedEventsReq);
-    REQUEST_SIZE_MATCH(xXIGetSelectedEventsReq);
 
     rc = dixLookupWindow(&win, stuff->win, client, DixGetAttrAccess);
     if (rc != Success)

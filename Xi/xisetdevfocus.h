@@ -30,10 +30,8 @@
 #ifndef XISETDEVFOCUS_H
 #define XISETDEVFOCUS_H 1
 
-int SProcXISetFocus(ClientPtr client);
 int ProcXISetFocus(ClientPtr client);
 
-int SProcXIGetFocus(ClientPtr client);
 int ProcXIGetFocus(ClientPtr client);
 
 void SRepXIGetFocus(ClientPtr client, int len, xXIGetFocusReply * rep);

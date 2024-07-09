@@ -54,34 +54,20 @@ SOFTWARE.
 #include <dix-config.h>
 #endif
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "windowstr.h"          /* window structure  */
 #include "scrnintstr.h"         /* screen structure  */
-
 #include "dixevents.h"
 #include "exevents.h"
 #include "exglobals.h"
 
 #include "chgptr.h"
-
-/***********************************************************************
- *
- * This procedure is invoked to swap the request bytes if the server and
- * client have a different byte order.
- *
- */
-
-int _X_COLD
-SProcXChangePointerDevice(ClientPtr client)
-{
-    REQUEST(xChangePointerDeviceReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xChangePointerDeviceReq);
-    return (ProcXChangePointerDevice(client));
-}
 
 /***********************************************************************
  *
@@ -92,8 +78,7 @@ SProcXChangePointerDevice(ClientPtr client)
 int
 ProcXChangePointerDevice(ClientPtr client)
 {
-    /* REQUEST(xChangePointerDeviceReq); */
-    REQUEST_SIZE_MATCH(xChangePointerDeviceReq);
+    REQUEST_HEAD_STRUCT(xChangePointerDeviceReq);
 
     return BadDevice;
 }

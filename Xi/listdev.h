@@ -32,9 +32,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #define VPC	20              /* Max # valuators per chunk */
 
-int SProcXListInputDevices(ClientPtr    /* client */
-    );
-
 int ProcXListInputDevices(ClientPtr     /* client */
     );
 

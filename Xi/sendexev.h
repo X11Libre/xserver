@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SENDEXEV_H
 #define SENDEXEV_H 1
 
-int SProcXSendExtensionEvent(ClientPtr  /* client */
-    );
-
 int ProcXSendExtensionEvent(ClientPtr   /* client */
     );
 

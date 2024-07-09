@@ -40,6 +40,7 @@ from The Open Group.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -48,19 +49,6 @@ from The Open Group.
 #include "xkbstr.h"
 #include "queryst.h"
 
-/***********************************************************************
- *
- * This procedure allows a client to query the state of a device.
- *
- */
-
-int _X_COLD
-SProcXQueryDeviceState(ClientPtr client)
-{
-    REQUEST(xQueryDeviceStateReq);
-    swaps(&stuff->length);
-    return (ProcXQueryDeviceState(client));
-}
 
 /***********************************************************************
  *
@@ -84,8 +72,7 @@ ProcXQueryDeviceState(ClientPtr client)
     DeviceIntPtr dev;
     double *values;
 
-    REQUEST(xQueryDeviceStateReq);
-    REQUEST_SIZE_MATCH(xQueryDeviceStateReq);
+    REQUEST_HEAD_STRUCT(xQueryDeviceStateReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
     if (rc != Success && rc != BadAccess)

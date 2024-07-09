@@ -30,7 +30,6 @@
 #ifndef WARPDEVP_H
 #define WARPDEVP_H 1
 
-int SProcXIWarpPointer(ClientPtr /* client */ );
 int ProcXIWarpPointer(ClientPtr /* client */ );
 
 #endif                          /* WARPDEVP_H */

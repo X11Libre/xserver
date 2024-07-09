@@ -54,9 +54,12 @@ SOFTWARE.
 #include <dix-config.h>
 #endif
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"
@@ -65,21 +68,6 @@ SOFTWARE.
 #include "opendev.h"
 
 extern CARD8 event_base[];
-
-/***********************************************************************
- *
- * This procedure swaps the request if the server and client have different
- * byte orderings.
- *
- */
-
-int _X_COLD
-SProcXOpenDevice(ClientPtr client)
-{
-    REQUEST(xOpenDeviceReq);
-    swaps(&stuff->length);
-    return (ProcXOpenDevice(client));
-}
 
 /***********************************************************************
  *
@@ -95,8 +83,7 @@ ProcXOpenDevice(ClientPtr client)
     int status = Success;
     DeviceIntPtr dev;
 
-    REQUEST(xOpenDeviceReq);
-    REQUEST_SIZE_MATCH(xOpenDeviceReq);
+    REQUEST_HEAD_STRUCT(xOpenDeviceReq);
 
     status = dixLookupDevice(&dev, stuff->deviceid, client, DixUseAccess);
 

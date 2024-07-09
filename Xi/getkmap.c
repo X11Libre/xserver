@@ -54,30 +54,18 @@ SOFTWARE.
 #include <dix-config.h>
 #endif
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/request_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 #include "swaprep.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
 
 #include "getkmap.h"
-
-/***********************************************************************
- *
- * This procedure gets the key mapping for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceKeyMapping(ClientPtr client)
-{
-    REQUEST(xGetDeviceKeyMappingReq);
-    swaps(&stuff->length);
-    return (ProcXGetDeviceKeyMapping(client));
-}
 
 /***********************************************************************
  *
@@ -93,8 +81,7 @@ ProcXGetDeviceKeyMapping(ClientPtr client)
     KeySymsPtr syms;
     int rc;
 
-    REQUEST(xGetDeviceKeyMappingReq);
-    REQUEST_SIZE_MATCH(xGetDeviceKeyMappingReq);
+    REQUEST_HEAD_STRUCT(xGetDeviceKeyMappingReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)

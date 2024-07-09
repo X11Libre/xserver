@@ -143,7 +143,7 @@ request_XIGetSelectedEvents(xXIGetSelectedEventsReq * req, int error)
     client.swapped = TRUE;
     swapl(&req->win);
     swaps(&req->length);
-    rc = SProcXIGetSelectedEvents(&client);
+    rc = ProcXIGetSelectedEvents(&client);
     assert(rc == error);
 }
 

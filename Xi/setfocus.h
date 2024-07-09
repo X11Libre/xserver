@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SETFOCUS_H
 #define SETFOCUS_H 1
 
-int SProcXSetDeviceFocus(ClientPtr      /* client */
-    );
-
 int ProcXSetDeviceFocus(ClientPtr       /* client */
     );
 
