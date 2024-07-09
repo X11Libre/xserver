@@ -28,7 +28,6 @@
 #include "protocol-versions.h"
 #include "list.h"
 #include "misc.h"
-#include <string.h>
 #include "hashtable.h"
 #include "picturestr.h"
 #include "compint.h"
