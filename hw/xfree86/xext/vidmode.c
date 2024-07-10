@@ -207,10 +207,8 @@ ProcVidModeQueryVersion(ClientPtr client)
         .minorVersion = SERVER_XF86VIDMODE_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -269,20 +267,19 @@ ProcVidModeGetModeLine(ClientPtr client)
            reply.vdisplay, reply.vsyncstart, reply.vsyncend,
            reply.vtotal, (unsigned long) reply.flags);
 
-    if (client->swapped) {
-        swapl(&reply.dotclock);
-        swaps(&reply.hdisplay);
-        swaps(&reply.hsyncstart);
-        swaps(&reply.hsyncend);
-        swaps(&reply.htotal);
-        swaps(&reply.hskew);
-        swaps(&reply.vdisplay);
-        swaps(&reply.vsyncstart);
-        swaps(&reply.vsyncend);
-        swaps(&reply.vtotal);
-        swapl(&reply.flags);
-        swapl(&reply.privsize);
-    }
+    X_REPLY_FIELD_CARD32(dotclock);
+    X_REPLY_FIELD_CARD16(hdisplay);
+    X_REPLY_FIELD_CARD16(hsyncstart);
+    X_REPLY_FIELD_CARD16(hsyncend);
+    X_REPLY_FIELD_CARD16(htotal);
+    X_REPLY_FIELD_CARD16(hskew);
+    X_REPLY_FIELD_CARD16(vdisplay);
+    X_REPLY_FIELD_CARD16(vsyncstart);
+    X_REPLY_FIELD_CARD16(vsyncend);
+    X_REPLY_FIELD_CARD16(vtotal);
+    X_REPLY_FIELD_CARD32(flags);
+    X_REPLY_FIELD_CARD32(privsize);
+
     if (ver < 2) {
         xXF86OldVidModeGetModeLineReply oldrep = {
             .dotclock = reply.dotclock,
@@ -381,9 +378,7 @@ ProcVidModeGetAllModeLines(ClientPtr client)
         .modecount = modecount
     };
 
-    if (client->swapped) {
-        swapl(&reply.modecount);
-    }
+    X_REPLY_FIELD_CARD32(modecount);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1084,11 +1079,10 @@ VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff
     xXF86VidModeValidateModeLineReply reply = {
         .status = status
     };
-    if (client->swapped) {
-        swapl(&reply.status);
-    }
 
     DebugF("ValidateModeLine - Succeeded (status = %d)\n", status);
+
+    X_REPLY_FIELD_CARD32(status);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1353,10 +1347,8 @@ ProcVidModeGetViewPort(ClientPtr client)
         .y = y
     };
 
-    if (client->swapped) {
-        swapl(&reply.x);
-        swapl(&reply.y);
-    }
+    X_REPLY_FIELD_CARD32(x);
+    X_REPLY_FIELD_CARD32(y);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1436,11 +1428,9 @@ ProcVidModeGetDotClocks(ClientPtr client)
         .flags = (ClockProg ? CLKFLAG_PROGRAMABLE : 0),
     };
 
-    if (client->swapped) {
-        swapl(&reply.clocks);
-        swapl(&reply.maxclocks);
-        swapl(&reply.flags);
-    }
+    X_REPLY_FIELD_CARD32(clocks);
+    X_REPLY_FIELD_CARD32(maxclocks);
+    X_REPLY_FIELD_CARD32(flags);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1505,11 +1495,10 @@ ProcVidModeGetGamma(ClientPtr client)
         .green = (CARD32) (green * 10000.),
         .blue = (CARD32) (blue * 10000.)
     };
-    if (client->swapped) {
-        swapl(&reply.red);
-        swapl(&reply.green);
-        swapl(&reply.blue);
-    }
+
+    X_REPLY_FIELD_CARD32(red);
+    X_REPLY_FIELD_CARD32(green);
+    X_REPLY_FIELD_CARD32(blue);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1598,9 +1587,8 @@ ProcVidModeGetGammaRamp(ClientPtr client)
     xXF86VidModeGetGammaRampReply reply = {
         .size = stuff->size
     };
-    if (client->swapped) {
-        swaps(&reply.size);
-    }
+
+    X_REPLY_FIELD_CARD16(size);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1624,10 +1612,8 @@ ProcVidModeGetGammaRampSize(ClientPtr client)
     xXF86VidModeGetGammaRampSizeReply reply = {
         .size = pVidMode->GetGammaRampSize(pScreen)
     };
-    if (client->swapped) {
-        swaps(&reply.size);
-    }
 
+    X_REPLY_FIELD_CARD16(size);
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
@@ -1646,9 +1632,7 @@ ProcVidModeGetPermissions(ClientPtr client)
                             XF86VM_WRITE_PERMISSION : 0)),
     };
 
-    if (client->swapped) {
-        swapl(&reply.permissions);
-    }
+    X_REPLY_FIELD_CARD32(permissions);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
