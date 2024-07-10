@@ -282,10 +282,7 @@ ProcShmQueryVersion(ClientPtr client)
     REQUEST_HEAD_STRUCT(xShmQueryVersionReq);
 
     xShmQueryVersionReply rep = {
-        .type = X_Reply,
         .sharedPixmaps = sharedPixmaps,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_SHM_MAJOR_VERSION,
         .minorVersion = SERVER_SHM_MINOR_VERSION,
         .uid = geteuid(),
@@ -293,16 +290,11 @@ ProcShmQueryVersion(ClientPtr client)
         .pixmapFormat = sharedPixmaps ? ZPixmap : 0
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-        swaps(&rep.uid);
-        swaps(&rep.gid);
-    }
-    WriteToClient(client, sizeof(xShmQueryVersionReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_FIELD_CARD16(uid);
+    REPLY_FIELD_CARD16(gid);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /*
@@ -625,7 +617,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
     DrawablePtr pDraw;
     long lenPer = 0, length;
     Mask plane = 0;
-    xShmGetImageReply xgi;
     ShmDescPtr shmdesc;
     VisualID visual = None;
     RegionPtr pVisibleRegion = NULL;
@@ -670,13 +661,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
             return BadMatch;
         visual = None;
     }
-    xgi = (xShmGetImageReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .visual = visual,
-        .depth = pDraw->depth
-    };
     if (stuff->format == ZPixmap) {
         length = PixmapBytePad(stuff->width, pDraw->depth) * stuff->height;
     }
@@ -688,7 +672,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
     }
 
     VERIFY_SHMSIZE(shmdesc, stuff->offset, length, client);
-    xgi.size = length;
 
     if (length == 0) {
         /* nothing to do */
@@ -705,7 +688,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
                     stuff->format, shmdesc->addr + stuff->offset);
     }
     else {
-
         length = stuff->offset;
         for (; plane; plane >>= 1) {
             if (stuff->planeMask & plane) {
@@ -724,15 +706,15 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
         }
     }
 
-    if (client->swapped) {
-        swaps(&xgi.sequenceNumber);
-        swapl(&xgi.length);
-        swapl(&xgi.visual);
-        swapl(&xgi.size);
-    }
-    WriteToClient(client, sizeof(xShmGetImageReply), &xgi);
+    xShmGetImageReply rep = {
+        .visual = visual,
+        .depth = pDraw->depth,
+        .size = length,
+    };
 
-    return Success;
+    REPLY_FIELD_CARD32(visual);
+    REPLY_FIELD_CARD32(size);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 static int
@@ -818,7 +800,6 @@ ProcShmGetImage(ClientPtr client)
     PanoramiXRes *draw;
     DrawablePtr *drawables;
     DrawablePtr pDraw;
-    xShmGetImageReply xgi;
     ShmDescPtr shmdesc;
     int i, x, y, w, h, format, rc;
     Mask plane = 0, planemask;
@@ -910,16 +891,6 @@ ProcShmGetImage(ClientPtr client)
                                               IncludeInferiors);
     }
 
-    xgi = (xShmGetImageReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .visual = wVisual(((WindowPtr) pDraw)),
-        .depth = pDraw->depth
-    };
-
-    xgi.size = length;
-
     if (length == 0) {          /* nothing to do */
     }
     else if (format == ZPixmap) {
@@ -941,15 +912,15 @@ ProcShmGetImage(ClientPtr client)
     }
     free(drawables);
 
-    if (client->swapped) {
-        swaps(&xgi.sequenceNumber);
-        swapl(&xgi.length);
-        swapl(&xgi.visual);
-        swapl(&xgi.size);
-    }
-    WriteToClient(client, sizeof(xShmGetImageReply), &xgi);
+    xShmGetImageReply rep = {
+        .visual = wVisual(((WindowPtr) pDraw)),
+        .depth = pDraw->depth,
+        .size = length,
+    };
 
-    return Success;
+    REPLY_FIELD_CARD32(visual);
+    REPLY_FIELD_CARD32(size);
+    REPLY_SEND_RET_SUCCESS();
 #else
     return ShmGetImage(client, stuff);
 #endif /* PANORAMIX */
@@ -1324,12 +1295,6 @@ ProcShmCreateSegment(ClientPtr client)
 
     int fd;
     ShmDescPtr shmdesc;
-    xShmCreateSegmentReply rep = {
-        .type = X_Reply,
-        .nfd = 1,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-    };
 
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
@@ -1385,8 +1350,12 @@ ProcShmCreateSegment(ClientPtr client)
         close(fd);
         return BadAlloc;
     }
-    WriteToClient(client, sizeof (xShmCreateSegmentReply), &rep);
-    return Success;
+
+    xShmCreateSegmentReply rep = {
+        .nfd = 1,
+    };
+
+    REPLY_SEND_RET_SUCCESS();
 }
 #endif /* SHM_FD_PASSING */
 
