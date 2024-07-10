@@ -82,7 +82,6 @@ ProcXSetDeviceMode(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_SetDeviceMode,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixSetAttrAccess);

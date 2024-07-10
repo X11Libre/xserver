@@ -264,7 +264,6 @@ ProcXGetFeedbackControl(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_GetFeedbackControl,
         .sequenceNumber = client->sequence,
-        .num_feedbacks = 0
     };
 
     for (k = dev->kbdfeed; k; k = k->next) {

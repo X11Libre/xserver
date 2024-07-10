@@ -359,8 +359,6 @@ ProcXIGetSelectedEvents(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_XIGetSelectedEvents,
         .sequenceNumber = client->sequence,
-        .length = 0,
-        .num_masks = 0
     };
 
     masks = wOtherInputMasks(win);
