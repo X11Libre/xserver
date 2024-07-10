@@ -106,11 +106,7 @@ ProcCompositeQueryVersion(ClientPtr client)
 
     CompositeClientPtr pCompositeClient = GetCompositeClient(client);
 
-    xCompositeQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
+    xCompositeQueryVersionReply rep = { 0 };
 
     if (stuff->majorVersion < SERVER_COMPOSITE_MAJOR_VERSION) {
         rep.majorVersion = stuff->majorVersion;
@@ -122,13 +118,10 @@ ProcCompositeQueryVersion(ClientPtr client)
     }
     pCompositeClient->major_version = rep.majorVersion;
     pCompositeClient->minor_version = rep.minorVersion;
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
-    }
-    WriteToClient(client, sizeof(xCompositeQueryVersionReply), &rep);
+
+    REPLY_FIELD_CARD32(majorVersion);
+    REPLY_FIELD_CARD32(minorVersion);
+    REPLY_SEND();
     return Success;
 }
 
@@ -302,19 +295,11 @@ SingleCompositeGetOverlayWindow(ClientPtr client, xCompositeGetOverlayWindowReq 
     }
 
     xCompositeGetOverlayWindowReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.overlayWin);
-    }
-    WriteToClient(client, sz_xCompositeGetOverlayWindowReply, &rep);
-
+    REPLY_FIELD_CARD32(overlayWin);
+    REPLY_SEND();
     return Success;
 }
 
@@ -675,7 +660,6 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
     if (!compositeUseXinerama)
         return SingleCompositeGetOverlayWindow(client, stuff);
 
-    xCompositeGetOverlayWindowReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
     CompScreenPtr cs;
@@ -753,19 +737,12 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
 
     cs = GetCompScreen(screenInfo.screens[0]);
 
-    rep = (xCompositeGetOverlayWindowReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xCompositeGetOverlayWindowReply rep = {
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.overlayWin);
-    }
-    WriteToClient(client, sz_xCompositeGetOverlayWindowReply, &rep);
+    REPLY_FIELD_CARD32(overlayWin);
+    REPLY_SEND();
     return Success;
 #else
     return SingleCompositeGetOverlayWindow(client, stuff);
