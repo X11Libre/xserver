@@ -269,7 +269,6 @@ ProcXGetFeedbackControl(ClientPtr client)
     StringFeedbackPtr s;
     BellFeedbackPtr b;
     LedFeedbackPtr l;
-    xGetFeedbackControlReply rep;
 
     REQUEST(xGetFeedbackControlReq);
     REQUEST_SIZE_MATCH(xGetFeedbackControlReq);
@@ -278,12 +277,10 @@ ProcXGetFeedbackControl(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xGetFeedbackControlReply) {
+    xGetFeedbackControlReply rep = {
         .repType = X_Reply,
         .RepType = X_GetFeedbackControl,
         .sequenceNumber = client->sequence,
-        .length = 0,
-        .num_feedbacks = 0
     };
 
     for (k = dev->kbdfeed; k; k = k->next) {

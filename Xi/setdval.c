@@ -72,17 +72,15 @@ int
 ProcXSetDeviceValuators(ClientPtr client)
 {
     DeviceIntPtr dev;
-    xSetDeviceValuatorsReply rep;
     int rc;
 
     REQUEST(xSetDeviceValuatorsReq);
     REQUEST_AT_LEAST_SIZE(xSetDeviceValuatorsReq);
 
-    rep = (xSetDeviceValuatorsReply) {
+    xSetDeviceValuatorsReply rep = {
         .repType = X_Reply,
         .RepType = X_SetDeviceValuators,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .status = Success
     };
 

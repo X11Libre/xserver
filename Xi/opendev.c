@@ -76,7 +76,6 @@ ProcXOpenDevice(ClientPtr client)
     xInputClassInfo evbase[numInputClasses];
     int j = 0;
     int status = Success;
-    xOpenDeviceReply rep;
     DeviceIntPtr dev;
 
     REQUEST(xOpenDeviceReq);
@@ -127,7 +126,8 @@ ProcXOpenDevice(ClientPtr client)
     }
     evbase[j].class = OtherClass;
     evbase[j++].event_type_base = event_base[OtherClass];
-    rep = (xOpenDeviceReply) {
+
+    xOpenDeviceReply rep = {
         .repType = X_Reply,
         .RepType = X_OpenDevice,
         .sequenceNumber = client->sequence,

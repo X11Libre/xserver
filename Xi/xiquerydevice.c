@@ -66,7 +66,6 @@ SProcXIQueryDevice(ClientPtr client)
 int
 ProcXIQueryDevice(ClientPtr client)
 {
-    xXIQueryDeviceReply rep;
     DeviceIntPtr dev = NULL;
     int rc = Success;
     int i = 0, len = 0;
@@ -109,12 +108,11 @@ ProcXIQueryDevice(ClientPtr client)
         return BadAlloc;
     }
 
-    rep = (xXIQueryDeviceReply) {
+    xXIQueryDeviceReply rep = {
         .repType = X_Reply,
         .RepType = X_XIQueryDevice,
         .sequenceNumber = client->sequence,
         .length = len / 4,
-        .num_devices = 0
     };
 
     ptr = info;

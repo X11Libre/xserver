@@ -86,7 +86,6 @@ SProcXGetExtensionVersion(ClientPtr client)
 int
 ProcXGetExtensionVersion(ClientPtr client)
 {
-    xGetExtensionVersionReply rep;
 
     REQUEST(xGetExtensionVersionReq);
     REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
@@ -95,11 +94,10 @@ ProcXGetExtensionVersion(ClientPtr client)
                                         stuff->nbytes))
         return BadLength;
 
-    rep = (xGetExtensionVersionReply) {
+    xGetExtensionVersionReply rep = {
         .repType = X_Reply,
         .RepType = X_GetExtensionVersion,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .major_version = XIVersion.major_version,
         .minor_version = XIVersion.minor_version,
         .present = TRUE
