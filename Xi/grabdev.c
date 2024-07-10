@@ -116,7 +116,6 @@ ProcXGrabDevice(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_GrabDevice,
         .sequenceNumber = client->sequence,
-        .length = 0,
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);

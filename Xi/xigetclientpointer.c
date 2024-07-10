@@ -78,7 +78,6 @@ ProcXIGetClientPointer(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_XIGetClientPointer,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .set = (winclient->clientPtr != NULL),
         .deviceid = (winclient->clientPtr) ? winclient->clientPtr->id : 0
     };

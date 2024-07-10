@@ -104,9 +104,6 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_GetSelectedExtensionEvents,
         .sequenceNumber = client->sequence,
-        .length = 0,
-        .this_client_count = 0,
-        .all_clients_count = 0
     };
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);

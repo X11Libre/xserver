@@ -103,8 +103,6 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_GetDeviceDontPropagateList,
         .sequenceNumber = client->sequence,
-        .length = 0,
-        .count = 0
     };
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);

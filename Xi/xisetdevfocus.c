@@ -102,7 +102,6 @@ ProcXIGetFocus(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_XIGetFocus,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
 
     if (dev->focus->win == NoneWin)

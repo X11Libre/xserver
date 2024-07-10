@@ -126,7 +126,6 @@ ProcXChangeDeviceControl(ClientPtr client)
     }
 
     xChangeDeviceControlReply rep = {
-        .repType = X_Reply,
         .RepType = X_ChangeDeviceControl,
         .sequenceNumber = client->sequence,
         .status = Success,

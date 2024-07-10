@@ -97,7 +97,6 @@ ProcXGetExtensionVersion(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_GetExtensionVersion,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .major_version = XIVersion.major_version,
         .minor_version = XIVersion.minor_version,
         .present = TRUE

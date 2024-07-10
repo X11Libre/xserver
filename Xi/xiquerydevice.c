@@ -114,7 +114,6 @@ ProcXIQueryDevice(ClientPtr client)
         .RepType = X_XIQueryDevice,
         .sequenceNumber = client->sequence,
         .length = len / 4,
-        .num_devices = 0
     };
 
     ptr = info;
