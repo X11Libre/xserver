@@ -852,7 +852,6 @@ int
 ProcXListDeviceProperties(ClientPtr client)
 {
     Atom *atoms;
-    xListDevicePropertiesReply rep;
     int natoms;
     DeviceIntPtr dev;
     int rc = Success;
@@ -868,7 +867,7 @@ ProcXListDeviceProperties(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xListDevicePropertiesReply) {
+    xListDevicePropertiesReply rep = {
         .repType = X_Reply,
         .RepType = X_ListDeviceProperties,
         .sequenceNumber = client->sequence,
@@ -949,7 +948,6 @@ ProcXGetDeviceProperty(ClientPtr client)
     int rc, format, nitems, bytes_after;
     char *data;
     Atom type;
-    xGetDevicePropertyReply reply;
 
     REQUEST_SIZE_MATCH(xGetDevicePropertyReq);
     if (stuff->delete)
@@ -966,7 +964,7 @@ ProcXGetDeviceProperty(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    reply = (xGetDevicePropertyReply) {
+    xGetDevicePropertyReply rep = {
         .repType = X_Reply,
         .RepType = X_GetDeviceProperty,
         .sequenceNumber = client->sequence,
@@ -978,13 +976,13 @@ ProcXGetDeviceProperty(ClientPtr client)
         .deviceid = dev->id
     };
 
-    if (stuff->delete && (reply.bytesAfter == 0))
+    if (stuff->delete && (rep.bytesAfter == 0))
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
-    WriteReplyToClient(client, sizeof(xGenericReply), &reply);
+    WriteReplyToClient(client, sizeof(xGenericReply), &rep);
 
     if (length) {
-        switch (reply.format) {
+        switch (rep.format) {
         case 32:
             client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
             break;
@@ -999,7 +997,7 @@ ProcXGetDeviceProperty(ClientPtr client)
     }
 
     /* delete the Property */
-    if (stuff->delete && (reply.bytesAfter == 0)) {
+    if (stuff->delete && (rep.bytesAfter == 0)) {
         XIPropertyPtr prop, *prev;
 
         for (prev = &dev->properties.properties; (prop = *prev);
@@ -1093,7 +1091,6 @@ int
 ProcXIListProperties(ClientPtr client)
 {
     Atom *atoms;
-    xXIListPropertiesReply rep;
     int natoms;
     DeviceIntPtr dev;
     int rc = Success;
@@ -1109,7 +1106,7 @@ ProcXIListProperties(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xXIListPropertiesReply) {
+    xXIListPropertiesReply rep = {
         .repType = X_Reply,
         .RepType = X_XIListProperties,
         .sequenceNumber = client->sequence,
@@ -1187,7 +1184,6 @@ ProcXIGetProperty(ClientPtr client)
 {
     REQUEST(xXIGetPropertyReq);
     DeviceIntPtr dev;
-    xXIGetPropertyReply reply;
     int length;
     int rc, format, nitems, bytes_after;
     char *data;
@@ -1208,7 +1204,7 @@ ProcXIGetProperty(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    reply = (xXIGetPropertyReply) {
+    xXIGetPropertyReply rep = {
         .repType = X_Reply,
         .RepType = X_XIGetProperty,
         .sequenceNumber = client->sequence,
@@ -1219,13 +1215,13 @@ ProcXIGetProperty(ClientPtr client)
         .format = format
     };
 
-    if (length && stuff->delete && (reply.bytes_after == 0))
+    if (length && stuff->delete && (rep.bytes_after == 0))
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
-    WriteReplyToClient(client, sizeof(xXIGetPropertyReply), &reply);
+    WriteReplyToClient(client, sizeof(xXIGetPropertyReply), &rep);
 
     if (length) {
-        switch (reply.format) {
+        switch (rep.format) {
         case 32:
             client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
             break;
@@ -1240,7 +1236,7 @@ ProcXIGetProperty(ClientPtr client)
     }
 
     /* delete the Property */
-    if (stuff->delete && (reply.bytes_after == 0)) {
+    if (stuff->delete && (rep.bytes_after == 0)) {
         XIPropertyPtr prop, *prev;
 
         for (prev = &dev->properties.properties; (prop = *prev);

@@ -102,7 +102,6 @@ ProcXGrabDeviceButton(ClientPtr client)
     DeviceIntPtr mdev;
     XEventClass *class;
     struct tmask tmp[EMASKSIZE];
-    GrabParameters param;
     GrabMask mask;
 
     REQUEST(xGrabDeviceButtonReq);
@@ -138,7 +137,7 @@ ProcXGrabDeviceButton(ClientPtr client)
                                   X_GrabDeviceButton)) != Success)
         return ret;
 
-    param = (GrabParameters) {
+    GrabParameters param = {
         .grabtype = XI,
         .ownerEvents = stuff->ownerEvents,
         .this_device_mode = stuff->this_device_mode,

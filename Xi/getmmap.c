@@ -86,7 +86,6 @@ int
 ProcXGetDeviceModifierMapping(ClientPtr client)
 {
     DeviceIntPtr dev;
-    xGetDeviceModifierMappingReply rep;
     KeyCode *modkeymap = NULL;
     int ret, max_keys_per_mod;
 
@@ -101,12 +100,12 @@ ProcXGetDeviceModifierMapping(ClientPtr client)
     if (ret != Success)
         return ret;
 
-    rep = (xGetDeviceModifierMappingReply) {
+    xGetDeviceModifierMappingReply rep = {
         .repType = X_Reply,
         .RepType = X_GetDeviceModifierMapping,
         .sequenceNumber = client->sequence,
         .numKeyPerModifier = max_keys_per_mod,
-    /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
+        /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
         .length = max_keys_per_mod << 1
     };
 

@@ -103,7 +103,6 @@ int
 ProcXGrabDevice(ClientPtr client)
 {
     int rc;
-    xGrabDeviceReply rep;
     DeviceIntPtr dev;
     GrabMask mask;
     struct tmask tmp[EMASKSIZE];
@@ -115,11 +114,10 @@ ProcXGrabDevice(ClientPtr client)
         bytes_to_int32(sizeof(xGrabDeviceReq)) + stuff->event_count)
         return BadLength;
 
-    rep = (xGrabDeviceReply) {
+    xGrabDeviceReply rep = {
         .repType = X_Reply,
         .RepType = X_GrabDevice,
         .sequenceNumber = client->sequence,
-        .length = 0,
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);

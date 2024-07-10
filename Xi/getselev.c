@@ -93,7 +93,6 @@ int
 ProcXGetSelectedExtensionEvents(ClientPtr client)
 {
     int i, rc, total_length = 0;
-    xGetSelectedExtensionEventsReply rep;
     WindowPtr pWin;
     XEventClass *buf = NULL;
     XEventClass *tclient;
@@ -104,13 +103,10 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     REQUEST(xGetSelectedExtensionEventsReq);
     REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
 
-    rep = (xGetSelectedExtensionEventsReply) {
+    xGetSelectedExtensionEventsReply rep = {
         .repType = X_Reply,
         .RepType = X_GetSelectedExtensionEvents,
         .sequenceNumber = client->sequence,
-        .length = 0,
-        .this_client_count = 0,
-        .all_clients_count = 0
     };
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);

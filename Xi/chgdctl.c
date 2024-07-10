@@ -109,7 +109,6 @@ ProcXChangeDeviceControl(ClientPtr client)
     int i, status, ret = BadValue;
     DeviceIntPtr dev;
     xDeviceResolutionCtl *r;
-    xChangeDeviceControlReply rep;
     AxisInfoPtr a;
     CARD32 *resolution;
     xDeviceEnableCtl *e;
@@ -128,11 +127,9 @@ ProcXChangeDeviceControl(ClientPtr client)
         goto out;
     }
 
-    rep = (xChangeDeviceControlReply) {
-        .repType = X_Reply,
+    xChangeDeviceControlReply rep = {
         .RepType = X_ChangeDeviceControl,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .status = Success,
     };
 

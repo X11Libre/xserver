@@ -90,7 +90,6 @@ int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
     INT32 *coords = NULL, *bufptr;
-    xGetDeviceMotionEventsReply rep;
     unsigned long i;
     int rc, num_events, axes, size = 0;
     unsigned long nEvents;
@@ -111,7 +110,8 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     if (dev->valuator->motionHintWindow)
         MaybeStopDeviceHint(dev, client);
     axes = v->numAxes;
-    rep = (xGetDeviceMotionEventsReply) {
+
+    xGetDeviceMotionEventsReply rep = {
         .repType = X_Reply,
         .RepType = X_GetDeviceMotionEvents,
         .sequenceNumber = client->sequence,

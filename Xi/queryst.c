@@ -81,7 +81,6 @@ ProcXQueryDeviceState(ClientPtr client)
     xButtonState *tb;
     ValuatorClassPtr v;
     xValuatorState *tv;
-    xQueryDeviceStateReply rep;
     DeviceIntPtr dev;
     double *values;
 
@@ -159,7 +158,7 @@ ProcXQueryDeviceState(ClientPtr client)
         }
     }
 
-    rep = (xQueryDeviceStateReply) {
+    xQueryDeviceStateReply rep = {
         .repType = X_Reply,
         .RepType = X_QueryDeviceState,
         .sequenceNumber = client->sequence,
