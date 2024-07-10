@@ -1264,9 +1264,6 @@ ProcShmCreateSegment(ClientPtr client)
 
     int fd;
     ShmDescPtr shmdesc;
-    xShmCreateSegmentReply reply = {
-        .nfd = 1,
-    };
 
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
@@ -1322,6 +1319,10 @@ ProcShmCreateSegment(ClientPtr client)
         close(fd);
         return BadAlloc;
     }
+
+    xShmCreateSegmentReply reply = {
+        .nfd = 1,
+    };
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
