@@ -347,25 +347,32 @@ static int ProcCompositeUnredirectSubwindows(ClientPtr client);
 static int ProcCompositeNameWindowPixmap(ClientPtr client);
 static int ProcCompositeGetOverlayWindow(ClientPtr client);
 
-static int (*ProcCompositeVector[CompositeNumberRequests]) (ClientPtr) = {
-ProcCompositeQueryVersion,
-        ProcCompositeRedirectWindow,
-        ProcCompositeRedirectSubwindows,
-        ProcCompositeUnredirectWindow,
-        ProcCompositeUnredirectSubwindows,
-        ProcCompositeCreateRegionFromBorderClip,
-        ProcCompositeNameWindowPixmap,
-        ProcCompositeGetOverlayWindow, ProcCompositeReleaseOverlayWindow,};
-
 static int
 ProcCompositeDispatch(ClientPtr client)
 {
     REQUEST(xReq);
-
-    if (stuff->data < CompositeNumberRequests)
-        return (*ProcCompositeVector[stuff->data]) (client);
-    else
-        return BadRequest;
+    switch (stuff->data) {
+        case X_CompositeQueryVersion:
+            return ProcCompositeQueryVersion(client);
+        case X_CompositeRedirectWindow:
+            return ProcCompositeRedirectWindow(client);
+        case X_CompositeRedirectSubwindows:
+            return ProcCompositeRedirectSubwindows(client);
+        case X_CompositeUnredirectWindow:
+            return ProcCompositeUnredirectWindow(client);
+        case X_CompositeUnredirectSubwindows:
+            return ProcCompositeUnredirectSubwindows(client);
+        case X_CompositeCreateRegionFromBorderClip:
+            return ProcCompositeCreateRegionFromBorderClip(client);
+        case X_CompositeNameWindowPixmap:
+            return ProcCompositeNameWindowPixmap(client);
+        case X_CompositeGetOverlayWindow:
+            return ProcCompositeGetOverlayWindow(client);
+        case X_CompositeReleaseOverlayWindow:
+            return ProcCompositeReleaseOverlayWindow(client);
+        default:
+            return BadRequest;
+    }
 }
 
 static int _X_COLD
@@ -375,7 +382,7 @@ SProcCompositeQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xCompositeQueryVersionReq);
     swapl(&stuff->majorVersion);
     swapl(&stuff->minorVersion);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeQueryVersion(client);
 }
 
 static int _X_COLD
@@ -384,7 +391,7 @@ SProcCompositeRedirectWindow(ClientPtr client)
     REQUEST(xCompositeRedirectWindowReq);
     REQUEST_SIZE_MATCH(xCompositeRedirectWindowReq);
     swapl(&stuff->window);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeRedirectWindow(client);
 }
 
 static int _X_COLD
@@ -393,7 +400,7 @@ SProcCompositeRedirectSubwindows(ClientPtr client)
     REQUEST(xCompositeRedirectSubwindowsReq);
     REQUEST_SIZE_MATCH(xCompositeRedirectSubwindowsReq);
     swapl(&stuff->window);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeRedirectSubwindows(client);
 }
 
 static int _X_COLD
@@ -402,7 +409,7 @@ SProcCompositeUnredirectWindow(ClientPtr client)
     REQUEST(xCompositeUnredirectWindowReq);
     REQUEST_SIZE_MATCH(xCompositeUnredirectWindowReq);
     swapl(&stuff->window);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeUnredirectWindow(client);
 }
 
 static int _X_COLD
@@ -411,7 +418,7 @@ SProcCompositeUnredirectSubwindows(ClientPtr client)
     REQUEST(xCompositeUnredirectSubwindowsReq);
     REQUEST_SIZE_MATCH(xCompositeUnredirectSubwindowsReq);
     swapl(&stuff->window);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeUnredirectSubwindows(client);
 }
 
 static int _X_COLD
@@ -421,7 +428,7 @@ SProcCompositeCreateRegionFromBorderClip(ClientPtr client)
     REQUEST_SIZE_MATCH(xCompositeCreateRegionFromBorderClipReq);
     swapl(&stuff->region);
     swapl(&stuff->window);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeCreateRegionFromBorderClip(client);
 }
 
 static int _X_COLD
@@ -431,7 +438,7 @@ SProcCompositeNameWindowPixmap(ClientPtr client)
     REQUEST_SIZE_MATCH(xCompositeNameWindowPixmapReq);
     swapl(&stuff->window);
     swapl(&stuff->pixmap);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeNameWindowPixmap(client);
 }
 
 static int _X_COLD
@@ -440,7 +447,7 @@ SProcCompositeGetOverlayWindow(ClientPtr client)
     REQUEST(xCompositeGetOverlayWindowReq);
     REQUEST_SIZE_MATCH(xCompositeGetOverlayWindowReq);
     swapl(&stuff->window);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeGetOverlayWindow(client);
 }
 
 static int _X_COLD
@@ -449,31 +456,35 @@ SProcCompositeReleaseOverlayWindow(ClientPtr client)
     REQUEST(xCompositeReleaseOverlayWindowReq);
     REQUEST_SIZE_MATCH(xCompositeReleaseOverlayWindowReq);
     swapl(&stuff->window);
-    return (*ProcCompositeVector[stuff->compositeReqType]) (client);
+    return ProcCompositeReleaseOverlayWindow(client);
 }
-
-static int
-(*SProcCompositeVector[CompositeNumberRequests]) (ClientPtr) = {
-    SProcCompositeQueryVersion,
-    SProcCompositeRedirectWindow,
-    SProcCompositeRedirectSubwindows,
-    SProcCompositeUnredirectWindow,
-    SProcCompositeUnredirectSubwindows,
-    SProcCompositeCreateRegionFromBorderClip,
-    SProcCompositeNameWindowPixmap,
-    SProcCompositeGetOverlayWindow,
-    SProcCompositeReleaseOverlayWindow,
-};
 
 static int _X_COLD
 SProcCompositeDispatch(ClientPtr client)
 {
     REQUEST(xReq);
-
-    if (stuff->data < CompositeNumberRequests)
-        return (*SProcCompositeVector[stuff->data]) (client);
-    else
-        return BadRequest;
+    switch (stuff->data) {
+        case X_CompositeQueryVersion:
+            return SProcCompositeQueryVersion(client);
+        case X_CompositeRedirectWindow:
+            return SProcCompositeRedirectWindow(client);
+        case X_CompositeRedirectSubwindows:
+            return SProcCompositeRedirectSubwindows(client);
+        case X_CompositeUnredirectWindow:
+            return SProcCompositeUnredirectWindow(client);
+        case X_CompositeUnredirectSubwindows:
+            return SProcCompositeUnredirectSubwindows(client);
+        case X_CompositeCreateRegionFromBorderClip:
+            return SProcCompositeCreateRegionFromBorderClip(client);
+        case X_CompositeNameWindowPixmap:
+            return SProcCompositeNameWindowPixmap(client);
+        case X_CompositeGetOverlayWindow:
+            return SProcCompositeGetOverlayWindow(client);
+        case X_CompositeReleaseOverlayWindow:
+            return SProcCompositeReleaseOverlayWindow(client);
+        default:
+            return BadRequest;
+    }
 }
 
 /** @see GetDefaultBytes */
