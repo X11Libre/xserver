@@ -249,12 +249,10 @@ ProcShmQueryVersion(ClientPtr client)
         .pixmapFormat = sharedPixmaps ? ZPixmap : 0
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-        swaps(&reply.uid);
-        swaps(&reply.gid);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
+    X_REPLY_FIELD_CARD16(uid);
+    X_REPLY_FIELD_CARD16(gid);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -678,10 +676,8 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
         .visual = visual,
     };
 
-    if (client->swapped) {
-        swapl(&reply.visual);
-        swapl(&reply.size);
-    }
+    X_REPLY_FIELD_CARD32(visual);
+    X_REPLY_FIELD_CARD32(size);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -891,10 +887,8 @@ ProcShmGetImage(ClientPtr client)
         .size = length
     };
 
-    if (client->swapped) {
-        swapl(&reply.visual);
-        swapl(&reply.size);
-    }
+    X_REPLY_FIELD_CARD32(visual);
+    X_REPLY_FIELD_CARD32(size);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 #else
