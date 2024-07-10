@@ -330,7 +330,6 @@ ShouldSkipDevice(ClientPtr client, DeviceIntPtr d)
 int
 ProcXListInputDevices(ClientPtr client)
 {
-    xListInputDevicesReply rep;
     int numdevs = 0;
     int namesize = 1;           /* need 1 extra byte for strcpy */
     int i = 0, size = 0;
@@ -341,13 +340,6 @@ ProcXListInputDevices(ClientPtr client)
     DeviceIntPtr d;
 
     REQUEST_SIZE_MATCH(xListInputDevicesReq);
-
-    rep = (xListInputDevicesReply) {
-        .repType = X_Reply,
-        .RepType = X_ListInputDevices,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
 
     /* allocate space for saving skip value */
     skip = calloc(inputInfo.numDevices, sizeof(Bool));
@@ -397,8 +389,15 @@ ProcXListInputDevices(ClientPtr client)
 
         ListDeviceInfo(client, d, dev++, &devbuf, &classbuf, &namebuf);
     }
-    rep.ndevices = numdevs;
-    rep.length = bytes_to_int32(total_length);
+
+    xListInputDevicesReply rep = {
+        .repType = X_Reply,
+        .RepType = X_ListInputDevices,
+        .sequenceNumber = client->sequence,
+        .ndevices = numdevs,
+        .length = bytes_to_int32(total_length),
+    };
+
     WriteReplyToClient(client, sizeof(xListInputDevicesReply), &rep);
     WriteToClient(client, total_length, savbuf);
     free(savbuf);
