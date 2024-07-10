@@ -205,10 +205,8 @@ ProcVidModeQueryVersion(ClientPtr client)
         .minorVersion = SERVER_XF86VIDMODE_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
     X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
@@ -216,16 +214,8 @@ ProcVidModeQueryVersion(ClientPtr client)
 static int
 ProcVidModeGetModeLine(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeGetModeLineReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeGetModeLineReq);
-
-    if (client->swapped)
-        swaps(&stuff->screen);
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeGetModeLineReq);
     REQUEST_FIELD_CARD16(screen);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     ScreenPtr pScreen;
     VidModePtr pVidMode;
@@ -275,20 +265,19 @@ ProcVidModeGetModeLine(ClientPtr client)
            reply.vdisplay, reply.vsyncstart, reply.vsyncend,
            reply.vtotal, (unsigned long) reply.flags);
 
-    if (client->swapped) {
-        swapl(&reply.dotclock);
-        swaps(&reply.hdisplay);
-        swaps(&reply.hsyncstart);
-        swaps(&reply.hsyncend);
-        swaps(&reply.htotal);
-        swaps(&reply.hskew);
-        swaps(&reply.vdisplay);
-        swaps(&reply.vsyncstart);
-        swaps(&reply.vsyncend);
-        swaps(&reply.vtotal);
-        swapl(&reply.flags);
-        swapl(&reply.privsize);
-    }
+    REPLY_FIELD_CARD32(dotclock);
+    REPLY_FIELD_CARD16(hdisplay);
+    REPLY_FIELD_CARD16(hsyncstart);
+    REPLY_FIELD_CARD16(hsyncend);
+    REPLY_FIELD_CARD16(htotal);
+    REPLY_FIELD_CARD16(hskew);
+    REPLY_FIELD_CARD16(vdisplay);
+    REPLY_FIELD_CARD16(vsyncstart);
+    REPLY_FIELD_CARD16(vsyncend);
+    REPLY_FIELD_CARD16(vtotal);
+    REPLY_FIELD_CARD32(flags);
+    REPLY_FIELD_CARD32(privsize);
+
     if (ver < 2) {
         xXF86OldVidModeGetModeLineReply oldrep = {
             .dotclock = reply.dotclock,
@@ -350,16 +339,8 @@ static void fillModeInfoV2(x_rpcbuf_t *rpcbuf, int dotClock,
 static int
 ProcVidModeGetAllModeLines(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeGetAllModeLinesReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeGetAllModeLinesReq);
-
-    if (client->swapped)
-        swaps(&stuff->screen);
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeGetAllModeLinesReq);
     REQUEST_FIELD_CARD16(screen);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     ScreenPtr pScreen;
     VidModePtr pVidMode;
@@ -397,9 +378,7 @@ ProcVidModeGetAllModeLines(ClientPtr client)
         .modecount = modecount
     };
 
-    if (client->swapped) {
-        swapl(&reply.modecount);
-    }
+    REPLY_FIELD_CARD32(modecount);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1262,31 +1241,20 @@ VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff
     xXF86VidModeValidateModeLineReply reply = {
         .status = status
     };
-    if (client->swapped) {
-        swapl(&reply.status);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
+
+    REPLY_FIELD_CARD32(status);
+
     DebugF("ValidateModeLine - Succeeded (status = %d)\n", status);
 
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
 ProcVidModeSwitchMode(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeSwitchModeReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeSwitchModeReq);
-
-    if (client->swapped) {
-        swaps(&stuff->screen);
-        swaps(&stuff->zoom);
-    }
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeSwitchModeReq);
     REQUEST_FIELD_CARD16(screen);
     REQUEST_FIELD_CARD16(zoom);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     ScreenPtr pScreen;
     VidModePtr pVidMode;
@@ -1438,19 +1406,9 @@ VidModeSwitchToMode(ClientPtr client, xXF86VidModeSwitchToModeReq *stuff)
 static int
 ProcVidModeLockModeSwitch(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeLockModeSwitchReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeLockModeSwitchReq);
-
-    if (client->swapped) {
-        swaps(&stuff->screen);
-        swaps(&stuff->lock);
-    }
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeLockModeSwitchReq);
     REQUEST_FIELD_CARD16(screen);
     REQUEST_FIELD_CARD16(lock);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     ScreenPtr pScreen;
     VidModePtr pVidMode;
@@ -1486,16 +1444,8 @@ static inline CARD32 _combine_f(vidMonitorValue a, vidMonitorValue b)
 static int
 ProcVidModeGetMonitor(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeGetMonitorReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeGetMonitorReq);
-
-    if (client->swapped)
-        swaps(&stuff->screen);
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeGetMonitorReq);
     REQUEST_FIELD_CARD16(screen);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     DEBUG_P("XF86VidModeGetMonitor");
 
@@ -1545,16 +1495,8 @@ ProcVidModeGetMonitor(ClientPtr client)
 static int
 ProcVidModeGetViewPort(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeGetViewPortReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeGetViewPortReq);
-
-    if (client->swapped)
-        swaps(&stuff->screen);
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeGetViewPortReq);
     REQUEST_FIELD_CARD16(screen);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     ScreenPtr pScreen;
     VidModePtr pVidMode;
@@ -1577,32 +1519,19 @@ ProcVidModeGetViewPort(ClientPtr client)
         .y = y
     };
 
-    if (client->swapped) {
-        swapl(&reply.x);
-        swapl(&reply.y);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    REPLY_FIELD_CARD32(x);
+    REPLY_FIELD_CARD32(y);
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
 ProcVidModeSetViewPort(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeSetViewPortReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeSetViewPortReq);
-
-    if (client->swapped) {
-        swaps(&stuff->screen);
-        swapl(&stuff->x);
-        swapl(&stuff->y);
-    }
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeSetViewPortReq);
     REQUEST_FIELD_CARD16(screen);
     REQUEST_FIELD_CARD32(x);
     REQUEST_FIELD_CARD32(y);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     ScreenPtr pScreen;
     VidModePtr pVidMode;
@@ -1630,16 +1559,8 @@ ProcVidModeSetViewPort(ClientPtr client)
 static int
 ProcVidModeGetDotClocks(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeGetDotClocksReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeGetDotClocksReq);
-
-    if (client->swapped)
-        swaps(&stuff->screen);
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeGetDotClocksReq);
     REQUEST_FIELD_CARD16(screen);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     ScreenPtr pScreen;
     VidModePtr pVidMode;
@@ -1681,11 +1602,9 @@ ProcVidModeGetDotClocks(ClientPtr client)
         .flags = (ClockProg ? CLKFLAG_PROGRAMABLE : 0),
     };
 
-    if (client->swapped) {
-        swapl(&reply.clocks);
-        swapl(&reply.maxclocks);
-        swapl(&reply.flags);
-    }
+    REPLY_FIELD_CARD32(clocks);
+    REPLY_FIELD_CARD32(maxclocks);
+    REPLY_FIELD_CARD32(flags);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1693,23 +1612,11 @@ ProcVidModeGetDotClocks(ClientPtr client)
 static int
 ProcVidModeSetGamma(ClientPtr client)
 {
-<<<<<<< HEAD
-    REQUEST(xXF86VidModeSetGammaReq);
-    REQUEST_SIZE_MATCH(xXF86VidModeSetGammaReq);
-
-    if (client->swapped) {
-        swaps(&stuff->screen);
-        swapl(&stuff->red);
-        swapl(&stuff->green);
-        swapl(&stuff->blue);
-    }
-=======
     REQUEST_HEAD_STRUCT(xXF86VidModeSetGammaReq);
     REQUEST_FIELD_CARD16(screen);
     REQUEST_FIELD_CARD32(red);
     REQUEST_FIELD_CARD32(green);
     REQUEST_FIELD_CARD32(blue);
->>>>>>> 7e1eba12c07 (Xext: vidmode: use REQUEST_HEAD_STRUCT and REQUEST_FIELD_* macros)
 
     ScreenPtr pScreen;
     VidModePtr pVidMode;
@@ -1764,13 +1671,12 @@ ProcVidModeGetGamma(ClientPtr client)
         .green = (CARD32) (green * 10000.),
         .blue = (CARD32) (blue * 10000.)
     };
-    if (client->swapped) {
-        swapl(&reply.red);
-        swapl(&reply.green);
-        swapl(&reply.blue);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    REPLY_FIELD_CARD32(red);
+    REPLY_FIELD_CARD32(green);
+    REPLY_FIELD_CARD32(blue);
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -1863,9 +1769,8 @@ ProcVidModeGetGammaRamp(ClientPtr client)
     xXF86VidModeGetGammaRampReply reply = {
         .size = stuff->size
     };
-    if (client->swapped) {
-        swaps(&reply.size);
-    }
+
+    REPLY_FIELD_CARD16(size);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -1890,10 +1795,8 @@ ProcVidModeGetGammaRampSize(ClientPtr client)
     xXF86VidModeGetGammaRampSizeReply reply = {
         .size = pVidMode->GetGammaRampSize(pScreen)
     };
-    if (client->swapped) {
-        swaps(&reply.size);
-    }
 
+    REPLY_FIELD_CARD16(size);
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
@@ -1915,11 +1818,9 @@ ProcVidModeGetPermissions(ClientPtr client)
                             XF86VM_WRITE_PERMISSION : 0)),
     };
 
-    if (client->swapped) {
-        swapl(&reply.permissions);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    REPLY_FIELD_CARD32(permissions);
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
