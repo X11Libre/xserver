@@ -1421,12 +1421,7 @@ ProcVidModeGetDotClocks(ClientPtr client)
     if (!ClockProg) {
         for (n = 0; n < numClocks; n++) {
             dotclock = Clocks[n];
-            if (client->swapped) {
-                WriteSwappedDataToClient(client, 4, (char *) &dotclock);
-            }
-            else {
-                WriteToClient(client, 4, &dotclock);
-            }
+            WriteSwappedDataToClient(client, 4, (char *) &dotclock);
         }
     }
 
