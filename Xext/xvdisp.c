@@ -1019,8 +1019,8 @@ ProcXvQueryImageAttributes(ClientPtr client)
     CARD16 width, height;
     XvImagePtr pImage = NULL;
     XvPortPtr pPort;
-    int *offsets;
-    int *pitches;
+    int32_t *offsets;
+    int32_t *pitches;
     int planeLength;
 
     REQUEST(xvQueryImageAttributesReq);
