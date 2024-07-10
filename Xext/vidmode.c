@@ -205,11 +205,34 @@ ProcVidModeQueryVersion(ClientPtr client)
         .minorVersion = SERVER_XF86VIDMODE_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-    }
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
     X_SEND_REPLY_SIMPLE(client, rep);
+}
+
+static int
+oldVidModeGetModeLineReply(ClientPtr client, xXF86VidModeGetModeLineReply *r)
+{
+    xXF86OldVidModeGetModeLineReply rep = {
+        .length = bytes_to_int32(sizeof(xXF86OldVidModeGetModeLineReply) -
+                                 sizeof(xGenericReply)),
+        .dotclock = r->dotclock,
+        .hdisplay = r->hdisplay,
+        .hsyncstart = r->hsyncstart,
+        .hsyncend = r->hsyncend,
+        .htotal = r->htotal,
+        .vdisplay = r->vdisplay,
+        .vsyncstart = r->vsyncstart,
+        .vsyncend = r->vsyncend,
+        .vtotal = r->vtotal,
+        .flags = r->flags,
+        .privsize = r->privsize
+    };
+
+    /* the fields already had been swapped by caller (except for length, which
+       will be swapped by REQUEST_SEND() */
+    REPLY_SEND();
+>>>>>>> 67b72e5d0a (Xext: vidmode: use REPLY_*() macros for preparing / sending replies)
     return Success;
 }
 
@@ -268,20 +291,19 @@ ProcVidModeGetModeLine(ClientPtr client)
            rep.vdisplay, rep.vsyncstart, rep.vsyncend,
            rep.vtotal, (unsigned long) rep.flags);
 
-    if (client->swapped) {
-        swapl(&rep.dotclock);
-        swaps(&rep.hdisplay);
-        swaps(&rep.hsyncstart);
-        swaps(&rep.hsyncend);
-        swaps(&rep.htotal);
-        swaps(&rep.hskew);
-        swaps(&rep.vdisplay);
-        swaps(&rep.vsyncstart);
-        swaps(&rep.vsyncend);
-        swaps(&rep.vtotal);
-        swapl(&rep.flags);
-        swapl(&rep.privsize);
-    }
+    REPLY_FIELD_CARD32(dotclock);
+    REPLY_FIELD_CARD16(hdisplay);
+    REPLY_FIELD_CARD16(hsyncstart);
+    REPLY_FIELD_CARD16(hsyncend);
+    REPLY_FIELD_CARD16(htotal);
+    REPLY_FIELD_CARD16(hskew);
+    REPLY_FIELD_CARD16(vdisplay);
+    REPLY_FIELD_CARD16(vsyncstart);
+    REPLY_FIELD_CARD16(vsyncend);
+    REPLY_FIELD_CARD16(vtotal);
+    REPLY_FIELD_CARD32(flags);
+    REPLY_FIELD_CARD32(privsize);
+
     if (ver < 2) {
         xXF86OldVidModeGetModeLineReply oldrep = {
             .dotclock = rep.dotclock,
@@ -378,19 +400,12 @@ ProcVidModeGetAllModeLines(ClientPtr client)
             fillModeInfoV2(&rpcbuf, dotClock, mode);
     } while (pVidMode->GetNextModeline(pScreen, &mode, &dotClock));
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xXF86VidModeGetAllModeLinesReply rep = {
         .modecount = modecount
     };
 
-    if (client->swapped) {
-        swapl(&rep.modecount);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD32(modecount);
+    return REPLY_SEND_RPCBUF();
 }
 
 #define MODEMATCH(mode,stuff)	  \
@@ -1094,13 +1109,11 @@ VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff
     xXF86VidModeValidateModeLineReply rep = {
         .status = status
     };
-    if (client->swapped) {
-        swapl(&rep.status);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
+
     DebugF("ValidateModeLine - Succeeded (status = %d)\n", status);
 
-    return Success;
+    REPLY_FIELD_CARD32(status);
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
@@ -1330,9 +1343,6 @@ ProcVidModeGetMonitor(ClientPtr client)
     x_rpcbuf_write_string_pad(&rpcbuf, vendorStr);
     x_rpcbuf_write_string_pad(&rpcbuf, modelStr);
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xXF86VidModeGetMonitorReply rep = {
         .nhsync = nHsync,
         .nvsync = nVrefresh,
@@ -1340,8 +1350,7 @@ ProcVidModeGetMonitor(ClientPtr client)
         .modelLength = x_safe_strlen(modelStr),
     };
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return REPLY_SEND_RPCBUF();
 }
 
 static int
@@ -1371,12 +1380,10 @@ ProcVidModeGetViewPort(ClientPtr client)
         .y = y
     };
 
-    if (client->swapped) {
-        swapl(&rep.x);
-        swapl(&rep.y);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(x);
+    REPLY_FIELD_CARD32(y);
+    return X_SEND_REPLY_SIMPLE(client, rep);
+    REPLY_SEND();
 }
 
 static int
@@ -1450,23 +1457,16 @@ ProcVidModeGetDotClocks(ClientPtr client)
         free(Clocks);
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xXF86VidModeGetDotClocksReply rep = {
         .clocks = numClocks,
         .maxclocks = MAXCLOCKS,
         .flags = (ClockProg ? CLKFLAG_PROGRAMABLE : 0),
     };
 
-    if (client->swapped) {
-        swapl(&rep.clocks);
-        swapl(&rep.maxclocks);
-        swapl(&rep.flags);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD32(clocks);
+    REPLY_FIELD_CARD32(maxclocks);
+    REPLY_FIELD_CARD32(flags);
+    return REPLY_SEND_RPCBUF();
 }
 
 static int
@@ -1531,11 +1531,10 @@ ProcVidModeGetGamma(ClientPtr client)
         .green = (CARD32) (green * 10000.),
         .blue = (CARD32) (blue * 10000.)
     };
-    if (client->swapped) {
-        swapl(&rep.red);
-        swapl(&rep.green);
-        swapl(&rep.blue);
-    }
+
+    REPLY_FIELD_CARD32(red);
+    REPLY_FIELD_CARD32(green);
+    REPLY_FIELD_CARD32(blue);
     X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
@@ -1626,14 +1625,11 @@ ProcVidModeGetGammaRamp(ClientPtr client)
     xXF86VidModeGetGammaRampReply rep = {
         .size = stuff->size
     };
-    if (client->swapped) {
-        swaps(&rep.size);
-    }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_BUF_CARD16((short *) ramp, length * 3);
+    REPLY_FIELD_CARD16(size);
+    return REPLY_SEND_RPCBUF();
 }
-
 
 static int
 ProcVidModeGetGammaRampSize(ClientPtr client)
@@ -1655,9 +1651,8 @@ ProcVidModeGetGammaRampSize(ClientPtr client)
     xXF86VidModeGetGammaRampSizeReply rep = {
         .size = pVidMode->GetGammaRampSize(pScreen)
     };
-    if (client->swapped) {
-        swaps(&rep.size);
-    }
+
+    REPLY_FIELD_CARD16(size);
     X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
@@ -1677,11 +1672,8 @@ ProcVidModeGetPermissions(ClientPtr client)
                             XF86VM_WRITE_PERMISSION : 0)),
     };
 
-    if (client->swapped) {
-        swapl(&rep.permissions);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(permissions);
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
