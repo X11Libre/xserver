@@ -993,7 +993,7 @@ ProcXvQueryImageAttributes(ClientPtr client)
 
     // allocating for `offsets` as well as `pitches` in one block
     // both having CARD32 * num_planes (actually int32_t put into CARD32)
-    if (!(offsets = malloc(num_planes * sizeof(CARD32) * 2)))
+    if (!(offsets = alloca(num_planes * sizeof(CARD32) * 2)))
         return BadAlloc;
     pitches = offsets + num_planes;
 
@@ -1018,8 +1018,6 @@ ProcXvQueryImageAttributes(ClientPtr client)
     if (client->swapped)
         SwapLongs((CARD32 *) offsets, rep.length);
     WriteToClient(client, rep.length * sizeof(CARD32), offsets);
-
-    free(offsets);
 
     return Success;
 }
