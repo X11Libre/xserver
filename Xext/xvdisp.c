@@ -1021,7 +1021,6 @@ ProcXvQueryImageAttributes(ClientPtr client)
     XvPortPtr pPort;
     int32_t *offsets;
     int32_t *pitches;
-    int planeLength;
 
     REQUEST(xvQueryImageAttributesReq);
 
@@ -1046,7 +1045,9 @@ ProcXvQueryImageAttributes(ClientPtr client)
 
     num_planes = pImage->num_planes;
 
-    if (!(offsets = calloc(1, num_planes << 3)))
+    // allocating for `offsets` as well as `pitches` in one block
+    // both having CARD32 * num_planes (actually int32_t put into CARD32)
+    if (!(offsets = calloc(num_planes*2, sizeof(CARD32))))
         return BadAlloc;
     pitches = offsets + num_planes;
 
@@ -1060,7 +1061,7 @@ ProcXvQueryImageAttributes(ClientPtr client)
     rep = (xvQueryImageAttributesReply) {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = planeLength = num_planes << 1,
+        .length = num_planes * 2, // in 32bit units
         .num_planes = num_planes,
         .width = width,
         .height = height,
@@ -1069,8 +1070,8 @@ ProcXvQueryImageAttributes(ClientPtr client)
 
     _WriteQueryImageAttributesReply(client, &rep);
     if (client->swapped)
-        SwapLongs((CARD32 *) offsets, planeLength);
-    WriteToClient(client, planeLength << 2, offsets);
+        SwapLongs((CARD32 *) offsets, rep.length);
+    WriteToClient(client, rep.length * sizeof(CARD32), offsets);
 
     free(offsets);
 
