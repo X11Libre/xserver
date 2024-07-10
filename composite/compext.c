@@ -119,12 +119,10 @@ ProcCompositeQueryVersion(ClientPtr client)
 
     pCompositeClient->major_version = rep.majorVersion;
     pCompositeClient->minor_version = rep.minorVersion;
-    if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    REPLY_FIELD_CARD32(majorVersion);
+    REPLY_FIELD_CARD32(minorVersion);
+    return REPLY_SEND();
 }
 
 #define VERIFY_WINDOW(pWindow, wid, client, mode)			\
@@ -300,11 +298,8 @@ SingleCompositeGetOverlayWindow(ClientPtr client, xCompositeGetOverlayWindowReq 
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
-    if (client->swapped) {
-        swapl(&rep.overlayWin);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(overlayWin);
+    return REPLY_SEND();
 }
 
 static int
@@ -666,7 +661,6 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
     if (!compositeUseXinerama)
         return SingleCompositeGetOverlayWindow(client, stuff);
 
-    xCompositeGetOverlayWindowReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
     CompScreenPtr cs;
@@ -745,15 +739,12 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
 
     cs = GetCompScreen(screenInfo.screens[0]);
 
-    rep = (xCompositeGetOverlayWindowReply) {
+    xCompositeGetOverlayWindowReply rep = {
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
-    if (client->swapped) {
-        swapl(&rep.overlayWin);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(overlayWin);
+    return REPLY_SEND();
 #else
     return SingleCompositeGetOverlayWindow(client, stuff);
 #endif /* XINERAMA */
