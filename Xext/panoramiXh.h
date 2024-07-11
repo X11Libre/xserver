@@ -65,8 +65,6 @@ int ProcPanoramiXGetScreenSize(ClientPtr client);
 int ProcXineramaQueryScreens(ClientPtr client);
 int ProcXineramaIsActive(ClientPtr client);
 
-int SProcPanoramiXDispatch(ClientPtr client);
-
 extern int connBlockScreenStart;
 extern xConnSetupPrefix connSetupPrefix;
 
