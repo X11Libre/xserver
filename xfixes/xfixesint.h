@@ -61,6 +61,7 @@
 #include "xfixes.h"
 
 extern int XFixesEventBase;
+extern int XFixesUseXinerama;
 
 typedef struct _XFixesClient {
     CARD32 major_version;
@@ -252,15 +253,6 @@ int
 int
  SProcXFixesExpandRegion(ClientPtr client);
 
-int
- PanoramiXFixesSetGCClipRegion(ClientPtr client);
-
-int
- PanoramiXFixesSetWindowShapeRegion(ClientPtr client);
-
-int
- PanoramiXFixesSetPictureClipRegion(ClientPtr client);
-
 /* Cursor Visibility (Version 4) */
 
 int
@@ -311,7 +303,6 @@ Bool
 
 /* Xinerama */
 #ifdef XINERAMA
-extern int (*PanoramiXSaveXFixesVector[XFixesNumberRequests]) (ClientPtr);
 void PanoramiXFixesInit(void);
 void PanoramiXFixesReset(void);
 #endif /* XINERAMA */
