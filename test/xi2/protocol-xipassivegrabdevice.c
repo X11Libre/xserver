@@ -139,7 +139,14 @@ request_XIPassiveGrabDevice(ClientPtr client, xXIPassiveGrabDeviceReq * req,
     int mask_len;
 
     client_request.req_len = req->length;
+    fprintf(stderr, "request_XIPassiveGrabDevice: calling unswapped\n");
+    if (client_request.swapped)
+        printf(stderr, "WHOO client is swapped ?\n");
+    else
+        printf(stderr, "client isn't swapped. as it should be\n");
     rc = ProcXIPassiveGrabDevice(&client_request);
+
+    fprintf(stderr, "request_XIPassiveGrabDevice: expected %d got %d\n", error, rc);
     assert(rc == error);
 
     if (rc != Success)
@@ -163,7 +170,9 @@ request_XIPassiveGrabDevice(ClientPtr client, xXIPassiveGrabDeviceReq * req,
         swapl(mod);
     }
 
+    fprintf(stderr, "request_XIPassiveGrabDevice: calling swapped\n");
     rc = ProcXIPassiveGrabDevice(&client_request);
+    fprintf(stderr, "request_XIPassiveGrabDevice: expected %d got %d\n", error, rc);
     assert(rc == error);
 
     if (rc != Success)
