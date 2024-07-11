@@ -44,7 +44,7 @@ if build_xf86bigfont
 endif
 
 if build_xinerama
-    srcs_xext += ['panoramiX.c', 'panoramiXprocs.c', 'panoramiXSwap.c']
+    srcs_xext += ['panoramiX.c', 'panoramiXprocs.c']
     hdrs_xext += ['panoramiX.h', 'panoramiXsrv.h']
 endif
 
