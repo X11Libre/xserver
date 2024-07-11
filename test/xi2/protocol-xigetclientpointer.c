@@ -84,12 +84,9 @@ request_XIGetClientPointer(ClientPtr client, xXIGetClientPointerReq * req,
 
     test_data.win = req->win;
 
-    fprintf(stderr, "request_XIGetClientPointer(): win=%d\n", req->win);
-
-    fprintf(stderr, "request_XIGetClientPointer() unswapped\n");
-
+    fprintf(stderr, "request_XIGetClientPointer(): non-swapped win=%d\n", req->win);
     rc = ProcXIGetClientPointer(&client_request);
-    fprintf(stderr, "expecting %d - got %d\n", error, rc);
+    fprintf(stderr, "request_XIGetClientPointer(): expecting %d - got %d\n", error, rc);
     assert(rc == error);
 
     if (rc == BadWindow)
