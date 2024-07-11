@@ -168,7 +168,6 @@ int
 ProcXGetDeviceControl(ClientPtr client)
 {
     int rc, total_length = 0;
-    char *buf, *savbuf;
     DeviceIntPtr dev;
 
     REQUEST(xGetDeviceControlReq);
@@ -177,7 +176,6 @@ ProcXGetDeviceControl(ClientPtr client)
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
-
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
@@ -199,10 +197,8 @@ ProcXGetDeviceControl(ClientPtr client)
         return BadValue;
     }
 
-    buf = (char *) malloc(total_length);
-    if (!buf)
-        return BadAlloc;
-    savbuf = buf;
+    char buf[total_length];
+    memset(buf, 0, sizeof(buf));
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
@@ -226,7 +222,6 @@ ProcXGetDeviceControl(ClientPtr client)
     };
 
     WriteReplyToClient(client, sizeof(xGetDeviceControlReply), &rep);
-    WriteToClient(client, total_length, savbuf);
-    free(savbuf);
+    WriteToClient(client, total_length, buf);
     return Success;
 }
