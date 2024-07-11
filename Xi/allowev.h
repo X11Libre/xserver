@@ -30,9 +30,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef ALLOWEV_H
 #define ALLOWEV_H 1
 
-int SProcXAllowDeviceEvents(ClientPtr   /* client */
-    );
-
 int ProcXAllowDeviceEvents(ClientPtr    /* client */
     );
 
