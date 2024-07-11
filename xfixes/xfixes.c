@@ -257,32 +257,18 @@ XFixesExtensionInit(void)
 
 #ifdef XINERAMA
 
-int (*PanoramiXSaveXFixesVector[XFixesNumberRequests]) (ClientPtr);
+int XFixesUseXinerama = 0;
 
 void
 PanoramiXFixesInit(void)
 {
-    int i;
-
-    for (i = 0; i < XFixesNumberRequests; i++)
-        PanoramiXSaveXFixesVector[i] = ProcXFixesVector[i];
-    /*
-     * Stuff in Xinerama aware request processing hooks
-     */
-    ProcXFixesVector[X_XFixesSetGCClipRegion] = PanoramiXFixesSetGCClipRegion;
-    ProcXFixesVector[X_XFixesSetWindowShapeRegion] =
-        PanoramiXFixesSetWindowShapeRegion;
-    ProcXFixesVector[X_XFixesSetPictureClipRegion] =
-        PanoramiXFixesSetPictureClipRegion;
+    XFixesUseXinerama = 1;
 }
 
 void
 PanoramiXFixesReset(void)
 {
-    int i;
-
-    for (i = 0; i < XFixesNumberRequests; i++)
-        ProcXFixesVector[i] = PanoramiXSaveXFixesVector[i];
+    XFixesUseXinerama = 0;
 }
 
 #endif /* XINERAMA */
