@@ -137,6 +137,7 @@ request_XIPassiveGrabDevice(ClientPtr client, xXIPassiveGrabDeviceReq * req,
     int mask_len;
 
     client_request.req_len = req->length;
+    client_request.swapped = FALSE;
     rc = ProcXIPassiveGrabDevice(&client_request);
     assert(rc == error);
 
