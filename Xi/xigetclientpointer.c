@@ -50,17 +50,33 @@ ProcXIGetClientPointer(ClientPtr client)
     int rc;
     ClientPtr winclient;
 
+    if (client->swapped) {
+        fprintf(stderr, "ProcXIGetClientPointer() client is swapped\n");
+    } else {
+        fprintf(stderr, "ProcXIGetClientPointer() client NOT swapped\n");
+    }
+
     REQUEST_HEAD_STRUCT(xXIGetClientPointerReq);
+
+    fprintf(stderr, "ProcXIGetClientPointer() raw win=%d\n", stuff->win);
+
     REQUEST_FIELD_CARD32(win);
 
+    fprintf(stderr, "ProcXIGetClientPointer() win=%d\n", stuff->win);
+
     if (stuff->win != None) {
+        fprintf(stderr, "window given: %d\n", stuff->win);
         rc = dixLookupClient(&winclient, stuff->win, client, DixGetAttrAccess);
 
-        if (rc != Success)
+        if (rc != Success) {
+            fprintf(stderr, "dixLookupClient() returned %d -- BadWindow\n", rc);
             return BadWindow;
+        }
     }
-    else
+    else {
+        fprintf(stderr, "window is NONE\n");
         winclient = client;
+    }
 
     xXIGetClientPointerReply rep = {
         .repType = X_Reply,
@@ -69,6 +85,8 @@ ProcXIGetClientPointer(ClientPtr client)
         .set = (winclient->clientPtr != NULL),
         .deviceid = (winclient->clientPtr) ? winclient->clientPtr->id : 0
     };
+
+    fprintf(stderr, ".set=%d .deviceid=%d\n", rep.set, rep.deviceid);
 
     WriteReplyToClient(client, sizeof(xXIGetClientPointerReply), &rep);
     return Success;

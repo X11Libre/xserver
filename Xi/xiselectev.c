@@ -27,6 +27,8 @@
 #include <dix-config.h>
 #endif
 
+#include <stdio.h>
+
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
@@ -122,28 +124,40 @@ ProcXISelectEvents(ClientPtr client)
     REQUEST_FIELD_CARD32(win);
     REQUEST_FIELD_CARD16(num_masks);
 
-    if (stuff->num_masks == 0)
+    fprintf(stderr, "ProcXISelectEvents\n");
+
+    if (stuff->num_masks == 0) {
+        fprintf(stderr, "ProcXISelectEvents: num_masks=0\n");
         return BadValue;
+    }
 
     if (client->swapped) {
         int i;
         int len;
         xXIEventMask *evmask;
 
+        fprintf(stderr, "ProcXISelectEvents: client is swapped\n");
+
         len = stuff->length - bytes_to_int32(sizeof(xXISelectEventsReq));
         evmask = (xXIEventMask *) &stuff[1];
         for (i = 0; i < stuff->num_masks; i++) {
-            if (len < bytes_to_int32(sizeof(xXIEventMask)))
+            if (len < bytes_to_int32(sizeof(xXIEventMask))) {
+                fprintf(stderr, "ProcXISelectEvents: 2 len mismatch %d vs %d\n", len, bytes_to_int32(sizeof(xXIEventMask)));
                 return BadLength;
+            }
             len -= bytes_to_int32(sizeof(xXIEventMask));
             swaps(&evmask->deviceid);
             swaps(&evmask->mask_len);
-            if (len < evmask->mask_len)
+            if (len < evmask->mask_len) {
+                fprintf(stderr, "ProcXISelectEvents: 2 len mismatch %d vs %d\n", len, evmask->mask_len);
                 return BadLength;
+            }
             len -= evmask->mask_len;
             evmask =
                 (xXIEventMask *) (((char *) &evmask[1]) + evmask->mask_len * 4);
         }
+    } else {
+        fprintf(stderr, "ProcXISelectEvents: client NOT swapped\n");
     }
 
     int rc, num_masks;
@@ -154,9 +168,14 @@ ProcXISelectEvents(ClientPtr client)
     int *types = NULL;
     int len;
 
+    fprintf(stderr, "ProcXISelectEvents:: num_masks=%d length/4=%d window=%d\n",
+        stuff->num_masks, stuff->length, stuff->win);
+
     rc = dixLookupWindow(&win, stuff->win, client, DixReceiveAccess);
-    if (rc != Success)
+    if (rc != Success) {
+        fprintf(stderr, "ProcXISelectEvents: window lookup failed\n");
         return rc;
+    }
 
     len = sz_xXISelectEventsReq;
 
@@ -166,8 +185,10 @@ ProcXISelectEvents(ClientPtr client)
     while (num_masks--) {
         len += sizeof(xXIEventMask) + evmask->mask_len * 4;
 
-        if (bytes_to_int32(len) > stuff->length)
+        if (bytes_to_int32(len) > stuff->length) {
+            fprintf(stderr, "ProcXISelectEvents: BadLength 1\n");
             return BadLength;
+        }
 
         if (evmask->deviceid != XIAllDevices &&
             evmask->deviceid != XIAllMasterDevices)
@@ -175,8 +196,10 @@ ProcXISelectEvents(ClientPtr client)
         else {
             /* XXX: XACE here? */
         }
-        if (rc != Success)
+        if (rc != Success) {
+            fprintf(stderr, "ProcXISelectEvents: no success\n");
             return rc;
+        }
 
         /* hierarchy event mask is not allowed on devices */
         if (evmask->deviceid != XIAllDevices && evmask->mask_len >= 1) {
@@ -184,6 +207,7 @@ ProcXISelectEvents(ClientPtr client)
 
             if (BitIsOn(bits, XI_HierarchyChanged)) {
                 client->errorValue = XI_HierarchyChanged;
+                fprintf(stderr, "ProcXISelectEvents: badvalue 2\n");
                 return BadValue;
             }
         }
@@ -201,6 +225,7 @@ ProcXISelectEvents(ClientPtr client)
                 BitIsOn(bits, XI_RawTouchUpdate) ||
                 BitIsOn(bits, XI_RawTouchEnd)) {
                 client->errorValue = XI_RawKeyPress;
+                fprintf(stderr, "ProcXISelectEvents: badvalue 3\n");
                 return BadValue;
             }
         }
@@ -217,6 +242,7 @@ ProcXISelectEvents(ClientPtr client)
                  !BitIsOn(bits, XI_TouchUpdate) ||
                  !BitIsOn(bits, XI_TouchEnd))) {
                 client->errorValue = XI_TouchBegin;
+                fprintf(stderr, "ProcXISelectEvents: badvalue 4\n");
                 return BadValue;
             }
 
@@ -228,6 +254,7 @@ ProcXISelectEvents(ClientPtr client)
                  !BitIsOn(bits, XI_GesturePinchUpdate) ||
                  !BitIsOn(bits, XI_GesturePinchEnd))) {
                 client->errorValue = XI_GesturePinchBegin;
+                fprintf(stderr, "ProcXISelectEvents: badvalue 5\n");
                 return BadValue;
             }
 
@@ -239,6 +266,7 @@ ProcXISelectEvents(ClientPtr client)
                  BitIsOn(bits, XI_GestureSwipeUpdate)))
             {
                 client->errorValue = XI_GestureSwipeBegin;
+                fprintf(stderr, "ProcXISelectEvents: badvalue 6\n");
                 return BadValue;
             }
 
@@ -250,6 +278,7 @@ ProcXISelectEvents(ClientPtr client)
                  !BitIsOn(bits, XI_GestureSwipeUpdate) ||
                  !BitIsOn(bits, XI_GestureSwipeEnd))) {
                 client->errorValue = XI_GestureSwipeBegin;
+                fprintf(stderr, "ProcXISelectEvents: badvalue 7\n");
                 return BadValue;
             }
 
@@ -261,30 +290,39 @@ ProcXISelectEvents(ClientPtr client)
                                                          win,
                                                          evmask->deviceid,
                                                          XI_TouchBegin);
-                if (rc != Success)
+                if (rc != Success) {
+                    fprintf(stderr, "ProcXISelectEvents: no success 2\n");
                     return rc;
+                }
             }
             if (BitIsOn(bits, XI_GesturePinchBegin)) {
                 rc = check_for_touch_selection_conflicts(client,
                                                          win,
                                                          evmask->deviceid,
                                                          XI_GesturePinchBegin);
-                if (rc != Success)
+                if (rc != Success) {
+                    fprintf(stderr, "ProcXISelectEvents: no success 3\n");
                     return rc;
+                }
             }
             if (BitIsOn(bits, XI_GestureSwipeBegin)) {
                 rc = check_for_touch_selection_conflicts(client,
                                                          win,
                                                          evmask->deviceid,
                                                          XI_GestureSwipeBegin);
-                if (rc != Success)
+                if (rc != Success) {
+                    fprintf(stderr, "ProcXISelectEvents: no success 4\n");
                     return rc;
+                }
             }
         }
 
         if (XICheckInvalidMaskBits(client, (unsigned char *) &evmask[1],
                                    evmask->mask_len * 4) != Success)
+        {
+            fprintf(stderr, "ProcXISelectEvents: check invalid mask bits failed\n");
             return BadValue;
+        }
 
         evmask =
             (xXIEventMask *) (((unsigned char *) evmask) +
@@ -292,8 +330,13 @@ ProcXISelectEvents(ClientPtr client)
         evmask++;
     }
 
-    if (bytes_to_int32(len) != stuff->length)
+    fprintf(stderr, "ProcXISelectEvents: len=%d len/4=%d stuff->length=%d\n",
+        len, bytes_to_int32(len), stuff->length);
+
+    if (bytes_to_int32(len) != stuff->length) {
+        fprintf(stderr, "ProcXISelectEvents: BadLength #3\n");
         return BadLength;
+    }
 
     /* Set masks on window */
     evmask = (xXIEventMask *) &stuff[1];
@@ -307,8 +350,10 @@ ProcXISelectEvents(ClientPtr client)
         else
             dixLookupDevice(&dev, evmask->deviceid, client, DixUseAccess);
         if (XISetEventMask(dev, win, client, evmask->mask_len * 4,
-                           (unsigned char *) &evmask[1]) != Success)
+                           (unsigned char *) &evmask[1]) != Success) {
+            fprintf(stderr, "ProcXISelectEvents: BadAlloc #3\n");
             return BadAlloc;
+        }
         evmask =
             (xXIEventMask *) (((unsigned char *) evmask) +
                               evmask->mask_len * 4);
@@ -318,6 +363,7 @@ ProcXISelectEvents(ClientPtr client)
     RecalculateDeliverableEvents(win);
 
     free(types);
+    fprintf(stderr, "ProcXISelectEvents: Success\n");
     return Success;
 }
 

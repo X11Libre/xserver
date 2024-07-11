@@ -2,7 +2,7 @@
 #define TESTS_H
 
 extern int verbose;
-#define dbg(...) if (verbose) printf("DBG" __VA_ARGS__);
+#define dbg(...) if (verbose) fprintf(stderr, "DBG" __VA_ARGS__);
 
 #define DECLARE_WRAP_FUNCTION(f_, rval_, ...) \
     extern rval_ (*wrapped_ ## f_)(__VA_ARGS__) \

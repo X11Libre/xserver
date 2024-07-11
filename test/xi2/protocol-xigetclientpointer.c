@@ -31,6 +31,7 @@
 /*
  * Protocol testing for XIGetClientPointer request.
  */
+#include <stdio.h>
 #include <stdint.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -83,21 +84,30 @@ request_XIGetClientPointer(ClientPtr client, xXIGetClientPointerReq * req,
 
     test_data.win = req->win;
 
+    fprintf(stderr, "request_XIGetClientPointer(): win=%d\n", req->win);
+
+    fprintf(stderr, "request_XIGetClientPointer() unswapped\n");
+
     rc = ProcXIGetClientPointer(&client_request);
+    fprintf(stderr, "expecting %d - got %d\n", error, rc);
     assert(rc == error);
 
     if (rc == BadWindow)
         assert(client_request.errorValue == req->win);
 
+    fprintf(stderr, "request_XIGetClientPointer() swapped win=%d\n", req->win);
     client_request.swapped = TRUE;
+    fprintf(stderr, "  sending win=%d length=%d\n", req->win, req->length);
     swapl(&req->win);
     swaps(&req->length);
+    fprintf(stderr, "  swapped win=%d length=%d\n", req->win, req->length);
     rc = ProcXIGetClientPointer(&client_request);
     assert(rc == error);
 
     if (rc == BadWindow)
         assert(client_request.errorValue == req->win);
 
+    fprintf(stderr, "request_XIGetClientPointer() done\n");
 }
 
 static void

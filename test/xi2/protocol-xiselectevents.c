@@ -51,6 +51,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2proto.h>
@@ -87,6 +88,8 @@ request_XISelectEvent(xXISelectEventsReq * req, int error)
     ClientRec client;
     xXIEventMask *mask, *next;
 
+    fprintf(stderr, "request_XISelectEvent() trying unswapped\n");
+
     req->length = (sz_xXISelectEventsReq / 4);
     mask = (xXIEventMask *) &req[1];
     for (i = 0; i < req->num_masks; i++) {
@@ -96,8 +99,17 @@ request_XISelectEvent(xXISelectEventsReq * req, int error)
 
     client = init_client(req->length, req);
 
+    fprintf(stderr, "request_XISelectEvent --> length=%d\n", req->length);
+    fprintf(stderr, "request_XISelectEvent --> num_masks=%d\n", req->num_masks);
+    fprintf(stderr, "request_XISelectEvent --> win=%d\n", req->win);
+
     rc = ProcXISelectEvents(&client);
     assert(rc == error);
+
+    fprintf(stderr, "request_XISelectEvent() trying swapped\n");
+    fprintf(stderr, "request_XISelectEvent --> length=%d\n", req->length);
+    fprintf(stderr, "request_XISelectEvent --> num_masks=%d\n", req->num_masks);
+    fprintf(stderr, "request_XISelectEvent --> win=%d\n", req->win);
 
     client.swapped = TRUE;
 
@@ -112,8 +124,16 @@ request_XISelectEvent(xXISelectEventsReq * req, int error)
     swapl(&req->win);
     swaps(&req->length);
     swaps(&req->num_masks);
+
+    fprintf(stderr, "request_XISelectEvent() after swapping\n");
+    fprintf(stderr, "request_XISelectEvent --> length=%d\n", req->length);
+    fprintf(stderr, "request_XISelectEvent --> num_masks=%d\n", req->num_masks);
+    fprintf(stderr, "request_XISelectEvent --> win=%d\n", req->win);
+
     rc = ProcXISelectEvents(&client);
     assert(rc == error);
+
+    fprintf(stderr, "request_XISelectEvent() done\n");
 }
 
 static void
