@@ -83,6 +83,7 @@ request_XIGetClientPointer(ClientPtr client, xXIGetClientPointerReq * req,
     int rc;
 
     test_data.win = req->win;
+    client_request.swapped = FALSE;
 
     fprintf(stderr, "request_XIGetClientPointer(): non-swapped win=%d\n", req->win);
     rc = ProcXIGetClientPointer(&client_request);
