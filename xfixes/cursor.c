@@ -369,8 +369,6 @@ ProcXFixesGetCursorImage(ClientPtr client)
     CopyCursorToImage(pCursor, image);
 
     xXFixesGetCursorImageReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .length = npixels,
         .width = width,
         .height = height,
@@ -381,20 +379,15 @@ ProcXFixesGetCursorImage(ClientPtr client)
         .cursorSerial = pCursor->serialNumber,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.xhot);
-        swaps(&rep.yhot);
-        swapl(&rep.cursorSerial);
-        SwapLongs(image, npixels);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, npixels * sizeof(CARD32), image);
+    REPLY_FIELD_CARD16(x);
+    REPLY_FIELD_CARD16(y);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_FIELD_CARD16(xhot);
+    REPLY_FIELD_CARD16(yhot);
+    REPLY_FIELD_CARD32(cursorSerial);
+    REPLY_BUF_CARD32(image, npixels);
+    REPLY_SEND_EXTRA(image, npixels * sizeof(CARD32));
     free(image);
     return Success;
 }
@@ -439,21 +432,12 @@ ProcXFixesGetCursorName(ClientPtr client)
     len = strlen(str);
 
     xXFixesGetCursorNameReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(len),
         .atom = pCursor->name,
         .nbytes = len
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.atom);
-        swaps(&rep.nbytes);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, len, str);
-
+    REPLY_FIELD_CARD32(atom);
+    REPLY_FIELD_CARD16(nbytes);
+    REPLY_SEND_EXTRA(str, len);
     return Success;
 }
 
@@ -493,9 +477,6 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     memcpy((image + npixels), name, nbytes);
 
     xXFixesGetCursorImageAndNameReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(image_size),
         .width = width,
         .height = height,
         .x = x,
@@ -507,22 +488,17 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
         .nbytes = nbytes,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.xhot);
-        swaps(&rep.yhot);
-        swapl(&rep.cursorSerial);
-        swapl(&rep.cursorName);
-        swaps(&rep.nbytes);
-        SwapLongs(image, npixels);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, image_size, image);
+    REPLY_FIELD_CARD16(x);
+    REPLY_FIELD_CARD16(y);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_FIELD_CARD16(xhot);
+    REPLY_FIELD_CARD16(yhot);
+    REPLY_FIELD_CARD32(cursorSerial);
+    REPLY_FIELD_CARD32(cursorName);
+    REPLY_FIELD_CARD16(nbytes);
+    REPLY_BUF_CARD32(image, npixels);
+    REPLY_SEND_EXTRA(image, image_size);
     free(image);
     return Success;
 }
