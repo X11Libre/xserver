@@ -197,7 +197,7 @@ SProcXFixesSelectSelectionInput(ClientPtr client)
     swapl(&stuff->window);
     swapl(&stuff->selection);
     swapl(&stuff->eventMask);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesSelectSelectionInput(client);
 }
 
 void _X_COLD
