@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/selection_priv.h"
 
 #include "xfixesint.h"
@@ -134,6 +135,9 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
 {
     REQUEST(xXFixesSelectSelectionInputReq);
     REQUEST_SIZE_MATCH(xXFixesSelectSelectionInputReq);
+    REQUEST_FIELD_CARD32(window);
+    REQUEST_FIELD_CARD32(selection);
+    REQUEST_FIELD_CARD32(eventMask);
 
     /* allow extensions to intercept */
     SelectionFilterParamRec param = {
@@ -214,17 +218,6 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
     }
     e->eventMask = stuff->eventMask;
     return Success;
-}
-
-int _X_COLD
-SProcXFixesSelectSelectionInput(ClientPtr client)
-{
-    REQUEST(xXFixesSelectSelectionInputReq);
-    REQUEST_SIZE_MATCH(xXFixesSelectSelectionInputReq);
-    swapl(&stuff->window);
-    swapl(&stuff->selection);
-    swapl(&stuff->eventMask);
-    return ProcXFixesSelectSelectionInput(client);
 }
 
 void _X_COLD
