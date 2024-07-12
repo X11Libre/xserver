@@ -435,14 +435,10 @@ ProcXFixesFetchRegion(ClientPtr client)
         .height = pExtent->y2 - pExtent->y1,
     };
 
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swaps(&reply.x);
-        swaps(&reply.y);
-        swaps(&reply.width);
-        swaps(&reply.height);
-    }
+    REPLY_FIELD_CARD16(x);
+    REPLY_FIELD_CARD16(y);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

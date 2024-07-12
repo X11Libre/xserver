@@ -84,9 +84,7 @@ ProcXFixesGetClientDisconnectMode(ClientPtr client)
         .disconnect_mode = pDisconnect->disconnect_mode,
     };
 
-    if (client->swapped) {
-        swapl(&reply.disconnect_mode);
-    }
+    REPLY_FIELD_CARD32(disconnect_mode);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
