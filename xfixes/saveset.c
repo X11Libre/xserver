@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 
 #include "xfixesint.h"
@@ -30,15 +31,12 @@
 int
 ProcXFixesChangeSaveSet(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xXFixesChangeSaveSetReq);
+    X_REQUEST_FIELD_CARD32(window);
+
     Bool toRoot, map;
     int result;
     WindowPtr pWin;
-
-    REQUEST(xXFixesChangeSaveSetReq);
-    REQUEST_SIZE_MATCH(xXFixesChangeSaveSetReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
 
     result = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
     if (result != Success)
