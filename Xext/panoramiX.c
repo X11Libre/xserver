@@ -884,10 +884,8 @@ ProcPanoramiXQueryVersion(ClientPtr client)
         .minorVersion = SERVER_PANORAMIX_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -910,9 +908,7 @@ ProcPanoramiXGetState(ClientPtr client)
         .window = stuff->window
     };
 
-    if (client->swapped) {
-        swapl(&reply.window);
-    }
+    REPLY_FIELD_CARD32(window);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -935,9 +931,7 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
         .window = stuff->window
     };
 
-    if (client->swapped) {
-        swapl(&reply.window);
-    }
+    REPLY_FIELD_CARD32(window);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -969,12 +963,10 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
         .screen = stuff->screen
     };
 
-    if (client->swapped) {
-        swapl(&reply.width);
-        swapl(&reply.height);
-        swapl(&reply.window);
-        swapl(&reply.screen);
-    }
+    REPLY_FIELD_CARD32(width);
+    REPLY_FIELD_CARD32(height);
+    REPLY_FIELD_CARD32(window);
+    REPLY_FIELD_CARD32(screen);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -994,9 +986,7 @@ ProcXineramaIsActive(ClientPtr client)
 #endif
     };
 
-    if (client->swapped) {
-        swapl(&reply.state);
-    }
+    REPLY_FIELD_CARD32(state);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1011,10 +1001,6 @@ ProcXineramaQueryScreens(ClientPtr client)
         .number = number
     };
 
-    if (client->swapped) {
-        swapl(&reply.number);
-    }
-
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!noPanoramiXExtension) {
@@ -1028,6 +1014,7 @@ ProcXineramaQueryScreens(ClientPtr client)
         });
     }
 
+    REPLY_FIELD_CARD32(number);
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
