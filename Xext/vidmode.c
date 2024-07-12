@@ -1200,7 +1200,6 @@ static int
 ProcVidModeGetMonitor(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetMonitorReq);
-    CARD32 *hsyncdata, *vsyncdata;
     ScreenPtr pScreen;
     VidModePtr pVidMode;
     int i, nHsync, nVrefresh, vendorLength = 0, modelLength = 0;
@@ -1244,16 +1243,8 @@ ProcVidModeGetMonitor(ClientPtr client)
                                  pad_to_int32(modelLength)),
     };
 
-    hsyncdata = xallocarray(nHsync, sizeof(CARD32));
-    if (!hsyncdata) {
-        return BadAlloc;
-    }
-    vsyncdata = xallocarray(nVrefresh, sizeof(CARD32));
-
-    if (!vsyncdata) {
-        free(hsyncdata);
-        return BadAlloc;
-    }
+    CARD32 hsyncdata[nHsync];
+    CARD32 vsyncdata[nVrefresh];
 
     for (i = 0; i < nHsync; i++) {
         hsyncdata[i] = (unsigned short) (pVidMode->GetMonitorValue(pScreen,
@@ -1286,9 +1277,6 @@ ProcVidModeGetMonitor(ClientPtr client)
     if (rep.modelLength)
         WriteToClient(client, rep.modelLength,
                  (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0)).ptr);
-
-    free(hsyncdata);
-    free(vsyncdata);
 
     return Success;
 }
