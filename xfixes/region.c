@@ -100,7 +100,7 @@ SProcXFixesCreateRegion(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionReq);
     swapl(&stuff->region);
     SwapRestS(stuff);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesCreateRegion(client);
 }
 
 int
@@ -142,7 +142,7 @@ SProcXFixesCreateRegionFromBitmap(ClientPtr client)
     REQUEST_SIZE_MATCH(xXFixesCreateRegionFromBitmapReq);
     swapl(&stuff->region);
     swapl(&stuff->bitmap);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesCreateRegionFromBitmap(client);
 }
 
 int
@@ -199,7 +199,7 @@ SProcXFixesCreateRegionFromWindow(ClientPtr client)
     REQUEST_SIZE_MATCH(xXFixesCreateRegionFromWindowReq);
     swapl(&stuff->region);
     swapl(&stuff->window);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesCreateRegionFromWindow(client);
 }
 
 int
@@ -240,7 +240,7 @@ SProcXFixesCreateRegionFromGC(ClientPtr client)
     REQUEST_SIZE_MATCH(xXFixesCreateRegionFromGCReq);
     swapl(&stuff->region);
     swapl(&stuff->gc);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesCreateRegionFromGC(client);
 }
 
 int
@@ -280,7 +280,7 @@ SProcXFixesCreateRegionFromPicture(ClientPtr client)
     REQUEST_SIZE_MATCH(xXFixesCreateRegionFromPictureReq);
     swapl(&stuff->region);
     swapl(&stuff->picture);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesCreateRegionFromPicture(client);
 }
 
 int
@@ -301,7 +301,7 @@ SProcXFixesDestroyRegion(ClientPtr client)
     REQUEST(xXFixesDestroyRegionReq);
     REQUEST_SIZE_MATCH(xXFixesDestroyRegionReq);
     swapl(&stuff->region);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesDestroyRegion(client);
 }
 
 int
@@ -338,7 +338,7 @@ SProcXFixesSetRegion(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xXFixesSetRegionReq);
     swapl(&stuff->region);
     SwapRestS(stuff);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesSetRegion(client);
 }
 
 int
@@ -365,7 +365,7 @@ SProcXFixesCopyRegion(ClientPtr client)
     REQUEST_SIZE_MATCH(xXFixesCopyRegionReq);
     swapl(&stuff->source);
     swapl(&stuff->destination);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesCopyRegion(client);
 }
 
 int
@@ -406,7 +406,7 @@ SProcXFixesCombineRegion(ClientPtr client)
     swapl(&stuff->source1);
     swapl(&stuff->source2);
     swapl(&stuff->destination);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesCombineRegion(client);
 }
 
 int
@@ -451,7 +451,7 @@ SProcXFixesInvertRegion(ClientPtr client)
     swaps(&stuff->width);
     swaps(&stuff->height);
     swapl(&stuff->destination);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesInvertRegion(client);
 }
 
 int
@@ -476,7 +476,7 @@ SProcXFixesTranslateRegion(ClientPtr client)
     swapl(&stuff->region);
     swaps(&stuff->dx);
     swaps(&stuff->dy);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesTranslateRegion(client);
 }
 
 int
@@ -502,7 +502,7 @@ SProcXFixesRegionExtents(ClientPtr client)
     REQUEST_SIZE_MATCH(xXFixesRegionExtentsReq);
     swapl(&stuff->source);
     swapl(&stuff->destination);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesRegionExtents(client);
 }
 
 int
@@ -564,7 +564,7 @@ SProcXFixesFetchRegion(ClientPtr client)
     REQUEST(xXFixesFetchRegionReq);
     REQUEST_SIZE_MATCH(xXFixesFetchRegionReq);
     swapl(&stuff->region);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesFetchRegion(client);
 }
 
 static int
@@ -624,7 +624,7 @@ SProcXFixesSetGCClipRegion(ClientPtr client)
     swapl(&stuff->region);
     swaps(&stuff->xOrigin);
     swaps(&stuff->yOrigin);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesSetGCClipRegion(client);
 }
 
 typedef RegionPtr (*CreateDftPtr) (WindowPtr pWin);
@@ -725,7 +725,7 @@ SProcXFixesSetWindowShapeRegion(ClientPtr client)
     swaps(&stuff->xOff);
     swaps(&stuff->yOff);
     swapl(&stuff->region);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesSetWindowShapeRegion(client);
 }
 
 static int
@@ -772,7 +772,7 @@ SProcXFixesSetPictureClipRegion(ClientPtr client)
     swapl(&stuff->region);
     swaps(&stuff->xOrigin);
     swaps(&stuff->yOrigin);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesSetPictureClipRegion(client);
 }
 
 int
@@ -825,7 +825,7 @@ SProcXFixesExpandRegion(ClientPtr client)
     swaps(&stuff->right);
     swaps(&stuff->top);
     swaps(&stuff->bottom);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesExpandRegion(client);
 }
 
 #ifdef XINERAMA

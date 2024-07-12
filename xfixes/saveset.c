@@ -65,5 +65,5 @@ SProcXFixesChangeSaveSet(ClientPtr client)
     REQUEST_SIZE_MATCH(xXFixesChangeSaveSetReq);
 
     swapl(&stuff->window);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesChangeSaveSet(client);
 }
