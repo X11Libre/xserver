@@ -507,8 +507,6 @@ int
 ProcXFixesFetchRegion(ClientPtr client)
 {
     RegionPtr pRegion;
-    xXFixesFetchRegionReply *reply;
-    xRectangle *pRect;
     BoxPtr pExtent;
     BoxPtr pBox;
     int i, nBox;
@@ -522,37 +520,39 @@ ProcXFixesFetchRegion(ClientPtr client)
     pBox = RegionRects(pRegion);
     nBox = RegionNumRects(pRegion);
 
-    reply = calloc(sizeof(xXFixesFetchRegionReply) + nBox * sizeof(xRectangle),
-                   1);
-    if (!reply)
+    xRectangle *pRect = calloc(nBox, sizeof(xRectangle));
+    if (!pRect)
         return BadAlloc;
-    reply->type = X_Reply;
-    reply->sequenceNumber = client->sequence;
-    reply->length = nBox << 1;
-    reply->x = pExtent->x1;
-    reply->y = pExtent->y1;
-    reply->width = pExtent->x2 - pExtent->x1;
-    reply->height = pExtent->y2 - pExtent->y1;
 
-    pRect = (xRectangle *) (reply + 1);
     for (i = 0; i < nBox; i++) {
         pRect[i].x = pBox[i].x1;
         pRect[i].y = pBox[i].y1;
         pRect[i].width = pBox[i].x2 - pBox[i].x1;
         pRect[i].height = pBox[i].y2 - pBox[i].y1;
     }
+
+    xXFixesFetchRegionReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = nBox << 1,
+        .x = pExtent->x1,
+        .y = pExtent->y1,
+        .width = pExtent->x2 - pExtent->x1,
+        .height = pExtent->y2 - pExtent->y1,
+    };
+
     if (client->swapped) {
-        swaps(&reply->sequenceNumber);
-        swapl(&reply->length);
-        swaps(&reply->x);
-        swaps(&reply->y);
-        swaps(&reply->width);
-        swaps(&reply->height);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.x);
+        swaps(&rep.y);
+        swaps(&rep.width);
+        swaps(&rep.height);
         SwapShorts((INT16 *) pRect, nBox * 4);
     }
-    WriteToClient(client, sizeof(xXFixesFetchRegionReply) +
-                         nBox * sizeof(xRectangle), (char *) reply);
-    free(reply);
+    WriteToClient(client, sizeof(xXFixesFetchRegionReply), &rep);
+    WriteToClient(client, sizeof(pRect), pRect);
+    free(pRect);
     return Success;
 }
 
