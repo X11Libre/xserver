@@ -527,59 +527,60 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
     {
         int nfontprops = pFont->info.nprops;
-        int rlength = sizeof(xXF86BigfontQueryFontReply)
+        int rlength =
             + nfontprops * sizeof(xFontProp)
             + (nCharInfos > 0 && shmid == -1
                ? nUniqCharInfos * sizeof(xCharInfo)
                + (nCharInfos + 1) / 2 * 2 * sizeof(CARD16)
                : 0);
-        xXF86BigfontQueryFontReply *reply = calloc(1, rlength);
-        char *p;
 
-        if (!reply) {
-            if (nCharInfos > 0) {
-                if (shmid == -1)
-                    free(pIndex2UniqIndex);
-                if (!pDesc)
-                    free(pCI);
-            }
-            return BadAlloc;
-        }
-        reply->type = X_Reply;
-        reply->length = bytes_to_int32(rlength - sizeof(xGenericReply));
-        reply->sequenceNumber = client->sequence;
-        reply->minBounds = pFont->info.ink_minbounds;
-        reply->maxBounds = pFont->info.ink_maxbounds;
-        reply->minCharOrByte2 = pFont->info.firstCol;
-        reply->maxCharOrByte2 = pFont->info.lastCol;
-        reply->defaultChar = pFont->info.defaultCh;
-        reply->nFontProps = pFont->info.nprops;
-        reply->drawDirection = pFont->info.drawDirection;
-        reply->minByte1 = pFont->info.firstRow;
-        reply->maxByte1 = pFont->info.lastRow;
-        reply->allCharsExist = pFont->info.allExist;
-        reply->fontAscent = pFont->info.fontAscent;
-        reply->fontDescent = pFont->info.fontDescent;
-        reply->nCharInfos = nCharInfos;
-        reply->nUniqCharInfos = nUniqCharInfos;
-        reply->shmid = shmid;
+        xXF86BigfontQueryFontReply rep = {
+            .type = X_Reply;
+            .length = bytes_to_int32(buflength),
+            .sequenceNumber = client->sequence,
+            .minBounds = pFont->info.ink_minbounds,
+            .maxBounds = pFont->info.ink_maxbounds,
+            .minCharOrByte2 = pFont->info.firstCol,
+            .maxCharOrByte2 = pFont->info.lastCol,
+            .defaultChar = pFont->info.defaultCh,
+            .nFontProps = pFont->info.nprops,
+            .drawDirection = pFont->info.drawDirection,
+            .minByte1 = pFont->info.firstRow,
+            .maxByte1 = pFont->info.lastRow,
+            .allCharsExist = pFont->info.allExist,
+            .fontAscent = pFont->info.fontAscent,
+            .fontDescent = pFont->info.fontDescent,
+            .nCharInfos = nCharInfos,
+            .nUniqCharInfos = nUniqCharInfos,
+            .shmid = shmid,
+        };
+
         if (client->swapped) {
-            swaps(&reply->sequenceNumber);
-            swapl(&reply->length);
-            swapCharInfo(&reply->minBounds);
-            swapCharInfo(&reply->maxBounds);
-            swaps(&reply->minCharOrByte2);
-            swaps(&reply->maxCharOrByte2);
-            swaps(&reply->defaultChar);
-            swaps(&reply->nFontProps);
-            swaps(&reply->fontAscent);
-            swaps(&reply->fontDescent);
-            swapl(&reply->nCharInfos);
-            swapl(&reply->nUniqCharInfos);
-            swapl(&reply->shmid);
-            swapl(&reply->shmsegoffset);
+            swaps(&rep.sequenceNumber);
+            swapl(&rep.length);
+            swapCharInfo(&rep.minBounds);
+            swapCharInfo(&rep.maxBounds);
+            swaps(&rep.minCharOrByte2);
+            swaps(&rep.maxCharOrByte2);
+            swaps(&rep.defaultChar);
+            swaps(&rep.nFontProps);
+            swaps(&rep.fontAscent);
+            swaps(&rep.fontDescent);
+            swapl(&rep.nCharInfos);
+            swapl(&rep.nUniqCharInfos);
+            swapl(&rep.shmid);
+            swapl(&rep.shmsegoffset);
         }
-        p = (char *) &reply[1];
+
+        int rc = Success;
+        char *buf = calloc(1, rlength);
+        if (!buf) {
+            rc = BadAlloc;
+            goto out;
+        }
+
+        char *p = buf;
+
         {
             FontPropPtr pFP;
             xFontProp *prFP;
@@ -615,15 +616,18 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                 }
             }
         }
-        WriteToClient(client, rlength, reply);
-        free(reply);
+
+        WriteToClient(client, sizeof(xXF86BigfontQueryFontReply), &rep);
+        WriteToClient(client, rlength, buf);
+        free(buf);
+out:
         if (nCharInfos > 0) {
             if (shmid == -1)
                 free(pIndex2UniqIndex);
             if (!pDesc)
                 free(pCI);
         }
-        return Success;
+        return rc;
     }
 }
 
