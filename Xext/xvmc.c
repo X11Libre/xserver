@@ -667,26 +667,35 @@ ProcXvMCGetDRInfo(ClientPtr client)
     return Success;
 }
 
-int (*ProcXvMCVector[xvmcNumRequest]) (ClientPtr) = {
-ProcXvMCQueryVersion,
-        ProcXvMCListSurfaceTypes,
-        ProcXvMCCreateContext,
-        ProcXvMCDestroyContext,
-        ProcXvMCCreateSurface,
-        ProcXvMCDestroySurface,
-        ProcXvMCCreateSubpicture,
-        ProcXvMCDestroySubpicture,
-        ProcXvMCListSubpictureTypes, ProcXvMCGetDRInfo};
-
 static int
 ProcXvMCDispatch(ClientPtr client)
 {
     REQUEST(xReq);
-
-    if (stuff->data < xvmcNumRequest)
-        return (*ProcXvMCVector[stuff->data]) (client);
-    else
-        return BadRequest;
+    switch (stuff->data)
+    {
+        case xvmc_QueryVersion:
+            return ProcXvMCQueryVersion(client);
+        case xvmc_ListSurfaceTypes:
+            return ProcXvMCListSurfaceTypes(client);
+        case xvmc_CreateContext:
+            return ProcXvMCCreateContext(client);
+        case xvmc_DestroyContext:
+            return ProcXvMCDestroyContext(client);
+        case xvmc_CreateSurface:
+            return ProcXvMCCreateSurface(client);
+        case xvmc_DestroySurface:
+            return ProcXvMCDestroySurface(client);
+        case xvmc_CreateSubpicture:
+            return ProcXvMCCreateSubpicture(client);
+        case xvmc_DestroySubpicture:
+            return ProcXvMCDestroySubpicture(client);
+        case xvmc_ListSubpictureTypes:
+            return ProcXvMCListSubpictureTypes(client);
+        case xvmc_GetDRInfo:
+            return ProcXvMCGetDRInfo(client);
+        default:
+            return BadRequest;
+    }
 }
 
 static int _X_COLD
