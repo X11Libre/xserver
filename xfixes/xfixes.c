@@ -110,56 +110,99 @@ static const int version_requests[] = {
     X_XFixesGetClientDisconnectMode,    /* Version 6 */
 };
 
-int (*ProcXFixesVector[XFixesNumberRequests]) (ClientPtr) = {
-/*************** Version 1 ******************/
-    ProcXFixesQueryVersion,
-        ProcXFixesChangeSaveSet,
-        ProcXFixesSelectSelectionInput,
-        ProcXFixesSelectCursorInput, ProcXFixesGetCursorImage,
-/*************** Version 2 ******************/
-        ProcXFixesCreateRegion,
-        ProcXFixesCreateRegionFromBitmap,
-        ProcXFixesCreateRegionFromWindow,
-        ProcXFixesCreateRegionFromGC,
-        ProcXFixesCreateRegionFromPicture,
-        ProcXFixesDestroyRegion,
-        ProcXFixesSetRegion,
-        ProcXFixesCopyRegion,
-        ProcXFixesCombineRegion,
-        ProcXFixesCombineRegion,
-        ProcXFixesCombineRegion,
-        ProcXFixesInvertRegion,
-        ProcXFixesTranslateRegion,
-        ProcXFixesRegionExtents,
-        ProcXFixesFetchRegion,
-        ProcXFixesSetGCClipRegion,
-        ProcXFixesSetWindowShapeRegion,
-        ProcXFixesSetPictureClipRegion,
-        ProcXFixesSetCursorName,
-        ProcXFixesGetCursorName,
-        ProcXFixesGetCursorImageAndName,
-        ProcXFixesChangeCursor, ProcXFixesChangeCursorByName,
-/*************** Version 3 ******************/
-        ProcXFixesExpandRegion,
-/*************** Version 4 ****************/
-        ProcXFixesHideCursor, ProcXFixesShowCursor,
-/*************** Version 5 ****************/
-        ProcXFixesCreatePointerBarrier, ProcXFixesDestroyPointerBarrier,
-/*************** Version 6 ****************/
-        ProcXFixesSetClientDisconnectMode, ProcXFixesGetClientDisconnectMode,
-};
-
 static int
 ProcXFixesDispatch(ClientPtr client)
 {
-    REQUEST(xXFixesReq);
+    REQUEST(xReq);
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
 
     if (pXFixesClient->major_version >= ARRAY_SIZE(version_requests))
         return BadRequest;
-    if (stuff->xfixesReqType > version_requests[pXFixesClient->major_version])
+    if (stuff->data > version_requests[pXFixesClient->major_version])
         return BadRequest;
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+
+    switch (stuff->data) {
+        /*************** Version 1 ******************/
+        case X_XFixesQueryVersion:
+            return ProcXFixesQueryVersion(client);
+        case X_XFixesChangeSaveSet:
+            return ProcXFixesChangeSaveSet(client);
+        case X_XFixesSelectSelectionInput:
+            return ProcXFixesSelectSelectionInput(client);
+        case X_XFixesSelectCursorInput:
+            return ProcXFixesSelectCursorInput(client);
+        case X_XFixesGetCursorImage:
+            return ProcXFixesGetCursorImage(client);
+
+        /*************** Version 2 ******************/
+        case X_XFixesCreateRegion:
+            return ProcXFixesCreateRegion(client);
+        case X_XFixesCreateRegionFromBitmap:
+            return ProcXFixesCreateRegionFromBitmap(client);
+        case X_XFixesCreateRegionFromWindow:
+            return ProcXFixesCreateRegionFromWindow(client);
+        case X_XFixesCreateRegionFromGC:
+            return ProcXFixesCreateRegionFromGC(client);
+        case X_XFixesCreateRegionFromPicture:
+            return ProcXFixesCreateRegionFromPicture(client);
+        case X_XFixesDestroyRegion:
+            return ProcXFixesDestroyRegion(client);
+        case X_XFixesSetRegion:
+            return ProcXFixesSetRegion(client);
+        case X_XFixesCopyRegion:
+            return ProcXFixesCopyRegion(client);
+        case X_XFixesUnionRegion:
+            return ProcXFixesCombineRegion(client);
+        case X_XFixesIntersectRegion:
+            return ProcXFixesCombineRegion(client);
+        case X_XFixesSubtractRegion:
+            return ProcXFixesCombineRegion(client);
+        case X_XFixesInvertRegion:
+            return ProcXFixesInvertRegion(client);
+        case X_XFixesTranslateRegion:
+            return ProcXFixesTranslateRegion(client);
+        case X_XFixesRegionExtents:
+            return ProcXFixesRegionExtents(client);
+        case X_XFixesFetchRegion:
+            return ProcXFixesFetchRegion(client);
+        case X_XFixesSetGCClipRegion:
+            return ProcXFixesSetGCClipRegion(client);
+        case X_XFixesSetWindowShapeRegion:
+            return ProcXFixesSetWindowShapeRegion(client);
+        case X_XFixesSetPictureClipRegion:
+            return ProcXFixesSetPictureClipRegion(client);
+        case X_XFixesSetCursorName:
+            return ProcXFixesSetCursorName(client);
+        case X_XFixesGetCursorName:
+            return ProcXFixesGetCursorName(client);
+        case X_XFixesGetCursorImageAndName:
+            return ProcXFixesGetCursorImageAndName(client);
+        case X_XFixesChangeCursor:
+            return ProcXFixesChangeCursor(client);
+        case X_XFixesChangeCursorByName:
+            return ProcXFixesChangeCursorByName(client);
+
+        /*************** Version 3 ******************/
+        case X_XFixesExpandRegion:
+            return ProcXFixesExpandRegion(client);
+        /*************** Version 4 ******************/
+        case X_XFixesHideCursor:
+            return ProcXFixesHideCursor(client);
+        case X_XFixesShowCursor:
+            return ProcXFixesShowCursor(client);
+        /*************** Version 5 ******************/
+        case X_XFixesCreatePointerBarrier:
+            return ProcXFixesCreatePointerBarrier(client);
+        case X_XFixesDestroyPointerBarrier:
+            return ProcXFixesDestroyPointerBarrier(client);
+        /*************** Version 6 ******************/
+        case X_XFixesSetClientDisconnectMode:
+            return ProcXFixesSetClientDisconnectMode(client);
+        case X_XFixesGetClientDisconnectMode:
+            return ProcXFixesGetClientDisconnectMode(client);
+        default:
+            return BadRequest;
+    }
 }
 
 static _X_COLD int
@@ -170,59 +213,102 @@ SProcXFixesQueryVersion(ClientPtr client)
 
     swapl(&stuff->majorVersion);
     swapl(&stuff->minorVersion);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesQueryVersion(client);
 }
-
-static int (*SProcXFixesVector[XFixesNumberRequests]) (ClientPtr) = {
-/*************** Version 1 ******************/
-    SProcXFixesQueryVersion,
-        SProcXFixesChangeSaveSet,
-        SProcXFixesSelectSelectionInput,
-        SProcXFixesSelectCursorInput, SProcXFixesGetCursorImage,
-/*************** Version 2 ******************/
-        SProcXFixesCreateRegion,
-        SProcXFixesCreateRegionFromBitmap,
-        SProcXFixesCreateRegionFromWindow,
-        SProcXFixesCreateRegionFromGC,
-        SProcXFixesCreateRegionFromPicture,
-        SProcXFixesDestroyRegion,
-        SProcXFixesSetRegion,
-        SProcXFixesCopyRegion,
-        SProcXFixesCombineRegion,
-        SProcXFixesCombineRegion,
-        SProcXFixesCombineRegion,
-        SProcXFixesInvertRegion,
-        SProcXFixesTranslateRegion,
-        SProcXFixesRegionExtents,
-        SProcXFixesFetchRegion,
-        SProcXFixesSetGCClipRegion,
-        SProcXFixesSetWindowShapeRegion,
-        SProcXFixesSetPictureClipRegion,
-        SProcXFixesSetCursorName,
-        SProcXFixesGetCursorName,
-        SProcXFixesGetCursorImageAndName,
-        SProcXFixesChangeCursor, SProcXFixesChangeCursorByName,
-/*************** Version 3 ******************/
-        SProcXFixesExpandRegion,
-/*************** Version 4 ****************/
-        SProcXFixesHideCursor, SProcXFixesShowCursor,
-/*************** Version 5 ****************/
-        SProcXFixesCreatePointerBarrier, SProcXFixesDestroyPointerBarrier,
-/*************** Version 6 ****************/
-        SProcXFixesSetClientDisconnectMode, SProcXFixesGetClientDisconnectMode,
-};
 
 static _X_COLD int
 SProcXFixesDispatch(ClientPtr client)
 {
-    REQUEST(xXFixesReq);
+    REQUEST(xReq);
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
 
     if (pXFixesClient->major_version >= ARRAY_SIZE(version_requests))
         return BadRequest;
-    if (stuff->xfixesReqType > version_requests[pXFixesClient->major_version])
+    if (stuff->data > version_requests[pXFixesClient->major_version])
         return BadRequest;
-    return (*SProcXFixesVector[stuff->xfixesReqType]) (client);
+
+    switch (stuff->data) {
+        /*************** Version 1 ******************/
+        case X_XFixesQueryVersion:
+            return SProcXFixesQueryVersion(client);
+        case X_XFixesChangeSaveSet:
+            return SProcXFixesChangeSaveSet(client);
+        case X_XFixesSelectSelectionInput:
+            return SProcXFixesSelectSelectionInput(client);
+        case X_XFixesSelectCursorInput:
+            return SProcXFixesSelectCursorInput(client);
+        case X_XFixesGetCursorImage:
+            return SProcXFixesGetCursorImage(client);
+
+        /*************** Version 2 ******************/
+        case X_XFixesCreateRegion:
+            return SProcXFixesCreateRegion(client);
+        case X_XFixesCreateRegionFromBitmap:
+            return SProcXFixesCreateRegionFromBitmap(client);
+        case X_XFixesCreateRegionFromWindow:
+            return SProcXFixesCreateRegionFromWindow(client);
+        case X_XFixesCreateRegionFromGC:
+            return SProcXFixesCreateRegionFromGC(client);
+        case X_XFixesCreateRegionFromPicture:
+            return SProcXFixesCreateRegionFromPicture(client);
+        case X_XFixesDestroyRegion:
+            return SProcXFixesDestroyRegion(client);
+        case X_XFixesSetRegion:
+            return SProcXFixesSetRegion(client);
+        case X_XFixesCopyRegion:
+            return SProcXFixesCopyRegion(client);
+        case X_XFixesUnionRegion:
+            return SProcXFixesCombineRegion(client);
+        case X_XFixesIntersectRegion:
+            return SProcXFixesCombineRegion(client);
+        case X_XFixesSubtractRegion:
+            return SProcXFixesCombineRegion(client);
+        case X_XFixesInvertRegion:
+            return SProcXFixesInvertRegion(client);
+        case X_XFixesTranslateRegion:
+            return SProcXFixesTranslateRegion(client);
+        case X_XFixesRegionExtents:
+            return SProcXFixesRegionExtents(client);
+        case X_XFixesFetchRegion:
+            return SProcXFixesFetchRegion(client);
+        case X_XFixesSetGCClipRegion:
+            return SProcXFixesSetGCClipRegion(client);
+        case X_XFixesSetWindowShapeRegion:
+            return SProcXFixesSetWindowShapeRegion(client);
+        case X_XFixesSetPictureClipRegion:
+            return SProcXFixesSetPictureClipRegion(client);
+        case X_XFixesSetCursorName:
+            return SProcXFixesSetCursorName(client);
+        case X_XFixesGetCursorName:
+            return SProcXFixesGetCursorName(client);
+        case X_XFixesGetCursorImageAndName:
+            return SProcXFixesGetCursorImageAndName(client);
+        case X_XFixesChangeCursor:
+            return SProcXFixesChangeCursor(client);
+        case X_XFixesChangeCursorByName:
+            return SProcXFixesChangeCursorByName(client);
+
+        /*************** Version 3 ******************/
+        case X_XFixesExpandRegion:
+            return SProcXFixesExpandRegion(client);
+        /*************** Version 4 ******************/
+        case X_XFixesHideCursor:
+            return SProcXFixesHideCursor(client);
+        case X_XFixesShowCursor:
+            return SProcXFixesShowCursor(client);
+        /*************** Version 5 ******************/
+        case X_XFixesCreatePointerBarrier:
+            return SProcXFixesCreatePointerBarrier(client);
+        case X_XFixesDestroyPointerBarrier:
+            return SProcXFixesDestroyPointerBarrier(client);
+        /*************** Version 6 ******************/
+        case X_XFixesSetClientDisconnectMode:
+            return SProcXFixesSetClientDisconnectMode(client);
+        case X_XFixesGetClientDisconnectMode:
+            return SProcXFixesGetClientDisconnectMode(client);
+        default:
+            return BadRequest;
+    }
 }
 
 void

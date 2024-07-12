@@ -69,8 +69,6 @@ typedef struct _XFixesClient {
 
 #define GetXFixesClient(pClient) ((XFixesClientPtr)dixLookupPrivate(&(pClient)->devPrivates, XFixesClientPrivateKey))
 
-extern int (*ProcXFixesVector[XFixesNumberRequests]) (ClientPtr);
-
 /* Save set */
 int
  ProcXFixesChangeSaveSet(ClientPtr client);
