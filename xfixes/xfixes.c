@@ -70,11 +70,7 @@ ProcXFixesQueryVersion(ClientPtr client)
 
     int major, minor;
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
-    xXFixesQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
+    xXFixesQueryVersionReply rep = { 0 };
 
     if (version_compare(stuff->majorVersion, stuff->minorVersion,
                         SERVER_XFIXES_MAJOR_VERSION,
@@ -90,13 +86,10 @@ ProcXFixesQueryVersion(ClientPtr client)
     pXFixesClient->major_version = major;
     rep.majorVersion = min(stuff->majorVersion, major);
     rep.minorVersion = minor;
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
-    }
-    WriteToClient(client, sizeof(xXFixesQueryVersionReply), &rep);
+
+    REPLY_FIELD_CARD32(majorVersion);
+    REPLY_FIELD_CARD32(minorVersion);
+    REPLY_SEND();
     return Success;
 }
 

@@ -383,17 +383,15 @@ ProcXFixesGetCursorImage(ClientPtr client)
         .cursorSerial = pCursor->serialNumber,
     };
 
-    if (client->swapped) {
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.xhot);
-        swaps(&rep.yhot);
-        swapl(&rep.cursorSerial);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    REPLY_FIELD_CARD16(x);
+    REPLY_FIELD_CARD16(y);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_FIELD_CARD16(xhot);
+    REPLY_FIELD_CARD16(yhot);
+    REPLY_FIELD_CARD32(cursorSerial);
+    REPLY_BUF_CARD32(image, npixels);
+    REPLY_SEND_RPCBUF();
     return Success;
 }
 
@@ -440,12 +438,10 @@ ProcXFixesGetCursorName(ClientPtr client)
         .atom = pCursor->name,
         .nbytes = strlen(str)
     };
-    if (client->swapped) {
-        swapl(&rep.atom);
-        swaps(&rep.nbytes);
-    }
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+
+    REPLY_FIELD_CARD32(atom);
+    REPLY_FIELD_CARD16(nbytes);
+    return REPLY_SEND_RPCBUF();
 }
 
 int
@@ -499,20 +495,17 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
         .nbytes = strlen(name),
     };
 
-    if (client->swapped) {
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.xhot);
-        swaps(&rep.yhot);
-        swapl(&rep.cursorSerial);
-        swapl(&rep.cursorName);
-        swaps(&rep.nbytes);
-    }
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    REPLY_FIELD_CARD16(x);
+    REPLY_FIELD_CARD16(y);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_FIELD_CARD16(xhot);
+    REPLY_FIELD_CARD16(yhot);
+    REPLY_FIELD_CARD32(cursorSerial);
+    REPLY_FIELD_CARD32(cursorName);
+    REPLY_FIELD_CARD16(nbytes);
+    REPLY_BUF_CARD32(image, npixels);
+    return REPLY_SEND_RPCBUF(image, image_size);
 }
 
 /*
