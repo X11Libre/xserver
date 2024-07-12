@@ -903,20 +903,13 @@ ProcPanoramiXQueryVersion(ClientPtr client)
     REQUEST_HEAD_STRUCT(xPanoramiXQueryVersionReq);
 
     xPanoramiXQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_PANORAMIX_MAJOR_VERSION,
         .minorVersion = SERVER_PANORAMIX_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-    }
-    WriteToClient(client, sizeof(xPanoramiXQueryVersionReply), &rep);
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_SEND();
     return Success;
 }
 
@@ -927,28 +920,19 @@ ProcPanoramiXGetState(ClientPtr client)
     REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    xPanoramiXGetStateReply rep;
     int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    rep = (xPanoramiXGetStateReply) {
-        .type = X_Reply,
+    xPanoramiXGetStateReply rep = {
         .state = !noPanoramiXExtension,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .window = stuff->window
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.window);
-    }
-    WriteToClient(client, sizeof(xPanoramiXGetStateReply), &rep);
+    REPLY_FIELD_CARD32(window);
+    REPLY_SEND();
     return Success;
-
 }
 
 int
@@ -958,26 +942,19 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
     REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
-    xPanoramiXGetScreenCountReply rep;
     int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    rep = (xPanoramiXGetScreenCountReply) {
-        .type = X_Reply,
+    xPanoramiXGetScreenCountReply rep = {
         .ScreenCount = PanoramiXNumScreens,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .window = stuff->window
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.window);
-    }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenCountReply), &rep);
+
+    REPLY_FIELD_CARD32(window);
+    REPLY_SEND();
     return Success;
 }
 
@@ -989,7 +966,6 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     REQUEST_FIELD_CARD32(screen);
 
     WindowPtr pWin;
-    xPanoramiXGetScreenSizeReply rep;
     int rc;
 
     if (stuff->screen >= PanoramiXNumScreens)
@@ -999,25 +975,19 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xPanoramiXGetScreenSizeReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-    /* screen dimensions */
+    xPanoramiXGetScreenSizeReply rep = {
+        /* screen dimensions */
         .width = screenInfo.screens[stuff->screen]->width,
         .height = screenInfo.screens[stuff->screen]->height,
         .window = stuff->window,
         .screen = stuff->screen
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.width);
-        swapl(&rep.height);
-        swapl(&rep.window);
-        swapl(&rep.screen);
-    }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenSizeReply), &rep);
+
+    REPLY_FIELD_CARD32(width);
+    REPLY_FIELD_CARD32(height);
+    REPLY_FIELD_CARD32(window);
+    REPLY_FIELD_CARD32(screen);
+    REPLY_SEND();
     return Success;
 }
 
@@ -1027,9 +997,6 @@ ProcXineramaIsActive(ClientPtr client)
     REQUEST_HEAD_STRUCT(xXineramaIsActiveReq);
 
     xXineramaIsActiveReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
 #if 1
         /* The following hack fools clients into thinking that Xinerama
          * is disabled even though it is not. */
@@ -1038,12 +1005,9 @@ ProcXineramaIsActive(ClientPtr client)
         .state = !noPanoramiXExtension;
 #endif
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.state);
-    }
-    WriteToClient(client, sizeof(xXineramaIsActiveReply), &rep);
+
+    REPLY_FIELD_CARD32(state);
+    REPLY_SEND();
     return Success;
 }
 
@@ -1054,8 +1018,6 @@ ProcXineramaQueryScreens(ClientPtr client)
 
     CARD32 number = (noPanoramiXExtension) ? 0 : PanoramiXNumScreens;
     xXineramaQueryScreensReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .length = bytes_to_int32(number * sz_XineramaScreenInfo),
         .number = number
     };
@@ -1077,19 +1039,12 @@ ProcXineramaQueryScreens(ClientPtr client)
             scratch[i].y_org = screenInfo.screens[i]->y;
             scratch[i].width = screenInfo.screens[i]->width;
             scratch[i].height = screenInfo.screens[i]->height;
-
-            if (client->swapped) {
-                swaps(&scratch[i].x_org);
-                swaps(&scratch[i].y_org);
-                swaps(&scratch[i].width);
-                swaps(&scratch[i].height);
-            }
+            CLIENT_STRUCT_CARD16_4(&scratch[i], x_org, y_org, width, height);
         }
     }
 
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
-    WriteToClient(client, number * sizeof(xXineramaQueryScreensReply), scratch);
-
+    REPLY_FIELD_CARD32(number);
+    REPLY_SEND_EXTRA(scratch, number * sizeof(xXineramaQueryScreensReply));
     return Success;
 }
 
