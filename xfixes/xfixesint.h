@@ -69,8 +69,6 @@ typedef struct _XFixesClient {
 
 #define GetXFixesClient(pClient) ((XFixesClientPtr)dixLookupPrivate(&(pClient)->devPrivates, XFixesClientPrivateKey))
 
-extern int (*ProcXFixesVector[XFixesNumberRequests]) (ClientPtr);
-
 /* Save set */
 int
  ProcXFixesChangeSaveSet(ClientPtr client);
@@ -110,9 +108,6 @@ SXFixesCursorNotifyEvent(xXFixesCursorNotifyEvent * from,
 int
  ProcXFixesGetCursorImage(ClientPtr client);
 
-int
- SProcXFixesGetCursorImage(ClientPtr client);
-
 /* Cursor names (Version 2) */
 
 int
@@ -129,9 +124,6 @@ int
 
 int
  ProcXFixesGetCursorImageAndName(ClientPtr client);
-
-int
- SProcXFixesGetCursorImageAndName(ClientPtr client);
 
 /* Cursor replacement (Version 2) */
 
@@ -294,9 +286,6 @@ int
 
 int
  SProcXFixesSetClientDisconnectMode(ClientPtr client);
-
-int
- SProcXFixesGetClientDisconnectMode(ClientPtr client);
 
 Bool
  XFixesShouldDisconnectClient(ClientPtr client);

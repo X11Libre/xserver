@@ -80,7 +80,7 @@ SProcXFixesSetClientDisconnectMode(ClientPtr client)
 
     swapl(&stuff->disconnect_mode);
 
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesSetClientDisconnectMode(client);
 }
 
 int
@@ -104,15 +104,6 @@ ProcXFixesGetClientDisconnectMode(ClientPtr client)
     WriteToClient(client, sizeof(xXFixesGetClientDisconnectModeReply), &reply);
 
     return Success;
-}
-
-int _X_COLD
-SProcXFixesGetClientDisconnectMode(ClientPtr client)
-{
-    REQUEST(xXFixesGetClientDisconnectModeReq);
-    REQUEST_SIZE_MATCH(xXFixesGetClientDisconnectModeReq);
-
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
 }
 
 Bool
