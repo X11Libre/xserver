@@ -113,13 +113,13 @@ ProcXvMCQueryVersion(ClientPtr client)
     REQUEST_HEAD_STRUCT(xvmcQueryVersionReq);
 
     xvmcQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .major = SERVER_XVMC_MAJOR_VERSION,
         .minor = SERVER_XVMC_MINOR_VERSION
     };
 
-    WriteToClient(client, sizeof(xvmcQueryVersionReply), &rep);
+    REPLY_FIELD_CARD32(major);
+    REPLY_FIELD_CARD32(minor);
+    REPLY_SEND();
     return Success;
 }
 
@@ -165,20 +165,19 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
             info[i].subpicture_max_height = surface->subpicture_max_height;
             info[i].mc_type = surface->mc_type;
             info[i].flags = surface->flags;
+
+            CLIENT_STRUCT_CARD16_5(&info[i], chroma_format, max_width, max_height,
+                                   subpicture_max_width, subpicture_max_height);
+            CLIENT_STRUCT_CARD32_3(&info[i], surface_type_id, mc_type, flags);
         }
     }
 
     xvmcListSurfaceTypesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .num = num_surfaces,
-        .length = bytes_to_int32(sizeof(xvmcSurfaceInfo) * num_surfaces),
     };
 
-    WriteToClient(client, sizeof(xvmcListSurfaceTypesReply), &rep);
-    WriteToClient(client, sizeof(xvmcSurfaceInfo) * num_surfaces, info);
-    free(info);
-
+    REPLY_FIELD_CARD32(num);
+    REPLY_SEND_EXTRA(info, sizeof(xvmcSurfaceInfo) * num_surfaces);
     return Success;
 }
 
@@ -262,20 +261,18 @@ ProcXvMCCreateContext(ClientPtr client)
     }
 
     xvmcCreateContextReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = dwords,
         .width_actual = pContext->width,
         .height_actual = pContext->height,
         .flags_return = pContext->flags
     };
 
-    WriteToClient(client, sizeof(xvmcCreateContextReply), &rep);
-    if (dwords)
-        WriteToClient(client, dwords << 2, data);
+    REPLY_FIELD_CARD16(width_actual);
+    REPLY_FIELD_CARD16(height_actual);
+    REPLY_FIELD_CARD32(flags_return);
+    REPLY_BUF_CARD32(data, dwords);
+    REPLY_SEND_EXTRA(data, dwords * sizeof(CARD32));
 
     free(data);
-
     return Success;
 }
 
@@ -340,15 +337,10 @@ ProcXvMCCreateSurface(ClientPtr client)
         return BadAlloc;
     }
 
-    xvmcCreateSurfaceReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = dwords
-    };
+    xvmcCreateSurfaceReply rep = { 0 };
 
-    WriteToClient(client, sizeof(xvmcCreateSurfaceReply), &rep);
-    if (dwords)
-        WriteToClient(client, dwords << 2, data);
+    REPLY_BUF_CARD32(data, dwords);
+    REPLY_SEND_EXTRA(data, dwords * sizeof(CARD32));
 
     free(data);
 
@@ -464,9 +456,6 @@ ProcXvMCCreateSubpicture(ClientPtr client)
     }
 
     xvmcCreateSubpictureReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = dwords,
         .width_actual = pSubpicture->width,
         .height_actual = pSubpicture->height,
         .num_palette_entries = pSubpicture->num_palette_entries,
@@ -477,9 +466,12 @@ ProcXvMCCreateSubpicture(ClientPtr client)
         .component_order[3] = pSubpicture->component_order[3]
     };
 
-    WriteToClient(client, sizeof(xvmcCreateSubpictureReply), &rep);
-    if (dwords)
-        WriteToClient(client, dwords << 2, data);
+    REPLY_FIELD_CARD16(width_actual);
+    REPLY_FIELD_CARD16(height_actual);
+    REPLY_FIELD_CARD16(num_palette_entries);
+    REPLY_FIELD_CARD16(entry_bytes);
+    REPLY_BUF_CARD32(data, dwords);
+    REPLY_SEND_EXTRA(data, dwords * sizeof(CARD32));
 
     free(data);
 
@@ -596,18 +588,18 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
             info[i].vert_v_period = pImage->vert_v_period;
             memcpy(&info[i].comp_order, pImage->component_order, 32);
             info[i].scanline_order = pImage->scanline_order;
+
+            CLIENT_STRUCT_CARD32_5(&info[i], id, red_mask, green_mask, blue_mask, y_sample_bits);
+            CLIENT_STRUCT_CARD32_5(&info[i], u_sample_bits, v_sample_bits, horz_y_period, horz_u_period, horz_v_period);
+            CLIENT_STRUCT_CARD32_3(&info[i], vert_y_period, vert_u_period, vert_v_period);
         }
     }
 
     xvmcListSubpictureTypesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .num = num,
-        .length = bytes_to_int32(num * sizeof(xvImageFormatInfo)),
     };
 
-    WriteToClient(client, sizeof(xvmcListSubpictureTypesReply), &rep);
-    WriteToClient(client, sizeof(xvImageFormatInfo) * num, info);
+    REPLY_SEND_EXTRA(info, sizeof(info));
     free(info);
     return Success;
 }
@@ -646,14 +638,11 @@ ProcXvMCGetDRInfo(ClientPtr client)
     memcpy(buf+nameLen, pScreenPriv->busID, busIDLen);
 
     xvmcGetDRInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .major = pScreenPriv->major,
         .minor = pScreenPriv->minor,
         .patchLevel = pScreenPriv->patchLevel,
         .nameLen = nameLen,
         .busIDLen = busIDLen,
-        .length = bytes_to_int32(sizeof(buf)),
         .isLocal = 1
     };
 
@@ -683,8 +672,13 @@ ProcXvMCGetDRInfo(ClientPtr client)
     }
 #endif                          /* HAS_XVMCSHM */
 
-    WriteToClient(client, sizeof(xvmcGetDRInfoReply), &rep);
-    WriteToClient(client, buflen, buf);
+    REPLY_FIELD_CARD32(major);
+    REPLY_FIELD_CARD32(minor);
+    REPLY_FIELD_CARD32(patchLevel);
+    REPLY_FIELD_CARD32(nameLen);
+    REPLY_FIELD_CARD32(busIDLen);
+    REPLY_FIELD_CARD32(isLocal);
+    REPLY_SEND_EXTRA(buf, buflen);
     free(buf);
     return Success;
 }
