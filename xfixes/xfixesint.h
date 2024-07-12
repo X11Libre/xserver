@@ -75,15 +75,9 @@ typedef struct _XFixesClient {
 int
  ProcXFixesChangeSaveSet(ClientPtr client);
 
-int
- SProcXFixesChangeSaveSet(ClientPtr client);
-
 /* Selection events */
 int
  ProcXFixesSelectSelectionInput(ClientPtr client);
-
-int
- SProcXFixesSelectSelectionInput(ClientPtr client);
 
 void
 
@@ -99,11 +93,7 @@ Bool
 int
  ProcXFixesSelectCursorInput(ClientPtr client);
 
-int
- SProcXFixesSelectCursorInput(ClientPtr client);
-
 void
-
 SXFixesCursorNotifyEvent(xXFixesCursorNotifyEvent * from,
                          xXFixesCursorNotifyEvent * to);
 
@@ -116,13 +106,7 @@ int
  ProcXFixesSetCursorName(ClientPtr client);
 
 int
- SProcXFixesSetCursorName(ClientPtr client);
-
-int
  ProcXFixesGetCursorName(ClientPtr client);
-
-int
- SProcXFixesGetCursorName(ClientPtr client);
 
 int
  ProcXFixesGetCursorImageAndName(ClientPtr client);
@@ -133,13 +117,7 @@ int
  ProcXFixesChangeCursor(ClientPtr client);
 
 int
- SProcXFixesChangeCursor(ClientPtr client);
-
-int
  ProcXFixesChangeCursorByName(ClientPtr client);
-
-int
- SProcXFixesChangeCursorByName(ClientPtr client);
 
 /* Region objects (Version 2* */
 Bool
@@ -149,103 +127,52 @@ int
  ProcXFixesCreateRegion(ClientPtr client);
 
 int
- SProcXFixesCreateRegion(ClientPtr client);
-
-int
  ProcXFixesCreateRegionFromBitmap(ClientPtr client);
-
-int
- SProcXFixesCreateRegionFromBitmap(ClientPtr client);
 
 int
  ProcXFixesCreateRegionFromWindow(ClientPtr client);
 
 int
- SProcXFixesCreateRegionFromWindow(ClientPtr client);
-
-int
  ProcXFixesCreateRegionFromGC(ClientPtr client);
-
-int
- SProcXFixesCreateRegionFromGC(ClientPtr client);
 
 int
  ProcXFixesCreateRegionFromPicture(ClientPtr client);
 
 int
- SProcXFixesCreateRegionFromPicture(ClientPtr client);
-
-int
  ProcXFixesDestroyRegion(ClientPtr client);
-
-int
- SProcXFixesDestroyRegion(ClientPtr client);
 
 int
  ProcXFixesSetRegion(ClientPtr client);
 
 int
- SProcXFixesSetRegion(ClientPtr client);
-
-int
  ProcXFixesCopyRegion(ClientPtr client);
-
-int
- SProcXFixesCopyRegion(ClientPtr client);
 
 int
  ProcXFixesCombineRegion(ClientPtr client);
 
 int
- SProcXFixesCombineRegion(ClientPtr client);
-
-int
  ProcXFixesInvertRegion(ClientPtr client);
-
-int
- SProcXFixesInvertRegion(ClientPtr client);
 
 int
  ProcXFixesTranslateRegion(ClientPtr client);
 
 int
- SProcXFixesTranslateRegion(ClientPtr client);
-
-int
  ProcXFixesRegionExtents(ClientPtr client);
-
-int
- SProcXFixesRegionExtents(ClientPtr client);
 
 int
  ProcXFixesFetchRegion(ClientPtr client);
 
 int
- SProcXFixesFetchRegion(ClientPtr client);
-
-int
  ProcXFixesSetGCClipRegion(ClientPtr client);
-
-int
- SProcXFixesSetGCClipRegion(ClientPtr client);
 
 int
  ProcXFixesSetWindowShapeRegion(ClientPtr client);
 
 int
- SProcXFixesSetWindowShapeRegion(ClientPtr client);
-
-int
  ProcXFixesSetPictureClipRegion(ClientPtr client);
 
 int
- SProcXFixesSetPictureClipRegion(ClientPtr client);
-
-int
  ProcXFixesExpandRegion(ClientPtr client);
-
-int
- SProcXFixesExpandRegion(ClientPtr client);
 
 /* Cursor Visibility (Version 4) */
 
@@ -253,13 +180,7 @@ int
  ProcXFixesHideCursor(ClientPtr client);
 
 int
- SProcXFixesHideCursor(ClientPtr client);
-
-int
  ProcXFixesShowCursor(ClientPtr client);
-
-int
- SProcXFixesShowCursor(ClientPtr client);
 
 /* Version 5 */
 
@@ -267,13 +188,7 @@ int
  ProcXFixesCreatePointerBarrier(ClientPtr client);
 
 int
- SProcXFixesCreatePointerBarrier(ClientPtr client);
-
-int
  ProcXFixesDestroyPointerBarrier(ClientPtr client);
-
-int
- SProcXFixesDestroyPointerBarrier(ClientPtr client);
 
 /* Version 6 */
 
@@ -285,9 +200,6 @@ int
 
 int
  ProcXFixesGetClientDisconnectMode(ClientPtr client);
-
-int
- SProcXFixesSetClientDisconnectMode(ClientPtr client);
 
 Bool
  XFixesShouldDisconnectClient(ClientPtr client);
