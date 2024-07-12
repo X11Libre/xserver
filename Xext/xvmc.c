@@ -714,13 +714,6 @@ ProcXvMCDispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcXvMCDispatch(ClientPtr client)
-{
-    /* We only support local */
-    return BadImplementation;
-}
-
 void
 XvMCExtensionInit(void)
 {
@@ -742,7 +735,7 @@ XvMCExtensionInit(void)
         return;
 
     extEntry = AddExtension(XvMCName, XvMCNumEvents, XvMCNumErrors,
-                            ProcXvMCDispatch, SProcXvMCDispatch,
+                            ProcXvMCDispatch, ProcXvMCDispatch,
                             NULL, StandardMinorOpcode);
 
     if (!extEntry)
