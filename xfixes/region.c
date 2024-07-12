@@ -425,26 +425,18 @@ ProcXFixesFetchRegion(ClientPtr client)
     }
 
     xXFixesFetchRegionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = nBox << 1,
         .x = pExtent->x1,
         .y = pExtent->y1,
         .width = pExtent->x2 - pExtent->x1,
         .height = pExtent->y2 - pExtent->y1,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        SwapShorts((INT16 *) pRect, nBox * 4);
-    }
-    WriteToClient(client, sizeof(xXFixesFetchRegionReply), &rep);
-    WriteToClient(client, sizeof(pRect), pRect);
+    REPLY_FIELD_CARD16(x);
+    REPLY_FIELD_CARD16(y);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_BUF_CARD16(pRect, nBox * 4);
+    REPLY_SEND_EXTRA(pRect, sizeof(pRect));
     return Success;
 }
 

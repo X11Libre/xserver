@@ -81,18 +81,11 @@ ProcXFixesGetClientDisconnectMode(ClientPtr client)
     ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
 
     xXFixesGetClientDisconnectModeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .disconnect_mode = pDisconnect->disconnect_mode,
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.disconnect_mode);
-    }
-    WriteToClient(client, sizeof(xXFixesGetClientDisconnectModeReply), &rep);
 
-    return Success;
+    REPLY_FIELD_CARD32(disconnect_mode);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 Bool
