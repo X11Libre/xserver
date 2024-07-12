@@ -606,11 +606,11 @@ TestForCursor(CursorPtr pCursor, void *closure)
 int
 ProcXFixesChangeCursor(ClientPtr client)
 {
-    CursorPtr pSource, pDestination;
-
     X_REQUEST_HEAD_STRUCT(xXFixesChangeCursorReq);
     X_REQUEST_FIELD_CARD32(source);
     X_REQUEST_FIELD_CARD32(destination);
+
+    CursorPtr pSource, pDestination;
 
     VERIFY_CURSOR(pSource, stuff->source, client,
                   DixReadAccess | DixGetAttrAccess);
@@ -883,7 +883,6 @@ int
 ProcXFixesCreatePointerBarrier(ClientPtr client)
 {
     X_REQUEST_HEAD_AT_LEAST(xXFixesCreatePointerBarrierReq);
-
     X_REQUEST_FIELD_CARD16(num_devices);
     X_REQUEST_FIELD_CARD32(barrier);
     X_REQUEST_FIELD_CARD32(window);
