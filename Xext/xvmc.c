@@ -163,10 +163,7 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
         .num = num_surfaces,
     };
 
-    if (client->swapped) {
-        swapl(&reply.num);
-    }
-
+    X_REPLY_FIELD_CARD32(num);
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
@@ -259,11 +256,9 @@ ProcXvMCCreateContext(ClientPtr client)
         .flags_return = pContext->flags
     };
 
-    if (client->swapped) {
-        swaps(&reply.width_actual);
-        swaps(&reply.height_actual);
-        swapl(&reply.flags_return);
-    }
+    X_REPLY_FIELD_CARD16(width_actual);
+    X_REPLY_FIELD_CARD16(height_actual);
+    X_REPLY_FIELD_CARD32(flags_return);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -461,12 +456,10 @@ ProcXvMCCreateSubpicture(ClientPtr client)
         .component_order[3] = pSubpicture->component_order[3]
     };
 
-    if (client->swapped) {
-        swaps(&reply.width_actual);
-        swaps(&reply.height_actual);
-        swaps(&reply.num_palette_entries);
-        swaps(&reply.entry_bytes);
-    }
+    X_REPLY_FIELD_CARD16(width_actual);
+    X_REPLY_FIELD_CARD16(height_actual);
+    X_REPLY_FIELD_CARD16(num_palette_entries);
+    X_REPLY_FIELD_CARD16(entry_bytes);
 
     pContext->refcnt++;
 
@@ -595,9 +588,7 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
         .num = num,
     };
 
-    if (client->swapped) {
-        swapl(&reply.num);
-    }
+    X_REPLY_FIELD_CARD32(num);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -639,14 +630,12 @@ ProcXvMCGetDRInfo(ClientPtr client)
      * Read back to the client what she has put in the shared memory
      * segment she prepared for us.
      */
-    if (client->swapped) {
-        swapl(&reply.major);
-        swapl(&reply.minor);
-        swapl(&reply.patchLevel);
-        swapl(&reply.nameLen);
-        swapl(&reply.busIDLen);
-        swapl(&reply.isLocal);
-    }
+    X_REPLY_FIELD_CARD32(major);
+    X_REPLY_FIELD_CARD32(minor);
+    X_REPLY_FIELD_CARD32(patchLevel);
+    X_REPLY_FIELD_CARD32(nameLen);
+    X_REPLY_FIELD_CARD32(busIDLen);
+    X_REPLY_FIELD_CARD32(isLocal);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
