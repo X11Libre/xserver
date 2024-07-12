@@ -388,16 +388,13 @@ ProcXFixesGetCursorImage(ClientPtr client)
         .cursorSerial = pCursor->serialNumber,
     };
 
-    if (client->swapped) {
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.xhot);
-        swaps(&rep.yhot);
-        swapl(&rep.cursorSerial);
-    }
-
+    REPLY_FIELD_CARD16(x);
+    REPLY_FIELD_CARD16(y);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_FIELD_CARD16(xhot);
+    REPLY_FIELD_CARD16(yhot);
+    REPLY_FIELD_CARD32(cursorSerial);
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
@@ -444,11 +441,9 @@ ProcXFixesGetCursorName(ClientPtr client)
         .atom = pCursor->name,
         .nbytes = strlen(str)
     };
-    if (client->swapped) {
-        swapl(&rep.atom);
-        swaps(&rep.nbytes);
-    }
 
+    REPLY_FIELD_CARD32(atom);
+    REPLY_FIELD_CARD16(nbytes);
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
@@ -503,18 +498,15 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
         .nbytes = strlen(name),
     };
 
-    if (client->swapped) {
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.xhot);
-        swaps(&rep.yhot);
-        swapl(&rep.cursorSerial);
-        swapl(&rep.cursorName);
-        swaps(&rep.nbytes);
-    }
-
+    REPLY_FIELD_CARD16(x);
+    REPLY_FIELD_CARD16(y);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_FIELD_CARD16(xhot);
+    REPLY_FIELD_CARD16(yhot);
+    REPLY_FIELD_CARD32(cursorSerial);
+    REPLY_FIELD_CARD32(cursorName);
+    REPLY_FIELD_CARD16(nbytes);
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
