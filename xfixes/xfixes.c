@@ -44,6 +44,7 @@
 
 #include <dix-config.h>
 
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/fmt.h"
 
@@ -63,6 +64,10 @@ static DevPrivateKeyRec XFixesClientPrivateKeyRec;
 static int
 ProcXFixesQueryVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesQueryVersionReq);
+    REQUEST_FIELD_CARD32(majorVersion);
+    REQUEST_FIELD_CARD32(minorVersion);
+
     int major, minor;
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
     xXFixesQueryVersionReply rep = {
@@ -70,10 +75,6 @@ ProcXFixesQueryVersion(ClientPtr client)
         .sequenceNumber = client->sequence,
         .length = 0
     };
-
-    REQUEST(xXFixesQueryVersionReq);
-
-    REQUEST_SIZE_MATCH(xXFixesQueryVersionReq);
 
     if (version_compare(stuff->majorVersion, stuff->minorVersion,
                         SERVER_XFIXES_MAJOR_VERSION,
@@ -205,112 +206,6 @@ ProcXFixesDispatch(ClientPtr client)
     }
 }
 
-static _X_COLD int
-SProcXFixesQueryVersion(ClientPtr client)
-{
-    REQUEST(xXFixesQueryVersionReq);
-    REQUEST_SIZE_MATCH(xXFixesQueryVersionReq);
-
-    swapl(&stuff->majorVersion);
-    swapl(&stuff->minorVersion);
-    return ProcXFixesQueryVersion(client);
-}
-
-static _X_COLD int
-SProcXFixesDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    XFixesClientPtr pXFixesClient = GetXFixesClient(client);
-
-    if (pXFixesClient->major_version >= ARRAY_SIZE(version_requests))
-        return BadRequest;
-    if (stuff->data > version_requests[pXFixesClient->major_version])
-        return BadRequest;
-
-    switch (stuff->data) {
-        /*************** Version 1 ******************/
-        case X_XFixesQueryVersion:
-            return SProcXFixesQueryVersion(client);
-        case X_XFixesChangeSaveSet:
-            return SProcXFixesChangeSaveSet(client);
-        case X_XFixesSelectSelectionInput:
-            return SProcXFixesSelectSelectionInput(client);
-        case X_XFixesSelectCursorInput:
-            return SProcXFixesSelectCursorInput(client);
-        case X_XFixesGetCursorImage:
-            return ProcXFixesGetCursorImage(client);
-
-        /*************** Version 2 ******************/
-        case X_XFixesCreateRegion:
-            return SProcXFixesCreateRegion(client);
-        case X_XFixesCreateRegionFromBitmap:
-            return SProcXFixesCreateRegionFromBitmap(client);
-        case X_XFixesCreateRegionFromWindow:
-            return SProcXFixesCreateRegionFromWindow(client);
-        case X_XFixesCreateRegionFromGC:
-            return SProcXFixesCreateRegionFromGC(client);
-        case X_XFixesCreateRegionFromPicture:
-            return SProcXFixesCreateRegionFromPicture(client);
-        case X_XFixesDestroyRegion:
-            return SProcXFixesDestroyRegion(client);
-        case X_XFixesSetRegion:
-            return SProcXFixesSetRegion(client);
-        case X_XFixesCopyRegion:
-            return SProcXFixesCopyRegion(client);
-        case X_XFixesUnionRegion:
-            return SProcXFixesCombineRegion(client);
-        case X_XFixesIntersectRegion:
-            return SProcXFixesCombineRegion(client);
-        case X_XFixesSubtractRegion:
-            return SProcXFixesCombineRegion(client);
-        case X_XFixesInvertRegion:
-            return SProcXFixesInvertRegion(client);
-        case X_XFixesTranslateRegion:
-            return SProcXFixesTranslateRegion(client);
-        case X_XFixesRegionExtents:
-            return SProcXFixesRegionExtents(client);
-        case X_XFixesFetchRegion:
-            return SProcXFixesFetchRegion(client);
-        case X_XFixesSetGCClipRegion:
-            return SProcXFixesSetGCClipRegion(client);
-        case X_XFixesSetWindowShapeRegion:
-            return SProcXFixesSetWindowShapeRegion(client);
-        case X_XFixesSetPictureClipRegion:
-            return SProcXFixesSetPictureClipRegion(client);
-        case X_XFixesSetCursorName:
-            return SProcXFixesSetCursorName(client);
-        case X_XFixesGetCursorName:
-            return SProcXFixesGetCursorName(client);
-        case X_XFixesGetCursorImageAndName:
-            return ProcXFixesGetCursorImageAndName(client);
-        case X_XFixesChangeCursor:
-            return SProcXFixesChangeCursor(client);
-        case X_XFixesChangeCursorByName:
-            return SProcXFixesChangeCursorByName(client);
-
-        /*************** Version 3 ******************/
-        case X_XFixesExpandRegion:
-            return SProcXFixesExpandRegion(client);
-        /*************** Version 4 ******************/
-        case X_XFixesHideCursor:
-            return SProcXFixesHideCursor(client);
-        case X_XFixesShowCursor:
-            return SProcXFixesShowCursor(client);
-        /*************** Version 5 ******************/
-        case X_XFixesCreatePointerBarrier:
-            return SProcXFixesCreatePointerBarrier(client);
-        case X_XFixesDestroyPointerBarrier:
-            return SProcXFixesDestroyPointerBarrier(client);
-        /*************** Version 6 ******************/
-        case X_XFixesSetClientDisconnectMode:
-            return SProcXFixesSetClientDisconnectMode(client);
-        case X_XFixesGetClientDisconnectMode:
-            return ProcXFixesGetClientDisconnectMode(client);
-        default:
-            return BadRequest;
-    }
-}
-
 void
 XFixesExtensionInit(void)
 {
@@ -326,7 +221,7 @@ XFixesExtensionInit(void)
         XFixesClientDisconnectInit() &&
         (extEntry = AddExtension(XFIXES_NAME, XFixesNumberEvents,
                                  XFixesNumberErrors,
-                                 ProcXFixesDispatch, SProcXFixesDispatch,
+                                 ProcXFixesDispatch, ProcXFixesDispatch,
                                  NULL, StandardMinorOpcode)) != 0) {
         XFixesReqCode = (unsigned char) extEntry->base;
         XFixesEventBase = extEntry->eventBase;
