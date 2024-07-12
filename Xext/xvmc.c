@@ -9,6 +9,7 @@
 #include <X11/extensions/Xvproto.h>
 #include <X11/extensions/XvMCproto.h>
 
+#include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/xvdix_priv.h"
@@ -109,15 +110,14 @@ XvMCDestroySubpictureRes(void *data, XID id)
 static int
 ProcXvMCQueryVersion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvmcQueryVersionReq);
+
     xvmcQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .major = SERVER_XVMC_MAJOR_VERSION,
         .minor = SERVER_XVMC_MINOR_VERSION
     };
-
-    /* REQUEST(xvmcQueryVersionReq); */
-    REQUEST_SIZE_MATCH(xvmcQueryVersionReq);
 
     WriteToClient(client, sizeof(xvmcQueryVersionReply), &rep);
     return Success;
@@ -130,8 +130,8 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
     XvMCScreenPtr pScreenPriv;
     XvMCAdaptorPtr adaptor = NULL;
 
-    REQUEST(xvmcListSurfaceTypesReq);
-    REQUEST_SIZE_MATCH(xvmcListSurfaceTypesReq);
+    REQUEST_HEAD_STRUCT(xvmcListSurfaceTypesReq);
+    REQUEST_FIELD_CARD32(port);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -195,8 +195,11 @@ ProcXvMCCreateContext(ClientPtr client)
     XvMCAdaptorPtr adaptor = NULL;
     XvMCSurfaceInfoPtr surface = NULL;
 
-    REQUEST(xvmcCreateContextReq);
-    REQUEST_SIZE_MATCH(xvmcCreateContextReq);
+    REQUEST_HEAD_STRUCT(xvmcCreateContextReq);
+    REQUEST_FIELD_CARD32(context_id);
+    REQUEST_FIELD_CARD16(width);
+    REQUEST_FIELD_CARD16(height);
+    REQUEST_FIELD_CARD32(flags);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -279,11 +282,11 @@ ProcXvMCCreateContext(ClientPtr client)
 static int
 ProcXvMCDestroyContext(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvmcDestroyContextReq);
+    REQUEST_FIELD_CARD32(context_id);
+
     void *val;
     int rc;
-
-    REQUEST(xvmcDestroyContextReq);
-    REQUEST_SIZE_MATCH(xvmcDestroyContextReq);
 
     rc = dixLookupResourceByType(&val, stuff->context_id, XvMCRTContext,
                                  client, DixDestroyAccess);
@@ -298,15 +301,16 @@ ProcXvMCDestroyContext(ClientPtr client)
 static int
 ProcXvMCCreateSurface(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvmcCreateSurfaceReq);
+    REQUEST_FIELD_CARD32(surface_id);
+    REQUEST_FIELD_CARD32(context_id);
+
     CARD32 *data = NULL;
     int dwords = 0;
     int result;
     XvMCContextPtr pContext;
     XvMCSurfacePtr pSurface;
     XvMCScreenPtr pScreenPriv;
-
-    REQUEST(xvmcCreateSurfaceReq);
-    REQUEST_SIZE_MATCH(xvmcCreateSurfaceReq);
 
     result = dixLookupResourceByType((void **) &pContext, stuff->context_id,
                                      XvMCRTContext, client, DixUseAccess);
@@ -356,11 +360,11 @@ ProcXvMCCreateSurface(ClientPtr client)
 static int
 ProcXvMCDestroySurface(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvmcDestroySurfaceReq);
+    REQUEST_FIELD_CARD32(surface_id);
+
     void *val;
     int rc;
-
-    REQUEST(xvmcDestroySurfaceReq);
-    REQUEST_SIZE_MATCH(xvmcDestroySurfaceReq);
 
     rc = dixLookupResourceByType(&val, stuff->surface_id, XvMCRTSurface,
                                  client, DixDestroyAccess);
@@ -375,6 +379,13 @@ ProcXvMCDestroySurface(ClientPtr client)
 static int
 ProcXvMCCreateSubpicture(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvmcCreateSubpictureReq);
+    REQUEST_FIELD_CARD32(subpicture_id);
+    REQUEST_FIELD_CARD32(context_id);
+    REQUEST_FIELD_CARD32(xvimage_id);
+    REQUEST_FIELD_CARD16(width);
+    REQUEST_FIELD_CARD16(height);
+
     Bool image_supported = FALSE;
     CARD32 *data = NULL;
     int result, dwords = 0;
@@ -383,9 +394,6 @@ ProcXvMCCreateSubpicture(ClientPtr client)
     XvMCScreenPtr pScreenPriv;
     XvMCAdaptorPtr adaptor;
     XvMCSurfaceInfoPtr surface = NULL;
-
-    REQUEST(xvmcCreateSubpictureReq);
-    REQUEST_SIZE_MATCH(xvmcCreateSubpictureReq);
 
     result = dixLookupResourceByType((void **) &pContext, stuff->context_id,
                                      XvMCRTContext, client, DixUseAccess);
@@ -483,11 +491,11 @@ ProcXvMCCreateSubpicture(ClientPtr client)
 static int
 ProcXvMCDestroySubpicture(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvmcDestroySubpictureReq);
+    REQUEST_FIELD_CARD32(subpicture_id);
+
     void *val;
     int rc;
-
-    REQUEST(xvmcDestroySubpictureReq);
-    REQUEST_SIZE_MATCH(xvmcDestroySubpictureReq);
 
     rc = dixLookupResourceByType(&val, stuff->subpicture_id, XvMCRTSubpicture,
                                  client, DixDestroyAccess);
@@ -502,15 +510,16 @@ ProcXvMCDestroySubpicture(ClientPtr client)
 static int
 ProcXvMCListSubpictureTypes(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvmcListSubpictureTypesReq);
+    REQUEST_FIELD_CARD32(port);
+    REQUEST_FIELD_CARD32(surface_type_id);
+
     XvPortPtr pPort;
     XvMCScreenPtr pScreenPriv;
     ScreenPtr pScreen;
     XvMCAdaptorPtr adaptor = NULL;
     XvMCSurfaceInfoPtr surface = NULL;
     XvImagePtr pImage;
-
-    REQUEST(xvmcListSubpictureTypesReq);
-    REQUEST_SIZE_MATCH(xvmcListSubpictureTypesReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
@@ -606,6 +615,11 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
 static int
 ProcXvMCGetDRInfo(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xvmcGetDRInfoReq);
+    REQUEST_FIELD_CARD32(port);
+    REQUEST_FIELD_CARD32(shmKey);
+    REQUEST_FIELD_CARD32(magic);
+
     XvPortPtr pPort;
     ScreenPtr pScreen;
     XvMCScreenPtr pScreenPriv;
@@ -613,9 +627,6 @@ ProcXvMCGetDRInfo(ClientPtr client)
 #ifdef HAS_XVMCSHM
     volatile CARD32 *patternP;
 #endif
-
-    REQUEST(xvmcGetDRInfoReq);
-    REQUEST_SIZE_MATCH(xvmcGetDRInfoReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
