@@ -889,12 +889,9 @@ ProcPanoramiXQueryVersion(ClientPtr client)
         .minorVersion = SERVER_PANORAMIX_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -915,12 +912,8 @@ ProcPanoramiXGetState(ClientPtr client)
         .window = stuff->window
     };
 
-    if (client->swapped) {
-        swapl(&reply.window);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
-
+    REPLY_FIELD_CARD32(window);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -941,11 +934,8 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
         .window = stuff->window
     };
 
-    if (client->swapped) {
-        swapl(&reply.window);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    REPLY_FIELD_CARD32(window);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -975,14 +965,11 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
         .screen = stuff->screen
     };
 
-    if (client->swapped) {
-        swapl(&reply.width);
-        swapl(&reply.height);
-        swapl(&reply.window);
-        swapl(&reply.screen);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    REPLY_FIELD_CARD32(width);
+    REPLY_FIELD_CARD32(height);
+    REPLY_FIELD_CARD32(window);
+    REPLY_FIELD_CARD32(screen);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1000,11 +987,8 @@ ProcXineramaIsActive(ClientPtr client)
 #endif
     };
 
-    if (client->swapped) {
-        swapl(&reply.state);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    REPLY_FIELD_CARD32(state);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1016,10 +1000,6 @@ ProcXineramaQueryScreens(ClientPtr client)
     xXineramaQueryScreensReply reply = {
         .number = number
     };
-
-    if (client->swapped) {
-        swapl(&reply.number);
-    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -1034,6 +1014,7 @@ ProcXineramaQueryScreens(ClientPtr client)
         });
     }
 
+    REPLY_FIELD_CARD32(number);
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
