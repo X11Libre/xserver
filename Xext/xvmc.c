@@ -110,10 +110,8 @@ ProcXvMCQueryVersion(ClientPtr client)
         .minor = SERVER_XVMC_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swapl(&reply.major);
-        swapl(&reply.minor);
-    }
+    X_REPLY_FIELD_CARD32(major);
+    X_REPLY_FIELD_CARD32(minor);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
