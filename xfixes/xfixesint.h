@@ -94,7 +94,6 @@ int
  ProcXFixesSelectCursorInput(ClientPtr client);
 
 void
-
 SXFixesCursorNotifyEvent(xXFixesCursorNotifyEvent * from,
                          xXFixesCursorNotifyEvent * to);
 

@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/selection_priv.h"
 
 #include "xfixesint.h"
@@ -134,6 +135,9 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
 {
     REQUEST(xXFixesSelectSelectionInputReq);
     REQUEST_SIZE_MATCH(xXFixesSelectSelectionInputReq);
+    REQUEST_FIELD_CARD32(window);
+    REQUEST_FIELD_CARD32(selection);
+    REQUEST_FIELD_CARD32(eventMask);
 
     if (client->swapped) {
         swapl(&stuff->window);

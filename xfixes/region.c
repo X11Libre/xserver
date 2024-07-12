@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/window_priv.h"
 #include "render/picturestr_priv.h"
@@ -73,16 +74,12 @@ XFixesRegionInit(void)
 int
 ProcXFixesCreateRegion(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xXFixesCreateRegionReq);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_REST_CARD16();
+
     int things;
     RegionPtr pRegion;
-
-    REQUEST(xXFixesCreateRegionReq);
-    REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-        SwapRestS(stuff);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
@@ -103,17 +100,13 @@ ProcXFixesCreateRegion(ClientPtr client)
 int
 ProcXFixesCreateRegionFromBitmap(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesCreateRegionFromBitmapReq);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_FIELD_CARD32(bitmap);
+
     RegionPtr pRegion;
     PixmapPtr pPixmap;
     int rc;
-
-    REQUEST(xXFixesCreateRegionFromBitmapReq);
-    REQUEST_SIZE_MATCH(xXFixesCreateRegionFromBitmapReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-        swapl(&stuff->bitmap);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
@@ -140,18 +133,14 @@ ProcXFixesCreateRegionFromBitmap(ClientPtr client)
 int
 ProcXFixesCreateRegionFromWindow(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesCreateRegionFromWindowReq);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_FIELD_CARD32(window);
+
     RegionPtr pRegion;
     Bool copy = TRUE;
     WindowPtr pWin;
     int rc;
-
-    REQUEST(xXFixesCreateRegionFromWindowReq);
-    REQUEST_SIZE_MATCH(xXFixesCreateRegionFromWindowReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-        swapl(&stuff->window);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->region, client);
     rc = dixLookupResourceByType((void **) &pWin, stuff->window, X11_RESTYPE_WINDOW,
@@ -192,17 +181,13 @@ ProcXFixesCreateRegionFromWindow(ClientPtr client)
 int
 ProcXFixesCreateRegionFromGC(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesCreateRegionFromGCReq);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_FIELD_CARD32(gc);
+
     RegionPtr pRegion, pClip;
     GCPtr pGC;
     int rc;
-
-    REQUEST(xXFixesCreateRegionFromGCReq);
-    REQUEST_SIZE_MATCH(xXFixesCreateRegionFromGCReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-        swapl(&stuff->gc);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
@@ -228,16 +213,12 @@ ProcXFixesCreateRegionFromGC(ClientPtr client)
 int
 ProcXFixesCreateRegionFromPicture(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesCreateRegionFromPictureReq);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_FIELD_CARD32(picture);
+
     RegionPtr pRegion;
     PicturePtr pPicture;
-
-    REQUEST(xXFixesCreateRegionFromPictureReq);
-    REQUEST_SIZE_MATCH(xXFixesCreateRegionFromPictureReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-        swapl(&stuff->picture);
-    }
 
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
@@ -263,13 +244,10 @@ ProcXFixesCreateRegionFromPicture(ClientPtr client)
 int
 ProcXFixesDestroyRegion(ClientPtr client)
 {
-    REQUEST(xXFixesDestroyRegionReq);
+    REQUEST_HEAD_STRUCT(xXFixesDestroyRegionReq);
+    REQUEST_FIELD_CARD32(region);
+
     RegionPtr pRegion;
-
-    REQUEST_SIZE_MATCH(xXFixesDestroyRegionReq);
-
-    if (client->swapped)
-        swapl(&stuff->region);
 
     VERIFY_REGION(pRegion, stuff->region, client, DixWriteAccess);
     FreeResource(stuff->region, X11_RESTYPE_NONE);
@@ -279,16 +257,12 @@ ProcXFixesDestroyRegion(ClientPtr client)
 int
 ProcXFixesSetRegion(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xXFixesSetRegionReq);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_REST_CARD16();
+
     int things;
     RegionPtr pRegion, pNew;
-
-    REQUEST(xXFixesSetRegionReq);
-    REQUEST_AT_LEAST_SIZE(xXFixesSetRegionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-        SwapRestS(stuff);
-    }
 
     VERIFY_REGION(pRegion, stuff->region, client, DixWriteAccess);
 
@@ -311,10 +285,11 @@ ProcXFixesSetRegion(ClientPtr client)
 int
 ProcXFixesCopyRegion(ClientPtr client)
 {
-    RegionPtr pSource, pDestination;
+    REQUEST_HEAD_STRUCT(xXFixesCopyRegionReq);
+    REQUEST_FIELD_CARD32(source);
+    REQUEST_FIELD_CARD32(destination);
 
-    REQUEST(xXFixesCopyRegionReq);
-    REQUEST_SIZE_MATCH(xXFixesCopyRegionReq);
+    RegionPtr pSource, pDestination;
 
     if (client->swapped) {
         swapl(&stuff->source);
@@ -333,16 +308,12 @@ ProcXFixesCopyRegion(ClientPtr client)
 int
 ProcXFixesCombineRegion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesCombineRegionReq);
+    REQUEST_FIELD_CARD32(source1);
+    REQUEST_FIELD_CARD32(source2);
+    REQUEST_FIELD_CARD32(destination);
+
     RegionPtr pSource1, pSource2, pDestination;
-
-    REQUEST(xXFixesCombineRegionReq);
-    REQUEST_SIZE_MATCH(xXFixesCombineRegionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->source1);
-        swapl(&stuff->source2);
-        swapl(&stuff->destination);
-    }
 
     VERIFY_REGION(pSource1, stuff->source1, client, DixReadAccess);
     VERIFY_REGION(pSource2, stuff->source2, client, DixReadAccess);
@@ -369,20 +340,16 @@ ProcXFixesCombineRegion(ClientPtr client)
 int
 ProcXFixesInvertRegion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesInvertRegionReq);
+    REQUEST_FIELD_CARD32(source);
+    REQUEST_FIELD_CARD16(x);
+    REQUEST_FIELD_CARD16(y);
+    REQUEST_FIELD_CARD16(width);
+    REQUEST_FIELD_CARD16(height);
+    REQUEST_FIELD_CARD32(destination);
+
     RegionPtr pSource, pDestination;
     BoxRec bounds;
-
-    REQUEST(xXFixesInvertRegionReq);
-    REQUEST_SIZE_MATCH(xXFixesInvertRegionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->source);
-        swaps(&stuff->x);
-        swaps(&stuff->y);
-        swaps(&stuff->width);
-        swaps(&stuff->height);
-        swapl(&stuff->destination);
-    }
 
     VERIFY_REGION(pSource, stuff->source, client, DixReadAccess);
     VERIFY_REGION(pDestination, stuff->destination, client, DixWriteAccess);
@@ -409,16 +376,12 @@ ProcXFixesInvertRegion(ClientPtr client)
 int
 ProcXFixesTranslateRegion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesTranslateRegionReq);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_FIELD_CARD16(dx);
+    REQUEST_FIELD_CARD16(dy);
+
     RegionPtr pRegion;
-
-    REQUEST(xXFixesTranslateRegionReq);
-    REQUEST_SIZE_MATCH(xXFixesTranslateRegionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-        swaps(&stuff->dx);
-        swaps(&stuff->dy);
-    }
 
     VERIFY_REGION(pRegion, stuff->region, client, DixWriteAccess);
 
@@ -429,15 +392,11 @@ ProcXFixesTranslateRegion(ClientPtr client)
 int
 ProcXFixesRegionExtents(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesRegionExtentsReq);
+    REQUEST_FIELD_CARD32(source);
+    REQUEST_FIELD_CARD32(destination);
+
     RegionPtr pSource, pDestination;
-
-    REQUEST(xXFixesRegionExtentsReq);
-    REQUEST_SIZE_MATCH(xXFixesRegionExtentsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->source);
-        swapl(&stuff->destination);
-    }
 
     VERIFY_REGION(pSource, stuff->source, client, DixReadAccess);
     VERIFY_REGION(pDestination, stuff->destination, client, DixWriteAccess);
@@ -450,17 +409,13 @@ ProcXFixesRegionExtents(ClientPtr client)
 int
 ProcXFixesFetchRegion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesFetchRegionReq);
+    REQUEST_FIELD_CARD32(region);
+
     RegionPtr pRegion;
     BoxPtr pExtent;
     BoxPtr pBox;
     int i, nBox;
-
-    REQUEST(xXFixesFetchRegionReq);
-    REQUEST_SIZE_MATCH(xXFixesFetchRegionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-    }
 
     VERIFY_REGION(pRegion, stuff->region, client, DixReadAccess);
 
@@ -506,8 +461,11 @@ SingleXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff);
 int
 ProcXFixesSetGCClipRegion(ClientPtr client)
 {
-    REQUEST(xXFixesSetGCClipRegionReq);
-    REQUEST_SIZE_MATCH(xXFixesSetGCClipRegionReq);
+    REQUEST_HEAD_STRUCT(xXFixesSetGCClipRegionReq);
+    REQUEST_FIELD_CARD32(gc);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_FIELD_CARD16(xOrigin);
+    REQUEST_FIELD_CARD16(yOrigin);
 
     if (client->swapped) {
         swapl(&stuff->gc);
@@ -631,8 +589,11 @@ PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegion
 int
 ProcXFixesSetWindowShapeRegion(ClientPtr client)
 {
-    REQUEST(xXFixesSetWindowShapeRegionReq);
-    REQUEST_SIZE_MATCH(xXFixesSetWindowShapeRegionReq);
+    REQUEST_HEAD_STRUCT(xXFixesSetWindowShapeRegionReq);
+    REQUEST_FIELD_CARD32(dest);
+    REQUEST_FIELD_CARD16(xOff);
+    REQUEST_FIELD_CARD16(yOff);
+    REQUEST_FIELD_CARD32(region);
 
     if (client->swapped) {
         swapl(&stuff->dest);
@@ -657,8 +618,11 @@ PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegion
 int
 ProcXFixesSetPictureClipRegion(ClientPtr client)
 {
-    REQUEST(xXFixesSetPictureClipRegionReq);
-    REQUEST_SIZE_MATCH(xXFixesSetPictureClipRegionReq);
+    REQUEST_HEAD_STRUCT(xXFixesSetPictureClipRegionReq);
+    REQUEST_FIELD_CARD32(picture);
+    REQUEST_FIELD_CARD32(region);
+    REQUEST_FIELD_CARD16(xOrigin);
+    REQUEST_FIELD_CARD16(yOrigin);
 
     if (client->swapped) {
         swapl(&stuff->picture);
@@ -693,24 +657,20 @@ SingleXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegionRe
 int
 ProcXFixesExpandRegion(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesExpandRegionReq);
+    REQUEST_FIELD_CARD32(source);
+    REQUEST_FIELD_CARD32(destination);
+    REQUEST_FIELD_CARD16(left);
+    REQUEST_FIELD_CARD16(right);
+    REQUEST_FIELD_CARD16(top);
+    REQUEST_FIELD_CARD16(bottom);
+
     RegionPtr pSource, pDestination;
 
-    REQUEST(xXFixesExpandRegionReq);
     BoxPtr pTmp;
     BoxPtr pSrc;
     int nBoxes;
     int i;
-
-    REQUEST_SIZE_MATCH(xXFixesExpandRegionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->source);
-        swapl(&stuff->destination);
-        swaps(&stuff->left);
-        swaps(&stuff->right);
-        swaps(&stuff->top);
-        swaps(&stuff->bottom);
-    }
 
     VERIFY_REGION(pSource, stuff->source, client, DixReadAccess);
     VERIFY_REGION(pDestination, stuff->destination, client, DixWriteAccess);
