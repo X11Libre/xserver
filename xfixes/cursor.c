@@ -400,18 +400,17 @@ ProcXFixesGetCursorImage(ClientPtr client)
 int
 ProcXFixesSetCursorName(ClientPtr client)
 {
-    CursorPtr pCursor;
-    char *tchar;
-    Atom atom;
-
     X_REQUEST_HEAD_AT_LEAST(xXFixesSetCursorNameReq);
     X_REQUEST_FIELD_CARD32(cursor);
     X_REQUEST_FIELD_CARD16(nbytes);
     REQUEST_FIXED_SIZE(xXFixesSetCursorNameReq, stuff->nbytes);
 
+    CursorPtr pCursor;
+    char *tchar;
+
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixSetAttrAccess);
     tchar = (char *) &stuff[1];
-    atom = MakeAtom(tchar, stuff->nbytes, TRUE);
+    Atom atom = MakeAtom(tchar, stuff->nbytes, TRUE);
     if (atom == BAD_RESOURCE)
         return BadAlloc;
 
@@ -620,11 +619,11 @@ TestForCursor(CursorPtr pCursor, void *closure)
 int
 ProcXFixesChangeCursor(ClientPtr client)
 {
-    CursorPtr pSource, pDestination;
-
     X_REQUEST_HEAD_STRUCT(xXFixesChangeCursorReq);
     X_REQUEST_FIELD_CARD32(source);
     X_REQUEST_FIELD_CARD32(destination);
+
+    CursorPtr pSource, pDestination;
 
     VERIFY_CURSOR(pSource, stuff->source, client,
                   DixReadAccess | DixGetAttrAccess);
@@ -897,7 +896,6 @@ int
 ProcXFixesCreatePointerBarrier(ClientPtr client)
 {
     X_REQUEST_HEAD_AT_LEAST(xXFixesCreatePointerBarrierReq);
-
     X_REQUEST_FIELD_CARD16(num_devices);
     X_REQUEST_FIELD_CARD32(barrier);
     X_REQUEST_FIELD_CARD32(window);
