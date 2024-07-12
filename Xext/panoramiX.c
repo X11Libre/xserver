@@ -884,10 +884,8 @@ ProcPanoramiXQueryVersion(ClientPtr client)
         .minorVersion = SERVER_PANORAMIX_MINOR_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&reply.majorVersion);
-        swaps(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD16(majorVersion);
+    X_REPLY_FIELD_CARD16(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -910,9 +908,7 @@ ProcPanoramiXGetState(ClientPtr client)
         .window = stuff->window
     };
 
-    if (client->swapped) {
-        swapl(&reply.window);
-    }
+    X_REPLY_FIELD_CARD32(window);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -935,9 +931,7 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
         .window = stuff->window
     };
 
-    if (client->swapped) {
-        swapl(&reply.window);
-    }
+    X_REPLY_FIELD_CARD32(window);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -969,12 +963,10 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
         .screen = stuff->screen
     };
 
-    if (client->swapped) {
-        swapl(&reply.width);
-        swapl(&reply.height);
-        swapl(&reply.window);
-        swapl(&reply.screen);
-    }
+    X_REPLY_FIELD_CARD32(width);
+    X_REPLY_FIELD_CARD32(height);
+    X_REPLY_FIELD_CARD32(window);
+    X_REPLY_FIELD_CARD32(screen);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -994,9 +986,7 @@ ProcXineramaIsActive(ClientPtr client)
 #endif
     };
 
-    if (client->swapped) {
-        swapl(&reply.state);
-    }
+    X_REPLY_FIELD_CARD32(state);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -1011,10 +1001,6 @@ ProcXineramaQueryScreens(ClientPtr client)
         .number = number
     };
 
-    if (client->swapped) {
-        swapl(&reply.number);
-    }
-
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!noPanoramiXExtension) {
@@ -1027,6 +1013,8 @@ ProcXineramaQueryScreens(ClientPtr client)
                                 walkScreen->height);
         });
     }
+
+    X_REPLY_FIELD_CARD32(number);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
