@@ -45,6 +45,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "xfixesint.h"
 
@@ -63,35 +64,21 @@ typedef struct _ClientDisconnect {
 int
 ProcXFixesSetClientDisconnectMode(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXFixesSetClientDisconnectModeReq);
+    REQUEST_FIELD_CARD32(disconnect_mode);
+
     ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
-
-    REQUEST(xXFixesSetClientDisconnectModeReq);
-
     pDisconnect->disconnect_mode = stuff->disconnect_mode;
 
     return Success;
 }
 
-int _X_COLD
-SProcXFixesSetClientDisconnectMode(ClientPtr client)
-{
-    REQUEST(xXFixesSetClientDisconnectModeReq);
-
-    swaps(&stuff->length);
-
-    REQUEST_AT_LEAST_SIZE(xXFixesSetClientDisconnectModeReq);
-
-    swapl(&stuff->disconnect_mode);
-
-    return ProcXFixesSetClientDisconnectMode(client);
-}
-
 int
 ProcXFixesGetClientDisconnectMode(ClientPtr client)
 {
-    ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
+    REQUEST_HEAD_STRUCT(xXFixesGetClientDisconnectModeReq);
 
-    REQUEST_SIZE_MATCH(xXFixesGetClientDisconnectModeReq);
+    ClientDisconnectPtr pDisconnect = GetClientDisconnect(client);
 
     xXFixesGetClientDisconnectModeReply rep = {
         .type = X_Reply,
@@ -106,18 +93,6 @@ ProcXFixesGetClientDisconnectMode(ClientPtr client)
     WriteToClient(client, sizeof(xXFixesGetClientDisconnectModeReply), &rep);
 
     return Success;
-}
-
-int _X_COLD
-SProcXFixesGetClientDisconnectMode(ClientPtr client)
-{
-    REQUEST(xXFixesGetClientDisconnectModeReq);
-
-    swaps(&stuff->length);
-
-    REQUEST_SIZE_MATCH(xXFixesGetClientDisconnectModeReq);
-
-    return ProcXFixesGetClientDisconnectMode(client);
 }
 
 Bool
