@@ -1365,18 +1365,18 @@ XkbSizeVirtualModMap(XkbDescPtr xkb, xkbGetMapReply * rep)
 }
 
 static char *
-XkbWriteVirtualModMap(XkbDescPtr xkb, xkbGetMapReply * rep, char *buf,
-                      ClientPtr client)
+XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
+                      CARD8 nVModMapKeys, char *buf)
 {
     unsigned i;
     xkbVModMapWireDesc *wire;
     unsigned short *pMap;
 
     wire = (xkbVModMapWireDesc *) buf;
-    pMap = &xkb->server->vmodmap[rep->firstVModMapKey];
-    for (i = 0; i < rep->nVModMapKeys; i++, pMap++) {
+    pMap = &xkb->server->vmodmap[firstVModMapKey];
+    for (i = 0; i < nVModMapKeys; i++, pMap++) {
         if (*pMap != 0) {
-            wire->key = i + rep->firstVModMapKey;
+            wire->key = i + firstVModMapKey;
             wire->vmods = *pMap;
             wire++;
         }
@@ -1436,7 +1436,7 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply * rep)
     if (rep->totalModMapKeys > 0)
         desc = XkbWriteModifierMap(xkb, rep->firstModMapKey, rep->nModMapKeys, desc);
     if (rep->totalVModMapKeys > 0)
-        desc = XkbWriteVirtualModMap(xkb, rep, desc, client);
+        desc = XkbWriteVirtualModMap(xkb, rep->firstVModMapKey, rep->nVModMapKeys, desc);
     if ((desc - start) != (len)) {
         ErrorF
             ("[xkb] BOGUS LENGTH in write keyboard desc, expected %d, got %ld\n",
