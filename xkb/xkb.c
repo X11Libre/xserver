@@ -201,19 +201,14 @@ ProcXkbUseExtension(ClientPtr client)
     }
 
     xkbUseExtensionReply rep = {
-        .type = X_Reply,
         .supported = supported,
-        .sequenceNumber = client->sequence,
         .serverMajor = SERVER_XKB_MAJOR_VERSION,
         .serverMinor = SERVER_XKB_MINOR_VERSION
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.serverMajor);
-        swaps(&rep.serverMinor);
-    }
-    WriteToClient(client, SIZEOF(xkbUseExtensionReply), &rep);
-    return Success;
+
+    REPLY_FIELD_CARD16(serverMajor);
+    REPLY_FIELD_CARD16(serverMinor);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /***====================================================================***/
@@ -606,9 +601,7 @@ ProcXkbGetState(ClientPtr client)
     xkb = &dev->key->xkbInfo->state;
 
     xkbGetStateReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .mods = XkbStateFieldFromRec(xkb) & 0xff,
         .baseMods = xkb->base_mods,
         .latchedMods = xkb->latched_mods,
@@ -620,12 +613,8 @@ ProcXkbGetState(ClientPtr client)
         .compatState = xkb->compat_state,
         .ptrBtnState = xkb->ptr_buttons
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.ptrBtnState);
-    }
-    WriteToClient(client, SIZEOF(xkbGetStateReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD16(ptrBtnState);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /***====================================================================***/
@@ -718,9 +707,7 @@ ProcXkbGetControls(ClientPtr client)
     xkb = dev->key->xkbInfo->desc->ctrls;
 
     xkbGetControlsReply rep = {
-        .type = X_Reply,
         .deviceID = ((DeviceIntPtr) dev)->id,
-        .sequenceNumber = client->sequence,
         .length = bytes_to_int32(sizeof(xkbGetControlsReply) -
                                  sizeof(xGenericReply)),
         .mkDfltBtn = xkb->mk_dflt_btn,
@@ -750,30 +737,25 @@ ProcXkbGetControls(ClientPtr client)
         .enabledCtrls = xkb->enabled_ctrls,
     };
     memcpy(rep.perKeyRepeat, xkb->per_key_repeat, XkbPerKeyBitArraySize);
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.internalVMods);
-        swaps(&rep.ignoreLockVMods);
-        swapl(&rep.enabledCtrls);
-        swaps(&rep.repeatDelay);
-        swaps(&rep.repeatInterval);
-        swaps(&rep.slowKeysDelay);
-        swaps(&rep.debounceDelay);
-        swaps(&rep.mkDelay);
-        swaps(&rep.mkInterval);
-        swaps(&rep.mkTimeToMax);
-        swaps(&rep.mkMaxSpeed);
-        swaps(&rep.mkCurve);
-        swaps(&rep.axTimeout);
-        swapl(&rep.axtCtrlsMask);
-        swapl(&rep.axtCtrlsValues);
-        swaps(&rep.axtOptsMask);
-        swaps(&rep.axtOptsValues);
-        swaps(&rep.axOptions);
-    }
-    WriteToClient(client, SIZEOF(xkbGetControlsReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD16(internalVMods);
+    REPLY_FIELD_CARD16(ignoreLockVMods);
+    REPLY_FIELD_CARD32(enabledCtrls);
+    REPLY_FIELD_CARD16(repeatDelay);
+    REPLY_FIELD_CARD16(repeatInterval);
+    REPLY_FIELD_CARD16(slowKeysDelay);
+    REPLY_FIELD_CARD16(debounceDelay);
+    REPLY_FIELD_CARD16(mkDelay);
+    REPLY_FIELD_CARD16(mkInterval);
+    REPLY_FIELD_CARD16(mkTimeToMax);
+    REPLY_FIELD_CARD16(mkMaxSpeed);
+    REPLY_FIELD_CARD16(mkCurve);
+    REPLY_FIELD_CARD16(axTimeout);
+    REPLY_FIELD_CARD32(axtCtrlsMask);
+    REPLY_FIELD_CARD32(axtCtrlsValues);
+    REPLY_FIELD_CARD16(axtOptsMask);
+    REPLY_FIELD_CARD16(axtOptsValues);
+    REPLY_FIELD_CARD16(axOptions);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 int
@@ -1491,10 +1473,7 @@ ProcXkbGetMap(ClientPtr client)
     xkb = dev->key->xkbInfo->desc;
 
     xkbGetMapReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xkbGetMapReply) - sizeof(xGenericReply)),
         .present = stuff->partial | stuff->full,
         .minKeyCode = xkb->min_key_code,
         .maxKeyCode = xkb->max_key_code,
@@ -1590,16 +1569,10 @@ ProcXkbGetMap(ClientPtr client)
 
     XkbAssembleMap(client, xkb, rep, payload_buf);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.present);
-        swaps(&rep.totalSyms);
-        swaps(&rep.totalActs);
-    }
-
-    WriteToClient(client, sizeof(xkbGetMapReply), &rep);
-    WriteToClient(client, payload_len, payload_buf);
+    REPLY_FIELD_CARD16(present);
+    REPLY_FIELD_CARD16(totalSyms);
+    REPLY_FIELD_CARD16(totalActs);
+    REPLY_SEND_EXTRA(payload_buf, payload_len);
     free(payload_buf);
     return Success;
 }
@@ -2903,8 +2876,6 @@ ProcXkbGetCompatMap(ClientPtr client)
     compat = xkb->compat;
 
     xkbGetCompatMapReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .deviceID = dev->id,
         .firstSI = stuff->firstSI,
         .nSI = stuff->nSI,
@@ -2929,16 +2900,10 @@ ProcXkbGetCompatMap(ClientPtr client)
 
     XkbAssembleCompatMap(client, compat, rep, buf);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.firstSI);
-        swaps(&rep.nSI);
-        swaps(&rep.nTotalSI);
-    }
-
-    WriteToClient(client, sizeof(xkbGetCompatMapReply), &rep);
-    WriteToClient(client, sz, buf);
+    REPLY_FIELD_CARD16(firstSI);
+    REPLY_FIELD_CARD16(nSI);
+    REPLY_FIELD_CARD16(nTotalSI);
+    REPLY_SEND_EXTRA(buf, sz);
     free(buf);
     return Success;
 }
@@ -3183,18 +3148,12 @@ ProcXkbGetIndicatorState(ClientPtr client)
         return BadAlloc;
 
     xkbGetIndicatorStateReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .state = sli->effectiveState
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.state);
-    }
-    WriteToClient(client, SIZEOF(xkbGetIndicatorStateReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD32(state);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /***====================================================================***/
@@ -3269,9 +3228,7 @@ ProcXkbGetIndicatorMap(ClientPtr client)
     leds = xkb->indicators;
 
     xkbGetIndicatorMapReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .which = stuff->which
     };
     XkbComputeGetIndicatorMapReplySize(leds, &rep);
@@ -3283,15 +3240,9 @@ ProcXkbGetIndicatorMap(ClientPtr client)
 
     XkbAssembleIndicatorMap(client, leds, rep, buf);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.which);
-        swapl(&rep.realIndicators);
-    }
-
-    WriteToClient(client, sizeof(xkbGetIndicatorMapReply), &rep);
-    WriteToClient(client, sz, buf);
+    REPLY_FIELD_CARD32(which);
+    REPLY_FIELD_CARD32(realIndicators);
+    REPLY_SEND_EXTRA(buf, sz);
     free(buf);
     return Success;
 }
@@ -3445,8 +3396,6 @@ ProcXkbGetNamedIndicator(ClientPtr client)
     }
 
     xkbGetNamedIndicatorReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .deviceID = dev->id,
         .indicator = stuff->indicator,
         .supported = TRUE,
@@ -3466,16 +3415,11 @@ ProcXkbGetNamedIndicator(ClientPtr client)
         rep.virtualMods = map->mods.vmods;
         rep.ctrls = map->ctrls;
     }
-    if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.indicator);
-        swaps(&rep.virtualMods);
-        swapl(&rep.ctrls);
-    }
 
-    WriteToClient(client, SIZEOF(xkbGetNamedIndicatorReply), &rep);
-    return Success;
+    REPLY_FIELD_CARD32(indicator);
+    REPLY_FIELD_CARD16(virtualMods);
+    REPLY_FIELD_CARD32(ctrls);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /**
@@ -3953,9 +3897,7 @@ ProcXkbGetNames(ClientPtr client)
     xkb = dev->key->xkbInfo->desc;
 
     xkbGetNamesReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .which = stuff->which,
         .nTypes = xkb->map->num_types,
         .firstKey = xkb->min_key_code,
@@ -3972,16 +3914,10 @@ ProcXkbGetNames(ClientPtr client)
 
     XkbAssembleNames(client, xkb, rep, payload_buf);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.which);
-        swaps(&rep.virtualMods);
-        swapl(&rep.indicators);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, sz, payload_buf);
+    REPLY_FIELD_CARD32(which);
+    REPLY_FIELD_CARD16(virtualMods);
+    REPLY_FIELD_CARD32(indicators);
+    REPLY_SEND_EXTRA(payload_buf, sz);
     free(payload_buf);
     return Success;
 }
@@ -5021,9 +4957,7 @@ ProcXkbGetGeometry(ClientPtr client)
     geom = XkbLookupNamedGeometry(dev, stuff->name, &shouldFree);
 
     xkbGetGeometryReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
     };
     status = XkbComputeGetGeometryReplySize(geom, &rep, stuff->name);
     if (status != Success)
@@ -5038,22 +4972,16 @@ ProcXkbGetGeometry(ClientPtr client)
 
     XkbAssembleGeometry(client, geom, rep, buf);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.name);
-        swaps(&rep.widthMM);
-        swaps(&rep.heightMM);
-        swaps(&rep.nProperties);
-        swaps(&rep.nColors);
-        swaps(&rep.nShapes);
-        swaps(&rep.nSections);
-        swaps(&rep.nDoodads);
-        swaps(&rep.nKeyAliases);
-    }
-
-    WriteToClient(client, sizeof(xkbGetGeometryReply), &rep);
-    WriteToClient(client, len, buf);
+    REPLY_FIELD_CARD32(name);
+    REPLY_FIELD_CARD16(widthMM);
+    REPLY_FIELD_CARD16(heightMM);
+    REPLY_FIELD_CARD16(nProperties);
+    REPLY_FIELD_CARD16(nColors);
+    REPLY_FIELD_CARD16(nShapes);
+    REPLY_FIELD_CARD16(nSections);
+    REPLY_FIELD_CARD16(nDoodads);
+    REPLY_FIELD_CARD16(nKeyAliases);
+    REPLY_SEND_EXTRA(buf, len);
     free(buf);
 
 free_out:
@@ -5709,22 +5637,17 @@ ProcXkbPerClientFlags(ClientPtr client)
     }
 
     xkbPerClientFlagsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .supported = XkbPCF_AllFlagsMask,
         .value = client->xkbClientFlags & XkbPCF_AllFlagsMask,
         .autoCtrls = interest ? interest->autoCtrls : 0,
         .autoCtrlValues =  interest ? interest->autoCtrlValues : 0,
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.supported);
-        swapl(&rep.value);
-        swapl(&rep.autoCtrls);
-        swapl(&rep.autoCtrlValues);
-    }
-    WriteToClient(client, SIZEOF(xkbPerClientFlagsReply), &rep);
-    return Success;
+
+    REPLY_FIELD_CARD32(supported);
+    REPLY_FIELD_CARD32(value);
+    REPLY_FIELD_CARD32(autoCtrls);
+    REPLY_FIELD_CARD32(autoCtrlValues);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /***====================================================================***/
@@ -5835,16 +5758,10 @@ ProcXkbListComponents(ClientPtr client)
         return BadLength;
 
     xkbListComponentsReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, SIZEOF(xkbListComponentsReply), &rep);
-    return Success;
+
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /***====================================================================***/
@@ -6007,7 +5924,7 @@ ProcXkbGetKbdByName(ClientPtr client)
                 mrep.nVModMapKeys = XkbNumKeys(new);
             }
             XkbComputeGetMapReplySize(new, &mrep);
-            payload_length += SIZEOF(xGenericReply) / 4 + mrep.length;
+            payload_length += bytes_to_int32(sizeof(xkbGetMapReply));
         }
         if (new->compat == NULL)
             reported &= ~XkbGBN_CompatMapMask;
@@ -6066,9 +5983,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
 
     xkbGetKbdByNameReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .minKeyCode = xkb->min_key_code,
         .maxKeyCode = xkb->max_key_code,
         .reported = reported,
@@ -6082,13 +5997,6 @@ ProcXkbGetKbdByName(ClientPtr client)
         return BadAlloc;
 
     char *payload_walk = payload_buffer;
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.found);
-        swaps(&rep.reported);
-    }
 
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
         char *buf = payload_walk + sizeof(mrep);
@@ -6175,8 +6083,9 @@ ProcXkbGetKbdByName(ClientPtr client)
         payload_walk = buf + (grep.length * 4) - (sizeof(grep) - sizeof(xGenericReply));
     }
 
-    WriteToClient(client, sizeof(xkbGetKbdByNameReply), &rep);
-    WriteToClient(client, payload_length * 4, payload_buffer);
+    REPLY_FIELD_CARD16(found);
+    REPLY_FIELD_CARD16(reported);
+    REPLY_SEND_EXTRA(payload_buffer, payload_length * 4);
 
     free(payload_buffer);
 
@@ -6345,7 +6254,8 @@ static int
 FillDeviceLedInfo(XkbSrvLedInfoPtr sli, char *buffer, ClientPtr client)
 {
     int length = 0;
-    xkbDeviceLedsWireDesc wire = {
+
+    xkbDeviceLedsWireDesc rep = {
         .ledClass = sli->class,
         .ledID = sli->id,
         .namesPresent = sli->namesPresent,
@@ -6354,18 +6264,16 @@ FillDeviceLedInfo(XkbSrvLedInfoPtr sli, char *buffer, ClientPtr client)
         .state = sli->effectiveState,
     };
 
-    if (client->swapped) {
-        swaps(&wire.ledClass);
-        swaps(&wire.ledID);
-        swapl(&wire.namesPresent);
-        swapl(&wire.mapsPresent);
-        swapl(&wire.physIndicators);
-        swapl(&wire.state);
-    }
+    REPLY_FIELD_CARD16(ledClass);
+    REPLY_FIELD_CARD16(ledID);
+    REPLY_FIELD_CARD32(namesPresent);
+    REPLY_FIELD_CARD32(mapsPresent);
+    REPLY_FIELD_CARD32(physIndicators);
+    REPLY_FIELD_CARD32(state);
 
-    memcpy(buffer, &wire, sizeof(wire));
-    buffer += sizeof(wire);
-    length += sizeof(wire);
+    memcpy(buffer, &rep, sizeof(rep));
+    buffer += sizeof(rep);
+    length += sizeof(rep);
 
     if (sli->namesPresent | sli->mapsPresent) {
         register unsigned i, bit;
@@ -6375,9 +6283,7 @@ FillDeviceLedInfo(XkbSrvLedInfoPtr sli, char *buffer, ClientPtr client)
                 if (sli->namesPresent & bit) {
                     CARD32 *val = (CARD32*)buffer;
                     *val = sli->names[i];
-                    if (client->swapped) {
-                        swapl(val);
-                    }
+                    REPLY_BUF_CARD32(val, 1);
                     length += sizeof(CARD32);
                     buffer += sizeof(CARD32);
                 }
@@ -6489,9 +6395,7 @@ ProcXkbGetDeviceInfo(ClientPtr client)
     nameLen = XkbSizeCountedString(dev->name);
 
     xkbGetDeviceInfoReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .length = bytes_to_int32(nameLen),
         .present = wanted,
         .supported = XkbXI_AllDeviceFeaturesMask,
@@ -6557,18 +6461,6 @@ ProcXkbGetDeviceInfo(ClientPtr client)
     }
 
     length = rep.length * 4;
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.present);
-        swaps(&rep.supported);
-        swaps(&rep.unsupported);
-        swaps(&rep.nDeviceLedFBs);
-        swaps(&rep.dfltKbdFB);
-        swaps(&rep.dfltLedFB);
-        swapl(&rep.devType);
-    }
-    WriteToClient(client, SIZEOF(xkbGetDeviceInfoReply), &rep);
 
     int sz = nameLen + rep.nBtnsRtrn * sizeof(xkbActionWireDesc) + led_len;
     char *buf = calloc(1, sz);
@@ -6600,7 +6492,16 @@ ProcXkbGetDeviceInfo(ClientPtr client)
         return BadLength;
     }
 
-    WriteToClient(client, sizeof(buf), &buf);
+    REPLY_FIELD_CARD16(present);
+    REPLY_FIELD_CARD16(supported);
+    REPLY_FIELD_CARD16(unsupported);
+    REPLY_FIELD_CARD16(nDeviceLedFBs);
+    REPLY_FIELD_CARD16(dfltKbdFB);
+    REPLY_FIELD_CARD16(dfltLedFB);
+    REPLY_FIELD_CARD32(devType);
+    REPLY_SEND_EXTRA(buf, sz);
+    free(buf);
+
     return Success;
 }
 
@@ -6653,9 +6554,8 @@ CheckSetDeviceIndicators(char *wire,
                         return (char *) atomWire;
                     }
 
-                    if (client->swapped) {
-                        swapl(atomWire);
-                    }
+                    REPLY_BUF_CARD32(atomWire, 1);
+
                     CHK_ATOM_OR_NONE3(((Atom) (*atomWire)), client->errorValue,
                                       *status_rtrn, NULL);
                     atomWire++;
@@ -7001,22 +6901,17 @@ ProcXkbSetDebuggingFlags(ClientPtr client)
     xkbDebugCtrls = newCtrls;
 
     xkbSetDebuggingFlagsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .currentFlags = newFlags,
         .currentCtrls = newCtrls,
         .supportedFlags = ~0,
         .supportedCtrls = ~0
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.currentFlags);
-        swapl(&rep.currentCtrls);
-        swapl(&rep.supportedFlags);
-        swapl(&rep.supportedCtrls);
-    }
-    WriteToClient(client, SIZEOF(xkbSetDebuggingFlagsReply), &rep);
-    return Success;
+
+    REPLY_FIELD_CARD32(currentFlags);
+    REPLY_FIELD_CARD32(currentCtrls);
+    REPLY_FIELD_CARD32(supportedFlags);
+    REPLY_FIELD_CARD32(supportedCtrls);
+    REPLY_SEND_RET_SUCCESS();
 }
 
 /***====================================================================***/
