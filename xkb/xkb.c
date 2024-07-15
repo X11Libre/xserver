@@ -171,13 +171,9 @@ _XkbCheckRequestBounds(ClientPtr client, void *stuff, void *from, void *to) {
 int
 ProcXkbUseExtension(ClientPtr client)
 {
-    REQUEST(xkbUseExtensionReq);
-    REQUEST_SIZE_MATCH(xkbUseExtensionReq);
-
-    if (client->swapped) {
-        swaps(&stuff->wantedMajor);
-        swaps(&stuff->wantedMinor);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbUseExtensionReq);
+    X_REQUEST_FIELD_CARD16(wantedMajor);
+    X_REQUEST_FIELD_CARD16(wantedMinor);
 
     int supported;
 
@@ -218,16 +214,16 @@ ProcXkbUseExtension(ClientPtr client)
 int
 ProcXkbSelectEvents(ClientPtr client)
 {
-    REQUEST(xkbSelectEventsReq);
-    REQUEST_AT_LEAST_SIZE(xkbSelectEventsReq);
+    X_REQUEST_HEAD_AT_LEAST(xkbSelectEventsReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(affectWhich);
+    X_REQUEST_FIELD_CARD16(clear);
+    X_REQUEST_FIELD_CARD16(selectAll);
+    X_REQUEST_FIELD_CARD16(affectMap);
+    X_REQUEST_FIELD_CARD16(map);
+    /* more swapping done down below */
 
     if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->affectWhich);
-        swaps(&stuff->clear);
-        swaps(&stuff->selectAll);
-        swaps(&stuff->affectMap);
-        swaps(&stuff->map);
         if ((stuff->affectWhich & (~XkbMapNotifyMask)) != 0) {
             union {
                 BOOL *b;
@@ -561,18 +557,14 @@ _XkbBell(ClientPtr client, DeviceIntPtr dev, WindowPtr pWin,
 int
 ProcXkbBell(ClientPtr client)
 {
-    REQUEST(xkbBellReq);
-    REQUEST_SIZE_MATCH(xkbBellReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->bellClass);
-        swaps(&stuff->bellID);
-        swapl(&stuff->name);
-        swapl(&stuff->window);
-        swaps(&stuff->pitch);
-        swaps(&stuff->duration);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbBellReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(bellClass);
+    X_REQUEST_FIELD_CARD16(bellID);
+    X_REQUEST_FIELD_CARD32(name);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD16(pitch);
+    X_REQUEST_FIELD_CARD16(duration);
 
     DeviceIntPtr dev;
     WindowPtr pWin;
@@ -657,11 +649,8 @@ ProcXkbBell(ClientPtr client)
 int
 ProcXkbGetState(ClientPtr client)
 {
-    REQUEST(xkbGetStateReq);
-    REQUEST_SIZE_MATCH(xkbGetStateReq);
-
-    if (client->swapped)
-        swaps(&stuff->deviceSpec);
+    X_REQUEST_HEAD_STRUCT(xkbGetStateReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
 
     DeviceIntPtr dev;
     XkbStateRec *xkb;
@@ -696,13 +685,9 @@ ProcXkbGetState(ClientPtr client)
 int
 ProcXkbLatchLockState(ClientPtr client)
 {
-    REQUEST(xkbLatchLockStateReq);
-    REQUEST_SIZE_MATCH(xkbLatchLockStateReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->groupLatch);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbLatchLockStateReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(groupLatch);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -766,11 +751,8 @@ ProcXkbLatchLockState(ClientPtr client)
 int
 ProcXkbGetControls(ClientPtr client)
 {
-    REQUEST(xkbGetControlsReq);
-    REQUEST_SIZE_MATCH(xkbGetControlsReq);
-
-    if (client->swapped)
-        swaps(&stuff->deviceSpec);
+    X_REQUEST_HEAD_STRUCT(xkbGetControlsReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
 
     XkbControlsPtr xkb;
     DeviceIntPtr dev;
@@ -838,34 +820,30 @@ ProcXkbGetControls(ClientPtr client)
 int
 ProcXkbSetControls(ClientPtr client)
 {
-    REQUEST(xkbSetControlsReq);
-    REQUEST_SIZE_MATCH(xkbSetControlsReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->affectInternalVMods);
-        swaps(&stuff->internalVMods);
-        swaps(&stuff->affectIgnoreLockVMods);
-        swaps(&stuff->ignoreLockVMods);
-        swaps(&stuff->axOptions);
-        swapl(&stuff->affectEnabledCtrls);
-        swapl(&stuff->enabledCtrls);
-        swapl(&stuff->changeCtrls);
-        swaps(&stuff->repeatDelay);
-        swaps(&stuff->repeatInterval);
-        swaps(&stuff->slowKeysDelay);
-        swaps(&stuff->debounceDelay);
-        swaps(&stuff->mkDelay);
-        swaps(&stuff->mkInterval);
-        swaps(&stuff->mkTimeToMax);
-        swaps(&stuff->mkMaxSpeed);
-        swaps(&stuff->mkCurve);
-        swaps(&stuff->axTimeout);
-        swapl(&stuff->axtCtrlsMask);
-        swapl(&stuff->axtCtrlsValues);
-        swaps(&stuff->axtOptsMask);
-        swaps(&stuff->axtOptsValues);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbSetControlsReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(affectInternalVMods);
+    X_REQUEST_FIELD_CARD16(internalVMods);
+    X_REQUEST_FIELD_CARD16(affectIgnoreLockVMods);
+    X_REQUEST_FIELD_CARD16(ignoreLockVMods);
+    X_REQUEST_FIELD_CARD16(axOptions);
+    X_REQUEST_FIELD_CARD32(affectEnabledCtrls);
+    X_REQUEST_FIELD_CARD32(enabledCtrls);
+    X_REQUEST_FIELD_CARD32(changeCtrls);
+    X_REQUEST_FIELD_CARD16(repeatDelay);
+    X_REQUEST_FIELD_CARD16(repeatInterval);
+    X_REQUEST_FIELD_CARD16(slowKeysDelay);
+    X_REQUEST_FIELD_CARD16(debounceDelay);
+    X_REQUEST_FIELD_CARD16(mkDelay);
+    X_REQUEST_FIELD_CARD16(mkInterval);
+    X_REQUEST_FIELD_CARD16(mkTimeToMax);
+    X_REQUEST_FIELD_CARD16(mkMaxSpeed);
+    X_REQUEST_FIELD_CARD16(mkCurve);
+    X_REQUEST_FIELD_CARD16(axTimeout);
+    X_REQUEST_FIELD_CARD32(axtCtrlsMask);
+    X_REQUEST_FIELD_CARD32(axtCtrlsValues);
+    X_REQUEST_FIELD_CARD16(axtOptsMask);
+    X_REQUEST_FIELD_CARD16(axtOptsValues);
 
     DeviceIntPtr dev, tmpd;
     XkbSrvInfoPtr xkbi;
@@ -1482,8 +1460,11 @@ static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
 int
 ProcXkbGetMap(ClientPtr client)
 {
-    REQUEST(xkbGetMapReq);
-    REQUEST_SIZE_MATCH(xkbGetMapReq);
+    X_REQUEST_HEAD_STRUCT(xkbGetMapReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(full);
+    X_REQUEST_FIELD_CARD16(partial);
+    X_REQUEST_FIELD_CARD16(virtualMods);
 
     if (client->swapped) {
         swaps(&stuff->deviceSpec);
@@ -2723,17 +2704,13 @@ _XkbSetMap(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req, char *values)
 int
 ProcXkbSetMap(ClientPtr client)
 {
-    REQUEST(xkbSetMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetMapReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->present);
-        swaps(&stuff->flags);
-        swaps(&stuff->totalSyms);
-        swaps(&stuff->totalActs);
-        swaps(&stuff->virtualMods);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbSetMapReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(present);
+    X_REQUEST_FIELD_CARD16(flags);
+    X_REQUEST_FIELD_CARD16(totalSyms);
+    X_REQUEST_FIELD_CARD16(totalActs);
+    X_REQUEST_FIELD_CARD16(virtualMods);
 
     DeviceIntPtr dev, master;
     char *tmp;
@@ -2882,8 +2859,10 @@ XkbAssembleCompatMap(ClientPtr client,
 int
 ProcXkbGetCompatMap(ClientPtr client)
 {
-    REQUEST(xkbGetCompatMapReq);
-    REQUEST_SIZE_MATCH(xkbGetCompatMapReq);
+    X_REQUEST_HEAD_STRUCT(xkbGetCompatMapReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(firstSI);
+    X_REQUEST_FIELD_CARD16(nSI);
 
     if (client->swapped) {
         swaps(&stuff->deviceSpec);
@@ -3095,14 +3074,10 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetCompatMap(ClientPtr client)
 {
-    REQUEST(xkbSetCompatMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetCompatMapReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->firstSI);
-        swaps(&stuff->nSI);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbSetCompatMapReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(firstSI);
+    X_REQUEST_FIELD_CARD16(nSI);
 
     DeviceIntPtr dev;
     char *data;
@@ -3162,11 +3137,8 @@ ProcXkbSetCompatMap(ClientPtr client)
 int
 ProcXkbGetIndicatorState(ClientPtr client)
 {
-    REQUEST(xkbGetIndicatorStateReq);
-    REQUEST_SIZE_MATCH(xkbGetIndicatorStateReq);
-
-    if (client->swapped)
-        swaps(&stuff->deviceSpec);
+    X_REQUEST_HEAD_STRUCT(xkbGetIndicatorStateReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
 
     XkbSrvLedInfoPtr sli;
     DeviceIntPtr dev;
@@ -3237,13 +3209,9 @@ XkbAssembleIndicatorMap(ClientPtr client,
 int
 ProcXkbGetIndicatorMap(ClientPtr client)
 {
-    REQUEST(xkbGetIndicatorMapReq);
-    REQUEST_SIZE_MATCH(xkbGetIndicatorMapReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swapl(&stuff->which);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbGetIndicatorMapReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD32(which);
 
     DeviceIntPtr dev;
     XkbDescPtr xkb;
@@ -3327,13 +3295,9 @@ _XkbSetIndicatorMap(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetIndicatorMap(ClientPtr client)
 {
-    REQUEST(xkbSetIndicatorMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetIndicatorMapReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swapl(&stuff->which);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbSetIndicatorMapReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD32(which);
 
     int i, bit;
     int nIndicators;
@@ -3396,15 +3360,11 @@ ProcXkbSetIndicatorMap(ClientPtr client)
 int
 ProcXkbGetNamedIndicator(ClientPtr client)
 {
-    REQUEST(xkbGetNamedIndicatorReq);
-    REQUEST_SIZE_MATCH(xkbGetNamedIndicatorReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->ledClass);
-        swaps(&stuff->ledID);
-        swapl(&stuff->indicator);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbGetNamedIndicatorReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(ledClass);
+    X_REQUEST_FIELD_CARD16(ledID);
+    X_REQUEST_FIELD_CARD32(indicator);
 
     DeviceIntPtr dev;
     register int i = 0;
@@ -3599,17 +3559,13 @@ _XkbSetNamedIndicator(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetNamedIndicator(ClientPtr client)
 {
-    REQUEST(xkbSetNamedIndicatorReq);
-    REQUEST_SIZE_MATCH(xkbSetNamedIndicatorReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->ledClass);
-        swaps(&stuff->ledID);
-        swapl(&stuff->indicator);
-        swaps(&stuff->virtualMods);
-        swapl(&stuff->ctrls);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbSetNamedIndicatorReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(ledClass);
+    X_REQUEST_FIELD_CARD16(ledID);
+    X_REQUEST_FIELD_CARD32(indicator);
+    X_REQUEST_FIELD_CARD16(virtualMods);
+    X_REQUEST_FIELD_CARD32(ctrls);
 
     int rc;
     DeviceIntPtr dev;
@@ -3890,13 +3846,9 @@ XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, x_rpcbu
 int
 ProcXkbGetNames(ClientPtr client)
 {
-    REQUEST(xkbGetNamesReq);
-    REQUEST_SIZE_MATCH(xkbGetNamesReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swapl(&stuff->which);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbGetNamesReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD32(which);
 
     DeviceIntPtr dev;
     XkbDescPtr xkb;
@@ -4338,16 +4290,12 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
 int
 ProcXkbSetNames(ClientPtr client)
 {
-    REQUEST(xkbSetNamesReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetNamesReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->virtualMods);
-        swapl(&stuff->which);
-        swapl(&stuff->indicators);
-        swaps(&stuff->totalKTLevelNames);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbSetNamesReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(virtualMods);
+    X_REQUEST_FIELD_CARD32(which);
+    X_REQUEST_FIELD_CARD32(indicators);
+    X_REQUEST_FIELD_CARD16(totalKTLevelNames);
 
     DeviceIntPtr dev;
     CARD32 *tmp;
@@ -4894,13 +4842,9 @@ XkbAssembleGeometry(ClientPtr client,
 int
 ProcXkbGetGeometry(ClientPtr client)
 {
-    REQUEST(xkbGetGeometryReq);
-    REQUEST_SIZE_MATCH(xkbGetGeometryReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swapl(&stuff->name);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbGetGeometryReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD32(name);
 
     DeviceIntPtr dev;
     XkbGeometryPtr geom;
@@ -5490,19 +5434,15 @@ _XkbSetGeometry(ClientPtr client, DeviceIntPtr dev, xkbSetGeometryReq * stuff)
 int
 ProcXkbSetGeometry(ClientPtr client)
 {
-    REQUEST(xkbSetGeometryReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetGeometryReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swapl(&stuff->name);
-        swaps(&stuff->widthMM);
-        swaps(&stuff->heightMM);
-        swaps(&stuff->nProperties);
-        swaps(&stuff->nColors);
-        swaps(&stuff->nDoodads);
-        swaps(&stuff->nKeyAliases);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbSetGeometryReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD32(name);
+    X_REQUEST_FIELD_CARD16(widthMM);
+    X_REQUEST_FIELD_CARD16(heightMM);
+    X_REQUEST_FIELD_CARD16(nProperties);
+    X_REQUEST_FIELD_CARD16(nColors);
+    X_REQUEST_FIELD_CARD16(nDoodads);
+    X_REQUEST_FIELD_CARD16(nKeyAliases);
 
     DeviceIntPtr dev;
     int rc;
@@ -5536,17 +5476,13 @@ ProcXkbSetGeometry(ClientPtr client)
 int
 ProcXkbPerClientFlags(ClientPtr client)
 {
-    REQUEST(xkbPerClientFlagsReq);
-    REQUEST_SIZE_MATCH(xkbPerClientFlagsReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swapl(&stuff->change);
-        swapl(&stuff->value);
-        swapl(&stuff->ctrlsToChange);
-        swapl(&stuff->autoCtrls);
-        swapl(&stuff->autoCtrlValues);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbPerClientFlagsReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD32(change);
+    X_REQUEST_FIELD_CARD32(value);
+    X_REQUEST_FIELD_CARD32(ctrlsToChange);
+    X_REQUEST_FIELD_CARD32(autoCtrls);
+    X_REQUEST_FIELD_CARD32(autoCtrlValues);
 
     DeviceIntPtr dev;
     XkbInterestPtr interest;
@@ -5684,13 +5620,9 @@ GetComponentSpec(ClientPtr client, xkbGetKbdByNameReq *stuff,
 int
 ProcXkbListComponents(ClientPtr client)
 {
-    REQUEST(xkbListComponentsReq);
-    REQUEST_AT_LEAST_SIZE(xkbListComponentsReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->maxNames);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbListComponentsReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(maxNames);
 
     DeviceIntPtr dev;
     unsigned len;
@@ -5769,14 +5701,10 @@ XkbConvertGetByNameComponents(Bool toXkm, unsigned orig)
 int
 ProcXkbGetKbdByName(ClientPtr client)
 {
-    REQUEST(xkbGetKbdByNameReq);
-    REQUEST_AT_LEAST_SIZE(xkbGetKbdByNameReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->want);
-        swaps(&stuff->need);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbGetKbdByNameReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(want);
+    X_REQUEST_FIELD_CARD16(need);
 
     DeviceIntPtr dev;
     DeviceIntPtr tmpd;
@@ -6371,15 +6299,11 @@ FillDeviceLedFBs(DeviceIntPtr dev, int class, int id, unsigned wantLength,
 int
 ProcXkbGetDeviceInfo(ClientPtr client)
 {
-    REQUEST(xkbGetDeviceInfoReq);
-    REQUEST_SIZE_MATCH(xkbGetDeviceInfoReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->wanted);
-        swaps(&stuff->ledClass);
-        swaps(&stuff->ledID);
-    }
+    X_REQUEST_HEAD_STRUCT(xkbGetDeviceInfoReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(wanted);
+    X_REQUEST_FIELD_CARD16(ledClass);
+    X_REQUEST_FIELD_CARD16(ledID);
 
     DeviceIntPtr dev;
     int status;
@@ -6799,14 +6723,10 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetDeviceInfo(ClientPtr client)
 {
-    REQUEST(xkbSetDeviceInfoReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetDeviceInfoReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceSpec);
-        swaps(&stuff->change);
-        swaps(&stuff->nDeviceLedFBs);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbSetDeviceInfoReq);
+    X_REQUEST_FIELD_CARD16(deviceSpec);
+    X_REQUEST_FIELD_CARD16(change);
+    X_REQUEST_FIELD_CARD16(nDeviceLedFBs);
 
     DeviceIntPtr dev;
     int rc;
@@ -6871,16 +6791,12 @@ ProcXkbSetDeviceInfo(ClientPtr client)
 int
 ProcXkbSetDebuggingFlags(ClientPtr client)
 {
-    REQUEST(xkbSetDebuggingFlagsReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetDebuggingFlagsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->affectFlags);
-        swapl(&stuff->flags);
-        swapl(&stuff->affectCtrls);
-        swapl(&stuff->ctrls);
-        swaps(&stuff->msgLength);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xkbSetDebuggingFlagsReq);
+    X_REQUEST_FIELD_CARD32(affectFlags);
+    X_REQUEST_FIELD_CARD32(flags);
+    X_REQUEST_FIELD_CARD32(affectCtrls);
+    X_REQUEST_FIELD_CARD32(ctrls);
+    X_REQUEST_FIELD_CARD16(msgLength);
 
     CARD32 newFlags, newCtrls, extraLength;
     int rc;
