@@ -223,71 +223,6 @@ ProcXkbSelectEvents(ClientPtr client)
     X_REQUEST_FIELD_CARD16(map);
     /* more swapping done down below */
 
-    if (client->swapped) {
-        if ((stuff->affectWhich & (~XkbMapNotifyMask)) != 0) {
-            union {
-                BOOL *b;
-                CARD8 *c8;
-                CARD16 *c16;
-                CARD32 *c32;
-            } from;
-            register unsigned bit, ndx, maskLeft, dataLeft;
-
-            from.c8 = (CARD8 *) &stuff[1];
-            dataLeft = (client->req_len * 4) - sizeof(xkbSelectEventsReq);
-            maskLeft = (stuff->affectWhich & (~XkbMapNotifyMask));
-            for (ndx = 0, bit = 1; (maskLeft != 0); ndx++, bit <<= 1) {
-                if (((bit & maskLeft) == 0) || (ndx == XkbMapNotify))
-                    continue;
-                maskLeft &= ~bit;
-                if ((stuff->selectAll & bit) || (stuff->clear & bit))
-                    continue;
-                switch (ndx) {
-                    // CARD16
-                    case XkbNewKeyboardNotify:
-                    case XkbStateNotify:
-                    case XkbNamesNotify:
-                    case XkbAccessXNotify:
-                    case XkbExtensionDeviceNotify:
-                        if (dataLeft < sizeof(CARD16)*2)
-                            return BadLength;
-                        swaps(&from.c16[0]);
-                        swaps(&from.c16[1]);
-                        from.c8 += sizeof(CARD16)*2;
-                        dataLeft -= sizeof(CARD16)*2;
-                    break;
-                    // CARD32
-                    case XkbControlsNotify:
-                    case XkbIndicatorStateNotify:
-                    case XkbIndicatorMapNotify:
-                        if (dataLeft < sizeof(CARD32)*2)
-                            return BadLength;
-                        swapl(&from.c32[0]);
-                        swapl(&from.c32[1]);
-                        from.c8 += sizeof(CARD32)*2;
-                        dataLeft -= sizeof(CARD32)*2;
-                    break;
-                    // CARD8
-                    case XkbBellNotify:
-                    case XkbActionMessage:
-                    case XkbCompatMapNotify:
-                        if (dataLeft < 2)
-                            return BadLength;
-                        from.c8 += 4;
-                        dataLeft -= 4;
-                    break;
-                    default:
-                        client->errorValue = _XkbErrCode2(0x1, bit);
-                        return BadValue;
-                }
-            }
-            if (dataLeft > 2) {
-                ErrorF("[xkb] Extra data (%d bytes) after SelectEvents\n", dataLeft);
-                return BadLength;
-            }
-        }
-    }
-
     unsigned legal;
     DeviceIntPtr dev;
     XkbInterestPtr masks;
@@ -313,11 +248,7 @@ ProcXkbSelectEvents(ClientPtr client)
         masks = XkbAddClientResource((DevicePtr) dev, client, id);
     }
     if (masks) {
-        union {
-            CARD8 *c8;
-            CARD16 *c16;
-            CARD32 *c32;
-        } from, to;
+        union { CARD8 *c8; CARD16 *c16; CARD32 *c32; } from, to;
         register unsigned bit, ndx, maskLeft, dataLeft, size;
 
         from.c8 = (CARD8 *) &stuff[1];
@@ -408,12 +339,14 @@ ProcXkbSelectEvents(ClientPtr client)
                 if (dataLeft < (size * 2))
                     return BadLength;
                 if (size == 2) {
+                    CLIENT_STRUCT_CARD16_2(&from, c16[0], c16[1]);
                     CHK_MASK_MATCH(ndx, from.c16[0], from.c16[1]);
                     CHK_MASK_LEGAL(ndx, from.c16[0], legal);
                     to.c16[0] &= ~from.c16[0];
                     to.c16[0] |= (from.c16[0] & from.c16[1]);
                 }
                 else if (size == 4) {
+                    REQUEST_BUF_CARD32(from.c32, 2);
                     CHK_MASK_MATCH(ndx, from.c32[0], from.c32[1]);
                     CHK_MASK_LEGAL(ndx, from.c32[0], legal);
                     to.c32[0] &= ~from.c32[0];
