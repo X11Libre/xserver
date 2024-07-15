@@ -1240,18 +1240,17 @@ XkbSizeKeyBehaviors(XkbDescPtr xkb, xkbGetMapReply * rep)
 }
 
 static char *
-XkbWriteKeyBehaviors(XkbDescPtr xkb, xkbGetMapReply * rep, char *buf,
-                     ClientPtr client)
+XkbWriteKeyBehaviors(XkbDescPtr xkb, KeyCode firstKeyBehavior, CARD8 nKeyBehaviors, char *buf)
 {
     unsigned i;
     xkbBehaviorWireDesc *wire;
     XkbBehavior *pBhvr;
 
     wire = (xkbBehaviorWireDesc *) buf;
-    pBhvr = &xkb->server->behaviors[rep->firstKeyBehavior];
-    for (i = 0; i < rep->nKeyBehaviors; i++, pBhvr++) {
+    pBhvr = &xkb->server->behaviors[firstKeyBehavior];
+    for (i = 0; i < nKeyBehaviors; i++, pBhvr++) {
         if (pBhvr->type != XkbKB_Default) {
-            wire->key = i + rep->firstKeyBehavior;
+            wire->key = i + firstKeyBehavior;
             wire->type = pBhvr->type;
             wire->data = pBhvr->data;
             wire++;
@@ -1421,7 +1420,7 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply * rep)
     if (rep->nKeyActs > 0)
         desc = XkbWriteKeyActions(xkb, rep->firstKeyAct, rep->nKeyActs, desc);
     if (rep->totalKeyBehaviors > 0)
-        desc = XkbWriteKeyBehaviors(xkb, rep, desc, client);
+        desc = XkbWriteKeyBehaviors(xkb, rep->firstKeyBehavior, rep->nKeyBehaviors, desc);
     if (rep->virtualMods) {
         register int sz, bit;
 
