@@ -1406,13 +1406,13 @@ XkbComputeGetMapReplySize(XkbDescPtr xkb, xkbGetMapReply * rep)
 static int
 XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep)
 {
-    unsigned i, len;
-    char *desc, *start;
-
-    len = (rep.length * 4) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
-    start = desc = calloc(1, len);
+    int len = (rep.length * sizeof(CARD32)) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
+    char *start = calloc(1, len);
     if (!start)
         return BadAlloc;
+
+    char *desc = start;
+
     if (rep.nTypes > 0)
         desc = XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, desc, client);
     if (rep.nKeySyms > 0)
@@ -1422,9 +1422,9 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep)
     if (rep.totalKeyBehaviors > 0)
         desc = XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, desc);
     if (rep.virtualMods) {
-        register int sz, bit;
+        register int sz;
 
-        for (i = sz = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
+        for (int i = sz = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
             if (rep.virtualMods & bit) {
                 desc[sz++] = xkb->server->vmods[i];
             }
@@ -1451,7 +1451,7 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep)
     }
     WriteToClient(client, sizeof(xkbGetMapReply), &rep);
     WriteToClient(client, len, start);
-    free((char *) start);
+    free(start);
     return Success;
 }
 
