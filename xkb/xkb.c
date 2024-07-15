@@ -2804,22 +2804,22 @@ XkbComputeGetCompatMapReplySize(XkbCompatMapPtr compat,
 
 static int
 XkbSendCompatMap(ClientPtr client,
-                 XkbCompatMapPtr compat, xkbGetCompatMapReply * rep)
+                 XkbCompatMapPtr compat, xkbGetCompatMapReply rep)
 {
     char *data;
     int size;
 
-    if (rep->length > 0) {
-        data = calloc(rep->length, 4);
+    if (rep.length > 0) {
+        data = calloc(rep.length, 4);
         if (data) {
             register unsigned i, bit;
             xkbModsWireDesc *grp;
-            XkbSymInterpretPtr sym = &compat->sym_interpret[rep->firstSI];
+            XkbSymInterpretPtr sym = &compat->sym_interpret[rep.firstSI];
             xkbSymInterpretWireDesc *wire = (xkbSymInterpretWireDesc *) data;
 
-            size = rep->length * 4;
+            size = rep.length * 4;
 
-            for (i = 0; i < rep->nSI; i++, sym++, wire++) {
+            for (i = 0; i < rep.nSI; i++, sym++, wire++) {
                 wire->sym = sym->sym;
                 wire->mods = sym->mods;
                 wire->match = sym->match;
@@ -2831,10 +2831,10 @@ XkbSendCompatMap(ClientPtr client,
                     swapl(&wire->sym);
                 }
             }
-            if (rep->groups) {
+            if (rep.groups) {
                 grp = (xkbModsWireDesc *) wire;
                 for (i = 0, bit = 1; i < XkbNumKbdGroups; i++, bit <<= 1) {
-                    if (rep->groups & bit) {
+                    if (rep.groups & bit) {
                         grp->mask = compat->groups[i].mask;
                         grp->realMods = compat->groups[i].real_mods;
                         grp->virtualMods = compat->groups[i].vmods;
@@ -2854,14 +2854,14 @@ XkbSendCompatMap(ClientPtr client,
         data = NULL;
 
     if (client->swapped) {
-        swaps(&rep->sequenceNumber);
-        swapl(&rep->length);
-        swaps(&rep->firstSI);
-        swaps(&rep->nSI);
-        swaps(&rep->nTotalSI);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.firstSI);
+        swaps(&rep.nSI);
+        swaps(&rep.nTotalSI);
     }
 
-    WriteToClient(client, SIZEOF(xkbGetCompatMapReply), rep);
+    WriteToClient(client, sizeof(xkbGetCompatMapReply), &rep);
     if (data) {
         WriteToClient(client, size, data);
         free((char *) data);
@@ -2906,7 +2906,7 @@ ProcXkbGetCompatMap(ClientPtr client)
         return BadValue;
     }
     XkbComputeGetCompatMapReplySize(compat, &rep);
-    return XkbSendCompatMap(client, compat, &rep);
+    return XkbSendCompatMap(client, compat, rep);
 }
 
 /**
@@ -6118,7 +6118,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask))
         XkbSendMap(client, new, mrep);
     if (reported & XkbGBN_CompatMapMask)
-        XkbSendCompatMap(client, new->compat, &crep);
+        XkbSendCompatMap(client, new->compat, crep);
     if (reported & XkbGBN_IndicatorMapMask)
         XkbSendIndicatorMap(client, new->indicators, &irep);
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask))
