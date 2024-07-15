@@ -6469,9 +6469,8 @@ CheckSetDeviceIndicators(char *wire,
                         return (char *) atomWire;
                     }
 
-                    if (client->swapped) {
-                        swapl(atomWire);
-                    }
+                    X_REPLY_BUF_CARD32(atomWire, 1);
+
                     CHK_ATOM_OR_NONE3(((Atom) (*atomWire)), client->errorValue,
                                       *status_rtrn, NULL);
                     atomWire++;
