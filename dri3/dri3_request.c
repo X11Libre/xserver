@@ -136,10 +136,8 @@ proc_dri3_query_version(ClientPtr client)
         reply.minorVersion = stuff->minorVersion;
     }
 
-    if (client->swapped) {
-        swapl(&reply.majorVersion);
-        swapl(&reply.minorVersion);
-    }
+    X_REPLY_FIELD_CARD32(majorVersion);
+    X_REPLY_FIELD_CARD32(minorVersion);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -303,16 +301,15 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
     if (fd < 0)
         return BadPixmap;
 
-    if (client->swapped) {
-        swapl(&reply.size);
-        swaps(&reply.width);
-        swaps(&reply.height);
-        swaps(&reply.stride);
-    }
     if (WriteFdToClient(client, fd, TRUE) < 0) {
         close(fd);
         return BadAlloc;
     }
+
+    X_REPLY_FIELD_CARD32(size);
+    X_REPLY_FIELD_CARD16(width);
+    X_REPLY_FIELD_CARD16(height);
+    X_REPLY_FIELD_CARD16(stride);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -413,10 +410,8 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
         .numScreenModifiers = nscreenmodifiers,
     };
 
-    if (client->swapped) {
-        swapl(&reply.numWindowModifiers);
-        swapl(&reply.numScreenModifiers);
-    }
+    X_REPLY_FIELD_CARD32(numWindowModifiers);
+    X_REPLY_FIELD_CARD32(numScreenModifiers);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
@@ -574,11 +569,9 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
         .modifier = modifier,
     };
 
-    if (client->swapped) {
-        swaps(&reply.width);
-        swaps(&reply.height);
-        swapll(&reply.modifier);
-    }
+    X_REPLY_FIELD_CARD16(width);
+    X_REPLY_FIELD_CARD16(height);
+    X_REPLY_FIELD_CARD64(modifier);
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
