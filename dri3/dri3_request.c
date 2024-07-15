@@ -391,13 +391,26 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
                                  &nwindowmodifiers, &window_modifiers,
                                  &nscreenmodifiers, &screen_modifiers);
 
+    const size_t bufsz = (nwindowmodifiers + nscreenmodifiers) * sizeof(CARD64);
+    CARD64 *buf = calloc(1, bufsz);
+    if (!buf) {
+        free(window_modifiers);
+        free(screen_modifiers);
+        return BadAlloc;
+    }
+
+    memcpy(buf, window_modifiers, sizeof(CARD64) * nwindowmodifiers);
+    memcpy(&buf[nwindowmodifiers], screen_modifiers, sizeof(CARD64) * nscreenmodifiers);
+
+    free(window_modifiers);
+    free(screen_modifiers);
+
     xDRI3GetSupportedModifiersReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .numWindowModifiers = nwindowmodifiers,
         .numScreenModifiers = nscreenmodifiers,
-        .length = bytes_to_int32(nwindowmodifiers * sizeof(CARD64)) +
-                  bytes_to_int32(nscreenmodifiers * sizeof(CARD64)),
+        .length = bytes_to_int32(bufsz),
     };
 
     if (client->swapped) {
@@ -405,19 +418,13 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
         swapl(&rep.length);
         swapl(&rep.numWindowModifiers);
         swapl(&rep.numScreenModifiers);
-        for (i = 0; i < nwindowmodifiers; i++)
-            swapll(&window_modifiers[i]);
-        for (i = 0; i < nscreenmodifiers; i++)
-            swapll(&screen_modifiers[i]);
+        for (i = 0; i < nwindowmodifiers+nscreenmodifiers; i++)
+            swapll(&buf[i]);
     }
 
     WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, nwindowmodifiers * sizeof(CARD64), window_modifiers);
-    WriteToClient(client, nscreenmodifiers * sizeof(CARD64), screen_modifiers);
-
-    free(window_modifiers);
-    free(screen_modifiers);
-
+    WriteToClient(client, bufsz, buf);
+    free(buf);
     return Success;
 }
 
@@ -547,11 +554,19 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
         }
     }
 
+    const size_t bufsz = num_fds * 2 * sizeof(CARD32);
+    CARD32 *buf = calloc(1, bufsz);
+    if (!buf)
+        return BadAlloc;
+
+    memcpy(buf, strides, num_fds * sizeof(CARD32));
+    memcpy(&buf[num_fds], offsets, num_fds * sizeof(CARD32));
+
     xDRI3BuffersFromPixmapReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .nfd = num_fds,
-        .length = bytes_to_int32(num_fds * 2 * sizeof(CARD32)),
+        .length = bytes_to_int32(bufsz),
         .width = pixmap->drawable.width,
         .height = pixmap->drawable.height,
         .depth = pixmap->drawable.depth,
@@ -565,16 +580,13 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
         swaps(&rep.width);
         swaps(&rep.height);
         swapll(&rep.modifier);
-        for (i = 0; i < num_fds; i++) {
-            swapl(&strides[i]);
-            swapl(&offsets[i]);
-        }
+        for (i = 0; i < num_fds * 2; i++)
+            swapl(&buf[i]);
     }
 
     WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, num_fds * sizeof(CARD32), strides);
-    WriteToClient(client, num_fds * sizeof(CARD32), offsets);
-
+    WriteToClient(client, bufsz, buf);
+    free(buf);
     return Success;
 }
 
