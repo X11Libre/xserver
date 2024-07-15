@@ -1324,18 +1324,18 @@ XkbSizeModifierMap(XkbDescPtr xkb, xkbGetMapReply * rep)
 }
 
 static char *
-XkbWriteModifierMap(XkbDescPtr xkb, xkbGetMapReply * rep, char *buf,
-                    ClientPtr client)
+XkbWriteModifierMap(XkbDescPtr xkb, KeyCode firstModMapKey, CARD8 nModMapKeys,
+                    char *buf)
 {
     unsigned i;
     char *start;
     unsigned char *pMap;
 
     start = buf;
-    pMap = &xkb->map->modmap[rep->firstModMapKey];
-    for (i = 0; i < rep->nModMapKeys; i++, pMap++) {
+    pMap = &xkb->map->modmap[firstModMapKey];
+    for (i = 0; i < nModMapKeys; i++, pMap++) {
         if (*pMap != 0) {
-            *buf++ = i + rep->firstModMapKey;
+            *buf++ = i + firstModMapKey;
             *buf++ = *pMap;
         }
     }
@@ -1434,7 +1434,7 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply * rep)
     if (rep->totalKeyExplicit > 0)
         desc = XkbWriteExplicit(xkb, rep->firstKeyExplicit, rep->nKeyExplicit, desc);
     if (rep->totalModMapKeys > 0)
-        desc = XkbWriteModifierMap(xkb, rep, desc, client);
+        desc = XkbWriteModifierMap(xkb, rep->firstModMapKey, rep->nModMapKeys, desc);
     if (rep->totalVModMapKeys > 0)
         desc = XkbWriteVirtualModMap(xkb, rep, desc, client);
     if ((desc - start) != (len)) {
