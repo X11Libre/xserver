@@ -1122,7 +1122,7 @@ XkbSizeVirtualMods(XkbDescPtr xkb, xkbGetMapReply * rep)
 }
 
 static char *
-XkbWriteKeySyms(XkbDescPtr xkb, xkbGetMapReply * rep, char *buf,
+XkbWriteKeySyms(XkbDescPtr xkb, KeyCode firstKeySym, CARD8 nKeySyms, char *buf,
                 ClientPtr client)
 {
     register KeySym *pSym;
@@ -1130,8 +1130,8 @@ XkbWriteKeySyms(XkbDescPtr xkb, xkbGetMapReply * rep, char *buf,
     xkbSymMapWireDesc *outMap;
     register unsigned i;
 
-    symMap = &xkb->map->key_sym_map[rep->firstKeySym];
-    for (i = 0; i < rep->nKeySyms; i++, symMap++) {
+    symMap = &xkb->map->key_sym_map[firstKeySym];
+    for (i = 0; i < nKeySyms; i++, symMap++) {
         outMap = (xkbSymMapWireDesc *) buf;
         outMap->ktIndex[0] = symMap->kt_index[0];
         outMap->ktIndex[1] = symMap->kt_index[1];
@@ -1418,7 +1418,7 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply * rep)
     if (rep->nTypes > 0)
         desc = XkbWriteKeyTypes(xkb, rep, desc, client);
     if (rep->nKeySyms > 0)
-        desc = XkbWriteKeySyms(xkb, rep, desc, client);
+        desc = XkbWriteKeySyms(xkb, rep->firstKeySym, rep->nKeySyms, desc, client);
     if (rep->nKeyActs > 0)
         desc = XkbWriteKeyActions(xkb, rep, desc, client);
     if (rep->totalKeyBehaviors > 0)
