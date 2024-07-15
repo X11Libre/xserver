@@ -1283,18 +1283,18 @@ XkbSizeExplicit(XkbDescPtr xkb, xkbGetMapReply * rep)
 }
 
 static char *
-XkbWriteExplicit(XkbDescPtr xkb, xkbGetMapReply * rep, char *buf,
-                 ClientPtr client)
+XkbWriteExplicit(XkbDescPtr xkb, KeyCode firstKeyExplicit, CARD8 nKeyExplicit,
+                 char *buf)
 {
     unsigned i;
     char *start;
     unsigned char *pExp;
 
     start = buf;
-    pExp = &xkb->server->explicit[rep->firstKeyExplicit];
-    for (i = 0; i < rep->nKeyExplicit; i++, pExp++) {
+    pExp = &xkb->server->explicit[firstKeyExplicit];
+    for (i = 0; i < nKeyExplicit; i++, pExp++) {
         if (*pExp != 0) {
-            *buf++ = i + rep->firstKeyExplicit;
+            *buf++ = i + firstKeyExplicit;
             *buf++ = *pExp;
         }
     }
@@ -1432,7 +1432,7 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply * rep)
         desc += XkbPaddedSize(sz);
     }
     if (rep->totalKeyExplicit > 0)
-        desc = XkbWriteExplicit(xkb, rep, desc, client);
+        desc = XkbWriteExplicit(xkb, rep->firstKeyExplicit, rep->nKeyExplicit, desc);
     if (rep->totalModMapKeys > 0)
         desc = XkbWriteModifierMap(xkb, rep, desc, client);
     if (rep->totalVModMapKeys > 0)
