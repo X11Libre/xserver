@@ -644,30 +644,47 @@ proc_dri3_free_syncobj(ClientPtr client)
     return Success;
 }
 
-int (*proc_dri3_vector[DRI3NumberRequests]) (ClientPtr) = {
-    proc_dri3_query_version,            /* 0 */
-    proc_dri3_open,                     /* 1 */
-    proc_dri3_pixmap_from_buffer,       /* 2 */
-    proc_dri3_buffer_from_pixmap,       /* 3 */
-    proc_dri3_fence_from_fd,            /* 4 */
-    proc_dri3_fd_from_fence,            /* 5 */
-    proc_dri3_get_supported_modifiers,  /* 6 */
-    proc_dri3_pixmap_from_buffers,      /* 7 */
-    proc_dri3_buffers_from_pixmap,      /* 8 */
-    proc_dri3_set_drm_device_in_use,    /* 9 */
-    proc_dri3_import_syncobj,           /* 10 */
-    proc_dri3_free_syncobj,             /* 11 */
-};
-
 int
 proc_dri3_dispatch(ClientPtr client)
 {
     REQUEST(xReq);
     if (!client->local)
         return BadMatch;
-    if (stuff->data >= DRI3NumberRequests || !proc_dri3_vector[stuff->data])
-        return BadRequest;
-    return (*proc_dri3_vector[stuff->data]) (client);
+
+    switch (stuff->data) {
+        case X_DRI3QueryVersion:
+            return proc_dri3_query_version(client);
+        case X_DRI3Open:
+            return proc_dri3_open(client);
+        case X_DRI3PixmapFromBuffer:
+            return proc_dri3_pixmap_from_buffer(client);
+        case X_DRI3BufferFromPixmap:
+            return proc_dri3_buffer_from_pixmap(client);
+        case X_DRI3FenceFromFD:
+            return proc_dri3_fence_from_fd(client);
+        case X_DRI3FDFromFence:
+            return proc_dri3_fd_from_fence(client);
+
+        /* v1.2 */
+        case xDRI3GetSupportedModifiers:
+            return proc_dri3_get_supported_modifiers(client);
+        case xDRI3PixmapFromBuffers:
+            return proc_dri3_pixmap_from_buffers(client);
+        case xDRI3BuffersFromPixmap:
+            return proc_dri3_buffers_from_pixmap(client);
+
+        /* v1.3 */
+        case xDRI3SetDRMDeviceInUse:
+            return proc_dri3_set_drm_device_in_use(client);
+
+        /* v1.4 */
+        case xDRI3ImportSyncobj:
+            return proc_dri3_import_syncobj(client);
+        case xDRI3FreeSyncobj:
+            return proc_dri3_free_syncobj(client);
+        default:
+            return BadRequest;
+    }
 }
 
 static int _X_COLD
@@ -677,7 +694,7 @@ sproc_dri3_query_version(ClientPtr client)
     REQUEST_SIZE_MATCH(xDRI3QueryVersionReq);
     swapl(&stuff->majorVersion);
     swapl(&stuff->minorVersion);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_query_version(client);
 }
 
 static int _X_COLD
@@ -687,7 +704,7 @@ sproc_dri3_open(ClientPtr client)
     REQUEST_SIZE_MATCH(xDRI3OpenReq);
     swapl(&stuff->drawable);
     swapl(&stuff->provider);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_open(client);
 }
 
 static int _X_COLD
@@ -701,7 +718,7 @@ sproc_dri3_pixmap_from_buffer(ClientPtr client)
     swaps(&stuff->width);
     swaps(&stuff->height);
     swaps(&stuff->stride);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_pixmap_from_buffer(client);
 }
 
 static int _X_COLD
@@ -710,7 +727,7 @@ sproc_dri3_buffer_from_pixmap(ClientPtr client)
     REQUEST(xDRI3BufferFromPixmapReq);
     REQUEST_SIZE_MATCH(xDRI3BufferFromPixmapReq);
     swapl(&stuff->pixmap);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_buffer_from_pixmap(client);
 }
 
 static int _X_COLD
@@ -720,7 +737,7 @@ sproc_dri3_fence_from_fd(ClientPtr client)
     REQUEST_SIZE_MATCH(xDRI3FenceFromFDReq);
     swapl(&stuff->drawable);
     swapl(&stuff->fence);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_fence_from_fd(client);
 }
 
 static int _X_COLD
@@ -730,7 +747,7 @@ sproc_dri3_fd_from_fence(ClientPtr client)
     REQUEST_SIZE_MATCH(xDRI3FDFromFenceReq);
     swapl(&stuff->drawable);
     swapl(&stuff->fence);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_fd_from_fence(client);
 }
 
 static int _X_COLD
@@ -739,7 +756,7 @@ sproc_dri3_get_supported_modifiers(ClientPtr client)
     REQUEST(xDRI3GetSupportedModifiersReq);
     REQUEST_SIZE_MATCH(xDRI3GetSupportedModifiersReq);
     swapl(&stuff->window);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_get_supported_modifiers(client);
 }
 
 static int _X_COLD
@@ -760,7 +777,7 @@ sproc_dri3_pixmap_from_buffers(ClientPtr client)
     swapl(&stuff->stride3);
     swapl(&stuff->offset3);
     swapll(&stuff->modifier);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_pixmap_from_buffers(client);
 }
 
 static int _X_COLD
@@ -769,7 +786,7 @@ sproc_dri3_buffers_from_pixmap(ClientPtr client)
     REQUEST(xDRI3BuffersFromPixmapReq);
     REQUEST_SIZE_MATCH(xDRI3BuffersFromPixmapReq);
     swapl(&stuff->pixmap);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_buffers_from_pixmap(client);
 }
 
 static int _X_COLD
@@ -780,7 +797,7 @@ sproc_dri3_set_drm_device_in_use(ClientPtr client)
     swapl(&stuff->window);
     swapl(&stuff->drmMajor);
     swapl(&stuff->drmMinor);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_set_drm_device_in_use(client);
 }
 
 static int _X_COLD
@@ -790,7 +807,7 @@ sproc_dri3_import_syncobj(ClientPtr client)
     REQUEST_SIZE_MATCH(xDRI3ImportSyncobjReq);
     swapl(&stuff->syncobj);
     swapl(&stuff->drawable);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_import_syncobj(client);
 }
 
 static int _X_COLD
@@ -799,23 +816,8 @@ sproc_dri3_free_syncobj(ClientPtr client)
     REQUEST(xDRI3FreeSyncobjReq);
     REQUEST_SIZE_MATCH(xDRI3FreeSyncobjReq);
     swapl(&stuff->syncobj);
-    return (*proc_dri3_vector[stuff->dri3ReqType]) (client);
+    return proc_dri3_free_syncobj(client);
 }
-
-int (*sproc_dri3_vector[DRI3NumberRequests]) (ClientPtr) = {
-    sproc_dri3_query_version,           /* 0 */
-    sproc_dri3_open,                    /* 1 */
-    sproc_dri3_pixmap_from_buffer,      /* 2 */
-    sproc_dri3_buffer_from_pixmap,      /* 3 */
-    sproc_dri3_fence_from_fd,           /* 4 */
-    sproc_dri3_fd_from_fence,           /* 5 */
-    sproc_dri3_get_supported_modifiers, /* 6 */
-    sproc_dri3_pixmap_from_buffers,     /* 7 */
-    sproc_dri3_buffers_from_pixmap,     /* 8 */
-    sproc_dri3_set_drm_device_in_use,   /* 9 */
-    sproc_dri3_import_syncobj,          /* 10 */
-    sproc_dri3_free_syncobj,            /* 11 */
-};
 
 int _X_COLD
 sproc_dri3_dispatch(ClientPtr client)
@@ -823,7 +825,39 @@ sproc_dri3_dispatch(ClientPtr client)
     REQUEST(xReq);
     if (!client->local)
         return BadMatch;
-    if (stuff->data >= DRI3NumberRequests || !sproc_dri3_vector[stuff->data])
-        return BadRequest;
-    return (*sproc_dri3_vector[stuff->data]) (client);
+
+    switch (stuff->data) {
+        case X_DRI3QueryVersion:
+            return sproc_dri3_query_version(client);
+        case X_DRI3Open:
+            return sproc_dri3_open(client);
+        case X_DRI3PixmapFromBuffer:
+            return sproc_dri3_pixmap_from_buffer(client);
+        case X_DRI3BufferFromPixmap:
+            return sproc_dri3_buffer_from_pixmap(client);
+        case X_DRI3FenceFromFD:
+            return sproc_dri3_fence_from_fd(client);
+        case X_DRI3FDFromFence:
+            return sproc_dri3_fd_from_fence(client);
+
+        /* v1.2 */
+        case xDRI3GetSupportedModifiers:
+            return sproc_dri3_get_supported_modifiers(client);
+        case xDRI3PixmapFromBuffers:
+            return sproc_dri3_pixmap_from_buffers(client);
+        case xDRI3BuffersFromPixmap:
+            return sproc_dri3_buffers_from_pixmap(client);
+
+        /* v1.3 */
+        case xDRI3SetDRMDeviceInUse:
+            return sproc_dri3_set_drm_device_in_use(client);
+
+        /* v1.4 */
+        case xDRI3ImportSyncobj:
+            return sproc_dri3_import_syncobj(client);
+        case xDRI3FreeSyncobj:
+            return sproc_dri3_free_syncobj(client);
+        default:
+            return BadRequest;
+    }
 }
