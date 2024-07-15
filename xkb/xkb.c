@@ -4894,7 +4894,6 @@ ProcXkbGetGeometry(ClientPtr client)
     geom = XkbLookupNamedGeometry(dev, stuff->name, &shouldFree);
 
     xkbGetGeometryReply reply = {
-        .type = X_Reply,
         .deviceID = dev->id,
     };
     status = XkbComputeGetGeometryReplySize(geom, &reply, stuff->name);
@@ -6361,9 +6360,7 @@ ProcXkbGetDeviceInfo(ClientPtr client)
     nameLen = XkbSizeCountedString(dev->name);
 
     xkbGetDeviceInfoReply reply = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .length = bytes_to_int32(nameLen),
         .present = wanted,
         .supported = XkbXI_AllDeviceFeaturesMask,
