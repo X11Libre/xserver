@@ -1185,30 +1185,29 @@ XkbSizeKeyActions(XkbDescPtr xkb, xkbGetMapReply * rep)
 }
 
 static char *
-XkbWriteKeyActions(XkbDescPtr xkb, xkbGetMapReply * rep, char *buf,
-                   ClientPtr client)
+XkbWriteKeyActions(XkbDescPtr xkb, KeyCode firstKeyAct, CARD8 nKeyActs, char *buf)
 {
     unsigned i;
     CARD8 *numDesc;
     XkbAnyAction *actDesc;
 
     numDesc = (CARD8 *) buf;
-    for (i = 0; i < rep->nKeyActs; i++) {
-        if (xkb->server->key_acts[i + rep->firstKeyAct] == 0)
+    for (i = 0; i < nKeyActs; i++) {
+        if (xkb->server->key_acts[i + firstKeyAct] == 0)
             numDesc[i] = 0;
         else
-            numDesc[i] = XkbKeyNumActions(xkb, (i + rep->firstKeyAct));
+            numDesc[i] = XkbKeyNumActions(xkb, (i + firstKeyAct));
     }
-    buf += XkbPaddedSize(rep->nKeyActs);
+    buf += XkbPaddedSize(nKeyActs);
 
     actDesc = (XkbAnyAction *) buf;
-    for (i = 0; i < rep->nKeyActs; i++) {
-        if (xkb->server->key_acts[i + rep->firstKeyAct] != 0) {
+    for (i = 0; i < nKeyActs; i++) {
+        if (xkb->server->key_acts[i + firstKeyAct] != 0) {
             unsigned int num;
 
-            num = XkbKeyNumActions(xkb, (i + rep->firstKeyAct));
+            num = XkbKeyNumActions(xkb, (i + firstKeyAct));
             memcpy((char *) actDesc,
-                   (char *) XkbKeyActionsPtr(xkb, (i + rep->firstKeyAct)),
+                   (char *) XkbKeyActionsPtr(xkb, (i + firstKeyAct)),
                    num * SIZEOF(xkbActionWireDesc));
             actDesc += num;
         }
@@ -1420,7 +1419,7 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply * rep)
     if (rep->nKeySyms > 0)
         desc = XkbWriteKeySyms(xkb, rep->firstKeySym, rep->nKeySyms, desc, client);
     if (rep->nKeyActs > 0)
-        desc = XkbWriteKeyActions(xkb, rep, desc, client);
+        desc = XkbWriteKeyActions(xkb, rep->firstKeyAct, rep->nKeyActs, desc);
     if (rep->totalKeyBehaviors > 0)
         desc = XkbWriteKeyBehaviors(xkb, rep, desc, client);
     if (rep->virtualMods) {
