@@ -33,6 +33,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XKMformat.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbfmisc_priv.h"
@@ -172,10 +173,13 @@ _XkbCheckRequestBounds(ClientPtr client, void *stuff, void *from, void *to) {
 int
 ProcXkbUseExtension(ClientPtr client)
 {
-    REQUEST(xkbUseExtensionReq);
+    REQUEST_HEAD_STRUCT(xkbUseExtensionReq);
+    REQUEST_SIZE_MATCH(xkbUseExtensionReq);
+    REQUEST_FIELD_CARD16(wantedMajor);
+    REQUEST_FIELD_CARD16(wantedMinor);
+
     int supported;
 
-    REQUEST_SIZE_MATCH(xkbUseExtensionReq);
     if (stuff->wantedMajor != SERVER_XKB_MAJOR_VERSION) {
         /* pre-release version 0.65 is compatible with 1.00 */
         supported = ((SERVER_XKB_MAJOR_VERSION == 1) &&
@@ -218,13 +222,18 @@ ProcXkbUseExtension(ClientPtr client)
 int
 ProcXkbSelectEvents(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbSelectEventsReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(affectWhich);
+    REQUEST_FIELD_CARD16(clear);
+    REQUEST_FIELD_CARD16(selectAll);
+    REQUEST_FIELD_CARD16(affectMap);
+    REQUEST_FIELD_CARD16(map);
+    /* more swapping done down below */
+
     unsigned legal;
     DeviceIntPtr dev;
     XkbInterestPtr masks;
-
-    REQUEST(xkbSelectEventsReq);
-
-    REQUEST_AT_LEAST_SIZE(xkbSelectEventsReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -247,11 +256,7 @@ ProcXkbSelectEvents(ClientPtr client)
         masks = XkbAddClientResource((DevicePtr) dev, client, id);
     }
     if (masks) {
-        union {
-            CARD8 *c8;
-            CARD16 *c16;
-            CARD32 *c32;
-        } from, to;
+        union { CARD8 *c8; CARD16 *c16; CARD32 *c32; } from, to;
         register unsigned bit, ndx, maskLeft, dataLeft, size;
 
         from.c8 = (CARD8 *) &stuff[1];
@@ -342,12 +347,14 @@ ProcXkbSelectEvents(ClientPtr client)
                 if (dataLeft < (size * 2))
                     return BadLength;
                 if (size == 2) {
+                    CLIENT_STRUCT_CARD16_2(&from, c16[0], c16[1]);
                     CHK_MASK_MATCH(ndx, from.c16[0], from.c16[1]);
                     CHK_MASK_LEGAL(ndx, from.c16[0], legal);
                     to.c16[0] &= ~from.c16[0];
                     to.c16[0] |= (from.c16[0] & from.c16[1]);
                 }
                 else if (size == 4) {
+                    REQUEST_BUF_CARD32(from.c32, 2);
                     CHK_MASK_MATCH(ndx, from.c32[0], from.c32[1]);
                     CHK_MASK_LEGAL(ndx, from.c32[0], legal);
                     to.c32[0] &= ~from.c32[0];
@@ -492,12 +499,18 @@ _XkbBell(ClientPtr client, DeviceIntPtr dev, WindowPtr pWin,
 int
 ProcXkbBell(ClientPtr client)
 {
-    REQUEST(xkbBellReq);
+    REQUEST_HEAD_STRUCT(xkbBellReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(bellClass);
+    REQUEST_FIELD_CARD16(bellID);
+    REQUEST_FIELD_CARD32(name);
+    REQUEST_FIELD_CARD32(window);
+    REQUEST_FIELD_CARD16(pitch);
+    REQUEST_FIELD_CARD16(duration);
+
     DeviceIntPtr dev;
     WindowPtr pWin;
     int rc;
-
-    REQUEST_SIZE_MATCH(xkbBellReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -580,11 +593,11 @@ ProcXkbBell(ClientPtr client)
 int
 ProcXkbGetState(ClientPtr client)
 {
-    REQUEST(xkbGetStateReq);
+    REQUEST_HEAD_STRUCT(xkbGetStateReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+
     DeviceIntPtr dev;
     XkbStateRec *xkb;
-
-    REQUEST_SIZE_MATCH(xkbGetStateReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -621,15 +634,16 @@ ProcXkbGetState(ClientPtr client)
 int
 ProcXkbLatchLockState(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbLatchLockStateReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(groupLatch);
+
     int status;
     DeviceIntPtr dev, tmpd;
     XkbStateRec oldState, *newState;
     CARD16 changed;
     xkbStateNotify sn;
     XkbEventCauseRec cause;
-
-    REQUEST(xkbLatchLockStateReq);
-    REQUEST_SIZE_MATCH(xkbLatchLockStateReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -691,11 +705,11 @@ ProcXkbLatchLockState(ClientPtr client)
 int
 ProcXkbGetControls(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetControlsReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+
     XkbControlsPtr xkb;
     DeviceIntPtr dev;
-
-    REQUEST(xkbGetControlsReq);
-    REQUEST_SIZE_MATCH(xkbGetControlsReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -766,6 +780,31 @@ ProcXkbGetControls(ClientPtr client)
 int
 ProcXkbSetControls(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbSetControlsReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(affectInternalVMods);
+    REQUEST_FIELD_CARD16(internalVMods);
+    REQUEST_FIELD_CARD16(affectIgnoreLockVMods);
+    REQUEST_FIELD_CARD16(ignoreLockVMods);
+    REQUEST_FIELD_CARD16(axOptions);
+    REQUEST_FIELD_CARD32(affectEnabledCtrls);
+    REQUEST_FIELD_CARD32(enabledCtrls);
+    REQUEST_FIELD_CARD32(changeCtrls);
+    REQUEST_FIELD_CARD16(repeatDelay);
+    REQUEST_FIELD_CARD16(repeatInterval);
+    REQUEST_FIELD_CARD16(slowKeysDelay);
+    REQUEST_FIELD_CARD16(debounceDelay);
+    REQUEST_FIELD_CARD16(mkDelay);
+    REQUEST_FIELD_CARD16(mkInterval);
+    REQUEST_FIELD_CARD16(mkTimeToMax);
+    REQUEST_FIELD_CARD16(mkMaxSpeed);
+    REQUEST_FIELD_CARD16(mkCurve);
+    REQUEST_FIELD_CARD16(axTimeout);
+    REQUEST_FIELD_CARD32(axtCtrlsMask);
+    REQUEST_FIELD_CARD32(axtCtrlsValues);
+    REQUEST_FIELD_CARD16(axtOptsMask);
+    REQUEST_FIELD_CARD16(axtOptsValues);
+
     DeviceIntPtr dev, tmpd;
     XkbSrvInfoPtr xkbi;
     XkbControlsPtr ctrl;
@@ -773,9 +812,6 @@ ProcXkbSetControls(ClientPtr client)
     xkbControlsNotify cn;
     XkbEventCauseRec cause;
     XkbSrvLedInfoPtr sli;
-
-    REQUEST(xkbSetControlsReq);
-    REQUEST_SIZE_MATCH(xkbSetControlsReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -1435,12 +1471,15 @@ XkbAssembleMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep, char *desc)
 int
 ProcXkbGetMap(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetMapReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(full);
+    REQUEST_FIELD_CARD16(partial);
+    REQUEST_FIELD_CARD16(virtualMods);
+
     DeviceIntPtr dev;
     XkbDescRec *xkb;
     int n, status;
-
-    REQUEST(xkbGetMapReq);
-    REQUEST_SIZE_MATCH(xkbGetMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -2682,12 +2721,17 @@ _XkbSetMap(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req, char *values)
 int
 ProcXkbSetMap(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbSetMapReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(present);
+    REQUEST_FIELD_CARD16(flags);
+    REQUEST_FIELD_CARD16(totalSyms);
+    REQUEST_FIELD_CARD16(totalActs);
+    REQUEST_FIELD_CARD16(virtualMods);
+
     DeviceIntPtr dev, master;
     char *tmp;
     int rc;
-
-    REQUEST(xkbSetMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -2843,12 +2887,14 @@ XkbAssembleCompatMap(ClientPtr client,
 int
 ProcXkbGetCompatMap(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetCompatMapReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(firstSI);
+    REQUEST_FIELD_CARD16(nSI);
+
     DeviceIntPtr dev;
     XkbDescPtr xkb;
     XkbCompatMapPtr compat;
-
-    REQUEST(xkbGetCompatMapReq);
-    REQUEST_SIZE_MATCH(xkbGetCompatMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -3057,12 +3103,14 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetCompatMap(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbSetCompatMapReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(firstSI);
+    REQUEST_FIELD_CARD16(nSI);
+
     DeviceIntPtr dev;
     char *data;
     int rc;
-
-    REQUEST(xkbSetCompatMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetCompatMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -3120,11 +3168,11 @@ ProcXkbSetCompatMap(ClientPtr client)
 int
 ProcXkbGetIndicatorState(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetIndicatorStateReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+
     XkbSrvLedInfoPtr sli;
     DeviceIntPtr dev;
-
-    REQUEST(xkbGetIndicatorStateReq);
-    REQUEST_SIZE_MATCH(xkbGetIndicatorStateReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -3206,12 +3254,13 @@ XkbAssembleIndicatorMap(ClientPtr client,
 int
 ProcXkbGetIndicatorMap(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetIndicatorMapReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD32(which);
+
     DeviceIntPtr dev;
     XkbDescPtr xkb;
     XkbIndicatorPtr leds;
-
-    REQUEST(xkbGetIndicatorMapReq);
-    REQUEST_SIZE_MATCH(xkbGetIndicatorMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -3298,14 +3347,15 @@ _XkbSetIndicatorMap(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetIndicatorMap(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbSetIndicatorMapReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD32(which);
+
     int i, bit;
     int nIndicators;
     DeviceIntPtr dev;
     xkbIndicatorMapWireDesc *from;
     int rc;
-
-    REQUEST(xkbSetIndicatorMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetIndicatorMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -3364,13 +3414,16 @@ ProcXkbSetIndicatorMap(ClientPtr client)
 int
 ProcXkbGetNamedIndicator(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetNamedIndicatorReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(ledClass);
+    REQUEST_FIELD_CARD16(ledID);
+    REQUEST_FIELD_CARD32(indicator);
+
     DeviceIntPtr dev;
     register int i = 0;
     XkbSrvLedInfoPtr sli;
     XkbIndicatorMapPtr map = NULL;
-
-    REQUEST(xkbGetNamedIndicatorReq);
-    REQUEST_SIZE_MATCH(xkbGetNamedIndicatorReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -3565,13 +3618,18 @@ _XkbSetNamedIndicator(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetNamedIndicator(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbSetNamedIndicatorReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(ledClass);
+    REQUEST_FIELD_CARD16(ledID);
+    REQUEST_FIELD_CARD32(indicator);
+    REQUEST_FIELD_CARD16(virtualMods);
+    REQUEST_FIELD_CARD32(ctrls);
+
     int rc;
     DeviceIntPtr dev;
     int led = 0;
     XkbIndicatorMapPtr map;
-
-    REQUEST(xkbSetNamedIndicatorReq);
-    REQUEST_SIZE_MATCH(xkbSetNamedIndicatorReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -3881,11 +3939,12 @@ XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, char *b
 int
 ProcXkbGetNames(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetNamesReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD32(which);
+
     DeviceIntPtr dev;
     XkbDescPtr xkb;
-
-    REQUEST(xkbGetNamesReq);
-    REQUEST_SIZE_MATCH(xkbGetNamesReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -4333,13 +4392,17 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
 int
 ProcXkbSetNames(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbSetNamesReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(virtualMods);
+    REQUEST_FIELD_CARD32(which);
+    REQUEST_FIELD_CARD32(indicators);
+    REQUEST_FIELD_CARD16(totalKTLevelNames);
+
     DeviceIntPtr dev;
     CARD32 *tmp;
     Atom bad;
     int rc;
-
-    REQUEST(xkbSetNamesReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetNamesReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -4942,13 +5005,14 @@ XkbAssembleGeometry(ClientPtr client,
 int
 ProcXkbGetGeometry(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetGeometryReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD32(name);
+
     DeviceIntPtr dev;
     XkbGeometryPtr geom;
     Bool shouldFree;
     Status status;
-
-    REQUEST(xkbGetGeometryReq);
-    REQUEST_SIZE_MATCH(xkbGetGeometryReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -5546,11 +5610,18 @@ _XkbSetGeometry(ClientPtr client, DeviceIntPtr dev, xkbSetGeometryReq * stuff)
 int
 ProcXkbSetGeometry(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbSetGeometryReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD32(name);
+    REQUEST_FIELD_CARD16(widthMM);
+    REQUEST_FIELD_CARD16(heightMM);
+    REQUEST_FIELD_CARD16(nProperties);
+    REQUEST_FIELD_CARD16(nColors);
+    REQUEST_FIELD_CARD16(nDoodads);
+    REQUEST_FIELD_CARD16(nKeyAliases);
+
     DeviceIntPtr dev;
     int rc;
-
-    REQUEST(xkbSetGeometryReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetGeometryReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -5583,12 +5654,17 @@ ProcXkbSetGeometry(ClientPtr client)
 int
 ProcXkbPerClientFlags(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbPerClientFlagsReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD32(change);
+    REQUEST_FIELD_CARD32(value);
+    REQUEST_FIELD_CARD32(ctrlsToChange);
+    REQUEST_FIELD_CARD32(autoCtrls);
+    REQUEST_FIELD_CARD32(autoCtrlValues);
+
     DeviceIntPtr dev;
     XkbInterestPtr interest;
     Mask access_mode = DixGetAttrAccess | DixSetAttrAccess;
-
-    REQUEST(xkbPerClientFlagsReq);
-    REQUEST_SIZE_MATCH(xkbPerClientFlagsReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -5728,14 +5804,15 @@ GetComponentSpec(ClientPtr client, xkbGetKbdByNameReq *stuff,
 int
 ProcXkbListComponents(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbListComponentsReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(maxNames);
+
     DeviceIntPtr dev;
     unsigned len;
     unsigned char *str;
     uint8_t size;
     int i;
-
-    REQUEST(xkbListComponentsReq);
-    REQUEST_AT_LEAST_SIZE(xkbListComponentsReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -5815,6 +5892,11 @@ XkbConvertGetByNameComponents(Bool toXkm, unsigned orig)
 int
 ProcXkbGetKbdByName(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbGetKbdByNameReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(want);
+    REQUEST_FIELD_CARD16(need);
+
     DeviceIntPtr dev;
     DeviceIntPtr tmpd;
     DeviceIntPtr master;
@@ -5829,9 +5911,6 @@ ProcXkbGetKbdByName(ClientPtr client)
     XkbSrvLedInfoPtr old_sli;
     XkbSrvLedInfoPtr sli;
     Mask access_mode = DixGetAttrAccess | DixManageAccess;
-
-    REQUEST(xkbGetKbdByNameReq);
-    REQUEST_AT_LEAST_SIZE(xkbGetKbdByNameReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -6423,14 +6502,17 @@ FillDeviceLedFBs(DeviceIntPtr dev, int class, int id, unsigned wantLength,
 int
 ProcXkbGetDeviceInfo(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xkbGetDeviceInfoReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(wanted);
+    REQUEST_FIELD_CARD16(ledClass);
+    REQUEST_FIELD_CARD16(ledID);
+
     DeviceIntPtr dev;
     int status;
     unsigned length, nameLen;
     CARD16 ledClass, ledID;
     unsigned wanted;
-
-    REQUEST(xkbGetDeviceInfoReq);
-    REQUEST_SIZE_MATCH(xkbGetDeviceInfoReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -6843,11 +6925,13 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetDeviceInfo(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbSetDeviceInfoReq);
+    REQUEST_FIELD_CARD16(deviceSpec);
+    REQUEST_FIELD_CARD16(change);
+    REQUEST_FIELD_CARD16(nDeviceLedFBs);
+
     DeviceIntPtr dev;
     int rc;
-
-    REQUEST(xkbSetDeviceInfoReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetDeviceInfoReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -6911,11 +6995,15 @@ ProcXkbSetDeviceInfo(ClientPtr client)
 int
 ProcXkbSetDebuggingFlags(ClientPtr client)
 {
+    REQUEST_HEAD_AT_LEAST(xkbSetDebuggingFlagsReq);
+    REQUEST_FIELD_CARD32(affectFlags);
+    REQUEST_FIELD_CARD32(flags);
+    REQUEST_FIELD_CARD32(affectCtrls);
+    REQUEST_FIELD_CARD32(ctrls);
+    REQUEST_FIELD_CARD16(msgLength);
+
     CARD32 newFlags, newCtrls, extraLength;
     int rc;
-
-    REQUEST(xkbSetDebuggingFlagsReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetDebuggingFlagsReq);
 
     rc = XaceHookServerAccess(client, DixDebugAccess);
     if (rc != Success)
@@ -7061,7 +7149,7 @@ XkbExtensionInit(void)
         return;
 
     if ((extEntry = AddExtension(XkbName, XkbNumberEvents, XkbNumberErrors,
-                                 ProcXkbDispatch, SProcXkbDispatch,
+                                 ProcXkbDispatch, ProcXkbDispatch,
                                  NULL, StandardMinorOpcode))) {
         XkbReqCode = (unsigned char) extEntry->base;
         XkbEventBase = (unsigned char) extEntry->eventBase;
