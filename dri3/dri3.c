@@ -90,7 +90,7 @@ dri3_extension_init(void)
 #endif /* XINERAMA */
 
     extension = AddExtension(DRI3_NAME, DRI3NumberEvents, DRI3NumberErrors,
-                             proc_dri3_dispatch, sproc_dri3_dispatch,
+                             proc_dri3_dispatch, proc_dri3_dispatch,
                              NULL, StandardMinorOpcode);
     if (!extension)
         goto bail;
