@@ -63,10 +63,10 @@ static int
 proc_dri3_query_version(ClientPtr client)
 {
     REQUEST(xDRI3QueryVersionReq);
+
     xDRI3QueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_DRI3_MAJOR_VERSION,
         .minorVersion = SERVER_DRI3_MINOR_VERSION
     };
@@ -126,7 +126,6 @@ dri3_send_open_reply(ClientPtr client, int fd)
         .type = X_Reply,
         .nfd = 1,
         .sequenceNumber = client->sequence,
-        .length = 0,
     };
 
     if (client->swapped) {
@@ -256,12 +255,7 @@ static int
 proc_dri3_buffer_from_pixmap(ClientPtr client)
 {
     REQUEST(xDRI3BufferFromPixmapReq);
-    xDRI3BufferFromPixmapReply rep = {
-        .type = X_Reply,
-        .nfd = 1,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-    };
+
     int rc;
     int fd;
     PixmapPtr pixmap;
@@ -274,10 +268,15 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
         return rc;
     }
 
-    rep.width = pixmap->drawable.width;
-    rep.height = pixmap->drawable.height;
-    rep.depth = pixmap->drawable.depth;
-    rep.bpp = pixmap->drawable.bitsPerPixel;
+    xDRI3BufferFromPixmapReply rep = {
+        .type = X_Reply,
+        .nfd = 1,
+        .sequenceNumber = client->sequence,
+        .width = pixmap->drawable.width,
+        .height = pixmap->drawable.height,
+        .depth = pixmap->drawable.depth,
+        .bpp = pixmap->drawable.bitsPerPixel,
+    };
 
     fd = dri3_fd_from_pixmap(pixmap, &rep.stride, &rep.size);
     if (fd < 0)
@@ -335,7 +334,6 @@ proc_dri3_fd_from_fence(ClientPtr client)
         .type = X_Reply,
         .nfd = 1,
         .sequenceNumber = client->sequence,
-        .length = 0,
     };
     DrawablePtr drawable;
     int fd;
@@ -371,10 +369,6 @@ static int
 proc_dri3_get_supported_modifiers(ClientPtr client)
 {
     REQUEST(xDRI3GetSupportedModifiersReq);
-    xDRI3GetSupportedModifiersReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
     WindowPtr window;
     ScreenPtr pScreen;
     CARD64 *window_modifiers = NULL;
@@ -396,10 +390,14 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
                                  &nwindowmodifiers, &window_modifiers,
                                  &nscreenmodifiers, &screen_modifiers);
 
-    rep.numWindowModifiers = nwindowmodifiers;
-    rep.numScreenModifiers = nscreenmodifiers;
-    rep.length = bytes_to_int32(rep.numWindowModifiers * sizeof(CARD64)) +
-                 bytes_to_int32(rep.numScreenModifiers * sizeof(CARD64));
+    xDRI3GetSupportedModifiersReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .numWindowModifiers = nwindowmodifiers,
+        .numScreenModifiers = nscreenmodifiers,
+        .length = bytes_to_int32(nwindowmodifiers * sizeof(CARD64)) +
+                  bytes_to_int32(nscreenmodifiers* sizeof(CARD64)),
+    };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -519,10 +517,6 @@ static int
 proc_dri3_buffers_from_pixmap(ClientPtr client)
 {
     REQUEST(xDRI3BuffersFromPixmapReq);
-    xDRI3BuffersFromPixmapReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
     int rc;
     int fds[4];
     int num_fds;
@@ -543,13 +537,25 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
     if (num_fds == 0)
         return BadPixmap;
 
-    rep.nfd = num_fds;
-    rep.length = bytes_to_int32(num_fds * 2 * sizeof(CARD32));
-    rep.width = pixmap->drawable.width;
-    rep.height = pixmap->drawable.height;
-    rep.depth = pixmap->drawable.depth;
-    rep.bpp = pixmap->drawable.bitsPerPixel;
-    rep.modifier = modifier;
+    for (i = 0; i < num_fds; i++) {
+        if (WriteFdToClient(client, fds[i], TRUE) < 0) {
+            while (i--)
+                close(fds[i]);
+            return BadAlloc;
+        }
+    }
+
+    xDRI3BuffersFromPixmapReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .nfd = num_fds,
+        .length = bytes_to_int32(num_fds * 2 * sizeof(CARD32)),
+        .width = pixmap->drawable.width,
+        .height = pixmap->drawable.height,
+        .depth = pixmap->drawable.depth,
+        .bpp = pixmap->drawable.bitsPerPixel,
+        .modifier = modifier,
+    };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -560,14 +566,6 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
         for (i = 0; i < num_fds; i++) {
             swapl(&strides[i]);
             swapl(&offsets[i]);
-        }
-    }
-
-    for (i = 0; i < num_fds; i++) {
-        if (WriteFdToClient(client, fds[i], TRUE) < 0) {
-            while (i--)
-                close(fds[i]);
-            return BadAlloc;
         }
     }
 
