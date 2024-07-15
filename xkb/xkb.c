@@ -1404,52 +1404,52 @@ XkbComputeGetMapReplySize(XkbDescPtr xkb, xkbGetMapReply * rep)
 }
 
 static int
-XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply * rep)
+XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep)
 {
     unsigned i, len;
     char *desc, *start;
 
-    len = (rep->length * 4) - (SIZEOF(xkbGetMapReply) - SIZEOF(xGenericReply));
+    len = (rep.length * 4) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
     start = desc = calloc(1, len);
     if (!start)
         return BadAlloc;
-    if (rep->nTypes > 0)
-        desc = XkbWriteKeyTypes(xkb, rep->firstType, rep->nTypes, desc, client);
-    if (rep->nKeySyms > 0)
-        desc = XkbWriteKeySyms(xkb, rep->firstKeySym, rep->nKeySyms, desc, client);
-    if (rep->nKeyActs > 0)
-        desc = XkbWriteKeyActions(xkb, rep->firstKeyAct, rep->nKeyActs, desc);
-    if (rep->totalKeyBehaviors > 0)
-        desc = XkbWriteKeyBehaviors(xkb, rep->firstKeyBehavior, rep->nKeyBehaviors, desc);
-    if (rep->virtualMods) {
+    if (rep.nTypes > 0)
+        desc = XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, desc, client);
+    if (rep.nKeySyms > 0)
+        desc = XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, desc, client);
+    if (rep.nKeyActs > 0)
+        desc = XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, desc);
+    if (rep.totalKeyBehaviors > 0)
+        desc = XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, desc);
+    if (rep.virtualMods) {
         register int sz, bit;
 
         for (i = sz = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
-            if (rep->virtualMods & bit) {
+            if (rep.virtualMods & bit) {
                 desc[sz++] = xkb->server->vmods[i];
             }
         }
         desc += XkbPaddedSize(sz);
     }
-    if (rep->totalKeyExplicit > 0)
-        desc = XkbWriteExplicit(xkb, rep->firstKeyExplicit, rep->nKeyExplicit, desc);
-    if (rep->totalModMapKeys > 0)
-        desc = XkbWriteModifierMap(xkb, rep->firstModMapKey, rep->nModMapKeys, desc);
-    if (rep->totalVModMapKeys > 0)
-        desc = XkbWriteVirtualModMap(xkb, rep->firstVModMapKey, rep->nVModMapKeys, desc);
+    if (rep.totalKeyExplicit > 0)
+        desc = XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, desc);
+    if (rep.totalModMapKeys > 0)
+        desc = XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, desc);
+    if (rep.totalVModMapKeys > 0)
+        desc = XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, desc);
     if ((desc - start) != (len)) {
         ErrorF
             ("[xkb] BOGUS LENGTH in write keyboard desc, expected %d, got %ld\n",
              len, (unsigned long) (desc - start));
     }
     if (client->swapped) {
-        swaps(&rep->sequenceNumber);
-        swapl(&rep->length);
-        swaps(&rep->present);
-        swaps(&rep->totalSyms);
-        swaps(&rep->totalActs);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.present);
+        swaps(&rep.totalSyms);
+        swaps(&rep.totalActs);
     }
-    WriteToClient(client, (i = SIZEOF(xkbGetMapReply)), rep);
+    WriteToClient(client, sizeof(xkbGetMapReply), &rep);
     WriteToClient(client, len, start);
     free((char *) start);
     return Success;
@@ -1567,7 +1567,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if ((status = XkbComputeGetMapReplySize(xkb, &rep)) != Success)
         return status;
-    return XkbSendMap(client, xkb, &rep);
+    return XkbSendMap(client, xkb, rep);
 }
 
 /***====================================================================***/
@@ -6116,7 +6116,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
     WriteToClient(client, SIZEOF(xkbGetKbdByNameReply), &rep);
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask))
-        XkbSendMap(client, new, &mrep);
+        XkbSendMap(client, new, mrep);
     if (reported & XkbGBN_CompatMapMask)
         XkbSendCompatMap(client, new->compat, &crep);
     if (reported & XkbGBN_IndicatorMapMask)
