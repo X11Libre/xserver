@@ -2040,11 +2040,7 @@ SetKeySyms(ClientPtr client,
             for (s = 0; s < wire->nSyms; s++) {
                 newSyms[s] = pSyms[s];
             }
-            if (client->swapped) {
-                for (s = 0; s < wire->nSyms; s++) {
-                    swapl(&newSyms[s]);
-                }
-            }
+            REQUEST_BUF_CARD32(newSyms, wire->nSyms);
         }
         if (XkbKeyHasActions(xkb, i + req->firstKeySym))
             XkbResizeKeyActions(xkb, i + req->firstKeySym,
@@ -2910,9 +2906,7 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
         }
         sym = &compat->sym_interpret[req->firstSI];
         for (i = 0; i < req->nSI; i++, wire++) {
-            if (client->swapped) {
-                swapl(&wire->sym);
-            }
+            CLIENT_STRUCT_CARD32_1(wire, sym);
             if (wire->sym == NoSymbol && wire->match == XkbSI_AnyOfOrNone &&
                 (wire->mods & 0xff) == 0xff &&
                 wire->act.type == XkbSA_XFree86Private) {
@@ -3248,10 +3242,8 @@ ProcXkbSetIndicatorMap(ClientPtr client)
     from = (xkbIndicatorMapWireDesc *) &stuff[1];
     for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
         if (stuff->which & bit) {
-            if (client->swapped) {
-                swaps(&from->virtualMods);
-                swapl(&from->ctrls);
-            }
+            CLIENT_STRUCT_CARD16_1(from, virtualMods);
+            CLIENT_STRUCT_CARD32_1(from, ctrls);
             CHK_MASK_LEGAL(i, from->whichGroups, XkbIM_UseAnyGroup);
             CHK_MASK_LEGAL(i, from->whichMods, XkbIM_UseAnyMods);
             from++;
@@ -4854,12 +4846,8 @@ _CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
 
     any = dWire->any;
     wire = (char *) &dWire[1];
-    if (client->swapped) {
-        swapl(&any.name);
-        swaps(&any.top);
-        swaps(&any.left);
-        swaps(&any.angle);
-    }
+    CLIENT_STRUCT_CARD32_1(&any, name);
+    CLIENT_STRUCT_CARD16_3(&any, top, left, angle);
     CHK_ATOM_ONLY(dWire->any.name);
     doodad = XkbAddGeomDoodad(geom, section, any.name);
     if (!doodad)
@@ -4968,9 +4956,8 @@ _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
     if (!_XkbCheckRequestBounds(client, req, olWire, olWire + 1))
         return BadLength;
 
-    if (client->swapped) {
-        swapl(&olWire->name);
-    }
+    CLIENT_STRUCT_CARD32_1(olWire, name);
+
     CHK_ATOM_ONLY(olWire->name);
     ol = XkbAddGeomOverlay(section, olWire->name, olWire->nRows);
     rWire = (xkbOverlayRowWireDesc *) &olWire[1];
@@ -5029,14 +5016,9 @@ _CheckSetSections(XkbGeometryPtr geom,
         if (!_XkbCheckRequestBounds(client, req, sWire, sWire + 1))
             return BadLength;
 
-        if (client->swapped) {
-            swapl(&sWire->name);
-            swaps(&sWire->top);
-            swaps(&sWire->left);
-            swaps(&sWire->width);
-            swaps(&sWire->height);
-            swaps(&sWire->angle);
-        }
+        CLIENT_STRUCT_CARD32_1(sWire, name);
+        CLIENT_STRUCT_CARD16_5(sWire, top, left, width, height, angle);
+
         CHK_ATOM_ONLY(sWire->name);
         section = XkbAddGeomSection(geom, sWire->name, sWire->nRows,
                                     sWire->nDoodads, sWire->nOverlays);
@@ -5851,13 +5833,10 @@ ProcXkbGetKbdByName(ClientPtr client)
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch mrep size (%ld // %ld units)\n",
                        (unsigned long)childbuf.wpos, (unsigned long)mrep.length * 4, (unsigned long)mrep.length);
 
-        if (client->swapped) {
-            swaps(&mrep.sequenceNumber);
-            swapl(&mrep.length);
-            swaps(&mrep.present);
-            swaps(&mrep.totalSyms);
-            swaps(&mrep.totalActs);
-        }
+        // note: we must set payload size and swap the standard header fields ourselves
+        CLIENT_STRUCT_CARD32_1(&mrep, length);
+        CLIENT_STRUCT_CARD16_1(&mrep, sequenceNumber);
+        CLIENT_STRUCT_CARD16_3(&mrep, present, totalSyms, totalActs);
 
         x_rpcbuf_write_binary_pad(&rpcbuf, &mrep, sizeof(mrep));
         x_rpcbuf_write_rpcbuf_pad(&rpcbuf, &childbuf);
@@ -5872,13 +5851,11 @@ ProcXkbGetKbdByName(ClientPtr client)
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch crep size (%ld // %ld units)\n",
                        (unsigned long)childbuf.wpos, (unsigned long)crep.length * 4, (unsigned long)crep.length);
 
-        if (client->swapped) {
-            swaps(&crep.sequenceNumber);
-            swapl(&crep.length);
-            swaps(&crep.firstSI);
-            swaps(&crep.nSI);
-            swaps(&crep.nTotalSI);
-        }
+        // note: we must set payload size and swap the standard header fields ourselves
+        CLIENT_STRUCT_CARD32_1(&crep, length);
+        CLIENT_STRUCT_CARD16_1(&crep, sequenceNumber);
+
+        CLIENT_STRUCT_CARD16_3(&crep, firstSI, nSI, nTotalSI);
 
         x_rpcbuf_write_binary_pad(&rpcbuf, &crep, sizeof(crep));
         x_rpcbuf_write_rpcbuf_pad(&rpcbuf, &childbuf);
@@ -5896,12 +5873,11 @@ ProcXkbGetKbdByName(ClientPtr client)
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch irep size (%ld // %ld units)\n",
                        (unsigned long)childbuf.wpos, (unsigned long)irep.length * 4, (unsigned long)irep.length);
 
-        if (client->swapped) {
-            swaps(&irep.sequenceNumber);
-            swapl(&irep.length);
-            swapl(&irep.which);
-            swapl(&irep.realIndicators);
-        }
+        // note: we must set payload size and swap the standard header fields ourselves
+        CLIENT_STRUCT_CARD32_1(&irep, length);
+        CLIENT_STRUCT_CARD16_1(&irep, sequenceNumber);
+
+        CLIENT_STRUCT_CARD32_2(&irep, which, realIndicators);
 
         x_rpcbuf_write_binary_pad(&rpcbuf, &irep, sizeof(irep));
         x_rpcbuf_write_rpcbuf_pad(&rpcbuf, &childbuf);
@@ -5916,13 +5892,12 @@ ProcXkbGetKbdByName(ClientPtr client)
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch nrep size (%ld // %ld units)\n",
                        (unsigned long)childbuf.wpos, (unsigned long)nrep.length * 4, (unsigned long)nrep.length);
 
-        if (client->swapped) {
-            swaps(&nrep.sequenceNumber);
-            swapl(&nrep.length);
-            swapl(&nrep.which);
-            swaps(&nrep.virtualMods);
-            swapl(&nrep.indicators);
-        }
+        // note: we must set payload size and swap the standard header fields ourselves
+        CLIENT_STRUCT_CARD32_1(&nrep, length);
+        CLIENT_STRUCT_CARD16_1(&nrep, sequenceNumber);
+        CLIENT_STRUCT_CARD32_2(&nrep, which, indicators);
+
+        CLIENT_STRUCT_CARD16_1(&nrep, virtualMods);
 
         x_rpcbuf_write_binary_pad(&rpcbuf, &nrep, sizeof(nrep));
         x_rpcbuf_write_rpcbuf_pad(&rpcbuf, &childbuf);
@@ -5933,19 +5908,13 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         XkbAssembleGeometry(client, new->geom, grep, &childbuf);
 
-        if (client->swapped) {
-            swaps(&grep.sequenceNumber);
-            swapl(&grep.length);
-            swapl(&grep.name);
-            swaps(&grep.widthMM);
-            swaps(&grep.heightMM);
-            swaps(&grep.nProperties);
-            swaps(&grep.nColors);
-            swaps(&grep.nShapes);
-            swaps(&grep.nSections);
-            swaps(&grep.nDoodads);
-            swaps(&grep.nKeyAliases);
-        }
+        // note: we must set payload size and swap the standard header fields ourselves
+        CLIENT_STRUCT_CARD32_1(&grep, length);
+        CLIENT_STRUCT_CARD16_1(&grep, sequenceNumber);
+
+        CLIENT_STRUCT_CARD32_1(&grep, name);
+        CLIENT_STRUCT_CARD16_4(&grep, widthMM, heightMM, nProperties, nColors);
+        CLIENT_STRUCT_CARD16_4(&grep, nShapes, nSections, nDoodads, nKeyAliases);
 
         x_rpcbuf_write_binary_pad(&rpcbuf, &grep, sizeof(grep));
         x_rpcbuf_write_rpcbuf_pad(&rpcbuf, &childbuf);
@@ -6383,13 +6352,8 @@ CheckSetDeviceIndicators(char *wire,
             return (char *) ledWire;
         }
 
-        if (client->swapped) {
-            swaps(&ledWire->ledClass);
-            swaps(&ledWire->ledID);
-            swapl(&ledWire->namesPresent);
-            swapl(&ledWire->mapsPresent);
-            swapl(&ledWire->physIndicators);
-        }
+        CLIENT_STRUCT_CARD16_2(ledWire, ledClass, ledID);
+        CLIENT_STRUCT_CARD32_3(ledWire, namesPresent, mapsPresent, physIndicators);
 
         sli = XkbFindSrvLedInfo(dev, ledWire->ledClass, ledWire->ledID,
                                 XkbXI_IndicatorsMask);
@@ -6429,10 +6393,10 @@ CheckSetDeviceIndicators(char *wire,
                         *status_rtrn = BadLength;
                         return (char *) mapWire;
                     }
-                    if (client->swapped) {
-                        swaps(&mapWire->virtualMods);
-                        swapl(&mapWire->ctrls);
-                    }
+
+                    CLIENT_STRUCT_CARD16_1(mapWire, virtualMods);
+                    CLIENT_STRUCT_CARD32_1(mapWire, ctrls);
+
                     CHK_MASK_LEGAL3(0x21, mapWire->whichGroups,
                                     XkbIM_UseAnyGroup,
                                     client->errorValue, *status_rtrn, NULL);
