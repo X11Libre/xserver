@@ -1015,15 +1015,15 @@ XkbSizeKeyTypes(XkbDescPtr xkb, xkbGetMapReply * rep)
 }
 
 static char *
-XkbWriteKeyTypes(XkbDescPtr xkb,
-                 xkbGetMapReply * rep, char *buf, ClientPtr client)
+XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
+                 char *buf, ClientPtr client)
 {
     XkbKeyTypePtr type;
     unsigned i;
     xkbKeyTypeWireDesc *wire;
 
-    type = &xkb->map->types[rep->firstType];
-    for (i = 0; i < rep->nTypes; i++, type++) {
+    type = &xkb->map->types[firstType];
+    for (i = 0; i < nTypes; i++, type++) {
         register unsigned n;
 
         wire = (xkbKeyTypeWireDesc *) buf;
@@ -1416,7 +1416,7 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply * rep)
     if (!start)
         return BadAlloc;
     if (rep->nTypes > 0)
-        desc = XkbWriteKeyTypes(xkb, rep, desc, client);
+        desc = XkbWriteKeyTypes(xkb, rep->firstType, rep->nTypes, desc, client);
     if (rep->nKeySyms > 0)
         desc = XkbWriteKeySyms(xkb, rep->firstKeySym, rep->nKeySyms, desc, client);
     if (rep->nKeyActs > 0)
