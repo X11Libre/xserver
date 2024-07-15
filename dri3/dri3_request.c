@@ -111,12 +111,9 @@ proc_dri3_query_version(ClientPtr client)
         rep.minorVersion = stuff->minorVersion;
     }
 
-    if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
-    }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(majorVersion);
+    REPLY_FIELD_CARD32(minorVersion);
+    return REPLY_SEND();
 }
 
 int
@@ -131,8 +128,7 @@ dri3_send_open_reply(ClientPtr client, int fd)
         return BadAlloc;
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 static int
@@ -279,19 +275,16 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
     if (fd < 0)
         return BadPixmap;
 
-    if (client->swapped) {
-        swapl(&rep.size);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.stride);
-    }
     if (WriteFdToClient(client, fd, TRUE) < 0) {
         close(fd);
         return BadAlloc;
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    REPLY_FIELD_CARD32(size);
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_FIELD_CARD16(stride);
+    return REPLY_SEND();
 }
 
 static int
@@ -332,6 +325,7 @@ proc_dri3_fd_from_fence(ClientPtr client)
     xDRI3FDFromFenceReply rep = {
         .nfd = 1,
     };
+
     DrawablePtr drawable;
     int fd;
     int status;
@@ -351,8 +345,7 @@ proc_dri3_fd_from_fence(ClientPtr client)
     if (WriteFdToClient(client, fd, FALSE) < 0)
         return BadAlloc;
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 static int
@@ -391,11 +384,8 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
         .numScreenModifiers = nscreenmodifiers,
     };
 
-    if (client->swapped) {
-        swapl(&rep.numWindowModifiers);
-        swapl(&rep.numScreenModifiers);
-    }
-
+    REPLY_FIELD_CARD32(numWindowModifiers);
+    REPLY_FIELD_CARD32(numScreenModifiers);
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
@@ -552,12 +542,10 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
         .modifier = modifier,
     };
 
-    if (client->swapped) {
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swapll(&rep.modifier);
-    }
 
+    REPLY_FIELD_CARD16(width);
+    REPLY_FIELD_CARD16(height);
+    REPLY_FIELD_CARD64(modifier);
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
