@@ -748,8 +748,6 @@ VidModeModModeLine(ClientPtr client, xXF86VidModeModModeLineReq *stuff);
 static int
 ProcVidModeModModeLine(ClientPtr client)
 {
-    int len;
-
     /* limited to local-only connections */
     if (!VidModeAllowNonLocal && !client->local)
         return VidModeErrorBase + XF86VidModeClientNotLocal;
@@ -759,7 +757,7 @@ ProcVidModeModModeLine(ClientPtr client)
     if (ClientMajorVersion(client) < 2) {
         REQUEST(xXF86OldVidModeModModeLineReq)
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeModModeLineReq);
-        len =
+        int len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86OldVidModeModModeLineReq));
         if (len != stuff->privsize)
@@ -786,7 +784,7 @@ ProcVidModeModModeLine(ClientPtr client)
     else {
         REQUEST(xXF86VidModeModModeLineReq);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeModModeLineReq);
-        len =
+        int len =
             client->req_len -
             bytes_to_int32(sizeof(xXF86VidModeModModeLineReq));
         if (len != stuff->privsize)
