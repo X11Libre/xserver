@@ -6194,7 +6194,11 @@ ComputeDeviceLedInfoSize(DeviceIntPtr dev,
 static int
 CheckDeviceLedFBs(DeviceIntPtr dev,
                   int class,
-                  int id, xkbGetDeviceInfoReply * rep, ClientPtr client)
+                  int id,
+                  int present,
+                  ClientPtr client,
+                  int *r_length,
+                  int *r_nFBs)
 {
     int nFBs = 0;
     int length = 0;
@@ -6224,7 +6228,7 @@ CheckDeviceLedFBs(DeviceIntPtr dev,
             length += SIZEOF(xkbDeviceLedsWireDesc);
             if (!kf->xkb_sli)
                 kf->xkb_sli = XkbAllocSrvLedInfo(dev, kf, NULL, 0);
-            length += ComputeDeviceLedInfoSize(dev, rep->present, kf->xkb_sli);
+            length += ComputeDeviceLedInfoSize(dev, present, kf->xkb_sli);
             if (id != XkbAllXIIds)
                 break;
         }
@@ -6242,14 +6246,14 @@ CheckDeviceLedFBs(DeviceIntPtr dev,
             length += SIZEOF(xkbDeviceLedsWireDesc);
             if (!lf->xkb_sli)
                 lf->xkb_sli = XkbAllocSrvLedInfo(dev, NULL, lf, 0);
-            length += ComputeDeviceLedInfoSize(dev, rep->present, lf->xkb_sli);
+            length += ComputeDeviceLedInfoSize(dev, present, lf->xkb_sli);
             if (id != XkbAllXIIds)
                 break;
         }
     }
     if (nFBs > 0) {
-        rep->nDeviceLedFBs = nFBs;
-        rep->length += (length / 4);
+        *r_length = length;
+        *r_nFBs = nFBs;
         return Success;
     }
     if (classOk)
@@ -6375,7 +6379,7 @@ int
 ProcXkbGetDeviceInfo(ClientPtr client)
 {
     DeviceIntPtr dev;
-    int status, nDeviceLedFBs;
+    int status;
     unsigned length, nameLen;
     CARD16 ledClass, ledID;
     unsigned wanted;
@@ -6455,13 +6459,18 @@ ProcXkbGetDeviceInfo(ClientPtr client)
         }
     }
 
+    int led_len = 0;
+    int nDeviceLedFBs = 0;
+
     if (wanted & XkbXI_IndicatorsMask) {
-        status = CheckDeviceLedFBs(dev, ledClass, ledID, &rep, client);
+        status = CheckDeviceLedFBs(dev, ledClass, ledID, rep.present, client, &led_len, &nDeviceLedFBs);
         if (status != Success)
             return status;
+        rep.nDeviceLedFBs = nDeviceLedFBs;
+        rep.length += bytes_to_int32(led_len);
     }
+
     length = rep.length * 4;
-    nDeviceLedFBs = rep.nDeviceLedFBs;
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
