@@ -6223,7 +6223,7 @@ CheckDeviceLedFBs(DeviceIntPtr dev,
 }
 
 static int
-SendDeviceLedInfo(XkbSrvLedInfoPtr sli, ClientPtr client)
+FillDeviceLedInfo(XkbSrvLedInfoPtr sli, char *buffer, ClientPtr client)
 {
     int length = 0;
     xkbDeviceLedsWireDesc wire = {
@@ -6243,22 +6243,24 @@ SendDeviceLedInfo(XkbSrvLedInfoPtr sli, ClientPtr client)
         swapl(&wire.physIndicators);
         swapl(&wire.state);
     }
-    WriteToClient(client, SIZEOF(xkbDeviceLedsWireDesc), &wire);
-    length += SIZEOF(xkbDeviceLedsWireDesc);
+
+    memcpy(buffer, &wire, sizeof(wire));
+    buffer += sizeof(wire);
+    length += sizeof(wire);
+
     if (sli->namesPresent | sli->mapsPresent) {
         register unsigned i, bit;
 
         if (sli->namesPresent) {
-            CARD32 awire;
-
             for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
                 if (sli->namesPresent & bit) {
-                    awire = (CARD32) sli->names[i];
+                    CARD32 *val = (CARD32*)buffer;
+                    *val = sli->names[i];
                     if (client->swapped) {
-                        swapl(&awire);
+                        swapl(val);
                     }
-                    WriteToClient(client, 4, &awire);
-                    length += 4;
+                    length += sizeof(CARD32);
+                    buffer += sizeof(CARD32);
                 }
             }
         }
@@ -6275,14 +6277,13 @@ SendDeviceLedInfo(XkbSrvLedInfoPtr sli, ClientPtr client)
                         .virtualMods = sli->maps[i].mods.vmods,
                         .ctrls = sli->maps[i].ctrls,
                     };
-
                     if (client->swapped) {
                         swaps(&iwire.virtualMods);
                         swapl(&iwire.ctrls);
                     }
-                    WriteToClient(client, SIZEOF(xkbIndicatorMapWireDesc),
-                                  &iwire);
-                    length += sizeof(xkbIndicatorMapWireDesc);
+                    memcpy(buffer, &iwire, sizeof(iwire));
+                    buffer += sizeof(iwire);
+                    length += sizeof(iwire);
                 }
             }
         }
@@ -6291,8 +6292,8 @@ SendDeviceLedInfo(XkbSrvLedInfoPtr sli, ClientPtr client)
 }
 
 static int
-SendDeviceLedFBs(DeviceIntPtr dev,
-                 int class, int id, unsigned wantLength, ClientPtr client)
+FillDeviceLedFBs(DeviceIntPtr dev, int class, int id, unsigned wantLength,
+                 char *buffer, ClientPtr client)
 {
     int length = 0;
 
@@ -6309,7 +6310,9 @@ SendDeviceLedFBs(DeviceIntPtr dev,
         for (kf = dev->kbdfeed; (kf); kf = kf->next) {
             if ((id == XkbAllXIIds) || (id == XkbDfltXIId) ||
                 (id == kf->ctrl.id)) {
-                length += SendDeviceLedInfo(kf->xkb_sli, client);
+                int written = FillDeviceLedInfo(kf->xkb_sli, buffer, client);
+                buffer += written;
+                length += written;
                 if (id != XkbAllXIIds)
                     break;
             }
@@ -6322,7 +6325,9 @@ SendDeviceLedFBs(DeviceIntPtr dev,
         for (lf = dev->leds; (lf); lf = lf->next) {
             if ((id == XkbAllXIIds) || (id == XkbDfltXIId) ||
                 (id == lf->ctrl.id)) {
-                length += SendDeviceLedInfo(lf->xkb_sli, client);
+                int written = FillDeviceLedInfo(lf->xkb_sli, buffer, client);
+                buffer += written;
+                length += written;
                 if (id != XkbAllXIIds)
                     break;
             }
@@ -6443,7 +6448,7 @@ ProcXkbGetDeviceInfo(ClientPtr client)
     }
     WriteToClient(client, SIZEOF(xkbGetDeviceInfoReply), &rep);
 
-    int sz = nameLen + rep.nBtnsRtrn * sizeof(xkbActionWireDesc);
+    int sz = nameLen + rep.nBtnsRtrn * sizeof(xkbActionWireDesc) + led_len;
     char *buf = calloc(1, sz);
     if (!buf)
         return BadAlloc;
@@ -6459,11 +6464,10 @@ ProcXkbGetDeviceInfo(ClientPtr client)
         walk += sizeof(xkbActionWireDesc)*rep.nBtnsRtrn;
     }
 
-    WriteToClient(client, sz, buf);
     length -= sz;
 
     if (nDeviceLedFBs > 0) {
-        status = SendDeviceLedFBs(dev, ledClass, ledID, length, client);
+        status = FillDeviceLedFBs(dev, ledClass, ledID, length, walk, client);
         if (status != Success)
             return status;
     }
@@ -6473,6 +6477,8 @@ ProcXkbGetDeviceInfo(ClientPtr client)
                length);
         return BadLength;
     }
+
+    WriteToClient(client, sizeof(buf), &buf);
     return Success;
 }
 
