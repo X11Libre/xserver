@@ -937,7 +937,7 @@ SProcDbeSwapBuffers(ClientPtr client)
          * followed by a 1 byte swap action and then 3 pad bytes.  We only need
          * to swap the window information.
          */
-        for (i = 0; i < stuff->n; i++) {
+        for (i = 0; i < stuff->n; i++, pSwapInfo++) {
             swapl(&pSwapInfo->window);
         }
     }
