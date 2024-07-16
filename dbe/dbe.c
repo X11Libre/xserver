@@ -1,4 +1,5 @@
-/******************************************************************************
+/*******
+***********************************************************************
  *
  * Copyright (c) 1994, 1995  Hewlett-Packard Company
  *
@@ -40,6 +41,7 @@
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
@@ -112,19 +114,17 @@ DbeStubScreen(DbeScreenPrivPtr pDbeScreenPriv, int *nStubbedScreens)
 static int
 ProcDbeGetVersion(ClientPtr client)
 {
-    /* REQUEST(xDbeGetVersionReq); */
+    REQUEST_HEAD_STRUCT(xDbeGetVersionReq);
+
     xDbeGetVersionReply rep = {
         .majorVersion = DBE_MAJOR_VERSION,
         .minorVersion = DBE_MINOR_VERSION
     };
 
-    REQUEST_SIZE_MATCH(xDbeGetVersionReq);
-
     X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
+}
 
-}                               /* ProcDbeGetVersion() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeAllocateBackBufferName
@@ -153,6 +153,8 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
 {
     REQUEST(xDbeAllocateBackBufferNameReq);
     REQUEST_SIZE_MATCH(xDbeAllocateBackBufferNameReq);
+    REQUEST_FIELD_CARD32(window);
+    REQUEST_FIELD_CARD32(buffer);
 
     if (client->swapped) {
         swapl(&stuff->window);
@@ -362,8 +364,8 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
 static int
 ProcDbeDeallocateBackBufferName(ClientPtr client)
 {
-    REQUEST(xDbeDeallocateBackBufferNameReq);
-    REQUEST_SIZE_MATCH(xDbeDeallocateBackBufferNameReq);
+    REQUEST_HEAD_STRUCT(xDbeDeallocateBackBufferNameReq);
+    REQUEST_FIELD_CARD32(buffer);
 
     if (client->swapped)
         swapl(&stuff->buffer);
@@ -434,17 +436,20 @@ ProcDbeDeallocateBackBufferName(ClientPtr client)
 static int
 ProcDbeSwapBuffers(ClientPtr client)
 {
-    REQUEST(xDbeSwapBuffersReq);
     REQUEST_AT_LEAST_SIZE(xDbeSwapBuffersReq);
+    REQUEST_FIELD_CARD32(n);
+
+    if (stuff->n == 0) {
+        REQUEST_SIZE_MATCH(xDbeSwapBuffersReq);
+        return Success;
+    }
+
+    if (stuff->n > UINT32_MAX / sizeof(DbeSwapInfoRec))
+        return BadLength;
+    REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
 
     if (client->swapped) {
         xDbeSwapInfo *pSwapInfo;
-
-        swapl(&stuff->n);
-        if (stuff->n > UINT32_MAX / sizeof(DbeSwapInfoRec))
-            return BadLength;
-        REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
-
         if (stuff->n != 0) {
             pSwapInfo = (xDbeSwapInfo *) stuff + 1;
 
@@ -460,15 +465,6 @@ ProcDbeSwapBuffers(ClientPtr client)
     int error = Success;
 
     unsigned int nStuff = stuff->n; /* use local variable for performance. */
-
-    if (nStuff == 0) {
-        REQUEST_SIZE_MATCH(xDbeSwapBuffersReq);
-        return Success;
-    }
-
-    if (nStuff > UINT32_MAX / sizeof(DbeSwapInfoRec))
-        return BadAlloc;
-    REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, nStuff * sizeof(xDbeSwapInfo));
 
     /* Get to the swap info appended to the end of the request. */
     xDbeSwapInfo* dbeSwapInfo = (xDbeSwapInfo *) &stuff[1];
@@ -568,13 +564,9 @@ ProcDbeSwapBuffers(ClientPtr client)
 static int
 ProcDbeGetVisualInfo(ClientPtr client)
 {
-    REQUEST(xDbeGetVisualInfoReq);
-    REQUEST_AT_LEAST_SIZE(xDbeGetVisualInfoReq);
-
-    if (client->swapped) {
-        swapl(&stuff->n);
-        SwapRestL(stuff);
-    }
+    REQUEST_HEAD_AT_LEAST(xDbeGetVisualInfoReq);
+    REQUEST_FIELD_CARD32(n);
+    REQUEST_REST_CARD32();
 
     DbeScreenPrivPtr pDbeScreenPriv;
     Drawable *drawables;
@@ -686,11 +678,8 @@ clearRpcBuf:
 static int
 ProcDbeGetBackBufferAttributes(ClientPtr client)
 {
-    REQUEST(xDbeGetBackBufferAttributesReq);
-    REQUEST_SIZE_MATCH(xDbeGetBackBufferAttributesReq);
-
-    if (client->swapped)
-        swapl(&stuff->buffer);
+    REQUEST_HEAD_STRUCT(xDbeGetBackBufferAttributesReq);
+    REQUEST_FIELD_CARD32(buffer);
 
     DbeWindowPrivPtr pDbeWindowPriv;
     int rc;
