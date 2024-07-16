@@ -3783,6 +3783,13 @@ XkbComputeGetNamesReplySize(XkbDescPtr xkb, xkbGetNamesReply * rep)
     return Success;
 }
 
+#define _ADD_CARD32(val) \
+    do { \
+        *((CARD32 *) desc) = (val); \
+        if (client->swapped) { swapl((int *)desc); } \
+        desc += sizeof(CARD32); \
+    } while (0)
+
 static int
 XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep)
 {
@@ -3805,83 +3812,40 @@ XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep)
         return BadAlloc;
     if (xkb->names) {
         if (which & XkbKeycodesNameMask) {
-            *((CARD32 *) desc) = xkb->names->keycodes;
-            if (client->swapped) {
-                swapl((int *) desc);
-            }
-            desc += 4;
+            _ADD_CARD32(xkb->names->keycodes);
         }
         if (which & XkbGeometryNameMask) {
-            *((CARD32 *) desc) = xkb->names->geometry;
-            if (client->swapped) {
-                swapl((int *) desc);
-            }
-            desc += 4;
+            _ADD_CARD32(xkb->names->geometry);
         }
         if (which & XkbSymbolsNameMask) {
-            *((CARD32 *) desc) = xkb->names->symbols;
-            if (client->swapped) {
-                swapl((int *) desc);
-            }
-            desc += 4;
+            _ADD_CARD32(xkb->names->symbols);
         }
         if (which & XkbPhysSymbolsNameMask) {
-            register CARD32 *atm = (CARD32 *) desc;
-
-            atm[0] = (CARD32) xkb->names->phys_symbols;
-            if (client->swapped) {
-                swapl(&atm[0]);
-            }
-            desc += 4;
+            _ADD_CARD32(xkb->names->phys_symbols);
         }
         if (which & XkbTypesNameMask) {
-            *((CARD32 *) desc) = (CARD32) xkb->names->types;
-            if (client->swapped) {
-                swapl((int *) desc);
-            }
-            desc += 4;
+            _ADD_CARD32(xkb->names->types);
         }
         if (which & XkbCompatNameMask) {
-            *((CARD32 *) desc) = (CARD32) xkb->names->compat;
-            if (client->swapped) {
-                swapl((int *) desc);
-            }
-            desc += 4;
+            _ADD_CARD32(xkb->names->compat);
         }
         if (which & XkbKeyTypeNamesMask) {
-            register CARD32 *atm = (CARD32 *) desc;
-            register XkbKeyTypePtr type = xkb->map->types;
-
-            for (i = 0; i < xkb->map->num_types; i++, atm++, type++) {
-                *atm = (CARD32) type->name;
-                if (client->swapped) {
-                    swapl(atm);
-                }
+            for (i = 0; i < xkb->map->num_types; i++) {
+                _ADD_CARD32(xkb->map->types[i].name);
             }
-            desc = (char *) atm;
         }
         if (which & XkbKTLevelNamesMask && xkb->map) {
             XkbKeyTypePtr type = xkb->map->types;
-            register CARD32 *atm;
 
             for (i = 0; i < rep.nTypes; i++, type++) {
                 *desc++ = type->num_levels;
             }
             desc += XkbPaddedSize(rep.nTypes) - rep.nTypes;
 
-            atm = (CARD32 *) desc;
             type = xkb->map->types;
             for (i = 0; i < xkb->map->num_types; i++, type++) {
-                register unsigned l;
-
-                if (type->level_names) {
-                    for (l = 0; l < type->num_levels; l++, atm++) {
-                        *atm = type->level_names[l];
-                        if (client->swapped) {
-                            swapl(atm);
-                        }
-                    }
-                    desc += type->num_levels * 4;
+                for (int l = 0; l < type->num_levels; l++) {
+                    _ADD_CARD32(type->level_names[l]);
                 }
             }
         }
@@ -3916,12 +3880,8 @@ XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep)
             register CARD32 *atm = (CARD32 *) desc;
 
             for (i = 0; i < rep.nRadioGroups; i++, atm++) {
-                *atm = (CARD32) xkb->names->radio_groups[i];
-                if (client->swapped) {
-                    swapl(atm);
-                }
+                _ADD_CARD32(xkb->names->radio_groups[i]);
             }
-            desc += rep.nRadioGroups * 4;
         }
     }
 
@@ -3934,6 +3894,7 @@ XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep)
     free((char *) start);
     return Success;
 }
+#undef _ADD_CARD32
 
 int
 ProcXkbGetNames(ClientPtr client)
