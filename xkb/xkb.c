@@ -3784,20 +3784,20 @@ XkbComputeGetNamesReplySize(XkbDescPtr xkb, xkbGetNamesReply * rep)
 }
 
 static int
-XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply * rep)
+XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep)
 {
     register unsigned i, length, which;
     char *start;
     char *desc;
 
-    length = rep->length * 4;
-    which = rep->which;
+    length = rep.length * 4;
+    which = rep.which;
     if (client->swapped) {
-        swaps(&rep->sequenceNumber);
-        swapl(&rep->length);
-        swapl(&rep->which);
-        swaps(&rep->virtualMods);
-        swapl(&rep->indicators);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.which);
+        swaps(&rep.virtualMods);
+        swapl(&rep.indicators);
     }
 
     start = desc = calloc(1, length);
@@ -3864,10 +3864,10 @@ XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply * rep)
             XkbKeyTypePtr type = xkb->map->types;
             register CARD32 *atm;
 
-            for (i = 0; i < rep->nTypes; i++, type++) {
+            for (i = 0; i < rep.nTypes; i++, type++) {
                 *desc++ = type->num_levels;
             }
-            desc += XkbPaddedSize(rep->nTypes) - rep->nTypes;
+            desc += XkbPaddedSize(rep.nTypes) - rep.nTypes;
 
             atm = (CARD32 *) desc;
             type = xkb->map->types;
@@ -3899,29 +3899,29 @@ XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply * rep)
                                   client->swapped);
         }
         if (which & XkbKeyNamesMask) {
-            for (i = 0; i < rep->nKeys; i++, desc += sizeof(XkbKeyNameRec)) {
-                *((XkbKeyNamePtr) desc) = xkb->names->keys[i + rep->firstKey];
+            for (i = 0; i < rep.nKeys; i++, desc += sizeof(XkbKeyNameRec)) {
+                *((XkbKeyNamePtr) desc) = xkb->names->keys[i + rep.firstKey];
             }
         }
         if (which & XkbKeyAliasesMask) {
             XkbKeyAliasPtr pAl;
 
             pAl = xkb->names->key_aliases;
-            for (i = 0; i < rep->nKeyAliases;
+            for (i = 0; i < rep.nKeyAliases;
                  i++, pAl++, desc += 2 * XkbKeyNameLength) {
                 *((XkbKeyAliasPtr) desc) = *pAl;
             }
         }
-        if ((which & XkbRGNamesMask) && (rep->nRadioGroups > 0)) {
+        if ((which & XkbRGNamesMask) && (rep.nRadioGroups > 0)) {
             register CARD32 *atm = (CARD32 *) desc;
 
-            for (i = 0; i < rep->nRadioGroups; i++, atm++) {
+            for (i = 0; i < rep.nRadioGroups; i++, atm++) {
                 *atm = (CARD32) xkb->names->radio_groups[i];
                 if (client->swapped) {
                     swapl(atm);
                 }
             }
-            desc += rep->nRadioGroups * 4;
+            desc += rep.nRadioGroups * 4;
         }
     }
 
@@ -3929,7 +3929,7 @@ XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply * rep)
         ErrorF("[xkb] BOGUS LENGTH in write names, expected %d, got %ld\n",
                length, (unsigned long) (desc - start));
     }
-    WriteToClient(client, SIZEOF(xkbGetNamesReply), rep);
+    WriteToClient(client, sizeof(rep), &rep);
     WriteToClient(client, length, start);
     free((char *) start);
     return Success;
@@ -3964,7 +3964,7 @@ ProcXkbGetNames(ClientPtr client)
         .nRadioGroups = xkb->names ? xkb->names->num_rg : 0
     };
     XkbComputeGetNamesReplySize(xkb, &rep);
-    return XkbSendNames(client, xkb, &rep);
+    return XkbSendNames(client, xkb, rep);
 }
 
 /***====================================================================***/
@@ -6099,7 +6099,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     if (reported & XkbGBN_IndicatorMapMask)
         XkbSendIndicatorMap(client, new->indicators, irep);
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask))
-        XkbSendNames(client, new, &nrep);
+        XkbSendNames(client, new, nrep);
     if (reported & XkbGBN_GeometryMask)
         XkbSendGeometry(client, new->geom, &grep);
     if (rep.loaded) {
