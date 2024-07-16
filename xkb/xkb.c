@@ -3173,24 +3173,24 @@ XkbComputeGetIndicatorMapReplySize(XkbIndicatorPtr indicators,
 
 static int
 XkbSendIndicatorMap(ClientPtr client,
-                    XkbIndicatorPtr indicators, xkbGetIndicatorMapReply * rep)
+                    XkbIndicatorPtr indicators, xkbGetIndicatorMapReply rep)
 {
     int length;
     CARD8 *map;
     register int i;
     register unsigned bit;
 
-    if (rep->length > 0) {
+    if (rep.length > 0) {
         CARD8 *to;
 
-        to = map = calloc(rep->length, 4);
+        to = map = calloc(rep.length, 4);
         if (map) {
             xkbIndicatorMapWireDesc *wire = (xkbIndicatorMapWireDesc *) to;
 
-            length = rep->length * 4;
+            length = rep.length * 4;
 
             for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
-                if (rep->which & bit) {
+                if (rep.which & bit) {
                     wire->flags = indicators->maps[i].flags;
                     wire->whichGroups = indicators->maps[i].which_groups;
                     wire->groups = indicators->maps[i].groups;
@@ -3219,12 +3219,12 @@ XkbSendIndicatorMap(ClientPtr client,
     else
         map = NULL;
     if (client->swapped) {
-        swaps(&rep->sequenceNumber);
-        swapl(&rep->length);
-        swapl(&rep->which);
-        swapl(&rep->realIndicators);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.which);
+        swapl(&rep.realIndicators);
     }
-    WriteToClient(client, SIZEOF(xkbGetIndicatorMapReply), rep);
+    WriteToClient(client, sizeof(xkbGetIndicatorMapReply), &rep);
     if (map) {
         WriteToClient(client, length, map);
         free((char *) map);
@@ -3257,7 +3257,7 @@ ProcXkbGetIndicatorMap(ClientPtr client)
         .which = stuff->which
     };
     XkbComputeGetIndicatorMapReplySize(leds, &rep);
-    return XkbSendIndicatorMap(client, leds, &rep);
+    return XkbSendIndicatorMap(client, leds, rep);
 }
 
 /**
@@ -6111,7 +6111,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     if (reported & XkbGBN_CompatMapMask)
         XkbSendCompatMap(client, new->compat, crep);
     if (reported & XkbGBN_IndicatorMapMask)
-        XkbSendIndicatorMap(client, new->indicators, &irep);
+        XkbSendIndicatorMap(client, new->indicators, irep);
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask))
         XkbSendNames(client, new, &nrep);
     if (reported & XkbGBN_GeometryMask)
