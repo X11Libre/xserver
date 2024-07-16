@@ -356,9 +356,14 @@ DRI2CreateDrawable2(ClientPtr client, DrawablePtr pDraw, XID id,
                     XID *dri2_id_out)
 {
     DRI2DrawablePtr pPriv;
-    DRI2ClientPtr dri2_client = dri2ClientPrivate(client);
+    DRI2ClientPtr dri2_client;
     XID dri2_id;
     int rc;
+
+    if (!dixPrivateKeyRegistered(dri2ScreenPrivateKey))
+        return BadValue;
+
+    dri2_client = dri2ClientPrivate(client);
 
     pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL)
@@ -1362,8 +1367,13 @@ Bool
 DRI2Authenticate(ClientPtr client, ScreenPtr pScreen, uint32_t magic)
 {
     DRI2ScreenPtr ds;
-    DRI2ClientPtr dri2_client = dri2ClientPrivate(client);
+    DRI2ClientPtr dri2_client;
     ScreenPtr primescreen;
+
+    if (!dixPrivateKeyRegistered(dri2ScreenPrivateKey))
+        return FALSE;
+
+    dri2_client = dri2ClientPrivate(client);
 
     ds = DRI2GetScreenPrime(pScreen, dri2_client->prime_id);
     if (ds == NULL)
