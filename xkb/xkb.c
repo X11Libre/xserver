@@ -6484,23 +6484,25 @@ ProcXkbGetDeviceInfo(ClientPtr client)
     }
     WriteToClient(client, SIZEOF(xkbGetDeviceInfoReply), &rep);
 
-    char *str = calloc(1, nameLen);
-    if (!str)
+    int sz = nameLen + rep.nBtnsRtrn * sizeof(xkbActionWireDesc);
+    char *buf = calloc(1, sz);
+    if (!buf)
         return BadAlloc;
-    XkbWriteCountedString(str, dev->name, client->swapped);
-    WriteToClient(client, nameLen, str);
-    free(str);
-    length -= nameLen;
+    char *walk = buf;
+
+    XkbWriteCountedString(walk, dev->name, client->swapped);
+    walk += nameLen;
 
     if (rep.nBtnsRtrn > 0) {
-        int sz;
-        xkbActionWireDesc *awire;
-
-        sz = rep.nBtnsRtrn * SIZEOF(xkbActionWireDesc);
-        awire = (xkbActionWireDesc *) &dev->button->xkb_acts[rep.firstBtnRtrn];
-        WriteToClient(client, sz, awire);
-        length -= sz;
+        memcpy(walk,
+               &dev->button->xkb_acts[rep.firstBtnRtrn],
+               sizeof(xkbActionWireDesc)*rep.nBtnsRtrn);
+        walk += sizeof(xkbActionWireDesc)*rep.nBtnsRtrn;
     }
+
+    WriteToClient(client, sz, buf);
+    length -= sz;
+
     if (nDeviceLedFBs > 0) {
         status = SendDeviceLedFBs(dev, ledClass, ledID, length, client);
         if (status != Success)
