@@ -446,7 +446,6 @@ ProcDbeSwapBuffers(ClientPtr client)
     REQUEST(xDbeSwapBuffersReq);
     WindowPtr pWin;
     DbeScreenPrivPtr pDbeScreenPriv;
-    DbeSwapInfoPtr swapInfo;
     xDbeSwapInfo *dbeSwapInfo;
     int error;
     unsigned int i, j;
@@ -469,10 +468,7 @@ ProcDbeSwapBuffers(ClientPtr client)
     dbeSwapInfo = (xDbeSwapInfo *) &stuff[1];
 
     /* Allocate array to record swap information. */
-    swapInfo = xallocarray(nStuff, sizeof(DbeSwapInfoRec));
-    if (swapInfo == NULL) {
-        return BadAlloc;
-    }
+    DbeSwapInfoRec swapInfo[nStuff];
 
     for (i = 0; i < nStuff; i++) {
         /* Check all windows to swap. */
@@ -480,38 +476,29 @@ ProcDbeSwapBuffers(ClientPtr client)
         /* Each window must be a valid window - BadWindow. */
         error = dixLookupWindow(&pWin, dbeSwapInfo[i].window, client,
                                 DixWriteAccess);
-        if (error != Success) {
-            free(swapInfo);
+        if (error != Success)
             return error;
-        }
 
         /* Each window must be double-buffered - BadMatch. */
-        if (DBE_WINDOW_PRIV(pWin) == NULL) {
-            free(swapInfo);
+        if (DBE_WINDOW_PRIV(pWin) == NULL)
             return BadMatch;
-        }
 
         /* Each window must only be specified once - BadMatch. */
         for (j = i + 1; j < nStuff; j++) {
-            if (dbeSwapInfo[i].window == dbeSwapInfo[j].window) {
-                free(swapInfo);
+            if (dbeSwapInfo[i].window == dbeSwapInfo[j].window)
                 return BadMatch;
-            }
         }
 
         /* Each swap action must be valid - BadValue. */
         if ((dbeSwapInfo[i].swapAction != XdbeUndefined) &&
             (dbeSwapInfo[i].swapAction != XdbeBackground) &&
             (dbeSwapInfo[i].swapAction != XdbeUntouched) &&
-            (dbeSwapInfo[i].swapAction != XdbeCopied)) {
-            free(swapInfo);
+            (dbeSwapInfo[i].swapAction != XdbeCopied))
             return BadValue;
-        }
 
         /* Everything checks out OK.  Fill in the swap info array. */
         swapInfo[i].pWindow = pWin;
         swapInfo[i].swapAction = dbeSwapInfo[i].swapAction;
-
     }                           /* for (i = 0; i < nStuff; i++) */
 
     /* Call the DDX routine to perform the swap(s).  The DDX routine should
@@ -531,17 +518,13 @@ ProcDbeSwapBuffers(ClientPtr client)
     while (nStuff_i > 0) {
         pDbeScreenPriv = DBE_SCREEN_PRIV_FROM_WINDOW(swapInfo[0].pWindow);
         error = (*pDbeScreenPriv->SwapBuffers) (client, &nStuff_i, swapInfo);
-        if (error != Success) {
-            free(swapInfo);
+        if (error != Success)
             return error;
-        }
     }
 
-    free(swapInfo);
     return Success;
+}
 
-}                               /* ProcDbeSwapBuffers() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeGetVisualInfo
@@ -565,13 +548,10 @@ ProcDbeGetVisualInfo(ClientPtr client)
     REQUEST(xDbeGetVisualInfoReq);
     DbeScreenPrivPtr pDbeScreenPriv;
     xDbeGetVisualInfoReply rep;
-    Drawable *drawables;
-    DrawablePtr *pDrawables = NULL;
     register int i, j, rc;
     register int count;         /* number of visual infos in reply */
     register int length;        /* length of reply */
     ScreenPtr pScreen;
-    XdbeScreenVisualInfo *pScrVisInfo;
 
     REQUEST_AT_LEAST_SIZE(xDbeGetVisualInfoReq);
     if (stuff->n > UINT32_MAX / sizeof(CARD32))
@@ -580,30 +560,25 @@ ProcDbeGetVisualInfo(ClientPtr client)
 
     if (stuff->n > UINT32_MAX / sizeof(DrawablePtr))
         return BadAlloc;
+
+    DrawablePtr pDrawables[stuff->n * sizeof(DrawablePtr)];
+
     /* Make sure any specified drawables are valid. */
     if (stuff->n != 0) {
-        if (!(pDrawables = xallocarray(stuff->n, sizeof(DrawablePtr)))) {
-            return BadAlloc;
-        }
-
-        drawables = (Drawable *) &stuff[1];
+        Drawable *drawables = (Drawable *) &stuff[1];
 
         for (i = 0; i < stuff->n; i++) {
             rc = dixLookupDrawable(pDrawables + i, drawables[i], client, 0,
                                    DixGetAttrAccess);
             if (rc != Success) {
-                free(pDrawables);
                 return rc;
             }
         }
     }
 
     count = (stuff->n == 0) ? screenInfo.numScreens : stuff->n;
-    if (!(pScrVisInfo = calloc(count, sizeof(XdbeScreenVisualInfo)))) {
-        free(pDrawables);
-
-        return BadAlloc;
-    }
+    XdbeScreenVisualInfo pScrVisInfo[count];
+    memset(pScrVisInfo, 0, sizeof(pScrVisInfo));
 
     length = 0;
 
@@ -694,9 +669,6 @@ ProcDbeGetVisualInfo(ClientPtr client)
     for (i = 0; i < count; i++) {
         free(pScrVisInfo[i].visinfo);
     }
-    free(pScrVisInfo);
-
-    free(pDrawables);
 
     return rc;
 
