@@ -40,6 +40,7 @@
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
 
@@ -111,7 +112,8 @@ DbeStubScreen(DbeScreenPrivPtr pDbeScreenPriv, int *nStubbedScreens)
 static int
 ProcDbeGetVersion(ClientPtr client)
 {
-    /* REQUEST(xDbeGetVersionReq); */
+    REQUEST_HEAD_STRUCT(xDbeGetVersionReq);
+
     xDbeGetVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -119,8 +121,6 @@ ProcDbeGetVersion(ClientPtr client)
         .majorVersion = DBE_MAJOR_VERSION,
         .minorVersion = DBE_MINOR_VERSION
     };
-
-    REQUEST_SIZE_MATCH(xDbeGetVersionReq);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -158,7 +158,10 @@ ProcDbeGetVersion(ClientPtr client)
 static int
 ProcDbeAllocateBackBufferName(ClientPtr client)
 {
-    REQUEST(xDbeAllocateBackBufferNameReq);
+    REQUEST_HEAD_STRUCT(xDbeAllocateBackBufferNameReq);
+    REQUEST_FIELD_CARD32(window);
+    REQUEST_FIELD_CARD32(buffer);
+
     WindowPtr pWin;
     DbeScreenPrivPtr pDbeScreenPriv;
     DbeWindowPrivPtr pDbeWindowPriv;
@@ -169,8 +172,6 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
     VisualID visual;
     int status;
     int add_index;
-
-    REQUEST_SIZE_MATCH(xDbeAllocateBackBufferNameReq);
 
     /* The window must be valid. */
     status = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
@@ -370,12 +371,12 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
 static int
 ProcDbeDeallocateBackBufferName(ClientPtr client)
 {
-    REQUEST(xDbeDeallocateBackBufferNameReq);
+    REQUEST_HEAD_STRUCT(xDbeDeallocateBackBufferNameReq);
+    REQUEST_FIELD_CARD32(buffer);
+
     DbeWindowPrivPtr pDbeWindowPriv;
     int rc, i;
     void *val;
-
-    REQUEST_SIZE_MATCH(xDbeDeallocateBackBufferNameReq);
 
     /* Buffer name must be valid */
     rc = dixLookupResourceByType((void **) &pDbeWindowPriv, stuff->buffer,
@@ -439,7 +440,24 @@ ProcDbeDeallocateBackBufferName(ClientPtr client)
 static int
 ProcDbeSwapBuffers(ClientPtr client)
 {
-    REQUEST(xDbeSwapBuffersReq);
+    REQUEST_HEAD_AT_LEAST(xDbeSwapBuffersReq);
+    REQUEST_FIELD_CARD32(n);
+
+    if (stuff->n > UINT32_MAX / sizeof(DbeSwapInfoRec))
+        return BadLength;
+    REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
+
+    if (stuff->n != 0) {
+        xDbeSwapInfo *pSwapInfo = (xDbeSwapInfo *) stuff + 1;
+        /* The swap info following the fix part of this request is a window(32)
+         * followed by a 1 byte swap action and then 3 pad bytes.  We only need
+         * to swap the window information.
+         */
+        for (int i = 0; i < stuff->n; i++, pSwapInfo++) {
+            CLIENT_STRUCT_CARD32_1(pSwapInfo, window);
+        }
+    }
+
     WindowPtr pWin;
     DbeScreenPrivPtr pDbeScreenPriv;
     DbeSwapInfoPtr swapInfo;
@@ -449,7 +467,6 @@ ProcDbeSwapBuffers(ClientPtr client)
     unsigned int nStuff;
     int nStuff_i;       /* DDX API requires int for nStuff */
 
-    REQUEST_AT_LEAST_SIZE(xDbeSwapBuffersReq);
     nStuff = stuff->n;          /* use local variable for performance. */
 
     if (nStuff == 0) {
@@ -558,7 +575,10 @@ ProcDbeSwapBuffers(ClientPtr client)
 static int
 ProcDbeGetVisualInfo(ClientPtr client)
 {
-    REQUEST(xDbeGetVisualInfoReq);
+    REQUEST_HEAD_AT_LEAST(xDbeGetVisualInfoReq);
+    REQUEST_FIELD_CARD32(n);
+    REQUEST_REST_CARD32();
+
     DbeScreenPrivPtr pDbeScreenPriv;
     xDbeGetVisualInfoReply rep;
     Drawable *drawables;
@@ -569,7 +589,6 @@ ProcDbeGetVisualInfo(ClientPtr client)
     ScreenPtr pScreen;
     XdbeScreenVisualInfo *pScrVisInfo;
 
-    REQUEST_AT_LEAST_SIZE(xDbeGetVisualInfoReq);
     if (stuff->n > UINT32_MAX / sizeof(CARD32))
         return BadLength;
     REQUEST_FIXED_SIZE(xDbeGetVisualInfoReq, stuff->n * sizeof(CARD32));
@@ -715,7 +734,9 @@ ProcDbeGetVisualInfo(ClientPtr client)
 static int
 ProcDbeGetBackBufferAttributes(ClientPtr client)
 {
-    REQUEST(xDbeGetBackBufferAttributesReq);
+    REQUEST_HEAD_STRUCT(xDbeGetBackBufferAttributesReq);
+    REQUEST_FIELD_CARD32(buffer);
+
     xDbeGetBackBufferAttributesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -723,8 +744,6 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
     };
     DbeWindowPrivPtr pDbeWindowPriv;
     int rc;
-
-    REQUEST_SIZE_MATCH(xDbeGetBackBufferAttributesReq);
 
     rc = dixLookupResourceByType((void **) &pDbeWindowPriv, stuff->buffer,
                                  dbeWindowPrivResType, client,
@@ -793,227 +812,6 @@ ProcDbeDispatch(ClientPtr client)
 
 }                               /* ProcDbeDispatch() */
 
-/******************************************************************************
- *
- * DBE DIX Procedure: SProcDbeAllocateBackBufferName
- *
- * Description:
- *
- *     This function is for processing a DbeAllocateBackBufferName request on
- *     a swapped server.  This request allocates a drawable ID used to refer
- *     to the back buffer of a window.
- *
- * Return Values:
- *
- *     BadAlloc    - server can not allocate resources
- *     BadIDChoice - id is out of range for client; id is already in use
- *     BadMatch    - window is not an InputOutput window;
- *                   visual of window is not on list returned by
- *                   DBEGetVisualInfo;
- *     BadValue    - invalid swap action is specified
- *     BadWindow   - window is not a valid window
- *     Success
- *
- *****************************************************************************/
-
-static int _X_COLD
-SProcDbeAllocateBackBufferName(ClientPtr client)
-{
-    REQUEST(xDbeAllocateBackBufferNameReq);
-    REQUEST_SIZE_MATCH(xDbeAllocateBackBufferNameReq);
-
-    swapl(&stuff->window);
-    swapl(&stuff->buffer);
-    /* stuff->swapAction is a byte.  We do not need to swap this field. */
-
-    return (ProcDbeAllocateBackBufferName(client));
-
-}                               /* SProcDbeAllocateBackBufferName() */
-
-/******************************************************************************
- *
- * DBE DIX Procedure: SProcDbeDeallocateBackBufferName
- *
- * Description:
- *
- *     This function is for processing a DbeDeallocateBackBufferName request
- *     on a swapped server.  This request frees a drawable ID that was
- *     obtained by a DbeAllocateBackBufferName request.
- *
- * Return Values:
- *
- *     BadBuffer - buffer to deallocate is not associated with a window
- *     Success
- *
- *****************************************************************************/
-
-static int _X_COLD
-SProcDbeDeallocateBackBufferName(ClientPtr client)
-{
-    REQUEST(xDbeDeallocateBackBufferNameReq);
-    REQUEST_SIZE_MATCH(xDbeDeallocateBackBufferNameReq);
-
-    swapl(&stuff->buffer);
-
-    return (ProcDbeDeallocateBackBufferName(client));
-
-}                               /* SProcDbeDeallocateBackBufferName() */
-
-/******************************************************************************
- *
- * DBE DIX Procedure: SProcDbeSwapBuffers
- *
- * Description:
- *
- *     This function is for processing a DbeSwapBuffers request on a swapped
- *     server.  This request swaps the buffers for all windows listed,
- *     applying the appropriate swap action for each window.
- *
- * Return Values:
- *
- *     BadMatch  - a window in request is not double-buffered; a window in
- *                 request is listed more than once; all windows in request do
- *                 not have the same root
- *     BadValue  - invalid swap action is specified
- *     BadWindow - a window in request is not valid
- *     Success
- *
- *****************************************************************************/
-
-static int _X_COLD
-SProcDbeSwapBuffers(ClientPtr client)
-{
-    REQUEST(xDbeSwapBuffersReq);
-    unsigned int i;
-    xDbeSwapInfo *pSwapInfo;
-
-    REQUEST_AT_LEAST_SIZE(xDbeSwapBuffersReq);
-
-    swapl(&stuff->n);
-    if (stuff->n > UINT32_MAX / sizeof(DbeSwapInfoRec))
-        return BadLength;
-    REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
-
-    if (stuff->n != 0) {
-        pSwapInfo = (xDbeSwapInfo *) stuff + 1;
-
-        /* The swap info following the fix part of this request is a window(32)
-         * followed by a 1 byte swap action and then 3 pad bytes.  We only need
-         * to swap the window information.
-         */
-        for (i = 0; i < stuff->n; i++, pSwapInfo++) {
-            swapl(&pSwapInfo->window);
-        }
-    }
-
-    return (ProcDbeSwapBuffers(client));
-
-}                               /* SProcDbeSwapBuffers() */
-
-/******************************************************************************
- *
- * DBE DIX Procedure: SProcDbeGetVisualInfo
- *
- * Description:
- *
- *     This function is for processing a ProcDbeGetVisualInfo request on a
- *     swapped server.  This request returns information about which visuals
- *     support double buffering.
- *
- * Return Values:
- *
- *     BadDrawable - value in screen specifiers is not a valid drawable
- *     Success
- *
- *****************************************************************************/
-
-static int _X_COLD
-SProcDbeGetVisualInfo(ClientPtr client)
-{
-    REQUEST(xDbeGetVisualInfoReq);
-    REQUEST_AT_LEAST_SIZE(xDbeGetVisualInfoReq);
-
-    swapl(&stuff->n);
-    SwapRestL(stuff);
-
-    return (ProcDbeGetVisualInfo(client));
-
-}                               /* SProcDbeGetVisualInfo() */
-
-/******************************************************************************
- *
- * DBE DIX Procedure: SProcDbeGetbackBufferAttributes
- *
- * Description:
- *
- *     This function is for processing a ProcDbeGetbackBufferAttributes
- *     request on a swapped server.  This request returns information about a
- *     back buffer.
- *
- * Return Values:
- *
- *     Success
- *
- *****************************************************************************/
-
-static int _X_COLD
-SProcDbeGetBackBufferAttributes(ClientPtr client)
-{
-    REQUEST(xDbeGetBackBufferAttributesReq);
-    REQUEST_SIZE_MATCH(xDbeGetBackBufferAttributesReq);
-
-    swapl(&stuff->buffer);
-
-    return (ProcDbeGetBackBufferAttributes(client));
-
-}                               /* SProcDbeGetBackBufferAttributes() */
-
-/******************************************************************************
- *
- * DBE DIX Procedure: SProcDbeDispatch
- *
- * Description:
- *
- *     This function dispatches DBE requests on a swapped server.
- *
- *****************************************************************************/
-
-static int _X_COLD
-SProcDbeDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_DbeGetVersion:
-        return ProcDbeGetVersion(client);
-
-    case X_DbeAllocateBackBufferName:
-        return (SProcDbeAllocateBackBufferName(client));
-
-    case X_DbeDeallocateBackBufferName:
-        return (SProcDbeDeallocateBackBufferName(client));
-
-    case X_DbeSwapBuffers:
-        return (SProcDbeSwapBuffers(client));
-
-    case X_DbeBeginIdiom:
-        return Success;
-
-    case X_DbeEndIdiom:
-        return Success;
-
-    case X_DbeGetVisualInfo:
-        return (SProcDbeGetVisualInfo(client));
-
-    case X_DbeGetBackBufferAttributes:
-        return (SProcDbeGetBackBufferAttributes(client));
-
-    default:
-        return BadRequest;
-    }
-
-}                               /* SProcDbeDispatch() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: DbeSetupBackgroundPainter
@@ -1366,7 +1164,7 @@ DbeExtensionInit(void)
 
     /* Now add the extension. */
     extEntry = AddExtension(DBE_PROTOCOL_NAME, DbeNumberEvents,
-                            DbeNumberErrors, ProcDbeDispatch, SProcDbeDispatch,
+                            DbeNumberErrors, ProcDbeDispatch, ProcDbeDispatch,
                             DbeResetProc, StandardMinorOpcode);
 
     dbeErrorBase = extEntry->errorBase;
