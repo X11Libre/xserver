@@ -4915,29 +4915,29 @@ XkbComputeGetGeometryReplySize(XkbGeometryPtr geom,
 }
 static int
 XkbSendGeometry(ClientPtr client,
-                XkbGeometryPtr geom, xkbGetGeometryReply *rep)
+                XkbGeometryPtr geom, xkbGetGeometryReply rep)
 {
-    char *desc, *start;
-    int len;
+    char *desc, *start = NULL;
+    int len = 0;
 
     if (geom != NULL) {
-        start = desc = calloc(rep->length, 4);
+        start = desc = calloc(rep.length, sizeof(CARD32));
         if (!start)
             return BadAlloc;
-        len = rep->length * 4;
+        len = rep.length * sizeof(CARD32);
         desc = XkbWriteCountedString(desc, geom->label_font, client->swapped);
-        if (rep->nProperties > 0)
+        if (rep.nProperties > 0)
             desc = XkbWriteGeomProperties(desc, geom, client->swapped);
-        if (rep->nColors > 0)
+        if (rep.nColors > 0)
             desc = XkbWriteGeomColors(desc, geom, client->swapped);
-        if (rep->nShapes > 0)
+        if (rep.nShapes > 0)
             desc = XkbWriteGeomShapes(desc, geom, client->swapped);
-        if (rep->nSections > 0)
+        if (rep.nSections > 0)
             desc = XkbWriteGeomSections(desc, geom, client->swapped);
-        if (rep->nDoodads > 0)
+        if (rep.nDoodads > 0)
             desc = XkbWriteGeomDoodads(desc, geom->num_doodads, geom->doodads,
                                        client->swapped);
-        if (rep->nKeyAliases > 0)
+        if (rep.nKeyAliases > 0)
             desc = XkbWriteGeomKeyAliases(desc, geom, client->swapped);
         if ((desc - start) != (len)) {
             ErrorF
@@ -4945,24 +4945,20 @@ XkbSendGeometry(ClientPtr client,
                  len, (unsigned long) (desc - start));
         }
     }
-    else {
-        len = 0;
-        start = NULL;
-    }
     if (client->swapped) {
-        swaps(&rep->sequenceNumber);
-        swapl(&rep->length);
-        swapl(&rep->name);
-        swaps(&rep->widthMM);
-        swaps(&rep->heightMM);
-        swaps(&rep->nProperties);
-        swaps(&rep->nColors);
-        swaps(&rep->nShapes);
-        swaps(&rep->nSections);
-        swaps(&rep->nDoodads);
-        swaps(&rep->nKeyAliases);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.name);
+        swaps(&rep.widthMM);
+        swaps(&rep.heightMM);
+        swaps(&rep.nProperties);
+        swaps(&rep.nColors);
+        swaps(&rep.nShapes);
+        swaps(&rep.nSections);
+        swaps(&rep.nDoodads);
+        swaps(&rep.nKeyAliases);
     }
-    WriteToClient(client, SIZEOF(xkbGetGeometryReply), rep);
+    WriteToClient(client, sizeof(xkbGetGeometryReply), &rep);
     if (len > 0)
         WriteToClient(client, len, start);
     if (start != NULL)
@@ -4998,7 +4994,7 @@ ProcXkbGetGeometry(ClientPtr client)
     if (status != Success)
         goto free_out;
 
-    status = XkbSendGeometry(client, geom, &rep);
+    status = XkbSendGeometry(client, geom, rep);
 
 free_out:
     if (shouldFree)
@@ -6062,7 +6058,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask))
         XkbSendNames(client, new, nrep);
     if (reported & XkbGBN_GeometryMask)
-        XkbSendGeometry(client, new->geom, &grep);
+        XkbSendGeometry(client, new->geom, grep);
     if (rep.loaded) {
         XkbDescPtr old_xkb;
 
