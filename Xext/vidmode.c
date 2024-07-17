@@ -1542,27 +1542,23 @@ static int
 ProcVidModeGetGammaRamp(ClientPtr client)
 {
     CARD16 *ramp = NULL;
-    int length;
     size_t ramplen = 0;
-    ScreenPtr pScreen;
-    VidModePtr pVidMode;
 
     REQUEST(xXF86VidModeGetGammaRampReq);
-
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaRampReq);
 
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
-    pScreen = screenInfo.screens[stuff->screen];
+    ScreenPtr pScreen = screenInfo.screens[stuff->screen];
 
-    pVidMode = VidModeGetPtr(pScreen);
+    VidModePtr pVidMode = VidModeGetPtr(pScreen);
     if (pVidMode == NULL)
         return BadImplementation;
 
     if (stuff->size != pVidMode->GetGammaRampSize(pScreen))
         return BadValue;
 
-    length = (stuff->size + 1) & ~1;
+    const int length = (stuff->size + 1) & ~1;
 
     if (stuff->size) {
         if (!(ramp = calloc(length, 3 * sizeof(CARD16))))
