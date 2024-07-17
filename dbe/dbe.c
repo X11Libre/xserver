@@ -601,6 +601,8 @@ ProcDbeGetVisualInfo(ClientPtr client)
         return BadAlloc;
     }
 
+    char *buf = 0;
+
     length = 0;
 
     for (i = 0; i < count; i++) {
@@ -643,45 +645,42 @@ ProcDbeGetVisualInfo(ClientPtr client)
     /* Send off reply. */
     WriteToClient(client, sizeof(xDbeGetVisualInfoReply), &rep);
 
-    for (i = 0; i < count; i++) {
-        CARD32 data32;
+    if (!(buf = calloc(1, length)))
+        return BadAlloc;
 
+    char *walk = buf;
+
+    for (i = 0; i < count; i++) {
         /* For each screen in the reply, send off the visual info */
 
         /* Send off number of visuals. */
-        data32 = (CARD32) pScrVisInfo[i].count;
-
-        if (client->swapped) {
-            swapl(&data32);
-        }
-
-        WriteToClient(client, sizeof(CARD32), &data32);
+        *(CARD32*)walk = pScrVisInfo[i].count;
+        if (client->swapped) { swapl((CARD32*)walk); }
+        walk += sizeof(CARD32);
 
         /* Now send off visual info items. */
         for (j = 0; j < pScrVisInfo[i].count; j++) {
-            xDbeVisInfo visInfo;
+            xDbeVisInfo *visInfo = (xDbeVisInfo*)walk;
 
             /* Copy the data in the client data structure to a protocol
              * data structure.  We will send data to the client from the
              * protocol data structure.
              */
 
-            visInfo.visualID = (CARD32) pScrVisInfo[i].visinfo[j].visual;
-            visInfo.depth = (CARD8) pScrVisInfo[i].visinfo[j].depth;
-            visInfo.perfLevel = (CARD8) pScrVisInfo[i].visinfo[j].perflevel;
+            visInfo->visualID = pScrVisInfo[i].visinfo[j].visual;
+            visInfo->depth = pScrVisInfo[i].visinfo[j].depth;
+            visInfo->perfLevel = pScrVisInfo[i].visinfo[j].perflevel;
 
             if (client->swapped) {
-                swapl(&visInfo.visualID);
+                swapl(&visInfo->visualID);
 
                 /* We do not need to swap depth and perfLevel since they are
                  * already 1 byte quantities.
                  */
             }
-
-            /* Write visualID(32), depth(8), perfLevel(8), and pad(16). */
-            WriteToClient(client, 2 * sizeof(CARD32), &visInfo.visualID);
         }
     }
+    WriteToClient(client, length, buf);
 
     rc = Success;
 
@@ -691,8 +690,8 @@ ProcDbeGetVisualInfo(ClientPtr client)
         free(pScrVisInfo[i].visinfo);
     }
     free(pScrVisInfo);
-
     free(pDrawables);
+    free(buf);
 
     return rc;
 
