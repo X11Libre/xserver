@@ -121,8 +121,7 @@ ProcDbeGetVersion(ClientPtr client)
         .minorVersion = DBE_MINOR_VERSION
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return REPLY_SEND();
 }
 
 /******************************************************************************
@@ -646,9 +645,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
         .m = count
     };
 
-    if (client->swapped) {
-        swapl(&rep.m);
-    }
+    REPLY_FIELD_CARD32(m);
 
     rc = X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
@@ -701,10 +698,10 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
         swapl(&rep.attributes);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
-}                               /* ProcDbeGetbackBufferAttributes() */
-
+    REPLY_FIELD_CARD32(attributes);
+    return REPLY_SEND();
+}
+
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeDispatch
