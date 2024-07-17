@@ -1585,11 +1585,8 @@ ProcVidModeGetGammaRamp(ClientPtr client)
         SwapShorts((short *) ramp, length * 3);
     }
     WriteToClient(client, sizeof(xXF86VidModeGetGammaRampReply), &rep);
-
-    if (stuff->size) {
-        WriteToClient(client, ramplen, ramp);
-        free(ramp);
-    }
+    WriteToClient(client, ramplen, ramp);
+    free(ramp);
 
     return Success;
 }
