@@ -1575,7 +1575,7 @@ ProcVidModeGetGammaRamp(ClientPtr client)
     xXF86VidModeGetGammaRampReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = (length >> 1) * 3,
+        .length = bytes_to_int32(ramplen),
         .size = stuff->size
     };
     if (client->swapped) {
