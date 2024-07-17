@@ -240,20 +240,21 @@ ProcXResQueryClients(ClientPtr client)
     }
     WriteToClient(client, sizeof(xXResQueryClientsReply), &rep);
 
-    if (num_clients) {
-        xXResClient scratch;
+    xXResClient scratch[num_clients];
 
+    if (num_clients) {
         for (i = 0; i < num_clients; i++) {
-            scratch.resource_base = clients[current_clients[i]]->clientAsMask;
-            scratch.resource_mask = RESOURCE_ID_MASK;
+            scratch[i].resource_base = clients[current_clients[i]]->clientAsMask;
+            scratch[i].resource_mask = RESOURCE_ID_MASK;
 
             if (client->swapped) {
-                swapl(&scratch.resource_base);
-                swapl(&scratch.resource_mask);
+                swapl(&scratch[i].resource_base);
+                swapl(&scratch[i].resource_mask);
             }
-            WriteToClient(client, sz_xXResClient, &scratch);
         }
     }
+
+    WriteToClient(client, sizeof(scratch), scratch);
 
     return Success;
 }
