@@ -1066,23 +1066,23 @@ ProcXineramaQueryScreens(ClientPtr client)
     WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
 
     if (!noPanoramiXExtension) {
-        xXineramaScreenInfo scratch;
+        xXineramaScreenInfo scratch[number];
         int i;
 
         FOR_NSCREENS(i) {
-            scratch.x_org = screenInfo.screens[i]->x;
-            scratch.y_org = screenInfo.screens[i]->y;
-            scratch.width = screenInfo.screens[i]->width;
-            scratch.height = screenInfo.screens[i]->height;
+            scratch[i].x_org = screenInfo.screens[i]->x;
+            scratch[i].y_org = screenInfo.screens[i]->y;
+            scratch[i].width = screenInfo.screens[i]->width;
+            scratch[i].height = screenInfo.screens[i]->height;
 
             if (client->swapped) {
-                swaps(&scratch.x_org);
-                swaps(&scratch.y_org);
-                swaps(&scratch.width);
-                swaps(&scratch.height);
+                swaps(&scratch[i].x_org);
+                swaps(&scratch[i].y_org);
+                swaps(&scratch[i].width);
+                swaps(&scratch[i].height);
             }
-            WriteToClient(client, sz_XineramaScreenInfo, &scratch);
         }
+        WriteToClient(client, sizeof(scratch), &scratch);
     }
 
     return Success;
