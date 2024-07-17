@@ -420,7 +420,7 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
             REPLY_FIELD_CARD32(spec.mask);
             REPLY_FIELD_CARD32(length);    // need to do it, since not calling REPLY_SEND()
 
-            if (sendClient->swapped) swapl (value);
+            REPLY_BUF_CARD32(value, 1);
 
             memcpy(ptr, &rep, sizeof(rep));
             *value = pid;
