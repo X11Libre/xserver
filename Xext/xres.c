@@ -307,9 +307,13 @@ ProcXResQueryClientResources(ClientPtr client)
 
     FindAllClientResources(clients[clientID], ResFindAllRes, counts);
 
+    int cnt[lastResourceType + 1];
+
     for (i = 0; i <= lastResourceType; i++) {
-        if (counts[i])
+        if (counts[i]) {
+            cnt[num_types] = counts[i];
             num_types++;
+        }
     }
 
     xXResQueryClientResourcesReply rep = {
@@ -324,26 +328,20 @@ ProcXResQueryClientResources(ClientPtr client)
         swapl(&rep.num_types);
     }
 
-    WriteToClient(client, sizeof(xXResQueryClientResourcesReply), &rep);
+    xXResType scratch[num_types];
 
-    if (num_types) {
-        xXResType scratch;
+    for (i = 0; i < num_types; i++) {
+        scratch[i].resource_type = resourceTypeAtom(i + 1);
+        scratch[i].count = cnt[i];
 
-        for (i = 0; i < lastResourceType; i++) {
-            if (!counts[i])
-                continue;
-
-            scratch.resource_type = resourceTypeAtom(i + 1);
-            scratch.count = counts[i];
-
-            if (client->swapped) {
-                swapl(&scratch.resource_type);
-                swapl(&scratch.count);
-            }
-            WriteToClient(client, sz_xXResType, &scratch);
+        if (client->swapped) {
+            swapl(&scratch[i].resource_type);
+            swapl(&scratch[i].count);
         }
     }
 
+    WriteToClient(client, sizeof(xXResQueryClientResourcesReply), &rep);
+    WriteToClient(client, sizeof(scratch), scratch);
     return Success;
 }
 
