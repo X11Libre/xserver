@@ -622,44 +622,41 @@ ProcDbeGetVisualInfo(ClientPtr client)
     /* Send off reply. */
     WriteToClient(client, sizeof(xDbeGetVisualInfoReply), &rep);
 
-    for (i = 0; i < count; i++) {
-        CARD32 data32;
+    {
+        char buf[length];
+        char *walk = buf;
 
-        /* For each screen in the reply, send off the visual info */
+        for (i = 0; i < count; i++) {
+            /* For each screen in the reply, send off the visual info */
 
-        /* Send off number of visuals. */
-        data32 = (CARD32) pScrVisInfo[i].count;
+            /* Send off number of visuals. */
+            *(CARD32*)walk = pScrVisInfo[i].count;
+            if (client->swapped) { swapl((CARD32*)walk); }
+            walk += sizeof(CARD32);
 
-        if (client->swapped) {
-            swapl(&data32);
-        }
+            /* Now send off visual info items. */
+            for (j = 0; j < pScrVisInfo[i].count; j++) {
+                xDbeVisInfo *visInfo = (xDbeVisInfo*)walk;
 
-        WriteToClient(client, sizeof(CARD32), &data32);
-
-        /* Now send off visual info items. */
-        for (j = 0; j < pScrVisInfo[i].count; j++) {
-            xDbeVisInfo visInfo;
-
-            /* Copy the data in the client data structure to a protocol
-             * data structure.  We will send data to the client from the
-             * protocol data structure.
-             */
-
-            visInfo.visualID = (CARD32) pScrVisInfo[i].visinfo[j].visual;
-            visInfo.depth = (CARD8) pScrVisInfo[i].visinfo[j].depth;
-            visInfo.perfLevel = (CARD8) pScrVisInfo[i].visinfo[j].perflevel;
-
-            if (client->swapped) {
-                swapl(&visInfo.visualID);
-
-                /* We do not need to swap depth and perfLevel since they are
-                 * already 1 byte quantities.
+                /* Copy the data in the client data structure to a protocol
+                 * data structure.  We will send data to the client from the
+                 * protocol data structure.
                  */
-            }
 
-            /* Write visualID(32), depth(8), perfLevel(8), and pad(16). */
-            WriteToClient(client, 2 * sizeof(CARD32), &visInfo.visualID);
+                visInfo->visualID = pScrVisInfo[i].visinfo[j].visual;
+                visInfo->depth = pScrVisInfo[i].visinfo[j].depth;
+                visInfo->perfLevel = pScrVisInfo[i].visinfo[j].perflevel;
+
+                if (client->swapped) {
+                    swapl(&visInfo->visualID);
+
+                    /* We do not need to swap depth and perfLevel since they are
+                     * already 1 byte quantities.
+                     */
+                }
+            }
         }
+        WriteToClient(client, sizeof(buf), buf);
     }
 
     rc = Success;
