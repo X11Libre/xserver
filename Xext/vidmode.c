@@ -1197,14 +1197,20 @@ ProcVidModeLockModeSwitch(ClientPtr client)
     return Success;
 }
 
+static inline CARD32 _combine_f(vidMonitorValue a, vidMonitorValue b, Bool swapped)
+{
+    CARD32 buf =
+        ((unsigned short) a.f) |
+        ((unsigned short) b.f << 16);
+    if (swapped)
+        swapl(&buf);
+    return buf;
+}
+
 static int
 ProcVidModeGetMonitor(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetMonitorReq);
-    CARD32 *hsyncdata, *vsyncdata;
-    ScreenPtr pScreen;
-    VidModePtr pVidMode;
-    int i, nHsync, nVrefresh, vendorLength = 0, modelLength = 0;
 
     DEBUG_P("XF86VidModeGetMonitor");
 
@@ -1212,24 +1218,23 @@ ProcVidModeGetMonitor(ClientPtr client)
 
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
-    pScreen = screenInfo.screens[stuff->screen];
+    ScreenPtr pScreen = screenInfo.screens[stuff->screen];
 
-    pVidMode = VidModeGetPtr(pScreen);
+    VidModePtr pVidMode = VidModeGetPtr(pScreen);
     if (pVidMode == NULL)
         return BadImplementation;
 
-    nHsync = pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_NHSYNC, 0).i;
-    nVrefresh = pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_NVREFRESH, 0).i;
+    const int nHsync = pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_NHSYNC, 0).i;
+    const int nVrefresh = pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_NVREFRESH, 0).i;
 
-    if ((char *) (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0)).ptr)
-        vendorLength = strlen((char *) (pVidMode->GetMonitorValue(pScreen,
-                                                                      VIDMODE_MON_VENDOR,
-                                                                      0)).ptr);
+    const char *vendorStr = (const char*)pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0).ptr;
+    const char *modelStr = (const char*)pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0).ptr;
 
-    if ((char *) (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0)).ptr)
-        modelLength = strlen((char *) (pVidMode->GetMonitorValue(pScreen,
-                                                                     VIDMODE_MON_MODEL,
-                                                                     0)).ptr);
+    const int vendorLength = (vendorStr ? strlen(vendorStr) : 0);
+    const int modelLength = (modelStr ? strlen(modelStr) : 0);
+
+    const int nVendorItems = bytes_to_int32(pad_to_int32(vendorLength));
+    const int nModelItems = bytes_to_int32(pad_to_int32(modelLength));
 
     xXF86VidModeGetMonitorReply rep = {
         .type = X_Reply,
@@ -1239,59 +1244,51 @@ ProcVidModeGetMonitor(ClientPtr client)
         .vendorLength = vendorLength,
         .modelLength = modelLength,
         .length = bytes_to_int32(sizeof(xXF86VidModeGetMonitorReply) -
-                                 sizeof(xGenericReply) +
-                                 (nHsync + nVrefresh) * sizeof(CARD32) +
-                                 pad_to_int32(vendorLength) +
-                                 pad_to_int32(modelLength)),
+                                 sizeof(xGenericReply))
+                  + nHsync + nVrefresh + nVendorItems + nModelItems
     };
 
-    hsyncdata = calloc(nHsync, sizeof(CARD32));
-    if (!hsyncdata) {
-        return BadAlloc;
-    }
-    vsyncdata = calloc(nVrefresh, sizeof(CARD32));
+    const int buflen = nHsync * nVrefresh + nVendorItems + nModelItems;
 
-    if (!vsyncdata) {
-        free(hsyncdata);
+    CARD32 *sendbuf = calloc(buflen, sizeof(CARD32));
+    if (!sendbuf)
         return BadAlloc;
+
+    CARD32 *bufwalk = sendbuf;
+
+    for (int i = 0; i < nHsync; i++) {
+        *bufwalk = _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_LO, i),
+                              pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_HI, i),
+                              client->swapped);
+        bufwalk++;
     }
 
-    for (i = 0; i < nHsync; i++) {
-        hsyncdata[i] = (unsigned short) (pVidMode->GetMonitorValue(pScreen,
-                                                                   VIDMODE_MON_HSYNC_LO,
-                                                                   i)).f |
-            (unsigned
-             short) (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_HI,
-                                               i)).f << 16;
+    for (int i = 0; i < nVrefresh; i++) {
+        *bufwalk = _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_LO, i),
+                              pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_HI, i),
+                              client->swapped);
+        bufwalk++;
     }
-    for (i = 0; i < nVrefresh; i++) {
-        vsyncdata[i] = (unsigned short) (pVidMode->GetMonitorValue(pScreen,
-                                                                   VIDMODE_MON_VREFRESH_LO,
-                                                                   i)).f |
-            (unsigned
-             short) (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_HI,
-                                               i)).f << 16;
-    }
+
+    memcpy(sendbuf,
+           pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0).ptr,
+           vendorLength);
+    sendbuf += nVendorItems;
+
+    memcpy(sendbuf,
+           pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0).ptr,
+           modelLength);
+    sendbuf += nModelItems;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
-        SwapLongs(hsyncdata, sizeof(hsyncdata));
-        SwapLongs(vsyncdata, sizeof(vsyncdata));
     }
+
     WriteToClient(client, SIZEOF(xXF86VidModeGetMonitorReply), &rep);
-    WriteToClient(client, sizeof(hsyncdata), hsyncdata);
-    WriteToClient(client, sizeof(vsyncdata), vsyncdata);
-    if (rep.vendorLength)
-        WriteToClient(client, rep.vendorLength,
-                 (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0)).ptr);
-    if (rep.modelLength)
-        WriteToClient(client, rep.modelLength,
-                 (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0)).ptr);
+    WriteToClient(client, buflen * sizeof(CARD32), sendbuf);
 
-    free(hsyncdata);
-    free(vsyncdata);
-
+    free(sendbuf);
     return Success;
 }
 
