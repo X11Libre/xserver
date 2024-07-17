@@ -626,6 +626,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
 
         free(visualInfo.visinfo);
     }
+    WriteToClient(client, length, buf);
 
     if (rpcbuf.error) {
         rc = BadAlloc;
@@ -646,6 +647,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
 clearRpcBuf:
     x_rpcbuf_clear(&rpcbuf);
     free(pDrawables);
+    free(buf);
 
     return rc;
 
