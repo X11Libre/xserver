@@ -1535,9 +1535,7 @@ ProcVidModeSetGammaRamp(ClientPtr client)
 static int
 ProcVidModeGetGammaRamp(ClientPtr client)
 {
-    CARD16 *ramp = NULL;
     int length;
-    size_t ramplen = 0;
     ScreenPtr pScreen;
     VidModePtr pVidMode;
 
@@ -1558,14 +1556,15 @@ ProcVidModeGetGammaRamp(ClientPtr client)
 
     length = (stuff->size + 1) & ~1;
 
-    if (stuff->size) {
-        if (!(ramp = xallocarray(length, 3 * sizeof(CARD16))))
-            return BadAlloc;
-        ramplen = length * 3 * sizeof(CARD16);
+    struct {
+        CARD16 r[length];
+        CARD16 g[length];
+        CARD16 b[length];
+    } ramp;
 
+    if (stuff->size) {
         if (!pVidMode->GetGammaRamp(pScreen, stuff->size,
-                                 ramp, ramp + length, ramp + (length * 2))) {
-            free(ramp);
+                                    ramp.r, ramp.g, ramp.b)) {
             return BadValue;
         }
     }
@@ -1573,20 +1572,19 @@ ProcVidModeGetGammaRamp(ClientPtr client)
     xXF86VidModeGetGammaRampReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = (length >> 1) * 3,
+        .length = bytes_to_int32(sizeof(ramp)),
         .size = stuff->size
     };
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.size);
-        SwapShorts((short *) ramp, length * 3);
+        SwapShorts((short *) &ramp, length * 3);
     }
     WriteToClient(client, sizeof(xXF86VidModeGetGammaRampReply), &rep);
 
     if (stuff->size) {
-        WriteToClient(client, ramplen, ramp);
-        free(ramp);
+        WriteToClient(client, sizeof(ramp), &ramp);
     }
 
     return Success;
