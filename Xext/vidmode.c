@@ -1537,36 +1537,29 @@ ProcVidModeSetGammaRamp(ClientPtr client)
 static int
 ProcVidModeGetGammaRamp(ClientPtr client)
 {
-    CARD16 *ramp = NULL;
-    int length;
-    size_t ramplen = 0;
-    ScreenPtr pScreen;
-    VidModePtr pVidMode;
-
     REQUEST(xXF86VidModeGetGammaRampReq);
-
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaRampReq);
 
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
-    pScreen = screenInfo.screens[stuff->screen];
+    ScreenPtr pScreen = screenInfo.screens[stuff->screen];
 
-    pVidMode = VidModeGetPtr(pScreen);
+    VidModePtr pVidMode = VidModeGetPtr(pScreen);
     if (pVidMode == NULL)
         return BadImplementation;
 
     if (stuff->size != pVidMode->GetGammaRampSize(pScreen))
         return BadValue;
 
-    length = (stuff->size + 1) & ~1;
+    const int length = (stuff->size + 1) & ~1;
+
+    CARD16 *ramp = calloc(length, sizeof(CARD16));
+    if (!ramp)
+        return BadAlloc;
 
     if (stuff->size) {
-        if (!(ramp = xallocarray(length, 3 * sizeof(CARD16))))
-            return BadAlloc;
-        ramplen = length * 3 * sizeof(CARD16);
-
         if (!pVidMode->GetGammaRamp(pScreen, stuff->size,
-                                 ramp, ramp + length, ramp + (length * 2))) {
+                                    ramp, ramp+length, ramp+length+length)) {
             free(ramp);
             return BadValue;
         }
@@ -1575,20 +1568,20 @@ ProcVidModeGetGammaRamp(ClientPtr client)
     xXF86VidModeGetGammaRampReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = (length >> 1) * 3,
+        .length = bytes_to_int32(sizeof(ramp)),
         .size = stuff->size
     };
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.size);
-        SwapShorts((short *) ramp, length * 3);
+        if (ramp)
+            SwapShorts((short *)ramp, length * 3);
     }
     WriteToClient(client, sizeof(xXF86VidModeGetGammaRampReply), &rep);
 
     if (stuff->size) {
-        WriteToClient(client, ramplen, ramp);
-        free(ramp);
+        WriteToClient(client, length * 3 * sizeof(CARD16), ramp);
     }
 
     return Success;
