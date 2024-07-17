@@ -214,12 +214,11 @@ ProcXResQueryVersion(ClientPtr client)
 static int
 ProcXResQueryClients(ClientPtr client)
 {
-    int *current_clients;
     int i, num_clients = 0;
 
     REQUEST_SIZE_MATCH(xXResQueryClientsReq);
 
-    current_clients = xallocarray(currentMaxClients, sizeof(int));
+    int current_clients[currentMaxClients];
 
     for (i = 0; i < currentMaxClients; i++) {
         if (clients[i]) {
@@ -255,8 +254,6 @@ ProcXResQueryClients(ClientPtr client)
             WriteToClient(client, sz_xXResClient, &scratch);
         }
     }
-
-    free(current_clients);
 
     return Success;
 }
