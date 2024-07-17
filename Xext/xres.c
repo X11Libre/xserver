@@ -296,7 +296,6 @@ ProcXResQueryClientResources(ClientPtr client)
     REQUEST_SIZE_MATCH(xXResQueryClientResourcesReq);
 
     int i, clientID, num_types = 0;
-    int *counts;
 
     clientID = CLIENT_ID(stuff->xid);
 
@@ -305,7 +304,8 @@ ProcXResQueryClientResources(ClientPtr client)
         return BadValue;
     }
 
-    counts = calloc(lastResourceType + 1, sizeof(int));
+    int counts[lastResourceType + 1];
+    memset(counts, 0, sizeof(counts));
 
     FindAllClientResources(clients[clientID], ResFindAllRes, counts);
 
@@ -345,8 +345,6 @@ ProcXResQueryClientResources(ClientPtr client)
             WriteToClient(client, sz_xXResType, &scratch);
         }
     }
-
-    free(counts);
 
     return Success;
 }
