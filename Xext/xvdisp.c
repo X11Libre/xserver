@@ -183,7 +183,6 @@ static int
 ProcXvQueryEncodings(ClientPtr client)
 {
     int totalSize;
-    int nameSize;
     XvPortPtr pPort;
     int ne;
     XvEncodingPtr pe;
@@ -203,6 +202,11 @@ ProcXvQueryEncodings(ClientPtr client)
         pe++;
     }
 
+    char *buf = calloc(1, totalSize);
+    if (!buf)
+        return BadAlloc;
+    char *walk = buf;
+
     xvQueryEncodingsReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -216,32 +220,37 @@ ProcXvQueryEncodings(ClientPtr client)
         swaps(&rep.num_encodings);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-
     ne = pPort->pAdaptor->nEncodings;
     pe = pPort->pAdaptor->pEncodings;
     while (ne--) {
-        xvEncodingInfo einfo = { 0 };
-        einfo.encoding = pe->id;
-        einfo.name_size = nameSize = strlen(pe->name);
-        einfo.width = pe->width;
-        einfo.height = pe->height;
-        einfo.rate.numerator = pe->rate.numerator;
-        einfo.rate.denominator = pe->rate.denominator;
+        int nameSize;
+        xvEncodingInfo *einfo = (xvEncodingInfo*)walk;
+
+        einfo->encoding = pe->id;
+        einfo->name_size = nameSize = strlen(pe->name);
+        einfo->width = pe->width;
+        einfo->height = pe->height;
+        einfo->rate.numerator = pe->rate.numerator;
+        einfo->rate.denominator = pe->rate.denominator;
 
         if (client->swapped) {
-            swapl(&einfo.encoding);
-            swaps(&einfo.name_size);
-            swaps(&einfo.width);
-            swaps(&einfo.height);
-            swapl(&einfo.rate.numerator);
-            swapl(&einfo.rate.denominator);
+            swapl(&einfo->encoding);
+            swaps(&einfo->name_size);
+            swaps(&einfo->width);
+            swaps(&einfo->height);
+            swapl(&einfo->rate.numerator);
+            swapl(&einfo->rate.denominator);
         }
-        WriteToClient(client, sz_xvEncodingInfo, &einfo);
-        WriteToClient(client, nameSize, pe->name);
+
+        walk += sizeof(xvEncodingInfo);
+        memcpy(walk, pe->name, nameSize);
+        walk += pad_to_int32(nameSize);
+
         pe++;
     }
 
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, totalSize, buf);
     return Success;
 }
 
