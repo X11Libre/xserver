@@ -1240,11 +1240,15 @@ ProcVidModeGetMonitor(ClientPtr client)
                                  pad_to_int32(modelLength)),
     };
 
-    CARD32 hsyncdata[nHsync];
-    CARD32 vsyncdata[nVrefresh];
+    struct {
+        CARD32 hsyncdata[nHsync];
+        CARD32 vsyncdata[nVrefresh];
+        CARD32 vendor[pad_to_int32(vendorLength)];
+        CARD32 model[pad_to_int32(modelLength)];
+    } sendbuf;
 
     for (i = 0; i < nHsync; i++) {
-        hsyncdata[i] = (unsigned short) (pVidMode->GetMonitorValue(pScreen,
+        sendbuf.hsyncdata[i] = (unsigned short) (pVidMode->GetMonitorValue(pScreen,
                                                                    VIDMODE_MON_HSYNC_LO,
                                                                    i)).f |
             (unsigned
@@ -1252,7 +1256,7 @@ ProcVidModeGetMonitor(ClientPtr client)
                                                i)).f << 16;
     }
     for (i = 0; i < nVrefresh; i++) {
-        vsyncdata[i] = (unsigned short) (pVidMode->GetMonitorValue(pScreen,
+        sendbuf.vsyncdata[i] = (unsigned short) (pVidMode->GetMonitorValue(pScreen,
                                                                    VIDMODE_MON_VREFRESH_LO,
                                                                    i)).f |
             (unsigned
@@ -1263,19 +1267,22 @@ ProcVidModeGetMonitor(ClientPtr client)
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
-        SwapLongs(hsyncdata, sizeof(hsyncdata));
-        SwapLongs(vsyncdata, sizeof(vsyncdata));
+        SwapLongs(sendbuf.hsyncdata, nHsync);
+        SwapLongs(sendbuf.vsyncdata, nVrefresh);
     }
-    WriteToClient(client, SIZEOF(xXF86VidModeGetMonitorReply), &rep);
-    WriteToClient(client, sizeof(hsyncdata), hsyncdata);
-    WriteToClient(client, sizeof(vsyncdata), vsyncdata);
-    if (rep.vendorLength)
-        WriteToClient(client, rep.vendorLength,
-                 (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0)).ptr);
-    if (rep.modelLength)
-        WriteToClient(client, rep.modelLength,
-                 (pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0)).ptr);
 
+    memset(sendbuf.vendor, 0, sizeof(sendbuf.vendor));
+    memcpy(sendbuf.vendor,
+           pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0).ptr,
+           vendorLength);
+
+    memset(sendbuf.model, 0, sizeof(sendbuf.model));
+    memcpy(sendbuf.model,
+           pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0).ptr,
+           modelLength);
+
+    WriteToClient(client, SIZEOF(xXF86VidModeGetMonitorReply), &rep);
+    WriteToClient(client, sizeof(sendbuf), &sendbuf);
     return Success;
 }
 
