@@ -628,20 +628,22 @@ ProcXvQueryPortAttributes(ClientPtr client)
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixGetAttrAccess);
 
+    int text_size = 0;
+    for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
+         i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
+        text_size += pad_to_int32(strlen(pAtt->name) + 1);
+    }
+
+    int length = (pPort->pAdaptor->nAttributes * sz_xvAttributeInfo)
+               + text_size;
+
     xvQueryPortAttributesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_attributes = pPort->pAdaptor->nAttributes,
+        .length = bytes_to_int32(length),
+        .text_size = text_size,
     };
-
-    for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
-         i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
-        rep.text_size += pad_to_int32(strlen(pAtt->name) + 1);
-    }
-
-    rep.length = (pPort->pAdaptor->nAttributes * sz_xvAttributeInfo)
-        + rep.text_size;
-    rep.length >>= 2;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -650,29 +652,37 @@ ProcXvQueryPortAttributes(ClientPtr client)
         swapl(&rep.text_size);
     }
 
-    WriteToClient(client, sz_xvQueryPortAttributesReply, &rep);
+    char * buf = calloc(1, length);
+    if (!buf)
+        return BadAlloc;
+    char * walk = buf;
 
     for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
          i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
         size = strlen(pAtt->name) + 1;  /* pass the NULL */
-        xvAttributeInfo Info = {
-            .flags = pAtt->flags,
-            .min = pAtt->min_value,
-            .max = pAtt->max_value,
-            .size = pad_to_int32(size)
-        };
+
+        xvAttributeInfo *Info = (xvAttributeInfo*)walk;
+        Info->flags = pAtt->flags;
+        Info->min = pAtt->min_value;
+        Info->max = pAtt->max_value;
+        Info->size = pad_to_int32(size);
 
         if (client->swapped) {
-            swapl(&Info.flags);
-            swapl(&Info.size);
-            swapl(&Info.min);
-            swapl(&Info.max);
+            swapl(&Info->flags);
+            swapl(&Info->size);
+            swapl(&Info->min);
+            swapl(&Info->max);
         }
 
-        WriteToClient(client, sz_xvAttributeInfo, &Info);
-        WriteToClient(client, size, pAtt->name);
+        walk += sizeof(xvAttributeInfo);
+
+        memcpy(walk, pAtt->name, size);
+        walk += pad_to_int32(size);
     }
 
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, length, buf);
+    free(buf);
     return Success;
 }
 
