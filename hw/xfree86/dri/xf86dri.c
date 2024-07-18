@@ -85,11 +85,9 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
         .patchVersion = SERVER_XF86DRI_PATCH_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-        swapl(&rep.patchVersion);
-    }
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_FIELD_CARD32(patchVersion);
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
@@ -114,7 +112,7 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
     if (!client->local || client->swapped)
         isCapable = 0;
 
-    xXF86DRIQueryDirectRenderingCapableReply reply = {
+    xXF86DRIQueryDirectRenderingCapableReply rep = {
         .isCapable = isCapable
     };
 
@@ -385,7 +383,6 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
                 j++;
             }
         }
-
         rep.numClipRects = j;
     }
 
@@ -403,7 +400,7 @@ static int
 ProcXF86DRIGetDeviceInfo(register ClientPtr client)
 {
     drm_handle_t hFrameBuffer;
-    void *pDevPrivate;
+    void *pDevPrivate = NULL;
 
     REQUEST_HEAD_STRUCT(xXF86DRIGetDeviceInfoReq);
 
