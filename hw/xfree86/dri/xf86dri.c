@@ -85,11 +85,9 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
         .patchVersion = SERVER_XF86DRI_PATCH_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-        swapl(&rep.patchVersion);
-    }
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_FIELD_CARD32(patchVersion);
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
@@ -114,7 +112,7 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
     if (!client->local || client->swapped)
         isCapable = 0;
 
-    xXF86DRIQueryDirectRenderingCapableReply reply = {
+    xXF86DRIQueryDirectRenderingCapableReply rep = {
         .isCapable = isCapable
     };
 
@@ -321,10 +319,7 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xXF86DRIGetDrawableInfoReq);
 
-    xXF86DRIGetDrawableInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xXF86DRIGetDrawableInfoReply rep = { 0 };
     DrawablePtr pDrawable;
     int X, Y, W, H;
     drm_clip_rect_t *pClipRects, *pClippedRects = NULL;
@@ -392,28 +387,11 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
                 j++;
             }
         }
-
         rep.numClipRects = j;
-        rep.length += sizeof(drm_clip_rect_t) * rep.numClipRects;
     }
 
-    rep.length = bytes_to_int32(rep.length);
-
-    WriteToClient(client, sizeof(xXF86DRIGetDrawableInfoReply), &rep);
-
-    if (rep.numClipRects) {
-        WriteToClient(client,
-                      sizeof(drm_clip_rect_t) * rep.numClipRects,
-                      pClippedRects);
-        free(pClippedRects);
-    }
-
-    if (rep.numBackClipRects) {
-        WriteToClient(client,
-                      sizeof(drm_clip_rect_t) * rep.numBackClipRects,
-                      pBackClipRects);
-    }
-
+    REPLY_SEND_EXTRA_2(pClippedRects, sizeof(drm_clip_rect_t) * rep.numClipRects,
+                       pBackClipRects, sizeof(drm_clip_rect_t) * rep.numBackClipRects);
     return Success;
 }
 
@@ -421,7 +399,7 @@ static int
 ProcXF86DRIGetDeviceInfo(register ClientPtr client)
 {
     drm_handle_t hFrameBuffer;
-    void *pDevPrivate;
+    void *pDevPrivate = NULL;
 
     REQUEST_HEAD_STRUCT(xXF86DRIGetDeviceInfoReq);
 
