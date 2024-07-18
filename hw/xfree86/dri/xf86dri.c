@@ -158,8 +158,6 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
         .hSAREALow = (CARD32) (hSAREA & 0xffffffff),
 #if defined(LONG64) && !defined(__linux__)
         .hSAREAHigh = (CARD32) (hSAREA >> 32),
-#else
-        .hSAREAHigh = 0
 #endif
     };
 
@@ -449,8 +447,6 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
     rep.hFrameBufferLow = (CARD32) (hFrameBuffer & 0xffffffff);
 #if defined(LONG64) && !defined(__linux__)
     rep.hFrameBufferHigh = (CARD32) (hFrameBuffer >> 32);
-#else
-    rep.hFrameBufferHigh = 0;
 #endif
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
