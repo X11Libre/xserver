@@ -364,7 +364,7 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     };
     DrawablePtr pDrawable;
     int X, Y, W, H;
-    drm_clip_rect_t *pClipRects, *pClippedRects = NULL;
+    drm_clip_rect_t *pClipRects;
     drm_clip_rect_t *pBackClipRects;
     int backX, backY, rc;
 
@@ -408,12 +408,10 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     if (rep.numBackClipRects)
         rep.length += sizeof(drm_clip_rect_t) * rep.numBackClipRects;
 
+    drm_clip_rect_t pClippedRects[rep.numClipRects];
+
     if (rep.numClipRects) {
         /* Clip cliprects to screen dimensions (redirected windows) */
-        pClippedRects = xallocarray(rep.numClipRects, sizeof(drm_clip_rect_t));
-
-        if (!pClippedRects)
-            return BadAlloc;
 
         ScreenPtr pScreen = screenInfo.screens[stuff->screen];
         int i, j;
@@ -444,7 +442,6 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
         WriteToClient(client,
                       sizeof(drm_clip_rect_t) * rep.numClipRects,
                       pClippedRects);
-        free(pClippedRects);
     }
 
     if (rep.numBackClipRects) {
