@@ -43,6 +43,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "xf86.h"
 #include "misc.h"
@@ -76,6 +77,8 @@ XF86DRIResetProc(ExtensionEntry *extEntry)
 static int
 ProcXF86DRIQueryVersion(register ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRIQueryVersionReq);
+
     xXF86DRIQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -84,7 +87,6 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
         .patchVersion = SERVER_XF86DRI_PATCH_VERSION
     };
 
-    REQUEST_SIZE_MATCH(xXF86DRIQueryVersionReq);
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -99,10 +101,11 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
 static int
 ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRIQueryDirectRenderingCapableReq);
+    REQUEST_FIELD_CARD32(screen);
+
     Bool isCapable;
 
-    REQUEST(xXF86DRIQueryDirectRenderingCapableReq);
-    REQUEST_SIZE_MATCH(xXF86DRIQueryDirectRenderingCapableReq);
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -136,12 +139,12 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 static int
 ProcXF86DRIOpenConnection(register ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRIOpenConnectionReq);
+
     drm_handle_t hSAREA;
     char *busIdString;
     CARD32 busIdStringLength = 0;
 
-    REQUEST(xXF86DRIOpenConnectionReq);
-    REQUEST_SIZE_MATCH(xXF86DRIOpenConnectionReq);
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -178,14 +181,14 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
 static int
 ProcXF86DRIAuthConnection(register ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRIAuthConnectionReq);
+
     xXF86DRIAuthConnectionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .authenticated = 1
     };
 
-    REQUEST(xXF86DRIAuthConnectionReq);
-    REQUEST_SIZE_MATCH(xXF86DRIAuthConnectionReq);
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -202,8 +205,8 @@ ProcXF86DRIAuthConnection(register ClientPtr client)
 static int
 ProcXF86DRICloseConnection(register ClientPtr client)
 {
-    REQUEST(xXF86DRICloseConnectionReq);
-    REQUEST_SIZE_MATCH(xXF86DRICloseConnectionReq);
+    REQUEST_HEAD_STRUCT(xXF86DRICloseConnectionReq);
+
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -217,14 +220,14 @@ ProcXF86DRICloseConnection(register ClientPtr client)
 static int
 ProcXF86DRIGetClientDriverName(register ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRIGetClientDriverNameReq);
+
     xXF86DRIGetClientDriverNameReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
     };
     char *clientDriverName;
 
-    REQUEST(xXF86DRIGetClientDriverNameReq);
-    REQUEST_SIZE_MATCH(xXF86DRIGetClientDriverNameReq);
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -251,14 +254,14 @@ ProcXF86DRIGetClientDriverName(register ClientPtr client)
 static int
 ProcXF86DRICreateContext(register ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRICreateContextReq);
+
     xXF86DRICreateContextReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
     };
     ScreenPtr pScreen;
 
-    REQUEST(xXF86DRICreateContextReq);
-    REQUEST_SIZE_MATCH(xXF86DRICreateContextReq);
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -279,8 +282,8 @@ ProcXF86DRICreateContext(register ClientPtr client)
 static int
 ProcXF86DRIDestroyContext(register ClientPtr client)
 {
-    REQUEST(xXF86DRIDestroyContextReq);
-    REQUEST_SIZE_MATCH(xXF86DRIDestroyContextReq);
+    REQUEST_HEAD_STRUCT(xXF86DRIDestroyContextReq);
+
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -296,6 +299,8 @@ ProcXF86DRIDestroyContext(register ClientPtr client)
 static int
 ProcXF86DRICreateDrawable(ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRICreateDrawableReq);
+
     xXF86DRICreateDrawableReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -303,8 +308,6 @@ ProcXF86DRICreateDrawable(ClientPtr client)
     DrawablePtr pDrawable;
     int rc;
 
-    REQUEST(xXF86DRICreateDrawableReq);
-    REQUEST_SIZE_MATCH(xXF86DRICreateDrawableReq);
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -327,11 +330,10 @@ ProcXF86DRICreateDrawable(ClientPtr client)
 static int
 ProcXF86DRIDestroyDrawable(register ClientPtr client)
 {
-    REQUEST(xXF86DRIDestroyDrawableReq);
+    REQUEST_HEAD_STRUCT(xXF86DRIDestroyDrawableReq);
+
     DrawablePtr pDrawable;
     int rc;
-
-    REQUEST_SIZE_MATCH(xXF86DRIDestroyDrawableReq);
 
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
@@ -354,6 +356,8 @@ ProcXF86DRIDestroyDrawable(register ClientPtr client)
 static int
 ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRIGetDrawableInfoReq);
+
     xXF86DRIGetDrawableInfoReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -364,8 +368,6 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     drm_clip_rect_t *pBackClipRects;
     int backX, backY, rc;
 
-    REQUEST(xXF86DRIGetDrawableInfoReq);
-    REQUEST_SIZE_MATCH(xXF86DRIGetDrawableInfoReq);
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -455,6 +457,8 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 static int
 ProcXF86DRIGetDeviceInfo(register ClientPtr client)
 {
+    REQUEST_HEAD_STRUCT(xXF86DRIGetDeviceInfoReq);
+
     xXF86DRIGetDeviceInfoReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -462,8 +466,6 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
     drm_handle_t hFrameBuffer;
     void *pDevPrivate;
 
-    REQUEST(xXF86DRIGetDeviceInfoReq);
-    REQUEST_SIZE_MATCH(xXF86DRIGetDeviceInfoReq);
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -539,15 +541,6 @@ ProcXF86DRIDispatch(register ClientPtr client)
 }
 
 static int _X_COLD
-SProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
-{
-    REQUEST(xXF86DRIQueryDirectRenderingCapableReq);
-    REQUEST_SIZE_MATCH(xXF86DRIQueryDirectRenderingCapableReq);
-    swapl(&stuff->screen);
-    return ProcXF86DRIQueryDirectRenderingCapable(client);
-}
-
-static int _X_COLD
 SProcXF86DRIDispatch(register ClientPtr client)
 {
     REQUEST(xReq);
@@ -560,7 +553,7 @@ SProcXF86DRIDispatch(register ClientPtr client)
     case X_XF86DRIQueryVersion:
         return ProcXF86DRIQueryVersion(client);
     case X_XF86DRIQueryDirectRenderingCapable:
-        return SProcXF86DRIQueryDirectRenderingCapable(client);
+        return ProcXF86DRIQueryDirectRenderingCapable(client);
     default:
         return DRIErrorBase + XF86DRIClientNotLocal;
     }
