@@ -80,21 +80,15 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
     REQUEST_HEAD_STRUCT(xXF86DRIQueryVersionReq);
 
     xXF86DRIQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .majorVersion = SERVER_XF86DRI_MAJOR_VERSION,
         .minorVersion = SERVER_XF86DRI_MINOR_VERSION,
         .patchVersion = SERVER_XF86DRI_PATCH_VERSION
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-        swapl(&rep.patchVersion);
-    }
-    WriteToClient(client, sizeof(xXF86DRIQueryVersionReply), &rep);
+    REPLY_FIELD_CARD16(majorVersion);
+    REPLY_FIELD_CARD16(minorVersion);
+    REPLY_FIELD_CARD32(patchVersion);
+    REPLY_SEND();
     return Success;
 }
 
@@ -120,19 +114,10 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
         isCapable = 0;
 
     xXF86DRIQueryDirectRenderingCapableReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .isCapable = isCapable
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client,
-                  sizeof(xXF86DRIQueryDirectRenderingCapableReply),
-                  &rep);
+    REPLY_SEND();
     return Success;
 }
 
@@ -159,10 +144,16 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
         busIdStringLength = strlen(busIdString);
 
     xXF86DRIOpenConnectionReply rep = {
+<<<<<<< HEAD
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = X_REPLY_HEADER_UNITS(xXF86DRIOpenConnectionReply)
                 + bytes_to_int32(busIdStringLength),
+=======
+        .length = bytes_to_int32(SIZEOF(xXF86DRIOpenConnectionReply) -
+                                 SIZEOF(xGenericReply) +
+                                 pad_to_int32(busIdStringLength)),
+>>>>>>> 39db2a2668 (dri: use REPLY_*() macros for preparing / sending replies)
         .busIdStringLength = busIdStringLength,
 
         .hSAREALow = (CARD32) (hSAREA & 0xffffffff),
@@ -171,9 +162,7 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
 #endif
     };
 
-    WriteToClient(client, sizeof(xXF86DRIOpenConnectionReply), &rep);
-    if (busIdStringLength)
-        WriteToClient(client, busIdStringLength, busIdString);
+    REPLY_SEND_EXTRA(busIdString, busIdStringLength);
     return Success;
 }
 
@@ -183,8 +172,6 @@ ProcXF86DRIAuthConnection(register ClientPtr client)
     REQUEST_HEAD_STRUCT(xXF86DRIAuthConnectionReq);
 
     xXF86DRIAuthConnectionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .authenticated = 1
     };
 
@@ -197,7 +184,8 @@ ProcXF86DRIAuthConnection(register ClientPtr client)
         ErrorF("Failed to authenticate %lu\n", (unsigned long) stuff->magic);
         rep.authenticated = 0;
     }
-    WriteToClient(client, sizeof(xXF86DRIAuthConnectionReply), &rep);
+
+    REPLY_SEND();
     return Success;
 }
 
@@ -221,10 +209,7 @@ ProcXF86DRIGetClientDriverName(register ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xXF86DRIGetClientDriverNameReq);
 
-    xXF86DRIGetClientDriverNameReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xXF86DRIGetClientDriverNameReply rep = { 0 };
     char *clientDriverName;
 
     if (stuff->screen >= screenInfo.numScreens) {
@@ -243,9 +228,7 @@ ProcXF86DRIGetClientDriverName(register ClientPtr client)
     rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetClientDriverNameReply)
                + bytes_to_int32(rep.clientDriverNameLength);
 
-    WriteToClient(client, sizeof(xXF86DRIGetClientDriverNameReply), &rep);
-    if (rep.clientDriverNameLength)
-        WriteToClient(client, rep.clientDriverNameLength, clientDriverName);
+    REPLY_SEND_EXTRA(clientDriverName, rep.clientDriverNameLength);
     return Success;
 }
 
@@ -254,10 +237,7 @@ ProcXF86DRICreateContext(register ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xXF86DRICreateContextReq);
 
-    xXF86DRICreateContextReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xXF86DRICreateContextReply rep = { 0 };
     ScreenPtr pScreen;
 
     if (stuff->screen >= screenInfo.numScreens) {
@@ -273,7 +253,7 @@ ProcXF86DRICreateContext(register ClientPtr client)
         return BadValue;
     }
 
-    WriteToClient(client, sizeof(xXF86DRICreateContextReply), &rep);
+    REPLY_SEND();
     return Success;
 }
 
@@ -299,10 +279,7 @@ ProcXF86DRICreateDrawable(ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xXF86DRICreateDrawableReq);
 
-    xXF86DRICreateDrawableReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xXF86DRICreateDrawableReply rep = { 0 };
     DrawablePtr pDrawable;
     int rc;
 
@@ -321,7 +298,7 @@ ProcXF86DRICreateDrawable(ClientPtr client)
         return BadValue;
     }
 
-    WriteToClient(client, sizeof(xXF86DRICreateDrawableReply), &rep);
+    REPLY_SEND();
     return Success;
 }
 
@@ -356,10 +333,7 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xXF86DRIGetDrawableInfoReq);
 
-    xXF86DRIGetDrawableInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xXF86DRIGetDrawableInfoReply rep = { 0 };
     DrawablePtr pDrawable;
     int X, Y, W, H;
     drm_clip_rect_t *pClipRects, *pClippedRects = NULL;
@@ -396,7 +370,11 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     rep.drawableY = Y;
     rep.drawableWidth = W;
     rep.drawableHeight = H;
+<<<<<<< HEAD
     rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetDrawableInfoReply);
+=======
+
+>>>>>>> 39db2a2668 (dri: use REPLY_*() macros for preparing / sending replies)
     rep.backX = backX;
     rep.backY = backY;
 
@@ -426,28 +404,11 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
                 j++;
             }
         }
-
         rep.numClipRects = j;
-        rep.length += sizeof(drm_clip_rect_t) * rep.numClipRects;
     }
 
-    rep.length = bytes_to_int32(rep.length);
-
-    WriteToClient(client, sizeof(xXF86DRIGetDrawableInfoReply), &rep);
-
-    if (rep.numClipRects) {
-        WriteToClient(client,
-                      sizeof(drm_clip_rect_t) * rep.numClipRects,
-                      pClippedRects);
-        free(pClippedRects);
-    }
-
-    if (rep.numBackClipRects) {
-        WriteToClient(client,
-                      sizeof(drm_clip_rect_t) * rep.numBackClipRects,
-                      pBackClipRects);
-    }
-
+    REPLY_SEND_EXTRA_2(pClippedRects, sizeof(drm_clip_rect_t) * rep.numClipRects,
+                       pBackClipRects, sizeof(drm_clip_rect_t) * rep.numBackClipRects);
     return Success;
 }
 
@@ -456,12 +417,9 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
 {
     REQUEST_HEAD_STRUCT(xXF86DRIGetDeviceInfoReq);
 
-    xXF86DRIGetDeviceInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xXF86DRIGetDeviceInfoReply rep = { 0 };
     drm_handle_t hFrameBuffer;
-    void *pDevPrivate;
+    void *pDevPrivate = NULL;
 
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
@@ -482,15 +440,7 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
     rep.hFrameBufferHigh = (CARD32) (hFrameBuffer >> 32);
 #endif
 
-    if (rep.devPrivateSize) {
-        rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetDeviceInfoReply)
-                   + bytes_to_int32(rep.devPrivateSize);
-    }
-
-    WriteToClient(client, sizeof(xXF86DRIGetDeviceInfoReply), &rep);
-    if (rep.length) {
-        WriteToClient(client, rep.devPrivateSize, pDevPrivate);
-    }
+    REPLY_SEND_EXTRA(pDevPrivate, rep.devPrivateSize);
     return Success;
 }
 
