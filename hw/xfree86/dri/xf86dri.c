@@ -79,7 +79,6 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
     xXF86DRIQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_XF86DRI_MAJOR_VERSION,
         .minorVersion = SERVER_XF86DRI_MINOR_VERSION,
         .patchVersion = SERVER_XF86DRI_PATCH_VERSION
@@ -100,7 +99,6 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
 static int
 ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 {
-    xXF86DRIQueryDirectRenderingCapableReply rep;
     Bool isCapable;
 
     REQUEST(xXF86DRIQueryDirectRenderingCapableReq);
@@ -118,10 +116,9 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
     if (!client->local || client->swapped)
         isCapable = 0;
 
-    rep = (xXF86DRIQueryDirectRenderingCapableReply) {
+    xXF86DRIQueryDirectRenderingCapableReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .isCapable = isCapable
     };
 
@@ -139,7 +136,6 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 static int
 ProcXF86DRIOpenConnection(register ClientPtr client)
 {
-    xXF86DRIOpenConnectionReply rep;
     drm_handle_t hSAREA;
     char *busIdString;
     CARD32 busIdStringLength = 0;
@@ -159,7 +155,7 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
     if (busIdString)
         busIdStringLength = strlen(busIdString);
 
-    rep = (xXF86DRIOpenConnectionReply) {
+    xXF86DRIOpenConnectionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(SIZEOF(xXF86DRIOpenConnectionReply) -
@@ -170,8 +166,6 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
         .hSAREALow = (CARD32) (hSAREA & 0xffffffff),
 #if defined(LONG64) && !defined(__linux__)
         .hSAREAHigh = (CARD32) (hSAREA >> 32),
-#else
-        .hSAREAHigh = 0
 #endif
     };
 
@@ -187,7 +181,6 @@ ProcXF86DRIAuthConnection(register ClientPtr client)
     xXF86DRIAuthConnectionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .authenticated = 1
     };
 
@@ -227,7 +220,6 @@ ProcXF86DRIGetClientDriverName(register ClientPtr client)
     xXF86DRIGetClientDriverNameReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .clientDriverNameLength = 0
     };
     char *clientDriverName;
 
@@ -262,7 +254,6 @@ ProcXF86DRICreateContext(register ClientPtr client)
     xXF86DRICreateContextReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
     ScreenPtr pScreen;
 
@@ -308,7 +299,6 @@ ProcXF86DRICreateDrawable(ClientPtr client)
     xXF86DRICreateDrawableReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
     DrawablePtr pDrawable;
     int rc;
@@ -367,11 +357,10 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     xXF86DRIGetDrawableInfoReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
     DrawablePtr pDrawable;
     int X, Y, W, H;
-    drm_clip_rect_t *pClipRects, *pClippedRects;
+    drm_clip_rect_t *pClipRects, *pClippedRects = NULL;
     drm_clip_rect_t *pBackClipRects;
     int backX, backY, rc;
 
@@ -415,8 +404,6 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     if (rep.numBackClipRects)
         rep.length += sizeof(drm_clip_rect_t) * rep.numBackClipRects;
 
-    pClippedRects = pClipRects;
-
     if (rep.numClipRects) {
         /* Clip cliprects to screen dimensions (redirected windows) */
         pClippedRects = calloc(rep.numClipRects, sizeof(drm_clip_rect_t));
@@ -428,10 +415,12 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
         int i, j;
 
         for (i = 0, j = 0; i < rep.numClipRects; i++) {
-            pClippedRects[j].x1 = max(pClipRects[i].x1, 0);
-            pClippedRects[j].y1 = max(pClipRects[i].y1, 0);
-            pClippedRects[j].x2 = min(pClipRects[i].x2, pScreen->width);
-            pClippedRects[j].y2 = min(pClipRects[i].y2, pScreen->height);
+            pClippedRects[j] = (drm_clip_rect_t) {
+                .x1 = max(pClipRects[i].x1, 0),
+                .y1 = max(pClipRects[i].y1, 0),
+                .x2 = min(pClipRects[i].x2, pScreen->width),
+                .y2 = min(pClipRects[i].y2, pScreen->height),
+            };
 
             if (pClippedRects[j].x1 < pClippedRects[j].x2 &&
                 pClippedRects[j].y1 < pClippedRects[j].y2) {
@@ -469,7 +458,6 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
     xXF86DRIGetDeviceInfoReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
     drm_handle_t hFrameBuffer;
     void *pDevPrivate;
@@ -493,8 +481,6 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
     rep.hFrameBufferLow = (CARD32) (hFrameBuffer & 0xffffffff);
 #if defined(LONG64) && !defined(__linux__)
     rep.hFrameBufferHigh = (CARD32) (hFrameBuffer >> 32);
-#else
-    rep.hFrameBufferHigh = 0;
 #endif
 
     if (rep.devPrivateSize) {
