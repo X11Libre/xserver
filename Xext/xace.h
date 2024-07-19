@@ -56,6 +56,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 extern CallbackListPtr XaceHooks[XACE_NUM_HOOKS];
 
+/* Entry point for hook functions.  Called by Xserver.
+ * Required by several modules
+ */
+_X_EXPORT Bool XaceRegisterCallback(int hook, CallbackProcPtr callback, void *data);
+_X_EXPORT Bool XaceDeleteCallback(int hook, CallbackProcPtr callback, void *data);
+
 /* determine whether any callbacks are present for the XACE hook */
 int XaceHookIsSet(int hook);
 
@@ -88,16 +94,7 @@ int XaceHookScreensaverAccess(ClientPtr client, ScreenPtr screen, Mask access_mo
 int XaceHookAuthAvail(ClientPtr client, XID authId);
 int XaceHookKeyAvail(xEventPtr ev, DeviceIntPtr dev, int count);
 
-
-/* Register a callback for a given hook.
- */
-#define XaceRegisterCallback(hook,callback,data) \
-    AddCallback(XaceHooks+(hook), callback, data)
-
-/* Unregister an existing callback for a given hook.
- */
-#define XaceDeleteCallback(hook,callback,data) \
-    DeleteCallback(XaceHooks+(hook), callback, data)
+/* Register / unregister a callback for a given hook. */
 
 /* XTrans wrappers for use by security modules
  */
