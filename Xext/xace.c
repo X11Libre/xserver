@@ -280,3 +280,15 @@ XaceIsLocal(ClientPtr client)
 {
     return ClientIsLocal(client);
 }
+
+Bool
+XaceRegisterCallback(int hook, CallbackProcPtr callback, void *data)
+{
+    return AddCallback(XaceHooks+(hook), callback, data);
+}
+
+Bool
+XaceDeleteCallback(int hook, CallbackProcPtr callback, void *data)
+{
+    return DeleteCallback(XaceHooks+(hook), callback, data);
+}
