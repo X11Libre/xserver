@@ -59,6 +59,9 @@ typedef enum { ClientStateInitial,
     ClientStateGone
 } ClientState;
 
+/* currently largest one in use is 4 */
+#define MAX_CLIENT_RECV_FD	8
+
 struct _Client {
     void *requestBuffer;
     void *osPrivate;             /* for OS layer, including scheduler */
@@ -96,7 +99,16 @@ struct _Client {
 
     DeviceIntPtr clientPtr;
     struct _ClientId *clientIds;
+
+    /* req_fds is kept at its original offset and ReadFdFromClient() is kept
+       exported purely for driver ABI: the proprietary nvidia blob (470/550/570)
+       sets client->req_fds and calls ReadFdFromClient() directly. In-tree fd
+       handling now uses recv_fd_list[] (populated once when the request is read)
+       instead. */
     int req_fds;
+
+    int recv_fd_count;
+    int recv_fd_list[MAX_CLIENT_RECV_FD];
 
     /* driver should never ever touch anything beyond here */
     struct xorg_list saveSets;

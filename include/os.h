@@ -102,6 +102,9 @@ typedef struct _NewClientRec *NewClientPtr;
 #include <stdio.h>
 #include <stdarg.h>
 
+/* Kept exported for driver ABI (the nvidia blob imports it): pulls the next
+   passed fd for the current request. In-tree code reads client->recv_fd_list[]
+   directly instead. */
 extern _X_EXPORT int ReadFdFromClient(ClientPtr client);
 
 /**

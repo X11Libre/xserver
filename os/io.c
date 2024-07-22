@@ -267,14 +267,6 @@ ReadRequestFromClient(ClientPtr client)
         oc->input = oci;
     }
 
-#if XTRANS_SEND_FDS
-    /* Discard any unused file descriptors */
-    while (client->req_fds > 0) {
-        int req_fd = ReadFdFromClient(client);
-        if (req_fd >= 0)
-            close(req_fd);
-    }
-#endif
     /* advance to start of next request */
 
     oci->bufptr += oci->lenLastReq;
@@ -480,25 +472,45 @@ ReadRequestFromClient(ClientPtr client)
                client->index, req->reqType, req->data, req->length);
     }
 #endif
+
+    /* read the passed fds into Client struct */
+    client->recv_fd_count = 0;
+#if XTRANS_SEND_FDS
+    /* _XSERVTransRecvFd() returns the fd (>= 0, and 0 is a valid fd) or -1 */
+    for (;((client->recv_fd_count < MAX_CLIENT_RECV_FD) &&
+           (client->recv_fd_list[client->recv_fd_count] = _XSERVTransRecvFd(oc->trans_conn)) >= 0);
+          client->recv_fd_count++) {}
+    /* just in case somebody sent a massive number of fds */
+    int _fd = -1;
+    while ((_fd = _XSERVTransRecvFd(oc->trans_conn)) >= 0)
+        close(_fd);
+#endif
+
+    for (int x=client->recv_fd_count; x<MAX_CLIENT_RECV_FD; x++)
+        client->recv_fd_list[x] = -1;
+
     return needed;
 }
 
+/* Compatibility shim kept exported for the proprietary nvidia driver, which
+   sets client->req_fds and calls ReadFdFromClient() to pull the passed fds one
+   at a time. The fds are now collected up-front into client->recv_fd_list[] when
+   the request is read, so this just hands out the next unclaimed slot (marking
+   it -1 so Dispatch()'s cleanup doesn't close it). In-tree callers read
+   recv_fd_list[] directly and do not use this. */
 int
 ReadFdFromClient(ClientPtr client)
 {
-    int fd = -1;
-
-#if XTRANS_SEND_FDS
-    if (client->req_fds > 0) {
-        OsCommPtr oc = (OsCommPtr) client->osPrivate;
-
-        --client->req_fds;
-        fd = _XSERVTransRecvFd(oc->trans_conn);
-    } else
-        LogMessage(X_ERROR, "Request asks for FD without setting req_fds\n");
-#endif
-
-    return fd;
+    for (int i = 0; i < MAX_CLIENT_RECV_FD; i++) {
+        if (client->recv_fd_list[i] >= 0) {
+            int fd = client->recv_fd_list[i];
+            client->recv_fd_list[i] = -1;
+            if (client->req_fds > 0)
+                client->req_fds--;
+            return fd;
+        }
+    }
+    return -1;
 }
 
 int

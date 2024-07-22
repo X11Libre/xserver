@@ -212,7 +212,6 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
     CARD32 stride, offset;
     int rc;
 
-    SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
     rc = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
     if (rc != Success) {
@@ -240,7 +239,8 @@ proc_dri3_pixmap_from_buffer(ClientPtr client)
         }
     }
 
-    fd = ReadFdFromClient(client);
+    fd = client->recv_fd_list[0];
+    client->recv_fd_list[0] = -1;
     if (fd < 0)
         return BadValue;
 
@@ -325,14 +325,14 @@ proc_dri3_fence_from_fd(ClientPtr client)
     int fd;
     int status;
 
-    SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->fence, client);
 
     status = dixLookupDrawable(&drawable, stuff->drawable, client, M_ANY, DixGetAttrAccess);
     if (status != Success)
         return status;
 
-    fd = ReadFdFromClient(client);
+    fd = client->recv_fd_list[0];
+    client->recv_fd_list[0] = -1;
     if (fd < 0)
         return BadValue;
 
@@ -442,7 +442,6 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
     int rc;
     int i;
 
-    SetReqFds(client, stuff->num_buffers);
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
     rc = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
     if (rc != Success) {
@@ -477,7 +476,7 @@ proc_dri3_pixmap_from_buffers(ClientPtr client)
     }
 
     for (i = 0; i < stuff->num_buffers; i++) {
-        fds[i] = ReadFdFromClient(client);
+        fds[i] = client->recv_fd_list[i];
         if (fds[i] < 0) {
             while (--i >= 0)
                 close(fds[i]);
@@ -612,7 +611,6 @@ proc_dri3_import_syncobj(ClientPtr client)
     int fd;
     int status;
 
-    SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->syncobj, client);
 
     status = dixLookupDrawable(&drawable, stuff->drawable, client,
@@ -622,7 +620,8 @@ proc_dri3_import_syncobj(ClientPtr client)
 
     screen = drawable->pScreen;
 
-    fd = ReadFdFromClient(client);
+    fd = client->recv_fd_list[0];
+    client->recv_fd_list[0] = -1;
     if (fd < 0)
         return BadValue;
 

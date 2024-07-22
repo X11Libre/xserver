@@ -1141,13 +1141,14 @@ ProcShmAttachFd(ClientPtr client)
     ShmDescPtr shmdesc;
     struct stat statb;
 
-    SetReqFds(client, 1);
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
         client->errorValue = stuff->readOnly;
         return BadValue;
     }
-    fd = ReadFdFromClient(client);
+    fd = client->recv_fd_list[0];
+    client->recv_fd_list[0] = -1;
+
     if (fd < 0)
         return BadMatch;
 
