@@ -73,6 +73,9 @@ typedef struct _saveSet {
 #define SaveSetAssignToRoot(ss,tr)  ((ss).toRoot = (tr))
 #define SaveSetAssignMap(ss,m)      ((ss).map = (m))
 
+/* currently largest one in use is 4 */
+#define MAX_CLIENT_RECV_FD	8
+
 typedef struct _Client {
     void *requestBuffer;
     void *osPrivate;             /* for OS layer, including scheduler */
@@ -110,7 +113,9 @@ typedef struct _Client {
 
     DeviceIntPtr clientPtr;
     ClientIdPtr clientIds;
-    int req_fds;
+
+    int recv_fd_count;
+    int recv_fd_list[MAX_CLIENT_RECV_FD];
 } ClientRec;
 
 typedef struct _WorkQueue {

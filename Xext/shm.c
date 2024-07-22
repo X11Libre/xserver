@@ -1151,14 +1151,15 @@ ProcShmAttachFd(ClientPtr client)
     REQUEST(xShmAttachFdReq);
     struct stat statb;
 
-    SetReqFds(client, 1);
     REQUEST_SIZE_MATCH(xShmAttachFdReq);
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
     if ((stuff->readOnly != xTrue) && (stuff->readOnly != xFalse)) {
         client->errorValue = stuff->readOnly;
         return BadValue;
     }
-    fd = ReadFdFromClient(client);
+    fd = client->recv_fd_list[0];
+    client->recv_fd_list[0] = -1;
+
     if (fd < 0)
         return BadMatch;
 
@@ -1462,7 +1463,6 @@ static int _X_COLD
 SProcShmAttachFd(ClientPtr client)
 {
     REQUEST(xShmAttachFdReq);
-    SetReqFds(client, 1);
     REQUEST_SIZE_MATCH(xShmAttachFdReq);
     swapl(&stuff->shmseg);
     return ProcShmAttachFd(client);
