@@ -86,8 +86,6 @@ typedef struct _NewClientRec *NewClientPtr;
 
 extern _X_EXPORT int ReadRequestFromClient(ClientPtr /*client */ );
 
-extern _X_EXPORT int ReadFdFromClient(ClientPtr client);
-
 extern _X_EXPORT int WriteFdToClient(ClientPtr client, int fd, Bool do_close);
 
 extern _X_EXPORT Bool InsertFakeRequest(ClientPtr /*client */ ,
