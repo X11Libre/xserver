@@ -560,6 +560,14 @@ Dispatch(void)
                             (*client->requestVector[client->majorOp]) (client);
                         currentClient = NULL;
                     }
+
+#if XTRANS_SEND_FDS
+                    /* close down all unused passed fd's */
+                    for (int x=0; x<MAX_CLIENT_RECV_FD; x++) {
+                        close(client->recv_fd_list[x]);
+                        client->recv_fd_list[x] = -1;
+                    }
+#endif
                 }
                 if (!SmartScheduleSignalEnable)
                     SmartScheduleTime = GetTimeInMillis();
