@@ -60,6 +60,11 @@ SOFTWARE.
 #include "swaprep.h"
 #include "xace.h"
 
+#ifdef PANORAMIX
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
+#endif
+
 /*****************************************************************
  * Property Stuff
  *
@@ -106,6 +111,46 @@ dixLookupProperty(PropertyPtr *result, WindowPtr pWin, Atom propertyName,
         rc = XaceHookPropertyAccess(client, pWin, &pProp, access_mode);
     *result = pProp;
     return rc;
+}
+
+static void
+setVRRMode(WindowPtr pWin, WindowVRRMode mode)
+{
+    SetWindowVRRModeProcPtr proc = pWin->drawable.pScreen->SetWindowVRRMode;
+    if (proc != NULL)
+        proc(pWin, mode);
+}
+
+static void
+notifyVRRMode(ClientPtr pClient, WindowPtr pWindow, int state, PropertyPtr pProp)
+{
+    const char *pName = NameForAtom(pProp->propertyName);
+    if (pName == NULL || strcmp(pName, "_VARIABLE_REFRESH") || pProp->format != 32 || pProp->size != 1)
+        return;
+
+    WindowVRRMode mode = (WindowVRRMode)(state == PropertyNewValue ? (*((uint32_t*)pProp->data)) : 0);
+
+#ifdef PANORAMIX
+    if (!noPanoramiXExtension) {
+        PanoramiXRes *win;
+        int rc, j;
+
+        rc = dixLookupResourceByType((void **) &win, pWindow->drawable.id, XRT_WINDOW,
+                                     pClient, DixWriteAccess);
+        if (rc != Success)
+            goto no_panoramix;
+
+        FOR_NSCREENS_BACKWARD(j) {
+            WindowPtr pWin;
+            rc = dixLookupWindow(&pWin, win->info[j].id, pClient, DixSetPropAccess);
+            if (rc == Success)
+                setVRRMode(pWin, mode);
+        }
+    }
+    return;
+no_panoramix:
+#endif
+    setVRRMode(pWindow, mode);
 }
 
 CallbackListPtr PropertyStateCallback;
@@ -188,6 +233,7 @@ ProcRotateProperties(ClientPtr client)
         for (i = 0; i < stuff->nAtoms; i++) {
             j = (i + delta) % stuff->nAtoms;
             deliverPropertyNotifyEvent(pWin, PropertyNewValue, props[i]);
+            notifyVRRMode(client, pWin, PropertyNewValue, props[i]);
 
             /* Preserve name and devPrivates */
             props[j]->type = saved[i].type;
@@ -363,8 +409,10 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
     else
         return rc;
 
-    if (sendevent)
+    if (sendevent) {
         deliverPropertyNotifyEvent(pWin, PropertyNewValue, pProp);
+        notifyVRRMode(pClient, pWin, PropertyNewValue, pProp);
+    }
 
     return Success;
 }
@@ -394,6 +442,7 @@ DeleteProperty(ClientPtr client, WindowPtr pWin, Atom propName)
         }
 
         deliverPropertyNotifyEvent(pWin, PropertyDelete, pProp);
+        notifyVRRMode(client, pWin, PropertyDelete, pProp);
         free(pProp->data);
         dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
     }
@@ -530,7 +579,10 @@ ProcGetProperty(ClientPtr client)
     };
 
     if (stuff->delete && (reply.bytesAfter == 0))
+    {
         deliverPropertyNotifyEvent(pWin, PropertyDelete, pProp);
+        notifyVRRMode(client, pWin, PropertyDelete, pProp);
+    }
 
     WriteReplyToClient(client, sizeof(xGenericReply), &reply);
     if (len) {
