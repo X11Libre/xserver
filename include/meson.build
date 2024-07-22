@@ -327,6 +327,7 @@ conf_data.set('SYSCONS_SUPPORT', supports_syscons ? '1' : false)
 conf_data.set('WSCONS_SUPPORT', supports_wscons ? '1' : false)
 conf_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
 conf_data.set('XSERVER_PLATFORM_BUS', build_udev_kms ? '1' : false)
+conf_data.set('XSERVER_SCREEN_VRR', '1')
 
 configure_file(output : 'dix-config.h',
                configuration : conf_data)
