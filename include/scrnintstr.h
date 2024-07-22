@@ -561,6 +561,7 @@ typedef struct _Screen {
     ClipNotifyProcPtr ClipNotify;
     RestackWindowProcPtr RestackWindow;
     PaintWindowProcPtr PaintWindow;
+    SetWindowVRRModeProcPtr SetWindowVRRMode;
 
     /* Pixmap procedures */
 
