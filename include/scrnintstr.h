@@ -92,6 +92,11 @@ typedef struct _ScreenSaverStuff {
                                  Bool /*force */ );
 } ScreenSaverStuffRec;
 
+typedef enum {
+    WINDOW_VRR_DISABLED = 0,
+    WINDOW_VRR_ENABLED,
+} WindowVRRMode;
+
 /*
  *  There is a typedef for each screen function pointer so that code that
  *  needs to declare a screen function pointer (e.g. in a screen private
@@ -178,6 +183,8 @@ typedef void (*ClearToBackgroundProcPtr) (WindowPtr /*pWindow */ ,
 typedef void (*ClipNotifyProcPtr) (WindowPtr /*pWindow */ ,
                                    int /*dx */ ,
                                    int /*dy */ );
+
+typedef void (*SetWindowVRRModeProcPtr) (WindowPtr pWindow, WindowVRRMode mode);
 
 /* pixmap will exist only for the duration of the current rendering operation */
 #define CREATE_PIXMAP_USAGE_SCRATCH                     1
@@ -556,6 +563,7 @@ typedef struct _Screen {
     ClipNotifyProcPtr ClipNotify;
     RestackWindowProcPtr RestackWindow;
     PaintWindowProcPtr PaintWindow;
+    SetWindowVRRModeProcPtr SetWindowVRRMode;
 
     /* additional window destructors (replaces wrapping DestroyWindow).
        should NOT be touched outside of DIX core */
