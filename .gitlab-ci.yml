@@ -112,7 +112,7 @@ debian-bullseye:
             - $MESON_BUILDDIR/meson-logs/
             - $MESON_BUILDDIR/test/piglit-results/
     variables:
-        MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=true
+        MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true
         CCACHE_COMPILERCHECK: content
         CCACHE_DIR: /cache/xserver/cache
         LC_ALL: C.UTF-8
