@@ -110,21 +110,6 @@ AddFragment(struct xorg_list *frags, int bytes)
     }
 }
 
-/** @brief Sends all fragments in the list to the client. Does not
-           free anything.
-
-    @param client The client to send the fragments to
-    @param frags The head of the list of fragments
-*/
-static void
-WriteFragmentsToClient(ClientPtr client, struct xorg_list *frags)
-{
-    FragmentList *it;
-    xorg_list_for_each_entry(it, frags, l) {
-        WriteToClient(client, it->bytes, (char*) it + sizeof(*it));
-    }
-}
-
 /** @brief Frees a list of fragments. Does not free() root node.
 
     @param frags The head of the list of fragments
@@ -562,7 +547,14 @@ ProcXResQueryClientIds (ClientPtr client)
     rc = ConstructClientIds(client, stuff->numSpecs, specs, &ctx);
 
     if (rc == Success) {
-        assert((ctx.resultBytes & 3) == 0);
+        char buf[ctx.resultBytes];
+        char *walk = buf;
+
+        FragmentList *it;
+        xorg_list_for_each_entry(it, &ctx.response, l) {
+            memcpy(walk, FRAGMENT_DATA(it), it->bytes);
+            walk += it->bytes;
+        }
 
         xXResQueryClientIdsReply rep = {
             .type = X_Reply,
@@ -578,7 +570,7 @@ ProcXResQueryClientIds (ClientPtr client)
         }
 
         WriteToClient(client, sizeof(rep), &rep);
-        WriteFragmentsToClient(client, &ctx.response);
+        WriteToClient(client, sizeof(buf), buf);
     }
 
     DestroyConstructClientIdCtx(&ctx);
@@ -962,8 +954,17 @@ ProcXResQueryResourceBytes (ClientPtr client)
             SwapXResQueryResourceBytes(&ctx.response);
         }
 
+        char buf[ctx.resultBytes];
+        {
+            char *walk = buf;
+            FragmentList *it;
+            xorg_list_for_each_entry(it, &ctx.response, l) {
+                memcpy(walk, FRAGMENT_DATA(it), it->bytes);
+                walk += it->bytes;
+            }
+        }
         WriteToClient(client, sizeof(rep), &rep);
-        WriteFragmentsToClient(client, &ctx.response);
+        WriteToClient(client, sizeof(buf), buf);
     }
 
     DestroyConstructResourceBytesCtx(&ctx);
