@@ -935,7 +935,6 @@ ProcXvListImageFormats(ClientPtr client)
     XvPortPtr pPort;
     XvImagePtr pImage;
     int i;
-    xvImageFormatInfo info;
 
     REQUEST(xvListImageFormatsReq);
 
@@ -943,12 +942,13 @@ ProcXvListImageFormats(ClientPtr client)
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
+    int payload_size = pPort->pAdaptor->nImages * sz_xvImageFormatInfo;
+
     xvListImageFormatsReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_formats = pPort->pAdaptor->nImages,
-        .length =
-            bytes_to_int32(pPort->pAdaptor->nImages * sz_xvImageFormatInfo)
+        .length = bytes_to_int32(payload_size)
     };
 
     if (client->swapped) {
@@ -961,48 +961,52 @@ ProcXvListImageFormats(ClientPtr client)
 
     pImage = pPort->pAdaptor->pImages;
 
+    xvImageFormatInfo info[pPort->pAdaptor->nImages];
+    memset(info, 0, sizeof(info));
+
     for (i = 0; i < pPort->pAdaptor->nImages; i++, pImage++) {
-        info.id = pImage->id;
-        info.type = pImage->type;
-        info.byte_order = pImage->byte_order;
-        memcpy(&info.guid, pImage->guid, 16);
-        info.bpp = pImage->bits_per_pixel;
-        info.num_planes = pImage->num_planes;
-        info.depth = pImage->depth;
-        info.red_mask = pImage->red_mask;
-        info.green_mask = pImage->green_mask;
-        info.blue_mask = pImage->blue_mask;
-        info.format = pImage->format;
-        info.y_sample_bits = pImage->y_sample_bits;
-        info.u_sample_bits = pImage->u_sample_bits;
-        info.v_sample_bits = pImage->v_sample_bits;
-        info.horz_y_period = pImage->horz_y_period;
-        info.horz_u_period = pImage->horz_u_period;
-        info.horz_v_period = pImage->horz_v_period;
-        info.vert_y_period = pImage->vert_y_period;
-        info.vert_u_period = pImage->vert_u_period;
-        info.vert_v_period = pImage->vert_v_period;
-        memcpy(&info.comp_order, pImage->component_order, 32);
-        info.scanline_order = pImage->scanline_order;
+        info[i].id = pImage->id;
+        info[i].type = pImage->type;
+        info[i].byte_order = pImage->byte_order;
+        memcpy(&info[i].guid, pImage->guid, 16);
+        info[i].bpp = pImage->bits_per_pixel;
+        info[i].num_planes = pImage->num_planes;
+        info[i].depth = pImage->depth;
+        info[i].red_mask = pImage->red_mask;
+        info[i].green_mask = pImage->green_mask;
+        info[i].blue_mask = pImage->blue_mask;
+        info[i].format = pImage->format;
+        info[i].y_sample_bits = pImage->y_sample_bits;
+        info[i].u_sample_bits = pImage->u_sample_bits;
+        info[i].v_sample_bits = pImage->v_sample_bits;
+        info[i].horz_y_period = pImage->horz_y_period;
+        info[i].horz_u_period = pImage->horz_u_period;
+        info[i].horz_v_period = pImage->horz_v_period;
+        info[i].vert_y_period = pImage->vert_y_period;
+        info[i].vert_u_period = pImage->vert_u_period;
+        info[i].vert_v_period = pImage->vert_v_period;
+        memcpy(&info[i].comp_order, pImage->component_order, 32);
+        info[i].scanline_order = pImage->scanline_order;
 
         if (client->swapped) {
-            swapl(&info.id);
-            swapl(&info.red_mask);
-            swapl(&info.green_mask);
-            swapl(&info.blue_mask);
-            swapl(&info.y_sample_bits);
-            swapl(&info.u_sample_bits);
-            swapl(&info.v_sample_bits);
-            swapl(&info.horz_y_period);
-            swapl(&info.horz_u_period);
-            swapl(&info.horz_v_period);
-            swapl(&info.vert_y_period);
-            swapl(&info.vert_u_period);
-            swapl(&info.vert_v_period);
+            swapl(&info[i].id);
+            swapl(&info[i].red_mask);
+            swapl(&info[i].green_mask);
+            swapl(&info[i].blue_mask);
+            swapl(&info[i].y_sample_bits);
+            swapl(&info[i].u_sample_bits);
+            swapl(&info[i].v_sample_bits);
+            swapl(&info[i].horz_y_period);
+            swapl(&info[i].horz_u_period);
+            swapl(&info[i].horz_v_period);
+            swapl(&info[i].vert_y_period);
+            swapl(&info[i].vert_u_period);
+            swapl(&info[i].vert_v_period);
         }
-
-        WriteToClient(client, sizeof(info), &info);
     }
+
+    if (sizeof(info))
+        WriteToClient(client, sizeof(info), info);
 
     return Success;
 }
