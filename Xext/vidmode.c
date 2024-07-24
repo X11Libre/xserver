@@ -310,6 +310,72 @@ ProcVidModeGetModeLine(ClientPtr client)
     return Success;
 }
 
+static char *fillModeInfoV1(ClientPtr client, char *buf, int dotClock, DisplayModePtr mode)
+{
+    xXF86OldVidModeModeInfo info = {
+        .dotclock = dotClock,
+        .hdisplay = VidModeGetModeValue(mode, VIDMODE_H_DISPLAY),
+        .hsyncstart = VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART),
+        .hsyncend = VidModeGetModeValue(mode, VIDMODE_H_SYNCEND),
+        .htotal = VidModeGetModeValue(mode, VIDMODE_H_TOTAL),
+        .vdisplay = VidModeGetModeValue(mode, VIDMODE_V_DISPLAY),
+        .vsyncstart = VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART),
+        .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
+        .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
+        .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
+    };
+
+    if (client->swapped) {
+        swapl(&info.dotclock);
+        swaps(&info.hdisplay);
+        swaps(&info.hsyncstart);
+        swaps(&info.hsyncend);
+        swaps(&info.htotal);
+        swaps(&info.vdisplay);
+        swaps(&info.vsyncstart);
+        swaps(&info.vsyncend);
+        swaps(&info.vtotal);
+        swapl(&info.flags);
+    }
+
+    memcpy(buf, &info, sizeof(info));
+    return buf + sizeof(info);
+}
+
+static char *fillModeInfoV2(ClientPtr client, char *buf, int dotClock, DisplayModePtr mode)
+{
+    xXF86VidModeModeInfo info = {
+        .dotclock = dotClock,
+        .hdisplay = VidModeGetModeValue(mode, VIDMODE_H_DISPLAY),
+        .hsyncstart = VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART),
+        .hsyncend = VidModeGetModeValue(mode, VIDMODE_H_SYNCEND),
+        .htotal = VidModeGetModeValue(mode, VIDMODE_H_TOTAL),
+        .hskew = VidModeGetModeValue(mode, VIDMODE_H_SKEW),
+        .vdisplay = VidModeGetModeValue(mode, VIDMODE_V_DISPLAY),
+        .vsyncstart = VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART),
+        .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
+        .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
+        .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
+    };
+
+    if (client->swapped) {
+        swapl(&info.dotclock);
+        swaps(&info.hdisplay);
+        swaps(&info.hsyncstart);
+        swaps(&info.hsyncend);
+        swaps(&info.htotal);
+        swapl(&info.hskew);
+        swaps(&info.vdisplay);
+        swaps(&info.vsyncstart);
+        swaps(&info.vsyncend);
+        swaps(&info.vtotal);
+        swapl(&info.flags);
+    }
+
+    memcpy(buf, &info, sizeof(info));
+    return buf + sizeof(info);
+}
+
 static int
 ProcVidModeGetAllModeLines(ClientPtr client)
 {
@@ -355,58 +421,21 @@ ProcVidModeGetAllModeLines(ClientPtr client)
         swapl(&rep.length);
         swapl(&rep.modecount);
     }
-    WriteToClient(client, sizeof(xXF86VidModeGetAllModeLinesReply), &rep);
+
+    char *payload = calloc(1, payload_len);
+    if (!payload)
+        return BadAlloc;
+
+    char *walk = payload;
 
     do {
-        xXF86VidModeModeInfo mdinf = {
-            .dotclock = dotClock,
-            .hdisplay = VidModeGetModeValue(mode, VIDMODE_H_DISPLAY),
-            .hsyncstart = VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART),
-            .hsyncend = VidModeGetModeValue(mode, VIDMODE_H_SYNCEND),
-            .htotal = VidModeGetModeValue(mode, VIDMODE_H_TOTAL),
-            .hskew = VidModeGetModeValue(mode, VIDMODE_H_SKEW),
-            .vdisplay = VidModeGetModeValue(mode, VIDMODE_V_DISPLAY),
-            .vsyncstart = VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART),
-            .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
-            .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
-            .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
-            .privsize = 0
-        };
-        if (client->swapped) {
-            swapl(&mdinf.dotclock);
-            swaps(&mdinf.hdisplay);
-            swaps(&mdinf.hsyncstart);
-            swaps(&mdinf.hsyncend);
-            swaps(&mdinf.htotal);
-            swapl(&mdinf.hskew);
-            swaps(&mdinf.vdisplay);
-            swaps(&mdinf.vsyncstart);
-            swaps(&mdinf.vsyncend);
-            swaps(&mdinf.vtotal);
-            swapl(&mdinf.flags);
-            swapl(&mdinf.privsize);
-        }
-        if (ver < 2) {
-            xXF86OldVidModeModeInfo oldmdinf = {
-                .dotclock = mdinf.dotclock,
-                .hdisplay = mdinf.hdisplay,
-                .hsyncstart = mdinf.hsyncstart,
-                .hsyncend = mdinf.hsyncend,
-                .htotal = mdinf.htotal,
-                .vdisplay = mdinf.vdisplay,
-                .vsyncstart = mdinf.vsyncstart,
-                .vsyncend = mdinf.vsyncend,
-                .vtotal = mdinf.vtotal,
-                .flags = mdinf.flags,
-                .privsize = mdinf.privsize
-            };
-            WriteToClient(client, sizeof(xXF86OldVidModeModeInfo), &oldmdinf);
-        }
-        else {
-            WriteToClient(client, sizeof(xXF86VidModeModeInfo), &mdinf);
-        }
-
+        walk = (ver < 2) ? fillModeInfoV1(client, walk, dotClock, mode)
+                         : fillModeInfoV2(client, walk, dotClock, mode);
     } while (pVidMode->GetNextModeline(pScreen, &mode, &dotClock));
+
+    WriteToClient(client, sizeof(xXF86VidModeGetAllModeLinesReply), &rep);
+    WriteToClient(client, payload_len, payload);
+    free(payload);
 
     return Success;
 }
