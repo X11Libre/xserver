@@ -82,8 +82,6 @@ ProcXvQueryExtension(ClientPtr client)
 static int
 ProcXvQueryAdaptors(ClientPtr client)
 {
-    xvFormat format;
-    xvAdaptorInfo ainfo;
     int totalSize, na, nf, rc;
     int nameSize;
     XvAdaptorPtr pa;
@@ -129,50 +127,57 @@ ProcXvQueryAdaptors(ClientPtr client)
         pa++;
     }
 
+    char *payload = calloc(1, totalSize);
+    if (!payload)
+        return BadAlloc;
+    char *walk = payload;
+
     rep.length = bytes_to_int32(totalSize);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.num_adaptors);
-        WriteToClient(client, sizeof(rep), &rep);
     }
 
     na = pxvs->nAdaptors;
     pa = pxvs->pAdaptors;
     while (na--) {
+        xvAdaptorInfo *ainfo = (xvAdaptorInfo*)walk;
 
-        ainfo.base_id = pa->base_id;
-        ainfo.num_ports = pa->nPorts;
-        ainfo.type = pa->type;
-        ainfo.name_size = nameSize = strlen(pa->name);
-        ainfo.num_formats = pa->nFormats;
+        ainfo->base_id = pa->base_id;
+        ainfo->num_ports = pa->nPorts;
+        ainfo->type = pa->type;
+        ainfo->name_size = nameSize = strlen(pa->name);
+        ainfo->num_formats = pa->nFormats;
 
         if (client->swapped) {
-            swapl(&ainfo.base_id);
-            swaps(&ainfo.name_size);
-            swaps(&ainfo.num_ports);
-            swaps(&ainfo.num_formats);
+            swapl(&ainfo->base_id);
+            swaps(&ainfo->name_size);
+            swaps(&ainfo->num_ports);
+            swaps(&ainfo->num_formats);
         }
 
-        WriteToClient(client, sizeof(ainfo), &ainfo);
-
-        WriteToClient(client, nameSize, pa->name);
+        walk += sizeof(ainfo);
+        memcpy(walk, pa->name, nameSize);
+        walk += pad_to_int32(nameSize);
 
         nf = pa->nFormats;
         pf = pa->pFormats;
         while (nf--) {
-            format.depth = pf->depth;
-            format.visual = pf->visual;
-            if (client->swapped) swapl(&format.visual);
-            WriteToClient(client, sizeof(format), &format);
+            xvFormat *format = (xvFormat *)walk;
+            format->depth = pf->depth;
+            format->visual = pf->visual;
+            if (client->swapped) swapl(&format->visual);
             pf++;
         }
 
         pa++;
-
     }
 
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, totalSize, payload);
+    free(payload);
     return Success;
 }
 
