@@ -1946,9 +1946,7 @@ PanoramiXGetImage(ClientPtr client)
     DrawablePtr drawables[MAXSCREENS];
     DrawablePtr pDraw;
     PanoramiXRes *draw;
-    xGetImageReply xgi;
     Bool isRoot;
-    char *pBuf;
     int i, x, y, w, h, format, rc;
     Mask plane = 0, planemask;
     int linesDone, nlines, linesPerBuf;
@@ -2020,12 +2018,6 @@ PanoramiXGetImage(ClientPtr client)
                                               IncludeInferiors);
     }
 
-    xgi = (xGetImageReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .visual = wVisual(((WindowPtr) pDraw)),
-        .depth = pDraw->depth
-    };
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(w, pDraw->depth);
         length = widthBytesLine * h;
@@ -2039,8 +2031,6 @@ PanoramiXGetImage(ClientPtr client)
 
     }
 
-    xgi.length = bytes_to_int32(length);
-
     if (widthBytesLine == 0 || h == 0)
         linesPerBuf = 0;
     else if (widthBytesLine >= XINERAMA_IMAGE_BUFSIZE)
@@ -2050,10 +2040,10 @@ PanoramiXGetImage(ClientPtr client)
         if (linesPerBuf > h)
             linesPerBuf = h;
     }
-    if (!(pBuf = xallocarray(linesPerBuf, widthBytesLine)))
-        return BadAlloc;
 
-    WriteReplyToClient(client, sizeof(xGetImageReply), &xgi);
+    char payload[length];
+    memset(payload, 0, sizeof(payload));
+    char *walk = payload;
 
     if (linesPerBuf == 0) {
         /* nothing to do */
@@ -2063,14 +2053,11 @@ PanoramiXGetImage(ClientPtr client)
         while (h - linesDone > 0) {
             nlines = min(linesPerBuf, h - linesDone);
 
-            if (pDraw->depth == 1)
-                memset(pBuf, 0, nlines * widthBytesLine);
-
             XineramaGetImageData(drawables, x, y + linesDone, w, nlines,
-                                 format, planemask, pBuf, widthBytesLine,
+                                 format, planemask, walk, widthBytesLine,
                                  isRoot);
 
-            WriteToClient(client, (int) (nlines * widthBytesLine), pBuf);
+            walk += nlines * widthBytesLine;
             linesDone += nlines;
         }
     }
@@ -2081,20 +2068,30 @@ PanoramiXGetImage(ClientPtr client)
                 while (h - linesDone > 0) {
                     nlines = min(linesPerBuf, h - linesDone);
 
-                    memset(pBuf, 0, nlines * widthBytesLine);
-
                     XineramaGetImageData(drawables, x, y + linesDone, w,
-                                         nlines, format, plane, pBuf,
+                                         nlines, format, plane, walk,
                                          widthBytesLine, isRoot);
 
-                    WriteToClient(client, (int)(nlines * widthBytesLine), pBuf);
-
+                    walk += nlines * widthBytesLine;
                     linesDone += nlines;
                 }
             }
         }
     }
-    free(pBuf);
+
+    xGetImageReply xgi = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .visual = wVisual(((WindowPtr) pDraw)),
+        .depth = pDraw->depth,
+        .length = bytes_to_int32(length),
+    };
+
+    WriteReplyToClient(client, sizeof(xGetImageReply), &xgi);
+
+    if (length)
+        WriteToClient(client, length, payload);
+
     return Success;
 }
 
