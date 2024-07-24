@@ -2093,7 +2093,7 @@ PanoramiXGetImage(ClientPtr client)
             if (!pBuf)
                 return BadAlloc;
             XineramaGetImageData(drawables, x, y + linesDone, w, nlines,
-                                 format, planemask, pBuf, widthBytesLine,
+                                 format, planemask, walk, widthBytesLine,
                                  isRoot);
 
             linesDone += nlines;
@@ -2110,7 +2110,7 @@ PanoramiXGetImage(ClientPtr client)
                     if (!pBuf)
                         return BadAlloc;
                     XineramaGetImageData(drawables, x, y + linesDone, w,
-                                         nlines, format, plane, pBuf,
+                                         nlines, format, plane, walk,
                                          widthBytesLine, isRoot);
 
                     linesDone += nlines;
