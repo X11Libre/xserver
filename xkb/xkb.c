@@ -6039,20 +6039,21 @@ ProcXkbGetKbdByName(ClientPtr client)
         .length = payload_length,
     };
 
+    char *payload_buffer = calloc(1, payload_length * 4);
+    if (!payload_buffer)
+        return BadAlloc;
+
+    char *payload_walk = payload_buffer;
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.found);
         swaps(&rep.reported);
     }
-    WriteToClient(client, SIZEOF(xkbGetKbdByNameReply), &rep);
 
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
-        int sz = (mrep.length * sizeof(CARD32)) - (sizeof(mrep) - sizeof(xGenericReply));
-        char *buf = calloc(1, sz);
-        if (!buf)
-            return BadAlloc;
-
+        char *buf = payload_walk + sizeof(mrep);
         XkbAssembleMap(client, xkb, mrep, buf);
 
         if (client->swapped) {
@@ -6062,17 +6063,13 @@ ProcXkbGetKbdByName(ClientPtr client)
             swaps(&mrep.totalSyms);
             swaps(&mrep.totalActs);
         }
-        WriteToClient(client, sizeof(mrep), &mrep);
-        WriteToClient(client, sz, buf);
-        free(buf);
+
+        memcpy(payload_walk, &mrep, sizeof(mrep));
+        payload_walk = buf + (mrep.length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
     }
 
     if (reported & XkbGBN_CompatMapMask) {
-        int sz = crep.length * sizeof(CARD32);
-        char *buf = calloc(1, sz);
-        if (!buf)
-            return BadAlloc;
-
+        char *buf = payload_walk + sizeof(crep);
         XkbAssembleCompatMap(client, new->compat, crep, buf);
 
         if (client->swapped) {
@@ -6083,17 +6080,12 @@ ProcXkbGetKbdByName(ClientPtr client)
             swaps(&crep.nTotalSI);
         }
 
-        WriteToClient(client, sizeof(crep), &crep);
-        WriteToClient(client, sz, buf);
-        free(buf);
+        memcpy(payload_walk, &crep, sizeof(crep));
+        payload_walk = buf + (crep.length * 4) - (sizeof(crep) - sizeof(xGenericReply));
     }
 
     if (reported & XkbGBN_IndicatorMapMask) {
-        int sz = irep.length * sizeof(CARD32);
-        char *buf = calloc(1, sz);
-        if (!buf)
-            return BadAlloc;
-
+        char *buf = payload_walk + sizeof(irep);
         XkbAssembleIndicatorMap(client, new->indicators, irep, buf);
 
         if (client->swapped) {
@@ -6103,15 +6095,12 @@ ProcXkbGetKbdByName(ClientPtr client)
             swapl(&irep.realIndicators);
         }
 
-        WriteToClient(client, sizeof(irep), &irep);
-        WriteToClient(client, sz, buf);
-        free(buf);
+        memcpy(payload_walk, &irep, sizeof(irep));
+        payload_walk = buf + (irep.length * 4) - (sizeof(irep) - sizeof(xGenericReply));
     }
 
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask)) {
-        int sz = nrep.length * sizeof(CARD32);
-        char *buf = calloc(1, sz);
-
+        char *buf = payload_walk + sizeof(nrep);
         XkbAssembleNames(client, new, nrep, buf);
 
         if (client->swapped) {
@@ -6122,14 +6111,12 @@ ProcXkbGetKbdByName(ClientPtr client)
             swapl(&nrep.indicators);
         }
 
-        WriteToClient(client, sizeof(nrep), &nrep);
-        WriteToClient(client, sz, buf);
-        free(buf);
+        memcpy(payload_walk, &nrep, sizeof(nrep));
+        payload_walk = buf + (nrep.length * 4) - (sizeof(nrep) - sizeof(xGenericReply));
     }
 
     if (reported & XkbGBN_GeometryMask) {
-        char buf[grep.length * 4];
-
+        char *buf = payload_walk + sizeof(grep);
         XkbAssembleGeometry(client, new->geom, grep, buf);
 
         if (client->swapped) {
@@ -6146,9 +6133,14 @@ ProcXkbGetKbdByName(ClientPtr client)
             swaps(&grep.nKeyAliases);
         }
 
-        WriteToClient(client, sizeof(xkbGetGeometryReply), &grep);
-        WriteToClient(client, sizeof(buf), buf);
+        memcpy(payload_walk, &grep, sizeof(grep));
+        payload_walk = buf + (grep.length * 4) - (sizeof(grep) - sizeof(xGenericReply));
     }
+
+    WriteToClient(client, sizeof(xkbGetKbdByNameReply), &rep);
+    WriteToClient(client, payload_length * 4, payload_buffer);
+
+    free(payload_buffer);
 
     if (loaded) {
         XkbDescPtr old_xkb;
