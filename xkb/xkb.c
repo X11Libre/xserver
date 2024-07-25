@@ -1403,16 +1403,9 @@ XkbComputeGetMapReplySize(XkbDescPtr xkb, xkbGetMapReply * rep)
     return Success;
 }
 
-static int
-XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep)
+static void
+XkbAssembleMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep, char *desc)
 {
-    int len = (rep.length * sizeof(CARD32)) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
-    char *start = calloc(1, len);
-    if (!start)
-        return BadAlloc;
-
-    char *desc = start;
-
     if (rep.nTypes > 0)
         desc = XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, desc, client);
     if (rep.nKeySyms > 0)
@@ -1437,22 +1430,6 @@ XkbSendMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep)
         desc = XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, desc);
     if (rep.totalVModMapKeys > 0)
         desc = XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, desc);
-    if ((desc - start) != (len)) {
-        ErrorF
-            ("[xkb] BOGUS LENGTH in write keyboard desc, expected %d, got %ld\n",
-             len, (unsigned long) (desc - start));
-    }
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.present);
-        swaps(&rep.totalSyms);
-        swaps(&rep.totalActs);
-    }
-    WriteToClient(client, sizeof(xkbGetMapReply), &rep);
-    WriteToClient(client, len, start);
-    free(start);
-    return Success;
 }
 
 int
@@ -1567,7 +1544,26 @@ ProcXkbGetMap(ClientPtr client)
 
     if ((status = XkbComputeGetMapReplySize(xkb, &rep)) != Success)
         return status;
-    return XkbSendMap(client, xkb, rep);
+
+    int payload_len = (rep.length * sizeof(CARD32)) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
+    char *payload_buf = calloc(1, payload_len);
+    if (!payload_buf)
+        return BadAlloc;
+
+    XkbAssembleMap(client, xkb, rep, payload_buf);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.present);
+        swaps(&rep.totalSyms);
+        swaps(&rep.totalActs);
+    }
+
+    WriteToClient(client, sizeof(xkbGetMapReply), &rep);
+    WriteToClient(client, payload_len, payload_buf);
+    free(payload_buf);
+    return Success;
 }
 
 /***====================================================================***/
@@ -6048,8 +6044,27 @@ ProcXkbGetKbdByName(ClientPtr client)
         swaps(&rep.reported);
     }
     WriteToClient(client, SIZEOF(xkbGetKbdByNameReply), &rep);
-    if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask))
-        XkbSendMap(client, new, mrep);
+
+    if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
+        int sz = ((mrep.length * sizeof(CARD32)) - (sizeof(mrep) - sizeof(xGenericReply)));
+        char *buf = calloc(1, sz);
+        if (!buf)
+            return BadAlloc;
+
+        XkbAssembleMap(client, xkb, mrep, buf);
+
+        if (client->swapped) {
+            swaps(&mrep.sequenceNumber);
+            swapl(&mrep.length);
+            swaps(&mrep.present);
+            swaps(&mrep.totalSyms);
+            swaps(&mrep.totalActs);
+        }
+        WriteToClient(client, sizeof(mrep), &mrep);
+        WriteToClient(client, sizeof(buf), buf);
+        free(buf);
+    }
+
     if (reported & XkbGBN_CompatMapMask)
         XkbSendCompatMap(client, new->compat, crep);
     if (reported & XkbGBN_IndicatorMapMask)
