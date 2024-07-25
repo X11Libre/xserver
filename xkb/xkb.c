@@ -4914,18 +4914,14 @@ XkbComputeGetGeometryReplySize(XkbGeometryPtr geom,
     }
     return Success;
 }
-static int
-XkbSendGeometry(ClientPtr client,
-                XkbGeometryPtr geom, xkbGetGeometryReply rep)
-{
-    char *desc, *start = NULL;
-    int len = 0;
 
+static void
+XkbAssembleGeometry(ClientPtr client,
+                    XkbGeometryPtr geom,
+                    xkbGetGeometryReply rep,
+                    char *desc)
+{
     if (geom != NULL) {
-        start = desc = calloc(rep.length, sizeof(CARD32));
-        if (!start)
-            return BadAlloc;
-        len = rep.length * sizeof(CARD32);
         desc = XkbWriteCountedString(desc, geom->label_font, client->swapped);
         if (rep.nProperties > 0)
             desc = XkbWriteGeomProperties(desc, geom, client->swapped);
@@ -4940,31 +4936,7 @@ XkbSendGeometry(ClientPtr client,
                                        client->swapped);
         if (rep.nKeyAliases > 0)
             desc = XkbWriteGeomKeyAliases(desc, geom, client->swapped);
-        if ((desc - start) != (len)) {
-            ErrorF
-                ("[xkb] BOGUS LENGTH in XkbSendGeometry, expected %d, got %ld\n",
-                 len, (unsigned long) (desc - start));
-        }
     }
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.name);
-        swaps(&rep.widthMM);
-        swaps(&rep.heightMM);
-        swaps(&rep.nProperties);
-        swaps(&rep.nColors);
-        swaps(&rep.nShapes);
-        swaps(&rep.nSections);
-        swaps(&rep.nDoodads);
-        swaps(&rep.nKeyAliases);
-    }
-    WriteToClient(client, sizeof(xkbGetGeometryReply), &rep);
-    if (len > 0)
-        WriteToClient(client, len, start);
-    if (start != NULL)
-        free((char *) start);
-    return Success;
 }
 
 int
@@ -4995,7 +4967,32 @@ ProcXkbGetGeometry(ClientPtr client)
     if (status != Success)
         goto free_out;
 
-    status = XkbSendGeometry(client, geom, rep);
+    int len = rep.length * sizeof(CARD32);
+    char *buf = calloc(1, len);
+    if (!buf) {
+        status = BadAlloc;
+        goto free_out;
+    }
+
+    XkbAssembleGeometry(client, geom, rep, buf);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.name);
+        swaps(&rep.widthMM);
+        swaps(&rep.heightMM);
+        swaps(&rep.nProperties);
+        swaps(&rep.nColors);
+        swaps(&rep.nShapes);
+        swaps(&rep.nSections);
+        swaps(&rep.nDoodads);
+        swaps(&rep.nKeyAliases);
+    }
+
+    WriteToClient(client, sizeof(xkbGetGeometryReply), &rep);
+    WriteToClient(client, len, buf);
+    free(buf);
 
 free_out:
     if (shouldFree)
@@ -6130,8 +6127,28 @@ ProcXkbGetKbdByName(ClientPtr client)
         free(buf);
     }
 
-    if (reported & XkbGBN_GeometryMask)
-        XkbSendGeometry(client, new->geom, grep);
+    if (reported & XkbGBN_GeometryMask) {
+        char buf[grep.length * 4];
+
+        XkbAssembleGeometry(client, new->geom, grep, buf);
+
+        if (client->swapped) {
+            swaps(&grep.sequenceNumber);
+            swapl(&grep.length);
+            swapl(&grep.name);
+            swaps(&grep.widthMM);
+            swaps(&grep.heightMM);
+            swaps(&grep.nProperties);
+            swaps(&grep.nColors);
+            swaps(&grep.nShapes);
+            swaps(&grep.nSections);
+            swaps(&grep.nDoodads);
+            swaps(&grep.nKeyAliases);
+        }
+
+        WriteToClient(client, sizeof(xkbGetGeometryReply), &grep);
+        WriteToClient(client, sizeof(buf), buf);
+    }
 
     if (loaded) {
         XkbDescPtr old_xkb;
