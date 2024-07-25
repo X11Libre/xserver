@@ -5779,11 +5779,6 @@ ProcXkbGetKbdByName(ClientPtr client)
     DeviceIntPtr dev;
     DeviceIntPtr tmpd;
     DeviceIntPtr master;
-    xkbGetMapReply mrep = { 0 };
-    xkbGetCompatMapReply crep = { 0 };
-    xkbGetIndicatorMapReply irep = { 0 };
-    xkbGetNamesReply nrep = { 0 };
-    xkbGetGeometryReply grep = { 0 };
     XkbDescPtr xkb, new;
     XkbEventCauseRec cause;
     unsigned char *str;
@@ -5887,6 +5882,13 @@ ProcXkbGetKbdByName(ClientPtr client)
     Bool loaded = 0;
 
     stuff->want |= stuff->need;
+
+    xkbGetMapReply mrep          = { .type = X_Reply, .sequenceNumber = client->sequence };
+    xkbGetCompatMapReply crep    = { .type = X_Reply, .sequenceNumber = client->sequence };
+    xkbGetIndicatorMapReply irep = { .type = X_Reply, .sequenceNumber = client->sequence };
+    xkbGetNamesReply nrep        = { .type = X_Reply, .sequenceNumber = client->sequence };
+    xkbGetGeometryReply grep     = { .type = X_Reply, .sequenceNumber = client->sequence };
+
     if (new) {
         if (stuff->load)
             loaded = TRUE;
@@ -5900,9 +5902,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         if (new->map == NULL)
             reported &= ~(XkbGBN_SymbolsMask | XkbGBN_TypesMask);
         else if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
-            mrep.type = X_Reply;
             mrep.deviceID = dev->id;
-            mrep.sequenceNumber = client->sequence;
             mrep.length =
                 ((SIZEOF(xkbGetMapReply) - SIZEOF(xGenericReply)) >> 2);
             mrep.minKeyCode = new->min_key_code;
@@ -5935,9 +5935,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         if (new->compat == NULL)
             reported &= ~XkbGBN_CompatMapMask;
         else if (reported & XkbGBN_CompatMapMask) {
-            crep.type = X_Reply;
             crep.deviceID = dev->id;
-            crep.sequenceNumber = client->sequence;
             crep.groups = XkbAllGroupsMask;
             crep.nSI = crep.nTotalSI = new->compat->num_si;
             XkbComputeGetCompatMapReplySize(new->compat, &crep);
@@ -5946,9 +5944,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         if (new->indicators == NULL)
             reported &= ~XkbGBN_IndicatorMapMask;
         else if (reported & XkbGBN_IndicatorMapMask) {
-            irep.type = X_Reply;
             irep.deviceID = dev->id;
-            irep.sequenceNumber = client->sequence;
             irep.which = XkbAllIndicatorsMask;
             XkbComputeGetIndicatorMapReplySize(new->indicators, &irep);
             payload_length += SIZEOF(xGenericReply) / 4 + irep.length;
@@ -5956,9 +5952,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         if (new->names == NULL)
             reported &= ~(XkbGBN_OtherNamesMask | XkbGBN_KeyNamesMask);
         else if (reported & (XkbGBN_OtherNamesMask | XkbGBN_KeyNamesMask)) {
-            nrep.type = X_Reply;
             nrep.deviceID = dev->id;
-            nrep.sequenceNumber = client->sequence;
             nrep.minKeyCode = new->min_key_code;
             nrep.maxKeyCode = new->max_key_code;
             if (reported & XkbGBN_OtherNamesMask) {
@@ -5987,9 +5981,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         if (new->geom == NULL)
             reported &= ~XkbGBN_GeometryMask;
         else if (reported & XkbGBN_GeometryMask) {
-            grep.type = X_Reply;
             grep.deviceID = dev->id;
-            grep.sequenceNumber = client->sequence;
             grep.found = TRUE;
             XkbComputeGetGeometryReplySize(new->geom, &grep, None);
             payload_length += SIZEOF(xGenericReply) / 4 + grep.length;
