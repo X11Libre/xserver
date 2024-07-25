@@ -2798,16 +2798,13 @@ XkbComputeGetCompatMapReplySize(XkbCompatMapPtr compat,
     return Success;
 }
 
-static int
-XkbSendCompatMap(ClientPtr client,
-                 XkbCompatMapPtr compat, xkbGetCompatMapReply rep)
+static void
+XkbAssembleCompatMap(ClientPtr client,
+                     XkbCompatMapPtr compat,
+                     xkbGetCompatMapReply rep,
+                     char *buf)
 {
-    int sz = rep.length * sizeof(CARD32);
-    char *buf = calloc(1, sz);
-    if (sz && (!buf))
-        return BadAlloc;
-
-    if (sz) {
+    if (rep.length) {
         register unsigned i, bit;
         xkbModsWireDesc *grp;
         XkbSymInterpretPtr sym = &compat->sym_interpret[rep.firstSI];
@@ -2841,19 +2838,6 @@ XkbSendCompatMap(ClientPtr client,
             wire = (xkbSymInterpretWireDesc *) grp;
         }
     }
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.firstSI);
-        swaps(&rep.nSI);
-        swaps(&rep.nTotalSI);
-    }
-
-    WriteToClient(client, sizeof(xkbGetCompatMapReply), &rep);
-    WriteToClient(client, sz, buf);
-    free(buf);
-    return Success;
 }
 
 int
@@ -2893,7 +2877,26 @@ ProcXkbGetCompatMap(ClientPtr client)
         return BadValue;
     }
     XkbComputeGetCompatMapReplySize(compat, &rep);
-    return XkbSendCompatMap(client, compat, rep);
+
+    int sz = rep.length * sizeof(CARD32);
+    char *buf = calloc(1, sz);
+    if (rep.length && (!buf)) // rep.length = 0 is valid here
+        return BadAlloc;
+
+    XkbAssembleCompatMap(client, compat, rep, buf);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.firstSI);
+        swaps(&rep.nSI);
+        swaps(&rep.nTotalSI);
+    }
+
+    WriteToClient(client, sizeof(xkbGetCompatMapReply), &rep);
+    WriteToClient(client, sz, buf);
+    free(buf);
+    return Success;
 }
 
 /**
@@ -6065,8 +6068,27 @@ ProcXkbGetKbdByName(ClientPtr client)
         free(buf);
     }
 
-    if (reported & XkbGBN_CompatMapMask)
-        XkbSendCompatMap(client, new->compat, crep);
+    if (reported & XkbGBN_CompatMapMask) {
+        int sz = crep.length * sizeof(CARD32);
+        char *buf = calloc(1, sz);
+        if (!buf)
+            return BadAlloc;
+
+        XkbAssembleCompatMap(client, new->compat, crep, buf);
+
+        if (client->swapped) {
+            swaps(&crep.sequenceNumber);
+            swapl(&crep.length);
+            swaps(&crep.firstSI);
+            swaps(&crep.nSI);
+            swaps(&crep.nTotalSI);
+        }
+
+        WriteToClient(client, sizeof(crep), &crep);
+        WriteToClient(client, sz, buf);
+        free(buf);
+    }
+
     if (reported & XkbGBN_IndicatorMapMask)
         XkbSendIndicatorMap(client, new->indicators, irep);
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask))
