@@ -5830,7 +5830,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     unsigned char *str;
     char mapFile[PATH_MAX] = { 0 };
     unsigned len;
-    unsigned fwant, fneed, reported;
+    unsigned fwant, fneed;
     int status;
     Bool geom_changed;
     XkbSrvLedInfoPtr old_sli;
@@ -5917,34 +5917,30 @@ ProcXkbGetKbdByName(ClientPtr client)
         fwant |= XkmIndicatorsIndex;
     }
 
-    xkbGetKbdByNameReply rep = { 
-        .type = X_Reply,
-        .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
-        .minKeyCode = xkb->min_key_code,
-        .maxKeyCode = xkb->max_key_code,
-        .reported = XkbConvertGetByNameComponents(FALSE, fwant | fneed),
-        /* We pass dev in here so we can get the old names out if needed. */
-        .found = XkbDDXLoadKeymapByNames(dev, &names, fwant, fneed, &new,
-                                         mapFile, PATH_MAX),
-    };
+    /* We pass dev in here so we can get the old names out if needed. */
+    unsigned int found = XkbDDXLoadKeymapByNames(dev, &names, fwant, fneed, &new,
+                                         mapFile, PATH_MAX);
+    unsigned int reported = XkbConvertGetByNameComponents(FALSE, fwant | fneed);
+    if (new == NULL)
+        reported = 0;
+
+    int payload_length = 0;
+    Bool loaded = 0;
 
     stuff->want |= stuff->need;
-    if (new == NULL)
-        rep.reported = 0;
-    else {
+    if (new) {
         if (stuff->load)
-            rep.loaded = TRUE;
+            loaded = TRUE;
         if (stuff->load ||
-            ((rep.reported & XkbGBN_SymbolsMask) && (new->compat))) {
+            ((reported & XkbGBN_SymbolsMask) && (new->compat))) {
             XkbChangesRec changes = { 0 };
             XkbUpdateDescActions(new,
                                  new->min_key_code, XkbNumKeys(new), &changes);
         }
 
         if (new->map == NULL)
-            rep.reported &= ~(XkbGBN_SymbolsMask | XkbGBN_TypesMask);
-        else if (rep.reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
+            reported &= ~(XkbGBN_SymbolsMask | XkbGBN_TypesMask);
+        else if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
             mrep.type = X_Reply;
             mrep.deviceID = dev->id;
             mrep.sequenceNumber = client->sequence;
@@ -5955,16 +5951,16 @@ ProcXkbGetKbdByName(ClientPtr client)
             mrep.totalSyms = mrep.totalActs =
                 mrep.totalKeyBehaviors = mrep.totalKeyExplicit =
                 mrep.totalModMapKeys = mrep.totalVModMapKeys = 0;
-            if (rep.reported & (XkbGBN_TypesMask | XkbGBN_ClientSymbolsMask)) {
+            if (reported & (XkbGBN_TypesMask | XkbGBN_ClientSymbolsMask)) {
                 mrep.present |= XkbKeyTypesMask;
                 mrep.nTypes = mrep.totalTypes = new->map->num_types;
             }
-            if (rep.reported & XkbGBN_ClientSymbolsMask) {
+            if (reported & XkbGBN_ClientSymbolsMask) {
                 mrep.present |= (XkbKeySymsMask | XkbModifierMapMask);
                 mrep.firstKeySym = mrep.firstModMapKey = new->min_key_code;
                 mrep.nKeySyms = mrep.nModMapKeys = XkbNumKeys(new);
             }
-            if (rep.reported & XkbGBN_ServerSymbolsMask) {
+            if (reported & XkbGBN_ServerSymbolsMask) {
                 mrep.present |= XkbAllServerInfoMask;
                 mrep.virtualMods = ~0;
                 mrep.firstKeyAct = mrep.firstKeyBehavior =
@@ -5975,38 +5971,38 @@ ProcXkbGetKbdByName(ClientPtr client)
                 mrep.nVModMapKeys = XkbNumKeys(new);
             }
             XkbComputeGetMapReplySize(new, &mrep);
-            rep.length += SIZEOF(xGenericReply) / 4 + mrep.length;
+            payload_length += SIZEOF(xGenericReply) / 4 + mrep.length;
         }
         if (new->compat == NULL)
-            rep.reported &= ~XkbGBN_CompatMapMask;
-        else if (rep.reported & XkbGBN_CompatMapMask) {
+            reported &= ~XkbGBN_CompatMapMask;
+        else if (reported & XkbGBN_CompatMapMask) {
             crep.type = X_Reply;
             crep.deviceID = dev->id;
             crep.sequenceNumber = client->sequence;
             crep.groups = XkbAllGroupsMask;
             crep.nSI = crep.nTotalSI = new->compat->num_si;
             XkbComputeGetCompatMapReplySize(new->compat, &crep);
-            rep.length += SIZEOF(xGenericReply) / 4 + crep.length;
+            payload_length += SIZEOF(xGenericReply) / 4 + crep.length;
         }
         if (new->indicators == NULL)
-            rep.reported &= ~XkbGBN_IndicatorMapMask;
-        else if (rep.reported & XkbGBN_IndicatorMapMask) {
+            reported &= ~XkbGBN_IndicatorMapMask;
+        else if (reported & XkbGBN_IndicatorMapMask) {
             irep.type = X_Reply;
             irep.deviceID = dev->id;
             irep.sequenceNumber = client->sequence;
             irep.which = XkbAllIndicatorsMask;
             XkbComputeGetIndicatorMapReplySize(new->indicators, &irep);
-            rep.length += SIZEOF(xGenericReply) / 4 + irep.length;
+            payload_length += SIZEOF(xGenericReply) / 4 + irep.length;
         }
         if (new->names == NULL)
-            rep.reported &= ~(XkbGBN_OtherNamesMask | XkbGBN_KeyNamesMask);
-        else if (rep.reported & (XkbGBN_OtherNamesMask | XkbGBN_KeyNamesMask)) {
+            reported &= ~(XkbGBN_OtherNamesMask | XkbGBN_KeyNamesMask);
+        else if (reported & (XkbGBN_OtherNamesMask | XkbGBN_KeyNamesMask)) {
             nrep.type = X_Reply;
             nrep.deviceID = dev->id;
             nrep.sequenceNumber = client->sequence;
             nrep.minKeyCode = new->min_key_code;
             nrep.maxKeyCode = new->max_key_code;
-            if (rep.reported & XkbGBN_OtherNamesMask) {
+            if (reported & XkbGBN_OtherNamesMask) {
                 nrep.which = XkbAllNamesMask;
                 if (new->map != NULL)
                     nrep.nTypes = new->map->num_types;
@@ -6015,7 +6011,7 @@ ProcXkbGetKbdByName(ClientPtr client)
                 nrep.indicators = XkbAllIndicatorsMask;
                 nrep.nRadioGroups = new->names->num_rg;
             }
-            if (rep.reported & XkbGBN_KeyNamesMask) {
+            if (reported & XkbGBN_KeyNamesMask) {
                 nrep.which |= XkbKeyNamesMask;
                 nrep.firstKey = new->min_key_code;
                 nrep.nKeys = XkbNumKeys(new);
@@ -6027,21 +6023,32 @@ ProcXkbGetKbdByName(ClientPtr client)
                 nrep.which &= ~(XkbKeyNamesMask | XkbKeyAliasesMask);
             }
             XkbComputeGetNamesReplySize(new, &nrep);
-            rep.length += SIZEOF(xGenericReply) / 4 + nrep.length;
+            payload_length += SIZEOF(xGenericReply) / 4 + nrep.length;
         }
         if (new->geom == NULL)
-            rep.reported &= ~XkbGBN_GeometryMask;
-        else if (rep.reported & XkbGBN_GeometryMask) {
+            reported &= ~XkbGBN_GeometryMask;
+        else if (reported & XkbGBN_GeometryMask) {
             grep.type = X_Reply;
             grep.deviceID = dev->id;
             grep.sequenceNumber = client->sequence;
             grep.found = TRUE;
             XkbComputeGetGeometryReplySize(new->geom, &grep, None);
-            rep.length += SIZEOF(xGenericReply) / 4 + grep.length;
+            payload_length += SIZEOF(xGenericReply) / 4 + grep.length;
         }
     }
 
-    reported = rep.reported;
+    xkbGetKbdByNameReply rep = {
+        .type = X_Reply,
+        .deviceID = dev->id,
+        .sequenceNumber = client->sequence,
+        .minKeyCode = xkb->min_key_code,
+        .maxKeyCode = xkb->max_key_code,
+        .reported = reported,
+        .found = found,
+        .loaded = loaded,
+        .length = payload_length,
+    };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -6059,7 +6066,8 @@ ProcXkbGetKbdByName(ClientPtr client)
         XkbSendNames(client, new, nrep);
     if (reported & XkbGBN_GeometryMask)
         XkbSendGeometry(client, new->geom, grep);
-    if (rep.loaded) {
+
+    if (loaded) {
         XkbDescPtr old_xkb;
 
         old_xkb = xkb;
