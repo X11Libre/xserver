@@ -3170,16 +3170,13 @@ XkbComputeGetIndicatorMapReplySize(XkbIndicatorPtr indicators,
     return Success;
 }
 
-static int
-XkbSendIndicatorMap(ClientPtr client,
-                    XkbIndicatorPtr indicators, xkbGetIndicatorMapReply rep)
+static void
+XkbAssembleIndicatorMap(ClientPtr client,
+                        XkbIndicatorPtr indicators,
+                        xkbGetIndicatorMapReply rep,
+                        char *buf)
 {
-    int length = rep.length * 4;
-
-    CARD8 *map = calloc(1, length);
-    if (!map)
-        return BadAlloc;
-
+    CARD8 *map = (CARD8*)buf;
     register int i;
     register unsigned bit;
 
@@ -3204,17 +3201,6 @@ XkbSendIndicatorMap(ClientPtr client,
             }
         }
     }
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.which);
-        swapl(&rep.realIndicators);
-    }
-    WriteToClient(client, sizeof(xkbGetIndicatorMapReply), &rep);
-    WriteToClient(client, length, map);
-    free(map);
-    return Success;
 }
 
 int
@@ -3242,7 +3228,25 @@ ProcXkbGetIndicatorMap(ClientPtr client)
         .which = stuff->which
     };
     XkbComputeGetIndicatorMapReplySize(leds, &rep);
-    return XkbSendIndicatorMap(client, leds, rep);
+
+    int sz = rep.length * sizeof(CARD32);
+    char *buf = calloc(1, sz);
+    if (!buf)
+        return BadAlloc;
+
+    XkbAssembleIndicatorMap(client, leds, rep, buf);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.which);
+        swapl(&rep.realIndicators);
+    }
+
+    WriteToClient(client, sizeof(xkbGetIndicatorMapReply), &rep);
+    WriteToClient(client, sz, buf);
+    free(buf);
+    return Success;
 }
 
 /**
@@ -3789,26 +3793,14 @@ XkbComputeGetNamesReplySize(XkbDescPtr xkb, xkbGetNamesReply * rep)
         desc += sizeof(CARD32); \
     } while (0)
 
-static int
-XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep)
+static void
+XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, char *buf)
 {
-    register unsigned i, length, which;
-    char *start;
-    char *desc;
+    register unsigned i, which;
+    char *desc = buf;
 
-    length = rep.length * 4;
     which = rep.which;
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.which);
-        swaps(&rep.virtualMods);
-        swapl(&rep.indicators);
-    }
 
-    start = desc = calloc(1, length);
-    if (!start)
-        return BadAlloc;
     if (xkb->names) {
         if (which & XkbKeycodesNameMask) {
             _ADD_CARD32(xkb->names->keycodes);
@@ -3883,15 +3875,6 @@ XkbSendNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep)
             }
         }
     }
-
-    if ((desc - start) != (length)) {
-        ErrorF("[xkb] BOGUS LENGTH in write names, expected %d, got %ld\n",
-               length, (unsigned long) (desc - start));
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, length, start);
-    free((char *) start);
-    return Success;
 }
 #undef _ADD_CARD32
 
@@ -3924,7 +3907,26 @@ ProcXkbGetNames(ClientPtr client)
         .nRadioGroups = xkb->names ? xkb->names->num_rg : 0
     };
     XkbComputeGetNamesReplySize(xkb, &rep);
-    return XkbSendNames(client, xkb, rep);
+
+    int sz = rep.length * sizeof(CARD32);
+    char *payload_buf = calloc(1, sz);
+    if (!payload_buf)
+        return BadAlloc;
+
+    XkbAssembleNames(client, xkb, rep, payload_buf);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.which);
+        swaps(&rep.virtualMods);
+        swapl(&rep.indicators);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, sz, payload_buf);
+    free(payload_buf);
+    return Success;
 }
 
 /***====================================================================***/
@@ -6049,7 +6051,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     WriteToClient(client, SIZEOF(xkbGetKbdByNameReply), &rep);
 
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
-        int sz = ((mrep.length * sizeof(CARD32)) - (sizeof(mrep) - sizeof(xGenericReply)));
+        int sz = (mrep.length * sizeof(CARD32)) - (sizeof(mrep) - sizeof(xGenericReply));
         char *buf = calloc(1, sz);
         if (!buf)
             return BadAlloc;
@@ -6064,7 +6066,7 @@ ProcXkbGetKbdByName(ClientPtr client)
             swaps(&mrep.totalActs);
         }
         WriteToClient(client, sizeof(mrep), &mrep);
-        WriteToClient(client, sizeof(buf), buf);
+        WriteToClient(client, sz, buf);
         free(buf);
     }
 
@@ -6089,10 +6091,45 @@ ProcXkbGetKbdByName(ClientPtr client)
         free(buf);
     }
 
-    if (reported & XkbGBN_IndicatorMapMask)
-        XkbSendIndicatorMap(client, new->indicators, irep);
-    if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask))
-        XkbSendNames(client, new, nrep);
+    if (reported & XkbGBN_IndicatorMapMask) {
+        int sz = irep.length * sizeof(CARD32);
+        char *buf = calloc(1, sz);
+        if (!buf)
+            return BadAlloc;
+
+        XkbAssembleIndicatorMap(client, new->indicators, irep, buf);
+
+        if (client->swapped) {
+            swaps(&irep.sequenceNumber);
+            swapl(&irep.length);
+            swapl(&irep.which);
+            swapl(&irep.realIndicators);
+        }
+
+        WriteToClient(client, sizeof(irep), &irep);
+        WriteToClient(client, sz, buf);
+        free(buf);
+    }
+
+    if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask)) {
+        int sz = nrep.length * sizeof(CARD32);
+        char *buf = calloc(1, sz);
+
+        XkbAssembleNames(client, new, nrep, buf);
+
+        if (client->swapped) {
+            swaps(&nrep.sequenceNumber);
+            swapl(&nrep.length);
+            swapl(&nrep.which);
+            swaps(&nrep.virtualMods);
+            swapl(&nrep.indicators);
+        }
+
+        WriteToClient(client, sizeof(nrep), &nrep);
+        WriteToClient(client, sz, buf);
+        free(buf);
+    }
+
     if (reported & XkbGBN_GeometryMask)
         XkbSendGeometry(client, new->geom, grep);
 
