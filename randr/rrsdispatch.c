@@ -116,6 +116,17 @@ SProcRRGetScreenResources(ClientPtr client)
 }
 
 static int _X_COLD
+SProcRRGetScreenResourcesCurrent(ClientPtr client)
+{
+    REQUEST(xRRGetScreenResourcesCurrentReq);
+
+    REQUEST_SIZE_MATCH(xRRGetScreenResourcesCurrentReq);
+    swaps(&stuff->length);
+    swapl(&stuff->window);
+    return (*ProcRandrVector[stuff->randrReqType]) (client);
+}
+
+static int _X_COLD
 SProcRRGetOutputInfo(ClientPtr client)
 {
     REQUEST(xRRGetOutputInfoReq);
@@ -667,7 +678,7 @@ int (*SProcRandrVector[RRNumberRequests]) (ClientPtr) = {
         SProcRRGetCrtcGamma,    /* 23 */
         SProcRRSetCrtcGamma,    /* 24 */
 /* V1.3 additions */
-        SProcRRGetScreenResources,      /* 25 GetScreenResourcesCurrent */
+        SProcRRGetScreenResourcesCurrent,      /* 25 */
         SProcRRSetCrtcTransform,        /* 26 */
         SProcRRGetCrtcTransform,        /* 27 */
         SProcRRGetPanning,      /* 28 */
