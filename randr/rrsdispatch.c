@@ -603,60 +603,71 @@ SProcRRFreeLease(ClientPtr client) {
     return ProcRRFreeLease(client);
 }
 
-int (*SProcRandrVector[RRNumberRequests]) (ClientPtr) = {
-    SProcRRQueryVersion,        /* 0 */
-/* we skip 1 to make old clients fail pretty immediately */
-        NULL,                   /* 1 SProcRandrOldGetScreenInfo */
-/* V1.0 apps share the same set screen config request id */
-        SProcRRSetScreenConfig, /* 2 */
-        NULL,                   /* 3 SProcRandrOldScreenChangeSelectInput */
-/* 3 used to be ScreenChangeSelectInput; deprecated */
-        SProcRRSelectInput,     /* 4 */
-        SProcRRGetScreenInfo,   /* 5 */
-/* V1.2 additions */
-        SProcRRGetScreenSizeRange,      /* 6 */
-        SProcRRSetScreenSize,   /* 7 */
-        SProcRRGetScreenResources,      /* 8 */
-        SProcRRGetOutputInfo,   /* 9 */
-        SProcRRListOutputProperties,    /* 10 */
-        SProcRRQueryOutputProperty,     /* 11 */
-        SProcRRConfigureOutputProperty, /* 12 */
-        SProcRRChangeOutputProperty,    /* 13 */
-        SProcRRDeleteOutputProperty,    /* 14 */
-        SProcRRGetOutputProperty,       /* 15 */
-        SProcRRCreateMode,      /* 16 */
-        SProcRRDestroyMode,     /* 17 */
-        SProcRRAddOutputMode,   /* 18 */
-        SProcRRDeleteOutputMode,        /* 19 */
-        SProcRRGetCrtcInfo,     /* 20 */
-        SProcRRSetCrtcConfig,   /* 21 */
-        SProcRRGetCrtcGammaSize,        /* 22 */
-        SProcRRGetCrtcGamma,    /* 23 */
-        SProcRRSetCrtcGamma,    /* 24 */
-/* V1.3 additions */
-        SProcRRGetScreenResourcesCurrent,      /* 25 */
-        SProcRRSetCrtcTransform,        /* 26 */
-        SProcRRGetCrtcTransform,        /* 27 */
-        SProcRRGetPanning,      /* 28 */
-        SProcRRSetPanning,      /* 29 */
-        SProcRRSetOutputPrimary,        /* 30 */
-        SProcRRGetOutputPrimary,        /* 31 */
-/* V1.4 additions */
-        SProcRRGetProviders,            /* 32 */
-        SProcRRGetProviderInfo,         /* 33 */
-        SProcRRSetProviderOffloadSink,  /* 34 */
-        SProcRRSetProviderOutputSource, /* 35 */
-        SProcRRListProviderProperties,  /* 36 */
-        SProcRRQueryProviderProperty,   /* 37 */
-        SProcRRConfigureProviderProperty, /* 38 */
-        SProcRRChangeProviderProperty,  /* 39 */
-        SProcRRDeleteProviderProperty,  /* 40 */
-        SProcRRGetProviderProperty,     /* 41 */
-/* V1.5 additions */
-        SProcRRGetMonitors,            /* 42 */
-        SProcRRSetMonitor,             /* 43 */
-        SProcRRDeleteMonitor,          /* 44 */
-/* V1.6 additions */
-        SProcRRCreateLease,            /* 45 */
-        SProcRRFreeLease,              /* 46 */
-};
+#define HANDLER(name) case X_##name: return SProc##name(client)
+
+int
+SProcRRDispatch(ClientPtr client)
+{
+    REQUEST(xReq);
+    UpdateCurrentTimeIf();
+
+    switch (stuff->data) {
+        HANDLER(RRQueryVersion);
+        HANDLER(RRSetScreenConfig);
+        HANDLER(RRSelectInput);
+        HANDLER(RRGetScreenInfo);
+
+        /* V1.2 additions */
+        HANDLER(RRGetScreenSizeRange);
+        HANDLER(RRSetScreenSize);
+        HANDLER(RRGetScreenResources);
+        HANDLER(RRGetOutputInfo);
+        HANDLER(RRListOutputProperties);
+        HANDLER(RRQueryOutputProperty);
+        HANDLER(RRConfigureOutputProperty);
+        HANDLER(RRChangeOutputProperty);
+        HANDLER(RRDeleteOutputProperty);
+        HANDLER(RRGetOutputProperty);
+        HANDLER(RRCreateMode);
+        HANDLER(RRDestroyMode);
+        HANDLER(RRAddOutputMode);
+        HANDLER(RRDeleteOutputMode);
+        HANDLER(RRGetCrtcInfo);
+        HANDLER(RRSetCrtcConfig);
+        HANDLER(RRGetCrtcGammaSize);
+        HANDLER(RRGetCrtcGamma);
+        HANDLER(RRSetCrtcGamma);
+
+        /* V1.3 additions */
+        HANDLER(RRGetScreenResourcesCurrent);
+        HANDLER(RRSetCrtcTransform);
+        HANDLER(RRGetCrtcTransform);
+        HANDLER(RRGetPanning);
+        HANDLER(RRSetPanning);
+        HANDLER(RRSetOutputPrimary);
+        HANDLER(RRGetOutputPrimary);
+
+        /* V1.4 additions */
+        HANDLER(RRGetProviders);
+        HANDLER(RRGetProviderInfo);
+        HANDLER(RRSetProviderOffloadSink);
+        HANDLER(RRSetProviderOutputSource);
+        HANDLER(RRListProviderProperties);
+        HANDLER(RRQueryProviderProperty);
+        HANDLER(RRConfigureProviderProperty);
+        HANDLER(RRChangeProviderProperty);
+        HANDLER(RRDeleteProviderProperty);
+        HANDLER(RRGetProviderProperty);
+
+        /* V1.5 additions */
+        HANDLER(RRGetMonitors);
+        HANDLER(RRSetMonitor);
+        HANDLER(RRDeleteMonitor);
+
+        /* V1.6 additions */
+        HANDLER(RRCreateLease);
+        HANDLER(RRFreeLease);
+    }
+
+    return BadRequest;
+}
