@@ -48,7 +48,6 @@ static int RRNScreens;
     real->mem = priv->mem; \
 }
 
-static int ProcRRDispatch(ClientPtr pClient);
 static int SProcRRDispatch(ClientPtr pClient);
 
 int RREventBase;
@@ -719,16 +718,6 @@ RRVerticalRefresh(xRRModeInfo * mode)
     if (refresh > 0xffff)
         refresh = 0xffff;
     return (CARD16) refresh;
-}
-
-static int
-ProcRRDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    if (stuff->data >= RRNumberRequests || !ProcRandrVector[stuff->data])
-        return BadRequest;
-    UpdateCurrentTimeIf();
-    return (*ProcRandrVector[stuff->data]) (client);
 }
 
 static int _X_COLD
