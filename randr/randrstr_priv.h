@@ -141,4 +141,6 @@ int ProcRRSelectInput(ClientPtr client);
 
 int ProcRRDispatch(ClientPtr client);
 
+int SProcRRDispatch(ClientPtr client);
+
 #endif /* _XSERVER_RANDRSTR_PRIV_H_ */
