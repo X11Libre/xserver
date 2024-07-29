@@ -60,7 +60,6 @@ ProcRRGetProviders (ClientPtr client)
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int rc;
-    CARD8 *extra;
     unsigned int extraLen;
     RRProvider *providers;
     int total_providers = 0, count_providers = 0;
@@ -96,6 +95,7 @@ ProcRRGetProviders (ClientPtr client)
     }
 
     extraLen = total_providers * sizeof(CARD32);
+    char extra[extraLen];
 
     xRRGetProvidersReply rep = {
         .type = X_Reply,
@@ -104,13 +104,6 @@ ProcRRGetProviders (ClientPtr client)
         .nProviders = total_providers,
         .length = bytes_to_int32(extraLen),
     };
-
-    if (extraLen) {
-        extra = malloc(extraLen);
-        if (!extra)
-            return BadAlloc;
-    } else
-        extra = NULL;
 
     providers = (RRProvider *)extra;
     ADD_PROVIDER(pScreen);
@@ -125,11 +118,7 @@ ProcRRGetProviders (ClientPtr client)
         swaps(&rep.nProviders);
     }
     WriteToClient(client, sizeof(xRRGetProvidersReply), (char *)&rep);
-    if (extraLen)
-    {
-        WriteToClient (client, extraLen, (char *) extra);
-        free(extra);
-    }
+    WriteToClient(client, extraLen, extra);
     return Success;
 }
 
