@@ -491,14 +491,16 @@ ProcRRQueryOutputProperty(ClientPtr client)
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
     }
-    WriteToClient(client, sizeof(xRRQueryOutputPropertyReply), &rep);
     if (prop->num_valid) {
         memcpy(extra, prop->valid_values, prop->num_valid * sizeof(INT32));
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, prop->num_valid * sizeof(INT32),
-                                 extra);
-        free(extra);
+        if (client->swapped) SwapLongs((CARD32*)extra, prop->num_valid);
     }
+
+    WriteToClient(client, sizeof(xRRQueryOutputPropertyReply), &rep);
+    WriteToClient(client, prop->num_valid * sizeof(INT32), extra);
+
+    if (extra) free(extra);
+
     return Success;
 }
 
