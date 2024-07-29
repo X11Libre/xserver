@@ -67,11 +67,9 @@ typedef XID KeySym64;
 #define KeySym          KeySym64
 #endif  /*_XSERVER64*/
 
-#define GC XlibGC
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
-#undef GC
 
 #ifdef _XSERVER64_tmp
 #define _XSERVER64

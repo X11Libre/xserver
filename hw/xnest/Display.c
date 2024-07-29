@@ -52,7 +52,7 @@ Pixel xnestWhitePixel;
 Drawable xnestDefaultDrawables[MAXDEPTH + 1];
 Pixmap xnestIconBitmap;
 Pixmap xnestScreenSaverPixmap;
-XlibGC xnestBitmapGC;
+GC xnestBitmapGC;
 unsigned long xnestEventMask;
 
 static int _X_NORETURN
