@@ -116,7 +116,7 @@ SProcRRGetScreenResourcesCurrent(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetScreenResourcesCurrentReq);
     swaps(&stuff->length);
     swapl(&stuff->window);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetScreenResourcesCurrent(client);
 }
 
 static int _X_COLD
