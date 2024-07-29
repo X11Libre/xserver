@@ -481,15 +481,8 @@ ProcRRGetOutputInfo(ClientPtr client)
             .sequenceNumber = client->sequence,
             .length = bytes_to_int32(OutputInfoExtra),
             .timestamp = pScrPriv->lastSetTime.milliseconds,
-            .crtc = None,
-            .mmWidth = 0,
-            .mmHeight = 0,
             .connection = RR_Disconnected,
             .subpixelOrder = SubPixelUnknown,
-            .nCrtcs = 0,
-            .nModes = 0,
-            .nPreferred = 0,
-            .nClones = 0,
             .nameLength = output->nameLength
         };
         extraLen = bytes_to_int32(rep.nameLength) << 2;
@@ -658,7 +651,6 @@ ProcRRGetOutputPrimary(ClientPtr client)
     REQUEST(xRRGetOutputPrimaryReq);
     WindowPtr pWin;
     rrScrPrivPtr pScrPriv;
-    xRRGetOutputPrimaryReply rep;
     RROutputPtr primary = NULL;
     int rc;
 
@@ -672,7 +664,7 @@ ProcRRGetOutputPrimary(ClientPtr client)
     if (pScrPriv)
         primary = pScrPriv->primaryOutput;
 
-    rep = (xRRGetOutputPrimaryReply) {
+    xRRGetOutputPrimaryReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .output = primary ? primary->id : None

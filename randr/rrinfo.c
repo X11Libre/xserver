@@ -250,19 +250,18 @@ RRRegisterSize(ScreenPtr pScreen,
 {
     rrScrPriv(pScreen);
     int i;
-    RRScreenSize tmp;
     RRScreenSizePtr pNew;
 
     if (!pScrPriv)
         return 0;
 
-    tmp.id = 0;
-    tmp.width = width;
-    tmp.height = height;
-    tmp.mmWidth = mmWidth;
-    tmp.mmHeight = mmHeight;
-    tmp.pRates = 0;
-    tmp.nRates = 0;
+    RRScreenSize tmp = {
+        .width = width,
+        .height = height,
+        .mmWidth = mmWidth,
+        .mmHeight = mmHeight,
+    };
+
     for (i = 0; i < pScrPriv->nSizes; i++)
         if (RRScreenSizeMatches(&tmp, &pScrPriv->pSizes[i]))
             return &pScrPriv->pSizes[i];

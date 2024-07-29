@@ -212,7 +212,6 @@ int
 ProcRRCreateLease(ClientPtr client)
 {
     REQUEST(xRRCreateLeaseReq);
-    xRRCreateLeaseReply rep;
     WindowPtr window;
     ScreenPtr screen;
     rrScrPrivPtr scr_priv;
@@ -333,11 +332,10 @@ leaseReturned:
 
     RRLeaseChangeState(lease, RRLeaseCreating, RRLeaseRunning);
 
-    rep = (xRRCreateLeaseReply) {
+    xRRCreateLeaseReply rep = {
         .type = X_Reply,
         .nfd = 1,
         .sequenceNumber = client->sequence,
-        .length = 0,
     };
 
     if (client->swapped) {
