@@ -77,16 +77,8 @@ RRCrtcCreate(ScreenPtr pScreen, void *devPrivate)
         return NULL;
     crtc->id = FakeClientID(0);
     crtc->pScreen = pScreen;
-    crtc->mode = NULL;
-    crtc->x = 0;
-    crtc->y = 0;
     crtc->rotation = RR_Rotate_0;
     crtc->rotations = RR_Rotate_0;
-    crtc->outputs = NULL;
-    crtc->numOutputs = 0;
-    crtc->gammaSize = 0;
-    crtc->gammaRed = crtc->gammaBlue = crtc->gammaGreen = NULL;
-    crtc->changed = FALSE;
     crtc->devPrivate = devPrivate;
     RRTransformInit(&crtc->client_pending_transform);
     RRTransformInit(&crtc->client_current_transform);
