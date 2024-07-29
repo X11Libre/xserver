@@ -31,7 +31,7 @@ SProcRRQueryVersion(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->majorVersion);
     swapl(&stuff->minorVersion);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRQueryVersion(client);
 }
 
 static int _X_COLD
@@ -42,7 +42,7 @@ SProcRRGetScreenInfo(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetScreenInfoReq);
     swaps(&stuff->length);
     swapl(&stuff->window);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetScreenInfo(client);
 }
 
 static int _X_COLD
@@ -63,7 +63,7 @@ SProcRRSetScreenConfig(ClientPtr client)
     swapl(&stuff->timestamp);
     swaps(&stuff->sizeID);
     swaps(&stuff->rotation);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRSetScreenConfig(client);
 }
 
 static int _X_COLD
@@ -75,7 +75,7 @@ SProcRRSelectInput(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->window);
     swaps(&stuff->enable);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRSelectInput(client);
 }
 
 static int _X_COLD
@@ -86,7 +86,7 @@ SProcRRGetScreenSizeRange(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetScreenSizeRangeReq);
     swaps(&stuff->length);
     swapl(&stuff->window);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetScreenSizeRange(client);
 }
 
 static int _X_COLD
@@ -101,7 +101,7 @@ SProcRRSetScreenSize(ClientPtr client)
     swaps(&stuff->height);
     swapl(&stuff->widthInMillimeters);
     swapl(&stuff->heightInMillimeters);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRSetScreenSize(client);
 }
 
 static int _X_COLD
@@ -112,7 +112,7 @@ SProcRRGetScreenResources(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetScreenResourcesReq);
     swaps(&stuff->length);
     swapl(&stuff->window);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetScreenResources(client);
 }
 
 static int _X_COLD
@@ -135,7 +135,7 @@ SProcRRGetOutputInfo(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->configTimestamp);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetScreenResources(client);
 }
 
 static int _X_COLD
@@ -146,7 +146,7 @@ SProcRRListOutputProperties(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRListOutputPropertiesReq);
     swaps(&stuff->length);
     swapl(&stuff->output);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRListOutputProperties(client);
 }
 
 static int _X_COLD
@@ -158,7 +158,7 @@ SProcRRQueryOutputProperty(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->property);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRQueryOutputProperty(client);
 }
 
 static int _X_COLD
@@ -171,7 +171,7 @@ SProcRRConfigureOutputProperty(ClientPtr client)
     swapl(&stuff->output);
     swapl(&stuff->property);
     SwapRestL(stuff);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRConfigureOutputProperty(client);
 }
 
 static int _X_COLD
@@ -198,7 +198,7 @@ SProcRRChangeOutputProperty(ClientPtr client)
         client->errorValue = stuff->format;
         return BadValue;
     }
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRChangeOutputProperty(client);
 }
 
 static int _X_COLD
@@ -210,7 +210,7 @@ SProcRRDeleteOutputProperty(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->property);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRDeleteOutputProperty(client);
 }
 
 static int _X_COLD
@@ -225,7 +225,7 @@ SProcRRGetOutputProperty(ClientPtr client)
     swapl(&stuff->type);
     swapl(&stuff->longOffset);
     swapl(&stuff->longLength);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetOutputProperty(client);
 }
 
 static int _X_COLD
@@ -252,7 +252,7 @@ SProcRRCreateMode(ClientPtr client)
     swaps(&modeinfo->vTotal);
     swaps(&modeinfo->nameLength);
     swapl(&modeinfo->modeFlags);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRCreateMode(client);
 }
 
 static int _X_COLD
@@ -263,7 +263,7 @@ SProcRRDestroyMode(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRDestroyModeReq);
     swaps(&stuff->length);
     swapl(&stuff->mode);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRDestroyMode(client);
 }
 
 static int _X_COLD
@@ -275,7 +275,7 @@ SProcRRAddOutputMode(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->mode);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRAddOutputMode(client);
 }
 
 static int _X_COLD
@@ -287,7 +287,7 @@ SProcRRDeleteOutputMode(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->mode);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRDeleteOutputMode(client);
 }
 
 static int _X_COLD
@@ -299,7 +299,7 @@ SProcRRGetCrtcInfo(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->crtc);
     swapl(&stuff->configTimestamp);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetCrtcInfo(client);
 }
 
 static int _X_COLD
@@ -317,7 +317,7 @@ SProcRRSetCrtcConfig(ClientPtr client)
     swapl(&stuff->mode);
     swaps(&stuff->rotation);
     SwapRestL(stuff);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRSetCrtcConfig(client);
 }
 
 static int _X_COLD
@@ -328,7 +328,7 @@ SProcRRGetCrtcGammaSize(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetCrtcGammaSizeReq);
     swaps(&stuff->length);
     swapl(&stuff->crtc);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetCrtcGammaSize(client);
 }
 
 static int _X_COLD
@@ -339,7 +339,7 @@ SProcRRGetCrtcGamma(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetCrtcGammaReq);
     swaps(&stuff->length);
     swapl(&stuff->crtc);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetCrtcGamma(client);
 }
 
 static int _X_COLD
@@ -352,7 +352,7 @@ SProcRRSetCrtcGamma(ClientPtr client)
     swapl(&stuff->crtc);
     swaps(&stuff->size);
     SwapRestS(stuff);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRSetCrtcGamma(client);
 }
 
 static int _X_COLD
@@ -377,7 +377,7 @@ SProcRRSetCrtcTransform(ClientPtr client)
         return BadLength;
 
     SwapLongs(params, nparams);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRSetCrtcTransform(client);
 }
 
 static int _X_COLD
@@ -388,7 +388,7 @@ SProcRRGetCrtcTransform(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetCrtcTransformReq);
     swaps(&stuff->length);
     swapl(&stuff->crtc);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetCrtcTransform(client);
 }
 
 static int _X_COLD
@@ -399,7 +399,7 @@ SProcRRGetPanning(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetPanningReq);
     swaps(&stuff->length);
     swapl(&stuff->crtc);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRGetPanning(client);
 }
 
 static int _X_COLD
@@ -423,7 +423,7 @@ SProcRRSetPanning(ClientPtr client)
     swaps(&stuff->border_top);
     swaps(&stuff->border_right);
     swaps(&stuff->border_bottom);
-    return (*ProcRandrVector[stuff->randrReqType]) (client);
+    return ProcRRSetPanning(client);
 }
 
 static int _X_COLD
@@ -435,7 +435,7 @@ SProcRRSetOutputPrimary(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->window);
     swapl(&stuff->output);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRSetOutputPrimary(client);
 }
 
 static int _X_COLD
@@ -446,7 +446,7 @@ SProcRRGetOutputPrimary(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetOutputPrimaryReq);
     swaps(&stuff->length);
     swapl(&stuff->window);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRGetOutputPrimary(client);
 }
 
 static int _X_COLD
@@ -457,7 +457,7 @@ SProcRRGetProviders(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRGetProvidersReq);
     swaps(&stuff->length);
     swapl(&stuff->window);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRGetProviders(client);
 }
 
 static int _X_COLD
@@ -469,7 +469,7 @@ SProcRRGetProviderInfo(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->configTimestamp);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRGetProviderInfo(client);
 }
 
 static int _X_COLD
@@ -482,7 +482,7 @@ SProcRRSetProviderOffloadSink(ClientPtr client)
     swapl(&stuff->provider);
     swapl(&stuff->sink_provider);
     swapl(&stuff->configTimestamp);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRSetProviderOffloadSink(client);
 }
 
 static int _X_COLD
@@ -495,7 +495,7 @@ SProcRRSetProviderOutputSource(ClientPtr client)
     swapl(&stuff->provider);
     swapl(&stuff->source_provider);
     swapl(&stuff->configTimestamp);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRSetProviderOutputSource(client);
 }
 
 static int _X_COLD
@@ -506,7 +506,7 @@ SProcRRListProviderProperties(ClientPtr client)
     REQUEST_SIZE_MATCH(xRRListProviderPropertiesReq);
     swaps(&stuff->length);
     swapl(&stuff->provider);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRListProviderProperties(client);
 }
 
 static int _X_COLD
@@ -518,7 +518,7 @@ SProcRRQueryProviderProperty(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->property);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRQueryProviderProperty(client);
 }
 
 static int _X_COLD
@@ -532,7 +532,7 @@ SProcRRConfigureProviderProperty(ClientPtr client)
     swapl(&stuff->property);
     /* TODO: no way to specify format? */
     SwapRestL(stuff);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRConfigureProviderProperty(client);
 }
 
 static int _X_COLD
@@ -556,7 +556,7 @@ SProcRRChangeProviderProperty(ClientPtr client)
         SwapRestL(stuff);
         break;
     }
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRChangeProviderProperty(client);
 }
 
 static int _X_COLD
@@ -568,7 +568,7 @@ SProcRRDeleteProviderProperty(ClientPtr client)
     swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->property);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRDeleteProviderProperty(client);
 }
 
 static int _X_COLD
@@ -583,7 +583,7 @@ SProcRRGetProviderProperty(ClientPtr client)
     swapl(&stuff->type);
     swapl(&stuff->longOffset);
     swapl(&stuff->longLength);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRGetProviderProperty(client);
 }
 
 static int _X_COLD
@@ -593,7 +593,7 @@ SProcRRGetMonitors(ClientPtr client) {
     REQUEST_SIZE_MATCH(xRRGetMonitorsReq);
     swaps(&stuff->length);
     swapl(&stuff->window);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRGetMonitors(client);
 }
 
 static int _X_COLD
@@ -610,7 +610,7 @@ SProcRRSetMonitor(ClientPtr client) {
     swaps(&stuff->monitor.width);
     swaps(&stuff->monitor.height);
     SwapRestL(stuff);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRSetMonitor(client);
 }
 
 static int _X_COLD
@@ -621,7 +621,7 @@ SProcRRDeleteMonitor(ClientPtr client) {
     swaps(&stuff->length);
     swapl(&stuff->window);
     swapl(&stuff->name);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRDeleteMonitor(client);
 }
 
 static int _X_COLD
@@ -634,7 +634,7 @@ SProcRRCreateLease(ClientPtr client) {
     swaps(&stuff->nCrtcs);
     swaps(&stuff->nOutputs);
     SwapRestL(stuff);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRCreateLease(client);
 }
 
 static int _X_COLD
@@ -644,7 +644,7 @@ SProcRRFreeLease(ClientPtr client) {
     REQUEST_SIZE_MATCH(xRRFreeLeaseReq);
     swaps(&stuff->length);
     swapl(&stuff->lid);
-    return ProcRandrVector[stuff->randrReqType] (client);
+    return ProcRRFreeLease(client);
 }
 
 int (*SProcRandrVector[RRNumberRequests]) (ClientPtr) = {
