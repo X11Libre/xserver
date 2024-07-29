@@ -136,4 +136,8 @@ int ProcRRCreateLease(ClientPtr client);
 
 int ProcRRFreeLease(ClientPtr client);
 
+int ProcRRQueryVersion(ClientPtr client);
+
+int ProcRRSelectInput(ClientPtr client);
+
 #endif /* _XSERVER_RANDRSTR_PRIV_H_ */
