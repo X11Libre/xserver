@@ -1752,8 +1752,6 @@ ProcRRSetCrtcTransform(ClientPtr client)
                               filter, nbytes, params, nparams);
 }
 
-#define CrtcTransformExtra	(SIZEOF(xRRGetCrtcTransformReply) - 32)
-
 static int
 transform_filter_length(RRTransformPtr transform)
 {
@@ -1808,11 +1806,9 @@ int
 ProcRRGetCrtcTransform(ClientPtr client)
 {
     REQUEST(xRRGetCrtcTransformReq);
-    xRRGetCrtcTransformReply *reply;
     RRCrtcPtr crtc;
     int nextra;
     RRTransformPtr current, pending;
-    char *extra;
 
     REQUEST_SIZE_MATCH(xRRGetCrtcTransformReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
@@ -1823,33 +1819,33 @@ ProcRRGetCrtcTransform(ClientPtr client)
     nextra = (transform_filter_length(pending) +
               transform_filter_length(current));
 
-    reply = calloc(1, sizeof(xRRGetCrtcTransformReply) + nextra);
-    if (!reply)
-        return BadAlloc;
+    char extra_buf[nextra];
+    memset(extra_buf, 0, sizeof(extra_buf));
+    char *extra = extra_buf;
 
-    extra = (char *) (reply + 1);
-    reply->type = X_Reply;
-    reply->sequenceNumber = client->sequence;
-    reply->length = bytes_to_int32(CrtcTransformExtra + nextra);
+    xRRGetCrtcTransformReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = bytes_to_int32(sizeof(xRRGetCrtcTransformReply) - sizeof(xReq)),
+        .hasTransforms = crtc->transforms,
+    };
 
-    reply->hasTransforms = crtc->transforms;
-
-    transform_encode(client, &reply->pendingTransform, &pending->transform);
+    transform_encode(client, &rep.pendingTransform, &pending->transform);
     extra += transform_filter_encode(client, extra,
-                                     &reply->pendingNbytesFilter,
-                                     &reply->pendingNparamsFilter, pending);
+                                     &rep.pendingNbytesFilter,
+                                     &rep.pendingNparamsFilter, pending);
 
-    transform_encode(client, &reply->currentTransform, &current->transform);
+    transform_encode(client, &rep.currentTransform, &current->transform);
     extra += transform_filter_encode(client, extra,
-                                     &reply->currentNbytesFilter,
-                                     &reply->currentNparamsFilter, current);
+                                     &rep.currentNbytesFilter,
+                                     &rep.currentNparamsFilter, current);
 
     if (client->swapped) {
-        swaps(&reply->sequenceNumber);
-        swapl(&reply->length);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
     }
-    WriteToClient(client, sizeof(xRRGetCrtcTransformReply) + nextra, reply);
-    free(reply);
+    WriteToClient(client, sizeof(xRRGetCrtcTransformReply), &rep);
+    WriteToClient(client, nextra, extra);
     return Success;
 }
 
