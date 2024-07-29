@@ -1676,13 +1676,16 @@ ProcRRGetCrtcGamma(ClientPtr client)
         swapl(&reply.length);
         swaps(&reply.size);
     }
-    WriteToClient(client, sizeof(xRRGetCrtcGammaReply), &reply);
     if (crtc->gammaSize) {
         memcpy(extra, crtc->gammaRed, len);
-        client->pSwapReplyFunc = (ReplySwapPtr) CopySwap16Write;
-        WriteSwappedDataToClient(client, len, extra);
-        free(extra);
+        if (client->swapped) SwapShorts((short*)extra, len/sizeof(CARD16));
     }
+
+    WriteToClient(client, sizeof(xRRGetCrtcGammaReply), &reply);
+    WriteToClient(client, len, extra);
+
+    if (extra) free(extra);
+
     return Success;
 }
 
