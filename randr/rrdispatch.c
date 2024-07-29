@@ -42,7 +42,6 @@ ProcRRQueryVersion(ClientPtr client)
     xRRQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
     REQUEST(xRRQueryVersionReq);
     rrClientPriv(client);

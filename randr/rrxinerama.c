@@ -99,7 +99,6 @@ ProcRRXineramaQueryVersion(ClientPtr client)
     xPanoramiXQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_RRXINERAMA_MAJOR_VERSION,
         .minorVersion = SERVER_RRXINERAMA_MINOR_VERSION
     };
@@ -120,7 +119,6 @@ ProcRRXineramaGetState(ClientPtr client)
 {
     REQUEST(xPanoramiXGetStateReq);
     WindowPtr pWin;
-    xPanoramiXGetStateReply rep;
     register int rc;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
@@ -138,11 +136,10 @@ ProcRRXineramaGetState(ClientPtr client)
         active = TRUE;
     }
 
-    rep = (xPanoramiXGetStateReply) {
+    xPanoramiXGetStateReply rep = {
         .type = X_Reply,
         .state = active,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .window = stuff->window
     };
     if (client->swapped) {
@@ -171,7 +168,6 @@ ProcRRXineramaGetScreenCount(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenCountReq);
     WindowPtr pWin;
-    xPanoramiXGetScreenCountReply rep;
     register int rc;
 
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
@@ -179,11 +175,10 @@ ProcRRXineramaGetScreenCount(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xPanoramiXGetScreenCountReply)  {
+    xPanoramiXGetScreenCountReply rep = {
         .type = X_Reply,
         .ScreenCount = RRXineramaScreenCount(pWin->drawable.pScreen),
         .sequenceNumber = client->sequence,
-        .length = 0,
         .window = stuff->window
     };
     if (client->swapped) {
@@ -201,7 +196,6 @@ ProcRRXineramaGetScreenSize(ClientPtr client)
     REQUEST(xPanoramiXGetScreenSizeReq);
     WindowPtr pWin, pRoot;
     ScreenPtr pScreen;
-    xPanoramiXGetScreenSizeReply rep;
     register int rc;
 
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
@@ -212,10 +206,9 @@ ProcRRXineramaGetScreenSize(ClientPtr client)
     pScreen = pWin->drawable.pScreen;
     pRoot = pScreen->root;
 
-    rep = (xPanoramiXGetScreenSizeReply) {
+    xPanoramiXGetScreenSizeReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .width = pRoot->drawable.width,
         .height = pRoot->drawable.height,
         .window = stuff->window,
@@ -236,13 +229,11 @@ ProcRRXineramaGetScreenSize(ClientPtr client)
 int
 ProcRRXineramaIsActive(ClientPtr client)
 {
-    xXineramaIsActiveReply rep;
 
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
-    rep = (xXineramaIsActiveReply) {
+    xXineramaIsActiveReply rep = {
         .type = X_Reply,
-        .length = 0,
         .sequenceNumber = client->sequence,
         .state = RRXineramaScreenActive(screenInfo.screens[RR_XINERAMA_SCREEN])
     };
@@ -258,12 +249,12 @@ ProcRRXineramaIsActive(ClientPtr client)
 static void
 RRXineramaWriteMonitor(ClientPtr client, RRMonitorPtr monitor)
 {
-    xXineramaScreenInfo scratch;
-
-    scratch.x_org = monitor->geometry.box.x1;
-    scratch.y_org = monitor->geometry.box.y1;
-    scratch.width = monitor->geometry.box.x2 - monitor->geometry.box.x1;
-    scratch.height = monitor->geometry.box.y2 - monitor->geometry.box.y1;
+    xXineramaScreenInfo scratch = {
+        .x_org = monitor->geometry.box.x1,
+        .y_org = monitor->geometry.box.y1,
+        .width = monitor->geometry.box.x2 - monitor->geometry.box.x1,
+        .height = monitor->geometry.box.y2 - monitor->geometry.box.y1,
+    };
 
     if (client->swapped) {
         swaps(&scratch.x_org);
@@ -278,7 +269,6 @@ RRXineramaWriteMonitor(ClientPtr client, RRMonitorPtr monitor)
 int
 ProcRRXineramaQueryScreens(ClientPtr client)
 {
-    xXineramaQueryScreensReply rep;
     ScreenPtr pScreen = screenInfo.screens[RR_XINERAMA_SCREEN];
     int m;
     RRMonitorPtr monitors = NULL;
@@ -292,7 +282,7 @@ ProcRRXineramaQueryScreens(ClientPtr client)
             return BadAlloc;
     }
 
-    rep = (xXineramaQueryScreensReply) {
+    xXineramaQueryScreensReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(nmonitors * sz_XineramaScreenInfo),
