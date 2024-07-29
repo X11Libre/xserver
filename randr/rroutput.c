@@ -83,7 +83,7 @@ RROutputCreate(ScreenPtr pScreen,
 
     pScrPriv->outputs = outputs;
 
-    output = malloc(sizeof(RROutputRec) + nameLength + 1);
+    output = calloc(1, sizeof(RROutputRec) + nameLength + 1);
     if (!output)
         return NULL;
     output->id = FakeClientID(0);
@@ -94,22 +94,6 @@ RROutputCreate(ScreenPtr pScreen,
     output->name[nameLength] = '\0';
     output->connection = RR_UnknownConnection;
     output->subpixelOrder = SubPixelUnknown;
-    output->mmWidth = 0;
-    output->mmHeight = 0;
-    output->crtc = NULL;
-    output->numCrtcs = 0;
-    output->crtcs = NULL;
-    output->numClones = 0;
-    output->clones = NULL;
-    output->numModes = 0;
-    output->numPreferred = 0;
-    output->modes = NULL;
-    output->numUserModes = 0;
-    output->userModes = NULL;
-    output->properties = NULL;
-    output->pendingProperties = FALSE;
-    output->changed = FALSE;
-    output->nonDesktop = FALSE;
     output->devPrivate = devPrivate;
 
     if (!AddResource(output->id, RROutputType, (void *) output))
