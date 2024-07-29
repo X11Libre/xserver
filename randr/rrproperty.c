@@ -643,16 +643,16 @@ ProcRRGetOutputProperty(ClientPtr client)
         if (prop->propertyName == stuff->property)
             break;
 
-    xRRGetOutputPropertyReply reply = {
+    xRRGetOutputPropertyReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence
     };
 
     if (!prop) {
         if (client->swapped) {
-            swaps(&reply.sequenceNumber);
+            swaps(&rep.sequenceNumber);
         }
-        WriteToClient(client, sizeof(xRRGetOutputPropertyReply), &reply);
+        WriteToClient(client, sizeof(rep), &rep);
         return Success;
     }
 
@@ -668,15 +668,15 @@ ProcRRGetOutputProperty(ClientPtr client)
 
     if (((stuff->type != prop_value->type) && (stuff->type != AnyPropertyType))
         ) {
-        reply.bytesAfter = prop_value->size;
-        reply.format = prop_value->format;
-        reply.propertyType = prop_value->type;
+        rep.bytesAfter = prop_value->size;
+        rep.format = prop_value->format;
+        rep.propertyType = prop_value->type;
         if (client->swapped) {
-            swaps(&reply.sequenceNumber);
-            swapl(&reply.propertyType);
-            swapl(&reply.bytesAfter);
+            swaps(&rep.sequenceNumber);
+            swapl(&rep.propertyType);
+            swapl(&rep.bytesAfter);
         }
-        WriteToClient(client, sizeof(xRRGetOutputPropertyReply), &reply);
+        WriteToClient(client, sizeof(rep), &rep);
         return Success;
     }
 
@@ -701,14 +701,14 @@ ProcRRGetOutputProperty(ClientPtr client)
         if (!extra)
             return BadAlloc;
     }
-    reply.bytesAfter = n - (ind + len);
-    reply.format = prop_value->format;
-    reply.length = bytes_to_int32(len);
+    rep.bytesAfter = n - (ind + len);
+    rep.format = prop_value->format;
+    rep.length = bytes_to_int32(len);
     if (prop_value->format)
-        reply.nItems = len / (prop_value->format / 8);
-    reply.propertyType = prop_value->type;
+        rep.nItems = len / (prop_value->format / 8);
+    rep.propertyType = prop_value->type;
 
-    if (stuff->delete && (reply.bytesAfter == 0)) {
+    if (stuff->delete && (rep.bytesAfter == 0)) {
         xRROutputPropertyNotifyEvent event = {
             .type = RREventBase + RRNotify,
             .subCode = RRNotify_OutputProperty,
@@ -721,16 +721,16 @@ ProcRRGetOutputProperty(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swapl(&reply.propertyType);
-        swapl(&reply.bytesAfter);
-        swapl(&reply.nItems);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.propertyType);
+        swapl(&rep.bytesAfter);
+        swapl(&rep.nItems);
     }
-    WriteToClient(client, sizeof(xGenericReply), &reply);
+    WriteToClient(client, sizeof(rep), &rep);
     if (len) {
         memcpy(extra, (char *) prop_value->data + ind, len);
-        switch (reply.format) {
+        switch (rep.format) {
         case 32:
             client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
             break;
@@ -745,7 +745,7 @@ ProcRRGetOutputProperty(ClientPtr client)
         free(extra);
     }
 
-    if (stuff->delete && (reply.bytesAfter == 0)) {     /* delete the Property */
+    if (stuff->delete && (rep.bytesAfter == 0)) {     /* delete the Property */
         *prev = prop->next;
         RRDestroyOutputProperty(prop);
     }
