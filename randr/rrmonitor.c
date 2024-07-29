@@ -622,8 +622,6 @@ ProcRRGetMonitors(ClientPtr client)
     }
     WriteToClient(client, sizeof(xRRGetMonitorsReply), &rep);
 
-    client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
-
     for (m = 0; m < nmonitors; m++) {
         RRMonitorPtr    monitor = &monitors[m];
         xRRMonitorInfo  info = {
@@ -649,8 +647,13 @@ ProcRRGetMonitors(ClientPtr client)
             swapl(&info.heightInMillimeters);
         }
 
+        RROutput outputs[monitor->numOutputs];
+        memcpy(outputs, monitor->outputs, monitor->numOutputs * sizeof (RROutput));
+
+        if (client->swapped) SwapLongs(outputs, monitor->numOutputs);
+
         WriteToClient(client, sizeof(xRRMonitorInfo), &info);
-        WriteSwappedDataToClient(client, monitor->numOutputs * sizeof (RROutput), monitor->outputs);
+        WriteToClient(client, sizeof(outputs), outputs);
     }
 
     RRMonitorFreeList(monitors, nmonitors);
