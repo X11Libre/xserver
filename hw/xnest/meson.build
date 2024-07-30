@@ -44,7 +44,6 @@ executable(
         libxserver_xi_stubs,
         libxserver_xkb_stubs,
     ],
-    c_args: '-DHAVE_XNEST_CONFIG_H',
     install: true,
 )
 
