@@ -19,4 +19,7 @@ extern xnestUpstreamInfoRec xnestUpstreamInfo;
 /* fetch upstream connection's xcb setup data */
 void xnest_upstream_setup(void);
 
+/* generate a new XID for upstream X11 connection */
+uint32_t xnestUpstreamXID(void);
+
 #endif /* __XNEST__XCB_H */
