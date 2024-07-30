@@ -365,7 +365,7 @@ xnestRealizeWindow(WindowPtr pWin)
 {
     xnestConfigureWindow(pWin, XCB_CONFIG_WINDOW_SIBLING);
     xnestShapeWindow(pWin);
-    XMapWindow(xnestDisplay, xnestWindow(pWin));
+    xcb_map_window(xnestUpstreamInfo.conn, xnestWindow(pWin));
 
     return TRUE;
 }
@@ -373,8 +373,7 @@ xnestRealizeWindow(WindowPtr pWin)
 Bool
 xnestUnrealizeWindow(WindowPtr pWin)
 {
-    XUnmapWindow(xnestDisplay, xnestWindow(pWin));
-
+    xcb_unmap_window(xnestUpstreamInfo.conn, xnestWindow(pWin));
     return TRUE;
 }
 
