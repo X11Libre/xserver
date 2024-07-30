@@ -31,6 +31,7 @@ is" without express or implied warranty.
 #include "servermd.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Init.h"
@@ -88,8 +89,10 @@ xnestOpenDisplay(int argc, char *argv[])
     if (xnestSynchronize)
         XSynchronize(xnestDisplay, TRUE);
 
+    xnest_upstream_setup();
+
     mask = VisualScreenMask;
-    vi.screen = DefaultScreen(xnestDisplay);
+    vi.screen = xnestUpstreamInfo.screenId;
     xnestVisuals = XGetVisualInfo(xnestDisplay, mask, &vi, &xnestNumVisuals);
     if (xnestNumVisuals == 0 || xnestVisuals == NULL)
         FatalError("Unable to find any visuals.\n");
@@ -110,8 +113,7 @@ xnestOpenDisplay(int argc, char *argv[])
     }
     else {
         vi.visualid = XVisualIDFromVisual(DefaultVisual(xnestDisplay,
-                                                        DefaultScreen
-                                                        (xnestDisplay)));
+                                                        xnestUpstreamInfo.screenId));
         xnestDefaultVisualIndex = 0;
         for (i = 0; i < xnestNumVisuals; i++)
             if (vi.visualid == xnestVisuals[i].visualid)
@@ -128,14 +130,14 @@ xnestOpenDisplay(int argc, char *argv[])
                                                    xnestVisuals[i].visual,
                                                    AllocNone);
 
-    xnestDepths = XListDepths(xnestDisplay, DefaultScreen(xnestDisplay),
+    xnestDepths = XListDepths(xnestDisplay, xnestUpstreamInfo.screenId,
                               &xnestNumDepths);
 
     xnestPixmapFormats = XListPixmapFormats(xnestDisplay,
                                             &xnestNumPixmapFormats);
 
-    xnestBlackPixel = BlackPixel(xnestDisplay, DefaultScreen(xnestDisplay));
-    xnestWhitePixel = WhitePixel(xnestDisplay, DefaultScreen(xnestDisplay));
+    xnestBlackPixel = BlackPixel(xnestDisplay, xnestUpstreamInfo.screenId);
+    xnestWhitePixel = WhitePixel(xnestDisplay, xnestUpstreamInfo.screenId);
 
     if (xnestParentWindow != (Window) 0)
         xnestEventMask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
@@ -164,12 +166,10 @@ xnestOpenDisplay(int argc, char *argv[])
 
     if (xnestParentWindow == 0) {
         if (!(xnestUserGeometry & WidthValue))
-            xnestWidth = 3 * DisplayWidth(xnestDisplay,
-                                          DefaultScreen(xnestDisplay)) / 4;
+            xnestWidth = 3 * DisplayWidth(xnestDisplay, xnestUpstreamInfo.screenId) / 4;
 
         if (!(xnestUserGeometry & HeightValue))
-            xnestHeight = 3 * DisplayHeight(xnestDisplay,
-                                            DefaultScreen(xnestDisplay)) / 4;
+            xnestHeight = 3 * DisplayHeight(xnestDisplay, xnestUpstreamInfo.screenId) / 4;
     }
 
     if (!xnestUserBorderWidth)
@@ -188,8 +188,7 @@ xnestOpenDisplay(int argc, char *argv[])
                                     screensaver_height,
                                     xnestWhitePixel,
                                     xnestBlackPixel,
-                                    DefaultDepth(xnestDisplay,
-                                                 DefaultScreen(xnestDisplay)));
+                                    DefaultDepth(xnestDisplay, xnestUpstreamInfo.screenId));
 }
 
 void
