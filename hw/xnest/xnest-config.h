@@ -29,6 +29,5 @@
 #define XNEST_CONFIG_H
 
 #include <dix-config.h>
-#include <xkb-config.h>
 
 #endif                          /* XNEST_CONFIG_H */
