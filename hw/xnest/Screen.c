@@ -13,6 +13,9 @@ is" without express or implied warranty.
 */
 #include <dix-config.h>
 
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
@@ -137,7 +140,6 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     int numVisuals, numDepths;
     int i, j, depthIndex;
     unsigned long valuemask;
-    XSetWindowAttributes attributes;
     XWindowAttributes gattributes;
     XSizeHints sizeHints;
     VisualID defaultVisual;
@@ -360,29 +362,35 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
     if (xnestDoFullGeneration) {
 
+        xcb_params_cw_t attributes = {
+            .back_pixel = xnestUpstreamInfo.screenInfo->white_pixel,
+            .event_mask = xnestEventMask,
+            .colormap = xnestDefaultVisualColormap(xnestDefaultVisual(pScreen)),
+        };
+
         valuemask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP;
-        attributes.background_pixel = xnestUpstreamInfo.screenInfo->white_pixel;
-        attributes.event_mask = xnestEventMask;
-        attributes.colormap =
-            xnestDefaultVisualColormap(xnestDefaultVisual(pScreen));
 
         if (xnestParentWindow != 0) {
             xnestDefaultWindows[pScreen->myNum] = xnestParentWindow;
             XSelectInput(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
                          xnestEventMask);
         }
-        else
-            xnestDefaultWindows[pScreen->myNum] =
-                XCreateWindow(xnestDisplay,
-                              xnestUpstreamInfo.screenInfo->root,
-                              xnestX + POSITION_OFFSET,
-                              xnestY + POSITION_OFFSET,
-                              xnestWidth, xnestHeight,
-                              xnestBorderWidth,
-                              pScreen->rootDepth,
-                              InputOutput,
-                              xnestDefaultVisual(pScreen),
-                              valuemask, &attributes);
+        else {
+            xnestDefaultWindows[pScreen->myNum] = xcb_generate_id(xnestUpstreamInfo.conn);
+            xcb_aux_create_window(xnestUpstreamInfo.conn,
+                                  pScreen->rootDepth,
+                                  xnestDefaultWindows[pScreen->myNum],
+                                  xnestUpstreamInfo.screenInfo->root,
+                                  xnestX + POSITION_OFFSET,
+                                  xnestY + POSITION_OFFSET,
+                                  xnestWidth,
+                                  xnestHeight,
+                                  xnestBorderWidth,
+                                  XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                                  xnestDefaultVisual(pScreen)->visualid,
+                                  valuemask,
+                                  &attributes);
+        }
 
         if (!xnestWindowName)
             xnestWindowName = argv[0];
@@ -405,17 +413,23 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
         XMapWindow(xnestDisplay, xnestDefaultWindows[pScreen->myNum]);
 
         valuemask = XCB_CW_BACK_PIXMAP | XCB_CW_COLORMAP;
-        attributes.background_pixmap = xnestScreenSaverPixmap;
+        attributes.back_pixmap = xnestScreenSaverPixmap;
         attributes.colormap = xnestUpstreamInfo.screenInfo->default_colormap;
-        xnestScreenSaverWindows[pScreen->myNum] =
-            XCreateWindow(xnestDisplay,
-                          xnestDefaultWindows[pScreen->myNum],
-                          0, 0, xnestWidth, xnestHeight, 0,
-                          xnestUpstreamInfo.screenInfo->root_depth,
-                          InputOutput, DefaultVisual(xnestDisplay,
-                                                     xnestUpstreamInfo.screenId),
-                          valuemask,
-                          &attributes);
+
+        xnestScreenSaverWindows[pScreen->myNum] = xcb_generate_id(xnestUpstreamInfo.conn);
+        xcb_aux_create_window(xnestUpstreamInfo.conn,
+                              xnestUpstreamInfo.screenInfo->root_depth,
+                              xnestScreenSaverWindows[pScreen->myNum],
+                              xnestDefaultWindows[pScreen->myNum],
+                              0,
+                              0,
+                              xnestWidth,
+                              xnestHeight,
+                              0,
+                              XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                              xnestUpstreamInfo.screenInfo->root_visual,
+                              valuemask,
+                              &attributes);
     }
 
     if (!xnestCreateDefaultColormap(pScreen))

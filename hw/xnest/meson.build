@@ -22,6 +22,7 @@ srcs = [
 
 x11_xcb_dep = dependency('x11-xcb', required: true)
 xcb_dep = dependency('xcb', required: true)
+xcb_aux_dep = dependency('xcb-aux', required: true)
 
 executable(
     'Xnest',
@@ -31,6 +32,7 @@ executable(
         common_dep,
         xnest_dep,
         xcb_dep,
+        xcb_aux_dep,
         x11_xcb_dep,
     ],
     link_with: [

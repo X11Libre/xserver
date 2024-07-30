@@ -13,6 +13,9 @@ is" without express or implied warranty.
 */
 #include <dix-config.h>
 
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
+
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
@@ -27,6 +30,7 @@ is" without express or implied warranty.
 #include "region.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -74,7 +78,7 @@ Bool
 xnestCreateWindow(WindowPtr pWin)
 {
     unsigned long mask;
-    XSetWindowAttributes attributes;
+    xcb_params_cw_t attributes = { 0 };
     Visual *visual;
     ColormapPtr pCmap;
 
@@ -114,18 +118,21 @@ xnestCreateWindow(WindowPtr pWin)
         }
     }
 
-    xnestWindowPriv(pWin)->window = XCreateWindow(xnestDisplay,
-                                                  xnestWindowParent(pWin),
-                                                  pWin->origin.x -
-                                                  wBorderWidth(pWin),
-                                                  pWin->origin.y -
-                                                  wBorderWidth(pWin),
-                                                  pWin->drawable.width,
-                                                  pWin->drawable.height,
-                                                  pWin->borderWidth,
-                                                  pWin->drawable.depth,
-                                                  pWin->drawable.class,
-                                                  visual, mask, &attributes);
+    xnestWindowPriv(pWin)->window = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_aux_create_window(xnestUpstreamInfo.conn,
+                          pWin->drawable.depth,
+                          xnestWindowPriv(pWin)->window,
+                          xnestWindowParent(pWin),
+                          pWin->origin.x - wBorderWidth(pWin),
+                          pWin->origin.y - wBorderWidth(pWin),
+                          pWin->drawable.width,
+                          pWin->drawable.height,
+                          pWin->borderWidth,
+                          pWin->drawable.class,
+                          (visual ? visual->visualid : 0),
+                          mask,
+                          &attributes);
+
     xnestWindowPriv(pWin)->parent = xnestWindowParent(pWin);
     xnestWindowPriv(pWin)->x = pWin->origin.x - wBorderWidth(pWin);
     xnestWindowPriv(pWin)->y = pWin->origin.y - wBorderWidth(pWin);
