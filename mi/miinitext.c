@@ -70,20 +70,11 @@ SOFTWARE.
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #include "xf86Extensions.h"
-#endif
-
-#ifdef HAVE_XNEST_CONFIG_H
-#include <xnest-config.h>
-#undef COMPOSITE
-#undef DPMSExtension
 #endif
 
 #include "misc.h"
