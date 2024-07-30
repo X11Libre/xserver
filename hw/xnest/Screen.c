@@ -26,6 +26,7 @@ is" without express or implied warranty.
 #include "resource.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -321,13 +322,12 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                   &xnestCursorFuncs);
     PointPriv->spriteFuncs = &xnestPointerSpriteFuncs;
 
-    pScreen->mmWidth = xnestWidth * DisplayWidthMM(xnestDisplay,
-                                                   DefaultScreen(xnestDisplay))
-        / DisplayWidth(xnestDisplay, DefaultScreen(xnestDisplay));
+    pScreen->mmWidth = xnestWidth * DisplayWidthMM(xnestDisplay, xnestUpstreamInfo.screenId)
+        / DisplayWidth(xnestDisplay, xnestUpstreamInfo.screenId);
     pScreen->mmHeight =
         xnestHeight * DisplayHeightMM(xnestDisplay,
-                                      DefaultScreen(xnestDisplay)) /
-        DisplayHeight(xnestDisplay, DefaultScreen(xnestDisplay));
+                                      xnestUpstreamInfo.screenId) /
+        DisplayHeight(xnestDisplay, xnestUpstreamInfo.screenId);
 
     /* overwrite miCloseScreen with our own */
     pScreen->CloseScreen = xnestCloseScreen;
@@ -388,16 +388,15 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
         valuemask = XCB_CW_BACK_PIXMAP | XCB_CW_COLORMAP;
         attributes.background_pixmap = xnestScreenSaverPixmap;
         attributes.colormap =
-            DefaultColormap(xnestDisplay, DefaultScreen(xnestDisplay));
+            DefaultColormap(xnestDisplay, xnestUpstreamInfo.screenId);
         xnestScreenSaverWindows[pScreen->myNum] =
             XCreateWindow(xnestDisplay,
                           xnestDefaultWindows[pScreen->myNum],
                           0, 0, xnestWidth, xnestHeight, 0,
-                          DefaultDepth(xnestDisplay,
-                                       DefaultScreen(xnestDisplay)),
+                          DefaultDepth(xnestDisplay, xnestUpstreamInfo.screenId),
                           InputOutput, DefaultVisual(xnestDisplay,
-                                                     DefaultScreen
-                                                     (xnestDisplay)), valuemask,
+                                                     xnestUpstreamInfo.screenId),
+                          valuemask,
                           &attributes);
     }
 
