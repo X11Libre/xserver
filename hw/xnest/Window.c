@@ -191,7 +191,7 @@ void
 xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
 {
     unsigned int valuemask;
-    XWindowChanges values;
+    XnWindowChanges values;
 
     if (mask & XCB_CONFIG_WINDOW_SIBLING  &&
         xnestWindowPriv(pWin)->parent != xnestWindowParent(pWin)) {
@@ -241,8 +241,7 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
             xnestWindowPriv(pWin)->border_width = pWin->borderWidth;
     }
 
-    if (valuemask)
-        XConfigureWindow(xnestDisplay, xnestWindow(pWin), valuemask, &values);
+    xnConfigureWindow(xnestUpstreamInfo.conn, xnestWindow(pWin), valuemask, values);
 
     if (mask & XCB_CONFIG_WINDOW_SIBLING &&
         xnestWindowPriv(pWin)->sibling_above != xnestWindowSiblingAbove(pWin)) {
@@ -254,7 +253,8 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
         /* the top sibling */
         valuemask = XCB_CONFIG_WINDOW_STACK_MODE;
         values.stack_mode = Above;
-        XConfigureWindow(xnestDisplay, xnestWindow(pSib), valuemask, &values);
+
+        xnConfigureWindow(xnestUpstreamInfo.conn, xnestWindow(pSib), valuemask, values);
         xnestWindowPriv(pSib)->sibling_above = XCB_WINDOW_NONE;
 
         /* the rest of siblings */
@@ -262,8 +262,7 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
             valuemask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
             values.sibling = xnestWindowSiblingAbove(pSib);
             values.stack_mode = Below;
-            XConfigureWindow(xnestDisplay, xnestWindow(pSib), valuemask,
-                             &values);
+            xnConfigureWindow(xnestUpstreamInfo.conn, xnestWindow(pSib), valuemask, values);
             xnestWindowPriv(pSib)->sibling_above =
                 xnestWindowSiblingAbove(pSib);
         }

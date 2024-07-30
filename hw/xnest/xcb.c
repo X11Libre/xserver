@@ -70,3 +70,24 @@ void xnestEncodeWindowAttr(XnSetWindowAttr attr, uint32_t mask, uint32_t *values
     EXTRA_VALUE(XCB_CW_CURSOR,            cursor);
 #undef EXTRA_VALUE
 }
+
+void xnConfigureWindow(xcb_connection_t *conn, uint32_t window, uint32_t mask, XnWindowChanges values)
+{
+    if (mask) {
+        uint32_t value_list[16] = { 0 };
+
+        int idx = 0;
+
+#define EXTRA_VALUE(flag,val) if (mask & flag) { value_list[idx++] = values.val; }
+        EXTRA_VALUE(XCB_CONFIG_WINDOW_X,            x);
+        EXTRA_VALUE(XCB_CONFIG_WINDOW_Y,            y);
+        EXTRA_VALUE(XCB_CONFIG_WINDOW_WIDTH,        width);
+        EXTRA_VALUE(XCB_CONFIG_WINDOW_HEIGHT,       height);
+        EXTRA_VALUE(XCB_CONFIG_WINDOW_BORDER_WIDTH, border_width);
+        EXTRA_VALUE(XCB_CONFIG_WINDOW_SIBLING,      sibling);
+        EXTRA_VALUE(XCB_CONFIG_WINDOW_STACK_MODE,   stack_mode);
+#undef EXTRA_VALUE
+
+        xcb_configure_window(conn, window, mask, value_list);
+    }
+}
