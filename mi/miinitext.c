@@ -78,12 +78,6 @@ SOFTWARE.
 #include "xf86Extensions.h"
 #endif
 
-#ifdef HAVE_XNEST_CONFIG_H
-#include <xnest-config.h>
-#undef COMPOSITE
-#undef DPMSExtension
-#endif
-
 #include "misc.h"
 #include "extension.h"
 #include "extinit_priv.h"
