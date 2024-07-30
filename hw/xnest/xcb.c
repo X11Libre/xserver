@@ -29,3 +29,7 @@ void xnestUpstreamSetup(void) {
         xcb_screen_next (&iter);
     xnestUpstreamInfo.screenInfo = iter.data;
 }
+
+uint32_t xnestUpstreamXID(void) {
+    return xcb_generate_id(xnestUpstreamInfo.conn);
+}
