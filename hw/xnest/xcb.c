@@ -48,3 +48,8 @@ uint32_t xnestUpstreamGC(GCPtr pGC) {
     XFlushGC(xnestDisplay, priv->gc);
     return priv->gc->gid;
 }
+
+/* retrieve XID of our screen's corresponding root window on the upstream */
+xcb_window_t xnestUpstreamRootWindow(void) {
+    return DefaultRootWindow(xnestDisplay);
+}

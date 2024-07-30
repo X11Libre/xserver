@@ -123,8 +123,7 @@ xnestOpenDisplay(int argc, char *argv[])
                                         sizeof(Colormap));
     for (i = 0; i < xnestNumDefaultColormaps; i++)
         xnestDefaultColormaps[i] = XCreateColormap(xnestDisplay,
-                                                   DefaultRootWindow
-                                                   (xnestDisplay),
+                                                   xnestUpstreamRootWindow(),
                                                    xnestVisuals[i].visual,
                                                    AllocNone);
 
@@ -147,7 +146,7 @@ xnestOpenDisplay(int argc, char *argv[])
             if (xnestPixmapFormats[i].depth == 1 ||
                 xnestPixmapFormats[i].depth == xnestDepths[j]) {
                 xnestDefaultDrawables[xnestPixmapFormats[i].depth] =
-                    XCreatePixmap(xnestDisplay, DefaultRootWindow(xnestDisplay),
+                    XCreatePixmap(xnestDisplay, xnestUpstreamRootWindow(),
                                   1, 1, xnestPixmapFormats[i].depth);
             }
 
@@ -172,12 +171,12 @@ xnestOpenDisplay(int argc, char *argv[])
 
     xnestIconBitmap =
         XCreateBitmapFromData(xnestDisplay,
-                              DefaultRootWindow(xnestDisplay),
+                              xnestUpstreamRootWindow(),
                               (char *) icon_bits, icon_width, icon_height);
 
     xnestScreenSaverPixmap =
         XCreatePixmapFromBitmapData(xnestDisplay,
-                                    DefaultRootWindow(xnestDisplay),
+                                    xnestUpstreamRootWindow(),
                                     (char *) screensaver_bits,
                                     screensaver_width,
                                     screensaver_height,

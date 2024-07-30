@@ -359,7 +359,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
         else
             xnestDefaultWindows[pScreen->myNum] =
                 XCreateWindow(xnestDisplay,
-                              DefaultRootWindow(xnestDisplay),
+                              xnestUpstreamRootWindow(),
                               xnestX + POSITION_OFFSET,
                               xnestY + POSITION_OFFSET,
                               xnestWidth, xnestHeight,
