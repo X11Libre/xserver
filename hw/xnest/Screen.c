@@ -11,10 +11,7 @@ the suitability of this software for any purpose.  It is provided "as
 is" without express or implied warranty.
 
 */
-
-#ifdef HAVE_XNEST_CONFIG_H
-#include <xnest-config.h>
-#endif
+#include <dix-config.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
