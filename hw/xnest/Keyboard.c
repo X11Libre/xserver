@@ -11,8 +11,7 @@ the suitability of this software for any purpose.  It is provided "as
 is" without express or implied warranty.
 
 */
-
-#include <xnest-config.h>
+#include <dix-config.h>
 
 #ifdef WIN32
 #include <X11/Xwindows.h>
