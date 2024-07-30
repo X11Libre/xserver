@@ -19,6 +19,9 @@ srcs = [
     '../../mi/miinitext.h',
 ]
 
+x11_xcb_dep = dependency('x11-xcb', required: true)
+xcb_dep = dependency('xcb', required: true)
+
 executable(
     'Xnest',
     srcs,
@@ -26,6 +29,8 @@ executable(
     dependencies: [
         common_dep,
         xnest_dep,
+        xcb_dep,
+        x11_xcb_dep,
     ],
     link_with: [
         libxserver_main,
