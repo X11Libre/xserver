@@ -31,6 +31,4 @@
 #include <dix-config.h>
 #include <xkb-config.h>
 
-#undef MITSHM
-
 #endif                          /* XNEST_CONFIG_H */
