@@ -48,3 +48,25 @@ uint32_t xnestUpstreamGC(GCPtr pGC) {
     XFlushGC(xnestDisplay, priv->gc);
     return priv->gc->gid;
 }
+
+void xnestEncodeWindowAttr(XnSetWindowAttr attr, uint32_t mask, uint32_t *values)
+{
+    int idx = 0;
+#define EXTRA_VALUE(flag,val) if (mask & flag) { values[idx++] = attr.val; }
+    EXTRA_VALUE(XCB_CW_BACK_PIXMAP,       background_pixmap);
+    EXTRA_VALUE(XCB_CW_BACK_PIXEL,        background_pixel)
+    EXTRA_VALUE(XCB_CW_BORDER_PIXMAP,     border_pixmap)
+    EXTRA_VALUE(XCB_CW_BORDER_PIXEL,      border_pixel)
+    EXTRA_VALUE(XCB_CW_BIT_GRAVITY,       bit_gravity)
+    EXTRA_VALUE(XCB_CW_WIN_GRAVITY,       win_gravity);
+    EXTRA_VALUE(XCB_CW_BACKING_STORE,     backing_store);
+    EXTRA_VALUE(XCB_CW_BACKING_PLANES,    backing_planes);
+    EXTRA_VALUE(XCB_CW_BACKING_PIXEL,     backing_pixel);
+    EXTRA_VALUE(XCB_CW_OVERRIDE_REDIRECT, override_redirect);
+    EXTRA_VALUE(XCB_CW_SAVE_UNDER,        save_under);
+    EXTRA_VALUE(XCB_CW_EVENT_MASK,        event_mask);
+    EXTRA_VALUE(XCB_CW_DONT_PROPAGATE,    do_not_propagate_mask);
+    EXTRA_VALUE(XCB_CW_COLORMAP,          colormap);
+    EXTRA_VALUE(XCB_CW_CURSOR,            cursor);
+#undef EXTRA_VALUE
+}

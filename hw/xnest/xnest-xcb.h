@@ -25,4 +25,7 @@ uint32_t xnestUpstreamXID(void);
 /* retrieve upstream GC XID for our xserver GC */
 uint32_t xnestUpstreamGC(GCPtr pGC);
 
+typedef XSetWindowAttributes XnSetWindowAttr;
+void xnestEncodeWindowAttr(XnSetWindowAttr attr, uint32_t mask, uint32_t *values);
+
 #endif /* __XNEST__XCB_H */
