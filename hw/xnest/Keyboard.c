@@ -32,6 +32,7 @@ is" without express or implied warranty.
 #include "servermd.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -67,13 +68,13 @@ DeviceIntPtr xnestKeyboardDevice = NULL;
 void
 xnestBell(int volume, DeviceIntPtr pDev, void *ctrl, int cls)
 {
-    XBell(xnestDisplay, volume);
+    xcb_bell(xnestUpstreamInfo.conn, volume);
 }
 
 void
 DDXRingBell(int volume, int pitch, int duration)
 {
-    XBell(xnestDisplay, volume);
+    xcb_bell(xnestUpstreamInfo.conn, volume);
 }
 
 void
