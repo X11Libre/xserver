@@ -82,23 +82,28 @@ xnestSaveScreen(ScreenPtr pScreen, int what)
     else {
         switch (what) {
         case SCREEN_SAVER_ON:
-            XMapRaised(xnestDisplay, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_map_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            uint32_t value = XCB_STACK_MODE_ABOVE;
+            xcb_configure_window(xnestUpstreamInfo.conn,
+                                 xnestScreenSaverWindows[pScreen->myNum],
+                                 XCB_CONFIG_WINDOW_STACK_MODE,
+                                 &value);
             xnestSetScreenSaverColormapWindow(pScreen);
             break;
 
         case SCREEN_SAVER_OFF:
-            XUnmapWindow(xnestDisplay, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
             xnestSetInstalledColormapWindows(pScreen);
             break;
 
         case SCREEN_SAVER_FORCER:
             lastEventTime = GetTimeInMillis();
-            XUnmapWindow(xnestDisplay, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
             xnestSetInstalledColormapWindows(pScreen);
             break;
 
         case SCREEN_SAVER_CYCLE:
-            XUnmapWindow(xnestDisplay, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
             xnestSetInstalledColormapWindows(pScreen);
             break;
         }
@@ -410,7 +415,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                                xnestWindowName,
                                xnestIconBitmap, argv, argc, &sizeHints);
 
-        XMapWindow(xnestDisplay, xnestDefaultWindows[pScreen->myNum]);
+        xcb_map_window(xnestUpstreamInfo.conn, xnestDefaultWindows[pScreen->myNum]);
 
         valuemask = XCB_CW_BACK_PIXMAP | XCB_CW_COLORMAP;
         attributes.back_pixmap = xnestScreenSaverPixmap;
