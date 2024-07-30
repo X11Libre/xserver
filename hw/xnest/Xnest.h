@@ -27,6 +27,8 @@ other dealings in this Software without prior written authorization
 from the X Consortium.
 
 */
+#ifndef _XORG_XNEST_H
+#define _XORG_XNEST_H
 
 /*
 ** Machines with a 64 bit library interface and a 32 bit server require
@@ -88,3 +90,5 @@ typedef XID KeySym64;
 #undef GContext
 #undef KeySym
 #endif /*_XSERVER64_tmp*/
+
+#endif /* _XORG_XNEST_H */
