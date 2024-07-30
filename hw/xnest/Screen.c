@@ -141,7 +141,6 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     int numVisuals, numDepths;
     int i, j, depthIndex;
     unsigned long valuemask;
-    XSetWindowAttributes attributes;
     XWindowAttributes gattributes;
     XSizeHints sizeHints;
     VisualID defaultVisual;
@@ -345,29 +344,38 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
     if (xnestDoFullGeneration) {
 
+        XnSetWindowAttr attributes = {
+            .background_pixel = xnestUpstreamInfo.screenInfo->white_pixel,
+            .event_mask = xnestEventMask,
+            .colormap = xnestDefaultVisualColormap(xnestDefaultVisual(pScreen)),
+        };
+
         valuemask = CWBackPixel | CWEventMask | CWColormap;
-        attributes.background_pixel = xnestUpstreamInfo.screenInfo->white_pixel;
-        attributes.event_mask = xnestEventMask;
-        attributes.colormap =
-            xnestDefaultVisualColormap(xnestDefaultVisual(pScreen));
 
         if (xnestParentWindow != 0) {
             xnestDefaultWindows[pScreen->myNum] = xnestParentWindow;
             XSelectInput(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
                          xnestEventMask);
         }
-        else
-            xnestDefaultWindows[pScreen->myNum] =
-                XCreateWindow(xnestDisplay,
+        else {
+            uint32_t values[32] = { 0 };
+            xnestEncodeWindowAttr(attributes, valuemask, values);
+
+            xnestDefaultWindows[pScreen->myNum] = xnestUpstreamXID();
+            xcb_create_window(xnestUpstreamInfo.conn,
+                              pScreen->rootDepth,
+                              xnestDefaultWindows[pScreen->myNum],
                               xnestUpstreamInfo.screenInfo->root,
                               xnestX + POSITION_OFFSET,
                               xnestY + POSITION_OFFSET,
-                              xnestWidth, xnestHeight,
+                              xnestWidth,
+                              xnestHeight,
                               xnestBorderWidth,
-                              pScreen->rootDepth,
-                              InputOutput,
-                              xnestDefaultVisual(pScreen),
-                              valuemask, &attributes);
+                              XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                              xnestDefaultVisual(pScreen)->visualid,
+                              valuemask,
+                              values);
+        }
 
         if (!xnestWindowName)
             xnestWindowName = argv[0];
@@ -393,15 +401,24 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
         attributes.background_pixmap = xnestScreenSaverPixmap;
         attributes.colormap =
             DefaultColormap(xnestDisplay, xnestUpstreamInfo.screenId);
-        xnestScreenSaverWindows[pScreen->myNum] =
-            XCreateWindow(xnestDisplay,
-                          xnestDefaultWindows[pScreen->myNum],
-                          0, 0, xnestWidth, xnestHeight, 0,
+
+        uint32_t values[32] = { 0 };
+        xnestEncodeWindowAttr(attributes, valuemask, values);
+
+        xnestScreenSaverWindows[pScreen->myNum] = xnestUpstreamXID();
+        xcb_create_window(xnestUpstreamInfo.conn,
                           xnestUpstreamInfo.screenInfo->root_depth,
-                          InputOutput, DefaultVisual(xnestDisplay,
-                                                     xnestUpstreamInfo.screenId),
+                          xnestScreenSaverWindows[pScreen->myNum],
+                          xnestDefaultWindows[pScreen->myNum],
+                          0,
+                          0,
+                          xnestWidth,
+                          xnestHeight,
+                          0,
+                          XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                          DefaultVisual(xnestDisplay, xnestUpstreamInfo.screenId)->visualid,
                           valuemask,
-                          &attributes);
+                          values);
     }
 
     if (!xnestCreateDefaultColormap(pScreen))
