@@ -40,7 +40,6 @@ xnestCursorFuncRec xnestCursorFuncs = { NULL };
 Bool
 xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    XImage *ximage;
     unsigned long valuemask;
     XGCValues values;
 
@@ -55,37 +54,41 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 
     XChangeGC(xnestDisplay, xnestBitmapGC, valuemask, &values);
 
-    uint32_t winId = xnestDefaultWindows[pScreen->myNum];
+    uint32_t const winId = xnestDefaultWindows[pScreen->myNum];
 
-    Pixmap source = xcb_generate_id(xnestUpstreamInfo.conn);
+    Pixmap const source = xcb_generate_id(xnestUpstreamInfo.conn);
     xcb_create_pixmap(xnestUpstreamInfo.conn, 1, source, winId, pCursor->bits->width, pCursor->bits->height);
 
-    Pixmap mask = xcb_generate_id(xnestUpstreamInfo.conn);
+    Pixmap const mask = xcb_generate_id(xnestUpstreamInfo.conn);
     xcb_create_pixmap(xnestUpstreamInfo.conn, 1, mask, winId, pCursor->bits->width, pCursor->bits->height);
 
-    ximage = XCreateImage(xnestDisplay,
-                          xnestDefaultVisual(pScreen),
-                          1, XYBitmap, 0,
-                          (char *) pCursor->bits->source,
-                          pCursor->bits->width,
-                          pCursor->bits->height, BitmapPad(xnestDisplay), 0);
+    int const pixmap_len = BitmapBytePad(pCursor->bits->width) * pCursor->bits->height;
 
-    XPutImage(xnestDisplay, source, xnestBitmapGC, ximage,
-              0, 0, 0, 0, pCursor->bits->width, pCursor->bits->height);
+    xcb_put_image(xnestUpstreamInfo.conn,
+                  XCB_IMAGE_FORMAT_XY_BITMAP,
+                  source,
+                  xnestBitmapGC->gid,
+                  pCursor->bits->width,
+                  pCursor->bits->height,
+                  0, // x
+                  0, // y
+                  0, // left_pad
+                  1, // depth
+                  pixmap_len,
+                  (uint8_t*) pCursor->bits->source);
 
-    XFree(ximage);
-
-    ximage = XCreateImage(xnestDisplay,
-                          xnestDefaultVisual(pScreen),
-                          1, XYBitmap, 0,
-                          (char *) pCursor->bits->mask,
-                          pCursor->bits->width,
-                          pCursor->bits->height, BitmapPad(xnestDisplay), 0);
-
-    XPutImage(xnestDisplay, mask, xnestBitmapGC, ximage,
-              0, 0, 0, 0, pCursor->bits->width, pCursor->bits->height);
-
-    XFree(ximage);
+    xcb_put_image(xnestUpstreamInfo.conn,
+                  XCB_IMAGE_FORMAT_XY_BITMAP,
+                  mask,
+                  xnestBitmapGC->gid,
+                  pCursor->bits->width,
+                  pCursor->bits->height,
+                  0, // x
+                  0, // y
+                  0, // left_pad
+                  1, // depth
+                  pixmap_len,
+                  (uint8_t*) pCursor->bits->mask);
 
     xnestSetCursorPriv(pCursor, pScreen, calloc(1, sizeof(xnestPrivCursor)));
     uint32_t cursor = xcb_generate_id(xnestUpstreamInfo.conn);
