@@ -27,6 +27,7 @@ is" without express or implied warranty.
 #include "servermd.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -78,19 +79,19 @@ void
 xnestPutImage(DrawablePtr pDrawable, GCPtr pGC, int depth, int x, int y,
               int w, int h, int leftPad, int format, char *pImage)
 {
-    XImage *ximage;
-
-    ximage = XCreateImage(xnestDisplay, xnestDefaultVisual(pDrawable->pScreen),
-                          depth, format, leftPad, (char *) pImage,
-                          w, h, BitmapPad(xnestDisplay),
-                          (format == ZPixmap) ?
-                          PixmapBytePad(w, depth) : BitmapBytePad(w + leftPad));
-
-    if (ximage) {
-        XPutImage(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                  ximage, 0, 0, x, y, w, h);
-        XFree(ximage);
-    }
+    xcb_put_image(xnestUpstreamInfo.conn,
+                  format,
+                  xnestDrawable(pDrawable),
+                  xnest_upstream_gc(pGC),
+                  w,
+                  h,
+                  x,
+                  y,
+                  leftPad,
+                  depth,
+                  (format == XCB_IMAGE_FORMAT_Z_PIXMAP ? PixmapBytePad(w, depth)
+                                                       : BitmapBytePad(w + leftPad)) * h,
+                  (uint8_t*)pImage);
 }
 
 static int
