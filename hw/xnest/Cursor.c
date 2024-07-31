@@ -99,7 +99,7 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     bg_color.green = pCursor->backGreen;
     bg_color.blue = pCursor->backBlue;
 
-    xnestSetCursorPriv(pCursor, pScreen, malloc(sizeof(xnestPrivCursor)));
+    xnestSetCursorPriv(pCursor, pScreen, calloc(1, sizeof(xnestPrivCursor)));
     xnestCursor(pCursor, pScreen) =
         XCreatePixmapCursor(xnestDisplay, source, mask, &fg_color, &bg_color,
                             pCursor->bits->xhot, pCursor->bits->yhot);
