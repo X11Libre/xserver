@@ -14,6 +14,7 @@ is" without express or implied warranty.
 #include <dix-config.h>
 
 #include <xcb/xcb.h>
+#include <xcb/shape.h>
 #include <xcb/xcb_aux.h>
 
 #include <X11/X.h>
@@ -460,11 +461,6 @@ xnestRegionEqual(RegionPtr pReg1, RegionPtr pReg2)
 void
 xnestShapeWindow(WindowPtr pWin)
 {
-    Region reg;
-    BoxPtr pBox;
-    XRectangle rect;
-    int i;
-
     if (!xnestRegionEqual(xnestWindowPriv(pWin)->bounding_shape,
                           wBoundingShape(pWin))) {
 
@@ -472,26 +468,27 @@ xnestShapeWindow(WindowPtr pWin)
             RegionCopy(xnestWindowPriv(pWin)->bounding_shape,
                        wBoundingShape(pWin));
 
-            reg = XCreateRegion();
-            pBox = RegionRects(xnestWindowPriv(pWin)->bounding_shape);
-            for (i = 0;
-                 i < RegionNumRects(xnestWindowPriv(pWin)->bounding_shape);
-                 i++) {
-                rect.x = pBox[i].x1;
-                rect.y = pBox[i].y1;
-                rect.width = pBox[i].x2 - pBox[i].x1;
-                rect.height = pBox[i].y2 - pBox[i].y1;
-                XUnionRectWithRegion(&rect, reg, reg);
+            int const num_rects = RegionNumRects(xnestWindowPriv(pWin)->bounding_shape);
+            BoxPtr const pBox = RegionRects(xnestWindowPriv(pWin)->bounding_shape);
+            xcb_rectangle_t *rects = calloc(num_rects, sizeof(xcb_rectangle_t));
+
+            for (int i = 0; i < num_rects; i++) {
+                rects[i].x = pBox[i].x1;
+                rects[i].y = pBox[i].y1;
+                rects[i].width = pBox[i].x2 - pBox[i].x1;
+                rects[i].height = pBox[i].y2 - pBox[i].y1;
             }
-            XShapeCombineRegion(xnestDisplay, xnestWindow(pWin),
-                                ShapeBounding, 0, 0, reg, ShapeSet);
-            XDestroyRegion(reg);
+
+            xcb_shape_rectangles(xnestUpstreamInfo.conn, XCB_SHAPE_SO_SET,
+                                 XCB_SHAPE_SK_BOUNDING, XCB_CLIP_ORDERING_YX_BANDED,
+                                 xnestWindow(pWin), 0, 0, num_rects, rects);
+            free(rects);
         }
         else {
             RegionEmpty(xnestWindowPriv(pWin)->bounding_shape);
-
-            XShapeCombineMask(xnestDisplay, xnestWindow(pWin),
-                              ShapeBounding, 0, 0, XCB_PIXMAP_NONE, ShapeSet);
+            xcb_shape_mask(xnestUpstreamInfo.conn, XCB_SHAPE_SO_SET,
+                           XCB_SHAPE_SK_BOUNDING, xnestWindow(pWin),
+                           0, 0, XCB_PIXMAP_NONE);
         }
     }
 
@@ -500,25 +497,26 @@ xnestShapeWindow(WindowPtr pWin)
         if (wClipShape(pWin)) {
             RegionCopy(xnestWindowPriv(pWin)->clip_shape, wClipShape(pWin));
 
-            reg = XCreateRegion();
-            pBox = RegionRects(xnestWindowPriv(pWin)->clip_shape);
-            for (i = 0;
-                 i < RegionNumRects(xnestWindowPriv(pWin)->clip_shape); i++) {
-                rect.x = pBox[i].x1;
-                rect.y = pBox[i].y1;
-                rect.width = pBox[i].x2 - pBox[i].x1;
-                rect.height = pBox[i].y2 - pBox[i].y1;
-                XUnionRectWithRegion(&rect, reg, reg);
+            int const num_rects = RegionNumRects(xnestWindowPriv(pWin)->clip_shape);
+            BoxPtr const pBox = RegionRects(xnestWindowPriv(pWin)->clip_shape);
+            xcb_rectangle_t *rects = calloc(num_rects, sizeof(xcb_rectangle_t));
+
+            for (int i = 0; i < num_rects; i++) {
+                rects[i].x = pBox[i].x1;
+                rects[i].y = pBox[i].y1;
+                rects[i].width = pBox[i].x2 - pBox[i].x1;
+                rects[i].height = pBox[i].y2 - pBox[i].y1;
             }
-            XShapeCombineRegion(xnestDisplay, xnestWindow(pWin),
-                                ShapeClip, 0, 0, reg, ShapeSet);
-            XDestroyRegion(reg);
+
+            xcb_shape_rectangles(xnestUpstreamInfo.conn, XCB_SHAPE_SO_SET,
+                                 XCB_SHAPE_SK_CLIP, XCB_CLIP_ORDERING_YX_BANDED,
+                                 xnestWindow(pWin), 0, 0, num_rects, rects);
+            free(rects);
         }
         else {
             RegionEmpty(xnestWindowPriv(pWin)->clip_shape);
-
-            XShapeCombineMask(xnestDisplay, xnestWindow(pWin),
-                              ShapeClip, 0, 0, XCB_PIXMAP_NONE, ShapeSet);
+            xcb_shape_mask(xnestUpstreamInfo.conn, XCB_SHAPE_SO_SET,
+                           XCB_SHAPE_SK_CLIP, xnestWindow(pWin), 0, 0, XCB_PIXMAP_NONE);
         }
     }
 }
