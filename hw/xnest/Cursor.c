@@ -29,6 +29,7 @@ is" without express or implied warranty.
 #include "mipointrst.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -43,7 +44,6 @@ Bool
 xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
     XImage *ximage;
-    Pixmap source, mask;
     XColor fg_color, bg_color;
     unsigned long valuemask;
     XGCValues values;
@@ -59,13 +59,13 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 
     XChangeGC(xnestDisplay, xnestBitmapGC, valuemask, &values);
 
-    source = XCreatePixmap(xnestDisplay,
-                           xnestDefaultWindows[pScreen->myNum],
-                           pCursor->bits->width, pCursor->bits->height, 1);
+    uint32_t winId = xnestDefaultWindows[pScreen->myNum];
 
-    mask = XCreatePixmap(xnestDisplay,
-                         xnestDefaultWindows[pScreen->myNum],
-                         pCursor->bits->width, pCursor->bits->height, 1);
+    Pixmap source = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_create_pixmap(xnestUpstreamInfo.conn, 1, source, winId, pCursor->bits->width, pCursor->bits->height);
+
+    Pixmap mask = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_create_pixmap(xnestUpstreamInfo.conn, 1, mask, winId, pCursor->bits->width, pCursor->bits->height);
 
     ximage = XCreateImage(xnestDisplay,
                           xnestDefaultVisual(pScreen),
@@ -104,8 +104,8 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
         XCreatePixmapCursor(xnestDisplay, source, mask, &fg_color, &bg_color,
                             pCursor->bits->xhot, pCursor->bits->yhot);
 
-    XFreePixmap(xnestDisplay, source);
-    XFreePixmap(xnestDisplay, mask);
+    xcb_free_pixmap(xnestUpstreamInfo.conn, source);
+    xcb_free_pixmap(xnestUpstreamInfo.conn, mask);
 
     return TRUE;
 }
