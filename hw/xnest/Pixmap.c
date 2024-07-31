@@ -26,6 +26,7 @@ is" without express or implied warranty.
 #include "mi.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -56,11 +57,12 @@ xnestCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     pPixmap->refcnt = 1;
     pPixmap->devKind = PixmapBytePad(width, depth);
     pPixmap->usage_hint = usage_hint;
-    if (width && height)
-        xnestPixmapPriv(pPixmap)->pixmap =
-            XCreatePixmap(xnestDisplay,
-                          xnestDefaultWindows[pScreen->myNum],
-                          width, height, depth);
+    if (width && height) {
+        uint32_t pixmap = xcb_generate_id(xnestUpstreamInfo.conn);
+        xcb_create_pixmap(xnestUpstreamInfo.conn, depth, pixmap,
+                          xnestDefaultWindows[pScreen->myNum], width, height);
+        xnestPixmapPriv(pPixmap)->pixmap = pixmap;
+    }
     else
         xnestPixmapPriv(pPixmap)->pixmap = 0;
 
@@ -72,7 +74,7 @@ xnestDestroyPixmap(PixmapPtr pPixmap)
 {
     if (--pPixmap->refcnt)
         return TRUE;
-    XFreePixmap(xnestDisplay, xnestPixmap(pPixmap));
+    xcb_free_pixmap(xnestUpstreamInfo.conn, xnestPixmap(pPixmap));
     FreePixmap(pPixmap);
     return TRUE;
 }
@@ -82,10 +84,11 @@ xnestModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
                         int bitsPerPixel, int devKind, void *pPixData)
 {
   if(!xnestPixmapPriv(pPixmap)->pixmap && width > 0 && height > 0) {
-    xnestPixmapPriv(pPixmap)->pixmap =
-        XCreatePixmap(xnestDisplay,
-                      xnestDefaultWindows[pPixmap->drawable.pScreen->myNum],
-                      width, height, depth);
+        uint32_t pixmap = xcb_generate_id(xnestUpstreamInfo.conn);
+        xcb_create_pixmap(xnestUpstreamInfo.conn, depth, pixmap,
+                          xnestDefaultWindows[pPixmap->drawable.pScreen->myNum],
+                          width, height);
+        xnestPixmapPriv(pPixmap)->pixmap = pixmap;
   }
 
   return miModifyPixmapHeader(pPixmap, width, height, depth,
