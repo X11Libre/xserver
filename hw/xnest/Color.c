@@ -25,6 +25,7 @@ is" without express or implied warranty.
 #include "resource.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -54,11 +55,14 @@ xnestCreateColormap(ColormapPtr pCmap)
     pVisual = pCmap->pVisual;
     ncolors = pVisual->ColormapEntries;
 
-    xnestColormapPriv(pCmap)->colormap =
-        XCreateColormap(xnestDisplay,
+    uint32_t const cmap = xcb_generate_id(xnestUpstreamInfo.conn);
+    xnestColormapPriv(pCmap)->colormap = cmap;
+
+    xcb_create_colormap(xnestUpstreamInfo.conn,
+                        (pVisual->class & DynamicClass) ? XCB_COLORMAP_ALLOC_ALL : XCB_COLORMAP_ALLOC_NONE,
+                        cmap,
                         xnestDefaultWindows[pCmap->pScreen->myNum],
-                        xnestVisual(pVisual),
-                        (pVisual->class & DynamicClass) ? AllocAll : AllocNone);
+                        xnestVisual(pVisual)->visualid);
 
     switch (pVisual->class) {
     case StaticGray:           /* read only */
@@ -133,7 +137,7 @@ xnestCreateColormap(ColormapPtr pCmap)
 void
 xnestDestroyColormap(ColormapPtr pCmap)
 {
-    XFreeColormap(xnestDisplay, xnestColormap(pCmap));
+    xcb_free_colormap(xnestUpstreamInfo.conn, xnestColormap(pCmap));
 }
 
 #define SEARCH_PREDICATE \
