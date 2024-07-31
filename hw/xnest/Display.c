@@ -143,9 +143,13 @@ xnestOpenDisplay(int argc, char *argv[])
         for (j = 0; j < xnestNumDepths; j++)
             if (xnestPixmapFormats[i].depth == 1 ||
                 xnestPixmapFormats[i].depth == xnestDepths[j]) {
-                xnestDefaultDrawables[xnestPixmapFormats[i].depth] =
-                    XCreatePixmap(xnestDisplay, xnestUpstreamInfo.screenInfo->root,
-                                  1, 1, xnestPixmapFormats[i].depth);
+                uint32_t pixmap = xcb_generate_id(xnestUpstreamInfo.conn);
+                xcb_create_pixmap(xnestUpstreamInfo.conn,
+                                  xnestPixmapFormats[i].depth,
+                                  pixmap,
+                                  xnestUpstreamInfo.screenInfo->root,
+                                  1, 1);
+                xnestDefaultDrawables[xnestPixmapFormats[i].depth] = pixmap;
             }
 
     xnestBitmapGC = XCreateGC(xnestDisplay, xnestDefaultDrawables[1], 0L, NULL);
