@@ -121,11 +121,14 @@ xnestOpenDisplay(int argc, char *argv[])
     xnestNumDefaultColormaps = xnestNumVisuals;
     xnestDefaultColormaps = xallocarray(xnestNumDefaultColormaps,
                                         sizeof(Colormap));
-    for (i = 0; i < xnestNumDefaultColormaps; i++)
-        xnestDefaultColormaps[i] = XCreateColormap(xnestDisplay,
-                                                   xnestUpstreamInfo.screenInfo->root,
-                                                   xnestVisuals[i].visual,
-                                                   AllocNone);
+    for (i = 0; i < xnestNumDefaultColormaps; i++) {
+        xnestDefaultColormaps[i] = xcb_generate_id(xnestUpstreamInfo.conn);
+        xcb_create_colormap(xnestUpstreamInfo.conn,
+                            XCB_COLORMAP_ALLOC_NONE,
+                            xnestDefaultColormaps[i],
+                            xnestUpstreamInfo.screenInfo->root,
+                            xnestVisuals[i].visual->visualid);
+    }
 
     xnestDepths = XListDepths(xnestDisplay, xnestUpstreamInfo.screenId,
                               &xnestNumDepths);
