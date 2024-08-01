@@ -231,8 +231,13 @@ void
 xnestPolySegment(DrawablePtr pDrawable, GCPtr pGC, int nSegments,
                  xSegment * pSegments)
 {
-    XDrawSegments(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                  (XSegment *) pSegments, nSegments);
+    /* xSegment and xcb_segment_t are defined in the same way, both matching
+       the protocol layout, so we can directly typecast them */
+    xcb_poly_segment(xnestUpstreamInfo.conn,
+                     xnestDrawable(pDrawable),
+                     xnest_upstream_gc(pGC),
+                     nSegments,
+                     (xcb_segment_t*)pSegments);
 }
 
 void
