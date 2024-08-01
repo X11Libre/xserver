@@ -194,9 +194,11 @@ xnestCopyPlane(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
                GCPtr pGC, int srcx, int srcy, int width, int height,
                int dstx, int dsty, unsigned long plane)
 {
-    XCopyPlane(xnestDisplay,
-               xnestDrawable(pSrcDrawable), xnestDrawable(pDstDrawable),
-               xnestGC(pGC), srcx, srcy, width, height, dstx, dsty, plane);
+    xcb_copy_plane(xnestUpstreamInfo.conn,
+                   xnestDrawable(pSrcDrawable),
+                   xnestDrawable(pDstDrawable),
+                   xnest_upstream_gc(pGC),
+                   srcx, srcy, dstx, dsty, width, height, plane);
 
     return xnestBitBlitHelper(pGC);
 }
