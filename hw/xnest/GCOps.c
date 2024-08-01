@@ -256,8 +256,13 @@ xnestPolyRectangle(DrawablePtr pDrawable, GCPtr pGC, int nRectangles,
 void
 xnestPolyArc(DrawablePtr pDrawable, GCPtr pGC, int nArcs, xArc * pArcs)
 {
-    XDrawArcs(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-              (XArc *) pArcs, nArcs);
+    /* xArc and xcb_arc_t are defined in the same way, both matching
+       the protocol layout, so we can directly typecast them */
+    xcb_poly_arc(xnestUpstreamInfo.conn,
+                 xnestDrawable(pDrawable),
+                 xnest_upstream_gc(pGC),
+                 nArcs,
+                 (xcb_arc_t*)pArcs);
 }
 
 void
