@@ -309,6 +309,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     pScreen->WindowExposures = xnestWindowExposures;
     pScreen->CopyWindow = xnestCopyWindow;
     pScreen->ClipNotify = xnestClipNotify;
+    pScreen->ClearToBackground = xnest_screen_ClearToBackground;
 
     /* Pixmap procedures */
 
