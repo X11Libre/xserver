@@ -315,8 +315,24 @@ xnestPolyText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
 {
     int width;
 
-    XDrawString(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                x, y, string, count);
+    // we need to prepend a xTextElt struct before our actual characters
+    // won't get more than 254 elements, since it's already processed by doPolyText()
+    int const bufsize = sizeof(xTextElt) + count;
+    uint8_t *buffer = malloc(bufsize);
+    xTextElt *elt = (xTextElt*)buffer;
+    elt->len = count;
+    elt->delta = 0;
+    memcpy(buffer+2, string, count);
+
+    xcb_poly_text_8(xnestUpstreamInfo.conn,
+                    xnestDrawable(pDrawable),
+                    xnest_upstream_gc(pGC),
+                    x,
+                    y,
+                    bufsize,
+                    (uint8_t*)buffer);
+
+    free(buffer);
 
     width = XTextWidth(xnestFontStruct(pGC->font), string, count);
 
@@ -329,8 +345,24 @@ xnestPolyText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
 {
     int width;
 
-    XDrawString16(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                  x, y, (XChar2b *) string, count);
+    // we need to prepend a xTextElt struct before our actual characters
+    // won't get more than 254 elements, since it's already processed by doPolyText()
+    int const bufsize = sizeof(xTextElt) + count*2;
+    uint8_t *buffer = malloc(bufsize);
+    xTextElt *elt = (xTextElt*)buffer;
+    elt->len = count;
+    elt->delta = 0;
+    memcpy(buffer+2, string, count*2);
+
+    xcb_poly_text_16(xnestUpstreamInfo.conn,
+                     xnestDrawable(pDrawable),
+                     xnest_upstream_gc(pGC),
+                     x,
+                     y,
+                     bufsize,
+                     buffer);
+
+    free(buffer);
 
     width = XTextWidth16(xnestFontStruct(pGC->font), (XChar2b *) string, count);
 
