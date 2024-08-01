@@ -69,4 +69,7 @@ void xnestWindowExposures(WindowPtr pWin, RegionPtr pRgn);
 void xnestSetShape(WindowPtr pWin, int kind);
 void xnestShapeWindow(WindowPtr pWin);
 
+/* ScreenRec operations */
+void xnest_screen_ClearToBackground(WindowPtr pWin, int x, int y, int w, int h, Bool generateExposures);
+
 #endif                          /* XNESTWINDOW_H */
