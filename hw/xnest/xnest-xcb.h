@@ -22,4 +22,7 @@ void xnest_upstream_setup(void);
 /* generate a new XID for upstream X11 connection */
 uint32_t xnestUpstreamXID(void);
 
+/* retrieve upstream GC XID for our xserver GC */
+uint32_t xnestUpstreamGC(GCPtr pGC);
+
 #endif /* __XNEST__XCB_H */
