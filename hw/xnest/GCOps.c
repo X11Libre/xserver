@@ -203,8 +203,14 @@ void
 xnestPolyPoint(DrawablePtr pDrawable, GCPtr pGC, int mode, int nPoints,
                DDXPointPtr pPoints)
 {
-    XDrawPoints(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                (XPoint *) pPoints, nPoints, mode);
+    /* xPoint and xcb_segment_t are defined in the same way, both matching
+       the protocol layout, so we can directly typecast them */
+    xcb_poly_point(xnestUpstreamInfo.conn,
+                   mode,
+                   xnestDrawable(pDrawable),
+                   xnest_upstream_gc(pGC),
+                   nPoints,
+                   (xcb_point_t*)pPoints);
 }
 
 void
