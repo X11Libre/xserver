@@ -19,4 +19,7 @@ extern struct xnest_upstream_info xnestUpstreamInfo;
 /* fetch upstream connection's xcb setup data */
 void xnest_upstream_setup(void);
 
+/* retrieve upstream GC XID for our xserver GC */
+uint32_t xnest_upstream_gc(GCPtr pGC);
+
 #endif /* __XNEST__XCB_H */

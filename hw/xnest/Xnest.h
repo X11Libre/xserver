@@ -68,6 +68,7 @@ typedef XID KeySym64;
 #endif  /*_XSERVER64*/
 
 #include <X11/Xlib.h>
+#include <X11/Xlibint.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
 #include <X11/Xlib-xcb.h>
