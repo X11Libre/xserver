@@ -244,8 +244,13 @@ void
 xnestPolyRectangle(DrawablePtr pDrawable, GCPtr pGC, int nRectangles,
                    xRectangle *pRectangles)
 {
-    XDrawRectangles(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                    (XRectangle *) pRectangles, nRectangles);
+    /* xRectangle and xcb_rectangle_t are defined in the same way, both matching
+       the protocol layout, so we can directly typecast them */
+    xcb_poly_rectangle(xnestUpstreamInfo.conn,
+                       xnestDrawable(pDrawable),
+                       xnest_upstream_gc(pGC),
+                       nRectangles,
+                       (xcb_rectangle_t*)pRectangles);
 }
 
 void
