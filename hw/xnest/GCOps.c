@@ -288,8 +288,13 @@ void
 xnestPolyFillRect(DrawablePtr pDrawable, GCPtr pGC, int nRectangles,
                   xRectangle *pRectangles)
 {
-    XFillRectangles(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                    (XRectangle *) pRectangles, nRectangles);
+    /* xRectangle and xcb_rectangle_t are defined in the same way, both matching
+       the protocol layout, so we can directly typecast them */
+    xcb_poly_fill_rectangle(xnestUpstreamInfo.conn,
+                            xnestDrawable(pDrawable),
+                            xnest_upstream_gc(pGC),
+                            nRectangles,
+                            (xcb_rectangle_t*)pRectangles);
 }
 
 void
@@ -373,8 +378,16 @@ xnestPushPixels(GCPtr pGC, PixmapPtr pBitmap, DrawablePtr pDst,
         XSetStipple(xnestDisplay, xnestGC(pGC), xnestPixmap(pBitmap));
         XSetTSOrigin(xnestDisplay, xnestGC(pGC), x, y);
         XSetFillStyle(xnestDisplay, xnestGC(pGC), FillStippled);
-        XFillRectangle(xnestDisplay, xnestDrawable(pDst),
-                       xnestGC(pGC), x, y, width, height);
+
+        xcb_rectangle_t rect = {
+            .x = x, .y = y, .width = width, .height = height,
+        };
+        xcb_poly_fill_rectangle(xnestUpstreamInfo.conn,
+                                xnestDrawable(pDst),
+                                xnest_upstream_gc(pGC),
+                                1,
+                                &rect);
+
         XSetFillStyle(xnestDisplay, xnestGC(pGC), FillSolid);
     }
     else
