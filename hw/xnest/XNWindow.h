@@ -68,5 +68,6 @@ void xnestClipNotify(WindowPtr pWin, int dx, int dy);
 void xnestWindowExposures(WindowPtr pWin, RegionPtr pRgn);
 void xnestSetShape(WindowPtr pWin, int kind);
 void xnestShapeWindow(WindowPtr pWin);
+void xnestClearToBackground(WindowPtr pWin, int x, int y, int w, int h, Bool generateExposures);
 
 #endif                          /* XNESTWINDOW_H */

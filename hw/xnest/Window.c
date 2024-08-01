@@ -525,3 +525,11 @@ xnestShapeWindow(WindowPtr pWin)
         }
     }
 }
+
+void xnestClearToBackground(WindowPtr pWin, int x, int y, int w, int h, Bool generateExposures)
+{
+    xcb_clear_area(xnestUpstreamInfo.conn,
+                   generateExposures,
+                   xnestWindow(pWin),
+                   x, y, w, h);
+}
