@@ -69,6 +69,7 @@ typedef XID KeySym64;
 
 #define GC XlibGC
 #include <X11/Xlib.h>
+#include <X11/Xlibint.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/shape.h>
 #include <X11/Xlib-xcb.h>
