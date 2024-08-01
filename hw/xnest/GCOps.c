@@ -180,9 +180,11 @@ xnestCopyArea(DrawablePtr pSrcDrawable, DrawablePtr pDstDrawable,
               GCPtr pGC, int srcx, int srcy, int width, int height,
               int dstx, int dsty)
 {
-    XCopyArea(xnestDisplay,
-              xnestDrawable(pSrcDrawable), xnestDrawable(pDstDrawable),
-              xnestGC(pGC), srcx, srcy, width, height, dstx, dsty);
+    xcb_copy_area(xnestUpstreamInfo.conn,
+                  xnestDrawable(pSrcDrawable),
+                  xnestDrawable(pDstDrawable),
+                  xnest_upstream_gc(pGC),
+                  srcx, srcy, dstx, dsty, width, height);
 
     return xnestBitBlitHelper(pGC);
 }
