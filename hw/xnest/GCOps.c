@@ -273,8 +273,15 @@ void
 xnestFillPolygon(DrawablePtr pDrawable, GCPtr pGC, int shape, int mode,
                  int nPoints, DDXPointPtr pPoints)
 {
-    XFillPolygon(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                 (XPoint *) pPoints, nPoints, shape, mode);
+    /* xPoint and xcb_segment_t are defined in the same way, both matching
+       the protocol layout, so we can directly typecast them */
+    xcb_fill_poly(xnestUpstreamInfo.conn,
+                  xnestDrawable(pDrawable),
+                  xnest_upstream_gc(pGC),
+                  shape,
+                  mode,
+                  nPoints,
+                  (xcb_point_t*)pPoints);
 }
 
 void
