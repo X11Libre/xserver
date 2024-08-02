@@ -322,7 +322,7 @@ xnestPolyText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
     xTextElt *elt = (xTextElt*)buffer;
     elt->len = count;
     elt->delta = 0;
-    memcpy(buffer+2, string, count);
+    memcpy(buffer+sizeof(xTextElt), string, count);
 
     xcb_poly_text_8(xnestUpstreamInfo.conn,
                     xnestDrawable(pDrawable),
@@ -352,7 +352,7 @@ xnestPolyText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
     xTextElt *elt = (xTextElt*)buffer;
     elt->len = count;
     elt->delta = 0;
-    memcpy(buffer+2, string, count*2);
+    memcpy(buffer+sizeof(xTextElt), string, count*2);
 
     xcb_poly_text_16(xnestUpstreamInfo.conn,
                      xnestDrawable(pDrawable),
@@ -373,16 +373,26 @@ void
 xnestImageText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
                 char *string)
 {
-    XDrawImageString(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                     x, y, string, count);
+    xcb_image_text_8(xnestUpstreamInfo.conn,
+                     count,
+                     xnestDrawable(pDrawable),
+                     xnest_upstream_gc(pGC),
+                     x,
+                     y,
+                     string);
 }
 
 void
 xnestImageText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
                  unsigned short *string)
 {
-    XDrawImageString16(xnestDisplay, xnestDrawable(pDrawable), xnestGC(pGC),
-                       x, y, (XChar2b *) string, count);
+    xcb_image_text_16(xnestUpstreamInfo.conn,
+                      count,
+                      xnestDrawable(pDrawable),
+                      xnest_upstream_gc(pGC),
+                      x,
+                      y,
+                      (xcb_char2b_t*)string);
 }
 
 void
