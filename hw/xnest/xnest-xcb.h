@@ -68,4 +68,34 @@ typedef struct {
 
 void xnestEncodeKeyboardControl(XnKeyboardControl ctrl, long mask, uint32_t *value);
 
+typedef struct {
+        int function;           /* logical operation */
+        unsigned long plane_mask;/* plane mask */
+        unsigned long foreground;/* foreground pixel */
+        unsigned long background;/* background pixel */
+        int line_width;         /* line width */
+        int line_style;         /* LineSolid, LineOnOffDash, LineDoubleDash */
+        int cap_style;          /* CapNotLast, CapButt,
+                                   CapRound, CapProjecting */
+        int join_style;         /* JoinMiter, JoinRound, JoinBevel */
+        int fill_style;         /* FillSolid, FillTiled,
+                                   FillStippled, FillOpaqueStippled */
+        int fill_rule;          /* EvenOddRule, WindingRule */
+        int arc_mode;           /* ArcChord, ArcPieSlice */
+        xcb_pixmap_t tile;            /* tile pixmap for tiling operations */
+        xcb_pixmap_t stipple;         /* stipple 1 plane pixmap for stippling */
+        int ts_x_origin;        /* offset for tile or stipple operations */
+        int ts_y_origin;
+        xcb_font_t font;              /* default text font for text operations */
+        int subwindow_mode;     /* ClipByChildren, IncludeInferiors */
+        Bool graphics_exposures;/* boolean, should exposures be generated */
+        int clip_x_origin;      /* origin for clipping */
+        int clip_y_origin;
+        xcb_pixmap_t clip_mask;       /* bitmap clipping; other calls for rects */
+        int dash_offset;        /* patterned/dashed line information */
+        char dashes;
+} XnGCValues;
+
+void xnChangeGC(xcb_connection_t *conn, uint32_t gc, XnGCValues gcval, uint32_t mask);
+
 #endif /* __XNEST__XCB_H */

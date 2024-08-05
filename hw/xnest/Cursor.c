@@ -43,19 +43,16 @@ xnestCursorFuncRec xnestCursorFuncs = { NULL };
 Bool
 xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    unsigned long valuemask;
-    XGCValues values;
+    uint32_t valuemask = XCB_GC_FUNCTION | XCB_GC_PLANE_MASK | XCB_GC_FOREGROUND
+                         | XCB_GC_BACKGROUND | XCB_GC_CLIP_MASK;
 
-    valuemask = GCFunction |
-        GCPlaneMask | GCForeground | GCBackground | GCClipMask;
+    XnGCValues values = {
+        .function   = XCB_GX_COPY,
+        .plane_mask = ((unsigned long)~0L),
+        .foreground = 1L,
+    };
 
-    values.function = GXcopy;
-    values.plane_mask = AllPlanes;
-    values.foreground = 1L;
-    values.background = 0L;
-    values.clip_mask = XCB_PIXMAP_NONE;
-
-    XChangeGC(xnestDisplay, xnestBitmapGC, valuemask, &values);
+    xnChangeGC(xnestUpstreamInfo.conn, xnestBitmapGC->gid, values, valuemask);
 
     uint32_t const winId = xnestDefaultWindows[pScreen->myNum];
 
