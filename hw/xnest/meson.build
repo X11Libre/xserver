@@ -23,6 +23,7 @@ srcs = [
 x11_xcb_dep = dependency('x11-xcb', required: true)
 xcb_dep = dependency('xcb', required: true)
 xcb_shape_dep = dependency('xcb-shape', required: true)
+xcb_icccm_dep = dependency('xcb-icccm', required: true)
 
 executable(
     'Xnest',
@@ -33,6 +34,7 @@ executable(
         xnest_dep,
         xcb_dep,
         xcb_shape_dep,
+        xcb_icccm_dep,
         x11_xcb_dep,
     ],
     link_with: [
