@@ -13,10 +13,15 @@ is" without express or implied warranty.
 */
 #include <dix-config.h>
 
+#include <stdint.h>
+
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 #include <X11/fonts/fontstruct.h>
+
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
 
 #include "regionstr.h"
 #include "gcstruct.h"
@@ -417,9 +422,17 @@ xnestPushPixels(GCPtr pGC, PixmapPtr pBitmap, DrawablePtr pDst,
 {
     /* only works for solid bitmaps */
     if (pGC->fillStyle == FillSolid) {
-        XSetStipple(xnestDisplay, xnestGC(pGC), xnestPixmap(pBitmap));
-        XSetTSOrigin(xnestDisplay, xnestGC(pGC), x, y);
-        XSetFillStyle(xnestDisplay, xnestGC(pGC), FillStippled);
+        xcb_params_gc_t params = {
+            .fill_style = XCB_FILL_STYLE_STIPPLED,
+            .tile_stipple_origin_x = x,
+            .tile_stipple_origin_y = y,
+            .stipple = xnestPixmap(pBitmap),
+        };
+        xcb_aux_change_gc(xnestUpstreamInfo.conn,
+                          xnest_upstream_gc(pGC),
+                          XCB_GC_FILL_STYLE | XCB_GC_TILE_STIPPLE_ORIGIN_X |
+                              XCB_GC_TILE_STIPPLE_ORIGIN_Y | XCB_GC_STIPPLE,
+                          &params);
 
         xcb_rectangle_t rect = {
             .x = x, .y = y, .width = width, .height = height,
@@ -430,7 +443,10 @@ xnestPushPixels(GCPtr pGC, PixmapPtr pBitmap, DrawablePtr pDst,
                                 1,
                                 &rect);
 
-        XSetFillStyle(xnestDisplay, xnestGC(pGC), FillSolid);
+        xcb_aux_change_gc(xnestUpstreamInfo.conn,
+                          xnest_upstream_gc(pGC),
+                          XCB_GC_FILL_STYLE,
+                          &params);
     }
     else
         ErrorF("xnest warning: function xnestPushPixels not implemented\n");
