@@ -268,20 +268,20 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
 Bool
 xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 {
-    XSetWindowAttributes attributes;
+    xcb_params_cw_t attributes;
 
     if (mask & XCB_CW_BACK_PIXMAP)
         switch (pWin->backgroundState) {
         case XCB_BACK_PIXMAP_NONE:
-            attributes.background_pixmap = XCB_PIXMAP_NONE;
+            attributes.back_pixmap = XCB_PIXMAP_NONE;
             break;
 
         case XCB_BACK_PIXMAP_PARENT_RELATIVE:
-            attributes.background_pixmap = ParentRelative;
+            attributes.back_pixmap = ParentRelative;
             break;
 
         case BackgroundPixmap:
-            attributes.background_pixmap = xnestPixmap(pWin->background.pixmap);
+            attributes.back_pixmap = xnestPixmap(pWin->background.pixmap);
             break;
 
         case BackgroundPixel:
@@ -291,7 +291,7 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 
     if (mask & XCB_CW_BACK_PIXEL) {
         if (pWin->backgroundState == BackgroundPixel)
-            attributes.background_pixel = xnestPixel(pWin->background.pixel);
+            attributes.back_pixel = xnestPixel(pWin->background.pixel);
         else
             mask &= ~XCB_CW_BACK_PIXEL;
     }
@@ -351,10 +351,12 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
     if (mask & XCB_CW_CURSOR)        /* this is handled in cursor code */
         mask &= ~XCB_CW_CURSOR;
 
-    if (mask)
-        XChangeWindowAttributes(xnestDisplay, xnestWindow(pWin),
-                                mask, &attributes);
-
+    if (mask) {
+        xcb_aux_change_window_attributes(xnestUpstreamInfo.conn,
+                                         xnestWindow(pWin),
+                                         mask,
+                                         &attributes);
+    }
     return TRUE;
 }
 
