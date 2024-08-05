@@ -22,4 +22,7 @@ void xnest_upstream_setup(void);
 /* retrieve upstream GC XID for our xserver GC */
 uint32_t xnest_upstream_gc(GCPtr pGC);
 
+void xnest_wm_colormap_windows(xcb_connection_t *conn, xcb_window_t w,
+                               xcb_window_t *windows, int count);
+
 #endif /* __XNEST__XCB_H */
