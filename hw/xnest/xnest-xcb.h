@@ -68,4 +68,7 @@ typedef struct {
 
 void xnestEncodeKeyboardControl(XnKeyboardControl ctrl, long mask, uint32_t *value);
 
+typedef XGCValues XnGCValues;
+void xnChangeGC(xcb_connection_t *conn, uint32_t gc, XnGCValues gcval, uint32_t mask);
+
 #endif /* __XNEST__XCB_H */

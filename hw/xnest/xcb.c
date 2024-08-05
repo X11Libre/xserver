@@ -118,3 +118,37 @@ void xnestEncodeKeyboardControl(XnKeyboardControl ctrl, long mask, uint32_t *val
     if (mask & KBAutoRepeatMode)
         *value++ = ctrl.auto_repeat_mode;
 }
+
+void xnChangeGC(xcb_connection_t *conn, uint32_t gc, XnGCValues gcval, uint32_t mask)
+{
+    char value_list[128] = { 0 };
+    char *walk = value_list;
+
+#define EXTRA_VALUE(flag,val) if (mask & flag) { *((uint32_t*)walk) = gcval.val; walk+=4; }
+    EXTRA_VALUE(GCFunction,          function);
+    EXTRA_VALUE(GCPlaneMask,         plane_mask);
+    EXTRA_VALUE(GCForeground,        foreground);
+    EXTRA_VALUE(GCBackground,        background);
+    EXTRA_VALUE(GCLineWidth,         line_width);
+    EXTRA_VALUE(GCLineStyle,         line_style);
+    EXTRA_VALUE(GCCapStyle,          cap_style);
+    EXTRA_VALUE(GCJoinStyle,         join_style);
+    EXTRA_VALUE(GCFillStyle,         fill_style);
+    EXTRA_VALUE(GCFillRule,          fill_rule);
+    EXTRA_VALUE(GCTile,              tile);
+    EXTRA_VALUE(GCStipple,           stipple);
+    EXTRA_VALUE(GCTileStipXOrigin,   ts_x_origin);
+    EXTRA_VALUE(GCTileStipYOrigin,   ts_y_origin);
+    EXTRA_VALUE(GCFont,              font);
+    EXTRA_VALUE(GCSubwindowMode,     subwindow_mode);
+    EXTRA_VALUE(GCGraphicsExposures, graphics_exposures);
+    EXTRA_VALUE(GCClipXOrigin,       clip_x_origin);
+    EXTRA_VALUE(GCClipYOrigin,       clip_y_origin);
+    EXTRA_VALUE(GCClipMask,          clip_mask);
+    EXTRA_VALUE(GCDashOffset,        dash_offset);
+    EXTRA_VALUE(GCDashList,          dashes);
+    EXTRA_VALUE(GCArcMode,           arc_mode);
+#undef EXTRA_VALUE
+
+    xcb_change_gc(conn, gc, mask, value_list);
+}

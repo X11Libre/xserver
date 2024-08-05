@@ -29,6 +29,7 @@ is" without express or implied warranty.
 #include "region.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "XNGC.h"
@@ -95,7 +96,7 @@ xnestValidateGC(GCPtr pGC, unsigned long changes, DrawablePtr pDrawable)
 void
 xnestChangeGC(GCPtr pGC, unsigned long mask)
 {
-    XGCValues values;
+    XnGCValues values;
 
     if (mask & GCFunction)
         values.function = pGC->alu;
@@ -174,7 +175,7 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
         values.arc_mode = pGC->arcMode;
 
     if (mask)
-        XChangeGC(xnestDisplay, xnestGC(pGC), mask, &values);
+        xnChangeGC(xnestUpstreamInfo.conn, xnestUpstreamGC(pGC), values, mask);
 }
 
 void
