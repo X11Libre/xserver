@@ -204,7 +204,13 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
 
     switch (type) {
     case CT_NONE:
-        XSetClipMask(xnestDisplay, xnestGC(pGC), None);
+        {
+            uint32_t pixmap = XCB_PIXMAP_NONE;
+            xcb_change_gc(xnestUpstreamInfo.conn,
+                          xnestUpstreamGC(pGC),
+                          XCB_GC_CLIP_MASK,
+                          &pixmap);
+        }
         pValue = NULL;
         break;
 
@@ -231,8 +237,13 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
         break;
 
     case CT_PIXMAP:
-        XSetClipMask(xnestDisplay, xnestGC(pGC),
-                     xnestPixmap((PixmapPtr) pValue));
+        {
+            uint32_t val = xnestPixmap((PixmapPtr) pValue);
+            xcb_change_gc(xnestUpstreamInfo.conn,
+                          xnestUpstreamGC(pGC),
+                          XCB_GC_CLIP_MASK,
+                          &val);
+        }
         /*
          * Need to change into region, so subsequent uses are with
          * current pixmap contents.
@@ -310,7 +321,11 @@ xnestDestroyClip(GCPtr pGC)
 {
     if (pGC->clientClip) {
         RegionDestroy(pGC->clientClip);
-        XSetClipMask(xnestDisplay, xnestGC(pGC), None);
+        uint32_t val = XCB_PIXMAP_NONE;
+        xcb_change_gc(xnestUpstreamInfo.conn,
+                      xnestUpstreamGC(pGC),
+                      XCB_GC_CLIP_MASK,
+                      &val);
         pGC->clientClip = NULL;
     }
 }
