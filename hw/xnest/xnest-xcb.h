@@ -55,4 +55,17 @@ typedef struct {
 
 void xnConfigureWindow(xcb_connection_t *conn, uint32_t window, uint32_t mask, XnWindowChanges values);
 
+typedef struct {
+    int key_click_percent;
+    int bell_percent;
+    int bell_pitch;
+    int bell_duration;
+    int led;
+    int led_mode;
+    int key;
+    int auto_repeat_mode;
+} XnKeyboardControl;
+
+void xnestEncodeKeyboardControl(XnKeyboardControl ctrl, long mask, uint32_t *value);
+
 #endif /* __XNEST__XCB_H */
