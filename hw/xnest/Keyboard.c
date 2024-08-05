@@ -62,21 +62,20 @@ xnestChangeKeyboardControl(DeviceIntPtr pDev, KeybdCtrl * ctrl)
 {
 #if 0
     unsigned long value_mask;
-    XKeyboardControl values;
     int i;
 
     value_mask = KBKeyClickPercent |
         KBBellPercent | KBBellPitch | KBBellDuration | KBAutoRepeatMode;
 
-    values.key_click_percent = ctrl->click;
-    values.bell_percent = ctrl->bell;
-    values.bell_pitch = ctrl->bell_pitch;
-    values.bell_duration = ctrl->bell_duration;
-    values.auto_repeat_mode = ctrl->autoRepeat ?
-        AutoRepeatModeOn : AutoRepeatModeOff;
+    xcb_params_keyboard_t values = {
+        .key_click_percent = ctrl->click,
+        .bell_percent = ctrl->bell,
+        .bell_pitch = ctrl->bell_pitch,
+        .bell_duration = ctrl->bell_duration,
+        .auto_repeat_mode = ctrl->autoRepeat ? AutoRepeatModeOn : AutoRepeatModeOff,
+    };
 
-    XChangeKeyboardControl(xnestDisplay, value_mask, &values);
-
+    xcb_aux_change_keyboard_control(xnestUpstreamInfo.conn, value_mask, &values);
     /*
        value_mask = KBKey | KBAutoRepeatMode;
        At this point, we need to walk through the vector and compare it
@@ -88,7 +87,8 @@ xnestChangeKeyboardControl(DeviceIntPtr pDev, KeybdCtrl * ctrl)
         values.led = i;
         values.led_mode =
             (ctrl->leds & (1 << (i - 1))) ? LedModeOn : LedModeOff;
-        XChangeKeyboardControl(xnestDisplay, value_mask, &values);
+
+        xcb_aux_change_keyboard_control(xnestUpstreamInfo.conn, value_mask, &values);
     }
 #endif
 }
