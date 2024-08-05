@@ -13,9 +13,14 @@ is" without express or implied warranty.
 */
 #include <dix-config.h>
 
+#include <stdint.h>
+
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
+
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
 
 #include "gcstruct.h"
 #include "windowstr.h"
@@ -26,6 +31,7 @@ is" without express or implied warranty.
 #include "region.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "XNGC.h"
@@ -92,7 +98,7 @@ xnestValidateGC(GCPtr pGC, unsigned long changes, DrawablePtr pDrawable)
 void
 xnestChangeGC(GCPtr pGC, unsigned long mask)
 {
-    XGCValues values;
+    xcb_params_gc_t values;
 
     if (mask & GCFunction)
         values.function = pGC->alu;
@@ -135,10 +141,10 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
         values.stipple = xnestPixmap(pGC->stipple);
 
     if (mask & GCTileStipXOrigin)
-        values.ts_x_origin = pGC->patOrg.x;
+        values.tile_stipple_origin_x = pGC->patOrg.x;
 
     if (mask & GCTileStipYOrigin)
-        values.ts_y_origin = pGC->patOrg.y;
+        values.tile_stipple_origin_y = pGC->patOrg.y;
 
     if (mask & GCFont)
         values.font = xnestFont(pGC->font);
@@ -150,10 +156,10 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
         values.graphics_exposures = pGC->graphicsExposures;
 
     if (mask & GCClipXOrigin)
-        values.clip_x_origin = pGC->clipOrg.x;
+        values.clip_originX = pGC->clipOrg.x;
 
     if (mask & GCClipYOrigin)
-        values.clip_y_origin = pGC->clipOrg.y;
+        values.clip_originY = pGC->clipOrg.y;
 
     if (mask & GCClipMask)      /* this is handled in change clip */
         mask &= ~GCClipMask;
@@ -171,7 +177,10 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
         values.arc_mode = pGC->arcMode;
 
     if (mask)
-        XChangeGC(xnestDisplay, xnestGC(pGC), mask, &values);
+        xcb_aux_change_gc(xnestUpstreamInfo.conn,
+                          xnest_upstream_gc(pGC),
+                          mask,
+                          &values);
 }
 
 void
