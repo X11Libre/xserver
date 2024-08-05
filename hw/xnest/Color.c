@@ -36,6 +36,8 @@ is" without express or implied warranty.
 #include "XNWindow.h"
 #include "Args.h"
 
+#include <xcb/xcb_icccm.h>
+
 DevPrivateKeyRec xnestColormapPrivateKeyRec;
 
 static DevPrivateKeyRec cmapScrPrivateKeyRec;
@@ -221,22 +223,10 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
     if (!xnestSameInstalledColormapWindows(icws.windows, icws.numWindows)) {
         free(xnestOldInstalledColormapWindows);
 
-#ifdef _XSERVER64
-        {
-            int i;
-            Window64 *windows = xallocarray(numWindows, sizeof(Window64));
-
-            for (i = 0; i < numWindows; ++i)
-                windows[i] = icws.windows[i];
-            XSetWMColormapWindows(xnestDisplay,
-                                  xnestDefaultWindows[pScreen->myNum], windows,
+        xnest_wm_colormap_windows(xnestUpstreamInfo.conn,
+                                  xnestDefaultWindows[pScreen->myNum],
+                                  icws.windows,
                                   numWindows);
-            free(windows);
-        }
-#else
-        XSetWMColormapWindows(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
-                              icws.windows, numWindows);
-#endif
 
         xnestOldInstalledColormapWindows = icws.windows;
         xnestNumOldInstalledColormapWindows = icws.numWindows;
@@ -278,19 +268,10 @@ xnestSetScreenSaverColormapWindow(ScreenPtr pScreen)
 {
     free(xnestOldInstalledColormapWindows);
 
-#ifdef _XSERVER64
-    {
-        Window64 window;
-
-        window = xnestScreenSaverWindows[pScreen->myNum];
-        XSetWMColormapWindows(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
-                              &window, 1);
-        xnestScreenSaverWindows[pScreen->myNum] = window;
-    }
-#else
-    XSetWMColormapWindows(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
-                          &xnestScreenSaverWindows[pScreen->myNum], 1);
-#endif                          /* _XSERVER64 */
+    xnest_wm_colormap_windows(xnestUpstreamInfo.conn,
+                              xnestDefaultWindows[pScreen->myNum],
+                              &xnestScreenSaverWindows[pScreen->myNum],
+                              1);
 
     xnestOldInstalledColormapWindows = NULL;
     xnestNumOldInstalledColormapWindows = 0;
