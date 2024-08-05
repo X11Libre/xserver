@@ -91,3 +91,30 @@ void xnConfigureWindow(xcb_connection_t *conn, uint32_t window, uint32_t mask, X
         xcb_configure_window(conn, window, mask, value_list);
     }
 }
+
+void xnestEncodeKeyboardControl(XnKeyboardControl ctrl, long mask, uint32_t *value)
+{
+    if (mask & KBKeyClickPercent)
+        *value++ = ctrl.key_click_percent;
+
+    if (mask & KBBellPercent)
+        *value++ = ctrl.bell_percent;
+
+    if (mask & KBBellPitch)
+        *value++ = ctrl.bell_pitch;
+
+    if (mask & KBBellDuration)
+        *value++ = ctrl.bell_duration;
+
+    if (mask & KBLed)
+        *value++ = ctrl.led;
+
+    if (mask & KBLedMode)
+        *value++ = ctrl.led_mode;
+
+    if (mask & KBKey)
+        *value++ = ctrl.key;
+
+    if (mask & KBAutoRepeatMode)
+        *value++ = ctrl.auto_repeat_mode;
+}

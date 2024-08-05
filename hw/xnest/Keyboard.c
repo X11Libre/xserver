@@ -81,7 +81,7 @@ xnestChangeKeyboardControl(DeviceIntPtr pDev, KeybdCtrl * ctrl)
 {
 #if 0
     unsigned long value_mask;
-    XKeyboardControl values;
+    XnKeyboardControl values;
     int i;
 
     value_mask = KBKeyClickPercent |
@@ -94,7 +94,9 @@ xnestChangeKeyboardControl(DeviceIntPtr pDev, KeybdCtrl * ctrl)
     values.auto_repeat_mode = ctrl->autoRepeat ?
         AutoRepeatModeOn : AutoRepeatModeOff;
 
-    XChangeKeyboardControl(xnestDisplay, value_mask, &values);
+    uint32_t value_list[16];
+    xnestEncodeKeyboardControl(values, value_mask, value_list);
+    xcb_change_keyboard_control(xnestUpstreamConn(), value_mask, value_list);
 
     /*
        value_mask = KBKey | KBAutoRepeatMode;
@@ -107,7 +109,9 @@ xnestChangeKeyboardControl(DeviceIntPtr pDev, KeybdCtrl * ctrl)
         values.led = i;
         values.led_mode =
             (ctrl->leds & (1 << (i - 1))) ? LedModeOn : LedModeOff;
-        XChangeKeyboardControl(xnestDisplay, value_mask, &values);
+
+        xnestEncodeKeyboardControl(values, value_mask, value_list);
+        xcb_change_keyboard_control(xnestUpstreamConn(), value_mask, value_list);
     }
 #endif
 }
