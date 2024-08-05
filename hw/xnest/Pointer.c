@@ -27,6 +27,7 @@ is" without express or implied warranty.
 #include "mipointer.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -41,8 +42,12 @@ DeviceIntPtr xnestPointerDevice = NULL;
 void
 xnestChangePointerControl(DeviceIntPtr pDev, PtrCtrl * ctrl)
 {
-    XChangePointerControl(xnestDisplay, TRUE, TRUE,
-                          ctrl->num, ctrl->den, ctrl->threshold);
+    xcb_change_pointer_control(xnestUpstreamInfo.conn,
+                               ctrl->num,
+                               ctrl->den,
+                               ctrl->threshold,
+                               TRUE,
+                               TRUE);
 }
 
 int
