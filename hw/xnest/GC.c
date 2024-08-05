@@ -167,8 +167,11 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
 
     if (mask & GCDashList) {
         mask &= ~GCDashList;
-        XSetDashes(xnestDisplay, xnestGC(pGC),
-                   pGC->dashOffset, (char *) pGC->dash, pGC->numInDashList);
+        xcb_set_dashes(xnestUpstreamInfo.conn,
+                       xnestUpstreamGC(pGC),
+                       pGC->dashOffset,
+                       pGC->numInDashList,
+                       (uint8_t*) pGC->dash);
     }
 
     if (mask & GCArcMode)
