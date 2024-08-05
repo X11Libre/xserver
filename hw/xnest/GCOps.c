@@ -420,9 +420,16 @@ xnestPushPixels(GCPtr pGC, PixmapPtr pBitmap, DrawablePtr pDst,
 {
     /* only works for solid bitmaps */
     if (pGC->fillStyle == FillSolid) {
-        XSetStipple(xnestDisplay, xnestGC(pGC), xnestPixmap(pBitmap));
-        XSetTSOrigin(xnestDisplay, xnestGC(pGC), x, y);
-        XSetFillStyle(xnestDisplay, xnestGC(pGC), FillStippled);
+        xnChangeGC(xnestUpstreamInfo.conn,
+                   xnestUpstreamGC(pGC),
+                   (XnGCValues) {
+                        .fill_style = XCB_FILL_STYLE_STIPPLED,
+                        .ts_x_origin = x,
+                        .ts_y_origin = y,
+                        .stipple = xnestPixmap(pBitmap),
+                   },
+                   XCB_GC_FILL_STYLE | XCB_GC_TILE_STIPPLE_ORIGIN_X |
+                      XCB_GC_TILE_STIPPLE_ORIGIN_Y | XCB_GC_STIPPLE);
 
         xcb_rectangle_t rect = {
             .x = x, .y = y, .width = width, .height = height,
@@ -433,7 +440,15 @@ xnestPushPixels(GCPtr pGC, PixmapPtr pBitmap, DrawablePtr pDst,
                                 1,
                                 &rect);
 
-        XSetFillStyle(xnestDisplay, xnestGC(pGC), FillSolid);
+        xnChangeGC(xnestUpstreamInfo.conn,
+                   xnestUpstreamGC(pGC),
+                   (XnGCValues) {
+                        .fill_style = XCB_FILL_STYLE_SOLID,
+                        .ts_x_origin = x,
+                        .ts_y_origin = y,
+                        .stipple = xnestPixmap(pBitmap),
+                   },
+                   XCB_GC_FILL_STYLE);
     }
     else
         ErrorF("xnest warning: function xnestPushPixels not implemented\n");
