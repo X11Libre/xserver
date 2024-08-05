@@ -13,9 +13,14 @@ is" without express or implied warranty.
 */
 #include <dix-config.h>
 
+#include <stdint.h>
+
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
+
+#include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
 
 #include "screenint.h"
 #include "input.h"
@@ -40,19 +45,16 @@ xnestCursorFuncRec xnestCursorFuncs = { NULL };
 Bool
 xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    unsigned long valuemask;
-    XGCValues values;
+    uint32_t valuemask = XCB_GC_FUNCTION | XCB_GC_PLANE_MASK | XCB_GC_FOREGROUND
+                         | XCB_GC_BACKGROUND | XCB_GC_CLIP_MASK;
 
-    valuemask = GCFunction |
-        GCPlaneMask | GCForeground | GCBackground | GCClipMask;
+    xcb_params_gc_t values = {
+        .function   = XCB_GX_COPY,
+        .plane_mask = ((uint32_t)~0L),
+        .foreground = 1L,
+    };
 
-    values.function = GXcopy;
-    values.plane_mask = AllPlanes;
-    values.foreground = 1L;
-    values.background = 0L;
-    values.clip_mask = XCB_PIXMAP_NONE;
-
-    XChangeGC(xnestDisplay, xnestBitmapGC, valuemask, &values);
+    xcb_aux_change_gc(xnestUpstreamInfo.conn, xnestBitmapGC->gid, valuemask, &values);
 
     uint32_t const winId = xnestDefaultWindows[pScreen->myNum];
 
