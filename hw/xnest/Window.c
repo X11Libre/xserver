@@ -273,7 +273,7 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
 Bool
 xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 {
-    XSetWindowAttributes attributes;
+    XnSetWindowAttr attributes;
 
     if (mask & XCB_CW_BACK_PIXMAP)
         switch (pWin->backgroundState) {
@@ -356,10 +356,14 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
     if (mask & XCB_CW_CURSOR)        /* this is handled in cursor code */
         mask &= ~XCB_CW_CURSOR;
 
-    if (mask)
-        XChangeWindowAttributes(xnestDisplay, xnestWindow(pWin),
-                                mask, &attributes);
-
+    if (mask) {
+        uint32_t values[32];
+        xnestEncodeWindowAttr(attributes, mask, values);
+        xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                     xnestWindow(pWin),
+                                     mask,
+                                     values);
+    }
     return TRUE;
 }
 
