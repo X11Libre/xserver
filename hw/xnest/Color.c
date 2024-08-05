@@ -45,17 +45,49 @@ static DevPrivateKeyRec cmapScrPrivateKeyRec;
 #define GetInstalledColormap(s) ((ColormapPtr) dixLookupPrivate(&(s)->devPrivates, cmapScrPrivateKey))
 #define SetInstalledColormap(s,c) (dixSetPrivate(&(s)->devPrivates, cmapScrPrivateKey, c))
 
+static Bool load_colormap(ColormapPtr pCmap, int ncolors, uint32_t *colors)
+{
+    xcb_generic_error_t *err = NULL;
+    xcb_query_colors_reply_t *reply = xcb_query_colors_reply(
+        xnestUpstreamInfo.conn,
+        xcb_query_colors(
+            xnestUpstreamInfo.conn,
+            xnestColormap(pCmap),
+            ncolors,
+            colors),
+        &err);
+
+    if (!reply) {
+        LogMessage(X_WARNING, "load_colormap(): missing reply for QueryColors request\n");
+        free(colors);
+        return FALSE;
+    }
+
+    if (xcb_query_colors_colors_length(reply) != ncolors) {
+        LogMessage(X_WARNING, "load_colormap(): received wrong number of entries: %d - expected %d\n",
+            xcb_query_colors_colors_length(reply), ncolors);
+        free(reply);
+        free(colors);
+        return FALSE;
+    }
+
+    xcb_rgb_t *rgb = xcb_query_colors_colors(reply);
+    for (int i = 0; i < ncolors; i++) {
+        pCmap->red[i].co.local.red = rgb[i].red;
+        pCmap->green[i].co.local.green = rgb[i].green;
+        pCmap->blue[i].co.local.blue = rgb[i].blue;
+    }
+
+    free(colors);
+    free(reply);
+    return TRUE;
+}
+
 Bool
 xnestCreateColormap(ColormapPtr pCmap)
 {
-    VisualPtr pVisual;
-    XColor *colors;
-    int i, ncolors;
-    Pixel red, green, blue;
-    Pixel redInc, greenInc, blueInc;
-
-    pVisual = pCmap->pVisual;
-    ncolors = pVisual->ColormapEntries;
+    VisualPtr pVisual = pCmap->pVisual;
+    int ncolors = pVisual->ColormapEntries;
 
     uint32_t const cmap = xcb_generate_id(xnestUpstreamInfo.conn);
     xnestColormapPriv(pCmap)->colormap = cmap;
@@ -68,42 +100,24 @@ xnestCreateColormap(ColormapPtr pCmap)
 
     switch (pVisual->class) {
     case StaticGray:           /* read only */
-        if (!(colors = calloc(ncolors, sizeof(XColor))))
-            return FALSE;
-        for (i = 0; i < ncolors; i++)
-            colors[i].pixel = i;
-        XQueryColors(xnestDisplay, xnestColormap(pCmap), colors, ncolors);
-        for (i = 0; i < ncolors; i++) {
-            pCmap->red[i].co.local.red = colors[i].red;
-            pCmap->red[i].co.local.green = colors[i].red;
-            pCmap->red[i].co.local.blue = colors[i].red;
-        }
-        free(colors);
-        break;
-
     case StaticColor:          /* read only */
-        if (!(colors = calloc(ncolors, sizeof(XColor))))
-            return FALSE;
-        for (i = 0; i < ncolors; i++)
-            colors[i].pixel = i;
-        XQueryColors(xnestDisplay, xnestColormap(pCmap), colors, ncolors);
-        for (i = 0; i < ncolors; i++) {
-            pCmap->red[i].co.local.red = colors[i].red;
-            pCmap->red[i].co.local.green = colors[i].green;
-            pCmap->red[i].co.local.blue = colors[i].blue;
-        }
-        free(colors);
-        break;
+    {
+        uint32_t *colors = malloc(ncolors * sizeof(uint32_t));
+        for (int i = 0; i < ncolors; i++)
+            colors[i] = i;
+        return load_colormap(pCmap, ncolors, colors);
+    }
+    break;
 
     case TrueColor:            /* read only */
-        if (!(colors = calloc(ncolors, sizeof(XColor))))
-            return FALSE;
-        red = green = blue = 0L;
-        redInc = lowbit(pVisual->redMask);
-        greenInc = lowbit(pVisual->greenMask);
-        blueInc = lowbit(pVisual->blueMask);
-        for (i = 0; i < ncolors; i++) {
-            colors[i].pixel = red | green | blue;
+    {
+        uint32_t *colors = malloc(ncolors * sizeof(uint32_t));
+        Pixel red = 0, redInc = lowbit(pVisual->redMask);
+        Pixel green = 0, greenInc = lowbit(pVisual->greenMask);
+        Pixel blue = 0, blueInc = lowbit(pVisual->blueMask);
+
+        for (int i = 0; i < ncolors; i++) {
+            colors[i] = red | green | blue;
             red += redInc;
             if (red > pVisual->redMask)
                 red = 0L;
@@ -114,14 +128,9 @@ xnestCreateColormap(ColormapPtr pCmap)
             if (blue > pVisual->blueMask)
                 blue = 0L;
         }
-        XQueryColors(xnestDisplay, xnestColormap(pCmap), colors, ncolors);
-        for (i = 0; i < ncolors; i++) {
-            pCmap->red[i].co.local.red = colors[i].red;
-            pCmap->green[i].co.local.green = colors[i].green;
-            pCmap->blue[i].co.local.blue = colors[i].blue;
-        }
-        free(colors);
-        break;
+        return load_colormap(pCmap, ncolors, colors);
+    }
+    break;
 
     case GrayScale:            /* read and write */
         break;
