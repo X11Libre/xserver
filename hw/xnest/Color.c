@@ -258,9 +258,11 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
                                         pScreen->defColormap, X11_RESTYPE_COLORMAP,
                                         serverClient, DixUseAccess);
 
-            XSetWindowColormap(xnestDisplay,
-                               xnestDefaultWindows[pScreen->myNum],
-                               xnestColormap(pCmap));
+            uint32_t cmap = xnestColormap(pCmap);
+            xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                         xnestDefaultWindows[pScreen->myNum],
+                                         XCB_CW_COLORMAP,
+                                         &cmap);
         }
 #endif                          /* DUMB_WINDOW_MANAGERS */
     }
