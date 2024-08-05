@@ -390,27 +390,10 @@ void
 xnestStoreColors(ColormapPtr pCmap, int nColors, xColorItem * pColors)
 {
     if (pCmap->pVisual->class & DynamicClass)
-#ifdef _XSERVER64
-    {
-        int i;
-        XColor *pColors64 = calloc(nColors, sizeof(XColor));
-        if (!pColors64)
-            return;
-
-        for (i = 0; i < nColors; ++i) {
-            pColors64[i].pixel = pColors[i].pixel;
-            pColors64[i].red = pColors[i].red;
-            pColors64[i].green = pColors[i].green;
-            pColors64[i].blue = pColors[i].blue;
-            pColors64[i].flags = pColors[i].flags;
-        }
-        XStoreColors(xnestDisplay, xnestColormap(pCmap), pColors64, nColors);
-        free(pColors64);
-    }
-#else
-        XStoreColors(xnestDisplay, xnestColormap(pCmap),
-                     (XColor *) pColors, nColors);
-#endif
+        xcb_store_colors(xnestUpstreamInfo.conn,
+                         xnestColormap(pCmap),
+                         nColors,
+                         (xcb_coloritem_t*) pColors);
 }
 
 void
