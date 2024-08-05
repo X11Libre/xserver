@@ -98,4 +98,6 @@ typedef struct {
 
 void xnChangeGC(xcb_connection_t *conn, uint32_t gc, XnGCValues gcval, uint32_t mask);
 
+void xnestWMColormapWindows(xcb_connection_t *conn, xcb_window_t w, xcb_window_t *windows, int count);
+
 #endif /* __XNEST__XCB_H */
