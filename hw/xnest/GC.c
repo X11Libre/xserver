@@ -218,8 +218,15 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
             pRects[i].width = pBox[i].x2 - pBox[i].x1;
             pRects[i].height = pBox[i].y2 - pBox[i].y1;
         }
-        XSetClipRectangles(xnestDisplay, xnestGC(pGC), 0, 0,
-                           pRects, nRects, Unsorted);
+        xcb_set_clip_rectangles(
+            xnestUpstreamInfo.conn,
+            XCB_CLIP_ORDERING_UNSORTED,
+            xnestUpstreamGC(pGC),
+            0,
+            0,
+            nRects,
+            (xcb_rectangle_t*)pRects);
+
         free((char *) pRects);
         break;
 
@@ -236,27 +243,47 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
         break;
 
     case CT_UNSORTED:
-        XSetClipRectangles(xnestDisplay, xnestGC(pGC),
-                           pGC->clipOrg.x, pGC->clipOrg.y,
-                           (XRectangle *) pValue, nRects, Unsorted);
+        xcb_set_clip_rectangles(
+            xnestUpstreamInfo.conn,
+            XCB_CLIP_ORDERING_UNSORTED,
+            xnestUpstreamGC(pGC),
+            pGC->clipOrg.x, pGC->clipOrg.y,
+            nRects,
+            (xcb_rectangle_t*)pValue);
         break;
 
     case CT_YSORTED:
-        XSetClipRectangles(xnestDisplay, xnestGC(pGC),
-                           pGC->clipOrg.x, pGC->clipOrg.y,
-                           (XRectangle *) pValue, nRects, YSorted);
+        xcb_set_clip_rectangles(
+            xnestUpstreamInfo.conn,
+            XCB_CLIP_ORDERING_Y_SORTED,
+            xnestUpstreamGC(pGC),
+            pGC->clipOrg.x,
+            pGC->clipOrg.y,
+            nRects,
+            (xcb_rectangle_t*)pValue);
         break;
 
     case CT_YXSORTED:
-        XSetClipRectangles(xnestDisplay, xnestGC(pGC),
-                           pGC->clipOrg.x, pGC->clipOrg.y,
-                           (XRectangle *) pValue, nRects, YXSorted);
+        xcb_set_clip_rectangles(
+            xnestUpstreamInfo.conn,
+            XCB_CLIP_ORDERING_YX_SORTED,
+            xnestUpstreamGC(pGC),
+            pGC->clipOrg.x,
+            pGC->clipOrg.y,
+            nRects,
+            (xcb_rectangle_t*)pValue);
+
         break;
 
     case CT_YXBANDED:
-        XSetClipRectangles(xnestDisplay, xnestGC(pGC),
-                           pGC->clipOrg.x, pGC->clipOrg.y,
-                           (XRectangle *) pValue, nRects, YXBanded);
+        xcb_set_clip_rectangles(
+            xnestUpstreamInfo.conn,
+            XCB_CLIP_ORDERING_YX_BANDED,
+            xnestUpstreamGC(pGC),
+            pGC->clipOrg.x,
+            pGC->clipOrg.y,
+            nRects,
+            (xcb_rectangle_t*)pValue);
         break;
     }
 
