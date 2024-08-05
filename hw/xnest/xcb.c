@@ -5,6 +5,7 @@
 #include <dix-config.h>
 
 #include <xcb/xcb.h>
+#include <xcb/xcb_icccm.h>
 
 #include <X11/X.h>
 #include <X11/Xdefs.h>
@@ -41,4 +42,33 @@ uint32_t xnest_upstream_gc(GCPtr pGC) {
     if (priv == NULL) return 0;
 
     return priv->gc;
+}
+
+const char WM_COLORMAP_WINDOWS[] = "WM_COLORMAP_WINDOWS";
+
+void xnest_wm_colormap_windows(
+    xcb_connection_t *conn,
+    xcb_window_t w,
+    xcb_window_t *windows,
+    int count)
+{
+    xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(
+        conn,
+        xcb_intern_atom(
+            conn, 0,
+            sizeof(WM_COLORMAP_WINDOWS)-1,
+            WM_COLORMAP_WINDOWS),
+        NULL);
+
+    if (!reply)
+        return;
+
+    xcb_icccm_set_wm_colormap_windows_checked(
+        conn,
+        w,
+        reply->atom,
+        count,
+        (xcb_window_t*)windows);
+
+    free(reply);
 }
