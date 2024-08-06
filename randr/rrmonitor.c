@@ -672,7 +672,7 @@ ProcRRSetMonitor(ClientPtr client)
 
     REQUEST_AT_LEAST_SIZE(xRRSetMonitorReq);
 
-    if (stuff->monitor.noutput != stuff->length - (SIZEOF(xRRSetMonitorReq) >> 2))
+    if (stuff->monitor.noutput != client->req_len - (sizeof(xRRSetMonitorReq) >> 2))
         return BadLength;
 
     r = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
