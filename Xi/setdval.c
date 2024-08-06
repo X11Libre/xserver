@@ -100,7 +100,7 @@ ProcXSetDeviceValuators(ClientPtr client)
         .status = Success
     };
 
-    if (stuff->length != bytes_to_int32(sizeof(xSetDeviceValuatorsReq)) +
+    if (client->req_len != bytes_to_int32(sizeof(xSetDeviceValuatorsReq)) +
         stuff->num_valuators)
         return BadLength;
 

@@ -102,7 +102,7 @@ ProcXChangeDeviceDontPropagateList(ClientPtr client)
     REQUEST(xChangeDeviceDontPropagateListReq);
     REQUEST_AT_LEAST_SIZE(xChangeDeviceDontPropagateListReq);
 
-    if (stuff->length !=
+    if (client->req_len !=
         bytes_to_int32(sizeof(xChangeDeviceDontPropagateListReq)) +
         stuff->count)
         return BadLength;

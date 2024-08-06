@@ -106,7 +106,7 @@ ProcXGrabDeviceButton(ClientPtr client)
     REQUEST(xGrabDeviceButtonReq);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceButtonReq);
 
-    if (stuff->length !=
+    if (client->req_len !=
         bytes_to_int32(sizeof(xGrabDeviceButtonReq)) + stuff->event_count)
         return BadLength;
 

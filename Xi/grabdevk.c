@@ -104,7 +104,7 @@ ProcXGrabDeviceKey(ClientPtr client)
     REQUEST(xGrabDeviceKeyReq);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceKeyReq);
 
-    if (stuff->length !=
+    if (client->req_len !=
         bytes_to_int32(sizeof(xGrabDeviceKeyReq)) + stuff->event_count)
         return BadLength;
 
