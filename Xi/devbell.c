@@ -71,8 +71,6 @@ SOFTWARE.
 int _X_COLD
 SProcXDeviceBell(ClientPtr client)
 {
-    REQUEST(xDeviceBellReq);
-    swaps(&stuff->length);
     return (ProcXDeviceBell(client));
 }
 

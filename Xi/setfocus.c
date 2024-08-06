@@ -76,7 +76,6 @@ int _X_COLD
 SProcXSetDeviceFocus(ClientPtr client)
 {
     REQUEST(xSetDeviceFocusReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSetDeviceFocusReq);
     swapl(&stuff->focus);
     swapl(&stuff->time);
