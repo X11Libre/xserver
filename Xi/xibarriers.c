@@ -843,7 +843,6 @@ SProcXIBarrierReleasePointer(ClientPtr client)
     REQUEST(xXIBarrierReleasePointerReq);
     int i;
 
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xXIBarrierReleasePointerReq);
 
     swapl(&stuff->num_barriers);
