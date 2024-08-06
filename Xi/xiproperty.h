@@ -36,7 +36,6 @@ int ProcXDeleteDeviceProperty(ClientPtr client);
 int ProcXGetDeviceProperty(ClientPtr client);
 
 /* request swapping */
-int SProcXListDeviceProperties(ClientPtr client);
 int SProcXChangeDeviceProperty(ClientPtr client);
 int SProcXDeleteDeviceProperty(ClientPtr client);
 int SProcXGetDeviceProperty(ClientPtr client);
