@@ -378,8 +378,6 @@ static int _X_COLD
 SProcXwlQueryVersion(ClientPtr client)
 {
     REQUEST(xXwlQueryVersionReq);
-
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xXwlQueryVersionReq);
     swaps(&stuff->majorVersion);
     swaps(&stuff->minorVersion);
