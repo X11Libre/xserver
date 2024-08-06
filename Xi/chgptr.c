@@ -67,19 +67,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure is invoked to swap the request bytes if the server and
- * client have a different byte order.
- *
- */
-
-int _X_COLD
-SProcXChangePointerDevice(ClientPtr client)
-{
-    return (ProcXChangePointerDevice(client));
-}
-
-/***********************************************************************
- *
  * This procedure changes the device used as the X pointer.
  *
  */

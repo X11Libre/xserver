@@ -61,19 +61,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure gets the modifier mapping for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceModifierMapping(ClientPtr client)
-{
-    return (ProcXGetDeviceModifierMapping(client));
-}
-
-/***********************************************************************
- *
  * Get the device Modifier mapping.
  *
  */

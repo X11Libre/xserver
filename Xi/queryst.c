@@ -49,18 +49,6 @@ from The Open Group.
 
 /***********************************************************************
  *
- * This procedure allows a client to query the state of a device.
- *
- */
-
-int _X_COLD
-SProcXQueryDeviceState(ClientPtr client)
-{
-    return (ProcXQueryDeviceState(client));
-}
-
-/***********************************************************************
- *
  * This procedure allows frozen events to be routed.
  *
  */

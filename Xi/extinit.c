@@ -252,19 +252,19 @@ static int (*ProcIVector[]) (ClientPtr) = {
 
 /* For swapped clients */
 static int (*SProcIVector[]) (ClientPtr) = {
-    NULL,                       /*  0 */
+        NULL,                       /*  0 */
         SProcXGetExtensionVersion,      /*  1 */
-        SProcXListInputDevices, /*  2 */
-        SProcXOpenDevice,       /*  3 */
-        SProcXCloseDevice,      /*  4 */
-        SProcXSetDeviceMode,    /*  5 */
+        ProcXListInputDevices, /*  2 */
+        ProcXOpenDevice,       /*  3 */
+        ProcXCloseDevice,      /*  4 */
+        ProcXSetDeviceMode,    /*  5 */
         SProcXSelectExtensionEvent,     /*  6 */
         SProcXGetSelectedExtensionEvents,       /*  7 */
         SProcXChangeDeviceDontPropagateList,    /*  8 */
         SProcXGetDeviceDontPropagateList,       /*  9 */
         SProcXGetDeviceMotionEvents,    /* 10 */
-        SProcXChangeKeyboardDevice,     /* 11 */
-        SProcXChangePointerDevice,      /* 12 */
+        ProcXChangeKeyboardDevice,     /* 11 */
+        ProcXChangePointerDevice,      /* 12 */
         SProcXGrabDevice,       /* 13 */
         SProcXUngrabDevice,     /* 14 */
         SProcXGrabDeviceKey,    /* 15 */
@@ -272,30 +272,30 @@ static int (*SProcIVector[]) (ClientPtr) = {
         SProcXGrabDeviceButton, /* 17 */
         SProcXUngrabDeviceButton,       /* 18 */
         SProcXAllowDeviceEvents,        /* 19 */
-        SProcXGetDeviceFocus,   /* 20 */
+        ProcXGetDeviceFocus,   /* 20 */
         SProcXSetDeviceFocus,   /* 21 */
-        SProcXGetFeedbackControl,       /* 22 */
+        ProcXGetFeedbackControl,       /* 22 */
         SProcXChangeFeedbackControl,    /* 23 */
-        SProcXGetDeviceKeyMapping,      /* 24 */
+        ProcXGetDeviceKeyMapping,      /* 24 */
         SProcXChangeDeviceKeyMapping,   /* 25 */
-        SProcXGetDeviceModifierMapping, /* 26 */
-        SProcXSetDeviceModifierMapping, /* 27 */
-        SProcXGetDeviceButtonMapping,   /* 28 */
-        SProcXSetDeviceButtonMapping,   /* 29 */
-        SProcXQueryDeviceState, /* 30 */
+        ProcXGetDeviceModifierMapping, /* 26 */
+        ProcXSetDeviceModifierMapping, /* 27 */
+        ProcXGetDeviceButtonMapping,   /* 28 */
+        ProcXSetDeviceButtonMapping,   /* 29 */
+        ProcXQueryDeviceState, /* 30 */
         SProcXSendExtensionEvent,       /* 31 */
-        SProcXDeviceBell,       /* 32 */
-        SProcXSetDeviceValuators,       /* 33 */
+        ProcXDeviceBell,       /* 32 */
+        ProcXSetDeviceValuators,       /* 33 */
         SProcXGetDeviceControl, /* 34 */
         SProcXChangeDeviceControl,      /* 35 */
-        SProcXListDeviceProperties,     /* 36 */
+        ProcXListDeviceProperties,     /* 36 */
         SProcXChangeDeviceProperty,     /* 37 */
         SProcXDeleteDeviceProperty,     /* 38 */
         SProcXGetDeviceProperty,        /* 39 */
         SProcXIQueryPointer,    /* 40 */
         SProcXIWarpPointer,     /* 41 */
         SProcXIChangeCursor,    /* 42 */
-        SProcXIChangeHierarchy, /* 43 */
+        ProcXIChangeHierarchy, /* 43 */
         SProcXISetClientPointer,        /* 44 */
         SProcXIGetClientPointer,        /* 45 */
         SProcXISelectEvents,    /* 46 */

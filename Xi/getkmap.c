@@ -64,19 +64,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure gets the key mapping for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceKeyMapping(ClientPtr client)
-{
-    return (ProcXGetDeviceKeyMapping(client));
-}
-
-/***********************************************************************
- *
  * Get the device key mapping.
  *
  */

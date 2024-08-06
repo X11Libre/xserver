@@ -64,18 +64,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure closes an input device.
- *
- */
-
-int _X_COLD
-SProcXCloseDevice(ClientPtr client)
-{
-    return (ProcXCloseDevice(client));
-}
-
-/***********************************************************************
- *
  * Clear out event selections and passive grabs from a window for the
  * specified device.
  *

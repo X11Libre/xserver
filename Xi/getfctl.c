@@ -61,19 +61,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure gets the control attributes for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXGetFeedbackControl(ClientPtr client)
-{
-    return (ProcXGetFeedbackControl(client));
-}
-
-/***********************************************************************
- *
  * This procedure copies KbdFeedbackClass data, swapping if necessary.
  *
  */

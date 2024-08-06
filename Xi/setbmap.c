@@ -64,18 +64,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure changes the button mapping.
- *
- */
-
-int _X_COLD
-SProcXSetDeviceButtonMapping(ClientPtr client)
-{
-    return (ProcXSetDeviceButtonMapping(client));
-}
-
-/***********************************************************************
- *
  * This procedure lists the input devices available to the server.
  *
  */

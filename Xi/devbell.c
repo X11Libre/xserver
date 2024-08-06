@@ -61,19 +61,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure is invoked to swap the request bytes if the server and
- * client have a different byte order.
- *
- */
-
-int _X_COLD
-SProcXDeviceBell(ClientPtr client)
-{
-    return (ProcXDeviceBell(client));
-}
-
-/***********************************************************************
- *
  * This procedure rings a bell on an extension device.
  *
  */
