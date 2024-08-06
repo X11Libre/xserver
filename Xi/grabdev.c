@@ -84,7 +84,7 @@ SProcXGrabDevice(ClientPtr client)
     swapl(&stuff->time);
     swaps(&stuff->event_count);
 
-    if (stuff->length !=
+    if (client->req_len !=
         bytes_to_int32(sizeof(xGrabDeviceReq)) + stuff->event_count)
         return BadLength;
 
@@ -111,7 +111,7 @@ ProcXGrabDevice(ClientPtr client)
     REQUEST(xGrabDeviceReq);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceReq);
 
-    if (stuff->length !=
+    if (client->req_len !=
         bytes_to_int32(sizeof(xGrabDeviceReq)) + stuff->event_count)
         return BadLength;
 
