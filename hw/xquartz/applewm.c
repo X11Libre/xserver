@@ -692,7 +692,6 @@ static int
 SProcAppleWMQueryVersion(register ClientPtr client)
 {
     REQUEST(xAppleWMQueryVersionReq);
-    swaps(&stuff->length);
     return ProcAppleWMQueryVersion(client);
 }
 

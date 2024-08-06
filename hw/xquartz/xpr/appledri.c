@@ -399,7 +399,6 @@ static int
 SProcAppleDRIQueryVersion(register ClientPtr client)
 {
     REQUEST(xAppleDRIQueryVersionReq);
-    swaps(&stuff->length);
     return ProcAppleDRIQueryVersion(client);
 }
 
@@ -407,7 +406,6 @@ static int
 SProcAppleDRIQueryDirectRenderingCapable(register ClientPtr client)
 {
     REQUEST(xAppleDRIQueryDirectRenderingCapableReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xAppleDRIQueryDirectRenderingCapableReq);
     swapl(&stuff->screen);
     return ProcAppleDRIQueryDirectRenderingCapable(client);
@@ -417,7 +415,6 @@ static int
 SProcAppleDRIAuthConnection(register ClientPtr client)
 {
     REQUEST(xAppleDRIAuthConnectionReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xAppleDRIAuthConnectionReq);
     swapl(&stuff->screen);
     swapl(&stuff->magic);
@@ -428,7 +425,6 @@ static int
 SProcAppleDRICreateSurface(register ClientPtr client)
 {
     REQUEST(xAppleDRICreateSurfaceReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xAppleDRICreateSurfaceReq);
     swapl(&stuff->screen);
     swapl(&stuff->drawable);
@@ -440,7 +436,6 @@ static int
 SProcAppleDRIDestroySurface(register ClientPtr client)
 {
     REQUEST(xAppleDRIDestroySurfaceReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xAppleDRIDestroySurfaceReq);
     swapl(&stuff->screen);
     swapl(&stuff->drawable);
@@ -451,7 +446,6 @@ static int
 SProcAppleDRICreatePixmap(register ClientPtr client)
 {
     REQUEST(xAppleDRICreatePixmapReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xAppleDRICreatePixmapReq);
     swapl(&stuff->screen);
     swapl(&stuff->drawable);
@@ -462,7 +456,6 @@ static int
 SProcAppleDRIDestroyPixmap(register ClientPtr client)
 {
     REQUEST(xAppleDRIDestroyPixmapReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xAppleDRIDestroyPixmapReq);
     swapl(&stuff->drawable);
     return ProcAppleDRIDestroyPixmap(client);
