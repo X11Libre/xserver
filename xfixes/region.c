@@ -97,8 +97,6 @@ int _X_COLD
 SProcXFixesCreateRegion(ClientPtr client)
 {
     REQUEST(xXFixesCreateRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xXFixesCreateRegionReq);
     swapl(&stuff->region);
     SwapRestS(stuff);
@@ -141,8 +139,6 @@ int _X_COLD
 SProcXFixesCreateRegionFromBitmap(ClientPtr client)
 {
     REQUEST(xXFixesCreateRegionFromBitmapReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesCreateRegionFromBitmapReq);
     swapl(&stuff->region);
     swapl(&stuff->bitmap);
@@ -200,8 +196,6 @@ int _X_COLD
 SProcXFixesCreateRegionFromWindow(ClientPtr client)
 {
     REQUEST(xXFixesCreateRegionFromWindowReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesCreateRegionFromWindowReq);
     swapl(&stuff->region);
     swapl(&stuff->window);
@@ -243,8 +237,6 @@ int _X_COLD
 SProcXFixesCreateRegionFromGC(ClientPtr client)
 {
     REQUEST(xXFixesCreateRegionFromGCReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesCreateRegionFromGCReq);
     swapl(&stuff->region);
     swapl(&stuff->gc);
@@ -285,8 +277,6 @@ int _X_COLD
 SProcXFixesCreateRegionFromPicture(ClientPtr client)
 {
     REQUEST(xXFixesCreateRegionFromPictureReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesCreateRegionFromPictureReq);
     swapl(&stuff->region);
     swapl(&stuff->picture);
@@ -309,8 +299,6 @@ int _X_COLD
 SProcXFixesDestroyRegion(ClientPtr client)
 {
     REQUEST(xXFixesDestroyRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesDestroyRegionReq);
     swapl(&stuff->region);
     return ProcXFixesDestroyRegion(client);
@@ -347,8 +335,6 @@ int _X_COLD
 SProcXFixesSetRegion(ClientPtr client)
 {
     REQUEST(xXFixesSetRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xXFixesSetRegionReq);
     swapl(&stuff->region);
     SwapRestS(stuff);
@@ -376,8 +362,6 @@ int _X_COLD
 SProcXFixesCopyRegion(ClientPtr client)
 {
     REQUEST(xXFixesCopyRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesCopyRegionReq);
     swapl(&stuff->source);
     swapl(&stuff->destination);
@@ -418,8 +402,6 @@ int _X_COLD
 SProcXFixesCombineRegion(ClientPtr client)
 {
     REQUEST(xXFixesCombineRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesCombineRegionReq);
     swapl(&stuff->source1);
     swapl(&stuff->source2);
@@ -462,8 +444,6 @@ int _X_COLD
 SProcXFixesInvertRegion(ClientPtr client)
 {
     REQUEST(xXFixesInvertRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesInvertRegionReq);
     swapl(&stuff->source);
     swaps(&stuff->x);
@@ -492,8 +472,6 @@ int _X_COLD
 SProcXFixesTranslateRegion(ClientPtr client)
 {
     REQUEST(xXFixesTranslateRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesTranslateRegionReq);
     swapl(&stuff->region);
     swaps(&stuff->dx);
@@ -521,8 +499,6 @@ int _X_COLD
 SProcXFixesRegionExtents(ClientPtr client)
 {
     REQUEST(xXFixesRegionExtentsReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesRegionExtentsReq);
     swapl(&stuff->source);
     swapl(&stuff->destination);
@@ -586,8 +562,6 @@ int _X_COLD
 SProcXFixesFetchRegion(ClientPtr client)
 {
     REQUEST(xXFixesFetchRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesFetchRegionReq);
     swapl(&stuff->region);
     return ProcXFixesFetchRegion(client);
@@ -645,8 +619,6 @@ int _X_COLD
 SProcXFixesSetGCClipRegion(ClientPtr client)
 {
     REQUEST(xXFixesSetGCClipRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesSetGCClipRegionReq);
     swapl(&stuff->gc);
     swapl(&stuff->region);
@@ -748,8 +720,6 @@ int _X_COLD
 SProcXFixesSetWindowShapeRegion(ClientPtr client)
 {
     REQUEST(xXFixesSetWindowShapeRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesSetWindowShapeRegionReq);
     swapl(&stuff->dest);
     swaps(&stuff->xOff);
@@ -797,8 +767,6 @@ int _X_COLD
 SProcXFixesSetPictureClipRegion(ClientPtr client)
 {
     REQUEST(xXFixesSetPictureClipRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesSetPictureClipRegionReq);
     swapl(&stuff->picture);
     swapl(&stuff->region);
@@ -850,8 +818,6 @@ int _X_COLD
 SProcXFixesExpandRegion(ClientPtr client)
 {
     REQUEST(xXFixesExpandRegionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXFixesExpandRegionReq);
     swapl(&stuff->source);
     swapl(&stuff->destination);
