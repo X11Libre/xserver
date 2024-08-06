@@ -70,7 +70,6 @@ int SProcInternAtom(ClientPtr client);
 int SProcListFonts(ClientPtr client);
 int SProcListFontsWithInfo(ClientPtr client);
 int SProcLookupColor(ClientPtr client);
-int SProcNoOperation(ClientPtr client);
 int SProcOpenFont(ClientPtr client);
 int SProcPoly(ClientPtr client);
 int SProcPolyText(ClientPtr client);

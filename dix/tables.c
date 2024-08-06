@@ -449,7 +449,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcBadRequest,
     ProcBadRequest,                     /* 125 */
     ProcBadRequest,
-    SProcNoOperation,
+    ProcNoOperation,
     ProcBadRequest,
     ProcBadRequest,
     ProcBadRequest,
