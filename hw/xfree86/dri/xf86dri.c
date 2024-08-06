@@ -560,12 +560,6 @@ ProcXF86DRIDispatch(register ClientPtr client)
 }
 
 static int _X_COLD
-SProcXF86DRIQueryVersion(register ClientPtr client)
-{
-    return ProcXF86DRIQueryVersion(client);
-}
-
-static int _X_COLD
 SProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 {
     REQUEST(xXF86DRIQueryDirectRenderingCapableReq);
@@ -585,7 +579,7 @@ SProcXF86DRIDispatch(register ClientPtr client)
      */
     switch (stuff->data) {
     case X_XF86DRIQueryVersion:
-        return SProcXF86DRIQueryVersion(client);
+        return ProcXF86DRIQueryVersion(client);
     case X_XF86DRIQueryDirectRenderingCapable:
         return SProcXF86DRIQueryDirectRenderingCapable(client);
     default:
