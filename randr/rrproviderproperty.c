@@ -487,7 +487,7 @@ ProcRRConfigureProviderProperty(ClientPtr client)
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
     num_valid =
-        stuff->length - bytes_to_int32(sizeof(xRRConfigureProviderPropertyReq));
+        client->req_len - bytes_to_int32(sizeof(xRRConfigureProviderPropertyReq));
     return RRConfigureProviderProperty(provider, stuff->property, stuff->pending,
                                      stuff->range, FALSE, num_valid,
                                      (INT32 *) (stuff + 1));

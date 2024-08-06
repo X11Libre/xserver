@@ -520,7 +520,7 @@ ProcRRConfigureOutputProperty(ClientPtr client)
         return BadAccess;
 
     num_valid =
-        stuff->length - bytes_to_int32(sizeof(xRRConfigureOutputPropertyReq));
+        client->req_len - bytes_to_int32(sizeof(xRRConfigureOutputPropertyReq));
     return RRConfigureOutputProperty(output, stuff->property, stuff->pending,
                                      stuff->range, FALSE, num_valid,
                                      (INT32 *) (stuff + 1));
