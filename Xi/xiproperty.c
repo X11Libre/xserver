@@ -1018,10 +1018,6 @@ ProcXGetDeviceProperty(ClientPtr client)
 int _X_COLD
 SProcXListDeviceProperties(ClientPtr client)
 {
-    REQUEST(xListDevicePropertiesReq);
-    REQUEST_SIZE_MATCH(xListDevicePropertiesReq);
-
-    swaps(&stuff->length);
     return (ProcXListDeviceProperties(client));
 }
 
@@ -1031,7 +1027,6 @@ SProcXChangeDeviceProperty(ClientPtr client)
     REQUEST(xChangeDevicePropertyReq);
 
     REQUEST_AT_LEAST_SIZE(xChangeDevicePropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->property);
     swapl(&stuff->type);
     swapl(&stuff->nUnits);
@@ -1044,7 +1039,6 @@ SProcXDeleteDeviceProperty(ClientPtr client)
     REQUEST(xDeleteDevicePropertyReq);
     REQUEST_SIZE_MATCH(xDeleteDevicePropertyReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->property);
     return (ProcXDeleteDeviceProperty(client));
 }
@@ -1055,7 +1049,6 @@ SProcXGetDeviceProperty(ClientPtr client)
     REQUEST(xGetDevicePropertyReq);
     REQUEST_SIZE_MATCH(xGetDevicePropertyReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->property);
     swapl(&stuff->type);
     swapl(&stuff->longOffset);
@@ -1263,7 +1256,6 @@ SProcXIListProperties(ClientPtr client)
     REQUEST(xXIListPropertiesReq);
     REQUEST_SIZE_MATCH(xXIListPropertiesReq);
 
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
     return (ProcXIListProperties(client));
 }
@@ -1274,7 +1266,6 @@ SProcXIChangeProperty(ClientPtr client)
     REQUEST(xXIChangePropertyReq);
 
     REQUEST_AT_LEAST_SIZE(xXIChangePropertyReq);
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
     swapl(&stuff->property);
     swapl(&stuff->type);
@@ -1288,7 +1279,6 @@ SProcXIDeleteProperty(ClientPtr client)
     REQUEST(xXIDeletePropertyReq);
     REQUEST_SIZE_MATCH(xXIDeletePropertyReq);
 
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
     swapl(&stuff->property);
     return (ProcXIDeleteProperty(client));
@@ -1300,7 +1290,6 @@ SProcXIGetProperty(ClientPtr client)
     REQUEST(xXIGetPropertyReq);
     REQUEST_SIZE_MATCH(xXIGetPropertyReq);
 
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
     swapl(&stuff->property);
     swapl(&stuff->type);

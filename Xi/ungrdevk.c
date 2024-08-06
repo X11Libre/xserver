@@ -81,7 +81,6 @@ int _X_COLD
 SProcXUngrabDeviceKey(ClientPtr client)
 {
     REQUEST(xUngrabDeviceKeyReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xUngrabDeviceKeyReq);
     swapl(&stuff->grabWindow);
     swaps(&stuff->modifiers);

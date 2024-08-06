@@ -54,7 +54,6 @@ SProcXIGetClientPointer(ClientPtr client)
     REQUEST(xXIGetClientPointerReq);
     REQUEST_SIZE_MATCH(xXIGetClientPointerReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->win);
     return ProcXIGetClientPointer(client);
 }
