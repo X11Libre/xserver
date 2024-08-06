@@ -131,8 +131,6 @@ XISendDeviceHierarchyEvent(int flags[MAXDEVICES])
 int _X_COLD
 SProcXIChangeHierarchy(ClientPtr client)
 {
-    REQUEST(xXIChangeHierarchyReq);
-    swaps(&stuff->length);
     return (ProcXIChangeHierarchy(client));
 }
 

@@ -71,8 +71,6 @@ SOFTWARE.
 int _X_COLD
 SProcXSetDeviceValuators(ClientPtr client)
 {
-    REQUEST(xSetDeviceValuatorsReq);
-    swaps(&stuff->length);
     return (ProcXSetDeviceValuators(client));
 }
 

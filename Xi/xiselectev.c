@@ -122,7 +122,6 @@ SProcXISelectEvents(ClientPtr client)
     xXIEventMask *evmask;
 
     REQUEST(xXISelectEventsReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xXISelectEventsReq);
     swapl(&stuff->win);
     swaps(&stuff->num_masks);
@@ -333,7 +332,6 @@ int _X_COLD
 SProcXIGetSelectedEvents(ClientPtr client)
 {
     REQUEST(xXIGetSelectedEventsReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXIGetSelectedEventsReq);
     swapl(&stuff->win);
 

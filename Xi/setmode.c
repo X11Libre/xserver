@@ -71,8 +71,6 @@ SOFTWARE.
 int _X_COLD
 SProcXSetDeviceMode(ClientPtr client)
 {
-    REQUEST(xSetDeviceModeReq);
-    swaps(&stuff->length);
     return (ProcXSetDeviceMode(client));
 }
 

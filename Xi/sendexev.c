@@ -84,7 +84,6 @@ SProcXSendExtensionEvent(ClientPtr client)
     EventSwapPtr proc;
 
     REQUEST(xSendExtensionEventReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
     swapl(&stuff->destination);
     swaps(&stuff->count);

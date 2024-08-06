@@ -71,8 +71,6 @@ SOFTWARE.
 int _X_COLD
 SProcXGetDeviceModifierMapping(ClientPtr client)
 {
-    REQUEST(xGetDeviceModifierMappingReq);
-    swaps(&stuff->length);
     return (ProcXGetDeviceModifierMapping(client));
 }
 

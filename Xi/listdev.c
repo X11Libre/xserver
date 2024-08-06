@@ -77,8 +77,6 @@ SOFTWARE.
 int _X_COLD
 SProcXListInputDevices(ClientPtr client)
 {
-    REQUEST(xListInputDevicesReq);
-    swaps(&stuff->length);
     return (ProcXListInputDevices(client));
 }
 

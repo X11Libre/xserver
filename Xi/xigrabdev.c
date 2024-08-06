@@ -55,7 +55,6 @@ SProcXIGrabDevice(ClientPtr client)
      */
     REQUEST_AT_LEAST_SIZE(xXIGrabDeviceReq);
 
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
     swapl(&stuff->grab_window);
     swapl(&stuff->cursor);
@@ -140,7 +139,6 @@ SProcXIUngrabDevice(ClientPtr client)
     REQUEST(xXIUngrabDeviceReq);
     REQUEST_SIZE_MATCH(xXIUngrabDeviceReq);
 
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
     swapl(&stuff->time);
 
