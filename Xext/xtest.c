@@ -374,7 +374,6 @@ ProcXTestFakeInput(ClientPtr client)
         /* swap the request back so we can simply re-execute it */
         if (client->swapped) {
             (void) XTestSwapFakeInput(client, (xReq *) stuff);
-            swaps(&stuff->length);
         }
         ResetCurrentRequest(client);
         client->sequence--;
@@ -488,8 +487,6 @@ static int _X_COLD
 SProcXTestGetVersion(ClientPtr client)
 {
     REQUEST(xXTestGetVersionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXTestGetVersionReq);
     swaps(&stuff->minorVersion);
     return ProcXTestGetVersion(client);
@@ -499,8 +496,6 @@ static int _X_COLD
 SProcXTestCompareCursor(ClientPtr client)
 {
     REQUEST(xXTestCompareCursorReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXTestCompareCursorReq);
     swapl(&stuff->window);
     swapl(&stuff->cursor);
@@ -538,7 +533,6 @@ SProcXTestFakeInput(ClientPtr client)
 
     REQUEST(xReq);
 
-    swaps(&stuff->length);
     n = XTestSwapFakeInput(client, stuff);
     if (n != Success)
         return n;
@@ -548,10 +542,6 @@ SProcXTestFakeInput(ClientPtr client)
 static int _X_COLD
 SProcXTestGrabControl(ClientPtr client)
 {
-    REQUEST(xXTestGrabControlReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xXTestGrabControlReq);
     return ProcXTestGrabControl(client);
 }
 
