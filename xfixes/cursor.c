@@ -410,8 +410,7 @@ ProcXFixesGetCursorImage(ClientPtr client)
 int _X_COLD
 SProcXFixesGetCursorImage(ClientPtr client)
 {
-    REQUEST(xXFixesGetCursorImageReq);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesGetCursorImage(client);
 }
 
 int
@@ -563,8 +562,7 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
 int _X_COLD
 SProcXFixesGetCursorImageAndName(ClientPtr client)
 {
-    REQUEST(xXFixesGetCursorImageAndNameReq);
-    return (*ProcXFixesVector[stuff->xfixesReqType]) (client);
+    return ProcXFixesGetCursorImageAndName(client);
 }
 
 /*
