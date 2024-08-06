@@ -74,7 +74,6 @@ SWAPREQ_PROC(SProcInternAtom);
 SWAPREQ_PROC(SProcListFonts);
 SWAPREQ_PROC(SProcListFontsWithInfo);
 SWAPREQ_PROC(SProcLookupColor);
-SWAPREQ_PROC(SProcNoOperation);
 SWAPREQ_PROC(SProcOpenFont);
 SWAPREQ_PROC(SProcPoly);
 SWAPREQ_PROC(SProcPolyText);
