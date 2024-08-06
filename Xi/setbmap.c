@@ -92,7 +92,7 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
     REQUEST(xSetDeviceButtonMappingReq);
     REQUEST_AT_LEAST_SIZE(xSetDeviceButtonMappingReq);
 
-    if (stuff->length !=
+    if (client->req_len !=
         bytes_to_int32(sizeof(xSetDeviceButtonMappingReq) + stuff->map_length))
         return BadLength;
 
