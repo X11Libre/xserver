@@ -637,10 +637,10 @@ SProcSecurityGenerateAuthorization(ClientPtr client)
     values_offset = bytes_to_int32(stuff->nbytesAuthProto) +
         bytes_to_int32(stuff->nbytesAuthData);
     if (values_offset >
-        stuff->length - bytes_to_int32(sz_xSecurityGenerateAuthorizationReq))
+        client->req_len - bytes_to_int32(sz_xSecurityGenerateAuthorizationReq))
         return BadLength;
     values = (CARD32 *) (&stuff[1]) + values_offset;
-    nvalues = (((CARD32 *) stuff) + stuff->length) - values;
+    nvalues = (((CARD32 *) stuff) + client->req_len) - values;
     SwapLongs(values, nvalues);
     return ProcSecurityGenerateAuthorization(client);
 }                               /* SProcSecurityGenerateAuthorization */
