@@ -469,7 +469,7 @@ ProcVidModeAddModeLine(ClientPtr client)
     if (ver < 2) {
         /* convert from old format */
         stuff = &newstuff;
-        stuff->length = oldstuff->length;
+        stuff->length = client->req_len;
         stuff->screen = oldstuff->screen;
         stuff->dotclock = oldstuff->dotclock;
         stuff->hdisplay = oldstuff->hdisplay;
@@ -639,7 +639,7 @@ ProcVidModeDeleteModeLine(ClientPtr client)
     if (ver < 2) {
         /* convert from old format */
         stuff = &newstuff;
-        stuff->length = oldstuff->length;
+        stuff->length = client->req_len;
         stuff->screen = oldstuff->screen;
         stuff->dotclock = oldstuff->dotclock;
         stuff->hdisplay = oldstuff->hdisplay;
@@ -668,7 +668,7 @@ ProcVidModeDeleteModeLine(ClientPtr client)
                "len = %d, length = %d\n",
                (unsigned long) client->req_len,
                (int) sizeof(xXF86VidModeDeleteModeLineReq) >> 2,
-               (unsigned long) stuff->privsize, len, stuff->length);
+               (unsigned long) stuff->privsize, len, client->req_len);
         return BadLength;
     }
 
@@ -763,7 +763,7 @@ ProcVidModeModModeLine(ClientPtr client)
     if (ver < 2) {
         /* convert from old format */
         stuff = &newstuff;
-        stuff->length = oldstuff->length;
+        stuff->length = client->req_len;
         stuff->screen = oldstuff->screen;
         stuff->hdisplay = oldstuff->hdisplay;
         stuff->hsyncstart = oldstuff->hsyncstart;
@@ -897,7 +897,7 @@ ProcVidModeValidateModeLine(ClientPtr client)
     if (ver < 2) {
         /* convert from old format */
         stuff = &newstuff;
-        stuff->length = oldstuff->length;
+        stuff->length = client->req_len;
         stuff->screen = oldstuff->screen;
         stuff->dotclock = oldstuff->dotclock;
         stuff->hdisplay = oldstuff->hdisplay;
@@ -1050,7 +1050,7 @@ ProcVidModeSwitchToMode(ClientPtr client)
     if (ver < 2) {
         /* convert from old format */
         stuff = &newstuff;
-        stuff->length = oldstuff->length;
+        stuff->length = client->req_len;
         stuff->screen = oldstuff->screen;
         stuff->dotclock = oldstuff->dotclock;
         stuff->hdisplay = oldstuff->hdisplay;
