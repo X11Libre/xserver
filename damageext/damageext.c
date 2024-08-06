@@ -494,8 +494,6 @@ static int _X_COLD
 SProcDamageQueryVersion(ClientPtr client)
 {
     REQUEST(xDamageQueryVersionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
     swapl(&stuff->majorVersion);
     swapl(&stuff->minorVersion);
@@ -506,8 +504,6 @@ static int _X_COLD
 SProcDamageCreate(ClientPtr client)
 {
     REQUEST(xDamageCreateReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDamageCreateReq);
     swapl(&stuff->damage);
     swapl(&stuff->drawable);
@@ -518,8 +514,6 @@ static int _X_COLD
 SProcDamageDestroy(ClientPtr client)
 {
     REQUEST(xDamageDestroyReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDamageDestroyReq);
     swapl(&stuff->damage);
     return (*ProcDamageVector[stuff->damageReqType]) (client);
@@ -529,8 +523,6 @@ static int _X_COLD
 SProcDamageSubtract(ClientPtr client)
 {
     REQUEST(xDamageSubtractReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDamageSubtractReq);
     swapl(&stuff->damage);
     swapl(&stuff->repair);
@@ -542,8 +534,6 @@ static int _X_COLD
 SProcDamageAdd(ClientPtr client)
 {
     REQUEST(xDamageAddReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDamageSubtractReq);
     swapl(&stuff->drawable);
     swapl(&stuff->region);
