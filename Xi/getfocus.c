@@ -71,8 +71,6 @@ SOFTWARE.
 int _X_COLD
 SProcXGetDeviceFocus(ClientPtr client)
 {
-    REQUEST(xGetDeviceFocusReq);
-    swaps(&stuff->length);
     return (ProcXGetDeviceFocus(client));
 }
 
