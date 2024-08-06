@@ -72,8 +72,6 @@ SOFTWARE.
 int _X_COLD
 SProcXGetDeviceKeyMapping(ClientPtr client)
 {
-    REQUEST(xGetDeviceKeyMappingReq);
-    swaps(&stuff->length);
     return (ProcXGetDeviceKeyMapping(client));
 }
 

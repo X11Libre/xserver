@@ -69,7 +69,6 @@ int _X_COLD
 SProcXUngrabDevice(ClientPtr client)
 {
     REQUEST(xUngrabDeviceReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xUngrabDeviceReq);
     swapl(&stuff->time);
     return (ProcXUngrabDevice(client));

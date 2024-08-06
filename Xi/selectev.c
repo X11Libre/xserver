@@ -121,7 +121,6 @@ int _X_COLD
 SProcXSelectExtensionEvent(ClientPtr client)
 {
     REQUEST(xSelectExtensionEventReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xSelectExtensionEventReq);
     swapl(&stuff->window);
     swaps(&stuff->count);

@@ -51,7 +51,6 @@ SProcXIAllowEvents(ClientPtr client)
     REQUEST(xXIAllowEventsReq);
     REQUEST_AT_LEAST_SIZE(xXIAllowEventsReq);
 
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
     swapl(&stuff->time);
     if (client->req_len > 3) {

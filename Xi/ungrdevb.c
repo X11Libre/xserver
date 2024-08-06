@@ -77,7 +77,6 @@ int _X_COLD
 SProcXUngrabDeviceButton(ClientPtr client)
 {
     REQUEST(xUngrabDeviceButtonReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xUngrabDeviceButtonReq);
     swapl(&stuff->grabWindow);
     swaps(&stuff->modifiers);

@@ -66,8 +66,18 @@ request_XISetClientPointer(xXISetClientPointerReq * req, int error)
         assert(client_request.errorValue == req->deviceid);
 
     client_request.swapped = TRUE;
+
+    /* MUST NOT swap req->length here !
+
+       The handler proc's don't use that field anymore, thus also SProc's
+       wont swap it. But this test program uses that field to initialize
+       client->req_len (see above). We previously had to swap it here, so
+       that SProcXIPassiveGrabDevice() will swap it back. Since that's gone
+       now, still swapping itself would break if this function is called
+       again and writing back a errornously swapped value
+    */
+
     swapl(&req->win);
-    swaps(&req->length);
     swaps(&req->deviceid);
     rc = SProcXISetClientPointer(&client_request);
     assert(rc == error);

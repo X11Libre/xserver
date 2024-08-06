@@ -53,7 +53,6 @@ SProcXISetClientPointer(ClientPtr client)
     REQUEST(xXISetClientPointerReq);
     REQUEST_SIZE_MATCH(xXISetClientPointerReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->win);
     swaps(&stuff->deviceid);
     return (ProcXISetClientPointer(client));

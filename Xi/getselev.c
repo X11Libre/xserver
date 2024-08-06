@@ -74,7 +74,6 @@ int _X_COLD
 SProcXGetSelectedExtensionEvents(ClientPtr client)
 {
     REQUEST(xGetSelectedExtensionEventsReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
     swapl(&stuff->window);
     return (ProcXGetSelectedExtensionEvents(client));

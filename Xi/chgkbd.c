@@ -73,9 +73,6 @@ SOFTWARE.
 int _X_COLD
 SProcXChangeKeyboardDevice(ClientPtr client)
 {
-    REQUEST(xChangeKeyboardDeviceReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xChangeKeyboardDeviceReq);
     return (ProcXChangeKeyboardDevice(client));
 }
 

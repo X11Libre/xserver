@@ -71,7 +71,6 @@ int _X_COLD
 SProcXGetDeviceMotionEvents(ClientPtr client)
 {
     REQUEST(xGetDeviceMotionEventsReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
     swapl(&stuff->start);
     swapl(&stuff->stop);

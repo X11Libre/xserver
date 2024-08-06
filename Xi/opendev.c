@@ -74,8 +74,6 @@ extern CARD8 event_base[];
 int _X_COLD
 SProcXOpenDevice(ClientPtr client)
 {
-    REQUEST(xOpenDeviceReq);
-    swaps(&stuff->length);
     return (ProcXOpenDevice(client));
 }
 

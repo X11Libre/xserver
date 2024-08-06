@@ -133,7 +133,6 @@ int _X_COLD
 SProcXIQueryVersion(ClientPtr client)
 {
     REQUEST(xXIQueryVersionReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xXIQueryVersionReq);
     swaps(&stuff->major_version);
     swaps(&stuff->minor_version);

@@ -75,9 +75,6 @@ SOFTWARE.
 int _X_COLD
 SProcXChangePointerDevice(ClientPtr client)
 {
-    REQUEST(xChangePointerDeviceReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xChangePointerDeviceReq);
     return (ProcXChangePointerDevice(client));
 }
 

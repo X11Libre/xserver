@@ -71,9 +71,6 @@ SOFTWARE.
 int _X_COLD
 SProcXCloseDevice(ClientPtr client)
 {
-    REQUEST(xCloseDeviceReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xCloseDeviceReq);
     return (ProcXCloseDevice(client));
 }
 

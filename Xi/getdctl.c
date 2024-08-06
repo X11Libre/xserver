@@ -70,7 +70,6 @@ int _X_COLD
 SProcXGetDeviceControl(ClientPtr client)
 {
     REQUEST(xGetDeviceControlReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xGetDeviceControlReq);
     swaps(&stuff->control);
     return (ProcXGetDeviceControl(client));

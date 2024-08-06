@@ -69,8 +69,6 @@ SOFTWARE.
 int _X_COLD
 SProcXGetFeedbackControl(ClientPtr client)
 {
-    REQUEST(xGetFeedbackControlReq);
-    swaps(&stuff->length);
     return (ProcXGetFeedbackControl(client));
 }
 

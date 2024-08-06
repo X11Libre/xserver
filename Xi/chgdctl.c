@@ -76,7 +76,6 @@ SProcXChangeDeviceControl(ClientPtr client)
     xDeviceCtl *ctl;
 
     REQUEST(xChangeDeviceControlReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
     swaps(&stuff->control);
     ctl = (xDeviceCtl *) &stuff[1];

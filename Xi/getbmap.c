@@ -68,8 +68,6 @@ SOFTWARE.
 int _X_COLD
 SProcXGetDeviceButtonMapping(ClientPtr client)
 {
-    REQUEST(xGetDeviceButtonMappingReq);
-    swaps(&stuff->length);
     return (ProcXGetDeviceButtonMapping(client));
 }
 

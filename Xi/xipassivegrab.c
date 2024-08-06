@@ -55,7 +55,6 @@ SProcXIPassiveGrabDevice(ClientPtr client)
     REQUEST(xXIPassiveGrabDeviceReq);
     REQUEST_AT_LEAST_SIZE(xXIPassiveGrabDeviceReq);
 
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
     swapl(&stuff->grab_window);
     swapl(&stuff->cursor);
@@ -280,7 +279,6 @@ SProcXIPassiveUngrabDevice(ClientPtr client)
     REQUEST(xXIPassiveUngrabDeviceReq);
     REQUEST_AT_LEAST_SIZE(xXIPassiveUngrabDeviceReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->grab_window);
     swaps(&stuff->deviceid);
     swapl(&stuff->detail);

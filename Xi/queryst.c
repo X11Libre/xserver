@@ -56,8 +56,6 @@ from The Open Group.
 int _X_COLD
 SProcXQueryDeviceState(ClientPtr client)
 {
-    REQUEST(xQueryDeviceStateReq);
-    swaps(&stuff->length);
     return (ProcXQueryDeviceState(client));
 }
 

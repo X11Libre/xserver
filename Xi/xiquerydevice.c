@@ -58,7 +58,6 @@ SProcXIQueryDevice(ClientPtr client)
     REQUEST(xXIQueryDeviceReq);
     REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
 
-    swaps(&stuff->length);
     swaps(&stuff->deviceid);
 
     return ProcXIQueryDevice(client);

@@ -75,7 +75,6 @@ int _X_COLD
 SProcXChangeDeviceDontPropagateList(ClientPtr client)
 {
     REQUEST(xChangeDeviceDontPropagateListReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xChangeDeviceDontPropagateListReq);
     swapl(&stuff->window);
     swaps(&stuff->count);

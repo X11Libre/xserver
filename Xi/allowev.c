@@ -72,7 +72,6 @@ int _X_COLD
 SProcXAllowDeviceEvents(ClientPtr client)
 {
     REQUEST(xAllowDeviceEventsReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xAllowDeviceEventsReq);
     swapl(&stuff->time);
     return (ProcXAllowDeviceEvents(client));

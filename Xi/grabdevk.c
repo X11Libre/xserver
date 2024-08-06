@@ -74,7 +74,6 @@ int _X_COLD
 SProcXGrabDeviceKey(ClientPtr client)
 {
     REQUEST(xGrabDeviceKeyReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceKeyReq);
     swapl(&stuff->grabWindow);
     swaps(&stuff->modifiers);
