@@ -387,7 +387,7 @@ ProcAppleWMSetWindowMenu(register ClientPtr client)
         return BadAlloc;
     }
 
-    max_len = (stuff->length << 2) - sizeof(xAppleWMSetWindowMenuReq);
+    max_len = (client->req-len << 2) - sizeof(xAppleWMSetWindowMenuReq);
     bytes = (char *)&stuff[1];
 
     for (i = j = 0; i < max_len && j < nitems;) {
@@ -601,7 +601,7 @@ ProcAppleWMFrameDraw(register ClientPtr client)
     or = make_box(stuff->ox, stuff->oy, stuff->ow, stuff->oh);
 
     title_length = stuff->title_length;
-    title_max = (stuff->length << 2) - sizeof(xAppleWMFrameDrawReq);
+    title_max = (client->req_len << 2) - sizeof(xAppleWMFrameDrawReq);
 
     if (title_max < title_length)
         return BadValue;
