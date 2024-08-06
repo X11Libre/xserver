@@ -492,8 +492,6 @@ static int _X_COLD
 SProcDPMSGetVersion(ClientPtr client)
 {
     REQUEST(xDPMSGetVersionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
     swaps(&stuff->majorVersion);
     swaps(&stuff->minorVersion);
@@ -503,22 +501,12 @@ SProcDPMSGetVersion(ClientPtr client)
 static int _X_COLD
 SProcDPMSCapable(ClientPtr client)
 {
-    REQUEST(xDPMSCapableReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xDPMSCapableReq);
-
     return ProcDPMSCapable(client);
 }
 
 static int _X_COLD
 SProcDPMSGetTimeouts(ClientPtr client)
 {
-    REQUEST(xDPMSGetTimeoutsReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xDPMSGetTimeoutsReq);
-
     return ProcDPMSGetTimeouts(client);
 }
 
@@ -526,8 +514,6 @@ static int _X_COLD
 SProcDPMSSetTimeouts(ClientPtr client)
 {
     REQUEST(xDPMSSetTimeoutsReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDPMSSetTimeoutsReq);
 
     swaps(&stuff->standby);
@@ -539,22 +525,12 @@ SProcDPMSSetTimeouts(ClientPtr client)
 static int _X_COLD
 SProcDPMSEnable(ClientPtr client)
 {
-    REQUEST(xDPMSEnableReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xDPMSEnableReq);
-
     return ProcDPMSEnable(client);
 }
 
 static int _X_COLD
 SProcDPMSDisable(ClientPtr client)
 {
-    REQUEST(xDPMSDisableReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xDPMSDisableReq);
-
     return ProcDPMSDisable(client);
 }
 
@@ -562,8 +538,6 @@ static int _X_COLD
 SProcDPMSForceLevel(ClientPtr client)
 {
     REQUEST(xDPMSForceLevelReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDPMSForceLevelReq);
 
     swaps(&stuff->level);
@@ -574,11 +548,6 @@ SProcDPMSForceLevel(ClientPtr client)
 static int _X_COLD
 SProcDPMSInfo(ClientPtr client)
 {
-    REQUEST(xDPMSInfoReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xDPMSInfoReq);
-
     return ProcDPMSInfo(client);
 }
 
@@ -586,7 +555,6 @@ static int _X_COLD
 SProcDPMSSelectInput(ClientPtr client)
 {
     REQUEST(xDPMSSelectInputReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
     swapl(&stuff->eventMask);
     return ProcDPMSSelectInput(client);
