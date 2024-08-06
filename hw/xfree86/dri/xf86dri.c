@@ -562,8 +562,6 @@ ProcXF86DRIDispatch(register ClientPtr client)
 static int _X_COLD
 SProcXF86DRIQueryVersion(register ClientPtr client)
 {
-    REQUEST(xXF86DRIQueryVersionReq);
-    swaps(&stuff->length);
     return ProcXF86DRIQueryVersion(client);
 }
 
@@ -572,7 +570,6 @@ SProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 {
     REQUEST(xXF86DRIQueryDirectRenderingCapableReq);
     REQUEST_SIZE_MATCH(xXF86DRIQueryDirectRenderingCapableReq);
-    swaps(&stuff->length);
     swapl(&stuff->screen);
     return ProcXF86DRIQueryDirectRenderingCapable(client);
 }
