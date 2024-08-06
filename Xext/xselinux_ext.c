@@ -625,8 +625,6 @@ SProcSELinuxDispatch(ClientPtr client)
 {
     REQUEST(xReq);
 
-    swaps(&stuff->length);
-
     switch (stuff->data) {
     case X_SELinuxQueryVersion:
         return SProcSELinuxQueryVersion(client);
