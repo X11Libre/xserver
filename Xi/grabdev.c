@@ -79,6 +79,7 @@ SProcXGrabDevice(ClientPtr client)
 {
     REQUEST(xGrabDeviceReq);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceReq);
+
     swapl(&stuff->grabWindow);
     swapl(&stuff->time);
     swaps(&stuff->event_count);

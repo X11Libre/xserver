@@ -1016,12 +1016,6 @@ ProcXGetDeviceProperty(ClientPtr client)
 }
 
 int _X_COLD
-SProcXListDeviceProperties(ClientPtr client)
-{
-    return (ProcXListDeviceProperties(client));
-}
-
-int _X_COLD
 SProcXChangeDeviceProperty(ClientPtr client)
 {
     REQUEST(xChangeDevicePropertyReq);
