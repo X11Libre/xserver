@@ -256,7 +256,7 @@ ProcXkbSelectEvents(ClientPtr client)
         register unsigned bit, ndx, maskLeft, dataLeft, size;
 
         from.c8 = (CARD8 *) &stuff[1];
-        dataLeft = (stuff->length * 4) - SIZEOF(xkbSelectEventsReq);
+        dataLeft = (client->req_len * 4) - sizeof(xkbSelectEventsReq);
         maskLeft = (stuff->affectWhich & (~XkbMapNotifyMask));
         for (ndx = 0, bit = 1; (maskLeft != 0); ndx++, bit <<= 1) {
             if ((bit & maskLeft) == 0)
@@ -3373,7 +3373,7 @@ ProcXkbSetIndicatorMap(ClientPtr client)
         if (stuff->which & bit)
             nIndicators++;
     }
-    if (stuff->length != ((SIZEOF(xkbSetIndicatorMapReq) +
+    if (client->req_len != ((sizeof(xkbSetIndicatorMapReq) +
                            (nIndicators * SIZEOF(xkbIndicatorMapWireDesc))) /
                           4)) {
         return BadLength;
@@ -4280,8 +4280,8 @@ _XkbSetNamesCheck(ClientPtr client, DeviceIntPtr dev,
             return BadAtom;
         }
     }
-    if ((tmp - ((CARD32 *) stuff)) != stuff->length) {
-        client->errorValue = stuff->length;
+    if ((tmp - ((CARD32 *) stuff)) != client->req_len) {
+        client->errorValue = client->req_len;
         return BadLength;
     }
 
@@ -5876,11 +5876,11 @@ ProcXkbListComponents(ClientPtr client)
             return BadLength;
         size = *((uint8_t *)str);
         len = (str + size + 1) - ((unsigned char *) stuff);
-        if ((XkbPaddedSize(len) / 4) > stuff->length)
+        if ((XkbPaddedSize(len) / 4) > client->req_len)
             return BadLength;
         str += (size + 1);
     }
-    if ((XkbPaddedSize(len) / 4) != stuff->length)
+    if ((XkbPaddedSize(len) / 4) != client->req_len)
         return BadLength;
     rep = (xkbListComponentsReply) {
         .type = X_Reply,
@@ -5962,7 +5962,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     names.geometry = GetComponentSpec(client, stuff, &str, TRUE, &status);
     if (status == Success) {
         len = str - ((unsigned char *) stuff);
-        if ((XkbPaddedSize(len) / 4) != stuff->length)
+        if ((XkbPaddedSize(len) / 4) != client->req_len)
             status = BadLength;
     }
 
@@ -6823,7 +6823,7 @@ _XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
         if (status != Success)
             return status;
     }
-    if (((wire - ((char *) stuff)) / 4) != stuff->length)
+    if (((wire - ((char *) stuff)) / 4) != client->req_len)
         return BadLength;
 
     return Success;
@@ -6978,7 +6978,7 @@ ProcXkbSetDebuggingFlags(ClientPtr client)
             ErrorF("[xkb] XkbDebug: Setting debug controls to 0x%lx\n",
                    (long) newCtrls);
     }
-    extraLength = (stuff->length << 2) - sz_xkbSetDebuggingFlagsReq;
+    extraLength = (client->req_len << 2) - sz_xkbSetDebuggingFlagsReq;
     if (stuff->msgLength > 0) {
         char *msg;
 
