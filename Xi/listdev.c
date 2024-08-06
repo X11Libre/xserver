@@ -70,18 +70,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure lists the input devices available to the server.
- *
- */
-
-int _X_COLD
-SProcXListInputDevices(ClientPtr client)
-{
-    return (ProcXListInputDevices(client));
-}
-
-/***********************************************************************
- *
  * This procedure calculates the size of the information to be returned
  * for an input device.
  *

@@ -128,12 +128,6 @@ XISendDeviceHierarchyEvent(int flags[MAXDEVICES])
  *
  */
 
-int _X_COLD
-SProcXIChangeHierarchy(ClientPtr client)
-{
-    return (ProcXIChangeHierarchy(client));
-}
-
 static int
 add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
 {
