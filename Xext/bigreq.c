@@ -49,9 +49,6 @@ ProcBigReqDispatch(ClientPtr client)
     REQUEST(xBigReqEnableReq);
     xBigReqEnableReply rep;
 
-    if (client->swapped) {
-        swaps(&stuff->length);
-    }
     if (stuff->brReqType != X_BigReqEnable)
         return BadRequest;
     REQUEST_SIZE_MATCH(xBigReqEnableReq);
