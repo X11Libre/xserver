@@ -2003,7 +2003,6 @@ SProcRenderQueryVersion(ClientPtr client)
 {
     REQUEST(xRenderQueryVersionReq);
     REQUEST_SIZE_MATCH(xRenderQueryVersionReq);
-    swaps(&stuff->length);
     swapl(&stuff->majorVersion);
     swapl(&stuff->minorVersion);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
@@ -2014,7 +2013,6 @@ SProcRenderQueryPictFormats(ClientPtr client)
 {
     REQUEST(xRenderQueryPictFormatsReq);
     REQUEST_SIZE_MATCH(xRenderQueryPictFormatsReq);
-    swaps(&stuff->length);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
@@ -2023,7 +2021,6 @@ SProcRenderQueryPictIndexValues(ClientPtr client)
 {
     REQUEST(xRenderQueryPictIndexValuesReq);
     REQUEST_AT_LEAST_SIZE(xRenderQueryPictIndexValuesReq);
-    swaps(&stuff->length);
     swapl(&stuff->format);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
@@ -2039,7 +2036,6 @@ SProcRenderCreatePicture(ClientPtr client)
 {
     REQUEST(xRenderCreatePictureReq);
     REQUEST_AT_LEAST_SIZE(xRenderCreatePictureReq);
-    swaps(&stuff->length);
     swapl(&stuff->pid);
     swapl(&stuff->drawable);
     swapl(&stuff->format);
@@ -2053,7 +2049,6 @@ SProcRenderChangePicture(ClientPtr client)
 {
     REQUEST(xRenderChangePictureReq);
     REQUEST_AT_LEAST_SIZE(xRenderChangePictureReq);
-    swaps(&stuff->length);
     swapl(&stuff->picture);
     swapl(&stuff->mask);
     SwapRestL(stuff);
@@ -2065,7 +2060,6 @@ SProcRenderSetPictureClipRectangles(ClientPtr client)
 {
     REQUEST(xRenderSetPictureClipRectanglesReq);
     REQUEST_AT_LEAST_SIZE(xRenderSetPictureClipRectanglesReq);
-    swaps(&stuff->length);
     swapl(&stuff->picture);
     swaps(&stuff->xOrigin);
     swaps(&stuff->yOrigin);
@@ -2078,7 +2072,6 @@ SProcRenderFreePicture(ClientPtr client)
 {
     REQUEST(xRenderFreePictureReq);
     REQUEST_SIZE_MATCH(xRenderFreePictureReq);
-    swaps(&stuff->length);
     swapl(&stuff->picture);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
@@ -2088,7 +2081,6 @@ SProcRenderComposite(ClientPtr client)
 {
     REQUEST(xRenderCompositeReq);
     REQUEST_SIZE_MATCH(xRenderCompositeReq);
-    swaps(&stuff->length);
     swapl(&stuff->src);
     swapl(&stuff->mask);
     swapl(&stuff->dst);
@@ -2115,7 +2107,6 @@ SProcRenderTrapezoids(ClientPtr client)
     REQUEST(xRenderTrapezoidsReq);
 
     REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
-    swaps(&stuff->length);
     swapl(&stuff->src);
     swapl(&stuff->dst);
     swapl(&stuff->maskFormat);
@@ -2131,7 +2122,6 @@ SProcRenderTriangles(ClientPtr client)
     REQUEST(xRenderTrianglesReq);
 
     REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
-    swaps(&stuff->length);
     swapl(&stuff->src);
     swapl(&stuff->dst);
     swapl(&stuff->maskFormat);
@@ -2147,7 +2137,6 @@ SProcRenderTriStrip(ClientPtr client)
     REQUEST(xRenderTriStripReq);
 
     REQUEST_AT_LEAST_SIZE(xRenderTriStripReq);
-    swaps(&stuff->length);
     swapl(&stuff->src);
     swapl(&stuff->dst);
     swapl(&stuff->maskFormat);
@@ -2163,7 +2152,6 @@ SProcRenderTriFan(ClientPtr client)
     REQUEST(xRenderTriFanReq);
 
     REQUEST_AT_LEAST_SIZE(xRenderTriFanReq);
-    swaps(&stuff->length);
     swapl(&stuff->src);
     swapl(&stuff->dst);
     swapl(&stuff->maskFormat);
@@ -2196,7 +2184,6 @@ SProcRenderCreateGlyphSet(ClientPtr client)
 {
     REQUEST(xRenderCreateGlyphSetReq);
     REQUEST_SIZE_MATCH(xRenderCreateGlyphSetReq);
-    swaps(&stuff->length);
     swapl(&stuff->gsid);
     swapl(&stuff->format);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
@@ -2207,7 +2194,6 @@ SProcRenderReferenceGlyphSet(ClientPtr client)
 {
     REQUEST(xRenderReferenceGlyphSetReq);
     REQUEST_SIZE_MATCH(xRenderReferenceGlyphSetReq);
-    swaps(&stuff->length);
     swapl(&stuff->gsid);
     swapl(&stuff->existing);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
@@ -2218,7 +2204,6 @@ SProcRenderFreeGlyphSet(ClientPtr client)
 {
     REQUEST(xRenderFreeGlyphSetReq);
     REQUEST_SIZE_MATCH(xRenderFreeGlyphSetReq);
-    swaps(&stuff->length);
     swapl(&stuff->glyphset);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
@@ -2233,7 +2218,6 @@ SProcRenderAddGlyphs(ClientPtr client)
 
     REQUEST(xRenderAddGlyphsReq);
     REQUEST_AT_LEAST_SIZE(xRenderAddGlyphsReq);
-    swaps(&stuff->length);
     swapl(&stuff->glyphset);
     swapl(&stuff->nglyphs);
     if (stuff->nglyphs & 0xe0000000)
@@ -2268,7 +2252,6 @@ SProcRenderFreeGlyphs(ClientPtr client)
 {
     REQUEST(xRenderFreeGlyphsReq);
     REQUEST_AT_LEAST_SIZE(xRenderFreeGlyphsReq);
-    swaps(&stuff->length);
     swapl(&stuff->glyphset);
     SwapRestL(stuff);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
@@ -2299,7 +2282,6 @@ SProcRenderCompositeGlyphs(ClientPtr client)
         break;
     }
 
-    swaps(&stuff->length);
     swapl(&stuff->src);
     swapl(&stuff->dst);
     swapl(&stuff->maskFormat);
@@ -2361,7 +2343,6 @@ SProcRenderFillRectangles(ClientPtr client)
     REQUEST(xRenderFillRectanglesReq);
 
     REQUEST_AT_LEAST_SIZE(xRenderFillRectanglesReq);
-    swaps(&stuff->length);
     swapl(&stuff->dst);
     swaps(&stuff->color.red);
     swaps(&stuff->color.green);
@@ -2377,7 +2358,6 @@ SProcRenderCreateCursor(ClientPtr client)
     REQUEST(xRenderCreateCursorReq);
     REQUEST_SIZE_MATCH(xRenderCreateCursorReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->cid);
     swapl(&stuff->src);
     swaps(&stuff->x);
@@ -2391,7 +2371,6 @@ SProcRenderSetPictureTransform(ClientPtr client)
     REQUEST(xRenderSetPictureTransformReq);
     REQUEST_SIZE_MATCH(xRenderSetPictureTransformReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->picture);
     swapl(&stuff->transform.matrix11);
     swapl(&stuff->transform.matrix12);
@@ -2411,7 +2390,6 @@ SProcRenderQueryFilters(ClientPtr client)
     REQUEST(xRenderQueryFiltersReq);
     REQUEST_SIZE_MATCH(xRenderQueryFiltersReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->drawable);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
@@ -2422,7 +2400,6 @@ SProcRenderSetPictureFilter(ClientPtr client)
     REQUEST(xRenderSetPictureFilterReq);
     REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->picture);
     swaps(&stuff->nbytes);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
@@ -2434,7 +2411,6 @@ SProcRenderCreateAnimCursor(ClientPtr client)
     REQUEST(xRenderCreateAnimCursorReq);
     REQUEST_AT_LEAST_SIZE(xRenderCreateAnimCursorReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->cid);
     SwapRestL(stuff);
     return (*ProcRenderVector[stuff->renderReqType]) (client);
@@ -2446,7 +2422,6 @@ SProcRenderAddTraps(ClientPtr client)
     REQUEST(xRenderAddTrapsReq);
     REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->picture);
     swaps(&stuff->xOff);
     swaps(&stuff->yOff);
@@ -2460,7 +2435,6 @@ SProcRenderCreateSolidFill(ClientPtr client)
     REQUEST(xRenderCreateSolidFillReq);
     REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->pid);
     swaps(&stuff->color.alpha);
     swaps(&stuff->color.red);
@@ -2496,7 +2470,6 @@ SProcRenderCreateLinearGradient(ClientPtr client)
     REQUEST(xRenderCreateLinearGradientReq);
     REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->pid);
     swapl(&stuff->p1.x);
     swapl(&stuff->p1.y);
@@ -2523,7 +2496,6 @@ SProcRenderCreateRadialGradient(ClientPtr client)
     REQUEST(xRenderCreateRadialGradientReq);
     REQUEST_AT_LEAST_SIZE(xRenderCreateRadialGradientReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->pid);
     swapl(&stuff->inner.x);
     swapl(&stuff->inner.y);
@@ -2552,7 +2524,6 @@ SProcRenderCreateConicalGradient(ClientPtr client)
     REQUEST(xRenderCreateConicalGradientReq);
     REQUEST_AT_LEAST_SIZE(xRenderCreateConicalGradientReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->pid);
     swapl(&stuff->center.x);
     swapl(&stuff->center.y);
