@@ -411,7 +411,6 @@ ProcXFixesGetCursorImage(ClientPtr client)
 int _X_COLD
 SProcXFixesGetCursorImage(ClientPtr client)
 {
-    REQUEST(xXFixesGetCursorImageReq);
     return ProcXFixesGetCursorImage(client);
 }
 
@@ -562,7 +561,6 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
 int _X_COLD
 SProcXFixesGetCursorImageAndName(ClientPtr client)
 {
-    REQUEST(xXFixesGetCursorImageAndNameReq);
     return ProcXFixesGetCursorImageAndName(client);
 }
 

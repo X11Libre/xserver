@@ -108,9 +108,6 @@ ProcXFixesGetClientDisconnectMode(ClientPtr client)
 int _X_COLD
 SProcXFixesGetClientDisconnectMode(ClientPtr client)
 {
-    REQUEST(xXFixesGetClientDisconnectModeReq);
-    REQUEST_SIZE_MATCH(xXFixesGetClientDisconnectModeReq);
-
     return ProcXFixesGetClientDisconnectMode(client);
 }
 
