@@ -197,7 +197,7 @@ ProcXTestFakeInput(ClientPtr client)
     int flags = 0;
     int need_ptr_update = 1;
 
-    nev = (stuff->length << 2) - sizeof(xReq);
+    nev = (client->req_len << 2) - sizeof(xReq);
     if ((nev % sizeof(xEvent)) || !nev)
         return BadLength;
     nev /= sizeof(xEvent);
@@ -514,7 +514,7 @@ XTestSwapFakeInput(ClientPtr client, xReq * req)
     xEvent sev;
     EventSwapPtr proc;
 
-    nev = ((req->length << 2) - sizeof(xReq)) / sizeof(xEvent);
+    nev = ((client->req_len << 2) - sizeof(xReq)) / sizeof(xEvent);
     for (ev = (xEvent *) &req[1]; --nev >= 0; ev++) {
         int evtype = ev->u.u.type & 0177;
         /* Swap event */
