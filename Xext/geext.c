@@ -101,8 +101,6 @@ static int _X_COLD
 SProcGEQueryVersion(ClientPtr client)
 {
     REQUEST(xGEQueryVersionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xGEQueryVersionReq);
     swaps(&stuff->majorVersion);
     swaps(&stuff->minorVersion);
