@@ -1067,7 +1067,6 @@ static int _X_COLD
 SProcResDispatch (ClientPtr client)
 {
     REQUEST(xReq);
-    swaps(&stuff->length);
 
     switch (stuff->data) {
     case X_XResQueryVersion:
