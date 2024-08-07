@@ -21,7 +21,7 @@ is" without express or implied warranty.
 #include "include/privates.h"
 
 typedef struct {
-    GC gc;
+    uint32_t gc;
 } xnestPrivGC;
 
 extern DevPrivateKeyRec xnestGCPrivateKeyRec;
