@@ -118,18 +118,14 @@ xnestUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 void
 xnestRecolorCursor(ScreenPtr pScreen, CursorPtr pCursor, Bool displayed)
 {
-    XColor fg_color, bg_color;
-
-    fg_color.red = pCursor->foreRed;
-    fg_color.green = pCursor->foreGreen;
-    fg_color.blue = pCursor->foreBlue;
-
-    bg_color.red = pCursor->backRed;
-    bg_color.green = pCursor->backGreen;
-    bg_color.blue = pCursor->backBlue;
-
-    XRecolorCursor(xnestDisplay,
-                   xnestCursor(pCursor, pScreen), &fg_color, &bg_color);
+    xcb_recolor_cursor(xnestUpstreamInfo.conn,
+                       xnestCursor(pCursor, pScreen),
+                       pCursor->foreRed,
+                       pCursor->foreGreen,
+                       pCursor->foreBlue,
+                       pCursor->backRed,
+                       pCursor->backGreen,
+                       pCursor->backBlue);
 }
 
 void
