@@ -500,18 +500,6 @@ SProcDPMSGetVersion(ClientPtr client)
 }
 
 static int _X_COLD
-SProcDPMSCapable(ClientPtr client)
-{
-    return ProcDPMSCapable(client);
-}
-
-static int _X_COLD
-SProcDPMSGetTimeouts(ClientPtr client)
-{
-    return ProcDPMSGetTimeouts(client);
-}
-
-static int _X_COLD
 SProcDPMSSetTimeouts(ClientPtr client)
 {
     REQUEST(xDPMSSetTimeoutsReq);
@@ -524,18 +512,6 @@ SProcDPMSSetTimeouts(ClientPtr client)
 }
 
 static int _X_COLD
-SProcDPMSEnable(ClientPtr client)
-{
-    return ProcDPMSEnable(client);
-}
-
-static int _X_COLD
-SProcDPMSDisable(ClientPtr client)
-{
-    return ProcDPMSDisable(client);
-}
-
-static int _X_COLD
 SProcDPMSForceLevel(ClientPtr client)
 {
     REQUEST(xDPMSForceLevelReq);
@@ -544,12 +520,6 @@ SProcDPMSForceLevel(ClientPtr client)
     swaps(&stuff->level);
 
     return ProcDPMSForceLevel(client);
-}
-
-static int _X_COLD
-SProcDPMSInfo(ClientPtr client)
-{
-    return ProcDPMSInfo(client);
 }
 
 static int _X_COLD
@@ -571,19 +541,19 @@ SProcDPMSDispatch(ClientPtr client)
     case X_DPMSGetVersion:
         return SProcDPMSGetVersion(client);
     case X_DPMSCapable:
-        return SProcDPMSCapable(client);
+        return ProcDPMSCapable(client);
     case X_DPMSGetTimeouts:
-        return SProcDPMSGetTimeouts(client);
+        return ProcDPMSGetTimeouts(client);
     case X_DPMSSetTimeouts:
         return SProcDPMSSetTimeouts(client);
     case X_DPMSEnable:
-        return SProcDPMSEnable(client);
+        return ProcDPMSEnable(client);
     case X_DPMSDisable:
-        return SProcDPMSDisable(client);
+        return ProcDPMSDisable(client);
     case X_DPMSForceLevel:
         return SProcDPMSForceLevel(client);
     case X_DPMSInfo:
-        return SProcDPMSInfo(client);
+        return ProcDPMSInfo(client);
     case X_DPMSSelectInput:
         return SProcDPMSSelectInput(client);
     default:
