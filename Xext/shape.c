@@ -1062,12 +1062,6 @@ SShapeNotifyEvent(xShapeNotifyEvent * from, xShapeNotifyEvent * to)
 }
 
 static int _X_COLD
-SProcShapeQueryVersion(ClientPtr client)
-{
-    return ProcShapeQueryVersion(client);
-}
-
-static int _X_COLD
 SProcShapeRectangles(ClientPtr client)
 {
     REQUEST(xShapeRectanglesReq);
@@ -1156,7 +1150,7 @@ SProcShapeDispatch(ClientPtr client)
     REQUEST(xReq);
     switch (stuff->data) {
     case X_ShapeQueryVersion:
-        return SProcShapeQueryVersion(client);
+        return ProcShapeQueryVersion(client);
     case X_ShapeRectangles:
         return SProcShapeRectangles(client);
     case X_ShapeMask:
