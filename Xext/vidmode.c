@@ -1704,12 +1704,6 @@ ProcVidModeDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcVidModeQueryVersion(ClientPtr client)
-{
-    return ProcVidModeQueryVersion(client);
-}
-
-static int _X_COLD
 SProcVidModeGetModeLine(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetModeLineReq);
@@ -2046,7 +2040,7 @@ SProcVidModeDispatch(ClientPtr client)
     REQUEST(xReq);
     switch (stuff->data) {
     case X_XF86VidModeQueryVersion:
-        return SProcVidModeQueryVersion(client);
+        return ProcVidModeQueryVersion(client);
     case X_XF86VidModeGetModeLine:
         return SProcVidModeGetModeLine(client);
     case X_XF86VidModeGetMonitor:
