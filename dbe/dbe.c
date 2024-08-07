@@ -811,11 +811,7 @@ ProcDbeDispatch(ClientPtr client)
 static int _X_COLD
 SProcDbeGetVersion(ClientPtr client)
 {
-    REQUEST(xDbeGetVersionReq);
-
-    swaps(&stuff->length);
     return (ProcDbeGetVersion(client));
-
 }                               /* SProcDbeGetVersion() */
 
 /******************************************************************************
@@ -845,8 +841,6 @@ static int _X_COLD
 SProcDbeAllocateBackBufferName(ClientPtr client)
 {
     REQUEST(xDbeAllocateBackBufferNameReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDbeAllocateBackBufferNameReq);
 
     swapl(&stuff->window);
@@ -878,8 +872,6 @@ static int _X_COLD
 SProcDbeDeallocateBackBufferName(ClientPtr client)
 {
     REQUEST(xDbeDeallocateBackBufferNameReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDbeDeallocateBackBufferNameReq);
 
     swapl(&stuff->buffer);
@@ -916,7 +908,6 @@ SProcDbeSwapBuffers(ClientPtr client)
     unsigned int i;
     xDbeSwapInfo *pSwapInfo;
 
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xDbeSwapBuffersReq);
 
     swapl(&stuff->n);
@@ -961,8 +952,6 @@ static int _X_COLD
 SProcDbeGetVisualInfo(ClientPtr client)
 {
     REQUEST(xDbeGetVisualInfoReq);
-
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xDbeGetVisualInfoReq);
 
     swapl(&stuff->n);
@@ -992,8 +981,6 @@ static int _X_COLD
 SProcDbeGetBackBufferAttributes(ClientPtr client)
 {
     REQUEST(xDbeGetBackBufferAttributesReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xDbeGetBackBufferAttributesReq);
 
     swapl(&stuff->buffer);
