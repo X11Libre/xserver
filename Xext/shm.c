@@ -1364,9 +1364,6 @@ SShmCompletionEvent(xShmCompletionEvent * from, xShmCompletionEvent * to)
 static int _X_COLD
 SProcShmQueryVersion(ClientPtr client)
 {
-    REQUEST(xShmQueryVersionReq);
-
-    swaps(&stuff->length);
     return ProcShmQueryVersion(client);
 }
 
@@ -1374,7 +1371,6 @@ static int _X_COLD
 SProcShmAttach(ClientPtr client)
 {
     REQUEST(xShmAttachReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xShmAttachReq);
     swapl(&stuff->shmseg);
     swapl(&stuff->shmid);
@@ -1385,7 +1381,6 @@ static int _X_COLD
 SProcShmDetach(ClientPtr client)
 {
     REQUEST(xShmDetachReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xShmDetachReq);
     swapl(&stuff->shmseg);
     return ProcShmDetach(client);
@@ -1395,7 +1390,6 @@ static int _X_COLD
 SProcShmPutImage(ClientPtr client)
 {
     REQUEST(xShmPutImageReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xShmPutImageReq);
     swapl(&stuff->drawable);
     swapl(&stuff->gc);
@@ -1416,7 +1410,6 @@ static int _X_COLD
 SProcShmGetImage(ClientPtr client)
 {
     REQUEST(xShmGetImageReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xShmGetImageReq);
     swapl(&stuff->drawable);
     swaps(&stuff->x);
@@ -1433,7 +1426,6 @@ static int _X_COLD
 SProcShmCreatePixmap(ClientPtr client)
 {
     REQUEST(xShmCreatePixmapReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xShmCreatePixmapReq);
     swapl(&stuff->pid);
     swapl(&stuff->drawable);
@@ -1450,7 +1442,6 @@ SProcShmAttachFd(ClientPtr client)
 {
     REQUEST(xShmAttachFdReq);
     SetReqFds(client, 1);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xShmAttachFdReq);
     swapl(&stuff->shmseg);
     return ProcShmAttachFd(client);
@@ -1460,7 +1451,6 @@ static int _X_COLD
 SProcShmCreateSegment(ClientPtr client)
 {
     REQUEST(xShmCreateSegmentReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xShmCreateSegmentReq);
     swapl(&stuff->shmseg);
     swapl(&stuff->size);
