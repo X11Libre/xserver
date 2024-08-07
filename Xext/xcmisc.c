@@ -151,12 +151,6 @@ SProcXCMiscGetVersion(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXCMiscGetXIDRange(ClientPtr client)
-{
-    return ProcXCMiscGetXIDRange(client);
-}
-
-static int _X_COLD
 SProcXCMiscGetXIDList(ClientPtr client)
 {
     REQUEST(xXCMiscGetXIDListReq);
@@ -174,7 +168,7 @@ SProcXCMiscDispatch(ClientPtr client)
     case X_XCMiscGetVersion:
         return SProcXCMiscGetVersion(client);
     case X_XCMiscGetXIDRange:
-        return SProcXCMiscGetXIDRange(client);
+        return ProcXCMiscGetXIDRange(client);
     case X_XCMiscGetXIDList:
         return SProcXCMiscGetXIDList(client);
     default:
