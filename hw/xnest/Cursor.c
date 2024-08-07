@@ -133,9 +133,12 @@ xnestSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor, int x,
                int y)
 {
     if (pCursor) {
-        XDefineCursor(xnestDisplay,
-                      xnestDefaultWindows[pScreen->myNum],
-                      xnestCursor(pCursor, pScreen));
+        uint32_t cursor = xnestCursor(pCursor, pScreen);
+
+        xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                     xnestDefaultWindows[pScreen->myNum],
+                                     XCB_CW_CURSOR,
+                                     &cursor);
     }
 }
 
