@@ -791,29 +791,7 @@ ProcDbeDispatch(ClientPtr client)
     }
 
 }                               /* ProcDbeDispatch() */
-
-/******************************************************************************
- *
- * DBE DIX Procedure: SProcDbeGetVersion
- *
- * Description:
- *
- *     This function is for processing a DbeGetVersion request on a swapped
- *     server.  This request returns the major and minor version numbers of
- *     this extension.
- *
- * Return Values:
- *
- *     Success
- *
- *****************************************************************************/
 
-static int _X_COLD
-SProcDbeGetVersion(ClientPtr client)
-{
-    return (ProcDbeGetVersion(client));
-}                               /* SProcDbeGetVersion() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: SProcDbeAllocateBackBufferName
@@ -1006,7 +984,7 @@ SProcDbeDispatch(ClientPtr client)
 
     switch (stuff->data) {
     case X_DbeGetVersion:
-        return (SProcDbeGetVersion(client));
+        return ProcDbeGetVersion(client);
 
     case X_DbeAllocateBackBufferName:
         return (SProcDbeAllocateBackBufferName(client));
