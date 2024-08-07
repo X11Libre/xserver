@@ -146,8 +146,6 @@ static int _X_COLD
 SProcXCMiscGetVersion(ClientPtr client)
 {
     REQUEST(xXCMiscGetVersionReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
     swaps(&stuff->majorVersion);
     swaps(&stuff->minorVersion);
@@ -157,9 +155,6 @@ SProcXCMiscGetVersion(ClientPtr client)
 static int _X_COLD
 SProcXCMiscGetXIDRange(ClientPtr client)
 {
-    REQUEST(xReq);
-
-    swaps(&stuff->length);
     return ProcXCMiscGetXIDRange(client);
 }
 
@@ -169,7 +164,6 @@ SProcXCMiscGetXIDList(ClientPtr client)
     REQUEST(xXCMiscGetXIDListReq);
     REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
 
-    swaps(&stuff->length);
     swapl(&stuff->count);
     return ProcXCMiscGetXIDList(client);
 }
