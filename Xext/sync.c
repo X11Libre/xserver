@@ -2153,20 +2153,12 @@ ProcSyncDispatch(ClientPtr client)
 static int _X_COLD
 SProcSyncInitialize(ClientPtr client)
 {
-    REQUEST(xSyncInitializeReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xSyncInitializeReq);
-
     return ProcSyncInitialize(client);
 }
 
 static int _X_COLD
 SProcSyncListSystemCounters(ClientPtr client)
 {
-    REQUEST(xSyncListSystemCountersReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xSyncListSystemCountersReq);
-
     return ProcSyncListSystemCounters(client);
 }
 
@@ -2174,7 +2166,6 @@ static int _X_COLD
 SProcSyncCreateCounter(ClientPtr client)
 {
     REQUEST(xSyncCreateCounterReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncCreateCounterReq);
     swapl(&stuff->cid);
     swapl(&stuff->initial_value_lo);
@@ -2187,7 +2178,6 @@ static int _X_COLD
 SProcSyncSetCounter(ClientPtr client)
 {
     REQUEST(xSyncSetCounterReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncSetCounterReq);
     swapl(&stuff->cid);
     swapl(&stuff->value_lo);
@@ -2200,7 +2190,6 @@ static int _X_COLD
 SProcSyncChangeCounter(ClientPtr client)
 {
     REQUEST(xSyncChangeCounterReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncChangeCounterReq);
     swapl(&stuff->cid);
     swapl(&stuff->value_lo);
@@ -2213,7 +2202,6 @@ static int _X_COLD
 SProcSyncQueryCounter(ClientPtr client)
 {
     REQUEST(xSyncQueryCounterReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncQueryCounterReq);
     swapl(&stuff->counter);
 
@@ -2224,7 +2212,6 @@ static int _X_COLD
 SProcSyncDestroyCounter(ClientPtr client)
 {
     REQUEST(xSyncDestroyCounterReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncDestroyCounterReq);
     swapl(&stuff->counter);
 
@@ -2235,7 +2222,6 @@ static int _X_COLD
 SProcSyncAwait(ClientPtr client)
 {
     REQUEST(xSyncAwaitReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xSyncAwaitReq);
     SwapRestL(stuff);
 
@@ -2246,7 +2232,6 @@ static int _X_COLD
 SProcSyncCreateAlarm(ClientPtr client)
 {
     REQUEST(xSyncCreateAlarmReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xSyncCreateAlarmReq);
     swapl(&stuff->id);
     swapl(&stuff->valueMask);
@@ -2259,7 +2244,6 @@ static int _X_COLD
 SProcSyncChangeAlarm(ClientPtr client)
 {
     REQUEST(xSyncChangeAlarmReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xSyncChangeAlarmReq);
     swapl(&stuff->alarm);
     swapl(&stuff->valueMask);
@@ -2271,7 +2255,6 @@ static int _X_COLD
 SProcSyncQueryAlarm(ClientPtr client)
 {
     REQUEST(xSyncQueryAlarmReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncQueryAlarmReq);
     swapl(&stuff->alarm);
 
@@ -2282,7 +2265,6 @@ static int _X_COLD
 SProcSyncDestroyAlarm(ClientPtr client)
 {
     REQUEST(xSyncDestroyAlarmReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncDestroyAlarmReq);
     swapl(&stuff->alarm);
 
@@ -2293,7 +2275,6 @@ static int _X_COLD
 SProcSyncSetPriority(ClientPtr client)
 {
     REQUEST(xSyncSetPriorityReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncSetPriorityReq);
     swapl(&stuff->id);
     swapl(&stuff->priority);
@@ -2305,7 +2286,6 @@ static int _X_COLD
 SProcSyncGetPriority(ClientPtr client)
 {
     REQUEST(xSyncGetPriorityReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncGetPriorityReq);
     swapl(&stuff->id);
 
@@ -2316,7 +2296,6 @@ static int _X_COLD
 SProcSyncCreateFence(ClientPtr client)
 {
     REQUEST(xSyncCreateFenceReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncCreateFenceReq);
     swapl(&stuff->d);
     swapl(&stuff->fid);
@@ -2328,7 +2307,6 @@ static int _X_COLD
 SProcSyncTriggerFence(ClientPtr client)
 {
     REQUEST(xSyncTriggerFenceReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncTriggerFenceReq);
     swapl(&stuff->fid);
 
@@ -2339,7 +2317,6 @@ static int _X_COLD
 SProcSyncResetFence(ClientPtr client)
 {
     REQUEST(xSyncResetFenceReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncResetFenceReq);
     swapl(&stuff->fid);
 
@@ -2350,7 +2327,6 @@ static int _X_COLD
 SProcSyncDestroyFence(ClientPtr client)
 {
     REQUEST(xSyncDestroyFenceReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncDestroyFenceReq);
     swapl(&stuff->fid);
 
@@ -2361,7 +2337,6 @@ static int _X_COLD
 SProcSyncQueryFence(ClientPtr client)
 {
     REQUEST(xSyncQueryFenceReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xSyncQueryFenceReq);
     swapl(&stuff->fid);
 
@@ -2372,7 +2347,6 @@ static int _X_COLD
 SProcSyncAwaitFence(ClientPtr client)
 {
     REQUEST(xSyncAwaitFenceReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xSyncAwaitFenceReq);
     SwapRestL(stuff);
 
