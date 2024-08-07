@@ -2151,18 +2151,6 @@ ProcSyncDispatch(ClientPtr client)
  */
 
 static int _X_COLD
-SProcSyncInitialize(ClientPtr client)
-{
-    return ProcSyncInitialize(client);
-}
-
-static int _X_COLD
-SProcSyncListSystemCounters(ClientPtr client)
-{
-    return ProcSyncListSystemCounters(client);
-}
-
-static int _X_COLD
 SProcSyncCreateCounter(ClientPtr client)
 {
     REQUEST(xSyncCreateCounterReq);
@@ -2360,9 +2348,9 @@ SProcSyncDispatch(ClientPtr client)
 
     switch (stuff->data) {
     case X_SyncInitialize:
-        return SProcSyncInitialize(client);
+        return ProcSyncInitialize(client);
     case X_SyncListSystemCounters:
-        return SProcSyncListSystemCounters(client);
+        return ProcSyncListSystemCounters(client);
     case X_SyncCreateCounter:
         return SProcSyncCreateCounter(client);
     case X_SyncSetCounter:
