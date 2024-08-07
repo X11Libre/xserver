@@ -48,10 +48,6 @@ Equipment Corporation.
 static int _X_COLD
 SProcPanoramiXQueryVersion(ClientPtr client)
 {
-    REQUEST(xPanoramiXQueryVersionReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xPanoramiXQueryVersionReq);
     return ProcPanoramiXQueryVersion(client);
 }
 
@@ -59,8 +55,6 @@ static int _X_COLD
 SProcPanoramiXGetState(ClientPtr client)
 {
     REQUEST(xPanoramiXGetStateReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
     swapl(&stuff->window);
     return ProcPanoramiXGetState(client);
@@ -70,8 +64,6 @@ static int _X_COLD
 SProcPanoramiXGetScreenCount(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenCountReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
     swapl(&stuff->window);
     return ProcPanoramiXGetScreenCount(client);
@@ -81,8 +73,6 @@ static int _X_COLD
 SProcPanoramiXGetScreenSize(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenSizeReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
     swapl(&stuff->window);
     swapl(&stuff->screen);
@@ -92,20 +82,12 @@ SProcPanoramiXGetScreenSize(ClientPtr client)
 static int _X_COLD
 SProcXineramaIsActive(ClientPtr client)
 {
-    REQUEST(xXineramaIsActiveReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
     return ProcXineramaIsActive(client);
 }
 
 static int _X_COLD
 SProcXineramaQueryScreens(ClientPtr client)
 {
-    REQUEST(xXineramaQueryScreensReq);
-
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xXineramaQueryScreensReq);
     return ProcXineramaQueryScreens(client);
 }
 
