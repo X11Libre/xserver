@@ -1706,8 +1706,6 @@ ProcVidModeDispatch(ClientPtr client)
 static int _X_COLD
 SProcVidModeQueryVersion(ClientPtr client)
 {
-    REQUEST(xXF86VidModeQueryVersionReq);
-    swaps(&stuff->length);
     return ProcVidModeQueryVersion(client);
 }
 
@@ -1715,7 +1713,6 @@ static int _X_COLD
 SProcVidModeGetModeLine(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetModeLineReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetModeLineReq);
     swaps(&stuff->screen);
     return ProcVidModeGetModeLine(client);
@@ -1725,7 +1722,6 @@ static int _X_COLD
 SProcVidModeGetAllModeLines(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetAllModeLinesReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetAllModeLinesReq);
     swaps(&stuff->screen);
     return ProcVidModeGetAllModeLines(client);
@@ -1741,7 +1737,6 @@ SProcVidModeAddModeLine(ClientPtr client)
     REQUEST(xXF86VidModeAddModeLineReq);
     ver = ClientMajorVersion(client);
     if (ver < 2) {
-        swaps(&oldstuff->length);
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeAddModeLineReq);
         swapl(&oldstuff->screen);
         swaps(&oldstuff->hdisplay);
@@ -1757,7 +1752,6 @@ SProcVidModeAddModeLine(ClientPtr client)
         SwapRestL(oldstuff);
     }
     else {
-        swaps(&stuff->length);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeAddModeLineReq);
         swapl(&stuff->screen);
         swaps(&stuff->hdisplay);
@@ -1786,7 +1780,6 @@ SProcVidModeDeleteModeLine(ClientPtr client)
     REQUEST(xXF86VidModeDeleteModeLineReq);
     ver = ClientMajorVersion(client);
     if (ver < 2) {
-        swaps(&oldstuff->length);
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeDeleteModeLineReq);
         swapl(&oldstuff->screen);
         swaps(&oldstuff->hdisplay);
@@ -1802,7 +1795,6 @@ SProcVidModeDeleteModeLine(ClientPtr client)
         SwapRestL(oldstuff);
     }
     else {
-        swaps(&stuff->length);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeDeleteModeLineReq);
         swapl(&stuff->screen);
         swaps(&stuff->hdisplay);
@@ -1831,7 +1823,6 @@ SProcVidModeModModeLine(ClientPtr client)
     REQUEST(xXF86VidModeModModeLineReq);
     ver = ClientMajorVersion(client);
     if (ver < 2) {
-        swaps(&oldstuff->length);
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeModModeLineReq);
         swapl(&oldstuff->screen);
         swaps(&oldstuff->hdisplay);
@@ -1847,7 +1838,6 @@ SProcVidModeModModeLine(ClientPtr client)
         SwapRestL(oldstuff);
     }
     else {
-        swaps(&stuff->length);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeModModeLineReq);
         swapl(&stuff->screen);
         swaps(&stuff->hdisplay);
@@ -1876,7 +1866,6 @@ SProcVidModeValidateModeLine(ClientPtr client)
     REQUEST(xXF86VidModeValidateModeLineReq);
     ver = ClientMajorVersion(client);
     if (ver < 2) {
-        swaps(&oldstuff->length);
         REQUEST_AT_LEAST_SIZE(xXF86OldVidModeValidateModeLineReq);
         swapl(&oldstuff->screen);
         swaps(&oldstuff->hdisplay);
@@ -1892,7 +1881,6 @@ SProcVidModeValidateModeLine(ClientPtr client)
         SwapRestL(oldstuff);
     }
     else {
-        swaps(&stuff->length);
         REQUEST_AT_LEAST_SIZE(xXF86VidModeValidateModeLineReq);
         swapl(&stuff->screen);
         swaps(&stuff->hdisplay);
@@ -1915,7 +1903,6 @@ static int _X_COLD
 SProcVidModeSwitchMode(ClientPtr client)
 {
     REQUEST(xXF86VidModeSwitchModeReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeSwitchModeReq);
     swaps(&stuff->screen);
     swaps(&stuff->zoom);
@@ -1926,7 +1913,6 @@ static int _X_COLD
 SProcVidModeSwitchToMode(ClientPtr client)
 {
     REQUEST(xXF86VidModeSwitchToModeReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeSwitchToModeReq);
     swapl(&stuff->screen);
     return ProcVidModeSwitchToMode(client);
@@ -1936,7 +1922,6 @@ static int _X_COLD
 SProcVidModeLockModeSwitch(ClientPtr client)
 {
     REQUEST(xXF86VidModeLockModeSwitchReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeLockModeSwitchReq);
     swaps(&stuff->screen);
     swaps(&stuff->lock);
@@ -1947,7 +1932,6 @@ static int _X_COLD
 SProcVidModeGetMonitor(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetMonitorReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetMonitorReq);
     swaps(&stuff->screen);
     return ProcVidModeGetMonitor(client);
@@ -1957,7 +1941,6 @@ static int _X_COLD
 SProcVidModeGetViewPort(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetViewPortReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetViewPortReq);
     swaps(&stuff->screen);
     return ProcVidModeGetViewPort(client);
@@ -1967,7 +1950,6 @@ static int _X_COLD
 SProcVidModeSetViewPort(ClientPtr client)
 {
     REQUEST(xXF86VidModeSetViewPortReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeSetViewPortReq);
     swaps(&stuff->screen);
     swapl(&stuff->x);
@@ -1979,7 +1961,6 @@ static int _X_COLD
 SProcVidModeGetDotClocks(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetDotClocksReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetDotClocksReq);
     swaps(&stuff->screen);
     return ProcVidModeGetDotClocks(client);
@@ -1989,7 +1970,6 @@ static int _X_COLD
 SProcVidModeSetClientVersion(ClientPtr client)
 {
     REQUEST(xXF86VidModeSetClientVersionReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeSetClientVersionReq);
     swaps(&stuff->major);
     swaps(&stuff->minor);
@@ -2000,7 +1980,6 @@ static int _X_COLD
 SProcVidModeSetGamma(ClientPtr client)
 {
     REQUEST(xXF86VidModeSetGammaReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeSetGammaReq);
     swaps(&stuff->screen);
     swapl(&stuff->red);
@@ -2013,7 +1992,6 @@ static int _X_COLD
 SProcVidModeGetGamma(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetGammaReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaReq);
     swaps(&stuff->screen);
     return ProcVidModeGetGamma(client);
@@ -2025,7 +2003,6 @@ SProcVidModeSetGammaRamp(ClientPtr client)
     int length;
 
     REQUEST(xXF86VidModeSetGammaRampReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xXF86VidModeSetGammaRampReq);
     swaps(&stuff->size);
     swaps(&stuff->screen);
@@ -2039,7 +2016,6 @@ static int _X_COLD
 SProcVidModeGetGammaRamp(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetGammaRampReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaRampReq);
     swaps(&stuff->size);
     swaps(&stuff->screen);
@@ -2050,7 +2026,6 @@ static int _X_COLD
 SProcVidModeGetGammaRampSize(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetGammaRampSizeReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaRampSizeReq);
     swaps(&stuff->screen);
     return ProcVidModeGetGammaRampSize(client);
@@ -2060,7 +2035,6 @@ static int _X_COLD
 SProcVidModeGetPermissions(ClientPtr client)
 {
     REQUEST(xXF86VidModeGetPermissionsReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xXF86VidModeGetPermissionsReq);
     swaps(&stuff->screen);
     return ProcVidModeGetPermissions(client);
