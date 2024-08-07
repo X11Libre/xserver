@@ -1272,9 +1272,6 @@ ProcScreenSaverDispatch(ClientPtr client)
 static int _X_COLD
 SProcScreenSaverQueryVersion(ClientPtr client)
 {
-    REQUEST(xScreenSaverQueryVersionReq);
-    swaps(&stuff->length);
-    REQUEST_SIZE_MATCH(xScreenSaverQueryVersionReq);
     return ProcScreenSaverQueryVersion(client);
 }
 
@@ -1282,7 +1279,6 @@ static int _X_COLD
 SProcScreenSaverQueryInfo(ClientPtr client)
 {
     REQUEST(xScreenSaverQueryInfoReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xScreenSaverQueryInfoReq);
     swapl(&stuff->drawable);
     return ProcScreenSaverQueryInfo(client);
@@ -1292,7 +1288,6 @@ static int _X_COLD
 SProcScreenSaverSelectInput(ClientPtr client)
 {
     REQUEST(xScreenSaverSelectInputReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xScreenSaverSelectInputReq);
     swapl(&stuff->drawable);
     swapl(&stuff->eventMask);
@@ -1303,7 +1298,6 @@ static int _X_COLD
 SProcScreenSaverSetAttributes(ClientPtr client)
 {
     REQUEST(xScreenSaverSetAttributesReq);
-    swaps(&stuff->length);
     REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
     swapl(&stuff->drawable);
     swaps(&stuff->x);
@@ -1321,7 +1315,6 @@ static int _X_COLD
 SProcScreenSaverUnsetAttributes(ClientPtr client)
 {
     REQUEST(xScreenSaverUnsetAttributesReq);
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
     swapl(&stuff->drawable);
     return ProcScreenSaverUnsetAttributes(client);
@@ -1331,8 +1324,6 @@ static int _X_COLD
 SProcScreenSaverSuspend(ClientPtr client)
 {
     REQUEST(xScreenSaverSuspendReq);
-
-    swaps(&stuff->length);
     REQUEST_SIZE_MATCH(xScreenSaverSuspendReq);
     swapl(&stuff->suspend);
     return ProcScreenSaverSuspend(client);
