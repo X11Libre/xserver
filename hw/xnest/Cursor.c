@@ -110,7 +110,7 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 Bool
 xnestUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
-    XFreeCursor(xnestDisplay, xnestCursor(pCursor, pScreen));
+    xcb_free_cursor(xnestUpstreamInfo.conn, xnestCursor(pCursor, pScreen));
     free(xnestGetCursorPriv(pCursor, pScreen));
     return TRUE;
 }
