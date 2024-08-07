@@ -46,12 +46,6 @@ Equipment Corporation.
 #include "panoramiXh.h"
 
 static int _X_COLD
-SProcPanoramiXQueryVersion(ClientPtr client)
-{
-    return ProcPanoramiXQueryVersion(client);
-}
-
-static int _X_COLD
 SProcPanoramiXGetState(ClientPtr client)
 {
     REQUEST(xPanoramiXGetStateReq);
@@ -79,25 +73,13 @@ SProcPanoramiXGetScreenSize(ClientPtr client)
     return ProcPanoramiXGetScreenSize(client);
 }
 
-static int _X_COLD
-SProcXineramaIsActive(ClientPtr client)
-{
-    return ProcXineramaIsActive(client);
-}
-
-static int _X_COLD
-SProcXineramaQueryScreens(ClientPtr client)
-{
-    return ProcXineramaQueryScreens(client);
-}
-
 int _X_COLD
 SProcPanoramiXDispatch(ClientPtr client)
 {
     REQUEST(xReq);
     switch (stuff->data) {
     case X_PanoramiXQueryVersion:
-        return SProcPanoramiXQueryVersion(client);
+        return ProcPanoramiXQueryVersion(client);
     case X_PanoramiXGetState:
         return SProcPanoramiXGetState(client);
     case X_PanoramiXGetScreenCount:
@@ -105,9 +87,9 @@ SProcPanoramiXDispatch(ClientPtr client)
     case X_PanoramiXGetScreenSize:
         return SProcPanoramiXGetScreenSize(client);
     case X_XineramaIsActive:
-        return SProcXineramaIsActive(client);
+        return ProcXineramaIsActive(client);
     case X_XineramaQueryScreens:
-        return SProcXineramaQueryScreens(client);
+        return ProcXineramaQueryScreens(client);
     }
     return BadRequest;
 }
