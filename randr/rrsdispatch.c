@@ -28,7 +28,6 @@ SProcRRQueryVersion(ClientPtr client)
     REQUEST(xRRQueryVersionReq);
 
     REQUEST_SIZE_MATCH(xRRQueryVersionReq);
-    swaps(&stuff->length);
     swapl(&stuff->majorVersion);
     swapl(&stuff->minorVersion);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
@@ -40,7 +39,6 @@ SProcRRGetScreenInfo(ClientPtr client)
     REQUEST(xRRGetScreenInfoReq);
 
     REQUEST_SIZE_MATCH(xRRGetScreenInfoReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -58,7 +56,6 @@ SProcRRSetScreenConfig(ClientPtr client)
         REQUEST_SIZE_MATCH(xRR1_0SetScreenConfigReq);
     }
 
-    swaps(&stuff->length);
     swapl(&stuff->drawable);
     swapl(&stuff->timestamp);
     swaps(&stuff->sizeID);
@@ -72,7 +69,6 @@ SProcRRSelectInput(ClientPtr client)
     REQUEST(xRRSelectInputReq);
 
     REQUEST_SIZE_MATCH(xRRSelectInputReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     swaps(&stuff->enable);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
@@ -84,7 +80,6 @@ SProcRRGetScreenSizeRange(ClientPtr client)
     REQUEST(xRRGetScreenSizeRangeReq);
 
     REQUEST_SIZE_MATCH(xRRGetScreenSizeRangeReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -95,7 +90,6 @@ SProcRRSetScreenSize(ClientPtr client)
     REQUEST(xRRSetScreenSizeReq);
 
     REQUEST_SIZE_MATCH(xRRSetScreenSizeReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     swaps(&stuff->width);
     swaps(&stuff->height);
@@ -110,7 +104,6 @@ SProcRRGetScreenResources(ClientPtr client)
     REQUEST(xRRGetScreenResourcesReq);
 
     REQUEST_SIZE_MATCH(xRRGetScreenResourcesReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -132,7 +125,6 @@ SProcRRGetOutputInfo(ClientPtr client)
     REQUEST(xRRGetOutputInfoReq);
 
     REQUEST_SIZE_MATCH(xRRGetOutputInfoReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->configTimestamp);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
@@ -144,7 +136,6 @@ SProcRRListOutputProperties(ClientPtr client)
     REQUEST(xRRListOutputPropertiesReq);
 
     REQUEST_SIZE_MATCH(xRRListOutputPropertiesReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -155,7 +146,6 @@ SProcRRQueryOutputProperty(ClientPtr client)
     REQUEST(xRRQueryOutputPropertyReq);
 
     REQUEST_SIZE_MATCH(xRRQueryOutputPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->property);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
@@ -167,7 +157,6 @@ SProcRRConfigureOutputProperty(ClientPtr client)
     REQUEST(xRRConfigureOutputPropertyReq);
 
     REQUEST_AT_LEAST_SIZE(xRRConfigureOutputPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->property);
     SwapRestL(stuff);
@@ -180,7 +169,6 @@ SProcRRChangeOutputProperty(ClientPtr client)
     REQUEST(xRRChangeOutputPropertyReq);
 
     REQUEST_AT_LEAST_SIZE(xRRChangeOutputPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->property);
     swapl(&stuff->type);
@@ -207,7 +195,6 @@ SProcRRDeleteOutputProperty(ClientPtr client)
     REQUEST(xRRDeleteOutputPropertyReq);
 
     REQUEST_SIZE_MATCH(xRRDeleteOutputPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->property);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
@@ -219,7 +206,6 @@ SProcRRGetOutputProperty(ClientPtr client)
     REQUEST(xRRGetOutputPropertyReq);
 
     REQUEST_SIZE_MATCH(xRRGetOutputPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->property);
     swapl(&stuff->type);
@@ -236,7 +222,6 @@ SProcRRCreateMode(ClientPtr client)
     REQUEST(xRRCreateModeReq);
 
     REQUEST_AT_LEAST_SIZE(xRRCreateModeReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
 
     modeinfo = &stuff->modeInfo;
@@ -261,7 +246,6 @@ SProcRRDestroyMode(ClientPtr client)
     REQUEST(xRRDestroyModeReq);
 
     REQUEST_SIZE_MATCH(xRRDestroyModeReq);
-    swaps(&stuff->length);
     swapl(&stuff->mode);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -272,7 +256,6 @@ SProcRRAddOutputMode(ClientPtr client)
     REQUEST(xRRAddOutputModeReq);
 
     REQUEST_SIZE_MATCH(xRRAddOutputModeReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->mode);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
@@ -284,7 +267,6 @@ SProcRRDeleteOutputMode(ClientPtr client)
     REQUEST(xRRDeleteOutputModeReq);
 
     REQUEST_SIZE_MATCH(xRRDeleteOutputModeReq);
-    swaps(&stuff->length);
     swapl(&stuff->output);
     swapl(&stuff->mode);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
@@ -296,7 +278,6 @@ SProcRRGetCrtcInfo(ClientPtr client)
     REQUEST(xRRGetCrtcInfoReq);
 
     REQUEST_SIZE_MATCH(xRRGetCrtcInfoReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     swapl(&stuff->configTimestamp);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
@@ -308,7 +289,6 @@ SProcRRSetCrtcConfig(ClientPtr client)
     REQUEST(xRRSetCrtcConfigReq);
 
     REQUEST_AT_LEAST_SIZE(xRRSetCrtcConfigReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     swapl(&stuff->timestamp);
     swapl(&stuff->configTimestamp);
@@ -326,7 +306,6 @@ SProcRRGetCrtcGammaSize(ClientPtr client)
     REQUEST(xRRGetCrtcGammaSizeReq);
 
     REQUEST_SIZE_MATCH(xRRGetCrtcGammaSizeReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -337,7 +316,6 @@ SProcRRGetCrtcGamma(ClientPtr client)
     REQUEST(xRRGetCrtcGammaReq);
 
     REQUEST_SIZE_MATCH(xRRGetCrtcGammaReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -348,7 +326,6 @@ SProcRRSetCrtcGamma(ClientPtr client)
     REQUEST(xRRSetCrtcGammaReq);
 
     REQUEST_AT_LEAST_SIZE(xRRSetCrtcGammaReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     swaps(&stuff->size);
     SwapRestS(stuff);
@@ -365,7 +342,6 @@ SProcRRSetCrtcTransform(ClientPtr client)
     REQUEST(xRRSetCrtcTransformReq);
 
     REQUEST_AT_LEAST_SIZE(xRRSetCrtcTransformReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     SwapLongs((CARD32 *) &stuff->transform,
               bytes_to_int32(sizeof(xRenderTransform)));
@@ -386,7 +362,6 @@ SProcRRGetCrtcTransform(ClientPtr client)
     REQUEST(xRRGetCrtcTransformReq);
 
     REQUEST_SIZE_MATCH(xRRGetCrtcTransformReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -397,7 +372,6 @@ SProcRRGetPanning(ClientPtr client)
     REQUEST(xRRGetPanningReq);
 
     REQUEST_SIZE_MATCH(xRRGetPanningReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     return (*ProcRandrVector[stuff->randrReqType]) (client);
 }
@@ -408,7 +382,6 @@ SProcRRSetPanning(ClientPtr client)
     REQUEST(xRRSetPanningReq);
 
     REQUEST_SIZE_MATCH(xRRSetPanningReq);
-    swaps(&stuff->length);
     swapl(&stuff->crtc);
     swapl(&stuff->timestamp);
     swaps(&stuff->left);
@@ -432,7 +405,6 @@ SProcRRSetOutputPrimary(ClientPtr client)
     REQUEST(xRRSetOutputPrimaryReq);
 
     REQUEST_SIZE_MATCH(xRRSetOutputPrimaryReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     swapl(&stuff->output);
     return ProcRandrVector[stuff->randrReqType] (client);
@@ -444,7 +416,6 @@ SProcRRGetOutputPrimary(ClientPtr client)
     REQUEST(xRRGetOutputPrimaryReq);
 
     REQUEST_SIZE_MATCH(xRRGetOutputPrimaryReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     return ProcRandrVector[stuff->randrReqType] (client);
 }
@@ -455,7 +426,6 @@ SProcRRGetProviders(ClientPtr client)
     REQUEST(xRRGetProvidersReq);
 
     REQUEST_SIZE_MATCH(xRRGetProvidersReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     return ProcRandrVector[stuff->randrReqType] (client);
 }
@@ -466,7 +436,6 @@ SProcRRGetProviderInfo(ClientPtr client)
     REQUEST(xRRGetProviderInfoReq);
 
     REQUEST_SIZE_MATCH(xRRGetProviderInfoReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->configTimestamp);
     return ProcRandrVector[stuff->randrReqType] (client);
@@ -478,7 +447,6 @@ SProcRRSetProviderOffloadSink(ClientPtr client)
     REQUEST(xRRSetProviderOffloadSinkReq);
 
     REQUEST_SIZE_MATCH(xRRSetProviderOffloadSinkReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->sink_provider);
     swapl(&stuff->configTimestamp);
@@ -491,7 +459,6 @@ SProcRRSetProviderOutputSource(ClientPtr client)
     REQUEST(xRRSetProviderOutputSourceReq);
 
     REQUEST_SIZE_MATCH(xRRSetProviderOutputSourceReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->source_provider);
     swapl(&stuff->configTimestamp);
@@ -504,7 +471,6 @@ SProcRRListProviderProperties(ClientPtr client)
     REQUEST(xRRListProviderPropertiesReq);
 
     REQUEST_SIZE_MATCH(xRRListProviderPropertiesReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     return ProcRandrVector[stuff->randrReqType] (client);
 }
@@ -515,7 +481,6 @@ SProcRRQueryProviderProperty(ClientPtr client)
     REQUEST(xRRQueryProviderPropertyReq);
 
     REQUEST_SIZE_MATCH(xRRQueryProviderPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->property);
     return ProcRandrVector[stuff->randrReqType] (client);
@@ -527,7 +492,6 @@ SProcRRConfigureProviderProperty(ClientPtr client)
     REQUEST(xRRConfigureProviderPropertyReq);
 
     REQUEST_AT_LEAST_SIZE(xRRConfigureProviderPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->property);
     /* TODO: no way to specify format? */
@@ -541,7 +505,6 @@ SProcRRChangeProviderProperty(ClientPtr client)
     REQUEST(xRRChangeProviderPropertyReq);
 
     REQUEST_AT_LEAST_SIZE(xRRChangeProviderPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->property);
     swapl(&stuff->type);
@@ -565,7 +528,6 @@ SProcRRDeleteProviderProperty(ClientPtr client)
     REQUEST(xRRDeleteProviderPropertyReq);
 
     REQUEST_SIZE_MATCH(xRRDeleteProviderPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->property);
     return ProcRandrVector[stuff->randrReqType] (client);
@@ -577,7 +539,6 @@ SProcRRGetProviderProperty(ClientPtr client)
     REQUEST(xRRGetProviderPropertyReq);
 
     REQUEST_SIZE_MATCH(xRRGetProviderPropertyReq);
-    swaps(&stuff->length);
     swapl(&stuff->provider);
     swapl(&stuff->property);
     swapl(&stuff->type);
@@ -591,7 +552,6 @@ SProcRRGetMonitors(ClientPtr client) {
     REQUEST(xRRGetMonitorsReq);
 
     REQUEST_SIZE_MATCH(xRRGetMonitorsReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     return ProcRandrVector[stuff->randrReqType] (client);
 }
@@ -601,7 +561,6 @@ SProcRRSetMonitor(ClientPtr client) {
     REQUEST(xRRSetMonitorReq);
 
     REQUEST_AT_LEAST_SIZE(xRRGetMonitorsReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     swapl(&stuff->monitor.name);
     swaps(&stuff->monitor.noutput);
@@ -618,7 +577,6 @@ SProcRRDeleteMonitor(ClientPtr client) {
     REQUEST(xRRDeleteMonitorReq);
 
     REQUEST_SIZE_MATCH(xRRDeleteMonitorReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     swapl(&stuff->name);
     return ProcRandrVector[stuff->randrReqType] (client);
@@ -629,7 +587,6 @@ SProcRRCreateLease(ClientPtr client) {
     REQUEST(xRRCreateLeaseReq);
 
     REQUEST_AT_LEAST_SIZE(xRRCreateLeaseReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     swaps(&stuff->nCrtcs);
     swaps(&stuff->nOutputs);
@@ -642,7 +599,6 @@ SProcRRFreeLease(ClientPtr client) {
     REQUEST(xRRFreeLeaseReq);
 
     REQUEST_SIZE_MATCH(xRRFreeLeaseReq);
-    swaps(&stuff->length);
     swapl(&stuff->lid);
     return ProcRandrVector[stuff->randrReqType] (client);
 }
