@@ -1270,12 +1270,6 @@ ProcScreenSaverDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcScreenSaverQueryVersion(ClientPtr client)
-{
-    return ProcScreenSaverQueryVersion(client);
-}
-
-static int _X_COLD
 SProcScreenSaverQueryInfo(ClientPtr client)
 {
     REQUEST(xScreenSaverQueryInfoReq);
@@ -1330,7 +1324,7 @@ SProcScreenSaverSuspend(ClientPtr client)
 }
 
 static int (*SwappedVector[]) (ClientPtr /* client */ ) = {
-SProcScreenSaverQueryVersion,
+        ProcScreenSaverQueryVersion,
         SProcScreenSaverQueryInfo,
         SProcScreenSaverSelectInput,
         SProcScreenSaverSetAttributes,
