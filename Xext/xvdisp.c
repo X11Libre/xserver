@@ -1116,12 +1116,6 @@ ProcXvDispatch(ClientPtr client)
 /* Swapped Procs */
 
 static int _X_COLD
-SProcXvQueryExtension(ClientPtr client)
-{
-    return XvProcVector[xv_QueryExtension] (client);
-}
-
-static int _X_COLD
 SProcXvQueryAdaptors(ClientPtr client)
 {
     REQUEST(xvQueryAdaptorsReq);
@@ -1378,7 +1372,7 @@ SProcXvListImageFormats(ClientPtr client)
 }
 
 static int (*SXvProcVector[xvNumRequests]) (ClientPtr) = {
-SProcXvQueryExtension,
+        ProcXvQueryExtension,
         SProcXvQueryAdaptors,
         SProcXvQueryEncodings,
         SProcXvGrabPort,
