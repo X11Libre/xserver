@@ -38,9 +38,7 @@ uint32_t xnest_upstream_gc(GCPtr pGC) {
     if (pGC == NULL) return 0;
 
     xnestPrivGC *priv = dixLookupPrivate(&(pGC)->devPrivates, xnestGCPrivateKey);
-    if ((priv == NULL) || (priv->gc == NULL)) return 0;
+    if (priv == NULL) return 0;
 
-    // make sure Xlib's GC cache is written out before using (server side) GC.
-    XFlushGC(xnestDisplay, priv->gc);
-    return priv->gc->gid;
+    return priv->gc;
 }

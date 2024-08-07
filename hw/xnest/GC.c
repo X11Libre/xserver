@@ -83,9 +83,12 @@ xnestCreateGC(GCPtr pGC)
 
     pGC->miTranslate = 1;
 
-    xnestGCPriv(pGC)->gc = XCreateGC(xnestDisplay,
-                                     xnestDefaultDrawables[pGC->depth],
-                                     0L, NULL);
+    xnestGCPriv(pGC)->gc = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_create_gc(xnestUpstreamInfo.conn,
+                  xnestGCPriv(pGC)->gc,
+                  xnestDefaultDrawables[pGC->depth],
+                  0,
+                  NULL);
 
     return TRUE;
 }
@@ -189,13 +192,16 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
 void
 xnestCopyGC(GCPtr pGCSrc, unsigned long mask, GCPtr pGCDst)
 {
-    XCopyGC(xnestDisplay, xnestGC(pGCSrc), mask, xnestGC(pGCDst));
+    xcb_copy_gc(xnestUpstreamInfo.conn,
+                xnestGC(pGCSrc),
+                xnestGC(pGCDst),
+                mask);
 }
 
 void
 xnestDestroyGC(GCPtr pGC)
 {
-    XFreeGC(xnestDisplay, xnestGC(pGC));
+    xcb_free_gc(xnestUpstreamInfo.conn, xnestGC(pGC));
 }
 
 void
