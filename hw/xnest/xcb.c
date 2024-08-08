@@ -209,3 +209,44 @@ uint32_t xnestCreateBitmapFromData(
     xcb_free_gc(conn, gc);
     return pix;
 }
+
+uint32_t xnestCreatePixmapFromBitmapData(
+    xcb_connection_t *conn,
+    uint32_t drawable,
+    const char *data,
+    uint32_t width,
+    uint32_t height,
+    uint32_t fg,
+    uint32_t bg,
+    uint16_t depth)
+{
+    uint32_t pix = xnestUpstreamXID();
+    xcb_create_pixmap(conn, depth, pix, drawable, width, height);
+
+    uint32_t gc = xnestUpstreamXID();
+    xcb_create_gc(conn, gc, pix, 0, NULL);
+
+    XnGCValues gcv = {
+        .foreground = fg,
+        .background = bg
+    };
+
+    xnChangeGC(conn, gc, gcv, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND);
+
+    const int leftPad = 0;
+    xcb_put_image(conn,
+                  XYBitmap,
+                  pix,
+                  gc,
+                  width,
+                  height,
+                  0 /* dst_x */,
+                  0 /* dst_y */,
+                  leftPad,
+                  1 /* depth */,
+                  BitmapBytePad(width + leftPad) * height,
+                  (uint8_t*)data);
+
+    xcb_free_gc(conn, gc);
+    return pix;
+}
