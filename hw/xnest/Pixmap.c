@@ -98,30 +98,60 @@ xnestModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
 RegionPtr
 xnestPixmapToRegion(PixmapPtr pPixmap)
 {
-    XImage *ximage;
     register RegionPtr pReg, pTmpReg;
     register int x, y;
     unsigned long previousPixel, currentPixel;
     BoxRec Box = { 0, 0, 0, 0 };
     Bool overlap;
 
-    ximage = XGetImage(xnestDisplay, xnestPixmap(pPixmap), 0, 0,
-                       pPixmap->drawable.width, pPixmap->drawable.height,
-                       1, XYPixmap);
+    if (pPixmap->drawable.depth != 1) {
+        LogMessage(X_WARNING, "xnestPixmapToRegion() depth != 1: %d\n", pPixmap->drawable.depth);
+        return NULL;
+    }
+
+    xcb_generic_error_t *err = NULL;
+    xcb_get_image_reply_t *reply = xcb_get_image_reply(
+        xnestUpstreamInfo.conn,
+        xcb_get_image(
+            xnestUpstreamInfo.conn,
+            XCB_IMAGE_FORMAT_XY_PIXMAP,
+            xnestPixmap(pPixmap),
+            0,
+            0,
+            pPixmap->drawable.width,
+            pPixmap->drawable.height,
+            ~0),
+        &err);
+
+    if (err) {
+        //  badMatch may happeen if the upstream window is currently minimized
+        if (err->error_code != BadMatch)
+            ErrorF("xnestGetImage: received error %d\n", err->error_code);
+        free(err);
+        return NULL;
+    }
+
+    if (!reply) {
+        ErrorF("xnestGetImage: received no reply\n");
+        return NULL;
+    }
 
     pReg = RegionCreate(NULL, 1);
     pTmpReg = RegionCreate(NULL, 1);
     if (!pReg || !pTmpReg) {
-        XDestroyImage(ximage);
+        free(reply);
         return NullRegion;
     }
 
+    uint8_t *image_data = xcb_get_image_data(reply);
     for (y = 0; y < pPixmap->drawable.height; y++) {
         Box.y1 = y;
         Box.y2 = y + 1;
         previousPixel = 0L;
+        const int line_start = BitmapBytePad(pPixmap->drawable.width) * y;
+
         for (x = 0; x < pPixmap->drawable.width; x++) {
-            currentPixel = XGetPixel(ximage, x, y);
+            currentPixel = ((image_data[line_start + (x/8)]) >> (x % 8)) & 1;
             if (previousPixel != currentPixel) {
                 if (previousPixel == 0L) {
                     /* left edge */
@@ -145,7 +175,7 @@ xnestPixmapToRegion(PixmapPtr pPixmap)
     }
 
     RegionDestroy(pTmpReg);
-    XDestroyImage(ximage);
+    free(reply);
 
     RegionValidate(pReg, &overlap);
 
