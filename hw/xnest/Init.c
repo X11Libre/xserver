@@ -36,6 +36,7 @@ is" without express or implied warranty.
 #include "mi.h"
 #include "dixfontstr.h"
 #include "extinit_priv.h"
+
 #include "Xnest.h"
 #include "xnest-xcb.h"
 
@@ -66,7 +67,7 @@ GlxExtensionInit(void)
 void
 InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
 {
-    int i, j;
+    int i;
 
     xnestOpenDisplay(argc, argv);
 
@@ -75,10 +76,14 @@ InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
     screen_info->bitmapScanlinePad = xnestUpstreamInfo.setup->bitmap_format_scanline_pad;
     screen_info->bitmapBitOrder = xnestUpstreamInfo.setup->bitmap_format_bit_order;
     screen_info->numPixmapFormats = 0;
-    for (i = 0; i < xnestNumPixmapFormats; i++)
-        for (j = 0; j < xnestNumDepths; j++)
+    for (i = 0; i < xnestNumPixmapFormats; i++) {
+        xcb_depth_iterator_t depth_iter;
+        for (depth_iter = xcb_screen_allowed_depths_iterator(xnestUpstreamInfo.screenInfo);
+             depth_iter.rem;
+             xcb_depth_next(&depth_iter))
+        {
             if ((xnestPixmapFormats[i].depth == 1) ||
-                (xnestPixmapFormats[i].depth == xnestDepths[j])) {
+                (xnestPixmapFormats[i].depth == depth_iter.data->depth)) {
                 screen_info->formats[screen_info->numPixmapFormats].depth =
                     xnestPixmapFormats[i].depth;
                 screen_info->formats[screen_info->numPixmapFormats].bitsPerPixel =
@@ -88,6 +93,8 @@ InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
                 screen_info->numPixmapFormats++;
                 break;
             }
+        }
+    }
 
     xnestFontPrivateIndex = xfont2_allocate_font_private_index();
 
