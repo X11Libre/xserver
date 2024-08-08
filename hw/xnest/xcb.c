@@ -34,6 +34,16 @@ void xnestUpstreamSetup(void) {
     for (int i = 0; i < xnestUpstreamInfo.screenId; ++i)
         xcb_screen_next (&iter);
     xnestUpstreamInfo.screenInfo = iter.data;
+
+    /* report */
+    fprintf (stderr, "\n");
+    fprintf (stderr, "Informations of screen %d:\n", xnestUpstreamInfo.screenInfo->root);
+    fprintf (stderr, "  width.........: %d\n", xnestUpstreamInfo.screenInfo->width_in_pixels);
+    fprintf (stderr, "  height........: %d\n", xnestUpstreamInfo.screenInfo->height_in_pixels);
+    fprintf (stderr, "  white pixel...: %d\n", xnestUpstreamInfo.screenInfo->white_pixel);
+    fprintf (stderr, "  black pixel...: %d\n", xnestUpstreamInfo.screenInfo->black_pixel);
+    fprintf (stderr, "  root depth....: %d\n", xnestUpstreamInfo.screenInfo->root_depth);
+    fprintf (stderr, "\n");
 }
 
 uint32_t xnestUpstreamXID(void) {
