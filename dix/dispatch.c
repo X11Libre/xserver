@@ -2175,8 +2175,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     if (pDraw->type == DRAWABLE_WINDOW) {
         WindowPtr pWin = (WindowPtr) pDraw;
 
-        fprintf(stderr, "DoGetImage() WINDOW x=%d y=%d w=%d h=%d\n", relx, rely, width, height);
-
         /* "If the drawable is a window, the window must be viewable ... or a
          * BadMatch error results" */
         if (!pWin->viewable)
@@ -2209,7 +2207,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         xgi.visual = wVisual(pWin);
     }
     else {
-        fprintf(stderr, "DoGetImage() OTHER x=%d y=%d w=%d h=%d\n", relx, rely, width, height);
         pBoundingDraw = pDraw;
         xgi.visual = None;
     }
@@ -2235,7 +2232,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(width, pDraw->depth);
         length = widthBytesLine * height;
-        fprintf(stderr, "ZPixmap: widthBytesLine=%ld length=%ld\n", widthBytesLine, length);
+
     }
     else {
         widthBytesLine = BitmapBytePad(width);
@@ -2244,7 +2241,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         length = widthBytesLine * height *
             Ones(planemask & (plane | (plane - 1)));
 
-        fprintf(stderr, "XYPixmap: widthBytesLine=%ld length=%ld plane=%d\n", widthBytesLine, length, plane);
     }
 
     xgi.length = length;
@@ -2286,7 +2282,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         /* nothing to do */
     }
     else if (format == ZPixmap) {
-        fprintf(stderr, "sending ZPixmap\n");
         linesDone = 0;
         while (height - linesDone > 0) {
             nlines = min(linesPerBuf, height - linesDone);
@@ -2311,7 +2306,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         }
     }
     else {                      /* XYPixmap */
-        fprintf(stderr, "sending XYPixmap\n");
+
         for (; plane; plane >>= 1) {
             if (planemask & plane) {
                 linesDone = 0;
