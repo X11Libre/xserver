@@ -252,8 +252,8 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     pScreen->maxInstalledCmaps = MAXCMAPS;
     pScreen->backingStoreSupport = XCB_BACKING_STORE_NOT_USEFUL;
     pScreen->saveUnderSupport = XCB_BACKING_STORE_NOT_USEFUL;
-    pScreen->whitePixel = xnestWhitePixel;
-    pScreen->blackPixel = xnestBlackPixel;
+    pScreen->whitePixel = xnestUpstreamInfo.screenInfo->white_pixel;
+    pScreen->blackPixel = xnestUpstreamInfo.screenInfo->black_pixel;
     /* GCperDepth */
     /* defaultStipple */
     /* WindowPrivateLen */
@@ -342,7 +342,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     if (xnestDoFullGeneration) {
 
         valuemask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP;
-        attributes.background_pixel = xnestWhitePixel;
+        attributes.background_pixel = xnestUpstreamInfo.screenInfo->white_pixel;
         attributes.event_mask = xnestEventMask;
         attributes.colormap =
             xnestDefaultVisualColormap(xnestDefaultVisual(pScreen));
