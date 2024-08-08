@@ -159,7 +159,17 @@ DarwinHandleGUI(int argc, char *argv[])
 void
 OsVendorInit(void)
 {
-    return;
+    char *env = NULL;
+    char buf[PATH_MAX] = { 0 };
+
+    /* When not running as root, we won't be able to write to /var/log */
+    if (geteuid() != 0) {
+        if ((env = getenv("HOME")))
+            snprintf(buf, sizeof(buf), "%s/.Xnest.log", env);
+        else
+            snprintf(buf, sizeof(buf), "/tmp/Xnest.log");
+    }
+    LogInit(buf, ".old");
 }
 
 void
