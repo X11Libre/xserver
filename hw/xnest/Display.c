@@ -185,7 +185,8 @@ xnestOpenDisplay(int argc, char *argv[])
                                       (char *) icon_bits, icon_width, icon_height);
 
     xnestScreenSaverPixmap =
-        XCreatePixmapFromBitmapData(xnestDisplay,
+        xnest_create_pixmap_from_bitmap_data(
+                                    xnestUpstreamInfo.conn,
                                     xnestUpstreamInfo.screenInfo->root,
                                     (char *) screensaver_bits,
                                     screensaver_width,
