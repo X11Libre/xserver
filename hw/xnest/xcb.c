@@ -5,6 +5,7 @@
 #include <dix-config.h>
 
 #include <xcb/xcb.h>
+#include <xcb/xcb_aux.h>
 #include <xcb/xcb_icccm.h>
 
 #include <X11/X.h>
@@ -91,6 +92,47 @@ uint32_t xnest_create_bitmap_from_data(
 
     xcb_put_image(conn,
                   XYPixmap,
+                  pix,
+                  gc,
+                  width,
+                  height,
+                  0 /* dst_x */,
+                  0 /* dst_y */,
+                  leftPad,
+                  1 /* depth */,
+                  BitmapBytePad(width + leftPad) * height,
+                  (uint8_t*)data);
+
+    xcb_free_gc(conn, gc);
+    return pix;
+}
+
+uint32_t xnest_create_pixmap_from_bitmap_data(
+    xcb_connection_t *conn,
+    uint32_t drawable,
+    const char *data,
+    uint32_t width,
+    uint32_t height,
+    uint32_t fg,
+    uint32_t bg,
+    uint16_t depth)
+{
+    uint32_t pix = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_create_pixmap(conn, depth, pix, drawable, width, height);
+
+    uint32_t gc = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_create_gc(conn, gc, pix, 0, NULL);
+
+    xcb_params_gc_t gcv = {
+        .foreground = fg,
+        .background = bg
+    };
+
+    xcb_aux_change_gc(conn, gc, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND, &gcv);
+
+    const int leftPad = 0;
+    xcb_put_image(conn,
+                  XYBitmap,
                   pix,
                   gc,
                   width,

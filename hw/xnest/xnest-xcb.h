@@ -28,4 +28,8 @@ void xnest_wm_colormap_windows(xcb_connection_t *conn, xcb_window_t w,
 uint32_t xnest_create_bitmap_from_data(xcb_connection_t *conn, uint32_t drawable,
                                        const char *data, uint32_t width, uint32_t height);
 
+uint32_t xnest_create_pixmap_from_bitmap_data(xcb_connection_t *conn, uint32_t drawable,
+                                         const char *data, uint32_t width, uint32_t height,
+                                         uint32_t fg, uint32_t bg, uint16_t depth);
+
 #endif /* __XNEST__XCB_H */
