@@ -2094,83 +2094,51 @@ ProcPutImage(ClientPtr client)
     long lengthProto;           /* length of scanline protocol padded */
     char *tmpImage;
 
-    fprintf(stderr, "ProcPutImage()\n");
-
     REQUEST(xPutImageReq);
 
     REQUEST_AT_LEAST_SIZE(xPutImageReq);
-
-    fprintf(stderr, "ProcPutImage() size checked\n");
-
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
-
-    fprintf(stderr, "ProcPutImage() drawable and gc validated\n");
-
     if (stuff->format == XYBitmap) {
         if ((stuff->depth != 1) ||
-            (stuff->leftPad >= (unsigned int) screenInfo.bitmapScanlinePad)) {
-            fprintf(stderr, "XYBitmap badmatch 1\n");
+            (stuff->leftPad >= (unsigned int) screenInfo.bitmapScanlinePad))
             return BadMatch;
-        }
         length = BitmapBytePad(stuff->width + stuff->leftPad);
-        fprintf(stderr, "XYBitmap: length=%ld\n", length);
     }
     else if (stuff->format == XYPixmap) {
         if ((pDraw->depth != stuff->depth) ||
             (stuff->leftPad >= (unsigned int) screenInfo.bitmapScanlinePad))
-{
-            fprintf(stderr, "XYPixmap pDraw->depth=%d depth=%d\n", pDraw->depth, stuff->depth);
-            fprintf(stderr, "leftPad=%d\n", stuff->leftPad);
-            fprintf(stderr, "scanlinepad=%d\n", screenInfo.bitmapScanlinePad);
-            fprintf(stderr, "badmatch 2\n");
             return BadMatch;
-}
         length = BitmapBytePad(stuff->width + stuff->leftPad);
         length *= stuff->depth;
     }
     else if (stuff->format == ZPixmap) {
         if ((pDraw->depth != stuff->depth) || (stuff->leftPad != 0))
-{
-            fprintf(stderr, "ZPixmap badmatch 3\n");
             return BadMatch;
-}
         length = PixmapBytePad(stuff->width, stuff->depth);
     }
     else {
-        fprintf(stderr, "unsupported format\n");
         client->errorValue = stuff->format;
-        fprintf(stderr, "badvalue\n");
         return BadValue;
     }
-
-    fprintf(stderr, "ProcPutImage() request checks okay req_len=%d\n", client->req_len);
 
     tmpImage = (char *) &stuff[1];
     lengthProto = length;
 
     if (stuff->height != 0 && lengthProto >= (INT32_MAX / stuff->height))
-    {
-        fprintf(stderr, "BadLength 1: lengthProto=%ld\n", lengthProto);
         return BadLength;
-    }
 
     if ((bytes_to_int32(lengthProto * stuff->height) +
-         bytes_to_int32(sizeof(xPutImageReq))) != client->req_len) {
-        fprintf(stderr, "BadLength 2\n");
+         bytes_to_int32(sizeof(xPutImageReq))) != client->req_len)
         return BadLength;
-    }
 
-    fprintf(stderr, "reformatting image\n");
     ReformatImage(tmpImage, lengthProto * stuff->height,
                   stuff->format == ZPixmap ? BitsPerPixel(stuff->depth) : 1,
                   ClientOrder(client));
 
-    fprintf(stderr, "calling GC ops\n");
     (*pGC->ops->PutImage) (pDraw, pGC, stuff->depth, stuff->dstX, stuff->dstY,
                            stuff->width, stuff->height,
                            stuff->leftPad, stuff->format, tmpImage);
 
-    fprintf(stderr, "ProcPutImage() success\n");
     return Success;
 }
 
