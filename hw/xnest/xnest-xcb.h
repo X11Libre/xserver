@@ -100,4 +100,7 @@ void xnChangeGC(xcb_connection_t *conn, uint32_t gc, XnGCValues gcval, uint32_t 
 
 void xnestWMColormapWindows(xcb_connection_t *conn, xcb_window_t w, xcb_window_t *windows, int count);
 
+uint32_t xnestCreateBitmapFromData(xcb_connection_t *conn, uint32_t drawable,
+                                   const char *data, uint32_t width, uint32_t height);
+
 #endif /* __XNEST__XCB_H */
