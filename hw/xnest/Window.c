@@ -160,7 +160,7 @@ xnestDestroyWindow(WindowPtr pWin)
             xnestWindowPriv(pWin)->sibling_above;
     RegionDestroy(xnestWindowPriv(pWin)->bounding_shape);
     RegionDestroy(xnestWindowPriv(pWin)->clip_shape);
-    XDestroyWindow(xnestDisplay, xnestWindow(pWin));
+    xcb_destroy_window(xnestUpstreamInfo.conn, xnestWindow(pWin));
     xnestWindowPriv(pWin)->window = XCB_WINDOW_NONE;
 
     if (pWin->optional && pWin->optional->colormap && pWin->parent)
