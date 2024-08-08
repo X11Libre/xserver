@@ -32,8 +32,6 @@ extern int *xnestDepths;
 extern int xnestNumDepths;
 extern XPixmapFormatValues *xnestPixmapFormats;
 extern int xnestNumPixmapFormats;
-extern Pixel xnestBlackPixel;
-extern Pixel xnestWhitePixel;
 extern Drawable xnestDefaultDrawables[MAXDEPTH + 1];
 extern Pixmap xnestIconBitmap;
 extern Pixmap xnestScreenSaverPixmap;
