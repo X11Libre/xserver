@@ -322,12 +322,12 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                   &xnestCursorFuncs);
     PointPriv->spriteFuncs = &xnestPointerSpriteFuncs;
 
-    pScreen->mmWidth = xnestWidth * DisplayWidthMM(xnestDisplay, xnestUpstreamInfo.screenId)
-        / DisplayWidth(xnestDisplay, xnestUpstreamInfo.screenId);
+    pScreen->mmWidth =
+        xnestWidth * xnestUpstreamInfo.screenInfo->width_in_millimeters /
+        xnestUpstreamInfo.screenInfo->width_in_pixels;
     pScreen->mmHeight =
-        xnestHeight * DisplayHeightMM(xnestDisplay,
-                                      xnestUpstreamInfo.screenId) /
-        DisplayHeight(xnestDisplay, xnestUpstreamInfo.screenId);
+        xnestHeight * xnestUpstreamInfo.screenInfo->height_in_millimeters /
+        xnestUpstreamInfo.screenInfo->height_in_pixels;
 
     /* overwrite miCloseScreen with our own */
     pScreen->CloseScreen = xnestCloseScreen;
