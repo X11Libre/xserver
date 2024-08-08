@@ -12,6 +12,7 @@
 #include <X11/Xproto.h>
 
 #include "include/gc.h"
+#include "include/servermd.h"
 
 #include "Xnest.h"
 #include "xnest-xcb.h"
@@ -71,4 +72,36 @@ void xnest_wm_colormap_windows(
         (xcb_window_t*)windows);
 
     free(reply);
+}
+
+uint32_t xnest_create_bitmap_from_data(
+     xcb_connection_t *conn,
+     uint32_t drawable,
+     const char *data,
+     uint32_t width,
+     uint32_t height)
+{
+    uint32_t pix = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_create_pixmap(conn, 1, pix, drawable, width, height);
+
+    uint32_t gc = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_create_gc(conn, gc, pix, 0, NULL);
+
+    const int leftPad = 0;
+
+    xcb_put_image(conn,
+                  XYPixmap,
+                  pix,
+                  gc,
+                  width,
+                  height,
+                  0 /* dst_x */,
+                  0 /* dst_y */,
+                  leftPad,
+                  1 /* depth */,
+                  BitmapBytePad(width + leftPad) * height,
+                  (uint8_t*)data);
+
+    xcb_free_gc(conn, gc);
+    return pix;
 }
