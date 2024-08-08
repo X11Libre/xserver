@@ -97,36 +97,27 @@ xnestPutImage(DrawablePtr pDrawable, GCPtr pGC, int depth, int x, int y,
                   (uint8_t*)pImage);
 }
 
-static int
-xnestIgnoreErrorHandler (Display     *dpy,
-                         XErrorEvent *event)
-{
-    return False; /* return value is ignored */
-}
-
 void
 xnestGetImage(DrawablePtr pDrawable, int x, int y, int w, int h,
               unsigned int format, unsigned long planeMask, char *pImage)
 {
-    XImage *ximage;
-    int length;
-    int (*old_handler)(Display*, XErrorEvent*);
+    xcb_get_image_cookie_t cookie = xcb_get_image(xnestUpstreamInfo.conn,
+                                                  format,
+                                                  xnestDrawable(pDrawable),
+                                                  x, y, w, h, planeMask);
+    xcb_generic_error_t * err = NULL;
+    xcb_get_image_reply_t *reply= xcb_get_image_reply(xnestUpstreamInfo.conn,
+                                                      cookie, &err);
 
-    /* we may get BadMatch error when xnest window is minimized */
-    XSync(xnestDisplay, False);
-    old_handler = XSetErrorHandler (xnestIgnoreErrorHandler);
-
-    ximage = XGetImage(xnestDisplay, xnestDrawable(pDrawable),
-                       x, y, w, h, planeMask, format);
-    XSetErrorHandler(old_handler);
-
-    if (ximage) {
-        length = ximage->bytes_per_line * ximage->height;
-
-        memmove(pImage, ximage->data, length);
-
-        XDestroyImage(ximage);
+    if ( err ) {
+        //  badMatch may happeen if the upstream window is currently minimized
+        if (err->error_code != BadMatch)
+            LogMessage(X_WARNING, "xnestGetImage: received error %d\n", err->error_code);
+        free( err );
+        return;
     }
+
+    memmove(pImage, xcb_get_image_data(reply), xcb_get_image_data_length(reply));
 }
 
 static Bool
