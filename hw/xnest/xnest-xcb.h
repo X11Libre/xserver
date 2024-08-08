@@ -25,4 +25,7 @@ uint32_t xnest_upstream_gc(GCPtr pGC);
 void xnest_wm_colormap_windows(xcb_connection_t *conn, xcb_window_t w,
                                xcb_window_t *windows, int count);
 
+uint32_t xnest_create_bitmap_from_data(xcb_connection_t *conn, uint32_t drawable,
+                                       const char *data, uint32_t width, uint32_t height);
+
 #endif /* __XNEST__XCB_H */

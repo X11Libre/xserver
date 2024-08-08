@@ -180,9 +180,9 @@ xnestOpenDisplay(int argc, char *argv[])
         xnestBorderWidth = 1;
 
     xnestIconBitmap =
-        XCreateBitmapFromData(xnestDisplay,
-                              xnestUpstreamInfo.screenInfo->root,
-                              (char *) icon_bits, icon_width, icon_height);
+        xnest_create_bitmap_from_data(xnestUpstreamInfo.conn,
+                                      xnestUpstreamInfo.screenInfo->root,
+                                      (char *) icon_bits, icon_width, icon_height);
 
     xnestScreenSaverPixmap =
         XCreatePixmapFromBitmapData(xnestDisplay,
