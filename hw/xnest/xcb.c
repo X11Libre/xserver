@@ -147,3 +147,36 @@ uint32_t xnest_create_pixmap_from_bitmap_data(
     xcb_free_gc(conn, gc);
     return pix;
 }
+
+void xnest_set_command(
+    xcb_connection_t *conn,
+    xcb_window_t window,
+    char **argv,
+    int argc)
+{
+    int i = 0, nbytes = 0;
+
+    for (i = 0, nbytes = 0; i < argc; i++)
+        nbytes += strlen(argv[i]) + 1;
+
+    if (nbytes >= (2^16) - 1)
+        return;
+
+    char buf[nbytes+1];
+    char *bp = buf;
+
+    /* copy arguments into single buffer */
+    for (i = 0; i < argc; i++) {
+        strcpy(bp, argv[i]);
+        bp += strlen(argv[i]) + 1;
+    }
+
+    xcb_change_property(conn,
+                        XCB_PROP_MODE_REPLACE,
+                        window,
+                        XCB_ATOM_WM_COMMAND,
+                        XCB_ATOM_STRING,
+                        8,
+                        nbytes,
+                        buf);
+}
