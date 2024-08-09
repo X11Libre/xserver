@@ -32,4 +32,6 @@ uint32_t xnest_create_pixmap_from_bitmap_data(xcb_connection_t *conn, uint32_t d
                                          const char *data, uint32_t width, uint32_t height,
                                          uint32_t fg, uint32_t bg, uint16_t depth);
 
+void xnest_set_command(xcb_connection_t *conn, xcb_window_t window, char ** argv, int argc);
+
 #endif /* __XNEST__XCB_H */
