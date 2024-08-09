@@ -165,8 +165,12 @@ Bool
 xnestPositionWindow(WindowPtr pWin, int x, int y)
 {
     xnestConfigureWindow(pWin,
-                         CWParent |
-                         CWX | CWY | CWWidth | CWHeight | CWBorderWidth);
+                         XCB_CONFIG_WINDOW_SIBLING | \
+                         XCB_CONFIG_WINDOW_X | \
+                         XCB_CONFIG_WINDOW_Y | \
+                         XCB_CONFIG_WINDOW_WIDTH | \
+                         XCB_CONFIG_WINDOW_HEIGHT | \
+                         XCB_CONFIG_WINDOW_BORDER_WIDTH);
 
     return TRUE;
 }
@@ -177,7 +181,7 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
     unsigned int valuemask;
     XWindowChanges values;
 
-    if (mask & CWParent &&
+    if (mask & XCB_CONFIG_WINDOW_SIBLING  &&
         xnestWindowPriv(pWin)->parent != xnestWindowParent(pWin)) {
         XReparentWindow(xnestDisplay, xnestWindow(pWin),
                         xnestWindowParent(pWin),
@@ -193,34 +197,34 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
 
     valuemask = 0;
 
-    if (mask & CWX &&
+    if (mask & XCB_CONFIG_WINDOW_X &&
         xnestWindowPriv(pWin)->x != pWin->origin.x - wBorderWidth(pWin)) {
-        valuemask |= CWX;
+        valuemask |= XCB_CONFIG_WINDOW_X;
         values.x =
             xnestWindowPriv(pWin)->x = pWin->origin.x - wBorderWidth(pWin);
     }
 
-    if (mask & CWY &&
+    if (mask & XCB_CONFIG_WINDOW_Y &&
         xnestWindowPriv(pWin)->y != pWin->origin.y - wBorderWidth(pWin)) {
-        valuemask |= CWY;
+        valuemask |= XCB_CONFIG_WINDOW_Y;
         values.y =
             xnestWindowPriv(pWin)->y = pWin->origin.y - wBorderWidth(pWin);
     }
 
-    if (mask & CWWidth && xnestWindowPriv(pWin)->width != pWin->drawable.width) {
-        valuemask |= CWWidth;
+    if (mask & XCB_CONFIG_WINDOW_WIDTH && xnestWindowPriv(pWin)->width != pWin->drawable.width) {
+        valuemask |= XCB_CONFIG_WINDOW_WIDTH;
         values.width = xnestWindowPriv(pWin)->width = pWin->drawable.width;
     }
 
-    if (mask & CWHeight &&
+    if (mask & XCB_CONFIG_WINDOW_HEIGHT &&
         xnestWindowPriv(pWin)->height != pWin->drawable.height) {
-        valuemask |= CWHeight;
+        valuemask |= XCB_CONFIG_WINDOW_HEIGHT;
         values.height = xnestWindowPriv(pWin)->height = pWin->drawable.height;
     }
 
-    if (mask & CWBorderWidth &&
+    if (mask & XCB_CONFIG_WINDOW_BORDER_WIDTH &&
         xnestWindowPriv(pWin)->border_width != pWin->borderWidth) {
-        valuemask |= CWBorderWidth;
+        valuemask |= XCB_CONFIG_WINDOW_BORDER_WIDTH;
         values.border_width =
             xnestWindowPriv(pWin)->border_width = pWin->borderWidth;
     }
@@ -228,7 +232,7 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
     if (valuemask)
         XConfigureWindow(xnestDisplay, xnestWindow(pWin), valuemask, &values);
 
-    if (mask & CWStackingOrder &&
+    if (mask & XCB_CONFIG_WINDOW_SIBLING &&
         xnestWindowPriv(pWin)->sibling_above != xnestWindowSiblingAbove(pWin)) {
         WindowPtr pSib;
 
@@ -236,14 +240,14 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
         for (pSib = pWin; pSib->prevSib != NullWindow; pSib = pSib->prevSib);
 
         /* the top sibling */
-        valuemask = CWStackMode;
+        valuemask = XCB_CONFIG_WINDOW_STACK_MODE;
         values.stack_mode = Above;
         XConfigureWindow(xnestDisplay, xnestWindow(pSib), valuemask, &values);
         xnestWindowPriv(pSib)->sibling_above = None;
 
         /* the rest of siblings */
         for (pSib = pSib->nextSib; pSib != NullWindow; pSib = pSib->nextSib) {
-            valuemask = CWSibling | CWStackMode;
+            valuemask = XCB_CONFIG_WINDOW_SIBLING | XCB_CONFIG_WINDOW_STACK_MODE;
             values.sibling = xnestWindowSiblingAbove(pSib);
             values.stack_mode = Below;
             XConfigureWindow(xnestDisplay, xnestWindow(pSib), valuemask,
@@ -350,7 +354,7 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 Bool
 xnestRealizeWindow(WindowPtr pWin)
 {
-    xnestConfigureWindow(pWin, CWStackingOrder);
+    xnestConfigureWindow(pWin, XCB_CONFIG_WINDOW_SIBLING);
     xnestShapeWindow(pWin);
     XMapWindow(xnestDisplay, xnestWindow(pWin));
 
@@ -373,7 +377,7 @@ xnestCopyWindow(WindowPtr pWin, xPoint oldOrigin, RegionPtr oldRegion)
 void
 xnestClipNotify(WindowPtr pWin, int dx, int dy)
 {
-    xnestConfigureWindow(pWin, CWStackingOrder);
+    xnestConfigureWindow(pWin, XCB_CONFIG_WINDOW_SIBLING);
     xnestShapeWindow(pWin);
 }
 
