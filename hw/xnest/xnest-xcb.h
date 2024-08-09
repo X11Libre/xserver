@@ -107,4 +107,6 @@ uint32_t xnestCreatePixmapFromBitmapData(xcb_connection_t *conn, uint32_t drawab
                                          const char *data, uint32_t width, uint32_t height,
                                          uint32_t fg, uint32_t bg, uint16_t depth);
 
+void xnestSetCommand(xcb_connection_t *conn, xcb_window_t window, char ** argv, int argc);
+
 #endif /* __XNEST__XCB_H */
