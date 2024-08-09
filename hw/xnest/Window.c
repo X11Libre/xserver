@@ -83,7 +83,7 @@ xnestCreateWindow(WindowPtr pWin)
         visual = CopyFromParent;
     }
     else {
-        mask = CWEventMask | CWBackingStore;
+        mask = XCB_CW_EVENT_MASK | XCB_CW_BACKING_STORE;
         attributes.event_mask = ExposureMask;
         attributes.backing_store = NotUseful;
 
@@ -92,7 +92,7 @@ xnestCreateWindow(WindowPtr pWin)
                 pWin->optional->visual != wVisual(pWin->parent)) {
                 visual =
                     xnestVisualFromID(pWin->drawable.pScreen, wVisual(pWin));
-                mask |= CWColormap;
+                mask |= XCB_CW_COLORMAP;
                 if (pWin->optional->colormap) {
                     dixLookupResourceByType((void **) &pCmap, wColormap(pWin),
                                             X11_RESTYPE_COLORMAP, serverClient,
@@ -109,7 +109,7 @@ xnestCreateWindow(WindowPtr pWin)
             visual = xnestVisualFromID(pWin->drawable.pScreen, wVisual(pWin));
             dixLookupResourceByType((void **) &pCmap, wColormap(pWin),
                                     X11_RESTYPE_COLORMAP, serverClient, DixUseAccess);
-            mask |= CWColormap;
+            mask |= XCB_CW_COLORMAP;
             attributes.colormap = xnestColormap(pCmap);
         }
     }
@@ -259,7 +259,7 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 {
     XSetWindowAttributes attributes;
 
-    if (mask & CWBackPixmap)
+    if (mask & XCB_CW_BACK_PIXMAP)
         switch (pWin->backgroundState) {
         case None:
             attributes.background_pixmap = None;
@@ -274,59 +274,59 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
             break;
 
         case BackgroundPixel:
-            mask &= ~CWBackPixmap;
+            mask &= ~XCB_CW_BACK_PIXMAP;
             break;
         }
 
-    if (mask & CWBackPixel) {
+    if (mask & XCB_CW_BACK_PIXEL) {
         if (pWin->backgroundState == BackgroundPixel)
             attributes.background_pixel = xnestPixel(pWin->background.pixel);
         else
-            mask &= ~CWBackPixel;
+            mask &= ~XCB_CW_BACK_PIXEL;
     }
 
-    if (mask & CWBorderPixmap) {
+    if (mask & XCB_CW_BORDER_PIXMAP) {
         if (pWin->borderIsPixel)
-            mask &= ~CWBorderPixmap;
+            mask &= ~XCB_CW_BORDER_PIXMAP;
         else
             attributes.border_pixmap = xnestPixmap(pWin->border.pixmap);
     }
 
-    if (mask & CWBorderPixel) {
+    if (mask & XCB_CW_BORDER_PIXEL) {
         if (pWin->borderIsPixel)
             attributes.border_pixel = xnestPixel(pWin->border.pixel);
         else
-            mask &= ~CWBorderPixel;
+            mask &= ~XCB_CW_BORDER_PIXEL;
     }
 
-    if (mask & CWBitGravity)
+    if (mask & XCB_CW_BIT_GRAVITY)
         attributes.bit_gravity = pWin->bitGravity;
 
-    if (mask & CWWinGravity)    /* dix does this for us */
-        mask &= ~CWWinGravity;
+    if (mask & XCB_CW_WIN_GRAVITY)    /* dix does this for us */
+        mask &= ~XCB_CW_WIN_GRAVITY;
 
-    if (mask & CWBackingStore)  /* this is really not useful */
-        mask &= ~CWBackingStore;
+    if (mask & XCB_CW_BACKING_STORE)  /* this is really not useful */
+        mask &= ~XCB_CW_BACKING_STORE;
 
-    if (mask & CWBackingPlanes) /* this is really not useful */
-        mask &= ~CWBackingPlanes;
+    if (mask & XCB_CW_BACKING_PLANES) /* this is really not useful */
+        mask &= ~XCB_CW_BACKING_PLANES;
 
-    if (mask & CWBackingPixel)  /* this is really not useful */
-        mask &= ~CWBackingPixel;
+    if (mask & XCB_CW_BACKING_PIXEL)  /* this is really not useful */
+        mask &= ~XCB_CW_BACKING_PIXEL;
 
-    if (mask & CWOverrideRedirect)
+    if (mask & XCB_CW_OVERRIDE_REDIRECT)
         attributes.override_redirect = pWin->overrideRedirect;
 
-    if (mask & CWSaveUnder)     /* this is really not useful */
-        mask &= ~CWSaveUnder;
+    if (mask & XCB_CW_SAVE_UNDER)     /* this is really not useful */
+        mask &= ~XCB_CW_SAVE_UNDER;
 
-    if (mask & CWEventMask)     /* events are handled elsewhere */
-        mask &= ~CWEventMask;
+    if (mask & XCB_CW_EVENT_MASK)     /* events are handled elsewhere */
+        mask &= ~XCB_CW_EVENT_MASK;
 
-    if (mask & CWDontPropagate) /* events are handled elsewhere */
-        mask &= ~CWDontPropagate;
+    if (mask & XCB_CW_DONT_PROPAGATE) /* events are handled elsewhere */
+        mask &= ~XCB_CW_DONT_PROPAGATE;
 
-    if (mask & CWColormap) {
+    if (mask & XCB_CW_COLORMAP) {
         ColormapPtr pCmap;
 
         dixLookupResourceByType((void **) &pCmap, wColormap(pWin),
@@ -337,8 +337,8 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
         xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
     }
 
-    if (mask & CWCursor)        /* this is handled in cursor code */
-        mask &= ~CWCursor;
+    if (mask & XCB_CW_CURSOR)        /* this is handled in cursor code */
+        mask &= ~XCB_CW_CURSOR;
 
     if (mask)
         XChangeWindowAttributes(xnestDisplay, xnestWindow(pWin),
