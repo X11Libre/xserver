@@ -20,6 +20,8 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 
+#include <xcb/xcb_icccm.h>
+
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 
@@ -146,7 +148,6 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     int i, j, depthIndex;
     unsigned long valuemask;
     XWindowAttributes gattributes;
-    XSizeHints sizeHints;
     VisualID defaultVisual;
     int rootDepth;
     miPointerScreenPtr PointPriv;
@@ -401,20 +402,47 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
         if (!xnestWindowName)
             xnestWindowName = argv[0];
 
-        sizeHints.flags = PPosition | PSize | PMaxSize;
-        sizeHints.x = xnestX + POSITION_OFFSET;
-        sizeHints.y = xnestY + POSITION_OFFSET;
-        sizeHints.width = sizeHints.max_width = xnestWidth;
-        sizeHints.height = sizeHints.max_height = xnestHeight;
+        xcb_size_hints_t sizeHints = {
+            .flags = XCB_ICCCM_SIZE_HINT_P_POSITION | XCB_ICCCM_SIZE_HINT_P_SIZE | XCB_ICCCM_SIZE_HINT_P_MAX_SIZE,
+            .x = xnestX + POSITION_OFFSET,
+            .y = xnestY + POSITION_OFFSET,
+            .width = sizeHints.max_width = xnestWidth,
+            .height = sizeHints.max_height = xnestHeight,
+        };
+
         if (xnestUserGeometry & XValue || xnestUserGeometry & YValue)
-            sizeHints.flags |= USPosition;
+            sizeHints.flags |= XCB_ICCCM_SIZE_HINT_US_POSITION;
         if (xnestUserGeometry & WidthValue || xnestUserGeometry & HeightValue)
-            sizeHints.flags |= USSize;
-        XSetStandardProperties(xnestDisplay,
-                               xnestDefaultWindows[pScreen->myNum],
-                               xnestWindowName,
-                               xnestWindowName,
-                               xnestIconBitmap, argv, argc, &sizeHints);
+            sizeHints.flags |= XCB_ICCCM_SIZE_HINT_US_SIZE;
+
+        const size_t windowNameLen = strlen(xnestWindowName);
+
+        xcb_icccm_set_wm_name_checked(xnestUpstreamInfo.conn,
+                                      xnestDefaultWindows[pScreen->myNum],
+                                      XCB_ATOM_STRING,
+                                      8,
+                                      windowNameLen,
+                                      xnestWindowName);
+
+        xcb_icccm_set_wm_icon_name_checked(xnestUpstreamInfo.conn,
+                                           xnestDefaultWindows[pScreen->myNum],
+                                           XCB_ATOM_STRING,
+                                           8,
+                                           windowNameLen,
+                                           xnestWindowName);
+
+        xnest_set_command(xnestUpstreamInfo.conn,
+                          xnestDefaultWindows[pScreen->myNum],
+                          argv, argc);
+
+        xcb_icccm_wm_hints_t wmhints = {
+            .icon_pixmap = xnestIconBitmap,
+            .flags = XCB_ICCCM_WM_HINT_ICON_PIXMAP,
+        };
+
+        xcb_icccm_set_wm_hints_checked(xnestUpstreamInfo.conn,
+                                       xnestDefaultWindows[pScreen->myNum],
+                                       &wmhints);
 
         xcb_map_window(xnestUpstreamInfo.conn, xnestDefaultWindows[pScreen->myNum]);
 
