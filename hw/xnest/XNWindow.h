@@ -55,9 +55,6 @@ extern DevPrivateKeyRec xnestWindowPrivateKeyRec;
 #define xnestWindowSiblingBelow(pWin) \
   ((pWin)->nextSib ? xnestWindow((pWin)->nextSib) : None)
 
-#define CWParent CWSibling
-#define CWStackingOrder CWStackMode
-
 WindowPtr xnestWindowPtr(Window window);
 Bool xnestCreateWindow(WindowPtr pWin);
 Bool xnestDestroyWindow(WindowPtr pWin);
