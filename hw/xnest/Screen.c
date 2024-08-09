@@ -393,7 +393,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
             XCreateWindow(xnestDisplay,
                           xnestDefaultWindows[pScreen->myNum],
                           0, 0, xnestWidth, xnestHeight, 0,
-                          DefaultDepth(xnestDisplay, xnestUpstreamInfo.screenId),
+                          xnestUpstreamInfo.screenInfo->root_depth,
                           InputOutput, DefaultVisual(xnestDisplay,
                                                      xnestUpstreamInfo.screenId),
                           valuemask,
