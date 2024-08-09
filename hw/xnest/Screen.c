@@ -357,7 +357,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
             .colormap = xnestDefaultVisualColormap(xnestDefaultVisual(pScreen)),
         };
 
-        valuemask = CWBackPixel | CWEventMask | CWColormap;
+        valuemask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP;
 
         if (xnestParentWindow != 0) {
             xnestDefaultWindows[pScreen->myNum] = xnestParentWindow;
@@ -435,7 +435,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
         xcb_map_window(xnestUpstreamInfo.conn, xnestDefaultWindows[pScreen->myNum]);
 
-        valuemask = CWBackPixmap | CWColormap;
+        valuemask = XCB_CW_BACK_PIXMAP | XCB_CW_COLORMAP;
         attributes.background_pixmap = xnestScreenSaverPixmap;
         attributes.colormap =
             DefaultColormap(xnestDisplay, xnestUpstreamInfo.screenId);
