@@ -77,20 +77,23 @@ InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
     screen_info->bitmapScanlinePad = xnestUpstreamInfo.setup->bitmap_format_scanline_pad;
     screen_info->bitmapBitOrder = xnestUpstreamInfo.setup->bitmap_format_bit_order;
     screen_info->numPixmapFormats = 0;
-    for (i = 0; i < xnestNumPixmapFormats; i++) {
+
+    xcb_format_t *fmt = xcb_setup_pixmap_formats(xnestUpstreamInfo.setup);
+    const xcb_format_t *fmtend = fmt + xcb_setup_pixmap_formats_length(xnestUpstreamInfo.setup);
+    for(; fmt != fmtend; ++fmt) {
         xcb_depth_iterator_t depth_iter;
         for (depth_iter = xcb_screen_allowed_depths_iterator(xnestUpstreamInfo.screenInfo);
              depth_iter.rem;
              xcb_depth_next(&depth_iter))
         {
-            if ((xnestPixmapFormats[i].depth == 1) ||
-                (xnestPixmapFormats[i].depth == depth_iter.data->depth)) {
+            if ((fmt->depth == 1) ||
+                (fmt->depth == depth_iter.data->depth)) {
                 screen_info->formats[screen_info->numPixmapFormats].depth =
-                    xnestPixmapFormats[i].depth;
+                    fmt->depth;
                 screen_info->formats[screen_info->numPixmapFormats].bitsPerPixel =
-                    xnestPixmapFormats[i].bits_per_pixel;
+                    fmt->bits_per_pixel;
                 screen_info->formats[screen_info->numPixmapFormats].scanlinePad =
-                    xnestPixmapFormats[i].scanline_pad;
+                    fmt->scanline_pad;
                 screen_info->numPixmapFormats++;
                 break;
             }
