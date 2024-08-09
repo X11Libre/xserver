@@ -181,7 +181,7 @@ xnestOpenDisplay(int argc, char *argv[])
                                     screensaver_height,
                                     xnestUpstreamInfo.screenInfo->white_pixel,
                                     xnestUpstreamInfo.screenInfo->black_pixel,
-                                    DefaultDepth(xnestDisplay, xnestUpstreamInfo.screenId));
+                                    xnestUpstreamInfo.screenInfo->root_depth);
 }
 
 void
