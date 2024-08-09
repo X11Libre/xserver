@@ -34,6 +34,7 @@ is" without express or implied warranty.
 #include "dixfontstr.h"
 #include "extinit_priv.h"
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -70,11 +71,10 @@ InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
 
     xnestOpenDisplay(argc, argv);
 
-    screen_info->imageByteOrder = ImageByteOrder(xnestDisplay);
-    screen_info->bitmapScanlineUnit = BitmapUnit(xnestDisplay);
-    screen_info->bitmapScanlinePad = BitmapPad(xnestDisplay);
-    screen_info->bitmapBitOrder = BitmapBitOrder(xnestDisplay);
-
+    screen_info->imageByteOrder = xnestUpstreamInfo.setup->image_byte_order;
+    screen_info->bitmapScanlineUnit = xnestUpstreamInfo.setup->bitmap_format_scanline_unit;
+    screen_info->bitmapScanlinePad = xnestUpstreamInfo.setup->bitmap_format_scanline_pad;
+    screen_info->bitmapBitOrder = xnestUpstreamInfo.setup->bitmap_format_bit_order;
     screen_info->numPixmapFormats = 0;
     for (i = 0; i < xnestNumPixmapFormats; i++)
         for (j = 0; j < xnestNumDepths; j++)
