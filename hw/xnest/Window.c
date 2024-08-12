@@ -85,7 +85,7 @@ xnestCreateWindow(WindowPtr pWin)
     else {
         mask = XCB_CW_EVENT_MASK | XCB_CW_BACKING_STORE;
         attributes.event_mask = ExposureMask;
-        attributes.backing_store = NotUseful;
+        attributes.backing_store = XCB_BACKING_STORE_NOT_USEFUL;
 
         if (pWin->parent) {
             if (pWin->optional &&

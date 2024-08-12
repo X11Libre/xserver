@@ -249,8 +249,8 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     pScreen->defColormap = (Colormap) FakeClientID(0);
     pScreen->minInstalledCmaps = MINCMAPS;
     pScreen->maxInstalledCmaps = MAXCMAPS;
-    pScreen->backingStoreSupport = NotUseful;
-    pScreen->saveUnderSupport = NotUseful;
+    pScreen->backingStoreSupport = XCB_BACKING_STORE_NOT_USEFUL;
+    pScreen->saveUnderSupport = XCB_BACKING_STORE_NOT_USEFUL;
     pScreen->whitePixel = xnestWhitePixel;
     pScreen->blackPixel = xnestBlackPixel;
     /* GCperDepth */
