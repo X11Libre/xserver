@@ -379,8 +379,10 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
         if (xnestParentWindow != 0) {
             xnestDefaultWindows[pScreen->myNum] = xnestParentWindow;
-            XSelectInput(xnestDisplay, xnestDefaultWindows[pScreen->myNum],
-                         xnestEventMask);
+            xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                         xnestDefaultWindows[pScreen->myNum],
+                                         XCB_CW_EVENT_MASK,
+                                         &xnestEventMask);
         }
         else {
             xnestDefaultWindows[pScreen->myNum] = xcb_generate_id(xnestUpstreamInfo.conn);
