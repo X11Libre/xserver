@@ -127,7 +127,7 @@ xnestOpenDisplay(int argc, char *argv[])
     }
 
     if (xnestParentWindow != (Window) 0)
-        xnestEventMask = StructureNotifyMask;
+        xnestEventMask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
     else
         xnestEventMask = 0L;
 
