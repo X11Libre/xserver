@@ -183,12 +183,18 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
     case DEVICE_ON:
         xnestEventMask |= XNEST_KEYBOARD_EVENT_MASK;
         for (i = 0; i < xnestNumScreens; i++)
-            XSelectInput(xnestDisplay, xnestDefaultWindows[i], xnestEventMask);
+            xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                         xnestDefaultWindows[i],
+                                         XCB_CW_EVENT_MASK,
+                                         &xnestEventMask);
         break;
     case DEVICE_OFF:
         xnestEventMask &= ~XNEST_KEYBOARD_EVENT_MASK;
         for (i = 0; i < xnestNumScreens; i++)
-            XSelectInput(xnestDisplay, xnestDefaultWindows[i], xnestEventMask);
+            xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                         xnestDefaultWindows[i],
+                                         XCB_CW_EVENT_MASK,
+                                         &xnestEventMask);
         break;
     case DEVICE_CLOSE:
         break;

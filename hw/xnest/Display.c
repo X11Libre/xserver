@@ -49,7 +49,7 @@ Drawable xnestDefaultDrawables[MAXDEPTH + 1];
 Pixmap xnestIconBitmap;
 Pixmap xnestScreenSaverPixmap;
 uint32_t xnestBitmapGC;
-unsigned long xnestEventMask;
+uint32_t xnestEventMask;
 
 static int _X_NORETURN
 x_io_error_handler(Display * dpy)
