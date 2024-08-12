@@ -136,7 +136,7 @@ xnestDestroyColormap(ColormapPtr pCmap)
 }
 
 #define SEARCH_PREDICATE \
-  (xnestWindow(pWin) != None && wColormap(pWin) == icws->cmapIDs[i])
+  (xnestWindow(pWin) != XCB_WINDOW_NONE && wColormap(pWin) == icws->cmapIDs[i])
 
 static int
 xnestCountInstalledColormapWindows(WindowPtr pWin, void *ptr)
@@ -345,7 +345,7 @@ xnestInstallColormap(ColormapPtr pCmap)
         xnestDirectUninstallColormaps(pCmap->pScreen);
 
         /* Uninstall pInstalledMap. Notify all interested parties. */
-        if (pOldCmap != (ColormapPtr) None)
+        if (pOldCmap != (ColormapPtr) XCB_COLORMAP_NONE)
             WalkTree(pCmap->pScreen, TellLostMap, (void *) &pOldCmap->mid);
 
         SetInstalledColormap(pCmap->pScreen, pCmap);

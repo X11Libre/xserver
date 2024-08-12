@@ -63,5 +63,5 @@ xnestDefaultVisualColormap(Visual * visual)
         if (xnestVisuals[i].visual == visual)
             return xnestDefaultColormaps[i];
 
-    return None;
+    return XCB_WINDOW_NONE;
 }
