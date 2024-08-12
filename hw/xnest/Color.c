@@ -342,7 +342,7 @@ xnestInstallColormap(ColormapPtr pCmap)
         xnestDirectUninstallColormaps(pCmap->pScreen);
 
         /* Uninstall pInstalledMap. Notify all interested parties. */
-        if (pOldCmap != (ColormapPtr) None)
+        if (pOldCmap != (ColormapPtr) XCB_NONE)
             WalkTree(pCmap->pScreen, TellLostMap, (void *) &pOldCmap->mid);
 
         SetInstalledColormap(pCmap->pScreen, pCmap);
