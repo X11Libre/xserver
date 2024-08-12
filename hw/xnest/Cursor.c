@@ -52,7 +52,7 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     values.plane_mask = AllPlanes;
     values.foreground = 1L;
     values.background = 0L;
-    values.clip_mask = None;
+    values.clip_mask = XCB_PIXMAP_NONE;
 
     XChangeGC(xnestDisplay, xnestBitmapGC, valuemask, &values);
 
