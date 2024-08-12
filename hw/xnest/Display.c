@@ -141,7 +141,7 @@ xnestOpenDisplay(int argc, char *argv[])
         xnestEventMask = 0L;
 
     for (i = 0; i <= MAXDEPTH; i++)
-        xnestDefaultDrawables[i] = None;
+        xnestDefaultDrawables[i] = XCB_WINDOW_NONE;
 
     for (i = 0; i < xnestNumPixmapFormats; i++)
         for (j = 0; j < xnestNumDepths; j++)

@@ -197,7 +197,7 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
 
     switch (type) {
     case CT_NONE:
-        XSetClipMask(xnestDisplay, xnestGC(pGC), None);
+        XSetClipMask(xnestDisplay, xnestGC(pGC), XCB_PIXMAP_NONE);
         pValue = NULL;
         break;
 
@@ -277,7 +277,7 @@ xnestDestroyClip(GCPtr pGC)
 {
     if (pGC->clientClip) {
         RegionDestroy(pGC->clientClip);
-        XSetClipMask(xnestDisplay, xnestGC(pGC), None);
+        XSetClipMask(xnestDisplay, xnestGC(pGC), XCB_PIXMAP_NONE);
         pGC->clientClip = NULL;
     }
 }
