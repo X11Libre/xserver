@@ -7,8 +7,6 @@
 
 #include <xcb/xcb.h>
 
-#include "Xnest.h"
-
 typedef struct {
     xcb_connection_t *conn;
     uint32_t screenId;
@@ -27,7 +25,24 @@ uint32_t xnestUpstreamXID(void);
 /* retrieve upstream GC XID for our xserver GC */
 uint32_t xnestUpstreamGC(GCPtr pGC);
 
-typedef XSetWindowAttributes XnSetWindowAttr;
+typedef struct {
+    uint32_t background_pixmap;
+    uint32_t background_pixel;
+    uint32_t border_pixmap;
+    uint32_t border_pixel;
+    uint16_t bit_gravity;
+    uint16_t win_gravity;
+    uint16_t backing_store;
+    uint32_t backing_planes;
+    uint32_t backing_pixel;
+    Bool save_under;
+    uint32_t event_mask;
+    uint32_t do_not_propagate_mask;
+    Bool override_redirect;
+    uint32_t colormap;
+    uint32_t cursor;
+} XnSetWindowAttr;
+
 void xnestEncodeWindowAttr(XnSetWindowAttr attr, uint32_t mask, uint32_t *values);
 
 typedef struct {
