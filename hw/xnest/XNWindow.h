@@ -50,10 +50,10 @@ extern DevPrivateKeyRec xnestWindowPrivateKeyRec;
    xnestDefaultWindows[pWin->drawable.pScreen->myNum])
 
 #define xnestWindowSiblingAbove(pWin) \
-  ((pWin)->prevSib ? xnestWindow((pWin)->prevSib) : None)
+  ((pWin)->prevSib ? xnestWindow((pWin)->prevSib) : XCB_WINDOW_NONE)
 
 #define xnestWindowSiblingBelow(pWin) \
-  ((pWin)->nextSib ? xnestWindow((pWin)->nextSib) : None)
+  ((pWin)->nextSib ? xnestWindow((pWin)->nextSib) : XCB_WINDOW_NONE)
 
 WindowPtr xnestWindowPtr(Window window);
 Bool xnestCreateWindow(WindowPtr pWin);
