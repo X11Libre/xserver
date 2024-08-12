@@ -132,7 +132,7 @@ xnestOpenDisplay(int argc, char *argv[])
         xnestEventMask = 0L;
 
     for (i = 0; i <= MAXDEPTH; i++)
-        xnestDefaultDrawables[i] = None;
+        xnestDefaultDrawables[i] = XCB_WINDOW_NONE;
 
     xcb_format_t *fmt = xcb_setup_pixmap_formats(xnestUpstreamInfo.setup);
     const xcb_format_t *fmtend = fmt + xcb_setup_pixmap_formats_length(xnestUpstreamInfo.setup);

@@ -152,7 +152,7 @@ xnestDestroyColormap(ColormapPtr pCmap)
 }
 
 #define SEARCH_PREDICATE \
-  (xnestWindow(pWin) != None && wColormap(pWin) == icws->cmapIDs[i])
+  (xnestWindow(pWin) != XCB_WINDOW_NONE && wColormap(pWin) == icws->cmapIDs[i])
 
 static int
 xnestCountInstalledColormapWindows(WindowPtr pWin, void *ptr)

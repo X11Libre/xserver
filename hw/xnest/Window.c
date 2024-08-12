@@ -145,7 +145,7 @@ xnestCreateWindow(WindowPtr pWin)
     xnestWindowPriv(pWin)->width = pWin->drawable.width;
     xnestWindowPriv(pWin)->height = pWin->drawable.height;
     xnestWindowPriv(pWin)->border_width = pWin->borderWidth;
-    xnestWindowPriv(pWin)->sibling_above = None;
+    xnestWindowPriv(pWin)->sibling_above = XCB_WINDOW_NONE;
     if (pWin->nextSib)
         xnestWindowPriv(pWin->nextSib)->sibling_above = xnestWindow(pWin);
     xnestWindowPriv(pWin)->bounding_shape = RegionCreate(NULL, 1);
@@ -166,7 +166,7 @@ xnestDestroyWindow(WindowPtr pWin)
     RegionDestroy(xnestWindowPriv(pWin)->bounding_shape);
     RegionDestroy(xnestWindowPriv(pWin)->clip_shape);
     xcb_destroy_window(xnestUpstreamInfo.conn, xnestWindow(pWin));
-    xnestWindowPriv(pWin)->window = None;
+    xnestWindowPriv(pWin)->window = XCB_WINDOW_NONE;
 
     if (pWin->optional && pWin->optional->colormap && pWin->parent)
         xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
@@ -203,7 +203,7 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
         xnestWindowPriv(pWin)->parent = xnestWindowParent(pWin);
         xnestWindowPriv(pWin)->x = pWin->origin.x - wBorderWidth(pWin);
         xnestWindowPriv(pWin)->y = pWin->origin.y - wBorderWidth(pWin);
-        xnestWindowPriv(pWin)->sibling_above = None;
+        xnestWindowPriv(pWin)->sibling_above = XCB_WINDOW_NONE;
         if (pWin->nextSib)
             xnestWindowPriv(pWin->nextSib)->sibling_above = xnestWindow(pWin);
     }
@@ -257,7 +257,7 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
 
         xnConfigureWindow(xnestUpstreamInfo.conn, xnestWindow(pSib), valuemask, values);
 
-        xnestWindowPriv(pSib)->sibling_above = None;
+        xnestWindowPriv(pSib)->sibling_above = XCB_WINDOW_NONE;
 
         /* the rest of siblings */
         for (pSib = pSib->nextSib; pSib != NullWindow; pSib = pSib->nextSib) {
@@ -279,7 +279,7 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
     if (mask & XCB_CW_BACK_PIXMAP)
         switch (pWin->backgroundState) {
         case XCB_BACK_PIXMAP_NONE:
-            attributes.background_pixmap = None;
+            attributes.background_pixmap = XCB_PIXMAP_NONE;
             break;
 
         case XCB_BACK_PIXMAP_PARENT_RELATIVE:
