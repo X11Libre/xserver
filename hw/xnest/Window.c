@@ -265,11 +265,11 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
 
     if (mask & XCB_CW_BACK_PIXMAP)
         switch (pWin->backgroundState) {
-        case None:
+        case XCB_BACK_PIXMAP_NONE:
             attributes.background_pixmap = None;
             break;
 
-        case ParentRelative:
+        case XCB_BACK_PIXMAP_PARENT_RELATIVE:
             attributes.background_pixmap = ParentRelative;
             break;
 
