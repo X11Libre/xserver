@@ -118,4 +118,6 @@ xcb_get_keyboard_mapping_reply_t *xnestGetKeyboardMapping(
     int count
 );
 
+void xnestGetPointerControl(xcb_connection_t *conn, int *acc_num, int *acc_den, int *threshold);
+
 #endif /* __XNEST__XCB_H */
