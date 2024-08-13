@@ -359,3 +359,29 @@ xcb_get_keyboard_mapping_reply_t *xnestGetKeyboardMapping(
 
     return reply;
 }
+
+void xnestGetPointerControl(
+    xcb_connection_t *conn,
+    int *acc_num,
+    int *acc_den,
+    int *threshold)
+{
+    xcb_get_pointer_control_cookie_t cookie = xcb_get_pointer_control(
+        xnestUpstreamInfo.conn);
+
+    xcb_generic_error_t *err = NULL;
+    xcb_get_pointer_control_reply_t *reply = xcb_get_pointer_control_reply(
+        xnestUpstreamInfo.conn,
+        cookie,
+        &err);
+
+    if (err) {
+        ErrorF("error retrieving pointer control data: %d\n", err->error_code);
+        free(err);
+    } else {
+        *acc_num = reply->acceleration_numerator;
+        *acc_den = reply->acceleration_denominator;
+        *threshold = reply->threshold;
+        free(reply);
+    }
+}
