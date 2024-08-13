@@ -112,4 +112,10 @@ void xnestSetCommand(xcb_connection_t *conn, xcb_window_t window, char ** argv, 
 void xnestXkbInit(xcb_connection_t *conn);
 int xnestXkbDeviceId(xcb_connection_t *conn);
 
+xcb_get_keyboard_mapping_reply_t *xnestGetKeyboardMapping(
+    xcb_connection_t *conn,
+    int min_keycode,
+    int count
+);
+
 #endif /* __XNEST__XCB_H */
