@@ -11,6 +11,7 @@
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
+#include <xcb/xkb.h>
 
 #include "include/gc.h"
 #include "include/servermd.h"
@@ -179,4 +180,67 @@ void xnest_set_command(
                         8,
                         nbytes,
                         buf);
+}
+
+void xnest_xkb_init(xcb_connection_t *conn)
+{
+    xcb_generic_error_t *err = NULL;
+    xcb_xkb_use_extension_reply_t *reply = xcb_xkb_use_extension_reply(
+        xnestUpstreamInfo.conn,
+        xcb_xkb_use_extension(
+            xnestUpstreamInfo.conn,
+            XCB_XKB_MAJOR_VERSION,
+            XCB_XKB_MINOR_VERSION),
+        &err);
+
+    if (err) {
+        ErrorF("failed query xkb extension: %d\n", err->error_code);
+        free(err);
+    } else {
+        free(reply);
+    }
+}
+
+#define XkbGBN_AllComponentsMask_2 ( \
+    XCB_XKB_GBN_DETAIL_TYPES | \
+    XCB_XKB_GBN_DETAIL_COMPAT_MAP | \
+    XCB_XKB_GBN_DETAIL_CLIENT_SYMBOLS | \
+    XCB_XKB_GBN_DETAIL_SERVER_SYMBOLS | \
+    XCB_XKB_GBN_DETAIL_INDICATOR_MAPS | \
+    XCB_XKB_GBN_DETAIL_KEY_NAMES | \
+    XCB_XKB_GBN_DETAIL_GEOMETRY | \
+    XCB_XKB_GBN_DETAIL_OTHER_NAMES)
+
+int xnest_xkb_device_id(xcb_connection_t *conn)
+{
+    int device_id = -1;
+    uint8_t xlen[6] = { 0 };
+    xcb_generic_error_t *err = NULL;
+
+    xcb_xkb_get_kbd_by_name_reply_t *reply = xcb_xkb_get_kbd_by_name_reply(
+        xnestUpstreamInfo.conn,
+        xcb_xkb_get_kbd_by_name(
+            xnestUpstreamInfo.conn,
+            XCB_XKB_ID_USE_CORE_KBD,
+            XkbGBN_AllComponentsMask_2,
+            XkbGBN_AllComponentsMask_2,
+            0,
+            sizeof(xlen),
+            xlen),
+        &err);
+
+    if (err) {
+        ErrorF("failed retrieving core keyboard: %d\n", err->error_code);
+        free(err);
+        return -1;
+    }
+
+    if (!reply) {
+        ErrorF("failed retrieving core keyboard: no reply");
+        return -1;
+    }
+
+    device_id = reply->deviceID;
+    free(reply);
+    return device_id;
 }
