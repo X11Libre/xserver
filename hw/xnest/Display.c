@@ -110,8 +110,7 @@ xnestOpenDisplay(int argc, char *argv[])
             FatalError("Unable to find desired default visual.\n");
     }
     else {
-        vi.visualid = XVisualIDFromVisual(DefaultVisual(xnestDisplay,
-                                                        xnestUpstreamInfo.screenId));
+        vi.visualid = xnestUpstreamInfo.screenInfo->root_visual;
         xnestDefaultVisualIndex = 0;
         for (i = 0; i < xnestNumVisuals; i++)
             if (vi.visualid == xnestVisuals[i].visualid)
