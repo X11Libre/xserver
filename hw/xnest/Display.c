@@ -88,10 +88,12 @@ xnestOpenDisplay(int argc, char *argv[])
 
     mask = VisualScreenMask;
     vi.screen = xnestUpstreamInfo.screenId;
+    fprintf(stderr, "fetch visuals for screen #%d\n", vi.screen);
     xnestVisuals = XGetVisualInfo(xnestDisplay, mask, &vi, &xnestNumVisuals);
     if (xnestNumVisuals == 0 || xnestVisuals == NULL)
         FatalError("Unable to find any visuals.\n");
 
+    fprintf(stderr, "now got %d visuals\n", xnestNumVisuals);
     if (xnestUserDefaultClass || xnestUserDefaultDepth) {
         xnestDefaultVisualIndex = UNDEFINED;
         for (i = 0; i < xnestNumVisuals; i++)
@@ -112,6 +114,23 @@ xnestOpenDisplay(int argc, char *argv[])
         for (i = 0; i < xnestNumVisuals; i++)
             if (vi.visualid == xnestVisuals[i].visualid)
                 xnestDefaultVisualIndex = i;
+    }
+
+    /* visuals */
+    {
+        xcb_depth_iterator_t depth_iter;
+        for (depth_iter = xcb_screen_allowed_depths_iterator(xnestUpstreamInfo.screenInfo);
+             depth_iter.rem;
+             xcb_depth_next(&depth_iter))
+        {
+            int vlen = xcb_depth_visuals_length (depth_iter.data);
+            fprintf(stderr, "Depth: %d nvisuals %d\n", depth_iter.data->depth, depth_iter.data->visuals_len);
+            xcb_visualtype_t *vts = xcb_depth_visuals (depth_iter.data);
+            for (int x=0; x<vlen; x++) {
+                fprintf(stderr, "#%d: ID=%d cls=%d bits=%d cmlen=%d rmask=%d gmask=%d bmask=%d\n",
+                    x, vts[x].visual_id, vts[x]._class, vts[x].bits_per_rgb_value, vts[x].red_mask, vts[x].green_mask, vts[x].blue_mask);
+            }
+        }
     }
 
     xnestNumDefaultColormaps = xnestNumVisuals;

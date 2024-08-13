@@ -182,6 +182,8 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     depths[0].vids = (VisualID *) malloc(MAXVISUALSPERDEPTH * sizeof(VisualID));
     numDepths = 1;
 
+    fprintf(stderr, "xnestNumVisuals=%d\n", xnestNumVisuals);
+
     for (i = 0; i < xnestNumVisuals; i++) {
         visuals[numVisuals].class = xnestVisuals[i].class;
         visuals[numVisuals].bitsPerRGBValue = xnestVisuals[i].bits_per_rgb;
