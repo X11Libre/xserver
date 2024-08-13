@@ -73,10 +73,11 @@ xnestPointerProc(DeviceIntPtr pDev, int onoff)
         axes_labels[0] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_X);
         axes_labels[1] = XIGetKnownProperty(AXIS_LABEL_PROP_REL_Y);
 
-        XGetPointerControl(xnestDisplay,
-                           &defaultPointerControl.num,
-                           &defaultPointerControl.den,
-                           &defaultPointerControl.threshold);
+        xnest_get_pointer_control(xnestUpstreamInfo.conn,
+                                  &defaultPointerControl.num,
+                                  &defaultPointerControl.den,
+                                  &defaultPointerControl.threshold);
+
         InitPointerDeviceStruct(&pDev->public, map, nmap, btn_labels,
                                 xnestChangePointerControl,
                                 GetMotionHistorySize(), 2, axes_labels);
