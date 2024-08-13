@@ -95,19 +95,28 @@ _XkbLookupKeyboard(DeviceIntPtr *pDev, int id, ClientPtr client,
     DeviceIntPtr dev;
     int rc;
 
+    fprintf(stderr, "lookup keyboard: id=%d\n", id);
+
     if (id == XkbDfltXIId)
+    {
         id = XkbUseCoreKbd;
+        fprintf(stderr, "--> using core kbd\n");
+    }
 
     rc = _XkbLookupAnyDevice(pDev, id, client, access_mode, xkb_err);
-    if (rc != Success)
+    if (rc != Success) {
+        fprintf(stderr, "didn't find any device %d\n", rc);
         return rc;
+    }
 
     dev = *pDev;
     if (!dev->key || !dev->key->xkbInfo) {
         *pDev = NULL;
         *xkb_err = XkbErr_BadClass;
+        fprintf(stderr, "xkbErr_BadClass\n");
         return XkbKeyboardErrorCode;
     }
+    fprintf(stderr, "success\n");
     return Success;
 }
 

@@ -700,10 +700,16 @@ ProcXkbGetControls(ClientPtr client)
     REQUEST(xkbGetControlsReq);
     REQUEST_SIZE_MATCH(xkbGetControlsReq);
 
-    if (!(client->xkbClientFlags & _XkbClientInitialized))
+    if (!(client->xkbClientFlags & _XkbClientInitialized)) {
+        fprintf(stderr, "xkb: client not initialized\n");
         return BadAccess;
+    }
+
+    fprintf(stderr, "checking device\n");
 
     CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixGetAttrAccess);
+
+    fprintf(stderr, "huhu\n");
 
     xkb = dev->key->xkbInfo->desc->ctrls;
     rep = (xkbGetControlsReply) {
@@ -762,6 +768,7 @@ ProcXkbGetControls(ClientPtr client)
         swaps(&rep.axOptions);
     }
     WriteToClient(client, SIZEOF(xkbGetControlsReply), &rep);
+    fprintf(stderr, "xkb: success\n");
     return Success;
 }
 
@@ -5810,12 +5817,15 @@ GetComponentSpec(ClientPtr client, xkbGetKbdByNameReq *stuff,
 
     wire = *pWire;
     if (!_XkbCheckRequestBounds(client, stuff, wire, wire + 1)) {
+        fprintf(stderr, "_XkbCheckRequestBounds() failed\n");
         *errRtrn = BadLength;
         return NULL;
     }
     len = (*(unsigned char *) wire++);
+    fprintf(stderr, "GetComponentSpec: len=%d\n", len);
     if (len > 0) {
         if (!_XkbCheckRequestBounds(client, stuff, wire, wire + len)) {
+            fprintf(stderr, "_XkbCheckRequestBounds() 2 failed\n");
             *errRtrn = BadLength;
             return NULL;
         }
@@ -5939,10 +5949,19 @@ ProcXkbGetKbdByName(ClientPtr client)
     REQUEST(xkbGetKbdByNameReq);
     REQUEST_AT_LEAST_SIZE(xkbGetKbdByNameReq);
 
+    fprintf(stderr, "ProcXkbGetKbdByName: req size = %d\n", client->req_len);
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
+    fprintf(stderr, "req header size = %d %d\n", sizeof(xkbGetKbdByNameReq), sizeof(xkbGetKbdByNameReq)/4);
+    char *buf = (char*)&stuff[1];
+
+    fprintf(stderr, "payload: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+        buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
+
+    fprintf(stderr, "ProcXkbGetKbdByName: checking for device %d\n", stuff->deviceSpec);
     CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, access_mode);
+    fprintf(stderr, "ProcXkbGetKbdByName: check okay\n");
     master = GetMaster(dev, MASTER_KEYBOARD);
 
     xkb = dev->key->xkbInfo->desc;
@@ -5952,19 +5971,38 @@ ProcXkbGetKbdByName(ClientPtr client)
         char *keymap = GetComponentSpec(client, stuff, &str, TRUE, &status);  /* keymap, unsupported */
         if (keymap) {
             free(keymap);
+            fprintf(stderr, "badmatch 2\n");
             return BadMatch;
         }
+        fprintf(stderr, "no keymap given. OK\n");
+    }
+    if (status != Success) {
+        fprintf(stderr, "--> status %d\n", status);
     }
     names.keycodes = GetComponentSpec(client, stuff, &str, TRUE, &status);
+    if (status != Success)
+        fprintf(stderr, "GetComponentSpec keycodes failed\n");
     names.types = GetComponentSpec(client, stuff, &str, TRUE, &status);
+    if (status != Success)
+        fprintf(stderr, "GetComponentSpec types failed\n");
     names.compat = GetComponentSpec(client, stuff, &str, TRUE, &status);
+    if (status != Success)
+        fprintf(stderr, "GetComponentSpec compat failed\n");
     names.symbols = GetComponentSpec(client, stuff, &str, TRUE, &status);
+    if (status != Success)
+        fprintf(stderr, "GetComponentSpec symbols failed\n");
     names.geometry = GetComponentSpec(client, stuff, &str, TRUE, &status);
+    if (status != Success)
+        fprintf(stderr, "GetComponentSpec geometry failed\n");
     if (status == Success) {
         len = str - ((unsigned char *) stuff);
-        if ((XkbPaddedSize(len) / 4) != stuff->length)
+        if ((XkbPaddedSize(len) / 4) != stuff->length) {
             status = BadLength;
+            fprintf(stderr, "BadLength: expected %d got %d\n", (XkbPaddedSize(len) / 4), stuff->length);
+        }
     }
+
+    fprintf(stderr, "ProcXkbGetKbdByName: status=%d\n", status);
 
     if (status != Success) {
         free(names.keycodes);
@@ -5972,9 +6010,11 @@ ProcXkbGetKbdByName(ClientPtr client)
         free(names.compat);
         free(names.symbols);
         free(names.geometry);
+        fprintf(stderr, "return failed\n");
         return status;
     }
 
+    fprintf(stderr, "ProcXkbGetKbdByName: checking mask legal\n");
     CHK_MASK_LEGAL(0x01, stuff->want, XkbGBN_AllComponentsMask);
     CHK_MASK_LEGAL(0x02, stuff->need, XkbGBN_AllComponentsMask);
 
@@ -5998,6 +6038,8 @@ ProcXkbGetKbdByName(ClientPtr client)
         names.geometry = Xstrdup("%");
         geom_changed = FALSE;
     }
+
+    fprintf(stderr, "ProcXkbGetKbdByName() sending reply dev->id=%d...\n", dev->id);
 
     memset(mapFile, 0, PATH_MAX);
     rep.type = X_Reply;
@@ -6253,6 +6295,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     XkbSetCauseXkbReq(&cause, X_kbGetKbdByName, client);
     XkbUpdateAllDeviceIndicators(NULL, &cause);
 
+    fprintf(stderr, "ProcXkbGetKbdByName() return success\n");
     return Success;
 }
 
@@ -7025,6 +7068,8 @@ static int
 ProcXkbDispatch(ClientPtr client)
 {
     REQUEST(xReq);
+
+    fprintf(stderr, "xkbDispatch: data=%d\n", stuff->data);
     switch (stuff->data) {
     case X_kbUseExtension:
         return ProcXkbUseExtension(client);
@@ -7037,8 +7082,10 @@ ProcXkbDispatch(ClientPtr client)
     case X_kbLatchLockState:
         return ProcXkbLatchLockState(client);
     case X_kbGetControls:
+        fprintf(stderr, "GetControls\n");
         return ProcXkbGetControls(client);
     case X_kbSetControls:
+        fprintf(stderr, "SetControls\n");
         return ProcXkbSetControls(client);
     case X_kbGetMap:
         return ProcXkbGetMap(client);
