@@ -53,18 +53,12 @@ xnestChangePointerControl(DeviceIntPtr pDev, PtrCtrl * ctrl)
 int
 xnestPointerProc(DeviceIntPtr pDev, int onoff)
 {
-    CARD8 map[MAXBUTTONS];
     Atom btn_labels[MAXBUTTONS] = { 0 };
     Atom axes_labels[2] = { 0 };
-    int nmap;
     int i;
 
     switch (onoff) {
     case DEVICE_INIT:
-        nmap = XGetPointerMapping(xnestDisplay, map, MAXBUTTONS);
-        for (i = 0; i <= nmap; i++)
-            map[i] = i;         /* buttons are already mapped */
-
         btn_labels[0] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_LEFT);
         btn_labels[1] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_MIDDLE);
         btn_labels[2] = XIGetKnownProperty(BTN_LABEL_PROP_BTN_RIGHT);
@@ -81,9 +75,29 @@ xnestPointerProc(DeviceIntPtr pDev, int onoff)
                                &defaultPointerControl.den,
                                &defaultPointerControl.threshold);
 
-        InitPointerDeviceStruct(&pDev->public, map, nmap, btn_labels,
+        xcb_get_pointer_mapping_cookie_t pm_cookie =
+            xcb_get_pointer_mapping(xnestUpstreamInfo.conn);
+        xcb_generic_error_t *pm_err = NULL;
+        xcb_get_pointer_mapping_reply_t *pm_reply =
+            xcb_get_pointer_mapping_reply(xnestUpstreamInfo.conn, pm_cookie, &pm_err);
+        if (pm_err) {
+            ErrorF("failed getting pointer mapping %d\n", pm_err->error_code);
+            free(pm_err);
+            break;
+        }
+
+        const int nmap = xcb_get_pointer_mapping_map_length(pm_reply);
+        uint8_t *map = xcb_get_pointer_mapping_map(pm_reply);
+        for (i=0; i<nmap; i++)
+            map[i] = i;         /* buttons are already mapped */
+
+        InitPointerDeviceStruct(&pDev->public,
+                                map,
+                                nmap,
+                                btn_labels,
                                 xnestChangePointerControl,
                                 GetMotionHistorySize(), 2, axes_labels);
+        free(pm_reply);
         break;
     case DEVICE_ON:
         xnestEventMask |= XNEST_POINTER_EVENT_MASK;
