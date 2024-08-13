@@ -39,7 +39,6 @@ is" without express or implied warranty.
 #include "Events.h"
 
 // must come after Xnest.h, because of trickery to avoid name clash
-#include <X11/XKBlib.h>
 #include <X11/extensions/XKB.h>
 
 #include "xkbsrv.h"
@@ -98,7 +97,6 @@ int
 xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
 {
     int i, j;
-    XKeyboardState values;
 
     switch (onoff) {
     case DEVICE_INIT:
@@ -240,10 +238,27 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
     }
     return Success;
 
- XkbError:
-    XGetKeyboardControl(xnestDisplay, &values);
-    memmove((char *) defaultKeyboardControl.autoRepeats,
-            (char *) values.auto_repeats, sizeof(values.auto_repeats));
+XkbError:
+    {
+        xcb_generic_error_t *ctrl_err = NULL;
+        xcb_get_keyboard_control_reply_t *ctrl_reply =
+            xcb_get_keyboard_control_reply(xnestUpstreamInfo.conn,
+                                           xcb_get_keyboard_control(xnestUpstreamInfo.conn),
+                                           &ctrl_err);
+        if (ctrl_err) {
+            ErrorF("failed retrieving keyboard control: %d\n", ctrl_err->error_code);
+            free(ctrl_err);
+        }
+        else if (!ctrl_reply) {
+            ErrorF("failed retrieving keyboard control: no reply\n");
+        }
+        else {
+            memcpy(defaultKeyboardControl.autoRepeats,
+                   ctrl_reply->auto_repeats,
+                   sizeof(ctrl_reply->auto_repeats));
+            free(ctrl_reply);
+        }
+    }
 
     InitKeyboardDeviceStruct(pDev, NULL, xnestBell, xnestChangeKeyboardControl);
     return Success;
