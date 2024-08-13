@@ -97,8 +97,6 @@ xnestChangeKeyboardControl(DeviceIntPtr pDev, KeybdCtrl * ctrl)
 int
 xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
 {
-    XModifierKeymap *modifier_keymap;
-    CARD8 modmap[MAP_LENGTH];
     int i, j;
     XKeyboardState values;
 
@@ -126,19 +124,34 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
             .map = xcb_get_keyboard_mapping_keysyms(keymap_reply),
         };
 
-        memset(modmap, 0, sizeof(modmap));
-        modifier_keymap = XGetModifierMapping(xnestDisplay);
+        xcb_generic_error_t *mod_err = NULL;
+        xcb_get_modifier_mapping_reply_t *mod_reply = xcb_get_modifier_mapping_reply(
+            xnestUpstreamInfo.conn,
+            xcb_get_modifier_mapping(xnestUpstreamInfo.conn),
+            &mod_err);
+
+        if (mod_err) {
+            free(keymap_reply);
+            ErrorF("Couldn't get keyboard modifier mapping: %d\n", mod_err->error_code);
+            goto XkbError;
+        }
+
+        if (!mod_reply) {
+            free(keymap_reply);
+            ErrorF("Couldn't get keyboard modifier mapping: no reply\n");
+            goto XkbError;
+        }
+
+        xcb_keycode_t *mod_keycodes = xcb_get_modifier_mapping_keycodes(mod_reply);
+        CARD8 modmap[MAP_LENGTH] = { 0 };
         for (j = 0; j < 8; j++)
-            for (i = 0; i < modifier_keymap->max_keypermod; i++) {
+            for (i = 0; i < mod_reply->keycodes_per_modifier; i++) {
                 CARD8 keycode;
 
                 if ((keycode =
-                     modifier_keymap->modifiermap[j *
-                                                  modifier_keymap->
-                                                  max_keypermod + i]))
+                     mod_keycodes[j * mod_reply->keycodes_per_modifier + i]))
                     modmap[keycode] |= 1 << j;
             }
-        XFreeModifiermap(modifier_keymap);
 
         InitKeyboardDeviceStruct(pDev, NULL,
                                  xnestBell, xnestChangeKeyboardControl);
