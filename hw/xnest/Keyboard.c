@@ -29,6 +29,7 @@ is" without express or implied warranty.
 #include "servermd.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
@@ -98,7 +99,6 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
     XModifierKeymap *modifier_keymap;
     KeySym *keymap;
     int mapWidth;
-    int min_keycode, max_keycode;
     KeySymsRec keySyms;
     CARD8 modmap[MAP_LENGTH];
     int i, j;
@@ -108,7 +108,11 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
 
     switch (onoff) {
     case DEVICE_INIT:
-        XDisplayKeycodes(xnestDisplay, &min_keycode, &max_keycode);
+    {
+        const int min_keycode = xnestUpstreamInfo.setup->min_keycode;
+        const int max_keycode = xnestUpstreamInfo.setup->max_keycode;
+        const int num_keycode = max_keycode - min_keycode + 1;
+
 #ifdef _XSERVER64
         {
             KeySym64 *keymap64;
@@ -116,7 +120,7 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
 
             keymap64 = XGetKeyboardMapping(xnestDisplay,
                                            min_keycode,
-                                           max_keycode - min_keycode + 1,
+                                           num_keycode,
                                            &mapWidth);
             len = (max_keycode - min_keycode + 1) * mapWidth;
             if (!(keymap = calloc(len, sizeof(KeySym))))
@@ -128,7 +132,7 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
 #else
         keymap = XGetKeyboardMapping(xnestDisplay,
                                      min_keycode,
-                                     max_keycode - min_keycode + 1, &mapWidth);
+                                     num_keycode, &mapWidth);
 #endif
 
         memset(modmap, 0, sizeof(modmap));
@@ -175,6 +179,7 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
         XkbFreeKeyboard(xkb, 0, FALSE);
         free(keymap);
         break;
+    }
     case DEVICE_ON:
         xnestEventMask |= XNEST_KEYBOARD_EVENT_MASK;
         for (i = 0; i < xnestNumScreens; i++)
