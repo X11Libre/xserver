@@ -34,4 +34,7 @@ uint32_t xnest_create_pixmap_from_bitmap_data(xcb_connection_t *conn, uint32_t d
 
 void xnest_set_command(xcb_connection_t *conn, xcb_window_t window, char ** argv, int argc);
 
+void xnest_xkb_init(xcb_connection_t *conn);
+int xnest_xkb_device_id(xcb_connection_t *conn);
+
 #endif /* __XNEST__XCB_H */
