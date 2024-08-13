@@ -41,4 +41,6 @@ xcb_get_keyboard_mapping_reply_t *xnest_get_keyboard_mapping(xcb_connection_t *c
                                                              int min_keycode,
                                                              int count);
 
+void xnest_get_pointer_control(xcb_connection_t *conn, int *acc_num, int *acc_den, int *threshold);
+
 #endif /* __XNEST__XCB_H */
