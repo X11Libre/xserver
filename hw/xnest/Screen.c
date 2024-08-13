@@ -174,6 +174,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     depths[0].vids = calloc(MAXVISUALSPERDEPTH, sizeof(VisualID));
     numDepths = 1;
 
+    int found_default_visual = 0;
     for (i = 0; i < xnestNumVisuals; i++) {
         visuals[numVisuals].class = xnestVisuals[i].class;
         visuals[numVisuals].bitsPerRGBValue = xnestVisuals[i].bits_per_rgb;
@@ -228,6 +229,24 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
             visuals[numVisuals].vid;
         depths[depthIndex].numVids++;
 
+        if (xnestUserDefaultClass || xnestUserDefaultDepth) {
+            if ((!xnestDefaultClass || visuals[numVisuals].class == xnestDefaultClass) &&
+                (!xnestDefaultDepth || visuals[numVisuals].nplanes == xnestDefaultDepth))
+            {
+                defaultVisual = visuals[numVisuals].vid;
+                rootDepth = visuals[numVisuals].nplanes;
+                found_default_visual = 1;
+            }
+        }
+        else
+        {
+            VisualID visual_id = xnestUpstreamInfo.screenInfo->root_visual;
+            if (visual_id == xnestVisuals[i].visualid) {
+                defaultVisual = visuals[numVisuals].vid;
+                rootDepth = visuals[numVisuals].nplanes;
+                found_default_visual = 1;
+            }
+        }
         numVisuals++;
     }
     visuals = reallocarray(visuals, numVisuals, sizeof(VisualRec));
