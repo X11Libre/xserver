@@ -109,4 +109,7 @@ uint32_t xnestCreatePixmapFromBitmapData(xcb_connection_t *conn, uint32_t drawab
 
 void xnestSetCommand(xcb_connection_t *conn, xcb_window_t window, char ** argv, int argc);
 
+void xnestXkbInit(xcb_connection_t *conn);
+int xnestXkbDeviceId(xcb_connection_t *conn);
+
 #endif /* __XNEST__XCB_H */
