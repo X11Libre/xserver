@@ -245,3 +245,22 @@ int xnest_xkb_device_id(xcb_connection_t *conn)
     free(reply);
     return device_id;
 }
+
+xcb_get_keyboard_mapping_reply_t *xnest_get_keyboard_mapping(
+    xcb_connection_t *conn,
+    int min_keycode,
+    int count
+) {
+    xcb_generic_error_t *err= NULL;
+    xcb_get_keyboard_mapping_reply_t * reply = xcb_get_keyboard_mapping_reply(
+        xnestUpstreamInfo.conn,
+        xcb_get_keyboard_mapping(conn, min_keycode, count),
+        &err);
+
+    if (err) {
+        ErrorF("Couldn't get keyboard mapping: %d\n", err->error_code);
+        free(err);
+    }
+
+    return reply;
+}
