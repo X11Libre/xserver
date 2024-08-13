@@ -103,7 +103,6 @@ int
 xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
 {
     int i, j;
-    XKeyboardState values;
 
     switch (onoff) {
     case DEVICE_INIT:
@@ -227,10 +226,23 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
     }
     return Success;
 
- XkbError:
-    XGetKeyboardControl(xnestDisplay, &values);
-    memmove((char *) defaultKeyboardControl.autoRepeats,
-            (char *) values.auto_repeats, sizeof(values.auto_repeats));
+XkbError:
+    xcb_get_keyboard_control_cookie_t ctrl_cookie =
+        xcb_get_keyboard_control(xnestUpstreamInfo.conn);
+    xcb_generic_error_t *ctrl_err = NULL;
+    xcb_get_keyboard_control_reply_t *ctrl_reply =
+        xcb_get_keyboard_control_reply(xnestUpstreamInfo.conn,
+                                       ctrl_cookie,
+                                       &ctrl_err);
+    if (ctrl_err) {
+        ErrorF("failed retrieving keyboard control: %d\n", ctrl_err->error_code);
+        free(ctrl_err);
+    } else {
+        memcpy(defaultKeyboardControl.autoRepeats,
+               ctrl_reply->auto_repeats,
+               sizeof(ctrl_reply->auto_repeats));
+        free(ctrl_reply);
+    }
 
     InitKeyboardDeviceStruct(pDev, NULL, xnestBell, xnestChangeKeyboardControl);
     return Success;
