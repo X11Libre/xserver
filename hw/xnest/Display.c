@@ -160,17 +160,17 @@ xnestOpenDisplay(int argc, char *argv[])
                   0,
                   NULL);
 
-    if (!(xnestUserGeometry & XValue))
+    if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_X))
         xnestGeometry.x = 0;
 
-    if (!(xnestUserGeometry & YValue))
+    if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_Y))
         xnestGeometry.y = 0;
 
     if (xnestParentWindow == 0) {
-        if (!(xnestUserGeometry & WidthValue))
+        if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_WIDTH))
             xnestGeometry.width = 3 * xnestUpstreamInfo.screenInfo->width_in_pixels / 4;
 
-        if (!(xnestUserGeometry & HeightValue))
+        if (!(xnestUserGeometry & XCB_CONFIG_WINDOW_HEIGHT))
             xnestGeometry.height = 3 * xnestUpstreamInfo.screenInfo->height_in_pixels / 4;
     }
 
