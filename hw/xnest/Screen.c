@@ -205,7 +205,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                 break;
         }
         if (j < numVisuals)
-            break;
+            continue;
 
         visuals[numVisuals].vid = FakeClientID(0);
 
