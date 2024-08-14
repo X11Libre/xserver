@@ -28,7 +28,7 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 #include "servermd.h"
 
-#include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Args.h"
@@ -127,13 +127,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
     if (!strcmp(argv[i], "-geometry")) {
         if (++i < argc) {
-            int x, y; unsigned w, h;
-            xnestUserGeometry = XParseGeometry(argv[i], &x, &y, &w, &h);
-            xnestGeometry = (xRectangle) {
-                .x = x, .y = y, .width = w, .height = h,
-            };
-
-            if (xnestUserGeometry)
+            if (xnest_parse_geometry(argv[i], &xnestGeometry))
                 return 2;
         }
         return 0;
