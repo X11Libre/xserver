@@ -414,9 +414,11 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
             .max_height = xnestGeometry.height,
         };
 
-        if (xnestUserGeometry & XValue || xnestUserGeometry & YValue)
+        if (xnestUserGeometry & XCB_CONFIG_WINDOW_X ||
+            xnestUserGeometry & XCB_CONFIG_WINDOW_Y)
             sizeHints.flags |= XCB_ICCCM_SIZE_HINT_US_POSITION;
-        if (xnestUserGeometry & WidthValue || xnestUserGeometry & HeightValue)
+        if (xnestUserGeometry & XCB_CONFIG_WINDOW_WIDTH ||
+            xnestUserGeometry & XCB_CONFIG_WINDOW_HEIGHT)
             sizeHints.flags |= XCB_ICCCM_SIZE_HINT_US_SIZE;
 
         const size_t windowNameLen = strlen(xnestWindowName);
