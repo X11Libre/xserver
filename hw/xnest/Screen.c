@@ -148,7 +148,6 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     int numVisuals, numDepths;
     int i, j, depthIndex;
     unsigned long valuemask;
-    XWindowAttributes gattributes;
     VisualID defaultVisual;
     int rootDepth;
     miPointerScreenPtr PointPriv;
@@ -264,9 +263,9 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     rootDepth = visuals[xnestDefaultVisualIndex].nplanes;
 
     if (xnestParentWindow != 0) {
-        XGetWindowAttributes(xnestDisplay, xnestParentWindow, &gattributes);
-        xnestGeometry.width = gattributes.width;
-        xnestGeometry.height = gattributes.height;
+        xRectangle r = xnest_get_geometry(xnestUpstreamInfo.conn, xnestParentWindow);
+        xnestGeometry.width = r.width;
+        xnestGeometry.height = r.height;
     }
 
     /* myNum */
