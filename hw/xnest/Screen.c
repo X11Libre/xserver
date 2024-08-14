@@ -171,7 +171,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     VisualPtr visuals;
     DepthPtr depths;
     int numVisuals, numDepths;
-    int i, j;
+    int j;
     unsigned long valuemask;
     VisualID defaultVisual;
     int rootDepth;
@@ -197,7 +197,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                                      PRIVATE_CURSOR, 0))
         return FALSE;
 
-    visuals = xallocarray(xnestNumVisuals, sizeof(VisualRec));
+    visuals = xallocarray(1, sizeof(VisualRec));
     numVisuals = 0;
 
     depths = (DepthPtr) malloc(MAXDEPTH * sizeof(DepthRec));
@@ -206,62 +206,70 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     depths[0].vids = (VisualID *) malloc(MAXVISUALSPERDEPTH * sizeof(VisualID));
     numDepths = 1;
 
+    /* visuals */
     int found_default_visual = 0;
-    for (i = 0; i < xnestNumVisuals; i++) {
-        visuals[numVisuals].class = xnestVisuals[i].class;
-        visuals[numVisuals].bitsPerRGBValue = xnestVisuals[i].bits_per_rgb;
-        visuals[numVisuals].ColormapEntries = xnestVisuals[i].colormap_size;
-        visuals[numVisuals].nplanes = xnestVisuals[i].depth;
-        visuals[numVisuals].redMask = xnestVisuals[i].red_mask;
-        visuals[numVisuals].greenMask = xnestVisuals[i].green_mask;
-        visuals[numVisuals].blueMask = xnestVisuals[i].blue_mask;
-        visuals[numVisuals].offsetRed = offset(xnestVisuals[i].red_mask);
-        visuals[numVisuals].offsetGreen = offset(xnestVisuals[i].green_mask);
-        visuals[numVisuals].offsetBlue = offset(xnestVisuals[i].blue_mask);
+    xcb_depth_iterator_t depth_iter;
+    for (depth_iter = xcb_screen_allowed_depths_iterator(xnestUpstreamInfo.screenInfo);
+         depth_iter.rem;
+         xcb_depth_next(&depth_iter))
+    {
+        int vlen = xcb_depth_visuals_length (depth_iter.data);
+        xcb_visualtype_t *vts = xcb_depth_visuals (depth_iter.data);
+        for (int x=0; x<vlen; x++) {
+            for (j = 0; j < numVisuals; j++) {
+                if (vts[x]._class == visuals[j].class &&
+                    vts[x].bits_per_rgb_value == visuals[j].bitsPerRGBValue &&
+                    vts[x].colormap_entries == visuals[j].ColormapEntries &&
+                    depth_iter.data->depth == visuals[j].nplanes &&
+                    vts[x].red_mask == visuals[j].redMask &&
+                    vts[x].green_mask == visuals[j].greenMask &&
+                    vts[x].blue_mask == visuals[j].blueMask &&
+                    offset(vts[x].red_mask) == visuals[j].offsetRed &&
+                    offset(vts[x].green_mask) == visuals[j].offsetGreen &&
+                    offset(vts[x].blue_mask) == visuals[j].offsetBlue)
+                        goto breakout;
+            }
 
-        /* Check for and remove duplicates. */
-        for (j = 0; j < numVisuals; j++) {
-            if (visuals[numVisuals].class == visuals[j].class &&
-                visuals[numVisuals].bitsPerRGBValue ==
-                visuals[j].bitsPerRGBValue &&
-                visuals[numVisuals].ColormapEntries ==
-                visuals[j].ColormapEntries &&
-                visuals[numVisuals].nplanes == visuals[j].nplanes &&
-                visuals[numVisuals].redMask == visuals[j].redMask &&
-                visuals[numVisuals].greenMask == visuals[j].greenMask &&
-                visuals[numVisuals].blueMask == visuals[j].blueMask &&
-                visuals[numVisuals].offsetRed == visuals[j].offsetRed &&
-                visuals[numVisuals].offsetGreen == visuals[j].offsetGreen &&
-                visuals[numVisuals].offsetBlue == visuals[j].offsetBlue)
-                break;
-        }
-        if (j < numVisuals)
-            break;
+            visuals[numVisuals] = (VisualRec) {
+                .class = vts[x]._class,
+                .bitsPerRGBValue = vts[x].bits_per_rgb_value,
+                .ColormapEntries = vts[x].colormap_entries,
+                .nplanes = depth_iter.data->depth,
+                .redMask = vts[x].red_mask,
+                .greenMask = vts[x].green_mask,
+                .blueMask = vts[x].blue_mask,
+                .offsetRed = offset(vts[x].red_mask),
+                .offsetGreen = offset(vts[x].green_mask),
+                .offsetBlue = offset(vts[x].blue_mask),
+                .vid = FakeClientID(0),
+            };
 
-        visuals[numVisuals].vid = FakeClientID(0);
+            numDepths = addDepthVisual(depths, numDepths, visuals[numVisuals].nplanes, visuals[numVisuals].vid);
 
-        numDepths = addDepthVisual(depths, numDepths, visuals[numVisuals].nplanes, visuals[numVisuals].vid);
-
-        if (xnestUserDefaultClass || xnestUserDefaultDepth) {
-            if ((!xnestDefaultClass || visuals[numVisuals].class == xnestDefaultClass) &&
-                (!xnestDefaultDepth || visuals[numVisuals].nplanes == xnestDefaultDepth))
+            if (xnestUserDefaultClass || xnestUserDefaultDepth) {
+                if ((!xnestDefaultClass || visuals[numVisuals].class == xnestDefaultClass) &&
+                    (!xnestDefaultDepth || visuals[numVisuals].nplanes == xnestDefaultDepth))
+                {
+                    defaultVisual = visuals[numVisuals].vid;
+                    rootDepth = visuals[numVisuals].nplanes;
+                    found_default_visual = 1;
+                }
+            }
+            else
             {
-                defaultVisual = visuals[numVisuals].vid;
-                rootDepth = visuals[numVisuals].nplanes;
-                found_default_visual = 1;
+                VisualID visual_id = xnestUpstreamInfo.screenInfo->root_visual;
+                if (visual_id == vts[x].visual_id) {
+                    defaultVisual = visuals[numVisuals].vid;
+                    rootDepth = visuals[numVisuals].nplanes;
+                    found_default_visual = 1;
+                }
             }
+
+            numVisuals++;
+            visuals = reallocarray(visuals, numVisuals+1, sizeof(VisualRec));
         }
-        else
-        {
-            VisualID visual_id = xnestUpstreamInfo.screenInfo->root_visual;
-            if (visual_id == xnestVisuals[i].visualid) {
-                defaultVisual = visuals[numVisuals].vid;
-                rootDepth = visuals[numVisuals].nplanes;
-                found_default_visual = 1;
-            }
-        }
-        numVisuals++;
     }
+breakout:
     visuals = reallocarray(visuals, numVisuals, sizeof(VisualRec));
 
     if (!found_default_visual) {
