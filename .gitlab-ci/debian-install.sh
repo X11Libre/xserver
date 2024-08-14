@@ -115,9 +115,24 @@ apt-get install -y \
 	xtrans-dev \
 	xutils-dev
 
+echo "=== calling mingw32 build"
 .gitlab-ci/cross-prereqs-build.sh i686-w64-mingw32
+echo "=== finished mingw32 build"
 
 cd /root
+
+# Xnest requires xcb bugfix
+echo "==== building xcbproto ==="
+git clone https://gitlab.freedesktop.org/metux/xcbproto.git --depth 1 --branch=incubate
+( cd xcbproto && ./autogen.sh --prefix=/usr && make && make install )
+echo "==== finished xcbproto ==="
+
+echo "=== building libxcb ==="
+git clone https://gitlab.freedesktop.org/lib/libxcb.git --depth 1 --branch=master
+( cd libxcb && ./autogen.sh --prefix=/usr && make && make install )
+
+git clone https://gitlab.freedesktop.org/lib/libxcb-util.git --depth 1 --branch=master
+( cd libxcb-util && ./autogen.sh --prefix=/usr && make && make install )
 
 # Xwayland requires drm 2.4.116 for drmSyncobjEventfd
 git clone https://gitlab.freedesktop.org/mesa/drm --depth 1 --branch=libdrm-2.4.116
