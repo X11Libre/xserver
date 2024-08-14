@@ -11,7 +11,7 @@ HOST=$1
 cat >/usr/local/bin/${HOST}-pkg-config <<EOF
 #!/bin/sh
 
-PKG_CONFIG_SYSROOT_DIR=/usr/${HOST} PKG_CONFIG_LIBDIR=/usr/${HOST}/lib/pkgconfig:/usr/share/pkgconfig pkg-config \$@
+PKG_CONFIG_SYSROOT_DIR=/usr/${HOST} PKG_CONFIG_LIBDIR=/usr/${HOST}/lib/pkgconfig:/usr/${HOST}/share/pkgconfig pkg-config \$@
 EOF
 chmod +x /usr/local/bin/${HOST}-pkg-config
 

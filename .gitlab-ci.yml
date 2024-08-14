@@ -19,7 +19,7 @@ variables:
     FDO_UPSTREAM_REPO: xorg/xserver
     FDO_DISTRIBUTION_VERSION: bullseye-slim
     FDO_DISTRIBUTION_EXEC: 'env FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT} bash .gitlab-ci/debian-install.sh'
-    FDO_DISTRIBUTION_TAG: "2024-03-26-explicit-sync-2"
+    FDO_DISTRIBUTION_TAG: "2024-08-23-fix-cross"
     MESON_BUILDDIR: "build"
 
 include:
