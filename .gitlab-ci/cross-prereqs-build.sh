@@ -49,10 +49,10 @@ build 'https://gitlab.freedesktop.org/pixman/pixman.git' 'pixman-0.38.4'
 build 'https://gitlab.freedesktop.org/xorg/lib/pthread-stubs.git' '0.4'
 # we can't use the xorgproto pkgconfig files from /usr/share/pkgconfig, because
 # these would add -I/usr/include to CFLAGS, which breaks cross-compilation
-build 'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git' 'xorgproto-2024.1' '--datadir=/lib'
+build 'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git' 'master' '--datadir=/lib'
 build 'https://gitlab.freedesktop.org/xorg/lib/libXau.git' 'libXau-1.0.9'
-build 'https://gitlab.freedesktop.org/xorg/proto/xcbproto.git' 'xcb-proto-1.14.1'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxcb.git' 'libxcb-1.14'
+build 'https://gitlab.freedesktop.org/metux/xcbproto.git' 'master'
+build 'https://gitlab.freedesktop.org/metux/libxcb.git' 'master'
 build 'https://gitlab.freedesktop.org/xorg/lib/libxtrans.git' 'xtrans-1.4.0'
 # the default value of keysymdefdir is taken from the includedir variable for
 # xproto, which isn't adjusted by pkg-config for the sysroot

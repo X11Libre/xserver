@@ -115,6 +115,15 @@ apt-get install -y \
 	xtrans-dev \
 	xutils-dev
 
+# Xnest requires xcb bugfix
+git clone https://gitlab.freedesktop.org/metux/xcbproto.git --depth 1 --branch=master
+( cd xcbproto && ./autogen.sh --prefix=/usr && make && make install )
+rm -Rf xcbproto
+
+git clone https://gitlab.freedesktop.org/xorg/lib/libxcb.git --depth 1 --branch=master
+( cd libxcb && ./autogen.sh --prefix=/usr && make && make install )
+rm -Rf libxcb
+
 .gitlab-ci/cross-prereqs-build.sh i686-w64-mingw32
 
 cd /root
