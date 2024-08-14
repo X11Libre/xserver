@@ -218,6 +218,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
         int vlen = xcb_depth_visuals_length (depth_iter.data);
         xcb_visualtype_t *vts = xcb_depth_visuals (depth_iter.data);
         for (int x=0; x<vlen; x++) {
+            int duplicate = 0;
             for (int j = 0; j < numVisuals; j++) {
                 if (vts[x]._class == visuals[j].class &&
                     vts[x].bits_per_rgb_value == visuals[j].bitsPerRGBValue &&
@@ -228,9 +229,15 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                     vts[x].blue_mask == visuals[j].blueMask &&
                     offset(vts[x].red_mask) == visuals[j].offsetRed &&
                     offset(vts[x].green_mask) == visuals[j].offsetGreen &&
-                    offset(vts[x].blue_mask) == visuals[j].offsetBlue)
-                        goto breakout;
+                    offset(vts[x].blue_mask) == visuals[j].offsetBlue) {
+                        duplicate = 1;
+                        break;
+                }
             }
+            /* just skip duplicates instead of breaking off entirely,
+               otherwise only one depth would be supported */
+            if (duplicate)
+                continue;
 
             visuals[numVisuals] = (VisualRec) {
                 .class = vts[x]._class,
@@ -287,7 +294,6 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
             xnestVisualMap = reallocarray(xnestVisualMap, xnestNumVisualMap+1, sizeof(xnest_visual_t));
         }
     }
-breakout:
     visuals = reallocarray(visuals, numVisuals, sizeof(VisualRec));
     xnestVisualMap = reallocarray(xnestVisualMap, xnestNumVisualMap, sizeof(xnest_visual_t));
 
