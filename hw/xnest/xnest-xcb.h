@@ -43,4 +43,6 @@ xcb_get_keyboard_mapping_reply_t *xnest_get_keyboard_mapping(xcb_connection_t *c
 
 void xnest_get_pointer_control(xcb_connection_t *conn, int *acc_num, int *acc_den, int *threshold);
 
+xRectangle xnest_get_geometry(xcb_connection_t *conn, uint32_t window);
+
 #endif /* __XNEST__XCB_H */
