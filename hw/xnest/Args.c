@@ -40,10 +40,7 @@ Bool xnestUserDefaultClass = FALSE;
 int xnestDefaultDepth;
 Bool xnestUserDefaultDepth = FALSE;
 Bool xnestSoftwareScreenSaver = FALSE;
-int xnestX;
-int xnestY;
-unsigned int xnestWidth;
-unsigned int xnestHeight;
+xRectangle xnestGeometry = { 0 };
 int xnestUserGeometry = 0;
 int xnestBorderWidth;
 Bool xnestUserBorderWidth = FALSE;
@@ -140,9 +137,12 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
     if (!strcmp(argv[i], "-geometry")) {
         if (++i < argc) {
-            xnestUserGeometry = XParseGeometry(argv[i],
-                                               &xnestX, &xnestY,
-                                               &xnestWidth, &xnestHeight);
+            int x, y; unsigned w, h;
+            xnestUserGeometry = XParseGeometry(argv[i], &x, &y, &w, &h);
+            xnestGeometry = (xRectangle) {
+                .x = x, .y = y, .width = w, .height = h,
+            };
+
             if (xnestUserGeometry)
                 return 2;
         }

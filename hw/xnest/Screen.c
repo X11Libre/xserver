@@ -264,13 +264,14 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
     if (xnestParentWindow != 0) {
         XGetWindowAttributes(xnestDisplay, xnestParentWindow, &gattributes);
-        xnestWidth = gattributes.width;
-        xnestHeight = gattributes.height;
+        xnestGeometry.width = gattributes.width;
+        xnestGeometry.height = gattributes.height;
     }
 
     /* myNum */
     /* id */
-    if (!miScreenInit(pScreen, NULL, xnestWidth, xnestHeight, 1, 1, xnestWidth, rootDepth, numDepths, depths, defaultVisual, /* root visual */
+    if (!miScreenInit(pScreen, NULL, xnestGeometry.width, xnestGeometry.height,
+                      1, 1, xnestGeometry.width, rootDepth, numDepths, depths, defaultVisual, /* root visual */
                       numVisuals, visuals))
         return FALSE;
 
@@ -351,10 +352,10 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     PointPriv->spriteFuncs = &xnestPointerSpriteFuncs;
 
     pScreen->mmWidth =
-        xnestWidth * xnestUpstreamInfo.screenInfo->width_in_millimeters /
+        xnestGeometry.width * xnestUpstreamInfo.screenInfo->width_in_millimeters /
         xnestUpstreamInfo.screenInfo->width_in_pixels;
     pScreen->mmHeight =
-        xnestHeight * xnestUpstreamInfo.screenInfo->height_in_millimeters /
+        xnestGeometry.height * xnestUpstreamInfo.screenInfo->height_in_millimeters /
         xnestUpstreamInfo.screenInfo->height_in_pixels;
 
     /* overwrite miCloseScreen with our own */
@@ -365,7 +366,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
     /* devPrivates */
 
-#define POSITION_OFFSET (pScreen->myNum * (xnestWidth + xnestHeight) / 32)
+#define POSITION_OFFSET (pScreen->myNum * (xnestGeometry.width + xnestGeometry.height) / 32)
 
     if (xnestDoFullGeneration) {
 
@@ -390,10 +391,10 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                                   pScreen->rootDepth,
                                   xnestDefaultWindows[pScreen->myNum],
                                   xnestUpstreamInfo.screenInfo->root,
-                                  xnestX + POSITION_OFFSET,
-                                  xnestY + POSITION_OFFSET,
-                                  xnestWidth,
-                                  xnestHeight,
+                                  xnestGeometry.x + POSITION_OFFSET,
+                                  xnestGeometry.y + POSITION_OFFSET,
+                                  xnestGeometry.width,
+                                  xnestGeometry.height,
                                   xnestBorderWidth,
                                   XCB_WINDOW_CLASS_INPUT_OUTPUT,
                                   xnestDefaultVisual(pScreen)->visualid,
@@ -406,10 +407,12 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
         xcb_size_hints_t sizeHints = {
             .flags = XCB_ICCCM_SIZE_HINT_P_POSITION | XCB_ICCCM_SIZE_HINT_P_SIZE | XCB_ICCCM_SIZE_HINT_P_MAX_SIZE,
-            .x = xnestX + POSITION_OFFSET,
-            .y = xnestY + POSITION_OFFSET,
-            .width = sizeHints.max_width = xnestWidth,
-            .height = sizeHints.max_height = xnestHeight,
+            .x = xnestGeometry.x + POSITION_OFFSET,
+            .y = xnestGeometry.y + POSITION_OFFSET,
+            .width = xnestGeometry.width,
+            .height = xnestGeometry.height,
+            .max_width = xnestGeometry.width,
+            .max_height = xnestGeometry.height,
         };
 
         if (xnestUserGeometry & XValue || xnestUserGeometry & YValue)
@@ -459,8 +462,8 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                               xnestDefaultWindows[pScreen->myNum],
                               0,
                               0,
-                              xnestWidth,
-                              xnestHeight,
+                              xnestGeometry.width,
+                              xnestGeometry.height,
                               0,
                               XCB_WINDOW_CLASS_INPUT_OUTPUT,
                               xnestUpstreamInfo.screenInfo->root_visual,
