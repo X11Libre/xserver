@@ -139,13 +139,38 @@ static miPointerSpriteFuncRec xnestPointerSpriteFuncs = {
     xnestDeviceCursorCleanup
 };
 
+static int add_depth_visual(DepthPtr depths, int numDepths, int nplanes, VisualID vid)
+{
+    DepthPtr walk = NULL;
+
+    for (int j = 0; j < numDepths; j++)
+        if (depths[j].depth == nplanes) {
+            walk = &depths[j];
+            break;
+        }
+
+    if (!walk) {
+        walk = &depths[numDepths++];
+        walk->depth = nplanes;
+        walk->numVids = 0;
+        walk->vids = (VisualID *) malloc(MAXVISUALSPERDEPTH * sizeof(VisualID));
+    }
+    if (walk->numVids >= MAXVISUALSPERDEPTH) {
+        FatalError("Visual table overflow");
+    }
+    walk->vids[walk->numVids] = vid;
+    walk->numVids++;
+
+    return numDepths;
+}
+
 Bool
 xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 {
     VisualPtr visuals;
     DepthPtr depths;
     int numVisuals, numDepths;
-    int i, j, depthIndex;
+    int i, j;
     unsigned long valuemask;
     VisualID defaultVisual;
     int rootDepth;
@@ -215,26 +240,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
         visuals[numVisuals].vid = FakeClientID(0);
 
-        depthIndex = UNDEFINED;
-        for (j = 0; j < numDepths; j++)
-            if (depths[j].depth == xnestVisuals[i].depth) {
-                depthIndex = j;
-                break;
-            }
-
-        if (depthIndex == UNDEFINED) {
-            depthIndex = numDepths;
-            depths[depthIndex].depth = xnestVisuals[i].depth;
-            depths[depthIndex].numVids = 0;
-            depths[depthIndex].vids = calloc(MAXVISUALSPERDEPTH, sizeof(VisualID));
-            numDepths++;
-        }
-        if (depths[depthIndex].numVids >= MAXVISUALSPERDEPTH) {
-            FatalError("Visual table overflow");
-        }
-        depths[depthIndex].vids[depths[depthIndex].numVids] =
-            visuals[numVisuals].vid;
-        depths[depthIndex].numVids++;
+        numDepths = add_depth_visual(depths, numDepths, visuals[numVisuals].nplanes, visuals[numVisuals].vid);
 
         if (xnestUserDefaultClass || xnestUserDefaultDepth) {
             if ((!xnestDefaultClass || visuals[numVisuals].class == xnestDefaultClass) &&
