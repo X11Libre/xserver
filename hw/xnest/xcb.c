@@ -18,7 +18,6 @@
 #include "Xnest.h"
 #include "xnest-xcb.h"
 #include "XNGC.h"
-
 #include "Display.h"
 
 xnestUpstreamInfoRec xnestUpstreamInfo = { 0 };
@@ -518,4 +517,34 @@ int xnestParseGeometry(const char *string, xRectangle *geometry)
         geometry->height = temp.height;
 
     return mask;
+}
+
+uint32_t xnestVisualMapToHost(VisualID visual)
+{
+    for (int i = 0; i < xnestNumVisualMap; i++) {
+        if (xnestVisualMap[i].ourXID == visual) {
+            return xnestVisualMap[i].hostVisual->visual_id;
+        }
+    }
+    return XCB_NONE;
+}
+
+uint32_t xnestHostVisualToHostCmap(uint32_t hostVisual)
+{
+    for (int i = 0; i < xnestNumVisualMap; i++) {
+        if (xnestVisualMap[i].hostVisual->visual_id == hostVisual) {
+            return xnestVisualMap[i].hostCMap;
+        }
+    }
+    return XCB_COLORMAP_NONE;
+}
+
+uint32_t xnestVisualToHostCmap(uint32_t visual)
+{
+    for (int i = 0; i < xnestNumVisualMap; i++) {
+        if (xnestVisualMap[i].ourXID == visual) {
+            return xnestVisualMap[i].hostCMap;
+        }
+    }
+    return XCB_COLORMAP_NONE;
 }

@@ -41,7 +41,6 @@ is" without express or implied warranty.
 #include "XNGC.h"
 #include "Drawable.h"
 #include "Color.h"
-#include "Visual.h"
 #include "Events.h"
 #include "Args.h"
 
@@ -83,7 +82,7 @@ xnestCreateWindow(WindowPtr pWin)
 {
     unsigned long mask;
     XnSetWindowAttr attributes = { 0 };
-    Visual *visual;
+    uint32_t visual = CopyFromParent; /* 0L */
     ColormapPtr pCmap;
     uint32_t params[32] = { 0 };
 
@@ -99,8 +98,7 @@ xnestCreateWindow(WindowPtr pWin)
         if (pWin->parent) {
             if (pWin->optional &&
                 pWin->optional->visual != wVisual(pWin->parent)) {
-                visual =
-                    xnestVisualFromID(pWin->drawable.pScreen, wVisual(pWin));
+                visual = xnestVisualMapToHost(wVisual(pWin));
                 mask |= XCB_CW_COLORMAP;
                 if (pWin->optional->colormap) {
                     dixLookupResourceByType((void **) &pCmap, wColormap(pWin),
@@ -109,13 +107,13 @@ xnestCreateWindow(WindowPtr pWin)
                     attributes.colormap = xnestColormap(pCmap);
                 }
                 else
-                    attributes.colormap = xnestDefaultVisualColormap(visual);
+                    attributes.colormap = xnestHostVisualToHostCmap(visual);
             }
             else
                 visual = CopyFromParent;
         }
         else {                  /* root windows have their own colormaps at creation time */
-            visual = xnestVisualFromID(pWin->drawable.pScreen, wVisual(pWin));
+            visual = xnestVisualMapToHost(wVisual(pWin));
             dixLookupResourceByType((void **) &pCmap, wColormap(pWin),
                                     X11_RESTYPE_COLORMAP, serverClient, DixUseAccess);
             mask |= XCB_CW_COLORMAP;
@@ -135,7 +133,7 @@ xnestCreateWindow(WindowPtr pWin)
                       pWin->drawable.height,
                       pWin->borderWidth,
                       pWin->drawable.class,
-                      (visual ? visual->visualid : 0),
+                      visual,
                       mask,
                       &params);
 

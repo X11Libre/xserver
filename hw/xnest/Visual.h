@@ -21,7 +21,6 @@ Visual *xnestVisual(VisualPtr pVisual);
 Visual *xnestVisualFromID(ScreenPtr pScreen, VisualID visual);
 Colormap xnestDefaultVisualColormap(Visual * visual);
 
-#define xnestDefaultVisual(pScreen) \
-  xnestVisualFromID((pScreen), (pScreen)->rootVisual)
+VisualPtr ScreenGetVisual(ScreenPtr pScreen, VisualID visual);
 
 #endif                          /* XNESTVISUAL_H */

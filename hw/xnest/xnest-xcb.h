@@ -135,4 +135,8 @@ xRectangle xnestGetGeometry(xcb_connection_t *conn, uint32_t window);
 
 int xnestParseGeometry(const char *string, xRectangle *geometry);
 
+uint32_t xnestVisualMapToHost(VisualID visual);
+uint32_t xnestHostVisualToHostCmap(uint32_t visual);
+uint32_t xnestVisualToHostCmap(uint32_t visual);
+
 #endif /* __XNEST__XCB_H */
