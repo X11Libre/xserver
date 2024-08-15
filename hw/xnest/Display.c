@@ -180,6 +180,9 @@ xnestCloseDisplay(void)
        If xnestDoFullGeneration all x resources will be destroyed upon closing
        the display connection.  There is no need to generate extra protocol.
      */
+    free(xnestVisualMap);
+    xnestVisualMap = NULL;
+    xnestNumVisualMap = 0;
 
     free(xnestDefaultColormaps);
     XFree(xnestVisuals);
