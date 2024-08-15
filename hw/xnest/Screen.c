@@ -41,7 +41,6 @@ is" without express or implied warranty.
 #include "XNFont.h"
 #include "Color.h"
 #include "XNCursor.h"
-#include "Visual.h"
 #include "Events.h"
 #include "Init.h"
 #include "mipointer.h"
@@ -411,7 +410,7 @@ breakout:
         xcb_params_cw_t attributes = {
             .back_pixel = xnestUpstreamInfo.screenInfo->white_pixel,
             .event_mask = xnestEventMask,
-            .colormap = xnestDefaultVisualColormap(xnestDefaultVisual(pScreen)),
+            .colormap = xnest_visual_to_upstream_cmap(pScreen->rootVisual),
         };
 
         valuemask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP;
@@ -435,7 +434,7 @@ breakout:
                                   xnestGeometry.height,
                                   xnestBorderWidth,
                                   XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                                  xnestDefaultVisual(pScreen)->visualid,
+                                  xnest_visual_map_to_upstream(pScreen->rootVisual),
                                   valuemask,
                                   &attributes);
         }

@@ -24,13 +24,11 @@ is" without express or implied warranty.
 #include "windowstr.h"
 #include "resource.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
 #include "Color.h"
-#include "Visual.h"
 #include "XNWindow.h"
 #include "Args.h"
 
@@ -96,7 +94,7 @@ xnestCreateColormap(ColormapPtr pCmap)
                         (pVisual->class & DynamicClass) ? XCB_COLORMAP_ALLOC_ALL : XCB_COLORMAP_ALLOC_NONE,
                         cmap,
                         xnestDefaultWindows[pCmap->pScreen->myNum],
-                        xnestVisual(pVisual)->visualid);
+                        xnest_visual_map_to_upstream(pVisual->vid));
 
     switch (pVisual->class) {
     case StaticGray:           /* read only */
@@ -252,13 +250,12 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
          */
         if (icws.numWindows) {
             WindowPtr pWin;
-            Visual *visual;
             ColormapPtr pCmap;
 
             pWin = xnestWindowPtr(icws.windows[0]);
-            visual = xnestVisualFromID(pScreen, wVisual(pWin));
 
-            if (visual == xnestDefaultVisual(pScreen))
+            if (xnest_visual_map_to_upstream(wVisual(pWin)) ==
+                xnest_visual_map_to_upstream(pScreen->rootVisual))
                 dixLookupResourceByType((void **) &pCmap, wColormap(pWin),
                                         X11_RESTYPE_COLORMAP, serverClient,
                                         DixUseAccess);
