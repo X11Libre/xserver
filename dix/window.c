@@ -818,12 +818,6 @@ CreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
         }
     }
 
-    if (((vmask & (CWBorderPixmap | CWBorderPixel)) == 0) &&
-        (class != InputOnly) && (depth != pParent->drawable.depth)) {
-        *error = BadMatch;
-        return NullWindow;
-    }
-
     if (((vmask & CWColormap) == 0) &&
         (class != InputOnly) &&
         ((visual != ancwopt->visual) || (ancwopt->colormap == None))) {
