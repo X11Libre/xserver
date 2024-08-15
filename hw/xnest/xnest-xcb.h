@@ -66,6 +66,17 @@ typedef struct {
     int auto_repeat_mode;
 } XnKeyboardControl;
 
+typedef struct {
+    xcb_visualtype_t *hostVisual;
+    xcb_depth_t *hostDepth;
+    xcb_colormap_t hostCMap;
+    uint32_t ourXID;
+    VisualPtr ourVisual;
+} XnestVisualRec;
+
+extern XnestVisualRec *xnestVisualMap;
+extern int xnestNumVisualMap;
+
 void xnestEncodeKeyboardControl(XnKeyboardControl ctrl, long mask, uint32_t *value);
 
 typedef struct {

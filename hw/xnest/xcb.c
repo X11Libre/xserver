@@ -22,6 +22,8 @@
 #include "Display.h"
 
 xnestUpstreamInfoRec xnestUpstreamInfo = { 0 };
+XnestVisualRec *xnestVisualMap;
+int xnestNumVisualMap;
 
 void xnest_upstream_setup(void) {
     xnestUpstreamInfo.screenId = DefaultScreen(xnestDisplay);
