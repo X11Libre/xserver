@@ -13,7 +13,6 @@ srcs = [
     'Pixmap.c',
     'Pointer.c',
     'Screen.c',
-    'Visual.c',
     'Window.c',
     '../../mi/miinitext.c',
     '../../mi/miinitext.h',
