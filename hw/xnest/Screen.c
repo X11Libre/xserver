@@ -203,6 +203,11 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
         return FALSE;
     }
 
+    if (!xnestVisualMap)
+        xnestVisualMap = calloc(1, sizeof(xnest_visual_t));
+    else
+        xnestVisualMap = reallocarray(xnestVisualMap, xnestNumVisualMap+1, sizeof(xnest_visual_t));
+
     depths[0].depth = 1;
     depths[0].numVids = 0;
     depths[0].vids = calloc(MAXVISUALSPERDEPTH, sizeof(VisualID));
@@ -244,6 +249,20 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                 .vid = FakeClientID(0),
             };
 
+            xnestVisualMap[xnestNumVisualMap] = (xnest_visual_t) {
+                .ourXID = visuals[numVisuals].vid,
+                .ourVisual = &visuals[numVisuals],
+                .upstreamDepth = depth_iter.data,
+                .upstreamVisual = &vts[x],
+                .upstreamCMap = xcb_generate_id(xnestUpstreamInfo.conn),
+            };
+
+            xcb_create_colormap(xnestUpstreamInfo.conn,
+                                XCB_COLORMAP_ALLOC_NONE,
+                                xnestVisualMap[xnestNumVisualMap].upstreamCMap,
+                                xnestUpstreamInfo.screenInfo->root,
+                                xnestVisualMap[xnestNumVisualMap].upstreamVisual->visual_id);
+
             numDepths = add_depth_visual(depths, numDepths, visuals[numVisuals].nplanes, visuals[numVisuals].vid);
 
             if (xnestUserDefaultClass || xnestUserDefaultDepth) {
@@ -266,11 +285,14 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
             }
 
             numVisuals++;
+            xnestNumVisualMap++;
             visuals = reallocarray(visuals, numVisuals+1, sizeof(VisualRec));
+            xnestVisualMap = reallocarray(xnestVisualMap, xnestNumVisualMap+1, sizeof(xnest_visual_t));
         }
     }
 breakout:
     visuals = reallocarray(visuals, numVisuals, sizeof(VisualRec));
+    xnestVisualMap = reallocarray(xnestVisualMap, xnestNumVisualMap, sizeof(xnest_visual_t));
 
     if (!found_default_visual) {
         ErrorF("Xnest: can't find matching visual for user specified depth %d\n", xnestDefaultDepth);
