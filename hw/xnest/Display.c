@@ -41,7 +41,6 @@ is" without express or implied warranty.
 Display *xnestDisplay = NULL;
 XVisualInfo *xnestVisuals;
 int xnestNumVisuals;
-int xnestDefaultVisualIndex;
 Colormap *xnestDefaultColormaps;
 static uint16_t xnestNumDefaultColormaps;
 int xnestNumPixmapFormats;
@@ -89,29 +88,6 @@ xnestOpenDisplay(int argc, char *argv[])
     xnestVisuals = XGetVisualInfo(xnestDisplay, mask, &vi, &xnestNumVisuals);
     if (xnestNumVisuals == 0 || xnestVisuals == NULL)
         FatalError("Unable to find any visuals.\n");
-
-    if (xnestUserDefaultClass || xnestUserDefaultDepth) {
-        xnestDefaultVisualIndex = UNDEFINED;
-        for (i = 0; i < xnestNumVisuals; i++)
-            if ((!xnestUserDefaultClass ||
-                 xnestVisuals[i].class == xnestDefaultClass)
-                &&
-                (!xnestUserDefaultDepth ||
-                 xnestVisuals[i].depth == xnestDefaultDepth)) {
-                xnestDefaultVisualIndex = i;
-                break;
-            }
-        if (xnestDefaultVisualIndex == UNDEFINED)
-            FatalError("Unable to find desired default visual.\n");
-    }
-    else {
-        vi.visualid = XVisualIDFromVisual(DefaultVisual(xnestDisplay,
-                                                        xnestUpstreamInfo.screenId));
-        xnestDefaultVisualIndex = 0;
-        for (i = 0; i < xnestNumVisuals; i++)
-            if (vi.visualid == xnestVisuals[i].visualid)
-                xnestDefaultVisualIndex = i;
-    }
 
     xnestNumDefaultColormaps = xnestNumVisuals;
     xnestDefaultColormaps = calloc(xnestNumDefaultColormaps,
