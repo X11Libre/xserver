@@ -38,7 +38,6 @@ is" without express or implied warranty.
 #include "XNGC.h"
 #include "Drawable.h"
 #include "Color.h"
-#include "Visual.h"
 #include "Events.h"
 #include "Args.h"
 
@@ -80,7 +79,7 @@ xnestCreateWindow(WindowPtr pWin)
 {
     unsigned long mask;
     xcb_params_cw_t attributes = { 0 };
-    Visual *visual;
+    uint32_t visual = CopyFromParent; /* 0L */
     ColormapPtr pCmap;
 
     if (pWin->drawable.class == InputOnly) {
@@ -95,8 +94,7 @@ xnestCreateWindow(WindowPtr pWin)
         if (pWin->parent) {
             if (pWin->optional &&
                 pWin->optional->visual != wVisual(pWin->parent)) {
-                visual =
-                    xnestVisualFromID(pWin->drawable.pScreen, wVisual(pWin));
+                visual = xnest_visual_map_to_upstream(wVisual(pWin));
                 mask |= XCB_CW_COLORMAP;
                 if (pWin->optional->colormap) {
                     dixLookupResourceByType((void **) &pCmap, wColormap(pWin),
@@ -105,13 +103,13 @@ xnestCreateWindow(WindowPtr pWin)
                     attributes.colormap = xnestColormap(pCmap);
                 }
                 else
-                    attributes.colormap = xnestDefaultVisualColormap(visual);
+                    attributes.colormap = xnest_upstream_visual_to_cmap(visual);
             }
             else
                 visual = CopyFromParent;
         }
         else {                  /* root windows have their own colormaps at creation time */
-            visual = xnestVisualFromID(pWin->drawable.pScreen, wVisual(pWin));
+            visual = xnest_visual_map_to_upstream(wVisual(pWin));
             dixLookupResourceByType((void **) &pCmap, wColormap(pWin),
                                     X11_RESTYPE_COLORMAP, serverClient, DixUseAccess);
             mask |= XCB_CW_COLORMAP;
@@ -130,7 +128,7 @@ xnestCreateWindow(WindowPtr pWin)
                           pWin->drawable.height,
                           pWin->borderWidth,
                           pWin->drawable.class,
-                          (visual ? visual->visualid : 0),
+                          visual,
                           mask,
                           &attributes);
 

@@ -40,7 +40,6 @@ is" without express or implied warranty.
 #include "XNFont.h"
 #include "GCOps.h"
 #include "Drawable.h"
-#include "Visual.h"
 
 void
 xnestFillSpans(DrawablePtr pDrawable, GCPtr pGC, int nSpans, xPoint * pPoints,
