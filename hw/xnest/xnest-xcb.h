@@ -22,6 +22,17 @@ void xnest_upstream_setup(void);
 /* retrieve upstream GC XID for our xserver GC */
 uint32_t xnest_upstream_gc(GCPtr pGC);
 
+typedef struct {
+    xcb_visualtype_t *upstreamVisual;
+    xcb_depth_t *upstreamDepth;
+    xcb_colormap_t upstreamCMap;
+    uint32_t ourXID;
+    VisualPtr ourVisual;
+} xnest_visual_t;
+
+extern xnest_visual_t *xnestVisualMap;
+extern int xnestNumVisualMap;
+
 void xnest_wm_colormap_windows(xcb_connection_t *conn, xcb_window_t w,
                                xcb_window_t *windows, int count);
 
