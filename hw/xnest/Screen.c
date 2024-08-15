@@ -264,8 +264,11 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     }
     visuals = reallocarray(visuals, numVisuals, sizeof(VisualRec));
 
-    defaultVisual = visuals[xnestDefaultVisualIndex].vid;
-    rootDepth = visuals[xnestDefaultVisualIndex].nplanes;
+    if (!found_default_visual) {
+        ErrorF("Xnest: can't find matching visual for user specified depth %d\n", xnestDefaultDepth);
+        defaultVisual = visuals[0].vid;
+        rootDepth = visuals[0].nplanes;
+    }
 
     if (xnestParentWindow != 0) {
         xRectangle r = xnestGetGeometry(xnestUpstreamInfo.conn, xnestParentWindow);

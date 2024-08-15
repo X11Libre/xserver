@@ -27,7 +27,6 @@ is" without express or implied warranty.
 extern Display *xnestDisplay;
 extern XVisualInfo *xnestVisuals;
 extern int xnestNumVisuals;
-extern int xnestDefaultVisualIndex;
 extern Colormap *xnestDefaultColormaps;
 extern int xnestNumDefaultClormaps;
 extern int xnestNumPixmapFormats;
