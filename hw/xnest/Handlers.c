@@ -22,8 +22,6 @@ is" without express or implied warranty.
 #include "windowstr.h"
 #include "servermd.h"
 
-#include "Xnest.h"
-
 #include "Display.h"
 #include "Events.h"
 #include "Handlers.h"
