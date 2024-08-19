@@ -26,7 +26,6 @@ is" without express or implied warranty.
 #include "servermd.h"
 #include "mipointer.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
