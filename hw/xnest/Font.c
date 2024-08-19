@@ -30,7 +30,6 @@ is" without express or implied warranty.
 #include "dixfontstr.h"
 #include "scrnintstr.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
