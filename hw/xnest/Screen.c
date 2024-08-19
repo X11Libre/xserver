@@ -33,7 +33,6 @@ is" without express or implied warranty.
 #include "colormapst.h"
 #include "resource.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
