@@ -34,9 +34,7 @@ is" without express or implied warranty.
 #include "dixfontstr.h"
 #include "extinit_priv.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
-
 #include "Display.h"
 #include "Screen.h"
 #include "Pointer.h"

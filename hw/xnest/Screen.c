@@ -30,7 +30,6 @@ is" without express or implied warranty.
 #include "micmap.h"
 #include "resource.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
