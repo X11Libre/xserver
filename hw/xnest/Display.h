@@ -25,10 +25,6 @@ is" without express or implied warranty.
 #define MAXVISUALSPERDEPTH 256
 
 extern Display *xnestDisplay;
-extern XVisualInfo *xnestVisuals;
-extern int xnestNumVisuals;
-extern Colormap *xnestDefaultColormaps;
-extern int xnestNumDefaultClormaps;
 extern int xnestNumPixmapFormats;
 extern Drawable xnestDefaultDrawables[MAXDEPTH + 1];
 extern Pixmap xnestIconBitmap;
