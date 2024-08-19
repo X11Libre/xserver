@@ -33,7 +33,6 @@ is" without express or implied warranty.
 
 #include "mi.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
