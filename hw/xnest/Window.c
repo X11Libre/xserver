@@ -31,7 +31,6 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 #include "region.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"

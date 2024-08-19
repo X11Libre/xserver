@@ -30,7 +30,6 @@ is" without express or implied warranty.
 #include "mistruct.h"
 #include "region.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
