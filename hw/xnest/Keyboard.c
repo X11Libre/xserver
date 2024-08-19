@@ -21,6 +21,7 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 #include <X11/keysym.h>
+#include <X11/extensions/XKB.h>
 #include <xcb/xkb.h>
 
 #include "screenint.h"
@@ -29,7 +30,6 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 #include "servermd.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -37,10 +37,6 @@ is" without express or implied warranty.
 #include "Keyboard.h"
 #include "Args.h"
 #include "Events.h"
-
-// must come after Xnest.h, because of trickery to avoid name clash
-#include <X11/extensions/XKB.h>
-
 #include "xkbsrv.h"
 
 DeviceIntPtr xnestKeyboardDevice = NULL;

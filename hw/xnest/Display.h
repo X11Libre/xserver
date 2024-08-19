@@ -17,8 +17,6 @@ is" without express or implied warranty.
 
 #include "colormap.h"
 
-#include "Xnest.h"
-
 #define UNDEFINED -1
 
 #define MAXDEPTH 32
