@@ -72,4 +72,7 @@ typedef struct {
     uint16_t chars_len;
 } xnestPrivFont;
 
+int xnest_text_width (xnestPrivFont *font, const char *string, int count);
+int xnest_text_width_16 (xnestPrivFont *font, const uint16_t *string, int count);
+
 #endif /* __XNEST__XCB_H */
