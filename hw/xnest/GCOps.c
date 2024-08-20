@@ -31,7 +31,6 @@ is" without express or implied warranty.
 #include "region.h"
 #include "servermd.h"
 
-#include "Xnest.h"
 #include "xnest-xcb.h"
 
 #include "Display.h"
@@ -66,17 +65,31 @@ void
 xnestQueryBestSize(int class, unsigned short *pWidth, unsigned short *pHeight,
                    ScreenPtr pScreen)
 {
-    unsigned int width, height;
+    xcb_generic_error_t *err = NULL;
+    xcb_query_best_size_reply_t *reply = xcb_query_best_size_reply(
+        xnestUpstreamInfo.conn,
+        xcb_query_best_size(
+            xnestUpstreamInfo.conn,
+            class,
+            xnestDefaultWindows[pScreen->myNum],
+            *pWidth,
+            *pHeight),
+        &err);
 
-    width = *pWidth;
-    height = *pHeight;
+    if (err) {
+        ErrorF("QueryBestSize request failed: %d\n", err->error_code);
+        free(err);
+        return;
+    }
 
-    XQueryBestSize(xnestDisplay, class,
-                   xnestDefaultWindows[pScreen->myNum],
-                   width, height, &width, &height);
+    if (!reply) {
+        ErrorF("QueryBestSize request failed: no reply\n");
+        return;
+    }
 
-    *pWidth = width;
-    *pHeight = height;
+    *pWidth = reply->width;
+    *pHeight = reply->height;
+    free(reply);
 }
 
 void
