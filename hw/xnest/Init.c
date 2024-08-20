@@ -133,7 +133,10 @@ InitInput(int argc, char *argv[])
 
     mieqInit();
 
-    SetNotifyFd(XConnectionNumber(xnestDisplay), xnestNotifyConnection, X_NOTIFY_READ, NULL);
+    SetNotifyFd(xcb_get_file_descriptor(xnestUpstreamInfo.conn),
+                xnestNotifyConnection,
+                X_NOTIFY_READ,
+                NULL);
 
     RegisterBlockAndWakeupHandlers(xnestBlockHandler, xnestWakeupHandler, NULL);
 }
