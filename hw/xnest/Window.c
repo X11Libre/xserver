@@ -391,40 +391,6 @@ xnestClipNotify(WindowPtr pWin, int dx, int dy)
     xnestShapeWindow(pWin);
 }
 
-static Bool
-xnestWindowExposurePredicate(Display * dpy, XEvent * event, XPointer ptr)
-{
-    return (event->type == Expose && event->xexpose.window == *(Window *) ptr);
-}
-
-void
-xnestWindowExposures(WindowPtr pWin, RegionPtr pRgn)
-{
-    XEvent event;
-    Window window;
-    BoxRec Box;
-
-    XSync(xnestDisplay, FALSE);
-
-    window = xnestWindow(pWin);
-
-    while (XCheckIfEvent(xnestDisplay, &event,
-                         xnestWindowExposurePredicate, (char *) &window)) {
-
-        Box.x1 = pWin->drawable.x + wBorderWidth(pWin) + event.xexpose.x;
-        Box.y1 = pWin->drawable.y + wBorderWidth(pWin) + event.xexpose.y;
-        Box.x2 = Box.x1 + event.xexpose.width;
-        Box.y2 = Box.y1 + event.xexpose.height;
-
-        event.xexpose.type = ProcessedExpose;
-
-        if (RegionContainsRect(pRgn, &Box) != rgnIN)
-            XPutBackEvent(xnestDisplay, &event);
-    }
-
-    miWindowExposures(pWin, pRgn);
-}
-
 void
 xnestSetShape(WindowPtr pWin, int kind)
 {
