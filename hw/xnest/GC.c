@@ -150,7 +150,7 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
         values.tile_stipple_origin_y = pGC->patOrg.y;
 
     if (mask & GCFont)
-        values.font = xnestFont(pGC->font);
+        values.font = xnestFontPriv(pGC->font)->font_id;
 
     if (mask & GCSubwindowMode)
         values.subwindow_mode = pGC->subWindowMode;
