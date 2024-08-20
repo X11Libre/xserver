@@ -327,8 +327,6 @@ int
 xnestPolyText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
                char *string)
 {
-    int width;
-
     // we need to prepend a xTextElt struct before our actual characters
     // won't get more than 254 elements, since it's already processed by doPolyText()
     int const bufsize = sizeof(xTextElt) + count;
@@ -348,17 +346,13 @@ xnestPolyText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
 
     free(buffer);
 
-    width = XTextWidth(xnestFontPriv(pGC->font)->font_struct, string, count);
-
-    return width + x;
+    return x + xnestTextWidth(xnestFontPriv(pGC->font), string, count);
 }
 
 int
 xnestPolyText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
                 unsigned short *string)
 {
-    int width;
-
     // we need to prepend a xTextElt struct before our actual characters
     // won't get more than 254 elements, since it's already processed by doPolyText()
     int const bufsize = sizeof(xTextElt) + count*2;
@@ -378,9 +372,7 @@ xnestPolyText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
 
     free(buffer);
 
-    width = XTextWidth16(xnestFontPriv(pGC->font)->font_struct, (XChar2b *) string, count);
-
-    return width + x;
+    return x + xnestTextWidth16(xnestFontPriv(pGC->font), string, count);
 }
 
 void
