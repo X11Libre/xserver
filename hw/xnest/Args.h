@@ -19,7 +19,6 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 
 extern char *xnestDisplayName;
-extern Bool xnestSynchronize;
 extern Bool xnestFullGeneration;
 extern int xnestDefaultClass;
 extern Bool xnestUserDefaultClass;
