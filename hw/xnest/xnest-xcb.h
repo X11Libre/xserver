@@ -7,11 +7,19 @@
 
 #include <xcb/xcb.h>
 
+#include "include/list.h"
+
+struct xnest_event_queue {
+    struct xorg_list entry;
+    xcb_generic_event_t *event;
+};
+
 struct xnest_upstream_info {
     xcb_connection_t *conn;
     uint32_t screenId;
     const xcb_screen_t *screenInfo;
     const xcb_setup_t *setup;
+    struct xnest_event_queue eventQueue;
 };
 
 extern struct xnest_upstream_info xnestUpstreamInfo;
