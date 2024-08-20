@@ -189,10 +189,14 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
 
     if (mask & XCB_CONFIG_WINDOW_SIBLING  &&
         xnestWindowPriv(pWin)->parent != xnestWindowParent(pWin)) {
-        XReparentWindow(xnestDisplay, xnestWindow(pWin),
-                        xnestWindowParent(pWin),
-                        pWin->origin.x - wBorderWidth(pWin),
-                        pWin->origin.y - wBorderWidth(pWin));
+
+        xcb_reparent_window(
+            xnestUpstreamInfo.conn,
+            xnestWindow(pWin),
+            xnestWindowParent(pWin),
+            pWin->origin.x - wBorderWidth(pWin),
+            pWin->origin.y - wBorderWidth(pWin));
+
         xnestWindowPriv(pWin)->parent = xnestWindowParent(pWin);
         xnestWindowPriv(pWin)->x = pWin->origin.x - wBorderWidth(pWin);
         xnestWindowPriv(pWin)->y = pWin->origin.y - wBorderWidth(pWin);
