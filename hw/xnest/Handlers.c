@@ -31,8 +31,7 @@ is" without express or implied warranty.
 void
 xnestBlockHandler(void *blockData, void *timeout)
 {
-    xnestCollectExposures();
-    XFlush(xnestDisplay);
+    xnestCollectEvents();
 }
 
 void
