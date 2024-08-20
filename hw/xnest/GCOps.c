@@ -348,7 +348,7 @@ xnestPolyText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
 
     free(buffer);
 
-    width = XTextWidth(xnestFontStruct(pGC->font), string, count);
+    width = XTextWidth(xnestFontPriv(pGC->font)->font_struct, string, count);
 
     return width + x;
 }
@@ -378,7 +378,7 @@ xnestPolyText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
 
     free(buffer);
 
-    width = XTextWidth16(xnestFontStruct(pGC->font), (XChar2b *) string, count);
+    width = XTextWidth16(xnestFontPriv(pGC->font)->font_struct, (XChar2b *) string, count);
 
     return width + x;
 }

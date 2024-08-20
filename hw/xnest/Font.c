@@ -70,9 +70,7 @@ xnestRealizeFont(ScreenPtr pScreen, FontPtr pFont)
     priv = (void *) malloc(sizeof(xnestPrivFont));
     xfont2_font_set_private(pFont, xnestFontPrivateIndex, priv);
 
-    xnestFontPriv(pFont)->font_struct = XLoadQueryFont(xnestDisplay, name);
-
-    if (!xnestFontStruct(pFont))
+    if (!(xnestFontPriv(pFont)->font_struct = XLoadQueryFont(xnestDisplay, name)))
         return FALSE;
 
     return TRUE;
@@ -82,8 +80,8 @@ Bool
 xnestUnrealizeFont(ScreenPtr pScreen, FontPtr pFont)
 {
     if (xnestFontPriv(pFont)) {
-        if (xnestFontStruct(pFont))
-            XFreeFont(xnestDisplay, xnestFontStruct(pFont));
+        if (xnestFontPriv(pFont)->font_struct)
+            XFreeFont(xnestDisplay, xnestFontPriv(pFont)->font_struct);
         free(xnestFontPriv(pFont));
         xfont2_font_set_private(pFont, xnestFontPrivateIndex, NULL);
     }

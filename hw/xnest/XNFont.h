@@ -26,9 +26,7 @@ extern int xnestFontPrivateIndex;
 #define xnestFontPriv(pFont) \
   ((xnestPrivFont *)FontGetPrivate(pFont, xnestFontPrivateIndex))
 
-#define xnestFontStruct(pFont) (xnestFontPriv(pFont)->font_struct)
-
-#define xnestFont(pFont) (xnestFontStruct(pFont)->fid)
+#define xnestFont(pFont) (xnestFontPriv(pFont)->font_struct->fid)
 
 Bool xnestRealizeFont(ScreenPtr pScreen, FontPtr pFont);
 Bool xnestUnrealizeFont(ScreenPtr pScreen, FontPtr pFont);
