@@ -28,6 +28,7 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Display.h"
 #include "XNFont.h"
@@ -37,7 +38,7 @@ int xnestFontPrivateIndex;
 Bool
 xnestRealizeFont(ScreenPtr pScreen, FontPtr pFont)
 {
-    void *priv;
+    xnestPrivFont *priv;
     Atom name_atom, value_atom;
     int nprops;
     FontPropPtr props;
@@ -69,9 +70,27 @@ xnestRealizeFont(ScreenPtr pScreen, FontPtr pFont)
     priv = (void *) malloc(sizeof(xnestPrivFont));
     xfont2_font_set_private(pFont, xnestFontPrivateIndex, priv);
 
-    xnestFontPriv(pFont)->font_struct = XLoadQueryFont(xnestDisplay, name);
+    priv->font_id = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_open_font(xnestUpstreamInfo.conn, priv->font_id, strlen(name), name);
 
-    if (!xnestFontStruct(pFont))
+    xcb_generic_error_t *err = NULL;
+    priv->font_reply = xcb_query_font_reply(
+        xnestUpstreamInfo.conn,
+        xcb_query_font(xnestUpstreamInfo.conn, priv->font_id),
+        &err);
+    if (err) {
+        ErrorF("failed to query font \"%s\": %d", name, err->error_code);
+        free(err);
+        return FALSE;
+    }
+    if (!priv->font_reply) {
+        ErrorF("failed to query font \"%s\": no reply", name);
+        return FALSE;
+    }
+    priv->chars_len = xcb_query_font_char_infos_length(priv->font_reply);
+    priv->chars = xcb_query_font_char_infos(priv->font_reply);
+
+    if (!(xnestFontPriv(pFont)->font_struct = XLoadQueryFont(xnestDisplay, name)))
         return FALSE;
 
     return TRUE;
@@ -81,8 +100,9 @@ Bool
 xnestUnrealizeFont(ScreenPtr pScreen, FontPtr pFont)
 {
     if (xnestFontPriv(pFont)) {
-        if (xnestFontStruct(pFont))
-            XFreeFont(xnestDisplay, xnestFontStruct(pFont));
+        xcb_close_font(xnestUpstreamInfo.conn, xnestFontPriv(pFont)->font_id);
+        if (xnestFontPriv(pFont)->font_struct)
+            XFreeFont(xnestDisplay, xnestFontPriv(pFont)->font_struct);
         free(xnestFontPriv(pFont));
         xfont2_font_set_private(pFont, xnestFontPrivateIndex, NULL);
     }
