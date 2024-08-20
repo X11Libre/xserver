@@ -307,7 +307,7 @@ xnestDirectInstallColormaps(ScreenPtr pScreen)
         dixLookupResourceByType((void **) &pCmap, pCmapIDs[i], X11_RESTYPE_COLORMAP,
                                 serverClient, DixInstallAccess);
         if (pCmap)
-            XInstallColormap(xnestDisplay, xnestColormap(pCmap));
+            xcb_install_colormap(xnestUpstreamInfo.conn, xnestColormap(pCmap));
     }
 }
 
@@ -328,7 +328,7 @@ xnestDirectUninstallColormaps(ScreenPtr pScreen)
         dixLookupResourceByType((void **) &pCmap, pCmapIDs[i], X11_RESTYPE_COLORMAP,
                                 serverClient, DixUninstallAccess);
         if (pCmap)
-            XUninstallColormap(xnestDisplay, xnestColormap(pCmap));
+            xcb_uninstall_colormap(xnestUpstreamInfo.conn, xnestColormap(pCmap));
     }
 }
 
