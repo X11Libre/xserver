@@ -33,7 +33,6 @@ is" without express or implied warranty.
 #include "Args.h"
 
 char *xnestDisplayName = NULL;
-Bool xnestSynchronize = FALSE;
 Bool xnestFullGeneration = FALSE;
 int xnestDefaultClass;
 Bool xnestUserDefaultClass = FALSE;
@@ -69,10 +68,6 @@ ddxProcessArgument(int argc, char *argv[], int i)
             return 2;
         }
         return 0;
-    }
-    if (!strcmp(argv[i], "-sync")) {
-        xnestSynchronize = TRUE;
-        return 1;
     }
     if (!strcmp(argv[i], "-full")) {
         xnestFullGeneration = TRUE;
@@ -187,7 +182,6 @@ void
 ddxUseMsg(void)
 {
     ErrorF("-display string        display name of the real server\n");
-    ErrorF("-sync                  sinchronize with the real server\n");
     ErrorF("-full                  utilize full regeneration\n");
     ErrorF("-class string          default visual class\n");
     ErrorF("-depth int             default depth\n");

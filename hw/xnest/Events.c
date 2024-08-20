@@ -30,6 +30,7 @@ is" without express or implied warranty.
 #include "inpututils.h"
 
 #include "Xnest.h"
+#include "xnest-xcb.h"
 
 #include "Args.h"
 #include "Color.h"
@@ -63,42 +64,6 @@ SetTimeSinceLastInputEvent(void)
     lastEventTime = GetTimeInMillis();
 }
 
-static Bool
-xnestExposurePredicate(Display * dpy, XEvent * event, char *args)
-{
-    return event->type == Expose || event->type == ProcessedExpose;
-}
-
-static Bool
-xnestNotExposurePredicate(Display * dpy, XEvent * event, char *args)
-{
-    return !xnestExposurePredicate(dpy, event, args);
-}
-
-void
-xnestCollectExposures(void)
-{
-    XEvent X;
-    WindowPtr pWin;
-    RegionRec Rgn;
-    BoxRec Box;
-
-    while (XCheckIfEvent(xnestDisplay, &X, xnestExposurePredicate, NULL)) {
-        pWin = xnestWindowPtr(X.xexpose.window);
-
-        if (pWin && X.xexpose.width && X.xexpose.height) {
-            Box.x1 = pWin->drawable.x + wBorderWidth(pWin) + X.xexpose.x;
-            Box.y1 = pWin->drawable.y + wBorderWidth(pWin) + X.xexpose.y;
-            Box.x2 = Box.x1 + X.xexpose.width;
-            Box.y2 = Box.y1 + X.xexpose.height;
-
-            RegionInit(&Rgn, &Box, 1);
-
-            miSendExposures(pWin, &Rgn, Box.x1, Box.y1);
-        }
-    }
-}
-
 void
 xnestQueueKeyEvent(int type, unsigned int keycode)
 {
@@ -106,52 +71,62 @@ xnestQueueKeyEvent(int type, unsigned int keycode)
     QueueKeyboardEvents(xnestKeyboardDevice, type, keycode);
 }
 
+#define EVTYPE(tname) tname *ev = (tname*)event
+
 static void
-xnest_handle_event(XEvent X)
+xnest_handle_event(xcb_generic_event_t *event)
 {
-    switch (X.type) {
+    if (!event)
+        return;
+
+    switch (event->response_type & ~0x80) {
         case KeyPress:
         {
-            xnestUpdateModifierState(X.xkey.state);
-            xnestQueueKeyEvent(KeyPress, X.xkey.keycode);
+            EVTYPE(xcb_key_press_event_t);
+            xnestUpdateModifierState(ev->state);
+            xnestQueueKeyEvent(KeyPress, ev->detail);
             break;
         }
 
         case KeyRelease:
         {
-            xnestUpdateModifierState(X.xkey.state);
-            xnestQueueKeyEvent(KeyRelease, X.xkey.keycode);
+            EVTYPE(xcb_key_release_event_t);
+            xnestUpdateModifierState(ev->state);
+            xnestQueueKeyEvent(KeyRelease, ev->detail);
             break;
         }
 
         case ButtonPress:
         {
             ValuatorMask mask;
+            EVTYPE(xcb_button_press_event_t);
             valuator_mask_set_range(&mask, 0, 0, NULL);
-            xnestUpdateModifierState(X.xkey.state);
+            xnestUpdateModifierState(ev->state);
             lastEventTime = GetTimeInMillis();
             QueuePointerEvents(xnestPointerDevice, ButtonPress,
-                               X.xbutton.button, POINTER_RELATIVE, &mask);
+                               ev->detail, POINTER_RELATIVE, &mask);
             break;
         }
 
         case ButtonRelease:
         {
             ValuatorMask mask;
+            EVTYPE(xcb_button_release_event_t);
             valuator_mask_set_range(&mask, 0, 0, NULL);
-            xnestUpdateModifierState(X.xkey.state);
+            xnestUpdateModifierState(ev->state);
             lastEventTime = GetTimeInMillis();
             QueuePointerEvents(xnestPointerDevice, ButtonRelease,
-                               X.xbutton.button, POINTER_RELATIVE, &mask);
+                               ev->detail, POINTER_RELATIVE, &mask);
             break;
         }
 
         case MotionNotify:
         {
+            EVTYPE(xcb_motion_notify_event_t);
             ValuatorMask mask;
             int valuators[2];
-            valuators[0] = X.xmotion.x;
-            valuators[1] = X.xmotion.y;
+            valuators[0] = ev->event_x;
+            valuators[1] = ev->event_y;
             valuator_mask_set_range(&mask, 0, 2, valuators);
             lastEventTime = GetTimeInMillis();
             QueuePointerEvents(xnestPointerDevice, MotionNotify,
@@ -161,8 +136,9 @@ xnest_handle_event(XEvent X)
 
         case FocusIn:
         {
-            if (X.xfocus.detail != NotifyInferior) {
-                ScreenPtr pScreen = xnestScreen(X.xfocus.window);
+            EVTYPE(xcb_focus_in_event_t);
+            if (ev->detail != NotifyInferior) {
+                ScreenPtr pScreen = xnestScreen(ev->event);
                 if (pScreen)
                     xnestDirectInstallColormaps(pScreen);
             }
@@ -171,8 +147,9 @@ xnest_handle_event(XEvent X)
 
         case FocusOut:
         {
-            if (X.xfocus.detail != NotifyInferior) {
-                ScreenPtr pScreen = xnestScreen(X.xfocus.window);
+            EVTYPE(xcb_focus_out_event_t);
+            if (ev->detail != NotifyInferior) {
+                ScreenPtr pScreen = xnestScreen(ev->event);
                 if (pScreen)
                     xnestDirectUninstallColormaps(pScreen);
             }
@@ -184,15 +161,16 @@ xnest_handle_event(XEvent X)
 
         case EnterNotify:
         {
-            if (X.xcrossing.detail != NotifyInferior) {
-                ScreenPtr pScreen = xnestScreen(X.xcrossing.window);
+            EVTYPE(xcb_enter_notify_event_t);
+            if (ev->detail != NotifyInferior) {
+                ScreenPtr pScreen = xnestScreen(ev->event);
                 if (pScreen) {
                     ValuatorMask mask;
                     int valuators[2];
-                    NewCurrentScreen(inputInfo.pointer, pScreen, X.xcrossing.x,
-                                     X.xcrossing.y);
-                    valuators[0] = X.xcrossing.x;
-                    valuators[1] = X.xcrossing.y;
+                    NewCurrentScreen(inputInfo.pointer, pScreen,
+                                     ev->event_x, ev->event_y);
+                    valuators[0] = ev->event_x;
+                    valuators[1] = ev->event_y;
                     valuator_mask_set_range(&mask, 0, 2, valuators);
                     lastEventTime = GetTimeInMillis();
                     QueuePointerEvents(xnestPointerDevice, MotionNotify,
@@ -205,8 +183,9 @@ xnest_handle_event(XEvent X)
 
         case LeaveNotify:
         {
-            if (X.xcrossing.detail != NotifyInferior) {
-                ScreenPtr pScreen = xnestScreen(X.xcrossing.window);
+            EVTYPE(xcb_leave_notify_event_t);
+            if (ev->detail != NotifyInferior) {
+                ScreenPtr pScreen = xnestScreen(ev->event);
                 if (pScreen) {
                     xnestDirectUninstallColormaps(pScreen);
                 }
@@ -216,8 +195,9 @@ xnest_handle_event(XEvent X)
 
         case DestroyNotify:
         {
-            if (xnestParentWindow != (Window) 0 &&
-                X.xdestroywindow.window == xnestParentWindow)
+            xcb_destroy_notify_event_t *ev = (xcb_destroy_notify_event_t*)event;
+            if (xnestParentWindow &&
+                ev->window == xnestParentWindow)
                 exit(0);
             break;
         }
@@ -228,11 +208,35 @@ xnest_handle_event(XEvent X)
         case MapNotify:
         case ReparentNotify:
         case UnmapNotify:
-        case NoExpose:
             break;
 
+        case Expose:
+        {
+            EVTYPE(xcb_expose_event_t);
+            WindowPtr pWin = xnestWindowPtr(ev->window);
+            if (pWin && ev->width && ev->height) {
+                RegionRec Rgn;
+                BoxRec Box = {
+                    .x1 = pWin->drawable.x + wBorderWidth(pWin) + ev->x,
+                    .y1 = pWin->drawable.y + wBorderWidth(pWin) + ev->y,
+                    .x2 = Box.x1 + ev->width,
+                    .y2 = Box.y1 + ev->height,
+                };
+                RegionInit(&Rgn, &Box, 1);
+                miSendExposures(pWin, &Rgn, Box.x1, Box.y1);
+            }
+        }
+        break;
+
+        case NoExpose:
+            ErrorF("xnest: received stray NoExpose\n");
+        break;
+        case GraphicsExpose:
+            ErrorF("xnest: received stray GraphicsExpose\n");
+        break;
+
         default:
-            ErrorF("xnest warning: unhandled event: %d\n", X.type);
+            ErrorF("xnest warning: unhandled event: %d\n", event->response_type);
             break;
     }
 }
@@ -240,9 +244,29 @@ xnest_handle_event(XEvent X)
 void
 xnestCollectEvents(void)
 {
-    XEvent X;
-
-    while (XCheckIfEvent(xnestDisplay, &X, xnestNotExposurePredicate, NULL)) {
-        xnest_handle_event(X);
+    /* process queued events */
+    struct xnest_event_queue *tmp = NULL, *walk = NULL;
+    xorg_list_for_each_entry_safe(walk, tmp, &xnestUpstreamInfo.eventQueue.entry, entry) {
+        xnest_handle_event(walk->event);
+        xorg_list_del(&walk->entry);
+        free(walk->event);
+        free(walk);
     }
+
+    xcb_flush(xnestUpstreamInfo.conn);
+
+    int err = xcb_connection_has_error(xnestUpstreamInfo.conn);
+    if (err) {
+        ErrorF("Xnest: upsream connection error: %d\n", err);
+        exit(0);
+    }
+
+    /* fetch new events from xcb */
+    xcb_generic_event_t *event = NULL;
+    while ((event = xcb_poll_for_event(xnestUpstreamInfo.conn))) {
+        xnest_handle_event(event);
+        free(event);
+    }
+
+    xcb_flush(xnestUpstreamInfo.conn);
 }
