@@ -446,3 +446,122 @@ uint32_t xnest_visual_to_upstream_cmap(uint32_t visual)
     }
     return XCB_COLORMAP_NONE;
 }
+
+static inline char XN_CI_NONEXISTCHAR(xcb_charinfo_t *cs)
+{
+    return ((cs->character_width == 0) && \
+             ((cs->right_side_bearing | cs->left_side_bearing | cs->ascent | cs->descent) == 0));
+}
+
+#define XN_CI_GET_CHAR_INFO_1D(font,col,def,cs) \
+do { \
+    cs = def; \
+    if (col >= font->font_reply->min_char_or_byte2 && col <= font->font_reply->max_char_or_byte2) { \
+        if (font->chars == NULL) { \
+            cs = &font->font_reply->min_bounds; \
+        } else { \
+            cs = (xcb_charinfo_t *)&font->chars[(col - font->font_reply->min_char_or_byte2)]; \
+            if (XN_CI_NONEXISTCHAR(cs)) cs = def; \
+        } \
+    } \
+} while (0)
+
+#define XN_CI_GET_CHAR_INFO_2D(font,row,col,def,cs) \
+do { \
+    cs = def; \
+    if (row >= font->font_reply->min_byte1 && row <= font->font_reply->max_byte1 && \
+        col >= font->font_reply->min_char_or_byte2 && col <= font->font_reply->max_char_or_byte2) { \
+        if (font->chars == NULL) { \
+            cs = &font->font_reply->min_bounds; \
+        } else { \
+            cs = (xcb_charinfo_t*)&font->chars[((row - font->font_reply->min_byte1) * \
+                                (font->font_reply->max_char_or_byte2 - \
+                                 font->font_reply->min_char_or_byte2 + 1)) + \
+                               (col - font->font_reply->min_char_or_byte2)]; \
+            if (XN_CI_NONEXISTCHAR(cs)) cs = def; \
+        } \
+    } \
+} while (0)
+
+#define XN_CI_GET_DEFAULT_INFO_2D(font,cs) \
+do { \
+    unsigned int r = (font->font_reply->default_char >> 8); \
+    unsigned int c = (font->font_reply->default_char & 0xff); \
+    XN_CI_GET_CHAR_INFO_2D (font, r, c, NULL, cs); \
+} while (0)
+
+#define XN_CI_GET_ROWZERO_CHAR_INFO_2D(font,col,def,cs) \
+do { \
+    cs = def; \
+    if (font->font_reply->min_byte1 == 0 && \
+        col >= font->font_reply->min_char_or_byte2 && col <= font->font_reply->max_char_or_byte2) { \
+        if (font->chars == NULL) { \
+            cs = &font->font_reply->min_bounds; \
+        } else { \
+            cs = (xcb_charinfo_t*)&font->chars[(col - font->font_reply->min_char_or_byte2)]; \
+            if (XN_CI_NONEXISTCHAR(cs)) cs = def; \
+        } \
+    } \
+} while (0)
+
+int xnest_text_width(xnestPrivFont *font, const char *string, int count)
+{
+    xcb_charinfo_t *def;
+
+    if (font->font_reply->max_byte1 == 0)
+        XN_CI_GET_CHAR_INFO_1D (font, font->font_reply->default_char, NULL, def);
+    else
+        XN_CI_GET_DEFAULT_INFO_2D (font, def);
+
+    if (def && font->font_reply->min_bounds.character_width == font->font_reply->max_bounds.character_width)
+        return (font->font_reply->min_bounds.character_width * count);
+
+    int width = 0, i = 0;
+    unsigned char *us;
+    for (i = 0, us = (unsigned char *) string; i < count; i++, us++) {
+        unsigned uc = (unsigned) *us;
+        xcb_charinfo_t *cs;
+
+        if (font->font_reply->max_byte1 == 0) {
+            XN_CI_GET_CHAR_INFO_1D (font, uc, def, cs);
+        } else {
+            XN_CI_GET_ROWZERO_CHAR_INFO_2D (font, uc, def, cs);
+        }
+
+        if (cs) width += cs->character_width;
+    }
+
+    return width;
+}
+
+int xnest_text_width_16 (xnestPrivFont *font, const uint16_t* str, int count)
+{
+    xcb_charinfo_t *def;
+    xcb_char2b_t *string = (xcb_char2b_t*)str;
+
+    if (font->font_reply->max_byte1 == 0)
+        XN_CI_GET_CHAR_INFO_1D (font, font->font_reply->default_char, NULL, def);
+    else
+        XN_CI_GET_DEFAULT_INFO_2D (font, def);
+
+    if (def && font->font_reply->min_bounds.character_width == font->font_reply->max_bounds.character_width)
+        return (font->font_reply->min_bounds.character_width * count);
+
+    int width = 0;
+    for (int i = 0; i < count; i++, string++) {
+        xcb_charinfo_t *cs;
+        unsigned int r = (unsigned int) string->byte1;
+        unsigned int c = (unsigned int) string->byte2;
+
+        if (font->font_reply->max_byte1 == 0) {
+            unsigned int ind = ((r << 8) | c);
+            XN_CI_GET_CHAR_INFO_1D (font, ind, def, cs);
+        } else {
+            XN_CI_GET_CHAR_INFO_2D (font, r, c, def, cs);
+        }
+
+        if (cs) width += cs->character_width;
+    }
+
+    return width;
+}
