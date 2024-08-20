@@ -17,9 +17,7 @@ is" without express or implied warranty.
 
 #include <X11/Xdefs.h>
 
-typedef struct {
-    XFontStruct *font_struct;
-} xnestPrivFont;
+#include <xcb/xcb.h>
 
 extern int xnestFontPrivateIndex;
 
