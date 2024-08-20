@@ -65,7 +65,6 @@ Bool xnestRealizeWindow(WindowPtr pWin);
 Bool xnestUnrealizeWindow(WindowPtr pWin);
 void xnestCopyWindow(WindowPtr pWin, xPoint oldOrigin, RegionPtr oldRegion);
 void xnestClipNotify(WindowPtr pWin, int dx, int dy);
-void xnestWindowExposures(WindowPtr pWin, RegionPtr pRgn);
 void xnestSetShape(WindowPtr pWin, int kind);
 void xnestShapeWindow(WindowPtr pWin);
 
