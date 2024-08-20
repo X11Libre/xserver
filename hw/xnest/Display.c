@@ -74,9 +74,6 @@ xnestOpenDisplay(int argc, char *argv[])
         FatalError("Unable to open display \"%s\".\n",
                    XDisplayName(xnestDisplayName));
 
-    if (xnestSynchronize)
-        XSynchronize(xnestDisplay, TRUE);
-
     xnest_upstream_setup();
 
     if (xnestParentWindow != (Window) 0)

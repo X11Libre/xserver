@@ -35,6 +35,8 @@ void xnest_upstream_setup(void) {
     for (int i = 0; i < xnestUpstreamInfo.screenId; ++i)
         xcb_screen_next (&iter);
     xnestUpstreamInfo.screenInfo = iter.data;
+
+    xorg_list_init(&xnestUpstreamInfo.eventQueue.entry);
 }
 
 uint32_t xnestUpstreamXID(void) {
