@@ -148,7 +148,7 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
         values.ts_y_origin = pGC->patOrg.y;
 
     if (mask & GCFont)
-        values.font = xnestFont(pGC->font);
+        values.font = xnestFontPriv(pGC->font)->font_struct->fid;
 
     if (mask & GCSubwindowMode)
         values.subwindow_mode = pGC->subWindowMode;
