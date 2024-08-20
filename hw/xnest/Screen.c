@@ -344,7 +344,7 @@ breakout:
     pScreen->RealizeWindow = xnestRealizeWindow;
     pScreen->UnrealizeWindow = xnestUnrealizeWindow;
     pScreen->PostValidateTree = NULL;
-    pScreen->WindowExposures = xnestWindowExposures;
+    pScreen->WindowExposures = miWindowExposures;
     pScreen->CopyWindow = xnestCopyWindow;
     pScreen->ClipNotify = xnestClipNotify;
     pScreen->ClearToBackground = xnest_screen_ClearToBackground;
