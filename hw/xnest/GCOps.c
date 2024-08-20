@@ -142,21 +142,13 @@ xnestGetImage(DrawablePtr pDrawable, int x, int y, int w, int h,
     free(reply);
 }
 
-static Bool
-xnestBitBlitPredicate(Display * dpy, XEvent * event, char *args)
-{
-    return event->type == GraphicsExpose || event->type == NoExpose;
-}
-
 static RegionPtr
 xnestBitBlitHelper(GCPtr pGC)
 {
     if (!pGC->graphicsExposures)
         return NullRegion;
     else {
-        XEvent event;
         RegionPtr pReg, pTmpReg;
-        BoxRec Box;
         Bool pending, overlap;
 
         pReg = RegionCreate(NULL, 1);
@@ -164,24 +156,43 @@ xnestBitBlitHelper(GCPtr pGC)
         if (!pReg || !pTmpReg)
             return NullRegion;
 
+        xcb_flush(xnestUpstreamInfo.conn);
+
         pending = TRUE;
         while (pending) {
-            XIfEvent(xnestDisplay, &event, xnestBitBlitPredicate, NULL);
-
-            switch (event.type) {
-            case NoExpose:
+            xcb_generic_event_t *event = xcb_wait_for_event(xnestUpstreamInfo.conn);
+            if (!event) {
                 pending = FALSE;
                 break;
+            }
 
-            case GraphicsExpose:
-                Box.x1 = event.xgraphicsexpose.x;
-                Box.y1 = event.xgraphicsexpose.y;
-                Box.x2 = event.xgraphicsexpose.x + event.xgraphicsexpose.width;
-                Box.y2 = event.xgraphicsexpose.y + event.xgraphicsexpose.height;
-                RegionReset(pTmpReg, &Box);
-                RegionAppend(pReg, pTmpReg);
-                pending = event.xgraphicsexpose.count;
-                break;
+            switch (event->response_type & ~0x80) {
+                case NoExpose:
+                    pending = FALSE;
+                    free(event);
+                    break;
+
+                case GraphicsExpose:
+                {
+                    xcb_graphics_exposure_event_t* ev = (xcb_graphics_exposure_event_t*)event;
+                    BoxRec Box = {
+                        .x1 = ev->x,
+                        .y1 = ev->y,
+                        .x2 = ev->x + ev->width,
+                        .y2 = ev->y + ev->height,
+                    };
+                    RegionReset(pTmpReg, &Box);
+                    RegionAppend(pReg, pTmpReg);
+                    pending = ev->count;
+                    free(event);
+                    break;
+                }
+                default:
+                {
+                    struct xnest_event_queue *q = malloc(sizeof(struct xnest_event_queue));
+                    q->event = event;
+                    xorg_list_add(&q->entry, &xnestUpstreamInfo.eventQueue.entry);
+                }
             }
         }
 
