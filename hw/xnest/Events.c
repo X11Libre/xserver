@@ -257,7 +257,7 @@ xnestCollectEvents(void)
 
     int err = xcb_connection_has_error(xnestUpstreamInfo.conn);
     if (err) {
-        ErrorF("Xnest: upsream connection error: %d\n", err);
+        ErrorF("Xnest: upstream connection error: %d\n", err);
         exit(0);
     }
 
