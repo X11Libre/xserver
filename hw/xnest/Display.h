@@ -24,7 +24,6 @@ is" without express or implied warranty.
 #define MAXDEPTH 32
 #define MAXVISUALSPERDEPTH 256
 
-extern Display *xnestDisplay;
 extern int xnestNumPixmapFormats;
 extern Drawable xnestDefaultDrawables[MAXDEPTH + 1];
 extern Pixmap xnestIconBitmap;
