@@ -107,7 +107,7 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     XFreePixmap(xnestDisplay, source);
     XFreePixmap(xnestDisplay, mask);
 
-    return True;
+    return TRUE;
 }
 
 Bool
@@ -115,7 +115,7 @@ xnestUnrealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
 {
     XFreeCursor(xnestDisplay, xnestCursor(pCursor, pScreen));
     free(xnestGetCursorPriv(pCursor, pScreen));
-    return True;
+    return TRUE;
 }
 
 void

@@ -190,7 +190,7 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
                               modmap, serverClient);
 
         XkbDDXChangeControls(pDev, xkb->ctrls, xkb->ctrls);
-        XkbFreeKeyboard(xkb, 0, False);
+        XkbFreeKeyboard(xkb, 0, FALSE);
         free(keymap);
         break;
     case DEVICE_ON:

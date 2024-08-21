@@ -86,7 +86,7 @@ xnestOpenDisplay(int argc, char *argv[])
                    XDisplayName(xnestDisplayName));
 
     if (xnestSynchronize)
-        XSynchronize(xnestDisplay, True);
+        XSynchronize(xnestDisplay, TRUE);
 
     mask = VisualScreenMask;
     vi.screen = DefaultScreen(xnestDisplay);

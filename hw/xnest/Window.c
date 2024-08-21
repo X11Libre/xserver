@@ -145,7 +145,7 @@ xnestCreateWindow(WindowPtr pWin)
     if (!pWin->parent)          /* only the root window will have the right colormap */
         xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
 
-    return True;
+    return TRUE;
 }
 
 Bool
@@ -162,7 +162,7 @@ xnestDestroyWindow(WindowPtr pWin)
     if (pWin->optional && pWin->optional->colormap && pWin->parent)
         xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
 
-    return True;
+    return TRUE;
 }
 
 Bool
@@ -172,7 +172,7 @@ xnestPositionWindow(WindowPtr pWin, int x, int y)
                          CWParent |
                          CWX | CWY | CWWidth | CWHeight | CWBorderWidth);
 
-    return True;
+    return TRUE;
 }
 
 void
@@ -348,7 +348,7 @@ xnestChangeWindowAttributes(WindowPtr pWin, unsigned long mask)
         XChangeWindowAttributes(xnestDisplay, xnestWindow(pWin),
                                 mask, &attributes);
 
-    return True;
+    return TRUE;
 }
 
 Bool
@@ -358,7 +358,7 @@ xnestRealizeWindow(WindowPtr pWin)
     xnestShapeWindow(pWin);
     XMapWindow(xnestDisplay, xnestWindow(pWin));
 
-    return True;
+    return TRUE;
 }
 
 Bool
@@ -366,7 +366,7 @@ xnestUnrealizeWindow(WindowPtr pWin)
 {
     XUnmapWindow(xnestDisplay, xnestWindow(pWin));
 
-    return True;
+    return TRUE;
 }
 
 void
@@ -394,7 +394,7 @@ xnestWindowExposures(WindowPtr pWin, RegionPtr pRgn)
     Window window;
     BoxRec Box;
 
-    XSync(xnestDisplay, False);
+    XSync(xnestDisplay, FALSE);
 
     window = xnestWindow(pWin);
 
@@ -429,10 +429,10 @@ xnestRegionEqual(RegionPtr pReg1, RegionPtr pReg2)
     unsigned int n1, n2;
 
     if (pReg1 == pReg2)
-        return True;
+        return TRUE;
 
     if (pReg1 == NullRegion || pReg2 == NullRegion)
-        return False;
+        return FALSE;
 
     pBox1 = RegionRects(pReg1);
     n1 = RegionNumRects(pReg1);
@@ -441,15 +441,15 @@ xnestRegionEqual(RegionPtr pReg1, RegionPtr pReg2)
     n2 = RegionNumRects(pReg2);
 
     if (n1 != n2)
-        return False;
+        return FALSE;
 
     if (pBox1 == pBox2)
-        return True;
+        return TRUE;
 
     if (memcmp(pBox1, pBox2, n1 * sizeof(BoxRec)))
-        return False;
+        return FALSE;
 
-    return True;
+    return TRUE;
 }
 
 void

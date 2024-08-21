@@ -84,7 +84,7 @@ xnestCreateGC(GCPtr pGC)
                                      xnestDefaultDrawables[pGC->depth],
                                      0L, NULL);
 
-    return True;
+    return TRUE;
 }
 
 void
