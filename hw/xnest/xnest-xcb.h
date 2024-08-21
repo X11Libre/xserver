@@ -16,7 +16,7 @@ struct xnest_event_queue {
 
 struct xnest_upstream_info {
     xcb_connection_t *conn;
-    uint32_t screenId;
+    int screenId;
     const xcb_screen_t *screenInfo;
     const xcb_setup_t *setup;
     struct xnest_event_queue eventQueue;
@@ -24,8 +24,8 @@ struct xnest_upstream_info {
 
 extern struct xnest_upstream_info xnestUpstreamInfo;
 
-/* fetch upstream connection's xcb setup data */
-void xnest_upstream_setup(void);
+/* connect to upstream X server */
+Bool xnest_upstream_setup(const char* displayName);
 
 /* retrieve upstream GC XID for our xserver GC */
 uint32_t xnest_upstream_gc(GCPtr pGC);
