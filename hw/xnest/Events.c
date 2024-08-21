@@ -108,13 +108,10 @@ xnestQueueKeyEvent(int type, unsigned int keycode)
     QueueKeyboardEvents(xnestKeyboardDevice, type, keycode);
 }
 
-void
-xnestCollectEvents(void)
+static void
+xnest_handle_event(XEvent X)
 {
-    XEvent X;
-
-    while (XCheckIfEvent(xnestDisplay, &X, xnestNotExposurePredicate, NULL)) {
-        switch (X.type) {
+    switch (X.type) {
         case KeyPress:
         {
             xnestUpdateModifierState(X.xkey.state);
@@ -239,6 +236,15 @@ xnestCollectEvents(void)
         default:
             ErrorF("xnest warning: unhandled event: %d\n", X.type);
             break;
-        }
+    }
+}
+
+void
+xnestCollectEvents(void)
+{
+    XEvent X;
+
+    while (XCheckIfEvent(xnestDisplay, &X, xnestNotExposurePredicate, NULL)) {
+        xnest_handle_event(X);
     }
 }
