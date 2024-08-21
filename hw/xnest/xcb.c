@@ -24,11 +24,13 @@ xnestUpstreamInfoRec xnestUpstreamInfo = { 0 };
 XnestVisualRec *xnestVisualMap;
 int xnestNumVisualMap;
 
-void xnest_upstream_setup(void) {
-    xnestUpstreamInfo.screenId = DefaultScreen(xnestDisplay);
+Bool xnest_upstream_setup(const char* displayName)
+{
+    xnestUpstreamInfo.conn = xcb_connect(displayName, &xnestUpstreamInfo.screenId);
+    if (!xnestUpstreamInfo.conn)
+        return FALSE;
 
     /* retrieve setup data for our screen */
-    xnestUpstreamInfo.conn = XGetXCBConnection(xnestDisplay);
     xnestUpstreamInfo.setup = xcb_get_setup(xnestUpstreamInfo.conn);
     xcb_screen_iterator_t iter = xcb_setup_roots_iterator (xnestUpstreamInfo.setup);
 
@@ -37,6 +39,8 @@ void xnest_upstream_setup(void) {
     xnestUpstreamInfo.screenInfo = iter.data;
 
     xorg_list_init(&xnestUpstreamInfo.eventQueue.entry);
+
+    return TRUE;
 }
 
 uint32_t xnestUpstreamXID(void) {

@@ -16,7 +16,7 @@ typedef struct {
 
 typedef struct {
     xcb_connection_t *conn;
-    uint32_t screenId;
+    int screenId;
     const xcb_screen_t *screenInfo;
     const xcb_setup_t *setup;
     xnestEventQueue eventQueue;
@@ -24,8 +24,8 @@ typedef struct {
 
 extern xnestUpstreamInfoRec xnestUpstreamInfo;
 
-/* fetch upstream connection's xcb setup data */
-void xnest_upstream_setup(void);
+/* connect to upstream X server */
+Bool xnest_upstream_setup(const char* displayName);
 
 /* generate a new XID for upstream X11 connection */
 uint32_t xnestUpstreamXID(void);
