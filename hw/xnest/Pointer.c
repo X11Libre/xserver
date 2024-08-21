@@ -41,7 +41,7 @@ DeviceIntPtr xnestPointerDevice = NULL;
 void
 xnestChangePointerControl(DeviceIntPtr pDev, PtrCtrl * ctrl)
 {
-    XChangePointerControl(xnestDisplay, True, True,
+    XChangePointerControl(xnestDisplay, TRUE, TRUE,
                           ctrl->num, ctrl->den, ctrl->threshold);
 }
 

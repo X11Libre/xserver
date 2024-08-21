@@ -126,7 +126,7 @@ xnestCreateColormap(ColormapPtr pCmap)
         break;
     }
 
-    return True;
+    return TRUE;
 }
 
 void
@@ -175,19 +175,19 @@ static Bool
 xnestSameInstalledColormapWindows(Window *windows, int numWindows)
 {
     if (xnestNumOldInstalledColormapWindows != numWindows)
-        return False;
+        return FALSE;
 
     if (xnestOldInstalledColormapWindows == windows)
-        return True;
+        return TRUE;
 
     if (xnestOldInstalledColormapWindows == NULL || windows == NULL)
-        return False;
+        return FALSE;
 
     if (memcmp(xnestOldInstalledColormapWindows, windows,
                numWindows * sizeof(Window)))
-        return False;
+        return FALSE;
 
-    return True;
+    return TRUE;
 }
 
 void
@@ -372,7 +372,7 @@ xnestUninstallColormap(ColormapPtr pCmap)
     }
 }
 
-static Bool xnestInstalledDefaultColormap = False;
+static Bool xnestInstalledDefaultColormap = FALSE;
 
 int
 xnestListInstalledColormaps(ScreenPtr pScreen, Colormap * pCmapIDs)
@@ -474,7 +474,7 @@ xnestCreateDefaultColormap(ScreenPtr pScreen)
                        (pVisual->class & DynamicClass) ? AllocNone : AllocAll,
                        0)
         != Success)
-        return False;
+        return FALSE;
 
     wp = pScreen->whitePixel;
     bp = pScreen->blackPixel;
@@ -486,7 +486,7 @@ xnestCreateDefaultColormap(ScreenPtr pScreen)
     pScreen->blackPixel = bp;
     (*pScreen->InstallColormap) (pCmap);
 
-    xnestInstalledDefaultColormap = True;
+    xnestInstalledDefaultColormap = TRUE;
 
-    return True;
+    return TRUE;
 }

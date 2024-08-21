@@ -78,7 +78,7 @@ static Bool
 xnestSaveScreen(ScreenPtr pScreen, int what)
 {
     if (xnestSoftwareScreenSaver)
-        return False;
+        return FALSE;
     else {
         switch (what) {
         case SCREEN_SAVER_ON:
@@ -102,7 +102,7 @@ xnestSaveScreen(ScreenPtr pScreen, int what)
             xnestSetInstalledColormapWindows(pScreen);
             break;
         }
-        return True;
+        return TRUE;
     }
 }
 
@@ -406,9 +406,9 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     }
 
     if (!xnestCreateDefaultColormap(pScreen))
-        return False;
+        return FALSE;
 
-    return True;
+    return TRUE;
 }
 
 Bool
@@ -427,5 +427,5 @@ xnestCloseScreen(ScreenPtr pScreen)
        the display connection.  There is no need to generate extra protocol.
      */
 
-    return True;
+    return TRUE;
 }
