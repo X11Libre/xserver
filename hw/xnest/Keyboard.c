@@ -41,7 +41,6 @@ is" without express or implied warranty.
 
 #include <X11/extensions/XKB.h>
 #include "xkbsrv.h"
-#include <X11/extensions/XKBconfig.h>
 
 extern Bool
  XkbQueryExtension(Display * /* dpy */ ,
