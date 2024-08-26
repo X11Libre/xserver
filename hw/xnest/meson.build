@@ -18,6 +18,7 @@ srcs = [
     '../../mi/miinitext.c',
     '../../mi/miinitext.h',
     'xcb.c',
+    'xkb.c',
 ]
 
 x11_xcb_dep = dependency('x11-xcb', required: true)
