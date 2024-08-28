@@ -24,7 +24,7 @@ variables:
     XORG_DEBIAN_TAG:      '2025-02-18-xvmc'
     XORG_FREEBSD_VERSION: '14.2'
     XORG_FREEBSD_EXEC:    ''
-    XORG_FREEBSD_TAG:     '2025-02-18-xvmc'
+    XORG_FREEBSD_TAG:     '2025-02-18-fix-freebsd-xcb'
 
 include:
   - project: 'freedesktop/ci-templates'
@@ -109,7 +109,7 @@ stages:
     FDO_DISTRIBUTION_TAG:       '$XORG_FREEBSD_TAG'
     FDO_DISTRIBUTION_VERSION:   '$XORG_FREEBSD_VERSION'
     FDO_DISTRIBUTION_EXEC:      ''
-    FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim libxvmc'
+    FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim libxvmc xcb-util xcb-util-wm'
     FDO_IMAGE_SIZE:             '30G'
 
 debian-bullseye:
