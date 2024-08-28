@@ -198,7 +198,7 @@ __glXDisp_RenderMode(__GLXclientState * cl, GLbyte * pc)
         .size = nitems,
         .newMode = newMode
     };
-    WriteToClient(client, sz_xGLXRenderModeReply, &reply);
+    WriteToClient(client, sizeof(xGLXRenderModeReply), &reply);
     if (retBytes) {
         WriteToClient(client, retBytes, retBuffer);
     }

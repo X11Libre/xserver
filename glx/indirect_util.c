@@ -135,7 +135,7 @@ __glXSendReply(ClientPtr client, const void *data, size_t elements,
      */
 
     (void) memcpy(&reply.pad3, data, 8);
-    WriteToClient(client, sz_xGLXSingleReply, &reply);
+    WriteToClient(client, sizeof(xGLXSingleReply), &reply);
 
     if (reply_ints != 0) {
         WriteToClient(client, reply_ints * 4, data);
@@ -183,7 +183,7 @@ __glXSendReplySwap(ClientPtr client, const void *data, size_t elements,
      */
 
     (void) memcpy(&reply.pad3, data, 8);
-    WriteToClient(client, sz_xGLXSingleReply, &reply);
+    WriteToClient(client, sizeof(xGLXSingleReply), &reply);
 
     if (reply_ints != 0) {
         WriteToClient(client, reply_ints * 4, data);
