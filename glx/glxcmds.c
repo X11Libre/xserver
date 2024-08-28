@@ -1684,12 +1684,10 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
     sendBuf[9] = (int) (ctx->renderType);
 
     if (client->swapped) {
-        __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-        __GLX_SWAP_INT(&reply.n);
-        __GLX_SWAP_INT_ARRAY(sendBuf, sizeof(sendBuf) / sizeof(CARD32));
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.n);
+        SwapLongs(sendBuf, sizeof(sendBuf) / 4);
     }
 
     WriteToClient(client, sizeof(xGLXQueryContextInfoEXTReply), &reply);
