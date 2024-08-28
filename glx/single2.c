@@ -106,7 +106,6 @@ int
 __glXDisp_RenderMode(__GLXclientState * cl, GLbyte * pc)
 {
     ClientPtr client = cl->client;
-    xGLXRenderModeReply reply;
     __GLXcontext *cx;
     GLint nitems = 0, retBytes = 0, retval, newModeCheck;
     GLubyte *retBuffer = NULL;
@@ -191,7 +190,7 @@ __glXDisp_RenderMode(__GLXclientState * cl, GLbyte * pc)
      ** selection array, as per the API for glRenderMode itself.
      */
  noChangeAllowed:;
-    reply = (xGLXRenderModeReply) {
+    xGLXRenderModeReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = nitems,
@@ -230,7 +229,6 @@ __glXDisp_Finish(__GLXclientState * cl, GLbyte * pc)
     ClientPtr client = cl->client;
     __GLXcontext *cx;
     int error;
-    xGLXSingleReply reply = { 0, };
 
     REQUEST_SIZE_MATCH(xGLXSingleReq);
 
@@ -244,6 +242,8 @@ __glXDisp_Finish(__GLXclientState * cl, GLbyte * pc)
 
     /* Send empty reply packet to indicate finish is finished */
     client = cl->client;
+
+    xGLXSingleReply reply = { 0 };
     __GLX_BEGIN_REPLY(0);
     __GLX_SEND_HEADER();
     return Success;
@@ -327,7 +327,6 @@ DoGetString(__GLXclientState * cl, GLbyte * pc, GLboolean need_swap)
     __GLXcontext *cx;
     GLenum name;
     const char *string;
-    xGLXSingleReply reply = { 0, };
 
     __GLX_DECLARE_SWAP_VARIABLES;
     int error;
@@ -381,6 +380,7 @@ DoGetString(__GLXclientState * cl, GLbyte * pc, GLboolean need_swap)
         length = strlen((const char *) string) + 1;
     }
 
+    xGLXSingleReply reply = { 0 };
     __GLX_BEGIN_REPLY(length);
     __GLX_PUT_SIZE(length);
 

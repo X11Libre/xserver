@@ -112,7 +112,6 @@ __glXSendReply(ClientPtr client, const void *data, size_t elements,
                size_t element_size, GLboolean always_array, CARD32 retval)
 {
     size_t reply_ints = 0;
-    xGLXSingleReply reply = { 0, };
 
     if (__glXErrorOccured()) {
         elements = 0;
@@ -121,11 +120,13 @@ __glXSendReply(ClientPtr client, const void *data, size_t elements,
         reply_ints = bytes_to_int32(elements * element_size);
     }
 
-    reply.length = reply_ints;
-    reply.type = X_Reply;
-    reply.sequenceNumber = client->sequence;
-    reply.size = elements;
-    reply.retval = retval;
+    xGLXSingleReply reply = {
+        .length = reply_ints,
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .size = elements,
+        .retval = retval,
+    };
 
     /* It is faster on almost always every architecture to just copy the 8
      * bytes, even when not necessary, than check to see of the value of
@@ -159,7 +160,6 @@ __glXSendReplySwap(ClientPtr client, const void *data, size_t elements,
                    size_t element_size, GLboolean always_array, CARD32 retval)
 {
     size_t reply_ints = 0;
-    xGLXSingleReply reply = { 0, };
 
     if (__glXErrorOccured()) {
         elements = 0;
@@ -168,11 +168,13 @@ __glXSendReplySwap(ClientPtr client, const void *data, size_t elements,
         reply_ints = bytes_to_int32(elements * element_size);
     }
 
-    reply.length = bswap_32(reply_ints);
-    reply.type = X_Reply;
-    reply.sequenceNumber = bswap_16(client->sequence);
-    reply.size = bswap_32(elements);
-    reply.retval = bswap_32(retval);
+    xGLXSingleReply reply = {
+        .length = bswap_32(reply_ints),
+        .type = X_Reply,
+        .sequenceNumber = bswap_16(client->sequence),
+        .size = bswap_32(elements),
+        .retval = bswap_32(retval),
+    };
 
     /* It is faster on almost always every architecture to just copy the 8
      * bytes, even when not necessary, than check to see of the value of
