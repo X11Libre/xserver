@@ -1659,7 +1659,7 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
 {
     ClientPtr client = cl->client;
     __GLXcontext *ctx;
-    int sendBuf[GLX_QUERY_NPROPS * 2];
+    CARD32 sendBuf[GLX_QUERY_NPROPS * 2];
     int nReplyBytes;
     int err;
 
@@ -1694,7 +1694,7 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
         __GLX_SWAP_INT(&reply.length);
         __GLX_SWAP_INT(&reply.n);
         WriteToClient(client, sizeof(xGLXQueryContextInfoEXTReply), &reply);
-        __GLX_SWAP_INT_ARRAY((int *) sendBuf, length);
+        __GLX_SWAP_INT_ARRAY(sendBuf, length);
         WriteToClient(client, length << 2, sendBuf);
     }
     else {
