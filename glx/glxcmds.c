@@ -1660,7 +1660,6 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
     ClientPtr client = cl->client;
     __GLXcontext *ctx;
     CARD32 sendBuf[GLX_QUERY_NPROPS * 2];
-    int nReplyBytes;
     int err;
 
     if (!validGlxContext(cl->client, gcId, DixReadAccess, &ctx, &err))
@@ -1669,11 +1668,10 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
     xGLXQueryContextInfoEXTReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = GLX_QUERY_NPROPS  << 1,
+        .length = bytes_to_int32(sizeof(sendBuf)),
         .n = GLX_QUERY_NPROPS,
     };
 
-    nReplyBytes = reply.length << 2;
     sendBuf[0] = GLX_SHARE_CONTEXT_EXT;
     sendBuf[1] = (int) (ctx->share_id);
     sendBuf[2] = GLX_VISUAL_ID_EXT;
@@ -1686,20 +1684,18 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
     sendBuf[9] = (int) (ctx->renderType);
 
     if (client->swapped) {
-        int length = reply.length;
-
         __GLX_DECLARE_SWAP_VARIABLES;
         __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
         __GLX_SWAP_SHORT(&reply.sequenceNumber);
         __GLX_SWAP_INT(&reply.length);
         __GLX_SWAP_INT(&reply.n);
         WriteToClient(client, sizeof(xGLXQueryContextInfoEXTReply), &reply);
-        __GLX_SWAP_INT_ARRAY(sendBuf, length);
-        WriteToClient(client, length << 2, sendBuf);
+        __GLX_SWAP_INT_ARRAY(sendBuf, sizeof(sendBuf) / sizeof(CARD32));
+        WriteToClient(client, sizeof(sendBuf), sendBuf);
     }
     else {
         WriteToClient(client, sizeof(xGLXQueryContextInfoEXTReply), &reply);
-        WriteToClient(client, nReplyBytes, sendBuf);
+        WriteToClient(client, sizeof(sendBuf), sendBuf);
     }
 
     return Success;
