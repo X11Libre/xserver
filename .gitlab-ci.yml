@@ -24,7 +24,7 @@ variables:
     XORG_DEBIAN_TAG:      '2025-03-07-xvmc'
     XORG_FREEBSD_VERSION: '14.2'
     XORG_FREEBSD_EXEC:    ''
-    XORG_FREEBSD_TAG:     '2025-02-18-xvmc'
+    XORG_FREEBSD_TAG:     '2025-02-18-fix-freebsd-xcb'
 
 include:
   - project: 'freedesktop/ci-templates'
@@ -111,7 +111,7 @@ stages:
     FDO_DISTRIBUTION_TAG:       '$XORG_FREEBSD_TAG'
     FDO_DISTRIBUTION_VERSION:   '$XORG_FREEBSD_VERSION'
     FDO_DISTRIBUTION_EXEC:      ''
-    FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim libxvmc'
+    FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim libxvmc xcb-util xcb-util-wm'
     FDO_IMAGE_SIZE:             '30G'
 
 debian-bullseye:
@@ -221,6 +221,8 @@ freebsd:
       - /app/vmctl start
       - set +e
       - scp -r $PWD "vm:"
+      # need to install extra packages, as long as image cant be rebuilt
+      - /app/vmctl exec "pkg update && pkg add libxvmc xcb-util xcb-util-wm"
       # need to install newer xorgproto
       - /app/vmctl exec "cd $CI_PROJECT_NAME/dep.xorgproto && ./autogen.sh --prefix=/usr && make && make install"
       - /app/vmctl exec "cd $CI_PROJECT_NAME && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" MESON_ARGS=\"$MESON_ARGS\" MESON_BUILDDIR=\"$MESON_BUILDDIR\" .gitlab-ci/meson-build.sh --skip-test" && touch .success
