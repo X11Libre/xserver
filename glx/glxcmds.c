@@ -1689,14 +1689,11 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
         __GLX_SWAP_SHORT(&reply.sequenceNumber);
         __GLX_SWAP_INT(&reply.length);
         __GLX_SWAP_INT(&reply.n);
-        WriteToClient(client, sizeof(xGLXQueryContextInfoEXTReply), &reply);
         __GLX_SWAP_INT_ARRAY(sendBuf, sizeof(sendBuf) / sizeof(CARD32));
-        WriteToClient(client, sizeof(sendBuf), sendBuf);
     }
-    else {
-        WriteToClient(client, sizeof(xGLXQueryContextInfoEXTReply), &reply);
-        WriteToClient(client, sizeof(sendBuf), sendBuf);
-    }
+
+    WriteToClient(client, sizeof(xGLXQueryContextInfoEXTReply), &reply);
+    WriteToClient(client, sizeof(sendBuf), sendBuf);
 
     return Success;
 }
