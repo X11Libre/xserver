@@ -1654,13 +1654,14 @@ __glXDisp_SwapBuffers(__GLXclientState * cl, GLbyte * pc)
     return Success;
 }
 
+#define GLX_QUERY_NPROPS 5
+
 static int
 DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
 {
     ClientPtr client = cl->client;
     __GLXcontext *ctx;
-    int nProps = 5;
-    int sendBuf[nProps * 2];
+    int sendBuf[GLX_QUERY_NPROPS * 2];
     int nReplyBytes;
     int err;
 
@@ -1670,8 +1671,8 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
     xGLXQueryContextInfoEXTReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = nProps << 1,
-        .n = nProps
+        .length = GLX_QUERY_NPROPS  << 1,
+        .n = GLX_QUERY_NPROPS,
     };
 
     nReplyBytes = reply.length << 2;
@@ -1705,6 +1706,8 @@ DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
 
     return Success;
 }
+
+#undef GLX_QUERY_NPROPS
 
 int
 __glXDisp_QueryContextInfoEXT(__GLXclientState * cl, GLbyte * pc)
