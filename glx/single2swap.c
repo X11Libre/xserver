@@ -217,7 +217,7 @@ noChangeAllowed:
     __GLX_SWAP_INT(&reply.retval);
     __GLX_SWAP_INT(&reply.size);
     __GLX_SWAP_INT(&reply.newMode);
-    WriteToClient(client, sz_xGLXRenderModeReply, &reply);
+    WriteToClient(client, sizeof(xGLXRenderModeReply), &reply);
     if (retBytes) {
         WriteToClient(client, retBytes, retBuffer);
     }
