@@ -111,12 +111,8 @@ stages:
     FDO_DISTRIBUTION_TAG:       '$XORG_FREEBSD_TAG'
     FDO_DISTRIBUTION_VERSION:   '$XORG_FREEBSD_VERSION'
     FDO_DISTRIBUTION_EXEC:      ''
-<<<<<<< HEAD
     FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim'
     FDO_IMAGE_SIZE:             '30G'
-=======
-    FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim libxvmc'
->>>>>>> dbbdb2cbb6 ((!1675) ci: enable xv and xvmc)
 
 debian-bullseye:
   extends:
