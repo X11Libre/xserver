@@ -190,10 +190,10 @@ xorg_backtrace(void)
 #include <dlfcn.h>
 #include <execinfo.h>
 
+#define BT_SIZE 64
 void
 xorg_backtrace(void)
 {
-    const int BT_SIZE = 64;
     void *array[BT_SIZE];
     const char *mod;
     int size, i;
