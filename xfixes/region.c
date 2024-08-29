@@ -577,7 +577,7 @@ ProcXFixesSetGCClipRegion(ClientPtr client)
     REQUEST(xXFixesSetGCClipRegionReq);
     REQUEST_SIZE_MATCH(xXFixesSetGCClipRegionReq);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (XFixesUseXinerama)
         return PanoramiXFixesSetGCClipRegion(client, stuff);
 #endif
@@ -707,7 +707,7 @@ ProcXFixesSetWindowShapeRegion(ClientPtr client)
     REQUEST(xXFixesSetWindowShapeRegionReq);
     REQUEST_SIZE_MATCH(xXFixesSetWindowShapeRegionReq);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (XFixesUseXinerama)
         return PanoramiXFixesSetWindowShapeRegion(client, stuff);
 #endif
@@ -738,7 +738,7 @@ ProcXFixesSetPictureClipRegion(ClientPtr client)
     REQUEST(xXFixesSetPictureClipRegionReq);
     REQUEST_SIZE_MATCH(xXFixesSetPictureClipRegionReq);
 
-#ifdef PANORAMIX
+#ifdef XINERAMA
     if (XFixesUseXinerama)
         return PanoramiXFixesSetPictureClipRegion(client, stuff);
 #endif
