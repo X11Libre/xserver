@@ -355,13 +355,6 @@ xf86-driver-build-test:
         GIT_DEPTH: 1
         MESON_ARGS: -Dprefix=/usr/
         MESON_EXTRA_ARGS: -Dxwayland=false -Dxnest=false -Dxvfb=false -Dxquartz=false -Ddocs=false
-    rules:
-      - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-        changes:
-          *dix_paths
-      - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-        changes:
-          *xorg_paths
 
 #
 # Verify that commit messages are as expected
