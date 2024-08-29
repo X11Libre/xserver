@@ -252,7 +252,7 @@ xf86-driver-build-test:
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati
               SHA: xf86-video-ati-22.0.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-qxl
-              SHA: xf86-video-qxl-0.1.6
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa
               SHA: xf86-video-vesa-2.6.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vmware
