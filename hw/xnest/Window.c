@@ -43,6 +43,17 @@ is" without express or implied warranty.
 
 DevPrivateKeyRec xnestWindowPrivateKeyRec;
 
+/*
+ * retrieve the Window's parent upstream ID.
+ * if it's a toplevel window, return the root window instead
+ */
+static inline xcb_window_t xnest_upstream_window_parent(WindowPtr pWin)
+{
+    return (pWin->parent ?
+        xnestWindow(pWin->parent) :
+        xnest_screen_priv(pWin->drawable.pScreen)->upstream_frame_window);
+}
+
 static int
 xnestFindWindowMatch(WindowPtr pWin, void *ptr)
 {
@@ -121,7 +132,7 @@ xnestCreateWindow(WindowPtr pWin)
     xcb_aux_create_window(xnestUpstreamInfo.conn,
                           pWin->drawable.depth,
                           xnestWindowPriv(pWin)->window,
-                          xnestWindowParent(pWin),
+                          xnest_upstream_window_parent(pWin),
                           pWin->origin.x - wBorderWidth(pWin),
                           pWin->origin.y - wBorderWidth(pWin),
                           pWin->drawable.width,
@@ -132,7 +143,7 @@ xnestCreateWindow(WindowPtr pWin)
                           mask,
                           &attributes);
 
-    xnestWindowPriv(pWin)->parent = xnestWindowParent(pWin);
+    xnestWindowPriv(pWin)->parent = xnest_upstream_window_parent(pWin);
     xnestWindowPriv(pWin)->x = pWin->origin.x - wBorderWidth(pWin);
     xnestWindowPriv(pWin)->y = pWin->origin.y - wBorderWidth(pWin);
     xnestWindowPriv(pWin)->width = pWin->drawable.width;
@@ -188,16 +199,16 @@ xnestConfigureWindow(WindowPtr pWin, unsigned int mask)
     xcb_params_configure_window_t values;
 
     if (mask & XCB_CONFIG_WINDOW_SIBLING  &&
-        xnestWindowPriv(pWin)->parent != xnestWindowParent(pWin)) {
+        xnestWindowPriv(pWin)->parent != xnest_upstream_window_parent(pWin)) {
 
         xcb_reparent_window(
             xnestUpstreamInfo.conn,
             xnestWindow(pWin),
-            xnestWindowParent(pWin),
+            xnest_upstream_window_parent(pWin),
             pWin->origin.x - wBorderWidth(pWin),
             pWin->origin.y - wBorderWidth(pWin));
 
-        xnestWindowPriv(pWin)->parent = xnestWindowParent(pWin);
+        xnestWindowPriv(pWin)->parent = xnest_upstream_window_parent(pWin);
         xnestWindowPriv(pWin)->x = pWin->origin.x - wBorderWidth(pWin);
         xnestWindowPriv(pWin)->y = pWin->origin.y - wBorderWidth(pWin);
         xnestWindowPriv(pWin)->sibling_above = XCB_WINDOW_NONE;
