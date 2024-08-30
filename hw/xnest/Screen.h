@@ -20,7 +20,6 @@ is" without express or implied warranty.
 
 #include <xcb/xcb.h>
 
-extern xcb_window_t xnestDefaultWindows[MAXSCREENS];
 extern xcb_window_t xnestScreenSaverWindows[MAXSCREENS];
 
 ScreenPtr xnestScreen(xcb_window_t window);

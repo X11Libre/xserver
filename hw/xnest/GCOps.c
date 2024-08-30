@@ -71,7 +71,7 @@ xnestQueryBestSize(int class, unsigned short *pWidth, unsigned short *pHeight,
         xcb_query_best_size(
             xnestUpstreamInfo.conn,
             class,
-            xnestDefaultWindows[pScreen->myNum],
+            xnest_screen_priv(pScreen)->upstream_frame_window,
             *pWidth,
             *pHeight),
         &err);

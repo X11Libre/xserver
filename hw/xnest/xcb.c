@@ -21,6 +21,7 @@
 #include "XNGC.h"
 #include "Display.h"
 
+struct xnest_screen_info xnestScreens[MAXSCREENS] = { 0 };
 struct xnest_upstream_info xnestUpstreamInfo = { 0 };
 xnest_visual_t *xnestVisualMap;
 int xnestNumVisualMap;

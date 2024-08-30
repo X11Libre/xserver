@@ -59,7 +59,7 @@ xnestCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     if (width && height) {
         uint32_t pixmap = xcb_generate_id(xnestUpstreamInfo.conn);
         xcb_create_pixmap(xnestUpstreamInfo.conn, depth, pixmap,
-                          xnestDefaultWindows[pScreen->myNum], width, height);
+                          xnest_screen_priv(pScreen)->upstream_frame_window, width, height);
         xnestPixmapPriv(pPixmap)->pixmap = pixmap;
     }
     else
@@ -85,7 +85,7 @@ xnestModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
   if(!xnestPixmapPriv(pPixmap)->pixmap && width > 0 && height > 0) {
         uint32_t pixmap = xcb_generate_id(xnestUpstreamInfo.conn);
         xcb_create_pixmap(xnestUpstreamInfo.conn, depth, pixmap,
-                          xnestDefaultWindows[pPixmap->drawable.pScreen->myNum],
+                          xnest_screen_priv(pPixmap->drawable.pScreen)->upstream_frame_window,
                           width, height);
         xnestPixmapPriv(pPixmap)->pixmap = pixmap;
   }

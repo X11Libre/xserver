@@ -8,10 +8,22 @@
 #include <xcb/xcb.h>
 
 #include "include/list.h"
+#include "include/scrnintstr.h"
 
 struct xnest_event_queue {
     struct xorg_list entry;
     xcb_generic_event_t *event;
+};
+
+struct xnest_screen_info {
+    /* the FRAME window isn't the ROOT window - it's where the ROOT window
+       is created into:
+
+       on startup the core will call xnestCreateWindow() with pWin->parent == NULL,
+       which means we're creating the screen's ROOT window. This approach makes
+       several things easier, eg. embedding Xnest into another application, or maybe
+       even adding some control widgets (eg. scroll bars) */
+    xcb_window_t upstream_frame_window;
 };
 
 struct xnest_upstream_info {
@@ -22,7 +34,16 @@ struct xnest_upstream_info {
     struct xnest_event_queue eventQueue;
 };
 
+extern struct xnest_screen_info xnestScreens[MAXSCREENS];
 extern struct xnest_upstream_info xnestUpstreamInfo;
+
+static inline struct xnest_screen_info *xnest_screen_by_id(int idx) {
+    return &xnestScreens[idx];
+}
+
+static inline struct xnest_screen_info *xnest_screen_priv(ScreenPtr pScreen) {
+    return xnest_screen_by_id(pScreen->myNum); // should use devPrivates
+}
 
 /* connect to upstream X server */
 Bool xnest_upstream_setup(const char* displayName);

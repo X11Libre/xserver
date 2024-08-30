@@ -107,7 +107,7 @@ xnestPointerProc(DeviceIntPtr pDev, int onoff)
         xnestEventMask |= XNEST_POINTER_EVENT_MASK;
         for (i = 0; i < xnestNumScreens; i++)
             xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[i],
+                                         xnest_screen_by_id(i)->upstream_frame_window,
                                          XCB_CW_EVENT_MASK,
                                          &xnestEventMask);
         break;
@@ -115,7 +115,7 @@ xnestPointerProc(DeviceIntPtr pDev, int onoff)
         xnestEventMask &= ~XNEST_POINTER_EVENT_MASK;
         for (i = 0; i < xnestNumScreens; i++)
             xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[i],
+                                         xnest_screen_by_id(i)->upstream_frame_window,
                                          XCB_CW_EVENT_MASK,
                                          &xnestEventMask);
         break;

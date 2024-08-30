@@ -47,7 +47,6 @@ is" without express or implied warranty.
 #include "Args.h"
 #include "mipointrst.h"
 
-xcb_window_t xnestDefaultWindows[MAXSCREENS];
 xcb_window_t xnestScreenSaverWindows[MAXSCREENS];
 DevPrivateKeyRec xnestScreenCursorFuncKeyRec;
 DevScreenPrivateKeyRec xnestScreenCursorPrivKeyRec;
@@ -58,7 +57,7 @@ xnestScreen(xcb_window_t window)
     int i;
 
     for (i = 0; i < xnestNumScreens; i++)
-        if (xnestDefaultWindows[i] == window)
+        if (xnest_screen_by_id(i)->upstream_frame_window == window)
             return screenInfo.screens[i];
 
     return NULL;
@@ -415,18 +414,20 @@ breakout:
 
         valuemask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP;
 
+        struct xnest_screen_info *screenPriv = xnest_screen_priv(pScreen);
+
         if (xnestParentWindow != 0) {
-            xnestDefaultWindows[pScreen->myNum] = xnestParentWindow;
+            screenPriv->upstream_frame_window = xnestParentWindow;
             xcb_change_window_attributes(xnestUpstreamInfo.conn,
-                                         xnestDefaultWindows[pScreen->myNum],
+                                         screenPriv->upstream_frame_window,
                                          XCB_CW_EVENT_MASK,
                                          &xnestEventMask);
         }
         else {
-            xnestDefaultWindows[pScreen->myNum] = xcb_generate_id(xnestUpstreamInfo.conn);
+            screenPriv->upstream_frame_window = xcb_generate_id(xnestUpstreamInfo.conn);
             xcb_aux_create_window(xnestUpstreamInfo.conn,
                                   pScreen->rootDepth,
-                                  xnestDefaultWindows[pScreen->myNum],
+                                  screenPriv->upstream_frame_window,
                                   xnestUpstreamInfo.screenInfo->root,
                                   xnestGeometry.x + POSITION_OFFSET,
                                   xnestGeometry.y + POSITION_OFFSET,
@@ -462,21 +463,21 @@ breakout:
         const size_t windowNameLen = strlen(xnestWindowName);
 
         xcb_icccm_set_wm_name_checked(xnestUpstreamInfo.conn,
-                                      xnestDefaultWindows[pScreen->myNum],
+                                      screenPriv->upstream_frame_window,
                                       XCB_ATOM_STRING,
                                       8,
                                       windowNameLen,
                                       xnestWindowName);
 
         xcb_icccm_set_wm_icon_name_checked(xnestUpstreamInfo.conn,
-                                           xnestDefaultWindows[pScreen->myNum],
+                                           screenPriv->upstream_frame_window,
                                            XCB_ATOM_STRING,
                                            8,
                                            windowNameLen,
                                            xnestWindowName);
 
         xnest_set_command(xnestUpstreamInfo.conn,
-                          xnestDefaultWindows[pScreen->myNum],
+                          screenPriv->upstream_frame_window,
                           argv, argc);
 
         xcb_icccm_wm_hints_t wmhints = {
@@ -485,10 +486,10 @@ breakout:
         };
 
         xcb_icccm_set_wm_hints_checked(xnestUpstreamInfo.conn,
-                                       xnestDefaultWindows[pScreen->myNum],
+                                       screenPriv->upstream_frame_window,
                                        &wmhints);
 
-        xcb_map_window(xnestUpstreamInfo.conn, xnestDefaultWindows[pScreen->myNum]);
+        xcb_map_window(xnestUpstreamInfo.conn, screenPriv->upstream_frame_window);
 
         valuemask = XCB_CW_BACK_PIXMAP | XCB_CW_COLORMAP;
         attributes.back_pixmap = xnestScreenSaverPixmap;
@@ -498,7 +499,7 @@ breakout:
         xcb_aux_create_window(xnestUpstreamInfo.conn,
                               xnestUpstreamInfo.screenInfo->root_depth,
                               xnestScreenSaverWindows[pScreen->myNum],
-                              xnestDefaultWindows[pScreen->myNum],
+                              screenPriv->upstream_frame_window,
                               0,
                               0,
                               xnestGeometry.width,
