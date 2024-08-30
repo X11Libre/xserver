@@ -281,9 +281,11 @@ xnestSetScreenSaverColormapWindow(ScreenPtr pScreen)
 {
     free(xnestOldInstalledColormapWindows);
 
+    struct xnest_screen_info *screenPriv = xnest_screen_priv(pScreen);
+
     xnest_wm_colormap_windows(xnestUpstreamInfo.conn,
                               xnest_screen_priv(pScreen)->upstream_frame_window,
-                              &xnestScreenSaverWindows[pScreen->myNum],
+                              &screenPriv->upstream_saver_window,
                               1);
 
     xnestOldInstalledColormapWindows = NULL;

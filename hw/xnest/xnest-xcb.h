@@ -24,6 +24,10 @@ struct xnest_screen_info {
        several things easier, eg. embedding Xnest into another application, or maybe
        even adding some control widgets (eg. scroll bars) */
     xcb_window_t upstream_frame_window;
+
+    /* the SAVER window also is child of the FRAME. It's only mapped while the
+       screen saver is active, and then overlapping our ROOT window. */
+    xcb_window_t upstream_saver_window;
 };
 
 struct xnest_upstream_info {

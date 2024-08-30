@@ -47,7 +47,6 @@ is" without express or implied warranty.
 #include "Args.h"
 #include "mipointrst.h"
 
-xcb_window_t xnestScreenSaverWindows[MAXSCREENS];
 DevPrivateKeyRec xnestScreenCursorFuncKeyRec;
 DevScreenPrivateKeyRec xnestScreenCursorPrivKeyRec;
 
@@ -77,33 +76,35 @@ offset(unsigned long mask)
 static Bool
 xnestSaveScreen(ScreenPtr pScreen, int what)
 {
+    struct xnest_screen_info *screenPriv = xnest_screen_priv(pScreen);
+
     if (xnestSoftwareScreenSaver)
         return FALSE;
     else {
         switch (what) {
         case SCREEN_SAVER_ON:
-            xcb_map_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_map_window(xnestUpstreamInfo.conn, screenPriv->upstream_saver_window);
             uint32_t value = XCB_STACK_MODE_ABOVE;
             xcb_configure_window(xnestUpstreamInfo.conn,
-                                 xnestScreenSaverWindows[pScreen->myNum],
+                                 screenPriv->upstream_saver_window,
                                  XCB_CONFIG_WINDOW_STACK_MODE,
                                  &value);
             xnestSetScreenSaverColormapWindow(pScreen);
             break;
 
         case SCREEN_SAVER_OFF:
-            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, screenPriv->upstream_saver_window);
             xnestSetInstalledColormapWindows(pScreen);
             break;
 
         case SCREEN_SAVER_FORCER:
             lastEventTime = GetTimeInMillis();
-            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, screenPriv->upstream_saver_window);
             xnestSetInstalledColormapWindows(pScreen);
             break;
 
         case SCREEN_SAVER_CYCLE:
-            xcb_unmap_window(xnestUpstreamInfo.conn, xnestScreenSaverWindows[pScreen->myNum]);
+            xcb_unmap_window(xnestUpstreamInfo.conn, screenPriv->upstream_saver_window);
             xnestSetInstalledColormapWindows(pScreen);
             break;
         }
@@ -495,10 +496,10 @@ breakout:
         attributes.back_pixmap = xnestScreenSaverPixmap;
         attributes.colormap = xnestUpstreamInfo.screenInfo->default_colormap;
 
-        xnestScreenSaverWindows[pScreen->myNum] = xcb_generate_id(xnestUpstreamInfo.conn);
+        screenPriv->upstream_saver_window = xcb_generate_id(xnestUpstreamInfo.conn);
         xcb_aux_create_window(xnestUpstreamInfo.conn,
                               xnestUpstreamInfo.screenInfo->root_depth,
-                              xnestScreenSaverWindows[pScreen->myNum],
+                              screenPriv->upstream_saver_window,
                               screenPriv->upstream_frame_window,
                               0,
                               0,
