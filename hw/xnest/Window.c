@@ -49,6 +49,9 @@ DevPrivateKeyRec xnestWindowPrivateKeyRec;
  */
 static inline xcb_window_t xnest_upstream_window_parent(WindowPtr pWin)
 {
+    if (xnestRootless && pWin->parent && !pWin->parent->parent)
+        return xnestUpstreamInfo.screenInfo->root;
+
     return (pWin->parent ?
         xnestWindow(pWin->parent) :
         xnest_screen_priv(pWin->drawable.pScreen)->upstream_frame_window);

@@ -46,6 +46,7 @@ char *xnestWindowName = NULL;
 int xnestNumScreens = 0;
 Bool xnestDoDirectColormaps = FALSE;
 xcb_window_t xnestParentWindow = 0;
+Bool xnestRootless = FALSE;
 
 int
 ddxProcessArgument(int argc, char *argv[], int i)
@@ -62,6 +63,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
 #ifdef DPMSExtension
     noDPMSExtension = TRUE;
 #endif
+
+    if (!strcmp(argv[i], "-rootless")) {
+        xnestRootless = TRUE;
+        return 1;
+    }
 
     if (!strcmp(argv[i], "-display")) {
         if (++i < argc) {
@@ -182,6 +188,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
 void
 ddxUseMsg(void)
 {
+    ErrorF("-rootless              enable rootless mode\n");
     ErrorF("-display string        display name of the real server\n");
     ErrorF("-full                  utilize full regeneration\n");
     ErrorF("-class string          default visual class\n");

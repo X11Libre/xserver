@@ -35,5 +35,6 @@ extern char *xnestWindowName;
 extern int xnestNumScreens;
 extern Bool xnestDoDirectColormaps;
 extern xcb_window_t xnestParentWindow;
+extern Bool xnestRootless;
 
 #endif                          /* XNESTARGS_H */
