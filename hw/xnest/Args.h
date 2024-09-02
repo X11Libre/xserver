@@ -18,6 +18,8 @@ is" without express or implied warranty.
 #include <X11/X.h>
 #include <X11/Xdefs.h>
 
+#include <xcb/xcb.h>
+
 extern char *xnestDisplayName;
 extern Bool xnestFullGeneration;
 extern int xnestDefaultClass;
@@ -32,6 +34,6 @@ extern Bool xnestUserBorderWidth;
 extern char *xnestWindowName;
 extern int xnestNumScreens;
 extern Bool xnestDoDirectColormaps;
-extern Window xnestParentWindow;
+extern xcb_window_t xnestParentWindow;
 
 #endif                          /* XNESTARGS_H */
