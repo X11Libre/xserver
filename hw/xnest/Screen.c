@@ -46,13 +46,13 @@ is" without express or implied warranty.
 #include "Args.h"
 #include "mipointrst.h"
 
-Window xnestDefaultWindows[MAXSCREENS];
-Window xnestScreenSaverWindows[MAXSCREENS];
+xcb_window_t xnestDefaultWindows[MAXSCREENS];
+xcb_window_t xnestScreenSaverWindows[MAXSCREENS];
 DevPrivateKeyRec xnestScreenCursorFuncKeyRec;
 DevScreenPrivateKeyRec xnestScreenCursorPrivKeyRec;
 
 ScreenPtr
-xnestScreen(Window window)
+xnestScreen(xcb_window_t window)
 {
     int i;
 
