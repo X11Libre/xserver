@@ -17,6 +17,8 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 
+#include <xcb/xcb.h>
+
 #include "dix/colormap_priv.h"
 
 #include "scrnintstr.h"
@@ -182,11 +184,11 @@ xnestGetInstalledColormapWindows(WindowPtr pWin, void *ptr)
     return WT_WALKCHILDREN;
 }
 
-static Window *xnestOldInstalledColormapWindows = NULL;
+static xcb_window_t *xnestOldInstalledColormapWindows = NULL;
 static int xnestNumOldInstalledColormapWindows = 0;
 
 static Bool
-xnestSameInstalledColormapWindows(Window *windows, int numWindows)
+xnestSameInstalledColormapWindows(xcb_window_t *windows, int numWindows)
 {
     if (xnestNumOldInstalledColormapWindows != numWindows)
         return FALSE;
@@ -198,7 +200,7 @@ xnestSameInstalledColormapWindows(Window *windows, int numWindows)
         return FALSE;
 
     if (memcmp(xnestOldInstalledColormapWindows, windows,
-               numWindows * sizeof(Window)))
+               numWindows * sizeof(xcb_window_t)))
         return FALSE;
 
     return TRUE;
@@ -216,10 +218,7 @@ xnestSetInstalledColormapWindows(ScreenPtr pScreen)
     icws.numWindows = 0;
     WalkTree(pScreen, xnestCountInstalledColormapWindows, (void *) &icws);
     if (icws.numWindows) {
-        if (!(icws.windows = calloc(icws.numWindows + 1, sizeof(Window)))) {
-            free(icws.cmapIDs);
-            return;
-        }
+        icws.windows = calloc(icws.numWindows + 1, sizeof(xcb_window_t));
         icws.index = 0;
         WalkTree(pScreen, xnestGetInstalledColormapWindows, (void *) &icws);
         icws.windows[icws.numWindows] = xnestDefaultWindows[pScreen->myNum];

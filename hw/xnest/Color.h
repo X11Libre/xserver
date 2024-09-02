@@ -33,7 +33,7 @@ typedef struct {
     int numCmapIDs;
     Colormap *cmapIDs;
     int numWindows;
-    Window *windows;
+    xcb_window_t *windows;
     int index;
 } xnestInstalledColormapWindows;
 
