@@ -47,7 +47,7 @@ Bool xnestUserBorderWidth = FALSE;
 char *xnestWindowName = NULL;
 int xnestNumScreens = 0;
 Bool xnestDoDirectColormaps = FALSE;
-Window xnestParentWindow = 0;
+xcb_window_t xnestParentWindow = 0;
 
 int
 ddxProcessArgument(int argc, char *argv[], int i)
