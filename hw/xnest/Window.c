@@ -58,7 +58,7 @@ xnestFindWindowMatch(WindowPtr pWin, void *ptr)
 }
 
 WindowPtr
-xnestWindowPtr(Window window)
+xnestWindowPtr(xcb_window_t window)
 {
     xnestWindowMatch wm;
     int i;
