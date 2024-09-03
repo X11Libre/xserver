@@ -107,4 +107,14 @@ int xnest_text_width_16 (xnestPrivFont *font, const uint16_t *string, int count)
 
 xcb_atom_t xnest_intern_atom(xcb_connection_t *conn, const char* name);
 
+void xnest_upstream_set_property(
+    struct xnest_upstream_info *upstream,
+    xcb_window_t window,
+    const char* property,
+    const char* type,
+    int state,
+    uint32_t format,
+    uint32_t size,
+    void *data);
+
 #endif /* __XNEST__XCB_H */

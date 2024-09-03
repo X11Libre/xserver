@@ -576,3 +576,33 @@ int xnest_text_width_16 (xnestPrivFont *font, const uint16_t* str, int count)
 
     return width;
 }
+
+void xnest_upstream_set_property(
+    struct xnest_upstream_info *upstream,
+    xcb_window_t window,
+    const char* property,
+    const char* type,
+    int state,
+    uint32_t format,
+    uint32_t size,
+    void *data)
+{
+    xcb_atom_t upstream_atom_type = xnest_intern_atom(upstream->conn, type);
+    xcb_atom_t upstream_atom_name = xnest_intern_atom(upstream->conn, property);
+
+    switch (state) {
+        case PropertyNewValue:
+            xcb_change_property(upstream->conn,
+                                XCB_PROP_MODE_REPLACE,
+                                window,
+                                upstream_atom_name,
+                                upstream_atom_type,
+                                format,
+                                size,
+                                data);
+        break;
+        case PropertyDelete:
+            xcb_delete_property(upstream->conn, window, upstream_atom_name);
+        break;
+    }
+}
