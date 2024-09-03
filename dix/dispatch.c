@@ -565,6 +565,8 @@ Dispatch(void)
 #if XTRANS_SEND_FDS
                     /* close down all unused passed fd's */
                     for (int x=0; x<MAX_CLIENT_RECV_FD; x++) {
+                        if (client->recv_fd_list[x] >= 0)
+                            fprintf(stderr, "closing unused received fd: %d\n", client->recv_fd_list[x]);
                         close(client->recv_fd_list[x]);
                         client->recv_fd_list[x] = -1;
                     }
@@ -581,6 +583,7 @@ Dispatch(void)
 #endif
 
                 if (client->noClientException != Success) {
+                    fprintf(stderr, "calling CloseDownClient() II\n");
                     CloseDownClient(client);
                     break;
                 }
@@ -3351,8 +3354,10 @@ CloseDownRetainedResources(void)
     for (i = 1; i < currentMaxClients; i++) {
         client = clients[i];
         if (client && (client->closeDownMode == RetainTemporary)
-            && (client->clientGone))
+            && (client->clientGone)) {
+            fprintf(stderr, "calling CloseDownClient (retained)\n");
             CloseDownClient(client);
+        }
     }
 }
 
@@ -3362,6 +3367,8 @@ ProcKillClient(ClientPtr client)
     REQUEST(xResourceReq);
     ClientPtr killclient;
     int rc;
+
+    fprintf(stderr, "ProcKillClient\n");
 
     REQUEST_SIZE_MATCH(xResourceReq);
     if (stuff->id == AllTemporary) {
@@ -3505,6 +3512,8 @@ CloseDownClient(ClientPtr client)
     Bool really_close_down = client->clientGone ||
         client->closeDownMode == DestroyAll;
 
+    fprintf(stderr, "in CloseDownClient()\n");
+
     if (!client->clientGone) {
         /* ungrab server if grabbing client dies */
         if (grabState != GrabNone && grabClient == client) {
@@ -3538,6 +3547,7 @@ CloseDownClient(ClientPtr client)
         if (ClientIsAsleep(client))
             ClientSignal(client);
         ProcessWorkQueueZombies();
+        fprintf(stderr, "calling CloseDownConnection\n");
         CloseDownConnection(client);
         output_pending_clear(client);
         mark_client_not_ready(client);
@@ -3584,14 +3594,20 @@ CloseDownClient(ClientPtr client)
             currentMaxClients--;
     }
 
-    if (ShouldDisconnectRemainingClients())
+    if (ShouldDisconnectRemainingClients()) {
+        fprintf(stderr, "ShouldDisconnectRemainingClients() enabled\n");
         SetDispatchExceptionTimer();
+    } else {
+        fprintf(stderr, "ShouldDisconnectRemainingClients() disabled\n");
+    }
 }
 
 static void
 KillAllClients(void)
 {
     int i;
+
+    fprintf(stderr, "KillAllClients()\n");
 
     for (i = 1; i < currentMaxClients; i++)
         if (clients[i]) {

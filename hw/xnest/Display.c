@@ -140,6 +140,8 @@ xnestCloseDisplay(void)
     xnestVisualMap = NULL;
     xnestNumVisualMap = 0;
 
+    fprintf(stderr, "xnestCloseDisplay()\n");
+
     xcb_disconnect(xnestUpstreamInfo.conn);
     xnestUpstreamInfo.conn = NULL;
     xnestUpstreamInfo.screenInfo = NULL;

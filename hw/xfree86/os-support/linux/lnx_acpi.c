@@ -152,6 +152,7 @@ lnxACPIOpen(void)
                 xf86MsgVerb(X_WARNING, 3, "Open ACPI failed (%s) (%s)\n",
                             ACPI_SOCKET, strerror(errno));
             warned = 1;
+            fprintf(stderr, "shutdown()\n");
             shutdown(fd, 2);
             close(fd);
             return NULL;
@@ -175,6 +176,7 @@ lnxCloseACPI(void)
     DebugF("ACPI: Closing device\n");
     if (ACPIihPtr) {
         fd = xf86RemoveGeneralHandler(ACPIihPtr);
+        fprintf(stderr, "shutdown()\n");
         shutdown(fd, 2);
         close(fd);
         ACPIihPtr = NULL;

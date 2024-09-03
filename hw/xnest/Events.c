@@ -194,10 +194,13 @@ xnest_handle_event(xcb_generic_event_t *event)
 
         case DestroyNotify:
         {
+            fprintf(stderr, "DestroyNotify\n");
             xcb_destroy_notify_event_t *ev = (xcb_destroy_notify_event_t*)event;
             if (xnestParentWindow &&
-                ev->window == xnestParentWindow)
+                ev->window == xnestParentWindow) {
+                fprintf(stderr, "it's our parent window\n");
                 exit(0);
+            }
             break;
         }
 
