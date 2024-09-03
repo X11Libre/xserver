@@ -12,6 +12,7 @@ srcs = [
     'Keyboard.c',
     'Pixmap.c',
     'Pointer.c',
+    'properties.c',
     'Screen.c',
     'Window.c',
     '../../mi/miinitext.c',

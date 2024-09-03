@@ -117,4 +117,6 @@ void xnest_upstream_set_property(
     uint32_t size,
     void *data);
 
+void xnest_property_state_callback(CallbackListPtr *pcbl, void *closure, void *calldata);
+
 #endif /* __XNEST__XCB_H */

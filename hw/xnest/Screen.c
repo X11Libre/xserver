@@ -22,6 +22,7 @@ is" without express or implied warranty.
 
 #include <xcb/xcb_icccm.h>
 
+#include "dix/property_priv.h"
 #include "mi/mi_priv.h"
 
 #include "scrnintstr.h"
@@ -511,6 +512,8 @@ breakout:
                               valuemask,
                               &attributes);
     }
+
+    AddCallback(&PropertyStateCallback, xnest_property_state_callback, pScreen);
 
     if (!xnestCreateDefaultColormap(pScreen))
         return FALSE;
