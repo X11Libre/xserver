@@ -105,4 +105,6 @@ typedef struct {
 int xnest_text_width (xnestPrivFont *font, const char *string, int count);
 int xnest_text_width_16 (xnestPrivFont *font, const uint16_t *string, int count);
 
+xcb_atom_t xnest_intern_atom(xcb_connection_t *conn, const char* name);
+
 #endif /* __XNEST__XCB_H */

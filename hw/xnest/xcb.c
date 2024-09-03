@@ -55,6 +55,24 @@ uint32_t xnest_upstream_gc(GCPtr pGC) {
     return priv->gc;
 }
 
+xcb_atom_t xnest_intern_atom(xcb_connection_t *conn, const char* name)
+{
+    if (!name)
+        return 0;
+
+    xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(
+        conn,
+        xcb_intern_atom(conn, 0, strlen(name), name),
+        NULL);
+
+    if (!reply)
+        return 0;
+
+    xcb_atom_t atom = reply->atom;
+    free(reply);
+    return atom;
+}
+
 const char WM_COLORMAP_WINDOWS[] = "WM_COLORMAP_WINDOWS";
 
 void xnest_wm_colormap_windows(
@@ -63,25 +81,12 @@ void xnest_wm_colormap_windows(
     xcb_window_t *windows,
     int count)
 {
-    xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(
-        conn,
-        xcb_intern_atom(
-            conn, 0,
-            sizeof(WM_COLORMAP_WINDOWS)-1,
-            WM_COLORMAP_WINDOWS),
-        NULL);
-
-    if (!reply)
-        return;
-
     xcb_icccm_set_wm_colormap_windows_checked(
         conn,
         w,
-        reply->atom,
+        xnest_intern_atom(conn, WM_COLORMAP_WINDOWS),
         count,
         (xcb_window_t*)windows);
-
-    free(reply);
 }
 
 uint32_t xnest_create_bitmap_from_data(
