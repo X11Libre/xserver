@@ -1,0 +1,21 @@
+/* SPDX-License-Identifier: MIT OR X11
+ *
+ * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
+ */
+#ifndef _XSERVER_DIX_RESOURCE_PRIV_H
+#define _XSERVER_DIX_RESOURCE_PRIV_H
+
+#include "include/dix.h"
+
+/*
+ * @brief retrieve client that owns given window
+ *
+ * XIDs carry the ID of the client who created/owns the resource in upper bits.
+ * (every client so is assigned a range of XIDs it may use for resource creation)
+ *
+ * @param WindowPtr to the window whose client shall be retrieved
+ * @return pointer to ClientRec structure or NullClient (NULL)
+ */
+ClientPtr dixClientForWindow(WindowPtr pWin);
+
+#endif /* _XSERVER_DIX_RESOURCE_PRIV_H */

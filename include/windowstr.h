@@ -193,7 +193,6 @@ extern _X_EXPORT Mask DontPropagateMasks[];
 #define wBoundingShape(w)	wUseDefault(w, boundingShape, NULL)
 #define wClipShape(w)		wUseDefault(w, clipShape, NULL)
 #define wInputShape(w)          wUseDefault(w, inputShape, NULL)
-#define wClient(w)		(clients[CLIENT_ID((w)->drawable.id)])
 #define wBorderWidth(w)		((int) (w)->borderWidth)
 
 static inline PropertyPtr wUserProps(WindowPtr pWin) { return pWin->properties; }

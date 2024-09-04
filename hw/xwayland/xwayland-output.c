@@ -31,6 +31,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/resource_priv.h"
 #include "randr/randrstr_priv.h"
 
 #include "xwayland-cvt.h"
@@ -574,7 +575,7 @@ xwl_output_set_window_randr_emu_props(struct xwl_screen *xwl_screen,
 {
     struct xwl_output_randr_emu_prop prop = {};
 
-    xwl_output_randr_emu_prop(xwl_screen, wClient(window), &prop);
+    xwl_output_randr_emu_prop(xwl_screen, dixClientForWindow(window), &prop);
     xwl_output_set_randr_emu_prop(window, &prop);
 }
 

@@ -44,6 +44,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/resource_priv.h"
 #include "os/osdep.h"
 
 #include "compint.h"
@@ -216,7 +217,7 @@ updateOverlayWindow(ScreenPtr pScreen)
         /* Let's resize the overlay window. */
         vlist[0] = w;
         vlist[1] = h;
-        return ConfigureWindow(pWin, CWWidth | CWHeight, vlist, wClient(pWin));
+        return ConfigureWindow(pWin, CWWidth | CWHeight, vlist, dixClientForWindow(pWin));
     }
 
     /* Let's be on the safe side and not assume an overlay window is

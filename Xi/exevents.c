@@ -96,6 +96,7 @@ SOFTWARE.
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 
 #include "inputstr.h"
@@ -1427,7 +1428,7 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
                     break;
 
             /* if owner selected, oclients is NULL */
-            *client = oclients ? rClient(oclients) : wClient(*win);
+            *client = oclients ? rClient(oclients) : dixClientForWindow(*win);
         }
 
         *grab = NULL;

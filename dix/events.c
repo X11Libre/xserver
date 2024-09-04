@@ -125,6 +125,7 @@ Equipment Corporation.
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/reqhandlers_priv.h"
+#include "dix/resource_priv.h"
 #include "os/bug_priv.h"
 #include "os/client_priv.h"
 #include "os/fmt.h"
@@ -2199,11 +2200,11 @@ DeliverToWindowOwner(DeviceIntPtr dev, WindowPtr win,
         !((wOtherEventMasks(win) | win->eventMask) & filter))
         return EVENT_SKIP;
 
-    if (IsInterferingGrab(wClient(win), dev, events))
+    if (IsInterferingGrab(dixClientForWindow(win), dev, events))
         return EVENT_SKIP;
 
-    if (!XaceHookReceiveAccess(wClient(win), win, events, count)) {
-        int attempt = TryClientEvents(wClient(win), dev, events,
+    if (!XaceHookReceiveAccess(dixClientForWindow(win), win, events, count)) {
+        int attempt = TryClientEvents(dixClientForWindow(win), dev, events,
                                       count, win->eventMask,
                                       filter, grab);
 
@@ -2377,7 +2378,7 @@ DeliverEventsToWindow(DeviceIntPtr pDev, WindowPtr pWin, xEvent
         case EVENT_DELIVERED:
             /* We delivered to the owner, with our event mask */
             deliveries++;
-            client = wClient(pWin);
+            client = dixClientForWindow(pWin);
             deliveryMask = pWin->eventMask;
             break;
         case EVENT_NOT_DELIVERED:
@@ -2551,16 +2552,16 @@ Bool MaybeDeliverEventToClient(WindowPtr pWin, xEvent *pEvents,
     OtherClients *other;
 
     if (pWin->eventMask & filter) {
-        if (wClient(pWin) == dontClient)
+        if (dixClientForWindow(pWin) == dontClient)
             return FALSE;
 #ifdef XINERAMA
         if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
-            return XineramaTryClientEventsResult(wClient(pWin), NullGrab,
+            return XineramaTryClientEventsResult(dixClientForWindow(pWin), NullGrab,
                                                  pWin->eventMask, filter);
 #endif /* XINERAMA */
-        if (XaceHookReceiveAccess(wClient(pWin), pWin, pEvents, 1))
+        if (XaceHookReceiveAccess(dixClientForWindow(pWin), pWin, pEvents, 1))
             return TRUE;           /* don't send, but pretend we did */
-        return TryClientEvents(wClient(pWin), NULL, pEvents, 1,
+        return TryClientEvents(dixClientForWindow(pWin), NULL, pEvents, 1,
                                pWin->eventMask, filter, NullGrab) == 1;
     }
     for (other = wOtherClients(pWin); other; other = other->next) {
@@ -4559,14 +4560,14 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
         /* It is illegal for two different clients to select on any of the
            events for AtMostOneClient. However, it is OK, for some client to
            continue selecting on one of those events.  */
-        if ((wClient(pWin) != client) && (check & pWin->eventMask))
+        if ((dixClientForWindow(pWin) != client) && (check & pWin->eventMask))
             return BadAccess;
         for (others = wOtherClients(pWin); others; others = others->next) {
             if (!SameClient(others, client) && (check & others->mask))
                 return BadAccess;
         }
     }
-    if (wClient(pWin) == client) {
+    if (dixClientForWindow(pWin) == client) {
         check = pWin->eventMask;
         pWin->eventMask = mask;
     }
@@ -4720,7 +4721,7 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
         xKeymapEvent ke = {
             .type = KeymapNotify
         };
-        ClientPtr client = grab ? rClient(grab) : wClient(pWin);
+        ClientPtr client = grab ? rClient(grab) : dixClientForWindow(pWin);
         int rc;
 
         rc = XaceHookDeviceAccess(client, keybd, DixReadAccess);
@@ -4833,7 +4834,7 @@ CoreFocusEvent(DeviceIntPtr dev, int type, int mode, int detail, WindowPtr pWin)
         xKeymapEvent ke = {
             .type = KeymapNotify
         };
-        ClientPtr client = wClient(pWin);
+        ClientPtr client = dixClientForWindow(pWin);
         int rc;
 
         rc = XaceHookDeviceAccess(client, dev, DixReadAccess);
@@ -5894,7 +5895,7 @@ DeleteWindowFromAnyEvents(WindowPtr pWin, Bool freeResources)
                        of ending up reverting to a dying window and thence
                        to None */
 #ifdef NOTDEF
-                             || wClient(parent)->clientGone
+                             || dixClientForWindow(parent)->clientGone
 #endif
                         );
                     if (!ActivateFocusInGrab(keybd, pWin, parent))
@@ -5966,7 +5967,7 @@ EventMaskForClient(WindowPtr pWin, ClientPtr client)
 {
     OtherClientsPtr other;
 
-    if (wClient(pWin) == client)
+    if (dixClientForWindow(pWin) == client)
         return pWin->eventMask;
     for (other = wOtherClients(pWin); other; other = other->next) {
         if (SameClient(other, client))

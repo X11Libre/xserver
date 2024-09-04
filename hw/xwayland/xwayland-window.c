@@ -34,6 +34,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
+#include "dix/resource_priv.h"
 
 #include "compositeext.h"
 #include "compint.h"
@@ -570,7 +571,7 @@ xwl_window_should_enable_viewport(struct xwl_window *xwl_window,
     if (!window)
         return FALSE;
 
-    owner = wClient(window);
+    owner = dixClientForWindow(window);
     drawable = &window->drawable;
 
     /* 1. Test if the window matches the emulated mode on one of the outputs

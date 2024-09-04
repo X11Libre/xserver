@@ -32,6 +32,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/resource_priv.h"
 #include "include/extinit_priv.h"
 #include "os/audit.h"
 #include "os/auth.h"
@@ -856,13 +857,13 @@ SecurityProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
     Mask allowed = SecurityResourceMask | DixReadAccess;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, stateKey);
-    obj = dixLookupPrivate(&wClient(rec->pWin)->devPrivates, stateKey);
+    obj = dixLookupPrivate(&dixClientForWindow(rec->pWin)->devPrivates, stateKey);
 
     if (SecurityDoCheck(subj, obj, requested, allowed) != Success) {
         SecurityAudit("Security: denied client %d access to property %s "
                       "(atom 0x%x) window 0x%lx of client %d on request %s\n",
                       rec->client->index, NameForAtom(name), name,
-                      (unsigned long)rec->pWin->drawable.id, wClient(rec->pWin)->index,
+                      (unsigned long)rec->pWin->drawable.id, dixClientForWindow(rec->pWin)->index,
                       SecurityLookupRequestName(rec->client));
         rec->status = BadAccess;
     }
@@ -878,7 +879,7 @@ SecuritySend(CallbackListPtr *pcbl, void *unused, void *calldata)
         int i;
 
         subj = dixLookupPrivate(&rec->client->devPrivates, stateKey);
-        obj = dixLookupPrivate(&wClient(rec->pWin)->devPrivates, stateKey);
+        obj = dixLookupPrivate(&dixClientForWindow(rec->pWin)->devPrivates, stateKey);
 
         if (SecurityDoCheck(subj, obj, DixSendAccess, 0) == Success)
             return;
@@ -893,7 +894,7 @@ SecuritySend(CallbackListPtr *pcbl, void *unused, void *calldata)
                               rec->client->index,
                               LookupEventName(rec->events[i].u.u.type),
                               (unsigned long)rec->pWin->drawable.id,
-                              wClient(rec->pWin)->index);
+                              dixClientForWindow(rec->pWin)->index);
                 rec->status = BadAccess;
                 return;
             }
@@ -907,7 +908,7 @@ SecurityReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
     SecurityStateRec *subj, *obj;
 
     subj = dixLookupPrivate(&rec->client->devPrivates, stateKey);
-    obj = dixLookupPrivate(&wClient(rec->pWin)->devPrivates, stateKey);
+    obj = dixLookupPrivate(&dixClientForWindow(rec->pWin)->devPrivates, stateKey);
 
     if (SecurityDoCheck(subj, obj, DixReceiveAccess, 0) == Success)
         return;
@@ -915,7 +916,7 @@ SecurityReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
     SecurityAudit("Security: denied client %d from receiving an event "
                   "sent to window 0x%lx of client %d\n",
                   rec->client->index, (unsigned long)rec->pWin->drawable.id,
-                  wClient(rec->pWin)->index);
+                  dixClientForWindow(rec->pWin)->index);
     rec->status = BadAccess;
 }
 
