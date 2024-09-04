@@ -1036,8 +1036,7 @@ CloseDevice(DeviceIntPtr dev)
         }
     }
 
-    if (dev->deviceGrab.grab)
-        FreeGrab(dev->deviceGrab.grab);
+    FreeGrab(dev->deviceGrab.grab);
     free(dev->deviceGrab.sync.event);
     free(dev->config_info);     /* Allocated in xf86ActivateDevice. */
     free(dev->last.scroll);
