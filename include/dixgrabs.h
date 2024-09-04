@@ -41,7 +41,7 @@ extern GrabPtr CreateGrab(int /* client */ ,
                           enum InputLevel /* grabtype */ ,
                           GrabMask * /* mask */ ,
                           struct _GrabParameters * /* param */ ,
-                          int /* type */ ,
+                          int /* eventType */ ,
                           KeyCode /* keybut */ ,
                           WindowPtr /* confineTo */ ,
                           CursorPtr /* cursor */ );
