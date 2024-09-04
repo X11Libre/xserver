@@ -197,21 +197,21 @@ GrabPtr
 AllocGrab(const GrabPtr src)
 {
     GrabPtr grab = calloc(1, sizeof(GrabRec));
+    if (!grab)
+        return NULL;
 
-    if (grab) {
-        grab->xi2mask = xi2mask_new();
-        if (!grab->xi2mask) {
-            free(grab);
-            grab = NULL;
-        }
-        else if (src && !CopyGrab(grab, src)) {
-            free(grab->xi2mask);
-            free(grab);
-            grab = NULL;
-        }
-    }
+    if (!(grab->xi2mask = xi2mask_new())
+        goto err;
+
+    if (src && !CopyGrab(grab, src))
+        goto err;
 
     return grab;
+
+err:
+    free(grab->xi2mask);
+    free(grab);
+    return NULL;
 }
 
 GrabPtr
