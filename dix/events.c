@@ -1512,8 +1512,7 @@ UpdateTouchesForGrab(DeviceIntPtr mouse)
             listener->window = grab->window;
             listener->state = TOUCH_LISTENER_IS_OWNER;
 
-            if (listener->grab)
-                FreeGrab(listener->grab);
+            FreeGrab(listener->grab);
             listener->grab = AllocGrab(grab);
         }
     }
@@ -1553,8 +1552,7 @@ UpdateGesturesForGrab(DeviceIntPtr mouse)
         listener->listener = grab->resource;
         listener->window = grab->window;
 
-        if (listener->grab)
-            FreeGrab(listener->grab);
+        FreeGrab(listener->grab);
         listener->grab = AllocGrab(grab);
     }
 }
@@ -1612,8 +1610,7 @@ ActivatePointerGrab(DeviceIntPtr mouse, GrabPtr grab,
     UpdateGesturesForGrab(mouse);
     CheckGrabForSyncs(mouse, (Bool) grab->pointerMode,
                       (Bool) grab->keyboardMode);
-    if (oldgrab)
-        FreeGrab(oldgrab);
+    FreeGrab(oldgrab);
 }
 
 /**
@@ -1732,8 +1729,7 @@ ActivateKeyboardGrab(DeviceIntPtr keybd, GrabPtr grab, TimeStamp time,
     grabinfo->implicitGrab = passive & ImplicitGrabMask;
     CheckGrabForSyncs(keybd, (Bool) grab->keyboardMode,
                       (Bool) grab->pointerMode);
-    if (oldgrab)
-        FreeGrab(oldgrab);
+    FreeGrab(oldgrab);
 }
 
 /**
