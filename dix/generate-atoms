@@ -1,0 +1,37 @@
+#!/bin/bash
+# SPDX-License-Identifier: MIT OR X11
+#
+# Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
+
+INPUT="$1"
+OUTPUT="$2"
+
+do_line() {
+    local name="$1"
+    [ "$2" != "@" ] && return 0
+    echo "    if (MakeAtom(\"$name\", ${#name}, 1) != XA_$name)"
+    echo "        AtomError();"
+}
+
+cat > "$OUTPUT" << __END__
+/* THIS IS A GENERATED FILE
+ *
+ * Do not change!  Changing this file implies a protocol change!
+ */
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
+
+#include <X11/X.h>
+#include <X11/Xatom.h>
+#include "misc.h"
+#include "dix.h"
+void
+MakePredeclaredAtoms(void)
+{
+__END__
+
+( grep '@' < "$INPUT" ) | ( while read l ; do do_line $l ; done ) >> "$OUTPUT"
+
+echo "}" >> "$OUTPUT"
