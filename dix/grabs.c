@@ -219,7 +219,7 @@ AllocGrab(const GrabPtr src)
 GrabPtr
 CreateGrab(int client, DeviceIntPtr device, DeviceIntPtr modDevice,
            WindowPtr window, enum InputLevel grabtype, GrabMask *mask,
-           GrabParameters *param, int type,
+           GrabParameters *param, int eventType,
            KeyCode keybut,        /* key or button */
            WindowPtr confineTo, CursorPtr cursor)
 {
@@ -242,7 +242,7 @@ CreateGrab(int client, DeviceIntPtr device, DeviceIntPtr modDevice,
     grab->modifiersDetail.exact = param->modifiers;
     grab->modifiersDetail.pMask = NULL;
     grab->modifierDevice = modDevice;
-    grab->type = type;
+    grab->type = eventType;
     grab->grabtype = grabtype;
     grab->detail.exact = keybut;
     grab->detail.pMask = NULL;
@@ -253,7 +253,6 @@ CreateGrab(int client, DeviceIntPtr device, DeviceIntPtr modDevice,
     if (grabtype == XI2)
         xi2mask_merge(grab->xi2mask, mask->xi2mask);
     return grab;
-
 }
 
 void
