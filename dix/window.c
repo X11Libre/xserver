@@ -104,6 +104,7 @@ Equipment Corporation.
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/property_priv.h"
+#include "dix/resource_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"         /* miPaintWindow */
@@ -922,7 +923,7 @@ dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
         RecalculateDeliverableEvents(pWin);
 
     if (vmask)
-        *error = ChangeWindowAttributes(pWin, vmask, vlist, wClient(pWin));
+        *error = ChangeWindowAttributes(pWin, vmask, vlist, dixClientForWindow(pWin));
     else
         *error = Success;
 
@@ -2945,7 +2946,7 @@ HandleSaveSet(ClientPtr client)
         else
         {
             pParent = pWin->parent;
-            while (pParent && (wClient(pParent) == client))
+            while (pParent && (dixClientForWindow(pParent) == client))
                 pParent = pParent->parent;
         }
         if (pParent) {

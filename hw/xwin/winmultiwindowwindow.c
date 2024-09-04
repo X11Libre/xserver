@@ -36,6 +36,7 @@
 #include <xwin-config.h>
 #endif
 
+#include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 
 #include "win.h"
@@ -694,7 +695,7 @@ XID
 winGetWindowID(WindowPtr pWin)
 {
     WindowIDPairRec wi = { pWin, 0 };
-    ClientPtr c = wClient(pWin);
+    ClientPtr c = dixClientForWindow(pWin);
 
     /* */
     FindClientResourcesByType(c, X11_RESTYPE_WINDOW, winFindWindow, &wi);
@@ -764,14 +765,14 @@ winReorderWindowsMultiWindow(void)
             if (!pWinSib) {     /* 1st window - raise to the top */
                 vlist[0] = Above;
 
-                ConfigureWindow(pWin, CWStackMode, vlist, wClient(pWin));
+                ConfigureWindow(pWin, CWStackMode, vlist, dixClientForWindow(pWin));
             }
             else {              /* 2nd or deeper windows - just below the previous one */
                 vlist[0] = winGetWindowID(pWinSib);
                 vlist[1] = Below;
 
                 ConfigureWindow(pWin, CWSibling | CWStackMode,
-                                vlist, wClient(pWin));
+                                vlist, dixClientForWindow(pWin));
             }
         }
     }
@@ -834,7 +835,7 @@ winAdjustXWindow(WindowPtr pWin, HWND hwnd)
          */
         vlist[0] = 0;
         vlist[1] = 0;
-        return ConfigureWindow(pWin, CWX | CWY, vlist, wClient(pWin));
+        return ConfigureWindow(pWin, CWX | CWY, vlist, dixClientForWindow(pWin));
     }
 
     pDraw = &pWin->drawable;
@@ -896,7 +897,7 @@ winAdjustXWindow(WindowPtr pWin, HWND hwnd)
            (unsigned int)vlist[2], (unsigned int)vlist[3]);
 #endif
     return ConfigureWindow(pWin, CWX | CWY | CWWidth | CWHeight,
-                           vlist, wClient(pWin));
+                           vlist, dixClientForWindow(pWin));
 
 #undef WIDTH
 #undef HEIGHT
