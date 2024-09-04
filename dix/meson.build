@@ -19,6 +19,7 @@ srcs_dix = [
     'glyphcurs.c',
     'grabs.c',
     'inpututils.c',
+    'lookup.c',
     'pixmap.c',
     'privates.c',
     'property.c',

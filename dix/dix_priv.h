@@ -306,4 +306,15 @@ void dixScreenRaiseClose(ScreenPtr pScreen);
  */
 void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap);
 
+/*
+ * @brief lookup window by XID
+ *
+ * This globally looks for Window with given XID (all screens, all clients)
+ * and returns a pointer to it. If not found, returns NULL.
+ *
+ * Unlike ::dixLookupWindow() it doesn't scan only one given client, nor does
+ * it do any XACE calls.
+ */
+WindowPtr dixLookupWindowByXID(Window window);
+
 #endif /* _XSERVER_DIX_PRIV_H */
