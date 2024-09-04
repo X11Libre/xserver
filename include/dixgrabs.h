@@ -33,7 +33,6 @@ extern void UngrabAllDevices(Bool kill_client);
 
 extern GrabPtr AllocGrab(const GrabPtr src);
 extern void FreeGrab(GrabPtr grab);
-extern Bool CopyGrab(GrabPtr dst, const GrabPtr src);
 
 extern GrabPtr CreateGrab(int /* client */ ,
                           DeviceIntPtr /* device */ ,

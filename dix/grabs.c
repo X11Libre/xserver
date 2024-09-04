@@ -193,6 +193,8 @@ UngrabAllDevices(Bool kill_client)
     ErrorF("End list of ungrabbed devices\n");
 }
 
+static Bool CopyGrab(GrabPtr dst, const GrabPtr src);
+
 GrabPtr
 AllocGrab(const GrabPtr src)
 {
@@ -269,7 +271,7 @@ FreeGrab(GrabPtr pGrab)
     free(pGrab);
 }
 
-Bool
+static Bool
 CopyGrab(GrabPtr dst, const GrabPtr src)
 {
     Mask *mdetails_mask = NULL;
