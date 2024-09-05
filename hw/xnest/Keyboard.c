@@ -289,11 +289,11 @@ xnestUpdateModifierState(unsigned int state)
             for (key = 0; key < MAP_LENGTH; key++)
                 if (keyc->xkbInfo->desc->map->modmap[key] & mask) {
                     if (mask == LockMask) {
-                        xnestQueueKeyEvent(KeyPress, key);
-                        xnestQueueKeyEvent(KeyRelease, key);
+                        xnestQueueKeyEvent(KeyPress, key, 0, 0, 0, 0, 0, 0, 0);
+                        xnestQueueKeyEvent(KeyRelease, key, 0, 0, 0, 0, 0, 0, 0);
                     }
                     else if (key_is_down(pDev, key, KEY_PROCESSED))
-                        xnestQueueKeyEvent(KeyRelease, key);
+                        xnestQueueKeyEvent(KeyRelease, key, 0, 0, 0, 0, 0, 0, 0);
 
                     if (--count == 0)
                         break;
@@ -304,9 +304,9 @@ xnestUpdateModifierState(unsigned int state)
         if (!(xkb_state & mask) && (state & mask))
             for (key = 0; key < MAP_LENGTH; key++)
                 if (keyc->xkbInfo->desc->map->modmap[key] & mask) {
-                    xnestQueueKeyEvent(KeyPress, key);
+                    xnestQueueKeyEvent(KeyPress, key, 0, 0, 0, 0, 0, 0, 0);
                     if (mask == LockMask)
-                        xnestQueueKeyEvent(KeyRelease, key);
+                        xnestQueueKeyEvent(KeyRelease, key, 0, 0, 0, 0, 0, 0, 0);
                     break;
                 }
     }

@@ -64,8 +64,21 @@ SetTimeSinceLastInputEvent(void)
 }
 
 void
-xnestQueueKeyEvent(int type, unsigned int keycode)
+xnestQueueKeyEvent(
+    int type,
+    unsigned int keycode,
+    xcb_window_t root,
+    xcb_window_t event,
+    xcb_window_t child,
+    int16_t root_x,
+    int16_t root_y,
+    int16_t event_x,
+    int16_t event_y)
 {
+    fprintf(stderr, "%s: keycode=%d root=%0x child=%0x event=%x R=(%d:%d) E=(%d:%d)\n", 
+        (type == KeyPress ? "KeyPress" : (type == KeyRelease ? "KeyRelease" : "unknown")),
+        keycode, root, event, child, root_x, root_y, event_x, event_y);
+
     lastEventTime = GetTimeInMillis();
     QueueKeyboardEvents(xnestKeyboardDevice, type, keycode);
 }
@@ -83,7 +96,15 @@ xnest_handle_event(xcb_generic_event_t *event)
         {
             EVTYPE(xcb_key_press_event_t);
             xnestUpdateModifierState(ev->state);
-            xnestQueueKeyEvent(KeyPress, ev->detail);
+            xnestQueueKeyEvent(KeyPress,
+                               ev->detail,
+                               ev->root,
+                               ev->event,
+                               ev->child,
+                               ev->root_x,
+                               ev->root_y,
+                               ev->event_x,
+                               ev->event_y);
             break;
         }
 
@@ -91,7 +112,15 @@ xnest_handle_event(xcb_generic_event_t *event)
         {
             EVTYPE(xcb_key_release_event_t);
             xnestUpdateModifierState(ev->state);
-            xnestQueueKeyEvent(KeyRelease, ev->detail);
+            xnestQueueKeyEvent(KeyRelease,
+                               ev->detail,
+                               ev->root,
+                               ev->event,
+                               ev->child,
+                               ev->root_x,
+                               ev->root_y,
+                               ev->event_x,
+                               ev->event_y);
             break;
         }
 

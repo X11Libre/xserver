@@ -17,10 +17,20 @@ is" without express or implied warranty.
 
 #include <X11/Xmd.h>
 
+#include <xcb/xcb.h>
+
 extern CARD32 lastEventTime;
 
 void SetTimeSinceLastInputEvent(void);
 void xnestCollectEvents(void);
-void xnestQueueKeyEvent(int type, unsigned int keycode);
+void xnestQueueKeyEvent(int type,
+                        unsigned int keycode,
+                        xcb_window_t root,
+                        xcb_window_t event,
+                        xcb_window_t child,
+                        int16_t root_x,
+                        int16_t root_y,
+                        int16_t event_x,
+                        int16_t event_y);
 
 #endif                          /* XNESTEVENTS_H */
