@@ -41,63 +41,12 @@ is" without express or implied warranty.
 
 DevPrivateKeyRec xnestGCPrivateKeyRec;
 
-static GCFuncs xnestFuncs = {
-    .ValidateGC = xnestValidateGC,
-    .ChangeGC = xnestChangeGC,
-    .CopyGC = xnestCopyGC,
-    .DestroyGC = xnestDestroyGC,
-    .ChangeClip = xnestChangeClip,
-    .DestroyClip = xnestDestroyClip,
-    .CopyClip = xnestCopyClip,
-};
-
-static GCOps xnestOps = {
-    .FillSpans = xnestFillSpans,
-    .SetSpans = xnestSetSpans,
-    .PutImage = xnestPutImage,
-    .CopyArea = xnestCopyArea,
-    .CopyPlane = xnestCopyPlane,
-    .PolyPoint = xnestPolyPoint,
-    .Polylines = xnestPolylines,
-    .PolySegment = xnestPolySegment,
-    .PolyRectangle = xnestPolyRectangle,
-    .PolyArc = xnestPolyArc,
-    .FillPolygon = xnestFillPolygon,
-    .PolyFillRect = xnestPolyFillRect,
-    .PolyFillArc = xnestPolyFillArc,
-    .PolyText8 = xnestPolyText8,
-    .PolyText16 = xnestPolyText16,
-    .ImageText8 = xnestImageText8,
-    .ImageText16 = xnestImageText16,
-    .ImageGlyphBlt = xnestImageGlyphBlt,
-    .PolyGlyphBlt = xnestPolyGlyphBlt,
-    .PushPixels = xnestPushPixels
-};
-
-Bool
-xnestCreateGC(GCPtr pGC)
-{
-    pGC->funcs = &xnestFuncs;
-    pGC->ops = &xnestOps;
-
-    pGC->miTranslate = 1;
-
-    xnestGCPriv(pGC)->gc = xcb_generate_id(xnestUpstreamInfo.conn);
-    xcb_create_gc(xnestUpstreamInfo.conn,
-                  xnestGCPriv(pGC)->gc,
-                  xnestDefaultDrawables[pGC->depth],
-                  0,
-                  NULL);
-
-    return TRUE;
-}
-
-void
+static void
 xnestValidateGC(GCPtr pGC, unsigned long changes, DrawablePtr pDrawable)
 {
 }
 
-void
+static void
 xnestChangeGC(GCPtr pGC, unsigned long mask)
 {
     xcb_params_gc_t values;
@@ -188,7 +137,7 @@ xnestChangeGC(GCPtr pGC, unsigned long mask)
                           &values);
 }
 
-void
+static void
 xnestCopyGC(GCPtr pGCSrc, unsigned long mask, GCPtr pGCDst)
 {
     xcb_copy_gc(xnestUpstreamInfo.conn,
@@ -197,13 +146,27 @@ xnestCopyGC(GCPtr pGCSrc, unsigned long mask, GCPtr pGCDst)
                 mask);
 }
 
-void
+static void
 xnestDestroyGC(GCPtr pGC)
 {
     xcb_free_gc(xnestUpstreamInfo.conn, xnestGC(pGC));
 }
 
-void
+static void
+xnestDestroyClip(GCPtr pGC)
+{
+    if (pGC->clientClip) {
+        RegionDestroy(pGC->clientClip);
+        uint32_t val = XCB_PIXMAP_NONE;
+        xcb_change_gc(xnestUpstreamInfo.conn,
+                      xnest_upstream_gc(pGC),
+                      XCB_GC_CLIP_MASK,
+                      &val);
+        pGC->clientClip = NULL;
+    }
+}
+
+static void
 xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
 {
     xnestDestroyClip(pGC);
@@ -329,21 +292,8 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
     pGC->clientClip = pValue;
 }
 
-void
-xnestDestroyClip(GCPtr pGC)
-{
-    if (pGC->clientClip) {
-        RegionDestroy(pGC->clientClip);
-        uint32_t val = XCB_PIXMAP_NONE;
-        xcb_change_gc(xnestUpstreamInfo.conn,
-                      xnest_upstream_gc(pGC),
-                      XCB_GC_CLIP_MASK,
-                      &val);
-        pGC->clientClip = NULL;
-    }
-}
 
-void
+static void
 xnestCopyClip(GCPtr pGCDst, GCPtr pGCSrc)
 {
     if (pGCSrc->clientClip) {
@@ -353,4 +303,55 @@ xnestCopyClip(GCPtr pGCDst, GCPtr pGCSrc)
     } else {
         xnestDestroyClip(pGCDst);
     }
+}
+
+static GCFuncs xnestFuncs = {
+    .ValidateGC = xnestValidateGC,
+    .ChangeGC = xnestChangeGC,
+    .CopyGC = xnestCopyGC,
+    .DestroyGC = xnestDestroyGC,
+    .ChangeClip = xnestChangeClip,
+    .DestroyClip = xnestDestroyClip,
+    .CopyClip = xnestCopyClip,
+};
+
+static GCOps xnestOps = {
+    .FillSpans = xnestFillSpans,
+    .SetSpans = xnestSetSpans,
+    .PutImage = xnestPutImage,
+    .CopyArea = xnestCopyArea,
+    .CopyPlane = xnestCopyPlane,
+    .PolyPoint = xnestPolyPoint,
+    .Polylines = xnestPolylines,
+    .PolySegment = xnestPolySegment,
+    .PolyRectangle = xnestPolyRectangle,
+    .PolyArc = xnestPolyArc,
+    .FillPolygon = xnestFillPolygon,
+    .PolyFillRect = xnestPolyFillRect,
+    .PolyFillArc = xnestPolyFillArc,
+    .PolyText8 = xnestPolyText8,
+    .PolyText16 = xnestPolyText16,
+    .ImageText8 = xnestImageText8,
+    .ImageText16 = xnestImageText16,
+    .ImageGlyphBlt = xnestImageGlyphBlt,
+    .PolyGlyphBlt = xnestPolyGlyphBlt,
+    .PushPixels = xnestPushPixels
+};
+
+Bool
+xnestCreateGC(GCPtr pGC)
+{
+    pGC->funcs = &xnestFuncs;
+    pGC->ops = &xnestOps;
+
+    pGC->miTranslate = 1;
+
+    xnestGCPriv(pGC)->gc = xcb_generate_id(xnestUpstreamInfo.conn);
+    xcb_create_gc(xnestUpstreamInfo.conn,
+                  xnestGCPriv(pGC)->gc,
+                  xnestDefaultDrawables[pGC->depth],
+                  0,
+                  NULL);
+
+    return TRUE;
 }

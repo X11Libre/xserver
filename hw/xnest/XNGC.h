@@ -34,12 +34,5 @@ extern DevPrivateKeyRec xnestGCPrivateKeyRec;
 #define xnestGC(pGC) (xnestGCPriv(pGC)->gc)
 
 Bool xnestCreateGC(GCPtr pGC);
-void xnestValidateGC(GCPtr pGC, unsigned long changes, DrawablePtr pDrawable);
-void xnestChangeGC(GCPtr pGC, unsigned long mask);
-void xnestCopyGC(GCPtr pGCSrc, unsigned long mask, GCPtr pGCDst);
-void xnestDestroyGC(GCPtr pGC);
-void xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects);
-void xnestDestroyClip(GCPtr pGC);
-void xnestCopyClip(GCPtr pGCDst, GCPtr pGCSrc);
 
 #endif                          /* XNESTGC_H */
