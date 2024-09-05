@@ -40,6 +40,8 @@ is" without express or implied warranty.
 #include "Color.h"
 #include "Events.h"
 #include "Args.h"
+#include "Keyboard.h"
+#include "Pointer.h"
 
 DevPrivateKeyRec xnestWindowPrivateKeyRec;
 
@@ -161,6 +163,15 @@ xnestCreateWindow(WindowPtr pWin)
     if (!pWin->parent)          /* only the root window will have the right colormap */
         xnestSetInstalledColormapWindows(pWin->drawable.pScreen);
 
+    /* special handling for toplevel windows in rootless mode */
+    if (xnestRootless && pWin->parent && !pWin->parent->parent) {
+        fprintf(stderr, "created toplevel window: catching input events\n");
+        uint32_t event_mask = XNEST_KEYBOARD_EVENT_MASK | XNEST_POINTER_EVENT_MASK;
+        xcb_change_window_attributes(xnestUpstreamInfo.conn,
+                                     xnestWindow(pWin),
+                                     XCB_CW_EVENT_MASK,
+                                     &event_mask);
+    }
     return TRUE;
 }
 
