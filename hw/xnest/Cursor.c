@@ -52,7 +52,7 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
         .foreground = 1L,
     };
 
-    xcb_aux_change_gc(xnestUpstreamInfo.conn, xnestBitmapGC, valuemask, &values);
+    xcb_aux_change_gc(xnestUpstreamInfo.conn, xnestUpstreamInfo.bitmapGC, valuemask, &values);
 
     uint32_t const winId = xnest_screen_priv(pScreen)->upstream_frame_window;
 
@@ -67,7 +67,7 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     xcb_put_image(xnestUpstreamInfo.conn,
                   XCB_IMAGE_FORMAT_XY_BITMAP,
                   source,
-                  xnestBitmapGC,
+                  xnestUpstreamInfo.bitmapGC,
                   pCursor->bits->width,
                   pCursor->bits->height,
                   0, // x
@@ -80,7 +80,7 @@ xnestRealizeCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     xcb_put_image(xnestUpstreamInfo.conn,
                   XCB_IMAGE_FORMAT_XY_BITMAP,
                   mask,
-                  xnestBitmapGC,
+                  xnestUpstreamInfo.bitmapGC,
                   pCursor->bits->width,
                   pCursor->bits->height,
                   0, // x

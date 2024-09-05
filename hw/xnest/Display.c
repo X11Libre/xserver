@@ -41,7 +41,6 @@ int xnestNumPixmapFormats;
 Drawable xnestDefaultDrawables[MAXDEPTH + 1];
 Pixmap xnestIconBitmap;
 Pixmap xnestScreenSaverPixmap;
-uint32_t xnestBitmapGC;
 uint32_t xnestEventMask;
 
 void
@@ -85,9 +84,9 @@ xnestOpenDisplay(int argc, char *argv[])
         }
     }
 
-    xnestBitmapGC = xcb_generate_id(xnestUpstreamInfo.conn);
+    xnestUpstreamInfo.bitmapGC = xcb_generate_id(xnestUpstreamInfo.conn);
     xcb_create_gc(xnestUpstreamInfo.conn,
-                  xnestBitmapGC,
+                  xnestUpstreamInfo.bitmapGC,
                   xnestDefaultDrawables[1],
                   0,
                   NULL);
