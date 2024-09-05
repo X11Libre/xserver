@@ -42,36 +42,36 @@ is" without express or implied warranty.
 DevPrivateKeyRec xnestGCPrivateKeyRec;
 
 static GCFuncs xnestFuncs = {
-    xnestValidateGC,
-    xnestChangeGC,
-    xnestCopyGC,
-    xnestDestroyGC,
-    xnestChangeClip,
-    xnestDestroyClip,
-    xnestCopyClip,
+    .ValidateGC = xnestValidateGC,
+    .ChangeGC = xnestChangeGC,
+    .CopyGC = xnestCopyGC,
+    .DestroyGC = xnestDestroyGC,
+    .ChangeClip = xnestChangeClip,
+    .DestroyClip = xnestDestroyClip,
+    .CopyClip = xnestCopyClip,
 };
 
 static GCOps xnestOps = {
-    xnestFillSpans,
-    xnestSetSpans,
-    xnestPutImage,
-    xnestCopyArea,
-    xnestCopyPlane,
-    xnestPolyPoint,
-    xnestPolylines,
-    xnestPolySegment,
-    xnestPolyRectangle,
-    xnestPolyArc,
-    xnestFillPolygon,
-    xnestPolyFillRect,
-    xnestPolyFillArc,
-    xnestPolyText8,
-    xnestPolyText16,
-    xnestImageText8,
-    xnestImageText16,
-    xnestImageGlyphBlt,
-    xnestPolyGlyphBlt,
-    xnestPushPixels
+    .FillSpans = xnestFillSpans,
+    .SetSpans = xnestSetSpans,
+    .PutImage = xnestPutImage,
+    .CopyArea = xnestCopyArea,
+    .CopyPlane = xnestCopyPlane,
+    .PolyPoint = xnestPolyPoint,
+    .Polylines = xnestPolylines,
+    .PolySegment = xnestPolySegment,
+    .PolyRectangle = xnestPolyRectangle,
+    .PolyArc = xnestPolyArc,
+    .FillPolygon = xnestFillPolygon,
+    .PolyFillRect = xnestPolyFillRect,
+    .PolyFillArc = xnestPolyFillArc,
+    .PolyText8 = xnestPolyText8,
+    .PolyText16 = xnestPolyText16,
+    .ImageText8 = xnestImageText8,
+    .ImageText16 = xnestImageText16,
+    .ImageGlyphBlt = xnestImageGlyphBlt,
+    .PolyGlyphBlt = xnestPolyGlyphBlt,
+    .PushPixels = xnestPushPixels
 };
 
 Bool
