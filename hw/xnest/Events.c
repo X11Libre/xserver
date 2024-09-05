@@ -152,9 +152,18 @@ xnest_handle_event(xcb_generic_event_t *event)
         {
             EVTYPE(xcb_motion_notify_event_t);
             ValuatorMask mask;
-            int valuators[2];
-            valuators[0] = ev->event_x;
-            valuators[1] = ev->event_y;
+            int valuators[2] = { ev->event_x, ev->event_y };
+
+            fprintf(stderr, "MotionNotify: E=(%d:%d) R=(%d:%d)\n", ev->event_x, ev->event_y, ev->root_x, ev->root_y);
+            fprintf(stderr, "  root=%0x event=%0x child=%0x\n", ev->root, ev->event, ev->child);
+
+            WindowPtr pWin = xnestWindowPtr(ev->event);
+            if (xnestRootless && pWin) {
+                fprintf(stderr, "window's position: %d:%d\n", pWin->drawable.x, pWin->drawable.y);
+                valuators[0] += pWin->drawable.x;
+                valuators[1] += pWin->drawable.y;
+            }
+
             valuator_mask_set_range(&mask, 0, 2, valuators);
             lastEventTime = GetTimeInMillis();
             QueuePointerEvents(xnestPointerDevice, MotionNotify,
