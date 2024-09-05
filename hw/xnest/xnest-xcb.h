@@ -37,6 +37,7 @@ struct xnest_upstream_info {
     const xcb_setup_t *setup;
     struct xnest_event_queue eventQueue;
     xcb_gc_t bitmapGC;
+    uint32_t eventMask;
 };
 
 extern struct xnest_screen_info xnestScreens[MAXSCREENS];

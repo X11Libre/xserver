@@ -104,20 +104,20 @@ xnestPointerProc(DeviceIntPtr pDev, int onoff)
         break;
     }
     case DEVICE_ON:
-        xnestEventMask |= XNEST_POINTER_EVENT_MASK;
+        xnestUpstreamInfo.eventMask |= XNEST_POINTER_EVENT_MASK;
         for (i = 0; i < xnestNumScreens; i++)
             xcb_change_window_attributes(xnestUpstreamInfo.conn,
                                          xnest_screen_by_id(i)->upstream_frame_window,
                                          XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+                                         &xnestUpstreamInfo.eventMask);
         break;
     case DEVICE_OFF:
-        xnestEventMask &= ~XNEST_POINTER_EVENT_MASK;
+        xnestUpstreamInfo.eventMask &= ~XNEST_POINTER_EVENT_MASK;
         for (i = 0; i < xnestNumScreens; i++)
             xcb_change_window_attributes(xnestUpstreamInfo.conn,
                                          xnest_screen_by_id(i)->upstream_frame_window,
                                          XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+                                         &xnestUpstreamInfo.eventMask);
         break;
     case DEVICE_CLOSE:
         break;

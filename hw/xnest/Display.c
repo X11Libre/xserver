@@ -41,7 +41,6 @@ int xnestNumPixmapFormats;
 Drawable xnestDefaultDrawables[MAXDEPTH + 1];
 Pixmap xnestIconBitmap;
 Pixmap xnestScreenSaverPixmap;
-uint32_t xnestEventMask;
 
 void
 xnestOpenDisplay(int argc, char *argv[])
@@ -57,9 +56,9 @@ xnestOpenDisplay(int argc, char *argv[])
         FatalError("Unable to open display \"%s\".\n", xnestDisplayName);
 
     if (xnestParentWindow != (Window) 0)
-        xnestEventMask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+        xnestUpstreamInfo.eventMask = XCB_EVENT_MASK_STRUCTURE_NOTIFY;
     else
-        xnestEventMask = 0L;
+        xnestUpstreamInfo.eventMask = 0;
 
     for (i = 0; i <= MAXDEPTH; i++)
         xnestDefaultDrawables[i] = XCB_WINDOW_NONE;

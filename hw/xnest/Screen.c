@@ -410,7 +410,7 @@ breakout:
 
         xcb_params_cw_t attributes = {
             .back_pixel = xnestUpstreamInfo.screenInfo->white_pixel,
-            .event_mask = xnestEventMask,
+            .event_mask = xnestUpstreamInfo.eventMask,
             .colormap = xnest_visual_to_upstream_cmap(pScreen->rootVisual),
         };
 
@@ -423,7 +423,7 @@ breakout:
             xcb_change_window_attributes(xnestUpstreamInfo.conn,
                                          screenPriv->upstream_frame_window,
                                          XCB_CW_EVENT_MASK,
-                                         &xnestEventMask);
+                                         &xnestUpstreamInfo.eventMask);
         }
         else {
             screenPriv->upstream_frame_window = xcb_generate_id(xnestUpstreamInfo.conn);
