@@ -166,7 +166,7 @@ xnestCreateWindow(WindowPtr pWin)
     /* special handling for toplevel windows in rootless mode */
     if (xnestRootless && pWin->parent && !pWin->parent->parent) {
         fprintf(stderr, "created toplevel window: catching input events\n");
-        uint32_t event_mask = XNEST_KEYBOARD_EVENT_MASK | XNEST_POINTER_EVENT_MASK;
+        uint32_t event_mask = XNEST_KEYBOARD_EVENT_MASK | XNEST_POINTER_EVENT_MASK | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
         xcb_change_window_attributes(xnestUpstreamInfo.conn,
                                      xnestWindow(pWin),
                                      XCB_CW_EVENT_MASK,

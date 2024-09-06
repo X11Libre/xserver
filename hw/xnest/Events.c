@@ -242,8 +242,13 @@ xnest_handle_event(xcb_generic_event_t *event)
             break;
         }
 
-        case CirculateNotify:
         case ConfigureNotify:
+        {
+            fprintf(stderr, "ConfigureNotify\n");
+            break;
+        }
+
+        case CirculateNotify:
         case GravityNotify:
         case MapNotify:
         case ReparentNotify:
