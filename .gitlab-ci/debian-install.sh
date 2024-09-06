@@ -65,6 +65,8 @@ apt-get install -y \
 	libx11-xcb-dev \
 	libxau-dev \
 	libxaw7-dev \
+	libxcb-dri2-0-dev \
+	libxcb-dri3-dev \
 	libxcb-glx0-dev \
 	libxcb-icccm4-dev \
 	libxcb-image0-dev \
@@ -79,6 +81,8 @@ apt-get install -y \
 	libxcb-xkb-dev \
 	libxcb-xv0-dev \
 	libxcb1-dev \
+	libxcursor-dev \
+	libxdamage-dev \
 	libxdmcp-dev \
 	libxext-dev \
 	libxfixes-dev \
@@ -90,13 +94,16 @@ apt-get install -y \
 	libxmu-dev \
 	libxmuu-dev \
 	libxpm-dev \
+	libxrandr-dev \
 	libxrender-dev \
 	libxres-dev \
 	libxshmfence-dev \
+	libxss-dev \
 	libxt-dev \
 	libxtst-dev \
 	libxv-dev \
 	libxvmc-dev \
+	libxxf86vm-dev \
 	libz-mingw-w64-dev \
 	linux-libc-dev/bullseye-backports \
 	mesa-common-dev \
@@ -109,6 +116,7 @@ apt-get install -y \
 	python3-mako \
 	python3-numpy \
 	python3-six \
+	valgrind \
 	weston \
 	x11-xkb-utils \
 	xfonts-utils \
