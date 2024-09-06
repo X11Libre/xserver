@@ -32,7 +32,20 @@ build() {
         git clone ${url} ${name}
         git -C ${name} checkout ${commit}
     else
-        git clone --depth 1 --branch ${commit:-master} --recurse-submodules -c advice.detachedHead=false ${url} ${name}
+        git clone --depth 1 --branch ${commit:-master} -c advice.detachedHead=false ${url} ${name}
+        # temporary workaround, until the repo is fixed. otherwise clone fails
+        pushd "${name}"
+        case "${name}" in
+            libxcb-util | libxcb-image | libxcb-wm )
+                echo "Special setup for ${name}"
+                git config submodule.m4.url "https://gitlab.freedesktop.org/xorg/util/xcb-util-m4.git"
+            ;;
+            *)
+                echo "No extra work for \"${name}\""
+            ;;
+        esac
+        git submodule update --init
+        popd
     fi
 
     pushd ${name}
