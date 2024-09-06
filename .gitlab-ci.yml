@@ -251,6 +251,8 @@ xf86-driver-build-test:
               SHA: xf86-video-amdgpu-23.0.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati
               SHA: xf86-video-ati-22.0.0
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-intel
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-qxl
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa
