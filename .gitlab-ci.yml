@@ -111,8 +111,12 @@ stages:
     FDO_DISTRIBUTION_TAG:       '$XORG_FREEBSD_TAG'
     FDO_DISTRIBUTION_VERSION:   '$XORG_FREEBSD_VERSION'
     FDO_DISTRIBUTION_EXEC:      ''
+<<<<<<< HEAD
     FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim'
     FDO_IMAGE_SIZE:             '30G'
+=======
+    FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim libxvmc'
+>>>>>>> dbbdb2cbb6 ((!1675) ci: enable xv and xvmc)
 
 debian-bullseye:
   extends:
@@ -155,7 +159,7 @@ freebsd-image:
             - $MESON_BUILDDIR/meson-logs/
             - $MESON_BUILDDIR/test/piglit-results/
     variables:
-        MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true
+        MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxv=true -Dxvmc=true
         CCACHE_COMPILERCHECK: content
         CCACHE_DIR: /cache/xserver/cache
         LC_ALL: C.UTF-8
@@ -205,14 +209,14 @@ mingw-cross-build:
     script:
         - .gitlab-ci/meson-build.sh --run-install
     variables:
-      MESON_ARGS: --cross-file=.gitlab-ci/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true
+      MESON_ARGS: --cross-file=.gitlab-ci/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true
 
 freebsd:
     stage: build-and-test
     extends:
         - .xorg-image@freebsd
     variables:
-        MESON_ARGS: -Dglx=false -Dglamor=false -Dudev=false -Dudev_kms=false
+        MESON_ARGS: -Dglx=false -Dglamor=false -Dudev=false -Dudev_kms=false -Dxvmc=true -Dxv=true
     script:
       # running of of disk space without this
       # needed until https://gitlab.freedesktop.org/freedesktop/ci-templates/-/issues/67 is fixed
