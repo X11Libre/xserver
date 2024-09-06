@@ -96,6 +96,7 @@ apt-get install -y \
 	libxt-dev \
 	libxtst-dev \
 	libxv-dev \
+	libxvmc-dev \
 	libz-mingw-w64-dev \
 	linux-libc-dev/bullseye-backports \
 	mesa-common-dev \
