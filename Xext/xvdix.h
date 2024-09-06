@@ -169,6 +169,15 @@ typedef struct _XvPortRec {
     DevUnion devPriv;
 } XvPortRec, *XvPortPtr;
 
+typedef struct {
+    int version, revision;
+    int nAdaptors;
+    XvAdaptorPtr pAdaptors;
+    DestroyWindowProcPtr DestroyWindow;
+    DestroyPixmapProcPtr DestroyPixmap;
+    CloseScreenProcPtr CloseScreen;
+} XvScreenRec, *XvScreenPtr;
+
 extern _X_EXPORT int XvScreenInit(ScreenPtr);
 extern _X_EXPORT DevPrivateKey XvGetScreenKey(void);
 extern _X_EXPORT unsigned long XvGetRTPort(void);
