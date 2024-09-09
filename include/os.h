@@ -360,9 +360,6 @@ extern _X_EXPORT void
 LogVWrite(int verb, const char *f, va_list args)
 _X_ATTRIBUTE_PRINTF(2, 0);
 extern _X_EXPORT void
-LogWrite(int verb, const char *f, ...)
-_X_ATTRIBUTE_PRINTF(2, 3);
-extern _X_EXPORT void
 LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
 _X_ATTRIBUTE_PRINTF(3, 0);
 extern _X_EXPORT void

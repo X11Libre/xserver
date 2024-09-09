@@ -438,14 +438,14 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
     vercode[1] = (ver / 100000) % 100;
     vercode[2] = (ver / 1000) % 100;
     vercode[3] = ver % 1000;
-    LogWrite(1, "\tcompiled for %d.%d.%d", vercode[0], vercode[1], vercode[2]);
+    LogMessageVerb(X_NONE, 1, "\tcompiled for %d.%d.%d", vercode[0], vercode[1], vercode[2]);
     if (vercode[3] != 0)
-        LogWrite(1, ".%d", vercode[3]);
-    LogWrite(1, ", module version = %d.%d.%d\n", data->majorversion,
+        LogMessageVerb(X_NONE, 1, ".%d", vercode[3]);
+    LogMessageVerb(X_NONE, 1, ", module version = %d.%d.%d\n", data->majorversion,
              data->minorversion, data->patchlevel);
 
     if (data->moduleclass)
-        LogWrite(2, "\tModule class: %s\n", data->moduleclass);
+        LogMessageVerb(X_NONE, 2, "\tModule class: %s\n", data->moduleclass);
 
     ver = -1;
     if (data->abiclass) {
@@ -463,7 +463,7 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
 
         abimaj = GET_ABI_MAJOR(data->abiversion);
         abimin = GET_ABI_MINOR(data->abiversion);
-        LogWrite(2, "\tABI class: %s, version %d.%d\n",
+        LogMessageVerb(X_NONE, 2, "\tABI class: %s, version %d.%d\n",
                  data->abiclass, abimaj, abimin);
         if (ver != -1) {
             vermaj = GET_ABI_MAJOR(ver);
@@ -686,14 +686,14 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
     name = LoaderGetCanonicalName(module, patterns);
     noncanonical = (name && strcmp(module, name) != 0);
     if (noncanonical) {
-        LogWrite(3, " (%s)\n", name);
+        LogMessageVerb(X_NONE, 3, " (%s)\n", name);
         LogMessageVerb(X_WARNING, 1,
                        "LoadModule: given non-canonical module name \"%s\"\n",
                        module);
         m = name;
     }
     else {
-        LogWrite(3, "\n");
+        LogMessageVerb(X_NONE, 3, "\n");
         m = (char *) module;
     }
 
