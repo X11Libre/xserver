@@ -30,6 +30,8 @@
 #include <drm_fourcc.h>
 #include <wayland-util.h>
 
+#include "os/log_priv.h"
+
 #include "xwayland-dmabuf.h"
 #include "xwayland-glamor-gbm.h"
 #include "xwayland-screen.h"

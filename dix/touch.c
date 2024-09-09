@@ -32,6 +32,7 @@
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "os/log_priv.h"
 
 #include "inputstr.h"
 #include "scrnintstr.h"
