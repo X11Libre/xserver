@@ -623,16 +623,6 @@ LogVWrite(int verb, const char *f, va_list args)
     return LogVMessageVerb(X_NONE, verb, f, args);
 }
 
-void
-LogWrite(int verb, const char *f, ...)
-{
-    va_list args;
-
-    va_start(args, f);
-    LogVWrite(verb, f, args);
-    va_end(args);
-}
-
 /* Returns the Message Type string to prepend to a logging message, or NULL
  * if the message will be dropped due to insufficient verbosity. */
 static const char *
@@ -1003,7 +993,7 @@ void
 LogPrintMarkers(void)
 {
     /* Show what the message marker symbols mean. */
-    LogWrite(0, "Markers: ");
+    LogMessageVerb(X_NONE, 0, "Markers: ");
     LogMessageVerb(X_PROBED, 0, "probed, ");
     LogMessageVerb(X_CONFIG, 0, "from config file, ");
     LogMessageVerb(X_DEFAULT, 0, "default setting,\n\t");

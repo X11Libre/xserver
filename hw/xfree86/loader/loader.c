@@ -75,19 +75,18 @@ LoaderInit(void)
     LogMessageVerb(X_INFO, 2, "Loader magic: %p\n", (void *) xorg_symbols);
 #endif
     LogMessageVerb(X_INFO, 2, "Module ABI versions:\n");
-    LogWrite(2, "\t%s: %d.%d\n", ABI_CLASS_ANSIC,
+    LogMessageVerb(X_NONE, 2, "\t%s: %d.%d\n", ABI_CLASS_ANSIC,
              GET_ABI_MAJOR(LoaderVersionInfo.ansicVersion),
              GET_ABI_MINOR(LoaderVersionInfo.ansicVersion));
-    LogWrite(2, "\t%s: %d.%d\n", ABI_CLASS_VIDEODRV,
+    LogMessageVerb(X_NONE, 2, "\t%s: %d.%d\n", ABI_CLASS_VIDEODRV,
              GET_ABI_MAJOR(LoaderVersionInfo.videodrvVersion),
              GET_ABI_MINOR(LoaderVersionInfo.videodrvVersion));
-    LogWrite(2, "\t%s : %d.%d\n", ABI_CLASS_XINPUT,
+    LogMessageVerb(X_NONE, 2, "\t%s : %d.%d\n", ABI_CLASS_XINPUT,
              GET_ABI_MAJOR(LoaderVersionInfo.xinputVersion),
              GET_ABI_MINOR(LoaderVersionInfo.xinputVersion));
-    LogWrite(2, "\t%s : %d.%d\n", ABI_CLASS_EXTENSION,
+    LogMessageVerb(X_NONE, 2, "\t%s : %d.%d\n", ABI_CLASS_EXTENSION,
              GET_ABI_MAJOR(LoaderVersionInfo.extensionVersion),
              GET_ABI_MINOR(LoaderVersionInfo.extensionVersion));
-
 }
 
 /* Public Interface to the loader. */
