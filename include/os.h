@@ -357,9 +357,6 @@ LogClose(enum ExitCode error);
 extern _X_EXPORT Bool
 LogSetParameter(LogParameter param, int value);
 extern _X_EXPORT void
-LogVWrite(int verb, const char *f, va_list args)
-_X_ATTRIBUTE_PRINTF(2, 0);
-extern _X_EXPORT void
 LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
 _X_ATTRIBUTE_PRINTF(3, 0);
 extern _X_EXPORT void
