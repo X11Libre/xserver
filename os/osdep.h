@@ -198,6 +198,7 @@ void OsBlockSignals(void);
 void OsReleaseSignals(void);
 void OsResetSignals(void);
 void OsAbort(void) _X_NORETURN;
+void AbortServer(void) _X_NORETURN;
 
 void MakeClientGrabPervious(ClientPtr client);
 void MakeClientGrabImpervious(ClientPtr client);

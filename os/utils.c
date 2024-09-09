@@ -1532,3 +1532,19 @@ os_move_fd(int fd)
     return newfd;
 }
 #endif
+
+void
+AbortServer(void)
+{
+#ifdef XF86BIGFONT
+    XF86BigfontCleanup();
+#endif
+    CloseWellKnownConnections();
+    OsCleanup(TRUE);
+    AbortDevices();
+    ddxGiveUp(EXIT_ERR_ABORT);
+    fflush(stderr);
+    if (CoreDump)
+        OsAbort();
+    exit(1);
+}

@@ -828,26 +828,6 @@ LogHdrMessageVerb(MessageType type, int verb, const char *msg_format,
     va_end(hdr_args);
 }
 
-void
-AbortServer(void)
-    _X_NORETURN;
-
-void
-AbortServer(void)
-{
-#ifdef XF86BIGFONT
-    XF86BigfontCleanup();
-#endif
-    CloseWellKnownConnections();
-    OsCleanup(TRUE);
-    AbortDevices();
-    ddxGiveUp(EXIT_ERR_ABORT);
-    fflush(stderr);
-    if (CoreDump)
-        OsAbort();
-    exit(1);
-}
-
 #define AUDIT_PREFIX "AUDIT: %s: %ld: "
 #ifndef AUDIT_TIMEOUT
 #define AUDIT_TIMEOUT ((CARD32)(120 * 1000))    /* 2 mn */
