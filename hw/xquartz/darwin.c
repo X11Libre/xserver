@@ -35,6 +35,7 @@
 #include <X11/Xproto.h>
 
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "os.h"

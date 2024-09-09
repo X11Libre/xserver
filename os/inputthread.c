@@ -35,6 +35,7 @@
 
 #include "dix/input_priv.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 
 #include "inputstr.h"
 #include "opaque.h"
