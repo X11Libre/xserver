@@ -84,4 +84,11 @@ extern int xorgLogVerbosity;
  */
 extern int xorgLogFileVerbosity;
 
+/**
+ * @brief force fsync() on each log write
+ *
+ * If set to TRUE, force fsync() on each log write.
+ */
+extern Bool xorgLogSync;
+
 #endif /* __XORG_OS_LOGGING_H */
