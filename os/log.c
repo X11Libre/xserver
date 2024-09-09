@@ -310,24 +310,6 @@ LogClose(enum ExitCode error)
     }
 }
 
-int
-LogSetParameter(LogParameter param, int value)
-{
-    switch (param) {
-    case XLOG_SYNC:
-        xorgLogSync = value ? TRUE : FALSE;
-        return TRUE;
-    case XLOG_VERBOSITY:
-        xorgLogVerbosity = value;
-        return TRUE;
-    case XLOG_FILE_VERBOSITY:
-        xorgLogFileVerbosity = value;
-        return TRUE;
-    default:
-        return FALSE;
-    }
-}
-
 enum {
     LMOD_LONG     = 0x1,
     LMOD_LONGLONG = 0x2,
