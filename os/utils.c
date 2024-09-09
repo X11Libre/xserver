@@ -67,9 +67,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #define TRANS_REOPEN
 #include <X11/Xtrans/Xtrans.h>
 
-#include "os/audit.h"
-#include "os/client_priv.h"
-
 #include "input.h"
 #include "dixfont.h"
 #include <X11/fonts/libxfont2.h>
@@ -97,10 +94,13 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "miext/extinit_priv.h"
+#include "os/audit.h"
 #include "os/auth.h"
 #include "os/bug_priv.h"
 #include "os/cmdline.h"
+#include "os/client_priv.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/serverlock.h"
 #include "xkb/xkbsrv_priv.h"

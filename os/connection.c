@@ -98,6 +98,7 @@ SOFTWARE.
 #include "os/audit.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "misc.h"               /* for typedef of pointer */

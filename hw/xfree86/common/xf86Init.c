@@ -58,6 +58,7 @@
 #include "mi/mi_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "servermd.h"

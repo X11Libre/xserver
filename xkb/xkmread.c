@@ -34,6 +34,7 @@
 #include <X11/keysym.h>
 #include <X11/extensions/XKMformat.h>
 
+#include "os/log_priv.h"
 #include "xkb/xkbfile_priv.h"
 #include "xkb/xkbfmisc_priv.h"
 #include "xkb/xkbsrv_priv.h"
