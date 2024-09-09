@@ -62,6 +62,7 @@ Equipment Corporation.
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
 #include "os/auth.h"
+#include "os/log_priv.h"
 
 #include "scrnintstr.h"
 #include "resource.h"

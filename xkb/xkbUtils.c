@@ -60,6 +60,7 @@ DEALINGS IN THE SOFTWARE.
 #define	XK_CYRILLIC
 #include <X11/keysym.h>
 
+#include "os/log_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
 #include "os.h"

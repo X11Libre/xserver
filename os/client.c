@@ -85,6 +85,7 @@
 #endif
 
 #include "os/auth.h"
+#include "os/log_priv.h"
 
 /**
  * Try to determine a PID for a client from its connection
