@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include "os/fmt.h"
+#include "os/log_priv.h"
 
 #include "assert.h"
 #include "misc.h"

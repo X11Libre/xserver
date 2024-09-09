@@ -94,6 +94,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/bug_priv.h"
 #include "os/ddx_priv.h"
 #include "os/fmt.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "opaque.h"
@@ -309,7 +310,7 @@ LogClose(enum ExitCode error)
     }
 }
 
-Bool
+int
 LogSetParameter(LogParameter param, int value)
 {
     switch (param) {

@@ -16,6 +16,9 @@
 #include <unistd.h>
 
 #include <X11/X.h>
+
+#include "os/log_priv.h"
+
 #include "misc.h"
 
 #include "xf86.h"

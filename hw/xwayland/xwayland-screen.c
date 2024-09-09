@@ -41,6 +41,7 @@
 #include "dix/property_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/xserver_poll.h"
 

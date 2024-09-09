@@ -34,6 +34,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
+#include "os/log_priv.h"
 
 #include "compositeext.h"
 #include "compint.h"

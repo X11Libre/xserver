@@ -36,6 +36,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "os/log_priv.h"
+
 #include "xf86.h"
 #include "vbe.h"
 #include "vbeModes.h"

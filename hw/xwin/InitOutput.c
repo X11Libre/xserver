@@ -38,6 +38,7 @@ from The Open Group.
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbsrv_priv.h"
 
