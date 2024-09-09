@@ -113,12 +113,8 @@ OR PERFORMANCE OF THIS SOFTWARE.
 void (*OsVendorVErrorFProc) (const char *, va_list args) = NULL;
 
 /* Default logging parameters. */
-#ifndef DEFAULT_LOG_VERBOSITY
 #define DEFAULT_LOG_VERBOSITY		0
-#endif
-#ifndef DEFAULT_LOG_FILE_VERBOSITY
 #define DEFAULT_LOG_FILE_VERBOSITY	3
-#endif
 
 static FILE *logFile = NULL;
 static int logFileFd = -1;
@@ -141,42 +137,18 @@ asm(".desc ___crashreporter_info__, 0x10");
 #endif
 
 /* Prefix strings for log messages. */
-#ifndef X_UNKNOWN_STRING
 #define X_UNKNOWN_STRING		"(\?\?)"
-#endif
-#ifndef X_PROBE_STRING
 #define X_PROBE_STRING			"(--)"
-#endif
-#ifndef X_CONFIG_STRING
 #define X_CONFIG_STRING			"(**)"
-#endif
-#ifndef X_DEFAULT_STRING
 #define X_DEFAULT_STRING		"(==)"
-#endif
-#ifndef X_CMDLINE_STRING
 #define X_CMDLINE_STRING		"(++)"
-#endif
-#ifndef X_NOTICE_STRING
 #define X_NOTICE_STRING			"(!!)"
-#endif
-#ifndef X_ERROR_STRING
 #define X_ERROR_STRING			"(EE)"
-#endif
-#ifndef X_WARNING_STRING
 #define X_WARNING_STRING		"(WW)"
-#endif
-#ifndef X_INFO_STRING
 #define X_INFO_STRING			"(II)"
-#endif
-#ifndef X_NOT_IMPLEMENTED_STRING
 #define X_NOT_IMPLEMENTED_STRING	"(NI)"
-#endif
-#ifndef X_DEBUG_STRING
 #define X_DEBUG_STRING			"(DB)"
-#endif
-#ifndef X_NONE_STRING
 #define X_NONE_STRING			""
-#endif
 
 static size_t
 strlen_sigsafe(const char *s)
