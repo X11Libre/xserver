@@ -36,6 +36,9 @@ from Kaleb S. KEITHLEY
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86vmproto.h>
+
+#include "os/log_priv.h"
+
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"

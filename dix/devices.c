@@ -61,6 +61,7 @@ SOFTWARE.
 #include "dix/input_priv.h"
 #include "dix/ptrveloc_priv.h"
 #include "mi/mi_priv.h"
+#include "os/log_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
 #include "misc.h"

@@ -36,6 +36,7 @@
 
 #include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "os.h"
