@@ -870,7 +870,7 @@ void
 xf86SetVerbosity(int verb)
 {
     xf86Verbose = verb;
-    LogSetParameter(XLOG_VERBOSITY, verb);
+    xorgLogVerbosity = verb;
 }
 
 void

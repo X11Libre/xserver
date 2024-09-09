@@ -68,4 +68,12 @@ int LogSetParameter(LogParameter param, int value);
 #define DebugF(...)             /* */
 #endif
 
+/**
+ * @brief console log verbosity (stderr)
+ *
+ * The verbosity level of logging to console. All messages with verbosity
+ * level below this one will be written to stderr
+ */
+extern int xorgLogVerbosity;
+
 #endif /* __XORG_OS_LOGGING_H */
