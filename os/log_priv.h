@@ -76,4 +76,12 @@ int LogSetParameter(LogParameter param, int value);
  */
 extern int xorgLogVerbosity;
 
+/**
+ * @brief log file verbosity
+ *
+ * The verbosity level of logging to per-display file. All messages with
+ * verbosity level below this one will be written to the log file.
+ */
+extern int xorgLogFileVerbosity;
+
 #endif /* __XORG_OS_LOGGING_H */

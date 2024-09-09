@@ -535,7 +535,7 @@ OsVendorInit(void)
 
     }
     xorgLogVerbosity = g_iLogVerbose;
-    LogSetParameter(XLOG_FILE_VERBOSITY, g_iLogVerbose);
+    xorgLogFileVerbosity = g_iLogVerbose;
 
     /* Log the version information */
     if (serverGeneration == 1)
