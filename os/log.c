@@ -120,7 +120,6 @@ void (*OsVendorVErrorFProc) (const char *, va_list args) = NULL;
 #define DEFAULT_LOG_FILE_VERBOSITY	3
 #endif
 
-static FILE *logFile = NULL;
 static int logFileFd = -1;
 static Bool logFlush = FALSE;
 static Bool logSync = FALSE;
@@ -270,18 +269,15 @@ LogInit(const char *fname, const char *backup)
                 saved_log_backup = strdup(backup);
         } else
             logFileName = LogFilePrep(fname, backup, display);
-        if ((logFile = fopen(logFileName, "w")) == NULL)
-            FatalError("Cannot open log file \"%s\"\n", logFileName);
-        setvbuf(logFile, NULL, _IONBF, 0);
 
-        logFileFd = fileno(logFile);
+        if ((logFileFd = open(logFileName, O_WRONLY | O_CREAT)) == -1)
+            FatalError("Cannot open log file \"%s\": %s\n", logFileName, strerror(errno));
 
         /* Flush saved log information. */
         if (saveBuffer && bufferSize > 0) {
-            fwrite(saveBuffer, bufferPos, 1, logFile);
-            fflush(logFile);
+            write(logFileFd, saveBuffer, bufferPos);
 #ifndef WIN32
-            fsync(fileno(logFile));
+            fsync(logFileFd);
 #endif
         }
     }
@@ -333,14 +329,13 @@ LogSetDisplay(void)
 void
 LogClose(enum ExitCode error)
 {
-    if (logFile) {
+    if (logFileFd != -1) {
         int msgtype = (error == EXIT_NO_ERROR) ? X_INFO : X_ERROR;
         LogMessageVerbSigSafe(msgtype, -1,
                 "Server terminated %s (%d). Closing log file.\n",
                 (error == EXIT_NO_ERROR) ? "successfully" : "with error",
                 error);
-        fclose(logFile);
-        logFile = NULL;
+        close(logFileFd);
         logFileFd = -1;
     }
 }
@@ -616,7 +611,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
                 fsync(logFileFd);
 #endif
         }
-        else if (!inSignalContext && logFile) {
+        else if (!inSignalContext && logFileFd != -1) {
             if (newline) {
                 time_t t = time(NULL);
                 struct tm tm;
@@ -627,17 +622,15 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 #else
                 localtime_r(&t, &tm);
 #endif
-                strftime(fmt_tm, sizeof(fmt_tm) - 1, "%Y-%m-%d %H:%M:%S", &tm);
-
-                fprintf(logFile, "[%s] ", fmt_tm);
+                strftime(fmt_tm, sizeof(fmt_tm) - 1, "[%Y-%m-%d %H:%M:%S] ", &tm);
+                write(logFileFd, fmt_tm, strlen(fmt_tm));
             }
             newline = end_line;
-            fwrite(buf, len, 1, logFile);
+            write(logFileFd, buf, len);
             if (logFlush) {
-                fflush(logFile);
 #ifndef WIN32
                 if (logSync)
-                    fsync(fileno(logFile));
+                    fsync(logFileFd);
 #endif
             }
         }
