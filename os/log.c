@@ -115,7 +115,7 @@ void (*OsVendorVErrorFProc) (const char *, va_list args) = NULL;
 static int logFileFd = -1;
 static Bool logSync = FALSE;
 int xorgLogVerbosity = DEFAULT_LOG_VERBOSITY;
-static int logFileVerbosity = DEFAULT_LOG_FILE_VERBOSITY;
+int xorgLogFileVerbosity = DEFAULT_LOG_FILE_VERBOSITY;
 
 /* Buffer to information logged before the log file is opened. */
 static char *saveBuffer = NULL;
@@ -322,7 +322,7 @@ LogSetParameter(LogParameter param, int value)
         xorgLogVerbosity = value;
         return TRUE;
     case XLOG_FILE_VERBOSITY:
-        logFileVerbosity = value;
+        xorgLogFileVerbosity = value;
         return TRUE;
     default:
         return FALSE;
@@ -571,7 +571,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
     if (verb < 0 || xorgLogVerbosity >= verb)
         ret = write(2, buf, len);
 
-    if (verb < 0 || logFileVerbosity >= verb) {
+    if (verb < 0 || xorgLogFileVerbosity >= verb) {
         if (inSignalContext && logFileFd >= 0) {
             ret = write(logFileFd, buf, len);
             if (logSync)
@@ -620,7 +620,7 @@ LogMessageTypeVerbString(MessageType type, int verb)
     if (type == X_ERROR)
         verb = 0;
 
-    if (xorgLogVerbosity < verb && logFileVerbosity < verb)
+    if (xorgLogVerbosity < verb && xorgLogFileVerbosity < verb)
         return NULL;
 
     switch (type) {
