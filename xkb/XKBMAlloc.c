@@ -29,9 +29,12 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/keysym.h>
+
+#include "os/log_priv.h"
+
 #include "misc.h"
 #include "inputstr.h"
-#include <X11/keysym.h>
 #include <xkbsrv.h>
 
 /***====================================================================***/
