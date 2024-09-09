@@ -31,15 +31,15 @@
 
 #include "dix/screen_hooks_priv.h"
 
+#include <X11/X.h>
+
+#include "os/log_priv.h"
+
 #include "misc.h"
 #include "xf86.h"
 #include "scrnintstr.h"
 #include "regionstr.h"
 #include "xf86fbman.h"
-
-/*
-#define DEBUG
-*/
 
 static DevPrivateKeyRec xf86FBManagerKeyRec;
 static DevPrivateKey xf86FBManagerKey;

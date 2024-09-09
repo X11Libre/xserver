@@ -35,6 +35,7 @@
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/bug_priv.h"
+#include "os/log_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
 #include <inputstr.h>
