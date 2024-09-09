@@ -40,25 +40,6 @@ void LogSetDisplay(void);
  */
 void LogClose(enum ExitCode error);
 
-/* @brief parameters for LogSetParameter() */
-typedef enum {
-    XLOG_SYNC,            /* enable/disable fsync() after each log file write */
-    XLOG_VERBOSITY,       /* set console log verbosity */
-    XLOG_FILE_VERBOSITY,  /* set log file verbosity */
-} LogParameter;
-
-/**
- * @brief set log file paremeters
- *
- * Set various (int) logging parameters, eg. verbosity.
- * See XLOG_* defines
- *
- * @param ID of the parameter to set
- * @param value the new value
- * @result TRUE if successful
- */
-int LogSetParameter(LogParameter param, int value);
-
 #ifdef DEBUG
 /**
  * @brief log debug messages (like errors) if symbol DEBUG is defined
