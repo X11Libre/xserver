@@ -1123,7 +1123,7 @@ xf86ErrorFVerb(int verb, const char *format, ...)
 
     va_start(ap, format);
     if (xf86Verbose >= verb || xf86LogVerbose >= verb)
-        LogVWrite(verb, format, ap);
+        LogVMessageVerb(X_NONE, verb, format, ap);
     va_end(ap);
 }
 
@@ -1135,7 +1135,7 @@ xf86ErrorF(const char *format, ...)
 
     va_start(ap, format);
     if (xf86Verbose >= 1 || xf86LogVerbose >= 1)
-        LogVWrite(1, format, ap);
+        LogVMessageVerb(X_NONE, 1, format, ap);
     va_end(ap);
 }
 

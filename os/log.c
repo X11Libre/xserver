@@ -617,12 +617,6 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
     (void) ret;
 }
 
-void
-LogVWrite(int verb, const char *f, va_list args)
-{
-    return LogVMessageVerb(X_NONE, verb, f, args);
-}
-
 /* Returns the Message Type string to prepend to a logging message, or NULL
  * if the message will be dropped due to insufficient verbosity. */
 static const char *
@@ -960,7 +954,7 @@ VErrorF(const char *f, va_list args)
     if (OsVendorVErrorFProc)
         OsVendorVErrorFProc(f, args);
     else
-        LogVWrite(-1, f, args);
+        LogVMessageVerb(X_NONE, -1, f, args);
 }
 
 void
