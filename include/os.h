@@ -324,13 +324,6 @@ extern _X_EXPORT int
 timingsafe_memcmp(const void *b1, const void *b2, size_t len);
 #endif
 
-/* Logging. */
-typedef enum _LogParameter {
-    XLOG_SYNC,
-    XLOG_VERBOSITY,
-    XLOG_FILE_VERBOSITY
-} LogParameter;
-
 /* Flags for log messages. */
 typedef enum {
     X_PROBED,                   /* Value was probed */
@@ -347,14 +340,6 @@ typedef enum {
     X_UNKNOWN = -1              /* unknown -- this must always be last */
 } MessageType;
 
-extern _X_EXPORT const char *
-LogInit(const char *fname, const char *backup);
-extern void
-LogSetDisplay(void);
-extern _X_EXPORT void
-LogClose(enum ExitCode error);
-extern _X_EXPORT Bool
-LogSetParameter(LogParameter param, int value);
 extern _X_EXPORT void
 LogVWrite(int verb, const char *f, va_list args)
 _X_ATTRIBUTE_PRINTF(2, 0);
@@ -377,7 +362,7 @@ extern _X_EXPORT void
 LogVMessageVerbSigSafe(MessageType type, int verb, const char *format, va_list args)
 _X_ATTRIBUTE_PRINTF(3, 0);
 
-extern _X_EXPORT void
+void
 LogVHdrMessageVerb(MessageType type, int verb,
                    const char *msg_format, va_list msg_args,
                    const char *hdr_format, va_list hdr_args)
@@ -400,12 +385,6 @@ FatalError(const char *f, ...)
 _X_ATTRIBUTE_PRINTF(1, 2)
     _X_NORETURN;
 
-#ifdef DEBUG
-#define DebugF ErrorF
-#else
-#define DebugF(...)             /* */
-#endif
-
 extern _X_EXPORT void
 VErrorF(const char *f, va_list args)
 _X_ATTRIBUTE_PRINTF(1, 0);
@@ -418,7 +397,7 @@ _X_ATTRIBUTE_PRINTF(1, 0);
 extern _X_EXPORT void
 ErrorFSigSafe(const char *f, ...)
 _X_ATTRIBUTE_PRINTF(1, 2);
-extern _X_EXPORT void
+void
 LogPrintMarkers(void);
 
 extern _X_EXPORT void

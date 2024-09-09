@@ -42,6 +42,9 @@
 #include <X11/Xfuncs.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
+
+#include "os/log_priv.h"
+
 #include "misc.h"
 #include "inputstr.h"
 #include "dix.h"

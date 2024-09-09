@@ -85,6 +85,9 @@
 #endif
 
 #include <X11/X.h>
+
+#include "os/log_priv.h"
+
 #include "xf86Modes.h"
 #include "xf86Crtc.h"
 #include "os.h"

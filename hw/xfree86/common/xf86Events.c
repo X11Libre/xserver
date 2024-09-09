@@ -59,17 +59,17 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+#include <X11/keysym.h>
 
 #include "dix/input_priv.h"
-
 #include "dix/dix_priv.h"
+#include "os/log_priv.h"
 
 #include "misc.h"
 #include "xf86.h"
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
-#include <X11/keysym.h>
 
 #ifdef XFreeXDGA
 #include "dgaproc.h"
