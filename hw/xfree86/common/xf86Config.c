@@ -828,7 +828,7 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
             }
             else if (!xf86NameCmp(s, "sync")) {
                 LogMessageVerb(X_CONFIG, 1, "Syncing logfile enabled\n");
-                LogSetParameter(XLOG_SYNC, TRUE);
+                xorgLogSync = TRUE;
             }
             else {
                 LogMessageVerb(X_WARNING, 1, "Unknown Log option\n");
