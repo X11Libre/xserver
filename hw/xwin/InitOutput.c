@@ -534,7 +534,7 @@ OsVendorInit(void)
         g_pszLogFile = LogInit(g_pszLogFile, ".old");
 
     }
-    LogSetParameter(XLOG_VERBOSITY, g_iLogVerbose);
+    xorgLogVerbosity = g_iLogVerbose;
     LogSetParameter(XLOG_FILE_VERBOSITY, g_iLogVerbose);
 
     /* Log the version information */

@@ -234,11 +234,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
             val = strtol(argv[i], &end, 0);
             if (*end == '\0') {
                 verbosity = val;
-                LogSetParameter(XLOG_VERBOSITY, verbosity);
+                xorgLogVerbosity = verbosity;
                 return 2;
             }
         }
-        LogSetParameter(XLOG_VERBOSITY, ++verbosity);
+        xorgLogVerbosity = ++verbosity;
         return 1;
     }
     else if (strcmp(argv[i], "-version") == 0) {

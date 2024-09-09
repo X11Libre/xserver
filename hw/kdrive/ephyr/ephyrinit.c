@@ -289,10 +289,8 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
     else if (!strcmp(argv[i], "-verbosity")) {
         if (i + 1 < argc && argv[i + 1][0] != '-') {
-            int verbosity = atoi(argv[i + 1]);
-
-            LogSetParameter(XLOG_VERBOSITY, verbosity);
-            EPHYR_LOG("set verbosiry to %d\n", verbosity);
+            xorgLogVerbosity = atoi(argv[i + 1]);
+            EPHYR_LOG("set verbosiry to %d\n", xorgLogVerbosity);
             return 2;
         }
         else {
