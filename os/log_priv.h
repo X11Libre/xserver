@@ -83,5 +83,6 @@ extern int xorgLogVerbosity;
  * verbosity level below this one will be written to the log file.
  */
 extern int xorgLogFileVerbosity;
+extern Bool xorgLogSync;
 
 #endif /* __XORG_OS_LOGGING_H */
