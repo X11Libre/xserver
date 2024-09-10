@@ -199,6 +199,12 @@ LogFilePrep(const char *fname, const char *backup, const char *idstring)
 }
 #pragma GCC diagnostic pop
 
+static inline void doLogSync(void) {
+#ifndef WIN32
+    fsync(logFileFd);
+#endif
+}
+
 /*
  * LogInit is called to start logging to a file.  It is also called (with
  * NULL arguments) when logging to a file is not wanted.  It must always be
@@ -241,9 +247,7 @@ LogInit(const char *fname, const char *backup)
         /* Flush saved log information. */
         if (saveBuffer && bufferSize > 0) {
             write(logFileFd, saveBuffer, bufferPos);
-#ifndef WIN32
-            fsync(logFileFd);
-#endif
+            doLogSync();
         }
     }
 
@@ -556,10 +560,8 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
     if (verb < 0 || logFileVerbosity >= verb) {
         if (inSignalContext && logFileFd >= 0) {
             ret = write(logFileFd, buf, len);
-#ifndef WIN32
             if (logSync)
-                fsync(logFileFd);
-#endif
+                doLogSync();
         }
         else if (!inSignalContext && logFileFd != -1) {
             if (newline) {
@@ -573,10 +575,8 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
             }
             newline = end_line;
             write(logFileFd, buf, len);
-#ifndef WIN32
             if (logSync)
-                fsync(logFileFd);
-#endif
+                doLogSync();
         }
         else if (!inSignalContext && needBuffer) {
             if (len > bufferUnused) {
