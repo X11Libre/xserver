@@ -92,7 +92,7 @@ xf86EnableIO(void)
 {
 #if defined(__i386__) || defined(__i386) || defined(__x86)
     if (sysi86(SI86V86, V86SC_IOPL, PS_IOPL) < 0) {
-        xf86Msg(X_WARNING, "xf86EnableIO: Failed to set IOPL for I/O\n");
+        LogMessageVerb(X_WARNING, 1, "xf86EnableIO: Failed to set IOPL for I/O\n");
         return FALSE;
     }
 #endif                          /* i386 */

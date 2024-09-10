@@ -60,7 +60,7 @@ get_drm_info(struct OdevAttributes *attribs, char *path, int delayed_index)
 
     v = drmGetVersion(fd);
     if (!v) {
-        xf86Msg(X_ERROR, "%s: failed to query DRM version\n", path);
+        LogMessageVerb(X_ERROR, 1, "%s: failed to query DRM version\n", path);
         goto out;
     }
 

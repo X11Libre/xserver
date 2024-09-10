@@ -124,7 +124,7 @@ xf86OpenSerial(XF86OptionPtr options)
 
     dev = xf86SetStrOption(options, "Device", NULL);
     if (!dev) {
-        xf86Msg(X_ERROR, "xf86OpenSerial: No Device specified.\n");
+        LogMessageVerb(X_ERROR, 1, "xf86OpenSerial: No Device specified.\n");
         return -1;
     }
 
@@ -134,9 +134,9 @@ xf86OpenSerial(XF86OptionPtr options)
         SYSCALL(fd = open(dev, O_RDWR | O_NONBLOCK));
 
     if (fd == -1) {
-        xf86Msg(X_ERROR,
-                "xf86OpenSerial: Cannot open device %s\n\t%s.\n",
-                dev, strerror(errno));
+        LogMessageVerb(X_ERROR, 1,
+                       "xf86OpenSerial: Cannot open device %s\n\t%s.\n",
+                       dev, strerror(errno));
         free(dev);
         return -1;
     }
@@ -209,7 +209,7 @@ xf86SetSerial(int fd, XF86OptionPtr options)
             cfsetospeed(&t, baud);
         }
         else {
-            xf86Msg(X_ERROR, "Invalid Option BaudRate value: %d\n", val);
+            LogMessageVerb(X_ERROR, 1, "Invalid Option BaudRate value: %d\n", val);
             return -1;
         }
     }
@@ -223,7 +223,7 @@ xf86SetSerial(int fd, XF86OptionPtr options)
             t.c_cflag |= CSTOPB;
             break;
         default:
-            xf86Msg(X_ERROR, "Invalid Option StopBits value: %d\n", val);
+            LogMessageVerb(X_ERROR, 1, "Invalid Option StopBits value: %d\n", val);
             return -1;
             break;
         }
@@ -248,7 +248,7 @@ xf86SetSerial(int fd, XF86OptionPtr options)
             t.c_cflag |= CS8;
             break;
         default:
-            xf86Msg(X_ERROR, "Invalid Option DataBits value: %d\n", val);
+            LogMessageVerb(X_ERROR, 1, "Invalid Option DataBits value: %d\n", val);
             return -1;
             break;
         }
@@ -266,7 +266,7 @@ xf86SetSerial(int fd, XF86OptionPtr options)
             t.c_cflag &= ~(PARENB);
         }
         else {
-            xf86Msg(X_ERROR, "Invalid Option Parity value: %s\n", s);
+            LogMessageVerb(X_ERROR, 1, "Invalid Option Parity value: %s\n", s);
             free(s);
             return -1;
         }
@@ -295,7 +295,7 @@ xf86SetSerial(int fd, XF86OptionPtr options)
             t.c_iflag &= ~(IXON | IXOFF);
         }
         else {
-            xf86Msg(X_ERROR, "Invalid Option FlowControl value: %s\n", s);
+            LogMessageVerb(X_ERROR, 1, "Invalid Option FlowControl value: %s\n", s);
             free(s);
             return -1;
         }
@@ -311,14 +311,14 @@ xf86SetSerial(int fd, XF86OptionPtr options)
         SYSCALL(ioctl(fd, TIOCCDTR, NULL));
 #endif
 #else
-        xf86Msg(X_WARNING, "Option ClearDTR not supported on this OS\n");
+        LogMessageVerb(X_WARNING, 1, "Option ClearDTR not supported on this OS\n");
         return -1;
 #endif
         xf86MarkOptionUsedByName(options, "ClearDTR");
     }
 
     if ((xf86SetBoolOption(options, "ClearRTS", FALSE))) {
-        xf86Msg(X_WARNING, "Option ClearRTS not supported on this OS\n");
+        LogMessageVerb(X_WARNING, 1, "Option ClearRTS not supported on this OS\n");
         return -1;
         xf86MarkOptionUsedByName(options, "ClearRTS");
     }
@@ -347,7 +347,7 @@ xf86SetSerialSpeed(int fd, int speed)
         cfsetospeed(&t, baud);
     }
     else {
-        xf86Msg(X_ERROR, "Invalid Option BaudRate value: %d\n", speed);
+        LogMessageVerb(X_ERROR, 1, "Invalid Option BaudRate value: %d\n", speed);
         return -1;
     }
 
