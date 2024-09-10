@@ -86,6 +86,10 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/Xfuncproto.h>
 #include <X11/Xos.h>
 
+#ifdef HAVE_SYSLOG_H
+#include <syslog.h>
+#endif
+
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "os/audit.h"
@@ -114,11 +118,14 @@ void (*OsVendorVErrorFProc) (const char *, va_list args) = NULL;
 /* Default logging parameters. */
 #define DEFAULT_LOG_VERBOSITY		0
 #define DEFAULT_LOG_FILE_VERBOSITY	3
+#define DEFAULT_SYSLOG_VERBOSITY	99
 
 static int logFileFd = -1;
 Bool xorgLogSync = FALSE;
 int xorgLogVerbosity = DEFAULT_LOG_VERBOSITY;
 int xorgLogFileVerbosity = DEFAULT_LOG_FILE_VERBOSITY;
+int xorgSyslogVerbosity = DEFAULT_SYSLOG_VERBOSITY;
+const char *xorgSyslogIdent = "X";
 
 /* Buffer to information logged before the log file is opened. */
 static char *saveBuffer = NULL;
@@ -210,6 +217,18 @@ static inline void doLogSync(void) {
 #endif
 }
 
+static void initSyslog(void) {
+#ifdef HAVE_SYSLOG_H
+    char buffer[4096];
+    strcpy(buffer, xorgSyslogIdent);
+
+    snprintf(buffer, sizeof(buffer), "%s :%s", xorgSyslogIdent, (display ? display : "<>"));
+
+    /* initialize syslog */
+    openlog(buffer, LOG_PID, LOG_LOCAL1);
+#endif
+}
+
 /*
  * LogInit is called to start logging to a file.  It is also called (with
  * NULL arguments) when logging to a file is not wanted.  It must always be
@@ -267,6 +286,7 @@ LogInit(const char *fname, const char *backup)
     }
     needBuffer = FALSE;
 
+    initSyslog();
     return logFileName;
 }
 
@@ -298,6 +318,7 @@ LogSetDisplay(void)
         free(saved_log_fname);
         free(saved_log_backup);
     }
+    initSyslog();
 }
 
 void
@@ -544,6 +565,19 @@ pnprintf(char *string, int size, const char *f, ...)
     return rc;
 }
 
+static void
+LogSyslogWrite(int verb, const char *buf, size_t len, Bool end_line) {
+#ifdef HAVE_SYSLOG_H
+    if (inSignalContext) // syslog() ins't signal-safe yet :(
+        return;          // shall we try syslog(2) syscall instead ?
+
+    if (verb >= 0 && xorgSyslogVerbosity < verb)
+        return;
+
+    syslog(LOG_PID, "%.*s", (int)len, buf);
+#endif
+}
+
 /* This function does the actual log message writes. It must be signal safe.
  * When attempting to call non-signal-safe functions, guard them with a check
  * of the inSignalContext global variable. */
@@ -552,6 +586,8 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 {
     static Bool newline = TRUE;
     int ret;
+
+    LogSyslogWrite(verb, buf, len, end_line);
 
     if (verb < 0 || xorgLogVerbosity >= verb)
         ret = write(2, buf, len);

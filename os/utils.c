@@ -79,6 +79,8 @@ __stdcall unsigned long GetTickCount(void);
 #define TRANS_REOPEN
 #include <X11/Xtrans/Xtrans.h>
 
+#include <libgen.h>
+
 #include "input.h"
 #include "dixfont.h"
 #include <X11/fonts/libxfont2.h>
@@ -497,6 +499,10 @@ ProcessCommandLine(int argc, char *argv[])
                            defaultNoListenList[i]);
     }
     SeatId = getenv("XDG_SEAT");
+
+    xorgSyslogIdent = getenv("SYSLOG_IDENT");
+    if (!xorgSyslogIdent)
+        xorgSyslogIdent = strdup(basename(argv[0]));
 
     for (i = 1; i < argc; i++) {
         /* call ddx first, so it can peek/override if it wants */
