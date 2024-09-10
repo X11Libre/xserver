@@ -71,8 +71,8 @@ xf86OSRingBell(int loudness, int pitch, int duration)
 
     audioFD = open(AUDIO_DEVICE, O_WRONLY | O_NONBLOCK);
     if (audioFD == -1) {
-        xf86Msg(X_ERROR, "Bell: cannot open audio device \"%s\": %s\n",
-                AUDIO_DEVICE, strerror(errno));
+        LogMessageVerb(X_ERROR, 1, "Bell: cannot open audio device \"%s\": %s\n",
+                       AUDIO_DEVICE, strerror(errno));
         return;
     }
 
@@ -119,9 +119,9 @@ xf86OSRingBell(int loudness, int pitch, int duration)
     audioInfo.play.gain = min(AUDIO_MAX_GAIN, AUDIO_MAX_GAIN * loudness / 100);
 
     if (ioctl(audioFD, AUDIO_SETINFO, &audioInfo) < 0) {
-        xf86Msg(X_ERROR,
-                "Bell: AUDIO_SETINFO failed on audio device \"%s\": %s\n",
-                AUDIO_DEVICE, strerror(errno));
+        LogMessageVerb(X_ERROR, 1,
+                       "Bell: AUDIO_SETINFO failed on audio device \"%s\": %s\n",
+                       AUDIO_DEVICE, strerror(errno));
         close(audioFD);
         return;
     }
@@ -150,9 +150,9 @@ xf86OSRingBell(int loudness, int pitch, int duration)
 
                 if (written == -1) {
                     if (errno != EAGAIN) {
-                        xf86Msg(X_ERROR,
-                                "Bell: writev failed on audio device \"%s\": %s\n",
-                                AUDIO_DEVICE, strerror(errno));
+                        LogMessageVerb(X_ERROR, 1,
+                                       "Bell: writev failed on audio device \"%s\": %s\n",
+                                       AUDIO_DEVICE, strerror(errno));
                         close(audioFD);
                         return;
                     }

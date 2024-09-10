@@ -71,7 +71,7 @@ dense_base(void)
         init_abw();
 
     /* XXX check abst_flags for ABST_DENSE just to be safe? */
-    xf86Msg(X_INFO, "dense base = %#lx\n", abw[0].abw_abst.abst_sys_start);     /* XXXX */
+    LogMessageVerb(X_INFO, 1, "dense base = %#lx\n", abw[0].abw_abst.abst_sys_start);
     return abw[0].abw_abst.abst_sys_start;
 }
 
@@ -120,14 +120,14 @@ checkDevMem(Bool warn)
         if (base != MAP_FAILED) {
             munmap((caddr_t) base, 4096);
             devMemFd = fd;
-            xf86Msg(X_INFO, "checkDevMem: using aperture driver %s\n",
-                    DEV_APERTURE);
+            LogMessageVerb(X_INFO, 1, "checkDevMem: using aperture driver %s\n",
+                           DEV_APERTURE);
             return;
         }
         else {
             if (warn) {
-                xf86Msg(X_WARNING, "checkDevMem: failed to mmap %s (%s)\n",
-                        DEV_APERTURE, strerror(errno));
+                LogMessageVerb(X_WARNING, 1, "checkDevMem: failed to mmap %s (%s)\n",
+                               DEV_APERTURE, strerror(errno));
             }
         }
     }
@@ -144,23 +144,23 @@ checkDevMem(Bool warn)
         }
         else {
             if (warn) {
-                xf86Msg(X_WARNING, "checkDevMem: failed to mmap %s (%s)\n",
-                        DEV_MEM, strerror(errno));
+                LogMessageVerb(X_WARNING, 1, "checkDevMem: failed to mmap %s (%s)\n",
+                               DEV_MEM, strerror(errno));
             }
         }
     }
     if (warn) {
 #ifndef HAS_APERTURE_DRV
-        xf86Msg(X_WARNING, "checkDevMem: failed to open/mmap %s (%s)\n",
-                DEV_MEM, strerror(errno));
+        LogMessageVerb(X_WARNING, 1, "checkDevMem: failed to open/mmap %s (%s)\n",
+                       DEV_MEM, strerror(errno));
 #else
 #ifndef __OpenBSD__
-        xf86Msg(X_WARNING, "checkDevMem: failed to open %s and %s\n"
-                "\t(%s)\n", DEV_APERTURE, DEV_MEM, strerror(errno));
+        LogMessageVerb(X_WARNING, 1, "checkDevMem: failed to open %s and %s\n"
+                       "\t(%s)\n", DEV_APERTURE, DEV_MEM, strerror(errno));
 #else                           /* __OpenBSD__ */
-        xf86Msg(X_WARNING, "checkDevMem: failed to open %s and %s\n"
-                "\t(%s)\n%s", DEV_APERTURE, DEV_MEM, strerror(errno),
-                SYSCTL_MSG);
+        LogMessageVerb(X_WARNING, 1, "checkDevMem: failed to open %s and %s\n"
+                       "\t(%s)\n%s", DEV_APERTURE, DEV_MEM, strerror(errno),
+                       SYSCTL_MSG);
 #endif                          /* __OpenBSD__ */
 #endif
         xf86ErrorF("\tlinear framebuffer access unavailable\n");
