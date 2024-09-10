@@ -67,6 +67,8 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #define TRANS_REOPEN
 #include <X11/Xtrans/Xtrans.h>
 
+#include <libgen.h>
+
 #include "input.h"
 #include "dixfont.h"
 #include <X11/fonts/libxfont2.h>
@@ -428,6 +430,12 @@ ProcessCommandLine(int argc, char *argv[])
                            defaultNoListenList[i]);
     }
     SeatId = getenv("XDG_SEAT");
+
+#ifdef CONFIG_SYSLOG
+    xorgSyslogIdent = getenv("SYSLOG_IDENT");
+    if (!xorgSyslogIdent)
+        xorgSyslogIdent = strdup(basename(argv[0]));
+#endif
 
     for (i = 1; i < argc; i++) {
         /* call ddx first, so it can peek/override if it wants */
@@ -795,6 +803,9 @@ ProcessCommandLine(int argc, char *argv[])
             else
                 UseMsg();
         }
+#ifdef CONFIG_SYSLOG
+        else if (ProcessCmdLineMultiInt(argc, argv, &i, "-syslogverbose", &xorgSyslogVerbosity));
+#endif
         else {
             ErrorF("Unrecognized option: %s\n", argv[i]);
             UseMsg();
