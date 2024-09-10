@@ -638,7 +638,6 @@ OsVendorInit(void)
         g_pszLogFile = LogInit(g_pszLogFile, ".old");
 
     }
-    LogSetParameter(XLOG_FLUSH, 1);
     LogSetParameter(XLOG_VERBOSITY, g_iLogVerbose);
     LogSetParameter(XLOG_FILE_VERBOSITY, g_iLogVerbose);
 
