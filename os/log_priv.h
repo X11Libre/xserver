@@ -34,6 +34,23 @@ extern int logVerbosity;
 extern int logFileVerbosity;
 
 /**
+ * @brief syslog verbosity
+ *
+ * The verbosity level of logging to syslog. All messages with
+ * verbosity level below this one will be sent to local syslog daemon.
+ */
+extern int xorgSyslogVerbosity;
+
+/**
+ * @brief syslog identifier
+ *
+ * The identifier prefix used for syslog logging.
+ * Per default will be filled with basename(argv[0]). DDX'es can override
+ * this before calling LogInit()
+ */
+extern const char *xorgSyslogIdent;
+
+/**
  * @brief initialize logging and open log files
  *
  * Make backup of existing log file, create a new one and open it for logging.
