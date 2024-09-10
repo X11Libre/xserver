@@ -163,7 +163,7 @@ xf86ProcessActionEvent(ActionEvent action, void *arg)
     switch (action) {
     case ACTION_TERMINATE:
         if (!xf86Info.dontZap) {
-            xf86Msg(X_INFO, "Server zapped. Shutting down.\n");
+            LogMessageVerb(X_INFO, 1, "Server zapped. Shutting down.\n");
             GiveUp(0);
         }
         break;

@@ -637,7 +637,7 @@ void
 xf86PrintDepthBpp(ScrnInfoPtr scrp)
 {
     xf86DrvMsg(scrp->scrnIndex, scrp->depthFrom, "Depth %d, ", scrp->depth);
-    xf86Msg(scrp->bitsPerPixelFrom, "framebuffer bpp %d\n", scrp->bitsPerPixel);
+    LogMessageVerb(scrp->bitsPerPixelFrom, 1, "framebuffer bpp %d\n", scrp->bitsPerPixel);
 }
 
 /*
@@ -1243,7 +1243,7 @@ xf86PrintChipsets(const char *drvname, const char *drvmsg, SymTabPtr chips)
     int len, i;
 
     len = 6 + strlen(drvname) + 2 + strlen(drvmsg) + 2;
-    xf86Msg(X_INFO, "%s: %s:", drvname, drvmsg);
+    LogMessageVerb(X_INFO, 1, "%s: %s:", drvname, drvmsg);
     for (i = 0; chips[i].name != NULL; i++) {
         if (i != 0) {
             xf86ErrorF(",");

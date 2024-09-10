@@ -71,8 +71,8 @@ xf86VGAarbiterInit(void)
 {
     if (pci_device_vgaarb_init() != 0) {
         vga_no_arb = 1;
-        xf86Msg(X_WARNING,
-                "VGA arbiter: cannot open kernel arbiter, no multi-card support\n");
+        LogMessageVerb(X_WARNING, 1,
+                      "VGA arbiter: cannot open kernel arbiter, no multi-card support\n");
     }
 }
 
@@ -167,8 +167,9 @@ xf86VGAarbiterWrapFunctions(void)
     if (vga_count < 2 || !xf86Screens)
         return FALSE;
 
-    xf86Msg(X_INFO, "Found %d VGA devices: arbiter wrapping enabled\n",
-            vga_count);
+    LogMessageVerb(X_INFO, 1,
+                   "Found %d VGA devices: arbiter wrapping enabled\n",
+                   vga_count);
 
     for (i = 0; i < xf86NumScreens; i++) {
         pScreen = xf86Screens[i]->pScreen;

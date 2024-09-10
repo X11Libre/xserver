@@ -89,8 +89,8 @@ handle_edid_quirks(xf86MonPtr m)
 
         xf86ForEachDetailedBlock(m, find_max_detailed_clock, &clock);
         if (clock && (ranges->max_clock * 1e6 < clock)) {
-            xf86Msg(X_WARNING, "EDID timing clock %.2f exceeds claimed max "
-                    "%dMHz, fixing\n", clock / 1.0e6, ranges->max_clock);
+            LogMessageVerb(X_WARNING, 1, "EDID timing clock %.2f exceeds claimed max "
+                           "%dMHz, fixing\n", clock / 1.0e6, ranges->max_clock);
             ranges->max_clock = (clock + 999999) / 1e6;
         }
     }
@@ -159,8 +159,8 @@ encode_aspect_ratio(xf86MonPtr m)
             m->features.vsize = (p.real_vsize + 5) / 10;
         }
 
-        xf86Msg(X_INFO, "Quirked EDID physical size to %dx%d cm\n",
-                m->features.hsize, m->features.vsize);
+        LogMessageVerb(X_INFO, 1, "Quirked EDID physical size to %dx%d cm\n",
+                       m->features.hsize, m->features.vsize);
     }
 }
 

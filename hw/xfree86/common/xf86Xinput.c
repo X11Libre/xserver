@@ -109,12 +109,12 @@
 #include "xkbsrv.h"
 
 /* Valuator verification macro */
-#define XI_VERIFY_VALUATORS(num_valuators)					\
-	if (num_valuators > MAX_VALUATORS) {					\
-		xf86Msg(X_ERROR, "%s: num_valuator %d is greater than"		\
-			" MAX_VALUATORS\n", __FUNCTION__, num_valuators);	\
-		return;								\
-	}
+#define XI_VERIFY_VALUATORS(num_valuators) \
+    if (num_valuators > MAX_VALUATORS) { \
+        LogMessageVerb(X_ERROR, 1, "%s: num_valuator %d is greater than MAX_VALUATORS\n", \
+                       __FUNCTION__, num_valuators); \
+        return; \
+    }
 
 static int
  xf86InputDevicePostInit(DeviceIntPtr dev);
@@ -148,8 +148,8 @@ ProcessVelocityConfiguration(DeviceIntPtr pDev, const char *devname, void *list,
     /* common settings (available via device properties) */
     tempf = xf86SetRealOption(list, "ConstantDeceleration", 1.0);
     if (tempf != 1.0) {
-        xf86Msg(X_CONFIG, "%s: (accel) constant deceleration by %.1f\n",
-                devname, tempf);
+        LogMessageVerb(X_CONFIG, 1, "%s: (accel) constant deceleration by %.1f\n",
+                       devname, tempf);
         prop = XIGetKnownProperty(ACCEL_PROP_CONSTANT_DECELERATION);
         XIChangeDeviceProperty(pDev, prop, float_prop, 32,
                                PropModeReplace, 1, &tempf, FALSE);
@@ -157,8 +157,8 @@ ProcessVelocityConfiguration(DeviceIntPtr pDev, const char *devname, void *list,
 
     tempf = xf86SetRealOption(list, "AdaptiveDeceleration", 1.0);
     if (tempf > 1.0) {
-        xf86Msg(X_CONFIG, "%s: (accel) adaptive deceleration by %.1f\n",
-                devname, tempf);
+        LogMessageVerb(X_CONFIG, 1, "%s: (accel) adaptive deceleration by %.1f\n",
+                       devname, tempf);
         prop = XIGetKnownProperty(ACCEL_PROP_ADAPTIVE_DECELERATION);
         XIChangeDeviceProperty(pDev, prop, float_prop, 32,
                                PropModeReplace, 1, &tempf, FALSE);
@@ -171,12 +171,11 @@ ProcessVelocityConfiguration(DeviceIntPtr pDev, const char *devname, void *list,
     prop = XIGetKnownProperty(ACCEL_PROP_PROFILE_NUMBER);
     if (XIChangeDeviceProperty(pDev, prop, XA_INTEGER, 32,
                                PropModeReplace, 1, &tempi, FALSE) == Success) {
-        xf86Msg(X_CONFIG, "%s: (accel) acceleration profile %i\n", devname,
-                tempi);
+        LogMessageVerb(X_CONFIG, 1, "%s: (accel) acceleration profile %i\n", devname, tempi);
     }
     else {
-        xf86Msg(X_CONFIG, "%s: (accel) acceleration profile %i is unknown\n",
-                devname, tempi);
+        LogMessageVerb(X_CONFIG, 1, "%s: (accel) acceleration profile %i is unknown\n",
+                       devname, tempi);
     }
 
     /* set scaling */
@@ -204,8 +203,8 @@ ProcessVelocityConfiguration(DeviceIntPtr pDev, const char *devname, void *list,
 
     tempf = xf86SetRealOption(list, "VelocityRelDiff", -1);
     if (tempf >= 0) {
-        xf86Msg(X_CONFIG, "%s: (accel) max rel. velocity difference: %.1f%%\n",
-                devname, tempf * 100.0);
+        LogMessageVerb(X_CONFIG, 1, "%s: (accel) max rel. velocity difference: %.1f%%\n",
+                       devname, tempf * 100.0);
         s->max_rel_diff = tempf;
     }
 
@@ -251,18 +250,18 @@ ApplyAccelerationSettings(DeviceIntPtr dev)
             }
 
             if (InitPointerAccelerationScheme(dev, scheme)) {
-                xf86Msg(X_CONFIG, "%s: (accel) selected scheme %s/%i\n",
-                        pInfo->name, schemeStr, scheme);
+                LogMessageVerb(X_CONFIG, 1, "%s: (accel) selected scheme %s/%i\n",
+                               pInfo->name, schemeStr, scheme);
             }
             else {
-                xf86Msg(X_CONFIG, "%s: (accel) could not init scheme %s\n",
-                        pInfo->name, schemeStr);
+                LogMessageVerb(X_CONFIG, 1, "%s: (accel) could not init scheme %s\n",
+                               pInfo->name, schemeStr);
                 scheme = dev->valuator->accelScheme.number;
             }
         }
         else {
-            xf86Msg(X_CONFIG, "%s: (accel) keeping acceleration scheme %i\n",
-                    pInfo->name, scheme);
+            LogMessageVerb(X_CONFIG, 1, "%s: (accel) keeping acceleration scheme %i\n",
+                           pInfo->name, scheme);
         }
 
         free(schemeStr);
@@ -291,11 +290,11 @@ ApplyAccelerationSettings(DeviceIntPtr dev)
         if (i >= 0)
             dev->ptrfeed->ctrl.threshold = i;
 
-        xf86Msg(X_CONFIG, "%s: (accel) acceleration factor: %.3f\n",
-                pInfo->name, ((float) dev->ptrfeed->ctrl.num) /
-                ((float) dev->ptrfeed->ctrl.den));
-        xf86Msg(X_CONFIG, "%s: (accel) acceleration threshold: %i\n",
-                pInfo->name, dev->ptrfeed->ctrl.threshold);
+        LogMessageVerb(X_CONFIG, 1, "%s: (accel) acceleration factor: %.3f\n",
+                       pInfo->name, ((float) dev->ptrfeed->ctrl.num) /
+                       ((float) dev->ptrfeed->ctrl.den));
+        LogMessageVerb(X_CONFIG, 1, "%s: (accel) acceleration threshold: %i\n",
+                       pInfo->name, dev->ptrfeed->ctrl.threshold);
     }
 }
 
@@ -318,9 +317,9 @@ ApplyTransformationMatrix(DeviceIntPtr dev)
                 &matrix[2], &matrix[3], &matrix[4], &matrix[5], &matrix[6],
                 &matrix[7], &matrix[8]);
     if (rc != 9) {
-        xf86Msg(X_ERROR,
-                "%s: invalid format for transformation matrix. Ignoring configuration.\n",
-                pInfo->name);
+        LogMessageVerb(X_ERROR,1,
+                       "%s: invalid format for transformation matrix. Ignoring configuration.\n",
+                       pInfo->name);
         return;
     }
 
@@ -347,11 +346,11 @@ ApplyAutoRepeat(DeviceIntPtr dev)
         return;
 
     if (sscanf(repeatStr, "%ld %ld", &delay, &rate) != 2) {
-        xf86Msg(X_ERROR, "\"%s\" is not a valid AutoRepeat value\n", repeatStr);
+        LogMessageVerb(X_ERROR, 1, "\"%s\" is not a valid AutoRepeat value\n", repeatStr);
         return;
     }
 
-    xf86Msg(X_CONFIG, "AutoRepeat: %ld %ld\n", delay, rate);
+    LogMessageVerb(X_CONFIG, 1, "AutoRepeat: %ld %ld\n", delay, rate);
     xkbi->desc->ctrls->repeat_delay = delay;
     xkbi->desc->ctrls->repeat_interval = 1000 / rate;
 }
@@ -372,11 +371,11 @@ xf86ProcessCommonOptions(InputInfoPtr pInfo, XF86OptionPtr list)
         !xf86SetBoolOption(list, "SendCoreEvents", 1) ||
         !xf86SetBoolOption(list, "CorePointer", 1) ||
         !xf86SetBoolOption(list, "CoreKeyboard", 1)) {
-        xf86Msg(X_CONFIG, "%s: doesn't report core events\n", pInfo->name);
+        LogMessageVerb(X_CONFIG, 1, "%s: doesn't report core events\n", pInfo->name);
     }
     else {
         pInfo->flags |= XI86_ALWAYS_CORE;
-        xf86Msg(X_CONFIG, "%s: always reports core events\n", pInfo->name);
+        LogMessageVerb(X_CONFIG, 1, "%s: always reports core events\n", pInfo->name);
     }
 }
 
@@ -398,7 +397,7 @@ xf86ActivateDevice(InputInfoPtr pInfo)
     dev = AddInputDevice(serverClient, pInfo->device_control, TRUE);
 
     if (dev == NULL) {
-        xf86Msg(X_ERROR, "Too many input devices. Ignoring %s\n", pInfo->name);
+        LogMessageVerb(X_ERROR, 1, "Too many input devices. Ignoring %s\n", pInfo->name);
         pInfo->dev = NULL;
         return NULL;
     }
@@ -415,9 +414,9 @@ xf86ActivateDevice(InputInfoPtr pInfo)
     dev->config_info = xf86SetStrOption(pInfo->options, "config_info", NULL);
 
     if (serverGeneration == 1)
-        xf86Msg(X_INFO,
-                "XINPUT: Adding extended input device \"%s\" (type: %s, id %d)\n",
-                pInfo->name, pInfo->type_name, dev->id);
+        LogMessageVerb(X_INFO, 1,
+                       "XINPUT: Adding extended input device \"%s\" (type: %s, id %d)\n",
+                       pInfo->name, pInfo->type_name, dev->id);
 
     return dev;
 }
@@ -724,16 +723,16 @@ MergeInputClasses(const InputInfoPtr idev, const InputAttributes * attrs)
             free((void *) idev->driver);
             idev->driver = Xstrdup(cl->driver);
             if (!idev->driver) {
-                xf86Msg(X_ERROR, "Failed to allocate memory while merging "
-                        "InputClass configuration");
+                LogMessageVerb(X_ERROR, 1, "Failed to allocate memory while merging "
+                               "InputClass configuration");
                 return BadAlloc;
             }
             classopts = xf86ReplaceStrOption(classopts, "driver", idev->driver);
         }
 
         /* Apply options to device with InputClass settings preferred. */
-        xf86Msg(X_CONFIG, "%s: Applying InputClass \"%s\"\n",
-                idev->name, cl->identifier);
+        LogMessageVerb(X_CONFIG, 1, "%s: Applying InputClass \"%s\"\n",
+                       idev->name, cl->identifier);
         idev->options = xf86optionListMerge(idev->options, classopts);
     }
 
@@ -761,8 +760,8 @@ IgnoreInputClass(const InputInfoPtr idev, const InputAttributes * attrs)
     }
 
     if (ignore)
-        xf86Msg(X_CONFIG, "%s: Ignoring device from InputClass \"%s\"\n",
-                idev->name, ignore_class);
+        LogMessageVerb(X_CONFIG, 1, "%s: Ignoring device from InputClass \"%s\"\n",
+                       idev->name, ignore_class);
     return ignore;
 }
 
@@ -914,10 +913,10 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
 
     drv = xf86LoadInputDriver(pInfo->driver);
     if (!drv) {
-        xf86Msg(X_ERROR, "No input driver matching `%s'\n", pInfo->driver);
+        LogMessageVerb(X_ERROR, 1, "No input driver matching `%s'\n", pInfo->driver);
 
         if (strlen(FALLBACK_INPUT_DRIVER) > 0) {
-            xf86Msg(X_INFO, "Falling back to input driver `%s'\n",
+            LogMessageVerb(X_INFO, 1, "Falling back to input driver `%s'\n",
                     FALLBACK_INPUT_DRIVER);
             drv = xf86LoadInputDriver(FALLBACK_INPUT_DRIVER);
             if (drv) {
@@ -931,13 +930,13 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
         }
     }
 
-    xf86Msg(X_INFO, "Using input driver '%s' for '%s'\n", drv->driverName,
+    LogMessageVerb(X_INFO, 1, "Using input driver '%s' for '%s'\n", drv->driverName,
             pInfo->name);
 
     if (!drv->PreInit) {
-        xf86Msg(X_ERROR,
-                "Input driver `%s' has no PreInit function (ignoring)\n",
-                drv->driverName);
+        LogMessageVerb(X_ERROR, 1,
+                       "Input driver `%s' has no PreInit function (ignoring)\n",
+                       drv->driverName);
         rval = BadImplementation;
         goto unwind;
     }
@@ -975,7 +974,7 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
     input_unlock();
 
     if (rval != Success) {
-        xf86Msg(X_ERROR, "PreInit returned %d for \"%s\"\n", rval, pInfo->name);
+        LogMessageVerb(X_ERROR, 1, "PreInit returned %d for \"%s\"\n", rval, pInfo->name);
         goto unwind;
     }
 
@@ -986,14 +985,14 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
 
     rval = ActivateDevice(dev, TRUE);
     if (rval != Success) {
-        xf86Msg(X_ERROR, "Couldn't init device \"%s\"\n", pInfo->name);
+        LogMessageVerb(X_ERROR, 1, "Couldn't init device \"%s\"\n", pInfo->name);
         RemoveDevice(dev, TRUE);
         goto unwind;
     }
 
     rval = xf86InputDevicePostInit(dev);
     if (rval != Success) {
-        xf86Msg(X_ERROR, "Couldn't post-init device \"%s\"\n", pInfo->name);
+        LogMessageVerb(X_ERROR, 1, "Couldn't post-init device \"%s\"\n", pInfo->name);
         RemoveDevice(dev, TRUE);
         goto unwind;
     }
@@ -1003,7 +1002,7 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
         input_lock();
         EnableDevice(dev, TRUE);
         if (!dev->enabled) {
-            xf86Msg(X_ERROR, "Couldn't init device \"%s\"\n", pInfo->name);
+            LogMessageVerb(X_ERROR, 1, "Couldn't init device \"%s\"\n", pInfo->name);
             RemoveDevice(dev, TRUE);
             rval = BadMatch;
             input_unlock();
@@ -1108,15 +1107,14 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
     }
 
     if (!pInfo->name) {
-        xf86Msg(X_INFO, "No identifier specified, ignoring this device.\n");
+        LogMessageVerb(X_INFO, 1, "No identifier specified, ignoring this device.\n");
         rval = BadRequest;
         goto unwind;
     }
 
     if (!pInfo->driver) {
-        xf86Msg(X_INFO, "No input driver specified, ignoring this device.\n");
-        xf86Msg(X_INFO,
-                "This device may have been added with another device file.\n");
+        LogMessageVerb(X_INFO, 1, "No input driver specified, ignoring this device.\n");
+        LogMessageVerb(X_INFO, 1, "This device may have been added with another device file.\n");
         rval = BadRequest;
         goto unwind;
     }
@@ -1129,7 +1127,7 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
 
  unwind:
     if (is_auto && !xf86Info.autoAddDevices)
-        xf86Msg(X_INFO, "AutoAddDevices is off - not adding device.\n");
+        LogMessageVerb(X_INFO, 1, "AutoAddDevices is off - not adding device.\n");
     xf86DeleteInput(pInfo, 0);
     return rval;
 }
