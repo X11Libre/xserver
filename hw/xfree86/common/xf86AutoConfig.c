@@ -160,7 +160,7 @@ xf86AddMatchedDriver(XF86MatchedDrivers *md, const char *driver)
         md->nmatches++;
     }
     else {
-        xf86Msg(X_WARNING, "Too many drivers registered, can't add %s\n", driver);
+        LogMessageVerb(X_WARNING, 1, "Too many drivers registered, can't add %s\n", driver);
     }
 }
 
@@ -178,7 +178,7 @@ xf86AutoConfig(void)
         ret = CONFIG_OK;    /* OK so far */
     }
     else {
-        xf86Msg(X_ERROR, "Couldn't allocate Config record.\n");
+        LogMessageVerb(X_ERROR, 1, "Couldn't allocate Config record.\n");
         return FALSE;
     }
 
@@ -220,7 +220,7 @@ xf86AutoConfig(void)
     FreeConfig();
 
     if (ret != CONFIG_OK)
-        xf86Msg(X_ERROR, "Error parsing the built-in default configuration.\n");
+        LogMessageVerb(X_ERROR, 1, "Error parsing the built-in default configuration.\n");
 
     return ret == CONFIG_OK;
 }
@@ -253,12 +253,12 @@ listPossibleVideoDrivers(XF86MatchedDrivers *md)
         }
 
         if (iret < 0) {
-            xf86Msg(X_WARNING,
-                    "could not get frame buffer identifier from %s\n",
-                    xf86SolarisFbDev);
+            LogMessageVerb(X_WARNING, 1,
+                           "could not get frame buffer identifier from %s\n",
+                           xf86SolarisFbDev);
         }
         else {
-            xf86Msg(X_PROBED, "console driver: %s\n", visid.name);
+            LogMessageVerb(X_PROBED, 1, "console driver: %s\n", visid.name);
 
             /* Special case from before the general case was set */
             if (strcmp(visid.name, "NVDAnvda") == 0) {
@@ -392,7 +392,7 @@ autoConfigDevice(GDevPtr preconf_device)
         /* get all possible video drivers and count them */
         listPossibleVideoDrivers(&md);
         for (i = 0; i < md.nmatches; i++) {
-            xf86Msg(X_DEFAULT, "Matched %s as autoconfigured driver %d\n",
+            LogMessageVerb(X_DEFAULT, 1, "Matched %s as autoconfigured driver %d\n",
                     md.matches[i], i);
         }
 
@@ -441,7 +441,7 @@ autoConfigDevice(GDevPtr preconf_device)
         }
     }
 
-    xf86Msg(X_DEFAULT, "Assigned the driver to the xf86ConfigLayout\n");
+    LogMessageVerb(X_DEFAULT, 1, "Assigned the driver to the xf86ConfigLayout\n");
 
     return ptr;
 }

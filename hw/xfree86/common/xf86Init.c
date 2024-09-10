@@ -317,7 +317,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
             case CONFIG_OK:
                 break;
             case CONFIG_PARSE_ERROR:
-                xf86Msg(X_ERROR, "Error parsing the config file\n");
+                LogMessageVerb(X_ERROR, 1, "Error parsing the config file\n");
                 return;
             case CONFIG_NOFILE:
                 autoconfig = TRUE;
@@ -349,7 +349,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
 
         if (autoconfig) {
             if (!xf86AutoConfig()) {
-                xf86Msg(X_ERROR, "Auto configuration failed\n");
+                LogMessageVerb(X_ERROR, 1, "Auto configuration failed\n");
                 return;
             }
         }
@@ -372,7 +372,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
         configured_device = xf86ConfigLayout.screens->screen->device;
         if ((!configured_device) || (!configured_device->driver)) {
             if (!autoConfigDevice(configured_device)) {
-                xf86Msg(X_ERROR, "Automatic driver configuration failed\n");
+                LogMessageVerb(X_ERROR, 1, "Automatic driver configuration failed\n");
                 return;
             }
         }
@@ -402,7 +402,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
          */
 
         if (xf86NumDrivers == 0) {
-            xf86Msg(X_ERROR, "No drivers available.\n");
+            LogMessageVerb(X_ERROR, 1, "No drivers available.\n");
             return;
         }
 
@@ -500,8 +500,8 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
          */
 
         if (xf86NumScreens == 0) {
-            xf86Msg(X_ERROR,
-                    "Screen(s) found, but none have a usable configuration.\n");
+            LogMessageVerb(X_ERROR, 1,
+                           "Screen(s) found, but none have a usable configuration.\n");
             return;
         }
 
