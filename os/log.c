@@ -552,15 +552,10 @@ LogSyslogWrite(int verb, const char *buf, size_t len, Bool end_line) {
     if (inSignalContext) // syslog() ins't signal-safe yet :(
         return;          // shall we try syslog(2) syscall instead ?
 
-    fprintf(stderr, "LogSyslogWrite: verb=%d len=%d text=\"%.*s\"\n", verb, len, (int)len, buf);
-
     if (verb >= 0 && xorgSyslogVerbosity < verb)
         return;
 
-    if (end_line)
-        syslog(LOG_PID, "endline %.*s", (int)len, buf);
-    else
-        syslog(LOG_PID, "noend %.*s", (int)len, buf);
+    syslog(LOG_PID, "%.*s", (int)len, buf);
 }
 
 /* This function does the actual log message writes. It must be signal safe.
