@@ -25,6 +25,7 @@ is" without express or implied warranty.
 
 #include "dix/screenint_priv.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "screenint.h"
