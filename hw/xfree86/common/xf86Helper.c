@@ -1094,17 +1094,6 @@ xf86IDrvMsg(InputInfoPtr dev, MessageType type, const char *format, ...)
     va_end(ap);
 }
 
-/* Print non-driver messages with verbose level of 1 (default) */
-void
-xf86Msg(MessageType type, const char *format, ...)
-{
-    va_list ap;
-
-    va_start(ap, format);
-    LogVMessageVerb(type, 1, format, ap);
-    va_end(ap);
-}
-
 /* Just like ErrorF, but with the verbose level checked */
 void
 xf86ErrorFVerb(int verb, const char *format, ...)
