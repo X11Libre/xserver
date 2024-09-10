@@ -28,7 +28,7 @@ fbdevHWProbe(struct pci_device *pPci, char *device, char **namep)
 Bool
 fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, char *device)
 {
-    xf86Msg(X_ERROR, "fbdevhw is not available on this platform\n");
+    LogMessageVerb(X_ERROR, 1, "fbdevhw is not available on this platform\n");
     return FALSE;
 }
 
