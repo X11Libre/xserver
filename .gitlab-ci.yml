@@ -180,11 +180,11 @@ meson-noglamor:
         MESON_EXTRA_ARGS: >
           -Dglamor=false
 
-meson-nolibdecor:
+xwayland-nolibdecor:
     extends: meson
     variables:
         MESON_EXTRA_ARGS: >
-          -Dlibdecor=false
+          -Dlibdecor=false -Dxorg=false -Dxephyr=false -Dxvfb=false -Dxnest=false
 
 mingw-cross-build:
     extends: .common-build-and-test
