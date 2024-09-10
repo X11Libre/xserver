@@ -165,7 +165,7 @@ lnxAPMOpen(void)
     DebugF("APM: Opening device\n");
     if ((fd = open(APM_DEVICE, O_RDWR)) > -1) {
         if (access(APM_PROC, R_OK) || ((pfd = open(APM_PROC, O_RDONLY)) == -1)) {
-            xf86MsgVerb(X_WARNING, 3, "Cannot open APM (%s) (%s)\n",
+            LogMessageVerb(X_WARNING, 3, "Cannot open APM (%s) (%s)\n",
                         APM_PROC, strerror(errno));
             close(fd);
             return NULL;
@@ -175,7 +175,7 @@ lnxAPMOpen(void)
         xf86PMGetEventFromOs = lnxPMGetEventFromOs;
         xf86PMConfirmEventToOs = lnxPMConfirmEventToOs;
         APMihPtr = xf86AddGeneralHandler(fd, xf86HandlePMEvents, NULL);
-        xf86MsgVerb(X_INFO, 3, "Open APM successful\n");
+        LogMessageVerb(X_INFO, 3, "Open APM successful\n");
         return lnxCloseAPM;
     }
     return NULL;
