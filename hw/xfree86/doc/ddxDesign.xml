@@ -5632,17 +5632,6 @@ strongly encouraged to improve the consistency of driver behaviour.
 
       <blockquote><para>
 	  <programlisting>
-    xf86MsgVerb(MessageType type, int verb, const char *format, ...);
-	  </programlisting>
-	  <blockquote><para>
-      Like <function>xf86Msg()</function>, but with the verbosity level given
-      explicitly.
-	    </para>
-
-	  </blockquote></para></blockquote>
-
-      <blockquote><para>
-	  <programlisting>
     xf86DrvMsg(int scrnIndex, MessageType type, const char *format, ...);
 	  </programlisting>
 	  <blockquote><para>

@@ -825,11 +825,11 @@ xf86MatchPciInstances(const char *driverName, int vendorID,
                     devList[j]->screen == instances[i].screen) {
 
                     if (devBus)
-                        xf86MsgVerb(X_WARNING, 0,
-                                    "%s: More than one matching Device section for "
-                                    "instances\n\t(BusID: %s) found: %s\n",
-                                    driverName, devList[j]->busID,
-                                    devList[j]->identifier);
+                        LogMessageVerb(X_WARNING, 0,
+                                       "%s: More than one matching Device section for "
+                                       "instances\n\t(BusID: %s) found: %s\n",
+                                       driverName, devList[j]->busID,
+                                       devList[j]->identifier);
                     else
                         devBus = devList[j];
                 }
@@ -843,10 +843,10 @@ xf86MatchPciInstances(const char *driverName, int vendorID,
                     xf86Msg(X_PROBED, "Assigning device section with no busID"
                             " to primary device\n");
                     if (dev || devBus)
-                        xf86MsgVerb(X_WARNING, 0,
-                                    "%s: More than one matching Device section "
-                                    "found: %s\n", driverName,
-                                    devList[j]->identifier);
+                        LogMessageVerb(X_WARNING, 0,
+                                       "%s: More than one matching Device section "
+                                       "found: %s\n", driverName,
+                                       devList[j]->identifier);
                     else
                         dev = devList[j];
                 }
@@ -856,10 +856,10 @@ xf86MatchPciInstances(const char *driverName, int vendorID,
             dev = devBus;       /* busID preferred */
         if (!dev) {
             if (xf86CheckPciSlot(pPci) && pciDeviceHasBars(pPci)) {
-                xf86MsgVerb(X_WARNING, 0, "%s: No matching Device section "
-                            "for instance (BusID PCI:%u@%u:%u:%u) found\n",
-                            driverName, pPci->bus, pPci->domain, pPci->dev,
-                            pPci->func);
+                LogMessageVerb(X_WARNING, 0, "%s: No matching Device section "
+                               "for instance (BusID PCI:%u@%u:%u:%u) found\n",
+                               driverName, pPci->bus, pPci->domain, pPci->dev,
+                               pPci->func);
             }
         }
         else {
@@ -888,10 +888,10 @@ xf86MatchPciInstances(const char *driverName, int vendorID,
             if (c->token == -1) {
                 instances[i].claimed = FALSE;
                 numClaimedInstances--;
-                xf86MsgVerb(X_WARNING, 0, "%s: Chipset \"%s\" in Device "
-                            "section \"%s\" isn't valid for this driver\n",
-                            driverName, instances[i].dev->chipset,
-                            instances[i].dev->identifier);
+                LogMessageVerb(X_WARNING, 0, "%s: Chipset \"%s\" in Device "
+                               "section \"%s\" isn't valid for this driver\n",
+                               driverName, instances[i].dev->chipset,
+                               instances[i].dev->identifier);
             }
             else {
                 instances[i].chip = c->token;
@@ -908,10 +908,10 @@ xf86MatchPciInstances(const char *driverName, int vendorID,
                 else {
                     instances[i].claimed = FALSE;
                     numClaimedInstances--;
-                    xf86MsgVerb(X_WARNING, 0, "%s: Chipset \"%s\" in Device "
-                                "section \"%s\" isn't a valid PCI chipset\n",
-                                driverName, instances[i].dev->chipset,
-                                instances[i].dev->identifier);
+                    LogMessageVerb(X_WARNING, 0, "%s: Chipset \"%s\" in Device "
+                                   "section \"%s\" isn't a valid PCI chipset\n",
+                                   driverName, instances[i].dev->chipset,
+                                   instances[i].dev->identifier);
                 }
             }
         }
@@ -923,10 +923,10 @@ xf86MatchPciInstances(const char *driverName, int vendorID,
             if (id->numChipset == -1) {
                 instances[i].claimed = FALSE;
                 numClaimedInstances--;
-                xf86MsgVerb(X_WARNING, 0, "%s: ChipID 0x%04X in Device "
-                            "section \"%s\" isn't valid for this driver\n",
-                            driverName, instances[i].dev->chipID,
-                            instances[i].dev->identifier);
+                LogMessageVerb(X_WARNING, 0, "%s: ChipID 0x%04X in Device "
+                               "section \"%s\" isn't valid for this driver\n",
+                               driverName, instances[i].dev->chipID,
+                               instances[i].dev->identifier);
             }
             else {
                 instances[i].chip = id->numChipset;

@@ -211,7 +211,7 @@ stack_trace(xf86Int10InfoPtr pInt)
     if (stack >= tail)
         return;
 
-    xf86MsgVerb(X_INFO, 3, "stack at 0x%8.8lx:\n", stack);
+    LogMessageVerb(X_INFO, 3, "stack at 0x%8.8lx:\n", stack);
     for (; stack < tail; stack++) {
         xf86ErrorFVerb(3, " %2.2x", MEM_RB(pInt, stack));
         i = (i + 1) % 0x10;

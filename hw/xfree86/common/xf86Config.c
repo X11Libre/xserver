@@ -2344,7 +2344,7 @@ xf86HandleConfigFile(Bool autoconfig)
         dirname = xf86openConfigDirFiles(dirsearch, xf86ConfigDir, PROJECTROOT);
         filename = xf86openConfigFile(filesearch, xf86ConfigFile, PROJECTROOT);
         if (filename) {
-            xf86MsgVerb(filefrom, 0, "Using config file: \"%s\"\n", filename);
+            LogMessageVerb(filefrom, 0, "Using config file: \"%s\"\n", filename);
             xf86ConfigFile = XNFstrdup(filename);
         }
         else {
@@ -2353,7 +2353,7 @@ xf86HandleConfigFile(Bool autoconfig)
                         xf86ConfigFile);
         }
         if (dirname) {
-            xf86MsgVerb(dirfrom, 0, "Using config directory: \"%s\"\n",
+            LogMessageVerb(dirfrom, 0, "Using config directory: \"%s\"\n",
                         dirname);
             xf86ConfigDir = XNFstrdup(dirname);
         }
@@ -2364,7 +2364,7 @@ xf86HandleConfigFile(Bool autoconfig)
                         xf86ConfigDir);
         }
         if (sysdirname)
-            xf86MsgVerb(X_DEFAULT, 0, "Using system config directory \"%s\"\n",
+            LogMessageVerb(X_DEFAULT, 0, "Using system config directory \"%s\"\n",
                         sysdirname);
         if (!filename && !dirname && !sysdirname)
             return CONFIG_NOFILE;
