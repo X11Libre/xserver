@@ -271,7 +271,6 @@ timingsafe_memcmp(const void *b1, const void *b2, size_t len);
 
 /* Logging. */
 typedef enum _LogParameter {
-    XLOG_FLUSH,
     XLOG_SYNC,
     XLOG_VERBOSITY,
     XLOG_FILE_VERBOSITY
