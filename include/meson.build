@@ -329,15 +329,6 @@ conf_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
 conf_data.set('XSERVER_PLATFORM_BUS', build_udev_kms ? '1' : false)
 conf_data.set('XSERVER_SCREEN_VRR', '1')
 
-configure_file(output : 'dix-config.h',
-               configuration : conf_data)
-
-configure_file(output : 'xorg-server.h',
-               input : 'xorg-server.h.meson.in',
-               configuration : conf_data,
-               install: build_xorg,
-               install_dir: xorgsdkdir)
-
 version_data = configuration_data()
 version_data.set('VENDOR_RELEASE', '@0@'.format(release))
 version_data.set_quoted('VENDOR_NAME', get_option('vendor_name'))

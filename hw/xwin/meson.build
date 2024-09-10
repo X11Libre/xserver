@@ -105,7 +105,7 @@ srcs_windows += [
 
 rsrc = windows.compile_resources(
      'XWin.rc',
-     include_directories: include_directories('../../include/'),
+     include_directories: include_directories('../../include/', '../..'),
      depend_files: ['XWin.exe.manifest', 'X.ico'],
 )
 srcs_windows += rsrc
