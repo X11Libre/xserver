@@ -66,4 +66,6 @@ extern int xorgLogVerbosity;
 extern int xorgLogFileVerbosity;
 extern Bool xorgLogSync;
 
+extern int xorgSyslogVerbosity;
+
 #endif /* __XORG_OS_LOGGING_H */

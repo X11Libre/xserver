@@ -82,6 +82,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdarg.h>
 #include <stdlib.h>             /* for malloc() */
 #include <sys/stat.h>
+#include <syslog.h>
 #include <time.h>
 #include <X11/Xfuncproto.h>
 #include <X11/Xos.h>
@@ -114,11 +115,13 @@ void (*OsVendorVErrorFProc) (const char *, va_list args) = NULL;
 /* Default logging parameters. */
 #define DEFAULT_LOG_VERBOSITY		0
 #define DEFAULT_LOG_FILE_VERBOSITY	3
+#define DEFAULT_SYSLOG_VERBOSITY	0
 
 static int logFileFd = -1;
 Bool xorgLogSync = FALSE;
 int xorgLogVerbosity = DEFAULT_LOG_VERBOSITY;
 int xorgLogFileVerbosity = DEFAULT_LOG_FILE_VERBOSITY;
+int xorgSyslogVerbosity = DEFAULT_SYSLOG_VERBOSITY;
 
 /* Buffer to information logged before the log file is opened. */
 static char *saveBuffer = NULL;
@@ -544,6 +547,22 @@ pnprintf(char *string, int size, const char *f, ...)
     return rc;
 }
 
+static void
+LogSyslogWrite(int verb, const char *buf, size_t len, Bool end_line) {
+    if (inSignalContext) // syslog() ins't signal-safe yet :(
+        return;          // shall we try syslog(2) syscall instead ?
+
+    fprintf(stderr, "LogSyslogWrite: verb=%d len=%d text=\"%.*s\"\n", verb, len, (int)len, buf);
+
+    if (verb >= 0 && xorgSyslogVerbosity < verb)
+        return;
+
+    if (end_line)
+        syslog(LOG_PID, "endline %.*s", (int)len, buf);
+    else
+        syslog(LOG_PID, "noend %.*s", (int)len, buf);
+}
+
 /* This function does the actual log message writes. It must be signal safe.
  * When attempting to call non-signal-safe functions, guard them with a check
  * of the inSignalContext global variable. */
@@ -552,6 +571,8 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 {
     static Bool newline = TRUE;
     int ret;
+
+    LogSyslogWrite(verb, buf, len, end_line);
 
     if (verb < 0 || xorgLogVerbosity >= verb)
         ret = write(2, buf, len);
