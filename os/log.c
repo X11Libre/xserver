@@ -121,7 +121,6 @@ void (*OsVendorVErrorFProc) (const char *, va_list args) = NULL;
 #endif
 
 static int logFileFd = -1;
-static Bool logFlush = FALSE;
 static Bool logSync = FALSE;
 static int logVerbosity = DEFAULT_LOG_VERBOSITY;
 static int logFileVerbosity = DEFAULT_LOG_FILE_VERBOSITY;
@@ -344,9 +343,6 @@ Bool
 LogSetParameter(LogParameter param, int value)
 {
     switch (param) {
-    case XLOG_FLUSH:
-        logFlush = value ? TRUE : FALSE;
-        return TRUE;
     case XLOG_SYNC:
         logSync = value ? TRUE : FALSE;
         return TRUE;
@@ -607,7 +603,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
         if (inSignalContext && logFileFd >= 0) {
             ret = write(logFileFd, buf, len);
 #ifndef WIN32
-            if (logFlush && logSync)
+            if (logSync)
                 fsync(logFileFd);
 #endif
         }
@@ -627,12 +623,10 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
             }
             newline = end_line;
             write(logFileFd, buf, len);
-            if (logFlush) {
 #ifndef WIN32
-                if (logSync)
-                    fsync(logFileFd);
+            if (logSync)
+                fsync(logFileFd);
 #endif
-            }
         }
         else if (!inSignalContext && needBuffer) {
             if (len > bufferUnused) {
