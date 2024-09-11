@@ -17,4 +17,19 @@ void UseMsg(void);
 void ProcessCommandLine(int argc, char * argv[]);
 void CheckUserParameters(int argc, char **argv, char **envp);
 
+/*
+ * @brief check for and parse an counting-flag or value-flag option
+ *
+ * Parses an option that may either be used for setting an integer value or
+ * given one or multiple times (without argument) to increase an value
+ *
+ * @param argc total number of elements in argv
+ * @param argv array of pointers to cmdline argument strings
+ * @param idx pointer to current index in argv -- eventually will be modified
+ * @param name the command line argument name
+ * @param value pointer to the field holding the setting value
+ * @return non-zero if the flag was found and parsed
+ */
+int ProcessCmdLineMultiInt(int argc, char *argv[], int *idx, const char* name, int *value);
+
 #endif /* _XSERVER_OS_CMELINE_H */
