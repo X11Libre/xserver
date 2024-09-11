@@ -50,9 +50,7 @@ SOFTWARE.
 #include "misc.h"
 #include <stdarg.h>
 #include <stdint.h>
-#if defined(HAVE_REALLOCARRAY)
-#include <stdlib.h>       /* for reallocarray */
-#endif
+#include <stdlib.h>
 #include <string.h>
 #ifdef MONOTONIC_CLOCK
 #include <time.h>
