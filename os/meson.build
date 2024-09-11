@@ -5,6 +5,7 @@ srcs_os = [
     'auth.c',
     'backtrace.c',
     'client.c',
+    'cmdline.c',
     'connection.c',
     'fmt.c',
     'inputthread.c',
