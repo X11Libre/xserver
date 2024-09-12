@@ -325,7 +325,7 @@ LogClose(enum ExitCode error)
 {
     if (logFileFd != -1) {
         int msgtype = (error == EXIT_NO_ERROR) ? X_INFO : X_ERROR;
-        LogMessageVerbSigSafe(msgtype, -1,
+        LogMessageVerb(msgtype, -1,
                 "Server terminated %s (%d). Closing log file.\n",
                 (error == EXIT_NO_ERROR) ? "successfully" : "with error",
                 error);
@@ -702,7 +702,7 @@ LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
     writeLog(verb, buf, len);
 }
 
-/* Log message with verbosity level specified. */
+/* Log message with verbosity level specified. -- signal safe */
 void
 LogMessageVerb(MessageType type, int verb, const char *format, ...)
 {
@@ -721,16 +721,6 @@ LogMessage(MessageType type, const char *format, ...)
 
     va_start(ap, format);
     LogVMessageVerb(type, 1, format, ap);
-    va_end(ap);
-}
-
-/* Log a message using only signal safe functions. */
-void
-LogMessageVerbSigSafe(MessageType type, int verb, const char *format, ...)
-{
-    va_list ap;
-    va_start(ap, format);
-    LogVMessageVerb(type, verb, format, ap);
     va_end(ap);
 }
 

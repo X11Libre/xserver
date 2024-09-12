@@ -120,10 +120,8 @@ OsSigHandler(int signo)
     if (signo == SIGNAL_FOR_RTLD_ERROR) {
         const char *dlerr = dlerror();
 
-        if (dlerr) {
-            LogMessageVerbSigSafe(X_ERROR, 1,
-                                  "Dynamic loader error: %s\n", dlerr);
-        }
+        if (dlerr)
+            LogMessageVerb(X_ERROR, 1, "Dynamic loader error: %s\n", dlerr);
     }
 #endif                          /* RTLD_DI_SETSIGNAL */
 
