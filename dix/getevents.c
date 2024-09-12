@@ -1965,8 +1965,8 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
 
     ti = TouchFindByDDXID(dev, ddx_touchid, (type == XI_TouchBegin));
     if (!ti) {
-        ErrorFSigSafe("[dix] %s: unable to %s touch point %u\n", dev->name,
-                      type == XI_TouchBegin ? "begin" : "find", ddx_touchid);
+        ErrorF("[dix] %s: unable to %s touch point %u\n", dev->name,
+               type == XI_TouchBegin ? "begin" : "find", ddx_touchid);
         return 0;
     }
     client_id = ti->client_id;
@@ -1999,16 +1999,14 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
         if (!mask_in ||
             !valuator_mask_isset(mask_in, 0) ||
             !valuator_mask_isset(mask_in, 1)) {
-            ErrorFSigSafe("%s: Attempted to start touch without x/y "
-                          "(driver bug)\n", dev->name);
+            ErrorF("%s: Attempted to start touch without x/y (driver bug)\n", dev->name);
             return 0;
         }
         break;
     case XI_TouchUpdate:
         event->type = ET_TouchUpdate;
         if (!mask_in || valuator_mask_num_valuators(mask_in) <= 0) {
-            ErrorFSigSafe("%s: TouchUpdate with no valuators? Driver bug\n",
-                          dev->name);
+            ErrorF("%s: TouchUpdate with no valuators? Driver bug\n", dev->name);
         }
         break;
     case XI_TouchEnd:
