@@ -370,9 +370,6 @@ _X_ATTRIBUTE_PRINTF(1, 0);
 extern _X_EXPORT void
 ErrorF(const char *f, ...)
 _X_ATTRIBUTE_PRINTF(1, 2);
-extern _X_EXPORT void
-VErrorFSigSafe(const char *f, va_list args)
-_X_ATTRIBUTE_PRINTF(1, 0);
 void
 LogPrintMarkers(void);
 
@@ -389,5 +386,6 @@ typedef _sigset_t sigset_t;
 #define LogVMessageVerbSigSafe(...) LogVMessageVerb(__VA_ARGS__)
 #define LogMessageVerbSigSafe(...) LogMessageVerb(__VA_ARGS__)
 #define ErrorFSigSafe(...) ErrorF(__VA_ARGS__)
+#define VErrorFSigSafe(...) VErrorF(__VA_ARGS__)
 
 #endif                          /* OS_H */
