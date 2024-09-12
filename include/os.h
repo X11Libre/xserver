@@ -348,9 +348,6 @@ _X_ATTRIBUTE_PRINTF(2, 3);
 extern _X_EXPORT void
 LogMessageVerbSigSafe(MessageType type, int verb, const char *format, ...)
 _X_ATTRIBUTE_PRINTF(3, 4);
-extern _X_EXPORT void
-LogVMessageVerbSigSafe(MessageType type, int verb, const char *format, va_list args)
-_X_ATTRIBUTE_PRINTF(3, 0);
 
 void
 LogVHdrMessageVerb(MessageType type, int verb,
@@ -393,5 +390,8 @@ xorg_backtrace(void);
 #if defined(WIN32)
 typedef _sigset_t sigset_t;
 #endif
+
+/* should not be used anymore, just for backwards compat with drivers */
+#define LogVMessageVerbSigSafe(...) LogVMessageVerb(__VA_ARGS__)
 
 #endif                          /* OS_H */
