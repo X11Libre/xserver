@@ -203,59 +203,59 @@ static void logging_format(void)
     } while (0)
 
     /* boring test message */
-    LogMessageVerbSigSafe(X_ERROR, 1, "test message\n");
+    LogMessageVerb(X_ERROR, 1, "test message\n");
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) test message\n") == 0);
 
     /* long buf is truncated to "....en\n" */
-    LogMessageVerbSigSafe(X_ERROR, 1, buf);
+    LogMessageVerb(X_ERROR, 1, buf);
     read_log_msg(logmsg);
     assert(strcmp(&logmsg[strlen(logmsg) - 3], "en\n") == 0);
 
     /* same thing, this time as string substitution */
-    LogMessageVerbSigSafe(X_ERROR, 1, "%s", buf);
+    LogMessageVerb(X_ERROR, 1, "%s", buf);
     read_log_msg(logmsg);
     assert(strcmp(&logmsg[strlen(logmsg) - 3], "en\n") == 0);
 
     /* strings containing placeholders should just work */
-    LogMessageVerbSigSafe(X_ERROR, 1, "%s\n", str);
+    LogMessageVerb(X_ERROR, 1, "%s\n", str);
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) %s %d %u %% %p %i\n") == 0);
 
     /* literal % */
-    LogMessageVerbSigSafe(X_ERROR, 1, "test %%\n");
+    LogMessageVerb(X_ERROR, 1, "test %%\n");
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) test %\n") == 0);
 
     /* character */
-    LogMessageVerbSigSafe(X_ERROR, 1, "test %c\n", 'a');
+    LogMessageVerb(X_ERROR, 1, "test %c\n", 'a');
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) test a\n") == 0);
 
     /* something unsupported % */
-    LogMessageVerbSigSafe(X_ERROR, 1, "test %Q\n");
+    LogMessageVerb(X_ERROR, 1, "test %Q\n");
     read_log_msg(logmsg);
     assert(strstr(logmsg, "BUG") != NULL);
-    LogMessageVerbSigSafe(X_ERROR, 1, "\n");
+    LogMessageVerb(X_ERROR, 1, "\n");
     fseek(f, 0, SEEK_END);
 
     /* string substitution */
-    LogMessageVerbSigSafe(X_ERROR, 1, "%s\n", "substituted string");
+    LogMessageVerb(X_ERROR, 1, "%s\n", "substituted string");
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) substituted string\n") == 0);
 
     /* Invalid format */
-    LogMessageVerbSigSafe(X_ERROR, 1, "%4", 4);
+    LogMessageVerb(X_ERROR, 1, "%4", 4);
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) ") == 0);
-    LogMessageVerbSigSafe(X_ERROR, 1, "\n");
+    LogMessageVerb(X_ERROR, 1, "\n");
     fseek(f, 0, SEEK_END);
 
     /* %hld is bogus */
-    LogMessageVerbSigSafe(X_ERROR, 1, "%hld\n", 4);
+    LogMessageVerb(X_ERROR, 1, "%hld\n", 4);
     read_log_msg(logmsg);
     assert(strstr(logmsg, "BUG") != NULL);
-    LogMessageVerbSigSafe(X_ERROR, 1, "\n");
+    LogMessageVerb(X_ERROR, 1, "\n");
     fseek(f, 0, SEEK_END);
 
     /* number substitution */
@@ -263,12 +263,12 @@ static void logging_format(void)
     do {
         char expected[30];
         sprintf(expected, "(EE) %u\n", ui);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%u\n", ui);
+        LogMessageVerb(X_ERROR, 1, "%u\n", ui);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
         sprintf(expected, "(EE) %x\n", ui);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%x\n", ui);
+        LogMessageVerb(X_ERROR, 1, "%x\n", ui);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
@@ -282,21 +282,21 @@ static void logging_format(void)
     do {
         char expected[30];
         sprintf(expected, "(EE) %lu\n", lui);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%lu\n", lui);
+        LogMessageVerb(X_ERROR, 1, "%lu\n", lui);
         read_log_msg(logmsg);
 
         sprintf(expected, "(EE) %lld\n", (unsigned long long)ui);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%lld\n", (unsigned long long)ui);
+        LogMessageVerb(X_ERROR, 1, "%lld\n", (unsigned long long)ui);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
         sprintf(expected, "(EE) %lx\n", lui);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%lx\n", lui);
+        LogMessageVerb(X_ERROR, 1, "%lx\n", lui);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
         sprintf(expected, "(EE) %llx\n", (unsigned long long)ui);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%llx\n", (unsigned long long)ui);
+        LogMessageVerb(X_ERROR, 1, "%llx\n", (unsigned long long)ui);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
@@ -311,12 +311,12 @@ static void logging_format(void)
     do {
         char expected[30];
         sprintf(expected, "(EE) %d\n", i);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%d\n", i);
+        LogMessageVerb(X_ERROR, 1, "%d\n", i);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
         sprintf(expected, "(EE) %d\n", i | INT_MIN);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%d\n", i | INT_MIN);
+        LogMessageVerb(X_ERROR, 1, "%d\n", i | INT_MIN);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
@@ -330,22 +330,22 @@ static void logging_format(void)
     do {
         char expected[30];
         sprintf(expected, "(EE) %ld\n", li);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%ld\n", li);
+        LogMessageVerb(X_ERROR, 1, "%ld\n", li);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
         sprintf(expected, "(EE) %ld\n", li | LONG_MIN);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%ld\n", li | LONG_MIN);
+        LogMessageVerb(X_ERROR, 1, "%ld\n", li | LONG_MIN);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
         sprintf(expected, "(EE) %lld\n", (long long)li);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%lld\n", (long long)li);
+        LogMessageVerb(X_ERROR, 1, "%lld\n", (long long)li);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
         sprintf(expected, "(EE) %lld\n", (long long)(li | LONG_MIN));
-        LogMessageVerbSigSafe(X_ERROR, 1, "%lld\n", (long long)(li | LONG_MIN));
+        LogMessageVerb(X_ERROR, 1, "%lld\n", (long long)(li | LONG_MIN));
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
@@ -358,7 +358,7 @@ static void logging_format(void)
 
     /* pointer substitution */
     /* we print a null-pointer differently to printf */
-    LogMessageVerbSigSafe(X_ERROR, 1, "%p\n", NULL);
+    LogMessageVerb(X_ERROR, 1, "%p\n", NULL);
     read_log_msg(logmsg);
     assert(strcmp(logmsg, "(EE) 0x0\n") == 0);
 
@@ -370,7 +370,7 @@ static void logging_format(void)
 #else
         sprintf(expected, "(EE) %p\n", (void*)ptr);
 #endif
-        LogMessageVerbSigSafe(X_ERROR, 1, "%p\n", (void*)ptr);
+        LogMessageVerb(X_ERROR, 1, "%p\n", (void*)ptr);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
         ptr <<= 1;
@@ -381,20 +381,20 @@ static void logging_format(void)
         double d = float_tests[i];
         char expected[30];
         sprintf(expected, "(EE) %.2f\n", d);
-        LogMessageVerbSigSafe(X_ERROR, 1, "%f\n", d);
+        LogMessageVerb(X_ERROR, 1, "%f\n", d);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
         /* test for length modifiers, we just ignore them atm */
-        LogMessageVerbSigSafe(X_ERROR, 1, "%.3f\n", d);
+        LogMessageVerb(X_ERROR, 1, "%.3f\n", d);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
-        LogMessageVerbSigSafe(X_ERROR, 1, "%3f\n", d);
+        LogMessageVerb(X_ERROR, 1, "%3f\n", d);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
 
-        LogMessageVerbSigSafe(X_ERROR, 1, "%.0f\n", d);
+        LogMessageVerb(X_ERROR, 1, "%.0f\n", d);
         read_log_msg(logmsg);
         assert(strcmp(logmsg, expected) == 0);
     }

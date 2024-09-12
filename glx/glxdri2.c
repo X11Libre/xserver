@@ -805,7 +805,7 @@ glxDRILeaveVT(ScrnInfoPtr scrn)
     __GLXDRIscreen *screen = (__GLXDRIscreen *)
         glxGetScreen(xf86ScrnToScreen(scrn));
 
-    LogMessageVerbSigSafe(X_INFO, -1, "AIGLX: Suspending AIGLX clients for VT switch\n");
+    LogMessageVerb(X_INFO, -1, "AIGLX: Suspending AIGLX clients for VT switch\n");
 
     glxSuspendClients();
 
