@@ -225,22 +225,22 @@ mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e)
              */
             miEventQueue.dropped++;
             if (miEventQueue.dropped == 1) {
-                ErrorFSigSafe("[mi] EQ overflowing.  Additional events will be "
-                              "discarded until existing events are processed.\n");
+                ErrorF("[mi] EQ overflowing.  Additional events will be "
+                       "discarded until existing events are processed.\n");
                 xorg_backtrace();
-                ErrorFSigSafe("[mi] These backtraces from mieqEnqueue may point to "
-                              "a culprit higher up the stack.\n");
-                ErrorFSigSafe("[mi] mieq is *NOT* the cause.  It is a victim.\n");
+                ErrorF("[mi] These backtraces from mieqEnqueue may point to "
+                       "a culprit higher up the stack.\n");
+                ErrorF("[mi] mieq is *NOT* the cause.  It is a victim.\n");
             }
             else if (miEventQueue.dropped % QUEUE_DROP_BACKTRACE_FREQUENCY == 0 &&
                      miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY <=
                      QUEUE_DROP_BACKTRACE_MAX) {
-                ErrorFSigSafe("[mi] EQ overflow continuing.  %zu events have been "
-                              "dropped.\n", miEventQueue.dropped);
+                ErrorF("[mi] EQ overflow continuing.  %zu events have been "
+                       "dropped.\n", miEventQueue.dropped);
                 if (miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY ==
                     QUEUE_DROP_BACKTRACE_MAX) {
-                    ErrorFSigSafe("[mi] No further overflow reports will be "
-                                  "reported until the clog is cleared.\n");
+                    ErrorF("[mi] No further overflow reports will be "
+                           "reported until the clog is cleared.\n");
                 }
                 xorg_backtrace();
             }

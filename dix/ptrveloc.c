@@ -78,7 +78,7 @@ DeletePredictableAccelerationProperties(DeviceIntPtr,
 /*#define PTRACCEL_DEBUGGING*/
 
 #ifdef PTRACCEL_DEBUGGING
-#define DebugAccelF(...) ErrorFSigSafe("dix/ptraccel: " __VA_ARGS__)
+#define DebugAccelF(...) ErrorF("dix/ptraccel: " __VA_ARGS__)
 #else
 #define DebugAccelF(...)        /* */
 #endif
