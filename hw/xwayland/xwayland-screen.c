@@ -89,7 +89,7 @@ xwl_give_up(const char *f, ...)
     va_list args;
 
     va_start(args, f);
-    VErrorFSigSafe(f, args);
+    VErrorF(f, args);
     va_end(args);
 
     CloseWellKnownConnections();
