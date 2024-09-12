@@ -126,9 +126,9 @@ notify_sync_finished(ClientPtr ptr, void *closure)
         already shut down and the descriptor is closed.
     */
     if (write(fd, &response, response.header.length) != response.header.length) {
-        LogMessageVerbSigSafe(X_ERROR, 0,
-                              "inputtest: Failed to write sync response: %s\n",
-                              strerror(errno));
+        LogMessageVerb(X_ERROR, 0,
+                       "inputtest: Failed to write sync response: %s\n",
+                       strerror(errno));
     }
     input_unlock();
     return TRUE;
