@@ -20,13 +20,15 @@
 #include "extnsionst.h"
 #include "servermd.h"
 #include "xvmcext.h"
-#include "protocol-versions.h"
 
 #ifdef HAS_XVMCSHM
 #include <sys/ipc.h>
 #include <sys/types.h>
 #include <sys/shm.h>
 #endif                          /* HAS_XVMCSHM */
+
+#define SERVER_XVMC_MAJOR_VERSION               1
+#define SERVER_XVMC_MINOR_VERSION               1
 
 #define DR_CLIENT_DRIVER_NAME_SIZE 48
 #define DR_BUSID_SIZE 48
