@@ -84,8 +84,6 @@ typedef struct {
     XvMCDestroySubpictureProcPtr DestroySubpicture;
 } XvMCAdaptorRec, *XvMCAdaptorPtr;
 
-extern int (*XvMCScreenInitProc)(ScreenPtr, int, XvMCAdaptorPtr);
-
 extern _X_EXPORT int XvMCScreenInit(ScreenPtr pScreen,
                                     int num, XvMCAdaptorPtr adapt);
 
