@@ -44,6 +44,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "os/osdep.h"
 
 #include "compint.h"
 #include "compositeext.h"

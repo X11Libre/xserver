@@ -390,8 +390,6 @@ extern _X_EXPORT void SwapShorts(short *list, unsigned long count);
 
 extern _X_EXPORT void MakePredeclaredAtoms(void);
 
-extern _X_EXPORT int Ones(unsigned long /*mask */ );
-
 typedef struct _xPoint *DDXPointPtr;
 typedef struct pixman_box16 *BoxPtr;
 typedef struct _xEvent *xEventPtr;

@@ -60,6 +60,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
+#include "os/osdep.h"
 
 #include "scrnintstr.h"
 #include "os.h"

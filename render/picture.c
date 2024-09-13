@@ -25,6 +25,7 @@
 #include <dix-config.h>
 
 #include "dix/colormap_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "scrnintstr.h"

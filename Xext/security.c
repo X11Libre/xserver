@@ -35,6 +35,7 @@ in this Software without prior written authorization from The Open Group.
 #include "miext/extinit_priv.h"
 #include "os/audit.h"
 #include "os/auth.h"
+#include "os/osdep.h"
 
 #include "scrnintstr.h"
 #include "inputstr.h"

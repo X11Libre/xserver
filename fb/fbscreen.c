@@ -22,6 +22,8 @@
 
 #include <dix-config.h>
 
+#include "os/osdep.h"
+
 #include "fb.h"
 
 Bool
