@@ -880,7 +880,7 @@ FatalError(const char *f, ...)
         va_end(apple_args);
     }
 #endif
-    VErrorF(f, args);
+    LogVMessageVerb(X_NONE, -1, f, args);
     va_end(args);
     ErrorF("\n");
     if (!beenhere)
@@ -895,18 +895,12 @@ FatalError(const char *f, ...)
  /*NOTREACHED*/}
 
 void
-VErrorF(const char *f, va_list args)
-{
-    LogVMessageVerb(X_NONE, -1, f, args);
-}
-
-void
 ErrorF(const char *f, ...)
 {
     va_list args;
 
     va_start(args, f);
-    VErrorF(f, args);
+    LogVMessageVerb(X_NONE, -1, f, args);
     va_end(args);
 }
 

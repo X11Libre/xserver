@@ -85,6 +85,6 @@ printk(const char *fmt, ...)
     va_list argptr;
 
     va_start(argptr, fmt);
-    VErrorF(fmt, argptr);
+    LogVMessageVerb(X_NONE, -1, fmt, argptr);
     va_end(argptr);
 }

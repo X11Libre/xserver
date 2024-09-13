@@ -2027,12 +2027,18 @@ static uint32_t wrap_time_in_millis(void)
     return GetTimeInMillis();
 }
 
+static void verrorf(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
+static void verrorf(const char *f, va_list args)
+{
+    LogVMessageVerb(X_NONE, -1, f, args);
+}
+
 static const xfont2_client_funcs_rec xfont2_client_funcs = {
     .version = XFONT2_CLIENT_FUNCS_VERSION,
     .client_auth_generation = _client_auth_generation,
     .client_signal = ClientSignal,
     .delete_font_client_id = delete_font_client_id,
-    .verrorf = VErrorF,
+    .verrorf = verrorf,
     .find_old_font = find_old_font,
     .get_client_resolutions = get_client_resolutions,
     .get_default_point_size = get_default_point_size,
