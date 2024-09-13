@@ -215,4 +215,6 @@ extern Bool CoreDump;
 extern Bool NoListenAll;
 extern Bool AllowByteSwappedClients;
 
+int Ones(unsigned long mask);
+
 #endif                          /* _OSDEP_H_ */

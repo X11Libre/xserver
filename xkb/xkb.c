@@ -35,6 +35,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XKMformat.h>
 
 #include "dix/dix_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "inputstr.h"
