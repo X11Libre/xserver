@@ -254,26 +254,104 @@ xf86-driver-build-test:
     stage: drivers
     parallel:
         matrix:
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-elographics
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-evdev
               SHA: xf86-input-evdev-2.11.0
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-joystick
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-libinput
               SHA: xf86-input-libinput-1.5.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-mouse
               SHA: 9cc5531bf1713ebdd06a88b7e05ea4bedea3d61c # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-synaptics
               SHA: xf86-input-synaptics-1.10.0
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-vmmouse
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-void
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-amdgpu
               SHA: 2cb59a92de4a19909682a35e4f31f3c02de2899f # no release yet
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-apm
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ark
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-armsoc
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ast
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati
               SHA: c610c037369500089baddd86aa3cf8046f3dc48b # no release yet
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-chips
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-cirrus
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-dummy
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-fbdev
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-i128
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-i740
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-intel
               SHA: ce811e78882d9f31636351dfe65351f4ded52c74 # no release yet
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mach64
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mga
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-neomagic
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nouveau
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nv
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-qxl
               SHA: e0bd955e18db0e53f8dce72b827ee4beb4afc79d # no release yet
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-r128
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-rendition
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-s3virge
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-savage
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-siliconmotion
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sis
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sisusb
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg14
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg3
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg6
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sunffb
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sunleo
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suntcx
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-tdfx
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-trident
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-v4l
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vbox
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa
               SHA: ec03b47ee9566b85bb39359000f3c0aed047c1a5 # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vmware
               SHA: 92cc4534146dd84c0d843759cdb30f75abddddd6 # no release yet
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-voodoo
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-xgi
+              SHA: master
     script:
         # built xserver is taken from meson-dist job
         - export PKG_CONFIG_PATH=$(pwd)/xserver-tarball/install/lib/x86_64-linux-gnu/pkgconfig
