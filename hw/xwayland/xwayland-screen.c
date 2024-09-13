@@ -91,7 +91,7 @@ xwl_give_up(const char *f, ...)
     va_list args;
 
     va_start(args, f);
-    VErrorF(f, args);
+    LogVMessageVerb(X_NONE, -1, f, args);
     va_end(args);
 
     CloseWellKnownConnections();

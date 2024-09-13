@@ -145,6 +145,4 @@ xf86freeExtensions(XF86ConfExtensionsPtr ptr);
 /* Externally provided functions */
 void
 ErrorF(const char *f, ...);
-void
-VErrorF(const char *f, va_list args);
 #endif
