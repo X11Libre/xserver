@@ -65,6 +65,7 @@ apt-get install -y \
 	libx11-xcb-dev \
 	libxau-dev \
 	libxaw7-dev \
+	libxcb-dri2-0-dev \
 	libxcb-glx0-dev \
 	libxcb-icccm4-dev \
 	libxcb-image0-dev \
