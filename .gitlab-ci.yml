@@ -21,7 +21,7 @@ variables:
     REPO_URL_XORGPROTO:   'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git'
     XORG_DEBIAN_VERSION:  'bullseye-slim'
     XORG_DEBIAN_EXEC:     'env FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT} bash .gitlab-ci/debian-install.sh'
-    XORG_DEBIAN_TAG:      '2025-02-12-xts'
+    XORG_DEBIAN_TAG:      '2025-02-18-drivers'
     XORG_FREEBSD_VERSION: '14.2'
     XORG_FREEBSD_EXEC:    ''
     XORG_FREEBSD_TAG:     '2025-02-18-vm-image'
@@ -251,26 +251,104 @@ xf86-driver-build-test:
     stage: drivers
     parallel:
         matrix:
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-elographics
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-evdev
               SHA: xf86-input-evdev-2.10.6
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-joystick
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-libinput
               SHA: xf86-input-libinput-1.4.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-mouse
               SHA: xf86-input-mouse-1.9.5
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-synaptics
               SHA: xf86-input-synaptics-1.9.2
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-vmmouse
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-void
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-amdgpu
               SHA: xf86-video-amdgpu-23.0.0
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-apm
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ark
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-armsoc
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ast
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati
               SHA: xf86-video-ati-22.0.0
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-chips
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-cirrus
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-dummy
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-fbdev
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-i128
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-i740
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-intel
               SHA: e6a4c4740c15ace9dd79dc7c18955f2eb413a6a5 # no release yet
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mach64
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mga
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-neomagic
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nouveau
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nv
+              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-qxl
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-r128
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-rendition
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-s3virge
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-savage
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-siliconmotion
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sis
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sisusb
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg14
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg3
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg6
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sunffb
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sunleo
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suntcx
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-tdfx
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-trident
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-v4l
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vbox
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa
               SHA: xf86-video-vesa-2.6.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vmware
               SHA: xf86-video-vmware-13.4.0
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-voodoo
+              SHA: master
+            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-xgi
+              SHA: master
     script:
         # Install the server first
         - .gitlab-ci/meson-build.sh --skip-test --run-install
