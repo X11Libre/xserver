@@ -52,6 +52,7 @@ SOFTWARE.
 #include <X11/Xproto.h>
 
 #include "dix/gc_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "resource.h"

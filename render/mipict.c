@@ -23,6 +23,8 @@
 
 #include <dix-config.h>
 
+#include "os/osdep.h"
+
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"

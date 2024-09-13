@@ -34,6 +34,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "inputstr.h"
