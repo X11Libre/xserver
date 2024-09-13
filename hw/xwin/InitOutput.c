@@ -529,9 +529,6 @@ OsVendorInit(void)
 
     winFixupPaths();
 
-    if (!OsVendorVErrorFProc)
-        OsVendorVErrorFProc = OsVendorVErrorF;
-
     if (!g_fLogInited) {
         /* keep this order. If LogInit fails it calls Abort which then calls
          * ddxGiveUp where LogInit is called again and creates an infinite
