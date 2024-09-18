@@ -433,41 +433,31 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
               unsigned long sizes, int bitsPerRGB, int preferredVis)
 {
     int i, j = 0, k;
-    VisualPtr visual;
-    DepthPtr depth;
-    VisualID *vid;
-    int d, b;
     int f;
-    int ndepth, nvisual;
-    int nvtype;
-    int vtype;
     miVisualsPtr visuals, nextVisuals;
-    int *preferredCVCs, *prefp;
-    int first_depth;
 
     /* none specified, we'll guess from pixmap formats */
     if (!miVisuals) {
         for (f = 0; f < screenInfo.numPixmapFormats; f++) {
-            d = screenInfo.formats[f].depth;
-            b = screenInfo.formats[f].bitsPerPixel;
-            if (sizes & (1 << (b - 1)))
-                vtype = miGetDefaultVisualMask(d);
-            else
-                vtype = 0;
+            int d = screenInfo.formats[f].depth;
+            int b = screenInfo.formats[f].bitsPerPixel;
+            int vtype = ((sizes & (1 << (b - 1))) ? miGetDefaultVisualMask(d) : 0);
             if (!miSetVisualTypes(d, vtype, bitsPerRGB, -1))
                 return FALSE;
         }
     }
-    nvisual = 0;
-    ndepth = 0;
+
+    int nvisual = 0;
+    int ndepth = 0;
     for (visuals = miVisuals; visuals; visuals = nextVisuals) {
         nextVisuals = visuals->next;
         ndepth++;
         nvisual += visuals->count;
     }
-    depth = xallocarray(ndepth, sizeof(DepthRec));
-    visual = xallocarray(nvisual, sizeof(VisualRec));
-    preferredCVCs = xallocarray(ndepth, sizeof(int));
+
+    DepthPtr depth = xallocarray(ndepth, sizeof(DepthRec));
+    VisualPtr visual = xallocarray(nvisual, sizeof(VisualRec));
+    int *preferredCVCs = xallocarray(ndepth, sizeof(int));
     if (!depth || !visual || !preferredCVCs) {
         free(depth);
         free(visual);
@@ -478,15 +468,17 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
     *visualp = visual;
     *ndepthp = ndepth;
     *nvisualp = nvisual;
-    prefp = preferredCVCs;
+
+    int *prefp = preferredCVCs;
     for (visuals = miVisuals; visuals; visuals = nextVisuals) {
+        int d = visuals->depth;
+        int vtype = visuals->visuals;
+        int nvtype = visuals->count;
+
         nextVisuals = visuals->next;
-        d = visuals->depth;
-        vtype = visuals->visuals;
-        nvtype = visuals->count;
+        VisualID *vid = NULL;
         *prefp = visuals->preferredCVC;
         prefp++;
-        vid = NULL;
         if (nvtype) {
             vid = xallocarray(nvtype, sizeof(VisualID));
             if (!vid) {
@@ -499,7 +491,6 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
         depth->depth = d;
         depth->numVids = nvtype;
         depth->vids = vid;
-        depth++;
         for (i = 0; i < NUM_PRIORITY; i++) {
             if (!(vtype & (1 << miVisualPriority[i])))
                 continue;
@@ -534,6 +525,7 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
             vid++;
             visual++;
         }
+        depth++;
         free(visuals);
     }
     miVisuals = NULL;
@@ -546,7 +538,7 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
      * structures - if there is, we want to start looking for the
      * default visual/depth from that depth.
      */
-    first_depth = 0;
+    int first_depth = 0;
     if (preferredVis < 0 && defaultColorVisualClass < 0) {
         for (i = 0; i < ndepth; i++) {
             if (preferredCVCs[i] >= 0) {
