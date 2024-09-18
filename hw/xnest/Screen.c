@@ -137,29 +137,27 @@ static miPointerSpriteFuncRec xnestPointerSpriteFuncs = {
     xnestDeviceCursorCleanup
 };
 
-static int add_depth_visual(DepthPtr depths, int numDepths, int nplanes, VisualID vid)
+static DepthPtr add_depth(DepthPtr depths, int *numDepths, int nplanes)
 {
-    DepthPtr walk = NULL;
+    int num = *numDepths;
 
-    for (int j = 0; j < numDepths; j++)
-        if (depths[j].depth == nplanes) {
-            walk = &depths[j];
-            break;
-        }
+    for (int j = 0; j < num; j++)
+        if (depths[j].depth == nplanes)
+            return &depths[j];
 
-    if (!walk) {
-        walk = &depths[numDepths++];
-        walk->depth = nplanes;
-        walk->numVids = 0;
-        walk->vids = (VisualID *) malloc(MAXVISUALSPERDEPTH * sizeof(VisualID));
-    }
-    if (walk->numVids >= MAXVISUALSPERDEPTH) {
-        FatalError("Visual table overflow");
-    }
+    depths[num].depth = nplanes;
+    if (!(depths[num].vids = calloc(MAXVISUALSPERDEPTH, sizeof(VisualID))))
+        FatalError("memory allocation failed");
+
+    (*numDepths)++;
+    return &depths[num];
+}
+
+static void add_depth_visual(DepthPtr depths, int *numDepths, int nplanes, VisualID vid)
+{
+    DepthPtr walk = add_depth(depths, numDepths, nplanes);
     walk->vids[walk->numVids] = vid;
     walk->numVids++;
-
-    return numDepths;
 }
 
 Bool
@@ -192,7 +190,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 
     int numVisuals = 0;
     VisualPtr visuals = calloc(1, sizeof(VisualRec));
-    int numDepths = 1;
+    int numDepths = 0;
     DepthPtr depths = calloc(MAXDEPTH, sizeof(DepthRec));
 
     if (!visuals || !depths) {
@@ -206,9 +204,10 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     else
         xnestVisualMap = reallocarray(xnestVisualMap, xnestNumVisualMap+1, sizeof(xnest_visual_t));
 
-    depths[0].depth = 1;
-    depths[0].numVids = 0;
-    depths[0].vids = calloc(MAXVISUALSPERDEPTH, sizeof(VisualID));
+    add_depth(depths, &numDepths, 1);
+
+    for (int i=0; i<screenInfo.numPixmapFormats; i++)
+        add_depth(depths, &numDepths, screenInfo.formats[i].depth);
 
     int found_default_visual = 0;
     xcb_depth_iterator_t depth_iter;
@@ -261,7 +260,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                                 xnestUpstreamInfo.screenInfo->root,
                                 xnestVisualMap[xnestNumVisualMap].upstreamVisual->visual_id);
 
-            numDepths = add_depth_visual(depths, numDepths, visuals[numVisuals].nplanes, visuals[numVisuals].vid);
+            add_depth_visual(depths, &numDepths, visuals[numVisuals].nplanes, visuals[numVisuals].vid);
 
             if (xnestUserDefaultClass || xnestUserDefaultDepth) {
                 if ((!xnestDefaultClass || visuals[numVisuals].class == xnestDefaultClass) &&
