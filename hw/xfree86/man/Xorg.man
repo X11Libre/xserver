@@ -291,6 +291,15 @@ file verbosity level.  When the
 value is supplied, the log file verbosity level is set to that value.
 The default log file verbosity level is 3.
 .TP 8
+.BR \-syslogverbose " [\fIn\fP]"
+Sets the verbosity level for information printed to syslog. If the
+.I n
+value isn't supplied, each occurrence of this option increments the log
+file verbosity level.  When the
+.I n
+value is supplied, the log file verbosity level is set to that value.
+The default log file verbosity level is 0 (silent).
+.TP 8
 .BI \-modulepath " searchpath"
 Set the module search path to
 .IR searchpath .
