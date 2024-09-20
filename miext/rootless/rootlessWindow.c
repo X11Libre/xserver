@@ -186,24 +186,14 @@ RootlessDestroyFrame(WindowPtr pWin, RootlessWindowPtr winRec)
 }
 
 /*
- * RootlessDestroyWindow
- *  Destroy the physical window associated with the given window.
+ * @brief window destructor: remove physical window associated with given window
  */
-Bool
-RootlessDestroyWindow(WindowPtr pWin)
+void
+RootlessWindowDestroy(ScreenPtr pScreen, WindowPtr pWin, void *arg)
 {
     RootlessWindowRec *winRec = WINREC(pWin);
-    Bool result;
-
-    if (winRec != NULL) {
+    if (winRec != NULL)
         RootlessDestroyFrame(pWin, winRec);
-    }
-
-    SCREEN_UNWRAP(pWin->drawable.pScreen, DestroyWindow);
-    result = pWin->drawable.pScreen->DestroyWindow(pWin);
-    SCREEN_WRAP(pWin->drawable.pScreen, DestroyWindow);
-
-    return result;
 }
 
 static Bool
