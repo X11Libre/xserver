@@ -65,7 +65,6 @@ typedef struct _damageScrPriv {
     CreateGCProcPtr CreateGC;
     DestroyPixmapProcPtr DestroyPixmap;
     SetWindowPixmapProcPtr SetWindowPixmap;
-    DestroyWindowProcPtr DestroyWindow;
     CompositeProcPtr Composite;
     GlyphsProcPtr Glyphs;
     AddTrapsProcPtr AddTraps;
