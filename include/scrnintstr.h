@@ -57,6 +57,8 @@ SOFTWARE.
 #include "privates.h"
 #include <X11/extensions/randr.h>
 
+#include "dix_screen_hooks.h"
+
 typedef struct _PixmapFormat {
     unsigned char depth;
     unsigned char bitsPerPixel;
@@ -490,7 +492,16 @@ typedef void (*DPMSProcPtr)(ScreenPtr pScreen, int level);
     required. Unwrap occurs at the top of each function, just after
     entry, and Wrap occurs at the bottom of each function, just
     before returning.
+
+    DestroyWindow() should NOT be wrapped anymore
+    use dixScreenHookWindowDestroy() instead.
  */
+
+#define _SCREEN_HOOK_TYPE(NAME, FUNCTYPE, ARRSIZE) \
+    struct { \
+        FUNCTYPE func; \
+        void *arg; \
+    } NAME[ARRSIZE];
 
 typedef struct _Screen {
     int myNum;                  /* index of this instance in Screens[] */
@@ -545,6 +556,10 @@ typedef struct _Screen {
     ClipNotifyProcPtr ClipNotify;
     RestackWindowProcPtr RestackWindow;
     PaintWindowProcPtr PaintWindow;
+
+    /* additional window destructors (replaces wrapping DestroyWindow).
+       should NOT be touched outside of DIX core */
+    _SCREEN_HOOK_TYPE(_notify_window_destroy, XorgWindowDestroyProcPtr, 8);
 
     /* Pixmap procedures */
 
