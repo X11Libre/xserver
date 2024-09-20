@@ -84,7 +84,6 @@ typedef struct _RootlessScreenRec {
     CloseScreenProcPtr CloseScreen;
 
     CreateWindowProcPtr CreateWindow;
-    DestroyWindowProcPtr DestroyWindow;
     RealizeWindowProcPtr RealizeWindow;
     UnrealizeWindowProcPtr UnrealizeWindow;
     MoveWindowProcPtr MoveWindow;

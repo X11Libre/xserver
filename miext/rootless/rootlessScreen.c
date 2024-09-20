@@ -649,6 +649,8 @@ RootlessWrap(ScreenPtr pScreen)
 {
     RootlessScreenRec *s = SCREENREC(pScreen);
 
+    dixScreenHookWindowDestroy(pScreen, RootlessWindowDestroy, NULL);
+
 #define WRAP(a) \
     if (pScreen->a) { \
         s->a = pScreen->a; \
@@ -666,7 +668,6 @@ RootlessWrap(ScreenPtr pScreen)
     WRAP(GetImage);
     WRAP(SourceValidate);
     WRAP(CreateWindow);
-    WRAP(DestroyWindow);
     WRAP(RealizeWindow);
     WRAP(UnrealizeWindow);
     WRAP(MoveWindow);
