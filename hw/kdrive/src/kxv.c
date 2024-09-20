@@ -40,6 +40,7 @@ of the copyright holder.
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>
 
+#include "dix/screen_hooks_priv.h"
 #include "Xext/xvdix_priv.h"
 
 #include "kdrive.h"
@@ -82,9 +83,10 @@ static int KdXVPutImage(DrawablePtr, XvPortPtr, GCPtr,
 static int KdXVQueryImageAttributes(XvPortPtr, XvImagePtr,
                                     CARD16 *, CARD16 *, int *, int *);
 
+static void KdXVWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
+
 /* ScreenRec fields */
 
-static Bool KdXVDestroyWindow(WindowPtr pWin);
 static void KdXVWindowExposures(WindowPtr pWin, RegionPtr r1);
 static void KdXVClipNotify(WindowPtr pWin, int dx, int dy);
 static Bool KdXVCloseScreen(ScreenPtr);
@@ -139,13 +141,13 @@ KdXVScreenInit(ScreenPtr pScreen, KdVideoAdaptorPtr adaptors, int num)
     if (!ScreenPriv)
         return FALSE;
 
-    ScreenPriv->DestroyWindow = pScreen->DestroyWindow;
+    dixScreenHookWindowDestroy(pScreen, KdXVWindowDestroy);
+
     ScreenPriv->WindowExposures = pScreen->WindowExposures;
     ScreenPriv->ClipNotify = pScreen->ClipNotify;
 
 /*   fprintf(stderr,"XV: Wrapping screen funcs\n"); */
 
-    pScreen->DestroyWindow = KdXVDestroyWindow;
     pScreen->WindowExposures = KdXVWindowExposures;
     pScreen->ClipNotify = KdXVClipNotify;
     /* it will call KdCloseScreen() as it's the last act */
@@ -755,13 +757,10 @@ KdXVRemovePortFromWindow(WindowPtr pWin, XvPortRecPrivatePtr portPriv)
 
 /****  ScreenRec fields ****/
 
-static Bool
-KdXVDestroyWindow(WindowPtr pWin)
+static void
+KdXVWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    KdXVScreenPtr ScreenPriv = GET_KDXV_SCREEN(pScreen);
     KdXVWindowPtr tmp, WinPriv = GET_KDXV_WINDOW(pWin);
-    int ret;
 
     while (WinPriv) {
         XvPortRecPrivatePtr pPriv = WinPriv->PortRec;
@@ -779,12 +778,6 @@ KdXVDestroyWindow(WindowPtr pWin)
     }
 
     dixSetPrivate(&pWin->devPrivates, KdXVWindowKey, NULL);
-
-    pScreen->DestroyWindow = ScreenPriv->DestroyWindow;
-    ret = (*pScreen->DestroyWindow) (pWin);
-    pScreen->DestroyWindow = KdXVDestroyWindow;
-
-    return ret;
 }
 
 static void
@@ -919,7 +912,6 @@ KdXVCloseScreen(ScreenPtr pScreen)
     if (!ScreenPriv)
         return TRUE;
 
-    pScreen->DestroyWindow = ScreenPriv->DestroyWindow;
     pScreen->WindowExposures = ScreenPriv->WindowExposures;
     pScreen->ClipNotify = ScreenPriv->ClipNotify;
 
