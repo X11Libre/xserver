@@ -57,6 +57,8 @@ SOFTWARE.
 #include "privates.h"
 #include <X11/extensions/randr.h>
 
+#include "dix_screen_hooks.h"
+
 typedef struct _PixmapFormat {
     unsigned char depth;
     unsigned char bitsPerPixel;
@@ -561,6 +563,10 @@ typedef struct _Screen {
     ClipNotifyProcPtr ClipNotify;
     RestackWindowProcPtr RestackWindow;
     PaintWindowProcPtr PaintWindow;
+
+    /* additional window destructors (replaces wrapping DestroyWindow).
+       should NOT be touched outside of DIX core */
+    _SCREEN_HOOK_TYPE(_notify_window_destroy, XorgWindowDestroyProcPtr, 8);
 
     /* Pixmap procedures */
 

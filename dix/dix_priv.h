@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT OR X11
+/*
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  */
@@ -744,5 +744,18 @@ static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
 
     return WriteToClient(pClient, sizeof(xEvent), &ev);
 }
+
+/*
+ * @brief call screen's window destructors
+ * @see dixScreenHookWindowDestroy
+ * @param pWin the window thats being destroyed
+ * @result the ScreenRec's DestroyWindow() return value
+ *
+ * Call the pluggable window destructors that extensions might have registered on
+ * the screen, and finally call ScreenRec's DestroyWindow proc.
+ *
+ * Should only be called by DIX itself.
+ */
+int dixScreenRaiseWindowDestroy(WindowPtr pWin);
 
 #endif /* _XSERVER_DIX_PRIV_H */
