@@ -44,6 +44,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screen_hooks_priv.h"
 #include "os/osdep.h"
 
 #include "compint.h"
@@ -76,11 +77,12 @@ compCloseScreen(ScreenPtr pScreen)
     pScreen->ClipNotify = cs->ClipNotify;
     pScreen->UnrealizeWindow = cs->UnrealizeWindow;
     pScreen->RealizeWindow = cs->RealizeWindow;
-    pScreen->DestroyWindow = cs->DestroyWindow;
     pScreen->CreateWindow = cs->CreateWindow;
     pScreen->CopyWindow = cs->CopyWindow;
     pScreen->PositionWindow = cs->PositionWindow;
     pScreen->SourceValidate = cs->SourceValidate;
+
+    dixScreenUnhookWindowDestroy(pScreen, compWindowDestroy);
 
     free(cs);
     dixSetPrivate(&pScreen->devPrivates, CompScreenPrivateKey, NULL);
@@ -368,6 +370,8 @@ compScreenInit(ScreenPtr pScreen)
     if (!disableBackingStore)
         pScreen->backingStoreSupport = WhenMapped;
 
+    dixScreenHookWindowDestroy(pScreen, compWindowDestroy);
+
     cs->PositionWindow = pScreen->PositionWindow;
     pScreen->PositionWindow = compPositionWindow;
 
@@ -376,9 +380,6 @@ compScreenInit(ScreenPtr pScreen)
 
     cs->CreateWindow = pScreen->CreateWindow;
     pScreen->CreateWindow = compCreateWindow;
-
-    cs->DestroyWindow = pScreen->DestroyWindow;
-    pScreen->DestroyWindow = compDestroyWindow;
 
     cs->RealizeWindow = pScreen->RealizeWindow;
     pScreen->RealizeWindow = compRealizeWindow;

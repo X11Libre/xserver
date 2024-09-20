@@ -127,7 +127,6 @@ typedef struct _CompScreen {
     PositionWindowProcPtr PositionWindow;
     CopyWindowProcPtr CopyWindow;
     CreateWindowProcPtr CreateWindow;
-    DestroyWindowProcPtr DestroyWindow;
     RealizeWindowProcPtr RealizeWindow;
     UnrealizeWindowProcPtr UnrealizeWindow;
     ClipNotifyProcPtr ClipNotify;
@@ -308,8 +307,7 @@ void
 Bool
  compCreateWindow(WindowPtr pWin);
 
-Bool
- compDestroyWindow(WindowPtr pWin);
+void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
 
 void
  compSetRedirectBorderClip(WindowPtr pWin, RegionPtr pRegion);

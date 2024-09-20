@@ -596,16 +596,12 @@ compCreateWindow(WindowPtr pWin)
     return ret;
 }
 
-Bool
-compDestroyWindow(WindowPtr pWin)
+void compWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
     CompWindowPtr cw;
     CompSubwindowsPtr csw;
-    Bool ret;
 
-    pScreen->DestroyWindow = cs->DestroyWindow;
     while ((cw = GetCompWindow(pWin)))
         FreeResource(cw->clients->id, X11_RESTYPE_NONE);
     while ((csw = GetCompSubwindows(pWin)))
@@ -617,16 +613,12 @@ compDestroyWindow(WindowPtr pWin)
         compSetParentPixmap(pWin);
         dixDestroyPixmap(pPixmap, 0);
     }
-    ret = (*pScreen->DestroyWindow) (pWin);
-    cs->DestroyWindow = pScreen->DestroyWindow;
-    pScreen->DestroyWindow = compDestroyWindow;
 
     /* Did we just destroy the overlay window? */
     if (pWin == cs->pOverlayWin)
         cs->pOverlayWin = NULL;
 
 /*    compCheckTree (pWin->drawable.pScreen); can't check -- tree isn't good*/
-    return ret;
 }
 
 void
