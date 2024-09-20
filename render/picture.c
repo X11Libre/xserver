@@ -63,13 +63,10 @@ PictureWindowFormat(WindowPtr pWindow)
                               WindowGetVisual(pWindow));
 }
 
-static Bool
-PictureDestroyWindow(WindowPtr pWindow)
+static void
+picture_window_destructor(ScreenPtr pScreen, WindowPtr pWindow, void *arg)
 {
-    ScreenPtr pScreen = pWindow->drawable.pScreen;
     PicturePtr pPicture;
-    PictureScreenPtr ps = GetPictureScreen(pScreen);
-    Bool ret;
 
     while ((pPicture = GetPictureWindow(pWindow))) {
         SetPictureWindow(pWindow, pPicture->pNext);
@@ -77,11 +74,6 @@ PictureDestroyWindow(WindowPtr pWindow)
             FreeResource(pPicture->id, PictureType);
         FreePicture((void *) pPicture, pPicture->id);
     }
-    pScreen->DestroyWindow = ps->DestroyWindow;
-    ret = (*pScreen->DestroyWindow) (pWindow);
-    ps->DestroyWindow = pScreen->DestroyWindow;
-    pScreen->DestroyWindow = PictureDestroyWindow;
-    return ret;
 }
 
 static Bool
@@ -693,11 +685,11 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     ps->subpixel = SubPixelUnknown;
 
     ps->CloseScreen = pScreen->CloseScreen;
-    ps->DestroyWindow = pScreen->DestroyWindow;
     ps->StoreColors = pScreen->StoreColors;
-    pScreen->DestroyWindow = PictureDestroyWindow;
     pScreen->CloseScreen = PictureCloseScreen;
     pScreen->StoreColors = PictureStoreColors;
+
+    dixScreenHookWindowDestroy(pScreen, picture_window_destructor, NULL);
 
     if (!PictureSetDefaultFilters(pScreen)) {
         PictureResetFilters(pScreen);
