@@ -1576,22 +1576,14 @@ damageSetWindowPixmap(WindowPtr pWindow, PixmapPtr pPixmap)
     }
 }
 
-static Bool
-damageDestroyWindow(WindowPtr pWindow)
+static void
+damageWindowDestroy(ScreenPtr pScreen, WindowPtr pWindow, void *arg)
 {
     DamagePtr pDamage;
-    ScreenPtr pScreen = pWindow->drawable.pScreen;
-    Bool ret;
-
-    damageScrPriv(pScreen);
 
     while ((pDamage = damageGetWinPriv(pWindow))) {
         DamageDestroy(pDamage);
     }
-    unwrap(pScrPriv, pScreen, DestroyWindow);
-    ret = (*pScreen->DestroyWindow) (pWindow);
-    wrap(pScrPriv, pScreen, DestroyWindow, damageDestroyWindow);
-    return ret;
 }
 
 static Bool
@@ -1691,9 +1683,10 @@ DamageSetup(ScreenPtr pScreen)
     pScrPriv->internalLevel = 0;
     pScrPriv->pScreenDamage = 0;
 
+    dixScreenHookWindowDestroy(pScreen, damageWindowDestroy, NULL);
+
     wrap(pScrPriv, pScreen, DestroyPixmap, damageDestroyPixmap);
     wrap(pScrPriv, pScreen, CreateGC, damageCreateGC);
-    wrap(pScrPriv, pScreen, DestroyWindow, damageDestroyWindow);
     wrap(pScrPriv, pScreen, SetWindowPixmap, damageSetWindowPixmap);
     wrap(pScrPriv, pScreen, CopyWindow, damageCopyWindow);
     wrap(pScrPriv, pScreen, CloseScreen, damageCloseScreen);
