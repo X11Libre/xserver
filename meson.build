@@ -276,7 +276,7 @@ else
     build_xquartz = get_option('xquartz') == 'true'
 endif
 
-build_rootless = false
+build_rootless = true
 if build_xquartz
     build_rootless = true
 endif
