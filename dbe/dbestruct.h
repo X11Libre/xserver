@@ -171,10 +171,8 @@ typedef struct _DbeWindowPrivRec {
 typedef struct _DbeScreenPrivRec {
     /* Wrapped functions
      * It is the responsibility of the DDX layer to wrap PositionWindow().
-     * DbeExtensionInit wraps DestroyWindow().
      */
     PositionWindowProcPtr PositionWindow;
-    DestroyWindowProcPtr DestroyWindow;
 
     /* Per-screen DIX routines */
     Bool (*SetupBackgroundPainter) (WindowPtr /*pWin */ ,

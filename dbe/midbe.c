@@ -375,9 +375,8 @@ miDbeSwapBuffers(ClientPtr client, int *pNumWindows, DbeSwapInfoPtr swapInfo)
  *     the resources associated with a DBE buffer ID.  There are 5 ways that
  *     miDbeWinPrivDelete() can be called by FreeResource().  They are:
  *
- *     - A DBE window is destroyed, in which case the DbeDestroyWindow()
- *       wrapper is invoked.  The wrapper calls FreeResource() for all DBE
- *       buffer IDs.
+ *     - A DBE window is destroyed, in which case the DbeWindowDestroy()
+ *       callback is invoked.  It calls FreeResource() for all DBE buffer IDs.
  *
  *     - miDbeAllocBackBufferName() calls FreeResource() to clean up resources
  *       after a buffer allocation failure.
