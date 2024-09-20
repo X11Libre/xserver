@@ -36,9 +36,10 @@
 #include <assert.h>
 #include <X11/Xatom.h>
 
+#include "dix/dix_priv.h"
+#include "dix/screen_hooks_priv.h"
 #include "fb/fb_priv.h"
 #include "mi/mi_priv.h"
-#include "dix_priv.h"
 
 #ifdef __APPLE__
 #include <Xplugin.h>
@@ -189,24 +190,14 @@ RootlessDestroyFrame(WindowPtr pWin, RootlessWindowPtr winRec)
 }
 
 /*
- * RootlessDestroyWindow
- *  Destroy the physical window associated with the given window.
+ * @brief window destructor: remove physical window associated with given window
  */
-Bool
-RootlessDestroyWindow(WindowPtr pWin)
+void
+RootlessWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
     RootlessWindowRec *winRec = WINREC(pWin);
-    Bool result;
-
-    if (winRec != NULL) {
+    if (winRec != NULL)
         RootlessDestroyFrame(pWin, winRec);
-    }
-
-    SCREEN_UNWRAP(pWin->drawable.pScreen, DestroyWindow);
-    result = pWin->drawable.pScreen->DestroyWindow(pWin);
-    SCREEN_WRAP(pWin->drawable.pScreen, DestroyWindow);
-
-    return result;
 }
 
 static Bool

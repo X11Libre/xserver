@@ -37,6 +37,7 @@
 #include <string.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/screen_hooks_priv.h"
 #include "mi/mi_priv.h"
 
 #include "scrnintstr.h"
@@ -649,6 +650,8 @@ RootlessWrap(ScreenPtr pScreen)
 {
     RootlessScreenRec *s = SCREENREC(pScreen);
 
+    dixScreenHookWindowDestroy(pScreen, RootlessWindowDestroy);
+
 #define WRAP(a) \
     if (pScreen->a) { \
         s->a = pScreen->a; \
@@ -666,7 +669,6 @@ RootlessWrap(ScreenPtr pScreen)
     WRAP(GetImage);
     WRAP(SourceValidate);
     WRAP(CreateWindow);
-    WRAP(DestroyWindow);
     WRAP(RealizeWindow);
     WRAP(UnrealizeWindow);
     WRAP(MoveWindow);

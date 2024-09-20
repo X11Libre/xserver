@@ -37,7 +37,7 @@
 #include "rootlessCommon.h"
 
 Bool RootlessCreateWindow(WindowPtr pWin);
-Bool RootlessDestroyWindow(WindowPtr pWin);
+void RootlessWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
 
 void RootlessSetShape(WindowPtr pWin, int kind);
 
