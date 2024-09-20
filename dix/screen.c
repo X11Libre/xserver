@@ -4,6 +4,7 @@
  */
 #include <dix-config.h>
 
+#include "dix/callback_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
 #include "include/screenint.h"
@@ -19,5 +20,6 @@ void dixFreeScreen(ScreenPtr pScreen)
     dixFreeScreenSpecificPrivates(pScreen);
     pScreen->CloseScreen(pScreen);
     dixFreePrivates(pScreen->devPrivates, PRIVATE_SCREEN);
+    DeleteCallbackList(&pScreen->hookWindowDestroy);
     free(pScreen);
 }
