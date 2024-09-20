@@ -25,6 +25,7 @@
 #include <dix-config.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/screen_hooks_priv.h"
 #include "os/osdep.h"
 
 #include "misc.h"
@@ -63,13 +64,10 @@ PictureWindowFormat(WindowPtr pWindow)
                               WindowGetVisual(pWindow));
 }
 
-static Bool
-PictureDestroyWindow(WindowPtr pWindow)
+static void
+picture_window_destructor(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWindow)
 {
-    ScreenPtr pScreen = pWindow->drawable.pScreen;
     PicturePtr pPicture;
-    PictureScreenPtr ps = GetPictureScreen(pScreen);
-    Bool ret;
 
     while ((pPicture = GetPictureWindow(pWindow))) {
         SetPictureWindow(pWindow, pPicture->pNext);
@@ -77,11 +75,6 @@ PictureDestroyWindow(WindowPtr pWindow)
             FreeResource(pPicture->id, PictureType);
         FreePicture((void *) pPicture, pPicture->id);
     }
-    pScreen->DestroyWindow = ps->DestroyWindow;
-    ret = (*pScreen->DestroyWindow) (pWindow);
-    ps->DestroyWindow = pScreen->DestroyWindow;
-    pScreen->DestroyWindow = PictureDestroyWindow;
-    return ret;
 }
 
 static Bool
@@ -693,11 +686,11 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     ps->subpixel = SubPixelUnknown;
 
     ps->CloseScreen = pScreen->CloseScreen;
-    ps->DestroyWindow = pScreen->DestroyWindow;
     ps->StoreColors = pScreen->StoreColors;
-    pScreen->DestroyWindow = PictureDestroyWindow;
     pScreen->CloseScreen = PictureCloseScreen;
     pScreen->StoreColors = PictureStoreColors;
+
+    dixScreenHookWindowDestroy(pScreen, picture_window_destructor);
 
     if (!PictureSetDefaultFilters(pScreen)) {
         PictureResetFilters(pScreen);
