@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include "dix/screen_hooks_priv.h"
+
 #include "present_priv.h"
 
 int present_request;
@@ -86,10 +88,9 @@ present_free_window_vblank(WindowPtr window)
 /*
  * Hook the close window function to clean up our window private
  */
-static Bool
-present_destroy_window(WindowPtr window)
+static void
+present_destroy_window(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr window)
 {
-    Bool ret;
     ScreenPtr screen = window->drawable.pScreen;
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
     present_window_priv_ptr window_priv = present_window_priv(window);
@@ -112,13 +113,6 @@ present_destroy_window(WindowPtr window)
 
         free(window_priv);
     }
-    unwrap(screen_priv, screen, DestroyWindow);
-    if (screen->DestroyWindow)
-        ret = screen->DestroyWindow (window);
-    else
-        ret = TRUE;
-    wrap(screen_priv, screen, DestroyWindow, present_destroy_window);
-    return ret;
 }
 
 /*
@@ -183,7 +177,9 @@ present_screen_priv_init(ScreenPtr screen)
         return NULL;
 
     wrap(screen_priv, screen, CloseScreen, present_close_screen);
-    wrap(screen_priv, screen, DestroyWindow, present_destroy_window);
+
+    dixScreenHookWindowDestroy(screen, present_destroy_window);
+
     wrap(screen_priv, screen, ConfigNotify, present_config_notify);
     wrap(screen_priv, screen, ClipNotify, present_clip_notify);
 
