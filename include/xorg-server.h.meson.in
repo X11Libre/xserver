@@ -214,4 +214,7 @@
 /* byte order */
 #mesondefine X_BYTE_ORDER
 
+/* announce server API features */
+#define XORG_API_DIX_SCREEN_HOOK_WINDOW_DESTROY 1
+
 #endif /* _XORG_SERVER_H_ */
