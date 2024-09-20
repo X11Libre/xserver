@@ -165,7 +165,6 @@ struct present_screen_priv {
     ScreenPtr                   pScreen;
     CloseScreenProcPtr          CloseScreen;
     ConfigNotifyProcPtr         ConfigNotify;
-    DestroyWindowProcPtr        DestroyWindow;
     ClipNotifyProcPtr           ClipNotify;
 
     present_vblank_ptr          flip_pending;
