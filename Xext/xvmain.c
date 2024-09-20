@@ -143,7 +143,6 @@ static Bool CreateResourceTypes(void);
 
 static Bool XvCloseScreen(ScreenPtr);
 static Bool XvDestroyPixmap(PixmapPtr);
-static Bool XvDestroyWindow(WindowPtr);
 static void XvResetProc(ExtensionEntry *);
 static int XvdiDestroyGrab(void *, XID);
 static int XvdiDestroyEncoding(void *, XID);
@@ -152,6 +151,7 @@ static int XvdiDestroyPortNotify(void *, XID);
 static int XvdiDestroyVideoNotifyList(void *, XID);
 static int XvdiDestroyPort(void *, XID);
 static int XvdiSendVideoNotify(XvPortPtr, DrawablePtr, int);
+static void XvStopAdaptors(DrawablePtr pDrawable);
 
 /*
 ** XvExtensionInit
@@ -257,6 +257,11 @@ CreateResourceTypes(void)
 
 }
 
+static void XvWindowDestroy(ScreenPtr pScreen, WindowPtr pWin, void *arg)
+{
+    XvStopAdaptors(&pWin->drawable);
+}
+
 int
 XvScreenInit(ScreenPtr pScreen)
 {
@@ -291,11 +296,11 @@ XvScreenInit(ScreenPtr pScreen)
     dixSetPrivate(&pScreen->devPrivates, XvScreenKey, pxvs);
 
     pxvs->DestroyPixmap = pScreen->DestroyPixmap;
-    pxvs->DestroyWindow = pScreen->DestroyWindow;
     pxvs->CloseScreen = pScreen->CloseScreen;
 
+    dixScreenHookWindowDestroy(pScreen, XvWindowDestroy, NULL);
+
     pScreen->DestroyPixmap = XvDestroyPixmap;
-    pScreen->DestroyWindow = XvDestroyWindow;
     pScreen->CloseScreen = XvCloseScreen;
 
     return Success;
@@ -304,13 +309,13 @@ XvScreenInit(ScreenPtr pScreen)
 static Bool
 XvCloseScreen(ScreenPtr pScreen)
 {
-
     XvScreenPtr pxvs;
 
     pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates, XvScreenKey);
 
+    dixScreenUnhookWindowDestroy(pScreen, XvWindowDestroy, NULL);
+
     pScreen->DestroyPixmap = pxvs->DestroyPixmap;
-    pScreen->DestroyWindow = pxvs->DestroyWindow;
     pScreen->CloseScreen = pxvs->CloseScreen;
 
     free(pxvs);
@@ -385,21 +390,6 @@ XvDestroyPixmap(PixmapPtr pPix)
 
 }
 
-static Bool
-XvDestroyWindow(WindowPtr pWin)
-{
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    Bool status;
-
-    XvStopAdaptors(&pWin->drawable);
-
-    SCREEN_PROLOGUE(pScreen, DestroyWindow);
-    status = (*pScreen->DestroyWindow) (pWin);
-    SCREEN_EPILOGUE(pScreen, DestroyWindow, XvDestroyWindow);
-
-    return status;
-
-}
 
 static int
 XvdiDestroyPort(void *pPort, XID id)
