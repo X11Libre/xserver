@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2003 by The XFree86 Project, Inc.
  *
@@ -37,7 +36,6 @@
 extern _X_EXPORT DevPrivateKey XF86XvScreenKey;
 
 typedef struct {
-    DestroyWindowProcPtr DestroyWindow;
     ClipNotifyProcPtr ClipNotify;
     WindowExposuresProcPtr WindowExposures;
     PostValidateTreeProcPtr PostValidateTree;
