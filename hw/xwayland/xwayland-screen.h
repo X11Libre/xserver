@@ -73,7 +73,6 @@ struct xwl_screen {
     ConfigNotifyProcPtr ConfigNotify;
     RealizeWindowProcPtr RealizeWindow;
     UnrealizeWindowProcPtr UnrealizeWindow;
-    DestroyWindowProcPtr DestroyWindow;
     XYToWindowProcPtr XYToWindow;
     SetWindowPixmapProcPtr SetWindowPixmap;
     ChangeWindowAttributesProcPtr ChangeWindowAttributes;
