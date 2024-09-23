@@ -404,7 +404,6 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
     xRectangle *prect;
     int numRects, regionnumrects;
 #ifdef COMPOSITE
-    WindowPtr orig_pWin = pWin;
 #endif
 
     /*
@@ -492,6 +491,7 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
 #ifdef COMPOSITE
         /* Make sure alpha will sample as 1.0 for opaque windows */
         if (drawable->depth == 32) {
+            WindowPtr orig_pWin = pWin;
             int effective_depth = orig_pWin->drawable.depth;
 
             if (effective_depth == 32) {
