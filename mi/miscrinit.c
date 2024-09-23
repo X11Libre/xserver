@@ -266,7 +266,7 @@ miScreenInit(ScreenPtr pScreen, void *pbits,  /* pointer to screen bits */
     pScreen->SaveScreen = miSaveScreen;
     /* GetImage, GetSpans */
     pScreen->SourceValidate = miSourceValidate;
-    /* CreateWindow, DestroyWindow, PositionWindow, ChangeWindowAttributes */
+    /* CreateWindow, PositionWindow, ChangeWindowAttributes */
     /* RealizeWindow, UnrealizeWindow */
     pScreen->ValidateTree = miValidateTree;
     pScreen->PostValidateTree = (PostValidateTreeProcPtr) 0;
