@@ -37,6 +37,7 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>
 
+#include "dix/screen_hooks_priv.h"
 #include "Xext/xvdix_priv.h"
 
 #include "misc.h"
@@ -81,9 +82,10 @@ static int xf86XVPutImage(DrawablePtr, XvPortPtr, GCPtr,
 static int xf86XVQueryImageAttributes(XvPortPtr, XvImagePtr,
                                       CARD16 *, CARD16 *, int *, int *);
 
+static void xf86XVWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
+
 /* ScreenRec fields */
 
-static Bool xf86XVDestroyWindow(WindowPtr pWin);
 static void xf86XVWindowExposures(WindowPtr pWin, RegionPtr r1);
 static void xf86XVPostValidateTree(WindowPtr pWin, WindowPtr pLayerWin,
                                    VTKind kind);
@@ -253,7 +255,6 @@ xf86XVScreenInit(ScreenPtr pScreen, XF86VideoAdaptorPtr * adaptors, int num)
 
     pScrn = xf86ScreenToScrn(pScreen);
 
-    ScreenPriv->DestroyWindow = pScreen->DestroyWindow;
     ScreenPriv->WindowExposures = pScreen->WindowExposures;
     ScreenPriv->PostValidateTree = PostValidateTreeUndefined;
     ScreenPriv->ClipNotify = pScreen->ClipNotify;
@@ -263,7 +264,6 @@ xf86XVScreenInit(ScreenPtr pScreen, XF86VideoAdaptorPtr * adaptors, int num)
     ScreenPriv->AdjustFrame = pScrn->AdjustFrame;
     ScreenPriv->ModeSet = pScrn->ModeSet;
 
-    pScreen->DestroyWindow = xf86XVDestroyWindow;
     pScreen->WindowExposures = xf86XVWindowExposures;
     pScreen->ClipNotify = xf86XVClipNotify;
     pScreen->CloseScreen = xf86XVCloseScreen;
@@ -991,13 +991,10 @@ xf86XVReputOrStopAllPorts(ScrnInfoPtr pScrn, Bool onlyChanged)
 
 /****  ScreenRec fields ****/
 
-static Bool
-xf86XVDestroyWindow(WindowPtr pWin)
+static void
+xf86XVWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    XF86XVScreenPtr ScreenPriv = GET_XF86XV_SCREEN(pScreen);
     XF86XVWindowPtr tmp, WinPriv = GET_XF86XV_WINDOW(pWin);
-    int ret;
 
     while (WinPriv) {
         XvPortRecPrivatePtr pPriv = WinPriv->PortRec;
@@ -1015,12 +1012,6 @@ xf86XVDestroyWindow(WindowPtr pWin)
     }
 
     dixSetPrivate(&pWin->devPrivates, XF86XVWindowKey, NULL);
-
-    pScreen->DestroyWindow = ScreenPriv->DestroyWindow;
-    ret = (*pScreen->DestroyWindow) (pWin);
-    pScreen->DestroyWindow = xf86XVDestroyWindow;
-
-    return ret;
 }
 
 static void
@@ -1148,7 +1139,8 @@ xf86XVCloseScreen(ScreenPtr pScreen)
     if (!ScreenPriv)
         return TRUE;
 
-    pScreen->DestroyWindow = ScreenPriv->DestroyWindow;
+    dixScreenUnhookWindowDestroy(pScreen, xf86XVWindowDestroy);
+
     pScreen->WindowExposures = ScreenPriv->WindowExposures;
     pScreen->ClipNotify = ScreenPriv->ClipNotify;
     pScreen->CloseScreen = ScreenPriv->CloseScreen;
