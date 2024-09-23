@@ -1134,8 +1134,7 @@ xwl_screen_init(ScreenPtr pScreen, int argc, char **argv)
     xwl_screen->UnrealizeWindow = pScreen->UnrealizeWindow;
     pScreen->UnrealizeWindow = xwl_unrealize_window;
 
-    xwl_screen->DestroyWindow = pScreen->DestroyWindow;
-    pScreen->DestroyWindow = xwl_destroy_window;
+    dixScreenHookWindowDestroy(pScreen, xwl_window_destroy, NULL);
 
     xwl_screen->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = xwl_close_screen;
