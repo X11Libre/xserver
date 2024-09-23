@@ -635,7 +635,7 @@ DRIScreenInit(ScreenPtr pScreen, DRIInfoPtr pDRIInfo, int *pDRMFD)
     return TRUE;
 }
 
-static Bool DRIDestroyWindow(WindowPtr pWin);
+static void DRIWindowDestroy(ScreenPtr pScreen, WindowPtr pWin, void *arg);
 
 Bool
 DRIFinishScreenInit(ScreenPtr pScreen)
@@ -649,8 +649,7 @@ DRIFinishScreenInit(ScreenPtr pScreen)
         pScreen->WindowExposures = pDRIInfo->wrap.WindowExposures;
     }
 
-    pDRIPriv->DestroyWindow = pScreen->DestroyWindow;
-    pScreen->DestroyWindow = DRIDestroyWindow;
+    dixScreenHookWindowDestroy(pScreen, DRIWindowDestroy, NULL);
 
     pDRIPriv->xf86_crtc_notify = xf86_wrap_crtc_notify(pScreen,
                                                        dri_crtc_notify);
@@ -697,11 +696,8 @@ DRICloseScreen(ScreenPtr pScreen)
                 pScreen->WindowExposures = pDRIPriv->wrap.WindowExposures;
                 pDRIPriv->wrap.WindowExposures = NULL;
             }
-            if (pDRIPriv->DestroyWindow) {
-                pScreen->DestroyWindow = pDRIPriv->DestroyWindow;
-                pDRIPriv->DestroyWindow = NULL;
-            }
 
+            dixScreenUnhookWindowDestroy(pScreen, DRIWindowDestroy, NULL);
             xf86_unwrap_crtc_notify(pScreen, pDRIPriv->xf86_crtc_notify);
 
             if (pDRIInfo->wrap.CopyWindow) {
@@ -1923,29 +1919,9 @@ DRITreeTraversal(WindowPtr pWin, void *data)
     return WT_WALKCHILDREN;
 }
 
-static Bool
-DRIDestroyWindow(WindowPtr pWin)
+static void DRIWindowDestroy(ScreenPtr pScreen, WindowPtr pWin, void *arg)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(pScreen);
-    Bool retval = TRUE;
-
     DRIDrawablePrivDestroy(pWin);
-
-    /* call lower wrapped functions */
-    if (pDRIPriv->DestroyWindow) {
-        /* unwrap */
-        pScreen->DestroyWindow = pDRIPriv->DestroyWindow;
-
-        /* call lower layers */
-        retval = (*pScreen->DestroyWindow) (pWin);
-
-        /* rewrap */
-        pDRIPriv->DestroyWindow = pScreen->DestroyWindow;
-        pScreen->DestroyWindow = DRIDestroyWindow;
-    }
-
-    return retval;
 }
 
 void
