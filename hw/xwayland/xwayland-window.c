@@ -1939,31 +1939,17 @@ xwl_window_create_frame_callback(struct xwl_window *xwl_window)
         xwl_present_for_each_frame_callback(xwl_window, xwl_present_reset_timer);
 }
 
-Bool
-xwl_destroy_window(WindowPtr window)
+void
+xwl_window_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr window)
 {
-    ScreenPtr screen = window->drawable.pScreen;
-    struct xwl_screen *xwl_screen = xwl_screen_get(screen);
+    struct xwl_screen *xwl_screen = xwl_screen_get(pScreen);
     struct xwl_window *xwl_window = xwl_window_get(window);
-    Bool ret;
 
     if (xwl_screen->present)
         xwl_present_cleanup(window);
 
     if (xwl_window)
         xwl_window_dispose(xwl_window);
-
-    screen->DestroyWindow = xwl_screen->DestroyWindow;
-
-    if (screen->DestroyWindow)
-        ret = screen->DestroyWindow (window);
-    else
-        ret = TRUE;
-
-    xwl_screen->DestroyWindow = screen->DestroyWindow;
-    screen->DestroyWindow = xwl_destroy_window;
-
-    return ret;
 }
 
 static Bool
