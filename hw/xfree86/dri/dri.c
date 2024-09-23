@@ -48,6 +48,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screen_hooks_priv.h"
 
 #include "xf86.h"
 #include "xf86drm.h"
@@ -644,7 +645,7 @@ DRIScreenInit(ScreenPtr pScreen, DRIInfoPtr pDRIInfo, int *pDRMFD)
     return TRUE;
 }
 
-static Bool DRIDestroyWindow(WindowPtr pWin);
+static void DRIWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
 
 Bool
 DRIFinishScreenInit(ScreenPtr pScreen)
@@ -660,8 +661,7 @@ DRIFinishScreenInit(ScreenPtr pScreen)
         pScreen->WindowExposures = pDRIInfo->wrap.WindowExposures;
     }
 
-    pDRIPriv->DestroyWindow = pScreen->DestroyWindow;
-    pScreen->DestroyWindow = DRIDestroyWindow;
+    dixScreenHookWindowDestroy(pScreen, DRIWindowDestroy);
 
     pDRIPriv->xf86_crtc_notify = xf86_wrap_crtc_notify(pScreen,
                                                        dri_crtc_notify);
@@ -708,11 +708,8 @@ DRICloseScreen(ScreenPtr pScreen)
                 pScreen->WindowExposures = pDRIPriv->wrap.WindowExposures;
                 pDRIPriv->wrap.WindowExposures = NULL;
             }
-            if (pDRIPriv->DestroyWindow) {
-                pScreen->DestroyWindow = pDRIPriv->DestroyWindow;
-                pDRIPriv->DestroyWindow = NULL;
-            }
 
+            dixScreenUnhookWindowDestroy(pScreen, DRIWindowDestroy);
             xf86_unwrap_crtc_notify(pScreen, pDRIPriv->xf86_crtc_notify);
 
             if (pDRIInfo->wrap.CopyWindow) {
@@ -1990,29 +1987,9 @@ DRITreeTraversal(WindowPtr pWin, void *data)
     return WT_WALKCHILDREN;
 }
 
-static Bool
-DRIDestroyWindow(WindowPtr pWin)
+static void DRIWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(pScreen);
-    Bool retval = TRUE;
-
     DRIDrawablePrivDestroy(pWin);
-
-    /* call lower wrapped functions */
-    if (pDRIPriv->DestroyWindow) {
-        /* unwrap */
-        pScreen->DestroyWindow = pDRIPriv->DestroyWindow;
-
-        /* call lower layers */
-        retval = (*pScreen->DestroyWindow) (pWin);
-
-        /* rewrap */
-        pDRIPriv->DestroyWindow = pScreen->DestroyWindow;
-        pScreen->DestroyWindow = DRIDestroyWindow;
-    }
-
-    return retval;
 }
 
 void

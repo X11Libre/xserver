@@ -86,7 +86,6 @@ typedef struct _DRIScreenPrivRec {
     DrawablePtr fullscreen;     /* pointer to fullscreen drawable */
     drm_clip_rect_t fullscreen_rect;    /* fake rect for fullscreen mode */
     DRIWrappedFuncsRec wrap;
-    DestroyWindowProcPtr DestroyWindow;
     DrawablePtr DRIDrawables[SAREA_MAX_DRAWABLES];
     DRIContextPrivPtr dummyCtxPriv;     /* Pointer to dummy context */
     Bool createDummyCtx;
