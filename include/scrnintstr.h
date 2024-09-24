@@ -561,6 +561,10 @@ typedef struct _Screen {
        should NOT be touched outside of DIX core */
     _SCREEN_HOOK_TYPE(_notify_window_destroy, XorgWindowDestroyProcPtr, 8);
 
+    /* additional window position notify hooks (replaces wrapping PositionWindow)
+       should NOT be touched outside of DIX core */
+    _SCREEN_HOOK_TYPE(_notify_window_position, XorgWindowPositionProcPtr, 4);
+
     /* Pixmap procedures */
 
     CreatePixmapProcPtr CreatePixmap;

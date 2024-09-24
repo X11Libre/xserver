@@ -277,7 +277,7 @@ miMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pNextSib, VTKind kind)
     SetWinSize(pWin);
     SetBorderSize(pWin);
 
-    (*pScreen->PositionWindow) (pWin, x, y);
+    dixScreenRaiseWindowPosition(pWin, x, y);
 
     windowToValidate = MoveWindowInStack(pWin, pNextSib);
 
@@ -447,7 +447,7 @@ miResizeWindow(WindowPtr pWin, int x, int y, unsigned int w, unsigned int h,
     ResizeChildrenWinSize(pWin, x - oldx, y - oldy, dw, dh);
 
     /* let the hardware adjust background and border pixmaps, if any */
-    (*pScreen->PositionWindow) (pWin, x, y);
+    dixScreenRaiseWindowPosition(pWin, x, y);
 
     pFirstChange = MoveWindowInStack(pWin, pSib);
 
