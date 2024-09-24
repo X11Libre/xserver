@@ -778,23 +778,11 @@ StartFrameResize(WindowPtr pWin, Bool gravity,
     ScreenPtr pScreen = pWin->drawable.pScreen;
     RootlessWindowRec *winRec = WINREC(pWin);
 
-    BoxRec rect;
-    int oldX2, newX2;
-    int oldY2, newY2;
     unsigned int weight;
-
-    oldX2 = oldX + oldW, newX2 = newX + newW;
-    oldY2 = oldY + oldH, newY2 = newY + newH;
 
     /* Decide which resize weighting to use */
     weight = ResizeWeighting(oldX, oldY, oldW, oldH, oldBW,
                              newX, newY, newW, newH, newBW);
-
-    /* Compute intersection between old and new rects */
-    rect.x1 = max(oldX, newX);
-    rect.y1 = max(oldY, newY);
-    rect.x2 = min(oldX2, newX2);
-    rect.y2 = min(oldY2, newY2);
 
     RL_DEBUG_MSG("RESIZE TOPLEVEL WINDOW with gravity %i ", gravity);
     RL_DEBUG_MSG("%d %d %d %d %d   %d %d %d %d %d\n",
@@ -832,8 +820,6 @@ FinishFrameResize(WindowPtr pWin, Bool gravity, int oldX, int oldY,
                   unsigned int newBW)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
-    RootlessWindowRec *winRec = WINREC(pWin);
-    int i;
 
     /* Redraw everything. FIXME: there must be times when we don't need
        to do this. Perhaps when top-left weighting and no gravity? */
