@@ -71,4 +71,42 @@ void dixScreenHookWindowDestroy(ScreenPtr pScreen,
 void dixScreenUnhookWindowDestroy(ScreenPtr pScreen,
                                   XorgScreenWindowDestroyProcPtr func);
 
+typedef struct {
+    WindowPtr window;
+    int32_t x;
+    int32_t y;
+} XorgScreenWindowPositionParamRec;
+
+/* prototype of a window move notification handler */
+typedef void (*XorgScreenWindowPositionProcPtr)(CallbackListPtr *pcbl,
+                                                ScreenPtr pScreen,
+                                                XorgScreenWindowPositionParamRec *param);
+
+/**
+ * @brief register a position notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the window hook function
+ * @param arg opaque pointer passed to the hook
+ *
+ * When registration fails, the server aborts.
+ *
+ **/
+void dixScreenHookWindowPosition(ScreenPtr pScreen,
+                                           XorgScreenWindowPositionProcPtr func);
+
+/**
+ * @brief unregister a window position notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookWindowPosition
+ *
+ * Unregister a window position notify hook registered via @ref dixScreenHookWindowPosition
+ **/
+void dixScreenUnhookWindowPosition(ScreenPtr pScreen,
+                                             XorgScreenWindowPositionProcPtr func);
+
 #endif /* DIX_SCREEN_HOOKS_H */

@@ -24,6 +24,7 @@
     }
 
 DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcPtr);
+DECLARE_HOOK_PROC(WindowPosition, hookWindowPosition, XorgScreenWindowPositionProcPtr);
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
@@ -35,4 +36,20 @@ int dixScreenRaiseWindowDestroy(WindowPtr pWin)
     CallCallbacks(&pScreen->hookWindowDestroy, pWin);
 
     return (pScreen->DestroyWindow ? pScreen->DestroyWindow(pWin) : Success);
+}
+
+void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y)
+{
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
+    XorgScreenWindowPositionParamRec param = {
+        .window = pWin,
+        .x = x,
+        .y = y,
+    };
+
+    CallCallbacks(&pScreen->hookWindowPosition, &param);
+
+    if (pScreen->PositionWindow)
+        pScreen->PositionWindow(pWin, x, y);
 }
