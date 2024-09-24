@@ -668,7 +668,8 @@ InitRootWindow(WindowPtr pWin)
 
     if (!(*pScreen->CreateWindow) (pWin))
         return;                 /* XXX */
-    (*pScreen->PositionWindow) (pWin, 0, 0);
+
+    dixScreenRaiseWindowPosition(pWin, 0, 0);
 
     pWin->cursorIsNone = FALSE;
     pWin->optional->cursor = RefCursor(rootCursor);
@@ -921,7 +922,7 @@ dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
         return NullWindow;
     }
     /* We SHOULD check for an error value here XXX */
-    (*pScreen->PositionWindow) (pWin, pWin->drawable.x, pWin->drawable.y);
+    dixScreenRaiseWindowPosition(pWin, pWin->drawable.x, pWin->drawable.y);
 
     if (!(vmask & CWEventMask))
         RecalculateDeliverableEvents(pWin);
@@ -1841,11 +1842,8 @@ GravityTranslate(int x, int y, int oldx, int oldy,
 void
 ResizeChildrenWinSize(WindowPtr pWin, int dx, int dy, int dw, int dh)
 {
-    ScreenPtr pScreen;
     WindowPtr pSib, pChild;
     Bool resized = (dw || dh);
-
-    pScreen = pWin->drawable.pScreen;
 
     for (pSib = pWin->firstChild; pSib; pSib = pSib->nextSib) {
         if (resized && (pSib->winGravity > NorthWestGravity)) {
@@ -1871,7 +1869,8 @@ ResizeChildrenWinSize(WindowPtr pWin, int dx, int dy, int dw, int dh)
         pSib->drawable.y = pWin->drawable.y + pSib->origin.y;
         SetWinSize(pSib);
         SetBorderSize(pSib);
-        (*pScreen->PositionWindow) (pSib, pSib->drawable.x, pSib->drawable.y);
+
+        dixScreenRaiseWindowPosition(pSib, pSib->drawable.x, pSib->drawable.y);
 
         if ((pChild = pSib->firstChild)) {
             while (1) {
@@ -1881,9 +1880,9 @@ ResizeChildrenWinSize(WindowPtr pWin, int dx, int dy, int dw, int dh)
                     pChild->origin.y;
                 SetWinSize(pChild);
                 SetBorderSize(pChild);
-                (*pScreen->PositionWindow) (pChild,
-                                            pChild->drawable.x,
-                                            pChild->drawable.y);
+                dixScreenRaiseWindowPosition(pChild,
+                                             pChild->drawable.x,
+                                             pChild->drawable.y);
                 if (pChild->firstChild) {
                     pChild = pChild->firstChild;
                     continue;
@@ -2577,7 +2576,8 @@ ReparentWindow(WindowPtr pWin, WindowPtr pParent,
 
     if (pScreen->ReparentWindow)
         (*pScreen->ReparentWindow) (pWin, pPriorParent);
-    (*pScreen->PositionWindow) (pWin, pWin->drawable.x, pWin->drawable.y);
+
+    dixScreenRaiseWindowPosition(pWin, pWin->drawable.x, pWin->drawable.y);
     ResizeChildrenWinSize(pWin, 0, 0, 0, 0);
 
     CheckWindowOptionalNeed(pWin);
