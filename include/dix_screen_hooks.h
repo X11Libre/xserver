@@ -72,4 +72,40 @@ _X_EXPORT void dixScreenUnhookWindowDestroy(ScreenPtr pScreen,
                                             XorgWindowDestroyProcPtr func,
                                             void *arg);
 
+/* prototype of a window move notification handler */
+typedef void (*XorgWindowPositionProcPtr)(ScreenPtr pScreen,
+                                          WindowPtr pWindow,
+                                          void *arg,
+                                          int32_t x,
+                                          int32_t y);
+
+/**
+ * @brief register a position notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the window hook function
+ * @param arg opaque pointer passed to the hook
+ *
+ * When registration fails, the server aborts.
+ *
+ **/
+_X_EXPORT void dixScreenHookWindowPosition(ScreenPtr pScreen,
+                                           XorgWindowPositionProcPtr func,
+                                           void *arg);
+
+/**
+ * @brief unregister a window position notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookWindowPosition
+ *
+ * Unregister a window position notify hook registered via @ref dixScreenHookWindowPosition
+ **/
+_X_EXPORT void dixScreenUnhookWindowPosition(ScreenPtr pScreen,
+                                             XorgWindowPositionProcPtr func,
+                                             void *arg);
+
 #endif /* DIX_SCREEN_HOOKS_H */
