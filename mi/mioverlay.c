@@ -4,6 +4,7 @@
 #include <X11/X.h>
 
 #include "dix/cursor_priv.h"
+#include "dix/dix_priv.h"
 
 #include "scrnintstr.h"
 #include <X11/extensions/shapeproto.h>
@@ -932,7 +933,7 @@ miOverlayMoveWindow(WindowPtr pWin,
     SetWinSize(pWin);
     SetBorderSize(pWin);
 
-    (*pScreen->PositionWindow) (pWin, x, y);
+    dixScreenRaiseWindowPosition(pWin, x, y);
 
     windowToValidate = MoveWindowInStack(pWin, pNextSib);
 
@@ -1185,7 +1186,7 @@ miOverlayResizeWindow(WindowPtr pWin,
     ResizeChildrenWinSize(pWin, x - oldx, y - oldy, dw, dh);
 
     /* let the hardware adjust background and border pixmaps, if any */
-    (*pScreen->PositionWindow) (pWin, x, y);
+    dixScreenRaiseWindowPosition(pWin, x, y);
 
     pFirstChange = MoveWindowInStack(pWin, pSib);
 

@@ -41,6 +41,7 @@
     }
 
 DECLARE_HOOK_LIST(WindowDestroy, _notify_window_destroy)
+DECLARE_HOOK_LIST(WindowPosition, _notify_window_position)
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
@@ -54,4 +55,17 @@ int dixScreenRaiseWindowDestroy(WindowPtr pWin)
             walk.ptr->func(pScreen, pWin, walk.ptr->arg);
     }
     return (pScreen->DestroyWindow ? (*pScreen->DestroyWindow) (pWin) : Success);
+}
+
+void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y)
+{
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
+    ARRAY_FOR_EACH(pScreen->_notify_window_position, walk) {
+        if (walk.ptr->func)
+            walk.ptr->func(pScreen, pWin, walk.ptr->arg, x, y);
+    }
+
+    if (pScreen->PositionWindow)
+        (*pScreen->PositionWindow) (pWin, x, y);
 }
