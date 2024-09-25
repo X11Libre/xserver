@@ -53,4 +53,6 @@ extern DevPrivateKeyRec dbeWindowPrivKeyRec;
 extern RESTYPE dbeDrawableResType;
 extern RESTYPE dbeWindowPrivResType;
 
+void miDbeWindowPosition(ScreenPtr pScreen, WindowPtr pWin, void *arg, int32_t x, int32_t y);
+
 #endif                          /* MIDBE_H */
