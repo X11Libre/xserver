@@ -59,6 +59,9 @@ int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 
 void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y)
 {
+    if (!pWin)
+        return;
+
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
     ARRAY_FOR_EACH(pScreen->_notify_window_position, walk) {
