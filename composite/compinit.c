@@ -79,10 +79,10 @@ compCloseScreen(ScreenPtr pScreen)
     pScreen->RealizeWindow = cs->RealizeWindow;
     pScreen->CreateWindow = cs->CreateWindow;
     pScreen->CopyWindow = cs->CopyWindow;
-    pScreen->PositionWindow = cs->PositionWindow;
     pScreen->SourceValidate = cs->SourceValidate;
 
     dixScreenUnhookWindowDestroy(pScreen, compWindowDestroy, NULL);
+    dixScreenUnhookWindowPosition(pScreen, compWindowPosition, NULL);
 
     free(cs);
     dixSetPrivate(&pScreen->devPrivates, CompScreenPrivateKey, NULL);
@@ -371,9 +371,7 @@ compScreenInit(ScreenPtr pScreen)
         pScreen->backingStoreSupport = WhenMapped;
 
     dixScreenHookWindowDestroy(pScreen, compWindowDestroy, NULL);
-
-    cs->PositionWindow = pScreen->PositionWindow;
-    pScreen->PositionWindow = compPositionWindow;
+    dixScreenHookWindowPosition(pScreen, compWindowPosition, NULL);
 
     cs->CopyWindow = pScreen->CopyWindow;
     pScreen->CopyWindow = compCopyWindow;

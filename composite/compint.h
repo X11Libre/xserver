@@ -124,7 +124,6 @@ typedef struct _CompImplicitRedirectException {
 } CompImplicitRedirectException;
 
 typedef struct _CompScreen {
-    PositionWindowProcPtr PositionWindow;
     CopyWindowProcPtr CopyWindow;
     CreateWindowProcPtr CreateWindow;
     RealizeWindowProcPtr RealizeWindow;
@@ -278,8 +277,7 @@ void
 Bool
  compCheckRedirect(WindowPtr pWin);
 
-Bool
- compPositionWindow(WindowPtr pWin, int x, int y);
+void compWindowPosition(ScreenPtr pScreen, WindowPtr pWin, void *arg, int32_t x, int32_t y);
 
 Bool
  compRealizeWindow(WindowPtr pWin);
