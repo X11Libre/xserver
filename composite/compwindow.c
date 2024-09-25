@@ -224,14 +224,9 @@ updateOverlayWindow(ScreenPtr pScreen)
     return Success;
 }
 
-Bool
-compPositionWindow(WindowPtr pWin, int x, int y)
+void compWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWindowPositionParamRec *param)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret = TRUE;
-
-    pScreen->PositionWindow = cs->PositionWindow;
+    WindowPtr pWin = param->window;
     /*
      * "Shouldn't need this as all possible places should be wrapped
      *
@@ -255,14 +250,8 @@ compPositionWindow(WindowPtr pWin, int x, int y)
         }
     }
 
-    if (!(*pScreen->PositionWindow) (pWin, x, y))
-        ret = FALSE;
-    cs->PositionWindow = pScreen->PositionWindow;
-    pScreen->PositionWindow = compPositionWindow;
     compCheckTree(pWin->drawable.pScreen);
-    if (updateOverlayWindow(pScreen) != Success)
-        ret = FALSE;
-    return ret;
+    updateOverlayWindow(pScreen);
 }
 
 Bool
