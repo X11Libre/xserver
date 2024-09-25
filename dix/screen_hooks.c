@@ -40,6 +40,9 @@ int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 
 void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y)
 {
+    if (!pWin)
+        return;
+
     ScreenPtr pScreen = pWin->drawable.pScreen;
 
     XorgScreenWindowPositionParamRec param = {

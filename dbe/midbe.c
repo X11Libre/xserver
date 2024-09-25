@@ -381,7 +381,7 @@ miDbeSwapBuffers(ClientPtr client, int *pNumWindows, DbeSwapInfoPtr swapInfo)
  *     - miDbeAllocBackBufferName() calls FreeResource() to clean up resources
  *       after a buffer allocation failure.
  *
- *     - The PositionWindow wrapper, miDbePositionWindow(), calls
+ *     - The WindowPosition hook, miDbeWindowPosition(), calls
  *       FreeResource() when it fails to create buffers of the new size.
  *       FreeResource() is called for all DBE buffer IDs.
  *
@@ -431,22 +431,20 @@ miDbeWinPrivDelete(DbeWindowPrivPtr pDbeWindowPriv, XID bufId)
     if (pDbeWindowPriv->pBackBuffer)
         dixDestroyPixmap(pDbeWindowPriv->pBackBuffer, 0);
 }                               /* miDbeWinPrivDelete() */
-
+
 /******************************************************************************
  *
- * DBE MI Procedure: miDbePositionWindow
+ * DBE MI Procedure: miDbeWindowPosition
  *
  * Description:
  *
- *     This function was cloned from miMbxPositionWindow() in mimultibuf.c.
+ *     This function was cloned from miMbxWindowPosition() in mimultibuf.c.
  *     This function resizes the buffer when the window is resized.
  *
  *****************************************************************************/
 
-static Bool
-miDbePositionWindow(WindowPtr pWin, int x, int y)
+void miDbeWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWindowPositionParamRec *param)
 {
-    ScreenPtr pScreen;
     DbeScreenPrivPtr pDbeScreenPriv;
     DbeWindowPrivPtr pDbeWindowPriv;
     int width, height;
@@ -459,43 +457,9 @@ miDbePositionWindow(WindowPtr pWin, int x, int y)
     Bool clear;
     GCPtr pGC;
     xRectangle clearRect;
-    Bool ret;
 
-    /*
-     **************************************************************************
-     ** 1. Unwrap the member routine.
-     **************************************************************************
-     */
-
-    pScreen = pWin->drawable.pScreen;
+    WindowPtr pWin = param->window;
     pDbeScreenPriv = DBE_SCREEN_PRIV(pScreen);
-    pScreen->PositionWindow = pDbeScreenPriv->PositionWindow;
-
-    /*
-     **************************************************************************
-     ** 2. Do any work necessary before the member routine is called.
-     **
-     **    In this case we do not need to do anything.
-     **************************************************************************
-     */
-
-    /*
-     **************************************************************************
-     ** 3. Call the member routine, saving its result if necessary.
-     **************************************************************************
-     */
-
-    ret = (*pScreen->PositionWindow) (pWin, x, y);
-
-    /*
-     **************************************************************************
-     ** 4. Rewrap the member routine, restoring the wrapper value first in case
-     **    the wrapper (or something that it wrapped) change this value.
-     **************************************************************************
-     */
-
-    pDbeScreenPriv->PositionWindow = pScreen->PositionWindow;
-    pScreen->PositionWindow = miDbePositionWindow;
 
     /*
      **************************************************************************
@@ -503,14 +467,12 @@ miDbePositionWindow(WindowPtr pWin, int x, int y)
      **************************************************************************
      */
 
-    if (!(pDbeWindowPriv = DBE_WINDOW_PRIV(pWin))) {
-        return ret;
-    }
+    if (!(pDbeWindowPriv = DBE_WINDOW_PRIV(pWin)))
+        return;
 
     if (pDbeWindowPriv->width == pWin->drawable.width &&
-        pDbeWindowPriv->height == pWin->drawable.height) {
-        return ret;
-    }
+        pDbeWindowPriv->height == pWin->drawable.height)
+        return;
 
     width = pWin->drawable.width;
     height = pWin->drawable.height;
@@ -594,7 +556,7 @@ miDbePositionWindow(WindowPtr pWin, int x, int y)
         }
 
         FreeScratchGC(pGC);
-        return FALSE;
+        return;
     }
 
     else {
@@ -644,11 +606,8 @@ miDbePositionWindow(WindowPtr pWin, int x, int y)
 
         FreeScratchGC(pGC);
     }
+}
 
-    return ret;
-
-}                               /* miDbePositionWindow() */
-
 /******************************************************************************
  *
  * DBE MI Procedure: miDbeInit
@@ -662,9 +621,7 @@ miDbePositionWindow(WindowPtr pWin, int x, int y)
 Bool
 miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv)
 {
-    /* Wrap functions. */
-    pDbeScreenPriv->PositionWindow = pScreen->PositionWindow;
-    pScreen->PositionWindow = miDbePositionWindow;
+    dixScreenHookWindowPosition(pScreen, miDbeWindowPosition);
 
     /* Initialize the per-screen DBE function pointers. */
     pDbeScreenPriv->GetVisualInfo = miDbeGetVisualInfo;

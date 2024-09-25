@@ -82,9 +82,6 @@ DbeStubScreen(DbeScreenPrivPtr pDbeScreenPriv, int *nStubbedScreens)
     /* Stub DIX. */
     pDbeScreenPriv->SetupBackgroundPainter = NULL;
 
-    /* Do not unwrap PositionWindow. If the DDX initialization function failed,
-       we assume that it did not wrap PositionWindow. */
-
     /* Stub DDX. */
     pDbeScreenPriv->GetVisualInfo = NULL;
     pDbeScreenPriv->AllocBackBufferName = NULL;
@@ -1226,7 +1223,7 @@ DbeResetProc(ExtensionEntry * extEntry)
 
         if (pDbeScreenPriv) {
             dixScreenUnhookWindowDestroy(pScreen, miDbeWindowDestroy);
-            pScreen->PositionWindow = pDbeScreenPriv->PositionWindow;
+            dixScreenUnhookWindowPosition(pScreen, miDbeWindowPosition);
             free(pDbeScreenPriv);
         }
     }
@@ -1341,7 +1338,7 @@ DbeExtensionInit(void)
 
             if (ddxInitSuccess) {
                 /* Hook in our window destructor. The DDX initialization function
-                 * already wrapped PositionWindow for us.
+                 * already added WindowPosition hook for us.
                  */
                 dixScreenHookWindowDestroy(pScreen, miDbeWindowDestroy);
             }

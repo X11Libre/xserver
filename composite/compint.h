@@ -48,6 +48,8 @@
 #ifndef _COMPINT_H_
 #define _COMPINT_H_
 
+#include "dix/screen_hooks_priv.h"
+
 #include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
