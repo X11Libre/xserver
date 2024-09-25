@@ -224,14 +224,8 @@ updateOverlayWindow(ScreenPtr pScreen)
     return Success;
 }
 
-Bool
-compPositionWindow(WindowPtr pWin, int x, int y)
+void compWindowPosition(ScreenPtr pScreen, WindowPtr pWin, void *arg, int32_t x, int32_t y)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret = TRUE;
-
-    pScreen->PositionWindow = cs->PositionWindow;
     /*
      * "Shouldn't need this as all possible places should be wrapped
      *
@@ -255,14 +249,8 @@ compPositionWindow(WindowPtr pWin, int x, int y)
         }
     }
 
-    if (!(*pScreen->PositionWindow) (pWin, x, y))
-        ret = FALSE;
-    cs->PositionWindow = pScreen->PositionWindow;
-    pScreen->PositionWindow = compPositionWindow;
     compCheckTree(pWin->drawable.pScreen);
-    if (updateOverlayWindow(pScreen) != Success)
-        ret = FALSE;
-    return ret;
+    updateOverlayWindow(pScreen);
 }
 
 Bool
