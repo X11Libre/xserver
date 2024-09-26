@@ -1193,7 +1193,6 @@ winSetEngineFunctionsShadowDDNL(ScreenPtr pScreen)
             winCreateBoundingWindowFullScreen;
     else
         pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowWindowed;
-    pScreenPriv->pwinFinishScreenInit = winFinishScreenInitFB;
     pScreenPriv->pwinBltExposedRegions = winBltExposedRegionsShadowDDNL;
     pScreenPriv->pwinBltExposedWindowRegion = NULL;
     pScreenPriv->pwinActivateApp = winActivateAppShadowDDNL;
