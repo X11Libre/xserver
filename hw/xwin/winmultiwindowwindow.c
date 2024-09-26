@@ -109,9 +109,7 @@ winCreateWindowMultiWindow(WindowPtr pWin)
     winTrace("winCreateWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(CreateWindow);
-    fResult = (*pScreen->CreateWindow) (pWin);
-    WIN_WRAP(CreateWindow, winCreateWindowMultiWindow);
+    fbCreateWindow(pWin);
 
     /* Initialize some privates values */
     pWinPriv->hRgn = NULL;
