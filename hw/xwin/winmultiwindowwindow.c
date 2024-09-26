@@ -343,9 +343,7 @@ winMapWindowMultiWindow(WindowPtr pWin)
     ErrorF("winMapWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(RealizeWindow);
-    fResult = (*pScreen->RealizeWindow) (pWin);
-    WIN_WRAP(RealizeWindow, winMapWindowMultiWindow);
+    fbRealizeWindow(pWin);
 
     /* Flag that this window has not been destroyed */
     pWinPriv->fXKilled = FALSE;
