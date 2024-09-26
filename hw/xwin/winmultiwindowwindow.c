@@ -775,24 +775,6 @@ winReorderWindowsMultiWindow(void)
 }
 
 /*
- * CopyWindow - See Porting Layer Definition - p. 39
- */
-void
-winCopyWindowMultiWindow(WindowPtr pWin, DDXPointRec oldpt, RegionPtr oldRegion)
-{
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
-#if ENABLE_DEBUG
-    ErrorF("CopyWindowMultiWindow\n");
-#endif
-    WIN_UNWRAP(CopyWindow);
-    (*pScreen->CopyWindow) (pWin, oldpt, oldRegion);
-    WIN_WRAP(CopyWindow, winCopyWindowMultiWindow);
-}
-
-/*
  * MoveWindow - See Porting Layer Definition - p. 42
  */
 void

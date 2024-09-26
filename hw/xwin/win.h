@@ -503,7 +503,6 @@ typedef struct _winPrivScreenRec {
     UnrealizeWindowProcPtr UnrealizeWindow;
     ValidateTreeProcPtr ValidateTree;
     PostValidateTreeProcPtr PostValidateTree;
-    CopyWindowProcPtr CopyWindow;
     ClearToBackgroundProcPtr ClearToBackground;
     ClipNotifyProcPtr ClipNotify;
     RestackWindowProcPtr RestackWindow;
@@ -924,11 +923,6 @@ void
 
 winMoveWindowMultiWindow(WindowPtr pWin, int x, int y,
                          WindowPtr pSib, VTKind kind);
-
-void
-
-winCopyWindowMultiWindow(WindowPtr pWin, DDXPointRec oldpt,
-                         RegionPtr oldRegion);
 
 PixmapPtr
 winCreatePixmapMultiwindow(ScreenPtr pScreen, int width, int height, int depth,
