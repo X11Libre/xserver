@@ -131,19 +131,13 @@ winCreateWindowMultiWindow(WindowPtr pWin)
 Bool
 winDestroyWindowMultiWindow(WindowPtr pWin)
 {
-    Bool fResult = TRUE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
     winWindowPriv(pWin);
-    winScreenPriv(pScreen);
 
 #if ENABLE_DEBUG
     ErrorF("winDestroyWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(DestroyWindow);
-    fResult = (*pScreen->DestroyWindow) (pWin);
-    WIN_WRAP(DestroyWindow, winDestroyWindowMultiWindow);
+    Bool fResult = fbDestroyWindow(pWin);
 
     /* Flag that the window has been destroyed */
     pWinPriv->fXKilled = TRUE;

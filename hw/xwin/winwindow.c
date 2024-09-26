@@ -80,19 +80,13 @@ winCreateWindowRootless(WindowPtr pWin)
 Bool
 winDestroyWindowRootless(WindowPtr pWin)
 {
-    Bool fResult = FALSE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
     winWindowPriv(pWin);
-    winScreenPriv(pScreen);
 
 #if ENABLE_DEBUG
     winTrace("winDestroyWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(DestroyWindow);
-    fResult = (*pScreen->DestroyWindow) (pWin);
-    WIN_WRAP(DestroyWindow, winDestroyWindowRootless);
+    Bool fResult = fbDestroyWindow(pWin);
 
     if (pWinPriv->hRgn != NULL) {
         DeleteObject(pWinPriv->hRgn);
