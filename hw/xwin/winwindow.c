@@ -163,9 +163,7 @@ winUnmapWindowRootless(WindowPtr pWin)
     winTrace("winUnmapWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(UnrealizeWindow);
-    fResult = (*pScreen->UnrealizeWindow) (pWin);
-    WIN_WRAP(UnrealizeWindow, winUnmapWindowRootless);
+    fbUnrealizeWindow(pWin);
 
     if (pWinPriv->hRgn != NULL) {
         DeleteObject(pWinPriv->hRgn);

@@ -377,9 +377,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
         pScreenPriv->a = NULL; \
     }
 
-        /* Save a pointer to each lower-level window procedure */
-        WRAP(UnrealizeWindow);
-
         /* Assign rootless window procedures to be top level procedures */
         pScreen->CreateWindow = winCreateWindowRootless;
         pScreen->DestroyWindow = winDestroyWindowRootless;
@@ -405,7 +402,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
     }
 
         /* Save a pointer to each lower-level window procedure */
-        WRAP(UnrealizeWindow);
         WRAP(ReparentWindow);
         WRAP(RestackWindow);
         WRAP(ResizeWindow);
