@@ -285,19 +285,13 @@ winChangeWindowAttributesMultiWindow(WindowPtr pWin, unsigned long mask)
 Bool
 winUnmapWindowMultiWindow(WindowPtr pWin)
 {
-    Bool fResult = TRUE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
     winWindowPriv(pWin);
-    winScreenPriv(pScreen);
 
 #if ENABLE_DEBUG
     ErrorF("winUnmapWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(UnrealizeWindow);
-    fResult = (*pScreen->UnrealizeWindow) (pWin);
-    WIN_WRAP(UnrealizeWindow, winUnmapWindowMultiWindow);
+    Bool fResult = fbUnrealizeWindow(pWin);
 
     /* Flag that the window has been killed */
     pWinPriv->fXKilled = TRUE;

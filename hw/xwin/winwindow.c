@@ -137,19 +137,13 @@ winChangeWindowAttributesRootless(WindowPtr pWin, unsigned long mask)
 Bool
 winUnmapWindowRootless(WindowPtr pWin)
 {
-    Bool fResult = FALSE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
     winWindowPriv(pWin);
-    winScreenPriv(pScreen);
 
 #if ENABLE_DEBUG
     winTrace("winUnmapWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(UnrealizeWindow);
-    fResult = (*pScreen->UnrealizeWindow) (pWin);
-    WIN_WRAP(UnrealizeWindow, winUnmapWindowRootless);
+    Bool fResult = fbUnrealizeWindow(pWin);
 
     if (pWinPriv->hRgn != NULL) {
         DeleteObject(pWinPriv->hRgn);
