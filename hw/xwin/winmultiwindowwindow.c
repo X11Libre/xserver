@@ -186,9 +186,7 @@ winPositionWindowMultiWindow(WindowPtr pWin, int x, int y)
     winTrace("winPositionWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(PositionWindow);
-    fResult = (*pScreen->PositionWindow) (pWin, x, y);
-    WIN_WRAP(PositionWindow, winPositionWindowMultiWindow);
+    fbPositionWindow(pWin, x, y);
 
 #if ENABLE_DEBUG
     ErrorF("winPositionWindowMultiWindow: (x, y) = (%d, %d)\n", x, y);
