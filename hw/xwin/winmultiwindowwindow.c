@@ -316,19 +316,13 @@ winUnmapWindowMultiWindow(WindowPtr pWin)
 Bool
 winMapWindowMultiWindow(WindowPtr pWin)
 {
-    Bool fResult = TRUE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
     winWindowPriv(pWin);
-    winScreenPriv(pScreen);
 
 #if ENABLE_DEBUG
     ErrorF("winMapWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(RealizeWindow);
-    fResult = (*pScreen->RealizeWindow) (pWin);
-    WIN_WRAP(RealizeWindow, winMapWindowMultiWindow);
+    Bool fResult = fbRealizeWindow(pWin);
 
     /* Flag that this window has not been destroyed */
     pWinPriv->fXKilled = FALSE;

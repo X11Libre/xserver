@@ -168,18 +168,11 @@ winUnmapWindowRootless(WindowPtr pWin)
 Bool
 winMapWindowRootless(WindowPtr pWin)
 {
-    Bool fResult = FALSE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
 #if ENABLE_DEBUG
     winTrace("winMapWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(RealizeWindow);
-    fResult = (*pScreen->RealizeWindow) (pWin);
-    WIN_WRAP(RealizeWindow, winMapWindowRootless);
+    Bool fResult = fbRealizeWindow(pWin);
 
     winReshapeRootless(pWin);
 
