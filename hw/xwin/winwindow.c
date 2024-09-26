@@ -104,18 +104,11 @@ winDestroyWindowRootless(WindowPtr pWin)
 Bool
 winPositionWindowRootless(WindowPtr pWin, int x, int y)
 {
-    Bool fResult = FALSE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
 #if ENABLE_DEBUG
     winTrace("winPositionWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(PositionWindow);
-    fResult = (*pScreen->PositionWindow) (pWin, x, y);
-    WIN_WRAP(PositionWindow, winPositionWindowRootless);
+    Bool fResult = fbPositionWindow(pWin, x, y);
 
     winUpdateRgnRootless(pWin);
 

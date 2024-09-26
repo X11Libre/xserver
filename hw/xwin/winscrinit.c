@@ -380,7 +380,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
         WRAP(CreateWindow);
         WRAP(RealizeWindow);
         WRAP(UnrealizeWindow);
-        WRAP(PositionWindow);
         WRAP(ChangeWindowAttributes);
         WRAP(SetShape);
 
@@ -412,7 +411,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
         WRAP(CreateWindow);
         WRAP(RealizeWindow);
         WRAP(UnrealizeWindow);
-        WRAP(PositionWindow);
         WRAP(ChangeWindowAttributes);
         WRAP(ReparentWindow);
         WRAP(RestackWindow);
