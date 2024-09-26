@@ -56,18 +56,14 @@ Bool
 winCreateWindowRootless(WindowPtr pWin)
 {
     Bool fResult = FALSE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
 
     winWindowPriv(pWin);
-    winScreenPriv(pScreen);
 
 #if ENABLE_DEBUG
     winTrace("winCreateWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(CreateWindow);
-    fResult = (*pScreen->CreateWindow) (pWin);
-    WIN_WRAP(CreateWindow, winCreateWindowRootless);
+    fResult = fbCreateWindow(pWin);
 
     pWinPriv->hRgn = NULL;
 

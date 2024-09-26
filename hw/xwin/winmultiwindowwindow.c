@@ -98,19 +98,13 @@ winInitMultiWindowClass(void)
 Bool
 winCreateWindowMultiWindow(WindowPtr pWin)
 {
-    Bool fResult = TRUE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
     winWindowPriv(pWin);
-    winScreenPriv(pScreen);
 
 #if ENABLE_DEBUG
     winTrace("winCreateWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(CreateWindow);
-    fResult = (*pScreen->CreateWindow) (pWin);
-    WIN_WRAP(CreateWindow, winCreateWindowMultiWindow);
+    Bool fResult = fbCreateWindow(pWin);
 
     /* Initialize some privates values */
     pWinPriv->hRgn = NULL;
