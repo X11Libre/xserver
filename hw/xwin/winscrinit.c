@@ -38,6 +38,8 @@
 #include "win.h"
 #include "winmsg.h"
 
+static Bool winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv);
+
 /*
  * Determine what type of screen we are initializing
  * and call the appropriate procedure to initialize
@@ -165,9 +167,8 @@ winScreenInit(ScreenPtr pScreen, int argc, char **argv)
     /* Clear the visuals list */
     miClearVisualTypes();
 
-    /* Call the engine dependent screen initialization procedure */
-    if (!((*pScreenPriv->pwinFinishScreenInit) (pScreen->myNum, pScreen, argc, argv))) {
-        ErrorF("winScreenInit - winFinishScreenInit () failed\n");
+    if (!winFinishScreenInitFB(pScreen->myNum, pScreen, argc, argv)) {
+        ErrorF("%s(): winFinishScreenInitFB () failed\n", __FUNCTION__);
 
         /* call the engine dependent screen close procedure to clean up from a failure */
         pScreenPriv->pwinCloseScreen(pScreen);
@@ -221,7 +222,7 @@ winCreateScreenResources(ScreenPtr pScreen)
 }
 
 /* See Porting Layer Definition - p. 20 */
-Bool
+static Bool
 winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
 {
     winScreenPriv(pScreen);
