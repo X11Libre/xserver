@@ -142,9 +142,7 @@ winDestroyWindowMultiWindow(WindowPtr pWin)
     ErrorF("winDestroyWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(DestroyWindow);
-    fResult = (*pScreen->DestroyWindow) (pWin);
-    WIN_WRAP(DestroyWindow, winDestroyWindowMultiWindow);
+    fbDestroyWindow(pWin);
 
     /* Flag that the window has been destroyed */
     pWinPriv->fXKilled = TRUE;

@@ -90,9 +90,7 @@ winDestroyWindowRootless(WindowPtr pWin)
     winTrace("winDestroyWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(DestroyWindow);
-    fResult = (*pScreen->DestroyWindow) (pWin);
-    WIN_WRAP(DestroyWindow, winDestroyWindowRootless);
+    fbDestroyWindow(pWin);
 
     if (pWinPriv->hRgn != NULL) {
         DeleteObject(pWinPriv->hRgn);
