@@ -417,7 +417,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
         WRAP(RestackWindow);
         WRAP(ResizeWindow);
         WRAP(MoveWindow);
-        WRAP(CopyWindow);
         WRAP(SetShape);
         WRAP(ModifyPixmapHeader);
 
@@ -432,7 +431,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
         pScreen->RestackWindow = winRestackWindowMultiWindow;
         pScreen->ResizeWindow = winResizeWindowMultiWindow;
         pScreen->MoveWindow = winMoveWindowMultiWindow;
-        pScreen->CopyWindow = winCopyWindowMultiWindow;
         pScreen->SetShape = winSetShapeMultiWindow;
 
         if (pScreenInfo->fCompositeWM) {
