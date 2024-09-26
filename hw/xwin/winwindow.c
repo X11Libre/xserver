@@ -191,9 +191,7 @@ winMapWindowRootless(WindowPtr pWin)
     winTrace("winMapWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(RealizeWindow);
-    fResult = (*pScreen->RealizeWindow) (pWin);
-    WIN_WRAP(RealizeWindow, winMapWindowRootless);
+    fbRealizeWindow(pWin);
 
     winReshapeRootless(pWin);
 
