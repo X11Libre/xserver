@@ -117,9 +117,7 @@ winPositionWindowRootless(WindowPtr pWin, int x, int y)
     winTrace("winPositionWindowRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(PositionWindow);
-    fResult = (*pScreen->PositionWindow) (pWin, x, y);
-    WIN_WRAP(PositionWindow, winPositionWindowRootless);
+    fbPositionWindow(pWin, x, y);
 
     winUpdateRgnRootless(pWin);
 
