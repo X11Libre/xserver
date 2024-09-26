@@ -50,9 +50,7 @@ winSetShapeMultiWindow(WindowPtr pWin, int kind)
     ErrorF("winSetShapeMultiWindow - pWin: %p kind: %i\n", pWin, kind);
 #endif
 
-    WIN_UNWRAP(SetShape);
-    (*pScreen->SetShape) (pWin, kind);
-    WIN_WRAP(SetShape, winSetShapeMultiWindow);
+    fbSetShape(pWin, kind);
 
     /* Update the Windows window's shape */
     winReshapeMultiWindow(pWin);
