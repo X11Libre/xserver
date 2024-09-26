@@ -264,18 +264,11 @@ winPositionWindowMultiWindow(WindowPtr pWin, int x, int y)
 Bool
 winChangeWindowAttributesMultiWindow(WindowPtr pWin, unsigned long mask)
 {
-    Bool fResult = TRUE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
 #if ENABLE_DEBUG
     ErrorF("winChangeWindowAttributesMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(ChangeWindowAttributes);
-    fResult = (*pScreen->ChangeWindowAttributes) (pWin, mask);
-    WIN_WRAP(ChangeWindowAttributes, winChangeWindowAttributesMultiWindow);
+    Bool fResult = fbChangeWindowAttributes(pWin, mask);
 
     /*
      * NOTE: We do not currently need to do anything here.

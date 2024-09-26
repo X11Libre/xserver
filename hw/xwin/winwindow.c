@@ -117,18 +117,11 @@ winPositionWindowRootless(WindowPtr pWin, int x, int y)
 Bool
 winChangeWindowAttributesRootless(WindowPtr pWin, unsigned long mask)
 {
-    Bool fResult = FALSE;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
 #if ENABLE_DEBUG
     winTrace("winChangeWindowAttributesRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(ChangeWindowAttributes);
-    fResult = (*pScreen->ChangeWindowAttributes) (pWin, mask);
-    WIN_WRAP(ChangeWindowAttributes, winChangeWindowAttributesRootless);
+    Bool fResult = fbChangeWindowAttributes(pWin, mask);
 
     winUpdateRgnRootless(pWin);
 
