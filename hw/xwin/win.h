@@ -485,7 +485,6 @@ typedef struct _winPrivScreenRec {
     winInitVisualsProcPtr pwinInitVisuals;
     winAdjustVideoModeProcPtr pwinAdjustVideoMode;
     winCreateBoundingWindowProcPtr pwinCreateBoundingWindow;
-    winFinishScreenInitProcPtr pwinFinishScreenInit;
     winBltExposedRegionsProcPtr pwinBltExposedRegions;
     winBltExposedWindowRegionProcPtr pwinBltExposedWindowRegion;
     winActivateAppProcPtr pwinActivateApp;
@@ -823,9 +822,6 @@ void
 
 Bool
  winScreenInit(ScreenPtr pScreen, int argc, char **argv);
-
-Bool
- winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv);
 
 /*
  * winshadddnl.c
