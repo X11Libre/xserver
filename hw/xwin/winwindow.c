@@ -137,9 +137,7 @@ winChangeWindowAttributesRootless(WindowPtr pWin, unsigned long mask)
     winTrace("winChangeWindowAttributesRootless (%p)\n", pWin);
 #endif
 
-    WIN_UNWRAP(ChangeWindowAttributes);
-    fResult = (*pScreen->ChangeWindowAttributes) (pWin, mask);
-    WIN_WRAP(ChangeWindowAttributes, winChangeWindowAttributesRootless);
+    fbChangeWindowAttributes(pWin, mask);
 
     winUpdateRgnRootless(pWin);
 

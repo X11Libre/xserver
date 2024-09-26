@@ -285,9 +285,7 @@ winChangeWindowAttributesMultiWindow(WindowPtr pWin, unsigned long mask)
     ErrorF("winChangeWindowAttributesMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(ChangeWindowAttributes);
-    fResult = (*pScreen->ChangeWindowAttributes) (pWin, mask);
-    WIN_WRAP(ChangeWindowAttributes, winChangeWindowAttributesMultiWindow);
+    fbChangeWindowAttributes(pWin, mask);
 
     /*
      * NOTE: We do not currently need to do anything here.
