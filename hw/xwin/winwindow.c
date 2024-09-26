@@ -185,7 +185,7 @@ winSetShapeRootless(WindowPtr pWin, int kind)
     winTrace("winSetShapeRootless (%p, %i)\n", pWin, kind);
 #endif
 
-    miSetShape(pWin, kind);
+    fbSetShape(pWin, kind);
 
     winReshapeRootless(pWin);
     winUpdateRgnRootless(pWin);

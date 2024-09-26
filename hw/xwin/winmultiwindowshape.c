@@ -52,7 +52,7 @@ winSetShapeMultiWindow(WindowPtr pWin, int kind)
     ErrorF("winSetShapeMultiWindow - pWin: %p kind: %i\n", pWin, kind);
 #endif
 
-    miSetShape(pWin, kind);
+    fbSetShape(pWin, kind);
 
     /* Update the Windows window's shape */
     winReshapeMultiWindow(pWin);
