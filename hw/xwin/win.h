@@ -499,7 +499,6 @@ typedef struct _winPrivScreenRec {
     winCreateScreenResourcesProc pwinCreateScreenResources;
 
     /* Window Procedures for Rootless mode */
-    UnrealizeWindowProcPtr UnrealizeWindow;
     ValidateTreeProcPtr ValidateTree;
     PostValidateTreeProcPtr PostValidateTree;
     ClearToBackgroundProcPtr ClearToBackground;
