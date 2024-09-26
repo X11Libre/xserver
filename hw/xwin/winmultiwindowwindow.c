@@ -312,9 +312,7 @@ winUnmapWindowMultiWindow(WindowPtr pWin)
     ErrorF("winUnmapWindowMultiWindow - pWin: %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(UnrealizeWindow);
-    fResult = (*pScreen->UnrealizeWindow) (pWin);
-    WIN_WRAP(UnrealizeWindow, winUnmapWindowMultiWindow);
+    fbUnrealizeWindow(pWin);
 
     /* Flag that the window has been killed */
     pWinPriv->fXKilled = TRUE;
