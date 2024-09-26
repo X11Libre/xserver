@@ -381,7 +381,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
     }
 
         /* Save a pointer to each lower-level window procedure */
-        WRAP(CreateWindow);
         WRAP(RealizeWindow);
         WRAP(UnrealizeWindow);
         WRAP(ChangeWindowAttributes);
@@ -412,7 +411,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
     }
 
         /* Save a pointer to each lower-level window procedure */
-        WRAP(CreateWindow);
         WRAP(RealizeWindow);
         WRAP(UnrealizeWindow);
         WRAP(ChangeWindowAttributes);
