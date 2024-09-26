@@ -34,6 +34,8 @@
 #endif
 #include "win.h"
 
+#include "mi/mi_priv.h"
+
 /*
  * Prototypes for local functions
  */
@@ -189,17 +191,11 @@ winMapWindowRootless(WindowPtr pWin)
 void
 winSetShapeRootless(WindowPtr pWin, int kind)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
 #if ENABLE_DEBUG
     winTrace("winSetShapeRootless (%p, %i)\n", pWin, kind);
 #endif
 
-    WIN_UNWRAP(SetShape);
-    (*pScreen->SetShape) (pWin, kind);
-    WIN_WRAP(SetShape, winSetShapeRootless);
+    miSetShape(pWin, kind);
 
     winReshapeRootless(pWin);
     winUpdateRgnRootless(pWin);

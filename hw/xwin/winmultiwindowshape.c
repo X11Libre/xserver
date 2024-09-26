@@ -33,6 +33,8 @@
 #include <xwin-config.h>
 #endif
 
+#include "mi/mi_priv.h"
+
 #include "win.h"
 
 /*
@@ -50,9 +52,7 @@ winSetShapeMultiWindow(WindowPtr pWin, int kind)
     ErrorF("winSetShapeMultiWindow - pWin: %p kind: %i\n", pWin, kind);
 #endif
 
-    WIN_UNWRAP(SetShape);
-    (*pScreen->SetShape) (pWin, kind);
-    WIN_WRAP(SetShape, winSetShapeMultiWindow);
+    miSetShape(pWin, kind);
 
     /* Update the Windows window's shape */
     winReshapeMultiWindow(pWin);
