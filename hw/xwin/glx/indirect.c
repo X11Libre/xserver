@@ -373,7 +373,6 @@ static __GLXdrawable *glxWinCreateDrawable(ClientPtr client,
                                            int type,
                                            XID glxDrawId, __GLXconfig * conf);
 
-static Bool glxWinRealizeWindow(WindowPtr pWin);
 static Bool glxWinUnrealizeWindow(WindowPtr pWin);
 static void glxWinCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg,
                              RegionPtr prgnSrc);
@@ -704,9 +703,7 @@ glxWinScreenProbe(ScreenPtr pScreen)
     // dump out fbConfigs now fbConfigIds and visualIDs have been assigned
     fbConfigsDump(screen->base.numFBConfigs, screen->base.fbconfigs, &rejects);
 
-    /* Wrap RealizeWindow, UnrealizeWindow and CopyWindow on this screen */
-    screen->RealizeWindow = pScreen->RealizeWindow;
-    pScreen->RealizeWindow = glxWinRealizeWindow;
+    /* Wrap UnrealizeWindow and CopyWindow on this screen */
     screen->UnrealizeWindow = pScreen->UnrealizeWindow;
     pScreen->UnrealizeWindow = glxWinUnrealizeWindow;
     screen->CopyWindow = pScreen->CopyWindow;
@@ -729,23 +726,6 @@ glxWinScreenProbe(ScreenPtr pScreen)
 /*
  * Window functions
  */
-
-static Bool
-glxWinRealizeWindow(WindowPtr pWin)
-{
-    Bool result;
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-    glxWinScreen *screenPriv = (glxWinScreen *) glxGetScreen(pScreen);
-
-    GLWIN_DEBUG_MSG("glxWinRealizeWindow");
-
-    /* Allow the window to be created (RootlessRealizeWindow is inside our wrap) */
-    pScreen->RealizeWindow = screenPriv->RealizeWindow;
-    result = pScreen->RealizeWindow(pWin);
-    pScreen->RealizeWindow = glxWinRealizeWindow;
-
-    return result;
-}
 
 static void
 glxWinCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
