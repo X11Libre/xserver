@@ -501,7 +501,6 @@ typedef struct _winPrivScreenRec {
 
     /* Window Procedures for Rootless mode */
     CreateWindowProcPtr CreateWindow;
-    PositionWindowProcPtr PositionWindow;
     ChangeWindowAttributesProcPtr ChangeWindowAttributes;
     RealizeWindowProcPtr RealizeWindow;
     UnrealizeWindowProcPtr UnrealizeWindow;
