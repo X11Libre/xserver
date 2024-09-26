@@ -1265,7 +1265,6 @@ winSetEngineFunctionsShadowGDI(ScreenPtr pScreen)
             winCreateBoundingWindowFullScreen;
     else
         pScreenPriv->pwinCreateBoundingWindow = winCreateBoundingWindowWindowed;
-    pScreenPriv->pwinFinishScreenInit = winFinishScreenInitFB;
     pScreenPriv->pwinBltExposedRegions = winBltExposedRegionsShadowGDI;
     pScreenPriv->pwinBltExposedWindowRegion = winBltExposedWindowRegionShadowGDI;
     pScreenPriv->pwinActivateApp = winActivateAppShadowGDI;
