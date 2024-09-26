@@ -510,7 +510,6 @@ typedef struct _winPrivScreenRec {
     ReparentWindowProcPtr ReparentWindow;
     ResizeWindowProcPtr ResizeWindow;
     MoveWindowProcPtr MoveWindow;
-    SetShapeProcPtr SetShape;
     ModifyPixmapHeaderProcPtr ModifyPixmapHeader;
 
     winCursorRec cursor;

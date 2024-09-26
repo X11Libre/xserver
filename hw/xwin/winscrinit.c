@@ -384,7 +384,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
         /* Save a pointer to each lower-level window procedure */
         WRAP(RealizeWindow);
         WRAP(UnrealizeWindow);
-        WRAP(SetShape);
 
         /* Assign rootless window procedures to be top level procedures */
         pScreen->CreateWindow = winCreateWindowRootless;
@@ -417,7 +416,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
         WRAP(RestackWindow);
         WRAP(ResizeWindow);
         WRAP(MoveWindow);
-        WRAP(SetShape);
         WRAP(ModifyPixmapHeader);
 
         /* Assign multi-window window procedures to be top level procedures */
