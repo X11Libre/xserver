@@ -213,9 +213,7 @@ winSetShapeRootless(WindowPtr pWin, int kind)
     winTrace("winSetShapeRootless (%p, %i)\n", pWin, kind);
 #endif
 
-    WIN_UNWRAP(SetShape);
-    (*pScreen->SetShape) (pWin, kind);
-    WIN_WRAP(SetShape, winSetShapeRootless);
+    fbSetShape(pWin, kind);
 
     winReshapeRootless(pWin);
     winUpdateRgnRootless(pWin);
