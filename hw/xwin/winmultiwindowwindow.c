@@ -792,9 +792,7 @@ winMoveWindowMultiWindow(WindowPtr pWin, int x, int y,
     ErrorF("MoveWindowMultiWindow to (%d, %d)\n", x, y);
 #endif
 
-    WIN_UNWRAP(MoveWindow);
-    (*pScreen->MoveWindow) (pWin, x, y, pSib, kind);
-    WIN_WRAP(MoveWindow, winMoveWindowMultiWindow);
+    fbMoveWindow(pWin, x, y, pSib, kind);
 }
 
 /*
