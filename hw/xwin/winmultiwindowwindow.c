@@ -373,11 +373,6 @@ winReparentWindowMultiWindow(WindowPtr pWin, WindowPtr pPriorParent)
          pPriorParent, (unsigned int)pPriorParent->drawable.id,
          pWin->parent, (unsigned int)pWin->parent->drawable.id);
 
-    WIN_UNWRAP(ReparentWindow);
-    if (pScreen->ReparentWindow)
-        (*pScreen->ReparentWindow) (pWin, pPriorParent);
-    WIN_WRAP(ReparentWindow, winReparentWindowMultiWindow);
-
     /* Update the Windows window associated with this X window */
     winUpdateWindowsWindow(pWin);
 }

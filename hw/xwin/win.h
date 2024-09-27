@@ -504,7 +504,6 @@ typedef struct _winPrivScreenRec {
     ClearToBackgroundProcPtr ClearToBackground;
     ClipNotifyProcPtr ClipNotify;
     RestackWindowProcPtr RestackWindow;
-    ReparentWindowProcPtr ReparentWindow;
     ResizeWindowProcPtr ResizeWindow;
     MoveWindowProcPtr MoveWindow;
     ModifyPixmapHeaderProcPtr ModifyPixmapHeader;

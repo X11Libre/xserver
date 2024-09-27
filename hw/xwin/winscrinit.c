@@ -402,7 +402,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
     }
 
         /* Save a pointer to each lower-level window procedure */
-        WRAP(ReparentWindow);
         WRAP(RestackWindow);
         WRAP(ResizeWindow);
         WRAP(MoveWindow);
