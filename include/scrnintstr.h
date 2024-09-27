@@ -675,6 +675,10 @@ typedef struct _Screen {
     /* additional window position notify hooks (replaces wrapping PositionWindow)
        should NOT be touched outside of DIX core */
     CallbackListPtr hookWindowPosition;
+
+    /* additional screen close notify hooks (replaces wrapping CloseScreen)
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookClose;
 } ScreenRec;
 
 static inline RegionPtr

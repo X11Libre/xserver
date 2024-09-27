@@ -109,4 +109,40 @@ void dixScreenHookWindowPosition(ScreenPtr pScreen,
 void dixScreenUnhookWindowPosition(ScreenPtr pScreen,
                                              XorgScreenWindowPositionProcPtr func);
 
+/* prototype of screen close notification handler */
+typedef void (*XorgScreenCloseProcPtr)(CallbackListPtr *pcbl,
+                                       ScreenPtr pScreen,
+                                       void *unused);
+
+/**
+ * @brief register a screen close notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the hook function
+ *
+ * When registration fails, the server aborts.
+ *
+ * NOTE: only exported for libglamoregl, not supposed to be used by drivers.
+ **/
+_X_EXPORT
+void dixScreenHookClose(ScreenPtr pScreen,
+                        XorgScreenCloseProcPtr func);
+
+/**
+ * @brief unregister a screen close notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookClose
+ *
+ * Unregister a screen close notify hook registered via @ref dixScreenHookClose
+ *
+ * NOTE: only exported for libglamoregl, not supposed to be used by drivers.
+ **/
+_X_EXPORT
+void dixScreenUnhookClose(ScreenPtr pScreen,
+                          XorgScreenCloseProcPtr func);
+
 #endif /* DIX_SCREEN_HOOKS_H */

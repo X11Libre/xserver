@@ -18,9 +18,10 @@ void dixFreeScreen(ScreenPtr pScreen)
     FreeGCperDepth(pScreen);
     dixDestroyPixmap(pScreen->defaultStipple, 0);
     dixFreeScreenSpecificPrivates(pScreen);
-    pScreen->CloseScreen(pScreen);
+    dixScreenRaiseClose(pScreen);
     dixFreePrivates(pScreen->devPrivates, PRIVATE_SCREEN);
     DeleteCallbackList(&pScreen->hookWindowDestroy);
     DeleteCallbackList(&pScreen->hookWindowPosition);
+    DeleteCallbackList(&pScreen->hookClose);
     free(pScreen);
 }

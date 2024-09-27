@@ -778,7 +778,7 @@ xf86platformRemoveDevice(int index)
 
     scrnum = xf86GPUScreens[i]->confScreen->screennum;
 
-    xf86GPUScreens[i]->pScreen->CloseScreen(xf86GPUScreens[i]->pScreen);
+    dixScreenRaiseClose(xf86GPUScreens[i]->pScreen);
 
     RemoveGPUScreen(xf86GPUScreens[i]->pScreen);
     xf86DeleteScreen(xf86GPUScreens[i]);
