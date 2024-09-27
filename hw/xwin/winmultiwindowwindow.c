@@ -1092,7 +1092,6 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
 {
     int i;
     winPrivPixmapPtr pPixmapPriv = winGetPixmapPriv(pPixmap);
-    Bool fResult;
 
     /* reinitialize everything */
     pPixmap->drawable.depth = depth;
@@ -1143,13 +1142,5 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
 
     winDebug("winModifyPixmapHeaderMultiwindow: falling back\n");
 
-    {
-        ScreenPtr pScreen = pPixmap->drawable.pScreen;
-        winScreenPriv(pScreen);
-        WIN_UNWRAP(ModifyPixmapHeader);
-        fResult = (*pScreen->ModifyPixmapHeader) (pPixmap, width, height, depth, bitsPerPixel, devKind, pPixData);
-        WIN_WRAP(ModifyPixmapHeader, winModifyPixmapHeaderMultiwindow);
-    }
-
-    return fResult;
+    return fbModifyPixmapHeader(pPixmap, width, height, depth, bitsPerPixel, devKind, pPixData);
 }
