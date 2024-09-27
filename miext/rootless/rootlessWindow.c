@@ -300,18 +300,16 @@ RootlessChangeWindowAttributes(WindowPtr pWin, unsigned long vmask)
 }
 
 /*
- * RootlessPositionWindow
- *  This is a hook for when DIX moves or resizes a window.
- *  Update the frame position now although the physical window is moved
- *  in RootlessMoveWindow. (x, y) are *inside* position. After this,
- *  mi and fb are expecting the pixmap to be at the new location.
+ * @brief DIX move/resize hook
+ *
+ * This is a hook for when DIX moves or resizes a window.
+ * Update the frame position now although the physical window is moved
+ * in RootlessMoveWindow. (x, y) are *inside* position. After this,
+ * mi and fb are expecting the pixmap to be at the new location.
  */
-Bool
-RootlessPositionWindow(WindowPtr pWin, int x, int y)
+void RootlessWindowPosition(ScreenPtr pScreen, WindowPtr pWin, void *arg, int32_t x, int32_t y)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
     RootlessWindowRec *winRec = WINREC(pWin);
-    Bool result;
 
     RL_DEBUG_MSG("positionwindow start (win %p (%lu) @ %i, %i)\n", pWin, RootlessWID(pWin), x, y);
 
@@ -325,12 +323,7 @@ RootlessPositionWindow(WindowPtr pWin, int x, int y)
         }
     }
 
-    SCREEN_UNWRAP(pScreen, PositionWindow);
-    result = pScreen->PositionWindow(pWin, x, y);
-    SCREEN_WRAP(pScreen, PositionWindow);
-
     RL_DEBUG_MSG("positionwindow end\n");
-    return result;
 }
 
 /*

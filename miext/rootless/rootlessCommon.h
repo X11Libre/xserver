@@ -91,7 +91,6 @@ typedef struct _RootlessScreenRec {
     RestackWindowProcPtr RestackWindow;
     ReparentWindowProcPtr ReparentWindow;
     ChangeBorderWidthProcPtr ChangeBorderWidth;
-    PositionWindowProcPtr PositionWindow;
     ChangeWindowAttributesProcPtr ChangeWindowAttributes;
     PaintWindowProcPtr PaintWindow;
 
