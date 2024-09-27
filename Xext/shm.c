@@ -43,6 +43,7 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/Xfuncproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screen_hooks_priv.h"
 #include "os/auth.h"
 #include "os/busfault.h"
 #include "os/client_priv.h"
@@ -96,7 +97,6 @@ in this Software without prior written authorization from The Open Group.
 #endif /* XINERAMA */
 
 typedef struct _ShmScrPrivateRec {
-    CloseScreenProcPtr CloseScreen;
     ShmFuncsPtr shmFuncs;
     DestroyPixmapProcPtr destroyPixmap;
 } ShmScrPrivateRec;
@@ -195,15 +195,13 @@ CheckForShmSyscall(void)
 
 #endif
 
-static Bool
-ShmCloseScreen(ScreenPtr pScreen)
+static void
+ShmScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
 
-    pScreen->CloseScreen = screen_priv->CloseScreen;
     dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, NULL);
     free(screen_priv);
-    return (*pScreen->CloseScreen) (pScreen);
 }
 
 static ShmScrPrivateRec *
@@ -213,9 +211,8 @@ ShmInitScreenPriv(ScreenPtr pScreen)
 
     if (!screen_priv) {
         screen_priv = calloc(1, sizeof(ShmScrPrivateRec));
-        screen_priv->CloseScreen = pScreen->CloseScreen;
         dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, screen_priv);
-        pScreen->CloseScreen = ShmCloseScreen;
+        dixScreenHookClose(pScreen, ShmScreenClose);
     }
     return screen_priv;
 }
