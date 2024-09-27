@@ -361,18 +361,10 @@ winRestackWindowMultiWindow(WindowPtr pWin, WindowPtr pOldNextSib)
     HWND hInsertAfter;
     HWND hWnd = NULL;
 #endif
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
 
 #if ENABLE_DEBUG || ENABLE_DEBUG
     winTrace("winRestackMultiWindow - %p\n", pWin);
 #endif
-
-    WIN_UNWRAP(RestackWindow);
-    if (pScreen->RestackWindow)
-        (*pScreen->RestackWindow) (pWin, pOldNextSib);
-    WIN_WRAP(RestackWindow, winRestackWindowMultiWindow);
 
 #if 1
     /*
