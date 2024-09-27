@@ -402,7 +402,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
     }
 
         /* Save a pointer to each lower-level window procedure */
-        WRAP(ResizeWindow);
         WRAP(ModifyPixmapHeader);
 
         /* Assign multi-window window procedures to be top level procedures */
@@ -414,7 +413,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
         pScreen->UnrealizeWindow = winUnmapWindowMultiWindow;
         pScreen->ReparentWindow = winReparentWindowMultiWindow;
         pScreen->RestackWindow = winRestackWindowMultiWindow;
-        pScreen->ResizeWindow = winResizeWindowMultiWindow;
         pScreen->MoveWindow = winMoveWindowMultiWindow;
         pScreen->SetShape = winSetShapeMultiWindow;
 
