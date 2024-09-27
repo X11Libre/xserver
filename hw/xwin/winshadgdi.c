@@ -582,10 +582,7 @@ winCloseScreenShadowGDI(ScreenPtr pScreen)
     pScreenPriv->fClosed = TRUE;
     pScreenPriv->fActive = FALSE;
 
-    /* Call the wrapped CloseScreen procedure */
-    WIN_UNWRAP(CloseScreen);
-    if (pScreen->CloseScreen)
-        fReturn = (*pScreen->CloseScreen) (pScreen);
+    fReturn = fbCloseScreen(pScreen);
 
     /* Delete the window property */
     RemoveProp(pScreenPriv->hwndScreen, WIN_SCR_PROP);
