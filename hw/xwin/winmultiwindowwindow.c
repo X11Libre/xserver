@@ -398,11 +398,6 @@ winRestackWindowMultiWindow(WindowPtr pWin, WindowPtr pOldNextSib)
     winTrace("winRestackMultiWindow - %p\n", pWin);
 #endif
 
-    WIN_UNWRAP(RestackWindow);
-    if (pScreen->RestackWindow)
-        (*pScreen->RestackWindow) (pWin, pOldNextSib);
-    WIN_WRAP(RestackWindow, winRestackWindowMultiWindow);
-
 #if 1
     /*
      * Calling winReorderWindowsMultiWindow here means our window manager
