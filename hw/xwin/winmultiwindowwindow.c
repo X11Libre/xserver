@@ -1108,5 +1108,5 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
 
     winDebug("winModifyPixmapHeaderMultiwindow: falling back\n");
 
-    return miModifyPixmapHeader(pPixmap, width, height, depth, bitsPerPixel, devKind, pPixData);
+    return fbModifyPixmapHeader(pPixmap, width, height, depth, bitsPerPixel, devKind, pPixData);
 }
