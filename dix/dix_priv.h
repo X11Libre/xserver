@@ -289,4 +289,16 @@ int dixScreenRaiseWindowDestroy(WindowPtr pWin);
  */
 void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y);
 
+/*
+ * @brief call screen's close hooks
+ * @see dixScreenHookClose
+ * @param pScreen the screen being closed
+ *
+ * Call the pluggable screen close hooks that extensions might have registered on
+ * the screen, and finally call ScreenRec's CloseScreen proc.
+ *
+ * Should only be called by DIX itself.
+ */
+void dixScreenRaiseClose(ScreenPtr pScreen);
+
 #endif /* _XSERVER_DIX_PRIV_H */

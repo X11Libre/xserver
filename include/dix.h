@@ -431,6 +431,9 @@ typedef void (*XorgWindowPositionProcPtr)(ScreenPtr pScreen,
                                           int32_t x,
                                           int32_t y);
 
+/* prototype of screen close notification handler */
+typedef void (*XorgScreenCloseProcPtr)(ScreenPtr pScreen, void *arg);
+
 /**
  * @brief register a window on the given screen
  *
@@ -501,5 +504,34 @@ _X_EXPORT void dixScreenHookWindowPosition(ScreenPtr pScreen,
 _X_EXPORT void dixScreenUnhookWindowPosition(ScreenPtr pScreen,
                                              XorgWindowPositionProcPtr func,
                                              void *arg);
+
+/**
+ * @brief register a screen close notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the hook
+ *
+ * When registration fails, the server aborts.
+ *
+ **/
+_X_EXPORT void dixScreenHookClose(ScreenPtr pScreen,
+                                  XorgScreenCloseProcPtr func,
+                                  void *arg);
+
+/**
+ * @brief unregister a screen close notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookClose
+ *
+ * Unregister a screen close notify hook registered via @ref dixScreenHookClose
+ **/
+_X_EXPORT void dixScreenUnhookClose(ScreenPtr pScreen,
+                                    XorgScreenCloseProcPtr func,
+                                    void *arg);
 
 #endif                          /* DIX_H */
