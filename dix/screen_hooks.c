@@ -43,6 +43,7 @@
 DECLARE_HOOK_LIST(WindowDestroy, _notify_window_destroy)
 DECLARE_HOOK_LIST(WindowPosition, _notify_window_position)
 DECLARE_HOOK_LIST(Close, _notify_screen_close)
+DECLARE_HOOK_LIST(PixmapDestroy, _notify_pixmap_destroy)
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
@@ -86,4 +87,19 @@ void dixScreenRaiseClose(ScreenPtr pScreen)
 
     if (pScreen->CloseScreen)
         (*pScreen->CloseScreen) (pScreen);
+}
+
+void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap)
+{
+    if (!pPixmap)
+        return;
+
+    ScreenPtr pScreen = pPixmap->drawable.pScreen;
+
+    ARRAY_FOR_EACH(pScreen->_notify_pixmap_destroy, walk) {
+        if (walk.ptr->func)
+            walk.ptr->func(pScreen, pPixmap, walk.ptr->arg);
+    }
+
+    /* we must not call the original ScreenRec->DestroyPixmap() here */
 }
