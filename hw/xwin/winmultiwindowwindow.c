@@ -338,20 +338,11 @@ winMapWindowMultiWindow(WindowPtr pWin)
 void
 winReparentWindowMultiWindow(WindowPtr pWin, WindowPtr pPriorParent)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
     winDebug
         ("winReparentMultiWindow - pWin:%p XID:0x%x, reparent from pWin:%p XID:0x%x to pWin:%p XID:0x%x\n",
          pWin, (unsigned int)pWin->drawable.id,
          pPriorParent, (unsigned int)pPriorParent->drawable.id,
          pWin->parent, (unsigned int)pWin->parent->drawable.id);
-
-    WIN_UNWRAP(ReparentWindow);
-    if (pScreen->ReparentWindow)
-        (*pScreen->ReparentWindow) (pWin, pPriorParent);
-    WIN_WRAP(ReparentWindow, winReparentWindowMultiWindow);
 
     /* Update the Windows window associated with this X window */
     winUpdateWindowsWindow(pWin);
