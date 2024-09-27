@@ -290,4 +290,20 @@ void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y);
  */
 void dixScreenRaiseClose(ScreenPtr pScreen);
 
+/*
+ * @brief call screen's PixmapDestroy hook
+ * @see dixScreenHookPixmapDestroy
+ * @param pPixmap the pixmap being destroyed
+ *
+ * Call the pluggable pixmap destroy pixmap hooks that extensions might have
+ * registered on the screen.
+ * Note that it's *only* called, when the pixmap is really being destroyed
+ * (instead of just unref'ed)
+ *
+ * Should only be called by DIX itself, by dixDestroyPixmap()
+ * It must be called *before* the ScreenRec->DestroyPixmap() is called, any
+ * only if the reference counter reaches 1.
+ */
+void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap);
+
 #endif /* _XSERVER_DIX_PRIV_H */
