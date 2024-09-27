@@ -36,6 +36,8 @@
 #include <xwin-config.h>
 #endif
 
+#include "mi/mi_priv.h"
+
 #include "win.h"
 #include "winmultiwindowclass.h"
 #include "winmultiwindowicons.h"
@@ -752,17 +754,11 @@ void
 winMoveWindowMultiWindow(WindowPtr pWin, int x, int y,
                          WindowPtr pSib, VTKind kind)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
 #if ENABLE_DEBUG
     ErrorF("MoveWindowMultiWindow to (%d, %d)\n", x, y);
 #endif
 
-    WIN_UNWRAP(MoveWindow);
-    (*pScreen->MoveWindow) (pWin, x, y, pSib, kind);
-    WIN_WRAP(MoveWindow, winMoveWindowMultiWindow);
+    miMoveWindow(pWin, x, y, pSib, kind);
 }
 
 /*
