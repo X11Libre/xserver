@@ -96,7 +96,6 @@ in this Software without prior written authorization from The Open Group.
 #endif /* XINERAMA */
 
 typedef struct _ShmScrPrivateRec {
-    CloseScreenProcPtr CloseScreen;
     ShmFuncsPtr shmFuncs;
     DestroyPixmapProcPtr destroyPixmap;
 } ShmScrPrivateRec;
@@ -195,15 +194,13 @@ CheckForShmSyscall(void)
 
 #endif
 
-static Bool
-ShmCloseScreen(ScreenPtr pScreen)
+static void
+ShmScreenClose(ScreenPtr pScreen, void *arg)
 {
     ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
 
-    pScreen->CloseScreen = screen_priv->CloseScreen;
     dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, NULL);
     free(screen_priv);
-    return (*pScreen->CloseScreen) (pScreen);
 }
 
 static ShmScrPrivateRec *
@@ -213,9 +210,8 @@ ShmInitScreenPriv(ScreenPtr pScreen)
 
     if (!screen_priv) {
         screen_priv = calloc(1, sizeof(ShmScrPrivateRec));
-        screen_priv->CloseScreen = pScreen->CloseScreen;
         dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, screen_priv);
-        pScreen->CloseScreen = ShmCloseScreen;
+        dixScreenHookClose(pScreen, ShmScreenClose, NULL);
     }
     return screen_priv;
 }
