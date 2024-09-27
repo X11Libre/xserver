@@ -503,7 +503,6 @@ typedef struct _winPrivScreenRec {
     PostValidateTreeProcPtr PostValidateTree;
     ClearToBackgroundProcPtr ClearToBackground;
     ClipNotifyProcPtr ClipNotify;
-    ResizeWindowProcPtr ResizeWindow;
     ModifyPixmapHeaderProcPtr ModifyPixmapHeader;
 
     winCursorRec cursor;
@@ -910,11 +909,6 @@ void
  winReorderWindowsMultiWindow(void);
 
 void
-
-winResizeWindowMultiWindow(WindowPtr pWin, int x, int y, unsigned int w,
-                           unsigned int h, WindowPtr pSib);
-void
-
 winMoveWindowMultiWindow(WindowPtr pWin, int x, int y,
                          WindowPtr pSib, VTKind kind);
 

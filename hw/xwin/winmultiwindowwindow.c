@@ -762,25 +762,6 @@ winMoveWindowMultiWindow(WindowPtr pWin, int x, int y,
 }
 
 /*
- * ResizeWindow - See Porting Layer Definition - p. 42
- */
-void
-winResizeWindowMultiWindow(WindowPtr pWin, int x, int y, unsigned int w,
-                           unsigned int h, WindowPtr pSib)
-{
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
-#if ENABLE_DEBUG
-    ErrorF("ResizeWindowMultiWindow to (%d, %d) - %dx%d\n", x, y, w, h);
-#endif
-    WIN_UNWRAP(ResizeWindow);
-    (*pScreen->ResizeWindow) (pWin, x, y, w, h, pSib);
-    WIN_WRAP(ResizeWindow, winResizeWindowMultiWindow);
-}
-
-/*
  * winAdjustXWindow
  *
  * Move and resize X window with respect to corresponding Windows window.
