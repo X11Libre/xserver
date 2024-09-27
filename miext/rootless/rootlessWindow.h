@@ -42,7 +42,7 @@ void RootlessWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr p
 void RootlessSetShape(WindowPtr pWin, int kind);
 
 Bool RootlessChangeWindowAttributes(WindowPtr pWin, unsigned long vmask);
-Bool RootlessPositionWindow(WindowPtr pWin, int x, int y);
+void RootlessWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWindowPositionParamRec *param);
 Bool RootlessRealizeWindow(WindowPtr pWin);
 Bool RootlessUnrealizeWindow(WindowPtr pWin);
 void RootlessRestackWindow(WindowPtr pWin, WindowPtr pOldNextSib);

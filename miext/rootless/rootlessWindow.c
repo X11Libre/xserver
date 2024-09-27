@@ -304,20 +304,20 @@ RootlessChangeWindowAttributes(WindowPtr pWin, unsigned long vmask)
 }
 
 /*
- * RootlessPositionWindow
- *  This is a hook for when DIX moves or resizes a window.
- *  Update the frame position now although the physical window is moved
- *  in RootlessMoveWindow. (x, y) are *inside* position. After this,
- *  mi and fb are expecting the pixmap to be at the new location.
+ * @brief DIX move/resize hook
+ *
+ * This is a hook for when DIX moves or resizes a window.
+ * Update the frame position now although the physical window is moved
+ * in RootlessMoveWindow. (x, y) are *inside* position. After this,
+ * mi and fb are expecting the pixmap to be at the new location.
  */
-Bool
-RootlessPositionWindow(WindowPtr pWin, int x, int y)
+void RootlessWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreenWindowPositionParamRec *param)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
+    WindowPtr pWin = param->window;
     RootlessWindowRec *winRec = WINREC(pWin);
-    Bool result;
 
-    RL_DEBUG_MSG("positionwindow start (win %p (%lu) @ %i, %i)\n", pWin, RootlessWID(pWin), x, y);
+    RL_DEBUG_MSG("positionwindow start (win %p (%lu) @ %i, %i)\n", pWin,
+                 RootlessWID(pWin), param->x, param->y);
 
     if (winRec) {
         if (winRec->is_drawing) {
@@ -325,16 +325,11 @@ RootlessPositionWindow(WindowPtr pWin, int x, int y)
             int bw = wBorderWidth(pWin);
 
             winRec->pixmap->devPrivate.ptr = winRec->pixelData;
-            SetPixmapBaseToScreen(winRec->pixmap, x - bw, y - bw);
+            SetPixmapBaseToScreen(winRec->pixmap, param->x - bw, param->y - bw);
         }
     }
 
-    SCREEN_UNWRAP(pScreen, PositionWindow);
-    result = pScreen->PositionWindow(pWin, x, y);
-    SCREEN_WRAP(pScreen, PositionWindow);
-
     RL_DEBUG_MSG("positionwindow end\n");
-    return result;
 }
 
 /*
