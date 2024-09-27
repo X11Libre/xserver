@@ -26,6 +26,7 @@
 DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcPtr);
 DECLARE_HOOK_PROC(WindowDestroy, _notify_window_destroy)
 DECLARE_HOOK_PROC(WindowPosition, _notify_window_position)
+DECLARE_HOOK_PROC(Close, _notify_screen_close)
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
@@ -53,4 +54,18 @@ void dixScreenRaiseWindowPosition(WindowPtr pWin, uint32_t x, uint32_t y)
 
     if (pScreen->PositionWindow)
         (*pScreen->PositionWindow) (pWin, x, y);
+}
+
+void dixScreenRaiseClose(ScreenPtr pScreen)
+{
+    if (!pScreen)
+        return;
+
+    ARRAY_FOR_EACH(pScreen->_notify_screen_close, walk) {
+        if (walk.ptr->func)
+            walk.ptr->func(pScreen, walk.ptr->arg);
+    }
+
+    if (pScreen->CloseScreen)
+        (*pScreen->CloseScreen) (pScreen);
 }
