@@ -23,6 +23,7 @@
 #include <X11/Xfuncproto.h>
 
 #include "include/callback.h" /* CallbackListPtr */
+#include "include/pixmap.h" /* PixmapPtr */
 #include "include/screenint.h" /* ScreenPtr */
 #include "include/window.h" /* WindowPtr */
 
@@ -144,5 +145,44 @@ void dixScreenHookClose(ScreenPtr pScreen,
 _X_EXPORT
 void dixScreenUnhookClose(ScreenPtr pScreen,
                           XorgScreenCloseProcPtr func);
+
+/* prototype of pixmap destroy notification handler */
+typedef void (*XorgScreenPixmapDestroyProcPtr)(CallbackListPtr *pcbl,
+                                               ScreenPtr pScreen,
+                                               PixmapPtr pPixmap);
+
+/**
+ * @brief register a pixmap destroy hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the hook
+ *
+ * When registration fails, the server aborts.
+ * This hook is called only when the pixmap is really to be destroyed,
+ * (unlike ScreenRec->DestroyPixmap())
+ *
+ * NOTE: only exported for libglamoregl, not supposed to be used by drivers.
+ **/
+_X_EXPORT
+void dixScreenHookPixmapDestroy(ScreenPtr pScreen,
+                                XorgScreenPixmapDestroyProcPtr func);
+
+/**
+ * @brief unregister a pixmap destroy notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookClose
+ *
+ * Unregister a screen close notify hook registered via @ref dixScreenHookPixmapDestroy
+ *
+ * NOTE: only exported for libglamoregl, not supposed to be used by drivers.
+ **/
+_X_EXPORT
+void dixScreenUnhookPixmapDestroy(ScreenPtr pScreen,
+                                  XorgScreenPixmapDestroyProcPtr func);
 
 #endif /* DIX_SCREEN_HOOKS_H */

@@ -26,6 +26,7 @@
 DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcPtr);
 DECLARE_HOOK_PROC(WindowPosition, hookWindowPosition, XorgScreenWindowPositionProcPtr);
 DECLARE_HOOK_PROC(Close, hookClose, XorgScreenCloseProcPtr);
+DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr);
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
@@ -66,4 +67,14 @@ void dixScreenRaiseClose(ScreenPtr pScreen) {
 
     if (pScreen->CloseScreen)
         pScreen->CloseScreen(pScreen);
+}
+
+void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap)
+{
+    if (!pPixmap)
+        return;
+
+    ScreenPtr pScreen = pPixmap->drawable.pScreen;
+    CallCallbacks(&pScreen->hookPixmapDestroy, pPixmap);
+    /* we must not call the original ScreenRec->DestroyPixmap() here */
 }
