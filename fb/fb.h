@@ -665,6 +665,14 @@ extern _X_EXPORT void
 fbPolyFillRect(DrawablePtr pDrawable,
                GCPtr pGC, int nrectInit, xRectangle *prectInit);
 
+#define fbPolyFillArc miPolyFillArc
+
+#define fbSetShape miSetShape
+
+#define fbMoveWindow miMoveWindow
+
+#define fbModifyPixmapHeader miModifyPixmapHeader
+
 /*
  * fbfillsp.c
  */
