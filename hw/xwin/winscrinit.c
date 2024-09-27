@@ -430,7 +430,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
     }
 
     /* Wrap either fb's or shadow's CloseScreen with our CloseScreen */
-    pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = pScreenPriv->pwinCloseScreen;
 
     /* Create a mutex for modules in separate threads to wait for */
