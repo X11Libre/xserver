@@ -759,7 +759,7 @@ winMoveWindowMultiWindow(WindowPtr pWin, int x, int y,
     ErrorF("MoveWindowMultiWindow to (%d, %d)\n", x, y);
 #endif
 
-    miMoveWindow(pWin, x, y, pSib, kind);
+    fbMoveWindow(pWin, x, y, pSib, kind);
 }
 
 /*
