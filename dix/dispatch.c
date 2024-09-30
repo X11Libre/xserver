@@ -1462,8 +1462,9 @@ int
 dixDestroyPixmap(void *value, XID pid)
 {
     PixmapPtr pPixmap = (PixmapPtr) value;
-
-    return (*pPixmap->drawable.pScreen->DestroyPixmap) (pPixmap);
+    if (pPixmap && pPixmap->drawable.pScreen && pPixmap->drawable.pScreen->DestroyPixmap)
+        return pPixmap->drawable.pScreen->DestroyPixmap(pPixmap);
+    return TRUE;
 }
 
 int
