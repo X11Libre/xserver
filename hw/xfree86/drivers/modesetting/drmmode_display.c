@@ -1570,8 +1570,7 @@ drmmode_copy_fb(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 
     pScreen->canDoBGNoneRoot = TRUE;
 
-    if (drmmode->fbcon_pixmap)
-        pScrn->pScreen->DestroyPixmap(drmmode->fbcon_pixmap);
+    dixDestroyPixmap(drmmode->fbcon_pixmap, 0);
     drmmode->fbcon_pixmap = NULL;
 #endif
 }
@@ -2151,7 +2150,7 @@ drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int height,
         if ((*pScreen->ModifyPixmapHeader)(pixmap, width, height, depth,
                                            bitsPerPixel, devKind, pPixData))
             return pixmap;
-        (*pScreen->DestroyPixmap)(pixmap);
+        dixDestroyPixmap(pixmap, 0);
     }
     return NullPixmap;
 }
@@ -2223,9 +2222,7 @@ drmmode_shadow_fb_destroy(xf86CrtcPtr crtc, PixmapPtr pixmap,
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
 
-    if (pixmap) {
-        pixmap->drawable.pScreen->DestroyPixmap(pixmap);
-    }
+    dixDestroyPixmap(pixmap, 0);
 
     if (data) {
         drmModeRmFB(drmmode->fd, *fb_id);

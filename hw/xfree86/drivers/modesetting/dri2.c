@@ -208,7 +208,7 @@ ms_dri2_create_buffer2(ScreenPtr screen, DrawablePtr drawable,
     if (buffer->name == -1) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                    "Failed to get DRI2 name for pixmap\n");
-        screen->DestroyPixmap(pixmap);
+        dixDestroyPixmap(pixmap, 0);
         free(private);
         free(buffer);
         return NULL;
@@ -247,8 +247,7 @@ static void ms_dri2_destroy_buffer2(ScreenPtr unused, DrawablePtr unused2,
     if (buffer->driverPrivate) {
         ms_dri2_buffer_private_ptr private = buffer->driverPrivate;
         if (--private->refcnt == 0) {
-            ScreenPtr screen = private->pixmap->drawable.pScreen;
-            screen->DestroyPixmap(private->pixmap);
+            dixDestroyPixmap(private->pixmap, 0);
             free(private);
             free(buffer);
         }
@@ -523,7 +522,7 @@ update_front(DrawablePtr draw, DRI2BufferPtr front)
 
     front->name = name;
 
-    (*screen->DestroyPixmap) (priv->pixmap);
+    dixDestroyPixmap(priv->pixmap, 0);
     front->pitch = pixmap->devKind;
     front->cpp = pixmap->drawable.bitsPerPixel / 8;
     priv->pixmap = pixmap;

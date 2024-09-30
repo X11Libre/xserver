@@ -428,8 +428,8 @@ DRI2DrawableGone(void *p, XID id)
     }
 
     if (pPriv->prime_secondary_pixmap) {
-        (*pPriv->prime_secondary_pixmap->primary_pixmap->drawable.pScreen->DestroyPixmap)(pPriv->prime_secondary_pixmap->primary_pixmap);
-        (*pPriv->prime_secondary_pixmap->drawable.pScreen->DestroyPixmap)(pPriv->prime_secondary_pixmap);
+        dixDestroyPixmap(pPriv->prime_secondary_pixmap->primary_pixmap, 0);
+        dixDestroyPixmap(pPriv->prime_secondary_pixmap, 0);
     }
 
     if (pPriv->buffers != NULL) {
@@ -441,7 +441,7 @@ DRI2DrawableGone(void *p, XID id)
 
     if (pPriv->redirectpixmap) {
         (*pDraw->pScreen->ReplaceScanoutPixmap)(pDraw, pPriv->redirectpixmap, FALSE);
-        (*pDraw->pScreen->DestroyPixmap)(pPriv->redirectpixmap);
+        dixDestroyPixmap(pPriv->redirectpixmap, 0);
     }
 
     dri2WakeAll(CLIENT_SIGNAL_ANY, pPriv, WAKE_SWAP);
@@ -839,7 +839,7 @@ DrawablePtr DRI2UpdatePrime(DrawablePtr pDraw, DRI2BufferPtr pDest)
 
                     ret = (*primary->ReplaceScanoutPixmap)(pDraw, mpix, TRUE);
                     if (ret == FALSE) {
-                        (*primary->DestroyPixmap)(mpix);
+                        dixDestroyPixmap(mpix, 0);
                         return NULL;
                     }
                     pPriv->redirectpixmap = mpix;
@@ -848,7 +848,7 @@ DrawablePtr DRI2UpdatePrime(DrawablePtr pDraw, DRI2BufferPtr pDest)
             }
         } else if (pPriv->redirectpixmap) {
             (*primary->ReplaceScanoutPixmap)(pDraw, pPriv->redirectpixmap, FALSE);
-            (*primary->DestroyPixmap)(pPriv->redirectpixmap);
+            dixDestroyPixmap(pPriv->redirectpixmap, 0);
             pPriv->redirectpixmap = NULL;
         }
     }
@@ -861,8 +861,8 @@ DrawablePtr DRI2UpdatePrime(DrawablePtr pDraw, DRI2BufferPtr pDest)
             return &pPriv->prime_secondary_pixmap->drawable;
         else {
             PixmapUnshareSecondaryPixmap(pPriv->prime_secondary_pixmap);
-            (*pPriv->prime_secondary_pixmap->primary_pixmap->drawable.pScreen->DestroyPixmap)(pPriv->prime_secondary_pixmap->primary_pixmap);
-            (*secondary->DestroyPixmap)(pPriv->prime_secondary_pixmap);
+            dixDestroyPixmap(pPriv->prime_secondary_pixmap->primary_pixmap, 0);
+            dixDestroyPixmap(pPriv->prime_secondary_pixmap, 0);
             pPriv->prime_secondary_pixmap = NULL;
         }
     }
