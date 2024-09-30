@@ -119,12 +119,11 @@ miDCSwitchScreenCursor(ScreenPtr pScreen, CursorPtr pCursor, PixmapPtr sourceBit
 {
     miDCScreenPtr pScreenPriv = dixLookupPrivate(&pScreen->devPrivates, miDCScreenKey);
 
-    if (pScreenPriv->sourceBits)
-        (*pScreen->DestroyPixmap)(pScreenPriv->sourceBits);
+    dixDestroyPixmap(pScreenPriv->sourceBits, 0);
     pScreenPriv->sourceBits = sourceBits;
 
     if (pScreenPriv->maskBits)
-        (*pScreen->DestroyPixmap)(pScreenPriv->maskBits);
+    dixDestroyPixmap(pScreenPriv->maskBits, 0);
     pScreenPriv->maskBits = maskBits;
 
     if (pScreenPriv->pPicture)
@@ -203,7 +202,7 @@ miDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
 
         pGC = GetScratchGC(32, pScreen);
         if (!pGC) {
-            (*pScreen->DestroyPixmap) (pPixmap);
+            dixDestroyPixmap(pPixmap, 0);
             return FALSE;
         }
         ValidateGC(&pPixmap->drawable, pGC);
@@ -214,7 +213,7 @@ miDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
         FreeScratchGC(pGC);
         pPicture = CreatePicture(0, &pPixmap->drawable,
                                  pFormat, 0, 0, serverClient, &error);
-        (*pScreen->DestroyPixmap) (pPixmap);
+        dixDestroyPixmap(pPixmap, 0);
         if (!pPicture)
             return FALSE;
 
@@ -230,7 +229,7 @@ miDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
     maskBits = (*pScreen->CreatePixmap) (pScreen, pCursor->bits->width,
                                          pCursor->bits->height, 1, 0);
     if (!maskBits) {
-        (*pScreen->DestroyPixmap) (sourceBits);
+        dixDestroyPixmap(sourceBits, 0);
         return FALSE;
     }
 
@@ -238,8 +237,8 @@ miDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
 
     pGC = GetScratchGC(1, pScreen);
     if (!pGC) {
-        (*pScreen->DestroyPixmap) (sourceBits);
-        (*pScreen->DestroyPixmap) (maskBits);
+        dixDestroyPixmap(sourceBits, 0);
+        dixDestroyPixmap(maskBits, 0);
         return FALSE;
     }
 
@@ -395,8 +394,7 @@ miDCSaveUnderCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
     pSave = pBuffer->pSave;
     pWin = pScreen->root;
     if (!pSave || pSave->drawable.width < w || pSave->drawable.height < h) {
-        if (pSave)
-            (*pScreen->DestroyPixmap) (pSave);
+        dixDestroyPixmap(pSave, 0);
         pBuffer->pSave = pSave =
             (*pScreen->CreatePixmap) (pScreen, w, h, pScreen->rootDepth, 0);
         if (!pSave)
@@ -513,8 +511,7 @@ miDCDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
                  * is freed when that root window is destroyed, so don't
                  * free it again here. */
 
-                if (pBuffer->pSave)
-                    (*pScreen->DestroyPixmap) (pBuffer->pSave);
+                dixDestroyPixmap(pBuffer->pSave, 0);
 
                 free(pBuffer);
                 dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, pScreen,

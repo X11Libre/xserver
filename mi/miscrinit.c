@@ -125,7 +125,8 @@ miModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
 static Bool
 miCloseScreen(ScreenPtr pScreen)
 {
-    return ((*pScreen->DestroyPixmap) ((PixmapPtr) pScreen->devPrivate));
+    dixDestroyPixmap((PixmapPtr) pScreen->devPrivate, 0);
+    return TRUE;
 }
 
 static Bool

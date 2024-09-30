@@ -1112,7 +1112,7 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
 
 out:
     if (fTricky) {
-        (*pGCTo->pScreen->DestroyPixmap) ((PixmapPtr) pDrawTo);
+        dixDestroyPixmap((PixmapPtr) pDrawTo, 0);
         FreeScratchGC(pGCTo);
     }
 }

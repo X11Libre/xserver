@@ -63,7 +63,7 @@ miChangeClip(GCPtr pGC, int type, void *pvalue, int nrects)
     if (type == CT_PIXMAP) {
         /* convert the pixmap to a region */
         pGC->clientClip = BitmapToRegion(pGC->pScreen, (PixmapPtr) pvalue);
-        (*pGC->pScreen->DestroyPixmap) (pvalue);
+        dixDestroyPixmap(pvalue, 0);
     }
     else if (type == CT_REGION) {
         /* stuff the region in the GC */
