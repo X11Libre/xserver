@@ -225,7 +225,7 @@ xnestChangeClip(GCPtr pGC, int type, void *pValue, int nRects)
          * current pixmap contents.
          */
         pGC->clientClip = (*pGC->pScreen->BitmapToRegion) ((PixmapPtr) pValue);
-        (*pGC->pScreen->DestroyPixmap) ((PixmapPtr) pValue);
+        dixDestroyPixmap((PixmapPtr) pValue, 0);
         pValue = pGC->clientClip;
         break;
 
