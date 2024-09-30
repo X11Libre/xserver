@@ -270,13 +270,10 @@ setEventMask(ScreenPtr pScreen, ClientPtr client, unsigned long mask)
 static void
 FreeAttrs(ScreenSaverAttrPtr pAttr)
 {
-    PixmapPtr pPixmap;
     CursorPtr pCursor;
 
-    if ((pPixmap = pAttr->pBackgroundPixmap) != 0)
-        (*pPixmap->drawable.pScreen->DestroyPixmap) (pPixmap);
-    if ((pPixmap = pAttr->pBorderPixmap) != 0)
-        (*pPixmap->drawable.pScreen->DestroyPixmap) (pPixmap);
+    dixDestroyPixmap(pAttr->pBackgroundPixmap, 0);
+    dixDestroyPixmap(pAttr->pBorderPixmap, 0);
     if ((pCursor = pAttr->pCursor) != 0)
         FreeCursor(pCursor, (Cursor) 0);
 }
