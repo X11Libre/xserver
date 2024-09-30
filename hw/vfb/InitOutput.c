@@ -730,8 +730,7 @@ vfbCloseScreen(ScreenPtr pScreen)
     /*
      * fb overwrites miCloseScreen, so do this here
      */
-    if (pScreen->devPrivate)
-        (*pScreen->DestroyPixmap) (pScreen->devPrivate);
+    dixDestroyPixmap(pScreen->devPrivate, 0);
     pScreen->devPrivate = NULL;
 
     return pScreen->CloseScreen(pScreen);
