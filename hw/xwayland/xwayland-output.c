@@ -180,7 +180,7 @@ update_backing_pixmaps(struct xwl_screen *xwl_screen, int width, int height)
 
     if (old_pixmap) {
         TraverseTree(pRoot, xwl_set_pixmap_visit_window, old_pixmap);
-        pScreen->DestroyPixmap(old_pixmap);
+        dixDestroyPixmap(old_pixmap, 0);
     }
 
     pScreen->ResizeWindow(pRoot, 0, 0, width, height, NULL);

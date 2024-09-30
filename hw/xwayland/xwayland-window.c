@@ -317,7 +317,7 @@ damage_report(DamagePtr pDamage, RegionPtr pRegion, void *data)
 
     window_pixmap = xwl_screen->screen->GetWindowPixmap(xwl_window->surface_window);
     if (xwl_is_client_pixmap(window_pixmap))
-        xwl_screen->screen->DestroyPixmap(xwl_window_swap_pixmap(xwl_window, FALSE));
+        dixDestroyPixmap(xwl_window_swap_pixmap(xwl_window, FALSE), 0);
 }
 
 static void
