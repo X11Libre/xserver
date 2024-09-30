@@ -3057,6 +3057,9 @@ must deallocate the PixmapRec and all attached devPrivate blocks.
 If successful, it returns TRUE.
 See Xserver/fb/fbpixmap.c for the sample server implementation.</para>
 <para>
+Consumers should never ever call that proc directly, but call dixDestroyPixmap() instead.
+</para>
+<para>
 <blockquote><programlisting>
 
 	Bool
