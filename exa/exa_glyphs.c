@@ -194,7 +194,7 @@ exaRealizeGlyphCaches(ScreenPtr pScreen, unsigned int format)
                              CPComponentAlpha, &component_alpha, serverClient,
                              &error);
 
-    (*pScreen->DestroyPixmap) (pPixmap);        /* picture holds a refcount */
+    dixDestroyPixmap(pPixmap, 0); /* picture holds a refcount */
 
     if (!pPicture)
         return FALSE;
@@ -728,7 +728,7 @@ exaGlyphs(CARD8 op,
         {
             PictFormatPtr argbFormat;
 
-            (*pScreen->DestroyPixmap) (pMaskPixmap);
+            dixDestroyPixmap(pMaskPixmap, 0);
 
             if (!pMask)
                 return;
@@ -751,7 +751,7 @@ exaGlyphs(CARD8 op,
             pMask = CreatePicture(0, &pMaskPixmap->drawable, maskFormat, 0, 0,
                                   serverClient, &error);
             if (!pMask) {
-                (*pScreen->DestroyPixmap) (pMaskPixmap);
+                dixDestroyPixmap(pMaskPixmap, 0);
                 return;
             }
         }
@@ -832,6 +832,6 @@ exaGlyphs(CARD8 op,
                          xSrc + x - first_xOff,
                          ySrc + y - first_yOff, 0, 0, x, y, width, height);
         FreePicture((void *) pMask, (XID) 0);
-        (*pScreen->DestroyPixmap) (pMaskPixmap);
+        dixDestroyPixmap(pMaskPixmap, 0);
     }
 }

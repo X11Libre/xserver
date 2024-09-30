@@ -614,7 +614,7 @@ ExaOffscreenDefragment(ScreenPtr pScreen)
     pDstPix->drawable.depth = 0;
     pDstPix->drawable.bitsPerPixel = 0;
 
-    (*pScreen->DestroyPixmap) (pDstPix);
+    dixDestroyPixmap(pDstPix, 0);
 
     if (area->state == ExaOffscreenAvail && area->size > largest_size)
         return area;
