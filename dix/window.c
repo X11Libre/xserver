@@ -1014,9 +1014,9 @@ FreeWindowResources(WindowPtr pWin)
     if (wInputShape(pWin))
         RegionDestroy(wInputShape(pWin));
     if (pWin->borderIsPixel == FALSE)
-        (*pScreen->DestroyPixmap) (pWin->border.pixmap);
+        dixDestroyPixmap(pWin->border.pixmap, 0);
     if (pWin->backgroundState == BackgroundPixmap)
-        (*pScreen->DestroyPixmap) (pWin->background.pixmap);
+        dixDestroyPixmap(pWin->background.pixmap, 0);
 
     DeleteAllWindowProperties(pWin);
     /* We SHOULD check for an error value here XXX */
@@ -1195,7 +1195,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                 borderRelative = TRUE;
             if (pixID == None) {
                 if (pWin->backgroundState == BackgroundPixmap)
-                    (*pScreen->DestroyPixmap) (pWin->background.pixmap);
+                    dixDestroyPixmap(pWin->background.pixmap, 0);
                 if (!pWin->parent)
                     SetRootWindowBackground(pWin, pScreen, &index2);
                 else {
@@ -1210,7 +1210,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                     goto PatchUp;
                 }
                 if (pWin->backgroundState == BackgroundPixmap)
-                    (*pScreen->DestroyPixmap) (pWin->background.pixmap);
+                    dixDestroyPixmap(pWin->background.pixmap, 0);
                 if (!pWin->parent)
                     SetRootWindowBackground(pWin, pScreen, &index2);
                 else
@@ -1229,7 +1229,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                         goto PatchUp;
                     }
                     if (pWin->backgroundState == BackgroundPixmap)
-                        (*pScreen->DestroyPixmap) (pWin->background.pixmap);
+                        dixDestroyPixmap(pWin->background.pixmap, 0);
                     pWin->backgroundState = BackgroundPixmap;
                     pWin->background.pixmap = pPixmap;
                     pPixmap->refcnt++;
@@ -1245,7 +1245,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
             if (pWin->backgroundState == ParentRelative)
                 borderRelative = TRUE;
             if (pWin->backgroundState == BackgroundPixmap)
-                (*pScreen->DestroyPixmap) (pWin->background.pixmap);
+                dixDestroyPixmap(pWin->background.pixmap, 0);
             pWin->backgroundState = BackgroundPixel;
             pWin->background.pixel = (CARD32) *pVlist;
             /* background pixel overrides background pixmap,
@@ -1264,7 +1264,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                 }
                 if (pWin->parent->borderIsPixel == TRUE) {
                     if (pWin->borderIsPixel == FALSE)
-                        (*pScreen->DestroyPixmap) (pWin->border.pixmap);
+                        dixDestroyPixmap(pWin->border.pixmap, 0);
                     pWin->border = pWin->parent->border;
                     pWin->borderIsPixel = TRUE;
                     index2 = CWBorderPixel;
@@ -1283,7 +1283,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                     goto PatchUp;
                 }
                 if (pWin->borderIsPixel == FALSE)
-                    (*pScreen->DestroyPixmap) (pWin->border.pixmap);
+                    dixDestroyPixmap(pWin->border.pixmap, 0);
                 pWin->borderIsPixel = FALSE;
                 pWin->border.pixmap = pPixmap;
                 pPixmap->refcnt++;
@@ -1296,7 +1296,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
             break;
         case CWBorderPixel:
             if (pWin->borderIsPixel == FALSE)
-                (*pScreen->DestroyPixmap) (pWin->border.pixmap);
+                dixDestroyPixmap(pWin->border.pixmap, 0);
             pWin->borderIsPixel = TRUE;
             pWin->border.pixel = (CARD32) *pVlist;
             /* border pixel overrides border pixmap,

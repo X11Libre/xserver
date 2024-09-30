@@ -253,7 +253,7 @@ ChangeGC(ClientPtr client, GC * pGC, BITS32 mask, ChangeGCValPtr pUnion)
             else {
                 pPixmap->refcnt++;
                 if (!pGC->tileIsPixel)
-                    (*pGC->pScreen->DestroyPixmap) (pGC->tile.pixmap);
+                    dixDestroyPixmap(pGC->tile.pixmap, 0);
                 pGC->tileIsPixel = FALSE;
                 pGC->tile.pixmap = pPixmap;
             }
@@ -270,7 +270,7 @@ ChangeGC(ClientPtr client, GC * pGC, BITS32 mask, ChangeGCValPtr pUnion)
                 if (pPixmap)
                     pPixmap->refcnt++;
                 if (pGC->stipple)
-                    (*pGC->pScreen->DestroyPixmap) (pGC->stipple);
+                    dixDestroyPixmap(pGC->stipple, 0);
                 pGC->stipple = pPixmap;
             }
             break;
@@ -587,8 +587,7 @@ CreateDefaultTile(GCPtr pGC)
         (*pGC->pScreen->CreatePixmap) (pGC->pScreen, w, h, pGC->depth, 0);
     pgcScratch = GetScratchGC(pGC->depth, pGC->pScreen);
     if (!pTile || !pgcScratch) {
-        if (pTile)
-            (*pTile->drawable.pScreen->DestroyPixmap) (pTile);
+        dixDestroyPixmap(pTile, 0);
         if (pgcScratch)
             FreeScratchGC(pgcScratch);
         return FALSE;
@@ -667,7 +666,7 @@ CopyGC(GC * pgcSrc, GC * pgcDst, BITS32 mask)
                 break;
             }
             if (!pgcDst->tileIsPixel)
-                (*pgcDst->pScreen->DestroyPixmap) (pgcDst->tile.pixmap);
+                dixDestroyPixmap(pgcDst->tile.pixmap, 0);
             pgcDst->tileIsPixel = pgcSrc->tileIsPixel;
             pgcDst->tile = pgcSrc->tile;
             if (!pgcDst->tileIsPixel)
@@ -679,7 +678,7 @@ CopyGC(GC * pgcSrc, GC * pgcDst, BITS32 mask)
             if (pgcDst->stipple == pgcSrc->stipple)
                 break;
             if (pgcDst->stipple)
-                (*pgcDst->pScreen->DestroyPixmap) (pgcDst->stipple);
+                dixDestroyPixmap(pgcDst->stipple, 0);
             pgcDst->stipple = pgcSrc->stipple;
             if (pgcDst->stipple)
                 pgcDst->stipple->refcnt++;
@@ -774,9 +773,9 @@ FreeGC(void *value, XID gid)
         (*pGC->funcs->DestroyClip) (pGC);
 
     if (!pGC->tileIsPixel)
-        (*pGC->pScreen->DestroyPixmap) (pGC->tile.pixmap);
+        dixDestroyPixmap(pGC->tile.pixmap, 0);
     if (pGC->stipple)
-        (*pGC->pScreen->DestroyPixmap) (pGC->stipple);
+        dixDestroyPixmap(pGC->stipple, 0);
 
     if (pGC->funcs)
         (*pGC->funcs->DestroyGC) (pGC);
@@ -884,7 +883,7 @@ CreateDefaultStipple(int screenNum)
     tmpval[2].val = FillSolid;
     pgcScratch = GetScratchGC(1, pScreen);
     if (!pgcScratch) {
-        (*pScreen->DestroyPixmap) (pScreen->defaultStipple);
+        dixDestroyPixmap(pScreen->defaultStipple, 0);
         return FALSE;
     }
     (void) ChangeGC(NullClient, pgcScratch,
@@ -904,8 +903,7 @@ void
 FreeDefaultStipple(int screenNum)
 {
     ScreenPtr pScreen = screenInfo.screens[screenNum];
-
-    (*pScreen->DestroyPixmap) (pScreen->defaultStipple);
+    dixDestroyPixmap(pScreen->defaultStipple, 0);
 }
 
 int
