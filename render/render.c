@@ -1134,7 +1134,7 @@ ProcRenderAddGlyphs(ClientPtr client)
 
                 /* The picture takes a reference to the pixmap, so we
                    drop ours. */
-                (pScreen->DestroyPixmap) (pDstPix);
+                dixDestroyPixmap(pDstPix, 0);
                 pDstPix = NULL;
 
                 if (!pDst) {
@@ -1539,7 +1539,7 @@ ProcRenderCreateCursor(ClientPtr client)
             free(mskbits);
             return error;
         }
-        (*pScreen->DestroyPixmap) (pPixmap);
+        dixDestroyPixmap(pPixmap, 0);
         CompositePicture(PictOpSrc,
                          pSrc, 0, pPicture, 0, 0, 0, 0, 0, 0, width, height);
         (*pScreen->GetImage) (pPicture->pDrawable,

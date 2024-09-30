@@ -65,7 +65,7 @@ miChangePictureClip(PicturePtr pPicture, int type, void *value, int n)
         clientClip = BitmapToRegion(pScreen, (PixmapPtr) value);
         if (!clientClip)
             return BadAlloc;
-        (*pScreen->DestroyPixmap) ((PixmapPtr) value);
+        dixDestroyPixmap((PixmapPtr) value, 0);
         break;
     case CT_REGION:
         clientClip = value;
