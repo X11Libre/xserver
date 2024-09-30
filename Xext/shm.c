@@ -509,7 +509,7 @@ doShmPutImage(DrawablePtr dst, GCPtr pGC,
         else
             (void) (*pGC->ops->CopyArea) (&pPixmap->drawable, dst, pGC, 0, 0,
                                           sw, sh, dx, dy);
-        (*pPixmap->drawable.pScreen->DestroyPixmap) (pPixmap);
+        dixDestroyPixmap(pPixmap, 0);
     }
 }
 
@@ -999,7 +999,7 @@ ProcPanoramiXShmCreatePixmap(ClientPtr client)
             result = XaceHookResourceAccess(client, stuff->pid,
                               X11_RESTYPE_PIXMAP, pMap, X11_RESTYPE_NONE, NULL, DixCreateAccess);
             if (result != Success) {
-                pDraw->pScreen->DestroyPixmap(pMap);
+                dixDestroyPixmap(pMap, 0);
                 break;
             }
             dixSetPrivate(&pMap->devPrivates, shmPixmapPrivateKey, shmdesc);
@@ -1043,7 +1043,7 @@ fbShmCreatePixmap(ScreenPtr pScreen,
                                          BitsPerPixel(depth),
                                          PixmapBytePad(width, depth),
                                          (void *) addr)) {
-        (*pScreen->DestroyPixmap) (pPixmap);
+        dixDestroyPixmap(pPixmap, 0);
         return NullPixmap;
     }
     return pPixmap;
@@ -1114,7 +1114,7 @@ ProcShmCreatePixmap(ClientPtr client)
         rc = XaceHookResourceAccess(client, stuff->pid, X11_RESTYPE_PIXMAP,
                       pMap, X11_RESTYPE_NONE, NULL, DixCreateAccess);
         if (rc != Success) {
-            pDraw->pScreen->DestroyPixmap(pMap);
+            dixDestroyPixmap(pMap, 0);
             return rc;
         }
         dixSetPrivate(&pMap->devPrivates, shmPixmapPrivateKey, shmdesc);
