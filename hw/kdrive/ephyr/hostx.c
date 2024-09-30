@@ -1655,7 +1655,7 @@ ephyr_glamor_create_screen_resources(ScreenPtr pScreen)
      * Thus, delete the current screen pixmap, and put a fresh one in.
      */
     old_screen_pixmap = pScreen->GetScreenPixmap(pScreen);
-    pScreen->DestroyPixmap(old_screen_pixmap);
+    dixDestroyPixmap(old_screen_pixmap, 0);
 
     screen_pixmap = pScreen->CreatePixmap(pScreen,
                                           pScreen->width,
