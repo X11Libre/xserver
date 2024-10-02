@@ -245,7 +245,7 @@ exaDestroyPixmap_mixed(PixmapPtr pPixmap)
     ScreenPtr pScreen = pPixmap->drawable.pScreen;
 
     ExaScreenPriv(pScreen);
-    Bool ret;
+    Bool ret = TRUE;
 
     if (pPixmap->refcnt == 1) {
         ExaPixmapPriv(pPixmap);
@@ -267,7 +267,8 @@ exaDestroyPixmap_mixed(PixmapPtr pPixmap)
     }
 
     swap(pExaScr, pScreen, DestroyPixmap);
-    ret = pScreen->DestroyPixmap(pPixmap);
+    if (pScreen->DestroyPixmap)
+        ret = pScreen->DestroyPixmap(pPixmap);
     swap(pExaScr, pScreen, DestroyPixmap);
 
     return ret;

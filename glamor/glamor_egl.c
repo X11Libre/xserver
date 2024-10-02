@@ -757,7 +757,7 @@ glamor_egl_destroy_pixmap(PixmapPtr pixmap)
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     struct glamor_egl_screen_private *glamor_egl =
         glamor_egl_get_screen_private(scrn);
-    Bool ret;
+    Bool ret = TRUE;
 
     if (pixmap->refcnt == 1) {
         struct glamor_pixmap_private *pixmap_priv =
@@ -768,7 +768,8 @@ glamor_egl_destroy_pixmap(PixmapPtr pixmap)
     }
 
     screen->DestroyPixmap = glamor_egl->saved_destroy_pixmap;
-    ret = screen->DestroyPixmap(pixmap);
+    if (screen->DestroyPixmap)
+        ret = screen->DestroyPixmap(pixmap);
     glamor_egl->saved_destroy_pixmap = screen->DestroyPixmap;
     screen->DestroyPixmap = glamor_egl_destroy_pixmap;
 

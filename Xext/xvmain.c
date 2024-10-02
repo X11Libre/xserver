@@ -371,13 +371,14 @@ static Bool
 XvDestroyPixmap(PixmapPtr pPix)
 {
     ScreenPtr pScreen = pPix->drawable.pScreen;
-    Bool status;
+    Bool status = TRUE;
 
     if (pPix->refcnt == 1)
         XvStopAdaptors(&pPix->drawable);
 
     SCREEN_PROLOGUE(pScreen, DestroyPixmap);
-    status = (*pScreen->DestroyPixmap) (pPix);
+    if (pScreen->DestroyPixmap)
+        status = pScreen->DestroyPixmap(pPix);
     SCREEN_EPILOGUE(pScreen, DestroyPixmap, XvDestroyPixmap);
 
     return status;
