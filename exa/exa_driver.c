@@ -98,10 +98,7 @@ exaCreatePixmap_driver(ScreenPtr pScreen, int w, int h, int depth,
     }
 
     if (!pExaPixmap->driverPriv) {
-        swap(pExaScr, pScreen, DestroyPixmap);
-        if (pScreen->DestroyPixmap)
-            pScreen->DestroyPixmap(pPixmap);
-        swap(pExaScr, pScreen, DestroyPixmap);
+        dixDestroyPixmap(pPixmap, 0);
         return NULL;
     }
 
@@ -196,6 +193,8 @@ exaDestroyPixmap_driver(PixmapPtr pPixmap)
 
     if (pPixmap->refcnt == 1) {
         ExaPixmapPriv(pPixmap);
+        if (!pExaPixmap) // we're called on an error path
+            goto out;
 
         exaDestroyPixmap(pPixmap);
 
@@ -204,6 +203,7 @@ exaDestroyPixmap_driver(PixmapPtr pPixmap)
         pExaPixmap->driverPriv = NULL;
     }
 
+out:
     swap(pExaScr, pScreen, DestroyPixmap);
     if (pScreen->DestroyPixmap)
         ret = pScreen->DestroyPixmap(pPixmap);
