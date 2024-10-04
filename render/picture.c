@@ -77,15 +77,11 @@ picture_window_destructor(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pW
     }
 }
 
-static Bool
-PictureCloseScreen(ScreenPtr pScreen)
+static void PictureScreenClose(ScreenPtr pScreen, void *arg)
 {
     PictureScreenPtr ps = GetPictureScreen(pScreen);
-    Bool ret;
     int n;
 
-    pScreen->CloseScreen = ps->CloseScreen;
-    ret = (*pScreen->CloseScreen) (pScreen);
     PictureResetFilters(pScreen);
     for (n = 0; n < ps->nformats; n++)
         if (ps->formats[n].type == PictTypeIndexed)
@@ -94,7 +90,6 @@ PictureCloseScreen(ScreenPtr pScreen)
     SetPictureScreen(pScreen, 0);
     free(ps->formats);
     free(ps);
-    return ret;
 }
 
 static void
@@ -685,12 +680,11 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
 
     ps->subpixel = SubPixelUnknown;
 
-    ps->CloseScreen = pScreen->CloseScreen;
     ps->StoreColors = pScreen->StoreColors;
-    pScreen->CloseScreen = PictureCloseScreen;
     pScreen->StoreColors = PictureStoreColors;
 
     dixScreenHookWindowDestroy(pScreen, picture_window_destructor);
+    dixScreenHookClose(pScreen, PictureScreenClose, NULL);
 
     if (!PictureSetDefaultFilters(pScreen)) {
         PictureResetFilters(pScreen);
