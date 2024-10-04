@@ -156,7 +156,6 @@ typedef struct {
     GetImageProcPtr SavedGetImage;
     GetSpansProcPtr SavedGetSpans;
     CreatePixmapProcPtr SavedCreatePixmap;
-    DestroyPixmapProcPtr SavedDestroyPixmap;
     CopyWindowProcPtr SavedCopyWindow;
     ChangeWindowAttributesProcPtr SavedChangeWindowAttributes;
     BitmapToRegionProcPtr SavedBitmapToRegion;
@@ -590,8 +589,7 @@ exaModifyPixmapHeader_classic(PixmapPtr pPixmap, int width, int height,
                               int depth, int bitsPerPixel, int devKind,
                               void *pPixData);
 
-Bool
- exaDestroyPixmap_classic(PixmapPtr pPixmap);
+void  exaPixmapDestroy_classic(ScreenPtr pScreen, PixmapPtr pPixmap, void *arg);
 
 Bool
  exaPixmapHasGpuCopy_classic(PixmapPtr pPixmap);
@@ -608,8 +606,7 @@ exaModifyPixmapHeader_driver(PixmapPtr pPixmap, int width, int height,
                              int depth, int bitsPerPixel, int devKind,
                              void *pPixData);
 
-Bool
- exaDestroyPixmap_driver(PixmapPtr pPixmap);
+void exaPixmapDestroy_driver(ScreenPtr pScreen, PixmapPtr pPixmap, void *arg);
 
 Bool
  exaPixmapHasGpuCopy_driver(PixmapPtr pPixmap);
@@ -625,8 +622,7 @@ Bool
 exaModifyPixmapHeader_mixed(PixmapPtr pPixmap, int width, int height, int depth,
                             int bitsPerPixel, int devKind, void *pPixData);
 
-Bool
- exaDestroyPixmap_mixed(PixmapPtr pPixmap);
+void exaPixmapDestroy_mixed(ScreenPtr pScreen, PixmapPtr pPixmap, void *arg);
 
 Bool
  exaPixmapHasGpuCopy_mixed(PixmapPtr pPixmap);
