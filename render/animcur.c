@@ -37,6 +37,7 @@
 #include <X11/Xmd.h>
 
 #include "dix/cursor_priv.h"
+#include "dix/screen_hooks_priv.h"
 
 #include "servermd.h"
 #include "scrnintstr.h"
@@ -60,7 +61,6 @@ typedef struct _AnimCur {
 } AnimCurRec, *AnimCurPtr;
 
 typedef struct _AnimScrPriv {
-    CloseScreenProcPtr CloseScreen;
     CursorLimitsProcPtr CursorLimits;
     DisplayCursorProcPtr DisplayCursor;
     SetCursorPositionProcPtr SetCursorPosition;
@@ -84,13 +84,11 @@ static DevPrivateKeyRec AnimCurScreenPrivateKeyRec;
 #define Wrap(as,s,elt,func) (((as)->elt = (s)->elt), (s)->elt = func)
 #define Unwrap(as,s,elt)    ((s)->elt = (as)->elt)
 
-static Bool
-AnimCurCloseScreen(ScreenPtr pScreen)
+static void AnimCurScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     AnimCurScreenPtr as = GetAnimCurScreen(pScreen);
-    Bool ret;
 
-    Unwrap(as, pScreen, CloseScreen);
+    dixScreenUnhookClose(pScreen, AnimCurScreenClose);
 
     Unwrap(as, pScreen, CursorLimits);
     Unwrap(as, pScreen, DisplayCursor);
@@ -98,8 +96,6 @@ AnimCurCloseScreen(ScreenPtr pScreen)
     Unwrap(as, pScreen, RealizeCursor);
     Unwrap(as, pScreen, UnrealizeCursor);
     Unwrap(as, pScreen, RecolorCursor);
-    ret = (*pScreen->CloseScreen) (pScreen);
-    return ret;
 }
 
 static void
@@ -286,7 +282,7 @@ AnimCurInit(ScreenPtr pScreen)
 
     as = GetAnimCurScreen(pScreen);
 
-    Wrap(as, pScreen, CloseScreen, AnimCurCloseScreen);
+    dixScreenHookClose(pScreen, AnimCurScreenClose);
 
     Wrap(as, pScreen, CursorLimits, AnimCurCursorLimits);
     Wrap(as, pScreen, DisplayCursor, AnimCurDisplayCursor);
