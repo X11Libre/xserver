@@ -210,7 +210,6 @@ struct glamor_format {
 struct glamor_saved_procs {
     CreateGCProcPtr create_gc;
     CreatePixmapProcPtr create_pixmap;
-    DestroyPixmapProcPtr destroy_pixmap;
     GetSpansProcPtr get_spans;
     GetImageProcPtr get_image;
     CompositeProcPtr composite;

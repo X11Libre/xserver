@@ -616,6 +616,11 @@ glamor_setup_formats(ScreenPtr screen)
     glamor_priv->cbcr_format.texture_only = FALSE;
 }
 
+static void glamor_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
+{
+    glamor_pixmap_destroy_fbo(pPixmap);
+}
+
 /* This function is used to free the glamor private screen's
  * resources. If the DDX driver is not set GLAMOR_USE_SCREEN,
  * then, DDX need to call this function at proper stage, if
@@ -651,7 +656,7 @@ glamor_init(ScreenPtr screen, unsigned int flags)
         LogMessage(X_WARNING,
                    "glamor%d: Failed to allocate screen private\n",
                    screen->myNum);
-        goto free_glamor_private;
+        goto fail;
     }
 
     glamor_set_screen_private(screen, glamor_priv);
@@ -661,7 +666,7 @@ glamor_init(ScreenPtr screen, unsigned int flags)
         LogMessage(X_WARNING,
                    "glamor%d: Failed to allocate pixmap private\n",
                    screen->myNum);
-        goto free_glamor_private;
+        goto fail;
     }
 
     if (!dixRegisterPrivateKey(&glamor_gc_private_key, PRIVATE_GC,
@@ -669,11 +674,8 @@ glamor_init(ScreenPtr screen, unsigned int flags)
         LogMessage(X_WARNING,
                    "glamor%d: Failed to allocate gc private\n",
                    screen->myNum);
-        goto free_glamor_private;
+        goto fail;
     }
-
-    glamor_priv->saved_procs.destroy_pixmap = screen->DestroyPixmap;
-    screen->DestroyPixmap = glamor_destroy_pixmap;
 
     /* If we are using egl screen, call egl screen init to
      * register correct close screen function. */
@@ -895,14 +897,11 @@ glamor_init(ScreenPtr screen, unsigned int flags)
     glamor_priv->screen = screen;
 
     dixScreenHookClose(screen, glamor_close_screen);
+    dixScreenHookPixmapDestroy(screen, glamor_pixmap_destroy);
 
     return TRUE;
 
- fail:
-    /* Restore default DestroyPixmap handler */
-    screen->DestroyPixmap = glamor_priv->saved_procs.destroy_pixmap;
-
- free_glamor_private:
+fail:
     free(glamor_priv);
     glamor_set_screen_private(screen, NULL);
     return FALSE;
@@ -932,10 +931,10 @@ static void glamor_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *u
     glamor_set_glvnd_vendor(screen, NULL);
 
     dixScreenUnhookClose(screen, glamor_close_screen);
+    dixScreenUnhookPixmapDestroy(screen, glamor_pixmap_destroy);
 
     screen->CreateGC = glamor_priv->saved_procs.create_gc;
     screen->CreatePixmap = glamor_priv->saved_procs.create_pixmap;
-    screen->DestroyPixmap = glamor_priv->saved_procs.destroy_pixmap;
     screen->GetSpans = glamor_priv->saved_procs.get_spans;
     screen->ChangeWindowAttributes =
         glamor_priv->saved_procs.change_window_attributes;
