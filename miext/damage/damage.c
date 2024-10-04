@@ -1485,28 +1485,16 @@ damageInsertDamage(DamagePtr * pPrev, DamagePtr pDamage)
     *pPrev = pDamage;
 }
 
-static Bool
-damageDestroyPixmap(PixmapPtr pPixmap)
+static void damagePixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
-    ScreenPtr pScreen = pPixmap->drawable.pScreen;
+    DamagePtr *pPrev = getPixmapDamageRef(pPixmap);
+    DamagePtr pDamage;
 
-    damageScrPriv(pScreen);
-
-    if (pPixmap->refcnt == 1) {
-        DamagePtr *pPrev = getPixmapDamageRef(pPixmap);
-        DamagePtr pDamage;
-
-        while ((pDamage = *pPrev)) {
-            damageRemoveDamage(pPrev, pDamage);
-            if (!pDamage->isWindow)
-                DamageDestroy(pDamage);
-        }
+    while ((pDamage = *pPrev)) {
+        damageRemoveDamage(pPrev, pDamage);
+        if (!pDamage->isWindow)
+            DamageDestroy(pDamage);
     }
-    unwrap(pScrPriv, pScreen, DestroyPixmap);
-    if (pScreen->DestroyPixmap)
-        pScreen->DestroyPixmap(pPixmap);
-    wrap(pScrPriv, pScreen, DestroyPixmap, damageDestroyPixmap);
-    return TRUE;
 }
 
 static void
@@ -1591,12 +1579,12 @@ static void damageCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *un
 {
     dixScreenUnhookClose(pScreen, damageCloseScreen);
     dixScreenUnhookWindowDestroy(pScreen, damageWindowDestroy);
+    dixScreenUnhookPixmapDestroy(pScreen, damagePixmapDestroy);
 
     damageScrPriv(pScreen);
     if (!pScrPriv)
         return;
 
-    unwrap(pScrPriv, pScreen, DestroyPixmap);
     unwrap(pScrPriv, pScreen, CreateGC);
     unwrap(pScrPriv, pScreen, CopyWindow);
 
@@ -1690,8 +1678,8 @@ DamageSetup(ScreenPtr pScreen)
 
     dixScreenHookClose(pScreen, damageCloseScreen);
     dixScreenHookWindowDestroy(pScreen, damageWindowDestroy);
+    dixScreenHookPixmapDestroy(pScreen, damagePixmapDestroy);
 
-    wrap(pScrPriv, pScreen, DestroyPixmap, damageDestroyPixmap);
     wrap(pScrPriv, pScreen, CreateGC, damageCreateGC);
     wrap(pScrPriv, pScreen, SetWindowPixmap, damageSetWindowPixmap);
     wrap(pScrPriv, pScreen, CopyWindow, damageCopyWindow);
