@@ -118,7 +118,6 @@ typedef struct _CursorHideCountRec {
 
 typedef struct _CursorScreen {
     DisplayCursorProcPtr DisplayCursor;
-    CloseScreenProcPtr CloseScreen;
     CursorHideCountPtr pCursorHideCounts;
 } CursorScreenRec, *CursorScreenPtr;
 
@@ -192,20 +191,15 @@ CursorDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen, CursorPtr pCursor)
     return ret;
 }
 
-static Bool
-CursorCloseScreen(ScreenPtr pScreen)
+static void CursorScreenClose(ScreenPtr pScreen, void *arg)
 {
     CursorScreenPtr cs = GetCursorScreen(pScreen);
-    Bool ret;
-    _X_UNUSED CloseScreenProcPtr close_proc;
     _X_UNUSED DisplayCursorProcPtr display_proc;
 
-    Unwrap(cs, pScreen, CloseScreen, close_proc);
+    dixScreenUnhookClose(pScreen, CursorScreenClose, arg);
     Unwrap(cs, pScreen, DisplayCursor, display_proc);
     deleteCursorHideCountsForScreen(pScreen);
-    ret = (*pScreen->CloseScreen) (pScreen);
     free(cs);
-    return ret;
 }
 
 #define CursorAllEvents (XFixesDisplayCursorNotifyMask)
@@ -1068,7 +1062,7 @@ XFixesCursorInit(void)
         cs = (CursorScreenPtr) calloc(1, sizeof(CursorScreenRec));
         if (!cs)
             return FALSE;
-        Wrap(cs, pScreen, CloseScreen, CursorCloseScreen);
+        dixScreenHookClose(pScreen, CursorScreenClose, NULL);
         Wrap(cs, pScreen, DisplayCursor, CursorDisplayCursor);
         cs->pCursorHideCounts = NULL;
         SetCursorScreen(pScreen, cs);
