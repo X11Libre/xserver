@@ -44,7 +44,6 @@ typedef struct dri3_dmabuf_format {
 } dri3_dmabuf_format_rec, *dri3_dmabuf_format_ptr;
 
 typedef struct dri3_screen_priv {
-    CloseScreenProcPtr          CloseScreen;
     ConfigNotifyProcPtr         ConfigNotify;
 
     Bool                        formats_cached;
