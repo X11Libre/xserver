@@ -294,8 +294,6 @@ typedef struct _PictureScreen {
     GlyphsProcPtr Glyphs;       /* unused */
     CompositeRectsProcPtr CompositeRects;
 
-    CloseScreenProcPtr CloseScreen;
-
     StoreColorsProcPtr StoreColors;
 
     InitIndexedProcPtr InitIndexed;
