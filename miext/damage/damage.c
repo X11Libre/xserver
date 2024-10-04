@@ -1591,6 +1591,8 @@ damageCloseScreen(ScreenPtr pScreen)
 {
     damageScrPriv(pScreen);
 
+    dixScreenUnhookWindowDestroy(pScreen, damageWindowDestroy, NULL);
+
     unwrap(pScrPriv, pScreen, DestroyPixmap);
     unwrap(pScrPriv, pScreen, CreateGC);
     unwrap(pScrPriv, pScreen, CopyWindow);
