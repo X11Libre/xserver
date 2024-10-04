@@ -933,6 +933,8 @@ static void glamor_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *u
     dixScreenUnhookClose(screen, glamor_close_screen);
     dixScreenUnhookPixmapDestroy(screen, glamor_pixmap_destroy);
 
+    dixScreenUnhookPixmapDestroy(screen, glamor_pixmap_destroy, NULL);
+
     screen->CreateGC = glamor_priv->saved_procs.create_gc;
     screen->CreatePixmap = glamor_priv->saved_procs.create_pixmap;
     screen->GetSpans = glamor_priv->saved_procs.get_spans;
