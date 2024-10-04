@@ -174,7 +174,6 @@ typedef struct {
     int nAdaptors;
     XvAdaptorPtr pAdaptors;
     DestroyPixmapProcPtr DestroyPixmap;
-    CloseScreenProcPtr CloseScreen;
 } XvScreenRec, *XvScreenPtr;
 
 extern _X_EXPORT int XvScreenInit(ScreenPtr);

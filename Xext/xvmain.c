@@ -142,7 +142,7 @@ static void WriteSwappedVideoNotifyEvent(xvEvent *, xvEvent *);
 static void WriteSwappedPortNotifyEvent(xvEvent *, xvEvent *);
 static Bool CreateResourceTypes(void);
 
-static Bool XvCloseScreen(ScreenPtr);
+static void XvScreenClose(CallbackListPtr *pcbl, ScreenPtr, void *arg);
 static Bool XvDestroyPixmap(PixmapPtr);
 static void XvResetProc(ExtensionEntry *);
 static int XvdiDestroyGrab(void *, XID);
@@ -297,33 +297,29 @@ XvScreenInit(ScreenPtr pScreen)
     dixSetPrivate(&pScreen->devPrivates, XvScreenKey, pxvs);
 
     pxvs->DestroyPixmap = pScreen->DestroyPixmap;
-    pxvs->CloseScreen = pScreen->CloseScreen;
 
     dixScreenHookWindowDestroy(pScreen, XvWindowDestroy);
+    dixScreenHookClose(pScreen, XvScreenClose);
 
     pScreen->DestroyPixmap = XvDestroyPixmap;
-    pScreen->CloseScreen = XvCloseScreen;
 
     return Success;
 }
 
-static Bool
-XvCloseScreen(ScreenPtr pScreen)
+static void XvScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     XvScreenPtr pxvs;
 
     pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates, XvScreenKey);
 
     dixScreenUnhookWindowDestroy(pScreen, XvWindowDestroy);
+    dixScreenUnhookClose(pScreen, XvScreenClose);
 
     pScreen->DestroyPixmap = pxvs->DestroyPixmap;
-    pScreen->CloseScreen = pxvs->CloseScreen;
 
     free(pxvs);
 
     dixSetPrivate(&pScreen->devPrivates, XvScreenKey, NULL);
-
-    return (*pScreen->CloseScreen) (pScreen);
 }
 
 static void
