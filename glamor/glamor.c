@@ -604,6 +604,11 @@ glamor_setup_formats(ScreenPtr screen)
     glamor_priv->cbcr_format.texture_only = FALSE;
 }
 
+static void glamor_pixmap_destroy(ScreenPtr pScreen, PixmapPtr pPixmap, void *arg)
+{
+    glamor_pixmap_destroy_fbo(pPixmap);
+}
+
 /** Set up glamor for an already-configured GL context. */
 Bool
 glamor_init(ScreenPtr screen, unsigned int flags)
@@ -652,8 +657,7 @@ glamor_init(ScreenPtr screen, unsigned int flags)
     glamor_priv->saved_procs.close_screen = screen->CloseScreen;
     screen->CloseScreen = glamor_close_screen;
 
-    glamor_priv->saved_procs.destroy_pixmap = screen->DestroyPixmap;
-    screen->DestroyPixmap = glamor_destroy_pixmap;
+    dixScreenHookPixmapDestroy(screen, glamor_pixmap_destroy, NULL);
 
     /* If we are using egl screen, call egl screen init to
      * register correct close screen function. */
@@ -879,7 +883,7 @@ glamor_init(ScreenPtr screen, unsigned int flags)
  fail:
     /* Restore default CloseScreen and DestroyPixmap handlers */
     screen->CloseScreen = glamor_priv->saved_procs.close_screen;
-    screen->DestroyPixmap = glamor_priv->saved_procs.destroy_pixmap;
+    dixScreenUnhookPixmapDestroy(screen, glamor_pixmap_destroy, NULL);
 
  free_glamor_private:
     free(glamor_priv);
@@ -913,9 +917,10 @@ glamor_close_screen(ScreenPtr screen)
     glamor_set_glvnd_vendor(screen, NULL);
     screen->CloseScreen = glamor_priv->saved_procs.close_screen;
 
+    dixScreenUnhookPixmapDestroy(screen, glamor_pixmap_destroy, NULL);
+
     screen->CreateGC = glamor_priv->saved_procs.create_gc;
     screen->CreatePixmap = glamor_priv->saved_procs.create_pixmap;
-    screen->DestroyPixmap = glamor_priv->saved_procs.destroy_pixmap;
     screen->GetSpans = glamor_priv->saved_procs.get_spans;
     screen->ChangeWindowAttributes =
         glamor_priv->saved_procs.change_window_attributes;
