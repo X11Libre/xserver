@@ -96,7 +96,6 @@ in this Software without prior written authorization from The Open Group.
 
 typedef struct _ShmScrPrivateRec {
     ShmFuncsPtr shmFuncs;
-    DestroyPixmapProcPtr destroyPixmap;
 } ShmScrPrivateRec;
 
 static PixmapPtr fbShmCreatePixmap(XSHM_CREATE_PIXMAP_ARGS);
@@ -104,8 +103,6 @@ static int ShmDetachSegment(void *value, XID shmseg);
 static void ShmResetProc(ExtensionEntry *extEntry);
 static void SShmCompletionEvent(xShmCompletionEvent *from,
                                 xShmCompletionEvent *to);
-
-static Bool ShmDestroyPixmap(PixmapPtr pPixmap);
 
 static unsigned char ShmReqCode;
 int ShmCompletionCode;
@@ -240,28 +237,6 @@ ShmRegisterFuncs(ScreenPtr pScreen, ShmFuncsPtr funcs)
     ShmInitScreenPriv(pScreen)->shmFuncs = funcs;
 }
 
-static Bool
-ShmDestroyPixmap(PixmapPtr pPixmap)
-{
-    ScreenPtr pScreen = pPixmap->drawable.pScreen;
-    ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
-    void *shmdesc = NULL;
-    Bool ret = TRUE;
-
-    if (pPixmap->refcnt == 1)
-        shmdesc = dixLookupPrivate(&pPixmap->devPrivates, shmPixmapPrivateKey);
-
-    pScreen->DestroyPixmap = screen_priv->destroyPixmap;
-    if (pScreen->DestroyPixmap)
-        ret = pScreen->DestroyPixmap(pPixmap);
-    screen_priv->destroyPixmap = pScreen->DestroyPixmap;
-    pScreen->DestroyPixmap = ShmDestroyPixmap;
-
-    if (shmdesc)
-	ShmDetachSegment(shmdesc, 0);
-
-    return ret;
-}
 
 void
 ShmRegisterFbFuncs(ScreenPtr pScreen)
@@ -429,6 +404,9 @@ ShmDetachSegment(void *value, /* must conform to DeleteType */
 {
     ShmDescPtr shmdesc = (ShmDescPtr) value;
     ShmDescPtr *prev;
+
+    if (!shmdesc)
+        return Success;
 
     if (--shmdesc->refcnt)
         return TRUE;
@@ -1523,6 +1501,14 @@ SProcShmDispatch(ClientPtr client)
     }
 }
 
+static void ShmPixmapDestroy(ScreenPtr pScreen, PixmapPtr pPixmap, void *arg)
+{
+    ShmDetachSegment(
+        dixLookupPrivate(&pPixmap->devPrivates, shmPixmapPrivateKey),
+        0);
+    dixSetPrivate(&pPixmap->devPrivates, shmPixmapPrivateKey, NULL);
+}
+
 void
 ShmExtensionInit(void)
 {
@@ -1551,13 +1537,8 @@ ShmExtensionInit(void)
                 sharedPixmaps = xFalse;
         }
         if (sharedPixmaps)
-            for (i = 0; i < screenInfo.numScreens; i++) {
-                ShmScrPrivateRec *screen_priv =
-                    ShmGetScreenPriv(screenInfo.screens[i]);
-                screen_priv->destroyPixmap =
-                    screenInfo.screens[i]->DestroyPixmap;
-                screenInfo.screens[i]->DestroyPixmap = ShmDestroyPixmap;
-            }
+            for (i = 0; i < screenInfo.numScreens; i++)
+                dixScreenHookPixmapDestroy(screenInfo.screens[i], ShmPixmapDestroy, NULL);
     }
     ShmSegType = CreateNewResourceType(ShmDetachSegment, "ShmSeg");
     if (ShmSegType &&
