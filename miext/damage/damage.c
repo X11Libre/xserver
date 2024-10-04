@@ -1484,28 +1484,16 @@ damageInsertDamage(DamagePtr * pPrev, DamagePtr pDamage)
     *pPrev = pDamage;
 }
 
-static Bool
-damageDestroyPixmap(PixmapPtr pPixmap)
+static void damagePixmapDestroy(ScreenPtr pScreen, PixmapPtr pPixmap, void *arg)
 {
-    ScreenPtr pScreen = pPixmap->drawable.pScreen;
+    DamagePtr *pPrev = getPixmapDamageRef(pPixmap);
+    DamagePtr pDamage;
 
-    damageScrPriv(pScreen);
-
-    if (pPixmap->refcnt == 1) {
-        DamagePtr *pPrev = getPixmapDamageRef(pPixmap);
-        DamagePtr pDamage;
-
-        while ((pDamage = *pPrev)) {
-            damageRemoveDamage(pPrev, pDamage);
-            if (!pDamage->isWindow)
-                DamageDestroy(pDamage);
-        }
+    while ((pDamage = *pPrev)) {
+        damageRemoveDamage(pPrev, pDamage);
+        if (!pDamage->isWindow)
+            DamageDestroy(pDamage);
     }
-    unwrap(pScrPriv, pScreen, DestroyPixmap);
-    if (pScreen->DestroyPixmap)
-        pScreen->DestroyPixmap(pPixmap);
-    wrap(pScrPriv, pScreen, DestroyPixmap, damageDestroyPixmap);
-    return TRUE;
 }
 
 static void
@@ -1592,8 +1580,8 @@ damageCloseScreen(ScreenPtr pScreen)
     damageScrPriv(pScreen);
 
     dixScreenUnhookWindowDestroy(pScreen, damageWindowDestroy, NULL);
+    dixScreenUnhookPixmapDestroy(pScreen, damagePixmapDestroy, NULL);
 
-    unwrap(pScrPriv, pScreen, DestroyPixmap);
     unwrap(pScrPriv, pScreen, CreateGC);
     unwrap(pScrPriv, pScreen, CopyWindow);
     unwrap(pScrPriv, pScreen, CloseScreen);
@@ -1686,8 +1674,8 @@ DamageSetup(ScreenPtr pScreen)
     pScrPriv->pScreenDamage = 0;
 
     dixScreenHookWindowDestroy(pScreen, damageWindowDestroy, NULL);
+    dixScreenHookPixmapDestroy(pScreen, damagePixmapDestroy, NULL);
 
-    wrap(pScrPriv, pScreen, DestroyPixmap, damageDestroyPixmap);
     wrap(pScrPriv, pScreen, CreateGC, damageCreateGC);
     wrap(pScrPriv, pScreen, SetWindowPixmap, damageSetWindowPixmap);
     wrap(pScrPriv, pScreen, CopyWindow, damageCopyWindow);
