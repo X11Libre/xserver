@@ -62,7 +62,6 @@ struct glamor_egl_screen_private {
     Bool force_vendor; /* if GLVND vendor is forced from options */
 
     CloseScreenProcPtr saved_close_screen;
-    DestroyPixmapProcPtr saved_destroy_pixmap;
     xf86FreeScreenProc *saved_free_screen;
 };
 
@@ -749,31 +748,18 @@ glamor_egl_get_driver_name(ScreenPtr screen)
     return NULL;
 }
 
-
-static Bool
-glamor_egl_destroy_pixmap(PixmapPtr pixmap)
+static void glamor_egl_pixmap_destroy(ScreenPtr pScreen, PixmapPtr pixmap, void *arg)
 {
     ScreenPtr screen = pixmap->drawable.pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     struct glamor_egl_screen_private *glamor_egl =
         glamor_egl_get_screen_private(scrn);
-    Bool ret = TRUE;
 
-    if (pixmap->refcnt == 1) {
-        struct glamor_pixmap_private *pixmap_priv =
-            glamor_get_pixmap_private(pixmap);
+    struct glamor_pixmap_private *pixmap_priv =
+        glamor_get_pixmap_private(pixmap);
 
-        if (pixmap_priv->image)
-            eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
-    }
-
-    screen->DestroyPixmap = glamor_egl->saved_destroy_pixmap;
-    if (screen->DestroyPixmap)
-        ret = screen->DestroyPixmap(pixmap);
-    glamor_egl->saved_destroy_pixmap = screen->DestroyPixmap;
-    screen->DestroyPixmap = glamor_egl_destroy_pixmap;
-
-    return ret;
+    if (pixmap_priv->image)
+        eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
 }
 
 void
@@ -815,6 +801,7 @@ glamor_egl_close_screen(ScreenPtr screen)
     eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
     pixmap_priv->image = NULL;
 
+    dixScreenUnhookPixmapDestroy(screen, glamor_egl_pixmap_destroy, NULL);
     screen->CloseScreen = glamor_egl->saved_close_screen;
 
     return screen->CloseScreen(screen);
@@ -900,8 +887,7 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
     glamor_egl->saved_close_screen = screen->CloseScreen;
     screen->CloseScreen = glamor_egl_close_screen;
 
-    glamor_egl->saved_destroy_pixmap = screen->DestroyPixmap;
-    screen->DestroyPixmap = glamor_egl_destroy_pixmap;
+    dixScreenHookPixmapDestroy(screen, glamor_egl_pixmap_destroy, NULL);
 
     glamor_ctx->ctx = glamor_egl->context;
     glamor_ctx->display = glamor_egl->display;
