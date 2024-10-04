@@ -48,7 +48,6 @@ static RESTYPE XvMCRTSubpicture;
 typedef struct {
     int num_adaptors;
     XvMCAdaptorPtr adaptors;
-    CloseScreenProcPtr CloseScreen;
     char clientDriverName[DR_CLIENT_DRIVER_NAME_SIZE];
     char busID[DR_BUSID_SIZE];
     int major;
@@ -744,16 +743,12 @@ XvMCExtensionInit(void)
                               extEntry->errorBase + XvMCBadSubpicture);
 }
 
-static Bool
-XvMCCloseScreen(ScreenPtr pScreen)
+static void XvMCScreenClose(ScreenPtr pScreen, void *arg)
 {
     XvMCScreenPtr pScreenPriv = XVMC_GET_PRIVATE(pScreen);
-
-    pScreen->CloseScreen = pScreenPriv->CloseScreen;
-
     free(pScreenPriv);
-
-    return (*pScreen->CloseScreen) (pScreen);
+    dixSetPrivate(&pScreen->devPrivates, XvMCScreenKey, NULL);
+    dixScreenUnhookClose(pScreen, XvMCScreenClose, NULL);
 }
 
 int
@@ -769,8 +764,7 @@ XvMCScreenInit(ScreenPtr pScreen, int num, XvMCAdaptorPtr pAdapt)
 
     dixSetPrivate(&pScreen->devPrivates, XvMCScreenKey, pScreenPriv);
 
-    pScreenPriv->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = XvMCCloseScreen;
+    dixScreenHookClose(pScreen, XvMCScreenClose, NULL);
 
     pScreenPriv->num_adaptors = num;
     pScreenPriv->adaptors = pAdapt;
