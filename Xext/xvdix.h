@@ -173,7 +173,6 @@ typedef struct {
     int version, revision;
     int nAdaptors;
     XvAdaptorPtr pAdaptors;
-    DestroyPixmapProcPtr DestroyPixmap;
     CloseScreenProcPtr CloseScreen;
 } XvScreenRec, *XvScreenPtr;
 
