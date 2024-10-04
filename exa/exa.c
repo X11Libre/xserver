@@ -743,6 +743,11 @@ static void exaCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unuse
 
     dixScreenUnhookClose(pScreen, exaCloseScreen);
 
+    /* doesn't matter which one actually was registered */
+    dixScreenUnhookPixmapDestroy(pScreen, exaPixmapDestroy_classic);
+    dixScreenUnhookPixmapDestroy(pScreen, exaPixmapDestroy_driver);
+    dixScreenUnhookPixmapDestroy(pScreen, exaPixmapDestroy_mixed);
+
     if (ps && ps->Glyphs == exaGlyphs)
         exaGlyphsFini(pScreen);
 
@@ -755,8 +760,6 @@ static void exaCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unuse
     unwrap(pExaScr, pScreen, GetSpans);
     if (pExaScr->SavedCreatePixmap)
         unwrap(pExaScr, pScreen, CreatePixmap);
-    if (pExaScr->SavedDestroyPixmap)
-        unwrap(pExaScr, pScreen, DestroyPixmap);
     if (pExaScr->SavedModifyPixmapHeader)
         unwrap(pExaScr, pScreen, ModifyPixmapHeader);
     unwrap(pExaScr, pScreen, CopyWindow);
@@ -958,8 +961,9 @@ exaDriverInit(ScreenPtr pScreen, ExaDriverPtr pScreenInfo)
         }
         if (pExaScr->info->flags & EXA_HANDLES_PIXMAPS) {
             if (pExaScr->info->flags & EXA_MIXED_PIXMAPS) {
+                dixScreenHookPixmapDestroy(pScreen, exaPixmapDestroy_mixed);
+
                 wrap(pExaScr, pScreen, CreatePixmap, exaCreatePixmap_mixed);
-                wrap(pExaScr, pScreen, DestroyPixmap, exaDestroyPixmap_mixed);
                 wrap(pExaScr, pScreen, ModifyPixmapHeader,
                      exaModifyPixmapHeader_mixed);
                 wrap(pExaScr, pScreen, SharePixmapBacking, exaSharePixmapBacking_mixed);
@@ -972,8 +976,9 @@ exaDriverInit(ScreenPtr pScreen, ExaDriverPtr pScreenInfo)
                 pExaScr->prepare_access_reg = exaPrepareAccessReg_mixed;
             }
             else {
+                dixScreenHookPixmapDestroy(pScreen, exaPixmapDestroy_driver);
+
                 wrap(pExaScr, pScreen, CreatePixmap, exaCreatePixmap_driver);
-                wrap(pExaScr, pScreen, DestroyPixmap, exaDestroyPixmap_driver);
                 wrap(pExaScr, pScreen, ModifyPixmapHeader,
                      exaModifyPixmapHeader_driver);
                 pExaScr->do_migration = NULL;
@@ -984,8 +989,9 @@ exaDriverInit(ScreenPtr pScreen, ExaDriverPtr pScreenInfo)
             }
         }
         else {
+            dixScreenHookPixmapDestroy(pScreen, exaPixmapDestroy_classic);
+
             wrap(pExaScr, pScreen, CreatePixmap, exaCreatePixmap_classic);
-            wrap(pExaScr, pScreen, DestroyPixmap, exaDestroyPixmap_classic);
             wrap(pExaScr, pScreen, ModifyPixmapHeader,
                  exaModifyPixmapHeader_classic);
             pExaScr->do_migration = exaDoMigration_classic;

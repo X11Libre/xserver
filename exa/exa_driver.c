@@ -185,33 +185,19 @@ exaModifyPixmapHeader_driver(PixmapPtr pPixmap, int width, int height,
     return ret;
 }
 
-Bool
-exaDestroyPixmap_driver(PixmapPtr pPixmap)
+void exaPixmapDestroy_driver(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
-    ScreenPtr pScreen = pPixmap->drawable.pScreen;
-
     ExaScreenPriv(pScreen);
-    Bool ret = TRUE;
 
-    if (pPixmap->refcnt == 1) {
-        ExaPixmapPriv(pPixmap);
-        if (!pExaPixmap) // we're called on an error path
-            goto out;
+    ExaPixmapPriv(pPixmap);
+    if (!pExaPixmap) // we're called on an error path
+        return;
 
-        exaDestroyPixmap(pPixmap);
+    exaDestroyPixmap(pPixmap);
 
-        if (pExaPixmap->driverPriv)
-            pExaScr->info->DestroyPixmap(pScreen, pExaPixmap->driverPriv);
-        pExaPixmap->driverPriv = NULL;
-    }
-
-out:
-    // restore original (screen driver's) DestroyPixmap() handler and call it
-    swap(pExaScr, pScreen, DestroyPixmap);
-    dixDestroyPixmap(pPixmap, 0);
-    swap(pExaScr, pScreen, DestroyPixmap);
-
-    return ret;
+    if (pExaPixmap->driverPriv)
+        pExaScr->info->DestroyPixmap(pScreen, pExaPixmap->driverPriv);
+    pExaPixmap->driverPriv = NULL;
 }
 
 Bool

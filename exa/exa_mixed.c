@@ -239,42 +239,28 @@ exaModifyPixmapHeader_mixed(PixmapPtr pPixmap, int width, int height, int depth,
     return ret;
 }
 
-Bool
-exaDestroyPixmap_mixed(PixmapPtr pPixmap)
+void exaPixmapDestroy_mixed(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
-    ScreenPtr pScreen = pPixmap->drawable.pScreen;
-
     ExaScreenPriv(pScreen);
-    Bool ret = TRUE;
 
-    if (pPixmap->refcnt == 1) {
-        ExaPixmapPriv(pPixmap);
-        if (!pExaPixmap)
-            goto out; // we're called on an error path
+    ExaPixmapPriv(pPixmap);
+    if (!pExaPixmap) // we're called on an error path
+        return;
 
-        exaDestroyPixmap(pPixmap);
+    exaDestroyPixmap(pPixmap);
 
-        if (pExaScr->deferred_mixed_pixmap == pPixmap)
-            pExaScr->deferred_mixed_pixmap = NULL;
+    if (pExaScr->deferred_mixed_pixmap == pPixmap)
+        pExaScr->deferred_mixed_pixmap = NULL;
 
-        if (pExaPixmap->driverPriv)
-            pExaScr->info->DestroyPixmap(pScreen, pExaPixmap->driverPriv);
-        pExaPixmap->driverPriv = NULL;
+    if (pExaPixmap->driverPriv)
+        pExaScr->info->DestroyPixmap(pScreen, pExaPixmap->driverPriv);
+    pExaPixmap->driverPriv = NULL;
 
-        if (pExaPixmap->pDamage) {
-            free(pExaPixmap->sys_ptr);
-            pExaPixmap->sys_ptr = NULL;
-            pExaPixmap->pDamage = NULL;
-        }
+    if (pExaPixmap->pDamage) {
+        free(pExaPixmap->sys_ptr);
+        pExaPixmap->sys_ptr = NULL;
+        pExaPixmap->pDamage = NULL;
     }
-
-out:
-    // restore original (screen driver's) DestroyPixmap() handler and call it
-    swap(pExaScr, pScreen, DestroyPixmap);
-    dixDestroyPixmap(pPixmap, 0);
-    swap(pExaScr, pScreen, DestroyPixmap);
-
-    return ret;
 }
 
 Bool
