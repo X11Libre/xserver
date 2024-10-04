@@ -29,15 +29,11 @@ DevPrivateKeyRec dri3_screen_private_key;
 
 static int dri3_screen_generation;
 
-static Bool
-dri3_close_screen(ScreenPtr screen)
+static void dri3_screen_close(ScreenPtr screen, void *arg)
 {
     dri3_screen_priv_ptr screen_priv = dri3_screen_priv(screen);
-
-    unwrap(screen_priv, screen, CloseScreen);
-
+    dixScreenUnhookClose(screen, dri3_screen_close, NULL);
     free(screen_priv);
-    return (*screen->CloseScreen) (screen);
 }
 
 Bool
@@ -53,7 +49,7 @@ dri3_screen_init(ScreenPtr screen, const dri3_screen_info_rec *info)
         if (!screen_priv)
             return FALSE;
 
-        wrap(screen_priv, screen, CloseScreen, dri3_close_screen);
+        dixScreenHookClose(screen, dri3_screen_close, NULL);
 
         screen_priv->info = info;
 
