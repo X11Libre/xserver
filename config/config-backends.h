@@ -22,13 +22,9 @@
  *
  * Author: Daniel Stone <daniel@fooishbar.org>
  */
-
 #ifndef XSERVER_CONFIG_BACKENDS_H
 #define XSERVER_CONFIG_BACKENDS_H
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
 #include "input.h"
 #include "list.h"
 
