@@ -1,5 +1,3 @@
-/* This file generated automatically by xkbcomp */
-/* DO  NOT EDIT */
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
