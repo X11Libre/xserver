@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETVERS_H
 #define GETVERS_H 1
 
-#include <dix-config.h>
-
 int SProcXGetExtensionVersion(ClientPtr /* client */
     );
 

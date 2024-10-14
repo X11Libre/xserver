@@ -1,8 +1,6 @@
 #ifndef _XIBARRIERS_H_
 #define _XIBARRIERS_H_
 
-#include <dix-config.h>
-
 #include "resource.h"
 
 extern RESTYPE PointerBarrierType;

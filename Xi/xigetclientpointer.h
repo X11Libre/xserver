@@ -25,8 +25,6 @@
 #ifndef GETCPTR_H
 #define GETCPTR_H 1
 
-#include <dix-config.h>
-
 int SProcXIGetClientPointer(ClientPtr /* client */ );
 int ProcXIGetClientPointer(ClientPtr /* client */ );
 

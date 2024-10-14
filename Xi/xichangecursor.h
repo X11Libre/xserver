@@ -25,8 +25,6 @@
 #ifndef CHDEVCUR_H
 #define CHDEVCUR_H 1
 
-#include <dix-config.h>
-
 int SProcXIChangeCursor(ClientPtr /* client */ );
 int ProcXIChangeCursor(ClientPtr /* client */ );
 

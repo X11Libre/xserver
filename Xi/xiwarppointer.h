@@ -25,8 +25,6 @@
 #ifndef WARPDEVP_H
 #define WARPDEVP_H 1
 
-#include <dix-config.h>
-
 int SProcXIWarpPointer(ClientPtr /* client */ );
 int ProcXIWarpPointer(ClientPtr /* client */ );
 

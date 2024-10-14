@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SETDVAL_H
 #define SETDVAL_H 1
 
-#include <dix-config.h>
-
 int ProcXSetDeviceValuators(ClientPtr   /* client */
     );
 
