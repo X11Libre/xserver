@@ -23,10 +23,6 @@
  * Author: Peter Hutterer, University of South Australia, NICTA
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef WARPDEVP_H
 #define WARPDEVP_H 1
 
