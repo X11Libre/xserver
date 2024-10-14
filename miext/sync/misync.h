@@ -24,10 +24,6 @@
 #ifndef _MISYNC_H_
 #define _MISYNC_H_
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 typedef struct _SyncObject SyncObject;
 typedef struct _SyncFence SyncFence;
 typedef struct _SyncTrigger SyncTrigger;

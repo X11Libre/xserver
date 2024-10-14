@@ -24,10 +24,6 @@
 #ifndef _MISYNCSTR_H_
 #define _MISYNCSTR_H_
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #include <stdint.h>
 #include "dix.h"
 #include "misync.h"
