@@ -40,13 +40,8 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-
 #ifndef _COMPINT_H_
 #define _COMPINT_H_
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
 
 #include "dix/screen_hooks_priv.h"
 
