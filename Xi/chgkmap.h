@@ -23,10 +23,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef CHGKMAP_H
 #define CHGKMAP_H 1
 
