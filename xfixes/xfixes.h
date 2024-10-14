@@ -23,10 +23,6 @@
 #ifndef _XFIXES_H_
 #define _XFIXES_H_
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #include "resource.h"
 
 extern RESTYPE RegionResType;

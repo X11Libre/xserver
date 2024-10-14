@@ -30,10 +30,6 @@
 #ifndef _ROOTLESSCONFIG_H
 #define _ROOTLESSCONFIG_H
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 /*# define ROOTLESSDEBUG*/
 
 #define ROOTLESS_PROTECT_ALPHA TRUE

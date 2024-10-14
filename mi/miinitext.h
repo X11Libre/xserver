@@ -74,10 +74,6 @@ SOFTWARE.
 #ifndef MIINITEXT_H
 #define MIINITEXT_H
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 void ListStaticExtensions(void);
 
 #endif /* MIINITEXT_H */
