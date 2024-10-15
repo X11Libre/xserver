@@ -28,12 +28,11 @@
  *
  * \author Ian Romanick <idr@us.ibm.com>
  */
-
 #include <dix-config.h>
 
 #include "glxserver.h"
-#include "glxbyteorder.h"
 #include "glxext.h"
+#include "misc.h"
 #include "singlesize.h"
 #include "unpack.h"
 #include "indirect_size_get.h"

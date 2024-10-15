@@ -22,9 +22,9 @@
  */
 #include <dix-config.h>
 
+#include "misc.h"
 #include "glxserver.h"
 #include "indirect_dispatch.h"
-#include "glxbyteorder.h"
 #include "unpack.h"
 
 static int

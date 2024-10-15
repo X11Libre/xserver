@@ -22,24 +22,23 @@
  * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include <dix-config.h>
 
+#include <inttypes.h>
 #include <string.h>
-
-#include <X11/Xmd.h>
+#include <X11/Xmd.h> // needs to be before glxproto.h
 #include <GL/gl.h>
 #include <GL/glxproto.h>
-#include <inttypes.h>
+
 #include "indirect_size.h"
 #include "indirect_size_get.h"
 #include "indirect_dispatch.h"
 #include "glxserver.h"
-#include "glxbyteorder.h"
 #include "singlesize.h"
 #include "glxext.h"
 #include "indirect_table.h"
 #include "indirect_util.h"
+#include "misc.h"
 
 #define __GLX_PAD(a) (((a)+3)&~3)
 

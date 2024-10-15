@@ -24,12 +24,14 @@
  * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include <dix-config.h>
 
 #include <GL/gl.h>
+
 #include "glxserver.h"
-#include "glxbyteorder.h"
 #include "indirect_size.h"
 #include "indirect_reqsize.h"
+#include "misc.h"
 
 #if defined(__CYGWIN__) || defined(__MINGW32__)
 #undef HAVE_ALIAS

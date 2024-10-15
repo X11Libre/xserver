@@ -22,12 +22,11 @@
  * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include <dix-config.h>
 
 #include "glxserver.h"
-#include "glxbyteorder.h"
 #include "glxext.h"
+#include "misc.h"
 #include "singlesize.h"
 #include "unpack.h"
 #include "indirect_size_get.h"
