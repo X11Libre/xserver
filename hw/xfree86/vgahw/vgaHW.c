@@ -600,12 +600,6 @@ vgaHWProtect(ScrnInfoPtr pScrn, Bool on)
     }
 }
 
-vgaHWProtectProc *
-vgaHWProtectWeak(void)
-{
-    return vgaHWProtect;
-}
-
 /*
  * vgaHWBlankScreen -- blank the screen.
  */
