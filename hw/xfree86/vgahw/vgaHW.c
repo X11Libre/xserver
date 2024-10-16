@@ -856,7 +856,7 @@ vgaHWRestoreMode(ScrnInfoPtr scrninfp, vgaRegPtr restore)
     hwp->disablePalette(hwp);
 }
 
-void
+static void
 vgaHWRestoreColormap(ScrnInfoPtr scrninfp, vgaRegPtr restore)
 {
     vgaHWPtr hwp = VGAHWPTR(scrninfp);

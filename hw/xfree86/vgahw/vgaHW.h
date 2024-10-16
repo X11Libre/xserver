@@ -185,8 +185,6 @@ extern _X_EXPORT void vgaHWBlankScreen(ScrnInfoPtr pScrn, Bool on);
 extern _X_EXPORT void vgaHWSeqReset(vgaHWPtr hwp, Bool start);
 extern _X_EXPORT void vgaHWRestoreFonts(ScrnInfoPtr scrninfp,
                                         vgaRegPtr restore);
-extern _X_EXPORT void vgaHWRestoreColormap(ScrnInfoPtr scrninfp,
-                                           vgaRegPtr restore);
 extern _X_EXPORT void vgaHWRestore(ScrnInfoPtr scrninfp, vgaRegPtr restore,
                                    int flags);
 extern _X_EXPORT void vgaHWSaveFonts(ScrnInfoPtr scrninfp, vgaRegPtr save);
