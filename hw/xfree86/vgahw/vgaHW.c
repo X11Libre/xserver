@@ -1728,12 +1728,6 @@ vgaHWEnable(vgaHWPtr hwp)
     hwp->writeEnable(hwp, hwp->readEnable(hwp) | 0x01);
 }
 
-void
-vgaHWDisable(vgaHWPtr hwp)
-{
-    hwp->writeEnable(hwp, hwp->readEnable(hwp) & ~0x01);
-}
-
 static void
 vgaHWLoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices, LOCO * colors,
                  VisualPtr pVisual)

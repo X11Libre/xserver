@@ -200,7 +200,6 @@ extern _X_EXPORT void vgaHWGetIOBase(vgaHWPtr hwp);
 extern _X_EXPORT void vgaHWLock(vgaHWPtr hwp);
 extern _X_EXPORT void vgaHWUnlock(vgaHWPtr hwp);
 extern _X_EXPORT void vgaHWEnable(vgaHWPtr hwp);
-extern _X_EXPORT void vgaHWDisable(vgaHWPtr hwp);
 extern _X_EXPORT void vgaHWDPMSSet(ScrnInfoPtr pScrn, int PowerManagementMode,
                                    int flags);
 extern _X_EXPORT Bool vgaHWHandleColormaps(ScreenPtr pScreen);

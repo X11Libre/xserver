@@ -6923,17 +6923,6 @@ programming the standard VGA registers, and for handling VGA colourmaps.
 
       <blockquote><para>
 	  <programlisting>
-    void vgaHWDisable(vgaHWPtr hwp);
-	  </programlisting>
-	  <blockquote><para>
-      This function disables the VGA subsystem.  (Note, this function is
-      present in XFree86 4.1.0 and later.).
-	    </para>
-
-	  </blockquote></para></blockquote>
-
-      <blockquote><para>
-	  <programlisting>
     void vgaHWSave(ScrnInfoPtr pScrn, vgaRegPtr save, int flags);
 	  </programlisting>
 	  <blockquote><para>
