@@ -627,12 +627,6 @@ vgaHWBlankScreen(ScrnInfoPtr pScrn, Bool on)
     vgaHWSeqReset(hwp, FALSE);
 }
 
-vgaHWBlankScreenProc *
-vgaHWBlankScreenWeak(void)
-{
-    return vgaHWBlankScreen;
-}
-
 /*
  * vgaHWSaveScreen -- blank the screen.
  */
