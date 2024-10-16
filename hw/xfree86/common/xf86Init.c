@@ -68,6 +68,7 @@
 #include "xf86VGAarbiter_priv.h"
 #include "loaderProcs.h"
 
+#include "xf86Module_priv.h"
 #include "xf86.h"
 #include "xf86Priv.h"
 #include "xf86Config.h"

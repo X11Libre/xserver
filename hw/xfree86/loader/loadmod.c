@@ -55,6 +55,7 @@
 #include "loaderProcs.h"
 #include "xf86Module.h"
 #include "loader.h"
+#include "xf86Module_priv.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -822,10 +823,8 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
 }
 
 void
-UnloadModule(void *_mod)
+UnloadModule(ModuleDescPtr mod)
 {
-    ModuleDescPtr mod = _mod;
-
     if (mod == (ModuleDescPtr) 1)
         return;
 
@@ -855,10 +854,8 @@ UnloadModule(void *_mod)
 }
 
 void
-UnloadSubModule(void *_mod)
+UnloadSubModule(ModuleDescPtr mod)
 {
-    ModuleDescPtr mod = (ModuleDescPtr) _mod;
-
     /* Some drivers are calling us on built-in submodules, ignore them */
     if (mod == (ModuleDescPtr) 1)
         return;
