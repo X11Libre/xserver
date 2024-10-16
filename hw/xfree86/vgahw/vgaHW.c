@@ -1031,7 +1031,7 @@ vgaHWSaveMode(ScrnInfoPtr scrninfp, vgaRegPtr save)
     }
 }
 
-void
+static void
 vgaHWSaveColormap(ScrnInfoPtr scrninfp, vgaRegPtr save)
 {
     vgaHWPtr hwp = VGAHWPTR(scrninfp);
