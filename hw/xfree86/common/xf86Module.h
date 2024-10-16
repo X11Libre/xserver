@@ -147,8 +147,6 @@ typedef struct {
 #define GET_MODULE_MINOR_VERSION(vers)	(((vers) >> 16) & 0xFF)
 #define GET_MODULE_PATCHLEVEL(vers)	((vers) & 0xFFFF)
 
-#define INITARGS void
-
 /* Prototypes for Loader functions that are exported to modules */
 extern _X_EXPORT void *LoadSubModule(void *, const char *, const char **,
                                        const char **, void *,
