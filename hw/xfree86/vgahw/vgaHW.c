@@ -825,7 +825,7 @@ vgaHWRestoreFonts(ScrnInfoPtr scrninfp, vgaRegPtr restore)
 #endif                          /* SAVE_TEXT || SAVE_FONT1 || SAVE_FONT2 */
 }
 
-void
+static void
 vgaHWRestoreMode(ScrnInfoPtr scrninfp, vgaRegPtr restore)
 {
     vgaHWPtr hwp = VGAHWPTR(scrninfp);
