@@ -191,9 +191,6 @@ extern _X_EXPORT void vgaHWSaveFonts(ScrnInfoPtr scrninfp, vgaRegPtr save);
 extern _X_EXPORT void vgaHWSave(ScrnInfoPtr scrninfp, vgaRegPtr save,
                                 int flags);
 extern _X_EXPORT Bool vgaHWInit(ScrnInfoPtr scrnp, DisplayModePtr mode);
-extern _X_EXPORT Bool vgaHWSetRegCounts(ScrnInfoPtr scrp, int numCRTC,
-                                        int numSequencer, int numGraphics,
-                                        int numAttribute);
 extern _X_EXPORT Bool vgaHWCopyReg(vgaRegPtr dst, vgaRegPtr src);
 extern _X_EXPORT Bool vgaHWGetHWRec(ScrnInfoPtr scrp);
 extern _X_EXPORT void vgaHWFreeHWRec(ScrnInfoPtr scrp);

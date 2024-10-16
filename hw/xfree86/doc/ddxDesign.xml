@@ -6776,30 +6776,6 @@ programming the standard VGA registers, and for handling VGA colourmaps.
 
       <blockquote><para>
 	  <programlisting>
-    Bool vgaHWSetRegCounts(ScrnInfoPtr pScrn, int numCRTC,
-                          int numSequencer, int numGraphics, int numAttribute);
-	  </programlisting>
-	  <blockquote><para>
-      This function allows the number of CRTC, Sequencer, Graphics and
-      Attribute registers to be changed.  This makes it possible for
-      extended registers to be saved and restored with
-      <function>vgaHWSave()</function> and <function>vgaHWRestore()</function>.
-      This function should be called after a <structname>vgaHWRec</structname>
-      has been allocated with <function>vgaHWGetHWRec()</function>.  The
-      default values are defined in <filename>vgaHW.h</filename> as follows:
-
-	      <programlisting>
-#define VGA_NUM_CRTC 25
-#define VGA_NUM_SEQ   5
-#define VGA_NUM_GFX   9
-#define VGA_NUM_ATTR 21
-	      </programlisting>
-	    </para>
-
-	  </blockquote></para></blockquote>
-
-      <blockquote><para>
-	  <programlisting>
     Bool vgaHWCopyReg(vgaRegPtr dst, vgaRegPtr src);
 	  </programlisting>
 	  <blockquote><para>
@@ -7021,11 +6997,6 @@ programming the standard VGA registers, and for handling VGA colourmaps.
 	      </literallayout>
 	    </para>
 
-	    <para>
-    The number of registers actually saved may be modified by a prior call
-    to <function>vgaHWSetRegCounts()</function>.
-	    </para>
-
 	  </blockquote></para></blockquote>
 
       <blockquote><para>
@@ -7103,11 +7074,6 @@ programming the standard VGA registers, and for handling VGA colourmaps.
         Graphics[0-8]
         Sequencer[0-4]
 	      </literallayout>
-	    </para>
-
-	    <para>
-    The number of registers actually restored may be modified by a prior call
-    to <function>vgaHWSetRegCounts()</function>.
 	    </para>
 
 	  </blockquote></para></blockquote>
