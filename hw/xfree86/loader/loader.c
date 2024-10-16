@@ -154,12 +154,6 @@ LoaderSetOptions(unsigned long opts)
     LoaderOptions |= opts;
 }
 
-Bool
-LoaderShouldIgnoreABI(void)
-{
-    return (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL) != 0;
-}
-
 int
 LoaderGetABIVersion(const char *abiclass)
 {
