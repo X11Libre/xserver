@@ -61,6 +61,7 @@
 #include "xf86InPriv.h"
 #include "xf86Config.h"
 #include "mivalidate.h"
+#include "xf86Module_priv.h"
 
 /* For xf86GetClocks */
 #if defined(CSRG_BASED) || defined(__GNU__)

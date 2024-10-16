@@ -76,6 +76,7 @@
 #include "eventstr.h"
 #include "inpututils.h"
 #include "optionstr.h"
+#include "xf86Module_priv.h"
 
 #ifdef HAVE_FNMATCH_H
 #include <fnmatch.h>

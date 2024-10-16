@@ -151,8 +151,6 @@ typedef struct {
 extern _X_EXPORT void *LoadSubModule(void *, const char *, const char **,
                                        const char **, void *,
                                        const XF86ModReqInfo *, int *, int *);
-extern _X_EXPORT void UnloadSubModule(void *);
-extern _X_EXPORT void UnloadModule(void *);
 extern _X_EXPORT void *LoaderSymbol(const char *);
 extern _X_EXPORT void *LoaderSymbolFromModule(void *, const char *);
 extern _X_EXPORT void LoaderErrorMsg(const char *, const char *, int, int);
