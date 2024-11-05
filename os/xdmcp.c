@@ -20,7 +20,7 @@
 #define XSERV_t
 #define TRANS_SERVER
 #define TRANS_REOPEN
-#include <X11/Xtrans/Xtrans.h>
+#include "os/Xtrans.h"
 #endif
 
 #include <X11/Xos.h>
@@ -51,7 +51,7 @@
 #define XSERV_t
 #define TRANS_SERVER
 #define TRANS_REOPEN
-#include <X11/Xtrans/Xtrans.h>
+#include "os/Xtrans.h"
 
 #ifdef XDMCP
 #undef REQUEST

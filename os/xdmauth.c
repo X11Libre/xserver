@@ -40,9 +40,9 @@ from The Open Group.
 #define XSERV_t
 #define TRANS_SERVER
 #define TRANS_REOPEN
-#include <X11/Xtrans/Xtrans.h>
 
 #include "os/auth.h"
+#include "os/Xtrans.h"
 
 #include "os.h"
 #include "osdep.h"
