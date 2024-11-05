@@ -70,8 +70,8 @@ SOFTWARE.
 #define XSERV_t
 #define TRANS_SERVER
 #define TRANS_REOPEN
-#include <X11/Xtrans/Xtrans.h>
-#include <X11/Xtrans/Xtransint.h>
+#include "os/Xtrans.h"
+#include "os/Xtransint.h"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>

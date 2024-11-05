@@ -84,7 +84,6 @@ damageproto_dep = dependency('damageproto', version: '>= 1.1', fallback: ['xorgp
 xcmiscproto_dep = dependency('xcmiscproto', version: '>= 1.2.0', fallback: ['xorgproto', 'ext_xorgproto'])
 bigreqsproto_dep = dependency('bigreqsproto', version: '>= 1.1.0', fallback: ['xorgproto', 'ext_xorgproto'])
 presentproto_dep = dependency('presentproto', version: '>= 1.4', fallback: ['xorgproto', 'ext_xorgproto'])
-xtrans_dep = dependency('xtrans', version: '>= 1.3.5')
 
 videoproto_dep = dependency('videoproto', fallback: ['xorgproto', 'ext_xorgproto'])
 compositeproto_dep = dependency('compositeproto', version: '>= 0.4', fallback: ['xorgproto', 'ext_xorgproto'])
@@ -579,7 +578,6 @@ common_dep = [
     xcmiscproto_dep,
     bigreqsproto_dep,
     presentproto_dep,
-    xtrans_dep,
     libsystemd_daemon_dep,
 
     videoproto_dep,
