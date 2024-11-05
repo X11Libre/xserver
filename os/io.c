@@ -64,7 +64,7 @@ SOFTWARE.
 #define XSERV_t
 #define TRANS_SERVER
 #define TRANS_REOPEN
-#include <X11/Xtrans/Xtrans.h>
+#include "os/Xtrans.h"
 #include <X11/Xmd.h>
 #include <errno.h>
 #if !defined(WIN32)
