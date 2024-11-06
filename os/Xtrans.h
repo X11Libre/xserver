@@ -83,13 +83,6 @@ static const char *__xtransname = "_XSERVTrans";
 #define X11_t
 #endif /* XSERV_t */
 
-#ifdef XIM_t
-#define TRANS(func) _XimXTrans##func
-#ifdef XTRANSDEBUG
-static const char *__xtransname = "_XimTrans";
-#endif
-#endif /* XIM_t */
-
 #if !defined(TRANS)
 #define TRANS(func) _XTrans##func
 #ifdef XTRANSDEBUG
