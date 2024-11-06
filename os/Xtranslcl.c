@@ -226,12 +226,6 @@ TRANS(FillAddrInfo)(XtransConnInfo ciptr,
 #if defined(FS_t) || defined (FONT_t)
 #define NAMEDNODENAME	"/tmp/.font-pipe/fs"
 #endif
-#if defined(ICE_t)
-#define NAMEDNODENAME	"/tmp/.ICE-pipe/"
-#endif
-
-
-
 
 
 #ifdef LOCAL_TRANS_NAMED
