@@ -292,7 +292,7 @@ TRANS(SocketINETGetAddr) (XtransConnInfo ciptr)
 
     prmsg (3,"SocketINETGetAddr(%p)\n", (void *) ciptr);
 
-    bzero(socknamePtr, namelen);
+    memset(socknamePtr, 0, namelen);
 
     if (getsockname (ciptr->fd,(struct sockaddr *) socknamePtr,
 		     (void *)&namelen) < 0)
@@ -341,7 +341,7 @@ TRANS(SocketINETGetPeerAddr) (XtransConnInfo ciptr)
     void *socknamePtr = &sockname;
     SOCKLEN_T namelen = sizeof(sockname);
 
-    bzero(socknamePtr, namelen);
+    memset(socknamePtr, 0, namelen);
 
     prmsg (3,"SocketINETGetPeerAddr(%p)\n", (void *) ciptr);
 
@@ -898,7 +898,7 @@ TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, const char *port,
     else
 	sport = 0;
 
-    bzero(&sockname, sizeof(sockname));
+    memset(&sockname, 0, sizeof(sockname));
     if (Sockettrans2devtab[ciptr->index].family == AF_INET) {
 	namelen = sizeof (struct sockaddr_in);
 #ifdef BSD44SOCKETS
@@ -1382,7 +1382,7 @@ TRANS(SocketINETConnect) (XtransConnInfo ciptr,
 	    strncpy(addrlist->host, host, sizeof(addrlist->host));
 	    addrlist->host[sizeof(addrlist->host) - 1] = '\0';
 
-	    bzero(&hints,sizeof(hints));
+	    memset(&hints, 0, sizeof(hints));
 #ifdef IPv6
 	    if (strcmp(Sockettrans2devtab[ciptr->index].transname, "tcp") == 0)
 		hints.ai_family = AF_UNSPEC;
