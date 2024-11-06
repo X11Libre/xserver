@@ -226,16 +226,6 @@ TRANS(ConvertAddress)(int *familyp, int *addrlenp, Xtransaddr **addrp)
 
 #endif /* X11_t */
 
-#ifdef ICE_t
-
-#include <signal.h>
-
-#include <setjmp.h>
-static jmp_buf env;
-
-#endif /* ICE_t */
-
-
 #if defined(WIN32) && defined(TCPCONN)
 int
 TRANS(WSAStartup) (void)

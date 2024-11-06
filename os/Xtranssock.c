@@ -242,11 +242,6 @@ is_numeric (const char *str)
 #define UNIX_PATH "/tmp/.font-unix/fs"
 #define UNIX_DIR "/tmp/.font-unix"
 #endif /* FS_t || FONT_t */
-#if defined(ICE_t)
-#define UNIX_PATH "/tmp/.ICE-unix/"
-#define UNIX_DIR "/tmp/.ICE-unix"
-#endif /* ICE_t */
-
 
 #endif /* UNIXCONN */
 
