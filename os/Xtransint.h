@@ -371,31 +371,7 @@ static int trans_mkdir (
 #ifdef XTRANSDEBUG
 #include <stdarg.h>
 
-/*
- * The X server and the font server both provide ErrorF() & VErrorF(). For
- * other software that uses xtrans, we provide our own simple
- * versions.
- */
-# if (defined(XSERV_t) || defined(TRANS_HAS_ERRORF)) && defined(TRANS_SERVER)
-#  include "os.h"
-# else
-static inline void _X_ATTRIBUTE_PRINTF(1, 0)
-VErrorF(const char *f, va_list args)
-{
-    vfprintf(stderr, f, args);
-    fflush(stderr);
-}
-
-static inline void  _X_ATTRIBUTE_PRINTF(1, 2)
-ErrorF(const char *f, ...)
-{
-    va_list args;
-
-    va_start(args, f);
-    VErrorF(f, args);
-    va_end(args);
-}
-# endif /* xserver */
+#include "os.h"
 #endif /* XTRANSDEBUG */
 
 static inline void  _X_ATTRIBUTE_PRINTF(2, 3)
