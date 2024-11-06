@@ -220,9 +220,6 @@ TRANS(FillAddrInfo)(XtransConnInfo ciptr,
 
 #define NAMEDNODENAME "/tmp/.X11-pipe/X"
 #endif
-#if defined(XIM_t)
-#define NAMEDNODENAME "/tmp/.XIM-pipe/XIM"
-#endif
 
 
 #ifdef LOCAL_TRANS_NAMED

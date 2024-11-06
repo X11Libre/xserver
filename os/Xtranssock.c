@@ -234,10 +234,6 @@ is_numeric (const char *str)
 #define UNIX_PATH "/tmp/.X11-unix/X"
 #define UNIX_DIR "/tmp/.X11-unix"
 #endif /* X11_t */
-#if defined(XIM_t)
-#define UNIX_PATH "/tmp/.XIM-unix/XIM"
-#define UNIX_DIR "/tmp/.XIM-unix"
-#endif /* XIM_t */
 
 #endif /* UNIXCONN */
 
