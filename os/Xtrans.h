@@ -90,13 +90,6 @@ static const char *__xtransname = "_XimTrans";
 #endif
 #endif /* XIM_t */
 
-#ifdef FS_t
-#define TRANS(func) _FSTrans##func
-#ifdef XTRANSDEBUG
-static const char *__xtransname = "_FSTrans";
-#endif
-#endif /* FS_t */
-
 #if !defined(TRANS)
 #define TRANS(func) _XTrans##func
 #ifdef XTRANSDEBUG
