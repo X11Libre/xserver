@@ -342,21 +342,6 @@ TRANS(ParseAddress) (const char *address,
 
     _port = mybuf;
 
-#if defined(FS_t)
-    /*
-     * Is there an optional catalogue list?
-     */
-
-    if ((mybuf = strchr (mybuf,'/')) != NULL)
-	*mybuf ++= '\0';
-
-    /*
-     * The rest, if any, is the (currently unused) catalogue list.
-     *
-     * _catalogue = mybuf;
-     */
-#endif
-
 done_parsing:
     /*
      * Now that we have all of the components, allocate new
