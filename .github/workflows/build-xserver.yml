@@ -1,0 +1,118 @@
+name: Build X servers
+
+env:
+    MESON_BUILDDIR:  "build"
+    X11_PREFIX:      /home/runner/x11
+    X11_BUILD_DIR:   /home/runner/build-deps
+
+on:
+    push:
+
+jobs:
+    xserver-build-ubuntu:
+        env:
+            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxwayland=true -Dxorg=true -Dxvfb=true -Dxnest=true
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: prepare build environment
+              run: |
+                export MACHINE=`gcc -dumpmachine`
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
+
+            - name: apt cache
+              uses: actions/cache@v4
+              with:
+                path: /var/cache/apt
+                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
+                restore-keys: apt-cache-
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: X11 prereq cache
+              uses: actions/cache@v4
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.os }}-x11-deps-
+
+            - name: generic prereq
+              run:  sudo .github/scripts/install-prereq.sh
+
+            - name: build
+              run:  .gitlab-ci/meson-build.sh
+
+            - name: tests (may fail)
+              continue-on-error: true
+              run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs || true
+              env:
+                  XTEST_DIR:  ${{ env.X11_BUILD_DIR }}/xts
+                  PIGLIT_DIR: ${{ env.X11_BUILD_DIR }}/piglit
+
+            - name: archive build logs
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-logs
+                  path: |
+                      build/meson-logs/*
+            - name: ddx build check
+              run:  .gitlab-ci/check-ddx-build.sh
+            - name: manpage check
+              run:  .gitlab-ci/manpages-check
+
+    drivers-build-ubuntu:
+        env:
+            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxwayland=false -Dxorg=true -Dxvfb=false -Dxnest=false
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: prepare build environment
+              run: |
+                export MACHINE=`gcc -dumpmachine`
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
+
+            - name: apt cache
+              uses: actions/cache@v4
+              with:
+                path: /var/cache/apt
+                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
+                restore-keys: apt-cache-
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: X11 prereq cache
+              uses: actions/cache@v4
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.os }}-x11-deps-
+
+            - name: generic prereq
+              run:  sudo .github/scripts/install-prereq.sh
+
+            - name: build xserver sdk
+              run:  |
+                echo -n > .meson_environment
+                echo "export MESON_BUILDDIR=$MESON_BUILDDIR" >> .meson_environment
+                echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> .meson_environment
+                .gitlab-ci/meson-build.sh --skip-test
+                sudo meson install --no-rebuild -C "$MESON_BUILDDIR"
+                sudo mkdir -p /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
+                sudo chown -R runner /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
+
+            - name: compile drivers
+              run: .github/scripts/compile-drivers.sh
