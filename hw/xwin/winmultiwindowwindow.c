@@ -36,6 +36,8 @@
 #include <xwin-config.h>
 #endif
 
+#include "mi/mi_priv.h"
+
 #include "win.h"
 #include "dixevents.h"
 #include "winmultiwindowclass.h"
