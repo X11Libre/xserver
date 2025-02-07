@@ -25,7 +25,6 @@ is" without express or implied warranty.
 #include "misc.h"
 #include "scrnintstr.h"
 #include "servermd.h"
-#include "extinit.h"
 
 #include "xnest-xcb.h"
 
