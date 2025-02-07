@@ -57,6 +57,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 extern _X_EXPORT Bool noCompositeExtension;
 #endif
 
+/* required by: several video drivers (eg. vmware and sis) */
 #ifdef XINERAMA
 extern _X_EXPORT Bool noPanoramiXExtension;
 #endif /* XINERAMA */
