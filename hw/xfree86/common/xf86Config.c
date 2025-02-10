@@ -50,6 +50,7 @@
 #include <sys/types.h>
 #include <grp.h>
 
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "xf86.h"
@@ -831,7 +832,7 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
             }
             else if (!xf86NameCmp(s, "sync")) {
                 LogMessageVerb(X_CONFIG, 1, "Syncing logfile enabled\n");
-                LogSetParameter(XLOG_SYNC, TRUE);
+                logSync = TRUE;
             }
             else {
                 LogMessageVerb(X_WARNING, 1, "Unknown Log option\n");
