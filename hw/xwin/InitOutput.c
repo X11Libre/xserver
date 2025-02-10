@@ -645,7 +645,7 @@ OsVendorInit(void)
 
     }
     logVerbosity = 2;
-    LogSetParameter(XLOG_FILE_VERBOSITY, logVerbosity);
+    logFileVerbosity = 2;
 
     /* Log the version information */
     if (serverGeneration == 1)

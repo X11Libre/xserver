@@ -878,7 +878,7 @@ void
 xf86SetLogVerbosity(int verb)
 {
     xf86LogVerbose = verb;
-    LogSetParameter(XLOG_FILE_VERBOSITY, verb);
+    logFileVerbosity = verb;
 }
 
 static void

@@ -23,4 +23,12 @@ extern Bool logSync;
  */
 extern int logVerbosity;
 
+/**
+ * @brief log file verbosity
+ *
+ * The verbosity level of logging to per-display file. All messages with
+ * verbosity level below this one will be written to the log file.
+ */
+extern int logFileVerbosity;
+
 #endif /* _XSERVER_LOG_PRIV_H */
