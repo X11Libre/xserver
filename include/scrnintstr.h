@@ -565,8 +565,8 @@ typedef struct _Screen {
 
     /* Pixmap procedures */
 
-    CreatePixmapProcPtr CreatePixmap;
-    DestroyPixmapProcPtr DestroyPixmap;
+    _X_XSERVER_INTERNAL("") CreatePixmapProcPtr CreatePixmap;
+    _X_XSERVER_INTERNAL("use dixDestroyPixmap()") DestroyPixmapProcPtr DestroyPixmap;
 
     /* Font procedures */
 
