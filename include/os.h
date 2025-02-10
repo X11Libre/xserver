@@ -283,13 +283,6 @@ extern _X_EXPORT int
 timingsafe_memcmp(const void *b1, const void *b2, size_t len);
 #endif
 
-/* Logging. */
-typedef enum _LogParameter {
-    XLOG_SYNC,
-    XLOG_VERBOSITY,
-    XLOG_FILE_VERBOSITY
-} LogParameter;
-
 /* Flags for log messages. */
 typedef enum {
     X_PROBED,                   /* Value was probed */
@@ -312,8 +305,6 @@ extern void
 LogSetDisplay(void);
 extern _X_EXPORT void
 LogClose(enum ExitCode error);
-extern _X_EXPORT Bool
-LogSetParameter(LogParameter param, int value);
 extern _X_EXPORT void
 LogVMessageVerb(MessageType type, int verb, const char *format, va_list args)
 _X_ATTRIBUTE_PRINTF(3, 0);
