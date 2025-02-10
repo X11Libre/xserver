@@ -103,6 +103,12 @@ typedef struct _NewClientRec *NewClientPtr;
 #include <stdio.h>
 #include <stdarg.h>
 
+#ifdef _INSIDE_XSERVER
+#define _X_XSERVER_INTERNAL(msg)
+#else
+#define _X_XSERVER_INTERNAL(msg) _X_DEPRECATED_MSG(msg)
+#endif
+
 extern _X_EXPORT int ReadFdFromClient(ClientPtr client);
 
 extern _X_EXPORT int WriteToClient(ClientPtr /*who */ , int /*count */ ,

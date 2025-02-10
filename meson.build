@@ -8,6 +8,8 @@ project('xserver', 'c',
 )
 release_date = '2025-12-21'
 
+add_project_arguments('-D_INSIDE_XSERVER', language: ['c', 'objc'])
+
 cc = meson.get_compiler('c')
 
 add_project_arguments('-fno-strict-aliasing', language : 'c')
