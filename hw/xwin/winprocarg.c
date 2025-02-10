@@ -36,8 +36,9 @@ from The Open Group.
 #endif
 
 #include "os/cmdline.h"
-#include "os/osdep.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
+#include "os/osdep.h"
 
 #include <../xfree86/common/xorgVersion.h>
 #include "win.h"
@@ -996,7 +997,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
      */
     if (IS_OPTION("-logverbose")) {
         CHECK_ARGS(1);
-        g_iLogVerbose = atoi(argv[++i]);
+        logVerbosity = atoi(argv[++i]);
         return 2;
     }
 

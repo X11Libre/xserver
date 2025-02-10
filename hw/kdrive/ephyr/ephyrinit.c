@@ -28,6 +28,7 @@
 #include "dix/dix_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "ephyr.h"
@@ -288,10 +289,8 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
     else if (!strcmp(argv[i], "-verbosity")) {
         if (i + 1 < argc && argv[i + 1][0] != '-') {
-            int verbosity = atoi(argv[i + 1]);
-
-            LogSetParameter(XLOG_VERBOSITY, verbosity);
-            EPHYR_LOG("set verbosiry to %d\n", verbosity);
+            logVerbosity = atoi(argv[i + 1]);
+            EPHYR_LOG("set verbosiry to %d\n", logVerbosity);
             return 2;
         }
         else {

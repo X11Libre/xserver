@@ -15,4 +15,12 @@
  */
 extern Bool logSync;
 
+/**
+ * @brief console log verbosity (stderr)
+ *
+ * The verbosity level of logging to console. All messages with verbosity
+ * level below this one will be written to stderr
+ */
+extern int logVerbosity;
+
 #endif /* _XSERVER_LOG_PRIV_H */

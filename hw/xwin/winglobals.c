@@ -69,7 +69,6 @@ const char *g_pszLogFile = DEFAULT_LOGDIR "/XWin.%s.log";
 const char *g_pszLogFile = "XWin.log";
 Bool g_fLogFileChanged = FALSE;
 #endif
-int g_iLogVerbose = 2;
 Bool g_fLogInited = FALSE;
 char *g_pszCommandLine = NULL;
 Bool g_fSilentFatalError = FALSE;

@@ -111,9 +111,9 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #define DEFAULT_LOG_FILE_VERBOSITY	3
 
 Bool logSync = FALSE;
+int logVerbosity = DEFAULT_LOG_VERBOSITY;
 
 static int logFileFd = -1;
-static int logVerbosity = DEFAULT_LOG_VERBOSITY;
 static int logFileVerbosity = DEFAULT_LOG_FILE_VERBOSITY;
 
 /* Buffer to information logged before the log file is opened. */

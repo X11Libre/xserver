@@ -41,6 +41,7 @@
 #include "os/client_priv.h"
 #include "os/ddx_priv.h"
 #include "os/fmt.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/xserver_poll.h"
 
@@ -134,7 +135,6 @@ static int init_fd = -1;
 static int wm_fd = -1;
 static int listen_fds[5] = { -1, -1, -1, -1, -1 };
 static int listen_fd_count = 0;
-static int verbosity = 0;
 
 static void
 xwl_show_version(void)
@@ -237,12 +237,11 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
             val = strtol(argv[i], &end, 0);
             if (*end == '\0') {
-                verbosity = val;
-                LogSetParameter(XLOG_VERBOSITY, verbosity);
+                logVerbosity = val;
                 return 2;
             }
         }
-        LogSetParameter(XLOG_VERBOSITY, ++verbosity);
+        logVerbosity++;
         return 1;
     }
     else if (strcmp(argv[i], "-version") == 0) {

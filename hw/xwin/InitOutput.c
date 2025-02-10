@@ -37,6 +37,7 @@ from The Open Group.
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "winmsg.h"
@@ -643,8 +644,8 @@ OsVendorInit(void)
         g_pszLogFile = LogInit(g_pszLogFile, ".old");
 
     }
-    LogSetParameter(XLOG_VERBOSITY, g_iLogVerbose);
-    LogSetParameter(XLOG_FILE_VERBOSITY, g_iLogVerbose);
+    logVerbosity = 2;
+    LogSetParameter(XLOG_FILE_VERBOSITY, logVerbosity);
 
     /* Log the version information */
     if (serverGeneration == 1)

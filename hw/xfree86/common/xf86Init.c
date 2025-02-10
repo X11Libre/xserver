@@ -58,6 +58,7 @@
 #include "mi/mi_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
+#include "os/log_priv.h"
 #include "os/osdep.h"
 
 #include "servermd.h"
@@ -870,7 +871,7 @@ void
 xf86SetVerbosity(int verb)
 {
     xf86Verbose = verb;
-    LogSetParameter(XLOG_VERBOSITY, verb);
+    logVerbosity = verb;
 }
 
 void

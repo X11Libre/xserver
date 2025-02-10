@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include "os/fmt.h"
+#include "os/log_priv.h"
 
 #include "assert.h"
 #include "misc.h"
@@ -149,7 +150,7 @@ number_formatting(void)
                                 -0x7FFFFFFFFFFFFFFF, /* Maximum 64-bit signed number */
     } ;
 
-    LogSetParameter(XLOG_VERBOSITY, -1);
+    logVerbosity = -1;
 
     for (i = 0; i < ARRAY_SIZE(unsigned_tests); i++)
         assert(check_number_format_test(unsigned_tests[i]));
@@ -181,7 +182,7 @@ static void logging_format(void)
     uintptr_t ptr;
     char *fname = NULL;
 
-    LogSetParameter(XLOG_VERBOSITY, -1);
+    logVerbosity = -1;
 
     /* set up buf to contain ".....end" */
     memset(buf, '.', sizeof(buf));

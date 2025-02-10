@@ -78,6 +78,8 @@
 #include <xwin-config.h>
 #endif
 
+#include "os/log_priv.h"
+
 #include "glwindows.h"
 #include <glx/glxserver.h>
 #include <glx/glxutil.h>
@@ -297,7 +299,7 @@ fbConfigsDump(unsigned int n, __GLXconfig * c, PixelFormatRejectStats *rejects)
     LogMessage(X_INFO, "ignored pixel formats: %d not OpenGL, %d unknown pixel type, %d unaccelerated\n",
                rejects->notOpenGL, rejects->unknownPixelType, rejects->unaccelerated);
 
-    if (g_iLogVerbose < 3)
+    if (logVerbosity < 3)
         return;
 
     ErrorF
@@ -572,7 +574,7 @@ glxWinScreenProbe(ScreenPtr pScreen)
     if (!wgl_extensions)
         wgl_extensions = "";
 
-    if (g_iLogVerbose >= 3) {
+    if (logVerbosity >= 3) {
         glxLogExtensions("GL_EXTENSIONS:  ", gl_extensions);
         glxLogExtensions("WGL_EXTENSIONS: ", wgl_extensions);
     }
