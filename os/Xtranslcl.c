@@ -204,8 +204,6 @@ TRANS(FillAddrInfo)(XtransConnInfo ciptr,
 
 #define X_STREAMS_DIR	"/tmp/.X11-pipe"
 
-#define DEV_PTMX	"/dev/ptmx"
-
 #define NAMEDNODENAME "/tmp/.X11-pipe/X"
 
 #ifdef LOCAL_TRANS_NAMED
