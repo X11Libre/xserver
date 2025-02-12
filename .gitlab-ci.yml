@@ -4,7 +4,7 @@
 # Please see the ci-templates documentation for details:
 # https://freedesktop.pages.freedesktop.org/ci-templates/
 
-.templates_sha: &template_sha c5626190ec14b475271288dda7a7dae8dbe0cd76 # see https://docs.gitlab.com/ee/ci/yaml/#includefile
+.templates_sha: &template_sha ef5e4669b7500834a17ffe9277e15fbb6d977fff # see https://docs.gitlab.com/ee/ci/yaml/#includefile
 
 # FDO_DISTRIBUTION_TAG is the tag of the docker image used for the build jobs.
 # If the image doesn't exist yet, the docker-image stage generates it.
@@ -22,9 +22,9 @@ variables:
     XORG_DEBIAN_VERSION:  'bullseye-slim'
     XORG_DEBIAN_EXEC:     'env FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT} bash .gitlab-ci/debian-install.sh'
     XORG_DEBIAN_TAG:      '2025-02-12-xts'
-    XORG_FREEBSD_VERSION: '14.0'
+    XORG_FREEBSD_VERSION: '14.2'
     XORG_FREEBSD_EXEC:    ''
-    XORG_FREEBSD_TAG:     '2024-06-10.0'
+    XORG_FREEBSD_TAG:     '2025-02-18-vm-image'
 
 include:
   - project: 'freedesktop/ci-templates'
@@ -110,6 +110,7 @@ stages:
     FDO_DISTRIBUTION_VERSION:   '$XORG_FREEBSD_VERSION'
     FDO_DISTRIBUTION_EXEC:      ''
     FDO_DISTRIBUTION_PACKAGES:  'git gcc pkgconf autoconf automake libtool xorg-macros xorgproto bash meson ninja pixman xtrans libXau libXdmcp libXfont2 libxkbfile libxcvt libpciaccess font-util libepoll-shim'
+    FDO_IMAGE_SIZE:             '30G'
 
 debian-bullseye:
   extends:
