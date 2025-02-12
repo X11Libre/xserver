@@ -62,7 +62,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #endif
 #include "misc.h"
 #include <X11/X.h>
-#define XSERV_t
 #include "os/Xtrans.h"
 
 #include <libgen.h>
