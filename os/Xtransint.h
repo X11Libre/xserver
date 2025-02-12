@@ -74,10 +74,6 @@ from The Open Group.
 
 #include "os/Xtrans.h"
 
-#ifndef _X_UNUSED  /* Defined in Xfuncproto.h in xproto >= 7.0.22 */
-# define _X_UNUSED  /* */
-#endif
-
 #ifdef XTRANSDEBUG
 # include <stdio.h>
 #endif /* XTRANSDEBUG */
@@ -85,23 +81,10 @@ from The Open Group.
 #include <errno.h>
 
 #ifndef WIN32
-#  include <sys/socket.h>
+# include <sys/socket.h>
 # include <netinet/in.h>
 # include <arpa/inet.h>
-
-/*
- * Moved the setting of NEED_UTSNAME to this header file from Xtrans.c,
- * to avoid a race condition. JKJ (6/5/97)
- */
-
-# if defined(_POSIX_SOURCE) || defined(SVR4) || defined(__SVR4)
-#  ifndef NEED_UTSNAME
-#   define NEED_UTSNAME
-#  endif
-#  include <sys/utsname.h>
-# endif
-
-#  define ESET(val) errno = val
+# define ESET(val) errno = val
 # define EGET() errno
 
 #else /* WIN32 */
