@@ -36,7 +36,6 @@
 #include "winmsg.h"
 
 #define XSERV_t
-#define TRANS_SERVER
 #include "os/Xtrans.h"
 
 /*

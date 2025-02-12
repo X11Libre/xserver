@@ -85,7 +85,6 @@ SOFTWARE.
 #include <stdio.h>
 #include <stdlib.h>
 #define XSERV_t
-#define TRANS_SERVER
 #define TRANS_REOPEN
 #include "os/Xtrans.h"
 #include <X11/Xauth.h>
