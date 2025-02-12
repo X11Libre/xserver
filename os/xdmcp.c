@@ -17,7 +17,6 @@
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>
-#define XSERV_t
 #include "os/Xtrans.h"
 #endif
 
@@ -46,7 +45,6 @@
 #include "input.h"
 #include "dixstruct.h"
 
-#define XSERV_t
 #include "os/Xtrans.h"
 
 #ifdef XDMCP

@@ -72,8 +72,6 @@ from The Open Group.
 #define HAVE_INET_NTOP
 #endif
 
-#ifdef X11_t
-
 /*
  * These values come from X.h and Xauth.h, and MUST match them. Some
  * of these values are also defined by the ChangeHost protocol message.
@@ -223,8 +221,6 @@ TRANS(ConvertAddress)(int *familyp, int *addrlenp, Xtransaddr **addrp)
 
     return 0;
 }
-
-#endif /* X11_t */
 
 #if defined(WIN32) && defined(TCPCONN)
 int

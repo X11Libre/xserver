@@ -35,7 +35,6 @@
 #include "windisplay.h"
 #include "winmsg.h"
 
-#define XSERV_t
 #include "os/Xtrans.h"
 
 /*

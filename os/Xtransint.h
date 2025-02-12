@@ -98,9 +98,7 @@ from The Open Group.
 
 #include <stddef.h>
 
-#ifdef X11_t
 #define X_TCP_PORT	6000
-#endif
 
 #if XTRANS_SEND_FDS
 
