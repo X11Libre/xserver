@@ -211,7 +211,6 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 static int TRANS(SocketINETClose) (XtransConnInfo ciptr);
 #endif
 
-#if (defined(TCPCONN) || defined(TRANS_REOPEN))
 static int
 is_numeric (const char *str)
 {
@@ -223,7 +222,6 @@ is_numeric (const char *str)
 
     return (1);
 }
-#endif
 
 #ifdef UNIXCONN
 
@@ -453,9 +451,6 @@ TRANS(SocketOpen) (int i, int type)
     return ciptr;
 }
 
-
-#ifdef TRANS_REOPEN
-
 static XtransConnInfo
 TRANS(SocketReopen) (int i _X_UNUSED, int type, int fd, const char *port)
 
@@ -535,9 +530,6 @@ TRANS(SocketReopen) (int i _X_UNUSED, int type, int fd, const char *port)
     /* port should now point to portnum or NULL */
     return ciptr;
 }
-
-#endif /* TRANS_REOPEN */
-
 
 /*
  * These functions are the interface supplied in the Xtransport structure
@@ -659,8 +651,6 @@ TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, const char *protocol,
     return ciptr;
 }
 
-#ifdef TRANS_REOPEN
-
 static XtransConnInfo
 TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, const char *port)
 
@@ -694,9 +684,6 @@ TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, const char *port)
 
     return ciptr;
 }
-
-#endif /* TRANS_REOPEN */
-
 
 static int
 TRANS(SocketSetOption) (XtransConnInfo ciptr, int option, int arg)
@@ -2353,9 +2340,7 @@ static Xtransport	TRANS(SocketTCPFuncs) = {
 #endif /* TRANS_CLIENT */
 	tcp_nolisten,
 	TRANS(SocketOpenCOTSServer),
-#ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
-#endif
 	TRANS(SocketSetOption),
 	TRANS(SocketINETCreateListener),
 	NULL,		       			/* ResetListener */
@@ -2386,9 +2371,7 @@ static Xtransport	TRANS(SocketINETFuncs) = {
 #endif /* TRANS_CLIENT */
 	NULL,
 	TRANS(SocketOpenCOTSServer),
-#ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
-#endif
 	TRANS(SocketSetOption),
 	TRANS(SocketINETCreateListener),
 	NULL,		       			/* ResetListener */
@@ -2420,9 +2403,7 @@ static Xtransport     TRANS(SocketINET6Funcs) = {
 #endif /* TRANS_CLIENT */
 	NULL,
 	TRANS(SocketOpenCOTSServer),
-#ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
-#endif
 	TRANS(SocketSetOption),
 	TRANS(SocketINETCreateListener),
 	NULL,					/* ResetListener */
@@ -2461,9 +2442,7 @@ static Xtransport	TRANS(SocketLocalFuncs) = {
 #endif /* TRANS_CLIENT */
 	NULL,
 	TRANS(SocketOpenCOTSServer),
-#ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
-#endif
 	TRANS(SocketSetOption),
 	TRANS(SocketUNIXCreateListener),
 	TRANS(SocketUNIXResetListener),
@@ -2506,9 +2485,7 @@ static Xtransport	TRANS(SocketUNIXFuncs) = {
 	NULL,
 #endif
 	TRANS(SocketOpenCOTSServer),
-#ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
-#endif
 	TRANS(SocketSetOption),
 	TRANS(SocketUNIXCreateListener),
 	TRANS(SocketUNIXResetListener),

@@ -209,8 +209,6 @@ XtransConnInfo TRANS(OpenCOTSServer)(
     const char *	/* address */
 );
 
-#ifdef TRANS_REOPEN
-
 XtransConnInfo TRANS(ReopenCOTSServer)(
     int,		/* trans_id */
     int,		/* fd */
@@ -223,9 +221,6 @@ int TRANS(GetReopenInfo)(
     int *,		/* fd */
     char **		/* port */
 );
-
-#endif /* TRANS_REOPEN */
-
 
 int TRANS(SetOption)(
     XtransConnInfo,	/* ciptr */
