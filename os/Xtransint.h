@@ -72,10 +72,6 @@ from The Open Group.
 #  define XTRANSDEBUG 1
 #endif
 
-#ifdef WIN32
-# define _WILLWINSOCK_
-#endif
-
 #include "os/Xtrans.h"
 
 #ifndef _X_UNUSED  /* Defined in Xfuncproto.h in xproto >= 7.0.22 */
