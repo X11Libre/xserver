@@ -438,9 +438,6 @@ TRANS(Open) (int type, const char *address)
     switch (type)
     {
     case XTRANS_OPEN_COTS_CLIENT:
-#ifdef TRANS_CLIENT
-	ciptr = thistrans->OpenCOTSClient(thistrans, protocol, host, port);
-#endif /* TRANS_CLIENT */
 	break;
     case XTRANS_OPEN_COTS_SERVER:
 	ciptr = thistrans->OpenCOTSServer(thistrans, protocol, host, port);
@@ -542,18 +539,6 @@ TRANS(Reopen) (int type, int trans_id, int fd, const char *port)
  * These are the only functions that should have knowledge of the transport
  * table.
  */
-
-#ifdef TRANS_CLIENT
-
-XtransConnInfo
-TRANS(OpenCOTSClient) (const char *address)
-
-{
-    prmsg (2,"OpenCOTSClient(%s)\n", address);
-    return TRANS(Open) (XTRANS_OPEN_COTS_CLIENT, address);
-}
-
-#endif /* TRANS_CLIENT */
 
 XtransConnInfo
 TRANS(OpenCOTSServer) (const char *address)
@@ -798,51 +783,6 @@ TRANS(Accept) (XtransConnInfo ciptr, int *status)
 
     return newciptr;
 }
-
-#ifdef TRANS_CLIENT
-
-int
-TRANS(Connect) (XtransConnInfo ciptr, const char *address)
-
-{
-    char	*protocol;
-    char	*host;
-    char	*port;
-    int		ret;
-
-    prmsg (2,"Connect(%d,%s)\n", ciptr->fd, address);
-
-    if (TRANS(ParseAddress) (address, &protocol, &host, &port) == 0)
-    {
-	prmsg (1,"Connect: Unable to Parse address %s\n",
-	       address);
-	return -1;
-    }
-
-#ifdef HAVE_LAUNCHD
-    if (!host) host=strdup("");
-#endif
-
-    if (!port || !*port)
-    {
-	prmsg (1,"Connect: Missing port specification in %s\n",
-	      address);
-	if (protocol) free (protocol);
-	if (host) free (host);
-	return -1;
-    }
-
-    ret = ciptr->transptr->Connect (ciptr, host, port);
-
-    if (protocol) free (protocol);
-    if (host) free (host);
-    if (port) free (port);
-
-    return ret;
-}
-
-#endif /* TRANS_CLIENT */
-
 
 int
 TRANS(BytesReadable) (XtransConnInfo ciptr, BytesReadable_t *pend)

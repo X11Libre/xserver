@@ -212,77 +212,6 @@ TRANS(FillAddrInfo)(XtransConnInfo ciptr,
 
 /* NAMED */
 
-#ifdef TRANS_CLIENT
-
-static int
-TRANS(NAMEDOpenClient)(XtransConnInfo ciptr, const char *port)
-
-{
-#ifdef NAMEDNODENAME
-    int			fd;
-    char		server_path[64];
-    struct stat		filestat;
-#endif
-
-    prmsg(2,"NAMEDOpenClient(%s)\n", port);
-
-#if !defined(NAMEDNODENAME)
-    prmsg(1,"NAMEDOpenClient: Protocol is not supported by a NAMED connection\n");
-    return -1;
-#else
-    if ( port && *port ) {
-	if( *port == '/' ) { /* A full pathname */
-		(void) snprintf(server_path, sizeof(server_path), "%s", port);
-	    } else {
-		(void) snprintf(server_path, sizeof(server_path), "%s%s", NAMEDNODENAME, port);
-	    }
-    } else {
-	(void) snprintf(server_path, sizeof(server_path), "%s%ld", NAMEDNODENAME, (long)getpid());
-    }
-
-    if ((fd = open(server_path, O_RDWR)) < 0) {
-	prmsg(1,"NAMEDOpenClient: Cannot open %s for NAMED connection\n", server_path);
-	return -1;
-    }
-
-    if (fstat(fd, &filestat) < 0 ) {
-	prmsg(1,"NAMEDOpenClient: Cannot stat %s for NAMED connection\n", server_path);
-	(void) close(fd);
-	return -1;
-    }
-
-    if ((filestat.st_mode & S_IFMT) != S_IFIFO) {
-	prmsg(1,"NAMEDOpenClient: Device %s is not a FIFO\n", server_path);
-	/* Is this really a failure? */
-	(void) close(fd);
-	return -1;
-    }
-
-
-    if (isastream(fd) <= 0) {
-	prmsg(1,"NAMEDOpenClient: %s is not a streams device\n", server_path);
-	(void) close(fd);
-	return -1;
-    }
-
-    /*
-     * Everything looks good: fill in the XtransConnInfo structure.
-     */
-
-    if (TRANS(FillAddrInfo) (ciptr, server_path, server_path) == 0)
-    {
-	prmsg(1,"NAMEDOpenClient: failed to fill in addr info\n");
-	close(fd);
-	return -1;
-    }
-
-    return(fd);
-
-#endif /* !NAMEDNODENAME */
-}
-
-#endif /* TRANS_CLIENT */
-
 #ifdef NAMEDNODENAME
 static int
 TRANS(NAMEDOpenPipe)(const char *server_path)
@@ -516,27 +445,9 @@ TRANS(NAMEDReopenServer)(XtransConnInfo ciptr, int fd _X_UNUSED, const char *por
 
 typedef struct _LOCALtrans2dev {
     const char	*transname;
-
-#ifdef TRANS_CLIENT
-
-    int	(*devcotsopenclient)(
-	XtransConnInfo, const char * /*port*/
-);
-
-#endif /* TRANS_CLIENT */
-
     int	(*devcotsopenserver)(
 	XtransConnInfo, const char * /*port*/
 );
-
-#ifdef TRANS_CLIENT
-
-    int	(*devcltsopenclient)(
-	XtransConnInfo, const char * /*port*/
-);
-
-#endif /* TRANS_CLIENT */
-
     int	(*devcltsopenserver)(
 	XtransConnInfo, const char * /*port*/
 );
@@ -565,13 +476,7 @@ typedef struct _LOCALtrans2dev {
 
 static LOCALtrans2dev LOCALtrans2devtab[] = {
 {"",
-#ifdef TRANS_CLIENT
-     TRANS(NAMEDOpenClient),
-#endif /* TRANS_CLIENT */
      TRANS(NAMEDOpenServer),
-#ifdef TRANS_CLIENT
-     TRANS(OpenFail),
-#endif /* TRANS_CLIENT */
      TRANS(OpenFail),
      TRANS(NAMEDReopenServer),
      TRANS(ReopenFail),
@@ -580,13 +485,7 @@ static LOCALtrans2dev LOCALtrans2devtab[] = {
 },
 
 {"local",
-#ifdef TRANS_CLIENT
-     TRANS(NAMEDOpenClient),
-#endif /* TRANS_CLIENT */
      TRANS(NAMEDOpenServer),
-#ifdef TRANS_CLIENT
-     TRANS(OpenFail),
-#endif /* TRANS_CLIENT */
      TRANS(OpenFail),
      TRANS(NAMEDReopenServer),
      TRANS(ReopenFail),
@@ -596,13 +495,7 @@ static LOCALtrans2dev LOCALtrans2devtab[] = {
 
 #ifdef LOCAL_TRANS_NAMED
 {"named",
-#ifdef TRANS_CLIENT
-     TRANS(NAMEDOpenClient),
-#endif /* TRANS_CLIENT */
      TRANS(NAMEDOpenServer),
-#ifdef TRANS_CLIENT
-     TRANS(OpenFail),
-#endif /* TRANS_CLIENT */
      TRANS(OpenFail),
      TRANS(NAMEDReopenServer),
      TRANS(ReopenFail),
@@ -611,13 +504,7 @@ static LOCALtrans2dev LOCALtrans2devtab[] = {
 },
 
 {"pipe",
-#ifdef TRANS_CLIENT
-     TRANS(NAMEDOpenClient),
-#endif /* TRANS_CLIENT */
      TRANS(NAMEDOpenServer),
-#ifdef TRANS_CLIENT
-     TRANS(OpenFail),
-#endif /* TRANS_CLIENT */
      TRANS(OpenFail),
      TRANS(NAMEDReopenServer),
      TRANS(ReopenFail),
@@ -665,172 +552,6 @@ TRANS(LocalEndTransports)(void)
 }
 
 #define TYPEBUFSIZE	32
-
-#ifdef TRANS_CLIENT
-
-static LOCALtrans2dev *
-TRANS(LocalGetNextTransport)(void)
-
-{
-    char	*typetocheck;
-    prmsg(3,"LocalGetNextTransport()\n");
-
-    while(1)
-    {
-	if( workingXLOCAL == NULL || *workingXLOCAL == '\0' )
-	    return NULL;
-
-	typetocheck=workingXLOCAL;
-	workingXLOCAL=strchr(workingXLOCAL,':');
-	if(workingXLOCAL && *workingXLOCAL)
-	    *workingXLOCAL++='\0';
-
-	for (unsigned int i = 0; i < NUMTRANSPORTS; i++)
-	{
-#ifndef HAVE_STRCASECMP
-	    int		j;
-	    char	typebuf[TYPEBUFSIZE];
-	    /*
-	     * This is equivalent to a case insensitive strcmp(),
-	     * but should be more portable.
-	     */
-	    strncpy(typebuf,typetocheck,TYPEBUFSIZE);
-	    for(j=0;j<TYPEBUFSIZE;j++)
-		if (isupper(typebuf[j]))
-		    typebuf[j]=tolower(typebuf[j]);
-
-	    /* Now, see if they match */
-	    if(!strcmp(LOCALtrans2devtab[i].transname,typebuf))
-#else
-	    if(!strcasecmp(LOCALtrans2devtab[i].transname,typetocheck))
-#endif
-		return &LOCALtrans2devtab[i];
-	}
-    }
-#if 0
-    /*NOTREACHED*/
-    return NULL;
-#endif
-}
-
-#include <sys/utsname.h>
-
-/*
- * Make sure 'host' is really local.
- */
-
-static int
-HostReallyLocal (const char *host)
-
-{
-    /*
-     * The 'host' passed to this function may have been generated
-     * by either uname() or gethostname().  We try both if possible.
-     */
-
-    struct utsname name;
-    char buf[256];
-
-    if (uname (&name) >= 0 && strcmp (host, name.nodename) == 0)
-	return (1);
-
-    buf[0] = '\0';
-    (void) gethostname (buf, 256);
-    buf[255] = '\0';
-
-    if (strcmp (host, buf) == 0)
-	return (1);
-
-    return (0);
-}
-
-
-static XtransConnInfo
-TRANS(LocalOpenClient)(int type, const char *protocol,
-                       const char *host, const char *port)
-
-{
-    LOCALtrans2dev *transptr;
-    XtransConnInfo ciptr;
-    int index;
-
-    prmsg(3,"LocalOpenClient()\n");
-
-    /*
-     * Make sure 'host' is really local.  If not, we return failure.
-     * The reason we make this check is because a process may advertise
-     * a "local" address for which it can accept connections, but if a
-     * process on a remote machine tries to connect to this address,
-     * we know for sure it will fail.
-     */
-
-    if (strcmp (host, "unix") != 0 && !HostReallyLocal (host))
-    {
-	prmsg (1,
-	   "LocalOpenClient: Cannot connect to non-local host %s\n",
-	       host);
-	return NULL;
-    }
-
-
-    /*
-     * X has a well known port, that is transport dependent. It is easier
-     * to handle it here, than try and come up with a transport independent
-     * representation that can be passed in and resolved the usual way.
-     *
-     * The port that is passed here is really a string containing the idisplay
-     * from ConnectDisplay(). Since that is what we want for the local transports,
-     * we don't have to do anything special.
-     */
-
-    if( (ciptr = calloc(1,sizeof(struct _XtransConnInfo))) == NULL )
-    {
-	prmsg(1,"LocalOpenClient: calloc(1,%lu) failed\n",
-	      sizeof(struct _XtransConnInfo));
-	return NULL;
-    }
-
-    ciptr->fd = -1;
-
-    TRANS(LocalInitTransports)(protocol);
-
-    index = 0;
-    for(transptr=TRANS(LocalGetNextTransport)();
-	transptr!=NULL;transptr=TRANS(LocalGetNextTransport)(), index++)
-    {
-	switch( type )
-	{
-	case XTRANS_OPEN_COTS_CLIENT:
-	    ciptr->fd=transptr->devcotsopenclient(ciptr,port);
-	    break;
-	case XTRANS_OPEN_COTS_SERVER:
-	    prmsg(1,
-		  "LocalOpenClient: Should not be opening a server with this function\n");
-	    break;
-	default:
-	    prmsg(1,
-		  "LocalOpenClient: Unknown Open type %d\n",
-		  type);
-	}
-	if( ciptr->fd >= 0 )
-	    break;
-    }
-
-    TRANS(LocalEndTransports)();
-
-    if( ciptr->fd < 0 )
-    {
-	free(ciptr);
-	return NULL;
-    }
-
-    ciptr->priv=(char *)transptr;
-    ciptr->index = index;
-
-    return ciptr;
-}
-
-#endif /* TRANS_CLIENT */
 
 static XtransConnInfo
 TRANS(LocalOpenServer)(int type, const char *protocol,
@@ -926,20 +647,6 @@ TRANS(LocalReopenServer)(int type, int index, int fd, const char *port)
 /*
  * This is the Local implementation of the X Transport service layer
  */
-
-#ifdef TRANS_CLIENT
-
-static XtransConnInfo
-TRANS(LocalOpenCOTSClient)(Xtransport *thistrans _X_UNUSED, const char *protocol,
-			   const char *host, const char *port)
-
-{
-    prmsg(2,"LocalOpenCOTSClient(%s,%s,%s)\n",protocol,host,port);
-
-    return TRANS(LocalOpenClient)(XTRANS_OPEN_COTS_CLIENT, protocol, host, port);
-}
-
-#endif /* TRANS_CLIENT */
 
 static XtransConnInfo
 TRANS(LocalOpenCOTSServer)(Xtransport *thistrans, const char *protocol,
@@ -1080,21 +787,6 @@ TRANS(LocalAccept)(XtransConnInfo ciptr, int *status)
     return newciptr;
 }
 
-#ifdef TRANS_CLIENT
-
-static int
-TRANS(LocalConnect)(XtransConnInfo ciptr,
-                    const char *host _X_UNUSED, const char *port)
-
-{
-    prmsg(2,"LocalConnect(%p->%d,%s)\n", (void *) ciptr, ciptr->fd, port);
-
-    return 0;
-}
-
-#endif /* TRANS_CLIENT */
-
-
 static int
 TRANS(LocalBytesReadable)(XtransConnInfo ciptr, BytesReadable_t *pend )
 
@@ -1207,9 +899,6 @@ static Xtransport	TRANS(LocalFuncs) = {
 	/* Local Interface */
 	"local",
 	TRANS_ALIAS | TRANS_LOCAL,
-#ifdef TRANS_CLIENT
-	TRANS(LocalOpenCOTSClient),
-#endif /* TRANS_CLIENT */
 	local_aliases,
 	TRANS(LocalOpenCOTSServer),
 	TRANS(LocalReopenCOTSServer),
@@ -1217,9 +906,6 @@ static Xtransport	TRANS(LocalFuncs) = {
 	TRANS(LocalCreateListener),
 	TRANS(LocalResetListener),
 	TRANS(LocalAccept),
-#ifdef TRANS_CLIENT
-	TRANS(LocalConnect),
-#endif /* TRANS_CLIENT */
 	TRANS(LocalBytesReadable),
 	TRANS(LocalRead),
 	TRANS(LocalWrite),
@@ -1241,9 +927,6 @@ static Xtransport	TRANS(NAMEDFuncs) = {
 	/* Local Interface */
 	"named",
 	TRANS_LOCAL,
-#ifdef TRANS_CLIENT
-	TRANS(LocalOpenCOTSClient),
-#endif /* TRANS_CLIENT */
 	NULL,
 	TRANS(LocalOpenCOTSServer),
 	TRANS(LocalReopenCOTSServer),
@@ -1251,9 +934,6 @@ static Xtransport	TRANS(NAMEDFuncs) = {
 	TRANS(LocalCreateListener),
 	TRANS(LocalResetListener),
 	TRANS(LocalAccept),
-#ifdef TRANS_CLIENT
-	TRANS(LocalConnect),
-#endif /* TRANS_CLIENT */
 	TRANS(LocalBytesReadable),
 	TRANS(LocalRead),
 	TRANS(LocalWrite),
@@ -1272,9 +952,6 @@ static Xtransport	TRANS(PIPEFuncs) = {
 	/* Local Interface */
 	"pipe",
 	TRANS_ALIAS | TRANS_LOCAL,
-#ifdef TRANS_CLIENT
-	TRANS(LocalOpenCOTSClient),
-#endif /* TRANS_CLIENT */
 	NULL,
 	TRANS(LocalOpenCOTSServer),
 	TRANS(LocalReopenCOTSServer),
@@ -1282,9 +959,6 @@ static Xtransport	TRANS(PIPEFuncs) = {
 	TRANS(LocalCreateListener),
 	TRANS(LocalResetListener),
 	TRANS(LocalAccept),
-#ifdef TRANS_CLIENT
-	TRANS(LocalConnect),
-#endif /* TRANS_CLIENT */
 	TRANS(LocalBytesReadable),
 	TRANS(LocalRead),
 	TRANS(LocalWrite),
