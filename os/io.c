@@ -62,7 +62,6 @@ SOFTWARE.
 #endif
 #include <stdio.h>
 #define XSERV_t
-#define TRANS_REOPEN
 #include "os/Xtrans.h"
 #include <X11/Xmd.h>
 #include <errno.h>

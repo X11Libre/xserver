@@ -154,16 +154,11 @@ typedef struct _Xtransport {
 	const char *		/* port */
     );
 
-#ifdef TRANS_REOPEN
-
     XtransConnInfo (*ReopenCOTSServer)(
 	struct _Xtransport *,	/* transport */
         int,			/* fd */
         const char *		/* port */
     );
-
-#endif /* TRANS_REOPEN */
-
 
     int	(*SetOption)(
 	XtransConnInfo,		/* connection */
