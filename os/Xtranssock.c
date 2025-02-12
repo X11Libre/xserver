@@ -533,53 +533,6 @@ TRANS(SocketReopen) (int i _X_UNUSED, int type, int fd, const char *port)
  * These functions are the interface supplied in the Xtransport structure
  */
 
-#ifdef TRANS_CLIENT
-
-static XtransConnInfo
-TRANS(SocketOpenCOTSClientBase) (const char *transname, const char *protocol,
-			   const char *host, const char *port, int previndex)
-{
-    XtransConnInfo	ciptr = NULL;
-    int			i = previndex;
-
-    prmsg (2, "SocketOpenCOTSClient(%s,%s,%s)\n",
-	protocol, host, port);
-
-    SocketInitOnce();
-
-    while ((i = TRANS(SocketSelectFamily) (i, transname)) >= 0) {
-	if ((ciptr = TRANS(SocketOpen) (
-		i, Sockettrans2devtab[i].devcotsname)) != NULL) {
-	    /* Save the index for later use */
-
-	    ciptr->index = i;
-	    break;
-	}
-    }
-    if (i < 0) {
-	if (i == -1)
-	    prmsg (1,"SocketOpenCOTSClient: Unable to open socket for %s\n",
-		   transname);
-	else
-	    prmsg (1,"SocketOpenCOTSClient: Unable to determine socket type for %s\n",
-		   transname);
-	return NULL;
-    }
-
-    return ciptr;
-}
-
-static XtransConnInfo
-TRANS(SocketOpenCOTSClient) (Xtransport *thistrans, const char *protocol,
-			     const char *host, const char *port)
-{
-    return TRANS(SocketOpenCOTSClientBase)(
-			thistrans->TransName, protocol, host, port, -1);
-}
-
-
-#endif /* TRANS_CLIENT */
-
 static XtransConnInfo
 TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, const char *protocol,
 			     const char *host, const char *port)
@@ -1256,674 +1209,6 @@ TRANS(SocketUNIXAccept) (XtransConnInfo ciptr, int *status)
 
 #endif /* UNIXCONN */
 
-#ifdef TRANS_CLIENT
-
-#ifdef TCPCONN
-
-#ifdef HAVE_GETADDRINFO
-struct addrlist {
-    struct addrinfo *	addr;
-    struct addrinfo *	firstaddr;
-    char 		port[PORTBUFSIZE];
-    char 		host[MAXHOSTNAMELEN];
-};
-static struct addrlist  *addrlist = NULL;
-#endif
-
-
-static int
-TRANS(SocketINETConnect) (XtransConnInfo ciptr,
-                          const char *host, const char *port)
-
-{
-    struct sockaddr *	socketaddr = NULL;
-    int			socketaddrlen = 0;
-    int			res;
-#ifdef HAVE_GETADDRINFO
-    struct addrinfo 	hints;
-    char		ntopbuf[INET6_ADDRSTRLEN];
-    int			resetonce = 0;
-#else
-    struct sockaddr_in	sockname;
-    struct hostent	*hostp;
-    struct servent	*servp;
-    unsigned long 	tmpaddr;
-#endif
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
-    _Xgethostbynameparams hparams;
-    _Xgetservbynameparams sparams;
-#endif
-    char	portbuf[PORTBUFSIZE];
-
-    char 		hostnamebuf[256];		/* tmp space */
-
-    prmsg (2,"SocketINETConnect(%d,%s,%s)\n", ciptr->fd, host, port);
-
-    if (!host)
-    {
-	hostnamebuf[0] = '\0';
-	(void) TRANS(GetHostname) (hostnamebuf, sizeof hostnamebuf);
-	host = hostnamebuf;
-    }
-
-    /*
-     * X has a well known port, that is transport dependent. It is easier
-     * to handle it here, than try and come up with a transport independent
-     * representation that can be passed in and resolved the usual way.
-     *
-     * The port that is passed here is really a string containing the idisplay
-     * from ConnectDisplay().
-     */
-
-    if (is_numeric (port))
-    {
-	long tmpport = X_TCP_PORT + strtol (port, (char**)NULL, 10);
-	snprintf (portbuf, sizeof(portbuf), "%lu", tmpport);
-	port = portbuf;
-    }
-
-#ifdef HAVE_GETADDRINFO
-    {
-	if (addrlist != NULL) {
-	    if (strcmp(host,addrlist->host) || strcmp(port,addrlist->port)) {
-		if (addrlist->firstaddr)
-		    freeaddrinfo(addrlist->firstaddr);
-		addrlist->firstaddr = NULL;
-	    }
-	} else {
-	    addrlist = malloc(sizeof(struct addrlist));
-	    if (addrlist == NULL) {
-		prmsg (1, "SocketINETConnect() can't allocate memory "
-			"for addrlist: %s\n", strerror(errno));
-		return TRANS_CONNECT_FAILED;
-	    }
-	    addrlist->firstaddr = NULL;
-	}
-
-	if (addrlist->firstaddr == NULL) {
-	    strncpy(addrlist->port, port, sizeof(addrlist->port));
-	    addrlist->port[sizeof(addrlist->port) - 1] = '\0';
-	    strncpy(addrlist->host, host, sizeof(addrlist->host));
-	    addrlist->host[sizeof(addrlist->host) - 1] = '\0';
-
-	    memset(&hints, 0, sizeof(hints));
-#ifdef IPv6
-	    if (strcmp(Sockettrans2devtab[ciptr->index].transname, "tcp") == 0)
-		hints.ai_family = AF_UNSPEC;
-	    else
-#endif
-		hints.ai_family = Sockettrans2devtab[ciptr->index].family;
-	    hints.ai_socktype = Sockettrans2devtab[ciptr->index].devcotsname;
-
-	    res = getaddrinfo(host,port,&hints,&addrlist->firstaddr);
-	    if (res != 0) {
-		prmsg (1, "SocketINETConnect() can't get address "
-			"for %s:%s: %s\n", host, port, gai_strerror(res));
-		ESET(EINVAL);
-		return TRANS_CONNECT_FAILED;
-	    }
-	    for (res = 0, addrlist->addr = addrlist->firstaddr;
-		 addrlist->addr ; res++) {
-		addrlist->addr = addrlist->addr->ai_next;
-	    }
-	    prmsg(4,"Got New Address list with %d addresses\n", res);
-	    res = 0;
-	    addrlist->addr = NULL;
-	}
-
-	while (socketaddr == NULL) {
-	    if (addrlist->addr == NULL) {
-		if (resetonce) {
-		    /* Already checked entire list - no usable addresses */
-		    prmsg (1, "SocketINETConnect() no usable address "
-			   "for %s:%s\n", host, port);
-		    return TRANS_CONNECT_FAILED;
-		} else {
-		    /* Go back to beginning of list */
-		    resetonce = 1;
-		    addrlist->addr = addrlist->firstaddr;
-		}
-	    }
-
-	    socketaddr = addrlist->addr->ai_addr;
-	    socketaddrlen = addrlist->addr->ai_addrlen;
-
-	    if (addrlist->addr->ai_family == AF_INET) {
-		struct sockaddr_in *sin = (struct sockaddr_in *) socketaddr;
-
-		prmsg (4,"SocketINETConnect() sockname.sin_addr = %s\n",
-			inet_ntop(addrlist->addr->ai_family,&sin->sin_addr,
-			ntopbuf,sizeof(ntopbuf)));
-
-		prmsg (4,"SocketINETConnect() sockname.sin_port = %d\n",
-			ntohs(sin->sin_port));
-
-#ifdef IPv6
-		if (Sockettrans2devtab[ciptr->index].family == AF_INET6) {
-		    if (strcmp(Sockettrans2devtab[ciptr->index].transname,
-				"tcp") == 0) {
-			XtransConnInfo newciptr;
-
-			/*
-			 * Our socket is an IPv6 socket, but the address is
-			 * IPv4.  Close it and get an IPv4 socket.  This is
-			 * needed for IPv4 connections to work on platforms
-			 * that don't allow IPv4 over IPv6 sockets.
-			 */
-			TRANS(SocketINETClose)(ciptr);
-			newciptr = TRANS(SocketOpenCOTSClientBase)(
-					"tcp", "tcp", host, port, ciptr->index);
-			if (newciptr)
-			    ciptr->fd = newciptr->fd;
-			if (!newciptr ||
-			    Sockettrans2devtab[newciptr->index].family !=
-				AF_INET) {
-			    socketaddr = NULL;
-			    prmsg (4,"SocketINETConnect() Cannot get IPv4 "
-					" socketfor IPv4 address\n");
-			}
-			if (newciptr)
-			    free(newciptr);
-		    } else {
-			socketaddr = NULL;
-			prmsg (4,"SocketINETConnect Skipping IPv4 address\n");
-		    }
-		}
-	    } else if (addrlist->addr->ai_family == AF_INET6) {
-		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) socketaddr;
-
-		prmsg (4,"SocketINETConnect() sockname.sin6_addr = %s\n",
-			inet_ntop(addrlist->addr->ai_family,
-				  &sin6->sin6_addr,ntopbuf,sizeof(ntopbuf)));
-		prmsg (4,"SocketINETConnect() sockname.sin6_port = %d\n",
-			ntohs(sin6->sin6_port));
-
-		if (Sockettrans2devtab[ciptr->index].family == AF_INET) {
-		    if (strcmp(Sockettrans2devtab[ciptr->index].transname,
-				"tcp") == 0) {
-			XtransConnInfo newciptr;
-
-			/*
-			 * Close the IPv4 socket and try to open an IPv6 socket.
-			 */
-			TRANS(SocketINETClose)(ciptr);
-			newciptr = TRANS(SocketOpenCOTSClientBase)(
-					"tcp", "tcp", host, port, -1);
-			if (newciptr)
-			    ciptr->fd = newciptr->fd;
-			if (!newciptr ||
-			    Sockettrans2devtab[newciptr->index].family !=
-					AF_INET6) {
-			    socketaddr = NULL;
-			    prmsg (4,"SocketINETConnect() Cannot get IPv6 "
-				   "socket for IPv6 address\n");
-			}
-			if (newciptr)
-			    free(newciptr);
-		    }
-		    else
-		    {
-			socketaddr = NULL;
-			prmsg (4,"SocketINETConnect() Skipping IPv6 address\n");
-		    }
-		}
-#endif /* IPv6 */
-	    } else {
-		socketaddr = NULL; /* Unsupported address type */
-	    }
-	    if (socketaddr == NULL) {
-		addrlist->addr = addrlist->addr->ai_next;
-	    }
-	}
-    }
-#else /* !HAVE_GETADDRINFO */
-    {
-	/*
-	 * Build the socket name.
-	 */
-
-#ifdef BSD44SOCKETS
-	sockname.sin_len = sizeof (struct sockaddr_in);
-#endif
-	sockname.sin_family = AF_INET;
-
-	/*
-	 * fill in sin_addr
-	 */
-
-#ifndef INADDR_NONE
-#define INADDR_NONE ((in_addr_t) 0xffffffff)
-#endif
-
-	/* check for ww.xx.yy.zz host string */
-
-	if (isascii (host[0]) && isdigit (host[0])) {
-	    tmpaddr = inet_addr (host); /* returns network byte order */
-	} else {
-	    tmpaddr = INADDR_NONE;
-	}
-
-	prmsg (4,"SocketINETConnect() inet_addr(%s) = %lx\n", host, tmpaddr);
-
-	if (tmpaddr == INADDR_NONE) {
-	    if ((hostp = _XGethostbyname(host,hparams)) == NULL) {
-		prmsg (1,"SocketINETConnect: Can't get address for %s\n",
-			host);
-		ESET(EINVAL);
-		return TRANS_CONNECT_FAILED;
-	    }
-	    if (hostp->h_addrtype != AF_INET) {  /* is IP host? */
-		prmsg (1,"SocketINETConnect: not INET host%s\n", host);
-		ESET(EPROTOTYPE);
-		return TRANS_CONNECT_FAILED;
-	    }
-
-	    memcpy ((char *) &sockname.sin_addr, (char *) hostp->h_addr,
-		    sizeof (sockname.sin_addr));
-
-	} else {
-	    sockname.sin_addr.s_addr = tmpaddr;
-        }
-
-	/*
-	 * fill in sin_port
-	 */
-
-	/* Check for number in the port string */
-
-	if (!is_numeric (port)) {
-	    if ((servp = _XGetservbyname (port,"tcp",sparams)) == NULL) {
-		prmsg (1,"SocketINETConnect: can't get service for %s\n",
-			port);
-		return TRANS_CONNECT_FAILED;
-	    }
-	    sockname.sin_port = htons (servp->s_port);
-	} else {
-	    long tmpport = strtol (port, (char**)NULL, 10);
-	    if (tmpport < 1024 || tmpport > USHRT_MAX)
-		return TRANS_CONNECT_FAILED;
-	    sockname.sin_port = htons (((unsigned short) tmpport));
-	}
-
-	prmsg (4,"SocketINETConnect: sockname.sin_port = %d\n",
-		ntohs(sockname.sin_port));
-	socketaddr = (struct sockaddr *) &sockname;
-	socketaddrlen = sizeof(sockname);
-    }
-#endif
-
-    /*
-     * Turn on socket keepalive so the client process will eventually
-     * be notified with a SIGPIPE signal if the display server fails
-     * to respond to a periodic transmission of messages
-     * on the connected socket.
-     * This is useful to avoid hung application processes when the
-     * processes are not spawned from the xdm session and
-     * the display server terminates abnormally.
-     * (Someone turned off the power switch.)
-     */
-
-    {
-	int tmp = 1;
-	setsockopt (ciptr->fd, SOL_SOCKET, SO_KEEPALIVE,
-		(char *) &tmp, sizeof (int));
-    }
-
-    /*
-     * Do the connect()
-     */
-
-    if (connect (ciptr->fd, socketaddr, socketaddrlen ) < 0)
-    {
-#ifdef WIN32
-	int olderrno = WSAGetLastError();
-#else
-	int olderrno = errno;
-#endif
-
-	/*
-	 * If the error was ECONNREFUSED, the server may be overloaded
-	 * and we should try again.
-	 *
-	 * If the error was EWOULDBLOCK or EINPROGRESS then the socket
-	 * was non-blocking and we should poll using select
-	 *
-	 * If the error was EINTR, the connect was interrupted and we
-	 * should try again.
-	 *
-	 * If multiple addresses are found for a host then we should
-	 * try to connect again with a different address for a larger
-	 * number of errors that made us quit before, since those
-	 * could be caused by trying to use an IPv6 address to contact
-	 * a machine with an IPv4-only server or other reasons that
-	 * only affect one of a set of addresses.
-	 */
-
-	if (olderrno == ECONNREFUSED || olderrno == EINTR
-#ifdef HAVE_GETADDRINFO
-	  || (((addrlist->addr->ai_next != NULL) ||
-	        (addrlist->addr != addrlist->firstaddr)) &&
-               (olderrno == ENETUNREACH || olderrno == EAFNOSUPPORT ||
-		 olderrno == EADDRNOTAVAIL || olderrno == ETIMEDOUT
-#if defined(EHOSTDOWN)
-		   || olderrno == EHOSTDOWN
-#endif
-	       ))
-#endif
-	    )
-	    res = TRANS_TRY_CONNECT_AGAIN;
-	else if (olderrno == EWOULDBLOCK || olderrno == EINPROGRESS)
-	    res = TRANS_IN_PROGRESS;
-	else
-	{
-	    prmsg (2,"SocketINETConnect: Can't connect: errno = %d\n",
-		   olderrno);
-
-	    res = TRANS_CONNECT_FAILED;
-	}
-    } else {
-	res = 0;
-
-
-	/*
-	 * Sync up the address fields of ciptr.
-	 */
-
-	if (TRANS(SocketINETGetAddr) (ciptr) < 0)
-	{
-	    prmsg (1,
-	     "SocketINETConnect: ...SocketINETGetAddr() failed:\n");
-	    res = TRANS_CONNECT_FAILED;
-	}
-
-	else if (TRANS(SocketINETGetPeerAddr) (ciptr) < 0)
-	{
-	    prmsg (1,
-	      "SocketINETConnect: ...SocketINETGetPeerAddr() failed:\n");
-	    res = TRANS_CONNECT_FAILED;
-	}
-    }
-
-#ifdef HAVE_GETADDRINFO
-   if (res != 0) {
-	addrlist->addr = addrlist->addr->ai_next;
-   }
-#endif
-
-    return res;
-}
-
-#endif /* TCPCONN */
-
-
-
-#ifdef UNIXCONN
-
-/*
- * Make sure 'host' is really local.
- */
-
-static int
-UnixHostReallyLocal (const char *host)
-
-{
-    char hostnamebuf[256];
-
-    TRANS(GetHostname) (hostnamebuf, sizeof (hostnamebuf));
-
-    if (strcmp (hostnamebuf, host) == 0)
-    {
-	return (1);
-    } else {
-#ifdef HAVE_GETADDRINFO
-	struct addrinfo *localhostaddr;
-	struct addrinfo *otherhostaddr;
-	struct addrinfo *i, *j;
-	int equiv = 0;
-
-	if (getaddrinfo(hostnamebuf, NULL, NULL, &localhostaddr) != 0)
-	    return 0;
-	if (getaddrinfo(host, NULL, NULL, &otherhostaddr) != 0) {
-	    freeaddrinfo(localhostaddr);
-	    return 0;
-	}
-
-	for (i = localhostaddr; i != NULL && equiv == 0; i = i->ai_next) {
-	    for (j = otherhostaddr; j != NULL && equiv == 0; j = j->ai_next) {
-		if (i->ai_family == j->ai_family) {
-		    if (i->ai_family == AF_INET) {
-			struct sockaddr_in *sinA
-			  = (struct sockaddr_in *) i->ai_addr;
-			struct sockaddr_in *sinB
-			  = (struct sockaddr_in *) j->ai_addr;
-			struct in_addr *A = &sinA->sin_addr;
-			struct in_addr *B = &sinB->sin_addr;
-
-			if (memcmp(A,B,sizeof(struct in_addr)) == 0) {
-			    equiv = 1;
-			}
-#ifdef IPv6
-		    } else if (i->ai_family == AF_INET6) {
-			struct sockaddr_in6 *sinA
-			  = (struct sockaddr_in6 *) i->ai_addr;
-			struct sockaddr_in6 *sinB
-			  = (struct sockaddr_in6 *) j->ai_addr;
-			struct in6_addr *A = &sinA->sin6_addr;
-			struct in6_addr *B = &sinB->sin6_addr;
-
-			if (memcmp(A,B,sizeof(struct in6_addr)) == 0) {
-			    equiv = 1;
-			}
-#endif /* IPv6 */
-		    }
-		}
-	    }
-	}
-
-	freeaddrinfo(localhostaddr);
-	freeaddrinfo(otherhostaddr);
-	return equiv;
-#else /* !HAVE_GETADDRINFO */
-	/*
-	 * A host may have more than one network address.  If any of the
-	 * network addresses of 'host' (specified to the connect call)
-	 * match any of the network addresses of 'hostname' (determined
-	 * by TRANS(GetHostname)), then the two hostnames are equivalent,
-	 * and we know that 'host' is really a local host.
-	 */
-	char specified_local_addr_list[10][4];
-	int scount, equiv, i, j;
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
-	_Xgethostbynameparams hparams;
-#endif
-	struct hostent *hostp;
-
-	if ((hostp = _XGethostbyname (host,hparams)) == NULL)
-	    return (0);
-
-	scount = 0;
-	while (hostp->h_addr_list[scount] && scount <= 8)
-	{
-	    /*
-	     * The 2nd call to gethostname() overrides the data
-	     * from the 1st call, so we must save the address list.
-	     */
-
-	    specified_local_addr_list[scount][0] =
-				hostp->h_addr_list[scount][0];
-	    specified_local_addr_list[scount][1] =
-				hostp->h_addr_list[scount][1];
-	    specified_local_addr_list[scount][2] =
-				hostp->h_addr_list[scount][2];
-	    specified_local_addr_list[scount][3] =
-				hostp->h_addr_list[scount][3];
-	    scount++;
-	}
-	if ((hostp = _XGethostbyname (hostnamebuf,hparams)) == NULL)
-	    return (0);
-
-	equiv = 0;
-	i = 0;
-
-	while (i < scount && !equiv)
-	{
-	    j = 0;
-
-	    while (hostp->h_addr_list[j])
-	    {
-		if ((specified_local_addr_list[i][0] ==
-					hostp->h_addr_list[j][0]) &&
-		    (specified_local_addr_list[i][1] ==
-					hostp->h_addr_list[j][1]) &&
-		    (specified_local_addr_list[i][2] ==
-					hostp->h_addr_list[j][2]) &&
-		    (specified_local_addr_list[i][3] ==
-					hostp->h_addr_list[j][3]))
-		{
-		    /* They're equal, so we're done */
-
-		    equiv = 1;
-		    break;
-		}
-
-		j++;
-	    }
-
-	    i++;
-	}
-	return (equiv);
-#endif
-    }
-}
-
-static int
-TRANS(SocketUNIXConnect) (XtransConnInfo ciptr,
-                          const char *host, const char *port)
-
-{
-    struct sockaddr_un	sockname;
-    SOCKLEN_T		namelen;
-
-    prmsg (2,"SocketUNIXConnect(%d,%s,%s)\n", ciptr->fd, host, port);
-
-    /*
-     * Make sure 'host' is really local.  If not, we return failure.
-     * The reason we make this check is because a process may advertise
-     * a "local" network ID for which it can accept connections, but if
-     * a process on a remote machine tries to connect to this network ID,
-     * we know for sure it will fail.
-     */
-
-    if (host && *host && host[0]!='/' && strcmp (host, "unix") != 0 && !UnixHostReallyLocal (host))
-    {
-	prmsg (1,
-	   "SocketUNIXConnect: Cannot connect to non-local host %s\n",
-	       host);
-	return TRANS_CONNECT_FAILED;
-    }
-
-
-    /*
-     * Check the port.
-     */
-
-    if (!port || !*port)
-    {
-	prmsg (1,"SocketUNIXConnect: Missing port specification\n");
-	return TRANS_CONNECT_FAILED;
-    }
-
-    /*
-     * Build the socket name.
-     */
-
-    sockname.sun_family = AF_UNIX;
-
-    if (set_sun_path(port, UNIX_PATH, sockname.sun_path, 0) != 0) {
-	prmsg (1, "SocketUNIXConnect: path too long\n");
-	return TRANS_CONNECT_FAILED;
-    }
-
-#if defined(BSD44SOCKETS)
-    sockname.sun_len = strlen (sockname.sun_path);
-#endif
-
-#if defined(BSD44SOCKETS) || defined(SUN_LEN)
-    namelen = SUN_LEN (&sockname);
-#else
-    namelen = strlen (sockname.sun_path) + offsetof(struct sockaddr_un, sun_path);
-#endif
-
-
-    /*
-     * Do the connect()
-     */
-
-    if (connect (ciptr->fd, (struct sockaddr *) &sockname, namelen) < 0)
-    {
-	int olderrno = errno;
-	int connected = 0;
-
-	if (!connected)
-	{
-	    errno = olderrno;
-
-	    /*
-	     * If the error was ENOENT, the server may be starting up; we used
-	     * to suggest to try again in this case with
-	     * TRANS_TRY_CONNECT_AGAIN, but this introduced problems for
-	     * processes still referencing stale sockets in their environment.
-	     * Hence, we now return a hard error, TRANS_CONNECT_FAILED, and it
-	     * is suggested that higher level stacks handle retries on their
-	     * level when they face a slow starting server.
-	     *
-	     * If the error was EWOULDBLOCK or EINPROGRESS then the socket
-	     * was non-blocking and we should poll using select
-	     *
-	     * If the error was EINTR, the connect was interrupted and we
-	     * should try again.
-	     */
-
-	    if (olderrno == EWOULDBLOCK || olderrno == EINPROGRESS)
-		return TRANS_IN_PROGRESS;
-	    else if (olderrno == EINTR)
-		return TRANS_TRY_CONNECT_AGAIN;
-	    else {
-		prmsg (2,"SocketUNIXConnect: Can't connect: errno = %d\n",
-		       EGET());
-
-		return TRANS_CONNECT_FAILED;
-	    }
-	}
-    }
-
-    /*
-     * Get the socket name and the peer name from the connect socket,
-     * since this is unix domain.
-     */
-
-    if ((ciptr->addr = malloc(namelen)) == NULL ||
-       (ciptr->peeraddr = malloc(namelen)) == NULL)
-    {
-        prmsg (1,
-	"SocketUNIXCreateListener: Can't allocate space for the addr\n");
-        return TRANS_CONNECT_FAILED;
-    }
-
-    ciptr->family = AF_UNIX;
-    ciptr->addrlen = namelen;
-    ciptr->peeraddrlen = namelen;
-    memcpy (ciptr->addr, &sockname, ciptr->addrlen);
-    memcpy (ciptr->peeraddr, &sockname, ciptr->peeraddrlen);
-
-    return 0;
-}
-
-#endif /* UNIXCONN */
-
-#endif /* TRANS_CLIENT */
-
-
 static int
 TRANS(SocketBytesReadable) (XtransConnInfo ciptr, BytesReadable_t *pend)
 
@@ -2325,9 +1610,6 @@ static Xtransport	TRANS(SocketTCPFuncs) = {
 	/* Socket Interface */
 	"tcp",
         TRANS_ALIAS,
-#ifdef TRANS_CLIENT
-	TRANS(SocketOpenCOTSClient),
-#endif /* TRANS_CLIENT */
 	tcp_nolisten,
 	TRANS(SocketOpenCOTSServer),
 	TRANS(SocketReopenCOTSServer),
@@ -2335,9 +1617,6 @@ static Xtransport	TRANS(SocketTCPFuncs) = {
 	TRANS(SocketINETCreateListener),
 	NULL,		       			/* ResetListener */
 	TRANS(SocketINETAccept),
-#ifdef TRANS_CLIENT
-	TRANS(SocketINETConnect),
-#endif /* TRANS_CLIENT */
 	TRANS(SocketBytesReadable),
 	TRANS(SocketRead),
 	TRANS(SocketWrite),
@@ -2356,9 +1635,6 @@ static Xtransport	TRANS(SocketINETFuncs) = {
 	/* Socket Interface */
 	"inet",
 	0,
-#ifdef TRANS_CLIENT
-	TRANS(SocketOpenCOTSClient),
-#endif /* TRANS_CLIENT */
 	NULL,
 	TRANS(SocketOpenCOTSServer),
 	TRANS(SocketReopenCOTSServer),
@@ -2366,9 +1642,6 @@ static Xtransport	TRANS(SocketINETFuncs) = {
 	TRANS(SocketINETCreateListener),
 	NULL,		       			/* ResetListener */
 	TRANS(SocketINETAccept),
-#ifdef TRANS_CLIENT
-	TRANS(SocketINETConnect),
-#endif /* TRANS_CLIENT */
 	TRANS(SocketBytesReadable),
 	TRANS(SocketRead),
 	TRANS(SocketWrite),
@@ -2388,9 +1661,6 @@ static Xtransport     TRANS(SocketINET6Funcs) = {
 	/* Socket Interface */
 	"inet6",
 	0,
-#ifdef TRANS_CLIENT
-	TRANS(SocketOpenCOTSClient),
-#endif /* TRANS_CLIENT */
 	NULL,
 	TRANS(SocketOpenCOTSServer),
 	TRANS(SocketReopenCOTSServer),
@@ -2398,9 +1668,6 @@ static Xtransport     TRANS(SocketINET6Funcs) = {
 	TRANS(SocketINETCreateListener),
 	NULL,					/* ResetListener */
 	TRANS(SocketINETAccept),
-#ifdef TRANS_CLIENT
-	TRANS(SocketINETConnect),
-#endif /* TRANS_CLIENT */
 	TRANS(SocketBytesReadable),
 	TRANS(SocketRead),
 	TRANS(SocketWrite),
@@ -2427,9 +1694,6 @@ static Xtransport	TRANS(SocketLocalFuncs) = {
 #else
 	0,
 #endif
-#ifdef TRANS_CLIENT
-	TRANS(SocketOpenCOTSClient),
-#endif /* TRANS_CLIENT */
 	NULL,
 	TRANS(SocketOpenCOTSServer),
 	TRANS(SocketReopenCOTSServer),
@@ -2437,9 +1701,6 @@ static Xtransport	TRANS(SocketLocalFuncs) = {
 	TRANS(SocketUNIXCreateListener),
 	TRANS(SocketUNIXResetListener),
 	TRANS(SocketUNIXAccept),
-#ifdef TRANS_CLIENT
-	TRANS(SocketUNIXConnect),
-#endif /* TRANS_CLIENT */
 	TRANS(SocketBytesReadable),
 	TRANS(SocketRead),
 	TRANS(SocketWrite),
@@ -2466,9 +1727,6 @@ static Xtransport	TRANS(SocketUNIXFuncs) = {
 #else
 	0,
 #endif
-#ifdef TRANS_CLIENT
-	TRANS(SocketOpenCOTSClient),
-#endif /* TRANS_CLIENT */
 #if !defined(LOCALCONN)
 	unix_nolisten,
 #else
@@ -2480,9 +1738,6 @@ static Xtransport	TRANS(SocketUNIXFuncs) = {
 	TRANS(SocketUNIXCreateListener),
 	TRANS(SocketUNIXResetListener),
 	TRANS(SocketUNIXAccept),
-#ifdef TRANS_CLIENT
-	TRANS(SocketUNIXConnect),
-#endif /* TRANS_CLIENT */
 	TRANS(SocketBytesReadable),
 	TRANS(SocketRead),
 	TRANS(SocketWrite),
