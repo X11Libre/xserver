@@ -443,9 +443,7 @@ TRANS(Open) (int type, const char *address)
 #endif /* TRANS_CLIENT */
 	break;
     case XTRANS_OPEN_COTS_SERVER:
-#ifdef TRANS_SERVER
 	ciptr = thistrans->OpenCOTSServer(thistrans, protocol, host, port);
-#endif /* TRANS_SERVER */
 	break;
     default:
 	prmsg (1,"Open: Unknown Open type %d\n", type);
@@ -564,9 +562,6 @@ TRANS(OpenCOTSClient) (const char *address)
 
 #endif /* TRANS_CLIENT */
 
-
-#ifdef TRANS_SERVER
-
 XtransConnInfo
 TRANS(OpenCOTSServer) (const char *address)
 
@@ -574,9 +569,6 @@ TRANS(OpenCOTSServer) (const char *address)
     prmsg (2,"OpenCOTSServer(%s)\n", address);
     return TRANS(Open) (XTRANS_OPEN_COTS_SERVER, address);
 }
-
-#endif /* TRANS_SERVER */
-
 
 #ifdef TRANS_REOPEN
 
@@ -696,18 +688,14 @@ TRANS(SetOption) (XtransConnInfo ciptr, int option, int arg)
     return ret;
 }
 
-#ifdef TRANS_SERVER
-
 int
 TRANS(CreateListener) (XtransConnInfo ciptr, const char *port, unsigned int flags)
-
 {
     return ciptr->transptr->CreateListener (ciptr, port, flags);
 }
 
 int
 TRANS(Received) (const char * protocol)
-
 {
    Xtransport *trans;
    int i = 0, ret = 0;
@@ -735,7 +723,6 @@ TRANS(Received) (const char * protocol)
 
 int
 TRANS(NoListen) (const char * protocol)
-
 {
    Xtransport *trans;
    int i = 0, ret = 0;
@@ -802,7 +789,6 @@ TRANS(IsListening) (const char * protocol)
 
 int
 TRANS(ResetListener) (XtransConnInfo ciptr)
-
 {
     if (ciptr->transptr->ResetListener)
 	return ciptr->transptr->ResetListener (ciptr);
@@ -810,10 +796,8 @@ TRANS(ResetListener) (XtransConnInfo ciptr)
 	return TRANS_RESET_NOOP;
 }
 
-
 XtransConnInfo
 TRANS(Accept) (XtransConnInfo ciptr, int *status)
-
 {
     XtransConnInfo	newciptr;
 
@@ -826,9 +810,6 @@ TRANS(Accept) (XtransConnInfo ciptr, int *status)
 
     return newciptr;
 }
-
-#endif /* TRANS_SERVER */
-
 
 #ifdef TRANS_CLIENT
 
@@ -996,18 +977,13 @@ TRANS(GetConnectionNumber) (XtransConnInfo ciptr)
     return ciptr->fd;
 }
 
-
 /*
  * These functions are really utility functions, but they require knowledge
  * of the internal data structures, so they have to be part of the Transport
  * Independent API.
  */
-
-#ifdef TRANS_SERVER
-
 static int
 complete_network_count (void)
-
 {
     int count = 0;
     int found_local = 0;
@@ -1245,10 +1221,6 @@ TRANS(MakeAllCOTSServerListeners) (const char *port, int *partial,
     return 0;
 }
 
-#endif /* TRANS_SERVER */
-
-
-
 /*
  * These routines are not part of the X Transport Interface, but they
  * may be used by it.

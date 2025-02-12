@@ -240,7 +240,6 @@ TRANS(WSAStartup) (void)
 }
 #endif
 
-#ifdef TRANS_SERVER
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -427,5 +426,3 @@ trans_mkdir(const char *path, int mode)
     /* In all other cases, fail */
     return -1;
 }
-
-#endif /* TRANS_SERVER */
