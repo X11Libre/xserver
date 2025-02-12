@@ -798,9 +798,7 @@ TRANS(LocalGetNextTransport)(void)
 #endif
 }
 
-#ifdef NEED_UTSNAME
 #include <sys/utsname.h>
-#endif
 
 /*
  * Make sure 'host' is really local.
@@ -815,15 +813,11 @@ HostReallyLocal (const char *host)
      * by either uname() or gethostname().  We try both if possible.
      */
 
-#ifdef NEED_UTSNAME
     struct utsname name;
-#endif
     char buf[256];
 
-#ifdef NEED_UTSNAME
     if (uname (&name) >= 0 && strcmp (host, name.nodename) == 0)
 	return (1);
-#endif
 
     buf[0] = '\0';
     (void) gethostname (buf, 256);
