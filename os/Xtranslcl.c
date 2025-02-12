@@ -202,22 +202,12 @@ TRANS(FillAddrInfo)(XtransConnInfo ciptr,
 }
 
 
-
-
-#ifndef X11_t
-#define X_STREAMS_DIR	"/dev/X"
-#else
 #define X_STREAMS_DIR	"/tmp/.X11-pipe"
-#endif
 
 #define DEV_PTMX	"/dev/ptmx"
 
-#if defined(X11_t)
-
 #define NAMEDNODENAME "/tmp/.X11-pipe/X"
-#endif
 
-
 #ifdef LOCAL_TRANS_NAMED
 
 /* NAMED */
@@ -783,7 +773,6 @@ TRANS(LocalOpenClient)(int type, const char *protocol,
     }
 
 
-#if defined(X11_t)
     /*
      * X has a well known port, that is transport dependent. It is easier
      * to handle it here, than try and come up with a transport independent
@@ -793,7 +782,6 @@ TRANS(LocalOpenClient)(int type, const char *protocol,
      * from ConnectDisplay(). Since that is what we want for the local transports,
      * we don't have to do anything special.
      */
-#endif /* X11_t */
 
     if( (ciptr = calloc(1,sizeof(struct _XtransConnInfo))) == NULL )
     {
@@ -853,14 +841,12 @@ TRANS(LocalOpenServer)(int type, const char *protocol,
 
     prmsg(2,"LocalOpenServer(%d,%s,%s)\n", type, protocol, port);
 
-#if defined(X11_t)
     /*
      * For X11, the port will be in the format xserverN where N is the
      * display number. All of the local connections just need to know
      * the display number because they don't do any name resolution on
      * the port. This just truncates port to the display portion.
      */
-#endif /* X11_t */
 
     if( (ciptr = calloc(1,sizeof(struct _XtransConnInfo))) == NULL )
     {

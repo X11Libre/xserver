@@ -61,7 +61,6 @@ SOFTWARE.
 #include <X11/Xwinsock.h>
 #endif
 #include <stdio.h>
-#define XSERV_t
 #include "os/Xtrans.h"
 #include <X11/Xmd.h>
 #include <errno.h>
