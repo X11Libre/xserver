@@ -211,9 +211,7 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 static int TRANS(SocketINETClose) (XtransConnInfo ciptr);
 #endif
 
-#if (defined(TCPCONN) && \
-     (defined(TRANS_SERVER) || defined(X11_t) || !defined(HAVE_GETADDRINFO))) \
-    || defined(TRANS_REOPEN)
+#if (defined(TCPCONN) || defined(TRANS_REOPEN))
 static int
 is_numeric (const char *str)
 {
@@ -592,9 +590,6 @@ TRANS(SocketOpenCOTSClient) (Xtransport *thistrans, const char *protocol,
 
 #endif /* TRANS_CLIENT */
 
-
-#ifdef TRANS_SERVER
-
 static XtransConnInfo
 TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, const char *protocol,
 			     const char *host, const char *port)
@@ -663,9 +658,6 @@ TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, const char *protocol,
 
     return ciptr;
 }
-
-#endif /* TRANS_SERVER */
-
 
 #ifdef TRANS_REOPEN
 
@@ -742,8 +734,6 @@ set_sun_path(const char *port, const char *upath, char *path, int abstract)
     return 0;
 }
 #endif
-
-#ifdef TRANS_SERVER
 
 static int
 TRANS(SocketCreateListener) (XtransConnInfo ciptr,
@@ -1284,9 +1274,6 @@ TRANS(SocketUNIXAccept) (XtransConnInfo ciptr, int *status)
 }
 
 #endif /* UNIXCONN */
-
-#endif /* TRANS_SERVER */
-
 
 #ifdef TRANS_CLIENT
 
@@ -2349,7 +2336,6 @@ TRANS(SocketUNIXCloseForCloning) (XtransConnInfo ciptr)
 
 
 #ifdef TCPCONN
-# ifdef TRANS_SERVER
 static const char* tcp_nolisten[] = {
 	"inet",
 #ifdef IPv6
@@ -2357,7 +2343,6 @@ static const char* tcp_nolisten[] = {
 #endif
 	NULL
 };
-# endif
 
 static Xtransport	TRANS(SocketTCPFuncs) = {
 	/* Socket Interface */
@@ -2366,19 +2351,15 @@ static Xtransport	TRANS(SocketTCPFuncs) = {
 #ifdef TRANS_CLIENT
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
 	tcp_nolisten,
 	TRANS(SocketOpenCOTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
 #endif
 	TRANS(SocketSetOption),
-#ifdef TRANS_SERVER
 	TRANS(SocketINETCreateListener),
 	NULL,		       			/* ResetListener */
 	TRANS(SocketINETAccept),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
 	TRANS(SocketINETConnect),
 #endif /* TRANS_CLIENT */
@@ -2403,19 +2384,15 @@ static Xtransport	TRANS(SocketINETFuncs) = {
 #ifdef TRANS_CLIENT
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
 	NULL,
 	TRANS(SocketOpenCOTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
 #endif
 	TRANS(SocketSetOption),
-#ifdef TRANS_SERVER
 	TRANS(SocketINETCreateListener),
 	NULL,		       			/* ResetListener */
 	TRANS(SocketINETAccept),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
 	TRANS(SocketINETConnect),
 #endif /* TRANS_CLIENT */
@@ -2441,19 +2418,15 @@ static Xtransport     TRANS(SocketINET6Funcs) = {
 #ifdef TRANS_CLIENT
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
 	NULL,
 	TRANS(SocketOpenCOTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
 #endif
 	TRANS(SocketSetOption),
-#ifdef TRANS_SERVER
 	TRANS(SocketINETCreateListener),
 	NULL,					/* ResetListener */
 	TRANS(SocketINETAccept),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
 	TRANS(SocketINETConnect),
 #endif /* TRANS_CLIENT */
@@ -2486,19 +2459,15 @@ static Xtransport	TRANS(SocketLocalFuncs) = {
 #ifdef TRANS_CLIENT
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
 	NULL,
 	TRANS(SocketOpenCOTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
 #endif
 	TRANS(SocketSetOption),
-#ifdef TRANS_SERVER
 	TRANS(SocketUNIXCreateListener),
 	TRANS(SocketUNIXResetListener),
 	TRANS(SocketUNIXAccept),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
 	TRANS(SocketUNIXConnect),
 #endif /* TRANS_CLIENT */
@@ -2516,11 +2485,9 @@ static Xtransport	TRANS(SocketLocalFuncs) = {
 	TRANS(SocketUNIXCloseForCloning),
 	};
 #endif /* !LOCALCONN */
-# ifdef TRANS_SERVER
 #  if !defined(LOCALCONN)
 static const char* unix_nolisten[] = { "local" , NULL };
 #  endif
-# endif
 
 static Xtransport	TRANS(SocketUNIXFuncs) = {
 	/* Socket Interface */
@@ -2533,23 +2500,19 @@ static Xtransport	TRANS(SocketUNIXFuncs) = {
 #ifdef TRANS_CLIENT
 	TRANS(SocketOpenCOTSClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
 #if !defined(LOCALCONN)
 	unix_nolisten,
 #else
 	NULL,
 #endif
 	TRANS(SocketOpenCOTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(SocketReopenCOTSServer),
 #endif
 	TRANS(SocketSetOption),
-#ifdef TRANS_SERVER
 	TRANS(SocketUNIXCreateListener),
 	TRANS(SocketUNIXResetListener),
 	TRANS(SocketUNIXAccept),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
 	TRANS(SocketUNIXConnect),
 #endif /* TRANS_CLIENT */

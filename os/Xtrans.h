@@ -205,13 +205,9 @@ XtransConnInfo TRANS(OpenCOTSClient)(
 
 #endif /* TRANS_CLIENT */
 
-#ifdef TRANS_SERVER
-
 XtransConnInfo TRANS(OpenCOTSServer)(
     const char *	/* address */
 );
-
-#endif /* TRANS_SERVER */
 
 #ifdef TRANS_REOPEN
 
@@ -236,8 +232,6 @@ int TRANS(SetOption)(
     int,		/* option */
     int			/* arg */
 );
-
-#ifdef TRANS_SERVER
 
 int TRANS(CreateListener)(
     XtransConnInfo,	/* ciptr */
@@ -269,8 +263,6 @@ XtransConnInfo TRANS(Accept)(
     XtransConnInfo,	/* ciptr */
     int *		/* status */
 );
-
-#endif /* TRANS_SERVER */
 
 #ifdef TRANS_CLIENT
 
@@ -341,17 +333,12 @@ int TRANS(GetConnectionNumber)(
     XtransConnInfo	/* ciptr */
 );
 
-#ifdef TRANS_SERVER
-
 int TRANS(MakeAllCOTSServerListeners)(
     const char *,	/* port */
     int *,		/* partial */
     int *,		/* count_ret */
     XtransConnInfo **	/* ciptrs_ret */
 );
-
-#endif /* TRANS_SERVER */
-
 
 /*
  * Function Prototypes for Utility Functions.

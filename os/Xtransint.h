@@ -146,7 +146,6 @@ typedef struct _Xtransport {
 
 #endif /* TRANS_CLIENT */
 
-#ifdef TRANS_SERVER
     const char **	nolisten;
     XtransConnInfo (*OpenCOTSServer)(
 	struct _Xtransport *,	/* transport */
@@ -154,8 +153,6 @@ typedef struct _Xtransport {
 	const char *,		/* host */
 	const char *		/* port */
     );
-
-#endif /* TRANS_SERVER */
 
 #ifdef TRANS_REOPEN
 
@@ -174,7 +171,6 @@ typedef struct _Xtransport {
 	int			/* arg */
     );
 
-#ifdef TRANS_SERVER
 /* Flags */
 # define ADDR_IN_USE_ALLOWED	1
 
@@ -192,8 +188,6 @@ typedef struct _Xtransport {
 	XtransConnInfo,		/* connection */
         int *			/* status */
     );
-
-#endif /* TRANS_SERVER */
 
 #ifdef TRANS_CLIENT
 
@@ -332,12 +326,10 @@ static int TRANS(WriteV)(
 
 #endif /* WIN32 */
 
-#ifdef TRANS_SERVER
 static int trans_mkdir (
     const char *,	/* path */
     int			/* mode */
 );
-#endif
 
 #ifdef __clang__
 #pragma clang diagnostic pop

@@ -18,7 +18,6 @@
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #define XSERV_t
-#define TRANS_SERVER
 #define TRANS_REOPEN
 #include "os/Xtrans.h"
 #endif
@@ -49,7 +48,6 @@
 #include "dixstruct.h"
 
 #define XSERV_t
-#define TRANS_SERVER
 #define TRANS_REOPEN
 #include "os/Xtrans.h"
 

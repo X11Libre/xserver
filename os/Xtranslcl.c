@@ -297,10 +297,6 @@ TRANS(NAMEDOpenClient)(XtransConnInfo ciptr, const char *port)
 
 #endif /* TRANS_CLIENT */
 
-
-#ifdef TRANS_SERVER
-
-
 #ifdef NAMEDNODENAME
 static int
 TRANS(NAMEDOpenPipe)(const char *server_path)
@@ -484,8 +480,6 @@ TRANS(NAMEDAccept)(XtransConnInfo ciptr, XtransConnInfo newciptr, int *status)
     return str.fd;
 }
 
-#endif /* TRANS_SERVER */
-
 #endif /* LOCAL_TRANS_NAMED */
 
 
@@ -562,13 +556,9 @@ typedef struct _LOCALtrans2dev {
 
 #endif /* TRANS_CLIENT */
 
-#ifdef TRANS_SERVER
-
     int	(*devcotsopenserver)(
 	XtransConnInfo, const char * /*port*/
 );
-
-#endif /* TRANS_SERVER */
 
 #ifdef TRANS_CLIENT
 
@@ -578,13 +568,9 @@ typedef struct _LOCALtrans2dev {
 
 #endif /* TRANS_CLIENT */
 
-#ifdef TRANS_SERVER
-
     int	(*devcltsopenserver)(
 	XtransConnInfo, const char * /*port*/
 );
-
-#endif /* TRANS_SERVER */
 
 #ifdef TRANS_REOPEN
 
@@ -602,8 +588,6 @@ typedef struct _LOCALtrans2dev {
 
 #endif /* TRANS_REOPEN */
 
-#ifdef TRANS_SERVER
-
     int (*devreset)(
 	XtransConnInfo /* ciptr */
 );
@@ -612,8 +596,6 @@ typedef struct _LOCALtrans2dev {
 	XtransConnInfo, XtransConnInfo, int *
 );
 
-#endif /* TRANS_SERVER */
-
 } LOCALtrans2dev;
 
 static LOCALtrans2dev LOCALtrans2devtab[] = {
@@ -621,46 +603,34 @@ static LOCALtrans2dev LOCALtrans2devtab[] = {
 #ifdef TRANS_CLIENT
      TRANS(NAMEDOpenClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
      TRANS(NAMEDOpenServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
      TRANS(OpenFail),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
      TRANS(OpenFail),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
      TRANS(NAMEDReopenServer),
      TRANS(ReopenFail),
 #endif
-#ifdef TRANS_SERVER
      TRANS(NAMEDResetListener),
      TRANS(NAMEDAccept)
-#endif /* TRANS_SERVER */
 },
 
 {"local",
 #ifdef TRANS_CLIENT
      TRANS(NAMEDOpenClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
      TRANS(NAMEDOpenServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
      TRANS(OpenFail),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
      TRANS(OpenFail),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
      TRANS(NAMEDReopenServer),
      TRANS(ReopenFail),
 #endif
-#ifdef TRANS_SERVER
      TRANS(NAMEDResetListener),
      TRANS(NAMEDAccept)
-#endif /* TRANS_SERVER */
 },
 
 #ifdef LOCAL_TRANS_NAMED
@@ -668,46 +638,34 @@ static LOCALtrans2dev LOCALtrans2devtab[] = {
 #ifdef TRANS_CLIENT
      TRANS(NAMEDOpenClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
      TRANS(NAMEDOpenServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
      TRANS(OpenFail),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
      TRANS(OpenFail),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
      TRANS(NAMEDReopenServer),
      TRANS(ReopenFail),
 #endif
-#ifdef TRANS_SERVER
      TRANS(NAMEDResetListener),
      TRANS(NAMEDAccept)
-#endif /* TRANS_SERVER */
 },
 
 {"pipe",
 #ifdef TRANS_CLIENT
      TRANS(NAMEDOpenClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
      TRANS(NAMEDOpenServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
      TRANS(OpenFail),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
      TRANS(OpenFail),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
      TRANS(NAMEDReopenServer),
      TRANS(ReopenFail),
 #endif
-#ifdef TRANS_SERVER
      TRANS(NAMEDResetListener),
      TRANS(NAMEDAccept)
-#endif /* TRANS_SERVER */
 },
 #endif /* LOCAL_TRANS_NAMED */
 
@@ -919,9 +877,6 @@ TRANS(LocalOpenClient)(int type, const char *protocol,
 
 #endif /* TRANS_CLIENT */
 
-
-#ifdef TRANS_SERVER
-
 static XtransConnInfo
 TRANS(LocalOpenServer)(int type, const char *protocol,
                        const char *host _X_UNUSED, const char *port)
@@ -975,9 +930,6 @@ TRANS(LocalOpenServer)(int type, const char *protocol,
     free(ciptr);
     return NULL;
 }
-
-#endif /* TRANS_SERVER */
-
 
 #ifdef TRANS_REOPEN
 
@@ -1042,9 +994,6 @@ TRANS(LocalOpenCOTSClient)(Xtransport *thistrans _X_UNUSED, const char *protocol
 
 #endif /* TRANS_CLIENT */
 
-
-#ifdef TRANS_SERVER
-
 static XtransConnInfo
 TRANS(LocalOpenCOTSServer)(Xtransport *thistrans, const char *protocol,
 			   const char *host, const char *port)
@@ -1090,8 +1039,6 @@ TRANS(LocalOpenCOTSServer)(Xtransport *thistrans, const char *protocol,
     return TRANS(LocalOpenServer)(XTRANS_OPEN_COTS_SERVER, protocol, host, port);
 }
 
-#endif /* TRANS_SERVER */
-
 #ifdef TRANS_REOPEN
 
 static XtransConnInfo
@@ -1130,9 +1077,6 @@ TRANS(LocalSetOption)(XtransConnInfo ciptr, int option, int arg)
 
     return -1;
 }
-
-
-#ifdef TRANS_SERVER
 
 static int
 TRANS(LocalCreateListener)(XtransConnInfo ciptr, const char *port,
@@ -1194,9 +1138,6 @@ TRANS(LocalAccept)(XtransConnInfo ciptr, int *status)
 
     return newciptr;
 }
-
-#endif /* TRANS_SERVER */
-
 
 #ifdef TRANS_CLIENT
 
@@ -1316,13 +1257,10 @@ TRANS(LocalCloseForCloning)(XtransConnInfo ciptr)
  * The TransName is in lowercase, so it will never match during a normal
  * call to SelectTransport() in Xtrans.c.
  */
-
-#ifdef TRANS_SERVER
 static const char * local_aliases[] = {
 				  "named",
 				  "pipe", /* compatibility with Solaris Xlib */
 				  NULL };
-#endif
 
 static Xtransport	TRANS(LocalFuncs) = {
 	/* Local Interface */
@@ -1331,19 +1269,15 @@ static Xtransport	TRANS(LocalFuncs) = {
 #ifdef TRANS_CLIENT
 	TRANS(LocalOpenCOTSClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
 	local_aliases,
 	TRANS(LocalOpenCOTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(LocalReopenCOTSServer),
 #endif
 	TRANS(LocalSetOption),
-#ifdef TRANS_SERVER
 	TRANS(LocalCreateListener),
 	TRANS(LocalResetListener),
 	TRANS(LocalAccept),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
 	TRANS(LocalConnect),
 #endif /* TRANS_CLIENT */
@@ -1371,19 +1305,15 @@ static Xtransport	TRANS(NAMEDFuncs) = {
 #ifdef TRANS_CLIENT
 	TRANS(LocalOpenCOTSClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
 	NULL,
 	TRANS(LocalOpenCOTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(LocalReopenCOTSServer),
 #endif
 	TRANS(LocalSetOption),
-#ifdef TRANS_SERVER
 	TRANS(LocalCreateListener),
 	TRANS(LocalResetListener),
 	TRANS(LocalAccept),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
 	TRANS(LocalConnect),
 #endif /* TRANS_CLIENT */
@@ -1408,19 +1338,15 @@ static Xtransport	TRANS(PIPEFuncs) = {
 #ifdef TRANS_CLIENT
 	TRANS(LocalOpenCOTSClient),
 #endif /* TRANS_CLIENT */
-#ifdef TRANS_SERVER
 	NULL,
 	TRANS(LocalOpenCOTSServer),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_REOPEN
 	TRANS(LocalReopenCOTSServer),
 #endif
 	TRANS(LocalSetOption),
-#ifdef TRANS_SERVER
 	TRANS(LocalCreateListener),
 	TRANS(LocalResetListener),
 	TRANS(LocalAccept),
-#endif /* TRANS_SERVER */
 #ifdef TRANS_CLIENT
 	TRANS(LocalConnect),
 #endif /* TRANS_CLIENT */
