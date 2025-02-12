@@ -53,6 +53,7 @@ from The Open Group.
 #ifdef HAVE_SYSTEMD_DAEMON
 #include <systemd/sd-daemon.h>
 #endif
+#include <sys/utsname.h>
 
 /*
  * The transport table contains a definition for every transport (protocol)
@@ -1316,35 +1317,18 @@ static int TRANS(WriteV) (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
 #endif /* WIN32 */
 
 
-#if defined(_POSIX_SOURCE) || defined(SVR4) || defined(__SVR4)
-#ifndef NEED_UTSNAME
-#define NEED_UTSNAME
-#endif
-#include <sys/utsname.h>
-#endif
-
 /*
  * TRANS(GetHostname) - similar to gethostname but allows special processing.
  */
 
 int TRANS(GetHostname) (char *buf, int maxlen)
-
 {
-    int len;
-
-#ifdef NEED_UTSNAME
     struct utsname name;
-
     uname (&name);
-    len = strlen (name.nodename);
+
+    int len = strlen (name.nodename);
     if (len >= maxlen) len = maxlen - 1;
     memcpy (buf, name.nodename, len);
     buf[len] = '\0';
-#else
-    buf[0] = '\0';
-    (void) gethostname (buf, maxlen);
-    buf [maxlen - 1] = '\0';
-    len = strlen(buf);
-#endif /* NEED_UTSNAME */
     return len;
 }
