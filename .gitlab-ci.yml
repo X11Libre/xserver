@@ -219,6 +219,8 @@ freebsd:
       - /app/vmctl start
       - set +e
       - scp -r $PWD "vm:"
+      # need to install extra packages, as long as image cant be rebuilt
+      - /app/vmctl exec "pkg update && pkg add libxvmc xcb-util xcb-util-wm"
       # need to install newer xorgproto
       - /app/vmctl exec "cd $CI_PROJECT_NAME/dep.xorgproto && ./autogen.sh --prefix=/usr && make && make install"
       - /app/vmctl exec "cd $CI_PROJECT_NAME && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" MESON_ARGS=\"$MESON_ARGS\" MESON_BUILDDIR=\"$MESON_BUILDDIR\" .gitlab-ci/meson-build.sh --skip-test" && touch .success
