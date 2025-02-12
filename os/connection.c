@@ -68,7 +68,6 @@ SOFTWARE.
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #define XSERV_t
-#define TRANS_REOPEN
 #include "os/Xtrans.h"
 #include "os/Xtransint.h"
 #include <errno.h>

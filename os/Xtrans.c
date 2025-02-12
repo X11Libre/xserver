@@ -471,9 +471,6 @@ TRANS(Open) (int type, const char *address)
     return ciptr;
 }
 
-
-#ifdef TRANS_REOPEN
-
 /*
  * We might want to create an XtransConnInfo object based on a previously
  * opened connection.  For example, the font server may clone itself and
@@ -540,10 +537,6 @@ TRANS(Reopen) (int type, int trans_id, int fd, const char *port)
     return ciptr;
 }
 
-#endif /* TRANS_REOPEN */
-
-
-
 /*
  * These are the public interfaces to this Transport interface.
  * These are the only functions that should have knowledge of the transport
@@ -569,8 +562,6 @@ TRANS(OpenCOTSServer) (const char *address)
     prmsg (2,"OpenCOTSServer(%s)\n", address);
     return TRANS(Open) (XTRANS_OPEN_COTS_SERVER, address);
 }
-
-#ifdef TRANS_REOPEN
 
 XtransConnInfo
 TRANS(ReopenCOTSServer) (int trans_id, int fd, const char *port)
@@ -601,9 +592,6 @@ TRANS(GetReopenInfo) (XtransConnInfo ciptr,
 
     return 0;
 }
-
-#endif /* TRANS_REOPEN */
-
 
 int
 TRANS(SetOption) (XtransConnInfo ciptr, int option, int arg)
