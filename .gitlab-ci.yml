@@ -291,8 +291,8 @@ xf86-driver-build-test:
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-i740
               SHA: master
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-intel
-              SHA: e6a4c4740c15ace9dd79dc7c18955f2eb413a6a5 # no release yet
+            - REPO: https://gitlab.freedesktop.org/metux/xf86-video-intel
+              SHA: incubate # temporary
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mach64
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mga
