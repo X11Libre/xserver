@@ -129,7 +129,6 @@ extern _X_EXPORT OsTimerPtr TimerSet(OsTimerPtr timer,
                                      OsTimerCallback func,
                                      void *arg);
 
-extern _X_EXPORT void TimerCheck(void);
 extern _X_EXPORT void TimerCancel(OsTimerPtr /* pTimer */ );
 extern _X_EXPORT void TimerFree(OsTimerPtr /* pTimer */ );
 

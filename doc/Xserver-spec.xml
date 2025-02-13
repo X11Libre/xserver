@@ -859,7 +859,7 @@ Similarly, the X server or an extension may need to wait for some timeout.
 Early X releases implemented this functionality using block and wakeup handlers,
 but this has been rewritten to use a general timer facilty, and the
 internal screen saver facilities reimplemented to use Timers.
-These functions are TimerInit, TimerForce, TimerSet, TimerCheck, TimerCancel,
+These functions are TimerInit, TimerForce, TimerSet, TimerCancel,
 and TimerFree, as defined in Xserver/include/os.h. A callback function will be called
 when the timer fires, along with the current time, and a user provided argument.
 <blockquote><programlisting>
@@ -892,8 +892,6 @@ for the timer entry.
 
 	Bool TimerForce(OsTimerPtr /* pTimer */)
 
-	void TimerCheck(void);
-
 	void TimerCancel(OsTimerPtr /* pTimer */)
 
 	void TimerFree(OsTimerPtr /* pTimer */)
@@ -904,7 +902,6 @@ TimerInit frees any existing timer entries. TimerForce forces a call to the time
 callback function and returns true if the timer entry existed, else it returns false and
 does not call the callback function. TimerCancel will cancel the specified timer.
 TimerFree calls TimerCancel and frees the specified timer.
-Calling TimerCheck will force the server to see if any timer callbacks should be called.
 </para>
 </section>
 </section>
@@ -5048,7 +5045,6 @@ mi and fb implementations.</para>
 <row><entry><function>StoreColors</function></entry><entry><literal>ddx</literal></entry><entry><para>Screen</para></entry></row>
 <row><entry><function>Subtract</function></entry><entry><literal>mi</literal></entry><entry><para>Screen</para></entry></row>
 <row><entry><function>TimerCancel</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
-<row><entry><function>TimerCheck</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
 <row><entry><function>TimerForce</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
 <row><entry><function>TimerFree</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
 <row><entry><function>TimerInit</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
