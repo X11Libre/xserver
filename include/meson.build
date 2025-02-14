@@ -169,11 +169,9 @@ conf_data.set('HAVE_SIGACTION', cc.has_function('sigaction') ? '1' : false)
 conf_data.set('HAVE_SIGPROCMASK', cc.has_function('sigprocmask') ? '1' : false)
 # HAVE_SOCKLEN_T is used by xtrans when IPv6 is disabled
 conf_data.set('HAVE_SOCKLEN_T', cc.has_type('socklen_t', prefix: '#include <sys/socket.h>') ? '1' : false)
-conf_data.set('HAVE_STRCASECMP', cc.has_function('strcasecmp') ? '1' : false)
 conf_data.set('HAVE_STRCASESTR', cc.has_function('strcasestr') ? '1' : false)
 conf_data.set('HAVE_STRLCAT', cc.has_function('strlcat', dependencies: libbsd_dep) ? '1' : false)
 conf_data.set('HAVE_STRLCPY', cc.has_function('strlcpy', dependencies: libbsd_dep) ? '1' : false)
-conf_data.set('HAVE_STRNCASECMP', cc.has_function('strncasecmp') ? '1' : false)
 conf_data.set('HAVE_STRNDUP', cc.has_function('strndup') and cc.has_header_symbol('string.h', 'strndup') ? '1' : false)
 # HAVE_STRUCT_SOCKADDR_STORAGE is used by xtrans >= 1.6
 conf_data.set('HAVE_STRUCT_SOCKADDR_STORAGE', cc.has_type('struct sockaddr_storage', prefix: '#include <sys/socket.h>') ? '1' : false)
