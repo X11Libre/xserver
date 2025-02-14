@@ -234,18 +234,6 @@ extern _X_EXPORT void *
 reallocarray(void *optr, size_t nmemb, size_t size);
 #endif
 
-#ifndef HAVE_STRCASECMP
-#define strcasecmp xstrcasecmp
-extern _X_EXPORT int
-xstrcasecmp(const char *s1, const char *s2);
-#endif
-
-#ifndef HAVE_STRNCASECMP
-#define strncasecmp xstrncasecmp
-extern _X_EXPORT int
-xstrncasecmp(const char *s1, const char *s2, size_t n);
-#endif
-
 #ifndef HAVE_STRCASESTR
 #define strcasestr xstrcasestr
 extern _X_EXPORT char *

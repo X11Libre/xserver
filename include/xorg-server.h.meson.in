@@ -38,9 +38,6 @@
 /* Define to 1 if you have the `reallocarray' function. */
 #mesondefine HAVE_REALLOCARRAY
 
-/* Define to 1 if you have the `strcasecmp' function. */
-#mesondefine HAVE_STRCASECMP
-
 /* Define to 1 if you have the `strcasestr' function. */
 #mesondefine HAVE_STRCASESTR
 
@@ -49,9 +46,6 @@
 
 /* Define to 1 if you have the `strlcpy' function. */
 #mesondefine HAVE_STRLCPY
-
-/* Define to 1 if you have the `strncasecmp' function. */
-#mesondefine HAVE_STRNCASECMP
 
 /* Define to 1 if you have the `strndup' function. */
 #mesondefine HAVE_STRNDUP
