@@ -311,6 +311,35 @@ SyncCheckTriggerFence(SyncTrigger * pTrigger, int64_t unused)
     return (pFence == NULL || pFence->funcs.CheckTriggered(pFence));
 }
 
+static inline Bool
+checked_int64_add(int64_t *out, int64_t a, int64_t b)
+{
+    /* Do the potentially overflowing math as uint64_t, as signed
+     * integers in C are undefined on overflow (and the compiler may
+     * optimize out our overflow check below, otherwise)
+     */
+    int64_t result = (uint64_t)a + (uint64_t)b;
+    /* signed addition overflows if operands have the same sign, and
+     * the sign of the result doesn't match the sign of the inputs.
+     */
+    Bool overflow = (a < 0) == (b < 0) && (a < 0) != (result < 0);
+
+    *out = result;
+
+    return overflow;
+}
+
+static inline Bool
+checked_int64_subtract(int64_t *out, int64_t a, int64_t b)
+{
+    int64_t result = (uint64_t)a - (uint64_t)b;
+    Bool overflow = (a < 0) != (b < 0) && (a < 0) != (result < 0);
+
+    *out = result;
+
+    return overflow;
+}
+
 static int
 SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
                 RESTYPE resType, Mask changes)
