@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include "config/hotplug_priv.h"
+#include "os/fmt.h"
 
 #include "input.h"
 #include "inputstr.h"

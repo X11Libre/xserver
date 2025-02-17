@@ -224,8 +224,6 @@ padding_for_int32(const int bytes)
     return ((-bytes) & 3);
 }
 
-extern _X_EXPORT char **xstrtokenize(const char *str, const char *separators);
-
 /* some macros to help swap requests, replies, and events */
 
 #define LengthRestS(stuff) \
