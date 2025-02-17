@@ -33,6 +33,9 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
+
+#include "os/fmt.h"
+
 #include "dumb_bo.h"
 #include "inputstr.h"
 #include "xf86str.h"

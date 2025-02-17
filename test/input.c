@@ -38,6 +38,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "mi/mi_priv.h"
+#include "os/fmt.h"
 
 #include "misc.h"
 #include "resource.h"
