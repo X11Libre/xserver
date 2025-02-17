@@ -6,6 +6,7 @@
 #define _XSERVER_OS_FMT_H
 
 #include <stdint.h>
+#include <X11/Xfuncproto.h>
 
 void FormatInt64(int64_t num, char *string);
 void FormatUInt64(uint64_t num, char *string);
@@ -33,5 +34,8 @@ version_compare(uint32_t a_major, uint32_t a_minor,
 
     return 0;
 }
+
+/* still needed as long as modesetting is a module */
+_X_EXPORT char **xstrtokenize(const char *str, const char *separators);
 
 #endif /* _XSERVER_OS_FMT_H */
