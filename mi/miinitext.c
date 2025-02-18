@@ -102,7 +102,7 @@ SOFTWARE.
 
 /* List of built-in (statically linked) extensions */
 static const ExtensionModule staticExtensions[] = {
-    {GEExtensionInit, "Generic Event Extension", &noGEExtension},
+    {GEExtensionInit, "Generic Event Extension", NULL},
     {ShapeExtensionInit, "SHAPE", &noShapeExtension},
 #ifdef MITSHM
     {ShmExtensionInit, "MIT-SHM", &noMITShmExtension},

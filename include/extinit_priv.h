@@ -11,7 +11,6 @@
 extern Bool noDamageExtension;
 extern Bool noDbeExtension;
 extern Bool noDPMSExtension;
-extern Bool noGEExtension;
 extern Bool noGlxExtension;
 extern Bool noMITShmExtension;
 extern Bool noRenderExtension;
