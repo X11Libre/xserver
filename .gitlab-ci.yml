@@ -205,8 +205,9 @@ mingw-cross-build:
     variables:
       MESON_ARGS: --cross-file=.gitlab-ci/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true
     artifacts:
+      when: always
       paths:
-        - /usr/local
+        - /usr/local/
       expire_in: 1 week
 
 freebsd:
