@@ -27,6 +27,8 @@ from the author.
 */
 #ifndef _GEEXT_H_
 #define _GEEXT_H_
+
+#include <X11/Xfuncproto.h>
 #include <X11/extensions/geproto.h>
 
 /* Interface for other extensions */
