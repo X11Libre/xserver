@@ -40,9 +40,6 @@ typedef struct _GEExtension {
     void (*evswap) (xGenericEvent *from, xGenericEvent *to);
 } GEExtension, *GEExtensionPtr;
 
-/* All registered extensions and their handling functions. */
-extern _X_EXPORT GEExtension GEExtensions[MAXEXTENSIONS];
-
 /* Interface for other extensions */
 extern _X_EXPORT void GERegisterExtension(int extension,
                                           void (*ev_dispatch) (xGenericEvent

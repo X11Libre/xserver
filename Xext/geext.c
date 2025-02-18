@@ -34,7 +34,7 @@
 
 DevPrivateKeyRec GEClientPrivateKeyRec;
 
-GEExtension GEExtensions[MAXEXTENSIONS];
+static GEExtension GEExtensions[MAXEXTENSIONS];
 
 /* Forward declarations */
 static void SGEGenericEvent(xEvent *from, xEvent *to);
