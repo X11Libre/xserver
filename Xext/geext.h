@@ -56,10 +56,6 @@ extern _X_EXPORT GEExtension GEExtensions[MAXEXTENSIONS];
      (pWin)->optional->geMasks && \
      ((pWin)->optional->geMasks->eventMasks[(extension) & 0x7F] & (mask)))
 
-/* Returns first client */
-#define GECLIENT(pWin) \
-    (((pWin)->optional) ? (pWin)->optional->geMasks->geClients : NULL)
-
 /* Interface for other extensions */
 extern _X_EXPORT void GERegisterExtension(int extension,
                                           void (*ev_dispatch) (xGenericEvent
