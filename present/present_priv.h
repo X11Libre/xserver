@@ -345,7 +345,7 @@ present_send_idle_notify(WindowPtr window, CARD32 serial, PixmapPtr pixmap, pres
 
 int
 present_select_input(ClientPtr client,
-                     CARD32 eid,
+                     XID eid,
                      WindowPtr window,
                      CARD32 event_mask);
 
