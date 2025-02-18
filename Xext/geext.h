@@ -34,12 +34,6 @@ from the author.
 #define _GEEXT_H_
 #include <X11/extensions/geproto.h>
 
-/** Struct to keep information about registered extensions */
-typedef struct _GEExtension {
-    /** Event swapping routine */
-    void (*evswap) (xGenericEvent *from, xGenericEvent *to);
-} GEExtension, *GEExtensionPtr;
-
 /* Interface for other extensions */
 extern _X_EXPORT void GERegisterExtension(int extension,
                                           void (*ev_dispatch) (xGenericEvent
