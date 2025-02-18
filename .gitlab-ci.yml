@@ -204,8 +204,22 @@ mingw-cross-build:
     extends: .common-build-and-test
     script:
         - .gitlab-ci/meson-build.sh --run-install
+        - find / -name libX*.dll
     variables:
       MESON_ARGS: --cross-file=.gitlab-ci/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true
+    artifacts:
+      when: always
+      paths:
+        - hw/vfb/Xvfb.exe
+        - hw/xnest/Xnest.exe
+        - hw/xwin/winclipboard/xwinclip.exe
+        - hw/xwin/Xming.exe
+        - build/hw/vfb/Xvfb.exe
+        - build/hw/xnest/Xnest.exe
+        - build/hw/xwin/winclipboard/xwinclip.exe
+        - build/hw/xwin/Xming.exe
+        - hw/xwin/system.XWinrc
+      expire_in: 1 week
 
 freebsd:
     stage: build-and-test
