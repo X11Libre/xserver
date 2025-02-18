@@ -196,14 +196,3 @@ GERegisterExtension(int extension,
     /* extension opcodes are > 128, might as well save some space here */
     GEExtensions[EXT_MASK(extension)].evswap = ev_swap;
 }
-
-/* Sets type and extension field for a generic event. This is just an
- * auxiliary function, extensions could do it manually too.
- */
-void
-GEInitEvent(xGenericEvent *ev, int extension)
-{
-    ev->type = GenericEvent;
-    ev->extension = extension;
-    ev->length = 0;
-}
