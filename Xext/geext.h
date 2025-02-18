@@ -45,8 +45,6 @@ extern _X_EXPORT GEExtension GEExtensions[MAXEXTENSIONS];
 
 /* Typecast to generic event */
 #define GEV(ev) ((xGenericEvent*)(ev))
-/* Returns the extension offset from the event */
-#define GEEXT(ev) (GEV(ev)->extension)
 
 /* Interface for other extensions */
 extern _X_EXPORT void GERegisterExtension(int extension,
