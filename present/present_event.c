@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include "Xext/geext.h"
+
 #include "present_priv.h"
 
 static RESTYPE present_event_type;
