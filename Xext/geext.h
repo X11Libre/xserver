@@ -60,11 +60,6 @@ extern _X_EXPORT GEExtension GEExtensions[MAXEXTENSIONS];
 #define GECLIENT(pWin) \
     (((pWin)->optional) ? (pWin)->optional->geMasks->geClients : NULL)
 
-#define GEIsType(ev, ext, ev_type) \
-        ((GEV(ev)->type == GenericEvent) &&  \
-         GEEXT(ev) == (ext) && \
-         GEV(ev)->evtype == (ev_type))
-
 /* Interface for other extensions */
 extern _X_EXPORT void GERegisterExtension(int extension,
                                           void (*ev_dispatch) (xGenericEvent
