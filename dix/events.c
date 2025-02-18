@@ -147,7 +147,6 @@ Equipment Corporation.
 #include "extnsionst.h"
 #include "dixevents.h"
 #include "dispatch.h"
-#include "geext.h"
 #include "dixstruct_priv.h"
 #include "eventstr.h"
 #include "enterleave.h"

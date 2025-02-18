@@ -24,7 +24,6 @@
 #include "include/gc.h"
 #include "include/input.h"
 #include "include/window.h"
-#include "Xext/geext.h"
 
 /* server setting: maximum size for big requests */
 #define MAX_BIG_REQUEST_SIZE 4194303

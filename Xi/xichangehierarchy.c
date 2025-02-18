@@ -48,7 +48,6 @@
 #include "scrnintstr.h"         /* screen structure  */
 #include "extnsionst.h"
 #include "exglobals.h"
-#include "geext.h"
 #include "misc.h"
 #include "xace.h"
 #include "xiquerydevice.h"      /* for GetDeviceUse */

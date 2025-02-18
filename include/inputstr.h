@@ -54,7 +54,6 @@ SOFTWARE.
 #include "window.h"
 #include "dixstruct.h"
 #include "cursorstr.h"
-#include "geext.h"
 #include "privates.h"
 
 extern _X_EXPORT void AssignTypeAndName(DeviceIntPtr dev,
