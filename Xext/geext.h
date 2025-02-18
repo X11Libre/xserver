@@ -50,11 +50,6 @@ extern _X_EXPORT GEExtension GEExtensions[MAXEXTENSIONS];
 
 /* Return zero-based extension offset (offset - 128). Only for use in arrays */
 #define GEEXTIDX(ev) (GEEXT(ev) & 0x7F)
-/* True if mask is set for extension on window */
-#define GEMaskIsSet(pWin, extension, mask) \
-    ((pWin)->optional && \
-     (pWin)->optional->geMasks && \
-     ((pWin)->optional->geMasks->eventMasks[(extension) & 0x7F] & (mask)))
 
 /* Interface for other extensions */
 extern _X_EXPORT void GERegisterExtension(int extension,
