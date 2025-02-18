@@ -48,9 +48,6 @@ extern _X_EXPORT GEExtension GEExtensions[MAXEXTENSIONS];
 /* Returns the extension offset from the event */
 #define GEEXT(ev) (GEV(ev)->extension)
 
-/* Return zero-based extension offset (offset - 128). Only for use in arrays */
-#define GEEXTIDX(ev) (GEEXT(ev) & 0x7F)
-
 /* Interface for other extensions */
 extern _X_EXPORT void GERegisterExtension(int extension,
                                           void (*ev_dispatch) (xGenericEvent
