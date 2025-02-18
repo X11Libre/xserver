@@ -60,10 +60,6 @@ extern _X_EXPORT GEExtension GEExtensions[MAXEXTENSIONS];
 #define GECLIENT(pWin) \
     (((pWin)->optional) ? (pWin)->optional->geMasks->geClients : NULL)
 
-/* Returns the event_fill for the given event */
-#define GEEventFill(ev) \
-    GEExtensions[GEEXTIDX(ev)].evfill
-
 #define GEIsType(ev, ext, ev_type) \
         ((GEV(ev)->type == GenericEvent) &&  \
          GEEXT(ev) == (ext) && \
