@@ -230,11 +230,10 @@ XFixesSelectCursorInput(ClientPtr pClient, WindowPtr pWindow, CARD32 eventMask)
         return Success;
     }
     if (!e) {
-        e = (CursorEventPtr) malloc(sizeof(CursorEventRec));
+        e = (CursorEventPtr) calloc(1, sizeof(CursorEventRec));
         if (!e)
             return BadAlloc;
 
-        e->next = 0;
         e->pClient = pClient;
         e->pWindow = pWindow;
         e->clientResource = FakeClientID(pClient->index);
