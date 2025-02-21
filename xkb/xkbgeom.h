@@ -164,8 +164,6 @@ typedef struct _XkbKey {
 
 #define	XkbKeyShape(g,k)	(&(g)->shapes[(k)->shape_ndx])
 #define	XkbKeyColor(g,k)	(&(g)->colors[(k)->color_ndx])
-#define	XkbSetKeyShape(g,k,s)	((k)->shape_ndx= (s)-&(g)->shapes[0])
-#define	XkbSetKeyColor(g,k,c)	((k)->color_ndx= (c)-&(g)->colors[0])
 
 typedef struct _XkbRow {
     short top;
