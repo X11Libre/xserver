@@ -360,13 +360,6 @@ extern void
     );
 
 extern void
- XkbFreeGeomOverlayKeys(XkbOverlayRowPtr /* row */ ,
-                        int /* first */ ,
-                        int /* count */ ,
-                        Bool    /* freeAll */
-    );
-
-extern void
  XkbFreeGeomOverlayRows(XkbOverlayPtr /* overlay */ ,
                         int /* first */ ,
                         int /* count */ ,
