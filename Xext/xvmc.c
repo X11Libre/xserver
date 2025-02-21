@@ -128,7 +128,6 @@ static int
 ProcXvMCListSurfaceTypes(ClientPtr client)
 {
     XvPortPtr pPort;
-    int i;
     XvMCScreenPtr pScreenPriv;
     xvmcListSurfaceTypesReply rep;
     xvmcSurfaceInfo info;
@@ -145,7 +144,7 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
         ScreenPtr pScreen = pPort->pAdaptor->pScreen;
 
         if ((pScreenPriv = XVMC_GET_PRIVATE(pScreen))) {        /* any this screen */
-            for (i = 0; i < pScreenPriv->num_adaptors; i++) {
+            for (int i = 0; i < pScreenPriv->num_adaptors; i++) {
                 if (pPort->pAdaptor == pScreenPriv->adaptors[i].xv_adaptor) {
                     adaptor = &(pScreenPriv->adaptors[i]);
                     break;
@@ -164,7 +163,7 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
 
     WriteToClient(client, sizeof(xvmcListSurfaceTypesReply), &rep);
 
-    for (i = 0; i < num_surfaces; i++) {
+    for (int i = 0; i < num_surfaces; i++) {
         surface = adaptor->surfaces[i];
         info.surface_type_id = surface->surface_type_id;
         info.chroma_format = surface->chroma_format;
@@ -186,7 +185,7 @@ ProcXvMCCreateContext(ClientPtr client)
     XvPortPtr pPort;
     CARD32 *data = NULL;
     int dwords = 0;
-    int i, result, adapt_num = -1;
+    int result, adapt_num = -1;
     ScreenPtr pScreen;
     XvMCContextPtr pContext;
     XvMCScreenPtr pScreenPriv;
@@ -207,7 +206,7 @@ ProcXvMCCreateContext(ClientPtr client)
     if (!(pScreenPriv = XVMC_GET_PRIVATE(pScreen)))     /* none this screen */
         return BadMatch;
 
-    for (i = 0; i < pScreenPriv->num_adaptors; i++) {
+    for (int i = 0; i < pScreenPriv->num_adaptors; i++) {
         if (pPort->pAdaptor == pScreenPriv->adaptors[i].xv_adaptor) {
             adaptor = &(pScreenPriv->adaptors[i]);
             adapt_num = i;
@@ -218,7 +217,7 @@ ProcXvMCCreateContext(ClientPtr client)
     if (adapt_num < 0)          /* none this port */
         return BadMatch;
 
-    for (i = 0; i < adaptor->num_surfaces; i++) {
+    for (int i = 0; i < adaptor->num_surfaces; i++) {
         if (adaptor->surfaces[i]->surface_type_id == stuff->surface_type_id) {
             surface = adaptor->surfaces[i];
             break;
@@ -377,7 +376,7 @@ ProcXvMCCreateSubpicture(ClientPtr client)
 {
     Bool image_supported = FALSE;
     CARD32 *data = NULL;
-    int i, result, dwords = 0;
+    int result, dwords = 0;
     XvMCContextPtr pContext;
     XvMCSubpicturePtr pSubpicture;
     XvMCScreenPtr pScreenPriv;
@@ -398,7 +397,7 @@ ProcXvMCCreateSubpicture(ClientPtr client)
     adaptor = &(pScreenPriv->adaptors[pContext->adapt_num]);
 
     /* find which surface this context supports */
-    for (i = 0; i < adaptor->num_surfaces; i++) {
+    for (int i = 0; i < adaptor->num_surfaces; i++) {
         if (adaptor->surfaces[i]->surface_type_id == pContext->surface_type_id) {
             surface = adaptor->surfaces[i];
             break;
@@ -412,7 +411,7 @@ ProcXvMCCreateSubpicture(ClientPtr client)
     if (!surface->compatible_subpictures)
         return BadMatch;
 
-    for (i = 0; i < surface->compatible_subpictures->num_xvimages; i++) {
+    for (int i = 0; i < surface->compatible_subpictures->num_xvimages; i++) {
         if (surface->compatible_subpictures->xvimage_ids[i] ==
             stuff->xvimage_id) {
             image_supported = TRUE;
@@ -511,7 +510,6 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
     XvMCSurfaceInfoPtr surface = NULL;
     xvImageFormatInfo info;
     XvImagePtr pImage;
-    int i, j;
 
     REQUEST(xvmcListSubpictureTypesReq);
     REQUEST_SIZE_MATCH(xvmcListSubpictureTypesReq);
@@ -526,7 +524,7 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
     if (!(pScreenPriv = XVMC_GET_PRIVATE(pScreen)))
         return BadMatch;        /* None this screen */
 
-    for (i = 0; i < pScreenPriv->num_adaptors; i++) {
+    for (int i = 0; i < pScreenPriv->num_adaptors; i++) {
         if (pPort->pAdaptor == pScreenPriv->adaptors[i].xv_adaptor) {
             adaptor = &(pScreenPriv->adaptors[i]);
             break;
@@ -536,7 +534,7 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
     if (!adaptor)
         return BadMatch;
 
-    for (i = 0; i < adaptor->num_surfaces; i++) {
+    for (int i = 0; i < adaptor->num_surfaces; i++) {
         if (adaptor->surfaces[i]->surface_type_id == stuff->surface_type_id) {
             surface = adaptor->surfaces[i];
             break;
@@ -558,9 +556,9 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
 
     WriteToClient(client, sizeof(xvmcListSubpictureTypesReply), &rep);
 
-    for (i = 0; i < rep.num; i++) {
+    for (int i = 0; i < rep.num; i++) {
         pImage = NULL;
-        for (j = 0; j < adaptor->num_subpictures; j++) {
+        for (int j = 0; j < adaptor->num_subpictures; j++) {
             if (surface->compatible_subpictures->xvimage_ids[i] ==
                 adaptor->subpictures[j]->id) {
                 pImage = adaptor->subpictures[j];
@@ -785,7 +783,6 @@ XvMCFindXvImage(XvPortPtr pPort, CARD32 id)
     ScreenPtr pScreen = pPort->pAdaptor->pScreen;
     XvMCScreenPtr pScreenPriv;
     XvMCAdaptorPtr adaptor = NULL;
-    int i;
 
     if (!dixPrivateKeyRegistered(XvMCScreenKey))
         return NULL;
@@ -793,7 +790,7 @@ XvMCFindXvImage(XvPortPtr pPort, CARD32 id)
     if (!(pScreenPriv = XVMC_GET_PRIVATE(pScreen)))
         return NULL;
 
-    for (i = 0; i < pScreenPriv->num_adaptors; i++) {
+    for (int i = 0; i < pScreenPriv->num_adaptors; i++) {
         if (pPort->pAdaptor == pScreenPriv->adaptors[i].xv_adaptor) {
             adaptor = &(pScreenPriv->adaptors[i]);
             break;
@@ -803,7 +800,7 @@ XvMCFindXvImage(XvPortPtr pPort, CARD32 id)
     if (!adaptor)
         return NULL;
 
-    for (i = 0; i < adaptor->num_subpictures; i++) {
+    for (int i = 0; i < adaptor->num_subpictures; i++) {
         if (adaptor->subpictures[i]->id == id) {
             pImage = adaptor->subpictures[i];
             break;
