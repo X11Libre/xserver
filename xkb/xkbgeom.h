@@ -51,9 +51,6 @@ typedef struct _XkbBounds {
     short x2, y2;
 } XkbBoundsRec, *XkbBoundsPtr;
 
-#define	XkbBoundsWidth(b)	(((b)->x2)-((b)->x1))
-#define	XkbBoundsHeight(b)	(((b)->y2)-((b)->y1))
-
 typedef struct _XkbOutline {
     unsigned short num_points;
     unsigned short sz_points;
