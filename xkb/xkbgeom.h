@@ -83,8 +83,6 @@ typedef struct _XkbShapeDoodad {
 
 #define	XkbShapeDoodadColor(g,d)	(&(g)->colors[(d)->color_ndx])
 #define	XkbShapeDoodadShape(g,d)	(&(g)->shapes[(d)->shape_ndx])
-#define	XkbSetShapeDoodadColor(g,d,c)	((d)->color_ndx= (c)-&(g)->colors[0])
-#define	XkbSetShapeDoodadShape(g,d,s)	((d)->shape_ndx= (s)-&(g)->shapes[0])
 
 typedef struct _XkbTextDoodad {
     Atom name;
