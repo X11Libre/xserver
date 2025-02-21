@@ -27,6 +27,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef _XKBGEOM_H_
 #define	_XKBGEOM_H_
 
+#include <X11/Xdefs.h>
+
 #include "xkbstr.h"
 
 typedef struct _XkbProperty {
