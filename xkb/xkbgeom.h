@@ -99,7 +99,6 @@ typedef struct _XkbTextDoodad {
 } XkbTextDoodadRec, *XkbTextDoodadPtr;
 
 #define	XkbTextDoodadColor(g,d)	(&(g)->colors[(d)->color_ndx])
-#define	XkbSetTextDoodadColor(g,d,c)	((d)->color_ndx= (c)-&(g)->colors[0])
 
 typedef struct _XkbIndicatorDoodad {
     Atom name;
