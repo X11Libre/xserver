@@ -115,12 +115,6 @@ typedef struct _XkbIndicatorDoodad {
 #define	XkbIndicatorDoodadShape(g,d)	(&(g)->shapes[(d)->shape_ndx])
 #define	XkbIndicatorDoodadOnColor(g,d)	(&(g)->colors[(d)->on_color_ndx])
 #define	XkbIndicatorDoodadOffColor(g,d)	(&(g)->colors[(d)->off_color_ndx])
-#define	XkbSetIndicatorDoodadOnColor(g,d,c) \
-				((d)->on_color_ndx= (c)-&(g)->colors[0])
-#define	XkbSetIndicatorDoodadOffColor(g,d,c) \
-				((d)->off_color_ndx= (c)-&(g)->colors[0])
-#define	XkbSetIndicatorDoodadShape(g,d,s) \
-				((d)->shape_ndx= (s)-&(g)->shapes[0])
 
 typedef struct _XkbLogoDoodad {
     Atom name;
