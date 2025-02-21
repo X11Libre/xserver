@@ -360,20 +360,6 @@ extern void
     );
 
 extern void
- XkbFreeGeomOverlayRows(XkbOverlayPtr /* overlay */ ,
-                        int /* first */ ,
-                        int /* count */ ,
-                        Bool    /* freeAll */
-    );
-
-extern void
- XkbFreeGeomOverlays(XkbSectionPtr /* section */ ,
-                     int /* first */ ,
-                     int /* count */ ,
-                     Bool       /* freeAll */
-    );
-
-extern void
  XkbFreeGeomKeys(XkbRowPtr /* row */ ,
                  int /* first */ ,
                  int /* count */ ,
@@ -429,89 +415,8 @@ extern Bool
                 XkbGeomClearance        /* clearance */
     );
 
-extern Status XkbAllocGeomProps(XkbGeometryPtr /* geom */ ,
-                                int     /* nProps */
-    );
-
-extern Status XkbAllocGeomKeyAliases(XkbGeometryPtr /* geom */ ,
-                                     int        /* nAliases */
-    );
-
-extern Status XkbAllocGeomColors(XkbGeometryPtr /* geom */ ,
-                                 int    /* nColors */
-    );
-
-extern Status XkbAllocGeomShapes(XkbGeometryPtr /* geom */ ,
-                                 int    /* nShapes */
-    );
-
-extern Status XkbAllocGeomSections(XkbGeometryPtr /* geom */ ,
-                                   int  /* nSections */
-    );
-
-extern Status XkbAllocGeomOverlays(XkbSectionPtr /* section */ ,
-                                   int  /* num_needed */
-    );
-
-extern Status XkbAllocGeomOverlayRows(XkbOverlayPtr /* overlay */ ,
-                                      int       /* num_needed */
-    );
-
-extern Status XkbAllocGeomOverlayKeys(XkbOverlayRowPtr /* row */ ,
-                                      int       /* num_needed */
-    );
-
-extern Status XkbAllocGeomDoodads(XkbGeometryPtr /* geom */ ,
-                                  int   /* nDoodads */
-    );
-
-extern Status XkbAllocGeomSectionDoodads(XkbSectionPtr /* section */ ,
-                                         int    /* nDoodads */
-    );
-
-extern Status XkbAllocGeomOutlines(XkbShapePtr /* shape */ ,
-                                   int  /* nOL */
-    );
-
-extern Status XkbAllocGeomRows(XkbSectionPtr /* section */ ,
-                               int      /* nRows */
-    );
-
-extern Status XkbAllocGeomPoints(XkbOutlinePtr /* ol */ ,
-                                 int    /* nPts */
-    );
-
-extern Status XkbAllocGeomKeys(XkbRowPtr /* row */ ,
-                               int      /* nKeys */
-    );
-
 extern Status XkbAllocGeometry(XkbDescPtr /* xkb */ ,
                                XkbGeometrySizesPtr      /* sizes */
-    );
-
-extern Bool
- XkbComputeShapeTop(XkbShapePtr /* shape */ ,
-                    XkbBoundsPtr        /* bounds */
-    );
-
-extern Bool
- XkbComputeShapeBounds(XkbShapePtr      /* shape */
-    );
-
-extern Bool
- XkbComputeRowBounds(XkbGeometryPtr /* geom */ ,
-                     XkbSectionPtr /* section */ ,
-                     XkbRowPtr  /* row */
-    );
-
-extern Bool
- XkbComputeSectionBounds(XkbGeometryPtr /* geom */ ,
-                         XkbSectionPtr  /* section */
-    );
-
-extern char *XkbFindOverlayForKey(XkbGeometryPtr /* geom */ ,
-                                  XkbSectionPtr /* wanted */ ,
-                                  char *        /* under */
     );
 
 #endif                          /* _XKBGEOM_H_ */
