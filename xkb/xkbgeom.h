@@ -130,8 +130,6 @@ typedef struct _XkbLogoDoodad {
 
 #define	XkbLogoDoodadColor(g,d)		(&(g)->colors[(d)->color_ndx])
 #define	XkbLogoDoodadShape(g,d)		(&(g)->shapes[(d)->shape_ndx])
-#define	XkbSetLogoDoodadColor(g,d,c)	((d)->color_ndx= (c)-&(g)->colors[0])
-#define	XkbSetLogoDoodadShape(g,d,s)	((d)->shape_ndx= (s)-&(g)->shapes[0])
 
 typedef struct _XkbAnyDoodad {
     Atom name;
