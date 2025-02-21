@@ -170,7 +170,10 @@ void xnest_set_command(
     if (nbytes >= (2^16) - 1)
         return;
 
-    char buf[nbytes+1];
+    char *buf = calloc(1, nbytes+1);
+    if (!buf)
+        return; // BadAlloc
+
     char *bp = buf;
 
     /* copy arguments into single buffer */
@@ -187,6 +190,7 @@ void xnest_set_command(
                         8,
                         nbytes,
                         buf);
+    free(buf);
 }
 
 void xnest_xkb_init(xcb_connection_t *conn)
