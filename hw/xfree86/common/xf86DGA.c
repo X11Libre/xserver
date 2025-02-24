@@ -57,7 +57,6 @@
 #include "xf86Priv.h"
 #include "dgaproc.h"
 #include "dgaproc_priv.h"
-#include "colormapst.h"
 #include "pixmapstr.h"
 #include "inputstr.h"
 #include "globals.h"

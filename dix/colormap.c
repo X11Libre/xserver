@@ -58,7 +58,6 @@ SOFTWARE.
 #include "misc.h"
 #include "dix.h"
 #include "dixstruct.h"
-#include "colormapst.h"
 #include "os.h"
 #include "scrnintstr.h"
 #include "resource.h"

@@ -144,13 +144,14 @@
 #include <X11/Xos.h>
 #include <X11/Xprotostr.h>
 
+#include "dix/colormap_priv.h"
+
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "pixmap.h"
 #include "region.h"
 #include "gcstruct.h"
 #include "colormap.h"
-#include "colormapst.h"
 #include "miscstruct.h"
 #include "servermd.h"
 #include "windowstr.h"

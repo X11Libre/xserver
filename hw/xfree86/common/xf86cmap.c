@@ -39,7 +39,6 @@
 #include "mi/mi_priv.h"
 
 #include "misc.h"
-#include "colormapst.h"
 #include "scrnintstr.h"
 #include "resource.h"
 

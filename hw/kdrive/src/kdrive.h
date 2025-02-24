@@ -28,11 +28,13 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/Xos.h>
+
+#include "dix/colormap_priv.h"
+
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "servermd.h"
-#include "colormapst.h"
 #include "gcstruct.h"
 #include "input.h"
 #include "mipointer.h"

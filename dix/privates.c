@@ -51,12 +51,14 @@ from The Open Group.
 #include <dix-config.h>
 
 #include <stddef.h>
+
+#include "dix/colormap_priv.h"
+
 #include "windowstr.h"
 #include "resource.h"
 #include "privates.h"
 #include "gcstruct.h"
 #include "cursorstr.h"
-#include "colormapst.h"
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "extnsionst.h"
