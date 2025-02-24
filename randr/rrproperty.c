@@ -205,7 +205,7 @@ RRChangeOutputProperty(RROutputPtr output, Atom property, Atom type,
     if (mode == PropModeReplace || len > 0) {
         void *new_data = NULL, *old_data = NULL;
 
-        new_value.data = xallocarray(total_len, size_in_bytes);
+        new_value.data = calloc(total_len, size_in_bytes);
         if (!new_value.data && total_len && size_in_bytes) {
             if (add)
                 RRDestroyOutputProperty(prop);
@@ -477,7 +477,7 @@ ProcRRQueryOutputProperty(ClientPtr client)
         return BadName;
 
     if (prop->num_valid) {
-        extra = xallocarray(prop->num_valid, sizeof(INT32));
+        extra = calloc(prop->num_valid, sizeof(INT32));
         if (!extra)
             return BadAlloc;
     }

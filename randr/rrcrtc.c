@@ -174,7 +174,7 @@ RRCrtcNotify(RRCrtcPtr crtc,
                 newoutputs = reallocarray(crtc->outputs,
                                           numOutputs, sizeof(RROutputPtr));
             else
-                newoutputs = xallocarray(numOutputs, sizeof(RROutputPtr));
+                newoutputs = calloc(numOutputs, sizeof(RROutputPtr));
             if (!newoutputs)
                 return FALSE;
         }
@@ -1068,7 +1068,7 @@ RRCrtcGammaSetSize(RRCrtcPtr crtc, int size)
     if (size == crtc->gammaSize)
         return TRUE;
     if (size) {
-        gamma = xallocarray(size, 3 * sizeof(CARD16));
+        gamma = calloc(size, 3 * sizeof(CARD16));
         if (!gamma)
             return FALSE;
     }
@@ -1304,7 +1304,7 @@ ProcRRSetCrtcConfig(ClientPtr client)
             return BadMatch;
     }
     if (numOutputs) {
-        outputs = xallocarray(numOutputs, sizeof(RROutputPtr));
+        outputs = calloc(numOutputs, sizeof(RROutputPtr));
         if (!outputs)
             return BadAlloc;
     }

@@ -70,7 +70,7 @@ RRTransformSetFilter(RRTransformPtr dst,
     xFixed *new_params;
 
     if (nparams) {
-        new_params = xallocarray(nparams, sizeof(xFixed));
+        new_params = calloc(nparams, sizeof(xFixed));
         if (!new_params)
             return FALSE;
         memcpy(new_params, params, nparams * sizeof(xFixed));

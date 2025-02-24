@@ -131,7 +131,7 @@ RROutputSetClones(RROutputPtr output, RROutputPtr * clones, int numClones)
 
     RROutputPtr *newClones = NULL;
     if (numClones) {
-        newClones = xallocarray(numClones, sizeof(RROutputPtr));
+        newClones = calloc(numClones, sizeof(RROutputPtr));
         if (!newClones)
             return FALSE;
         memcpy(newClones, clones, numClones * sizeof(RROutputPtr));
@@ -163,7 +163,7 @@ RROutputSetModes(RROutputPtr output,
 
     RRModePtr *newModes = NULL;
     if (numModes) {
-        newModes = xallocarray(numModes, sizeof(RRModePtr));
+        newModes = calloc(numModes, sizeof(RRModePtr));
         if (!newModes)
             return FALSE;
         memcpy(newModes, modes, numModes * sizeof(RRModePtr));
@@ -262,7 +262,7 @@ RROutputSetCrtcs(RROutputPtr output, RRCrtcPtr * crtcs, int numCrtcs)
 
     RRCrtcPtr *newCrtcs = NULL;
     if (numCrtcs) {
-        newCrtcs = xallocarray(numCrtcs, sizeof(RRCrtcPtr));
+        newCrtcs = calloc(numCrtcs, sizeof(RRCrtcPtr));
         if (!newCrtcs)
             return FALSE;
         memcpy(newCrtcs, crtcs, numCrtcs * sizeof(RRCrtcPtr));
