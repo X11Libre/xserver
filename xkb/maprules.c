@@ -93,7 +93,7 @@ InputLineAddChar(InputLine * line, int ch)
 {
     if (line->num_line >= line->sz_line) {
         if (line->line == line->buf) {
-            line->line = xallocarray(line->sz_line, 2);
+            line->line = calloc(line->sz_line, 2);
             memcpy(line->line, line->buf, line->sz_line);
         }
         else {
