@@ -119,7 +119,8 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
                                            max_keycode - min_keycode + 1,
                                            &mapWidth);
             len = (max_keycode - min_keycode + 1) * mapWidth;
-            keymap = calloc(len, sizeof(KeySym));
+            if (!(keymap = calloc(len, sizeof(KeySym))))
+                goto XkbError;
             for (i = 0; i < len; ++i)
                 keymap[i] = keymap64[i];
             XFree(keymap64);
