@@ -426,7 +426,7 @@ OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
      * copy the current FPE list, so that if it gets changed by another client
      * while we're blocking, the request still appears atomic
      */
-    c->fpe_list = xallocarray(num_fpes, sizeof(FontPathElementPtr));
+    c->fpe_list = calloc(num_fpes, sizeof(FontPathElementPtr));
     if (!c->fpe_list) {
         free((void *) c->fontname);
         free(c);
@@ -820,7 +820,7 @@ ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
 
     if (!(c = calloc(1, sizeof *c)))
         return BadAlloc;
-    c->fpe_list = xallocarray(num_fpes, sizeof(FontPathElementPtr));
+    c->fpe_list = calloc(num_fpes, sizeof(FontPathElementPtr));
     if (!c->fpe_list) {
         free(c);
         return BadAlloc;
@@ -1070,7 +1070,7 @@ StartListFontsWithInfo(ClientPtr client, int length, unsigned char *pattern,
 
     if (!(c = calloc(1, sizeof *c)))
         goto badAlloc;
-    c->fpe_list = xallocarray(num_fpes, sizeof(FontPathElementPtr));
+    c->fpe_list = calloc(num_fpes, sizeof(FontPathElementPtr));
     if (!c->fpe_list) {
         free(c);
         goto badAlloc;
@@ -1439,7 +1439,7 @@ doImageText(ClientPtr client, ITclosurePtr c)
             *new_closure = *c;
             c = new_closure;
 
-            data = xallocarray(c->nChars, itemSize);
+            data = calloc(c->nChars, itemSize);
             if (!data) {
                 free(c);
                 c = old_closure;
@@ -1595,7 +1595,7 @@ SetFontPathElements(int npaths, unsigned char *paths, int *bad, Bool persist)
     unsigned char *cp = paths;
     FontPathElementPtr fpe = NULL, *fplist;
 
-    fplist = xallocarray(npaths, sizeof(FontPathElementPtr));
+    fplist = calloc(npaths, sizeof(FontPathElementPtr));
     if (!fplist) {
         *bad = 0;
         return BadAlloc;

@@ -601,10 +601,10 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
         i++;
     if (!i)
         return TRUE;
-    deletes = xallocarray(i, sizeof(GrabPtr));
-    adds = xallocarray(i, sizeof(GrabPtr));
-    updates = xallocarray(i, sizeof(Mask **));
-    details = xallocarray(i, sizeof(Mask *));
+    deletes = calloc(i, sizeof(GrabPtr));
+    adds = calloc(i, sizeof(GrabPtr));
+    updates = calloc(i, sizeof(Mask **));
+    details = calloc(i, sizeof(Mask *));
     if (!deletes || !adds || !updates || !details) {
         free(details);
         free(updates);

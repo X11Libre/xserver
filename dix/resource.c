@@ -862,10 +862,10 @@ RebuildTable(int client)
      */
 
     j = 2 * clientTable[client].buckets;
-    tails =  xallocarray(j, sizeof(ResourcePtr *));
+    tails =  calloc(j, sizeof(ResourcePtr *));
     if (!tails)
         return;
-    resources =  xallocarray(j, sizeof(ResourcePtr));
+    resources =  calloc(j, sizeof(ResourcePtr));
     if (!resources) {
         free(tails);
         return;

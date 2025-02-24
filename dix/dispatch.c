@@ -1056,7 +1056,7 @@ ProcQueryTree(ClientPtr client)
     if (numChildren) {
         int curChild = 0;
 
-        childIDs = xallocarray(numChildren, sizeof(Window));
+        childIDs = calloc(numChildren, sizeof(Window));
         if (!childIDs)
             return BadAlloc;
         for (pChild = pWin->lastChild; pChild != pHead;

@@ -197,7 +197,7 @@ InitAtoms(void)
 {
     FreeAllAtoms();
     tableLength = InitialTableSize;
-    nodeTable = xallocarray(InitialTableSize, sizeof(NodePtr));
+    nodeTable = calloc(InitialTableSize, sizeof(NodePtr));
     if (!nodeTable)
         AtomError();
     nodeTable[None] = NULL;
