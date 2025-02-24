@@ -443,8 +443,8 @@ miFillUniqueSpanGroup(DrawablePtr pDraw, GCPtr pGC, SpanGroup * spanGroup)
         ylength = spanGroup->ymax - ymin + 1;
 
         /* Allocate Spans for y buckets */
-        yspans = xallocarray(ylength, sizeof(Spans));
-        ysizes = xallocarray(ylength, sizeof(int));
+        yspans = calloc(ylength, sizeof(Spans));
+        ysizes = calloc(ylength, sizeof(int));
 
         if (!yspans || !ysizes) {
             free(yspans);
@@ -511,8 +511,8 @@ miFillUniqueSpanGroup(DrawablePtr pDraw, GCPtr pGC, SpanGroup * spanGroup)
         }                       /* for i thorough Spans */
 
         /* Now sort by x and uniquify each bucket into the final array */
-        points = xallocarray(count, sizeof(DDXPointRec));
-        widths = xallocarray(count, sizeof(int));
+        points = calloc(count, sizeof(DDXPointRec));
+        widths = calloc(count, sizeof(int));
         if (!points || !widths) {
             for (i = 0; i < ylength; i++) {
                 free(yspans[i].points);
@@ -559,10 +559,10 @@ miFillUniqueSpanGroup(DrawablePtr pDraw, GCPtr pGC, SpanGroup * spanGroup)
 static Bool
 InitSpans(Spans * spans, size_t nspans)
 {
-    spans->points = xallocarray(nspans, sizeof(*spans->points));
+    spans->points = calloc(nspans, sizeof(*spans->points));
     if (!spans->points)
         return FALSE;
-    spans->widths = xallocarray(nspans, sizeof(*spans->widths));
+    spans->widths = calloc(nspans, sizeof(*spans->widths));
     if (!spans->widths) {
         free(spans->points);
         return FALSE;

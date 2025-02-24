@@ -86,7 +86,7 @@ miPolyRectangle(DrawablePtr pDraw, GCPtr pGC, int nrects, xRectangle *pRects)
         offset2 = pGC->lineWidth;
         offset1 = offset2 >> 1;
         offset3 = offset2 - offset1;
-        tmp = xallocarray(ntmp, sizeof(xRectangle));
+        tmp = calloc(ntmp, sizeof(xRectangle));
         if (!tmp)
             return;
         t = tmp;

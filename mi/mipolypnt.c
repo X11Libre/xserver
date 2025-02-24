@@ -65,7 +65,7 @@ miPolyPoint(DrawablePtr pDrawable, GCPtr pGC, int mode, /* Origin or Previous */
     int i;
     xPoint *ppt;
 
-    if (!(pwidthInit = xallocarray(npt, sizeof(int))))
+    if (!(pwidthInit = calloc(npt, sizeof(int))))
         return;
 
     /* make pointlist origin relative */

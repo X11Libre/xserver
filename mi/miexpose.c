@@ -528,7 +528,7 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
     regionnumrects = RegionNumRects(prgn);
     if (regionnumrects == 0)
         return;
-    prect = xallocarray(regionnumrects, sizeof(xRectangle));
+    prect = calloc(regionnumrects, sizeof(xRectangle));
     if (!prect)
         return;
 
