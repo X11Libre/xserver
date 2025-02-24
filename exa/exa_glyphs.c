@@ -209,8 +209,8 @@ exaRealizeGlyphCaches(ScreenPtr pScreen, unsigned int format)
 
         cache->picture = pPicture;
         cache->picture->refcnt++;
-        cache->hashEntries = xallocarray(cache->hashSize, sizeof(int));
-        cache->glyphs = xallocarray(cache->size, sizeof(ExaCachedGlyphRec));
+        cache->hashEntries = calloc(cache->hashSize, sizeof(int));
+        cache->glyphs = calloc(cache->size, sizeof(ExaCachedGlyphRec));
         cache->glyphCount = 0;
 
         if (!cache->hashEntries || !cache->glyphs)
