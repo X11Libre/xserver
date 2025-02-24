@@ -168,7 +168,7 @@ RRModesForScreen(ScreenPtr pScreen, int *num_ret)
     RRModePtr *screen_modes;
     int num_screen_modes = 0;
 
-    screen_modes = xallocarray((num_modes ? num_modes : 1), sizeof(RRModePtr));
+    screen_modes = calloc((num_modes ? num_modes : 1), sizeof(RRModePtr));
     if (!screen_modes)
         return NULL;
 

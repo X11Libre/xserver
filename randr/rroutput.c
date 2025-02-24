@@ -130,7 +130,7 @@ RROutputSetClones(RROutputPtr output, RROutputPtr * clones, int numClones)
             return TRUE;
     }
     if (numClones) {
-        newClones = xallocarray(numClones, sizeof(RROutputPtr));
+        newClones = calloc(numClones, sizeof(RROutputPtr));
         if (!newClones)
             return FALSE;
     }
@@ -163,7 +163,7 @@ RROutputSetModes(RROutputPtr output,
     }
 
     if (numModes) {
-        newModes = xallocarray(numModes, sizeof(RRModePtr));
+        newModes = calloc(numModes, sizeof(RRModePtr));
         if (!newModes)
             return FALSE;
     }
@@ -262,7 +262,7 @@ RROutputSetCrtcs(RROutputPtr output, RRCrtcPtr * crtcs, int numCrtcs)
             return TRUE;
     }
     if (numCrtcs) {
-        newCrtcs = xallocarray(numCrtcs, sizeof(RRCrtcPtr));
+        newCrtcs = calloc(numCrtcs, sizeof(RRCrtcPtr));
         if (!newCrtcs)
             return FALSE;
     }
