@@ -567,7 +567,7 @@ XkbAddGeomProperty(XkbGeometryPtr geom, char *name, char *value)
 }
 
 XkbKeyAliasPtr
-XkbAddGeomKeyAlias(XkbGeometryPtr geom, char *aliasStr, char *realStr)
+SrvXkbAddGeomKeyAlias(XkbGeometryPtr geom, char *aliasStr, char *realStr)
 {
     register int i;
     register XkbKeyAliasPtr alias;
