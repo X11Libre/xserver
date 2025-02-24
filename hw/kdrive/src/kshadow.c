@@ -34,7 +34,7 @@ KdShadowFbAlloc(KdScreenInfo * screen, Bool rotate)
 
     /* use fb computation for width */
     paddedWidth = ((width * bpp + FB_MASK) >> FB_SHIFT) * sizeof(FbBits);
-    buf = xallocarray(paddedWidth, height);
+    buf = calloc(paddedWidth, height);
     if (!buf)
         return FALSE;
     if (screen->fb.shadow)

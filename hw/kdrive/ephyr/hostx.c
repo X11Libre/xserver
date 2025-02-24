@@ -931,7 +931,7 @@ hostx_screen_init(KdScreenInfo *screen,
             scrpriv->ximg->byte_order = IMAGE_BYTE_ORDER;
 
         scrpriv->ximg->data =
-            xallocarray(scrpriv->ximg->stride, buffer_height);
+            calloc(scrpriv->ximg->stride, buffer_height);
     }
 
     if (!HostX.size_set_from_configure)
@@ -1000,7 +1000,7 @@ hostx_screen_init(KdScreenInfo *screen,
         *bits_per_pixel = scrpriv->server_depth;
 
         EPHYR_DBG("server bpp %i", bytes_per_pixel);
-        scrpriv->fb_data = xallocarray (stride, buffer_height);
+        scrpriv->fb_data = calloc(stride, buffer_height);
         return scrpriv->fb_data;
     }
 }
