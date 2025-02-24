@@ -47,9 +47,7 @@ SOFTWARE.
 #ifndef CMAPSTRUCT_H
 #define CMAPSTRUCT_H 1
 
-#include "colormap.h"
-#include "screenint.h"
-#include "privates.h"
+#include <X11/Xdefs.h>
 
 /* Shared color -- the color is used by AllocColorPlanes */
 typedef struct {
@@ -81,31 +79,5 @@ typedef struct _CMEntry {
     short refcnt;
     Bool fShared;
 } Entry;
-
-/* COLORMAPs can be used for either Direct or Pseudo color.  PseudoColor
- * only needs one cell table, we arbitrarily pick red.  We keep track
- * of that table with freeRed, numPixelsRed, and clientPixelsRed */
-
-typedef struct _ColormapRec {
-    VisualPtr pVisual;
-    short class;                /* PseudoColor or DirectColor */
-    XID mid;                    /* client's name for colormap */
-    ScreenPtr pScreen;          /* screen map is associated with */
-    short flags;                /* 1 = CM_IsDefault
-                                 * 2 = CM_AllAllocated */
-    int freeRed;
-    int freeGreen;
-    int freeBlue;
-    int *numPixelsRed;
-    int *numPixelsGreen;
-    int *numPixelsBlue;
-    Pixel **clientPixelsRed;
-    Pixel **clientPixelsGreen;
-    Pixel **clientPixelsBlue;
-    Entry *red;
-    Entry *green;
-    Entry *blue;
-    PrivateRec *devPrivates;
-} ColormapRec;
 
 #endif                          /* COLORMAP_H */

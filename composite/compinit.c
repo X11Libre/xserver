@@ -43,9 +43,9 @@
 
 #include <dix-config.h>
 
+#include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
-#include "include/colormapst.h"
 #include "os/osdep.h"
 
 #include "compint.h"

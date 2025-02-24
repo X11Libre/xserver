@@ -32,7 +32,6 @@
 #include "mi.h"
 #include "picturestr.h"
 #include "mipict.h"
-#include "colormapst.h"
 
 #define NUM_CUBE_LEVELS	4
 #define NUM_GRAY_LEVELS	13

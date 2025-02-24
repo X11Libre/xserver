@@ -3,13 +3,13 @@
 #include <xorg-config.h>
 #endif
 
+#include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "mi/mipointer_priv.h"
 
 #include "xf86.h"
 #include "xf86CursorPriv.h"
-#include "colormapst.h"
 #include "cursorstr.h"
 
 /* FIXME: This was added with the ABI change of the miPointerSpriteFuncs for

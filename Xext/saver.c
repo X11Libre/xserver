@@ -50,7 +50,6 @@ in this Software without prior written authorization from the X Consortium.
 #include "resource.h"
 #include "gcstruct.h"
 #include "cursorstr.h"
-#include "colormapst.h"
 #include "xace.h"
 #include "inputstr.h"
 #ifdef XINERAMA

@@ -10,6 +10,7 @@
 
 #include "dix/screenint_priv.h"
 #include "include/colormap.h"
+#include "include/colormapst.h"
 #include "include/dix.h"
 #include "include/window.h"
 
@@ -20,6 +21,32 @@
 #define CM_BeingCreated 4
 
 typedef struct _CMEntry *EntryPtr;
+
+/* COLORMAPs can be used for either Direct or Pseudo color.  PseudoColor
+ * only needs one cell table, we arbitrarily pick red.  We keep track
+ * of that table with freeRed, numPixelsRed, and clientPixelsRed */
+
+typedef struct _ColormapRec {
+    VisualPtr pVisual;
+    short class;                /* PseudoColor or DirectColor */
+    XID mid;                    /* client's name for colormap */
+    ScreenPtr pScreen;          /* screen map is associated with */
+    short flags;                /* 1 = CM_IsDefault
+                                 * 2 = CM_AllAllocated */
+    int freeRed;
+    int freeGreen;
+    int freeBlue;
+    int *numPixelsRed;
+    int *numPixelsGreen;
+    int *numPixelsBlue;
+    Pixel **clientPixelsRed;
+    Pixel **clientPixelsGreen;
+    Pixel **clientPixelsBlue;
+    Entry *red;
+    Entry *green;
+    Entry *blue;
+    PrivateRec *devPrivates;
+} ColormapRec;
 
 int dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
                       ColormapPtr *ppcmap, int alloc, ClientPtr client);

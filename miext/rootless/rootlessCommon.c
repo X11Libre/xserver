@@ -34,8 +34,9 @@
 #include <stddef.h>             /* For NULL */
 #include <limits.h>             /* For CHAR_BIT */
 
+#include "dix/colormap_priv.h"
+
 #include "rootlessCommon.h"
-#include "colormapst.h"
 
 unsigned int rootless_CopyBytes_threshold = 0;
 unsigned int rootless_CopyWindow_threshold = 0;

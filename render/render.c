@@ -31,6 +31,7 @@
 #include <X11/extensions/renderproto.h>
 #include <X11/Xfuncproto.h>
 
+#include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "os/osdep.h"
@@ -42,7 +43,6 @@
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "colormapst.h"
 #include "extnsionst.h"
 #include "extinit_priv.h"
 #include "servermd.h"

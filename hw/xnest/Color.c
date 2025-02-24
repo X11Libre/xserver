@@ -22,7 +22,6 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 #include "window.h"
 #include "windowstr.h"
-#include "colormapst.h"
 #include "resource.h"
 
 #include "Xnest.h"

@@ -47,7 +47,6 @@
 #include "propertyst.h"
 #include "mivalidate.h"
 #include "picturestr.h"
-#include "colormapst.h"
 
 #include "rootlessCommon.h"
 #include "rootlessWindow.h"

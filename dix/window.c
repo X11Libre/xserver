@@ -121,7 +121,6 @@ Equipment Corporation.
 #include "propertyst.h"
 #include "inputstr.h"
 #include "resource.h"
-#include "colormapst.h"
 #include "cursorstr.h"
 #include "dixstruct.h"
 #include "gcstruct.h"

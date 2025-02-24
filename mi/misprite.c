@@ -47,7 +47,6 @@ in this Software without prior written authorization from The Open Group.
 #include   "mi.h"
 #include   "cursorstr.h"
 #include   "scrnintstr.h"
-#include   "colormapst.h"
 #include   "windowstr.h"
 #include   "gcstruct.h"
 #include   "mipointer.h"

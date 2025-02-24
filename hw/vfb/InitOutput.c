@@ -48,7 +48,6 @@ from The Open Group.
 #include "servermd.h"
 #define PSZ 8
 #include "fb.h"
-#include "colormapst.h"
 #include "gcstruct.h"
 #include "input.h"
 #include "mipointer.h"
