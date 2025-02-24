@@ -470,7 +470,7 @@ ProcDbeSwapBuffers(ClientPtr client)
     dbeSwapInfo = (xDbeSwapInfo *) &stuff[1];
 
     /* Allocate array to record swap information. */
-    swapInfo = xallocarray(nStuff, sizeof(DbeSwapInfoRec));
+    swapInfo = calloc(nStuff, sizeof(DbeSwapInfoRec));
     if (swapInfo == NULL) {
         return BadAlloc;
     }
@@ -583,7 +583,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
         return BadAlloc;
     /* Make sure any specified drawables are valid. */
     if (stuff->n != 0) {
-        if (!(pDrawables = xallocarray(stuff->n, sizeof(DrawablePtr)))) {
+        if (!(pDrawables = calloc(stuff->n, sizeof(DrawablePtr)))) {
             return BadAlloc;
         }
 
