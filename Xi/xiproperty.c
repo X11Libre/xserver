@@ -222,7 +222,7 @@ list_atoms(DeviceIntPtr dev, int *natoms, Atom **atoms_return)
     if (nprops) {
         Atom *a;
 
-        atoms = xallocarray(nprops, sizeof(Atom));
+        atoms = calloc(nprops, sizeof(Atom));
         if (!atoms)
             return BadAlloc;
         a = atoms;
@@ -723,7 +723,7 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
     if (mode == PropModeReplace || len > 0) {
         void *new_data = NULL, *old_data = NULL;
 
-        new_value.data = xallocarray(total_len, size_in_bytes);
+        new_value.data = calloc(total_len, size_in_bytes);
         if (!new_value.data && total_len && size_in_bytes) {
             if (add)
                 XIDestroyDeviceProperty(prop);
