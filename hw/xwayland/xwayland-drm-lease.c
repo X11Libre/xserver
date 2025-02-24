@@ -165,7 +165,8 @@ xwl_randr_request_lease(ClientPtr client, ScreenPtr screen, RRLeasePtr rrLease)
 
     req = wp_drm_lease_device_v1_create_lease_request(
             lease_device->drm_lease_device);
-    lease_private = calloc(1, sizeof(struct xwl_drm_lease));
+    if (!(lease_private = calloc(1, sizeof(struct xwl_drm_lease))))
+        return BadAlloc;
     for (i = 0; i < rrLease->numOutputs; ++i) {
         output = rrLease->outputs[i]->devPrivate;
         output->lease = lease_private;
