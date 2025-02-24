@@ -284,7 +284,10 @@ AddInputDevice(ClientPtr client, DeviceProc deviceProc, Bool autoStart)
     dev->deviceGrab.grabTime = currentTime;
     dev->deviceGrab.ActivateGrab = ActivateKeyboardGrab;
     dev->deviceGrab.DeactivateGrab = DeactivateKeyboardGrab;
-    dev->deviceGrab.sync.event = calloc(1, sizeof(InternalEvent));
+    if (!(dev->deviceGrab.sync.event = calloc(1, sizeof(InternalEvent)))) {
+        free(dev);
+        return NULL;
+    }
 
     dev->sendEventsProc = XTestDeviceSendEvents;
 
@@ -1703,7 +1706,8 @@ InitTouchClassDeviceStruct(DeviceIntPtr device, unsigned int max_touches,
     touch->sourceid = device->id;
 
     device->touch = touch;
-    device->last.touches = calloc(max_touches, sizeof(*device->last.touches));
+    if (!(device->last.touches = calloc(max_touches, sizeof(*device->last.touches))))
+        goto err;
     device->last.num_touches = touch->num_touches;
     for (i = 0; i < touch->num_touches; i++)
         TouchInitDDXTouchPoint(device, &device->last.touches[i]);
@@ -2863,6 +2867,11 @@ AllocDevicePair(ClientPtr client, const char *name,
     if (IsMaster(pointer)) {
         pointer->unused_classes = calloc(1, sizeof(ClassesRec));
         keyboard->unused_classes = calloc(1, sizeof(ClassesRec));
+        if (!pointer->unused_classes || !keyboard->unused_classes) {
+            free(keyboard->unused_classes);
+            free(pointer->unused_classes);
+            return BadAlloc;
+        }
     }
 
     *ptr = pointer;
