@@ -1318,7 +1318,7 @@ damageText(DrawablePtr pDrawable,
     if (!checkGCDamage(pDrawable, pGC))
         return;
 
-    charinfo = xallocarray(count, sizeof(CharInfoPtr));
+    charinfo = calloc(count, sizeof(CharInfoPtr));
     if (!charinfo)
         return;
 
