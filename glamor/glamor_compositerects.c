@@ -58,7 +58,7 @@ _pixman_region_init_clipped_rectangles(pixman_region16_t * region,
     unsigned int i, j;
 
     if (num_rects > ARRAY_SIZE(stack_boxes)) {
-        boxes = xallocarray(num_rects, sizeof(pixman_box16_t));
+        boxes = calloc(num_rects, sizeof(pixman_box16_t));
         if (boxes == NULL)
             return FALSE;
     }

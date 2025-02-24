@@ -123,8 +123,8 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
         }
 
         if (!priv->pbo) {
-            pixmap->devPrivate.ptr = xallocarray(pixmap->devKind,
-                                                 pixmap->drawable.height);
+            pixmap->devPrivate.ptr = calloc(pixmap->devKind,
+                                            pixmap->drawable.height);
             if (!pixmap->devPrivate.ptr)
                 return FALSE;
         }

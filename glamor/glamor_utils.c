@@ -31,7 +31,7 @@ glamor_solid_boxes(DrawablePtr drawable,
     xRectangle *rect;
     int n;
 
-    rect = xallocarray(nbox, sizeof(xRectangle));
+    rect = calloc(nbox, sizeof(xRectangle));
     if (!rect)
         return;
     for (n = 0; n < nbox; n++) {
