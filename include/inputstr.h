@@ -326,15 +326,6 @@ typedef struct _TouchPointInfo {
     size_t history_size;        /* Size of history in elements */
 } TouchPointInfoRec;
 
-typedef struct _DDXTouchPointInfo {
-    uint32_t client_id;         /* touch ID as seen in client events */
-    Bool active;                /* whether or not the touch is active */
-    uint32_t ddx_id;            /* touch ID given by the DDX */
-    Bool emulate_pointer;
-
-    ValuatorMask *valuators;    /* last axis values as posted, pre-transform */
-} DDXTouchPointInfoRec;
-
 typedef struct _TouchClassRec {
     int sourceid;
     TouchPointInfoPtr touches;

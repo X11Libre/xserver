@@ -55,6 +55,15 @@ SOFTWARE.
 #include "include/input.h"
 #include "include/inputstr.h"
 
+typedef struct _DDXTouchPointInfo {
+    uint32_t client_id;         /* touch ID as seen in client events */
+    Bool active;                /* whether or not the touch is active */
+    uint32_t ddx_id;            /* touch ID given by the DDX */
+    Bool emulate_pointer;
+
+    ValuatorMask *valuators;    /* last axis values as posted, pre-transform */
+} DDXTouchPointInfoRec;
+
 void InitCoreDevices(void);
 void InitXTestDevices(void);
 
