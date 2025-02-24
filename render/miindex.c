@@ -249,7 +249,7 @@ miInitIndexed(ScreenPtr pScreen, PictFormatPtr pFormat)
         return FALSE;
 
     pFormat->index.nvalues = num;
-    pFormat->index.pValues = xallocarray(num, sizeof(xIndexValue));
+    pFormat->index.pValues = calloc(num, sizeof(xIndexValue));
     if (!pFormat->index.pValues) {
         free(pIndexed);
         return FALSE;
