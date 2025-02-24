@@ -117,6 +117,8 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         if (count) {
             rep.count = count;
             buf = calloc(rep.count, sizeof(XEventClass));
+            if (!buf)
+                return BadAlloc;
             rep.length = bytes_to_int32(rep.count * sizeof(XEventClass));
 
             tbuf = buf;
