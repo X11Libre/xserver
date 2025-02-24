@@ -123,7 +123,7 @@ fbGlyphs(CARD8 op,
     pixman_glyph_cache_freeze (glyphCache);
 
     if (n_glyphs > N_STACK_GLYPHS) {
-	if (!(pglyphs = xallocarray(n_glyphs, sizeof(pixman_glyph_t))))
+	if (!(pglyphs = calloc(n_glyphs, sizeof(pixman_glyph_t))))
 	    goto out;
     }
 
