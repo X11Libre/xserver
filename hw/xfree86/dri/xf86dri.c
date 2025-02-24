@@ -420,7 +420,7 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 
     if (rep.numClipRects) {
         /* Clip cliprects to screen dimensions (redirected windows) */
-        pClippedRects = xallocarray(rep.numClipRects, sizeof(drm_clip_rect_t));
+        pClippedRects = calloc(rep.numClipRects, sizeof(drm_clip_rect_t));
 
         if (!pClippedRects)
             return BadAlloc;

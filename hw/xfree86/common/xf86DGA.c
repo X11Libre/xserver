@@ -1321,7 +1321,7 @@ ProcXDGAQueryModes(ClientPtr client)
         return Success;
     }
 
-    if (!(mode = xallocarray(num, sizeof(XDGAModeRec))))
+    if (!(mode = calloc(num, sizeof(XDGAModeRec))))
         return BadAlloc;
 
     for (i = 0; i < num; i++)

@@ -114,7 +114,7 @@ xf86CrtcCreate(ScrnInfoPtr scrn, const xf86CrtcFuncsRec * funcs)
 
     /* Preallocate gamma at a sensible size. */
     crtc->gamma_size = 256;
-    crtc->gamma_red = xallocarray(crtc->gamma_size, 3 * sizeof(CARD16));
+    crtc->gamma_red = calloc(crtc->gamma_size, 3 * sizeof(CARD16));
     if (!crtc->gamma_red) {
         free(crtc);
         return NULL;
@@ -126,7 +126,7 @@ xf86CrtcCreate(ScrnInfoPtr scrn, const xf86CrtcFuncsRec * funcs)
         crtcs = reallocarray(xf86_config->crtc,
                              xf86_config->num_crtc + 1, sizeof(xf86CrtcPtr));
     else
-        crtcs = xallocarray(xf86_config->num_crtc + 1, sizeof(xf86CrtcPtr));
+        crtcs = calloc(xf86_config->num_crtc + 1, sizeof(xf86CrtcPtr));
     if (!crtcs) {
         free(crtc->gamma_red);
         free(crtc);
@@ -670,8 +670,7 @@ xf86OutputCreate(ScrnInfoPtr scrn,
                                xf86_config->num_output + 1,
                                sizeof(xf86OutputPtr));
     else
-        outputs = xallocarray(xf86_config->num_output + 1,
-                              sizeof(xf86OutputPtr));
+        outputs = calloc(xf86_config->num_output + 1, sizeof(xf86OutputPtr));
     if (!outputs) {
         free(output);
         return NULL;
@@ -992,7 +991,7 @@ xf86PickCrtcs(ScrnInfoPtr scrn,
     if (modes[n] == NULL)
         return best_score;
 
-    crtcs = xallocarray(config->num_output, sizeof(xf86CrtcPtr));
+    crtcs = calloc(config->num_output, sizeof(xf86CrtcPtr));
     if (!crtcs)
         return best_score;
 
