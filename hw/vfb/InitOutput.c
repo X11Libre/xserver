@@ -486,6 +486,8 @@ vfbInstallColormap(ColormapPtr pmap)
         ppix = calloc(entries, sizeof(Pixel));
         prgb = calloc(entries, sizeof(xrgb));
         defs = calloc(entries, sizeof(xColorItem));
+        if (!ppix || !prgb || !defs)
+            goto out;
 
         for (i = 0; i < entries; i++)
             ppix[i] = i;
@@ -501,6 +503,7 @@ vfbInstallColormap(ColormapPtr pmap)
         }
         (*pmap->pScreen->StoreColors) (pmap, entries, defs);
 
+out:
         free(ppix);
         free(prgb);
         free(defs);
