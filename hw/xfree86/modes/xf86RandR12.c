@@ -1153,6 +1153,8 @@ xf86RandR12CrtcSet(ScreenPtr pScreen,
         return FALSE;
 
     save_crtcs = calloc(config->num_output, sizeof(xf86CrtcPtr));
+    if (!save_crtcs)
+        return FALSE;
     if ((randr_mode != NULL) != crtc->enabled)
         changed = TRUE;
     else if (randr_mode && !xf86RandRModeMatches(randr_mode, &crtc->mode))
@@ -1652,6 +1654,11 @@ xf86RandR12SetInfo12(ScreenPtr pScreen)
 
     clones = calloc(config->num_output, sizeof(RROutputPtr));
     crtcs = calloc(config->num_crtc, sizeof(RRCrtcPtr));
+    if (!clones || !crtcs) {
+        free(clones);
+        free(crtcs);
+        return FALSE;
+    }
     for (o = 0; o < config->num_output; o++) {
         xf86OutputPtr output = config->output[o];
 

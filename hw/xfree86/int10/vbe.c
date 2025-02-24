@@ -375,6 +375,8 @@ VBEGetVBEInfo(vbeInfoPtr pVbe)
         return NULL;
 
     block = calloc(1, sizeof(VbeInfoBlock));
+    if (!block)
+        return NULL;
     block->VESASignature[0] = ((char *) pVbe->memory)[0];
     block->VESASignature[1] = ((char *) pVbe->memory)[1];
     block->VESASignature[2] = ((char *) pVbe->memory)[2];
@@ -397,7 +399,8 @@ VBEGetVBEInfo(vbeInfoPtr pVbe)
     i = 0;
     while (modes[i] != 0xffff)
         i++;
-    block->VideoModePtr = calloc(i + 1, sizeof(CARD16));
+    if (!(block->VideoModePtr = calloc(i + 1, sizeof(CARD16))))
+        return NULL;
     memcpy(block->VideoModePtr, modes, sizeof(CARD16) * i);
     block->VideoModePtr[i] = 0xffff;
 
@@ -823,7 +826,8 @@ VBESetGetPaletteData(vbeInfoPtr pVbe, Bool set, int first, int num,
     if (set)
         return data;
 
-    data = calloc(num, sizeof(CARD32));
+    if (!(data = calloc(num, sizeof(CARD32))))
+        return NULL;
     memcpy(data, pVbe->memory, num * sizeof(CARD32));
 
     return data;
