@@ -650,7 +650,7 @@ SyncAwaitTriggerFired(SyncTrigger * pTrigger)
 
     pAwaitUnion = (SyncAwaitUnion *) pAwait->pHeader;
     numwaits = pAwaitUnion->header.num_waitconditions;
-    ppAwait = xallocarray(numwaits, sizeof(SyncAwait *));
+    ppAwait = calloc(numwaits, sizeof(SyncAwait *));
     if (!ppAwait)
         goto bail;
 
@@ -1546,7 +1546,7 @@ SyncAwaitPrologue(ClientPtr client, int items)
     /*  all the memory for the entire await list is allocated
      *  here in one chunk
      */
-    pAwaitUnion = xallocarray(items + 1, sizeof(SyncAwaitUnion));
+    pAwaitUnion = calloc(items + 1, sizeof(SyncAwaitUnion));
     if (!pAwaitUnion)
         return NULL;
 

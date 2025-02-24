@@ -101,7 +101,7 @@ ProcXCMiscGetXIDList(ClientPtr client)
     if (stuff->count > UINT32_MAX / sizeof(XID))
         return BadAlloc;
 
-    pids = xallocarray(stuff->count, sizeof(XID));
+    pids = calloc(stuff->count, sizeof(XID));
     if (!pids) {
         return BadAlloc;
     }

@@ -1202,11 +1202,11 @@ ProcVidModeGetMonitor(ClientPtr client)
                        pad_to_int32(rep.modelLength));
     rep.nhsync = nHsync;
     rep.nvsync = nVrefresh;
-    hsyncdata = xallocarray(nHsync, sizeof(CARD32));
+    hsyncdata = calloc(nHsync, sizeof(CARD32));
     if (!hsyncdata) {
         return BadAlloc;
     }
-    vsyncdata = xallocarray(nVrefresh, sizeof(CARD32));
+    vsyncdata = calloc(nVrefresh, sizeof(CARD32));
 
     if (!vsyncdata) {
         free(hsyncdata);
@@ -1524,7 +1524,7 @@ ProcVidModeGetGammaRamp(ClientPtr client)
     length = (stuff->size + 1) & ~1;
 
     if (stuff->size) {
-        if (!(ramp = xallocarray(length, 3 * sizeof(CARD16))))
+        if (!(ramp = calloc(length, 3 * sizeof(CARD16))))
             return BadAlloc;
         ramplen = length * 3 * sizeof(CARD16);
 

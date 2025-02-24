@@ -226,7 +226,7 @@ ProcXResQueryClients(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXResQueryClientsReq);
 
-    current_clients = xallocarray(currentMaxClients, sizeof(int));
+    current_clients = calloc(currentMaxClients, sizeof(int));
 
     num_clients = 0;
     for (i = 0; i < currentMaxClients; i++) {
