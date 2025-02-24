@@ -1065,8 +1065,8 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                         }
                         else if (!dtype->map_count || !dtype->map ||
                                  i >= dst->map->num_types) {
-                            tmp = xallocarray(stype->map_count,
-                                              sizeof(XkbKTMapEntryRec));
+                            tmp = calloc(stype->map_count,
+                                         sizeof(XkbKTMapEntryRec));
                             if (!tmp)
                                 return FALSE;
                             dtype->map = tmp;
@@ -1094,8 +1094,7 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                         }
                         else if (!dtype->preserve || !dtype->map_count ||
                                  i >= dst->map->num_types) {
-                            tmp = xallocarray(stype->map_count,
-                                              sizeof(XkbModsRec));
+                            tmp = calloc(stype->map_count, sizeof(XkbModsRec));
                             if (!tmp)
                                 return FALSE;
                             dtype->preserve = tmp;
@@ -1605,8 +1604,8 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                          j < sshape->num_outlines;
                          j++, soutline++, doutline++) {
                         if (soutline->num_points) {
-                            tmp = xallocarray(soutline->num_points,
-                                              sizeof(XkbPointRec));
+                            tmp = calloc(soutline->num_points,
+                                         sizeof(XkbPointRec));
                             if (!tmp)
                                 return FALSE;
                             doutline->points = tmp;
@@ -1733,7 +1732,7 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
                 for (j = 0, srow = ssection->rows, drow = dsection->rows;
                      j < ssection->num_rows; j++, srow++, drow++) {
                     if (srow->num_keys) {
-                        tmp = xallocarray(srow->num_keys, sizeof(XkbKeyRec));
+                        tmp = calloc(srow->num_keys, sizeof(XkbKeyRec));
                         if (!tmp)
                             return FALSE;
                         drow->keys = tmp;
