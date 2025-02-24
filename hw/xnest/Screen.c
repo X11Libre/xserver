@@ -163,7 +163,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
                                      PRIVATE_CURSOR, 0))
         return FALSE;
 
-    visuals = xallocarray(xnestNumVisuals, sizeof(VisualRec));
+    visuals = calloc(xnestNumVisuals, sizeof(VisualRec));
     numVisuals = 0;
 
     depths = calloc(MAXDEPTH, sizeof(DepthRec));

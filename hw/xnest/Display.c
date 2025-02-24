@@ -117,8 +117,7 @@ xnestOpenDisplay(int argc, char *argv[])
     }
 
     xnestNumDefaultColormaps = xnestNumVisuals;
-    xnestDefaultColormaps = xallocarray(xnestNumDefaultColormaps,
-                                        sizeof(Colormap));
+    xnestDefaultColormaps = calloc(xnestNumDefaultColormaps, sizeof(Colormap));
     for (i = 0; i < xnestNumDefaultColormaps; i++)
         xnestDefaultColormaps[i] = XCreateColormap(xnestDisplay,
                                                    DefaultRootWindow
