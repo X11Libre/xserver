@@ -228,7 +228,7 @@ InitPatterns(const char **patternlist)
         for (i = 0, s = patternlist; *s; i++, s++)
             if (*s == DEFAULT_LIST)
                 i += ARRAY_SIZE(stdPatterns) - 1 - 1;
-        patterns = xallocarray(i + 1, sizeof(PatternRec));
+        patterns = calloc(i + 1, sizeof(PatternRec));
         if (!patterns) {
             return NULL;
         }

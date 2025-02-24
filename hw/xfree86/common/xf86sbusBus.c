@@ -625,7 +625,7 @@ xf86SbusCmapLoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
         return;
     fbcmap.count = 0;
     fbcmap.index = indices[0];
-    fbcmap.red = data = xallocarray(numColors, 3);
+    fbcmap.red = data = calloc(numColors, 3);
     if (!data)
         return;
     fbcmap.green = data + numColors;

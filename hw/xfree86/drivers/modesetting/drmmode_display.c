@@ -3799,7 +3799,7 @@ drmmode_create_lease(RRLeasePtr lease, int *fd)
     if (!lease_private)
         return BadAlloc;
 
-    objects = xallocarray(nobjects, sizeof (uint32_t));
+    objects = calloc(nobjects, sizeof(uint32_t));
 
     if (!objects) {
         free(lease_private);

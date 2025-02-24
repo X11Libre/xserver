@@ -589,7 +589,7 @@ dispatch_damages(ScrnInfoPtr scrn, xf86CrtcPtr crtc, RegionPtr dirty,
         return 0;
 
     if (num_cliprects) {
-        drmModeClip *clip = xallocarray(num_cliprects, sizeof(drmModeClip));
+        drmModeClip *clip = calloc(num_cliprects, sizeof(drmModeClip));
         BoxPtr rect = REGION_RECTS(dirty);
         int i;
         int c = 0;

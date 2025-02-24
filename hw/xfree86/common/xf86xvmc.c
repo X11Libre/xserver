@@ -158,7 +158,7 @@ xf86XvMCScreenInit(ScreenPtr pScreen,
     if (noXvExtension)
         return FALSE;
 
-    if (!(pAdapt = xallocarray(num_adaptors, sizeof(XvMCAdaptorRec))))
+    if (!(pAdapt = calloc(num_adaptors, sizeof(XvMCAdaptorRec))))
         return FALSE;
 
     if (!dixRegisterPrivateKey(&XF86XvMCScreenKeyRec, PRIVATE_SCREEN, 0)) {

@@ -1060,7 +1060,7 @@ xf86RandR12CrtcNotify(RRCrtcPtr randr_crtc)
     DisplayModePtr mode = &crtc->mode;
     Bool ret;
 
-    randr_outputs = xallocarray(config->num_output, sizeof(RROutputPtr));
+    randr_outputs = calloc(config->num_output, sizeof(RROutputPtr));
     if (!randr_outputs)
         return FALSE;
     x = crtc->x;
@@ -1152,7 +1152,7 @@ xf86RandR12CrtcSet(ScreenPtr pScreen,
     if (!crtc->scrn->vtSema)
         return FALSE;
 
-    save_crtcs = xallocarray(config->num_output, sizeof(xf86CrtcPtr));
+    save_crtcs = calloc(config->num_output, sizeof(xf86CrtcPtr));
     if ((randr_mode != NULL) != crtc->enabled)
         changed = TRUE;
     else if (randr_mode && !xf86RandRModeMatches(randr_mode, &crtc->mode))
@@ -1428,7 +1428,7 @@ xf86RandR12CrtcInitGamma(xf86CrtcPtr crtc, float gamma_red, float gamma_green,
         (gamma_red != 1.0f || gamma_green != 1.0f || gamma_blue != 1.0f))
         return FALSE;
 
-    red = xallocarray(size, 3 * sizeof(CARD16));
+    red = calloc(size, 3 * sizeof(CARD16));
     if (!red)
         return FALSE;
 
@@ -1595,7 +1595,7 @@ xf86RROutputSetModes(RROutputPtr randr_output, DisplayModePtr modes)
         nmode++;
 
     if (nmode) {
-        rrmodes = xallocarray(nmode, sizeof(RRModePtr));
+        rrmodes = calloc(nmode, sizeof(RRModePtr));
 
         if (!rrmodes)
             return FALSE;
@@ -1650,8 +1650,8 @@ xf86RandR12SetInfo12(ScreenPtr pScreen)
     int o, c, l;
     int nclone;
 
-    clones = xallocarray(config->num_output, sizeof(RROutputPtr));
-    crtcs = xallocarray(config->num_crtc, sizeof(RRCrtcPtr));
+    clones = calloc(config->num_output, sizeof(RROutputPtr));
+    crtcs = calloc(config->num_crtc, sizeof(RRCrtcPtr));
     for (o = 0; o < config->num_output; o++) {
         xf86OutputPtr output = config->output[o];
 
