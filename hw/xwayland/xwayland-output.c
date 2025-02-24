@@ -359,7 +359,8 @@ output_get_rr_modes(struct xwl_output *xwl_output,
     RRModePtr *rr_modes;
     int i;
 
-    rr_modes = xallocarray(ARRAY_SIZE(xwl_output_fake_modes) + 1, sizeof(RRModePtr));
+    rr_modes = calloc(ARRAY_SIZE(xwl_output_fake_modes) + 1,
+                      sizeof(RRModePtr));
     if (!rr_modes)
         goto err;
 
@@ -1230,7 +1231,7 @@ xwl_randr_add_modes_fixed(struct xwl_output *xwl_output,
     RRModePtr mode;
     int i, nmodes, current;
 
-    modes = xallocarray(ARRAY_SIZE(xwl_output_fake_modes) + 1, sizeof(RRModePtr));
+    modes = calloc(ARRAY_SIZE(xwl_output_fake_modes) + 1, sizeof(RRModePtr));
     if (!modes) {
         ErrorF("Failed to allocated RandR modes\n");
         return FALSE;
