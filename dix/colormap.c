@@ -307,7 +307,7 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
         for (pent = &pmap->red[size - 1]; pent >= pmap->red; pent--)
             pent->refcnt = AllocPrivate;
         pmap->freeRed = 0;
-        ppix = xallocarray(size, sizeof(Pixel));
+        ppix = calloc(size, sizeof(Pixel));
         if (!ppix) {
             free(pmap);
             return BadAlloc;
@@ -348,7 +348,7 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
             for (pent = &pmap->green[size - 1]; pent >= pmap->green; pent--)
                 pent->refcnt = AllocPrivate;
             pmap->freeGreen = 0;
-            ppix = xallocarray(size, sizeof(Pixel));
+            ppix = calloc(size, sizeof(Pixel));
             if (!ppix) {
                 free(pmap->clientPixelsRed[client]);
                 free(pmap);
@@ -363,7 +363,7 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
             for (pent = &pmap->blue[size - 1]; pent >= pmap->blue; pent--)
                 pent->refcnt = AllocPrivate;
             pmap->freeBlue = 0;
-            ppix = xallocarray(size, sizeof(Pixel));
+            ppix = calloc(size, sizeof(Pixel));
             if (!ppix) {
                 free(pmap->clientPixelsGreen[client]);
                 free(pmap->clientPixelsRed[client]);
@@ -713,7 +713,7 @@ doUpdateColors(ColormapPtr pmap)
 
     pVisual = pmap->pVisual;
     size = pVisual->ColormapEntries;
-    defs = xallocarray(size, sizeof(xColorItem));
+    defs = calloc(size, sizeof(xColorItem));
     if (!defs)
         return;
     n = 0;
@@ -1659,9 +1659,9 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     for (p = pixels; p < pixels + c; p++)
         *p = 0;
 
-    ppixRed = xallocarray(npixR, sizeof(Pixel));
-    ppixGreen = xallocarray(npixG, sizeof(Pixel));
-    ppixBlue = xallocarray(npixB, sizeof(Pixel));
+    ppixRed = calloc(npixR, sizeof(Pixel));
+    ppixGreen = calloc(npixG, sizeof(Pixel));
+    ppixBlue = calloc(npixB, sizeof(Pixel));
     if (!ppixRed || !ppixGreen || !ppixBlue) {
         free(ppixBlue);
         free(ppixGreen);
@@ -1759,7 +1759,7 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
     npix = c << r;
     if ((r >= 32) || (npix > pmap->freeRed) || (npix < c))
         return BadAlloc;
-    if (!(ppixTemp = xallocarray(npix, sizeof(Pixel))))
+    if (!(ppixTemp = calloc(npix, sizeof(Pixel))))
         return BadAlloc;
     ok = AllocCP(pmap, pmap->red, c, r, contig, ppixTemp, pmask);
 
@@ -1971,7 +1971,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
 
     npixClientNew = c << (r + g + b);
     npixShared = (c << r) + (c << g) + (c << b);
-    psharedList = xallocarray(npixShared, sizeof(SHAREDCOLOR *));
+    psharedList = calloc(npixShared, sizeof(SHAREDCOLOR *));
     if (!psharedList)
         return FALSE;
     ppshared = psharedList;
@@ -2480,8 +2480,8 @@ IsMapInstalled(Colormap map, WindowPtr pWin)
     Colormap *pmaps;
     int imap, nummaps, found;
 
-    pmaps = xallocarray(pWin->drawable.pScreen->maxInstalledCmaps,
-                        sizeof(Colormap));
+    pmaps = calloc(pWin->drawable.pScreen->maxInstalledCmaps,
+                   sizeof(Colormap));
     if (!pmaps)
         return FALSE;
     nummaps = (*pWin->drawable.pScreen->ListInstalledColormaps)
