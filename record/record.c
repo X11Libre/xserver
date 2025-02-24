@@ -1086,8 +1086,8 @@ RecordAddClientToRCAP(RecordClientsAndProtocolPtr pRCAP, XID clientspec)
         }
         else {
             XID *pNewIDs =
-                xallocarray(pRCAP->sizeClients + CLIENT_ARRAY_GROWTH_INCREMENT,
-                            sizeof(XID));
+                calloc(pRCAP->sizeClients + CLIENT_ARRAY_GROWTH_INCREMENT,
+                       sizeof(XID));
             if (!pNewIDs)
                 return;
             memcpy(pNewIDs, pRCAP->pClientIDs, pRCAP->numClients * sizeof(XID));
@@ -1217,7 +1217,7 @@ RecordCanonicalizeClientSpecifiers(XID *pClientspecs, int *pNumClientspecs,
     for (i = 0; i < numClients; i++) {
         if (pClientspecs[i] == XRecordAllClients || pClientspecs[i] == XRecordCurrentClients) { /* expand All/Current */
             int j, nc;
-            XID *pCanon = xallocarray(currentMaxClients + 1, sizeof(XID));
+            XID *pCanon = calloc(currentMaxClients + 1, sizeof(XID));
 
             if (!pCanon)
                 return NULL;
@@ -1417,7 +1417,7 @@ static int
 RecordAllocIntervals(SetInfoPtr psi, int nIntervals)
 {
     assert(!psi->intervals);
-    psi->intervals = xallocarray(nIntervals, sizeof(RecordSetInterval));
+    psi->intervals = calloc(nIntervals, sizeof(RecordSetInterval));
     if (!psi->intervals)
         return BadAlloc;
     memset(psi->intervals, 0, nIntervals * sizeof(RecordSetInterval));
@@ -1578,7 +1578,7 @@ RecordRegisterClients(RecordContextPtr pContext, ClientPtr client,
      * range for extension replies.
      */
     maxSets = RI_PREDEFSETS + 2 * stuff->nRanges;
-    si = xallocarray(maxSets, sizeof(SetInfoRec));
+    si = calloc(maxSets, sizeof(SetInfoRec));
     if (!si) {
         err = BadAlloc;
         goto bailout;
@@ -2142,7 +2142,7 @@ ProcRecordGetContext(ClientPtr client)
 
     /* allocate and initialize space for record range info */
 
-    pRangeInfo = xallocarray(nRCAPs, sizeof(GetContextRangeInfoRec));
+    pRangeInfo = calloc(nRCAPs, sizeof(GetContextRangeInfoRec));
     if (!pRangeInfo && nRCAPs > 0)
         return BadAlloc;
     for (i = 0; i < nRCAPs; i++) {
@@ -2711,8 +2711,7 @@ RecordAClientStateChange(CallbackListPtr *pcbl, void *nulldata,
         /* RecordDisableContext modifies contents of ppAllContexts. */
         if (!(numContextsCopy = numContexts))
             break;
-        ppAllContextsCopy = xallocarray(numContextsCopy,
-                                        sizeof(RecordContextPtr));
+        ppAllContextsCopy = calloc(numContextsCopy, sizeof(RecordContextPtr));
         assert(ppAllContextsCopy);
         memcpy(ppAllContextsCopy, ppAllContexts,
                numContextsCopy * sizeof(RecordContextPtr));
