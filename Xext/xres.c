@@ -220,12 +220,13 @@ ProcXResQueryClients(ClientPtr client)
 {
     /* REQUEST(xXResQueryClientsReq); */
     xXResQueryClientsReply rep;
-    int *current_clients;
     int i, num_clients;
 
     REQUEST_SIZE_MATCH(xXResQueryClientsReq);
 
-    current_clients = calloc(currentMaxClients, sizeof(int));
+    int *current_clients = calloc(currentMaxClients, sizeof(int));
+    if (!current_clients)
+        return BadAlloc;
 
     num_clients = 0;
     for (i = 0; i < currentMaxClients; i++) {
@@ -300,7 +301,6 @@ ProcXResQueryClientResources(ClientPtr client)
     REQUEST(xXResQueryClientResourcesReq);
     xXResQueryClientResourcesReply rep;
     int i, clientID, num_types;
-    int *counts;
 
     REQUEST_SIZE_MATCH(xXResQueryClientResourcesReq);
 
@@ -311,7 +311,9 @@ ProcXResQueryClientResources(ClientPtr client)
         return BadValue;
     }
 
-    counts = calloc(lastResourceType + 1, sizeof(int));
+    int *counts = calloc(lastResourceType + 1, sizeof(int));
+    if (!counts)
+        return BadAlloc;
 
     FindAllClientResources(clients[clientID], ResFindAllRes, counts);
 
