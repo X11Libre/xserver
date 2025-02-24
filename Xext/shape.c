@@ -988,7 +988,7 @@ ProcShapeGetRectangles(ClientPtr client)
 
         nrects = RegionNumRects(region);
         box = RegionRects(region);
-        rects = xallocarray(nrects, sizeof(xRectangle));
+        rects = calloc(nrects, sizeof(xRectangle));
         if (!rects && nrects)
             return BadAlloc;
         for (i = 0; i < nrects; i++, box++) {

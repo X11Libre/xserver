@@ -390,7 +390,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             }
             else {
 #endif
-                pCI = xallocarray(nCharInfos, sizeof(xCharInfo));
+                pCI = calloc(nCharInfos, sizeof(xCharInfo));
                 if (!pCI)
                     return BadAlloc;
 #ifdef MITSHM
@@ -452,7 +452,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             if (hashModulus > nCharInfos + 1)
                 hashModulus = nCharInfos + 1;
 
-            tmp = xallocarray(4 * nCharInfos + 1, sizeof(CARD16));
+            tmp = calloc(4 * nCharInfos + 1, sizeof(CARD16));
             if (!tmp) {
                 if (!pDesc)
                     free(pCI);
