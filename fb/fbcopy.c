@@ -192,7 +192,7 @@ fbCopyNto1(DrawablePtr pSrcDrawable,
             height = pbox->y2 - pbox->y1;
 
             tmpStride = ((width + FB_STIP_MASK) >> FB_STIP_SHIFT);
-            tmp = xallocarray(tmpStride * height, sizeof(FbStip));
+            tmp = calloc(tmpStride * height, sizeof(FbStip));
             if (!tmp)
                 return;
 
