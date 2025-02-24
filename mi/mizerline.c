@@ -148,8 +148,8 @@ miZeroLine(DrawablePtr pDraw, GCPtr pGC, int mode,      /* Origin or Previous */
     width = xright - xleft + 1;
     height = ybottom - ytop + 1;
     list_len = (height >= width) ? height : width;
-    pspanInit = xallocarray(list_len, sizeof(DDXPointRec));
-    pwidthInit = xallocarray(list_len, sizeof(int));
+    pspanInit = calloc(list_len, sizeof(DDXPointRec));
+    pwidthInit = calloc(list_len, sizeof(int));
     if (!pspanInit || !pwidthInit) {
         free(pspanInit);
         free(pwidthInit);

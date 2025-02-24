@@ -1191,9 +1191,9 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
     y = ymax - ymin + 1;
     if ((count < 3) || (y <= 0))
         return;
-    ptsOut = FirstPoint = xallocarray(y, sizeof(DDXPointRec));
-    width = FirstWidth = xallocarray(y, sizeof(int));
-    Marked = xallocarray(count, sizeof(int));
+    ptsOut = FirstPoint = calloc(y, sizeof(DDXPointRec));
+    width = FirstWidth = calloc(y, sizeof(int));
+    Marked = calloc(count, sizeof(int));
 
     if (!ptsOut || !width || !Marked) {
         free(Marked);
@@ -1893,10 +1893,10 @@ miComputeArcs(xArc * parcs, int narcs, GCPtr pGC)
     isDoubleDash = (pGC->lineStyle == LineDoubleDash);
     dashOffset = pGC->dashOffset;
 
-    data = xallocarray(narcs, sizeof(struct arcData));
+    data = calloc(narcs, sizeof(struct arcData));
     if (!data)
         return NULL;
-    arcs = xallocarray(isDoubleDash ? 2 : 1, sizeof(*arcs));
+    arcs = calloc(isDoubleDash ? 2 : 1, sizeof(*arcs));
     if (!arcs) {
         free(data);
         return NULL;
@@ -3083,8 +3083,8 @@ fillSpans(DrawablePtr pDrawable, GCPtr pGC)
 
     if (nspans == 0)
         return;
-    xSpan = xSpans = xallocarray(nspans, sizeof(DDXPointRec));
-    xWidth = xWidths = xallocarray(nspans, sizeof(int));
+    xSpan = xSpans = calloc(nspans, sizeof(DDXPointRec));
+    xWidth = xWidths = calloc(nspans, sizeof(int));
     if (xSpans && xWidths) {
         i = 0;
         f = finalSpans;
@@ -3138,7 +3138,7 @@ realFindSpan(int y)
         else
             change = SPAN_REALLOC;
         newSize = finalSize + change;
-        newSpans = xallocarray(newSize, sizeof(struct finalSpan *));
+        newSpans = calloc(newSize, sizeof(struct finalSpan *));
         if (!newSpans)
             return NULL;
         newMiny = finalMiny;
