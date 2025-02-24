@@ -242,7 +242,7 @@ xwl_get_rrmodes_from_connector_id(int drm, int32_t connector_id, int *nmode, int
         ErrorF("drmModeGetConnector for connector %d failed\n", connector_id);
         return NULL;
     }
-    rrmodes = xallocarray(conn->count_modes, sizeof(RRModePtr));
+    rrmodes = calloc(conn->count_modes, sizeof(RRModePtr));
     if (!rrmodes) {
         ErrorF("Failed to allocate connector modes\n");
         drmModeFreeConnector(conn);
