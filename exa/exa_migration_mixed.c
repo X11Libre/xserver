@@ -203,8 +203,8 @@ exaPrepareAccessReg_mixed(PixmapPtr pPixmap, int index, RegionPtr pReg)
 
         /* Do we need to allocate our system buffer? */
         if (!pExaPixmap->sys_ptr) {
-            pExaPixmap->sys_ptr = xallocarray(pExaPixmap->sys_pitch,
-                                              pPixmap->drawable.height);
+            pExaPixmap->sys_ptr = calloc(pExaPixmap->sys_pitch,
+                                         pPixmap->drawable.height);
             if (!pExaPixmap->sys_ptr)
                 FatalError("EXA: malloc failed for size %d bytes\n",
                            pExaPixmap->sys_pitch * pPixmap->drawable.height);
