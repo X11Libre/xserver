@@ -119,6 +119,8 @@ SOFTWARE.
 #include "probes.h"
 #include "xdmcp.h"
 
+#define MAX_CONNECTIONS (2^16)
+
 struct ospoll   *server_poll;
 
 Bool NewOutputPending;          /* not yet attempted to write some new output */
@@ -266,7 +268,12 @@ CreateWellKnownSockets(void)
         LogSetDisplay();
     }
 
-    ListenTransFds = xallocarray(ListenTransCount, sizeof (int));
+    if (ListenTransCount >= MAX_CONNECTIONS) {
+        FatalError ("Tried to clear too many listening sockets - OOM");
+        return; // mostly to keep GCC from complaining about too large alloc
+    }
+
+    ListenTransFds = calloc(ListenTransCount, sizeof(int));
     if (ListenTransFds == NULL)
         FatalError ("Failed to create listening socket array");
 
