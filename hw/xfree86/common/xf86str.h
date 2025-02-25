@@ -538,6 +538,7 @@ typedef struct {
 /*
  * Driver entry point types
  */
+struct _CMAP_LOCO;
 
 typedef Bool xf86ProbeProc(DriverPtr, int);
 typedef Bool xf86PreInitProc(ScrnInfoPtr, int);
@@ -554,7 +555,7 @@ typedef int xf86ChangeGammaProc(ScrnInfoPtr, Gamma);
 typedef void xf86PointerMovedProc(ScrnInfoPtr, int, int);
 typedef Bool xf86PMEventProc(ScrnInfoPtr, pmEvent, Bool);
 typedef void xf86DPMSSetProc(ScrnInfoPtr, int, int);
-typedef void xf86LoadPaletteProc(ScrnInfoPtr, int, int *, LOCO *, VisualPtr);
+typedef void xf86LoadPaletteProc(ScrnInfoPtr, int, int *, struct _CMAP_LOCO *, VisualPtr);
 typedef void xf86SetOverscanProc(ScrnInfoPtr, int);
 typedef void xf86ModeSetProc(ScrnInfoPtr);
 

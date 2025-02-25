@@ -17,6 +17,7 @@
 
 #include <X11/X.h>
 
+#include "dix/colormap_priv.h"
 #include "os/log_priv.h"
 
 #include "misc.h"

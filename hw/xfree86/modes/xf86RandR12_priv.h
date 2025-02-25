@@ -7,6 +7,8 @@
 
 #include <X11/extensions/render.h>
 
+#include "dix/colormap_priv.h"
+
 #include "randrstr.h"
 #include "xf86RandR12.h"
 

@@ -34,6 +34,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include "dix/colormap_priv.h"
 #include "os/fmt.h"
 
 #include "dumb_bo.h"
