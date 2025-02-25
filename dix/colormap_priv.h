@@ -20,7 +20,15 @@
 #define CM_AllAllocated 2
 #define CM_BeingCreated 4
 
-typedef struct _CMEntry *EntryPtr;
+/* color map entry */
+typedef struct _CMEntry {
+    union {
+        LOCO local;
+        SHCO shco;
+    } co;
+    short refcnt;
+    Bool fShared;
+} Entry, *EntryPtr;
 
 /* COLORMAPs can be used for either Direct or Pseudo color.  PseudoColor
  * only needs one cell table, we arbitrarily pick red.  We keep track
