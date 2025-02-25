@@ -330,4 +330,6 @@ int InputThreadUnregisterDev(int fd);
 
 void AssignTypeAndName(DeviceIntPtr dev, Atom type, const char *name);
 
+int CountBits(const uint8_t * mask, int len);
+
 #endif /* _XSERVER_INPUT_PRIV_H */
