@@ -328,4 +328,6 @@ int InputThreadRegisterDev(int fd,
 
 int InputThreadUnregisterDev(int fd);
 
+void AssignTypeAndName(DeviceIntPtr dev, Atom type, const char *name);
+
 #endif /* _XSERVER_INPUT_PRIV_H */

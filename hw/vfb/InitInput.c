@@ -33,6 +33,7 @@ from The Open Group.
 #include <X11/Xos.h>
 #include <X11/keysym.h>
 
+#include "dix/input_priv.h"
 #include "mi/mi_priv.h"
 
 #include "scrnintstr.h"
