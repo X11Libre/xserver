@@ -67,6 +67,10 @@ SOFTWARE.
 #include "exglobals.h"
 #include "inpututils.h"
 
+#define MasksPerDetailMask 8    /* 256 keycodes and 256 possible
+                                   modifier combinations, but only
+                                   3 buttons. */
+
 #define BITMASK(i) (((Mask)1) << ((i) & 31))
 #define MASKIDX(i) ((i) >> 5)
 #define MASKWORD(buf, i) buf[MASKIDX(i)]

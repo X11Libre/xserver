@@ -157,10 +157,6 @@ typedef struct _OtherInputMasks {
  * keyboard/pointer device) going at once in the server.
  */
 
-#define MasksPerDetailMask 8    /* 256 keycodes and 256 possible
-                                   modifier combinations, but only
-                                   3 buttons. */
-
 typedef struct _DetailRec {     /* Grab details may be bit masks */
     unsigned int exact;
     Mask *pMask;
