@@ -132,13 +132,6 @@ typedef struct _xReq *xReqPtr;
 #define MILLI_PER_MIN (1000 * 60)
 #define MILLI_PER_SECOND (1000)
 
-    /* this next is used with None and ParentRelative to tell
-       PaintWin() what to use to paint the background. Also used
-       in the macro IS_VALID_PIXMAP */
-
-#define USE_BACKGROUND_PIXEL 3
-#define USE_BORDER_PIXEL 3
-
 #undef min
 #undef max
 
