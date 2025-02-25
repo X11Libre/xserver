@@ -43,6 +43,8 @@
 #include "dix/input_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "resource.h"
@@ -58,11 +60,6 @@
 #include "windowstr.h"
 
 #include "xkbsrv.h"
-
-#ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 #include "exglobals.h"
 #include "exevents.h"
