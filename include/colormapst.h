@@ -49,4 +49,11 @@ SOFTWARE.
 
 #include <X11/Xdefs.h>
 
+/* LOCO -- a local color for a PseudoColor cell. DirectColor maps always
+ * use the first value (called red) in the structure.  What channel they
+ * are really talking about depends on which map they are in. */
+typedef struct {
+    unsigned short red, green, blue;
+} LOCO;
+
 #endif                          /* COLORMAP_H */

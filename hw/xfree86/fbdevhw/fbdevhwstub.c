@@ -2,8 +2,6 @@
 #include <xorg-config.h>
 #endif
 
-#include "dix/colormap_priv.h"
-
 #include "xf86.h"
 #include "xf86cmap.h"
 #include "fbdevhw.h"
