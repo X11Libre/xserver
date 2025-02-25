@@ -24,6 +24,8 @@
 
 #include "dix/dix_priv.h"
 #include "render/picturestr_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "xfixesint.h"
 #include "scrnintstr.h"
@@ -782,8 +784,6 @@ SProcXFixesExpandRegion(ClientPtr client)
 }
 
 #ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
 
 int
 PanoramiXFixesSetGCClipRegion(ClientPtr client)
