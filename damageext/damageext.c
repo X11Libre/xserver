@@ -25,6 +25,8 @@
 
 #include "dix/dix_priv.h"
 #include "os/client_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "damageextint.h"
 #include "damagestr.h"
@@ -33,8 +35,6 @@
 #include "dixstruct_priv.h"
 
 #ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
 
 typedef struct {
     DamageExtPtr ext;
