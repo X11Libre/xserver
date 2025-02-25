@@ -61,6 +61,7 @@ SOFTWARE.
 #include <X11/extensions/geproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/input_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
 #include "miext/extinit_priv.h"

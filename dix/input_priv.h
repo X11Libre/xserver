@@ -384,4 +384,6 @@ static inline int CountBits(const uint8_t * mask, int len)
     return ret;
 }
 
+void AssignTypeAndName(DeviceIntPtr dev, Atom type, const char *name);
+
 #endif /* _XSERVER_INPUT_PRIV_H */
