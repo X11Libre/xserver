@@ -39,6 +39,7 @@ from The Open Group.
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
+#include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
