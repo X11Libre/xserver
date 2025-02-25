@@ -62,12 +62,4 @@ typedef struct {
     unsigned short red, green, blue;
 } LOCO;
 
-/* SHCO -- a shared color for a PseudoColor cell. Used with AllocColorPlanes.
- * DirectColor maps always use the first value (called red) in the structure.
- * What channel they are really talking about depends on which map they
- * are in. */
-typedef struct {
-    SHAREDCOLOR *red, *green, *blue;
-} SHCO;
-
 #endif                          /* COLORMAP_H */
