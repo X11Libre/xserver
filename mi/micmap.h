@@ -13,10 +13,6 @@ extern _X_EXPORT DevPrivateKeyRec micmapScrPrivateKeyRec;
 
 #define micmapScrPrivateKey (&micmapScrPrivateKeyRec)
 
-typedef Bool (*miInitVisualsProcPtr) (VisualPtr *, DepthPtr *, int *, int *,
-                                      int *, VisualID *, unsigned long, int,
-                                      int);
-
 extern _X_EXPORT int miListInstalledColormaps(ScreenPtr pScreen,
                                               Colormap * pmaps);
 extern _X_EXPORT void miInstallColormap(ColormapPtr pmap);
