@@ -9,9 +9,6 @@
 #include "privates.h"
 #include "screenint.h"
 
-#define GetInstalledmiColormap(s) \
-    ((ColormapPtr) dixLookupPrivate(&(s)->devPrivates, micmapScrPrivateKey))
-
 extern _X_EXPORT DevPrivateKeyRec micmapScrPrivateKeyRec;
 
 #define micmapScrPrivateKey (&micmapScrPrivateKeyRec)
