@@ -82,6 +82,8 @@ SOFTWARE.
 #include <X11/extensions/Xvproto.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 #include "Xext/xvdix_priv.h"
 
 #include "misc.h"
@@ -96,11 +98,6 @@ SOFTWARE.
 #include "resource.h"
 #include "opaque.h"
 #include "input.h"
-
-#ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 #include "xvdisp.h"
 
 #define SCREEN_PROLOGUE(pScreen, field) ((pScreen)->field = ((XvScreenPtr) \

@@ -39,6 +39,8 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/window_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -52,10 +54,6 @@ in this Software without prior written authorization from the X Consortium.
 #include "cursorstr.h"
 #include "xace.h"
 #include "inputstr.h"
-#ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 #ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
 #include "dpmsproc.h"

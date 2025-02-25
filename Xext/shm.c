@@ -48,6 +48,8 @@ in this Software without prior written authorization from The Open Group.
 #include "os/busfault.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -91,10 +93,6 @@ in this Software without prior written authorization from The Open Group.
 #define SHMPERM_MODE(p)		p->mode
 #endif
 
-#ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 typedef struct _ShmScrPrivateRec {
     ShmFuncsPtr shmFuncs;

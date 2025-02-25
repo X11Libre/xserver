@@ -33,6 +33,8 @@ in this Software without prior written authorization from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -66,11 +68,6 @@ static void SShapeNotifyEvent(xShapeNotifyEvent * /* from */ ,
 /* SendShapeNotify, CreateBoundingShape and CreateClipShape are used
  * externally by the Xfixes extension and are now defined in window.h
  */
-
-#ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 static int ShapeEventBase = 0;
 static RESTYPE ClientType, ShapeEventType;      /* resource types for event masks */

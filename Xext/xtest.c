@@ -42,6 +42,8 @@
 #include "mi/mipointer_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -79,11 +81,6 @@ static InternalEvent *xtest_evlist;
  * Neither of these devices can be deleted.
  */
 DeviceIntPtr xtestpointer, xtestkeyboard;
-
-#ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 static int XTestSwapFakeInput(ClientPtr /* client */ ,
                               xReq *    /* req */

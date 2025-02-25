@@ -33,6 +33,8 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "os/osdep.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "windowstr.h"
 #include "dixfontstr.h"
@@ -43,8 +45,6 @@ Equipment Corporation.
 #include "migc.h"
 #include "misc.h"
 #include "dixstruct.h"
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
 #include "resource.h"
 #include "panoramiXh.h"
 
