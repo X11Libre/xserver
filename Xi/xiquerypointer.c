@@ -41,6 +41,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "os/fmt.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -48,10 +49,6 @@
 #include "exglobals.h"
 #include "scrnintstr.h"
 #include "xkbsrv.h"
-
-#ifdef XINERAMA
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 #include "inpututils.h"
 #include "xiquerypointer.h"
