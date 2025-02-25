@@ -42,6 +42,8 @@
 #include "globals.h"
 #include "micmap.h"
 
+#define MIN_TRUE_DEPTH  6
+
 #define ALL_VISUALS     (StaticGrayMask|GrayScaleMask|StaticColorMask|\
                          PseudoColorMask|TrueColorMask|DirectColorMask)
 #define LARGE_VISUALS   (TrueColorMask|DirectColorMask)
