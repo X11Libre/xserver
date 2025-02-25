@@ -35,6 +35,8 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "os/osdep.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -51,11 +53,6 @@
 #include "cursorstr.h"
 #include "xace.h"
 #include "protocol-versions.h"
-
-#ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 Bool noRenderExtension = FALSE;
 
