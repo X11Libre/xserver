@@ -70,14 +70,4 @@ typedef struct {
     SHAREDCOLOR *red, *green, *blue;
 } SHCO;
 
-/* color map entry */
-typedef struct _CMEntry {
-    union {
-        LOCO local;
-        SHCO shco;
-    } co;
-    short refcnt;
-    Bool fShared;
-} Entry;
-
 #endif                          /* COLORMAP_H */
