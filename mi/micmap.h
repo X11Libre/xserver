@@ -38,7 +38,6 @@ extern _X_EXPORT Bool miInitVisuals(VisualPtr *, DepthPtr *, int *, int *,
                                     int *, VisualID *, unsigned long, int, int);
 
 #define MAX_PSEUDO_DEPTH	10
-#define MIN_TRUE_DEPTH		6
 
 #define StaticGrayMask	(1 << StaticGray)
 #define GrayScaleMask	(1 << GrayScale)
