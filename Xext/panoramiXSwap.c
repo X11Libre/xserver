@@ -28,6 +28,11 @@ Equipment Corporation.
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/extensions/panoramiXproto.h>
+
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
+
 #include "misc.h"
 #include "cursor.h"
 #include "cursorstr.h"
@@ -39,9 +44,6 @@ Equipment Corporation.
 #include "window.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "panoramiX.h"
-#include <X11/extensions/panoramiXproto.h>
-#include "panoramiXsrv.h"
 #include "globals.h"
 #include "panoramiXh.h"
 

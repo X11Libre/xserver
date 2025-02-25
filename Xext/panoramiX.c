@@ -32,6 +32,8 @@ Equipment Corporation.
 #include <X11/extensions/panoramiXproto.h>
 
 #include "dix/dix_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "cursor.h"
@@ -44,8 +46,6 @@ Equipment Corporation.
 #include "window.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
 #include "globals.h"
 #include "servermd.h"
 #include "resource.h"

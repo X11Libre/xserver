@@ -32,6 +32,8 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "Xext/xvdix_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "scrnintstr.h"
@@ -49,9 +51,6 @@ SOFTWARE.
 #include "xvdisp.h"
 
 #ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-
 unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
