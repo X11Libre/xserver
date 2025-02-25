@@ -80,6 +80,8 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "mi/mi_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "regionstr.h"
@@ -90,11 +92,6 @@ Equipment Corporation.
 #include "input.h"
 #include "dixstruct.h"
 #include "globals.h"
-
-#ifdef XINERAMA
-#include "panoramiX.h"
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 /*
     machine-independent graphics exposure code.  any device that uses
