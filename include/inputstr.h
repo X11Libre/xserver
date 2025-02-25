@@ -63,7 +63,6 @@ extern _X_EXPORT void AssignTypeAndName(DeviceIntPtr dev,
 #define BitIsOn(ptr, bit) (!!(((const BYTE *) (ptr))[(bit)>>3] & (1 << ((bit) & 7))))
 #define SetBit(ptr, bit)  (((BYTE *) (ptr))[(bit)>>3] |= (1 << ((bit) & 7)))
 #define ClearBit(ptr, bit) (((BYTE *)(ptr))[(bit)>>3] &= ~(1 << ((bit) & 7)))
-extern _X_EXPORT int CountBits(const uint8_t * mask, int len);
 
 #define EMASKSIZE	(MAXDEVICES + 2)
 
