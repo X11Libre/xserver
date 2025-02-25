@@ -22,8 +22,9 @@
 #include "mi/mi.h"
 #include "mi/micmap.h"
 
-#define SetInstalledmiColormap(s,c) \
-    (dixSetPrivate(&(s)->devPrivates, micmapScrPrivateKey, c))
+static inline void SetInstalledmiColormap(ScreenPtr s, ColormapPtr c) {
+    dixSetPrivate(&(s)->devPrivates, micmapScrPrivateKey, c);
+}
 
 static inline ColormapPtr GetInstalledmiColormap(ScreenPtr s) {
     return (ColormapPtr)dixLookupPrivate(&(s)->devPrivates, &micmapScrPrivateKeyRec);
