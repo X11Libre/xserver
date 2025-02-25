@@ -292,8 +292,6 @@ xf86-driver-build-test:
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ark
               SHA: master
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-armsoc
-              SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ast
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati

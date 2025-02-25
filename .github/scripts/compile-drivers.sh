@@ -20,7 +20,6 @@ build_drv_ac xf86-input-mouse       $XORG_DRV_GIT/xf86-input-mouse       master
 build_drv_ac xf86-input-synaptics   $XORG_DRV_GIT/xf86-input-synaptics   xf86-input-synaptics-1.10.0
 
 build_drv_ac xf86-video-amdgpu      $XORG_DRV_GIT/xf86-video-amdgpu      xf86-video-amdgpu-23.0.0
-build_drv_ac xf86-video-armsoc      $XORG_DRV_GIT/xf86-video-armsoc      1.4.1
 build_drv_ac xf86-video-ati         $XORG_DRV_GIT/xf86-video-ati         xf86-video-ati-22.0.0
 build_drv_ac xf86-video-intel       $XMTX_DRV_GIT/xf86-video-intel.git   incubate # upstream broken against current Xserver
 build_drv_ac xf86-video-nouveau     $XORG_DRV_GIT/xf86-video-nouveau     xf86-video-nouveau-1.0.18
