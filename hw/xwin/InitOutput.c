@@ -91,9 +91,6 @@ void
 void
  winLogVersionInfo(void);
 
-Bool
- winValidateArgs(void);
-
 #ifdef RELOCATE_PROJECTROOT
 const char *winGetBaseDir(void);
 #endif
