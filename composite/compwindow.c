@@ -46,13 +46,10 @@
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
 #include "os/osdep.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "compint.h"
 #include "compositeext_priv.h"
-
-#ifdef XINERAMA
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 #ifdef COMPOSITE_DEBUG
 static int

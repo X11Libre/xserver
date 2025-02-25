@@ -42,15 +42,14 @@
  */
 
 #include <dix-config.h>
+#include <X11/Xmd.h>
+
+#include "Xext/panoramiXsrv.h"
 
 #include "dix/window_priv.h"
 
 #include "compint.h"
 #include "xace.h"
-
-#ifdef XINERAMA
-#include "panoramiXsrv.h"
-#endif /* XINERAMA */
 
 /*
  * Delete the given overlay client list element from its screen list.
