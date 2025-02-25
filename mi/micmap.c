@@ -44,6 +44,9 @@
 
 #define MIN_TRUE_DEPTH  6
 
+#define StaticGrayMask  (1 << StaticGray)
+#define GrayScaleMask   (1 << GrayScale)
+
 #define ALL_VISUALS     (StaticGrayMask|GrayScaleMask|StaticColorMask|\
                          PseudoColorMask|TrueColorMask|DirectColorMask)
 #define LARGE_VISUALS   (TrueColorMask|DirectColorMask)

@@ -39,8 +39,6 @@ extern _X_EXPORT Bool miInitVisuals(VisualPtr *, DepthPtr *, int *, int *,
 
 #define MAX_PSEUDO_DEPTH	10
 
-#define StaticGrayMask	(1 << StaticGray)
-#define GrayScaleMask	(1 << GrayScale)
 #define StaticColorMask	(1 << StaticColor)
 #define PseudoColorMask	(1 << PseudoColor)
 #define TrueColorMask	(1 << TrueColor)
