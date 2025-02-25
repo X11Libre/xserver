@@ -98,6 +98,7 @@ Equipment Corporation.
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "scrnintstr.h"
 #include "misc.h"
@@ -114,11 +115,7 @@ Equipment Corporation.
 #include "extnsionst.h"
 #include "privates.h"
 #include "exevents.h"
-#ifdef XINERAMA
-#include "panoramiXsrv.h"
-#else
 #include "dixevents.h"          /* InitEvents() */
-#endif /* XINERAMA */
 
 #ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>

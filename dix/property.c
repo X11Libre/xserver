@@ -51,6 +51,8 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
+#include "Xext/panoramiX.h"
+#include "Xext/panoramiXsrv.h"
 
 #include "windowstr.h"
 #include "propertyst.h"
