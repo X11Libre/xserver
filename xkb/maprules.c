@@ -352,10 +352,10 @@ SetUpRemap(InputLine * line, RemapSpec * remap)
 static Bool
 MatchOneOf(const char *wanted, const char *vals_defined)
 {
-    const char *str, *next;
     int want_len = strlen(wanted);
 
-    for (str = vals_defined, next = NULL; str != NULL; str = next) {
+    const char *str, *next = NULL;
+    for (str = vals_defined; str != NULL; str = next) {
         int len;
 
         next = strchr(str, ',');
@@ -378,11 +378,6 @@ static Bool
 CheckLine(InputLine * line,
           RemapSpec * remap, XkbRF_RulePtr rule, XkbRF_GroupPtr group)
 {
-    char *str, *tok;
-    register int nread;
-    _Xstrtokparams strtok_buf;
-    Bool append = FALSE;
-
     if (line && line->line && line->line[0] == '!') {
         if (line->line[1] == '$' ||
             (line->line[1] == ' ' && line->line[2] == '$')) {
@@ -425,7 +420,13 @@ CheckLine(InputLine * line,
 
     FileSpec tmp = { 0 };
 
-    str = line->line;
+    char *str = line->line;
+
+    int nread;
+    _Xstrtokparams strtok_buf;
+    char *tok;
+    Bool append = FALSE;
+
     for (nread = 0; (tok = _XStrtok(str, " ", strtok_buf)) != NULL; nread++) {
         str = NULL;
         if (strcmp(tok, "=") == 0) {
@@ -481,11 +482,9 @@ CheckLine(InputLine * line,
 static char *
 _Concat(char *str1, const char *str2)
 {
-    int len;
-
     if ((!str1) || (!str2))
         return str1;
-    len = strlen(str1) + strlen(str2) + 1;
+    int len = strlen(str1) + strlen(str2) + 1;
     str1 = realloc(str1, len * sizeof(char));
     if (str1)
         strcat(str1, str2);
@@ -506,10 +505,10 @@ squeeze_spaces(char *p1)
 static Bool
 MakeMultiDefs(XkbRF_MultiDefsPtr mdefs, XkbRF_VarDefsPtr defs)
 {
-    char *options;
     memset((char *) mdefs, 0, sizeof(XkbRF_MultiDefsRec));
     mdefs->model = defs->model;
-    options = Xstrdup(defs->options);
+
+    char *options = Xstrdup(defs->options);
     if (options)
         squeeze_spaces(options);
     mdefs->options = options;
@@ -519,15 +518,12 @@ MakeMultiDefs(XkbRF_MultiDefsPtr mdefs, XkbRF_VarDefsPtr defs)
             mdefs->layout[0] = defs->layout;
         }
         else {
-            char *p;
-            char *layout;
-
-            layout = Xstrdup(defs->layout);
+            char *layout = Xstrdup(defs->layout);
             if (layout == NULL)
                 return FALSE;
             squeeze_spaces(layout);
             mdefs->layout[1] = layout;
-            p = layout;
+            char *p = layout;
             for (int i = 2; i <= XkbNumKbdGroups; i++) {
                 if ((p = strchr(p, ','))) {
                     *p++ = '\0';
@@ -547,15 +543,12 @@ MakeMultiDefs(XkbRF_MultiDefsPtr mdefs, XkbRF_VarDefsPtr defs)
             mdefs->variant[0] = defs->variant;
         }
         else {
-            char *p;
-            char *variant;
-
-            variant = Xstrdup(defs->variant);
+            char *variant = Xstrdup(defs->variant);
             if (variant == NULL)
                 return FALSE;
             squeeze_spaces(variant);
             mdefs->variant[1] = variant;
-            p = variant;
+            char *p = variant;
             for (int i = 2; i <= XkbNumKbdGroups; i++) {
                 if ((p = strchr(p, ','))) {
                     *p++ = '\0';
