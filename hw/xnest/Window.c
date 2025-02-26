@@ -23,7 +23,6 @@ is" without express or implied warranty.
 #include "window.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "colormapst.h"
 #include "scrnintstr.h"
 #include "region.h"
 
