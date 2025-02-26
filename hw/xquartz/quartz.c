@@ -52,7 +52,6 @@
 // X headers
 #include "scrnintstr.h"
 #include "windowstr.h"
-#include "colormapst.h"
 #include "globals.h"
 #include "mi.h"
 
