@@ -30,7 +30,6 @@
 #define _XF86CMAP_H
 
 #include "xf86str.h"
-#include "colormapst.h"
 
 #define CMAP_PALETTED_TRUECOLOR		0x0000001
 #define CMAP_RELOAD_ON_MODE_SWITCH	0x0000002

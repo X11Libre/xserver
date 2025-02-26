@@ -3,7 +3,6 @@
 #define _FBDEVHW_H_
 
 #include "xf86str.h"
-#include "colormapst.h"
 
 #define FBDEVHW_PACKED_PIXELS		0       /* Packed Pixels        */
 #define FBDEVHW_INTERLEAVED_PLANES	2       /* Interleaved planes   */
