@@ -55,8 +55,6 @@
 #define KD_DPMS_POWERDOWN   3
 #define KD_DPMS_MAX	    KD_DPMS_POWERDOWN
 
-#define Status int
-
 typedef struct _KdCardInfo {
     struct _KdCardFuncs *cfuncs;
     void *closure;
@@ -182,8 +180,8 @@ typedef struct _KdPointerInfo KdPointerInfo;
 
 typedef struct _KdPointerDriver {
     const char *name;
-     Status(*Init) (KdPointerInfo *);
-     Status(*Enable) (KdPointerInfo *);
+    int (*Init) (KdPointerInfo *);
+    int (*Enable) (KdPointerInfo *);
     void (*Disable) (KdPointerInfo *);
     void (*Fini) (KdPointerInfo *);
     struct _KdPointerDriver *next;

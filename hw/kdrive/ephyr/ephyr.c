@@ -1393,7 +1393,7 @@ ephyrPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs)
 
 /* Mouse calls */
 
-static Status
+static int
 MouseInit(KdPointerInfo * pi)
 {
     pi->driverPrivate = (EphyrPointerPrivate *)
@@ -1418,7 +1418,7 @@ MouseInit(KdPointerInfo * pi)
     return Success;
 }
 
-static Status
+static int
 MouseEnable(KdPointerInfo * pi)
 {
     ((EphyrPointerPrivate *) pi->driverPrivate)->enabled = TRUE;
@@ -1452,7 +1452,7 @@ KdPointerDriver EphyrMouseDriver = {
 
 /* Keyboard */
 
-static Status
+static int
 EphyrKeyboardInit(KdKeyboardInfo * ki)
 {
     KeySymsRec keySyms;
@@ -1483,7 +1483,7 @@ EphyrKeyboardInit(KdKeyboardInfo * ki)
     return Success;
 }
 
-static Status
+static int
 EphyrKeyboardEnable(KdKeyboardInfo * ki)
 {
     ((EphyrKbdPrivate *) ki->driverPrivate)->enabled = TRUE;
