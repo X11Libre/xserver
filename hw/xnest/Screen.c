@@ -23,7 +23,6 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 #include "dix.h"
 #include "micmap.h"
-#include "colormapst.h"
 #include "resource.h"
 
 #include "Xnest.h"
