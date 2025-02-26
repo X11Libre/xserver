@@ -42,7 +42,6 @@
 #include "dixstruct.h"
 #include "globals.h"
 #include "extnsionst.h"
-#include "colormapst.h"
 #include "cursorstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
