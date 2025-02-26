@@ -1,8 +1,13 @@
-
-#include "colormapst.h"
-
 #ifndef _MICMAP_H_
 #define _MICMAP_H_
+
+#include <X11/X.h>
+#include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
+
+#include "colormap.h"
+#include "privates.h"
+#include "screenint.h"
 
 #define GetInstalledmiColormap(s) \
     ((ColormapPtr) dixLookupPrivate(&(s)->devPrivates, micmapScrPrivateKey))
