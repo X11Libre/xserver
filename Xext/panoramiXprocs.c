@@ -37,7 +37,6 @@ Equipment Corporation.
 #include "windowstr.h"
 #include "dixfontstr.h"
 #include "gcstruct.h"
-#include "colormapst.h"
 #include "scrnintstr.h"
 #include "opaque.h"
 #include "inputstr.h"

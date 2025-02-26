@@ -43,7 +43,6 @@ in this Software without prior written authorization from The Open Group.
 #include "inputstr.h"
 #include "windowstr.h"
 #include "propertyst.h"
-#include "colormapst.h"
 #include "privates.h"
 #include "xacestr.h"
 #include "securitysrv.h"
