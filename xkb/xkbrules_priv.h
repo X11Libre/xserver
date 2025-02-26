@@ -11,6 +11,13 @@
 
 #include "include/xkbrules.h"
 
+typedef struct _XkbRF_VarDefs {
+    const char *model;
+    const char *layout;
+    const char *variant;
+    const char *options;
+} XkbRF_VarDefsRec, *XkbRF_VarDefsPtr;
+
 typedef struct _XkbRF_Rule {
     int number;
     int layout_num;

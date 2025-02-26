@@ -37,11 +37,4 @@ typedef struct _XkbRMLVOSet {
     char *options;
 } XkbRMLVOSet;
 
-typedef struct _XkbRF_VarDefs {
-    const char *model;
-    const char *layout;
-    const char *variant;
-    const char *options;
-} XkbRF_VarDefsRec, *XkbRF_VarDefsPtr;
-
 #endif                          /* _XKBRULES_H_ */

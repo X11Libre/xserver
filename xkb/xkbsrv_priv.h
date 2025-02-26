@@ -9,6 +9,8 @@
 #include <X11/Xdefs.h>
 #include <X11/Xmd.h>
 
+#include "xkb/xkbrules_priv.h"
+
 #include "dix.h"
 #include "input.h"
 #include "misc.h"
