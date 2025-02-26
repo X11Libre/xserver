@@ -1,3 +1,5 @@
+// exports scan complete
+
 /************************************************************
 Copyright (c) 1993 by Silicon Graphics Computer Systems, Inc.
 
