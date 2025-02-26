@@ -36,7 +36,6 @@
 #include <string.h>
 #include <windowstr.h>
 #include <os.h>
-#include <colormapst.h>
 
 #include "extinit.h"
 #include "privates.h"
