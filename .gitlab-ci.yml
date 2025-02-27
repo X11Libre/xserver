@@ -152,7 +152,7 @@ freebsd-image:
             - $MESON_BUILDDIR/meson-logs/
             - $MESON_BUILDDIR/test/piglit-results/
     variables:
-        MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxv=true -Dxvmc=true
+        MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxv=true -Dxvmc=true -Dxf86bigfont=true
         CCACHE_COMPILERCHECK: content
         CCACHE_DIR: /cache/xserver/cache
         LC_ALL: C.UTF-8
@@ -199,7 +199,7 @@ freebsd:
     extends:
         - .xorg-image@freebsd
     variables:
-        MESON_ARGS: -Dglx=false -Dglamor=false -Dudev=false -Dudev_kms=false -Dxvmc=true -Dxv=true
+        MESON_ARGS: -Dglx=false -Dglamor=false -Dudev=false -Dudev_kms=false -Dxvmc=true -Dxv=true -Dxf86bigfont=true
     script:
       # running of of disk space without this
       # needed until https://gitlab.freedesktop.org/freedesktop/ci-templates/-/issues/67 is fixed
