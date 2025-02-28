@@ -150,8 +150,8 @@ XkbFreeGeomProperties(XkbGeometryPtr geom, int first, int count, Bool freeAll)
 
 /***====================================================================***/
 
-void
-XkbFreeGeomKeyAliases(XkbGeometryPtr geom, int first, int count, Bool freeAll)
+static void
+SrvXkbFreeGeomKeyAliases(XkbGeometryPtr geom, int first, int count, Bool freeAll)
 {
     _XkbFreeGeomLeafElems(freeAll, first, count,
                           &geom->num_key_aliases, &geom->sz_key_aliases,
@@ -357,7 +357,7 @@ XkbFreeGeometry(XkbGeometryPtr geom, unsigned which, Bool freeMap)
         geom->num_doodads = geom->sz_doodads = 0;
     }
     if ((which & XkbGeomKeyAliasesMask) && (geom->key_aliases != NULL))
-        XkbFreeGeomKeyAliases(geom, 0, geom->num_key_aliases, TRUE);
+        SrvXkbFreeGeomKeyAliases(geom, 0, geom->num_key_aliases, TRUE);
     if (freeMap) {
         free(geom->label_font);
         geom->label_font = NULL;
