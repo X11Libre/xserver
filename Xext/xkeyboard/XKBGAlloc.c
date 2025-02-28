@@ -262,8 +262,8 @@ _XkbClearRow(char *row_in)
     return;
 }
 
-void
-XkbFreeGeomRows(XkbSectionPtr section, int first, int count, Bool freeAll)
+static void
+SrvXkbFreeGeomRows(XkbSectionPtr section, int first, int count, Bool freeAll)
 {
     _XkbFreeGeomNonLeafElems(freeAll, first, count,
                              &section->num_rows, &section->sz_rows,
@@ -279,7 +279,7 @@ _XkbClearSection(char *section_in)
     XkbSectionPtr section = (XkbSectionPtr) section_in;
 
     if (section->rows != NULL)
-        XkbFreeGeomRows(section, 0, section->num_rows, TRUE);
+        SrvXkbFreeGeomRows(section, 0, section->num_rows, TRUE);
     if (section->doodads != NULL) {
         SrvXkbFreeGeomDoodads(section->doodads, section->num_doodads, TRUE);
         section->doodads = NULL;

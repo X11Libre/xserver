@@ -318,13 +318,6 @@ XkbDoodadPtr SrvXkbAddGeomDoodad(XkbGeometryPtr geom,
                                  Atom name);
 
 extern void
- XkbFreeGeomRows(XkbSectionPtr /* section */ ,
-                 int /* first */ ,
-                 int /* count */ ,
-                 Bool           /* freeAll */
-    );
-
-extern void
  XkbFreeGeomSections(XkbGeometryPtr /* geom */ ,
                      int /* first */ ,
                      int /* count */ ,
