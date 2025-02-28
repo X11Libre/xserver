@@ -595,7 +595,7 @@ SrvXkbAddGeomKeyAlias(XkbGeometryPtr geom, char *aliasStr, char *realStr)
 }
 
 XkbColorPtr
-XkbAddGeomColor(XkbGeometryPtr geom, char *spec, unsigned int pixel)
+SrvXkbAddGeomColor(XkbGeometryPtr geom, char *spec, unsigned int pixel)
 {
     register int i;
     register XkbColorPtr color;

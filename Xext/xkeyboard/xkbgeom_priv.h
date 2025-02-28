@@ -282,10 +282,9 @@ XkbKeyAliasPtr SrvXkbAddGeomKeyAlias(XkbGeometryPtr geom,
                                      char *alias,
                                      char *real);
 
-extern XkbColorPtr XkbAddGeomColor(XkbGeometryPtr /* geom */ ,
-                                   char * /* spec */ ,
-                                   unsigned int /* pixel */
-    );
+XkbColorPtr SrvXkbAddGeomColor(XkbGeometryPtr geom,
+                               char *spec,
+                               unsigned int pixel);
 
 extern XkbOutlinePtr XkbAddGeomOutline(XkbShapePtr /* shape */ ,
                                        int      /* sz_points */

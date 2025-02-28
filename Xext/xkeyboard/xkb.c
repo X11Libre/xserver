@@ -5394,7 +5394,7 @@ _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
         status = _GetCountedString(&wire, client, &name);
         if (status != Success)
             return status;
-        if (!XkbAddGeomColor(geom, name, geom->num_colors)) {
+        if (!SrvXkbAddGeomColor(geom, name, geom->num_colors)) {
             free(name);
             return BadAlloc;
         }

@@ -1086,7 +1086,7 @@ ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
     if (wireGeom.num_colors > 0) {
         for (i = 0; i < wireGeom.num_colors; i++) {
             nRead += XkmGetCountedString(file, buf, 100);
-            if (XkbAddGeomColor(geom, buf, i) == NULL) {
+            if (SrvXkbAddGeomColor(geom, buf, i) == NULL) {
                 _XkbLibError(_XkbErrBadAlloc, "ReadXkmGeometry", 0);
                 return nRead;
             }
