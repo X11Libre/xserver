@@ -325,10 +325,9 @@ extern XkbOverlayKeyPtr XkbAddGeomOverlayKey(XkbOverlayPtr /* overlay */ ,
                                              char *     /* under */
     );
 
-extern XkbDoodadPtr XkbAddGeomDoodad(XkbGeometryPtr /* geom */ ,
-                                     XkbSectionPtr /* section */ ,
-                                     Atom       /* name */
-    );
+XkbDoodadPtr SrvXkbAddGeomDoodad(XkbGeometryPtr geom,
+                                 XkbSectionPtr section,
+                                 Atom name);
 
 extern void
  XkbFreeGeomKeyAliases(XkbGeometryPtr /* geom */ ,

@@ -877,7 +877,7 @@ ReadXkmGeomDoodad(FILE * file, XkbGeometryPtr geom, XkbSectionPtr section)
     nRead += XkmGetCountedString(file, buf, 100);
     tmp = fread(&doodadWire, SIZEOF(xkmDoodadDesc), 1, file);
     nRead += SIZEOF(xkmDoodadDesc) * tmp;
-    doodad = XkbAddGeomDoodad(geom, section, XkbInternAtom(buf, FALSE));
+    doodad = SrvXkbAddGeomDoodad(geom, section, XkbInternAtom(buf, FALSE));
     if (!doodad)
         return nRead;
     doodad->any.type = doodadWire.any.type;

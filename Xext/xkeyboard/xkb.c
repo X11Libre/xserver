@@ -4987,7 +4987,7 @@ _CheckSetDoodad(char **wire_inout, xkbSetGeometryReq *req,
         swaps(&any.angle);
     }
     CHK_ATOM_ONLY(dWire->any.name);
-    doodad = XkbAddGeomDoodad(geom, section, any.name);
+    doodad = SrvXkbAddGeomDoodad(geom, section, any.name);
     if (!doodad)
         return BadAlloc;
     doodad->any.type = dWire->any.type;
