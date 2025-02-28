@@ -194,7 +194,7 @@ RunXkbComp(xkbcomp_buffer_callback callback, void *userdata)
 #ifdef WIN32
             unlink(tmpname);
 #endif
-            return XNFstrdup(keymap);
+            return strdup(keymap);
         }
         else {
             LogMessage(X_ERROR, "Error compiling keymap (%s) executing '%s'\n",
