@@ -975,9 +975,9 @@ ReadXkmGeomSection(FILE * file, XkbGeometryPtr geom)
     nameAtom = XkbInternAtom(buf, FALSE);
     tmp = fread(&sectionWire, SIZEOF(xkmSectionDesc), 1, file);
     nRead += SIZEOF(xkmSectionDesc) * tmp;
-    section = XkbAddGeomSection(geom, nameAtom, sectionWire.num_rows,
-                                sectionWire.num_doodads,
-                                sectionWire.num_overlays);
+    section = SrvXkbAddGeomSection(geom, nameAtom, sectionWire.num_rows,
+                                   sectionWire.num_doodads,
+                                   sectionWire.num_overlays);
     if (!section) {
         _XkbLibError(_XkbErrBadAlloc, "ReadXkmGeomSection", 0);
         return nRead;

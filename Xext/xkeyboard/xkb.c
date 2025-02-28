@@ -5168,8 +5168,8 @@ _CheckSetSections(XkbGeometryPtr geom,
             swaps(&sWire->angle);
         }
         CHK_ATOM_ONLY(sWire->name);
-        section = XkbAddGeomSection(geom, sWire->name, sWire->nRows,
-                                    sWire->nDoodads, sWire->nOverlays);
+        section = SrvXkbAddGeomSection(geom, sWire->name, sWire->nRows,
+                                       sWire->nDoodads, sWire->nOverlays);
         if (!section)
             return BadAlloc;
         section->priority = sWire->priority;

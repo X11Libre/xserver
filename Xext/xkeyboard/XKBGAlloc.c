@@ -700,8 +700,8 @@ SrvXkbAddGeomRow(XkbSectionPtr section, int sz_keys)
 }
 
 XkbSectionPtr
-XkbAddGeomSection(XkbGeometryPtr geom,
-                  Atom name, int sz_rows, int sz_doodads, int sz_over)
+SrvXkbAddGeomSection(XkbGeometryPtr geom,
+                     Atom name, int sz_rows, int sz_doodads, int sz_over)
 {
     register int i;
     XkbSectionPtr section;
