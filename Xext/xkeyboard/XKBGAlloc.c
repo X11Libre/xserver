@@ -533,7 +533,7 @@ XkbAllocGeometry(XkbDescPtr xkb, XkbGeometrySizesPtr sizes)
 /***====================================================================***/
 
 XkbPropertyPtr
-XkbAddGeomProperty(XkbGeometryPtr geom, char *name, char *value)
+SrvXkbAddGeomProperty(XkbGeometryPtr geom, char *name, char *value)
 {
     register int i;
     register XkbPropertyPtr prop;

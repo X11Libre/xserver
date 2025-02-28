@@ -1077,7 +1077,7 @@ ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
         for (i = 0; i < wireGeom.num_properties; i++) {
             nRead += XkmGetCountedString(file, buf, 100);
             nRead += XkmGetCountedString(file, val, 1024);
-            if (XkbAddGeomProperty(geom, buf, val) == NULL) {
+            if (SrvXkbAddGeomProperty(geom, buf, val) == NULL) {
                 _XkbLibError(_XkbErrBadAlloc, "ReadXkmGeometry", 0);
                 return nRead;
             }

@@ -5359,7 +5359,7 @@ _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
             free(name);
             return status;
         }
-        if (XkbAddGeomProperty(geom, name, val) == NULL) {
+        if (SrvXkbAddGeomProperty(geom, name, val) == NULL) {
             free(name);
             free(val);
             return BadAlloc;
