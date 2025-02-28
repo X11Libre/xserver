@@ -170,8 +170,8 @@ _XkbClearColor(char *color_in)
     return;
 }
 
-void
-XkbFreeGeomColors(XkbGeometryPtr geom, int first, int count, Bool freeAll)
+static void
+SrvXkbFreeGeomColors(XkbGeometryPtr geom, int first, int count, Bool freeAll)
 {
     _XkbFreeGeomNonLeafElems(freeAll, first, count,
                              &geom->num_colors, &geom->sz_colors,
@@ -346,7 +346,7 @@ XkbFreeGeometry(XkbGeometryPtr geom, unsigned which, Bool freeMap)
     if ((which & XkbGeomPropertiesMask) && (geom->properties != NULL))
         XkbFreeGeomProperties(geom, 0, geom->num_properties, TRUE);
     if ((which & XkbGeomColorsMask) && (geom->colors != NULL))
-        XkbFreeGeomColors(geom, 0, geom->num_colors, TRUE);
+        SrvXkbFreeGeomColors(geom, 0, geom->num_colors, TRUE);
     if ((which & XkbGeomShapesMask) && (geom->shapes != NULL))
         XkbFreeGeomShapes(geom, 0, geom->num_shapes, TRUE);
     if ((which & XkbGeomSectionsMask) && (geom->sections != NULL))
