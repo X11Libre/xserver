@@ -207,11 +207,11 @@ XkbInitRules(XkbRMLVOSet *rmlvo,
              const char *variant,
              const char *options)
 {
-    rmlvo->rules = rules ? XNFstrdup(rules) : NULL;
-    rmlvo->model = model ? XNFstrdup(model) : NULL;
-    rmlvo->layout = layout ? XNFstrdup(layout) : NULL;
-    rmlvo->variant = variant ? XNFstrdup(variant) : NULL;
-    rmlvo->options = options ? XNFstrdup(options) : NULL;
+    rmlvo->rules = rules ? strdup(rules) : NULL;
+    rmlvo->model = model ? strdup(model) : NULL;
+    rmlvo->layout = layout ? strdup(layout) : NULL;
+    rmlvo->variant = variant ? strdup(variant) : NULL;
+    rmlvo->options = options ? strdup(options) : NULL;
 }
 
 static void
