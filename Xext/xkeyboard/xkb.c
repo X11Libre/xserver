@@ -5115,7 +5115,7 @@ _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
                                               rWire->rowUnder);
             return BadMatch;
         }
-        row = XkbAddGeomOverlayRow(ol, rWire->rowUnder, rWire->nKeys);
+        row = SrvXkbAddGeomOverlayRow(ol, rWire->rowUnder, rWire->nKeys);
         if (!row)
             return BadAlloc;
         kWire = (xkbOverlayKeyWireDesc *) &rWire[1];

@@ -944,7 +944,7 @@ ReadXkmGeomOverlay(FILE * file, XkbGeometryPtr geom, XkbSectionPtr section)
 
         tmp = fread(&rowWire, SIZEOF(xkmOverlayRowDesc), 1, file);
         nRead += tmp * SIZEOF(xkmOverlayRowDesc);
-        row = XkbAddGeomOverlayRow(ol, rowWire.row_under, rowWire.num_keys);
+        row = SrvXkbAddGeomOverlayRow(ol, rowWire.row_under, rowWire.num_keys);
         if (!row) {
             _XkbLibError(_XkbErrBadAlloc, "ReadXkmGeomOverlay", 0);
             return nRead;
