@@ -400,8 +400,6 @@ extern Bool
                 XkbGeomClearance        /* clearance */
     );
 
-extern int XkbAllocGeometry(XkbDescPtr /* xkb */ ,
-                               XkbGeometrySizesPtr      /* sizes */
-    );
+int SrvXkbAllocGeometry(XkbDescPtr xkb, XkbGeometrySizesPtr sizes);
 
 #endif                          /* _XKBGEOM_H_ */

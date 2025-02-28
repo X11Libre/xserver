@@ -487,7 +487,7 @@ _XkbGeomAlloc(void **old,
 				(n),sizeof(XkbOverlayKeyRec))
 
 int
-XkbAllocGeometry(XkbDescPtr xkb, XkbGeometrySizesPtr sizes)
+SrvXkbAllocGeometry(XkbDescPtr xkb, XkbGeometrySizesPtr sizes)
 {
     XkbGeometryPtr geom;
     int rtrn;

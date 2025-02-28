@@ -1061,7 +1061,7 @@ ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
     sizes.num_sections = wireGeom.num_sections;
     sizes.num_doodads = wireGeom.num_doodads;
     sizes.num_key_aliases = wireGeom.num_key_aliases;
-    if (XkbAllocGeometry(xkb, &sizes) != Success) {
+    if (SrvXkbAllocGeometry(xkb, &sizes) != Success) {
         _XkbLibError(_XkbErrBadAlloc, "ReadXkmGeometry", 0);
         return nRead;
     }

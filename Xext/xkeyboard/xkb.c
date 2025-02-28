@@ -5452,7 +5452,7 @@ _XkbSetGeometry(ClientPtr client, DeviceIntPtr dev, xkbSetGeometryReq * stuff)
         .num_key_aliases = stuff->nKeyAliases,
     };
 
-    if ((status = XkbAllocGeometry(xkb, &sizes)) != Success) {
+    if ((status = SrvXkbAllocGeometry(xkb, &sizes)) != Success) {
         xkb->geom = old;
         return status;
     }
