@@ -185,8 +185,8 @@ SrvXkbFreeGeomColors(XkbGeometryPtr geom, int first, int count, Bool freeAll)
 
 /***====================================================================***/
 
-void
-XkbFreeGeomPoints(XkbOutlinePtr outline, int first, int count, Bool freeAll)
+static void
+SrvXkbFreeGeomPoints(XkbOutlinePtr outline, int first, int count, Bool freeAll)
 {
     _XkbFreeGeomLeafElems(freeAll, first, count,
                           &outline->num_points, &outline->sz_points,
@@ -202,7 +202,7 @@ _XkbClearOutline(char *outline_in)
     XkbOutlinePtr outline = (XkbOutlinePtr) outline_in;
 
     if (outline->points != NULL)
-        XkbFreeGeomPoints(outline, 0, outline->num_points, TRUE);
+        SrvXkbFreeGeomPoints(outline, 0, outline->num_points, TRUE);
     return;
 }
 
