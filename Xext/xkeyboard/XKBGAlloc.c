@@ -241,8 +241,8 @@ XkbFreeGeomShapes(XkbGeometryPtr geom, int first, int count, Bool freeAll)
 
 /***====================================================================***/
 
-void
-XkbFreeGeomKeys(XkbRowPtr row, int first, int count, Bool freeAll)
+static void
+SrvXkbFreeGeomKeys(XkbRowPtr row, int first, int count, Bool freeAll)
 {
     _XkbFreeGeomLeafElems(freeAll, first, count,
                           &row->num_keys, &row->sz_keys,
@@ -258,7 +258,7 @@ _XkbClearRow(char *row_in)
     XkbRowPtr row = (XkbRowPtr) row_in;
 
     if (row->keys != NULL)
-        XkbFreeGeomKeys(row, 0, row->num_keys, TRUE);
+        SrvXkbFreeGeomKeys(row, 0, row->num_keys, TRUE);
     return;
 }
 
