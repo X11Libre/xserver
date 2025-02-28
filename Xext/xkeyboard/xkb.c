@@ -5288,7 +5288,7 @@ _CheckSetShapes(XkbGeometryPtr geom,
                 if (!_XkbCheckRequestBounds(client, req, olWire, olWire + 1))
                     return BadLength;
 
-                ol = XkbAddGeomOutline(shape, olWire->nPoints);
+                ol = SrvXkbAddGeomOutline(shape, olWire->nPoints);
                 if (!ol)
                     return BadAlloc;
                 ol->corner_radius = olWire->cornerRadius;

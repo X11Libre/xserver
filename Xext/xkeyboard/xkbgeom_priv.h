@@ -286,9 +286,7 @@ XkbColorPtr SrvXkbAddGeomColor(XkbGeometryPtr geom,
                                char *spec,
                                unsigned int pixel);
 
-extern XkbOutlinePtr XkbAddGeomOutline(XkbShapePtr /* shape */ ,
-                                       int      /* sz_points */
-    );
+XkbOutlinePtr SrvXkbAddGeomOutline(XkbShapePtr shape, int sz_points);
 
 extern XkbShapePtr XkbAddGeomShape(XkbGeometryPtr /* geom */ ,
                                    Atom /* name */ ,

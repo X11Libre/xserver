@@ -1119,7 +1119,7 @@ ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
 
                 tmp = fread(&olWire, SIZEOF(xkmOutlineDesc), 1, file);
                 nRead += tmp * SIZEOF(xkmOutlineDesc);
-                ol = XkbAddGeomOutline(shape, olWire.num_points);
+                ol = SrvXkbAddGeomOutline(shape, olWire.num_points);
                 if (!ol) {
                     _XkbLibError(_XkbErrBadAlloc, "ReadXkmGeometry", 0);
                     return nRead;

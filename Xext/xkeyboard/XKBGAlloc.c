@@ -622,7 +622,7 @@ SrvXkbAddGeomColor(XkbGeometryPtr geom, char *spec, unsigned int pixel)
 }
 
 XkbOutlinePtr
-XkbAddGeomOutline(XkbShapePtr shape, int sz_points)
+SrvXkbAddGeomOutline(XkbShapePtr shape, int sz_points)
 {
     XkbOutlinePtr outline;
 
