@@ -682,7 +682,7 @@ SrvXkbAddGeomKey(XkbRowPtr row)
 }
 
 XkbRowPtr
-XkbAddGeomRow(XkbSectionPtr section, int sz_keys)
+SrvXkbAddGeomRow(XkbSectionPtr section, int sz_keys)
 {
     XkbRowPtr row;
 

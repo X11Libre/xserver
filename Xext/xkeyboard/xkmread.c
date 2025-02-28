@@ -998,7 +998,7 @@ ReadXkmGeomSection(FILE * file, XkbGeometryPtr geom)
         for (i = 0; i < sectionWire.num_rows; i++) {
             tmp = fread(&rowWire, SIZEOF(xkmRowDesc), 1, file);
             nRead += SIZEOF(xkmRowDesc) * tmp;
-            row = XkbAddGeomRow(section, rowWire.num_keys);
+            row = SrvXkbAddGeomRow(section, rowWire.num_keys);
             if (!row) {
                 _XkbLibError(_XkbErrBadAlloc, "ReadXkmKeycodes", 0);
                 return nRead;

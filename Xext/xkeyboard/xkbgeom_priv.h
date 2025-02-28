@@ -293,10 +293,7 @@ extern XkbShapePtr XkbAddGeomShape(XkbGeometryPtr /* geom */ ,
     );
 
 XkbKeyPtr SrvXkbAddGeomKey(XkbRowPtr row);
-
-extern XkbRowPtr XkbAddGeomRow(XkbSectionPtr /* section */ ,
-                               int      /* sz_keys */
-    );
+XkbRowPtr SrvXkbAddGeomRow(XkbSectionPtr section, int sz_keys);
 
 extern XkbSectionPtr XkbAddGeomSection(XkbGeometryPtr /* geom */ ,
                                        Atom /* name */ ,
