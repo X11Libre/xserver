@@ -641,7 +641,7 @@ SrvXkbAddGeomOutline(XkbShapePtr shape, int sz_points)
 }
 
 XkbShapePtr
-XkbAddGeomShape(XkbGeometryPtr geom, Atom name, int sz_outlines)
+SrvXkbAddGeomShape(XkbGeometryPtr geom, Atom name, int sz_outlines)
 {
     XkbShapePtr shape;
     register int i;

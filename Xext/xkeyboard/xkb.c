@@ -5276,7 +5276,7 @@ _CheckSetShapes(XkbGeometryPtr geom,
                 return BadLength;
 
             shape =
-                XkbAddGeomShape(geom, shapeWire->name, shapeWire->nOutlines);
+                SrvXkbAddGeomShape(geom, shapeWire->name, shapeWire->nOutlines);
             if (!shape)
                 return BadAlloc;
             olWire = (xkbOutlineWireDesc *) (&shapeWire[1]);

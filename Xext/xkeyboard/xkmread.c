@@ -1108,7 +1108,7 @@ ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
             nameAtom = XkbInternAtom(buf, FALSE);
             tmp = fread(&shapeWire, SIZEOF(xkmShapeDesc), 1, file);
             nRead += tmp * SIZEOF(xkmShapeDesc);
-            shape = XkbAddGeomShape(geom, nameAtom, shapeWire.num_outlines);
+            shape = SrvXkbAddGeomShape(geom, nameAtom, shapeWire.num_outlines);
             if (!shape) {
                 _XkbLibError(_XkbErrBadAlloc, "ReadXkmGeometry", 0);
                 return nRead;
