@@ -36,6 +36,9 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <xkbsrv.h>
 #include "xkbgeom_priv.h"
 
+static void
+SrvXkbFreeGeomDoodads(XkbDoodadPtr doodads, int nDoodads, Bool freeAll);
+
 /***====================================================================***/
 
 static void
@@ -278,7 +281,7 @@ _XkbClearSection(char *section_in)
     if (section->rows != NULL)
         XkbFreeGeomRows(section, 0, section->num_rows, TRUE);
     if (section->doodads != NULL) {
-        XkbFreeGeomDoodads(section->doodads, section->num_doodads, TRUE);
+        SrvXkbFreeGeomDoodads(section->doodads, section->num_doodads, TRUE);
         section->doodads = NULL;
     }
     return;
@@ -320,8 +323,8 @@ _XkbClearDoodad(char *doodad_in)
     return;
 }
 
-void
-XkbFreeGeomDoodads(XkbDoodadPtr doodads, int nDoodads, Bool freeAll)
+static void
+SrvXkbFreeGeomDoodads(XkbDoodadPtr doodads, int nDoodads, Bool freeAll)
 {
     register int i;
     register XkbDoodadPtr doodad;
@@ -352,7 +355,7 @@ XkbFreeGeometry(XkbGeometryPtr geom, unsigned which, Bool freeMap)
     if ((which & XkbGeomSectionsMask) && (geom->sections != NULL))
         XkbFreeGeomSections(geom, 0, geom->num_sections, TRUE);
     if ((which & XkbGeomDoodadsMask) && (geom->doodads != NULL)) {
-        XkbFreeGeomDoodads(geom->doodads, geom->num_doodads, TRUE);
+        SrvXkbFreeGeomDoodads(geom->doodads, geom->num_doodads, TRUE);
         geom->doodads = NULL;
         geom->num_doodads = geom->sz_doodads = 0;
     }
