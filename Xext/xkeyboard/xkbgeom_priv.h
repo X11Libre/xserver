@@ -295,8 +295,7 @@ extern XkbShapePtr XkbAddGeomShape(XkbGeometryPtr /* geom */ ,
                                    int  /* sz_outlines */
     );
 
-extern XkbKeyPtr XkbAddGeomKey(XkbRowPtr        /* row */
-    );
+XkbKeyPtr SrvXkbAddGeomKey(XkbRowPtr row);
 
 extern XkbRowPtr XkbAddGeomRow(XkbSectionPtr /* section */ ,
                                int      /* sz_keys */

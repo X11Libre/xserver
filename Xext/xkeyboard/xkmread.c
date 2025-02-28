@@ -1009,7 +1009,7 @@ ReadXkmGeomSection(FILE * file, XkbGeometryPtr geom)
             for (k = 0; k < rowWire.num_keys; k++) {
                 tmp = fread(&keyWire, SIZEOF(xkmKeyDesc), 1, file);
                 nRead += SIZEOF(xkmKeyDesc) * tmp;
-                key = XkbAddGeomKey(row);
+                key = SrvXkbAddGeomKey(row);
                 if (!key) {
                     _XkbLibError(_XkbErrBadAlloc, "ReadXkmGeomSection", 0);
                     return nRead;

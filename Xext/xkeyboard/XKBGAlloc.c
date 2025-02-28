@@ -668,7 +668,7 @@ XkbAddGeomShape(XkbGeometryPtr geom, Atom name, int sz_outlines)
 }
 
 XkbKeyPtr
-XkbAddGeomKey(XkbRowPtr row)
+SrvXkbAddGeomKey(XkbRowPtr row)
 {
     XkbKeyPtr key;
 
