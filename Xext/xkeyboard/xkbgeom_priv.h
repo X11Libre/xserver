@@ -306,10 +306,9 @@ extern XkbSectionPtr XkbAddGeomSection(XkbGeometryPtr /* geom */ ,
                                        int      /* sz_overlays */
     );
 
-extern XkbOverlayPtr XkbAddGeomOverlay(XkbSectionPtr /* section */ ,
-                                       Atom /* name */ ,
-                                       int      /* sz_rows */
-    );
+XkbOverlayPtr SrvXkbAddGeomOverlay(XkbSectionPtr section,
+                                   Atom name,
+                                   int sz_rows);
 
 extern XkbOverlayRowPtr XkbAddGeomOverlayRow(XkbOverlayPtr /* overlay */ ,
                                              int /* row_under */ ,

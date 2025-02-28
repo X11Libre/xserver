@@ -843,7 +843,7 @@ XkbAddGeomOverlayRow(XkbOverlayPtr overlay, int row_under, int sz_keys)
 }
 
 XkbOverlayPtr
-XkbAddGeomOverlay(XkbSectionPtr section, Atom name, int sz_rows)
+SrvXkbAddGeomOverlay(XkbSectionPtr section, Atom name, int sz_rows)
 {
     register int i;
     XkbOverlayPtr overlay;

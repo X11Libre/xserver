@@ -935,7 +935,7 @@ ReadXkmGeomOverlay(FILE * file, XkbGeometryPtr geom, XkbSectionPtr section)
     nRead += XkmGetCountedString(file, buf, 100);
     tmp = fread(&olWire, SIZEOF(xkmOverlayDesc), 1, file);
     nRead += tmp * SIZEOF(xkmOverlayDesc);
-    ol = XkbAddGeomOverlay(section, XkbInternAtom(buf, FALSE), olWire.num_rows);
+    ol = SrvXkbAddGeomOverlay(section, XkbInternAtom(buf, FALSE), olWire.num_rows);
     if (!ol)
         return nRead;
     for (r = 0; r < olWire.num_rows; r++) {

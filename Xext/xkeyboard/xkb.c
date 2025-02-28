@@ -5098,7 +5098,7 @@ _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
         swapl(&olWire->name);
     }
     CHK_ATOM_ONLY(olWire->name);
-    ol = XkbAddGeomOverlay(section, olWire->name, olWire->nRows);
+    ol = SrvXkbAddGeomOverlay(section, olWire->name, olWire->nRows);
     if (!ol)
         return BadAlloc;
     rWire = (xkbOverlayRowWireDesc *) &olWire[1];
