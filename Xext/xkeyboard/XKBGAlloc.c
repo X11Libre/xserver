@@ -777,8 +777,8 @@ SrvXkbAddGeomDoodad(XkbGeometryPtr geom, XkbSectionPtr section, Atom name)
 }
 
 XkbOverlayKeyPtr
-XkbAddGeomOverlayKey(XkbOverlayPtr overlay,
-                     XkbOverlayRowPtr row, char *over, char *under)
+SrvXkbAddGeomOverlayKey(XkbOverlayPtr overlay,
+                        XkbOverlayRowPtr row, char *over, char *under)
 {
     register int i;
     XkbOverlayKeyPtr key;

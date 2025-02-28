@@ -5123,9 +5123,9 @@ _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
             if (!_XkbCheckRequestBounds(client, req, kWire, kWire + 1))
                 return BadLength;
 
-            if (XkbAddGeomOverlayKey(ol, row,
-                                     (char *) kWire->over,
-                                     (char *) kWire->under) == NULL) {
+            if (SrvXkbAddGeomOverlayKey(ol, row,
+                                        (char *) kWire->over,
+                                        (char *) kWire->under) == NULL) {
                 client->errorValue = _XkbErrCode3(0x21, r, k);
                 return BadMatch;
             }
