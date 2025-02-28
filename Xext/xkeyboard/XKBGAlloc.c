@@ -287,8 +287,8 @@ _XkbClearSection(char *section_in)
     return;
 }
 
-void
-XkbFreeGeomSections(XkbGeometryPtr geom, int first, int count, Bool freeAll)
+static void
+SrvXkbFreeGeomSections(XkbGeometryPtr geom, int first, int count, Bool freeAll)
 {
     _XkbFreeGeomNonLeafElems(freeAll, first, count,
                              &geom->num_sections, &geom->sz_sections,
@@ -353,7 +353,7 @@ XkbFreeGeometry(XkbGeometryPtr geom, unsigned which, Bool freeMap)
     if ((which & XkbGeomShapesMask) && (geom->shapes != NULL))
         XkbFreeGeomShapes(geom, 0, geom->num_shapes, TRUE);
     if ((which & XkbGeomSectionsMask) && (geom->sections != NULL))
-        XkbFreeGeomSections(geom, 0, geom->num_sections, TRUE);
+        SrvXkbFreeGeomSections(geom, 0, geom->num_sections, TRUE);
     if ((which & XkbGeomDoodadsMask) && (geom->doodads != NULL)) {
         SrvXkbFreeGeomDoodads(geom->doodads, geom->num_doodads, TRUE);
         geom->doodads = NULL;
