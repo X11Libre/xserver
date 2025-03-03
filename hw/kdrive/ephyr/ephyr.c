@@ -1431,7 +1431,6 @@ MouseDisable(KdPointerInfo * pi)
 {
     ((EphyrPointerPrivate *) pi->driverPrivate)->enabled = FALSE;
     RemoveNotifyFd(hostx_get_fd());
-    return;
 }
 
 static void
@@ -1439,7 +1438,6 @@ MouseFini(KdPointerInfo * pi)
 {
     free(pi->driverPrivate);
     ephyrMouse = NULL;
-    return;
 }
 
 KdPointerDriver EphyrMouseDriver = {
@@ -1502,7 +1500,6 @@ EphyrKeyboardFini(KdKeyboardInfo * ki)
 {
     free(ki->driverPrivate);
     ephyrKbd = NULL;
-    return;
 }
 
 static void
