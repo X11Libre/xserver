@@ -492,7 +492,11 @@ connect_hook(DBusConnection *connection, void *data)
                    error.message);
         goto cleanup;
     }
-    session = XNFstrdup(session);
+    session = strdup(session);
+    if (!session) {
+        LogMessage(X_ERROR, "systemd-logind: out of memory\n");
+        goto cleanup;
+    }
 
     dbus_message_unref(reply);
     reply = NULL;
