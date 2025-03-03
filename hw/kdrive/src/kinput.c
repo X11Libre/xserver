@@ -395,7 +395,7 @@ KdPointerProc(DeviceIntPtr pDevice, int onoff)
                 ErrorF("Couldn't find pointer driver %s\n",
                        pi->driverPrivate ? (char *) pi->driverPrivate :
                        "(unnamed)");
-                return !Success;
+                return BadRequest;
             }
             free(pi->driverPrivate);
             pi->driverPrivate = NULL;
@@ -407,7 +407,7 @@ KdPointerProc(DeviceIntPtr pDevice, int onoff)
         }
 
         if ((*pi->driver->Init) (pi) != Success) {
-            return !Success;
+            return BadRequest;
         }
 
         btn_labels = calloc(pi->nButtons, sizeof(Atom));
@@ -704,7 +704,7 @@ KdKeyboardProc(DeviceIntPtr pDevice, int onoff)
                 ErrorF("Couldn't find keyboard driver %s\n",
                        ki->driverPrivate ? (char *) ki->driverPrivate :
                        "(unnamed)");
-                return !Success;
+                return BadRequest;
             }
             free(ki->driverPrivate);
             ki->driverPrivate = NULL;
@@ -732,7 +732,7 @@ KdKeyboardProc(DeviceIntPtr pDevice, int onoff)
         }
 
         if ((*ki->driver->Init) (ki) != Success) {
-            return !Success;
+            return BadRequest;
         }
 
         xiclass = AtomFromName(XI_KEYBOARD);
@@ -911,13 +911,13 @@ KdAddKeyboard(KdKeyboardInfo * ki)
     KdKeyboardInfo **prev;
 
     if (!ki)
-        return !Success;
+        return BadRequest;
 
     ki->dixdev = AddInputDevice(serverClient, KdKeyboardProc, TRUE);
     if (!ki->dixdev) {
         ErrorF("Couldn't register keyboard device %s\n",
                ki->name ? ki->name : "(unnamed)");
-        return !Success;
+        return BadRequest;
     }
 
 #ifdef DEBUG
