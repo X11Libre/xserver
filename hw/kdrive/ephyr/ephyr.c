@@ -1394,7 +1394,7 @@ ephyrPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs)
 
 /* Mouse calls */
 
-static Status
+static Bool
 MouseInit(KdPointerInfo * pi)
 {
     pi->driverPrivate = (EphyrPointerPrivate *)
@@ -1416,15 +1416,15 @@ MouseInit(KdPointerInfo * pi)
     pi->transformCoordinates = TRUE;
 
     ephyrMouse = pi;
-    return Success;
+    return TRUE;
 }
 
-static Status
+static Bool
 MouseEnable(KdPointerInfo * pi)
 {
     ((EphyrPointerPrivate *) pi->driverPrivate)->enabled = TRUE;
     SetNotifyFd(hostx_get_fd(), ephyrXcbNotify, X_NOTIFY_READ, NULL);
-    return Success;
+    return TRUE;
 }
 
 static void
