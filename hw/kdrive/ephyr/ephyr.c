@@ -1440,6 +1440,7 @@ MouseFini(KdPointerInfo * pi)
     ephyrMouse = NULL;
 }
 
+/* *must not* be const/readonly, because some fields are written later */
 KdPointerDriver EphyrMouseDriver = {
     .name    = "ephyr",
     .Init    = MouseInit,
@@ -1512,6 +1513,7 @@ EphyrKeyboardBell(KdKeyboardInfo * ki, int volume, int frequency, int duration)
 {
 }
 
+/* *must not* be const/readonly, because some fields are written later */
 KdKeyboardDriver EphyrKeyboardDriver = {
     .name    = "ephyr",
     .Init    = EphyrKeyboardInit,
