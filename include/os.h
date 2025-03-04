@@ -211,12 +211,6 @@ TimeSinceLastInputEvent(void);
 
 /* Function fallbacks provided by AC_REPLACE_FUNCS in configure.ac */
 
-#ifndef HAVE_REALLOCARRAY
-#define reallocarray xreallocarray
-extern _X_EXPORT void *
-reallocarray(void *optr, size_t nmemb, size_t size);
-#endif
-
 #ifndef HAVE_STRCASESTR
 #define strcasestr xstrcasestr
 extern _X_EXPORT char *

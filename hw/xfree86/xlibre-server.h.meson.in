@@ -41,9 +41,6 @@
 /* Add a padding for legacy nvidia drivers that support old ABI */
 #mesondefine CONFIG_LEGACY_NVIDIA_PADDING
 
-/* Define to 1 if you have the `reallocarray' function. */
-#mesondefine HAVE_REALLOCARRAY
-
 /* Define to 1 if you have the `strcasestr' function. */
 #mesondefine HAVE_STRCASESTR
 

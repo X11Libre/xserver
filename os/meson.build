@@ -29,9 +29,6 @@ conf_data.set('CONFIG_SYSLOG', cc.has_header('syslog.h') ? '1' : false)
 
 # Wrapper code for missing C library functions. Note that conf_data contains either '1' or false.
 srcs_libc = []
-if conf_data.get('HAVE_REALLOCARRAY').to_int() == 0
-    srcs_libc += 'reallocarray.c'
-endif
 if conf_data.get('HAVE_STRCASESTR').to_int() == 0
     srcs_libc += 'strcasestr.c'
 endif
