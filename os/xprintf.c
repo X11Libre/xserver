@@ -176,15 +176,3 @@ XNFvprintf(const char *format, va_list va)
 
     return ret;
 }
-
-char *
-XNFprintf(const char *format, ...)
-{
-    char *ret;
-    va_list va;
-
-    va_start(va, format);
-    XNFvasprintf(&ret, format, va);
-    va_end(va);
-    return ret;
-}
