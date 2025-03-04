@@ -32,8 +32,11 @@
 
 #include "dix/screen_hooks_priv.h"
 
-#include <GL/glxtokens.h>
 #include <string.h>
+#include <GL/glxtokens.h>
+
+#include "dix/colormap_priv.h"
+
 #include <windowstr.h>
 #include <os.h>
 

@@ -108,4 +108,7 @@ int StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client
 
 int IsMapInstalled(Colormap map, WindowPtr pWin);
 
+/* only exported for glx, but should not be used by external drivers */
+_X_EXPORT Bool ResizeVisualArray(ScreenPtr pScreen, int new_vis_count, DepthPtr depth);
+
 #endif /* _XSERVER_DIX_COLORMAP_PRIV_H */
