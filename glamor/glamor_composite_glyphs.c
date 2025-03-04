@@ -19,7 +19,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
+#include <dix-config.h>
+
 #include <stdlib.h>
+#include <stdio.h>
 #include "Xprintf.h"
 
 #include "glamor_priv.h"
