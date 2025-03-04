@@ -153,16 +153,3 @@ int Xscnprintf(char *s, int n, const char *format, ...)
     va_end(ap);
     return x;
 }
-
-char *
-Xprintf(const char *format, ...)
-{
-    char *ret;
-    va_list va;
-
-    va_start(va, format);
-    if (vasprintf(&ret, format, va) == -1)
-        ret = NULL;
-    va_end(va);
-    return ret;
-}
