@@ -154,18 +154,6 @@ int Xscnprintf(char *s, int n, const char *format, ...)
     return x;
 }
 
-/* Old api, now deprecated, may be removed in the future */
-char *
-Xvprintf(const char *format, va_list va)
-{
-    char *ret;
-
-    if (vasprintf(&ret, format, va) == -1)
-        ret = NULL;
-
-    return ret;
-}
-
 char *
 Xprintf(const char *format, ...)
 {
