@@ -55,8 +55,4 @@ SOFTWARE.
 
 typedef CARD32 Pixel;
 
-extern _X_EXPORT Bool ResizeVisualArray(ScreenPtr /* pScreen */ ,
-                                        int /* new_vis_count */ ,
-                                        DepthPtr /* depth */ );
-
 #endif                          /* CMAP_H */
