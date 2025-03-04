@@ -49,22 +49,11 @@
  * on failure.
  */
 extern _X_EXPORT int
-Xasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, ...)
-_X_ATTRIBUTE_PRINTF(2, 3);
-extern _X_EXPORT int
-Xvasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, va_list va)
-_X_ATTRIBUTE_PRINTF(2, 0);
-extern _X_EXPORT int
 XNFasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, ...)
 _X_ATTRIBUTE_PRINTF(2, 3);
 extern _X_EXPORT int
 XNFvasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, va_list va)
 _X_ATTRIBUTE_PRINTF(2, 0);
-
-#if !defined(HAVE_ASPRINTF) && !defined(HAVE_VASPRINTF)
-#define asprintf  Xasprintf
-#define vasprintf Xvasprintf
-#endif
 
 /*
  * These functions provide a portable implementation of the linux kernel

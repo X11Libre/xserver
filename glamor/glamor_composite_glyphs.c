@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "os/bug_priv.h"
 
