@@ -631,7 +631,10 @@ SELinuxResource(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (offset < 0) {
         /* No: use the SID of the owning client */
         class = SECCLASS_X_RESOURCE;
-        privatePtr = &clients[dixClientIdForXID(rec->id)]->devPrivates;
+        ClientPtr owner = dixClientForXID(rec->id);
+        if (!owner)
+            return;
+        privatePtr = &owner->devPrivates;
         obj = dixLookupPrivate(privatePtr, objectKey);
     }
     else {

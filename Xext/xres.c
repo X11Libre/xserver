@@ -307,10 +307,10 @@ ProcXResQueryClientResources(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXResQueryClientResourcesReq);
 
-    int clientID = dixClientIdForXID(stuff->xid);
+    ClientPtr resClient = dixClientForXID(stuff->xid);
 
-    if ((clientID >= currentMaxClients) || !clients[clientID] ||
-        (XaceHookClientAccess(client, clients[clientID], DixReadAccess)
+    if ((!resClient) ||
+        (XaceHookClientAccess(client, resClient, DixReadAccess)
                               != Success)) {
         client->errorValue = stuff->xid;
         return BadValue;
@@ -318,7 +318,7 @@ ProcXResQueryClientResources(ClientPtr client)
 
     counts = calloc(lastResourceType + 1, sizeof(int));
 
-    FindAllClientResources(clients[clientID], ResFindAllRes, counts);
+    FindAllClientResources(resClient, ResFindAllRes, counts);
 
     num_types = 0;
 
@@ -380,22 +380,19 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
 {
     REQUEST(xXResQueryClientPixmapBytesReq);
     xXResQueryClientPixmapBytesReply rep;
-    unsigned long bytes;
 
     REQUEST_SIZE_MATCH(xXResQueryClientPixmapBytesReq);
 
-    int clientID = dixClientIdForXID(stuff->xid);
-
-    if ((clientID >= currentMaxClients) || !clients[clientID] ||
-        (XaceHookClientAccess(client, clients[clientID], DixReadAccess)
+    ClientPtr owner = dixClientForXID(stuff->xid);
+    if ((!owner) ||
+        (XaceHookClientAccess(client, owner, DixReadAccess)
                               != Success)) {
         client->errorValue = stuff->xid;
         return BadValue;
     }
 
-    bytes = 0;
-
-    FindAllClientResources(clients[clientID], ResFindResourcePixmaps,
+    unsigned long bytes = 0;
+    FindAllClientResources(owner, ResFindResourcePixmaps,
                            (void *) (&bytes));
 
     rep = (xXResQueryClientPixmapBytesReply) {
@@ -555,12 +552,11 @@ ConstructClientIds(ClientPtr client,
                 }
             }
         } else {
-            int clientID = dixClientIdForXID(specs[specIdx].client);
-
-            if ((clientID < currentMaxClients) && clients[clientID] &&
-                (XaceHookClientAccess(client, clients[clientID], DixReadAccess)
+            ClientPtr owner = dixClientForXID(specs[specIdx].client);
+            if (owner &&
+                (XaceHookClientAccess(client, owner, DixReadAccess)
                                       != Success)) {
-                if (!ConstructClientIdValue(client, clients[clientID],
+                if (!ConstructClientIdValue(client, owner,
                                             specs[specIdx].mask, ctx)) {
                     return BadAlloc;
                 }
@@ -897,16 +893,12 @@ ConstructResourceBytesByResource(XID aboutClient, ConstructResourceBytesCtx *ctx
     for (specIdx = 0; specIdx < ctx->numSpecs; ++specIdx) {
         xXResResourceIdSpec *spec = ctx->specs + specIdx;
         if (spec->resource) {
-            int cid = dixClientIdForXID(spec->resource);
-            if (cid < currentMaxClients &&
-                (aboutClient == None || cid == aboutClient)) {
-                ClientPtr client = clients[cid];
-                if (client) {
-                    ctx->curSpec = spec;
-                    FindAllClientResources(client,
-                                           AddResourceSizeValueByResource,
-                                           ctx);
-                }
+            ClientPtr client = dixClientForXID(spec->resource);
+            if (client && (aboutClient == None || aboutClient == client->index)) {
+                ctx->curSpec = spec;
+                FindAllClientResources(client,
+                                       AddResourceSizeValueByResource,
+                                       ctx);
             }
         }
     }
@@ -925,15 +917,11 @@ ConstructResourceBytes(XID aboutClient,
                        ConstructResourceBytesCtx *ctx)
 {
     if (aboutClient) {
-        int clientIdx = dixClientIdForXID(aboutClient);
-        ClientPtr client = NullClient;
-
-        if ((clientIdx >= currentMaxClients) || !clients[clientIdx]) {
+        ClientPtr client = dixClientForXID(aboutClient);
+        if (!client) {
             ctx->sendClient->errorValue = aboutClient;
             return BadValue;
         }
-
-        client = clients[clientIdx];
 
         ConstructClientResourceBytes(client, ctx);
         ConstructResourceBytesByResource(aboutClient, ctx);

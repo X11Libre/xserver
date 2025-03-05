@@ -2505,7 +2505,9 @@ void
 __glXsendSwapEvent(__GLXdrawable *drawable, int type, CARD64 ust,
                    CARD64 msc, CARD32 sbc)
 {
-    ClientPtr client = clients[dixClientIdForXID(drawable->drawId)];
+    ClientPtr client = dixClientForXID(drawable->drawId);
+    if (!client)
+        return;
 
     xGLXBufferSwapComplete2 wire =  {
         .type = __glXEventBase + GLX_BufferSwapComplete
