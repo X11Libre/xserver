@@ -114,13 +114,6 @@ extern _X_EXPORT unsigned int ResourceClientBits(void);
 #define CLIENT_ID(id) ((int)(CLIENT_BITS(id) >> CLIENTOFFSET))
 #define SERVER_BIT		(Mask)0x40000000        /* use illegal bit */
 
-#ifdef INVALID
-#undef INVALID                  /* needed on HP/UX */
-#endif
-
-/* Invalid resource id */
-#define INVALID	(0)
-
 #define BAD_RESOURCE 0xe0000000
 
 #define rClient(obj) (clients[CLIENT_ID((obj)->resource)])
