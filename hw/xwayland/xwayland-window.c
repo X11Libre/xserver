@@ -471,7 +471,7 @@ window_is_wm_window(WindowPtr window)
 {
     struct xwl_screen *xwl_screen = xwl_screen_get(window->drawable.pScreen);
 
-    return CLIENT_ID(window->drawable.id) == xwl_screen->wm_client_id;
+    return dixClientIdForXID(window->drawable.id) == xwl_screen->wm_client_id;
 }
 
 static WindowPtr
@@ -1787,7 +1787,7 @@ xwl_change_window_attributes(WindowPtr window, unsigned long mask)
 
     for (others = wOtherClients(window); others; others = others->next) {
         if (others->mask & (SubstructureRedirectMask | ResizeRedirectMask))
-            xwl_screen->wm_client_id = CLIENT_ID(others->resource);
+            xwl_screen->wm_client_id = dixClientIdForXID(others->resource);
     }
 
     return ret;

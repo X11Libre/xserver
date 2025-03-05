@@ -110,8 +110,6 @@ extern _X_EXPORT unsigned int ResourceClientBits(void);
 #define RESOURCE_CLIENT_MASK	(((1 << RESOURCE_CLIENT_BITS) - 1) << CLIENTOFFSET)
 /* extract the client mask from an XID */
 #define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
-/* extract the client id from an XID */
-#define CLIENT_ID(id) ((int)(CLIENT_BITS(id) >> CLIENTOFFSET))
 
 /*
  * Resource IDs having that bit set still belonging to some client,

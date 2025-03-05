@@ -16,26 +16,26 @@ ClientPtr dixClientForWindow(WindowPtr pWin) {
     if (!pWin)
         return NullClient;
 
-    return clients[CLIENT_ID(pWin->drawable.id)];
+    return clients[dixClientIdForXID(pWin->drawable.id)];
 }
 
 ClientPtr dixClientForGrab(GrabPtr pGrab) {
     if (!pGrab)
         return NullClient;
 
-    return clients[CLIENT_ID(pGrab->resource)];
+    return clients[dixClientIdForXID(pGrab->resource)];
 }
 
 ClientPtr dixClientForInputClients(InputClientsPtr pInputClients) {
     if (!pInputClients)
         return NullClient;
 
-    return clients[CLIENT_ID(pInputClients->resource)];
+    return clients[dixClientIdForXID(pInputClients->resource)];
 }
 
 ClientPtr dixClientForOtherClients(OtherClientsPtr pOtherClients) {
     if (!pOtherClients)
         return NullClient;
 
-    return clients[CLIENT_ID(pOtherClients->resource)];
+    return clients[dixClientIdForXID(pOtherClients->resource)];
 }

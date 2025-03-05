@@ -87,6 +87,7 @@ Author:  Adobe Systems Incorporated
 
 #include "dix/callback_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/resource_priv.h"
 
 #include "misc.h"
 #include "windowstr.h"
@@ -221,7 +222,7 @@ int
 dixLookupResourceOwner(ClientPtr *result, XID id, ClientPtr client, Mask access_mode)
 {
     void *pRes;
-    int rc = BadValue, clientIndex = CLIENT_ID(id);
+    int rc = BadValue, clientIndex = dixClientIdForXID(id);
 
     if (!clientIndex || !clients[clientIndex] || (id & SERVER_BIT))
         goto bad;

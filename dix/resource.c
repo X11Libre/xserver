@@ -112,7 +112,7 @@ Equipment Corporation.
  *      like it belongs to a client.  This ID, however,  must not be one
  *      the client actually can create, or we have the potential for conflict.
  *      The 31st bit of the ID is reserved for the server's use for this
- *      purpose.  By setting CLIENT_ID(id) to the client, the SERVER_BIT to
+ *      purpose.  By setting dixClientIdForXID(id) to the client, the SERVER_BIT to
  *      1, and an otherwise arbitrary ID in the low 22 bits, we can create a
  *      resource "owned" by the client.
  */
@@ -126,6 +126,7 @@ Equipment Corporation.
 #include "dix/dixgrabs_priv.h"
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/resource_priv.h"
 #include "os/osdep.h"
 
 #include "misc.h"
@@ -824,7 +825,7 @@ AddResource(XID id, RESTYPE type, void *value)
 #ifdef XSERVER_DTRACE
     XSERVER_RESOURCE_ALLOC(id, type, value, TypeNameString(type));
 #endif
-    client = CLIENT_ID(id);
+    client = dixClientIdForXID(id);
     rrec = &clientTable[client];
     if (!rrec->buckets) {
         ErrorF("[dix] AddResource(%lx, %x, %lx), client=%d \n",
@@ -912,7 +913,7 @@ FreeResource(XID id, RESTYPE skipDeleteFuncType)
     int *eltptr;
     int elements;
 
-    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
+    if (((cid = dixClientIdForXID(id)) < LimitClients) && clientTable[cid].buckets) {
         head = &clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
         eltptr = &clientTable[cid].elements;
 
@@ -946,7 +947,7 @@ FreeResourceByType(XID id, RESTYPE type, Bool skipFree)
     ResourcePtr res;
     ResourcePtr *prev, *head;
 
-    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
+    if (((cid = dixClientIdForXID(id)) < LimitClients) && clientTable[cid].buckets) {
         head = &clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         prev = head;
@@ -981,7 +982,7 @@ ChangeResourceValue(XID id, RESTYPE rtype, void *value)
     int cid;
     ResourcePtr res;
 
-    if (((cid = CLIENT_ID(id)) < LimitClients) && clientTable[cid].buckets) {
+    if (((cid = dixClientIdForXID(id)) < LimitClients) && clientTable[cid].buckets) {
         res = clientTable[cid].resources[HashResourceID(id, clientTable[cid].hashsize)];
 
         for (; res; res = res->next)
@@ -1212,7 +1213,7 @@ int
 dixLookupResourceByType(void **result, XID id, RESTYPE rtype,
                         ClientPtr client, Mask mode)
 {
-    int cid = CLIENT_ID(id);
+    int cid = dixClientIdForXID(id);
     ResourcePtr res = NULL;
 
     *result = NULL;
@@ -1249,7 +1250,7 @@ int
 dixLookupResourceByClass(void **result, XID id, RESTYPE rclass,
                          ClientPtr client, Mask mode)
 {
-    int cid = CLIENT_ID(id);
+    int cid = dixClientIdForXID(id);
     ResourcePtr res = NULL;
 
     *result = NULL;

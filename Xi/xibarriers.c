@@ -46,6 +46,7 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 
@@ -841,7 +842,7 @@ XIDestroyPointerBarrier(ClientPtr client,
         return err;
     }
 
-    if (CLIENT_ID(stuff->barrier) != client->index)
+    if (dixClientIdForXID(stuff->barrier) != client->index)
         return BadAccess;
 
     FreeResource(stuff->barrier, X11_RESTYPE_NONE);
@@ -910,9 +911,8 @@ ProcXIBarrierReleasePointer(ClientPtr client)
             return err;
         }
 
-        if (CLIENT_ID(barrier_id) != client->index)
+        if (dixClientIdForXID(barrier_id) != client->index)
             return BadAccess;
-
 
         barrier = container_of(b, struct PointerBarrierClient, barrier);
 

@@ -31,6 +31,7 @@
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 
@@ -994,7 +995,7 @@ TouchAcceptReject(ClientPtr client, DeviceIntPtr dev, int mode,
     }
 
     for (i = 0; i < ti->num_listeners; i++) {
-        if (CLIENT_ID(ti->listeners[i].listener) == client->index &&
+        if (dixClientIdForXID(ti->listeners[i].listener) == client->index &&
             ti->listeners[i].window->drawable.id == grab_window)
             break;
     }

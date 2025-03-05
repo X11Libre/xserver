@@ -55,6 +55,7 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/resource_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
 
@@ -88,7 +89,7 @@ PrintDeviceGrabInfo(DeviceIntPtr dev)
            (grab->grabtype == XI2) ? "xi2" :
            ((grab->grabtype == CORE) ? "core" : "xi1"), dev->name, dev->id);
 
-    client = clients[CLIENT_ID(grab->resource)];
+    client = clients[dixClientIdForXID(grab->resource)];
     if (client) {
         pid_t clientpid = GetClientPid(client);
         const char *cmdname = GetClientCmdName(client);
@@ -110,7 +111,7 @@ PrintDeviceGrabInfo(DeviceIntPtr dev)
     }
     if (!clientIdPrinted) {
         ErrorF("      (no client information available for client %d)\n",
-               CLIENT_ID(grab->resource));
+               dixClientIdForXID(grab->resource));
     }
 
     /* XXX is this even correct? */
@@ -181,7 +182,7 @@ UngrabAllDevices(Bool kill_client)
         if (!dev->deviceGrab.grab)
             continue;
         PrintDeviceGrabInfo(dev);
-        client = clients[CLIENT_ID(dev->deviceGrab.grab->resource)];
+        client = clients[dixClientIdForXID(dev->deviceGrab.grab->resource)];
         if (!kill_client || !client || client->clientGone)
             dev->deviceGrab.DeactivateGrab(dev);
         if (kill_client)
@@ -538,7 +539,7 @@ AddPassiveGrabToList(ClientPtr client, GrabPtr pGrab)
 
     for (grab = wPassiveGrabs(pGrab->window); grab; grab = grab->next) {
         if (GrabMatchesSecond(pGrab, grab, (pGrab->grabtype == CORE))) {
-            if (CLIENT_BITS(pGrab->resource) != CLIENT_BITS(grab->resource)) {
+            if (dixClientIdForXID(pGrab->resource) != dixClientIdForXID(grab->resource)) {
                 FreeGrab(pGrab);
                 return BadAccess;
             }
@@ -618,7 +619,7 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
     ok = TRUE;
     for (grab = wPassiveGrabs(pMinuendGrab->window);
          grab && ok; grab = grab->next) {
-        if ((CLIENT_BITS(grab->resource) != CLIENT_BITS(pMinuendGrab->resource))
+        if ((dixClientIdForXID(grab->resource) != dixClientIdForXID(pMinuendGrab->resource))
             || !GrabMatchesSecond(grab, pMinuendGrab, (grab->grabtype == CORE)))
             continue;
         if (GrabSupersedesSecond(pMinuendGrab, grab)) {
@@ -646,7 +647,7 @@ DeletePassiveGrabFromList(GrabPtr pMinuendGrab)
             param.other_devices_mode = grab->pointerMode;
             param.modifiers = any_modifier;
 
-            pNewGrab = CreateGrab(CLIENT_ID(grab->resource), grab->device,
+            pNewGrab = CreateGrab(dixClientIdForXID(grab->resource), grab->device,
                                   grab->modifierDevice, grab->window,
                                   grab->grabtype,
                                   (GrabMask *) &grab->eventMask,

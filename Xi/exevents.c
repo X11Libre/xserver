@@ -1743,7 +1743,7 @@ ProcessBarrierEvent(InternalEvent *e, DeviceIntPtr dev)
        Otherwise, deliver normally to the client.
      */
     if (grab &&
-        CLIENT_ID(be->barrierid) == CLIENT_ID(grab->resource) &&
+        dixClientIdForXID(be->barrierid) == dixClientIdForXID(grab->resource) &&
         grab->window->drawable.id == be->window) {
         DeliverGrabbedEvent(e, dev, FALSE);
     } else {

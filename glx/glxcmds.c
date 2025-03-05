@@ -36,6 +36,7 @@
 #include <X11/extensions/presenttokens.h>
 
 #include "dix/dix_priv.h"
+#include "dix/resource_priv.h"
 #include "os/bug_priv.h"
 
 #include "glxserver.h"
@@ -2504,7 +2505,7 @@ void
 __glXsendSwapEvent(__GLXdrawable *drawable, int type, CARD64 ust,
                    CARD64 msc, CARD32 sbc)
 {
-    ClientPtr client = clients[CLIENT_ID(drawable->drawId)];
+    ClientPtr client = clients[dixClientIdForXID(drawable->drawId)];
 
     xGLXBufferSwapComplete2 wire =  {
         .type = __glXEventBase + GLX_BufferSwapComplete
