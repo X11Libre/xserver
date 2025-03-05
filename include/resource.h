@@ -101,13 +101,6 @@ typedef uint32_t RESTYPE;
 
 extern _X_EXPORT unsigned int ResourceClientBits(void);
 
-#ifdef INVALID
-#undef INVALID                  /* needed on HP/UX */
-#endif
-
-/* Invalid resource id */
-#define INVALID	(0)
-
 #define BAD_RESOURCE 0xe0000000
 
 /* Resource state callback */
