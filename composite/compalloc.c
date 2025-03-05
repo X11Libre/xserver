@@ -43,6 +43,8 @@
 
 #include <dix-config.h>
 
+#include "dix/resource_priv.h"
+
 #include "compint.h"
 
 static Bool
@@ -327,7 +329,7 @@ compUnredirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
         return BadValue;
 
     for (ccw = cw->clients; ccw; ccw = ccw->next)
-        if (ccw->update == update && CLIENT_ID(ccw->id) == pClient->index) {
+        if (ccw->update == update && dixClientIdForXID(ccw->id) == pClient->index) {
             FreeResource(ccw->id, X11_RESTYPE_NONE);
             return Success;
         }
@@ -426,7 +428,7 @@ compFreeClientSubwindows(WindowPtr pWin, XID id)
         return;
     for (prev = &csw->clients; (ccw = *prev); prev = &ccw->next) {
         if (ccw->id == id) {
-            ClientPtr pClient = clients[CLIENT_ID(id)];
+            ClientPtr pClient = clients[dixClientIdForXID(id)];
 
             *prev = ccw->next;
             if (ccw->update == CompositeRedirectManual) {
@@ -475,7 +477,7 @@ compUnredirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
     if (!csw)
         return BadValue;
     for (ccw = csw->clients; ccw; ccw = ccw->next)
-        if (ccw->update == update && CLIENT_ID(ccw->id) == pClient->index) {
+        if (ccw->update == update && dixClientIdForXID(ccw->id) == pClient->index) {
             FreeResource(ccw->id, X11_RESTYPE_NONE);
             return Success;
         }
@@ -495,7 +497,7 @@ compRedirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
     if (!csw)
         return Success;
     for (ccw = csw->clients; ccw; ccw = ccw->next) {
-        int ret = compRedirectWindow(clients[CLIENT_ID(ccw->id)],
+        int ret = compRedirectWindow(clients[dixClientIdForXID(ccw->id)],
                                      pWin, ccw->update);
 
         if (ret != Success)
@@ -517,7 +519,7 @@ compUnredirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
     if (!csw)
         return Success;
     for (ccw = csw->clients; ccw; ccw = ccw->next) {
-        int ret = compUnredirectWindow(clients[CLIENT_ID(ccw->id)],
+        int ret = compUnredirectWindow(clients[dixClientIdForXID(ccw->id)],
                                        pWin, ccw->update);
 
         if (ret != Success)

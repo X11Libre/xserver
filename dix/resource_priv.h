@@ -51,4 +51,19 @@ ClientPtr dixClientForInputClients(InputClientsPtr pInputClients);
  */
 ClientPtr dixClientForOtherClients(OtherClientsPtr pOtherClients);
 
+/*
+ * @brief extract client ID from XID
+ *
+ * XIDs carry the ID of the client who created/owns the resource in upper bits.
+ * (every client so is assigned a range of XIDs it may use for resource creation)
+ *
+ * This ID is frequently used as table index, eg. for client or resource lookup.
+ *
+ * @param XID the ID of the resource whose client is retrieved
+ * @return index of the client (within client or resource table)
+ */
+static inline int dixClientIdForXID(XID xid) {
+    return ((int)(CLIENT_BITS(xid) >> CLIENTOFFSET));
+}
+
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */

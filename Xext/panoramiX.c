@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/extensions/panoramiXproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/resource_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -352,7 +353,7 @@ PanoramiXFindIDByScrnum(RESTYPE type, XID id, int screen)
     data.screen = screen;
     data.id = id;
 
-    return LookupClientResourceComplex(clients[CLIENT_ID(id)], type,
+    return LookupClientResourceComplex(clients[dixClientIdForXID(id)], type,
                                        XineramaFindIDByScrnum, &data);
 }
 

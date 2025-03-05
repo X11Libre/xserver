@@ -53,6 +53,7 @@ SOFTWARE.
 #include <strings.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/resource_priv.h"
 #include "os/osdep.h"
 
 #include "misc.h"
@@ -414,7 +415,7 @@ FreeColormap(void *value, XID mid)
     EntryPtr pent;
     ColormapPtr pmap = (ColormapPtr) value;
 
-    if (CLIENT_ID(mid) != SERVER_ID) {
+    if (dixClientIdForXID(mid) != SERVER_ID) {
         (*pmap->pScreen->UninstallColormap) (pmap);
         WalkTree(pmap->pScreen, (VisitWindowProcPtr) TellNoMap, (void *) &mid);
     }
@@ -545,7 +546,7 @@ CopyColormapAndFree(Colormap mid, ColormapPtr pSrc, int client)
     pScreen = pSrc->pScreen;
     pVisual = pSrc->pVisual;
     midSrc = pSrc->mid;
-    alloc = ((pSrc->flags & CM_AllAllocated) && CLIENT_ID(midSrc) == client) ?
+    alloc = ((pSrc->flags & CM_AllAllocated) && dixClientIdForXID(midSrc) == client) ?
         AllocAll : AllocNone;
     size = pVisual->ColormapEntries;
 
@@ -1085,7 +1086,7 @@ AllocColor(ColormapPtr pmap,
      * resource manager that the client has pixels in this colormap which
      * should be freed when the client dies */
     if ((pmap->numPixelsRed[client] == 1) &&
-        (CLIENT_ID(pmap->mid) != client) && !(pmap->flags & CM_BeingCreated)) {
+        (dixClientIdForXID(pmap->mid) != client) && !(pmap->flags & CM_BeingCreated)) {
         colorResource *pcr;
 
         pcr = malloc(sizeof(colorResource));
@@ -1505,7 +1506,7 @@ AllocColorCells(int client, ColormapPtr pmap, int colors, int planes,
     oldcount = pmap->numPixelsRed[client];
     if (pmap->class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
-    if (!oldcount && (CLIENT_ID(pmap->mid) != client)) {
+    if (!oldcount && (dixClientIdForXID(pmap->mid) != client)) {
         pcr = malloc(sizeof(colorResource));
         if (!pcr)
             return BadAlloc;
@@ -1572,7 +1573,7 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
     oldcount = pmap->numPixelsRed[client];
     if (class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
-    if (!oldcount && (CLIENT_ID(pmap->mid) != client)) {
+    if (!oldcount && (dixClientIdForXID(pmap->mid) != client)) {
         pcr = malloc(sizeof(colorResource));
         if (!pcr)
             return BadAlloc;

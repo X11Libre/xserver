@@ -1426,8 +1426,8 @@ CheckGrabForSyncs(DeviceIntPtr thisDev, Bool thisMode, Bool otherMode)
     else {                      /* free both if same client owns both */
         thisDev->deviceGrab.sync.state = GRAB_STATE_THAWED;
         if (thisDev->deviceGrab.sync.other &&
-            (CLIENT_BITS(thisDev->deviceGrab.sync.other->resource) ==
-             CLIENT_BITS(grab->resource)))
+            (dixClientIdForXID(thisDev->deviceGrab.sync.other->resource) ==
+             dixClientIdForXID(grab->resource)))
             thisDev->deviceGrab.sync.other = NullGrab;
     }
 
@@ -1437,8 +1437,8 @@ CheckGrabForSyncs(DeviceIntPtr thisDev, Bool thisMode, Bool otherMode)
             dev->deviceGrab.sync.other = grab;
         else {                  /* free both if same client owns both */
             if (dev->deviceGrab.sync.other &&
-                (CLIENT_BITS(dev->deviceGrab.sync.other->resource) ==
-                 CLIENT_BITS(grab->resource)))
+                (dixClientIdForXID(dev->deviceGrab.sync.other->resource) ==
+                 dixClientIdForXID(grab->resource)))
                 dev->deviceGrab.sync.other = NullGrab;
         }
     }
@@ -4425,8 +4425,8 @@ FreezeThisEventIfNeededForSyncGrab(DeviceIntPtr thisDev, InternalEvent *event)
         if (dev) {
             FreezeThaw(dev, TRUE);
             if ((dev->deviceGrab.sync.state == GRAB_STATE_FREEZE_BOTH_NEXT_EVENT) &&
-                (CLIENT_BITS(grab->resource) ==
-                 CLIENT_BITS(dev->deviceGrab.grab->resource)))
+                (dixClientIdForXID(grab->resource) ==
+                 dixClientIdForXID(dev->deviceGrab.grab->resource)))
                 dev->deviceGrab.sync.state = GRAB_STATE_FROZEN_NO_EVENT;
             else
                 dev->deviceGrab.sync.other = grab;
@@ -6286,5 +6286,5 @@ IsWrongPointerBarrierClient(ClientPtr client, DeviceIntPtr dev, xEvent *event)
     if (ev->evtype != XI_BarrierHit && ev->evtype != XI_BarrierLeave)
         return FALSE;
 
-    return client->index != CLIENT_ID(ev->barrier);
+    return client->index != dixClientIdForXID(ev->barrier);
 }

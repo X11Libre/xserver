@@ -29,6 +29,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/resource_priv.h"
 
 #include "dixstruct.h"
 #include "windowstr.h"
@@ -56,7 +57,7 @@ check_for_touch_selection_conflicts(ClientPtr B, WindowPtr win, int deviceid,
     for (; A; A = A->next) {
         DeviceIntPtr tmp;
 
-        if (CLIENT_ID(A->resource) == B->index)
+        if (dixClientIdForXID(A->resource) == B->index)
             continue;
 
         if (deviceid == XIAllDevices)
