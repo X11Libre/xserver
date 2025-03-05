@@ -55,6 +55,7 @@ SOFTWARE.
 #include "dix/colormap_priv.h"
 #include "dix/resource_priv.h"
 #include "os/osdep.h"
+#include "os/bug_priv.h"
 
 #include "misc.h"
 #include "dix.h"
@@ -244,8 +245,8 @@ typedef struct _colorResource {
  * \param alloc  1 iff all entries are allocated writable
  */
 int
-CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
-               ColormapPtr *ppcmap, int alloc, int client)
+dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
+                  ColormapPtr *ppcmap, int alloc, ClientPtr pClient)
 {
     int class, size;
     unsigned long sizebytes;
@@ -254,9 +255,14 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
     int i;
     Pixel *ppix, **pptr;
 
+    if (!pClient)
+        return BadMatch;
+
+    const int clientIndex = pClient->index;
+
     class = pVisual->class;
     if (!(class & DynamicClass) && (alloc != AllocNone) &&
-        (client != SERVER_ID))
+        (pClient != serverClient))
         return BadMatch;
 
     size = pVisual->ColormapEntries;
@@ -313,10 +319,10 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
             free(pmap);
             return BadAlloc;
         }
-        pmap->clientPixelsRed[client] = ppix;
+        pmap->clientPixelsRed[clientIndex] = ppix;
         for (i = 0; i < size; i++)
             ppix[i] = i;
-        pmap->numPixelsRed[client] = size;
+        pmap->numPixelsRed[clientIndex] = size;
     }
 
     if ((class | DynamicClass) == DirectColor) {
@@ -351,14 +357,14 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
             pmap->freeGreen = 0;
             ppix = calloc(size, sizeof(Pixel));
             if (!ppix) {
-                free(pmap->clientPixelsRed[client]);
+                free(pmap->clientPixelsRed[clientIndex]);
                 free(pmap);
                 return BadAlloc;
             }
-            pmap->clientPixelsGreen[client] = ppix;
+            pmap->clientPixelsGreen[clientIndex] = ppix;
             for (i = 0; i < size; i++)
                 ppix[i] = i;
-            pmap->numPixelsGreen[client] = size;
+            pmap->numPixelsGreen[clientIndex] = size;
 
             size = pmap->freeBlue;
             for (pent = &pmap->blue[size - 1]; pent >= pmap->blue; pent--)
@@ -366,15 +372,15 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
             pmap->freeBlue = 0;
             ppix = calloc(size, sizeof(Pixel));
             if (!ppix) {
-                free(pmap->clientPixelsGreen[client]);
-                free(pmap->clientPixelsRed[client]);
+                free(pmap->clientPixelsGreen[clientIndex]);
+                free(pmap->clientPixelsRed[clientIndex]);
                 free(pmap);
                 return BadAlloc;
             }
-            pmap->clientPixelsBlue[client] = ppix;
+            pmap->clientPixelsBlue[clientIndex] = ppix;
             for (i = 0; i < size; i++)
                 ppix[i] = i;
-            pmap->numPixelsBlue[client] = size;
+            pmap->numPixelsBlue[clientIndex] = size;
         }
     }
     pmap->flags |= CM_BeingCreated;
@@ -385,7 +391,7 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
     /*
      * Security creation/labeling check
      */
-    i = XaceHookResourceAccess(clients[client], mid, X11_RESTYPE_COLORMAP,
+    i = XaceHookResourceAccess(pClient, mid, X11_RESTYPE_COLORMAP,
                  pmap, X11_RESTYPE_NONE, NULL, DixCreateAccess);
     if (i != Success) {
         FreeResource(mid, X11_RESTYPE_NONE);
@@ -551,7 +557,7 @@ CopyColormapAndFree(Colormap mid, ColormapPtr pSrc, int client)
     size = pVisual->ColormapEntries;
 
     /* If the create returns non-0, it failed */
-    result = CreateColormap(mid, pScreen, pVisual, &pmap, alloc, client);
+    result = dixCreateColormap(mid, pScreen, pVisual, &pmap, alloc, clients[client]);
     if (result != Success)
         return result;
     if (alloc == AllocAll) {

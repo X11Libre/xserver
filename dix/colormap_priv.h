@@ -71,8 +71,8 @@ typedef struct _ColormapRec {
 } ColormapRec;
 
 
-int CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
-                   ColormapPtr *ppcmap, int alloc, int client);
+int dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
+                      ColormapPtr *ppcmap, int alloc, ClientPtr client);
 
 /* should only be called via resource type's destructor */
 int FreeColormap(void *pmap, XID mid);
