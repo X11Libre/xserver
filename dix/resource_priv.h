@@ -66,4 +66,20 @@ static inline int dixClientIdForXID(XID xid) {
     return ((int)(CLIENT_BITS(xid) >> CLIENTOFFSET));
 }
 
+/*
+ * @brief retrieve client pointer from XID
+ *
+ * XIDs carry the ID of the client who created/owns the resource in upper bits.
+ * (every client so is assigned a range of XIDs it may use for resource creation)
+ *
+ * @param XID the ID of the resource whose client is retrieved
+ * @return pointer to ClientRec structure or NullClient (NULL)
+ */
+static inline ClientPtr dixClientForXID(XID xid) {
+    const int idx = dixClientIdForXID(xid);
+    if (idx < MAXCLIENTS)
+        return clients[idx];
+    return NullClient;
+}
+
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */

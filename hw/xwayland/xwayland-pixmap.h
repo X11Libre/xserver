@@ -50,7 +50,7 @@ Bool xwl_pixmap_init(void);
 static inline Bool
 xwl_is_client_pixmap(PixmapPtr pixmap)
 {
-    return clients[dixClientIdForXID(pixmap->drawable.id)] != serverClient;
+    return dixClientForXID(pixmap->drawable.id) != serverClient;
 }
 
 #endif /* XWAYLAND_PIXMAP_H */

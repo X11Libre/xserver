@@ -743,7 +743,6 @@ SecurityResource(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XaceResourceAccessRec *rec = calldata;
     SecurityStateRec *subj, *obj;
-    int cid = dixClientIdForXID(rec->id);
     Mask requested = rec->access_mode;
     Mask allowed = SecurityResourceMask;
 
@@ -758,8 +757,12 @@ SecurityResource(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (rec->rtype == X11_RESTYPE_WINDOW)
         allowed |= SecurityWindowExtraMask;
 
+    ClientPtr owner = dixClientForXID(rec->id);
+    if (!owner)
+        goto denied;
+
     /* special checks for server-owned resources */
-    if (cid == 0) {
+    if (owner == serverClient) {
         if (rec->rtype & RC_DRAWABLE)
             /* additional operations allowed on root windows */
             allowed |= SecurityRootWindowExtraMask;
@@ -773,15 +776,15 @@ SecurityResource(CallbackListPtr *pcbl, void *unused, void *calldata)
             allowed |= DixReadAccess;
     }
 
-    if (clients[cid] != NULL) {
-        obj = dixLookupPrivate(&clients[cid]->devPrivates, stateKey);
-        if (SecurityDoCheck(subj, obj, requested, allowed) == Success)
-            return;
-    }
+    obj = dixLookupPrivate(&owner->devPrivates, stateKey);
+    if (SecurityDoCheck(subj, obj, requested, allowed) == Success)
+        return;
 
+denied:
     SecurityAudit("Security: denied client %d access %lx to resource 0x%lx "
                   "of client %d on request %s\n", rec->client->index,
-                  (unsigned long)requested, (unsigned long)rec->id, cid,
+                  (unsigned long)requested, (unsigned long)rec->id,
+                  dixClientIdForXID(rec->id),
                   SecurityLookupRequestName(rec->client));
     rec->status = BadAccess;    /* deny access */
 }

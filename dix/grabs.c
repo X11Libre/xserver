@@ -81,7 +81,6 @@ SOFTWARE.
 void
 PrintDeviceGrabInfo(DeviceIntPtr dev)
 {
-    ClientPtr client;
     LocalClientCredRec *lcc;
     int i, j;
     GrabInfoPtr devGrab = &dev->deviceGrab;
@@ -93,7 +92,7 @@ PrintDeviceGrabInfo(DeviceIntPtr dev)
            (grab->grabtype == XI2) ? "xi2" :
            ((grab->grabtype == CORE) ? "core" : "xi1"), dev->name, dev->id);
 
-    client = clients[dixClientIdForXID(grab->resource)];
+    ClientPtr client = dixClientForXID(grab->resource);
     if (client) {
         pid_t clientpid = GetClientPid(client);
         const char *cmdname = GetClientCmdName(client);
@@ -177,7 +176,6 @@ void
 UngrabAllDevices(Bool kill_client)
 {
     DeviceIntPtr dev;
-    ClientPtr client;
 
     ErrorF("Ungrabbing all devices%s; grabs listed below:\n",
            kill_client ? " and killing their owners" : "");
@@ -186,7 +184,7 @@ UngrabAllDevices(Bool kill_client)
         if (!dev->deviceGrab.grab)
             continue;
         PrintDeviceGrabInfo(dev);
-        client = clients[dixClientIdForXID(dev->deviceGrab.grab->resource)];
+        ClientPtr client = dixClientForXID(dev->deviceGrab.grab->resource);
         if (!kill_client || !client || client->clientGone)
             dev->deviceGrab.DeactivateGrab(dev);
         if (kill_client)
