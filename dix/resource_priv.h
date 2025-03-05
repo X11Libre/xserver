@@ -82,4 +82,14 @@ static inline ClientPtr dixClientForXID(XID xid) {
     return NullClient;
 }
 
+/*
+ * @brief check whether resource is owned by server
+ *
+ * @param XID the ID of the resource to check
+ * @return TRUE if resource is server owned
+ */
+static inline Bool dixResouceIsServerOwned(XID xid) {
+    return (dixClientForXID(xid) == serverClient);
+}
+
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */
