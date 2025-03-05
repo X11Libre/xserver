@@ -219,8 +219,6 @@ static void FindColorInRootCmap(ColormapPtr /* pmap */ ,
 	    (bits) += (base);		 	\
 	    while((bits) & ~(mask))		\
 		(bits) += ((bits) & ~(mask));
-/* ID of server as client */
-#define SERVER_ID	0
 
 typedef struct _colorResource {
     Colormap mid;
@@ -417,7 +415,7 @@ FreeColormap(void *value, XID mid)
     EntryPtr pent;
     ColormapPtr pmap = (ColormapPtr) value;
 
-    if (dixClientIdForXID(mid) != SERVER_ID) {
+    if (!dixResouceIsServerOwned(mid)) {
         (*pmap->pScreen->UninstallColormap) (pmap);
         WalkTree(pmap->pScreen, (VisitWindowProcPtr) TellNoMap, (void *) &mid);
     }

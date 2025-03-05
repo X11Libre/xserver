@@ -762,7 +762,7 @@ SecurityResource(CallbackListPtr *pcbl, void *unused, void *calldata)
         goto denied;
 
     /* special checks for server-owned resources */
-    if (owner == serverClient) {
+    if (dixResouceIsServerOwned(rec->id)) {
         if (rec->rtype & RC_DRAWABLE)
             /* additional operations allowed on root windows */
             allowed |= SecurityRootWindowExtraMask;
