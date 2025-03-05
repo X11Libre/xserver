@@ -308,8 +308,8 @@ xf86-driver-build-test:
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-i740
               SHA: master
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-intel
-              SHA: incubate # temporary
+            - REPO: https://gitlab.freedesktop.org/metux/xf86-video-intel
+              SHA: submit/fixes-for-xserver # temporary
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mach64
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mga
@@ -332,8 +332,8 @@ xf86-driver-build-test:
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-savage
               SHA: master
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-siliconmotion
-              SHA: master
+            - REPO: https://gitlab.freedesktop.org/metux/xf86-video-siliconmotion
+              SHA: wip/ci
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sis
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sisusb
@@ -354,8 +354,8 @@ xf86-driver-build-test:
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-trident
               SHA: master
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-v4l
-              SHA: master
+            - REPO: https://gitlab.freedesktop.org/metux/xf86-video-v4l
+              SHA: incubate
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vbox
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa
