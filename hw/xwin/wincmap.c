@@ -520,12 +520,12 @@ winCreateDefColormap(ScreenPtr pScreen)
 #endif
 
     /* Allocate an X colormap, owned by client 0 */
-    if (CreateColormap(pScreen->defColormap,
-                       pScreen,
-                       pVisual,
-                       &pcmap,
-                       (pVisual->class & DynamicClass) ? AllocNone : AllocAll,
-                       0) != Success) {
+    if (dixCreateColormap(pScreen->defColormap,
+                          pScreen,
+                          pVisual,
+                          &pcmap,
+                          (pVisual->class & DynamicClass) ? AllocNone : AllocAll,
+                          serverClient) != Success) {
         ErrorF("winCreateDefColormap - CreateColormap failed\n");
         return FALSE;
     }

@@ -709,7 +709,7 @@ DGACreateColormap(int index, ClientPtr client, int id, int mode, int alloc)
 
     LEGAL_NEW_RESOURCE(id, client);
 
-    return CreateColormap(id, pScreen, pVisual, &pmap, alloc, client->index);
+    return dixCreateColormap(id, pScreen, pVisual, &pmap, alloc, client);
 }
 
 /*  Called by the extension to install a colormap on DGA active screens */

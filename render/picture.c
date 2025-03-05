@@ -421,8 +421,8 @@ PictureInitIndexedFormat(ScreenPtr pScreen, PictFormatPtr format)
         if (pVisual == NULL)
             return FALSE;
 
-        if (CreateColormap(FakeClientID(0), pScreen, pVisual,
-                           &format->index.pColormap, AllocNone, 0)
+        if (dixCreateColormap(FakeClientID(0), pScreen, pVisual,
+                              &format->index.pColormap, AllocNone, serverClient)
             != Success)
             return FALSE;
     }

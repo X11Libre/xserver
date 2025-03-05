@@ -469,9 +469,9 @@ xnestCreateDefaultColormap(ScreenPtr pScreen)
     for (pVisual = pScreen->visuals;
          pVisual->vid != pScreen->rootVisual; pVisual++);
 
-    if (CreateColormap(pScreen->defColormap, pScreen, pVisual, &pCmap,
+    if (dixCreateColormap(pScreen->defColormap, pScreen, pVisual, &pCmap,
                        (pVisual->class & DynamicClass) ? AllocNone : AllocAll,
-                       0)
+                       serverClient)
         != Success)
         return FALSE;
 

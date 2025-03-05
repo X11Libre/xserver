@@ -261,8 +261,8 @@ miCreateDefColormap(ScreenPtr pScreen)
     else
         alloctype = AllocAll;
 
-    if (CreateColormap(pScreen->defColormap, pScreen, pVisual, &cmap,
-                       alloctype, 0) != Success)
+    if (dixCreateColormap(pScreen->defColormap, pScreen, pVisual, &cmap,
+                          alloctype, serverClient) != Success)
         return FALSE;
 
     if (pScreen->rootDepth > 1) {
