@@ -23,6 +23,9 @@
 /* extract the client mask from an XID */
 #define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
 
+/* resource field */
+#define RESOURCE_ID_MASK        ((1 << CLIENTOFFSET) - 1)
+
 /*
  * @brief retrieve client that owns given window
  *

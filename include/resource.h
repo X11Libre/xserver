@@ -103,8 +103,6 @@ extern _X_EXPORT unsigned int ResourceClientBits(void);
 /* bits and fields within a resource id */
 #define RESOURCE_AND_CLIENT_COUNT   29  /* 29 bits for XIDs */
 #define CLIENTOFFSET	    (RESOURCE_AND_CLIENT_COUNT - ResourceClientBits())
-/* resource field */
-#define RESOURCE_ID_MASK	((1 << CLIENTOFFSET) - 1)
 
 #ifdef INVALID
 #undef INVALID                  /* needed on HP/UX */
