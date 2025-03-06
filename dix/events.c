@@ -2570,12 +2570,12 @@ Bool MaybeDeliverEventToClient(WindowPtr pWin, xEvent *pEvents,
                 return FALSE;
 #ifdef XINERAMA
             if (!noPanoramiXExtension && pWin->drawable.pScreen->myNum)
-                return XineramaTryClientEventsResult(rClient(other), NullGrab,
+                return XineramaTryClientEventsResult(dixClientForOtherClients(other), NullGrab,
                                                      other->mask, filter);
 #endif /* XINERAMA */
-            if (XaceHookReceiveAccess(rClient(other), pWin, pEvents, 1))
+            if (XaceHookReceiveAccess(dixClientForOtherClients(other), pWin, pEvents, 1))
                 return TRUE;       /* don't send, but pretend we did */
-            return TryClientEvents(rClient(other), NULL, pEvents, 1,
+            return TryClientEvents(dixClientForOtherClients(other), NULL, pEvents, 1,
                                    other->mask, filter, NullGrab) == 1;
         }
     }

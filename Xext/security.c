@@ -208,7 +208,7 @@ SecurityDeleteAuthorization(void *value, XID id)
             .type = SecurityEventBase + XSecurityAuthorizationRevoked,
             .authId = pAuth->id
         };
-        WriteEventsToClient(rClient(pEventClient), 1, (xEvent *) &are);
+        WriteEventsToClient(dixClientForOtherClients(pEventClient), 1, (xEvent *) &are);
         FreeResource(pEventClient->resource, X11_RESTYPE_NONE);
     }
 

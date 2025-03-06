@@ -32,3 +32,10 @@ ClientPtr dixClientForInputClients(InputClientsPtr pInputClients) {
 
     return clients[CLIENT_ID(pInputClients->resource)];
 }
+
+ClientPtr dixClientForOtherClients(OtherClientsPtr pOtherClients) {
+    if (!pOtherClients)
+        return NullClient;
+
+    return clients[CLIENT_ID(pOtherClients->resource)];
+}

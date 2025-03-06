@@ -1428,7 +1428,7 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
                     break;
 
             /* if owner selected, oclients is NULL */
-            *client = oclients ? rClient(oclients) : dixClientForWindow(*win);
+            *client = oclients ? dixClientForOtherClients(oclients) : dixClientForWindow(*win);
         }
 
         *grab = NULL;
