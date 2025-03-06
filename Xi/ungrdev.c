@@ -52,11 +52,13 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <X11/extensions/XIproto.h>
+
+#include "dix/resource_priv.h"
+
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include <X11/extensions/XIproto.h>
 #include "exglobals.h"
-
 #include "ungrdev.h"
 
 /***********************************************************************

@@ -57,6 +57,7 @@ SOFTWARE.
 
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/resource_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
