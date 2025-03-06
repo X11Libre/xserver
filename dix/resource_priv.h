@@ -11,6 +11,12 @@
         (CLIENT_BITS((obj)->resource) == (client)->clientAsMask)
 
 /*
+ * Resource IDs having that bit set still belonging to some client,
+ * but are server-internal, thus invisible to clients.
+ */
+#define SERVER_BIT           (Mask)0x40000000        /* use illegal bit */
+
+/*
  * @brief retrieve client that owns given window
  *
  * XIDs carry the ID of the client who created/owns the resource in upper bits.
