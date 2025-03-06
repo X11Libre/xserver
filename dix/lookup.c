@@ -25,3 +25,10 @@ ClientPtr dixClientForGrab(GrabPtr pGrab) {
 
     return clients[CLIENT_ID(pGrab->resource)];
 }
+
+ClientPtr dixClientForInputClients(InputClientsPtr pInputClients) {
+    if (!pInputClients)
+        return NullClient;
+
+    return clients[CLIENT_ID(pInputClients->resource)];
+}

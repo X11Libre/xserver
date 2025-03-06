@@ -2271,7 +2271,7 @@ DeliverEventToInputClients(DeviceIntPtr dev, InputClients * inputclients,
 
     for (; inputclients; inputclients = inputclients->next) {
         Mask mask;
-        ClientPtr client = rClient(inputclients);
+        ClientPtr client = dixClientForInputClients(inputclients);
 
         if (IsInterferingGrab(client, dev, events))
             continue;
@@ -2507,7 +2507,7 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
              */
             ic.next = NULL;
 
-            if (!FilterRawEvents(rClient(&ic), grab, root))
+            if (!FilterRawEvents(dixClientForInputClients(&ic), grab, root))
                 DeliverEventToInputClients(device, &ic, root, xi, 1,
                                            filter, NULL, &c, &m);
         }
