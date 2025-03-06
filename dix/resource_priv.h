@@ -6,11 +6,15 @@
 #define _XSERVER_DIX_RESOURCE_PRIV_H
 
 #include "include/dix.h"
+#include "include/resource.h"
 
 #define SameClient(obj,client) \
         (CLIENT_BITS((obj)->resource) == (client)->clientAsMask)
 
 #define SERVER_BIT           (Mask)0x40000000        /* use illegal bit */
+
+/* client field */
+#define RESOURCE_CLIENT_MASK   (((1 << ResourceClientBits()) - 1) << CLIENTOFFSET)
 
 /* extract the client mask from an XID */
 #define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
