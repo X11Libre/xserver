@@ -143,4 +143,17 @@ unsigned int GetXIDList(ClientPtr pClient,
                         unsigned int count,
                         XID *pids);
 
+/*
+ * @brief retrieve a range of free XIDs for given client
+ *
+ * @param client the client to scan
+ * @param server TRUE if scanning for free server XIDs
+ * @param minp pointer to result buffer: minimum XID of found range
+ * @param maxp pointer to result buffer: maximum XID of found range
+ */
+void GetXIDRange(int client,
+                 Bool server,
+                 XID *minp,
+                 XID *maxp);
+
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */

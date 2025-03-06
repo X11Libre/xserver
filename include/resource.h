@@ -247,11 +247,6 @@ extern _X_EXPORT int dixLookupResourceByClass(void **result,
                                               ClientPtr client,
                                               Mask access_mode);
 
-extern _X_EXPORT void GetXIDRange(int /*client */ ,
-                                  Bool /*server */ ,
-                                  XID * /*minp */ ,
-                                  XID * /*maxp */ );
-
 extern _X_EXPORT RESTYPE lastResourceType;
 extern _X_EXPORT RESTYPE TypeMask;
 
