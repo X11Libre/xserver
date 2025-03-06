@@ -28,17 +28,19 @@ from The Open Group.
 
 #include <dix-config.h>
 
+#include <stdint.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/extensions/xcmiscproto.h>
+
+#include "dix/resource_priv.h"
+
 #include "misc.h"
 #include "os.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "swaprep.h"
-#include <X11/extensions/xcmiscproto.h>
 #include "extinit_priv.h"
-
-#include <stdint.h>
 
 static int
 ProcXCMiscGetVersion(ClientPtr client)

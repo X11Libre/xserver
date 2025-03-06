@@ -5,6 +5,8 @@
 #ifndef _XSERVER_DIX_RESOURCE_PRIV_H
 #define _XSERVER_DIX_RESOURCE_PRIV_H
 
+#include <X11/Xdefs.h>
+
 #include "include/dix.h"
 #include "include/resource.h"
 
@@ -128,5 +130,17 @@ static inline Bool dixResouceIsServerOwned(XID xid) {
  * providing at most MAXHASHSIZE hashes.
  */
 int HashResourceID(XID id, unsigned int numBits);
+
+/*
+ * @brief scan for free XIDs for client
+ *
+ * @param pClient the client to scan
+ * @param count maximum size of items to return
+ * @param pids pointer to XID where to return found free XIDs
+ * @result number of free XIDs
+ */
+unsigned int GetXIDList(ClientPtr pClient,
+                        unsigned int count,
+                        XID *pids);
 
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */
