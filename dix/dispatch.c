@@ -109,6 +109,7 @@ Equipment Corporation.
 #include "dix/input_priv.h"
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/resource.h"
 #include "os/auth.h"
