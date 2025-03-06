@@ -25,6 +25,8 @@
 #include <dix-config.h>
 #endif
 
+#include "dix/resource_priv.h"
+
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "exevents.h"

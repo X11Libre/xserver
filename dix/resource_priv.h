@@ -20,6 +20,10 @@
 /* client field */
 #define RESOURCE_CLIENT_MASK   (((1 << ResourceClientBits()) - 1) << CLIENTOFFSET)
 
+/* bits and fields within a resource id */
+#define RESOURCE_AND_CLIENT_COUNT   29  /* 29 bits for XIDs */
+#define CLIENTOFFSET     (RESOURCE_AND_CLIENT_COUNT - ResourceClientBits())
+
 /* extract the client mask from an XID */
 #define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
 

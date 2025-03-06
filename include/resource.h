@@ -100,9 +100,6 @@ typedef uint32_t RESTYPE;
 
 
 extern _X_EXPORT unsigned int ResourceClientBits(void);
-/* bits and fields within a resource id */
-#define RESOURCE_AND_CLIENT_COUNT   29  /* 29 bits for XIDs */
-#define CLIENTOFFSET	    (RESOURCE_AND_CLIENT_COUNT - ResourceClientBits())
 
 #ifdef INVALID
 #undef INVALID                  /* needed on HP/UX */
