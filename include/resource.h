@@ -107,8 +107,6 @@ extern _X_EXPORT unsigned int ResourceClientBits(void);
 #define RESOURCE_ID_MASK	((1 << CLIENTOFFSET) - 1)
 /* client field */
 #define RESOURCE_CLIENT_MASK	(((1 << ResourceClientBits()) - 1) << CLIENTOFFSET)
-/* extract the client mask from an XID */
-#define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
 
 #ifdef INVALID
 #undef INVALID                  /* needed on HP/UX */

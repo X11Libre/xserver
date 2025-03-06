@@ -16,6 +16,9 @@
  */
 #define SERVER_BIT           (Mask)0x40000000        /* use illegal bit */
 
+/* extract the client mask from an XID */
+#define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
+
 /*
  * @brief retrieve client that owns given window
  *
