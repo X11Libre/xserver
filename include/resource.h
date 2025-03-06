@@ -245,10 +245,6 @@ extern _X_EXPORT void GetXIDRange(int /*client */ ,
                                   XID * /*minp */ ,
                                   XID * /*maxp */ );
 
-extern _X_EXPORT unsigned int GetXIDList(ClientPtr /*client */ ,
-                                         unsigned int /*count */ ,
-                                         XID * /*pids */ );
-
 extern _X_EXPORT RESTYPE lastResourceType;
 extern _X_EXPORT RESTYPE TypeMask;
 

@@ -33,6 +33,7 @@ from The Open Group.
 #include <X11/Xproto.h>
 #include <X11/extensions/xcmiscproto.h>
 
+#include "dix/resource_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "misc.h"
