@@ -1047,7 +1047,7 @@ TouchClientWantsOwnershipEvents(ClientPtr client, DeviceIntPtr dev,
 
     assert(wOtherInputMasks(win));
     nt_list_for_each_entry(iclient, wOtherInputMasks(win)->inputClients, next) {
-        if (rClient(iclient) != client)
+        if (dixClientForInputClients(iclient) != client)
             continue;
 
         return xi2mask_isset(iclient->xi2mask, dev, XI_TouchOwnership);
@@ -1401,7 +1401,7 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
             BUG_RETURN_VAL(!iclients, FALSE);
 
             *mask = iclients->xi2mask;
-            *client = rClient(iclients);
+            *client = dixClientForInputClients(iclients);
         }
         else if (listener->level == XI) {
             int xi_type = GetXIType(TouchGetPointerEventType(ev));
@@ -1414,7 +1414,7 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
                 break;
             BUG_RETURN_VAL(!iclients, FALSE);
 
-            *client = rClient(iclients);
+            *client = dixClientForInputClients(iclients);
         }
         else {
             int coretype = GetCoreType(TouchGetPointerEventType(ev));
@@ -2304,7 +2304,7 @@ RetrieveGestureDeliveryData(DeviceIntPtr dev, InternalEvent *ev, GestureListener
 
         BUG_RETURN_VAL(!iclients, FALSE);
 
-        *client = rClient(iclients);
+        *client = dixClientForInputClients(iclients);
     }
 
     return TRUE;

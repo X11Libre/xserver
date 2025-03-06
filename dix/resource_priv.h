@@ -29,4 +29,15 @@ ClientPtr dixClientForWindow(WindowPtr pWin);
  */
 ClientPtr dixClientForGrab(GrabPtr pGrab);
 
+/*
+ * @brief retrieve client that owns InputClients
+ *
+ * XIDs carry the ID of the client who created/owns the resource in upper bits.
+ * (every client so is assigned a range of XIDs it may use for resource creation)
+ *
+ * @param GrabPtr to the InputClients whose owning client shall be retrieved
+ * @return pointer to ClientRec structure or NullClient (NULL)
+ */
+ClientPtr dixClientForInputClients(InputClientsPtr pInputClients);
+
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */
