@@ -3826,7 +3826,7 @@ ActivatePassiveGrab(DeviceIntPtr device, GrabPtr grab, InternalEvent *event,
         FixUpEventFromWindow(pSprite, xE, grab->window, None, TRUE);
 
         /* XXX: XACE? */
-        TryClientEvents(rClient(grab), device, xE, count,
+        TryClientEvents(dixClientForGrab(grab), device, xE, count,
                         GetEventFilter(device, xE),
                         GetEventFilter(device, xE), grab);
     }
@@ -3866,7 +3866,7 @@ CoreGrabInterferes(DeviceIntPtr device, GrabPtr grab)
         GrabPtr othergrab = other->deviceGrab.grab;
 
         if (othergrab && othergrab->grabtype == CORE &&
-            SameClient(grab, rClient(othergrab)) &&
+            SameClient(grab, dixClientForGrab(othergrab)) &&
             ((IsPointerDevice(grab->device) &&
               IsPointerDevice(othergrab->device)) ||
              (IsKeyboardDevice(grab->device) &&
@@ -4325,10 +4325,10 @@ DeliverOneGrabbedEvent(InternalEvent *event, DeviceIntPtr dev,
     if (rc == Success) {
         FixUpEventFromWindow(pSprite, xE, grab->window, None, TRUE);
         if (XaceHookSendAccess(NullClient, dev, grab->window, xE, count) ||
-            XaceHookReceiveAccess(rClient(grab), grab->window, xE, count))
+            XaceHookReceiveAccess(dixClientForGrab(grab), grab->window, xE, count))
             deliveries = 1;     /* don't send, but pretend we did */
-        else if (level != CORE || !IsInterferingGrab(rClient(grab), dev, xE)) {
-            deliveries = TryClientEvents(rClient(grab), dev,
+        else if (level != CORE || !IsInterferingGrab(dixClientForGrab(grab), dev, xE)) {
+            deliveries = TryClientEvents(dixClientForGrab(grab), dev,
                                          xE, count, mask, filter, grab);
         }
     }
@@ -4682,7 +4682,7 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
     if (grab) {
         mask = (pWin == grab->window) ? grab->eventMask : 0;
         if (grab->ownerEvents)
-            mask |= EventMaskForClient(pWin, rClient(grab));
+            mask |= EventMaskForClient(pWin, dixClientForGrab(grab));
     }
     else {
         mask = pWin->eventMask | wOtherEventMasks(pWin);
@@ -4710,7 +4710,7 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
 
     if ((mask & GetEventFilter(mouse, &event))) {
         if (grab)
-            TryClientEvents(rClient(grab), mouse, &event, 1, mask,
+            TryClientEvents(dixClientForGrab(grab), mouse, &event, 1, mask,
                             GetEventFilter(mouse, &event), grab);
         else
             DeliverEventsToWindow(mouse, pWin, &event, 1,
@@ -4721,7 +4721,7 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
         xKeymapEvent ke = {
             .type = KeymapNotify
         };
-        ClientPtr client = grab ? rClient(grab) : dixClientForWindow(pWin);
+        ClientPtr client = grab ? dixClientForGrab(grab) : dixClientForWindow(pWin);
         int rc;
 
         rc = XaceHookDeviceAccess(client, keybd, DixReadAccess);
@@ -4729,7 +4729,7 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
             memcpy((char *) &ke.map[0], (char *) &keybd->key->down[1], 31);
 
         if (grab)
-            TryClientEvents(rClient(grab), keybd, (xEvent *) &ke, 1,
+            TryClientEvents(dixClientForGrab(grab), keybd, (xEvent *) &ke, 1,
                             mask, KeymapStateMask, grab);
         else
             DeliverEventsToWindow(mouse, pWin, (xEvent *) &ke, 1,
@@ -4803,7 +4803,7 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
         Mask mask;
 
         mask = xi2mask_isset(grab->xi2mask, mouse, type);
-        TryClientEvents(rClient(grab), mouse, (xEvent *) event, 1, mask, 1,
+        TryClientEvents(dixClientForGrab(grab), mouse, (xEvent *) event, 1, mask, 1,
                         grab);
     }
     else {

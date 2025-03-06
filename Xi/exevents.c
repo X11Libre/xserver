@@ -1119,7 +1119,7 @@ ActivateEarlyAccept(DeviceIntPtr dev, TouchPointInfoPtr ti)
                ti->listeners[0].type != TOUCH_LISTENER_POINTER_GRAB);
     BUG_RETURN(!grab);
 
-    client = rClient(grab);
+    client = dixClientForGrab(grab);
 
     if (TouchAcceptReject(client, dev, XIAcceptTouch, ti->client_id,
                           ti->listeners[0].window->drawable.id, &error) != Success)
@@ -1371,7 +1371,7 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
 
         BUG_RETURN_VAL(!*grab, FALSE);
 
-        *client = rClient(*grab);
+        *client = dixClientForGrab(*grab);
         *win = (*grab)->window;
         *mask = (*grab)->xi2mask;
     }
@@ -1454,7 +1454,7 @@ DeliverTouchEmulatedEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
         if (grab) {
             win = grab->window;
             xi2mask = grab->xi2mask;
-            client = rClient(grab);
+            client = dixClientForGrab(grab);
         }
     }
 
@@ -2284,7 +2284,7 @@ RetrieveGestureDeliveryData(DeviceIntPtr dev, InternalEvent *ev, GestureListener
 
         BUG_RETURN_VAL(!*grab, FALSE);
 
-        *client = rClient(*grab);
+        *client = dixClientForGrab(*grab);
         *win = (*grab)->window;
     }
     else {
