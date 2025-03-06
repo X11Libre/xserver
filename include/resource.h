@@ -109,7 +109,6 @@ extern _X_EXPORT unsigned int ResourceClientBits(void);
 #define RESOURCE_CLIENT_MASK	(((1 << ResourceClientBits()) - 1) << CLIENTOFFSET)
 /* extract the client mask from an XID */
 #define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
-#define SERVER_BIT		(Mask)0x40000000        /* use illegal bit */
 
 #define BAD_RESOURCE 0xe0000000
 

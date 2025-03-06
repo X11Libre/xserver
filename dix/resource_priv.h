@@ -10,6 +10,8 @@
 #define SameClient(obj,client) \
         (CLIENT_BITS((obj)->resource) == (client)->clientAsMask)
 
+#define SERVER_BIT           (Mask)0x40000000        /* use illegal bit */
+
 /*
  * @brief retrieve client that owns given window
  *
