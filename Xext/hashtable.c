@@ -1,6 +1,9 @@
 #include <dix-config.h>
 
 #include <stdlib.h>
+
+#include "dix/resource_priv.h"
+
 #include "misc.h"
 #include "hashtable.h"
 

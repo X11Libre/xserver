@@ -50,6 +50,7 @@
 #include <sys/types.h>
 #include <grp.h>
 
+#include "dix/resource_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbsrv_priv.h"
