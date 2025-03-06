@@ -115,4 +115,18 @@ static inline Bool dixResouceIsServerOwned(XID xid) {
     return (dixClientForXID(xid) == serverClient);
 }
 
+/*
+ * @brief hash a XID for using as hashtable index
+ *
+ * @param id the XID to hash
+ * @param numBits number of bits in the resulting hash (>=0)
+ * @result the computed hash value
+ *
+ * @note This function is really only for handling
+ * INITHASHSIZE..MAXHASHSIZE bit hashes, but will handle any number
+ * of bits by either masking numBits lower bits of the ID or by
+ * providing at most MAXHASHSIZE hashes.
+ */
+int HashResourceID(XID id, unsigned int numBits);
+
 #endif /* _XSERVER_DIX_RESOURCE_PRIV_H */

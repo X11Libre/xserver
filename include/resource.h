@@ -259,16 +259,4 @@ extern _X_EXPORT unsigned int GetXIDList(ClientPtr /*client */ ,
 extern _X_EXPORT RESTYPE lastResourceType;
 extern _X_EXPORT RESTYPE TypeMask;
 
-/** @brief A hashing function to be used for hashing resource IDs
-
-    @param id The resource ID to hash
-    @param numBits The number of bits in the resulting hash. Must be >=0.
-
-    @note This function is really only for handling
-    INITHASHSIZE..MAXHASHSIZE bit hashes, but will handle any number
-    of bits by either masking numBits lower bits of the ID or by
-    providing at most MAXHASHSIZE hashes.
-*/
-extern _X_EXPORT int HashResourceID(XID id, unsigned int numBits);
-
 #endif /* RESOURCE_H */
