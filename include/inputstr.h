@@ -65,9 +65,6 @@ extern _X_EXPORT void AssignTypeAndName(DeviceIntPtr dev,
 #define ClearBit(ptr, bit) (((BYTE *)(ptr))[(bit)>>3] &= ~(1 << ((bit) & 7)))
 extern _X_EXPORT int CountBits(const uint8_t * mask, int len);
 
-#define SameClient(obj,client) \
-	(CLIENT_BITS((obj)->resource) == (client)->clientAsMask)
-
 #define EMASKSIZE	(MAXDEVICES + 2)
 
 /* This is the last XI2 event supported by the server. If you add

@@ -7,6 +7,9 @@
 
 #include "include/dix.h"
 
+#define SameClient(obj,client) \
+        (CLIENT_BITS((obj)->resource) == (client)->clientAsMask)
+
 /*
  * @brief retrieve client that owns given window
  *

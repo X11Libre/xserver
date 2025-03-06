@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/input_priv.h"
+#include "dix/resource_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
