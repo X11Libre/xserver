@@ -25,6 +25,14 @@
 #include "include/input.h"
 #include "include/window.h"
 
+#define LEGAL_NEW_RESOURCE(id,client)           \
+    do {                                        \
+        if (!LegalNewID((id), (client))) {      \
+            (client)->errorValue = (id);        \
+            return BadIDChoice;                 \
+        }                                       \
+    } while (0)
+
 /* server setting: maximum size for big requests */
 #define MAX_BIG_REQUEST_SIZE 4194303
 extern long maxBigRequestSize;

@@ -92,14 +92,6 @@ SOFTWARE.
             return(BadLength);                                          \
     } while (0)
 
-#define LEGAL_NEW_RESOURCE(id,client)           \
-    do {                                        \
-        if (!LegalNewID((id), (client))) {      \
-            (client)->errorValue = (id);        \
-            return BadIDChoice;                 \
-        }                                       \
-    } while (0)
-
 #define WriteReplyToClient(pClient, size, pReply)                       \
     do {                                                                \
         if ((pClient)->swapped)                                         \

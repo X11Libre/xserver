@@ -32,6 +32,7 @@
 
 #include <string.h>
 
+#include "dix/dix_priv.h"
 #include "os/client_priv.h"
 
 #include "glxserver.h"
