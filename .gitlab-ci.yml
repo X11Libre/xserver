@@ -21,7 +21,7 @@ variables:
     REPO_URL_XORGPROTO:   'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git'
     XORG_DEBIAN_VERSION:  'bullseye-slim'
     XORG_DEBIAN_EXEC:     'env FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT} bash .gitlab-ci/debian-install.sh'
-    XORG_DEBIAN_TAG:      '2025-02-26-xcb-deps'
+    XORG_DEBIAN_TAG:      '2025-03-07-libdrm'
     XORG_FREEBSD_VERSION: '14.2'
     XORG_FREEBSD_EXEC:    ''
     XORG_FREEBSD_TAG:     '2025-02-18-vm-image'
