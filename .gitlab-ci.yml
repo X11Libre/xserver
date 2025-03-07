@@ -322,8 +322,8 @@ xf86-driver-build-test:
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nv
               SHA: master
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-qxl
-              SHA: e0bd955e18db0e53f8dce72b827ee4beb4afc79d # no release yet
+            - REPO: https://gitlab.freedesktop.org/metux/xf86-video-qxl
+              SHA: 813d3cd96075caad88fd9b6a366ff7203ed1d254 # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-r128
               SHA: master
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-rendition
