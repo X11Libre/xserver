@@ -255,25 +255,25 @@ xf86-driver-build-test:
     parallel:
         matrix:
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-evdev
-              SHA: xf86-input-evdev-2.10.6
+              SHA: xf86-input-evdev-2.11.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-libinput
-              SHA: xf86-input-libinput-1.4.0
+              SHA: xf86-input-libinput-1.5.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-mouse
-              SHA: xf86-input-mouse-1.9.5
+              SHA: 9cc5531bf1713ebdd06a88b7e05ea4bedea3d61c # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-synaptics
-              SHA: xf86-input-synaptics-1.9.2
+              SHA: xf86-input-synaptics-1.10.0
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-amdgpu
-              SHA: xf86-video-amdgpu-23.0.0
+              SHA: 2cb59a92de4a19909682a35e4f31f3c02de2899f # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati
-              SHA: xf86-video-ati-22.0.0
+              SHA: c610c037369500089baddd86aa3cf8046f3dc48b # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-intel
-              SHA: e6a4c4740c15ace9dd79dc7c18955f2eb413a6a5 # no release yet
+              SHA: ce811e78882d9f31636351dfe65351f4ded52c74 # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-qxl
-              SHA: 989ff620220e8d0555cec38c1508b57dfbcfb0c6 # no release yet
+              SHA: e0bd955e18db0e53f8dce72b827ee4beb4afc79d # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa
-              SHA: xf86-video-vesa-2.6.0
+              SHA: ec03b47ee9566b85bb39359000f3c0aed047c1a5 # no release yet
             - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vmware
-              SHA: xf86-video-vmware-13.4.0
+              SHA: 92cc4534146dd84c0d843759cdb30f75abddddd6 # no release yet
     script:
         # built xserver is taken from meson-dist job
         - export PKG_CONFIG_PATH=$(pwd)/xserver-tarball/install/lib/x86_64-linux-gnu/pkgconfig
