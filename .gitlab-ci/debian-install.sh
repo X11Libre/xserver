@@ -132,7 +132,7 @@ apt-get install -y \
 cd /root
 
 # Xwayland requires drm 2.4.116 for drmSyncobjEventfd
-git clone https://gitlab.freedesktop.org/mesa/drm --depth 1 --branch=libdrm-2.4.116
+git clone https://gitlab.freedesktop.org/mesa/drm --depth 1 --branch=libdrm-2.4.121
 cd drm
 meson _build
 ninja -C _build -j${FDO_CI_CONCURRENT:-4} install
