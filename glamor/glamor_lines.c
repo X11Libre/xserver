@@ -120,7 +120,6 @@ glamor_poly_lines_solid_gl(DrawablePtr drawable, GCPtr gc,
                       box->y2 - box->y1);
             box++;
             glDrawArrays(GL_LINE_STRIP, 0, n + add_last);
-            glDrawArrays(GL_POINTS, 0, n + add_last);
         }
     }
 
