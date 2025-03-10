@@ -5,6 +5,9 @@
 
 #include "dix.h"
 
+#define XAUTH_PROTO_MIT "MIT-MAGIC-COOKIE-1"
+#define XAUTH_PROTO_XDM "XDM-AUTHORIZATION-1"
+
 #define AuthInitArgs void
 typedef void (*AuthInitFunc) (AuthInitArgs);
 

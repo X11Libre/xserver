@@ -64,7 +64,7 @@ struct protocol {
 
 static struct protocol protocols[] = {
     {
-        .name = "MIT-MAGIC-COOKIE-1",
+        .name = XAUTH_PROTO_MIT,
         .Add = MitAddCookie,
         .Check = MitCheckCookie,
         .Reset = MitResetCookie,
@@ -74,7 +74,7 @@ static struct protocol protocols[] = {
     },
 #ifdef HASXDMAUTH
     {
-        .name = "XDM-AUTHORIZATION-1",
+        .name = XAUTH_PROTO_XDM,
         .Add = XdmAddCookie,
         .Check = XdmCheckCookie,
         .Reset = XdmResetCookie,
