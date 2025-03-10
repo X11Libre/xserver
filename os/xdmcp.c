@@ -902,13 +902,14 @@ XdmcpCheckAuthentication(ARRAY8Ptr Name, ARRAY8Ptr Data, int packet_type)
 static int
 XdmcpAddAuthorization(ARRAY8Ptr name, ARRAY8Ptr data)
 {
-    AddAuthorFunc AddAuth;
-
     if (AuthenticationFuncs && AuthenticationFuncs->AddAuth)
-        AddAuth = AuthenticationFuncs->AddAuth;
+        return AuthenticationFuncs->AddAuth(
+                       (unsigned short) name->length,
+                       (char *) name->data,
+                       (unsigned short) data->length, (char *) data->data);
     else
-        AddAuth = AddAuthorization;
-    return (*AddAuth) ((unsigned short) name->length,
+        return AddAuthorization(
+                       (unsigned short) name->length,
                        (char *) name->data,
                        (unsigned short) data->length, (char *) data->data);
 }
