@@ -1017,7 +1017,7 @@ AllocColor(ColormapPtr pmap,
 
             dixLookupResourceByType((void **) &prootmap,
                                     pmap->pScreen->defColormap, X11_RESTYPE_COLORMAP,
-                                    clients[client], DixReadAccess);
+                                    NULL, DixReadAccess);
 
             if (pmap->class == prootmap->class)
                 FindColorInRootCmap(prootmap, prootmap->red, entries, &rgb,
@@ -1035,7 +1035,7 @@ AllocColor(ColormapPtr pmap,
 
             dixLookupResourceByType((void **) &prootmap,
                                     pmap->pScreen->defColormap, X11_RESTYPE_COLORMAP,
-                                    clients[client], DixReadAccess);
+                                    NULL, DixReadAccess);
 
             if (pmap->class == prootmap->class) {
                 pixR = (*pPix & pVisual->redMask) >> pVisual->offsetRed;
