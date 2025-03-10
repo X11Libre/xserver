@@ -49,7 +49,16 @@ static struct auth {
 XID
 MitAddCookie(unsigned short data_length, const char *data)
 {
-    struct auth *new = calloc(1, sizeof(struct auth));
+    struct auth *new;
+
+    // check for possible duplicate and return it instead
+    for (struct auth *walk=mit_auth; walk; walk=walk->next) {
+        if ((walk->len == data_length) &&
+            (memcmp(walk->data, data, data_length) == 0))
+            return walk->id;
+    }
+
+    new = calloc(1, sizeof(struct auth));
     if (!new)
         return 0;
     new->data = calloc(1, (unsigned) data_length);
