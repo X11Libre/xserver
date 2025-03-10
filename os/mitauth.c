@@ -161,7 +161,7 @@ MitGenerateCookie(unsigned data_length,
     GenerateRandomData(sizeof(cookie), cookie);
     XID id = MitAddCookie(sizeof(cookie), cookie);
     if (!id)
-        return -1;
+        return 0;
 
     *data_return = cookie;
     *data_length_return = sizeof(cookie);

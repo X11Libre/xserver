@@ -293,5 +293,5 @@ GenerateAuthorization(unsigned name_length,
                                          data_length_return, data_return);
         }
     }
-    return -1;
+    return 0;
 }

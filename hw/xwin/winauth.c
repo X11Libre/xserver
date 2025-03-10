@@ -68,7 +68,7 @@ winGenerateAuthorization(void)
     g_authId = GenerateAuthorization(strlen(AUTH_NAME),
                                      AUTH_NAME,
                                      0, NULL, &g_uiAuthDataLen, &g_pAuthData);
-    if ((XID) ~0L == g_authId) {
+    if (!g_authId) {
         ErrorF("winGenerateAuthorization - GenerateAuthorization failed\n");
         return FALSE;
     }

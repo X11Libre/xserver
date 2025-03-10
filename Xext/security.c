@@ -491,7 +491,7 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     authId = GenerateAuthorization(stuff->nbytesAuthProto, protoname,
                                    stuff->nbytesAuthData, protodata,
                                    &authdata_len, &pAuthdata);
-    if ((XID) ~0L == authId) {
+    if (!authId) {
         return SecurityErrorBase + XSecurityBadAuthorizationProtocol;
     }
 
