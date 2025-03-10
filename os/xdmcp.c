@@ -536,11 +536,12 @@ XdmcpRegisterAuthorizations(void)
 }
 
 void
-XdmcpRegisterAuthorization(const char *name, int namelen)
+XdmcpRegisterAuthorization(const char *name)
 {
     ARRAY8 authName;
     int i;
 
+    size_t namelen = strlen(name);
     authName.data = calloc(namelen, sizeof(CARD8));
     if (!authName.data)
         return;

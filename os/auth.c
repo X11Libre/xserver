@@ -53,7 +53,6 @@ from The Open Group.
 #include "mitauth.h"
 
 struct protocol {
-    unsigned short name_length;
     const char *name;
     AuthAddCFunc Add;           /* new authorization data */
     AuthCheckFunc Check;        /* verify client authorization data */
@@ -67,7 +66,6 @@ struct protocol {
 
 static struct protocol protocols[] = {
     {
-        .name_length = 18,
         .name = "MIT-MAGIC-COOKIE-1",
         .Add = MitAddCookie,
         .Check = MitCheckCookie,
@@ -80,7 +78,6 @@ static struct protocol protocols[] = {
     },
 #ifdef HASXDMAUTH
     {
-        .name_length = 19,
         .name = "XDM-AUTHORIZATION-1",
         .Add = XdmAddCookie,
         .Check = XdmCheckCookie,
@@ -132,7 +129,7 @@ LoadAuthorization(void)
 
     while ((auth = XauReadAuth(f)) != 0) {
         for (i = 0; i < NUM_AUTHORIZATION; i++) {
-            if (protocols[i].name_length == auth->name_length &&
+            if (strlen(protocols[i].name) == auth->name_length &&
                 memcmp(protocols[i].name, auth->name,
                        (int) auth->name_length) == 0 && protocols[i].Add) {
                 ++count;
@@ -158,8 +155,7 @@ RegisterAuthorizations(void)
     int i;
 
     for (i = 0; i < NUM_AUTHORIZATION; i++)
-        XdmcpRegisterAuthorization(protocols[i].name,
-                                   (int) protocols[i].name_length);
+        XdmcpRegisterAuthorization(protocols[i].name);
 }
 #endif
 
@@ -210,7 +206,7 @@ CheckAuthorization(unsigned int name_length,
     }
     if (name_length) {
         for (i = 0; i < NUM_AUTHORIZATION; i++) {
-            if (protocols[i].name_length == name_length &&
+            if (strlen(protocols[i].name) == name_length &&
                 memcmp(protocols[i].name, name, (int) name_length) == 0) {
                 return (*protocols[i].Check) (data_length, data, client,
                                               reason);
@@ -244,7 +240,7 @@ AuthorizationFromID(XID id,
     for (i = 0; i < NUM_AUTHORIZATION; i++) {
         if (protocols[i].FromID &&
             (*protocols[i].FromID) (id, data_lenp, datap)) {
-            *name_lenp = protocols[i].name_length;
+            *name_lenp = strlen(protocols[i].name);
             *namep = protocols[i].name;
             return 1;
         }
@@ -260,7 +256,7 @@ RemoveAuthorization(unsigned short name_length,
     int i;
 
     for (i = 0; i < NUM_AUTHORIZATION; i++) {
-        if (protocols[i].name_length == name_length &&
+        if (strlen(protocols[i].name) == name_length &&
             memcmp(protocols[i].name, name, (int) name_length) == 0 &&
             protocols[i].Remove) {
             return (*protocols[i].Remove) (data_length, data);
@@ -276,7 +272,7 @@ AddAuthorization(unsigned name_length, const char *name,
     int i;
 
     for (i = 0; i < NUM_AUTHORIZATION; i++) {
-        if (protocols[i].name_length == name_length &&
+        if (strlen(protocols[i].name) == name_length &&
             memcmp(protocols[i].name, name, (int) name_length) == 0 &&
             protocols[i].Add) {
             return (*protocols[i].Add) (data_length, data, FakeClientID(0));
@@ -297,7 +293,7 @@ GenerateAuthorization(unsigned name_length,
     int i;
 
     for (i = 0; i < NUM_AUTHORIZATION; i++) {
-        if (protocols[i].name_length == name_length &&
+        if (strlen(protocols[i].name) == name_length &&
             memcmp(protocols[i].name, name, (int) name_length) == 0 &&
             protocols[i].Generate) {
             return (*protocols[i].Generate) (data_length, data,

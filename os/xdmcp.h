@@ -9,7 +9,7 @@ void XdmcpUseMsg(void);
 int XdmcpOptions(int argc, char **argv, int i);
 void XdmcpRegisterConnection(int type, const char *address, int addrlen);
 void XdmcpRegisterAuthorizations(void);
-void XdmcpRegisterAuthorization(const char *name, int namelen);
+void XdmcpRegisterAuthorization(const char *name);
 void XdmcpInit(void);
 void XdmcpReset(void);
 void XdmcpOpenDisplay(int sock);
