@@ -319,8 +319,8 @@ XdmAuthorizationValidate(unsigned char *plain, int length,
     return client;
 }
 
-int
-XdmAddCookie(unsigned short data_length, const char *data, XID id)
+XID
+XdmAddCookie(unsigned short data_length, const char *data)
 {
     unsigned char *rho_bits, *key_bits;
 
@@ -360,8 +360,8 @@ XdmAddCookie(unsigned short data_length, const char *data, XID id)
     xdmAuth = new;
     memcpy(new->key.data, key_bits, 8);
     memcpy(new->rho.data, rho_bits, 8);
-    new->id = id;
-    return 1;
+    new->id = FakeClientID(0);
+    return new->id;
 }
 
 XID

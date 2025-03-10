@@ -128,9 +128,8 @@ LoadAuthorization(void)
             if (strlen(protocols[i].name) == auth->name_length &&
                 memcmp(protocols[i].name, auth->name,
                        (int) auth->name_length) == 0 && protocols[i].Add) {
-                ++count;
-                (*protocols[i].Add) (auth->data_length, auth->data,
-                                     FakeClientID(0));
+                if (protocols[i].Add(auth->data_length, auth->data))
+                    count++;
             }
         }
         XauDisposeAuth(auth);
@@ -271,7 +270,7 @@ AddAuthorization(unsigned name_length, const char *name,
         if (strlen(protocols[i].name) == name_length &&
             memcmp(protocols[i].name, name, (int) name_length) == 0 &&
             protocols[i].Add) {
-            return (*protocols[i].Add) (data_length, data, FakeClientID(0));
+            return protocols[i].Add(data_length, data);
         }
     }
     return 0;
@@ -290,9 +289,8 @@ GenerateAuthorization(unsigned name_length,
         if (strlen(protocols[i].name) == name_length &&
             memcmp(protocols[i].name, name, (int) name_length) == 0 &&
             protocols[i].Generate) {
-            return (*protocols[i].Generate) (data_length, data,
-                                             FakeClientID(0),
-                                             data_length_return, data_return);
+            return protocols[i].Generate(data_length, data,
+                                         data_length_return, data_return);
         }
     }
     return -1;

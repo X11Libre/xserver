@@ -11,8 +11,8 @@
 #define AuthInitArgs void
 typedef void (*AuthInitFunc) (AuthInitArgs);
 
-#define AuthAddCArgs unsigned short data_length, const char *data, XID id
-typedef int (*AuthAddCFunc) (AuthAddCArgs);
+#define AuthAddCArgs unsigned short data_length, const char *data
+typedef XID (*AuthAddCFunc) (AuthAddCArgs);
 
 #define AuthCheckArgs unsigned short data_length, const char *data, ClientPtr client, const char **reason
 typedef XID (*AuthCheckFunc) (AuthCheckArgs);
@@ -20,7 +20,7 @@ typedef XID (*AuthCheckFunc) (AuthCheckArgs);
 #define AuthFromIDArgs XID id, unsigned short *data_lenp, char **datap
 typedef int (*AuthFromIDFunc) (AuthFromIDArgs);
 
-#define AuthGenCArgs unsigned data_length, const char *data, XID id, unsigned *data_length_return, char **data_return
+#define AuthGenCArgs unsigned data_length, const char *data, unsigned *data_length_return, char **data_return
 typedef XID (*AuthGenCFunc) (AuthGenCArgs);
 
 #define AuthRemCArgs unsigned short data_length, const char *data

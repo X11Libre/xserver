@@ -46,8 +46,8 @@ static struct auth {
     XID id;
 } *mit_auth;
 
-int
-MitAddCookie(unsigned short data_length, const char *data, XID id)
+XID
+MitAddCookie(unsigned short data_length, const char *data)
 {
     struct auth *new = calloc(1, sizeof(struct auth));
     if (!new)
@@ -61,8 +61,8 @@ MitAddCookie(unsigned short data_length, const char *data, XID id)
     mit_auth = new;
     memcpy(new->data, data, (size_t) data_length);
     new->len = data_length;
-    new->id = id;
-    return 1;
+    new->id = FakeClientID(0);
+    return new->id;
 }
 
 XID
@@ -149,10 +149,9 @@ GenerateRandomData(int len, char *buf)
 XID
 MitGenerateCookie(unsigned data_length,
                   const char *data,
-                  XID id, unsigned *data_length_return, char **data_return)
+                  unsigned *data_length_return, char **data_return)
 {
     int i = 0;
-    int status;
 
     while (data_length--) {
         cookie[i++] += *data++;
@@ -160,13 +159,11 @@ MitGenerateCookie(unsigned data_length,
             i = 0;
     }
     GenerateRandomData(sizeof(cookie), cookie);
-    status = MitAddCookie(sizeof(cookie), cookie, id);
-    if (!status) {
-        id = -1;
-    }
-    else {
-        *data_return = cookie;
-        *data_length_return = sizeof(cookie);
-    }
+    XID id = MitAddCookie(sizeof(cookie), cookie);
+    if (!id)
+        return -1;
+
+    *data_return = cookie;
+    *data_length_return = sizeof(cookie);
     return id;
 }
