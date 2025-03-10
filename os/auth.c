@@ -59,9 +59,7 @@ struct protocol {
     AuthRstCFunc Reset;         /* delete all authorization data entries */
     AuthFromIDFunc FromID;      /* convert ID to cookie */
     AuthRemCFunc Remove;        /* remove a specific cookie */
-#ifdef XCSECURITY
     AuthGenCFunc Generate;
-#endif
 };
 
 static struct protocol protocols[] = {
@@ -72,9 +70,7 @@ static struct protocol protocols[] = {
         .Reset = MitResetCookie,
         .FromID = MitFromID,
         .Remove = MitRemoveCookie,
-#ifdef XCSECURITY
         .Generate = MitGenerateCookie
-#endif
     },
 #ifdef HASXDMAUTH
     {
@@ -281,8 +277,6 @@ AddAuthorization(unsigned name_length, const char *name,
     return 0;
 }
 
-#ifdef XCSECURITY
-
 XID
 GenerateAuthorization(unsigned name_length,
                       const char *name,
@@ -303,8 +297,6 @@ GenerateAuthorization(unsigned name_length,
     }
     return -1;
 }
-
-#endif                          /* XCSECURITY */
 
 void
 GenerateRandomData(int len, char *buf)

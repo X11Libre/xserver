@@ -58,23 +58,6 @@ static char *g_pAuthData = NULL;
 static xcb_auth_info_t auth_info;
 
 /*
- * Code to generate a MIT-MAGIC-COOKIE-1, copied from under XCSECURITY
- */
-
-#ifndef XCSECURITY
-XID
-GenerateAuthorization(unsigned name_length,
-                      const char *name,
-                      unsigned data_length,
-                      const char *data,
-                      unsigned *data_length_return, char **data_return)
-{
-    return MitGenerateCookie(data_length, data,
-                             FakeClientID(0), data_length_return, data_return);
-}
-#endif
-
-/*
  * Generate authorization cookie for internal server clients
  */
 
