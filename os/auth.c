@@ -66,21 +66,28 @@ struct protocol {
 };
 
 static struct protocol protocols[] = {
-    {(unsigned short) 18, "MIT-MAGIC-COOKIE-1",
-     MitAddCookie, MitCheckCookie, MitResetCookie,
-     MitFromID, MitRemoveCookie,
+    {
+        .name_length = 18,
+        .name = "MIT-MAGIC-COOKIE-1",
+        .Add = MitAddCookie,
+        .Check = MitCheckCookie,
+        .Reset = MitResetCookie,
+        .FromID = MitFromID,
+        .Remove = MitRemoveCookie,
 #ifdef XCSECURITY
-     MitGenerateCookie
+        .Generate = MitGenerateCookie
 #endif
-     },
+    },
 #ifdef HASXDMAUTH
-    {(unsigned short) 19, "XDM-AUTHORIZATION-1",
-     XdmAddCookie, XdmCheckCookie, XdmResetCookie,
-     XdmFromID, XdmRemoveCookie,
-#ifdef XCSECURITY
-     NULL
-#endif
-     },
+    {
+        .name_length = 19,
+        .name = "XDM-AUTHORIZATION-1",
+        .Add = XdmAddCookie,
+        .Check = XdmCheckCookie,
+        .Reset = XdmResetCookie,
+        .FromID = XdmFromID,
+        .Remove = XdmRemoveCookie,
+    },
 #endif
 };
 
