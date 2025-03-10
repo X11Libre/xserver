@@ -132,6 +132,20 @@ MitRemoveCookie(unsigned short data_length, const char *data)
 
 static char cookie[16];         /* 128 bits */
 
+static void
+GenerateRandomData(int len, char *buf)
+{
+#ifdef HAVE_ARC4RANDOM_BUF
+    arc4random_buf(buf, len);
+#else
+    int fd;
+
+    fd = open("/dev/urandom", O_RDONLY);
+    read(fd, buf, len);
+    close(fd);
+#endif
+}
+
 XID
 MitGenerateCookie(unsigned data_length,
                   const char *data,

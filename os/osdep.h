@@ -134,9 +134,6 @@ extern Bool NewOutputPending;
 /* in access.c */
 extern Bool ComputeLocalClient(ClientPtr client);
 
-/* in auth.c */
-extern void GenerateRandomData(int len, char *buf);
-
 /* OsTimer functions */
 void TimerInit(void);
 Bool TimerForce(OsTimerPtr timer);
