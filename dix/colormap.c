@@ -1484,13 +1484,14 @@ FreeClientPixels(void *value, XID fakeid)
 }
 
 int
-AllocColorCells(int client, ColormapPtr pmap, int colors, int planes,
+AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
                 Bool contig, Pixel * ppix, Pixel * masks)
 {
     Pixel rmask, gmask, bmask, *ppixFirst, r, g, b;
     int n, class;
     int ok;
     int oldcount;
+    const int client = pClient->index;
     colorResource *pcr = (colorResource *) NULL;
 
     class = pmap->class;

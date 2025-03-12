@@ -2722,7 +2722,7 @@ ProcAllocColorCells(ClientPtr client)
             return BadAlloc;
         pmasks = ppixels + npixels;
 
-        if ((rc = AllocColorCells(client->index, pcmp, npixels, nmasks,
+        if ((rc = AllocColorCells(client, pcmp, npixels, nmasks,
                                   (Bool) stuff->contiguous, ppixels, pmasks))) {
             free(ppixels);
             return rc;

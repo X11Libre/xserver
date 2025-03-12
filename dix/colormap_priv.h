@@ -46,7 +46,7 @@ int QueryColors(ColormapPtr pmap, int count, Pixel *ppixIn,
 /* should only be called via resource type's destructor */
 int FreeClientPixels(void *pcr, XID fakeid);
 
-int AllocColorCells(int client, ColormapPtr pmap, int colors, int planes,
+int AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
                     Bool contig, Pixel *ppix, Pixel *masks);
 
 int AllocColorPlanes(int client, ColormapPtr pmap, int colors, int r, int g,
