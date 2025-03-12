@@ -106,6 +106,7 @@ Equipment Corporation.
 #include "dix/input_priv.h"
 #include "dix/property_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/window_priv.h"
 #include "mi/mi_priv.h"         /* miPaintWindow */
 #include "os/auth.h"
 #include "os/client_priv.h"
@@ -142,7 +143,7 @@ Equipment Corporation.
 /******
  * Window stuff for server
  *
- *    CreateRootWindow, CreateWindow, ChangeWindowAttributes,
+ *    CreateRootWindow, dixCreateWindow, ChangeWindowAttributes,
  *    GetWindowAttributes, DeleteWindow, DestroySubWindows,
  *    HandleSaveSet, ReparentWindow, MapWindow, MapSubWindows,
  *    UnmapWindow, UnmapSubWindows, ConfigureWindow, CirculateWindow,
@@ -741,13 +742,8 @@ RealChildHead(WindowPtr pWin)
         return NullWindow;
 }
 
-/*****
- * CreateWindow
- *    Makes a window in response to client request
- *****/
-
 WindowPtr
-CreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
+dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
              unsigned h, unsigned bw, unsigned class, Mask vmask, XID *vlist,
              int depth, ClientPtr client, VisualID visual, int *error)
 {
@@ -3277,7 +3273,7 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
     }
 
     pWin = pScreen->screensaver.pWindow =
-        CreateWindow(pScreen->screensaver.wid,
+        dixCreateWindow(pScreen->screensaver.wid,
                      pScreen->root,
                      -RANDOM_WIDTH, -RANDOM_WIDTH,
                      (unsigned short) pScreen->width + RANDOM_WIDTH,

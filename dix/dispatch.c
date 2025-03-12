@@ -111,6 +111,7 @@ Equipment Corporation.
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "include/resource.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
@@ -137,9 +138,6 @@ Equipment Corporation.
 #include "xkbsrv.h"
 #include "xfixesint.h"
 #include "dixstruct_priv.h"
-
-// temporary workaround for win32/mingw32 name clash
-#undef CreateWindow
 
 #ifdef XSERVER_DTRACE
 #include "probes.h"
@@ -766,7 +764,7 @@ ProcCreateWindow(ClientPtr client)
         client->errorValue = 0;
         return BadValue;
     }
-    pWin = CreateWindow(stuff->wid, pParent, stuff->x,
+    pWin = dixCreateWindow(stuff->wid, pParent, stuff->x,
                         stuff->y, stuff->width, stuff->height,
                         stuff->borderWidth, stuff->class,
                         stuff->mask, (XID *) &stuff[1],
