@@ -689,7 +689,6 @@ _dixInitScreenPrivates(ScreenPtr pScreen, PrivatePtr *privates, void *addr, DevP
 void *
 _dixAllocateScreenObjectWithPrivates(ScreenPtr pScreen,
                                      unsigned baseSize,
-                                     unsigned clear,
                                      unsigned offset,
                                      DevPrivateType type)
 {
@@ -713,7 +712,6 @@ _dixAllocateScreenObjectWithPrivates(ScreenPtr pScreen,
     if (!object)
         return NULL;
 
-    memset(object, '\0', clear);
     privates = (PrivatePtr) (((char *) object) + baseSize);
     devPrivates = (PrivatePtr *) ((char *) object + offset);
 

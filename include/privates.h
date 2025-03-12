@@ -258,11 +258,10 @@ Bool dixPrivatesCreated(DevPrivateType type);
 extern _X_EXPORT void *
 _dixAllocateScreenObjectWithPrivates(ScreenPtr pScreen,
                                      unsigned size,
-                                     unsigned clear,
                                      unsigned offset,
                                      DevPrivateType type);
 
-#define dixAllocateScreenObjectWithPrivates(s, t, type) _dixAllocateScreenObjectWithPrivates(s, sizeof(t), sizeof(t), offsetof(t, devPrivates), type)
+#define dixAllocateScreenObjectWithPrivates(s, t, type) _dixAllocateScreenObjectWithPrivates(s, sizeof(t), offsetof(t, devPrivates), type)
 
 extern _X_EXPORT int
 dixScreenSpecificPrivatesSize(ScreenPtr pScreen, DevPrivateType type);
