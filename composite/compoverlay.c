@@ -43,6 +43,8 @@
 
 #include <dix-config.h>
 
+#include "dix/window_priv.h"
+
 #include "compint.h"
 #include "xace.h"
 
@@ -143,7 +145,7 @@ compCreateOverlayWindow(ScreenPtr pScreen)
 #endif /* XINERAMA */
 
     pWin = cs->pOverlayWin =
-        CreateWindow(cs->overlayWid, pRoot, x, y, w, h, 0,
+        dixCreateWindow(cs->overlayWid, pRoot, x, y, w, h, 0,
                      InputOutput, CWBackPixmap | CWOverrideRedirect, &attrs[0],
                      pRoot->drawable.depth,
                      serverClient, pScreen->rootVisual, &result);

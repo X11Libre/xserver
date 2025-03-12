@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/window_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
 
@@ -62,10 +63,6 @@ in this Software without prior written authorization from the X Consortium.
 #endif
 #include "protocol-versions.h"
 #include "extinit_priv.h"
-
-// temporary workaround for win32/mingw32 name clash
-// see: https://gitlab.freedesktop.org/xorg/xserver/-/merge_requests/1355
-#undef CreateWindow
 
 Bool noScreenSaverExtension = FALSE;
 
@@ -476,7 +473,7 @@ CreateSaverWindow(ScreenPtr pScreen)
     if (GrabInProgress && GrabInProgress != pAttr->client->index)
         return FALSE;
 
-    pWin = CreateWindow(pSaver->wid, pScreen->root,
+    pWin = dixCreateWindow(pSaver->wid, pScreen->root,
                         pAttr->x, pAttr->y, pAttr->width, pAttr->height,
                         pAttr->borderWidth, pAttr->class,
                         pAttr->mask, (XID *) pAttr->values,
@@ -757,7 +754,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
     depth = stuff->depth;
     visual = stuff->visualID;
 
-    /* copied directly from CreateWindow */
+    /* copied directly from dixCreateWindow */
 
     if (class == CopyFromParent)
         class = pParent->drawable.class;
@@ -810,7 +807,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
         return BadMatch;
     }
 
-    /* end of errors from CreateWindow */
+    /* end of errors from dixCreateWindow */
 
     pPriv = GetScreenPrivate(pScreen);
     if (pPriv && pPriv->attr) {

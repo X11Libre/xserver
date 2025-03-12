@@ -99,21 +99,6 @@ extern _X_EXPORT void RegisterRealChildHeadProc(RealChildHeadProc proc);
 
 extern _X_EXPORT WindowPtr RealChildHead(WindowPtr /*pWin */ );
 
-extern _X_EXPORT WindowPtr CreateWindow(Window /*wid */ ,
-                                        WindowPtr /*pParent */ ,
-                                        int /*x */ ,
-                                        int /*y */ ,
-                                        unsigned int /*w */ ,
-                                        unsigned int /*h */ ,
-                                        unsigned int /*bw */ ,
-                                        unsigned int /*class */ ,
-                                        Mask /*vmask */ ,
-                                        XID * /*vlist */ ,
-                                        int /*depth */ ,
-                                        ClientPtr /*client */ ,
-                                        VisualID /*visual */ ,
-                                        int * /*error */ );
-
 extern _X_EXPORT int DeleteWindow(void *pWin,
                                   XID wid);
 

@@ -47,6 +47,4 @@
 #include "ddraw.h"
 #pragma pop_macro("Status")
 
-#undef CreateWindow
-
 #endif                          /* _WINMS_H_ */
