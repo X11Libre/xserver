@@ -745,4 +745,6 @@ static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
     return WriteToClient(pClient, sizeof(xEvent), &ev);
 }
 
+void dixFreeScreen(ScreenPtr pScreen);
+
 #endif /* _XSERVER_DIX_PRIV_H */
