@@ -28,6 +28,7 @@ srcs_dix = [
     'registry.c',
     'resource.c',
     'selection.c',
+    'screen.c',
     'swaprep.c',
     'swapreq.c',
     'tables.c',

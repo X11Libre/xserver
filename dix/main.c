@@ -324,23 +324,16 @@ dix_main(int argc, char *argv[], char *envp[])
         CloseDownEvents();
 
         for (i = screenInfo.numGPUScreens - 1; i >= 0; i--) {
-            ScreenPtr pScreen = screenInfo.gpuscreens[i];
-            dixFreeScreenSpecificPrivates(pScreen);
-            (*pScreen->CloseScreen) (pScreen);
-            dixFreePrivates(pScreen->devPrivates, PRIVATE_SCREEN);
-            free(pScreen);
+            dixFreeScreen(screenInfo.gpuscreens[i]);
             screenInfo.numGPUScreens = i;
         }
+        memset(&screenInfo.numGPUScreens, 0, sizeof(screenInfo.numGPUScreens));
 
         for (i = screenInfo.numScreens - 1; i >= 0; i--) {
-            FreeGCperDepth(screenInfo.screens[i]);
-            dixDestroyPixmap(screenInfo.screens[i]->defaultStipple, 0);
-            dixFreeScreenSpecificPrivates(screenInfo.screens[i]);
-            (*screenInfo.screens[i]->CloseScreen) (screenInfo.screens[i]);
-            dixFreePrivates(screenInfo.screens[i]->devPrivates, PRIVATE_SCREEN);
-            free(screenInfo.screens[i]);
+            dixFreeScreen(screenInfo.screens[i]);
             screenInfo.numScreens = i;
         }
+        memset(&screenInfo.screens, 0, sizeof(screenInfo.numGPUScreens));
 
         ReleaseClientIds(serverClient);
         dixFreePrivates(serverClient->devPrivates, PRIVATE_CLIENT);

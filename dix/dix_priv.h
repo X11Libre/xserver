@@ -422,4 +422,6 @@ XRetCode AlterSaveSetForClient(ClientPtr pClient,
                                Bool toRoot,
                                Bool map);
 
+void dixFreeScreen(ScreenPtr pScreen);
+
 #endif /* _XSERVER_DIX_PRIV_H */
