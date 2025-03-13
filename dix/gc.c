@@ -768,6 +768,8 @@ int
 FreeGC(void *value, XID gid)
 {
     GCPtr pGC = (GCPtr) value;
+    if (!pGC)
+        return BadMatch;
 
     CloseFont(pGC->font, (Font) 0);
     if (pGC->funcs)
