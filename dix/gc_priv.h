@@ -28,8 +28,6 @@ Bool CreateGCperDepth(int screenNum);
 
 Bool CreateDefaultStipple(int screenNum);
 
-void FreeDefaultStipple(int screenNum);
-
 int SetDashes(GCPtr pGC, unsigned offset, unsigned ndash, unsigned char *pdash);
 
 int VerifyRectOrder(int nrects, xRectangle *prects, int ordering);

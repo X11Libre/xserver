@@ -334,7 +334,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
         for (i = screenInfo.numScreens - 1; i >= 0; i--) {
             FreeGCperDepth(screenInfo.screens[i]);
-            FreeDefaultStipple(i);
+            dixDestroyPixmap(screenInfo.screens[i]->defaultStipple, 0);
             dixFreeScreenSpecificPrivates(screenInfo.screens[i]);
             (*screenInfo.screens[i]->CloseScreen) (screenInfo.screens[i]);
             dixFreePrivates(screenInfo.screens[i]->devPrivates, PRIVATE_SCREEN);

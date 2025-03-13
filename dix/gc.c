@@ -903,13 +903,6 @@ CreateDefaultStipple(int screenNum)
     return TRUE;
 }
 
-void
-FreeDefaultStipple(int screenNum)
-{
-    ScreenPtr pScreen = screenInfo.screens[screenNum];
-    dixDestroyPixmap(pScreen->defaultStipple, 0);
-}
-
 int
 SetDashes(GCPtr pGC, unsigned offset, unsigned ndash, unsigned char *pdash)
 {
