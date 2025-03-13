@@ -22,7 +22,7 @@ int CopyGC(GCPtr pgcSrc, GCPtr pgcDst, BITS32 mask);
 
 int FreeGC(void *pGC, XID gid);
 
-void FreeGCperDepth(int screenNum);
+void FreeGCperDepth(ScreenPtr pScreen);
 
 Bool CreateGCperDepth(int screenNum);
 

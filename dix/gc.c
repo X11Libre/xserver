@@ -821,13 +821,14 @@ CreateScratchGC(ScreenPtr pScreen, unsigned depth)
 }
 
 void
-FreeGCperDepth(int screenNum)
+FreeGCperDepth(ScreenPtr pScreen)
 {
     int i;
-    ScreenPtr pScreen;
     GCPtr *ppGC;
 
-    pScreen = screenInfo.screens[screenNum];
+    if (!pScreen)
+        return;
+
     ppGC = pScreen->GCperDepth;
 
     for (i = 0; i <= pScreen->numDepths; i++) {

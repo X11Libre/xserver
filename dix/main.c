@@ -333,7 +333,7 @@ dix_main(int argc, char *argv[], char *envp[])
         }
 
         for (i = screenInfo.numScreens - 1; i >= 0; i--) {
-            FreeGCperDepth(i);
+            FreeGCperDepth(screenInfo.screens[i]);
             FreeDefaultStipple(i);
             dixFreeScreenSpecificPrivates(screenInfo.screens[i]);
             (*screenInfo.screens[i]->CloseScreen) (screenInfo.screens[i]);
