@@ -38,7 +38,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* security hooks */
 /* Constants used to identify the available security hooks
  */
-#define XACE_CORE_DISPATCH		0
 #define XACE_EXT_DISPATCH		1
 #define XACE_RESOURCE_ACCESS		2
 #define XACE_DEVICE_ACCESS		3

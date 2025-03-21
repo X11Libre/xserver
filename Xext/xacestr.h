@@ -29,12 +29,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "selection.h"
 #include "xace.h"
 
-/* XACE_CORE_DISPATCH */
-typedef struct {
-    ClientPtr client;
-    int status;
-} XaceCoreDispatchRec;
-
 /* XACE_RESOURCE_ACCESS */
 typedef struct {
     ClientPtr client;
