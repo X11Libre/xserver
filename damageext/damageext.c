@@ -317,7 +317,7 @@ ProcDamageDestroy(ClientPtr client)
     DamageExtPtr pDamageExt;
 
     REQUEST_SIZE_MATCH(xDamageDestroyReq);
-    VERIFY_DAMAGEEXT(pDamageExt, stuff->damage, client, DixWriteAccess);
+    VERIFY_DAMAGEEXT(pDamageExt, stuff->damage, client, DixDestroyAccess);
     FreeResource(stuff->damage, X11_RESTYPE_NONE);
     return Success;
 }
