@@ -142,19 +142,6 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
     return ext;
 }
 
-static int
-FindExtension(const char *extname, int len)
-{
-    int i;
-
-    for (i = 0; i < NumExtensions; i++) {
-        if ((strlen(extensions[i]->name) == len) &&
-            !strncmp(extname, extensions[i]->name, len))
-            break;
-    }
-    return ((i == NumExtensions) ? -1 : i);
-}
-
 /*
  * CheckExtension returns the extensions[] entry for the requested
  * extension name.  Maybe this could just return a Bool instead?
@@ -162,13 +149,13 @@ FindExtension(const char *extname, int len)
 ExtensionEntry *
 CheckExtension(const char *extname)
 {
-    int n;
-
-    n = FindExtension(extname, strlen(extname));
-    if (n != -1)
-        return extensions[n];
-    else
-        return NULL;
+    for (int i = 0; i < NumExtensions; i++) {
+        if (extensions[i] &&
+            extensions[i]->name &&
+            strcmp(extensions[i]->name, extname) == 0)
+            return extensions[i];
+    }
+    return NULL;
 }
 
 /*
@@ -237,14 +224,17 @@ ProcQueryExtension(ClientPtr client)
     if (!NumExtensions || !extensions)
         rep.present = xFalse;
     else {
-        int i = FindExtension((char *) &stuff[1], stuff->nbytes);
-        if (i < 0 || !ExtensionAvailable(client, extensions[i]))
+        char extname[PATH_MAX] = { 0 };
+        strncpy(extname, (char *) &stuff[1], min(stuff->nbytes, sizeof(extname)-1));
+        ExtensionEntry *extEntry = CheckExtension(extname);
+
+        if (!extEntry || !ExtensionAvailable(client, extEntry))
             rep.present = xFalse;
         else {
             rep.present = xTrue;
-            rep.major_opcode = extensions[i]->base;
-            rep.first_event = extensions[i]->eventBase;
-            rep.first_error = extensions[i]->errorBase;
+            rep.major_opcode = extEntry->base;
+            rep.first_event = extEntry->eventBase;
+            rep.first_error = extEntry->errorBase;
         }
     }
 
