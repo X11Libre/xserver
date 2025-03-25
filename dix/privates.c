@@ -541,6 +541,9 @@ _dixFreeObjectWithPrivates(void *object, PrivatePtr privates,
 void
 dixFreePrivates(PrivatePtr privates, DevPrivateType type)
 {
+    if (!privates)
+        return;
+
     _dixFiniPrivates(privates, type);
     --global_keys[type].allocated;
     free(privates);

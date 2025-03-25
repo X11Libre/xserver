@@ -76,7 +76,6 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
              unsigned short (*MinorOpcodeProc) (ClientPtr c3))
 {
     int i;
-    ExtensionEntry *ext, **newexts;
 
     if (!MainProc || !SwappedMainProc || !MinorOpcodeProc)
         return ((ExtensionEntry *) NULL);
@@ -87,27 +86,21 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
         return ((ExtensionEntry *) NULL);
     }
 
-    ext = calloc(1, sizeof(ExtensionEntry));
+    ExtensionEntry *ext = calloc(1, sizeof(ExtensionEntry));
     if (!ext)
         return NULL;
-    if (!dixAllocatePrivates(&ext->devPrivates, PRIVATE_EXTENSION)) {
-        free(ext);
-        return NULL;
-    }
+    if (!dixAllocatePrivates(&ext->devPrivates, PRIVATE_EXTENSION))
+        goto badalloc;
     ext->name = strdup(name);
-    if (!ext->name) {
-        dixFreePrivates(ext->devPrivates, PRIVATE_EXTENSION);
-        free(ext);
-        return ((ExtensionEntry *) NULL);
-    }
+    if (!ext->name)
+        goto badalloc;
+
     i = NumExtensions;
-    newexts = reallocarray(extensions, i + 1, sizeof(ExtensionEntry *));
-    if (!newexts) {
-        free((void *) ext->name);
-        dixFreePrivates(ext->devPrivates, PRIVATE_EXTENSION);
-        free(ext);
-        return ((ExtensionEntry *) NULL);
-    }
+
+    ExtensionEntry **newexts = reallocarray(extensions, i + 1, sizeof(ExtensionEntry *));
+    if (!newexts)
+        goto badalloc;
+
     NumExtensions++;
     extensions = newexts;
     extensions[i] = ext;
@@ -140,6 +133,14 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
     RegisterExtensionNames(ext);
 #endif
     return ext;
+
+badalloc:
+    if (ext) {
+        free((char*)ext->name);
+        dixFreePrivates(ext->devPrivates, PRIVATE_EXTENSION);
+        free(ext);
+    }
+    return NULL;
 }
 
 /*
