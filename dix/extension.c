@@ -69,8 +69,55 @@ int lastEvent = EXTENSION_EVENT_BASE;
 static int lastError = FirstExtensionError;
 static unsigned int NumExtensions = RESERVED_EXTENSIONS;
 
+static struct { const char *name; int id; } reservedExt[] = {
+    { "BIG-REQUESTS",               EXTENSION_MAJOR_BIG_REQUESTS },
+    { "Apple-WM",                   EXTENSION_MAJOR_APPLE_WM },
+    { "Apple-DRI",                  EXTENSION_MAJOR_APPLE_DRI },
+    { "Composite",                  EXTENSION_MAJOR_COMPOSITE },
+    { "DAMAGE",                     EXTENSION_MAJOR_DAMAGE },
+    { "DOUBLE-BUFFER",              EXTENSION_MAJOR_DOUBLE_BUFFER },
+    { "DPMS",                       EXTENSION_MAJOR_DPMS },
+    { "DRI2",                       EXTENSION_MAJOR_DRI2 },
+    { "DRI3",                       EXTENSION_MAJOR_DRI3 },
+    { "Generic Event Extension",    EXTENSION_MAJOR_GENERIC_EVENT },
+    { "GLX",                        EXTENSION_MAJOR_GLX },
+    { "MIT-SCREEN-SAVER",           EXTENSION_MAJOR_MIT_SCREEN_SAVER },
+    { "NAMESPACE",                  EXTENSION_MAJOR_NAMESPACE },
+    { "Present",                    EXTENSION_MAJOR_PRESENT },
+    { "RANDR",                      EXTENSION_MAJOR_RANDR },
+    { "RECORD",                     EXTENSION_MAJOR_RECORD },
+    { "RENDER",                     EXTENSION_MAJOR_RENDER },
+    { "SECURITY",                   EXTENSION_MAJOR_SECURITY },
+    { "SELinux",                    EXTENSION_MAJOR_SELINUX },
+    { "SHAPE",                      EXTENSION_MAJOR_SHAPE },
+    { "MIT-SHM",                    EXTENSION_MAJOR_SHM },
+    { "SYNC",                       EXTENSION_MAJOR_SYNC },
+    { "Windows-DRI",                EXTENSION_MAJOR_WINDOWS_DRI },
+    { "XFIXES",                     EXTENSION_MAJOR_XFIXES },
+    { "XFree86-Bigfont",            EXTENSION_MAJOR_XF86_BIGFONT },
+    { "XFree86-DGA",                EXTENSION_MAJOR_XF86_DGA },
+    { "XFree86-DRI",                EXTENSION_MAJOR_XF86_DRI },
+    { "XFree86-VidModeExtension",   EXTENSION_MAJOR_XF86_VIDMODE },
+    { "XC-MISC",                    EXTENSION_MAJOR_XC_MISC },
+    { "XInputExtension",            EXTENSION_MAJOR_XINPUT },
+    { "XINERAMA",                   EXTENSION_MAJOR_XINERAMA },
+    { "XKEYBOARD",                  EXTENSION_MAJOR_XKEYBOARD },
+    { "X-Resource",                 EXTENSION_MAJOR_XRESOURCE },
+    { "XTEST",                      EXTENSION_MAJOR_XTEST },
+    { "XVideo",                     EXTENSION_MAJOR_XVIDEO },
+    { "XVideo-MotionCompensation",  EXTENSION_MAJOR_XVMC },
+    { "XWAYLAND",                   EXTENSION_MAJOR_XWAYLAND },
+};
+
 static int checkReserved(const char* name)
 {
+    for (int i=0; i<ARRAY_SIZE(reservedExt); i++) {
+        if (strcmp(name, reservedExt[i].name) == 0) {
+            if (reservedExt[i].id < (RESERVED_EXTENSIONS + EXTENSION_BASE))
+                return reservedExt[i].id;
+            FatalError("BUG: RESERVED_EXTENSIONS too small for %d\n", reservedExt[i].id);
+        }
+    }
     return -1;
 }
 
