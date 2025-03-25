@@ -49,6 +49,7 @@ SOFTWARE.
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
+#include "dix/extension_priv.h"
 #include "dix/registry_priv.h"
 
 #include "misc.h"
@@ -66,7 +67,12 @@ static ExtensionEntry **extensions = (ExtensionEntry **) NULL;
 
 int lastEvent = EXTENSION_EVENT_BASE;
 static int lastError = FirstExtensionError;
-static unsigned int NumExtensions = 0;
+static unsigned int NumExtensions = RESERVED_EXTENSIONS;
+
+static int checkReserved(const char* name)
+{
+    return -1;
+}
 
 ExtensionEntry *
 AddExtension(const char *name, int NumEvents, int NumErrors,
@@ -75,7 +81,10 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
              void (*CloseDownProc) (ExtensionEntry * e),
              unsigned short (*MinorOpcodeProc) (ClientPtr c3))
 {
-    int i;
+    if (!extensions)
+        extensions = calloc(NumExtensions, sizeof(ExtensionEntry*));
+    if (!extensions)
+        return NULL;
 
     if (!MainProc || !SwappedMainProc || !MinorOpcodeProc)
         return ((ExtensionEntry *) NULL);
@@ -95,14 +104,19 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
     if (!ext->name)
         goto badalloc;
 
-    i = NumExtensions;
+    int i = checkReserved(ext->name);
+    if (i == -1) {
+        i = NumExtensions;
+        ExtensionEntry **newexts = reallocarray(extensions, i + 1, sizeof(ExtensionEntry *));
+        if (!newexts)
+            goto badalloc;
 
-    ExtensionEntry **newexts = reallocarray(extensions, i + 1, sizeof(ExtensionEntry *));
-    if (!newexts)
-        goto badalloc;
+        NumExtensions++;
+        extensions = newexts;
+    } else {
+        i = i - EXTENSION_BASE;
+    }
 
-    NumExtensions++;
-    extensions = newexts;
     extensions[i] = ext;
     ext->index = i;
     ext->base = i + EXTENSION_BASE;
@@ -150,11 +164,15 @@ badalloc:
 ExtensionEntry *
 CheckExtension(const char *extname)
 {
+    if (!extensions)
+        return NULL;
+
     for (int i = 0; i < NumExtensions; i++) {
         if (extensions[i] &&
             extensions[i]->name &&
-            strcmp(extensions[i]->name, extname) == 0)
+            strcmp(extensions[i]->name, extname) == 0) {
             return extensions[i];
+        }
     }
     return NULL;
 }
@@ -165,7 +183,7 @@ CheckExtension(const char *extname)
 ExtensionEntry *
 GetExtensionEntry(int major)
 {
-    if (major < EXTENSION_BASE)
+    if ((major < EXTENSION_BASE) || !extensions)
         return NULL;
     major -= EXTENSION_BASE;
     if (major >= NumExtensions)
@@ -182,9 +200,12 @@ StandardMinorOpcode(ClientPtr client)
 void
 CloseDownExtensions(void)
 {
-    int i;
+    if (!extensions)
+        return;
 
-    for (i = NumExtensions - 1; i >= 0; i--) {
+    for (int i = NumExtensions - 1; i >= 0; i--) {
+        if (!extensions[i])
+            continue;
         if (extensions[i]->CloseDown)
             extensions[i]->CloseDown(extensions[i]);
         NumExtensions = i;
@@ -194,6 +215,7 @@ CloseDownExtensions(void)
     }
     free(extensions);
     extensions = (ExtensionEntry **) NULL;
+    NumExtensions = RESERVED_EXTENSIONS;
     lastEvent = EXTENSION_EVENT_BASE;
     lastError = FirstExtensionError;
 }
@@ -201,6 +223,8 @@ CloseDownExtensions(void)
 static Bool
 ExtensionAvailable(ClientPtr client, ExtensionEntry *ext)
 {
+    if (!ext)
+        return FALSE;
     if (XaceHookExtAccess(client, ext) != Success)
         return FALSE;
     if (!ext->base)
@@ -224,7 +248,7 @@ ProcQueryExtension(ClientPtr client)
         .major_opcode = 0
     };
 
-    if (!NumExtensions)
+    if (!NumExtensions || !extensions)
         reply.present = xFalse;
     else {
         char extname[PATH_MAX] = { 0 };
@@ -261,7 +285,7 @@ ProcListExtensions(ClientPtr client)
     };
     buffer = NULL;
 
-    if (NumExtensions) {
+    if (NumExtensions && extensions) {
         int i;
 
         for (i = 0; i < NumExtensions; i++) {
