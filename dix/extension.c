@@ -142,19 +142,6 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
     return ext;
 }
 
-static int
-FindExtension(const char *extname, int len)
-{
-    int i;
-
-    for (i = 0; i < NumExtensions; i++) {
-        if ((strlen(extensions[i]->name) == len) &&
-            !strncmp(extname, extensions[i]->name, len))
-            break;
-    }
-    return ((i == NumExtensions) ? -1 : i);
-}
-
 /*
  * CheckExtension returns the extensions[] entry for the requested
  * extension name.  Maybe this could just return a Bool instead?
@@ -162,13 +149,13 @@ FindExtension(const char *extname, int len)
 ExtensionEntry *
 CheckExtension(const char *extname)
 {
-    int n;
-
-    n = FindExtension(extname, strlen(extname));
-    if (n != -1)
-        return extensions[n];
-    else
-        return NULL;
+    for (int i = 0; i < NumExtensions; i++) {
+        if (extensions[i] &&
+            extensions[i]->name &&
+            strcmp(extensions[i]->name, extname) == 0)
+            return extensions[i];
+    }
+    return NULL;
 }
 
 /*
@@ -224,7 +211,6 @@ int
 ProcQueryExtension(ClientPtr client)
 {
     xQueryExtensionReply reply;
-    int i;
 
     REQUEST(xQueryExtensionReq);
 
@@ -240,14 +226,17 @@ ProcQueryExtension(ClientPtr client)
     if (!NumExtensions)
         reply.present = xFalse;
     else {
-        i = FindExtension((char *) &stuff[1], stuff->nbytes);
-        if (i < 0 || !ExtensionAvailable(client, extensions[i]))
+        char extname[PATH_MAX] = { 0 };
+        strncpy(extname, (char *) &stuff[1], min(stuff->nbytes, sizeof(extname)-1));
+        ExtensionEntry *extEntry = CheckExtension(extname);
+
+        if (!extEntry || !ExtensionAvailable(client, extEntry))
             reply.present = xFalse;
         else {
             reply.present = xTrue;
-            reply.major_opcode = extensions[i]->base;
-            reply.first_event = extensions[i]->eventBase;
-            reply.first_error = extensions[i]->errorBase;
+            reply.major_opcode = extEntry->base;
+            reply.first_event = extEntry->eventBase;
+            reply.first_error = extEntry->errorBase;
         }
     }
     WriteReplyToClient(client, sizeof(xQueryExtensionReply), &reply);
