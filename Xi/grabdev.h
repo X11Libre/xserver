@@ -44,9 +44,4 @@ int CreateMaskFromList(ClientPtr /* client */ ,
                        int      /* req */
     );
 
-void SRepXGrabDevice(ClientPtr /* client */ ,
-                     int /* size */ ,
-                     xGrabDeviceReply * /* rep */
-    );
-
 #endif                          /* GRABDEV_H */

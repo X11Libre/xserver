@@ -137,7 +137,11 @@ ProcXGrabDevice(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    WriteReplyToClient(client, sizeof(xGrabDeviceReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+    WriteToClient(client, sizeof(xGrabDeviceReply), &rep);
     return Success;
 }
 
@@ -194,19 +198,4 @@ CreateMaskFromList(ClientPtr client, XEventClass * list, int count,
             }
     }
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGrabDevice function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGrabDevice(ClientPtr client, int size, xGrabDeviceReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }
