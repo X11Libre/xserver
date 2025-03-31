@@ -422,9 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_OpenDevice)
-        SRepXOpenDevice(client, len, (xOpenDeviceReply *) rep);
-    else if (rep->RepType == X_SetDeviceMode)
+    if (rep->RepType == X_SetDeviceMode)
         SRepXSetDeviceMode(client, len, (xSetDeviceModeReply *) rep);
     else if (rep->RepType == X_GetSelectedExtensionEvents)
         SRepXGetSelectedExtensionEvents(client, len,
