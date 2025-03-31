@@ -36,9 +36,4 @@ int SProcXGetDeviceMotionEvents(ClientPtr       /* client */
 int ProcXGetDeviceMotionEvents(ClientPtr        /* client */
     );
 
-void SRepXGetDeviceMotionEvents(ClientPtr /* client */ ,
-                                int /* size */ ,
-                                xGetDeviceMotionEventsReply *   /* rep */
-    );
-
 #endif                          /* GTMOTION_H */
