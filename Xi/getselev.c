@@ -145,7 +145,13 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
                     ClassFromMask(aclient, others->mask[i], i, NULL, CREATE);
     }
 
-    WriteReplyToClient(client, sizeof(xGetSelectedExtensionEventsReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.this_client_count);
+        swaps(&rep.all_clients_count);
+    }
+    WriteToClient(client, sizeof(xGetSelectedExtensionEventsReply), &rep);
 
     if (total_length) {
         client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
@@ -153,22 +159,4 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     }
     free(buf);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGetSelectedExtensionEvents function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetSelectedExtensionEvents(ClientPtr client, int size,
-                                xGetSelectedExtensionEventsReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->this_client_count);
-    swaps(&rep->all_clients_count);
-    WriteToClient(client, size, rep);
 }

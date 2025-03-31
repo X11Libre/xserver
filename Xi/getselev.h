@@ -36,9 +36,4 @@ int SProcXGetSelectedExtensionEvents(ClientPtr  /* client */
 int ProcXGetSelectedExtensionEvents(ClientPtr   /* client */
     );
 
-void SRepXGetSelectedExtensionEvents(ClientPtr /* client */ ,
-                                     int /* size */ ,
-                                     xGetSelectedExtensionEventsReply * /* rep */
-    );
-
 #endif                          /* GETSELEV_H */
