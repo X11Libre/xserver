@@ -63,7 +63,6 @@ AppleDRIResetProc(ExtensionEntry* extEntry);
 static int
 ProcAppleDRICreatePixmap(ClientPtr client);
 
-static unsigned char DRIReqCode = 0;
 static int DRIEventBase = 0;
 
 static void
@@ -510,7 +509,6 @@ AppleDRIExtensionInit(void)
                                  AppleDRIResetProc,
                                  StandardMinorOpcode))) {
         size_t i;
-        DRIReqCode = (unsigned char)extEntry->base;
         DRIErrorBase = extEntry->errorBase;
         DRIEventBase = extEntry->eventBase;
         for (i = 0; i < AppleDRINumberEvents; i++)
