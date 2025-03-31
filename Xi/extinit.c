@@ -422,11 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_GetDeviceDontPropagateList)
-        SRepXGetDeviceDontPropagateList(client, len,
-                                        (xGetDeviceDontPropagateListReply *)
-                                        rep);
-    else if (rep->RepType == X_GetDeviceMotionEvents)
+    if (rep->RepType == X_GetDeviceMotionEvents)
         SRepXGetDeviceMotionEvents(client, len,
                                    (xGetDeviceMotionEventsReply *) rep);
     else if (rep->RepType == X_GrabDevice)
