@@ -384,24 +384,15 @@ ProcXListInputDevices(ClientPtr client)
     }
     rep.ndevices = numdevs;
     rep.length = bytes_to_int32(total_length);
-    WriteReplyToClient(client, sizeof(xListInputDevicesReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+
+    WriteToClient(client, sizeof(xListInputDevicesReply), &rep);
     WriteToClient(client, total_length, savbuf);
     free(savbuf);
     free(skip);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XListInputDevices function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXListInputDevices(ClientPtr client, int size, xListInputDevicesReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }
