@@ -68,8 +68,6 @@ static int DRIErrorBase;
 
 static void XF86DRIResetProc(ExtensionEntry *extEntry);
 
-static unsigned char DRIReqCode = 0;
-
 /*ARGSUSED*/
 static void
 XF86DRIResetProc(ExtensionEntry *extEntry)
@@ -596,7 +594,6 @@ XFree86DRIExtensionInit(void)
                                  ProcXF86DRIDispatch,
                                  SProcXF86DRIDispatch,
                                  XF86DRIResetProc, StandardMinorOpcode))) {
-        DRIReqCode = (unsigned char) extEntry->base;
         DRIErrorBase = extEntry->errorBase;
     }
 }
