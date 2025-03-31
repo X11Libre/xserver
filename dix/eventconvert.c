@@ -40,6 +40,7 @@
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
+#include "dix/extension_priv.h"
 
 #include "dix.h"
 #include "inputstr.h"
@@ -604,7 +605,7 @@ eventToDeviceChanged(DeviceChangedEvent *dce, xEvent **xi)
     }
 
     dcce->type = GenericEvent;
-    dcce->extension = IReqCode;
+    dcce->extension = EXTENSION_MAJOR_XINPUT;
     dcce->evtype = XI_DeviceChanged;
     dcce->time = dce->time;
     dcce->deviceid = dce->deviceid;
@@ -687,7 +688,7 @@ eventToDeviceEvent(DeviceEvent *ev, xEvent **xi)
         return BadAlloc;
     xde = (xXIDeviceEvent *) * xi;
     xde->type = GenericEvent;
-    xde->extension = IReqCode;
+    xde->extension = EXTENSION_MAJOR_XINPUT;
     xde->evtype = GetXI2Type(ev->type);
     xde->time = ev->time;
     xde->length = bytes_to_int32(len - sizeof(xEvent));
@@ -757,7 +758,7 @@ eventToTouchOwnershipEvent(TouchOwnershipEvent *ev, xEvent **xi)
         return BadAlloc;
     xtoe = (xXITouchOwnershipEvent *) * xi;
     xtoe->type = GenericEvent;
-    xtoe->extension = IReqCode;
+    xtoe->extension = EXTENSION_MAJOR_XINPUT;
     xtoe->length = bytes_to_int32(len - sizeof(xEvent));
     xtoe->evtype = GetXI2Type(ev->type);
     xtoe->deviceid = ev->deviceid;
@@ -789,7 +790,7 @@ eventToRawEvent(RawDeviceEvent *ev, xEvent **xi)
         return BadAlloc;
     raw = (xXIRawEvent *) * xi;
     raw->type = GenericEvent;
-    raw->extension = IReqCode;
+    raw->extension = EXTENSION_MAJOR_XINPUT;
     raw->evtype = GetXI2Type(ev->type);
     raw->time = ev->time;
     raw->length = bytes_to_int32(len - sizeof(xEvent));
@@ -826,7 +827,7 @@ eventToBarrierEvent(BarrierEvent *ev, xEvent **xi)
         return BadAlloc;
     barrier = (xXIBarrierEvent*) *xi;
     barrier->type = GenericEvent;
-    barrier->extension = IReqCode;
+    barrier->extension = EXTENSION_MAJOR_XINPUT;
     barrier->evtype = GetXI2Type(ev->type);
     barrier->length = bytes_to_int32(len - sizeof(xEvent));
     barrier->deviceid = ev->deviceid;
@@ -857,7 +858,7 @@ eventToGesturePinchEvent(GestureEvent *ev, xEvent **xi)
         return BadAlloc;
     xpe = (xXIGesturePinchEvent *) * xi;
     xpe->type = GenericEvent;
-    xpe->extension = IReqCode;
+    xpe->extension = EXTENSION_MAJOR_XINPUT;
     xpe->evtype = GetXI2Type(ev->type);
     xpe->time = ev->time;
     xpe->length = bytes_to_int32(len - sizeof(xEvent));
@@ -901,7 +902,7 @@ eventToGestureSwipeEvent(GestureEvent *ev, xEvent **xi)
         return BadAlloc;
     xde = (xXIGestureSwipeEvent *) * xi;
     xde->type = GenericEvent;
-    xde->extension = IReqCode;
+    xde->extension = EXTENSION_MAJOR_XINPUT;
     xde->evtype = GetXI2Type(ev->type);
     xde->time = ev->time;
     xde->length = bytes_to_int32(len - sizeof(xEvent));

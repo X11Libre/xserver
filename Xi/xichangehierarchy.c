@@ -40,6 +40,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "os/bug_priv.h"
 
@@ -75,7 +76,7 @@ XISendDeviceHierarchyEvent(int flags[MAXDEVICES])
     if (!ev)
         return;
     ev->type = GenericEvent;
-    ev->extension = IReqCode;
+    ev->extension = EXTENSION_MAJOR_XINPUT;
     ev->evtype = XI_HierarchyChanged;
     ev->time = GetTimeInMillis();
     ev->flags = 0;

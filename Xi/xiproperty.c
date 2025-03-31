@@ -33,6 +33,7 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/exevents_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 
 #include "dix.h"
@@ -194,7 +195,7 @@ send_property_event(DeviceIntPtr dev, Atom property, int what)
     };
     xXIPropertyEvent xi2 = {
         .type = GenericEvent,
-        .extension = IReqCode,
+        .extension = EXTENSION_MAJOR_XINPUT,
         .length = 0,
         .evtype = XI_PropertyEvent,
         .deviceid = dev->id,
