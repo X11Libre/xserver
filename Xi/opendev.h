@@ -33,9 +33,4 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 int ProcXOpenDevice(ClientPtr   /* client */
     );
 
-void SRepXOpenDevice(ClientPtr /* client */ ,
-                     int /* size */ ,
-                     xOpenDeviceReply * /* rep */
-    );
-
 #endif                          /* OPENDEV_H */

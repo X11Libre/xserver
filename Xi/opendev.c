@@ -134,22 +134,13 @@ ProcXOpenDevice(ClientPtr client)
         .length = bytes_to_int32(j * sizeof(xInputClassInfo)),
         .num_classes = j
     };
-    WriteReplyToClient(client, sizeof(xOpenDeviceReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+
+    WriteToClient(client, sizeof(xOpenDeviceReply), &rep);
     WriteToClient(client, j * sizeof(xInputClassInfo), evbase);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XOpenDevice function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXOpenDevice(ClientPtr client, int size, xOpenDeviceReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }
