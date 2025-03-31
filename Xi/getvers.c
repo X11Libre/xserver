@@ -103,25 +103,14 @@ ProcXGetExtensionVersion(ClientPtr client)
         .present = TRUE
     };
 
-    WriteReplyToClient(client, sizeof(xGetExtensionVersionReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.major_version);
+        swaps(&rep.minor_version);
+    }
+
+    WriteToClient(client, sizeof(xGetExtensionVersionReply), &rep);
 
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGetExtensionVersion function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetExtensionVersion(ClientPtr client, int size,
-                         xGetExtensionVersionReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->major_version);
-    swaps(&rep->minor_version);
-    WriteToClient(client, size, rep);
 }
