@@ -43,9 +43,4 @@ XEventClass *ClassFromMask(XEventClass * /* buf */ ,
                            int  /* mode */
     );
 
-void SRepXGetDeviceDontPropagateList(ClientPtr /* client */ ,
-                                     int /* size */ ,
-                                     xGetDeviceDontPropagateListReply * /* rep */
-    );
-
 #endif                          /* GETPROP_H */
