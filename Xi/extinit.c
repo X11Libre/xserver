@@ -422,10 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_GetDeviceMotionEvents)
-        SRepXGetDeviceMotionEvents(client, len,
-                                   (xGetDeviceMotionEventsReply *) rep);
-    else if (rep->RepType == X_GrabDevice)
+    if (rep->RepType == X_GrabDevice)
         SRepXGrabDevice(client, len, (xGrabDeviceReply *) rep);
     else if (rep->RepType == X_GetDeviceFocus)
         SRepXGetDeviceFocus(client, len, (xGetDeviceFocusReply *) rep);
