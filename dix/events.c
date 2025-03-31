@@ -121,10 +121,11 @@ Equipment Corporation.
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
-#include "dix/input_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/reqhandlers_priv.h"
+#include "dix/input_priv.h"
 #include "os/bug_priv.h"
 #include "os/client_priv.h"
 #include "os/fmt.h"
@@ -196,7 +197,7 @@ xi2_get_type(const xEvent *event)
     const xGenericEvent *e = (const xGenericEvent *) event;
 
     return (e->type != GenericEvent ||
-            e->extension != IReqCode) ? 0 : e->evtype;
+            e->extension != EXTENSION_MAJOR_XINPUT) ? 0 : e->evtype;
 }
 
 /**
@@ -4762,7 +4763,7 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
 
     event = calloc(1, len);
     event->type = GenericEvent;
-    event->extension = IReqCode;
+    event->extension = EXTENSION_MAJOR_XINPUT;
     event->evtype = type;
     event->length = (len - sizeof(xEvent)) / 4;
     event->buttons_len = btlen;
@@ -6279,7 +6280,7 @@ IsWrongPointerBarrierClient(ClientPtr client, DeviceIntPtr dev, xEvent *event)
 {
     xXIBarrierEvent *ev = (xXIBarrierEvent*)event;
 
-    if (ev->type != GenericEvent || ev->extension != IReqCode)
+    if (ev->type != GenericEvent || ev->extension != EXTENSION_MAJOR_XINPUT)
         return FALSE;
 
     if (ev->evtype != XI_BarrierHit && ev->evtype != XI_BarrierLeave)

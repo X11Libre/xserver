@@ -53,6 +53,8 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <assert.h>
+
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 #include <X11/extensions/XI2proto.h>
@@ -60,6 +62,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/extension_priv.h"
 
 #include "inputstr.h"
 #include "gcstruct.h"           /* pointer for extnsionst.h */
@@ -322,7 +325,6 @@ static int (*SProcIVector[]) (ClientPtr) = {
  *
  */
 
-int IReqCode = 0;
 int IEventBase = 0;
 int BadDevice = 0;
 static int BadEvent = 1;
@@ -1030,7 +1032,6 @@ RestoreExtensionEvents(void)
 {
     int i, j;
 
-    IReqCode = 0;
     IEventBase = 0;
 
     for (i = 0; i < ExtEventIndex - 1; i++) {
@@ -1231,7 +1232,8 @@ XInputExtensionInit(void)
     extEntry = AddExtension(INAME, IEVENTS, IERRORS, ProcIDispatch,
                             SProcIDispatch, IResetProc, StandardMinorOpcode);
     if (extEntry) {
-        IReqCode = extEntry->base;
+        assert(extEntry->base == EXTENSION_MAJOR_XINPUT);
+
         IEventBase = extEntry->eventBase;
         XIVersion = thisversion;
         MakeDeviceTypeAtoms();
@@ -1257,7 +1259,7 @@ XInputExtensionInit(void)
         EventSwapVector[ChangeDeviceNotify] = SEventIDispatch;
         EventSwapVector[DevicePresenceNotify] = SEventIDispatch;
 
-        GERegisterExtension(IReqCode, XI2EventSwap);
+        GERegisterExtension(EXTENSION_MAJOR_XINPUT, XI2EventSwap);
 
         memset(&xi_all_devices, 0, sizeof(xi_all_devices));
         memset(&xi_all_master_devices, 0, sizeof(xi_all_master_devices));

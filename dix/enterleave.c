@@ -33,6 +33,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
+#include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "os/bug_priv.h"
 
@@ -785,7 +786,7 @@ DeviceFocusEvent(DeviceIntPtr dev, int type, int mode, int detail,
 
     xi2event = calloc(1, len);
     xi2event->type = GenericEvent;
-    xi2event->extension = IReqCode;
+    xi2event->extension = EXTENSION_MAJOR_XINPUT;
     xi2event->evtype = type;
     xi2event->length = bytes_to_int32(len - sizeof(xEvent));
     xi2event->buttons_len = btlen;
