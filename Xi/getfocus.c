@@ -71,7 +71,6 @@ ProcXGetDeviceFocus(ClientPtr client)
 {
     DeviceIntPtr dev;
     FocusClassPtr focus;
-    xGetDeviceFocusReply rep;
     int rc;
 
     REQUEST(xGetDeviceFocusReq);
@@ -83,7 +82,7 @@ ProcXGetDeviceFocus(ClientPtr client)
     if (!dev->focus)
         return BadDevice;
 
-    rep = (xGetDeviceFocusReply) {
+    xGetDeviceFocusReply rep = {
         .repType = X_Reply,
         .RepType = X_GetDeviceFocus,
         .sequenceNumber = client->sequence,

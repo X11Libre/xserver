@@ -342,7 +342,6 @@ ProcXIGetSelectedEvents(ClientPtr client)
     int rc, i;
     WindowPtr win;
     char *buffer = NULL;
-    xXIGetSelectedEventsReply reply;
     OtherInputMasks *masks;
     InputClientsPtr others = NULL;
     xXIEventMask *evmask = NULL;
@@ -356,7 +355,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    reply = (xXIGetSelectedEventsReply) {
+    xXIGetSelectedEventsReply rep = {
         .repType = X_Reply,
         .RepType = X_XIGetSelectedEvents,
         .sequenceNumber = client->sequence,
@@ -375,7 +374,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
     }
 
     if (!others) {
-        WriteReplyToClient(client, sizeof(xXIGetSelectedEventsReply), &reply);
+        WriteReplyToClient(client, sizeof(xXIGetSelectedEventsReply), &rep);
         return Success;
     }
 
@@ -401,8 +400,8 @@ ProcXIGetSelectedEvents(ClientPtr client)
 
                 evmask->deviceid = i;
                 evmask->mask_len = mask_len;
-                reply.num_masks++;
-                reply.length += sizeof(xXIEventMask) / 4 + evmask->mask_len;
+                rep.num_masks++;
+                rep.length += sizeof(xXIEventMask) / 4 + evmask->mask_len;
 
                 if (client->swapped) {
                     swaps(&evmask->deviceid);
@@ -418,10 +417,10 @@ ProcXIGetSelectedEvents(ClientPtr client)
     }
 
     /* save the value before SRepXIGetSelectedEvents swaps it */
-    length = reply.length;
-    WriteReplyToClient(client, sizeof(xXIGetSelectedEventsReply), &reply);
+    length = rep.length;
+    WriteReplyToClient(client, sizeof(xXIGetSelectedEventsReply), &rep);
 
-    if (reply.num_masks)
+    if (rep.num_masks)
         WriteToClient(client, length * 4, buffer);
 
     free(buffer);

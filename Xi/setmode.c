@@ -72,13 +72,12 @@ int
 ProcXSetDeviceMode(ClientPtr client)
 {
     DeviceIntPtr dev;
-    xSetDeviceModeReply rep;
     int rc;
 
     REQUEST(xSetDeviceModeReq);
     REQUEST_SIZE_MATCH(xSetDeviceModeReq);
 
-    rep = (xSetDeviceModeReply) {
+    xSetDeviceModeReply rep = {
         .repType = X_Reply,
         .RepType = X_SetDeviceMode,
         .sequenceNumber = client->sequence,

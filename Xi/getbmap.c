@@ -69,20 +69,11 @@ int
 ProcXGetDeviceButtonMapping(ClientPtr client)
 {
     DeviceIntPtr dev;
-    xGetDeviceButtonMappingReply rep;
     ButtonClassPtr b;
     int rc;
 
     REQUEST(xGetDeviceButtonMappingReq);
     REQUEST_SIZE_MATCH(xGetDeviceButtonMappingReq);
-
-    rep = (xGetDeviceButtonMappingReply) {
-        .repType = X_Reply,
-        .RepType = X_GetDeviceButtonMapping,
-        .sequenceNumber = client->sequence,
-        .nElts = 0,
-        .length = 0
-    };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
@@ -92,8 +83,14 @@ ProcXGetDeviceButtonMapping(ClientPtr client)
     if (b == NULL)
         return BadMatch;
 
-    rep.nElts = b->numButtons;
-    rep.length = bytes_to_int32(rep.nElts);
+    xGetDeviceButtonMappingReply rep = {
+        .repType = X_Reply,
+        .RepType = X_GetDeviceButtonMapping,
+        .sequenceNumber = client->sequence,
+        .nElts = b->numButtons,
+        .length = bytes_to_int32(b->numButtons),
+    };
+
     WriteReplyToClient(client, sizeof(xGetDeviceButtonMappingReply), &rep);
     WriteToClient(client, rep.nElts, &b->map[1]);
     return Success;

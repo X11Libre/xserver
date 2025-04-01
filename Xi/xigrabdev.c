@@ -66,7 +66,6 @@ int
 ProcXIGrabDevice(ClientPtr client)
 {
     DeviceIntPtr dev;
-    xXIGrabDeviceReply rep;
     int ret = Success;
     uint8_t status;
     GrabMask mask = { 0 };
@@ -122,7 +121,7 @@ ProcXIGrabDevice(ClientPtr client)
     if (ret != Success)
         return ret;
 
-    rep = (xXIGrabDeviceReply) {
+    xXIGrabDeviceReply rep = {
         .repType = X_Reply,
         .RepType = X_XIGrabDevice,
         .sequenceNumber = client->sequence,

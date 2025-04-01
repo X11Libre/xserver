@@ -73,7 +73,6 @@ int
 ProcXSetDeviceModifierMapping(ClientPtr client)
 {
     int ret;
-    xSetDeviceModifierMappingReply rep;
     DeviceIntPtr dev;
 
     REQUEST(xSetDeviceModifierMappingReq);
@@ -83,13 +82,6 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
         (stuff->numKeyPerModifier << 1))
         return BadLength;
 
-    rep = (xSetDeviceModifierMappingReply) {
-        .repType = X_Reply,
-        .RepType = X_SetDeviceModifierMapping,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
-
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
     if (ret != Success)
         return ret;
@@ -98,6 +90,13 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
                         stuff->numKeyPerModifier);
     if (ret == Success)
         ret = MappingSuccess;
+
+    xSetDeviceModifierMappingReply rep = {
+        .repType = X_Reply,
+        .RepType = X_SetDeviceModifierMapping,
+        .sequenceNumber = client->sequence,
+        .length = 0
+    };
 
     if (ret == MappingSuccess || ret == MappingBusy || ret == MappingFailed) {
         rep.success = ret;

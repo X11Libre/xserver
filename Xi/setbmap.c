@@ -72,7 +72,6 @@ int
 ProcXSetDeviceButtonMapping(ClientPtr client)
 {
     int ret;
-    xSetDeviceButtonMappingReply rep;
     DeviceIntPtr dev;
 
     REQUEST(xSetDeviceButtonMappingReq);
@@ -86,7 +85,7 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
     if (ret != Success)
         return ret;
 
-    rep = (xSetDeviceButtonMappingReply) {
+    xSetDeviceButtonMappingReply rep = {
         .repType = X_Reply,
         .RepType = X_SetDeviceButtonMapping,
         .sequenceNumber = client->sequence,
