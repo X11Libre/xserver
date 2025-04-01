@@ -422,10 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_ListDeviceProperties)
-        SRepXListDeviceProperties(client, len,
-                                  (xListDevicePropertiesReply *) rep);
-    else if (rep->RepType == X_GetDeviceProperty)
+    if (rep->RepType == X_GetDeviceProperty)
         SRepXGetDeviceProperty(client, len, (xGetDevicePropertyReply *) rep);
     else if (rep->RepType == X_XIQueryPointer)
         SRepXIQueryPointer(client, len, (xXIQueryPointerReply *) rep);
