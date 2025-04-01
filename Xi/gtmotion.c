@@ -86,13 +86,10 @@ SProcXGetDeviceMotionEvents(ClientPtr client)
 int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
-    INT32 *coords = NULL, *bufptr;
-    unsigned long i;
+    INT32 *coords = NULL;
     int rc, num_events, axes, size = 0;
-    unsigned long nEvents;
     DeviceIntPtr dev;
     TimeStamp start, stop;
-    int length = 0;
     ValuatorClassPtr v;
 
     REQUEST(xGetDeviceMotionEventsReq);
@@ -134,22 +131,16 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
                                        start.milliseconds, stop.milliseconds,
                                        (ScreenPtr) NULL, FALSE);
     }
-    if (rep.nEvents > 0) {
-        length = bytes_to_int32(rep.nEvents * size);
-        rep.length = length;
+
+    const int length = rep.nEvents * size;
+    rep.length = bytes_to_int32(length);
+
+    if (client->swapped) {
+        SwapLongs((CARD32*) coords, rep.length);
     }
-    nEvents = rep.nEvents;
+
     WriteReplyToClient(client, sizeof(xGetDeviceMotionEventsReply), &rep);
-    if (nEvents) {
-        if (client->swapped) {
-            bufptr = coords;
-            for (i = 0; i < nEvents * (axes + 1); i++) {
-                swapl(bufptr);
-                bufptr++;
-            }
-        }
-        WriteToClient(client, length * 4, coords);
-    }
+    WriteToClient(client, length, coords);
     free(coords);
     return Success;
 }
