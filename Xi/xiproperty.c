@@ -1084,7 +1084,12 @@ ProcXIListProperties(ClientPtr client)
         .num_properties = natoms
     };
 
-    WriteReplyToClient(client, sizeof(xXIListPropertiesReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.num_properties);
+    }
+    WriteToClient(client, sizeof(xXIListPropertiesReply), &rep);
     if (natoms) {
         client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
         WriteSwappedDataToClient(client, natoms * sizeof(Atom), atoms);
@@ -1268,16 +1273,6 @@ SProcXIGetProperty(ClientPtr client)
     swapl(&stuff->offset);
     swapl(&stuff->len);
     return (ProcXIGetProperty(client));
-}
-
-void _X_COLD
-SRepXIListProperties(ClientPtr client, int size, xXIListPropertiesReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_properties);
-    /* properties will be swapped later, see ProcXIListProperties */
-    WriteToClient(client, size, rep);
 }
 
 void _X_COLD
