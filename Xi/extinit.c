@@ -422,11 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_XIGetFocus)
-        SRepXIGetFocus(client, len, (xXIGetFocusReply *) rep);
-    else {
-        FatalError("XINPUT confused sending swapped reply");
-    }
+    FatalError("XINPUT confused sending swapped reply");
 }
 
 /************************************************************************
