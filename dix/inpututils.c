@@ -150,7 +150,7 @@ check_modmap_change(ClientPtr client, DeviceIntPtr dev, KeyCode *modmap)
          * keycode range. */
         if (i < xkb->min_key_code || i > xkb->max_key_code) {
             client->errorValue = i;
-            return -1;
+            return BadValue;
         }
 
         /* None of the new modifiers may be down while we change the
