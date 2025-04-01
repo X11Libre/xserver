@@ -32,8 +32,5 @@
 
 int SProcXIQueryPointer(ClientPtr /* client */ );
 int ProcXIQueryPointer(ClientPtr /* client */ );
-void SRepXIQueryPointer(ClientPtr /* client */ ,
-                        int /* size */ ,
-                        xXIQueryPointerReply * /* rep */ );
 
 #endif                          /* QUERYDP_H */
