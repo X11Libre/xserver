@@ -145,21 +145,6 @@ CopySwapDeviceEnable(ClientPtr client, DeviceIntPtr dev, char *buf)
 
 /***********************************************************************
  *
- * This procedure writes the reply for the xGetDeviceControl function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetDeviceControl(ClientPtr client, int size, xGetDeviceControlReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
-}
-
-/***********************************************************************
- *
  * Get the state of the specified device control.
  *
  */
@@ -224,7 +209,11 @@ ProcXGetDeviceControl(ClientPtr client)
         .length = bytes_to_int32(total_length),
     };
 
-    WriteReplyToClient(client, sizeof(xGetDeviceControlReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+    WriteToClient(client, sizeof(xGetDeviceControlReply), &rep);
     WriteToClient(client, total_length, savbuf);
     free(savbuf);
     return Success;
