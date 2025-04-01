@@ -36,6 +36,4 @@ int SProcXIGrabDevice(ClientPtr client);
 int ProcXIUngrabDevice(ClientPtr client);
 int SProcXIUngrabDevice(ClientPtr client);
 
-void SRepXIGrabDevice(ClientPtr client, int size, xXIGrabDeviceReply * rep);
-
 #endif                          /* XIGRABDEV_H */

@@ -125,11 +125,13 @@ ProcXIGrabDevice(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_XIGrabDevice,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .status = status
     };
 
-    WriteReplyToClient(client, sizeof(rep), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return ret;
 }
 
@@ -169,12 +171,4 @@ ProcXIUngrabDevice(ClientPtr client)
         (*dev->deviceGrab.DeactivateGrab) (dev);
 
     return Success;
-}
-
-void _X_COLD
-SRepXIGrabDevice(ClientPtr client, int size, xXIGrabDeviceReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }
