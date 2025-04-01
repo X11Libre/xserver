@@ -102,23 +102,13 @@ ProcXGetDeviceFocus(ClientPtr client)
 
     rep.time = focus->time.milliseconds;
     rep.revertTo = focus->revert;
-    WriteReplyToClient(client, sizeof(xGetDeviceFocusReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.focus);
+        swapl(&rep.time);
+    }
+    WriteToClient(client, sizeof(xGetDeviceFocusReply), &rep);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the GetDeviceFocus function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetDeviceFocus(ClientPtr client, int size, xGetDeviceFocusReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->focus);
-    swapl(&rep->time);
-    WriteToClient(client, size, rep);
 }
