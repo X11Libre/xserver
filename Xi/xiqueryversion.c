@@ -54,7 +54,6 @@ extern XExtensionVersion XIVersion;     /* defined in getvers.c */
 int
 ProcXIQueryVersion(ClientPtr client)
 {
-    xXIQueryVersionReply rep;
     XIClientPtr pXIClient;
     int major, minor;
 
@@ -113,7 +112,7 @@ ProcXIQueryVersion(ClientPtr client)
         pXIClient->minor_version = minor;
     }
 
-    rep = (xXIQueryVersionReply) {
+    xXIQueryVersionReply rep = {
         .repType = X_Reply,
         .RepType = X_XIQueryVersion,
         .sequenceNumber = client->sequence,

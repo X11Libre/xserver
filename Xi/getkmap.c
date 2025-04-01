@@ -71,7 +71,6 @@ SOFTWARE.
 int
 ProcXGetDeviceKeyMapping(ClientPtr client)
 {
-    xGetDeviceKeyMappingReply rep;
     DeviceIntPtr dev;
     XkbDescPtr xkb;
     KeySymsPtr syms;
@@ -102,7 +101,7 @@ ProcXGetDeviceKeyMapping(ClientPtr client)
     if (!syms)
         return BadAlloc;
 
-    rep = (xGetDeviceKeyMappingReply) {
+    xGetDeviceKeyMappingReply rep = {
         .repType = X_Reply,
         .RepType = X_GetDeviceKeyMapping,
         .sequenceNumber = client->sequence,

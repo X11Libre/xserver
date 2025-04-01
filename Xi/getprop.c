@@ -94,13 +94,12 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     int i, rc;
     XEventClass *buf = NULL, *tbuf;
     WindowPtr pWin;
-    xGetDeviceDontPropagateListReply rep;
     OtherInputMasks *others;
 
     REQUEST(xGetDeviceDontPropagateListReq);
     REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
 
-    rep = (xGetDeviceDontPropagateListReply) {
+    xGetDeviceDontPropagateListReply rep = {
         .repType = X_Reply,
         .RepType = X_GetDeviceDontPropagateList,
         .sequenceNumber = client->sequence,

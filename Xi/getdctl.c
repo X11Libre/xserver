@@ -170,7 +170,6 @@ ProcXGetDeviceControl(ClientPtr client)
     int rc, total_length = 0;
     char *savbuf;
     DeviceIntPtr dev;
-    xGetDeviceControlReply rep;
 
     REQUEST(xGetDeviceControlReq);
     REQUEST_SIZE_MATCH(xGetDeviceControlReq);
@@ -178,13 +177,6 @@ ProcXGetDeviceControl(ClientPtr client)
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
-
-    rep = (xGetDeviceControlReply) {
-        .repType = X_Reply,
-        .RepType = X_GetDeviceControl,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
@@ -225,7 +217,13 @@ ProcXGetDeviceControl(ClientPtr client)
         break;
     }
 
-    rep.length = bytes_to_int32(total_length);
+    xGetDeviceControlReply rep = {
+        .repType = X_Reply,
+        .RepType = X_GetDeviceControl,
+        .sequenceNumber = client->sequence,
+        .length = bytes_to_int32(total_length),
+    };
+
     WriteReplyToClient(client, sizeof(xGetDeviceControlReply), &rep);
     WriteToClient(client, total_length, savbuf);
     free(savbuf);

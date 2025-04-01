@@ -61,7 +61,6 @@ ProcXIGetClientPointer(ClientPtr client)
 {
     int rc;
     ClientPtr winclient;
-    xXIGetClientPointerReply rep;
 
     REQUEST(xXIGetClientPointerReq);
     REQUEST_SIZE_MATCH(xXIGetClientPointerReq);
@@ -75,7 +74,7 @@ ProcXIGetClientPointer(ClientPtr client)
     else
         winclient = client;
 
-    rep = (xXIGetClientPointerReply) {
+    xXIGetClientPointerReply rep = {
         .repType = X_Reply,
         .RepType = X_XIGetClientPointer,
         .sequenceNumber = client->sequence,

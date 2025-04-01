@@ -77,7 +77,6 @@ int
 ProcXIQueryPointer(ClientPtr client)
 {
     int rc;
-    xXIQueryPointerReply rep;
     DeviceIntPtr pDev, kbd;
     WindowPtr pWin, t;
     SpritePtr pSprite;
@@ -126,7 +125,7 @@ ProcXIQueryPointer(ClientPtr client)
 
     pSprite = pDev->spriteInfo->sprite;
 
-    rep = (xXIQueryPointerReply) {
+    xXIQueryPointerReply rep = {
         .repType = X_Reply,
         .RepType = X_XIQueryPointer,
         .sequenceNumber = client->sequence,

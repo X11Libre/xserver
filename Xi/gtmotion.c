@@ -87,7 +87,6 @@ int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
     INT32 *coords = NULL, *bufptr;
-    xGetDeviceMotionEventsReply rep;
     unsigned long i;
     int rc, num_events, axes, size = 0;
     unsigned long nEvents;
@@ -97,8 +96,8 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     ValuatorClassPtr v;
 
     REQUEST(xGetDeviceMotionEventsReq);
-
     REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
+
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
     if (rc != Success)
         return rc;
@@ -108,7 +107,8 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     if (dev->valuator->motionHintWindow)
         MaybeStopDeviceHint(dev, client);
     axes = v->numAxes;
-    rep = (xGetDeviceMotionEventsReply) {
+
+    xGetDeviceMotionEventsReply rep = {
         .repType = X_Reply,
         .RepType = X_GetDeviceMotionEvents,
         .sequenceNumber = client->sequence,
@@ -117,6 +117,7 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
         .axes = axes,
         .mode = Absolute        /* XXX we don't do relative at the moment */
     };
+
     start = ClientTimeToServerTime(stuff->start);
     stop = ClientTimeToServerTime(stuff->stop);
     if (CompareTimeStamps(start, stop) == LATER ||
