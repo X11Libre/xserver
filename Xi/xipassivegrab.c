@@ -92,7 +92,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     GrabParameters param;
     void *tmp;
     int mask_len;
-    uint32_t length;
 
     REQUEST(xXIPassiveGrabDeviceReq);
     REQUEST_FIXED_SIZE(xXIPassiveGrabDeviceReq,
@@ -247,27 +246,20 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         }
     }
 
-    /* save the value before SRepXIPassiveGrabDevice swaps it */
-    length = rep.length;
-    WriteReplyToClient(client, sizeof(rep), &rep);
-    if (rep.num_modifiers)
-        WriteToClient(client, length * 4, modifiers_failed);
+    uint32_t length = rep.length; /* save it before swapping */
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.num_modifiers);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, length * 4, modifiers_failed);
 
  out:
     free(modifiers_failed);
     xi2mask_free(&mask.xi2mask);
     return ret;
-}
-
-void _X_COLD
-SRepXIPassiveGrabDevice(ClientPtr client, int size,
-                        xXIPassiveGrabDeviceReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_modifiers);
-
-    WriteToClient(client, size, rep);
 }
 
 int _X_COLD
