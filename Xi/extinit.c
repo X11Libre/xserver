@@ -410,21 +410,6 @@ SProcIDispatch(ClientPtr client)
     return (*SProcIVector[stuff->data]) (client);
 }
 
-/**********************************************************************
- *
- * SReplyIDispatch
- * Swap any replies defined in this extension.
- *
- */
-
-static void _X_COLD
-SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
-{
-    /* All we look at is the type field */
-    /* This is common to all replies    */
-    FatalError("XINPUT confused sending swapped reply");
-}
-
 /************************************************************************
  *
  * This function swaps the DeviceValuator event.
@@ -1094,7 +1079,6 @@ RestoreExtensionEvents(void)
 static void
 IResetProc(ExtensionEntry * unused)
 {
-    ReplySwapVector[IReqCode] = ReplyNotSwappd;
     EventSwapVector[DeviceValuator] = NotImplemented;
     EventSwapVector[DeviceKeyPress] = NotImplemented;
     EventSwapVector[DeviceKeyRelease] = NotImplemented;
@@ -1256,7 +1240,6 @@ XInputExtensionInit(void)
         if (!RT_INPUTCLIENT)
             FatalError("Failed to add resource type for XI.\n");
         FixExtensionEvents(extEntry);
-        ReplySwapVector[IReqCode] = (ReplySwapPtr) SReplyIDispatch;
         EventSwapVector[DeviceValuator] = SEventIDispatch;
         EventSwapVector[DeviceKeyPress] = SEventIDispatch;
         EventSwapVector[DeviceKeyRelease] = SEventIDispatch;
