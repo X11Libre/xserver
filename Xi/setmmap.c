@@ -91,35 +91,19 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     if (ret == Success)
         ret = MappingSuccess;
 
+    if (ret != MappingSuccess && ret != MappingBusy && ret != MappingFailed)
+        return ret;
+
     xSetDeviceModifierMappingReply rep = {
         .repType = X_Reply,
         .RepType = X_SetDeviceModifierMapping,
         .sequenceNumber = client->sequence,
-        .length = 0
+        .success = ret,
     };
 
-    if (ret == MappingSuccess || ret == MappingBusy || ret == MappingFailed) {
-        rep.success = ret;
-        WriteReplyToClient(client, sizeof(xSetDeviceModifierMappingReply),
-                           &rep);
-        return Success;
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
     }
-
-    return ret;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XSetDeviceModifierMapping function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXSetDeviceModifierMapping(ClientPtr client, int size,
-                              xSetDeviceModifierMappingReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
+    WriteToClient(client, sizeof(xSetDeviceModifierMappingReply), &rep);
+    return Success;
 }
