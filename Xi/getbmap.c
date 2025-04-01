@@ -91,23 +91,11 @@ ProcXGetDeviceButtonMapping(ClientPtr client)
         .length = bytes_to_int32(b->numButtons),
     };
 
-    WriteReplyToClient(client, sizeof(xGetDeviceButtonMappingReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+    WriteToClient(client, sizeof(xGetDeviceButtonMappingReply), &rep);
     WriteToClient(client, rep.nElts, &b->map[1]);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XGetDeviceButtonMapping function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetDeviceButtonMapping(ClientPtr client, int size,
-                            xGetDeviceButtonMappingReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }
