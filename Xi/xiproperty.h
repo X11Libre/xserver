@@ -51,8 +51,6 @@ int SProcXIChangeProperty(ClientPtr client);
 int SProcXIDeleteProperty(ClientPtr client);
 int SProcXIGetProperty(ClientPtr client);
 
-void SRepXIGetProperty(ClientPtr client, int size, xXIGetPropertyReply * rep);
-
 void XIResetProperties(void);
 
 #endif                          /* XIPROPERTY_H */
