@@ -422,10 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_GetDeviceButtonMapping)
-        SRepXGetDeviceButtonMapping(client, len,
-                                    (xGetDeviceButtonMappingReply *) rep);
-    else if (rep->RepType == X_SetDeviceButtonMapping)
+    if (rep->RepType == X_SetDeviceButtonMapping)
         SRepXSetDeviceButtonMapping(client, len,
                                     (xSetDeviceButtonMappingReply *) rep);
     else if (rep->RepType == X_QueryDeviceState)
