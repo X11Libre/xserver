@@ -1193,7 +1193,14 @@ ProcXIGetProperty(ClientPtr client)
     if (length && stuff->delete && (rep.bytes_after == 0))
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
-    WriteReplyToClient(client, sizeof(xXIGetPropertyReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.type);
+        swapl(&rep.bytes_after);
+        swapl(&rep.num_items);
+    }
+    WriteToClient(client, sizeof(xXIGetPropertyReply), &rep);
 
     if (length) {
         switch (rep.format) {
@@ -1273,16 +1280,4 @@ SProcXIGetProperty(ClientPtr client)
     swapl(&stuff->offset);
     swapl(&stuff->len);
     return (ProcXIGetProperty(client));
-}
-
-void _X_COLD
-SRepXIGetProperty(ClientPtr client, int size, xXIGetPropertyReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->type);
-    swapl(&rep->bytes_after);
-    swapl(&rep->num_items);
-    /* data will be swapped, see ProcXIGetProperty */
-    WriteToClient(client, size, rep);
 }
