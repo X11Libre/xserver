@@ -86,24 +86,20 @@ SProcXGetDeviceMotionEvents(ClientPtr client)
 int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
-    INT32 *coords = NULL;
-    int rc, axes, size = 0;
-    DeviceIntPtr dev;
-    TimeStamp start, stop;
-    ValuatorClassPtr v;
-
     REQUEST(xGetDeviceMotionEventsReq);
     REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
 
-    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
+    DeviceIntPtr dev;
+    int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
     if (rc != Success)
         return rc;
-    v = dev->valuator;
+
+    const ValuatorClassPtr v = dev->valuator;
     if (v == NULL || v->numAxes == 0)
         return BadMatch;
+
     if (dev->valuator->motionHintWindow)
         MaybeStopDeviceHint(dev, client);
-    axes = v->numAxes;
 
     xGetDeviceMotionEventsReply rep = {
         .repType = X_Reply,
@@ -111,12 +107,12 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
         .sequenceNumber = client->sequence,
         .length = 0,
         .nEvents = 0,
-        .axes = axes,
+        .axes = v->numAxes,
         .mode = Absolute        /* XXX we don't do relative at the moment */
     };
 
-    start = ClientTimeToServerTime(stuff->start);
-    stop = ClientTimeToServerTime(stuff->stop);
+    TimeStamp start = ClientTimeToServerTime(stuff->start);
+    TimeStamp stop = ClientTimeToServerTime(stuff->stop);
     if (CompareTimeStamps(start, stop) == LATER ||
         CompareTimeStamps(start, currentTime) == LATER) {
         WriteReplyToClient(client, sizeof(xGetDeviceMotionEventsReply), &rep);
@@ -124,14 +120,16 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     }
     if (CompareTimeStamps(stop, currentTime) == LATER)
         stop = currentTime;
+
+    int length = 0;
+    INT32 *coords = NULL;
     if (v->numMotionEvents) {
-        size = sizeof(Time) + (axes * sizeof(INT32));
         rep.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
                                        start.milliseconds, stop.milliseconds,
                                        (ScreenPtr) NULL, FALSE);
+        length = rep.nEvents * (sizeof(Time) + (v->numAxes * sizeof(INT32)));
     }
 
-    const int length = rep.nEvents * size;
     rep.length = bytes_to_int32(length);
 
     if (client->swapped) {
