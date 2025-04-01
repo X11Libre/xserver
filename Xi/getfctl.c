@@ -236,23 +236,6 @@ CopySwapBellFeedback(ClientPtr client, BellFeedbackPtr b, char **buf)
 
 /***********************************************************************
  *
- * This procedure writes the reply for the xGetFeedbackControl function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXGetFeedbackControl(ClientPtr client, int size,
-                        xGetFeedbackControlReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_feedbacks);
-    WriteToClient(client, size, rep);
-}
-
-/***********************************************************************
- *
  * Get the feedback control state.
  *
  */
@@ -281,7 +264,6 @@ ProcXGetFeedbackControl(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_GetFeedbackControl,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .num_feedbacks = 0
     };
 
@@ -333,7 +315,13 @@ ProcXGetFeedbackControl(ClientPtr client)
         CopySwapBellFeedback(client, b, &buf);
 
     rep.length = bytes_to_int32(total_length);
-    WriteReplyToClient(client, sizeof(xGetFeedbackControlReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.num_feedbacks);
+    }
+    WriteToClient(client, sizeof(xGetFeedbackControlReply), &rep);
     WriteToClient(client, total_length, savbuf);
     free(savbuf);
     return Success;

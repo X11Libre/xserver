@@ -422,9 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_GetFeedbackControl)
-        SRepXGetFeedbackControl(client, len, (xGetFeedbackControlReply *) rep);
-    else if (rep->RepType == X_GetDeviceKeyMapping)
+    if (rep->RepType == X_GetDeviceKeyMapping)
         SRepXGetDeviceKeyMapping(client, len,
                                  (xGetDeviceKeyMappingReply *) rep);
     else if (rep->RepType == X_GetDeviceModifierMapping)

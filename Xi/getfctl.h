@@ -33,9 +33,4 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 int ProcXGetFeedbackControl(ClientPtr   /* client */
     );
 
-void SRepXGetFeedbackControl(ClientPtr /* client */ ,
-                             int /* size */ ,
-                             xGetFeedbackControlReply * /* rep */
-    );
-
 #endif                          /* GETFCTL_H */
