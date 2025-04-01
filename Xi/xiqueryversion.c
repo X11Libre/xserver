@@ -116,12 +116,16 @@ ProcXIQueryVersion(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_XIQueryVersion,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .major_version = major,
         .minor_version = minor
     };
 
-    WriteReplyToClient(client, sizeof(xXIQueryVersionReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swaps(&rep.major_version);
+        swaps(&rep.minor_version);
+    }
+    WriteToClient(client, sizeof(xXIQueryVersionReply), &rep);
 
     return Success;
 }
@@ -136,14 +140,4 @@ SProcXIQueryVersion(ClientPtr client)
     swaps(&stuff->major_version);
     swaps(&stuff->minor_version);
     return (ProcXIQueryVersion(client));
-}
-
-void _X_COLD
-SRepXIQueryVersion(ClientPtr client, int size, xXIQueryVersionReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->major_version);
-    swaps(&rep->minor_version);
-    WriteToClient(client, size, rep);
 }

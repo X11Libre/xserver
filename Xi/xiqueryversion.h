@@ -35,6 +35,5 @@
 
 int SProcXIQueryVersion(ClientPtr client);
 int ProcXIQueryVersion(ClientPtr client);
-void SRepXIQueryVersion(ClientPtr client, int size, xXIQueryVersionReply * rep);
 
 #endif                          /* QUERYVERSION_H */
