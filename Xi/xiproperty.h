@@ -40,10 +40,6 @@ int SProcXChangeDeviceProperty(ClientPtr client);
 int SProcXDeleteDeviceProperty(ClientPtr client);
 int SProcXGetDeviceProperty(ClientPtr client);
 
-/* reply swapping */
-void SRepXGetDeviceProperty(ClientPtr client, int size,
-                            xGetDevicePropertyReply * rep);
-
 /* XI2 request/reply handling  */
 int ProcXIListProperties(ClientPtr client);
 int ProcXIChangeProperty(ClientPtr client);

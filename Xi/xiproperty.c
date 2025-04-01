@@ -983,7 +983,14 @@ ProcXGetDeviceProperty(ClientPtr client)
     if (stuff->delete && (rep.bytesAfter == 0))
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
-    WriteReplyToClient(client, sizeof(xGenericReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.propertyType);
+        swapl(&rep.bytesAfter);
+        swapl(&rep.nItems);
+    }
+    WriteToClient(client, sizeof(xGenericReply), &rep);
 
     if (length) {
         switch (rep.format) {
@@ -1049,19 +1056,6 @@ SProcXGetDeviceProperty(ClientPtr client)
     swapl(&stuff->longOffset);
     swapl(&stuff->longLength);
     return (ProcXGetDeviceProperty(client));
-}
-
-void _X_COLD
-SRepXGetDeviceProperty(ClientPtr client, int size,
-                       xGetDevicePropertyReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->propertyType);
-    swapl(&rep->bytesAfter);
-    swapl(&rep->nItems);
-    /* data will be swapped, see ProcXGetDeviceProperty */
-    WriteToClient(client, size, rep);
 }
 
 /* XI2 Request/reply handling */
