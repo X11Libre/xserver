@@ -36,5 +36,4 @@ int ProcXISetFocus(ClientPtr client);
 int SProcXIGetFocus(ClientPtr client);
 int ProcXIGetFocus(ClientPtr client);
 
-void SRepXIGetFocus(ClientPtr client, int len, xXIGetFocusReply * rep);
 #endif                          /* XISETDEVFOCUS_H */

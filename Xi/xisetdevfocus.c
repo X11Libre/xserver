@@ -114,15 +114,11 @@ ProcXIGetFocus(ClientPtr client)
     else
         rep.focus = dev->focus->win->drawable.id;
 
-    WriteReplyToClient(client, sizeof(xXIGetFocusReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.focus);
+    }
+    WriteToClient(client, sizeof(xXIGetFocusReply), &rep);
     return Success;
-}
-
-void
-SRepXIGetFocus(ClientPtr client, int len, xXIGetFocusReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->focus);
-    WriteToClient(client, len, rep);
 }
