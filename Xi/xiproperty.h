@@ -41,8 +41,6 @@ int SProcXDeleteDeviceProperty(ClientPtr client);
 int SProcXGetDeviceProperty(ClientPtr client);
 
 /* reply swapping */
-void SRepXListDeviceProperties(ClientPtr client, int size,
-                               xListDevicePropertiesReply * rep);
 void SRepXGetDeviceProperty(ClientPtr client, int size,
                             xGetDevicePropertyReply * rep);
 

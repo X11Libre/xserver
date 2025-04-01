@@ -872,7 +872,12 @@ ProcXListDeviceProperties(ClientPtr client)
         .nAtoms = natoms
     };
 
-    WriteReplyToClient(client, sizeof(xListDevicePropertiesReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.nAtoms);
+    }
+    WriteToClient(client, sizeof(xListDevicePropertiesReply), &rep);
     if (natoms) {
         client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
         WriteSwappedDataToClient(client, natoms * sizeof(Atom), atoms);
@@ -1042,19 +1047,6 @@ SProcXGetDeviceProperty(ClientPtr client)
     swapl(&stuff->longOffset);
     swapl(&stuff->longLength);
     return (ProcXGetDeviceProperty(client));
-}
-
-/* Reply swapping */
-
-void _X_COLD
-SRepXListDeviceProperties(ClientPtr client, int size,
-                          xListDevicePropertiesReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->nAtoms);
-    /* properties will be swapped later, see ProcXListDeviceProperties */
-    WriteToClient(client, size, rep);
 }
 
 void _X_COLD
