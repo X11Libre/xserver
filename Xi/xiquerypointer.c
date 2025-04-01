@@ -194,34 +194,21 @@ ProcXIQueryPointer(ClientPtr client)
     }
 #endif /* XINERAMA */
 
-    WriteReplyToClient(client, sizeof(xXIQueryPointerReply), &rep);
-    if (buttons)
-        WriteToClient(client, buttons_size, buttons);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.root);
+        swapl(&rep.child);
+        swapl(&rep.root_x);
+        swapl(&rep.root_y);
+        swapl(&rep.win_x);
+        swapl(&rep.win_y);
+        swaps(&rep.buttons_len);
+    }
+    WriteToClient(client, sizeof(xXIQueryPointerReply), &rep);
+    WriteToClient(client, buttons_size, buttons);
 
     free(buttons);
 
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XIQueryPointer function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void
-SRepXIQueryPointer(ClientPtr client, int size, xXIQueryPointerReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->root);
-    swapl(&rep->child);
-    swapl(&rep->root_x);
-    swapl(&rep->root_y);
-    swapl(&rep->win_x);
-    swapl(&rep->win_y);
-    swaps(&rep->buttons_len);
-
-    WriteToClient(client, size, rep);
 }
