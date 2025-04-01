@@ -36,9 +36,4 @@ int SProcXChangeDeviceControl(ClientPtr /* client */
 int ProcXChangeDeviceControl(ClientPtr  /* client */
     );
 
-void SRepXChangeDeviceControl(ClientPtr /* client */ ,
-                              int /* size */ ,
-                              xChangeDeviceControlReply *       /* rep */
-    );
-
 #endif                          /* CHGDCTL_H */
