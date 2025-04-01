@@ -82,7 +82,6 @@ ProcXSetDeviceValuators(ClientPtr client)
         .repType = X_Reply,
         .RepType = X_SetDeviceValuators,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .status = Success
     };
 
@@ -112,22 +111,9 @@ ProcXSetDeviceValuators(ClientPtr client)
     if (rep.status != Success && rep.status != AlreadyGrabbed)
         return rep.status;
 
-    WriteReplyToClient(client, sizeof(xSetDeviceValuatorsReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+    }
+    WriteToClient(client, sizeof(xSetDeviceValuatorsReply), &rep);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XSetDeviceValuators function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXSetDeviceValuators(ClientPtr client, int size,
-                        xSetDeviceValuatorsReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }
