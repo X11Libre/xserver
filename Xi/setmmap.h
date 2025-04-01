@@ -33,9 +33,4 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 int ProcXSetDeviceModifierMapping(ClientPtr     /* client */
     );
 
-void SRepXSetDeviceModifierMapping(ClientPtr /* client */ ,
-                                   int /* size */ ,
-                                   xSetDeviceModifierMappingReply *     /* rep */
-    );
-
 #endif                          /* SETMMAP_H */
