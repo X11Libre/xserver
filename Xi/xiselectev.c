@@ -346,7 +346,6 @@ ProcXIGetSelectedEvents(ClientPtr client)
     InputClientsPtr others = NULL;
     xXIEventMask *evmask = NULL;
     DeviceIntPtr dev;
-    uint32_t length;
 
     REQUEST(xXIGetSelectedEventsReq);
     REQUEST_SIZE_MATCH(xXIGetSelectedEventsReq);
@@ -373,10 +372,8 @@ ProcXIGetSelectedEvents(ClientPtr client)
         }
     }
 
-    if (!others) {
-        WriteReplyToClient(client, sizeof(xXIGetSelectedEventsReply), &rep);
-        return Success;
-    }
+    if (!others)
+        goto finish;
 
     buffer =
         calloc(MAXDEVICES, sizeof(xXIEventMask) + pad_to_int32(XI2MASKSIZE));
@@ -416,23 +413,17 @@ ProcXIGetSelectedEvents(ClientPtr client)
         }
     }
 
-    /* save the value before SRepXIGetSelectedEvents swaps it */
-    length = rep.length;
-    WriteReplyToClient(client, sizeof(xXIGetSelectedEventsReply), &rep);
+finish: ;
+    uint32_t length = rep.length; /* save before swapping it */
 
-    if (rep.num_masks)
-        WriteToClient(client, length * 4, buffer);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.num_masks);
+    }
+    WriteToClient(client, sizeof(xXIGetSelectedEventsReply), &rep);
+    WriteToClient(client, length * 4, buffer);
 
     free(buffer);
     return Success;
-}
-
-void
-SRepXIGetSelectedEvents(ClientPtr client,
-                        int len, xXIGetSelectedEventsReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_masks);
-    WriteToClient(client, len, rep);
 }
