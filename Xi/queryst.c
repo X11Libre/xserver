@@ -150,24 +150,13 @@ ProcXQueryDeviceState(ClientPtr client)
         .length = bytes_to_int32(total_length),
         .num_classes = num_classes
     };
-    WriteReplyToClient(client, sizeof(xQueryDeviceStateReply), &rep);
-    if (total_length > 0)
-        WriteToClient(client, total_length, savbuf);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+    WriteToClient(client, sizeof(xQueryDeviceStateReply), &rep);
+    WriteToClient(client, total_length, savbuf);
     free(savbuf);
     return Success;
-}
-
-/***********************************************************************
- *
- * This procedure writes the reply for the XQueryDeviceState function,
- * if the client and server have a different byte ordering.
- *
- */
-
-void _X_COLD
-SRepXQueryDeviceState(ClientPtr client, int size, xQueryDeviceStateReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    WriteToClient(client, size, rep);
 }
