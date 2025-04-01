@@ -422,9 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_XIQueryDevice)
-        SRepXIQueryDevice(client, len, (xXIQueryDeviceReply *) rep);
-    else if (rep->RepType == X_XIGrabDevice)
+    if (rep->RepType == X_XIGrabDevice)
         SRepXIGrabDevice(client, len, (xXIGrabDeviceReply *) rep);
     else if (rep->RepType == X_XIPassiveGrabDevice)
         SRepXIPassiveGrabDevice(client, len, (xXIPassiveGrabDeviceReply *) rep);

@@ -35,7 +35,6 @@
 
 int SProcXIQueryDevice(ClientPtr client);
 int ProcXIQueryDevice(ClientPtr client);
-void SRepXIQueryDevice(ClientPtr client, int size, xXIQueryDeviceReply * rep);
 int SizeDeviceClasses(DeviceIntPtr dev);
 int ListDeviceClasses(ClientPtr client, DeviceIntPtr dev,
                       char *any, uint16_t * nclasses);
