@@ -36,9 +36,4 @@ int SProcXGetDeviceControl(ClientPtr    /* client */
 int ProcXGetDeviceControl(ClientPtr     /* client */
     );
 
-void SRepXGetDeviceControl(ClientPtr /* client */ ,
-                           int /* size */ ,
-                           xGetDeviceControlReply *     /* rep */
-    );
-
 #endif                          /* GETDCTL_H */
