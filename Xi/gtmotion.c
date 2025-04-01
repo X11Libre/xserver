@@ -87,7 +87,7 @@ int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
     INT32 *coords = NULL;
-    int rc, num_events, axes, size = 0;
+    int rc, axes, size = 0;
     DeviceIntPtr dev;
     TimeStamp start, stop;
     ValuatorClassPtr v;
@@ -124,8 +124,7 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     }
     if (CompareTimeStamps(stop, currentTime) == LATER)
         stop = currentTime;
-    num_events = v->numMotionEvents;
-    if (num_events) {
+    if (v->numMotionEvents) {
         size = sizeof(Time) + (axes * sizeof(INT32));
         rep.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
                                        start.milliseconds, stop.milliseconds,
