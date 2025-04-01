@@ -103,15 +103,10 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
         rep.success = ret;
         WriteReplyToClient(client, sizeof(xSetDeviceModifierMappingReply),
                            &rep);
-    }
-    else if (ret == -1) {
-        return BadValue;
-    }
-    else {
-        return ret;
+        return Success;
     }
 
-    return Success;
+    return ret;
 }
 
 /***********************************************************************

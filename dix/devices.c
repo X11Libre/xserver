@@ -1771,7 +1771,7 @@ ProcSetModifierMapping(ClientPtr client)
 
     rc = change_modmap(client, PickKeyboard(client), (KeyCode *) &stuff[1],
                        stuff->numKeyPerModifier);
-    if (rc == MappingFailed || rc == -1)
+    if (rc == MappingFailed)
         return BadValue;
     if (rc != MappingSuccess && rc != MappingFailed && rc != MappingBusy)
         return rc;
