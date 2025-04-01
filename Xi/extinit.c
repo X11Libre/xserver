@@ -422,9 +422,7 @@ SReplyIDispatch(ClientPtr client, int len, xGrabDeviceReply * rep)
 {
     /* All we look at is the type field */
     /* This is common to all replies    */
-    if (rep->RepType == X_SetDeviceValuators)
-        SRepXSetDeviceValuators(client, len, (xSetDeviceValuatorsReply *) rep);
-    else if (rep->RepType == X_GetDeviceControl)
+    if (rep->RepType == X_GetDeviceControl)
         SRepXGetDeviceControl(client, len, (xGetDeviceControlReply *) rep);
     else if (rep->RepType == X_ChangeDeviceControl)
         SRepXChangeDeviceControl(client, len,

@@ -33,9 +33,4 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 int ProcXSetDeviceValuators(ClientPtr   /* client */
     );
 
-void SRepXSetDeviceValuators(ClientPtr /* client */ ,
-                             int /* size */ ,
-                             xSetDeviceValuatorsReply * /* rep */
-    );
-
 #endif                          /* SETDVAL_H */
