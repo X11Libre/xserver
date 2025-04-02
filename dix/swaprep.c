@@ -306,16 +306,6 @@ SGetMotionEventsReply(ClientPtr pClient, int size, xGetMotionEventsReply * pRep)
 }
 
 void _X_COLD
-STranslateCoordsReply(ClientPtr pClient, int size, xTranslateCoordsReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->child);
-    swaps(&pRep->dstX);
-    swaps(&pRep->dstY);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SGetInputFocusReply(ClientPtr pClient, int size, xGetInputFocusReply * pRep)
 {
     swaps(&pRep->sequenceNumber);

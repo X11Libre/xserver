@@ -1234,7 +1234,6 @@ ProcTranslateCoords(ClientPtr client)
     REQUEST(xTranslateCoordsReq);
 
     WindowPtr pWin, pDst;
-    xTranslateCoordsReply rep;
     int rc;
 
     REQUEST_SIZE_MATCH(xTranslateCoordsReq);
@@ -1245,7 +1244,7 @@ ProcTranslateCoords(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xTranslateCoordsReply) {
+    xTranslateCoordsReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0
@@ -1296,7 +1295,14 @@ ProcTranslateCoords(ClientPtr client)
         rep.dstX = x - pDst->drawable.x;
         rep.dstY = y - pDst->drawable.y;
     }
-    WriteReplyToClient(client, sizeof(xTranslateCoordsReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.child);
+        swaps(&rep.dstX);
+        swaps(&rep.dstY);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 

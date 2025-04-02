@@ -755,7 +755,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,
     (ReplySwapPtr) SQueryPointerReply,
     (ReplySwapPtr) SGetMotionEventsReply,
-    (ReplySwapPtr) STranslateCoordsReply,       /* 40 */
+    ReplyNotSwappd,                             /* 40 */
     ReplyNotSwappd,
     ReplyNotSwappd,
     (ReplySwapPtr) SGetInputFocusReply,
