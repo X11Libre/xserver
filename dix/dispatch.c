@@ -1014,8 +1014,8 @@ ProcCirculateWindow(ClientPtr client)
     return Success;
 }
 
-static int
-GetGeometry(ClientPtr client, xGetGeometryReply * rep)
+int
+ProcGetGeometry(ClientPtr client)
 {
     DrawablePtr pDraw;
     int rc;
@@ -1027,37 +1027,23 @@ GetGeometry(ClientPtr client, xGetGeometryReply * rep)
     if (rc != Success)
         return rc;
 
-    rep->type = X_Reply;
-    rep->length = 0;
-    rep->sequenceNumber = client->sequence;
-    rep->root = pDraw->pScreen->root->drawable.id;
-    rep->depth = pDraw->depth;
-    rep->width = pDraw->width;
-    rep->height = pDraw->height;
+    xGetGeometryReply rep = {
+        .type = X_Reply,
+        .length = 0,
+        .sequenceNumber = client->sequence,
+        .root = pDraw->pScreen->root->drawable.id,
+        .depth = pDraw->depth,
+        .width = pDraw->width,
+        .height = pDraw->height,
+    };
 
     if (WindowDrawable(pDraw->type)) {
         WindowPtr pWin = (WindowPtr) pDraw;
 
-        rep->x = pWin->origin.x - wBorderWidth(pWin);
-        rep->y = pWin->origin.y - wBorderWidth(pWin);
-        rep->borderWidth = pWin->borderWidth;
+        rep.x = pWin->origin.x - wBorderWidth(pWin);
+        rep.y = pWin->origin.y - wBorderWidth(pWin);
+        rep.borderWidth = pWin->borderWidth;
     }
-    else {                      /* DRAWABLE_PIXMAP */
-
-        rep->x = rep->y = rep->borderWidth = 0;
-    }
-
-    return Success;
-}
-
-int
-ProcGetGeometry(ClientPtr client)
-{
-    xGetGeometryReply rep = { .type = X_Reply };
-    int status;
-
-    if ((status = GetGeometry(client, &rep)) != Success)
-        return status;
 
     WriteReplyToClient(client, sizeof(xGetGeometryReply), &rep);
     return Success;
