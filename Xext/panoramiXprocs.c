@@ -1960,7 +1960,6 @@ PanoramiXGetImage(ClientPtr client)
     DrawablePtr drawables[MAXSCREENS];
     DrawablePtr pDraw;
     PanoramiXRes *draw;
-    xGetImageReply xgi;
     Bool isRoot;
     char *pBuf;
     int i, x, y, w, h, format, rc;
@@ -2034,12 +2033,7 @@ PanoramiXGetImage(ClientPtr client)
                                               IncludeInferiors);
     }
 
-    xgi = (xGetImageReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .visual = wVisual(((WindowPtr) pDraw)),
-        .depth = pDraw->depth
-    };
+
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(w, pDraw->depth);
         length = widthBytesLine * h;
@@ -2053,7 +2047,13 @@ PanoramiXGetImage(ClientPtr client)
 
     }
 
-    xgi.length = bytes_to_int32(length);
+    xGetImageReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .visual = wVisual(((WindowPtr) pDraw)),
+        .depth = pDraw->depth,
+        .length = bytes_to_int32(length),
+    };
 
     if (widthBytesLine == 0 || h == 0)
         linesPerBuf = 0;
@@ -2067,7 +2067,12 @@ PanoramiXGetImage(ClientPtr client)
     if (!(pBuf = xallocarray(linesPerBuf, widthBytesLine)))
         return BadAlloc;
 
-    WriteReplyToClient(client, sizeof(xGetImageReply), &xgi);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.visual);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
 
     if (linesPerBuf == 0) {
         /* nothing to do */

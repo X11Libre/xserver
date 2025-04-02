@@ -788,7 +788,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,                             /* 70 */
     ReplyNotSwappd,
     ReplyNotSwappd,
-    (ReplySwapPtr) SGetImageReply,
+    ReplyNotSwappd,
     ReplyNotSwappd,
     ReplyNotSwappd,                             /* 75 */
     ReplyNotSwappd,
