@@ -448,7 +448,6 @@ int
 ProcXFixesGetCursorName(ClientPtr client)
 {
     CursorPtr pCursor;
-    xXFixesGetCursorNameReply reply;
 
     REQUEST(xXFixesGetCursorNameReq);
     const char *str;
@@ -462,7 +461,7 @@ ProcXFixesGetCursorName(ClientPtr client)
         str = "";
     len = strlen(str);
 
-    reply = (xXFixesGetCursorNameReply) {
+    xXFixesGetCursorNameReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(len),
@@ -470,12 +469,12 @@ ProcXFixesGetCursorName(ClientPtr client)
         .nbytes = len
     };
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-        swapl(&reply.atom);
-        swaps(&reply.nbytes);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.atom);
+        swaps(&rep.nbytes);
     }
-    WriteReplyToClient(client, sizeof(xXFixesGetCursorNameReply), &reply);
+    WriteToClient(client, sizeof(rep), &rep);
     WriteToClient(client, len, str);
 
     return Success;
