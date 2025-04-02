@@ -202,19 +202,6 @@ SGetWindowAttributesReply(ClientPtr pClient, int size,
 }
 
 void _X_COLD
-SGetGeometryReply(ClientPtr pClient, int size, xGetGeometryReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->root);
-    swaps(&pRep->x);
-    swaps(&pRep->y);
-    swaps(&pRep->width);
-    swaps(&pRep->height);
-    swaps(&pRep->borderWidth);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SQueryTreeReply(ClientPtr pClient, int size, xQueryTreeReply * pRep)
 {
     swaps(&pRep->sequenceNumber);

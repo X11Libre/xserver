@@ -47,10 +47,6 @@ extern void SGetWindowAttributesReply(ClientPtr /* pClient */ ,
                                       xGetWindowAttributesReply *
                                       /* pRep */ );
 
-extern void SGetGeometryReply(ClientPtr /* pClient */ ,
-                              int /* size */ ,
-                              xGetGeometryReply * /* pRep */ );
-
 extern void SQueryTreeReply(ClientPtr /* pClient */ ,
                             int /* size */ ,
                             xQueryTreeReply * /* pRep */ );
