@@ -621,7 +621,6 @@ PanoramiXTranslateCoords(ClientPtr client)
     REQUEST(xTranslateCoordsReq);
     int rc;
     WindowPtr pWin, pDst;
-    xTranslateCoordsReply rep;
 
     REQUEST_SIZE_MATCH(xTranslateCoordsReq);
     rc = dixLookupWindow(&pWin, stuff->srcWid, client, DixReadAccess);
@@ -630,7 +629,8 @@ PanoramiXTranslateCoords(ClientPtr client)
     rc = dixLookupWindow(&pDst, stuff->dstWid, client, DixReadAccess);
     if (rc != Success)
         return rc;
-    rep = (xTranslateCoordsReply) {
+
+    xTranslateCoordsReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
@@ -681,7 +681,13 @@ PanoramiXTranslateCoords(ClientPtr client)
         rep.dstY += screenInfo.screens[0]->y;
     }
 
-    WriteReplyToClient(client, sizeof(xTranslateCoordsReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.child);
+        swaps(&rep.dstX);
+        swaps(&rep.dstY);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 

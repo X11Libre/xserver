@@ -85,11 +85,6 @@ extern void SGetMotionEventsReply(ClientPtr /* pClient */ ,
                                   xGetMotionEventsReply *       /* pRep */
     );
 
-extern void STranslateCoordsReply(ClientPtr /* pClient */ ,
-                                  int /* size */ ,
-                                  xTranslateCoordsReply *       /* pRep */
-    );
-
 extern void SGetInputFocusReply(ClientPtr /* pClient */ ,
                                 int /* size */ ,
                                 xGetInputFocusReply * /* pRep */ );
