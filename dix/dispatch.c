@@ -2160,7 +2160,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     long widthBytesLine, length;
     Mask plane = 0;
     char *pBuf;
-    xGetImageReply xgi;
     RegionPtr pVisibleRegion = NULL;
 
     if ((format != XYPixmap) && (format != ZPixmap)) {
@@ -2171,7 +2170,10 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     if (rc != Success)
         return rc;
 
-    memset(&xgi, 0, sizeof(xGetImageReply));
+    xGetImageReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+    };
 
     relx = x;
     rely = y;
@@ -2208,11 +2210,11 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
             pBoundingDraw = (DrawablePtr) pDraw->pScreen->root;
         }
 
-        xgi.visual = wVisual(pWin);
+        rep.visual = wVisual(pWin);
     }
     else {
         pBoundingDraw = pDraw;
-        xgi.visual = None;
+        rep.visual = None;
     }
 
     /* "If the drawable is a pixmap, the given rectangle must be wholly
@@ -2230,9 +2232,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         rely < 0 || rely + height > (int) pBoundingDraw->height)
         return BadMatch;
 
-    xgi.type = X_Reply;
-    xgi.sequenceNumber = client->sequence;
-    xgi.depth = pDraw->depth;
+    rep.depth = pDraw->depth;
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(width, pDraw->depth);
         length = widthBytesLine * height;
@@ -2247,9 +2247,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
 
     }
 
-    xgi.length = length;
+    rep.length = bytes_to_int32(length);
 
-    xgi.length = bytes_to_int32(xgi.length);
     if (widthBytesLine == 0 || height == 0)
         linesPerBuf = 0;
     else if (widthBytesLine >= IMAGE_BUFSIZE)
@@ -2274,7 +2273,13 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     }
     if (!(pBuf = calloc(1, length)))
         return BadAlloc;
-    WriteReplyToClient(client, sizeof(xGetImageReply), &xgi);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.visual);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
 
     if (pDraw->type == DRAWABLE_WINDOW) {
         pVisibleRegion = &((WindowPtr) pDraw)->borderClip;

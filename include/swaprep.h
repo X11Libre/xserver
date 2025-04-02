@@ -115,10 +115,6 @@ extern void SGetFontPathReply(ClientPtr /* pClient */ ,
                               int /* size */ ,
                               xGetFontPathReply * /* pRep */ );
 
-extern void SGetImageReply(ClientPtr /* pClient */ ,
-                           int /* size */ ,
-                           xGetImageReply * /* pRep */ );
-
 extern void SListInstalledColormapsReply(ClientPtr /* pClient */ ,
                                          int /* size */ ,
                                          xListInstalledColormapsReply
