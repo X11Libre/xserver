@@ -556,7 +556,6 @@ PanoramiXCirculateWindow(ClientPtr client)
 int
 PanoramiXGetGeometry(ClientPtr client)
 {
-    xGetGeometryReply rep;
     DrawablePtr pDraw;
     int rc;
 
@@ -567,7 +566,7 @@ PanoramiXGetGeometry(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xGetGeometryReply) {
+    xGetGeometryReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
@@ -601,7 +600,16 @@ PanoramiXGetGeometry(ClientPtr client)
         rep.borderWidth = pWin->borderWidth;
     }
 
-    WriteReplyToClient(client, sizeof(xGetGeometryReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.root);
+        swaps(&rep.x);
+        swaps(&rep.y);
+        swaps(&rep.width);
+        swaps(&rep.height);
+        swaps(&rep.borderWidth);
+    }
+    WriteToClient(client, sizeof(xGetGeometryReply), &rep);
     return Success;
 }
 

@@ -1043,7 +1043,16 @@ ProcGetGeometry(ClientPtr client)
         rep.borderWidth = pWin->borderWidth;
     }
 
-    WriteReplyToClient(client, sizeof(xGetGeometryReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.root);
+        swaps(&rep.x);
+        swaps(&rep.y);
+        swaps(&rep.width);
+        swaps(&rep.height);
+        swaps(&rep.borderWidth);
+    }
+    WriteToClient(client, sizeof(xGetGeometryReply), &rep);
     return Success;
 }
 
