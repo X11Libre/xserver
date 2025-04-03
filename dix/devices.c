@@ -2420,7 +2420,6 @@ ProcGetPointerControl(ClientPtr client)
 {
     DeviceIntPtr ptr = PickPointer(client);
     PtrCtrl *ctrl;
-    xGetPointerControlReply rep;
     int rc;
 
     if (ptr->ptrfeed)
@@ -2434,7 +2433,7 @@ ProcGetPointerControl(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xGetPointerControlReply) {
+    xGetPointerControlReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
@@ -2442,7 +2441,14 @@ ProcGetPointerControl(ClientPtr client)
         .accelDenominator = ctrl->den,
         .threshold = ctrl->threshold
     };
-    WriteReplyToClient(client, sizeof(xGenericReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swaps(&rep.accelNumerator);
+        swaps(&rep.accelDenominator);
+        swaps(&rep.threshold);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 

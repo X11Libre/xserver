@@ -536,17 +536,6 @@ SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply * pRep)
 }
 
 void _X_COLD
-SGetPointerControlReply(ClientPtr pClient, int size,
-                        xGetPointerControlReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swaps(&pRep->accelNumerator);
-    swaps(&pRep->accelDenominator);
-    swaps(&pRep->threshold);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SGetScreenSaverReply(ClientPtr pClient, int size, xGetScreenSaverReply * pRep)
 {
     swaps(&pRep->sequenceNumber);
