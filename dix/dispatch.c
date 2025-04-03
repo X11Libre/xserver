@@ -2687,38 +2687,48 @@ ProcAllocNamedColor(ClientPtr client)
     REQUEST_FIXED_SIZE(xAllocNamedColorReq, stuff->nbytes);
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixAddAccess);
-    if (rc == Success) {
-        xAllocNamedColorReply ancr = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
-            .length = 0
-        };
-        if (dixLookupBuiltinColor
-            (pcmp->pScreen->myNum, (char *) &stuff[1], stuff->nbytes,
-             &ancr.exactRed, &ancr.exactGreen, &ancr.exactBlue)) {
-            ancr.screenRed = ancr.exactRed;
-            ancr.screenGreen = ancr.exactGreen;
-            ancr.screenBlue = ancr.exactBlue;
-            ancr.pixel = 0;
-            if ((rc = AllocColor(pcmp,
-                                 &ancr.screenRed, &ancr.screenGreen,
-                                 &ancr.screenBlue, &ancr.pixel, client->index)))
-                return rc;
-#ifdef XINERAMA
-            if (noPanoramiXExtension || !pcmp->pScreen->myNum)
-#endif /* XINERAMA */
-                WriteReplyToClient(client, sizeof(xAllocNamedColorReply),
-                                   &ancr);
-            return Success;
-        }
-        else
-            return BadName;
-
-    }
-    else {
+    if (rc != Success) {
         client->errorValue = stuff->cmap;
         return rc;
     }
+
+    xAllocNamedColorReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0
+    };
+
+    if (!dixLookupBuiltinColor
+            (pcmp->pScreen->myNum, (char *) &stuff[1], stuff->nbytes,
+             &rep.exactRed, &rep.exactGreen, &rep.exactBlue))
+        return BadName;
+
+    rep.screenRed = rep.exactRed;
+    rep.screenGreen = rep.exactGreen;
+    rep.screenBlue = rep.exactBlue;
+    rep.pixel = 0;
+
+    if ((rc = AllocColor(pcmp,
+                         &rep.screenRed, &rep.screenGreen,
+                         &rep.screenBlue, &rep.pixel, client->index)))
+        return rc;
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.pixel);
+        swaps(&rep.exactRed);
+        swaps(&rep.exactGreen);
+        swaps(&rep.exactBlue);
+        swaps(&rep.screenRed);
+        swaps(&rep.screenGreen);
+        swaps(&rep.screenBlue);
+    }
+
+#ifdef XINERAMA
+    if (noPanoramiXExtension || !pcmp->pScreen->myNum)
+#endif /* XINERAMA */
+        WriteToClient(client, sizeof(rep), &rep);
+    return Success;
 }
 
 int
