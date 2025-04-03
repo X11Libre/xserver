@@ -1059,13 +1059,3 @@ WriteSConnSetupPrefix(ClientPtr pClient, xConnSetupPrefix * pcsp)
     SwapConnSetupPrefix(pcsp, &cspT);
     WriteToClient(pClient, sizeof(cspT), &cspT);
 }
-
-/*
- * Dummy entry for ReplySwapVector[]
- */
-
-void _X_COLD
-ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)
-{
-    FatalError("Not implemented");
-}

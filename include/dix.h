@@ -94,7 +94,8 @@ SOFTWARE.
 
 #define WriteReplyToClient(pClient, size, pReply)                       \
     do {                                                                \
-        if ((pClient)->swapped)                                         \
+        if ((pClient->swapped) &&                                       \
+            ReplySwapVector[((xReq *)pClient->requestBuffer)->reqType]) \
             (*ReplySwapVector[((xReq *)(pClient)->requestBuffer)->reqType]) \
                 (pClient, (int)(size), pReply);                         \
         else                                                            \
@@ -103,7 +104,7 @@ SOFTWARE.
 
 #define WriteSwappedDataToClient(pClient, size, pbuf)                   \
     do {                                                                \
-        if ((pClient)->swapped)                                         \
+        if (pClient->swapped && pClient->pSwapReplyFunc)                \
             (*(pClient)->pSwapReplyFunc)(pClient, (int)(size), pbuf);   \
         else                                                            \
             WriteToClient(pClient, (int)(size), (pbuf));                \
