@@ -2544,13 +2544,13 @@ ProcGetMotionEvents(ClientPtr client)
 int
 ProcQueryKeymap(ClientPtr client)
 {
-    xQueryKeymapReply rep;
     int rc, i;
     DeviceIntPtr keybd = PickKeyboard(client);
     CARD8 *down = keybd->key->down;
 
     REQUEST_SIZE_MATCH(xReq);
-    rep = (xQueryKeymapReply) {
+
+    xQueryKeymapReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 2
@@ -2567,7 +2567,11 @@ ProcQueryKeymap(ClientPtr client)
     else if (rc != BadAccess)
         return rc;
 
-    WriteReplyToClient(client, sizeof(xQueryKeymapReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
 
     return Success;
 }

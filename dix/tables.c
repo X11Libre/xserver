@@ -759,7 +759,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,
     ReplyNotSwappd,
     (ReplySwapPtr) SGetInputFocusReply,
-    (ReplySwapPtr) SQueryKeymapReply,
+    ReplyNotSwappd,
     ReplyNotSwappd,                             /* 45 */
     ReplyNotSwappd,
     (ReplySwapPtr) SQueryFontReply,

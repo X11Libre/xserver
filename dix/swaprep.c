@@ -295,15 +295,6 @@ SGetInputFocusReply(ClientPtr pClient, int size, xGetInputFocusReply * pRep)
     WriteToClient(pClient, size, pRep);
 }
 
-/* extra long reply */
-void _X_COLD
-SQueryKeymapReply(ClientPtr pClient, int size, xQueryKeymapReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    WriteToClient(pClient, size, pRep);
-}
-
 static void _X_COLD
 SwapCharInfo(xCharInfo * pInfo)
 {

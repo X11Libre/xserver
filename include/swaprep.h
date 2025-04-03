@@ -79,10 +79,6 @@ extern void SGetInputFocusReply(ClientPtr /* pClient */ ,
                                 int /* size */ ,
                                 xGetInputFocusReply * /* pRep */ );
 
-extern void SQueryKeymapReply(ClientPtr /* pClient */ ,
-                              int /* size */ ,
-                              xQueryKeymapReply * /* pRep */ );
-
 extern void SQueryFontReply(ClientPtr /* pClient */ ,
                             int /* size */ ,
                             xQueryFontReply * /* pRep */ );
