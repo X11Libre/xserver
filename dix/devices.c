@@ -1945,7 +1945,6 @@ ProcSetPointerMapping(ClientPtr client)
 int
 ProcGetKeyboardMapping(ClientPtr client)
 {
-    xGetKeyboardMappingReply rep;
     DeviceIntPtr kbd = PickKeyboard(client);
     XkbDescPtr xkb;
     KeySymsPtr syms;
@@ -1974,14 +1973,20 @@ ProcGetKeyboardMapping(ClientPtr client)
     if (!syms)
         return BadAlloc;
 
-    rep = (xGetKeyboardMappingReply) {
+    xGetKeyboardMappingReply rep = {
         .type = X_Reply,
         .keySymsPerKeyCode = syms->mapWidth,
         .sequenceNumber = client->sequence,
         /* length is a count of 4 byte quantities and KeySyms are 4 bytes */
         .length = syms->mapWidth * stuff->count
     };
-    WriteReplyToClient(client, sizeof(xGetKeyboardMappingReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
     client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
     WriteSwappedDataToClient(client,
                              syms->mapWidth * stuff->count * sizeof(KeySym),

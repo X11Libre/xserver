@@ -154,11 +154,6 @@ extern void SListExtensionsReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListExtensionsReply * /* pRep */ );
 
-extern void SGetKeyboardMappingReply(ClientPtr /* pClient */ ,
-                                     int /* size */ ,
-                                     xGetKeyboardMappingReply *
-                                     /* pRep */ );
-
 extern void SGetKeyboardControlReply(ClientPtr /* pClient */ ,
                                      int /* size */ ,
                                      xGetKeyboardControlReply *
