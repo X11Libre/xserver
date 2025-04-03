@@ -41,6 +41,10 @@
 #include "win.h"
 #include "winmsg.h"
 
+// workaround for win32/mingw32 name clash:
+// windows headers #define CreateWindow to CreateWindowA
+#undef CreateWindow
+
 static Bool winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv);
 
 /*
