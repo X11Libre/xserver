@@ -200,7 +200,6 @@ winClipboardSelectionNotifyData(HWND hwnd, xcb_window_t iWindow, xcb_connection_
 
     BOOL fSetClipboardData = TRUE;
     char *pszReturnData = NULL;
-    UINT codepage;
     wchar_t *pwszUnicodeStr = NULL;
     HGLOBAL hGlobal = NULL;
     char *pszGlobalData = NULL;
@@ -274,6 +273,8 @@ winClipboardSelectionNotifyData(HWND hwnd, xcb_window_t iWindow, xcb_connection_
         xtpText_encoding = encoding;
         xtpText_nitems = nitems;
     }
+
+    UINT codepage = CP_ACP;
 
     if (xtpText_encoding == atoms->atomUTF8String) {
         pszReturnData = calloc(1, xtpText_nitems + 1);
@@ -412,7 +413,6 @@ winClipboardFlushXEvents(HWND hwnd,
         {
             char *xtpText_value = NULL;
             int xtpText_nitems;
-            UINT codepage;
 
             xcb_selection_request_event_t *selection_request =  (xcb_selection_request_event_t *)event;
         {
@@ -534,6 +534,8 @@ winClipboardFlushXEvents(HWND hwnd,
                 goto winClipboardFlushXEvents_SelectionRequest_Done;
             }
             pszGlobalData = (char *) GlobalLock(hGlobal);
+
+            UINT codepage = CP_ACP;
 
             /* Convert to target string style */
             if (selection_request->target == XCB_ATOM_STRING) {
