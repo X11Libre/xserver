@@ -219,7 +219,6 @@ ProcGetSelectionOwner(ClientPtr client)
 {
     int rc;
     Selection *pSel;
-    xGetSelectionOwnerReply reply;
 
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
@@ -229,7 +228,7 @@ ProcGetSelectionOwner(ClientPtr client)
         return BadAtom;
     }
 
-    reply = (xGetSelectionOwnerReply) {
+    xGetSelectionOwnerReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
@@ -237,13 +236,18 @@ ProcGetSelectionOwner(ClientPtr client)
 
     rc = dixLookupSelection(&pSel, stuff->id, client, DixGetAttrAccess);
     if (rc == Success)
-        reply.owner = pSel->window;
+        rep.owner = pSel->window;
     else if (rc == BadMatch)
-        reply.owner = None;
+        rep.owner = None;
     else
         return rc;
 
-    WriteReplyToClient(client, sizeof(xGetSelectionOwnerReply), &reply);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.owner);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 
