@@ -1888,7 +1888,6 @@ ProcSetPointerMapping(ClientPtr client)
     int ret;
     int i, j;
     DeviceIntPtr ptr = PickPointer(client);
-    xSetPointerMappingReply rep;
 
     REQUEST(xSetPointerMappingReq);
     REQUEST_AT_LEAST_SIZE(xSetPointerMappingReq);
@@ -1897,12 +1896,6 @@ ProcSetPointerMapping(ClientPtr client)
         bytes_to_int32(sizeof(xSetPointerMappingReq) + stuff->nElts))
         return BadLength;
 
-    rep = (xSetPointerMappingReply) {
-        .type = X_Reply,
-        .success = MappingSuccess,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
     map = (BYTE *) &stuff[1];
 
     /* So we're bounded here by the number of core buttons.  This check
@@ -1928,14 +1921,24 @@ ProcSetPointerMapping(ClientPtr client)
     }
 
     ret = ApplyPointerMapping(ptr, map, stuff->nElts, client);
-    if (ret == MappingBusy)
-        rep.success = ret;
-    else if (ret == -1)
+
+    if (ret == -1)
         return BadValue;
-    else if (ret != Success)
+    if (ret != Success && ret != MappingBusy)
         return ret;
 
-    WriteReplyToClient(client, sizeof(xSetPointerMappingReply), &rep);
+    xSetPointerMappingReply rep = {
+        .type = X_Reply,
+        .success = MappingSuccess,
+        .sequenceNumber = client->sequence,
+        .success = ret,
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 
