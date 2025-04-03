@@ -611,15 +611,12 @@ winIconIsOverride(HICON hicon)
 
 /*
  * Open and parse the XWinrc config file @path.
- * If @path is NULL, use the built-in default.
+ * @path must not be NULL
  */
 static int
 winPrefsLoadPreferences(const char *path)
 {
-    FILE *prefFile = NULL;
-
-    if (path)
-        prefFile = fopen(path, "r");
+    FILE *prefFile = fopen(path, "r");
 
     if (!prefFile) {
         ErrorF("LoadPreferences: %s not found\n", path);
@@ -684,7 +681,6 @@ LoadPreferences(void)
     if (!parsed) {
         ErrorF
             ("LoadPreferences: See \"man XWinrc\" to customize the XWin menu.\n");
-        parsed = winPrefsLoadPreferences(NULL);
     }
 
     /* Setup a DISPLAY environment variable, need to allocate on heap */
