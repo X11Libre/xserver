@@ -184,14 +184,6 @@ SGenericReply(ClientPtr pClient, int size, xGenericReply * pRep)
 }
 
 void _X_COLD
-SInternAtomReply(ClientPtr pClient, int size, xInternAtomReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->atom);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SGetAtomNameReply(ClientPtr pClient, int size, xGetAtomNameReply * pRep)
 {
     swaps(&pRep->sequenceNumber);

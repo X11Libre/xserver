@@ -731,7 +731,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,
     ReplyNotSwappd,
     ReplyNotSwappd,                             /* 15 */
-    (ReplySwapPtr) SInternAtomReply,
+    ReplyNotSwappd,
     (ReplySwapPtr) SGetAtomNameReply,
     ReplyNotSwappd,
     ReplyNotSwappd,

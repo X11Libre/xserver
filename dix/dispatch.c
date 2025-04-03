@@ -1105,18 +1105,22 @@ ProcInternAtom(ClientPtr client)
     }
     tchar = (char *) &stuff[1];
     atom = MakeAtom(tchar, stuff->nbytes, !stuff->onlyIfExists);
-    if (atom != BAD_RESOURCE) {
-        xInternAtomReply reply = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
-            .length = 0,
-            .atom = atom
-        };
-        WriteReplyToClient(client, sizeof(xInternAtomReply), &reply);
-        return Success;
-    }
-    else
+    if (atom == BAD_RESOURCE)
         return BadAlloc;
+
+    xInternAtomReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .atom = atom
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.atom);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
+    return Success;
 }
 
 int

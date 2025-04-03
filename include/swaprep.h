@@ -42,10 +42,6 @@ extern void SGenericReply(ClientPtr /* pClient */ ,
                           int /* size */ ,
                           xGenericReply * /* pRep */ );
 
-extern void SInternAtomReply(ClientPtr /* pClient */ ,
-                             int /* size */ ,
-                             xInternAtomReply * /* pRep */ );
-
 extern void SGetAtomNameReply(ClientPtr /* pClient */ ,
                               int /* size */ ,
                               xGetAtomNameReply * /* pRep */ );
