@@ -68,11 +68,6 @@ extern void SGetFontPathReply(ClientPtr /* pClient */ ,
                               int /* size */ ,
                               xGetFontPathReply * /* pRep */ );
 
-extern void SListInstalledColormapsReply(ClientPtr /* pClient */ ,
-                                         int /* size */ ,
-                                         xListInstalledColormapsReply
-                                         * /* pRep */ );
-
 extern void SAllocColorReply(ClientPtr /* pClient */ ,
                              int /* size */ ,
                              xAllocColorReply * /* pRep */ );

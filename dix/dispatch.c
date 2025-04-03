@@ -2587,7 +2587,7 @@ ProcUninstallColormap(ClientPtr client)
 int
 ProcListInstalledColormaps(ClientPtr client)
 {
-    int nummaps, rc;
+    int rc;
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
@@ -2601,23 +2601,33 @@ ProcListInstalledColormaps(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xListInstalledColormapsReply *preply = calloc(1,
-                    sizeof(xListInstalledColormapsReply) +
-                    pWin->drawable.pScreen->maxInstalledCmaps *
-                    sizeof(Colormap));
-    if (!preply)
+    Colormap *cm = calloc(pWin->drawable.pScreen->maxInstalledCmaps,
+                          sizeof(Colormap));
+    if (!cm)
         return BadAlloc;
 
-    preply->type = X_Reply;
-    preply->sequenceNumber = client->sequence;
-    nummaps = (*pWin->drawable.pScreen->ListInstalledColormaps)
-        (pWin->drawable.pScreen, (Colormap *) &preply[1]);
-    preply->nColormaps = nummaps;
-    preply->length = nummaps;
-    WriteReplyToClient(client, sizeof(xListInstalledColormapsReply), preply);
-    client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-    WriteSwappedDataToClient(client, nummaps * sizeof(Colormap), &preply[1]);
-    free(preply);
+    const ScreenPtr pScreen = pWin->drawable.pScreen;
+    const int nummaps = pScreen->ListInstalledColormaps(pScreen, cm);
+
+    xListInstalledColormapsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .nColormaps = nummaps,
+        .length = nummaps,
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.nColormaps);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
+    if (client->swapped)
+        Swap32Write(client, nummaps * sizeof(Colormap), cm);
+    else
+        WriteToClient(client, nummaps * sizeof(Colormap), cm);
+    free(cm);
     return Success;
 }
 
