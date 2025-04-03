@@ -2272,18 +2272,16 @@ ProcChangeKeyboardControl(ClientPtr client)
 int
 ProcGetKeyboardControl(ClientPtr client)
 {
-    int rc, i;
     DeviceIntPtr kbd = PickKeyboard(client);
     KeybdCtrl *ctrl = &kbd->kbdfeed->ctrl;
-    xGetKeyboardControlReply rep;
 
     REQUEST_SIZE_MATCH(xReq);
 
-    rc = XaceHookDeviceAccess(client, kbd, DixGetAttrAccess);
+    int rc = XaceHookDeviceAccess(client, kbd, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    rep = (xGetKeyboardControlReply) {
+    xGetKeyboardControlReply rep = {
         .type = X_Reply,
         .globalAutoRepeat = ctrl->autoRepeat,
         .sequenceNumber = client->sequence,
@@ -2294,9 +2292,17 @@ ProcGetKeyboardControl(ClientPtr client)
         .bellPitch = ctrl->bell_pitch,
         .bellDuration = ctrl->bell_duration
     };
-    for (i = 0; i < 32; i++)
+    for (int i = 0; i < 32; i++)
         rep.map[i] = ctrl->autoRepeats[i];
-    WriteReplyToClient(client, sizeof(xGetKeyboardControlReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.ledMask);
+        swaps(&rep.bellPitch);
+        swaps(&rep.bellDuration);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 
