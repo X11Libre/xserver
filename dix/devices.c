@@ -1996,7 +1996,6 @@ ProcGetKeyboardMapping(ClientPtr client)
 int
 ProcGetPointerMapping(ClientPtr client)
 {
-    xGetPointerMappingReply rep;
 
     /* Apps may get different values each time they call GetPointerMapping as
      * the ClientPointer could change. */
@@ -2012,15 +2011,21 @@ ProcGetPointerMapping(ClientPtr client)
         return rc;
 
     nElts = (butc) ? butc->numButtons : 0;
-    rep = (xGetPointerMappingReply) {
+
+    xGetPointerMappingReply rep = {
         .type = X_Reply,
         .nElts = nElts,
         .sequenceNumber = client->sequence,
         .length = ((unsigned) nElts + (4 - 1)) / 4
     };
-    WriteReplyToClient(client, sizeof(xGetPointerMappingReply), &rep);
-    if (butc)
-        WriteToClient(client, nElts, &butc->map[1]);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, nElts, &butc->map[1]);
     return Success;
 }
 

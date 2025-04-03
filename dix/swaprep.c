@@ -545,15 +545,6 @@ SGetKeyboardMappingReply(ClientPtr pClient, int size,
 }
 
 void _X_COLD
-SGetPointerMappingReply(ClientPtr pClient, int size,
-                        xGetPointerMappingReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SGetKeyboardControlReply(ClientPtr pClient, int size,
                          xGetKeyboardControlReply * pRep)
 {
