@@ -1131,23 +1131,27 @@ ProcGetAtomName(ClientPtr client)
     REQUEST(xResourceReq);
 
     REQUEST_SIZE_MATCH(xResourceReq);
-    if ((str = NameForAtom(stuff->id))) {
-        int len = strlen(str);
-        xGetAtomNameReply reply = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
-            .length = bytes_to_int32(len),
-            .nameLength = len
-        };
-
-        WriteReplyToClient(client, sizeof(xGetAtomNameReply), &reply);
-        WriteToClient(client, len, str);
-        return Success;
-    }
-    else {
+    if (!(str = NameForAtom(stuff->id))) {
         client->errorValue = stuff->id;
         return BadAtom;
     }
+
+    const int len = strlen(str);
+    xGetAtomNameReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = bytes_to_int32(len),
+        .nameLength = len
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.nameLength);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, len, str);
+    return Success;
 }
 
 int
