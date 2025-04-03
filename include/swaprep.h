@@ -42,10 +42,6 @@ extern void SGenericReply(ClientPtr /* pClient */ ,
                           int /* size */ ,
                           xGenericReply * /* pRep */ );
 
-extern void SQueryTreeReply(ClientPtr /* pClient */ ,
-                            int /* size */ ,
-                            xQueryTreeReply * /* pRep */ );
-
 extern void SInternAtomReply(ClientPtr /* pClient */ ,
                              int /* size */ ,
                              xInternAtomReply * /* pRep */ );

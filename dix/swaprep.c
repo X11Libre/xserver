@@ -184,17 +184,6 @@ SGenericReply(ClientPtr pClient, int size, xGenericReply * pRep)
 }
 
 void _X_COLD
-SQueryTreeReply(ClientPtr pClient, int size, xQueryTreeReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swapl(&pRep->root);
-    swapl(&pRep->parent);
-    swaps(&pRep->nChildren);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SInternAtomReply(ClientPtr pClient, int size, xInternAtomReply * pRep)
 {
     swaps(&pRep->sequenceNumber);

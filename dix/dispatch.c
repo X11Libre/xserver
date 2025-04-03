@@ -1042,7 +1042,6 @@ ProcGetGeometry(ClientPtr client)
 int
 ProcQueryTree(ClientPtr client)
 {
-    xQueryTreeReply reply;
     int rc, numChildren = 0;
     WindowPtr pChild, pWin, pHead;
     Window *childIDs = (Window *) NULL;
@@ -1054,12 +1053,6 @@ ProcQueryTree(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    reply = (xQueryTreeReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .root = pWin->drawable.pScreen->root->drawable.id,
-        .parent = (pWin->parent) ? pWin->parent->drawable.id : (Window) None
-    };
     pHead = RealChildHead(pWin);
     for (pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib)
         numChildren++;
@@ -1074,17 +1067,26 @@ ProcQueryTree(ClientPtr client)
             childIDs[curChild++] = pChild->drawable.id;
     }
 
-    reply.nChildren = numChildren;
-    reply.length = bytes_to_int32(numChildren * sizeof(Window));
+    xQueryTreeReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .root = pWin->drawable.pScreen->root->drawable.id,
+        .parent = (pWin->parent) ? pWin->parent->drawable.id : (Window) None,
+        .nChildren = numChildren,
+        .length = bytes_to_int32(numChildren * sizeof(Window)),
+    };
 
-    WriteReplyToClient(client, sizeof(xQueryTreeReply), &reply);
-    if (numChildren) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, numChildren * sizeof(Window),
-                                 childIDs);
-        free(childIDs);
+    if (client->swapped) {
+        SwapLongs(childIDs, rep.length);
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.root);
+        swapl(&rep.parent);
+        swaps(&rep.nChildren);
     }
-
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, numChildren * sizeof(Window), childIDs);
+    free(childIDs);
     return Success;
 }
 
