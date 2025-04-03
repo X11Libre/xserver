@@ -2642,30 +2642,38 @@ ProcAllocColor(ClientPtr client)
     REQUEST_SIZE_MATCH(xAllocColorReq);
     rc = dixLookupResourceByType((void **) &pmap, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixAddAccess);
-    if (rc == Success) {
-        xAllocColorReply acr = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
-            .length = 0,
-            .red = stuff->red,
-            .green = stuff->green,
-            .blue = stuff->blue,
-            .pixel = 0
-        };
-        if ((rc = AllocColor(pmap, &acr.red, &acr.green, &acr.blue,
-                             &acr.pixel, client->index)))
-            return rc;
-#ifdef XINERAMA
-        if (noPanoramiXExtension || !pmap->pScreen->myNum)
-#endif /* XINERAMA */
-            WriteReplyToClient(client, sizeof(xAllocColorReply), &acr);
-        return Success;
-
-    }
-    else {
+    if (rc != Success) {
         client->errorValue = stuff->cmap;
         return rc;
     }
+
+    xAllocColorReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .red = stuff->red,
+        .green = stuff->green,
+        .blue = stuff->blue,
+        .pixel = 0
+    };
+
+    if ((rc = AllocColor(pmap, &rep.red, &rep.green, &rep.blue,
+                         &rep.pixel, client->index)))
+        return rc;
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swaps(&rep.red);
+        swaps(&rep.green);
+        swaps(&rep.blue);
+        swapl(&rep.pixel);
+    }
+
+#ifdef XINERAMA
+    if (noPanoramiXExtension || !pmap->pScreen->myNum)
+#endif /* XINERAMA */
+        WriteToClient(client, sizeof(rep), &rep);
+    return Success;
 }
 
 int

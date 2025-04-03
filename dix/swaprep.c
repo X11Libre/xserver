@@ -311,17 +311,6 @@ SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply * pRep)
 }
 
 void _X_COLD
-SAllocColorReply(ClientPtr pClient, int size, xAllocColorReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swaps(&pRep->red);
-    swaps(&pRep->green);
-    swaps(&pRep->blue);
-    swapl(&pRep->pixel);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SAllocNamedColorReply(ClientPtr pClient, int size, xAllocNamedColorReply * pRep)
 {
     swaps(&pRep->sequenceNumber);
