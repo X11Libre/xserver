@@ -822,7 +822,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,
     ReplyNotSwappd,
     ReplyNotSwappd,                             /* 105 */
-    (ReplySwapPtr) SGetPointerControlReply,
+    ReplyNotSwappd,
     ReplyNotSwappd,
     (ReplySwapPtr) SGetScreenSaverReply,
     ReplyNotSwappd,

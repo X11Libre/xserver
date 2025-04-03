@@ -154,11 +154,6 @@ extern void SListExtensionsReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListExtensionsReply * /* pRep */ );
 
-extern void SGetPointerControlReply(ClientPtr /* pClient */ ,
-                                    int /* size */ ,
-                                    xGetPointerControlReply *
-                                    /* pRep */ );
-
 extern void SGetScreenSaverReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xGetScreenSaverReply * /* pRep */ );
