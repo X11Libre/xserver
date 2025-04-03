@@ -164,11 +164,6 @@ extern void SGetPointerMappingReply(ClientPtr /* pClient */ ,
                                     xGetPointerMappingReply *
                                     /* pRep */ );
 
-extern void SGetModifierMappingReply(ClientPtr /* pClient */ ,
-                                     int /* size */ ,
-                                     xGetModifierMappingReply *
-                                     /* pRep */ );
-
 extern void SGetKeyboardControlReply(ClientPtr /* pClient */ ,
                                      int /* size */ ,
                                      xGetKeyboardControlReply *
