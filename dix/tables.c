@@ -738,7 +738,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     (ReplySwapPtr) SGetPropertyReply,           /* 20 */
     (ReplySwapPtr) SListPropertiesReply,
     ReplyNotSwappd,
-    (ReplySwapPtr) SGetSelectionOwnerReply,
+    ReplyNotSwappd,
     ReplyNotSwappd,
     ReplyNotSwappd,                             /* 25 */
     (ReplySwapPtr) SGenericReply,               /* SGrabPointerReply, */

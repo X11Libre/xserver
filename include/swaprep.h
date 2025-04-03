@@ -67,11 +67,6 @@ extern void SListPropertiesReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListPropertiesReply * /* pRep */ );
 
-extern void SGetSelectionOwnerReply(ClientPtr /* pClient */ ,
-                                    int /* size */ ,
-                                    xGetSelectionOwnerReply *
-                                    /* pRep */ );
-
 extern void SQueryPointerReply(ClientPtr /* pClient */ ,
                                int /* size */ ,
                                xQueryPointerReply * /* pRep */ );

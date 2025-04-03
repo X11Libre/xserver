@@ -250,15 +250,6 @@ SListPropertiesReply(ClientPtr pClient, int size, xListPropertiesReply * pRep)
 }
 
 void _X_COLD
-SGetSelectionOwnerReply(ClientPtr pClient, int size,
-                        xGetSelectionOwnerReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->owner);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SQueryPointerReply(ClientPtr pClient, int size, xQueryPointerReply * pRep)
 {
     swaps(&pRep->sequenceNumber);
