@@ -1759,7 +1759,6 @@ BadDeviceMap(BYTE * buff, int length, unsigned low, unsigned high, XID *errval)
 int
 ProcSetModifierMapping(ClientPtr client)
 {
-    xSetModifierMappingReply rep;
     int rc;
 
     REQUEST(xSetModifierMappingReq);
@@ -1769,11 +1768,6 @@ ProcSetModifierMapping(ClientPtr client)
                             bytes_to_int32(sizeof(xSetModifierMappingReq))))
         return BadLength;
 
-    rep = (xSetModifierMappingReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
 
     rc = change_modmap(client, PickKeyboard(client), (KeyCode *) &stuff[1],
                        stuff->numKeyPerModifier);
@@ -1782,9 +1776,17 @@ ProcSetModifierMapping(ClientPtr client)
     if (rc != MappingSuccess && rc != MappingFailed && rc != MappingBusy)
         return rc;
 
-    rep.success = rc;
+    xSetModifierMappingReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .success = rc,
+    };
 
-    WriteReplyToClient(client, sizeof(xSetModifierMappingReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 
