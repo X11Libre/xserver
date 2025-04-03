@@ -718,7 +718,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,
     ReplyNotSwappd,
     ReplyNotSwappd,
-    (ReplySwapPtr) SGetWindowAttributesReply,
+    ReplyNotSwappd,
     ReplyNotSwappd,
     ReplyNotSwappd,                             /* 5 */
     ReplyNotSwappd,

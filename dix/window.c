@@ -100,6 +100,7 @@ Equipment Corporation.
 
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
+#include "dix/dispatch.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
@@ -1582,42 +1583,55 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
     return error;
 }
 
-/*****
- * GetWindowAttributes
- *    Notice that this is different than ChangeWindowAttributes
- *****/
-
-void
-GetWindowAttributes(WindowPtr pWin, ClientPtr client,
-                    xGetWindowAttributesReply * wa)
+int
+ProcGetWindowAttributes(ClientPtr client)
 {
-    wa->type = X_Reply;
-    wa->bitGravity = pWin->bitGravity;
-    wa->winGravity = pWin->winGravity;
-    wa->backingStore = pWin->backingStore;
-    wa->length = bytes_to_int32(sizeof(xGetWindowAttributesReply) -
-                                sizeof(xGenericReply));
-    wa->sequenceNumber = client->sequence;
-    wa->backingBitPlanes = wBackingBitPlanes(pWin);
-    wa->backingPixel = wBackingPixel(pWin);
-    wa->saveUnder = (BOOL) pWin->saveUnder;
-    wa->override = pWin->overrideRedirect;
-    if (!pWin->mapped)
-        wa->mapState = IsUnmapped;
-    else if (pWin->realized)
-        wa->mapState = IsViewable;
-    else
-        wa->mapState = IsUnviewable;
+    REQUEST(xResourceReq);
+    REQUEST_SIZE_MATCH(xResourceReq);
 
-    wa->colormap = wColormap(pWin);
-    wa->mapInstalled = (wa->colormap == None) ? xFalse
-        : IsMapInstalled(wa->colormap, pWin);
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
+    if (rc != Success)
+        return rc;
 
-    wa->yourEventMask = EventMaskForClient(pWin, client);
-    wa->allEventMasks = pWin->eventMask | wOtherEventMasks(pWin);
-    wa->doNotPropagateMask = wDontPropagateMask(pWin);
-    wa->class = pWin->drawable.class;
-    wa->visualID = wVisual(pWin);
+    xGetWindowAttributesReply rep = {
+        .type = X_Reply,
+        .bitGravity = pWin->bitGravity,
+        .winGravity = pWin->winGravity,
+        .backingStore = pWin->backingStore,
+        .length = bytes_to_int32(sizeof(xGetWindowAttributesReply) -
+                                 sizeof(xGenericReply)),
+        .sequenceNumber = client->sequence,
+        .backingBitPlanes = wBackingBitPlanes(pWin),
+        .backingPixel = wBackingPixel(pWin),
+        .saveUnder = (BOOL) pWin->saveUnder,
+        .override = pWin->overrideRedirect,
+        .mapState = (!pWin->mapped ? IsUnmapped :
+                     (pWin->realized ? IsViewable : IsUnviewable)),
+        .colormap = wColormap(pWin),
+        .mapInstalled = (wColormap(pWin) == None) ? xFalse
+            : IsMapInstalled(wColormap(pWin), pWin),
+        .yourEventMask = EventMaskForClient(pWin, client),
+        .allEventMasks = pWin->eventMask | wOtherEventMasks(pWin),
+        .doNotPropagateMask = wDontPropagateMask(pWin),
+        .class = pWin->drawable.class,
+        .visualID = wVisual(pWin),
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.visualID);
+        swaps(&rep.class);
+        swapl(&rep.backingBitPlanes);
+        swapl(&rep.backingPixel);
+        swapl(&rep.colormap);
+        swapl(&rep.allEventMasks);
+        swapl(&rep.yourEventMask);
+        swaps(&rep.doNotPropagateMask);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
+    return Success;
 }
 
 WindowPtr

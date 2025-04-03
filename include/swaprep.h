@@ -42,11 +42,6 @@ extern void SGenericReply(ClientPtr /* pClient */ ,
                           int /* size */ ,
                           xGenericReply * /* pRep */ );
 
-extern void SGetWindowAttributesReply(ClientPtr /* pClient */ ,
-                                      int /* size */ ,
-                                      xGetWindowAttributesReply *
-                                      /* pRep */ );
-
 extern void SQueryTreeReply(ClientPtr /* pClient */ ,
                             int /* size */ ,
                             xQueryTreeReply * /* pRep */ );

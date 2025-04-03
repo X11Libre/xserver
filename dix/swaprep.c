@@ -183,24 +183,6 @@ SGenericReply(ClientPtr pClient, int size, xGenericReply * pRep)
     WriteToClient(pClient, size, pRep);
 }
 
-/* Extra-large reply */
-void _X_COLD
-SGetWindowAttributesReply(ClientPtr pClient, int size,
-                          xGetWindowAttributesReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swapl(&pRep->visualID);
-    swaps(&pRep->class);
-    swapl(&pRep->backingBitPlanes);
-    swapl(&pRep->backingPixel);
-    swapl(&pRep->colormap);
-    swapl(&pRep->allEventMasks);
-    swapl(&pRep->yourEventMask);
-    swaps(&pRep->doNotPropagateMask);
-    WriteToClient(pClient, size, pRep);
-}
-
 void _X_COLD
 SQueryTreeReply(ClientPtr pClient, int size, xQueryTreeReply * pRep)
 {
