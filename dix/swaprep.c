@@ -288,15 +288,6 @@ SwapTimeCoordWrite(ClientPtr pClient, int size, xTimecoord * pRep)
 }
 
 void _X_COLD
-SGetMotionEventsReply(ClientPtr pClient, int size, xGetMotionEventsReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swapl(&pRep->nEvents);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SGetInputFocusReply(ClientPtr pClient, int size, xGetInputFocusReply * pRep)
 {
     swaps(&pRep->sequenceNumber);

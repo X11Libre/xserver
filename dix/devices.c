@@ -2473,7 +2473,6 @@ ProcGetMotionEvents(ClientPtr client)
 {
     WindowPtr pWin;
     xTimecoord *coords = (xTimecoord *) NULL;
-    xGetMotionEventsReply rep;
     int i, count, xmin, xmax, ymin, ymax, rc;
     unsigned long nEvents;
     DeviceIntPtr mouse = PickPointer(client);
@@ -2492,10 +2491,7 @@ ProcGetMotionEvents(ClientPtr client)
     UpdateCurrentTimeIf();
     if (mouse->valuator->motionHintWindow)
         MaybeStopHint(mouse, client);
-    rep = (xGetMotionEventsReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence
-    };
+
     nEvents = 0;
     start = ClientTimeToServerTime(stuff->start);
     stop = ClientTimeToServerTime(stuff->stop);
@@ -2522,9 +2518,20 @@ ProcGetMotionEvents(ClientPtr client)
                 nEvents++;
             }
     }
-    rep.length = nEvents * bytes_to_int32(sizeof(xTimecoord));
-    rep.nEvents = nEvents;
-    WriteReplyToClient(client, sizeof(xGetMotionEventsReply), &rep);
+
+    xGetMotionEventsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = nEvents * bytes_to_int32(sizeof(xTimecoord)),
+        .nEvents = nEvents,
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.nEvents);
+    }
+    WriteToClient(client, sizeof(xGetMotionEventsReply), &rep);
     if (nEvents) {
         client->pSwapReplyFunc = (ReplySwapPtr) SwapTimeCoordWrite;
         WriteSwappedDataToClient(client, nEvents * sizeof(xTimecoord),

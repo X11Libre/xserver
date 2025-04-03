@@ -75,11 +75,6 @@ extern void SwapTimeCoordWrite(ClientPtr /* pClient */ ,
                                int /* size */ ,
                                xTimecoord * /* pRep */ );
 
-extern void SGetMotionEventsReply(ClientPtr /* pClient */ ,
-                                  int /* size */ ,
-                                  xGetMotionEventsReply *       /* pRep */
-    );
-
 extern void SGetInputFocusReply(ClientPtr /* pClient */ ,
                                 int /* size */ ,
                                 xGetInputFocusReply * /* pRep */ );
