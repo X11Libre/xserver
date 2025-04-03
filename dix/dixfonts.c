@@ -59,6 +59,7 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "include/swaprep.h"
 #include "os/auth.h"
 
 #include "scrnintstr.h"
@@ -862,7 +863,6 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     xFontProp *pFP;
     int i;
     int aliascount = 0;
-    xListFontsWithInfoReply finalReply;
 
     if (client->clientGone) {
         if (c->current.current_fpe < c->num_fpes) {
@@ -872,7 +872,6 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
         err = Successful;
         goto bail;
     }
-    client->pSwapReplyFunc = ReplySwapVector[X_ListFontsWithInfo];
     if (!c->current.patlen)
         goto finish;
     while (c->current.current_fpe < c->num_fpes) {
@@ -1014,7 +1013,10 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
                 pFP->value = pFontInfo->props[i].value;
                 pFP++;
             }
-            WriteSwappedDataToClient(client, length, reply);
+            if (client->swapped) {
+                SwapFont((xQueryFontReply *) reply, FALSE);
+            }
+            WriteToClient(client, length, reply);
             WriteToClient(client, namelen, name);
             if (pFontInfo == &fontInfo) {
                 free(fontInfo.props);
@@ -1025,13 +1027,16 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     }
  finish:
     length = sizeof(xListFontsWithInfoReply);
-    finalReply = (xListFontsWithInfoReply) {
+    xListFontsWithInfoReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(sizeof(xListFontsWithInfoReply)
                                  - sizeof(xGenericReply))
     };
-    WriteSwappedDataToClient(client, length, &finalReply);
+    if (client->swapped) {
+        SwapFont((xQueryFontReply *) &rep, FALSE);
+    }
+    WriteToClient(client, length, &rep);
  bail:
     ClientWakeup(client);
     for (i = 0; i < c->num_fpes; i++)

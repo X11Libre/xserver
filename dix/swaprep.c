@@ -317,14 +317,6 @@ SQueryTextExtentsReply(ClientPtr pClient, int size,
 }
 
 void _X_COLD
-SListFontsWithInfoReply(ClientPtr pClient, int size,
-                        xListFontsWithInfoReply * pRep)
-{
-    SwapFont((xQueryFontReply *) pRep, FALSE);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply * pRep)
 {
     swaps(&pRep->sequenceNumber);
