@@ -564,9 +564,6 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     int nnames;
     int stringLens;
     int i;
-    xListFontsReply reply;
-    char *bufptr;
-    char *bufferStart;
     int aliascount = 0;
 
     if (client->clientGone) {
@@ -748,16 +745,17 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     for (i = 0; i < nnames; i++)
         stringLens += (names->length[i] <= 255) ? names->length[i] : 0;
 
-    reply = (xListFontsReply) {
+    xListFontsReply rep = {
         .type = X_Reply,
         .length = bytes_to_int32(stringLens + nnames),
         .nFonts = nnames,
         .sequenceNumber = client->sequence
     };
 
-    bufptr = bufferStart = calloc(1, reply.length << 2);
+    char *bufferStart = calloc(1, rep.length << 2);
+    char *bufptr = bufferStart;
 
-    if (!bufptr && reply.length) {
+    if (!bufptr && rep.length) {
         SendErrorToClient(client, X_ListFonts, 0, 0, BadAlloc);
         goto bail;
     }
@@ -767,17 +765,23 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
      */
     for (i = 0; i < nnames; i++) {
         if (names->length[i] > 255)
-            reply.nFonts--;
+            rep.nFonts--;
         else {
             *bufptr++ = names->length[i];
             memcpy(bufptr, names->names[i], names->length[i]);
             bufptr += names->length[i];
         }
     }
-    nnames = reply.nFonts;
-    reply.length = bytes_to_int32(stringLens + nnames);
-    client->pSwapReplyFunc = ReplySwapVector[X_ListFonts];
-    WriteSwappedDataToClient(client, sizeof(xListFontsReply), &reply);
+    nnames = rep.nFonts;
+    rep.length = bytes_to_int32(stringLens + nnames);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.nFonts);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
     WriteToClient(client, stringLens + nnames, bufferStart);
     free(bufferStart);
 

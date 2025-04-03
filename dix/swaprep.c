@@ -258,7 +258,7 @@ SwapCharInfo(xCharInfo * pInfo)
     swaps(&pInfo->attributes);
 }
 
-static void _X_COLD
+void
 SwapFontInfo(xQueryFontReply * pr)
 {
     swaps(&pr->minCharOrByte2);
@@ -313,15 +313,6 @@ SQueryTextExtentsReply(ClientPtr pClient, int size,
     swapl(&pRep->overallWidth);
     swapl(&pRep->overallLeft);
     swapl(&pRep->overallRight);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
-SListFontsReply(ClientPtr pClient, int size, xListFontsReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swaps(&pRep->nFonts);
     WriteToClient(pClient, size, pRep);
 }
 

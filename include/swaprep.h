@@ -69,10 +69,6 @@ extern void SQueryTextExtentsReply(ClientPtr /* pClient */ ,
                                    xQueryTextExtentsReply *     /* pRep */
     );
 
-extern void SListFontsReply(ClientPtr /* pClient */ ,
-                            int /* size */ ,
-                            xListFontsReply * /* pRep */ );
-
 extern void SListFontsWithInfoReply(ClientPtr /* pClient */ ,
                                     int /* size */ ,
                                     xListFontsWithInfoReply *
