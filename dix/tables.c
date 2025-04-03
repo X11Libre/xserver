@@ -834,7 +834,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,                             /* 115 */
     (ReplySwapPtr) SGenericReply,               /* SetPointerMapping */
     (ReplySwapPtr) SGetPointerMappingReply,
-    (ReplySwapPtr) SGenericReply,               /* SetModifierMapping */
+    ReplyNotSwappd,
     (ReplySwapPtr) SGetModifierMappingReply,    /* 119 */
     ReplyNotSwappd,                             /* 120 */
     ReplyNotSwappd,                             /* 121 */
