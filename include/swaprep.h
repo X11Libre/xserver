@@ -64,11 +64,6 @@ extern void SGetInputFocusReply(ClientPtr /* pClient */ ,
                                 int /* size */ ,
                                 xGetInputFocusReply * /* pRep */ );
 
-extern void SQueryTextExtentsReply(ClientPtr /* pClient */ ,
-                                   int /* size */ ,
-                                   xQueryTextExtentsReply *     /* pRep */
-    );
-
 extern void SGetFontPathReply(ClientPtr /* pClient */ ,
                               int /* size */ ,
                               xGetFontPathReply * /* pRep */ );

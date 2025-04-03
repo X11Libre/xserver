@@ -1390,7 +1390,6 @@ ProcQueryFont(ClientPtr client)
 int
 ProcQueryTextExtents(ClientPtr client)
 {
-    xQueryTextExtentsReply reply;
     FontPtr pFont;
     ExtentInfoRec info;
     unsigned long length;
@@ -1412,7 +1411,8 @@ ProcQueryTextExtents(ClientPtr client)
     }
     if (!xfont2_query_text_extents(pFont, length, (unsigned char *) &stuff[1], &info))
         return BadAlloc;
-    reply = (xQueryTextExtentsReply) {
+
+    xQueryTextExtentsReply rep = {
         .type = X_Reply,
         .drawDirection = info.drawDirection,
         .sequenceNumber = client->sequence,
@@ -1425,7 +1425,18 @@ ProcQueryTextExtents(ClientPtr client)
         .overallLeft = info.overallLeft,
         .overallRight = info.overallRight
     };
-    WriteReplyToClient(client, sizeof(xQueryTextExtentsReply), &reply);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swaps(&rep.fontAscent);
+        swaps(&rep.fontDescent);
+        swaps(&rep.overallAscent);
+        swaps(&rep.overallDescent);
+        swapl(&rep.overallWidth);
+        swapl(&rep.overallLeft);
+        swapl(&rep.overallRight);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 
