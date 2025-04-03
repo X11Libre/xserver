@@ -1973,27 +1973,36 @@ ProcGetKeyboardMapping(ClientPtr client)
     if (!syms)
         return BadAlloc;
 
+    const int count = syms->mapWidth * stuff->count;
+    const int size = count * sizeof(KeySym);
+    void *payload = calloc(count, sizeof(KeySym));
+    if (!payload)
+        return BadAlloc;
+
+    memcpy(payload,
+           &syms->map[syms->mapWidth * (stuff->firstKeyCode - syms->minKeyCode)],
+           size);
+
     xGetKeyboardMappingReply rep = {
         .type = X_Reply,
         .keySymsPerKeyCode = syms->mapWidth,
         .sequenceNumber = client->sequence,
         /* length is a count of 4 byte quantities and KeySyms are 4 bytes */
-        .length = syms->mapWidth * stuff->count
+        .length = count
     };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
+        SwapLongs(payload, count);
     }
 
     WriteToClient(client, sizeof(rep), &rep);
-    client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
-    WriteSwappedDataToClient(client,
-                             syms->mapWidth * stuff->count * sizeof(KeySym),
-                             &syms->map[syms->mapWidth * (stuff->firstKeyCode -
-                                                          syms->minKeyCode)]);
+    WriteToClient(client, size, payload);
+
     free(syms->map);
     free(syms);
+    free(payload);
 
     return Success;
 }
@@ -2255,18 +2264,16 @@ ProcChangeKeyboardControl(ClientPtr client)
 int
 ProcGetKeyboardControl(ClientPtr client)
 {
-    int rc, i;
     DeviceIntPtr kbd = PickKeyboard(client);
     KeybdCtrl *ctrl = &kbd->kbdfeed->ctrl;
-    xGetKeyboardControlReply rep;
 
     REQUEST_SIZE_MATCH(xReq);
 
-    rc = XaceHookDeviceAccess(client, kbd, DixGetAttrAccess);
+    int rc = XaceHookDeviceAccess(client, kbd, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
-    rep = (xGetKeyboardControlReply) {
+    xGetKeyboardControlReply rep = {
         .type = X_Reply,
         .globalAutoRepeat = ctrl->autoRepeat,
         .sequenceNumber = client->sequence,
@@ -2277,9 +2284,17 @@ ProcGetKeyboardControl(ClientPtr client)
         .bellPitch = ctrl->bell_pitch,
         .bellDuration = ctrl->bell_duration
     };
-    for (i = 0; i < 32; i++)
+    for (int i = 0; i < 32; i++)
         rep.map[i] = ctrl->autoRepeats[i];
-    WriteReplyToClient(client, sizeof(xGetKeyboardControlReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.ledMask);
+        swaps(&rep.bellPitch);
+        swaps(&rep.bellDuration);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 

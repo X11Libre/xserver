@@ -536,18 +536,6 @@ SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply * pRep)
 }
 
 void _X_COLD
-SGetKeyboardControlReply(ClientPtr pClient, int size,
-                         xGetKeyboardControlReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swapl(&pRep->ledMask);
-    swaps(&pRep->bellPitch);
-    swaps(&pRep->bellDuration);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SGetPointerControlReply(ClientPtr pClient, int size,
                         xGetPointerControlReply * pRep)
 {
