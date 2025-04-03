@@ -38,6 +38,10 @@
 #include "win.h"
 #include "winmsg.h"
 
+// workaround for win32/mingw32 name clash:
+// windows headers #define CreateWindow to CreateWindowA
+#undef CreateWindow
+
 /*
  * Determine what type of screen we are initializing
  * and call the appropriate procedure to initialize
