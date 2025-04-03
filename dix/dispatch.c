@@ -1377,7 +1377,11 @@ ProcQueryFont(ClientPtr client)
         reply->sequenceNumber = client->sequence;
         QueryFont(pFont, reply, nprotoxcistructs);
 
-        WriteReplyToClient(client, rlength, reply);
+        if (client->swapped) {
+            SwapFont(reply, TRUE);
+        }
+
+        WriteToClient(client, rlength, reply);
         free(reply);
         return Success;
     }

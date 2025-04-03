@@ -762,7 +762,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,
     ReplyNotSwappd,                             /* 45 */
     ReplyNotSwappd,
-    (ReplySwapPtr) SQueryFontReply,
+    ReplyNotSwappd,
     (ReplySwapPtr) SQueryTextExtentsReply,
     (ReplySwapPtr) SListFontsReply,
     (ReplySwapPtr) SListFontsWithInfoReply,     /* 50 */

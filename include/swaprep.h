@@ -26,6 +26,8 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SWAPREP_H
 #define SWAPREP_H 1
 
+void SwapFont(xQueryFontReply * pr, Bool hasGlyphs);
+
 extern void Swap32Write(ClientPtr /* pClient */ ,
                         int /* size */ ,
                         CARD32 * /* pbuf */ );
@@ -61,10 +63,6 @@ extern void SwapTimeCoordWrite(ClientPtr /* pClient */ ,
 extern void SGetInputFocusReply(ClientPtr /* pClient */ ,
                                 int /* size */ ,
                                 xGetInputFocusReply * /* pRep */ );
-
-extern void SQueryFontReply(ClientPtr /* pClient */ ,
-                            int /* size */ ,
-                            xQueryFontReply * /* pRep */ );
 
 extern void SQueryTextExtentsReply(ClientPtr /* pClient */ ,
                                    int /* size */ ,

@@ -59,8 +59,6 @@ static void SwapFontInfo(xQueryFontReply * pr);
 
 static void SwapCharInfo(xCharInfo * pInfo);
 
-static void SwapFont(xQueryFontReply * pr, Bool hasGlyphs);
-
 /**
  * Thanks to Jack Palevich for testing and subsequently rewriting all this
  *
@@ -274,7 +272,7 @@ SwapFontInfo(xQueryFontReply * pr)
     swapl(&pr->nCharInfos);
 }
 
-static void _X_COLD
+void _X_COLD
 SwapFont(xQueryFontReply * pr, Bool hasGlyphs)
 {
     unsigned i;
@@ -301,13 +299,6 @@ SwapFont(xQueryFontReply * pr, Bool hasGlyphs)
         for (i = 0; i < nchars; i++, pxci++)
             SwapCharInfo(pxci);
     }
-}
-
-void _X_COLD
-SQueryFontReply(ClientPtr pClient, int size, xQueryFontReply * pRep)
-{
-    SwapFont(pRep, TRUE);
-    WriteToClient(pClient, size, pRep);
 }
 
 void _X_COLD
