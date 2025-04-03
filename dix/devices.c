@@ -1793,7 +1793,6 @@ ProcSetModifierMapping(ClientPtr client)
 int
 ProcGetModifierMapping(ClientPtr client)
 {
-    xGetModifierMappingReply rep;
     int max_keys_per_mod = 0;
     KeyCode *modkeymap = NULL;
 
@@ -1802,15 +1801,20 @@ ProcGetModifierMapping(ClientPtr client)
     generate_modkeymap(client, PickKeyboard(client), &modkeymap,
                        &max_keys_per_mod);
 
-    rep = (xGetModifierMappingReply) {
+    xGetModifierMappingReply rep = {
         .type = X_Reply,
         .numKeyPerModifier = max_keys_per_mod,
         .sequenceNumber = client->sequence,
-    /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
+        /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
         .length = max_keys_per_mod << 1
     };
 
-    WriteReplyToClient(client, sizeof(xGetModifierMappingReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
     WriteToClient(client, max_keys_per_mod * 8, modkeymap);
 
     free(modkeymap);
