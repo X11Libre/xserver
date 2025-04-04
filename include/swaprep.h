@@ -60,10 +60,6 @@ extern void SwapTimeCoordWrite(ClientPtr /* pClient */ ,
                                int /* size */ ,
                                xTimecoord * /* pRep */ );
 
-extern void SGetInputFocusReply(ClientPtr /* pClient */ ,
-                                int /* size */ ,
-                                xGetInputFocusReply * /* pRep */ );
-
 extern void SListExtensionsReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListExtensionsReply * /* pRep */ );

@@ -4971,7 +4971,6 @@ int
 ProcGetInputFocus(ClientPtr client)
 {
     DeviceIntPtr kbd = PickKeyboard(client);
-    xGetInputFocusReply rep;
     FocusClassPtr focus = kbd->focus;
     int rc;
 
@@ -4982,7 +4981,7 @@ ProcGetInputFocus(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xGetInputFocusReply) {
+    xGetInputFocusReply rep = {
         .type = X_Reply,
         .length = 0,
         .sequenceNumber = client->sequence,
@@ -4996,7 +4995,11 @@ ProcGetInputFocus(ClientPtr client)
     else
         rep.focus = focus->win->drawable.id;
 
-    WriteReplyToClient(client, sizeof(xGetInputFocusReply), &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.focus);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 

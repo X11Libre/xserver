@@ -239,14 +239,6 @@ SwapTimeCoordWrite(ClientPtr pClient, int size, xTimecoord * pRep)
 
 }
 
-void _X_COLD
-SGetInputFocusReply(ClientPtr pClient, int size, xGetInputFocusReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->focus);
-    WriteToClient(pClient, size, pRep);
-}
-
 static void _X_COLD
 SwapCharInfo(xCharInfo * pInfo)
 {
