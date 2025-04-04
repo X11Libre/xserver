@@ -311,19 +311,6 @@ SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply * pRep)
 }
 
 void _X_COLD
-SLookupColorReply(ClientPtr pClient, int size, xLookupColorReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swaps(&pRep->exactRed);
-    swaps(&pRep->exactGreen);
-    swaps(&pRep->exactBlue);
-    swaps(&pRep->screenRed);
-    swaps(&pRep->screenGreen);
-    swaps(&pRep->screenBlue);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SQueryBestSizeReply(ClientPtr pClient, int size, xQueryBestSizeReply * pRep)
 {
     swaps(&pRep->sequenceNumber);
