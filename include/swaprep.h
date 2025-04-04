@@ -44,9 +44,6 @@ extern void SGenericReply(ClientPtr /* pClient */ ,
                           int /* size */ ,
                           xGenericReply * /* pRep */ );
 
-extern void SListPropertiesReply(ClientPtr /* pClient */ ,
-                                 int /* size */ ,
-                                 xListPropertiesReply * /* pRep */ );
 extern void SwapTimeCoordWrite(ClientPtr /* pClient */ ,
                                int /* size */ ,
                                xTimecoord * /* pRep */ );

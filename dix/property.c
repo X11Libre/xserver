@@ -573,7 +573,6 @@ int
 ProcListProperties(ClientPtr client)
 {
     Atom *pAtoms = NULL, *temppAtoms;
-    xListPropertiesReply xlpr;
     int rc, numProps = 0;
     WindowPtr pWin;
     PropertyPtr pProp, realProp;
@@ -605,18 +604,24 @@ ProcListProperties(ClientPtr client)
         }
     }
 
-    xlpr = (xListPropertiesReply) {
+    xListPropertiesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(numProps * sizeof(Atom)),
         .nProperties = numProps
     };
-    WriteReplyToClient(client, sizeof(xGenericReply), &xlpr);
-    if (numProps) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, numProps * sizeof(Atom), pAtoms);
-        free(pAtoms);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.nProperties);
+        SwapLongs(pAtoms, numProps);
     }
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, numProps * sizeof(Atom), pAtoms);
+    free(pAtoms);
+
     return Success;
 }
 
