@@ -224,34 +224,34 @@ ExtensionAvailable(ClientPtr client, ExtensionEntry *ext)
 int
 ProcQueryExtension(ClientPtr client)
 {
-    xQueryExtensionReply reply;
-    int i;
-
     REQUEST(xQueryExtensionReq);
-
     REQUEST_FIXED_SIZE(xQueryExtensionReq, stuff->nbytes);
 
-    reply = (xQueryExtensionReply) {
+    xQueryExtensionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
         .major_opcode = 0
     };
 
-    if (!NumExtensions)
-        reply.present = xFalse;
+    if (!NumExtensions || !extensions)
+        rep.present = xFalse;
     else {
-        i = FindExtension((char *) &stuff[1], stuff->nbytes);
+        int i = FindExtension((char *) &stuff[1], stuff->nbytes);
         if (i < 0 || !ExtensionAvailable(client, extensions[i]))
-            reply.present = xFalse;
+            rep.present = xFalse;
         else {
-            reply.present = xTrue;
-            reply.major_opcode = extensions[i]->base;
-            reply.first_event = extensions[i]->eventBase;
-            reply.first_error = extensions[i]->errorBase;
+            rep.present = xTrue;
+            rep.major_opcode = extensions[i]->base;
+            rep.first_event = extensions[i]->eventBase;
+            rep.first_error = extensions[i]->errorBase;
         }
     }
-    WriteReplyToClient(client, sizeof(xQueryExtensionReply), &reply);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 

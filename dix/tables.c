@@ -813,7 +813,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,                             /* 95 */
     ReplyNotSwappd,
     ReplyNotSwappd,
-    (ReplySwapPtr) SGenericReply,               /* SQueryExtensionReply, */
+    ReplyNotSwappd,
     (ReplySwapPtr) SListExtensionsReply,
     ReplyNotSwappd,                             /* 100 */
     ReplyNotSwappd,
