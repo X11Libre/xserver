@@ -182,17 +182,6 @@ SGenericReply(ClientPtr pClient, int size, xGenericReply * pRep)
 }
 
 void _X_COLD
-SGetPropertyReply(ClientPtr pClient, int size, xGetPropertyReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swapl(&pRep->propertyType);
-    swapl(&pRep->bytesAfter);
-    swapl(&pRep->nItems);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SListPropertiesReply(ClientPtr pClient, int size, xListPropertiesReply * pRep)
 {
     swaps(&pRep->sequenceNumber);

@@ -418,22 +418,6 @@ DeleteAllWindowProperties(WindowPtr pWin)
     pWin->properties = NULL;
 }
 
-static int
-NullPropertyReply(ClientPtr client, ATOM propertyType, int format)
-{
-    xGetPropertyReply reply = {
-        .type = X_Reply,
-        .format = format,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .propertyType = propertyType,
-        .bytesAfter = 0,
-        .nItems = 0
-    };
-    WriteReplyToClient(client, sizeof(xGenericReply), &reply);
-    return Success;
-}
-
 /*****************
  * GetProperty
  *    If type Any is specified, returns the property from the specified
@@ -451,7 +435,6 @@ ProcGetProperty(ClientPtr client)
     unsigned long n, len, ind;
     int rc;
     WindowPtr pWin;
-    xGetPropertyReply reply;
     Mask win_mode = DixGetPropAccess, prop_mode = DixReadAccess;
 
     REQUEST(xGetPropertyReq);
@@ -480,8 +463,17 @@ ProcGetProperty(ClientPtr client)
     }
 
     rc = dixLookupProperty(&pProp, pWin, stuff->property, client, prop_mode);
-    if (rc == BadMatch)
-        return NullPropertyReply(client, None, 0);
+    if (rc == BadMatch) {
+        xGetPropertyReply rep = {
+            .type = X_Reply,
+            .sequenceNumber = client->sequence,
+        };
+        if (client->swapped) {
+            swaps(&rep.sequenceNumber);
+        }
+        WriteToClient(client, sizeof(rep), &rep);
+        return Success;
+    }
     else if (rc != Success)
         return rc;
 
@@ -490,16 +482,19 @@ ProcGetProperty(ClientPtr client)
 
     if (((stuff->type != pProp->type) && (stuff->type != AnyPropertyType))
         ) {
-        reply = (xGetPropertyReply) {
+        xGetPropertyReply rep = {
             .type = X_Reply,
             .sequenceNumber = client->sequence,
             .bytesAfter = pProp->size,
             .format = pProp->format,
-            .length = 0,
-            .nItems = 0,
             .propertyType = pProp->type
         };
-        WriteReplyToClient(client, sizeof(xGenericReply), &reply);
+        if (client->swapped) {
+            swaps(&rep.sequenceNumber);
+            swapl(&rep.propertyType);
+            swapl(&rep.bytesAfter);
+        }
+        WriteToClient(client, sizeof(rep), &rep);
         return Success;
     }
 
@@ -519,7 +514,7 @@ ProcGetProperty(ClientPtr client)
 
     len = min(n - ind, 4 * stuff->longLength);
 
-    reply = (xGetPropertyReply) {
+    xGetPropertyReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .bytesAfter = n - (ind + len),
@@ -529,26 +524,15 @@ ProcGetProperty(ClientPtr client)
         .propertyType = pProp->type
     };
 
-    if (stuff->delete && (reply.bytesAfter == 0))
+    if (stuff->delete && (rep.bytesAfter == 0))
         deliverPropertyNotifyEvent(pWin, PropertyDelete, pProp);
 
-    WriteReplyToClient(client, sizeof(xGenericReply), &reply);
-    if (len) {
-        switch (reply.format) {
-        case 32:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
-            break;
-        case 16:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap16Write;
-            break;
-        default:
-            client->pSwapReplyFunc = (ReplySwapPtr) WriteToClient;
-            break;
-        }
-        WriteSwappedDataToClient(client, len, (char *) pProp->data + ind);
-    }
+    void *payload = calloc(1, len);
+    if (!payload)
+        return BadAlloc;
+    memcpy(payload, (char*)(pProp->data) + ind, len);
 
-    if (stuff->delete && (reply.bytesAfter == 0)) {
+    if (stuff->delete && (rep.bytesAfter == 0)) {
         /* Delete the Property */
         if (pWin->properties == pProp) {
             /* Takes care of head */
@@ -566,6 +550,22 @@ ProcGetProperty(ClientPtr client)
         free(pProp->data);
         dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
     }
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.propertyType);
+        swapl(&rep.bytesAfter);
+        swapl(&rep.nItems);
+        if (rep.format == 32)
+            SwapLongs(payload, len / 4);
+        else if (rep.format == 16)
+            SwapShorts(payload, len / 2);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, len, payload);
+    free(payload);
     return Success;
 }
 

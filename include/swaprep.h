@@ -44,10 +44,6 @@ extern void SGenericReply(ClientPtr /* pClient */ ,
                           int /* size */ ,
                           xGenericReply * /* pRep */ );
 
-extern void SGetPropertyReply(ClientPtr /* pClient */ ,
-                              int /* size */ ,
-                              xGetPropertyReply * /* pRep */ );
-
 extern void SListPropertiesReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListPropertiesReply * /* pRep */ );
