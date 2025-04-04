@@ -310,38 +310,6 @@ SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply * pRep)
     WriteToClient(pClient, size, pRep);
 }
 
-static void _X_COLD
-SwapRGB(xrgb * prgb)
-{
-    swaps(&prgb->red);
-    swaps(&prgb->green);
-    swaps(&prgb->blue);
-}
-
-void _X_COLD
-SQColorsExtend(ClientPtr pClient, int size, xrgb * prgb)
-{
-    int i, n;
-    xrgb *prgbT;
-
-    n = size / sizeof(xrgb);
-    prgbT = prgb;
-    for (i = 0; i < n; i++) {
-        SwapRGB(prgbT);
-        prgbT++;
-    }
-    WriteToClient(pClient, size, prgb);
-}
-
-void _X_COLD
-SQueryColorsReply(ClientPtr pClient, int size, xQueryColorsReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swaps(&pRep->nColors);
-    WriteToClient(pClient, size, pRep);
-}
-
 void _X_COLD
 SLookupColorReply(ClientPtr pClient, int size, xLookupColorReply * pRep)
 {

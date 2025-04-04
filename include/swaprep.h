@@ -68,14 +68,6 @@ extern void SGetFontPathReply(ClientPtr /* pClient */ ,
                               int /* size */ ,
                               xGetFontPathReply * /* pRep */ );
 
-extern void SQColorsExtend(ClientPtr /* pClient */ ,
-                           int /* size */ ,
-                           xrgb * /* prgb */ );
-
-extern void SQueryColorsReply(ClientPtr /* pClient */ ,
-                              int /* size */ ,
-                              xQueryColorsReply * /* pRep */ );
-
 extern void SLookupColorReply(ClientPtr /* pClient */ ,
                               int /* size */ ,
                               xLookupColorReply * /* pRep */ );

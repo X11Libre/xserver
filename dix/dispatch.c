@@ -2967,7 +2967,6 @@ ProcQueryColors(ClientPtr client)
     if (rc == Success) {
         int count;
         xrgb *prgbs;
-        xQueryColorsReply qcr;
 
         count =
             bytes_to_int32((client->req_len << 2) - sizeof(xQueryColorsReq));
@@ -2979,20 +2978,25 @@ ProcQueryColors(ClientPtr client)
             free(prgbs);
             return rc;
         }
-        qcr = (xQueryColorsReply) {
+
+        xQueryColorsReply rep = {
             .type = X_Reply,
             .sequenceNumber = client->sequence,
             .length = bytes_to_int32(count * sizeof(xrgb)),
             .nColors = count
         };
-        WriteReplyToClient(client, sizeof(xQueryColorsReply), &qcr);
-        if (count) {
-            client->pSwapReplyFunc = (ReplySwapPtr) SQColorsExtend;
-            WriteSwappedDataToClient(client, count * sizeof(xrgb), prgbs);
+
+        if (client->swapped) {
+            swaps(&rep.sequenceNumber);
+            swapl(&rep.length);
+            swaps(&rep.nColors);
+            SwapShorts((short*)prgbs, count * 4); // xrgb = 4 shorts
         }
+
+        WriteToClient(client, sizeof(rep), &rep);
+        WriteToClient(client, count * sizeof(xrgb), prgbs);
         free(prgbs);
         return Success;
-
     }
     else {
         client->errorValue = stuff->cmap;
