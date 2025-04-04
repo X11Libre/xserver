@@ -64,10 +64,6 @@ extern void SGetInputFocusReply(ClientPtr /* pClient */ ,
                                 int /* size */ ,
                                 xGetInputFocusReply * /* pRep */ );
 
-extern void SGetFontPathReply(ClientPtr /* pClient */ ,
-                              int /* size */ ,
-                              xGetFontPathReply * /* pRep */ );
-
 extern void SListExtensionsReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListExtensionsReply * /* pRep */ );

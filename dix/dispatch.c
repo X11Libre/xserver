@@ -3504,7 +3504,6 @@ ProcSetFontPath(ClientPtr client)
 int
 ProcGetFontPath(ClientPtr client)
 {
-    xGetFontPathReply reply;
     int rc, stringLens, numpaths;
     unsigned char *bufferStart;
 
@@ -3515,16 +3514,20 @@ ProcGetFontPath(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    reply = (xGetFontPathReply) {
+    xGetFontPathReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(stringLens + numpaths),
         .nPaths = numpaths
     };
 
-    WriteReplyToClient(client, sizeof(xGetFontPathReply), &reply);
-    if (stringLens || numpaths)
-        WriteToClient(client, stringLens + numpaths, bufferStart);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.nPaths);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, stringLens + numpaths, bufferStart);
     return Success;
 }
 

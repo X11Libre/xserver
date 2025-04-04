@@ -302,15 +302,6 @@ SwapFont(xQueryFontReply * pr, Bool hasGlyphs)
 }
 
 void _X_COLD
-SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swaps(&pRep->nPaths);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply * pRep)
 {
     swaps(&pRep->sequenceNumber);
