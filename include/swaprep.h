@@ -72,14 +72,6 @@ extern void SListExtensionsReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListExtensionsReply * /* pRep */ );
 
-extern void SLHostsExtend(ClientPtr /* pClient */ ,
-                          int /* size */ ,
-                          char * /* buf */ );
-
-extern void SListHostsReply(ClientPtr /* pClient */ ,
-                            int /* size */ ,
-                            xListHostsReply * /* pRep */ );
-
 extern void SErrorEvent(xError * /* from */ ,
                         xError * /* to */ );
 

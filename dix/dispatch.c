@@ -3364,7 +3364,6 @@ ProcChangeHosts(ClientPtr client)
 int
 ProcListHosts(ClientPtr client)
 {
-    xListHostsReply reply;
     int len, nHosts, result;
     BOOL enabled;
     void *pdata;
@@ -3382,18 +3381,33 @@ ProcListHosts(ClientPtr client)
     if (result != Success)
         return result;
 
-    reply = (xListHostsReply) {
+    xListHostsReply rep = {
         .type = X_Reply,
         .enabled = enabled,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(len),
         .nHosts = nHosts
     };
-    WriteReplyToClient(client, sizeof(xListHostsReply), &reply);
-    if (nHosts) {
-        client->pSwapReplyFunc = (ReplySwapPtr) SLHostsExtend;
-        WriteSwappedDataToClient(client, len, pdata);
+
+    if (client->swapped) {
+        char *bufT = pdata;
+        char *endbuf = bufT + len;
+
+        while (bufT < endbuf) {
+            xHostEntry *host = (xHostEntry *) bufT;
+            int l1 = host->length;
+            swaps(&host->length);
+            bufT += sizeof(xHostEntry) + pad_to_int32(l1);
+        }
+
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.nHosts);
     }
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteToClient(client, len, pdata);
+
     free(pdata);
     return Success;
 }

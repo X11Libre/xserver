@@ -319,31 +319,6 @@ SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply * pRep)
 }
 
 void _X_COLD
-SLHostsExtend(ClientPtr pClient, int size, char *buf)
-{
-    char *bufT = buf;
-    char *endbuf = buf + size;
-
-    while (bufT < endbuf) {
-        xHostEntry *host = (xHostEntry *) bufT;
-        int len = host->length;
-
-        swaps(&host->length);
-        bufT += sizeof(xHostEntry) + pad_to_int32(len);
-    }
-    WriteToClient(pClient, size, buf);
-}
-
-void _X_COLD
-SListHostsReply(ClientPtr pClient, int size, xListHostsReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swaps(&pRep->nHosts);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SErrorEvent(xError * from, xError * to)
 {
     to->type = X_Error;
