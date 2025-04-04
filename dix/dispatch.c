@@ -3314,7 +3314,6 @@ ProcSetScreenSaver(ClientPtr client)
 int
 ProcGetScreenSaver(ClientPtr client)
 {
-    xGetScreenSaverReply rep;
     int rc, i;
 
     REQUEST_SIZE_MATCH(xReq);
@@ -3326,7 +3325,7 @@ ProcGetScreenSaver(ClientPtr client)
             return rc;
     }
 
-    rep = (xGetScreenSaverReply) {
+    xGetScreenSaverReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
@@ -3335,7 +3334,13 @@ ProcGetScreenSaver(ClientPtr client)
         .preferBlanking = ScreenSaverBlanking,
         .allowExposures = ScreenSaverAllowExposures
     };
-    WriteReplyToClient(client, sizeof(xGetScreenSaverReply), &rep);
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swaps(&rep.timeout);
+        swaps(&rep.interval);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 

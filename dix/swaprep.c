@@ -319,15 +319,6 @@ SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply * pRep)
 }
 
 void _X_COLD
-SGetScreenSaverReply(ClientPtr pClient, int size, xGetScreenSaverReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swaps(&pRep->timeout);
-    swaps(&pRep->interval);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SLHostsExtend(ClientPtr pClient, int size, char *buf)
 {
     char *bufT = buf;

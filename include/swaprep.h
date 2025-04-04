@@ -72,10 +72,6 @@ extern void SListExtensionsReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListExtensionsReply * /* pRep */ );
 
-extern void SGetScreenSaverReply(ClientPtr /* pClient */ ,
-                                 int /* size */ ,
-                                 xGetScreenSaverReply * /* pRep */ );
-
 extern void SLHostsExtend(ClientPtr /* pClient */ ,
                           int /* size */ ,
                           char * /* buf */ );
