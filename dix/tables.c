@@ -753,7 +753,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,                             /* 35 */
     ReplyNotSwappd,
     ReplyNotSwappd,
-    (ReplySwapPtr) SQueryPointerReply,
+    ReplyNotSwappd,
     ReplyNotSwappd,
     ReplyNotSwappd,                             /* 40 */
     ReplyNotSwappd,

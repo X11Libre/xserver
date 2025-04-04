@@ -51,11 +51,6 @@ extern void SGetPropertyReply(ClientPtr /* pClient */ ,
 extern void SListPropertiesReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListPropertiesReply * /* pRep */ );
-
-extern void SQueryPointerReply(ClientPtr /* pClient */ ,
-                               int /* size */ ,
-                               xQueryPointerReply * /* pRep */ );
-
 extern void SwapTimeCoordWrite(ClientPtr /* pClient */ ,
                                int /* size */ ,
                                xTimecoord * /* pRep */ );

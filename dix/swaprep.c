@@ -201,20 +201,6 @@ SListPropertiesReply(ClientPtr pClient, int size, xListPropertiesReply * pRep)
     WriteToClient(pClient, size, pRep);
 }
 
-void _X_COLD
-SQueryPointerReply(ClientPtr pClient, int size, xQueryPointerReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->root);
-    swapl(&pRep->child);
-    swaps(&pRep->rootX);
-    swaps(&pRep->rootY);
-    swaps(&pRep->winX);
-    swaps(&pRep->winY);
-    swaps(&pRep->mask);
-    WriteToClient(pClient, size, pRep);
-}
-
 static void _X_COLD
 SwapTimecoord(xTimecoord * pCoord)
 {
