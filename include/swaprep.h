@@ -68,10 +68,6 @@ extern void SGetFontPathReply(ClientPtr /* pClient */ ,
                               int /* size */ ,
                               xGetFontPathReply * /* pRep */ );
 
-extern void SQueryBestSizeReply(ClientPtr /* pClient */ ,
-                                int /* size */ ,
-                                xQueryBestSizeReply * /* pRep */ );
-
 extern void SListExtensionsReply(ClientPtr /* pClient */ ,
                                  int /* size */ ,
                                  xListExtensionsReply * /* pRep */ );

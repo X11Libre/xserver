@@ -311,15 +311,6 @@ SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply * pRep)
 }
 
 void _X_COLD
-SQueryBestSizeReply(ClientPtr pClient, int size, xQueryBestSizeReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swaps(&pRep->width);
-    swaps(&pRep->height);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply * pRep)
 {
     swaps(&pRep->sequenceNumber);
