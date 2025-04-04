@@ -2772,16 +2772,22 @@ ProcAllocColorCells(ClientPtr client)
         if (noPanoramiXExtension || !pcmp->pScreen->myNum)
 #endif /* XINERAMA */
         {
-            xAllocColorCellsReply accr = {
+            xAllocColorCellsReply rep = {
                 .type = X_Reply,
                 .sequenceNumber = client->sequence,
                 .length = bytes_to_int32(length),
                 .nPixels = npixels,
                 .nMasks = nmasks
             };
-            WriteReplyToClient(client, sizeof(xAllocColorCellsReply), &accr);
-            client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-            WriteSwappedDataToClient(client, length, ppixels);
+            if (client->swapped) {
+                swaps(&rep.sequenceNumber);
+                swapl(&rep.length);
+                swaps(&rep.nPixels);
+                swaps(&rep.nMasks);
+                SwapLongs(ppixels, length / 4);
+            }
+            WriteToClient(client, sizeof(rep), &rep);
+            WriteToClient(client, length, ppixels);
         }
         free(ppixels);
         return Success;

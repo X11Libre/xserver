@@ -311,16 +311,6 @@ SGetFontPathReply(ClientPtr pClient, int size, xGetFontPathReply * pRep)
 }
 
 void _X_COLD
-SAllocColorCellsReply(ClientPtr pClient, int size, xAllocColorCellsReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    swaps(&pRep->nPixels);
-    swaps(&pRep->nMasks);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SAllocColorPlanesReply(ClientPtr pClient, int size,
                        xAllocColorPlanesReply * pRep)
 {

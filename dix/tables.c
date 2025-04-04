@@ -801,7 +801,7 @@ ReplySwapPtr ReplySwapVector[256] = {
     ReplyNotSwappd,
     ReplyNotSwappd,
     ReplyNotSwappd,                             /* 85 */
-    (ReplySwapPtr) SAllocColorCellsReply,
+    ReplyNotSwappd,
     (ReplySwapPtr) SAllocColorPlanesReply,
     ReplyNotSwappd,
     ReplyNotSwappd,
