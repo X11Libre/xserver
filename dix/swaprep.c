@@ -280,14 +280,6 @@ SwapFont(xQueryFontReply * pr, Bool hasGlyphs)
 }
 
 void _X_COLD
-SListExtensionsReply(ClientPtr pClient, int size, xListExtensionsReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    swapl(&pRep->length);
-    WriteToClient(pClient, size, pRep);
-}
-
-void _X_COLD
 SErrorEvent(xError * from, xError * to)
 {
     to->type = X_Error;

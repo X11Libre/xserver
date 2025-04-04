@@ -55,10 +55,6 @@ extern void SwapTimeCoordWrite(ClientPtr /* pClient */ ,
                                int /* size */ ,
                                xTimecoord * /* pRep */ );
 
-extern void SListExtensionsReply(ClientPtr /* pClient */ ,
-                                 int /* size */ ,
-                                 xListExtensionsReply * /* pRep */ );
-
 extern void SErrorEvent(xError * /* from */ ,
                         xError * /* to */ );
 
