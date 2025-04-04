@@ -2810,7 +2810,6 @@ ProcAllocColorPlanes(ClientPtr client)
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixAddAccess);
     if (rc == Success) {
-        xAllocColorPlanesReply acpr;
         int npixels;
         long length;
 
@@ -2823,7 +2822,8 @@ ProcAllocColorPlanes(ClientPtr client)
             client->errorValue = stuff->contiguous;
             return BadValue;
         }
-        acpr = (xAllocColorPlanesReply) {
+
+        xAllocColorPlanesReply rep = {
             .type = X_Reply,
             .sequenceNumber = client->sequence,
             .nPixels = npixels
@@ -2836,19 +2836,29 @@ ProcAllocColorPlanes(ClientPtr client)
         if ((rc = AllocColorPlanes(client->index, pcmp, npixels,
                                    (int) stuff->red, (int) stuff->green,
                                    (int) stuff->blue, (Bool) stuff->contiguous,
-                                   ppixels, &acpr.redMask, &acpr.greenMask,
-                                   &acpr.blueMask))) {
+                                   ppixels, &rep.redMask, &rep.greenMask,
+                                   &rep.blueMask))) {
             free(ppixels);
             return rc;
         }
-        acpr.length = bytes_to_int32(length);
+        rep.length = bytes_to_int32(length);
+
+        if (client->swapped) {
+            SwapLongs(ppixels, rep.length);
+            swaps(&rep.sequenceNumber);
+            swapl(&rep.length);
+            swaps(&rep.nPixels);
+            swapl(&rep.redMask);
+            swapl(&rep.greenMask);
+            swapl(&rep.blueMask);
+        }
+
 #ifdef XINERAMA
         if (noPanoramiXExtension || !pcmp->pScreen->myNum)
 #endif /* XINERAMA */
         {
-            WriteReplyToClient(client, sizeof(xAllocColorPlanesReply), &acpr);
-            client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-            WriteSwappedDataToClient(client, length, ppixels);
+            WriteToClient(client, sizeof(rep), &rep);
+            WriteToClient(client, length, ppixels);
         }
         free(ppixels);
         return Success;
