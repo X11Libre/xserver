@@ -2620,13 +2620,11 @@ ProcListInstalledColormaps(ClientPtr client)
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.nColormaps);
+        SwapLongs(cm, nummaps * sizeof(Colormap) / 4);
     }
 
     WriteToClient(client, sizeof(rep), &rep);
-    if (client->swapped)
-        Swap32Write(client, nummaps * sizeof(Colormap), cm);
-    else
-        WriteToClient(client, nummaps * sizeof(Colormap), cm);
+    WriteToClient(client, nummaps * sizeof(Colormap), cm);
     free(cm);
     return Success;
 }
