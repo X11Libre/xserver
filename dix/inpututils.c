@@ -690,19 +690,6 @@ valuator_mask_fetch_unaccelerated(const ValuatorMask *mask,
         return FALSE;
 }
 
-int
-CountBits(const uint8_t * mask, int len)
-{
-    int i;
-    int ret = 0;
-
-    for (i = 0; i < len; i++)
-        if (BitIsOn(mask, i))
-            ret++;
-
-    return ret;
-}
-
 /**
  * Verifies sanity of the event. If the event is not an internal event,
  * memdumps the first 32 bytes of event to the log, a backtrace, then kill
