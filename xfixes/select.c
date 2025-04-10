@@ -142,7 +142,7 @@ XFixesSelectSelectionInput(ClientPtr pClient,
         return Success;
     }
     if (!e) {
-        e = (SelectionEventPtr) malloc(sizeof(SelectionEventRec));
+        e = calloc(1, sizeof(SelectionEventRec));
         if (!e)
             return BadAlloc;
 
