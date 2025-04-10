@@ -525,7 +525,6 @@ hostx_init(void)
     uint32_t pixel;
     int index;
     char *tmpstr;
-    char *class_hint;
     size_t class_len;
     xcb_screen_t *xscreen;
     xcb_rectangle_t rect = { 0, 0, 1, 1 };
@@ -650,7 +649,7 @@ hostx_init(void)
             if (tmpstr && (!ephyrResNameFromCmd))
                 ephyrResName = tmpstr;
             class_len = strlen(ephyrResName) + 1 + strlen("Xephyr") + 1;
-            class_hint = malloc(class_len);
+            char *class_hint = calloc(1, class_len);
             if (class_hint) {
                 strcpy(class_hint, ephyrResName);
                 strcpy(class_hint + strlen(ephyrResName) + 1, "Xephyr");

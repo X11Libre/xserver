@@ -76,9 +76,7 @@ ephyrInitialize(KdCardInfo * card, EphyrPriv * priv)
 Bool
 ephyrCardInit(KdCardInfo * card)
 {
-    EphyrPriv *priv;
-
-    priv = (EphyrPriv *) malloc(sizeof(EphyrPriv));
+    EphyrPriv *priv = calloc(1, sizeof(EphyrPriv));
     if (!priv)
         return FALSE;
 
