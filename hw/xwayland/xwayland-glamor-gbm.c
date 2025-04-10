@@ -166,7 +166,6 @@ xwl_glamor_gbm_create_pixmap_for_bo(ScreenPtr screen, struct gbm_bo *bo,
                                     Bool implicit_modifier)
 {
     PixmapPtr pixmap;
-    struct xwl_pixmap *xwl_pixmap;
     struct xwl_screen *xwl_screen = xwl_screen_get(screen);
 #ifdef GBM_BO_FD_FOR_PLANE
     struct xwl_gbm_private *xwl_gbm = xwl_gbm_get(xwl_screen);
@@ -218,7 +217,7 @@ xwl_glamor_gbm_create_pixmap_for_bo(ScreenPtr screen, struct gbm_bo *bo,
     for (plane = 0; plane < num_planes; plane++) fds[plane] = -1;
 #endif
 
-    xwl_pixmap = calloc(1, sizeof(*xwl_pixmap));
+    struct xwl_pixmap *xwl_pixmap = calloc(1, sizeof(struct xwl_pixmap));
     if (xwl_pixmap == NULL)
         return NULL;
 
@@ -717,7 +716,6 @@ xwl_dri3_open_client(ClientPtr client,
 {
     struct xwl_screen *xwl_screen = xwl_screen_get(screen);
     struct xwl_gbm_private *xwl_gbm = xwl_gbm_get(xwl_screen);
-    struct xwl_auth_state *state;
     drm_magic_t magic;
     int fd;
 
@@ -729,7 +727,7 @@ xwl_dri3_open_client(ClientPtr client,
         return Success;
     }
 
-    state = malloc(sizeof *state);
+    struct xwl_auth_state *state = calloc(1, sizeof(struct xwl_auth_state));
     if (state == NULL) {
         close(fd);
         return BadAlloc;

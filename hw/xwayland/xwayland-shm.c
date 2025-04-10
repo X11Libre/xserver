@@ -129,7 +129,6 @@ os_create_anonymous_file(off_t size)
 {
     static const char template[] = "/xwayland-shared-XXXXXX";
     const char *path;
-    char *name;
     int fd;
     int ret;
 
@@ -152,7 +151,7 @@ os_create_anonymous_file(off_t size)
             return -1;
         }
 
-        name = malloc(strlen(path) + sizeof(template));
+        char *name = calloc(1, strlen(path) + sizeof(template));
         if (!name)
             return -1;
 
