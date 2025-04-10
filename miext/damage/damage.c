@@ -1638,7 +1638,6 @@ miDamageDestroy(DamagePtr pDamage)
 Bool
 DamageSetup(ScreenPtr pScreen)
 {
-    DamageScrPrivPtr pScrPriv;
     PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
 
     const DamageScreenFuncsRec miFuncs = {
@@ -1661,7 +1660,7 @@ DamageSetup(ScreenPtr pScreen)
     if (!dixRegisterPrivateKey(&damageWinPrivateKeyRec, PRIVATE_WINDOW, 0))
         return FALSE;
 
-    pScrPriv = malloc(sizeof(DamageScrPrivRec));
+    DamageScrPrivPtr pScrPriv = calloc(1, sizeof(DamageScrPrivRec));
     if (!pScrPriv)
         return FALSE;
 

@@ -363,7 +363,6 @@ static RootlessWindowRec *
 RootlessEnsureFrame(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
-    RootlessWindowRec *winRec;
     RegionRec shape;
     RegionPtr pShape = NULL;
 
@@ -376,8 +375,7 @@ RootlessEnsureFrame(WindowPtr pWin)
     if (pWin->drawable.class != InputOutput)
         return NULL;
 
-    winRec = malloc(sizeof(RootlessWindowRec));
-
+    RootlessWindowRec *winRec = calloc(1, sizeof(RootlessWindowRec));
     if (!winRec)
         return NULL;
 

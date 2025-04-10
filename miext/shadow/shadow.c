@@ -111,7 +111,6 @@ static void shadowCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *un
 Bool
 shadowSetup(ScreenPtr pScreen)
 {
-    shadowBufPtr pBuf;
 
     if (!dixRegisterPrivateKey(&shadowScrPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
@@ -119,7 +118,7 @@ shadowSetup(ScreenPtr pScreen)
     if (!DamageSetup(pScreen))
         return FALSE;
 
-    pBuf = malloc(sizeof(shadowBufRec));
+    shadowBufPtr pBuf = calloc(1, sizeof(shadowBufRec));
     if (!pBuf)
         return FALSE;
     pBuf->pDamage = DamageCreate((DamageReportFunc) NULL,
