@@ -505,8 +505,6 @@ VBEGetVBEMode(vbeInfoPtr pVbe, int *mode)
 VbeModeInfoBlock *
 VBEGetModeInfo(vbeInfoPtr pVbe, int mode)
 {
-    VbeModeInfoBlock *block = NULL;
-
     memset(pVbe->memory, 0, sizeof(VbeModeInfoBlock));
 
     /*
@@ -530,7 +528,7 @@ VBEGetModeInfo(vbeInfoPtr pVbe, int mode)
     if (R16(pVbe->pInt10->ax) != 0x4f)
         return NULL;
 
-    block = malloc(sizeof(VbeModeInfoBlock));
+    VbeModeInfoBlock *block = calloc(1, sizeof(VbeModeInfoBlock));
     if (block)
         memcpy(block, pVbe->memory, sizeof(*block));
 

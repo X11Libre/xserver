@@ -649,7 +649,7 @@ xf86_cursors_init(ScreenPtr screen, int max_width, int max_height, int flags)
     if (!cursor_info)
         return FALSE;
 
-    xf86_config->cursor_image = malloc(max_width * max_height * 4);
+    xf86_config->cursor_image = calloc(max_width * max_height, 4);
 
     if (!xf86_config->cursor_image) {
         xf86DestroyCursorInfoRec(cursor_info);

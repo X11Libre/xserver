@@ -93,7 +93,7 @@ find_header(unsigned char *block)
 static unsigned char *
 resort(unsigned char *s_block)
 {
-    unsigned char *d_new, *d_ptr, *d_end, *s_ptr, *s_end;
+    unsigned char *d_ptr, *d_end, *s_ptr, *s_end;
     unsigned char tmp;
 
     s_ptr = find_header(s_block);
@@ -101,7 +101,7 @@ resort(unsigned char *s_block)
         return NULL;
     s_end = s_block + EDID1_LEN;
 
-    d_new = malloc(EDID1_LEN);
+    unsigned char *d_new = calloc(1, EDID1_LEN);
     if (!d_new)
         return NULL;
     d_end = d_new + EDID1_LEN;
@@ -189,7 +189,7 @@ FetchEDID_DDC1(register ScrnInfoPtr pScrn,
     int count = NUM;
     unsigned int *ptr, *xp;
 
-    ptr = xp = malloc(sizeof(int) * NUM);
+    ptr = xp = calloc(NUM, sizeof(int));
 
     if (!ptr)
         return NULL;
@@ -416,9 +416,7 @@ xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool complete)
 
     /* Default DDC and DDC2 to enabled. */
     Bool noddc = FALSE, noddc2 = FALSE;
-    OptionInfoPtr options;
-
-    options = malloc(sizeof(DDCOptions));
+    OptionInfoPtr options = calloc(1, sizeof(DDCOptions));
     if (!options)
         return NULL;
     memcpy(options, DDCOptions, sizeof(DDCOptions));

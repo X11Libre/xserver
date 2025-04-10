@@ -247,7 +247,7 @@ xf86XVScreenInit(ScreenPtr pScreen, XF86VideoAdaptorPtr * adaptors, int num)
 
     PortResource = XvGetRTPort();
 
-    ScreenPriv = malloc(sizeof(XF86XVScreenRec));
+    ScreenPriv = calloc(1, sizeof(XF86XVScreenRec));
     dixSetPrivate(&pScreen->devPrivates, &XF86XVScreenPrivateKey, ScreenPriv);
 
     if (!ScreenPriv)

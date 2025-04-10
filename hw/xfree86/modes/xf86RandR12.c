@@ -847,7 +847,6 @@ Bool
 xf86RandR12Init(ScreenPtr pScreen)
 {
     rrScrPrivPtr rp;
-    XF86RandRInfoPtr randrp;
 
 #ifdef XINERAMA
     /* XXX disable RandR when using Xinerama */
@@ -865,7 +864,7 @@ xf86RandR12Init(ScreenPtr pScreen)
     if (!dixRegisterPrivateKey(&xf86RandR12KeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
 
-    randrp = malloc(sizeof(XF86RandRInfoRec));
+    XF86RandRInfoPtr randrp = calloc(1, sizeof(XF86RandRInfoRec));
     if (!randrp)
         return FALSE;
 

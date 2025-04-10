@@ -482,7 +482,7 @@ AddEdge(xf86EdgePtr edge,
         }
 
         if (!pEdge) {
-            if (!(pNew = malloc(sizeof(xf86EdgeRec))))
+            if (!(pNew = calloc(1, sizeof(xf86EdgeRec))))
                 break;
 
             pNew->screen = screen;
@@ -500,7 +500,7 @@ AddEdge(xf86EdgePtr edge,
             break;
         }
         else if (min < pEdge->start) {
-            if (!(pNew = malloc(sizeof(xf86EdgeRec))))
+            if (!(pNew = calloc(1, sizeof(xf86EdgeRec))))
                 break;
 
             pNew->screen = screen;

@@ -184,7 +184,7 @@ xf86VGAarbiterWrapFunctions(void)
         if (!dixRegisterPrivateKey(&VGAarbiterScreenKeyRec, PRIVATE_SCREEN, 0))
             return FALSE;
 
-        if (!(pScreenPriv = malloc(sizeof(VGAarbiterScreenRec))))
+        if (!(pScreenPriv = calloc(1, sizeof(VGAarbiterScreenRec))))
             return FALSE;
 
         dixSetPrivate(&pScreen->devPrivates, VGAarbiterScreenKey, pScreenPriv);

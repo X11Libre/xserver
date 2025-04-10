@@ -1328,7 +1328,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
 
     /* Process the options */
     xf86CollectOptions(pScrn, NULL);
-    if (!(ms->drmmode.Options = malloc(sizeof(Options))))
+    if (!(ms->drmmode.Options = calloc(1, sizeof(Options))))
         return FALSE;
     memcpy(ms->drmmode.Options, Options, sizeof(Options));
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, ms->drmmode.Options);

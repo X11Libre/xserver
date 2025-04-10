@@ -88,7 +88,6 @@ struct ms_dri2_resource {
 static struct ms_dri2_resource *
 ms_get_resource(XID id, RESTYPE type)
 {
-    struct ms_dri2_resource *resource;
     void *ptr;
 
     ptr = NULL;
@@ -96,7 +95,7 @@ ms_get_resource(XID id, RESTYPE type)
     if (ptr)
         return ptr;
 
-    resource = malloc(sizeof(*resource));
+    struct ms_dri2_resource *resource = calloc(1, sizeof(*resource));
     if (resource == NULL)
         return NULL;
 

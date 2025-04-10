@@ -236,12 +236,11 @@ static DRI2DrawablePtr
 DRI2AllocateDrawable(DrawablePtr pDraw)
 {
     DRI2ScreenPtr ds = DRI2GetScreen(pDraw->pScreen);
-    DRI2DrawablePtr pPriv;
     CARD64 ust;
     WindowPtr pWin;
     PixmapPtr pPixmap;
 
-    pPriv = malloc(sizeof *pPriv);
+    DRI2DrawablePtr pPriv = calloc(1, sizeof *pPriv);
     if (pPriv == NULL)
         return NULL;
 
@@ -328,9 +327,7 @@ static int
 DRI2AddDrawableRef(DRI2DrawablePtr pPriv, XID id, XID dri2_id,
                    DRI2InvalidateProcPtr invalidate, void *priv)
 {
-    DRI2DrawableRefPtr ref;
-
-    ref = malloc(sizeof *ref);
+    DRI2DrawableRefPtr ref = calloc(1, sizeof *ref);
     if (ref == NULL)
         return BadAlloc;
 

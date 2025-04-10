@@ -142,7 +142,7 @@ InitPathList(const char *path)
                 free(fullpath);
                 return NULL;
             }
-            list[n] = malloc(len + 1);
+            list[n] = calloc(1, len + 1);
             if (!list[n]) {
                 FreeStringList(list);
                 free(fullpath);
@@ -398,7 +398,7 @@ LoaderListDir(const char *subdir, const char **patternlist)
                             closedir(d);
                             goto bail;
                         }
-                        listing[n] = malloc(len + 1);
+                        listing[n] = calloc(1, len + 1);
                         if (!listing[n]) {
                             FreeStringList(listing);
                             closedir(d);
@@ -725,7 +725,7 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
 
     pathlist = defaultPathList;
     if (!pathlist) {
-        /* This could be a malloc failure too */
+        /* This could be a calloc failure too */
         if (errmaj)
             *errmaj = LDR_BADUSAGE;
         goto LoadModule_fail;
@@ -964,7 +964,6 @@ LoaderErrorMsg(const char *name, const char *modname, int errmaj, int errmin)
 static char *
 LoaderGetCanonicalName(const char *modname, PatternPtr patterns)
 {
-    char *str;
     const char *s;
     int len;
     PatternPtr p;
@@ -981,7 +980,7 @@ LoaderGetCanonicalName(const char *modname, PatternPtr patterns)
     for (p = patterns; p->pattern; p++)
         if (regexec(&p->rex, s, 2, match, 0) == 0 && match[1].rm_so != -1) {
             len = match[1].rm_eo - match[1].rm_so;
-            str = malloc(len + 1);
+            char *str = calloc(1, len + 1);
             if (!str)
                 return NULL;
             strncpy(str, s + match[1].rm_so, len);

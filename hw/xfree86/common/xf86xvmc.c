@@ -166,7 +166,7 @@ xf86XvMCScreenInit(ScreenPtr pScreen,
         return FALSE;
     }
 
-    if (!(pScreenPriv = malloc(sizeof(xf86XvMCScreenRec)))) {
+    if (!(pScreenPriv = calloc(1, sizeof(xf86XvMCScreenRec)))) {
         free(pAdapt);
         return FALSE;
     }

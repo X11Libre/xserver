@@ -410,7 +410,7 @@ drmmode_prop_info_copy(drmmode_prop_info_ptr dst,
             continue;
 
         dst[i].enum_values =
-            malloc(src[i].num_enum_values *
+            calloc(src[i].num_enum_values,
                     sizeof(*dst[i].enum_values));
         if (!dst[i].enum_values)
             goto err;
@@ -4121,7 +4121,7 @@ drmmode_crtc_upgrade_lut(xf86CrtcPtr crtc, int num)
 
     if (size != crtc->gamma_size) {
         ScrnInfoPtr pScrn = crtc->scrn;
-        uint16_t *gamma = malloc(3 * size * sizeof(uint16_t));
+        uint16_t *gamma = calloc(3 * size, sizeof(uint16_t));
 
         if (gamma) {
             free(crtc->gamma_red);

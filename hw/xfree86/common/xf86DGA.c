@@ -145,7 +145,7 @@ DGAInit(ScreenPtr pScreen, DGAFunctionPtr funcs, DGAModePtr modes, int num)
     pScreenPriv = DGA_GET_SCREEN_PRIV(pScreen);
 
     if (!pScreenPriv) {
-        if (!(pScreenPriv = (DGAScreenPtr) malloc(sizeof(DGAScreenRec))))
+        if (!(pScreenPriv = calloc(1, sizeof(DGAScreenRec))))
             return FALSE;
         dixSetPrivate(&pScreen->devPrivates, &DGAScreenKeyRec, pScreenPriv);
         dixScreenHookClose(pScreen, DGACloseScreen);
@@ -399,7 +399,7 @@ xf86SetDGAMode(ScrnInfoPtr pScrn, int num, DGADevicePtr devRet)
     else
         return BadValue;
 
-    if (!(device = (DGADevicePtr) malloc(sizeof(DGADeviceRec))))
+    if (!(device = calloc(1, sizeof(DGADeviceRec))))
         return BadAlloc;
 
     if (!pScreenPriv->current) {
@@ -663,7 +663,7 @@ DGACreateColormap(int index, ClientPtr client, int id, int mode, int alloc)
 
     pMode = &(pScreenPriv->modes[mode - 1]);
 
-    if (!(pVisual = malloc(sizeof(VisualRec))))
+    if (!(pVisual = calloc(1, sizeof(VisualRec))))
         return BadAlloc;
 
     pVisual->vid = FakeClientID(0);
@@ -697,7 +697,7 @@ DGACreateColormap(int index, ClientPtr client, int id, int mode, int alloc)
         pVisual->offsetBlue = BitsClear(pVisual->blueMask);
     }
 
-    if (!(fvlp = malloc(sizeof(FakedVisualList)))) {
+    if (!(fvlp = calloc(1, sizeof(FakedVisualList)))) {
         free(pVisual);
         return BadAlloc;
     }
@@ -1681,7 +1681,7 @@ ProcXDGASetClientVersion(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGASetClientVersionReq);
     if ((pPriv = DGA_GETPRIV(client)) == NULL) {
-        pPriv = malloc(sizeof(DGAPrivRec));
+        pPriv = calloc(1, sizeof(DGAPrivRec));
         /* XXX Need to look into freeing this */
         if (!pPriv)
             return BadAlloc;

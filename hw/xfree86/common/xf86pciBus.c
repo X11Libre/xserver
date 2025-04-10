@@ -1358,7 +1358,7 @@ xf86MatchDriverFromFiles(uint16_t match_vendor, uint16_t match_chip,
                     }
                     if (vendor == match_vendor && chip == match_chip) {
                         tmpMatch =
-                            (char *) malloc(sizeof(char) *
+                            (char *) calloc(1, sizeof(char) *
                                             strlen(direntry->d_name) - 3);
                         if (!tmpMatch) {
                             LogMessageVerb(X_ERROR, 1,

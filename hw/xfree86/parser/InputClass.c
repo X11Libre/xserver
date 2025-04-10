@@ -155,9 +155,7 @@ enum MatchType {
 static void
 add_group_entry(struct xorg_list *head, char **values, enum MatchType type)
 {
-    xf86MatchGroup *group;
-
-    group = malloc(sizeof(*group));
+    xf86MatchGroup *group = calloc(1, sizeof(xf86MatchGroup));
     if (group) {
         group->is_negated = (type == MATCH_NEGATED);
         group->values = values;

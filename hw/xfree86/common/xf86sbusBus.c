@@ -86,7 +86,7 @@ xf86SbusProbe(void)
     char fbDevName[32];
     sbusDevicePtr psdp, *psdpp;
 
-    xf86SbusInfo = malloc(sizeof(psdp));
+    xf86SbusInfo = calloc(1, sizeof(psdp));
     *xf86SbusInfo = NULL;
     for (i = 0; i < 32; i++) {
         snprintf(fbDevName, sizeof(fbDevName), "/dev/fb%d", i);

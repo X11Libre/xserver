@@ -207,7 +207,7 @@ xf86HandleInt10Options(ScrnInfoPtr pScrn, int entityIndex)
             configOptions = pEnt->device->options;
 
         if (configOptions) {
-            if (!(options = (OptionInfoPtr) malloc(sizeof(INT10Options))))
+            if (!(options = (OptionInfoPtr) calloc(1, sizeof(INT10Options))))
                 return NULL;
 
             (void) memcpy(options, INT10Options, sizeof(INT10Options));

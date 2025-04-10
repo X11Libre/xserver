@@ -81,9 +81,7 @@ xf86freeOutputClassList(XF86ConfOutputClassPtr ptr)
 static void
 add_group_entry(struct xorg_list *head, char **values)
 {
-    xf86MatchGroup *group;
-
-    group = malloc(sizeof(*group));
+    xf86MatchGroup *group = calloc(1, sizeof(xf86MatchGroup));
     if (group) {
         group->values = values;
         xorg_list_add(&group->entry, head);

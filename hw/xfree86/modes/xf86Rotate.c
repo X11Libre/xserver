@@ -457,7 +457,7 @@ xf86CrtcRotate(xf86CrtcPtr crtc)
 #ifdef RANDR_12_INTERFACE
         if (transform) {
             if (transform->nparams) {
-                new_params = malloc(transform->nparams * sizeof(xFixed));
+                new_params = calloc(transform->nparams, sizeof(xFixed));
                 if (new_params) {
                     memcpy(new_params, transform->params,
                            transform->nparams * sizeof(xFixed));

@@ -324,16 +324,14 @@ listPossibleVideoDrivers(XF86MatchedDrivers *md)
 static Bool
 copyScreen(confScreenPtr oscreen, GDevPtr odev, int i, char *driver)
 {
-    confScreenPtr nscreen;
-    GDevPtr cptr = NULL;
     char *identifier;
 
-    nscreen = malloc(sizeof(confScreenRec));
+    confScreenPtr nscreen = calloc(1, sizeof(confScreenRec));
     if (!nscreen)
         return FALSE;
     memcpy(nscreen, oscreen, sizeof(confScreenRec));
 
-    cptr = malloc(sizeof(GDevRec));
+    GDevPtr cptr = calloc(1, sizeof(GDevRec));
     if (!cptr) {
         free(nscreen);
         return FALSE;

@@ -205,7 +205,7 @@ sparcPromInit(void)
     promFd = open("/dev/openprom", O_RDONLY, 0);
     if (promFd == -1)
         return -1;
-    promOpio = (struct openpromio *) malloc(4096);
+    promOpio = (struct openpromio *) calloc(1, 4096);
     if (!promOpio) {
         sparcPromClose();
         return -1;
@@ -526,11 +526,9 @@ promWalkNode2Pathname(char *path, int parent, int node, int searchNode,
 char *
 sparcPromNode2Pathname(sbusPromNodePtr pnode)
 {
-    char *ret;
-
     if (!pnode->node)
         return NULL;
-    ret = malloc(4096);
+    char *ret = calloc(1, 4096);
     if (!ret)
         return NULL;
     if (promWalkNode2Pathname
@@ -600,10 +598,10 @@ int
 sparcPromPathname2Node(const char *pathName)
 {
     int i;
-    char *name, *regstr, *p;
+    char *regstr, *p;
 
     i = strlen(pathName);
-    name = malloc(i + 2);
+    char *name = calloc(1, i + 2);
     if (!name)
         return 0;
     strcpy(name, pathName);

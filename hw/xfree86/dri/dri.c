@@ -1334,7 +1334,7 @@ DRICreateDrawable(ScreenPtr pScreen, ClientPtr client, DrawablePtr pDrawable,
         }
         else {
             /* allocate a DRI Window Private record */
-            if (!(pDRIDrawablePriv = malloc(sizeof(DRIDrawablePrivRec)))) {
+            if (!(pDRIDrawablePriv = calloc(1, sizeof(DRIDrawablePrivRec)))) {
                 return FALSE;
             }
 

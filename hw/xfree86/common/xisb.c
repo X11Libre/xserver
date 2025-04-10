@@ -64,12 +64,10 @@
 XISBuffer *
 XisbNew(int fd, ssize_t size)
 {
-    XISBuffer *b;
-
-    b = malloc(sizeof(XISBuffer));
+    XISBuffer *b = calloc(1, sizeof(XISBuffer));
     if (!b)
         return NULL;
-    b->buf = malloc((sizeof(unsigned char) * size));
+    b->buf = calloc(sizeof(unsigned char), size);
     if (!b->buf) {
         free(b);
         return NULL;

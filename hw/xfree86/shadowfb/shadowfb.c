@@ -60,7 +60,7 @@ ShadowFBInit2(ScreenPtr pScreen,
     if (!dixRegisterPrivateKey(&ShadowScreenKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
 
-    if (!(pPriv = (ShadowScreenPtr) malloc(sizeof(ShadowScreenRec))))
+    if (!(pPriv = (ShadowScreenPtr) calloc(1, sizeof(ShadowScreenRec))))
         return FALSE;
 
     dixSetPrivate(&pScreen->devPrivates, &ShadowScreenKeyRec, pPriv);
