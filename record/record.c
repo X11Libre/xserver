@@ -116,7 +116,7 @@ typedef struct _RecordClientsAndProtocolRec {
     short sizeClients;          /* size of pClientIDs array */
     unsigned int clientStarted:1;       /* record new client connections? */
     unsigned int clientDied:1;  /* record client disconnections? */
-    unsigned int clientIDsSeparatelyAllocated:1;        /* pClientIDs malloced? */
+    unsigned int clientIDsSeparatelyAllocated:1;        /* pClientIDs calloced? */
 } RecordClientsAndProtocolRec, *RecordClientsAndProtocolPtr;
 
 /* how much bigger to make pRCAP->pClientIDs when reallocing */
@@ -870,8 +870,7 @@ RecordInstallHooks(RecordClientsAndProtocolPtr pRCAP, XID oneclient)
                     RecordClientPrivatePtr pClientPriv;
 
                     /* no Record proc vector; allocate one */
-                    pClientPriv = (RecordClientPrivatePtr)
-                        malloc(sizeof(RecordClientPrivateRec));
+                    pClientPriv = calloc(1, sizeof(RecordClientPrivateRec));
                     if (!pClientPriv)
                         return BadAlloc;
                     /* copy old proc vector to new */
@@ -1189,7 +1188,7 @@ RecordSanityCheckClientSpecifiers(ClientPtr client, XID *clientspecs,
  *	  - XRecordCurrentClients expanded to a list of all currently
  *	    connected clients - excludespec (if non-zero)
  *	The returned array may be the passed array modified in place, or
- *	it may be an malloc'ed array.  The caller should keep a pointer to the
+ *	it may be an calloc'ed array.  The caller should keep a pointer to the
  *	original array and free the returned array if it is different.
  *
  *	*pNumClientspecs is set to the number of elements in the returned
@@ -1546,7 +1545,6 @@ RecordRegisterClients(RecordContextPtr pContext, ClientPtr client,
     int nClients;
     int sizeClients;
     int totRCAPsize;
-    RecordClientsAndProtocolPtr pRCAP;
     int pad;
     XID recordingClient;
 
@@ -1684,7 +1682,7 @@ RecordRegisterClients(RecordContextPtr pContext, ClientPtr client,
 
     /* allocate memory for the whole RCAP */
 
-    pRCAP = (RecordClientsAndProtocolPtr) malloc(totRCAPsize);
+    RecordClientsAndProtocolPtr pRCAP = calloc(1, totRCAPsize);
     if (!pRCAP) {
         err = BadAlloc;
         goto bailout;
@@ -1837,14 +1835,13 @@ static int
 ProcRecordCreateContext(ClientPtr client)
 {
     REQUEST(xRecordCreateContextReq);
-    RecordContextPtr pContext;
     RecordContextPtr *ppNewAllContexts = NULL;
     int err = BadAlloc;
 
     REQUEST_AT_LEAST_SIZE(xRecordCreateContextReq);
     LEGAL_NEW_RESOURCE(stuff->context, client);
 
-    pContext = (RecordContextPtr) malloc(sizeof(RecordContextRec));
+    RecordContextPtr pContext = calloc(1, sizeof(RecordContextRec));
     if (!pContext)
         goto bailout;
 
@@ -2636,7 +2633,7 @@ RecordConnectionSetupInfo(RecordContextPtr pContext, NewClientInfoRec * pci)
     int restsize = pci->prefix->length * 4;
 
     if (pci->client->swapped) {
-        char *pConnSetup = (char *) malloc(prefixsize + restsize);
+        char *pConnSetup = calloc(1, prefixsize + restsize);
 
         if (!pConnSetup)
             return;

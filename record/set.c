@@ -355,7 +355,7 @@ IntervalListCreateSet(RecordSetInterval * pIntervals, int nIntervals,
     }
     else {
         prls = (IntervalListSetPtr)
-            malloc(sizeof(IntervalListSet) +
+            calloc(1, sizeof(IntervalListSet) +
                    nIntervals * sizeof(RecordSetInterval));
         if (!prls)
             goto bailout;
