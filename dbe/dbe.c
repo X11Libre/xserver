@@ -1305,7 +1305,7 @@ DbeExtensionInit(void)
 
         pScreen = screenInfo.screens[i];
 
-        if (!(pDbeScreenPriv = malloc(sizeof(DbeScreenPrivRec)))) {
+        if (!(pDbeScreenPriv = calloc(1, sizeof(DbeScreenPrivRec)))) {
             /* If we can not alloc a window or screen private,
              * then free any privates that we already alloc'ed and return
              */
