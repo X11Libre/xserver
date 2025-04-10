@@ -167,10 +167,10 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
     visuals = xallocarray(xnestNumVisuals, sizeof(VisualRec));
     numVisuals = 0;
 
-    depths = (DepthPtr) malloc(MAXDEPTH * sizeof(DepthRec));
+    depths = calloc(MAXDEPTH, sizeof(DepthRec));
     depths[0].depth = 1;
     depths[0].numVids = 0;
-    depths[0].vids = (VisualID *) malloc(MAXVISUALSPERDEPTH * sizeof(VisualID));
+    depths[0].vids = calloc(MAXVISUALSPERDEPTH, sizeof(VisualID));
     numDepths = 1;
 
     for (i = 0; i < xnestNumVisuals; i++) {
@@ -217,8 +217,7 @@ xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
             depthIndex = numDepths;
             depths[depthIndex].depth = xnestVisuals[i].depth;
             depths[depthIndex].numVids = 0;
-            depths[depthIndex].vids =
-                (VisualID *) malloc(MAXVISUALSPERDEPTH * sizeof(VisualID));
+            depths[depthIndex].vids = calloc(MAXVISUALSPERDEPTH, sizeof(VisualID));
             numDepths++;
         }
         if (depths[depthIndex].numVids >= MAXVISUALSPERDEPTH) {
