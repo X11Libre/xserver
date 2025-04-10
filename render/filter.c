@@ -92,7 +92,6 @@ int
 PictureGetFilterId(const char *filter, int len, Bool makeit)
 {
     int i;
-    char *name;
     char **names;
 
     if (len < 0)
@@ -103,7 +102,7 @@ PictureGetFilterId(const char *filter, int len, Bool makeit)
             return i;
     if (!makeit)
         return -1;
-    name = malloc(len + 1);
+    char *name = calloc(1, len + 1);
     if (!name)
         return -1;
     memcpy(name, filter, len);
@@ -111,7 +110,7 @@ PictureGetFilterId(const char *filter, int len, Bool makeit)
     if (filterNames)
         names = reallocarray(filterNames, nfilterNames + 1, sizeof(char *));
     else
-        names = malloc(sizeof(char *));
+        names = calloc(1, sizeof(char *));
     if (!names) {
         free(name);
         return -1;
@@ -189,7 +188,7 @@ PictureAddFilter(ScreenPtr pScreen,
         filters =
             reallocarray(ps->filters, ps->nfilters + 1, sizeof(PictFilterRec));
     else
-        filters = malloc(sizeof(PictFilterRec));
+        filters = calloc(1, sizeof(PictFilterRec));
     if (!filters)
         return -1;
     ps->filters = filters;
@@ -223,7 +222,7 @@ PictureSetFilterAlias(ScreenPtr pScreen, const char *filter, const char *alias)
                                    ps->nfilterAliases + 1,
                                    sizeof(PictFilterAliasRec));
         else
-            aliases = malloc(sizeof(PictFilterAliasRec));
+            aliases = calloc(1, sizeof(PictFilterAliasRec));
         if (!aliases)
             return FALSE;
         ps->filterAliases = aliases;

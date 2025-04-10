@@ -347,13 +347,12 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
 {
     PictureScreenPtr ps;
     int size;
-    GlyphPtr glyph;
     int i;
     int head_size;
 
     head_size = sizeof(GlyphRec) + screenInfo.numScreens * sizeof(PicturePtr);
     size = (head_size + dixPrivatesSize(PRIVATE_GLYPH));
-    glyph = (GlyphPtr) malloc(size);
+    GlyphPtr glyph = calloc(1, size);
     if (!glyph)
         return 0;
     glyph->refcnt = 1;
