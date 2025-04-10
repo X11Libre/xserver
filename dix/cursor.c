@@ -376,7 +376,7 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
             unsigned char *mskptr;
 
             n = BitmapBytePad(cm.width) * (long) cm.height;
-            mskptr = mskbits = malloc(n);
+            mskptr = mskbits = calloc(1, n);
             if (!mskptr)
                 return BadAlloc;
             while (--n >= 0)
@@ -427,7 +427,7 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
             bits->refcnt = -1;
         else {
             bits->refcnt = 1;
-            pShare = malloc(sizeof(GlyphShare));
+            pShare = calloc(1, sizeof(GlyphShare));
             if (!pShare) {
                 FreeCursorBits(bits);
                 return BadAlloc;

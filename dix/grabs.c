@@ -279,7 +279,7 @@ CopyGrab(GrabPtr dst, const GrabPtr src)
     if (src->modifiersDetail.pMask) {
         int len = MasksPerDetailMask * sizeof(Mask);
 
-        mdetails_mask = malloc(len);
+        mdetails_mask = calloc(1, len);
         if (!mdetails_mask)
             return FALSE;
         memcpy(mdetails_mask, src->modifiersDetail.pMask, len);
@@ -288,7 +288,7 @@ CopyGrab(GrabPtr dst, const GrabPtr src)
     if (src->detail.pMask) {
         int len = MasksPerDetailMask * sizeof(Mask);
 
-        details_mask = malloc(len);
+        details_mask = calloc(1, len);
         if (!details_mask) {
             free(mdetails_mask);
             return FALSE;
@@ -345,10 +345,9 @@ DeletePassiveGrab(void *value, XID id)
 static Mask *
 DeleteDetailFromMask(Mask *pDetailMask, unsigned int detail)
 {
-    Mask *mask;
     int i;
 
-    mask = malloc(sizeof(Mask) * MasksPerDetailMask);
+    Mask *mask = calloc(MasksPerDetailMask, sizeof(Mask));
     if (mask) {
         if (pDetailMask)
             for (i = 0; i < MasksPerDetailMask; i++)

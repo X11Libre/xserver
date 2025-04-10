@@ -284,7 +284,7 @@ ProcListExtensions(ClientPtr client)
             reply.nExtensions += 1;
         }
         reply.length = bytes_to_int32(total_length);
-        buffer = bufptr = malloc(total_length);
+        buffer = bufptr = calloc(1, total_length);
         if (!buffer)
             return BadAlloc;
         for (i = 0; i < NumExtensions; i++) {

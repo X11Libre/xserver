@@ -532,9 +532,7 @@ Bool
 QueueWorkProc(Bool (*function) (ClientPtr pClient, void *closure),
               ClientPtr client, void *closure)
 {
-    WorkQueuePtr q;
-
-    q = malloc(sizeof *q);
+    WorkQueuePtr q = calloc(1, sizeof *q);
     if (!q)
         return FALSE;
     q->function = function;
@@ -566,9 +564,7 @@ static SleepQueuePtr sleepQueue = NULL;
 Bool
 ClientSleep(ClientPtr client, ClientSleepProcPtr function, void *closure)
 {
-    SleepQueuePtr q;
-
-    q = malloc(sizeof *q);
+    SleepQueuePtr q = calloc(1, sizeof *q);
     if (!q)
         return FALSE;
 
@@ -654,9 +650,7 @@ static CallbackListPtr **listsToCleanup = NULL;
 static Bool
 _AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
-    CallbackPtr cbr;
-
-    cbr = malloc(sizeof(CallbackRec));
+    CallbackPtr cbr = calloc(1, sizeof(CallbackRec));
     if (!cbr)
         return FALSE;
     cbr->proc = callback;
@@ -775,12 +769,12 @@ void DeleteCallbackList(CallbackListPtr *pcbl)
 static Bool
 CreateCallbackList(CallbackListPtr *pcbl)
 {
-    CallbackListPtr cbl;
     int i;
 
     if (!pcbl)
         return FALSE;
-    cbl = malloc(sizeof(CallbackListRec));
+
+    CallbackListPtr cbl = calloc(1, sizeof(CallbackListRec));
     if (!cbl)
         return FALSE;
     cbl->inCallback = 0;

@@ -581,7 +581,7 @@ CreateRootWindow(ScreenPtr pScreen)
     pWin->parent = NullWindow;
     SetWindowToDefaults(pWin);
 
-    pWin->optional = malloc(sizeof(WindowOptRec));
+    pWin->optional = calloc(1, sizeof(WindowOptRec));
     if (!pWin->optional)
         return FALSE;
 
@@ -3197,7 +3197,6 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
     Mask mask;
     WindowPtr pWin;
     CursorMetricRec cm;
-    unsigned char *srcbits, *mskbits;
     CursorPtr cursor;
     XID cursorID = 0;
     int attri;
@@ -3235,8 +3234,8 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
     cm.height = 16;
     cm.xhot = 8;
     cm.yhot = 8;
-    srcbits = malloc(BitmapBytePad(32) * 16);
-    mskbits = malloc(BitmapBytePad(32) * 16);
+    unsigned char *srcbits = calloc(16, BitmapBytePad(32));
+    unsigned char *mskbits = calloc(16, BitmapBytePad(32));
     if (!srcbits || !mskbits) {
         free(srcbits);
         free(mskbits);
@@ -3374,12 +3373,12 @@ CheckWindowOptionalNeed(WindowPtr w)
 Bool
 MakeWindowOptional(WindowPtr pWin)
 {
-    WindowOptPtr optional;
     WindowOptPtr parentOptional;
 
     if (pWin->optional)
         return TRUE;
-    optional = malloc(sizeof(WindowOptRec));
+
+    WindowOptPtr optional = calloc(1, sizeof(WindowOptRec));
     if (!optional)
         return FALSE;
     optional->dontPropagateMask = DontPropagateMasks[pWin->dontPropagate];

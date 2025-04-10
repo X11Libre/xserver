@@ -1143,7 +1143,6 @@ void
 EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
 {
     QdEventPtr tail = NULL;
-    QdEventPtr qe;
     SpritePtr pSprite = device->spriteInfo->sprite;
     int eventlen;
     DeviceEvent *event = &ev->device_event;
@@ -1204,7 +1203,7 @@ EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
 
     eventlen = sizeof(InternalEvent);
 
-    qe = malloc(sizeof(QdEventRec) + eventlen);
+    QdEventPtr qe = calloc(1, sizeof(QdEventRec) + eventlen);
     if (!qe)
         return;
     xorg_list_init(&qe->next);
@@ -4587,7 +4586,7 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
         check = 0;
         if (!pWin->optional && !MakeWindowOptional(pWin))
             return BadAlloc;
-        others = malloc(sizeof(OtherClients));
+        others = calloc(1, sizeof(OtherClients));
         if (!others)
             return BadAlloc;
         others->mask = mask;

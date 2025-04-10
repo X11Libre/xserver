@@ -1202,7 +1202,7 @@ CloseOneDevice(const DeviceIntPtr dev, DeviceIntPtr *listHead)
  * the removal of the device.
  *
  * No PresenceNotify is sent for device that the client never saw. This can
- * happen if a malloc fails during the addition of master devices. If
+ * happen if a calloc fails during the addition of master devices. If
  * dev->init is FALSE it means the client never received a DeviceAdded event,
  * so let's not send a DeviceRemoved event either.
  *
@@ -1475,12 +1475,10 @@ InitPointerAccelerationScheme(DeviceIntPtr dev, int scheme)
 Bool
 InitFocusClassDeviceStruct(DeviceIntPtr dev)
 {
-    FocusClassPtr focc;
-
     BUG_RETURN_VAL(dev == NULL, FALSE);
     BUG_RETURN_VAL(dev->focus != NULL, FALSE);
 
-    focc = malloc(sizeof(FocusClassRec));
+    FocusClassPtr focc = calloc(1, sizeof(FocusClassRec));
     if (!focc)
         return FALSE;
     UpdateCurrentTimeIf();
@@ -1498,11 +1496,9 @@ InitFocusClassDeviceStruct(DeviceIntPtr dev)
 Bool
 InitPtrFeedbackClassDeviceStruct(DeviceIntPtr dev, PtrCtrlProcPtr controlProc)
 {
-    PtrFeedbackPtr feedc;
-
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
-    feedc = malloc(sizeof(PtrFeedbackClassRec));
+    PtrFeedbackPtr feedc = calloc(1, sizeof(PtrFeedbackClassRec));
     if (!feedc)
         return FALSE;
     feedc->CtrlProc = controlProc;
@@ -1541,11 +1537,10 @@ InitStringFeedbackClassDeviceStruct(DeviceIntPtr dev,
                                     KeySym * symbols)
 {
     int i;
-    StringFeedbackPtr feedc;
 
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
-    feedc = malloc(sizeof(StringFeedbackClassRec));
+    StringFeedbackPtr feedc = calloc(1, sizeof(StringFeedbackClassRec));
     if (!feedc)
         return FALSE;
     feedc->CtrlProc = controlProc;
@@ -1577,11 +1572,9 @@ Bool
 InitBellFeedbackClassDeviceStruct(DeviceIntPtr dev, BellProcPtr bellProc,
                                   BellCtrlProcPtr controlProc)
 {
-    BellFeedbackPtr feedc;
-
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
-    feedc = malloc(sizeof(BellFeedbackClassRec));
+    BellFeedbackPtr feedc = calloc(1, sizeof(BellFeedbackClassRec));
     if (!feedc)
         return FALSE;
     feedc->CtrlProc = controlProc;
@@ -1598,11 +1591,9 @@ InitBellFeedbackClassDeviceStruct(DeviceIntPtr dev, BellProcPtr bellProc,
 Bool
 InitLedFeedbackClassDeviceStruct(DeviceIntPtr dev, LedCtrlProcPtr controlProc)
 {
-    LedFeedbackPtr feedc;
-
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
-    feedc = malloc(sizeof(LedFeedbackClassRec));
+    LedFeedbackPtr feedc = calloc(1, sizeof(LedFeedbackClassRec));
     if (!feedc)
         return FALSE;
     feedc->CtrlProc = controlProc;
@@ -1620,11 +1611,9 @@ Bool
 InitIntegerFeedbackClassDeviceStruct(DeviceIntPtr dev,
                                      IntegerCtrlProcPtr controlProc)
 {
-    IntegerFeedbackPtr feedc;
-
     BUG_RETURN_VAL(dev == NULL, FALSE);
 
-    feedc = malloc(sizeof(IntegerFeedbackClassRec));
+    IntegerFeedbackPtr feedc = calloc(1, sizeof(IntegerFeedbackClassRec));
     if (!feedc)
         return FALSE;
     feedc->CtrlProc = controlProc;

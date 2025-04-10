@@ -469,7 +469,6 @@ _dixAllocateObjectWithPrivates(unsigned baseSize, unsigned clear,
                                unsigned offset, DevPrivateType type)
 {
     unsigned totalSize;
-    void *object;
     PrivatePtr privates;
     PrivatePtr *devPrivates;
 
@@ -480,7 +479,7 @@ _dixAllocateObjectWithPrivates(unsigned baseSize, unsigned clear,
     /* round up so that void * is aligned */
     baseSize = (baseSize + sizeof(void *) - 1) & ~(sizeof(void *) - 1);
     totalSize = baseSize + global_keys[type].offset;
-    object = malloc(totalSize);
+    void *object = calloc(1, totalSize);
     if (!object)
         return NULL;
 
@@ -512,7 +511,7 @@ dixAllocatePrivates(PrivatePtr *privates, DevPrivateType type)
         p = NULL;
     }
     else {
-        if (!(p = malloc(size)))
+        if (!(p = calloc(1, size)))
             return FALSE;
     }
 
@@ -692,7 +691,6 @@ _dixAllocateScreenObjectWithPrivates(ScreenPtr pScreen,
                                      DevPrivateType type)
 {
     unsigned totalSize;
-    void *object;
     PrivatePtr privates;
     PrivatePtr *devPrivates;
     int privates_size;
@@ -708,7 +706,7 @@ _dixAllocateScreenObjectWithPrivates(ScreenPtr pScreen,
     /* round up so that pointer is aligned */
     baseSize = (baseSize + sizeof(void *) - 1) & ~(sizeof(void *) - 1);
     totalSize = baseSize + privates_size;
-    object = malloc(totalSize);
+    void *object = calloc(1, totalSize);
     if (!object)
         return NULL;
 

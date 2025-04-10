@@ -650,13 +650,13 @@ InitClientResources(ClientPtr client)
         lastResourceClass = RC_LASTPREDEF;
         TypeMask = RC_LASTPREDEF - 1;
         free(resourceTypes);
-        resourceTypes = malloc(sizeof(predefTypes));
+        resourceTypes = calloc(1, sizeof(predefTypes));
         if (!resourceTypes)
             return FALSE;
         memcpy(resourceTypes, predefTypes, sizeof(predefTypes));
     }
     clientTable[i = client->index].resources =
-        malloc(INITBUCKETS * sizeof(ResourcePtr));
+        calloc(INITBUCKETS, sizeof(ResourcePtr));
     if (!clientTable[i].resources)
         return FALSE;
     clientTable[i].buckets = INITBUCKETS;
@@ -809,7 +809,7 @@ AddResource(XID id, RESTYPE type, void *value)
 {
     int client;
     ClientResourceRec *rrec;
-    ResourcePtr res, *head;
+    ResourcePtr *head;
 
 #ifdef XSERVER_DTRACE
     XSERVER_RESOURCE_ALLOC(id, type, value, TypeNameString(type));
@@ -824,7 +824,7 @@ AddResource(XID id, RESTYPE type, void *value)
     if ((rrec->elements >= 4 * rrec->buckets) && (rrec->hashsize < MAXHASHSIZE))
         RebuildTable(client);
     head = &rrec->resources[HashResourceID(id, clientTable[client].hashsize)];
-    res = malloc(sizeof(ResourceRec));
+    ResourcePtr res = calloc(1, sizeof(ResourceRec));
     if (!res) {
         (*resourceTypes[type & TypeMask].deleteFunc) (value, id);
         return FALSE;

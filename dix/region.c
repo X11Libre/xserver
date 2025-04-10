@@ -235,16 +235,14 @@ InitRegions(void)
 
 /*****************************************************************
  *   RegionCreate(rect, size)
- *     This routine does a simple malloc to make a structure of
+ *     This routine does a simple calloc to make a structure of
  *     REGION of "size" number of rectangles.
  *****************************************************************/
 
 RegionPtr
 RegionCreate(BoxPtr rect, int size)
 {
-    RegionPtr pReg;
-
-    pReg = (RegionPtr) malloc(sizeof(RegionRec));
+    RegionPtr pReg = calloc(1, sizeof(RegionRec));
     if (!pReg)
         return &RegionBrokenRegion;
 
@@ -356,7 +354,7 @@ RegionRectAlloc(RegionPtr pRgn, int n)
     if (!pRgn->data) {
         n++;
         rgnSize = RegionSizeof(n);
-        pRgn->data = (rgnSize > 0) ? malloc(rgnSize) : NULL;
+        pRgn->data = (rgnSize > 0) ? calloc(1, rgnSize) : NULL;
         if (!pRgn->data)
             return RegionBreak(pRgn);
         pRgn->data->numRects = 1;
@@ -364,7 +362,7 @@ RegionRectAlloc(RegionPtr pRgn, int n)
     }
     else if (!pRgn->data->size) {
         rgnSize = RegionSizeof(n);
-        pRgn->data = (rgnSize > 0) ? malloc(rgnSize) : NULL;
+        pRgn->data = (rgnSize > 0) ? calloc(1, rgnSize) : NULL;
         if (!pRgn->data)
             return RegionBreak(pRgn);
         pRgn->data->numRects = 0;
@@ -1150,7 +1148,6 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     } RegionInfo;
 
     int numRects;               /* Original numRects for badreg         */
-    RegionInfo *ri;             /* Array of current regions             */
     int numRI;                  /* Number of entries used in ri         */
     int sizeRI;                 /* Number of entries available in ri    */
     int i;                      /* Index into rects                     */
@@ -1193,7 +1190,7 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
 
     /* Set up the first region to be the first rectangle in badreg */
     /* Note that step 2 code will never overflow the ri[0].reg rects array */
-    ri = (RegionInfo *) malloc(4 * sizeof(RegionInfo));
+    RegionInfo *ri = calloc(4, sizeof(RegionInfo));
     if (!ri)
         return RegionBreak(badreg);
     sizeRI = 4;
@@ -1324,7 +1321,6 @@ RegionFromRects(int nrects, xRectangle *prect, int ctype)
 
     RegionPtr pRgn;
     size_t rgnSize;
-    RegDataPtr pData;
     BoxPtr pBox;
     int i;
     int x1, y1, x2, y2;
@@ -1351,7 +1347,7 @@ RegionFromRects(int nrects, xRectangle *prect, int ctype)
         return pRgn;
     }
     rgnSize = RegionSizeof(nrects);
-    pData = (rgnSize > 0) ? malloc(rgnSize) : NULL;
+    RegDataPtr pData = (rgnSize > 0) ? calloc(1, rgnSize) : NULL;
     if (!pData) {
         RegionBreak(pRgn);
         return pRgn;

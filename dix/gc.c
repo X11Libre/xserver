@@ -361,9 +361,7 @@ ChangeGC(ClientPtr client, GC * pGC, BITS32 mask, ChangeGCValPtr pUnion)
                 }
             }
             else if (newdash != 0) {
-                unsigned char *dash;
-
-                dash = malloc(2 * sizeof(unsigned char));
+                unsigned char *dash = calloc(2, sizeof(unsigned char));
                 if (dash) {
                     if (pGC->dash != DefaultDash)
                         free(pGC->dash);
@@ -726,10 +724,8 @@ CopyGC(GC * pgcSrc, GC * pgcDst, BITS32 mask)
                 }
             }
             else {
-                unsigned char *dash;
                 unsigned int i;
-
-                dash = malloc(pgcSrc->numInDashList * sizeof(unsigned char));
+                unsigned char *dash = calloc(pgcSrc->numInDashList, sizeof(unsigned char));
                 if (dash) {
                     if (pgcDst->dash != DefaultDash)
                         free(pgcDst->dash);
@@ -920,9 +916,9 @@ SetDashes(GCPtr pGC, unsigned offset, unsigned ndash, unsigned char *pdash)
     }
 
     if (ndash & 1)
-        p = malloc(2 * ndash * sizeof(unsigned char));
+        p = calloc(2 * ndash, sizeof(unsigned char));
     else
-        p = malloc(ndash * sizeof(unsigned char));
+        p = calloc(ndash, sizeof(unsigned char));
     if (!p)
         return BadAlloc;
 
@@ -1001,13 +997,13 @@ SetClipRects(GCPtr pGC, int xOrigin, int yOrigin, int nrects,
              xRectangle *prects, int ordering)
 {
     int newct, size;
-    xRectangle *prectsNew;
 
     newct = VerifyRectOrder(nrects, prects, ordering);
     if (newct < 0)
         return BadMatch;
     size = nrects * sizeof(xRectangle);
-    prectsNew = malloc(size);
+
+    xRectangle *prectsNew = calloc(1, size);
     if (!prectsNew && size)
         return BadAlloc;
 

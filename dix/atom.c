@@ -100,9 +100,7 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         }
     }
     if (makeit) {
-        NodePtr nd;
-
-        nd = malloc(sizeof(NodeRec));
+        NodePtr nd = calloc(1, sizeof(NodeRec));
         if (!nd)
             return BAD_RESOURCE;
         if (lastAtom < XA_LAST_PREDEFINED) {

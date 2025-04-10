@@ -379,7 +379,6 @@ int
 OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
          const char *pfontname)
 {
-    OFclosurePtr c;
     int i;
     FontPtr cached = (FontPtr) 0;
 
@@ -412,10 +411,10 @@ OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
             return Success;
         }
     }
-    c = malloc(sizeof(OFclosureRec));
+    OFclosurePtr c = calloc(1, sizeof(OFclosureRec));
     if (!c)
         return BadAlloc;
-    c->fontname = malloc(lenfname);
+    c->fontname = calloc(1, lenfname);
     c->origFontName = pfontname;
     c->origFontNameLen = lenfname;
     if (!c->fontname) {
@@ -644,7 +643,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                 }
                 if (err == FontNameAlias) {
                     free(resolved);
-                    resolved = malloc(resolvedlen + 1);
+                    resolved = calloc(1, resolvedlen + 1);
                     if (resolved)
                         memcpy(resolved, tmpname, resolvedlen + 1);
                 }
@@ -694,7 +693,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                     c->saved = c->current;
                     c->haveSaved = TRUE;
                     free(c->savedName);
-                    c->savedName = malloc(namelen + 1);
+                    c->savedName = calloc(1, namelen + 1);
                     if (c->savedName)
                         memcpy(c->savedName, name, namelen + 1);
                     c->savedNameLen = namelen;
@@ -756,7 +755,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
         .sequenceNumber = client->sequence
     };
 
-    bufptr = bufferStart = malloc(reply.length << 2);
+    bufptr = bufferStart = calloc(1, reply.length << 2);
 
     if (!bufptr && reply.length) {
         SendErrorToClient(client, X_ListFonts, 0, 0, BadAlloc);
@@ -814,7 +813,7 @@ ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
     if (i != Success)
         return i;
 
-    if (!(c = malloc(sizeof *c)))
+    if (!(c = calloc(1, sizeof *c)))
         return BadAlloc;
     c->fpe_list = xallocarray(num_fpes, sizeof(FontPathElementPtr));
     if (!c->fpe_list) {
@@ -934,7 +933,7 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
                 c->haveSaved = TRUE;
                 c->savedNumFonts = numFonts;
                 free(c->savedName);
-                c->savedName = malloc(namelen + 1);
+                c->savedName = calloc(1, namelen + 1);
                 if (c->savedName)
                     memcpy(c->savedName, name, namelen + 1);
                 aliascount = 20;
@@ -1060,7 +1059,7 @@ StartListFontsWithInfo(ClientPtr client, int length, unsigned char *pattern,
     if (i != Success)
         return i;
 
-    if (!(c = malloc(sizeof *c)))
+    if (!(c = calloc(1, sizeof *c)))
         goto badAlloc;
     c->fpe_list = xallocarray(num_fpes, sizeof(FontPathElementPtr));
     if (!c->fpe_list) {
@@ -1219,7 +1218,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
                     /*  We're putting the client to sleep.  We need to do a few things
                        to ensure successful and atomic-appearing execution of the
                        remainder of the request.  First, copy the remainder of the
-                       request into a safe malloc'd area.  Second, create a scratch GC
+                       request into a safe calloc'd area.  Second, create a scratch GC
                        to use for the remainder of the request.  Third, mark all fonts
                        referenced in the remainder of the request to prevent their
                        deallocation.  Fourth, make the original GC look like the
@@ -1231,9 +1230,9 @@ doPolyText(ClientPtr client, PTclosurePtr c)
                        indicated by client_state = START_SLEEP.  */
 
                     /* Step 1 */
-                    /* Allocate a malloc'd closure structure to replace
+                    /* Allocate a calloc'd closure structure to replace
                        the local one we were passed */
-                    new_closure = malloc(sizeof(PTclosureRec));
+                    new_closure = calloc(1, sizeof(PTclosureRec));
                     if (!new_closure) {
                         err = BadAlloc;
                         goto bail;
@@ -1241,7 +1240,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
                     *new_closure = *c;
 
                     len = new_closure->endReq - new_closure->pElt;
-                    new_closure->data = malloc(len);
+                    new_closure->data = calloc(1, len);
                     if (!new_closure->data) {
                         free(new_closure);
                         err = BadAlloc;
@@ -1415,7 +1414,6 @@ doImageText(ClientPtr client, ITclosurePtr c)
         if (!ClientIsAsleep(client)) {
             GC *pGC;
             unsigned char *data;
-            ITclosurePtr new_closure;
             ITclosurePtr old_closure;
 
             /* We're putting the client to sleep.  We need to
@@ -1423,7 +1421,7 @@ doImageText(ClientPtr client, ITclosurePtr c)
                in doPolyText, but much simpler because the
                request structure is much simpler. */
 
-            new_closure = malloc(sizeof(ITclosureRec));
+            ITclosurePtr new_closure = calloc(1, sizeof(ITclosureRec));
             if (!new_closure) {
                 err = BadAlloc;
                 goto bail;
@@ -1624,13 +1622,12 @@ SetFontPathElements(int npaths, unsigned char *paths, int *bad, Bool persist)
             }
             /* if error or can't do it, act like it's a new one */
             if (!fpe) {
-                char *name;
-                fpe = malloc(sizeof(FontPathElementRec));
+                fpe = calloc(1, sizeof(FontPathElementRec));
                 if (!fpe) {
                     err = BadAlloc;
                     goto bail;
                 }
-                name = malloc(len + 1);
+                char *name = calloc(1, len + 1);
                 if (!name) {
                     free(fpe);
                     err = BadAlloc;
@@ -1737,7 +1734,7 @@ SetDefaultFontPath(const char *path)
 
     /* get enough for string, plus values -- use up commas */
     len = strlen(temp_path) + 1;
-    nump = cp = newpath = malloc(len);
+    nump = cp = newpath = calloc(1, len);
     if (!newpath) {
         free(temp_path);
         return BadAlloc;

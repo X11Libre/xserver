@@ -261,7 +261,7 @@ CreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
         sizebytes *= 3;
     sizebytes += sizeof(ColormapRec);
     if (mid == pScreen->defColormap) {
-        pmap = malloc(sizebytes);
+        pmap = calloc(1, sizebytes);
         if (!pmap)
             return BadAlloc;
         if (!dixAllocatePrivates(&pmap->devPrivates, PRIVATE_COLORMAP)) {
@@ -1082,9 +1082,7 @@ AllocColor(ColormapPtr pmap,
      * should be freed when the client dies */
     if ((pmap->numPixelsRed[client] == 1) &&
         (CLIENT_ID(pmap->mid) != client) && !(pmap->flags & CM_BeingCreated)) {
-        colorResource *pcr;
-
-        pcr = malloc(sizeof(colorResource));
+        colorResource *pcr = calloc(1, sizeof(colorResource));
         if (!pcr) {
             (void) FreeColors(pmap, client, 1, pPix, (Pixel) 0);
             return BadAlloc;
@@ -1502,7 +1500,7 @@ AllocColorCells(int client, ColormapPtr pmap, int colors, int planes,
     if (pmap->class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
     if (!oldcount && (CLIENT_ID(pmap->mid) != client)) {
-        pcr = malloc(sizeof(colorResource));
+        pcr = calloc(1, sizeof(colorResource));
         if (!pcr)
             return BadAlloc;
     }
@@ -1569,7 +1567,7 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
     if (class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
     if (!oldcount && (CLIENT_ID(pmap->mid) != client)) {
-        pcr = malloc(sizeof(colorResource));
+        pcr = calloc(1, sizeof(colorResource));
         if (!pcr)
             return BadAlloc;
     }
@@ -1972,7 +1970,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
         return FALSE;
     ppshared = psharedList;
     for (z = npixShared; --z >= 0;) {
-        if (!(ppshared[z] = malloc(sizeof(SHAREDCOLOR)))) {
+        if (!(ppshared[z] = calloc(1, sizeof(SHAREDCOLOR)))) {
             for (z++; z < npixShared; z++)
                 free(ppshared[z]);
             free(psharedList);

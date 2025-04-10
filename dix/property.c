@@ -261,7 +261,6 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
     PropertyPtr pProp;
     PropertyRec savedProp;
     int sizeInBytes, totalSize, rc;
-    unsigned char *data;
     Mask access_mode;
 
     sizeInBytes = format >> 3;
@@ -277,7 +276,7 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
         pProp = dixAllocateObjectWithPrivates(PropertyRec, PRIVATE_PROPERTY);
         if (!pProp)
             return BadAlloc;
-        data = malloc(totalSize);
+        unsigned char *data = calloc(1, totalSize);
         if (totalSize) {
             if (!data) {
                 dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
@@ -316,7 +315,7 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
         savedProp = *pProp;
 
         if (mode == PropModeReplace) {
-            data = malloc(totalSize);
+            unsigned char *data = calloc(1, totalSize);
             if (totalSize) {
                 if (!data)
                     return BadAlloc;
@@ -331,7 +330,7 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
             /* do nothing */
         }
         else if (mode == PropModeAppend) {
-            data = xallocarray(pProp->size + len, sizeInBytes);
+            unsigned char *data = calloc(pProp->size + len, sizeInBytes);
             if (!data)
                 return BadAlloc;
             memcpy(data, pProp->data, pProp->size * sizeInBytes);
@@ -340,7 +339,7 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
             pProp->size += len;
         }
         else if (mode == PropModePrepend) {
-            data = xallocarray(len + pProp->size, sizeInBytes);
+            unsigned char *data = calloc(len + pProp->size, sizeInBytes);
             if (!data)
                 return BadAlloc;
             memcpy(data + totalSize, pProp->data, pProp->size * sizeInBytes);
