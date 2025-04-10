@@ -700,7 +700,7 @@ PanoramiXCompositeNameWindowPixmap(ClientPtr client)
 
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
 
-    if (!(newPix = malloc(sizeof(PanoramiXRes))))
+    if (!(newPix = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
 
     newPix->type = XRT_PIXMAP;
@@ -769,7 +769,7 @@ PanoramiXCompositeGetOverlayWindow(ClientPtr client)
 
     cs = GetCompScreen(screenInfo.screens[0]);
     if (!cs->pOverlayWin) {
-        if (!(overlayWin = malloc(sizeof(PanoramiXRes))))
+        if (!(overlayWin = calloc(1, sizeof(PanoramiXRes))))
             return BadAlloc;
 
         overlayWin->type = XRT_WINDOW;

@@ -96,9 +96,7 @@ CompOverlayClientPtr
 compCreateOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
-    CompOverlayClientPtr pOc;
-
-    pOc = (CompOverlayClientPtr) malloc(sizeof(CompOverlayClientRec));
+    CompOverlayClientPtr pOc = calloc(1, sizeof(CompOverlayClientRec));
     if (pOc == NULL)
         return NULL;
 
