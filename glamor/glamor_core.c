@@ -63,11 +63,10 @@ glamor_compile_glsl_prog(GLenum type, const char *source)
     glCompileShader(prog);
     glGetShaderiv(prog, GL_COMPILE_STATUS, &ok);
     if (!ok) {
-        GLchar *info;
         GLint size;
 
         glGetShaderiv(prog, GL_INFO_LOG_LENGTH, &size);
-        info = malloc(size);
+        GLchar *info = calloc(1, size);
         if (info) {
             glGetShaderInfoLog(prog, size, NULL, info);
             ErrorF("Failed to compile %s: %s\n",
@@ -103,11 +102,10 @@ glamor_link_glsl_prog(ScreenPtr screen, GLint prog, const char *format, ...)
     glLinkProgram(prog);
     glGetProgramiv(prog, GL_LINK_STATUS, &ok);
     if (!ok) {
-        GLchar *info;
         GLint size;
 
         glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &size);
-        info = malloc(size);
+        GLchar *info = calloc(1, size);
 
         glGetProgramInfoLog(prog, size, NULL, info);
         ErrorF("Failed to link: %s\n", info);
