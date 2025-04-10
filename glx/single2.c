@@ -272,15 +272,15 @@ __glXcombine_strings(const char *cext_string, const char *sext_string)
     clen = strlen(cext_string);
     slen = strlen(sext_string);
     if (clen > slen) {
-        combo_string = (char *) malloc(slen + 2);
-        s1 = (char *) malloc(slen + 2);
+        combo_string = (char *) calloc(1, slen + 2);
+        s1 = (char *) calloc(1, slen + 2);
         if (s1)
             strcpy(s1, sext_string);
         s2 = cext_string;
     }
     else {
-        combo_string = (char *) malloc(clen + 2);
-        s1 = (char *) malloc(clen + 2);
+        combo_string = (char *) calloc(1, clen + 2);
+        s1 = (char *) calloc(1, clen + 2);
         if (s1)
             strcpy(s1, cext_string);
         s2 = sext_string;

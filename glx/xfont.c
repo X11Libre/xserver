@@ -64,7 +64,7 @@ __glXMakeBitmapFromGlyph(FontPtr font, CharInfoPtr pci)
     widthPadded = GLYPHWIDTHBYTESPADDED(pci);
 
     /*
-     ** Use the local buf if possible, otherwise malloc.
+     ** Use the local buf if possible, otherwise calloc.
      */
     allocBytes = widthPadded * h;
     if (allocBytes <= __GL_CHAR_BUF_SIZE) {
@@ -72,7 +72,7 @@ __glXMakeBitmapFromGlyph(FontPtr font, CharInfoPtr pci)
         allocbuf = 0;
     }
     else {
-        p = (unsigned char *) malloc(allocBytes);
+        p = calloc(1, allocBytes);
         if (!p)
             return BadAlloc;
         allocbuf = p;
