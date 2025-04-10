@@ -261,7 +261,7 @@ int
 ProcXGetFeedbackControl(ClientPtr client)
 {
     int rc, total_length = 0;
-    char *buf, *savbuf;
+    char *savbuf;
     DeviceIntPtr dev;
     KbdFeedbackPtr k;
     PtrFeedbackPtr p;
@@ -315,7 +315,7 @@ ProcXGetFeedbackControl(ClientPtr client)
     if (total_length == 0)
         return BadMatch;
 
-    buf = (char *) malloc(total_length);
+    char *buf = (char *) calloc(1, total_length);
     if (!buf)
         return BadAlloc;
     savbuf = buf;

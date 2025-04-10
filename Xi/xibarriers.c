@@ -103,9 +103,7 @@ typedef struct _BarrierScreen {
 
 static struct PointerBarrierDevice *AllocBarrierDevice(void)
 {
-    struct PointerBarrierDevice *pbd = NULL;
-
-    pbd = malloc(sizeof(struct PointerBarrierDevice));
+    struct PointerBarrierDevice *pbd = calloc(1, sizeof(struct PointerBarrierDevice));
     if (!pbd)
         return NULL;
 
@@ -558,15 +556,13 @@ CreatePointerBarrierClient(ClientPtr client,
     ScreenPtr screen;
     BarrierScreenPtr cs;
     int err;
-    int size;
     int i;
-    struct PointerBarrierClient *ret;
     CARD16 *in_devices;
     DeviceIntPtr dev;
 
-    size = sizeof(*ret) + sizeof(DeviceIntPtr) * stuff->num_devices;
-    ret = malloc(size);
-
+    const int size = sizeof(struct PointerBarrierClient)
+                   + sizeof(DeviceIntPtr) * stuff->num_devices;
+    struct PointerBarrierClient *ret = calloc(1, size);
     if (!ret) {
         return BadAlloc;
     }

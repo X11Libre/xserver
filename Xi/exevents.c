@@ -2335,12 +2335,10 @@ DeliverGestureEventToOwner(DeviceIntPtr dev, GestureInfoPtr gi, InternalEvent *e
 int
 InitProximityClassDeviceStruct(DeviceIntPtr dev)
 {
-    ProximityClassPtr proxc;
-
     BUG_RETURN_VAL(dev == NULL, FALSE);
     BUG_RETURN_VAL(dev->proximity != NULL, FALSE);
 
-    proxc = (ProximityClassPtr) malloc(sizeof(ProximityClassRec));
+    ProximityClassPtr proxc = calloc(1, sizeof(ProximityClassRec));
     if (!proxc)
         return FALSE;
     proxc->sourceid = dev->id;

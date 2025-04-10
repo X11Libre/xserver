@@ -575,9 +575,7 @@ XIUnregisterPropertyHandler(DeviceIntPtr dev, long id)
 static XIPropertyPtr
 XICreateDeviceProperty(Atom property)
 {
-    XIPropertyPtr prop;
-
-    prop = (XIPropertyPtr) malloc(sizeof(XIPropertyRec));
+    XIPropertyPtr prop = calloc(1, sizeof(XIPropertyRec));
     if (!prop)
         return NULL;
 

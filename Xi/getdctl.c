@@ -168,7 +168,7 @@ int
 ProcXGetDeviceControl(ClientPtr client)
 {
     int rc, total_length = 0;
-    char *buf, *savbuf;
+    char *savbuf;
     DeviceIntPtr dev;
     xGetDeviceControlReply rep;
 
@@ -206,7 +206,7 @@ ProcXGetDeviceControl(ClientPtr client)
         return BadValue;
     }
 
-    buf = (char *) malloc(total_length);
+    char *buf = calloc(1, total_length);
     if (!buf)
         return BadAlloc;
     savbuf = buf;
