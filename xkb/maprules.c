@@ -793,7 +793,7 @@ XkbRF_SubstituteVars(char *name, XkbRF_MultiDefsPtr mdefs)
         }
         str = index(&str[0], '%');
     }
-    name = malloc(len + 1);
+    name = calloc(1, len + 1);
     str = orig;
     outstr = name;
     while (*str != '\0') {

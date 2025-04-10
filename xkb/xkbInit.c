@@ -140,7 +140,6 @@ XkbWriteRulesProp(void)
 {
     int len, out;
     Atom name;
-    char *pval;
 
     len = (XkbRulesUsed ? strlen(XkbRulesUsed) : 0);
     len += (XkbModelUsed ? strlen(XkbModelUsed) : 0);
@@ -158,7 +157,7 @@ XkbWriteRulesProp(void)
         ErrorF("[xkb] Atom error: %s not created\n", _XKB_RF_NAMES_PROP_ATOM);
         return TRUE;
     }
-    pval = (char *) malloc(len);
+    char *pval = calloc(1, len);
     if (!pval) {
         ErrorF("[xkb] Allocation error: %s proprerty not created\n",
                _XKB_RF_NAMES_PROP_ATOM);

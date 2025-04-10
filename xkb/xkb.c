@@ -5146,7 +5146,7 @@ _GetCountedString(char **wire_inout, ClientPtr client, char **str)
     if (client->req_len <
         bytes_to_int32(next - (char *) client->requestBuffer))
         return BadValue;
-    *str = malloc(len + 1);
+    *str = calloc(1, len + 1);
     if (!*str)
         return BadAlloc;
     memcpy(*str, &wire[2], len);
@@ -6510,7 +6510,6 @@ ProcXkbGetDeviceInfo(ClientPtr client)
     unsigned length, nameLen;
     CARD16 ledClass, ledID;
     unsigned wanted;
-    char *str;
 
     REQUEST(xkbGetDeviceInfoReq);
     REQUEST_SIZE_MATCH(xkbGetDeviceInfoReq);
@@ -6612,7 +6611,7 @@ ProcXkbGetDeviceInfo(ClientPtr client)
     }
     WriteToClient(client, SIZEOF(xkbGetDeviceInfoReply), &rep);
 
-    str = malloc(nameLen);
+    char *str = calloc(1, nameLen);
     if (!str)
         return BadAlloc;
     XkbWriteCountedString(str, dev->name, client->swapped);

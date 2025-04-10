@@ -1031,7 +1031,7 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                     }
                     else if (!dtype->num_levels || !dtype->level_names ||
                              i >= dst->map->num_types) {
-                        tmp = malloc(stype->num_levels * sizeof(Atom));
+                        tmp = calloc(stype->num_levels, sizeof(Atom));
                         if (!tmp)
                             continue;
                         dtype->level_names = tmp;
@@ -1879,7 +1879,7 @@ _XkbCopyGeom(XkbDescPtr src, XkbDescPtr dst)
         /* font */
         if (src->geom->label_font) {
             if (!dst->geom->label_font) {
-                tmp = malloc(strlen(src->geom->label_font) + 1);
+                tmp = calloc(1, strlen(src->geom->label_font) + 1);
                 if (!tmp)
                     return FALSE;
                 dst->geom->label_font = tmp;
@@ -1927,7 +1927,7 @@ _XkbCopyIndicators(XkbDescPtr src, XkbDescPtr dst)
     /* indicators */
     if (src->indicators) {
         if (!dst->indicators) {
-            dst->indicators = malloc(sizeof(XkbIndicatorRec));
+            dst->indicators = calloc(1, sizeof(XkbIndicatorRec));
             if (!dst->indicators)
                 return FALSE;
         }
@@ -1946,7 +1946,7 @@ _XkbCopyControls(XkbDescPtr src, XkbDescPtr dst)
     /* controls */
     if (src->ctrls) {
         if (!dst->ctrls) {
-            dst->ctrls = malloc(sizeof(XkbControlsRec));
+            dst->ctrls = calloc(1, sizeof(XkbControlsRec));
             if (!dst->ctrls)
                 return FALSE;
         }
