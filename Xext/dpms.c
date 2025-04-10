@@ -145,10 +145,9 @@ ProcDPMSSelectInput(register ClientPtr client)
         }
 
         /* build the entry */
-        pNewEvent = (DPMSEventPtr)malloc(sizeof(DPMSEventRec));
+        pNewEvent = calloc(1, sizeof(DPMSEventRec));
         if (!pNewEvent)
             return BadAlloc;
-        pNewEvent->next = 0;
         pNewEvent->client = client;
         pNewEvent->mask = stuff->eventMask;
         /*
@@ -164,7 +163,7 @@ ProcDPMSSelectInput(register ClientPtr client)
          * of clients selecting input
          */
         if (i != Success || !pHead) {
-            pHead = (DPMSEventPtr *)malloc(sizeof(DPMSEventPtr));
+            pHead = calloc(1, sizeof(DPMSEventPtr));
             if (!pHead ||
                     !AddResource(eventResource, DPMSEventType, (void *)pHead)) {
                 FreeResource(clientResource, X11_RESTYPE_NONE);

@@ -55,7 +55,7 @@ int selinuxEnforcingState = SELINUX_MODE_DEFAULT;
 static char *
 SELinuxCopyContext(char *ptr, unsigned len)
 {
-    char *copy = malloc(len + 1);
+    char *copy = calloc(1, len + 1);
 
     if (!copy)
         return NULL;

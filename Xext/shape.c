@@ -752,7 +752,7 @@ ProcShapeSelectInput(ClientPtr client)
         }
 
         /* build the entry */
-        pNewShapeEvent = malloc(sizeof(ShapeEventRec));
+        pNewShapeEvent = calloc(1, sizeof(ShapeEventRec));
         if (!pNewShapeEvent)
             return BadAlloc;
         pNewShapeEvent->next = 0;
@@ -773,7 +773,7 @@ ProcShapeSelectInput(ClientPtr client)
          * done through the resource database.
          */
         if (!pHead) {
-            pHead = malloc(sizeof(ShapeEventPtr));
+            pHead = calloc(1, sizeof(ShapeEventPtr));
             if (!pHead ||
                 !AddResource(pWin->drawable.id, ShapeEventType,
                              (void *) pHead)) {
@@ -962,7 +962,7 @@ ProcShapeGetRectangles(ClientPtr client)
     }
     if (!region) {
         nrects = 1;
-        rects = malloc(sizeof(xRectangle));
+        rects = calloc(1, sizeof(xRectangle));
         if (!rects)
             return BadAlloc;
         switch (stuff->kind) {

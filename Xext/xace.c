@@ -204,7 +204,6 @@ XaceCensorImage(ClientPtr client,
     if (nRects > 0) {           /* we have something to censor */
         GCPtr pScratchGC = NULL;
         PixmapPtr pPix = NULL;
-        xRectangle *pRects = NULL;
         Bool failed = FALSE;
         int depth = 1;
         int bitsPerPixel = 1;
@@ -213,7 +212,7 @@ XaceCensorImage(ClientPtr client,
 
         /* convert region to list-of-rectangles for PolyFillRect */
 
-        pRects = malloc(nRects * sizeof(xRectangle));
+        xRectangle *pRects = calloc(1, nRects * sizeof(xRectangle));
         if (!pRects) {
             failed = TRUE;
             goto failSafe;

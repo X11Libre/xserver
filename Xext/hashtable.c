@@ -39,7 +39,7 @@ ht_create(int             keySize,
 {
     int c;
     int numBuckets;
-    HashTable ht = malloc(sizeof(struct HashTableRec));
+    HashTable ht = calloc(1, sizeof(struct HashTableRec));
 
     if (!ht) {
         return NULL;
@@ -127,7 +127,7 @@ ht_add(HashTable ht, const void *key)
     if (!elem) {
         goto outOfMemory;
     }
-    elem->key = malloc(ht->keySize);
+    elem->key = calloc(1, ht->keySize);
     if (!elem->key) {
         goto outOfMemory;
     }

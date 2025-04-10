@@ -100,7 +100,7 @@ typedef struct {
 static void *
 AddFragment(struct xorg_list *frags, int bytes)
 {
-    FragmentList *f = malloc(sizeof(FragmentList) + bytes);
+    FragmentList *f = calloc(1, sizeof(FragmentList) + bytes);
     if (!f) {
         return NULL;
     } else {

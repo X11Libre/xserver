@@ -1217,7 +1217,7 @@ ProcScreenSaverSuspend(ClientPtr client)
      * to the record, so the screensaver will be re-enabled and the record freed
      * if the client disconnects without reenabling it first.
      */
-    this = malloc(sizeof(ScreenSaverSuspensionRec));
+    this = calloc(1, sizeof(ScreenSaverSuspensionRec));
 
     if (!this)
         return BadAlloc;

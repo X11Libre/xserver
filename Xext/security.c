@@ -385,7 +385,7 @@ SecurityEventSelectForAuthorization(SecurityAuthorizationPtr pAuth,
         }
     }
 
-    pEventClient = malloc(sizeof(OtherClients));
+    pEventClient = calloc(1, sizeof(OtherClients));
     if (!pEventClient)
         return BadAlloc;
     pEventClient->mask = mask;
@@ -406,7 +406,6 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     REQUEST(xSecurityGenerateAuthorizationReq);
     int len;                    /* request length in CARD32s */
     Bool removeAuth = FALSE;    /* if bailout, call RemoveAuthorization? */
-    SecurityAuthorizationPtr pAuth = NULL;      /* auth we are creating */
     int err;                    /* error to return from this function */
     XID authId;                 /* authorization ID assigned by os layer */
     xSecurityGenerateAuthorizationReply rep;    /* reply struct */
@@ -493,8 +492,7 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
                                    stuff->nbytesAuthData, protodata,
                                    &authdata_len, &pAuthdata);
     if ((XID) ~0L == authId) {
-        err = SecurityErrorBase + XSecurityBadAuthorizationProtocol;
-        goto bailout;
+        return SecurityErrorBase + XSecurityBadAuthorizationProtocol;
     }
 
     /* now that we've added the auth, remember to remove it if we have to
@@ -504,7 +502,7 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
 
     /* associate additional information with this auth ID */
 
-    pAuth = malloc(sizeof(SecurityAuthorizationRec));
+    SecurityAuthorizationPtr pAuth = calloc(1, sizeof(SecurityAuthorizationRec));
     if (!pAuth) {
         err = BadAlloc;
         goto bailout;

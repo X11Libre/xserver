@@ -992,7 +992,7 @@ ProcXvQueryImageAttributes(ClientPtr client)
 
     num_planes = pImage->num_planes;
 
-    if (!(offsets = malloc(num_planes << 3)))
+    if (!(offsets = calloc(1, num_planes << 3)))
         return BadAlloc;
     pitches = offsets + num_planes;
 
@@ -1745,7 +1745,7 @@ XineramifyXv(void)
 
         /* now create a resource for each port */
         for (j = 0; j < refAdapt->nPorts; j++) {
-            PanoramiXRes *port = malloc(sizeof(PanoramiXRes));
+            PanoramiXRes *port = calloc(1, sizeof(PanoramiXRes));
 
             if (!port)
                 break;

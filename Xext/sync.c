@@ -764,8 +764,6 @@ SyncChangeCounter(SyncCounter * pCounter, int64_t newval)
 static Bool
 SyncEventSelectForAlarm(SyncAlarm * pAlarm, ClientPtr client, Bool wantevents)
 {
-    SyncAlarmClientList *pClients;
-
     if (client == pAlarm->client) {     /* alarm owner */
         pAlarm->events = wantevents;
         return Success;
@@ -773,7 +771,8 @@ SyncEventSelectForAlarm(SyncAlarm * pAlarm, ClientPtr client, Bool wantevents)
 
     /* see if the client is already on the list (has events selected) */
 
-    for (pClients = pAlarm->pEventClients; pClients; pClients = pClients->next) {
+    for (SyncAlarmClientList *pClients = pClients = pAlarm->pEventClients;
+         pClients; pClients = pClients->next) {
         if (pClients->client == client) {
             /* client's presence on the list indicates desire for
              * events.  If the client doesn't want events, remove it
@@ -799,7 +798,7 @@ SyncEventSelectForAlarm(SyncAlarm * pAlarm, ClientPtr client, Bool wantevents)
 
     /* add new client to pAlarm->pEventClients */
 
-    pClients = malloc(sizeof(SyncAlarmClientList));
+    SyncAlarmClientList *pClients = calloc(1, sizeof(SyncAlarmClientList));
     if (!pClients)
         return BadAlloc;
 
@@ -934,7 +933,7 @@ SyncCreate(ClientPtr client, XID id, unsigned char type)
 
     switch (type) {
     case SYNC_COUNTER:
-        pSync = malloc(sizeof(SyncCounter));
+        pSync = calloc(1, sizeof(SyncCounter));
         resType = RTCounter;
         break;
     case SYNC_FENCE:
@@ -1030,9 +1029,7 @@ SyncCreateSystemCounter(const char *name,
     SyncCounter *pCounter = SyncCreateCounter(NULL, FakeClientID(0), initial);
 
     if (pCounter) {
-        SysCounterInfo *psci;
-
-        psci = malloc(sizeof(SysCounterInfo));
+        SysCounterInfo *psci = calloc(1, sizeof(SysCounterInfo));
         if (!psci) {
             FreeResource(pCounter->sync.id, X11_RESTYPE_NONE);
             return pCounter;
@@ -1311,7 +1308,7 @@ ProcSyncListSystemCounters(ClientPtr client)
     }
 
     if (len) {
-        walklist = list = malloc(len);
+        walklist = list = calloc(1, len);
         if (!list)
             return BadAlloc;
     }
@@ -1739,7 +1736,7 @@ ProcSyncCreateAlarm(ClientPtr client)
     if (len != (Ones(vmask) + Ones(vmask & (XSyncCAValue | XSyncCADelta))))
         return BadLength;
 
-    if (!(pAlarm = malloc(sizeof(SyncAlarm)))) {
+    if (!(pAlarm = calloc(1, sizeof(SyncAlarm)))) {
         return BadAlloc;
     }
 

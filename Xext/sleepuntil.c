@@ -72,7 +72,7 @@ ClientSleepUntil(ClientPtr client,
                  TimeStamp *revive,
                  void (*notifyFunc) (ClientPtr, void *), void *closure)
 {
-    SertafiedPtr pRequest, pReq, pPrev;
+    SertafiedPtr pReq, pPrev;
 
     if (SertafiedGeneration != serverGeneration) {
         SertafiedResType = CreateNewResourceType(SertafiedDelete,
@@ -82,7 +82,8 @@ ClientSleepUntil(ClientPtr client,
         SertafiedGeneration = serverGeneration;
         BlockHandlerRegistered = FALSE;
     }
-    pRequest = malloc(sizeof(SertafiedRec));
+
+    SertafiedPtr pRequest = calloc(1, sizeof(SertafiedRec));
     if (!pRequest)
         return FALSE;
     pRequest->pClient = client;

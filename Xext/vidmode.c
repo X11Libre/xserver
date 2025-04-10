@@ -75,9 +75,7 @@ typedef struct {
 static DisplayModePtr
 VidModeCreateMode(void)
 {
-    DisplayModePtr mode;
-
-    mode = malloc(sizeof(DisplayModeRec));
+    DisplayModePtr mode = calloc(1, sizeof(DisplayModeRec));
     if (mode != NULL) {
         mode->name = "";
         mode->VScan = 1;        /* divides refresh rate. default = 1 */
@@ -1636,7 +1634,7 @@ ProcVidModeSetClientVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xXF86VidModeSetClientVersionReq);
 
     if ((pPriv = VM_GETPRIV(client)) == NULL) {
-        pPriv = malloc(sizeof(VidModePrivRec));
+        pPriv = calloc(1, sizeof(VidModePrivRec));
         if (!pPriv)
             return BadAlloc;
         VM_SETPRIV(client, pPriv);

@@ -117,7 +117,7 @@ PanoramiXCreateWindow(ClientPtr client)
         }
     }
 
-    if (!(newWin = malloc(sizeof(PanoramiXRes))))
+    if (!(newWin = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
 
     newWin->type = XRT_WINDOW;
@@ -694,7 +694,7 @@ PanoramiXCreatePixmap(ClientPtr client)
     if (result != Success)
         return (result == BadValue) ? BadDrawable : result;
 
-    if (!(newPix = malloc(sizeof(PanoramiXRes))))
+    if (!(newPix = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
 
     newPix->type = XRT_PIXMAP;
@@ -801,7 +801,7 @@ PanoramiXCreateGC(ClientPtr client)
         }
     }
 
-    if (!(newGC = malloc(sizeof(PanoramiXRes))))
+    if (!(newGC = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
 
     newGC->type = XRT_GC;
@@ -2289,7 +2289,7 @@ PanoramiXCreateColormap(ClientPtr client)
     if (result != Success)
         return result;
 
-    if (!(newCmap = malloc(sizeof(PanoramiXRes))))
+    if (!(newCmap = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
 
     newCmap->type = XRT_COLORMAP;
@@ -2361,7 +2361,7 @@ PanoramiXCopyColormapAndFree(ClientPtr client)
     if (result != Success)
         return result;
 
-    if (!(newCmap = malloc(sizeof(PanoramiXRes))))
+    if (!(newCmap = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
 
     newCmap->type = XRT_COLORMAP;

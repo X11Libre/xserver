@@ -147,7 +147,6 @@ static ShmDescPtr ShmList = (ShmDescPtr) NULL;
 static ShmDescPtr
 shmalloc(unsigned int size)
 {
-    ShmDescPtr pDesc;
     int shmid;
     char *addr;
 
@@ -165,7 +164,7 @@ shmalloc(unsigned int size)
     if (size < 3500)
         return (ShmDescPtr) NULL;
 
-    pDesc = malloc(sizeof(ShmDescRec));
+    ShmDescPtr pDesc = calloc(1, sizeof(ShmDescRec));
     if (!pDesc)
         return (ShmDescPtr) NULL;
 

@@ -270,8 +270,6 @@ static void XvPixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr 
 int
 XvScreenInit(ScreenPtr pScreen)
 {
-    XvScreenPtr pxvs;
-
     if (XvScreenGeneration != serverGeneration) {
         if (!CreateResourceTypes()) {
             ErrorF("XvScreenInit: Unable to allocate resource types\n");
@@ -292,7 +290,7 @@ XvScreenInit(ScreenPtr pScreen)
 
     /* ALLOCATE SCREEN PRIVATE RECORD */
 
-    pxvs = malloc(sizeof(XvScreenRec));
+    XvScreenPtr pxvs = calloc(1, sizeof(XvScreenRec));
     if (!pxvs) {
         ErrorF("XvScreenInit: Unable to allocate screen private structure\n");
         return BadAlloc;
@@ -777,7 +775,7 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
        WILL BE DELETED WHEN THE DRAWABLE IS DESTROYED */
 
     if (!pn) {
-        if (!(tpn = malloc(sizeof(XvVideoNotifyRec))))
+        if (!(tpn = calloc(1, sizeof(XvVideoNotifyRec))))
             return BadAlloc;
         tpn->next = NULL;
         tpn->client = NULL;
@@ -813,7 +811,7 @@ XvdiSelectVideoNotify(ClientPtr client, DrawablePtr pDraw, BOOL onoff)
             tpn = fpn;
         }
         else {
-            if (!(tpn = malloc(sizeof(XvVideoNotifyRec))))
+            if (!(tpn = calloc(1, sizeof(XvVideoNotifyRec))))
                 return BadAlloc;
             tpn->next = pn->next;
             pn->next = tpn;
@@ -867,7 +865,7 @@ XvdiSelectPortNotify(ClientPtr client, XvPortPtr pPort, BOOL onoff)
        CREATE A NEW ONE AND ADD IT TO THE BEGINNING OF THE LIST */
 
     if (!tpn) {
-        if (!(tpn = malloc(sizeof(XvPortNotifyRec))))
+        if (!(tpn = calloc(1, sizeof(XvPortNotifyRec))))
             return BadAlloc;
         tpn->next = pPort->pNotify;
         pPort->pNotify = tpn;

@@ -368,7 +368,7 @@ XineramaRegisterConnectionBlockCallback(void (*func) (void))
 {
     XineramaConnectionCallbackList *newlist;
 
-    if (!(newlist = malloc(sizeof(XineramaConnectionCallbackList))))
+    if (!(newlist = calloc(1, sizeof(XineramaConnectionCallbackList))))
         return FALSE;
 
     newlist->next = ConnectionCallbackList;
@@ -439,7 +439,6 @@ PanoramiXExtensionInit(void)
     Bool success = FALSE;
     ExtensionEntry *extEntry;
     ScreenPtr pScreen = screenInfo.screens[0];
-    PanoramiXScreenPtr pScreenPriv;
 
     if (noPanoramiXExtension)
         return;
@@ -476,7 +475,7 @@ PanoramiXExtensionInit(void)
 
         FOR_NSCREENS(i) {
             pScreen = screenInfo.screens[i];
-            pScreenPriv = malloc(sizeof(PanoramiXScreenRec));
+            PanoramiXScreenPtr pScreenPriv = calloc(1, sizeof(PanoramiXScreenRec));
             dixSetPrivate(&pScreen->devPrivates, PanoramiXScreenKey,
                           pScreenPriv);
             if (!pScreenPriv) {
