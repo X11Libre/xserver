@@ -238,7 +238,7 @@ exaOffscreenAlloc(ScreenPtr pScreen, int size, int align,
 
     /* save extra space in new area */
     if (real_size < area->size) {
-        ExaOffscreenArea *new_area = malloc(sizeof(ExaOffscreenArea));
+        ExaOffscreenArea *new_area = calloc(1, sizeof(ExaOffscreenArea));
 
         if (!new_area)
             return NULL;
@@ -634,11 +634,9 @@ Bool
 exaOffscreenInit(ScreenPtr pScreen)
 {
     ExaScreenPriv(pScreen);
-    ExaOffscreenArea *area;
 
     /* Allocate a big free area */
-    area = malloc(sizeof(ExaOffscreenArea));
-
+    ExaOffscreenArea *area = calloc(1, sizeof(ExaOffscreenArea));
     if (!area)
         return FALSE;
 
