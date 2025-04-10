@@ -87,7 +87,7 @@ miInsertEdgeInET(EdgeTable * ET, EdgeTableEntry * ETE, int scanline,
      */
     if ((!pSLL) || (pSLL->scanline > scanline)) {
         if (*iSLLBlock > SLLSPERBLOCK - 1) {
-            tmpSLLBlock = malloc(sizeof(ScanLineListBlock));
+            tmpSLLBlock = calloc(1, sizeof(ScanLineListBlock));
             if (!tmpSLLBlock)
                 return FALSE;
             (*SLLBlock)->next = tmpSLLBlock;
@@ -542,7 +542,7 @@ miFillGeneralPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
     if (count < 3)
         return TRUE;
 
-    if (!(pETEs = malloc(sizeof(EdgeTableEntry) * count)))
+    if (!(pETEs = calloc(count, sizeof(EdgeTableEntry))))
         return FALSE;
     ptsOut = FirstPoint;
     width = FirstWidth;

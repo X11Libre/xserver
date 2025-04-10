@@ -280,7 +280,6 @@ miSpriteReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
 Bool
 miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
 {
-    miSpriteScreenPtr pScreenPriv;
     VisualPtr pVisual;
 
     if (!DamageSetup(pScreen))
@@ -293,7 +292,7 @@ miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
         (&miSpriteDevPrivatesKeyRec, PRIVATE_DEVICE, sizeof(miCursorInfoRec)))
         return FALSE;
 
-    pScreenPriv = malloc(sizeof(miSpriteScreenRec));
+    miSpriteScreenPtr pScreenPriv = calloc(1, sizeof(miSpriteScreenRec));
     if (!pScreenPriv)
         return FALSE;
 

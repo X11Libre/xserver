@@ -123,7 +123,7 @@ miInitOverlay(ScreenPtr pScreen,
     if (!dixRegisterPrivateKey(&miOverlayScreenKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
 
-    if (!(pScreenPriv = malloc(sizeof(miOverlayScreenRec))))
+    if (!(pScreenPriv = calloc(1, sizeof(miOverlayScreenRec))))
         return FALSE;
 
     dixSetPrivate(&pScreen->devPrivates, miOverlayScreenKey, pScreenPriv);

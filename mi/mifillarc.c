@@ -665,7 +665,7 @@ miPolyFillArc(DrawablePtr pDraw, GCPtr pGC, int narcs_all, xArc * parcs)
                 nspans += (arc->height + 1) >> 1;
         }
 
-        pts = points = malloc (sizeof (DDXPointRec) * nspans +
+        pts = points = calloc(1, sizeof (DDXPointRec) * nspans +
                                sizeof(int) * nspans);
         if (points) {
             wids = widths = (int *) (points + nspans);

@@ -93,7 +93,6 @@ miPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr pDrawable,
              int dx, int dy, int xOrg, int yOrg)
 {
     int h, dxDivPPW, ibEnd;
-    MiBits *pwLineStart;
     MiBits *pw, *pwEnd;
     MiBits msk;
     int ib, w;
@@ -116,7 +115,7 @@ miPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr pDrawable,
         startmask = (MiBits) (-1) ^ LONG2CHARSDIFFORDER((MiBits) (-1) >> 1);
 #endif
 
-    pwLineStart = malloc(BitmapBytePad(dx));
+    MiBits *pwLineStart = calloc(1, BitmapBytePad(dx));
     if (!pwLineStart)
         return;
     ipt = 0;
