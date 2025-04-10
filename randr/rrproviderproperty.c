@@ -178,7 +178,7 @@ RRChangeProviderProperty(RRProviderPtr provider, Atom property, Atom type,
         void *new_data = NULL, *old_data = NULL;
 
         total_size = total_len * size_in_bytes;
-        new_value.data = (void *) malloc(total_size);
+        new_value.data = calloc(1, total_size);
         if (!new_value.data && total_size) {
             if (add)
                 RRDestroyProviderProperty(prop);
@@ -654,7 +654,7 @@ ProcRRGetProviderProperty(ClientPtr client)
     len = min(n - ind, 4 * stuff->longLength);
 
     if (len) {
-        extra = malloc(len);
+        extra = calloc(1, len);
         if (!extra)
             return BadAlloc;
     }

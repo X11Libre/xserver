@@ -58,7 +58,7 @@ RROldModeAdd(RROutputPtr output, RRScreenSizePtr size, int refresh)
         modes = reallocarray(output->modes,
                              output->numModes + 1, sizeof(RRModePtr));
     else
-        modes = malloc(sizeof(RRModePtr));
+        modes = calloc(1, sizeof(RRModePtr));
     if (!modes) {
         RRModeDestroy(mode);
         FreeResource(mode->mode.id, 0);

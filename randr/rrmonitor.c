@@ -501,7 +501,7 @@ RRMonitorAdd(ClientPtr client, ScreenPtr screen, RRMonitorPtr monitor)
                                 pScrPriv->numMonitors + 1,
                                 sizeof (RRMonitorPtr));
     else
-        monitors = malloc(sizeof (RRMonitorPtr));
+        monitors = calloc(1, sizeof(RRMonitorPtr));
 
     if (!monitors)
         return BadAlloc;

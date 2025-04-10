@@ -208,7 +208,7 @@ RROutputAddUserMode(RROutputPtr output, RRModePtr mode)
         newModes = reallocarray(output->userModes,
                                 output->numUserModes + 1, sizeof(RRModePtr));
     else
-        newModes = malloc(sizeof(RRModePtr));
+        newModes = calloc(1, sizeof(RRModePtr));
     if (!newModes)
         return BadAlloc;
 

@@ -70,7 +70,7 @@ RRModeCreate(xRRModeInfo * modeInfo, const char *name, ScreenPtr userScreen)
     if (!RRInit())
         return NULL;
 
-    mode = malloc(sizeof(RRModeRec) + modeInfo->nameLength + 1);
+    mode = calloc(1, sizeof(RRModeRec) + modeInfo->nameLength + 1);
     if (!mode)
         return NULL;
     mode->refcnt = 1;
@@ -83,7 +83,7 @@ RRModeCreate(xRRModeInfo * modeInfo, const char *name, ScreenPtr userScreen)
     if (num_modes)
         newModes = reallocarray(modes, num_modes + 1, sizeof(RRModePtr));
     else
-        newModes = malloc(sizeof(RRModePtr));
+        newModes = calloc(1, sizeof(RRModePtr));
 
     if (!newModes) {
         free(mode);

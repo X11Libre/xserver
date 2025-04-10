@@ -112,7 +112,7 @@ ProcRRSelectInput(ClientPtr client)
 
         if (!pRREvent) {
             /* build the entry */
-            pRREvent = (RREventPtr) malloc(sizeof(RREventRec));
+            pRREvent = calloc(1, sizeof(RREventRec));
             if (!pRREvent)
                 return BadAlloc;
             pRREvent->next = 0;
@@ -134,7 +134,7 @@ ProcRRSelectInput(ClientPtr client)
              * done through the resource database.
              */
             if (!pHead) {
-                pHead = (RREventPtr *) malloc(sizeof(RREventPtr));
+                pHead = calloc(1, sizeof(RREventPtr));
                 if (!pHead ||
                     !AddResource(pWin->drawable.id, RREventType,
                                  (void *) pHead)) {
