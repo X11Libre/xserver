@@ -692,7 +692,7 @@ vfbAllocateFramebufferMemory(vfbScreenInfoPtr pvfb)
 #endif
 
     case NORMAL_MEMORY_FB:
-        pvfb->pXWDHeader = (XWDFileHeader *) malloc(pvfb->sizeInBytes);
+        pvfb->pXWDHeader = (XWDFileHeader *) calloc(1, pvfb->sizeInBytes);
         break;
     }
 
