@@ -44,18 +44,12 @@
 #if defined(IN_MINI_GLX)
 #include <stdlib.h>
 #include <string.h>
-#define _mesa_free(m)   free(m)
-#define _mesa_memset memset
 #else
 #ifdef XFree86Server
 #include <os.h>
 #include <string.h>
-#define _mesa_free(m)   free(m)
-#define _mesa_memset memset
 #else
 #include <X11/Xlibint.h>
-#define _mesa_memset memset
-#define _mesa_free(m)   free(m)
 #endif  /* XFree86Server */
 #endif /* !defined(IN_MINI_GLX) */
 
@@ -126,7 +120,7 @@ _gl_copy_visual_to_context_mode(__GLcontextModes * mode,
 {
     __GLcontextModes * const next = mode->next;
 
-    (void)_mesa_memset(mode, 0, sizeof(__GLcontextModes));
+    (void)memset(mode, 0, sizeof(__GLcontextModes));
     mode->next = next;
 
     mode->visualID = config->vid;
@@ -472,7 +466,7 @@ _gl_context_modes_destroy(__GLcontextModes * modes)
     while (modes != NULL) {
         __GLcontextModes * const next = modes->next;
 
-        _mesa_free(modes);
+        free(modes);
         modes = next;
     }
 }
