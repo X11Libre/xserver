@@ -233,7 +233,7 @@ static DamageExtPtr
 DamageExtCreate(DrawablePtr pDrawable, DamageReportLevel level,
                 ClientPtr client, XID id, XID drawable)
 {
-    DamageExtPtr pDamageExt = malloc(sizeof(DamageExtRec));
+    DamageExtPtr pDamageExt = calloc(1, sizeof(DamageExtRec));
     if (!pDamageExt)
         return NULL;
 
