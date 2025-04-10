@@ -260,7 +260,6 @@ fbOverlayFinishScreenInit(ScreenPtr pScreen,
     int nvisuals;
     int ndepths;
     VisualID defaultVisual;
-    FbOverlayScrPrivPtr pScrPriv;
 
     if (!dixRegisterPrivateKey
         (&fbOverlayScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
@@ -269,7 +268,7 @@ fbOverlayFinishScreenInit(ScreenPtr pScreen,
     if (bpp1 == 24 || bpp2 == 24)
         return FALSE;
 
-    pScrPriv = malloc(sizeof(FbOverlayScrPrivRec));
+    FbOverlayScrPrivPtr pScrPriv = calloc(1, sizeof(FbOverlayScrPrivRec));
     if (!pScrPriv)
         return FALSE;
 
