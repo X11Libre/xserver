@@ -1123,7 +1123,7 @@ winLogCommandLine(int argc, char *argv[])
         }
 
     /* Allocate memory for concatenated command line */
-    g_pszCommandLine = malloc(iSize + 1);
+    g_pszCommandLine = calloc(1, iSize + 1);
     if (!g_pszCommandLine)
         FatalError("winLogCommandLine - Could not allocate memory for "
                    "command line string.  Exiting.\n");

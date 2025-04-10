@@ -463,7 +463,7 @@ winFixupPaths(void)
 
                     /* allocate memory */
                     if (fontpath == NULL)
-                        fontpath = malloc(newsize + 1);
+                        fontpath = calloc(1, newsize + 1);
                     else
                         fontpath = realloc(fontpath, newsize + 1);
 
@@ -509,7 +509,7 @@ winFixupPaths(void)
         while (ptr != NULL) {
             size_t oldfp_len = (ptr - oldptr);
             size_t newsize = oldfp_len;
-            char *newpath = malloc(newsize + 1);
+            char *newpath = calloc(1, newsize + 1);
 
             strncpy(newpath, oldptr, newsize);
             newpath[newsize] = 0;
@@ -518,7 +518,7 @@ winFixupPaths(void)
                 char *compose;
 
                 newsize = newsize - libx11dir_len + basedirlen;
-                compose = malloc(newsize + 1);
+                compose = calloc(1, newsize + 1);
                 strcpy(compose, basedir);
                 strncat(compose, newpath + libx11dir_len, newsize - basedirlen);
                 compose[newsize] = 0;
@@ -532,7 +532,7 @@ winFixupPaths(void)
             newfp_len += newsize;
 
             if (newfp == NULL)
-                newfp = malloc(newfp_len + 1);
+                newfp = calloc(1, newfp_len + 1);
             else
                 newfp = realloc(newfp, newfp_len + 1);
 

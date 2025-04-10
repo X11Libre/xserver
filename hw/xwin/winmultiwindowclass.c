@@ -68,7 +68,7 @@ winMultiWindowGetClassHint(WindowPtr pWin, char **res_name, char **res_class)
             len_name = strlen((char *) prop->data);
             if (len_name > prop->size) len_name = prop->size;
 
-            (*res_name) = malloc(len_name + 1);
+            (*res_name) = calloc(1, len_name + 1);
 
             if (!*res_name) {
                 ErrorF("winMultiWindowGetClassHint - *res_name was NULL\n");
@@ -83,7 +83,7 @@ winMultiWindowGetClassHint(WindowPtr pWin, char **res_name, char **res_class)
             len_class = (len_name >= prop->size) ? 0 : (strlen(((char *) prop->data) + 1 + len_name));
             if (len_class > prop->size - 1 - len_name) len_class = prop->size - 1 - len_name;
 
-            (*res_class) = malloc(len_class + 1);
+            (*res_class) = calloc(1, len_class + 1);
 
             if (!*res_class) {
                 ErrorF("winMultiWindowGetClassHint - *res_class was NULL\n");
@@ -146,7 +146,7 @@ winMultiWindowGetWindowRole(WindowPtr pWin, char **res_role)
             && prop->type == XA_STRING && prop->format == 8 && prop->data) {
             len_role = prop->size;
 
-            (*res_role) = malloc(len_role + 1);
+            (*res_role) = calloc(1, len_role + 1);
 
             if (!*res_role) {
                 ErrorF("winMultiWindowGetWindowRole - *res_role was NULL\n");
@@ -235,7 +235,7 @@ winMultiWindowGetWMName(WindowPtr pWin, char **wmName)
             && prop->type == XA_STRING && prop->data) {
             len_name = prop->size;
 
-            (*wmName) = malloc(len_name + 1);
+            (*wmName) = calloc(1, len_name + 1);
 
             if (!*wmName) {
                 ErrorF("winMultiWindowGetWMName - *wmName was NULL\n");

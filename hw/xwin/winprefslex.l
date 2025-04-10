@@ -42,8 +42,7 @@ extern void ErrorF (const char* /*f*/, ...);
 /* Copy the parsed string, must be free()d in yacc parser */
 static char *makestr(char *str)
 {
-  char *ptr;
-  ptr = malloc(strlen(str)+1);
+  char *ptr = calloc(1, strlen(str)+1);
   if (!ptr)
     {
       ErrorF ("winMultiWindowLex:makestr() out of memory\n");

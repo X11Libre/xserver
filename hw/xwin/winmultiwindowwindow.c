@@ -872,13 +872,12 @@ winAdjustXWindow(WindowPtr pWin, HWND hwnd)
 static HBITMAP winCreateDIB(ScreenPtr pScreen, int width, int height, int bpp, void **ppvBits, BITMAPINFOHEADER **ppbmih)
 {
     winScreenPriv(pScreen);
-    BITMAPV4HEADER *pbmih = NULL;
     HBITMAP hBitmap = NULL;
 
     /* Allocate bitmap info header */
-    pbmih = malloc(sizeof(BITMAPV4HEADER) + 256 * sizeof(RGBQUAD));
+    BITMAPV4HEADER *pbmih = calloc(1, sizeof(BITMAPV4HEADER) + 256 * sizeof(RGBQUAD));
     if (pbmih == NULL) {
-        ErrorF("winCreateDIB: malloc() failed\n");
+        ErrorF("winCreateDIB: calloc() failed\n");
         return NULL;
     }
     memset(pbmih, 0, sizeof(BITMAPV4HEADER) + 256 * sizeof(RGBQUAD));

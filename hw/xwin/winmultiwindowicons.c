@@ -513,9 +513,9 @@ winXIconToHICON(xcb_connection_t *conn, xcb_window_t id, int iconSize)
                     /* Mask is 1-bit deep */
                     maskStride = ((iconSize * 1 + 15) & (~15)) / 8;
 
-                    image = malloc(stride * iconSize);
-                    imageMask = malloc(stride * iconSize);
-                    mask = malloc(maskStride * iconSize);
+                    image = calloc(stride, iconSize);
+                    imageMask = calloc(stride, iconSize);
+                    mask = calloc(maskStride, iconSize);
 
                     /* Default to a completely black mask */
                     memset(imageMask, 0, stride * iconSize);

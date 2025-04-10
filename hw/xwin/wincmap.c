@@ -405,7 +405,6 @@ winGetPaletteDD(ScreenPtr pScreen, ColormapPtr pcmap)
     Pixel pixel;                /* Pixel == CARD32 */
     CARD16 nRed, nGreen, nBlue; /* CARD16 == unsigned short */
     UINT uiSystemPaletteEntries;
-    LPPALETTEENTRY ppeColors = NULL;
     HDC hdc = NULL;
 
     /* Get a DC to obtain the default palette */
@@ -429,9 +428,9 @@ winGetPaletteDD(ScreenPtr pScreen, ColormapPtr pcmap)
 #endif
 
     /* Allocate palette entries structure */
-    ppeColors = malloc(uiSystemPaletteEntries * sizeof(PALETTEENTRY));
+    LPPALETTEENTRY ppeColors = calloc(uiSystemPaletteEntries, sizeof(PALETTEENTRY));
     if (ppeColors == NULL) {
-        ErrorF("winGetPaletteDD - malloc () for colormap failed\n");
+        ErrorF("winGetPaletteDD - calloc () for colormap failed\n");
         return FALSE;
     }
 

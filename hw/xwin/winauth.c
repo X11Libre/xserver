@@ -81,10 +81,6 @@ GenerateAuthorization(unsigned name_length,
 BOOL
 winGenerateAuthorization(void)
 {
-#ifdef XCSECURITY
-    SecurityAuthorizationPtr pAuth = NULL;
-#endif
-
     /* Call OS layer to generate authorization key */
     g_authId = GenerateAuthorization(strlen(AUTH_NAME),
                                      AUTH_NAME,
@@ -107,8 +103,7 @@ winGenerateAuthorization(void)
 
 #ifdef XCSECURITY
     /* Allocate structure for additional auth information */
-    pAuth = (SecurityAuthorizationPtr)
-        malloc(sizeof(SecurityAuthorizationRec));
+    SecurityAuthorizationPtr pAuth = calloc(1, sizeof(SecurityAuthorizationRec));
     if (!(pAuth)) {
         ErrorF("winGenerateAuthorization - Failed allocating "
                "SecurityAuthorizationPtr.\n");

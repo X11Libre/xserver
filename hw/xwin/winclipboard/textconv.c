@@ -100,7 +100,7 @@ winClipboardUNIXtoDOS(char **ppszData, int iLength)
         return;
 
     /* Allocate a new string */
-    pszDestBegin = pszDest = malloc(iLength + iNewlineCount + 1);
+    pszDestBegin = pszDest = calloc(1, iLength + iNewlineCount + 1);
 
     /* Set source pointer to beginning of data string */
     pszSrc = *ppszData;
