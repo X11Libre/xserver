@@ -398,7 +398,7 @@ XdmcpRegisterAuthentication(const char *name,
           XdmcpReallocARRAYofARRAY8(&AuthenticationDatas,
                                     AuthenticationDatas.length + 1) &&
           (newFuncs =
-           malloc((AuthenticationNames.length +
+           calloc(1, (AuthenticationNames.length +
                    1) * sizeof(AuthenticationFuncsRec))))) {
         XdmcpDisposeARRAY8(&AuthenticationName);
         XdmcpDisposeARRAY8(&AuthenticationData);
@@ -502,7 +502,7 @@ XdmcpRegisterConnection(int type, const char *address, int addrlen)
     }
     if (ConnectionAddresses.length + 1 == 256)
         return;
-    newAddress = malloc(addrlen * sizeof(CARD8));
+    newAddress = calloc(addrlen, sizeof(CARD8));
     if (!newAddress)
         return;
     if (!XdmcpReallocARRAY16(&ConnectionTypes, ConnectionTypes.length + 1)) {
@@ -541,7 +541,7 @@ XdmcpRegisterAuthorization(const char *name, int namelen)
     ARRAY8 authName;
     int i;
 
-    authName.data = malloc(namelen * sizeof(CARD8));
+    authName.data = calloc(namelen, sizeof(CARD8));
     if (!authName.data)
         return;
     if (!XdmcpReallocARRAYofARRAY8

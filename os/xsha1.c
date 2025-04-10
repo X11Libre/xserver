@@ -45,8 +45,7 @@
 void *
 x_sha1_init(void)
 {
-    SHA1_CTX *ctx = malloc(sizeof(*ctx));
-
+    SHA1_CTX *ctx = calloc(1, sizeof(SHA1_CTX));
     if (!ctx)
         return NULL;
     SHA1Init(ctx);
@@ -79,7 +78,7 @@ x_sha1_final(void *ctx, unsigned char result[20])
 void *
 x_sha1_init(void)
 {
-    CC_SHA1_CTX *ctx = malloc(sizeof(*ctx));
+    CC_SHA1_CTX *ctx = calloc(1, sizeof(CC_SHA1_CTX));
 
     if (!ctx)
         return NULL;
@@ -117,7 +116,7 @@ static HCRYPTPROV hProv;
 void *
 x_sha1_init(void)
 {
-    HCRYPTHASH *ctx = malloc(sizeof(*ctx));
+    HCRYPTHASH *ctx = calloc(1, sizeof(HCRYPTHASH));
 
     if (!ctx)
         return NULL;
@@ -155,7 +154,7 @@ x_sha1_final(void *ctx, unsigned char result[20])
 void *
 x_sha1_init(void)
 {
-    struct sha1_ctx *ctx = malloc(sizeof(*ctx));
+    struct sha1_ctx *ctx = calloc(1, sizeof(struct sha1_ctx ));
 
     if (!ctx)
         return NULL;
@@ -229,7 +228,7 @@ x_sha1_final(void *ctx, unsigned char result[20])
 void *
 x_sha1_init(void)
 {
-    sha1_ctx *ctx = malloc(sizeof(*ctx));
+    sha1_ctx *ctx = calloc(1, sizeof(sha1_ctx));
 
     if (!ctx)
         return NULL;
@@ -261,7 +260,7 @@ void *
 x_sha1_init(void)
 {
     int ret;
-    SHA_CTX *ctx = malloc(sizeof(*ctx));
+    SHA_CTX *ctx = calloc(1, sizeof(SHA_CTX));
 
     if (!ctx)
         return NULL;

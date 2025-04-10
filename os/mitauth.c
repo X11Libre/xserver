@@ -49,12 +49,10 @@ static struct auth {
 int
 MitAddCookie(unsigned short data_length, const char *data, XID id)
 {
-    struct auth *new;
-
-    new = malloc(sizeof(struct auth));
+    struct auth *new = calloc(1, sizeof(struct auth));
     if (!new)
         return 0;
-    new->data = malloc((unsigned) data_length);
+    new->data = calloc(1, (unsigned) data_length);
     if (!new->data) {
         free(new);
         return 0;

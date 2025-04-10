@@ -96,7 +96,7 @@ __stdcall unsigned long GetTickCount(void);
 #include <sys/stat.h>
 #include <ctype.h>              /* for isspace */
 #include <stdarg.h>
-#include <stdlib.h>             /* for malloc() */
+#include <stdlib.h>             /* for calloc() */
 
 #if defined(TCPCONN)
 #ifndef WIN32
@@ -1030,7 +1030,7 @@ Popen(const char *command, const char *type)
     if ((*type != 'r' && *type != 'w') || type[1])
         return NULL;
 
-    if ((cur = malloc(sizeof(struct pid))) == NULL)
+    if ((cur = calloc(1, sizeof(struct pid))) == NULL)
         return NULL;
 
     if (pipe(pdes) < 0) {

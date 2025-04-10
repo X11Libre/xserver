@@ -972,12 +972,10 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
 static ConnectionInputPtr
 AllocateInputBuffer(void)
 {
-    ConnectionInputPtr oci;
-
-    oci = malloc(sizeof(ConnectionInput));
+    ConnectionInputPtr oci = calloc(1, sizeof(ConnectionInput));
     if (!oci)
         return NULL;
-    oci->buffer = malloc(BUFSIZE);
+    oci->buffer = calloc(1, BUFSIZE);
     if (!oci->buffer) {
         free(oci);
         return NULL;
@@ -993,9 +991,7 @@ AllocateInputBuffer(void)
 static ConnectionOutputPtr
 AllocateOutputBuffer(void)
 {
-    ConnectionOutputPtr oco;
-
-    oco = malloc(sizeof(ConnectionOutput));
+    ConnectionOutputPtr oco = calloc(1, sizeof(ConnectionOutput));
     if (!oco)
         return NULL;
     oco->buf = calloc(1, BUFSIZE);

@@ -614,10 +614,9 @@ ClientReady(int fd, int xevents, void *data)
 static ClientPtr
 AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
 {
-    OsCommPtr oc;
     ClientPtr client;
 
-    oc = malloc(sizeof(OsCommRec));
+    OsCommPtr oc = calloc(1, sizeof(OsCommRec));
     if (!oc)
         return NullClient;
     oc->trans_conn = trans_conn;

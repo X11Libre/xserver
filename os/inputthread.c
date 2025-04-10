@@ -409,7 +409,7 @@ InputThreadPreInit(void)
      if (pipe(hotplugPipe) < 0)
         FatalError("input-thread: could not create pipe");
 
-    inputThreadInfo = malloc(sizeof(InputThreadInfo));
+    inputThreadInfo = calloc(1, sizeof(InputThreadInfo));
     if (!inputThreadInfo)
         FatalError("input-thread: could not allocate memory");
 

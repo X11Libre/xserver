@@ -82,7 +82,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <errno.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <stdlib.h>             /* for malloc() */
+#include <stdlib.h>             /* for calloc() */
 #include <sys/stat.h>
 #include <time.h>
 #include <X11/Xfuncproto.h>
@@ -773,7 +773,6 @@ AuditPrefix(void)
 {
     time_t tm;
     char *autime, *s;
-    char *tmpBuf;
     int len;
 
     time(&tm);
@@ -781,7 +780,7 @@ AuditPrefix(void)
     if ((s = strchr(autime, '\n')))
         *s = '\0';
     len = strlen(AUDIT_PREFIX) + strlen(autime) + 10 + 1;
-    tmpBuf = malloc(len);
+    char *tmpBuf = calloc(1, len);
     if (!tmpBuf)
         return NULL;
     snprintf(tmpBuf, len, AUDIT_PREFIX, autime, (unsigned long) getpid());

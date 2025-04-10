@@ -181,7 +181,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
         size_t len = argmax;
         int32_t argc = -1;
 
-        char * const procargs = malloc(len);
+        char * const procargs = calloc(1, len);
         if (!procargs) {
             ErrorF("Failed to allocate memory (%lu bytes) for KERN_PROCARGS2 result for pid %d: %s\n", len, pid, strerror(errno));
             return;
@@ -278,7 +278,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
 
         /* Read KERN_PROC_ARGS contents. Similar to /proc/pid/cmdline
          * the process name and each argument are separated by NUL byte. */
-        char *const procargs = malloc(len);
+        char *const procargs = calloc(1, len);
         if (sysctl(mib, ARRAY_SIZE(mib), procargs, &len, NULL, 0) != 0) {
             ErrorF("Failed to get KERN_PROC_ARGS for PID %d: %s\n", pid, strerror(errno));
             free(procargs);
@@ -383,7 +383,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
         char *args = NULL;
 
         if (argsize > 0)
-            args = malloc(argsize);
+            args = calloc(1, argsize);
         if (args) {
             int i = 0;
 

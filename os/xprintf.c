@@ -103,7 +103,7 @@ Xvasprintf(char **ret, const char *_X_RESTRICT_KYWD format, va_list va)
     size = vsnprintf(NULL, 0, format, va2);
     va_end(va2);
 
-    *ret = malloc(size + 1);
+    *ret = calloc(1, size + 1);
     if (*ret == NULL)
         return -1;
 

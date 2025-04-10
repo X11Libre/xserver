@@ -43,7 +43,7 @@ strndup(const char *str, size_t n)
     for (len = 0; len < n && str[len]; len++)
         continue;
 
-    if ((copy = malloc(len + 1)) == NULL)
+    if ((copy = calloc(1, len + 1)) == NULL)
         return (NULL);
     memcpy(copy, str, len);
     copy[len] = '\0';

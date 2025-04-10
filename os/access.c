@@ -217,7 +217,7 @@ typedef struct _host {
     int requested;
 } HOST;
 
-#define MakeHost(h,l)	(h)=malloc(sizeof *(h)+(l));\
+#define MakeHost(h,l)	(h)=calloc(1, sizeof *(h)+(l));\
 			if (h) { \
 			   (h)->addr=(unsigned char *) ((h) + 1);\
 			   (h)->requested = FALSE; \
@@ -590,7 +590,7 @@ DefineSelf(int fd)
         ErrorF("Getting interface count: %s\n", strerror(errno));
     if (len < (ifn.lifn_count * sizeof(struct lifreq))) {
         len = ifn.lifn_count * sizeof(struct lifreq);
-        bufptr = malloc(len);
+        bufptr = calloc(1, len);
     }
 #endif
 
@@ -1415,7 +1415,7 @@ GetHosts(void **data, int *pnHosts, int *pLen, BOOL * pEnabled)
             break;
     }
     if (n) {
-        *data = ptr = malloc(n);
+        *data = ptr = calloc(1, n);
         if (!ptr) {
             return BadAlloc;
         }
@@ -1638,7 +1638,7 @@ siTypeAdd(const char *typeName, siAddrMatchFunc addrMatch,
         }
     }
 
-    s = malloc(sizeof(struct siType));
+    s = calloc(1, sizeof(struct siType));
     if (s == NULL)
         return BadAlloc;
 
@@ -1997,7 +1997,7 @@ static Bool
 siLocalCredGetId(const char *addr, int len, siLocalCredPrivPtr lcPriv, int *id)
 {
     Bool parsedOK = FALSE;
-    char *addrbuf = malloc(len + 1);
+    char *addrbuf = calloc(1, len + 1);
 
     if (addrbuf == NULL) {
         return FALSE;
