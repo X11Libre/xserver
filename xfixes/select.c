@@ -116,26 +116,36 @@ CheckSelectionCallback(void)
 			    XFixesSelectionWindowDestroyNotifyMask |\
 			    XFixesSelectionClientCloseNotifyMask)
 
-static int
-XFixesSelectSelectionInput(ClientPtr pClient,
-                           Atom selection_name, WindowPtr pWindow, CARD32 eventMask)
+int
+ProcXFixesSelectSelectionInput(ClientPtr client)
 {
+    REQUEST(xXFixesSelectSelectionInputReq);
+    REQUEST_SIZE_MATCH(xXFixesSelectSelectionInputReq);
+
+    WindowPtr pWindow;
+    int rc = dixLookupWindow(&pWindow, stuff->window, client, DixGetAttrAccess);
+    if (rc != Success)
+        return rc;
+    if (stuff->eventMask & ~SelectionAllEvents) {
+        client->errorValue = stuff->eventMask;
+        return BadValue;
+    }
+
     void *val;
-    int rc;
     SelectionEventPtr *prev, e;
     Selection *selection;
 
-    rc = dixLookupSelection(&selection, selection_name, pClient, DixGetAttrAccess);
+    rc = dixLookupSelection(&selection, stuff->selection, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
     for (prev = &selectionEvents; (e = *prev); prev = &e->next) {
         if (e->selection == selection &&
-            e->pClient == pClient && e->pWindow == pWindow) {
+            e->pClient == client && e->pWindow == pWindow) {
             break;
         }
     }
-    if (!eventMask) {
+    if (!stuff->eventMask) {
         if (e) {
             FreeResource(e->clientResource, 0);
         }
@@ -148,9 +158,9 @@ XFixesSelectSelectionInput(ClientPtr pClient,
 
         e->next = 0;
         e->selection = selection;
-        e->pClient = pClient;
+        e->pClient = client;
         e->pWindow = pWindow;
-        e->clientResource = FakeClientID(pClient->index);
+        e->clientResource = FakeClientID(client->index);
 
         /*
          * Add a resource hanging from the window to
@@ -175,27 +185,8 @@ XFixesSelectSelectionInput(ClientPtr pClient,
             return BadAlloc;
         }
     }
-    e->eventMask = eventMask;
+    e->eventMask = stuff->eventMask;
     return Success;
-}
-
-int
-ProcXFixesSelectSelectionInput(ClientPtr client)
-{
-    REQUEST(xXFixesSelectSelectionInputReq);
-    WindowPtr pWin;
-    int rc;
-
-    REQUEST_SIZE_MATCH(xXFixesSelectSelectionInputReq);
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
-    if (rc != Success)
-        return rc;
-    if (stuff->eventMask & ~SelectionAllEvents) {
-        client->errorValue = stuff->eventMask;
-        return BadValue;
-    }
-    return XFixesSelectSelectionInput(client, stuff->selection,
-                                      pWin, stuff->eventMask);
 }
 
 int _X_COLD
