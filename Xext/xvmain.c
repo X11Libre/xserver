@@ -351,7 +351,7 @@ XvStopAdaptors(DrawablePtr pDrawable)
         XvPortPtr pp = pa->pPorts;
         int np = pa->nPorts;
 
-        while (np--) {
+        while ((np--) && (pp)) {
             if (pp->pDraw == pDrawable) {
                 XvdiSendVideoNotify(pp, pDrawable, XvPreempted);
 
