@@ -112,6 +112,11 @@ extern _X_EXPORT unsigned int ResourceClientBits(void);
 #define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
 /* extract the client id from an XID */
 #define CLIENT_ID(id) ((int)(CLIENT_BITS(id) >> CLIENTOFFSET))
+
+/*
+ * Resource IDs having that bit set still belonging to some client,
+ * but are server-internal, thus invisible to clients.
+ */
 #define SERVER_BIT		(Mask)0x40000000        /* use illegal bit */
 
 #ifdef INVALID
