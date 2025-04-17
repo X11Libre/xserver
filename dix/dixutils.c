@@ -218,28 +218,28 @@ dixLookupFontable(FontPtr *pFont, XID id, ClientPtr client, Mask access)
 }
 
 int
-dixLookupClient(ClientPtr *pClient, XID rid, ClientPtr client, Mask access)
+dixLookupClient(ClientPtr *result, XID id, ClientPtr client, Mask access_mode)
 {
     void *pRes;
-    int rc = BadValue, clientIndex = CLIENT_ID(rid);
+    int rc = BadValue, clientIndex = CLIENT_ID(id);
 
-    if (!clientIndex || !clients[clientIndex] || (rid & SERVER_BIT))
+    if (!clientIndex || !clients[clientIndex] || (id & SERVER_BIT))
         goto bad;
 
-    rc = dixLookupResourceByClass(&pRes, rid, RC_ANY, client, DixGetAttrAccess);
+    rc = dixLookupResourceByClass(&pRes, id, RC_ANY, client, DixGetAttrAccess);
     if (rc != Success)
         goto bad;
 
-    rc = XaceHookClientAccess(client, clients[clientIndex], access);
+    rc = XaceHookClientAccess(client, clients[clientIndex], access_mode);
     if (rc != Success)
         goto bad;
 
-    *pClient = clients[clientIndex];
+    *result = clients[clientIndex];
     return Success;
  bad:
     if (client)
-        client->errorValue = rid;
-    *pClient = NULL;
+        client->errorValue = id;
+    *result = NULL;
     return rc;
 }
 
