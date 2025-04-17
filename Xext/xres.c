@@ -386,7 +386,9 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
 
     clientID = CLIENT_ID(stuff->xid);
 
-    if ((clientID >= currentMaxClients) || !clients[clientID]) {
+    if ((clientID >= currentMaxClients) || !clients[clientID] ||
+        (XaceHookClientAccess(client, clients[clientID], DixReadAccess)
+                              != Success)) {
         client->errorValue = stuff->xid;
         return BadValue;
     }
