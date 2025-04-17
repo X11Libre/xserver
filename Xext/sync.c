@@ -1355,7 +1355,8 @@ ProcSyncListSystemCounters(ClientPtr client)
 }
 
 /*
- * ** Set client Priority
+ * Set the priority of the client owning given resource.
+ * If the resource ID is None then set the priority of calling client.
  */
 static int
 ProcSyncSetPriority(ClientPtr client)
@@ -1389,7 +1390,8 @@ ProcSyncSetPriority(ClientPtr client)
 }
 
 /*
- * ** Get client Priority
+ * Retrieve the priority of the client owning given resource.
+ * If the resource ID is None then retrieve the priority of calling client.
  */
 static int
 ProcSyncGetPriority(ClientPtr client)
