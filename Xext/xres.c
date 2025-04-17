@@ -13,6 +13,7 @@
 
 #include "dix/registry_priv.h"
 #include "os/client_priv.h"
+#include "Xext/xace.h"
 
 #include "misc.h"
 #include "os.h"
@@ -229,8 +230,10 @@ ProcXResQueryClients(ClientPtr client)
     num_clients = 0;
     for (i = 0; i < currentMaxClients; i++) {
         if (clients[i]) {
-            current_clients[num_clients] = i;
-            num_clients++;
+            if (XaceHookClientAccess(client, clients[i], DixReadAccess) == Success) {
+                current_clients[num_clients] = i;
+                num_clients++;
+            }
         }
     }
 
