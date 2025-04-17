@@ -1370,7 +1370,7 @@ ProcSyncSetPriority(ClientPtr client)
     if (stuff->id == None)
         priorityclient = client;
     else {
-        rc = dixLookupClient(&priorityclient, stuff->id, client,
+        rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
                              DixSetAttrAccess);
         if (rc != Success)
             return rc;
@@ -1406,7 +1406,7 @@ ProcSyncGetPriority(ClientPtr client)
     if (stuff->id == None)
         priorityclient = client;
     else {
-        rc = dixLookupClient(&priorityclient, stuff->id, client,
+        rc = dixLookupResourceOwner(&priorityclient, stuff->id, client,
                              DixGetAttrAccess);
         if (rc != Success)
             return rc;

@@ -82,7 +82,7 @@ int dixLookupGC(GCPtr *result,
                 ClientPtr client,
                 Mask access_mode);
 
-int dixLookupClient(ClientPtr *result,
+int dixLookupResourceOwner(ClientPtr *result,
                     XID id,
                     ClientPtr client,
                     Mask access_mode);

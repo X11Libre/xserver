@@ -218,7 +218,7 @@ dixLookupFontable(FontPtr *pFont, XID id, ClientPtr client, Mask access)
 }
 
 int
-dixLookupClient(ClientPtr *result, XID id, ClientPtr client, Mask access_mode)
+dixLookupResourceOwner(ClientPtr *result, XID id, ClientPtr client, Mask access_mode)
 {
     void *pRes;
     int rc = BadValue, clientIndex = CLIENT_ID(id);

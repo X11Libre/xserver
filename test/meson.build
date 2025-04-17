@@ -218,7 +218,7 @@ if build_xorg
        unit_includes += [include_directories('xi1', 'xi2')]
        ldwraps = [
         '-Wl,-wrap,dixLookupWindow',
-        '-Wl,-wrap,dixLookupClient',
+        '-Wl,-wrap,dixLookupResourceOwner',
         '-Wl,-wrap,WriteToClient',
         '-Wl,-wrap,dixLookupWindow',
         '-Wl,-wrap,XISetEventMask',

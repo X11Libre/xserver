@@ -67,7 +67,7 @@ ProcXIGetClientPointer(ClientPtr client)
     REQUEST_SIZE_MATCH(xXIGetClientPointerReq);
 
     if (stuff->win != None) {
-        rc = dixLookupClient(&winclient, stuff->win, client, DixGetAttrAccess);
+        rc = dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess);
 
         if (rc != Success)
             return BadWindow;

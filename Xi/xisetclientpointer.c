@@ -82,7 +82,7 @@ ProcXISetClientPointer(ClientPtr client)
     pDev = GetMaster(pDev, MASTER_POINTER);
 
     if (stuff->win != None) {
-        rc = dixLookupClient(&targetClient, stuff->win, client,
+        rc = dixLookupResourceOwner(&targetClient, stuff->win, client,
                              DixManageAccess);
 
         if (rc != Success)

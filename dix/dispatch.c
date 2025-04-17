@@ -3364,7 +3364,7 @@ ProcKillClient(ClientPtr client)
         return Success;
     }
 
-    rc = dixLookupClient(&killclient, stuff->id, client, DixDestroyAccess);
+    rc = dixLookupResourceOwner(&killclient, stuff->id, client, DixDestroyAccess);
     if (rc == Success) {
         CloseDownClient(killclient);
         if (client == killclient) {
