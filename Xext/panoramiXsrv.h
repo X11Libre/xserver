@@ -35,14 +35,14 @@ extern RESTYPE XRT_PICTURE;
 typedef Bool (*XineramaVisualsEqualProcPtr) (VisualPtr, ScreenPtr, VisualPtr);
 extern _X_EXPORT XineramaVisualsEqualProcPtr XineramaVisualsEqualPtr;
 
-extern _X_EXPORT void XineramaGetImageData(DrawablePtr *pDrawables,
-                                           int left,
-                                           int top,
-                                           int width,
-                                           int height,
-                                           unsigned int format,
-                                           unsigned long planemask,
-                                           char *data, int pitch, Bool isRoot);
+void XineramaGetImageData(DrawablePtr *pDrawables,
+                          int left,
+                          int top,
+                          int width,
+                          int height,
+                          unsigned int format,
+                          unsigned long planemask,
+                          char *data, int pitch, Bool isRoot);
 
 static inline void
 panoramix_setup_ids(PanoramiXRes * resource, ClientPtr client, XID base_id)
