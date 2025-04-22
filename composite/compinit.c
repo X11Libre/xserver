@@ -213,28 +213,6 @@ CompositeRegisterAlternateVisuals(ScreenPtr pScreen, VisualID * vids,
     return compRegisterAlternateVisuals(cs, vids, nVisuals);
 }
 
-Bool
-CompositeRegisterImplicitRedirectionException(ScreenPtr pScreen,
-                                              VisualID parentVisual,
-                                              VisualID winVisual)
-{
-    CompScreenPtr cs = GetCompScreen(pScreen);
-    CompImplicitRedirectException *p;
-
-    p = reallocarray(cs->implicitRedirectExceptions,
-                     cs->numImplicitRedirectExceptions + 1, sizeof(p[0]));
-    if (p == NULL)
-        return FALSE;
-
-    p[cs->numImplicitRedirectExceptions].parentVisual = parentVisual;
-    p[cs->numImplicitRedirectExceptions].winVisual = winVisual;
-
-    cs->implicitRedirectExceptions = p;
-    cs->numImplicitRedirectExceptions++;
-
-    return TRUE;
-}
-
 typedef struct _alternateVisual {
     int depth;
     CARD32 format;
