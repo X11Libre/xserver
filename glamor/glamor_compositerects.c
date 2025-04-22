@@ -26,6 +26,7 @@
  * 	original author is Chris Wilson at sna.
  *
  */
+#include <dix-config.h>
 
 #include "glamor_priv.h"
 #include "mipict.h"

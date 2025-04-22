@@ -26,6 +26,7 @@
  *    Zhigang Gong <zhigang.gong@linux.intel.com>
  *
  */
+#include <dix-config.h>
 
 #include <stdlib.h>
 

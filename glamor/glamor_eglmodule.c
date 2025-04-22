@@ -26,8 +26,7 @@
  * Authors:
  *    Zhigang Gong <zhigang.gong@gmail.com>
  */
-
-#include "dix-config.h"
+#include <dix-config.h>
 
 #include <xf86.h>
 #define GLAMOR_FOR_XORG

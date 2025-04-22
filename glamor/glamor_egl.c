@@ -26,8 +26,7 @@
  *    Zhigang Gong <zhigang.gong@linux.intel.com>
  *
  */
-
-#include "dix-config.h"
+#include <dix-config.h>
 
 #define GLAMOR_FOR_XORG
 #include <unistd.h>

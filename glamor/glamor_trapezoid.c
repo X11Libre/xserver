@@ -29,6 +29,7 @@
  *
  * Trapezoid acceleration implementation
  */
+#include <dix-config.h>
 
 #include "glamor_priv.h"
 
