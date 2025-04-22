@@ -10,6 +10,7 @@
 #ifdef FB_DEBUG
 
 void fbValidateDrawable(DrawablePtr d);
+void fbSetBits(FbStip * bits, int stride, FbStip data);
 
 #else
 

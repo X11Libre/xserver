@@ -110,8 +110,6 @@ typedef FbBits FbStip;
 typedef int FbStride;
 
 #ifdef FB_DEBUG
-extern _X_EXPORT void fbSetBits(FbStip * bits, int stride, FbStip data);
-
 #define FB_HEAD_BITS   (FbStip) (0xbaadf00d)
 #define FB_TAIL_BITS   (FbStip) (0xbaddf0ad)
 #endif
