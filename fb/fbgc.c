@@ -26,7 +26,7 @@
 
 #include "fb.h"
 
-const GCFuncs fbGCFuncs = {
+static const GCFuncs fbGCFuncs = {
     fbValidateGC,
     miChangeGC,
     miCopyGC,
