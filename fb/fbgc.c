@@ -36,7 +36,7 @@ const GCFuncs fbGCFuncs = {
     miCopyClip,
 };
 
-const GCOps fbGCOps = {
+static const GCOps fbGCOps = {
     fbFillSpans,
     fbSetSpans,
     fbPutImage,
