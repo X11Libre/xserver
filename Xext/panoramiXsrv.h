@@ -14,7 +14,7 @@ extern RegionRec PanoramiXScreenRegion;
 VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
 void PanoramiXConsolidate(void);
 Bool PanoramiXCreateConnectionBlock(void);
-extern _X_EXPORT PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
+PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
 extern _X_EXPORT Bool
 XineramaRegisterConnectionBlockCallback(void (*func) (void));
 extern _X_EXPORT int XineramaDeleteResource(void *, XID);
