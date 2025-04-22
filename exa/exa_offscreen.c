@@ -25,6 +25,7 @@
  * When allocating, the contiguous block of areas with the minimum eviction
  * cost is found and evicted in order to make room for the new allocation.
  */
+#include <dix-config.h>
 
 #include "exa_priv.h"
 
