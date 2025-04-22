@@ -418,13 +418,6 @@ XineramaInitData(void)
     }
 }
 
-void
-XineramaReinitData(void)
-{
-    RegionUninit(&PanoramiXScreenRegion);
-    XineramaInitData();
-}
-
 /*
  *	PanoramiXExtensionInit():
  *		Called from InitExtensions in main().

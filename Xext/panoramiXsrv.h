@@ -19,8 +19,6 @@ extern _X_EXPORT Bool
 XineramaRegisterConnectionBlockCallback(void (*func) (void));
 extern _X_EXPORT int XineramaDeleteResource(void *, XID);
 
-extern _X_EXPORT void XineramaReinitData(void);
-
 extern _X_EXPORT RESTYPE XRC_DRAWABLE;
 extern _X_EXPORT RESTYPE XRT_WINDOW;
 extern _X_EXPORT RESTYPE XRT_PIXMAP;
