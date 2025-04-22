@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 
-#include "fb.h"
+#include "fb/fb_priv.h"
 
 PixmapPtr
 fbCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,

@@ -36,6 +36,7 @@
 #include <assert.h>
 #include <X11/Xatom.h>
 
+#include "fb/fb_priv.h"
 #include "mi/mi_priv.h"
 #include "dix_priv.h"
 
@@ -47,7 +48,6 @@
 extern int darwinMainScreenX, darwinMainScreenY;
 extern Bool no_configure_window;
 #endif
-#include "fb.h"
 
 #include "rootlessCommon.h"
 #include "rootlessWindow.h"

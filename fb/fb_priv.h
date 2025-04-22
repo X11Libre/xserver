@@ -1,0 +1,20 @@
+/* SPDX-License-Identifier: MIT OR X11
+ *
+ * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
+ */
+#ifndef XORG_FB_PRIV_H
+#define XORG_FB_PRIV_H
+
+#include "fb/fb.h"
+
+#ifdef FB_DEBUG
+
+void fbValidateDrawable(DrawablePtr d);
+
+#else
+
+static inline void fbValidateDrawable(DrawablePtr d) {}
+
+#endif /* FB_DEBUG */
+
+#endif /* XORG_FB_PRIV_H */
