@@ -16,7 +16,7 @@ void PanoramiXConsolidate(void);
 Bool PanoramiXCreateConnectionBlock(void);
 PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
 Bool XineramaRegisterConnectionBlockCallback(void (*func) (void));
-extern _X_EXPORT int XineramaDeleteResource(void *, XID);
+int XineramaDeleteResource(void *, XID);
 
 extern _X_EXPORT RESTYPE XRC_DRAWABLE;
 extern _X_EXPORT RESTYPE XRT_WINDOW;
