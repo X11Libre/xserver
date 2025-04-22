@@ -26,6 +26,12 @@
 
 #include "fb/fb_priv.h"
 
+#ifdef FB_DEBUG
+static void fbInitializeDrawable(DrawablePtr pDrawable);
+#else
+static inline void fbInitializeDrawable(DrawablePtr pDrawable) {}
+#endif
+
 PixmapPtr
 fbCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
                unsigned usage_hint)
