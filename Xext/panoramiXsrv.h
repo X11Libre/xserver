@@ -13,7 +13,7 @@ extern RegionRec PanoramiXScreenRegion;
 
 VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
 void PanoramiXConsolidate(void);
-extern _X_EXPORT Bool PanoramiXCreateConnectionBlock(void);
+Bool PanoramiXCreateConnectionBlock(void);
 extern _X_EXPORT PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
 extern _X_EXPORT Bool
 XineramaRegisterConnectionBlockCallback(void (*func) (void));
