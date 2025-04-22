@@ -15,8 +15,7 @@ VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
 void PanoramiXConsolidate(void);
 Bool PanoramiXCreateConnectionBlock(void);
 PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
-extern _X_EXPORT Bool
-XineramaRegisterConnectionBlockCallback(void (*func) (void));
+Bool XineramaRegisterConnectionBlockCallback(void (*func) (void));
 extern _X_EXPORT int XineramaDeleteResource(void *, XID);
 
 extern _X_EXPORT RESTYPE XRC_DRAWABLE;
