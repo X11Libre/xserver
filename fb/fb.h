@@ -438,12 +438,6 @@ typedef struct {
 #define FbEvenTile(w)	    ((w) <= FB_UNIT && FbPowerOfTwo(w))
 
 /*
- * fballpriv.c
- */
-extern _X_EXPORT Bool
-fbAllocatePrivates(ScreenPtr pScreen);
-
-/*
  * fbarc.c
  */
 

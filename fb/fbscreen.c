@@ -22,9 +22,10 @@
 
 #include <dix-config.h>
 
+#include "fb/fb_priv.h"
 #include "os/osdep.h"
 
-#include "fb.h"
+#undef CreateWindow
 
 Bool
 fbCloseScreen(ScreenPtr pScreen)

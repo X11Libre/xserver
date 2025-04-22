@@ -5,6 +5,9 @@
 #ifndef XORG_FB_PRIV_H
 #define XORG_FB_PRIV_H
 
+#include <X11/Xdefs.h>
+
+#include "include/scrnintstr.h"
 #include "fb/fb.h"
 
 #ifdef FB_DEBUG
@@ -17,5 +20,7 @@ void fbSetBits(FbStip * bits, int stride, FbStip data);
 static inline void fbValidateDrawable(DrawablePtr d) {}
 
 #endif /* FB_DEBUG */
+
+Bool fbAllocatePrivates(ScreenPtr pScreen);
 
 #endif /* XORG_FB_PRIV_H */
