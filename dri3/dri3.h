@@ -128,7 +128,4 @@ typedef struct dri3_screen_info {
 extern _X_EXPORT Bool
 dri3_screen_init(ScreenPtr screen, const dri3_screen_info_rec *info);
 
-extern _X_EXPORT uint32_t
-drm_format_for_depth(uint32_t depth, uint32_t bpp);
-
 #endif /* _DRI3_H_ */
