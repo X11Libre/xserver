@@ -774,9 +774,6 @@ extern _X_EXPORT unsigned long
 extern _X_EXPORT unsigned long
  exaGetPixmapPitch(PixmapPtr pPix);
 
-extern _X_EXPORT unsigned long
- exaGetPixmapSize(PixmapPtr pPix);
-
 extern _X_EXPORT void *exaGetPixmapDriverPrivate(PixmapPtr p);
 
 /* in exa_offscreen.c */

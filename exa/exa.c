@@ -83,21 +83,6 @@ exaGetPixmapPitch(PixmapPtr pPix)
 }
 
 /**
- * exaGetPixmapSize() returns the size in bytes of the given pixmap in video
- * memory. Only valid when the pixmap is currently in framebuffer.
- */
-unsigned long
-exaGetPixmapSize(PixmapPtr pPix)
-{
-    ExaPixmapPrivPtr pExaPixmap;
-
-    pExaPixmap = ExaGetPixmapPriv(pPix);
-    if (pExaPixmap != NULL)
-        return pExaPixmap->fb_size;
-    return 0;
-}
-
-/**
  * exaGetDrawablePixmap() returns a backing pixmap for a given drawable.
  *
  * @param pDrawable the drawable being requested.
