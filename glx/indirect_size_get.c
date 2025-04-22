@@ -22,7 +22,7 @@
  * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+#include <dix-config.h>
 
 #include <X11/Xfuncproto.h>
 #include <GL/gl.h>

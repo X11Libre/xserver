@@ -31,7 +31,8 @@
  * \author Ian Romanick <idr@us.ibm.com>
  */
 
-#include "dix-config.h"
+#include <dix-config.h>
+
 #include "extension_string.h"
 #include "opaque.h"
 
