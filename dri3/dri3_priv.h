@@ -115,4 +115,7 @@ dri3_get_supported_modifiers(ScreenPtr screen, DrawablePtr drawable,
 int
 dri3_import_syncobj(ClientPtr client, ScreenPtr screen, XID id, int fd);
 
+int
+dri3_send_open_reply(ClientPtr client, int fd);
+
 #endif /* _DRI3PRIV_H_ */
