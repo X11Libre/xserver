@@ -87,7 +87,7 @@ RESTYPE XRT_GC;
 RESTYPE XRT_COLORMAP;
 
 static Bool VisualsEqual(VisualPtr, ScreenPtr, VisualPtr);
-XineramaVisualsEqualProcPtr XineramaVisualsEqualPtr = &VisualsEqual;
+static XineramaVisualsEqualProcPtr XineramaVisualsEqualPtr = &VisualsEqual;
 
 /*
  *	Function prototypes

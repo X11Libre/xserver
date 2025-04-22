@@ -33,7 +33,6 @@ extern RESTYPE XRT_PICTURE;
  * screen 0.
  */
 typedef Bool (*XineramaVisualsEqualProcPtr) (VisualPtr, ScreenPtr, VisualPtr);
-extern _X_EXPORT XineramaVisualsEqualProcPtr XineramaVisualsEqualPtr;
 
 void XineramaGetImageData(DrawablePtr *pDrawables,
                           int left,
