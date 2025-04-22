@@ -799,9 +799,6 @@ extern _X_EXPORT Bool
 extern _X_EXPORT void
  exaMoveInPixmap(PixmapPtr pPixmap);
 
-extern _X_EXPORT void
- exaMoveOutPixmap(PixmapPtr pPixmap);
-
 /* in exa_unaccel.c */
 extern _X_EXPORT CARD32
  exaGetPixmapFirstPixel(PixmapPtr pPixmap);

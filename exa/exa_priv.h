@@ -718,4 +718,6 @@ void
 void
  exaPrepareAccessReg_classic(PixmapPtr pPixmap, int index, RegionPtr pReg);
 
+void exaMoveOutPixmap(PixmapPtr pPixmap);
+
 #endif                          /* EXAPRIV_H */
