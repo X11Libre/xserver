@@ -12,7 +12,7 @@ extern int PanoramiXPixHeight;
 extern RegionRec PanoramiXScreenRegion;
 
 VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
-extern _X_EXPORT void PanoramiXConsolidate(void);
+void PanoramiXConsolidate(void);
 extern _X_EXPORT Bool PanoramiXCreateConnectionBlock(void);
 extern _X_EXPORT PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
 extern _X_EXPORT Bool
