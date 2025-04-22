@@ -1,5 +1,3 @@
-/* DO NOT EDIT - This file generated automatically by glX_server_table.py (from Mesa) script */
-
 /*
  * (C) Copyright IBM Corporation 2005, 2006
  * All Rights Reserved.
