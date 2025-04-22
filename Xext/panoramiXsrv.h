@@ -18,12 +18,12 @@ PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
 Bool XineramaRegisterConnectionBlockCallback(void (*func) (void));
 int XineramaDeleteResource(void *, XID);
 
-extern _X_EXPORT RESTYPE XRC_DRAWABLE;
-extern _X_EXPORT RESTYPE XRT_WINDOW;
-extern _X_EXPORT RESTYPE XRT_PIXMAP;
-extern _X_EXPORT RESTYPE XRT_GC;
-extern _X_EXPORT RESTYPE XRT_COLORMAP;
-extern _X_EXPORT RESTYPE XRT_PICTURE;
+extern RESTYPE XRC_DRAWABLE;
+extern RESTYPE XRT_WINDOW;
+extern RESTYPE XRT_PIXMAP;
+extern RESTYPE XRT_GC;
+extern RESTYPE XRT_COLORMAP;
+extern RESTYPE XRT_PICTURE;
 
 /*
  * Drivers are allowed to wrap this function.  Each wrapper can decide that the
