@@ -694,8 +694,6 @@ _DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
     return FALSE;
 }
 
-static void DeleteCallbackList(CallbackListPtr *pcbl);
-
 void
 _CallCallbacks(CallbackListPtr *pcbl, void *call_data)
 {
@@ -746,25 +744,26 @@ _CallCallbacks(CallbackListPtr *pcbl, void *call_data)
     }
 }
 
-static void
-_DeleteCallbackList(CallbackListPtr *pcbl)
+void DeleteCallbackList(CallbackListPtr *pcbl)
 {
+    if (!pcbl || !*pcbl)
+        return;
+
     CallbackListPtr cbl = *pcbl;
-    CallbackPtr cbr, nextcbr;
-    int i;
 
     if (cbl->inCallback) {
         cbl->deleted = TRUE;
         return;
     }
 
-    for (i = 0; i < numCallbackListsToCleanup; i++) {
+    for (int i = 0; i < numCallbackListsToCleanup; i++) {
         if (listsToCleanup[i] == pcbl) {
             listsToCleanup[i] = NULL;
             break;
         }
     }
 
+    CallbackPtr cbr, nextcbr;
     for (cbr = cbl->list; cbr != NULL; cbr = nextcbr) {
         nextcbr = cbr->next;
         free(cbr);
@@ -826,13 +825,6 @@ DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
     if (!pcbl || !*pcbl)
         return FALSE;
     return _DeleteCallback(pcbl, callback, data);
-}
-
-static void DeleteCallbackList(CallbackListPtr *pcbl)
-{
-    if (!pcbl || !*pcbl)
-        return;
-    _DeleteCallbackList(pcbl);
 }
 
 void
