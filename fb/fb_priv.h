@@ -22,5 +22,6 @@ static inline void fbValidateDrawable(DrawablePtr d) {}
 #endif /* FB_DEBUG */
 
 Bool fbAllocatePrivates(ScreenPtr pScreen);
+int  fbListInstalledColormaps(ScreenPtr pScreen, Colormap* pmaps);
 
 #endif /* XORG_FB_PRIV_H */

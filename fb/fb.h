@@ -641,9 +641,6 @@ fbBltPlane(FbBits * src,
 /*
  * fbcmap_mi.c
  */
-extern _X_EXPORT int
- fbListInstalledColormaps(ScreenPtr pScreen, Colormap * pmaps);
-
 extern _X_EXPORT void
  fbInstallColormap(ColormapPtr pmap);
 
