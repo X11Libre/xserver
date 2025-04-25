@@ -56,16 +56,13 @@ DevPrivateKeyRec CompScreenPrivateKeyRec;
 DevPrivateKeyRec CompWindowPrivateKeyRec;
 DevPrivateKeyRec CompSubwindowsPrivateKeyRec;
 
-static Bool
-compCloseScreen(ScreenPtr pScreen)
+static void compCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
-    Bool ret;
 
     free(cs->alternateVisuals);
     free(cs->implicitRedirectExceptions);
 
-    pScreen->CloseScreen = cs->CloseScreen;
     pScreen->InstallColormap = cs->InstallColormap;
     pScreen->ChangeWindowAttributes = cs->ChangeWindowAttributes;
     pScreen->ReparentWindow = cs->ReparentWindow;
@@ -81,14 +78,12 @@ compCloseScreen(ScreenPtr pScreen)
     pScreen->CopyWindow = cs->CopyWindow;
     pScreen->SourceValidate = cs->SourceValidate;
 
+    dixScreenUnhookClose(pScreen, compCloseScreen);
     dixScreenUnhookWindowDestroy(pScreen, compWindowDestroy);
     dixScreenUnhookWindowPosition(pScreen, compWindowPosition);
 
     free(cs);
     dixSetPrivate(&pScreen->devPrivates, CompScreenPrivateKey, NULL);
-    ret = (*pScreen->CloseScreen) (pScreen);
-
-    return ret;
 }
 
 static void
@@ -370,6 +365,7 @@ compScreenInit(ScreenPtr pScreen)
     if (!disableBackingStore)
         pScreen->backingStoreSupport = WhenMapped;
 
+    dixScreenHookClose(pScreen, compCloseScreen);
     dixScreenHookWindowDestroy(pScreen, compWindowDestroy);
     dixScreenHookWindowPosition(pScreen, compWindowPosition);
 
@@ -408,9 +404,6 @@ compScreenInit(ScreenPtr pScreen)
 
     cs->ChangeWindowAttributes = pScreen->ChangeWindowAttributes;
     pScreen->ChangeWindowAttributes = compChangeWindowAttributes;
-
-    cs->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = compCloseScreen;
 
     cs->SourceValidate = pScreen->SourceValidate;
     pScreen->SourceValidate = compSourceValidate;
