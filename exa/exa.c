@@ -32,6 +32,8 @@
 
 #include <stdlib.h>
 
+#include "dix/screen_hooks_priv.h"
+
 #include "exa_priv.h"
 #include "exa.h"
 
@@ -734,11 +736,12 @@ ExaWakeupHandler(ScreenPtr pScreen, int result)
  * exaCloseScreen() unwraps its wrapped screen functions and tears down EXA's
  * screen private, before calling down to the next CloseSccreen.
  */
-static Bool
-exaCloseScreen(ScreenPtr pScreen)
+static void exaCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     ExaScreenPriv(pScreen);
     PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
+
+    dixScreenUnhookClose(pScreen, exaCloseScreen);
 
     if (ps && ps->Glyphs == exaGlyphs)
         exaGlyphsFini(pScreen);
@@ -748,7 +751,6 @@ exaCloseScreen(ScreenPtr pScreen)
     if (pScreen->WakeupHandler == ExaWakeupHandler)
         unwrap(pExaScr, pScreen, WakeupHandler);
     unwrap(pExaScr, pScreen, CreateGC);
-    unwrap(pExaScr, pScreen, CloseScreen);
     unwrap(pExaScr, pScreen, GetImage);
     unwrap(pExaScr, pScreen, GetSpans);
     if (pExaScr->SavedCreatePixmap)
@@ -776,8 +778,6 @@ exaCloseScreen(ScreenPtr pScreen)
     }
 
     free(pExaScr);
-
-    return (*pScreen->CloseScreen) (pScreen);
 }
 
 /**
@@ -917,7 +917,7 @@ exaDriverInit(ScreenPtr pScreen, ExaDriverPtr pScreenInfo)
         !(pExaScr->info->flags & EXA_HANDLES_PIXMAPS))
         wrap(pExaScr, pScreen, WakeupHandler, ExaWakeupHandler);
     wrap(pExaScr, pScreen, CreateGC, exaCreateGC);
-    wrap(pExaScr, pScreen, CloseScreen, exaCloseScreen);
+    dixScreenHookClose(pScreen, exaCloseScreen);
     wrap(pExaScr, pScreen, GetImage, exaGetImage);
     wrap(pExaScr, pScreen, GetSpans, ExaCheckGetSpans);
     wrap(pExaScr, pScreen, CopyWindow, exaCopyWindow);

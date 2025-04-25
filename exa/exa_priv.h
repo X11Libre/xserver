@@ -152,7 +152,6 @@ typedef struct {
     ScreenBlockHandlerProcPtr SavedBlockHandler;
     ScreenWakeupHandlerProcPtr SavedWakeupHandler;
     CreateGCProcPtr SavedCreateGC;
-    CloseScreenProcPtr SavedCloseScreen;
     GetImageProcPtr SavedGetImage;
     GetSpansProcPtr SavedGetSpans;
     CreatePixmapProcPtr SavedCreatePixmap;
