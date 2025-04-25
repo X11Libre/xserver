@@ -42,6 +42,7 @@
 #include <gbm.h>
 #include <drm_fourcc.h>
 
+#include "dix/screen_hooks_priv.h"
 #include "os/bug_priv.h"
 
 #include "glamor_egl.h"
@@ -56,13 +57,11 @@ struct glamor_egl_screen_private {
     EGLContext context;
     char *device_path;
 
-    CloseScreenProcPtr CloseScreen;
     int fd;
     struct gbm_device *gbm;
     int dmabuf_capable;
     Bool force_vendor; /* if GLVND vendor is forced from options */
 
-    CloseScreenProcPtr saved_close_screen;
     DestroyPixmapProcPtr saved_destroy_pixmap;
     xf86FreeScreenProc *saved_free_screen;
 };
@@ -817,8 +816,7 @@ glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
     glamor_set_pixmap_type(back, GLAMOR_TEXTURE_DRM);
 }
 
-static Bool
-glamor_egl_close_screen(ScreenPtr screen)
+static void glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     ScrnInfoPtr scrn;
     struct glamor_egl_screen_private *glamor_egl;
@@ -835,9 +833,7 @@ glamor_egl_close_screen(ScreenPtr screen)
     eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
     pixmap_priv->image = NULL;
 
-    screen->CloseScreen = glamor_egl->saved_close_screen;
-
-    return screen->CloseScreen(screen);
+    dixScreenUnhookClose(screen, glamor_egl_close_screen);
 }
 
 #ifdef DRI3
@@ -917,8 +913,7 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 #endif
     const char *gbm_backend_name;
 
-    glamor_egl->saved_close_screen = screen->CloseScreen;
-    screen->CloseScreen = glamor_egl_close_screen;
+    dixScreenHookClose(screen, glamor_egl_close_screen);
 
     glamor_egl->saved_destroy_pixmap = screen->DestroyPixmap;
     screen->DestroyPixmap = glamor_egl_destroy_pixmap;

@@ -208,7 +208,6 @@ struct glamor_format {
 };
 
 struct glamor_saved_procs {
-    CloseScreenProcPtr close_screen;
     CreateGCProcPtr create_gc;
     CreatePixmapProcPtr create_pixmap;
     DestroyPixmapProcPtr destroy_pixmap;

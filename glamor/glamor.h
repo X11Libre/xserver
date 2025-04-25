@@ -106,7 +106,6 @@ extern _X_EXPORT void glamor_fini(ScreenPtr screen);
  * screen pixmap which must be a glamor pixmap and requires
  * the internal data structure still exist at that time.
  * Otherwise, the glamor internal structure will not be freed.*/
-extern _X_EXPORT Bool glamor_close_screen(ScreenPtr screen);
 
 extern _X_EXPORT uint32_t glamor_get_pixmap_texture(PixmapPtr pixmap);
 
