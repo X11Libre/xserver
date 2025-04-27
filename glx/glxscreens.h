@@ -149,8 +149,6 @@ struct __GLXscreen {
     char *GLXextensions;
     char *glvnd;
     unsigned char glx_enable_bits[__GLX_EXT_BYTES];
-
-    Bool (*CloseScreen) (ScreenPtr pScreen);
 };
 
 void __glXScreenInit(__GLXscreen * screen, ScreenPtr pScreen);
