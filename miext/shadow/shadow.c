@@ -23,8 +23,10 @@
 #include <dix-config.h>
 
 #include <stdlib.h>
+#include <X11/X.h>
 
-#include    <X11/X.h>
+#include "dix/screen_hooks_priv.h"
+
 #include    "scrnintstr.h"
 #include    "windowstr.h"
 #include    "dixfontstr.h"
@@ -93,19 +95,17 @@ shadowGetImage(DrawablePtr pDrawable, int sx, int sy, int w, int h,
     wrap(pBuf, pScreen, GetImage);
 }
 
-static Bool
-shadowCloseScreen(ScreenPtr pScreen)
+static void shadowCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    shadowBuf(pScreen);
+    dixScreenUnhookClose(pScreen, shadowCloseScreen);
 
+    shadowBuf(pScreen);
     unwrap(pBuf, pScreen, GetImage);
-    unwrap(pBuf, pScreen, CloseScreen);
     unwrap(pBuf, pScreen, BlockHandler);
     shadowRemove(pScreen, pBuf->pPixmap);
     DamageDestroy(pBuf->pDamage);
     dixDestroyPixmap(pBuf->pPixmap, 0);
     free(pBuf);
-    return pScreen->CloseScreen(pScreen);
 }
 
 Bool
@@ -130,7 +130,8 @@ shadowSetup(ScreenPtr pScreen)
         return FALSE;
     }
 
-    wrap(pBuf, pScreen, CloseScreen);
+    dixScreenHookClose(pScreen, shadowCloseScreen);
+
     wrap(pBuf, pScreen, GetImage);
     wrap(pBuf, pScreen, BlockHandler);
     pBuf->update = 0;
