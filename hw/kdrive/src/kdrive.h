@@ -143,7 +143,6 @@ typedef struct {
     xColorItem systemPalette[KD_MAX_PSEUDO_SIZE];       /* saved windows colors */
 
     CreateScreenResourcesProcPtr CreateScreenResources;
-    CloseScreenProcPtr CloseScreen;
 } KdPrivScreenRec, *KdPrivScreenPtr;
 
 typedef enum _kdPointerState {

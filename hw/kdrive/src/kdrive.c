@@ -559,18 +559,13 @@ KdCloseScreen(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     KdCardInfo *card = pScreenPriv->card;
-    Bool ret;
 
     if (card->cfuncs->closeScreen)
         (*card->cfuncs->closeScreen)(pScreen);
 
     pScreenPriv->closed = TRUE;
-    pScreen->CloseScreen = pScreenPriv->CloseScreen;
 
-    if (pScreen->CloseScreen)
-        ret = (*pScreen->CloseScreen) (pScreen);
-    else
-        ret = TRUE;
+    Bool ret = fbCloseScreen(pScreen);
 
     if (screen->mynum == card->selected)
         KdDisableScreen(pScreen);
@@ -789,12 +784,6 @@ KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
         if (!(*card->cfuncs->finishInitScreen) (pScreen))
             return FALSE;
 
-    /*
-     * Wrap CloseScreen, the order now is:
-     *  KdCloseScreen
-     *  fbCloseScreen
-     */
-    pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreen->CloseScreen = KdCloseScreen;
 
     pScreenPriv->CreateScreenResources = pScreen->CreateScreenResources;
