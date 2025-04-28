@@ -169,7 +169,6 @@ struct xwl_output *xwl_screen_get_fixed_or_first_output(struct xwl_screen *xwl_s
 int xwl_screen_get_width(struct xwl_screen *xwl_screen);
 int xwl_screen_get_height(struct xwl_screen *xwl_screen);
 
-Bool xwl_close_screen(ScreenPtr screen);
 Bool xwl_screen_init(ScreenPtr pScreen, int argc, char **argv);
 void xwl_sync_events (struct xwl_screen *xwl_screen);
 void xwl_screen_roundtrip (struct xwl_screen *xwl_screen);

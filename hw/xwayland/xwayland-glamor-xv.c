@@ -34,6 +34,7 @@
 
 #include <X11/extensions/Xv.h>
 
+#include "dix/screen_hooks_priv.h"
 #include "Xext/xvdix_priv.h"
 
 #include "glamor_priv.h"
@@ -50,8 +51,6 @@ static DevPrivateKeyRec xwlXvScreenPrivateKeyRec;
 typedef struct {
     XvAdaptorPtr glxv_adaptor; /* We have only one adaptor, glamor Xv */
     glamor_port_private *port_privates;
-
-    CloseScreenProcPtr CloseScreen;
 } xwlXvScreenRec, *xwlXvScreenPtr;
 
 typedef struct {
@@ -374,23 +373,24 @@ failed:
     return FALSE;
 }
 
-static Bool
-xwl_glamor_xv_close_screen(ScreenPtr pScreen)
+static void xwl_glamor_xv_close_screen(CallbackListPtr *pcbl,
+                                       ScreenPtr pScreen, void *unused)
 {
-    xwlXvScreenPtr xwlXvScreen;
+    dixScreenUnhookClose(pScreen, xwl_glamor_xv_close_screen);
 
+    xwlXvScreenPtr xwlXvScreen;
     xwlXvScreen = dixLookupPrivate(&(pScreen)->devPrivates,
                                    xwlXvScreenPrivateKey);
+
+    if (!xwlXvScreen)
+        return;
 
     if (xwlXvScreen->glxv_adaptor) {
         XvFreeAdaptor(xwlXvScreen->glxv_adaptor);
         free(xwlXvScreen->glxv_adaptor);
     }
     free(xwlXvScreen->port_privates);
-
-    pScreen->CloseScreen = xwlXvScreen->CloseScreen;
-
-    return pScreen->CloseScreen(pScreen);
+    dixSetPrivate(&(pScreen)->devPrivates, xwlXvScreenPrivateKey, NULL);
 }
 
 Bool
@@ -407,8 +407,8 @@ xwl_glamor_xv_init(ScreenPtr pScreen)
 
     xwlXvScreen->port_privates = NULL;
     xwlXvScreen->glxv_adaptor = NULL;
-    xwlXvScreen->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = xwl_glamor_xv_close_screen;
+
+    dixScreenHookClose(pScreen, xwl_glamor_xv_close_screen);
 
     glamor_xv_core_init(pScreen);
 

@@ -236,8 +236,8 @@ xwl_root_window_finalized_callback(CallbackListPtr *pcbl,
     DeleteCallback(&RootWindowFinalizeCallback, xwl_root_window_finalized_callback, screen);
 }
 
-Bool
-xwl_close_screen(ScreenPtr screen)
+static void xwl_close_screen(CallbackListPtr *pcbl,
+                             ScreenPtr screen, void *unused)
 {
     struct xwl_screen *xwl_screen = xwl_screen_get(screen);
     struct xwl_output *xwl_output, *next_xwl_output;
@@ -246,6 +246,7 @@ xwl_close_screen(ScreenPtr screen)
 #ifdef XWL_HAS_GLAMOR
     xwl_dmabuf_feedback_destroy(&xwl_screen->default_feedback);
 #endif
+    dixScreenUnhookClose(screen, xwl_close_screen);
     DeleteCallback(&PropertyStateCallback, xwl_property_callback, screen);
     XaceDeleteCallback(XACE_PROPERTY_ACCESS, xwl_access_property_callback, screen);
 
@@ -276,11 +277,7 @@ xwl_close_screen(ScreenPtr screen)
 
     wl_display_disconnect(xwl_screen->display);
 
-    screen->CloseScreen = xwl_screen->CloseScreen;
-
     free(xwl_screen);
-
-    return screen->CloseScreen(screen);
 }
 
 static struct xwl_seat *
@@ -1142,9 +1139,7 @@ xwl_screen_init(ScreenPtr pScreen, int argc, char **argv)
     pScreen->UnrealizeWindow = xwl_unrealize_window;
 
     dixScreenHookWindowDestroy(pScreen, xwl_window_destroy);
-
-    xwl_screen->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = xwl_close_screen;
+    dixScreenHookClose(pScreen, xwl_close_screen);
 
     xwl_screen->ChangeWindowAttributes = pScreen->ChangeWindowAttributes;
     pScreen->ChangeWindowAttributes = xwl_change_window_attributes;
