@@ -962,22 +962,16 @@ winCreatePixmapMultiwindow(ScreenPtr pScreen, int width, int height, int depth,
 
     /* setup Pixmap header */
     pPixmap->drawable.type = DRAWABLE_PIXMAP;
-    pPixmap->drawable.class = 0;
     pPixmap->drawable.pScreen = pScreen;
     pPixmap->drawable.depth = depth;
     pPixmap->drawable.bitsPerPixel = bpp;
-    pPixmap->drawable.id = 0;
     pPixmap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
-    pPixmap->drawable.x = 0;
-    pPixmap->drawable.y = 0;
     pPixmap->drawable.width = width;
     pPixmap->drawable.height = height;
     pPixmap->devKind = paddedwidth;
     pPixmap->refcnt = 1;
     pPixmap->devPrivate.ptr = NULL; // later set to pbBits
     pPixmap->primary_pixmap = NULL;
-    pPixmap->screen_x = 0;
-    pPixmap->screen_y = 0;
     pPixmap->usage_hint = usage_hint;
 
     /* Check for zero width or height pixmaps */

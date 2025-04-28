@@ -57,14 +57,10 @@ fbCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     if (!pPixmap)
         return NullPixmap;
     pPixmap->drawable.type = DRAWABLE_PIXMAP;
-    pPixmap->drawable.class = 0;
     pPixmap->drawable.pScreen = pScreen;
     pPixmap->drawable.depth = depth;
     pPixmap->drawable.bitsPerPixel = bpp;
-    pPixmap->drawable.id = 0;
     pPixmap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
-    pPixmap->drawable.x = 0;
-    pPixmap->drawable.y = 0;
     pPixmap->drawable.width = width;
     pPixmap->drawable.height = height;
     pPixmap->devKind = paddedWidth;
@@ -77,9 +73,6 @@ fbCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
         (void *) ((char *) pPixmap->devPrivate.ptr + paddedWidth);
     fbInitializeDrawable(&pPixmap->drawable);
 #endif
-
-    pPixmap->screen_x = 0;
-    pPixmap->screen_y = 0;
 
     pPixmap->usage_hint = usage_hint;
 
