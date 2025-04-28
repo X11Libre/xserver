@@ -142,13 +142,13 @@ KdXVScreenInit(ScreenPtr pScreen, KdVideoAdaptorPtr adaptors, int num)
     ScreenPriv->DestroyWindow = pScreen->DestroyWindow;
     ScreenPriv->WindowExposures = pScreen->WindowExposures;
     ScreenPriv->ClipNotify = pScreen->ClipNotify;
-    ScreenPriv->CloseScreen = pScreen->CloseScreen;
 
 /*   fprintf(stderr,"XV: Wrapping screen funcs\n"); */
 
     pScreen->DestroyWindow = KdXVDestroyWindow;
     pScreen->WindowExposures = KdXVWindowExposures;
     pScreen->ClipNotify = KdXVClipNotify;
+    /* it will call KdCloseScreen() as it's the last act */
     pScreen->CloseScreen = KdXVCloseScreen;
 
     if (!KdXVInitAdaptors(pScreen, adaptors, num))
@@ -922,9 +922,6 @@ KdXVCloseScreen(ScreenPtr pScreen)
     pScreen->DestroyWindow = ScreenPriv->DestroyWindow;
     pScreen->WindowExposures = ScreenPriv->WindowExposures;
     pScreen->ClipNotify = ScreenPriv->ClipNotify;
-    pScreen->CloseScreen = ScreenPriv->CloseScreen;
-
-/*   fprintf(stderr,"XV: Unwrapping screen funcs\n"); */
 
     for (c = 0, pa = pxvs->pAdaptors; c < pxvs->nAdaptors; c++, pa++) {
         KdXVFreeAdaptor(pa);
@@ -933,7 +930,7 @@ KdXVCloseScreen(ScreenPtr pScreen)
     free(pxvs->pAdaptors);
     free(ScreenPriv);
 
-    return pScreen->CloseScreen(pScreen);
+    return KdCloseScreen(pScreen);
 }
 
 /**** XvAdaptorRec fields ****/

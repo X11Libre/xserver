@@ -553,8 +553,7 @@ KdCreateScreenResources(ScreenPtr pScreen)
     return ret;
 }
 
-static Bool
-KdCloseScreen(ScreenPtr pScreen)
+Bool KdCloseScreen(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;

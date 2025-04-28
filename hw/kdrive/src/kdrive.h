@@ -434,4 +434,6 @@ void
 void
  InitCard(char *name);
 
+Bool KdCloseScreen(ScreenPtr pScreen);
+
 #endif                          /* _KDRIVE_H_ */
