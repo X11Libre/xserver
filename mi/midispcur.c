@@ -35,6 +35,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include   "dix/dix_priv.h"
 #include   "dix/gc_priv.h"
+#include   "dix/screen_hooks_priv.h"
 
 #include   "misc.h"
 #include   "input.h"
@@ -59,7 +60,7 @@ static DevScreenPrivateKeyRec miDCDeviceKeyRec;
 
 #define miDCDeviceKey (&miDCDeviceKeyRec)
 
-static Bool miDCCloseScreen(ScreenPtr pScreen);
+static void miDCCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused);
 
 /* per device private data */
 typedef struct {
@@ -79,7 +80,6 @@ typedef struct {
  * in the pCursorBuffers array.
  */
 typedef struct {
-    CloseScreenProcPtr CloseScreen;
     PixmapPtr sourceBits;       /* source bits */
     PixmapPtr maskBits;         /* mask bits */
     PicturePtr pPicture;
@@ -102,9 +102,7 @@ miDCInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
     if (!pScreenPriv)
         return FALSE;
 
-    pScreenPriv->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = miDCCloseScreen;
-
+    dixScreenHookClose(pScreen, miDCCloseScreen);
     dixSetPrivate(&pScreen->devPrivates, miDCScreenKey, pScreenPriv);
 
     if (!miSpriteInitialize(pScreen, screenFuncs)) {
@@ -118,6 +116,8 @@ static void
 miDCSwitchScreenCursor(ScreenPtr pScreen, CursorPtr pCursor, PixmapPtr sourceBits, PixmapPtr maskBits, PicturePtr pPicture)
 {
     miDCScreenPtr pScreenPriv = dixLookupPrivate(&pScreen->devPrivates, miDCScreenKey);
+    if (!pScreenPriv)
+        return;
 
     dixDestroyPixmap(pScreenPriv->sourceBits, 0);
     pScreenPriv->sourceBits = sourceBits;
@@ -133,18 +133,16 @@ miDCSwitchScreenCursor(ScreenPtr pScreen, CursorPtr pCursor, PixmapPtr sourceBit
     pScreenPriv->pCursor = pCursor;
 }
 
-static Bool
-miDCCloseScreen(ScreenPtr pScreen)
+static void miDCCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    miDCScreenPtr pScreenPriv;
+    dixScreenUnhookClose(pScreen, miDCCloseScreen);
 
+    miDCScreenPtr pScreenPriv;
     pScreenPriv = (miDCScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
                                                    miDCScreenKey);
-    pScreen->CloseScreen = pScreenPriv->CloseScreen;
-
     miDCSwitchScreenCursor(pScreen, NULL, NULL, NULL, NULL);
     free((void *) pScreenPriv);
-    return (*pScreen->CloseScreen) (pScreen);
+    dixSetPrivate(&pScreen->devPrivates, miDCScreenKey, NULL); /* clear it, just for sure */
 }
 
 Bool

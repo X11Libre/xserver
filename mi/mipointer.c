@@ -55,6 +55,7 @@ in this Software without prior written authorization from The Open Group.
 #include   "dix/cursor_priv.h"
 #include   "dix/dix_priv.h"
 #include   "dix/input_priv.h"
+#include   "dix/screen_hooks_priv.h"
 #include   "mi/mi_priv.h"
 #include   "mi/mipointer_priv.h"
 
@@ -107,7 +108,7 @@ static void miPointerCursorLimits(DeviceIntPtr pDev, ScreenPtr pScreen,
                                   BoxPtr pTopLeftBox);
 static Bool miPointerSetCursorPosition(DeviceIntPtr pDev, ScreenPtr pScreen,
                                        int x, int y, Bool generateEvent);
-static Bool miPointerCloseScreen(ScreenPtr pScreen);
+static void miPointerCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused);
 static void miPointerMove(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y);
 static Bool miPointerDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen);
 static void miPointerDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen);
@@ -140,8 +141,7 @@ miPointerInitialize(ScreenPtr pScreen,
     pScreenPriv->screenFuncs = screenFuncs;
     pScreenPriv->waitForUpdate = waitForUpdate;
     pScreenPriv->showTransparent = FALSE;
-    pScreenPriv->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = miPointerCloseScreen;
+    dixScreenHookClose(pScreen, miPointerCloseScreen);
     dixSetPrivate(&pScreen->devPrivates, miPointerScreenKey, pScreenPriv);
     /*
      * set up screen cursor method table
@@ -163,19 +163,17 @@ miPointerInitialize(ScreenPtr pScreen,
 /**
  * Destroy screen-specific information.
  *
- * @param index Screen index of the screen in screenInfo.screens[]
  * @param pScreen The actual screen pointer
  */
-static Bool
-miPointerCloseScreen(ScreenPtr pScreen)
+static void miPointerCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     SetupScreen(pScreen);
 
-    pScreen->CloseScreen = pScreenPriv->CloseScreen;
+    dixScreenUnhookClose(pScreen, miPointerCloseScreen);
     free((void *) pScreenPriv);
+    dixSetPrivate(&pScreen->devPrivates, miPointerScreenKey, NULL);
     FreeEventList(mipointermove_events, GetMaximumEventsNum());
     mipointermove_events = NULL;
-    return (*pScreen->CloseScreen) (pScreen);
 }
 
 /*

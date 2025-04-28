@@ -38,6 +38,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include   "dix/colormap_priv.h"
 #include   "dix/dix_priv.h"
+#include   "dix/screen_hooks_priv.h"
 #include   "mi/mipointer_priv.h"
 
 #include   "misc.h"
@@ -72,7 +73,6 @@ typedef struct {
 
 typedef struct {
     /* screen procedures */
-    CloseScreenProcPtr CloseScreen;
     SourceValidateProcPtr SourceValidate;
 
     /* window procedures */
@@ -190,7 +190,7 @@ miSpriteIsDown(miCursorInfoPtr pDevCursor)
  * screen wrappers
  */
 
-static Bool miSpriteCloseScreen(ScreenPtr pScreen);
+static void miSpriteCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused);
 static void miSpriteSourceValidate(DrawablePtr pDrawable, int x, int y,
                                    int width, int height,
                                    unsigned int subWindowMode);
@@ -309,7 +309,6 @@ miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
     for (pVisual = pScreen->visuals;
          pVisual->vid != pScreen->rootVisual; pVisual++);
     pScreenPriv->pVisual = pVisual;
-    pScreenPriv->CloseScreen = pScreen->CloseScreen;
     pScreenPriv->SourceValidate = pScreen->SourceValidate;
 
     pScreenPriv->CopyWindow = pScreen->CopyWindow;
@@ -332,7 +331,7 @@ miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
 
     dixSetPrivate(&pScreen->devPrivates, &miSpriteScreenKeyRec, pScreenPriv);
 
-    pScreen->CloseScreen = miSpriteCloseScreen;
+    dixScreenHookClose(pScreen, miSpriteCloseScreen);
     pScreen->SourceValidate = miSpriteSourceValidate;
 
     pScreen->CopyWindow = miSpriteCopyWindow;
@@ -346,26 +345,22 @@ miSpriteInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
  * Screen wrappers
  */
 
-/*
- * CloseScreen wrapper -- unwrap everything, free the private data
- * and call the wrapped function
- */
-
-static Bool
-miSpriteCloseScreen(ScreenPtr pScreen)
+static void miSpriteCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    miSpriteScreenPtr pScreenPriv = GetSpriteScreen(pScreen);
+    dixScreenUnhookClose(pScreen, miSpriteCloseScreen);
 
-    pScreen->CloseScreen = pScreenPriv->CloseScreen;
+    miSpriteScreenPtr pScreenPriv = GetSpriteScreen(pScreen);
+    if (!pScreenPriv)
+        return;
+
     pScreen->SourceValidate = pScreenPriv->SourceValidate;
     pScreen->InstallColormap = pScreenPriv->InstallColormap;
     pScreen->StoreColors = pScreenPriv->StoreColors;
 
     DamageDestroy(pScreenPriv->pDamage);
 
+    dixSetPrivate(&pScreen->devPrivates, &miSpriteScreenKeyRec, NULL);
     free(pScreenPriv);
-
-    return (*pScreen->CloseScreen) (pScreen);
 }
 
 static void
