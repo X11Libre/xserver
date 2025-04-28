@@ -13,9 +13,6 @@ extern DevPrivateKeyRec miSyncScreenPrivateKey;
 typedef struct _syncScreenPriv {
     /* Wrappable sync-specific screen functions */
     SyncScreenFuncsRec funcs;
-
-    /* Wrapped screen functions */
-    CloseScreenProcPtr CloseScreen;
 } SyncScreenPrivRec, *SyncScreenPrivPtr;
 
 #define SYNC_SCREEN_PRIV(pScreen)                               \
