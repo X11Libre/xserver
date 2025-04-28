@@ -61,7 +61,6 @@ typedef struct _damageScrPriv {
     DamagePtr pScreenDamage;
 
     CopyWindowProcPtr CopyWindow;
-    CloseScreenProcPtr CloseScreen;
     CreateGCProcPtr CreateGC;
     DestroyPixmapProcPtr DestroyPixmap;
     SetWindowPixmapProcPtr SetWindowPixmap;
