@@ -54,18 +54,18 @@ present_get_window_priv(WindowPtr window, Bool create)
 /*
  * Hook the close screen function to clean up our screen private
  */
-static Bool
-present_close_screen(ScreenPtr screen)
+static void present_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     present_screen_priv_ptr screen_priv = present_screen_priv(screen);
+    if (!screen_priv)
+        return;
 
     if (screen_priv->flip_destroy)
         screen_priv->flip_destroy(screen);
 
-    unwrap(screen_priv, screen, CloseScreen);
-    (*screen->CloseScreen) (screen);
+    dixScreenUnhookClose(screen, present_close_screen);
+    dixSetPrivate(&screen->devPrivates, &present_screen_private_key, NULL);
     free(screen_priv);
-    return TRUE;
 }
 
 /*
@@ -176,9 +176,8 @@ present_screen_priv_init(ScreenPtr screen)
     if (!screen_priv)
         return NULL;
 
-    wrap(screen_priv, screen, CloseScreen, present_close_screen);
-
     dixScreenHookWindowDestroy(screen, present_destroy_window);
+    dixScreenHookClose(screen, present_close_screen);
 
     wrap(screen_priv, screen, ConfigNotify, present_config_notify);
     wrap(screen_priv, screen, ClipNotify, present_clip_notify);

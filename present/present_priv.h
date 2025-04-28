@@ -163,7 +163,6 @@ typedef void (*present_priv_flip_destroy_ptr)(ScreenPtr screen);
 
 struct present_screen_priv {
     ScreenPtr                   pScreen;
-    CloseScreenProcPtr          CloseScreen;
     ConfigNotifyProcPtr         ConfigNotify;
     ClipNotifyProcPtr           ClipNotify;
 
