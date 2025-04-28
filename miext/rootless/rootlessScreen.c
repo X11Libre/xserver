@@ -133,15 +133,11 @@ RootlessCreateScreenResources(ScreenPtr pScreen)
     return ret;
 }
 
-static Bool
-RootlessCloseScreen(ScreenPtr pScreen)
+static void RootlessCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    RootlessScreenRec *s;
+    dixScreenUnhookClose(pScreen, RootlessCloseScreen);
 
-    s = SCREENREC(pScreen);
-
-    // fixme unwrap everything that was wrapped?
-    pScreen->CloseScreen = s->CloseScreen;
+    RootlessScreenRec *s = SCREENREC(pScreen);
 
     if (s->pixmap_data != NULL) {
         free(s->pixmap_data);
@@ -150,7 +146,7 @@ RootlessCloseScreen(ScreenPtr pScreen)
     }
 
     free(s);
-    return pScreen->CloseScreen(pScreen);
+    dixSetPrivate(&(pScreen)->devPrivates, rootlessScreenPrivateKey, NULL);
 }
 
 static void
@@ -650,6 +646,7 @@ RootlessWrap(ScreenPtr pScreen)
 {
     RootlessScreenRec *s = SCREENREC(pScreen);
 
+    dixScreenHookClose(pScreen, RootlessCloseScreen);
     dixScreenHookWindowDestroy(pScreen, RootlessWindowDestroy);
     dixScreenHookWindowPosition(pScreen, RootlessWindowPosition);
 
@@ -663,7 +660,6 @@ RootlessWrap(ScreenPtr pScreen)
     pScreen->a = Rootless##a
 
     WRAP(CreateScreenResources);
-    WRAP(CloseScreen);
     WRAP(CreateGC);
     WRAP(CopyWindow);
     WRAP(PaintWindow);

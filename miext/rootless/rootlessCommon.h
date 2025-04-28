@@ -81,7 +81,6 @@ typedef struct _RootlessScreenRec {
 
     // Wrapped screen functions
     CreateScreenResourcesProcPtr CreateScreenResources;
-    CloseScreenProcPtr CloseScreen;
 
     CreateWindowProcPtr CreateWindow;
     RealizeWindowProcPtr RealizeWindow;
