@@ -27,7 +27,6 @@
 
 extern _X_EXPORT Bool xf86RandR12CreateScreenResources(ScreenPtr pScreen);
 extern _X_EXPORT Bool xf86RandR12Init(ScreenPtr pScreen);
-extern _X_EXPORT void xf86RandR12CloseScreen(ScreenPtr pScreen);
 extern _X_EXPORT void xf86RandR12SetRotations(ScreenPtr pScreen,
                                               Rotation rotation);
 extern _X_EXPORT void xf86RandR12SetTransformSupport(ScreenPtr pScreen,

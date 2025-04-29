@@ -15,4 +15,6 @@ void xf86RandR12LoadPalette(ScrnInfoPtr pScrn, int numColors,
                             VisualPtr pVisual);
 Bool xf86RandR12InitGamma(ScrnInfoPtr pScrn, unsigned gammaSize);
 
+void xf86RandR12CloseScreen(ScreenPtr pScreen);
+
 #endif /* _XSERVER_XF86RANDR12_PRIV_H_ */
