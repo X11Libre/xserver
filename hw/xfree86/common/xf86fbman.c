@@ -25,15 +25,14 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
+
+#include <X11/X.h>
+
+#include "dix/screen_hooks_priv.h"
 
 #include "misc.h"
 #include "xf86.h"
-
-#include <X11/X.h>
 #include "scrnintstr.h"
 #include "regionstr.h"
 #include "xf86fbman.h"
@@ -288,7 +287,6 @@ typedef struct {
     FBLinkPtr UsedAreas;
     int NumUsedAreas;
     FBLinearLinkPtr LinearAreas;
-    CloseScreenProcPtr CloseScreen;
     int NumCallbacks;
     FreeBoxCallbackProcPtr *FreeBoxesUpdateCallback;
     DevUnion *devPrivates;
@@ -1148,15 +1146,18 @@ static FBManagerFuncs xf86FBManFuncs = {
     localPurgeUnlockedOffscreenAreas
 };
 
-static Bool
-xf86FBCloseScreen(ScreenPtr pScreen)
+static void xf86FBCloseScreen(CallbackListPtr *pcbl,
+                              ScreenPtr pScreen, void *unused)
 {
     FBLinkPtr pLink, tmp;
     FBLinearLinkPtr pLinearLink, tmp2;
     FBManagerPtr offman = (FBManagerPtr) dixLookupPrivate(&pScreen->devPrivates,
                                                           xf86FBScreenKey);
 
-    pScreen->CloseScreen = offman->CloseScreen;
+    dixScreenUnhookClose(pScreen, xf86FBCloseScreen);
+
+    if (!offman)
+        return;
 
     pLink = offman->UsedAreas;
     while (pLink) {
@@ -1179,8 +1180,6 @@ xf86FBCloseScreen(ScreenPtr pScreen)
     free(offman->devPrivates);
     free(offman);
     dixSetPrivate(&pScreen->devPrivates, xf86FBScreenKey, NULL);
-
-    return (*pScreen->CloseScreen) (pScreen);
 }
 
 Bool
@@ -1325,9 +1324,7 @@ xf86InitFBManagerRegion(ScreenPtr pScreen, RegionPtr FullRegion)
         return FALSE;
 
     dixSetPrivate(&pScreen->devPrivates, xf86FBScreenKey, offman);
-
-    offman->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = xf86FBCloseScreen;
+    dixScreenHookClose(pScreen, xf86FBCloseScreen);
 
     offman->InitialBoxes = RegionCreate(NULL, 1);
     offman->FreeBoxes = RegionCreate(NULL, 1);
