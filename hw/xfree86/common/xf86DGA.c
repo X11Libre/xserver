@@ -50,6 +50,7 @@
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
+#include "dix/screen_hooks_priv.h"
 #include "mi/mi_priv.h"
 
 #include "xf86.h"
@@ -83,7 +84,7 @@ static DevPrivateKeyRec DGAScreenKeyRec;
 
 #define DGAScreenKeyRegistered dixPrivateKeyRegistered(&DGAScreenKeyRec)
 
-static Bool DGACloseScreen(ScreenPtr pScreen);
+static void DGACloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused);
 static void DGADestroyColormap(ColormapPtr pmap);
 static void DGAInstallColormap(ColormapPtr pmap);
 static void DGAUninstallColormap(ColormapPtr pmap);
@@ -110,7 +111,6 @@ typedef struct {
     ScrnInfoPtr pScrn;
     int numModes;
     DGAModePtr modes;
-    CloseScreenProcPtr CloseScreen;
     DestroyColormapProcPtr DestroyColormap;
     InstallColormapProcPtr InstallColormap;
     UninstallColormapProcPtr UninstallColormap;
@@ -148,8 +148,7 @@ DGAInit(ScreenPtr pScreen, DGAFunctionPtr funcs, DGAModePtr modes, int num)
         if (!(pScreenPriv = (DGAScreenPtr) malloc(sizeof(DGAScreenRec))))
             return FALSE;
         dixSetPrivate(&pScreen->devPrivates, &DGAScreenKeyRec, pScreenPriv);
-        pScreenPriv->CloseScreen = pScreen->CloseScreen;
-        pScreen->CloseScreen = DGACloseScreen;
+        dixScreenHookClose(pScreen, DGACloseScreen);
         pScreenPriv->DestroyColormap = pScreen->DestroyColormap;
         pScreen->DestroyColormap = DGADestroyColormap;
         pScreenPriv->InstallColormap = pScreen->InstallColormap;
@@ -263,23 +262,24 @@ FreeMarkedVisuals(ScreenPtr pScreen)
     }
 }
 
-static Bool
-DGACloseScreen(ScreenPtr pScreen)
+static void DGACloseScreen(CallbackListPtr *pcbl,
+                           ScreenPtr pScreen, void *unused)
 {
     DGAScreenPtr pScreenPriv = DGA_GET_SCREEN_PRIV(pScreen);
+    if (!pScreenPriv)
+        return;
 
     mieqSetHandler(ET_DGAEvent, NULL);
     pScreenPriv->pScrn->SetDGAMode(pScreenPriv->pScrn, 0, NULL);
     FreeMarkedVisuals(pScreen);
 
-    pScreen->CloseScreen = pScreenPriv->CloseScreen;
+    dixScreenUnhookClose(pScreen, DGACloseScreen);
     pScreen->DestroyColormap = pScreenPriv->DestroyColormap;
     pScreen->InstallColormap = pScreenPriv->InstallColormap;
     pScreen->UninstallColormap = pScreenPriv->UninstallColormap;
 
     free(pScreenPriv);
-
-    return ((*pScreen->CloseScreen) (pScreen));
+    dixSetPrivate(&pScreen->devPrivates, &DGAScreenKeyRec, NULL);
 }
 
 static void
