@@ -44,10 +44,7 @@
 #include "glxutil.h"
 #include "glxext.h"
 #include "protocol-versions.h"
-
-#ifdef COMPOSITE
 #include "compositeext.h"
-#endif
 
 static DevPrivateKeyRec glxScreenPrivateKeyRec;
 
@@ -275,14 +272,12 @@ pickFBConfig(__GLXscreen * pGlxScreen, VisualPtr visual)
         /* Can't use the same FBconfig for multiple X visuals.  I think. */
         if (config->visualID != 0)
             continue;
-#ifdef COMPOSITE
         if (!noCompositeExtension) {
             /* Use only duplicated configs for compIsAlternateVisuals */
             if (!!compIsAlternateVisual(pGlxScreen->pScreen, visual->vid) !=
                 !!config->duplicatedForComp)
                 continue;
         }
-#endif
         /*
          * If possible, use the same swapmethod for all built-in visual
          * fbconfigs, to avoid getting the 32-bit composite visual when
@@ -349,12 +344,10 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
         if (config) {
             pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
             config->visualID = visual->vid;
-#ifdef COMPOSITE
             if (!noCompositeExtension) {
                 if (compIsAlternateVisual(pScreen, visual->vid))
                     config->visualSelectGroup++;
             }
-#endif
         }
     }
 
@@ -374,14 +367,12 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
          * set up above is for.
          */
         depth = config->redBits + config->greenBits + config->blueBits;
-#ifdef COMPOSITE
         if (!noCompositeExtension) {
             if (config->duplicatedForComp) {
                     depth += config->alphaBits;
                     config->visualSelectGroup++;
             }
         }
-#endif
         /* Make sure that our FBconfig's depth can actually be displayed
          * (corresponds to an existing visual).
          */
@@ -404,12 +395,10 @@ __glXScreenInit(__GLXscreen * pGlxScreen, ScreenPtr pScreen)
         if (visual == NULL)
             continue;
 
-#ifdef COMPOSITE
         if (!noCompositeExtension) {
             if (config->duplicatedForComp)
                 (void) CompositeRegisterAlternateVisuals(pScreen, &visual->vid, 1);
         }
-#endif
         pGlxScreen->visuals[pGlxScreen->numVisuals++] = config;
         initGlxVisual(visual, config);
     }

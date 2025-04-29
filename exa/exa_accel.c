@@ -961,10 +961,8 @@ exaCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
     RegionInit(&rgnDst, NullBox, 0);
 
     RegionIntersect(&rgnDst, &pWin->borderClip, prgnSrc);
-#if defined(COMPOSITE) || defined(ROOTLESS)
     if (pPixmap->screen_x || pPixmap->screen_y)
         RegionTranslate(&rgnDst, -pPixmap->screen_x, -pPixmap->screen_y);
-#endif
 
     if (pExaScr->fallback_counter) {
         pExaScr->fallback_flags |= EXA_FALLBACK_COPYWINDOW;

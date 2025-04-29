@@ -828,7 +828,6 @@ winBltExposedWindowRegionShadowGDI(ScreenPtr pScreen, WindowPtr pWin)
         return 0;
     }
 
-#ifdef COMPOSITE
     if (pWin->redirectDraw != RedirectDrawNone) {
         HBITMAP hBitmap;
         HDC hdcPixmap;
@@ -870,7 +869,6 @@ winBltExposedWindowRegionShadowGDI(ScreenPtr pScreen, WindowPtr pWin)
         DeleteDC(hdcPixmap);
     }
     else
-#endif
     {
     /* Try to copy from the shadow buffer to the invalidated region */
     if (!BitBlt(hdcUpdate,

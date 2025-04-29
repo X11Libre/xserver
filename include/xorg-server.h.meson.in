@@ -23,9 +23,6 @@
 /* Default font path */
 #mesondefine COMPILEDDEFAULTFONTPATH
 
-/* Support Composite Extension */
-#mesondefine COMPOSITE
-
 /* Build DPMS extension */
 #mesondefine DPMSExtension
 

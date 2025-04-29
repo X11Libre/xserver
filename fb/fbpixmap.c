@@ -80,10 +80,8 @@ fbCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     fbInitializeDrawable(&pPixmap->drawable);
 #endif
 
-#if defined(COMPOSITE) || defined(ROOTLESS)
     pPixmap->screen_x = 0;
     pPixmap->screen_y = 0;
-#endif
 
     pPixmap->usage_hint = usage_hint;
 

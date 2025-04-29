@@ -53,9 +53,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "extnsionst.h"
 
-#ifdef COMPOSITE
 extern _X_EXPORT Bool noCompositeExtension;
-#endif
 
 #ifdef XINERAMA
 extern _X_EXPORT Bool noPanoramiXExtension;

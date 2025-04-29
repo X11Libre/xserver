@@ -1115,10 +1115,8 @@ retry:
                 PixmapPtr old_pixmap = screen->GetWindowPixmap(window);
 
                 /* Replace window pixmap with flip pixmap */
-#ifdef COMPOSITE
                 vblank->pixmap->screen_x = old_pixmap->screen_x;
                 vblank->pixmap->screen_y = old_pixmap->screen_y;
-#endif
                 present_set_tree_pixmap(toplvl_window, old_pixmap, vblank->pixmap);
 
                 if (toplvl_window == screen->root &&

@@ -53,9 +53,7 @@ Equipment Corporation.
 #include "picturestr_priv.h"
 #include "xfixesint.h"
 #include "damageextint.h"
-#ifdef COMPOSITE
 #include "compint.h"
-#endif
 #include "extinit_priv.h"
 #include "protocol-versions.h"
 
@@ -585,10 +583,7 @@ PanoramiXExtensionInit(void)
     PanoramiXRenderInit();
     PanoramiXFixesInit();
     PanoramiXDamageInit();
-#ifdef COMPOSITE
     PanoramiXCompositeInit();
-#endif
-
 }
 
 Bool
@@ -901,9 +896,7 @@ PanoramiXResetProc(ExtensionEntry * extEntry)
     PanoramiXRenderReset();
     PanoramiXFixesReset();
     PanoramiXDamageReset();
-#ifdef COMPOSITE
     PanoramiXCompositeReset ();
-#endif
     screenInfo.numScreens = PanoramiXNumScreens;
     for (i = 256; i--;)
         ProcVector[i] = SavedProcVector[i];

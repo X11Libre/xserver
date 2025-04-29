@@ -791,10 +791,8 @@ glamor_copy_window(WindowPtr window, DDXPointRec old_origin, RegionPtr src_regio
 
     RegionIntersect(&dst_region, &window->borderClip, src_region);
 
-#if defined(COMPOSITE) || defined(ROOTLESS)
     if (pixmap->screen_x || pixmap->screen_y)
         RegionTranslate(&dst_region, -pixmap->screen_x, -pixmap->screen_y);
-#endif
 
     miCopyRegion(drawable, drawable,
                  0, &dst_region, dx, dy, glamor_copy, 0, 0);

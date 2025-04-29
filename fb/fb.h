@@ -282,13 +282,8 @@ typedef struct {
 #define __fbPixDrawableX(pPix)	((pPix)->drawable.x)
 #define __fbPixDrawableY(pPix)	((pPix)->drawable.y)
 
-#if defined(COMPOSITE) || defined(ROOTLESS)
 #define __fbPixOffXWin(pPix)	(__fbPixDrawableX(pPix) - (pPix)->screen_x)
 #define __fbPixOffYWin(pPix)	(__fbPixDrawableY(pPix) - (pPix)->screen_y)
-#else
-#define __fbPixOffXWin(pPix)	(__fbPixDrawableX(pPix))
-#define __fbPixOffYWin(pPix)	(__fbPixDrawableY(pPix))
-#endif
 #define __fbPixOffXPix(pPix)	(__fbPixDrawableX(pPix))
 #define __fbPixOffYPix(pPix)	(__fbPixDrawableY(pPix))
 

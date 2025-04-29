@@ -976,10 +976,8 @@ winCreatePixmapMultiwindow(ScreenPtr pScreen, int width, int height, int depth,
     pPixmap->refcnt = 1;
     pPixmap->devPrivate.ptr = NULL; // later set to pbBits
     pPixmap->primary_pixmap = NULL;
-#ifdef COMPOSITE
     pPixmap->screen_x = 0;
     pPixmap->screen_y = 0;
-#endif
     pPixmap->usage_hint = usage_hint;
 
     /* Check for zero width or height pixmaps */

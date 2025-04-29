@@ -78,10 +78,8 @@ typedef struct _Pixmap {
     int refcnt;
     int devKind;                /* This is the pitch of the pixmap, typically width*bpp/8. */
     DevUnion devPrivate;        /* When !NULL, devPrivate.ptr points to the raw pixel data. */
-#if defined(COMPOSITE) || defined(ROOTLESS)
     short screen_x;
     short screen_y;
-#endif
     unsigned usage_hint;        /* see CREATE_PIXMAP_USAGE_* */
 
     PixmapPtr primary_pixmap;    /* pointer to primary copy of pixmap for pixmap sharing */

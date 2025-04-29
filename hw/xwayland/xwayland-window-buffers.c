@@ -308,10 +308,8 @@ xwl_window_set_pixmap(WindowPtr window, PixmapPtr pixmap)
     visit.old = screen->GetWindowPixmap(window);
     visit.new = pixmap;
 
-#ifdef COMPOSITE
     pixmap->screen_x = visit.old->screen_x;
     pixmap->screen_y = visit.old->screen_y;
-#endif
 
     TraverseTree(window, xwl_set_pixmap_visit_window, &visit);
 

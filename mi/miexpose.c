@@ -429,10 +429,8 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
         tile_x_off = pWin->drawable.x - draw_x_off;
         tile_y_off = pWin->drawable.y - draw_y_off;
         fill = pWin->background;
-#ifdef COMPOSITE
         if (pWin->inhibitBGPaint)
             return;
-#endif
         switch (pWin->backgroundState) {
         case None:
             return;
@@ -459,15 +457,10 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
         tile_x_off = pWin->drawable.x;
         tile_y_off = pWin->drawable.y;
 
-#if defined(COMPOSITE) || defined(ROOTLESS)
         draw_x_off = pixmap->screen_x;
         draw_y_off = pixmap->screen_y;
         tile_x_off -= draw_x_off;
         tile_y_off -= draw_y_off;
-#else
-        draw_x_off = 0;
-        draw_y_off = 0;
-#endif
     }
 
     gcval[0].val = GXcopy;
@@ -486,7 +479,6 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
         gcval[1].val =
             fill.pixel | RootlessAlphaMask(pWin->drawable.bitsPerPixel);
 #else
-#ifdef COMPOSITE
         /* Make sure alpha will sample as 1.0 for opaque windows */
         if (drawable->depth == 32) {
             WindowPtr orig_pWin = pWin;
@@ -507,7 +499,6 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
             if (effective_depth == 24)
                 fill.pixel |= 0xff000000;
         }
-#endif
         gcval[1].val = fill.pixel;
 #endif
         gcval[2].val = FillSolid;

@@ -288,11 +288,9 @@ ms_dri2_copy_region2(ScreenPtr screen, DrawablePtr drawable, RegionPtr pRegion,
     }
 
     if (translate && drawable->type == DRAWABLE_WINDOW) {
-#ifdef COMPOSITE
         PixmapPtr pixmap = get_drawable_pixmap(drawable);
         off_x = -pixmap->screen_x;
         off_y = -pixmap->screen_y;
-#endif
         off_x += drawable->x;
         off_y += drawable->y;
     }

@@ -257,10 +257,8 @@ xwl_source_validate(DrawablePtr drawable, int x, int y, int width, int height,
         if (!RegionNotEmpty(xwl_window->surface_window_damage))
             need_source_validate_dec(xwl_window->xwl_screen);
 
-#if defined(COMPOSITE)
         if (dst_pix->screen_x || dst_pix->screen_y)
             RegionTranslate(&region, -dst_pix->screen_x, -dst_pix->screen_y);
-#endif
 
         pbox = RegionRects(&region);
         nbox = RegionNumRects(&region);

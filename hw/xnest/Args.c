@@ -60,9 +60,7 @@ ddxProcessArgument(int argc, char *argv[], int i)
     noMITShmExtension = TRUE;
 #endif
 
-#ifdef COMPOSITE
     noCompositeExtension = TRUE;
-#endif
 
 #ifdef DPMSExtension
     noDPMSExtension = TRUE;
