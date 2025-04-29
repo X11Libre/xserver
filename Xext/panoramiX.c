@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/extensions/panoramiXproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screen_hooks_priv.h"
 
 #include "misc.h"
 #include "cursor.h"
@@ -123,7 +124,6 @@ typedef struct {
 
 typedef struct {
     CreateGCProcPtr CreateGC;
-    CloseScreenProcPtr CloseScreen;
 } PanoramiXScreenRec, *PanoramiXScreenPtr;
 
 static void XineramaValidateGC(GCPtr, unsigned long, DrawablePtr);
@@ -148,21 +148,23 @@ static const GCFuncs XineramaGCFuncs = {
     pGCPriv->wrapFuncs = (pGC)->funcs;\
     (pGC)->funcs = &XineramaGCFuncs;
 
-static Bool
-XineramaCloseScreen(ScreenPtr pScreen)
+static void XineramaCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unsused)
 {
+    dixScreenUnhookClose(pScreen, XineramaCloseScreen);
+
     PanoramiXScreenPtr pScreenPriv = (PanoramiXScreenPtr)
         dixLookupPrivate(&pScreen->devPrivates, PanoramiXScreenKey);
 
-    pScreen->CloseScreen = pScreenPriv->CloseScreen;
+    if (!pScreenPriv)
+        return;
+
     pScreen->CreateGC = pScreenPriv->CreateGC;
 
     if (pScreen->myNum == 0)
         RegionUninit(&PanoramiXScreenRegion);
 
     free(pScreenPriv);
-
-    return (*pScreen->CloseScreen) (pScreen);
+    dixSetPrivate(&pScreen->devPrivates, PanoramiXScreenKey, NULL);
 }
 
 static Bool
@@ -484,11 +486,10 @@ PanoramiXExtensionInit(void)
                 return;
             }
 
-            pScreenPriv->CreateGC = pScreen->CreateGC;
-            pScreenPriv->CloseScreen = pScreen->CloseScreen;
+            dixScreenHookClose(pScreen, XineramaCloseScreen);
 
+            pScreenPriv->CreateGC = pScreen->CreateGC;
             pScreen->CreateGC = XineramaCreateGC;
-            pScreen->CloseScreen = XineramaCloseScreen;
         }
 
         XRC_DRAWABLE = CreateNewResourceClass();
