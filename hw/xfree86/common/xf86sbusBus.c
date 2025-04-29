@@ -624,7 +624,6 @@ static DevPrivateKeyRec sbusPaletteKeyRec;
 
 typedef struct _sbusCmap {
     sbusDevicePtr psdp;
-    CloseScreenProcPtr CloseScreen;
     Bool origCmapValid;
     unsigned char origRed[16];
     unsigned char origGreen[16];
@@ -668,13 +667,18 @@ xf86SbusCmapLoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
     free(data);
 }
 
-static Bool
-xf86SbusCmapCloseScreen(ScreenPtr pScreen)
+static void xf86SbusCmapCloseScreen(CallbackListPtr *pcbl,
+                                    ScreenPtr pScreen, void *unused)
 {
     sbusCmapPtr cmap;
     struct fbcmap fbcmap;
 
+    dixScreenUnhook(pScreen, xf86SbusCmapCloseScreen);
+
     cmap = SBUSCMAPPTR(pScreen);
+    if (!cmap)
+        return;
+
     if (cmap->origCmapValid) {
         fbcmap.index = 0;
         fbcmap.count = 16;
@@ -683,9 +687,8 @@ xf86SbusCmapCloseScreen(ScreenPtr pScreen)
         fbcmap.blue = cmap->origBlue;
         ioctl(cmap->psdp->fd, FBIOPUTCMAP, &fbcmap);
     }
-    pScreen->CloseScreen = cmap->CloseScreen;
     free(cmap);
-    return (*pScreen->CloseScreen) (pScreen);
+    dixSetPrivate(&pScreen->devPrivates, sbusPaletteKey, NULL);
 }
 
 Bool
@@ -722,8 +725,7 @@ xf86SbusHandleColormaps(ScreenPtr pScreen, sbusDevicePtr psdp)
         data[1] = 255;
     }
     ioctl(psdp->fd, FBIOPUTCMAP, &fbcmap);
-    cmap->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = xf86SbusCmapCloseScreen;
+    dixScreenHookClose(pScreen, xf86SbusCmapCloseScreen);
     return xf86HandleColormaps(pScreen, 256, 8,
                                xf86SbusCmapLoadPalette, NULL, 0);
 }
