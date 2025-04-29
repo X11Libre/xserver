@@ -31,13 +31,14 @@
 
 #include <string.h>
 
+#include "dix/screen_hooks_priv.h"
+
 #include "exa_priv.h"
 
 #include "xf86str.h"
 #include "xf86.h"
 
 typedef struct _ExaXorgScreenPrivRec {
-    CloseScreenProcPtr SavedCloseScreen;
     xf86EnableDisableFBAccessProc *SavedEnableDisableFBAccess;
     OptionInfoPtr options;
 } ExaXorgScreenPrivRec, *ExaXorgScreenPrivPtr;
@@ -69,21 +70,22 @@ static const OptionInfoRec EXAOptions[] = {
      OPTV_NONE, {0}, FALSE}
 };
 
-static Bool
-exaXorgCloseScreen(ScreenPtr pScreen)
+static void exaXorgCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     ExaXorgScreenPrivPtr pScreenPriv = (ExaXorgScreenPrivPtr)
         dixLookupPrivate(&pScreen->devPrivates, exaXorgScreenPrivateKey);
 
-    pScreen->CloseScreen = pScreenPriv->SavedCloseScreen;
+    dixScreenUnhookClose(pScreen, exaXorgCloseScreen);
+
+    if (!pScrn)
+        return;
 
     pScrn->EnableDisableFBAccess = pScreenPriv->SavedEnableDisableFBAccess;
 
     free(pScreenPriv->options);
     free(pScreenPriv);
-
-    return pScreen->CloseScreen(pScreen);
+    dixSetPrivate(&pScreen->devPrivates, exaXorgScreenPrivateKey, NULL);
 }
 
 static void
@@ -176,9 +178,7 @@ exaDDXDriverInit(ScreenPtr pScreen)
     pScreenPriv->SavedEnableDisableFBAccess = pScrn->EnableDisableFBAccess;
     pScrn->EnableDisableFBAccess = exaXorgEnableDisableFBAccess;
 
-    pScreenPriv->SavedCloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = exaXorgCloseScreen;
-
+    dixScreenHookClose(pScreen, exaXorgCloseScreen);
 }
 
 static XF86ModuleVersionInfo exaVersRec = {
