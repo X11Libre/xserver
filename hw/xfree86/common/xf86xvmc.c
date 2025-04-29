@@ -36,6 +36,9 @@
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
+
+#include "dix/screen_hooks_priv.h"
+
 #include "scrnintstr.h"
 #include "resource.h"
 #include "dixstruct.h"
@@ -44,7 +47,6 @@
 #include "xf86xvmc.h"
 
 typedef struct {
-    CloseScreenProcPtr CloseScreen;
     int num_adaptors;
     XF86MCAdaptorPtr *adaptors;
     XvMCAdaptorPtr dixinfo;
@@ -129,17 +131,18 @@ xf86XvMCDestroySubpicture(XvMCSubpicturePtr pSubpicture)
                                                                       pSubpicture);
 }
 
-static Bool
-xf86XvMCCloseScreen(ScreenPtr pScreen)
+static void xf86XvMCCloseScreen(CallbackListPtr *pcbl,
+                                ScreenPtr pScreen, void *unused)
 {
-    xf86XvMCScreenPtr pScreenPriv = XF86XVMC_GET_PRIVATE(pScreen);
+    dixScreenUnhookClose(pScreen, xf86XvMCCloseScreen);
 
-    pScreen->CloseScreen = pScreenPriv->CloseScreen;
+    xf86XvMCScreenPtr pScreenPriv = XF86XVMC_GET_PRIVATE(pScreen);
+    if (!pScreenPriv)
+        return;
 
     free(pScreenPriv->dixinfo);
     free(pScreenPriv);
-
-    return (*pScreen->CloseScreen) (pScreen);
+    dixSetPrivate(&pScreen->devPrivates, XF86XvMCScreenKey, NULL);
 }
 
 Bool
@@ -169,9 +172,7 @@ xf86XvMCScreenInit(ScreenPtr pScreen,
     }
 
     dixSetPrivate(&pScreen->devPrivates, XF86XvMCScreenKey, pScreenPriv);
-
-    pScreenPriv->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = xf86XvMCCloseScreen;
+    dixScreenHookClose(pScreen, xf86XvMCCloseScreen);
 
     pScreenPriv->num_adaptors = num_adaptors;
     pScreenPriv->adaptors = adaptors;
