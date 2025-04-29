@@ -5,37 +5,36 @@
    Written by Mark Vojkovich (mvojkovi@ucsd.edu)
    Pre-fb-write callbacks and RENDER support - Nolan Leake (nolan@vmware.com)
 */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/fonts/font.h>
+#include <X11/fonts/fontstruct.h>
+
+#include "dix/screen_hooks_priv.h"
+
 #include "misc.h"
 #include "pixmapstr.h"
 #include "input.h"
-#include <X11/fonts/font.h>
 #include "mi.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "gcstruct.h"
 #include "dixfontstr.h"
-#include <X11/fonts/fontstruct.h>
 #include "xf86.h"
 #include "xf86str.h"
 #include "shadowfb.h"
 
 #include "picturestr.h"
 
-static Bool ShadowCloseScreen(ScreenPtr pScreen);
+static void ShadowCloseScreen(CallbackListPtr *, ScreenPtr pScreen, void *unused);
 static Bool ShadowCreateRootWindow(WindowPtr pWin);
 
 typedef struct {
     ScrnInfoPtr pScrn;
     RefreshAreaFuncPtr preRefresh;
     RefreshAreaFuncPtr postRefresh;
-    CloseScreenProcPtr CloseScreen;
     CreateWindowProcPtr CreateWindow;
 } ShadowScreenRec, *ShadowScreenPtr;
 
@@ -70,10 +69,9 @@ ShadowFBInit2(ScreenPtr pScreen,
     pPriv->preRefresh = preRefreshArea;
     pPriv->postRefresh = postRefreshArea;
 
-    pPriv->CloseScreen = pScreen->CloseScreen;
-    pPriv->CreateWindow = pScreen->CreateWindow;
+    dixScreenHookClose(pScreen, ShadowCloseScreen);
 
-    pScreen->CloseScreen = ShadowCloseScreen;
+    pPriv->CreateWindow = pScreen->CreateWindow;
     pScreen->CreateWindow = ShadowCreateRootWindow;
 
     return TRUE;
@@ -158,14 +156,14 @@ ShadowCreateRootWindow(WindowPtr pWin)
     return ret;
 }
 
-static Bool
-ShadowCloseScreen(ScreenPtr pScreen)
+static void ShadowCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    ShadowScreenPtr pPriv = shadowfbGetScreenPrivate(pScreen);
+    dixScreenUnhookClose(pScreen, ShadowCloseScreen);
 
-    pScreen->CloseScreen = pPriv->CloseScreen;
+    ShadowScreenPtr pPriv = shadowfbGetScreenPrivate(pScreen);
+    if (!pPriv)
+        return;
 
     free(pPriv);
-
-    return (*pScreen->CloseScreen) (pScreen);
+    dixSetPrivate(&pScreen->devPrivates, &ShadowScreenKeyRec, NULL);
 }
