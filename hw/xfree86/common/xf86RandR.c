@@ -28,6 +28,7 @@
 #include <X11/X.h>
 
 #include "dix/input_priv.h"
+#include "dix/screen_hooks_priv.h"
 
 #include "os.h"
 #include "globals.h"
@@ -40,7 +41,6 @@
 #include "inputstr.h"
 
 typedef struct _xf86RandRInfo {
-    CloseScreenProcPtr CloseScreen;
     int virtualX;
     int virtualY;
     int mmWidth;
@@ -341,19 +341,22 @@ xf86RandRSetConfig(ScreenPtr pScreen,
 /*
  * Reset size back to original
  */
-static Bool
-xf86RandRCloseScreen(ScreenPtr pScreen)
+static void xf86RandRCloseScreen(CallbackListPtr *pcbl,
+                                 ScreenPtr pScreen, void *unused)
 {
     ScrnInfoPtr scrp = xf86ScreenToScrn(pScreen);
+    if (!scrp)
+        return;
+
     XF86RandRInfoPtr randrp = XF86RANDRINFO(pScreen);
 
     scrp->virtualX = pScreen->width = randrp->virtualX;
     scrp->virtualY = pScreen->height = randrp->virtualY;
     scrp->currentMode = scrp->modes;
-    pScreen->CloseScreen = randrp->CloseScreen;
+
+    dixScreenUnhookClose(pScreen, xf86RandRCloseScreen);
     free(randrp);
     dixSetPrivate(&pScreen->devPrivates, xf86RandRKey, NULL);
-    return (*pScreen->CloseScreen) (pScreen);
 }
 
 Rotation
@@ -438,8 +441,7 @@ xf86RandRInit(ScreenPtr pScreen)
     randrp->mmWidth = pScreen->mmWidth;
     randrp->mmHeight = pScreen->mmHeight;
 
-    randrp->CloseScreen = pScreen->CloseScreen;
-    pScreen->CloseScreen = xf86RandRCloseScreen;
+    dixScreenHookClose(pScreen, xf86RandRCloseScreen);
 
     randrp->rotation = RR_Rotate_0;
 
