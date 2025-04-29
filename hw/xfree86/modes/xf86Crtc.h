@@ -799,8 +799,6 @@ typedef struct _xf86CrtcConfig {
 
     CreateScreenResourcesProcPtr CreateScreenResources;
 
-    CloseScreenProcPtr CloseScreen;
-
     /* Cursor information */
     xf86CursorInfoPtr cursor_info;
     CursorPtr cursor;
