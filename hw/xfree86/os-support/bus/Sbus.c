@@ -41,7 +41,7 @@
 #include "xf86sbusBus_priv.h"
 #include "xf86Sbus.h"
 
-int promRootNode;
+static int promRootNode;
 
 static int promFd = -1;
 static int promCurrentNode;

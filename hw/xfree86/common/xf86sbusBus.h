@@ -75,8 +75,6 @@ extern _X_EXPORT void xf86SbusSetOsHwCursorCmap(sbusDevicePtr psdp, int bg,
 extern _X_EXPORT Bool xf86SbusHandleColormaps(ScreenPtr pScreen,
                                               sbusDevicePtr psdp);
 
-extern _X_EXPORT int promRootNode;
-
 extern _X_EXPORT int sparcPromInit(void);
 extern _X_EXPORT void sparcPromClose(void);
 extern _X_EXPORT int sparcPromGetBool(sbusPromNodePtr pnode, const char *prop);
