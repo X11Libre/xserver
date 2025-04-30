@@ -64,7 +64,6 @@ struct sbus_devtable {
     const char *descr;
 };
 
-extern _X_EXPORT void xf86SbusProbe(void);
 extern _X_EXPORT sbusDevicePtr *xf86SbusInfo;
 extern _X_EXPORT struct sbus_devtable sbusDeviceTable[];
 
