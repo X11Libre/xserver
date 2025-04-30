@@ -57,7 +57,6 @@ sbusDevicePtr *xf86SbusInfo = NULL;
 struct sbus_devtable sbusDeviceTable[] = {
     {SBUS_DEVICE_CG3, FBTYPE_SUN3COLOR, "cgthree", "suncg3",
      "Sun Color3 (cgthree)"},
-    {SBUS_DEVICE_CG4, FBTYPE_SUN4COLOR, "cgfour", NULL, "Sun Color4 (cgfour)"},
     {SBUS_DEVICE_CG6, FBTYPE_SUNFAST_COLOR, "cgsix", "suncg6", "Sun GX"},
     {SBUS_DEVICE_CG8, FBTYPE_MEMCOLOR, "cgeight", NULL, "Sun CG8/RasterOps"},
     {SBUS_DEVICE_CG12, FBTYPE_SUNGP3, "cgtwelve", NULL, "Sun GS (cgtwelve)"},
