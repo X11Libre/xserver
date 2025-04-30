@@ -123,8 +123,6 @@ typedef struct _CursorScreen {
 } CursorScreenRec, *CursorScreenPtr;
 
 #define GetCursorScreen(s) ((CursorScreenPtr)dixLookupPrivate(&(s)->devPrivates, CursorScreenPrivateKey))
-#define GetCursorScreenIfSet(s) GetCursorScreen(s)
-#define SetCursorScreen(s,p) dixSetPrivate(&(s)->devPrivates, CursorScreenPrivateKey, p)
 #define Wrap(as,s,elt,func)	(((as)->elt = (s)->elt), (s)->elt = func)
 #define Unwrap(as,s,elt,backup)	(((backup) = (s)->elt), (s)->elt = (as)->elt)
 
@@ -196,16 +194,14 @@ static Bool
 CursorCloseScreen(ScreenPtr pScreen)
 {
     CursorScreenPtr cs = GetCursorScreen(pScreen);
-    Bool ret;
+
     _X_UNUSED CloseScreenProcPtr close_proc;
     _X_UNUSED DisplayCursorProcPtr display_proc;
 
     Unwrap(cs, pScreen, CloseScreen, close_proc);
     Unwrap(cs, pScreen, DisplayCursor, display_proc);
     deleteCursorHideCountsForScreen(pScreen);
-    ret = (*pScreen->CloseScreen) (pScreen);
-    free(cs);
-    return ret;
+    return pScreen->CloseScreen(pScreen);
 }
 
 #define CursorAllEvents (XFixesDisplayCursorNotifyMask)
@@ -1058,20 +1054,15 @@ XFixesCursorInit(void)
     else
         CursorVisible = FALSE;
 
-    if (!dixRegisterPrivateKey(&CursorScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
+    if (!dixRegisterPrivateKey(&CursorScreenPrivateKeyRec, PRIVATE_SCREEN, sizeof(CursorScreenRec)))
         return FALSE;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
         ScreenPtr pScreen = screenInfo.screens[i];
-        CursorScreenPtr cs;
-
-        cs = (CursorScreenPtr) calloc(1, sizeof(CursorScreenRec));
-        if (!cs)
-            return FALSE;
+        CursorScreenPtr cs = GetCursorScreen(pScreen);
         Wrap(cs, pScreen, CloseScreen, CursorCloseScreen);
         Wrap(cs, pScreen, DisplayCursor, CursorDisplayCursor);
         cs->pCursorHideCounts = NULL;
-        SetCursorScreen(pScreen, cs);
     }
     CursorClientType = CreateNewResourceType(CursorFreeClient,
                                              "XFixesCursorClient");
