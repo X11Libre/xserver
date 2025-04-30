@@ -37,7 +37,7 @@
 
 #include "xf86Bus.h"
 
-#include "xf86sbusBus.h"
+#include "xf86sbusBus_priv.h"
 #include "xf86Sbus.h"
 
 Bool sbusSlotClaimed = FALSE;
