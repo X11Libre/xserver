@@ -32,7 +32,6 @@
 #define SBUS_DEVICE_LEO		0x0009
 #define SBUS_DEVICE_TCX		0x000a
 #define SBUS_DEVICE_FFB		0x000b
-#define SBUS_DEVICE_GT		0x000c
 #define SBUS_DEVICE_MGX		0x000d
 
 typedef struct sbus_prom_node {
