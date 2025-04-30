@@ -58,7 +58,6 @@ struct sbus_devtable sbusDeviceTable[] = {
     {SBUS_DEVICE_CG3, FBTYPE_SUN3COLOR, "cgthree", "suncg3",
      "Sun Color3 (cgthree)"},
     {SBUS_DEVICE_CG6, FBTYPE_SUNFAST_COLOR, "cgsix", "suncg6", "Sun GX"},
-    {SBUS_DEVICE_CG8, FBTYPE_MEMCOLOR, "cgeight", NULL, "Sun CG8/RasterOps"},
     {SBUS_DEVICE_CG12, FBTYPE_SUNGP3, "cgtwelve", NULL, "Sun GS (cgtwelve)"},
     {SBUS_DEVICE_CG14, FBTYPE_MDICOLOR, "cgfourteen", "suncg14", "Sun SX"},
     {SBUS_DEVICE_GT, FBTYPE_SUNGT, "gt", NULL, "Sun Graphics Tower"},
