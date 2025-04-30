@@ -26,7 +26,6 @@
 
 #include "xf86str.h"
 
-#define SBUS_DEVICE_CG2		0x0002
 #define SBUS_DEVICE_CG3		0x0003
 #define SBUS_DEVICE_CG4		0x0004
 #define SBUS_DEVICE_CG6		0x0005

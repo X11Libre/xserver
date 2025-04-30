@@ -55,7 +55,6 @@ static struct openpromio *promOpio;
 sbusDevicePtr *xf86SbusInfo = NULL;
 
 struct sbus_devtable sbusDeviceTable[] = {
-    {SBUS_DEVICE_CG2, FBTYPE_SUN2COLOR, "cgtwo", NULL, "Sun Color2 (cgtwo)"},
     {SBUS_DEVICE_CG3, FBTYPE_SUN3COLOR, "cgthree", "suncg3",
      "Sun Color3 (cgthree)"},
     {SBUS_DEVICE_CG4, FBTYPE_SUN4COLOR, "cgfour", NULL, "Sun Color4 (cgfour)"},
