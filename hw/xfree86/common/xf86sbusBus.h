@@ -56,14 +56,6 @@ typedef struct sbus_device {
     const char *device;
 } sbusDevice, *sbusDevicePtr;
 
-struct sbus_devtable {
-    int devId;
-    int fbType;
-    const char *promName;
-    const char *driverName;
-    const char *descr;
-};
-
 extern _X_EXPORT int xf86MatchSbusInstances(const char *driverName,
                                             int sbusDevId, GDevPtr * devList,
                                             int numDevs, DriverPtr drvp,

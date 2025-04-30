@@ -10,6 +10,14 @@
 
 #include "xf86sbusBus.h"
 
+struct sbus_devtable {
+    int devId;
+    int fbType;
+    const char *promName;
+    const char *driverName;
+    const char *descr;
+};
+
 extern sbusDevicePtr *xf86SbusInfo;
 extern struct sbus_devtable sbusDeviceTable[];
 
