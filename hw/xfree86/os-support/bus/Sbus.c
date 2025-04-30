@@ -115,7 +115,7 @@ promGetProperty(const char *prop, int *lenp)
     return promOpio->oprom_array;
 }
 
-int
+static int
 promGetBool(const char *prop)
 {
     promOpio->oprom_size = 0;

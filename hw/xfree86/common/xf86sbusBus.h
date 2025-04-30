@@ -77,8 +77,6 @@ extern _X_EXPORT Bool xf86SbusHandleColormaps(ScreenPtr pScreen,
 
 extern _X_EXPORT int promRootNode;
 
-extern _X_EXPORT int promGetBool(const char *prop);
-
 extern _X_EXPORT int sparcPromInit(void);
 extern _X_EXPORT void sparcPromClose(void);
 extern _X_EXPORT int sparcPromGetBool(sbusPromNodePtr pnode, const char *prop);
