@@ -33,8 +33,6 @@
 
 /*** These are DDX layer privates ***/
 
-extern DevPrivateKey XF86XvScreenKey;
-
 typedef struct {
     ClipNotifyProcPtr ClipNotify;
     WindowExposuresProcPtr WindowExposures;
