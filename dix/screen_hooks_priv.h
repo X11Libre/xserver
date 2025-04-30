@@ -20,6 +20,7 @@
 #ifndef XORG_DIX_SCREEN_HOOKS_H
 #define XORG_DIX_SCREEN_HOOKS_H
 
+#include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
 
 #include "include/callback.h" /* CallbackListPtr */
@@ -184,5 +185,37 @@ void dixScreenHookPixmapDestroy(ScreenPtr pScreen,
 _X_EXPORT
 void dixScreenUnhookPixmapDestroy(ScreenPtr pScreen,
                                   XorgScreenPixmapDestroyProcPtr func);
+
+/* prototype of screen close notification handler */
+typedef void (*XorgScreenPostCreateResourcesProcPtr)(CallbackListPtr *pcbl,
+                                                     ScreenPtr pScreen,
+                                                     Bool *ret);
+
+/**
+ * @brief register post-CreateScreenResources hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the hook
+ *
+ * This hook is called when CreateScreenResources() had been called
+ * and returned TRUE.
+ **/
+_X_EXPORT
+void dixScreenHookPostCreateResources(ScreenPtr pScreen,
+                                      XorgScreenPostCreateResourcesProcPtr func);
+
+/**
+ * @brief unregister a post-CreateScreenResources hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookPostCreateResources
+ **/
+_X_EXPORT
+void dixScreenUnhookPostCreateResources(ScreenPtr pScreen,
+                                        XorgScreenPostCreateResourcesProcPtr func);
 
 #endif /* DIX_SCREEN_HOOKS_H */

@@ -724,8 +724,7 @@ xf86platformAddDevice(const char *driver_name, int index)
 
    PixmapScreenInit(xf86GPUScreens[i]->pScreen);
 
-   if (xf86GPUScreens[i]->pScreen->CreateScreenResources &&
-       !(*xf86GPUScreens[i]->pScreen->CreateScreenResources) (xf86GPUScreens[i]->pScreen)) {
+   if (dixScreenRaiseCreateResources(xf86GPUScreens[i]->pScreen)) {
        RemoveGPUScreen(xf86GPUScreens[i]->pScreen);
        xf86DeleteScreen(xf86GPUScreens[i]);
        xf86UnclaimPlatformSlot(&xf86_platform_devices[index], NULL);

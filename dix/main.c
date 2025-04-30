@@ -209,8 +209,7 @@ dix_main(int argc, char *argv[], char *envp[])
             ScreenPtr pScreen = screenInfo.gpuscreens[i];
             if (!PixmapScreenInit(pScreen))
                 FatalError("failed to create screen pixmap properties");
-            if (pScreen->CreateScreenResources &&
-                !(*pScreen->CreateScreenResources) (pScreen))
+            if (!dixScreenRaiseCreateResources(pScreen))
                 FatalError("failed to create screen resources");
         }
 
@@ -219,8 +218,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
             if (!PixmapScreenInit(pScreen))
                 FatalError("failed to create screen pixmap properties");
-            if (pScreen->CreateScreenResources &&
-                !(*pScreen->CreateScreenResources) (pScreen))
+            if (!dixScreenRaiseCreateResources(pScreen))
                 FatalError("failed to create screen resources");
             if (!CreateGCperDepth(i))
                 FatalError("failed to create scratch GCs");

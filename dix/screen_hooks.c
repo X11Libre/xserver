@@ -5,6 +5,8 @@
 
 #include <dix-config.h>
 
+#include <X11/Xdefs.h>
+
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/dix.h"
@@ -27,6 +29,8 @@ DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcP
 DECLARE_HOOK_PROC(WindowPosition, hookWindowPosition, XorgScreenWindowPositionProcPtr);
 DECLARE_HOOK_PROC(Close, hookClose, XorgScreenCloseProcPtr);
 DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr);
+DECLARE_HOOK_PROC(PostCreateResources, hookPostCreateResources,
+                  XorgScreenPostCreateResourcesProcPtr);
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
@@ -77,4 +81,19 @@ void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap)
     ScreenPtr pScreen = pPixmap->drawable.pScreen;
     CallCallbacks(&pScreen->hookPixmapDestroy, pPixmap);
     /* we must not call the original ScreenRec->DestroyPixmap() here */
+}
+
+Bool dixScreenRaiseCreateResources(ScreenPtr pScreen)
+{
+    if (!pScreen)
+        return FALSE;
+
+    if (pScreen->CreateScreenResources) {
+        if (!pScreen->CreateScreenResources(pScreen))
+            return FALSE;
+    }
+
+    Bool ret = TRUE;
+    CallCallbacks(&pScreen->hookPostCreateResources, &ret);
+    return ret;
 }

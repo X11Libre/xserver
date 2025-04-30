@@ -683,6 +683,10 @@ typedef struct _Screen {
     /* additional pixmap destroy notify hooks (replaces wrapping DestroyPixmap)
        should NOT be touched outside of DIX core */
     CallbackListPtr hookPixmapDestroy;
+
+    /* hooks run right after SUCCESSFUL CreateScreenResources
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookPostCreateResources;
 } ScreenRec;
 
 static inline RegionPtr
