@@ -800,4 +800,16 @@ void dixScreenRaiseClose(ScreenPtr pScreen);
  */
 void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap);
 
+/*
+ * @brief call screen's CreateScreenResources chain
+ * @see dixScreenHookPostCreateResources
+ * @param pScreen the screen to run on
+ *
+ * Call the screen's CreateScreenResources() proc, and if it returns TRUE,
+ * run the installed hooks afterwards.
+ *
+ * Should only be called by DIX itself.
+ */
+Bool dixScreenRaiseCreateResources(ScreenPtr pScreen);
+
 #endif /* _XSERVER_DIX_PRIV_H */
