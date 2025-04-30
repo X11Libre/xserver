@@ -109,11 +109,6 @@ xf86SbusProbe(void)
             int len, chiprev, vmsize;
 
             switch (psdp->devId) {
-            case SBUS_DEVICE_MGX:
-                prop = sparcPromGetProperty(&psdp->node, "fb_size", &len);
-                if (prop && len == 4 && *(int *) prop == 0x400000)
-                    psdp->descr = "Quantum 3D MGXplus with 4M VRAM";
-                break;
             case SBUS_DEVICE_CG6:
                 chiprev = 0;
                 vmsize = 0;
