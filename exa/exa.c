@@ -656,32 +656,18 @@ exaBitmapToRegion(PixmapPtr pPix)
     return ret;
 }
 
-static Bool
-exaCreateScreenResources(ScreenPtr pScreen)
+static void exaCreateScreenResources(CallbackListPtr *pcbl, ScreenPtr pScreen, Bool *ret)
 {
     ExaScreenPriv(pScreen);
-    PixmapPtr pScreenPixmap;
-    Bool b;
-
-    swap(pExaScr, pScreen, CreateScreenResources);
-    b = pScreen->CreateScreenResources(pScreen);
-    swap(pExaScr, pScreen, CreateScreenResources);
-
-    if (!b)
-        return FALSE;
-
-    pScreenPixmap = pScreen->GetScreenPixmap(pScreen);
+    PixmapPtr pScreenPixmap = pScreen->GetScreenPixmap(pScreen);
 
     if (pScreenPixmap) {
         ExaPixmapPriv(pScreenPixmap);
-
         exaSetAccelBlock(pExaScr, pExaPixmap,
                          pScreenPixmap->drawable.width,
                          pScreenPixmap->drawable.height,
                          pScreenPixmap->drawable.bitsPerPixel);
     }
-
-    return TRUE;
 }
 
 static void
@@ -742,6 +728,7 @@ static void exaCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unuse
     PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
 
     dixScreenUnhookClose(pScreen, exaCloseScreen);
+    dixScreenUnhookPostCreateResources(pScreen, exaCreateScreenResources);
 
     /* doesn't matter which one actually was registered */
     dixScreenUnhookPixmapDestroy(pScreen, exaPixmapDestroy_classic);
@@ -765,7 +752,6 @@ static void exaCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unuse
     unwrap(pExaScr, pScreen, CopyWindow);
     unwrap(pExaScr, pScreen, ChangeWindowAttributes);
     unwrap(pExaScr, pScreen, BitmapToRegion);
-    unwrap(pExaScr, pScreen, CreateScreenResources);
     if (pExaScr->SavedSharePixmapBacking)
         unwrap(pExaScr, pScreen, SharePixmapBacking);
     if (pExaScr->SavedSetSharedPixmapBacking)
@@ -921,12 +907,12 @@ exaDriverInit(ScreenPtr pScreen, ExaDriverPtr pScreenInfo)
         wrap(pExaScr, pScreen, WakeupHandler, ExaWakeupHandler);
     wrap(pExaScr, pScreen, CreateGC, exaCreateGC);
     dixScreenHookClose(pScreen, exaCloseScreen);
+    dixScreenHookPostCreateResources(pScreen, exaCreateScreenResources);
     wrap(pExaScr, pScreen, GetImage, exaGetImage);
     wrap(pExaScr, pScreen, GetSpans, ExaCheckGetSpans);
     wrap(pExaScr, pScreen, CopyWindow, exaCopyWindow);
     wrap(pExaScr, pScreen, ChangeWindowAttributes, exaChangeWindowAttributes);
     wrap(pExaScr, pScreen, BitmapToRegion, exaBitmapToRegion);
-    wrap(pExaScr, pScreen, CreateScreenResources, exaCreateScreenResources);
 
     if (ps) {
         wrap(pExaScr, ps, Composite, exaComposite);
