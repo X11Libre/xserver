@@ -74,7 +74,7 @@ struct sbus_devtable sbusDeviceTable[] = {
     {0, 0, NULL}
 };
 
-int
+static int
 promGetSibling(int node)
 {
     promOpio->oprom_size = sizeof(int);
