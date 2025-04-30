@@ -55,8 +55,6 @@ static struct openpromio *promOpio;
 sbusDevicePtr *xf86SbusInfo = NULL;
 
 struct sbus_devtable sbusDeviceTable[] = {
-    {SBUS_DEVICE_BW2, FBTYPE_SUN2BW, "bwtwo", "sunbw2",
-     "Sun Monochrome (bwtwo)"},
     {SBUS_DEVICE_CG2, FBTYPE_SUN2COLOR, "cgtwo", NULL, "Sun Color2 (cgtwo)"},
     {SBUS_DEVICE_CG3, FBTYPE_SUN3COLOR, "cgthree", "suncg3",
      "Sun Color3 (cgthree)"},
@@ -403,7 +401,6 @@ sparcPromAssignNodes(void)
             int devId;
             char *prefix;
         } procFbPrefixes[] = {
-            {SBUS_DEVICE_BW2, "BWtwo"},
             {SBUS_DEVICE_CG14, "CGfourteen"},
             {SBUS_DEVICE_CG6, "CGsix"},
             {SBUS_DEVICE_CG3, "CGthree"},
