@@ -16,5 +16,6 @@ void xf86SbusProbe(void);
 
 char *sparcPromGetProperty(sbusPromNodePtr pnode, const char *prop, int *lenp);
 void sparcPromAssignNodes(void);
+char *sparcPromNode2Pathname(sbusPromNodePtr pnode);
 
 #endif /* _XSERVER_XF86_SBUSBUS_H */
