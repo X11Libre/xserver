@@ -102,7 +102,7 @@ promGetChild(int node)
     return *(int *) promOpio->oprom_array;
 }
 
-char *
+static char *
 promGetProperty(const char *prop, int *lenp)
 {
     promOpio->oprom_size = MAX_VAL;
