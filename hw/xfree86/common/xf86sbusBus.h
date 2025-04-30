@@ -77,7 +77,6 @@ extern _X_EXPORT Bool xf86SbusHandleColormaps(ScreenPtr pScreen,
 
 extern _X_EXPORT int promRootNode;
 
-extern _X_EXPORT int promGetChild(int node);
 extern _X_EXPORT char *promGetProperty(const char *prop, int *lenp);
 extern _X_EXPORT int promGetBool(const char *prop);
 

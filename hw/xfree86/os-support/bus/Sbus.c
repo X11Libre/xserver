@@ -88,7 +88,7 @@ promGetSibling(int node)
     return *(int *) promOpio->oprom_array;
 }
 
-int
+static int
 promGetChild(int node)
 {
     promOpio->oprom_size = sizeof(int);
