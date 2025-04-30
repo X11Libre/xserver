@@ -54,7 +54,6 @@ extern _X_EXPORT int xf86MatchSbusInstances(const char *driverName,
                                             int numDevs, DriverPtr drvp,
                                             int **foundEntities);
 extern _X_EXPORT sbusDevicePtr xf86GetSbusInfoForEntity(int entityIndex);
-extern _X_EXPORT int xf86GetEntityForSbusInfo(sbusDevicePtr psdp);
 extern _X_EXPORT void xf86SbusUseBuiltinMode(ScrnInfoPtr pScrn,
                                              sbusDevicePtr psdp);
 extern _X_EXPORT void *xf86MapSbusMem(sbusDevicePtr psdp,

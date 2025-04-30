@@ -562,23 +562,6 @@ xf86GetSbusInfoForEntity(int entityIndex)
     return NULL;
 }
 
-int
-xf86GetEntityForSbusInfo(sbusDevicePtr psdp)
-{
-    int i;
-
-    for (i = 0; i < xf86NumEntities; i++) {
-        EntityPtr p = xf86Entities[i];
-
-        if (p->bus.type != BUS_SBUS)
-            continue;
-
-        if (p->bus.id.sbus.fbNum == psdp->fbNum)
-            return i;
-    }
-    return -1;
-}
-
 void
 xf86SbusUseBuiltinMode(ScrnInfoPtr pScrn, sbusDevicePtr psdp)
 {
