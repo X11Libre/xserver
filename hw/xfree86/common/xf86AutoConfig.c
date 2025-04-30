@@ -44,7 +44,7 @@
 #include "xf86platformBus.h"
 #include "xf86pciBus.h"
 #ifdef __sparc__
-#include "xf86sbusBus.h"
+#include "xf86sbusBus_priv.h"
 #endif
 
 #ifdef __sun
