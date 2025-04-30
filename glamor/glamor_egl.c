@@ -56,7 +56,6 @@ struct glamor_egl_screen_private {
     EGLContext context;
     char *device_path;
 
-    CreateScreenResourcesProcPtr CreateScreenResources;
     CloseScreenProcPtr CloseScreen;
     int fd;
     struct gbm_device *gbm;
