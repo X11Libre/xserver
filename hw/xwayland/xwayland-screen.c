@@ -1129,7 +1129,6 @@ xwl_screen_init(ScreenPtr pScreen, int argc, char **argv)
     xwl_screen->present = xwl_present_init(pScreen);
 
     if (!xwl_screen->glamor) {
-        xwl_screen->CreateScreenResources = pScreen->CreateScreenResources;
         pScreen->CreateScreenResources = xwl_shm_create_screen_resources;
         pScreen->CreatePixmap = xwl_shm_create_pixmap;
         pScreen->DestroyPixmap = xwl_shm_destroy_pixmap;

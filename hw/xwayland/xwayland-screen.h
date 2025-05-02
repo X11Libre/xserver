@@ -69,7 +69,6 @@ struct xwl_screen {
     int hidpi;
 
     ClipNotifyProcPtr ClipNotify;
-    CreateScreenResourcesProcPtr CreateScreenResources;
     CloseScreenProcPtr CloseScreen;
     ConfigNotifyProcPtr ConfigNotify;
     RealizeWindowProcPtr RealizeWindow;

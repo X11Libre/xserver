@@ -36,6 +36,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "mi/mi_priv.h"
 #include "os/osdep.h"
 
 #include "fb.h"
@@ -351,15 +352,9 @@ Bool
 xwl_shm_create_screen_resources(ScreenPtr screen)
 {
     struct xwl_screen *xwl_screen = xwl_screen_get(screen);
-    int ret;
 
-    screen->CreateScreenResources = xwl_screen->CreateScreenResources;
-    ret = (*screen->CreateScreenResources) (screen);
-    xwl_screen->CreateScreenResources = screen->CreateScreenResources;
-    screen->CreateScreenResources = xwl_shm_create_screen_resources;
-
-    if (!ret)
-        return ret;
+    if (!miCreateScreenResources(screen))
+        return FALSE;
 
     if (xwl_screen->rootless)
         screen->devPrivate =
