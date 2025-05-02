@@ -5,6 +5,7 @@
 #ifndef _XSERVER_XF86RANDR12_PRIV_H_
 #define _XSERVER_XF86RANDR12_PRIV_H_
 
+#include <X11/Xdefs.h>
 #include <X11/extensions/render.h>
 
 #include "randrstr.h"
@@ -16,5 +17,6 @@ void xf86RandR12LoadPalette(ScrnInfoPtr pScrn, int numColors,
 Bool xf86RandR12InitGamma(ScrnInfoPtr pScrn, unsigned gammaSize);
 
 void xf86RandR12CloseScreen(ScreenPtr pScreen);
+Bool xf86RandR12CreateScreenResources(ScreenPtr pScreen);
 
 #endif /* _XSERVER_XF86RANDR12_PRIV_H_ */

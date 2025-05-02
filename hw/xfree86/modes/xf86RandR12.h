@@ -25,7 +25,6 @@
 #include <randrstr.h>
 #include <X11/extensions/render.h>
 
-extern _X_EXPORT Bool xf86RandR12CreateScreenResources(ScreenPtr pScreen);
 extern _X_EXPORT Bool xf86RandR12Init(ScreenPtr pScreen);
 extern _X_EXPORT void xf86RandR12SetRotations(ScreenPtr pScreen,
                                               Rotation rotation);
