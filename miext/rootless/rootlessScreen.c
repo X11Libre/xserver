@@ -111,31 +111,17 @@ RootlessUpdateScreenPixmap(ScreenPtr pScreen)
  *  Rootless implementations typically set a null framebuffer pointer, which
  *  causes problems with miCreateScreenResources. We fix things up here.
  */
-static Bool
-RootlessCreateScreenResources(ScreenPtr pScreen)
+static void RootlessCreateScreenResources(CallbackListPtr *pcbl,
+                                          ScreenPtr pScreen, Bool *ret)
 {
-    Bool ret = TRUE;
-
-    SCREEN_UNWRAP(pScreen, CreateScreenResources);
-
-    if (pScreen->CreateScreenResources != NULL)
-        ret = (*pScreen->CreateScreenResources) (pScreen);
-
-    SCREEN_WRAP(pScreen, CreateScreenResources);
-
-    if (!ret)
-        return ret;
-
     /* Make sure we have a valid screen pixmap. */
-
     RootlessUpdateScreenPixmap(pScreen);
-
-    return ret;
 }
 
 static void RootlessCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     dixScreenUnhookClose(pScreen, RootlessCloseScreen);
+    dixScreenUnhookPostCreateResources(pScreen, RootlessCreateScreenResources);
 
     RootlessScreenRec *s = SCREENREC(pScreen);
 
@@ -649,6 +635,7 @@ RootlessWrap(ScreenPtr pScreen)
     dixScreenHookClose(pScreen, RootlessCloseScreen);
     dixScreenHookWindowDestroy(pScreen, RootlessWindowDestroy);
     dixScreenHookWindowPosition(pScreen, RootlessWindowPosition);
+    dixScreenHookPostCreateResources(pScreen, RootlessCreateScreenResources);
 
 #define WRAP(a) \
     if (pScreen->a) { \
@@ -659,7 +646,6 @@ RootlessWrap(ScreenPtr pScreen)
     } \
     pScreen->a = Rootless##a
 
-    WRAP(CreateScreenResources);
     WRAP(CreateGC);
     WRAP(CopyWindow);
     WRAP(PaintWindow);
