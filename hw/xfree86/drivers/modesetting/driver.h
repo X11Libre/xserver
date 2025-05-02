@@ -108,7 +108,6 @@ typedef struct _modesettingRec {
     CreateWindowProcPtr CreateWindow;
     unsigned int SaveGeneration;
 
-    CreateScreenResourcesProcPtr createScreenResources;
     ScreenBlockHandlerProcPtr BlockHandler;
     miPointerSpriteFuncPtr SpriteFuncs;
     void *driver;

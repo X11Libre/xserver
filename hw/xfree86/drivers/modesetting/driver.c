@@ -42,6 +42,7 @@
 
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
+#include "mi/mi_priv.h"
 
 #include "xf86.h"
 #include "xf86Priv.h"
@@ -1744,18 +1745,15 @@ msStopFlippingPixmapTracking(DrawablePtr src,
 }
 
 static Bool
-CreateScreenResources(ScreenPtr pScreen)
+modsetCreateScreenResources(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     modesettingPtr ms = modesettingPTR(pScrn);
     PixmapPtr rootPixmap;
-    Bool ret;
     void *pixels = NULL;
     int err;
 
-    pScreen->CreateScreenResources = ms->createScreenResources;
-    ret = pScreen->CreateScreenResources(pScreen);
-    pScreen->CreateScreenResources = CreateScreenResources;
+    Bool ret = miCreateScreenResources(pScreen);
 
     if (!drmmode_set_desired_modes(pScrn, &ms->drmmode, pScrn->is_gpu, FALSE))
         return FALSE;
@@ -2057,8 +2055,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
     }
 
-    ms->createScreenResources = pScreen->CreateScreenResources;
-    pScreen->CreateScreenResources = CreateScreenResources;
+    pScreen->CreateScreenResources = modsetCreateScreenResources;
 
     xf86SetBlackWhitePixels(pScreen);
 
@@ -2325,7 +2322,6 @@ CloseScreen(ScreenPtr pScreen)
         LeaveVT(pScrn);
     }
 
-    pScreen->CreateScreenResources = ms->createScreenResources;
     pScreen->BlockHandler = ms->BlockHandler;
 
     pScrn->vtSema = FALSE;
