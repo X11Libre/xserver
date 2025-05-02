@@ -35,6 +35,9 @@
 #ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
 #endif
+
+#include "mi/mi_priv.h"
+
 #include "win.h"
 #include "winmsg.h"
 
@@ -206,9 +209,8 @@ static Bool
 winCreateScreenResources(ScreenPtr pScreen)
 {
     winScreenPriv(pScreen);
-    Bool result;
 
-    result = pScreenPriv->pwinCreateScreenResources(pScreen);
+    Bool result = miCreateScreenResources(pScreen);
 
     /* Now the screen bitmap has been wrapped in a pixmap,
        add that to the Shadow framebuffer */
@@ -362,7 +364,6 @@ winFinishScreenInitFB(int i, ScreenPtr pScreen, int argc, char **argv)
 
         /* Wrap CreateScreenResources so we can add the screen pixmap
            to the Shadow framebuffer after it's been created */
-        pScreenPriv->pwinCreateScreenResources = pScreen->CreateScreenResources;
         pScreen->CreateScreenResources = winCreateScreenResources;
     }
 

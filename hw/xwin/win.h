@@ -291,8 +291,6 @@ typedef Bool (*winCreatePrimarySurfaceProcPtr) (ScreenPtr);
 
 typedef Bool (*winReleasePrimarySurfaceProcPtr) (ScreenPtr);
 
-typedef Bool (*winCreateScreenResourcesProc) (ScreenPtr);
-
 /*
  * Pixmap privates
  */
@@ -496,7 +494,6 @@ typedef struct _winPrivScreenRec {
     winDestroyColormapProcPtr pwinDestroyColormap;
     winCreatePrimarySurfaceProcPtr pwinCreatePrimarySurface;
     winReleasePrimarySurfaceProcPtr pwinReleasePrimarySurface;
-    winCreateScreenResourcesProc pwinCreateScreenResources;
 
     /* Window Procedures for Rootless mode */
     ValidateTreeProcPtr ValidateTree;
