@@ -745,23 +745,12 @@ xf86OutputDestroy(xf86OutputPtr output)
 }
 
 /*
- * Called during CreateScreenResources to hook up RandR
+ * installed by xf86CrtcScreenInit() and called by during CreateScreenResources
  */
-static Bool
-xf86CrtcCreateScreenResources(ScreenPtr screen)
+static void xf86CrtcCreateScreenResources(CallbackListPtr *pcbl,
+                                          ScreenPtr pScreen, Bool *ret)
 {
-    ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
-    xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(scrn);
-
-    screen->CreateScreenResources = config->CreateScreenResources;
-
-    if (!(*screen->CreateScreenResources) (screen))
-        return FALSE;
-
-    if (!xf86RandR12CreateScreenResources(screen))
-        return FALSE;
-
-    return TRUE;
+    xf86RandR12CreateScreenResources(pScreen);
 }
 
 /*
@@ -771,6 +760,7 @@ static void xf86CrtcCloseScreen(CallbackListPtr *pcbl,
                                 ScreenPtr screen, void *unused)
 {
     dixScreenUnhookClose(screen, xf86CrtcCloseScreen);
+    dixScreenUnhookPostCreateResources(screen, xf86CrtcCreateScreenResources);
 
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(scrn);
@@ -838,11 +828,8 @@ xf86CrtcScreenInit(ScreenPtr screen)
         xf86RandR12SetTransformSupport(screen, FALSE);
     }
 
-    /* Wrap CreateScreenResources so we can initialize the RandR code */
-    config->CreateScreenResources = screen->CreateScreenResources;
-    screen->CreateScreenResources = xf86CrtcCreateScreenResources;
-
     dixScreenHookClose(screen, xf86CrtcCloseScreen);
+    dixScreenHookPostCreateResources(screen, xf86CrtcCreateScreenResources);
 
     /* This might still be marked wrapped from a previous generation */
     config->BlockHandler = NULL;
