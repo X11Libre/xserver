@@ -141,8 +141,6 @@ typedef struct {
 
     ColormapPtr pInstalledmap;  /* current colormap */
     xColorItem systemPalette[KD_MAX_PSEUDO_SIZE];       /* saved windows colors */
-
-    CreateScreenResourcesProcPtr CreateScreenResources;
 } KdPrivScreenRec, *KdPrivScreenPtr;
 
 typedef enum _kdPointerState {

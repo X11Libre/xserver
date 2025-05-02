@@ -27,6 +27,7 @@
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 
+#include "mi/mi_priv.h"
 #include "os/osdep.h"
 
 #include "kdrive.h"
@@ -539,18 +540,14 @@ KdCreateScreenResources(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdCardInfo *card = pScreenPriv->card;
-    Bool ret;
 
-    pScreen->CreateScreenResources = pScreenPriv->CreateScreenResources;
-    if (pScreen->CreateScreenResources)
-        ret = (*pScreen->CreateScreenResources) (pScreen);
-    else
-        ret = -1;
-    pScreenPriv->CreateScreenResources = pScreen->CreateScreenResources;
-    pScreen->CreateScreenResources = KdCreateScreenResources;
-    if (ret && card->cfuncs->createRes)
-        ret = (*card->cfuncs->createRes) (pScreen);
-    return ret;
+    if (!miCreateScreenResources(pScreen))
+        return FALSE;
+
+    if (card->cfuncs->createRes)
+        return card->cfuncs->createRes(pScreen);
+
+    return TRUE;
 }
 
 Bool KdCloseScreen(ScreenPtr pScreen)
@@ -784,8 +781,6 @@ KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
             return FALSE;
 
     pScreen->CloseScreen = KdCloseScreen;
-
-    pScreenPriv->CreateScreenResources = pScreen->CreateScreenResources;
     pScreen->CreateScreenResources = KdCreateScreenResources;
 
     if (screen->softCursor ||
