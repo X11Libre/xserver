@@ -50,7 +50,6 @@ extern _X_EXPORT Bool fbdevHWSaveScreen(ScreenPtr pScreen, int mode);
 
 extern _X_EXPORT xf86SwitchModeProc *fbdevHWSwitchModeWeak(void);
 extern _X_EXPORT xf86AdjustFrameProc *fbdevHWAdjustFrameWeak(void);
-extern _X_EXPORT xf86EnterVTProc *fbdevHWEnterVTWeak(void);
 extern _X_EXPORT xf86LeaveVTProc *fbdevHWLeaveVTWeak(void);
 extern _X_EXPORT xf86ValidModeProc *fbdevHWValidModeWeak(void);
 extern _X_EXPORT xf86DPMSSetProc *fbdevHWDPMSSetWeak(void);

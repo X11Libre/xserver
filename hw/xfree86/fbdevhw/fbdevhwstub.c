@@ -164,12 +164,6 @@ fbdevHWAdjustFrameWeak(void)
     return fbdevHWAdjustFrame;
 }
 
-xf86EnterVTProc *
-fbdevHWEnterVTWeak(void)
-{
-    return fbdevHWEnterVT;
-}
-
 xf86LeaveVTProc *
 fbdevHWLeaveVTWeak(void)
 {
