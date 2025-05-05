@@ -154,7 +154,7 @@ fbOverlayPaintKey(DrawablePtr pDrawable,
 /*
  * Track visible region for each layer
  */
-void
+static void
 fbOverlayUpdateLayerRegion(ScreenPtr pScreen, int layer, RegionPtr prgn)
 {
     FbOverlayScrPrivPtr pScrPriv = fbOverlayGetScrPriv(pScreen);
