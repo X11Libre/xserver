@@ -83,7 +83,7 @@ enum {
     FBIOBLANK_UNSUPPORTED = 0,
 };
 
-Bool
+static Bool
 fbdevHWGetRec(ScrnInfoPtr pScrn)
 {
     if (fbdevHWPrivateIndex < 0)

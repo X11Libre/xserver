@@ -8,12 +8,6 @@
 
 /* Stubs for the static server on platforms that don't support fbdev */
 
-Bool
-fbdevHWGetRec(ScrnInfoPtr pScrn)
-{
-    return FALSE;
-}
-
 void
 fbdevHWFreeRec(ScrnInfoPtr pScrn)
 {

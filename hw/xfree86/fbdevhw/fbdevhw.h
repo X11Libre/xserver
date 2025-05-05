@@ -11,7 +11,6 @@
 #define FBDEVHW_TEXT			3       /* Text/attributes      */
 #define FBDEVHW_VGA_PLANES		4       /* EGA/VGA planes       */
 
-extern _X_EXPORT Bool fbdevHWGetRec(ScrnInfoPtr pScrn);
 extern _X_EXPORT void fbdevHWFreeRec(ScrnInfoPtr pScrn);
 
 extern _X_EXPORT int fbdevHWGetFD(ScrnInfoPtr pScrn);
