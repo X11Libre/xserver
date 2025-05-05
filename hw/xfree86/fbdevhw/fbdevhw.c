@@ -96,17 +96,6 @@ fbdevHWGetRec(ScrnInfoPtr pScrn)
     return TRUE;
 }
 
-int
-fbdevHWGetFD(ScrnInfoPtr pScrn)
-{
-    fbdevHWPtr fPtr;
-
-    fbdevHWGetRec(pScrn);
-    fPtr = FBDEVHWPTR(pScrn);
-
-    return fPtr->fd;
-}
-
 /* -------------------------------------------------------------------- */
 /* some helpers for printing debug information                          */
 
