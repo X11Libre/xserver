@@ -30,8 +30,6 @@
 
 #define DRI3_SCREEN_INFO_VERSION        4
 
-extern RESTYPE dri3_syncobj_type;
-
 struct dri3_syncobj
 {
     XID id;

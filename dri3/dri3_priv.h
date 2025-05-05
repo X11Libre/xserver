@@ -35,6 +35,8 @@
 
 extern DevPrivateKeyRec dri3_screen_private_key;
 
+extern RESTYPE dri3_syncobj_type;
+
 typedef struct dri3_dmabuf_format {
     uint32_t                    format;
     uint32_t                    num_modifiers;
