@@ -29,7 +29,6 @@ extern _X_EXPORT void *fbdevHWMapMMIO(ScrnInfoPtr pScrn);
 extern _X_EXPORT Bool fbdevHWUnmapMMIO(ScrnInfoPtr pScrn);
 
 extern _X_EXPORT void fbdevHWSetVideoModes(ScrnInfoPtr pScrn);
-extern _X_EXPORT DisplayModePtr fbdevHWGetBuildinMode(ScrnInfoPtr pScrn);
 extern _X_EXPORT void fbdevHWUseBuildinMode(ScrnInfoPtr pScrn);
 extern _X_EXPORT Bool fbdevHWModeInit(ScrnInfoPtr pScrn, DisplayModePtr mode);
 extern _X_EXPORT void fbdevHWSave(ScrnInfoPtr pScrn);

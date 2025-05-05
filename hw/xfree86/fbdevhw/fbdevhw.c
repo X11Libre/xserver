@@ -587,14 +587,6 @@ fbdevHWSetVideoModes(ScrnInfoPtr pScrn)
     }
 }
 
-DisplayModePtr
-fbdevHWGetBuildinMode(ScrnInfoPtr pScrn)
-{
-    fbdevHWPtr fPtr = FBDEVHWPTR(pScrn);
-
-    return &fPtr->buildin;
-}
-
 void
 fbdevHWUseBuildinMode(ScrnInfoPtr pScrn)
 {
