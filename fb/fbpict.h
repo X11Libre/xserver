@@ -28,6 +28,8 @@
 #ifndef _FBPICT_H_
 #define _FBPICT_H_
 
+#include "fb.h"
+
 /* fbpict.c */
 extern _X_EXPORT void
 fbComposite(CARD8 op,
@@ -44,9 +46,6 @@ fbComposite(CARD8 op,
 extern _X_EXPORT void
 fbAddTraps(PicturePtr pPicture,
            INT16 xOff, INT16 yOff, int ntrap, xTrap * traps);
-
-extern _X_EXPORT void
-fbRasterizeTrapezoid(PicturePtr alpha, xTrapezoid * trap, int x_off, int y_off);
 
 extern _X_EXPORT void
 fbAddTriangles(PicturePtr pPicture,

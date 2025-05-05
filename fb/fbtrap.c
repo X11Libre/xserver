@@ -22,11 +22,12 @@
 
 #include <dix-config.h>
 
+#include "fb/fbpict_priv.h"
+
 #include "fb.h"
 
 #include "picturestr.h"
 #include "mipict.h"
-#include "fbpict.h"
 #include "damage.h"
 
 void
