@@ -599,6 +599,7 @@ typedef struct _DeviceIntRec {
     struct _SyncCounter *idle_counter;
 
     Bool ignoreXkbActionsBehaviors; /* TRUE if keys don't trigger behaviors and actions */
+    Bool hasDdxKeymap;              /* TRUE if clients cannot modify the keymap */
 } DeviceIntRec;
 
 typedef struct {
