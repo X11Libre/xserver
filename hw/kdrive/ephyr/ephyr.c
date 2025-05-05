@@ -28,6 +28,7 @@
 #include <xcb/xcb_keysyms.h>
 #include <X11/keysym.h>
 
+#include "fb/fb_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"

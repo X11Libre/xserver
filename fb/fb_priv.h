@@ -15,6 +15,8 @@
 #define fbGetGCPrivateKey(pGC) (&fbGetScreenPrivate((pGC)->pScreen)->gcPrivateKeyRec)
 #define fbGetGCPrivate(pGC) ((FbGCPrivPtr)dixLookupPrivate(&(pGC)->devPrivates, fbGetGCPrivateKey(pGC)))
 
+#define fbGetScreenPixmap(s)    ((PixmapPtr) (s)->devPrivate)
+
 #ifdef FB_DEBUG
 
 #define FB_HEAD_BITS   (FbStip) (0xbaadf00d)

@@ -274,8 +274,6 @@ typedef struct {
 
 #define fbGetCompositeClip(pGC) ((pGC)->pCompositeClip)
 
-#define fbGetScreenPixmap(s)	((PixmapPtr) (s)->devPrivate)
-
 #define fbGetWinPrivateKey(pWin)        (&fbGetScreenPrivate(((DrawablePtr) (pWin))->pScreen)->winPrivateKeyRec)
 
 #define fbGetWindowPixmap(pWin)	((PixmapPtr)\
