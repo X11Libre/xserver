@@ -67,7 +67,6 @@
 #define FbMergeRopBits wFbMergeRopBits
 #define fbOddTile wfbOddTile
 #define fbOver wfbOver
-#define fbOverlayCopyWindow wfbOverlayCopyWindow
 #define fbOverlayFinishScreenInit wfbOverlayFinishScreenInit
 #define fbOverlayGeneration wfbOverlayGeneration
 #define fbOverlayGetScreenPrivateKey wfbOverlayGetScreenPrivateKey

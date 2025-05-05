@@ -61,9 +61,6 @@ typedef struct _fbOverlayScrPriv {
     dixLookupPrivate(&(s)->devPrivates, fbOverlayGetScreenPrivateKey())
 
 extern _X_EXPORT void
- fbOverlayCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc);
-
-extern _X_EXPORT void
 fbOverlayWindowExposures(WindowPtr pWin, RegionPtr prgn);
 
 extern _X_EXPORT Bool

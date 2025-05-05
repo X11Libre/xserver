@@ -186,7 +186,7 @@ fbOverlayUpdateLayerRegion(ScreenPtr pScreen, int layer, RegionPtr prgn)
 /*
  * Copy only areas in each layer containing real bits
  */
-void
+static void
 fbOverlayCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
