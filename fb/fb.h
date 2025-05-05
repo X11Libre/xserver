@@ -270,21 +270,6 @@ extern _X_EXPORT void fbSetBits(FbStip * bits, int stride, FbStip data);
     } \
 }
 
-#define FbMaskStip(x,w,l,n,r) { \
-    n = (w); \
-    r = FbRightStipMask((x)+n); \
-    l = FbLeftStipMask(x); \
-    if (l) { \
-	n -= FB_STIP_UNIT - ((x) & FB_STIP_MASK); \
-	if (n < 0) { \
-	    n = 0; \
-	    l &= r; \
-	    r = 0; \
-	} \
-    } \
-    n >>= FB_STIP_SHIFT; \
-}
-
 /*
  * These macros are used to transparently stipple
  * in copy mode; the expected usage is with 'n' constant
