@@ -832,8 +832,6 @@ fbPolyFillRect(DrawablePtr pDrawable,
 
 #define fbPolyFillArc miPolyFillArc
 
-#define fbFillPolygon miFillPolygon
-
 /*
  * fbfillsp.c
  */
