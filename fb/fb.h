@@ -779,8 +779,6 @@ extern _X_EXPORT void
 fbPolyFillRect(DrawablePtr pDrawable,
                GCPtr pGC, int nrectInit, xRectangle *prectInit);
 
-#define fbPolyFillArc miPolyFillArc
-
 /*
  * fbfillsp.c
  */
@@ -884,8 +882,6 @@ extern _X_EXPORT void
 
 extern _X_EXPORT void
  fbPolySegment(DrawablePtr pDrawable, GCPtr pGC, int nseg, xSegment * pseg);
-
-#define fbPolyRectangle	miPolyRectangle
 
 /*
  * fbpict.c
