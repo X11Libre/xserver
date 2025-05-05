@@ -14,6 +14,9 @@
 
 #ifdef FB_DEBUG
 
+#define FB_HEAD_BITS   (FbStip) (0xbaadf00d)
+#define FB_TAIL_BITS   (FbStip) (0xbaddf0ad)
+
 void fbValidateDrawable(DrawablePtr d);
 void fbSetBits(FbStip * bits, int stride, FbStip data);
 

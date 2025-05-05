@@ -89,11 +89,6 @@ typedef FbBits FbStip;
 
 typedef int FbStride;
 
-#ifdef FB_DEBUG
-#define FB_HEAD_BITS   (FbStip) (0xbaadf00d)
-#define FB_TAIL_BITS   (FbStip) (0xbaddf0ad)
-#endif
-
 #include "fbrop.h"
 
 #if BITMAP_BIT_ORDER == LSBFirst
