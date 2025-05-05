@@ -371,7 +371,6 @@ typedef struct {
 				 dixLookupPrivate(&(pGC)->devPrivates, fbGetGCPrivateKey(pGC)))
 
 #define fbGetCompositeClip(pGC) ((pGC)->pCompositeClip)
-#define fbGetExpose(pGC)	((pGC)->fExpose)
 
 #define fbGetScreenPixmap(s)	((PixmapPtr) (s)->devPrivate)
 
