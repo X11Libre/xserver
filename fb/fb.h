@@ -93,8 +93,6 @@
 #define FB_STIP_UNIT	(1 << FB_STIP_SHIFT)
 #define FB_STIP_MASK	(FB_STIP_UNIT - 1)
 #define FB_STIP_ALLONES	((FbStip) -1)
-#define FB_STIP_ODDSTRIDE(s)	(((s) & (FB_MASK >> FB_STIP_SHIFT)) != 0)
-#define FB_STIP_ODDPTR(p)	((((long) (p)) & (FB_MASK >> 3)) != 0)
 #define FbStipStrideToBitsStride(s) (((s) >> (FB_SHIFT - FB_STIP_SHIFT)))
 #define FbBitsStrideToStipStride(s) (((s) << (FB_SHIFT - FB_STIP_SHIFT)))
 #define FbFullMask(n)   ((n) == FB_UNIT ? FB_ALLONES : ((((FbBits) 1) << n) - 1))
