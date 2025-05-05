@@ -31,11 +31,4 @@ from the author.
 #include <X11/Xfuncproto.h>
 #include <X11/extensions/geproto.h>
 
-/* Interface for other extensions */
-extern _X_EXPORT void GERegisterExtension(int extension,
-                                          void (*ev_dispatch) (xGenericEvent
-                                                               *from,
-                                                               xGenericEvent
-                                                               *to));
-
 #endif                          /* _GEEXT_H_ */

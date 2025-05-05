@@ -24,10 +24,13 @@
  */
 
 #include <dix-config.h>
-#include "windowstr.h"
-#include <X11/extensions/ge.h>
 
-#include "geext.h"
+#include <X11/extensions/ge.h>
+#include <X11/extensions/geproto.h>
+
+#include "Xext/geext_priv.h"
+
+#include "windowstr.h"
 #include "protocol-versions.h"
 #include "extinit_priv.h"
 

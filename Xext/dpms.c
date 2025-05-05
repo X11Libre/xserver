@@ -32,7 +32,7 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 
 #include "os/screensaver.h"
-#include "Xext/geext.h"
+#include "Xext/geext_priv.h"
 
 #include "misc.h"
 #include "os.h"

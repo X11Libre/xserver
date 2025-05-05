@@ -21,7 +21,7 @@
  */
 #include <dix-config.h>
 
-#include "Xext/geext.h"
+#include "Xext/geext_priv.h"
 
 #include "present_priv.h"
 
