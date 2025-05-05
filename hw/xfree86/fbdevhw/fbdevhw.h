@@ -54,6 +54,5 @@ extern _X_EXPORT xf86LeaveVTProc *fbdevHWLeaveVTWeak(void);
 extern _X_EXPORT xf86ValidModeProc *fbdevHWValidModeWeak(void);
 extern _X_EXPORT xf86DPMSSetProc *fbdevHWDPMSSetWeak(void);
 extern _X_EXPORT xf86LoadPaletteProc *fbdevHWLoadPaletteWeak(void);
-extern _X_EXPORT SaveScreenProcPtr fbdevHWSaveScreenWeak(void);
 
 #endif

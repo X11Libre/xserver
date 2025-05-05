@@ -977,9 +977,3 @@ fbdevHWLoadPaletteWeak(void)
 {
     return fbdevHWLoadPalette;
 }
-
-SaveScreenProcPtr
-fbdevHWSaveScreenWeak(void)
-{
-    return fbdevHWSaveScreen;
-}
