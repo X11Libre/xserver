@@ -96,15 +96,6 @@ fbdevHWGetRec(ScrnInfoPtr pScrn)
     return TRUE;
 }
 
-void
-fbdevHWFreeRec(ScrnInfoPtr pScrn)
-{
-    if (fbdevHWPrivateIndex < 0)
-        return;
-    free(FBDEVHWPTR(pScrn));
-    FBDEVHWPTRLVAL(pScrn) = NULL;
-}
-
 int
 fbdevHWGetFD(ScrnInfoPtr pScrn)
 {

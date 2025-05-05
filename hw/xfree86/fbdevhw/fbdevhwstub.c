@@ -8,11 +8,6 @@
 
 /* Stubs for the static server on platforms that don't support fbdev */
 
-void
-fbdevHWFreeRec(ScrnInfoPtr pScrn)
-{
-}
-
 Bool
 fbdevHWProbe(struct pci_device *pPci, char *device, char **namep)
 {
