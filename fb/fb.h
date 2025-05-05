@@ -126,14 +126,12 @@ extern _X_EXPORT void fbSetBits(FbStip * bits, int stride, FbStip data);
 #if BITMAP_BIT_ORDER == LSBFirst
 #define FbScrLeft(x,n)	((x) >> (n))
 #define FbScrRight(x,n)	((x) << (n))
-/* #define FbLeftBits(x,n)	((x) & ((((FbBits) 1) << (n)) - 1)) */
 #define FbLeftStipBits(x,n) ((x) & ((((FbStip) 1) << (n)) - 1))
 #define FbStipMoveLsb(x,s,n)	(FbStipRight (x,(s)-(n)))
 #define FbPatternOffsetBits	0
 #else
 #define FbScrLeft(x,n)	((x) << (n))
 #define FbScrRight(x,n)	((x) >> (n))
-/* #define FbLeftBits(x,n)	((x) >> (FB_UNIT - (n))) */
 #define FbLeftStipBits(x,n) ((x) >> (FB_STIP_UNIT - (n)))
 #define FbStipMoveLsb(x,s,n)	(x)
 #define FbPatternOffsetBits	(sizeof (FbBits) - 1)
