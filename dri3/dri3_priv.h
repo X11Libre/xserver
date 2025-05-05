@@ -64,6 +64,16 @@ typedef struct dri3_screen_priv {
     real->mem = priv->mem; \
 }
 
+#define VERIFY_DRI3_SYNCOBJ(id, ptr, a)\
+    do {\
+        int rc = dixLookupResourceByType((void **)&(ptr), id,\
+                                         dri3_syncobj_type, client, a);\
+        if (rc != Success) {\
+            client->errorValue = id;\
+            return rc;\
+        }\
+    } while (0);
+
 static inline dri3_screen_priv_ptr
 dri3_screen_priv(ScreenPtr screen)
 {
