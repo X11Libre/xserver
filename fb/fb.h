@@ -270,41 +270,6 @@ extern _X_EXPORT void fbSetBits(FbStip * bits, int stride, FbStip data);
     } \
 }
 
-/*
- * These macros are used to transparently stipple
- * in copy mode; the expected usage is with 'n' constant
- * so all of the conditional parts collapse into a minimal
- * sequence of partial word writes
- *
- * 'n' is the bytemask of which bytes to store, 'a' is the address
- * of the FbBits base unit, 'o' is the offset within that unit
- *
- * The term "lane" comes from the hardware term "byte-lane" which
- */
-
-#define FbLaneCase1(n,a,o)						\
-    if ((n) == 0x01) {							\
-	WRITE((CARD8 *) ((a)+FbPatternOffset(o,CARD8)), fgxor);		\
-    }
-
-#define FbLaneCase2(n,a,o)						\
-    if ((n) == 0x03) {							\
-	WRITE((CARD16 *) ((a)+FbPatternOffset(o,CARD16)), fgxor);	\
-    } else {								\
-	FbLaneCase1((n)&1,a,o)						\
-	FbLaneCase1((n)>>1,a,(o)+1)					\
-    }
-
-#define FbLaneCase4(n,a,o)						\
-    if ((n) == 0x0f) {							\
-	WRITE((CARD32 *) ((a)+FbPatternOffset(o,CARD32)), fgxor);	\
-    } else {								\
-	FbLaneCase2((n)&3,a,o)						\
-	FbLaneCase2((n)>>2,a,(o)+2)					\
-    }
-
-#define FbLaneCase(n,a)   FbLaneCase4(n,(CARD8 *) (a),0)
-
 /* Macros for dealing with dashing */
 
 #define FbDashDeclare	\
