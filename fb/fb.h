@@ -143,10 +143,6 @@ extern _X_EXPORT void fbSetBits(FbStip * bits, int stride, FbStip data);
 #define FbStipRight(x,n) FbScrRight(x,n)
 
 #define FbRotLeft(x,n)	FbScrLeft(x,n) | (n ? FbScrRight(x,FB_UNIT-n) : 0)
-#define FbRotRight(x,n)	FbScrRight(x,n) | (n ? FbScrLeft(x,FB_UNIT-n) : 0)
-
-#define FbRotStipLeft(x,n)  FbStipLeft(x,n) | (n ? FbStipRight(x,FB_STIP_UNIT-n) : 0)
-#define FbRotStipRight(x,n)  FbStipRight(x,n) | (n ? FbStipLeft(x,FB_STIP_UNIT-n) : 0)
 
 #define FbLeftMask(x)	    ( ((x) & FB_MASK) ? \
 			     FbScrRight(FB_ALLONES,(x) & FB_MASK) : 0)
