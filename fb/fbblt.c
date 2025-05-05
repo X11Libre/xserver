@@ -50,6 +50,8 @@
 
 #endif /* FB_ACCESS_WRAPPER */
 
+#define FbStipStrideToBitsStride(s) (((s) >> (FB_SHIFT - FB_STIP_SHIFT)))
+
 #define InitializeShifts(sx,dx,ls,rs) { \
     if (sx != dx) { \
 	if (sx > dx) { \
