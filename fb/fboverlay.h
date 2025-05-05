@@ -62,16 +62,6 @@ typedef struct _fbOverlayScrPriv {
 
 extern _X_EXPORT Bool
 
-fbOverlaySetupScreen(ScreenPtr pScreen,
-                     void *pbits1,
-                     void *pbits2,
-                     int xsize,
-                     int ysize,
-                     int dpix,
-                     int dpiy, int width1, int width2, int bpp1, int bpp2);
-
-extern _X_EXPORT Bool
-
 fbOverlayFinishScreenInit(ScreenPtr pScreen,
                           void *pbits1,
                           void *pbits2,

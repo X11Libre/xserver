@@ -70,7 +70,6 @@
 #define fbOverlayFinishScreenInit wfbOverlayFinishScreenInit
 #define fbOverlayGeneration wfbOverlayGeneration
 #define fbOverlayGetScreenPrivateKey wfbOverlayGetScreenPrivateKey
-#define fbOverlaySetupScreen wfbOverlaySetupScreen
 #define fbPadPixmap wfbPadPixmap
 #define fbPictureInit wfbPictureInit
 #define fbPixmapToRegion wfbPixmapToRegion

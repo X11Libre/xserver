@@ -244,19 +244,6 @@ fbOverlayWindowExposures(WindowPtr pWin, RegionPtr prgn)
 }
 
 Bool
-fbOverlaySetupScreen(ScreenPtr pScreen,
-                     void *pbits1,
-                     void *pbits2,
-                     int xsize,
-                     int ysize,
-                     int dpix,
-                     int dpiy, int width1, int width2, int bpp1, int bpp2)
-{
-    return fbSetupScreen(pScreen,
-                         pbits1, xsize, ysize, dpix, dpiy, width1, bpp1);
-}
-
-Bool
 fbOverlayFinishScreenInit(ScreenPtr pScreen,
                           void *pbits1,
                           void *pbits2,
