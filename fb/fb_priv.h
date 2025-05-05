@@ -10,6 +10,8 @@
 #include "include/scrnintstr.h"
 #include "fb/fb.h"
 
+#define FbBitsStrideToStipStride(s) (((s) << (FB_SHIFT - FB_STIP_SHIFT)))
+
 #ifdef FB_DEBUG
 
 void fbValidateDrawable(DrawablePtr d);

@@ -22,7 +22,7 @@
 
 #include <dix-config.h>
 
-#include "fb.h"
+#include "fb/fb_priv.h"
 
 static void
 fbPushPattern(DrawablePtr pDrawable,

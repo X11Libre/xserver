@@ -75,7 +75,6 @@
 #define FB_STIP_UNIT	(1 << FB_STIP_SHIFT)
 #define FB_STIP_MASK	(FB_STIP_UNIT - 1)
 #define FB_STIP_ALLONES	((FbStip) -1)
-#define FbBitsStrideToStipStride(s) (((s) << (FB_SHIFT - FB_STIP_SHIFT)))
 #define FbFullMask(n)   ((n) == FB_UNIT ? FB_ALLONES : ((((FbBits) 1) << n) - 1))
 
 #if FB_SHIFT == 5
