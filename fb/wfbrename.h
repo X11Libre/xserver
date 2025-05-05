@@ -68,7 +68,6 @@
 #define fbOddTile wfbOddTile
 #define fbOver wfbOver
 #define fbOverlayCopyWindow wfbOverlayCopyWindow
-#define fbOverlayCreateScreenResources wfbOverlayCreateScreenResources
 #define fbOverlayFinishScreenInit wfbOverlayFinishScreenInit
 #define fbOverlayGeneration wfbOverlayGeneration
 #define fbOverlayGetScreenPrivateKey wfbOverlayGetScreenPrivateKey

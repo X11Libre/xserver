@@ -105,7 +105,7 @@ fbOverlayWindowLayer(WindowPtr pWin)
     return 0;
 }
 
-Bool
+static Bool
 fbOverlayCreateScreenResources(ScreenPtr pScreen)
 {
     int i;
