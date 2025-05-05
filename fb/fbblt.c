@@ -25,6 +25,31 @@
 #include <string.h>
 #include "fb.h"
 
+#ifdef FB_ACCESS_WRAPPER
+
+#define MEMCPY_WRAPPED(dst, src, size) do {                       \
+    size_t _i;                                                    \
+    CARD8 *_dst = (CARD8*)(dst), *_src = (CARD8*)(src);           \
+    for(_i = 0; _i < size; _i++) {                                \
+        WRITE(_dst +_i, READ(_src + _i));                         \
+    }                                                             \
+} while(0)
+
+#define MEMSET_WRAPPED(dst, val, size) do {                       \
+    size_t _i;                                                    \
+    CARD8 *_dst = (CARD8*)(dst);                                  \
+    for(_i = 0; _i < size; _i++) {                                \
+        WRITE(_dst +_i, (val));                                   \
+    }                                                             \
+} while(0)
+
+#else
+
+#define MEMCPY_WRAPPED(dst, src, size) memcpy((dst), (src), (size))
+#define MEMSET_WRAPPED(dst, val, size) memset((dst), (val), (size))
+
+#endif /* FB_ACCESS_WRAPPER */
+
 #define InitializeShifts(sx,dx,ls,rs) { \
     if (sx != dx) { \
 	if (sx > dx) { \

@@ -48,29 +48,11 @@
 #define WRITE(ptr, val) ((*wfbWriteMemory)((ptr), (val), sizeof(*(ptr))))
 #define READ(ptr) ((*wfbReadMemory)((ptr), sizeof(*(ptr))))
 
-#define MEMCPY_WRAPPED(dst, src, size) do {                       \
-    size_t _i;                                                    \
-    CARD8 *_dst = (CARD8*)(dst), *_src = (CARD8*)(src);           \
-    for(_i = 0; _i < size; _i++) {                                \
-        WRITE(_dst +_i, READ(_src + _i));                         \
-    }                                                             \
-} while(0)
-
-#define MEMSET_WRAPPED(dst, val, size) do {                       \
-    size_t _i;                                                    \
-    CARD8 *_dst = (CARD8*)(dst);                                  \
-    for(_i = 0; _i < size; _i++) {                                \
-        WRITE(_dst +_i, (val));                                   \
-    }                                                             \
-} while(0)
-
 #else
 
 #define FBPREFIX(x) fb##x
 #define WRITE(ptr, val) (*(ptr) = (val))
 #define READ(ptr) (*(ptr))
-#define MEMCPY_WRAPPED(dst, src, size) memcpy((dst), (src), (size))
-#define MEMSET_WRAPPED(dst, val, size) memset((dst), (val), (size))
 
 #endif
 
