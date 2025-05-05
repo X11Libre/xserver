@@ -24,7 +24,9 @@
 
 #include <stdlib.h>
 
-#include "fb.h"
+#include "fb/fb.h"
+#include "fb/fbbits.h"
+
 #include "miline.h"
 
 #define fbBresShiftMask(mask,dir,bpp) ((bpp == FB_STIP_UNIT) ? 0 : \

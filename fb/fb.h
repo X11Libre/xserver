@@ -223,49 +223,6 @@ typedef int FbStride;
     } \
 }
 
-/* Macros for dealing with dashing */
-
-#define FbDashDeclare	\
-    unsigned char	*__dash, *__firstDash, *__lastDash
-
-#define FbDashInit(pGC,pPriv,dashOffset,dashlen,even) {	    \
-    (even) = TRUE;					    \
-    __firstDash = (pGC)->dash;				    \
-    __lastDash = __firstDash + (pGC)->numInDashList;	    \
-    (dashOffset) %= (pPriv)->dashLength;		    \
-							    \
-    __dash = __firstDash;				    \
-    while ((dashOffset) >= ((dashlen) = *__dash))	    \
-    {							    \
-	(dashOffset) -= (dashlen);			    \
-	(even) = 1-(even);				    \
-	if (++__dash == __lastDash)			    \
-	    __dash = __firstDash;			    \
-    }							    \
-    (dashlen) -= (dashOffset);				    \
-}
-
-#define FbDashNext(dashlen) {				    \
-    if (++__dash == __lastDash)				    \
-	__dash = __firstDash;				    \
-    (dashlen) = *__dash;				    \
-}
-
-/* as numInDashList is always even, this case can skip a test */
-
-#define FbDashNextEven(dashlen) {			    \
-    (dashlen) = *++__dash;				    \
-}
-
-#define FbDashNextOdd(dashlen)	FbDashNext(dashlen)
-
-#define FbDashStep(dashlen,even) {			    \
-    if (!--(dashlen)) {					    \
-	FbDashNext(dashlen);				    \
-	(even) = 1-(even);				    \
-    }							    \
-}
-
 /* Framebuffer access wrapper */
 typedef FbBits(*ReadMemoryProcPtr) (const void *src, int size);
 typedef void (*WriteMemoryProcPtr) (void *dst, FbBits value, int size);
