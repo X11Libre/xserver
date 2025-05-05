@@ -59,8 +59,6 @@ typedef struct _fbOverlayScrPriv {
 
 #define fbOverlayGetScrPriv(s) \
     dixLookupPrivate(&(s)->devPrivates, fbOverlayGetScreenPrivateKey())
-extern _X_EXPORT Bool
- fbOverlayCreateWindow(WindowPtr pWin);
 
 extern _X_EXPORT Bool
  fbOverlayCloseScreen(ScreenPtr pScreen);

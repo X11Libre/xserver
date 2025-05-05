@@ -46,7 +46,7 @@ fbOverlayGetScreenPrivateKey(void)
  * Replace this if you want something supporting
  * multiple overlays with the same depth
  */
-Bool
+static Bool
 fbOverlayCreateWindow(WindowPtr pWin)
 {
     FbOverlayScrPrivPtr pScrPriv = fbOverlayGetScrPriv(pWin->drawable.pScreen);

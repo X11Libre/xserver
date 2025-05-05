@@ -70,7 +70,6 @@
 #define fbOverlayCloseScreen wfbOverlayCloseScreen
 #define fbOverlayCopyWindow wfbOverlayCopyWindow
 #define fbOverlayCreateScreenResources wfbOverlayCreateScreenResources
-#define fbOverlayCreateWindow wfbOverlayCreateWindow
 #define fbOverlayFinishScreenInit wfbOverlayFinishScreenInit
 #define fbOverlayGeneration wfbOverlayGeneration
 #define fbOverlayGetScreenPrivateKey wfbOverlayGetScreenPrivateKey
