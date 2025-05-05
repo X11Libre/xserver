@@ -9,7 +9,6 @@ srcs_xext = [
 ]
 
 hdrs_xext = [
-    'geext.h',
     'syncsdk.h',
 ]
 

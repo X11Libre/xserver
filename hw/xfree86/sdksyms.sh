@@ -53,7 +53,6 @@ cat > sdksyms.c << EOF
 #include "xvdix.h"
 #include "xvmcext.h"
 #endif
-#include "geext.h"
 #ifdef MITSHM
 #include "shmint.h"
 #endif
