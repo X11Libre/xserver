@@ -128,21 +128,6 @@ typedef int FbStride;
 #define FbStipMask(x,w)	(FbStipRight(FB_STIP_ALLONES,(x) & FB_STIP_MASK) & \
 			 FbStipLeft(FB_STIP_ALLONES,(FB_STIP_UNIT - ((x)+(w))) & FB_STIP_MASK))
 
-#define FbMaskBits(x,w,l,n,r) { \
-    n = (w); \
-    r = FbRightMask((x)+n); \
-    l = FbLeftMask(x); \
-    if (l) { \
-	n -= FB_UNIT - ((x) & FB_MASK); \
-	if (n < 0) { \
-	    n = 0; \
-	    l &= r; \
-	    r = 0; \
-	} \
-    } \
-    n >>= FB_SHIFT; \
-}
-
 #define FbByteMaskInvalid   0x10
 
 #define FbPatternOffset(o,t)  ((o) ^ (FbPatternOffsetBits & ~(sizeof (t) - 1)))

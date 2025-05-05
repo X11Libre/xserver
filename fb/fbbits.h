@@ -31,6 +31,23 @@
 #include <dix-config.h>
 #endif
 
+#include "fb/fb.h"
+
+#define __FbMaskBits(x,w,l,n,r) { \
+    n = (w); \
+    r = FbRightMask((x)+n); \
+    l = FbLeftMask(x); \
+    if (l) { \
+        n -= FB_UNIT - ((x) & FB_MASK); \
+        if (n < 0) { \
+            n = 0; \
+            l &= r; \
+            r = 0; \
+        } \
+    } \
+    n >>= FB_SHIFT; \
+}
+
 #ifdef BITSSTORE
 #define STORE(b,x)  BITSSTORE(b,x)
 #else
@@ -785,7 +802,7 @@ POLYSEGMENT(DrawablePtr pDrawable, GCPtr pGC, int nseg, xSegment * pseg)
                 dstLine = dst + (intToY(pt1) + yoff + dstYoff) * dstStride;
                 dstLine += dstX >> FB_SHIFT;
                 dstX &= FB_MASK;
-                FbMaskBits(dstX, width, startmask, nmiddle, endmask);
+                __FbMaskBits(dstX, width, startmask, nmiddle, endmask);
                 if (startmask) {
                     WRITE(dstLine,
                           FbDoMaskRRop(READ(dstLine), andBits, xorBits,
