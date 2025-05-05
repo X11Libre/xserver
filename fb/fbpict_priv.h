@@ -20,4 +20,9 @@ void fbTrapezoids(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
                   PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
                   int ntrap, xTrapezoid *traps);
 
+_X_EXPORT /* only for glamor module, not supposed to be used by external drivers */
+void fbTriangles(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                 PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                 int ntris, xTriangle *tris);
+
 #endif /* XORG_FBPICT_PRIV_H */

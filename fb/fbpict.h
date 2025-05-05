@@ -48,13 +48,6 @@ fbAddTraps(PicturePtr pPicture,
            INT16 xOff, INT16 yOff, int ntrap, xTrap * traps);
 
 extern _X_EXPORT void
-fbTriangles(CARD8 op,
-            PicturePtr pSrc,
-            PicturePtr pDst,
-            PictFormatPtr maskFormat,
-            INT16 xSrc, INT16 ySrc, int ntris, xTriangle * tris);
-
-extern _X_EXPORT void
 fbGlyphs(CARD8 op,
 	 PicturePtr pSrc,
 	 PicturePtr pDst,
