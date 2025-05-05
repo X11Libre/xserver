@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 
-#include "fb/fb.h"
+#include "fb/fb_priv.h"
 #include "fb/fbbits.h"
 
 #include "miline.h"

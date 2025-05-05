@@ -272,11 +272,6 @@ typedef struct {
     unsigned int dashLength;    /* total of all dash elements */
 } FbGCPrivRec, *FbGCPrivPtr;
 
-#define fbGetGCPrivateKey(pGC)  (&fbGetScreenPrivate((pGC)->pScreen)->gcPrivateKeyRec)
-
-#define fbGetGCPrivate(pGC)	((FbGCPrivPtr)\
-				 dixLookupPrivate(&(pGC)->devPrivates, fbGetGCPrivateKey(pGC)))
-
 #define fbGetCompositeClip(pGC) ((pGC)->pCompositeClip)
 
 #define fbGetScreenPixmap(s)	((PixmapPtr) (s)->devPrivate)

@@ -31,7 +31,7 @@
 #include <dix-config.h>
 #endif
 
-#include "fb/fb.h"
+#include "fb/fb_priv.h"
 
 #define __FbMaskBits(x,w,l,n,r) { \
     n = (w); \

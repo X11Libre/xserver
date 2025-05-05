@@ -12,6 +12,9 @@
 
 #define FbBitsStrideToStipStride(s) (((s) << (FB_SHIFT - FB_STIP_SHIFT)))
 
+#define fbGetGCPrivateKey(pGC) (&fbGetScreenPrivate((pGC)->pScreen)->gcPrivateKeyRec)
+#define fbGetGCPrivate(pGC) ((FbGCPrivPtr)dixLookupPrivate(&(pGC)->devPrivates, fbGetGCPrivateKey(pGC)))
+
 #ifdef FB_DEBUG
 
 #define FB_HEAD_BITS   (FbStip) (0xbaadf00d)

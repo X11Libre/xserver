@@ -22,7 +22,8 @@
 
 #include <dix-config.h>
 
-#include "fb.h"
+#include "fb/fb_priv.h"
+
 #include "mizerarc.h"
 #include <limits.h>
 
