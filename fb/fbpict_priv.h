@@ -16,4 +16,8 @@ void fbRasterizeTrapezoid(PicturePtr alpha, xTrapezoid *trap,
 void fbAddTriangles(PicturePtr pPicture, INT16 xOff, INT16 yOff,
                     int ntri, xTriangle * tris);
 
+void fbTrapezoids(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                  PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                  int ntrap, xTrapezoid *traps);
+
 #endif /* XORG_FBPICT_PRIV_H */
