@@ -143,7 +143,7 @@ fbOverlayCreateScreenResources(ScreenPtr pScreen)
     return TRUE;
 }
 
-void
+static void
 fbOverlayPaintKey(DrawablePtr pDrawable,
                   RegionPtr pRegion, CARD32 pixel, int layer)
 {

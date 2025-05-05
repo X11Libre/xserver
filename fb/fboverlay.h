@@ -61,10 +61,6 @@ typedef struct _fbOverlayScrPriv {
     dixLookupPrivate(&(s)->devPrivates, fbOverlayGetScreenPrivateKey())
 
 extern _X_EXPORT void
-
-fbOverlayPaintKey(DrawablePtr pDrawable,
-                  RegionPtr pRegion, CARD32 pixel, int layer);
-extern _X_EXPORT void
  fbOverlayUpdateLayerRegion(ScreenPtr pScreen, int layer, RegionPtr prgn);
 
 extern _X_EXPORT void
