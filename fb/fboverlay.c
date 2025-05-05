@@ -92,7 +92,7 @@ fbOverlayCloseScreen(ScreenPtr pScreen)
 /*
  * Return layer containing this window
  */
-int
+static int
 fbOverlayWindowLayer(WindowPtr pWin)
 {
     FbOverlayScrPrivPtr pScrPriv = fbOverlayGetScrPriv(pWin->drawable.pScreen);

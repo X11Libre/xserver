@@ -76,7 +76,6 @@
 #define fbOverlaySetupScreen wfbOverlaySetupScreen
 #define fbOverlayUpdateLayerRegion wfbOverlayUpdateLayerRegion
 #define fbOverlayWindowExposures wfbOverlayWindowExposures
-#define fbOverlayWindowLayer wfbOverlayWindowLayer
 #define fbPadPixmap wfbPadPixmap
 #define fbPictureInit wfbPictureInit
 #define fbPixmapToRegion wfbPixmapToRegion
