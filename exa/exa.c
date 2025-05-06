@@ -740,7 +740,7 @@ exaCloseScreen(ScreenPtr pScreen)
     ExaScreenPriv(pScreen);
     PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
 
-    if (ps->Glyphs == exaGlyphs)
+    if (ps && ps->Glyphs == exaGlyphs)
         exaGlyphsFini(pScreen);
 
     if (pScreen->BlockHandler == ExaBlockHandler)
@@ -765,12 +765,15 @@ exaCloseScreen(ScreenPtr pScreen)
         unwrap(pExaScr, pScreen, SharePixmapBacking);
     if (pExaScr->SavedSetSharedPixmapBacking)
         unwrap(pExaScr, pScreen, SetSharedPixmapBacking);
-    unwrap(pExaScr, ps, Composite);
-    if (pExaScr->SavedGlyphs)
-        unwrap(pExaScr, ps, Glyphs);
-    unwrap(pExaScr, ps, Trapezoids);
-    unwrap(pExaScr, ps, Triangles);
-    unwrap(pExaScr, ps, AddTraps);
+
+    if (ps) {
+        unwrap(pExaScr, ps, Composite);
+        if (pExaScr->SavedGlyphs)
+            unwrap(pExaScr, ps, Glyphs);
+        unwrap(pExaScr, ps, Trapezoids);
+        unwrap(pExaScr, ps, Triangles);
+        unwrap(pExaScr, ps, AddTraps);
+    }
 
     free(pExaScr);
 
@@ -1019,7 +1022,7 @@ exaDriverInit(ScreenPtr pScreen, ExaDriverPtr pScreenInfo)
         }
     }
 
-    if (ps->Glyphs == exaGlyphs)
+    if (ps && ps->Glyphs == exaGlyphs)
         exaGlyphsInit(pScreen);
 
     LogMessage(X_INFO, "EXA(%d): Driver registered support for the following"
