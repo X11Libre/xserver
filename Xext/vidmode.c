@@ -739,7 +739,7 @@ ProcVidModeModModeLine(ClientPtr client)
     xXF86VidModeModModeLineReq newstuff;
     ScreenPtr pScreen;
     VidModePtr pVidMode;
-    DisplayModePtr mode, modetmp;
+    DisplayModePtr mode;
     int len, dotClock;
     int ver;
 
@@ -805,7 +805,10 @@ ProcVidModeModModeLine(ClientPtr client)
     if (!pVidMode->GetCurrentModeline(pScreen, &mode, &dotClock))
         return BadValue;
 
-    modetmp = VidModeCreateMode();
+    DisplayModePtr modetmp = VidModeCreateMode();
+    if (!modetmp)
+        return BadAlloc;
+
     VidModeCopyMode(mode, modetmp);
 
     VidModeSetModeValue(modetmp, VIDMODE_H_DISPLAY, stuff->hdisplay);
@@ -949,6 +952,9 @@ ProcVidModeValidateModeLine(ClientPtr client)
         return BadValue;
 
     modetmp = VidModeCreateMode();
+    if (!modetmp)
+        return BadAlloc;
+
     VidModeCopyMode(mode, modetmp);
 
     VidModeSetModeValue(modetmp, VIDMODE_H_DISPLAY, stuff->hdisplay);
@@ -1370,7 +1376,7 @@ ProcVidModeGetDotClocks(ClientPtr client)
         swapl(&rep.flags);
     }
     WriteToClient(client, sizeof(xXF86VidModeGetDotClocksReply), &rep);
-    if (!ClockProg) {
+    if (!ClockProg && Clocks) {
         for (n = 0; n < numClocks; n++) {
             dotclock = Clocks[n];
             if (client->swapped) {
