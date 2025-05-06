@@ -1013,7 +1013,10 @@ cpAlphaMap(void **result, XID id, ScreenPtr screen, ClientPtr client, Mask mode)
                                           client, mode);
         if (err != Success)
             return err;
-        id = res->info[screen->myNum].id;
+        if (screen == NULL)
+            LogMessage(X_WARNING, "cpAlphaMap() screen == NULL\n");
+        else
+            id = res->info[screen->myNum].id;
     }
 #endif /* XINERAMA */
     return dixLookupResourceByType(result, id, PictureType, client, mode);
