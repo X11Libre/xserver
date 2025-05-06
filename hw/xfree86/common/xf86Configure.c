@@ -181,7 +181,9 @@ configureInputSection(void)
         }
     }
 
-    mouse = calloc(1, sizeof(XF86ConfInputRec));
+    if (!(mouse = calloc(1, sizeof(XF86ConfInputRec))))
+        return NULL;
+
     mouse->inp_identifier = XNFstrdup("Mouse0");
     mouse->inp_driver = XNFstrdup("mouse");
     mouse->inp_option_lst =
@@ -213,9 +215,9 @@ configureScreenSection(int screennum)
     ptr->scrn_device_str = tmp;
 
     for (i = 0; i < ARRAY_SIZE(depths); i++) {
-        XF86ConfDisplayPtr conf_display;
-
-        conf_display = calloc(1, sizeof(XF86ConfDisplayRec));
+        XF86ConfDisplayPtr conf_display = calloc(1, sizeof(XF86ConfDisplayRec));
+        if (!conf_display)
+            continue;
         conf_display->disp_depth = depths[i];
         conf_display->disp_black.red = conf_display->disp_white.red = -1;
         conf_display->disp_black.green = conf_display->disp_white.green = -1;
@@ -412,9 +414,9 @@ configureModuleSection(void)
     elist = LoaderListDir("extensions", NULL);
     if (elist) {
         for (el = elist; *el; el++) {
-            XF86LoadPtr module;
-
-            module = calloc(1, sizeof(XF86LoadRec));
+            XF86LoadPtr module = calloc(1, sizeof(XF86LoadRec));
+            if (!module)
+                return ptr;
             module->load_name = *el;
             ptr->mod_load_lst = (XF86LoadPtr) xf86addListItem((glp) ptr->
                                                               mod_load_lst,
