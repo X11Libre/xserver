@@ -2393,7 +2393,9 @@ DRIAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
             py = pScrn->frameY0;
         if (py > pScrn->frameY1)
             py = pScrn->frameY1;
-        pScreen->SetCursorPosition(inputInfo.pointer, pScreen, px, py, TRUE);
+
+        if (pScreen->SetCursorPosition)
+            pScreen->SetCursorPosition(inputInfo.pointer, pScreen, px, py, TRUE);
 
         return;
     }

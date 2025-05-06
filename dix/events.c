@@ -558,7 +558,9 @@ XineramaSetCursorPosition(DeviceIntPtr pDev, int x, int y, Bool generateEvent)
     x -= pScreen->x;
     y -= pScreen->y;
 
-    return (*pScreen->SetCursorPosition) (pDev, pScreen, x, y, generateEvent);
+    if (pScreen->SetCursorPosition)
+        return pScreen->SetCursorPosition(pDev, pScreen, x, y, generateEvent);
+    return TRUE;
 }
 
 static void
@@ -776,8 +778,8 @@ CheckPhysLimits(DeviceIntPtr pDev, CursorPtr cursor, Bool generateEvents,
         {
             if (pScreen != pSprite->hotPhys.pScreen)
                 pSprite->hotPhys = new;
-            (*pScreen->SetCursorPosition)
-                (pDev, pScreen, new.x, new.y, generateEvents);
+            if (pScreen && pScreen->SetCursorPosition)
+                pScreen->SetCursorPosition(pDev, pScreen, new.x, new.y, generateEvents);
         }
         if (!generateEvents)
             SyntheticMotion(pDev, new.x, new.y);

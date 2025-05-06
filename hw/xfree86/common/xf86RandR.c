@@ -330,7 +330,8 @@ xf86RandRSetConfig(ScreenPtr pScreen,
                 view_adjusted = TRUE;
             }
 
-            (*pScreen->SetCursorPosition) (dev, pScreen, px, py, FALSE);
+            if (pScreen->SetCursorPosition)
+                pScreen->SetCursorPosition(dev, pScreen, px, py, FALSE);
         }
     }
 

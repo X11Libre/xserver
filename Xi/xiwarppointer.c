@@ -178,7 +178,8 @@ ProcXIWarpPointer(ClientPtr client)
 
         if (pSprite->hotShape)
             ConfineToShape(pSprite->hotShape, &x, &y);
-        (*newScreen->SetCursorPosition) (pDev, newScreen, x, y, TRUE);
+        if (newScreen->SetCursorPosition)
+            newScreen->SetCursorPosition(pDev, newScreen, x, y, TRUE);
     }
     else if (!PointerConfinedToScreen(pDev)) {
         NewCurrentScreen(pDev, newScreen, x, y);
