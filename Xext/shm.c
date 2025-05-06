@@ -1536,6 +1536,8 @@ ShmExtensionInit(void)
         for (i = 0; i < screenInfo.numScreens; i++) {
             ShmScrPrivateRec *screen_priv =
                 ShmInitScreenPriv(screenInfo.screens[i]);
+            if (!screen_priv)
+                continue;
             if (!screen_priv->shmFuncs)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
