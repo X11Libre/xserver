@@ -70,6 +70,16 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         '-Woverride-init',
         '-Wvla',
         '-Wincompatible-pointer-types',
+#        '-fanalyzer',
+#        '-Wno-analyzer-mismatching-deallocation',
+        '-Wno-analyzer-malloc-leak',
+# has some false alarms on deferred request handlers (closure on stack)
+#        '-Wno-error=analyzer-free-of-non-heap',
+# has some false alarms on reallocarray (miinitext)
+#        '-Wno-error=analyzer-double-free',
+#        '-Wno-error=analyzer-null-dereference',
+#        '-Wno-error=analyzer-file-leak',
+#        '-Wno-error=analyzer-possible-null-dereference',
     ]
 else
     test_wflags = []
