@@ -1521,8 +1521,10 @@ get_mcast_options(int argc, char **argv, int i)
         else {
             struct multicastinfo *mcastinfo, *mcl;
 
-            mcastinfo = malloc(sizeof(struct multicastinfo));
-            mcastinfo->next = NULL;
+            mcastinfo = calloc(1, sizeof(struct multicastinfo));
+            if (!mcastinfo)
+                FatalError("Xserver: failed to allocate mcastinfo\n");
+
             mcastinfo->ai = firstai;
             mcastinfo->hops = hopcount;
 
