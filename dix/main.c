@@ -200,7 +200,10 @@ dix_main(int argc, char *argv[], char *envp[])
 
         if (screenInfo.numScreens < 1)
             FatalError("no screens found");
+        LogMessageVerb(X_INFO, 1, "Output(s) initialized\n");
+
         InitExtensions(argc, argv);
+        LogMessageVerb(X_INFO, 1, "Extensions initialized\n");
 
         for (i = 0; i < screenInfo.numGPUScreens; i++) {
             ScreenPtr pScreen = screenInfo.gpuscreens[i];
@@ -253,9 +256,13 @@ dix_main(int argc, char *argv[], char *envp[])
         for (i = 0; i < screenInfo.numScreens; i++)
             InitRootWindow(screenInfo.screens[i]->root);
 
+        LogMessageVerb(X_INFO, 1, "Screen(s) initialized\n");
+
         InitCoreDevices();
         InitInput(argc, argv);
         InitAndStartDevices();
+        LogMessageVerb(X_INFO, 1, "Input(s) initialized\n");
+
         ReserveClientIds(serverClient);
 
         dixSaveScreens(serverClient, SCREEN_SAVER_FORCER, ScreenSaverReset);
