@@ -85,7 +85,6 @@ typedef struct _WindowOpt {
     Mask otherEventMasks;       /* default: 0 */
     struct _OtherClients *otherClients; /* default: NULL */
     struct _GrabRec *passiveGrabs;      /* default: NULL */
-    PropertyPtr userProps;      /* default: NULL */
     CARD32 backingBitPlanes;    /* default: ~0L */
     CARD32 backingPixel;        /* default: 0 */
     RegionPtr boundingShape;    /* default: NULL */
@@ -165,6 +164,8 @@ typedef struct _Window {
     unsigned damagedDescendants:1;      /* some descendants are damaged */
     unsigned inhibitBGPaint:1;  /* paint the background? */
 #endif
+
+    PropertyPtr properties;     /* default: NULL */
 } WindowRec;
 
 /*
@@ -189,7 +190,6 @@ extern _X_EXPORT Mask DontPropagateMasks[];
 #define wOtherClients(w)	wUseDefault(w, otherClients, NULL)
 #define wOtherInputMasks(w)	wUseDefault(w, inputMasks, NULL)
 #define wPassiveGrabs(w)	wUseDefault(w, passiveGrabs, NULL)
-#define wUserProps(w)		wUseDefault(w, userProps, NULL)
 #define wBackingBitPlanes(w)	wUseDefault(w, backingBitPlanes, ~0L)
 #define wBackingPixel(w)	wUseDefault(w, backingPixel, 0)
 #define wBoundingShape(w)	wUseDefault(w, boundingShape, NULL)
@@ -197,6 +197,8 @@ extern _X_EXPORT Mask DontPropagateMasks[];
 #define wInputShape(w)          wUseDefault(w, inputShape, NULL)
 #define wClient(w)		(clients[CLIENT_ID((w)->drawable.id)])
 #define wBorderWidth(w)		((int) (w)->borderWidth)
+
+static inline PropertyPtr wUserProps(WindowPtr pWin) { return pWin->properties; }
 
 /* true when w needs a border drawn. */
 

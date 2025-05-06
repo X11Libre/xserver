@@ -423,7 +423,7 @@ ProcSELinuxListProperties(ClientPtr client)
 
     /* Count the number of properties and allocate items */
     count = 0;
-    for (pProp = wUserProps(pWin); pProp; pProp = pProp->next)
+    for (pProp = pWin->properties; pProp; pProp = pProp->next)
         count++;
     items = calloc(count, sizeof(SELinuxListItemRec));
     if (count && !items)
@@ -432,7 +432,7 @@ ProcSELinuxListProperties(ClientPtr client)
     /* Fill in the items and calculate size */
     i = 0;
     size = 0;
-    for (pProp = wUserProps(pWin); pProp; pProp = pProp->next) {
+    for (pProp = pWin->properties; pProp; pProp = pProp->next) {
         id = pProp->propertyName;
         rc = SELinuxPopulateItem(items + i, &pProp->devPrivates, id, &size);
         if (rc != Success) {

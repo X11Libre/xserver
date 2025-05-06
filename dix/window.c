@@ -205,7 +205,7 @@ get_window_name(WindowPtr pWin)
         return overlay_win_name;
 #endif
 
-    for (prop = wUserProps(pWin); prop; prop = prop->next) {
+    for (prop = pWin->properties; prop; prop = prop->next) {
         if (prop->propertyName == XA_WM_NAME && prop->type == XA_STRING &&
             prop->data) {
             len = min(prop->size, WINDOW_NAME_BUF_LEN - 1);
@@ -599,7 +599,6 @@ CreateRootWindow(ScreenPtr pScreen)
     pWin->optional->otherEventMasks = 0;
     pWin->optional->otherClients = NULL;
     pWin->optional->passiveGrabs = NULL;
-    pWin->optional->userProps = NULL;
     pWin->optional->backingBitPlanes = ~0L;
     pWin->optional->backingPixel = 0;
     pWin->optional->boundingShape = NULL;
@@ -3349,8 +3348,6 @@ CheckWindowOptionalNeed(WindowPtr w)
         return;
     if (optional->passiveGrabs != NULL)
         return;
-    if (optional->userProps != NULL)
-        return;
     if (optional->backingBitPlanes != (CARD32)~0L)
         return;
     if (optional->backingPixel != 0)
@@ -3406,7 +3403,6 @@ MakeWindowOptional(WindowPtr pWin)
     optional->otherEventMasks = 0;
     optional->otherClients = NULL;
     optional->passiveGrabs = NULL;
-    optional->userProps = NULL;
     optional->backingBitPlanes = ~0L;
     optional->backingPixel = 0;
     optional->boundingShape = NULL;
