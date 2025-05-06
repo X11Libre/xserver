@@ -384,7 +384,7 @@ ProcXTestFakeInput(ClientPtr client)
     switch (type) {
     case KeyPress:
     case KeyRelease:
-        if (!dev->key)
+        if ((!dev) || (!dev->key))
             return BadDevice;
 
         if (ev->u.u.detail < dev->key->xkbInfo->desc->min_key_code ||
@@ -396,7 +396,7 @@ ProcXTestFakeInput(ClientPtr client)
         need_ptr_update = 0;
         break;
     case MotionNotify:
-        if (!dev->valuator)
+        if (!dev || !dev->valuator)
             return BadDevice;
 
         if (!(extension || ev->u.keyButtonPointer.root == None)) {
@@ -427,7 +427,7 @@ ProcXTestFakeInput(ClientPtr client)
         break;
     case ButtonPress:
     case ButtonRelease:
-        if (!dev->button)
+        if (!dev || !dev->button)
             return BadDevice;
 
         if (!ev->u.u.detail || ev->u.u.detail > dev->button->numButtons) {
@@ -441,7 +441,7 @@ ProcXTestFakeInput(ClientPtr client)
 
     valuator_mask_set_range(&mask, firstValuator, numValuators, valuators);
 
-    if (dev->sendEventsProc)
+    if (dev && dev->sendEventsProc)
         (*dev->sendEventsProc) (dev, type, ev->u.u.detail, flags, &mask);
 
     if (need_ptr_update)
