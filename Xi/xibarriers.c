@@ -722,14 +722,14 @@ static void add_master_func(void *res, XID id, void *devid)
 {
     struct PointerBarrier *b;
     struct PointerBarrierClient *barrier;
-    struct PointerBarrierDevice *pbd;
     int *deviceid = devid;
 
     b = res;
     barrier = container_of(b, struct PointerBarrierClient, barrier);
 
-
-    pbd = AllocBarrierDevice();
+    struct PointerBarrierDevice *pbd = AllocBarrierDevice();
+    if (!pbd)
+        return;
     pbd->deviceid = *deviceid;
 
     input_lock();
