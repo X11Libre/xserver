@@ -771,7 +771,6 @@ DeviceFocusEvent(DeviceIntPtr dev, int type, int mode, int detail,
                  WindowPtr pWin)
 {
     deviceFocus event;
-    xXIFocusInEvent *xi2event;
     DeviceIntPtr mouse;
     int btlen, len, i;
 
@@ -783,7 +782,10 @@ DeviceFocusEvent(DeviceIntPtr dev, int type, int mode, int detail,
     btlen = bytes_to_int32(btlen);
     len = sizeof(xXIFocusInEvent) + btlen * 4;
 
-    xi2event = calloc(1, len);
+    xXIFocusInEvent *xi2event = calloc(1, len);
+    if (!xi2event)
+        return;
+
     xi2event->type = GenericEvent;
     xi2event->extension = IReqCode;
     xi2event->evtype = type;
