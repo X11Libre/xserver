@@ -587,8 +587,10 @@ miFillGeneralPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
                     width = FirstWidth;
                     nPts = 0;
                 }
-                EVALUATEEDGEEVENODD(pAET, pPrevAET, y);
-                EVALUATEEDGEEVENODD(pAET, pPrevAET, y);
+                if (pAET != NULL) { // FIXME: somewhow analyzer still complains
+                    EVALUATEEDGEEVENODD(pAET, pPrevAET, y);
+                    EVALUATEEDGEEVENODD(pAET, pPrevAET, y);
+                }
             }
             miInsertionSort(&AET);
         }

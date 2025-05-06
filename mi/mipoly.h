@@ -159,6 +159,7 @@ typedef struct _ScanLineListBlock {
  *     The even-odd rule is in effect.
  */
 #define EVALUATEEDGEEVENODD(pAET, pPrevAET, y) { \
+   assert(pAET); \
    if (pAET->ymax == y) {          /* leaving this edge */ \
       pPrevAET->next = pAET->next; \
       pAET = pPrevAET->next; \
