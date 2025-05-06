@@ -616,7 +616,7 @@ removeInputHandler(IHPtr ih)
         p = InputHandlers;
         while (p && p->next != ih)
             p = p->next;
-        if (ih)
+        if (ih && p)
             p->next = ih->next;
     }
     free(ih);
