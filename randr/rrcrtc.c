@@ -20,12 +20,16 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
+#include <dix-config.h>
+
+#include <X11/Xatom.h>
+
+#include "os/bug_priv.h"
 
 #include "randrstr_priv.h"
 #include "swaprep.h"
 #include "mipointer.h"
 
-#include <X11/Xatom.h>
 
 RESTYPE RRCrtcType = 0;
 
@@ -181,10 +185,13 @@ RRCrtcNotify(RRCrtcPtr crtc,
         crtc->outputs = newoutputs;
         crtc->numOutputs = numOutputs;
     }
+
     /*
      * Copy the new list of outputs into the crtc
      */
+    BUG_RETURN_VAL(outputs == NULL, FALSE);
     memcpy(crtc->outputs, outputs, numOutputs * sizeof(RROutputPtr));
+
     /*
      * Update remaining crtc fields
      */
@@ -734,6 +741,8 @@ RRCrtcSet(RRCrtcPtr crtc,
     Bool recompute = TRUE;
     Bool crtcChanged;
     int  o;
+
+    BUG_RETURN_VAL(outputs == NULL, FALSE);
 
     rrScrPriv(pScreen);
 
