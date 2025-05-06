@@ -609,8 +609,6 @@ xorgGlxMakeCurrent(ClientPtr client, GLXContextTag tag, XID drawId, XID readId,
 
     /* Look up new context. It must not be current for someone else. */
     if (contextId != None) {
-        int status;
-
         if (!validGlxContext(client, contextId, DixUseAccess, &glxc, &error))
             return error;
 
@@ -618,12 +616,14 @@ xorgGlxMakeCurrent(ClientPtr client, GLXContextTag tag, XID drawId, XID readId,
             return BadAccess;
 
         if (drawId) {
+            int status = 0;
             drawPriv = __glXGetDrawable(glxc, drawId, client, &status);
             if (drawPriv == NULL)
                 return status;
         }
 
         if (readId) {
+            int status = 0;
             readPriv = __glXGetDrawable(glxc, readId, client, &status);
             if (readPriv == NULL)
                 return status;
