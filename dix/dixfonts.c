@@ -1317,7 +1317,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
 
     if (client_state == START_SLEEP) {
         /* Step 4 */
-        if (pFont != origGC->font) {
+        if (origGC && (pFont != origGC->font)) {
             ChangeGCVal val;
 
             val.ptr = pFont;
