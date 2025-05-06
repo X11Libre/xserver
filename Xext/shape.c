@@ -938,7 +938,7 @@ ProcShapeGetRectangles(ClientPtr client)
     REQUEST(xShapeGetRectanglesReq);
     WindowPtr pWin;
     xShapeGetRectanglesReply rep;
-    xRectangle *rects;
+    xRectangle *rects = NULL;
     int nrects, i, rc;
     RegionPtr region;
 
@@ -991,14 +991,16 @@ ProcShapeGetRectangles(ClientPtr client)
 
         nrects = RegionNumRects(region);
         box = RegionRects(region);
-        rects = xallocarray(nrects, sizeof(xRectangle));
-        if (!rects && nrects)
-            return BadAlloc;
-        for (i = 0; i < nrects; i++, box++) {
-            rects[i].x = box->x1;
-            rects[i].y = box->y1;
-            rects[i].width = box->x2 - box->x1;
-            rects[i].height = box->y2 - box->y1;
+        if (nrects) {
+            rects = calloc(nrects, sizeof(xRectangle));
+            if (!rects)
+                return BadAlloc;
+            for (i = 0; i < nrects; i++, box++) {
+                rects[i].x = box->x1;
+                rects[i].y = box->y1;
+                rects[i].width = box->x2 - box->x1;
+                rects[i].height = box->y2 - box->y1;
+            }
         }
     }
     rep = (xShapeGetRectanglesReply) {
