@@ -1098,7 +1098,7 @@ PanoramiXCopyArea(ClientPtr client)
     if ((dst->type == XRT_PIXMAP) && (src->type == XRT_WINDOW)) {
         DrawablePtr drawables[MAXSCREENS];
         DrawablePtr pDst;
-        GCPtr pGC;
+        GCPtr pGC = NULL;
         char *data;
         int pitch, rc;
 
