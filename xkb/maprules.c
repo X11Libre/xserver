@@ -93,7 +93,9 @@ InputLineAddChar(InputLine * line, int ch)
 {
     if (line->num_line >= line->sz_line) {
         if (line->line == line->buf) {
-            line->line = xallocarray(line->sz_line, 2);
+            line->line = calloc(line->sz_line, 2);
+            if (line->line == NULL)
+                return -1;
             memcpy(line->line, line->buf, line->sz_line);
         }
         else {
@@ -379,7 +381,7 @@ CheckLine(InputLine * line,
     _Xstrtokparams strtok_buf;
     Bool append = FALSE;
 
-    if (line->line[0] == '!') {
+    if (line && line->line && line->line[0] == '!') {
         if (line->line[1] == '$' ||
             (line->line[1] == ' ' && line->line[2] == '$')) {
             char *gname = strchr(line->line, '$');
