@@ -167,6 +167,9 @@ Equipment Corporation.
         ((r1)->y1 <= (r2)->y1) && \
         ((r1)->y2 >= (r2)->y2) )
 
+// note: we really need to check for size, because when it's zero, then data
+// might point to RegionBrokenData (.data segment), which we must not free()
+// (this also can create analyzer false alarms)
 #define xfreeData(reg) if ((reg)->data && (reg)->data->size) free((reg)->data)
 
 #define RECTALLOC_BAIL(pReg,n,bail) \
