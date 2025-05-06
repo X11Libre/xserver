@@ -34,6 +34,7 @@
 
 #include "dix/colormap_priv.h"
 #include "mi/mi_priv.h"
+#include "os/bug_priv.h"
 #include "os/osdep.h"
 
 #include "scrnintstr.h"
@@ -504,7 +505,12 @@ miInitVisuals(VisualPtr * visualp, DepthPtr * depthp, int *nvisualp,
             visual->bitsPerRGBValue = visuals->bitsPerRGB;
             visual->ColormapEntries = 1 << d;
             visual->nplanes = d;
-            visual->vid = *vid = FakeClientID(0);
+            visual->vid = FakeClientID(0);
+            if (vid)
+                *vid = visual->vid;
+            else
+                BUG_WARN(vid == 0);
+
             switch (visual->class) {
             case PseudoColor:
             case GrayScale:
