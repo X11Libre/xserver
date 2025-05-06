@@ -293,6 +293,7 @@ breakout:
 
     if (!found_default_visual) {
         ErrorF("Xnest: can't find matching visual for user specified depth %d\n", xnestDefaultDepth);
+        assert(visuals);
         defaultVisual = visuals[0].vid;
         rootDepth = visuals[0].nplanes;
     }
