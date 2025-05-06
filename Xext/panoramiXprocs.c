@@ -1136,7 +1136,7 @@ PanoramiXCopyArea(ClientPtr client)
         }
         free(data);
 
-        if (pGC->graphicsExposures) {
+        if (pGC && pGC->graphicsExposures) {
             RegionRec rgn;
             int dx, dy;
             BoxRec sourceBox;
