@@ -80,8 +80,6 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
 {
     ClientPtr client = cl->client;
     xGLXCreateContextAttribsARBReq *req = (xGLXCreateContextAttribsARBReq *) pc;
-    int32_t *attribs = (req->numAttribs != 0) ? (int32_t *) (req + 1) : NULL;
-    unsigned i;
     int major_version = 1;
     int minor_version = 0;
     uint32_t flags = 0;
@@ -168,63 +166,67 @@ __glXDisp_CreateContextAttribsARB(__GLXclientState * cl, GLbyte * pc)
         }
     }
 
-    for (i = 0; i < req->numAttribs; i++) {
-        switch (attribs[i * 2]) {
-        case GLX_CONTEXT_MAJOR_VERSION_ARB:
-            major_version = attribs[2 * i + 1];
-            break;
+    int32_t *attribs = NULL;
 
-        case GLX_CONTEXT_MINOR_VERSION_ARB:
-            minor_version = attribs[2 * i + 1];
-            break;
+    if (req->numAttribs) {
+        attribs = (int32_t *) (req + 1);
+        for (int i = 0; i < req->numAttribs; i++) {
+            switch (attribs[i * 2]) {
+            case GLX_CONTEXT_MAJOR_VERSION_ARB:
+                major_version = attribs[2 * i + 1];
+                break;
 
-        case GLX_CONTEXT_FLAGS_ARB:
-            flags = attribs[2 * i + 1];
-            break;
+            case GLX_CONTEXT_MINOR_VERSION_ARB:
+                minor_version = attribs[2 * i + 1];
+                break;
 
-        case GLX_RENDER_TYPE:
-            /* Not valid for GLX_EXT_no_config_context */
-            if (!req->fbconfig)
-                return BadValue;
-            render_type = attribs[2 * i + 1];
-            break;
+            case GLX_CONTEXT_FLAGS_ARB:
+                flags = attribs[2 * i + 1];
+                break;
 
-        case GLX_CONTEXT_PROFILE_MASK_ARB:
-            profile = attribs[2 * i + 1];
-            break;
+            case GLX_RENDER_TYPE:
+                /* Not valid for GLX_EXT_no_config_context */
+                if (!req->fbconfig)
+                    return BadValue;
+                render_type = attribs[2 * i + 1];
+                break;
 
-        case GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB:
-            reset = attribs[2 * i + 1];
-            if (reset != GLX_NO_RESET_NOTIFICATION_ARB
-                && reset != GLX_LOSE_CONTEXT_ON_RESET_ARB)
-                return BadValue;
+            case GLX_CONTEXT_PROFILE_MASK_ARB:
+                profile = attribs[2 * i + 1];
+                break;
 
-            break;
+            case GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB:
+                reset = attribs[2 * i + 1];
+                if (reset != GLX_NO_RESET_NOTIFICATION_ARB
+                    && reset != GLX_LOSE_CONTEXT_ON_RESET_ARB)
+                    return BadValue;
+                break;
 
-        case GLX_CONTEXT_RELEASE_BEHAVIOR_ARB:
-            flush = attribs[2 * i + 1];
-            if (flush != GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB
-                && flush != GLX_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB)
-                return BadValue;
-            break;
+            case GLX_CONTEXT_RELEASE_BEHAVIOR_ARB:
+                flush = attribs[2 * i + 1];
+                if (flush != GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB
+                    && flush != GLX_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB)
+                    return BadValue;
+                break;
 
-        case GLX_SCREEN:
-            /* Only valid for GLX_EXT_no_config_context */
-            if (req->fbconfig)
-                return BadValue;
-            /* Must match the value in the request header */
-            if (attribs[2 * i + 1] != req->screen)
-                return BadValue;
-            break;
+            case GLX_SCREEN:
+                /* Only valid for GLX_EXT_no_config_context */
+                if (req->fbconfig)
+                    return BadValue;
+                /* Must match the value in the request header */
+                if (attribs[2 * i + 1] != req->screen)
+                    return BadValue;
+                break;
 
-        case GLX_CONTEXT_OPENGL_NO_ERROR_ARB:
-            /* ignore */
-            break;
+            case GLX_CONTEXT_OPENGL_NO_ERROR_ARB:
+                /* ignore */
+                break;
 
-        default:
-            if (!req->isDirect)
-                return BadValue;
-            break;
+            default:
+                if (!req->isDirect)
+                    return BadValue;
+                break;
+            }
         }
     }
 
