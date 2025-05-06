@@ -189,8 +189,10 @@ xnestBitBlitHelper(GCPtr pGC)
                 default:
                 {
                     struct xnest_event_queue *q = malloc(sizeof(struct xnest_event_queue));
-                    q->event = event;
-                    xorg_list_add(&q->entry, &xnestUpstreamInfo.eventQueue.entry);
+                    if (q) {
+                        q->event = event;
+                        xorg_list_add(&q->entry, &xnestUpstreamInfo.eventQueue.entry);
+                    }
                 }
             }
         }
@@ -343,6 +345,9 @@ xnestPolyText8(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
     // won't get more than 254 elements, since it's already processed by doPolyText()
     int const bufsize = sizeof(xTextElt) + count;
     uint8_t *buffer = malloc(bufsize);
+    if (!buffer)
+        return 0;
+
     xTextElt *elt = (xTextElt*)buffer;
     elt->len = count;
     elt->delta = 0;
@@ -369,6 +374,8 @@ xnestPolyText16(DrawablePtr pDrawable, GCPtr pGC, int x, int y, int count,
     // won't get more than 254 elements, since it's already processed by doPolyText()
     int const bufsize = sizeof(xTextElt) + count*2;
     uint8_t *buffer = malloc(bufsize);
+    if (!buffer)
+        return 0;
     xTextElt *elt = (xTextElt*)buffer;
     elt->len = count;
     elt->delta = 0;
