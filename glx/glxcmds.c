@@ -36,6 +36,7 @@
 #include <X11/extensions/presenttokens.h>
 
 #include "dix/dix_priv.h"
+#include "os/bug_priv.h"
 
 #include "glxserver.h"
 #include <unpack.h>
@@ -121,6 +122,8 @@ validGlxFBConfigForWindow(ClientPtr client, __GLXconfig * config,
             break;
         }
     }
+
+    BUG_RETURN_VAL(!pVisual, FALSE);
 
     /* FIXME: What exactly should we check here... */
     if (pVisual->class != glxConvertToXVisualType(config->visualType) ||
