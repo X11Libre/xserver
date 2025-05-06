@@ -3241,8 +3241,11 @@ DeviceEventSuppressForWindow(WindowPtr pWin, ClientPtr client, Mask mask,
         inputMasks->dontPropagateMask[maskndx] = mask;
     }
     RecalculateDeviceDeliverableEvents(pWin);
-    if (ShouldFreeInputMasks(pWin, FALSE))
+    if (ShouldFreeInputMasks(pWin, FALSE)) {
+        BUG_RETURN_VAL(!inputMasks, BadImplementation);
+        BUG_RETURN_VAL(!inputMasks->inputClients, BadImplementation);
         FreeResource(inputMasks->inputClients->resource, X11_RESTYPE_NONE);
+    }
     return Success;
 }
 
