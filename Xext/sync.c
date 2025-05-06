@@ -2647,16 +2647,15 @@ typedef struct {
 static void
 IdleTimeQueryValue(void *pCounter, int64_t *pValue_return)
 {
-    int deviceid;
+    int deviceid = XIAllDevices;
     CARD32 idle;
 
     if (pCounter) {
         SyncCounter *counter = pCounter;
         IdleCounterPriv *priv = SysCounterGetPrivate(counter);
-        deviceid = priv->deviceid;
+        if (priv)
+            deviceid = priv->deviceid;
     }
-    else
-        deviceid = XIAllDevices;
     idle = GetTimeInMillis() - LastEventTime(deviceid).milliseconds;
     *pValue_return = idle;
 }
@@ -2666,6 +2665,8 @@ IdleTimeBlockHandler(void *pCounter, void *wt)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
+    if (!priv)
+        return;
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     int64_t idle, old_idle;
@@ -2756,6 +2757,8 @@ IdleTimeWakeupHandler(void *pCounter, int rc)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
+    if (!priv)
+        return;
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     int64_t idle;
@@ -2789,6 +2792,8 @@ IdleTimeBracketValues(void *pCounter, int64_t *pbracket_less,
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
+    if (!priv)
+        return;
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     Bool registered = (less || greater);
