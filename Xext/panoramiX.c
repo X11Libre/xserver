@@ -806,7 +806,6 @@ extern void
 PanoramiXConsolidate(void)
 {
     int i;
-    PanoramiXRes *root, *defmap, *saver;
     ScreenPtr pScreen = screenInfo.screens[0];
     DepthPtr pDepth = pScreen->allowedDepths;
     VisualPtr pVisual = pScreen->visuals;
@@ -820,11 +819,23 @@ PanoramiXConsolidate(void)
     for (i = 0; i < pScreen->numVisuals; i++)
         PanoramiXMaybeAddVisual(pVisual++);
 
-    root = malloc(sizeof(PanoramiXRes));
+    PanoramiXRes *root = calloc(1, sizeof(PanoramiXRes));
+    if (!root)
+        return;
+
     root->type = XRT_WINDOW;
-    defmap = malloc(sizeof(PanoramiXRes));
+    PanoramiXRes *defmap = calloc(1, sizeof(PanoramiXRes));
+    if (!defmap) {
+        free(root);
+        return;
+    }
     defmap->type = XRT_COLORMAP;
-    saver = malloc(sizeof(PanoramiXRes));
+    PanoramiXRes *saver = calloc(1, sizeof(PanoramiXRes));
+    if (!saver) {
+        free(root);
+        free(defmap);
+        return;
+    }
     saver->type = XRT_WINDOW;
 
     FOR_NSCREENS(i) {
