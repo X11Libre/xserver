@@ -881,6 +881,8 @@ ephyrProcessExpose(xcb_generic_event_t *xev)
 {
     xcb_expose_event_t *expose = (xcb_expose_event_t *)xev;
     KdScreenInfo *screen = screen_from_window(expose->window);
+    if (!screen)
+        return;
     EphyrScrPriv *scrpriv = screen->driver;
 
     /* Wait for the last expose event in a series of cliprects
@@ -904,6 +906,9 @@ ephyrProcessMouseMotion(xcb_generic_event_t *xev)
 {
     xcb_motion_notify_event_t *motion = (xcb_motion_notify_event_t *)xev;
     KdScreenInfo *screen = screen_from_window(motion->event);
+
+    if (!screen)
+        return;
 
     if (!ephyrMouse ||
         !((EphyrPointerPrivate *) ephyrMouse->driverPrivate)->enabled) {
@@ -1032,6 +1037,7 @@ ephyrProcessKeyRelease(xcb_generic_event_t *xev)
           || xcb_key_symbols_get_keysym(keysyms, key->detail, 0) == XK_Control_R)
          && (key->state & XCB_MOD_MASK_SHIFT)))) {
         KdScreenInfo *screen = screen_from_window(key->event);
+        assert(screen);
         EphyrScrPriv *scrpriv = screen->driver;
 
         if (grabbed_screen != -1) {
@@ -1266,6 +1272,9 @@ MouseInit(KdPointerInfo * pi)
 {
     pi->driverPrivate = (EphyrPointerPrivate *)
         calloc(1, sizeof(EphyrPointerPrivate));
+    if (!pi->driverPrivate)
+        return BadAlloc;
+
     ((EphyrPointerPrivate *) pi->driverPrivate)->enabled = FALSE;
     pi->nAxes = 3;
     pi->nButtons = 32;
