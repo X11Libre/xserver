@@ -361,7 +361,8 @@ IntervalListCreateSet(RecordSetInterval * pIntervals, int nIntervals,
             goto bailout;
         prls->baseSet.ops = &IntervalListSetOperations;
     }
-    memcpy(&prls[1], stackIntervals, nIntervals * sizeof(RecordSetInterval));
+    if (stackIntervals)
+        memcpy(&prls[1], stackIntervals, nIntervals * sizeof(RecordSetInterval));
     prls->nIntervals = nIntervals;
  bailout:
     free(stackIntervals);

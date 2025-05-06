@@ -887,7 +887,8 @@ RecordInstallHooks(RecordClientsAndProtocolPtr pRCAP, XID oneclient)
                     unsigned int j;
 
                     for (j = interval.first; j <= interval.last; j++)
-                        pClient->requestVector[j] = RecordARequest;
+                        if (pClient)
+                            pClient->requestVector[j] = RecordARequest;
                 }
             }
         }
