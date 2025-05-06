@@ -43,6 +43,8 @@
 
 #include <dix-config.h>
 
+#include "os/bug_priv.h"
+
 #include "compint.h"
 
 static Bool
@@ -133,6 +135,8 @@ compHandleMarkedWindows(WindowPtr pWin, WindowPtr pLayerWin)
 int
 compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
 {
+    BUG_RETURN_VAL(!pClient, BadMatch);
+
     CompWindowPtr cw = GetCompWindow(pWin);
     CompClientWindowPtr ccw;
     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);
@@ -322,6 +326,8 @@ compUnredirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
 {
     CompWindowPtr cw = GetCompWindow(pWin);
     CompClientWindowPtr ccw;
+
+    BUG_RETURN_VAL(!pClient, BadValue);
 
     if (!cw)
         return BadValue;
