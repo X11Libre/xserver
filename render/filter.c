@@ -387,7 +387,8 @@ SetPicturePictFilter(PicturePtr pPicture, PictFilterPtr pFilter,
         pPicture->filter_nparams = nparams;
     }
     for (i = 0; i < nparams; i++)
-        pPicture->filter_params[i] = params[i];
+        if (pPicture->filter_params)
+            pPicture->filter_params[i] = params[i];
     pPicture->filter = pFilter->id;
 
     if (pPicture->pDrawable) {
