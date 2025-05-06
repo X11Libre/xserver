@@ -1348,6 +1348,10 @@ doPolyText(ClientPtr client, PTclosurePtr c)
 
         FreeScratchGC(c->pGC);
         free(c->data);
+
+        /* if compiler/ananylzer warns here, it's a false alarm:
+           here `c` points to a calloc()ed chunk, not the on-stack struct
+           from PolyText(). */
         free(c);
     }
     return TRUE;
@@ -1494,6 +1498,9 @@ doImageText(ClientPtr client, ITclosurePtr c)
 
         FreeScratchGC(c->pGC);
         free(c->data);
+        /* if compiler/ananylzer warns here, it's a false alarm:
+           here `c` points to a calloc()ed chunk, not the on-stack struct
+           from PolyText(). */
         free(c);
     }
     return TRUE;
