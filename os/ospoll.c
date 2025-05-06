@@ -224,8 +224,9 @@ ospoll_create(void)
     return ospoll;
 #endif
 #if EPOLL
-    struct ospoll       *ospoll = calloc(1, sizeof (struct ospoll));
-
+    struct ospoll *ospoll = calloc(1, sizeof (struct ospoll));
+    if (ospoll == NULL)
+        return NULL;
     ospoll->epoll_fd = epoll_create1(EPOLL_CLOEXEC);
     if (ospoll->epoll_fd < 0) {
         free (ospoll);
