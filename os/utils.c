@@ -817,7 +817,9 @@ set_font_authorizations(char **authorizations, int *authlen, void *client)
 #endif
 
         len = strlen(hnameptr) + 1;
-        result = malloc(len + sizeof(AUTHORIZATION_NAME) + 4);
+        result = calloc(1, len + sizeof(AUTHORIZATION_NAME) + 4);
+        if (!result)
+            return 0;
 
         p = result;
         *p++ = sizeof(AUTHORIZATION_NAME) >> 8;
