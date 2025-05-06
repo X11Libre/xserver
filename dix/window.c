@@ -3486,17 +3486,17 @@ ChangeWindowDeviceCursor(WindowPtr pWin, DeviceIntPtr pDev, CursorPtr pCursor)
     }
     else {
         /* no device cursor yet */
-        DevCursNodePtr pNewNode;
-
         if (!pCursor)
             return Success;
 
-        pNewNode = malloc(sizeof(DevCursNodeRec));
+        DevCursNodePtr pNewNode = calloc(1, sizeof(DevCursNodeRec));
+        if (!pNewNode)
+            return BadAlloc;
+
         pNewNode->dev = pDev;
         pNewNode->next = pWin->optional->deviceCursors;
         pWin->optional->deviceCursors = pNewNode;
         pNode = pNewNode;
-
     }
 
     if (pCursor && WindowParentHasDeviceCursor(pWin, pDev, pCursor))
