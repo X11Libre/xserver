@@ -440,7 +440,8 @@ xnestShapeWindow(WindowPtr pWin)
             int const num_rects = RegionNumRects(xnestWindowPriv(pWin)->bounding_shape);
             BoxPtr const pBox = RegionRects(xnestWindowPriv(pWin)->bounding_shape);
             xcb_rectangle_t *rects = calloc(num_rects, sizeof(xcb_rectangle_t));
-
+            if (!rects)
+                return;
             for (int i = 0; i < num_rects; i++) {
                 rects[i].x = pBox[i].x1;
                 rects[i].y = pBox[i].y1;
@@ -469,7 +470,8 @@ xnestShapeWindow(WindowPtr pWin)
             int const num_rects = RegionNumRects(xnestWindowPriv(pWin)->clip_shape);
             BoxPtr const pBox = RegionRects(xnestWindowPriv(pWin)->clip_shape);
             xcb_rectangle_t *rects = calloc(num_rects, sizeof(xcb_rectangle_t));
-
+            if (!rects)
+                return;
             for (int i = 0; i < num_rects; i++) {
                 rects[i].x = pBox[i].x1;
                 rects[i].y = pBox[i].y1;
