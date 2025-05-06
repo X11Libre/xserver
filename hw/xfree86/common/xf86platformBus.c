@@ -684,7 +684,7 @@ xf86platformAddDevice(const char *driver_name, int index)
         }
     }
 
-    if (i == xf86NumDrivers) {
+    if (!drvp) {
         ErrorF("can't find driver %s for hotplugged device\n", driver_name);
         return -1;
     }
