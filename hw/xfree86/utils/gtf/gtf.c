@@ -294,7 +294,9 @@ vert_refresh(int h_pixels, int v_lines, float freq, int interlaced, int margins)
     float h_front_porch;
     float v_odd_front_porch_lines;
 
-    mode *m = (mode *) malloc(sizeof(mode));
+    mode *m = (mode *) calloc(1, sizeof(mode));
+    if (!m)
+        return NULL;
 
     /*  1. In order to give correct results, the number of horizontal
      *  pixels requested is first processed to ensure that it is divisible
@@ -604,6 +606,8 @@ parse_command_line(int argc, char *argv[])
     int n;
 
     options *o = (options *) calloc(1, sizeof(options));
+    if (!o)
+        goto bad_option;
 
     if (argc < 4)
         goto bad_option;
