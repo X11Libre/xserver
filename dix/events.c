@@ -4744,7 +4744,6 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
                       int mode, int detail, WindowPtr pWin, Window child)
 {
     GrabPtr grab = mouse->deviceGrab.grab;
-    xXIEnterEvent *event;
     WindowPtr focus;
     int filter;
     int btlen, len, i;
@@ -4758,7 +4757,10 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
     btlen = bytes_to_int32(btlen);
     len = sizeof(xXIEnterEvent) + btlen * 4;
 
-    event = calloc(1, len);
+    xXIEnterEvent *event = calloc(1, len);
+    if (!event)
+        return;
+
     event->type = GenericEvent;
     event->extension = IReqCode;
     event->evtype = type;
