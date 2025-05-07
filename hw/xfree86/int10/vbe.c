@@ -834,8 +834,6 @@ VBESetGetPaletteData(vbeInfoPtr pVbe, Bool set, int first, int num,
 VBEpmi *
 VBEGetVBEpmi(vbeInfoPtr pVbe)
 {
-    VBEpmi *pmi;
-
     /*
        Input:
        AH    := 4Fh     Super VGA support
@@ -859,7 +857,10 @@ VBEGetVBEpmi(vbeInfoPtr pVbe)
     if (R16(pVbe->pInt10->ax) != 0x4f)
         return NULL;
 
-    pmi = malloc(sizeof(VBEpmi));
+    VBEpmi *pmi = calloc(1, sizeof(VBEpmi));
+    if (!pmi)
+        return NULL;
+
     pmi->seg_tbl = R16(pVbe->pInt10->es);
     pmi->tbl_off = R16(pVbe->pInt10->di);
     pmi->tbl_len = R16(pVbe->pInt10->cx);
@@ -936,7 +937,8 @@ VBEVesaSaveRestore(vbeInfoPtr pVbe, vbeSaveRestorePtr vbe_sr,
                 vbe_sr->stateMode = -1; /* invalidate */
                 /* don't rely on the memory not being touched */
                 if (vbe_sr->pstate == NULL)
-                    vbe_sr->pstate = malloc(vbe_sr->stateSize);
+                    vbe_sr->pstate = calloc(1, vbe_sr->stateSize);
+                assert(vbe_sr->pstate);
                 memcpy(vbe_sr->pstate, vbe_sr->state, vbe_sr->stateSize);
             }
             ErrorF("VBESaveRestore done with success\n");
