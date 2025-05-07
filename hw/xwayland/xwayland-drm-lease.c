@@ -26,6 +26,7 @@
 
 #include <xwayland-config.h>
 
+#include "os/bug_priv.h"
 #include "os/client_priv.h"
 
 #ifdef WITH_LIBDRM
@@ -455,7 +456,8 @@ xwl_screen_add_drm_lease_device(struct xwl_screen *xwl_screen, uint32_t id)
 {
     struct wp_drm_lease_device_v1 *lease_device = wl_registry_bind(
         xwl_screen->registry, id, &wp_drm_lease_device_v1_interface, 1);
-    struct xwl_drm_lease_device *device_data = malloc(sizeof(struct xwl_drm_lease_device));
+    struct xwl_drm_lease_device *device_data = calloc(1, sizeof(struct xwl_drm_lease_device));
+    BUG_RETURN(!device_data);
 
     device_data->drm_lease_device = lease_device;
     device_data->xwl_screen = xwl_screen;

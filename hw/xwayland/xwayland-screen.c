@@ -39,6 +39,7 @@
 
 #include "dix/input_priv.h"
 #include "dix/property_priv.h"
+#include "os/bug_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
 #include "os/xserver_poll.h"
@@ -312,6 +313,10 @@ xwl_cursor_warped_to(DeviceIntPtr device,
         window = XYToWindow(sprite, x, y);
 
     xwl_window = xwl_window_from_window(window);
+    if (!xwl_window) {
+        BUG_RETURN(!xwl_seat);
+    }
+
     if (!xwl_window && xwl_seat->focus_window) {
         focus = xwl_seat->focus_window->toplevel;
 
@@ -524,7 +529,8 @@ registry_global(void *data, struct wl_registry *registry, uint32_t id,
     }
     else if (strcmp(interface, wp_drm_lease_device_v1_interface.name) == 0) {
         if (xwl_screen->screen->root == NULL) {
-            struct xwl_queued_drm_lease_device *queued = malloc(sizeof(struct xwl_queued_drm_lease_device));
+            struct xwl_queued_drm_lease_device *queued = calloc(1, sizeof(struct xwl_queued_drm_lease_device));
+            BUG_RETURN(!queued);
             queued->id = id;
             xorg_list_append(&queued->link, &xwl_screen->queued_drm_lease_devices);
         } else {

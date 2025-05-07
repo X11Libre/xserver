@@ -25,6 +25,8 @@
 
 #include <xwayland-config.h>
 
+#include "os/bug_priv.h"
+
 #include <compint.h>
 #ifdef XWL_HAS_GLAMOR
 #include <glamor.h>
@@ -640,6 +642,8 @@ xwl_present_queue_vblank(ScreenPtr screen,
         ErrorF("present: Error getting event\n");
         return BadImplementation;
     }
+
+    BUG_RETURN_VAL(!xwl_present_window, BadImplementation);
 
     event->vblank.exec_msc = msc;
 

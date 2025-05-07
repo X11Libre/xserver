@@ -3341,6 +3341,7 @@ xwl_pointer_warp_emulator_is_locked(struct xwl_pointer_warp_emulator *warp_emula
 static void
 xwl_pointer_warp_emulator_lock(struct xwl_pointer_warp_emulator *warp_emulator)
 {
+    BUG_RETURN(!warp_emulator);
     struct xwl_seat *xwl_seat = warp_emulator->xwl_seat;
     struct xwl_screen *xwl_screen = xwl_seat->xwl_screen;
     struct zwp_pointer_constraints_v1 *pointer_constraints =
