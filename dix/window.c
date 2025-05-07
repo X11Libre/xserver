@@ -2915,7 +2915,7 @@ UnmapSubwindows(WindowPtr pWin)
                 UnrealizeTree(pChild, FALSE);
         }
     }
-    if (wasViewable && anyMarked) {
+    if (wasViewable && anyMarked && pLayerWin) {
         if (pLayerWin->parent == pWin)
             (*pScreen->MarkWindow) (pWin);
         else {
