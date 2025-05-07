@@ -295,10 +295,10 @@ xf86ComputeCrtcPan(Bool transform_in_use,
          * dy = (F T0 - Q0) / U0
          * dy = (F P0 - V0) / W0
          */
-        double r[3];
-        double q[2], u[2], t[2], v[2], w[2], p[2];
+        double r[3] = { 0 };
+        double q[2], u[2], t[2], v[2], w[2] = { 0 }, p[2];
         double f;
-        struct pixman_f_vector d;
+        struct pixman_f_vector d = { 0 };
         int i;
 
         /* Get the un-normalized crtc coordinates again */
