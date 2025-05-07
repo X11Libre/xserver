@@ -2818,20 +2818,24 @@ init_system_idle_counter(const char *name, int deviceid)
 
     IdleTimeQueryValue(NULL, &idle);
 
+    IdleCounterPriv *priv = calloc(1, sizeof(IdleCounterPriv));
+    if (!priv)
+        return NULL;
+
     idle_time_counter = SyncCreateSystemCounter(name, idle, resolution,
                                                 XSyncCounterUnrestricted,
                                                 IdleTimeQueryValue,
                                                 IdleTimeBracketValues);
 
-    if (idle_time_counter != NULL) {
-        IdleCounterPriv *priv = malloc(sizeof(IdleCounterPriv));
-
-        priv->value_less = priv->value_greater = NULL;
-        priv->deviceid = deviceid;
-
-        idle_time_counter->pSysCounterInfo->private = priv;
+    if (!idle_time_counter) {
+        free(priv);
+        return NULL;
     }
 
+    priv->value_less = priv->value_greater = NULL;
+    priv->deviceid = deviceid;
+
+    idle_time_counter->pSysCounterInfo->private = priv;
     return idle_time_counter;
 }
 
