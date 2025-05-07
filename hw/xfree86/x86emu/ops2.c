@@ -38,6 +38,8 @@
 *
 ****************************************************************************/
 
+#include <assert.h>
+
 #include "x86emu/x86emui.h"
 
 #undef bswap_32
@@ -377,6 +379,7 @@ x86emuOp2_bt_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -390,6 +393,7 @@ x86emuOp2_bt_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -405,6 +409,7 @@ x86emuOp2_bt_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -418,6 +423,7 @@ x86emuOp2_bt_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -433,6 +439,7 @@ x86emuOp2_bt_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -446,6 +453,7 @@ x86emuOp2_bt_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -460,7 +468,10 @@ x86emuOp2_bt_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
+            assert(shiftreg);
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & (0x1 << bit), F_CF);
         }
         else {
@@ -470,7 +481,9 @@ x86emuOp2_bt_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & (0x1 << bit), F_CF);
         }
         break;
@@ -507,6 +520,7 @@ x86emuOp2_shld_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shld_long(destval, *shiftreg, shift);
             store_data_long(destoffset, destval);
         }
@@ -522,6 +536,7 @@ x86emuOp2_shld_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shld_word(destval, *shiftreg, shift);
             store_data_word(destoffset, destval);
         }
@@ -539,6 +554,7 @@ x86emuOp2_shld_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shld_long(destval, *shiftreg, shift);
             store_data_long(destoffset, destval);
         }
@@ -554,6 +570,7 @@ x86emuOp2_shld_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shld_word(destval, *shiftreg, shift);
             store_data_word(destoffset, destval);
         }
@@ -571,6 +588,7 @@ x86emuOp2_shld_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shld_long(destval, *shiftreg, shift);
             store_data_long(destoffset, destval);
         }
@@ -586,6 +604,7 @@ x86emuOp2_shld_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shld_word(destval, *shiftreg, shift);
             store_data_word(destoffset, destval);
         }
@@ -601,6 +620,8 @@ x86emuOp2_shld_IMM(u8 X86EMU_UNUSED(op2))
             shift = fetch_byte_imm();
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(shiftreg);
             *destreg = shld_long(*destreg, *shiftreg, shift);
         }
         else {
@@ -613,6 +634,8 @@ x86emuOp2_shld_IMM(u8 X86EMU_UNUSED(op2))
             shift = fetch_byte_imm();
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(shiftreg);
             *destreg = shld_word(*destreg, *shiftreg, shift);
         }
         break;
@@ -646,6 +669,7 @@ x86emuOp2_shld_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shld_long(destval, *shiftreg, M.x86.R_CL);
             store_data_long(destoffset, destval);
         }
@@ -659,6 +683,7 @@ x86emuOp2_shld_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shld_word(destval, *shiftreg, M.x86.R_CL);
             store_data_word(destoffset, destval);
         }
@@ -674,6 +699,7 @@ x86emuOp2_shld_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shld_long(destval, *shiftreg, M.x86.R_CL);
             store_data_long(destoffset, destval);
         }
@@ -687,6 +713,7 @@ x86emuOp2_shld_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shld_word(destval, *shiftreg, M.x86.R_CL);
             store_data_word(destoffset, destval);
         }
@@ -702,6 +729,7 @@ x86emuOp2_shld_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shld_long(destval, *shiftreg, M.x86.R_CL);
             store_data_long(destoffset, destval);
         }
@@ -715,6 +743,7 @@ x86emuOp2_shld_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shld_word(destval, *shiftreg, M.x86.R_CL);
             store_data_word(destoffset, destval);
         }
@@ -728,6 +757,8 @@ x86emuOp2_shld_CL(u8 X86EMU_UNUSED(op2))
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(shiftreg);
             *destreg = shld_long(*destreg, *shiftreg, M.x86.R_CL);
         }
         else {
@@ -738,6 +769,8 @@ x86emuOp2_shld_CL(u8 X86EMU_UNUSED(op2))
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(shiftreg);
             *destreg = shld_word(*destreg, *shiftreg, M.x86.R_CL);
         }
         break;
@@ -800,6 +833,7 @@ x86emuOp2_bts_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -815,6 +849,7 @@ x86emuOp2_bts_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -832,6 +867,7 @@ x86emuOp2_bts_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -847,6 +883,7 @@ x86emuOp2_bts_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -864,7 +901,9 @@ x86emuOp2_bts_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
+            assert(shiftreg);
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
             mask = (0x1 << bit);
@@ -879,6 +918,7 @@ x86emuOp2_bts_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -893,8 +933,10 @@ x86emuOp2_bts_R(u8 X86EMU_UNUSED(op2))
             u32 mask;
 
             srcreg = DECODE_RM_LONG_REGISTER(rl);
+            assert(srcreg);
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
+            assert(shiftreg);
             TRACE_AND_STEP();
             bit = *shiftreg & 0x1F;
             mask = (0x1 << bit);
@@ -909,8 +951,10 @@ x86emuOp2_bts_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             mask = (u16) (0x1 << bit);
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & mask, F_CF);
             *srcreg |= mask;
         }
@@ -948,6 +992,7 @@ x86emuOp2_shrd_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shrd_long(destval, *shiftreg, shift);
             store_data_long(destoffset, destval);
         }
@@ -963,6 +1008,7 @@ x86emuOp2_shrd_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shrd_word(destval, *shiftreg, shift);
             store_data_word(destoffset, destval);
         }
@@ -980,6 +1026,7 @@ x86emuOp2_shrd_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shrd_long(destval, *shiftreg, shift);
             store_data_long(destoffset, destval);
         }
@@ -995,6 +1042,7 @@ x86emuOp2_shrd_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shrd_word(destval, *shiftreg, shift);
             store_data_word(destoffset, destval);
         }
@@ -1012,6 +1060,7 @@ x86emuOp2_shrd_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shrd_long(destval, *shiftreg, shift);
             store_data_long(destoffset, destval);
         }
@@ -1027,6 +1076,7 @@ x86emuOp2_shrd_IMM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shrd_word(destval, *shiftreg, shift);
             store_data_word(destoffset, destval);
         }
@@ -1042,6 +1092,8 @@ x86emuOp2_shrd_IMM(u8 X86EMU_UNUSED(op2))
             shift = fetch_byte_imm();
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(shiftreg);
             *destreg = shrd_long(*destreg, *shiftreg, shift);
         }
         else {
@@ -1054,6 +1106,8 @@ x86emuOp2_shrd_IMM(u8 X86EMU_UNUSED(op2))
             shift = fetch_byte_imm();
             DECODE_PRINTF2("%d\n", shift);
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(shiftreg);
             *destreg = shrd_word(*destreg, *shiftreg, shift);
         }
         break;
@@ -1087,6 +1141,7 @@ x86emuOp2_shrd_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shrd_long(destval, *shiftreg, M.x86.R_CL);
             store_data_long(destoffset, destval);
         }
@@ -1100,6 +1155,7 @@ x86emuOp2_shrd_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shrd_word(destval, *shiftreg, M.x86.R_CL);
             store_data_word(destoffset, destval);
         }
@@ -1115,6 +1171,7 @@ x86emuOp2_shrd_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shrd_long(destval, *shiftreg, M.x86.R_CL);
             store_data_long(destoffset, destval);
         }
@@ -1128,6 +1185,7 @@ x86emuOp2_shrd_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shrd_word(destval, *shiftreg, M.x86.R_CL);
             store_data_word(destoffset, destval);
         }
@@ -1143,6 +1201,7 @@ x86emuOp2_shrd_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_long(destoffset);
+            assert(shiftreg);
             destval = shrd_long(destval, *shiftreg, M.x86.R_CL);
             store_data_long(destoffset, destval);
         }
@@ -1156,6 +1215,7 @@ x86emuOp2_shrd_CL(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
             destval = fetch_data_word(destoffset);
+            assert(shiftreg);
             destval = shrd_word(destval, *shiftreg, M.x86.R_CL);
             store_data_word(destoffset, destval);
         }
@@ -1169,6 +1229,8 @@ x86emuOp2_shrd_CL(u8 X86EMU_UNUSED(op2))
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(shiftreg);
             *destreg = shrd_long(*destreg, *shiftreg, M.x86.R_CL);
         }
         else {
@@ -1179,6 +1241,8 @@ x86emuOp2_shrd_CL(u8 X86EMU_UNUSED(op2))
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             DECODE_PRINTF(",CL\n");
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(shiftreg);
             *destreg = shrd_word(*destreg, *shiftreg, M.x86.R_CL);
         }
         break;
@@ -1256,6 +1320,7 @@ x86emuOp2_imul_R_RM(u8 X86EMU_UNUSED(op2))
             srcoffset = decode_rm01_address(rl);
             srcval = fetch_data_long(srcoffset);
             TRACE_AND_STEP();
+            assert(destreg);
             imul_long_direct(&res_lo, &res_hi, (s32) * destreg, (s32) srcval);
             if (res_hi != 0) {
                 SET_FLAG(F_CF);
@@ -1277,6 +1342,7 @@ x86emuOp2_imul_R_RM(u8 X86EMU_UNUSED(op2))
             srcoffset = decode_rm01_address(rl);
             srcval = fetch_data_word(srcoffset);
             TRACE_AND_STEP();
+            assert(destreg);
             res = (s16) * destreg * (s16) srcval;
             if (res > 0xFFFF) {
                 SET_FLAG(F_CF);
@@ -1342,6 +1408,8 @@ x86emuOp2_imul_R_RM(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             srcreg = DECODE_RM_LONG_REGISTER(rl);
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(srcreg);
             imul_long_direct(&res_lo, &res_hi, (s32) * destreg, (s32) * srcreg);
             if (res_hi != 0) {
                 SET_FLAG(F_CF);
@@ -1360,6 +1428,8 @@ x86emuOp2_imul_R_RM(u8 X86EMU_UNUSED(op2))
             destreg = DECODE_RM_WORD_REGISTER(rh);
             DECODE_PRINTF(",");
             srcreg = DECODE_RM_WORD_REGISTER(rl);
+            assert(destreg);
+            assert(srcreg);
             res = (s16) * destreg * (s16) * srcreg;
             if (res > 0xFFFF) {
                 SET_FLAG(F_CF);
@@ -1398,6 +1468,7 @@ x86emuOp2_lss_R_IMM(u8 X86EMU_UNUSED(op2))
         srcoffset = decode_rm00_address(rl);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(dstreg);
         *dstreg = fetch_data_word(srcoffset);
         M.x86.R_SS = fetch_data_word(srcoffset + 2);
         break;
@@ -1407,6 +1478,7 @@ x86emuOp2_lss_R_IMM(u8 X86EMU_UNUSED(op2))
         srcoffset = decode_rm01_address(rl);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(dstreg);
         *dstreg = fetch_data_word(srcoffset);
         M.x86.R_SS = fetch_data_word(srcoffset + 2);
         break;
@@ -1451,6 +1523,7 @@ x86emuOp2_btr_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -1466,6 +1539,7 @@ x86emuOp2_btr_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -1483,6 +1557,7 @@ x86emuOp2_btr_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -1498,6 +1573,7 @@ x86emuOp2_btr_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -1515,6 +1591,7 @@ x86emuOp2_btr_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -1530,6 +1607,7 @@ x86emuOp2_btr_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -1547,8 +1625,10 @@ x86emuOp2_btr_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             mask = (0x1 << bit);
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & mask, F_CF);
             *srcreg &= ~mask;
         }
@@ -1560,8 +1640,10 @@ x86emuOp2_btr_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             mask = (u16) (0x1 << bit);
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & mask, F_CF);
             *srcreg &= ~mask;
         }
@@ -1592,6 +1674,7 @@ x86emuOp2_lfs_R_IMM(u8 X86EMU_UNUSED(op2))
         srcoffset = decode_rm00_address(rl);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(dstreg);
         *dstreg = fetch_data_word(srcoffset);
         M.x86.R_FS = fetch_data_word(srcoffset + 2);
         break;
@@ -1601,6 +1684,7 @@ x86emuOp2_lfs_R_IMM(u8 X86EMU_UNUSED(op2))
         srcoffset = decode_rm01_address(rl);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(dstreg);
         *dstreg = fetch_data_word(srcoffset);
         M.x86.R_FS = fetch_data_word(srcoffset + 2);
         break;
@@ -1610,6 +1694,7 @@ x86emuOp2_lfs_R_IMM(u8 X86EMU_UNUSED(op2))
         srcoffset = decode_rm10_address(rl);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(dstreg);
         *dstreg = fetch_data_word(srcoffset);
         M.x86.R_FS = fetch_data_word(srcoffset + 2);
         break;
@@ -1651,6 +1736,7 @@ x86emuOp2_lgs_R_IMM(u8 X86EMU_UNUSED(op2))
         srcoffset = decode_rm01_address(rl);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(dstreg);
         *dstreg = fetch_data_word(srcoffset);
         M.x86.R_GS = fetch_data_word(srcoffset + 2);
         break;
@@ -1722,6 +1808,7 @@ x86emuOp2_movzx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcval = fetch_data_byte(srcoffset);
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(destreg);
             *destreg = srcval;
         }
         else {
@@ -1734,6 +1821,7 @@ x86emuOp2_movzx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcval = fetch_data_byte(srcoffset);
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(destreg);
             *destreg = srcval;
         }
         break;
@@ -1773,6 +1861,8 @@ x86emuOp2_movzx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcreg = DECODE_RM_BYTE_REGISTER(rl);
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(destreg);
+            assert(srcreg);
             *destreg = *srcreg;
         }
         else {
@@ -1784,6 +1874,8 @@ x86emuOp2_movzx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcreg = DECODE_RM_BYTE_REGISTER(rl);
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(srcreg);
+            assert(destreg);
             *destreg = *srcreg;
         }
         break;
@@ -1816,6 +1908,7 @@ x86emuOp2_movzx_word_R_RM(u8 X86EMU_UNUSED(op2))
         srcval = fetch_data_word(srcoffset);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(destreg);
         *destreg = srcval;
         break;
     case 1:
@@ -1825,6 +1918,7 @@ x86emuOp2_movzx_word_R_RM(u8 X86EMU_UNUSED(op2))
         srcval = fetch_data_word(srcoffset);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(destreg);
         *destreg = srcval;
         break;
     case 2:
@@ -1834,6 +1928,8 @@ x86emuOp2_movzx_word_R_RM(u8 X86EMU_UNUSED(op2))
         srcval = fetch_data_word(srcoffset);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(destreg);
+        assert(srcreg);
         *destreg = srcval;
         break;
     case 3:                    /* register to register */
@@ -1842,6 +1938,8 @@ x86emuOp2_movzx_word_R_RM(u8 X86EMU_UNUSED(op2))
         srcreg = DECODE_RM_WORD_REGISTER(rl);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(destreg);
+        assert(srcreg);
         *destreg = *srcreg;
         break;
     }
@@ -2057,6 +2155,7 @@ x86emuOp2_btX_I(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             bit = shift & 0x1F;
             mask = (0x1 << bit);
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & mask, F_CF);
             switch (rh) {
             case 5:
@@ -2083,6 +2182,7 @@ x86emuOp2_btX_I(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             bit = shift & 0xF;
             mask = (0x1 << bit);
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & mask, F_CF);
             switch (rh) {
             case 5:
@@ -2128,6 +2228,7 @@ x86emuOp2_btc_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -2143,6 +2244,7 @@ x86emuOp2_btc_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -2160,6 +2262,7 @@ x86emuOp2_btc_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -2175,6 +2278,7 @@ x86emuOp2_btc_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -2192,6 +2296,7 @@ x86emuOp2_btc_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             disp = (s16) * shiftreg >> 5;
             srcval = fetch_data_long(srcoffset + disp);
@@ -2207,6 +2312,7 @@ x86emuOp2_btc_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             disp = (s16) * shiftreg >> 4;
             srcval = fetch_data_word(srcoffset + disp);
@@ -2224,8 +2330,10 @@ x86emuOp2_btc_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0x1F;
             mask = (0x1 << bit);
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & mask, F_CF);
             *srcreg ^= mask;
         }
@@ -2237,8 +2345,10 @@ x86emuOp2_btc_R(u8 X86EMU_UNUSED(op2))
             DECODE_PRINTF(",");
             shiftreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
+            assert(shiftreg);
             bit = *shiftreg & 0xF;
             mask = (u16) (0x1 << bit);
+            assert(srcreg);
             CONDITIONAL_SET_FLAG(*srcreg & mask, F_CF);
             *srcreg ^= mask;
         }
@@ -2272,6 +2382,7 @@ x86emuOp2_bsf(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_long(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 0; *dstreg < 32; (*dstreg)++)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2285,6 +2396,7 @@ x86emuOp2_bsf(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_word(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 0; *dstreg < 16; (*dstreg)++)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2300,6 +2412,7 @@ x86emuOp2_bsf(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_long(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 0; *dstreg < 32; (*dstreg)++)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2313,6 +2426,7 @@ x86emuOp2_bsf(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_word(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 0; *dstreg < 16; (*dstreg)++)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2328,6 +2442,7 @@ x86emuOp2_bsf(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_long(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 0; *dstreg < 32; (*dstreg)++)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2341,6 +2456,7 @@ x86emuOp2_bsf(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_word(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 0; *dstreg < 16; (*dstreg)++)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2348,25 +2464,27 @@ x86emuOp2_bsf(u8 X86EMU_UNUSED(op2))
         break;
     case 3:                    /* register to register */
         if (M.x86.mode & SYSMODE_PREFIX_DATA) {
-            u32 srcval, *dstreg;
-
-            srcval = *DECODE_RM_LONG_REGISTER(rl);
+            u32* dec = DECODE_RM_LONG_REGISTER(rl);
+            assert(dec);
+            u32 srcval = *dec;
             DECODE_PRINTF(",");
-            dstreg = DECODE_RM_LONG_REGISTER(rh);
+            u32 *dstreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 0; *dstreg < 32; (*dstreg)++)
                 if ((srcval >> *dstreg) & 1)
                     break;
         }
         else {
-            u16 srcval, *dstreg;
-
-            srcval = *DECODE_RM_WORD_REGISTER(rl);
+            u16 *dec = DECODE_RM_WORD_REGISTER(rl);
+            assert(dec);
+            u16 srcval = *DECODE_RM_WORD_REGISTER(rl);
             DECODE_PRINTF(",");
-            dstreg = DECODE_RM_WORD_REGISTER(rh);
+            u16 *dstreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 0; *dstreg < 16; (*dstreg)++)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2401,6 +2519,7 @@ x86emuOp2_bsr(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_long(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 31; *dstreg > 0; (*dstreg)--)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2414,6 +2533,7 @@ x86emuOp2_bsr(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_word(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 15; *dstreg > 0; (*dstreg)--)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2429,6 +2549,7 @@ x86emuOp2_bsr(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_long(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 31; *dstreg > 0; (*dstreg)--)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2442,6 +2563,7 @@ x86emuOp2_bsr(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_word(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 15; *dstreg > 0; (*dstreg)--)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2457,6 +2579,7 @@ x86emuOp2_bsr(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_long(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 31; *dstreg > 0; (*dstreg)--)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2470,6 +2593,7 @@ x86emuOp2_bsr(u8 X86EMU_UNUSED(op2))
             TRACE_AND_STEP();
             srcval = fetch_data_word(srcoffset);
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 15; *dstreg > 0; (*dstreg)--)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2477,25 +2601,27 @@ x86emuOp2_bsr(u8 X86EMU_UNUSED(op2))
         break;
     case 3:                    /* register to register */
         if (M.x86.mode & SYSMODE_PREFIX_DATA) {
-            u32 srcval, *dstreg;
-
-            srcval = *DECODE_RM_LONG_REGISTER(rl);
+            u32 *dec = DECODE_RM_LONG_REGISTER(rl);
+            assert(dec);
+            u32 srcval = *dec;
             DECODE_PRINTF(",");
-            dstreg = DECODE_RM_LONG_REGISTER(rh);
+            u32 *dstreg = DECODE_RM_LONG_REGISTER(rh);
             TRACE_AND_STEP();
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 31; *dstreg > 0; (*dstreg)--)
                 if ((srcval >> *dstreg) & 1)
                     break;
         }
         else {
-            u16 srcval, *dstreg;
-
-            srcval = *DECODE_RM_WORD_REGISTER(rl);
+            u16 *dec = DECODE_RM_WORD_REGISTER(rl);
+            assert(dec);
+            u16 srcval = *dec;
             DECODE_PRINTF(",");
-            dstreg = DECODE_RM_WORD_REGISTER(rh);
+            u16 *dstreg = DECODE_RM_WORD_REGISTER(rh);
             TRACE_AND_STEP();
             CONDITIONAL_SET_FLAG(srcval == 0, F_ZF);
+            assert(dstreg);
             for (*dstreg = 15; *dstreg > 0; (*dstreg)--)
                 if ((srcval >> *dstreg) & 1)
                     break;
@@ -2543,6 +2669,7 @@ x86emuOp2_movsx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcval = (s16) ((s8) fetch_data_byte(srcoffset));
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(destreg);
             *destreg = srcval;
         }
         break;
@@ -2557,6 +2684,7 @@ x86emuOp2_movsx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcval = (s32) ((s8) fetch_data_byte(srcoffset));
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(destreg);
             *destreg = srcval;
         }
         else {
@@ -2569,6 +2697,7 @@ x86emuOp2_movsx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcval = (s16) ((s8) fetch_data_byte(srcoffset));
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(destreg);
             *destreg = srcval;
         }
         break;
@@ -2583,6 +2712,7 @@ x86emuOp2_movsx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcval = (s32) ((s8) fetch_data_byte(srcoffset));
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(destreg);
             *destreg = srcval;
         }
         else {
@@ -2595,6 +2725,7 @@ x86emuOp2_movsx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             srcval = (s16) ((s8) fetch_data_byte(srcoffset));
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
+            assert(destreg);
             *destreg = srcval;
         }
         break;
@@ -2604,8 +2735,10 @@ x86emuOp2_movsx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             u8 *srcreg;
 
             destreg = DECODE_RM_LONG_REGISTER(rh);
+            assert(destreg);
             DECODE_PRINTF(",");
             srcreg = DECODE_RM_BYTE_REGISTER(rl);
+            assert(srcreg);
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
             *destreg = (s32) ((s8) * srcreg);
@@ -2615,8 +2748,10 @@ x86emuOp2_movsx_byte_R_RM(u8 X86EMU_UNUSED(op2))
             u8 *srcreg;
 
             destreg = DECODE_RM_WORD_REGISTER(rh);
+            assert(destreg);
             DECODE_PRINTF(",");
             srcreg = DECODE_RM_BYTE_REGISTER(rl);
+            assert(srcreg);
             DECODE_PRINTF("\n");
             TRACE_AND_STEP();
             *destreg = (s16) ((s8) * srcreg);
@@ -2651,6 +2786,7 @@ x86emuOp2_movsx_word_R_RM(u8 X86EMU_UNUSED(op2))
         srcval = (s32) ((s16) fetch_data_word(srcoffset));
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(destreg);
         *destreg = srcval;
         break;
     case 1:
@@ -2660,6 +2796,7 @@ x86emuOp2_movsx_word_R_RM(u8 X86EMU_UNUSED(op2))
         srcval = (s32) ((s16) fetch_data_word(srcoffset));
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(destreg);
         *destreg = srcval;
         break;
     case 2:
@@ -2669,12 +2806,15 @@ x86emuOp2_movsx_word_R_RM(u8 X86EMU_UNUSED(op2))
         srcval = (s32) ((s16) fetch_data_word(srcoffset));
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
+        assert(destreg);
         *destreg = srcval;
         break;
     case 3:                    /* register to register */
         destreg = DECODE_RM_LONG_REGISTER(rh);
+        assert(destreg);
         DECODE_PRINTF(",");
         srcreg = DECODE_RM_WORD_REGISTER(rl);
+        assert(srcreg);
         DECODE_PRINTF("\n");
         TRACE_AND_STEP();
         *destreg = (s32) ((s16) * srcreg);
