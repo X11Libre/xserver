@@ -339,7 +339,7 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
 
     rc = dixLookupResourceByType((void **) &sourcefont, source, X11_RESTYPE_FONT,
                                  client, DixUseAccess);
-    if (rc != Success) {
+    if ((rc != Success) || (!sourcefont)) {
         client->errorValue = source;
         return rc;
     }
