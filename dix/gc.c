@@ -1022,7 +1022,7 @@ SetClipRects(GCPtr pGC, int xOrigin, int yOrigin, int nrects,
     pGC->clipOrg.y = yOrigin;
     pGC->stateChanges |= GCClipYOrigin;
 
-    if (size)
+    if (size && prectsNew)
         memmove((char *) prectsNew, (char *) prects, size);
     (*pGC->funcs->ChangeClip) (pGC, newct, (void *) prectsNew, nrects);
     if (pGC->funcs->ChangeGC)
