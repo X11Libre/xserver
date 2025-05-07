@@ -1209,7 +1209,7 @@ unsigned
 XkmReadFile(FILE * file, unsigned need, unsigned want, XkbDescPtr *xkb)
 {
     register unsigned i;
-    xkmSectionInfo toc[MAX_TOC], tmpTOC;
+    xkmSectionInfo toc[MAX_TOC] = { 0 }, tmpTOC = { 0 };
     xkmFileInfo fileInfo;
     unsigned tmp, nRead = 0;
     unsigned which = need | want;
