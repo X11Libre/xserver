@@ -702,6 +702,8 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
     if (!strcmp(m, "vbe"))
         m = name = strdup("int10");
 
+    assert(m);
+
     for (cim = compiled_in_modules; *cim; cim++)
         if (!strcmp(m, *cim)) {
             LogMessageVerb(X_INFO, 3, "Module \"%s\" already built-in\n", m);
