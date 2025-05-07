@@ -59,10 +59,12 @@ xi2mask_test(void)
     assert(xi2mask_num_masks(xi2mask) == xi2mask->nmasks);
 
     mask = calloc(1, xi2mask_mask_size(xi2mask));
+    assert(mask);
+
     /* ensure zeros */
     for (i = 0; i < xi2mask_num_masks(xi2mask); i++) {
         const unsigned char *m = xi2mask_get_one_mask(xi2mask, i);
-
+        assert(mask);
         assert(memcmp(mask, m, xi2mask_mask_size(xi2mask)) == 0);
     }
 
@@ -77,7 +79,10 @@ xi2mask_test(void)
 
         m = xi2mask_get_one_mask(xi2mask, i);
         SetBit(mask, i);
-        assert(memcmp(mask, m, xi2mask_mask_size(xi2mask)) == 0);
+        assert(mask);
+        assert(m);
+        if (mask)
+            assert(memcmp(mask, m, xi2mask_mask_size(xi2mask)) == 0);
         ClearBit(mask, i);
     }
 
@@ -85,6 +90,7 @@ xi2mask_test(void)
     for (i = 0; i < xi2mask_num_masks(xi2mask); i++) {
         const unsigned char *m = xi2mask_get_one_mask(xi2mask, i);
 
+        assert(mask);
         assert(memcmp(mask, m, xi2mask_mask_size(xi2mask)) != 0);
         xi2mask_zero(xi2mask, i);
         assert(memcmp(mask, m, xi2mask_mask_size(xi2mask)) == 0);
@@ -97,7 +103,7 @@ xi2mask_test(void)
 
     for (i = 0; i < xi2mask_num_masks(xi2mask); i++) {
         const unsigned char *m = xi2mask_get_one_mask(xi2mask, i);
-
+        assert(mask);
         assert(memcmp(mask, m, xi2mask_mask_size(xi2mask)) == 0);
     }
 

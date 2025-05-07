@@ -52,6 +52,8 @@ strndup_checks(void)
     char *firsthalf = strndup(sample, 8);
     char *secondhalf = strndup(sample + 8, 8);
 
+    assert(firsthalf);
+    assert(secondhalf);
     assert(strcmp(firsthalf, "01234567") == 0);
     assert(strcmp(secondhalf, "89abcdef") == 0);
 
@@ -59,6 +61,7 @@ strndup_checks(void)
     free(secondhalf);
 
     allofit = strndup(sample, 20);
+    assert(allofit);
     assert(strcmp(allofit, sample) == 0);
     free(allofit);
 }

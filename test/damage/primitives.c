@@ -75,8 +75,10 @@ get_image(struct test_setup *setup, xcb_drawable_t drawable)
     assert(reply->depth == 24);
     assert(len == 4 * setup->width * setup->height);
 
-    uint32_t *result = malloc(sizeof(uint32_t) *
-                              setup->width * setup->height);
+    uint32_t *result = calloc(setup->width * setup->height, sizeof(uint32_t));
+    if (!result)
+        return NULL;
+
     memcpy(result, data, len);
     free(reply);
 
@@ -93,7 +95,9 @@ compute_expected_damage(struct test_setup *setup)
     uint32_t *results = get_image(setup, setup->d);
     bool any_modified_pixels = false;
 
+    assert(results);
     for (int i = 0; i < setup->width * setup->height; i++) {
+        assert(setup->start_drawable_contents);
         if (results[i] != setup->start_drawable_contents[i]) {
             setup->expected[i / 32] |= 1 << (i % 32);
             any_modified_pixels = true;

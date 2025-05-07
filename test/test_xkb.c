@@ -153,6 +153,17 @@ xkb_set_get_rules_test(void)
 
     /* This test is iffy, because strictly we may be comparing against already
      * freed memory */
+    assert(rmlvo.rules);
+    assert(rmlvo.model);
+    assert(rmlvo.layout);
+    assert(rmlvo.variant);
+    assert(rmlvo.options);
+    assert(rmlvo_backup.rules);
+    assert(rmlvo_backup.model);
+    assert(rmlvo_backup.layout);
+    assert(rmlvo_backup.variant);
+    assert(rmlvo_backup.options);
+
     assert(strcmp(rmlvo.rules, rmlvo_backup.rules) == 0);
     assert(strcmp(rmlvo.model, rmlvo_backup.model) == 0);
     assert(strcmp(rmlvo.layout, rmlvo_backup.layout) == 0);

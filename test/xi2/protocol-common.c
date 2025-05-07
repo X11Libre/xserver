@@ -56,6 +56,7 @@ fake_init_sprite(DeviceIntPtr dev)
 
     sprite->spriteTraceSize = 10;
     sprite->spriteTrace = calloc(sprite->spriteTraceSize, sizeof(WindowPtr));
+    assert(sprite->spriteTrace);
     sprite->spriteTraceGood = 1;
     sprite->spriteTrace[0] = &root;
     sprite->hot.x = SPRITE_X;

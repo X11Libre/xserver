@@ -242,6 +242,7 @@ test_nt_list_append(void)
     struct foo *item;
 
     for (item = foo, i = 1; i <= 10; i++, item++) {
+        assert(item);
         item->a = i;
         item->b = i * 2;
         nt_list_init(item, next);
@@ -273,6 +274,7 @@ test_nt_list_insert(void)
 {
     int i;
     struct foo *foo = calloc(10, sizeof(struct foo));
+    assert(foo);
     struct foo *item;
 
     foo->a = 1;
@@ -309,6 +311,8 @@ test_nt_list_delete(void)
 {
     int i = 1;
     struct foo *list = calloc(10, sizeof(struct foo));
+    assert(list);
+
     struct foo *foo = list;
     struct foo *item, *tmp;
     struct foo *empty_list = foo;
