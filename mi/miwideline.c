@@ -1893,7 +1893,7 @@ miWideLine(DrawablePtr pDrawable, GCPtr pGC,
     SpanDataPtr spanData;
     long pixel;
     Bool projectLeft, projectRight;
-    LineFaceRec leftFace, rightFace, prevRightFace;
+    LineFaceRec leftFace = { 0 }, rightFace = { 0 }, prevRightFace;
     LineFaceRec firstFace;
     int first;
     Bool somethingDrawn = FALSE;
