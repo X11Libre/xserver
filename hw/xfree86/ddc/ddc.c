@@ -45,6 +45,9 @@ find_start(unsigned int *ptr)
     unsigned int comp[9], test[9];
     int i, j;
 
+    if (!ptr)
+        return -1;
+
     for (i = 0; i < 9; i++) {
         comp[i] = *(ptr++);
         test[i] = 1;
