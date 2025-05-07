@@ -450,9 +450,9 @@ xf86layoutAddInputDevices(XF86ConfigPtr config, XF86ConfLayoutPtr layout)
             }
 
             if (!iref) {
-                XF86ConfInputrefPtr iptr;
-
-                iptr = calloc(1, sizeof(XF86ConfInputrefRec));
+                XF86ConfInputrefPtr iptr = calloc(1, sizeof(XF86ConfInputrefRec));
+                if (!iptr)
+                    return -1;
                 iptr->iref_inputdev_str = input->inp_identifier;
                 layout->lay_input_lst = (XF86ConfInputrefPtr)
                     xf86addListItem((glp) layout->lay_input_lst, (glp) iptr);

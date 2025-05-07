@@ -569,7 +569,6 @@ static char *
 DoSubstitution(const char *template, const char *cmdline, const char *projroot,
                int *cmdlineUsed, int *envUsed, const char *XConfigFile)
 {
-    char *result;
     int i, l;
     static const char *env = NULL;
     static char *hostname = NULL;
@@ -582,7 +581,10 @@ DoSubstitution(const char *template, const char *cmdline, const char *projroot,
     if (envUsed)
         *envUsed = 0;
 
-    result = malloc(PATH_MAX + 1);
+    char *result = calloc(1, PATH_MAX + 1);
+    if (!result)
+        return NULL;
+
     l = 0;
     for (i = 0; template[i]; i++) {
         if (template[i] != '%') {

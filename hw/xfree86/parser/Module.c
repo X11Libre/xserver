@@ -56,6 +56,8 @@
 #include <xorg-config.h>
 #endif
 
+#include <assert.h>
+
 #include "xf86Parser.h"
 #include "xf86tokens.h"
 #include "Configint.h"
@@ -228,6 +230,7 @@ xf86addNewLoadDirective(XF86LoadPtr head, const char *name, int type,
     int token;
 
     new = calloc(1, sizeof(XF86LoadRec));
+    assert(new);
     new->load_name = name;
     new->load_type = type;
     new->load_opt = opts;

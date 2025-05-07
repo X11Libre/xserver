@@ -55,6 +55,8 @@
 #include <xorg-config.h>
 #endif
 
+#include <assert.h>
+
 #include <X11/Xos.h>
 #include "xf86Parser.h"
 #include "xf86tokens.h"
@@ -109,9 +111,9 @@ xf86parseFilesSection(void)
                 }
             }
             ptr->file_fontpath = realloc(ptr->file_fontpath, i);
+            assert(ptr->file_fontpath);
             if (j)
                 strcat(ptr->file_fontpath, ",");
-
             strcat(ptr->file_fontpath, str);
             free(xf86_lex_val.str);
             break;
@@ -121,7 +123,8 @@ xf86parseFilesSection(void)
             l = FALSE;
             str = xf86_lex_val.str;
             if (ptr->file_modulepath == NULL) {
-                ptr->file_modulepath = malloc(1);
+                ptr->file_modulepath = calloc(1, 1);
+                assert(ptr->file_modulepath);
                 ptr->file_modulepath[0] = '\0';
                 k = strlen(str) + 1;
             }
@@ -134,6 +137,7 @@ xf86parseFilesSection(void)
                 }
             }
             ptr->file_modulepath = realloc(ptr->file_modulepath, k);
+            assert(ptr->file_modulepath);
             if (l)
                 strcat(ptr->file_modulepath, ",");
 

@@ -55,6 +55,8 @@
 #include <xorg-config.h>
 #endif
 
+#include <assert.h>
+
 #include "xf86Parser.h"
 #include "xf86tokens.h"
 #include "Configint.h"
@@ -200,6 +202,7 @@ addNewOption2(XF86OptionPtr head, char *name, char *_val, int used)
     }
     else
         new = calloc(1, sizeof(*new));
+    assert(new);
     new->opt_name = name;
     new->opt_val = _val;
     new->opt_used = used;
@@ -437,6 +440,7 @@ xf86parseOption(XF86OptionPtr head)
     name = xf86_lex_val.str;
     if ((token = xf86getSubToken(&comment)) == STRING) {
         option = xf86newOption(name, xf86_lex_val.str);
+        assert(option);
         option->opt_comment = comment;
         if ((token = xf86getToken(NULL)) == COMMENT) {
             option->opt_comment = xf86addComment(option->opt_comment, xf86_lex_val.str);
@@ -448,6 +452,7 @@ xf86parseOption(XF86OptionPtr head)
     }
     else {
         option = xf86newOption(name, NULL);
+        assert(option);
         option->opt_comment = comment;
         if (token == COMMENT) {
             option->opt_comment = xf86addComment(option->opt_comment, xf86_lex_val.str);

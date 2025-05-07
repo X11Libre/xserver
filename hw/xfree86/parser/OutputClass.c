@@ -58,9 +58,12 @@ xf86freeOutputClassList(XF86ConfOutputClassPtr ptr)
 
         xorg_list_for_each_entry_safe(group, next, &ptr->match_driver, entry) {
             xorg_list_del(&group->entry);
-            for (list = group->values; *list; list++)
+            for (list = group->values; *list; list++) {
                 free(*list);
+                *list = NULL;
+            }
             free(group);
+            group = NULL;
         }
 
         xf86optionListFree(ptr->option_lst);
