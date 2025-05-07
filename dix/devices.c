@@ -2772,15 +2772,19 @@ GetMaster(DeviceIntPtr dev, int which)
             return dev;
     }
 
-    if (master && which != MASTER_ATTACHED) {
-        if (which == MASTER_KEYBOARD || which == KEYBOARD_OR_FLOAT) {
-            if (master->type != MASTER_KEYBOARD)
-                master = GetPairedDevice(master);
-        }
-        else {
-            if (master->type != MASTER_POINTER)
-                master = GetPairedDevice(master);
-        }
+    if (!master)
+        return NULL;
+
+    if (which == MASTER_ATTACHED)
+        return master;
+
+    if (which == MASTER_KEYBOARD || which == KEYBOARD_OR_FLOAT) {
+        if (master->type != MASTER_KEYBOARD)
+            return GetPairedDevice(master);
+    }
+    else {
+        if (master->type != MASTER_POINTER)
+            return GetPairedDevice(master);
     }
 
     return master;
