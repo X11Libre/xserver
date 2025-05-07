@@ -203,6 +203,7 @@ CloseDownExtensions(void)
         free((void *) extensions[i]->name);
         dixFreePrivates(extensions[i]->devPrivates, PRIVATE_EXTENSION);
         free(extensions[i]);
+        extensions[i] = NULL;
     }
     free(extensions);
     extensions = (ExtensionEntry **) NULL;
