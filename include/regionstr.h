@@ -163,7 +163,8 @@ static inline void
 RegionUninit(RegionPtr _pReg)
 {
     if ((_pReg)->data && (_pReg)->data->size) {
-        free((_pReg)->data);
+        if ((_pReg)->data != &RegionEmptyData)
+            free((_pReg)->data);
         (_pReg)->data = NULL;
     }
 }
