@@ -1016,8 +1016,7 @@ void
 input_option_set_value(InputOption *opt, const char *value)
 {
     free(opt->opt_val);
-    if (value)
-        opt->opt_val = strdup(value);
+    opt->opt_val = (value ? strdup(value) : NULL);
 }
 
 /* FP1616/FP3232 conversion functions.
