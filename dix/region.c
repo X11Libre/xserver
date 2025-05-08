@@ -170,7 +170,12 @@ Equipment Corporation.
 // note: we really need to check for size, because when it's zero, then data
 // might point to RegionBrokenData (.data segment), which we must not free()
 // (this also can create analyzer false alarms)
-#define xfreeData(reg) if ((reg)->data && (reg)->data->size) free((reg)->data)
+static inline void xfreeData(RegionPtr reg) {
+    if (reg && reg->data && reg->data->size &&
+        reg->data != &RegionBrokenData &&
+        reg->data != &RegionEmptyData)
+            free(reg->data);
+}
 
 #define RECTALLOC_BAIL(pReg,n,bail) \
 if (!(pReg)->data || (((pReg)->data->numRects + (n)) > (pReg)->data->size)) \
