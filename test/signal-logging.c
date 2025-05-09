@@ -398,6 +398,8 @@ static void logging_format(void)
         assert(strcmp(logmsg, expected) == 0);
     }
 
+    if (f)
+        fclose(f);
 
     LogClose(EXIT_NO_ERROR);
     unlink(log_file_path);
