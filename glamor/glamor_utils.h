@@ -32,6 +32,8 @@
 #ifndef __GLAMOR_UTILS_H__
 #define __GLAMOR_UTILS_H__
 
+#include "os/bug_priv.h"
+
 #include "glamor_prepare.h"
 #include "mipict.h"
 
@@ -570,7 +572,10 @@
                                                     && (_w_) <= _glamor_->max_fbo_size  \
                                                     && (_h_) <= _glamor_->max_fbo_size)
 
-#define GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv)    (pixmap_priv->gl_fbo == GLAMOR_FBO_NORMAL)
+static inline Bool GLAMOR_PIXMAP_PRIV_HAS_FBO(glamor_pixmap_private *pixmap_priv) {
+    BUG_RETURN_VAL(!pixmap_priv, FALSE);
+    return pixmap_priv->gl_fbo == GLAMOR_FBO_NORMAL;
+}
 
 #define REVERT_NONE       		0
 #define REVERT_NORMAL     		1
