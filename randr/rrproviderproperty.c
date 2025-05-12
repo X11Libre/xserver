@@ -327,7 +327,6 @@ RRConfigureProviderProperty(RRProviderPtr provider, Atom property,
 {
     RRPropertyPtr prop = RRQueryProviderProperty(provider, property);
     Bool add = FALSE;
-    INT32 *new_values;
 
     if (!prop) {
         prop = RRCreateProviderProperty(property);
@@ -347,14 +346,16 @@ RRConfigureProviderProperty(RRProviderPtr provider, Atom property,
         return BadMatch;
     }
 
-    new_values = xallocarray(num_values, sizeof(INT32));
-    if (!new_values && num_values) {
-        if (add)
-            RRDestroyProviderProperty(prop);
-        return BadAlloc;
-    }
-    if (num_values)
+    INT32 *new_values = NULL;
+    if (num_values) {
+        new_values = calloc(num_values, sizeof(INT32));
+        if (!new_values) {
+            if (add)
+                RRDestroyProviderProperty(prop);
+            return BadAlloc;
+        }
         memcpy(new_values, values, num_values * sizeof(INT32));
+    }
 
     /*
      * Property moving from pending to non-pending

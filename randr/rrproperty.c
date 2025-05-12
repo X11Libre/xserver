@@ -359,7 +359,6 @@ RRConfigureOutputProperty(RROutputPtr output, Atom property,
 {
     RRPropertyPtr prop = RRQueryOutputProperty(output, property);
     Bool add = FALSE;
-    INT32 *new_values;
 
     if (!prop) {
         prop = RRCreateOutputProperty(property);
@@ -379,14 +378,17 @@ RRConfigureOutputProperty(RROutputPtr output, Atom property,
         return BadMatch;
     }
 
-    new_values = xallocarray(num_values, sizeof(INT32));
-    if (!new_values && num_values) {
-        if (add)
-            RRDestroyOutputProperty(prop);
-        return BadAlloc;
-    }
-    if (num_values)
+    INT32 *new_values = NULL;
+
+    if (num_values) {
+        new_values = calloc(num_values, sizeof(INT32));
+        if (!new_values) {
+            if (add)
+                RRDestroyOutputProperty(prop);
+            return BadAlloc;
+        }
         memcpy(new_values, values, num_values * sizeof(INT32));
+    }
 
     /*
      * Property moving from pending to non-pending
