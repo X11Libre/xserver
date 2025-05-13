@@ -25,6 +25,9 @@
  *    Zhigang Gong <zhigang.gong@gmail.com>
  *
  */
+#include <dix-config.h>
+
+#include "os/bug_priv.h"
 
 #include "glamor_priv.h"
 #include <dixfontstr.h>
@@ -68,6 +71,8 @@ glamor_poly_glyph_blt_gl(DrawablePtr drawable, GCPtr gc,
 
     start_x += drawable->x;
     y += drawable->y;
+
+    BUG_RETURN_VAL(!pixmap_priv, FALSE);
 
     glamor_pixmap_loop(pixmap_priv, box_index) {
         int x;
@@ -232,6 +237,8 @@ glamor_push_pixels_gl(GCPtr gc, PixmapPtr bitmap,
                           GL_FALSE, 0, vbo_offset);
 
     glamor_put_vbo_space(screen);
+
+    BUG_RETURN_VAL(!pixmap_priv, FALSE);
 
     glamor_pixmap_loop(pixmap_priv, box_index) {
         if (!glamor_set_destination_drawable(drawable, box_index, FALSE, TRUE,

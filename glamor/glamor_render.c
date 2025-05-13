@@ -31,9 +31,13 @@
  *
  * Render acceleration implementation
  */
+#include <dix-config.h>
+
+#include <assert.h>
+
+#include "os/bug_priv.h"
 
 #include "glamor_priv.h"
-
 #include "mipict.h"
 #include "fbpict.h"
 #if 0
@@ -581,6 +585,7 @@ glamor_set_composite_texture(glamor_screen_private *glamor_priv, int unit,
                              glamor_pixmap_private *dest_priv)
 {
     glamor_pixmap_private *pixmap_priv = glamor_get_pixmap_private(pixmap);
+    BUG_RETURN(!pixmap_priv);
     glamor_pixmap_fbo *fbo = pixmap_priv->fbo;
     float wh[4];
     int repeat_type;

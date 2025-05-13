@@ -30,9 +30,13 @@
  * This file covers the initialization and teardown of glamor, and has various
  * functions not responsible for performing rendering.
  */
+#include <dix-config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#include "os/bug_priv.h"
 
 #include "glamor_priv.h"
 #include "mipict.h"
@@ -95,6 +99,7 @@ glamor_set_pixmap_type(PixmapPtr pixmap, glamor_pixmap_type_t type)
     glamor_pixmap_private *pixmap_priv;
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
+    BUG_RETURN(!pixmap_priv);
     pixmap_priv->type = type;
     glamor_init_pixmap_private_small(pixmap, pixmap_priv);
 }
@@ -109,6 +114,8 @@ glamor_set_pixmap_texture(PixmapPtr pixmap, unsigned int tex)
 
     glamor_priv = glamor_get_screen_private(screen);
     pixmap_priv = glamor_get_pixmap_private(pixmap);
+
+    BUG_RETURN_VAL(!pixmap_priv, FALSE);
 
     if (pixmap_priv->fbo) {
         fbo = glamor_pixmap_detach_fbo(pixmap_priv);
@@ -141,6 +148,7 @@ glamor_clear_pixmap(PixmapPtr pixmap)
     pixmap_priv = glamor_get_pixmap_private(pixmap);
     pixmap_format = glamor_format_for_pixmap(pixmap);
 
+    BUG_RETURN(!pixmap_priv);
     assert(pixmap_priv->fbo != NULL);
 
     glamor_pixmap_clear_fbo(glamor_priv, pixmap_priv->fbo, pixmap_format);
@@ -224,6 +232,7 @@ glamor_create_pixmap(ScreenPtr screen, int w, int h, int depth,
         pixmap = fbCreatePixmap(screen, 0, 0, depth, usage);
 
     pixmap_priv = glamor_get_pixmap_private(pixmap);
+    BUG_RETURN_VAL(!pixmap_priv, NULL);
 
     pixmap_priv->is_cbcr = (GLAMOR_CREATE_FORMAT_CBCR & usage) == GLAMOR_CREATE_FORMAT_CBCR;
 
@@ -426,6 +435,8 @@ glamor_format_for_pixmap(PixmapPtr pixmap)
     ScreenPtr pScreen = pixmap->drawable.pScreen;
     glamor_screen_private *glamor_priv = glamor_get_screen_private(pScreen);
     glamor_pixmap_private *pixmap_priv = glamor_get_pixmap_private(pixmap);
+
+    BUG_RETURN_VAL(!pixmap_priv, NULL);
 
     if (pixmap_priv->is_cbcr)
         return &glamor_priv->cbcr_format;
@@ -1023,6 +1034,9 @@ _glamor_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
 
     if (!glamor_priv->dri3_enabled)
         return 0;
+
+    BUG_RETURN_VAL(!pixmap_priv, 0);
+
     switch (pixmap_priv->type) {
     case GLAMOR_TEXTURE_DRM:
     case GLAMOR_TEXTURE_ONLY:
@@ -1099,6 +1113,8 @@ int
 glamor_name_from_pixmap(PixmapPtr pixmap, CARD16 *stride, CARD32 *size)
 {
     glamor_pixmap_private *pixmap_priv = glamor_get_pixmap_private(pixmap);
+
+    BUG_RETURN_VAL(!pixmap_priv, -1);
 
     switch (pixmap_priv->type) {
     case GLAMOR_TEXTURE_DRM:

@@ -30,8 +30,11 @@
  *
  * This file covers core X rendering in glamor.
  */
+#include <dix-config.h>
 
 #include <stdlib.h>
+
+#include "os/bug_priv.h"
 
 #include "glamor_priv.h"
 
@@ -40,6 +43,8 @@ glamor_get_drawable_location(const DrawablePtr drawable)
 {
     PixmapPtr pixmap = glamor_get_drawable_pixmap(drawable);
     glamor_pixmap_private *pixmap_priv = glamor_get_pixmap_private(pixmap);
+
+    BUG_RETURN_VAL(!pixmap_priv, FALSE);
 
     if (pixmap_priv->gl_fbo == GLAMOR_FBO_UNATTACHED)
         return 'm';

@@ -31,8 +31,11 @@
  *
  * Xv acceleration implementation
  */
-
 #include <dix-config.h>
+
+#include <assert.h>
+
+#include "os/bug_priv.h"
 
 #include "glamor_priv.h"
 #include "glamor_transform.h"
@@ -580,6 +583,7 @@ glamor_xv_render(glamor_port_private *port_priv, int id)
     glamor_put_vbo_space(screen);
 
     /* Now draw our big triangle, clipped to each of the clip boxes. */
+    BUG_RETURN(!pixmap_priv);
     glamor_pixmap_loop(pixmap_priv, dst_box_index) {
         int dst_off_x, dst_off_y;
 

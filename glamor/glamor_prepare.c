@@ -19,6 +19,9 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
+#include <dix-config.h>
+
+#include "os/bug_priv.h"
 
 #include "glamor_priv.h"
 #include "glamor_prepare.h"
@@ -40,6 +43,8 @@ glamor_prep_drawable_box(DrawablePtr drawable, glamor_access_t access, BoxPtr bo
     int                         gl_access, gl_usage;
     RegionRec                   region;
     int                         off_x, off_y;
+
+    BUG_RETURN_VAL(!priv, FALSE);
 
     if (priv->type == GLAMOR_DRM_ONLY)
         return FALSE;
@@ -158,6 +163,8 @@ glamor_finish_access(DrawablePtr drawable)
 
     if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(priv))
         return;
+
+    BUG_RETURN(!priv);
 
     if (!priv->prepared)
         return;

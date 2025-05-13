@@ -19,9 +19,13 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-#include <stdlib.h>
-#include "Xprintf.h"
+#include <dix-config.h>
 
+#include <stdlib.h>
+
+#include "os/bug_priv.h"
+
+#include "Xprintf.h"
 #include "glamor_priv.h"
 #include "glamor_transform.h"
 #include "glamor_transfer.h"
@@ -266,6 +270,8 @@ glamor_glyphs_flush(CARD8 op, PicturePtr src, PicturePtr dst,
             break;
 
         glUniform1i(prog->atlas_uniform, 1);
+
+        BUG_RETURN(!pixmap_priv);
 
         glamor_pixmap_loop(pixmap_priv, box_index) {
             BoxPtr box = RegionRects(dst->pCompositeClip);

@@ -19,6 +19,9 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
+#include <dix-config.h>
+
+#include "os/bug_priv.h"
 
 #include "glamor_priv.h"
 #include "glamor_program.h"
@@ -125,6 +128,8 @@ glamor_poly_fill_rect_gl(DrawablePtr drawable,
     }
 
     glEnable(GL_SCISSOR_TEST);
+
+    BUG_RETURN_VAL(!pixmap_priv, FALSE);
 
     glamor_pixmap_loop(pixmap_priv, box_index) {
         int nbox = RegionNumRects(gc->pCompositeClip);

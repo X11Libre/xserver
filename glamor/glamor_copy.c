@@ -19,6 +19,9 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
+#include <dix-config.h>
+
+#include "os/bug_priv.h"
 
 #include "glamor_priv.h"
 #include "glamor_transfer.h"
@@ -446,6 +449,8 @@ glamor_copy_fbo_fbo_draw(DrawablePtr src,
 
     glEnable(GL_SCISSOR_TEST);
 
+    BUG_RETURN_VAL(!src_priv, FALSE);
+
     glamor_pixmap_loop(src_priv, src_box_index) {
         BoxPtr src_box = glamor_pixmap_box_at(src_priv, src_box_index);
 
@@ -455,6 +460,8 @@ glamor_copy_fbo_fbo_draw(DrawablePtr src,
 
         if (!glamor_use_program(dst, gc, prog, &args))
             goto bail_ctx;
+
+        BUG_RETURN_VAL(!dst_priv, FALSE);
 
         glamor_pixmap_loop(dst_priv, dst_box_index) {
             BoxRec scissor = {
@@ -700,6 +707,9 @@ glamor_copy_gl(DrawablePtr src,
     PixmapPtr dst_pixmap = glamor_get_drawable_pixmap(dst);
     glamor_pixmap_private *src_priv = glamor_get_pixmap_private(src_pixmap);
     glamor_pixmap_private *dst_priv = glamor_get_pixmap_private(dst_pixmap);
+
+    BUG_RETURN_VAL(!dst_priv, FALSE);
+    BUG_RETURN_VAL(!src_priv, FALSE);
 
     if (GLAMOR_PIXMAP_PRIV_HAS_FBO(dst_priv)) {
         if (GLAMOR_PIXMAP_PRIV_HAS_FBO(src_priv)) {
