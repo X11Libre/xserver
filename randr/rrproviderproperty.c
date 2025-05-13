@@ -385,7 +385,7 @@ int
 ProcRRListProviderProperties(ClientPtr client)
 {
     REQUEST(xRRListProviderPropertiesReq);
-    Atom *pAtoms = NULL, *temppAtoms;
+    Atom *pAtoms = NULL;
     int numProps = 0;
     RRProviderPtr provider;
     RRPropertyPtr prop;
@@ -396,9 +396,20 @@ ProcRRListProviderProperties(ClientPtr client)
 
     for (prop = provider->properties; prop; prop = prop->next)
         numProps++;
-    if (numProps)
-        if (!(pAtoms = xallocarray(numProps, sizeof(Atom))))
+
+    const Bool swapped = client->swapped;
+
+    if (numProps) {
+        if (!(pAtoms = calloc(numProps, sizeof(Atom))))
             return BadAlloc;
+        Atom *temppAtoms = pAtoms;
+        for (prop = provider->properties; prop; prop = prop->next) {
+            *temppAtoms = prop->propertyName;
+            if (swapped)
+                swapl(temppAtoms);
+            temppAtoms++;
+        }
+    }
 
     xRRListProviderPropertiesReply rep = {
         .type = X_Reply,
@@ -406,21 +417,16 @@ ProcRRListProviderProperties(ClientPtr client)
         .length = bytes_to_int32(numProps * sizeof(Atom)),
         .nAtoms = numProps
     };
-    if (client->swapped) {
+    if (swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.nAtoms);
     }
-    temppAtoms = pAtoms;
-    for (prop = provider->properties; prop; prop = prop->next)
-        *temppAtoms++ = prop->propertyName;
 
     WriteToClient(client, sizeof(xRRListProviderPropertiesReply), (char *) &rep);
-    if (numProps) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, numProps * sizeof(Atom), pAtoms);
-        free(pAtoms);
-    }
+    WriteToClient(client, numProps * sizeof(Atom), pAtoms);
+
+    free(pAtoms);
     return Success;
 }
 
