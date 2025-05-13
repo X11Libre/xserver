@@ -119,7 +119,6 @@ RROutputCreate(ScreenPtr pScreen,
 Bool
 RROutputSetClones(RROutputPtr output, RROutputPtr * clones, int numClones)
 {
-    RROutputPtr *newClones;
     int i;
 
     if (numClones == output->numClones) {
@@ -129,15 +128,16 @@ RROutputSetClones(RROutputPtr output, RROutputPtr * clones, int numClones)
         if (i == numClones)
             return TRUE;
     }
+
+    RROutputPtr *newClones = NULL;
     if (numClones) {
         newClones = xallocarray(numClones, sizeof(RROutputPtr));
         if (!newClones)
             return FALSE;
+        memcpy(newClones, clones, numClones * sizeof(RROutputPtr));
     }
-    else
-        newClones = NULL;
+
     free(output->clones);
-    memcpy(newClones, clones, numClones * sizeof(RROutputPtr));
     output->clones = newClones;
     output->numClones = numClones;
     RROutputChanged(output, TRUE);
