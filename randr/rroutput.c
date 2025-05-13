@@ -250,7 +250,6 @@ RROutputDeleteUserMode(RROutputPtr output, RRModePtr mode)
 Bool
 RROutputSetCrtcs(RROutputPtr output, RRCrtcPtr * crtcs, int numCrtcs)
 {
-    RRCrtcPtr *newCrtcs;
     int i;
 
     if (numCrtcs == output->numCrtcs) {
@@ -260,15 +259,16 @@ RROutputSetCrtcs(RROutputPtr output, RRCrtcPtr * crtcs, int numCrtcs)
         if (i == numCrtcs)
             return TRUE;
     }
+
+    RRCrtcPtr *newCrtcs = NULL;
     if (numCrtcs) {
         newCrtcs = xallocarray(numCrtcs, sizeof(RRCrtcPtr));
         if (!newCrtcs)
             return FALSE;
+        memcpy(newCrtcs, crtcs, numCrtcs * sizeof(RRCrtcPtr));
     }
-    else
-        newCrtcs = NULL;
+
     free(output->crtcs);
-    memcpy(newCrtcs, crtcs, numCrtcs * sizeof(RRCrtcPtr));
     output->crtcs = newCrtcs;
     output->numCrtcs = numCrtcs;
     RROutputChanged(output, TRUE);
