@@ -148,7 +148,6 @@ Bool
 RROutputSetModes(RROutputPtr output,
                  RRModePtr * modes, int numModes, int numPreferred)
 {
-    RRModePtr *newModes;
     int i;
 
     if (numModes == output->numModes && numPreferred == output->numPreferred) {
@@ -162,19 +161,19 @@ RROutputSetModes(RROutputPtr output,
         }
     }
 
+    RRModePtr *newModes = NULL;
     if (numModes) {
         newModes = xallocarray(numModes, sizeof(RRModePtr));
         if (!newModes)
             return FALSE;
+        memcpy(newModes, modes, numModes * sizeof(RRModePtr));
     }
-    else
-        newModes = NULL;
+
     if (output->modes) {
         for (i = 0; i < output->numModes; i++)
             RRModeDestroy(output->modes[i]);
         free(output->modes);
     }
-    memcpy(newModes, modes, numModes * sizeof(RRModePtr));
     output->modes = newModes;
     output->numModes = numModes;
     output->numPreferred = numPreferred;
