@@ -488,10 +488,6 @@ rrGetScreenResources(ClientPtr client, Bool query)
     CARD8 *extra = NULL;
     unsigned long extraLen = 0;
     int i, rc, has_primary = 0;
-    RRCrtc *crtcs;
-    RROutput *outputs;
-    xRRModeInfo *modeinfos;
-    CARD8 *names;
 
     REQUEST_SIZE_MATCH(xRRGetScreenResourcesReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
@@ -543,20 +539,19 @@ rrGetScreenResources(ClientPtr client, Bool query)
                       bytes_to_int32(rep.nbytesNames));
 
         extraLen = rep.length << 2;
-        if (extraLen) {
-            extra = calloc(1, extraLen);
-            if (!extra) {
-                free(modes);
-                return BadAlloc;
-            }
-        }
-        else
-            extra = NULL;
+        if (!extraLen)
+            goto finish;
 
-        crtcs = (RRCrtc *) extra;
-        outputs = (RROutput *) (crtcs + pScrPriv->numCrtcs);
-        modeinfos = (xRRModeInfo *) (outputs + pScrPriv->numOutputs);
-        names = (CARD8 *) (modeinfos + num_modes);
+        extra = calloc(1, extraLen);
+        if (!extra) {
+            free(modes);
+            return BadAlloc;
+        }
+
+        RRCrtc *crtcs = (RRCrtc *) extra;
+        RROutput *outputs = (RROutput *) (crtcs + pScrPriv->numCrtcs);
+        xRRModeInfo *modeinfos = (xRRModeInfo *) (outputs + pScrPriv->numOutputs);
+        CARD8* names = (CARD8 *) (modeinfos + num_modes);
 
         if (pScrPriv->primaryOutput && pScrPriv->primaryOutput->crtc) {
             has_primary = 1;
@@ -604,8 +599,9 @@ rrGetScreenResources(ClientPtr client, Bool query)
             memcpy(names, mode->name, mode->mode.nameLength);
             names += mode->mode.nameLength;
         }
-        free(modes);
         assert(bytes_to_int32((char *) names - (char *) extra) == rep.length);
+finish:
+        free(modes);
     }
 
     if (client->swapped) {
