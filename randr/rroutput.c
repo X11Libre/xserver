@@ -469,13 +469,14 @@ ProcRRGetOutputInfo(ClientPtr client)
             .nameLength = output->nameLength
         };
         extraLen = bytes_to_int32(rep.nameLength) << 2;
-        if (extraLen) {
-            rep.length += bytes_to_int32(extraLen);
-            extra = calloc(1, extraLen);
-            if (!extra)
-                return BadAlloc;
-            memcpy(extra, output->name, output->nameLength);
-        }
+        if (!extraLen)
+            goto sendout;
+
+        rep.length += bytes_to_int32(extraLen);
+        extra = calloc(1, extraLen);
+        if (!extra)
+            return BadAlloc;
+        memcpy(extra, output->name, output->nameLength);
     } else {
         rep = (xRRGetOutputInfoReply) {
             .type = X_Reply,
@@ -498,12 +499,13 @@ ProcRRGetOutputInfo(ClientPtr client)
                      output->numModes + output->numUserModes +
                      output->numClones + bytes_to_int32(rep.nameLength)) << 2);
 
-        if (extraLen) {
-            rep.length += bytes_to_int32(extraLen);
-            extra = calloc(1, extraLen);
-            if (!extra)
-                return BadAlloc;
-        }
+        if (!extraLen)
+            goto sendout;
+
+        rep.length += bytes_to_int32(extraLen);
+        extra = calloc(1, extraLen);
+        if (!extra)
+            return BadAlloc;
 
         crtcs = (RRCrtc *) extra;
         modes = (RRMode *) (crtcs + output->numCrtcs);
@@ -516,6 +518,7 @@ ProcRRGetOutputInfo(ClientPtr client)
             if (client->swapped)
                 swapl(&crtcs[i]);
         }
+
         for (i = 0; i < output->numModes + output->numUserModes; i++) {
             if (i < output->numModes)
                 modes[i] = output->modes[i]->mode.id;
@@ -531,6 +534,7 @@ ProcRRGetOutputInfo(ClientPtr client)
         }
     }
 
+sendout:
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -544,11 +548,10 @@ ProcRRGetOutputInfo(ClientPtr client)
         swaps(&rep.nClones);
         swaps(&rep.nameLength);
     }
+
     WriteToClient(client, sizeof(xRRGetOutputInfoReply), &rep);
-    if (extraLen) {
-        WriteToClient(client, extraLen, extra);
-        free(extra);
-    }
+    WriteToClient(client, extraLen, extra);
+    free(extra);
 
     return Success;
 }
