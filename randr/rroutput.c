@@ -438,14 +438,12 @@ ProcRRGetOutputInfo(ClientPtr client)
     REQUEST(xRRGetOutputInfoReq);
     xRRGetOutputInfoReply rep;
     RROutputPtr output;
-    CARD8 *extra;
     unsigned long extraLen;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     RRCrtc *crtcs;
     RRMode *modes;
     RROutput *clones;
-    char *name;
     int i;
     Bool leased;
 
@@ -456,6 +454,8 @@ ProcRRGetOutputInfo(ClientPtr client)
 
     pScreen = output->pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
+
+    CARD8 *extra = NULL;
 
     if (leased) {
         rep = (xRRGetOutputInfoReply) {
@@ -474,11 +474,8 @@ ProcRRGetOutputInfo(ClientPtr client)
             extra = calloc(1, extraLen);
             if (!extra)
                 return BadAlloc;
+            memcpy(extra, output->name, output->nameLength);
         }
-        else
-            extra = NULL;
-
-        name = (char *) extra;
     } else {
         rep = (xRRGetOutputInfoReply) {
             .type = X_Reply,
@@ -507,13 +504,12 @@ ProcRRGetOutputInfo(ClientPtr client)
             if (!extra)
                 return BadAlloc;
         }
-        else
-            extra = NULL;
 
         crtcs = (RRCrtc *) extra;
         modes = (RRMode *) (crtcs + output->numCrtcs);
         clones = (RROutput *) (modes + output->numModes + output->numUserModes);
-        name = (char *) (clones + output->numClones);
+
+        memcpy((clones + output->numClones), output->name, output->nameLength);
 
         for (i = 0; i < output->numCrtcs; i++) {
             crtcs[i] = output->crtcs[i]->id;
@@ -534,7 +530,7 @@ ProcRRGetOutputInfo(ClientPtr client)
                 swapl(&clones[i]);
         }
     }
-    memcpy(name, output->name, output->nameLength);
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
