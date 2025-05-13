@@ -430,7 +430,6 @@ ProcRRQueryProviderProperty(ClientPtr client)
     REQUEST(xRRQueryProviderPropertyReq);
     RRProviderPtr provider;
     RRPropertyPtr prop;
-    char *extra = NULL;
 
     REQUEST_SIZE_MATCH(xRRQueryProviderPropertyReq);
 
@@ -439,12 +438,6 @@ ProcRRQueryProviderProperty(ClientPtr client)
     prop = RRQueryProviderProperty(provider, stuff->property);
     if (!prop)
         return BadName;
-
-    if (prop->num_valid) {
-        extra = xallocarray(prop->num_valid, sizeof(INT32));
-        if (!extra)
-            return BadAlloc;
-    }
 
     xRRQueryProviderPropertyReply rep = {
         .type = X_Reply,
@@ -460,11 +453,10 @@ ProcRRQueryProviderProperty(ClientPtr client)
     }
     WriteToClient(client, sizeof(xRRQueryProviderPropertyReply), (char *) &rep);
     if (prop->num_valid) {
-        memcpy(extra, prop->valid_values, prop->num_valid * sizeof(INT32));
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, prop->num_valid * sizeof(INT32),
-                                 extra);
-        free(extra);
+        if (client->swapped)
+            CopySwap32Write(client, prop->num_valid * sizeof(INT32), (CARD32*)prop->valid_values);
+        else
+            WriteToClient(client, prop->num_valid * sizeof(INT32), prop->valid_values);
     }
     return Success;
 }
