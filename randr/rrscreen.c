@@ -773,8 +773,6 @@ ProcRRGetScreenInfo(ClientPtr client)
     }
     else {
         int i, j;
-        xScreenSizes *size;
-        CARD16 *rates;
         CARD8 *data8;
         Bool has_rate = RRClientKnowsRates(client);
         RR10DataPtr pData;
@@ -802,21 +800,20 @@ ProcRRGetScreenInfo(ClientPtr client)
         if (has_rate)
             extraLen += rep.nrateEnts * sizeof(CARD16);
 
-        if (extraLen) {
-            extra = (CARD8 *) malloc(extraLen);
-            if (!extra) {
-                free(pData);
-                return BadAlloc;
-            }
+        if (!extraLen)
+            goto finish; // no extra payload
+
+        extra = calloc(1, extraLen);
+        if (!extra) {
+            free(pData);
+            return BadAlloc;
         }
-        else
-            extra = NULL;
 
         /*
          * First comes the size information
          */
-        size = (xScreenSizes *) extra;
-        rates = (CARD16 *) (size + rep.nSizes);
+        xScreenSizes *size = (xScreenSizes *) extra;
+        CARD16 *rates = (CARD16 *) (size + rep.nSizes);
         for (i = 0; i < pData->nsize; i++) {
             pSize = &pData->sizes[i];
             size->widthInPixels = pSize->width;
@@ -845,7 +842,6 @@ ProcRRGetScreenInfo(ClientPtr client)
                 }
             }
         }
-        free(pData);
 
         data8 = (CARD8 *) rates;
 
@@ -853,6 +849,9 @@ ProcRRGetScreenInfo(ClientPtr client)
             FatalError("RRGetScreenInfo bad extra len %ld != %ld\n",
                        (unsigned long) (data8 - (CARD8 *) extra), extraLen);
         rep.length = bytes_to_int32(extraLen);
+
+finish:
+        free(pData);
     }
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
