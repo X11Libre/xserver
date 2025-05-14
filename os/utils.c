@@ -302,15 +302,6 @@ UseMsg(void)
     ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
     ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
     ErrorF("-I                     ignore all remaining arguments\n");
-#ifdef RLIMIT_DATA
-    ErrorF("-ld int                limit data space to N Kb\n");
-#endif
-#ifdef RLIMIT_NOFILE
-    ErrorF("-lf int                limit number of open files to N\n");
-#endif
-#ifdef RLIMIT_STACK
-    ErrorF("-ls int                limit stack space to N Kb\n");
-#endif
     LockServerUseMsg();
     ErrorF("-maxclients n          set maximum number of clients (power of two)\n");
     ErrorF("-nolisten string       don't listen on protocol\n");
@@ -574,36 +565,6 @@ ProcessCommandLine(int argc, char *argv[])
             else
                 UseMsg();
         }
-#ifdef RLIMIT_DATA
-        else if (strcmp(argv[i], "-ld") == 0) {
-            if (++i < argc) {
-                limitDataSpace = atoi(argv[i]);
-                if (limitDataSpace > 0)
-                    limitDataSpace *= 1024;
-            }
-            else
-                UseMsg();
-        }
-#endif
-#ifdef RLIMIT_NOFILE
-        else if (strcmp(argv[i], "-lf") == 0) {
-            if (++i < argc)
-                limitNoFile = atoi(argv[i]);
-            else
-                UseMsg();
-        }
-#endif
-#ifdef RLIMIT_STACK
-        else if (strcmp(argv[i], "-ls") == 0) {
-            if (++i < argc) {
-                limitStackSpace = atoi(argv[i]);
-                if (limitStackSpace > 0)
-                    limitStackSpace *= 1024;
-            }
-            else
-                UseMsg();
-        }
-#endif
 #ifdef LOCK_SERVER
         else if (strcmp(argv[i], "-nolock") == 0) {
 #if !defined(WIN32) && !defined(__CYGWIN__)

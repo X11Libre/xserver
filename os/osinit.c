@@ -77,16 +77,6 @@ SOFTWARE.
 #define ADMPATH "/usr/adm/X%smsgs"
 #endif
 
-#ifdef RLIMIT_DATA
-int limitDataSpace = -1;
-#endif
-#ifdef RLIMIT_STACK
-int limitStackSpace = -1;
-#endif
-#ifdef RLIMIT_NOFILE
-int limitNoFile = -1;
-#endif
-
 /* The actual user defined max number of clients */
 int LimitClients = LIMITCLIENTS;
 
@@ -265,46 +255,6 @@ OsInit(void)
 #if !defined(WIN32) || defined(__CYGWIN__)
         if (getpgrp() == 0)
             setpgid(0, 0);
-#endif
-
-#ifdef RLIMIT_DATA
-        if (limitDataSpace >= 0) {
-            struct rlimit rlim;
-
-            if (!getrlimit(RLIMIT_DATA, &rlim)) {
-                if ((limitDataSpace > 0) && (limitDataSpace < rlim.rlim_max))
-                    rlim.rlim_cur = limitDataSpace;
-                else
-                    rlim.rlim_cur = rlim.rlim_max;
-                (void) setrlimit(RLIMIT_DATA, &rlim);
-            }
-        }
-#endif
-#ifdef RLIMIT_STACK
-        if (limitStackSpace >= 0) {
-            struct rlimit rlim;
-
-            if (!getrlimit(RLIMIT_STACK, &rlim)) {
-                if ((limitStackSpace > 0) && (limitStackSpace < rlim.rlim_max))
-                    rlim.rlim_cur = limitStackSpace;
-                else
-                    rlim.rlim_cur = rlim.rlim_max;
-                (void) setrlimit(RLIMIT_STACK, &rlim);
-            }
-        }
-#endif
-#ifdef RLIMIT_NOFILE
-        if (limitNoFile >= 0) {
-            struct rlimit rlim;
-
-            if (!getrlimit(RLIMIT_NOFILE, &rlim)) {
-                if ((limitNoFile > 0) && (limitNoFile < rlim.rlim_max))
-                    rlim.rlim_cur = limitNoFile;
-                else
-                    rlim.rlim_cur = rlim.rlim_max;
-                (void) setrlimit(RLIMIT_NOFILE, &rlim);
-            }
-        }
 #endif
         LockServer();
         been_here = TRUE;

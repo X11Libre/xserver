@@ -205,10 +205,6 @@ void CloseDownConnection(ClientPtr client);
 extern int LimitClients;
 extern Bool PartialNetwork;
 
-extern int limitDataSpace;
-extern int limitStackSpace;
-extern int limitNoFile;
-
 extern Bool CoreDump;
 extern Bool NoListenAll;
 extern Bool AllowByteSwappedClients;

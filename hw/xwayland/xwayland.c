@@ -153,10 +153,6 @@ try_raising_nofile_limit(void)
 #ifdef RLIMIT_NOFILE
     struct rlimit rlim;
 
-    /* Only fiddle with the limit if not set explicitly from the command line */
-    if (limitNoFile >= 0)
-        return;
-
     if (getrlimit(RLIMIT_NOFILE, &rlim) < 0) {
         ErrorF("Failed to get the current nofile limit: %s\n", strerror(errno));
         return;

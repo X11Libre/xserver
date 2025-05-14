@@ -323,21 +323,6 @@ platform and configuration specific.
 .SH SERVER DEPENDENT OPTIONS
 Some X servers accept the following options:
 .TP 8
-.B \-ld \fIkilobytes\fP
-sets the data space limit of the server to the specified number of kilobytes.
-A value of zero makes the data size as large as possible.  The default value
-of \-1 leaves the data space limit unchanged.
-.TP 8
-.B \-lf \fIfiles\fP
-sets the number-of-open-files limit of the server to the specified number.
-A value of zero makes the limit as large as possible.  The default value
-of \-1 leaves the limit unchanged.
-.TP 8
-.B \-ls \fIkilobytes\fP
-sets the stack space limit of the server to the specified number of kilobytes.
-A value of zero makes the stack size as large as possible.  The default value
-of \-1 leaves the stack space limit unchanged.
-.TP 8
 .B \-maxclients
 .BR 64 | 128 | 256 | 512
 Set the maximum number of clients allowed to connect to the X server.
