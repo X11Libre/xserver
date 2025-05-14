@@ -73,10 +73,6 @@ SOFTWARE.
 #include <sys/resource.h>
 #endif
 
-#ifndef ADMPATH
-#define ADMPATH "/usr/adm/X%smsgs"
-#endif
-
 /* The actual user defined max number of clients */
 int LimitClients = LIMITCLIENTS;
 
@@ -152,10 +148,6 @@ void
 OsInit(void)
 {
     static Bool been_here = FALSE;
-#ifndef XQUARTZ
-    static const char *devnull = "/dev/null";
-    char fname[PATH_MAX];
-#endif
 
     if (!been_here) {
 #if !defined(WIN32) || defined(__CYGWIN__)
@@ -215,42 +207,6 @@ OsInit(void)
             dlinfo(RTLD_SELF, RTLD_DI_SETSIGNAL, &failure_signal);
         }
 #endif
-
-#if !defined(XQUARTZ)    /* STDIN is already /dev/null and STDOUT/STDERR is managed by console_redirect.c */
-        /*
-         * If a write of zero bytes to stderr returns non-zero, i.e. -1,
-         * then writing to stderr failed, and we'll write somewhere else
-         * instead. (Apparently this never happens in the Real World.)
-         */
-        if (write(2, fname, 0) == -1) {
-            FILE *err;
-
-            if (strlen(display) + strlen(ADMPATH) + 1 < sizeof fname)
-                snprintf(fname, sizeof(fname), ADMPATH, display);
-            else
-                strcpy(fname, devnull);
-            /*
-             * uses stdio to avoid os dependencies here,
-             * a real os would use
-             *  open (fname, O_WRONLY|O_APPEND|O_CREAT, 0666)
-             */
-            if (!(err = fopen(fname, "a+")))
-                err = fopen(devnull, "w");
-            if (err && (fileno(err) != 2)) {
-                dup2(fileno(err), 2);
-                fclose(err);
-            }
-#if defined(SVR4) || defined(WIN32) || defined(__CYGWIN__)
-            {
-                static char buf[BUFSIZ];
-
-                setvbuf(stderr, buf, _IOLBF, BUFSIZ);
-            }
-#else
-            setlinebuf(stderr);
-#endif
-        }
-#endif /* !XQUARTZ */
 
 #if !defined(WIN32) || defined(__CYGWIN__)
         if (getpgrp() == 0)
