@@ -126,6 +126,8 @@ glamor_copy_glyph(PixmapPtr     glyph_pixmap,
 static Bool
 glamor_glyph_atlas_init(ScreenPtr screen, struct glamor_glyph_atlas *atlas)
 {
+    BUG_RETURN_VAL(!atlas, FALSE);
+
     glamor_screen_private       *glamor_priv = glamor_get_screen_private(screen);
     PictFormatPtr               format = atlas->format;
 
@@ -435,6 +437,7 @@ glamor_composite_glyphs(CARD8 op,
 
                     /* Glyph not cached in current atlas?
                      */
+                    BUG_RETURN(!glyph_atlas);
                     if (_X_UNLIKELY(glyph_priv->serial != glyph_atlas->serial)) {
                         if (!glamor_glyph_can_add(glyph_atlas, glyph_atlas_dim, glyph_draw)) {
                             if (glyphs_queued) {
