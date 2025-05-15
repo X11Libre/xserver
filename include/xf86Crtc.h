@@ -509,7 +509,7 @@ typedef struct _xf86OutputFuncs {
      */
     Bool
      (*set_property) (xf86OutputPtr output,
-                      Atom property, RRPropertyValuePtr value);
+                      Atom property, PropertyValuePtr value);
 #endif
 #ifdef RANDR_13_INTERFACE
     /**
@@ -668,7 +668,7 @@ typedef struct _xf86ProviderFuncs {
      */
     Bool
     (*set_property) (ScrnInfoPtr scrn,
-                     Atom property, RRPropertyValuePtr value);
+                     Atom property, PropertyValuePtr value);
 
     /**
      * Callback to get an updated property value

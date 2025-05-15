@@ -3424,7 +3424,7 @@ drmmode_output_create_resources(xf86OutputPtr output)
 
 static Bool
 drmmode_output_set_property(xf86OutputPtr output, Atom property,
-                            RRPropertyValuePtr value)
+                            PropertyValuePtr value)
 {
     drmmode_output_private_ptr drmmode_output = output->driver_private;
     drmmode_ptr drmmode = drmmode_output->drmmode;

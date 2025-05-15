@@ -1523,7 +1523,7 @@ xf86RandR12InitGamma(ScrnInfoPtr pScrn, unsigned gammaSize) {
 static Bool
 xf86RandR12OutputSetProperty(ScreenPtr pScreen,
                              RROutputPtr randr_output,
-                             Atom property, RRPropertyValuePtr value)
+                             Atom property, PropertyValuePtr value)
 {
     xf86OutputPtr output = randr_output->devPrivate;
 
@@ -2143,7 +2143,7 @@ xf86RandR14ProviderSetOffloadSink(ScreenPtr pScreen,
 static Bool
 xf86RandR14ProviderSetProperty(ScreenPtr pScreen,
                              RRProviderPtr randr_provider,
-                             Atom property, RRPropertyValuePtr value)
+                             Atom property, PropertyValuePtr value)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(pScrn);
