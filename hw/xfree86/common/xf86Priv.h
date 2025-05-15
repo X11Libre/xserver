@@ -36,7 +36,6 @@
 #define _XF86PRIV_H
 
 #include "xf86Privstr.h"
-#include "propertyst.h"
 #include "input.h"
 
 /*
