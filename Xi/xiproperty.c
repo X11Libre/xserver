@@ -223,7 +223,7 @@ get_property(ClientPtr client, DeviceIntPtr dev, Atom property, Atom type,
     unsigned long n, len, ind;
     int rc;
     XIPropertyPtr prop;
-    XIPropertyValuePtr prop_value;
+    PropertyValuePtr prop_value;
 
     if (!ValidAtom(property)) {
         client->errorValue = property;
@@ -393,7 +393,7 @@ XIResetProperties(void)
  * @return Success or the error code if an error occurred.
  */
 int
-XIPropToInt(XIPropertyValuePtr val, int *nelem_return, int **buf_return)
+XIPropToInt(PropertyValuePtr val, int *nelem_return, int **buf_return)
 {
     int i;
     int *buf;
@@ -463,7 +463,7 @@ XIPropToInt(XIPropertyValuePtr val, int *nelem_return, int **buf_return)
  * @return Success or the error code if an error occurred.
  */
 int
-XIPropToFloat(XIPropertyValuePtr val, int *nelem_return, float **buf_return)
+XIPropToFloat(PropertyValuePtr val, int *nelem_return, float **buf_return)
 {
     int i;
     float *buf;
@@ -503,11 +503,11 @@ long
 XIRegisterPropertyHandler(DeviceIntPtr dev,
                           int (*SetProperty) (DeviceIntPtr dev,
                                               Atom property,
-                                              XIPropertyValuePtr prop,
+                                              PropertyValuePtr prop,
                                               BOOL checkonly),
                           int (*GetProperty) (DeviceIntPtr dev,
                                               Atom property),
-                          int (*DeleteProperty) (DeviceIntPtr dev,
+                          int (*DelProperty) (DeviceIntPtr dev,
                                                  Atom property))
 {
     XIPropertyHandlerPtr new_handler;
@@ -519,7 +519,7 @@ XIRegisterPropertyHandler(DeviceIntPtr dev,
     new_handler->id = XIPropHandlerID++;
     new_handler->SetProperty = SetProperty;
     new_handler->GetProperty = GetProperty;
-    new_handler->DeleteProperty = DeleteProperty;
+    new_handler->DeleteProperty = DelProperty;
     new_handler->next = dev->properties.handlers;
     dev->properties.handlers = new_handler;
 
@@ -662,8 +662,8 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
     XIPropertyPtr prop;
     int size_in_bytes;
     unsigned long total_len;
-    XIPropertyValuePtr prop_value;
-    XIPropertyValueRec new_value;
+    PropertyValuePtr prop_value;
+    PropertyValueRec new_value;
     Bool add = FALSE;
     int rc;
 
@@ -779,7 +779,7 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
 }
 
 int
-XIGetDeviceProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr *value)
+XIGetDeviceProperty(DeviceIntPtr dev, Atom property, PropertyValuePtr *value)
 {
     XIPropertyPtr prop = XIFetchDeviceProperty(dev, property);
     int rc;

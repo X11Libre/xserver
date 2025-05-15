@@ -191,7 +191,7 @@ AccelerationDefaultCleanup(DeviceIntPtr dev)
  */
 static int
 AccelSetProfileProperty(DeviceIntPtr dev, Atom atom,
-                        XIPropertyValuePtr val, BOOL checkOnly)
+                        PropertyValuePtr val, BOOL checkOnly)
 {
     DeviceVelocityPtr vel;
     int profile, *ptr = &profile;
@@ -236,7 +236,7 @@ AccelInitProfileProperty(DeviceIntPtr dev, DeviceVelocityPtr vel)
  */
 static int
 AccelSetDecelProperty(DeviceIntPtr dev, Atom atom,
-                      XIPropertyValuePtr val, BOOL checkOnly)
+                      PropertyValuePtr val, BOOL checkOnly)
 {
     DeviceVelocityPtr vel;
     float v, *ptr = &v;
@@ -280,7 +280,7 @@ AccelInitDecelProperty(DeviceIntPtr dev, DeviceVelocityPtr vel)
  */
 static int
 AccelSetAdaptDecelProperty(DeviceIntPtr dev, Atom atom,
-                           XIPropertyValuePtr val, BOOL checkOnly)
+                           PropertyValuePtr val, BOOL checkOnly)
 {
     DeviceVelocityPtr veloc;
     float v, *ptr = &v;
@@ -327,7 +327,7 @@ AccelInitAdaptDecelProperty(DeviceIntPtr dev, DeviceVelocityPtr vel)
  */
 static int
 AccelSetScaleProperty(DeviceIntPtr dev, Atom atom,
-                      XIPropertyValuePtr val, BOOL checkOnly)
+                      PropertyValuePtr val, BOOL checkOnly)
 {
     DeviceVelocityPtr vel;
     float v, *ptr = &v;

@@ -538,7 +538,7 @@ InitXTestDevices(void)
  */
 static int
 DeviceSetXTestProperty(DeviceIntPtr dev, Atom property,
-                       XIPropertyValuePtr prop, BOOL checkonly)
+                       PropertyValuePtr prop, BOOL checkonly)
 {
     if (property == XIGetKnownProperty(XI_PROP_XTEST_DEVICE))
         return BadAccess;

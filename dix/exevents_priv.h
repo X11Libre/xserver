@@ -155,9 +155,9 @@ void XTestDeviceSendEvents(DeviceIntPtr dev,
                            int flags,
                            const ValuatorMask *mask);
 
-int XIPropToInt(XIPropertyValuePtr val, int *nelem_return, int **buf_return);
+int XIPropToInt(PropertyValuePtr val, int *nelem_return, int **buf_return);
 
-int XIPropToFloat(XIPropertyValuePtr val, int *nelem_return, float **buf_return);
+int XIPropToFloat(PropertyValuePtr val, int *nelem_return, float **buf_return);
 
 void XIUnregisterPropertyHandler(DeviceIntPtr dev, long id);
 

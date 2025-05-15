@@ -55,6 +55,7 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "cursorstr.h"
 #include "privates.h"
+#include "property_value.h"
 
 #define BitIsOn(ptr, bit) (!!(((const BYTE *) (ptr))[(bit)>>3] & (1 << ((bit) & 7))))
 #define SetBit(ptr, bit)  (((BYTE *) (ptr))[(bit)>>3] |= (1 << ((bit) & 7)))
@@ -452,28 +453,24 @@ typedef struct _ClassesRec {
 } ClassesRec;
 
 /* Device properties */
-typedef struct _XIPropertyValue {
-    Atom type;                  /* ignored by server */
-    short format;               /* format of data for swapping - 8,16,32 */
-    long size;                  /* size of data in (format/8) bytes */
-    void *data;                 /* private to client */
-} XIPropertyValueRec;
+
+/* for backwards compat with older drivers, should not be used anymore */
+typedef PropertyValueRec XIPropertyValueRec, *XIPropertyValuePtr;
 
 typedef struct _XIProperty {
     struct _XIProperty *next;
     Atom propertyName;
     BOOL deletable;             /* clients can delete this prop? */
-    XIPropertyValueRec value;
+    PropertyValueRec value;
 } XIPropertyRec;
 
 typedef XIPropertyRec *XIPropertyPtr;
-typedef XIPropertyValueRec *XIPropertyValuePtr;
 
 typedef struct _XIPropertyHandler {
     struct _XIPropertyHandler *next;
     long id;
     int (*SetProperty) (DeviceIntPtr dev,
-                        Atom property, XIPropertyValuePtr prop, BOOL checkonly);
+                        Atom property, PropertyValuePtr prop, BOOL checkonly);
     int (*GetProperty) (DeviceIntPtr dev, Atom property);
     int (*DeleteProperty) (DeviceIntPtr dev, Atom property);
 } XIPropertyHandler, *XIPropertyHandlerPtr;

@@ -150,7 +150,7 @@ DeviceSetTransform(DeviceIntPtr dev, float *transform_data)
  * DIX property handler.
  */
 static int
-DeviceSetProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
+DeviceSetProperty(DeviceIntPtr dev, Atom property, PropertyValuePtr prop,
                   BOOL checkonly)
 {
     if (property == XIGetKnownProperty(XI_PROP_ENABLED)) {
