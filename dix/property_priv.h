@@ -123,4 +123,14 @@ void dixPropertyFree(PropertyPtr pProp);
 PropertyPtr dixPropertyCreate(Atom type, Atom name, int format,
                               size_t len, const void *value);
 
+/*
+ * Unlink a property structure from a property list. The given property's next
+ * pointer is also cleared. The property structure itself is NOT destroyed.
+ *
+ * @param list pointer to the property list head (NULL on empty list)
+ * @param prop pointer to the property to unlink.
+ * @return on success, pointer to the property, NULL if not found in list
+ */
+PropertyPtr dixPropertyUnlinkPtr(PropertyPtr *list, PropertyPtr prop);
+
 #endif /* _XSERVER_PROPERTY_PRIV_H */

@@ -430,7 +430,7 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
 int
 DeleteProperty(ClientPtr client, WindowPtr pWin, Atom propName)
 {
-    PropertyPtr pProp, prevProp;
+    PropertyPtr pProp;
     int rc;
 
     rc = dixLookupProperty(&pProp, pWin, propName, client, DixDestroyAccess);
@@ -438,18 +438,9 @@ DeleteProperty(ClientPtr client, WindowPtr pWin, Atom propName)
         return Success;         /* Succeed if property does not exist */
 
     if (rc == Success) {
-        if (pWin->properties == pProp) {
-            /* Takes care of head */
-            if (!(pWin->properties = pProp->next))
-                CheckWindowOptionalNeed(pWin);
-        }
-        else {
-            /* Need to traverse to find the previous element */
-            prevProp = pWin->properties;
-            while (prevProp->next != pProp)
-                prevProp = prevProp->next;
-            prevProp->next = pProp->next;
-        }
+        dixPropertyUnlinkPtr(&pWin->properties, pProp);
+        if (!pWin->properties)
+            CheckWindowOptionalNeed(pWin);
 
         deliverPropertyNotifyEvent(pWin, PropertyDelete, pProp);
         notifyVRRMode(client, pWin, PropertyDelete, pProp);
@@ -461,16 +452,13 @@ DeleteProperty(ClientPtr client, WindowPtr pWin, Atom propName)
 void
 DeleteAllWindowProperties(WindowPtr pWin)
 {
-    PropertyPtr pProp = pWin->properties;
+    PropertyPtr pProp;
 
-    while (pProp) {
+    while ((pProp = pWin->properties)) {
         deliverPropertyNotifyEvent(pWin, PropertyDelete, pProp);
-        PropertyPtr pNextProp = pProp->next;
+        dixPropertyUnlinkPtr(&pWin->properties, pProp);
         dixPropertyFree(pProp);
-        pProp = pNextProp;
     }
-
-    pWin->properties = NULL;
 }
 
 /*****************
