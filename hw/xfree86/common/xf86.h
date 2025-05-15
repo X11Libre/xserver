@@ -49,8 +49,6 @@
 #include <X11/extensions/randr.h>
 #endif
 
-#include "propertyst.h"
-
 /* General parameters */
 extern _X_EXPORT int xf86DoConfigure;
 extern _X_EXPORT int xf86DoShowOptions;
