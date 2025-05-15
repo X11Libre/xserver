@@ -109,4 +109,18 @@ void DeleteAllWindowProperties(WindowPtr pWin);
  */
 void dixPropertyFree(PropertyPtr pProp);
 
+/*
+ * Create and fill a new property structure from given data. The `value`
+ * is malloc()ed and copied over.
+ *
+ * @param type   AtomID of the property type
+ * @param name   AtomID of the property name
+ * @param format the property format (8/16/32 bits)
+ * @param len    length in units defined by format
+ * @param value  pointer to the (raw) property data)
+ * @return pointer to newly created property structure (NULL on allocation failure)
+ */
+PropertyPtr dixPropertyCreate(Atom type, Atom name, int format,
+                              size_t len, const void *value);
+
 #endif /* _XSERVER_PROPERTY_PRIV_H */
