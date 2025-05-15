@@ -33,7 +33,6 @@ from The Open Group.
 #include <X11/extensions/secur.h>
 
 #include "input.h"              /* for DeviceIntPtr */
-#include "property.h"           /* for PropertyPtr */
 #include "pixmap.h"             /* for DrawablePtr */
 #include "resource.h"           /* for RESTYPE */
 
