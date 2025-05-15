@@ -341,24 +341,21 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
         pProp = dixAllocateObjectWithPrivates(PropertyRec, PRIVATE_PROPERTY);
         if (!pProp)
             return BadAlloc;
-        unsigned char *data = calloc(1, totalSize);
         if (totalSize) {
-            if (!data) {
-                dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
+            if (!(pProp->data = calloc(1, totalSize))) {
+                dixPropertyFree(pProp);
                 return BadAlloc;
             }
-            memcpy(data, value, totalSize);
+            memcpy(pProp->data, value, totalSize);
         }
         pProp->propertyName = property;
         pProp->type = type;
         pProp->format = format;
-        pProp->data = data;
         pProp->size = len;
         rc = XaceHookPropertyAccess(pClient, pWin, &pProp,
                                     DixCreateAccess | DixWriteAccess);
         if (rc != Success) {
-            free(data);
-            dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
+            dixPropertyFree(pProp);
             pClient->errorValue = property;
             return rc;
         }
@@ -464,8 +461,7 @@ DeleteProperty(ClientPtr client, WindowPtr pWin, Atom propName)
 
         deliverPropertyNotifyEvent(pWin, PropertyDelete, pProp);
         notifyVRRMode(client, pWin, PropertyDelete, pProp);
-        free(pProp->data);
-        dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
+        dixPropertyFree(pProp);
     }
     return rc;
 }
@@ -478,8 +474,7 @@ DeleteAllWindowProperties(WindowPtr pWin)
     while (pProp) {
         deliverPropertyNotifyEvent(pWin, PropertyDelete, pProp);
         PropertyPtr pNextProp = pProp->next;
-        free(pProp->data);
-        dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
+        dixPropertyFree(pProp);
         pProp = pNextProp;
     }
 
@@ -632,8 +627,7 @@ ProcGetProperty(ClientPtr client)
             prevProp->next = pProp->next;
         }
 
-        free(pProp->data);
-        dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
+        dixPropertyFree(pProp);
     }
 
     if (client->swapped) {

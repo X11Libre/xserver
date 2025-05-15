@@ -53,6 +53,8 @@ SOFTWARE.
 
 #include <X11/X.h>
 
+#include "include/privates.h"
+
 #include "dix.h"
 #include "window.h"
 #include "property.h"
@@ -98,5 +100,13 @@ int dixLookupProperty(PropertyPtr *result, WindowPtr pWin, Atom proprty,
                       ClientPtr pClient, Mask access_mode);
 
 void DeleteAllWindowProperties(WindowPtr pWin);
+
+/*
+ * Free an individual property structure and related data.
+ * Invalidates the passed pointer. Doesn't touch anything other in the list.
+ *
+ * @param pProp pointer to property structure to free
+ */
+void dixPropertyFree(PropertyPtr pProp);
 
 #endif /* _XSERVER_PROPERTY_PRIV_H */
