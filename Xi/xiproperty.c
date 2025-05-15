@@ -582,10 +582,10 @@ XICreateDeviceProperty(Atom property)
 
     prop->next = NULL;
     prop->propertyName = property;
-    prop->value.type = None;
-    prop->value.format = 0;
-    prop->value.size = 0;
-    prop->value.data = NULL;
+    prop->type = None;
+    prop->format = 0;
+    prop->size = 0;
+    prop->data = NULL;
     prop->deletable = TRUE;
 
     return prop;
@@ -605,7 +605,7 @@ XIFetchDeviceProperty(DeviceIntPtr dev, Atom property)
 static void
 XIDestroyDeviceProperty(XIPropertyPtr prop)
 {
-    free(prop->value.data);
+    free(prop->data);
     free(prop);
 }
 
@@ -687,8 +687,7 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
     XIPropertyPtr prop;
     int size_in_bytes;
     unsigned long total_len;
-    XIPropertyValuePtr prop_value;
-    XIPropertyValueRec new_value;
+    XIPropertyPtr prop_value;
     Bool add = FALSE;
     int rc;
 
@@ -703,7 +702,7 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
         add = TRUE;
         mode = PropModeReplace;
     }
-    prop_value = &prop->value;
+    prop_value = prop;
 
     /* To append or prepend to a property the request format and type
        must match those of the already defined property.  The
@@ -714,7 +713,8 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
         return BadMatch;
     if ((prop_value->type != type) && (mode != PropModeReplace))
         return BadMatch;
-    new_value = *prop_value;
+
+    XIPropertyRec new_value = *prop_value;
     if (mode == PropModeReplace)
         total_len = len;
     else
@@ -783,6 +783,11 @@ XIChangeDeviceProperty(DeviceIntPtr dev, Atom property, Atom type,
             } while (!checkonly);
         }
         free(prop_value->data);
+        prop_value.type = new_value.type;
+        prop_value.format = new_value.format;
+        prop_value.data = new_value.data;
+        prop_value.size = new_value.size;
+
         *prop_value = new_value;
     }
     else if (len == 0) {
@@ -830,7 +835,7 @@ XIGetDeviceProperty(DeviceIntPtr dev, Atom property, XIPropertyValuePtr *value)
         }
     }
 
-    *value = &prop->value;
+    *value = prop;
     return Success;
 }
 
