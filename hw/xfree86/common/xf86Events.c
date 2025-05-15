@@ -63,6 +63,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "include/property.h"
 #include "mi/mi_priv.h"
 
 #include "misc.h"
