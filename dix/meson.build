@@ -25,6 +25,7 @@ srcs_dix = [
     'pixmap.c',
     'privates.c',
     'property.c',
+    'property_list.c',
     'ptrveloc.c',
     'region.c',
     'registry.c',
