@@ -457,17 +457,12 @@ typedef struct _XIPropertyValue {
     short format;               /* format of data for swapping - 8,16,32 */
     long size;                  /* size of data in (format/8) bytes */
     void *data;                 /* private to client */
-} XIPropertyValueRec;
 
-typedef struct _XIProperty {
-    struct _XIProperty *next;
+    // not supposed to be touched by drivers
+    struct _XIPropertyValue *next;
     Atom propertyName;
-    BOOL deletable;             /* clients can delete this prop? */
-    XIPropertyValueRec value;
-} XIPropertyRec;
-
-typedef XIPropertyRec *XIPropertyPtr;
-typedef XIPropertyValueRec *XIPropertyValuePtr;
+    Bool deletable;             /* clients can delete this prop? */
+} XIPropertyRec, *XIPropertyPtr, *XIPropertyValuePtr;
 
 typedef struct _XIPropertyHandler {
     struct _XIPropertyHandler *next;
