@@ -7,6 +7,7 @@
 #include "dix/property_priv.h"
 #include "include/privates.h"
 #include "include/propertyst.h"
+#include "os/bug_priv.h"
 
 void dixPropertyFree(PropertyPtr pr)
 {
@@ -40,4 +41,36 @@ PropertyPtr dixPropertyCreate(Atom type, Atom name, int format, size_t len,
     pProp->type = type;
 
     return pProp;
+}
+
+PropertyPtr dixPropertyUnlinkPtr(PropertyPtr *list, PropertyPtr prop)
+{
+    BUG_RETURN_VAL(!list, NULL);
+
+    if ((!prop) || (!(*list))) // nothing to do
+        return NULL;
+
+    PropertyPtr walk = *list;
+
+    // remove from head
+    if (walk == prop) {
+        *list = prop->next;
+        walk->next = NULL;
+        return prop;
+    }
+
+    // walk the list to find it
+    while (walk->next && walk->next != prop) {
+        walk = walk->next;
+    }
+
+    // didn't find it
+    if (!walk->next)
+        return NULL;
+
+    // unlink the element
+    walk->next = walk->next->next;
+    prop->next = NULL;
+
+    return prop;
 }
