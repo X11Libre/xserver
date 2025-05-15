@@ -149,20 +149,23 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
     }
 
     int num_surfaces = (adaptor) ? adaptor->num_surfaces : 0;
-    xvmcSurfaceInfo *info = calloc(sizeof(xvmcSurfaceInfo), num_surfaces);
-    if (!info && num_surfaces)
-        return BadAlloc;
+    xvmcSurfaceInfo *info = NULL;
+    if (num_surfaces) {
+        info = calloc(sizeof(xvmcSurfaceInfo), num_surfaces);
+        if (!info)
+            return BadAlloc;
 
-    for (int i = 0; i < num_surfaces; i++) {
-        XvMCSurfaceInfoPtr surface = adaptor->surfaces[i];
-        info[i].surface_type_id = surface->surface_type_id;
-        info[i].chroma_format = surface->chroma_format;
-        info[i].max_width = surface->max_width;
-        info[i].max_height = surface->max_height;
-        info[i].subpicture_max_width = surface->subpicture_max_width;
-        info[i].subpicture_max_height = surface->subpicture_max_height;
-        info[i].mc_type = surface->mc_type;
-        info[i].flags = surface->flags;
+        for (int i = 0; i < num_surfaces; i++) {
+            XvMCSurfaceInfoPtr surface = adaptor->surfaces[i];
+            info[i].surface_type_id = surface->surface_type_id;
+            info[i].chroma_format = surface->chroma_format;
+            info[i].max_width = surface->max_width;
+            info[i].max_height = surface->max_height;
+            info[i].subpicture_max_width = surface->subpicture_max_width;
+            info[i].subpicture_max_height = surface->subpicture_max_height;
+            info[i].mc_type = surface->mc_type;
+            info[i].flags = surface->flags;
+        }
     }
 
     xvmcListSurfaceTypesReply rep = {
@@ -542,46 +545,49 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
     int num = (surface->compatible_subpictures ?
                surface->compatible_subpictures->num_xvimages : 0);
 
-    xvImageFormatInfo *info = calloc(sizeof(xvImageFormatInfo), num);
-    if (!info && num)
-        return BadAlloc;
+    xvImageFormatInfo *info = NULL;
+    if (num) {
+        info = calloc(sizeof(xvImageFormatInfo), num);
+        if (!info)
+            return BadAlloc;
 
-    for (int i = 0; i < num; i++) {
-        pImage = NULL;
-        for (int j = 0; j < adaptor->num_subpictures; j++) {
-            if (surface->compatible_subpictures->xvimage_ids[i] ==
-                adaptor->subpictures[j]->id) {
-                pImage = adaptor->subpictures[j];
-                break;
+        for (int i = 0; i < num; i++) {
+            pImage = NULL;
+            for (int j = 0; j < adaptor->num_subpictures; j++) {
+                if (surface->compatible_subpictures->xvimage_ids[i] ==
+                    adaptor->subpictures[j]->id) {
+                    pImage = adaptor->subpictures[j];
+                    break;
+                }
             }
-        }
-        if (!pImage) {
-            free(info);
-            return BadImplementation;
-        }
+            if (!pImage) {
+                free(info);
+                return BadImplementation;
+            }
 
-        info[i].id = pImage->id;
-        info[i].type = pImage->type;
-        info[i].byte_order = pImage->byte_order;
-        memcpy(&info[i].guid, pImage->guid, 16);
-        info[i].bpp = pImage->bits_per_pixel;
-        info[i].num_planes = pImage->num_planes;
-        info[i].depth = pImage->depth;
-        info[i].red_mask = pImage->red_mask;
-        info[i].green_mask = pImage->green_mask;
-        info[i].blue_mask = pImage->blue_mask;
-        info[i].format = pImage->format;
-        info[i].y_sample_bits = pImage->y_sample_bits;
-        info[i].u_sample_bits = pImage->u_sample_bits;
-        info[i].v_sample_bits = pImage->v_sample_bits;
-        info[i].horz_y_period = pImage->horz_y_period;
-        info[i].horz_u_period = pImage->horz_u_period;
-        info[i].horz_v_period = pImage->horz_v_period;
-        info[i].vert_y_period = pImage->vert_y_period;
-        info[i].vert_u_period = pImage->vert_u_period;
-        info[i].vert_v_period = pImage->vert_v_period;
-        memcpy(&info[i].comp_order, pImage->component_order, 32);
-        info[i].scanline_order = pImage->scanline_order;
+            info[i].id = pImage->id;
+            info[i].type = pImage->type;
+            info[i].byte_order = pImage->byte_order;
+            memcpy(&info[i].guid, pImage->guid, 16);
+            info[i].bpp = pImage->bits_per_pixel;
+            info[i].num_planes = pImage->num_planes;
+            info[i].depth = pImage->depth;
+            info[i].red_mask = pImage->red_mask;
+            info[i].green_mask = pImage->green_mask;
+            info[i].blue_mask = pImage->blue_mask;
+            info[i].format = pImage->format;
+            info[i].y_sample_bits = pImage->y_sample_bits;
+            info[i].u_sample_bits = pImage->u_sample_bits;
+            info[i].v_sample_bits = pImage->v_sample_bits;
+            info[i].horz_y_period = pImage->horz_y_period;
+            info[i].horz_u_period = pImage->horz_u_period;
+            info[i].horz_v_period = pImage->horz_v_period;
+            info[i].vert_y_period = pImage->vert_y_period;
+            info[i].vert_u_period = pImage->vert_u_period;
+            info[i].vert_v_period = pImage->vert_v_period;
+            memcpy(&info[i].comp_order, pImage->component_order, 32);
+            info[i].scanline_order = pImage->scanline_order;
+        }
     }
 
     xvmcListSubpictureTypesReply rep = {
