@@ -39,6 +39,7 @@ PropertyPtr dixPropertyCreate(Atom type, Atom name, int format, size_t len,
     pProp->value.format = format;
     pProp->value.size = len;
     pProp->value.type = type;
+    pProp->deletable = TRUE;
 
     return pProp;
 }

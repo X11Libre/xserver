@@ -61,6 +61,7 @@ typedef struct _Property {
     ATOM propertyName;
     PropertyValueRec value;
     PrivateRec *devPrivates;
+    Bool deletable;
 } PropertyRec;
 
 #endif                          /* PROPERTYSTRUCT_H */
