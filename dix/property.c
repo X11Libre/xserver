@@ -303,11 +303,9 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
 {
     PropertyPtr pProp;
     PropertyRec savedProp;
-    int sizeInBytes, totalSize, rc;
+    int rc;
     Mask access_mode;
 
-    sizeInBytes = format >> 3;
-    totalSize = len * sizeInBytes;
     access_mode = (mode == PropModeReplace) ? DixWriteAccess : DixBlendAccess;
 
     /* first see if property already exists */
@@ -316,20 +314,11 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
     if (rc == BadMatch) {       /* just add to list */
         if (!pWin->optional && !MakeWindowOptional(pWin))
             return BadAlloc;
-        pProp = dixAllocateObjectWithPrivates(PropertyRec, PRIVATE_PROPERTY);
+
+        pProp = dixPropertyCreate(type, property, format, len, value);
         if (!pProp)
             return BadAlloc;
-        if (totalSize) {
-            if (!(pProp->data = calloc(1, totalSize))) {
-                dixPropertyFree(pProp);
-                return BadAlloc;
-            }
-            memcpy(pProp->data, value, totalSize);
-        }
-        pProp->propertyName = property;
-        pProp->type = type;
-        pProp->format = format;
-        pProp->size = len;
+
         rc = XaceHookPropertyAccess(pClient, pWin, &pProp,
                                     DixCreateAccess | DixWriteAccess);
         if (rc != Success) {
@@ -341,6 +330,9 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
         pWin->properties = pProp;
     }
     else if (rc == Success) {
+        const int sizeInBytes = format >> 3;
+        const int totalSize = len * sizeInBytes;
+
         /* To append or prepend to a property the request format and type
            must match those of the already defined property.  The
            existing format and type are irrelevant when using the mode
