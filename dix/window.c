@@ -204,10 +204,10 @@ get_window_name(WindowPtr pWin)
         return overlay_win_name;
 
     for (PropertyPtr prop = pWin->properties; prop; prop = prop->next) {
-        if (prop->propertyName == XA_WM_NAME && prop->type == XA_STRING &&
-            prop->data) {
-            len = min(prop->size, WINDOW_NAME_BUF_LEN - 1);
-            memcpy(buf, prop->data, len);
+        if (prop->propertyName == XA_WM_NAME &&
+            prop->value.type == XA_STRING && prop->value.data) {
+            len = min(prop->value.size, WINDOW_NAME_BUF_LEN - 1);
+            memcpy(buf, prop->value.data, len);
             buf[len] = '\0';
             return buf;
         }

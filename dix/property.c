@@ -124,10 +124,10 @@ static void
 notifyVRRMode(ClientPtr pClient, WindowPtr pWindow, int state, PropertyPtr pProp)
 {
     const char *pName = NameForAtom(pProp->propertyName);
-    if (pName == NULL || strcmp(pName, "_VARIABLE_REFRESH") || pProp->format != 32 || pProp->size != 1)
+    if (pName == NULL || strcmp(pName, "_VARIABLE_REFRESH") || pProp->value.format != 32 || pProp->value.size != 1)
         return;
 
-    WindowVRRMode mode = (WindowVRRMode)(state == PropertyNewValue ? (*((uint32_t*)pProp->data)) : 0);
+    WindowVRRMode mode = (WindowVRRMode)(state == PropertyNewValue ? (*((uint32_t*)pProp->value.data)) : 0);
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
@@ -250,10 +250,10 @@ ProcRotateProperties(ClientPtr client)
             notifyVRRMode(client, pWin, PropertyNewValue, props[i]);
 
             /* Preserve name and devPrivates */
-            props[j]->type = saved[i].type;
-            props[j]->format = saved[i].format;
-            props[j]->size = saved[i].size;
-            props[j]->data = saved[i].data;
+            props[j]->value.type = saved[i].value.type;
+            props[j]->value.format = saved[i].value.format;
+            props[j]->value.size = saved[i].value.size;
+            props[j]->value.data = saved[i].value.data;
         }
     }
  out:
@@ -386,9 +386,9 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
            existing format and type are irrelevant when using the mode
            "PropModeReplace" since they will be written over. */
 
-        if ((format != pProp->format) && (mode != PropModeReplace))
+        if ((format != pProp->value.format) && (mode != PropModeReplace))
             return BadMatch;
-        if ((pProp->type != type) && (mode != PropModeReplace))
+        if ((pProp->value.type != type) && (mode != PropModeReplace))
             return BadMatch;
 
         /* save the old values for later */
@@ -401,43 +401,43 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
                     return BadAlloc;
                 memcpy(data, value, totalSize);
             }
-            pProp->data = data;
-            pProp->size = len;
-            pProp->type = type;
-            pProp->format = format;
+            pProp->value.data = data;
+            pProp->value.size = len;
+            pProp->value.type = type;
+            pProp->value.format = format;
         }
         else if (len == 0) {
             /* do nothing */
         }
         else if (mode == PropModeAppend) {
-            unsigned char *data = calloc(pProp->size + len, sizeInBytes);
+            unsigned char *data = calloc(pProp->value.size + len, sizeInBytes);
             if (!data)
                 return BadAlloc;
-            memcpy(data, pProp->data, pProp->size * sizeInBytes);
-            memcpy(data + pProp->size * sizeInBytes, value, totalSize);
-            pProp->data = data;
-            pProp->size += len;
+            memcpy(data, pProp->value.data, pProp->value.size * sizeInBytes);
+            memcpy(data + pProp->value.size * sizeInBytes, value, totalSize);
+            pProp->value.data = data;
+            pProp->value.size += len;
         }
         else if (mode == PropModePrepend) {
-            unsigned char *data = calloc(len + pProp->size, sizeInBytes);
+            unsigned char *data = calloc(len + pProp->value.size, sizeInBytes);
             if (!data)
                 return BadAlloc;
-            memcpy(data + totalSize, pProp->data, pProp->size * sizeInBytes);
+            memcpy(data + totalSize, pProp->value.data, pProp->value.size * sizeInBytes);
             memcpy(data, value, totalSize);
-            pProp->data = data;
-            pProp->size += len;
+            pProp->value.data = data;
+            pProp->value.size += len;
         }
 
         /* Allow security modules to check the new content */
         access_mode |= DixPostAccess;
         rc = XaceHookPropertyAccess(pClient, pWin, &pProp, access_mode);
         if (rc == Success) {
-            if (savedProp.data != pProp->data)
-                free(savedProp.data);
+            if (savedProp.value.data != pProp->value.data)
+                free(savedProp.value.data);
         }
         else {
-            if (savedProp.data != pProp->data)
-                free(pProp->data);
+            if (savedProp.value.data != pProp->value.data)
+                free(pProp->value.data);
             *pProp = savedProp;
             return rc;
         }
@@ -566,11 +566,11 @@ ProcGetProperty(ClientPtr client)
     /* If the request type and actual type don't match. Return the
        property information, but not the data. */
 
-    if (((p.type != pProp->type) && (p.type != AnyPropertyType))) {
+    if (((p.type != pProp->value.type) && (p.type != AnyPropertyType))) {
         xGetPropertyReply reply = {
-            .bytesAfter = pProp->size,
-            .format = pProp->format,
-            .propertyType = pProp->type
+            .bytesAfter = pProp->value.size,
+            .format = pProp->value.format,
+            .propertyType = pProp->value.type
         };
         if (client->swapped) {
             swapl(&reply.propertyType);
@@ -582,7 +582,7 @@ ProcGetProperty(ClientPtr client)
 /*
  *  Return type, format, value to client
  */
-    n = (pProp->format / 8) * pProp->size;      /* size (bytes) of prop */
+    n = (pProp->value.format / 8) * pProp->value.size; /* size (bytes) of prop */
     ind = p.longOffset << 2;
 
     /* If longOffset is invalid such that it causes "len" to
@@ -597,9 +597,9 @@ ProcGetProperty(ClientPtr client)
 
     xGetPropertyReply reply = {
         .bytesAfter = n - (ind + len),
-        .format = pProp->format,
-        .nItems = len / (pProp->format / 8),
-        .propertyType = pProp->type
+        .format = pProp->value.format,
+        .nItems = len / (pProp->value.format / 8),
+        .propertyType = pProp->value.type
     };
 
     if (p.delete && (reply.bytesAfter == 0)) {
@@ -607,7 +607,7 @@ ProcGetProperty(ClientPtr client)
         notifyVRRMode(client, pWin, PropertyDelete, pProp);
     }
 
-    const char *dataptr = ((char*)pProp->data) + ind;
+    const char *dataptr = ((char*)pProp->value.data) + ind;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     switch (pProp->format) {

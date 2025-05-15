@@ -58,13 +58,14 @@ winMultiWindowGetClassHint(WindowPtr pWin, char **res_name, char **res_class)
 
     while (prop) {
         if (prop->propertyName == XA_WM_CLASS
-            && prop->type == XA_STRING && prop->format == 8 && prop->data) {
+            && prop->value.type == XA_STRING
+            && prop->value.format == 8 && prop->value.data) {
             /*
               WM_CLASS property should consist of 2 null terminated strings, but we
               must handle the cases when one or both is absent or not null terminated
             */
-            len_name = strlen((char *) prop->data);
-            if (len_name > prop->size) len_name = prop->size;
+            len_name = strlen((char *) prop->value.data);
+            if (len_name > prop->value.size) len_name = prop->value.size;
 
             (*res_name) = calloc(1, len_name + 1);
 
@@ -74,12 +75,12 @@ winMultiWindowGetClassHint(WindowPtr pWin, char **res_name, char **res_class)
             }
 
             /* Copy name and ensure null terminated */
-            strncpy((*res_name), prop->data, len_name);
+            strncpy((*res_name), prop->value.data, len_name);
             (*res_name)[len_name] = '\0';
 
             /* Compute length of class name, it could be that it is absent or not null terminated */
-            len_class = (len_name >= prop->size) ? 0 : (strlen(((char *) prop->data) + 1 + len_name));
-            if (len_class > prop->size - 1 - len_name) len_class = prop->size - 1 - len_name;
+            len_class = (len_name >= prop->value.size) ? 0 : (strlen(((char *) prop->value.data) + 1 + len_name));
+            if (len_class > prop->value.size - 1 - len_name) len_class = prop->value.size - 1 - len_name;
 
             (*res_class) = calloc(1, len_class + 1);
 
@@ -92,7 +93,7 @@ winMultiWindowGetClassHint(WindowPtr pWin, char **res_name, char **res_class)
             }
 
             /* Copy class name and ensure null terminated */
-            strncpy((*res_class), ((char *) prop->data) + 1 + len_name, len_class);
+            strncpy((*res_class), ((char *) prop->value.data) + 1 + len_name, len_class);
             (*res_class)[len_class] = '\0';
 
             return 1;
@@ -117,8 +118,8 @@ winMultiWindowGetWMHints(WindowPtr pWin, WinXWMHints * hints)
     memset(hints, 0, sizeof(WinXWMHints));
 
     while (prop) {
-        if (prop->propertyName == XA_WM_HINTS && prop->data) {
-            memcpy(hints, prop->data, sizeof(WinXWMHints));
+        if (prop->propertyName == XA_WM_HINTS && prop->value.data) {
+            memcpy(hints, prop->value.data, sizeof(WinXWMHints));
             return 1;
         }
         else
@@ -141,8 +142,9 @@ winMultiWindowGetWindowRole(WindowPtr pWin, char **res_role)
     *res_role = NULL;
     while (prop) {
         if (prop->propertyName == AtmWmWindowRole()
-            && prop->type == XA_STRING && prop->format == 8 && prop->data) {
-            len_role = prop->size;
+            && prop->value.type == XA_STRING
+            && prop->value.format == 8 && prop->value.data) {
+            len_role = prop->value.size;
 
             (*res_role) = calloc(1, len_role + 1);
 
@@ -151,7 +153,7 @@ winMultiWindowGetWindowRole(WindowPtr pWin, char **res_role)
                 return 0;
             }
 
-            strncpy((*res_role), prop->data, len_role);
+            strncpy((*res_role), prop->value.data, len_role);
             (*res_role)[len_role] = 0;
 
             return 1;
@@ -176,8 +178,8 @@ winMultiWindowGetWMNormalHints(WindowPtr pWin, WinXSizeHints * hints)
     memset(hints, 0, sizeof(WinXSizeHints));
 
     while (prop) {
-        if (prop->propertyName == XA_WM_NORMAL_HINTS && prop->data) {
-            memcpy(hints, prop->data, sizeof(WinXSizeHints));
+        if (prop->propertyName == XA_WM_NORMAL_HINTS && prop->value.data) {
+            memcpy(hints, prop->value.data, sizeof(WinXSizeHints));
             return 1;
         }
         else
@@ -203,7 +205,7 @@ winMultiWindowGetTransientFor(WindowPtr pWin, Window *pDaddyId)
     while (prop) {
         if (prop->propertyName == XA_WM_TRANSIENT_FOR) {
             if (pDaddyId)
-                memcpy(pDaddyId, prop->data, sizeof(Window));
+                memcpy(pDaddyId, prop->value.data, sizeof(Window));
             return 1;
         }
         else
@@ -230,8 +232,8 @@ winMultiWindowGetWMName(WindowPtr pWin, char **wmName)
 
     while (prop) {
         if (prop->propertyName == XA_WM_NAME
-            && prop->type == XA_STRING && prop->data) {
-            len_name = prop->size;
+            && prop->value.type == XA_STRING && prop->value.data) {
+            len_name = prop->value.size;
 
             (*wmName) = calloc(1, len_name + 1);
 
@@ -240,7 +242,7 @@ winMultiWindowGetWMName(WindowPtr pWin, char **wmName)
                 return 0;
             }
 
-            strncpy((*wmName), prop->data, len_name);
+            strncpy((*wmName), prop->value.data, len_name);
             (*wmName)[len_name] = 0;
 
             return 1;

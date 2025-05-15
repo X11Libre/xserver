@@ -12,7 +12,7 @@
 void dixPropertyFree(PropertyPtr pr)
 {
     if (pr) {
-        free(pr->data);
+        free(pr->value.data);
         dixFreeObjectWithPrivates(pr, PRIVATE_PROPERTY);
     }
 }
@@ -34,11 +34,11 @@ PropertyPtr dixPropertyCreate(Atom type, Atom name, int format, size_t len,
 
     memcpy(data, value, totalSize);
 
-    pProp->data = data;
     pProp->propertyName = name;
-    pProp->format = format;
-    pProp->size = len;
-    pProp->type = type;
+    pProp->value.data = data;
+    pProp->value.format = format;
+    pProp->value.size = len;
+    pProp->value.type = type;
 
     return pProp;
 }

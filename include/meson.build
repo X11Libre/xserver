@@ -496,6 +496,7 @@ if build_xorg_sdk
             'pixmapstr.h',
             'privates.h',
             'property.h',
+            'property_value.h',
             'ptrveloc.h',
             'randrstr.h',
             'rrtransform.h',
