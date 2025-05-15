@@ -15,3 +15,29 @@ void dixPropertyFree(PropertyPtr pr)
         dixFreeObjectWithPrivates(pr, PRIVATE_PROPERTY);
     }
 }
+
+PropertyPtr dixPropertyCreate(Atom type, Atom name, int format, size_t len,
+                              const void *value)
+{
+    const int totalSize = (format >> 3) * len;
+
+    void *data = calloc(1, totalSize);
+    if (!data)
+        return NULL;
+
+    PropertyPtr pProp = dixAllocateObjectWithPrivates(PropertyRec, PRIVATE_PROPERTY);
+    if (!pProp) {
+        free(data);
+        return NULL;
+    }
+
+    memcpy(data, value, totalSize);
+
+    pProp->data = data;
+    pProp->propertyName = name;
+    pProp->format = format;
+    pProp->size = len;
+    pProp->type = type;
+
+    return pProp;
+}
