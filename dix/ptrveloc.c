@@ -26,11 +26,11 @@
 
 #include <math.h>
 
+#include "dix/exevents_priv.h"
 #include "dix/ptrveloc_priv.h"
 #include "os/bug_priv.h"
 
 #include <ptrveloc.h>
-#include <exevents.h>
 #include <X11/Xatom.h>
 #include <os.h>
 
