@@ -96,6 +96,14 @@ possible with the fb code.
 .TP 4
 .B "\-blackpixel \fIpixel-value\fP, \-whitepixel \fIpixel-value\fP"
 These options specify the black and white pixel values the server should use.
+.TP 4
+.BI "\-crtcs " n[@\fIW\fPx\fIH\fP]
+Sets the number of screen CRTCs to \fIn\fP and, optionally, sets each CRTC to
+the width \fIW\fP and height \fIH\fP.  When \fIW\fP and \fIH\fP are omitted,
+each CRTC uses the full screen size.  If \fB\-crtcs\fP is not supplied, a
+single CRTC matching the screen dimensions is created.  Unless overridden by
+\fB\-screen\fP, this is equivalent to \fB1@1280x1024\fP.  In all cases, only the
+first CRTC has a mode set at start\-up.
 .SH FILES
 The following files are created if the \-fbdir option is given.
 .TP 4
