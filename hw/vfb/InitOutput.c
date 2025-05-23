@@ -170,38 +170,40 @@ static char *render_node = NULL;
     else (_dst) = (_src);
 
 static void
-vfbAddCrtcInfo(vfbScreenInfoPtr screen, int numCrtcs)
+vfbSetCrtcInfo(vfbScreenInfoPtr screen, int numCrtcs, int crtcWidth,
+               int crtcHeight)
 {
     int i;
-    int count = numCrtcs - screen->numCrtcs;
 
-    if (count > 0) {
-        vfbCrtcInfoPtr crtcs =
-            reallocarray(screen->crtcs, numCrtcs, sizeof(*crtcs));
-        if (!crtcs)
-            FatalError("Not enough memory for %d CRTCs", numCrtcs);
+    vfbCrtcInfoPtr crtcs =
+        reallocarray(screen->crtcs, numCrtcs, sizeof(*crtcs));
+    if (!crtcs)
+        FatalError("Not enough memory for %d CRTCs", numCrtcs);
 
-        memset(crtcs + screen->numCrtcs, 0, count * sizeof(*crtcs));
+    memset(crtcs, 0, numCrtcs * sizeof(*crtcs));
 
-        for (i = screen->numCrtcs; i < numCrtcs; ++i) {
-            crtcs[i].width = screen->width;
-            crtcs[i].height = screen->height;
-        }
-
-        screen->crtcs = crtcs;
-        screen->numCrtcs = numCrtcs;
+    for (i = 0; i < numCrtcs; ++i) {
+        crtcs[i].width = crtcWidth;
+        crtcs[i].height = crtcHeight;
     }
+
+    /* First CRTC starts with one output */
+    if (numCrtcs > 0)
+        crtcs[0].numOutputs = 1;
+
+    screen->crtcs = crtcs;
+    screen->numCrtcs = numCrtcs;
 }
 
 static vfbScreenInfoPtr
 vfbInitializeScreenInfo(vfbScreenInfoPtr screen)
 {
     *screen = defaultScreenInfo;
-    vfbAddCrtcInfo(screen, VFB_DEFAULT_NUM_CRTCS);
 
-    /* First CRTC initializes with one output */
-    if (screen->numCrtcs > 0)
-        screen->crtcs[0].numOutputs = 1;
+    if (screen->numCrtcs == 0) {
+        vfbSetCrtcInfo(screen, VFB_DEFAULT_NUM_CRTCS, screen->width,
+                       screen->height);
+    }
 
     return screen;
 }
@@ -321,7 +323,8 @@ ddxUseMsg(void)
     ErrorF("-dri </dev/dri/renderDxxx>  render device to use\n");
 #endif
 
-    ErrorF("-crtcs n               number of CRTCs per screen (default: %d)\n",
+    ErrorF("-crtcs n[@WxH]         CRTC count with optional size "
+           "(default: %d @ screen's WxH)\n",
            VFB_DEFAULT_NUM_CRTCS);
 }
 
@@ -457,11 +460,32 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
 #endif
 
-    if (strcmp(argv[i], "-crtcs") == 0) {       /* -crtcs n */
-        int numCrtcs;
-
+    if (strcmp(argv[i], "-crtcs") == 0) {       /* -crtcs N[@WxH] */
         CHECK_FOR_REQUIRED_ARGUMENTS(1);
-        numCrtcs = atoi(argv[i + 1]);
+
+        int numCrtcs = VFB_DEFAULT_NUM_CRTCS;
+        int crtcWidth = currentScreen->width;
+        int crtcHeight = currentScreen->height;
+
+        if (strchr(argv[i + 1], '@')) {
+            if (sscanf(argv[i + 1], "%d@%dx%d",
+                       &numCrtcs, &crtcWidth, &crtcHeight) != 3 ||
+                crtcWidth <= 0 || crtcHeight <= 0) {
+                ErrorF("Invalid -crtcs argument '%s'\n", argv[i + 1]);
+                UseMsg();
+                FatalError("Invalid -crtcs argument '%s', expected N@WxH\n",
+                           argv[i + 1]);
+            }
+        }
+        else {
+            if (strchr(argv[i + 1], 'x')) {
+                ErrorF("Invalid -crtcs argument '%s'\n", argv[i + 1]);
+                UseMsg();
+                FatalError("Invalid -crtcs argument '%s', expected N or N@WxH\n",
+                           argv[i + 1]);
+            }
+            numCrtcs = atoi(argv[i + 1]);
+        }
 
         if (numCrtcs < 1) {
             ErrorF("Invalid number of CRTCs %d\n", numCrtcs);
@@ -471,7 +495,16 @@ ddxProcessArgument(int argc, char *argv[], int i)
 
         }
 
-        vfbAddCrtcInfo(currentScreen, numCrtcs);
+        if (crtcWidth > currentScreen->width ||
+            crtcHeight > currentScreen->height) {
+            ErrorF("CRTC size cannot exceed screen size\n");
+            UseMsg();
+            FatalError("CRTC size %dx%d exceeds screen size %dx%d\n",
+                       crtcWidth, crtcHeight,
+                       currentScreen->width, currentScreen->height);
+        }
+
+        vfbSetCrtcInfo(currentScreen, numCrtcs, crtcWidth, crtcHeight);
         return 2;
     }
 
