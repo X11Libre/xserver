@@ -354,7 +354,7 @@ miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy)
     }
 #endif /* XINERAMA */
 
-    DeliverEvents(pWin, pEvent, numRects, NullWindow);
+    dixDeliverEvents(pWin, pEvent, numRects, NullWindow);
 
     free(pEvent);
 }

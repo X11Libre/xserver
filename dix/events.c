@@ -2947,7 +2947,7 @@ DeliverDeviceEvents(WindowPtr pWin, InternalEvent *event, GrabPtr grab,
  * @return event delivery state (@see enum EventDeliveryState)
  */
 enum EventDeliveryState
-DeliverEvents(WindowPtr pWin, xEvent *xE, size_t count, WindowPtr otherParent)
+dixDeliverEvents(WindowPtr pWin, xEvent *xE, size_t count, WindowPtr otherParent)
 {
     DeviceIntRec dummy;
     int deliveries;

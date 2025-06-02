@@ -303,7 +303,7 @@ QuartzUpdateScreens(void)
     e.u.configureNotify.height = height;
     e.u.configureNotify.borderWidth = wBorderWidth(pRoot);
     e.u.configureNotify.override = pRoot->overrideRedirect;
-    DeliverEvents(pRoot, &e, 1, NullWindow);
+    dixDeliverEvents(pRoot, &e, 1, NullWindow);
 
     quartzProcs->UpdateScreen(masterScreen);
 
