@@ -599,10 +599,10 @@ int TryClientEvents(ClientPtr pClient,
  * @param otherParent   Used for ReparentNotify events.
  */
 _X_EXPORT // exported for nvidia
-enum EventDeliveryState DeliverEvents(WindowPtr pWindow,
-                                      xEventPtr events,
-                                      size_t nEvents,
-                                      WindowPtr otherParent)
+enum EventDeliveryState dixDeliverEvents(WindowPtr pWindow,
+                                         xEventPtr events,
+                                         size_t nEvents,
+                                         WindowPtr otherParent)
     _X_ATTRIBUTE_NONNULL_ARG(1,2);
 
 /**
