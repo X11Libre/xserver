@@ -167,7 +167,7 @@ void xnest_set_command(
     for (i = 0, nbytes = 0; i < argc; i++)
         nbytes += strlen(argv[i]) + 1;
 
-    if (nbytes >= (2^16) - 1)
+    if (nbytes >= (1<<16) - 1)
         return;
 
     char *buf = calloc(1, nbytes+1);
