@@ -90,11 +90,11 @@ extern _X_EXPORT PaddingInfo PixmapWidthPaddingInfo[];
 
 #define PixmapWidthInPadUnits(w, d) \
     (PixmapWidthPaddingInfo[d].notPower2 ? \
-    (((int)(w) * PixmapWidthPaddingInfo[d].bytesPerPixel +  \
+    ((int)((int)(w) * PixmapWidthPaddingInfo[d].bytesPerPixel +  \
 	         PixmapWidthPaddingInfo[d].bytesPerPixel) >> \
-	PixmapWidthPaddingInfo[d].padBytesLog2) : \
-    ((int)((w) + PixmapWidthPaddingInfo[d].padRoundUp) >> \
-	PixmapWidthPaddingInfo[d].padPixelsLog2))
+	(int)PixmapWidthPaddingInfo[d].padBytesLog2) : \
+    ((int)((int)(w) + PixmapWidthPaddingInfo[d].padRoundUp) >> \
+	(int)PixmapWidthPaddingInfo[d].padPixelsLog2))
 
 /*
  *	Return the number of bytes to which a scanline of the given
