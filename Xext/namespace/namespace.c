@@ -10,17 +10,17 @@
 #include "miext/extinit_priv.h"
 #include "Xext/xacestr.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 Bool noNamespaceExtension = TRUE;
 
-DevPrivateKeyRec namespaceClientPrivKeyRec = { 0 };
+DevPrivateKeyRec _mRNAClientPrivKeyRec = { 0 };
 
 void
 NamespaceExtensionInit(void)
 {
-    XNS_LOG("initializing namespace extension ...\n");
+    XNS_LOG("initializing _mRNA extension ...\n");
 
     /* load configuration */
     if (!XnsLoadConfig()) {
@@ -28,8 +28,8 @@ NamespaceExtensionInit(void)
         return;
     }
 
-    if (!(dixRegisterPrivateKey(&namespaceClientPrivKeyRec, PRIVATE_CLIENT,
-            sizeof(struct XnamespaceClientPriv)) &&
+    if (!(dixRegisterPrivateKey(&_mRNAClientPrivKeyRec, PRIVATE_CLIENT,
+            sizeof(struct X_mRNAClientPriv)) &&
           AddCallback(&ClientStateCallback, hookClientState, NULL) &&
           AddCallback(&PostInitRootWindowCallback, hookInitRootWindow, NULL) &&
           AddCallback(&PropertyFilterCallback, hookWindowProperty, NULL) &&
@@ -46,12 +46,12 @@ NamespaceExtensionInit(void)
         FatalError("NamespaceExtensionInit: allocation failure\n");
 
     /* Do the serverClient */
-    struct XnamespaceClientPriv *srv = XnsClientPriv(serverClient);
-    *srv = (struct XnamespaceClientPriv) { .isServer = TRUE };
-    XnamespaceAssignClient(srv, &ns_root);
+    struct X_mRNAClientPriv *srv = XnsClientPriv(serverClient);
+    *srv = (struct X_mRNAClientPriv) { .isServer = TRUE };
+    X_mRNAAssignClient(srv, &ns_root);
 }
 
-void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *newns)
+void X_mRNAAssignClient(struct X_mRNAClientPriv *priv, struct X_mRNA *newns)
 {
     if (priv->ns != NULL)
         priv->ns->refcnt--;
@@ -62,19 +62,19 @@ void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace
         newns->refcnt++;
 }
 
-void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name)
+void X_mRNAAssignClientByName(struct X_mRNAClientPriv *priv, const char *name)
 {
-    struct Xnamespace *newns = XnsFindByName(name);
+    struct X_mRNA *newns = XnsFindByName(name);
 
     if (newns == NULL)
         newns = &ns_anon;
 
-    XnamespaceAssignClient(priv, newns);
+    X_mRNAAssignClient(priv, newns);
 }
 
-struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken)
+struct X_mRNA* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken)
 {
-    struct Xnamespace *walk;
+    struct X_mRNA *walk;
     xorg_list_for_each_entry(walk, &ns_list, entry) {
         struct auth_token *at;
         xorg_list_for_each_entry(at, &walk->auth_tokens, entry) {

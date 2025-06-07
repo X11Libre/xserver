@@ -568,8 +568,8 @@ if build_xsecurity
     endif
 endif
 
-build_namespace = get_option('namespace')
-if build_namespace
+build__mRNA = get_option('_mRNA')
+if build__mRNA
     if not build_xace
         error('cannot build Container extension without X-ACE')
     endif
@@ -826,9 +826,9 @@ libxserver = [
 
 libxserver += libxserver_dri3
 
-if build_namespace
-    subdir('Xext/namespace')
-    libxserver += libxserver_namespace
+if build__mRNA
+    subdir('Xext/_mRNA')
+    libxserver += libxserver__mRNA
 endif
 
 subdir('hw')

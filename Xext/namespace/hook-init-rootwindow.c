@@ -8,7 +8,7 @@
 
 #include "dix/window_priv.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 static inline int setWinStrProp(WindowPtr pWin, Atom name, const char *text) {
@@ -29,7 +29,7 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
 
     assert(realRoot);
 
-    struct Xnamespace *walk;
+    struct X_mRNA *walk;
 
     xorg_list_for_each_entry(walk, &ns_list, entry) {
         if (strcmp(walk->name, NS_NAME_ROOT)==0) {
@@ -51,12 +51,12 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
             &rc);
 
         if (!pWin)
-            FatalError("hookInitRootWindow: cant create per-namespace root window for %s\n", walk->name);
+            FatalError("hookInitRootWindow: cant create per-_mRNA root window for %s\n", walk->name);
 
         Mask mask = pWin->eventMask;
         pWin->eventMask = 0;    /* subterfuge in case AddResource fails */
         if (!AddResource(pWin->drawable.id, X11_RESTYPE_WINDOW, (void *) pWin))
-            FatalError("hookInitRootWindow: cant add per-namespace root window as resource\n");
+            FatalError("hookInitRootWindow: cant add per-_mRNA root window as resource\n");
         pWin->eventMask = mask;
 
         walk->rootWindow = pWin;

@@ -25,7 +25,7 @@ extern Bool noXFixesExtension;
 extern Bool noXFree86BigfontExtension;
 extern Bool noNamespaceExtension;
 
-extern char *namespaceConfigFile;
+extern char *_mRNAConfigFile;
 
 void CompositeExtensionInit(void);
 void DamageExtensionInit(void);

@@ -1,5 +1,5 @@
-libxserver_namespace = static_library(
-	'libxserver_namespace',
+libxserver__mRNA = static_library(
+	'libxserver__mRNA',
 	[
 		'config.c',
 		'hook-client.c',
@@ -15,7 +15,7 @@ libxserver_namespace = static_library(
 		'hook-send.c',
 		'hook-server.c',
 		'hook-windowproperty.c',
-		'namespace.c',
+		'_mRNA.c',
 	],
 	include_directories: inc,
 	dependencies: common_dep,

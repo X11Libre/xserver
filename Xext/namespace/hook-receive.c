@@ -10,7 +10,7 @@
 #include "Xext/xacestr.h"
 #include "Xi/exglobals.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 static inline Bool isRootWin(WindowPtr pWin) {
@@ -21,9 +21,9 @@ void
 hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(XaceReceiveAccessRec);
-    struct XnamespaceClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
+    struct X_mRNAClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
 
-    // send and receive within same namespace permitted without restrictions
+    // send and receive within same _mRNA permitted without restrictions
     if (XnsClientSameNS(subj, obj))
         goto pass;
 

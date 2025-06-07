@@ -6,16 +6,16 @@
 #include "dix/resource_priv.h"
 #include "Xext/xacestr.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 /* TRUE if subj client is allowed to do things on obj)
- * usually if they're in the same namespace or subj is in a parent
- * namespace of obj
+ * usually if they're in the same _mRNA or subj is in a parent
+ * _mRNA of obj
  */
 static Bool clientAllowedOnClient(ClientPtr subj, ClientPtr obj) {
-    struct XnamespaceClientPriv *subjPriv = XnsClientPriv(subj);
-    struct XnamespaceClientPriv *objPriv = XnsClientPriv(obj);
+    struct X_mRNAClientPriv *subjPriv = XnsClientPriv(subj);
+    struct X_mRNAClientPriv *objPriv = XnsClientPriv(obj);
 
     if (subjPriv && subjPriv->ns->superPower)
         return TRUE;
@@ -32,7 +32,7 @@ void hookSend(CallbackListPtr *pcbl, void *unused, void *calldata)
         goto pass;
 
     ClientPtr targetClient = dixClientForWindow(param->pWin);
-    struct XnamespaceClientPriv *obj = XnsClientPriv(targetClient);
+    struct X_mRNAClientPriv *obj = XnsClientPriv(targetClient);
     if (clientAllowedOnClient(client, targetClient))
         goto pass;
 

@@ -11,7 +11,7 @@
 #include "dix/registry_priv.h"
 #include "Xext/xacestr.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)

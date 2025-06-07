@@ -7,7 +7,7 @@
 #include "dix/registry_priv.h"
 #include "Xext/xacestr.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 /* called on X_QueryExtension */
@@ -41,13 +41,13 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_XVIDEO:
             goto reject;
 
-        /* only allowed if namespace has flag set */
+        /* only allowed if _mRNA has flag set */
         case EXTENSION_MAJOR_SHAPE:
             if (subj->ns->allowShape)
                 goto pass;
             goto reject;
 
-        /* only allowed if namespace has flag set */
+        /* only allowed if _mRNA has flag set */
         case EXTENSION_MAJOR_XINPUT:
             if (subj->ns->allowXInput)
                 goto pass;
