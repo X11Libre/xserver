@@ -1568,7 +1568,7 @@ static void
 DeliverEmulatedMotionEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
                            InternalEvent *ev)
 {
-    DeviceEvent motion;
+    InternalEvent motion;
 
     if (ti->num_listeners) {
         ClientPtr client;
@@ -1580,27 +1580,27 @@ DeliverEmulatedMotionEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
             ti->listeners[0].type != TOUCH_LISTENER_POINTER_GRAB)
             return;
 
-        motion = ev->device_event;
-        motion.type = ET_TouchUpdate;
-        motion.detail.button = 0;
+        motion.device_event = ev->device_event;
+        motion.device_event.type = ET_TouchUpdate;
+        motion.device_event.detail.button = 0;
 
-        if (!RetrieveTouchDeliveryData(dev, ti, (InternalEvent*)&motion,
+        if (!RetrieveTouchDeliveryData(dev, ti, &motion,
                                        &ti->listeners[0], &client, &win, &grab,
                                        &mask))
             return;
 
-        DeliverTouchEmulatedEvent(dev, ti, (InternalEvent*)&motion, &ti->listeners[0], client,
+        DeliverTouchEmulatedEvent(dev, ti, &motion, &ti->listeners[0], client,
                                   win, grab, mask);
     }
     else {
         InternalEvent button;
         int converted;
 
-        converted = TouchConvertToPointerEvent(ev, (InternalEvent*)&motion, &button);
+        converted = TouchConvertToPointerEvent(ev, &motion, &button);
 
         BUG_WARN(converted == 0);
         if (converted)
-            ProcessOtherEvent((InternalEvent*)&motion, dev);
+            ProcessOtherEvent(&motion, dev);
     }
 }
 
