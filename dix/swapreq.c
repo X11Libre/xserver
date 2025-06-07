@@ -217,6 +217,8 @@ SProcChangeProperty(ClientPtr client)
     case 32:
         SwapRestL(stuff);
         break;
+    default:
+        break;
     }
     return ((*ProcVector[X_ChangeProperty]) (client));
 }
