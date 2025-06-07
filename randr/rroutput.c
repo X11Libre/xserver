@@ -494,9 +494,9 @@ ProcRRGetOutputInfo(ClientPtr client)
             .nClones = output->numClones,
             .nameLength = output->nameLength
         };
-        extraLen = ((output->numCrtcs +
+        extraLen = (output->numCrtcs +
                      output->numModes + output->numUserModes +
-                     output->numClones + bytes_to_int32(rep.nameLength)) << 2);
+                     output->numClones + bytes_to_int32(rep.nameLength)) << 2;
 
         if (!extraLen)
             goto sendout;
