@@ -647,7 +647,7 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     damage->ext = doDamageCreate(client, &rc, stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
         FOR_NSCREENS_FORWARD(i) {
-            DrawablePtr pDrawable;
+            DrawablePtr pDrawable = NULL;
             DamagePtr pDamage = DamageCreate(PanoramiXDamageReport,
                                              PanoramiXDamageExtDestroy,
                                              DamageReportRawRegion,
