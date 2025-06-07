@@ -217,7 +217,7 @@ static void
 log_window_info(WindowPtr pWin, int depth)
 {
     int i;
-    const char *win_name, *visibility;
+    const char *win_name, *visibility = NULL;
     BoxPtr rects;
 
     for (i = 0; i < (depth << 2); i++)

@@ -1893,9 +1893,9 @@ x86emuOp2_movzx_word_R_RM(u8 X86EMU_UNUSED(op2))
 {
     int mod, rl, rh;
     uint srcoffset;
-    u32 *destreg;
+    u32 *destreg = NULL;
     u32 srcval;
-    u16 *srcreg;
+    u16 *srcreg = NULL;
 
     START_OF_INSTR();
     DECODE_PRINTF("MOVZX\t");
