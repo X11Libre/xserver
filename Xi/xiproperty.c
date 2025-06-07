@@ -272,7 +272,7 @@ get_property(ClientPtr client, DeviceIntPtr dev, Atom property, Atom type,
 
     /* Return type, format, value to client */
     n = (prop_value->format / 8) * prop_value->size;    /* size (bytes) of prop */
-    ind = offset << 2;
+    ind = (unsigned long)offset << 2;
 
     /* If offset is invalid such that it causes "len" to
        be negative, it's a value error. */
