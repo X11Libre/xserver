@@ -526,7 +526,7 @@ QueryFont(FontPtr pFont, xQueryFontReply * pReply, int nProtoCCIStructs)
     }
 
     ninfos = 0;
-    ncols = (unsigned long) (pFont->info.lastCol - pFont->info.firstCol + 1);
+    ncols = (unsigned long)pFont->info.lastCol - pFont->info.firstCol + 1;
     prCI = (xCharInfo *) (prFP);
     for (int r = pFont->info.firstRow;
          ninfos < nProtoCCIStructs && r <= (int) pFont->info.lastRow; r++) {
