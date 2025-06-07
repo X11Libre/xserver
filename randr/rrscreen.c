@@ -420,7 +420,7 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
                   total_modes * bytes_to_int32(SIZEOF(xRRModeInfo)) +
                   bytes_to_int32(total_name_len));
 
-    extraLen = rep.length << 2;
+    extraLen = (unsigned long)rep.length << 2;
     if (extraLen) {
         extra = calloc(1, extraLen);
         if (!extra) {
@@ -539,7 +539,7 @@ rrGetScreenResources(ClientPtr client, Bool query)
                       num_modes * bytes_to_int32(SIZEOF(xRRModeInfo)) +
                       bytes_to_int32(rep.nbytesNames));
 
-        extraLen = rep.length << 2;
+        extraLen = (unsigned long)rep.length << 2;
         if (!extraLen)
             goto finish;
 

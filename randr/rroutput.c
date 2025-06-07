@@ -467,7 +467,7 @@ ProcRRGetOutputInfo(ClientPtr client)
             .subpixelOrder = SubPixelUnknown,
             .nameLength = output->nameLength
         };
-        extraLen = bytes_to_int32(rep.nameLength) << 2;
+        extraLen = (unsigned long)bytes_to_int32(rep.nameLength) << 2;
         if (!extraLen)
             goto sendout;
 

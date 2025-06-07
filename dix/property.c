@@ -592,7 +592,7 @@ ProcGetProperty(ClientPtr client)
  *  Return type, format, value to client
  */
     n = (pProp->format / 8) * pProp->size;      /* size (bytes) of prop */
-    ind = p.longOffset << 2;
+    ind = (unsigned long)p.longOffset << 2;
 
     /* If longOffset is invalid such that it causes "len" to
        be negative, it's a value error. */

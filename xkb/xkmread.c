@@ -647,7 +647,7 @@ ReadXkmIndicators(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
             xkb->names->indicators[wire.indicator - 1] = name;
             if (changes)
                 changes->names.changed_indicators |=
-                    (1 << (wire.indicator - 1));
+                    (1UL << (wire.indicator - 1));
         }
         map = &xkb->indicators->maps[wire.indicator - 1];
         map->flags = wire.flags;
