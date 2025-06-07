@@ -8,7 +8,7 @@
 #include "dix/property_priv.h"
 #include "dix/window_priv.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 static inline Bool winIsRoot(WindowPtr pWin) {
@@ -35,16 +35,16 @@ void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
         return;
     }
 
-    // whitelist anything that goes to caller's own namespace
-    struct XnamespaceClientPriv *obj = XnsClientPriv(owner);
+    // whitelist anything that goes to caller's own _mRNA
+    struct X_mRNAClientPriv *obj = XnsClientPriv(owner);
     if (XnsClientSameNS(subj, obj))
         return;
 
-    // allow access to namespace virtual root
+    // allow access to _mRNA virtual root
     if (param->window == subj->ns->rootWindow->drawable.id)
         return;
 
-    // redirect root window access to namespace's virtual root
+    // redirect root window access to _mRNA's virtual root
     if (dixWindowIsRoot(param->window)) {
         param->window = subj->ns->rootWindow->drawable.id;
         return;

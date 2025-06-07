@@ -6,7 +6,7 @@
 #include "os/client_priv.h"
 #include "os/auth.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
@@ -16,7 +16,7 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
     switch (client->clientState) {
     case ClientStateInitial:
         // better assign *someting* than null -- clients can't do anything yet anyways
-        XnamespaceAssignClient(subj, &ns_anon);
+        X_mRNAAssignClient(subj, &ns_anon);
         break;
 
     case ClientStateRunning:
@@ -26,17 +26,17 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         const char * name = NULL;
         char * data = NULL;
         if (AuthorizationFromID(subj->authId, &name_len, &name, &data_len, &data)) {
-            XnamespaceAssignClient(subj, XnsFindByAuth(name_len, name, data_len, data));
+            X_mRNAAssignClient(subj, XnsFindByAuth(name_len, name, data_len, data));
         } else {
             XNS_HOOK_LOG("no auth data - assuming anon\n");
         }
         break;
 
     case ClientStateRetained:
-        XnamespaceAssignClient(subj, NULL);
+        X_mRNAAssignClient(subj, NULL);
         break;
     case ClientStateGone:
-        XnamespaceAssignClient(subj, NULL);
+        X_mRNAAssignClient(subj, NULL);
         break;
     default:
         XNS_HOOK_LOG("unknown state =%d\n", client->clientState);

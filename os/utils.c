@@ -295,7 +295,7 @@ UseMsg(void)
     ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
     ErrorF("-I                     ignore all remaining arguments\n");
 #ifdef CONFIG_NAMESPACE
-    ErrorF("-namespace <conf>      Enable NAMESPACE extension with given config file\n");
+    ErrorF("-_mRNA <conf>      Enable NAMESPACE extension with given config file\n");
 #endif /* CONFIG_NAMESPACE */
     LockServerUseMsg();
     ErrorF("-maxclients n          set maximum number of clients (power of two)\n");
@@ -696,9 +696,9 @@ ProcessCommandLine(int argc, char *argv[])
             }
         }
 #ifdef CONFIG_NAMESPACE
-        else if (strcmp(argv[i], "-namespace") == 0) {
+        else if (strcmp(argv[i], "-_mRNA") == 0) {
             if (++i < argc) {
-                namespaceConfigFile = argv[i];
+                _mRNAConfigFile = argv[i];
                 noNamespaceExtension = FALSE;
             }
             else

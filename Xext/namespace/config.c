@@ -5,9 +5,9 @@
 
 #include "os/auth.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 
-struct Xnamespace ns_root = {
+struct X_mRNA ns_root = {
     .allowMouseMotion = TRUE,
     .allowShape = TRUE,
     .allowTransparency = TRUE,
@@ -19,7 +19,7 @@ struct Xnamespace ns_root = {
     .superPower = TRUE,
 };
 
-struct Xnamespace ns_anon = {
+struct X_mRNA ns_anon = {
     .builtin = TRUE,
     .name = NS_NAME_ANONYMOUS,
     .refcnt = 1,
@@ -27,17 +27,17 @@ struct Xnamespace ns_anon = {
 
 struct xorg_list ns_list = { 0 };
 
-char *namespaceConfigFile = NULL;
+char *_mRNAConfigFile = NULL;
 
-static struct Xnamespace* select_ns(const char* name)
+static struct X_mRNA* select_ns(const char* name)
 {
-    struct Xnamespace *walk;
+    struct X_mRNA *walk;
     xorg_list_for_each_entry(walk, &ns_list, entry) {
         if (strcmp(walk->name, name)==0)
             return walk;
     }
 
-    struct Xnamespace *newns = calloc(1, sizeof(struct Xnamespace));
+    struct X_mRNA *newns = calloc(1, sizeof(struct X_mRNA));
     newns->name = strdup(name);
     xorg_list_append(&newns->entry, &ns_list);
     return newns;
@@ -68,7 +68,7 @@ static int hex2bin(const char *in, char *out)
  *
  * Load the container config
 */
-static void parseLine(char *line, struct Xnamespace **walk_ns)
+static void parseLine(char *line, struct X_mRNA **walk_ns)
 {
     // trim newline and comments
     char *c1 = strchr(line, '\n');
@@ -85,7 +85,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         return;
 
     // if no "container" statement hasn't been issued yet, use root NS
-    struct Xnamespace * curr = (*walk_ns ? *walk_ns : &ns_root);
+    struct X_mRNA * curr = (*walk_ns ? *walk_ns : &ns_root);
 
     if (strcmp(token, "container") == 0)
     {
@@ -107,7 +107,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 
         struct auth_token *new_token = calloc(1, sizeof(struct auth_token));
         if (new_token == NULL)
-            FatalError("Xnamespace: failed allocating token\n");
+            FatalError("X_mRNA: failed allocating token\n");
 
         new_token->authProto = strdup(token);
         token = strtok(NULL, " ");
@@ -163,29 +163,29 @@ Bool XnsLoadConfig(void)
     xorg_list_append_ndup(&ns_root.entry, &ns_list);
     xorg_list_append_ndup(&ns_anon.entry, &ns_list);
 
-    if (!namespaceConfigFile) {
-        XNS_LOG("no namespace config given - Xnamespace disabled\n");
+    if (!_mRNAConfigFile) {
+        XNS_LOG("no _mRNA config given - X_mRNA disabled\n");
         return FALSE;
     }
 
-    FILE *fp = fopen(namespaceConfigFile, "r");
+    FILE *fp = fopen(_mRNAConfigFile, "r");
     if (fp == NULL) {
-        FatalError("failed loading container config: %s\n", namespaceConfigFile);
+        FatalError("failed loading container config: %s\n", _mRNAConfigFile);
         return FALSE;
     }
 
-    struct Xnamespace *walk_ns = NULL;
+    struct X_mRNA *walk_ns = NULL;
     char linebuf[1024];
     while (fgets(linebuf, sizeof(linebuf), fp) != NULL)
         parseLine(linebuf, &walk_ns);
 
     fclose(fp);
 
-    XNS_LOG("loaded namespace config file: %s\n", namespaceConfigFile);
+    XNS_LOG("loaded _mRNA config file: %s\n", _mRNAConfigFile);
 
-    struct Xnamespace *ns;
+    struct X_mRNA *ns;
     xorg_list_for_each_entry(ns, &ns_list, entry) {
-        XNS_LOG("namespace: \"%s\" \n", ns->name);
+        XNS_LOG("_mRNA: \"%s\" \n", ns->name);
         struct auth_token *at;
         xorg_list_for_each_entry(at, &ns->auth_tokens, entry) {
             XNS_LOG("      auth: \"%s\" \"", at->authProto);
@@ -198,8 +198,8 @@ Bool XnsLoadConfig(void)
     return TRUE;
 }
 
-struct Xnamespace *XnsFindByName(const char* name) {
-    struct Xnamespace *walk;
+struct X_mRNA *XnsFindByName(const char* name) {
+    struct X_mRNA *walk;
     xorg_list_for_each_entry(walk, &ns_list, entry) {
         if (strcmp(walk->name, name)==0)
             return walk;

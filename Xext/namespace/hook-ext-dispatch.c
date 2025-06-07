@@ -15,7 +15,7 @@
 #include "dix/registry_priv.h"
 #include "Xext/xacestr.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
@@ -54,7 +54,7 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
             XNS_HOOK_LOG("BLOCKED unhandled XKEYBOARD call: %s\n", param->ext->name);
             goto reject;
 
-        /* allow if namespace has flag set */
+        /* allow if _mRNA has flag set */
         case EXTENSION_MAJOR_SHAPE:
             if (subj->ns->allowShape)
                 goto pass;

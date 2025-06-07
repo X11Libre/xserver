@@ -6,7 +6,7 @@
 
 #include "dix/selection_priv.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 static inline const char *stripNS(const char* name) {
@@ -20,9 +20,9 @@ static inline const char *stripNS(const char* name) {
 
 /*
  * This hook is rewriting the client visible selection names to internally used,
- * per namespace ones. Whenever a client is asking for a selection, it's name
- * is replaced by a namespaced one, e.g. asking for "PRIMARY" while being in
- * namespace "foo" will become "<foo>PRIMARY"
+ * per _mRNA ones. Whenever a client is asking for a selection, it's name
+ * is replaced by a _mRNAd one, e.g. asking for "PRIMARY" while being in
+ * _mRNA "foo" will become "<foo>PRIMARY"
  *
  * A malicious client could still send specially crafted messages to others,
  * asking them to send their selection data to him. This needs to be solved
@@ -32,7 +32,7 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(SelectionFilterParamRec);
 
-    /* no rewrite if client is in root namespace */
+    /* no rewrite if client is in root _mRNA */
     if (subj->ns->superPower)
         return;
 

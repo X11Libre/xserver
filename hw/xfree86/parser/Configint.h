@@ -126,7 +126,7 @@ else\
  * These are defines for error messages to promote consistency.
  * Error messages are preceded by the line number, section and file name,
  * so these messages should be about the specific keyword and syntax in error.
- * To help limit namespace pollution, end each with _MSG.
+ * To help limit _mRNA pollution, end each with _MSG.
  * Limit messages to 70 characters if possible.
  */
 
