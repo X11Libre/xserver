@@ -628,6 +628,8 @@ FixDeviceValuator(DeviceIntPtr dev, deviceValuator * ev, ValuatorClassPtr v,
     case 1:
         ev->valuator0 = v->axisVal[first];
         break;
+    default:
+        break;
     }
 }
 
@@ -669,6 +671,8 @@ FixDeviceStateNotify(DeviceIntPtr dev, deviceStateNotify * ev, KeyClassPtr k,
             /* fallthrough */
         case 1:
             ev->valuator0 = v->axisVal[first];
+            break;
+        default:
             break;
         }
     }

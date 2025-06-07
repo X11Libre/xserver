@@ -195,6 +195,8 @@ init_raw(DeviceIntPtr dev, RawDeviceEvent *event, Time ms, int type, int detail)
     case XI_TouchEnd:
         event->type = ET_RawTouchEnd;
         break;
+    default:
+        break;
     }
     event->time = ms;
     event->deviceid = dev->id;
