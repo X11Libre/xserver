@@ -47,7 +47,6 @@ and Jim Haggerty of Metheus.
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
 
 #include "dixstruct.h"
 #include "extnsionst.h"
