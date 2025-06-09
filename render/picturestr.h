@@ -27,7 +27,6 @@
 #include <X11/extensions/renderproto.h>
 #include "scrnintstr.h"
 #include "glyphstr.h"
-#include "resource.h"
 #include "privates.h"
 
 typedef struct _DirectFormat {

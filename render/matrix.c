@@ -20,20 +20,7 @@
  * OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
-
-#include "misc.h"
 #include "scrnintstr.h"
-#include "os.h"
-#include "regionstr.h"
-#include "validate.h"
-#include "windowstr.h"
-#include "input.h"
-#include "resource.h"
-#include "cursorstr.h"
-#include "dixstruct.h"
-#include "gcstruct.h"
-#include "servermd.h"
 #include "picturestr.h"
 
 void
