@@ -83,7 +83,6 @@ SOFTWARE.
 
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
-#include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #include "Xext/xvdix_priv.h"
 
@@ -96,7 +95,6 @@ SOFTWARE.
 #include "extnsionst.h"
 #include "dixstruct.h"
 #include "resource.h"
-#include "opaque.h"
 #include "input.h"
 #include "xvdisp.h"
 

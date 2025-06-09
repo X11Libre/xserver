@@ -29,6 +29,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "regionstr.h"
 #include "gcstruct.h"
 #include "xacestr.h"
+#include "xace.h"
 
 CallbackListPtr XaceHooks[XACE_NUM_HOOKS] = { 0 };
 
