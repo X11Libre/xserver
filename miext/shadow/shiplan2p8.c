@@ -32,10 +32,8 @@
 #include    "windowstr.h"
 #include    <X11/fonts/font.h>
 #include    "dixfontstr.h"
-#include    <X11/fonts/fontstruct.h>
 #include    "mi.h"
 #include    "regionstr.h"
-#include    "globals.h"
 #include    "gcstruct.h"
 #include    "shadow.h"
 #include    "fb.h"

@@ -23,7 +23,3 @@
 #define FUNC	shadowUpdateRotate8_270
 #define Data	CARD8
 #define ROTATE	270
-
-#include <dix-config.h>
-
-#include "shrotpack.h"

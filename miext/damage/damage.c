@@ -37,7 +37,6 @@
 #include    "mi.h"
 #include    "mipict.h"
 #include    "regionstr.h"
-#include    "globals.h"
 #include    "gcstruct.h"
 #include    "damage.h"
 #include    "damagestr.h"

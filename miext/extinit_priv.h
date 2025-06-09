@@ -6,7 +6,7 @@
 #ifndef _XSERVER_EXTINIT_PRIV_H
 #define _XSERVER_EXTINIT_PRIV_H
 
-#include "extinit.h"
+#include <X11/Xdefs.h>
 
 /* required by: the 470 and 390 nvidia DDX drivers */
 extern _X_EXPORT Bool noDamageExtension;

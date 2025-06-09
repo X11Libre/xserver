@@ -52,6 +52,8 @@
 #include "xfixesint.h"
 #include "xibarriers.h"
 #include "protocol-versions.h"
+#include "privates.h"
+#include "extnsionst.h"
 
 Bool noXFixesExtension = FALSE;
 

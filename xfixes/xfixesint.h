@@ -49,6 +49,8 @@
 #ifndef _XFIXESINT_H_
 #define _XFIXESINT_H_
 
+#include "dixstruct.h"
+
 #include <X11/extensions/xfixesproto.h>
 #include <X11/Xdefs.h>
 

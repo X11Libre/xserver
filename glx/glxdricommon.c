@@ -35,6 +35,7 @@
 #include <GL/internal/dri_interface.h>
 
 #include "miext/extinit_priv.h"
+#include "extinit.h"
 
 #include <os.h>
 #include "glxserver.h"
