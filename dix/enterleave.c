@@ -629,6 +629,7 @@ FixDeviceValuator(DeviceIntPtr dev, deviceValuator * ev, ValuatorClassPtr v,
         ev->valuator0 = v->axisVal[first];
         break;
     default:
+        assert("ev->num_valuators becomes 0, it's a bug!");
         break;
     }
 }
@@ -673,6 +674,7 @@ FixDeviceStateNotify(DeviceIntPtr dev, deviceStateNotify * ev, KeyClassPtr k,
             ev->valuator0 = v->axisVal[first];
             break;
         default:
+            assert("ev->num_valuators becomes 0, it's a bug!");
             break;
         }
     }
