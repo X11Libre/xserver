@@ -33,13 +33,11 @@ is" without express or implied warranty.
 
 #include "Args.h"
 #include "Color.h"
-#include "Display.h"
 #include "Screen.h"
 #include "XNWindow.h"
 #include "Events.h"
 #include "Keyboard.h"
 #include "Pointer.h"
-#include "mipointer.h"
 
 CARD32 lastEventTime = 0;
 

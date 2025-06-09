@@ -20,8 +20,6 @@ is" without express or implied warranty.
 #include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
 
-#include "screenint.h"
-#include "input.h"
 #include "misc.h"
 #include "scrnintstr.h"
 #include "servermd.h"
@@ -29,7 +27,6 @@ is" without express or implied warranty.
 
 #include "xnest-xcb.h"
 
-#include "Display.h"
 #include "Args.h"
 
 char *xnestDisplayName = NULL;
