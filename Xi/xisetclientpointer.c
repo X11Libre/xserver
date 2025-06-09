@@ -39,11 +39,9 @@
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include "scrnintstr.h"         /* screen structure  */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XI2proto.h>
 #include "extnsionst.h"
-#include "exevents.h"
 #include "exglobals.h"
 #include "xisetclientpointer.h"
 

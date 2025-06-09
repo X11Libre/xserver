@@ -42,7 +42,6 @@
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "mi.h"
-#include "eventstr.h"
 #include "exglobals.h"          /* BadDevice */
 #include "xiallowev.h"
 
