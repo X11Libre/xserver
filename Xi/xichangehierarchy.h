@@ -29,9 +29,7 @@
  *
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+
 
 #ifndef CHDEVHIER_H
 #define CHDEVHIER_H 1

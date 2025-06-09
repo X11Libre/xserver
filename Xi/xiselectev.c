@@ -33,7 +33,6 @@
 
 #include "dixstruct.h"
 #include "windowstr.h"
-#include "exglobals.h"
 #include "inpututils.h"
 #include "xiselectev.h"
 

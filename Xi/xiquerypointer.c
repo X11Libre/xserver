@@ -37,7 +37,6 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
-#include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "os/fmt.h"
@@ -45,7 +44,6 @@
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include "extnsionst.h"
 #include "exglobals.h"
 #include "scrnintstr.h"
 #include "xkbsrv.h"

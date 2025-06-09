@@ -1,7 +1,6 @@
 /* This file generated automatically by xkbcomp */
 /* DO  NOT EDIT */
-#ifdef HAVE_DIX_CONFIG_H
-#endif
+
 
 #ifndef DEFAULT_H
 #define DEFAULT_H 1

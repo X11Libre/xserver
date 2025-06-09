@@ -60,9 +60,7 @@ SOFTWARE.
 #include "dix/input_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "XIstubs.h"
 #include "extnsionst.h"
-#include "exevents.h"
 #include "xace.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
