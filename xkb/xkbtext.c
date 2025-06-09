@@ -1261,7 +1261,7 @@ XkbActionText(XkbDescPtr xkb, XkbAction *action, unsigned format)
 char *
 XkbBehaviorText(XkbDescPtr xkb, XkbBehavior * behavior, unsigned format)
 {
-    char buf[256] = { NULL };
+    char buf[256] = { 0 };
 
     if (format == XkbCFile) {
         if (behavior->type == XkbKB_Default)
