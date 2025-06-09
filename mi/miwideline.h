@@ -31,8 +31,6 @@ from The Open Group.
 #ifndef XSERVER_MIWIDELINE_H
 #define XSERVER_MIWIDELINE_H
 
-#include "mifpoly.h"            /* for ICEIL */
-
 /*
  * Polygon edge description for integer wide-line routines
  */
