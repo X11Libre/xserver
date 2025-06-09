@@ -29,7 +29,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdio.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#include <X11/keysym.h>
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 

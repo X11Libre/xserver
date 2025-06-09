@@ -38,8 +38,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "xkbgeom.h"
 #include <os.h>
 
-#include "xkb/xkbsrv_priv.h"
-
 /***===================================================================***/
 
 /*ARGSUSED*/ int
