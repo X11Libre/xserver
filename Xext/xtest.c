@@ -44,8 +44,6 @@
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -60,7 +58,6 @@
 #include "exglobals.h"
 #include "mipointer.h"
 #include "xserver-properties.h"
-#include "eventstr.h"
 
 Bool noTestExtensions = FALSE;
 

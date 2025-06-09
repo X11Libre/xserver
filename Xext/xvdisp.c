@@ -43,7 +43,6 @@ SOFTWARE.
 #include "gcstruct.h"
 #include "dixstruct.h"
 #include "resource.h"
-#include "opaque.h"
 #ifdef CONFIG_MITSHM
 #include <X11/extensions/shmproto.h>
 #include "shmint.h"

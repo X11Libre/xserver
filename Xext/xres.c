@@ -4,7 +4,6 @@
 
 #include <dix-config.h>
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <X11/X.h>
@@ -22,15 +21,9 @@
 #include "os.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "swaprep.h"
-#include "pixmapstr.h"
-#include "windowstr.h"
-#include "gcstruct.h"
 #include "protocol-versions.h"
 #include "list.h"
-#include "misc.h"
 #include "hashtable.h"
-#include "picturestr.h"
 #include "compint.h"
 
 Bool noResExtension = FALSE;

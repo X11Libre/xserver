@@ -43,7 +43,6 @@ Equipment Corporation.
 #include "scrnintstr.h"
 #include "opaque.h"
 #include "inputstr.h"
-#include "migc.h"
 #include "misc.h"
 #include "dixstruct.h"
 #include "resource.h"
