@@ -32,11 +32,6 @@
 
 #include <dix-config.h>
 
-#include <ctype.h>
-#include <string.h>
-
-#include "os.h"
-
 /*
  * Find the first occurrence of find in s, ignore case.
  */

@@ -5,7 +5,6 @@
  */
 #include <dix-config.h>
 
-#include <stdlib.h>
 
 #include "os.h"
 

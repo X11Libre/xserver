@@ -93,10 +93,8 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #include "dix/dix_priv.h"
-#include "dix/input_priv.h"
 #include "os/audit.h"
 #include "os/bug_priv.h"
-#include "os/ddx_priv.h"
 #include "os/fmt.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
