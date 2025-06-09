@@ -17,7 +17,6 @@
 #include <dix-config.h>
 #include <limits.h>
 #include <string.h>
-#include <X11/Xfuncproto.h>
 #include "os.h"
 
 int

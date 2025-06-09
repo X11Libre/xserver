@@ -49,10 +49,8 @@ SOFTWARE.
 #include <errno.h>
 #include <stdio.h>
 #include <signal.h>
-#include <X11/X.h>
 #include <X11/Xos.h>
 #ifdef HAVE_DLFCN_H
-#include <dlfcn.h>
 #endif
 #if defined(HAVE_BACKTRACE) && defined(HAVE_EXECINFO_H)
 #include <execinfo.h>
@@ -66,12 +64,9 @@ SOFTWARE.
 
 #include "misc.h"
 #include "os.h"
-#include "opaque.h"
-#include "dixstruct.h"
 #include "dixstruct_priv.h"
 
 #if !defined(WIN32)
-#include <sys/resource.h>
 #endif
 
 /* The actual user defined max number of clients */

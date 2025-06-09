@@ -1,8 +1,6 @@
 #ifndef _XSERVER_OS_XDMCP_H
 #define _XSERVER_OS_XDMCP_H
 
-#include "osdep.h"
-
 typedef Bool (*ValidatorFunc) (ARRAY8Ptr Auth, ARRAY8Ptr Data, int packet_type);
 typedef Bool (*GeneratorFunc) (ARRAY8Ptr Auth, ARRAY8Ptr Data, int packet_type);
 typedef Bool (*AddAuthorFunc) (unsigned name_length, const char *name,

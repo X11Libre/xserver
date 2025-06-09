@@ -5,7 +5,6 @@
  * @brief command line helper functions
  */
 
-#include <dix-config.h>
 
 #include <string.h>
 #include <stdlib.h>

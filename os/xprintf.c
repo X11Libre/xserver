@@ -60,7 +60,6 @@
 
 #include <X11/Xos.h>
 #include "os.h"
-#include <stdarg.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
