@@ -17,8 +17,6 @@ is" without express or implied warranty.
 
 #include <X11/Xdefs.h>
 
-#include <xcb/xcb.h>
-
 extern int xnestFontPrivateIndex;
 
 #define xnestFontPriv(pFont) \

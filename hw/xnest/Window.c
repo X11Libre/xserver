@@ -28,16 +28,13 @@ is" without express or implied warranty.
 #include "windowstr.h"
 #include "pixmapstr.h"
 #include "scrnintstr.h"
-#include "region.h"
 
 #include "xnest-xcb.h"
 
 #include "Display.h"
 #include "Screen.h"
-#include "XNGC.h"
 #include "Drawable.h"
 #include "Color.h"
-#include "Events.h"
 #include "Args.h"
 
 DevPrivateKeyRec xnestWindowPrivateKeyRec;
