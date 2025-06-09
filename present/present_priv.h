@@ -24,18 +24,16 @@
 #define _PRESENT_PRIV_H_
 
 #include "dix-config.h"
-#include <X11/X.h>
+
+#include <X11/extensions/presentproto.h>
+
 #include "scrnintstr.h"
-#include "misc.h"
 #include "list.h"
 #include "windowstr.h"
 #include "dixstruct.h"
 #include "present.h"
 #include <syncsdk.h>
 #include <syncsrv.h>
-#include <xfixes.h>
-#include <randrstr.h>
-#include <inttypes.h>
 #include "dri3.h"
 
 #if 0
