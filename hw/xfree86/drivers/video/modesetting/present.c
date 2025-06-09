@@ -39,6 +39,7 @@
 #include <xf86drm.h>
 #include <xf86str.h>
 #include <present.h>
+#include <X11/extensions/presenttokens.h>
 
 #include "driver.h"
 #include "drmmode_display.h"

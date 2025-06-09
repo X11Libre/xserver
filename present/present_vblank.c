@@ -21,6 +21,8 @@
  */
 #include <dix-config.h>
 
+#include <X11/Xmd.h>
+
 #include "present_priv.h"
 #include <unistd.h>
 

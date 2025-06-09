@@ -35,8 +35,6 @@
 
 #include <dix-config.h>
 
-#include <X11/Xfuncproto.h>
-
 #include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 
