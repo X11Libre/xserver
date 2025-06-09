@@ -23,6 +23,7 @@
 #ifndef _XFIXES_H_
 #define _XFIXES_H_
 
+#include "regionstr.h"
 #include "resource.h"
 
 extern RESTYPE RegionResType;

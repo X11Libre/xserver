@@ -29,10 +29,8 @@
 
 #include    "scrnintstr.h"
 #include    "windowstr.h"
-#include    "dixfontstr.h"
 #include    "mi.h"
 #include    "regionstr.h"
-#include    "globals.h"
 #include    "gcstruct.h"
 #include    "shadow.h"
 
