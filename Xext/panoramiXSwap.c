@@ -30,21 +30,13 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 #include <X11/extensions/panoramiXproto.h>
 
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
-
 #include "misc.h"
-#include "cursor.h"
 #include "cursorstr.h"
 #include "extnsionst.h"
 #include "dixstruct.h"
-#include "gc.h"
-#include "gcstruct.h"
 #include "scrnintstr.h"
 #include "window.h"
 #include "windowstr.h"
-#include "pixmapstr.h"
-#include "globals.h"
 #include "panoramiXh.h"
 
 static int _X_COLD

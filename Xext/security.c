@@ -47,6 +47,7 @@ in this Software without prior written authorization from The Open Group.
 #include "xacestr.h"
 #include "securitysrv.h"
 #include "protocol-versions.h"
+#include "xace.h"
 
 Bool noSecurityExtension = FALSE;
 

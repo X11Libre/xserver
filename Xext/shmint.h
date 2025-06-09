@@ -23,8 +23,6 @@
 #ifndef _SHMINT_H_
 #define _SHMINT_H_
 
-#include <X11/extensions/shmproto.h>
-
 #include "screenint.h"
 #include "pixmap.h"
 #include "gc.h"
