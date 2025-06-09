@@ -120,7 +120,7 @@ SOFTWARE.
 #include "probes.h"
 #include "xdmcp.h"
 
-#define MAX_CONNECTIONS (2^16)
+#define MAX_CONNECTIONS (1<<16)
 
 struct ospoll   *server_poll;
 
