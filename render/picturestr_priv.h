@@ -6,11 +6,7 @@
 #ifndef _XSERVER_PICTURESTR_PRIV_H_
 #define _XSERVER_PICTURESTR_PRIV_H_
 
-#include "picturestr.h"
-#include "scrnintstr.h"
-#include "glyphstr.h"
 #include "resource.h"
-#include "privates.h"
 
 #define PICT_GRADIENT_STOPTABLE_SIZE 1024
 
