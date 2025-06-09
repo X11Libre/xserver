@@ -55,7 +55,6 @@ SOFTWARE.
 #include "mi/mi_priv.h"
 
 #include "regionstr.h"
-#include "region.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"

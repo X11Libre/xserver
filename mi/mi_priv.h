@@ -9,7 +9,6 @@
 #include <X11/Xproto.h>
 #include <X11/Xprotostr.h>
 
-#include "dix/screenint_priv.h"
 #include "include/callback.h"
 #include "include/events.h"
 #include "include/gc.h"

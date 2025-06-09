@@ -51,7 +51,6 @@ SOFTWARE.
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "windowstr.h"
-#include "pixmap.h"
 #include "mi.h"
 #include "miline.h"
 
