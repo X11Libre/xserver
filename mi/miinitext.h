@@ -71,9 +71,7 @@ SOFTWARE.
  * authorization from the copyright holder(s) and author(s).
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+
 
 #ifndef MIINITEXT_H
 #define MIINITEXT_H

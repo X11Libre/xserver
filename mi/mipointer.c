@@ -61,11 +61,9 @@ in this Software without prior written authorization from The Open Group.
 
 #include   "misc.h"
 #include   "windowstr.h"
-#include   "pixmapstr.h"
 #include   "scrnintstr.h"
 #include   "mipointrst.h"
 #include   "cursorstr.h"
-#include   "dixstruct.h"
 #include   "inputstr.h"
 #include   "inpututils.h"
 #include   "eventstr.h"

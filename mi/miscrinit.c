@@ -39,7 +39,6 @@ from The Open Group.
 #include "dix.h"
 #include "miline.h"
 #ifdef MITSHM
-#include <X11/extensions/shm.h>
 #include "shmint.h"
 #endif
 

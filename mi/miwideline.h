@@ -28,8 +28,6 @@ from The Open Group.
 
 /* Author:  Keith Packard, MIT X Consortium */
 
-#include "mifpoly.h"            /* for ICEIL */
-
 /*
  * Polygon edge description for integer wide-line routines
  */
