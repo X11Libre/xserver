@@ -27,8 +27,6 @@
 
 #include <X11/Xdefs.h>
 
-#include "misc.h"                         /* for TRUE/FALSE */
-
 #ifdef HAVE_SIGACTION
 
 #include <sys/types.h>

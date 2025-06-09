@@ -69,7 +69,6 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include "os/Xtrans.h"
 #include "os/Xtransint.h"
-#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,10 +84,7 @@ SOFTWARE.
 #ifdef CSRG_BASED
 #include <sys/param.h>
 #endif
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
 #endif
-#include <sys/uio.h>
 #endif                          /* WIN32 */
 
 #include "dix/dix_priv.h"

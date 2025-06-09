@@ -14,11 +14,8 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
-
 #include <sys/types.h>
 #include <string.h>
-#include "os.h"
 
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the
