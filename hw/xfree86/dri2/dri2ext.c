@@ -51,6 +51,7 @@
 #include "protocol-versions.h"
 
 /* The only xf86 includes */
+#include "extinit.h"
 #include "xf86Module.h"
 #include "xf86Extensions.h"
 

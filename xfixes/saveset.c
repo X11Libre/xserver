@@ -26,6 +26,7 @@
 #include "dix/resource_priv.h"
 
 #include "xfixesint.h"
+#include "windowstr.h"
 
 int
 ProcXFixesChangeSaveSet(ClientPtr client)

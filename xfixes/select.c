@@ -25,6 +25,7 @@
 #include "dix/dix_priv.h"
 #include "dix/selection_priv.h"
 
+#include "windowstr.h"
 #include "xfixesint.h"
 #include "xace.h"
 

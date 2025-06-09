@@ -33,6 +33,7 @@
 #include <X11/extensions/xfixeswire.h>
 
 #include "tests-common.h"
+#include "xibarriers.h"
 
 static void
 _fixes_test_direction(struct PointerBarrier *barrier, int d[4], int permitted)
