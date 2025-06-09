@@ -48,7 +48,6 @@ and Jim Haggerty of Metheus.
 #include "os/client_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
 
 #include "dixstruct.h"
 #include "extnsionst.h"
