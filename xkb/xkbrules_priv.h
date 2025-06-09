@@ -9,8 +9,6 @@
 #include <stdlib.h>
 #include <X11/Xdefs.h>
 
-#include "include/xkbrules.h"
-
 typedef struct _XkbRF_VarDefs {
     const char *model;
     const char *layout;
