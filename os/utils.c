@@ -119,6 +119,10 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <errno.h>
 
+#ifdef XF86BIGFONT
+#include "xf86bigfontsrv.h"
+#endif
+
 Bool CoreDump;
 
 Bool enableIndirectGLX = FALSE;
