@@ -31,7 +31,6 @@
 #include <X11/Xfuncs.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#include <X11/keysym.h>
 #include <X11/extensions/XKMformat.h>
 
 #include "os/log_priv.h"

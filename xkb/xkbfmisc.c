@@ -40,7 +40,6 @@
 #include "xkb/xkbout_priv.h"
 
 #include "misc.h"
-#include "inputstr.h"
 #include "dix.h"
 #include "xkbstr.h"
 #include <xkbsrv.h>
