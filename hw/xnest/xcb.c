@@ -178,7 +178,7 @@ void xnest_set_command(
 
     /* copy arguments into single buffer */
     for (i = 0; i < argc; i++) {
-        strcpy(bp, argv[i]);
+        strncpy(bp, argv[i], strlen(argv[i]) + 1);
         bp += strlen(argv[i]) + 1;
     }
 

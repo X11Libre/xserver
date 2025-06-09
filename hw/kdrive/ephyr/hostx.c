@@ -659,8 +659,8 @@ hostx_init(void)
             class_len = strlen(ephyrResName) + 1 + strlen("Xephyr") + 1;
             char *class_hint = calloc(1, class_len);
             if (class_hint) {
-                strcpy(class_hint, ephyrResName);
-                strcpy(class_hint + strlen(ephyrResName) + 1, "Xephyr");
+                strncpy(class_hint, ephyrResName, strlen(ephyrResName) + 1);
+                strncpy(class_hint + strlen(ephyrResName) + 1, "Xephyr", strlen("Xephyr") + 1);
                 xcb_change_property(HostX.conn,
                                     XCB_PROP_MODE_REPLACE,
                                     scrpriv->win,

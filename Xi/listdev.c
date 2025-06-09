@@ -111,7 +111,7 @@ CopyDeviceName(char **namebuf, const char *name)
 
     if (name) {
         *nameptr++ = strlen(name);
-        strcpy(nameptr, name);
+        strncpy(nameptr, name, strlen(name));
         *namebuf += (strlen(name) + 1);
     }
     else {
