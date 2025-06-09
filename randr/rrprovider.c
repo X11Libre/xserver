@@ -30,8 +30,6 @@
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
 
-#include "swaprep.h"
-
 RESTYPE RRProviderType = 0;
 
 /*

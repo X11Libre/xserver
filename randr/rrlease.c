@@ -28,8 +28,6 @@
 #include "randr/rrdispatch_priv.h"
 #include "os/client_priv.h"
 
-#include "swaprep.h"
-
 RESTYPE RRLeaseType;
 
 /*
