@@ -28,13 +28,10 @@ is" without express or implied warranty.
 
 #include "xnest-xcb.h"
 
-#include "Display.h"
 #include "Screen.h"
 #include "Color.h"
 #include "XNWindow.h"
 #include "Args.h"
-
-#include <xcb/xcb_icccm.h>
 
 DevPrivateKeyRec xnestColormapPrivateKeyRec;
 
