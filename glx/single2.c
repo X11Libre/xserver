@@ -275,14 +275,14 @@ __glXcombine_strings(const char *cext_string, const char *sext_string)
         combo_string = (char *) calloc(1, slen + 2);
         s1 = (char *) calloc(1, slen + 2);
         if (s1)
-            strcpy(s1, sext_string);
+            strncpy(s1, sext_string, slen + 2);
         s2 = cext_string;
     }
     else {
         combo_string = (char *) calloc(1, clen + 2);
         s1 = (char *) calloc(1, clen + 2);
         if (s1)
-            strcpy(s1, cext_string);
+            strncpy(s1, cext_string, clen + 2);
         s2 = sext_string;
     }
     if (!combo_string || !s1) {

@@ -109,7 +109,7 @@ get_prop_string_array(LibHalContext * hal_ctx, const char *udi,
 
         str = ret;
         for (i = 0; props[i]; i++) {
-            strcpy(str, props[i]);
+            strncpy(str, props[i], strlen(props[i]));
             str += strlen(props[i]);
             *str++ = ',';
         }
