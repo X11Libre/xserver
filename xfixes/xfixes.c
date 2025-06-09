@@ -48,7 +48,9 @@
 #include "miext/extinit_priv.h"
 #include "os/fmt.h"
 
+#include "xfixes.h"
 #include "xfixesint.h"
+#include "xibarriers.h"
 #include "protocol-versions.h"
 
 Bool noXFixesExtension = FALSE;
