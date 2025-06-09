@@ -51,6 +51,8 @@ PERFORMANCE OF THIS SOFTWARE.
 #ifndef _SYNCSRV_H_
 #define _SYNCSRV_H_
 
+#include <X11/extensions/syncproto.h>
+
 #include "list.h"
 #include "misync.h"
 #include "misyncstr.h"
