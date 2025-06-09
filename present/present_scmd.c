@@ -24,8 +24,6 @@
 #include "randr/randrstr_priv.h"
 
 #include "present_priv.h"
-#include <misync.h>
-#include <misyncstr.h>
 
 /*
  * Screen flip mode
