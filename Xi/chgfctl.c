@@ -56,8 +56,6 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>     /* control constants */
 
-#include "exglobals.h"
-
 #include "chgfctl.h"
 
 #define DO_ALL    (-1)

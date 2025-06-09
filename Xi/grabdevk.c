@@ -60,7 +60,6 @@ SOFTWARE.
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include "exglobals.h"
 #include "xace.h"
 #include "grabdev.h"
 #include "grabdevk.h"
