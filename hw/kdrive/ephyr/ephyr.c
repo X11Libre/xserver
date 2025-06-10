@@ -42,7 +42,6 @@
 #include "glamor.h"
 #endif
 #include "ephyr_glamor.h"
-#include "glx_extinit.h"
 #include "xkbsrv.h"
 
 extern Bool ephyr_glamor;
