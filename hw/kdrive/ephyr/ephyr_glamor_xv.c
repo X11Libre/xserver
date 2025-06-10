@@ -29,7 +29,6 @@
 #include "glamor_priv.h"
 
 #include <X11/extensions/Xv.h>
-#include "fourcc.h"
 
 #define NUM_FORMATS 3
 
