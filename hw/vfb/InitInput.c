@@ -31,7 +31,6 @@ from The Open Group.
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/Xos.h>
-#include <X11/keysym.h>
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
@@ -39,8 +38,6 @@ from The Open Group.
 
 #include "scrnintstr.h"
 #include "inputstr.h"
-#include "mipointer.h"
-#include "xkbsrv.h"
 #include "xserver-properties.h"
 #include "exevents.h"
 
