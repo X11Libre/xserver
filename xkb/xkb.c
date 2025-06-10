@@ -6545,7 +6545,7 @@ ProcXkbGetDeviceInfo(ClientPtr client)
         walk += sizeof(xkbActionWireDesc)*rep.nBtnsRtrn;
     }
 
-    length -= sz;
+    length -= walk - buf;
 
     if (nDeviceLedFBs > 0) {
         status = FillDeviceLedFBs(dev, ledClass, ledID, length, walk, client);
@@ -6559,7 +6559,7 @@ ProcXkbGetDeviceInfo(ClientPtr client)
         return BadLength;
     }
 
-    WriteToClient(client, sizeof(buf), &buf);
+    WriteToClient(client, sz, buf);
     return Success;
 }
 
