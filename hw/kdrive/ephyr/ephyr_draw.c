@@ -29,7 +29,6 @@
 
 #include "ephyr.h"
 #include "exa_priv.h"
-#include "fbpict.h"
 
 #define EPHYR_TRACE_DRAW 0
 

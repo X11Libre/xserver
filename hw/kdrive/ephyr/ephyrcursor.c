@@ -32,7 +32,6 @@
 #include "mi/mipointer_priv.h"
 
 #include "ephyr.h"
-#include "ephyrlog.h"
 #include "hostx.h"
 #include "cursorstr.h"
 
