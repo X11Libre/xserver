@@ -34,6 +34,7 @@
 #include "assert.h"
 
 #include "protocol-common.h"
+#include "tests.h"
 
 ClientRec client_window;
 

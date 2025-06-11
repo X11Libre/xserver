@@ -25,6 +25,7 @@
 #undef NDEBUG
 
 #include <dix-config.h>
+#include "tests.h"
 
 /*
  * Protocol testing for XIQueryVersion request and reply.
@@ -45,7 +46,6 @@
 #include "dix/exevents_priv.h"
 #include "miext/extinit_priv.h"            /* for XInputExtensionInit */
 
-#include "inputstr.h"
 #include "scrnintstr.h"
 #include "xiqueryversion.h"
 #include "protocol-common.h"

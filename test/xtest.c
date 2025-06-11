@@ -41,7 +41,6 @@
 #include "exevents.h"
 #include "xkbsrv.h"
 #include "xserver-properties.h"
-#include "syncsrv.h"
 #include "tests-common.h"
 
 /**

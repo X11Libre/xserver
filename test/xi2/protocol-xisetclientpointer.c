@@ -40,8 +40,6 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2proto.h>
 
-#include "miext/extinit_priv.h"            /* for XInputExtensionInit */
-
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
@@ -50,6 +48,7 @@
 #include "exglobals.h"
 
 #include "protocol-common.h"
+#include "tests.h"
 
 extern ClientRec client_window;
 static ClientRec client_request;
