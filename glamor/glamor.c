@@ -36,11 +36,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "glamor_debug.h"
 #include "dix/screen_hooks_priv.h"
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
-#include "mipict.h"
+#include "glamor_font.h"
+#include "glamor_utils.h"
 
 DevPrivateKeyRec glamor_screen_private_key;
 DevPrivateKeyRec glamor_pixmap_private_key;

@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "glamor_priv.h"
+#include "glamor_utils.h"
 #include "misyncshm.h"
 #include "misyncstr.h"
 

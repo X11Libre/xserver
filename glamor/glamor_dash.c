@@ -26,8 +26,8 @@
 #include "glamor_priv.h"
 #include "glamor_program.h"
 #include "glamor_transform.h"
-#include "glamor_transfer.h"
 #include "glamor_prepare.h"
+#include "glamor_utils.h"
 
 static const char dash_vs_vars[] =
     "in vec3 primitive;\n"

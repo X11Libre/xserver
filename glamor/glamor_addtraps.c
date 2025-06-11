@@ -25,9 +25,10 @@
  *    Zhigang Gong <zhigang.gong@gmail.com>
  *
  */
-#include <dix-config.h>
 
 #include "glamor_priv.h"
+#include "fbpict.h"
+#include "glamor_prepare.h"
 
 void
 glamor_add_traps(PicturePtr pPicture,

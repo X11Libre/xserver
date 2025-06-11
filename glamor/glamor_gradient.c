@@ -31,7 +31,9 @@
  */
 #include <dix-config.h>
 
+#include "glamor_debug.h"
 #include "glamor_priv.h"
+#include "glamor_utils.h"
 
 #define LINEAR_SMALL_STOPS (6 + 2)
 #define LINEAR_LARGE_STOPS (16 + 2)
