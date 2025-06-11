@@ -7,7 +7,6 @@
 #endif
 
 #include "xf86.h"
-#include "xf86Pci.h"
 #define _INT10_PRIVATE
 #include "xf86int10_priv.h"
 #include <x86emu.h>

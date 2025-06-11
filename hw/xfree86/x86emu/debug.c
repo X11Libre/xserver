@@ -38,7 +38,6 @@
 ****************************************************************************/
 
 #include "x86emu/regs.h"
-#include "x86emu/x86emui.h"
 #ifndef NO_SYS_HEADERS
 #endif
 

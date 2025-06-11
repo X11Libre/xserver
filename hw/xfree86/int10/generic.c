@@ -14,11 +14,12 @@
 #include "compiler.h"
 #define _INT10_PRIVATE
 #include "xf86int10_priv.h"
-#include "Pci.h"
 
 #define ALLOC_ENTRIES(x) ((V_RAM / x) - 1)
 
 #include <string.h>             /* needed for memmove */
+
+#include "xf86Pci.h"
 
 static __inline__ uint32_t
 ldl_u(uint32_t * p)
