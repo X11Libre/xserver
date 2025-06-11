@@ -342,13 +342,11 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
         if (!pProp)
             return BadAlloc;
         unsigned char *data = calloc(1, totalSize);
-        if (totalSize) {
-            if (!data) {
-                dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
-                return BadAlloc;
-            }
-            memcpy(data, value, totalSize);
+        if (!data) {
+            dixFreeObjectWithPrivates(pProp, PRIVATE_PROPERTY);
+            return BadAlloc;
         }
+        memcpy(data, value, totalSize);
         pProp->propertyName = property;
         pProp->type = type;
         pProp->format = format;
@@ -381,11 +379,9 @@ dixChangeWindowProperty(ClientPtr pClient, WindowPtr pWin, Atom property,
 
         if (mode == PropModeReplace) {
             unsigned char *data = calloc(1, totalSize);
-            if (totalSize) {
-                if (!data)
-                    return BadAlloc;
-                memcpy(data, value, totalSize);
-            }
+            if (!data)
+                return BadAlloc;
+            memcpy(data, value, totalSize);
             pProp->data = data;
             pProp->size = len;
             pProp->type = type;

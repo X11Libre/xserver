@@ -379,10 +379,12 @@ TouchEventHistoryAllocate(TouchPointInfoPtr ti)
         return TRUE;
 
     ti->history = calloc(TOUCH_HISTORY_SIZE, sizeof(*ti->history));
+    if (!ti->history)
+        return FALSE;
+
     ti->history_elements = 0;
-    if (ti->history)
-        ti->history_size = TOUCH_HISTORY_SIZE;
-    return ti->history != NULL;
+    ti->history_size = TOUCH_HISTORY_SIZE;
+    return TRUE;
 }
 
 void
