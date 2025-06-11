@@ -1,6 +1,4 @@
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+
 
 #ifndef _glxcmds_h_
 #define _glxcmds_h_

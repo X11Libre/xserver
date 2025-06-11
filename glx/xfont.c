@@ -33,12 +33,9 @@
 #include "dix/dix_priv.h"
 
 #include "glxserver.h"
-#include "glxutil.h"
-#include "unpack.h"
+#include "glxcontext.h"
 #include "indirect_dispatch.h"
 #include <GL/gl.h>
-#include <pixmapstr.h>
-#include <windowstr.h>
 #include <dixfontstr.h>
 
 /*

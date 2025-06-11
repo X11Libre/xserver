@@ -26,8 +26,8 @@
 
 #include <X11/Xfuncproto.h>
 #include <GL/gl.h>
-#include "indirect_size_get.h"
 #include "glxserver.h"
+#include "indirect_size_get.h"
 #include "indirect_util.h"
 #include "indirect_size.h"
 
