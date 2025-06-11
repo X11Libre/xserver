@@ -38,12 +38,9 @@
 #include "os.h"
 #include "windowstr.h"
 #include "propertyst.h"
-#include "xf86_priv.h"
 #include "xf86Priv.h"
 #include "xf86Parser.h"
 #include "xf86Xinput.h"
-#include "xf86InPriv.h"
-#include "xf86Config.h"
 
 /* Globals that video drivers may access */
 

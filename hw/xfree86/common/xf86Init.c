@@ -49,7 +49,6 @@
 #include <X11/Xproto.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/XI.h>
-#include <X11/extensions/XIproto.h>
 
 #include "config/dbus-core.h"
 #include "config/hotplug_priv.h"
@@ -69,7 +68,6 @@
 #include "xf86VGAarbiter_priv.h"
 #include "loaderProcs.h"
 
-#include "xf86Module_priv.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
 #include "xf86Config.h"
@@ -78,14 +76,12 @@
 #include "xf86cmap.h"
 #include "xorgVersion.h"
 #include "mipointer.h"
-#include "xf86Extensions.h"
-#include "xf86DDC.h"
 #include "xf86Xinput.h"
-#include "xf86InPriv.h"
 #include "xf86Crtc.h"
 #include "picturestr.h"
 #include "xf86Bus.h"
 #include "globals.h"
+#include "xf86pciBus.h"
 #include "xserver-properties.h"
 
 #ifdef DPMSExtension

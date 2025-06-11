@@ -22,15 +22,11 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
-#include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-#include <X11/Xatom.h>
 #include <X11/extensions/render.h>
-#include <X11/extensions/dpmsconst.h>
 
 #include "dix/dix_priv.h"
 #include "mi/mi_priv.h"
@@ -40,7 +36,6 @@
 #include "windowstr.h"
 #include "xf86Crtc.h"
 #include "xf86Modes.h"
-#include "xf86RandR12.h"
 
 void
 xf86RotateCrtcRedisplay(xf86CrtcPtr crtc, PixmapPtr dst_pixmap,

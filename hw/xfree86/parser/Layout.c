@@ -60,6 +60,8 @@
 #include "xf86tokens.h"
 #include "Configint.h"
 #include <string.h>
+
+#include "configProcs.h"
 #include "optionstr.h"
 
 /* Needed for auto server layout */

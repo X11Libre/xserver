@@ -26,7 +26,6 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <math.h>
@@ -39,20 +38,15 @@
 #include "dix/screen_hooks_priv.h"
 #include "mi/mi_priv.h"
 
-#include "misc.h"
 #include "scrnintstr.h"
 #include "resource.h"
 
 #include "xf86.h"
-#include "xf86_OSproc.h"
 #include "xf86str.h"
-#include "micmap.h"
 #include "xf86RandR12_priv.h"
 #include "xf86Crtc.h"
 
 #ifdef XFreeXDGA
-#include <X11/extensions/xf86dgaproto.h>
-#include "dgaproc.h"
 #include "dgaproc_priv.h"
 #endif
 

@@ -1,6 +1,5 @@
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <string.h>
@@ -13,7 +12,6 @@
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "scrnintstr.h"
-#include "pixmapstr.h"
 #include "windowstr.h"
 #include "xf86str.h"
 #include "cursorstr.h"

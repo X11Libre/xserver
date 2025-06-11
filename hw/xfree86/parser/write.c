@@ -57,8 +57,8 @@
 
 #include "os.h"
 #include "xf86Parser_priv.h"
-#include "xf86tokens.h"
 #include "Configint.h"
+#include "configProcs.h"
 
 #include <unistd.h>
 #include <sys/types.h>

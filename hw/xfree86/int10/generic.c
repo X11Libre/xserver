@@ -4,20 +4,16 @@
  *                 Copyright 1999 Egbert Eich
  */
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
-#include <errno.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "xf86.h"
-#include "xf86_OSproc.h"
 #include "xf86Bus.h"
 #include "compiler.h"
 #define _INT10_PRIVATE
 #include "xf86int10_priv.h"
-#include "int10Defines.h"
 #include "Pci.h"
 
 #define ALLOC_ENTRIES(x) ((V_RAM / x) - 1)

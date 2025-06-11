@@ -55,8 +55,6 @@
 #include <X11/Xfuncproto.h>
 #endif
 
-#include <pixman.h>             /* for uint*_t types */
-
 /* Allow drivers to use the GCC-supported __inline__ and/or __inline. */
 #ifndef __inline__
 #if defined(__GNUC__)
@@ -229,8 +227,6 @@ extern _X_EXPORT unsigned int inl(unsigned int port);
 #endif                          /* __NetBSD__ */
 
 #elif defined(__amd64__) || defined(__i386__) || defined(__ia64__)
-
-#include <inttypes.h>
 
 static __inline__ void
 outb(unsigned short port, unsigned char val)

@@ -37,7 +37,6 @@
 #include "xorgVersion.h"
 #include <xserver-properties.h>
 #include <os.h>
-#include <X11/Xatom.h>
 
 #include <sys/socket.h>
 #include <sys/stat.h>

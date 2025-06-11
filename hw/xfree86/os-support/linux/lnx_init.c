@@ -24,17 +24,14 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <errno.h>
-#include <X11/X.h>
 #include <X11/Xmd.h>
 
 #include "os/cmdline.h"
 #include "os/osdep.h"
 
-#include "compiler.h"
 #include "linux.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"

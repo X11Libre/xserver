@@ -40,7 +40,6 @@
 #include "xf86_priv.h"
 #include "xf86platformBus.h"
 #include "xf86Xinput_priv.h"
-#include "xf86Priv.h"
 #include "globals.h"
 
 #include "systemd-logind.h"

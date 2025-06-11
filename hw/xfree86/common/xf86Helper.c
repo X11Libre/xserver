@@ -42,7 +42,6 @@
 #include <X11/X.h>
 
 #include "dix/dix_priv.h"
-#include "dix/input_priv.h"
 #include "mi/mi_priv.h"
 #include "os/log_priv.h"
 
@@ -51,7 +50,6 @@
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "propertyst.h"
-#include "gcstruct.h"
 #include "loaderProcs.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
@@ -62,7 +60,6 @@
 #include "xf86Xinput_priv.h"
 #include "xf86InPriv.h"
 #include "xf86Config.h"
-#include "mivalidate.h"
 #include "xf86Module_priv.h"
 
 /* For xf86GetClocks */
