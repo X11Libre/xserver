@@ -201,18 +201,18 @@ GrabPtr
 AllocGrab(const GrabPtr src)
 {
     GrabPtr grab = calloc(1, sizeof(GrabRec));
+    if (!grab)
+        return NULL;
 
-    if (grab) {
-        grab->xi2mask = xi2mask_new();
-        if (!grab->xi2mask) {
-            free(grab);
-            grab = NULL;
-        }
-        else if (src && !CopyGrab(grab, src)) {
-            free(grab->xi2mask);
-            free(grab);
-            grab = NULL;
-        }
+    grab->xi2mask = xi2mask_new();
+    if (!grab->xi2mask) {
+        free(grab);
+        grab = NULL;
+    }
+    else if (src && !CopyGrab(grab, src)) {
+        free(grab->xi2mask);
+        free(grab);
+        grab = NULL;
     }
 
     return grab;
@@ -352,15 +352,17 @@ DeleteDetailFromMask(Mask *pDetailMask, unsigned int detail)
     int i;
 
     Mask *mask = calloc(MasksPerDetailMask, sizeof(Mask));
-    if (mask) {
-        if (pDetailMask)
-            for (i = 0; i < MasksPerDetailMask; i++)
-                mask[i] = pDetailMask[i];
-        else
-            for (i = 0; i < MasksPerDetailMask; i++)
-                mask[i] = ~0L;
-        BITCLEAR(mask, detail);
-    }
+    if (!mask)
+        return NULL;
+
+    if (pDetailMask)
+        for (i = 0; i < MasksPerDetailMask; i++)
+            mask[i] = pDetailMask[i];
+    else
+        for (i = 0; i < MasksPerDetailMask; i++)
+            mask[i] = ~0L;
+    BITCLEAR(mask, detail);
+
     return mask;
 }
 
