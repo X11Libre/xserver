@@ -13,7 +13,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define PRIVATES_H 1
 
 #include <X11/Xdefs.h>
-#include <X11/Xosdefs.h>
 #include <X11/Xfuncproto.h>
 #include <assert.h>
 #include "misc.h"

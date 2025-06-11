@@ -10,8 +10,8 @@
 
 #include "include/colormap.h"
 #include "include/colormapst.h"
-#include "include/dix.h"
 #include "include/window.h"
+#include "privates.h"
 
 /* Values for the flags field of a colormap. These should have 1 bit set
  * and not overlap */
