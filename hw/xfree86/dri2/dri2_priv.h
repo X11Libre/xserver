@@ -5,8 +5,6 @@
 #ifndef _XSERVER_DRI2_PRIV_H_
 #define _XSERVER_DRI2_PRIV_H_
 
-#include "dri2.h"
-
 extern CARD8 dri2_major;        /* version of DRI2 supported by DDX */
 extern CARD8 dri2_minor;
 

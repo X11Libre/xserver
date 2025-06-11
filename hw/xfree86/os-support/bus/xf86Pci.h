@@ -102,9 +102,7 @@
 
 #ifndef _XF86PCI_H
 #define _XF86PCI_H 1
-#include <X11/Xarch.h>
 #include <X11/Xfuncproto.h>
-#include "misc.h"
 #include <pciaccess.h>
 
 /*

@@ -46,7 +46,6 @@
 #include "x86emu/debug.h"
 #include "x86emu/prim_ops.h"
 #ifndef NO_SYS_HEADERS
-#include <string.h>
 #endif
 
 #ifdef __GNUC__

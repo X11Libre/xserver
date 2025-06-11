@@ -41,7 +41,6 @@ _X_EXPORT XF86ModuleData fbdevhwModuleData = {
 
 #include <fcntl.h>
 #include <errno.h>
-#include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -40,6 +40,7 @@
 #define __X86EMU_DEBUG_H
 
 #include <X11/Xfuncproto.h>
+#include <x86emu/types.h>
 
 /*---------------------- Macros and type definitions ----------------------*/
 

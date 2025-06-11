@@ -2,9 +2,6 @@
 #ifndef __DGAPROC_H
 #define __DGAPROC_H
 
-#include <X11/Xproto.h>
-#include "pixmap.h"
-
 #define DGA_CONCURRENT_ACCESS	0x00000001
 #define DGA_FILL_RECT		0x00000002
 #define DGA_BLIT_RECT		0x00000004

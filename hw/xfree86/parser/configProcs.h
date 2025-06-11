@@ -138,7 +138,6 @@ void
 xf86freeExtensions(XF86ConfExtensionsPtr ptr);
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #ifndef HAVE_XORG_CONFIG_H

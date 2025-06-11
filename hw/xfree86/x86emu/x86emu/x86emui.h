@@ -61,13 +61,6 @@
 #endif
 
 #include "x86emu.h"
-#include "x86emu/regs.h"
-#include "x86emu/debug.h"
-#include "x86emu/decode.h"
-#include "x86emu/ops.h"
-#include "x86emu/prim_ops.h"
-#include "x86emu/fpu.h"
-#include "x86emu/fpu_regs.h"
 
 #ifndef NO_SYS_HEADERS
 #include <stdio.h>

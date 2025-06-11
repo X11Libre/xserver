@@ -54,8 +54,9 @@
 #ifdef  __cplusplus
 extern "C" {                    /* Use "C" linkage when in C++ mode */
 #endif
+#include "types.h"
 
-    void x86emu_intr_raise(u8 type);
+void x86emu_intr_raise(u8 type);
     void fetch_decode_modrm(int *mod, int *regh, int *regl);
     u8 fetch_byte_imm(void);
     u16 fetch_word_imm(void);

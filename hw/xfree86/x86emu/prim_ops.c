@@ -100,6 +100,9 @@
 #include <stdlib.h>
 
 #define	PRIM_OPS_NO_REDEFINE_ASM
+#include "x86emu/debug.h"
+#include "x86emu/decode.h"
+#include "x86emu/regs.h"
 #include "x86emu/x86emui.h"
 
 #if defined(__GNUC__)

@@ -100,15 +100,12 @@
  * from xf86Pci.h.  Drivers should not use this file.
  */
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #ifndef _PCI_H
 #define _PCI_H 1
 
 #include <X11/Xdefs.h>
-
-#include "xf86Pci.h"
 
 /*
  * Global Definitions
