@@ -39,6 +39,7 @@
 #define _XF86DRI_SERVER_
 #include <xf86.h>
 #include <dri2.h>
+#include <X11/extensions/dri2tokens.h>
 
 #include "glxserver.h"
 #include "glxcontext.h"
