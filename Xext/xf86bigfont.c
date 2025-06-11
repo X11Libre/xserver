@@ -533,7 +533,8 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
         xXF86BigfontQueryFontReply rep = {
             .type = X_Reply,
-            .length = bytes_to_int32(buflength),
+            .length = bytes_to_int32(sizeof(xXF86BigfontQueryFontReply)
+                                     - sizeof(xGenericReply) + rlength),
             .sequenceNumber = client->sequence,
             .minBounds = pFont->info.ink_minbounds,
             .maxBounds = pFont->info.ink_maxbounds,
