@@ -41,6 +41,8 @@
 #include "syncsrv.h"
 #include "protocol-common.h"
 
+#include "tests.h"
+
 struct devices devices;
 ScreenRec screen;
 WindowRec root;
