@@ -46,8 +46,6 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include <X11/keysym.h>
-
 #include "dix/dix_priv.h"
 #include "include/dix.h"
 

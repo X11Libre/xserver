@@ -50,13 +50,11 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
 
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
 #include "os/osdep.h"
-#include "os/bug_priv.h"
 
 #include "misc.h"
 #include "dix.h"

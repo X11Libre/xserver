@@ -48,9 +48,7 @@
 #include "eventstr.h"
 #include "exglobals.h"
 #include "inpututils.h"
-#include "xiquerydevice.h"
 #include "xkbsrv.h"
-#include "inpututils.h"
 
 static int countValuators(DeviceEvent *ev, int *first);
 static int getValuatorEvents(DeviceEvent *ev, deviceValuator * xv);

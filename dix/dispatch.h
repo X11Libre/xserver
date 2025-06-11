@@ -29,8 +29,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * extension.c, property.c.
  */
 
-#include <dix-config.h>
-
 #ifndef DISPATCH_H
 #define DISPATCH_H 1
 

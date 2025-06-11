@@ -74,7 +74,6 @@ Equipment Corporation.
 ******************************************************************/
 
 #include <dix-config.h>
-#include <version-config.h>
 
 #include <pixman.h>
 #include <X11/X.h>
@@ -84,7 +83,6 @@ Equipment Corporation.
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
-#include "config/hotplug_priv.h"
 #include "dix/atom_priv.h"
 #include "dix/callback_priv.h"
 #include "dix/cursor_priv.h"
@@ -108,18 +106,12 @@ Equipment Corporation.
 #include "windowstr.h"
 #include "resource.h"
 #include "dixstruct.h"
-#include "gcstruct.h"
 #include "extension.h"
-#include "cursorstr.h"
-#include "servermd.h"
 #include "dixfont.h"
-#include "extnsionst.h"
 #include "privates.h"
 #include "exevents.h"
 
 #ifdef DPMSExtension
-#include <X11/extensions/dpmsconst.h>
-#include "dpmsproc.h"
 #endif
 
 extern void Dispatch(void);
