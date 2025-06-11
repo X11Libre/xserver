@@ -54,10 +54,12 @@
 #include "present.h"
 
 #include <cursorstr.h>
+#include <gbm.h>
 
 #include <X11/extensions/dpmsconst.h>
 
 #include "driver.h"
+#include "xf86Modes.h"
 
 static Bool drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height);
 static PixmapPtr drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int height,

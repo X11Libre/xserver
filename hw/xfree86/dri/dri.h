@@ -35,10 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #ifndef _DRI_H_
 
-#include <pciaccess.h>
-
 #include "scrnintstr.h"
-#include "xf86dri.h"
 
 typedef int DRISyncType;
 

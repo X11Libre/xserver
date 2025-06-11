@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <gbm.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -32,7 +33,6 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <time.h>
 
 #include <xf86.h>
 #include <xf86Crtc.h>

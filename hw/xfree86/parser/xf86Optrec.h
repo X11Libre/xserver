@@ -57,13 +57,11 @@
  * and Module setup procs.
  */
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #ifndef _xf86Optrec_h_
 #define _xf86Optrec_h_
 #include <stdio.h>
-#include <string.h>
 #include "xf86Optionstr.h"
 
 #include <X11/Xfuncproto.h>

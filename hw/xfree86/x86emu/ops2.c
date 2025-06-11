@@ -40,6 +40,10 @@
 
 #include <assert.h>
 
+#include "x86emu/debug.h"
+#include "x86emu/decode.h"
+#include "x86emu/prim_ops.h"
+#include "x86emu/regs.h"
 #include "x86emu/x86emui.h"
 
 #undef bswap_32

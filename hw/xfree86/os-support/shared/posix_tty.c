@@ -52,9 +52,7 @@
  *
  */
 
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
+#include "dix-config.h"
 
 #include <errno.h>
 #include <X11/X.h>
@@ -63,7 +61,6 @@
 #include "os/xserver_poll.h"
 
 #include "xf86.h"
-#include "xf86Opt_priv.h"
 #include "xf86Priv.h"
 #include "xf86_OSlib.h"
 

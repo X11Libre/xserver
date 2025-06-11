@@ -41,12 +41,10 @@
 *
 ****************************************************************************/
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include "x86emu.h"
-#include "x86emu/prim_asm.h"
 
 /*-------------------------- Implementation -------------------------------*/
 

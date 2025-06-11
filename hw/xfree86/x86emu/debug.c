@@ -37,12 +37,9 @@
 *
 ****************************************************************************/
 
+#include "x86emu/regs.h"
 #include "x86emu/x86emui.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
 #ifndef NO_SYS_HEADERS
-#include <stdlib.h>
 #endif
 
 /*----------------------------- Implementation ----------------------------*/

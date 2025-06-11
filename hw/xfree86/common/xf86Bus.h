@@ -32,17 +32,14 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #ifndef _XF86_BUS_H
 #define _XF86_BUS_H
 
-#include "xf86pciBus.h"
 #if defined(__sparc__) || defined(__sparc)
 #include "xf86sbusBus.h"
 #endif
-#include "xf86platformBus.h"
 
 typedef struct {
     DriverPtr driver;

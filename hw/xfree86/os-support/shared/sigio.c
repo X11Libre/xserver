@@ -67,7 +67,6 @@
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
-#include "inputstr.h"
 
 #ifdef HAVE_STROPTS_H
 #include <stropts.h>

@@ -30,7 +30,6 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <ctype.h>
@@ -42,7 +41,6 @@
 #include "xf86Priv.h"
 
 #include "xf86Bus.h"
-#include "xf86_OSproc.h"
 
 int
 xf86ClaimNoSlot(DriverPtr drvp, int chipset, GDevPtr dev, Bool active)

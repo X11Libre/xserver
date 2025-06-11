@@ -31,7 +31,6 @@
 #endif
 
 #ifdef XSERVER_PLATFORM_BUS
-#include <errno.h>
 
 #include <pciaccess.h>
 #include <fcntl.h>
@@ -57,6 +56,8 @@
 #include "xf86Xinput_priv.h"
 #include "xf86Config.h"
 #include "xf86Crtc.h"
+#include "xf86MatchDrivers.h"
+#include "xf86pciBus.h"
 
 int platformSlotClaimed;
 

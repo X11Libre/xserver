@@ -121,10 +121,11 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include "Pci.h"
+
+#include "xf86Pci.h"
 #include "../xf86_os_support.h"
 
 Bool

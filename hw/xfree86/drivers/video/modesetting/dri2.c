@@ -44,6 +44,8 @@
 #include "driver.h"
 #include "dri2.h"
 
+#include <X11/extensions/dri2tokens.h>
+
 #ifdef GLAMOR_HAS_GBM
 
 enum ms_dri2_frame_event_type {
