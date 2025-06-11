@@ -33,7 +33,7 @@
 #include <GL/gl.h>
 #include "glxserver.h"
 #include "singlesize.h"
-#include "indirect_size_get.h"
+#include "indirect_size.h"
 
 /*
 ** These routines compute the size of variable-size returned parameters.

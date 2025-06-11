@@ -40,12 +40,14 @@
 #include <xf86.h>
 #include <dri2.h>
 
-#include <GL/glxtokens.h>
 #include "glxserver.h"
+#include "glxcontext.h"
+#include "glxdrawable.h"
 #include "glxutil.h"
 #include "glxdricommon.h"
 
 #include "extension_string.h"
+#include "glx_extinit.h"
 
 typedef struct __GLXDRIscreen __GLXDRIscreen;
 typedef struct __GLXDRIcontext __GLXDRIcontext;

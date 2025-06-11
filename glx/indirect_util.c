@@ -30,11 +30,7 @@
 #include <GL/gl.h>
 #include <GL/glxproto.h>
 
-#include "indirect_size.h"
-#include "indirect_size_get.h"
-#include "indirect_dispatch.h"
 #include "glxserver.h"
-#include "singlesize.h"
 #include "glxext.h"
 #include "indirect_table.h"
 #include "indirect_util.h"

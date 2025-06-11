@@ -39,9 +39,6 @@
 
 #include <os.h>
 #include "glxserver.h"
-#include "glxext.h"
-#include "glxcontext.h"
-#include "glxscreens.h"
 #include "glxdricommon.h"
 
 #define __ATTRIB(attrib, field) \

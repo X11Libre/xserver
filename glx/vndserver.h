@@ -30,7 +30,6 @@
 #ifndef VNDSERVER_H
 #define VNDSERVER_H
 
-#include <dix-config.h>
 #include "glxvndabi.h"
 
 #define GLXContextID CARD32
