@@ -27,6 +27,7 @@
 #include "glamor_transfer.h"
 #include "glamor_prepare.h"
 #include "glamor_transform.h"
+#include "glamor_utils.h"
 
 struct copy_args {
     DrawablePtr         src_drawable;

@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include <stdint.h> /* For INT16_MAX */
 
+#include "glamor_debug.h"
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
+#include "glamor_utils.h"
 
 static void
 glamor_get_transform_extent_from_box(struct pixman_box32 *box,

@@ -48,6 +48,7 @@
 #include "glamor_egl.h"
 #include "glamor_glx_provider.h"
 #include "dri3.h"
+#include "glamor_utils.h"
 
 struct glamor_egl_screen_private {
     EGLDisplay display;

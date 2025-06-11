@@ -32,6 +32,7 @@
 #include "glamor_priv.h"
 #include <dixfontstr.h>
 #include "glamor_transform.h"
+#include "glamor_utils.h"
 
 static const glamor_facet glamor_facet_poly_glyph_blt = {
     .name = "poly_glyph_blt",

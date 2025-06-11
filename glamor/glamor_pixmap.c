@@ -30,7 +30,9 @@
 
 #include <stdlib.h>
 
+#include "glamor_debug.h"
 #include "glamor_priv.h"
+#include "glamor_utils.h"
 /**
  * Sets the offsets to add to coordinates to make them address the same bits in
  * the backing drawable. These coordinates are nonzero only for redirected

@@ -23,7 +23,8 @@
 
 #include "glamor_priv.h"
 #include "glamor_transform.h"
-#include "glamor_transfer.h"
+#include "glamor_prepare.h"
+#include "glamor_utils.h"
 
 glamor_program  fill_spans_progs[4];
 
