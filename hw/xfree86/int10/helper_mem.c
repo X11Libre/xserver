@@ -10,7 +10,6 @@
 #include <stdlib.h>
 
 #include "xf86.h"
-#include "xf86Pci.h"
 #define _INT10_PRIVATE
 #if 0
 #include "int10Defines.h"
