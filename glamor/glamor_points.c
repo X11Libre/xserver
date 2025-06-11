@@ -31,6 +31,7 @@
 
 #include "glamor_priv.h"
 #include "glamor_transform.h"
+#include "glamor_utils.h"
 
 static const glamor_facet glamor_facet_point = {
     .name = "poly_point",

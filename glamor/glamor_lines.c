@@ -26,7 +26,8 @@
 #include "glamor_priv.h"
 #include "glamor_program.h"
 #include "glamor_transform.h"
-#include "glamor_prepare.h"
+#include "glamor_debug.h"
+#include "glamor_utils.h"
 
 static const glamor_facet glamor_facet_poly_lines = {
     .name = "poly_lines",

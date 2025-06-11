@@ -31,6 +31,8 @@
 #include <stdlib.h>
 
 #include "glamor/glamor_priv.h"
+#include "glamor_utils.h"
+#include "glamor_debug.h"
 #include "os/bug_priv.h"
 
 void

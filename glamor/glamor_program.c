@@ -25,6 +25,10 @@
 #include "glamor_transform.h"
 #include "glamor_program.h"
 
+#include <sys/param.h>
+
+#include "glamor_utils.h"
+
 static Bool
 use_solid(DrawablePtr drawable, GCPtr gc, glamor_program *prog, void *arg)
 {

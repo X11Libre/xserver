@@ -26,13 +26,11 @@
 
 #include "os/bug_priv.h"
 
-#include "Xprintf.h"
 #include "glamor_priv.h"
 #include "glamor_transform.h"
 #include "glamor_transfer.h"
+#include "glamor_utils.h"
 #include "glyphstr_priv.h"
-
-#include <mipict.h>
 
 #define DEFAULT_ATLAS_DIM       1024
 
