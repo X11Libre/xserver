@@ -694,7 +694,11 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
                 }
                 if (err == FontNameAlias) {
                     free(resolved);
-                    resolved = XNFalloc(resolvedlen + 1);
+                    resolved = calloc(1, resolvedlen + 1);
+                    if (!resolved) {
+                        err = AllocError;
+                        goto bail;
+                    }
                     memcpy(resolved, tmpname, resolvedlen + 1);
                 }
             }
@@ -748,8 +752,11 @@ doListFontsAndAliases(ClientPtr client, struct list_fonts_closure *c)
                     c->haveSaved = TRUE;
                     free(c->savedName);
                     c->savedName = calloc(1, namelen + 1);
-                    if (c->savedName)
-                        memcpy(c->savedName, name, namelen + 1);
+                    if (!c->savedName) {
+                        err = AllocError;
+                        goto bail;
+                    }
+                    memcpy(c->savedName, name, namelen + 1);
                     c->savedNameLen = namelen;
                     aliascount = 20;
                 }
@@ -976,7 +983,11 @@ doListFontsWithInfo(ClientPtr client, struct list_fonts_with_info_closure *c)
                 c->haveSaved = TRUE;
                 c->savedNumFonts = numFonts;
                 free(c->savedName);
-                c->savedName = XNFalloc(namelen + 1);
+                c->savedName = calloc(1, namelen + 1);
+                if (!c->savedName) {
+                    err = AllocError;
+                    goto bail;
+                }
                 memcpy(c->savedName, name, namelen + 1);
                 aliascount = 20;
             }
