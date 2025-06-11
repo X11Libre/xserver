@@ -97,6 +97,8 @@ exaCreatePixmap_mixed(ScreenPtr pScreen, int w, int h, int depth,
 
         if (w == 1 && h == 1) {
             pExaPixmap->sys_ptr = calloc(1, paddedWidth);
+            if (!pExaPixmap->sys_ptr)
+                return NullPixmap;
 
             /* Set up damage tracking */
             pExaPixmap->pDamage = DamageCreate(exaDamageReport_mixed, NULL,
