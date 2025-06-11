@@ -33,11 +33,7 @@
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
 
-#include "indirect_size.h"
-#include "indirect_size_get.h"
-#include "indirect_dispatch.h"
 #include "glxserver.h"
-#include "singlesize.h"
 #include "glxext.h"
 #include "indirect_table.h"
 #include "indirect_util.h"

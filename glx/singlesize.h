@@ -31,8 +31,6 @@
  * Silicon Graphics, Inc.
  */
 
-#include "indirect_size.h"
-
 extern GLint __glReadPixels_size(GLenum format, GLenum type,
                                  GLint width, GLint height);
 extern GLint __glGetMap_size(GLenum pname, GLenum query);

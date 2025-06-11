@@ -24,6 +24,7 @@
 
 #include <GL/glxtokens.h>
 #include "glxserver.h"
+#include "glxcontext.h"
 #include "glxext.h"
 #include "indirect_dispatch.h"
 #include "opaque.h"
