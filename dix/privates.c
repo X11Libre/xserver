@@ -50,8 +50,6 @@ from The Open Group.
 
 #include <dix-config.h>
 
-#include <stddef.h>
-
 #include "dix/colormap_priv.h"
 
 #include "windowstr.h"
@@ -62,7 +60,6 @@ from The Open Group.
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "extnsionst.h"
-#include "inputstr.h"
 
 static DevPrivateSetRec global_keys[PRIVATE_LAST];
 

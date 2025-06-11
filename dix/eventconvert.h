@@ -25,10 +25,8 @@
 #ifndef _XSERVER_EVENTCONVERT_H_
 #define _XSERVER_EVENTCONVERT_H_
 
-#include <X11/X.h>
 #include <X11/extensions/XIproto.h>
 
-#include "input.h"
 #include "events.h"
 #include "eventstr.h"
 

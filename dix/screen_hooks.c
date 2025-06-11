@@ -9,7 +9,6 @@
 
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
-#include "include/dix.h"
 #include "include/os.h"
 #include "include/scrnintstr.h"
 #include "include/windowstr.h"

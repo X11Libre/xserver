@@ -33,12 +33,9 @@
 #include <limits.h>
 #include <pixman.h>
 #include <X11/X.h>
-#include <X11/keysym.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XI2.h>
-#include <X11/extensions/XIproto.h>
-#include <X11/extensions/XKBproto.h>
 
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
@@ -53,15 +50,12 @@
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "cursorstr.h"
-#include "dixstruct.h"
 #include "globals.h"
 #include "mipointer.h"
 #include "eventstr.h"
-#include "eventconvert.h"
 #include "windowstr.h"
 #include "xkbsrv.h"
 #include "exglobals.h"
-#include "exevents.h"
 #include "extnsionst.h"
 #include "listdev.h"            /* for sizing up DeviceClassesChangedEvent */
 

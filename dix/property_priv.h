@@ -53,7 +53,6 @@ SOFTWARE.
 
 #include <X11/X.h>
 
-#include "dix.h"
 #include "window.h"
 #include "property.h"
 

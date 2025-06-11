@@ -7,7 +7,6 @@
 #define _XSERVER_DIX_SELECTION_PRIV_H
 
 #include <X11/Xdefs.h>
-#include <X11/Xproto.h>
 
 #include "include/dixstruct.h"
 #include "include/privates.h"
