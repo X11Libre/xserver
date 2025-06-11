@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "hashtable.h"
-#include "resource.h"
 
 #include "tests-common.h"
 

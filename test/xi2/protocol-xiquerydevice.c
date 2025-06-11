@@ -30,9 +30,6 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2proto.h>
-#include <X11/Xatom.h>
-
-#include "miext/extinit_priv.h"
 
 #include "inputstr.h"
 #include "exglobals.h"
@@ -42,6 +39,7 @@
 #include "xiquerydevice.h"
 
 #include "protocol-common.h"
+#include "tests.h"
 
 DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
 /*

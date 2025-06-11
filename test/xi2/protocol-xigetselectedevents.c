@@ -51,6 +51,7 @@
 #include "xiselectev.h"
 
 #include "protocol-common.h"
+#include "tests.h"
 
 DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
 DECLARE_WRAP_FUNCTION(AddResource, Bool, XID id, RESTYPE type, void *value);

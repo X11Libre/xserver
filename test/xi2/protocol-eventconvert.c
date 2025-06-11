@@ -36,6 +36,7 @@
 #include "eventstr.h"
 
 #include "protocol-common.h"
+#include "tests.h"
 
 static void
 test_values_XIRawEvent(RawDeviceEvent *in, xXIRawEvent * out, BOOL swap)
