@@ -1,7 +1,4 @@
 #include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <stddef.h>  /* for offsetof() */
 
 #include <xcb/xcbext.h>
 #include <xcb/xkb.h>
