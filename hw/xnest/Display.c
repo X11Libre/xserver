@@ -19,14 +19,11 @@ is" without express or implied warranty.
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
-#include "os/client_priv.h"
 #include "os/osdep.h"
 
-#include "screenint.h"
 #include "input.h"
 #include "misc.h"
 #include "scrnintstr.h"
-#include "servermd.h"
 
 #include "xnest-xcb.h"
 

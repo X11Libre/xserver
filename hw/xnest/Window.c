@@ -31,7 +31,6 @@ is" without express or implied warranty.
 
 #include "xnest-xcb.h"
 
-#include "Display.h"
 #include "Screen.h"
 #include "Drawable.h"
 #include "Color.h"
