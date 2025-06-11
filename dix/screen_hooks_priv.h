@@ -23,7 +23,6 @@
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
 
-#include "include/callback.h" /* CallbackListPtr */
 #include "include/pixmap.h" /* PixmapPtr */
 #include "include/screenint.h" /* ScreenPtr */
 #include "include/window.h" /* WindowPtr */

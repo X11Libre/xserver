@@ -74,7 +74,6 @@ SOFTWARE.
 #include "scrnintstr.h"
 #include "cursorstr.h"
 #include "dixstruct.h"
-#include "ptrveloc.h"
 #include "privates.h"
 #include "xace.h"
 #include "dispatch.h"
@@ -82,8 +81,6 @@ SOFTWARE.
 #include "mipointer.h"
 #include "eventstr.h"
 #include "exglobals.h"
-#include "xiquerydevice.h"      /* for SizeDeviceClasses */
-#include "xiproperty.h"
 #include "enterleave.h"         /* for EnterWindow() */
 #include "xserver-properties.h"
 #include "xichangehierarchy.h"  /* For XISendDeviceHierarchyEvent */

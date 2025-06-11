@@ -7,7 +7,6 @@
 
 #include <X11/X.h>
 
-#include "include/dix.h"
 #include "include/window.h"
 
 /*

@@ -10,9 +10,7 @@
 #include <X11/Xdefs.h>
 #include <X11/Xmd.h>
 
-#include "dix/screenint_priv.h"
 #include "include/cursor.h"
-#include "include/dix.h"
 #include "include/input.h"
 #include "include/window.h"
 

@@ -2,7 +2,6 @@
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  */
-#include <dix-config.h>
 
 #include "dix/dix_priv.h"
 #include "include/dix.h"
