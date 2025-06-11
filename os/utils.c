@@ -105,8 +105,8 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/serverlock.h"
+#include "Xext/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
 #include "xkb/xkbsrv_priv.h"
-
 #include "dixstruct.h"
 #include "picture.h"
 #include "miinitext.h"
