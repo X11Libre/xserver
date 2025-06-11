@@ -1,31 +1,9 @@
 XLibre Xserver
 ===============
 
-Xlibre project's fork of the Xorg xserver, with lots of code cleanups
-and enhanced functionality.
+X11Libre...
 
-That fork was necessary since toxic elements within Xorg projects, moles
-from BigTech, are boycotting any substantial work on Xorg, in order to
-destroy the project, to elimitate competition of their own products.
-Classic "embrace, extend, extinguish" tactics.
-
-Right after first journalists began covering the planned fork Xlibre,
-on June 6th 2025, Redhat employees started a purge on the Xlibre founder's
-gitlab account on freedesktop.org: deleted the git repo, tickets, merge
-requests, etc, and so fired the shot that the whole world heared.
-
-This is an independent project, not at all affiliated with BigTech or any
-of their subsidiaries or tax evasion tools, nor any political activists
-groups, state actors, etc. It's explicitly free of any "DEI" or similar
-discriminatory policies. Anybody who's treating others nicely is welcomed.
-
-It doesn't matter which country you're coming from, your politicial views,
-your race, your sex, your age, your food menu, whether you wear boots or
-heels, whether you're furry or fairy, Conan or McKay, comic character, a
-small furry creature from Alpha Centauri, or just an boring average person.
-Anybody's welcomed, who's interested  in bringing X forward.
-
-Together we'll make X great again!
+A free and open "community and contributor driven" open source fork of xorg in the spirit of the UNIX philosophy.
 
 Upgrade notice
 --------------
