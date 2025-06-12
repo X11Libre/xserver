@@ -573,6 +573,7 @@ int TryClientEvents(ClientPtr pClient,
  * @param count         number of events in xE.
  * @param otherParent   Used for ReparentNotify events.
  */
+_X_EXPORT // exported for nvidia
 enum EventDeliveryState DeliverEvents(WindowPtr pWindow,
                                       xEventPtr events,
                                       size_t nEvents,
