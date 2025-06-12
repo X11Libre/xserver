@@ -11,7 +11,9 @@ extern int PanoramiXPixWidth;
 extern int PanoramiXPixHeight;
 extern RegionRec PanoramiXScreenRegion;
 
-VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
+// exported for nvidia
+_X_EXPORT VisualID PanoramiXTranslateVisualID(int screen, VisualID orig);
+
 void PanoramiXConsolidate(void);
 Bool PanoramiXCreateConnectionBlock(void);
 PanoramiXRes *PanoramiXFindIDByScrnum(RESTYPE, XID, int);
