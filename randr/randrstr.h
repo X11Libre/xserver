@@ -748,6 +748,15 @@ _X_EXPORT /* just for Nvidia legacy */
 Bool RRTransformSetFilter(RRTransformPtr dst, PictFilterPtr filter,
                           xFixed *params, int nparams, int width, int height);
 
+/*
+ * Set whether transforms are allowed on a CRTC
+ *
+ * @param crtc the CRTC to set the flag on
+ * @param transforms TRUE if transforms are allowed
+ */
+_X_EXPORT /* just for Nvidia legacy */
+void RRCrtcSetTransformSupport(RRCrtcPtr crtc, Bool transforms);
+
 #endif                          /* _RANDRSTR_H_ */
 
 /*

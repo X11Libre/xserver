@@ -174,14 +174,6 @@ CARD16 RRVerticalRefresh(xRRModeInfo * mode);
 Bool RRCrtcExists(ScreenPtr pScreen, RRCrtcPtr findCrtc);
 
 /*
- * Set whether transforms are allowed on a CRTC
- *
- * @param crtc the CRTC to set the flag on
- * @param transforms TRUE if transforms are allowed
- */
-void RRCrtcSetTransformSupport(RRCrtcPtr crtc, Bool transforms);
-
-/*
  * Deliver CRTC update event to given client
  *
  * @param pClient the client to send event to
