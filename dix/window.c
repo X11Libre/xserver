@@ -253,7 +253,10 @@ log_window_info(WindowPtr pWin, int depth)
         visibility = "unviewable";
         break;
     }
-    ErrorF(", %s", visibility);
+    if (visibility)
+        ErrorF(", %s", visibility);
+    else
+        ErrorF(", visibility not set!");
 
     if (RegionNotEmpty(&pWin->clipList)) {
         ErrorF(", clip list:");
