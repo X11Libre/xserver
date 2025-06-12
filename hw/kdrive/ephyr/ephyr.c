@@ -820,7 +820,7 @@ ephyrCrossScreen(ScreenPtr pScreen, Bool entering)
 {
 }
 
-ScreenPtr ephyrCursorScreen; /* screen containing the cursor */
+ScreenPtr ephyrCursorScreen = NULL; /* screen containing the cursor */
 
 static void
 ephyrWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
