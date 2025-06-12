@@ -549,7 +549,7 @@ __glXDRIscreenCreateContext(__GLXscreen * baseScreen,
         driShare = NULL;
 
     context = calloc(1, sizeof *context);
-    if (context == NULL) {
+    if (!context) {
         *error = BadAlloc;
         return NULL;
     }
@@ -597,7 +597,7 @@ __glXDRIscreenCreateDrawable(ClientPtr client,
     Bool ret;
 
     private = calloc(1, sizeof *private);
-    if (private == NULL)
+    if (!private)
         return NULL;
 
     private->screen = driScreen;
@@ -934,7 +934,7 @@ __glXDRIscreenProbe(ScreenPtr pScreen)
     OptionInfoPtr options;
 
     screen = calloc(1, sizeof *screen);
-    if (screen == NULL)
+    if (!screen)
         return NULL;
 
     if (!DRI2Connect(serverClient, pScreen, DRI2DriverDRI,
