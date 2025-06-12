@@ -4,7 +4,7 @@
 #include "dix/registry_priv.h"
 #include "include/misc.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 
 #define XNS_HOOK_LOG(...) do { \
         printf("XNS [" HOOK_NAME "] (#%d@%d) {%s} <%s>: ", \
@@ -22,7 +22,7 @@
     if (!client) { \
         /* XNS_LOG("hook %s NULL client\n", HOOK_NAME); */ \
     } \
-    struct XnamespaceClientPriv *subj = XnsClientPriv(client);
+    struct X_mRNAClientPriv *subj = XnsClientPriv(client);
 
 void hookClient(CallbackListPtr *pcbl, void *unused, void *calldata);
 void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata);

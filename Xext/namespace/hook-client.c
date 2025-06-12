@@ -15,13 +15,13 @@
 #include "include/windowstr.h"
 #include "Xext/xacestr.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 void hookClient(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(XaceClientAccessRec);
-    struct XnamespaceClientPriv *obj = XnsClientPriv(param->target);
+    struct X_mRNAClientPriv *obj = XnsClientPriv(param->target);
 
     if (subj->ns->superPower || XnsClientSameNS(subj, obj))
         return;

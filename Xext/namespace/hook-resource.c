@@ -10,7 +10,7 @@
 #include "dix/window_priv.h"
 #include "Xext/xacestr.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 static int checkAllowed(Mask requested, Mask allowed) {
@@ -21,7 +21,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(XaceResourceAccessRec);
     ClientPtr owner = dixLookupXIDOwner(param->id);
-    struct XnamespaceClientPriv *obj = XnsClientPriv(owner);
+    struct X_mRNAClientPriv *obj = XnsClientPriv(owner);
 
     // server can do anything
     if (param->client == serverClient)
@@ -45,7 +45,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (param->rtype == X11_RESTYPE_WINDOW) {
         WindowPtr pWindow = (WindowPtr) param->res;
 
-        /* white-listed operations on namespace's virtual root window */
+        /* white-listed operations on _mRNA's virtual root window */
         if (pWindow == subj->ns->rootWindow) {
             switch (client->majorOp) {
                 case X_DeleteProperty:

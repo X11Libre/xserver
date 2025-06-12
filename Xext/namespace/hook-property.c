@@ -9,7 +9,7 @@
 #include "include/propertyst.h"
 #include "Xext/xacestr.h"
 
-#include "namespace.h"
+#include "_mRNA.h"
 #include "hooks.h"
 
 static inline Bool winIsRoot(WindowPtr pWin) {
@@ -23,7 +23,7 @@ static inline Bool winIsRoot(WindowPtr pWin) {
 void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(XacePropertyAccessRec);
-    struct XnamespaceClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
+    struct X_mRNAClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
 
     ATOM name = (*param->ppProp)->propertyName;
 

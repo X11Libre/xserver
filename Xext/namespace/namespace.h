@@ -18,7 +18,7 @@ struct auth_token {
     XID authId;
 };
 
-struct Xnamespace {
+struct X_mRNA {
     struct xorg_list entry;
     const char *name;
     Bool builtin;
@@ -34,32 +34,32 @@ struct Xnamespace {
 };
 
 extern struct xorg_list ns_list;
-extern struct Xnamespace ns_root;
-extern struct Xnamespace ns_anon;
+extern struct X_mRNA ns_root;
+extern struct X_mRNA ns_anon;
 
-struct XnamespaceClientPriv {
+struct X_mRNAClientPriv {
     Bool isServer;
     XID authId;
-    struct Xnamespace* ns;
+    struct X_mRNA* ns;
 };
 
 #define NS_NAME_ROOT      "root"
 #define NS_NAME_ANONYMOUS "anon"
 
-extern DevPrivateKeyRec namespaceClientPrivKeyRec;
+extern DevPrivateKeyRec _mRNAClientPrivKeyRec;
 
 Bool XnsLoadConfig(void);
-struct Xnamespace *XnsFindByName(const char* name);
-struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken);
-void XnamespaceAssignClient(struct XnamespaceClientPriv *priv, struct Xnamespace *ns);
-void XnamespaceAssignClientByName(struct XnamespaceClientPriv *priv, const char *name);
+struct X_mRNA *XnsFindByName(const char* name);
+struct X_mRNA* XnsFindByAuth(size_t szAuthProto, const char* authProto, size_t szAuthToken, const char* authToken);
+void X_mRNAAssignClient(struct X_mRNAClientPriv *priv, struct X_mRNA *ns);
+void X_mRNAAssignClientByName(struct X_mRNAClientPriv *priv, const char *name);
 
-static inline struct XnamespaceClientPriv *XnsClientPriv(ClientPtr client) {
+static inline struct X_mRNAClientPriv *XnsClientPriv(ClientPtr client) {
     if (client == NULL) return NULL;
-    return dixLookupPrivate(&client->devPrivates, &namespaceClientPrivKeyRec);
+    return dixLookupPrivate(&client->devPrivates, &_mRNAClientPrivKeyRec);
 }
 
-static inline Bool XnsClientSameNS(struct XnamespaceClientPriv *p1, struct XnamespaceClientPriv *p2)
+static inline Bool XnsClientSameNS(struct X_mRNAClientPriv *p1, struct X_mRNAClientPriv *p2)
 {
     if (!p1 && !p2)
         return TRUE;

@@ -71,7 +71,7 @@ typedef uint32_t RESTYPE;
 
 /* types for Resource routines */
 
-// prevent namespace clash with Windows
+// prevent _mRNA clash with Windows
 #define X11_RESTYPE_NONE	((RESTYPE)0)
 #define X11_RESTYPE_WINDOW	((RESTYPE)1|RC_DRAWABLE)
 #define X11_RESTYPE_PIXMAP	((RESTYPE)2|RC_DRAWABLE)

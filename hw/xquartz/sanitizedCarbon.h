@@ -1,6 +1,6 @@
 /*
  * Don't #include any of the AppKit, etc stuff directly since it will
- * pollute the X11 namespace.
+ * pollute the X11 _mRNA.
  */
 
 #ifndef _XQ_SANITIZED_CARBON_H_
