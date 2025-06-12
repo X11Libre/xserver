@@ -346,7 +346,7 @@ ProcListExtensions(ClientPtr client)
         }
         rep.length = bytes_to_int32(total_length);
         buffer = bufptr = calloc(1, total_length);
-        if (!buffer)
+        if (!bufptr || !buffer)
             return BadAlloc;
         for (i = 0; i < NumExtensions; i++) {
             int len;
