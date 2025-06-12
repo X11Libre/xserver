@@ -220,7 +220,7 @@ __glXDRIscreenCreateContext(__GLXscreen * baseScreen,
         driShare = NULL;
 
     context = calloc(1, sizeof *context);
-    if (context == NULL)
+    if (!context)
         return NULL;
 
     context->base.config = glxConfig;
@@ -250,7 +250,7 @@ __glXDRIscreenCreateDrawable(ClientPtr client,
     __GLXDRIdrawable *private;
 
     private = calloc(1, sizeof *private);
-    if (private == NULL)
+    if (!private)
         return NULL;
 
     private->screen = driScreen;
@@ -415,7 +415,7 @@ __glXDRIscreenProbe(ScreenPtr pScreen)
     __GLXDRIscreen *screen;
 
     screen = calloc(1, sizeof *screen);
-    if (screen == NULL)
+    if (!screen)
         return NULL;
 
     screen->base.destroy = __glXDRIscreenDestroy;

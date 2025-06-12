@@ -78,9 +78,9 @@ GlxGetScreen(ScreenPtr pScreen)
 {
     if (pScreen != NULL) {
         GlxScreenPriv *priv = xglvGetScreenPrivate(pScreen);
-        if (priv == NULL) {
+        if (!priv) {
             priv = calloc(1, sizeof(GlxScreenPriv));
-            if (priv == NULL) {
+            if (!priv) {
                 return NULL;
             }
 
@@ -147,17 +147,19 @@ GlxGetClientData(ClientPtr client)
     if (cl == NULL) {
         cl = calloc(1, sizeof(GlxClientPriv)
                 + screenInfo.numScreens * sizeof(GlxServerVendor *));
-        if (cl != NULL) {
-            int i;
-
-            cl->vendors = (GlxServerVendor **) (cl + 1);
-            for (i=0; i<screenInfo.numScreens; i++)
-            {
-                cl->vendors[i] = GlxGetVendorForScreen(NULL, screenInfo.screens[i]);
-            }
-
-            xglvSetClientPrivate(client, cl);
+        if (!cl) {
+            return NULL;
         }
+
+        int i;
+
+        cl->vendors = (GlxServerVendor **) (cl + 1);
+        for (i=0; i<screenInfo.numScreens; i++)
+        {
+            cl->vendors[i] = GlxGetVendorForScreen(NULL, screenInfo.screens[i]);
+        }
+
+        xglvSetClientPrivate(client, cl);
     }
     return cl;
 }
@@ -300,7 +302,11 @@ GlxGetContextTagPrivate(ClientPtr client, GLXContextTag tag)
 static GlxServerImports *
 GlxAllocateServerImports(void)
 {
-    return calloc(1, sizeof(GlxServerImports));
+    GlxServerImports *imports = calloc(1, sizeof(GlxServerImports));
+    if (!imports)
+        return NULL;
+
+    return imports;
 }
 
 static void
