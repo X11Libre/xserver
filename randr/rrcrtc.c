@@ -190,7 +190,7 @@ RRCrtcNotify(RRCrtcPtr crtc,
     /*
      * Copy the new list of outputs into the crtc
      */
-    BUG_RETURN_VAL(outputs == NULL, FALSE);
+    BUG_RETURN_VAL(numOutputs != 0 && outputs == NULL, FALSE);
     memcpy(crtc->outputs, outputs, numOutputs * sizeof(RROutputPtr));
 
     /*
@@ -754,7 +754,7 @@ RRCrtcSet(RRCrtcPtr crtc,
     Bool crtcChanged;
     int  o;
 
-    BUG_RETURN_VAL(outputs == NULL, FALSE);
+    BUG_RETURN_VAL(numOutputs != 0 && outputs == NULL, FALSE);
 
     rrScrPriv(pScreen);
 
