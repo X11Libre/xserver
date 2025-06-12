@@ -32,12 +32,8 @@
 
 #include <string.h>
 #include "glxserver.h"
-#include "glxutil.h"
-#include <GL/glxtokens.h>
 #include <unpack.h>
-#include <pixmapstr.h>
 #include <windowstr.h>
-#include "glxext.h"
 #include "indirect_dispatch.h"
 #include "indirect_table.h"
 #include "indirect_util.h"

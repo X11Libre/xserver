@@ -1,10 +1,6 @@
-
-#include <dix-config.h>
-
 #include "dix/dix_priv.h"
 
 #include <dix.h>
-#include "vndserver.h"
 
 // HACK: The opcode in old glxproto.h has a typo in it.
 #if !defined(X_GLXCreateContextAttribsARB)

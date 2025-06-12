@@ -60,7 +60,6 @@ SOFTWARE.
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"
-#include "exevents.h"
 #include "exglobals.h"
 #include "chgprop.h"
 #include "grabdev.h"

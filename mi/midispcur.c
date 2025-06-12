@@ -44,7 +44,6 @@ in this Software without prior written authorization from The Open Group.
 #include   "regionstr.h"
 #include   "dixstruct.h"
 #include   "scrnintstr.h"
-#include   "servermd.h"
 #include   "mipointer.h"
 #include   "misprite.h"
 #include   "gcstruct.h"

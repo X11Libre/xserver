@@ -22,14 +22,12 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include "dix/dix_priv.h"
 
 #include "xf86_priv.h"
 #include "xf86DDC_priv.h"
-#include "xf86Priv.h"
 #include <X11/Xatom.h>
 #include "property.h"
 #include "propertyst.h"

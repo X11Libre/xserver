@@ -2,8 +2,7 @@
 #define _XSERVER_OS_AUTH_H
 
 #include <X11/X.h>
-
-#include "dix.h"
+#include <X11/Xdefs.h>
 
 #define XAUTH_PROTO_MIT "MIT-MAGIC-COOKIE-1"
 #define XAUTH_PROTO_XDM "XDM-AUTHORIZATION-1"

@@ -28,7 +28,6 @@
 #include "randr/rrdispatch_priv.h"
 #include "os/bug_priv.h"
 
-#include "swaprep.h"
 #include "mipointer.h"
 
 

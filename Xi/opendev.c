@@ -58,10 +58,8 @@ SOFTWARE.
 #include "dix/input_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "XIstubs.h"
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"
-#include "exevents.h"
 
 #include "opendev.h"
 

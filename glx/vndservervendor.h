@@ -30,8 +30,6 @@
 #ifndef VND_SERVER_VENDOR_H
 #define VND_SERVER_VENDOR_H
 
-#include <dix-config.h>
-
 #include "glxvndabi.h"
 #include "list.h"
 

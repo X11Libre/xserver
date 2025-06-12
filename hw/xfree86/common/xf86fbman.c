@@ -25,13 +25,8 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-#include <xorg-config.h>
-
-#include <X11/X.h>
 
 #include "dix/screen_hooks_priv.h"
-
-#include <X11/X.h>
 
 #include "os/log_priv.h"
 

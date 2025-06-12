@@ -58,14 +58,12 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
-#include <limits.h>
 #include "xf86Parser_priv.h"
 
 #if !defined(MAXHOSTNAMELEN)

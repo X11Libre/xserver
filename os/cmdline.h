@@ -5,8 +5,6 @@
 #ifndef _XSERVER_OS_CMDLINE_H
 #define _XSERVER_OS_CMDLINE_H
 
-#include "include/os.h"
-
 #define CHECK_FOR_REQUIRED_ARGUMENTS(num)  \
     do if (((i + num) >= argc) || (!argv[i + num])) {                   \
         UseMsg();                                                       \

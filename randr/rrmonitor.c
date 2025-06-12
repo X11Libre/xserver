@@ -25,8 +25,6 @@
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
 
-#include "swaprep.h"
-
 static Atom
 RRMonitorCrtcName(RRCrtcPtr crtc)
 {

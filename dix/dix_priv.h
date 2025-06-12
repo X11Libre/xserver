@@ -13,21 +13,18 @@
  *  Xserver's module API/ABI.
  */
 
-#include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
 #include <X11/extensions/XI.h>
 
 #include "dix/input_priv.h"
 #include "dix/resource_priv.h"
 
-#include "include/callback.h"
 #include "include/cursor.h"
 #include "include/dix.h"
 #include "include/events.h"
 #include "include/gc.h"
 #include "include/input.h"
 #include "include/os.h"
-#include "include/resource.h"
 #include "include/window.h"
 
 #define LEGAL_NEW_RESOURCE(id,client)           \

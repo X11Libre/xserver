@@ -8,9 +8,7 @@
 #ifndef _XF86INT10_H
 #define _XF86INT10_H
 
-#include <X11/Xmd.h>
 #include <X11/Xdefs.h>
-#include "xf86Pci.h"
 
 #define SEG_ADDR(x) (((x) >> 4) & 0x00F000)
 #define SEG_OFF(x) ((x) & 0x0FFFF)

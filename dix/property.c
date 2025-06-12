@@ -60,7 +60,6 @@ SOFTWARE.
 #include "propertyst.h"
 #include "dixstruct.h"
 #include "dispatch.h"
-#include "swaprep.h"
 #include "xace.h"
 
 /*****************************************************************

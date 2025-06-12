@@ -5,7 +5,6 @@
 #ifndef _XSERVER_DIX_REQHANDLERS_H
 #define _XSERVER_DIX_REQHANDLERS_H
 
-#include "include/dix.h"
 #include "include/os.h"
 
 

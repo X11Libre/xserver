@@ -27,13 +27,11 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #ifndef _xf86_config_h
 #define _xf86_config_h
 
-#include "xf86Optrec.h"
 #include "xf86Parser.h"
 #include "xf86str.h"
 

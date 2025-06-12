@@ -40,8 +40,6 @@
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include "swaprep.h"
-#include "exglobals.h"          /* BadDevice */
 #include "xipassivegrab.h"
 #include "misc.h"
 #include "inpututils.h"

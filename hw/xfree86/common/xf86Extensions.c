@@ -24,16 +24,16 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include "extension.h"
-#include "globals.h"
 
 #include "xf86_priv.h"
 #include "xf86Config.h"
-#include "xf86Module.h"
 #include "xf86Extensions.h"
+
+#include <X11/extensions/dri2proto.h>
+
 #include "xf86Opt_priv.h"
 #include "optionstr.h"
 

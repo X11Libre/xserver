@@ -24,12 +24,13 @@
 #define _XF86CRTC_H_
 
 #include <edid.h>
-#include "randrstr.h"
-#include "xf86Modes.h"
 #include "xf86Cursor.h"
+#include "xf86Parser.h"
 #include "xf86i2c.h"
 #include "damage.h"
 #include "picturestr.h"
+#include "rrtransform.h"
+#include "randrstr.h"
 
 /* Compat definitions for older X Servers. */
 #ifndef M_T_PREFERRED

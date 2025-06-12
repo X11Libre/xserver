@@ -47,7 +47,6 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <string.h>             /* InputClassMatches */
@@ -66,13 +65,11 @@
 #include "xf86Config.h"
 #include "xf86Xinput_priv.h"
 #include "XIstubs.h"
-#include "xf86Optrec.h"
 #include "mipointer.h"
 #include "loaderProcs.h"
 #include "../os-support/linux/systemd-logind.h"
 #include "exevents.h"           /* AddInputDevice */
 #include "exglobals.h"
-#include "eventstr.h"
 #include "inpututils.h"
 #include "optionstr.h"
 #include "xf86Module_priv.h"
@@ -103,7 +100,6 @@
 #include <xserver-properties.h>
 
 #ifdef XFreeXDGA
-#include "dgaproc.h"
 #include "dgaproc_priv.h"
 #endif
 

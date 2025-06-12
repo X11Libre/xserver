@@ -35,7 +35,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <string.h>
@@ -48,16 +47,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "cursorstr.h"
 #include "scrnintstr.h"
-#include "servermd.h"
 #define _XF86DRI_SERVER_
 #include <X11/dri/xf86driproto.h>
-#include "swaprep.h"
 #include "xf86str.h"
 #include "dri_priv.h"
-#include "sarea.h"
-#include "dristruct.h"
+#include "dri.h"
 #include "xf86drm.h"
 #include "protocol-versions.h"
 #include "xf86Extensions.h"

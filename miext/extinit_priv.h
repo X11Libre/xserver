@@ -6,7 +6,7 @@
 #ifndef _XSERVER_EXTINIT_PRIV_H
 #define _XSERVER_EXTINIT_PRIV_H
 
-#include "extinit.h"
+#include <X11/Xdefs.h>
 
 extern Bool noDamageExtension;
 extern Bool noDbeExtension;

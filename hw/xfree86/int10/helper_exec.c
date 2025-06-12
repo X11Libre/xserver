@@ -26,9 +26,7 @@
 #include "os/osdep.h"
 
 #include "xf86.h"
-#include "xf86_OSproc.h"
 #include "xf86Bus.h"
-#include "compiler.h"
 #define _INT10_PRIVATE
 #include "int10Defines.h"
 #include "xf86int10_priv.h"
@@ -39,6 +37,8 @@
 #define DEBUG_IO_TRACE() 0
 #endif
 #include <pciaccess.h>
+
+#include "x86emu/debug.h"
 
 static int pciCfg1in(uint16_t addr, uint32_t *val);
 static int pciCfg1out(uint16_t addr, uint32_t val);

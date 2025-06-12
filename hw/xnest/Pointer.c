@@ -19,9 +19,7 @@ is" without express or implied warranty.
 #include "inputstr.h"
 #include "input.h"
 #include "misc.h"
-#include "scrnintstr.h"
 #include "servermd.h"
-#include "mipointer.h"
 
 #include "xnest-xcb.h"
 

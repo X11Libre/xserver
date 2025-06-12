@@ -50,23 +50,20 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
 
+#include "dri_priv.h"
 #include "xf86.h"
 #include "xf86drm.h"
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "cursorstr.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
-#include "servermd.h"
 #define _XF86DRI_SERVER_
-#include <X11/dri/xf86driproto.h>
-#include "swaprep.h"
+#include "dri.h"
+
 #include "xf86str.h"
-#include "dri_priv.h"
 #include "sarea.h"
 #include "dristruct.h"
-#include "mi.h"
 #include "mipointer.h"
 #include "xf86_os_support.h"
 #include "xf86_OSproc.h"

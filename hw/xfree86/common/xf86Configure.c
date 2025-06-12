@@ -40,14 +40,15 @@
 #define IN_XSERVER
 #include "Configint.h"
 #include "xf86DDC_priv.h"
-#include "xf86pciBus.h"
 #if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
 #include "xf86Bus.h"
 #include "xf86Sbus.h"
 #endif
 #include "misc.h"
 #include "loaderProcs.h"
+#include "configProcs.h"
 #include "xf86Parser_priv.h"
+#include "xf86pciBus.h"
 
 typedef struct _DevToConfig {
     GDevRec GDev;

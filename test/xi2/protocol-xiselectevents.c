@@ -53,8 +53,6 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2proto.h>
 
-#include "miext/extinit_priv.h"            /* for XInputExtensionInit */
-
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
@@ -62,6 +60,7 @@
 #include "xiselectev.h"
 
 #include "protocol-common.h"
+#include "tests.h"
 
 DECLARE_WRAP_FUNCTION(XISetEventMask, int, DeviceIntPtr dev,
                       WindowPtr win, ClientPtr client,

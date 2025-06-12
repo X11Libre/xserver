@@ -33,6 +33,7 @@
 #include "xf86Parser.h"
 #include "xf86tokens.h"
 #include "Configint.h"
+#include "configProcs.h"
 
 static const xf86ConfigSymTabRec OutputClassTab[] = {
     {ENDSECTION, "endsection"},

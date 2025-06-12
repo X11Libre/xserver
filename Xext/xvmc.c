@@ -19,7 +19,6 @@
 #include "resource.h"
 #include "scrnintstr.h"
 #include "extnsionst.h"
-#include "servermd.h"
 #include "xvmcext.h"
 
 #ifdef HAS_XVMCSHM

@@ -57,11 +57,10 @@ SOFTWARE.
 #include <X11/Xdmcp.h>
 #endif
 
-#include <limits.h>
-#include <stddef.h>
 #include <X11/Xos.h>
 #include <X11/Xmd.h>
-#include <X11/Xdefs.h>
+
+#include "os.h"
 
 #ifndef __has_builtin
 # define __has_builtin(x) 0     /* Compatibility with older compilers */
@@ -114,7 +113,6 @@ extern void FreeOsBuffers(OsCommPtr     /*oc */
 void
 CloseDownFileDescriptor(OsCommPtr oc);
 
-#include "dix.h"
 #include "ospoll.h"
 
 extern struct ospoll    *server_poll;

@@ -35,7 +35,7 @@
 #include <stdlib.h>
 
 #include "glxserver.h"
-#include "glxutil.h"
+#include "glxcontext.h"
 #include "glxext.h"
 #include "indirect_dispatch.h"
 #include "unpack.h"

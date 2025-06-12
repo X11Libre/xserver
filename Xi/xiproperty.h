@@ -23,9 +23,7 @@
  * Author: Peter Hutterer
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+
 
 #ifndef XIPROPERTY_H
 #define XIPROPERTY_H 1

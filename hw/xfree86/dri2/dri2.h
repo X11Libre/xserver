@@ -33,8 +33,6 @@
 #ifndef _DRI2_H_
 #define _DRI2_H_
 
-#include <X11/extensions/dri2tokens.h>
-
 /* Version 2 structure (with format at the end) */
 typedef struct {
     unsigned int attachment;

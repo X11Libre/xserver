@@ -26,6 +26,7 @@
 #include "glamor_priv.h"
 #include "glamor_prepare.h"
 #include "glamor_transfer.h"
+#include "glamor_utils.h"
 
 /*
  * Make a drawable ready to draw with fb by

@@ -23,9 +23,7 @@
  * Author: Peter Hutterer, University of South Australia, NICTA
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+
 
 #ifndef QUERYDP_H
 #define QUERYDP_H 1

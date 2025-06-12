@@ -36,9 +36,10 @@
 #define EGL_NO_X11
 #include <epoxy/egl.h>
 #include "glxserver.h"
+#include "glxdrawable.h"
+#include "glx_extinit.h"
 #include "glxutil.h"
 #include "compint.h"
-#include <X11/extensions/composite.h>
 #include "glamor_priv.h"
 #include "glamor.h"
 

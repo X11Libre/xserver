@@ -72,7 +72,6 @@ SOFTWARE.
 #define TRANS_REOPEN
 #include <X11/Xtrans/Xtrans.h>
 #include <X11/Xtrans/Xtransint.h>
-#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -88,10 +87,7 @@ SOFTWARE.
 #ifdef CSRG_BASED
 #include <sys/param.h>
 #endif
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
 #endif
-#include <sys/uio.h>
 #endif                          /* WIN32 */
 
 #include "dix/dix_priv.h"
@@ -117,7 +113,6 @@ SOFTWARE.
 #include <systemd/sd-daemon.h>
 #endif
 
-#include "probes.h"
 #include "xdmcp.h"
 
 #define MAX_CONNECTIONS (2^16)

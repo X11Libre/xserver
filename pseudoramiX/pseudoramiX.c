@@ -35,8 +35,6 @@
 
 #include <dix-config.h>
 
-#include <X11/Xfuncproto.h>
-
 #include "miext/extinit_priv.h"
 
 #include "pseudoramiX.h"

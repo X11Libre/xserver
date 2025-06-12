@@ -58,7 +58,6 @@
 #include "xf86_priv.h"
 #include "xf86Modes.h"
 #include "xf86Parser_priv.h"
-#include "xf86tokens.h"
 #include "xf86Config.h"
 #include "xf86Priv.h"
 #include "xf86_OSlib.h"
@@ -67,7 +66,6 @@
 #include "extension.h"
 #include "xf86pciBus.h"
 #include "xf86Xinput.h"
-#include "loaderProcs.h"
 #include "xf86Xinput_priv.h"
 
 #include "picture.h"

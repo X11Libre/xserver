@@ -28,18 +28,18 @@
  * quirks to fix broken EDID data.
  */
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #define _PARSE_EDID_
 #include "xf86.h"
 #include "xf86DDC_priv.h"
-#include <X11/Xatom.h>
 #include "property.h"
 #include "propertyst.h"
 #include "xf86Crtc.h"
 #include <string.h>
 #include <math.h>
+
+#include "xf86Modes.h"
 
 static void
 handle_detailed_rblank(struct detailed_monitor_section *det_mon, void *data)
