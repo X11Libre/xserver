@@ -35,7 +35,7 @@ Upgrade notice
 
 * If your console is locked up (no input possible, not even VT switch), then
   most likely the input driver couldn't be loaded due to a version mismatch.
-  When unsure, it's best be prepared to ssh into your machine from another one
+  When unsure, it's best to be prepared to ssh into your machine from another one
   or set a timer that's calling `chvt 1` after certain time, so you don't
   need a cold reboot.
 
