@@ -319,16 +319,6 @@ void RROutputInitErrorValue(void);
 void RRPointerScreenConfigured(ScreenPtr pScreen);
 
 /*
- * Retrieve output property value
- *
- * @param output  the output to query
- * @param property Atom ID of the property to retrieve
- * @param pending  retrieve pending instead of current value
- * @return pointer to property value or NULL (if not found)
- */
-RRPropertyValuePtr RRGetOutputProperty(RROutputPtr output, Atom property, Bool pending);
-
-/*
  * Retrieve full property structure from output
  *
  * @param output    the output to query

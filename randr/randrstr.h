@@ -766,6 +766,17 @@ void RRCrtcSetTransformSupport(RRCrtcPtr crtc, Bool transforms);
 _X_EXPORT /* just for Nvidia legacy */
 void RROutputSetSubpixelOrder(RROutputPtr output, int order);
 
+/*
+ * Retrieve output property value
+ *
+ * @param output  the output to query
+ * @param property Atom ID of the property to retrieve
+ * @param pending  retrieve pending instead of current value
+ * @return pointer to property value or NULL (if not found)
+ */
+_X_EXPORT /* just for Nvidia legacy */
+RRPropertyValuePtr RRGetOutputProperty(RROutputPtr output, Atom property, Bool pending);
+
 #endif                          /* _RANDRSTR_H_ */
 
 /*
