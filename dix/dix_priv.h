@@ -549,6 +549,7 @@ XRetCode AlterSaveSetForClient(ClientPtr pClient,
  * @return 1 if event was delivered, 0 if not or -1 if grab was not set by the
  * client.
  */
+_X_EXPORT // exported for nvidia
 int TryClientEvents(ClientPtr pClient,
                     DeviceIntPtr device,
                     xEventPtr pEvents,
