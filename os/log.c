@@ -449,8 +449,10 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
         case 's':
             string_arg = va_arg(args, char*);
 
-            for (i = 0; string_arg[i] != 0 && s_idx < size - 1 && s_idx < precision; i++)
-                string[s_idx++] = string_arg[i];
+            if (string_arg) {
+                for (i = 0; string_arg[i] != 0 && s_idx < size - 1 && s_idx < precision; i++)
+                    string[s_idx++] = string_arg[i];
+            }
             break;
 
         case 'u':
