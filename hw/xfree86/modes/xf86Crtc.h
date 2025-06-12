@@ -799,6 +799,8 @@ typedef struct _xf86CrtcConfig {
 
     CreateScreenResourcesProcPtr CreateScreenResources;
 
+    void *_dummy1; // required in place of a removed field for ABI compatibility
+
     /* Cursor information */
     xf86CursorInfoPtr cursor_info;
     CursorPtr cursor;
