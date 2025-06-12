@@ -757,6 +757,15 @@ Bool RRTransformSetFilter(RRTransformPtr dst, PictFilterPtr filter,
 _X_EXPORT /* just for Nvidia legacy */
 void RRCrtcSetTransformSupport(RRCrtcPtr crtc, Bool transforms);
 
+/*
+ * Set subpixel order on given output
+ *
+ * @param output  the output to set subpixel order on
+ * @param order   subpixel order value to set
+ */
+_X_EXPORT /* just for Nvidia legacy */
+void RROutputSetSubpixelOrder(RROutputPtr output, int order);
+
 #endif                          /* _RANDRSTR_H_ */
 
 /*
