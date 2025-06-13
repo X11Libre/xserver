@@ -122,7 +122,7 @@ static Bool formatsDone = FALSE;
 static void
 xf86PrintBanner(void)
 {
-    xf86ErrorFVerb(0, "\nX.Org X Server %d.%d.%d",
+    xf86ErrorFVerb(0, "\nXLibre X Server %d.%d.%d",
                    XORG_VERSION_MAJOR, XORG_VERSION_MINOR, XORG_VERSION_PATCH);
 #if XORG_VERSION_SNAP > 0
     xf86ErrorFVerb(0, ".%d", XORG_VERSION_SNAP);
