@@ -1,31 +1,22 @@
 XLibre Xserver
 ===============
+XLibre represents a significant fork of the Xorg Xserver, designed to advance X server technology through comprehensive code cleanups, architectural improvements, and enhanced functionality. This project emerged from the need to maintain active development and innovation in the X server ecosystem, ensuring that this critical piece of infrastructure continues to evolve and meet modern computing demands.
+The decision to create this independent fork was driven by concerns about the future direction and development pace of the original Xorg project. We observed a pattern of stagnation and resistance to substantial improvements that would benefit the broader community. By establishing XLibre, we aim to create an environment where technical merit drives decisions and where contributors can focus on advancing the technology without unnecessary barriers or political considerations.
+Following the public announcement of XLibre on June 6th, 2025, our original development infrastructure on freedesktop.org was unexpectedly removed, including repositories, issue tracking, and merge requests. This action necessitated the immediate relocation of our development efforts to alternative platforms. While disruptive, this event reinforced our commitment to maintaining project independence and demonstrated the importance of having robust, decentralized development infrastructure.
 
-Xlibre is a fork of the Xorg Xserver, with lots of code cleanups
-and enhanced functionality.
+Project Philosophy and Community
+--------------------------------
 
-This fork was necessary since toxic elements within Xorg projects, moles
-from BigTech, are boycotting any substantial work on Xorg, in order to
-destroy the project, to eliminate competition of their own products.
-Classic "embrace, extend, extinguish" tactics.
+XLibre operates as a completely independent project, free from corporate control, political influence, or external organizational pressures. Our development decisions are guided solely by technical excellence, community needs, and the goal of creating the most robust and feature-rich X server implementation possible. We maintain strict neutrality regarding corporate interests and political movements, focusing exclusively on technical advancement.
+Our community welcomes developers, contributors, and users from all backgrounds, countries, and walks of life. We believe that diversity of thought, experience, and perspective strengthens our technical work. The only requirements for participation are technical competence, respectful communication, and a genuine interest in improving X server technology. We foster an environment where ideas are evaluated based on their technical merit rather than the identity or background of their proposers.
+We are committed to maintaining an inclusive development environment where all contributors can participate productively. This means establishing clear technical standards, maintaining respectful discourse, and ensuring that project decisions are made 
+transparently through technical discussion rather than political maneuvering or corporate influence. Our goal is to create software that serves users effectively, regardless of their personal characteristics or beliefs.
 
-Right after journalists first began covering the planned fork Xlibre,
-on June 6th 2025, Redhat employees started a purge on the Xlibre founder's
-GitLab account on freedesktop.org: deleted the git repo, tickets, merge
-requests, etc, and so fired the shot that the whole world heard.
-
-This is an independent project, not at all affiliated with BigTech or any
-of their subsidiaries or tax evasion tools, nor any political activists
-groups, state actors, etc. It's explicitly free of any "DEI" or similar
-discriminatory policies. Anybody who's treating others nicely is welcomed.
-
-It doesn't matter which country you're coming from, your political views,
-your race, your sex, your age, your food menu, whether you wear boots or
-heels, whether you're furry or fairy, Conan or McKay, comic character, a
-small furry creature from Alpha Centauri, or just an boring average person.
-Anybody who's interested in bringing X forward is welcome.
-
-Together we'll make X great again!
+Technical Vision and Development Goals
+--------------------------------
+The XLibre project aims to modernize and enhance the X server architecture while maintaining compatibility with existing applications and workflows. Our development priorities include improving performance, enhancing security, simplifying the codebase, and adding features that benefit end users and system administrators. We are particularly focused on addressing long-standing architectural limitations and technical debt that has accumulated in the codebase over decades of development.
+Performance optimization represents a core focus area for XLibre. We are implementing numerous improvements to rendering pipelines, memory management, and inter-process communication mechanisms. These enhancements are designed to reduce latency, improve throughput, and provide more consistent performance across different hardware configurations and usage patterns. Our benchmarking efforts consistently demonstrate measurable improvements over the baseline Xorg implementation.
+Security enhancements form another critical component of our development strategy. We are systematically reviewing and hardening the codebase against various attack vectors, implementing modern security practices, and improving privilege separation mechanisms. These efforts include both proactive security measures and reactive responses to newly discovered vulnerabilities. Our security-focused development approach helps ensure that XLibre can be deployed confidently in security-sensitive environments.
 
 Upgrade notice
 --------------
