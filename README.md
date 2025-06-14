@@ -1,31 +1,12 @@
 XLibre Xserver
 ===============
+Xlibre project's fork of the Xorg xserver, with lots of code cleanups and enhanced functionality aimed at modernization of the X11 xserver and system with focuses on security, performance, and cleaner code.
 
-Xlibre is a fork of the Xorg Xserver, with lots of code cleanups
-and enhanced functionality.
+This is an entirely independent project, contributed and maintained by the community at large of independent developers and anyone wishing to help modernize, cleanup, document, test, and advance X11 as the primary rendering, drawing, and graphics system of UNIX and UNIX-like operating systems and environments such as FreeBSD, OpenBSD, NetBSD, GNU/Linux, Illumos, etc. as well as non-UNIX/UNIX-like platforms such as Windows (Cygwin).
 
-This fork was necessary since toxic elements within Xorg projects, moles
-from BigTech, are boycotting any substantial work on Xorg, in order to
-destroy the project, to eliminate competition of their own products.
-Classic "embrace, extend, extinguish" tactics.
+X11 has been the primary rendering system of UNIX and UNIX-like systems since it's initial release in June of 1984 as X1. It has been the backbone of many multiplatform desktop environments such as Xfce, MATE, Trinity, Blackbox, CDE, Lumina, and many others.
 
-Right after journalists first began covering the planned fork Xlibre,
-on June 6th 2025, Redhat employees started a purge on the Xlibre founder's
-GitLab account on freedesktop.org: deleted the git repo, tickets, merge
-requests, etc, and so fired the shot that the whole world heard.
-
-This is an independent project, not at all affiliated with BigTech or any
-of their subsidiaries or tax evasion tools, nor any political activists
-groups, state actors, etc. It's explicitly free of any "DEI" or similar
-discriminatory policies. Anybody who's treating others nicely is welcomed.
-
-It doesn't matter which country you're coming from, your political views,
-your race, your sex, your age, your food menu, whether you wear boots or
-heels, whether you're furry or fairy, Conan or McKay, comic character, a
-small furry creature from Alpha Centauri, or just an boring average person.
-Anybody who's interested in bringing X forward is welcome.
-
-Together we'll make X great again!
+This project is not sponsored, endorsed, contributed to, or affiliated with the xorg efforts of FreeDesktops, an entity of Red Hat Linux and the GNOME project. 
 
 Upgrade notice
 --------------
