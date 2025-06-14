@@ -40,7 +40,7 @@ Upgrade notice
   need a cold reboot.
 
 * Proprietary Nvidia drivers might break: they still haven't managed to do
-  do even simple cleanups to catch up with Xorg master for about a year.
+  even simple cleanups to catch up with Xorg master for about a year.
   All attempts to get into direct mail contact have failed. We're trying to
   work around this, but cannot give any guarantees.
 
