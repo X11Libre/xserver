@@ -15,7 +15,7 @@ hdrs_present = [
     'present.h',
 ]
 
-libxserver_present = static_library('libxserver_present',
+libxserver_present = static_library('xserver_present',
     srcs_present,
     include_directories: inc,
     dependencies: [

@@ -7,7 +7,7 @@ srcs_xfixes = [
     'xfixes.c',
 ]
 
-libxserver_xfixes = static_library('libxserver_xfixes',
+libxserver_xfixes = static_library('xserver_xfixes',
     srcs_xfixes,
     include_directories: inc,
     dependencies: common_dep,

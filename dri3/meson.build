@@ -10,7 +10,7 @@ hdrs_dri3 = [
 
 libxserver_dri3 = []
 if build_dri3
-    libxserver_dri3 = static_library('libxserver_dri3',
+    libxserver_dri3 = static_library('xserver_dri3',
         srcs_dri3,
         include_directories: inc,
         dependencies: [ common_dep, libdrm_dep ],

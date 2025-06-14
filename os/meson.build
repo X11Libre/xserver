@@ -79,7 +79,7 @@ endif
 
 libxlibc = []
 if srcs_libc.length() > 0
-    libxlibc = static_library('libxlibc',
+    libxlibc = static_library('xlibc',
         srcs_libc,
         include_directories: inc,
         dependencies: [
@@ -92,7 +92,7 @@ if enable_input_thread
     os_dep += cc.find_library('pthread')
 endif
 
-libxserver_os = static_library('libxserver_os',
+libxserver_os = static_library('xserver_os',
     srcs_os,
     include_directories: inc,
     dependencies: [
