@@ -37,7 +37,8 @@ Upgrade notice
   most likely the input driver couldn't be loaded due to a version mismatch.
   When unsure, it's best be prepared to ssh into your machine from another one
   or set a timer that's calling `chvt 1` after certain time, so you don't
-  need a cold reboot.
+  need a cold reboot. On Linux you can switch to the text console by pressing
+  CTRL + ALT + F2.
 
 * Proprietary Nvidia drivers might break: they still haven't managed to do
   do even simple cleanups to catch up with Xorg master for about a year.
