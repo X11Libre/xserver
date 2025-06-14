@@ -1,31 +1,13 @@
 XLibre Xserver
-===============
+==============
 
-Xlibre is a fork of the Xorg Xserver, with lots of code cleanups
-and enhanced functionality.
+XLibre is a fork of the Xorg Xserver, with lots of code cleanups and enhanced
+functionality.
 
-This fork was necessary since toxic elements within Xorg projects, moles
-from BigTech, are boycotting any substantial work on Xorg, in order to
-destroy the project, to eliminate competition of their own products.
-Classic "embrace, extend, extinguish" tactics.
+XLibre intends to deliver an independent X server that will last long into the
+future, with no conflicts of interest or corporate affiliations.
 
-Right after journalists first began covering the planned fork Xlibre,
-on June 6th 2025, Redhat employees started a purge on the Xlibre founder's
-GitLab account on freedesktop.org: deleted the git repo, tickets, merge
-requests, etc, and so fired the shot that the whole world heard.
-
-This is an independent project, not at all affiliated with BigTech or any
-of their subsidiaries or tax evasion tools, nor any political activists
-groups, state actors, etc. It's explicitly free of any "DEI" or similar
-discriminatory policies. Anybody who's treating others nicely is welcomed.
-
-It doesn't matter which country you're coming from, your political views,
-your race, your sex, your age, your food menu, whether you wear boots or
-heels, whether you're furry or fairy, Conan or McKay, comic character, a
-small furry creature from Alpha Centauri, or just an boring average person.
-Anybody who's interested in bringing X forward is welcome.
-
-Together we'll make X great again!
+Anyone interested in bringing X forward is welcome to contribute.
 
 Upgrade notice
 --------------
@@ -35,9 +17,9 @@ Upgrade notice
 
 * If your console is locked up (no input possible, not even VT switch), then
   most likely the input driver couldn't be loaded due to a version mismatch.
-  When unsure, it's best be prepared to ssh into your machine from another one
-  or set a timer that's calling `chvt 1` after certain time, so you don't
-  need a cold reboot.
+  When unsure, it's best be prepared to SSH into your machine from another one
+  or set a timer to call `chvt 1` after a certain duration of time, so that you
+  don't need to cold reboot.
 
 * Proprietary Nvidia drivers might break: they still haven't managed to do
   do even simple cleanups to catch up with Xorg master for about a year.
@@ -45,17 +27,17 @@ Upgrade notice
   work around this, but cannot give any guarantees.
 
 * Most Xorg drivers should run as-is (once recompiled!), with some exceptions.
-  See `.gitlab-ci.yml` for the versions/branches built along with Xlibre.
+  See `.gitlab-ci.yml` for the versions/branches built along with XLibre.
 
 
 Driver repositories
 -------------------
 
-Since Redhat had deleted and banned all X11Libre repositories from freedesktop.org,
-the driver repositories are now moved to github:
+Since Red Hat has purged all XLibre repositories from freedesktop.org, the
+driver repositories have been migrated to GitHub:
 
-| Driver | Git repository |
-| --- | --- |
+| Driver                    | Git repository                                        |
+| ------------------------- | ----------------------------------------------------- |
 | xf86-input-elographics:   | https://github.com/X11Libre/xf86-input-elographics    |
 | xf86-input-evdev:         | https://github.com/X11Libre/xf86-input-evdev          |
 | xf86-input-joystick:      | https://github.com/X11Libre/xf86-input-joystick       |
@@ -113,8 +95,6 @@ the driver repositories are now moved to github:
 Contact
 -------
 
-|  |  |
-| --- | --- |
-| Mailing list:                     | https://www.freelists.org/list/xlibre |
-| Telegram channel:                 | https://t.me/x11dev |
-| Matrix room (mirror of tg group): | https://matrix.to/#/#xlibre:matrix.org |
+- Mailing list: https://www.freelists.org/list/xlibre
+- Telegram channel: https://t.me/x11dev
+- Matrix room: https://matrix.to/#/#xlibre:matrix.org
