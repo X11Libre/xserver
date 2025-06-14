@@ -294,6 +294,9 @@ typedef struct _PictureScreen {
     GlyphsProcPtr Glyphs;       /* unused */
     CompositeRectsProcPtr CompositeRects;
 
+    void *_dummy1; // required in place of a removed field for ABI compatibility
+    void *_dummy2; // required in place of a removed field for ABI compatibility
+
     StoreColorsProcPtr StoreColors;
 
     InitIndexedProcPtr InitIndexed;

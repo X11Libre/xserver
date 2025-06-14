@@ -109,7 +109,6 @@ static const char *key_names[PRIVATE_LAST] = {
     [PRIVATE_GLYPHSET] = "GLYPHSET",
     [PRIVATE_PICTURE] = "PICTURE",
     [PRIVATE_SYNC_FENCE] = "SYNC_FENCE",
-    [PRIVATE_NAMESPACE] = "NAMESPACE",
 };
 
 static const Bool screen_specific_private[PRIVATE_LAST] = {

@@ -14,6 +14,7 @@ typedef void (*XorgGESwapProcPtr) (xGenericEvent *from, xGenericEvent *to);
  * @param extension base opcode
  * @param event swap handler function
  */
+_X_EXPORT /* just for Nvidia legacy */
 void GERegisterExtension(int extension, XorgGESwapProcPtr swap_handler);
 
 #endif /* _XORG_GEEXT_PRIV_H */

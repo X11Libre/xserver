@@ -173,6 +173,9 @@ typedef struct {
     int version, revision;
     int nAdaptors;
     XvAdaptorPtr pAdaptors;
+    void *_dummy1; // required in place of a removed field for ABI compatibility
+    void *_dummy2; // required in place of a removed field for ABI compatibility
+    void *_dummy3; // required in place of a removed field for ABI compatibility
 } XvScreenRec, *XvScreenPtr;
 
 extern _X_EXPORT int XvScreenInit(ScreenPtr);

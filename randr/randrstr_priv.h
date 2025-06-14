@@ -174,14 +174,6 @@ CARD16 RRVerticalRefresh(xRRModeInfo * mode);
 Bool RRCrtcExists(ScreenPtr pScreen, RRCrtcPtr findCrtc);
 
 /*
- * Set whether transforms are allowed on a CRTC
- *
- * @param crtc the CRTC to set the flag on
- * @param transforms TRUE if transforms are allowed
- */
-void RRCrtcSetTransformSupport(RRCrtcPtr crtc, Bool transforms);
-
-/*
  * Deliver CRTC update event to given client
  *
  * @param pClient the client to send event to
@@ -298,14 +290,6 @@ int RROutputAddUserMode(RROutputPtr output, RRModePtr mode);
 int RROutputDeleteUserMode(RROutputPtr output, RRModePtr mode);
 
 /*
- * Set subpixel order on given output
- *
- * @param output  the output to set subpixel order on
- * @param order   subpixel order value to set
- */
-void RROutputSetSubpixelOrder(RROutputPtr output, int order);
-
-/*
  * Deliver RROutputChangeNotify event to client
  *
  * @param pClient the client to send notify even to
@@ -333,16 +317,6 @@ void RROutputInitErrorValue(void);
  * @param pScreen the screen that had been reconfigured
  */
 void RRPointerScreenConfigured(ScreenPtr pScreen);
-
-/*
- * Retrieve output property value
- *
- * @param output  the output to query
- * @param property Atom ID of the property to retrieve
- * @param pending  retrieve pending instead of current value
- * @return pointer to property value or NULL (if not found)
- */
-RRPropertyValuePtr RRGetOutputProperty(RROutputPtr output, Atom property, Bool pending);
 
 /*
  * Retrieve full property structure from output

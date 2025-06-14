@@ -748,6 +748,35 @@ _X_EXPORT /* just for Nvidia legacy */
 Bool RRTransformSetFilter(RRTransformPtr dst, PictFilterPtr filter,
                           xFixed *params, int nparams, int width, int height);
 
+/*
+ * Set whether transforms are allowed on a CRTC
+ *
+ * @param crtc the CRTC to set the flag on
+ * @param transforms TRUE if transforms are allowed
+ */
+_X_EXPORT /* just for Nvidia legacy */
+void RRCrtcSetTransformSupport(RRCrtcPtr crtc, Bool transforms);
+
+/*
+ * Set subpixel order on given output
+ *
+ * @param output  the output to set subpixel order on
+ * @param order   subpixel order value to set
+ */
+_X_EXPORT /* just for Nvidia legacy */
+void RROutputSetSubpixelOrder(RROutputPtr output, int order);
+
+/*
+ * Retrieve output property value
+ *
+ * @param output  the output to query
+ * @param property Atom ID of the property to retrieve
+ * @param pending  retrieve pending instead of current value
+ * @return pointer to property value or NULL (if not found)
+ */
+_X_EXPORT /* just for Nvidia legacy */
+RRPropertyValuePtr RRGetOutputProperty(RROutputPtr output, Atom property, Bool pending);
+
 #endif                          /* _RANDRSTR_H_ */
 
 /*
