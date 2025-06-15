@@ -54,14 +54,11 @@ apt-get install -y \
 	libpango1.0-dev \
 	libpciaccess-dev \
 	libpixman-1-dev \
-	libselinux1-dev \
 	libspice-protocol-dev \
-	libsystemd-dev \
 	libtool \
 	libudev-dev \
 	libunwind-dev \
 	libwayland-dev \
-	libx11-dev \
 	libx11-xcb-dev \
 	libxau-dev \
 	libxaw7-dev \
