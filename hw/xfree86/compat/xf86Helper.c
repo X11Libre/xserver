@@ -3,6 +3,7 @@
 #include <X11/Xfuncproto.h>
 
 
+#include "xf86Priv.h"
 #include "xf86Bus.h"
 
 
