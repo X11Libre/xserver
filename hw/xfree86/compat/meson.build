@@ -1,6 +1,8 @@
 srcs_xorg_compat = [
     'clientexception.c',
     'log.c',
+    'ones.c',
+    'xf86Helper.c',
 ]
 
 xorg_compat = static_library('xorg_compat',
