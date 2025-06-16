@@ -92,7 +92,6 @@ typedef struct _PropertyFilterParam {
     CARD32 longLength;
 } PropertyFilterParam;
 
-extern CallbackListPtr PropertyStateCallback;
 extern CallbackListPtr PropertyFilterCallback;
 
 int dixLookupProperty(PropertyPtr *result, WindowPtr pWin, Atom proprty,
