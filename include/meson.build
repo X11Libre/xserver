@@ -404,19 +404,6 @@ configure_file(output : 'xwin-config.h',
                input : 'xwin-config.h.meson.in',
                configuration : xwin_data)
 
-build_xwayland_glamor = build_glamor and gbm_dep.found()
-
-xwayland_data = configuration_data()
-xwayland_data.set('XWL_HAS_GLAMOR', build_xwayland_glamor ? '1' : false)
-xwayland_data.set('XWL_HAS_LIBDECOR', have_libdecor ? '1' : false)
-xwayland_data.set('XWL_HAS_XWAYLAND_EXTENSION', xwaylandproto_dep.found() ? '1' : false)
-xwayland_data.set('XWL_HAS_EI', build_ei)
-xwayland_data.set('XWL_HAS_EI_PORTAL', build_ei_portal)
-
-configure_file(output : 'xwayland-config.h',
-               input : 'xwayland-config.h.meson.in',
-               configuration : xwayland_data)
-
 dtrace_hdr = []
 dtrace_tmpl = files('Xserver.d')
 if with_dtrace

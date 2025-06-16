@@ -2,12 +2,8 @@ option('xorg', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable Xorg X Server')
 option('xephyr', type: 'boolean', value: false,
        description: 'Enable Xephyr nested X server')
-option('xwayland', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
-       description: 'Enable Xwayland X server')
 option('glamor', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
-       description: 'Enable glamor (default yes for Xorg/Xwayland builds)')
-option('xwayland_ei', type: 'combo', choices: ['socket', 'portal', 'false', 'auto'],
-       value: 'auto', description: 'Enable emulated input support on Xwayland')
+       description: 'Enable glamor (default yes for Xorg builds)')
 option('xnest', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable Xnest nested X server')
 option('xvfb', type: 'boolean', value: true,
@@ -140,10 +136,6 @@ option('xpbproxy', type: 'boolean', value: false,
 
 option('libunwind', type: 'boolean', value: false,
         description: 'Use libunwind for backtrace reporting')
-
-option('xwayland-path', type: 'string', description: 'Directory containing Xwayland executable')
-option('libdecor', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
-        description: 'Whether Xwayland should use libdecor when running rootful.')
 
 option('docs', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
         description: 'Build documentation')

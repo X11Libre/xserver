@@ -20,6 +20,5 @@ fi
 [[ "$BUILD_XNEST" == true ]]    && check_executable "hw/xnest/Xnest"
 [[ "$BUILD_XORG" == true ]]     && check_executable "hw/xfree86/Xorg"
 [[ "$BUILD_XVFB" == true ]]     && check_executable "hw/vfb/Xvfb"
-[[ "$BUILD_XWAYLAND" == true ]] && check_executable "hw/xwayland/Xwayland"
 
 exit 0

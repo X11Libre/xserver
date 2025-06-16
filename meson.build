@@ -66,8 +66,6 @@ libdrm_req = '>= 2.4.116'
 libselinux_req = '>= 2.0.86'
 xext_req = '>= 1.0.99.4'
 xproto_req = '>= 7.0.31'
-wayland_req = '>= 1.21.0'
-wayland_protocols_req = '>= 1.38'
 gbm_req = '>= 10.2'
 xf86dgaproto_req = '>= 2.0.99.1'
 xshmfence_req = '>= 1.1'
@@ -100,7 +98,6 @@ xf86bigfontproto_dep = dependency('xf86bigfontproto', version: '>= 1.2.0', fallb
 xf86vidmodeproto_dep = dependency('xf86vidmodeproto', version: '>= 2.2.99.1', fallback: ['xorgproto', 'ext_xorgproto'])
 applewmproto_dep = dependency('applewmproto', version: '>= 1.4', fallback: ['xorgproto', 'ext_xorgproto'], required: false)
 xshmfence_dep = dependency('xshmfence', version: xshmfence_req, required: false)
-xwaylandproto_dep = dependency('xwaylandproto', version: '>= 1.0', fallback: ['xorgproto', 'ext_xorgproto'], required: false)
 dpmsproto_dep = dependency('dpmsproto', version: '>= 1.2', required: get_option('dpms'))
 
 pixman_dep = dependency('pixman-1')
@@ -214,38 +211,6 @@ endif
 xorgsdkdir = join_paths(get_option('prefix'), get_option('includedir'), 'xorg')
 libxcvt_dep = dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: build_xorg)
 
-build_xwayland = false
-if (host_machine.system() != 'darwin' and
-    host_machine.system() != 'windows' and
-    get_option('xwayland') != 'false')
-    xwayland_required = get_option('xwayland') == 'true'
-    build_glamor = glamor_option == 'true' or glamor_option == 'auto'
-
-    xwayland_path = get_option('xwayland-path')
-    if (xwayland_path == '')
-        xwayland_path = join_paths(get_option('prefix'), get_option('bindir'))
-    endif
-
-    xwayland_dep = [
-        dependency('wayland-client', version: wayland_req, required: xwayland_required),
-        dependency('wayland-protocols', version: wayland_protocols_req, required: xwayland_required),
-        dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: xwayland_required),
-    ]
-    if build_glamor
-        xwayland_dep += dependency('xshmfence', version: xshmfence_req, required: xwayland_required)
-        xwayland_dep += dependency('libdrm', version: libdrm_req, required: xwayland_required)
-        xwayland_dep += dependency('epoxy', required: xwayland_required)
-    endif
-
-    build_xwayland = true
-    # check for all the deps being found, to handle 'auto' mode.
-    foreach d: xwayland_dep
-        if not d.found()
-            build_xwayland = false
-        endif
-    endforeach
-endif
-
 ## configure Xnest - nesting X server
 build_xnest = get_option('xnest') != 'false'
 
@@ -277,7 +242,6 @@ build_xvfb = get_option('xvfb')
 
 summary({
         'Xorg': build_xorg,
-        'Xwayland': build_xwayland,
         'Xnest': build_xnest,
         'Xvfb': build_xvfb,
         'Xwin': build_xwin,
@@ -350,7 +314,7 @@ endif
 module_dir = join_paths(get_option('libdir'), get_option('module_dir'))
 
 if glamor_option == 'auto'
-    build_glamor = build_xorg or build_xwayland
+    build_glamor = build_xorg
 else
     build_glamor = glamor_option == 'true'
 endif
@@ -360,32 +324,6 @@ epoxy_dep = dependency('', required: false)
 if build_glamor
     gbm_dep = dependency('gbm', version: gbm_req, required: false)
     epoxy_dep = dependency('epoxy', required: false)
-endif
-
-if build_xwayland
-    libdecor_dep = dependency('libdecor-0', required: false)
-    libdecor_option = get_option('libdecor')
-    if libdecor_option == 'auto'
-        have_libdecor = libdecor_dep.found()
-    else
-        have_libdecor = libdecor_option == 'true'
-        if have_libdecor and not libdecor_dep.found()
-            error('libdecor support requested but not found')
-        endif
-    endif
-else
-    have_libdecor = false
-endif
-
-if build_xwayland
-    libei_dep = dependency('libei-1.0', version: '>= 1.0.0', required: get_option('xwayland_ei') in ['portal', 'socket'])
-    liboeffis_dep = dependency('liboeffis-1.0', version: '>= 1.0.0', required: get_option('xwayland_ei') == 'portal')
-
-    build_ei = libei_dep.found() and get_option('xwayland_ei') != 'false'
-    build_ei_portal = liboeffis_dep.found() and get_option('xwayland_ei') in ['portal', 'auto']
-else
-    build_ei = false
-    build_ei_portal = false
 endif
 
 # Lots of sha1 options, because Linux is about choice :)

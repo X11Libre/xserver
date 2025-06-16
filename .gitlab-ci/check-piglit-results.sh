@@ -27,4 +27,3 @@ check_piglit_results ()
 
 check_piglit_results xephyr-glamor hw/kdrive/ephyr/Xephyr.p/ephyr_glamor.c.o
 check_piglit_results xvfb hw/vfb/Xvfb
-check_piglit_results xwayland hw/xwayland/Xwayland

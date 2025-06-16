@@ -638,7 +638,6 @@ Controlling the server once started:
 .PP
 Server-specific man pages:
 .BR Xorg (1),
-.BR Xwayland (1),
 .BR Xephyr (1),
 .BR Xnest (1),
 .BR Xvfb (1),

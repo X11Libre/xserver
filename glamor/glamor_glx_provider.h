@@ -24,8 +24,8 @@
  *	Adam Jackson <ajax@redhat.com>
  */
 
-#ifndef XWAYLAND_GLX_H
-#define XWAYLAND_GLX_H
+#ifndef GLAMOR_GLX_PROVIDER_H
+#define GLAMOR_GLX_PROVIDER_H
 
 #include <dix-config.h>
 
@@ -34,4 +34,4 @@
 extern _X_EXPORT __GLXprovider glamor_provider;
 #endif
 
-#endif /* XWAYLAND_GLX_H */
+#endif /* GLAMOR_GLX_PROVIDER_H */

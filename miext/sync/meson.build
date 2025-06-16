@@ -10,7 +10,7 @@ hdrs_miext_sync = [
     'misyncstr.h',
 ]
 
-if build_dri3 or build_xwayland
+if build_dri3
     srcs_miext_sync += 'misyncshm.c'
 endif
 

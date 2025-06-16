@@ -92,9 +92,6 @@ stages:
 .xorg_paths: &xorg_paths
   - hw/xfree86/**/*
 
-.xwayland_paths: &xwayland_paths
-  - hw/xwayland/**/*
-
 .all_ddx_paths:
   - hw/**/*
 
@@ -178,27 +175,17 @@ meson:
       PIGLIT_DIR: /root/piglit
       LP_NUM_THREADS: 0
       MESON_DDX_BUILD_ARGS: >
-        -Dxwayland=${BUILD_XWAYLAND} -Dxorg=${BUILD_XORG} -Dxephyr=${BUILD_XEPHYR} -Dxvfb=${BUILD_XVFB} -Dxnest=${BUILD_XNEST}
+        -Dxorg=${BUILD_XORG} -Dxephyr=${BUILD_XEPHYR} -Dxvfb=${BUILD_XVFB} -Dxnest=${BUILD_XNEST}
       BUILD_XEPHYR: true
       BUILD_XNEST: true
       BUILD_XORG: true
       BUILD_XVFB: true
-      BUILD_XWAYLAND: true
       MESON_EXTRA_ARGS: ${MESON_DDX_BUILD_ARGS}
 
 meson-noglamor:
     extends: meson
     variables:
         MESON_EXTRA_ARGS: -Dglamor=false ${MESON_DDX_BUILD_ARGS}
-
-xwayland-nolibdecor:
-    extends: meson
-    variables:
-        BUILD_XEPHYR: false
-        BUILD_XNEST: false
-        BUILD_XORG: false
-        BUILD_XVFB: false
-        MESON_EXTRA_ARGS: -Dlibdecor=false ${MESON_DDX_BUILD_ARGS}
 
 mingw-cross-build:
     extends: .common-build-and-test
@@ -374,7 +361,7 @@ xf86-driver-build-test:
     variables:
         GIT_DEPTH: 1
         MESON_ARGS: -Dprefix=/usr/
-        MESON_EXTRA_ARGS: -Dxwayland=false -Dxnest=false -Dxvfb=false -Dxquartz=false -Ddocs=false
+        MESON_EXTRA_ARGS: -Dxnest=false -Dxvfb=false -Dxquartz=false -Ddocs=false
 
 #
 # Verify that the merge request has the allow-collaboration checkbox ticked
