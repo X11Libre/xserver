@@ -47,9 +47,9 @@ option('xkb_default_options', type: 'string')
 
 option('fallback_input_driver', type: 'string', value: 'auto')
 
-option('vendor_name', type: 'string', value: 'The X.Org Foundation')
-option('vendor_name_short', type: 'string', value: 'X.Org')
-option('vendor_web', type: 'string', value: 'http://wiki.x.org')
+option('vendor_name', type: 'string', value: 'XLibre')
+option('vendor_name_short', type: 'string', value: 'XLibre')
+option('vendor_web', type: 'string', value: 'https://github.com/X11Libre/xserver')
 
 option('dtrace', type: 'boolean', value: false,
        description: 'Enable dtrace hooks')
