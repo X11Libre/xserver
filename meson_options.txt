@@ -82,8 +82,6 @@ option('udev', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable udev hotplugging support')
 option('udev_kms', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable udev kms support')
-option('hal', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
-       description: 'Enable HAL integration')
 option('systemd_notify', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
        description: 'Enable systemd-notify support')
 option('systemd_logind', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',

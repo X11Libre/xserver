@@ -9,11 +9,6 @@ if build_dbus
     config_dep += dbus_dep
 endif
 
-if build_hal
-    srcs_config += 'hal.c'
-    config_dep += hal_dep
-endif
-
 if build_udev
     srcs_config += 'udev.c'
     config_dep += udev_dep

@@ -1128,7 +1128,7 @@ KdInitOutput(int argc, char **argv)
     OsRegisterSigWrapper(KdSignalWrapper);
     xorgGlxCreateVendor();
 
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
     if (SeatId) /* Enable input hot-plugging */
         config_pre_init();
 #endif
@@ -1153,7 +1153,7 @@ DeleteGPUDeviceRequest(struct OdevAttributes *attribs)
 }
 #endif
 
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
 struct xf86_platform_device *
 xf86_find_platform_device_by_devnum(unsigned int major, unsigned int minor)
 {
