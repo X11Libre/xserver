@@ -295,6 +295,12 @@ else
     endif
 endif
 
+if build_hal
+    message('WARNING: HAL is deprecated and might be removed in near future')
+    message('If you really need it, please file a feature request on keeping it')
+    message('and explain why you need it, what your use case is.')
+endif
+
 if build_udev and build_hal
     error('Hotplugging through both libudev and hal not allowed')
 endif
