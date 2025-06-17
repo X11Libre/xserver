@@ -41,7 +41,6 @@ apt-get install -y \
 	libnvidia-egl-wayland-dev \
 	libpciaccess-dev \
 	libpixman-1-dev \
-	libselinux1-dev \
 	libspice-protocol-dev \
 	libsystemd-dev \
 	libudev-dev \
