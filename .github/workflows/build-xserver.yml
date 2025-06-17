@@ -69,7 +69,7 @@ jobs:
 
     drivers-build-ubuntu:
         env:
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxwayland=false -Dxorg=true -Dxvfb=false -Dxnest=false
+            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
