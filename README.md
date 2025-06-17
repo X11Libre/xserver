@@ -58,6 +58,7 @@ the driver repositories are now moved to github:
 | --- | --- |
 | xf86-input-elographics:   | https://github.com/X11Libre/xf86-input-elographics    |
 | xf86-input-evdev:         | https://github.com/X11Libre/xf86-input-evdev          |
+| xf86-input-void:          | https://github.com/X11Libre/xf86-input-void           |
 | xf86-input-joystick:      | https://github.com/X11Libre/xf86-input-joystick       |
 | xf86-input-keyboard:      | https://github.com/X11Libre/xf86-input-keyboard       |
 | xf86-input-libinput:      | https://github.com/X11Libre/xf86-input-libinput       |
@@ -76,7 +77,6 @@ the driver repositories are now moved to github:
 | xf86-video-freedreno:     | https://github.com/X11Libre/xf86-video-freedreno      |
 | xf86-video-geode:         | https://github.com/X11Libre/xf86-video-geode          |
 | xf86-video-i128:          | https://github.com/X11Libre/xf86-video-i128           |
-| xf86-video-i740:          | https://github.com/X11Libre/xf86-video-i740           |
 | xf86-video-i740:          | https://github.com/X11Libre/xf86-video-i740           |
 | xf86-video-intel:         | https://github.com/X11Libre/xf86-video-intel          |
 | xf86-video-mach64:        | https://github.com/X11Libre/xf86-video-mach64         |
@@ -102,6 +102,7 @@ the driver repositories are now moved to github:
 | xf86-video-suntcx:        | https://github.com/X11Libre/xf86-video-suntcx         |
 | xf86-video-tdfx:          | https://github.com/X11Libre/xf86-video-tdfx           |
 | xf86-video-trident:       | https://github.com/X11Libre/xf86-video-trident        |
+| xf86-video-vbox:          | https://github.com/X11Libre/xf86-video-vbox           |
 | xf86-video-v4l:           | https://github.com/X11Libre/xf86-video-v4l            |
 | xf86-video-vesa:          | https://github.com/X11Libre/xf86-video-vesa           |
 | xf86-video-vmware:        | https://github.com/X11Libre/xf86-video-vmware         |
