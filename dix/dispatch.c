@@ -519,10 +519,10 @@ Dispatch(void)
                 }
 
                 /* now, finally, deal with client requests */
-                result = ReadRequestFromClient(client);
-                if (result == 0)
+                long read_result = ReadRequestFromClient(client);
+                if (read_result == 0)
                     break;
-                else if (result == -1) {
+                else if (read_result == -1) {
                     CloseDownClient(client);
                     break;
                 }
@@ -544,7 +544,7 @@ Dispatch(void)
                                           client->index,
                                           client->requestBuffer);
 #endif
-                if (result < 0 || result > (maxBigRequestSize << 2))
+                if (read_result < 0 || read_result > (maxBigRequestSize << 2))
                     result = BadLength;
                 else {
                     result = XaceHookDispatch(client, client->majorOp);
