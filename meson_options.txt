@@ -68,9 +68,9 @@ option('udev', type: 'boolean', value: true)
 option('udev_kms', type: 'boolean', value: true)
 option('hal', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable HAL integration')
-option('systemd_notify', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
+option('systemd_notify', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
        description: 'Enable systemd-notify support')
-option('systemd_logind', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
+option('systemd_logind', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
        description: 'Enable systemd-logind integration')
 option('vgahw', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Xorg VGA access module')
