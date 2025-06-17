@@ -12,9 +12,6 @@ extern InputInfoPtr xf86InputDevs;
 int xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL is_auto);
 InputInfoPtr xf86AllocateInput(void);
 
-void xf86PostButtonEventM(DeviceIntPtr device, int is_absolute, int button,
-                          int is_down, const ValuatorMask *mask);
-
 void xf86InputEnableVTProbe(void);
 
 InputDriverPtr xf86LookupInputDriver(const char *name);
