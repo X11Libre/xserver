@@ -186,8 +186,13 @@ static void FindColorInRootCmap(ColormapPtr /* pmap */ ,
 #define NUMRED(vis) ((vis->redMask >> vis->offsetRed) + 1)
 #define NUMGREEN(vis) ((vis->greenMask >> vis->offsetGreen) + 1)
 #define NUMBLUE(vis) ((vis->blueMask >> vis->offsetBlue) + 1)
+#if COMPOSITE
 #define ALPHAMASK(vis)	((vis)->nplanes < 32 ? 0 : \
 			 (CARD32) ~((vis)->redMask|(vis)->greenMask|(vis)->blueMask))
+#else
+#define ALPHAMASK(vis)	0
+#endif
+
 #define RGBMASK(vis) (vis->redMask | vis->greenMask | vis->blueMask | ALPHAMASK(vis))
 
 /* GetNextBitsOrBreak(bits, mask, base)  --

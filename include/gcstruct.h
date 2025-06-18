@@ -281,4 +281,9 @@ typedef struct _GC {
     RegionPtr pCompositeClip;
 } GCRec;
 
+#ifndef XORG_COMPILATION
+/* source compatiblity with intel drivers */
+typedef GCRec GC;
+#endif
+
 #endif                          /* GCSTRUCT_H */

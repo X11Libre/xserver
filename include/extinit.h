@@ -54,7 +54,9 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "extnsionst.h"
 
 /* required by: libglx */
+#ifdef COMPOSITE
 extern _X_EXPORT Bool noCompositeExtension;
+#endif
 
 /* required by: several video drivers (eg. vmware and sis) */
 #ifdef XINERAMA

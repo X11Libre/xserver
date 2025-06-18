@@ -206,6 +206,7 @@ createModeFromConfig(const __DRIcoreExtension * core,
     config->config.drawableType = drawableType;
     config->config.yInverted = GL_TRUE;
 
+#ifdef COMPOSITE
     if (!noCompositeExtension) {
         /*
         * Here we decide what fbconfigs will be duplicated for compositing.
@@ -230,6 +231,7 @@ createModeFromConfig(const __DRIcoreExtension * core,
 
         config->config.duplicatedForComp = duplicateForComp;
     }
+#endif
 
     return &config->config;
 }
@@ -261,6 +263,7 @@ glxConvertConfigs(const __DRIcoreExtension * core,
         tail = tail->next;
     }
 
+#ifdef COMPOSITE
     if (!noCompositeExtension) {
         /* Duplicate fbconfigs for use with compositing visuals */
         for (i = 0; configs[i]; i++) {
@@ -272,6 +275,7 @@ glxConvertConfigs(const __DRIcoreExtension * core,
             tail = tail->next;
         }
     }
+#endif
 
     return head.next;
 }

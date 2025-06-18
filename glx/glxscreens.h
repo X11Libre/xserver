@@ -42,7 +42,9 @@ typedef struct __GLXconfig __GLXconfig;
 struct __GLXconfig {
     /* Management */
     __GLXconfig *next;
+#ifdef COMPOSITE
     GLboolean duplicatedForComp;
+#endif
     GLuint doubleBufferMode;
     GLuint stereoMode;
 
