@@ -167,6 +167,14 @@ Bool
 Bool
  ephyrCreateColormap(ColormapPtr pmap);
 
+/**
+ * @param desc examples: "ctrl+shift", "ctrl+mod1+a", "a",
+ *             NULL (disables host grab)
+ * @return TRUE if success, otherwise FALSE
+ */
+Bool
+ ephyrSetGrabShortcut(char const* const desc);
+
 #ifdef RANDR
 Bool
  ephyrRandRGetInfo(ScreenPtr pScreen, Rotation * rotations);
