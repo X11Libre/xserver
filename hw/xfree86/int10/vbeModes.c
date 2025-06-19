@@ -38,6 +38,7 @@
 
 #include "os/log_priv.h"
 
+#include "xf86.h"
 #include "xf86_priv.h"
 #include "vbe.h"
 #include "vbeModes.h"

@@ -93,6 +93,7 @@
 #include "os.h"
 #include "servermd.h"
 #include "globals.h"
+#include "xf86.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
 #include "edid.h"
