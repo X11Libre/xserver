@@ -105,6 +105,7 @@ extern _X_EXPORT void xf86SetEntityInstanceForScreen(ScrnInfoPtr pScrn,
 extern _X_EXPORT int xf86GetNumEntityInstances(int entityIndex);
 extern _X_EXPORT GDevPtr xf86GetDevFromEntity(int entityIndex, int instance);
 extern _X_EXPORT EntityInfoPtr xf86GetEntityInfo(int entityIndex);
+extern _X_EXPORT Bool xf86IsEntityPrimary(int entityIndex);
 
 #define xf86SetLastScrnFlag(e, s) do { } while (0)
 

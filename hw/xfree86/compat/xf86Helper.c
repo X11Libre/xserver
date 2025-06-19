@@ -4,7 +4,7 @@
 
 
 #include "xf86Priv.h"
-#include "xf86Bus.h"
+#include "xf86.h"
 
 
 /*
