@@ -516,7 +516,7 @@ ConstructClientIds(ClientPtr client,
             for (c = 0; c < currentMaxClients; ++c) {
                 if (clients[c] &&
                     (XaceHookClientAccess(client, clients[c], DixReadAccess)
-                                          != Success)) {
+                                          == Success)) {
                     if (!ConstructClientIdValue(client, clients[c],
                                                 specs[specIdx].mask, ctx)) {
                         return BadAlloc;
@@ -527,7 +527,7 @@ ConstructClientIds(ClientPtr client,
             ClientPtr owner = dixClientForXID(specs[specIdx].client);
             if (owner &&
                 (XaceHookClientAccess(client, owner, DixReadAccess)
-                                      != Success)) {
+                                      == Success)) {
                 if (!ConstructClientIdValue(client, owner,
                                             specs[specIdx].mask, ctx)) {
                     return BadAlloc;
