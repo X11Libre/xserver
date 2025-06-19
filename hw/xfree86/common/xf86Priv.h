@@ -40,6 +40,7 @@
 
 extern _X_EXPORT int xf86FbBpp;
 extern _X_EXPORT int xf86Depth;
+extern _X_EXPORT Bool xf86FlipPixels;
 
 /* Other parameters */
 

@@ -21,7 +21,7 @@
 
 #include "misc.h"
 
-#include "xf86_priv.h"
+#include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86Opt_priv.h"
 #include "xf86Priv.h"

@@ -33,7 +33,6 @@ extern char *xf86PointerName;
 extern char *xf86KeyboardName;
 
 extern rgb xf86Weight;
-extern Bool xf86FlipPixels;
 extern Gamma xf86Gamma;
 
 extern const char *xf86ModulePath;
