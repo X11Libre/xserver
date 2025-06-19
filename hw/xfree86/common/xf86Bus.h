@@ -75,7 +75,6 @@ extern int pciSlotClaimed;
 Bool xf86ComparePciBusString(const char *busID, int bus, int device, int func);
 Bool xf86DriverHasEntities(DriverPtr drvp);
 void xf86RemoveEntityFromScreen(ScrnInfoPtr pScrn, int entityIndex);
-ScrnInfoPtr xf86FindScreenForEntity(int entityIndex);
 
 Bool xf86BusConfig(void);
 void xf86PostProbe(void);
