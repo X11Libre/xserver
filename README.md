@@ -38,11 +38,17 @@ Upgrade notice
   When unsure, it's best to be prepared to ssh into your machine from another one
   or set a timer that's calling `chvt 1` after certain time, so you don't
   need a cold reboot.
+  Or, make sure that you have magic `SysRq` key enabled (`Alt+PrtSc`)
+  via sysctl (`kernel.sysrq=1`), then press following combination depending on keyboard
+  layout to make kernel regain control over keyboard to make VT switching work:
+  - QWERTY/AZERTY keyboard layout: `SysRq + R`
+  - Dvorak/Colemak keyboard layout: `SysRq + P`
 
 * Proprietary Nvidia drivers might break: they still haven't managed to do
   even simple cleanups to catch up with Xorg master for about a year.
   All attempts to get into direct mail contact have failed. We're trying to
-  work around this, but cannot give any guarantees.
+  work around this, but cannot give any guarantees. But you can make it work
+  by adding `Option "IgnoreABI" "1"` line to `ServerFlags` section in Xorg config.
 
 * Most Xorg drivers should run as-is (once recompiled!), with some exceptions.
   See `.gitlab-ci.yml` for the versions/branches built along with Xlibre.
