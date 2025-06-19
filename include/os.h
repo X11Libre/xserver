@@ -191,10 +191,39 @@ XNFstrdup(const char *s);
 /* Include new X*asprintf API */
 #include "Xprintf.h"
 
+typedef void (*OsSigHandlerPtr) (int /* sig */ );
 typedef int (*OsSigWrapperPtr) (int /* sig */ );
 
+extern _X_EXPORT OsSigHandlerPtr
+OsSignal(int /* sig */ , OsSigHandlerPtr /* handler */ );
 extern _X_EXPORT OsSigWrapperPtr
 OsRegisterSigWrapper(OsSigWrapperPtr newWrap);
+
+extern _X_EXPORT void
+OsInit(void);
+
+extern _X_EXPORT void
+OsCleanup(Bool);
+
+extern _X_EXPORT void
+OsVendorFatalError(const char *f, va_list args)
+_X_ATTRIBUTE_PRINTF(1, 0);
+
+extern _X_EXPORT void
+OsVendorInit(void);
+
+extern _X_EXPORT void
+OsBlockSignals(void);
+
+extern _X_EXPORT void
+OsReleaseSignals(void);
+
+extern void
+OsResetSignals(void);
+
+extern _X_EXPORT void
+OsAbort(void)
+    _X_NORETURN;
 
 extern _X_EXPORT Bool
 PrivsElevated(void);

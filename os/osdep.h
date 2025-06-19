@@ -164,19 +164,7 @@ int os_move_fd(int fd);
    depending on whether multithreading is used */
 int xthread_sigmask(int how, const sigset_t *set, sigset_t *oldest);
 
-typedef void (*OsSigHandlerPtr) (int sig);
 
-/* install signal handler */
-OsSigHandlerPtr OsSignal(int sig, OsSigHandlerPtr handler);
-
-void OsInit(void);
-void OsCleanup(Bool);
-void OsVendorFatalError(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
-void OsVendorInit(void);
-void OsBlockSignals(void);
-void OsReleaseSignals(void);
-void OsResetSignals(void);
-void OsAbort(void) _X_NORETURN;
 void AbortServer(void) _X_NORETURN;
 
 void MakeClientGrabPervious(ClientPtr client);
