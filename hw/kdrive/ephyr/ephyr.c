@@ -732,7 +732,7 @@ ephyrPrintGrabShortcut(char* const out, size_t const out_size,
             EphyrKeybindToggleHostGrabKey == 0
         ) || (
             EphyrTitleHostGrabKeyComboHint == 0 ||
-            EphyrTitleHostGrabKeyComboHint == 0
+            EphyrTitleHostGrabKeyComboHintLen == 0
         )
     ) {
         /* grabbing disabled */
