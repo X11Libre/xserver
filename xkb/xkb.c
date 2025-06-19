@@ -6065,7 +6065,9 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &mrep, sizeof(mrep));
-        payload_walk = buf + (mrep.length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
+
+        // length is in 4 byte units and only accounts what's above sizeof(xGenericReply)
+        payload_walk += mrep.length * sizeof(CARD32) + sizeof(xGenericReply);
     }
 
     if (reported & XkbGBN_CompatMapMask) {
@@ -6081,7 +6083,9 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &crep, sizeof(crep));
-        payload_walk = buf + (crep.length * 4) - (sizeof(crep) - sizeof(xGenericReply));
+
+        // length is in 4 byte units and only accounts what's above sizeof(xGenericReply)
+        payload_walk += crep.length * sizeof(CARD32) + sizeof(xGenericReply);
     }
 
     if (reported & XkbGBN_IndicatorMapMask) {
@@ -6096,7 +6100,9 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &irep, sizeof(irep));
-        payload_walk = buf + (irep.length * 4) - (sizeof(irep) - sizeof(xGenericReply));
+
+        // length is in 4 byte units and only accounts what's above sizeof(xGenericReply)
+        payload_walk += irep.length * sizeof(CARD32) + sizeof(xGenericReply);
     }
 
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask)) {
@@ -6112,7 +6118,9 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &nrep, sizeof(nrep));
-        payload_walk = buf + (nrep.length * 4) - (sizeof(nrep) - sizeof(xGenericReply));
+
+        // length is in 4 byte units and only accounts what's above sizeof(xGenericReply)
+        payload_walk += nrep.length * sizeof(CARD32) + sizeof(xGenericReply);
     }
 
     if (reported & XkbGBN_GeometryMask) {
@@ -6134,7 +6142,9 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &grep, sizeof(grep));
-        payload_walk = buf + (grep.length * 4) - (sizeof(grep) - sizeof(xGenericReply));
+
+        // length is in 4 byte units and only accounts what's above sizeof(xGenericReply)
+        payload_walk += grep.length * sizeof(CARD32) + sizeof(xGenericReply);
     }
 
     WriteToClient(client, sizeof(xkbGetKbdByNameReply), &rep);
