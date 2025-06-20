@@ -343,7 +343,18 @@ xf86UpdateHasVTProperty(Bool hasVT)
 static void xf86DisableInputHandler(void *handler);
 static void xf86EnableInputHandler(void *handler);
 static void xf86DisableGeneralHandler(void *handler);
-static void xf86EnableGeneralHandler(void *handler);
+
+static void _xf86EnableGeneralHandler(void *handler);
+
+_X_EXPORT /* needs to be exported for Nvidia legacy (470.256.02) */
+void xf86EnableGeneralHandler(void *handler);
+
+void xf86EnableGeneralHandler(void *handler) {
+    LogMessageVerb(X_WARNING, 0, "Outdated driver still using xf86EnableGeneralHandler() !\n");
+    LogMessageVerb(X_WARNING, 0, "File a bug report to driver vendor or use a FOSS driver.\n");
+    LogMessageVerb(X_WARNING, 0, "Proprietary drivers are inherently unstable, they just can't be done right.\n");
+    _xf86EnableGeneralHandler(handler);
+}
 
 static void
 xf86VTLeave(void)
@@ -432,7 +443,7 @@ switch_failed:
         if (ih->is_input)
             xf86EnableInputHandler(ih);
         else
-            xf86EnableGeneralHandler(ih);
+            _xf86EnableGeneralHandler(ih);
     }
     input_unlock();
 }
@@ -480,7 +491,7 @@ xf86VTEnter(void)
         if (ih->is_input)
             xf86EnableInputHandler(ih);
         else
-            xf86EnableGeneralHandler(ih);
+            _xf86EnableGeneralHandler(ih);
     }
 #ifdef XSERVER_PLATFORM_BUS
     /* check for any new output devices */
@@ -664,7 +675,7 @@ static void xf86EnableInputHandler(void *handler)
         SetNotifyFd(ih->fd, xf86InputHandlerNotify, X_NOTIFY_READ, ih);
 }
 
-static void xf86EnableGeneralHandler(void *handler)
+static void _xf86EnableGeneralHandler(void *handler)
 {
     IHPtr ih;
 
