@@ -33,7 +33,10 @@ extern char *xf86PointerName;
 extern char *xf86KeyboardName;
 
 extern rgb xf86Weight;
+
+_X_EXPORT /* only for in-tree vgahw module, not supposed to be used by OOT modules */
 extern Bool xf86FlipPixels;
+
 extern Gamma xf86Gamma;
 
 extern const char *xf86ModulePath;
