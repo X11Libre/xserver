@@ -79,7 +79,9 @@ Bool xf86LoadModules(const char **list, void **optlist);
 Bool xf86HasTTYs(void);
 
 /* xf86Mode.c */
+_X_EXPORT /* only for int10 module, not supposed to be used by OOT modules */
 const char * xf86ModeStatusToString(ModeStatus status);
+
 ModeStatus xf86CheckModeForDriver(ScrnInfoPtr scrp, DisplayModePtr mode, int flags);
 
 /* xf86DefaultModes (auto-generated) */
