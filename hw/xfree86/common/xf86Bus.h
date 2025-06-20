@@ -75,7 +75,10 @@ extern int pciSlotClaimed;
 Bool xf86ComparePciBusString(const char *busID, int bus, int device, int func);
 Bool xf86DriverHasEntities(DriverPtr drvp);
 void xf86RemoveEntityFromScreen(ScrnInfoPtr pScrn, int entityIndex);
+
+_X_EXPORT /* only for internal int10 module - not supposed to be used by OOT drivers */
 Bool xf86IsEntityPrimary(int entityIndex);
+
 ScrnInfoPtr xf86FindScreenForEntity(int entityIndex);
 
 Bool xf86BusConfig(void);
