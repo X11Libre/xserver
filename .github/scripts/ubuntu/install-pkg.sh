@@ -43,7 +43,6 @@ apt-get install -y \
 	libpixman-1-dev \
 	libselinux1-dev \
 	libspice-protocol-dev \
-	libsystemd-dev \
 	libudev-dev \
 	libunwind-dev \
 	libx11-dev \
