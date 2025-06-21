@@ -37,9 +37,6 @@ int config_udev_pre_init(void);
 int config_udev_init(void);
 void config_udev_fini(void);
 void config_udev_odev_probe(config_odev_probe_proc_ptr probe_callback);
-#elif defined(CONFIG_HAL)
-int config_hal_init(void);
-void config_hal_fini(void);
 #elif defined(CONFIG_WSCONS)
 int config_wscons_init(void);
 void config_wscons_fini(void);

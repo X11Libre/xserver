@@ -872,31 +872,31 @@ KdParseKbdOptions(KdKeyboardInfo * ki)
         const char *value = input_option_get_value(option);
 
         if (
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
             strcasecmp(key, "xkb_rules") == 0 ||
 #endif
             strcasecmp(key, "XkbRules") == 0)
             ki->xkbRules = strdup(value);
         else if (
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
                  strcasecmp(key, "xkb_model") == 0 ||
 #endif
                  strcasecmp(key, "XkbModel") == 0)
             ki->xkbModel = strdup(value);
         else if (
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
                  strcasecmp(key, "xkb_layout") == 0 ||
 #endif
                  strcasecmp(key, "XkbLayout") == 0)
             ki->xkbLayout = strdup(value);
         else if (
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
                  strcasecmp(key, "xkb_variant") == 0 ||
 #endif
                  strcasecmp(key, "XkbVariant") == 0)
             ki->xkbVariant = strdup(value);
         else if (
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
                  strcasecmp(key, "xkb_options") == 0 ||
 #endif
                  strcasecmp(key, "XkbOptions") == 0)
@@ -906,7 +906,7 @@ KdParseKbdOptions(KdKeyboardInfo * ki)
                 free(ki->path);
             ki->path = strdup(value);
         }
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
         else if (!strcasecmp(key, "path")) {
             if (ki->path != NULL)
                 free(ki->path);
@@ -1014,7 +1014,7 @@ KdParsePointerOptions(KdPointerInfo * pi)
                 free(pi->path);
             pi->path = strdup(value);
         }
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
         else if (!strcasecmp(key, "path")) {
             if (pi->path != NULL)
                 free(pi->path);
@@ -1141,7 +1141,7 @@ KdInitInput(void)
 
     mieqInit();
 
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
     if (SeatId) /* Enable input hot-plugging */
         config_init();
 #endif
@@ -1150,7 +1150,7 @@ KdInitInput(void)
 void
 KdCloseInput(void)
 {
-#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#if defined(CONFIG_UDEV)
     if (SeatId) /* Input hot-plugging is enabled */
         config_fini();
 #endif
@@ -1958,33 +1958,6 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
                 return BadValue;
             }
         }
-#ifdef CONFIG_HAL
-        else if (strcmp(key, "_source") == 0 &&
-                 strcmp(value, "server/hal") == 0) {
-            if (SeatId) {
-                /* Input hot-plugging is enabled */
-                if (attrs->flags & ATTR_POINTER) {
-                    pi = KdNewPointer();
-                    if (!pi) {
-                        input_option_free_list(&optionsdup);
-                        return BadAlloc;
-                    }
-                }
-                else if (attrs->flags & ATTR_KEYBOARD) {
-                    ki = KdNewKeyboard();
-                    if (!ki) {
-                        input_option_free_list(&optionsdup);
-                        return BadAlloc;
-                    }
-                }
-            }
-            else {
-                ErrorF("Ignoring device from HAL.\n");
-                input_option_free_list(&optionsdup);
-                return BadValue;
-            }
-        }
-#endif
 #ifdef CONFIG_UDEV
         else if (strcmp(key, "_source") == 0 &&
                  strcmp(value, "server/udev") == 0) {

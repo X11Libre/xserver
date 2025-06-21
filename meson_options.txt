@@ -66,8 +66,6 @@ option('pciaccess', type: 'boolean', value: true,
        description: 'Xorg pciaccess support')
 option('udev', type: 'boolean', value: true)
 option('udev_kms', type: 'boolean', value: true)
-option('hal', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
-       description: 'Enable HAL integration')
 option('systemd_notify', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
        description: 'Enable systemd-notify support')
 option('systemd_logind', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
