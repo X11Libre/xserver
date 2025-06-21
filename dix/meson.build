@@ -57,13 +57,13 @@ endif
 
 dtrace_dep = declare_dependency(sources: [dtrace_src, dtrace_hdr])
 
-libxserver_dix = static_library('libxserver_dix',
+libxserver_dix = static_library('xserver_dix',
     [ srcs_dix, builtinatoms_src ],
     include_directories: inc,
     dependencies: [ dtrace_dep, common_dep, ]
 )
 
-libxserver_main = static_library('libxserver_main',
+libxserver_main = static_library('xserver_main',
     'stubmain.c',
     include_directories: inc,
     dependencies: common_dep,
