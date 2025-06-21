@@ -10,9 +10,9 @@
    Keep in mind that history is also a piece of documentation.
 
 3. Once release is out, bugfixes should be submitted separately, against
-   the affected release branch(es) as well as master (so multiple MRs)
+   the affected release branch(es) as well as master (so multiple pull requests)
 
 4. If new functions or types are introduced, these should be documented
    in-code, so we can generate docs directly from the code :)
 
-5. Use MR tags if you can - if we need some more, just ask.
+5. Use pull request tags if you can - if we need some more, just ask.
