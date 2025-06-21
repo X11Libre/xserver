@@ -15,4 +15,4 @@
 4. If new functions or types are introduced, these should be documented
    in-code, so we can generate docs directly from the code :)
 
-5. Use MR tags if you can - if we need some more, just ask.
+5. Use Merge Request tags if you can - if we need some more, just ask.
