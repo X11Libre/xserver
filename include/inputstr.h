@@ -342,12 +342,12 @@ typedef struct _GestureListener {
 typedef struct _GestureInfo {
     int sourceid;               /* Source device's ID for this gesture */
     Bool active;                /* whether or not the gesture is active */
+    uint8_t num_touches;        /* The number of touches in the gesture */
     uint8_t type;               /* Gesture type: either ET_GesturePinchBegin or
-                                   ET_GestureSwipeBegin. Valid if active == TRUE */
-    int num_touches;            /* The number of touches in the gesture */
+                           ET_GestureSwipeBegin. Valid if active == TRUE */
+    Bool has_listener;          /* true if listener has been setup already */
     SpriteRec sprite;           /* window trace for delivery */
     GestureListener listener;   /* the listener that will receive events */
-    Bool has_listener;          /* true if listener has been setup already */
 } GestureInfoRec;
 
 typedef struct _GestureClassRec {
