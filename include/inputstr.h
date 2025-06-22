@@ -374,8 +374,8 @@ typedef struct _ButtonClassRec {
 } ButtonClassRec, *ButtonClassPtr;
 
 typedef struct _FocusClassRec {
-    int sourceid;
     WindowPtr win;              /* May be set to a int constant (e.g. PointerRootWin)! */
+    int sourceid;
     int revert;
     TimeStamp time;
     WindowPtr *trace;
