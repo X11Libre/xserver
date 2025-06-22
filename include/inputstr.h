@@ -179,9 +179,9 @@ union _GrabMask {
  */
 typedef struct _GrabRec {
     GrabPtr next;               /* for chain of passive grabs */
-    XID resource;
     DeviceIntPtr device;
     WindowPtr window;
+    XID resource;
     unsigned ownerEvents:1;
     unsigned keyboardMode:1;
     unsigned pointerMode:1;
