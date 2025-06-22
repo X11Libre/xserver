@@ -527,11 +527,11 @@ typedef struct _SpriteInfoRec {
 typedef struct _DeviceIntRec {
     DeviceRec public;
     DeviceIntPtr next;
+    DeviceProc deviceProc;      /* proc(DevicePtr, DEVICE_xx). It is
+                               used to initialize, turn on, or
+                               turn off the device */
     Bool startup;               /* true if needs to be turned on at
                                    server initialization time */
-    DeviceProc deviceProc;      /* proc(DevicePtr, DEVICE_xx). It is
-                                   used to initialize, turn on, or
-                                   turn off the device */
     Bool inited;                /* TRUE if INIT returns Success */
     Bool enabled;               /* TRUE if ON returns Success */
     Bool coreEvents;            /* TRUE if device also sends core */
@@ -539,7 +539,6 @@ typedef struct _DeviceIntRec {
     int type;                   /* MASTER_POINTER, MASTER_KEYBOARD, SLAVE */
     Atom xinput_type;
     char *name;
-    int id;
     KeyClassPtr key;
     ValuatorClassPtr valuator;
     TouchClassPtr touch;
@@ -553,10 +552,11 @@ typedef struct _DeviceIntRec {
     StringFeedbackPtr stringfeed;
     BellFeedbackPtr bell;
     LedFeedbackPtr leds;
+    int id;
+    int saved_master_id;        /* for slaves while grabbed */
     struct _XkbInterest *xkb_interest;
     char *config_info;          /* used by the hotplug layer */
     ClassesPtr unused_classes;  /* for master devices */
-    int saved_master_id;        /* for slaves while grabbed */
     PrivateRec *devPrivates;
     DeviceUnwrapProc unwrapProc;
     SpriteInfoPtr spriteInfo;
@@ -573,9 +573,9 @@ typedef struct _DeviceIntRec {
     struct {
         double valuators[MAX_VALUATORS];
         int numValuators;
+        int num_touches;        /* size of the touches array */
         DeviceIntPtr slave;
         ValuatorMask *scroll;
-        int num_touches;        /* size of the touches array */
         DDXTouchPointInfoPtr touches;
     } last;
 
@@ -592,11 +592,11 @@ typedef struct _DeviceIntRec {
        [1/scale] . [transform] . [scale]. See DeviceSetTransform */
     struct pixman_f_transform scale_and_transform;
 
-    /* XTest related master device id */
-    int xtest_master_id;
-    DeviceSendEventsProc sendEventsProc;
-
     struct _SyncCounter *idle_counter;
+
+    /* XTest related master device id */
+    DeviceSendEventsProc sendEventsProc;
+    int xtest_master_id;
 
     Bool ignoreXkbActionsBehaviors; /* TRUE if keys don't trigger behaviors and actions */
 } DeviceIntRec;
