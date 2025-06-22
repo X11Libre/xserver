@@ -352,8 +352,8 @@ typedef struct _GestureInfo {
 
 typedef struct _GestureClassRec {
     int sourceid;
-    GestureInfoRec gesture;
     unsigned short max_touches; /* maximum number of touches, may be 0 */
+    GestureInfoRec gesture;
 } GestureClassRec;
 
 typedef struct _ButtonClassRec {
