@@ -319,8 +319,8 @@ typedef struct _TouchPointInfo {
 } TouchPointInfoRec;
 
 typedef struct _TouchClassRec {
-    int sourceid;
     TouchPointInfoPtr touches;
+    int sourceid;
     unsigned short num_touches; /* number of allocated touches */
     unsigned short max_touches; /* maximum number of touches, may be 0 */
     CARD8 mode;                 /* ::XIDirectTouch, XIDependentTouch */
