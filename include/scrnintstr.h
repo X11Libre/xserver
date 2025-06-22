@@ -709,12 +709,12 @@ typedef struct _ScreenInfo {
     int bitmapScanlineUnit;
     int bitmapScanlinePad;
     int bitmapBitOrder;
-    int numPixmapFormats;
-     PixmapFormatRec formats[MAXFORMATS];
-    int numScreens;
     ScreenPtr screens[MAXSCREENS];
-    int numGPUScreens;
     ScreenPtr gpuscreens[MAXGPUSCREENS];
+    PixmapFormatRec formats[MAXFORMATS];
+    uint16_t numScreens;
+    uint16_t numGPUScreens;
+    uint8_t numPixmapFormats;
     int x;                      /* origin */
     int y;                      /* origin */
     int width;                  /* total width of all screens together */
