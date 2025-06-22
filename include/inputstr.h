@@ -248,8 +248,8 @@ typedef struct _KeyClassRec {
 } KeyClassRec, *KeyClassPtr;
 
 typedef struct _ScrollInfo {
-    enum ScrollType type;
     double increment;
+    enum ScrollType type;
     int flags;
 } ScrollInfo, *ScrollInfoPtr;
 
