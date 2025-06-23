@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 1999-2003 by The XFree86 Project, Inc.
  *
@@ -26,12 +25,12 @@
  * authorization from the copyright holder(s) and author(s).
  */
 
+#ifndef _XF86_PCI_BUS_H
+#define _XF86_PCI_BUS_H
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _XF86_PCI_BUS_H
-#define _XF86_PCI_BUS_H
 
 #include "xf86MatchDrivers.h"
 

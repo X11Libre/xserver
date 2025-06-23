@@ -21,12 +21,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifndef _XF86_SBUS_H
+#define _XF86_SBUS_H
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _XF86_SBUS_H
-#define _XF86_SBUS_H
 
 #if defined(__linux__)
 #include <asm/types.h>
