@@ -2,12 +2,12 @@
  * Memory range attribute operations, performed on /dev/mem
  */
 
+#ifndef _MEMRANGE_H
+#define _MEMRANGE_H
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _MEMRANGE_H
-#define _MEMRANGE_H
 
 /* Memory range attributes */
 #define MDF_UNCACHEABLE		(1<<0)  /* region not cached */

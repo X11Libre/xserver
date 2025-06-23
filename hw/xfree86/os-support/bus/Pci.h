@@ -99,12 +99,13 @@
  * This file has the private Pci definitions.  The public ones are imported
  * from xf86Pci.h.  Drivers should not use this file.
  */
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #ifndef _PCI_H
 #define _PCI_H 1
+
+#ifdef HAVE_XORG_CONFIG_H
+#include <xorg-config.h>
+#endif
 
 #include <X11/Xdefs.h>
 
