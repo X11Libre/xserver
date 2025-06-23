@@ -1,9 +1,9 @@
+#ifndef _DISMODEPROC_H_
+#define _DISMODEPROC_H_
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _DISMODEPROC_H_
-#define _DISMODEPROC_H_
 
 #include "scrnintstr.h"
 
