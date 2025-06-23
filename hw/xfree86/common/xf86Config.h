@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 1997-2000 by The XFree86 Project, Inc.
  *
@@ -26,12 +25,12 @@
  * authorization from the copyright holder(s) and author(s).
  */
 
+#ifndef _xf86_config_h
+#define _xf86_config_h
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _xf86_config_h
-#define _xf86_config_h
 
 #include "xf86Optrec.h"
 #include "xf86Parser.h"

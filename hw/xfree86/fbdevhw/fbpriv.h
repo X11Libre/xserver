@@ -3,12 +3,12 @@
  * removed internal stuff (#ifdef __KERNEL__)
  */
 
+#ifndef _LINUX_FB_H
+#define _LINUX_FB_H
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _LINUX_FB_H
-#define _LINUX_FB_H
 
 #include <asm/types.h>
 
