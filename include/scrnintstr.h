@@ -511,7 +511,7 @@ typedef void (*DPMSProcPtr)(ScreenPtr pScreen, int level);
 typedef struct _Screen {
     int myNum;                  /* index of this instance in Screens[] */
     ATOM id;
-    short x, y, width, height;
+    uint16 x, y, width, height;
     short mmWidth, mmHeight;
     short numDepths;
     unsigned char rootDepth;
