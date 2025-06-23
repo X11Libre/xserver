@@ -1,7 +1,7 @@
-#include "dix/dix_priv.h"
-
 #ifndef DEFAULT_H
 #define DEFAULT_H 1
+
+#include "dix/dix_priv.h"
 
 #define DPYTYPE	char *
 #define NUM_KEYS	1
