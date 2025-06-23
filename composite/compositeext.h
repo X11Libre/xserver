@@ -21,12 +21,12 @@
  * SOFTWARE.
  */
 
+#ifndef _COMPOSITEEXT_H_
+#define _COMPOSITEEXT_H_
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _COMPOSITEEXT_H_
-#define _COMPOSITEEXT_H_
 
 #include "misc.h"
 #include "scrnintstr.h"
