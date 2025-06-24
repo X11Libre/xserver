@@ -294,7 +294,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
         modifier = gbm_bo_get_modifier(gbm);
         gbm_bo_destroy(gbm);
 
-        if (!drmmode_is_format_supported(scrn, format, modifier)) {
+        if (!drmmode_is_format_supported(scrn, format, modifier, FALSE)) {
             if (reason)
                 *reason = PRESENT_FLIP_REASON_BUFFER_FORMAT;
             return FALSE;
