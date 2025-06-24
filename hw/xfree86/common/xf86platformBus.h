@@ -94,4 +94,11 @@ xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *bu
 
 #endif
 
+#ifndef HAVE_PCI_DEVICE_IS_BOOT_DISPLAY
+static inline Bool pci_device_is_boot_display(struct pci_device *dev)
+{
+    return FALSE;
+}
+#endif
+
 #endif
