@@ -22,8 +22,8 @@ discriminatory policies. Anybody who's treating others nicely is welcomed.
 It doesn't matter which country you're coming from, your political views,
 your race, your sex, your age, your food menu, whether you wear boots or
 heels, whether you're furry or fairy, Conan or McKay, comic character, a
-small furry creature from Alpha Centauri, a neurodivergeant or just a boring average person.
-Anybody who's interested in bringing X forward is welcome so a true inclusive project!
+small furry creature from Alpha Centauri, a neurodivergent or just a average person.
+Anybody who's interested in bringing X forward is welcome, so it's a true inclusive!
 
 Together we'll make X great again!
 
