@@ -248,6 +248,7 @@ get_drawable_modifiers(DrawablePtr draw, uint32_t format,
 {
     ScrnInfoPtr scrn = xf86ScreenToScrn(draw->pScreen);
     modesettingPtr ms = modesettingPTR(scrn);
+    Bool async_flip;
 
     if (!present_can_window_flip((WindowPtr) draw) ||
         !ms->drmmode.pageflip || ms->drmmode.dri2_flipping || !scrn->vtSema) {
@@ -256,8 +257,11 @@ get_drawable_modifiers(DrawablePtr draw, uint32_t format,
         return TRUE;
     }
 
+    async_flip = ms_window_has_async_flip((WindowPtr)draw);
+    ms_window_update_async_flip_modifiers((WindowPtr)draw, async_flip);
+
     *num_modifiers = get_modifiers_set(scrn, format, modifiers,
-                                       TRUE, FALSE, FALSE);
+                                       TRUE, FALSE, async_flip);
     return TRUE;
 }
 #endif
