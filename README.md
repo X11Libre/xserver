@@ -23,7 +23,7 @@ It doesn't matter which country you're coming from, your political views,
 your race, your sex, your age, your food menu, whether you wear boots or
 heels, whether you're furry or fairy, Conan or McKay, comic character, a
 small furry creature from Alpha Centauri or just a average person.
-Anybody who's interested in bringing X forward is welcome, so it's a true inclusive!
+Anybody who's interested in bringing X forward is welcome. 
 
 Together we'll make X great again!
 
