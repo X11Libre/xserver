@@ -19,7 +19,7 @@ We recommend always using the latest release for performance and security fixes.
 
 ##  Security Best Practices (User-Side)
 
-To help protect your systems when using x11libre:
+To help protect your systems when using X11Libre:
 
 - Use minimal privileges when running X sessions 
 - Avoid setuid binaries unless required 
@@ -38,4 +38,4 @@ For contributors submitting PRs:
 
 ---
 
-We appreciate your help in keeping x11libre safe for everyone. Let’s build something resilient, secure, and libre.
+We appreciate your help in keeping X11Libre safe for everyone. Let’s build something resilient, secure, and libre.
