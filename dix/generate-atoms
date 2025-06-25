@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # SPDX-License-Identifier: MIT OR X11
 #
 # Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
@@ -7,10 +7,10 @@ INPUT="$1"
 OUTPUT="$2"
 
 do_line() {
-    local name="$1"
+    name="$1"
     [ "$2" != "@" ] && return 0
     echo "    if (MakeAtom(\"$name\", ${#name}, 1) != XA_$name)"
-    echo "        FatalError(\"adding builtin atom\");"
+    echo "        FatalError(\"Adding builtin atom\");"
 }
 
 cat > "$OUTPUT" << __END__
@@ -35,6 +35,6 @@ MakePredeclaredAtoms(void)
 {
 __END__
 
-( grep '@' < "$INPUT" ) | ( while read l ; do do_line $l ; done ) >> "$OUTPUT"
+( grep '@' < "$INPUT" ) | ( while IFS= read -r l ; do do_line $l ; done ) >> "$OUTPUT"
 
 echo "}" >> "$OUTPUT"
