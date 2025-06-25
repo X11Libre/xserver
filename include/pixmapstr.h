@@ -60,10 +60,10 @@ typedef struct _Drawable {
     unsigned char depth;
     unsigned char bitsPerPixel;
     XID id;                     /* resource id */
-    short x;                    /* window: screen absolute, pixmap: 0 */
-    short y;                    /* window: screen absolute, pixmap: 0 */
-    unsigned short width;
-    unsigned short height;
+    unsigned int x;                    /* window: screen absolute, pixmap: 0 */
+    unsigned int y;                    /* window: screen absolute, pixmap: 0 */
+    unsigned int width;
+    unsigned int height;
     ScreenPtr pScreen;
     unsigned long serialNumber;
 } DrawableRec;
@@ -78,8 +78,8 @@ typedef struct _Pixmap {
     int refcnt;
     int devKind;                /* This is the pitch of the pixmap, typically width*bpp/8. */
     DevUnion devPrivate;        /* When !NULL, devPrivate.ptr points to the raw pixel data. */
-    short screen_x;
-    short screen_y;
+    unsigned int screen_x;
+    unsigned int screen_y;
     unsigned usage_hint;        /* see CREATE_PIXMAP_USAGE_* */
 
     PixmapPtr primary_pixmap;    /* pointer to primary copy of pixmap for pixmap sharing */
