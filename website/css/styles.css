@@ -1,0 +1,8 @@
+#github-card {
+    background-color: gray;
+}
+
+#github-card a{
+    text-decoration : none;
+    color : white; 
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+    <script type="text/javascript" src="js/scripts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <title>X11Libre X Server</title>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <img src="img/XLibre-Logo.svg" alt="Bootstrap" width="90" height="90">
+                <a class="navbar-brand" href="#">X11Libre X Server</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="about.html">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="download.html">Download</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="demo.html">Demonstration</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contribute.html">Contribute</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="hall-of-fame.html">Credit</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <md-block>
+Driver repositories
+-------------------
+
+Since Redhat had deleted and banned all X11Libre repositories from freedesktop.org,
+the driver repositories are now moved to GitHub:
+
+| Driver | Git repository | Release tag |
+| --- | --- | --- |
+| xf86-input-elographics:   | https://github.com/X11Libre/xf86-input-elographics    | xlibre-xf86-input-elographics-1.4.4.1    |
+| xf86-input-evdev:         | https://github.com/X11Libre/xf86-input-evdev          | xlibre-xf86-input-evdev-2.11.0.1         |
+| xf86-input-void:          | https://github.com/X11Libre/xf86-input-void           | xlibre-xf86-input-void-1.4.2.1           |
+| xf86-input-joystick:      | https://github.com/X11Libre/xf86-input-joystick       | xlibre-xf86-input-joystick-1.6.4.1       |
+| xf86-input-keyboard:      | https://github.com/X11Libre/xf86-input-keyboard       | xlibre-xf86-input-keyboard-2.1.0.1       |
+| xf86-input-libinput:      | https://github.com/X11Libre/xf86-input-libinput       | xlibre-xf86-input-libinput-1.5.0.1       |
+| xf86-input-mouse:         | https://github.com/X11Libre/xf86-input-mouse          | xlibre-xf86-input-mouse-1.9.5.1          |
+| xf86-input-synaptics:     | https://github.com/X11Libre/xf86-input-synaptics      | xlibre-xf86-input-synaptics-1.10.0.1     |
+| xf86-input-vmmouse:       | https://github.com/X11Libre/xf86-input-vmmouse        | xlibre-xf86-input-vmmouse-13.2.0.1       |
+| xf86-input-wacom:         | https://github.com/X11Libre/xf86-input-wacom          | xlibre-xf86-input-wacom-1.2.3.1          |
+| xf86-video-amdgpu:        | https://github.com/X11Libre/xf86-video-amdgpu         | xlibre-xf86-video-amdgpu-23.0.0.1        |
+| xf86-video-apm:           | https://github.com/X11Libre/xf86-video-apm            | xlibre-xf86-video-apm-1.3.0.1            |
+| xf86-video-ark:           | https://github.com/X11Libre/xf86-video-ark            | xfree-xf86-video-ark-0.7.6.1             |
+| xf86-video-ast:           | https://github.com/X11Libre/xf86-video-ast            | xlibre-xf86-video-ast-1.2.0              |
+| xf86-video-ati:           | https://github.com/X11Libre/xf86-video-ati            | xfree-xf86-video-ati-22.0.0.1            |
+| xf86-video-chips:         | https://github.com/X11Libre/xf86-video-chips          | xlibre-xf86-video-chips-1.5.0.1          |
+| xf86-video-cirrus:        | https://github.com/X11Libre/xf86-video-cirrus         | xlibre-xf86-video-cirrus-1.6.0.1         |
+| xf86-video-dummy:         | https://github.com/X11Libre/xf86-video-dummy          | xlibre-xf86-video-dummy-0.4.1.1          |
+| xf86-video-fbdev:         | https://github.com/X11Libre/xf86-video-fbdev          | xlibre-xf86-video-fbdev-0.5.1.1          |
+| xf86-video-freedreno:     | https://github.com/X11Libre/xf86-video-freedreno      | xlibre-xf86-video-freedreno-1.4.0.1      |
+| xf86-video-geode:         | https://github.com/X11Libre/xf86-video-geode          | xlibre-xf86-video-geode-2.18.1.1         |
+| xf86-video-i128:          | https://github.com/X11Libre/xf86-video-i128           | xlibre-xf86-video-i128-1.4.1.1           |
+| xf86-video-i740:          | https://github.com/X11Libre/xf86-video-i740           | xlibre-xf86-video-i740-1.4.0.1           |
+| xf86-video-intel:         | https://github.com/X11Libre/xf86-video-intel          | xlibre-xf86-video-intel-3.0.0.1          |
+| xf86-video-mach64:        | https://github.com/X11Libre/xf86-video-mach64         | xlibre-xf86-video-mach64-6.10.0.1        |
+| xf86-video-mga:           | https://github.com/X11Libre/xf86-video-mga            | xlibre-xf86-video-mga-2.1.0.1            |
+| xf86-video-neomagic:      | https://github.com/X11Libre/xf86-video-neomagic       | xlibre-xf86-video-neomagic-1.3.1.1       |
+| xf86-video-nested:        | https://github.com/X11Libre/xf86-video-nested         | xlibre-xf86-video-nested-1.0.0.1         |
+| xf86-video-nouveau:       | https://github.com/X11Libre/xf86-video-nouveau        | xlibre-xf86-video-nouveau-1.0.18.1       |
+| xf86-video-nv:            | https://github.com/X11Libre/xf86-video-nv             | xlibre-xf86-video-nv-2.1.23.1            |
+| xf86-video-omap:          | https://github.com/X11Libre/xf86-video-omap           | xlibre-xf86-video-omap-0.4.5.1           |
+| xf86-video-qxl:           | https://github.com/X11Libre/xf86-video-qxl            | xlibre-xf86-video-qxl-0.1.6.1            |
+| xf86-video-r128:          | https://github.com/X11Libre/xf86-video-r128           | xlibre-xf86-video-r128-6.13.0.1          |
+| xf86-video-rendition:     | https://github.com/X11Libre/xf86-video-rendition      | xlibre-xf86-video-rendition-4.2.7.1      |
+| xf86-video-s3virge:       | https://github.com/X11Libre/xf86-video-s3virge        | xlibre-xf86-video-s3virge-1.11.1.1       |
+| xf86-video-savage:        | https://github.com/X11Libre/xf86-video-savage         | xlibre-xf86-video-savage-2.4.1.1         |
+| xf86-video-siliconmotion: | https://github.com/X11Libre/xf86-video-siliconmotion  | xlibre-xf86-video-siliconmotion-1.7.10.1 |
+| xf86-video-sis:           | https://github.com/X11Libre/xf86-video-sis            | xlibre-xf86-video-sis-0.12.0.1           |
+| xf86-video-sisusb:        | https://github.com/X11Libre/xf86-video-sisusb         | xlibre-xf86-video-sisusb-0.9.7.1         |
+| xf86-video-suncg14:       | https://github.com/X11Libre/xf86-video-suncg14        | xlibre-xf86-video-suncg14-1.2.0          |
+| xf86-video-suncg3:        | https://github.com/X11Libre/xf86-video-suncg3         | xlibre-xf86-video-suncg3-1.1.3.0         |
+| xf86-video-suncg6:        | https://github.com/X11Libre/xf86-video-suncg6         | xlibre-xf86-video-suncg6-1.1.3.1         |
+| xf86-video-sunffb:        | https://github.com/X11Libre/xf86-video-sunffb         | xlibre-xf86-video-sunffb-1.2.3.1         |
+| xf86-video-sunleo:        | https://github.com/X11Libre/xf86-video-sunleo         | xlibre-xf86-video-sunleo-1.2.3.1         |
+| xf86-video-suntcx:        | https://github.com/X11Libre/xf86-video-suntcx         | xlibre-xf86-video-suntcx-1.1.3.1         |
+| xf86-video-tdfx:          | https://github.com/X11Libre/xf86-video-tdfx           | xlibre-xf86-video-tdfx-1.5.0.1           |
+| xf86-video-trident:       | https://github.com/X11Libre/xf86-video-trident        | xlibre-xf86-video-trident-1.4.0.1        |
+| xf86-video-vbox:          | https://github.com/X11Libre/xf86-video-vbox           | xlibre-xf86-video-vbox-1.0.1.1           |
+| xf86-video-v4l:           | https://github.com/X11Libre/xf86-video-v4l            | xlibre-xf86-video-v4l-0.3.0.1            |
+| xf86-video-vesa:          | https://github.com/X11Libre/xf86-video-vesa           | xlibre-xf86-video-vesa-2.6.0.1           |
+| xf86-video-vmware:        | https://github.com/X11Libre/xf86-video-vmware         | xlibre-xf86-video-vmware-13.4.0.1        |
+| xf86-video-voodoo:        | https://github.com/X11Libre/xf86-video-voodoo         | xlibre-xf86-video-voodoo-1.2.6.1         |
+| xf86-video-wsfb:          | https://github.com/X11Libre/xf86-video-wsfb           | xlibre-xf86-video-wsfb-0.4.1.1           |
+| xf86-video-xgi:           | https://github.com/X11Libre/xf86-video-xgi            | xlibre-xf86-video-xgi-1.6.1.1            |
+
+        </md-block>
+    </main>
+</body>
+
+</html>

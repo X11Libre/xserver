@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+  <script type="text/javascript" src="js/scripts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+    crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <title>X11Libre X Server</title>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <img src="img/XLibre-Logo.svg" alt="Bootstrap" width="90" height="90">
+        <a class="navbar-brand" href="#">X11Libre X Server</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="about.html">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="download.html">Download</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="demo.html">Demonstration</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="contribute.html">Contribute</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="hall-of-fame.html">Credit</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main>
+  <md-block>
+XLibre Xserver
+===============
+
+Xlibre is a fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver)
+with lots of code cleanups and enhanced functionality.
+
+This fork was necessary since toxic elements within Xorg projects, moles
+from BigTech, are boycotting any substantial work on Xorg, in order to
+destroy the project, to eliminate competition of their own products.
+Classic "embrace, extend, extinguish" tactics.
+
+Right after journalists first began covering the planned fork Xlibre,
+on June 6th 2025, Redhat employees started a purge on the Xlibre founder's
+GitLab account on freedesktop.org: deleted the git repo, tickets, merge
+requests, etc, and so fired the shot that the whole world heard.
+
+This is an independent project, not at all affiliated with BigTech or any
+of their subsidiaries or tax evasion tools, nor any political activists
+groups, state actors, etc. It's explicitly free of any "DEI" or similar
+discriminatory policies. Anybody who's treating others nicely is welcomed.
+
+It doesn't matter which country you're coming from, your political views,
+your race, your sex, your age, your food menu, whether you wear boots or
+heels, whether you're furry or fairy, Conan or McKay, comic character, a
+small furry creature from Alpha Centauri, a neurodivergent or just a average person.
+Anybody who's interested in bringing X forward is welcome, so it's a true inclusive!
+
+Together we'll make X great again!
+
+Upgrade notice
+--------------
+
+* Module ABIs have changed - drivers MUST be recompiled against this Xserver
+  version, otherwise the Xserver can crash or fail to start up correctly.
+
+* If your console is locked up (no input possible, not even VT switch), then
+  most likely the input driver couldn't be loaded due to a version mismatch.
+  When unsure, it's best to be prepared to ssh into your machine from another one
+  or set a timer that's calling `chvt 1` after certain time, so you don't
+  need a cold reboot.
+  Or, make sure that you have magic `SysRq` key enabled (`Alt+PrtSc`)
+  via sysctl (`kernel.sysrq=1`), then press following combination depending on keyboard
+  layout to make kernel regain control over keyboard to make VT switching work:
+  - QWERTY/AZERTY keyboard layout: `SysRq + R`
+  - Dvorak/Colemak keyboard layout: `SysRq + P`
+
+* Proprietary Nvidia drivers might break: they still haven't managed to do
+  even simple cleanups to catch up with Xorg master for about a year.
+  All attempts to get into direct mail contact have failed. We're trying to
+  work around this, but cannot give any guarantees. But you can make it work
+  by adding `Option "IgnoreABI" "1"` line to `ServerFlags` section in Xorg config.
+
+* Most Xorg drivers should run as-is (once recompiled!), with some exceptions.
+  See `.gitlab-ci.yml` for the versions/branches built along with Xlibre.
+
+Contact
+-------
+
+|  |  |
+| --- | --- |
+| Mailing list:                     | https://www.freelists.org/list/xlibre |
+| Telegram channel:                 | https://t.me/x11dev |
+| Matrix room (mirror of tg group): | https://matrix.to/#/#xlibre:matrix.org |
+
+  </md-block>
+  </main>
+</body>
+</html>
