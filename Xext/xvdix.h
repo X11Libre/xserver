@@ -76,7 +76,7 @@ typedef struct {
     int id;
     ScreenPtr pScreen;
     char *name;
-    unsigned short width, height;
+    unsigned int width, height;
     XvRationalRec rate;
 } XvEncodingRec, *XvEncodingPtr;
 
