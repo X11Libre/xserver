@@ -42,26 +42,26 @@ typedef struct _XkbColor {
 } XkbColorRec, *XkbColorPtr;
 
 typedef struct _XkbPoint {
-    short x;
-    short y;
+    unsigned int x;
+    unsigned int y;
 } XkbPointRec, *XkbPointPtr;
 
 typedef struct _XkbBounds {
-    short x1, y1;
-    short x2, y2;
+    unsigned int x1, y1;
+    unsigned int x2, y2;
 } XkbBoundsRec, *XkbBoundsPtr;
 
 typedef struct _XkbOutline {
-    unsigned short num_points;
-    unsigned short sz_points;
-    unsigned short corner_radius;
+    unsigned int num_points;
+    unsigned int sz_points;
+    unsigned int corner_radius;
     XkbPointPtr points;
 } XkbOutlineRec, *XkbOutlinePtr;
 
 typedef struct _XkbShape {
     Atom name;
-    unsigned short num_outlines;
-    unsigned short sz_outlines;
+    unsigned int num_outlines;
+    unsigned int sz_outlines;
     XkbOutlinePtr outlines;
     XkbOutlinePtr approx;
     XkbOutlinePtr primary;
