@@ -2,7 +2,7 @@
 
 ##  Reporting Vulnerabilities
 
-We take security seriously at X11Libre. If you discover any vulnerabilities, please report them responsibly.
+The X11Libre project takes security seriously. If you discover any vulnerabilities, please report them responsibly.
 
 - **Contact**: https://github.com/metux info@metux.net legendarydood@gmail.com
 - **Preferred Method**: Email with detailed reproduction steps, logs, and system info 
