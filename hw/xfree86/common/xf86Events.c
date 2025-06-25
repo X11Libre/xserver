@@ -342,18 +342,30 @@ xf86UpdateHasVTProperty(Bool hasVT)
 
 static void xf86DisableInputHandler(void *handler);
 static void xf86EnableInputHandler(void *handler);
-static void xf86DisableGeneralHandler(void *handler);
 
 static void _xf86EnableGeneralHandler(void *handler);
+static void _xf86DisableGeneralHandler(void *handler);
 
 _X_EXPORT /* needs to be exported for Nvidia legacy (470.256.02) */
 void xf86EnableGeneralHandler(void *handler);
 
+_X_EXPORT /* needs to be exported for Nvidia legacy (470.256.02) */
+void xf86DisableGeneralHandler(void *handler);
+
 void xf86EnableGeneralHandler(void *handler) {
     LogMessageVerb(X_WARNING, 0, "Outdated driver still using xf86EnableGeneralHandler() !\n");
     LogMessageVerb(X_WARNING, 0, "File a bug report to driver vendor or use a FOSS driver.\n");
+    LogMessageVerb(X_WARNING, 0, "https://forums.developer.nvidia.com/c/gpu-graphics/linux/148\n");
     LogMessageVerb(X_WARNING, 0, "Proprietary drivers are inherently unstable, they just can't be done right.\n");
     _xf86EnableGeneralHandler(handler);
+}
+
+void xf86DisableGeneralHandler(void *handler) {
+    LogMessageVerb(X_WARNING, 0, "Outdated driver still using xf86DisableGeneralHandler() !\n");
+    LogMessageVerb(X_WARNING, 0, "File a bug report to driver vendor or use a FOSS driver.\n");
+    LogMessageVerb(X_WARNING, 0, "https://forums.developer.nvidia.com/c/gpu-graphics/linux/148\n");
+    LogMessageVerb(X_WARNING, 0, "Proprietary drivers are inherently unstable, they just can't be done right.\n");
+    _xf86DisableGeneralHandler(handler);
 }
 
 static void
@@ -383,7 +395,7 @@ xf86VTLeave(void)
         if (ih->is_input)
             xf86DisableInputHandler(ih);
         else
-            xf86DisableGeneralHandler(ih);
+            _xf86DisableGeneralHandler(ih);
     }
     for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next)
         xf86DisableInputDeviceForVTSwitch(pInfo);
@@ -649,7 +661,7 @@ static void xf86DisableInputHandler(void *handler)
         RemoveNotifyFd(ih->fd);
 }
 
-static void xf86DisableGeneralHandler(void *handler)
+static void _xf86DisableGeneralHandler(void *handler)
 {
     IHPtr ih;
 

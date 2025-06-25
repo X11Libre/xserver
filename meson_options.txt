@@ -14,7 +14,7 @@ option('xquartz', type: 'combo', choices: ['true', 'false', 'auto'], value: 'aut
        description: 'Enable Xquartz X server')
 
 
-option('builder_addr', type: 'string', description: 'Builder address', value: 'xorg@lists.freedesktop.org')
+option('builder_addr', type: 'string', description: 'Builder address', value: 'xlibre@freelists.org')
 option('builder_string', type: 'string', description: 'Additional builder string')
 
 option('log_dir', type: 'string')

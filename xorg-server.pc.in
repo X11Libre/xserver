@@ -13,8 +13,8 @@ abi_xinput=@abi_xinput@
 abi_extension=@abi_extension@
 
 Name: xorg-server
-Description: Modular X.Org X Server
-URL: https://gitlab.freedesktop.org/xorg/xserver/
+Description: Modular XLibre X Server
+URL: https://github.com/X11Libre/xserver/
 Version: @PACKAGE_VERSION@
 Requires.private: @SDK_REQUIRED_MODULES@
 Cflags: -I${sdkdir} @symbol_visibility@
