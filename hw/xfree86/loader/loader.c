@@ -157,7 +157,14 @@ LoaderSetOptions(unsigned long opts)
 Bool
 LoaderShouldIgnoreABI(void)
 {
-    return (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL) != 0;
+    LogMessage(X_WARNING,
+               "ABI mismatch detected possibly from an NVIDIA driver. Attempting to continue loading X...\n"
+               "Expected ABI versions: ANSIC=%d, VideoDriver=%d, XInput=%d, Extension=%d\n",
+               LoaderVersionInfo.ansicVersion,
+               LoaderVersionInfo.videodrvVersion,
+               LoaderVersionInfo.xinputVersion,
+               LoaderVersionInfo.extensionVersion);
+    return TRUE;
 }
 
 int
