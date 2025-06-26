@@ -1,0 +1,44 @@
+name: ✅ Organizational task
+description: Create a task for project organization
+
+labels: [needs-triage, organization]
+#type: task
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the sections below to get organizational things done. If you have a general idea or question then please use the [discussions](https://github.com/orgs/X11Libre/discussions).
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the task
+      placeholder: These things need to be done.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: "It should be done because"
+      placeholder: Doing Y is needed for Z.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Additional Information
+      description: Additional information you want to provide such as the context for bigger tasks, the implicatons on existing workflows, related issues, etc.
+      placeholder: |
+        Add any other context about the task here.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Extra fields
+      options:
+        - label: I have checked the existing [issues](https://github.com/X11Libre/xserver/issues)
+          required: true
+        - label: I have read the [Contributing Guidelines](https://github.com/X11Libre/xserver/blob/master/CONTRIBUTING.md)
+          required: true
+        - label: I'd like to work on this issue
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for adding this task! We will get back to you as soon as possible.

@@ -1,0 +1,66 @@
+name: 🐞 Bug report
+description: Create a report to help us improve
+
+labels: [bug, needs-triage]
+#type: bug
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the sections below to help everyone identify and fix the bug. If you have a general idea or question then please use the [discussions](https://github.com/orgs/X11Libre/discussions).
+  - type: dropdown
+    id: affected-version
+    attributes:
+      label: Select the version
+      options:
+        - 25.0.0.0
+        - 25.0.0.1
+        - Git master branch
+        - other or don't know
+      default: 1
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe your issue
+      placeholder: When I did X then Y happened.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start ...
+        2. Do this
+        3. Do that
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: I expected this to happen.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Additional Information
+      description: Additional information you want to provide such as logs, system info, environment, screenshots, etc.
+      placeholder: |
+        Add any other context about the bug here.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Extra fields
+      options:
+        - label: I have checked the existing [issues](https://github.com/X11Libre/xserver/issues)
+          required: true
+        - label: I have read the [Contributing Guidelines](https://github.com/X11Libre/xserver/blob/master/CONTRIBUTING.md)
+          required: true
+        - label: I'd like to work on this issue
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this issue! We will get back to you as soon as possible.
