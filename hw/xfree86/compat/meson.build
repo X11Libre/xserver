@@ -8,6 +8,7 @@ srcs_xorg_compat = [
 
 if get_option('legacy_nvidia_340x')
     srcs_xorg_compat += 'timercheck.c'
+    srcs_xorg_compat += 'geeventinit.c'
 endif
 
 xorg_compat = static_library('xorg_compat',
