@@ -253,4 +253,7 @@ enum ExitCode {
 
 extern sig_atomic_t inSignalContext;
 
+/* run timers that are expired at timestamp `now` */
+void DoTimers(CARD32 now);
+
 #endif                          /* _OSDEP_H_ */
