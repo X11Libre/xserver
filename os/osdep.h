@@ -219,4 +219,7 @@ Ones(unsigned long mask)
 }
 #endif
 
+/* run timers that are expired at timestamp `now` */
+void DoTimers(CARD32 now);
+
 #endif                          /* _OSDEP_H_ */
