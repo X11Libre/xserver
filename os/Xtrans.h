@@ -402,11 +402,6 @@ TRANS(GetMyNetworkId)(
     XtransConnInfo	/* ciptr */
 );
 
-char *
-TRANS(GetPeerNetworkId)(
-    XtransConnInfo	/* ciptr */
-);
-
 #endif /* ICE_t */
 
 int
