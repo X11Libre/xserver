@@ -913,6 +913,51 @@ msSetWindowVRRMode(WindowPtr window, WindowVRRMode mode)
         ms_present_set_screen_vrr(scrn, variable_refresh);
 }
 
+
+Bool
+ms_window_has_async_flip(WindowPtr win)
+{
+    ScrnInfoPtr scrn = xf86ScreenToScrn(win->drawable.pScreen);
+    modesettingPtr ms = modesettingPTR(scrn);
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &ms->drmmode.asyncFlipPrivateKeyRec);
+
+    return priv->async_flip;
+}
+
+void
+ms_window_update_async_flip(WindowPtr win, Bool async_flip)
+{
+    ScrnInfoPtr scrn = xf86ScreenToScrn(win->drawable.pScreen);
+    modesettingPtr ms = modesettingPTR(scrn);
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &ms->drmmode.asyncFlipPrivateKeyRec);
+
+    priv->async_flip = async_flip;
+}
+
+Bool
+ms_window_has_async_flip_modifiers(WindowPtr win)
+{
+    ScrnInfoPtr scrn = xf86ScreenToScrn(win->drawable.pScreen);
+    modesettingPtr ms = modesettingPTR(scrn);
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &ms->drmmode.asyncFlipPrivateKeyRec);
+
+    return priv->async_flip_modifiers;
+}
+
+void
+ms_window_update_async_flip_modifiers(WindowPtr win, Bool async_flip)
+{
+    ScrnInfoPtr scrn = xf86ScreenToScrn(win->drawable.pScreen);
+    modesettingPtr ms = modesettingPTR(scrn);
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &ms->drmmode.asyncFlipPrivateKeyRec);
+
+    priv->async_flip_modifiers = async_flip;
+}
+
 static void
 FreeScreen(ScrnInfoPtr pScrn)
 {
@@ -1709,6 +1754,11 @@ modsetCreateScreenResources(ScreenPtr pScreen)
         !dixRegisterPrivateKey(&ms->drmmode.vrrPrivateKeyRec,
                                PRIVATE_WINDOW,
                                sizeof(struct ms_vrr_priv)))
+            return FALSE;
+
+    if (!dixRegisterPrivateKey(&ms->drmmode.asyncFlipPrivateKeyRec,
+                               PRIVATE_WINDOW,
+                               sizeof(struct ms_async_flip_priv)))
             return FALSE;
 
     return ret;
