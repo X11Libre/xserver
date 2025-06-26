@@ -395,15 +395,6 @@ int TRANS(ConvertAddress)(
 
 #endif /* X11_t */
 
-#ifdef ICE_t
-
-char *
-TRANS(GetMyNetworkId)(
-    XtransConnInfo	/* ciptr */
-);
-
-#endif /* ICE_t */
-
 int
 TRANS(GetHostname) (
     char *	/* buf */,
