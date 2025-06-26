@@ -3,6 +3,7 @@ srcs_xorg_compat = [
     'log.c',
     'nvidiabug.c',
     'ones.c',
+    'timercheck.c',
     'xf86Helper.c',
 ]
 

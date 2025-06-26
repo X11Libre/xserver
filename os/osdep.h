@@ -225,4 +225,7 @@ Ones(unsigned long mask)
 
 #define LIMITCLIENTS     256     /* Must be a power of 2 and <= MAXCLIENTS */
 
+/* run timers that are expired at timestamp `now` */
+void DoTimers(CARD32 now);
+
 #endif                          /* _OSDEP_H_ */
