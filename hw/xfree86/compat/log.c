@@ -4,6 +4,8 @@
 
 #include "include/os.h"
 
+#include "xf86_compat.h"
+
 #undef xf86Msg
 #undef xf86MsgVerb
 
@@ -17,9 +19,7 @@ _X_EXPORT void xf86Msg(MessageType type, const char *format, ...)
 
 void xf86Msg(MessageType type, const char *format, ...)
 {
-    LogMessageVerb(X_WARNING, 0, "Outdated driver still using xf86Msg() !\n");
-    LogMessageVerb(X_WARNING, 0, "File a bug report to driver vendor or use a FOSS driver.\n");
-    LogMessageVerb(X_WARNING, 0, "Proprietary drivers are inherently unstable, they just can't be done right.\n");
+    xf86NVidiaBugInternalFunc("xf86Msg()");
 
     va_list ap;
 
@@ -39,9 +39,7 @@ _X_EXPORT void xf86MsgVerb(MessageType type, int verb, const char *format, ...)
 void
 xf86MsgVerb(MessageType type, int verb, const char *format, ...)
 {
-    LogMessageVerb(X_WARNING, 0, "Outdated driver still using xf86MsgVerb() !\n");
-    LogMessageVerb(X_WARNING, 0, "File a bug report to driver vendor or use a FOSS driver.\n");
-    LogMessageVerb(X_WARNING, 0, "Proprietary drivers are inherently unstable, they just can't be done right.\n");
+    xf86NVidiaBugInternalFunc("xf86MsgVerb()");
 
     va_list ap;
     va_start(ap, format);
