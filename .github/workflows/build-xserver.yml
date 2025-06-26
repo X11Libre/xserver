@@ -41,11 +41,11 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
-                restore-keys: ${{ runner.os }}-x11-deps-
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: generic prereq
-              run:  sudo .github/scripts/install-prereq.sh
+              run:  .github/scripts/install-prereq.sh
 
             - name: build
               run:  .gitlab-ci/meson-build.sh
@@ -99,11 +99,11 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
-                restore-keys: ${{ runner.os }}-x11-deps-
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: generic prereq
-              run:  sudo .github/scripts/install-prereq.sh
+              run:  .github/scripts/install-prereq.sh
 
             - name: build xserver sdk
               run:  |
