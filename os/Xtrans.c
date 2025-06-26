@@ -557,28 +557,6 @@ TRANS(ReopenCOTSServer) (int trans_id, int fd, const char *port)
 }
 
 int
-TRANS(GetReopenInfo) (XtransConnInfo ciptr,
-		      int *trans_id, int *fd, char **port)
-
-{
-    for (unsigned int i = 0; i < NUMTRANS; i++)
-    {
-	if (Xtransports[i].transport == ciptr->transptr)
-	{
-	    *trans_id = Xtransports[i].transport_id;
-	    *fd = ciptr->fd;
-
-	    if ((*port = strdup (ciptr->port)) == NULL)
-		return 0;
-	    else
-		return 1;
-	}
-    }
-
-    return 0;
-}
-
-int
 TRANS(SetOption) (XtransConnInfo ciptr, int option, int arg)
 
 {
