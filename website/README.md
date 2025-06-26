@@ -29,3 +29,5 @@ This project is licensed under the MIT License.
 ## Contact
 
 For questions or contributions, please open an issue or contact @metux.
+
+### Made by [@xgui4](https://github.com/xgui4) and [@ChocodeerZyNX](https://github.com/ChocodeerZyNX)
