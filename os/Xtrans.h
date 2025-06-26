@@ -97,13 +97,6 @@ static const char *__xtransname = "_FSTrans";
 #endif
 #endif /* FS_t */
 
-#ifdef FONT_t
-#define TRANS(func) _FontTrans##func
-#ifdef XTRANSDEBUG
-static const char *__xtransname = "_FontTrans";
-#endif
-#endif /* FONT_t */
-
 #if !defined(TRANS)
 #define TRANS(func) _XTrans##func
 #ifdef XTRANSDEBUG
