@@ -89,9 +89,7 @@ from the copyright holders.
 #endif
 
 #ifdef UNIXCONN
-#ifndef X_NO_SYS_UN
 #include <sys/un.h>
-#endif
 #include <sys/stat.h>
 #endif
 

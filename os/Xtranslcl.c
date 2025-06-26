@@ -90,9 +90,7 @@ from The Open Group.
  */
 
 #include <sys/socket.h>
-#ifndef X_NO_SYS_UN
 #include <sys/un.h>
-#endif
 
 
 /* Types of local connections supported:
