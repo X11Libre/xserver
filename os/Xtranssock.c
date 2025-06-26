@@ -238,10 +238,10 @@ is_numeric (const char *str)
 #define UNIX_PATH "/tmp/.XIM-unix/XIM"
 #define UNIX_DIR "/tmp/.XIM-unix"
 #endif /* XIM_t */
-#if defined(FS_t) || defined(FONT_t)
+#if defined(FS_t)
 #define UNIX_PATH "/tmp/.font-unix/fs"
 #define UNIX_DIR "/tmp/.font-unix"
-#endif /* FS_t || FONT_t */
+#endif /* FS_t */
 
 #endif /* UNIXCONN */
 
@@ -400,7 +400,7 @@ TRANS(SocketOpen) (int i, int type)
                        Sockettrans2devtab[i].protocol);
 
 #ifndef WIN32
-#if (defined(X11_t) && !defined(USE_POLL)) || defined(FS_t) || defined(FONT_t)
+#if (defined(X11_t) && !defined(USE_POLL)) || defined(FS_t)
     if (ciptr->fd >= sysconf(_SC_OPEN_MAX))
     {
 	prmsg (2, "SocketOpen: socket() returned out of range fd %d\n",

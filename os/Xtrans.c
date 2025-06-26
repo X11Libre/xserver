@@ -342,7 +342,7 @@ TRANS(ParseAddress) (const char *address,
 
     _port = mybuf;
 
-#if defined(FONT_t) || defined(FS_t)
+#if defined(FS_t)
     /*
      * Is there an optional catalogue list?
      */
