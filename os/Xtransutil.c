@@ -228,13 +228,6 @@ TRANS(ConvertAddress)(int *familyp, int *addrlenp, Xtransaddr **addrp)
 
 #ifdef ICE_t
 
-/* Needed for _XGethostbyaddr usage in TRANS(GetPeerNetworkId) */
-# if defined(TCPCONN) || defined(UNIXCONN)
-#  define X_INCLUDE_NETDB_H
-#  define XOS_USE_NO_LOCKING
-#  include <X11/Xos_r.h>
-# endif
-
 #include <signal.h>
 
 char *
@@ -307,121 +300,6 @@ TRANS(GetMyNetworkId) (XtransConnInfo ciptr)
 
 #include <setjmp.h>
 static jmp_buf env;
-
-#ifdef SIGALRM
-static volatile int nameserver_timedout = 0;
-
-static void
-nameserver_lost(int sig _X_UNUSED)
-{
-  nameserver_timedout = 1;
-  longjmp (env, -1);
-  /* NOTREACHED */
-}
-#endif /* SIGALARM */
-
-
-char *
-TRANS(GetPeerNetworkId) (XtransConnInfo ciptr)
-
-{
-    int		family = ciptr->family;
-    char	*peer_addr = ciptr->peeraddr;
-    char	*hostname;
-    char	addrbuf[256];
-    const char	*addr = NULL;
-
-    switch (family)
-    {
-    case AF_UNSPEC:
-#if defined(UNIXCONN) || defined(LOCALCONN)
-    case AF_UNIX:
-    {
-	if (gethostname (addrbuf, sizeof (addrbuf)) == 0)
-	    addr = addrbuf;
-	break;
-    }
-#endif /* defined(UNIXCONN) || defined(LOCALCONN) */
-
-#if defined(TCPCONN)
-    case AF_INET:
-#ifdef IPv6
-    case AF_INET6:
-#endif
-    {
-	struct sockaddr_in *saddr = (struct sockaddr_in *) peer_addr;
-#ifdef IPv6
-	struct sockaddr_in6 *saddr6 = (struct sockaddr_in6 *) peer_addr;
-#endif
-	char *address;
-	int addresslen;
-#ifdef XTHREADS_NEEDS_BYNAMEPARAMS
-	_Xgethostbynameparams hparams;
-#endif
-	struct hostent * volatile hostp = NULL;
-
-#ifdef IPv6
-	if (family == AF_INET6)
-	{
-	    address = (char *) &saddr6->sin6_addr;
-	    addresslen = sizeof (saddr6->sin6_addr);
-	}
-	else
-#endif
-	{
-	    address = (char *) &saddr->sin_addr;
-	    addresslen = sizeof (saddr->sin_addr);
-	}
-
-#ifdef SIGALRM
-	/*
-	 * gethostbyaddr can take a LONG time if the host does not exist.
-	 * Assume that if it does not respond in NAMESERVER_TIMEOUT seconds
-	 * that something is wrong and do not make the user wait.
-	 * gethostbyaddr will continue after a signal, so we have to
-	 * jump out of it.
-	 */
-
-	nameserver_timedout = 0;
-	signal (SIGALRM, nameserver_lost);
-	alarm (4);
-	if (setjmp(env) == 0) {
-#endif
-	    hostp = _XGethostbyaddr (address, addresslen, family, hparams);
-#ifdef SIGALRM
-	}
-	alarm (0);
-#endif
-	if (hostp != NULL)
-	  addr = hostp->h_name;
-	else
-#ifdef HAVE_INET_NTOP
-	  addr = inet_ntop (family, address, addrbuf, sizeof (addrbuf));
-#else
-	  addr = inet_ntoa (saddr->sin_addr);
-#endif
-	break;
-    }
-
-#endif /* defined(TCPCONN) */
-
-
-    default:
-	return (NULL);
-    }
-
-
-    hostname = malloc (strlen (ciptr->transptr->TransName) +
-                       (addr ? strlen (addr) : 0) + 2);
-    if (hostname)
-    {
-	strcpy (hostname, ciptr->transptr->TransName);
-	strcat (hostname, "/");
-	if (addr)
-	    strcat (hostname, addr);
-    }
-    return (hostname);
-}
 
 #endif /* ICE_t */
 
