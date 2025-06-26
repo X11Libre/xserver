@@ -32,7 +32,7 @@
                 crossorigin="anonymous">
             <title>X11Libre X Server</title>
         </head>
-
+        <!--I used copliot temporaly jsut as a placeholder for the contributors, to be rewritten from stracth and better-->
         <body>
             <header>
                 <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -50,13 +50,7 @@
                                     <a class="nav-link active" aria-current="page" href="index.html">Home</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="about.html">About</a>
-                                </li>
-                                <li class="nav-item">
                                     <a class="nav-link" href="download.html">Download</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="demo.html">Demonstration</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="contribute.html">Contribute</a>
@@ -77,14 +71,70 @@
     </header>
     <main>
         <h1>List of contibutors </h1>
-        <p>To be made</p>
-        <h1>Website contributors</h1>
-        <h2>Creator</h2>
-        <div id="github-card" data-user="xgui4" data-height="150px" data-width="350px">
-            <a href="https://www.github.com/xgui4">
-                <h3> <img src="https://avatars.githubusercontent.com/u/134389196?v=4&size=64" alt="github profile">
-                    Xgui4 Studio (@xgui4) </h2>
-            </a>
+        <div id="contributors-list" class="mb-4">
+            <h2>Project Contributors</h2>
+            <ul id="contributors-ul" class="list-group">
+            <li class="list-group-item">Loading contributors...</li>
+            </ul>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+            fetch('https://api.github.com/repos/x11libre/xserver/contributors')
+                .then(response => response.json())
+                .then(data => {
+                const ul = document.getElementById('contributors-ul');
+                ul.innerHTML = '';
+                data.forEach(contributor => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex align-items-center';
+                    li.innerHTML = `
+                    <img src="${contributor.avatar_url}&s=32" alt="${contributor.login}" width="32" height="32" class="rounded-circle me-2">
+                    <a href="${contributor.html_url}" target="_blank">${contributor.login}</a>
+                    <span class="ms-auto badge bg-secondary">${contributor.contributions} commits</span>
+                    `;
+                    ul.appendChild(li);
+                });
+                if (data.length === 0) {
+                    ul.innerHTML = '<li class="list-group-item">No contributors found.</li>';
+                }
+                })
+                .catch(() => {
+                document.getElementById('contributors-ul').innerHTML = '<li class="list-group-item">Failed to load contributors.</li>';
+                });
+            });
+        </script>
+        <div id="contributors-list" class="mb-4">
+            <h2>Website Contributors</h2>
+            <ul id="contributors-ul2" class="list-group">
+            <li class="list-group-item">Loading contributors...</li>
+            </ul>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+            fetch('https://api.github.com/repos/xgui4/x11libre-website/contributors')
+                .then(response => response.json())
+                .then(data => {
+                const ul = document.getElementById('contributors-ul2');
+                ul.innerHTML = '';
+                data.forEach(contributor => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex align-items-center';
+                    li.innerHTML = `
+                    <img src="${contributor.avatar_url}&s=32" alt="${contributor.login}" width="32" height="32" class="rounded-circle me-2">
+                    <a href="${contributor.html_url}" target="_blank">${contributor.login}</a>
+                    <span class="ms-auto badge bg-secondary">${contributor.contributions} commits</span>
+                    `;
+                    ul.appendChild(li);
+                });
+                if (data.length === 0) {
+                    ul.innerHTML = '<li class="list-group-item">No contributors found.</li>';
+                }
+                })
+                .catch(() => {
+                document.getElementById('contributors-ul2').innerHTML = '<li class="list-group-item">Failed to load contributors.</li>';
+                });
+            });
+        </script>
         </div>
     </main>
 </body>
