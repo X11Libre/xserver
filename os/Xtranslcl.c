@@ -210,7 +210,6 @@ TRANS(FillAddrInfo)(XtransConnInfo ciptr,
 
 /* NAMED */
 
-#ifdef NAMEDNODENAME
 static int
 TRANS(NAMEDOpenPipe)(const char *server_path)
 {
@@ -270,22 +269,15 @@ TRANS(NAMEDOpenPipe)(const char *server_path)
 
     return(pipefd[1]);
 }
-#endif
 
 static int
 TRANS(NAMEDOpenServer)(XtransConnInfo ciptr, const char *port)
 {
-#ifdef NAMEDNODENAME
     int			fd;
     char		server_path[64];
-#endif
 
     prmsg(2,"NAMEDOpenServer(%s)\n", port);
 
-#if !defined(NAMEDNODENAME)
-    prmsg(1,"NAMEDOpenServer: Protocol is not supported by a NAMED connection\n");
-    return -1;
-#else
     if ( port && *port ) {
 	if( *port == '/' ) { /* A full pathname */
 	    (void) snprintf(server_path, sizeof(server_path), "%s", port);
@@ -315,8 +307,6 @@ TRANS(NAMEDOpenServer)(XtransConnInfo ciptr, const char *port)
     }
 
     return fd;
-
-#endif /* !NAMEDNODENAME */
 }
 
 static int
@@ -401,16 +391,10 @@ static int
 TRANS(NAMEDReopenServer)(XtransConnInfo ciptr, int fd _X_UNUSED, const char *port)
 
 {
-#ifdef NAMEDNODENAME
     char server_path[64];
-#endif
 
     prmsg(2,"NAMEDReopenServer(%s)\n", port);
 
-#if !defined(NAMEDNODENAME)
-    prmsg(1,"NAMEDReopenServer: Protocol is not supported by a NAMED connection\n");
-    return 0;
-#else
     if ( port && *port ) {
 	if( *port == '/' ) { /* A full pathname */
 	    snprintf(server_path, sizeof(server_path),"%s", port);
@@ -430,8 +414,6 @@ TRANS(NAMEDReopenServer)(XtransConnInfo ciptr, int fd _X_UNUSED, const char *por
     }
 
     return 1;
-
-#endif /* !NAMEDNODENAME */
 }
 
 #endif /* LOCAL_TRANS_NAMED */
