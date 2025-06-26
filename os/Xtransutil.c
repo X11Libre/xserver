@@ -89,16 +89,13 @@ from The Open Group.
 #define FamilyWild		65535
 
 /*
- * TRANS(ConvertAddress) converts a sockaddr based address to an
+ * _XSERVTransConvertAddress converts a sockaddr based address to an
  * X authorization based address. Some of this is defined as part of
  * the ChangeHost protocol. The rest is just done in a consistent manner.
  */
 
-int
-TRANS(ConvertAddress)(int *familyp, int *addrlenp, Xtransaddr **addrp)
-
+int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 {
-
     prmsg(2,"ConvertAddress(%d,%d,%p)\n",*familyp,*addrlenp,*addrp);
 
     switch( *familyp )
@@ -193,7 +190,7 @@ TRANS(ConvertAddress)(int *familyp, int *addrlenp, Xtransaddr **addrp)
 	 */
 
 	char hostnamebuf[256];
-	int len = TRANS(GetHostname) (hostnamebuf, sizeof hostnamebuf);
+	int len = _XSERVTransGetHostname (hostnamebuf, sizeof hostnamebuf);
 
 	if (len > 0) {
 	    if (*addrp && *addrlenp < (len + 1))
@@ -223,8 +220,7 @@ TRANS(ConvertAddress)(int *familyp, int *addrlenp, Xtransaddr **addrp)
 }
 
 #if defined(WIN32) && defined(TCPCONN)
-int
-TRANS(WSAStartup) (void)
+int _XSERVTransWSAStartup (void)
 {
     static WSADATA wsadata;
 
