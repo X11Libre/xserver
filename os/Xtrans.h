@@ -68,7 +68,6 @@ from The Open Group.
  * Set the functions names according to where this code is being compiled.
  */
 
-#define TRANS(func) _XSERVTrans##func
 #ifdef XTRANSDEBUG
 static const char *__xtransname = "_XSERVTrans";
 #endif
@@ -112,7 +111,7 @@ typedef long BytesReadable_t;
 #if defined(WIN32)
 
 /*
- *      TRANS(Readv) and TRANS(Writev) use struct iovec, normally found
+ *      _XSERVTransReadv and _XSERVTransWritev use struct iovec, normally found
  *      in Berkeley systems in <sys/uio.h>.  See the readv(2) and writev(2)
  *      manual pages for details.
  */
@@ -176,118 +175,118 @@ typedef struct _XtransConnInfo *XtransConnInfo;
  * Function prototypes for the exposed interface
  */
 
-void TRANS(FreeConnInfo) (
+void _XSERVTransFreeConnInfo (
     XtransConnInfo 	/* ciptr */
 );
 
-XtransConnInfo TRANS(OpenCOTSServer)(
+XtransConnInfo _XSERVTransOpenCOTSServer(
     const char *	/* address */
 );
 
-XtransConnInfo TRANS(ReopenCOTSServer)(
+XtransConnInfo _XSERVTransReopenCOTSServer(
     int,		/* trans_id */
     int,		/* fd */
     const char *	/* port */
 );
 
-int TRANS(SetOption)(
+int _XSERVTransSetOption(
     XtransConnInfo,	/* ciptr */
     int,		/* option */
     int			/* arg */
 );
 
-int TRANS(CreateListener)(
+int _XSERVTransCreateListener(
     XtransConnInfo,	/* ciptr */
     const char *,	/* port */
     unsigned int	/* flags */
 );
 
-int TRANS(Received) (
+int _XSERVTransReceived (
     const char*         /* protocol*/
 );
 
-int TRANS(NoListen) (
+int _XSERVTransNoListen (
     const char*         /* protocol*/
 );
 
-int TRANS(Listen) (
+int _XSERVTransListen (
     const char*         /* protocol*/
 );
 
-int TRANS(IsListening) (
+int _XSERVTransIsListening (
     const char*         /* protocol*/
 );
 
-int TRANS(ResetListener)(
+int _XSERVTransResetListener (
     XtransConnInfo	/* ciptr */
 );
 
-XtransConnInfo TRANS(Accept)(
+XtransConnInfo _XSERVTransAccept (
     XtransConnInfo,	/* ciptr */
     int *		/* status */
 );
 
-int TRANS(BytesReadable)(
+int _XSERVTransBytesReadable (
     XtransConnInfo,	/* ciptr */
     BytesReadable_t *	/* pend */
 );
 
-int TRANS(Read)(
+int _XSERVTransRead (
     XtransConnInfo,	/* ciptr */
     char *,		/* buf */
     int			/* size */
 );
 
-int TRANS(Write)(
+int _XSERVTransWrite (
     XtransConnInfo,	/* ciptr */
     const char *,	/* buf */
     int			/* size */
 );
 
-int TRANS(Readv)(
+int _XSERVTransReadv (
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* buf */
     int			/* size */
 );
 
-int TRANS(Writev)(
+int _XSERVTransWritev (
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* buf */
     int			/* size */
 );
 
-int TRANS(SendFd) (XtransConnInfo ciptr, int fd, int do_close);
+int _XSERVTransSendFd (XtransConnInfo ciptr, int fd, int do_close);
 
-int TRANS(RecvFd) (XtransConnInfo ciptr);
+int _XSERVTransRecvFd (XtransConnInfo ciptr);
 
-int TRANS(Disconnect)(
+int _XSERVTransDisconnect (
     XtransConnInfo	/* ciptr */
 );
 
-int TRANS(Close)(
+int _XSERVTransClose (
     XtransConnInfo	/* ciptr */
 );
 
-int TRANS(CloseForCloning)(
+int _XSERVTransCloseForCloning (
     XtransConnInfo	/* ciptr */
 );
 
-int TRANS(IsLocal)(
+int _XSERVTransIsLocal (
     XtransConnInfo	/* ciptr */
 );
 
-int TRANS(GetPeerAddr)(
+int _XSERVTransGetPeerAddr (
     XtransConnInfo,	/* ciptr */
     int *,		/* familyp */
     int *,		/* addrlenp */
     Xtransaddr **	/* addrp */
 );
 
-int TRANS(GetConnectionNumber)(
+int _XSERVTransGetConnectionNumber (
     XtransConnInfo	/* ciptr */
 );
 
-int TRANS(MakeAllCOTSServerListeners)(
+int _XSERVTransMakeAllCOTSServerListeners (
     const char *,	/* port */
     int *,		/* partial */
     int *,		/* count_ret */
@@ -298,20 +297,19 @@ int TRANS(MakeAllCOTSServerListeners)(
  * Function Prototypes for Utility Functions.
  */
 
-int TRANS(ConvertAddress)(
+int _XSERVTransConvertAddress (
     int *,		/* familyp */
     int *,		/* addrlenp */
     Xtransaddr **	/* addrp */
 );
 
-int
-TRANS(GetHostname) (
+int _XSERVTransGetHostname (
     char *	/* buf */,
     int 	/* maxlen */
 );
 
 #if defined(WIN32) && defined(TCPCONN)
-int TRANS(WSAStartup)();
+int _XSERVTransWSAStartup();
 #endif
 
 #endif /* _XTRANS_H_ */

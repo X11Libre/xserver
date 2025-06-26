@@ -1058,7 +1058,7 @@ ListenOnOpenFD(int fd, int noxauth)
     ListenTransCount++;
 }
 
-/* based on TRANS(SocketUNIXAccept) (XtransConnInfo ciptr, int *status) */
+/* based on _XSERVTransSocketUNIXAccept (XtransConnInfo ciptr, int *status) */
 Bool
 AddClientOnOpenFD(int fd)
 {

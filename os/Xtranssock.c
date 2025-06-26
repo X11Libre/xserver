@@ -208,7 +208,7 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 #define NUMSOCKETFAMILIES (sizeof(Sockettrans2devtab)/sizeof(Sockettrans2dev))
 
 #ifdef TCPCONN
-static int TRANS(SocketINETClose) (XtransConnInfo ciptr);
+static int _XSERVTransSocketINETClose (XtransConnInfo ciptr);
 #endif
 
 static int
@@ -249,9 +249,7 @@ is_numeric (const char *str)
  * These are some utility function used by the real interface function below.
  */
 
-static int
-TRANS(SocketSelectFamily) (int first, const char *family)
-
+static int _XSERVTransSocketSelectFamily (int first, const char *family)
 {
     int     i;
 
@@ -272,9 +270,7 @@ TRANS(SocketSelectFamily) (int first, const char *family)
  * XtransConnInfo structure for the connection.
  */
 
-static int
-TRANS(SocketINETGetAddr) (XtransConnInfo ciptr)
-
+static int _XSERVTransSocketINETGetAddr (XtransConnInfo ciptr)
 {
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
     struct sockaddr_storage sockname;
@@ -323,9 +319,7 @@ TRANS(SocketINETGetAddr) (XtransConnInfo ciptr)
  * XtransConnInfo structure for the connection.
  */
 
-static int
-TRANS(SocketINETGetPeerAddr) (XtransConnInfo ciptr)
-
+static int _XSERVTransSocketINETGetPeerAddr (XtransConnInfo ciptr)
 {
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
     struct sockaddr_storage sockname;
@@ -368,9 +362,7 @@ TRANS(SocketINETGetPeerAddr) (XtransConnInfo ciptr)
 }
 
 
-static XtransConnInfo
-TRANS(SocketOpen) (int i, int type)
-
+static XtransConnInfo _XSERVTransSocketOpen (int i, int type)
 {
     XtransConnInfo	ciptr;
 
@@ -449,9 +441,8 @@ TRANS(SocketOpen) (int i, int type)
     return ciptr;
 }
 
-static XtransConnInfo
-TRANS(SocketReopen) (int i _X_UNUSED, int type, int fd, const char *port)
-
+static XtransConnInfo _XSERVTransSocketReopen (
+    int i _X_UNUSED, int type, int fd, const char *port)
 {
     XtransConnInfo	ciptr;
     int portlen;
@@ -533,10 +524,8 @@ TRANS(SocketReopen) (int i _X_UNUSED, int type, int fd, const char *port)
  * These functions are the interface supplied in the Xtransport structure
  */
 
-static XtransConnInfo
-TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, const char *protocol,
-			     const char *host, const char *port)
-
+static XtransConnInfo _XSERVTransSocketOpenCOTSServer (
+    Xtransport *thistrans, const char *protocol, const char *host, const char *port)
 {
     XtransConnInfo	ciptr = NULL;
     int	i = -1;
@@ -545,8 +534,8 @@ TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, const char *protocol,
 
     SocketInitOnce();
 
-    while ((i = TRANS(SocketSelectFamily) (i, thistrans->TransName)) >= 0) {
-	if ((ciptr = TRANS(SocketOpen) (
+    while ((i = _XSERVTransSocketSelectFamily (i, thistrans->TransName)) >= 0) {
+	if ((ciptr = _XSERVTransSocketOpen (
 		 i, Sockettrans2devtab[i].devcotsname)) != NULL)
 	    break;
     }
@@ -602,9 +591,8 @@ TRANS(SocketOpenCOTSServer) (Xtransport *thistrans, const char *protocol,
     return ciptr;
 }
 
-static XtransConnInfo
-TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, const char *port)
-
+static XtransConnInfo _XSERVTransSocketReopenCOTSServer (
+    Xtransport *thistrans, int fd, const char *port)
 {
     XtransConnInfo	ciptr;
     int			i = -1;
@@ -614,8 +602,8 @@ TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, const char *port)
 
     SocketInitOnce();
 
-    while ((i = TRANS(SocketSelectFamily) (i, thistrans->TransName)) >= 0) {
-	if ((ciptr = TRANS(SocketReopen) (
+    while ((i = _XSERVTransSocketSelectFamily (i, thistrans->TransName)) >= 0) {
+	if ((ciptr = _XSERVTransSocketReopen (
 		 i, Sockettrans2devtab[i].devcotsname, fd, port)) != NULL)
 	    break;
     }
@@ -636,12 +624,9 @@ TRANS(SocketReopenCOTSServer) (Xtransport *thistrans, int fd, const char *port)
     return ciptr;
 }
 
-static int
-TRANS(SocketSetOption) (XtransConnInfo ciptr, int option, int arg)
-
+static int _XSERVTransSocketSetOption (XtransConnInfo ciptr, int option, int arg)
 {
     prmsg (2,"SocketSetOption(%d,%d,%d)\n", ciptr->fd, option, arg);
-
     return -1;
 }
 
@@ -673,11 +658,9 @@ set_sun_path(const char *port, const char *upath, char *path, int abstract)
 }
 #endif
 
-static int
-TRANS(SocketCreateListener) (XtransConnInfo ciptr,
+static int _XSERVTransSocketCreateListener (XtransConnInfo ciptr,
 			     struct sockaddr *sockname,
 			     int socknamelen, unsigned int flags)
-
 {
     SOCKLEN_T namelen = socknamelen;
     int	fd = ciptr->fd;
@@ -748,10 +731,8 @@ TRANS(SocketCreateListener) (XtransConnInfo ciptr,
 }
 
 #ifdef TCPCONN
-static int
-TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, const char *port,
-                                 unsigned int flags)
-
+static int _XSERVTransSocketINETCreateListener (
+    XtransConnInfo ciptr, const char *port, unsigned int flags)
 {
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
     struct sockaddr_storage sockname;
@@ -848,7 +829,7 @@ TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, const char *port,
 #endif
     }
 
-    if ((status = TRANS(SocketCreateListener) (ciptr,
+    if ((status = _XSERVTransSocketCreateListener (ciptr,
 	(struct sockaddr *) &sockname, namelen, flags)) < 0)
     {
 	prmsg (1,
@@ -856,7 +837,7 @@ TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, const char *port,
 	return status;
     }
 
-    if (TRANS(SocketINETGetAddr) (ciptr) < 0)
+    if (_XSERVTransSocketINETGetAddr (ciptr) < 0)
     {
 	prmsg (1,
        "SocketINETCreateListener: ...SocketINETGetAddr() failed\n");
@@ -871,10 +852,8 @@ TRANS(SocketINETCreateListener) (XtransConnInfo ciptr, const char *port,
 
 #ifdef UNIXCONN
 
-static int
-TRANS(SocketUNIXCreateListener) (XtransConnInfo ciptr, const char *port,
-				 unsigned int flags)
-
+static int _XSERVTransSocketUNIXCreateListener (
+    XtransConnInfo ciptr, const char *port, unsigned int flags)
 {
     struct sockaddr_un	sockname;
     int			namelen;
@@ -938,7 +917,7 @@ TRANS(SocketUNIXCreateListener) (XtransConnInfo ciptr, const char *port,
     else
 	unlink (sockname.sun_path);
 
-    if ((status = TRANS(SocketCreateListener) (ciptr,
+    if ((status = _XSERVTransSocketCreateListener (ciptr,
 	(struct sockaddr *) &sockname, namelen, flags)) < 0)
     {
 	prmsg (1,
@@ -951,7 +930,7 @@ TRANS(SocketUNIXCreateListener) (XtransConnInfo ciptr, const char *port,
      * Now that the listener is esablished, create the addr info for
      * this connection. getpeername() doesn't work for UNIX Domain Sockets
      * on some systems (hpux at least), so we will just do it manually, instead
-     * of calling something like TRANS(SocketUNIXGetAddr).
+     * of calling something like _XSERVTransSocketUNIXGetAddr.
      */
 
     namelen = sizeof (sockname); /* this will always make it the same size */
@@ -977,9 +956,7 @@ TRANS(SocketUNIXCreateListener) (XtransConnInfo ciptr, const char *port,
 }
 
 
-static int
-TRANS(SocketUNIXResetListener) (XtransConnInfo ciptr)
-
+static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
 {
     /*
      * See if the unix domain socket has disappeared.  If it has, recreate it.
@@ -1027,7 +1004,7 @@ TRANS(SocketUNIXResetListener) (XtransConnInfo ciptr)
 
 	if ((ciptr->fd = socket (AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
-	    TRANS(FreeConnInfo) (ciptr);
+	    _XSERVTransFreeConnInfo (ciptr);
 	    (void) umask (oldUmask);
 	    return TRANS_RESET_FAILURE;
 	}
@@ -1035,14 +1012,14 @@ TRANS(SocketUNIXResetListener) (XtransConnInfo ciptr)
 	if (bind (ciptr->fd, (struct sockaddr *) unsock, ciptr->addrlen) < 0)
 	{
 	    close (ciptr->fd);
-	    TRANS(FreeConnInfo) (ciptr);
+	    _XSERVTransFreeConnInfo (ciptr);
 	    return TRANS_RESET_FAILURE;
 	}
 
 	if (listen (ciptr->fd, BACKLOG) < 0)
 	{
 	    close (ciptr->fd);
-	    TRANS(FreeConnInfo) (ciptr);
+	    _XSERVTransFreeConnInfo (ciptr);
 	    (void) umask (oldUmask);
 	    return TRANS_RESET_FAILURE;
 	}
@@ -1060,9 +1037,8 @@ TRANS(SocketUNIXResetListener) (XtransConnInfo ciptr)
 
 #ifdef TCPCONN
 
-static XtransConnInfo
-TRANS(SocketINETAccept) (XtransConnInfo ciptr, int *status)
-
+static XtransConnInfo _XSERVTransSocketINETAccept (
+    XtransConnInfo ciptr, int *status)
 {
     XtransConnInfo	newciptr;
     struct sockaddr_in	sockname;
@@ -1106,7 +1082,7 @@ TRANS(SocketINETAccept) (XtransConnInfo ciptr, int *status)
      * specific address now that a connection is established.
      */
 
-    if (TRANS(SocketINETGetAddr) (newciptr) < 0)
+    if (_XSERVTransSocketINETGetAddr (newciptr) < 0)
     {
 	prmsg (1,
 	    "SocketINETAccept: ...SocketINETGetAddr() failed:\n");
@@ -1116,7 +1092,7 @@ TRANS(SocketINETAccept) (XtransConnInfo ciptr, int *status)
         return NULL;
     }
 
-    if (TRANS(SocketINETGetPeerAddr) (newciptr) < 0)
+    if (_XSERVTransSocketINETGetPeerAddr (newciptr) < 0)
     {
 	prmsg (1,
 	  "SocketINETAccept: ...SocketINETGetPeerAddr() failed:\n");
@@ -1136,9 +1112,8 @@ TRANS(SocketINETAccept) (XtransConnInfo ciptr, int *status)
 
 
 #ifdef UNIXCONN
-static XtransConnInfo
-TRANS(SocketUNIXAccept) (XtransConnInfo ciptr, int *status)
-
+static XtransConnInfo _XSERVTransSocketUNIXAccept (
+    XtransConnInfo ciptr, int *status)
 {
     XtransConnInfo	newciptr;
     struct sockaddr_un	sockname;
@@ -1209,9 +1184,8 @@ TRANS(SocketUNIXAccept) (XtransConnInfo ciptr, int *status)
 
 #endif /* UNIXCONN */
 
-static int
-TRANS(SocketBytesReadable) (XtransConnInfo ciptr, BytesReadable_t *pend)
-
+static int _XSERVTransSocketBytesReadable (
+    XtransConnInfo ciptr, BytesReadable_t *pend)
 {
     prmsg (2,"SocketBytesReadable(%p,%d,%p)\n",
 	(void *) ciptr, ciptr->fd, (void *) pend);
@@ -1296,29 +1270,27 @@ nFd(struct _XtransConnFd **prev)
     return n;
 }
 
-static int
-TRANS(SocketRecvFd) (XtransConnInfo ciptr)
+static int _XSERVTransSocketRecvFd (XtransConnInfo ciptr)
 {
     prmsg (2, "SocketRecvFd(%d)\n", ciptr->fd);
     return removeFd(&ciptr->recv_fds);
 }
 
-static int
-TRANS(SocketSendFd) (XtransConnInfo ciptr, int fd, int do_close)
+static int _XSERVTransSocketSendFd (
+    XtransConnInfo ciptr, int fd, int do_close)
 {
     appendFd(&ciptr->send_fds, fd, do_close);
     return 0;
 }
 
-static int
-TRANS(SocketRecvFdInvalid)(XtransConnInfo ciptr)
+static int _XSERVTransSocketRecvFdInvalid(XtransConnInfo ciptr)
 {
     errno = EINVAL;
     return -1;
 }
 
-static int
-TRANS(SocketSendFdInvalid)(XtransConnInfo ciptr, int fd, int do_close)
+static int _XSERVTransSocketSendFdInvalid(
+    XtransConnInfo ciptr, int fd, int do_close)
 {
     errno = EINVAL;
     return -1;
@@ -1333,9 +1305,8 @@ union fd_pass {
 
 #endif /* XTRANS_SEND_FDS */
 
-static int
-TRANS(SocketRead) (XtransConnInfo ciptr, char *buf, int size)
-
+static int _XSERVTransSocketRead (
+    XtransConnInfo ciptr, char *buf, int size)
 {
     prmsg (2,"SocketRead(%d,%p,%d)\n", ciptr->fd, (void *) buf, size);
 
@@ -1387,9 +1358,8 @@ TRANS(SocketRead) (XtransConnInfo ciptr, char *buf, int size)
 #endif /* WIN32 */
 }
 
-static int
-TRANS(SocketReadv) (XtransConnInfo ciptr, struct iovec *buf, int size)
-
+static int _XSERVTransSocketReadv (
+    XtransConnInfo ciptr, struct iovec *buf, int size)
 {
     prmsg (2,"SocketReadv(%d,%p,%d)\n", ciptr->fd, (void *) buf, size);
 
@@ -1427,10 +1397,8 @@ TRANS(SocketReadv) (XtransConnInfo ciptr, struct iovec *buf, int size)
 #endif
 }
 
-
-static int
-TRANS(SocketWritev) (XtransConnInfo ciptr, struct iovec *buf, int size)
-
+static int _XSERVTransSocketWritev (
+    XtransConnInfo ciptr, struct iovec *buf, int size)
 {
     prmsg (2,"SocketWritev(%d,%p,%d)\n", ciptr->fd, (void *) buf, size);
 
@@ -1472,10 +1440,8 @@ TRANS(SocketWritev) (XtransConnInfo ciptr, struct iovec *buf, int size)
     return WRITEV (ciptr, buf, size);
 }
 
-
-static int
-TRANS(SocketWrite) (XtransConnInfo ciptr, const char *buf, int size)
-
+static int _XSERVTransSocketWrite (
+    XtransConnInfo ciptr, const char *buf, int size)
 {
     prmsg (2,"SocketWrite(%d,%p,%d)\n", ciptr->fd, (const void *) buf, size);
 
@@ -1495,16 +1461,14 @@ TRANS(SocketWrite) (XtransConnInfo ciptr, const char *buf, int size)
 
         iov.iov_base = (void *) buf;
         iov.iov_len = size;
-        return TRANS(SocketWritev)(ciptr, &iov, 1);
+        return _XSERVTransSocketWritev(ciptr, &iov, 1);
     }
 #endif /* XTRANS_SEND_FDS */
     return write (ciptr->fd, buf, size);
 #endif /* WIN32 */
 }
 
-static int
-TRANS(SocketDisconnect) (XtransConnInfo ciptr)
-
+static int _XSERVTransSocketDisconnect (XtransConnInfo ciptr)
 {
     prmsg (2,"SocketDisconnect(%p,%d)\n", (void *) ciptr, ciptr->fd);
 
@@ -1519,11 +1483,8 @@ TRANS(SocketDisconnect) (XtransConnInfo ciptr)
 #endif
 }
 
-
 #ifdef TCPCONN
-static int
-TRANS(SocketINETClose) (XtransConnInfo ciptr)
-
+static int _XSERVTransSocketINETClose (XtransConnInfo ciptr)
 {
     prmsg (2,"SocketINETClose(%p,%d)\n", (void *) ciptr, ciptr->fd);
 
@@ -1540,10 +1501,8 @@ TRANS(SocketINETClose) (XtransConnInfo ciptr)
 
 #endif /* TCPCONN */
 
-
 #ifdef UNIXCONN
-static int
-TRANS(SocketUNIXClose) (XtransConnInfo ciptr)
+static int _XSERVTransSocketUNIXClose (XtransConnInfo ciptr)
 {
     /*
      * If this is the server side, then once the socket is closed,
@@ -1573,9 +1532,7 @@ TRANS(SocketUNIXClose) (XtransConnInfo ciptr)
     return ret;
 }
 
-static int
-TRANS(SocketUNIXCloseForCloning) (XtransConnInfo ciptr)
-
+static int _XSERVTransSocketUNIXCloseForCloning (XtransConnInfo ciptr)
 {
     /*
      * Don't unlink path.
@@ -1606,87 +1563,87 @@ static const char* tcp_nolisten[] = {
 	NULL
 };
 
-static Xtransport	TRANS(SocketTCPFuncs) = {
+static Xtransport _XSERVTransSocketTCPFuncs = {
 	/* Socket Interface */
 	"tcp",
         TRANS_ALIAS,
 	tcp_nolisten,
-	TRANS(SocketOpenCOTSServer),
-	TRANS(SocketReopenCOTSServer),
-	TRANS(SocketSetOption),
-	TRANS(SocketINETCreateListener),
+	_XSERVTransSocketOpenCOTSServer,
+	_XSERVTransSocketReopenCOTSServer,
+	_XSERVTransSocketSetOption,
+	_XSERVTransSocketINETCreateListener,
 	NULL,		       			/* ResetListener */
-	TRANS(SocketINETAccept),
-	TRANS(SocketBytesReadable),
-	TRANS(SocketRead),
-	TRANS(SocketWrite),
-	TRANS(SocketReadv),
-	TRANS(SocketWritev),
+	_XSERVTransSocketINETAccept,
+	_XSERVTransSocketBytesReadable,
+	_XSERVTransSocketRead,
+	_XSERVTransSocketWrite,
+	_XSERVTransSocketReadv,
+	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
-        TRANS(SocketSendFdInvalid),
-        TRANS(SocketRecvFdInvalid),
+	_XSERVTransSocketSendFdInvalid,
+	_XSERVTransSocketRecvFdInvalid,
 #endif
-	TRANS(SocketDisconnect),
-	TRANS(SocketINETClose),
-	TRANS(SocketINETClose),
-	};
+	_XSERVTransSocketDisconnect,
+	_XSERVTransSocketINETClose,
+	_XSERVTransSocketINETClose,
+};
 
-static Xtransport	TRANS(SocketINETFuncs) = {
+static Xtransport _XSERVTransSocketINETFuncs = {
 	/* Socket Interface */
 	"inet",
 	0,
 	NULL,
-	TRANS(SocketOpenCOTSServer),
-	TRANS(SocketReopenCOTSServer),
-	TRANS(SocketSetOption),
-	TRANS(SocketINETCreateListener),
+	_XSERVTransSocketOpenCOTSServer,
+	_XSERVTransSocketReopenCOTSServer,
+	_XSERVTransSocketSetOption,
+	_XSERVTransSocketINETCreateListener,
 	NULL,		       			/* ResetListener */
-	TRANS(SocketINETAccept),
-	TRANS(SocketBytesReadable),
-	TRANS(SocketRead),
-	TRANS(SocketWrite),
-	TRANS(SocketReadv),
-	TRANS(SocketWritev),
+	_XSERVTransSocketINETAccept,
+	_XSERVTransSocketBytesReadable,
+	_XSERVTransSocketRead,
+	_XSERVTransSocketWrite,
+	_XSERVTransSocketReadv,
+	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
-        TRANS(SocketSendFdInvalid),
-        TRANS(SocketRecvFdInvalid),
+	_XSERVTransSocketSendFdInvalid,
+	_XSERVTransSocketRecvFdInvalid,
 #endif
-	TRANS(SocketDisconnect),
-	TRANS(SocketINETClose),
-	TRANS(SocketINETClose),
-	};
+	_XSERVTransSocketDisconnect,
+	_XSERVTransSocketINETClose,
+	_XSERVTransSocketINETClose,
+};
 
 #ifdef IPv6
-static Xtransport     TRANS(SocketINET6Funcs) = {
+static Xtransport _XSERVTransSocketINET6Funcs = {
 	/* Socket Interface */
 	"inet6",
 	0,
 	NULL,
-	TRANS(SocketOpenCOTSServer),
-	TRANS(SocketReopenCOTSServer),
-	TRANS(SocketSetOption),
-	TRANS(SocketINETCreateListener),
+	_XSERVTransSocketOpenCOTSServer,
+	_XSERVTransSocketReopenCOTSServer,
+	_XSERVTransSocketSetOption,
+	_XSERVTransSocketINETCreateListener,
 	NULL,					/* ResetListener */
-	TRANS(SocketINETAccept),
-	TRANS(SocketBytesReadable),
-	TRANS(SocketRead),
-	TRANS(SocketWrite),
-	TRANS(SocketReadv),
-	TRANS(SocketWritev),
+	_XSERVTransSocketINETAccept,
+	_XSERVTransSocketBytesReadable,
+	_XSERVTransSocketRead,
+	_XSERVTransSocketWrite,
+	_XSERVTransSocketReadv,
+	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
-        TRANS(SocketSendFdInvalid),
-        TRANS(SocketRecvFdInvalid),
+	_XSERVTransSocketSendFdInvalid,
+	_XSERVTransSocketRecvFdInvalid,
 #endif
-	TRANS(SocketDisconnect),
-	TRANS(SocketINETClose),
-	TRANS(SocketINETClose),
-	};
+	_XSERVTransSocketDisconnect,
+	_XSERVTransSocketINETClose,
+	_XSERVTransSocketINETClose,
+};
 #endif /* IPv6 */
 #endif /* TCPCONN */
 
 #ifdef UNIXCONN
 #if !defined(LOCALCONN)
-static Xtransport	TRANS(SocketLocalFuncs) = {
+static Xtransport _XSERVTransSocketLocalFuncs = {
 	/* Socket Interface */
 	"local",
 #ifdef HAVE_ABSTRACT_SOCKETS
@@ -1695,31 +1652,31 @@ static Xtransport	TRANS(SocketLocalFuncs) = {
 	0,
 #endif
 	NULL,
-	TRANS(SocketOpenCOTSServer),
-	TRANS(SocketReopenCOTSServer),
-	TRANS(SocketSetOption),
-	TRANS(SocketUNIXCreateListener),
-	TRANS(SocketUNIXResetListener),
-	TRANS(SocketUNIXAccept),
-	TRANS(SocketBytesReadable),
-	TRANS(SocketRead),
-	TRANS(SocketWrite),
-	TRANS(SocketReadv),
-	TRANS(SocketWritev),
+	_XSERVTransSocketOpenCOTSServer,
+	_XSERVTransSocketReopenCOTSServer,
+	_XSERVTransSocketSetOption,
+	_XSERVTransSocketUNIXCreateListener,
+	_XSERVTransSocketUNIXResetListener,
+	_XSERVTransSocketUNIXAccept,
+	_XSERVTransSocketBytesReadable,
+	_XSERVTransSocketRead,
+	_XSERVTransSocketWrite,
+	_XSERVTransSocketReadv,
+	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
-        TRANS(SocketSendFd),
-        TRANS(SocketRecvFd),
+	_XSERVTransSocketSendFd,
+	_XSERVTransSocketRecvFd,
 #endif
-	TRANS(SocketDisconnect),
-	TRANS(SocketUNIXClose),
-	TRANS(SocketUNIXCloseForCloning),
-	};
+	_XSERVTransSocketDisconnect,
+	_XSERVTransSocketUNIXClose,
+	_XSERVTransSocketUNIXCloseForCloning,
+};
 #endif /* !LOCALCONN */
 #  if !defined(LOCALCONN)
 static const char* unix_nolisten[] = { "local" , NULL };
 #  endif
 
-static Xtransport	TRANS(SocketUNIXFuncs) = {
+static Xtransport _XSERVTransSocketUNIXFuncs = {
 	/* Socket Interface */
 	"unix",
 #if !defined(LOCALCONN) && !defined(HAVE_ABSTRACT_SOCKETS)
@@ -1732,24 +1689,24 @@ static Xtransport	TRANS(SocketUNIXFuncs) = {
 #else
 	NULL,
 #endif
-	TRANS(SocketOpenCOTSServer),
-	TRANS(SocketReopenCOTSServer),
-	TRANS(SocketSetOption),
-	TRANS(SocketUNIXCreateListener),
-	TRANS(SocketUNIXResetListener),
-	TRANS(SocketUNIXAccept),
-	TRANS(SocketBytesReadable),
-	TRANS(SocketRead),
-	TRANS(SocketWrite),
-	TRANS(SocketReadv),
-	TRANS(SocketWritev),
+	_XSERVTransSocketOpenCOTSServer,
+	_XSERVTransSocketReopenCOTSServer,
+	_XSERVTransSocketSetOption,
+	_XSERVTransSocketUNIXCreateListener,
+	_XSERVTransSocketUNIXResetListener,
+	_XSERVTransSocketUNIXAccept,
+	_XSERVTransSocketBytesReadable,
+	_XSERVTransSocketRead,
+	_XSERVTransSocketWrite,
+	_XSERVTransSocketReadv,
+	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
-        TRANS(SocketSendFd),
-        TRANS(SocketRecvFd),
+	_XSERVTransSocketSendFd,
+	_XSERVTransSocketRecvFd,
 #endif
-	TRANS(SocketDisconnect),
-	TRANS(SocketUNIXClose),
-	TRANS(SocketUNIXCloseForCloning),
-	};
+	_XSERVTransSocketDisconnect,
+	_XSERVTransSocketUNIXClose,
+	_XSERVTransSocketUNIXCloseForCloning,
+};
 
 #endif /* UNIXCONN */

@@ -266,9 +266,9 @@ typedef struct _Xtransport_table {
 
 #ifdef WIN32
 
-#define READV(ciptr, iov, iovcnt)	TRANS(ReadV)(ciptr, iov, iovcnt)
+#define READV(ciptr, iov, iovcnt)	_XSERVTransReadV(ciptr, iov, iovcnt)
 
-static	int TRANS(ReadV)(
+static	int _XSERVTransReadV(
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* iov */
     int			/* iovcnt */
@@ -283,9 +283,9 @@ static	int TRANS(ReadV)(
 
 #ifdef WIN32
 
-#define WRITEV(ciptr, iov, iovcnt)	TRANS(WriteV)(ciptr, iov, iovcnt)
+#define WRITEV(ciptr, iov, iovcnt)	_XSERVTransWriteV(ciptr, iov, iovcnt)
 
-static int TRANS(WriteV)(
+static int _XSERVTransWriteV(
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* iov */
     int 		/* iovcnt */
