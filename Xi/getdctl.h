@@ -23,12 +23,12 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifndef GETDCTL_H
+#define GETDCTL_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef GETDCTL_H
-#define GETDCTL_H 1
 
 int SProcXGetDeviceControl(ClientPtr    /* client */
     );

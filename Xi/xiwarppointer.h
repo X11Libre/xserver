@@ -23,12 +23,12 @@
  * Author: Peter Hutterer, University of South Australia, NICTA
  */
 
+#ifndef WARPDEVP_H
+#define WARPDEVP_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef WARPDEVP_H
-#define WARPDEVP_H 1
 
 int SProcXIWarpPointer(ClientPtr /* client */ );
 int ProcXIWarpPointer(ClientPtr /* client */ );

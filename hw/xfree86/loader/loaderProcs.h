@@ -46,12 +46,12 @@
  * authorization from the copyright holder(s) and author(s).
  */
 
+#ifndef _LOADERPROCS_H
+#define _LOADERPROCS_H
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _LOADERPROCS_H
-#define _LOADERPROCS_H
 
 #include "xf86Module.h"
 

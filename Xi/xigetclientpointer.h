@@ -23,12 +23,12 @@
  * Author: Peter Hutterer, University of South Australia, NICTA
  */
 
+#ifndef GETCPTR_H
+#define GETCPTR_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef GETCPTR_H
-#define GETCPTR_H 1
 
 int SProcXIGetClientPointer(ClientPtr /* client */ );
 int ProcXIGetClientPointer(ClientPtr /* client */ );

@@ -1,10 +1,3 @@
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#ifndef _GLX_server_h_
-#define _GLX_server_h_
-
 /*
  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
  * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.
@@ -34,6 +27,13 @@
  * other dealings in this Software without prior written authorization from
  * Silicon Graphics, Inc.
  */
+
+#ifndef _GLX_server_h_
+#define _GLX_server_h_
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 #include <X11/X.h>
 #include <X11/Xproto.h>

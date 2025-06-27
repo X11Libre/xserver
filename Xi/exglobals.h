@@ -23,19 +23,19 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
-/*****************************************************************
- *
- * Globals referenced elsewhere in the server.
- *
- */
+#ifndef EXGLOBALS_H
+#define EXGLOBALS_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
 #include "privates.h"
 
-#ifndef EXGLOBALS_H
-#define EXGLOBALS_H 1
-
+/*****************************************************************
+ *
+ * Globals referenced elsewhere in the server.
+ *
+ */
 extern int IEventBase;
 extern int BadDevice;
 extern int BadMode;

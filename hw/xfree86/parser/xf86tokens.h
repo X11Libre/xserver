@@ -52,12 +52,12 @@
  * authorization from the copyright holder(s) and author(s).
  */
 
+#ifndef _xf86_tokens_h
+#define _xf86_tokens_h
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _xf86_tokens_h
-#define _xf86_tokens_h
 
 /*
  * Each token should have a unique value regardless of the section

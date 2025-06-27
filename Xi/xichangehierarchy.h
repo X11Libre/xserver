@@ -23,18 +23,18 @@
  * Author: Peter Hutterer, University of South Australia, NICTA
  */
 
-/***********************************************************************
- *
- * Request change in the device hierarchy.
- *
- */
+#ifndef CHDEVHIER_H
+#define CHDEVHIER_H 1
 
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
 
-#ifndef CHDEVHIER_H
-#define CHDEVHIER_H 1
+/***********************************************************************
+ *
+ * Request change in the device hierarchy.
+ *
+ */
 
 int ProcXIChangeHierarchy(ClientPtr /* client */ );
 

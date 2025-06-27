@@ -44,12 +44,12 @@ SOFTWARE.
 
 ******************************************************************/
 
+#ifndef _OSDEP_H_
+#define _OSDEP_H_ 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _OSDEP_H_
-#define _OSDEP_H_ 1
 
 #include <X11/Xdefs.h>
 

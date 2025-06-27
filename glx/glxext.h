@@ -1,10 +1,3 @@
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#ifndef _glxext_h_
-#define _glxext_h_
-
 /*
  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
  * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.
@@ -34,6 +27,13 @@
  * other dealings in this Software without prior written authorization from
  * Silicon Graphics, Inc.
  */
+
+#ifndef _glxext_h_
+#define _glxext_h_
+
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#endif
 
 /* doing #include <GL/glx.h> & #include <GL/glxext.h> could cause problems
  * with overlapping definitions, so let's use the easy way

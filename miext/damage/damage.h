@@ -20,12 +20,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef _DAMAGE_H_
+#define _DAMAGE_H_
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _DAMAGE_H_
-#define _DAMAGE_H_
 
 typedef struct _damage *DamagePtr;
 

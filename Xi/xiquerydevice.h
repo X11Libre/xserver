@@ -24,12 +24,12 @@
  *
  */
 
+#ifndef QUERYDEV_H
+#define QUERYDEV_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef QUERYDEV_H
-#define QUERYDEV_H 1
 
 #include <X11/extensions/XI2proto.h>
 

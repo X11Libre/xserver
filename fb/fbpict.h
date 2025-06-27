@@ -21,12 +21,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef _FBPICT_H_
+#define _FBPICT_H_
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _FBPICT_H_
-#define _FBPICT_H_
 
 #include "fb.h"
 

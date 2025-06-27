@@ -31,14 +31,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
-/* Prototypes for DRI functions */
-
 #ifndef _DRI_H_
+#define _DRI_H_
 
 #include <pciaccess.h>
 
 #include "scrnintstr.h"
 #include "xf86dri.h"
+
+/* Prototypes for DRI functions */
 
 typedef int DRISyncType;
 
@@ -332,7 +333,5 @@ extern _X_EXPORT void DRIGetTexOffsetFuncs(ScreenPtr pScreen,
                                            texOffsetStartFunc,
                                            DRITexOffsetFinishProcPtr *
                                            texOffsetFinishFunc);
-
-#define _DRI_H_
 
 #endif

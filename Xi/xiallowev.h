@@ -23,12 +23,12 @@
  * Author: Peter Hutterer
  */
 
+#ifndef XIALLOWEV_H
+#define XIALLOWEV_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef XIALLOWEV_H
-#define XIALLOWEV_H 1
 
 int ProcXIAllowEvents(ClientPtr client);
 int SProcXIAllowEvents(ClientPtr client);

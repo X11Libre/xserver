@@ -20,12 +20,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef _DAMAGESTR_H_
+#define _DAMAGESTR_H_
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _DAMAGESTR_H_
-#define _DAMAGESTR_H_
 
 #include "damage.h"
 #include "gcstruct.h"
