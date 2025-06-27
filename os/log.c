@@ -178,6 +178,7 @@ LogFilePrep(const char *fname, const char *backup, const char *idstring)
     if (asprintf(&logFileName, fname, idstring) == -1)
         FatalError("Cannot allocate space for the log file name\n");
 
+    if (backup && *backup) {
         int fd = open(logFileName, O_RDWR | O_NOFOLLOW);
         if (fd != -1) {
             struct stat buf;
@@ -197,7 +198,6 @@ LogFilePrep(const char *fname, const char *backup, const char *idstring)
                 }
                 free(oldLog);
             }
-            free(oldLog);
             close(fd);
         }
     }
