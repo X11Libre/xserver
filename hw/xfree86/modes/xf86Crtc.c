@@ -1449,12 +1449,25 @@ preferredMode(ScrnInfoPtr pScrn, xf86OutputPtr output)
 {
     const char *preferred_mode = NULL;
 
-    /* Check for a configured preference for a particular mode */
-    preferred_mode = xf86GetOptValString(output->options,
-                                         OPTION_PREFERRED_MODE);
+    /* First: user-configured preferred mode */
+    preferred_mode = xf86GetOptValString(output->options, OPTION_PREFERRED_MODE);
     if (preferred_mode)
         return preferred_mode;
+  
+    /* Try to find a mode with ~75Hz refresh rate */
+    DisplayModePtr mode = output->probed_modes;
+    while (mode) {
+        /* Some drivers don’t populate VRefresh—manually calculate it */
+        float refresh = 0.0f;
+        if (mode->HTotal > 0 && mode->VTotal > 0)
+            refresh = ((float)mode->Clock * 1000.0f) /
+                      ((float)mode->HTotal * (float)mode->VTotal);
+        if ((int)(refresh + 0.5f) >= 75)
+            return mode->name;
+        mode = mode->next;
+    }
 
+    /* Fallback: use first mode in display list */
     if (pScrn->display->modes && *pScrn->display->modes)
         preferred_mode = *pScrn->display->modes;
 
