@@ -122,7 +122,6 @@ apt-get install -y \
 	x11-xkb-utils \
 	xfonts-utils \
 	xkb-data \
-	xtrans-dev \
 	xutils-dev
 
 .gitlab-ci/cross-prereqs-build.sh i686-w64-mingw32
