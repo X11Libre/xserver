@@ -178,24 +178,27 @@ LogFilePrep(const char *fname, const char *backup, const char *idstring)
     if (asprintf(&logFileName, fname, idstring) == -1)
         FatalError("Cannot allocate space for the log file name\n");
 
-    if (backup && *backup) {
-        struct stat buf;
+        int fd = open(logFileName, O_RDWR | O_NOFOLLOW);Add commentMore actions
+        if (fd != -1) {
+            struct stat buf;
+            if (fstat(fd, &buf) == 0 && S_ISREG(buf.st_mode)) {
+                char *suffix;
+                char *oldLog;
 
-        if (!stat(logFileName, &buf) && S_ISREG(buf.st_mode)) {
-            char *suffix;
-            char *oldLog;
+                if ((asprintf(&suffix, backup, idstring) == -1) ||
+                    (asprintf(&oldLog, "%s%s", logFileName, suffix) == -1)) {
+                    FatalError("Cannot allocate space for the log file name\n");
+                }
+                free(suffix);
 
-            if ((asprintf(&suffix, backup, idstring) == -1) ||
-                (asprintf(&oldLog, "%s%s", logFileName, suffix) == -1)) {
-                FatalError("Cannot allocate space for the log file name\n");
-            }
-            free(suffix);
-
-            if (rename(logFileName, oldLog) == -1) {
-                FatalError("Cannot move old log file \"%s\" to \"%s\"\n",
-                           logFileName, oldLog);
+                if (renameat(AT_FDCWD, logFileName, AT_FDCWD, oldLog) == -1) {
+                    FatalError("Cannot move old log file \"%s\" to \"%s\"\n",
+                               logFileName, oldLog);
+                }
+                free(oldLog);
             }
             free(oldLog);
+            close(fd);
         }
     }
     else {
