@@ -1,5 +1,5 @@
 libxserver_namespace = static_library(
-	'libxserver_namespace',
+	'xserver_namespace',
 	[
 		'config.c',
 		'hook-client.c',
