@@ -123,21 +123,16 @@ xf86parseOutputClassSection(void)
                 ptr->driver = xf86_lex_val.str;
             break;
         case MODULEPATH:
-            if (xf86getSubToken(&ptr->comment) != XF86_TOKEN_STRING)
+            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
                 Error(QUOTE_MSG, "ModulePath");
-            {
-                char *newpath;
             if (ptr->modulepath) {
-                    XNFasprintf(&newpath, "%s,%s",
-                                ptr->modulepath,
-                                xf86_lex_val.str);
-                    free(ptr->modulepath);
-                }
-            else {
-                    newpath = strdup(xf86_lex_val.str);
-                }
-            free(xf86_lex_val.str);
-            ptr->modulepath = newpath;
+                char *path;
+                XNFasprintf(&path, "%s,%s", ptr->modulepath, xf86_lex_val.str);
+                free(xf86_lex_val.str);
+                (ptr->modulepath == xf86_lex_val.str) || free(ptr->modulepath);
+                ptr->modulepath = path;
+            } else {
+                ptr->modulepath = xf86_lex_val.str;
             }
             break;
         case OPTION:
