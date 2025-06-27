@@ -50,9 +50,6 @@ config_init(void)
 #ifdef CONFIG_UDEV
     if (!config_udev_init())
         ErrorF("[config] failed to initialise udev\n");
-#elif defined(CONFIG_HAL)
-    if (!config_hal_init())
-        ErrorF("[config] failed to initialise HAL\n");
 #elif defined(CONFIG_WSCONS)
     if (!config_wscons_init())
         ErrorF("[config] failed to initialise wscons\n");
@@ -64,8 +61,6 @@ config_fini(void)
 {
 #if defined(CONFIG_UDEV)
     config_udev_fini();
-#elif defined(CONFIG_HAL)
-    config_hal_fini();
 #elif defined(CONFIG_WSCONS)
     config_wscons_fini();
 #endif

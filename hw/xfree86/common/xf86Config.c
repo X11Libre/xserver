@@ -1280,12 +1280,10 @@ checkCoreInputDevices(serverLayoutPtr servlayoutp, Bool implicitLayout)
     }
 
     if (!xf86Info.forceInputDevices && !(foundPointer && foundKeyboard)) {
-#if defined(CONFIG_HAL) || defined(CONFIG_UDEV) || defined(CONFIG_WSCONS)
+#if defined(CONFIG_UDEV) || defined(CONFIG_WSCONS)
         const char *config_backend;
 
-#if defined(CONFIG_HAL)
-        config_backend = "HAL";
-#elif defined(CONFIG_UDEV)
+#if defined(CONFIG_UDEV)
         config_backend = "udev";
 #else
         config_backend = "wscons";

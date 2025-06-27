@@ -176,11 +176,6 @@ endif
 
 glamor_option = get_option('glamor')
 
-hal_option = get_option('hal')
-if ['windows', 'darwin', 'cygwin'].contains(host_machine.system())
-    hal_option = 'false'
-endif
-
 build_udev = get_option('udev')
 build_udev_kms = get_option('udev_kms')
 if ['windows', 'darwin', 'freebsd', 'netbsd', 'openbsd', 'sunos'].contains(host_machine.system())
@@ -280,32 +275,7 @@ if int10 == 'auto'
     endif
 endif
 
-hal_dep = []
-if hal_option == 'auto'
-    if not build_udev
-        hal_dep = dependency('hal', required: false)
-        build_hal = hal_dep.found()
-    else
-        build_hal = false
-    endif
-else
-    build_hal = hal_option == 'true'
-    if build_hal
-        hal_dep = dependency('hal')
-    endif
-endif
-
-if build_hal
-    message('WARNING: HAL is deprecated and might be removed in near future')
-    message('If you really need it, please file a feature request on keeping it')
-    message('and explain why you need it, what your use case is.')
-endif
-
-if build_udev and build_hal
-    error('Hotplugging through both libudev and hal not allowed')
-endif
-
-build_dbus = build_hal or build_systemd_logind
+build_dbus = build_systemd_logind
 
 udev_dep = dependency('', required:false)
 if build_udev or build_udev_kms
