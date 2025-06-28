@@ -417,8 +417,11 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
 {
     int vercode[4];
     long ver = data->xf86version;
-    MessageType errtype;
-
+/* Only ignore ABI mismatches for NVIDIA proprietary driver */
+    if (data->vendor &&
+   (strstr(data->vendor, "NVIDIA") != NULL || {
+    LoaderOptions |= LDR_OPT_ABI_MISMATCH_NONFATAL;
+}
     LogMessage(X_INFO, "Module %s: vendor=\"%s\"\n",
                data->modname ? data->modname : "UNKNOWN!",
                data->vendor ? data->vendor : "UNKNOWN!");
@@ -458,26 +461,18 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
             vermaj = GET_ABI_MAJOR(ver);
             vermin = GET_ABI_MINOR(ver);
             if (abimaj != vermaj) {
-                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
-                    errtype = X_WARNING;
-                else
-                    errtype = X_ERROR;
-                LogMessageVerb(errtype, 0, "%s: module ABI major version (%d) "
-                               "doesn't match the server's version (%d)\n",
-                               module, abimaj, vermaj);
-                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
-                    return FALSE;
-            }
-            else if (abimin > vermin) {
-                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
-                    errtype = X_WARNING;
-                else
-                    errtype = X_ERROR;
-                LogMessageVerb(errtype, 0, "%s: module ABI minor version (%d) "
-                               "is newer than the server's version (%d)\n",
-                               module, abimin, vermin);
-                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
-                    return FALSE;
+            /* Always warn, never error out and crash X server */
+            LogMessageVerb(X_WARNING, 0,
+                           "%s: module ABI major version (%d) "
+                           "doesn't match the server's version (%d)\n",
+                           module, abimaj, vermaj);
+        }
+         else if (abimin > vermin) {
+            /* Ditto for minor‐version */
+            LogMessageVerb(X_WARNING, 0,
+                           "%s: module ABI minor version (%d) "
+                           "is newer than the server's version (%d)\n",
+                           module, abimin, vermin);
             }
         }
     }
