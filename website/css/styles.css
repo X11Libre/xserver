@@ -83,6 +83,7 @@ a {
 /* general layout */
 main {
     margin: 20px 20px 20px 20px;
+    min-height: 100vh;
 }
 
 #main-content {
@@ -104,12 +105,13 @@ main {
     float: left;
     width: 100%;
     /* margin-left: -300px; */
+    background-color: #16191B;
+    border-top: 1px solid #444;
 }
 
 div.nav-border {
     margin-bottom: 1.5em;
     padding: 0.65em;
-    border-left: 1px solid #bcd;
 }
 
 /* home: sidebar */
@@ -169,7 +171,6 @@ div.quicklink {
 /* responsive */
 @media only screen and (max-width: 768px) {
    #content-right {
-      border-top: 1px solid #bcd;
       width: 100%;
       margin-left: 0px;
    }
