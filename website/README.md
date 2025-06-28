@@ -31,5 +31,3 @@ This project is licensed under the MIT License.
 For questions or contributions, please open an issue or contact [@metux](https://github.com/metux).
 
 ### Made by [@xgui4](https://github.com/xgui4) and [@ChocodeerZyNX](https://github.com/ChocodeerZyNX) and [@yusi1](https://github.com/yuzi1)
-
-## Contributors and main dev are done here first -> [https://github.com/xlibre-website](https://github.com/xlibre-website)
