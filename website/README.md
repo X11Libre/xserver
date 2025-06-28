@@ -1,6 +1,6 @@
 # x11libre-website
 
-A website for the X11Libre project by @metux
+A website for the X11Libre (A fork of [Xorg XServer](https://gitlab.freedesktop.org/xorg/xserver)) project by @metux and the contributors
 
 ## About
 
@@ -28,6 +28,6 @@ This project is licensed under the MIT License.
 
 ## Contact
 
-For questions or contributions, please open an issue or contact @metux.
+For questions or contributions, please open an issue or contact [@metux](https://github.com/metux).
 
-### Made by [@xgui4](https://github.com/xgui4) and [@ChocodeerZyNX](https://github.com/ChocodeerZyNX)
+### Made by [@xgui4](https://github.com/xgui4) and [@ChocodeerZyNX](https://github.com/ChocodeerZyNX) and [@yusi1](https://github.com/yuzi1)

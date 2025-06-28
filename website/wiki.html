@@ -16,7 +16,7 @@
      <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
         <img src="img/XLibre-Logo.svg" alt="Bootstrap" width="90" height="90">
-        <a class="navbar-brand" href="#">X11Libre X Server</a>
+        <a class="navbar-brand" href="index.html">X11Libre X Server</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -24,7 +24,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+              <a class="nav-link" aria-current="page" href="index.html">Home</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="drivers.html">Drivers</a>
@@ -33,7 +33,7 @@
                 <a class="nav-link" href="about.html">About</a>
             </li>
             <li class="nav-item">
-                <a class="nav-itme" href="wiki.html">Wiki</a>
+                <a class="nav-link active" href="wiki.html">Wiki</a>
             </li>
           </ul>
         </div>
@@ -41,10 +41,17 @@
     </nav>
    </header>
    <body>
+     <main>
       <h2>How to install XLibre</h2>
         <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/xRzfHzZ6WDU?si=fWTrces_hvnUBvNH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       <div class="quicklink">
          <a href="#Arch">Arch Linux</a>
+         <br>
+         <a href="#Artix">Artix Linux</a>
+         <br>
+         <a href="#Gentoo">Gentoo Linux</a>
+         <br>
+         <a href="#Others">Others</a>
       </div>
       <div id="main-content">
          <div class="install">
@@ -52,24 +59,33 @@
             <ul>
                <li id="Arch">Arch Linux (AUR)
                   <a href="https://aur.archlinux.org/packages/xlibre-server-git#comment-1028466">Note: See this comment</a>
-<pre>
-<code>yay -S xlibre-server-bootstrap-git
-yay -S xlibre-input-libinput
-yay -S xlibre-server-git
-</code>
-</pre>
+                     <pre>
+                     <code>
+   yay -S xlibre-server-bootstrap-git
+   yay -S xlibre-input-libinput
+   yay -S xlibre-server-git
+                     </code>
+                     </pre>
                </li>
-               <li>Artix Linux</li>
-               <li>Gentoo Linux
+               <li id="Artix">Artix Linux
+                  <a href="https://wiki.artixlinux.org/Site/XlibreOnArtix">See this guide for XLibre on Artix</a>
+               </li>
+               <li id="Gentoo">Gentoo Linux
                   <a href="https://github.com/X11Libre/ports-gentoo">See Repo for packaging on Gentoo</a>
+               </li>
+
+               <li id="others">
+                  <p>Others : Build it yourself. If not available in your packages manager.</p>
                </li>
             </ul>
          </div>
       </div>
    </body>
+   </main>
    <footer>
         <div id="content-right">
          <div id="nav-sidebar" class="nav-border">
+           <div id="nav-content">
             <h3>Contact</h3>
             <ul>
                <li><a href="https://www.freelists.org/list/xlibre">Mailing list</a></li>
@@ -80,6 +96,7 @@ yay -S xlibre-server-git
                <ul>
                <li><a href="https://github.com/X11Libre/xserver">Github</a></li>
                </ul>
+           </div>
          </div>
       </div>
 </footer>
