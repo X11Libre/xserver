@@ -238,7 +238,37 @@ if build_xquartz
 endif
 
 build_xephyr = get_option('xephyr')
+build_xfbdev = get_option('xfbdev')
 build_xvfb = get_option('xvfb')
+
+build_kdrive_kbd = false
+build_kdrive_mouse = false
+build_kdrive_evdev = false
+build_kdrive_tslib = false
+
+if build_xfbdev
+    build_kdrive_kbd = get_option('kdrive_kbd')
+    build_kdrive_mouse = get_option('kdrive_mouse')
+    build_kdrive_evdev = get_option('kdrive_evdev')
+    build_kdrive_tslib = get_option('kdrive_tslib')
+endif
+
+if build_kdrive_kbd
+    add_project_arguments('-DKDRIVE_KBD=1', language : 'c')
+endif
+
+if build_kdrive_mouse
+    add_project_arguments('-DKDRIVE_MOUSE=1', language : 'c')
+endif
+
+if build_kdrive_evdev
+    add_project_arguments('-DKDRIVE_EVDEV=1', language : 'c')
+endif
+
+if build_kdrive_tslib
+    add_project_arguments('-DKDRIVE_TSLIB=1', language : 'c')
+endif
+
 
 summary({
         'Xorg': build_xorg,
@@ -246,6 +276,11 @@ summary({
         'Xvfb': build_xvfb,
         'Xwin': build_xwin,
         'Xquartz': build_xquartz,
+        'Xfbdev': build_xfbdev,
+        'Xfbdev-kbd': build_kdrive_kbd,
+        'Xfbdev-mouse': build_kdrive_mouse,
+        'Xfbdev-evdev': build_kdrive_evdev,
+        'Xfbdev-tslib': build_kdrive_tslib,
     },
     section: 'DDX',
     bool_yn: true,

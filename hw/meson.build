@@ -1,4 +1,4 @@
-if build_xephyr
+if build_xephyr or build_xfbdev
     subdir('kdrive')
 endif
 
