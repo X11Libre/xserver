@@ -19,8 +19,13 @@
  * IN THE SOFTWARE.
  */
 
+#ifndef XSERVER_XWIN_WINAUTH_H
+#define XSERVER_XWIN_WINAUTH_H
+
 #include <xcb/xcb.h>
 #include <X11/Xmd.h> // for BOOL
 
 BOOL winGenerateAuthorization(void);
 xcb_auth_info_t * winGetXcbAuthInfo(void);
+
+#endif /* XSERVER_XWIN_WINAUTH_H */

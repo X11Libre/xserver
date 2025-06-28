@@ -29,6 +29,7 @@
  */
 
 #ifndef _VBE_MODES_H
+#define _VBE_MODES_H
 
 /*
  * This is intended to be stored in the DisplayModeRec's private area.

@@ -1,0 +1,50 @@
+name: 🔧 Code cleanup
+description: Level up the source code
+labels: [code-cleanup, needs-triage]
+#type: codecleanup
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the sections below to properly describe the code cleanup you are suggesting. If you have a general idea or question then please use the [discussions](https://github.com/orgs/X11Libre/discussions).
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the cleanup"
+      placeholder: C in X needs to be changed into D.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: "It should be done because"
+      placeholder: Having D is needed for E.
+    validations:
+      required: true
+  - type: textarea
+    id: alternative
+    attributes:
+      label: "What are the alternatives?"
+      placeholder: We could do A or B instead.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Additional information you want to provide such as implications on existing code, how to ensure API/ABI stability, which tests are needed or to be run, related issues, etc.
+      placeholder: |
+        Add any other context about the cleanup here.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Extra fields
+      options:
+        - label: I have checked the existing [issues](https://github.com/X11Libre/xserver/issues)
+          required: true
+        - label: I have read the [Contributing Guidelines](https://github.com/X11Libre/xserver/blob/master/CONTRIBUTING.md)
+          required: true
+        - label: I'd like to work on this issue
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for looking at the source code! Let's see together how it can be improved.

@@ -34,6 +34,8 @@
 #ifndef _ROOTLESSWINDOW_H
 #define _ROOTLESSWINDOW_H
 
+#include "dix/screen_hooks_priv.h"
+
 #include "rootlessCommon.h"
 
 Bool RootlessCreateWindow(WindowPtr pWin);

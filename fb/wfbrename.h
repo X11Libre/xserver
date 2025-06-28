@@ -1,3 +1,6 @@
+#ifndef XSERVER_WFBRENAME_H
+#define XSERVER_WFBRENAME_H
+
 #define fbAddTraps wfbAddTraps
 #define fbAddTriangles wfbAddTriangles
 #define fbAllocatePrivates wfbAllocatePrivates
@@ -118,3 +121,5 @@
 #define fbWinPrivateKeyRec wfbWinPrivateKeyRec
 #define free_pixman_pict wfb_free_pixman_pict
 #define image_from_pict wfb_image_from_pict
+
+#endif /* XSERVER_WFBRENAME_H */

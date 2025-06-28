@@ -28,6 +28,9 @@ from The Open Group.
 
 /* Author:  Keith Packard, MIT X Consortium */
 
+#ifndef XSERVER_MIWIDELINE_H
+#define XSERVER_MIWIDELINE_H
+
 #include "mifpoly.h"            /* for ICEIL */
 
 /*
@@ -91,3 +94,5 @@ typedef struct _LineFace {
 	ValidateGC (pDrawable, pGC); \
     } \
 }
+
+#endif /* XSERVER_MIWIDELINE_H */

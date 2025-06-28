@@ -29,6 +29,9 @@
  *   Aaron Plattner <aplattner@nvidia.com>
  */
 
+#ifndef XSERVER_XFREE86_DRIVER_H
+#define XSERVER_XFREE86_DRIVER_H
+
 #include <errno.h>
 #include <drm.h>
 #include <xf86drm.h>
@@ -261,3 +264,5 @@ void ms_drain_drm_events(ScreenPtr screen);
 Bool ms_window_has_variable_refresh(modesettingPtr ms, WindowPtr win);
 void ms_present_set_screen_vrr(ScrnInfoPtr scrn, Bool vrr_enabled);
 Bool ms_tearfree_is_active_on_crtc(xf86CrtcPtr crtc);
+
+#endif /* XSERVER_XFREE86_DRIVER_H */
