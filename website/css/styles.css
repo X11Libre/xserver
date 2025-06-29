@@ -92,6 +92,10 @@ main {
     text-align: left;
 }
 
+.install ul {
+    margin-left: 195px;
+}
+
 #content-left-wrapper {
     float: left;
     width: 100%; /* req to keep content above sidebar in source code */
@@ -99,6 +103,10 @@ main {
 
 #content-left {
     margin: 0 340px 0 0;
+}
+
+#content-sep {
+    padding-top: 360px;
 }
 
 #content-right {
@@ -122,7 +130,7 @@ div.nav-border {
 }
 
 /* highlight Wiki link in navbar */
-.navbar-nav > li:nth-child(4) {
+.navbar-nav > li:nth-child(6) {
     text-decoration: underline;
     text-decoration-color: #78b2c3;
 }
@@ -141,19 +149,22 @@ code {
   padding: 0 3px;
 }
 
-pre {
+main pre {
    font-family: monospace, monospace;
    margin: 1em;
+   border-bottom: 1px solid #31373d;
+   border-radius: 3px;
 }
 
-pre code {
-   padding:10px;
-   display: block;
-   overflow: auto;
+main pre code {
+    padding: 20px 20px 20px 30px;
+    display: block;
+    overflow: auto;
+    box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset;
 }
 
 div.quicklink {
-   height: 200vh;
+   height: 150vh;
    position: sticky;
    z-index: 1;
    top: 0;

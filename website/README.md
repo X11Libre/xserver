@@ -31,3 +31,9 @@ This project is licensed under the MIT License.
 For questions or contributions, please open an issue or contact [@metux](https://github.com/metux).
 
 ### Made by [@xgui4](https://github.com/xgui4) and [@ChocodeerZyNX](https://github.com/ChocodeerZyNX) and [@yusi1](https://github.com/yuzi1)
+
+```text
+before doing commit the dev of the site is done here : https://www.github.com/xgui4/X11Libre-website
+
+you can try the website at : https://xgui4.github.io/xserver/website
+```
