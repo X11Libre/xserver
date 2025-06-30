@@ -164,7 +164,7 @@ Bool
 xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 {
     unsigned long valuemask;
-    VisualID defaultVisual;
+    VisualID defaultVisual = 0;
     int rootDepth;
     miPointerScreenPtr PointPriv;
 
