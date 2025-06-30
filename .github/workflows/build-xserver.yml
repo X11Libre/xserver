@@ -1,5 +1,8 @@
 name: Build X servers
 
+permissions:
+    contents: read
+
 env:
     MESON_BUILDDIR:  "build"
     X11_PREFIX:      /home/runner/x11

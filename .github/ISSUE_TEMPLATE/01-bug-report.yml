@@ -14,8 +14,7 @@ body:
     attributes:
       label: Select the version
       options:
-        - 25.0.0.0
-        - 25.0.0.1
+        - 25.0.0.X
         - Git master branch
         - other or don't know
       default: 1
