@@ -15,7 +15,7 @@ GitLab account on freedesktop.org: deleted the git repo, tickets, merge
 requests, etc, and so fired the shot that the whole world heard.
 
 This is an independent project, not at all affiliated with BigTech or any
-of their subsidiaries or tax evasion tools, nor any political activists
+of their subsidiaries nor any political activists
 groups, state actors, etc. It's explicitly free of any "DEI" or similar
 discriminatory policies. Anybody who's treating others nicely is welcomed.
 
