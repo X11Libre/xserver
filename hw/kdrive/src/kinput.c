@@ -383,6 +383,11 @@ DDXRingBell(int volume, int pitch, int duration)
 {
     KdKeyboardInfo *ki = NULL;
 
+    if (kdOsFuncs->Bell) {
+        kdOsFuncs->Bell(volume, pitch, duration);
+        return;
+    }
+
     for (ki = kdKeyboards; ki; ki = ki->next) {
         if (ki->dixdev->coreEvents)
             KdRingBell(ki, volume, pitch, duration);

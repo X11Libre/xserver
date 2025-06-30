@@ -285,6 +285,7 @@ typedef struct _KdOsFuncs {
     void (*Disable) (void);
     void (*Fini) (void);
     void (*pollEvents) (void);
+    /* if not NULL called instead of the keyboard driver's function */
     void (*Bell) (int, int, int);
 } KdOsFuncs;
 
