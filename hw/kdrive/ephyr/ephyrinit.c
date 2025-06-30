@@ -390,23 +390,19 @@ OsVendorInit(void)
 }
 
 KdCardFuncs ephyrFuncs = {
-    ephyrCardInit,              /* cardinit */
-    ephyrScreenInitialize,      /* scrinit */
-    ephyrInitScreen,            /* initScreen */
-    ephyrFinishInitScreen,      /* finishInitScreen */
-    ephyrCreateResources,       /* createRes */
-    ephyrScreenFini,            /* scrfini */
-    ephyrCardFini,              /* cardfini */
+    .cardinit         = ephyrCardInit,
+    .scrinit          = ephyrScreenInitialize,
+    .initScreen       = ephyrInitScreen,
+    .finishInitScreen = ephyrFinishInitScreen,
+    .createRes        = ephyrCreateResources,
 
-    0,                          /* initCursor */
+    .scrfini          = ephyrScreenFini,
+    .cardfini         = ephyrCardFini,
 
-    0,                          /* initAccel */
-    0,                          /* enableAccel */
-    0,                          /* disableAccel */
-    0,                          /* finiAccel */
+    /* no cursor or accel funcs here */
 
-    ephyrGetColors,             /* getColors */
-    ephyrPutColors,             /* putColors */
+    .getColors        = ephyrGetColors,
+    .putColors        = ephyrPutColors,
 
-    ephyrCloseScreen,           /* closeScreen */
+    .closeScreen      = ephyrCloseScreen,
 };
