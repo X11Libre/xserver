@@ -370,6 +370,23 @@ ddxProcessArgument(int argc, char **argv, int i)
     return KdProcessArgument(argc, argv, i);
 }
 
+static int
+EphyrInit(void)
+{
+    /*
+     * make sure at least one screen
+     * has been added to the system.
+     */
+    if (!KdCardInfoLast()) {
+        processScreenArg("640x480", NULL);
+    }
+    return hostx_init();
+}
+
+KdOsFuncs EphyrOsFuncs = {
+    .Init = EphyrInit,
+};
+
 void
 OsVendorInit(void)
 {
@@ -381,12 +398,7 @@ OsVendorInit(void)
     if (hostx_want_host_cursor())
         ephyrFuncs.initCursor = &ephyrCursorInit;
 
-    if (serverGeneration == 1) {
-        if (!KdCardInfoLast()) {
-            processScreenArg("640x480", NULL);
-        }
-        hostx_init();
-    }
+    KdOsInit(&EphyrOsFuncs);
 }
 
 KdCardFuncs ephyrFuncs = {
