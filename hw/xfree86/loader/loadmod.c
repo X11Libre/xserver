@@ -422,6 +422,8 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
    (strstr(data->vendor, "NVIDIA") != NULL || {
     LoaderOptions |= LDR_OPT_ABI_MISMATCH_NONFATAL;
 }
+    MessageType errtype;
+
     LogMessage(X_INFO, "Module %s: vendor=\"%s\"\n",
                data->modname ? data->modname : "UNKNOWN!",
                data->vendor ? data->vendor : "UNKNOWN!");
