@@ -1777,6 +1777,11 @@ KdBlockHandler(ScreenPtr pScreen, void *timeo)
                 myTimeout = ms;
         }
     }
+    /* if we need to poll for events, do that */
+    if (kdOsFuncs->pollEvents) {
+        kdOsFuncs->pollEvents();
+        myTimeout = 20;
+    }
     if (myTimeout > 0)
         AdjustWaitForDelay(timeo, myTimeout);
 }
