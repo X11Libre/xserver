@@ -96,8 +96,7 @@ const char *kdGlobalXkbOptions = NULL;
  * Carry arguments from InitOutput through driver initialization
  * to KdScreenInit
  */
-
-KdOsFuncs *kdOsFuncs = NULL;
+const KdOsFuncs *kdOsFuncs = NULL;
 
 void
 KdDisableScreen(ScreenPtr pScreen)
@@ -526,7 +525,7 @@ KdProcessArgument(int argc, char **argv, int i)
 }
 
 void
-KdOsInit(KdOsFuncs * pOsFuncs)
+KdOsInit(const KdOsFuncs * pOsFuncs)
 {
     kdOsFuncs = pOsFuncs;
     if (pOsFuncs) {
