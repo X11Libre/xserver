@@ -50,6 +50,8 @@ from The Open Group.
 #ifndef _XTRANS_H_
 #define _XTRANS_H_
 
+#include <stdint.h>
+
 #include <X11/Xfuncproto.h>
 #include <X11/Xos.h>
 #include <X11/Xmd.h>
@@ -289,7 +291,7 @@ int _XSERVTransGetConnectionNumber (
 int _XSERVTransMakeAllCOTSServerListeners (
     const char *,	/* port */
     int *,		/* partial */
-    int *,		/* count_ret */
+    uint32_t *,		/* count_ret */
     XtransConnInfo **	/* ciptrs_ret */
 );
 

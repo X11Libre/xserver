@@ -881,7 +881,7 @@ complete_network_count (void)
 
 static int
 receive_listening_fds(const char* port, XtransConnInfo* temp_ciptrs,
-                      int* count_ret)
+                      uint32_t* count_ret)
 
 {
 #ifdef HAVE_SYSTEMD_DAEMON
@@ -958,7 +958,7 @@ extern int xquartz_launchd_fd;
 #endif
 
 int _XSERVTransMakeAllCOTSServerListeners (const char *port, int *partial,
-                                   int *count_ret, XtransConnInfo **ciptrs_ret)
+                                   uint32_t *count_ret, XtransConnInfo **ciptrs_ret)
 {
     char		buffer[256]; /* ??? What size ?? */
     XtransConnInfo	ciptr, temp_ciptrs[NUMTRANS] = { NULL };
