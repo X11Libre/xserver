@@ -1,38 +1,53 @@
-# X11Libre X Server — A Modern, Inclusive Xorg Fork
+# XLibre Xserver
 
-Xlibre is a fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver), with 
-major code cleanups and enhanced functionality aimed at modernizing the X11 server 
-with a focus on **security**, **performance**, and **maintainability**.
+**XLibre** is a major fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver), created to push forward X server technology through extensive code cleanups, architectural improvements, and enhanced functionality. This project was born out of the need to maintain active development and innovation in the X server ecosystem, ensuring this critical infrastructure continues evolving to meet modern computing demands.
 
-This fork was created because problematic elements within the Xorg project, including 
-influence from large corporations, were blocking substantial progress. After journalists
-began covering the planned Xlibre fork on June 6th, 2025, freedesktop.org administrators
-banned the Xlibre founder’s GitLab account, which led to the deletion of repositories, 
-tickets, and merge requests. Xorg has also removed prior work and contributions from [@Metux](https://github.com/metux).
+---
 
-This is an entirely **independent project**, contributed to and maintained by a community 
-of independent developers — anyone who wants to modernize, clean up, document, test, 
-and advance X11 as the primary graphics and rendering system for UNIX and UNIX-like 
-operating systems such as: **FreeBSD, OpenBSD, NetBSD, GNU/Linux, Illumos**, and even 
-non-UNIX platforms like **Windows (via Cygwin)**.
+## Project Background
 
-X11 has served as the backbone of many desktop environments since its initial release 
-in **1984** (as X1), including **Xfce, MATE, Trinity, Blackbox, CDE, Lumina**, and 
-many others.
+The decision to fork from the original Xorg project was driven by a lack of progress and institutional barriers that were limiting meaningful contributions. After journalists began covering the planned XLibre fork on **June 6th, 2025**, the founder's account and infrastructure on freedesktop.org were abruptly removed — including repositories, merge requests, and issue trackers. This forced the project to relocate development elsewhere, reaffirming the importance of decentralized infrastructure and open collaboration.
 
-This project is **not affiliated with or endorsed by** the Xorg efforts of freedesktop.org, 
-Red Hat, or GNOME.
+This project preserves and builds upon prior work by contributors such as [@Metux](https://github.com/metux), whose contributions were later removed from the original upstream.
 
-We believe in equity of opportunity, openness, and community. It doesn’t matter what 
-country you’re from, what your political views are, your race, gender, age, dietary 
-habits, fashion style, whether you’re furry, fairy, Conan, McKay, a comic character, 
-a neurodivergent person, or a small furry creature from Alpha Centauri, **you are welcome here**.
-As long as you treat others with respect, you belong.This is a truly inclusive, 
-community-led project where everyone gets a fair opportunity to contribute and grow.
+---
 
-Together we’ll make X great again by modernizing it *and* making it for everyone.
+## Project Philosophy
+
+- **Independence:** XLibre is a fully independent project, free from corporate control, political organizations, and institutional sponsorship.
+- **Technical Merit:** Development is driven by quality, security, and real-world needs, not by marketing trends or centralized agendas.
+- **Transparency:** All decisions and technical discussions are public and community-driven.
+- **Focus:** Our goal is to build a modern, secure, performant, and maintainable X server for the UNIX ecosystem.
+
+---
+
+## Inclusive and Community-Driven
+
+We believe that good technology must be built by inclusive communities.
+
+XLibre welcomes contributors from all backgrounds — regardless of nationality, race, gender, age, political views, or lived experience. We explicitly welcome those who are **neurodivergent** (e.g. autistic, ADHD, etc.) and understand that inclusion means more than just allowing access — it means **providing equity of opportunity**, recognizing that some contributors face unique barriers in open source spaces.
+
+As long as you treat others with respect, you are welcome here. Whether you’re a seasoned systems developer or a small furry creature from Alpha Centauri — you belong.
+
+This is a project where everyone deserves a fair chance to learn, contribute, and improve X11 together.
+
+---
+
+## Technical Vision
+
+- **Modernization:** Improve the Xorg architecture while preserving compatibility with existing X11 clients.
+- **Performance:** Optimize rendering, reduce latency, and improve throughput across diverse hardware.
+- **Security:** Apply modern hardening practices, improve privilege separation, and reduce attack surface.
+- **Code Quality:** Clean up legacy code and reduce technical debt accumulated over decades.
+- **Portability:** Maintain support for UNIX-like systems (FreeBSD, NetBSD, OpenBSD, GNU/Linux, Illumos), and compatibility layers such as Cygwin for Windows.
+- **Stability:** Continuous testing and validation to ensure long-term reliability.
+
+---
+
+Together, let’s make X great again — by modernizing it, decentralizing it, and making it for **everyone who wants to build**.
 
 [Are we XLibre Yet?](https://gist.github.com/probonopd/301319568a554abe7426c02eb5e19b5a)
+
 
 Upgrade notice
 --------------
