@@ -603,12 +603,6 @@ ProcXF86BigfontDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXF86BigfontQueryVersion(ClientPtr client)
-{
-    return ProcXF86BigfontQueryVersion(client);
-}
-
-static int _X_COLD
 SProcXF86BigfontQueryFont(ClientPtr client)
 {
     REQUEST(xXF86BigfontQueryFontReq);
@@ -624,7 +618,7 @@ SProcXF86BigfontDispatch(ClientPtr client)
 
     switch (stuff->data) {
     case X_XF86BigfontQueryVersion:
-        return SProcXF86BigfontQueryVersion(client);
+        return ProcXF86BigfontQueryVersion(client);
     case X_XF86BigfontQueryFont:
         return SProcXF86BigfontQueryFont(client);
     default:
