@@ -163,7 +163,6 @@ static void add_depth_visual(DepthPtr depths, int *numDepths, int nplanes, Visua
 Bool
 xnestOpenScreen(ScreenPtr pScreen, int argc, char *argv[])
 {
-  
     unsigned long valuemask;
     VisualID defaultVisual = 0;
     int rootDepth = 0;
