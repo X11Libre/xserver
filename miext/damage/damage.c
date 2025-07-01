@@ -1714,7 +1714,9 @@ DamageCreate(DamageReportFunc damageReport,
     pDamage->damageDestroy = damageDestroy;
     pDamage->pScreen = pScreen;
 
-    (*pScrPriv->funcs.Create) (pDamage);
+    if (pScrPriv && pScrPriv->funcs.Create) {
+        pScrPriv->funcs.Create (pDamage);
+    }
 
     return pDamage;
 }
@@ -1755,7 +1757,10 @@ DamageRegister(DrawablePtr pDrawable, DamagePtr pDamage)
         pDamage->isWindow = FALSE;
     pDamage->pDrawable = pDrawable;
     damageInsertDamage(getDrawableDamageRef(pDrawable), pDamage);
-    (*pScrPriv->funcs.Register) (pDrawable, pDamage);
+
+    if (pScrPriv && pScrPriv->funcs.Register) {
+        pScrPriv->funcs.Register (pDrawable, pDamage);
+    }
 }
 
 void
@@ -1774,7 +1779,9 @@ DamageUnregister(DamagePtr pDamage)
 
     damageScrPriv(pScreen);
 
-    (*pScrPriv->funcs.Unregister) (pDrawable, pDamage);
+    if (pScrPriv && pScrPriv->funcs.Unregister) {
+        pScrPriv->funcs.Unregister (pDrawable, pDamage);
+    }
 
     if (pDrawable->type == DRAWABLE_WINDOW) {
         WindowPtr pWindow = (WindowPtr) pDrawable;
@@ -1817,7 +1824,11 @@ DamageDestroy(DamagePtr pDamage)
 
     if (pDamage->damageDestroy)
         (*pDamage->damageDestroy) (pDamage, pDamage->closure);
-    (*pScrPriv->funcs.Destroy) (pDamage);
+
+    if (pScrPriv && pScrPriv->funcs.Destroy) {
+        pScrPriv->funcs.Destroy (pDamage);
+    }
+
     RegionUninit(&pDamage->damage);
     RegionUninit(&pDamage->pendingDamage);
     free(pDamage);
