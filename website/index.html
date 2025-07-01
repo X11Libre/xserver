@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="icon" href="img/XLibre-Logo.svg"> 
+  <link rel="icon" href="img/XLibre-Logo.svg">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
     crossorigin="anonymous"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-  <title>X11Libre X Server</title>
+  <title>XLibre - Home</title>
 </head>
 
 <body>
   <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
-        <img src="img/XLibre-Logo.svg" alt="Bootstrap" width="90" height="90">
+        <img src="img/XLibre-Logo.svg" alt="XLibre temporary Logo" width="90" height="90">
         <a class="navbar-brand" href="index.html">X11Libre X Server</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,13 +33,13 @@
               <a class="nav-link" href="drivers.html">Drivers</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="about.html">About</a>
-            </li>
-            <li class="nav-item"> 
-                <a class="nav-link" href="download.html">Download</a>
+              <a class="nav-link" href="about.html">About</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="faq.html">FAQ & Privacy</a>
+              <a class="nav-link" href="download.html">Download</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="faq.html">FAQ & Privacy</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="wiki.html">Wiki</a>
@@ -49,84 +50,52 @@
     </nav>
   </header>
   <main>
-    <h1 id="xlibre-xserver">XLibre Xserver</h1>
-    <p>Xlibre is a fork of the <a href="https://gitlab.freedesktop.org/xorg/xserver">Xorg Xserver</a> with
-      lots of code cleanups and enhanced functionality.</p>
-    <p>This fork was necessary since toxic elements within Xorg projects,
-      moles from BigTech, are boycotting any substantial work on Xorg, in
-      order to destroy the project, to eliminate competition of their own
-      products. Classic “embrace, extend, extinguish” tactics.</p>
-    <p>Right after journalists first began covering the planned fork Xlibre,
-      on June 6th 2025, Redhat employees started a purge on the Xlibre
-      founder’s GitLab account on freedesktop.org: deleted the git repo,
-      tickets, merge requests, etc, and so fired the shot that the whole world
-      heard.</p>
-    <p>This is an independent project, not at all affiliated with BigTech or
-      any of their subsidiaries or tax evasion tools, nor any political
-      activists groups, state actors, etc. It’s explicitly free of any “DEI”
-      or similar discriminatory policies. Anybody who’s treating others nicely
-      is welcomed.</p>
-    <p>It doesn’t matter which country you’re coming from, your political
-      views, your race, your sex, your age, your food menu, whether you wear
-      boots or heels, whether you’re furry or fairy, Conan or McKay, comic
-      character, a small furry creature from Alpha Centauri, a neurodivergent
-      or just an average person. Anybody who’s interested in bringing X forward
-      is welcome, so it’s truly inclusive!</p>
-    <p>Together we’ll make X great again!</p>
-    <h2 id="upgrade-notice">Upgrade notice</h2>
-    <ul>
-      <li>
-        <p>Module ABIs have changed - drivers MUST be recompiled against
-          this Xserver version, otherwise the Xserver can crash or fail to start
-          up correctly.</p>
-      </li>
-      <li>
-        <p>If your console is locked up (no input possible, not even VT
-          switch), then most likely the input driver couldn’t be loaded due to a
-          version mismatch. When unsure, it’s best to be prepared to ssh into your
-          machine from another one or set a timer that’s calling
-          <code>chvt 1</code> after certain time, so you don’t need a cold reboot.
-          Or, make sure that you have magic <code>SysRq</code> key enabled
-          (<code>Alt+PrtSc</code>) via sysctl (<code>kernel.sysrq=1</code>), then
-          press following combination depending on keyboard layout to make kernel
-          regain control over keyboard to make VT switching work:
-        </p>
-        <ul>
-          <li>QWERTY/AZERTY keyboard layout: <code>SysRq + R</code></li>
-          <li>Dvorak/Colemak keyboard layout: <code>SysRq + P</code></li>
-        </ul>
-      </li>
-      <li>
-        <p>Proprietary Nvidia drivers might break: they still haven’t
-          managed to do even simple cleanups to catch up with Xorg master for
-          about a year. All attempts to get into direct mail contact have failed.
-          We’re trying to work around this, but cannot give any guarantees. But
-          you can make it work by adding <code>Option "IgnoreABI" "1"</code> line
-          to <code>ServerFlags</code> section in Xorg config.</p>
-      </li>
-      <li>
-        <p>Most Xorg drivers should run as-is (once recompiled!), with some
-          exceptions. See <code>.gitlab-ci.yml</code> for the versions/branches
-          built along with Xlibre.</p>
-      </li>
-    </ul>
+    <h1 id="x11libre-x-server-a-modern-inclusive-x11-fork">X11Libre X Server — A Modern, Inclusive Xorg Fork</h1>
+    <p>Xlibre is a fork of the <a href="https://gitlab.freedesktop.org/xorg/xserver">Xorg Xserver</a>, with
+      major code cleanups and enhanced functionality aimed at modernizing the X11 server
+      with a focus on <strong>security</strong>, <strong>performance</strong>, and <strong>maintainability</strong>.</p>
+    <p>This fork was created because problematic elements within the Xorg project, including
+      influence from large corporations, were blocking substantial progress. After journalists
+      began covering the planned Xlibre fork on June 6th, 2025, freedesktop.org administrators
+      banned the Xlibre founder’s GitLab account, which led to the deletion of repositories,
+      tickets, and merge requests. Xorg has also removed prior work and contributions from <a
+        href="https://github.com/metux">@Metux</a>.</p>
+    <p>This is an entirely <strong>independent project</strong>, contributed to and maintained by a community
+      of independent developers — anyone who wants to modernize, clean up, document, test,
+      and advance X11 as the primary graphics and rendering system for UNIX and UNIX-like
+      operating systems such as: <strong>FreeBSD, OpenBSD, NetBSD, GNU/Linux, Illumos</strong>, and even
+      non-UNIX platforms like <strong>Windows (via Cygwin)</strong>.</p>
+    <p>X11 has served as the backbone of many desktop environments since its initial release
+      in <strong>1984</strong> (as X1), including <strong>Xfce, MATE, Trinity, Blackbox, CDE, Lumina</strong>, and
+      many others.</p>
+    <p>This project is <strong>not affiliated with or endorsed by</strong> the Xorg efforts of freedesktop.org,
+      Red Hat, or GNOME.</p>
+    <p>We believe in equity of opportunity, openness, and community. It doesn’t matter what
+      country you’re from, what your political views are, your race, gender, age, dietary
+      habits, fashion style, whether you’re furry, fairy, Conan, McKay, a comic character,
+      a neurodivergent person, or a small furry creature from Alpha Centauri, <strong>you are welcome here</strong>.
+      As long as you treat others with respect, you belong.This is a truly inclusive,
+      community-led project where everyone gets a fair opportunity to contribute and grow.</p>
+    <p>Together we’ll make X great again by modernizing it <em>and</em> making it for everyone.</p>
+    <p><a href="https://gist.github.com/probonopd/301319568a554abe7426c02eb5e19b5a">Are we XLibre Yet?</a></p>
   </main>
 </body>
 <div id="content-sep"></div>
 <footer>
-        <div id="content-right">
-         <div id="nav-sidebar" class="nav-border">
-            <h3>Contact</h3>
-            <ul>
-               <li><a href="https://www.freelists.org/list/xlibre">Mailing list</a></li>
-               <li><a href="https://t.me/x11dev">Telegram channel</a></li>
-               <li><a href="https://matrix.to/#/%23xlibre:matrix.org">Matrix room (mirror of tg group)</a></li>
-            </ul>
-               <h3>Contribute</h3>
-               <ul>
-               <li><a href="https://github.com/X11Libre/xserver">Github</a></li>
-               </ul>
-         </div>
-      </div>
+  <div id="content-right">
+    <div id="nav-sidebar" class="nav-border">
+      <h3>Contact</h3>
+      <ul>
+        <li><a href="https://www.freelists.org/list/xlibre">Mailing list</a></li>
+        <li><a href="https://t.me/x11dev">Telegram channel</a></li>
+        <li><a href="https://matrix.to/#/%23xlibre:matrix.org">Matrix room (mirror of tg group)</a></li>
+      </ul>
+      <h3>Contribute</h3>
+      <ul>
+        <li><a href="https://github.com/X11Libre/xserver">Github</a></li>
+      </ul>
+    </div>
+  </div>
 </footer>
+
 </html>
