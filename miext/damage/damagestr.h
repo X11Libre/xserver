@@ -61,7 +61,7 @@ typedef struct _damageScrPriv {
     DamagePtr pScreenDamage;
 
     CopyWindowProcPtr CopyWindow;
-    void *_dummy1; // required in place of a removed field for ABI compatibility
+    CloseScreenProcPtr CloseScreen;
     CreateGCProcPtr CreateGC;
     void *_dummy2; // required in place of a removed field for ABI compatibility
     SetWindowPixmapProcPtr SetWindowPixmap;
