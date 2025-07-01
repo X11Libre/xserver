@@ -777,7 +777,8 @@ endif
 
 subdir('hw')
 
-if host_machine.system() != 'windows'
+build_tests = get_option('tests') and host_machine.system() != 'windows'
+if build_tests
     subdir('test')
 endif
 
