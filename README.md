@@ -2,7 +2,9 @@ XLibre Xserver
 ===============
 
 Xlibre is a fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver)
-with lots of code cleanups and enhanced functionality.
+with lots of code cleanups and enhanced functionality aimed at modernization 
+of the X11 xserver and system with focuses on security, performance, 
+and cleaner code.
 
 This fork was necessary since problematic elements within Xorg projects 
 like big corporation are preventing any substantial work on Xorg. 
@@ -14,11 +16,22 @@ which cuasing the git repo to be deleted and also xorg have remove
 any changes and activity made by Metux and this have made reat 
 publicity for XLibre by making this news loud.
 
-This is an community project, not at all affiliated with corporation or 
-any of their subsidiaries nor any political activists groups, state actors, 
-etc. It's explicitly free of any "DEI" or similar policies, but without
-excluding anynone. That mean anybody who's treating others nicely is 
-welcomed and accepted regardless of their identity.
+This is an entirely independent project, contributed and maintained by 
+the community at large of independent developers and anyone wishing to 
+help modernize, cleanup, document, test, and advance X11 as the primary 
+rendering, drawing, and graphics system of UNIX and UNIX-like operating 
+systems and environments such as FreeBSD, OpenBSD, NetBSD, GNU/Linux, 
+Illumos, etc. as well as non-UNIX/UNIX-like platforms such as Windows 
+(Cygwin).
+
+X11 has been the primary rendering system of UNIX and UNIX-like systems 
+since it's initial release in June of 1984 as X1. It has been the backbone 
+of many multiplatform desktop environments such as Xfce, MATE, Trinity, 
+Blackbox, CDE, Lumina, and many others.
+
+This project is not sponsored, endorsed, contributed to, or affiliated with 
+the xorg efforts of FreeDesktops, an entity of Red Hat Linux and the 
+GNOME project
 
 It doesn't matter which country you're coming from, your political views,
 your race, your sex, your age, your food menu, whether you wear boots or
