@@ -1,1 +1,5 @@
 special compat code for legacy drivers, namely Nvidia proprietary
+
+NVidia is lacking behind for at least a year and don't actually clean up
+their spaghetti code. That's why we need to keep several special compat
+functions to emulate prehistoric behaviour.
