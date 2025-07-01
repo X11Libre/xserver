@@ -1,4 +1,4 @@
-# X11Libre X Server — A Modern, Inclusive X11 Fork
+# X11Libre X Server — A Modern, Inclusive Xorg Fork
 
 Xlibre is a fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver), with 
 major code cleanups and enhanced functionality aimed at modernizing the X11 server 
