@@ -1,48 +1,42 @@
-XLibre Xserver
-===============
+# X11Libre X Server — A Modern, Inclusive X11 Fork
 
-Xlibre is a fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver)
-with lots of code cleanups and enhanced functionality aimed at modernization 
-of the X11 xserver and system with focuses on security, performance, 
-and cleaner code.
+Xlibre is a fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver),  
+with major code cleanups and enhanced functionality aimed at 
+modernizing the X11 server with a focus on **security**, 
+**performance**, and **maintainability**.
 
-This fork was necessary since problematic elements within Xorg projects 
-like big corporation are preventing any substantial work on Xorg. 
+This fork was created because problematic elements within the Xorg project,  
+including influence from large corporations, were blocking substantial progress.  
+After journalists began covering the planned Xlibre fork on June 6th, 2025,  
+freedesktop.org administrators banned the Xlibre founder’s GitLab account,  
+which led to the deletion of repositories, tickets, and merge requests.  
+Xorg has also removed prior work and contributions from [@Metux](https://github.com/metux).
 
-Right after journalists first began covering the planned fork Xlibre,
-on June 6th 2025, Freedesktop members that were also Red Hat employee 
-started banning the Xlibre founder's GitLab account on freedesktop.org: 
-which cuasing the git repo to be deleted and also xorg have remove
-any changes and activity made by Metux and this have made reat 
-publicity for XLibre by making this news loud.
+This is an entirely **independent project**, contributed to and maintained  
+by a community of independent developers — anyone who wants to modernize,  
+clean up, document, test, and advance X11 as the primary graphics and  
+rendering system for UNIX and UNIX-like operating systems such as:  
+**FreeBSD, OpenBSD, NetBSD, GNU/Linux, Illumos**, and even non-UNIX  
+platforms like **Windows (via Cygwin)**.
 
-This is an entirely independent project, contributed and maintained by 
-the community at large of independent developers and anyone wishing to 
-help modernize, cleanup, document, test, and advance X11 as the primary 
-rendering, drawing, and graphics system of UNIX and UNIX-like operating 
-systems and environments such as FreeBSD, OpenBSD, NetBSD, GNU/Linux, 
-Illumos, etc. as well as non-UNIX/UNIX-like platforms such as Windows 
-(Cygwin).
+X11 has served as the backbone of many desktop environments since its  
+initial release in **1984** (as X1), including **Xfce, MATE, Trinity,  
+Blackbox, CDE, Lumina**, and many others.
 
-X11 has been the primary rendering system of UNIX and UNIX-like systems 
-since it's initial release in June of 1984 as X1. It has been the backbone 
-of many multiplatform desktop environments such as Xfce, MATE, Trinity, 
-Blackbox, CDE, Lumina, and many others.
+This project is **not affiliated with or endorsed by** the Xorg efforts  
+of freedesktop.org, Red Hat, or GNOME.
 
-This project is not sponsored, endorsed, contributed to, or affiliated with 
-the xorg efforts of FreeDesktops, an entity of Red Hat Linux and the 
-GNOME project
+We believe in equity of opportunity, openness, and community. It doesn’t matter 
+what country you’re from, what your political views are, your race, gender, 
+age, dietary habits, fashion style, whether you’re furry, fairy, Conan, McKay, 
+a comic character, a neurodivergent contributor, or a small furry creature from 
+Alpha Centauri — **you are welcome here**.As long as you treat others with respect,
+you belong.This is a truly inclusive, community-led project where everyone gets 
+a fair opportunity to contribute and grow.
 
-It doesn't matter which country you're coming from, your political views,
-your race, your sex, your age, your food menu, whether you wear boots or
-heels, whether you're furry or fairy, Conan or McKay, comic character, a
-small furry creature from Alpha Centauri, a neurodivergent or literally 
-everybody else. Anybody who's interested in bringing X forward is welcome. 
-This is a true inclusive project!
+Together we’ll make X great again by modernizing it *and* making it for everyone.
 
-Together we'll make X great again by modernizing it and accepting everyone! 
-
-[Are we XLibre Yet ?](https://gist.github.com/probonopd/301319568a554abe7426c02eb5e19b5a)
+[Are we XLibre Yet?](https://gist.github.com/probonopd/301319568a554abe7426c02eb5e19b5a)
 
 Upgrade notice
 --------------
