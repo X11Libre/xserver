@@ -2,24 +2,30 @@ XLibre Xserver
 ===============
 
 Xlibre is a fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver)
-with lots of code cleanups and enhanced functionality for a more modern experience.
+with lots of code cleanups and enhanced functionality.
 
-This fork was necessary since problematic elements within Xorg projects like big corporation are preventing any substantial work on Xorg. 
+This fork was necessary since problematic elements within Xorg projects 
+like big corporation are preventing any substantial work on Xorg. 
 
 Right after journalists first began covering the planned fork Xlibre,
-on June 6th 2025, Freedesktop members that were also Red Hat employee started banning the Xlibre founder's
-GitLab account on freedesktop.org: deleted the git repo, tickets, merge
-requests, etc, and this have made great publicity for XLibre by making this news loud.
+on June 6th 2025, Freedesktop members that were also Red Hat employee 
+started banning the Xlibre founder's GitLab account on freedesktop.org: 
+which cuasing the git repo to be deleted and also xorg have remove
+any changes and activity made by Metux and this have made reat 
+publicity for XLibre by making this news loud.
 
-This is an community project, not at all affiliated with corporation or any
-of their subsidiaries nor any political activists
-groups, state actors, etc. It's explicitly free of any "DEI" or similar policies. That mean anybody who's treating others nicely is welcomed and accepted regardless of their identity.
+This is an community project, not at all affiliated with corporation or 
+any of their subsidiaries nor any political activists groups, state actors, 
+etc. It's explicitly free of any "DEI" or similar policies, but without
+excluding anynone. That mean anybody who's treating others nicely is 
+welcomed and accepted regardless of their identity.
 
 It doesn't matter which country you're coming from, your political views,
 your race, your sex, your age, your food menu, whether you wear boots or
 heels, whether you're furry or fairy, Conan or McKay, comic character, a
-small furry creature from Alpha Centauri, a neurodivergent or literally everybody else.
-Anybody who's interested in bringing X forward is welcome. This is a true inclusive project!
+small furry creature from Alpha Centauri, a neurodivergent or literally 
+everybody else. Anybody who's interested in bringing X forward is welcome. 
+This is a true inclusive project!
 
 Together we'll make X great again by modernizing it and accepting everyone! 
 
