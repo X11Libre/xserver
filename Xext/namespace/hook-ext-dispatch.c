@@ -39,7 +39,7 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         /* allow several operations */
         case EXTENSION_MAJOR_XKEYBOARD:
-            if (subj->ns->allowXKeyboard)
+            if (subj->ns->allowXKeyboard == ALLOW)
                 goto pass;
             switch (client->minorOp) {
                 case X_kbUseExtension:
@@ -56,11 +56,11 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         /* allow if namespace has flag set */
         case EXTENSION_MAJOR_SHAPE:
-            if (subj->ns->allowShape)
+            if (subj->ns->allowShape == ALLOW)
                 goto pass;
         break;
         case EXTENSION_MAJOR_XINPUT:
-            if (subj->ns->allowXInput)
+            if (subj->ns->allowXInput == ALLOW)
                 goto pass;
             switch (client->minorOp) {
                 case X_ListInputDevices:

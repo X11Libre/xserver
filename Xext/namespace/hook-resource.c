@@ -31,7 +31,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (param->rtype == X11_RESTYPE_WINDOW) {
         WindowPtr pWindow = (WindowPtr) param->res;
         if (param->access_mode & DixCreateAccess) {
-            if (!subj->ns->allowTransparency) {
+            if (!(subj->ns->allowTransparency == ALLOW)) {
                 pWindow->forcedBG = TRUE;
             }
         }

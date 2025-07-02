@@ -43,13 +43,13 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         /* only allowed if namespace has flag set */
         case EXTENSION_MAJOR_SHAPE:
-            if (subj->ns->allowShape)
+            if (subj->ns->allowShape == ALLOW)
                 goto pass;
             goto reject;
 
         /* only allowed if namespace has flag set */
         case EXTENSION_MAJOR_XINPUT:
-            if (subj->ns->allowXInput)
+            if (subj->ns->allowXInput == ALLOW)
                 goto pass;
             goto reject;
     }

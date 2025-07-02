@@ -10,6 +10,12 @@
 #include "include/window.h"
 #include "include/windowstr.h"
 
+enum Authlevel {
+	DENY,
+	ASK,
+	ALLOW,
+};
+
 struct auth_token {
     struct xorg_list entry;
     const char *authProto;
@@ -22,11 +28,11 @@ struct Xnamespace {
     struct xorg_list entry;
     const char *name;
     Bool builtin;
-    Bool allowMouseMotion;
-    Bool allowShape;
-    Bool allowTransparency;
-    Bool allowXInput;
-    Bool allowXKeyboard;
+    enum Authlevel allowMouseMotion;
+    enum Authlevel allowShape;
+    enum Authlevel allowTransparency;
+    enum Authlevel allowXInput;
+    enum Authlevel allowXKeyboard;
     Bool superPower;
     struct xorg_list auth_tokens;
     size_t refcnt;
