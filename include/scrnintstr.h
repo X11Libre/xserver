@@ -696,6 +696,10 @@ typedef struct _Screen {
     CallbackListPtr hookPostCreateResources;
 
     SetWindowVRRModeProcPtr SetWindowVRRMode;
+
+    /* additional screen post-close notify hooks (replaces wrapping CloseScreen)
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookPostClose;
 } ScreenRec;
 
 static inline RegionPtr
