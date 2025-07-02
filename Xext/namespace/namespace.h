@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <X11/Xmd.h>
 
+#include "extension_priv.h"
 #include "include/dixstruct.h"
 #include "include/list.h"
 #include "include/privates.h"
@@ -14,6 +15,14 @@ enum Authlevel {
 	DENY,
 	ASK,
 	ALLOW,
+};
+
+enum AuthType {
+	Mouse = EXTENSION_MAJOR_XINPUT,
+	Shape =  EXTENSION_MAJOR_SHAPE,
+	Transparency = EXTENSION_MAJOR_SHAPE,
+	XInput = EXTENSION_MAJOR_XINPUT,
+	XKeyboard = EXTENSION_MAJOR_XKEYBOARD,
 };
 
 struct auth_token {
@@ -84,5 +93,13 @@ static inline Bool streq(const char *a, const char *b)
         return FALSE;
     return (strcmp(a,b) == 0);
 }
+
+static inline Bool XnsAuthAsk(struct XnamespaceClientPriv source, enum AuthType event, enum Authlevel authlevel) {
+	//TODO
+	//Should spawn a window that knows the window's name and namespace (source), and what has been
+	//requested (event) if the authlevel is ASK
+	if (authlevel == ALLOW) return TRUE;
+	return FALSE;
+};
 
 #endif /* __XSERVER_NAMESPACE_H */
