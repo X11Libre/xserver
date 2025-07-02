@@ -19,6 +19,7 @@ fi
 [[ "$BUILD_XEPHYR" == true ]]   && check_executable "hw/kdrive/ephyr/Xephyr"
 [[ "$BUILD_XNEST" == true ]]    && check_executable "hw/xnest/Xnest"
 [[ "$BUILD_XORG" == true ]]     && check_executable "hw/xfree86/Xorg"
+[[ "$BUILD_XQUARTZ" == true ]]  && check_executable "hw/xquartz/mach-startup/Xquartz"
 [[ "$BUILD_XVFB" == true ]]     && check_executable "hw/vfb/Xvfb"
 
 exit 0

@@ -62,7 +62,7 @@ x11_bin = executable('X11.bin',
       mach_startup[3], # mach_startupUser.c
      ],
      link_with: x11_bin_libs,
-     dependencies: [xproto_dep, x11_bin_deps, mach_startup_dep],
+     dependencies: [xproto_dep, x11_dep, x11_bin_deps, mach_startup_dep],
      include_directories: [inc, '..', top_dir_inc],
      c_args: xquartz_defs,
      link_args: ['-Objc'],

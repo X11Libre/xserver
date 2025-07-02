@@ -1,5 +1,8 @@
 name: Build X servers
 
+permissions:
+    contents: read
+
 env:
     MESON_BUILDDIR:  "build"
     X11_PREFIX:      /home/runner/x11
@@ -20,7 +23,8 @@ jobs:
 
             - name: prepare build environment
               run: |
-                export MACHINE=`gcc -dumpmachine`
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
                 sudo chown root /bin/tar && sudo chmod u+s /bin/tar
 
@@ -41,11 +45,11 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
-                restore-keys: ${{ runner.os }}-x11-deps-
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: generic prereq
-              run:  sudo .github/scripts/install-prereq.sh
+              run:  .github/scripts/install-prereq.sh
 
             - name: build
               run:  .gitlab-ci/meson-build.sh
@@ -78,7 +82,8 @@ jobs:
 
             - name: prepare build environment
               run: |
-                export MACHINE=`gcc -dumpmachine`
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
                 echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
                 sudo chown root /bin/tar && sudo chmod u+s /bin/tar
 
@@ -99,11 +104,11 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
-                restore-keys: ${{ runner.os }}-x11-deps-
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: generic prereq
-              run:  sudo .github/scripts/install-prereq.sh
+              run:  .github/scripts/install-prereq.sh
 
             - name: build xserver sdk
               run:  |
@@ -117,3 +122,61 @@ jobs:
 
             - name: compile drivers
               run: .github/scripts/compile-drivers.sh
+
+    xserver-build-macos:
+        env:
+            MESON_ARGS: -Dprefix=/tmp -Dglx=false -Dxnest=false
+            X11_PREFIX: /Users/runner/x11
+            X11_BUILD_DIR: /Users/runner/build-deps
+        runs-on: macos-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: prepare build environment
+              run: |
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+
+            - name: homebrew cache
+              uses: actions/cache@v4
+              with:
+                path: /Users/runner/Library/Caches/Homebrew
+                key: ${{ runner.os }}-homebrew-cache-${{ hashFiles('.github/scripts/macos/install-pkg.sh') }}
+                restore-keys: ${{ runner.os }}-homebrew-cache-
+
+            - name: pkg install
+              run:  .github/scripts/macos/install-pkg.sh
+
+            - name: X11 prereq cache
+              uses: actions/cache@v4
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.os }}-x11-deps-
+
+            - name: generic prereq
+              run:  .github/scripts/install-prereq.sh
+
+            - name: build
+              run:  .gitlab-ci/meson-build.sh
+
+            - name: tests (may fail)
+              continue-on-error: true
+              run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs -j1 || true
+              env:
+                  XTEST_DIR:  ${{ env.X11_BUILD_DIR }}/xts
+                  PIGLIT_DIR: ${{ env.X11_BUILD_DIR }}/piglit
+
+            - name: archive build logs
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-logs-macos
+                  path: |
+                      build/meson-logs/*
+            - name: ddx build check
+              run:  .gitlab-ci/check-ddx-build.sh
+            - name: manpage check
+              run:  .gitlab-ci/manpages-check

@@ -110,6 +110,8 @@ option('sha1', type: 'combo', choices: ['libc', 'CommonCrypto', 'CryptoAPI', 'li
        description: 'SHA1 implementation')
 option('xf86-input-inputtest', type: 'boolean', value: true,
        description: 'Test input driver support on Xorg')
+option('tests', type: 'boolean', value: true,
+       description: 'Build tests for the X server on platforms that support it')
 
 option('dri1', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto', description: 'Build DRI1 extension (default: auto)')
 option('dri2', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto', description: 'Build DRI2 extension (default: auto)')

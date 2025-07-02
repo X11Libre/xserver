@@ -2,7 +2,9 @@
  *
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  */
+
 #ifndef _XORG_GEEXT_PRIV_H
+#define _XORG_GEEXT_PRIV_H
 
 #include <X11/Xproto.h>
 

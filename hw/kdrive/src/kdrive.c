@@ -91,6 +91,14 @@ const char *kdGlobalXkbLayout = NULL;
 const char *kdGlobalXkbVariant = NULL;
 const char *kdGlobalXkbOptions = NULL;
 
+
+/*
+ * Carry arguments from InitOutput through driver initialization
+ * to KdScreenInit
+ */
+
+KdOsFuncs *kdOsFuncs = NULL;
+
 void
 KdDisableScreen(ScreenPtr pScreen)
 {
@@ -515,6 +523,19 @@ KdProcessArgument(int argc, char **argv, int i)
     }
 
     return 0;
+}
+
+void
+KdOsInit(KdOsFuncs * pOsFuncs)
+{
+    kdOsFuncs = pOsFuncs;
+    if (pOsFuncs) {
+        if (serverGeneration == 1) {
+            KdDoSwitchCmd("start");
+            if (pOsFuncs->Init)
+                (*pOsFuncs->Init) ();
+        }
+    }
 }
 
 static Bool

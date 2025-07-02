@@ -460,22 +460,31 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
             vermaj = GET_ABI_MAJOR(ver);
             vermin = GET_ABI_MINOR(ver);
             if (abimaj != vermaj) {
-            /* Always warn, never error out and crash X server */
-            LogMessageVerb(X_WARNING, 0,
-                           "%s: module ABI major version (%d) "
-                           "doesn't match the server's version (%d)\n",
-                           module, abimaj, vermaj);
-        }
-         else if (abimin > vermin) {
-            /* Ditto for minor‐version */
-            LogMessageVerb(X_WARNING, 0,
-                           "%s: module ABI minor version (%d) "
-                           "is newer than the server's version (%d)\n",
-                           module, abimin, vermin);
+                MessageType errtype;
+                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
+                    errtype = X_WARNING;
+                else
+                    errtype = X_ERROR;
+                LogMessageVerb(errtype, 0, "%s: module ABI major version (%d) "
+                               "doesn't match the server's version (%d)\n",
+                               module, abimaj, vermaj);
+                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                    return FALSE;
+            }
+            else if (abimin > vermin) {
+                MessageType errtype;
+                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
+                    errtype = X_WARNING;
+                else
+                    errtype = X_ERROR;
+                LogMessageVerb(errtype, 0, "%s: module ABI minor version (%d) "
+                               "is newer than the server's version (%d)\n",
+                               module, abimin, vermin);
+                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                    return FALSE;
             }
         }
     }
-
     /* Check against requirements that the caller has specified */
     if (req) {
         if (data->majorversion != req->majorversion) {

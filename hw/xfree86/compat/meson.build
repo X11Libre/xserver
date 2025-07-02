@@ -1,6 +1,7 @@
 srcs_xorg_compat = [
     'clientexception.c',
     'log.c',
+    'nvidiabug.c',
     'ones.c',
     'xf86Helper.c',
 ]
