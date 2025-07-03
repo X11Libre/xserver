@@ -23,13 +23,13 @@ title: X11Libre
 description: >- # this means to ignore newlines until "baseurl:"
   This is the website for the X11Libre project which is an open-source initiative
   focused on providing a modern, libre implementation of the X11 protocol and related tools.
-baseurl: "/x11libre-website" # the subpath of your site, e.g. /blog
+baseurl: "/xserver/website" # the subpath of your site, e.g. /blog
 url: "https://xgui4.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 github_username: xgui4
 
 # Build settings
 #plugins:
-#  - jekyll-feed
+ # - jekyll-feed
 
 # Exclude from processing.
 # The following items will not be processed, by default.
