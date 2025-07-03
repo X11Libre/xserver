@@ -28,7 +28,7 @@ if build_xorg
                  install_dir: join_paths(get_option('datadir'), 'X11/xorg.conf.d'))
 endif
 
-libxserver_config = static_library('libxserver_config',
+libxserver_config = static_library('xserver_config',
     srcs_config,
     include_directories: inc,
     dependencies: config_dep,

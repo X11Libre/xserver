@@ -6,7 +6,7 @@ srcs_miext_rootless = [
         'rootlessWindow.c',
 ]
 
-libxserver_miext_rootless = static_library('libxserver_miext_rootless',
+libxserver_miext_rootless = static_library('xserver_miext_rootless',
         srcs_miext_rootless,
         include_directories: inc,
         dependencies: common_dep,
