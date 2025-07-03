@@ -1,0 +1,176 @@
+img {
+   width: 5%;
+   height: auto;
+}
+
+/* link */
+a:link,
+a:visited,
+th a:visited {
+   color: #00c3ff;
+}
+
+a:hover,
+a:focus,
+a:visited:hover {
+   color: #78b2c3;
+}
+
+
+/* general layout */
+main {
+    margin: 20px 20px 20px 20px;
+    min-height: 100vh;
+}
+
+#main-content {
+    width: 97%;
+    margin: 20px 20px 20px 20px;
+    text-align: left;
+}
+
+.install ul {
+    margin-left: 195px;
+}
+
+#content-left-wrapper {
+    float: left;
+    width: 100%; /* req to keep content above sidebar in source code */
+}
+
+#content-left {
+    margin: 0 340px 0 0;
+}
+
+#content-sep {
+    padding-top: 360px;
+}
+
+#content-right {
+    float: left;
+    width: 100%;
+    /* margin-left: -300px; */
+    background-color: #000000;
+    border-top: 1px solid #ffffff;
+}
+
+div.nav-border {
+    margin-bottom: 1.5em;
+    padding: 0.65em;
+}
+
+/* home: sidebar */
+#nav-sidebar ul {
+    list-style: none;
+    margin: 0.5em 0 0.5em 1em;
+    padding: 0;
+}
+
+/* highlight Wiki link in navbar */
+.navbar-nav > li:nth-child(5) {
+    text-decoration: underline;
+    text-decoration-color: #78b2c3;
+}
+
+.right {
+	float: right;
+	margin: 0;
+	padding: 0;
+}
+
+code {
+  font-size: 105%;
+  color: #e0e6ec;
+  background-color: #0f141c;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+main pre {
+   font-family: monospace, monospace;
+   margin: 1em;
+   border-bottom: 1px solid #31373d;
+   border-radius: 3px;
+}
+
+main pre code {
+    padding: 20px 20px 20px 30px;
+    display: block;
+    overflow: auto;
+    box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 0px, rgba(0, 0, 0, 0.8) 0px 1px 7px 0px inset;
+}
+
+div.quicklink {
+   height: 150vh;
+   position: sticky;
+   z-index: 1;
+   top: 0;
+   left: 0;
+   background-color: #111;
+	float: left;
+	margin: 0 1px 0 0;
+	padding: 20px 10px;
+	border-right: 1px dotted #ccc;
+	width: 200px;
+   overflow: auto;
+   margin-right: 30px;
+}
+
+/* responsive */
+@media only screen and (max-width: 768px) {
+   #content-right {
+      width: 100%;
+      margin-left: 0px;
+   }
+
+   #content-left {
+      margin: 0 0 0 0;
+   }
+
+   div.nav-border {
+      border-left: 0px;
+   }
+}
+
+@media only screen and (max-width: 600px) {
+   #header {
+      font-size: 6vw;
+   }
+
+}
+
+#driver {
+   border-collapse: collapse;
+   width: 80%;
+}
+
+th {
+   text-align: center;
+   height:45px;
+}
+
+tr:nth-child(even) {
+   background-color: #313840;
+}
+
+td {
+   height: 40px;
+   padding-left: 7px;
+}
+
+th, td {
+   border: 1px solid white;
+}
+
+.container {
+   margin: 10px auto;
+   max-width: 600px;
+   text-align: center;
+}
+h1 {
+   margin: 30px 0;
+   font-size: 4em;
+   line-height: 1;
+   letter-spacing: -1px;
+}
+
