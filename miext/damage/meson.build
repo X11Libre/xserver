@@ -7,7 +7,7 @@ hdrs_miext_damage = [
 	'damagestr.h',
 ]
 
-libxserver_miext_damage = static_library('libxserver_miext_damage',
+libxserver_miext_damage = static_library('xserver_miext_damage',
 	srcs_miext_damage,
 	include_directories: inc,
 	dependencies: common_dep,

@@ -3,7 +3,7 @@ srcs_record = [
 	'set.c',
 ]
 
-libxserver_record = static_library('libxserver_record',
+libxserver_record = static_library('xserver_record',
 	srcs_record,
 	include_directories: inc,
 	dependencies: common_dep,

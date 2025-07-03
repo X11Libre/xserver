@@ -39,7 +39,12 @@ _X_EXPORT void xf86MsgVerb(MessageType type, int verb, const char *format, ...)
 void
 xf86MsgVerb(MessageType type, int verb, const char *format, ...)
 {
-    xf86NVidiaBugInternalFunc("xf86MsgVerb()");
+    static char reportxf86MsgVerb = 1;
+
+    if (reportxf86MsgVerb) {
+        xf86NVidiaBugInternalFunc("xf86MsgVerb()");
+        reportxf86MsgVerb = 0;
+    }
 
     va_list ap;
     va_start(ap, format);

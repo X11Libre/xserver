@@ -128,13 +128,10 @@ __glXSendReply(ClientPtr client, const void *data, size_t elements,
         .retval = retval,
     };
 
-    /* It is faster on almost always every architecture to just copy the 8
-     * bytes, even when not necessary, than check to see of the value of
-     * elements requires it.  Copying the data when not needed will do no
-     * harm.
-     */
-
-    (void) memcpy(&reply.pad3, data, 8);
+    /* Single element goes in reply padding; don't leak uninitialized data. */
+    if (elements == 1) {
+        (void) memcpy(&reply.pad3, data, element_size);
+    }
     WriteToClient(client, sizeof(xGLXSingleReply), &reply);
 
     if (reply_ints != 0) {
@@ -176,13 +173,10 @@ __glXSendReplySwap(ClientPtr client, const void *data, size_t elements,
         .retval = bswap_32(retval),
     };
 
-    /* It is faster on almost always every architecture to just copy the 8
-     * bytes, even when not necessary, than check to see of the value of
-     * elements requires it.  Copying the data when not needed will do no
-     * harm.
-     */
-
-    (void) memcpy(&reply.pad3, data, 8);
+    /* Single element goes in reply padding; don't leak uninitialized data. */
+    if (elements == 1) {
+        (void) memcpy(&reply.pad3, data, element_size);
+    }
     WriteToClient(client, sizeof(xGLXSingleReply), &reply);
 
     if (reply_ints != 0) {

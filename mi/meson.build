@@ -40,7 +40,7 @@ hdrs_mi = [
   'mizerarc.h',
 ]
 
-libxserver_mi = static_library('libxserver_mi',
+libxserver_mi = static_library('xserver_mi',
     srcs_mi,
     include_directories: inc,
     dependencies: [
