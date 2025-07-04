@@ -22,12 +22,12 @@
  *
  */
 
+#ifndef INPUTUTILS_H
+#define INPUTUTILS_H
+
 #ifdef HAVE_DIX_CONFIG_H
 #include "dix-config.h"
 #endif
-
-#ifndef INPUTUTILS_H
-#define INPUTUTILS_H
 
 #include "input.h"
 #include "eventstr.h"

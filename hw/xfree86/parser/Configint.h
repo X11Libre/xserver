@@ -57,12 +57,12 @@
  * they should not be visible outside of the parser.
  */
 
+#ifndef _Configint_h_
+#define _Configint_h_
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _Configint_h_
-#define _Configint_h_
 
 #include <stdio.h>
 #include <string.h>

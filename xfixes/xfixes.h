@@ -20,12 +20,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifndef _XFIXES_H_
+#define _XFIXES_H_
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _XFIXES_H_
-#define _XFIXES_H_
 
 #include "resource.h"
 

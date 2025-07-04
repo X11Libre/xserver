@@ -23,12 +23,12 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifndef CHGDCTL_H
+#define CHGDCTL_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef CHGDCTL_H
-#define CHGDCTL_H 1
 
 int SProcXChangeDeviceControl(ClientPtr /* client */
     );

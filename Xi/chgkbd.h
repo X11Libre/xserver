@@ -23,12 +23,12 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifndef CHGKBD_H
+#define CHGKBD_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef CHGKBD_H
-#define CHGKBD_H 1
 
 int ProcXChangeKeyboardDevice(ClientPtr /* client */
     );

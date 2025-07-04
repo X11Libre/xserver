@@ -23,12 +23,12 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ********************************************************/
 
+#ifndef GTMOTION_H
+#define GTMOTION_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef GTMOTION_H
-#define GTMOTION_H 1
 
 int SProcXGetDeviceMotionEvents(ClientPtr       /* client */
     );

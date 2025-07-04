@@ -23,12 +23,12 @@
  * Author: Peter Hutterer
  */
 
+#ifndef XIGRABDEV_H
+#define XIGRABDEV_H 1
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef XIGRABDEV_H
-#define XIGRABDEV_H 1
 
 int ProcXIGrabDevice(ClientPtr client);
 int SProcXIGrabDevice(ClientPtr client);
