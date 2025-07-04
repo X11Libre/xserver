@@ -2,6 +2,8 @@ option('xorg', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable Xorg X Server')
 option('xephyr', type: 'boolean', value: false,
        description: 'Enable Xephyr nested X server')
+option('xfbdev', type: 'boolean', value: false,
+       description: 'Enable the kdrive framebuffer device server')
 option('glamor', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable glamor (default yes for Xorg builds)')
 option('xnest', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
@@ -12,6 +14,15 @@ option('xwin', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable XWin X server')
 option('xquartz', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable Xquartz X server')
+
+option('kdrive_kbd', type: 'boolean', value: true,
+       description: 'Build kbd driver for kdrive')
+option('kdrive_mouse', type: 'boolean', value: true,
+       description: 'Build mouse driver for kdrive')
+option('kdrive_evdev', type: 'boolean', value: true,
+       description: 'Build evdev driver for kdrive')
+option('kdrive_tslib', type: 'boolean', value: false,
+       description: 'Build kdrive tslib touchscreen support')
 
 
 option('builder_addr', type: 'string', description: 'Builder address', value: 'xlibre@freelists.org')
