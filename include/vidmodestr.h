@@ -1,9 +1,7 @@
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _VIDMODEPROC_H_
 #define _VIDMODEPROC_H_
+
+#include <dix-config.h>
 
 #include "displaymode.h"
 

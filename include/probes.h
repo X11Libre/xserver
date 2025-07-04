@@ -24,9 +24,7 @@
 #ifndef XORG_PROBES_H
 #define XORG_PROBES_H
 
-#ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
-#endif
 
 /* definitions needed to include Dtrace probes in a source file */
 
