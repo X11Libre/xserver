@@ -37,7 +37,7 @@
 
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#elif HAVE_DIX_CONFIG_H
+#else
 #include <dix-config.h>
 #endif
 
