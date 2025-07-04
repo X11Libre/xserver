@@ -4,7 +4,7 @@
 
 The X11Libre project takes security seriously. If you discover any vulnerabilities, please report them responsibly.
 
-### How to Report a Security Vulnerabilitiy
+### How to Report a Security Vulnerability
 
 Send a detailed email to one or more of the following contacts:
 - info@metux.net
