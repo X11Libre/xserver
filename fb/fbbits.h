@@ -24,14 +24,9 @@
  * This file defines functions for drawing some primitives using
  * underlying datatypes instead of masks
  */
+#include "fb/fb_priv.h"
 
 #define isClipped(c,ul,lr)  (((c) | ((c) - (ul)) | ((lr) - (c))) & 0x80008000)
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include "fb/fb_priv.h"
 
 #define __FbMaskBits(x,w,l,n,r) { \
     n = (w); \
