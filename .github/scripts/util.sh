@@ -8,7 +8,12 @@ clone_source() {
 
     if [ ! -f $pkgname/.git/config ]; then
         echo "need to clone $pkgname"
-        git clone $url $pkgname --branch=$ref --depth 1
+        # Using multiple commands to support revisions in $ref
+        # TODO: Switch to `git clone --revision=$ref ...` when using Git 2.49+
+        git init $pkgname
+        git -C $pkgname remote add origin $url
+        git -C $pkgname fetch origin $ref --depth 1
+        git -C $pkgname checkout FETCH_HEAD
     else
         echo "already cloned $pkgname"
     fi
