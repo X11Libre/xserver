@@ -532,7 +532,7 @@ QuartzCopyDisplayIDs(ScreenPtr pScreen,
     free(pQuartzScreen->displayIDs);
     if (displayCount) {
         size_t size = displayCount * sizeof(CGDirectDisplayID);
-        pQuartzScreen->displayIDs = malloc(size);
+        pQuartzScreen->displayIDs = calloc(1, size);
         memcpy(pQuartzScreen->displayIDs, displayIDs, size);
     }
     else {

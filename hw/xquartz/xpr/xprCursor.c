@@ -93,7 +93,7 @@ load_cursor(CursorPtr src, int screen)
         const uint32_t *be_data = (uint32_t *)src->bits->argb;
         unsigned i;
         rowbytes = src->bits->width * sizeof(CARD32);
-        data = malloc(rowbytes * src->bits->height);
+        data = calloc(rowbytes, src->bits->height);
         free_data = TRUE;
         if (!data) {
             FatalError("Failed to allocate memory in %s\n", __func__);
@@ -119,7 +119,7 @@ load_cursor(CursorPtr src, int screen)
 
         /* round up to 8 pixel boundary so we can convert whole bytes */
         rowbytes = ((src->bits->width * 4) + 31) & ~31;
-        data = malloc(rowbytes * src->bits->height);
+        data = calloc(rowbytes, src->bits->height);
         free_data = TRUE;
         if (!data) {
             FatalError("Failed to allocate memory in %s\n", __func__);
