@@ -64,8 +64,7 @@ font-util,\
 khronos-opengl-registry,\
 python38-lxml,\
 xkbcomp-devel,\
-xkeyboard-config,\
-xtrans"
+xkeyboard-config"
 - echo Install done
 - "%CYGWIN_ROOT%\\%SETUP% -qnNdO -R %CYGWIN_ROOT% -s %CYGWIN_MIRROR% -l %CACHE% -g"
 cache:

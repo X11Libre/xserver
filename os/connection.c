@@ -67,11 +67,8 @@ SOFTWARE.
 #endif
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#define XSERV_t
-#define TRANS_SERVER
-#define TRANS_REOPEN
-#include <X11/Xtrans/Xtrans.h>
-#include <X11/Xtrans/Xtransint.h>
+#include "os/Xtrans.h"
+#include "os/Xtransint.h"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -147,7 +144,7 @@ set_poll_clients(void);
 
 static XtransConnInfo *ListenTransConns = NULL;
 static int *ListenTransFds = NULL;
-static int ListenTransCount;
+static uint32_t ListenTransCount = 0;
 
 static void ErrorConnMax(XtransConnInfo /* trans_conn */ );
 
@@ -1061,7 +1058,7 @@ ListenOnOpenFD(int fd, int noxauth)
     ListenTransCount++;
 }
 
-/* based on TRANS(SocketUNIXAccept) (XtransConnInfo ciptr, int *status) */
+/* based on _XSERVTransSocketUNIXAccept (XtransConnInfo ciptr, int *status) */
 Bool
 AddClientOnOpenFD(int fd)
 {
