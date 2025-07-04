@@ -417,7 +417,10 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
 {
     int vercode[4];
     long ver = data->xf86version;
-
+    /* Only ignore ABI mismatches for NVIDIA proprietary driver */
+    if (data->vendor && strstr(data->vendor, "NVIDIA") != NULL) {
+        LoaderOptions |= LDR_OPT_ABI_MISMATCH_NONFATAL;
+    }
     LogMessage(X_INFO, "Module %s: vendor=\"%s\"\n",
                data->modname ? data->modname : "UNKNOWN!",
                data->vendor ? data->vendor : "UNKNOWN!");
@@ -482,7 +485,6 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
             }
         }
     }
-
     /* Check against requirements that the caller has specified */
     if (req) {
         if (data->majorversion != req->majorversion) {
