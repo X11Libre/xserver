@@ -551,7 +551,7 @@ __glXAquaScreenCreateDrawable(ClientPtr client,
 {
     __GLXAquaDrawable *glxPriv;
 
-    glxPriv = malloc(sizeof *glxPriv);
+    glxPriv = calloc(1, sizeof *glxPriv);
 
     if (glxPriv == NULL)
         return NULL;

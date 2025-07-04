@@ -189,7 +189,6 @@ DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
     int dpi;
     static int foundIndex = 0;
     Bool ret;
-    DarwinFramebufferPtr dfb;
 
     if (!dixRegisterPrivateKey(&darwinScreenKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
@@ -203,7 +202,7 @@ DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
     }
 
     // allocate space for private per screen storage
-    dfb = malloc(sizeof(DarwinFramebufferRec));
+    DarwinFramebufferPtr  dfb = calloc(1, sizeof(DarwinFramebufferRec));
 
     // SCREEN_PRIV(pScreen) = dfb;
     dixSetPrivate(&pScreen->devPrivates, darwinScreenKey, dfb);
