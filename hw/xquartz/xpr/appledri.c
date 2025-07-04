@@ -394,7 +394,6 @@ SNotifyEvent(xAppleDRINotifyEvent *from,
 static int
 SProcAppleDRIQueryVersion(register ClientPtr client)
 {
-    REQUEST(xAppleDRIQueryVersionReq);
     return ProcAppleDRIQueryVersion(client);
 }
 
