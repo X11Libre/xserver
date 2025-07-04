@@ -1,8 +1,6 @@
 #ifndef _DISMODEPROC_H_
 #define _DISMODEPROC_H_
 
-#include <dix-config.h>
-
 #include "scrnintstr.h"
 
 #define MAXCLOCKS   128
