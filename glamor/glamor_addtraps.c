@@ -27,6 +27,8 @@
  */
 #include <dix-config.h>
 
+#include "fb/fbpict.h"
+
 #include "glamor_priv.h"
 
 void
