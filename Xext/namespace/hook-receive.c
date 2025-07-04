@@ -35,7 +35,7 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                 if (gev->extension == EXTENSION_MAJOR_XINPUT) {
                     switch (gev->evtype) {
                         case XI_RawMotion:
-                            if ((!subj->ns->allowMouseMotion) || !isRootWin(param->pWin))
+                            if (!XnsAuthAsk(*subj, Mouse, subj->ns->allowMouseMotion) || !isRootWin(param->pWin))
                                 goto reject;
                             continue;
                         case XI_RawKeyPress:
