@@ -1,16 +1,16 @@
 - name: Home
   page: /
-  link: /x11libre-website/
-  link: /x11libre-website/index.html
+  link: /xlibre/
+  link: /xlibre/index.html
 - name: About
   page: /about.html
-  link: /x11libre-website/about.html
+  link: /xlibre/about.html
 - name: Download
   page: /download.html
-  link: /x11libre-website/download.html
+  link: /xlibre/download.html
 - name: FAQ & Privacy
   page: /faq.html
-  link: /x11libre-website/faq.html
+  link: /xlibre/faq.html
 - name: Wiki
   page: /wiki.html
-  link: /x11libre-website/wiki.html
+  link: /xlibre/wiki.html
