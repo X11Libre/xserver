@@ -1,9 +1,7 @@
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _GLX_screens_h_
 #define _GLX_screens_h_
+
+#include <dix-config.h>
 
 /*
  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
