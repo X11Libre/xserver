@@ -44,15 +44,12 @@
 #if defined(IN_MINI_GLX)
 #include <stdlib.h>
 #include <string.h>
-#define _mesa_free(m)   free(m)
 #else
 #ifdef XFree86Server
 #include <os.h>
 #include <string.h>
-#define _mesa_free(m)   free(m)
 #else
 #include <X11/Xlibint.h>
-#define _mesa_free(m)   free(m)
 #endif  /* XFree86Server */
 #endif /* !defined(IN_MINI_GLX) */
 
@@ -469,7 +466,7 @@ _gl_context_modes_destroy(__GLcontextModes * modes)
     while (modes != NULL) {
         __GLcontextModes * const next = modes->next;
 
-        _mesa_free(modes);
+        free(modes);
         modes = next;
     }
 }
