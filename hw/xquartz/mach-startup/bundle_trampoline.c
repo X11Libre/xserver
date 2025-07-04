@@ -50,7 +50,7 @@
  * needs and simply execs the startup script which then execs the main binary.
  */
 
-static char *executable_path() {
+static char *executable_path(void) {
     uint32_t bufsize = PATH_MAX;
     char *buf = calloc(1, bufsize);
 
