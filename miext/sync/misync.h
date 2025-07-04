@@ -20,13 +20,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _MISYNC_H_
 #define _MISYNC_H_
+
+#include <dix-config.h>
 
 typedef struct _SyncObject SyncObject;
 typedef struct _SyncFence SyncFence;

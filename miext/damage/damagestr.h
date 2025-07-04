@@ -19,13 +19,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _DAMAGESTR_H_
 #define _DAMAGESTR_H_
+
+#include <dix-config.h>
 
 #include "damage.h"
 #include "gcstruct.h"
