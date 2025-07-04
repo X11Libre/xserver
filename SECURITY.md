@@ -34,7 +34,7 @@ Include the following information:
 
 Please allow us ample time to validate and patch the issue before disclosing it publicly.
 
-Feel free to privately message staff over our offical Matrix or Telegram if the issue is of extreme merit and needs an immediate solution. 
+Feel free to privately message staff over our official Matrix or Telegram if the issue is of extreme merit and needs an immediate solution. 
 
 ##  Supported Versions
 
