@@ -1,6 +1,12 @@
+:root, 
+body {
+   scroll-behavior: smooth;
+}
+
 img {
-   width: 5%;
+   /* width: 5%; */
    height: auto;
+   margin-right: 0.5rem;
 }
 
 /* link */

@@ -4,3 +4,45 @@ _site
 .jekyll-metadata
 vendor
 Gemfile.lock
+
+
+# Ignore bundler install path
+/vendor/
+
+# Ignore site output
+/_site/
+
+# Ignore optional cache/log/temp
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+.log/
+*.log
+tmp/
+
+# Ignore Ruby stuff
+*.gem
+*.rbc
+.bundle/
+config.yml
+.yardoc
+_yardoc/
+.yardwarns
+coverage/
+InstalledFiles
+pkg/
+
+# Ignore OS + editor junk
+.DS_Store
+*.swp
+*.swo
+*.bak
+*.tmp
+*.~*
+*.kate-swp
+.idea/
+.vscode/
+*.code-workspace
+
+# Ignore custom local files
+.env
