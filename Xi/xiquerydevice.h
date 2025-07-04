@@ -23,13 +23,10 @@
  * Authors: Peter Hutterer
  *
  */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef QUERYDEV_H
 #define QUERYDEV_H 1
+
+#include <dix-config.h>
 
 #include <X11/extensions/XI2proto.h>
 

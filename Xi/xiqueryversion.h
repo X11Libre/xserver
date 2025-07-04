@@ -23,15 +23,12 @@
  * Authors: Peter Hutterer
  *
  */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
-#include <X11/extensions/XI2proto.h>
-
 #ifndef QUERYVERSION_H
 #define QUERYVERSION_H 1
+
+#include <dix-config.h>
+
+#include <X11/extensions/XI2proto.h>
 
 int SProcXIQueryVersion(ClientPtr client);
 int ProcXIQueryVersion(ClientPtr client);
