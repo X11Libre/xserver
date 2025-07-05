@@ -154,6 +154,7 @@ static void KdAddFd(int fd, int i)
     KdNonBlockFd(fd);
     InputThreadRegisterDev(fd, KdNotifyFd, (void *) (intptr_t) i);
 #ifdef KDRIVE_KBD
+/*  AddEnabledDevice(fd); */
     memset(&act, '\0', sizeof act);
     act.sa_handler = KdSigio;
 
@@ -590,6 +591,20 @@ KdComputePointerMatrix(KdPointerMatrix * m, Rotation randr, int width,
             if (m->matrix[i][j] < 0)
                 m->matrix[i][2] = size[j] - 1;
     }
+}
+
+void
+KdScreenToPointerCoords(int *x, int *y)
+{
+    int (*m)[3] = kdPointerMatrix.matrix;
+    int div = m[0][1] * m[1][0] - m[1][1] * m[0][0];
+    int sx = *x;
+    int sy = *y;
+
+    *x = (m[0][1] * sy - m[0][1] * m[1][2] + m[1][1] * m[0][2] -
+          m[1][1] * sx) / div;
+    *y = (m[1][0] * sx + m[0][0] * m[1][2] - m[1][0] * m[0][2] -
+          m[0][0] * sy) / div;
 }
 
 static void
@@ -1738,6 +1753,36 @@ static void
 KdReceiveTimeout(KdPointerInfo * pi)
 {
     KdRunMouseMachine(pi, timeout, 0, 0, 0, 0, 0, 0);
+}
+
+void
+KdReleaseAllKeys(void)
+{
+#if 0
+    int key;
+    KdKeyboardInfo *ki;
+
+#ifndef KDRIVE_KBD
+    input_lock();
+#else
+    KdBlockSigio();
+#endif
+
+    for (ki = kdKeyboards; ki; ki = ki->next) {
+        for (key = ki->keySyms.minKeyCode; key < ki->keySyms.maxKeyCode; key++) {
+            if (key_is_down(ki->dixdev, key, KEY_POSTED | KEY_PROCESSED)) {
+                KdHandleKeyboardEvent(ki, KeyRelease, key);
+                QueueGetKeyboardEvents(ki->dixdev, KeyRelease, key, NULL);
+            }
+        }
+    }
+
+#ifndef KDRIVE_KBD
+    input_unlock();
+#else
+    KdUnblockSigio();
+#endif
+#endif
 }
 
 static void

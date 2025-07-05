@@ -184,9 +184,65 @@ KdEnableScreen(ScreenPtr pScreen)
 }
 
 void
-ddxGiveUp(enum ExitCode error)
+KdResume(void)
+{
+    KdCardInfo *card;
+    KdScreenInfo *screen;
+
+    if (kdEnabled) {
+        KdDoSwitchCmd("resume");
+        for (card = kdCardInfo; card; card = card->next) {
+            if (card->cfuncs->preserve)
+                (*card->cfuncs->preserve) (card);
+            for (screen = card->screenList; screen; screen = screen->next)
+                if (screen->mynum == card->selected && screen->pScreen)
+                    KdEnableScreen(screen->pScreen);
+        }
+        KdEnableInput();
+        KdReleaseAllKeys();
+    }
+}
+
+void
+KdEnableScreens(void)
+{
+    if (!kdEnabled) {
+        kdEnabled = TRUE;
+        if (kdOsFuncs->Enable)
+            (*kdOsFuncs->Enable) ();
+    }
+    KdResume();
+}
+
+void
+KdProcessSwitch(void)
+{
+    if (kdEnabled)
+        KdDisableScreens();
+    else
+        KdEnableScreens();
+}
+
+static void
+AbortDDX(enum ExitCode error)
 {
     KdDisableScreens();
+    if (kdOsFuncs) {
+        if (kdEnabled && kdOsFuncs->Disable)
+            (*kdOsFuncs->Disable) ();
+        if (kdOsFuncs->Fini)
+            (*kdOsFuncs->Fini) ();
+        KdDoSwitchCmd("stop");
+    }
+
+    if (kdCaughtSignal)
+        OsAbort();
+}
+
+void
+ddxGiveUp(enum ExitCode error)
+{
+    AbortDDX(error);
 }
 
 Bool kdDumbDriver;
@@ -938,6 +994,20 @@ KdAddScreen(ScreenInfo * pScreenInfo,
 
     AddScreen(KdScreenInit, argc, argv);
 }
+
+#if 0                           /* This function is not used currently */
+
+int
+KdDepthToFb(ScreenPtr pScreen, int depth)
+{
+    KdScreenPriv(pScreen);
+
+    for (fb = 0; fb <= KD_MAX_FB && pScreenPriv->screen->fb.frameBuffer; fb++)
+        if (pScreenPriv->screen->fb.depth == depth)
+            return fb;
+}
+
+#endif
 
 void
 KdInitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
