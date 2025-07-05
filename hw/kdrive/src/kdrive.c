@@ -79,13 +79,18 @@ KdDepths kdDepths[] = {
 DevPrivateKeyRec kdScreenPrivateKeyRec;
 x_server_generation_t kdGeneration;
 
+Bool kdVideoTest;
+unsigned long kdVideoTestTime;
 Bool kdEmulateMiddleButton;
 Bool kdRawPointerCoordinates;
 Bool kdDisableZaphod;
+Bool kdAllowZap;
 Bool kdEnabled;
-static int kdSubpixelOrder;
+int kdSubpixelOrder;
+int kdVirtualTerminal = -1;
+Bool kdSwitchPending;
 char *kdSwitchCmd;
-static DDXPointRec kdOrigin;
+DDXPointRec kdOrigin;
 Bool kdHasPointer = FALSE;
 Bool kdHasKbd = FALSE;
 const char *kdGlobalXkbRules = NULL;
@@ -94,6 +99,7 @@ const char *kdGlobalXkbLayout = NULL;
 const char *kdGlobalXkbVariant = NULL;
 const char *kdGlobalXkbOptions = NULL;
 
+static Bool kdCaughtSignal = FALSE;
 
 /*
  * Carry arguments from InitOutput through driver initialization
@@ -183,8 +189,8 @@ ddxGiveUp(enum ExitCode error)
     KdDisableScreens();
 }
 
-static Bool kdDumbDriver;
-static Bool kdSoftCursor;
+Bool kdDumbDriver;
+Bool kdSoftCursor;
 
 const char *
 KdParseFindNext(const char *cur, const char *delim, char *save, char *last)

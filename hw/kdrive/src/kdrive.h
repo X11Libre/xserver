@@ -338,6 +338,7 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 extern x_server_generation_t kdGeneration;
 extern Bool kdEnabled;
+extern Bool kdSwitchPending;
 extern Bool kdEmulateMiddleButton;
 extern Bool kdDisableZaphod;
 extern char *kdSwitchCmd;
@@ -348,6 +349,9 @@ extern char *kdSwitchCmd;
  * Initialized via KdOSInit()
  */
 extern const KdOsFuncs *kdOsFuncs;
+
+extern Bool kdAllowZap;
+extern int kdVirtualTerminal;
 
 #define KdGetScreenPriv(pScreen) ((KdPrivScreenPtr) \
     dixLookupPrivate(&(pScreen)->devPrivates, kdScreenPrivateKey))
