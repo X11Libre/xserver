@@ -290,6 +290,32 @@ typedef struct _KdOsFuncs {
     void (*Bell) (int, int, int); /* if not NULL called instead of the keyboard driver's function */
 } KdOsFuncs;
 
+typedef enum _KdSyncPolarity {
+    KdSyncNegative, KdSyncPositive
+} KdSyncPolarity;
+
+typedef struct _KdMonitorTiming {
+    /* label */
+    int horizontal;
+    int vertical;
+    int rate;
+    /* pixel clock */
+    int clock;                  /* in KHz */
+    /* horizontal timing */
+    int hfp;                    /* front porch */
+    int hbp;                    /* back porch */
+    int hblank;                 /* blanking */
+    KdSyncPolarity hpol;        /* polarity */
+    /* vertical timing */
+    int vfp;                    /* front porch */
+    int vbp;                    /* back porch */
+    int vblank;                 /* blanking */
+    KdSyncPolarity vpol;        /* polarity */
+} KdMonitorTiming;
+
+extern const KdMonitorTiming kdMonitorTimings[];
+extern const int kdNumMonitorTimings;
+
 typedef struct _KdPointerMatrix {
     int matrix[2][3];
 } KdPointerMatrix;
@@ -481,6 +507,31 @@ void
  KdEnableInput(void);
 
 void KdRingBell(KdKeyboardInfo * ki, int volume, int pitch, int duration);
+
+/* kmode.c */
+const KdMonitorTiming *KdFindMode(KdScreenInfo * screen,
+                                  Bool (*supported) (KdScreenInfo *,
+                                                     const KdMonitorTiming *));
+
+Bool
+
+KdTuneMode(KdScreenInfo * screen,
+           Bool (*usable) (KdScreenInfo *),
+           Bool (*supported) (KdScreenInfo *, const KdMonitorTiming *));
+
+#ifdef RANDR
+Bool
+
+KdRandRGetInfo(ScreenPtr pScreen,
+               int randr,
+               Bool (*supported) (ScreenPtr pScreen, const KdMonitorTiming *));
+
+const KdMonitorTiming *KdRandRGetTiming(ScreenPtr pScreen,
+                                        Bool (*supported) (ScreenPtr pScreen,
+                                                           const KdMonitorTiming
+                                                           *), int rate,
+                                        RRScreenSizePtr pSize);
+#endif
 
 /* kshadow.c */
 Bool
