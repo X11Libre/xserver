@@ -38,7 +38,6 @@
 extern Window EphyrPreExistingHostWin;
 extern Bool EphyrWantGrayScale;
 extern Bool EphyrWantResize;
-extern Bool EphyrWantNoHostGrab;
 extern Bool kdHasPointer;
 extern Bool kdHasKbd;
 extern Bool ephyr_glamor, ephyr_glamor_gles2, ephyr_glamor_skip_present;
@@ -144,6 +143,8 @@ ddxUseMsg(void)
     ErrorF
         ("-title [title]       set the window title in the WM_NAME property\n");
     ErrorF("-no-host-grab        Disable grabbing the keyboard and mouse.\n");
+    ErrorF
+        ("-host-grab [keys]    set shortcut to grab the keyboard and mouse (default: ctrl+shift)\n");
     ErrorF("\n");
 }
 
@@ -343,8 +344,20 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
     /* end Xnest compat */
     else if (!strcmp(argv[i], "-no-host-grab")) {
-        EphyrWantNoHostGrab = 1;
+        ephyrSetGrabShortcut(NULL);
         return 1;
+    }
+    else if (!strcmp(argv[i], "-host-grab")) {
+        if (i + 1 >= argc) {
+            ErrorF(
+                "ephyr: -host-grab requires an argument e.g. ctrl+shift+x\n");
+            exit(1);
+        }
+        else if (!ephyrSetGrabShortcut(argv[i + 1])) {
+            /* specific error message is printed in ephyrSetGrabShortcut */
+            exit(1);
+        }
+        return 2;
     }
     else if (!strcmp(argv[i], "-sharevts") ||
              !strcmp(argv[i], "-novtswitch")) {
@@ -357,6 +370,23 @@ ddxProcessArgument(int argc, char **argv, int i)
     return KdProcessArgument(argc, argv, i);
 }
 
+static int
+EphyrInit(void)
+{
+    /*
+     * make sure at least one screen
+     * has been added to the system.
+     */
+    if (!KdCardInfoLast()) {
+        processScreenArg("640x480", NULL);
+    }
+    return hostx_init();
+}
+
+KdOsFuncs EphyrOsFuncs = {
+    .Init = EphyrInit,
+};
+
 void
 OsVendorInit(void)
 {
@@ -368,32 +398,23 @@ OsVendorInit(void)
     if (hostx_want_host_cursor())
         ephyrFuncs.initCursor = &ephyrCursorInit;
 
-    if (serverGeneration == 1) {
-        if (!KdCardInfoLast()) {
-            processScreenArg("640x480", NULL);
-        }
-        hostx_init();
-    }
+    KdOsInit(&EphyrOsFuncs);
 }
 
 KdCardFuncs ephyrFuncs = {
-    ephyrCardInit,              /* cardinit */
-    ephyrScreenInitialize,      /* scrinit */
-    ephyrInitScreen,            /* initScreen */
-    ephyrFinishInitScreen,      /* finishInitScreen */
-    ephyrCreateResources,       /* createRes */
-    ephyrScreenFini,            /* scrfini */
-    ephyrCardFini,              /* cardfini */
+    .cardinit         = ephyrCardInit,
+    .scrinit          = ephyrScreenInitialize,
+    .initScreen       = ephyrInitScreen,
+    .finishInitScreen = ephyrFinishInitScreen,
+    .createRes        = ephyrCreateResources,
 
-    0,                          /* initCursor */
+    .scrfini          = ephyrScreenFini,
+    .cardfini         = ephyrCardFini,
 
-    0,                          /* initAccel */
-    0,                          /* enableAccel */
-    0,                          /* disableAccel */
-    0,                          /* finiAccel */
+    /* no cursor or accel funcs here */
 
-    ephyrGetColors,             /* getColors */
-    ephyrPutColors,             /* putColors */
+    .getColors        = ephyrGetColors,
+    .putColors        = ephyrPutColors,
 
-    ephyrCloseScreen,           /* closeScreen */
+    .closeScreen      = ephyrCloseScreen,
 };

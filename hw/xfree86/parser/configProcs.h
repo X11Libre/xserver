@@ -29,6 +29,9 @@
 
 /* exported functions are/were used by the X Server */
 
+#ifndef XSERVER_XFREE86_CONFIGPROCS_H
+#define XSERVER_XFREE86_CONFIGPROCS_H
+
 #include <X11/Xfuncproto.h>
 
 /* Device.c */
@@ -146,3 +149,5 @@ xf86freeExtensions(XF86ConfExtensionsPtr ptr);
 void
 ErrorF(const char *f, ...);
 #endif
+
+#endif /* XSERVER_XFREE86_CONFIGPROCS_H */

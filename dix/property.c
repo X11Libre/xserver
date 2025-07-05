@@ -157,11 +157,6 @@ static void
 deliverPropertyNotifyEvent(WindowPtr pWin, int state, PropertyPtr pProp)
 {
     xEvent event;
-    PropertyStateRec rec = {
-        .win = pWin,
-        .prop = pProp,
-        .state = state
-    };
     UpdateCurrentTimeIf();
     event = (xEvent) {
         .u.property.window = pWin->drawable.id,

@@ -154,13 +154,6 @@ ddxGiveUp(enum ExitCode error)
     xnestCloseDisplay();
 }
 
-#ifdef __APPLE__
-void
-DarwinHandleGUI(int argc, char *argv[])
-{
-}
-#endif
-
 void
 OsVendorInit(void)
 {

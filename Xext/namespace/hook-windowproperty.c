@@ -11,14 +11,6 @@
 #include "namespace.h"
 #include "hooks.h"
 
-static inline Bool winIsRoot(WindowPtr pWin) {
-    if (!pWin)
-        return FALSE;
-    if (pWin->drawable.pScreen->root == pWin)
-        return TRUE;
-    return FALSE;
-}
-
 void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(PropertyFilterParam);

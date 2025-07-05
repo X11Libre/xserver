@@ -14,6 +14,7 @@ cd $DRV_BUILD_DIR
 build_drv_ac xf86-input-elographics $X11L_DRV_GIT/xf86-input-elographics master
 build_drv_ac xf86-input-evdev       $X11L_DRV_GIT/xf86-input-evdev       master
 build_drv_ac xf86-input-libinput    $X11L_DRV_GIT/xf86-input-libinput    master
+build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       master
 build_drv_ac xf86-input-synaptics   $X11L_DRV_GIT/xf86-input-synaptics   master
 
 build_drv_ac xf86-video-amdgpu      $X11L_DRV_GIT/xf86-video-amdgpu      xf86-video-amdgpu-23.0.0

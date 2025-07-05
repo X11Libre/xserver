@@ -1,4 +1,3 @@
-
 /*
 
 Copyright 1994, 1998  The Open Group
@@ -26,6 +25,7 @@ in this Software without prior written authorization from The Open Group.
 */
 
 #ifndef MILINE_H
+#define MILINE_H
 
 #include "screenint.h"
 #include "privates.h"

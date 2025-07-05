@@ -1280,7 +1280,7 @@ ProcVidModeGetMonitor(ClientPtr client)
                   + nHsync + nVrefresh + nVendorItems + nModelItems
     };
 
-    const int buflen = nHsync * nVrefresh + nVendorItems + nModelItems;
+    const int buflen = nHsync + nVrefresh + nVendorItems + nModelItems;
 
     CARD32 *sendbuf = calloc(buflen, sizeof(CARD32));
     if (!sendbuf)
@@ -1302,22 +1302,22 @@ ProcVidModeGetMonitor(ClientPtr client)
         bufwalk++;
     }
 
-    memcpy(sendbuf,
+    memcpy(bufwalk,
            pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0).ptr,
            vendorLength);
-    sendbuf += nVendorItems;
+    bufwalk += nVendorItems;
 
-    memcpy(sendbuf,
+    memcpy(bufwalk,
            pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0).ptr,
            modelLength);
-    sendbuf += nModelItems;
+    bufwalk += nModelItems;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
     }
 
-    WriteToClient(client, SIZEOF(xXF86VidModeGetMonitorReply), &rep);
+    WriteToClient(client, sizeof(xXF86VidModeGetMonitorReply), &rep);
     WriteToClient(client, buflen * sizeof(CARD32), sendbuf);
 
     free(sendbuf);

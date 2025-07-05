@@ -3,10 +3,10 @@ project('xserver', 'c',
             'buildtype=debugoptimized',
             'c_std=gnu99',
         ],
-        version: '21.1.99.1',
+        version: '25.0.0.4',
         meson_version: '>= 0.58.0',
 )
-release_date = '2021-07-05'
+release_date = '2025-07-04'
 
 add_project_arguments('-DHAVE_DIX_CONFIG_H', language: ['c', 'objc'])
 cc = meson.get_compiler('c')
@@ -777,7 +777,8 @@ endif
 
 subdir('hw')
 
-if host_machine.system() != 'windows'
+build_tests = get_option('tests') and host_machine.system() != 'windows'
+if build_tests
     subdir('test')
 endif
 

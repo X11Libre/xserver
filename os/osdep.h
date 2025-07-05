@@ -173,8 +173,13 @@ void OsInit(void);
 void OsCleanup(Bool);
 void OsVendorFatalError(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
 void OsVendorInit(void);
+
+_X_EXPORT /* needed by the int10 module, but should not be used by OOT drivers */
 void OsBlockSignals(void);
+
+_X_EXPORT /* needed by the int10 module, but should not be used by OOT drivers */
 void OsReleaseSignals(void);
+
 void OsResetSignals(void);
 void OsAbort(void) _X_NORETURN;
 void AbortServer(void) _X_NORETURN;

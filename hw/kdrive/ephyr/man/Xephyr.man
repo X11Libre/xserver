@@ -67,6 +67,31 @@ window. By default, the Xephyr window has a fixed size.
 .TP 8
 .B \-no\-host\-grab
 Disable grabbing the keyboard and mouse.
+.TP 8
+.BI \-host\-grab " keys"
+Set the keyboard shortcut for Xephyr to grab keyboard and mouse
+input. Possible values for mod-keys are: ctrl, shift, lock,
+mod1, mod2, mod3, mod4, mod5. Up to one ascii character (lower-case) can
+be used by itself or in conjunction with mod-keys. Keys are concatenated
+with
+.I +\fP. If omitted, defaults to
+.I ctrl+shift\fP.
+
+Examples:
+.RS
+.IP \[bu] 2
+.I ctrl+mod1
+.IP \[bu] 2
+.I ctrl+shift++
+(note that the
+.I +
+at the end is interpreted as the ascii character '+')
+.IP \[bu] 2
+.I a
+(mod-keys are optional, this will grab/release whenever the
+.I a
+key is pressed)
+.RE
 .SH "SIGNALS"
 Send a SIGUSR1 to the server (e.g. pkill \-USR1 Xephyr) to
 toggle the debugging mode.

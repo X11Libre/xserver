@@ -119,6 +119,12 @@ RRDeleteProviderProperty(RRProviderPtr provider, Atom property)
         }
 }
 
+/* shortcut for cleaning up property when failed to add */
+static inline void cleanupProperty(RRPropertyPtr prop, Bool added) {
+    if ((prop != NULL) && added)
+        RRDestroyProviderProperty(prop);
+}
+
 int
 RRChangeProviderProperty(RRProviderPtr provider, Atom property, Atom type,
                        int format, int mode, unsigned long len,
@@ -166,13 +172,14 @@ RRChangeProviderProperty(RRProviderPtr provider, Atom property, Atom type,
 
     if (mode == PropModeReplace || len > 0) {
         void *new_data = NULL, *old_data = NULL;
-        if (total_len > MAXINT / size_in_bytes)
+        if (total_len > MAXINT / size_in_bytes) {
+            cleanupProperty(prop, add);
             return BadValue;
+        }
         total_size = total_len * size_in_bytes;
         new_value.data = calloc(1, total_size);
         if (!new_value.data && total_size) {
-            if (add)
-                RRDestroyProviderProperty(prop);
+            cleanupProperty(prop, add);
             return BadAlloc;
         }
         new_value.size = len;
@@ -204,8 +211,7 @@ RRChangeProviderProperty(RRProviderPtr provider, Atom property, Atom type,
         if (pending && pScrPriv->rrProviderSetProperty &&
             !pScrPriv->rrProviderSetProperty(provider->pScreen, provider,
                                            prop->propertyName, &new_value)) {
-            if (add)
-                RRDestroyProviderProperty(prop);
+            cleanupProperty(prop, add);
             free(new_value.data);
             return BadValue;
         }
@@ -292,8 +298,7 @@ RRConfigureProviderProperty(RRProviderPtr provider, Atom property,
      * ranges must have even number of values
      */
     if (range && (num_values & 1)) {
-        if (add)
-            RRDestroyProviderProperty(prop);
+        cleanupProperty(prop, add);
         return BadMatch;
     }
 
@@ -301,8 +306,7 @@ RRConfigureProviderProperty(RRProviderPtr provider, Atom property,
     if (num_values) {
         new_values = calloc(num_values, sizeof(INT32));
         if (!new_values) {
-            if (add)
-                RRDestroyProviderProperty(prop);
+            cleanupProperty(prop, add);
             return BadAlloc;
         }
         memcpy(new_values, values, num_values * sizeof(INT32));

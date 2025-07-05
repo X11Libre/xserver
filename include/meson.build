@@ -204,6 +204,9 @@ conf_data.set('TCPCONN', '1')
 conf_data.set('UNIXCONN', host_machine.system() != 'windows' ? '1' : false)
 conf_data.set('IPv6', build_ipv6 ? '1' : false)
 
+# some drivers (eg. xf86-video-intel) still relying on this symbol being set
+conf_data.set('COMPOSITE', '1')
+
 conf_data.set('DAMAGE', '1')
 conf_data.set('DBE', '1')
 conf_data.set('DGA', build_dga ? '1' : false)

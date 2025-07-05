@@ -32,7 +32,7 @@ srcs_glx = [
 
 libxserver_glx = []
 if build_glx
-    libxserver_glx = static_library('libxserver_glx',
+    libxserver_glx = static_library('xserver_glx',
         srcs_glx,
         include_directories: inc,
         dependencies: [
@@ -68,7 +68,7 @@ hdrs_vnd = [
 
 libglxvnd = []
 if build_glx
-    libglxvnd = static_library('libglxvnd',
+    libglxvnd = static_library('glxvnd',
     srcs_vnd,
     include_directories: inc,
         dependencies: [

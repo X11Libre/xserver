@@ -1306,7 +1306,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     ms->atomic_modeset_capable = (ret == 0);
 
     if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_ATOMIC, FALSE)) {
-        ret = drmSetClientCap(ms->fd, DRM_CLIENT_CAP_ATOMIC, 1);
+        ret = drmSetClientCap(ms->fd, DRM_CLIENT_CAP_ATOMIC, 2);
         ms->atomic_modeset = (ret == 0);
         if (!ms->atomic_modeset)
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING, "Atomic modesetting not supported\n");
@@ -1631,7 +1631,7 @@ msStopFlippingPixmapTracking(DrawablePtr src,
 }
 
 static Bool
-modsetCreateScreenResources(ScreenPtr pScreen)
+modesetCreateScreenResources(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     modesettingPtr ms = modesettingPTR(pScrn);
@@ -1941,7 +1941,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
     }
 
-    pScreen->CreateScreenResources = modsetCreateScreenResources;
+    pScreen->CreateScreenResources = modesetCreateScreenResources;
 
     xf86SetBlackWhitePixels(pScreen);
 

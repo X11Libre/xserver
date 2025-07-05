@@ -6054,7 +6054,7 @@ ProcXkbGetKbdByName(ClientPtr client)
 
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
         char *buf = payload_walk + sizeof(mrep);
-        XkbAssembleMap(client, xkb, mrep, buf);
+        XkbAssembleMap(client, new, mrep, buf);
 
         if (client->swapped) {
             swaps(&mrep.sequenceNumber);

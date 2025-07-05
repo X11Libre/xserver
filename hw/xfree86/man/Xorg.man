@@ -656,11 +656,7 @@ Orest Zborowski    \fIorestz@eskimo.com\fP
 .fi
 .RE
 .PP
-Xorg source is available from the FTP server
-\fI<ftp://ftp.x.org/>\fP, and from the X.Org
-server \fI<https://gitlab.freedesktop.org/xorg/>\fP.  Documentation and other
-information can be found from the X.Org web site
-\fI<https://www.x.org/>\fP.
+Xlibre source is available via git \fI<https://github.com/X11Libre/xserver.git/>\fP.
 
 .SH LEGAL
 .B Xorg
