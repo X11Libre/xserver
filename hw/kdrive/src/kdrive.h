@@ -113,10 +113,18 @@ typedef struct _KdCardFuncs {
     Bool (*initScreen) (ScreenPtr);     /* initialize ScreenRec */
     Bool (*finishInitScreen) (ScreenPtr pScreen);
     Bool (*createRes) (ScreenPtr);      /* create screen resources */
+    void (*preserve) (KdCardInfo *);    /* save graphics card state */
+    Bool (*enable) (ScreenPtr); /* set up for rendering */
+    Bool (*dpms) (ScreenPtr, int);      /* set DPMS screen saver */
+    void (*disable) (ScreenPtr);        /* turn off rendering */
+    void (*restore) (KdCardInfo *);     /* restore graphics card state */
     void (*scrfini) (KdScreenInfo *);   /* close down screen */
     void (*cardfini) (KdCardInfo *);    /* close down */
 
     Bool (*initCursor) (ScreenPtr);     /* detect and map cursor */
+    void (*enableCursor) (ScreenPtr);   /* enable cursor */
+    void (*disableCursor) (ScreenPtr);  /* disable cursor */
+    void (*finiCursor) (ScreenPtr);     /* close down */
     void (*recolorCursor) (ScreenPtr, int, xColorItem *);
 
     Bool (*initAccel) (ScreenPtr);
@@ -145,6 +153,9 @@ typedef struct {
 
     ColormapPtr pInstalledmap;  /* current colormap */
     xColorItem systemPalette[KD_MAX_PSEUDO_SIZE];       /* saved windows colors */
+
+    CreateScreenResourcesProcPtr CreateScreenResources;
+    CloseScreenProcPtr CloseScreen;
 } KdPrivScreenRec, *KdPrivScreenPtr;
 
 typedef enum _kdPointerState {
@@ -237,6 +248,7 @@ typedef struct _KdKeyboardInfo KdKeyboardInfo;
 
 typedef struct _KdKeyboardDriver {
     const char *name;
+    Bool (*PreInit) (KdKeyboardInfo *);
     Bool (*Init) (KdKeyboardInfo *);
     Bool (*Enable) (KdKeyboardInfo *);
     void (*Leds) (KdKeyboardInfo *, int);
