@@ -698,7 +698,7 @@ KdNewKeyboard(void)
 }
 
 int
-KdAddConfigKeyboard(char *keyboard)
+KdAddConfigKeyboard(const char *keyboard)
 {
     struct KdConfigDevice **prev, *new;
 
@@ -762,7 +762,7 @@ KdRemoveKeyboard(KdKeyboardInfo * ki)
 }
 
 int
-KdAddConfigPointer(char *pointer)
+KdAddConfigPointer(const char *pointer)
 {
     struct KdConfigDevice **prev, *new;
 
