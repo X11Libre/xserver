@@ -431,6 +431,12 @@ void
 void
  KdCloseInput(void);
 
+Bool KdRegisterFd(int fd, void (*read) (int fd, void *closure), void *closure);
+
+void KdUnregisterFds(void *closure, Bool do_close);
+
+void KdUnregisterFd(void *closure, int fd, Bool do_close);
+
 void
 KdEnqueueKeyboardEvent(KdKeyboardInfo * ki, unsigned char scan_code,
                        unsigned char is_up);
