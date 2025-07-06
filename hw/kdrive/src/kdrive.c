@@ -446,6 +446,7 @@ KdUseMsg(void)
     ErrorF
         ("-origin X,Y      Locates the next screen in the virtual screen (Xinerama)\n");
     ErrorF("-switchCmd       Command to execute on vt switch\n");
+    ErrorF("-zap             Terminate server on Ctrl+Alt+Backspace\n");
     ErrorF
         ("vtxx             Use virtual terminal xx instead of the next available\n");
 }
@@ -478,6 +479,10 @@ KdProcessArgument(int argc, char **argv, int i)
         kdDisableZaphod = TRUE;
         return 1;
     }
+    if (!strcmp(argv[i], "-zap")) {
+        kdAllowZap = TRUE;
+        return 1;
+    }
     if (!strcmp(argv[i], "-3button")) {
         kdEmulateMiddleButton = FALSE;
         return 1;
@@ -496,6 +501,10 @@ KdProcessArgument(int argc, char **argv, int i)
     }
     if (!strcmp(argv[i], "-softCursor")) {
         kdSoftCursor = TRUE;
+        return 1;
+    }
+    if (!strcmp(argv[i], "-videoTest")) {
+        kdVideoTest = TRUE;
         return 1;
     }
     if (!strcmp(argv[i], "-origin")) {
@@ -529,6 +538,10 @@ KdProcessArgument(int argc, char **argv, int i)
         else
             UseMsg();
         return 2;
+    }
+    if (!strncmp(argv[i], "vt", 2) &&
+        sscanf(argv[i], "vt%2d", &kdVirtualTerminal) == 1) {
+        return 1;
     }
     if (!strcmp(argv[i], "-xkb-rules")) {
         if (i + 1 >= argc) {
