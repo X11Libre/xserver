@@ -3,38 +3,58 @@ title: XLibre - Wiki
 layout: page
 ---
 
-<a href="https://github.com/x11libre/xserver/wiki">Go to the official wiki</a>
+<div class="container-fluid d-flex position-relative px-0" style="min-height: 100vh;">
+  <!-- sidebar -->
+  <nav class="quick-link d-none d-md-block">
+    <a href="#arch">Arch Linux</a>
+    <a href="#artix">Artix Linux</a>
+    <a href="#gentoo">Gentoo Linux</a>
+    <a href="#others">Others</a>
 
-<h2>How to install XLibre</h2>
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/xRzfHzZ6WDU?si=fWTrces_hvnUBvNH" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-<div class="quicklink">
-  <a href="#Arch">Arch Linux</a>
-  <br>
-  <a href="#Artix">Artix Linux</a>
-  <br>
-  <a href="#Gentoo">Gentoo Linux</a>
-  <br>
-  <a href="#Others">Others</a>
-</div>
-<div id="main-content">
-  <div class="install">
-    <h2>Installation on Major Distros</h2>
-    <ul>
-      <li id="Arch">Arch Linux (AUR)
-        <a href="https://aur.archlinux.org/packages/xlibre-server-git#comment-1028466">Note: See this comment</a>
-      </li>
-<pre><code>yay -S xlibre-server-bootstrap-git
+  </nav>
+  <!-- main content -->
+  <div class="flex-grow-1 d-flex flex-column px-0 p-md-3 mx-0" style="margin-left: 1rem;">
+    <a href="https://github.com/x11libre/xserver/wiki">Official Wiki of the Xlibre</a>
+    <h2 class="text-capitalize py-2">How to install XLibre</h2>
+    <iframe class="py-3 border rounded" style="background-color: #000;" width="560" height="315" loading="lazy"
+      src="https://www.youtube-nocookie.com/embed/xRzfHzZ6WDU?si=fWTrces_hvnUBvNH" title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+    </iframe>
+    <div class="mt-4">
+      <h2 class="text-capitalize text-left">Installation on major distro</h2>
+
+      <div class="distro">
+        <h4 id="arch" class="accent-color text-capitalize text-left text-decoration-underline">Arch Linux</h4>
+        <div class="py-2">
+          <p>The current packages are in <a href="https://aur.archlinux.org">AUR(Arch User Repositoy)</a></p>
+          <p class="text-danger">Note: <a
+              href="https://aur.archlinux.org/packages/xlibre-server-git#comment-1028466">See this comment</a></p>
+          <pre><code>yay -S xlibre-server-bootstrap-git
 yay -S xlibre-input-libinput
-yay -S xlibre-server-git
-</pre></code>
-      <li id="Artix">Artix Linux:
-        <a href="https://wiki.artixlinux.org/Site/XlibreOnArtix">See this guide for XLibre on Artix</a>
-      </li>
-      <li id="Gentoo">Gentoo Linux:
-        <a href="https://github.com/X11Libre/ports-gentoo">See this repository for packaging on Gentoo</a>
-      </li>
-      <li id="Others">Others: Build it yourself. See the above video on how to compile XLibre
-      </li>
-    </ul>
+yay -S xlibre-server-git</pre></code>
+        </div>
+      </div>
+      <div class="distro">
+        <h4 id="artix" class="accent-color text-capitalize text-left text-decoration-underline">Artix Linux</h4>
+        <div class="py-2">
+          <p>See this <a href="https://wiki.artixlinux.org/Site/XlibreOnArtix">guide</a> for XLibre on Artix</p>
+        </div>
+      </div>
+      <div class="distro">
+        <h4 id="gentoo" class="accent-color text-capitalize text-left text-decoration-underline">Gentoo Linux</h4>
+        <div class="py-2">
+          <p>See this <a href="https://wiki.artixlinux.org/Site/XlibreOnArtix">repository</a> for packaging on Gentoo
+          </p>
+        </div>
+      </div>
+      <div class="distro">
+        <h4 id="others" class="accent-color text-capitalize text-left text-decoration-underline">Others</h4>
+        <div class="py-2">
+          <p>Others: Build it yourself. See the above video on how to compile XLibre</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
