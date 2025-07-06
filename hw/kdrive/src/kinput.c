@@ -241,6 +241,7 @@ KdDisableInput(void)
 {
     KdKeyboardInfo *ki;
     KdPointerInfo *pi;
+    int found = 0, i = 0;
 
     input_lock();
 
@@ -252,6 +253,49 @@ KdDisableInput(void)
     for (pi = kdPointers; pi; pi = pi->next) {
         if (pi->driver && pi->driver->Disable)
             (*pi->driver->Disable) (pi);
+    }
+
+    if (kdNumInputFds) {
+        ErrorF("[KdDisableInput] Buggy drivers: still %d input fds left!",
+               kdNumInputFds);
+        i = 0;
+        while (i < kdNumInputFds) {
+            found = 0;
+            for (ki = kdKeyboards; ki; ki = ki->next) {
+                if (ki == kdInputFds[i].closure) {
+                    ErrorF("    fd %d belongs to keybd driver %s\n",
+                           kdInputFds[i].fd,
+                           ki->driver && ki->driver->name ?
+                           ki->driver->name : "(unnamed!)");
+                    found = 1;
+                    break;
+                }
+            }
+
+            if (found) {
+                i++;
+                continue;
+            }
+
+            for (pi = kdPointers; pi; pi = pi->next) {
+                if (pi == kdInputFds[i].closure) {
+                    ErrorF("    fd %d belongs to pointer driver %s\n",
+                           kdInputFds[i].fd,
+                           pi->driver && pi->driver->name ?
+                           pi->driver->name : "(unnamed!)");
+                    break;
+                }
+            }
+
+            if (found) {
+                i++;
+                continue;
+            }
+
+            ErrorF("    fd %d not claimed by any active device!\n",
+                   kdInputFds[i].fd);
+            KdUnregisterFd(kdInputFds[i].closure, kdInputFds[i].fd, TRUE);
+        }
     }
 
     kdInputEnabled = FALSE;
