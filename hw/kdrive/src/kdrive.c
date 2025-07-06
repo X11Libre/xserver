@@ -154,6 +154,8 @@ static void
 KdDisableScreens(void)
 {
     KdSuspend();
+    if (kdEnabled && (kdOsFuncs->Disable))
+        kdOsFuncs->Disable();
     kdEnabled = FALSE;
 }
 
@@ -604,6 +606,8 @@ Bool KdCloseScreen(ScreenPtr pScreen)
          * Clean up OS when last card is closed
          */
         if (card == kdCardInfo) {
+            if (kdEnabled && (kdOsFuncs->Disable))
+                kdOsFuncs->Disable();
             kdEnabled = FALSE;
         }
     }
@@ -818,6 +822,8 @@ KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     /*
      * Enable the hardware
      */
+    if ((!kdEnabled) && (kdOsFuncs->Enable))
+        kdOsFuncs->Enable();
     kdEnabled = TRUE;
 
     if (screen->mynum == card->selected) {

@@ -280,9 +280,9 @@ void KdRemoveKeyboard(KdKeyboardInfo * ki);
 
 typedef struct _KdOsFuncs {
     int (*Init) (void); /* Only called when the X server is started, when serverGeneration == 1 */
-    void (*Enable) (void);
+    void (*Enable) (void);        /* called when screen is enabled */
+    void (*Disable) (void);       /* called when screen is disabled */
     Bool (*SpecialKey) (KeySym);
-    void (*Disable) (void);
     void (*Fini) (void);
     void (*pollEvents) (void);
     void (*Bell) (int, int, int); /* if not NULL called instead of the keyboard driver's function */
