@@ -116,6 +116,45 @@ static void KdSigio(int sig)
     for (int i = 0; i < kdNumInputFds; i++)
         (*kdInputFds[i].read) (kdInputFds[i].fd, kdInputFds[i].closure);
 }
+
+static void KdBlockSigio(void)
+{
+    sigset_t set;
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGIO);
+    sigprocmask(SIG_BLOCK, &set, 0);
+}
+
+static void KdUnblockSigio(void)
+{
+    sigset_t set;
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGIO);
+    sigprocmask(SIG_UNBLOCK, &set, 0);
+}
+
+#undef VERIFY_SIGIO
+#ifdef VERIFY_SIGIO
+
+void KdAssertSigioBlocked(char *where)
+{
+    sigset_t set, old;
+
+    sigemptyset(&set);
+    sigprocmask(SIG_BLOCK, &set, &old);
+    if (!sigismember(&old, SIGIO))
+        ErrorF("SIGIO not blocked at %s\n", where);
+}
+
+#else
+
+#define KdAssertSigioBlocked(s)
+
+#endif
+
+static int kdnFds;
 #endif
 
 #ifdef FNONBLOCK
