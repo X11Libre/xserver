@@ -693,7 +693,34 @@ Bool KdCloseScreen(ScreenPtr pScreen)
 
 Bool KdSaveScreen(ScreenPtr pScreen, int on)
 {
-    return FALSE;
+    KdScreenPriv(pScreen);
+    int dpmsState;
+
+    if (!pScreenPriv->card->cfuncs->dpms)
+        return FALSE;
+
+    dpmsState = pScreenPriv->dpmsState;
+    switch (on) {
+    case SCREEN_SAVER_OFF:
+        dpmsState = KD_DPMS_NORMAL;
+        break;
+    case SCREEN_SAVER_ON:
+        if (dpmsState == KD_DPMS_NORMAL)
+            dpmsState = KD_DPMS_NORMAL + 1;
+        break;
+    case SCREEN_SAVER_CYCLE:
+        if (dpmsState < KD_DPMS_MAX)
+            dpmsState++;
+        break;
+    case SCREEN_SAVER_FORCER:
+        break;
+    }
+    if (dpmsState != pScreenPriv->dpmsState) {
+        if (pScreenPriv->enabled)
+            (*pScreenPriv->card->cfuncs->dpms) (pScreen, dpmsState);
+        pScreenPriv->dpmsState = dpmsState;
+    }
+    return TRUE;
 }
 
 static Bool
