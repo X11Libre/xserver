@@ -119,7 +119,14 @@ KdDisableScreen(ScreenPtr pScreen)
     KdDisableColormap(pScreen);
     if (!pScreenPriv->screen->dumb && pScreenPriv->card->cfuncs->disableAccel)
         (*pScreenPriv->card->cfuncs->disableAccel) (pScreen);
+    if (!pScreenPriv->screen->softCursor &&
+        pScreenPriv->card->cfuncs->disableCursor)
+        (*pScreenPriv->card->cfuncs->disableCursor) (pScreen);
+    if (pScreenPriv->card->cfuncs->dpms)
+        (*pScreenPriv->card->cfuncs->dpms) (pScreen, KD_DPMS_NORMAL);
     pScreenPriv->enabled = FALSE;
+    if (pScreenPriv->card->cfuncs->disable)
+        (*pScreenPriv->card->cfuncs->disable) (pScreen);
 }
 
 static void
@@ -152,6 +159,8 @@ void KdSuspend(void)
             for (screen = card->screenList; screen; screen = screen->next)
                 if (screen->mynum == card->selected && screen->pScreen)
                     KdDisableScreen(screen->pScreen);
+            if (card->driver && card->cfuncs->restore)
+                (*card->cfuncs->restore) (card);
         }
         KdDisableInput();
         KdDoSwitchCmd("suspend");
@@ -173,13 +182,21 @@ KdEnableScreen(ScreenPtr pScreen)
 
     if (pScreenPriv->enabled)
         return TRUE;
+    if (pScreenPriv->card->cfuncs->enable)
+        if (!(*pScreenPriv->card->cfuncs->enable) (pScreen))
+            return FALSE;
     pScreenPriv->enabled = TRUE;
     pScreenPriv->dpmsState = KD_DPMS_NORMAL;
     pScreenPriv->card->selected = pScreenPriv->screen->mynum;
+    if (!pScreenPriv->screen->softCursor &&
+        pScreenPriv->card->cfuncs->enableCursor)
+        (*pScreenPriv->card->cfuncs->enableCursor) (pScreen);
     if (!pScreenPriv->screen->dumb && pScreenPriv->card->cfuncs->enableAccel)
         (*pScreenPriv->card->cfuncs->enableAccel) (pScreen);
     KdEnableColormap(pScreen);
     SetRootClip(pScreen, ROOT_CLIP_FULL);
+    if (pScreenPriv->card->cfuncs->dpms)
+        (*pScreenPriv->card->cfuncs->dpms) (pScreen, pScreenPriv->dpmsState);
     return TRUE;
 }
 
@@ -659,11 +676,25 @@ Bool KdCloseScreen(ScreenPtr pScreen)
 
     ret = fbCloseScreen(pScreen);
 
+    if (pScreenPriv->dpmsState != KD_DPMS_NORMAL)
+        (*card->cfuncs->dpms) (pScreen, KD_DPMS_NORMAL);
+
     if (screen->mynum == card->selected)
         KdDisableScreen(pScreen);
 
+    /*
+     * Restore video hardware when last screen is closed
+     */
+    if (screen == card->screenList) {
+        if (kdEnabled && card->cfuncs->restore)
+            (*card->cfuncs->restore) (card);
+    }
+
     if (!pScreenPriv->screen->dumb && card->cfuncs->finiAccel)
         (*card->cfuncs->finiAccel) (pScreen);
+
+    if (!pScreenPriv->screen->softCursor && card->cfuncs->finiCursor)
+        (*card->cfuncs->finiCursor) (pScreen);
 
     if (card->cfuncs->scrfini)
         (*card->cfuncs->scrfini) (screen);
@@ -925,7 +956,14 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     kdEnabled = TRUE;
 
     if (screen->mynum == card->selected) {
+        if (card->cfuncs->preserve)
+            (*card->cfuncs->preserve) (card);
+        if (card->cfuncs->enable)
+            if (!(*card->cfuncs->enable) (pScreen))
+                return FALSE;
         pScreenPriv->enabled = TRUE;
+        if (!screen->softCursor && card->cfuncs->enableCursor)
+            (*card->cfuncs->enableCursor) (pScreen);
         KdEnableColormap(pScreen);
         if (!screen->dumb && card->cfuncs->enableAccel)
             (*card->cfuncs->enableAccel) (pScreen);
