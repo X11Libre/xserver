@@ -35,6 +35,7 @@
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "servermd.h"
+#include "colormapst.h"
 #include "gcstruct.h"
 #include "input.h"
 #include "mipointer.h"
@@ -116,6 +117,7 @@ typedef struct _KdCardFuncs {
     void (*cardfini) (KdCardInfo *);    /* close down */
 
     Bool (*initCursor) (ScreenPtr);     /* detect and map cursor */
+    void (*recolorCursor) (ScreenPtr, int, xColorItem *);
 
     Bool (*initAccel) (ScreenPtr);
     void (*enableAccel) (ScreenPtr);
