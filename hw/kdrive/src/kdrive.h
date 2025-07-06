@@ -225,6 +225,8 @@ struct _KdPointerInfo {
     struct _KdPointerInfo *next;
 };
 
+extern int KdCurScreen;
+
 void KdAddPointerDriver(KdPointerDriver * driver);
 void KdRemovePointerDriver(KdPointerDriver * driver);
 KdPointerInfo *KdNewPointer(void);
