@@ -1122,6 +1122,16 @@ KdParseKbdOptions(KdKeyboardInfo * ki)
             ErrorF("Kbd option key (%s) of value (%s) not assigned!\n",
                    key, value);
     }
+
+#ifdef KDRIVE_EVDEV
+    if (!ki->driver && ki->path != NULL &&
+        strncasecmp(ki->path,
+                    DEV_INPUT_EVENT_PREFIX,
+                    DEV_INPUT_EVENT_PREFIX_LEN) == 0) {
+            ki->driver = KdFindKeyboardDriver("evdev");
+            ki->options = input_option_new(ki->options, "driver", "evdev");
+    }
+#endif
 }
 
 KdKeyboardInfo *KdParseKeyboard(const char *arg)
@@ -1231,6 +1241,16 @@ KdParsePointerOptions(KdPointerInfo * pi)
             ErrorF("Pointer option key (%s) of value (%s) not assigned!\n",
                    key, value);
     }
+
+#ifdef KDRIVE_EVDEV
+    if (!pi->driver && pi->path != NULL &&
+        strncasecmp(pi->path,
+                    DEV_INPUT_EVENT_PREFIX,
+                    DEV_INPUT_EVENT_PREFIX_LEN) == 0) {
+            pi->driver = KdFindPointerDriver("evdev");
+            pi->options = input_option_new(pi->options, "driver", "evdev");
+    }
+#endif
 }
 
 /*
@@ -1330,6 +1350,18 @@ KdInitInput(void)
         InputThreadPreInit();
 
     kdInputEnabled = TRUE;
+
+#ifdef KDRIVE_KBD
+    if (!kdConfigKeyboards) {
+        KdAddConfigKeyboard("keyboard");
+    }
+#endif
+
+#ifdef KDRIVE_MOUSE
+    if (!kdConfigPointers) {
+        KdAddConfigPointer("mouse");
+    }
+#endif
 
     for (dev = kdConfigPointers; dev; dev = dev->next) {
         pi = KdParsePointer(dev->line);
