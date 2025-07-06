@@ -52,6 +52,15 @@
 #include "xserver-properties.h"
 #include "optionstr.h"
 
+#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#include "hotplug.h"
+#endif
+
+#ifdef KDRIVE_EVDEV
+#define DEV_INPUT_EVENT_PREFIX "/dev/input/event"
+#define DEV_INPUT_EVENT_PREFIX_LEN (sizeof(DEV_INPUT_EVENT_PREFIX) - 1)
+#endif
+
 #define AtomFromName(x) MakeAtom(x, strlen(x), 1)
 
 struct KdConfigDevice {
