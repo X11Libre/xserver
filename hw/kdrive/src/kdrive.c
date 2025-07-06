@@ -555,13 +555,14 @@ Bool KdCloseScreen(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     KdCardInfo *card = pScreenPriv->card;
+    Bool ret;
 
     if (card->cfuncs->closeScreen)
         (*card->cfuncs->closeScreen)(pScreen);
 
     pScreenPriv->closed = TRUE;
 
-    Bool ret = fbCloseScreen(pScreen);
+    ret = fbCloseScreen(pScreen);
 
     if (screen->mynum == card->selected)
         KdDisableScreen(pScreen);
