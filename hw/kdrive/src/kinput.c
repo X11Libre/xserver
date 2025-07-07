@@ -1035,6 +1035,17 @@ KdParsePointerOptions(KdPointerInfo * pi)
     }
 }
 
+/*
+ * Mouse argument syntax:
+ *
+ *  device,protocol,options...
+ *
+ *  Options are any of:
+ *      1-5         n button mouse
+ *      2button     emulate middle button
+ *      {NMO}       Reorder buttons
+ */
+
 static KdPointerInfo *
 KdParsePointer(const char *arg)
 {
