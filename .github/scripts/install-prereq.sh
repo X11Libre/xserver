@@ -26,7 +26,7 @@ fi
 if [ "$X11_OS" = "Darwin" ]; then
 build_ac      xset              https://gitlab.freedesktop.org/xorg/app/xset             xset-1.2.5
 fi
-build_ac_xts  xts               https://gitlab.freedesktop.org/xorg/test/xts             master # dbbfa96c036e596346147081cbceda136e7c86c1
+build_ac_xts  xts               https://gitlab.freedesktop.org/xorg/test/xts             master     12a887c2c72c4258962b56ced7b0aec782f1ffed
 
 clone_source piglit             https://gitlab.freedesktop.org/mesa/piglit               main # 265896c86f90cb72e8f218ba6a3617fca8b9a1e3
 
