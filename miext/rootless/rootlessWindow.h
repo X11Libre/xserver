@@ -27,12 +27,12 @@
  * use or other dealings in this Software without prior written authorization.
  */
 
+#ifndef _ROOTLESSWINDOW_H
+#define _ROOTLESSWINDOW_H
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _ROOTLESSWINDOW_H
-#define _ROOTLESSWINDOW_H
 
 #include "dix/screen_hooks_priv.h"
 

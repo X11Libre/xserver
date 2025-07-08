@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 1999 by The XFree86 Project, Inc.
  *
@@ -26,12 +25,12 @@
  * authorization from the copyright holder(s) and author(s).
  */
 
+#ifndef _xf86InPriv_h
+#define _xf86InPriv_h
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _xf86InPriv_h
-#define _xf86InPriv_h
 
 /* xf86Globals.c */
 extern InputDriverPtr *xf86InputDriverList;

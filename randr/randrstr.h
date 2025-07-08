@@ -26,12 +26,12 @@
  *	    Keith Packard, Intel Corporation
  */
 
+#ifndef _RANDRSTR_H_
+#define _RANDRSTR_H_
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _RANDRSTR_H_
-#define _RANDRSTR_H_
 
 #include <X11/X.h>
 #include <X11/Xproto.h>

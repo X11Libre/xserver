@@ -21,12 +21,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#ifndef _MISYNCSTR_H_
+#define _MISYNCSTR_H_
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _MISYNCSTR_H_
-#define _MISYNCSTR_H_
 
 #include <stdint.h>
 #include "dix.h"

@@ -1,10 +1,9 @@
+#ifndef _XIBARRIERS_H_
+#define _XIBARRIERS_H_
 
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _XIBARRIERS_H_
-#define _XIBARRIERS_H_
 
 #include "resource.h"
 
