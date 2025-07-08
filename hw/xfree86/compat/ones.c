@@ -20,6 +20,9 @@ int
 Ones(unsigned long mask)
 {                               /* HACKMEM 169 */
     /* can't add a message here because this should be fast */
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
 #if __has_builtin(__builtin_popcountl)
     return __builtin_popcountl (mask);
 #else
