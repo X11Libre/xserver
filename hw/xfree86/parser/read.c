@@ -113,7 +113,7 @@ xf86readConfigFile(void)
             if (xf86nameCompare(xf86_lex_val.str, "files") == 0) {
                 free(xf86_lex_val.str);
                 xf86_lex_val.str = NULL;
-                HANDLE_RETURN(conf_files, xf86parseFilesSection());
+                HANDLE_RETURN(conf_files, xf86parseFilesSection(ptr->conf_files));
             }
             else if (xf86nameCompare(xf86_lex_val.str, "serverflags") == 0) {
                 free(xf86_lex_val.str);

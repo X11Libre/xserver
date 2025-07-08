@@ -41,7 +41,7 @@ void xf86freeDeviceList(XF86ConfDevicePtr ptr);
 int xf86validateDevice(XF86ConfigPtr p);
 
 /* Files.c */
-XF86ConfFilesPtr xf86parseFilesSection(void);
+XF86ConfFilesPtr xf86parseFilesSection(XF86ConfFilesPtr ptr);
 void xf86printFileSection(FILE * cf, XF86ConfFilesPtr ptr);
 void xf86freeFiles(XF86ConfFilesPtr p);
 
