@@ -8,11 +8,11 @@
 #include "namespace.h"
 
 struct Xnamespace ns_root = {
-    .allowMouseMotion = TRUE,
-    .allowShape = TRUE,
-    .allowTransparency = TRUE,
-    .allowXInput = TRUE,
-    .allowXKeyboard = TRUE,
+    .allowMouseMotion = ALLOW,
+    .allowShape = ALLOW,
+    .allowTransparency = ALLOW,
+    .allowXInput = ALLOW,
+    .allowXKeyboard = ALLOW,
     .builtin = TRUE,
     .name = NS_NAME_ROOT,
     .refcnt = 1,
@@ -21,6 +21,11 @@ struct Xnamespace ns_root = {
 
 struct Xnamespace ns_anon = {
     .builtin = TRUE,
+    .allowMouseMotion = ASK,
+    .allowShape = ASK,
+    .allowTransparency = ASK,
+    .allowXInput = ASK,
+    .allowXKeyboard = ASK,
     .name = NS_NAME_ANONYMOUS,
     .refcnt = 1,
 };
@@ -134,15 +139,55 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         while ((token = strtok(NULL, " ")) != NULL)
         {
             if (strcmp(token, "mouse-motion") == 0)
-                curr->allowMouseMotion = TRUE;
+                curr->allowMouseMotion = ALLOW;
             else if (strcmp(token, "shape") == 0)
-                curr->allowShape = TRUE;
+                curr->allowShape = ALLOW;
             else if (strcmp(token, "transparency") == 0)
-                curr->allowTransparency = TRUE;
+                curr->allowTransparency = ALLOW;
             else if (strcmp(token, "xinput") == 0)
-                curr->allowXInput = TRUE;
+                curr->allowXInput = ALLOW;
             else if (strcmp(token, "xkeyboard") == 0)
-                curr->allowXKeyboard = TRUE;
+                curr->allowXKeyboard = ALLOW;
+            else
+                XNS_LOG("unknown allow: %s\n", token);
+        }
+        return;
+    }
+
+    if (strcmp(token, "ask") == 0)
+    {
+        while ((token = strtok(NULL, " ")) != NULL)
+        {
+            if (strcmp(token, "mouse-motion") == 0)
+                curr->allowMouseMotion = ASK;
+            else if (strcmp(token, "shape") == 0)
+                curr->allowShape = ASK;
+            else if (strcmp(token, "transparency") == 0)
+                curr->allowTransparency = ASK;
+            else if (strcmp(token, "xinput") == 0)
+                curr->allowXInput = ASK;
+            else if (strcmp(token, "xkeyboard") == 0)
+                curr->allowXKeyboard = ASK;
+            else
+                XNS_LOG("unknown allow: %s\n", token);
+        }
+        return;
+    }
+
+    if (strcmp(token, "deny") == 0)
+    {
+        while ((token = strtok(NULL, " ")) != NULL)
+        {
+            if (strcmp(token, "mouse-motion") == 0)
+                curr->allowMouseMotion = DENY;
+            else if (strcmp(token, "shape") == 0)
+                curr->allowShape = DENY;
+            else if (strcmp(token, "transparency") == 0)
+                curr->allowTransparency = DENY;
+            else if (strcmp(token, "xinput") == 0)
+                curr->allowXInput = DENY;
+            else if (strcmp(token, "xkeyboard") == 0)
+                curr->allowXKeyboard = DENY;
             else
                 XNS_LOG("unknown allow: %s\n", token);
         }
