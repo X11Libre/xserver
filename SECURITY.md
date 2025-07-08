@@ -38,12 +38,14 @@ Feel free to privately message staff over our official Matrix or Telegram if the
 
 ##  Supported Versions
 
-| Version         | Status                    |
-| --------------- | ------------------------- |
-| `master` branch |  Supported and maintained |
-| Older tags      |  No longer supported      |
+| Version         | Status                                           |
+| --------------- | ------------------------------------------------ |
+| `master` branch |  Supported and maintained                        |
+| Tagged Releases |  Recieves security updates, resources permitting |
 
-We recommend always using the latest release for performance and security fixes.
+We recommend using the latest release for best performance and security.
+All versions currently receive security fixes.
+We'll reassess support boundaries as the project grows or resources shift.
 
 ##  Security Best Practices (User-Side)
 
