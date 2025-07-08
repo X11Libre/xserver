@@ -141,7 +141,7 @@ miPointerInitialize(ScreenPtr pScreen,
     pScreenPriv->screenFuncs = screenFuncs;
     pScreenPriv->waitForUpdate = waitForUpdate;
     pScreenPriv->showTransparent = FALSE;
-    dixScreenHookClose(pScreen, miPointerCloseScreen);
+    dixScreenHookPostClose(pScreen, miPointerCloseScreen);
     dixSetPrivate(&pScreen->devPrivates, miPointerScreenKey, pScreenPriv);
     /*
      * set up screen cursor method table
@@ -169,7 +169,7 @@ static void miPointerCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void 
 {
     SetupScreen(pScreen);
 
-    dixScreenUnhookClose(pScreen, miPointerCloseScreen);
+    dixScreenUnhookPostClose(pScreen, miPointerCloseScreen);
     free((void *) pScreenPriv);
     dixSetPrivate(&pScreen->devPrivates, miPointerScreenKey, NULL);
     FreeEventList(mipointermove_events, GetMaximumEventsNum());

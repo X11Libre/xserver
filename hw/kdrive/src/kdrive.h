@@ -217,7 +217,7 @@ void KdRemovePointerDriver(KdPointerDriver * driver);
 KdPointerInfo *KdNewPointer(void);
 void KdFreePointer(KdPointerInfo *);
 int KdAddPointer(KdPointerInfo * ki);
-int KdAddConfigPointer(char *pointer);
+int KdAddConfigPointer(const char *pointer);
 void KdRemovePointer(KdPointerInfo * ki);
 
 #define KD_KEY_COUNT 248
@@ -274,9 +274,19 @@ void KdAddKeyboardDriver(KdKeyboardDriver * driver);
 void KdRemoveKeyboardDriver(KdKeyboardDriver * driver);
 KdKeyboardInfo *KdNewKeyboard(void);
 void KdFreeKeyboard(KdKeyboardInfo * ki);
-int KdAddConfigKeyboard(char *pointer);
+int KdAddConfigKeyboard(const char *pointer);
 int KdAddKeyboard(KdKeyboardInfo * ki);
 void KdRemoveKeyboard(KdKeyboardInfo * ki);
+
+typedef struct _KdOsFuncs {
+    int (*Init) (void); /* Only called when the X server is started, when serverGeneration == 1 */
+    void (*Enable) (void);
+    Bool (*SpecialKey) (KeySym);
+    void (*Disable) (void);
+    void (*Fini) (void);
+    void (*pollEvents) (void);
+    void (*Bell) (int, int, int);
+} KdOsFuncs;
 
 typedef struct _KdPointerMatrix {
     int matrix[2][3];
@@ -288,6 +298,8 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 extern Bool kdEmulateMiddleButton;
 extern Bool kdDisableZaphod;
+
+extern KdOsFuncs *kdOsFuncs;
 
 #define KdGetScreenPriv(pScreen) ((KdPrivScreenPtr) \
     dixLookupPrivate(&(pScreen)->devPrivates, kdScreenPrivateKey))
@@ -344,6 +356,9 @@ void
 
 int
  KdProcessArgument(int argc, char **argv, int i);
+
+void
+ KdOsInit(KdOsFuncs * pOsFuncs);
 
 void
  KdOsAddInputDrivers(void);

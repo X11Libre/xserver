@@ -24,6 +24,9 @@
  *
  */
 
+#ifndef XSERVER_XFREE86_XF86VGAARBITERPRIV_H
+#define XSERVER_XFREE86_XF86VGAARBITERPRIV_H
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
@@ -273,3 +276,5 @@ static void VGAarbiterGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
 static void VGAarbiterCompositeRects(CARD8 op, PicturePtr pDst,
                                      xRenderColor * color, int nRect,
                                      xRectangle *rects);
+
+#endif /* XSERVER_XFREE86_XF86VGAARBITERPRIV_H */

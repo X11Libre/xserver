@@ -10,7 +10,7 @@ hdrs_composite = [
 	'compositeext.h',
 ]
 
-libxserver_composite = static_library('libxserver_composite',
+libxserver_composite = static_library('xserver_composite',
 	srcs_composite,
 	include_directories: inc,
 	dependencies: common_dep,

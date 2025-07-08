@@ -1,6 +1,6 @@
 #!/bin/sh
 
-find build/ -regex ".*\.[1-9]$" -exec grep -E \
+find build/ -type f -regex ".*\.[1-9]$" -exec grep -E \
 @vendorversion@\|\
 @xorgversion@\|\
 @xservername@\|\

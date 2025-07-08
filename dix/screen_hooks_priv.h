@@ -147,6 +147,37 @@ _X_EXPORT
 void dixScreenUnhookClose(ScreenPtr pScreen,
                           XorgScreenCloseProcPtr func);
 
+/**
+ * @brief register a screen post close notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the hook function
+ *
+ * In contrast to Close hook, it's called *after* the driver's CloseScreen()
+ * proc had been called.
+ *
+ * When registration fails, the server aborts.
+ **/
+void dixScreenHookPostClose(ScreenPtr pScreen,
+                            XorgScreenCloseProcPtr func);
+
+/**
+ * @brief unregister a screen close notify hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookPostClose
+ *
+ * Unregister a screen close notify hook registered via @ref dixScreenHookPostClose
+ *
+ * In contrast to Close hook, it's called *after* the driver's CloseScreen()
+ * proc had been called.
+ **/
+void dixScreenUnhookPostClose(ScreenPtr pScreen,
+                              XorgScreenCloseProcPtr func);
+
 /* prototype of pixmap destroy notification handler */
 typedef void (*XorgScreenPixmapDestroyProcPtr)(CallbackListPtr *pcbl,
                                                ScreenPtr pScreen,

@@ -27,6 +27,9 @@
  *  DEALINGS IN THE SOFTWARE.
  */
 
+#ifndef XSERVER_C2P_CORE_H
+#define XSERVER_C2P_CORE_H
+
 #include "os/bug_priv.h"
 
     /*
@@ -186,3 +189,5 @@ static inline void transp2x(CARD32 d[], unsigned int n)
     _transp(d, 1, 0, n, mask);
     return;
 }
+
+#endif /* XSERVER_C2P_CORE_H */

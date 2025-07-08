@@ -410,6 +410,10 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
 
         f_idx++;
 
+        /* silently ignore reverse justification */
+        if (f[f_idx] == '-')
+            f_idx++;
+
         /* silently swallow minimum field width */
         if (f[f_idx] == '*') {
             f_idx++;

@@ -78,6 +78,9 @@ from The Open Group.
  *     drawn (as with the even-odd rule).
  */
 
+#ifndef XSERVER_MIPOLY_H
+#define XSERVER_MIPOLY_H
+
 /*
  * for the winding number rule
  */
@@ -172,3 +175,5 @@ typedef struct _ScanLineListBlock {
       pAET = pAET->next; \
    } \
 }
+
+#endif /* XSERVER_MIPOLY_H */

@@ -28,6 +28,8 @@
  */
 
 #ifndef DRIWRAP_H
+#define DRIWRAP_H
+
 #include "scrnintstr.h"
 
 Bool

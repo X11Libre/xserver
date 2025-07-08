@@ -417,7 +417,6 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
 {
     int vercode[4];
     long ver = data->xf86version;
-    MessageType errtype;
 
     LogMessage(X_INFO, "Module %s: vendor=\"%s\"\n",
                data->modname ? data->modname : "UNKNOWN!",
@@ -458,6 +457,7 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
             vermaj = GET_ABI_MAJOR(ver);
             vermin = GET_ABI_MINOR(ver);
             if (abimaj != vermaj) {
+                MessageType errtype;
                 if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
                     errtype = X_WARNING;
                 else
@@ -469,6 +469,7 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
                     return FALSE;
             }
             else if (abimin > vermin) {
+                MessageType errtype;
                 if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
                     errtype = X_WARNING;
                 else

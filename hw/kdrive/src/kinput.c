@@ -698,7 +698,7 @@ KdNewKeyboard(void)
 }
 
 int
-KdAddConfigKeyboard(char *keyboard)
+KdAddConfigKeyboard(const char *keyboard)
 {
     struct KdConfigDevice **prev, *new;
 
@@ -762,7 +762,7 @@ KdRemoveKeyboard(KdKeyboardInfo * ki)
 }
 
 int
-KdAddConfigPointer(char *pointer)
+KdAddConfigPointer(const char *pointer)
 {
     struct KdConfigDevice **prev, *new;
 
@@ -1034,6 +1034,17 @@ KdParsePointerOptions(KdPointerInfo * pi)
                    key, value);
     }
 }
+
+/*
+ * Mouse argument syntax:
+ *
+ *  device,protocol,options...
+ *
+ *  Options are any of:
+ *      1-5         n button mouse
+ *      2button     emulate middle button
+ *      {NMO}       Reorder buttons
+ */
 
 static KdPointerInfo *
 KdParsePointer(const char *arg)

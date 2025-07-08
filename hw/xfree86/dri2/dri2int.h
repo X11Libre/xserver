@@ -23,4 +23,9 @@
  * Author: Daniel Stone <daniel@fooishbar.org>
  */
 
+#ifndef XSERVER_XFREE86_DRI2INT_H
+#define XSERVER_XFREE86_DRI2INT_H
+
 extern Bool DRI2ModuleSetup(void);
+
+#endif /* XSERVER_XFREE86_DRI2INT_H */

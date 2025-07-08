@@ -690,7 +690,6 @@ SNotifyEvent(xAppleWMNotifyEvent *from, xAppleWMNotifyEvent *to)
 static int
 SProcAppleWMQueryVersion(register ClientPtr client)
 {
-    REQUEST(xAppleWMQueryVersionReq);
     return ProcAppleWMQueryVersion(client);
 }
 

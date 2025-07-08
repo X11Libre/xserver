@@ -28,6 +28,7 @@
 DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcPtr);
 DECLARE_HOOK_PROC(WindowPosition, hookWindowPosition, XorgScreenWindowPositionProcPtr);
 DECLARE_HOOK_PROC(Close, hookClose, XorgScreenCloseProcPtr);
+DECLARE_HOOK_PROC(PostClose, hookPostClose, XorgScreenCloseProcPtr);
 DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr);
 DECLARE_HOOK_PROC(PostCreateResources, hookPostCreateResources,
                   XorgScreenPostCreateResourcesProcPtr);
@@ -71,6 +72,8 @@ void dixScreenRaiseClose(ScreenPtr pScreen) {
 
     if (pScreen->CloseScreen)
         pScreen->CloseScreen(pScreen);
+
+    CallCallbacks(&pScreen->hookPostClose, NULL);
 }
 
 void dixScreenRaisePixmapDestroy(PixmapPtr pPixmap)

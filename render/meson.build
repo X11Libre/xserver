@@ -19,7 +19,7 @@ hdrs_render = [
     'picturestr.h',
 ]
 
-libxserver_render = static_library('libxserver_render',
+libxserver_render = static_library('xserver_render',
     srcs_render,
     include_directories: inc,
     dependencies: common_dep,
