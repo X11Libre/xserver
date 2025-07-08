@@ -21,8 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef INPUTUTILS_H
-#define INPUTUTILS_H
+#ifndef _XSERVER_DIX_INPUTUTILS_PRIV_H
+#define _XSERVER_DIX_INPUTUTILS_PRIV_H
 
 #include "dix-config.h"
 
@@ -72,4 +72,4 @@ const unsigned char *xi2mask_get_one_mask(const XI2Mask *xi2mask, int deviceid);
 
 Bool CopySprite(SpritePtr src, SpritePtr dst);
 
-#endif
+#endif /* _XSERVER_DIX_INPUTUTILS_PRIV_H */
