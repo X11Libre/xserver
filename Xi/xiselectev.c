@@ -29,12 +29,12 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
 
 #include "dixstruct.h"
 #include "windowstr.h"
 #include "exglobals.h"
-#include "inpututils.h"
 #include "xiselectev.h"
 
 /**

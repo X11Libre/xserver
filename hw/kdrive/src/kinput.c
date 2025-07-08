@@ -39,6 +39,7 @@
 
 #include "config/hotplug_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
@@ -49,7 +50,6 @@
 #include "exglobals.h"
 #include "eventstr.h"
 #include "xserver-properties.h"
-#include "inpututils.h"
 #include "optionstr.h"
 
 #define AtomFromName(x) MakeAtom(x, strlen(x), 1)

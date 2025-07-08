@@ -18,6 +18,7 @@ is" without express or implied warranty.
 #include <X11/Xproto.h>
 
 #include "dix/cursor_priv.h"
+#include "dix/inpututils_priv.h"
 #include "mi/mi_priv.h"
 
 #include "screenint.h"
@@ -27,7 +28,6 @@ is" without express or implied warranty.
 #include "windowstr.h"
 #include "servermd.h"
 #include "inputstr.h"
-#include "inpututils.h"
 
 #include "xnest-xcb.h"
 
