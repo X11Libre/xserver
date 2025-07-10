@@ -526,6 +526,7 @@ KdProcessArgument(int argc, char **argv, int i)
 }
 
 void
+
 KdOsInit(KdOsFuncs * pOsFuncs)
 {
     kdOsFuncs = pOsFuncs;

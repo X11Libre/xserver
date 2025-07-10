@@ -298,7 +298,6 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 extern Bool kdEmulateMiddleButton;
 extern Bool kdDisableZaphod;
-
 extern KdOsFuncs *kdOsFuncs;
 
 #define KdGetScreenPriv(pScreen) ((KdPrivScreenPtr) \
@@ -356,6 +355,15 @@ void
 
 int
  KdProcessArgument(int argc, char **argv, int i);
+
+/*
+ * Initialize OS/platform specific parts of the Kdrive Xserver.
+ * Also filling kdOsFuncs with the given call vector table.
+ *
+ * @param pOsFuncs pointer to KdOsFuncs structure. Must be valid for the
+ *                 whole lifetime of the Xserver process.
+ */
+void KdOsInit(const KdOsFuncs * pOsFuncs);
 
 void
  KdOsInit(KdOsFuncs * pOsFuncs);

@@ -830,7 +830,7 @@ get_event_size(enum xf86ITEventType type)
         case XF86IT_EVENT_GESTURE_PINCH: return sizeof(xf86ITEventGesturePinch);
         case XF86IT_EVENT_GESTURE_SWIPE: return sizeof(xf86ITEventGestureSwipe);
     }
-    abort();
+    FatalError("xf86-input-inputtest: get_event_size() got undefined event type %d\n", (int)type);
 }
 
 static void

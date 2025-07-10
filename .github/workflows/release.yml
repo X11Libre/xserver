@@ -1,0 +1,21 @@
+name: Publish release on github
+
+on:
+  push
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release pushed tag
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.ref, 'refs/tags/xlibre-xserver-') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: .github/scripts/github/make-release

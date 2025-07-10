@@ -1,7 +1,3 @@
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _glxext_h_
 #define _glxext_h_
 

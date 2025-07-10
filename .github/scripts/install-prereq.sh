@@ -14,15 +14,6 @@ build_meson   drm               https://gitlab.freedesktop.org/mesa/drm         
 fi
 build_meson   libxcvt           https://gitlab.freedesktop.org/xorg/lib/libxcvt          libxcvt-0.1.0
 build_ac      xorgproto         https://gitlab.freedesktop.org/xorg/proto/xorgproto      xorgproto-2024.1
-if [ "$X11_OS" = "Linux" ]; then
-build_meson   wayland           https://gitlab.freedesktop.org/wayland/wayland           1.21.0           "" \
-    -Dtests=false -Ddocumentation=false -Ddtd_validation=false
-build_meson   wayland-protocols https://gitlab.freedesktop.org/wayland/wayland-protocols 1.38
-build_meson   libdecor          https://gitlab.freedesktop.org/libdecor/libdecor         0.1.1            "" \
-    -D{demo,install_demo}=false
-build_meson   libei             https://gitlab.freedesktop.org/libinput/libei            1.0.0            "" \
-    -Dtests=disabled -Ddocumentation=[] -Dliboeffis=enabled
-fi
 if [ "$X11_OS" = "Darwin" ]; then
 build_ac      xset              https://gitlab.freedesktop.org/xorg/app/xset             xset-1.2.5
 fi

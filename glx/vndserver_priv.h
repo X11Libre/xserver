@@ -26,11 +26,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
  */
-
 #ifndef _XSERVER_VNDSERVER_PRIV_H
 #define _XSERVER_VNDSERVER_PRIV_H
 
-#include <dix-config.h>
 #include "glxvndabi.h"
 #include "vndserver.h"
 

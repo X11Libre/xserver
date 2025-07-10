@@ -1,0 +1,17 @@
+#!/bin/bash
+
+err() {
+    echo "$0: $*"
+}
+
+[ "$GITHUB_REPOSITORY" ] || err "missing variable GITHUB_REPOSITORY"
+
+TITLE=$(git tag -l --format='%(contents)' $tag)
+
+echo "tag=$tag"
+echo "title=$TITLE"
+
+gh release create "$tag" \
+        --repo="$GITHUB_REPOSITORY" \
+        --title="$tag" \
+        --generate-notes

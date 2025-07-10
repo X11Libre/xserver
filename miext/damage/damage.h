@@ -46,6 +46,18 @@ typedef void (*DamageScreenRegisterFunc) (DrawablePtr, DamagePtr);
 typedef void (*DamageScreenUnregisterFunc) (DrawablePtr, DamagePtr);
 typedef void (*DamageScreenDestroyFunc) (DamagePtr);
 
+/* @public
+ *
+ * @brief Driver callbacks for getting notified on several damage calls
+ *
+ * The pointer to this struct can be obtained via DamageGetScreenFuncs().
+ * Drivers can inject themselves here, in order to get notified on
+ * DamageCreate(), DamageRegister(), DamageUnregister(), DamageDestroy().
+ *
+ * This should ONLY be touched by video drivers, nobody else.
+ *
+ * So far the only one using it is the proprietary NVidia driver.
+ */
 typedef struct _damageScreenFuncs {
     DamageScreenCreateFunc Create;
     DamageScreenRegisterFunc Register;
