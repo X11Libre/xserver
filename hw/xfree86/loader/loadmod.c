@@ -442,7 +442,7 @@ CheckVersion(const char *module, XF86ModuleVersionInfo *data,
 
     LogMessage(X_INFO, "Module %s: vendor=\"%s\"\n",
                data->modname ? data->modname : "UNKNOWN!",
-               data->vendor  ? data->vendor  : "UNKNOWN!");
+               data->vendor ? data->vendor : "UNKNOWN!");
 
     vercode[0] = ver / 10000000;
     vercode[1] = (ver / 100000) % 100;
@@ -475,11 +475,9 @@ CheckVersion(const char *module, XF86ModuleVersionInfo *data,
 
         LogMessageVerb(X_NONE, 2, "\tABI class: %s, version %d.%d\n",
                        data->abiclass, abimaj, abimin);
-
         if (ver != -1) {
             vermaj = GET_ABI_MAJOR(ver);
             vermin = GET_ABI_MINOR(ver);
-
             /* MAJOR mismatch */
             if (abimaj != vermaj) {
                 MessageType errtype =
@@ -489,7 +487,7 @@ CheckVersion(const char *module, XF86ModuleVersionInfo *data,
                         : X_ERROR;
                 LogMessageVerb(errtype, 0,
                                "%s: module ABI major version (%d) "
-                               "doesn't match server (%d)\n",
+                               "doesn't match the server's version (%d)\n",
                                module, abimaj, vermaj);
                 /* only fail if we're not skipping */
                 if (!skipABI &&
@@ -505,7 +503,7 @@ CheckVersion(const char *module, XF86ModuleVersionInfo *data,
                         : X_ERROR;
                 LogMessageVerb(errtype, 0,
                                "%s: module ABI minor version (%d) "
-                               "is newer than server (%d)\n",
+                               "is newer than the server's version (%d)\n",
                                module, abimin, vermin);
                 if (!skipABI &&
                     !(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
@@ -567,6 +565,7 @@ CheckVersion(const char *module, XF86ModuleVersionInfo *data,
                                "(%d)\n", module, maj, reqmaj);
                 return FALSE;
             }
+            /* XXX Maybe this should be the other way around? */
             if (min > reqmin) {
                 LogMessageVerb(X_WARNING, 2, "%s: module ABI minor version "
                                "(%d) is newer than that available (%d)\n",
@@ -575,7 +574,6 @@ CheckVersion(const char *module, XF86ModuleVersionInfo *data,
             }
         }
     }
-
     return TRUE;
 }
 
