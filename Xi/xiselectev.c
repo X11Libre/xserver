@@ -146,20 +146,14 @@ SProcXISelectEvents(ClientPtr client)
 int
 ProcXISelectEvents(ClientPtr client)
 {
-    int rc, num_masks;
-    WindowPtr win;
-    DeviceIntPtr dev;
-    DeviceIntRec dummy;
-    xXIEventMask *evmask;
-    int len;
-
     REQUEST(xXISelectEventsReq);
     REQUEST_AT_LEAST_SIZE(xXISelectEventsReq);
 
     if (stuff->num_masks == 0)
         return BadValue;
 
-    rc = dixLookupWindow(&win, stuff->win, client, DixReceiveAccess);
+    WindowPtr win;
+    int rc = dixLookupWindow(&win, stuff->win, client, DixReceiveAccess);
 
     // when access to the window is denied, just pretend everything's okay
     if (rc == BadAccess)
@@ -168,16 +162,18 @@ ProcXISelectEvents(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    len = sz_xXISelectEventsReq;
+    int len = sz_xXISelectEventsReq;
 
     /* check request validity */
-    evmask = (xXIEventMask *) &stuff[1];
-    num_masks = stuff->num_masks;
+    xXIEventMask *evmask = (xXIEventMask *) &stuff[1];
+    int num_masks = stuff->num_masks;
     while (num_masks--) {
         len += sizeof(xXIEventMask) + evmask->mask_len * 4;
 
         if (bytes_to_int32(len) > client->req_len)
             return BadLength;
+
+        DeviceIntPtr dev;
 
         if (evmask->deviceid != XIAllDevices &&
             evmask->deviceid != XIAllMasterDevices)
@@ -309,6 +305,8 @@ ProcXISelectEvents(ClientPtr client)
     evmask = (xXIEventMask *) &stuff[1];
     num_masks = stuff->num_masks;
     while (num_masks--) {
+        DeviceIntPtr dev;
+        DeviceIntRec dummy = { 0 };
         if (evmask->deviceid == XIAllDevices ||
             evmask->deviceid == XIAllMasterDevices) {
             dummy.id = evmask->deviceid;
