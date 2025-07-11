@@ -1657,8 +1657,8 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
         return BadAlloc;
 
     /* start out with empty pixels */
-    for (p = pixels; p < pixels + c; p++)
-        *p = 0;
+    for (size_t p = 0; p < (size_t)c; p++)
+         pixels[p] = 0;
 
     ppixRed = calloc(npixR, sizeof(Pixel));
     ppixGreen = calloc(npixG, sizeof(Pixel));
@@ -1713,33 +1713,33 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     *pbmask <<= pmap->pVisual->offsetBlue;
 
     ppix = rpix + pmap->numPixelsRed[client];
-    for (pDst = pixels, p = ppixRed; p < ppixRed + npixR; p++) {
+    for (pDst = pixels, p = ppixRed; (size_t)(p - ppixRed) < npixR; p++) {
         *ppix++ = *p;
-        if (p < ppixRed + c)
+        if ((size_t)(p - ppixRed) < c)
             *pDst++ |= *p << pmap->pVisual->offsetRed;
     }
     pmap->numPixelsRed[client] += npixR;
     pmap->freeRed -= npixR;
 
     ppix = gpix + pmap->numPixelsGreen[client];
-    for (pDst = pixels, p = ppixGreen; p < ppixGreen + npixG; p++) {
+    for (pDst = pixels, p = ppixGreen; (size_t)(p - ppixGreen) < npixG; p++) {
         *ppix++ = *p;
-        if (p < ppixGreen + c)
+        if ((size_t)(p - ppixGreen) < c)
             *pDst++ |= *p << pmap->pVisual->offsetGreen;
     }
     pmap->numPixelsGreen[client] += npixG;
     pmap->freeGreen -= npixG;
 
     ppix = bpix + pmap->numPixelsBlue[client];
-    for (pDst = pixels, p = ppixBlue; p < ppixBlue + npixB; p++) {
+    for (pDst = pixels, p = ppixBlue; (size_t)(p - ppixBlue) < npixB; p++) {
         *ppix++ = *p;
-        if (p < ppixBlue + c)
+        if ((size_t)(p - ppixBlue) < c)
             *pDst++ |= *p << pmap->pVisual->offsetBlue;
     }
     pmap->numPixelsBlue[client] += npixB;
     pmap->freeBlue -= npixB;
 
-    for (pDst = pixels; pDst < pixels + c; pDst++)
+    for (pDst = pixels; (pDst - pixels) < c; pDst++)
         *pDst |= ALPHAMASK(pmap->pVisual);
 
     free(ppixBlue);
@@ -1771,7 +1771,7 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         ppix = reallocarray(pmap->clientPixelsRed[client],
                             pmap->numPixelsRed[client] + npix, sizeof(Pixel));
         if (!ppix) {
-            for (p = ppixTemp; p < ppixTemp + npix; p++)
+            for (p = ppixTemp; (p - ppixTemp) < npix; p++)
                 pmap->red[*p].refcnt = 0;
             free(ppixTemp);
             return BadAlloc;
@@ -1780,9 +1780,9 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         ppix += pmap->numPixelsRed[client];
         *pppixFirst = ppix;
         pDst = pixels;
-        for (p = ppixTemp; p < ppixTemp + npix; p++) {
+        for (p = ppixTemp; (p - ppixTemp) < npix; p++) {
             *ppix++ = *p;
-            if (p < ppixTemp + c)
+            if ((p - ppixTemp) < c)
                 *pDst++ = *p;
         }
         pmap->numPixelsRed[client] += npix;
