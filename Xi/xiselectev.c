@@ -151,7 +151,6 @@ ProcXISelectEvents(ClientPtr client)
     DeviceIntPtr dev;
     DeviceIntRec dummy;
     xXIEventMask *evmask;
-    int *types = NULL;
     int len;
 
     REQUEST(xXISelectEventsReq);
@@ -327,8 +326,6 @@ ProcXISelectEvents(ClientPtr client)
     }
 
     RecalculateDeliverableEvents(win);
-
-    free(types);
     return Success;
 }
 
