@@ -1288,6 +1288,8 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
             glamor_egl->dmabuf_capable = TRUE;
         else if (strstr((const char *)renderer, "zink"))
             glamor_egl->dmabuf_capable = TRUE;
+        else if (strstr((const char *)renderer, "NVIDIA"))
+            glamor_egl->dmabuf_capable = TRUE;
         else
             glamor_egl->dmabuf_capable = FALSE;
     }
