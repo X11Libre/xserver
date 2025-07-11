@@ -68,32 +68,46 @@ SProcXIAllowEvents(ClientPtr client)
 int
 ProcXIAllowEvents(ClientPtr client)
 {
-    TimeStamp time;
-    DeviceIntPtr dev;
-    int ret = Success;
-    XIClientPtr xi_client;
     Bool have_xi22 = FALSE;
+    CARD32 clientTime;
+    int deviceId;
+    int mode;
+    Window grabWindow = 0;
+    uint32_t touchId = 0;
 
-    REQUEST(xXI2_2AllowEventsReq);
-
-    xi_client = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr xi_client = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    if (!xi_client)
+        return BadImplementation;
 
     if (version_compare(xi_client->major_version,
                         xi_client->minor_version, 2, 2) >= 0) {
+        // Xi >= v2.2 request
+        REQUEST(xXI2_2AllowEventsReq);
         REQUEST_AT_LEAST_SIZE(xXI2_2AllowEventsReq);
         have_xi22 = TRUE;
+        clientTime = stuff->time;
+        deviceId = stuff->deviceid;
+        mode = stuff->mode;
+        grabWindow = stuff->grab_window;
+        touchId = stuff->touchid;
     }
     else {
+        // Xi < v2.2 request
+        REQUEST(xXIAllowEventsReq);
         REQUEST_AT_LEAST_SIZE(xXIAllowEventsReq);
+        clientTime = stuff->time;
+        deviceId = stuff->deviceid;
+        mode = stuff->mode;
     }
 
-    ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
+    DeviceIntPtr dev;
+    int ret = dixLookupDevice(&dev, deviceId, client, DixGetAttrAccess);
     if (ret != Success)
         return ret;
 
-    time = ClientTimeToServerTime(stuff->time);
+    TimeStamp time = ClientTimeToServerTime(clientTime);
 
-    switch (stuff->mode) {
+    switch (mode) {
     case XIReplayDevice:
         AllowSome(client, time, dev, GRAB_STATE_NOT_GRABBED);
         break;
@@ -124,16 +138,16 @@ ProcXIAllowEvents(ClientPtr client)
         if (!have_xi22)
             return BadValue;
 
-        rc = dixLookupWindow(&win, stuff->grab_window, client, DixReadAccess);
+        rc = dixLookupWindow(&win, grabWindow, client, DixReadAccess);
         if (rc != Success)
             return rc;
 
-        ret = TouchAcceptReject(client, dev, stuff->mode, stuff->touchid,
-                                stuff->grab_window, &client->errorValue);
+        ret = TouchAcceptReject(client, dev, mode, touchId,
+                                grabWindow, &client->errorValue);
     }
         break;
     default:
-        client->errorValue = stuff->mode;
+        client->errorValue = mode;
         ret = BadValue;
     }
 
