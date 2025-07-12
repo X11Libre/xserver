@@ -4,26 +4,28 @@ XLibre Xserver
 Xlibre is a fork of the [Xorg Xserver](https://gitlab.freedesktop.org/xorg/xserver)
 with lots of code cleanups and enhanced functionality.
 
-This fork was necessary since toxic elements within Xorg projects, moles
-from BigTech, are boycotting any substantial work on Xorg, in order to
-destroy the project, to eliminate competition of their own products.
-Classic "embrace, extend, extinguish" tactics.
+This fork was necessary since toxic elements within Xorg projects and
+moles from BigTech are boycotting any substantial work on Xorg. They are
+doing this in order to destroy the project, to make their replacements
+look better and justify forcing users to use their products. Classic
+"embrace, extend, extinguish" tactics.
 
-Right after journalists first began covering the planned fork Xlibre,
-on June 6th 2025, Redhat employees started a purge on the Xlibre founder's
-GitLab account on freedesktop.org: deleted the git repo, tickets, merge
+Right after journalists first began covering the planned fork Xlibre, on
+June 6th 2025, employees of Red Hat purged the Xlibre founder's GitLab
+account on freedesktop.org: deleted the git repo, tickets, merge
 requests, etc, and so fired the shot that the whole world heard.
 
 This is an independent project, not at all affiliated with BigTech or any
-of their subsidiaries or tax evasion tools, nor any political activists
-groups, state actors, etc. It's explicitly free of any "DEI" or similar
-discriminatory policies. Anybody who's treating others nicely is welcomed.
+of their subsidiaries or tax evasion tools, nor any political activist
+groups, state actors, etc. It's explicitly free of any discriminatory
+policies, such as so-called DEI. Anybody who's treating others nicely is
+welcomed.
 
-It doesn't matter which country you're coming from, your political views,
-your race, your sex, your age, your food menu, whether you wear boots or
-heels, whether you're furry or fairy, Conan or McKay, comic character, a
-small furry creature from Alpha Centauri, or just a boring average person.
-Anybody who's interested in bringing X forward is welcome.
+It doesn't matter which country you're from, what your politics are,
+what race, sex, or age you are, your food menu, whether you wear boots
+or heels, whether you're a furry or a fairy, Conan or McKay, a comic
+character, a small furry creature from Alpha Centauri, or just a boring
+average person. Anybody who's interested in bringing X forward is welcome.
 
 Together we'll make X great again!
 
@@ -36,7 +38,7 @@ Upgrade notice
 * If your console is locked up (no input possible, not even VT switch), then
   most likely the input driver couldn't be loaded due to a version mismatch.
   When unsure, it's best to be prepared to ssh into your machine from another one
-  or set a timer that's calling `chvt 1` after certain time, so you don't
+  or set a timer that calls `chvt 1` after certain time, so you don't
   need a cold reboot.
   Or, make sure that you have magic `SysRq` key enabled (`Alt+PrtSc`)
   via sysctl (`kernel.sysrq=1`), then press following combination depending on keyboard
