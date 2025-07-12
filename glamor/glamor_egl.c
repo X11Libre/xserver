@@ -1159,6 +1159,7 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
 {
     struct glamor_egl_screen_private *glamor_egl;
     const GLubyte *renderer;
+    const GLubyte *vendor;
     OptionInfoPtr options;
     const char *api = NULL;
     Bool es_allowed = TRUE;
@@ -1242,15 +1243,22 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     renderer = glGetString(GL_RENDERER);
     if (!renderer) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
-                   "glGetString() returned NULL, your GL is broken\n");
+                   "glGetString(GL_RENDERER) returned NULL, your GL is broken\n");
         goto error;
     }
+
+    vendor = glGetString(GL_VENDOR);
+    if (!vendor) {
+        xf86DrvMsg(scrn->scrnIndex, X_ERROR,
+                   "glGetString(GL_VENDOR) returned NULL, your GL is broken\n");
+        goto error;
+    }
+
     if (strstr((const char *)renderer, "softpipe")) {
         xf86DrvMsg(scrn->scrnIndex, X_INFO,
                    "Refusing to try glamor on softpipe\n");
         goto error;
-    }
-    if (!strncmp("llvmpipe", (const char *)renderer, strlen("llvmpipe"))) {
+    } else if (!strncmp("llvmpipe", (const char *)renderer, strlen("llvmpipe"))) {
         if (scrn->confScreen->num_gpu_devices)
             xf86DrvMsg(scrn->scrnIndex, X_INFO,
                        "Allowing glamor on llvmpipe for PRIME\n");
@@ -1288,7 +1296,11 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
             glamor_egl->dmabuf_capable = TRUE;
         else if (strstr((const char *)renderer, "zink"))
             glamor_egl->dmabuf_capable = TRUE;
-        else if (strstr((const char *)renderer, "NVIDIA"))
+        /*
+         * NVIDIA doesn't have a stable way to check for their driver through
+         * GL_RENDERER so use GL_VENDOR instead as it is consistent.
+         */
+        else if (strstr((const char *)vendor, "NVIDIA"))
             glamor_egl->dmabuf_capable = TRUE;
         else
             glamor_egl->dmabuf_capable = FALSE;
