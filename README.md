@@ -16,8 +16,8 @@ requests, etc, and so fired the shot that the whole world heard.
 
 This is an independent project, not at all affiliated with BigTech or any
 of their subsidiaries or tax evasion tools, nor any political activists
-groups, state actors, etc. It's explicitly free of any "DEI" or similar
-discriminatory policies. Anybody who's treating others nicely is welcomed.
+groups, state actors, etc. It's explicitly free of any discriminatory policies.
+Anybody who's treating others nicely is welcomed.
 
 It doesn't matter which country you're coming from, your political views,
 your race, your sex, your age, your food menu, whether you wear boots or
