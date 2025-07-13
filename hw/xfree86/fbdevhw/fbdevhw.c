@@ -314,9 +314,14 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
         /* second: environment variable */
         dev = getenv("FRAMEBUFFER");
         if ((NULL == dev) || ((fd = open(dev, O_RDWR)) == -1)) {
-            /* last try: default device */
+            /* third try: default device */
             dev = "/dev/fb0";
             fd = open(dev, O_RDWR);
+            if (fd == -1) {
+                /* last try, the /dev/fb symlink */
+                dev = "/dev/fb";
+                fd = open(dev, O_RDWR);
+            }
         }
     }
 
