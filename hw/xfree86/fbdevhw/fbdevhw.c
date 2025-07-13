@@ -239,11 +239,28 @@ fbdev2xfree_timing(struct fb_var_screeninfo *var, DisplayModePtr mode)
  * Try to find the framebuffer device for a given PCI device
  */
 static int
-fbdev_open_pci(struct pci_device *pPci, char **namep)
+fbdev_open_pci(struct pci_device *pPci, char *device, char **namep)
 {
     struct fb_fix_screeninfo fix;
     char filename[256];
     int fd, i;
+
+    /* try argument (from XF86Config) first */
+    if (device) {
+        fd = open(device, O_RDWR);
+    }
+    else {
+        /* second: environment variable */
+        device = getenv("FRAMEBUFFER");
+        fd = device ? open(device, O_RDWR) : -1;
+    }
+
+    if (fd != -1) {
+        /* fbdev was provided by the user instead of guessed, skip pci check */
+        if (namep)
+            *namep = NULL;
+        return fd;
+    }
 
     for (i = 0; i < 8; i++) {
         snprintf(filename, sizeof(filename),
@@ -389,7 +406,7 @@ fbdevHWProbe(struct pci_device *pPci, const char *device, char **namep)
     int fd;
 
     if (pPci)
-        fd = fbdev_open_pci(pPci, namep);
+        fd = fbdev_open_pci(pPci, device, namep);
     else
         fd = fbdev_open(-1, device, namep);
 
@@ -409,7 +426,7 @@ fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, const char *device)
 
     /* open device */
     if (pPci)
-        fPtr->fd = fbdev_open_pci(pPci, NULL);
+        fPtr->fd = fbdev_open_pci(pPci, device, NULL);
     else
         fPtr->fd = fbdev_open(pScrn->scrnIndex, device, NULL);
     if (-1 == fPtr->fd) {
