@@ -250,18 +250,18 @@ fbdev_open_pci(struct pci_device *pPci, char **namep)
                  "/sys/bus/pci/devices/%04x:%02x:%02x.%d/graphics/fb%d",
                  pPci->domain, pPci->bus, pPci->dev, pPci->func, i);
 
-        fd = open(filename, O_RDONLY, 0);
+        fd = open(filename, O_RDONLY);
         if (fd < 0) {
             snprintf(filename, sizeof(filename),
                      "/sys/bus/pci/devices/%04x:%02x:%02x.%d/graphics:fb%d",
                      pPci->domain, pPci->bus, pPci->dev, pPci->func, i);
-            fd = open(filename, O_RDONLY, 0);
+            fd = open(filename, O_RDONLY);
         }
         if (fd >= 0) {
             close(fd);
             snprintf(filename, sizeof(filename), "/dev/fb%d", i);
 
-            fd = open(filename, O_RDWR, 0);
+            fd = open(filename, O_RDWR);
             if (fd != -1) {
                 if (ioctl(fd, FBIOGET_FSCREENINFO, (void *) &fix) != -1) {
                     if (namep) {
@@ -316,15 +316,15 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
 
     /* try argument (from XF86Config) first */
     if (dev) {
-        fd = open(dev, O_RDWR, 0);
+        fd = open(dev, O_RDWR);
     }
     else {
         /* second: environment variable */
         dev = getenv("FRAMEBUFFER");
-        if ((NULL == dev) || ((fd = open(dev, O_RDWR, 0)) == -1)) {
+        if ((NULL == dev) || ((fd = open(dev, O_RDWR)) == -1)) {
             /* last try: default device */
             dev = "/dev/fb0";
-            fd = open(dev, O_RDWR, 0);
+            fd = open(dev, O_RDWR);
         }
     }
 
