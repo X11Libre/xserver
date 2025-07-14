@@ -41,16 +41,15 @@
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
+#include "dix/inpututils_priv.h"
 
 #include "dix.h"
 #include "inputstr.h"
 #include "misc.h"
 #include "eventstr.h"
 #include "exglobals.h"
-#include "inpututils.h"
 #include "xiquerydevice.h"
 #include "xkbsrv.h"
-#include "inpututils.h"
 
 static int countValuators(DeviceEvent *ev, int *first);
 static int getValuatorEvents(DeviceEvent *ev, deviceValuator * xv);

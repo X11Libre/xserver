@@ -1934,9 +1934,8 @@ ProcSetPointerMapping(ClientPtr client)
 
     xSetPointerMappingReply rep = {
         .type = X_Reply,
-        .success = MappingSuccess,
+        .success = (ret == MappingBusy) ? MappingBusy : MappingSuccess,
         .sequenceNumber = client->sequence,
-        .success = ret,
     };
 
     if (client->swapped) {

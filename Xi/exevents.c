@@ -96,6 +96,7 @@ SOFTWARE.
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
@@ -114,7 +115,6 @@ SOFTWARE.
 #include "xace.h"
 #include "xiquerydevice.h"      /* For List*Info */
 #include "eventstr.h"
-#include "inpututils.h"
 
 #define WID(w) ((w) ? ((w)->drawable.id) : 0)
 #define AllModifiersMask ( \
