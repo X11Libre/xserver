@@ -63,6 +63,10 @@
 #include <dirent.h>
 #include <limits.h>
 
+/* Avoid hard-coding the NVIDIA vendor ID */
+#ifndef PCI_VENDOR_NVIDIA
+#define PCI_VENDOR_NVIDIA   0x10DE
+#endif
 static Bool SkipNvidiaPascalOrVolta = FALSE;
 
 typedef struct _pattern {
@@ -416,7 +420,7 @@ LoaderListDir(const char *subdir, const char **patternlist)
 static void
 DetectNvidiaPascalVolta(unsigned short vendorID, unsigned short deviceID)
 {
-    if (vendorID != 0x10DE)  /* not NVIDIA */
+    if (vendorID != PCI_VENDOR_NVIDIA)  /* not NVIDIA */
         return;
     switch (deviceID) {
         case 0x1B06: case 0x1B38: case 0x1B80:  /* Pascal family */
