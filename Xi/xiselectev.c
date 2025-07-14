@@ -29,12 +29,12 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
 
 #include "dixstruct.h"
 #include "windowstr.h"
 #include "exglobals.h"
-#include "inpututils.h"
 #include "xiselectev.h"
 
 /**
@@ -151,7 +151,6 @@ ProcXISelectEvents(ClientPtr client)
     DeviceIntPtr dev;
     DeviceIntRec dummy;
     xXIEventMask *evmask;
-    int *types = NULL;
     int len;
 
     REQUEST(xXISelectEventsReq);
@@ -327,8 +326,6 @@ ProcXISelectEvents(ClientPtr client)
     }
 
     RecalculateDeliverableEvents(win);
-
-    free(types);
     return Success;
 }
 

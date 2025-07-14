@@ -43,13 +43,10 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _OSDEP_H_
 #define _OSDEP_H_ 1
+
+#include <dix-config.h>
 
 #include <X11/Xdefs.h>
 

@@ -128,6 +128,7 @@ Equipment Corporation.
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "os/osdep.h"
+#include "os/probes_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -146,7 +147,6 @@ Equipment Corporation.
 #include "gcstruct.h"
 
 #ifdef XSERVER_DTRACE
-#include "probes.h"
 
 #define TypeNameString(t) LookupResourceName(t)
 #endif

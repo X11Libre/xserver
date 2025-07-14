@@ -71,6 +71,7 @@ RROutputCreate(ScreenPtr pScreen,
     RROutputPtr *outputs;
     rrScrPrivPtr pScrPriv;
     Atom nonDesktopAtom;
+    Atom DPIAtom;
 
     if (!RRInit())
         return NULL;
@@ -109,6 +110,18 @@ RROutputCreate(ScreenPtr pScreen,
                                             2, values);
     }
     RROutputSetNonDesktop(output, FALSE);
+
+    /* Initialize DPI property for all outputs. */
+    DPIAtom = MakeAtom("DPI", 3, TRUE);
+    if (DPIAtom != BAD_RESOURCE) {
+        static const INT32 values[2] = { 0, 960 }; // arbitrary range
+        (void) RRConfigureOutputProperty(output, DPIAtom, FALSE, TRUE, FALSE,
+                                         2, values);
+        INT32 value = monitorResolution ? monitorResolution : 96;
+        (void) RRChangeOutputProperty(output, DPIAtom, XA_INTEGER, 32,
+                                      PropModeReplace, 1, &value, FALSE, FALSE);
+    }
+
     RRResourcesChanged(pScreen);
 
     return output;
