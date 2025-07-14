@@ -40,6 +40,7 @@
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "os/fmt.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -50,7 +51,6 @@
 #include "scrnintstr.h"
 #include "xkbsrv.h"
 
-#include "inpututils.h"
 #include "xiquerypointer.h"
 
 /***********************************************************************

@@ -119,6 +119,7 @@ Equipment Corporation.
 #include "os/client_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
+#include "os/probes_priv.h"
 #include "os/screensaver.h"
 
 #include "windowstr.h"
@@ -138,10 +139,6 @@ Equipment Corporation.
 #include "xkbsrv.h"
 #include "xfixesint.h"
 #include "dixstruct_priv.h"
-
-#ifdef XSERVER_DTRACE
-#include "probes.h"
-#endif
 
 #define mskcnt ((MAXCLIENTS + 31) / 32)
 #define BITMASK(i) (1U << ((i) & 31))
