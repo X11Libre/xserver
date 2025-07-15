@@ -57,6 +57,7 @@ struct glamor_egl_screen_private {
     int fd;
     struct gbm_device *gbm;
     int dmabuf_capable;
+    int scanout_capable;
     Bool force_vendor; /* if GLVND vendor is forced from options */
 
     xf86FreeScreenProc *saved_free_screen;
@@ -395,7 +396,18 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 #ifdef GBM_BO_WITH_MODIFIERS2
             bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
                                                format, modifiers, num_modifiers,
-                                               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+                                               GBM_BO_USE_RENDERING |
+                                               (glamor_egl->scanout_capable ?
+                                                GBM_BO_USE_SCANOUT : 0));
+            if (glamor_egl->scanout_capable && !bo) {
+                /* something failed, try again without GBM_BO_USE_SCANOUT */
+                xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                           "Direct scanout support disabled\n");
+                glamor_egl->scanout_capable = FALSE;
+                bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
+                                                   format, modifiers, num_modifiers,
+                                                   GBM_BO_USE_RENDERING);
+            }
 #else
             bo = gbm_bo_create_with_modifiers(glamor_egl->gbm, width, height,
                                               format, modifiers, num_modifiers);
@@ -414,7 +426,20 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
                 (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
                  GBM_BO_USE_LINEAR : 0) |
 #endif
-                GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+                GBM_BO_USE_RENDERING |
+                (glamor_egl->scanout_capable ? GBM_BO_USE_SCANOUT : 0));
+        if (glamor_egl->scanout_capable && !bo) {
+            /* something failed, try again without GBM_BO_USE_SCANOUT */
+            xf86DrvMsg(scrn->scrnIndex, X_INFO,
+                "Direct scanout support disabled\n");
+            glamor_egl->scanout_capable = FALSE;
+            bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
+#ifdef GLAMOR_HAS_GBM_LINEAR
+                    (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
+                     GBM_BO_USE_LINEAR : 0) |
+                     GBM_BO_USE_RENDERING);
+#endif
+        }
     }
 
     if (!bo) {
@@ -1305,6 +1330,9 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
             glamor_egl->dmabuf_capable = FALSE;
     }
 #endif
+
+    /* Set this to true for now, later code will disable this if needed */
+    glamor_egl->scanout_capable = TRUE;
 
     glamor_egl->saved_free_screen = scrn->FreeScreen;
     scrn->FreeScreen = glamor_egl_free_screen;
