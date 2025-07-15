@@ -391,9 +391,16 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 
         glamor_get_modifiers(screen, format, &num_modifiers, &modifiers);
 
-        if (num_modifiers > 0)
+        if (num_modifiers > 0) {
+#ifdef GBM_BO_WITH_MODIFIERS2
+            bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
+                                               format, modifiers, num_modifiers,
+                                               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+#else
             bo = gbm_bo_create_with_modifiers(glamor_egl->gbm, width, height,
                                               format, modifiers, num_modifiers);
+#endif
+        }
         if (bo)
             used_modifiers = TRUE;
         free(modifiers);
