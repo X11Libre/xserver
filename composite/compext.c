@@ -99,16 +99,17 @@ FreeCompositeClientOverlay(void *value, XID ccwid)
 static int
 ProcCompositeQueryVersion(ClientPtr client)
 {
+    REQUEST(xCompositeQueryVersionReq);
+    REQUEST_SIZE_MATCH(xCompositeQueryVersionReq);
+
     CompositeClientPtr pCompositeClient = GetCompositeClient(client);
+
     xCompositeQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0
     };
 
-    REQUEST(xCompositeQueryVersionReq);
-
-    REQUEST_SIZE_MATCH(xCompositeQueryVersionReq);
     if (stuff->majorVersion < SERVER_COMPOSITE_MAJOR_VERSION) {
         rep.majorVersion = stuff->majorVersion;
         rep.minorVersion = stuff->minorVersion;
@@ -188,23 +189,21 @@ static int
 ProcCompositeCreateRegionFromBorderClip(ClientPtr client)
 {
     WindowPtr pWin;
-    CompWindowPtr cw;
-    RegionPtr pBorderClip, pRegion;
 
     REQUEST(xCompositeCreateRegionFromBorderClipReq);
-
     REQUEST_SIZE_MATCH(xCompositeCreateRegionFromBorderClipReq);
+
     VERIFY_WINDOW(pWin, stuff->window, client, DixGetAttrAccess);
     LEGAL_NEW_RESOURCE(stuff->region, client);
 
-    cw = GetCompWindow(pWin);
-    if (cw)
-        pBorderClip = &cw->borderClip;
-    else
-        pBorderClip = &pWin->borderClip;
-    pRegion = XFixesRegionCopy(pBorderClip);
+    CompWindowPtr cw = GetCompWindow(pWin);
+
+    RegionPtr pBorderClip = (cw ? &cw->borderClip : &pWin->borderClip);
+
+    RegionPtr pRegion = XFixesRegionCopy(pBorderClip);
     if (!pRegion)
         return BadAlloc;
+
     RegionTranslate(pRegion, -pWin->drawable.x, -pWin->drawable.y);
 
     if (!AddResource(stuff->region, RegionResType, (void *) pRegion))
@@ -217,31 +216,32 @@ static int
 SingleCompositeNameWindowPixmap(ClientPtr client, xCompositeNameWindowPixmapReq *stuff)
 {
     WindowPtr pWin;
-    CompWindowPtr cw;
-    PixmapPtr pPixmap;
-    ScreenPtr pScreen;
-    int rc;
 
     VERIFY_WINDOW(pWin, stuff->window, client, DixGetAttrAccess);
 
-    pScreen = pWin->drawable.pScreen;
+    ScreenPtr pScreen = pWin->drawable.pScreen;
 
     if (!pWin->viewable)
         return BadMatch;
 
     LEGAL_NEW_RESOURCE(stuff->pixmap, client);
 
-    cw = GetCompWindow(pWin);
+    CompWindowPtr cw = GetCompWindow(pWin);
     if (!cw)
         return BadMatch;
 
-    pPixmap = (*pScreen->GetWindowPixmap) (pWin);
+    PixmapPtr pPixmap = pScreen->GetWindowPixmap(pWin);
     if (!pPixmap)
         return BadMatch;
 
     /* security creation/labeling check */
-    rc = XaceHookResourceAccess(client, stuff->pixmap, X11_RESTYPE_PIXMAP,
-                  pPixmap, X11_RESTYPE_WINDOW, pWin, DixCreateAccess);
+    int rc = XaceHookResourceAccess(client,
+                                    stuff->pixmap,
+                                    X11_RESTYPE_PIXMAP,
+                                    pPixmap,
+                                    X11_RESTYPE_WINDOW,
+                                    pWin,
+                                    DixCreateAccess);
     if (rc != Success)
         return rc;
 
@@ -264,43 +264,41 @@ SingleCompositeNameWindowPixmap(ClientPtr client, xCompositeNameWindowPixmapReq 
 static int
 SingleCompositeGetOverlayWindow(ClientPtr client, xCompositeGetOverlayWindowReq *stuff)
 {
-    xCompositeGetOverlayWindowReply rep;
     WindowPtr pWin;
-    ScreenPtr pScreen;
-    CompScreenPtr cs;
-    CompOverlayClientPtr pOc;
-    int rc;
 
     VERIFY_WINDOW(pWin, stuff->window, client, DixGetAttrAccess);
-    pScreen = pWin->drawable.pScreen;
+    ScreenPtr pScreen = pWin->drawable.pScreen;
 
     /*
      * Create an OverlayClient structure to mark this client's
      * interest in the overlay window
      */
-    pOc = compCreateOverlayClient(pScreen, client);
+    CompOverlayClientPtr pOc = compCreateOverlayClient(pScreen, client);
     if (pOc == NULL)
         return BadAlloc;
 
     /*
      * Make sure the overlay window exists
      */
-    cs = GetCompScreen(pScreen);
+    CompScreenPtr cs = GetCompScreen(pScreen);
     if (cs->pOverlayWin == NULL)
         if (!compCreateOverlayWindow(pScreen)) {
             FreeResource(pOc->resource, X11_RESTYPE_NONE);
             return BadAlloc;
         }
 
-    rc = XaceHookResourceAccess(client, cs->pOverlayWin->drawable.id,
-                  X11_RESTYPE_WINDOW, cs->pOverlayWin, X11_RESTYPE_NONE,
-                  NULL, DixGetAttrAccess);
+    int rc = XaceHookResourceAccess(client,
+                                    cs->pOverlayWin->drawable.id,
+                                    X11_RESTYPE_WINDOW,
+                                    cs->pOverlayWin, X11_RESTYPE_NONE,
+                                    NULL,
+                                    DixGetAttrAccess);
     if (rc != Success) {
         FreeResource(pOc->resource, X11_RESTYPE_NONE);
         return rc;
     }
 
-    rep = (xCompositeGetOverlayWindowReply) {
+    xCompositeGetOverlayWindowReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
@@ -321,7 +319,6 @@ static int
 SingleCompositeReleaseOverlayWindow(ClientPtr client, xCompositeReleaseOverlayWindowReq *stuff)
 {
     WindowPtr pWin;
-    CompOverlayClientPtr pOc;
 
     VERIFY_WINDOW(pWin, stuff->window, client, DixGetAttrAccess);
 
@@ -329,7 +326,7 @@ SingleCompositeReleaseOverlayWindow(ClientPtr client, xCompositeReleaseOverlayWi
      * Has client queried a reference to the overlay window
      * on this screen? If not, generate an error.
      */
-    pOc = compFindOverlayClient(pWin->drawable.pScreen, client);
+    CompOverlayClientPtr pOc = compFindOverlayClient(pWin->drawable.pScreen, client);
     if (pOc == NULL)
         return BadMatch;
 
