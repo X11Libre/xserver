@@ -55,18 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteAttributeInfo(ClientPtr client, xvAttributeInfo * pAtt)
-{
-    swapl(&pAtt->flags);
-    swapl(&pAtt->size);
-    swapl(&pAtt->min);
-    swapl(&pAtt->max);
-    WriteToClient(client, sz_xvAttributeInfo, pAtt);
-
-    return Success;
-}
-
-static int
 SWriteImageFormatInfo(ClientPtr client, xvImageFormatInfo * pImage)
 {
     swapl(&pImage->id);
@@ -165,10 +153,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 
     return Success;
 }
-
-#define _WriteAttributeInfo(_c,_d) \
-  if ((_c)->swapped) SWriteAttributeInfo(_c, _d); \
-  else WriteToClient(_c, sz_xvAttributeInfo, _d)
 
 #define _WriteGrabPortReply(_c,_d) \
   if ((_c)->swapped) SWriteGrabPortReply(_c, _d); \
@@ -741,7 +725,6 @@ ProcXvQueryPortAttributes(ClientPtr client)
     int size, i;
     XvPortPtr pPort;
     XvAttributePtr pAtt;
-    xvAttributeInfo Info;
 
     REQUEST(xvQueryPortAttributesReq);
     REQUEST_SIZE_MATCH(xvQueryPortAttributesReq);
@@ -768,13 +751,21 @@ ProcXvQueryPortAttributes(ClientPtr client)
     for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
          i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
         size = strlen(pAtt->name) + 1;  /* pass the NULL */
-        Info.flags = pAtt->flags;
-        Info.min = pAtt->min_value;
-        Info.max = pAtt->max_value;
-        Info.size = pad_to_int32(size);
+        xvAttributeInfo Info = {
+            .flags = pAtt->flags,
+            .min = pAtt->min_value,
+            .max = pAtt->max_value,
+            .size = pad_to_int32(size)
+        };
 
-        _WriteAttributeInfo(client, &Info);
+        if (client->swapped) {
+            swapl(&Info.flags);
+            swapl(&Info.size);
+            swapl(&Info.min);
+            swapl(&Info.max);
+        }
 
+        WriteToClient(client, sz_xvAttributeInfo, &Info);
         WriteToClient(client, size, pAtt->name);
     }
 
