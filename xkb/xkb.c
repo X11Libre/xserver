@@ -1113,44 +1113,29 @@ XkbSizeVirtualMods(XkbDescPtr xkb, xkbGetMapReply * rep)
     return XkbPaddedSize(nMods);
 }
 
-static char *
-XkbWriteKeySyms(XkbDescPtr xkb, KeyCode firstKeySym, CARD8 nKeySyms, char *buf,
-                ClientPtr client)
+static void XkbWriteKeySyms(XkbDescPtr xkb, KeyCode firstKeySym, CARD8 nKeySyms,
+                            x_rpcbuf_t *rpcbuf, ClientPtr client)
 {
-    register KeySym *pSym;
-    XkbSymMapPtr symMap;
-    xkbSymMapWireDesc *outMap;
-    register unsigned i;
-
-    symMap = &xkb->map->key_sym_map[firstKeySym];
-    for (i = 0; i < nKeySyms; i++, symMap++) {
-        outMap = (xkbSymMapWireDesc *) buf;
+    XkbSymMapPtr symMap = &xkb->map->key_sym_map[firstKeySym];
+    for (int i = 0; i < nKeySyms; i++, symMap++) {
+        size_t nSyms = symMap->width * XkbNumGroups(symMap->group_info);
+        xkbSymMapWireDesc *outMap = x_rpcbuf_reserve(rpcbuf, sizeof(xkbSymMapWireDesc));
         outMap->ktIndex[0] = symMap->kt_index[0];
         outMap->ktIndex[1] = symMap->kt_index[1];
         outMap->ktIndex[2] = symMap->kt_index[2];
         outMap->ktIndex[3] = symMap->kt_index[3];
         outMap->groupInfo = symMap->group_info;
         outMap->width = symMap->width;
-        outMap->nSyms = symMap->width * XkbNumGroups(symMap->group_info);
-        buf = (char *) &outMap[1];
-        if (outMap->nSyms == 0)
-            continue;
+        outMap->nSyms = nSyms;
 
-        pSym = &xkb->map->syms[symMap->offset];
-        memcpy((char *) buf, (char *) pSym, outMap->nSyms * 4);
-        if (client->swapped) {
-            register int nSyms = outMap->nSyms;
-
+        if (client->swapped)
             swaps(&outMap->nSyms);
-            while (nSyms-- > 0) {
-                swapl((int *) buf);
-                buf += 4;
-            }
+
+        if (outMap->nSyms) {
+            KeySym *pSym = &xkb->map->syms[symMap->offset];
+            x_rpcbuf_write_CARD32s(rpcbuf, pSym, nSyms);
         }
-        else
-            buf += outMap->nSyms * 4;
     }
-    return buf;
 }
 
 static int
@@ -1399,11 +1384,10 @@ static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
                            xkbGetMapReply rep, x_rpcbuf_t *rpcbuf)
 {
     XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, rpcbuf, client);
+    XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, rpcbuf, client);
 
     char *desc = rpcbuf->buffer + rpcbuf->wpos;
 
-    if (rep.nKeySyms > 0)
-        desc = XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, desc, client);
     if (rep.nKeyActs > 0)
         desc = XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, desc);
     if (rep.totalKeyBehaviors > 0)
