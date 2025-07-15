@@ -55,17 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteGrabPortReply(ClientPtr client, xvGrabPortReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-
-    WriteToClient(client, sz_xvGrabPortReply, rep);
-
-    return Success;
-}
-
-static int
 SWriteGetPortAttributeReply(ClientPtr client, xvGetPortAttributeReply * rep)
 {
     swaps(&rep->sequenceNumber);
@@ -131,10 +120,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 
     return Success;
 }
-
-#define _WriteGrabPortReply(_c,_d) \
-  if ((_c)->swapped) SWriteGrabPortReply(_c, _d); \
-  else WriteToClient(_c, sz_xvGrabPortReply, _d)
 
 #define _WriteGetPortAttributeReply(_c,_d) \
   if ((_c)->swapped) SWriteGetPortAttributeReply(_c, _d); \
@@ -543,7 +528,12 @@ ProcXvGrabPort(ClientPtr client)
         .result = result
     };
 
-    _WriteGrabPortReply(client, &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+
+    WriteToClient(client, sz_xvGrabPortReply, &rep);
 
     return Success;
 }
