@@ -1287,24 +1287,27 @@ XkbSizeModifierMap(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteModifierMap(XkbDescPtr xkb, KeyCode firstModMapKey, CARD8 nModMapKeys,
-                    char *buf)
+static void XkbWriteModifierMap(XkbDescPtr xkb, KeyCode firstModMapKey,
+                                CARD8 nModMapKeys, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    char *start;
-    unsigned char *pMap;
+    unsigned char *pMap = &xkb->map->modmap[firstModMapKey];
 
-    start = buf;
-    pMap = &xkb->map->modmap[firstModMapKey];
-    for (i = 0; i < nModMapKeys; i++, pMap++) {
-        if (*pMap != 0) {
+    /* count how many active entries */
+    size_t count = 0;
+    for (int i = 0; i < nModMapKeys; i++) {
+        if (pMap[i] != 0)
+            count++;
+    }
+
+    /* reserve buffer space (padded) */
+    char *buf = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(count));
+
+    for (int i = 0; i < nModMapKeys; i++) {
+        if (pMap[i] != 0) {
             *buf++ = i + firstModMapKey;
-            *buf++ = *pMap;
+            *buf++ = pMap[i];
         }
     }
-    i = XkbPaddedSize(buf - start) - (buf - start);     /* pad to word boundary */
-    return buf + i;
 }
 
 static int
@@ -1389,11 +1392,11 @@ static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
 
     if (rep.totalKeyExplicit > 0)
         XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, rpcbuf);
+    if (rep.totalModMapKeys > 0)
+        XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, rpcbuf);
 
     char *desc = rpcbuf->buffer + rpcbuf->wpos;
 
-    if (rep.totalModMapKeys > 0)
-        desc = XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, desc);
     if (rep.totalVModMapKeys > 0)
         desc = XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, desc);
 }
