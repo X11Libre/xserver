@@ -55,18 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteQueryEncodingsReply(ClientPtr client, xvQueryEncodingsReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_encodings);
-
-    WriteToClient(client, sz_xvQueryEncodingsReply, rep);
-
-    return Success;
-}
-
-static int
 SWriteAdaptorInfo(ClientPtr client, xvAdaptorInfo * pAdaptor)
 {
     swapl(&pAdaptor->base_id);
@@ -214,10 +202,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 
     return Success;
 }
-
-#define _WriteQueryEncodingsReply(_c,_d) \
-  if ((_c)->swapped) SWriteQueryEncodingsReply(_c, _d); \
-  else WriteToClient(_c, sz_xvQueryEncodingsReply, _d)
 
 #define _WriteAdaptorInfo(_c,_d) \
   if ((_c)->swapped) SWriteAdaptorInfo(_c, _d); \
@@ -409,7 +393,13 @@ ProcXvQueryEncodings(ClientPtr client)
         .length = bytes_to_int32(totalSize),
     };
 
-    _WriteQueryEncodingsReply(client, &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.num_encodings);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
 
     ne = pPort->pAdaptor->nEncodings;
     pe = pPort->pAdaptor->pEncodings;
