@@ -55,20 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteQueryPortAttributesReply(ClientPtr client,
-                               xvQueryPortAttributesReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->num_attributes);
-    swapl(&rep->text_size);
-
-    WriteToClient(client, sz_xvQueryPortAttributesReply, rep);
-
-    return Success;
-}
-
-static int
 SWriteQueryImageAttributesReply(ClientPtr client,
                                 xvQueryImageAttributesReply * rep)
 {
@@ -95,10 +81,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 
     return Success;
 }
-
-#define _WriteQueryPortAttributesReply(_c,_d) \
-  if ((_c)->swapped) SWriteQueryPortAttributesReply(_c, _d); \
-  else WriteToClient(_c, sz_xvQueryPortAttributesReply, _d)
 
 #define _WriteQueryImageAttributesReply(_c,_d) \
   if ((_c)->swapped) SWriteQueryImageAttributesReply(_c, _d); \
@@ -688,7 +670,14 @@ ProcXvQueryPortAttributes(ClientPtr client)
         + rep.text_size;
     rep.length >>= 2;
 
-    _WriteQueryPortAttributesReply(client, &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.num_attributes);
+        swapl(&rep.text_size);
+    }
+
+    WriteToClient(client, sz_xvQueryPortAttributesReply, &rep);
 
     for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
          i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
