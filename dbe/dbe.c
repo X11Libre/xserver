@@ -565,8 +565,6 @@ ProcDbeGetVisualInfo(ClientPtr client)
     DrawablePtr *pDrawables = NULL;
     register int i, rc;
     register int count;         /* number of visual infos in reply */
-    ScreenPtr pScreen;
-    XdbeScreenVisualInfo *pScrVisInfo;
 
     REQUEST_AT_LEAST_SIZE(xDbeGetVisualInfoReq);
     if (stuff->n > UINT32_MAX / sizeof(CARD32))
@@ -597,14 +595,8 @@ ProcDbeGetVisualInfo(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (!(pScrVisInfo = calloc(count, sizeof(XdbeScreenVisualInfo)))) {
-        free(pDrawables);
-
-        return BadAlloc;
-    }
-
     for (i = 0; i < count; i++) {
-        pScreen = (stuff->n == 0) ? screenInfo.screens[i] :
+        ScreenPtr pScreen = (stuff->n == 0) ? screenInfo.screens[i] :
             pDrawables[i]->pScreen;
         pDbeScreenPriv = DBE_SCREEN_PRIV(pScreen);
 
@@ -612,35 +604,35 @@ ProcDbeGetVisualInfo(ClientPtr client)
         if (rc != Success)
             goto clearRpcBuf;
 
-        if (!(*pDbeScreenPriv->GetVisualInfo) (pScreen, &pScrVisInfo[i])) {
-            /* We failed to alloc pScrVisInfo[i].visinfo. */
+        XdbeScreenVisualInfo visualInfo = { 0 };
+        if (!(pDbeScreenPriv->GetVisualInfo(pScreen, &visualInfo))) {
+            /* We failed to alloc visualInfo.visinfo. */
             rc = BadAlloc;
 
             /* Free visinfos that we allocated for previous screen infos. */
             goto clearRpcBuf;
         }
-    }
-
-    for (i = 0; i < count; i++) {
-        const size_t numVisuals = pScrVisInfo[i].count;
 
         /* ensure enough buffer space here, so we don't need to check for
            errors on individual operations */
-        if (!x_rpcbuf_makeroom(&rpcbuf, (numVisuals+1)*8)) {
+        if (!x_rpcbuf_makeroom(&rpcbuf, (visualInfo.count+1)*8)) {
             rc = BadAlloc;
+            free(visualInfo.visinfo);
             goto clearRpcBuf;
         }
 
         /* For each screen in the reply, send off the visual info */
 
-        x_rpcbuf_write_CARD32(&rpcbuf, numVisuals);
-        for (int j = 0; j < numVisuals; j++) {
+        x_rpcbuf_write_CARD32(&rpcbuf, visualInfo.count);
+        for (int j = 0; j < visualInfo.count; j++) {
             /* Write visualID(32), depth(8), perfLevel(8), and pad(16). */
-            x_rpcbuf_write_CARD32(&rpcbuf, pScrVisInfo[i].visinfo[j].visual);
-            x_rpcbuf_write_CARD8(&rpcbuf, pScrVisInfo[i].visinfo[j].depth);
-            x_rpcbuf_write_CARD8(&rpcbuf, pScrVisInfo[i].visinfo[j].perflevel);
+            x_rpcbuf_write_CARD32(&rpcbuf, visualInfo.visinfo[j].visual);
+            x_rpcbuf_write_CARD8(&rpcbuf, visualInfo.visinfo[j].depth);
+            x_rpcbuf_write_CARD8(&rpcbuf, visualInfo.visinfo[j].perflevel);
             x_rpcbuf_write_CARD16(&rpcbuf, 0);
         }
+
+        free(visualInfo.visinfo);
     }
 
     if (rpcbuf.error) {
@@ -667,12 +659,6 @@ ProcDbeGetVisualInfo(ClientPtr client)
 
 clearRpcBuf:
     x_rpcbuf_clear(&rpcbuf);
-    /* Clean up memory. */
-    for (i = 0; i < count; i++) {
-        free(pScrVisInfo[i].visinfo);
-    }
-    free(pScrVisInfo);
-
     free(pDrawables);
 
     return rc;
