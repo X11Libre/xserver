@@ -104,6 +104,7 @@ Equipment Corporation.
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "dix/property_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/selection_priv.h"
@@ -131,7 +132,6 @@ Equipment Corporation.
 #include "mivalidate.h"
 #include "globals.h"
 #include "compint.h"
-#include "inpututils.h"
 #include "privates.h"
 #include "xace.h"
 

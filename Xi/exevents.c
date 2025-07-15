@@ -96,6 +96,7 @@ SOFTWARE.
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
@@ -114,7 +115,6 @@ SOFTWARE.
 #include "xace.h"
 #include "xiquerydevice.h"      /* For List*Info */
 #include "eventstr.h"
-#include "inpututils.h"
 
 #define WID(w) ((w) ? ((w)->drawable.id) : 0)
 #define AllModifiersMask ( \
@@ -1364,7 +1364,6 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
                           XI2Mask **mask)
 {
     int rc;
-    InputClients *iclients = NULL;
     *mask = NULL;
 
     if (listener->type == TOUCH_LISTENER_GRAB ||
@@ -1393,8 +1392,9 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
             else
                 evtype = GetXI2Type(ev->any.type);
 
-            assert(iclients);
             assert(wOtherInputMasks(*win));
+
+            InputClients *iclients = NULL;
             nt_list_for_each_entry(iclients,
                                    wOtherInputMasks(*win)->inputClients, next)
                 if (xi2mask_isset(iclients->xi2mask, dev, evtype))
@@ -1410,6 +1410,8 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
             Mask xi_filter = event_get_filter_from_type(dev, xi_type);
 
             assert(wOtherInputMasks(*win));
+
+            InputClients *iclients = NULL;
             nt_list_for_each_entry(iclients,
                                    wOtherInputMasks(*win)->inputClients, next)
                 if (iclients->mask[dev->id] & xi_filter)

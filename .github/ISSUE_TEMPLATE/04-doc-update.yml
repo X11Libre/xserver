@@ -1,0 +1,39 @@
+name: 🔖 Documentation update
+description: Make your mark for better documentation
+
+labels: [documentation, needs-triage]
+#type: docchange
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the sections below to help others understand our software. If you have a general idea or question then please use the [discussions](https://github.com/orgs/X11Libre/discussions).
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the update
+      placeholder: These things need to be better documented.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Additional Information
+      description: Additional information you want to provide such as tickets related to changes in the software, affected files, screenshots, etc.
+      placeholder: |
+        Add any other context about the update here.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Extra fields
+      options:
+        - label: I have checked the existing [issues](https://github.com/X11Libre/xserver/issues)
+          required: true
+        - label: I have read the [Contributing Guidelines](https://github.com/X11Libre/xserver/blob/master/CONTRIBUTING.md)
+          required: true
+        - label: I'd like to work on this issue
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for requesting this update! We will get back to you as soon as possible.

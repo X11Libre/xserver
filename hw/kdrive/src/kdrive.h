@@ -217,7 +217,7 @@ void KdRemovePointerDriver(KdPointerDriver * driver);
 KdPointerInfo *KdNewPointer(void);
 void KdFreePointer(KdPointerInfo *);
 int KdAddPointer(KdPointerInfo * ki);
-int KdAddConfigPointer(char *pointer);
+int KdAddConfigPointer(const char *pointer);
 void KdRemovePointer(KdPointerInfo * ki);
 
 #define KD_KEY_COUNT 248
@@ -274,9 +274,19 @@ void KdAddKeyboardDriver(KdKeyboardDriver * driver);
 void KdRemoveKeyboardDriver(KdKeyboardDriver * driver);
 KdKeyboardInfo *KdNewKeyboard(void);
 void KdFreeKeyboard(KdKeyboardInfo * ki);
-int KdAddConfigKeyboard(char *pointer);
+int KdAddConfigKeyboard(const char *pointer);
 int KdAddKeyboard(KdKeyboardInfo * ki);
 void KdRemoveKeyboard(KdKeyboardInfo * ki);
+
+typedef struct _KdOsFuncs {
+    int (*Init) (void); /* Only called when the X server is started, when serverGeneration == 1 */
+    void (*Enable) (void);
+    Bool (*SpecialKey) (KeySym);
+    void (*Disable) (void);
+    void (*Fini) (void);
+    void (*pollEvents) (void);
+    void (*Bell) (int, int, int);
+} KdOsFuncs;
 
 typedef struct _KdPointerMatrix {
     int matrix[2][3];
@@ -288,6 +298,13 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 extern Bool kdEmulateMiddleButton;
 extern Bool kdDisableZaphod;
+
+/*
+ * pointer to OS/platform specific callbacks from kdrive core back
+ * into the individual Xserver implementations.
+ * Initialized via KdOSInit()
+ */
+extern const KdOsFuncs *kdOsFuncs;
 
 #define KdGetScreenPriv(pScreen) ((KdPrivScreenPtr) \
     dixLookupPrivate(&(pScreen)->devPrivates, kdScreenPrivateKey))
@@ -344,6 +361,15 @@ void
 
 int
  KdProcessArgument(int argc, char **argv, int i);
+
+/*
+ * Initialize OS/platform specific parts of the Kdrive Xserver.
+ * Also filling kdOsFuncs with the given call vector table.
+ *
+ * @param pOsFuncs pointer to KdOsFuncs structure. Must be valid for the
+ *                 whole lifetime of the Xserver process.
+ */
+void KdOsInit(const KdOsFuncs * pOsFuncs);
 
 void
  KdOsAddInputDrivers(void);

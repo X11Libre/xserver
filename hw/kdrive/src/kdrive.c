@@ -91,6 +91,13 @@ const char *kdGlobalXkbLayout = NULL;
 const char *kdGlobalXkbVariant = NULL;
 const char *kdGlobalXkbOptions = NULL;
 
+
+/*
+ * Carry arguments from InitOutput through driver initialization
+ * to KdScreenInit
+ */
+const KdOsFuncs *kdOsFuncs = NULL;
+
 void
 KdDisableScreen(ScreenPtr pScreen)
 {
@@ -517,6 +524,19 @@ KdProcessArgument(int argc, char **argv, int i)
     return 0;
 }
 
+void
+KdOsInit(const KdOsFuncs * pOsFuncs)
+{
+    kdOsFuncs = pOsFuncs;
+    if (pOsFuncs) {
+        if (serverGeneration == 1) {
+            KdDoSwitchCmd("start");
+            if (pOsFuncs->Init)
+                (*pOsFuncs->Init) ();
+        }
+    }
+}
+
 static Bool
 KdAllocatePrivates(ScreenPtr pScreen)
 {
@@ -555,13 +575,14 @@ Bool KdCloseScreen(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     KdCardInfo *card = pScreenPriv->card;
+    Bool ret;
 
     if (card->cfuncs->closeScreen)
         (*card->cfuncs->closeScreen)(pScreen);
 
     pScreenPriv->closed = TRUE;
 
-    Bool ret = fbCloseScreen(pScreen);
+    ret = fbCloseScreen(pScreen);
 
     if (screen->mynum == card->selected)
         KdDisableScreen(pScreen);

@@ -27,6 +27,7 @@
 
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "os/bug_priv.h"
 
 #include "exglobals.h"
@@ -35,7 +36,6 @@
 #include "xace.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
-#include "inpututils.h"
 #include "eventstr.h"
 #include "scrnintstr.h"
 #include "optionstr.h"

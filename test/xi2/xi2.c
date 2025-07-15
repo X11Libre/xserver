@@ -27,7 +27,9 @@
 #include <dix-config.h>
 
 #include <stdint.h>
-#include "inpututils.h"
+
+#include "dix/inpututils_priv.h"
+
 #include "inputstr.h"
 #include "assert.h"
 

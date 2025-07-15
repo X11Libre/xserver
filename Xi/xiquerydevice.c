@@ -36,6 +36,7 @@
 
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "os/fmt.h"
 
 #include "inputstr.h"
@@ -43,7 +44,6 @@
 #include "xkbsrv.h"
 #include "xserver-properties.h"
 #include "xace.h"
-#include "inpututils.h"
 #include "exglobals.h"
 #include "privates.h"
 #include "xiquerydevice.h"

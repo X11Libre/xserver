@@ -58,8 +58,9 @@
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
-#include "dix/ptrveloc_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
+#include "dix/ptrveloc_priv.h"
 
 #include "xf86_priv.h"
 #include "xf86Priv.h"
@@ -73,7 +74,6 @@
 #include "exevents.h"           /* AddInputDevice */
 #include "exglobals.h"
 #include "eventstr.h"
-#include "inpututils.h"
 #include "optionstr.h"
 #include "xf86Module_priv.h"
 #include "xf86Opt_priv.h"

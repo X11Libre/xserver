@@ -55,6 +55,7 @@ in this Software without prior written authorization from The Open Group.
 #include   "dix/cursor_priv.h"
 #include   "dix/dix_priv.h"
 #include   "dix/input_priv.h"
+#include   "dix/inpututils_priv.h"
 #include   "dix/screen_hooks_priv.h"
 #include   "mi/mi_priv.h"
 #include   "mi/mipointer_priv.h"
@@ -67,7 +68,6 @@ in this Software without prior written authorization from The Open Group.
 #include   "cursorstr.h"
 #include   "dixstruct.h"
 #include   "inputstr.h"
-#include   "inpututils.h"
 #include   "eventstr.h"
 
 typedef struct {
@@ -141,7 +141,7 @@ miPointerInitialize(ScreenPtr pScreen,
     pScreenPriv->screenFuncs = screenFuncs;
     pScreenPriv->waitForUpdate = waitForUpdate;
     pScreenPriv->showTransparent = FALSE;
-    dixScreenHookClose(pScreen, miPointerCloseScreen);
+    dixScreenHookPostClose(pScreen, miPointerCloseScreen);
     dixSetPrivate(&pScreen->devPrivates, miPointerScreenKey, pScreenPriv);
     /*
      * set up screen cursor method table
@@ -169,7 +169,7 @@ static void miPointerCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void 
 {
     SetupScreen(pScreen);
 
-    dixScreenUnhookClose(pScreen, miPointerCloseScreen);
+    dixScreenUnhookPostClose(pScreen, miPointerCloseScreen);
     free((void *) pScreenPriv);
     dixSetPrivate(&pScreen->devPrivates, miPointerScreenKey, NULL);
     FreeEventList(mipointermove_events, GetMaximumEventsNum());

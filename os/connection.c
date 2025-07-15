@@ -100,6 +100,7 @@ SOFTWARE.
 #include "os/client_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
+#include "os/probes_priv.h"
 
 #include "misc.h"               /* for typedef of pointer */
 #include "dixstruct_priv.h"
@@ -117,7 +118,6 @@ SOFTWARE.
 #include <systemd/sd-daemon.h>
 #endif
 
-#include "probes.h"
 #include "xdmcp.h"
 
 #define MAX_CONNECTIONS (1<<16)

@@ -21,13 +21,10 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
+#ifndef _XSERVER_DIX_INPUTUTILS_PRIV_H
+#define _XSERVER_DIX_INPUTUTILS_PRIV_H
 
-#ifdef HAVE_DIX_CONFIG_H
 #include "dix-config.h"
-#endif
-
-#ifndef INPUTUTILS_H
-#define INPUTUTILS_H
 
 #include "input.h"
 #include "eventstr.h"
@@ -43,16 +40,16 @@ struct _ValuatorMask {
     double unaccelerated[MAX_VALUATORS];    /* valuator data */
 };
 
-extern void verify_internal_event(const InternalEvent *ev);
-extern void init_device_event(DeviceEvent *event, DeviceIntPtr dev, Time ms,
-                              enum DeviceEventSource event_source);
-extern void init_gesture_event(GestureEvent *event, DeviceIntPtr dev, Time ms);
-extern int event_get_corestate(DeviceIntPtr mouse, DeviceIntPtr kbd);
-extern void event_set_state(DeviceIntPtr mouse, DeviceIntPtr kbd,
-                            DeviceEvent *event);
-extern void event_set_state_gesture(DeviceIntPtr kbd, GestureEvent *event);
-extern Mask event_get_filter_from_type(DeviceIntPtr dev, int evtype);
-extern Mask event_get_filter_from_xi2type(int evtype);
+void verify_internal_event(const InternalEvent *ev);
+void init_device_event(DeviceEvent *event, DeviceIntPtr dev, Time ms,
+                       enum DeviceEventSource event_source);
+void init_gesture_event(GestureEvent *event, DeviceIntPtr dev, Time ms);
+int event_get_corestate(DeviceIntPtr mouse, DeviceIntPtr kbd);
+void event_set_state(DeviceIntPtr mouse, DeviceIntPtr kbd,
+                     DeviceEvent *event);
+void event_set_state_gesture(DeviceIntPtr kbd, GestureEvent *event);
+Mask event_get_filter_from_type(DeviceIntPtr dev, int evtype);
+Mask event_get_filter_from_xi2type(int evtype);
 
 FP3232 double_to_fp3232(double in);
 FP1616 double_to_fp1616(double in);
@@ -75,4 +72,4 @@ const unsigned char *xi2mask_get_one_mask(const XI2Mask *xi2mask, int deviceid);
 
 Bool CopySprite(SpritePtr src, SpritePtr dst);
 
-#endif
+#endif /* _XSERVER_DIX_INPUTUTILS_PRIV_H */

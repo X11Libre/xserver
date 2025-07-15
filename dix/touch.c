@@ -31,6 +31,7 @@
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
@@ -40,7 +41,6 @@
 #include "scrnintstr.h"
 #include "eventstr.h"
 #include "exglobals.h"
-#include "inpututils.h"
 #include "windowstr.h"
 
 #define TOUCH_HISTORY_SIZE 100

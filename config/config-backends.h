@@ -23,9 +23,11 @@
  * Author: Daniel Stone <daniel@fooishbar.org>
  */
 
-#ifdef HAVE_DIX_CONFIG_H
+#ifndef XSERVER_CONFIG_BACKENDS_H
+#define XSERVER_CONFIG_BACKENDS_H
+
 #include <dix-config.h>
-#endif
+
 #include "input.h"
 #include "list.h"
 
@@ -44,3 +46,5 @@ void config_hal_fini(void);
 int config_wscons_init(void);
 void config_wscons_fini(void);
 #endif
+
+#endif /* XSERVER_CONFIG_BACKENDS_H */

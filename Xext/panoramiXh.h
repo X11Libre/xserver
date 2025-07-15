@@ -1,7 +1,9 @@
-
 /*
  *	Server dispatcher function replacements
  */
+
+#ifndef XSERVER_PANORAMIXH_H
+#define XSERVER_PANORAMIXH_H
 
 extern int PanoramiXCreateWindow(ClientPtr client);
 extern int PanoramiXChangeWindowAttributes(ClientPtr client);
@@ -71,3 +73,5 @@ extern int connBlockScreenStart;
 extern xConnSetupPrefix connSetupPrefix;
 
 extern int (*SavedProcVector[256]) (ClientPtr client);
+
+#endif /* XSERVER_PANORAMIXH_H */

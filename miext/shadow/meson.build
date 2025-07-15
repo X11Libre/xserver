@@ -29,7 +29,7 @@ hdrs_miext_shadow = [
     'shadow.h',
 ]
 
-libxserver_miext_shadow = static_library('libxserver_miext_shadow',
+libxserver_miext_shadow = static_library('xserver_miext_shadow',
     srcs_miext_shadow,
     include_directories: inc,
     dependencies: common_dep,

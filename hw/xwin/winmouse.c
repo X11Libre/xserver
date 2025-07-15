@@ -36,10 +36,11 @@
 #endif
 #include "win.h"
 
+#include "dix/inpututils_priv.h"
+
 #include "inputstr.h"
 #include "exevents.h"           /* for button/axes labels */
 #include "xserver-properties.h"
-#include "inpututils.h"
 
 /* Peek the internal button mapping */
 static CARD8 const *g_winMouseButtonMap = NULL;

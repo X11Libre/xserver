@@ -35,6 +35,7 @@
 #include "dix/eventconvert.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "os/bug_priv.h"
 
 #include "inputstr.h"
@@ -43,7 +44,6 @@
 #include "exglobals.h"
 #include "enterleave.h"
 #include "xkbsrv.h"
-#include "inpututils.h"
 
 /**
  * @file

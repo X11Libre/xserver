@@ -84,7 +84,7 @@ KdEnableColormap(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     int i;
 
-    if (!pScreenPriv->card->cfuncs->putColors)
+    if (!pScreenPriv->card->cfuncs->getColors)
         return;
 
     if (pScreenPriv->screen->fb.depth <= KD_MAX_PSEUDO_DEPTH) {

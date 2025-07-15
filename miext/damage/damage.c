@@ -1569,7 +1569,7 @@ damageWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWindow)
 
 static void damageCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    dixScreenUnhookClose(pScreen, damageCloseScreen);
+    dixScreenUnhookPostClose(pScreen, damageCloseScreen);
     dixScreenUnhookWindowDestroy(pScreen, damageWindowDestroy);
     dixScreenUnhookPixmapDestroy(pScreen, damagePixmapDestroy);
 
@@ -1667,7 +1667,7 @@ DamageSetup(ScreenPtr pScreen)
     pScrPriv->internalLevel = 0;
     pScrPriv->pScreenDamage = 0;
 
-    dixScreenHookClose(pScreen, damageCloseScreen);
+    dixScreenHookPostClose(pScreen, damageCloseScreen);
     dixScreenHookWindowDestroy(pScreen, damageWindowDestroy);
     dixScreenHookPixmapDestroy(pScreen, damagePixmapDestroy);
 
