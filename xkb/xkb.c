@@ -1372,18 +1372,19 @@ static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
     if (rep.totalKeyBehaviors > 0)
         XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, rpcbuf);
 
-    char *desc = rpcbuf->buffer + rpcbuf->wpos;
-
     if (rep.virtualMods) {
-        register int sz;
-
-        for (int i = sz = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
+        CARD8 vmods[XkbPaddedSize(XkbNumVirtualMods)] = { 0 };
+        size_t sz = 0;
+        for (size_t i = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
             if (rep.virtualMods & bit) {
-                desc[sz++] = xkb->server->vmods[i];
+                vmods[sz++] = xkb->server->vmods[i];
             }
         }
-        desc += XkbPaddedSize(sz);
+        x_rpcbuf_write_CARD8s(rpcbuf, vmods, XkbPaddedSize(sz));
     }
+
+    char *desc = rpcbuf->buffer + rpcbuf->wpos;
+
     if (rep.totalKeyExplicit > 0)
         desc = XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, desc);
     if (rep.totalModMapKeys > 0)
