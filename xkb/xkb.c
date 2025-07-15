@@ -1161,36 +1161,26 @@ XkbSizeKeyActions(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteKeyActions(XkbDescPtr xkb, KeyCode firstKeyAct, CARD8 nKeyActs, char *buf)
+static void XkbWriteKeyActions(XkbDescPtr xkb, KeyCode firstKeyAct,
+                               CARD8 nKeyActs, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    CARD8 *numDesc;
-    XkbAnyAction *actDesc;
+    CARD8 *numDesc = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(nKeyActs));
 
-    numDesc = (CARD8 *) buf;
-    for (i = 0; i < nKeyActs; i++) {
+    for (int i = 0; i < nKeyActs; i++) {
         if (xkb->server->key_acts[i + firstKeyAct] == 0)
             numDesc[i] = 0;
         else
             numDesc[i] = XkbKeyNumActions(xkb, (i + firstKeyAct));
     }
-    buf += XkbPaddedSize(nKeyActs);
 
-    actDesc = (XkbAnyAction *) buf;
-    for (i = 0; i < nKeyActs; i++) {
+    for (int i = 0; i < nKeyActs; i++) {
         if (xkb->server->key_acts[i + firstKeyAct] != 0) {
-            unsigned int num;
-
-            num = XkbKeyNumActions(xkb, (i + firstKeyAct));
-            memcpy((char *) actDesc,
-                   (char *) XkbKeyActionsPtr(xkb, (i + firstKeyAct)),
-                   num * SIZEOF(xkbActionWireDesc));
-            actDesc += num;
+            size_t num = XkbKeyNumActions(xkb, (i + firstKeyAct));
+            x_rpcbuf_write_CARD8s(rpcbuf,
+                                  (CARD8*)XkbKeyActionsPtr(xkb, (i + firstKeyAct)),
+                                  num * SIZEOF(xkbActionWireDesc));
         }
     }
-    buf = (char *) actDesc;
-    return buf;
 }
 
 static int
@@ -1385,11 +1375,10 @@ static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
 {
     XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, rpcbuf, client);
     XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, rpcbuf, client);
+    XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, rpcbuf);
 
     char *desc = rpcbuf->buffer + rpcbuf->wpos;
 
-    if (rep.nKeyActs > 0)
-        desc = XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, desc);
     if (rep.totalKeyBehaviors > 0)
         desc = XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, desc);
     if (rep.virtualMods) {
