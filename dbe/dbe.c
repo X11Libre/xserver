@@ -40,6 +40,7 @@
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
 
@@ -563,7 +564,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
     xDbeGetVisualInfoReply rep;
     Drawable *drawables;
     DrawablePtr *pDrawables = NULL;
-    register int i, j, rc;
+    register int i, rc;
     register int count;         /* number of visual infos in reply */
     register int length;        /* length of reply */
     ScreenPtr pScreen;
@@ -595,6 +596,9 @@ ProcDbeGetVisualInfo(ClientPtr client)
     }
 
     count = (stuff->n == 0) ? screenInfo.numScreens : stuff->n;
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!(pScrVisInfo = calloc(count, sizeof(XdbeScreenVisualInfo)))) {
         free(pDrawables);
 
@@ -610,14 +614,14 @@ ProcDbeGetVisualInfo(ClientPtr client)
 
         rc = XaceHookScreenAccess(client, pScreen, DixGetAttrAccess);
         if (rc != Success)
-            goto freeScrVisInfo;
+            goto clearRpcBuf;
 
         if (!(*pDbeScreenPriv->GetVisualInfo) (pScreen, &pScrVisInfo[i])) {
             /* We failed to alloc pScrVisInfo[i].visinfo. */
             rc = BadAlloc;
 
             /* Free visinfos that we allocated for previous screen infos. */
-            goto freeScrVisInfo;
+            goto clearRpcBuf;
         }
 
         /* Account for n, number of xDbeVisInfo items in list. */
@@ -640,52 +644,34 @@ ProcDbeGetVisualInfo(ClientPtr client)
         swapl(&rep.m);
     }
 
-    /* Send off reply. */
-    WriteToClient(client, sizeof(xDbeGetVisualInfoReply), &rep);
-
     for (i = 0; i < count; i++) {
-        CARD32 data32;
+        const size_t numVisuals = pScrVisInfo[i].count;
+
+        /* ensure enough buffer space here, so we don't need to check for
+           errors on individual operations */
+        if (!x_rpcbuf_makeroom(&rpcbuf, (numVisuals+1)*8)) {
+            rc = BadAlloc;
+            goto clearRpcBuf;
+        }
 
         /* For each screen in the reply, send off the visual info */
 
-        /* Send off number of visuals. */
-        data32 = (CARD32) pScrVisInfo[i].count;
-
-        if (client->swapped) {
-            swapl(&data32);
-        }
-
-        WriteToClient(client, sizeof(CARD32), &data32);
-
-        /* Now send off visual info items. */
-        for (j = 0; j < pScrVisInfo[i].count; j++) {
-            xDbeVisInfo visInfo;
-
-            /* Copy the data in the client data structure to a protocol
-             * data structure.  We will send data to the client from the
-             * protocol data structure.
-             */
-
-            visInfo.visualID = (CARD32) pScrVisInfo[i].visinfo[j].visual;
-            visInfo.depth = (CARD8) pScrVisInfo[i].visinfo[j].depth;
-            visInfo.perfLevel = (CARD8) pScrVisInfo[i].visinfo[j].perflevel;
-
-            if (client->swapped) {
-                swapl(&visInfo.visualID);
-
-                /* We do not need to swap depth and perfLevel since they are
-                 * already 1 byte quantities.
-                 */
-            }
-
+        x_rpcbuf_write_CARD32(&rpcbuf, numVisuals);
+        for (int j = 0; j < numVisuals; j++) {
             /* Write visualID(32), depth(8), perfLevel(8), and pad(16). */
-            WriteToClient(client, 2 * sizeof(CARD32), &visInfo.visualID);
+            x_rpcbuf_write_CARD32(&rpcbuf, pScrVisInfo[i].visinfo[j].visual);
+            x_rpcbuf_write_CARD8(&rpcbuf, pScrVisInfo[i].visinfo[j].depth);
+            x_rpcbuf_write_CARD8(&rpcbuf, pScrVisInfo[i].visinfo[j].perflevel);
+            x_rpcbuf_write_CARD16(&rpcbuf, 0);
         }
     }
 
     rc = Success;
+    WriteToClient(client, sizeof(xDbeGetVisualInfoReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
 
- freeScrVisInfo:
+clearRpcBuf:
+    x_rpcbuf_clear(&rpcbuf);
     /* Clean up memory. */
     for (i = 0; i < count; i++) {
         free(pScrVisInfo[i].visinfo);
