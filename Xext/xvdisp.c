@@ -55,19 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteAdaptorInfo(ClientPtr client, xvAdaptorInfo * pAdaptor)
-{
-    swapl(&pAdaptor->base_id);
-    swaps(&pAdaptor->name_size);
-    swaps(&pAdaptor->num_ports);
-    swaps(&pAdaptor->num_formats);
-
-    WriteToClient(client, sz_xvAdaptorInfo, pAdaptor);
-
-    return Success;
-}
-
-static int
 SWriteEncodingInfo(ClientPtr client, xvEncodingInfo * pEncoding)
 {
 
@@ -203,10 +190,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
     return Success;
 }
 
-#define _WriteAdaptorInfo(_c,_d) \
-  if ((_c)->swapped) SWriteAdaptorInfo(_c, _d); \
-  else WriteToClient(_c, sz_xvAdaptorInfo, _d)
-
 #define _WriteAttributeInfo(_c,_d) \
   if ((_c)->swapped) SWriteAttributeInfo(_c, _d); \
   else WriteToClient(_c, sz_xvAttributeInfo, _d)
@@ -276,7 +259,6 @@ static int
 ProcXvQueryAdaptors(ClientPtr client)
 {
     xvFormat format;
-    xvAdaptorInfo ainfo;
     int totalSize, na, nf, rc;
     int nameSize;
     XvAdaptorPtr pa;
@@ -334,15 +316,22 @@ ProcXvQueryAdaptors(ClientPtr client)
     na = pxvs->nAdaptors;
     pa = pxvs->pAdaptors;
     while (na--) {
+        xvAdaptorInfo ainfo = {
+            ainfo.base_id = pa->base_id,
+            ainfo.num_ports = pa->nPorts,
+            ainfo.type = pa->type,
+            ainfo.name_size = nameSize = strlen(pa->name),
+            ainfo.num_formats = pa->nFormats,
+        };
 
-        ainfo.base_id = pa->base_id;
-        ainfo.num_ports = pa->nPorts;
-        ainfo.type = pa->type;
-        ainfo.name_size = nameSize = strlen(pa->name);
-        ainfo.num_formats = pa->nFormats;
+        if (client->swapped) {
+            swapl(&ainfo.base_id);
+            swaps(&ainfo.name_size);
+            swaps(&ainfo.num_ports);
+            swaps(&ainfo.num_formats);
+        }
 
-        _WriteAdaptorInfo(client, &ainfo);
-
+        WriteToClient(client, sz_xvAdaptorInfo, &ainfo);
         WriteToClient(client, nameSize, pa->name);
 
         nf = pa->nFormats;
