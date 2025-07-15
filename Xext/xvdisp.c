@@ -55,18 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteQueryAdaptorsReply(ClientPtr client, xvQueryAdaptorsReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->num_adaptors);
-
-    WriteToClient(client, sz_xvQueryAdaptorsReply, rep);
-
-    return Success;
-}
-
-static int
 SWriteQueryEncodingsReply(ClientPtr client, xvQueryEncodingsReply * rep)
 {
     swaps(&rep->sequenceNumber);
@@ -227,10 +215,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
     return Success;
 }
 
-#define _WriteQueryAdaptorsReply(_c,_d) \
-  if ((_c)->swapped) SWriteQueryAdaptorsReply(_c, _d); \
-  else WriteToClient(_c, sz_xvQueryAdaptorsReply, _d)
-
 #define _WriteQueryEncodingsReply(_c,_d) \
   if ((_c)->swapped) SWriteQueryEncodingsReply(_c, _d); \
   else WriteToClient(_c, sz_xvQueryEncodingsReply, _d)
@@ -282,6 +266,9 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 static int
 ProcXvQueryExtension(ClientPtr client)
 {
+    /* REQUEST(xvQueryExtensionReq); */
+    REQUEST_SIZE_MATCH(xvQueryExtensionReq);
+
     xvQueryExtensionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -289,9 +276,6 @@ ProcXvQueryExtension(ClientPtr client)
         .version = XvVersion,
         .revision = XvRevision
     };
-
-    /* REQUEST(xvQueryExtensionReq); */
-    REQUEST_SIZE_MATCH(xvQueryExtensionReq);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -333,7 +317,8 @@ ProcXvQueryAdaptors(ClientPtr client)
     pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
                                           XvGetScreenKey());
     if (!pxvs) {
-        _WriteQueryAdaptorsReply(client, &rep);
+        if (client->swapped) swaps(&rep.sequenceNumber);
+        WriteToClient(client, sizeof(rep), &rep);
         return Success;
     }
 
@@ -355,7 +340,12 @@ ProcXvQueryAdaptors(ClientPtr client)
 
     rep.length = bytes_to_int32(totalSize);
 
-    _WriteQueryAdaptorsReply(client, &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.num_adaptors);
+    }
+    WriteToClient(client, sizeof(rep), &rep);
 
     na = pxvs->nAdaptors;
     pa = pxvs->pAdaptors;
