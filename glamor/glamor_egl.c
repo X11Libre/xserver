@@ -393,9 +393,23 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 
         if (num_modifiers > 0) {
 #ifdef GBM_BO_WITH_MODIFIERS2
+            /* TODO: Is scanout ever used? If so, where? */
             bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
                                                format, modifiers, num_modifiers,
                                                GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+            if (!bo) {
+                /* something failed, try again without GBM_BO_USE_SCANOUT */
+                /* maybe scanout does work, but modifiers aren't supported */
+                /* we handle this case on the fallback path */
+                bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
+                                                   format, modifiers, num_modifiers,
+                                                   GBM_BO_USE_RENDERING);
+#if 0
+                if (bo) {
+                    /* TODO: scanout failed, but regular buffer succeeded, maybe log something? */
+                }
+#endif
+            }
 #else
             bo = gbm_bo_create_with_modifiers(glamor_egl->gbm, width, height,
                                               format, modifiers, num_modifiers);
@@ -409,12 +423,27 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 
     if (!bo)
     {
+        /* TODO: Is scanout ever used? If so, where? */
         bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
 #ifdef GLAMOR_HAS_GBM_LINEAR
                 (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
                  GBM_BO_USE_LINEAR : 0) |
 #endif
                 GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+        if (!bo) {
+            /* something failed, try again without GBM_BO_USE_SCANOUT */
+            bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
+#ifdef GLAMOR_HAS_GBM_LINEAR
+                    (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
+                     GBM_BO_USE_LINEAR : 0) |
+                     GBM_BO_USE_RENDERING);
+#endif
+#if 0
+            if (bo) {
+                /* TODO: scanout failed, but regular buffer succeeded, maybe log something? */
+            }
+#endif
+        }
     }
 
     if (!bo) {
