@@ -55,18 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteGetPortAttributeReply(ClientPtr client, xvGetPortAttributeReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->value);
-
-    WriteToClient(client, sz_xvGetPortAttributeReply, rep);
-
-    return Success;
-}
-
-static int
 SWriteQueryBestSizeReply(ClientPtr client, xvQueryBestSizeReply * rep)
 {
     swaps(&rep->sequenceNumber);
@@ -120,10 +108,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 
     return Success;
 }
-
-#define _WriteGetPortAttributeReply(_c,_d) \
-  if ((_c)->swapped) SWriteGetPortAttributeReply(_c, _d); \
-  else WriteToClient(_c, sz_xvGetPortAttributeReply, _d)
 
 #define _WriteQueryBestSizeReply(_c,_d) \
   if ((_c)->swapped) SWriteQueryBestSizeReply(_c, _d); \
@@ -650,8 +634,13 @@ ProcXvGetPortAttribute(ClientPtr client)
         .value = value
     };
 
-    _WriteGetPortAttributeReply(client, &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.value);
+    }
 
+    WriteToClient(client, sz_xvGetPortAttributeReply, &rep);
     return Success;
 }
 
