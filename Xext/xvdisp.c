@@ -55,22 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteQueryImageAttributesReply(ClientPtr client,
-                                xvQueryImageAttributesReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->num_planes);
-    swapl(&rep->data_size);
-    swaps(&rep->width);
-    swaps(&rep->height);
-
-    WriteToClient(client, sz_xvQueryImageAttributesReply, rep);
-
-    return Success;
-}
-
-static int
 SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 {
     swaps(&rep->sequenceNumber);
@@ -81,10 +65,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 
     return Success;
 }
-
-#define _WriteQueryImageAttributesReply(_c,_d) \
-  if ((_c)->swapped) SWriteQueryImageAttributesReply(_c, _d); \
-  else WriteToClient(_c, sz_xvQueryImageAttributesReply, _d)
 
 #define _WriteListImageFormatsReply(_c,_d) \
   if ((_c)->swapped) SWriteListImageFormatsReply(_c, _d); \
@@ -929,13 +909,19 @@ ProcXvQueryImageAttributes(ClientPtr client)
         .data_size = size
     };
 
-    _WriteQueryImageAttributesReply(client, &rep);
-    if (client->swapped)
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.num_planes);
+        swapl(&rep.data_size);
+        swaps(&rep.width);
+        swaps(&rep.height);
         SwapLongs((CARD32 *) offsets, rep.length);
+    }
+
+    WriteToClient(client, sz_xvQueryImageAttributesReply, &rep);
     WriteToClient(client, rep.length * sizeof(CARD32), offsets);
-
     free(offsets);
-
     return Success;
 }
 
