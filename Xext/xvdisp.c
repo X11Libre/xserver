@@ -55,19 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteQueryBestSizeReply(ClientPtr client, xvQueryBestSizeReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->actual_width);
-    swaps(&rep->actual_height);
-
-    WriteToClient(client, sz_xvQueryBestSizeReply, rep);
-
-    return Success;
-}
-
-static int
 SWriteQueryPortAttributesReply(ClientPtr client,
                                xvQueryPortAttributesReply * rep)
 {
@@ -108,10 +95,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 
     return Success;
 }
-
-#define _WriteQueryBestSizeReply(_c,_d) \
-  if ((_c)->swapped) SWriteQueryBestSizeReply(_c, _d); \
-  else WriteToClient(_c, sz_xvQueryBestSizeReply, _d)
 
 #define _WriteQueryPortAttributesReply(_c,_d) \
   if ((_c)->swapped) SWriteQueryPortAttributesReply(_c, _d); \
@@ -667,8 +650,14 @@ ProcXvQueryBestSize(ClientPtr client)
         .actual_height = actual_height
     };
 
-    _WriteQueryBestSizeReply(client, &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.actual_width);
+        swaps(&rep.actual_height);
+    }
 
+    WriteToClient(client, sz_xvQueryBestSizeReply, &rep);
     return Success;
 }
 
