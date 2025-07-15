@@ -55,19 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteQueryExtensionReply(ClientPtr client, xvQueryExtensionReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swaps(&rep->version);
-    swaps(&rep->revision);
-
-    WriteToClient(client, sz_xvQueryExtensionReply, rep);
-
-    return Success;
-}
-
-static int
 SWriteQueryAdaptorsReply(ClientPtr client, xvQueryAdaptorsReply * rep)
 {
     swaps(&rep->sequenceNumber);
@@ -244,10 +231,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
   if ((_c)->swapped) SWriteQueryAdaptorsReply(_c, _d); \
   else WriteToClient(_c, sz_xvQueryAdaptorsReply, _d)
 
-#define _WriteQueryExtensionReply(_c,_d) \
-  if ((_c)->swapped) SWriteQueryExtensionReply(_c, _d); \
-  else WriteToClient(_c, sz_xvQueryExtensionReply, _d)
-
 #define _WriteQueryEncodingsReply(_c,_d) \
   if ((_c)->swapped) SWriteQueryEncodingsReply(_c, _d); \
   else WriteToClient(_c, sz_xvQueryEncodingsReply, _d)
@@ -310,8 +293,14 @@ ProcXvQueryExtension(ClientPtr client)
     /* REQUEST(xvQueryExtensionReq); */
     REQUEST_SIZE_MATCH(xvQueryExtensionReq);
 
-    _WriteQueryExtensionReply(client, &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.version);
+        swaps(&rep.revision);
+    }
 
+    WriteToClient(client, sizeof(rep), &rep);
     return Success;
 }
 
