@@ -55,21 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteEncodingInfo(ClientPtr client, xvEncodingInfo * pEncoding)
-{
-
-    swapl(&pEncoding->encoding);
-    swaps(&pEncoding->name_size);
-    swaps(&pEncoding->width);
-    swaps(&pEncoding->height);
-    swapl(&pEncoding->rate.numerator);
-    swapl(&pEncoding->rate.denominator);
-    WriteToClient(client, sz_xvEncodingInfo, pEncoding);
-
-    return Success;
-}
-
-static int
 SWriteFormat(ClientPtr client, xvFormat * pFormat)
 {
     swapl(&pFormat->visual);
@@ -193,10 +178,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 #define _WriteAttributeInfo(_c,_d) \
   if ((_c)->swapped) SWriteAttributeInfo(_c, _d); \
   else WriteToClient(_c, sz_xvAttributeInfo, _d)
-
-#define _WriteEncodingInfo(_c,_d) \
-  if ((_c)->swapped) SWriteEncodingInfo(_c, _d); \
-  else WriteToClient(_c, sz_xvEncodingInfo, _d)
 
 #define _WriteFormat(_c,_d) \
   if ((_c)->swapped) SWriteFormat(_c, _d); \
@@ -353,7 +334,6 @@ ProcXvQueryAdaptors(ClientPtr client)
 static int
 ProcXvQueryEncodings(ClientPtr client)
 {
-    xvEncodingInfo einfo;
     int totalSize;
     int nameSize;
     XvPortPtr pPort;
@@ -393,13 +373,23 @@ ProcXvQueryEncodings(ClientPtr client)
     ne = pPort->pAdaptor->nEncodings;
     pe = pPort->pAdaptor->pEncodings;
     while (ne--) {
+        xvEncodingInfo einfo = { 0 };
         einfo.encoding = pe->id;
         einfo.name_size = nameSize = strlen(pe->name);
         einfo.width = pe->width;
         einfo.height = pe->height;
         einfo.rate.numerator = pe->rate.numerator;
         einfo.rate.denominator = pe->rate.denominator;
-        _WriteEncodingInfo(client, &einfo);
+
+        if (client->swapped) {
+            swapl(&einfo.encoding);
+            swaps(&einfo.name_size);
+            swaps(&einfo.width);
+            swaps(&einfo.height);
+            swapl(&einfo.rate.numerator);
+            swapl(&einfo.rate.denominator);
+        }
+        WriteToClient(client, sz_xvEncodingInfo, &einfo);
         WriteToClient(client, nameSize, pe->name);
         pe++;
     }
