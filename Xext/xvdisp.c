@@ -55,22 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
-{
-    swaps(&rep->sequenceNumber);
-    swapl(&rep->length);
-    swapl(&rep->num_formats);
-
-    WriteToClient(client, sz_xvListImageFormatsReply, rep);
-
-    return Success;
-}
-
-#define _WriteListImageFormatsReply(_c,_d) \
-  if ((_c)->swapped) SWriteListImageFormatsReply(_c, _d); \
-  else WriteToClient(_c, sz_xvListImageFormatsReply, _d)
-
-static int
 ProcXvQueryExtension(ClientPtr client)
 {
     /* REQUEST(xvQueryExtensionReq); */
@@ -946,7 +930,13 @@ ProcXvListImageFormats(ClientPtr client)
             bytes_to_int32(pPort->pAdaptor->nImages * sz_xvImageFormatInfo)
     };
 
-    _WriteListImageFormatsReply(client, &rep);
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.num_formats);
+    }
+
+    WriteToClient(client, sz_xvListImageFormatsReply, &rep);
 
     pImage = pPort->pAdaptor->pImages;
 
