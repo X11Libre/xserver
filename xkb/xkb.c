@@ -1206,25 +1206,18 @@ XkbSizeKeyBehaviors(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteKeyBehaviors(XkbDescPtr xkb, KeyCode firstKeyBehavior, CARD8 nKeyBehaviors, char *buf)
+static void XkbWriteKeyBehaviors(XkbDescPtr xkb, KeyCode firstKeyBehavior,
+                                 CARD8 nKeyBehaviors, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    xkbBehaviorWireDesc *wire;
-    XkbBehavior *pBhvr;
-
-    wire = (xkbBehaviorWireDesc *) buf;
-    pBhvr = &xkb->server->behaviors[firstKeyBehavior];
-    for (i = 0; i < nKeyBehaviors; i++, pBhvr++) {
+    XkbBehavior *pBhvr = &xkb->server->behaviors[firstKeyBehavior];
+    for (int i = 0; i < nKeyBehaviors; i++, pBhvr++) {
         if (pBhvr->type != XkbKB_Default) {
+            xkbBehaviorWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbBehaviorWireDesc));
             wire->key = i + firstKeyBehavior;
             wire->type = pBhvr->type;
             wire->data = pBhvr->data;
-            wire++;
         }
     }
-    buf = (char *) wire;
-    return buf;
 }
 
 static int
@@ -1376,11 +1369,11 @@ static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
     XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, rpcbuf, client);
     XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, rpcbuf, client);
     XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, rpcbuf);
+    if (rep.totalKeyBehaviors > 0)
+        XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, rpcbuf);
 
     char *desc = rpcbuf->buffer + rpcbuf->wpos;
 
-    if (rep.totalKeyBehaviors > 0)
-        desc = XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, desc);
     if (rep.virtualMods) {
         register int sz;
 
