@@ -561,12 +561,10 @@ ProcDbeGetVisualInfo(ClientPtr client)
 {
     REQUEST(xDbeGetVisualInfoReq);
     DbeScreenPrivPtr pDbeScreenPriv;
-    xDbeGetVisualInfoReply rep;
     Drawable *drawables;
     DrawablePtr *pDrawables = NULL;
     register int i, rc;
     register int count;         /* number of visual infos in reply */
-    register int length;        /* length of reply */
     ScreenPtr pScreen;
     XdbeScreenVisualInfo *pScrVisInfo;
 
@@ -605,8 +603,6 @@ ProcDbeGetVisualInfo(ClientPtr client)
         return BadAlloc;
     }
 
-    length = 0;
-
     for (i = 0; i < count; i++) {
         pScreen = (stuff->n == 0) ? screenInfo.screens[i] :
             pDrawables[i]->pScreen;
@@ -623,25 +619,6 @@ ProcDbeGetVisualInfo(ClientPtr client)
             /* Free visinfos that we allocated for previous screen infos. */
             goto clearRpcBuf;
         }
-
-        /* Account for n, number of xDbeVisInfo items in list. */
-        length += sizeof(CARD32);
-
-        /* Account for n xDbeVisInfo items */
-        length += pScrVisInfo[i].count * sizeof(xDbeVisInfo);
-    }
-
-    rep = (xDbeGetVisualInfoReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(length),
-        .m = count
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.m);
     }
 
     for (i = 0; i < count; i++) {
@@ -664,6 +641,24 @@ ProcDbeGetVisualInfo(ClientPtr client)
             x_rpcbuf_write_CARD8(&rpcbuf, pScrVisInfo[i].visinfo[j].perflevel);
             x_rpcbuf_write_CARD16(&rpcbuf, 0);
         }
+    }
+
+    if (rpcbuf.error) {
+        rc = BadAlloc;
+        goto clearRpcBuf;
+    }
+
+    xDbeGetVisualInfoReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = bytes_to_int32(rpcbuf.wpos),
+        .m = count
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.m);
     }
 
     rc = Success;
