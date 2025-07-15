@@ -55,28 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteImageFormatInfo(ClientPtr client, xvImageFormatInfo * pImage)
-{
-    swapl(&pImage->id);
-    swapl(&pImage->red_mask);
-    swapl(&pImage->green_mask);
-    swapl(&pImage->blue_mask);
-    swapl(&pImage->y_sample_bits);
-    swapl(&pImage->u_sample_bits);
-    swapl(&pImage->v_sample_bits);
-    swapl(&pImage->horz_y_period);
-    swapl(&pImage->horz_u_period);
-    swapl(&pImage->horz_v_period);
-    swapl(&pImage->vert_y_period);
-    swapl(&pImage->vert_u_period);
-    swapl(&pImage->vert_v_period);
-
-    WriteToClient(client, sz_xvImageFormatInfo, pImage);
-
-    return Success;
-}
-
-static int
 SWriteGrabPortReply(ClientPtr client, xvGrabPortReply * rep)
 {
     swaps(&rep->sequenceNumber);
@@ -177,10 +155,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
 #define _WriteListImageFormatsReply(_c,_d) \
   if ((_c)->swapped) SWriteListImageFormatsReply(_c, _d); \
   else WriteToClient(_c, sz_xvListImageFormatsReply, _d)
-
-#define _WriteImageFormatInfo(_c,_d) \
-  if ((_c)->swapped) SWriteImageFormatInfo(_c, _d); \
-  else WriteToClient(_c, sz_xvImageFormatInfo, _d)
 
 static int
 ProcXvQueryExtension(ClientPtr client)
@@ -1014,7 +988,6 @@ ProcXvListImageFormats(ClientPtr client)
     XvPortPtr pPort;
     XvImagePtr pImage;
     int i;
-    xvImageFormatInfo info;
 
     REQUEST(xvListImageFormatsReq);
 
@@ -1035,6 +1008,7 @@ ProcXvListImageFormats(ClientPtr client)
     pImage = pPort->pAdaptor->pImages;
 
     for (i = 0; i < pPort->pAdaptor->nImages; i++, pImage++) {
+        xvImageFormatInfo info;
         info.id = pImage->id;
         info.type = pImage->type;
         info.byte_order = pImage->byte_order;
@@ -1057,7 +1031,24 @@ ProcXvListImageFormats(ClientPtr client)
         info.vert_v_period = pImage->vert_v_period;
         memcpy(&info.comp_order, pImage->component_order, 32);
         info.scanline_order = pImage->scanline_order;
-        _WriteImageFormatInfo(client, &info);
+
+        if (client->swapped) {
+            swapl(&info.id);
+            swapl(&info.red_mask);
+            swapl(&info.green_mask);
+            swapl(&info.blue_mask);
+            swapl(&info.y_sample_bits);
+            swapl(&info.u_sample_bits);
+            swapl(&info.v_sample_bits);
+            swapl(&info.horz_y_period);
+            swapl(&info.horz_u_period);
+            swapl(&info.horz_v_period);
+            swapl(&info.vert_y_period);
+            swapl(&info.vert_u_period);
+            swapl(&info.vert_v_period);
+        }
+
+        WriteToClient(client, sz_xvImageFormatInfo, &info);
     }
 
     return Success;
