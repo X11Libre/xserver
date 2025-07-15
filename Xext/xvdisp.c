@@ -55,15 +55,6 @@ unsigned long XvXRTPort;
 #endif /* XINERAMA */
 
 static int
-SWriteFormat(ClientPtr client, xvFormat * pFormat)
-{
-    swapl(&pFormat->visual);
-    WriteToClient(client, sz_xvFormat, pFormat);
-
-    return Success;
-}
-
-static int
 SWriteAttributeInfo(ClientPtr client, xvAttributeInfo * pAtt)
 {
     swapl(&pAtt->flags);
@@ -179,10 +170,6 @@ SWriteListImageFormatsReply(ClientPtr client, xvListImageFormatsReply * rep)
   if ((_c)->swapped) SWriteAttributeInfo(_c, _d); \
   else WriteToClient(_c, sz_xvAttributeInfo, _d)
 
-#define _WriteFormat(_c,_d) \
-  if ((_c)->swapped) SWriteFormat(_c, _d); \
-  else WriteToClient(_c, sz_xvFormat, _d)
-
 #define _WriteGrabPortReply(_c,_d) \
   if ((_c)->swapped) SWriteGrabPortReply(_c, _d); \
   else WriteToClient(_c, sz_xvGrabPortReply, _d)
@@ -239,7 +226,6 @@ ProcXvQueryExtension(ClientPtr client)
 static int
 ProcXvQueryAdaptors(ClientPtr client)
 {
-    xvFormat format;
     int totalSize, na, nf, rc;
     int nameSize;
     XvAdaptorPtr pa;
@@ -318,14 +304,20 @@ ProcXvQueryAdaptors(ClientPtr client)
         nf = pa->nFormats;
         pf = pa->pFormats;
         while (nf--) {
-            format.depth = pf->depth;
-            format.visual = pf->visual;
-            _WriteFormat(client, &format);
+            xvFormat format = {
+                .depth = pf->depth,
+                .visual = pf->visual
+            };
+
+            if (client->swapped)
+                swapl(&format.visual);
+
+            WriteToClient(client, sz_xvFormat, &format);
+
             pf++;
         }
 
         pa++;
-
     }
 
     return Success;
