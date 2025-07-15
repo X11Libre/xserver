@@ -788,8 +788,9 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     struct glamor_egl_screen_private *glamor_egl;
     EGLint num;
 
-    /* Explicitly zero the count as the caller may ignore the return value */
+    /* Explicitly zero the count and modifiers as the caller may ignore the return value */
     *num_modifiers = 0;
+    *modifiers = NULL;
 
     glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
 
@@ -817,6 +818,8 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     return TRUE;
 #else
     *num_modifiers = 0;
+    *modifiers = NULL;
+
     return TRUE;
 #endif
 }
