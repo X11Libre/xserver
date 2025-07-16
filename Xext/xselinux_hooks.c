@@ -114,7 +114,7 @@ SELinuxDoCheck(SELinuxSubjectRec * subj, SELinuxObjectRec * obj,
 static void
 SELinuxLabelClient(ClientPtr client)
 {
-    int fd = XaceGetConnectionNumber(client);
+    int fd = GetClientFd(client);
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     char *ctx;
