@@ -129,7 +129,7 @@ SELinuxLabelClient(ClientPtr client)
     }
 
     /* For local clients, try and determine the executable name */
-    if (XaceIsLocal(client)) {
+    if (ClientIsLocal(client)) {
         /* Get cached command name if CLIENTIDS is enabled. */
         const char *cmdname = GetClientCmdName(client);
         Bool cached = (cmdname != NULL);
