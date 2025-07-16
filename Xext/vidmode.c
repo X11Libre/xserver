@@ -1352,10 +1352,7 @@ ProcVidModeGetDotClocks(ClientPtr client)
     REQUEST(xXF86VidModeGetDotClocksReq);
     ScreenPtr pScreen;
     VidModePtr pVidMode;
-    int n;
     int numClocks;
-    CARD32 dotclock;
-    int *Clocks = NULL;
     Bool ClockProg;
 
     DEBUG_P("XF86VidModeGetDotClocks");
@@ -1372,15 +1369,25 @@ ProcVidModeGetDotClocks(ClientPtr client)
 
     numClocks = pVidMode->GetNumOfClocks(pScreen, &ClockProg);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!ClockProg) {
-        Clocks = calloc(numClocks, sizeof(int));
+        int *Clocks = calloc(numClocks, sizeof(int));
         if (!Clocks)
             return BadValue;
         if (!pVidMode->GetClocks(pScreen, Clocks)) {
             free(Clocks);
             return BadValue;
         }
+
+        for (int n = 0; n < numClocks; n++)
+            x_rpcbuf_write_CARD32(&rpcbuf, Clocks[n]);
+
+        free(Clocks);
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     xXF86VidModeGetDotClocksReply rep = {
         .type = X_Reply,
@@ -1399,15 +1406,9 @@ ProcVidModeGetDotClocks(ClientPtr client)
         swapl(&rep.maxclocks);
         swapl(&rep.flags);
     }
-    WriteToClient(client, sizeof(xXF86VidModeGetDotClocksReply), &rep);
-    if (!ClockProg && Clocks) {
-        for (n = 0; n < numClocks; n++) {
-            dotclock = Clocks[n];
-            WriteSwappedDataToClient(client, 4, (char *) &dotclock);
-        }
-    }
 
-    free(Clocks);
+    WriteToClient(client, sizeof(xXF86VidModeGetDotClocksReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
