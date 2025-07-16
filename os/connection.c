@@ -626,7 +626,7 @@ AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
 
     OsCommPtr oc = calloc(1, sizeof(OsCommRec));
     if (!oc)
-        return NullClient;
+        return NULL;
     oc->trans_conn = trans_conn;
     oc->fd = fd;
     oc->input = (ConnectionInputPtr) NULL;
@@ -636,7 +636,7 @@ AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
     oc->flags = 0;
     if (!(client = NextAvailableClient((void *) oc))) {
         free(oc);
-        return NullClient;
+        return NULL;
     }
     client->local = ComputeLocalClient(client);
     ospoll_add(server_poll, fd,
