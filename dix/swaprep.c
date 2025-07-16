@@ -182,30 +182,6 @@ SGenericReply(ClientPtr pClient, int size, xGenericReply * pRep)
 }
 
 static void _X_COLD
-SwapTimecoord(xTimecoord * pCoord)
-{
-    swapl(&pCoord->time);
-    swaps(&pCoord->x);
-    swaps(&pCoord->y);
-}
-
-void _X_COLD
-SwapTimeCoordWrite(ClientPtr pClient, int size, xTimecoord * pRep)
-{
-    int i, n;
-    xTimecoord *pRepT;
-
-    n = size / sizeof(xTimecoord);
-    pRepT = pRep;
-    for (i = 0; i < n; i++) {
-        SwapTimecoord(pRepT);
-        pRepT++;
-    }
-    WriteToClient(pClient, size, pRep);
-
-}
-
-static void _X_COLD
 SwapCharInfo(xCharInfo * pInfo)
 {
     swaps(&pInfo->leftSideBearing);
