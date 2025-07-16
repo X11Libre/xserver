@@ -1331,24 +1331,17 @@ XkbSizeVirtualModMap(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
-                      CARD8 nVModMapKeys, char *buf)
+static void XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
+                                  CARD8 nVModMapKeys, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    xkbVModMapWireDesc *wire;
-    unsigned short *pMap;
-
-    wire = (xkbVModMapWireDesc *) buf;
-    pMap = &xkb->server->vmodmap[firstVModMapKey];
-    for (i = 0; i < nVModMapKeys; i++, pMap++) {
+    unsigned short *pMap = &xkb->server->vmodmap[firstVModMapKey];
+    for (int i = 0; i < nVModMapKeys; i++, pMap++) {
         if (*pMap != 0) {
+            xkbVModMapWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbVModMapWireDesc));
             wire->key = i + firstVModMapKey;
             wire->vmods = *pMap;
-            wire++;
         }
     }
-    return (char *) wire;
 }
 
 static Status
@@ -1394,11 +1387,8 @@ static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
         XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, rpcbuf);
     if (rep.totalModMapKeys > 0)
         XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, rpcbuf);
-
-    char *desc = rpcbuf->buffer + rpcbuf->wpos;
-
     if (rep.totalVModMapKeys > 0)
-        desc = XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, desc);
+        XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, rpcbuf);
 }
 
 int
