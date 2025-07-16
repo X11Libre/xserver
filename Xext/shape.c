@@ -205,15 +205,14 @@ CreateClipShape(WindowPtr pWin)
 static int
 ProcShapeQueryVersion(ClientPtr client)
 {
+    REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
+
     xShapeQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_SHAPE_MAJOR_VERSION,
         .minorVersion = SERVER_SHAPE_MINOR_VERSION
     };
-
-    REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -619,7 +618,6 @@ ProcShapeQueryExtents(ClientPtr client)
 {
     REQUEST(xShapeQueryExtentsReq);
     WindowPtr pWin;
-    xShapeQueryExtentsReply rep;
     BoxRec extents, *pExtents;
     int rc;
     RegionPtr region;
@@ -628,13 +626,14 @@ ProcShapeQueryExtents(ClientPtr client)
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
-    rep = (xShapeQueryExtentsReply) {
+
+    xShapeQueryExtentsReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .boundingShaped = (wBoundingShape(pWin) != 0),
         .clipShaped = (wClipShape(pWin) != 0)
     };
+
     if ((region = wBoundingShape(pWin))) {
         /* this is done in two steps because of a compiler bug on SunOS 4.1.3 */
         pExtents = RegionExtents(region);
@@ -901,7 +900,6 @@ ProcShapeInputSelected(ClientPtr client)
     WindowPtr pWin;
     ShapeEventPtr pShapeEvent, *pHead;
     int enabled, rc;
-    xShapeInputSelectedReply rep;
 
     REQUEST_SIZE_MATCH(xShapeInputSelectedReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
@@ -920,12 +918,13 @@ ProcShapeInputSelected(ClientPtr client)
             }
         }
     }
-    rep = (xShapeInputSelectedReply) {
+
+    xShapeInputSelectedReply rep = {
         .type = X_Reply,
         .enabled = enabled,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -939,7 +938,6 @@ ProcShapeGetRectangles(ClientPtr client)
 {
     REQUEST(xShapeGetRectanglesReq);
     WindowPtr pWin;
-    xShapeGetRectanglesReply rep;
     xRectangle *rects = NULL;
     int nrects, i, rc;
     RegionPtr region;
@@ -1005,13 +1003,15 @@ ProcShapeGetRectangles(ClientPtr client)
             }
         }
     }
-    rep = (xShapeGetRectanglesReply) {
+
+    xShapeGetRectanglesReply rep = {
         .type = X_Reply,
         .ordering = YXBanded,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(nrects * sizeof(xRectangle)),
         .nrects = nrects
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
