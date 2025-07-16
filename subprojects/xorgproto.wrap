@@ -1,0 +1,5 @@
+[wrap-git]
+url = https://gitlab.freedesktop.org/xorg/proto/xorgproto.git
+revision = HEAD
+depth = 1
+
