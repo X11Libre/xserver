@@ -275,12 +275,6 @@ XaceGetConnectionNumber(ClientPtr client)
     return GetClientFd(client);
 }
 
-int
-XaceIsLocal(ClientPtr client)
-{
-    return ClientIsLocal(client);
-}
-
 Bool
 XaceRegisterCallback(int hook, CallbackProcPtr callback, void *data)
 {

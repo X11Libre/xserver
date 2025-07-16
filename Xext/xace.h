@@ -100,7 +100,6 @@ int XaceHookKeyAvail(xEventPtr ev, DeviceIntPtr dev, int count);
 /* XTrans wrappers for use by security modules
  */
 int XaceGetConnectionNumber(ClientPtr ptr);
-int XaceIsLocal(ClientPtr ptr);
 
 /* From the original Security extension...
  */
