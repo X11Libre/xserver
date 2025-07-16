@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -1968,11 +1969,10 @@ PanoramiXGetImage(ClientPtr client)
     DrawablePtr pDraw;
     PanoramiXRes *draw;
     Bool isRoot;
-    char *pBuf;
     int i, x, y, w, h, format, rc;
     Mask plane = 0, planemask;
     int linesDone, nlines, linesPerBuf;
-    long widthBytesLine, length;
+    long widthBytesLine;
 
     REQUEST(xGetImageReq);
 
@@ -2040,18 +2040,16 @@ PanoramiXGetImage(ClientPtr client)
                                               IncludeInferiors);
     }
 
-
+    size_t length;
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(w, pDraw->depth);
         length = widthBytesLine * h;
-
     }
     else {
         widthBytesLine = BitmapBytePad(w);
         plane = ((Mask) 1) << (pDraw->depth - 1);
         /* only planes asked for */
         length = widthBytesLine * h * Ones(planemask & (plane | (plane - 1)));
-
     }
 
     xGetImageReply rep = {
@@ -2071,15 +2069,18 @@ PanoramiXGetImage(ClientPtr client)
         if (linesPerBuf > h)
             linesPerBuf = h;
     }
-    if (!(pBuf = calloc(linesPerBuf, widthBytesLine)))
-        return BadAlloc;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.visual);
     }
-    WriteToClient(client, sizeof(rep), &rep);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    /* can become quite big, so make enough room so we don't need to relloc */
+    if (!x_rpcbuf_makeroom(&rpcbuf, length))
+        return BadAlloc;
 
     if (linesPerBuf == 0) {
         /* nothing to do */
@@ -2089,14 +2090,13 @@ PanoramiXGetImage(ClientPtr client)
         while (h - linesDone > 0) {
             nlines = min(linesPerBuf, h - linesDone);
 
-            if (pDraw->depth == 1)
-                memset(pBuf, 0, nlines * widthBytesLine);
-
+            char *pBuf = x_rpcbuf_reserve(&rpcbuf, nlines * widthBytesLine);
+            if (!pBuf)
+                return BadAlloc;
             XineramaGetImageData(drawables, x, y + linesDone, w, nlines,
                                  format, planemask, pBuf, widthBytesLine,
                                  isRoot);
 
-            WriteToClient(client, (int) (nlines * widthBytesLine), pBuf);
             linesDone += nlines;
         }
     }
@@ -2107,20 +2107,21 @@ PanoramiXGetImage(ClientPtr client)
                 while (h - linesDone > 0) {
                     nlines = min(linesPerBuf, h - linesDone);
 
-                    memset(pBuf, 0, nlines * widthBytesLine);
-
+                    char *pBuf = x_rpcbuf_reserve(&rpcbuf, nlines * widthBytesLine);
+                    if (!pBuf)
+                        return BadAlloc;
                     XineramaGetImageData(drawables, x, y + linesDone, w,
                                          nlines, format, plane, pBuf,
                                          widthBytesLine, isRoot);
-
-                    WriteToClient(client, (int)(nlines * widthBytesLine), pBuf);
 
                     linesDone += nlines;
                 }
             }
         }
     }
-    free(pBuf);
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
