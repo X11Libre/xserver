@@ -33,7 +33,9 @@ from The Open Group.
 #include <X11/Xproto.h>
 #include <X11/extensions/xcmiscproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "misc.h"
@@ -106,6 +108,15 @@ ProcXCMiscGetXIDList(ClientPtr client)
         return BadAlloc;
     }
     count = GetXIDList(client, stuff->count, pids);
+
+    struct x_rpcbuf rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    x_rpcbuf_write_CARD32s(&rpcbuf, pids, count);
+    free(pids);
+
+    if (rpcbuf.error)
+        return BadAlloc;
+
     rep = (xXCMiscGetXIDListReply) {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -117,12 +128,9 @@ ProcXCMiscGetXIDList(ClientPtr client)
         swapl(&rep.length);
         swapl(&rep.count);
     }
+
     WriteToClient(client, sizeof(xXCMiscGetXIDListReply), &rep);
-    if (count) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, count * sizeof(XID), pids);
-    }
-    free(pids);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
