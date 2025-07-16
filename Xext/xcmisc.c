@@ -156,26 +156,10 @@ ProcXCMiscDispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcXCMiscDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-    case X_XCMiscGetVersion:
-        return ProcXCMiscGetVersion(client);
-    case X_XCMiscGetXIDRange:
-        return ProcXCMiscGetXIDRange(client);
-    case X_XCMiscGetXIDList:
-        return ProcXCMiscGetXIDList(client);
-    default:
-        return BadRequest;
-    }
-}
-
 void
 XCMiscExtensionInit(void)
 {
     AddExtension(XCMiscExtensionName, 0, 0,
-                 ProcXCMiscDispatch, SProcXCMiscDispatch,
+                 ProcXCMiscDispatch, ProcXCMiscDispatch,
                  NULL, StandardMinorOpcode);
 }
