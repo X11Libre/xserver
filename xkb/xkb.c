@@ -1510,6 +1510,10 @@ ProcXkbGetMap(ClientPtr client)
     if (!x_rpcbuf_makeroom(&rpcbuf, payload_len))
         return BadAlloc;
 
+    if (rpcbuf.wpos != payload_len)
+        LogMessage(X_WARNING, "ProcXkbGetMap() payload_len mismatch: %ld but shoud be %d\n",
+                   rpcbuf.wpos, payload_len);
+
     XkbAssembleMap(client, xkb, rep, &rpcbuf);
 
     if (client->swapped) {
