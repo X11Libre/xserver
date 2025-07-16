@@ -82,8 +82,6 @@ option('screensaver', type: 'boolean', value: true,
        description: 'ScreenSaver extension')
 option('xres', type: 'boolean', value: true,
        description: 'XRes extension')
-option('xace', type: 'boolean', value: true,
-       description: 'X-ACE extension')
 option('xselinux', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'XSELINUX extension')
 option('namespace', type: 'boolean', value: true,
