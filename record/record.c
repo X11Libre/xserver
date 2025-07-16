@@ -1226,7 +1226,7 @@ RecordCanonicalizeClientSpecifiers(XID *pClientspecs, int *pNumClientspecs,
             for (nc = 0, j = 1; j < currentMaxClients; j++) {
                 ClientPtr client = clients[j];
 
-                if (client != NullClient &&
+                if (client != NULL &&
                     client->clientState == ClientStateRunning &&
                     client->clientAsMask != excludespec) {
                     pCanon[nc++] = client->clientAsMask;
