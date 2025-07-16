@@ -110,8 +110,7 @@ glamor_get_dash_pixmap(GCPtr gc)
         ChangeGCVal     changes;
 
         changes.val = pixel;
-        (void) ChangeGC(NullClient, scratch_gc,
-                        GCForeground, &changes);
+        (void) ChangeGC(NULL, scratch_gc, GCForeground, &changes);
         ValidateGC(&pixmap->drawable, scratch_gc);
         rect.x = offset;
         rect.y = 0;

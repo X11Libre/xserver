@@ -97,7 +97,7 @@ glamor_copy_glyph(PixmapPtr     glyph_pixmap,
         }
         changes[0].val = 0xff;
         changes[1].val = 0x00;
-        if (ChangeGC(NullClient, scratch_gc,
+        if (ChangeGC(NULL, scratch_gc,
                      GCForeground|GCBackground, changes) != Success) {
             glamor_destroy_pixmap(upload_pixmap);
             FreeScratchGC(scratch_gc);
