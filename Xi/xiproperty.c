@@ -851,8 +851,6 @@ XISetDevicePropertyDeletable(DeviceIntPtr dev, Atom property, Bool deletable)
 int
 ProcXListDeviceProperties(ClientPtr client)
 {
-    Atom *atoms;
-    int natoms;
     DeviceIntPtr dev;
     int rc = Success;
 
@@ -863,9 +861,18 @@ ProcXListDeviceProperties(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    Atom *atoms = NULL;
+    int natoms;
     rc = list_atoms(dev, &natoms, &atoms);
     if (rc != Success)
         return rc;
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(&rpcbuf, atoms, natoms);
+    free(atoms);
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     xListDevicePropertiesReply rep = {
         .repType = X_Reply,
@@ -881,12 +888,8 @@ ProcXListDeviceProperties(ClientPtr client)
         swaps(&rep.nAtoms);
     }
     WriteToClient(client, sizeof(xListDevicePropertiesReply), &rep);
-    if (natoms) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, natoms * sizeof(Atom), atoms);
-        free(atoms);
-    }
-    return rc;
+    WriteRpcbufToClient(client, &rpcbuf);
+    return Success;
 }
 
 int
@@ -1098,13 +1101,18 @@ ProcXIListProperties(ClientPtr client)
         swapl(&rep.length);
         swaps(&rep.num_properties);
     }
-    WriteToClient(client, sizeof(xXIListPropertiesReply), &rep);
-    if (natoms) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, natoms * sizeof(Atom), atoms);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped };
+    if (!x_rpcbuf_write_CARD32s(&rpcbuf, atoms, natoms)) {
+        x_rpcbuf_clear(&rpcbuf);
         free(atoms);
+        return BadAlloc;
     }
-    return rc;
+    free(atoms);
+
+    WriteToClient(client, sizeof(xXIListPropertiesReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
+    return Success;
 }
 
 int
