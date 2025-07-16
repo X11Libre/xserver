@@ -32,9 +32,11 @@
 #include <X11/extensions/XIproto.h>
 #include <X11/extensions/XI2proto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
+#include "dix/rpcbuf_priv.h"
 
 #include "dix.h"
 #include "inputstr.h"
@@ -989,22 +991,25 @@ ProcXGetDeviceProperty(ClientPtr client)
         swapl(&rep.bytesAfter);
         swapl(&rep.nItems);
     }
-    WriteToClient(client, sizeof(xGenericReply), &rep);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (length) {
-        switch (rep.format) {
+        switch (format) {
         case 32:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
+            x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)data, length / 4);
             break;
         case 16:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap16Write;
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)data, length / 2);
             break;
         default:
-            client->pSwapReplyFunc = (ReplySwapPtr) WriteToClient;
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)data, length);
             break;
         }
-        WriteSwappedDataToClient(client, length, data);
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     /* delete the Property */
     if (stuff->delete && (rep.bytesAfter == 0)) {
@@ -1019,6 +1024,9 @@ ProcXGetDeviceProperty(ClientPtr client)
             }
         }
     }
+
+    WriteToClient(client, sizeof(xGenericReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
