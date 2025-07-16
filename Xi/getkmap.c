@@ -52,9 +52,13 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 #include "swaprep.h"
 #include "xkbsrv.h"
@@ -101,27 +105,36 @@ ProcXGetDeviceKeyMapping(ClientPtr client)
     if (!syms)
         return BadAlloc;
 
+    const size_t mapWidth = syms->mapWidth;
+    const size_t numKeySyms = (mapWidth * stuff->count);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(
+        &rpcbuf,
+        &syms->map[mapWidth * (stuff->firstKeyCode - syms->minKeyCode)],
+        numKeySyms);
+
+    free(syms->map);
+    free(syms);
+
+    if (rpcbuf.error)
+        return BadAlloc;
+
     xGetDeviceKeyMappingReply rep = {
         .repType = X_Reply,
         .RepType = X_GetDeviceKeyMapping,
         .sequenceNumber = client->sequence,
-        .keySymsPerKeyCode = syms->mapWidth,
-        .length = (syms->mapWidth * stuff->count) /* KeySyms are 4 bytes */
+        .keySymsPerKeyCode = mapWidth,
+        .length = numKeySyms /* KeySyms are 4 bytes */
     };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
     }
-    WriteToClient(client, sizeof(xGetDeviceKeyMappingReply), &rep);
 
-    client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
-    WriteSwappedDataToClient(client,
-                             syms->mapWidth * stuff->count * sizeof(KeySym),
-                             &syms->map[syms->mapWidth * (stuff->firstKeyCode -
-                                                          syms->minKeyCode)]);
-    free(syms->map);
-    free(syms);
+    WriteToClient(client, sizeof(xGetDeviceKeyMappingReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
 
     return Success;
 }
