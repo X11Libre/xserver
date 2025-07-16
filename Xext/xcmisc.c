@@ -94,20 +94,17 @@ static int
 ProcXCMiscGetXIDList(ClientPtr client)
 {
     REQUEST(xXCMiscGetXIDListReq);
-    xXCMiscGetXIDListReply rep;
-    XID *pids;
-    unsigned int count;
-
     REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
 
     if (stuff->count > UINT32_MAX / sizeof(XID))
         return BadAlloc;
 
-    pids = calloc(stuff->count, sizeof(XID));
+    XID *pids = calloc(stuff->count, sizeof(XID));
     if (!pids) {
         return BadAlloc;
     }
-    count = GetXIDList(client, stuff->count, pids);
+
+    size_t count = GetXIDList(client, stuff->count, pids);
 
     struct x_rpcbuf rpcbuf = { .swapped = client->swapped };
 
@@ -119,7 +116,7 @@ ProcXCMiscGetXIDList(ClientPtr client)
 
     free(pids);
 
-    rep = (xXCMiscGetXIDListReply) {
+    xXCMiscGetXIDListReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = count,
