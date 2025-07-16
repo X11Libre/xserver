@@ -45,13 +45,13 @@ static int
 ProcBigReqDispatch(ClientPtr client)
 {
     REQUEST(xBigReqEnableReq);
-    xBigReqEnableReply rep;
+    REQUEST_SIZE_MATCH(xBigReqEnableReq);
 
     if (stuff->brReqType != X_BigReqEnable)
         return BadRequest;
-    REQUEST_SIZE_MATCH(xBigReqEnableReq);
     client->big_requests = TRUE;
-    rep = (xBigReqEnableReply) {
+
+    xBigReqEnableReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
