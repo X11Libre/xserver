@@ -55,7 +55,9 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window struct     */
@@ -89,7 +91,7 @@ SProcXGetSelectedExtensionEvents(ClientPtr client)
 int
 ProcXGetSelectedExtensionEvents(ClientPtr client)
 {
-    int i, rc, total_length = 0;
+    int i, rc = 0;
     WindowPtr pWin;
     XEventClass *buf = NULL;
     XEventClass *tclient;
@@ -110,6 +112,8 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if ((pOthers = wOtherInputMasks(pWin)) != 0) {
         for (others = pOthers->inputClients; others; others = others->next)
             for (i = 0; i < EMASKSIZE; i++)
@@ -124,11 +128,11 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
                 break;
             }
 
-        total_length = (rep.all_clients_count + rep.this_client_count) *
-            sizeof(XEventClass);
+        size_t total_count = rep.all_clients_count + rep.this_client_count;
+        size_t total_length = total_count * sizeof(XEventClass);
         rep.length = bytes_to_int32(total_length);
         buf = calloc(1, total_length);
-        if (!buf)
+        if (!buf) /* rpcbuf still empty */
             return BadAlloc;
 
         tclient = buf;
@@ -142,7 +146,13 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
             for (i = 0; i < EMASKSIZE; i++)
                 aclient =
                     ClassFromMask(aclient, others->mask[i], i, NULL, CREATE);
+
+        x_rpcbuf_write_CARD32s(&rpcbuf, buf, total_count);
+        free(buf);
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -151,11 +161,6 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
         swaps(&rep.all_clients_count);
     }
     WriteToClient(client, sizeof(xGetSelectedExtensionEventsReply), &rep);
-
-    if (total_length) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, total_length, buf);
-    }
-    free(buf);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
