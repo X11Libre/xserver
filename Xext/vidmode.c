@@ -1197,13 +1197,11 @@ ProcVidModeLockModeSwitch(ClientPtr client)
     return Success;
 }
 
-static inline CARD32 _combine_f(vidMonitorValue a, vidMonitorValue b, Bool swapped)
+static inline CARD32 _combine_f(vidMonitorValue a, vidMonitorValue b)
 {
     CARD32 buf =
         ((unsigned short) a.f) |
         ((unsigned short) b.f << 16);
-    if (swapped)
-        swapl(&buf);
     return buf;
 }
 
@@ -1248,37 +1246,27 @@ ProcVidModeGetMonitor(ClientPtr client)
                   + nHsync + nVrefresh + nVendorItems + nModelItems
     };
 
-    const int buflen = nHsync + nVrefresh + nVendorItems + nModelItems;
-
-    CARD32 *sendbuf = calloc(buflen, sizeof(CARD32));
-    if (!sendbuf)
-        return BadAlloc;
-
-    CARD32 *bufwalk = sendbuf;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (int i = 0; i < nHsync; i++) {
-        *bufwalk = _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_LO, i),
-                              pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_HI, i),
-                              client->swapped);
-        bufwalk++;
+        x_rpcbuf_write_CARD32(
+            &rpcbuf,
+            _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_LO, i),
+                       pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_HI, i)));
     }
 
     for (int i = 0; i < nVrefresh; i++) {
-        *bufwalk = _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_LO, i),
-                              pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_HI, i),
-                              client->swapped);
-        bufwalk++;
+        x_rpcbuf_write_CARD32(
+            &rpcbuf,
+            _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_LO, i),
+                       pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_HI, i)));
     }
 
-    memcpy(bufwalk,
-           pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0).ptr,
-           vendorLength);
-    bufwalk += nVendorItems;
+    x_rpcbuf_write_string_pad(&rpcbuf, vendorStr);
+    x_rpcbuf_write_string_pad(&rpcbuf, modelStr);
 
-    memcpy(bufwalk,
-           pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0).ptr,
-           modelLength);
-    bufwalk += nModelItems;
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -1286,9 +1274,7 @@ ProcVidModeGetMonitor(ClientPtr client)
     }
 
     WriteToClient(client, sizeof(xXF86VidModeGetMonitorReply), &rep);
-    WriteToClient(client, buflen * sizeof(CARD32), sendbuf);
-
-    free(sendbuf);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
