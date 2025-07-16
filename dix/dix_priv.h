@@ -686,7 +686,7 @@ static inline ClientPtr dixLookupXIDOwner(XID xid)
     int clientId = dixClientIdForXID(xid);
     if (clientId < currentMaxClients)
         return clients[clientId];
-    return NullClient;
+    return NULL;
 }
 
 #endif /* _XSERVER_DIX_PRIV_H */

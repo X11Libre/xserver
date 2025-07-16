@@ -86,7 +86,7 @@ ValidateGC(DrawablePtr pDraw, GCPtr pGC)
  * The client performing the gc change must be passed so that access
  * checks can be performed on any tiles, stipples, or fonts that are
  * specified.  ddxen can call this too; they should normally pass
- * NullClient for the client since any access checking should have
+ * NULL for the client since any access checking should have
  * already been done at a higher level.
  *
  * If you have any XIDs, you must use ChangeGCXIDs:
@@ -594,7 +594,7 @@ CreateDefaultTile(GCPtr pGC)
     tmpval[0].val = GXcopy;
     tmpval[1].val = pGC->tile.pixel;
     tmpval[2].val = FillSolid;
-    (void) ChangeGC(NullClient, pgcScratch,
+    (void) ChangeGC(NULL, pgcScratch,
                     GCFunction | GCForeground | GCFillStyle, tmpval);
     ValidateGC((DrawablePtr) pTile, pgcScratch);
     rect.x = 0;
@@ -886,7 +886,7 @@ CreateDefaultStipple(int screenNum)
         dixDestroyPixmap(pScreen->defaultStipple, 0);
         return FALSE;
     }
-    (void) ChangeGC(NullClient, pgcScratch,
+    (void) ChangeGC(NULL, pgcScratch,
                     GCFunction | GCForeground | GCFillStyle, tmpval);
     ValidateGC((DrawablePtr) pScreen->defaultStipple, pgcScratch);
     rect.x = 0;
