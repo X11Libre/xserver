@@ -1178,22 +1178,28 @@ ProcXIGetProperty(ClientPtr client)
         swapl(&rep.bytes_after);
         swapl(&rep.num_items);
     }
-    WriteToClient(client, sizeof(xXIGetPropertyReply), &rep);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (length) {
-        switch (rep.format) {
+        switch (format) {
         case 32:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
+            x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)data, length / 4);
             break;
         case 16:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap16Write;
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)data, length / 2);
             break;
         default:
-            client->pSwapReplyFunc = (ReplySwapPtr) WriteToClient;
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)data, length);
             break;
         }
-        WriteSwappedDataToClient(client, length, data);
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    WriteToClient(client, sizeof(xXIGetPropertyReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
 
     /* delete the Property */
     if (stuff->delete && (rep.bytes_after == 0)) {
