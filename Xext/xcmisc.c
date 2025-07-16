@@ -102,6 +102,9 @@ ProcXCMiscGetXIDList(ClientPtr client)
     REQUEST(xXCMiscGetXIDListReq);
     REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
 
+    if (client->swapped)
+        swapl(&stuff->count);
+
     if (stuff->count > UINT32_MAX / sizeof(XID))
         return BadAlloc;
 
@@ -156,16 +159,6 @@ ProcXCMiscDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXCMiscGetXIDList(ClientPtr client)
-{
-    REQUEST(xXCMiscGetXIDListReq);
-    REQUEST_SIZE_MATCH(xXCMiscGetXIDListReq);
-
-    swapl(&stuff->count);
-    return ProcXCMiscGetXIDList(client);
-}
-
-static int _X_COLD
 SProcXCMiscDispatch(ClientPtr client)
 {
     REQUEST(xReq);
@@ -175,7 +168,7 @@ SProcXCMiscDispatch(ClientPtr client)
     case X_XCMiscGetXIDRange:
         return ProcXCMiscGetXIDRange(client);
     case X_XCMiscGetXIDList:
-        return SProcXCMiscGetXIDList(client);
+        return ProcXCMiscGetXIDList(client);
     default:
         return BadRequest;
     }
