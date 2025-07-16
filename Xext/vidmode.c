@@ -37,6 +37,7 @@ from Kaleb S. KEITHLEY
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86vmproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/log_priv.h"
 
@@ -314,7 +315,8 @@ ProcVidModeGetModeLine(ClientPtr client)
     return Success;
 }
 
-static char *fillModeInfoV1(ClientPtr client, char *buf, int dotClock, DisplayModePtr mode)
+static void fillModeInfoV1(x_rpcbuf_t *rpcbuf, int dotClock,
+                           DisplayModePtr mode)
 {
     xXF86OldVidModeModeInfo info = {
         .dotclock = dotClock,
@@ -329,7 +331,7 @@ static char *fillModeInfoV1(ClientPtr client, char *buf, int dotClock, DisplayMo
         .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
     };
 
-    if (client->swapped) {
+    if (rpcbuf->swapped) {
         swapl(&info.dotclock);
         swaps(&info.hdisplay);
         swaps(&info.hsyncstart);
@@ -342,11 +344,11 @@ static char *fillModeInfoV1(ClientPtr client, char *buf, int dotClock, DisplayMo
         swapl(&info.flags);
     }
 
-    memcpy(buf, &info, sizeof(info));
-    return buf + sizeof(info);
+    x_rpcbuf_write_binary_pad(rpcbuf, &info, sizeof(info));
 }
 
-static char *fillModeInfoV2(ClientPtr client, char *buf, int dotClock, DisplayModePtr mode)
+static void fillModeInfoV2(x_rpcbuf_t *rpcbuf, int dotClock,
+                           DisplayModePtr mode)
 {
     xXF86VidModeModeInfo info = {
         .dotclock = dotClock,
@@ -362,7 +364,7 @@ static char *fillModeInfoV2(ClientPtr client, char *buf, int dotClock, DisplayMo
         .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
     };
 
-    if (client->swapped) {
+    if (rpcbuf->swapped) {
         swapl(&info.dotclock);
         swaps(&info.hdisplay);
         swaps(&info.hsyncstart);
@@ -376,8 +378,7 @@ static char *fillModeInfoV2(ClientPtr client, char *buf, int dotClock, DisplayMo
         swapl(&info.flags);
     }
 
-    memcpy(buf, &info, sizeof(info));
-    return buf + sizeof(info);
+    x_rpcbuf_write_binary_pad(rpcbuf, &info, sizeof(info));
 }
 
 static int
@@ -430,17 +431,22 @@ ProcVidModeGetAllModeLines(ClientPtr client)
     if (!x_rpcbuf_makeroom(&rpcbuf, payload_len))
         return BadAlloc;
 
-    char *walk = rpcbuf.buffer;
-
     do {
-        walk = (ver < 2) ? fillModeInfoV1(client, walk, dotClock, mode)
-                         : fillModeInfoV2(client, walk, dotClock, mode);
+        if (ver < 2)
+            fillModeInfoV1(&rpcbuf, dotClock, mode);
+        else
+            fillModeInfoV2(&rpcbuf, dotClock, mode);
     } while (pVidMode->GetNextModeline(pScreen, &mode, &dotClock));
 
-    WriteToClient(client, sizeof(xXF86VidModeGetAllModeLinesReply), &rep);
-    WriteToClient(client, payload_len, rpcbuf.buffer);
-    x_rpcbuf_clear(&rpcbuf);
+    if (rpcbuf.error)
+        return BadAlloc;
 
+    if (payload_len != rpcbuf.wpos)
+        LogMessage(X_WARNING, "XF86VidModeGetAllModelines() payload_len mismatch: %ld but shoud be %d\n",
+                   rpcbuf.wpos, payload_len);
+
+    WriteToClient(client, sizeof(xXF86VidModeGetAllModeLinesReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
