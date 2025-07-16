@@ -47,6 +47,14 @@ from The Open Group.
 static int
 ProcXCMiscGetVersion(ClientPtr client)
 {
+    REQUEST(xXCMiscGetVersionReq);
+    REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
+
+    if (client->swapped) {
+        swaps(&stuff->majorVersion);
+        swaps(&stuff->minorVersion);
+    }
+
     xXCMiscGetVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -54,8 +62,6 @@ ProcXCMiscGetVersion(ClientPtr client)
         .majorVersion = XCMiscMajorVersion,
         .minorVersion = XCMiscMinorVersion
     };
-
-    REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -150,16 +156,6 @@ ProcXCMiscDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXCMiscGetVersion(ClientPtr client)
-{
-    REQUEST(xXCMiscGetVersionReq);
-    REQUEST_SIZE_MATCH(xXCMiscGetVersionReq);
-    swaps(&stuff->majorVersion);
-    swaps(&stuff->minorVersion);
-    return ProcXCMiscGetVersion(client);
-}
-
-static int _X_COLD
 SProcXCMiscGetXIDList(ClientPtr client)
 {
     REQUEST(xXCMiscGetXIDListReq);
@@ -175,7 +171,7 @@ SProcXCMiscDispatch(ClientPtr client)
     REQUEST(xReq);
     switch (stuff->data) {
     case X_XCMiscGetVersion:
-        return SProcXCMiscGetVersion(client);
+        return ProcXCMiscGetVersion(client);
     case X_XCMiscGetXIDRange:
         return ProcXCMiscGetXIDRange(client);
     case X_XCMiscGetXIDList:
