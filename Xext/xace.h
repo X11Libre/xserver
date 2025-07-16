@@ -97,10 +97,6 @@ int XaceHookKeyAvail(xEventPtr ev, DeviceIntPtr dev, int count);
 
 /* Register / unregister a callback for a given hook. */
 
-/* XTrans wrappers for use by security modules
- */
-int XaceGetConnectionNumber(ClientPtr ptr);
-
 /* From the original Security extension...
  */
 
