@@ -380,26 +380,7 @@ ProcVidModeGetAllModeLines(ClientPtr client)
     if (!pVidMode->GetFirstModeline(pScreen, &mode, &dotClock))
         return BadValue;
 
-    int payload_len = modecount * ((ver < 2) ? sizeof(xXF86OldVidModeModeInfo)
-                                             : sizeof(xXF86VidModeModeInfo));
-
-    xXF86VidModeGetAllModeLinesReply rep = {
-        .type = X_Reply,
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetAllModeLinesReply) -
-                                 sizeof(xGenericReply) + payload_len),
-        .sequenceNumber = client->sequence,
-        .modecount = modecount
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.modecount);
-    }
-
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    if (!x_rpcbuf_makeroom(&rpcbuf, payload_len))
-        return BadAlloc;
 
     do {
         if (ver < 2)
@@ -411,9 +392,19 @@ ProcVidModeGetAllModeLines(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    if (payload_len != rpcbuf.wpos)
-        LogMessage(X_WARNING, "XF86VidModeGetAllModelines() payload_len mismatch: %ld but shoud be %d\n",
-                   rpcbuf.wpos, payload_len);
+    xXF86VidModeGetAllModeLinesReply rep = {
+        .type = X_Reply,
+        .length = bytes_to_int32(sizeof(xXF86VidModeGetAllModeLinesReply) -
+                                 sizeof(xGenericReply) + rpcbuf.wpos),
+        .sequenceNumber = client->sequence,
+        .modecount = modecount
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.modecount);
+    }
 
     WriteToClient(client, sizeof(xXF86VidModeGetAllModeLinesReply), &rep);
     WriteRpcbufToClient(client, &rpcbuf);
