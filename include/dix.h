@@ -92,15 +92,6 @@ SOFTWARE.
             return(BadLength);                                          \
     } while (0)
 
-#define WriteReplyToClient(pClient, size, pReply)                       \
-    do {                                                                \
-        if ((pClient)->swapped)                                         \
-            (*ReplySwapVector[((xReq *)(pClient)->requestBuffer)->reqType]) \
-                (pClient, (int)(size), pReply);                         \
-        else                                                            \
-            WriteToClient(pClient, (int)(size), (pReply));              \
-    } while (0)
-
 #define WriteSwappedDataToClient(pClient, size, pbuf)                   \
     do {                                                                \
         if ((pClient)->swapped)                                         \
