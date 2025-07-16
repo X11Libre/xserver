@@ -69,12 +69,12 @@ ProcXCMiscGetVersion(ClientPtr client)
 static int
 ProcXCMiscGetXIDRange(ClientPtr client)
 {
-    xXCMiscGetXIDRangeReply rep;
-    XID min_id, max_id;
-
     REQUEST_SIZE_MATCH(xXCMiscGetXIDRangeReq);
+
+    XID min_id, max_id;
     GetXIDRange(client->index, FALSE, &min_id, &max_id);
-    rep = (xXCMiscGetXIDRangeReply) {
+
+    xXCMiscGetXIDRangeReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
