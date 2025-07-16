@@ -49,6 +49,12 @@
 #include "glamor_glx_provider.h"
 #include "dri3.h"
 
+typedef enum {
+    SCANOUT_DISABLED = 0,
+    SCANOUT_ENABLED_LEGACY_ONLY = 1,
+    SCANOUT_ENABLED = 2,
+} scanout_t;
+
 struct glamor_egl_screen_private {
     EGLDisplay display;
     EGLContext context;
@@ -57,7 +63,7 @@ struct glamor_egl_screen_private {
     int fd;
     struct gbm_device *gbm;
     int dmabuf_capable;
-    int scanout_capable;
+    scanout_t scanout_capable;
     Bool force_vendor; /* if GLVND vendor is forced from options */
 
     xf86FreeScreenProc *saved_free_screen;
@@ -397,13 +403,14 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
             bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
                                                format, modifiers, num_modifiers,
                                                GBM_BO_USE_RENDERING |
-                                               (glamor_egl->scanout_capable ?
+                                               (glamor_egl->scanout_capable == SCANOUT_ENABLED ?
                                                 GBM_BO_USE_SCANOUT : 0));
             if (glamor_egl->scanout_capable && !bo) {
                 /* something failed, try again without GBM_BO_USE_SCANOUT */
                 xf86DrvMsg(scrn->scrnIndex, X_INFO,
-                           "Direct scanout support disabled\n");
-                glamor_egl->scanout_capable = FALSE;
+                           "Direct scanout support with modifiers disabled\n");
+                /* maybe scanout does work, but modifiers aren't supported */
+                glamor_egl->scanout_capable = SCANOUT_ENABLED_LEGACY_ONLY;
                 bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
                                                    format, modifiers, num_modifiers,
                                                    GBM_BO_USE_RENDERING);
@@ -427,12 +434,13 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
                  GBM_BO_USE_LINEAR : 0) |
 #endif
                 GBM_BO_USE_RENDERING |
-                (glamor_egl->scanout_capable ? GBM_BO_USE_SCANOUT : 0));
+                (glamor_egl->scanout_capable != SCANOUT_DISABLED ?
+                 GBM_BO_USE_SCANOUT : 0));
         if (glamor_egl->scanout_capable && !bo) {
             /* something failed, try again without GBM_BO_USE_SCANOUT */
             xf86DrvMsg(scrn->scrnIndex, X_INFO,
                 "Direct scanout support disabled\n");
-            glamor_egl->scanout_capable = FALSE;
+            glamor_egl->scanout_capable = SCANOUT_DISABLED;
             bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
 #ifdef GLAMOR_HAS_GBM_LINEAR
                     (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
@@ -1331,8 +1339,8 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     }
 #endif
 
-    /* Set this to true for now, later code will disable this if needed */
-    glamor_egl->scanout_capable = TRUE;
+    /* Set this to SCANOUT_ENABLED for now, later code will change this if needed */
+    glamor_egl->scanout_capable = SCANOUT_ENABLED;
 
     glamor_egl->saved_free_screen = scrn->FreeScreen;
     scrn->FreeScreen = glamor_egl_free_screen;
