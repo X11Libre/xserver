@@ -1074,7 +1074,7 @@ DbeSetupBackgroundPainter(WindowPtr pWin, GCPtr pGC)
         return FALSE;
     }
 
-    return ChangeGC(NullClient, pGC, gcmask, gcvalues) == 0;
+    return ChangeGC(NULL, pGC, gcmask, gcvalues) == 0;
 }                               /* DbeSetupBackgroundPainter() */
 
 /******************************************************************************
