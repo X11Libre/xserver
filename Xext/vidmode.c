@@ -37,6 +37,7 @@ from Kaleb S. KEITHLEY
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86vmproto.h>
 
+#include "dix/rpcbuf_priv.h"
 #include "os/log_priv.h"
 
 #include "misc.h"
@@ -425,11 +426,11 @@ ProcVidModeGetAllModeLines(ClientPtr client)
         swapl(&rep.modecount);
     }
 
-    char *payload = calloc(1, payload_len);
-    if (!payload)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!x_rpcbuf_makeroom(&rpcbuf, payload_len))
         return BadAlloc;
 
-    char *walk = payload;
+    char *walk = rpcbuf.buffer;
 
     do {
         walk = (ver < 2) ? fillModeInfoV1(client, walk, dotClock, mode)
@@ -437,8 +438,8 @@ ProcVidModeGetAllModeLines(ClientPtr client)
     } while (pVidMode->GetNextModeline(pScreen, &mode, &dotClock));
 
     WriteToClient(client, sizeof(xXF86VidModeGetAllModeLinesReply), &rep);
-    WriteToClient(client, payload_len, payload);
-    free(payload);
+    WriteToClient(client, payload_len, rpcbuf.buffer);
+    x_rpcbuf_clear(&rpcbuf);
 
     return Success;
 }
