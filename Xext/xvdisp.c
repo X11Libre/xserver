@@ -137,32 +137,31 @@ ProcXvQueryAdaptors(ClientPtr client)
     }
     WriteToClient(client, sizeof(rep), &rep);
 
-    if (!pxvs) /* no payload to send, we're done here */
-        return Success;
-
-    na = pxvs->nAdaptors;
-    pa = pxvs->pAdaptors;
-    while (na--) {
-        /* xvAdaptorInfo */
-        x_rpcbuf_write_CARD32(&rpcbuf, pa->base_id);
-        x_rpcbuf_write_CARD16(&rpcbuf, strlen(pa->name));
-        x_rpcbuf_write_CARD16(&rpcbuf, pa->nPorts);
-        x_rpcbuf_write_CARD16(&rpcbuf, pa->nFormats);
-        x_rpcbuf_write_CARD8(&rpcbuf, pa->type);
-        x_rpcbuf_write_CARD8(&rpcbuf, 0); /* padding */
-        x_rpcbuf_write_string_pad(&rpcbuf, pa->name);
-
-        nf = pa->nFormats;
-        pf = pa->pFormats;
-        while (nf--) {
-            /* xvFormat */
-            x_rpcbuf_write_CARD32(&rpcbuf, pf->visual);
-            x_rpcbuf_write_CARD8(&rpcbuf, pf->depth);
+    if (pxvs) {
+        na = pxvs->nAdaptors;
+        pa = pxvs->pAdaptors;
+        while (na--) {
+            /* xvAdaptorInfo */
+            x_rpcbuf_write_CARD32(&rpcbuf, pa->base_id);
+            x_rpcbuf_write_CARD16(&rpcbuf, strlen(pa->name));
+            x_rpcbuf_write_CARD16(&rpcbuf, pa->nPorts);
+            x_rpcbuf_write_CARD16(&rpcbuf, pa->nFormats);
+            x_rpcbuf_write_CARD8(&rpcbuf, pa->type);
             x_rpcbuf_write_CARD8(&rpcbuf, 0); /* padding */
-            x_rpcbuf_write_CARD16(&rpcbuf, 0); /* padding */
-            pf++;
+            x_rpcbuf_write_string_pad(&rpcbuf, pa->name);
+
+            nf = pa->nFormats;
+            pf = pa->pFormats;
+            while (nf--) {
+                /* xvFormat */
+                x_rpcbuf_write_CARD32(&rpcbuf, pf->visual);
+                x_rpcbuf_write_CARD8(&rpcbuf, pf->depth);
+                x_rpcbuf_write_CARD8(&rpcbuf, 0); /* padding */
+                x_rpcbuf_write_CARD16(&rpcbuf, 0); /* padding */
+                pf++;
+            }
+            pa++;
         }
-        pa++;
     }
     WriteRpcbufToClient(client, &rpcbuf);
     return Success;
