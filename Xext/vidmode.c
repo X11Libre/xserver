@@ -318,67 +318,37 @@ ProcVidModeGetModeLine(ClientPtr client)
 static void fillModeInfoV1(x_rpcbuf_t *rpcbuf, int dotClock,
                            DisplayModePtr mode)
 {
-    xXF86OldVidModeModeInfo info = {
-        .dotclock = dotClock,
-        .hdisplay = VidModeGetModeValue(mode, VIDMODE_H_DISPLAY),
-        .hsyncstart = VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART),
-        .hsyncend = VidModeGetModeValue(mode, VIDMODE_H_SYNCEND),
-        .htotal = VidModeGetModeValue(mode, VIDMODE_H_TOTAL),
-        .vdisplay = VidModeGetModeValue(mode, VIDMODE_V_DISPLAY),
-        .vsyncstart = VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART),
-        .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
-        .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
-        .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
-    };
-
-    if (rpcbuf->swapped) {
-        swapl(&info.dotclock);
-        swaps(&info.hdisplay);
-        swaps(&info.hsyncstart);
-        swaps(&info.hsyncend);
-        swaps(&info.htotal);
-        swaps(&info.vdisplay);
-        swaps(&info.vsyncstart);
-        swaps(&info.vsyncend);
-        swaps(&info.vtotal);
-        swapl(&info.flags);
-    }
-
-    x_rpcbuf_write_binary_pad(rpcbuf, &info, sizeof(info));
+    /* 0.x version -- xXF86OldVidModeModeInfo */
+    x_rpcbuf_write_CARD32(rpcbuf, dotClock);
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_DISPLAY));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SYNCEND));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_TOTAL));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_DISPLAY));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCEND));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_TOTAL));
+    x_rpcbuf_write_CARD32(rpcbuf, VidModeGetModeValue(mode, VIDMODE_FLAGS));
+    x_rpcbuf_reserve0(rpcbuf, sizeof(CARD32)); /* unused ? */
 }
 
 static void fillModeInfoV2(x_rpcbuf_t *rpcbuf, int dotClock,
                            DisplayModePtr mode)
 {
-    xXF86VidModeModeInfo info = {
-        .dotclock = dotClock,
-        .hdisplay = VidModeGetModeValue(mode, VIDMODE_H_DISPLAY),
-        .hsyncstart = VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART),
-        .hsyncend = VidModeGetModeValue(mode, VIDMODE_H_SYNCEND),
-        .htotal = VidModeGetModeValue(mode, VIDMODE_H_TOTAL),
-        .hskew = VidModeGetModeValue(mode, VIDMODE_H_SKEW),
-        .vdisplay = VidModeGetModeValue(mode, VIDMODE_V_DISPLAY),
-        .vsyncstart = VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART),
-        .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
-        .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
-        .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
-    };
-
-    if (rpcbuf->swapped) {
-        swapl(&info.dotclock);
-        swaps(&info.hdisplay);
-        swaps(&info.hsyncstart);
-        swaps(&info.hsyncend);
-        swaps(&info.htotal);
-        swapl(&info.hskew);
-        swaps(&info.vdisplay);
-        swaps(&info.vsyncstart);
-        swaps(&info.vsyncend);
-        swaps(&info.vtotal);
-        swapl(&info.flags);
-    }
-
-    x_rpcbuf_write_binary_pad(rpcbuf, &info, sizeof(info));
+    /* xXF86VidModeModeInfo -- v2 */
+    x_rpcbuf_write_CARD32(rpcbuf, dotClock);
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_DISPLAY));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SYNCEND));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_TOTAL));
+    x_rpcbuf_write_CARD32(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SKEW));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_DISPLAY));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCEND));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_TOTAL));
+    x_rpcbuf_reserve0(rpcbuf, sizeof(CARD16)); /* pad1 */
+    x_rpcbuf_write_CARD32(rpcbuf, VidModeGetModeValue(mode, VIDMODE_FLAGS));
+    x_rpcbuf_reserve0(rpcbuf, sizeof(CARD32) * 4); /* reserved[1,2,3], privsize */
 }
 
 static int
