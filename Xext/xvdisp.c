@@ -572,20 +572,20 @@ ProcXvQueryPortAttributes(ClientPtr client)
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixGetAttrAccess);
 
+    size_t textSize = 0;
+    for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
+         i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
+        textSize += pad_to_int32(strlen(pAtt->name) + 1);
+    }
+
     xvQueryPortAttributesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_attributes = pPort->pAdaptor->nAttributes,
+        .length = bytes_to_int32(
+            (pPort->pAdaptor->nAttributes * sz_xvAttributeInfo) + textSize),
+        .text_size = textSize,
     };
-
-    for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
-         i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
-        rep.text_size += pad_to_int32(strlen(pAtt->name) + 1);
-    }
-
-    rep.length = (pPort->pAdaptor->nAttributes * sz_xvAttributeInfo)
-        + rep.text_size;
-    rep.length >>= 2;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
