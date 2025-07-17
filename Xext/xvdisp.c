@@ -563,7 +563,7 @@ ProcXvQueryBestSize(ClientPtr client)
 static int
 ProcXvQueryPortAttributes(ClientPtr client)
 {
-    int size, i;
+    int i;
     XvPortPtr pPort;
     XvAttributePtr pAtt;
 
@@ -571,6 +571,8 @@ ProcXvQueryPortAttributes(ClientPtr client)
     REQUEST_SIZE_MATCH(xvQueryPortAttributesReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixGetAttrAccess);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     size_t textSize = 0;
     for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
@@ -594,29 +596,20 @@ ProcXvQueryPortAttributes(ClientPtr client)
         swapl(&rep.text_size);
     }
 
-    WriteToClient(client, sz_xvQueryPortAttributesReply, &rep);
-
     for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
          i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
-        size = strlen(pAtt->name) + 1;  /* pass the NULL */
-        xvAttributeInfo Info = {
-            .flags = pAtt->flags,
-            .min = pAtt->min_value,
-            .max = pAtt->max_value,
-            .size = pad_to_int32(size)
-        };
-
-        if (client->swapped) {
-            swapl(&Info.flags);
-            swapl(&Info.size);
-            swapl(&Info.min);
-            swapl(&Info.max);
-        }
-
-        WriteToClient(client, sz_xvAttributeInfo, &Info);
-        WriteToClient(client, size, pAtt->name);
+        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->flags);
+        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->min_value);
+        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->max_value);
+        x_rpcbuf_write_CARD32(&rpcbuf, pad_to_int32(strlen(pAtt->name)+1)); /* pass the NULL */
+        x_rpcbuf_write_string_n_pad(&rpcbuf, pAtt->name);
     }
 
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
