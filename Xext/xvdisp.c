@@ -183,7 +183,6 @@ ProcXvQueryAdaptors(ClientPtr client)
 static int
 ProcXvQueryEncodings(ClientPtr client)
 {
-    int totalSize;
     XvPortPtr pPort;
     int ne;
     XvEncodingPtr pe;
@@ -192,29 +191,6 @@ ProcXvQueryEncodings(ClientPtr client)
     REQUEST_SIZE_MATCH(xvQueryEncodingsReq);
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
-
-    /* FOR EACH ENCODING ADD UP THE BYTES FOR ENCODING NAMES */
-
-    ne = pPort->pAdaptor->nEncodings;
-    pe = pPort->pAdaptor->pEncodings;
-    totalSize = ne * sz_xvEncodingInfo;
-    while (ne--) {
-        totalSize += pad_to_int32(strlen(pe->name));
-        pe++;
-    }
-
-    xvQueryEncodingsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .num_encodings = pPort->pAdaptor->nEncodings,
-        .length = bytes_to_int32(totalSize),
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.num_encodings);
-    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -236,6 +212,19 @@ ProcXvQueryEncodings(ClientPtr client)
 
     if (rpcbuf.error)
         return BadAlloc;
+
+    xvQueryEncodingsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .num_encodings = pPort->pAdaptor->nEncodings,
+        .length = bytes_to_int32(rpcbuf.wpos),
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.num_encodings);
+    }
 
     WriteToClient(client, sizeof(rep), &rep);
     WriteRpcbufToClient(client, &rpcbuf);
