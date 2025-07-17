@@ -1432,7 +1432,7 @@ ProcVidModeGetDotClocks(ClientPtr client)
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(sizeof(xXF86VidModeGetDotClocksReply)
-                                 - sizeof(xGenericReply) + numClocks),
+                                 - sizeof(xGenericReply)) + numClocks,
         .clocks = numClocks,
         .maxclocks = MAXCLOCKS,
         .flags = (ClockProg ? CLKFLAG_PROGRAMABLE : 0),
