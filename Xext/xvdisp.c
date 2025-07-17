@@ -31,6 +31,7 @@ SOFTWARE.
 #include <X11/extensions/Xvproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "Xext/xvdix_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -183,7 +184,6 @@ static int
 ProcXvQueryEncodings(ClientPtr client)
 {
     int totalSize;
-    int nameSize;
     XvPortPtr pPort;
     int ne;
     XvEncodingPtr pe;
@@ -216,32 +216,29 @@ ProcXvQueryEncodings(ClientPtr client)
         swaps(&rep.num_encodings);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     ne = pPort->pAdaptor->nEncodings;
     pe = pPort->pAdaptor->pEncodings;
     while (ne--) {
-        xvEncodingInfo einfo = { 0 };
-        einfo.encoding = pe->id;
-        einfo.name_size = nameSize = strlen(pe->name);
-        einfo.width = pe->width;
-        einfo.height = pe->height;
-        einfo.rate.numerator = pe->rate.numerator;
-        einfo.rate.denominator = pe->rate.denominator;
+        size_t nameSize = strlen(pe->name);
 
-        if (client->swapped) {
-            swapl(&einfo.encoding);
-            swaps(&einfo.name_size);
-            swaps(&einfo.width);
-            swaps(&einfo.height);
-            swapl(&einfo.rate.numerator);
-            swapl(&einfo.rate.denominator);
-        }
-        WriteToClient(client, sz_xvEncodingInfo, &einfo);
-        WriteToClient(client, nameSize, pe->name);
+        x_rpcbuf_write_CARD32(&rpcbuf, pe->id);
+        x_rpcbuf_write_CARD16(&rpcbuf, nameSize);
+        x_rpcbuf_write_CARD16(&rpcbuf, pe->width);
+        x_rpcbuf_write_CARD16(&rpcbuf, pe->height);
+        x_rpcbuf_write_CARD32(&rpcbuf, pe->rate.numerator);
+        x_rpcbuf_write_CARD32(&rpcbuf, pe->rate.denominator);
+        x_rpcbuf_write_string_pad(&rpcbuf, pe->name);
+
         pe++;
     }
 
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
