@@ -183,19 +183,16 @@ ProcXvQueryAdaptors(ClientPtr client)
 static int
 ProcXvQueryEncodings(ClientPtr client)
 {
-    XvPortPtr pPort;
-    int ne;
-    XvEncodingPtr pe;
-
     REQUEST(xvQueryEncodingsReq);
     REQUEST_SIZE_MATCH(xvQueryEncodingsReq);
 
+    XvPortPtr pPort;
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    ne = pPort->pAdaptor->nEncodings;
-    pe = pPort->pAdaptor->pEncodings;
+    size_t ne = pPort->pAdaptor->nEncodings;
+    XvEncodingPtr pe = pPort->pAdaptor->pEncodings;
     while (ne--) {
         size_t nameSize = strlen(pe->name);
 
