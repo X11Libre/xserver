@@ -578,14 +578,21 @@ ProcXvQueryPortAttributes(ClientPtr client)
     for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
          i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
         textSize += pad_to_int32(strlen(pAtt->name) + 1);
+        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->flags);
+        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->min_value);
+        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->max_value);
+        x_rpcbuf_write_CARD32(&rpcbuf, pad_to_int32(strlen(pAtt->name)+1)); /* pass the NULL */
+        x_rpcbuf_write_string_0t_pad(&rpcbuf, pAtt->name);
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     xvQueryPortAttributesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_attributes = pPort->pAdaptor->nAttributes,
-        .length = bytes_to_int32(
-            (pPort->pAdaptor->nAttributes * sz_xvAttributeInfo) + textSize),
+        .length = bytes_to_int32(rpcbuf.wpos),
         .text_size = textSize,
     };
 
@@ -595,18 +602,6 @@ ProcXvQueryPortAttributes(ClientPtr client)
         swapl(&rep.num_attributes);
         swapl(&rep.text_size);
     }
-
-    for (i = 0, pAtt = pPort->pAdaptor->pAttributes;
-         i < pPort->pAdaptor->nAttributes; i++, pAtt++) {
-        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->flags);
-        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->min_value);
-        x_rpcbuf_write_CARD32(&rpcbuf, pAtt->max_value);
-        x_rpcbuf_write_CARD32(&rpcbuf, pad_to_int32(strlen(pAtt->name)+1)); /* pass the NULL */
-        x_rpcbuf_write_string_n_pad(&rpcbuf, pAtt->name);
-    }
-
-    if (rpcbuf.error)
-        return BadAlloc;
 
     WriteToClient(client, sizeof(rep), &rep);
     WriteRpcbufToClient(client, &rpcbuf);
