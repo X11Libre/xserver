@@ -84,7 +84,6 @@ static int
 ProcXvQueryAdaptors(ClientPtr client)
 {
     int na, nf, rc;
-    int nameSize;
     XvAdaptorPtr pa;
     XvFormatPtr pf;
     WindowPtr pWin;
@@ -122,6 +121,8 @@ ProcXvQueryAdaptors(ClientPtr client)
         }
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     xvQueryAdaptorsReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
@@ -142,43 +143,28 @@ ProcXvQueryAdaptors(ClientPtr client)
     na = pxvs->nAdaptors;
     pa = pxvs->pAdaptors;
     while (na--) {
-        xvAdaptorInfo ainfo = {
-            ainfo.base_id = pa->base_id,
-            ainfo.num_ports = pa->nPorts,
-            ainfo.type = pa->type,
-            ainfo.name_size = nameSize = strlen(pa->name),
-            ainfo.num_formats = pa->nFormats,
-        };
-
-        if (client->swapped) {
-            swapl(&ainfo.base_id);
-            swaps(&ainfo.name_size);
-            swaps(&ainfo.num_ports);
-            swaps(&ainfo.num_formats);
-        }
-
-        WriteToClient(client, sz_xvAdaptorInfo, &ainfo);
-        WriteToClient(client, nameSize, pa->name);
+        /* xvAdaptorInfo */
+        x_rpcbuf_write_CARD32(&rpcbuf, pa->base_id);
+        x_rpcbuf_write_CARD16(&rpcbuf, strlen(pa->name));
+        x_rpcbuf_write_CARD16(&rpcbuf, pa->nPorts);
+        x_rpcbuf_write_CARD16(&rpcbuf, pa->nFormats);
+        x_rpcbuf_write_CARD8(&rpcbuf, pa->type);
+        x_rpcbuf_write_CARD8(&rpcbuf, 0); /* padding */
+        x_rpcbuf_write_string_pad(&rpcbuf, pa->name);
 
         nf = pa->nFormats;
         pf = pa->pFormats;
         while (nf--) {
-            xvFormat format = {
-                .depth = pf->depth,
-                .visual = pf->visual
-            };
-
-            if (client->swapped)
-                swapl(&format.visual);
-
-            WriteToClient(client, sz_xvFormat, &format);
-
+            /* xvFormat */
+            x_rpcbuf_write_CARD32(&rpcbuf, pf->visual);
+            x_rpcbuf_write_CARD8(&rpcbuf, pf->depth);
+            x_rpcbuf_write_CARD8(&rpcbuf, 0); /* padding */
+            x_rpcbuf_write_CARD16(&rpcbuf, 0); /* padding */
             pf++;
         }
-
         pa++;
     }
-
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
