@@ -97,6 +97,19 @@ Bool x_rpcbuf_write_string_pad(struct x_rpcbuf *rpcbuf, const char *str)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
+ * write a plain C string with terminating 0 to rpc buffer and pad it.
+ *
+ * allocate a region for the string (padded to 32bits) and copy in the string.
+ * if given string is NULL or zero-size, only a (CARD32)0 is written.
+ *
+ * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param needed    string to plain C string
+ * @return          TRUE on success, FALSE on allocation failure
+ */
+Bool x_rpcbuf_write_string_0t_pad(struct x_rpcbuf *rpcbuf, const char *str)
+    _X_ATTRIBUTE_NONNULL_ARG(1);
+
+/*
  * write binary data to rpc buffer and pad it.
  *
  * allocate a region for the string (padded to 32bits) and copy in the data.

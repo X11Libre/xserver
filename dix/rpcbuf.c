@@ -93,6 +93,23 @@ Bool x_rpcbuf_write_string_pad(struct x_rpcbuf *rpcbuf, const char *str)
     return TRUE;
 }
 
+Bool x_rpcbuf_write_string_0t_pad(struct x_rpcbuf *rpcbuf, const char *str)
+{
+    if (!str)
+        return x_rpcbuf_write_CARD32(rpcbuf, 0);
+
+    size_t slen = strlen(str);
+    if (!slen)
+        return x_rpcbuf_write_CARD32(rpcbuf, 0);
+
+    char *reserved = x_rpcbuf_reserve(rpcbuf, pad_to_int32(slen+1));
+    if (!reserved)
+        return FALSE;
+
+    memcpy(reserved, str, slen+1);
+    return TRUE;
+}
+
 Bool x_rpcbuf_write_CARD8(struct x_rpcbuf *rpcbuf, CARD8 value)
 {
     CARD8 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(value));
