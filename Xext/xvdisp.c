@@ -101,43 +101,11 @@ ProcXvQueryAdaptors(ClientPtr client)
     pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
                                           XvGetScreenKey());
 
-    size_t totalSize = 0;
     size_t numAdaptors = 0;
-    if (pxvs) {
-        numAdaptors = pxvs->nAdaptors;
-
-        /* CALCULATE THE TOTAL SIZE OF THE REPLY IN BYTES */
-
-        totalSize = pxvs->nAdaptors * sz_xvAdaptorInfo;
-
-        /* FOR EACH ADPATOR ADD UP THE BYTES FOR ENCODINGS AND FORMATS */
-
-        na = pxvs->nAdaptors;
-        pa = pxvs->pAdaptors;
-        while (na--) {
-            totalSize += pad_to_int32(strlen(pa->name));
-            totalSize += pa->nFormats * sz_xvFormat;
-            pa++;
-        }
-    }
-
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    xvQueryAdaptorsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .num_adaptors = numAdaptors,
-        .length = bytes_to_int32(totalSize)
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.num_adaptors);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-
     if (pxvs) {
+        numAdaptors = pxvs->nAdaptors;
         na = pxvs->nAdaptors;
         pa = pxvs->pAdaptors;
         while (na--) {
@@ -163,6 +131,21 @@ ProcXvQueryAdaptors(ClientPtr client)
             pa++;
         }
     }
+
+    xvQueryAdaptorsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .num_adaptors = numAdaptors,
+        .length = bytes_to_int32(rpcbuf.wpos)
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.num_adaptors);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
     WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
