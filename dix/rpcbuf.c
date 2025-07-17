@@ -10,10 +10,16 @@
 
 Bool x_rpcbuf_makeroom(struct x_rpcbuf *rpcbuf, size_t needed)
 {
+    /* break out of alreay in error state */
+    if (rpcbuf->error)
+        return FALSE;
+
     /* not allocated yet ? */
     if (!rpcbuf->buffer) {
-        if (!(rpcbuf->buffer = calloc(1, XLIBRE_RPCBUF_CHUNK_SIZE)))
+        if (!(rpcbuf->buffer = calloc(1, XLIBRE_RPCBUF_CHUNK_SIZE))) {
+            rpcbuf->error = TRUE;
             return FALSE;
+        }
         rpcbuf->size = XLIBRE_RPCBUF_CHUNK_SIZE;
         rpcbuf->wpos = 0;
     }
@@ -26,8 +32,10 @@ Bool x_rpcbuf_makeroom(struct x_rpcbuf *rpcbuf, size_t needed)
                                 * XLIBRE_RPCBUF_CHUNK_SIZE;
 
     char *newbuf = realloc(rpcbuf->buffer, newsize);
-    if (!newbuf)
+    if (!newbuf) {
+        rpcbuf->error = TRUE;
         return FALSE;
+    }
     memset(newbuf + rpcbuf->size, 0, newsize - rpcbuf->size);
     rpcbuf->buffer = newbuf;
     rpcbuf->size = newsize;

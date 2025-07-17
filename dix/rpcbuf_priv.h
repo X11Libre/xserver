@@ -31,6 +31,7 @@ typedef struct x_rpcbuf {
     size_t wpos;    /* length of data inside the buffer / next write position */
     char *buffer;   /* pointer to whole buffer */
     Bool swapped;   /* TRUE when typed write operation shall byte-swap */
+    Bool error;     /* TRUE when the last allocation failed */
 } x_rpcbuf_t;
 
 #define XLIBRE_RPCBUF_CHUNK_SIZE 4096
