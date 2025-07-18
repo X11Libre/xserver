@@ -780,13 +780,10 @@ ProcXvShmPutImage(ClientPtr client)
 static int
 ProcXvQueryImageAttributes(ClientPtr client)
 {
-    xvQueryImageAttributesReply rep;
     int size, num_planes, i;
     CARD16 width, height;
     XvImagePtr pImage = NULL;
     XvPortPtr pPort;
-    int32_t *offsets;
-    int32_t *pitches;
 
     REQUEST(xvQueryImageAttributesReq);
 
@@ -811,11 +808,14 @@ ProcXvQueryImageAttributes(ClientPtr client)
 
     num_planes = pImage->num_planes;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     // allocating for `offsets` as well as `pitches` in one block
     // both having CARD32 * num_planes (actually int32_t put into CARD32)
-    if (!(offsets = calloc(num_planes*2, sizeof(CARD32))))
+    INT32 *offsets = x_rpcbuf_reserve(&rpcbuf, 2 * num_planes * sizeof(INT32));
+    if (!offsets)
         return BadAlloc;
-    pitches = offsets + num_planes;
+    INT32 *pitches = offsets + num_planes;
 
     width = stuff->width;
     height = stuff->height;
@@ -824,10 +824,10 @@ ProcXvQueryImageAttributes(ClientPtr client)
                                                        &width, &height, offsets,
                                                        pitches);
 
-    rep = (xvQueryImageAttributesReply) {
+    xvQueryImageAttributesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = num_planes * 2, // in 32bit units
+        .length = bytes_to_int32(rpcbuf.wpos), /* in 32bit units */
         .num_planes = num_planes,
         .width = width,
         .height = height,
@@ -845,8 +845,7 @@ ProcXvQueryImageAttributes(ClientPtr client)
     }
 
     WriteToClient(client, sz_xvQueryImageAttributesReply, &rep);
-    WriteToClient(client, rep.length * sizeof(CARD32), offsets);
-    free(offsets);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
