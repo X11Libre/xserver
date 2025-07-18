@@ -1528,7 +1528,6 @@ int
 ProcRRSetPanning(ClientPtr client)
 {
     REQUEST(xRRSetPanningReq);
-    xRRSetPanningReply rep;
     RRCrtcPtr crtc;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
@@ -1581,18 +1580,16 @@ ProcRRSetPanning(ClientPtr client)
 
     status = RRSetConfigSuccess;
 
- sendReply:
-    rep = (xRRSetPanningReply) {
+sendReply: ;
+    xRRSetPanningReply rep = {
         .type = X_Reply,
         .status = status,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds
     };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.newTimestamp);
     }
     WriteToClient(client, sizeof(xRRSetPanningReply), &rep);
