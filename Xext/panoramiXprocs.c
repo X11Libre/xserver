@@ -2057,14 +2057,6 @@ PanoramiXGetImage(ClientPtr client)
         length = widthBytesLine * h * Ones(planemask & (plane | (plane - 1)));
     }
 
-    xGetImageReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .visual = wVisual(((WindowPtr) pDraw)),
-        .depth = pDraw->depth,
-        .length = bytes_to_int32(length),
-    };
-
     if (widthBytesLine == 0 || h == 0)
         linesPerBuf = 0;
     else if (widthBytesLine >= XINERAMA_IMAGE_BUFSIZE)
@@ -2075,11 +2067,6 @@ PanoramiXGetImage(ClientPtr client)
             linesPerBuf = h;
     }
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.visual);
-    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -2123,6 +2110,20 @@ PanoramiXGetImage(ClientPtr client)
                 }
             }
         }
+    }
+
+    xGetImageReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .visual = wVisual(((WindowPtr) pDraw)),
+        .depth = pDraw->depth,
+        .length = bytes_to_int32(length),
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.visual);
     }
 
     WriteToClient(client, sizeof(rep), &rep);
