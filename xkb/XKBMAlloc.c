@@ -777,7 +777,7 @@ XkbResizeKeyActions(XkbDescPtr xkb, int key, int needed)
     free(xkb->server->acts);
     xkb->server->acts = newActs;
     xkb->server->num_acts = nActs;
-    return &xkb->server->acts[xkb->server->key_acts[key]];
+    return &newActs[xkb->server->key_acts[key]];
 }
 
 void
