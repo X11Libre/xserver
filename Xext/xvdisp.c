@@ -880,50 +880,47 @@ ProcXvListImageFormats(ClientPtr client)
 
     pImage = pPort->pAdaptor->pImages;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     for (i = 0; i < pPort->pAdaptor->nImages; i++, pImage++) {
-        xvImageFormatInfo info;
-        info.id = pImage->id;
-        info.type = pImage->type;
-        info.byte_order = pImage->byte_order;
-        memcpy(&info.guid, pImage->guid, 16);
-        info.bpp = pImage->bits_per_pixel;
-        info.num_planes = pImage->num_planes;
-        info.depth = pImage->depth;
-        info.red_mask = pImage->red_mask;
-        info.green_mask = pImage->green_mask;
-        info.blue_mask = pImage->blue_mask;
-        info.format = pImage->format;
-        info.y_sample_bits = pImage->y_sample_bits;
-        info.u_sample_bits = pImage->u_sample_bits;
-        info.v_sample_bits = pImage->v_sample_bits;
-        info.horz_y_period = pImage->horz_y_period;
-        info.horz_u_period = pImage->horz_u_period;
-        info.horz_v_period = pImage->horz_v_period;
-        info.vert_y_period = pImage->vert_y_period;
-        info.vert_u_period = pImage->vert_u_period;
-        info.vert_v_period = pImage->vert_v_period;
-        memcpy(&info.comp_order, pImage->component_order, 32);
-        info.scanline_order = pImage->scanline_order;
-
-        if (client->swapped) {
-            swapl(&info.id);
-            swapl(&info.red_mask);
-            swapl(&info.green_mask);
-            swapl(&info.blue_mask);
-            swapl(&info.y_sample_bits);
-            swapl(&info.u_sample_bits);
-            swapl(&info.v_sample_bits);
-            swapl(&info.horz_y_period);
-            swapl(&info.horz_u_period);
-            swapl(&info.horz_v_period);
-            swapl(&info.vert_y_period);
-            swapl(&info.vert_u_period);
-            swapl(&info.vert_v_period);
-        }
-
-        WriteToClient(client, sz_xvImageFormatInfo, &info);
+        /* xvImageFormatInfo */
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->id);
+        x_rpcbuf_write_CARD8(&rpcbuf, pImage->type);
+        x_rpcbuf_write_CARD8(&rpcbuf, pImage->byte_order);
+        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD16)); /* pad1; */
+        x_rpcbuf_write_binary_pad(&rpcbuf, pImage->guid, 16);
+        x_rpcbuf_write_CARD8(&rpcbuf, pImage->bits_per_pixel);
+        x_rpcbuf_write_CARD8(&rpcbuf, pImage->num_planes);
+        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD16)); /* pad2; */
+        x_rpcbuf_write_CARD8(&rpcbuf, pImage->depth);
+        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)); /* pad3, pad4 */
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->red_mask);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->green_mask);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->blue_mask);
+        x_rpcbuf_write_CARD8(&rpcbuf, pImage->format);
+        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)); /* pad5, pad6 */
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->y_sample_bits);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->u_sample_bits);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->v_sample_bits);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->horz_y_period);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->horz_u_period);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->horz_v_period);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->vert_y_period);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->vert_u_period);
+        x_rpcbuf_write_CARD32(&rpcbuf, pImage->vert_v_period);
+        x_rpcbuf_write_binary_pad(&rpcbuf, pImage->component_order, 32);
+        x_rpcbuf_write_CARD8(&rpcbuf, pImage->scanline_order);
+        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)+(sizeof(CARD32)*2));
+        x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad7; */
+        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad8; */
+        x_rpcbuf_write_CARD32(&rpcbuf, 0); /* pad9; */
+        x_rpcbuf_write_CARD32(&rpcbuf, 0); /* pad10; */
     }
 
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
