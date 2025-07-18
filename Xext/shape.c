@@ -625,13 +625,6 @@ ProcShapeQueryExtents(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xShapeQueryExtentsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .boundingShaped = (wBoundingShape(pWin) != 0),
-        .clipShaped = (wClipShape(pWin) != 0)
-    };
-
     RegionPtr boundRegion;
     BoxRec boundBox;
     if ((boundRegion = wBoundingShape(pWin))) {
@@ -645,10 +638,6 @@ ProcShapeQueryExtents(ClientPtr client)
         boundBox.x2 = pWin->drawable.width + wBorderWidth(pWin);
         boundBox.y2 = pWin->drawable.height + wBorderWidth(pWin);
     }
-    rep.xBoundingShape = boundBox.x1;
-    rep.yBoundingShape = boundBox.y1;
-    rep.widthBoundingShape = boundBox.x2 - boundBox.x1;
-    rep.heightBoundingShape = boundBox.y2 - boundBox.y1;
 
     RegionPtr shapeRegion;
     BoxRec shapeBox;
@@ -663,10 +652,22 @@ ProcShapeQueryExtents(ClientPtr client)
         shapeBox.x2 = pWin->drawable.width;
         shapeBox.y2 = pWin->drawable.height;
     }
-    rep.xClipShape = shapeBox.x1;
-    rep.yClipShape = shapeBox.y1;
-    rep.widthClipShape = shapeBox.x2 - shapeBox.x1;
-    rep.heightClipShape = shapeBox.y2 - shapeBox.y1;
+
+    xShapeQueryExtentsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .boundingShaped = (wBoundingShape(pWin) != 0),
+        .clipShaped = (wClipShape(pWin) != 0),
+        .xBoundingShape = boundBox.x1,
+        .yBoundingShape = boundBox.y1,
+        .widthBoundingShape = boundBox.x2 - boundBox.x1,
+        .heightBoundingShape = boundBox.y2 - boundBox.y1,
+        .xClipShape = shapeBox.x1,
+        .yClipShape = shapeBox.y1,
+        .widthClipShape = shapeBox.x2 - shapeBox.x1,
+        .heightClipShape = shapeBox.y2 - shapeBox.y1,
+    };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
