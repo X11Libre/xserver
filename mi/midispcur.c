@@ -102,7 +102,7 @@ miDCInitialize(ScreenPtr pScreen, miPointerScreenFuncPtr screenFuncs)
     if (!pScreenPriv)
         return FALSE;
 
-    dixScreenHookClose(pScreen, miDCCloseScreen);
+    dixScreenHookPostClose(pScreen, miDCCloseScreen);
     dixSetPrivate(&pScreen->devPrivates, miDCScreenKey, pScreenPriv);
 
     if (!miSpriteInitialize(pScreen, screenFuncs)) {
@@ -135,7 +135,7 @@ miDCSwitchScreenCursor(ScreenPtr pScreen, CursorPtr pCursor, PixmapPtr sourceBit
 
 static void miDCCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    dixScreenUnhookClose(pScreen, miDCCloseScreen);
+    dixScreenUnhookPostClose(pScreen, miDCCloseScreen);
 
     miDCScreenPtr pScreenPriv;
     pScreenPriv = (miDCScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
