@@ -25,6 +25,7 @@
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
 #include "os/bug_priv.h"
@@ -1144,8 +1145,6 @@ ProcRRGetCrtcInfo(ClientPtr client)
 {
     REQUEST(xRRGetCrtcInfoReq);
     RRCrtcPtr crtc;
-    CARD8 *extra = NULL;
-    unsigned long extraLen = 0;
 
     REQUEST_SIZE_MATCH(xRRGetCrtcInfoReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
@@ -1168,6 +1167,9 @@ ProcRRGetCrtcInfo(ClientPtr client)
         .rotation = crtc->rotation,
         .rotations = crtc->rotations,
     };
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (leased) {
         rep.rotation = RR_Rotate_0;
         rep.rotations = RR_Rotate_0;
@@ -1200,37 +1202,24 @@ ProcRRGetCrtcInfo(ClientPtr client)
             }
         }
 
-        extraLen = (rep.nOutput + rep.nPossibleOutput) * sizeof(CARD32);
-        rep.length = bytes_to_int32(extraLen);
-
-        if (extraLen) {
-            extra = calloc(1, extraLen);
-            if (!extra)
-                return BadAlloc;
-        }
-
-        RROutput *outputs = (RROutput *) extra;
-        RROutput *possible = (RROutput *) (outputs + rep.nOutput);
-
         for (int i = 0; i < crtc->numOutputs; i++) {
-            outputs[i] = crtc->outputs[i]->id;
-            if (client->swapped)
-                swapl(&outputs[i]);
+            x_rpcbuf_write_CARD32(&rpcbuf, crtc->outputs[i]->id);
         }
 
-        int k = 0;
         for (int i = 0; i < pScrPriv->numOutputs; i++) {
             if (!RROutputIsLeased(pScrPriv->outputs[i])) {
                 for (int j = 0; j < pScrPriv->outputs[i]->numCrtcs; j++)
                     if (pScrPriv->outputs[i]->crtcs[j] == crtc) {
-                        possible[k] = pScrPriv->outputs[i]->id;
-                        if (client->swapped)
-                            swapl(&possible[k]);
-                        k++;
+                        x_rpcbuf_write_CARD32(&rpcbuf, pScrPriv->outputs[i]->id);
                     }
             }
         }
     }
+
+    rep.length = x_rpcbuf_wsize_units(&rpcbuf);
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (pScrPriv->rrCrtcGet)
         pScrPriv->rrCrtcGet(pScreen, crtc, &rep);
@@ -1249,12 +1238,9 @@ ProcRRGetCrtcInfo(ClientPtr client)
         swaps(&rep.nOutput);
         swaps(&rep.nPossibleOutput);
     }
-    WriteToClient(client, sizeof(xRRGetCrtcInfoReply), &rep);
-    if (extraLen) {
-        WriteToClient(client, extraLen, extra);
-        free(extra);
-    }
 
+    WriteToClient(client, sizeof(xRRGetCrtcInfoReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
