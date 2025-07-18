@@ -924,7 +924,6 @@ ProcPanoramiXGetState(ClientPtr client)
 {
     REQUEST(xPanoramiXGetStateReq);
     WindowPtr pWin;
-    xPanoramiXGetStateReply rep;
     int rc;
 
     REQUEST_SIZE_MATCH(xPanoramiXGetStateReq);
@@ -932,16 +931,15 @@ ProcPanoramiXGetState(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xPanoramiXGetStateReply) {
+    xPanoramiXGetStateReply rep = {
         .type = X_Reply,
         .state = !noPanoramiXExtension,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .window = stuff->window
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.window);
     }
     WriteToClient(client, sizeof(xPanoramiXGetStateReply), &rep);
@@ -954,7 +952,6 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenCountReq);
     WindowPtr pWin;
-    xPanoramiXGetScreenCountReply rep;
     int rc;
 
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenCountReq);
@@ -962,16 +959,15 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xPanoramiXGetScreenCountReply) {
+    xPanoramiXGetScreenCountReply rep = {
         .type = X_Reply,
         .ScreenCount = PanoramiXNumScreens,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .window = stuff->window
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.window);
     }
     WriteToClient(client, sizeof(xPanoramiXGetScreenCountReply), &rep);
@@ -983,7 +979,6 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenSizeReq);
     WindowPtr pWin;
-    xPanoramiXGetScreenSizeReply rep;
     int rc;
 
     REQUEST_SIZE_MATCH(xPanoramiXGetScreenSizeReq);
@@ -995,19 +990,18 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xPanoramiXGetScreenSizeReply) {
+    xPanoramiXGetScreenSizeReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
-    /* screen dimensions */
+        /* screen dimensions */
         .width = screenInfo.screens[stuff->screen]->width,
         .height = screenInfo.screens[stuff->screen]->height,
         .window = stuff->window,
         .screen = stuff->screen
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.width);
         swapl(&rep.height);
         swapl(&rep.window);
@@ -1021,14 +1015,11 @@ int
 ProcXineramaIsActive(ClientPtr client)
 {
     /* REQUEST(xXineramaIsActiveReq); */
-    xXineramaIsActiveReply rep;
-
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
-    rep = (xXineramaIsActiveReply) {
+    xXineramaIsActiveReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
 #if 1
         /* The following hack fools clients into thinking that Xinerama
          * is disabled even though it is not. */
@@ -1037,9 +1028,9 @@ ProcXineramaIsActive(ClientPtr client)
         .state = !noPanoramiXExtension;
 #endif
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.state);
     }
     WriteToClient(client, sizeof(xXineramaIsActiveReply), &rep);
