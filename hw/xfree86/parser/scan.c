@@ -55,6 +55,8 @@
 #include <xorg-config.h>
 #endif
 
+#include "xf86.h"        /* for xf86Msg() */
+#include <string.h>      /* for strlcpy() */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
