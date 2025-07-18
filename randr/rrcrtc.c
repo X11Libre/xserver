@@ -1632,8 +1632,6 @@ ProcRRGetCrtcGamma(ClientPtr client)
 {
     REQUEST(xRRGetCrtcGammaReq);
     RRCrtcPtr crtc;
-    unsigned long len;
-    char *extra = NULL;
 
     REQUEST_SIZE_MATCH(xRRGetCrtcGammaReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
@@ -1642,18 +1640,16 @@ ProcRRGetCrtcGamma(ClientPtr client)
     if (!RRCrtcGammaGet(crtc))
         return RRErrorBase + BadRRCrtc;
 
-    len = crtc->gammaSize * 3 * 2;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (crtc->gammaSize) {
-        extra = calloc(1, len);
-        if (!extra)
-            return BadAlloc;
-    }
+    x_rpcbuf_write_CARD16s(&rpcbuf, crtc->gammaRed, crtc->gammaSize);
+    x_rpcbuf_write_CARD16s(&rpcbuf, crtc->gammaGreen, crtc->gammaSize);
+    x_rpcbuf_write_CARD16s(&rpcbuf, crtc->gammaBlue, crtc->gammaSize);
 
     xRRGetCrtcGammaReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(len),
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .size = crtc->gammaSize
     };
     if (client->swapped) {
@@ -1661,16 +1657,9 @@ ProcRRGetCrtcGamma(ClientPtr client)
         swapl(&reply.length);
         swaps(&reply.size);
     }
-    if (crtc->gammaSize) {
-        memcpy(extra, crtc->gammaRed, len);
-        if (client->swapped)
-            SwapShorts((short*)extra, len/sizeof(CARD16));
-    }
 
     WriteToClient(client, sizeof(xRRGetCrtcGammaReply), &reply);
-    WriteToClient(client, len, extra);
-    free(extra);
-
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
