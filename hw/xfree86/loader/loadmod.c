@@ -63,6 +63,12 @@
 #include <dirent.h>
 #include <limits.h>
 
+/* Avoid hard-coding the NVIDIA vendor ID */
+#ifndef PCI_VENDOR_NVIDIA
+#define PCI_VENDOR_NVIDIA   0x10DE
+#endif
+static Bool SkipNvidiaPascalOrVolta = FALSE;
+
 typedef struct _pattern {
     const char *pattern;
     regex_t rex;
@@ -410,13 +416,33 @@ LoaderListDir(const char *subdir, const char **patternlist)
     FreePatterns(patterns);
     return (const char **) ret;
 }
+/* Call this once you have PCI info (e.g. in doLoadModule or Probe): DetectNvidiaPascalVolta(pciVendorID, pciDeviceID); */
+static void
+DetectNvidiaPascalVolta(unsigned short vendorID, unsigned short deviceID)
+{
+    if (vendorID != PCI_VENDOR_NVIDIA)  /* not NVIDIA */
+        return;
+    switch (deviceID) {
+        case 0x1B06: case 0x1B38: case 0x1B80:  /* Pascal family */
+        case 0x15F7: case 0x1B40:
+        case 0x1D81: case 0x1D11:              /* Volta */
+            SkipNvidiaPascalOrVolta = TRUE;
+            break;
+        default:
+            break;
+    }
+}
 
 static Bool
-CheckVersion(const char *module, XF86ModuleVersionInfo * data,
-             const XF86ModReqInfo * req)
+CheckVersion(const char *module, XF86ModuleVersionInfo *data,
+             const XF86ModReqInfo *req)
 {
     int vercode[4];
     long ver = data->xf86version;
+    /* only skip ABI mismatches on NVIDIA Pascal/Volta */
+    Bool skipABI =
+        SkipNvidiaPascalOrVolta &&
+        data->vendor && strstr(data->vendor, "NVIDIA");
 
     LogMessage(X_INFO, "Module %s: vendor=\"%s\"\n",
                data->modname ? data->modname : "UNKNOWN!",
@@ -426,18 +452,20 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
     vercode[1] = (ver / 100000) % 100;
     vercode[2] = (ver / 1000) % 100;
     vercode[3] = ver % 1000;
-    LogMessageVerb(X_NONE, 1, "\tcompiled for %d.%d.%d", vercode[0], vercode[1], vercode[2]);
+    LogMessageVerb(X_NONE, 1, "\tcompiled for %d.%d.%d",
+                   vercode[0], vercode[1], vercode[2]);
     if (vercode[3] != 0)
         LogMessageVerb(X_NONE, 1, ".%d", vercode[3]);
-    LogMessageVerb(X_NONE, 1, ", module version = %d.%d.%d\n", data->majorversion,
-                   data->minorversion, data->patchlevel);
+    LogMessageVerb(X_NONE, 1, ", module version = %d.%d.%d\n",
+                   data->majorversion, data->minorversion, data->patchlevel);
 
     if (data->moduleclass)
         LogMessageVerb(X_NONE, 2, "\tModule class: %s\n", data->moduleclass);
 
     ver = -1;
     if (data->abiclass) {
-        int abimaj, abimin;
+        int abimaj = GET_ABI_MAJOR(data->abiversion);
+        int abimin = GET_ABI_MINOR(data->abiversion);
         int vermaj, vermin;
 
         if (!strcmp(data->abiclass, ABI_CLASS_ANSIC))
@@ -449,35 +477,40 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
         else if (!strcmp(data->abiclass, ABI_CLASS_EXTENSION))
             ver = LoaderVersionInfo.extensionVersion;
 
-        abimaj = GET_ABI_MAJOR(data->abiversion);
-        abimin = GET_ABI_MINOR(data->abiversion);
         LogMessageVerb(X_NONE, 2, "\tABI class: %s, version %d.%d\n",
                        data->abiclass, abimaj, abimin);
         if (ver != -1) {
             vermaj = GET_ABI_MAJOR(ver);
             vermin = GET_ABI_MINOR(ver);
+            /* MAJOR mismatch */
             if (abimaj != vermaj) {
-                MessageType errtype;
-                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
-                    errtype = X_WARNING;
-                else
-                    errtype = X_ERROR;
-                LogMessageVerb(errtype, 0, "%s: module ABI major version (%d) "
+                MessageType errtype =
+                    (skipABI ||
+                     (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                        ? X_WARNING
+                        : X_ERROR;
+                LogMessageVerb(errtype, 0,
+                               "%s: module ABI major version (%d) "
                                "doesn't match the server's version (%d)\n",
                                module, abimaj, vermaj);
-                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                /* only fail if we're not skipping */
+                if (!skipABI &&
+                    !(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
                     return FALSE;
             }
+            /* MINOR mismatch */
             else if (abimin > vermin) {
-                MessageType errtype;
-                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
-                    errtype = X_WARNING;
-                else
-                    errtype = X_ERROR;
-                LogMessageVerb(errtype, 0, "%s: module ABI minor version (%d) "
+                MessageType errtype =
+                    (skipABI ||
+                     (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                        ? X_WARNING
+                        : X_ERROR;
+                LogMessageVerb(errtype, 0,
+                               "%s: module ABI minor version (%d) "
                                "is newer than the server's version (%d)\n",
                                module, abimin, vermin);
-                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                if (!skipABI &&
+                    !(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
                     return FALSE;
             }
         }
