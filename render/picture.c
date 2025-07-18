@@ -89,7 +89,7 @@ static void PictureScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *u
     SetPictureScreen(pScreen, 0);
     free(ps->formats);
     free(ps);
-    dixScreenUnhookClose(pScreen, PictureScreenClose);
+    dixScreenUnhookPostClose(pScreen, PictureScreenClose);
 }
 
 static void
@@ -683,7 +683,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     pScreen->StoreColors = PictureStoreColors;
 
     dixScreenHookWindowDestroy(pScreen, picture_window_destructor);
-    dixScreenHookClose(pScreen, PictureScreenClose);
+    dixScreenHookPostClose(pScreen, PictureScreenClose);
 
     if (!PictureSetDefaultFilters(pScreen)) {
         PictureResetFilters(pScreen);
