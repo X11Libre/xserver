@@ -239,29 +239,46 @@ fbdev2xfree_timing(struct fb_var_screeninfo *var, DisplayModePtr mode)
  * Try to find the framebuffer device for a given PCI device
  */
 static int
-fbdev_open_pci(struct pci_device *pPci, char **namep)
+fbdev_open_pci(struct pci_device *pPci, char *device, char **namep)
 {
     struct fb_fix_screeninfo fix;
     char filename[256];
     int fd, i;
+
+    /* try argument (from XF86Config) first */
+    if (device) {
+        fd = open(device, O_RDWR);
+    }
+    else {
+        /* second: environment variable */
+        device = getenv("FRAMEBUFFER");
+        fd = device ? open(device, O_RDWR) : -1;
+    }
+
+    if (fd != -1) {
+        /* fbdev was provided by the user instead of guessed, skip pci check */
+        if (namep)
+            *namep = NULL;
+        return fd;
+    }
 
     for (i = 0; i < 8; i++) {
         snprintf(filename, sizeof(filename),
                  "/sys/bus/pci/devices/%04x:%02x:%02x.%d/graphics/fb%d",
                  pPci->domain, pPci->bus, pPci->dev, pPci->func, i);
 
-        fd = open(filename, O_RDONLY, 0);
+        fd = open(filename, O_RDONLY);
         if (fd < 0) {
             snprintf(filename, sizeof(filename),
                      "/sys/bus/pci/devices/%04x:%02x:%02x.%d/graphics:fb%d",
                      pPci->domain, pPci->bus, pPci->dev, pPci->func, i);
-            fd = open(filename, O_RDONLY, 0);
+            fd = open(filename, O_RDONLY);
         }
         if (fd >= 0) {
             close(fd);
             snprintf(filename, sizeof(filename), "/dev/fb%d", i);
 
-            fd = open(filename, O_RDWR, 0);
+            fd = open(filename, O_RDWR);
             if (fd != -1) {
                 if (ioctl(fd, FBIOGET_FSCREENINFO, (void *) &fix) != -1) {
                     if (namep) {
@@ -283,31 +300,6 @@ fbdev_open_pci(struct pci_device *pPci, char **namep)
     return -1;
 }
 
-/* *
- * Try to resolve a filename as symbolic link.  If the file is not a link, the
- * original filename is returned.  NULL is returned if readlink raised an
- * error.
- */
-static const char *
-resolve_link(const char *filename, char *resolve_buf, size_t resolve_buf_size)
-{
-    ssize_t len = readlink(filename, resolve_buf, resolve_buf_size - 1);
-    /* if it is a link resolve it */
-    if (len >= 0) {
-        resolve_buf[len] = '\0';
-        return resolve_buf;
-    }
-    else {
-        if (errno == EINVAL) {
-            return filename;
-        }
-        else {
-            // Have caller handle error condition.
-            return NULL;
-        }
-    }
-}
-
 static int
 fbdev_open(int scrnIndex, const char *dev, char **namep)
 {
@@ -316,54 +308,26 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
 
     /* try argument (from XF86Config) first */
     if (dev) {
-        fd = open(dev, O_RDWR, 0);
+        fd = open(dev, O_RDWR);
     }
     else {
         /* second: environment variable */
         dev = getenv("FRAMEBUFFER");
-        if ((NULL == dev) || ((fd = open(dev, O_RDWR, 0)) == -1)) {
-            /* last try: default device */
+        if ((NULL == dev) || ((fd = open(dev, O_RDWR)) == -1)) {
+            /* third try: default device */
             dev = "/dev/fb0";
-            fd = open(dev, O_RDWR, 0);
+            fd = open(dev, O_RDWR);
+            if (fd == -1) {
+                /* last try, the /dev/fb symlink */
+                dev = "/dev/fb";
+                fd = open(dev, O_RDWR);
+            }
         }
     }
 
     if (fd == -1) {
         xf86DrvMsg(scrnIndex, X_ERROR, "open %s: %s\n", dev, strerror(errno));
         return -1;
-    }
-
-    /* only touch non-PCI devices on this path */
-    {
-        char device_path_buf[PATH_MAX];
-        char buf[PATH_MAX] = {0};
-        char *sysfs_path = NULL;
-        char const *real_dev = resolve_link(dev, device_path_buf,
-                                            sizeof(device_path_buf));
-        if (real_dev == NULL) {
-            xf86DrvMsg(scrnIndex, X_ERROR,
-                       "Failed resolving symbolic link for device '%s': %s",
-                       dev, strerror(errno));
-            return -1;
-        }
-
-        const char *node = strrchr(real_dev, '/');
-
-        if (node == NULL) {
-            node = real_dev;
-        }
-        else {
-            node++;
-        }
-
-        if (asprintf(&sysfs_path, "/sys/class/graphics/%s/device/subsystem", node) < 0 ||
-            readlink(sysfs_path, buf, sizeof(buf) - 1) < 0 ||
-            strstr(buf, "bus/pci")) {
-            free(sysfs_path);
-            close(fd);
-            return -1;
-        }
-        free(sysfs_path);
     }
 
     if (namep) {
@@ -389,7 +353,7 @@ fbdevHWProbe(struct pci_device *pPci, char *device, char **namep)
     int fd;
 
     if (pPci)
-        fd = fbdev_open_pci(pPci, namep);
+        fd = fbdev_open_pci(pPci, device, namep);
     else
         fd = fbdev_open(-1, device, namep);
 
@@ -409,7 +373,7 @@ fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, char *device)
 
     /* open device */
     if (pPci)
-        fPtr->fd = fbdev_open_pci(pPci, NULL);
+        fPtr->fd = fbdev_open_pci(pPci, device, NULL);
     else
         fPtr->fd = fbdev_open(pScrn->scrnIndex, device, NULL);
     if (-1 == fPtr->fd) {
