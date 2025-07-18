@@ -618,13 +618,10 @@ static int
 ProcShapeQueryExtents(ClientPtr client)
 {
     REQUEST(xShapeQueryExtentsReq);
-    WindowPtr pWin;
-    BoxRec extents, *pExtents;
-    int rc;
-    RegionPtr region;
-
     REQUEST_SIZE_MATCH(xShapeQueryExtentsReq);
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -635,36 +632,41 @@ ProcShapeQueryExtents(ClientPtr client)
         .clipShaped = (wClipShape(pWin) != 0)
     };
 
-    if ((region = wBoundingShape(pWin))) {
+    RegionPtr boundRegion;
+    BoxRec boundBox;
+    if ((boundRegion = wBoundingShape(pWin))) {
         /* this is done in two steps because of a compiler bug on SunOS 4.1.3 */
-        pExtents = RegionExtents(region);
-        extents = *pExtents;
+        BoxRec *pExtents = RegionExtents(boundRegion);
+        boundBox = *pExtents;
     }
     else {
-        extents.x1 = -wBorderWidth(pWin);
-        extents.y1 = -wBorderWidth(pWin);
-        extents.x2 = pWin->drawable.width + wBorderWidth(pWin);
-        extents.y2 = pWin->drawable.height + wBorderWidth(pWin);
+        boundBox.x1 = -wBorderWidth(pWin);
+        boundBox.y1 = -wBorderWidth(pWin);
+        boundBox.x2 = pWin->drawable.width + wBorderWidth(pWin);
+        boundBox.y2 = pWin->drawable.height + wBorderWidth(pWin);
     }
-    rep.xBoundingShape = extents.x1;
-    rep.yBoundingShape = extents.y1;
-    rep.widthBoundingShape = extents.x2 - extents.x1;
-    rep.heightBoundingShape = extents.y2 - extents.y1;
-    if ((region = wClipShape(pWin))) {
+    rep.xBoundingShape = boundBox.x1;
+    rep.yBoundingShape = boundBox.y1;
+    rep.widthBoundingShape = boundBox.x2 - boundBox.x1;
+    rep.heightBoundingShape = boundBox.y2 - boundBox.y1;
+
+    RegionPtr shapeRegion;
+    BoxRec shapeBox;
+    if ((shapeRegion = wClipShape(pWin))) {
         /* this is done in two steps because of a compiler bug on SunOS 4.1.3 */
-        pExtents = RegionExtents(region);
-        extents = *pExtents;
+        BoxRec *pExtents = RegionExtents(shapeRegion);
+        shapeBox = *pExtents;
     }
     else {
-        extents.x1 = 0;
-        extents.y1 = 0;
-        extents.x2 = pWin->drawable.width;
-        extents.y2 = pWin->drawable.height;
+        shapeBox.x1 = 0;
+        shapeBox.y1 = 0;
+        shapeBox.x2 = pWin->drawable.width;
+        shapeBox.y2 = pWin->drawable.height;
     }
-    rep.xClipShape = extents.x1;
-    rep.yClipShape = extents.y1;
-    rep.widthClipShape = extents.x2 - extents.x1;
-    rep.heightClipShape = extents.y2 - extents.y1;
+    rep.xClipShape = shapeBox.x1;
+    rep.yClipShape = shapeBox.y1;
+    rep.widthClipShape = shapeBox.x2 - shapeBox.x1;
+    rep.heightClipShape = shapeBox.y2 - shapeBox.y1;
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
