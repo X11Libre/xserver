@@ -862,22 +862,6 @@ ProcXvListImageFormats(ClientPtr client)
 
     VALIDATE_XV_PORT(stuff->port, pPort, DixReadAccess);
 
-    xvListImageFormatsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .num_formats = pPort->pAdaptor->nImages,
-        .length =
-            bytes_to_int32(pPort->pAdaptor->nImages * sz_xvImageFormatInfo)
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.num_formats);
-    }
-
-    WriteToClient(client, sz_xvListImageFormatsReply, &rep);
-
     pImage = pPort->pAdaptor->pImages;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
@@ -920,6 +904,24 @@ ProcXvListImageFormats(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
+    if (rpcbuf.wpos != (pPort->pAdaptor->nImages*sz_xvImageFormatInfo))
+        LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %ld but shoud be %d\n",
+                   rpcbuf.wpos, (pPort->pAdaptor->nImages*sz_xvImageFormatInfo));
+
+    xvListImageFormatsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .num_formats = pPort->pAdaptor->nImages,
+        .length = bytes_to_int32(rpcbuf.wpos)
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.num_formats);
+    }
+
+    WriteToClient(client, sz_xvListImageFormatsReply, &rep);
     WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
