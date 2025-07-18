@@ -54,6 +54,9 @@ typedef void (*DamageScreenDestroyFunc) (DamagePtr);
  * Drivers can inject themselves here, in order to get notified on
  * DamageCreate(), DamageRegister(), DamageUnregister(), DamageDestroy().
  *
+ * The fields may be assigned to NULL, if no action at all is wanted.
+ * (by default assigned to default implementations)
+ *
  * This should ONLY be touched by video drivers, nobody else.
  *
  * So far the only one using it is the proprietary NVidia driver.
