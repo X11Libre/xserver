@@ -67,6 +67,11 @@
 #include "xf86Optrec.h"
 #include "list.h"
 
+#include <sys/types.h>
+#ifdef HAVE_REGEX_H
+#include <regex.h>
+#endif
+
 #define HAVE_PARSER_DECLS
 
 typedef struct {
@@ -305,8 +310,31 @@ typedef struct {
 typedef struct {
     struct xorg_list entry;
     char **values;
+    struct xorg_list patterns;
     Bool is_negated;
 } xf86MatchGroup;
+
+typedef enum {
+    MATCH_IS_INVALID,
+    MATCH_IS_STRCMP,
+    MATCH_IS_STRCASECMP,
+    MATCH_IS_STRSTR,
+    MATCH_IS_STRCASESTR,
+    MATCH_IS_FILENAME,
+    MATCH_IS_PATHNAME,
+    MATCH_IS_SEQSTR,
+    MATCH_IS_REGEX
+} xf86MatchMode;
+
+typedef struct {
+    struct xorg_list entry;
+    xf86MatchMode mode;
+    Bool is_negated;
+    char *str;
+#ifdef HAVE_REGEX_H
+    regex_t *regex;
+#endif
+} xf86MatchPattern;
 
 typedef struct {
     GenericListRec list;

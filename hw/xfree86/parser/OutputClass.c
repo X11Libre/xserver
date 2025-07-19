@@ -51,7 +51,6 @@ xf86freeOutputClassList(XF86ConfOutputClassPtr ptr)
 
     while (ptr) {
         xf86MatchGroup *group, *next;
-        char **list;
 
         TestFree(ptr->identifier);
         TestFree(ptr->comment);
@@ -59,13 +58,8 @@ xf86freeOutputClassList(XF86ConfOutputClassPtr ptr)
         TestFree(ptr->modulepath);
 
         xorg_list_for_each_entry_safe(group, next, &ptr->match_driver, entry) {
-            for (list = group->values; *list; list++) {
-                free(*list);
-                *list = NULL;
-            }
             xorg_list_del(&group->entry);
-            free(group);
-            group = NULL;
+            xf86freeGroup(group);
         }
 
         xf86optionListFree(ptr->option_lst);

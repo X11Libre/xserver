@@ -140,6 +140,9 @@ xf86printExtensionsSection(FILE * cf, XF86ConfExtensionsPtr ptr);
 void
 xf86freeExtensions(XF86ConfExtensionsPtr ptr);
 
+/* pattern.c */
+void xf86freeGroup(xf86MatchGroup *group);
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
