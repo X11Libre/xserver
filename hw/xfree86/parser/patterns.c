@@ -68,7 +68,6 @@
 void
 xf86freeGroup(xf86MatchGroup *group)
 {
-#if 0 /* group->patterns are not used yet */
     xf86MatchPattern *pattern, *next_pattern;
     xorg_list_for_each_entry_safe(pattern, next_pattern, &group->patterns, entry) {
         xorg_list_del(&pattern->entry);
@@ -82,14 +81,6 @@ xf86freeGroup(xf86MatchGroup *group)
 #endif
         free(pattern);
     }
-#else
-    char **list;
-
-    for (list = group->values; *list; list++) {
-        free(*list);
-        *list = NULL;
-    }
-#endif
     free(group);
 }
 
