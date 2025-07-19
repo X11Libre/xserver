@@ -457,26 +457,24 @@ ProcRRQueryOutputProperty(ClientPtr client)
     REQUEST(xRRQueryOutputPropertyReq);
     RROutputPtr output;
     RRPropertyPtr prop;
-    char *extra = NULL;
 
     REQUEST_SIZE_MATCH(xRRQueryOutputPropertyReq);
-
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
     prop = RRQueryOutputProperty(output, stuff->property);
     if (!prop)
         return BadName;
 
-    if (prop->num_valid) {
-        extra = calloc(prop->num_valid, sizeof(INT32));
-        if (!extra)
-            return BadAlloc;
-    }
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)prop->valid_values, prop->num_valid);
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     xRRQueryOutputPropertyReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = prop->num_valid,
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .pending = prop->is_pending,
         .range = prop->range,
         .immutable = prop->immutable
@@ -486,16 +484,9 @@ ProcRRQueryOutputProperty(ClientPtr client)
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
     }
-    if (prop->num_valid) {
-        memcpy(extra, prop->valid_values, prop->num_valid * sizeof(INT32));
-        if (client->swapped)
-            SwapLongs((CARD32*)extra, prop->num_valid);
-    }
 
     WriteToClient(client, sizeof(xRRQueryOutputPropertyReply), &rep);
-    WriteToClient(client, prop->num_valid * sizeof(INT32), extra);
-    free(extra);
-
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
