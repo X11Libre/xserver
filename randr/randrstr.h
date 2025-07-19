@@ -25,11 +25,6 @@
  * Author:  Jim Gettys, Hewlett-Packard Company, Inc.
  *	    Keith Packard, Intel Corporation
  */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _RANDRSTR_H_
 #define _RANDRSTR_H_
 
