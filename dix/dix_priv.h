@@ -704,4 +704,18 @@ static inline int WriteRpcbufToClient(ClientPtr pClient,
     return ret;
 }
 
+/*
+ * @brief write rpc buffer to client and then clear it
+ *
+ * @param pClient the client to write buffer to
+ * @param rpcbuf  the buffer whose contents will be written
+ * @return the result of WriteToClient() call
+ */
+static inline int WriteRpcbufToClient(ClientPtr pClient,
+                                      x_rpcbuf_t *rpcbuf) {
+    int ret = WriteToClient(pClient, rpcbuf->wpos, rpcbuf->buffer);
+    x_rpcbuf_clear(rpcbuf);
+    return ret;
+}
+
 #endif /* _XSERVER_DIX_PRIV_H */
