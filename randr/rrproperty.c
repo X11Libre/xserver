@@ -417,47 +417,37 @@ int
 ProcRRListOutputProperties(ClientPtr client)
 {
     REQUEST(xRRListOutputPropertiesReq);
-    int numProps = 0;
-    RROutputPtr output;
-    RRPropertyPtr prop;
-
     REQUEST_SIZE_MATCH(xRRListOutputPropertiesReq);
 
+    RROutputPtr output;
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
-    for (prop = output->properties; prop; prop = prop->next)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    size_t numProps = 0;
+    for (RRPropertyPtr prop = output->properties; prop; prop = prop->next) {
         numProps++;
+        x_rpcbuf_write_CARD32(&rpcbuf, prop->propertyName);
+    }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     xRRListOutputPropertiesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(numProps * sizeof(Atom)),
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .nAtoms = numProps
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.nAtoms);
     }
 
-    Atom* pAtoms = calloc(sizeof(Atom), numProps);
-    if (numProps) {
-        if (!pAtoms)
-            return BadAlloc;
-
-        /* Copy property name atoms to reply buffer */
-        Atom *temppAtoms = pAtoms;
-        for (prop = output->properties; prop; prop = prop->next)
-            *temppAtoms++ = prop->propertyName;
-
-        if (client->swapped)
-            SwapLongs(pAtoms, numProps);
-    }
-
     WriteToClient(client, sizeof(xRRListOutputPropertiesReply), &rep);
-    WriteToClient(client, sizeof(Atom) * numProps, pAtoms);
-    free(pAtoms);
-
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
