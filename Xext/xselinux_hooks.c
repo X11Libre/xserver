@@ -114,7 +114,7 @@ SELinuxDoCheck(SELinuxSubjectRec * subj, SELinuxObjectRec * obj,
 static void
 SELinuxLabelClient(ClientPtr client)
 {
-    int fd = XaceGetConnectionNumber(client);
+    int fd = GetClientFd(client);
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     char *ctx;
@@ -129,7 +129,7 @@ SELinuxLabelClient(ClientPtr client)
     }
 
     /* For local clients, try and determine the executable name */
-    if (XaceIsLocal(client)) {
+    if (ClientIsLocal(client)) {
         /* Get cached command name if CLIENTIDS is enabled. */
         const char *cmdname = GetClientCmdName(client);
         Bool cached = (cmdname != NULL);
