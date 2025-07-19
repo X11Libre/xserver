@@ -142,6 +142,12 @@ xf86freeExtensions(XF86ConfExtensionsPtr ptr);
 
 /* pattern.c */
 void xf86freeGroup(xf86MatchGroup *group);
+xf86MatchGroup* xf86createGroup(const char *str,
+                                xf86MatchMode pref_mode,
+                                Bool negated);
+void xf86printPattern(FILE * cf,
+                      const xf86MatchPattern *pattern,
+                      Bool not_first);
 
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
