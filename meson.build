@@ -502,22 +502,9 @@ if build_res
     build_hashtable = true
 endif
 
-build_xace = get_option('xace')
 build_xinerama = get_option('xinerama')
-
 build_xsecurity = get_option('xcsecurity')
-if build_xsecurity
-    if not build_xace
-        error('cannot build Security extension without X-ACE')
-    endif
-endif
-
 build_namespace = get_option('namespace')
-if build_namespace
-    if not build_xace
-        error('cannot build Container extension without X-ACE')
-    endif
-endif
 
 build_xv = get_option('xv')
 build_xvmc = get_option('xvmc')

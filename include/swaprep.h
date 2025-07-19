@@ -44,10 +44,6 @@ extern void SGenericReply(ClientPtr /* pClient */ ,
                           int /* size */ ,
                           xGenericReply * /* pRep */ );
 
-extern void SwapTimeCoordWrite(ClientPtr /* pClient */ ,
-                               int /* size */ ,
-                               xTimecoord * /* pRep */ );
-
 extern void SErrorEvent(xError * /* from */ ,
                         xError * /* to */ );
 

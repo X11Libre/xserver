@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -630,14 +631,6 @@ PanoramiXTranslateCoords(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xTranslateCoordsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .sameScreen = xTrue,
-        .child = None
-    };
-
     if ((pWin == screenInfo.screens[0]->root) ||
         (pWin->drawable.id == screenInfo.screens[0]->screensaver.wid)) {
         x = stuff->srcX - screenInfo.screens[0]->x;
@@ -648,6 +641,8 @@ PanoramiXTranslateCoords(ClientPtr client)
         y = pWin->drawable.y + stuff->srcY;
     }
     pWin = pDst->firstChild;
+
+    XID child = None;
     while (pWin) {
         BoxRec box;
 
@@ -667,19 +662,30 @@ PanoramiXTranslateCoords(ClientPtr client)
                                     x - pWin->drawable.x,
                                     y - pWin->drawable.y, &box))
             ) {
-            rep.child = pWin->drawable.id;
+            child = pWin->drawable.id;
             pWin = (WindowPtr) NULL;
         }
         else
             pWin = pWin->nextSib;
     }
-    rep.dstX = x - pDst->drawable.x;
-    rep.dstY = y - pDst->drawable.y;
+
+    INT16 dstX = x - pDst->drawable.x;
+    INT16 dstY = y - pDst->drawable.y;
     if ((pDst == screenInfo.screens[0]->root) ||
         (pDst->drawable.id == screenInfo.screens[0]->screensaver.wid)) {
-        rep.dstX += screenInfo.screens[0]->x;
-        rep.dstY += screenInfo.screens[0]->y;
+        dstX += screenInfo.screens[0]->x;
+        dstY += screenInfo.screens[0]->y;
     }
+
+    xTranslateCoordsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .sameScreen = xTrue,
+        .dstX = dstX,
+        .dstY = dstY,
+        .child = child
+    };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -1968,11 +1974,10 @@ PanoramiXGetImage(ClientPtr client)
     DrawablePtr pDraw;
     PanoramiXRes *draw;
     Bool isRoot;
-    char *pBuf;
     int i, x, y, w, h, format, rc;
     Mask plane = 0, planemask;
     int linesDone, nlines, linesPerBuf;
-    long widthBytesLine, length;
+    long widthBytesLine;
 
     REQUEST(xGetImageReq);
 
@@ -2040,27 +2045,17 @@ PanoramiXGetImage(ClientPtr client)
                                               IncludeInferiors);
     }
 
-
+    size_t length;
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(w, pDraw->depth);
         length = widthBytesLine * h;
-
     }
     else {
         widthBytesLine = BitmapBytePad(w);
         plane = ((Mask) 1) << (pDraw->depth - 1);
         /* only planes asked for */
         length = widthBytesLine * h * Ones(planemask & (plane | (plane - 1)));
-
     }
-
-    xGetImageReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .visual = wVisual(((WindowPtr) pDraw)),
-        .depth = pDraw->depth,
-        .length = bytes_to_int32(length),
-    };
 
     if (widthBytesLine == 0 || h == 0)
         linesPerBuf = 0;
@@ -2071,15 +2066,13 @@ PanoramiXGetImage(ClientPtr client)
         if (linesPerBuf > h)
             linesPerBuf = h;
     }
-    if (!(pBuf = calloc(linesPerBuf, widthBytesLine)))
-        return BadAlloc;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.visual);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
+
+    struct x_rpcbuf rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    /* can become quite big, so make enough room so we don't need to relloc */
+    if (!x_rpcbuf_makeroom(&rpcbuf, length))
+        return BadAlloc;
 
     if (linesPerBuf == 0) {
         /* nothing to do */
@@ -2089,14 +2082,11 @@ PanoramiXGetImage(ClientPtr client)
         while (h - linesDone > 0) {
             nlines = min(linesPerBuf, h - linesDone);
 
-            if (pDraw->depth == 1)
-                memset(pBuf, 0, nlines * widthBytesLine);
-
+            char *pBuf = x_rpcbuf_reserve(&rpcbuf, nlines * widthBytesLine);
             XineramaGetImageData(drawables, x, y + linesDone, w, nlines,
                                  format, planemask, pBuf, widthBytesLine,
                                  isRoot);
 
-            WriteToClient(client, (int) (nlines * widthBytesLine), pBuf);
             linesDone += nlines;
         }
     }
@@ -2107,20 +2097,33 @@ PanoramiXGetImage(ClientPtr client)
                 while (h - linesDone > 0) {
                     nlines = min(linesPerBuf, h - linesDone);
 
-                    memset(pBuf, 0, nlines * widthBytesLine);
-
+                    char *pBuf = x_rpcbuf_reserve(&rpcbuf, nlines * widthBytesLine);
                     XineramaGetImageData(drawables, x, y + linesDone, w,
                                          nlines, format, plane, pBuf,
                                          widthBytesLine, isRoot);
-
-                    WriteToClient(client, (int)(nlines * widthBytesLine), pBuf);
 
                     linesDone += nlines;
                 }
             }
         }
     }
-    free(pBuf);
+
+    xGetImageReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .visual = wVisual(((WindowPtr) pDraw)),
+        .depth = pDraw->depth,
+        .length = bytes_to_int32(length),
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.visual);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 

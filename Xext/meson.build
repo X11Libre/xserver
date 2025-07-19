@@ -4,6 +4,7 @@ srcs_xext = [
     'shape.c',
     'sleepuntil.c',
     'sync.c',
+    'xace.c',
     'xcmisc.c',
     'xtest.c',
 ]
@@ -31,10 +32,6 @@ endif
 
 if build_screensaver
     srcs_xext += 'saver.c'
-endif
-
-if build_xace
-    srcs_xext += 'xace.c'
 endif
 
 if build_xf86bigfont
