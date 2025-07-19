@@ -587,8 +587,6 @@ ProcRRGetMonitors(ClientPtr client)
     int                 r;
     RRMonitorPtr        monitors;
     int                 nmonitors;
-    int                 noutputs;
-    int                 m;
     Bool                get_active;
     REQUEST_SIZE_MATCH(xRRGetMonitorsReq);
     r = dixLookupWindow(&window, stuff->window, client, DixGetAttrAccess);
@@ -600,42 +598,15 @@ ProcRRGetMonitors(ClientPtr client)
     if (!RRMonitorMakeList(screen, get_active, &monitors, &nmonitors))
         return BadAlloc;
 
-    noutputs = 0;
-    for (m = 0; m < nmonitors; m++) {
-        noutputs += monitors[m].numOutputs;
-    }
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    size_t noutputs = 0;
 
-    int payload_len = noutputs * sizeof(CARD32) + nmonitors * sizeof(xRRMonitorInfo);
-
-    xRRGetMonitorsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .timestamp = RRMonitorTimestamp(screen),
-        .length = bytes_to_int32(payload_len),
-        .nmonitors = nmonitors,
-        .noutputs = noutputs,
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.timestamp);
-        swapl(&rep.nmonitors);
-        swapl(&rep.noutputs);
-    }
-    WriteToClient(client, sizeof(xRRGetMonitorsReply), &rep);
-
-    char *payload_buf = calloc(1, payload_len);
-    if (!payload_buf) {
-        RRMonitorFreeList(monitors, nmonitors);
-        return BadAlloc;
-    }
-
-    char *walk = payload_buf;
-
-    for (m = 0; m < nmonitors; m++) {
+    for (size_t m = 0; m < nmonitors; m++) {
         RRMonitorPtr    monitor = &monitors[m];
-        xRRMonitorInfo  *info = (xRRMonitorInfo*) walk;
+        xRRMonitorInfo *info = x_rpcbuf_reserve(&rpcbuf, sizeof(xRRMonitorInfo));
+
+        noutputs += monitors[m].numOutputs;
+
         *info = (xRRMonitorInfo) {
             .name = monitor->name,
             .primary = monitor->primary,
@@ -648,6 +619,7 @@ ProcRRGetMonitors(ClientPtr client)
             .widthInMillimeters = monitor->geometry.mmWidth,
             .heightInMillimeters = monitor->geometry.mmHeight,
         };
+
         if (client->swapped) {
             swapl(&info->name);
             swaps(&info->noutput);
@@ -659,19 +631,29 @@ ProcRRGetMonitors(ClientPtr client)
             swapl(&info->heightInMillimeters);
         }
 
-        walk += sizeof(xRRMonitorInfo);
-        memcpy(walk, monitor->outputs, monitor->numOutputs * sizeof (RROutput));
-        if (client->swapped)
-            SwapLongs((CARD32*)walk, monitor->numOutputs);
-
-        walk += monitor->numOutputs * sizeof (RROutput);
+        x_rpcbuf_write_CARD32s(&rpcbuf, monitor->outputs, monitor->numOutputs);
     }
-
-    WriteToClient(client, payload_len, payload_buf);
-
-    free(payload_buf);
     RRMonitorFreeList(monitors, nmonitors);
 
+    xRRGetMonitorsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .timestamp = RRMonitorTimestamp(screen),
+        .nmonitors = nmonitors,
+        .noutputs = noutputs,
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.timestamp);
+        swapl(&rep.nmonitors);
+        swapl(&rep.noutputs);
+    }
+
+    WriteToClient(client, sizeof(xRRGetMonitorsReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
