@@ -1079,7 +1079,10 @@ There are two types of match entries used in
 .B InputClass
 sections. The first allows various tokens to be matched against attributes
 of the device. An entry can be constructed to match attributes from different
-devices by separating arguments with a '|' character. Multiple entries of the
+devices by separating arguments with a '|' character. If an argument is prepended
+with '!', then it should NOT be contained in an attribute. If one or more '&'
+characters are present in an argument, they split it into parts that ALL must
+be substrings of an attribute. Multiple entries of the
 same type may be supplied to add multiple matching conditions on the same
 attribute. For example:
 .PP
@@ -1087,10 +1090,10 @@ attribute. For example:
 .nf
 .B  "Section \*qInputClass\*q"
 .B  "    Identifier   \*qMy Class\*q"
-.B  "    # product string must contain example and"
-.B  "    # either gizmo or gadget"
-.B  "    MatchProduct \*qexample\*q"
-.B  "    MatchProduct \*qgizmo\^|\^gadget\*q"
+.B  "    # product string must not contain example and"
+.B  "    # contain either both gizmo and gremlin, or gadget"
+.B  "    MatchProduct \*q!example\*q"
+.B  "    MatchProduct \*qgizmo\^&\^gremlin\^|\^gadget\*q"
 .B  "    NoMatchDriver \*qdrivername\*q"
 .I  "    \&.\|.\|.\&"
 .B  EndSection
@@ -1173,6 +1176,25 @@ and
 .B NoMatchLayout
 directives. These NoMatch directives match if the subsequent match is not
 met by the device.
+.PP
+To apply more sophicticated conditions, an entire attribute can be matched
+against an extended regular expression (see
+.BR regex (7)
+):
+.PP
+.RS 4
+.nf
+.B  "    # product string must start with Experimental
+.B  "    # and end with Device
+.B  "    MatchProduct \*qregex:_^Experimental.*Device$_\*q"
+.fi
+.RE
+.PP
+Such a pattern is prefixed with "regex:", and the next character, which
+may be arbitrary, is used as a two-side delimiter, i.e. the regular
+expression starts after it and lasts until its next occurrence, or to
+the end of the argument, if the delimiting character has not been found
+again.
 .PP
 The second type of entry is used to match device types. These entries take a
 boolean argument similar to
