@@ -136,7 +136,6 @@ static int _X_COLD
 SProcGEDispatch(ClientPtr client)
 {
     REQUEST(xReq);
-    swaps(&stuff->length);
 
     switch (stuff->data) {
     case X_GEQueryVersion:
