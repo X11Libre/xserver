@@ -529,7 +529,7 @@ miPaintWindow(WindowPtr pWin, RegionPtr prgn, int what)
         return;
     }
 
-    ChangeGC(NullClient, pGC, gcmask, gcval);
+    ChangeGC(NULL, pGC, gcmask, gcval);
     ValidateGC(drawable, pGC);
 
     numRects = RegionNumRects(prgn);
@@ -562,9 +562,9 @@ miClearDrawable(DrawablePtr pDraw, GCPtr pGC)
     rect.y = 0;
     rect.width = pDraw->width;
     rect.height = pDraw->height;
-    ChangeGC(NullClient, pGC, GCForeground, &bg);
+    ChangeGC(NULL, pGC, GCForeground, &bg);
     ValidateGC(pDraw, pGC);
     (*pGC->ops->PolyFillRect) (pDraw, pGC, 1, &rect);
-    ChangeGC(NullClient, pGC, GCForeground, &fg);
+    ChangeGC(NULL, pGC, GCForeground, &fg);
     ValidateGC(pDraw, pGC);
 }

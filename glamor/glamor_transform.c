@@ -254,7 +254,7 @@ glamor_get_stipple_pixmap(GCPtr gc)
 
     changes[0].val = 0xff;
     changes[1].val = 0x00;
-    if (ChangeGC(NullClient, scratch_gc,
+    if (ChangeGC(NULL, scratch_gc,
                  GCForeground|GCBackground, changes) != Success)
         goto bail_gc;
     ValidateGC(&pixmap->drawable, scratch_gc);

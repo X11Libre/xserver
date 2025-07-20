@@ -525,7 +525,7 @@ MakeRootTile(WindowPtr pWin)
         attributes[0].val = pScreen->whitePixel;
         attributes[1].val = pScreen->blackPixel;
 
-        (void) ChangeGC(NullClient, pGC, GCForeground | GCBackground,
+        (void) ChangeGC(NULL, pGC, GCForeground | GCBackground,
                         attributes);
     }
 

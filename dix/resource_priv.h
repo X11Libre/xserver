@@ -39,7 +39,7 @@
  * (every client so is assigned a range of XIDs it may use for resource creation)
  *
  * @param WindowPtr to the window whose client shall be retrieved
- * @return pointer to ClientRec structure or NullClient (NULL)
+ * @return pointer to ClientRec structure or NULL
  */
 ClientPtr dixClientForWindow(WindowPtr pWin);
 
@@ -50,7 +50,7 @@ ClientPtr dixClientForWindow(WindowPtr pWin);
  * (every client so is assigned a range of XIDs it may use for resource creation)
  *
  * @param GrabPtr to the grab whose owning client shall be retrieved
- * @return pointer to ClientRec structure or NullClient (NULL)
+ * @return pointer to ClientRec structure or NULL
  */
 ClientPtr dixClientForGrab(GrabPtr pGrab);
 
@@ -61,7 +61,7 @@ ClientPtr dixClientForGrab(GrabPtr pGrab);
  * (every client so is assigned a range of XIDs it may use for resource creation)
  *
  * @param GrabPtr to the InputClients whose owning client shall be retrieved
- * @return pointer to ClientRec structure or NullClient (NULL)
+ * @return pointer to ClientRec structure or NULL
  */
 ClientPtr dixClientForInputClients(InputClientsPtr pInputClients);
 
@@ -72,7 +72,7 @@ ClientPtr dixClientForInputClients(InputClientsPtr pInputClients);
  * (every client so is assigned a range of XIDs it may use for resource creation)
  *
  * @param GrabPtr to the OtherClients whose owning client shall be retrieved
- * @return pointer to ClientRec structure or NullClient (NULL)
+ * @return pointer to ClientRec structure or NULL
  */
 ClientPtr dixClientForOtherClients(OtherClientsPtr pOtherClients);
 
@@ -98,13 +98,13 @@ static inline int dixClientIdForXID(XID xid) {
  * (every client so is assigned a range of XIDs it may use for resource creation)
  *
  * @param XID the ID of the resource whose client is retrieved
- * @return pointer to ClientRec structure or NullClient (NULL)
+ * @return pointer to ClientRec structure or NULL
  */
 static inline ClientPtr dixClientForXID(XID xid) {
     const int idx = dixClientIdForXID(xid);
     if (idx < MAXCLIENTS)
         return clients[idx];
-    return NullClient;
+    return NULL;
 }
 
 /*

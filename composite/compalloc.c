@@ -248,7 +248,7 @@ compRestoreWindow(WindowPtr pWin, PixmapPtr pPixmap)
             ChangeGCVal val;
 
             val.val = IncludeInferiors;
-            ChangeGC(NullClient, pGC, GCSubwindowMode, &val);
+            ChangeGC(NULL, pGC, GCSubwindowMode, &val);
             ValidateGC(&pWin->drawable, pGC);
             (void) (*pGC->ops->CopyArea) (&pPixmap->drawable,
                                    &pWin->drawable, pGC, x, y, w, h, 0, 0);
@@ -552,7 +552,7 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
             ChangeGCVal val;
 
             val.val = IncludeInferiors;
-            ChangeGC(NullClient, pGC, GCSubwindowMode, &val);
+            ChangeGC(NULL, pGC, GCSubwindowMode, &val);
             ValidateGC(&pPixmap->drawable, pGC);
             (void) (*pGC->ops->CopyArea) (&pParent->drawable,
                                           &pPixmap->drawable,

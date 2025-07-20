@@ -222,4 +222,10 @@ Ones(unsigned long mask)
 
 #define LIMITCLIENTS     256     /* Must be a power of 2 and <= MAXCLIENTS */
 
+/* static assert for protocol structure sizes */
+#ifndef __size_assert
+#define __size_assert(what, howmuch) \
+  typedef char what##_size_wrong_[( !!(sizeof(what) == howmuch) )*2-1 ]
+#endif
+
 #endif                          /* _OSDEP_H_ */

@@ -734,7 +734,7 @@ glxWinCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
     GLWIN_TRACE_MSG("glxWinCopyWindow pWindow %p", pWindow);
 
     dixLookupResourceByType((void *) &pGlxDraw, pWindow->drawable.id,
-                            __glXDrawableRes, NullClient, DixUnknownAccess);
+                            __glXDrawableRes, NULL, DixUnknownAccess);
 
     /*
        Discard any CopyWindow requests if a GL drawing context is pointing at the window

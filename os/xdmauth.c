@@ -37,12 +37,9 @@ from The Open Group.
 
 #include <stdio.h>
 #include <X11/X.h>
-#define XSERV_t
-#define TRANS_SERVER
-#define TRANS_REOPEN
-#include <X11/Xtrans/Xtrans.h>
 
 #include "os/auth.h"
+#include "os/Xtrans.h"
 
 #include "os.h"
 #include "osdep.h"

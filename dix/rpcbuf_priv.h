@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 
+#include "include/misc.h"
 #include "include/os.h"
 
 /*
@@ -215,5 +216,15 @@ Bool x_rpcbuf_write_CARD16s(struct x_rpcbuf *rpcbuf, const CARD16 *values,
  */
 Bool x_rpcbuf_write_CARD32s(struct x_rpcbuf *rpcbuf, const CARD32 *values,
     size_t count) _X_ATTRIBUTE_NONNULL_ARG(1);
+
+/*
+ * retrieve number of 4-byte-units (padded) of data written in the buffer
+ *
+ * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @return          number of 4-byte units (w/ padding) written into the buffer
+ */
+static inline size_t x_rpcbuf_wsize_units(struct x_rpcbuf *rpcbuf) {
+    return bytes_to_int32(pad_to_int32(rpcbuf->wpos));
+}
 
 #endif /* _XSERVER_DIX_RPCBUF_PRIV_H */

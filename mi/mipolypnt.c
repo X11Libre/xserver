@@ -94,7 +94,7 @@ miPolyPoint(DrawablePtr pDrawable, GCPtr pGC, int mode, /* Origin or Previous */
     fsOld.val = pGC->fillStyle;
     fsNew.val = FillSolid;
     if (pGC->fillStyle != FillSolid) {
-        ChangeGC(NullClient, pGC, GCFillStyle, &fsNew);
+        ChangeGC(NULL, pGC, GCFillStyle, &fsNew);
         ValidateGC(pDrawable, pGC);
     }
     pwidth = pwidthInit;
@@ -103,7 +103,7 @@ miPolyPoint(DrawablePtr pDrawable, GCPtr pGC, int mode, /* Origin or Previous */
     (*pGC->ops->FillSpans) (pDrawable, pGC, npt, pptInit, pwidthInit, FALSE);
 
     if (fsOld.val != FillSolid) {
-        ChangeGC(NullClient, pGC, GCFillStyle, &fsOld);
+        ChangeGC(NULL, pGC, GCFillStyle, &fsOld);
         ValidateGC(pDrawable, pGC);
     }
     free(pwidthInit);

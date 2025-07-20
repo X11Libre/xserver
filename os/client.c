@@ -107,7 +107,7 @@ DetermineClientPid(struct _Client * client)
     LocalClientCredRec *lcc = NULL;
     pid_t pid = -1;
 
-    if (client == NullClient)
+    if (client == NULL)
         return pid;
 
     if (client == serverClient)
@@ -451,7 +451,7 @@ void
 ReserveClientIds(struct _Client *client)
 {
 #ifdef CLIENTIDS
-    if (client == NullClient)
+    if (client == NULL)
         return;
 
     assert(!client->clientIds);
@@ -483,7 +483,7 @@ void
 ReleaseClientIds(struct _Client *client)
 {
 #ifdef CLIENTIDS
-    if (client == NullClient)
+    if (client == NULL)
         return;
 
     if (!client->clientIds)
@@ -518,7 +518,7 @@ ReleaseClientIds(struct _Client *client)
 pid_t
 GetClientPid(struct _Client *client)
 {
-    if (client == NullClient)
+    if (client == NULL)
         return -1;
 
     if (!client->clientIds)
@@ -544,7 +544,7 @@ GetClientPid(struct _Client *client)
 const char *
 GetClientCmdName(struct _Client *client)
 {
-    if (client == NullClient)
+    if (client == NULL)
         return NULL;
 
     if (!client->clientIds)
@@ -570,7 +570,7 @@ GetClientCmdName(struct _Client *client)
 const char *
 GetClientCmdArgs(struct _Client *client)
 {
-    if (client == NullClient)
+    if (client == NULL)
         return NULL;
 
     if (!client->clientIds)

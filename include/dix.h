@@ -59,8 +59,6 @@ SOFTWARE.
 #define SAMETIME 0
 #define LATER 1
 
-#define NullClient ((ClientPtr) 0)
-
 #define REQUEST(type)                                                   \
     type * stuff = (type *)client->requestBuffer;
 
