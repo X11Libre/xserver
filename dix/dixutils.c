@@ -298,10 +298,9 @@ AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
 void
 DeleteWindowFromAnySaveSet(WindowPtr pWin)
 {
-    int i;
     ClientPtr client;
 
-    for (i = 0; i < currentMaxClients; i++) {
+    for (int i = 0; i < currentMaxClients; i++) {
         client = clients[i];
         if (client && client->numSaved)
             (void) AlterSaveSetForClient(client, pWin, SetModeDelete, FALSE,
@@ -339,23 +338,21 @@ static Bool handlerDeleted;
 void
 BlockHandler(void *pTimeout)
 {
-    int i, j;
-
     ++inHandler;
-    for (i = 0; i < numHandlers; i++)
+    for (int i = 0; i < numHandlers; i++)
         if (!handlers[i].deleted)
             (*handlers[i].BlockHandler) (handlers[i].blockData, pTimeout);
 
-    for (i = 0; i < screenInfo.numGPUScreens; i++)
+    for (int i = 0; i < screenInfo.numGPUScreens; i++)
         (*screenInfo.gpuscreens[i]->BlockHandler) (screenInfo.gpuscreens[i], pTimeout);
 
-    for (i = 0; i < screenInfo.numScreens; i++)
+    for (int i = 0; i < screenInfo.numScreens; i++)
         (*screenInfo.screens[i]->BlockHandler) (screenInfo.screens[i], pTimeout);
 
     if (handlerDeleted) {
-        for (i = 0; i < numHandlers;)
+        for (int i = 0; i < numHandlers;)
             if (handlers[i].deleted) {
-                for (j = i; j < numHandlers - 1; j++)
+                for (int j = i; j < numHandlers - 1; j++)
                     handlers[j] = handlers[j + 1];
                 numHandlers--;
             }
@@ -374,20 +371,18 @@ BlockHandler(void *pTimeout)
 void
 WakeupHandler(int result)
 {
-    int i, j;
-
     ++inHandler;
-    for (i = 0; i < screenInfo.numScreens; i++)
+    for (int i = 0; i < screenInfo.numScreens; i++)
         (*screenInfo.screens[i]->WakeupHandler) (screenInfo.screens[i], result);
-    for (i = 0; i < screenInfo.numGPUScreens; i++)
+    for (int i = 0; i < screenInfo.numGPUScreens; i++)
         (*screenInfo.gpuscreens[i]->WakeupHandler) (screenInfo.gpuscreens[i], result);
-    for (i = numHandlers - 1; i >= 0; i--)
+    for (int i = numHandlers - 1; i >= 0; i--)
         if (!handlers[i].deleted)
             (*handlers[i].WakeupHandler) (handlers[i].blockData, result);
     if (handlerDeleted) {
-        for (i = 0; i < numHandlers;)
+        for (int i = 0; i < numHandlers;)
             if (handlers[i].deleted) {
-                for (j = i; j < numHandlers - 1; j++)
+                for (int j = i; j < numHandlers - 1; j++)
                     handlers[j] = handlers[j + 1];
                 numHandlers--;
             }
@@ -430,9 +425,7 @@ RemoveBlockAndWakeupHandlers(ServerBlockHandlerProcPtr blockHandler,
                              ServerWakeupHandlerProcPtr wakeupHandler,
                              void *blockData)
 {
-    int i;
-
-    for (i = 0; i < numHandlers; i++)
+    for (int i = 0; i < numHandlers; i++)
         if (handlers[i].BlockHandler == blockHandler &&
             handlers[i].WakeupHandler == wakeupHandler &&
             handlers[i].blockData == blockData) {
@@ -579,9 +572,7 @@ ClientSleep(ClientPtr client, ClientSleepProcPtr function, void *closure)
 
 Bool dixClientSignal(ClientPtr client)
 {
-    SleepQueuePtr q;
-
-    for (q = sleepQueue; q; q = q->next)
+    for (SleepQueuePtr q = sleepQueue; q; q = q->next)
         if (q->client == client) {
             return QueueWorkProc(q->function, q->client, q->closure);
         }
@@ -591,10 +582,9 @@ Bool dixClientSignal(ClientPtr client)
 int
 ClientSignalAll(ClientPtr client, ClientSleepProcPtr function, void *closure)
 {
-    SleepQueuePtr q;
     int count = 0;
 
-    for (q = sleepQueue; q; q = q->next) {
+    for (SleepQueuePtr q = sleepQueue; q; q = q->next) {
         if (!(client == CLIENT_SIGNAL_ANY || q->client == client))
             continue;
 
@@ -630,9 +620,7 @@ ClientWakeup(ClientPtr client)
 Bool
 ClientIsAsleep(ClientPtr client)
 {
-    SleepQueuePtr q;
-
-    for (q = sleepQueue; q; q = q->next)
+    for (SleepQueuePtr q = sleepQueue; q; q = q->next)
         if (q->client == client)
             return TRUE;
     return FALSE;
@@ -757,8 +745,7 @@ void DeleteCallbackList(CallbackListPtr *pcbl)
         }
     }
 
-    CallbackPtr cbr, nextcbr;
-    for (cbr = cbl->list; cbr != NULL; cbr = nextcbr) {
+    for (CallbackPtr cbr = cbl->list, nextcbr; cbr != NULL; cbr = nextcbr) {
         nextcbr = cbr->next;
         free(cbr);
     }
@@ -769,8 +756,6 @@ void DeleteCallbackList(CallbackListPtr *pcbl)
 static Bool
 CreateCallbackList(CallbackListPtr *pcbl)
 {
-    int i;
-
     if (!pcbl)
         return FALSE;
 
@@ -783,7 +768,7 @@ CreateCallbackList(CallbackListPtr *pcbl)
     cbl->list = NULL;
     *pcbl = cbl;
 
-    for (i = 0; i < numCallbackListsToCleanup; i++) {
+    for (int i = 0; i < numCallbackListsToCleanup; i++) {
         if (!listsToCleanup[i]) {
             listsToCleanup[i] = pcbl;
             return TRUE;
@@ -824,9 +809,7 @@ DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 void
 DeleteCallbackManager(void)
 {
-    int i;
-
-    for (i = 0; i < numCallbackListsToCleanup; i++) {
+    for (int i = 0; i < numCallbackListsToCleanup; i++) {
         DeleteCallbackList(listsToCleanup[i]);
     }
     free(listsToCleanup);
