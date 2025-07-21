@@ -9,3 +9,7 @@ endif
 if get_option('xf86-video-ark')
     subdir('ark')
 endif
+
+if get_option('xf86-video-ast')
+    subdir('ast')
+endif

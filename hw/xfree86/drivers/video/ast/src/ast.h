@@ -23,6 +23,9 @@
 #ifndef _AST_H_
 # define _AST_H_
 
+typedef void *pointer;
+
+
 /* Compiler Options */
 #define	Accel_2D
 /* #define MMIO_2D */
@@ -80,9 +83,9 @@ typedef enum _TX_CHIPTYPE {
 /* AST REC Info */
 #define AST_NAME 			"AST"
 #define AST_DRIVER_NAME 		"ast"
-#define AST_MAJOR_VERSION 		PACKAGE_VERSION_MAJOR
-#define AST_MINOR_VERSION 		PACKAGE_VERSION_MINOR
-#define AST_PATCH_VERSION		PACKAGE_VERSION_PATCHLEVEL
+#define AST_MAJOR_VERSION 		1
+#define AST_MINOR_VERSION 		2
+#define AST_PATCH_VERSION		0
 #define AST_VERSION	\
         ((AST_MAJOR_VERSION << 20) | (AST_MINOR_VERSION << 10) | AST_PATCH_VERSION)
 
