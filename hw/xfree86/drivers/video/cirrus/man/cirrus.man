@@ -1,6 +1,6 @@
 .\" shorthand for double quote that works everywhere.
 .ds q \N'34'
-.TH CIRRUS __drivermansuffix__ 2009-05-07 __vendorversion__
+.TH CIRRUS @drivermansuffix@ 2009-05-07 @vendorversion@
 .SH NAME
 cirrus \- Cirrus Logic video driver for Xlibre
 .SH SYNOPSIS
@@ -21,14 +21,14 @@ The
 driver supports...
 .SH CONFIGURATION DETAILS
 Please refer to
-.BR xorg.conf (__filemansuffix__)
+.BR xorg.conf (@filemansuffix@)
 for general configuration details.
 This section only covers configuration details specific to this driver.
 .SH "SEE ALSO"
 .BR Xorg (1),
-.BR xorg.conf (__filemansuffix__),
+.BR xorg.conf (@filemansuffix@),
 .BR Xserver (1),
-.BR X (__miscmansuffix__)
+.BR X (@miscmansuffix@)
 .SH AUTHORS
 Authors include: Corin Anderson, Egbert Eich, Derek Fawcus, Koen Gadeyne,
 Harm Hanemaayer, David Monniaux, Itai Nahshon
