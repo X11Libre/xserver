@@ -1339,10 +1339,3 @@ error:
     glamor_egl_cleanup(glamor_egl);
     return FALSE;
 }
-
-/** Stub to retain compatibility with pre-server-1.16 ABI. */
-Bool
-glamor_egl_init_textured_pixmap(ScreenPtr screen)
-{
-    return TRUE;
-}
