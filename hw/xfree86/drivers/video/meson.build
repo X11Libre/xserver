@@ -13,3 +13,7 @@ endif
 if get_option('xf86-video-ast')
     subdir('ast')
 endif
+
+if get_option('xf86-video-chips')
+    subdir('chips')
+endif

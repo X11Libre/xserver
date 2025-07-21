@@ -129,6 +129,8 @@ option('xf86-video-ark', type: 'boolean', value: true,
        description: 'xf86 video driver for ARK graphics chips')
 option('xf86-video-ast', type: 'boolean', value: true,
        description: 'xf86 video driver for AST graphics chips')
+option('xf86-video-chips', type: 'boolean', value: true,
+       description: 'xf86 video driver for CHIPS graphics chips')
 
 option('tests', type: 'boolean', value: true,
        description: 'Build tests for the X server on platforms that support it')
