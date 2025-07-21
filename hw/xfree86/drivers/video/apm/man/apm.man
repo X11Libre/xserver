@@ -1,0 +1,116 @@
+.\" shorthand for double quote that works everywhere.
+.ds q \N'34'
+.TH APM __drivermansuffix__ 2010-06-04 __vendorversion__
+.SH NAME
+apm \- Alliance ProMotion video driver for Xorg
+.SH SYNOPSIS
+.nf
+.B "Section \*qDevice\*q"
+.BI "  Identifier \*q"  devname \*q
+.B  "  Driver \*qapm\*q"
+\ \ ...
+.B EndSection
+.fi
+.SH DESCRIPTION
+.B apm
+is an Xorg driver for Alliance ProMotion video cards.
+The driver is accelerated for supported hardware/depth combinations.
+It supports framebuffer depths of 8, 15, 16, 24, and 32 bits.
+For 6420, 6422, AT24, AT3D, and AT25,
+all depths are fully accelerated except 24 bpp,
+for which only screen to screen copy and rectangle filling is accelerated.
+.SH SUPPORTED HARDWARE
+The
+.B apm
+driver supports PCI and ISA video cards on the following Alliance
+ProMotion chipsets:
+.TP 12
+.B ProMotion 6420
+.TP 12
+.B ProMotion 6422
+.TP 12
+.B AT24
+.TP 12
+.B AT3D
+.TP 12
+.B AT25
+.SH CONFIGURATION DETAILS
+Please refer to
+.BR xorg.conf (__filemansuffix__)
+for general configuration details.
+This section only covers configuration details specific to this driver.
+.PP
+The driver auto-detects the chipset type, but the following
+.B ChipSet
+names may optionally be specified in the config file
+.B \*qDevice\*q
+section, and will override the auto-detection:
+.PP
+.RS 4
+"6422", "at24", "at3d".
+.PP
+The AT25 is Chipset "at3d" and the 6420 is 6422.
+.PP
+The driver will auto-detect the amount of video memory present for all chips.
+The actual amount of video memory can also be specified with a
+.B VideoRam
+entry in the config file
+.B \*qDevice\*q
+section.
+.PP
+The following driver
+.B Options
+are supported:
+.TP
+.BI "Option \*qHWCursor\*q \*q" boolean \*q
+Enable or disable the hardware cursor.
+Default: on.
+.TP
+.BI "Option \*qNoAccel\*q \*q" boolean \*q
+Disable or enable acceleration.
+Default: acceleration is enabled.
+.TP
+.BI "Option \*qPciRetry\*q \*q" boolean \*q
+Enable or disable PCI retries.
+Default: off.
+.TP
+.BI "Option \*qRemap_DPMS_On\*q \*q" string \*q
+.TQ
+.BI "Option \*qRemap_DPMS_Standby\*q \*q" string \*q
+.TQ
+.BI "Option \*qRemap_DPMS_Suspend\*q \*q" string \*q
+.TQ
+.BI "Option \*qRemap_DPMS_Off\*q \*q" string \*q
+Remaps the corresponding DPMS events.
+I've found that my Hercules 128/3D swaps Off and Suspend events.
+You can correct that with
+.nf
+.RS
+.RS
+.B "Option \*qRemap_DPMS_Suspend\*q \*qOff\*q"
+.B "Option \*qRemap_DPMS_Off\*q \*qSuspend\*q"
+.RE
+.fi
+in the
+.B Device
+section of the config file.
+.TP
+.BI "Option \*qSWCursor\*q \*q" boolean \*q
+Force the software cursor.
+Default: off.
+.TP
+.BI "Option \*qShadowFB\*q \*q" boolean \*q
+Enable or disable use of the shadow framebuffer layer.
+Default: off.
+.SH "SEE ALSO"
+.BR Xorg (1),
+.BR xorg.conf (__filemansuffix__),
+.BR Xserver (1),
+.BR X (__miscmansuffix__)
+.SH AUTHORS
+Authors include:
+Egbert Eich,
+Loic Grenie,
+Henrik Harmsen,
+Alan Hourihane,
+Joe Moss
