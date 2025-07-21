@@ -1,11 +1,7 @@
-
 /*
  * Copyright 2002, SuSE Linux AG, Author: Egbert Eich
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 /* All drivers should typically include these */
 #include "xf86.h"
@@ -42,6 +38,8 @@
 #include "scrnintstr.h"
 #include "servermd.h"
 
+typedef void *pointer;
+
 /* Mandatory functions */
 static const OptionInfoRec *	DUMMYAvailableOptions(int chipid, int busid);
 static void     DUMMYIdentify(int flags);
@@ -69,9 +67,9 @@ static Bool	dummyDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op,
 #define DUMMY_NAME "DUMMY"
 #define DUMMY_DRIVER_NAME "dummy"
 
-#define DUMMY_MAJOR_VERSION PACKAGE_VERSION_MAJOR
-#define DUMMY_MINOR_VERSION PACKAGE_VERSION_MINOR
-#define DUMMY_PATCHLEVEL PACKAGE_VERSION_PATCHLEVEL
+#define DUMMY_MAJOR_VERSION 0
+#define DUMMY_MINOR_VERSION 4
+#define DUMMY_PATCHLEVEL 1
 
 #define DUMMY_MAX_WIDTH 32767
 #define DUMMY_MAX_HEIGHT 32767
@@ -119,8 +117,6 @@ static const OptionInfoRec DUMMYOptions[] = {
     { OPTION_SW_CURSOR,	"SWcursor",	OPTV_BOOLEAN,	{0}, FALSE },
     { -1,                  NULL,           OPTV_NONE,	{0}, FALSE }
 };
-
-#ifdef XFree86LOADER
 
 static MODULESETUPPROTO(dummySetup);
 
@@ -434,8 +430,6 @@ dummySetup(pointer module, pointer opts, int *errmaj, int *errmin)
 	return NULL;
     }
 }
-
-#endif /* XFree86LOADER */
 
 static Bool
 DUMMYGetRec(ScrnInfoPtr pScrn)
