@@ -10,10 +10,7 @@
  * Much of this code is inspired by the HW cursor code from XFree86
  * 3.3.3.
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 #include "xf86.h"
 #include "xf86_OSproc.h"

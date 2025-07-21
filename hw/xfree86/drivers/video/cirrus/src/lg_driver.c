@@ -13,10 +13,7 @@
  *      David Dawes, Andrew E. Mileski, Leonard N. Zubkoff,
  *      Guy DESBIEF, Itai Nahshon.
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 #define EXPERIMENTAL
 

@@ -10,10 +10,7 @@
  *	David Dawes, Andrew E. Mileski, Leonard N. Zubkoff,
  *	Guy DESBIEF
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 /* All drivers should typically include these */
 #include "xf86.h"
@@ -27,6 +24,8 @@
 #include "lg.h"
 
 #include "vbe.h"
+
+typedef void *pointer;
 
 /*
  * Forward definitions for the functions that make up the driver.

@@ -2,10 +2,7 @@
    Copyright (c) 1999,2000  The XFree86 Project Inc. 
    based on code written by Mark Vojkovich <markv@valinux.com>
 */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 #include "xf86.h"
 #include "xf86_OSproc.h"
