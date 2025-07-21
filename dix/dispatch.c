@@ -438,9 +438,7 @@ SetDispatchExceptionTimer(void)
 static Bool
 ShouldDisconnectRemainingClients(void)
 {
-    int i;
-
-    for (i = 1; i < currentMaxClients; i++) {
+    for (int i = 1; i < currentMaxClients; i++) {
         if (clients[i]) {
             if (!XFixesShouldDisconnectClient(clients[i]))
                 return FALSE;
@@ -596,7 +594,7 @@ CreateConnectionBlock(void)
     xVisualType visual;
     xPixmapFormat format;
     unsigned long vid;
-    int i, j, k, lenofblock, sizesofar = 0;
+    int paddingforint32, lenofblock, sizesofar = 0;
     char *pBuf;
     const char VendorString[] = VENDOR_NAME;
 
@@ -636,13 +634,13 @@ CreateConnectionBlock(void)
     memcpy(pBuf, VendorString, (size_t) setup.nbytesVendor);
     sizesofar += setup.nbytesVendor;
     pBuf += setup.nbytesVendor;
-    i = padding_for_int32(setup.nbytesVendor);
-    sizesofar += i;
-    while (--i >= 0)
+    paddingforint32 = padding_for_int32(setup.nbytesVendor);
+    sizesofar += paddingforint32;
+    while (--paddingforint32 >= 0)
         *pBuf++ = 0;
 
     memset(&format, 0, sizeof(xPixmapFormat));
-    for (i = 0; i < screenInfo.numPixmapFormats; i++) {
+    for (int i = 0; i < screenInfo.numPixmapFormats; i++) {
         format.depth = screenInfo.formats[i].depth;
         format.bitsPerPixel = screenInfo.formats[i].bitsPerPixel;
         format.scanLinePad = screenInfo.formats[i].scanlinePad;
@@ -654,7 +652,7 @@ CreateConnectionBlock(void)
     connBlockScreenStart = sizesofar;
     memset(&depth, 0, sizeof(xDepth));
     memset(&visual, 0, sizeof(xVisualType));
-    for (i = 0; i < screenInfo.numScreens; i++) {
+    for (int i = 0; i < screenInfo.numScreens; i++) {
         ScreenPtr pScreen;
         DepthPtr pDepth;
         VisualPtr pVisual;
@@ -681,7 +679,7 @@ CreateConnectionBlock(void)
         pBuf += sizeof(xWindowRoot);
 
         pDepth = pScreen->allowedDepths;
-        for (j = 0; j < pScreen->numDepths; j++, pDepth++) {
+        for (int j = 0; j < pScreen->numDepths; j++, pDepth++) {
             lenofblock += sizeof(xDepth) +
                 (pDepth->numVids * sizeof(xVisualType));
             pBuf = (char *) realloc(ConnectionInfo, lenofblock);
@@ -696,7 +694,7 @@ CreateConnectionBlock(void)
             memcpy(pBuf, &depth, sizeof(xDepth));
             pBuf += sizeof(xDepth);
             sizesofar += sizeof(xDepth);
-            for (k = 0; k < pDepth->numVids; k++) {
+            for (int k = 0; k < pDepth->numVids; k++) {
                 vid = pDepth->vids[k];
                 for (pVisual = pScreen->visuals;
                      pVisual->vid != vid; pVisual++);
@@ -1024,7 +1022,7 @@ int
 ProcQueryTree(ClientPtr client)
 {
     int rc, numChildren = 0;
-    WindowPtr pChild, pWin, pHead;
+    WindowPtr pWin, pHead;
     Window *childIDs = (Window *) NULL;
 
     REQUEST(xResourceReq);
@@ -1035,7 +1033,7 @@ ProcQueryTree(ClientPtr client)
         return rc;
 
     pHead = RealChildHead(pWin);
-    for (pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib)
+    for (WindowPtr pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib)
         numChildren++;
     if (numChildren) {
         int curChild = 0;
@@ -1043,7 +1041,7 @@ ProcQueryTree(ClientPtr client)
         childIDs = calloc(numChildren, sizeof(Window));
         if (!childIDs)
             return BadAlloc;
-        for (pChild = pWin->lastChild; pChild != pHead;
+        for (WindowPtr pChild = pWin->lastChild; pChild != pHead;
              pChild = pChild->prevSib)
             childIDs[curChild++] = pChild->drawable.id;
     }
@@ -1466,7 +1464,7 @@ ProcCreatePixmap(ClientPtr client)
 
     REQUEST(xCreatePixmapReq);
     DepthPtr pDepth;
-    int i, rc;
+    int rc;
 
     REQUEST_SIZE_MATCH(xCreatePixmapReq);
     client->errorValue = stuff->pid;
@@ -1499,7 +1497,7 @@ ProcCreatePixmap(ClientPtr client)
     }
     if (stuff->depth != 1) {
         pDepth = pDraw->pScreen->allowedDepths;
-        for (i = 0; i < pDraw->pScreen->numDepths; i++, pDepth++)
+        for (int i = 0; i < pDraw->pScreen->numDepths; i++, pDepth++)
             if (pDepth->depth == stuff->depth)
                 goto CreatePmap;
         client->errorValue = stuff->depth;
@@ -1723,7 +1721,6 @@ SendGraphicsExpose(ClientPtr client, RegionPtr pRgn, XID drawable,
         xEvent *pEvent;
         xEvent *pe;
         BoxPtr pBox;
-        int i;
         int numRects;
 
         numRects = RegionNumRects(pRgn);
@@ -1732,7 +1729,7 @@ SendGraphicsExpose(ClientPtr client, RegionPtr pRgn, XID drawable,
             return;
         pe = pEvent;
 
-        for (i = 1; i <= numRects; i++, pe++, pBox++) {
+        for (int i = 1; i <= numRects; i++, pe++, pBox++) {
             pe->u.u.type = GraphicsExpose;
             pe->u.graphicsExposure.drawable = drawable;
             pe->u.graphicsExposure.x = pBox->x1;
@@ -3233,12 +3230,12 @@ ProcQueryBestSize(ClientPtr client)
 int
 ProcSetScreenSaver(ClientPtr client)
 {
-    int rc, i, blankingOption, exposureOption;
+    int rc, blankingOption, exposureOption;
 
     REQUEST(xSetScreenSaverReq);
     REQUEST_SIZE_MATCH(xSetScreenSaverReq);
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
+    for (int i = 0; i < screenInfo.numScreens; i++) {
         rc = XaceHookScreensaverAccess(client, screenInfo.screens[i],
                       DixSetAttrAccess);
         if (rc != Success)
@@ -3293,11 +3290,11 @@ ProcSetScreenSaver(ClientPtr client)
 int
 ProcGetScreenSaver(ClientPtr client)
 {
-    int rc, i;
+    int rc;
 
     REQUEST_SIZE_MATCH(xReq);
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
+    for (int i = 0; i < screenInfo.numScreens; i++) {
         rc = XaceHookScreensaverAccess(client, screenInfo.screens[i],
                       DixGetAttrAccess);
         if (rc != Success)
@@ -3414,10 +3411,9 @@ ProcChangeAccessControl(ClientPtr client)
 static void
 CloseDownRetainedResources(void)
 {
-    int i;
     ClientPtr client;
 
-    for (i = 1; i < currentMaxClients; i++) {
+    for (int i = 1; i < currentMaxClients; i++) {
         client = clients[i];
         if (client && (client->closeDownMode == RetainTemporary)
             && (client->clientGone))
@@ -3663,9 +3659,7 @@ CloseDownClient(ClientPtr client)
 static void
 KillAllClients(void)
 {
-    int i;
-
-    for (i = 1; i < currentMaxClients; i++)
+    for (int i = 1; i < currentMaxClients; i++)
         if (clients[i]) {
             /* Make sure Retained clients are released. */
             clients[i]->closeDownMode = DestroyAll;
@@ -3776,7 +3770,6 @@ static int
 SendConnSetup(ClientPtr client, const char *reason)
 {
     xWindowRoot *root;
-    int i;
     int numScreens;
     char *lConnectionInfo;
     xConnSetupPrefix *lconnSetupPrefix;
@@ -3825,14 +3818,13 @@ SendConnSetup(ClientPtr client, const char *reason)
         numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
 #endif /* XINERAMA */
 
-    for (i = 0; i < numScreens; i++) {
-        unsigned int j;
+    for (int i = 0; i < numScreens; i++) {
         xDepth *pDepth;
         WindowPtr pRoot = screenInfo.screens[i]->root;
 
         root->currentInputMask = pRoot->eventMask | wOtherEventMasks(pRoot);
         pDepth = (xDepth *) (root + 1);
-        for (j = 0; j < root->nDepths; j++) {
+        for (unsigned int j = 0; j < root->nDepths; j++) {
             pDepth = (xDepth *) (((char *) (pDepth + 1)) +
                                  pDepth->nVisuals * sizeof(xVisualType));
         }
@@ -4001,7 +3993,7 @@ with its screen number, a pointer to its ScreenRec, argc, and argv.
 
 static int init_screen(ScreenPtr pScreen, int i, Bool gpu)
 {
-    int scanlinepad, format, depth, bitsPerPixel, j, k;
+    int scanlinepad, depth, bitsPerPixel, j, k;
 
     dixInitScreenSpecificPrivates(pScreen);
 
@@ -4029,7 +4021,7 @@ static int init_screen(ScreenPtr pScreen, int i, Bool gpu)
      * Anyway, this must be called after InitOutput and before the
      * screen init routine is called.
      */
-    for (format = 0; format < screenInfo.numPixmapFormats; format++) {
+    for (int format = 0; format < screenInfo.numPixmapFormats; format++) {
         depth = screenInfo.formats[format].depth;
         bitsPerPixel = screenInfo.formats[format].bitsPerPixel;
         scanlinepad = screenInfo.formats[format].scanlinePad;
@@ -4150,12 +4142,12 @@ AddGPUScreen(Bool (*pfnInit) (ScreenPtr /*pScreen */ ,
 void
 RemoveGPUScreen(ScreenPtr pScreen)
 {
-    int idx, j;
+    int idx;
     if (!pScreen->isGPU)
         return;
 
     idx = pScreen->myNum - GPU_SCREEN_OFFSET;
-    for (j = idx; j < screenInfo.numGPUScreens - 1; j++) {
+    for (int j = idx; j < screenInfo.numGPUScreens - 1; j++) {
         screenInfo.gpuscreens[j] = screenInfo.gpuscreens[j + 1];
         screenInfo.gpuscreens[j]->myNum = j + GPU_SCREEN_OFFSET;
     }
