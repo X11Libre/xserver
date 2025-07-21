@@ -1,0 +1,250 @@
+.\" shorthand for double quote that works everywhere.
+.ds q \N'34'
+.TH CHIPS __drivermansuffix__ 2011-03-29 __vendorversion__
+.SH NAME
+chips \- Chips and Technologies video driver for Xorg
+.SH SYNOPSIS
+.nf
+.B "Section \*qDevice\*q"
+.BI "  Identifier \*q"  devname \*q
+.B  "  Driver \*qchips\*q"
+\ \ ...
+.B EndSection
+.fi
+.SH DESCRIPTION
+.B chips
+is an Xorg driver for Chips and Technologies video processors.
+The majority of the Chips and Technologies chipsets are supported by this driver.
+In general the limitation on the capabilities of this driver are determined by
+the chipset on which it is run.
+Where possible, this driver provides full acceleration and
+supports the following depths: 1, 4, 8, 15, 16, 24,
+and on the latest chipsets, an 8+16 overlay mode.
+All visual types are supported for depth 1, 4 and 8,
+and both TrueColor and DirectColor visuals are supported where possible.
+Multi-head configurations are supported on PCI or AGP buses.
+.SH SUPPORTED HARDWARE
+The
+.B chips
+driver supports video processors on most of the bus types currently available.
+The chipsets supported fall into one of three architectural classes: a
+.B basic
+architecture, the
+.B WinGine
+architecture, and the newer
+.B HiQV
+architecture.
+.SS Basic Architecture
+The supported chipsets are
+.BR ct65520 ", " ct65525 ", " ct65530 ", "
+.BR ct65535 ", " ct65540 ", " ct65545 ", "
+.B ct65546
+and
+.BR ct65548 .
+.PP
+Color depths 1, 4, and 8 are supported on all chipsets,
+while depths 15, 16, and 24 are supported only on the
+.BR 65540 ", " 65545 ", " 65546
+and
+.B 65548
+chipsets.
+The driver is accelerated when used with the
+.BR 65545 ", " 65546
+or
+.B 65548
+chipsets, however the DirectColor visual is not available.
+.SS Wingine Architecture
+The supported chipsets are
+.B ct64200
+and
+.BR ct64300.
+.PP
+Color depths 1, 4, and 8 are supported on both chipsets,
+while depths 15, 16, and 24 are supported only on the
+.B 64300
+chipsets.
+The driver is accelerated when used with the
+.B 64300
+chipsets, however the DirectColor visual is not available.
+.SS HiQV Architecture
+The supported chipsets are
+.BR ct65550 ", " ct65554 ", " ct65555 ", " ct68554 ", " ct69000
+and
+.BR  ct69030 .
+.PP
+Color depths 1, 4, 8, 15, 16, 24 and 8+16 are supported on all chipsets.
+The DirectColor visual is supported on all color depths except the 8+16
+overlay mode.
+Full acceleration is supplied for all chipsets.
+.SH CONFIGURATION DETAILS
+Please refer to
+.BR xorg.conf (__filemansuffix__)
+for general configuration details.
+This section only covers configuration details specific to this driver.
+.PP
+The driver auto-detects the chipset type, but the following
+.B ChipSet
+names may optionally be specified in the config file
+.B \*qDevice\*q
+section, and will override the auto-detection:
+.PP
+.RS 4
+"ct65520", "ct65525", "ct65530", "ct65535", "ct65540", "ct65545", "ct65546",
+"ct65548", "ct65550", "ct65554", "ct65555", "ct68554", "ct69000", "ct69030",
+"ct64200", "ct64300".
+.RE
+.PP
+The driver will auto-detect the amount of video memory present for all chipsets,
+but it may be overridden with the
+.B VideoRam
+entry in the config file
+.B \*qDevice\*q
+section.
+.PP
+The following driver
+.B Options
+are supported, on one or more of the supported chipsets:
+.TP
+.BI "Option \*qNoAccel\*q \*q" boolean \*q
+Disable or enable acceleration.
+Default: acceleration is enabled.
+.TP
+.BI "Option \*qNoLinear\*q \*q" boolean \*q
+Disables linear addressing in cases where it is enabled by default.
+Default: off
+.TP
+.BI "Option \*qLinear\*q \*q" boolean \*q
+Enables linear addressing in cases where it is disabled by default.
+Default: off
+.TP
+.BI "Option \*qHWCursor\*q \*q" boolean \*q
+Enable or disable the HW cursor.
+Default: on.
+.TP
+.BI "Option \*qSWCursor\*q \*q" boolean \*q
+Enable or disable the SW cursor.
+Default: off.
+.TP
+.BI "Option \*qSTN\*q \*q" boolean \*q
+Force detection of STN screen type.
+Default: off.
+.TP
+.BI "Option \*qUseModeline\*q \*q" boolean \*q
+Reprogram flat panel timings with values from the modeline.
+Default: off
+.TP
+.BI "Option \*qFixPanelSize\*q \*q" boolean \*q
+Reprogram flat panel size with values from the modeline.
+Default: off
+.TP
+.BI "Option \*qNoStretch\*q \*q" boolean \*q
+This option disables the stretching on a mode on a flat panel to fill the
+screen.
+Default: off
+.TP
+.BI "Option \*qLcdCenter\*q \*q" boolean \*q
+Center the mode displayed on the flat panel on the screen.
+Default: off
+.TP
+.BI "Option \*qHWclocks\*q \*q" boolean \*q
+Force the use of fixed hardware clocks on chips that support both fixed
+and programmable clocks.
+Default: off
+.TP
+.BI "Option \*qUseVclk1\*q \*q" boolean \*q
+Use the Vclk1 programmable clock on
+.B HiQV
+chipsets instead of Vclk2.
+Default: off
+.TP
+.BI "Option \*qFPClock8\*q \*q" float \*q
+.TP
+.BI "Option \*qFPClock16\*q \*q" float \*q
+.TP
+.BI "Option \*qFPClock24\*q \*q" float \*q
+.TP
+.BI "Option \*qFPClock32\*q \*q" float \*q
+Force the use of a particular video clock speed for use with the
+flat panel at a specified depth
+.TP
+.BI "Option \*qMMIO\*q \*q" boolean \*q
+Force the use of memory mapped IO for acceleration registers.
+Default: off
+.TP
+.BI "Option \*qFullMMIO\*q \*q" boolean \*q
+Force the use of memory mapped IO where it can be used.
+Default: off
+.TP
+.BI "Option \*qSuspendHack\*q \*q" boolean \*q
+Force driver to leave centering and stretching registers alone.
+This can fix some laptop suspend/resume problems.
+Default: off
+.TP
+.BI "Option \*qColorKey\*q \*q" integer \*q
+Set the colormap index used for the transparency key for the depth 8 plane
+when operating in 8+16 overlay mode.
+The value must be in the range 2\-255.
+Default: 255.
+.TP
+.BI "Option \*qVideoKey\*q \*q" integer \*q
+This sets the default pixel value for the YUV video overlay key.
+Default: undefined.
+.TP
+.BI "Option \*qShadowFB\*q \*q" boolean \*q
+Enable or disable use of the shadow framebuffer layer.
+Default: off.
+.TP
+.BI "Option \*qSyncOnGreen\*q \*q" boolean \*q
+Enable or disable combining the sync signals with the green signal.
+Default: off.
+.TP
+.BI "Option \*qShowCache\*q \*q" boolean \*q
+Enable or disable viewing offscreen memory.
+Used for debugging only.
+Default: off.
+.TP
+.BI "Option \*q18bitBus\*q \*q" boolean \*q
+Force the driver to assume that the flat panel has an 18bit data bus.
+Default: off.
+.TP
+.BI "Option \*qCrt2Memory\*q \*q" integer \*q
+In a dual-head mode (69030 only) this option selects the amount of memory
+to set aside for the second head.
+If not specified, half the memory is used.
+Default: off.
+.TP
+.BI "Option \*qDualRefresh\*q \*q" integer \*q
+The 69030 supports independent refresh rates on its two display channels.
+This mode of operations uses additional memory bandwidth and thus limits
+the maximum colour depth and refresh rate that can be achieved, and so is
+off by default.
+Using this option forces the use of an independent refresh
+rate on the two screens.
+Default: off.
+.TP
+.BI "Option \*qFpMode\*q \*q" boolean \*q
+The driver probes the chip to find out if a flat panel (LCD) is connected
+and active.
+If this is true it limits the possible screen size to the maximum
+resolution of the panel.
+The chips is initialized by the BIOS which may
+set the chip to 'dual' mode even if no panel is connected.
+In this case the available resolution on the CRT is limited to the panel size
+the BIOS has set.
+To tell the driver that no panel is connected despite
+of what the BIOS is saying set this option to off.
+Don't set it to off if a panel is connected.
+Default: value probed by BIOS.
+.SH "SEE ALSO"
+.BR Xorg (__appmansuffix__),
+.BR xorg.conf (__filemansuffix__),
+.BR Xserver (__appmansuffix__),
+.BR X (__miscmansuffix__)
+.PP
+You are also recommended to read the README file that comes with the driver
+source, which discusses the
+.B chips
+driver in more detail.
+.SH AUTHORS
+Authors include: Jon Block, Mike Hollick, Regis Cridlig, Nozomi Ytow,
+Egbert Eich, David Bateman and Xavier Ducoin
