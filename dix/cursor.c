@@ -105,7 +105,6 @@ FreeCursorBits(CursorBitsPtr bits)
 int
 FreeCursor(void *value, XID cid)
 {
-    int nscr;
     CursorPtr pCurs = (CursorPtr) value;
 
     ScreenPtr pscr;
@@ -118,7 +117,7 @@ FreeCursor(void *value, XID cid)
 
     BUG_WARN(CursorRefCount(pCurs) < 0);
 
-    for (nscr = 0; nscr < screenInfo.numScreens; nscr++) {
+    for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
         pscr = screenInfo.screens[nscr];
         (void) (*pscr->UnrealizeCursor) (pDev, pscr, pCurs);
     }
@@ -185,13 +184,11 @@ CheckForEmptyMask(CursorBitsPtr bits)
 static int
 RealizeCursorAllScreens(CursorPtr pCurs)
 {
-    DeviceIntPtr pDev;
     ScreenPtr pscr;
-    int nscr;
 
-    for (nscr = 0; nscr < screenInfo.numScreens; nscr++) {
+    for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
         pscr = screenInfo.screens[nscr];
-        for (pDev = inputInfo.devices; pDev; pDev = pDev->next) {
+        for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next) {
             if (DevHasCursor(pDev)) {
                 if (!(*pscr->RealizeCursor) (pDev, pscr, pCurs)) {
                     /* Realize failed for device pDev on screen pscr.
@@ -291,20 +288,20 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
     *ppCurs = pCurs;
 
     if (argb) {
-        size_t i, size = bits->width * bits->height;
+        size_t size = bits->width * bits->height;
 
-        for (i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             if ((argb[i] & 0xff000000) == 0 && (argb[i] & 0xffffff) != 0) {
                 /* ARGB data doesn't seem pre-multiplied, fix it */
-                for (i = 0; i < size; i++) {
+                for (size_t j = 0; j < size; j++) {
                     CARD32 a, ar, ag, ab;
 
-                    a = argb[i] >> 24;
-                    ar = a * ((argb[i] >> 16) & 0xff) / 0xff;
-                    ag = a * ((argb[i] >> 8) & 0xff) / 0xff;
-                    ab = a * (argb[i] & 0xff) / 0xff;
+                    a = argb[j] >> 24;
+                    ar = a * ((argb[j] >> 16) & 0xff) / 0xff;
+                    ag = a * ((argb[j] >> 8) & 0xff) / 0xff;
+                    ab = a * (argb[j] & 0xff) / 0xff;
 
-                    argb[i] = a << 24 | ar << 16 | ag << 8 | ab;
+                    argb[j] = a << 24 | ar << 16 | ag << 8 | ab;
                 }
 
                 break;
