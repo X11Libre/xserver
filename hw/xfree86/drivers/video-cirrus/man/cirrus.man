@@ -1,0 +1,34 @@
+.\" shorthand for double quote that works everywhere.
+.ds q \N'34'
+.TH CIRRUS __drivermansuffix__ 2009-05-07 __vendorversion__
+.SH NAME
+cirrus \- Cirrus Logic video driver for Xorg
+.SH SYNOPSIS
+.nf
+.B "Section \*qDevice\*q"
+.BI "  Identifier \*q"  devname \*q
+.B  "  Driver \*qcirrus\*q"
+\ \ ...
+.B EndSection
+.fi
+.SH DESCRIPTION
+.B cirrus
+is an Xorg driver for Cirrus Logic video chips.
+THIS MAN PAGE NEEDS TO BE FILLED IN.
+.SH SUPPORTED HARDWARE
+The
+.B cirrus
+driver supports...
+.SH CONFIGURATION DETAILS
+Please refer to
+.BR xorg.conf (__filemansuffix__)
+for general configuration details.
+This section only covers configuration details specific to this driver.
+.SH "SEE ALSO"
+.BR Xorg (1),
+.BR xorg.conf (__filemansuffix__),
+.BR Xserver (1),
+.BR X (__miscmansuffix__)
+.SH AUTHORS
+Authors include: Corin Anderson, Egbert Eich, Derek Fawcus, Koen Gadeyne,
+Harm Hanemaayer, David Monniaux, Itai Nahshon
