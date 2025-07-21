@@ -135,6 +135,8 @@ option('xf86-video-cirrus', type: 'boolean', value: true,
        description: 'xf86 video driver for CIRRUS graphics chips')
 option('xf86-video-dummy', type: 'boolean', value: true,
        description: 'xf86 video driver DUMMY')
+option('xf86-video-fbdev', type: 'boolean', value: true,
+       description: 'xf86 video driver for /dev/fb*')
 
 option('tests', type: 'boolean', value: true,
        description: 'Build tests for the X server on platforms that support it')

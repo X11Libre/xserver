@@ -5,6 +5,7 @@ xorg_inc = include_directories(
     'common',
     'ddc',
     'dri2',
+    'fbdevhw',
     'i2c',
     'int10',
     'loader',

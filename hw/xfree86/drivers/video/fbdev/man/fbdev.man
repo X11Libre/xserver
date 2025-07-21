@@ -1,6 +1,6 @@
 .\" shorthand for double quote that works everywhere.
 .ds q \N'34'
-.TH FBDEV __drivermansuffix__ __vendorversion__
+.TH FBDEV @drivermansuffix@ @vendorversion@
 .SH NAME
 fbdev \- video driver for framebuffer device
 .SH SYNOPSIS
@@ -15,7 +15,7 @@ fbdev \- video driver for framebuffer device
 .SH DESCRIPTION
 .B fbdev
 is an
-.B __xservername__
+.B @xservername@
 driver for framebuffer devices.
 This is a non-accelerated driver,
 the following framebuffer depths are supported: 8, 15, 16, 24.
@@ -27,12 +27,12 @@ The
 .B fbdev
 driver supports all hardware where a framebuffer driver is available.
 fbdev uses the os-specific submodule
-.BR fbdevhw (__drivermansuffix__)
+.BR fbdevhw (@drivermansuffix@)
 to talk to the kernel device driver.
 Currently a fbdevhw module is available for Linux.
 .SH CONFIGURATION DETAILS
 Please refer to
-.BR __xconfigfile__ (__filemansuffix__)
+.BR @xconfigfile@ (@filemansuffix@)
 for general configuration details.
 This section only covers configuration details specific to this driver.
 .PP
@@ -68,10 +68,10 @@ Implies use of the shadow framebuffer layer.
 Disabled for 24bpp framebuffers.
 Default: off.
 .SH "SEE ALSO"
-.BR __xservername__ (__appmansuffix__),
-.BR __xconfigfile__ (__filemansuffix__),
-.BR Xserver (__appmansuffix__),
-.BR X (__miscmansuffix__),
-.BR fbdevhw (__drivermansuffix__)
+.BR @xservername@ (@appmansuffix@),
+.BR @xconfigfile@ (@filemansuffix@),
+.BR Xserver (@appmansuffix@),
+.BR X (@miscmansuffix@),
+.BR fbdevhw (@drivermansuffix@)
 .SH AUTHORS
 Authors include: Gerd Knorr, Michel D\(:anzer, Geert Uytterhoeven
