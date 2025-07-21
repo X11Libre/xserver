@@ -9,6 +9,12 @@
 #include "xf86Pci.h"
 #include "vgaHW.h"
 
+typedef void *pointer;
+
+#define PACKAGE_VERSION_MINOR 0
+#define PACKAGE_VERSION_MAJOR 7
+#define PACKAGE_VERSION_PATCHLEVEL 6
+
 #define PCI_VENDOR_ARK			0xEDD8
 #define PCI_CHIP_1000PV			0xA091
 #define PCI_CHIP_2000PV			0xA099

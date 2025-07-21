@@ -26,10 +26,7 @@
  *		Harm Hanemaayer <H.Hanemaayer@inter.nl.net>
  *
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 #include "xf86.h"
 #include "xf86_OSproc.h"
@@ -110,8 +107,6 @@ static const OptionInfoRec ARKOptions[] = {
 	{ -1,		  NULL,	     OPTV_NONE,	   {0}, FALSE }
 };
 
-#ifdef XFree86LOADER
-
 MODULESETUPPROTO(ARKSetup);
 
 static XF86ModuleVersionInfo ARKVersRec = {
@@ -144,9 +139,6 @@ pointer ARKSetup(pointer module, pointer opts, int *errmaj, int *errmin)
 	}
 }
 
-#endif /* XFree86LOADER */
-
-
 static Bool ARKGetRec(ScrnInfoPtr pScrn)
 {
 	if (pScrn->driverPrivate)
@@ -170,8 +162,7 @@ static const OptionInfoRec * ARKAvailableOptions(int chipid, int busid)
 
 static void ARKIdentify(int flags)
 {
-	xf86PrintChipsets("ARK", "driver (version " DRIVER_VERSION " for ARK Logic chipset",
-			  ARKChipsets);
+	xf86PrintChipsets("ARK", "driver for ARK Logic chipset", ARKChipsets);
 }
 
 static Bool ARKProbe(DriverPtr drv, int flags)
