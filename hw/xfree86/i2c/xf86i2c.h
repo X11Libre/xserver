@@ -59,7 +59,7 @@ extern _X_EXPORT void xf86DestroyI2CBusRec(I2CBusPtr pI2CBus, Bool unalloc,
 #define I2CBusInit		xf86I2CBusInit
 extern _X_EXPORT Bool xf86I2CBusInit(I2CBusPtr pI2CBus);
 
-extern _X_EXPORT I2CBusPtr xf86I2CFindBus(int scrnIndex, char *name);
+extern _X_EXPORT I2CBusPtr xf86I2CFindBus(int scrnIndex, const char *name);
 extern _X_EXPORT int xf86I2CGetScreenBuses(int scrnIndex,
                                            I2CBusPtr ** pppI2CBus);
 
