@@ -400,7 +400,7 @@ fbdevHWProbe(struct pci_device *pPci, const char *device, char **namep)
 }
 
 Bool
-fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, char *device)
+fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, const char *device)
 {
     fbdevHWPtr fPtr;
 

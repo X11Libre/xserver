@@ -12,7 +12,7 @@
 extern _X_EXPORT Bool fbdevHWProbe(struct pci_device *pPci, const char *device,
                                    char **namep);
 extern _X_EXPORT Bool fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci,
-                                  char *device);
+                                  const char *device);
 
 extern _X_EXPORT char *fbdevHWGetName(ScrnInfoPtr pScrn);
 extern _X_EXPORT int fbdevHWGetDepth(ScrnInfoPtr pScrn, int *fbbpp);
