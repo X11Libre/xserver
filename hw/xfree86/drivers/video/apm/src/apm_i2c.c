@@ -1,7 +1,4 @@
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 #include "apm.h"
 #include "apm_regs.h"

@@ -1,4 +1,6 @@
 
+typedef void *pointer;
+
 #include "apm_pcirename.h"
 #include <string.h>
 

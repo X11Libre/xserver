@@ -1,7 +1,4 @@
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 #include "apm.h"
 #include "xf86cmap.h"
@@ -10,20 +7,14 @@
 #include "vbe.h"
 
 #include "opaque.h"
-#ifdef HAVE_XEXTPROTO_71
 #include <X11/extensions/dpmsconst.h>
-#else
-#define DPMS_SERVER
-#include <X11/extensions/dpms.h>
-#endif
-
 
 #define APM_VERSION		4000
 #define APM_NAME		"APM"
 #define APM_DRIVER_NAME		"apm"
-#define APM_MAJOR_VERSION       PACKAGE_VERSION_MAJOR
-#define APM_MINOR_VERSION       PACKAGE_VERSION_MINOR
-#define APM_PATCHLEVEL          PACKAGE_VERSION_PATCHLEVEL
+#define APM_MAJOR_VERSION	1
+#define APM_MINOR_VERSION	0
+#define APM_PATCHLEVEL		1
 
 #define PCI_VENDOR_ALLIANCE     0x1142
 #define PCI_CHIP_AP6422         0x6422
