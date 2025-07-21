@@ -275,8 +275,6 @@ extern _X_EXPORT void glamor_set_drawable_modifiers_func(ScreenPtr screen,
  * */
 extern _X_EXPORT Bool glamor_egl_init(ScrnInfoPtr scrn, int fd);
 
-extern _X_EXPORT Bool glamor_egl_init_textured_pixmap(ScreenPtr screen);
-
 /*
  * @glamor_egl_create_textured_pixmap: Try to create a textured pixmap from
  * 				       a BO handle.
