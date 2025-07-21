@@ -22,12 +22,9 @@
  */
 
 /* $NetBSD: ct_exa.c,v 1.3 2017/02/16 15:05:57 macallan Exp $ */
+#include <dix-config.h>
 
 #include <sys/types.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 /* All drivers should typically include these */
 #include "xf86.h"

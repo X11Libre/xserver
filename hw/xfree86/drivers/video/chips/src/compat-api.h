@@ -28,6 +28,8 @@
 #ifndef COMPAT_API_H
 #define COMPAT_API_H
 
+typedef void *pointer;
+
 #ifndef GLYPH_HAS_GLYPH_PICTURE_ACCESSOR
 #define GetGlyphPicture(g, s) GlyphPicture((g))[(s)->myNum]
 #define SetGlyphPicture(g, s, p) GlyphPicture((g))[(s)->myNum] = p

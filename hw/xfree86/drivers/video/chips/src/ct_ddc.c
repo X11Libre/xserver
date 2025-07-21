@@ -1,7 +1,4 @@
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <dix-config.h>
 
 /* All drivers should typically include these */
 #include "xf86.h"
