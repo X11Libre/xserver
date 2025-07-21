@@ -1,6 +1,6 @@
 .\" shorthand for double quote that works everywhere.
 .ds q \N'34'
-.TH APM __drivermansuffix__ 2010-06-04 __vendorversion__
+.TH APM @drivermansuffix@ 2010-06-04 @vendorversion@
 .SH NAME
 apm \- Alliance ProMotion video driver for Xlibre
 .SH SYNOPSIS

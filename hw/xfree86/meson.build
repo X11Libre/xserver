@@ -14,6 +14,7 @@ xorg_inc = include_directories(
     'parser',
     'ramdac',
     'vgahw',
+    'shadowfb'
 )
 
 xorg_c_args = []
