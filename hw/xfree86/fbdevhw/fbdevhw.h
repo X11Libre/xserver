@@ -9,7 +9,7 @@
 #define FBDEVHW_TEXT			3       /* Text/attributes      */
 #define FBDEVHW_VGA_PLANES		4       /* EGA/VGA planes       */
 
-extern _X_EXPORT Bool fbdevHWProbe(struct pci_device *pPci, char *device,
+extern _X_EXPORT Bool fbdevHWProbe(struct pci_device *pPci, const char *device,
                                    char **namep);
 extern _X_EXPORT Bool fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci,
                                   char *device);
