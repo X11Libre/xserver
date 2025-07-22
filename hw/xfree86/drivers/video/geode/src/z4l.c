@@ -1689,8 +1689,6 @@ _X_EXPORT DriverRec Z4l = {
     0
 };
 
-#ifdef XFree86LOADER
-
 static MODULESETUPPROTO(z4lSetup);
 
 static XF86ModuleVersionInfo z4lVersionRec = {
@@ -1719,5 +1717,4 @@ z4lSetup(void *module, void *opts, int *errmaj, int *errmin)
     return (void*) 1;
 }
 
-#endif
 #endif                          /* !XvExtension */
