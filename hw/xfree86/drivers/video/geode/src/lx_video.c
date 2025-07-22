@@ -62,7 +62,7 @@
 #endif
 
 /* Local function prototypes */
-static void LXStopVideo(ScrnInfoPtr pScrni, pointer data, Bool exit);
+static void LXStopVideo(ScrnInfoPtr pScrni, void *data, Bool exit);
 
 static void
 
@@ -208,7 +208,7 @@ LXAllocateVidMem(ScrnInfoPtr pScrni, GeodePortPrivRec *pPriv, int size)
 static Bool
 LXCopyPlanar(ScrnInfoPtr pScrni, int id, unsigned char *buf,
              short x1, short y1, short x2, short y2,
-             int width, int height, pointer data)
+             int width, int height, void *data)
 {
     GeodeRec *pGeode = GEODEPTR(pScrni);
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
@@ -286,7 +286,7 @@ LXCopyPlanar(ScrnInfoPtr pScrni, int id, unsigned char *buf,
 static Bool
 LXCopyPacked(ScrnInfoPtr pScrni, int id, unsigned char *buf,
              short x1, short y1, short x2, short y2,
-             int width, int height, pointer data)
+             int width, int height, void *data)
 {
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
     GeodeRec *pGeode = GEODEPTR(pScrni);
@@ -460,7 +460,7 @@ LXPutImage(ScrnInfoPtr pScrni,
            short srcW, short srcH, short drawW, short drawH,
            int id, unsigned char *buf,
            short width, short height, Bool sync, RegionPtr clipBoxes,
-           pointer data, DrawablePtr pDraw)
+           void *data, DrawablePtr pDraw)
 {
     GeodeRec *pGeode = GEODEPTR(pScrni);
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
@@ -531,7 +531,7 @@ LXPutImage(ScrnInfoPtr pScrni,
 static void
 LXQueryBestSize(ScrnInfoPtr pScrni, Bool motion,
                 short vidW, short vidH, short drawW, short drawH,
-                unsigned int *retW, unsigned int *retH, pointer data)
+                unsigned int *retW, unsigned int *retH, void *data)
 {
     *retW = drawW > 16384 ? 16384 : drawW;
     *retH = drawH;
@@ -541,7 +541,7 @@ static Atom xvColorKey, xvColorKeyMode, xvFilter;
 
 static int
 LXGetPortAttribute(ScrnInfoPtr pScrni,
-                   Atom attribute, INT32 *value, pointer data)
+                   Atom attribute, INT32 *value, void *data)
 {
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
 
@@ -559,7 +559,7 @@ LXGetPortAttribute(ScrnInfoPtr pScrni,
 
 static int
 LXSetPortAttribute(ScrnInfoPtr pScrni,
-                   Atom attribute, INT32 value, pointer data)
+                   Atom attribute, INT32 value, void *data)
 {
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
 
@@ -585,7 +585,7 @@ LXSetPortAttribute(ScrnInfoPtr pScrni,
 }
 
 static void
-LXStopVideo(ScrnInfoPtr pScrni, pointer data, Bool exit)
+LXStopVideo(ScrnInfoPtr pScrni, void *data, Bool exit)
 {
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
 
@@ -705,7 +705,7 @@ LXSetupImageVideo(ScreenPtr pScreen)
     adapt->nPorts = 1;
     adapt->pPortPrivates = (DevUnion *) (&adapt[1]);
     pPriv = (GeodePortPrivRec *) (&adapt->pPortPrivates[1]);
-    adapt->pPortPrivates[0].ptr = (pointer) (pPriv);
+    adapt->pPortPrivates[0].ptr = pPriv;
     adapt->pAttributes = Attributes;
     adapt->nImages = ARRAY_SIZE(Images);
     adapt->nAttributes = ARRAY_SIZE(Attributes);
@@ -849,7 +849,7 @@ LXAllocateSurface(ScrnInfoPtr pScrni, int id, unsigned short w,
         surface->id = id;
         surface->pitches[0] = pitch;
         surface->offsets[0] = vidmem->offset;
-        surface->devPrivate.ptr = (pointer) pPriv;
+        surface->devPrivate.ptr = pPriv;
 
         return Success;
     }
@@ -904,14 +904,14 @@ static int
 LXGetSurfaceAttribute(ScrnInfoPtr pScrni, Atom attribute, INT32 *value)
 {
     return LXGetPortAttribute(pScrni, attribute, value,
-                              (pointer) (GET_PORT_PRIVATE(pScrni)));
+                              (GET_PORT_PRIVATE(pScrni)));
 }
 
 static int
 LXSetSurfaceAttribute(ScrnInfoPtr pScrni, Atom attribute, INT32 value)
 {
     return LXSetPortAttribute(pScrni, attribute, value,
-                              (pointer) (GET_PORT_PRIVATE(pScrni)));
+                              (GET_PORT_PRIVATE(pScrni)));
 }
 
 static void
