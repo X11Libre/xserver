@@ -17,7 +17,7 @@ typedef struct _I2CDevRec *I2CDevPtr;
 /* I2C masters have to register themselves */
 
 typedef struct _I2CBusRec {
-    char *BusName;
+    const char *BusName;
     int scrnIndex;
     ScrnInfoPtr pScrn;
 
