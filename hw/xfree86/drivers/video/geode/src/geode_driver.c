@@ -65,9 +65,9 @@
 #define GEODE_NAME        "GEODE"
 #define GEODE_DRIVER_NAME "geode"
 #define GEODE_VERSION       4000
-#define GEODE_VERSION_MAJOR PACKAGE_VERSION_MAJOR
-#define GEODE_VERSION_MINOR PACKAGE_VERSION_MINOR
-#define GEODE_VERSION_PATCH PACKAGE_VERSION_PATCHLEVEL
+#define GEODE_VERSION_MAJOR 2
+#define GEODE_VERSION_MINOR 18
+#define GEODE_VERSION_PATCH 1
 
 /* Forward definitions */
 static const OptionInfoRec *AmdAvailableOptions(int chipid, int busid);
