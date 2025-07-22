@@ -27,10 +27,7 @@
  * VG Config Register (0x00) page 16
  * VG FP Register (0x02) page 18
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include <stdio.h>
 

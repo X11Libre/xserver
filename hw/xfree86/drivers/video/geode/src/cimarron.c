@@ -28,10 +28,7 @@
   * Base include file for the Cimarron library. This file should be modified
   * and included in any Cimarron-based project.
   */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include <stdint.h>
 

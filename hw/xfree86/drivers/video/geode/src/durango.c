@@ -27,10 +27,7 @@
    been - remove the unnecessary #defines and routines, and concentrate on
    Linux for now.
 */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include <unistd.h>
 #include <errno.h>

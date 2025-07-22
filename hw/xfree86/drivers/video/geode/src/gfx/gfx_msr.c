@@ -35,10 +35,7 @@
  *       gfx_msr_read
  *       gfx_msr_write
  * */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 /* INCLUDE SUPPORT FOR REDCLOUD, IF SPECIFIED */
 

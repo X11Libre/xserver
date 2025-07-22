@@ -25,10 +25,7 @@
  */
 
 /* We want to share as much code between GX and LX as we possibly can for obvious reasons */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include <string.h>             /* memcmp() */
 #include <unistd.h>
