@@ -344,7 +344,6 @@ ApmPreInit(ScrnInfoPtr pScrn, int flags)
     EntityInfoPtr	pEnt;
     vgaHWPtr		hwp;
     MessageType		from;
-    char		*mod = NULL;
     const char		*s;
     ClockRangePtr	clockRanges;
     int			i;
@@ -965,6 +964,7 @@ ApmPreInit(ScrnInfoPtr pScrn, int flags)
     xf86SetDpi(pScrn, 0, 0);
 
     /* Load bpp-specific modules */
+    const char *mod = NULL;
     switch (pScrn->bitsPerPixel) {
     case 8:
     case 16:
