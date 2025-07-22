@@ -53,8 +53,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #define      _XKB_RF_NAMES_PROP_ATOM         "_XKB_RULES_NAMES"
 
-#define	CREATE_ATOM(s)	MakeAtom(s,sizeof(s)-1,1)
-
 #if defined(__alpha) || defined(__alpha__)
 #define	LED_COMPOSE	2
 #define LED_CAPS	3
@@ -387,7 +385,7 @@ XkbInitNames(XkbSrvInfoPtr xkbi)
     xkb = xkbi->desc;
     if ((rtrn = XkbAllocNames(xkb, XkbAllNamesMask, 0, 0)) != Success)
         return rtrn;
-    unknown = CREATE_ATOM("unknown");
+    unknown = dixAddAtom("unknown");
     names = xkb->names;
     if (names->keycodes == None)
         names->keycodes = unknown;
@@ -403,25 +401,25 @@ XkbInitNames(XkbSrvInfoPtr xkbi)
         names->compat = unknown;
     if (!(xkb->defined & XkmVirtualModsMask)) {
         if (names->vmods[vmod_NumLock] == None)
-            names->vmods[vmod_NumLock] = CREATE_ATOM("NumLock");
+            names->vmods[vmod_NumLock] = dixAddAtom("NumLock");
         if (names->vmods[vmod_Alt] == None)
-            names->vmods[vmod_Alt] = CREATE_ATOM("Alt");
+            names->vmods[vmod_Alt] = dixAddAtom("Alt");
         if (names->vmods[vmod_AltGr] == None)
-            names->vmods[vmod_AltGr] = CREATE_ATOM("ModeSwitch");
+            names->vmods[vmod_AltGr] = dixAddAtom("ModeSwitch");
     }
 
     if (!(xkb->defined & XkmIndicatorsMask) ||
         !(xkb->defined & XkmGeometryMask)) {
         initIndicatorNames(NULL, xkb);
         if (names->indicators[LED_CAPS - 1] == None)
-            names->indicators[LED_CAPS - 1] = CREATE_ATOM("Caps Lock");
+            names->indicators[LED_CAPS - 1] = dixAddAtom("Caps Lock");
         if (names->indicators[LED_NUM - 1] == None)
-            names->indicators[LED_NUM - 1] = CREATE_ATOM("Num Lock");
+            names->indicators[LED_NUM - 1] = dixAddAtom("Num Lock");
         if (names->indicators[LED_SCROLL - 1] == None)
-            names->indicators[LED_SCROLL - 1] = CREATE_ATOM("Scroll Lock");
+            names->indicators[LED_SCROLL - 1] = dixAddAtom("Scroll Lock");
 #ifdef LED_COMPOSE
         if (names->indicators[LED_COMPOSE - 1] == None)
-            names->indicators[LED_COMPOSE - 1] = CREATE_ATOM("Compose");
+            names->indicators[LED_COMPOSE - 1] = dixAddAtom("Compose");
 #endif
     }
 

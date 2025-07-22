@@ -1,13 +1,12 @@
-/* This file generated automatically by xkbcomp */
-/* DO  NOT EDIT */
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
 
+#include "dix/dix_priv.h"
+
 #ifndef DEFAULT_H
 #define DEFAULT_H 1
 
-#define GET_ATOM(d,s)	MakeAtom(s,strlen(s),1)
 #define DPYTYPE	char *
 #define NUM_KEYS	1
 
@@ -136,33 +135,33 @@ static XkbKeyTypeRec dflt_types[] = {
 static void
 initTypeNames(DPYTYPE dpy)
 {
-    dflt_types[0].name = GET_ATOM(dpy, "ONE_LEVEL");
-    lnames_ONE_LEVEL[0] = GET_ATOM(dpy, "Any");
-    dflt_types[1].name = GET_ATOM(dpy, "TWO_LEVEL");
-    lnames_TWO_LEVEL[0] = GET_ATOM(dpy, "Base");
-    lnames_TWO_LEVEL[1] = GET_ATOM(dpy, "Shift");
-    dflt_types[2].name = GET_ATOM(dpy, "ALPHABETIC");
-    lnames_ALPHABETIC[0] = GET_ATOM(dpy, "Base");
-    lnames_ALPHABETIC[1] = GET_ATOM(dpy, "Caps");
-    dflt_types[3].name = GET_ATOM(dpy, "KEYPAD");
-    lnames_KEYPAD[0] = GET_ATOM(dpy, "Base");
-    lnames_KEYPAD[1] = GET_ATOM(dpy, "Number");
-    dflt_types[4].name = GET_ATOM(dpy, "PC_BREAK");
-    lnames_PC_BREAK[0] = GET_ATOM(dpy, "Base");
-    lnames_PC_BREAK[1] = GET_ATOM(dpy, "Control");
-    dflt_types[5].name = GET_ATOM(dpy, "PC_SYSRQ");
-    lnames_PC_SYSRQ[0] = GET_ATOM(dpy, "Base");
-    lnames_PC_SYSRQ[1] = GET_ATOM(dpy, "Alt");
-    dflt_types[6].name = GET_ATOM(dpy, "CTRL+ALT");
-    lnames_CTRL_ALT[0] = GET_ATOM(dpy, "Base");
-    lnames_CTRL_ALT[1] = GET_ATOM(dpy, "Ctrl+Alt");
-    dflt_types[7].name = GET_ATOM(dpy, "THREE_LEVEL");
-    lnames_THREE_LEVEL[0] = GET_ATOM(dpy, "Base");
-    lnames_THREE_LEVEL[1] = GET_ATOM(dpy, "Shift");
-    lnames_THREE_LEVEL[2] = GET_ATOM(dpy, "Level3");
-    dflt_types[8].name = GET_ATOM(dpy, "SHIFT+ALT");
-    lnames_SHIFT_ALT[0] = GET_ATOM(dpy, "Base");
-    lnames_SHIFT_ALT[1] = GET_ATOM(dpy, "Shift+Alt");
+    dflt_types[0].name = dixAddAtom("ONE_LEVEL");
+    lnames_ONE_LEVEL[0] = dixAddAtom("Any");
+    dflt_types[1].name = dixAddAtom("TWO_LEVEL");
+    lnames_TWO_LEVEL[0] = dixAddAtom("Base");
+    lnames_TWO_LEVEL[1] = dixAddAtom("Shift");
+    dflt_types[2].name = dixAddAtom("ALPHABETIC");
+    lnames_ALPHABETIC[0] = dixAddAtom("Base");
+    lnames_ALPHABETIC[1] = dixAddAtom("Caps");
+    dflt_types[3].name = dixAddAtom("KEYPAD");
+    lnames_KEYPAD[0] = dixAddAtom("Base");
+    lnames_KEYPAD[1] = dixAddAtom("Number");
+    dflt_types[4].name = dixAddAtom("PC_BREAK");
+    lnames_PC_BREAK[0] = dixAddAtom("Base");
+    lnames_PC_BREAK[1] = dixAddAtom("Control");
+    dflt_types[5].name = dixAddAtom("PC_SYSRQ");
+    lnames_PC_SYSRQ[0] = dixAddAtom("Base");
+    lnames_PC_SYSRQ[1] = dixAddAtom("Alt");
+    dflt_types[6].name = dixAddAtom("CTRL+ALT");
+    lnames_CTRL_ALT[0] = dixAddAtom("Base");
+    lnames_CTRL_ALT[1] = dixAddAtom("Ctrl+Alt");
+    dflt_types[7].name = dixAddAtom("THREE_LEVEL");
+    lnames_THREE_LEVEL[0] = dixAddAtom("Base");
+    lnames_THREE_LEVEL[1] = dixAddAtom("Shift");
+    lnames_THREE_LEVEL[2] = dixAddAtom("Level3");
+    dflt_types[8].name = dixAddAtom("SHIFT+ALT");
+    lnames_SHIFT_ALT[0] = dixAddAtom("Base");
+    lnames_SHIFT_ALT[1] = dixAddAtom("Shift+Alt");
 }
 
 /* compat name is "default" */
@@ -461,11 +460,11 @@ static XkbCompatMapRec compatMap = {
 static void
 initIndicatorNames(DPYTYPE dpy, XkbDescPtr xkb)
 {
-    xkb->names->indicators[0] = GET_ATOM(dpy, "Caps Lock");
-    xkb->names->indicators[1] = GET_ATOM(dpy, "Num Lock");
-    xkb->names->indicators[2] = GET_ATOM(dpy, "Shift Lock");
-    xkb->names->indicators[3] = GET_ATOM(dpy, "Mouse Keys");
-    xkb->names->indicators[4] = GET_ATOM(dpy, "Scroll Lock");
-    xkb->names->indicators[5] = GET_ATOM(dpy, "Group 2");
+    xkb->names->indicators[0] = dixAddAtom("Caps Lock");
+    xkb->names->indicators[1] = dixAddAtom("Num Lock");
+    xkb->names->indicators[2] = dixAddAtom("Shift Lock");
+    xkb->names->indicators[3] = dixAddAtom("Mouse Keys");
+    xkb->names->indicators[4] = dixAddAtom("Scroll Lock");
+    xkb->names->indicators[5] = dixAddAtom("Group 2");
 }
 #endif                          /* DEFAULT_H */
