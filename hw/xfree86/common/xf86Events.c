@@ -324,14 +324,10 @@ xf86EnableInputDeviceForVTSwitch(InputInfoPtr pInfo)
 static void
 xf86UpdateHasVTProperty(Bool hasVT)
 {
-    Atom property_name;
     int32_t value = hasVT ? 1 : 0;
     int i;
 
-    property_name = MakeAtom(HAS_VT_ATOM_NAME, sizeof(HAS_VT_ATOM_NAME) - 1,
-                             FALSE);
-    if (property_name == BAD_RESOURCE)
-        FatalError("Failed to retrieve \"HAS_VT\" atom\n");
+    Atom property_name = MakeAtom(HAS_VT_ATOM_NAME, sizeof(HAS_VT_ATOM_NAME)-1, TRUE);
     for (i = 0; i < xf86NumScreens; i++) {
         dixChangeWindowProperty(serverClient,
                                 xf86ScrnToScreen(xf86Screens[i])->root,
