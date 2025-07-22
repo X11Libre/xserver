@@ -154,8 +154,7 @@ static MODULESETUPPROTO(apmSetup);
  */
 _X_EXPORT XF86ModuleData apmModuleData = { &apmVersRec, apmSetup, NULL };
 
-static pointer
-apmSetup(pointer module, pointer opts, int *errmaj, int *errmain)
+static void* apmSetup(void* module, void* opts, int *errmaj, int *errmain)
 {
     static Bool setupDone = FALSE;
 
@@ -163,7 +162,7 @@ apmSetup(pointer module, pointer opts, int *errmaj, int *errmain)
 	setupDone = TRUE;
 	xf86AddDriver(&APM, module, 0);
 
-	return (pointer)1;
+	return (void*)1;
     }
     else {
 	if (errmaj) *errmaj = LDR_ONCEONLY;
@@ -747,9 +746,9 @@ ApmPreInit(ScrnInfoPtr pScrn, int flags)
 	LinMap[0xFFECD9] = d9;
 	/*pciWriteLong(pApm->PciTag, PCI_CMD_STAT_REG, save);*/
 #ifndef XSERVER_LIBPCIACCESS
-	xf86UnMapVidMem(pScrn->scrnIndex, (pointer)LinMap, pApm->LinMapSize);
+	xf86UnMapVidMem(pScrn->scrnIndex, LinMap, pApm->LinMapSize);
 #else
-	pci_device_unmap_range(pApm->PciInfo, (pointer)LinMap, pApm->LinMapSize);
+	pci_device_unmap_range(pApm->PciInfo, LinMap, pApm->LinMapSize);
 #endif
 	from = X_PROBED;
     }
@@ -1120,17 +1119,17 @@ ApmUnmapMem(ScrnInfoPtr pScrn)
 	}
 	WRXB(0xC9, pApm->c9);
 #ifndef XSERVER_LIBPCIACCESS
-	xf86UnMapVidMem(pScrn->scrnIndex, (pointer)pApm->LinMap, pApm->LinMapSize);
+	xf86UnMapVidMem(pScrn->scrnIndex, pApm->LinMap, pApm->LinMapSize);
 #else
-	pci_device_unmap_range(pApm->PciInfo, (pointer)pApm->LinMap, pApm->LinMapSize);
+	pci_device_unmap_range(pApm->PciInfo, pApm->LinMap, pApm->LinMapSize);
 #endif
 	pApm->LinMap = NULL;
     }
     else if (pApm->FbBase)
 #ifndef XSERVER_LIBPCIACCESS
-	xf86UnMapVidMem(pScrn->scrnIndex, (pointer)pApm->LinMap, 0x10000);
+	xf86UnMapVidMem(pScrn->scrnIndex, pApm->LinMap, 0x10000);
 #else
-	pci_device_unmap_range(pApm->PciInfo, (pointer)pApm->LinMap, 0x10000);
+	pci_device_unmap_range(pApm->PciInfo, pApm->LinMap, 0x10000);
 #endif
 
     return TRUE;
