@@ -1478,9 +1478,7 @@ ASTDoDDC(ScrnInfoPtr pScrn, int index)
 
    xf86MonPtr MonInfo1 = NULL, MonInfo2 = NULL;
    unsigned long i, j, k;
-   struct monitor_ranges ranges, ranges1, ranges2;
    int DTSelect, dclock1=0, h_active1=0, v_active1=0, dclock2=0, h_active2=0, v_active2=0;
-   struct std_timings stdtiming, *stdtiming1, *stdtiming2;
 
    /* Honour Option "noDDC" */
    if (xf86ReturnOptValBool(pAST->Options, OPTION_NO_DDC, FALSE)) {
@@ -1528,6 +1526,7 @@ ASTDoDDC(ScrnInfoPtr pScrn, int index)
                    MonInfo->timings1.t_manu = MonInfo1->timings1.t_manu & MonInfo2->timings1.t_manu;
 
                    /* Update Std. Timing */
+                   struct std_timings stdtiming;
                    for (i=0; i<8; i++) {
                        stdtiming.hsize = stdtiming.vsize = stdtiming.refresh = stdtiming.id = 0;
                        for (j=0; j<8; j++) {
@@ -1542,7 +1541,11 @@ ASTDoDDC(ScrnInfoPtr pScrn, int index)
                        MonInfo->timings2[i] = stdtiming;
                    } /* Std. Timing */
 
+
+                   struct std_timings *stdtiming1 = NULL, *stdtiming2 = NULL;
+
                    /* Get Detailed Timing */
+                   struct monitor_ranges ranges1 = { 0 }, ranges2 = { 0 };
                    for (i=0;i<4;i++) {
                       if (MonInfo1->det_mon[i].type == 0xFD)
                          ranges1 = MonInfo1->det_mon[i].section.ranges;
@@ -1579,7 +1582,7 @@ ASTDoDDC(ScrnInfoPtr pScrn, int index)
                        DTSelect = SkipDT;
 
                    /* Chk Monitor Descriptor */
-                   ranges = ranges1;
+                   struct monitor_ranges ranges = ranges1;
                    ranges.min_h = ranges1.min_h > ranges2.min_h ? ranges1.min_h:ranges2.min_h;
                    ranges.min_v = ranges1.min_v > ranges2.min_v ? ranges1.min_v:ranges2.min_v;
                    ranges.max_h = ranges1.max_h < ranges2.max_h ? ranges1.max_h:ranges2.max_h;
