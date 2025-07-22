@@ -58,13 +58,7 @@
 #ifdef DPMSExtension
 #include "globals.h"
 #include "opaque.h"
-#ifdef HAVE_XEXTPROTO_71
 #include <X11/extensions/dpmsconst.h>
-#else
-#define DPMS_SERVER
-#include <X11/extensions/dpms.h>
-#endif
-
 #endif                          /* DPMSExtension */
 
 /* A few things all drivers should have */
