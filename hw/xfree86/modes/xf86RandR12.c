@@ -26,6 +26,7 @@
 
 #include <X11/extensions/render.h>
 
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
 
@@ -1803,7 +1804,7 @@ xf86RandR12CreateMonitors(ScreenPtr pScreen)
             return;
         monitor->pScreen = pScreen;
         snprintf(buf, 25, "Auto-Monitor-%d", tile_info->group_id);
-        monitor->name = MakeAtom(buf, strlen(buf), TRUE);
+        monitor->name = dixAddAtom(buf);
         monitor->primary = 0;
         monitor->automatic = TRUE;
         memset(&monitor->geometry.box, 0, sizeof(monitor->geometry.box));

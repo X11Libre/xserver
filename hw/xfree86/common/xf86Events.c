@@ -327,7 +327,7 @@ xf86UpdateHasVTProperty(Bool hasVT)
     int32_t value = hasVT ? 1 : 0;
     int i;
 
-    Atom property_name = MakeAtom(HAS_VT_ATOM_NAME, sizeof(HAS_VT_ATOM_NAME)-1, TRUE);
+    Atom property_name = dixAddAtom(HAS_VT_ATOM_NAME);
     for (i = 0; i < xf86NumScreens; i++) {
         dixChangeWindowProperty(serverClient,
                                 xf86ScrnToScreen(xf86Screens[i])->root,
