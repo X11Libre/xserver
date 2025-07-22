@@ -149,7 +149,6 @@ ctDoneCopy(PixmapPtr pDstPixmap)
     ENTER;
     ScrnInfoPtr pScrn = xf86Screens[pDstPixmap->drawable.pScreen->myNum];
     CHIPSPtr cPtr = CHIPSPTR(pScrn);
-    CHIPSACLPtr cAcl = CHIPSACLPTR(pScrn);
     ctBLTWAIT;
     LEAVE;
 }
