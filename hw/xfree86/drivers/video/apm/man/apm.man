@@ -2,7 +2,7 @@
 .ds q \N'34'
 .TH APM __drivermansuffix__ 2010-06-04 __vendorversion__
 .SH NAME
-apm \- Alliance ProMotion video driver for Xorg
+apm \- Alliance ProMotion video driver for Xlibre
 .SH SYNOPSIS
 .nf
 .B "Section \*qDevice\*q"
@@ -13,7 +13,7 @@ apm \- Alliance ProMotion video driver for Xorg
 .fi
 .SH DESCRIPTION
 .B apm
-is an Xorg driver for Alliance ProMotion video cards.
+is an Xlibre driver for Alliance ProMotion video cards.
 The driver is accelerated for supported hardware/depth combinations.
 It supports framebuffer depths of 8, 15, 16, 24, and 32 bits.
 For 6420, 6422, AT24, AT3D, and AT25,
