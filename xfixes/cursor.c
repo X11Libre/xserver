@@ -413,12 +413,12 @@ ProcXFixesSetCursorName(ClientPtr client)
     char *tchar;
 
     REQUEST(xXFixesSetCursorNameReq);
-    Atom atom;
 
     REQUEST_FIXED_SIZE(xXFixesSetCursorNameReq, stuff->nbytes);
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixSetAttrAccess);
     tchar = (char *) &stuff[1];
-    atom = MakeAtom(tchar, stuff->nbytes, TRUE);
+    tchar[stuff->nbytes] = 0;
+    Atom atom = dixGetAtomID(tchar);
     if (atom == BAD_RESOURCE)
         return BadAlloc;
 
@@ -692,7 +692,6 @@ int
 ProcXFixesChangeCursorByName(ClientPtr client)
 {
     CursorPtr pSource;
-    Atom name;
     char *tchar;
 
     REQUEST(xXFixesChangeCursorByNameReq);
@@ -701,7 +700,8 @@ ProcXFixesChangeCursorByName(ClientPtr client)
     VERIFY_CURSOR(pSource, stuff->source, client,
                   DixReadAccess | DixGetAttrAccess);
     tchar = (char *) &stuff[1];
-    name = MakeAtom(tchar, stuff->nbytes, FALSE);
+    tchar[stuff->nbytes] = 0;
+    Atom name = dixGetAtomID(tchar);
     if (name)
         ReplaceCursor(pSource, TestForCursorName, &name);
     return Success;
