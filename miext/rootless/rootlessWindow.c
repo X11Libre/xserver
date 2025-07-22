@@ -64,7 +64,7 @@ extern Bool no_configure_window;
     static Atom atom;                                           \
     if (generation != serverGeneration) {                       \
       generation = serverGeneration;                          \
-      atom = MakeAtom (atom_name, strlen (atom_name), TRUE);  \
+      atom = dixAddAtom(atom_name);                             \
     }                                                           \
     return atom;                                                \
   }
