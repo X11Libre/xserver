@@ -1,7 +1,4 @@
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include "apm.h"
 #include "apm_regs.h"

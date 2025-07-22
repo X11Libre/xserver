@@ -3,10 +3,7 @@
  * ported from s3virge, ported from mga
  *
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include "xf86.h"
 #include "xf86_OSproc.h"
