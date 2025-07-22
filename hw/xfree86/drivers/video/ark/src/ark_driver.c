@@ -126,14 +126,14 @@ static XF86ModuleVersionInfo ARKVersRec = {
 
 _X_EXPORT XF86ModuleData arkModuleData = { &ARKVersRec, ARKSetup, NULL };
 
-pointer ARKSetup(pointer module, pointer opts, int *errmaj, int *errmin)
+void *ARKSetup(void *module, void* opts, int *errmaj, int *errmin)
 {
 	static Bool setupDone = FALSE;
 
 	if (!setupDone) {
 		setupDone = TRUE;
 		xf86AddDriver(&ARK, module, 0);
-		return (pointer) 1;
+		return (void*) 1;
 	} else {
 		if (errmaj)
 			*errmaj = LDR_ONCEONLY;
