@@ -29,3 +29,7 @@ endif
 if get_option('xf86-video-fbdev')
     subdir('fbdev')
 endif
+
+if get_option('xf86-video-geode')
+    subdir('geode')
+endif
