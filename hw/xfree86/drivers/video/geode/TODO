@@ -1,0 +1,18 @@
+General:
+
+* Add automagic probing of the fb driver (for memory size)
+* Write the man page
+
+GX:
+
+* Fix the options so they are sane (i.e eliminate one of SWCursor or HWCursor)
+* TV support
+* Fix the rotate text strings (CCW?)
+* Don't crash when rotating when playing video
+
+LX:
+
+* Fix the options so they are sane
+* TV support (VOP)
+* Rotated video
+* ARGB cursor
