@@ -38,9 +38,9 @@ static Bool	CIRProbe(DriverPtr drv, int flags);
 #define CIR_VERSION 4000
 #define CIR_NAME "CIRRUS"
 #define CIR_DRIVER_NAME "cirrus"
-#define CIR_MAJOR_VERSION PACKAGE_VERSION_MAJOR
-#define CIR_MINOR_VERSION PACKAGE_VERSION_MINOR
-#define CIR_PATCHLEVEL PACKAGE_VERSION_PATCHLEVEL
+#define CIR_MAJOR_VERSION 1
+#define CIR_MINOR_VERSION 6
+#define CIR_PATCHLEVEL 0
 
 /*
  * This contains the functions needed by the server after loading the
