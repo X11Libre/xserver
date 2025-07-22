@@ -2,10 +2,7 @@
  * Authors:  Alan Hourihane, <alanh@fairlite.demon.co.uk>
  *	     Michel Dänzer, <michel@tungstengraphics.com>
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include <string.h>
 
