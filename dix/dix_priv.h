@@ -704,4 +704,16 @@ static inline int WriteRpcbufToClient(ClientPtr pClient,
     return ret;
 }
 
+/*
+ * @brief retrieve atom ID by name
+ *
+ * if the atom doesn't exist yet, 0 / NONE is returned
+ *
+ * @param name  the atom name
+ * @return atom ID
+ */
+static inline Atom dixGetAtomID(const char *name) {
+    return MakeAtom(name, strlen(name), FALSE);
+}
+
 #endif /* _XSERVER_DIX_PRIV_H */
