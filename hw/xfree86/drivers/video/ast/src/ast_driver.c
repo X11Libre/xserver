@@ -135,8 +135,6 @@ static const OptionInfoRec ASTOptions[] = {
    {-1,			               NULL,	   OPTV_NONE,	{0}, 	FALSE}
 };
 
-#ifdef XFree86LOADER
-
 static MODULESETUPPROTO(astSetup);
 
 static XF86ModuleVersionInfo astVersRec = {
@@ -179,8 +177,6 @@ static void* astSetup(void *module, void *opts, int *errmaj, int *errmin)
       return NULL;
    }
 }
-
-#endif	/* XFree86LOADER */
 
 /*
  * ASTIdentify --
