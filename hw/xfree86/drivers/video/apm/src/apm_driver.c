@@ -122,8 +122,6 @@ static const OptionInfoRec ApmOptions[] =
 	{0}, FALSE}
 };
 
-#ifdef XFree86LOADER
-
 static XF86ModuleVersionInfo apmVersRec = {
     "apm",
     MODULEVENDORSTRING,
@@ -160,7 +158,6 @@ static void* apmSetup(void* module, void* opts, int *errmaj, int *errmain)
 	return NULL;
     }
 }
-#endif
 
 static Bool
 ApmGetRec(ScrnInfoPtr pScrn)
