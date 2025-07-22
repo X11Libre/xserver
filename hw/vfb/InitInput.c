@@ -33,6 +33,7 @@ from The Open Group.
 #include <X11/Xos.h>
 #include <X11/keysym.h>
 
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "mi/mi_priv.h"
 
@@ -142,9 +143,9 @@ InitInput(int argc, char *argv[])
 
     p = AddInputDevice(serverClient, vfbMouseProc, TRUE);
     k = AddInputDevice(serverClient, vfbKeybdProc, TRUE);
-    xiclass = MakeAtom(XI_MOUSE, sizeof(XI_MOUSE) - 1, TRUE);
+    xiclass = dixAddAtom(XI_MOUSE);
     AssignTypeAndName(p, xiclass, "Xvfb mouse");
-    xiclass = MakeAtom(XI_KEYBOARD, sizeof(XI_KEYBOARD) - 1, TRUE);
+    xiclass = dixAddAtom(XI_KEYBOARD);
     AssignTypeAndName(k, xiclass, "Xvfb keyboard");
     (void) mieqInit();
 }
