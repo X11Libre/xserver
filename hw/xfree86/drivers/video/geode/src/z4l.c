@@ -728,7 +728,7 @@ z4l_setup_colorkey(Z4lPortPrivRec *pPriv, ScreenPtr pScrn, RegionPtr clipBoxes)
 }
 
 static void
-Z4lStopVideo(ScrnInfoPtr pScrni, pointer data, Bool exit)
+Z4lStopVideo(ScrnInfoPtr pScrni, void *data, Bool exit)
 {
     Z4lPortPrivRec *pPriv = (Z4lPortPrivRec *) data;
 
@@ -745,7 +745,7 @@ Z4lStopVideo(ScrnInfoPtr pScrni, pointer data, Bool exit)
 static void
 Z4lQueryBestSize(ScrnInfoPtr pScrni, Bool motion,
                  short vid_w, short vid_h, short drw_w, short drw_h,
-                 unsigned int *p_w, unsigned int *p_h, pointer data)
+                 unsigned int *p_w, unsigned int *p_h, void *data)
 {
     if (drw_w > MAX_OVLY_WIDTH)
         drw_w = MAX_OVLY_WIDTH;
@@ -762,7 +762,7 @@ static int
 Z4lPutImage(ScrnInfoPtr pScrni, short src_x, short src_y, short drw_x,
             short drw_y, short src_w, short src_h, short drw_w, short drw_h,
             int id, unsigned char *buf, short width, short height,
-            Bool sync, RegionPtr clipBoxes, pointer data, DrawablePtr pDraw)
+            Bool sync, RegionPtr clipBoxes, void *data, DrawablePtr pDraw)
 {
     int fd, size;
     int y_pitch, uv_pitch, offset1, offset2;
@@ -894,7 +894,7 @@ Z4lQueryImageAttributes(ScrnInfoPtr pScrni, int id, unsigned short *width,
 static int
 Z4lPutVideo(ScrnInfoPtr pScrni, short src_x, short src_y, short drw_x,
             short drw_y, short src_w, short src_h, short drw_w, short drw_h,
-            RegionPtr clipBoxes, pointer data, DrawablePtr pDraw)
+            RegionPtr clipBoxes, void *data, DrawablePtr pDraw)
 {
     int id;
     Z4lPortPrivRec *pPriv = (Z4lPortPrivRec *) data;
@@ -1139,7 +1139,7 @@ Z4lNewAdaptor(XF86VideoAdaptorPtr **adpts, int *nadpts, int nattrs)
     ++*nadpts;
     adpt->pPortPrivates = (DevUnion *) &adpt[1];
     pPriv = (Z4lPortPrivRec *) & adpt->pPortPrivates[1];
-    adpt->pPortPrivates[0].ptr = (pointer) pPriv;
+    adpt->pPortPrivates[0].ptr = pPriv;
     pPriv->adpt = adpt;
     adpt->nPorts = 1;
 
@@ -1148,7 +1148,7 @@ Z4lNewAdaptor(XF86VideoAdaptorPtr **adpts, int *nadpts, int nattrs)
 
 static int
 Z4lSetPortAttribute(ScrnInfoPtr pScrni, Atom attribute, INT32 value,
-                    pointer data)
+                    void *data)
 {
     Z4lPortPrivRec *pPriv = (Z4lPortPrivRec *) data;
     XF86VideoAdaptorPtr adpt;
@@ -1209,7 +1209,7 @@ Z4lSetPortAttribute(ScrnInfoPtr pScrni, Atom attribute, INT32 value,
 
 static int
 Z4lGetPortAttribute(ScrnInfoPtr pScrni, Atom attribute, INT32 *value,
-                    pointer data)
+                    void *data)
 {
     Z4lPortPrivRec *pPriv = (Z4lPortPrivRec *) data;
     XF86VideoAdaptorPtr adpt;
@@ -1703,8 +1703,8 @@ static XF86ModuleVersionInfo z4lVersionRec = {
 
 _X_EXPORT XF86ModuleData ztvModuleData = { &z4lVersionRec, z4lSetup, NULL };
 
-static pointer
-z4lSetup(pointer module, pointer opts, int *errmaj, int *errmin)
+static void *
+z4lSetup(void *module, void *opts, int *errmaj, int *errmin)
 {
     static Bool setupDone = FALSE;
 
@@ -1716,7 +1716,7 @@ z4lSetup(pointer module, pointer opts, int *errmaj, int *errmin)
 
     setupDone = TRUE;
     xf86AddDriver(&Z4l, module, 0);
-    return (pointer) 1;
+    return (void*) 1;
 }
 
 #endif

@@ -381,7 +381,7 @@ lx_crtc_gamma_set(xf86CrtcPtr crtc, CARD16 *red, CARD16 *green,
 static PixmapPtr
 lx_create_bo_pixmap(ScreenPtr pScreen,
                     int width, int height,
-                    int depth, int bpp, int pitch, pointer pPixData)
+                    int depth, int bpp, int pitch, void *pPixData)
 {
     PixmapPtr pixmap;
 

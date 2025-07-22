@@ -244,8 +244,8 @@ static XF86ModuleVersionInfo GeodeVersionRec = {
     {0, 0, 0, 0}
 };
 
-static pointer
-GeodeSetup(pointer Module, pointer Options, int *ErrorMajor, int *ErrorMinor)
+static void*
+GeodeSetup(void *Module, void *Options, int *ErrorMajor, int *ErrorMinor)
 {
     static Bool init = FALSE;
     int flag = 0;
@@ -255,17 +255,17 @@ GeodeSetup(pointer Module, pointer Options, int *ErrorMajor, int *ErrorMinor)
 #endif
     if (init) {
         *ErrorMajor = LDR_ONCEONLY;
-        return (pointer) NULL;
+        return NULL;
     }
 
     init = TRUE;
     xf86AddDriver(&GEODE, Module, flag);
 
-    return (pointer) TRUE;
+    return (void*) TRUE;
 }
 
-static pointer
-AmdSetup(pointer Module, pointer Options, int *ErrorMajor, int *ErrorMinor)
+static void*
+AmdSetup(void *Module, void *Options, int *ErrorMajor, int *ErrorMinor)
 {
     static Bool Initialised = FALSE;
 
@@ -279,7 +279,7 @@ AmdSetup(pointer Module, pointer Options, int *ErrorMajor, int *ErrorMinor)
 #endif
             );
 
-        return (pointer) TRUE;
+        return (void*) TRUE;
     }
 
     /*The return value must be non-NULL on success */

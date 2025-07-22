@@ -65,7 +65,7 @@ lx_create_resources(xf86OutputPtr output)
     s = "on";
     ret = RRChangeOutputProperty(output->randr_output, scale_atom,
                                  XA_STRING, 8, PropModeReplace, strlen(s),
-                                 (pointer) s, FALSE, FALSE);
+                                 s, FALSE, FALSE);
 
     if (ret) {
         xf86DrvMsg(pScrni->scrnIndex, X_ERROR,

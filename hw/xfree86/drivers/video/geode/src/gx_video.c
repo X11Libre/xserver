@@ -87,15 +87,15 @@ GXSetVideoPosition()
 void GXResetVideo(ScrnInfoPtr pScrni);
 static XF86VideoAdaptorPtr GXSetupImageVideo(ScreenPtr);
 static void GXInitOffscreenImages(ScreenPtr);
-static void GXStopVideo(ScrnInfoPtr, pointer, Bool);
-static int GXSetPortAttribute(ScrnInfoPtr, Atom, INT32, pointer);
-static int GXGetPortAttribute(ScrnInfoPtr, Atom, INT32 *, pointer);
+static void GXStopVideo(ScrnInfoPtr, void *, Bool);
+static int GXSetPortAttribute(ScrnInfoPtr, Atom, INT32, void *);
+static int GXGetPortAttribute(ScrnInfoPtr, Atom, INT32 *, void *);
 static void GXQueryBestSize(ScrnInfoPtr, Bool,
                             short, short, short, short, unsigned int *,
-                            unsigned int *, pointer);
+                            unsigned int *, void *);
 static int GXPutImage(ScrnInfoPtr, short, short, short, short, short, short,
                       short, short, int, unsigned char *, short, short, Bool,
-                      RegionPtr, pointer, DrawablePtr pDraw);
+                      RegionPtr, void *, DrawablePtr pDraw);
 
 static void GXBlockHandler(BLOCKHANDLER_ARGS_DECL);
 void GXSetVideoPosition(int x, int y, int width, int height,
@@ -380,7 +380,7 @@ GXSetupImageVideo(ScreenPtr pScrn)
     adapt->nPorts = 1;
     adapt->pPortPrivates = (DevUnion *) (&adapt[1]);
     pPriv = (GeodePortPrivRec *) (&adapt->pPortPrivates[1]);
-    adapt->pPortPrivates[0].ptr = (pointer) (pPriv);
+    adapt->pPortPrivates[0].ptr = pPriv;
     adapt->pAttributes = Attributes;
     adapt->nImages = NUM_IMAGES;
     adapt->nAttributes = NUM_ATTRIBUTES;
@@ -442,7 +442,7 @@ GXSetupImageVideo(ScreenPtr pScrn)
  *----------------------------------------------------------------------------
  */
 static void
-GXStopVideo(ScrnInfoPtr pScrni, pointer data, Bool exit)
+GXStopVideo(ScrnInfoPtr pScrni, void *data, Bool exit)
 {
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
     GeodeRec *pGeode = GEODEPTR(pScrni);
@@ -507,7 +507,7 @@ GXStopVideo(ScrnInfoPtr pScrni, pointer data, Bool exit)
  */
 static int
 GXSetPortAttribute(ScrnInfoPtr pScrni,
-                   Atom attribute, INT32 value, pointer data)
+                   Atom attribute, INT32 value, void *data)
 {
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
 
@@ -557,7 +557,7 @@ GXSetPortAttribute(ScrnInfoPtr pScrni,
  */
 static int
 GXGetPortAttribute(ScrnInfoPtr pScrni,
-                   Atom attribute, INT32 *value, pointer data)
+                   Atom attribute, INT32 *value, void *data)
 {
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
 
@@ -606,7 +606,7 @@ GXQueryBestSize(ScrnInfoPtr pScrni,
                 Bool motion,
                 short vid_w, short vid_h,
                 short drw_w, short drw_h,
-                unsigned int *p_w, unsigned int *p_h, pointer data)
+                unsigned int *p_w, unsigned int *p_h, void *data)
 {
     *p_w = drw_w;
     *p_h = drw_h;
@@ -1026,7 +1026,7 @@ GXPutImage(ScrnInfoPtr pScrni,
            short drw_w, short drw_h,
            int id, unsigned char *buf,
            short width, short height, Bool sync, RegionPtr clipBoxes,
-           pointer data, DrawablePtr pDraw)
+           void *data, DrawablePtr pDraw)
 {
     GeodePortPrivRec *pPriv = (GeodePortPrivRec *) data;
     GeodeRec *pGeode = GEODEPTR(pScrni);
@@ -1426,7 +1426,7 @@ GXAllocateSurface(ScrnInfoPtr pScrni,
     surface->id = id;
     surface->pitches[0] = pitch;
     surface->offsets[0] = global_offset;
-    surface->devPrivate.ptr = (pointer) pPriv;
+    surface->devPrivate.ptr = pPriv;
 
     return Success;
 }
@@ -1463,14 +1463,14 @@ static int
 GXGetSurfaceAttribute(ScrnInfoPtr pScrni, Atom attribute, INT32 *value)
 {
     return GXGetPortAttribute(pScrni, attribute, value,
-                              (pointer) (GET_PORT_PRIVATE(pScrni)));
+                              (GET_PORT_PRIVATE(pScrni)));
 }
 
 static int
 GXSetSurfaceAttribute(ScrnInfoPtr pScrni, Atom attribute, INT32 value)
 {
     return GXSetPortAttribute(pScrni, attribute, value,
-                              (pointer) (GET_PORT_PRIVATE(pScrni)));
+                              (GET_PORT_PRIVATE(pScrni)));
 }
 
 static int
