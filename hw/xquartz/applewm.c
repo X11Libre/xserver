@@ -34,6 +34,7 @@
 
 #include <errno.h>
 
+#include "dix/dix_priv.h"
 #include "dix/property_priv.h"
 
 #include "quartz.h"
@@ -62,7 +63,7 @@
         static Atom atom;                                           \
         if (generation != serverGeneration) {                       \
             generation = serverGeneration;                          \
-            atom = MakeAtom(atom_name, strlen(atom_name), TRUE);  \
+            atom = dixAddAtom(atom_name);                           \
         }                                                           \
         return atom;                                                \
     }
