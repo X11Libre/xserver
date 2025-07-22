@@ -81,6 +81,7 @@ SOFTWARE.
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
@@ -199,8 +200,7 @@ XvExtensionInit(void)
             (EventSwapPtr) WriteSwappedPortNotifyEvent;
 
         SetResourceTypeErrorValue(XvRTPort, _XvBadPort);
-        (void) MakeAtom(XvName, strlen(XvName), xTrue);
-
+        (void) dixAddAtom(XvName);
     }
 }
 

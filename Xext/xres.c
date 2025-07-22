@@ -11,6 +11,7 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/XResproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "os/client_priv.h"
@@ -272,12 +273,12 @@ resourceTypeAtom(int i)
 
     const char *name = LookupResourceName(i);
     if (strcmp(name, XREGISTRY_UNKNOWN))
-        ret = MakeAtom(name, strlen(name), TRUE);
+        ret = dixAddAtom(name);
     else {
         char buf[40];
 
         snprintf(buf, sizeof(buf), "Unregistered resource %i", i + 1);
-        ret = MakeAtom(buf, strlen(buf), TRUE);
+        ret = dixAddAtom(buf);
     }
 
     return ret;
