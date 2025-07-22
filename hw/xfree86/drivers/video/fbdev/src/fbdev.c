@@ -62,7 +62,7 @@ static void *	FBDevWindowLinear(ScreenPtr pScreen, CARD32 row, CARD32 offset, in
 static void	FBDevPointerMoved(ScrnInfoPtr pScrn, int x, int y);
 static Bool	FBDevDGAInit(ScrnInfoPtr pScrn, ScreenPtr pScreen);
 static Bool	FBDevDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op,
-				pointer ptr);
+				void *ptr);
 
 
 enum { FBDEV_ROTATE_NONE=0, FBDEV_ROTATE_CW=270, FBDEV_ROTATE_UD=180, FBDEV_ROTATE_CCW=90 };
@@ -148,15 +148,14 @@ static XF86ModuleVersionInfo FBDevVersRec =
 
 _X_EXPORT XF86ModuleData fbdevModuleData = { &FBDevVersRec, FBDevSetup, NULL };
 
-pointer
-FBDevSetup(pointer module, pointer opts, int *errmaj, int *errmin)
+void *FBDevSetup(void *module, void *opts, int *errmaj, int *errmin)
 {
 	static Bool setupDone = FALSE;
 
 	if (!setupDone) {
 		setupDone = TRUE;
 		xf86AddDriver(&FBDEV, module, HaveDriverFuncs);
-		return (pointer)1;
+		return (void *)1;
 	} else {
 		if (errmaj) *errmaj = LDR_ONCEONLY;
 		return NULL;
@@ -1232,7 +1231,7 @@ FBDevDGAInit(ScrnInfoPtr pScrn, ScreenPtr pScreen)
 }
 
 static Bool
-FBDevDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr)
+FBDevDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, void *ptr)
 {
     xorgHWFlags *flag;
     
