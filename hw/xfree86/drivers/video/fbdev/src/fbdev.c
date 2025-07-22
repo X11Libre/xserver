@@ -35,6 +35,10 @@
 #define HAVE_SHADOW_3224
 #endif
 
+#define PACKAGE_VERSION_MAJOR 0
+#define PACKAGE_VERSION_MINOR 5
+#define PACKAGE_VERSION_PATCHLEVEL 1
+
 static Bool debug = 0;
 
 #define TRACE_ENTER(str) \
