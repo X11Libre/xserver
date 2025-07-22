@@ -2,7 +2,7 @@
 .ds q \N'34'
 .TH CHIPS __drivermansuffix__ 2011-03-29 __vendorversion__
 .SH NAME
-chips \- Chips and Technologies video driver for Xorg
+chips \- Chips and Technologies video driver for Xlibre
 .SH SYNOPSIS
 .nf
 .B "Section \*qDevice\*q"
@@ -13,7 +13,7 @@ chips \- Chips and Technologies video driver for Xorg
 .fi
 .SH DESCRIPTION
 .B chips
-is an Xorg driver for Chips and Technologies video processors.
+is an Xlibre driver for Chips and Technologies video processors.
 The majority of the Chips and Technologies chipsets are supported by this driver.
 In general the limitation on the capabilities of this driver are determined by
 the chipset on which it is run.
