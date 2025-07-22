@@ -1244,28 +1244,6 @@ static ULONG MMCTestBurst2_AST2150(PAST2150DRAMParam  param, ULONG datagen)
   return(data);
 }
 
-static ULONG MMCTestSingle2_AST2150(PAST2150DRAMParam  param, ULONG datagen)
-{
-  ULONG data, timeout;
-  UCHAR *mmiobase;
-
-  mmiobase = param->pjMMIOVirtualAddress;
-
-  MOutdwm(mmiobase, 0x1E6E0070, 0x00000000);
-  MOutdwm(mmiobase, 0x1E6E0070, 0x00000005 | (datagen << 3));
-  timeout = 0;
-  do{
-    data = MIndwm(mmiobase, 0x1E6E0070) & 0x40;
-    if(++timeout > TIMEOUT_AST2150){
-      MOutdwm(mmiobase, 0x1E6E0070, 0x00000000);
-      return(-1);
-    }
-  }while(!data);
-  data = (MIndwm(mmiobase, 0x1E6E0070) & 0x80) >> 7;
-  MOutdwm(mmiobase, 0x1E6E0070, 0x00000000);
-  return(data);
-}
-
 static int CBRTest_AST2150(PAST2150DRAMParam  param)
 {
   if(MMCTestBurst2_AST2150(param, 0) ) return(0);
