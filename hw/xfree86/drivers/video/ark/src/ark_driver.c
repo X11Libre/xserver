@@ -162,8 +162,7 @@ static const OptionInfoRec * ARKAvailableOptions(int chipid, int busid)
 
 static void ARKIdentify(int flags)
 {
-	xf86PrintChipsets("ARK", "driver (version " DRIVER_VERSION " for ARK Logic chipset",
-			  ARKChipsets);
+	xf86PrintChipsets("ARK", "driver (for ARK Logic chipset)", ARKChipsets);
 }
 
 static Bool ARKProbe(DriverPtr drv, int flags)
