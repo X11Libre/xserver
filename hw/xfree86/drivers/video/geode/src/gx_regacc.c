@@ -36,10 +36,7 @@
  * It should not be recopied with new versions of Durango unless the
  * developer is willing to tune the file again for the specific project.
  * */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include "gfx_rtns.h"
 #include "gfx_defs.h"

@@ -22,10 +22,7 @@
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
  * */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include "xf86.h"
 #include "xf86i2c.h"

@@ -34,10 +34,7 @@
  * Project:       Amd Xfree Frame buffer device driver.
  *
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 /* Includes that are used by all drivers */
 #include "xf86.h"

@@ -31,10 +31,7 @@
 */
 
 /* To support PictOptAdd with a mask */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include "xf86.h"
 #include "exa.h"

@@ -25,10 +25,7 @@
  */
 
 /* prototype Xv interface for lxv4l2 driver */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include <sys/time.h>
 #include <sys/fcntl.h>

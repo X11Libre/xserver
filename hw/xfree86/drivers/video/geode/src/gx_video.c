@@ -35,10 +35,7 @@
 
  * code to allocate offscreen memory from EXA - is borrowed from Radeon
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include <stdlib.h>
 #include <string.h>

@@ -28,10 +28,7 @@
  * Since this file is for the first generation graphics unit, it interfaces
  * to SoftVGA registers.  It works for both VSA1 and VSA2.
  * */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include <stdlib.h>
 #include <string.h>
