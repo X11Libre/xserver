@@ -263,11 +263,10 @@ static Bool FBDevPciProbe(DriverPtr drv, int entity_num,
     pScrn = xf86ConfigPciEntity(NULL, 0, entity_num, NULL, NULL,
 				NULL, NULL, NULL, NULL);
     if (pScrn) {
-	char *device;
 	GDevPtr devSection = xf86GetDevFromEntity(pScrn->entityList[0],
 						  pScrn->entityInstanceList[0]);
 
-	device = xf86FindOptionValue(devSection->options, "fbdev");
+	const char *device = xf86FindOptionValue(devSection->options, "fbdev");
 	if (fbdevHWProbe(dev, device, NULL)) {
 	    pScrn->driverVersion = FBDEV_VERSION;
 	    pScrn->driverName    = FBDEV_DRIVER_NAME;
@@ -307,7 +306,6 @@ FBDevProbe(DriverPtr drv, int flags)
 #ifndef XSERVER_LIBPCIACCESS
 	int bus,device,func;
 #endif
-	char *dev;
 	Bool foundScreen = FALSE;
 
 	TRACE("probe start");
@@ -325,7 +323,7 @@ FBDevProbe(DriverPtr drv, int flags)
 	for (i = 0; i < numDevSections; i++) {
 	    Bool isPci = FALSE;
 
-	    dev = xf86FindOptionValue(devSections[i]->options,"fbdev");
+	    const char *dev = xf86FindOptionValue(devSections[i]->options,"fbdev");
 	    if (devSections[i]->busID) {
 #ifndef XSERVER_LIBPCIACCESS
 	        if (xf86ParsePciBusString(devSections[i]->busID,&bus,&device,
