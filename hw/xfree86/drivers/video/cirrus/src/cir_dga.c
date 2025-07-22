@@ -22,10 +22,7 @@
  * Authors:  Adapted from: Alan Hourihane, <alanh@fairlite.demon.co.uk>
  *           by: Egbert Eich
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 #include "xf86.h"
 #include "xf86_OSproc.h"

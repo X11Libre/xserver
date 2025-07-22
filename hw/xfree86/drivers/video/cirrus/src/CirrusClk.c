@@ -1,6 +1,4 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
 /*
  * Programming of the built-in Cirrus clock generator.
