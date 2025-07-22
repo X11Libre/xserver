@@ -292,8 +292,8 @@ CHIPSLoadCursorImage(ScrnInfoPtr pScrn, unsigned char *src)
     CHIPSPtr cPtr = CHIPSPTR(pScrn);
     CHIPSACLPtr cAcl = CHIPSACLPTR(pScrn);
 #if X_BYTE_ORDER == X_BIG_ENDIAN
-    CARD32 *s = (pointer)src;
-    CARD32 *d = (pointer)(cPtr->FbBase + cAcl->CursorAddress);
+    CARD32 *s = (CARD32*)src;
+    CARD32 *d = (CARD32*)(cPtr->FbBase + cAcl->CursorAddress);
     int y;
 #endif
 

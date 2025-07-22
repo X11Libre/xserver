@@ -23,14 +23,14 @@
 
 static XF86VideoAdaptorPtr CHIPSSetupImageVideo(ScreenPtr);
 static void CHIPSInitOffscreenImages(ScreenPtr);
-static void CHIPSStopVideo(ScrnInfoPtr, pointer, Bool);
-static int CHIPSSetPortAttribute(ScrnInfoPtr, Atom, INT32, pointer);
-static int CHIPSGetPortAttribute(ScrnInfoPtr, Atom ,INT32 *, pointer);
+static void CHIPSStopVideo(ScrnInfoPtr, void*, Bool);
+static int CHIPSSetPortAttribute(ScrnInfoPtr, Atom, INT32, void*);
+static int CHIPSGetPortAttribute(ScrnInfoPtr, Atom ,INT32 *, void*);
 static void CHIPSQueryBestSize(ScrnInfoPtr, Bool,
-	short, short, short, short, unsigned int *, unsigned int *, pointer);
+	short, short, short, short, unsigned int *, unsigned int *, void*);
 static int CHIPSPutImage( ScrnInfoPtr, 
 	short, short, short, short, short, short, short, short,
-	int, unsigned char*, short, short, Bool, RegionPtr, pointer,
+	int, unsigned char*, short, short, Bool, RegionPtr, void*,
 	DrawablePtr);
 static int CHIPSQueryImageAttributes(ScrnInfoPtr, 
 	int, unsigned short *, unsigned short *,  int *, int *);
@@ -241,7 +241,7 @@ CHIPSSetupImageVideo(ScreenPtr pScreen)
     adapt->nPorts = 1;
     adapt->pPortPrivates = (DevUnion*)(&adapt[1]);
     pPriv = (CHIPSPortPrivPtr)(&adapt->pPortPrivates[1]);
-    adapt->pPortPrivates[0].ptr = (pointer)(pPriv);
+    adapt->pPortPrivates[0].ptr = pPriv;
     adapt->pAttributes = Attributes;
     adapt->nImages = NUM_IMAGES;
     adapt->nAttributes = NUM_ATTRIBUTES;
@@ -276,7 +276,7 @@ CHIPSSetupImageVideo(ScreenPtr pScreen)
 
 
 static void 
-CHIPSStopVideo(ScrnInfoPtr pScrn, pointer data, Bool shadow)
+CHIPSStopVideo(ScrnInfoPtr pScrn, void *data, Bool shadow)
 {
   CHIPSPortPrivPtr pPriv = (CHIPSPortPrivPtr)data;
   CHIPSPtr cPtr = CHIPSPTR(pScrn);
@@ -309,7 +309,7 @@ CHIPSSetPortAttribute(
   ScrnInfoPtr pScrn, 
   Atom attribute,
   INT32 value, 
-  pointer data
+  void *data
 ){
   CHIPSPortPrivPtr pPriv = (CHIPSPortPrivPtr)data;
   CHIPSPtr cPtr = CHIPSPTR(pScrn);
@@ -356,7 +356,7 @@ CHIPSGetPortAttribute(
   ScrnInfoPtr pScrn, 
   Atom attribute,
   INT32 *value, 
-  pointer data
+  void *data
 ){
   CHIPSPortPrivPtr pPriv = (CHIPSPortPrivPtr)data;
 
@@ -374,7 +374,7 @@ CHIPSQueryBestSize(
   short vid_w, short vid_h, 
   short drw_w, short drw_h, 
   unsigned int *p_w, unsigned int *p_h, 
-  pointer data
+  void *data
 ){
   *p_w = drw_w;
   *p_h = drw_h; 
@@ -640,7 +640,7 @@ CHIPSPutImage(
   int id, unsigned char* buf, 
   short width, short height, 
   Bool sync,
-  RegionPtr clipBoxes, pointer data,
+  RegionPtr clipBoxes, void *data,
   DrawablePtr pDraw
 ){
    CHIPSPortPrivPtr pPriv = (CHIPSPortPrivPtr)data;
@@ -883,7 +883,7 @@ CHIPSAllocateSurface(
     surface->id = id;   
     surface->pitches[0] = pitch;
     surface->offsets[0] = linear->offset * bpp;
-    surface->devPrivate.ptr = (pointer)pPriv;
+    surface->devPrivate.ptr = pPriv;
 
     return Success;
 }
@@ -931,7 +931,7 @@ CHIPSGetSurfaceAttribute(
     INT32 *value
 ){
     return CHIPSGetPortAttribute(pScrn, attribute, value, 
-			(pointer)(GET_PORT_PRIVATE(pScrn)));
+			(GET_PORT_PRIVATE(pScrn)));
 }
 
 static int
@@ -941,7 +941,7 @@ CHIPSSetSurfaceAttribute(
     INT32 value
 ){
     return CHIPSSetPortAttribute(pScrn, attribute, value, 
-			(pointer)(GET_PORT_PRIVATE(pScrn)));
+			(GET_PORT_PRIVATE(pScrn)));
 }
 
 

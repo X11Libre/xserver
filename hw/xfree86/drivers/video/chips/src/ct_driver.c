@@ -709,8 +709,7 @@ static XF86ModuleVersionInfo chipsVersRec =
  */
 _X_EXPORT XF86ModuleData chipsModuleData = { &chipsVersRec, chipsSetup, NULL };
 
-static pointer
-chipsSetup(pointer module, pointer opts, int *errmaj, int *errmin)
+static void *chipsSetup(void* module, void* opts, int *errmaj, int *errmin)
 {
     static Bool setupDone = FALSE;
 
@@ -727,7 +726,7 @@ chipsSetup(pointer module, pointer opts, int *errmaj, int *errmin)
 	 * The return value must be non-NULL on success even though there
 	 * is no TearDownProc.
 	 */
-	return (pointer)1;
+	return (void*)1;
     } else {
 	if (errmaj) *errmaj = LDR_ONCEONLY;
 	return NULL;
@@ -1237,7 +1236,7 @@ chipsPreInitHiQV(ScrnInfoPtr pScrn, int flags)
     double real;
     int val, indx;
     const char *s;
-    pointer pVbeModule = NULL;
+    void* pVbeModule = NULL;
 
     vgaHWPtr hwp;
     CHIPSPtr cPtr = CHIPSPTR(pScrn);
@@ -6876,10 +6875,10 @@ chipsUnmapMem(ScrnInfoPtr pScrn)
 	if (IS_HiQV(cPtr)) {
 #ifndef XSERVER_LIBPCIACCESS
 	    if (cPtr->MMIOBase)
-		xf86UnMapVidMem(pScrn->scrnIndex, (pointer)cPtr->MMIOBase,
+		xf86UnMapVidMem(pScrn->scrnIndex, cPtr->MMIOBase,
 				0x20000);
 	    if (cPtr->MMIOBasePipeB)
-		xf86UnMapVidMem(pScrn->scrnIndex, (pointer)cPtr->MMIOBasePipeB,
+		xf86UnMapVidMem(pScrn->scrnIndex, cPtr->MMIOBasePipeB,
 				0x20000);
 #else
 	    if (cPtr->MMIOBase)
@@ -6893,7 +6892,7 @@ chipsUnmapMem(ScrnInfoPtr pScrn)
 	} else {
 #ifndef XSERVER_LIBPCIACCESS
 	  if (cPtr->MMIOBase)
-	      xf86UnMapVidMem(pScrn->scrnIndex, (pointer)cPtr->MMIOBase,
+	      xf86UnMapVidMem(pScrn->scrnIndex, cPtr->MMIOBase,
 			      0x10000);
 #else
 	    if (cPtr->MMIOBase)
@@ -6902,8 +6901,7 @@ chipsUnmapMem(ScrnInfoPtr pScrn)
 	}
 	cPtr->MMIOBase = NULL;
 #ifndef XSERVER_LIBPCIACCESS
-	xf86UnMapVidMem(pScrn->scrnIndex, (pointer)cPtr->FbBase, 
-			cPtr->FbMapSize);
+	xf86UnMapVidMem(pScrn->scrnIndex, cPtr->FbBase, cPtr->FbMapSize);
 #else
 	pci_device_unmap_range(cPtr->PciInfo, cPtr->FbBase, cPtr->FbMapSize);
 #endif
