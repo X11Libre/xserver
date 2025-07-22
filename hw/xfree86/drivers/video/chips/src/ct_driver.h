@@ -20,13 +20,11 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-
-
-
 #ifndef _CT_DRIVER_H_
 #define _CT_DRIVER_H_
 
-#include "config.h"
+#include <xorg-config.h>
+
 #include "ct_pcirename.h"
 #include "exa.h"
 #include "vbe.h"
