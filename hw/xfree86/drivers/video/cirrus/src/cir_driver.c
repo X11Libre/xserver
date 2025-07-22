@@ -98,8 +98,6 @@ _X_EXPORT PciChipsets CIRPciChipsets[] = {
 	{ -1,				-1,					RES_UNDEFINED}
 };
 
-#ifdef XFree86LOADER
-
 static MODULESETUPPROTO(cirSetup);
 
 static XF86ModuleVersionInfo cirVersRec =
@@ -138,8 +136,6 @@ cirSetup(pointer module, pointer opts, int *errmaj, int *errmin)
 	if (errmaj) *errmaj = LDR_ONCEONLY;
 	return NULL;
 }
-
-#endif /* XFree86LOADER */
 
 /* Mandatory */
 static void

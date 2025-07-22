@@ -133,8 +133,6 @@ static int gd7548_MaxClocks[] = {  80100,  80100,  80100,  80100,  80100 };
 static int gd7555_MaxClocks[] = {  80100,  80100,  80100,  80100,  80100 };
 static int gd7556_MaxClocks[] = {  80100,  80100,  80100,  80100,  80100 };
 
-#ifdef XFree86LOADER
-
 #define ALP_MAJOR_VERSION 1
 #define ALP_MINOR_VERSION 0
 #define ALP_PATCHLEVEL 0
@@ -162,8 +160,6 @@ _X_EXPORT XF86ModuleData cirrus_alpineModuleData = {
     NULL,
     NULL
 };
-
-#endif /* XFree86LOADER */
 
 _X_EXPORT const OptionInfoRec *
 AlpAvailableOptions(int chipid)

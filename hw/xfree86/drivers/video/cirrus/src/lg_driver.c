@@ -202,8 +202,6 @@ static int LgLinePitches[4][11] = {
     { 160,  256,  320,  416,  512,  640,  832, 1024, 1280, 1664, 0 }
 };
 
-#ifdef XFree86LOADER
-
 #define LG_MAJOR_VERSION 1
 #define LG_MINOR_VERSION 0
 #define LG_PATCHLEVEL 0
@@ -234,8 +232,6 @@ _X_EXPORT XF86ModuleData cirrus_lagunaModuleData = {
     NULL,
     NULL
 };
-
-#endif /* XFree86LOADER */
 
 _X_EXPORT const OptionInfoRec *
 LgAvailableOptions(int chipid) {
