@@ -107,8 +107,6 @@ static const OptionInfoRec ARKOptions[] = {
 	{ -1,		  NULL,	     OPTV_NONE,	   {0}, FALSE }
 };
 
-#ifdef XFree86LOADER
-
 MODULESETUPPROTO(ARKSetup);
 
 static XF86ModuleVersionInfo ARKVersRec = {
@@ -140,9 +138,6 @@ void *ARKSetup(void *module, void* opts, int *errmaj, int *errmin)
 		return NULL;
 	}
 }
-
-#endif /* XFree86LOADER */
-
 
 static Bool ARKGetRec(ScrnInfoPtr pScrn)
 {
