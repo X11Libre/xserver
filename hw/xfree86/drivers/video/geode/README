@@ -1,0 +1,223 @@
+xf86-video-geode -- AMD Geode GX and LX graphics driver for X.org
+=================================================================
+README last updated: 2025-03-01 version 2.18.1
+
+1.INTRODUCTION
+
+This is the X graphics driver for the AMD Geode GX and LX processors.
+
+Since version 2.18.1, the GX component no longer has XAA acceleration.
+Only EXA support remains.
+
+The LX component supports EXA, including compositing. Additionally, a
+V4L2 driver for the LX's video input port (VIP) is provided as "ztv".
+
+Both components support Xv overlay and dynamic rotation with XRandR.
+
+2.DEPENDENCIES
+
+Since version 2.9.0, this driver depends on Xserver 1.3 or greater,
+because it utilizes the new common DDC probing libraries from Xorg.
+
+Since version 2.18.1, this driver depends on Xserver 1.18 or greater.
+
+3.ROADMAP
+
+Support for old GX1 Geodes by Cyrix and NSC will be reintroduced soon,
+at which point xf86-video-cyrix and xf86-video-nsc will be retired.
+
+Until then, the current situation for Geode coverage is as follow:
+ 
+xf86-video-geode
+ * Geode LX      (a.k.a. GX3) PCI ID 0x1022:0x2081
+ * Geode GX      (a.k.a. GX2) PCI ID 0x100B:0x0030 (re-branded GX2)
+
+xf86-video-nsc
+ * Geode GX2     (a.k.a. GX2) PCI ID 0x100B:0x0030 (a.k.a. "Red Cloud")
+ * Geode SCx200  (a.k.a. GX1) PCI ID 0x100B:0x0504 
+ * Geode SC1400  (a.k.a. GX1) PCI ID 0x100B:0x0104 
+
+xf86-video-cyrix
+ * Geode MediaGX (a.k.a. GX1) PCI ID 0x1078:0x0104 
+
+Please note that both NSC and GEODE support GX2. This is indeed correct.
+However, only GEODE has up-to-date code, while NSC is deprecated. 
+
+4.MAXIMUM RESOLUTIONS
+
+The driver supports all maximum resolutions advertised by AMD, namely:
+
+LX: 1920x1440 (CRT) and 1600x1200 (TFT)
+GX: 1600x1200 (CRT) and 1280x1024 (TFT)
+SC: 1280x1024 (CRT/TFT) *** Currently unsupported by this driver ***
+
+Additionally, on the LX, the driver can DCC probe the display and calculate
+the clockrate for the maximum resolution supported by the display. However,
+this won't work on LX platforms with GPIO configured for serial console. On
+such hardware, the resolution must be specified in /etc/X11/xorg.conf.
+
+5.CONFIGURATION OPTIONS
+
+You can specify driver options in /etc/X11/xorg.conf in the usual fashion:
+
+Section "Device"
+	Identifier "AMD Geode"
+	Driver "geode"
+	Option "OptionName" "value"
+	...
+EndSection
+
+The following options may be added to such a Device section:
+
+5.1.COMMON OPTIONS
+
+FBSize: Specify the size of the video space (in bytes)
+NoAccel: Disable hardware assisted acceleration
+NoCompression: Disable video bandwidth compression
+NoPanel: Disable panel support
+Rotate: Select an initial orientation - LEFT, INVERT, CCW
+SWCursor: Enable software cursors (essentially disabling HW cursor support)
+
+5.2.GX-SPECIFIC OPTIONS
+
+AccelMethod: Since version 2.18.1, this option is ignored, since XAA is gone.
+PanelGeometry: Specify the geometry of the attached panel ("<width>x<height>")
+OSMImageBuffers: Set the number of image buffers (XAA only)
+OSMColorExpBuffers: Set the number of color expansion buffers (XAA only)
+
+5.3.LX-SPECIFIC OPTIONS
+
+ExaScratch: Specify the amount of extra EXA scratch buffer (in bytes)
+
+6.FREQUENTLY ASKED QUESTIONS (FAQ)
+
+Q: Why doesn't the GEODE driver work on recent Linux kernels?
+
+A: Since kernel 4.x Linux has strong memory protection. If the kernel is
+   booted with a frame buffer (e.g. vesafb) it reserves the video memory
+   for itself. Disabling this requires booting the kernel in non-graphic
+   mode. On GRUB, this is configured by this /etc/default/grub option:
+
+   GRUB_GFXPAYLOAD_LINUX=text
+
+   Alternately, adding iomem=relaxed to GRUB_CMDLINE_LINUX_DEFAULT will
+   allow the video memory to be accessed by vesafb and the GEODE driver.
+
+   Once either option has been added and the GRUB configuration refreshed,
+   the GEODE driver will launch on recent kernels as previously.
+
+Q: Why doesn't the GEODE driver work at WXGA (wide screen) resolutions?
+
+A: Make sure that TFT Panel support is disabled in the BIOS settings, 
+   otherwise resolutions will be restricted to traditional VGA modes. 
+   The GEODE offers a choice between CRT-only, CRT+TFT, TFT-only for
+   output device and selecting CRT-only removes the VGA restriction.
+
+Q: How can these hardcoded modes be expanded to support a WXGA laptop?
+
+A: By adding the desired modes to /etc/X11/xorg.conf as follow:
+
+   1) Use either the "cvt" or "gtf" command to determine the modeline:
+
+      cvt 1024 600 60
+
+      Where 1024x600 is the resolution and 60 the refresh rate. 
+      The resulting modeline using "gtf" is:
+
+Modeline "1024x600" 48.96 1024 1064 1168 1312 600 601 604 622 -hsync +vsync
+
+   2) Add it to the bottom of the "Monitor" section in /etc/X11/xorg.conf.
+      In this example, we created entries for two modes and configured the
+      larger resolution to be our preferred choice.
+
+#############################################################
+# /etc/X11/xorg.conf for 1024x600 and 800x480 laptop panels #
+#############################################################
+#### By J.KASPER and B.HIBRY #### for Hercules eCafe 800 ####
+#############################################################
+Section "Module"
+    Load  "ztv"
+EndSection
+Section "Device"
+    Identifier	"card0"
+    Driver	"geode"
+    BusID	"PCI:0:1:1"
+    Option	"PanelMode" "33450 800 840 968 1056 480 490 492 525"
+EndSection
+Section "Monitor"
+    Identifier	"monitor0"
+    Modeline  "1024x768" 64.56 1024 1056 1296 1328 768 783 791 807 -hsync +vsync
+    Modeline  "1024x600" 48.96 1024 1064 1168 1312 600 601 604 622 -hsync +vsync
+    Modeline   "800x480" 33.45  800  840  968 1056 480 490 492 525 -hsync +vsync
+    Option	"dpms"
+EndSection
+Section "Screen"
+    Identifier	"Default Screen"
+    Monitor	"monitor0"
+    Device	"card0"
+    DefaultDepth 24
+    Subsection "Display"
+        Depth 24
+        Modes "1024x600" "1024x768" "800x480"
+    EndSubsection        
+EndSection
+### EOF ###
+
+Q: Why doesn't screen rotation work?
+
+A: Make sure that a sufficient amount of video RAM is reserved in the BIOS,
+   otherwise rotation will fail and this error message appear in Xorg.log:
+
+      Couldn't allocate the shadow memory for rotation
+      You need XX bytes, but only YY bytes are available
+
+Q: How do I produce useful information whenever submitting a bug report?
+
+A: See https://www.x.org/wiki/Development/Documentation/ServerDebugging
+   and follow the instructions found there.
+
+Q: How do I test development snapshots from the upstream GIT repository?
+
+A: Run the following commands from a command line interpreter shell:
+   1. git clone https://gitlab.freedesktop.org/xorg/driver/xf86-video-geode.git
+   2. Debian/Ubuntu:  apt-get install autoconf automake libtool xutils-dev
+                      apt-get build-dep xserver-xorg-video-geode
+     Fedora/Red Hat:  yum install autoconf automake libtool xorg-x11-util-macros
+                      yum-builddep xorg-x11-drv-geode
+   3. cd xf86-video-geode
+   4. ./autogen.sh
+   5. make distcheck
+   ...then install the driver manually.
+
+Q: What is the preferred method for submitting patches to this driver?
+
+A: See https://www.x.org/wiki/Development/Documentation/SubmittingPatches
+   and submit the patches to the Geode X.org mailing list or to gitlab
+   in the xf86-video-geode project.
+
+7.LINUX KMS DRIVER
+
+On LX hardware, an alternative is to use the Linux KMS driver for Geode LX:
+
+https://github.com/fbrausse/geode-lx
+
+The codebase has yet to be merged into the Linux kernel tree. Help is welcome.
+
+8.PROJECT CONTACTS
+
+Project homepage:
+https://www.x.org/wiki/GeodeDriver
+
+Mailing list:
+https://lists.x.org/mailman/listinfo/xorg-driver-geode
+
+Bug reports:
+https://gitlab.freedesktop.org/xorg/driver/xf86-video-geode/issues
+
+Code repository:
+https://gitlab.freedesktop.org/xorg/driver/xf86-video-geode
+
+IRC channel:
+#geode on the Freenode network.
+
+.EOF.

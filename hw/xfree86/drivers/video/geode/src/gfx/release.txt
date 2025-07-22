@@ -1,0 +1,630 @@
+Durango Release Notes
+Version 2.57.00
+Win98/WinXP/DOS/Linux
+April 5, 2003
+
+-----------------------------------------------------------------------------
+PRODUCT INFORMATION
+-----------------------------------------------------------------------------
+Durango is a graphics/video software support package designed to assist in the
+development of display drivers and embedded applications. The core of this 
+package is source code that performs most of the graphics related 
+functionality for the National Semiconductor (c) Geode family of products.  
+Development time for new software is reduced by using these routines to access
+the hardware.
+
+-----------------------------------------------------------------------------
+INSTALLATION INSTRUCTIONS
+-----------------------------------------------------------------------------
+Download the file to a directory.  Modify and include the file durango.c 
+according to the needs of the application. 
+
+-----------------------------------------------------------------------------
+REVISION HISTORY
+-----------------------------------------------------------------------------
+
+04/05/04 Version 2.57.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Fixed the PLL setting for 1280x1024@70Hz and 1152x864@70Hz.
+
+=============================================================================
+
+03/30/04 Version 2.56.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Updated the GX2 render code such that BLTs that involve source will work 
+  correctly even if source is not involved in the ROP.
+
+=============================================================================
+
+03/26/04 Version 2.55.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Filled in all missing refresh rates in the mode table for Redcloud and Castle.
+* Added a new routine gfx_is_panel_mode_supported.
+* Added new routines gfx_set_graphics_palette and gfx_set_graphics_palette_entry
+  to support using the video palette to gamma correct graphics data.
+
+=============================================================================
+
+03/11/04 Version 2.54.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Updated the video palette routines to clear the bypass both bit before
+  updating the palette.
+
+=============================================================================
+
+03/02/04 Version 2.53.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Added 1152x864@60, 85, 90 and 100Hz to the mode table.
+
+=============================================================================
+
+02/07/04 Version 2.52.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Updated Durango to support Castle, including a 48MHz dotref.
+* Added 90 and 100Hz modes for Redcloud.
+* Updated the PLL table to remove any pre-divides by 2.
+
+=============================================================================
+
+10/24/03 Version 2.51.08
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Removed GX2 1.0 support from the PLL routines, gfx_set_clock_frequency and
+  gfx_get_clock_frequency.
+* Fixed a bug in gfx_set_clock_frequency, wherein the last three PLL values in
+  Durango's PLL table could never be set.
+
+=============================================================================
+
+09/22/03 Version 2.51.07
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Changed gfx_set_video_palette and gfx_set_video_palette_entry such that calling
+  one of these routines will also configure the video hardware to route video
+  data through the DF palette RAM.  
+* Added a new routine, gfx_set_video_palette_bypass to toggle the 'Bypass Both'
+  functionality of the SC1200 and GX2 palette RAMs.
+
+=============================================================================
+
+09/02/03 Version 2.51.06
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Added new routine gfx_get_max_video_width for SC1200 and CS5530.  This routine 
+  calculates the maximum theoretical video width based on the current display
+  mode and video clock.
+
+=============================================================================
+
+08/07/03 Version 2.51.05
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Fixed gfx_get_core_freq for SCx2xx when the fast PCI frequency is not 33MHz.
+* Fixed gfx_get_compression_pitch to mask correct bits.
+* Changed CS5530 and SCx2xx code to always enable video in the display 
+  controller.
+* Modified GX2 PLL code to only update the PLL when the value has not already
+  been programmed.
+
+=============================================================================
+
+06/17/03 Version 2.51.04
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Fixed code to set default gamma RAM for SCx2xx.
+
+=============================================================================
+
+06/02/03 Version 2.51.03
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Fixed gfx_get_cursor_position for GX2 to support large display resolutions.
+* Added default gamma RAM table for SCx2xx and GX2 to correct CSC hardware.
+
+=============================================================================
+
+03/20/03 Version 2.51.02
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Changed all preprocessor statements to conform to K and R standard.
+* Added support for 56Hz modes to all Durango routines.
+* Added missing header file to gfx_priv.h
+
+=============================================================================
+
+03/13/03 Version 2.51.01
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Updated file headers to NSC standard headers.
+* Added routine definitions for private and local routines.
+* Minor fixes for compilation without warnings.
+* Fixed panel timings for 640x480 panels and 1024x768 panels.
+
+=============================================================================
+
+02/05/03 Version 2.49.02
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Fixed GX2 left clipping for 4:2:0 video.
+
+=============================================================================
+
+01/29/03 Version 2.49.01
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Removed unused variable in CS5530 video code.
+* Changed max supported pixel clock for SCx2xx to 157.5 MHz.
+
+=============================================================================
+
+01/10/03 Version 2.49.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Added extra wait loop when polling for CRC completion.
+* Removed code that sets the pitch offsets for 4:2:0 video within
+  gfx_set_video_size.
+* Fixed panning code to work with any display pitch.
+* Added code to clear the PLL bypass bit when setting the dot PLL.
+* Fixed panning code so cursor never disappears when panning.
+* Changed GX2 delay loops to do a volatile register read to prevent
+  the entire delay loop from being discarded by a compiler.
+
+=============================================================================
+
+11/19/02 Version 2.47.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Updated gfx2_* routines to use a signed stride.
+* SW workaround for issue #134.8 - Strange horizontal lines appearing while
+  drawing lines.
+* Implemented gfx_set_video_left_crop for CS5530
+* Updated sub carrier reset values for NTSC and PAL.
+
+=============================================================================
+
+08/29/02 Version 2.45.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Modified gfx_set_cursor_position to use cursor position when panning and not adjust
+  using hotspots.
+* Added new routine gfx_get_refreshrate_from_mode.
+* Added gfx_text_blt routine.
+* Added gfx_get_tv_display_mode_frequency routine.
+* Added gfx_get_frequency_from_refreshrate routine.
+* Added gfx_set_video_cursor_enable routine.
+* Fixed Linux compilation warnings.
+* Updated modeset code to clear panning variables.
+* Added panel timings for 1600x1200 desktops.
+* Removed wait for VBlank when panning using cursor routines.
+
+=============================================================================
+
+07/12/02 Version 2.43.03
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Modified gfx_get_display_mode to support 56 Hz modes.
+* Added support for 8K pitch when setting a true color mode above 1024x768
+* Added a byte-packed option to gfx2_mono_expand_blt
+* Fix for Carmel D2 alpha blending issue.
+* Added typecasts for proper compilation.
+* Fixed CS5535 MBIU address.
+* Added new GX2 routine, gfx2_text_blt
+* Added MSR implementations for Linux.
+* Further optimized default GX1 string macros.
+* Added new routine, gfx_set_panel_present to allow panning without adjusting panel timings.
+* Added assembly macros for 32-bit Windows applications.
+
+=============================================================================
+
+03/21/02 Version 2.41.02
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Optimized GX2 Bitmap-to-screen BLTs by using a 2-line offscreen scratch area.
+* Fixed a bug in GX2 monochrome bitmap BLTs.
+* Fixed gfx_get_clock_frequency for GX2 2.0
+* Added 56 Hz support to gfx_get_clock_frequency
+* Changed gfx_set_compression_size to subtract header size
+* Changed gfx_get_compression_size to add header size
+
+=============================================================================
+
+03/04/02 Version 2.39.01
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Added support for CS5535 MSRs.
+* Fixed a bug in monochrome bitmap BLTs.
+* Added support for 32-bit CRC mechanism in GX2 2.0.
+* First official GX2 release.
+* Added support for new Dot PLL mechanism in GX2 2.0
+* Added support for Carmel D1.1 and D2.
+
+=============================================================================
+
+01/24/02 Version 2.37.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* Changed gfx_get_clock_frequency, gfx_get_cursor_offset and gfx_get_display_offset
+  to be outside the GFX_READ_ROUTINES flag.
+* Modified the modeset code to set higher FIFO priority levels for high bandwidth
+  modes.
+* Init code no longer returns Redcloud ID when no chip detected.
+* Added fix for Redcloud 1.x rev ID
+* New GX2 PLL settings - updates to the 14 MHz table and a new 48 MHz table.
+* Optimized all bitmap-to-screen routines.  Optimizations include new macros that
+  allow correct operation in a 16-bit environment.
+* 3K cache is now assumed to be the default scratchpad configuration.
+* gfx_get_frame_buffer_size for GX2 no longer uses a VGA register.  This allows
+  correct operation even with an external VGA card present in the system.
+* Added support for 1152x864 desktop resolution on a flat panel.
+* Added 24BPP support for large display modes.
+* Modified gfx_set_video_scale such that an identity scale is now default.
+* Modified flat panel modeset code to dynamically determine the size of the mode table.
+* Added support for Carmel Rev D2.
+
+=============================================================================
+
+10/22/01 Version 2.35.01
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+
+* New release notes format.
+* Added fix for SC1200 issue #813 (TVOut field indication is reversed.
+* Added check for invalid values in video upscale.
+* Fixed compilation warnings and run-time errors under DOS.
+* Added new macros for word I/O.
+* Optimized VSAII MSR code to used DWORD I/O.
+* Fixed SoftVG base PCI base addresses.
+* Several fixes to Redcloud API found during bringup.
+* Modified Durango to support 4-pixel video alignment for Redcloud.
+* Added the functions gfx_test_vip_overflow, gfx_get_vip_line,
+  gfx_set_decoder_luminance_filter, gfx_set_tv_YV_delya and 
+  gfx_set_tv_field_status_invert.
+* Added support for Carmel D1 revision ID.
+* Moved gfx_get_vip_base and gfx_get_vbi_pitch outside of the 
+  GXF_READ_ROUTINES flag.
+* Minor fixes to saa7114.c and gfx_set_tv-enable.
+* Added don't care option in gfx_set_vip_base.
+* Added fix for SC1200 issue #1121 (VIP FIFO bus request threshold bit 
+  is inverted.
+
+=============================================================================
+
+07/31/01 Version 2.33.02
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Completed implementation of vertical downscaling support for GX2.
+* Added a method to lock the display controller timings.
+* Added support for SC1200 Rev C.
+* Small modifications to gfx_set_video_format.
+* Removed unused and unimplemented I2C functions.
+* Changes to prevent errors and compiler warnings in DOS.
+* Updated headers to include both BSD and GPL licenses.
+
+=============================================================================
+
+06/08/01 Version 2.31.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Added new routines to manipulate vertical video downscaling on GX2.
+* Minor fixes to the function gfx_read_window_crc.
+* Implemented all init routines for GX2 except gfx_get_core_freq.
+* Added support for 27MHz reference frequency to the GX2 PLL.
+* Added new function gfx_get_softvga_active.
+* Minor changes to the function sc1200_reset_video.
+* Fixed some minor compiler warnings.
+
+=============================================================================
+
+04/25/01 Version 2.29.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Disabled all CSC when setting an RGB video format.
+* Modified sc1200_set_video_size to add 2 to the window height.
+* Modified code to support the accelerator and cursor in pixel and line double modes.
+* Modified gfx_get_core_freq to be a dynamic API routine.
+* Added the function gfx_read_window_crc for GX2.
+* Added init routine gfx_get_graphics_register_base for GX2.
+* Added new macros to access the scratchpad RAM to support Win2K and WinME.
+* Added mew macros to access the GP registers for GX2.
+
+=============================================================================
+
+04/06/01 Version 2.27.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Added new TV read functions:
+     gfx_get_tv_enable, gfx_get_tv_output, gfx_get_tv_display_mode,
+     gfx_get_tv_mode_count, gfx_is_tv_display_mode_supported
+* Added new function gfx_set_display_bpp.
+* Added new function gfx_get_frame_buffer_line_size.
+* Modified gfx_set_vbi_base to accept pure physical addresses instead of offsets.
+* Implemented video and display controller routines for GX2.
+* Modified some initialization routines to be dynamic.
+* Created new API extension for GX2 MSR accesses.
+* Added new icon routines for GX2.
+* Modified gfx_set_tv_display to preserve current bpp.
+* Minor modifications to gfx_set_tv_format, gfx_set_video_palette and 
+  gfx_set_video_palette entry.
+* Added support for 1152x864@75Hz
+
+=============================================================================
+
+03/12/01 Version 2.25.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Adapted new revision format system.
+* Synchronized with NSTA Durango.  Updated support for all SC1200 features.
+* Added support for 640x400 as well as emulated VGA modes.
+* Added new routines to access single palette color entries.
+* Added new routine to return the maximum supported pixel clock.
+* Added new routine gfx_set_crt_enable to manipulate the CRT display logic.
+* Added new rendering routine gfx_color_pattern_fill.
+* Added 4:2:0 and RGB video format support for CS5530 and SC1200.
+* Modified code to allow operation under DOS.
+
+=============================================================================
+
+07/21/00 Version 2.04
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Verified Xfree86 driver version 1.1.4 under Linux, and ce v2.3.
+* Merged sc1200 changes.
+* Added routines to support the query of current display mode.
+* Added functions gfx_enable_softvga, dfx_disable_softvga. 
+* Added code optimization in rendering loops to use 32 bit writes where possible.
+* Added gfx_is_mode_supported to query if given mode supported by the h/w.
+* Added Flat panel support, really testing with panel done only for 800x600.
+* Removed subtraction of 16 from gfx_set_compression_size.
+* Added version.h file to reflect the version of the durango used. 
+
+=============================================================================
+
+03/03/00 Version 2.01
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Verified Xfree86 driver version 1.1 under FreeBSD and Linux.
+* Added automatic detection of BLT buffer bases in "gfx_set_bpp" routine.
+* Fixed improper setting of VGA attribute controller index register.
+* Moved "gfx_get_display_bpp" to always be included.
+* Moved "gfx_get_hactive" and "gfx_get_vactive" to always be included.
+* Clipped video source size if off bottom or right side.
+* Properly adjusted video offset if clipped on the top side.
+* Added "gfx_get_video_line_size" and "gfx_get_video_xclip" routines.
+
+=============================================================================
+
+02/21/00 Version 2.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Added gfx_vga.c.
+* Added write to GP_BLIT_STATUS in "gfx_set_bpp" routine.
+* Verified alpha blending on SC1200.
+* Removed "gfx_set_blt_buffers" routine.
+
+=============================================================================
+
+02/09/00 Version 1.20
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Verified display modes and graphics rendering on SC1200.
+* Updated PLL table for SC1200 to set modes.
+* DURANGO.C FILE CHANGE!: Modified and added compiler definitions.
+* Split gfx_disp.c file into gu1_disp.c and gu2_disp.c
+* Split gfx_rndr.c file into gu1_rndr.c and gu2_rndr.c
+* Split gfx_vid.c file into vid_5530.c, vid_1400.c, and vid_1200.c
+* Split gfx_vip.c file into vip_1400.c and vip_1200.c
+* Split gfx_tv.c file into geode_tv.c and fs451_tv.c
+* Split gfx_i2c.c file into acc_i2c.c and gpio_i2c.c.
+* Split gfx_dcdr.c file to saa7114.c 
+* Added GFX_READ_ROUTINES compiler definition.  
+* Moved routines from gfx_read.c (no longer exists) to other files.
+* Abstracted display controller access in the video overlay routines.
+* Added routines to control display compression hardware.
+
+=============================================================================
+
+01/28/00 Version 1.13
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Passes randomly generated rendering tests in Darwin for GXLV.
+* Fixed bug for large bitmap to screen BLTs (greater than 64K).
+* Fixed bug for pattern fills using solid source data for plane masks.
+
+=============================================================================
+
+01/14/00 Version 1.12
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Added proper use of hotspot to gfx_set_cursor_position.
+* Fixed buffer size to handle all frame buffer start address alignments.
+* Added initial version of gfx_tv.c.
+
+=============================================================================
+
+01/07/00 Version 1.11
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Fixed bug with transparent BLTs (loading transparent color into BB1).
+* Added definition of gfx_color_bitmap_to_screen_blt to gfx_rtns.h.
+* Added gfx_color_bitmap_to_screen_xblt (transparent bitmap to screen).
+
+=============================================================================
+
+12/21/99 Version 1.10
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Added additional video decoder routines to gfx_dcdr.c.
+* Added VBI routines to gfx_vip.c.
+* Added alpha blending routines for SC1200 to gfx_vid.c
+
+=============================================================================
+
+10/01/99 Version 1.00
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Added video port, video decoder, I2C, and hardware query routines.
+* New files: gfx_vip.c, gfx_dcdr.c, gfx_i2c.c, gfx_read.c.
+
+=============================================================================
+
+08/27/99 Version 0.05
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* INTERFACE CHANGE: Changed "gfx_csptr[]" to "gfx_vidptr" and "gfx_vipptr".
+* Added "gfx_get_vid_register_base" and "gfx_get_vip_register_base".
+* Added initial PLL table for SC1400.
+* Verified mode set and video overlay routines work correctly on SC1400.
+* Updated initialization routines.
+* Added update of graphics engine in "gfx_set_display_pitch".
+
+=============================================================================
+
+08/20/99 Version 0.04
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* INTERFACE CHANGE: "gfx_load_*" routines changed to "gfx_set_*" for naming
+  consistency.  The "gfx_text_glyph" routine was removed. 
+* Added video overlay routines.
+* Added gfx_vid.c file.
+
+=============================================================================
+
+08/16/99 Version 0.03
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* INTERFACE CHANGE: Access to CS5530 now through separate pointer.  Project 
+  must declare and map the gfx_csptr[GFX_CSPTR_SIZE] variable.
+* Added durango.c file as template for main source file.
+* Added gfx_init.c file.
+
+=============================================================================
+
+08/04/99 Version 0.02
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Additional modes in gfx_mode.h file.
+* Separated register definitions from gfx_defs.h into gfx_regs.h.
+
+=============================================================================
+
+07/30/99 Version 0.01
+
+-----------------------------------------------------------------------------
+FUNCTIONAL CHANGES
+-----------------------------------------------------------------------------
+* Initial release.
+-----------------------------------------------------------------------------
+
