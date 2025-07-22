@@ -271,10 +271,6 @@ ASTProbe(DriverPtr drv, int flags)
 	    if ((pScrn = xf86ConfigPciEntity(pScrn, 0, usedChips[i],
 					     ASTPciChipsets, 0, 0, 0, 0, 0)))
             {
-	        EntityInfoPtr pEnt;
-
-	        pEnt = xf86GetEntityInfo(usedChips[i]);
-
 	        pScrn->driverVersion = AST_VERSION;
 	        pScrn->driverName = AST_DRIVER_NAME;
 	        pScrn->name = AST_NAME;
@@ -1790,7 +1786,6 @@ static XF86AttributeRec ASTAttributes[NUM_ATTRIBUTES] =
 static void ASTStopVideo(ScrnInfoPtr pScrn, void *data, Bool exit)
 {
     ASTPortPrivPtr pPriv = (ASTPortPrivPtr)data;
-    ASTPtr pAST = ASTPTR(pScrn);
 
     REGION_EMPTY(pScrn->pScreen, &pPriv->clip);
 
