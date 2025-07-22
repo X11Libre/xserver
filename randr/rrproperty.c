@@ -140,7 +140,7 @@ static void
 RRNoticePropertyChange(RROutputPtr output, Atom property, RRPropertyValuePtr value)
 {
     const char *non_desktop_str = RR_PROPERTY_NON_DESKTOP;
-    Atom non_desktop_prop = MakeAtom(non_desktop_str, strlen(non_desktop_str), FALSE);
+    Atom non_desktop_prop = dixGetAtomID(non_desktop_str);
 
     if (property == non_desktop_prop) {
         if (value->type == XA_INTEGER && value->format == 32 && value->size >= 1) {
