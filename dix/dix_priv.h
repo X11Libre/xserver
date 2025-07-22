@@ -705,6 +705,18 @@ static inline int WriteRpcbufToClient(ClientPtr pClient,
 }
 
 /*
+ * @brief make atom from null-terminated string
+ *
+ * if atom already existing, return the existing Atom ID
+ *
+ * @param name  the atom name
+ * @return atom ID
+ */
+static inline Atom dixAddAtom(const char *name) {
+    return MakeAtom(name, strlen(name), TRUE);
+}
+
+/*
  * @brief retrieve atom ID by name
  *
  * if the atom doesn't exist yet, 0 / NONE is returned
