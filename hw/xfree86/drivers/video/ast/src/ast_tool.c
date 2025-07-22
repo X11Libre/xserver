@@ -86,7 +86,7 @@ ASTUnmapMem(ScrnInfoPtr pScrn)
    ASTRecPtr pAST = ASTPTR(pScrn);
 
 #ifndef XSERVER_LIBPCIACCESS
-   xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pAST->FBVirtualAddr,
+   xf86UnMapVidMem(pScrn->scrnIndex, pAST->FBVirtualAddr,
 		   pAST->FbMapSize);
 #else
    pci_device_unmap_range(pAST->PciInfo, pAST->FBVirtualAddr, pAST->FbMapSize);
@@ -141,7 +141,7 @@ ASTUnmapMMIO(ScrnInfoPtr pScrn)
    ASTRecPtr pAST = ASTPTR(pScrn);
 
 #ifndef XSERVER_LIBPCIACCESS
-   xf86UnMapVidMem(pScrn->scrnIndex, (pointer) pAST->MMIOVirtualAddr,
+   xf86UnMapVidMem(pScrn->scrnIndex, pAST->MMIOVirtualAddr,
 		   pAST->MMIOMapSize);
 #else
    pci_device_unmap_range(pAST->PciInfo, pAST->MMIOVirtualAddr, pAST->MMIOMapSize);

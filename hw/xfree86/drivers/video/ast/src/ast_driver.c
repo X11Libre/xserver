@@ -80,7 +80,7 @@ static Bool ASTModeInit(ScrnInfoPtr pScrn, DisplayModePtr mode);
 static void ASTInitVideo(ScreenPtr pScreen);
 static int  ASTPutImage( ScrnInfoPtr,
         short, short, short, short, short, short, short, short,
-        int, unsigned char*, short, short, Bool, RegionPtr, pointer, DrawablePtr);
+        int, unsigned char*, short, short, Bool, RegionPtr, void *, DrawablePtr);
 #endif
 
 /*
@@ -160,8 +160,7 @@ static XF86ModuleVersionInfo astVersRec = {
 
 _X_EXPORT XF86ModuleData astModuleData = { &astVersRec, astSetup, NULL };
 
-static pointer
-astSetup(pointer module, pointer opts, int *errmaj, int *errmin)
+static void* astSetup(void *module, void *opts, int *errmaj, int *errmin)
 {
    static Bool setupDone = FALSE;
 
@@ -175,7 +174,7 @@ astSetup(pointer module, pointer opts, int *errmaj, int *errmin)
        * The return value must be non-NULL on success even though there
        * is no TearDownProc.
        */
-      return (pointer) TRUE;
+      return (void*) TRUE;
    } else {
       if (errmaj)
 	 *errmaj = LDR_ONCEONLY;
@@ -1794,7 +1793,7 @@ static XF86AttributeRec ASTAttributes[NUM_ATTRIBUTES] =
    {XvSettable | XvGettable, 100, 10000, astxvgammablue},
 };
 
-static void ASTStopVideo(ScrnInfoPtr pScrn, pointer data, Bool exit)
+static void ASTStopVideo(ScrnInfoPtr pScrn, void *data, Bool exit)
 {
     ASTPortPrivPtr pPriv = (ASTPortPrivPtr)data;
     ASTPtr pAST = ASTPTR(pScrn);
@@ -1824,7 +1823,7 @@ static void ASTStopVideo(ScrnInfoPtr pScrn, pointer data, Bool exit)
     }
 }
 
-static int ASTSetPortAttribute(ScrnInfoPtr pScrn, Atom attribute, INT32 value, pointer data)
+static int ASTSetPortAttribute(ScrnInfoPtr pScrn, Atom attribute, INT32 value, void *data)
 {
     ASTPortPrivPtr pPriv = (ASTPortPrivPtr)data;
     ASTPtr pAST = ASTPTR(pScrn);
@@ -1890,7 +1889,7 @@ static int ASTSetPortAttribute(ScrnInfoPtr pScrn, Atom attribute, INT32 value, p
     return Success;
 }
 
-static int ASTGetPortAttribute(ScrnInfoPtr pScrn, Atom attribute, INT32 *value, pointer data)
+static int ASTGetPortAttribute(ScrnInfoPtr pScrn, Atom attribute, INT32 *value, void *data)
 {
     ASTPortPrivPtr pPriv = (ASTPortPrivPtr)data;
     ASTPtr pAST = ASTPTR(pScrn);
@@ -1940,7 +1939,7 @@ static void ASTQueryBestSize(ScrnInfoPtr pScrn, Bool motion,
                                 short vid_w, short vid_h,
                                 short drw_w, short drw_h,
                                 unsigned int *p_w, unsigned int *p_h,
-                                pointer data)
+                                void *data)
 {
     *p_w = drw_w;
     *p_h = drw_h;
@@ -2022,7 +2021,8 @@ static int ASTPutImage(ScrnInfoPtr pScrn,
                           int id, unsigned char* buf,
                           short width, short height,
                           Bool sync,
-                          RegionPtr clipBoxes, pointer data, DrawablePtr pDraw)
+                          RegionPtr clipBoxes, void *data,
+                          DrawablePtr pDraw)
 {
     ASTPtr pAST = ASTPTR(pScrn);
     ASTPortPrivPtr pPriv = (ASTPortPrivPtr)data;
@@ -2205,7 +2205,7 @@ static XF86VideoAdaptorPtr ASTSetupImageVideo(ScreenPtr pScreen)
 
     pPriv = (ASTPortPrivPtr)(&adapt->pPortPrivates[1]);
 
-    adapt->pPortPrivates->ptr = (pointer)(pPriv);
+    adapt->pPortPrivates->ptr = pPriv;
     adapt->pAttributes = ASTAttributes;
     adapt->nAttributes = NUM_ATTRIBUTES;
 	adapt->nImages = NUM_IMAGES;
