@@ -235,15 +235,49 @@ fbdev2xfree_timing(struct fb_var_screeninfo *var, DisplayModePtr mode)
 /* -------------------------------------------------------------------- */
 /* open correct framebuffer device                                      */
 
+static int
+set_name(int scrnIndex, int fd, char **namep, Bool print_warning, Bool close_fd)
+{
+    struct fb_fix_screeninfo fix;
+
+    if (!namep) {
+        return fd;
+    }
+
+    if (fd == -1) {
+        return -1;
+    }
+
+    if (ioctl(fd, FBIOGET_FSCREENINFO, (void *) (&fix)) == -1) {
+        *namep = NULL;
+        if (print_warning) {
+            xf86DrvMsg(scrnIndex, X_ERROR,
+                       "FBIOGET_FSCREENINFO: %s\n", strerror(errno));
+        }
+        if (close_fd) {
+            close(fd);
+            return -1;
+        }
+        return fd;
+    }
+    *namep = malloc(16);
+    if (*namep) {
+        strncpy(*namep, fix.id, 16);
+    }
+    return fd;
+}
+
 /**
  * Try to find the framebuffer device for a given PCI device
  */
 static int
-fbdev_open_pci(struct pci_device *pPci, char *device, char **namep)
+fbdev_open_pci(struct pci_device *pPci, const char *device, char **namep)
 {
-    struct fb_fix_screeninfo fix;
     char filename[256];
     int fd, i;
+
+    if (namep)
+        *namep = NULL;
 
     /* try argument (from XF86Config) first */
     if (device) {
@@ -257,9 +291,7 @@ fbdev_open_pci(struct pci_device *pPci, char *device, char **namep)
 
     if (fd != -1) {
         /* fbdev was provided by the user instead of guessed, skip pci check */
-        if (namep)
-            *namep = NULL;
-        return fd;
+        return set_name(-1, fd, namep, TRUE, FALSE);
     }
 
     for (i = 0; i < 8; i++) {
@@ -279,22 +311,12 @@ fbdev_open_pci(struct pci_device *pPci, char *device, char **namep)
             snprintf(filename, sizeof(filename), "/dev/fb%d", i);
 
             fd = open(filename, O_RDWR);
+            fd = set_name(-1, fd, namep, FALSE, TRUE);
             if (fd != -1) {
-                if (ioctl(fd, FBIOGET_FSCREENINFO, (void *) &fix) != -1) {
-                    if (namep) {
-                        *namep = XNFalloc(16);
-                        strncpy(*namep, fix.id, 16);
-                    }
-
-                    return fd;
-                }
-                close(fd);
+                return fd;
             }
         }
     }
-
-    if (namep)
-        *namep = NULL;
 
     xf86DrvMsg(-1, X_ERROR, "Unable to find a valid framebuffer device\n");
     return -1;
@@ -319,7 +341,7 @@ resolve_link(const char *filename, char *resolve_buf, size_t resolve_buf_size)
             return filename;
         }
         else {
-            // Have caller handle error condition.
+            /* Have caller handle error condition */
             return NULL;
         }
     }
@@ -328,8 +350,10 @@ resolve_link(const char *filename, char *resolve_buf, size_t resolve_buf_size)
 static int
 fbdev_open(int scrnIndex, const char *dev, char **namep)
 {
-    struct fb_fix_screeninfo fix;
     int fd;
+
+    if (namep)
+        *namep = NULL;
 
     /* try argument (from XF86Config) first */
     if (dev) {
@@ -383,19 +407,7 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
         free(sysfs_path);
     }
 
-    if (namep) {
-        if (-1 == ioctl(fd, FBIOGET_FSCREENINFO, (void *) (&fix))) {
-            *namep = NULL;
-            xf86DrvMsg(scrnIndex, X_ERROR,
-                       "FBIOGET_FSCREENINFO: %s\n", strerror(errno));
-            return -1;
-        }
-        else {
-            *namep = XNFalloc(16);
-            strncpy(*namep, fix.id, 16);
-        }
-    }
-    return fd;
+    return set_name(scrnIndex, fd, namep, TRUE, TRUE);
 }
 
 /* -------------------------------------------------------------------- */
