@@ -268,7 +268,7 @@ set_name(int scrnIndex, int fd, char **namep, Bool print_warning, Bool close_fd)
 }
 
 static int
-check_user_devices(const char* dev, char **namep)
+check_user_devices(int scrnIndex, const char* dev, char **namep)
 {
     int fd;
 
@@ -286,19 +286,24 @@ check_user_devices(const char* dev, char **namep)
         fd = dev ? open(dev, O_RDWR) : -1;
     }
 
-    return set_name(-1, fd, namep, TRUE, FALSE);
+    fd = set_name(scrnIndex, fd, namep, TRUE, FALSE);
+    if (dev && fd == -1) {
+        xf86DrvMsg(scrnIndex, X_ERROR,
+                   "Could not use the explicitly provided framebuffer: %s\n", dev);
+    }
+    return fd;
 }
 
 /**
  * Try to find the framebuffer device for a given PCI device
  */
 static int
-fbdev_open_pci(struct pci_device *pPci, const char *device, char **namep)
+fbdev_open_pci(int scrnIndex, struct pci_device *pPci, const char *device, char **namep)
 {
     char filename[256];
     int fd, i;
 
-    fd = check_user_devices(device, namep);
+    fd = check_user_devices(scrnIndex, device, namep);
 
     if (fd != -1) {
         /* fbdev was provided by the user and not guessed, skip pci check */
@@ -322,14 +327,14 @@ fbdev_open_pci(struct pci_device *pPci, const char *device, char **namep)
             snprintf(filename, sizeof(filename), "/dev/fb%d", i);
 
             fd = open(filename, O_RDWR);
-            fd = set_name(-1, fd, namep, FALSE, TRUE);
+            fd = set_name(scrnIndex, fd, namep, FALSE, TRUE);
             if (fd != -1) {
                 return fd;
             }
         }
     }
 
-    xf86DrvMsg(-1, X_ERROR, "Unable to find a valid framebuffer device\n");
+    xf86DrvMsg(scrnIndex, X_ERROR, "Unable to find a valid framebuffer device\n");
     return -1;
 }
 
@@ -363,7 +368,7 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
 {
     int fd;
 
-    fd = check_user_devices(dev, namep);
+    fd = check_user_devices(scrnIndex, dev, namep);
 
     if (fd != -1) {
         /* fbdev was provided by the user and not guessed, skip non-pci check */
@@ -437,7 +442,7 @@ fbdevHWProbe(struct pci_device *pPci, const char *device, char **namep)
     int fd;
 
     if (pPci)
-        fd = fbdev_open_pci(pPci, device, namep);
+        fd = fbdev_open_pci(-1, pPci, device, namep);
     else
         fd = fbdev_open(-1, device, namep);
 
@@ -457,7 +462,7 @@ fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, const char *device)
 
     /* open device */
     if (pPci)
-        fPtr->fd = fbdev_open_pci(pPci, device, NULL);
+        fPtr->fd = fbdev_open_pci(pScrn->scrnIndex, pPci, device, NULL);
     else
         fPtr->fd = fbdev_open(pScrn->scrnIndex, device, NULL);
     if (-1 == fPtr->fd) {
