@@ -528,82 +528,96 @@ HostOS(void)
 #endif
 }
 
-static int
-match_substring(const char *attr, const char *pattern)
-{
-    return (strstr(attr, pattern)) ? 0 : -1;
-}
+/*
+ * Match an attribute against a pattern. Matching mode is
+ * determined by pattern->mode member.
+ */
 
-#ifdef HAVE_FNMATCH_H
 static int
-match_pattern(const char *attr, const char *pattern)
+match_token(const char *attr, xf86MatchPattern *pattern)
 {
-    return fnmatch(pattern, attr, 0);
-}
+    if ((!pattern) || (!attr))
+        return 0;
+
+    switch (pattern->mode)
+    {
+        case MATCH_IS_INVALID:
+            return 0;
+        case MATCH_EXACT:
+            return (strcmp(attr, pattern->str)) ? 0 : -1;
+        case MATCH_EXACT_NOCASE:
+            return (strcasecmp(attr, pattern->str)) ? 0 : -1;
+        case MATCH_AS_SUBSTRING:
+            return (strstr(attr, pattern->str)) ? -1 : 0;
+        case MATCH_AS_SUBSTRING_NOCASE:
+            return (strcasestr(attr, pattern->str)) ? -1 : 0;
+        case MATCH_AS_FILENAME:
+#ifdef HAVE_FNMATCH_H
+            return (fnmatch(pattern->str, attr, 0)) ? 0 : -1;
 #else
-#define match_pattern match_substring
+            LogMessageVerb(X_WARNING, 1, "Filename matching requested but unavailable for \"%s\", resorting to search for substring\n", pattern->str);
+                    pattern->mode = MATCH_AS_SUBSTRING;
+            return (strcmp(attr, pattern->str)) ? 0 : -1;
 #endif
 
+        case MATCH_AS_PATHNAME:
 #ifdef HAVE_FNMATCH_H
-static int
-match_path_pattern(const char *attr, const char *pattern)
-{
-    return fnmatch(pattern, attr, FNM_PATHNAME);
-}
+            return (fnmatch(pattern->str, attr, FNM_PATHNAME)) ? 0 : -1;
 #else
-#define match_path_pattern match_substring
+            LogMessageVerb(X_WARNING, 1, "Pathname matching requested but unavailable for \"%s\", resorting to search for substring\n", pattern->str);
+                    pattern->mode = MATCH_AS_SUBSTRING;
+            return (strcmp(attr, pattern->str)) ? 0 : -1;
 #endif
-
-/*
- * If no Layout section is found, xf86ServerLayout.id becomes "(implicit)"
- * It is convenient that "" in patterns means "no explicit layout"
- */
-static int
-match_string_implicit(const char *attr, const char *pattern)
-{
-    if (strlen(pattern)) {
-        return strcmp(attr, pattern);
-    }
-    else {
-        return strcmp(attr, "(implicit)");
+        case MATCH_SUBSTRINGS_SEQUENCE:
+        default:
+            {
+                char* str = pattern->str;
+                while (*str) {
+                    attr=strstr(attr, str);
+                    if (!attr) return 0;
+                    attr += strlen(str);
+                    str += strlen(str);
+                    str++;
+                }
+            }
+            return -1;
     }
 }
 
 /*
- * Match an attribute against a list of NULL terminated arrays of patterns.
- * If a pattern in each list entry is matched, return TRUE.
+ * Match an attribute against a list of xf86MatchGroup's.
+ * Return TRUE only if each list entry is successful.
  */
-static Bool
-MatchAttrToken(const char *attr, struct xorg_list *patterns,
-               int (*compare) (const char *attr, const char *pattern))
+Bool
+MatchAttrToken(const char *attr, struct xorg_list *groups)
 {
-    const xf86MatchGroup *group;
+    xf86MatchGroup *group;
+    xf86MatchPattern *pattern;
 
-    /* If there are no patterns, accept the match */
-    if (xorg_list_is_empty(patterns))
+    /* If there are no groups, accept the match */
+    if (xorg_list_is_empty(groups))
         return TRUE;
 
+    /* If there are groups but no attribute, reject the match */
+    if (!attr)
+        return FALSE;
+
     /*
-     * Iterate the list of patterns ensuring each entry has a
-     * match. Each list entry is a separate Match line of the same type.
+     * Otherwise, iterate the list of groups ensuring each entry has a
+     * match. Each list entry is a list of patterns obtained from
+     * a separate Match line.
      */
-    xorg_list_for_each_entry(group, patterns, entry) {
-        char *const *cur;
-        Bool is_negated = group->is_negated;
-        Bool match = is_negated;
+    xorg_list_for_each_entry(group, groups, entry) {
+        Bool match = FALSE;
 
-        /* If there's a pattern but no attribute, we reject the match for a
-         * MatchFoo directive, and accept it for a NoMatchFoo directive
-         */
-        if (!attr)
-            return is_negated;
-
-        for (cur = group->values; *cur; cur++)
-            if ((*compare) (attr, *cur) == 0) {
-                match = !is_negated;
-                break;
-            }
-        if (!match)
+        xorg_list_for_each_entry(pattern, &group->patterns, entry) {
+            /* It is enough to find one pattern matched by the attribute */
+            match = ((!match_token(attr, pattern)) == pattern->is_negated);
+            if (match)
+                goto group_done;
+        }
+      group_done:
+        if (match == group->is_negated)
             return FALSE;
     }
 
@@ -619,34 +633,34 @@ static Bool
 InputClassMatches(const XF86ConfInputClassPtr iclass, const InputInfoPtr idev,
                   const InputAttributes * attrs)
 {
+    const char *layout;
+
     /* MatchProduct substring */
-    if (!MatchAttrToken
-        (attrs->product, &iclass->match_product, match_substring))
+    if (!MatchAttrToken(attrs->product, &iclass->match_product))
         return FALSE;
 
     /* MatchVendor substring */
-    if (!MatchAttrToken(attrs->vendor, &iclass->match_vendor, match_substring))
+    if (!MatchAttrToken(attrs->vendor, &iclass->match_vendor))
         return FALSE;
 
     /* MatchDevicePath pattern */
-    if (!MatchAttrToken
-        (attrs->device, &iclass->match_device, match_path_pattern))
+    if (!MatchAttrToken(attrs->device, &iclass->match_device))
         return FALSE;
 
     /* MatchOS case-insensitive string */
-    if (!MatchAttrToken(HostOS(), &iclass->match_os, strcasecmp))
+    if (!MatchAttrToken(HostOS(), &iclass->match_os))
         return FALSE;
 
     /* MatchPnPID pattern */
-    if (!MatchAttrToken(attrs->pnp_id, &iclass->match_pnpid, match_pattern))
+    if (!MatchAttrToken(attrs->pnp_id, &iclass->match_pnpid))
         return FALSE;
 
     /* MatchUSBID pattern */
-    if (!MatchAttrToken(attrs->usb_id, &iclass->match_usbid, match_pattern))
+    if (!MatchAttrToken(attrs->usb_id, &iclass->match_usbid))
         return FALSE;
 
     /* MatchDriver string */
-    if (!MatchAttrToken(idev->driver, &iclass->match_driver, strcmp))
+    if (!MatchAttrToken(idev->driver, &iclass->match_driver))
         return FALSE;
 
     /*
@@ -660,7 +674,7 @@ InputClassMatches(const XF86ConfInputClassPtr iclass, const InputInfoPtr idev,
         if (!attrs->tags)
             return FALSE;
         for (tag = attrs->tags, match = FALSE; *tag; tag++) {
-            if (MatchAttrToken(*tag, &iclass->match_tag, strcmp)) {
+            if (MatchAttrToken(*tag, &iclass->match_tag)) {
                 match = TRUE;
                 break;
             }
@@ -669,12 +683,17 @@ InputClassMatches(const XF86ConfInputClassPtr iclass, const InputInfoPtr idev,
             return FALSE;
     }
 
-    /* MatchLayout string */
-    if (!xorg_list_is_empty(&iclass->match_layout)) {
-        if (!MatchAttrToken(xf86ConfigLayout.id,
-                            &iclass->match_layout, match_string_implicit))
+    /* MatchLayout string
+     *
+     * If no Layout section is found, xf86ServerLayout.id becomes "(implicit)"
+     * It is convenient that "" in patterns means "no explicit layout"
+     */
+    if (strcmp(xf86ConfigLayout.id,"(implicit)"))
+        layout = xf86ConfigLayout.id;
+    else
+        layout = "";
+    if (!MatchAttrToken(layout, &iclass->match_layout))
             return FALSE;
-    }
 
     /* MatchIs* booleans */
     if (iclass->is_keyboard.set &&
