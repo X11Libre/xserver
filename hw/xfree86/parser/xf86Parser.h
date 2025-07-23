@@ -305,8 +305,27 @@ typedef struct {
 typedef struct {
     struct xorg_list entry;
     char **values;
+    struct xorg_list patterns;
     Bool is_negated;
 } xf86MatchGroup;
+
+typedef enum {
+    MATCH_IS_INVALID,
+    MATCH_EXACT,
+    MATCH_EXACT_NOCASE,
+    MATCH_AS_SUBSTRING,
+    MATCH_AS_SUBSTRING_NOCASE,
+    MATCH_AS_FILENAME,
+    MATCH_AS_PATHNAME,
+    MATCH_SUBSTRINGS_SEQUENCE,
+} xf86MatchMode;
+
+typedef struct {
+    struct xorg_list entry;
+    xf86MatchMode mode;
+    Bool is_negated;
+    char *str;
+} xf86MatchPattern;
 
 typedef struct {
     GenericListRec list;
