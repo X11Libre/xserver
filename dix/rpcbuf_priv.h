@@ -85,6 +85,23 @@ void *x_rpcbuf_reserve(x_rpcbuf_t *rpcbuf, size_t needed)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
+ * like x_rpcbuf_reserve(), but additionally clearing the reserved space.
+ *
+ * the returned poiner can be used to directly write data into the
+ * reserved region. buffer pointer is moved right after that region.
+ *
+ * NOTE: that region is only valid until another operation on this
+ * buffer that might affect the allocated memory block: when buffer
+ * needs to be resized, it may get a new memory location.
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ * @param needed    amount of bytes needed
+ * @return          pointer to reserved region of NULL on allocation failure
+ */
+void *x_rpcbuf_reserve0(x_rpcbuf_t *rpcbuf, size_t needed)
+    _X_ATTRIBUTE_NONNULL_ARG(1);
+
+/*
  * write a plain C string to rpc buffer and pad it.
  *
  * allocate a region for the string (padded to 32bits) and copy in the string.
