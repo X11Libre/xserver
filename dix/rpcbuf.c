@@ -8,32 +8,37 @@
 
 #include "dix/rpcbuf_priv.h"
 
-Bool x_rpcbuf_makeroom(struct x_rpcbuf *rpcbuf, size_t needed)
+static inline Bool __x_rpcbuf_write_bin_pad(
+    x_rpcbuf_t *rpcbuf, const char *val, size_t len)
+{
+    const size_t blen = pad_to_int32(len);
+
+    char *reserved = x_rpcbuf_reserve(rpcbuf, blen);
+    if (!reserved)
+        return FALSE;
+
+    memcpy(reserved, val, len);
+    memset(reserved + len, 0, blen - len);
+    return TRUE;
+}
+
+Bool x_rpcbuf_makeroom(x_rpcbuf_t *rpcbuf, size_t needed)
 {
     /* break out of alreay in error state */
     if (rpcbuf->error)
         return FALSE;
 
-    /* not allocated yet ? */
-    if (!rpcbuf->buffer) {
-        if (!(rpcbuf->buffer = calloc(1, XLIBRE_RPCBUF_CHUNK_SIZE)))
-            goto err;
-        rpcbuf->size = XLIBRE_RPCBUF_CHUNK_SIZE;
-        rpcbuf->wpos = 0;
-    }
-
     /* still enough space */
     if (rpcbuf->size > rpcbuf->wpos + needed)
         return TRUE;
 
-    const size_t newsize = ((needed / XLIBRE_RPCBUF_CHUNK_SIZE) + 1)
+    const size_t newsize = (((rpcbuf->wpos + needed) / XLIBRE_RPCBUF_CHUNK_SIZE) + 1)
                                 * XLIBRE_RPCBUF_CHUNK_SIZE;
 
     char *newbuf = realloc(rpcbuf->buffer, newsize);
     if (!newbuf)
         goto err;
 
-    memset(newbuf + rpcbuf->size, 0, newsize - rpcbuf->size);
     rpcbuf->buffer = newbuf;
     rpcbuf->size = newsize;
 
@@ -48,24 +53,23 @@ err:
     return FALSE;
 }
 
-void x_rpcbuf_clear(struct x_rpcbuf *rpcbuf)
+void x_rpcbuf_clear(x_rpcbuf_t *rpcbuf)
 {
     free(rpcbuf->buffer);
-    memset(rpcbuf, 0, sizeof(struct x_rpcbuf));
+    memset(rpcbuf, 0, sizeof(x_rpcbuf_t));
 }
 
-void x_rpcbuf_reset(struct x_rpcbuf *rpcbuf)
+void x_rpcbuf_reset(x_rpcbuf_t *rpcbuf)
 {
     /* no need to reset if never been actually written to */
     if ((!rpcbuf->buffer) || (!rpcbuf->size) || (!rpcbuf->wpos))
         return;
 
     /* clear memory, but don't free it */
-    memset(rpcbuf->buffer, 0, rpcbuf->size);
     rpcbuf->wpos = 0;
 }
 
-void *x_rpcbuf_reserve(struct x_rpcbuf *rpcbuf, size_t needed)
+void *x_rpcbuf_reserve(x_rpcbuf_t *rpcbuf, size_t needed)
 {
     if (!x_rpcbuf_makeroom(rpcbuf, needed))
         return NULL;
@@ -76,41 +80,33 @@ void *x_rpcbuf_reserve(struct x_rpcbuf *rpcbuf, size_t needed)
     return pos;
 }
 
-Bool x_rpcbuf_write_string_pad(struct x_rpcbuf *rpcbuf, const char *str)
+void *x_rpcbuf_reserve0(x_rpcbuf_t *rpcbuf, size_t needed)
+{
+    void *buf = x_rpcbuf_reserve(rpcbuf, needed);
+    if (!buf)
+        return NULL;
+
+    memset(buf, 0, needed);
+    return buf;
+}
+
+Bool x_rpcbuf_write_string_pad(x_rpcbuf_t *rpcbuf, const char *str)
 {
     if (!str)
         return TRUE;
 
-    size_t slen = strlen(str);
-    if (!slen)
-        return TRUE;
-
-    char *reserved = x_rpcbuf_reserve(rpcbuf, pad_to_int32(slen));
-    if (!reserved)
-        return FALSE;
-
-    memcpy(reserved, str, slen);
-    return TRUE;
+    return __x_rpcbuf_write_bin_pad(rpcbuf, str, strlen(str));
 }
 
-Bool x_rpcbuf_write_string_0t_pad(struct x_rpcbuf *rpcbuf, const char *str)
+Bool x_rpcbuf_write_string_0t_pad(x_rpcbuf_t *rpcbuf, const char *str)
 {
     if (!str)
         return x_rpcbuf_write_CARD32(rpcbuf, 0);
 
-    size_t slen = strlen(str);
-    if (!slen)
-        return x_rpcbuf_write_CARD32(rpcbuf, 0);
-
-    char *reserved = x_rpcbuf_reserve(rpcbuf, pad_to_int32(slen+1));
-    if (!reserved)
-        return FALSE;
-
-    memcpy(reserved, str, slen+1);
-    return TRUE;
+    return __x_rpcbuf_write_bin_pad(rpcbuf, str, strlen(str)+1);
 }
 
-Bool x_rpcbuf_write_CARD8(struct x_rpcbuf *rpcbuf, CARD8 value)
+Bool x_rpcbuf_write_CARD8(x_rpcbuf_t *rpcbuf, CARD8 value)
 {
     CARD8 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(value));
     if (!reserved)
@@ -121,7 +117,7 @@ Bool x_rpcbuf_write_CARD8(struct x_rpcbuf *rpcbuf, CARD8 value)
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD16(struct x_rpcbuf *rpcbuf, CARD16 value)
+Bool x_rpcbuf_write_CARD16(x_rpcbuf_t *rpcbuf, CARD16 value)
 {
     CARD16 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(value));
     if (!reserved)
@@ -135,7 +131,7 @@ Bool x_rpcbuf_write_CARD16(struct x_rpcbuf *rpcbuf, CARD16 value)
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD32(struct x_rpcbuf *rpcbuf, CARD32 value)
+Bool x_rpcbuf_write_CARD32(x_rpcbuf_t *rpcbuf, CARD32 value)
 {
     CARD32 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(value));
     if (!reserved)
@@ -149,7 +145,7 @@ Bool x_rpcbuf_write_CARD32(struct x_rpcbuf *rpcbuf, CARD32 value)
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD8s(struct x_rpcbuf *rpcbuf, const CARD8 *values,
+Bool x_rpcbuf_write_CARD8s(x_rpcbuf_t *rpcbuf, const CARD8 *values,
                            size_t count)
 {
     if ((!values) || (!count))
@@ -164,7 +160,7 @@ Bool x_rpcbuf_write_CARD8s(struct x_rpcbuf *rpcbuf, const CARD8 *values,
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD16s(struct x_rpcbuf *rpcbuf, const CARD16 *values,
+Bool x_rpcbuf_write_CARD16s(x_rpcbuf_t *rpcbuf, const CARD16 *values,
                             size_t count)
 {
     if ((!values) || (!count))
@@ -182,7 +178,7 @@ Bool x_rpcbuf_write_CARD16s(struct x_rpcbuf *rpcbuf, const CARD16 *values,
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD32s(struct x_rpcbuf *rpcbuf, const CARD32 *values,
+Bool x_rpcbuf_write_CARD32s(x_rpcbuf_t *rpcbuf, const CARD32 *values,
                             size_t count)
 {
     if ((!values) || (!count))
@@ -200,17 +196,11 @@ Bool x_rpcbuf_write_CARD32s(struct x_rpcbuf *rpcbuf, const CARD32 *values,
     return TRUE;
 }
 
-Bool x_rpcbuf_write_binary_pad(struct x_rpcbuf *rpcbuf, const void *values,
+Bool x_rpcbuf_write_binary_pad(x_rpcbuf_t *rpcbuf, const void *values,
                                size_t size)
 {
     if ((!values) || (!size))
         return TRUE;
 
-    void *reserved = x_rpcbuf_reserve(rpcbuf, pad_to_int32(size));
-    if (!reserved)
-        return FALSE;
-
-    memcpy(reserved, values, size);
-
-    return TRUE;
+    return __x_rpcbuf_write_bin_pad(rpcbuf, values, size);
 }
