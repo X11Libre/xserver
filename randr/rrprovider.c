@@ -275,7 +275,7 @@ RRInitPrimeSyncProps(ScreenPtr pScreen)
     rrScrPrivPtr pScrPriv = rrGetScrPriv(pScreen);
 
     const char *syncStr = PRIME_SYNC_PROP;
-    Atom syncProp = dixGetAtomID(syncStr);
+    Atom syncProp = dixAddAtom(syncStr);
 
     int defaultVal = TRUE;
     INT32 validVals[2] = {FALSE, TRUE};
