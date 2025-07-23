@@ -374,11 +374,18 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
     dev = "/dev/fb0";
     fd = open(dev, O_RDWR);
     if (fd == -1) {
-        /* last try: default device symlink */
+        /* second try: default device symlink */
         /* TODO: we should try this one before /dev/fb0,
            but we keep it like this to not change old behavior */
         dev = "/dev/fb";
         fd = open(dev, O_RDWR);
+    }
+
+    /* last tries, framebuffers 1 through 7 */
+    char devbuf[] = "/dev/fb1";
+    for (int i = 1; i < 8 && fd == -1; i++) {
+        devbuf[sizeof(devbuf) - 2] = i + '0';
+        fd = open(devbuf, O_RDWR);
     }
 
     if (fd == -1) {
