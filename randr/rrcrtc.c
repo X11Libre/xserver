@@ -24,6 +24,7 @@
 
 #include <X11/Xatom.h>
 
+#include "dix/dix_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
 #include "os/bug_priv.h"
@@ -453,7 +454,7 @@ rrGetPixmapSharingSyncProp(int numOutputs, RROutputPtr * outputs)
     /* Determine if the user wants prime syncing */
     int o;
     const char *syncStr = PRIME_SYNC_PROP;
-    Atom syncProp = MakeAtom(syncStr, strlen(syncStr), FALSE);
+    Atom syncProp = dixGetAtomID(syncStr);
     if (syncProp == None)
         return TRUE;
 
@@ -477,7 +478,7 @@ rrSetPixmapSharingSyncProp(char val, int numOutputs, RROutputPtr * outputs)
 {
     int o;
     const char *syncStr = PRIME_SYNC_PROP;
-    Atom syncProp = MakeAtom(syncStr, strlen(syncStr), FALSE);
+    Atom syncProp = dixGetAtomID(syncStr);
     if (syncProp == None)
         return;
 
@@ -714,10 +715,9 @@ static Bool
 rrCheckEmulated(RROutputPtr output)
 {
     const char *emulStr = XRANDR_EMULATION_PROP;
-    Atom emulProp;
     RRPropertyValuePtr val;
 
-    emulProp = MakeAtom(emulStr, strlen(emulStr), FALSE);
+    Atom emulProp = dixGetAtomID(emulStr);
     if (emulProp == None)
         return FALSE;
 

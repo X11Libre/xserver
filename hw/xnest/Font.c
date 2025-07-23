@@ -22,6 +22,8 @@ is" without express or implied warranty.
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
+#include "dix/dix_priv.h"
+
 #include "misc.h"
 #include "regionstr.h"
 #include "dixfontstr.h"
@@ -37,7 +39,6 @@ int xnestFontPrivateIndex;
 Bool
 xnestRealizeFont(ScreenPtr pScreen, FontPtr pFont)
 {
-    Atom name_atom, value_atom;
     int nprops;
     FontPropPtr props;
     int i;
@@ -45,8 +46,8 @@ xnestRealizeFont(ScreenPtr pScreen, FontPtr pFont)
 
     xfont2_font_set_private(pFont, xnestFontPrivateIndex, NULL);
 
-    name_atom = MakeAtom("FONT", 4, TRUE);
-    value_atom = 0L;
+    Atom name_atom = dixAddAtom("FONT");
+    Atom value_atom = 0L;
 
     nprops = pFont->info.nprops;
     props = pFont->info.props;

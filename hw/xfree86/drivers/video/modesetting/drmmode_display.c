@@ -34,6 +34,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include "dix/dix_priv.h"
 #include "os/fmt.h"
 
 #include "dumb_bo.h"
@@ -3050,7 +3051,7 @@ drmmode_output_create_resources(xf86OutputPtr output)
 
     /* Create CONNECTOR_ID property */
     {
-        Atom    name = MakeAtom("CONNECTOR_ID", 12, TRUE);
+        Atom    name = dixAddAtom("CONNECTOR_ID");
         INT32   value = mode_output->connector_id;
 
         if (name != BAD_RESOURCE) {
@@ -3072,7 +3073,7 @@ drmmode_output_create_resources(xf86OutputPtr output)
     }
 
     if (drmmode->use_ctm) {
-        Atom name = MakeAtom("CTM", 3, TRUE);
+        Atom name = dixAddAtom("CTM");
 
         if (name != BAD_RESOURCE) {
             drmmode_output->ctm_atom = name;
@@ -3109,8 +3110,7 @@ drmmode_output_create_resources(xf86OutputPtr output)
             p->atoms = calloc(p->num_atoms, sizeof(Atom));
             if (!p->atoms)
                 continue;
-            p->atoms[0] =
-                MakeAtom(drmmode_prop->name, strlen(drmmode_prop->name), TRUE);
+            p->atoms[0] = dixAddAtom(drmmode_prop->name);
             prop_range[0] = drmmode_prop->values[0];
             prop_range[1] = drmmode_prop->values[1];
             err = RRConfigureOutputProperty(output->randr_output, p->atoms[0],
@@ -3135,12 +3135,10 @@ drmmode_output_create_resources(xf86OutputPtr output)
             p->atoms = calloc(p->num_atoms, sizeof(Atom));
             if (!p->atoms)
                 continue;
-            p->atoms[0] =
-                MakeAtom(drmmode_prop->name, strlen(drmmode_prop->name), TRUE);
+            p->atoms[0] = dixAddAtom(drmmode_prop->name);
             for (j = 1; j <= drmmode_prop->count_enums; j++) {
                 struct drm_mode_property_enum *e = &drmmode_prop->enums[j - 1];
-
-                p->atoms[j] = MakeAtom(e->name, strlen(e->name), TRUE);
+                p->atoms[j] = dixAddAtom(e->name);
             }
             err = RRConfigureOutputProperty(output->randr_output, p->atoms[0],
                                             FALSE, FALSE,

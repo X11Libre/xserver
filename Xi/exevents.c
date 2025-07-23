@@ -762,7 +762,7 @@ XISendDeviceChangedEvent(DeviceIntPtr device, DeviceChangedEvent *dce)
         return;
     }
 
-    /* we don't actually swap if there's a NullClient, swapping is done
+    /* we don't actually swap if there's a NULL client, swapping is done
      * later when event is delivered. */
     SendEventToAllWindows(device, XI_DeviceChangedMask, (xEvent *) dcce, 1);
     free(dcce);

@@ -134,7 +134,7 @@ DeleteWindowFromAnySelections(WindowPtr pWin)
 
             pSel->pWin = (WindowPtr) NULL;
             pSel->window = None;
-            pSel->client = NullClient;
+            pSel->client = NULL;
         }
 }
 
@@ -149,7 +149,7 @@ DeleteClientFromAnySelections(ClientPtr client)
 
             pSel->pWin = (WindowPtr) NULL;
             pSel->window = None;
-            pSel->client = NullClient;
+            pSel->client = NULL;
         }
 }
 
@@ -235,7 +235,7 @@ ProcSetSelectionOwner(ClientPtr client)
     pSel->lastTimeChanged = time;
     pSel->window = param.owner;
     pSel->pWin = pWin;
-    pSel->client = (pWin ? client : NullClient);
+    pSel->client = (pWin ? client : NULL);
 
     CallSelectionCallback(pSel, client, SelectionSetOwner);
     return Success;

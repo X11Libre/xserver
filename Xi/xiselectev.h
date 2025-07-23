@@ -22,13 +22,10 @@
  *
  * Author: Peter Hutterer
  */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef XISELECTEVENTS_H
 #define XISELECTEVENTS_H 1
+
+#include <dix-config.h>
 
 int SProcXISelectEvents(ClientPtr client);
 int ProcXISelectEvents(ClientPtr client);

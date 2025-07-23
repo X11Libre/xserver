@@ -32,6 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xatom.h>
 #include <X11/Xfuncproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
@@ -908,10 +909,10 @@ SELinuxFlaskInit(void)
         FatalError("SELinux: Failed to allocate private storage.\n");
 
     /* Create atoms for doing window labeling */
-    atom_ctx = MakeAtom("_SELINUX_CONTEXT", 16, TRUE);
+    atom_ctx = dixAddAtom("_SELINUX_CONTEXT");
     if (atom_ctx == BAD_RESOURCE)
         FatalError("SELinux: Failed to create atom\n");
-    atom_client_ctx = MakeAtom("_SELINUX_CLIENT_CONTEXT", 23, TRUE);
+    atom_client_ctx = dixAddAtom("_SELINUX_CLIENT_CONTEXT");
     if (atom_client_ctx == BAD_RESOURCE)
         FatalError("SELinux: Failed to create atom\n");
 

@@ -180,7 +180,7 @@ winUninstallColormap(ColormapPtr pmap)
     /* Install the default cmap in place of the cmap to be uninstalled */
     if (pmap->mid != pmap->pScreen->defColormap) {
         dixLookupResourceByType((void *) &curpmap, pmap->pScreen->defColormap,
-                                X11_RESTYPE_COLORMAP, NullClient, DixUnknownAccess);
+                                X11_RESTYPE_COLORMAP, NULL, DixUnknownAccess);
         (*pmap->pScreen->InstallColormap) (curpmap);
     }
 }

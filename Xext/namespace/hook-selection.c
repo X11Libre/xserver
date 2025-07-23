@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+#include "dix/dix_priv.h"
 #include "dix/selection_priv.h"
 
 #include "namespace.h"
@@ -40,7 +41,7 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     char selname[PATH_MAX] = { 0 };
     snprintf(selname, sizeof(selname)-1, "<%s>%s", subj->ns->name, origSelectionName);
-    Atom realSelection = MakeAtom(selname, strlen(selname), TRUE);
+    Atom realSelection = dixAddAtom(selname);
 
     switch (param->op) {
         case SELECTION_FILTER_GETOWNER:
@@ -55,7 +56,7 @@ void hookSelectionFilter(CallbackListPtr *pcbl, void *unused, void *calldata)
         {
             // need to translate back, since we're having the ns-prefixed name here
             const char *stripped = stripNS(origSelectionName);
-            param->selection = MakeAtom(stripped, strlen(stripped), TRUE);
+            param->selection = dixAddAtom(stripped);
             break;
         }
 

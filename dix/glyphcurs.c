@@ -112,13 +112,13 @@ ServerBitsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm,
     gcval[0].val = GXcopy;
     gcval[1].val = 0;
     gcval[2].ptr = (void *) pfont;
-    ChangeGC(NullClient, pGC, GCFunction | GCForeground | GCFont, gcval);
+    ChangeGC(NULL, pGC, GCFunction | GCForeground | GCFont, gcval);
     ValidateGC((DrawablePtr) ppix, pGC);
     (*pGC->ops->PolyFillRect) ((DrawablePtr) ppix, pGC, 1, &rect);
 
     /* draw the glyph */
     gcval[0].val = 1;
-    ChangeGC(NullClient, pGC, GCForeground, gcval);
+    ChangeGC(NULL, pGC, GCForeground, gcval);
     ValidateGC((DrawablePtr) ppix, pGC);
     (*pGC->ops->PolyText16) ((DrawablePtr) ppix, pGC, cm->xhot, cm->yhot,
                              1, (unsigned short *) char2b);

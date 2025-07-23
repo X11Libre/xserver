@@ -224,7 +224,7 @@ static void
 AddSeatId(CallbackListPtr *pcbl, void *data, void *screen)
 {
     ScreenPtr pScreen = screen;
-    Atom SeatAtom = MakeAtom(SEAT_ATOM_NAME, sizeof(SEAT_ATOM_NAME) - 1, TRUE);
+    Atom SeatAtom = dixAddAtom(SEAT_ATOM_NAME);
     int err;
 
     err = dixChangeWindowProperty(serverClient, pScreen->root, SeatAtom,
@@ -242,9 +242,8 @@ AddVTAtoms(CallbackListPtr *pcbl, void *data, void *screen)
 #define VT_ATOM_NAME         "XFree86_VT"
     int err, HasVT = 1;
     ScreenPtr pScreen = screen;
-    Atom VTAtom = MakeAtom(VT_ATOM_NAME, sizeof(VT_ATOM_NAME) - 1, TRUE);
-    Atom HasVTAtom = MakeAtom(HAS_VT_ATOM_NAME, sizeof(HAS_VT_ATOM_NAME) - 1,
-                              TRUE);
+    Atom VTAtom = dixAddAtom(VT_ATOM_NAME);
+    Atom HasVTAtom = dixAddAtom(HAS_VT_ATOM_NAME);
 
     err = dixChangeWindowProperty(serverClient, pScreen->root, VTAtom,
                                   XA_INTEGER, 32, PropModeReplace, 1,

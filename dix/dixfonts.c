@@ -1189,7 +1189,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
                     ChangeGCVal val;
 
                     val.ptr = pFont;
-                    ChangeGC(NullClient, c->pGC, GCFont, &val);
+                    ChangeGC(NULL, c->pGC, GCFont, &val);
                     ValidateGC(c->pDraw, c->pGC);
                 }
 
@@ -1330,7 +1330,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
             ChangeGCVal val;
 
             val.ptr = pFont;
-            ChangeGC(NullClient, origGC, GCFont, &val);
+            ChangeGC(NULL, origGC, GCFont, &val);
             ValidateGC(c->pDraw, origGC);
         }
 
@@ -1349,7 +1349,7 @@ doPolyText(ClientPtr client, PTclosurePtr c)
     }
     if (ClientIsAsleep(client)) {
         ClientWakeup(c->client);
-        ChangeGC(NullClient, c->pGC, clearGCmask, clearGC);
+        ChangeGC(NULL, c->pGC, clearGCmask, clearGC);
 
         /* Unreference the font from the scratch GC */
         CloseFont(c->pGC->font, (Font) 0);
@@ -1498,7 +1498,7 @@ doImageText(ClientPtr client, ITclosurePtr c)
     }
     if (ClientIsAsleep(client)) {
         ClientWakeup(c->client);
-        ChangeGC(NullClient, c->pGC, clearGCmask, clearGC);
+        ChangeGC(NULL, c->pGC, clearGCmask, clearGC);
 
         /* Unreference the font from the scratch GC */
         CloseFont(c->pGC->font, (Font) 0);

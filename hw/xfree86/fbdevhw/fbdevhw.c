@@ -384,7 +384,7 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
 /* -------------------------------------------------------------------- */
 
 Bool
-fbdevHWProbe(struct pci_device *pPci, char *device, char **namep)
+fbdevHWProbe(struct pci_device *pPci, const char *device, char **namep)
 {
     int fd;
 
@@ -400,7 +400,7 @@ fbdevHWProbe(struct pci_device *pPci, char *device, char **namep)
 }
 
 Bool
-fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, char *device)
+fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, const char *device)
 {
     fbdevHWPtr fPtr;
 

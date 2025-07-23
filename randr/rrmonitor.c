@@ -37,7 +37,7 @@ RRMonitorCrtcName(RRCrtcPtr crtc)
         return MakeAtom(output->name, output->nameLength, TRUE);
     }
     sprintf(name, "Monitor-%08lx", (unsigned long int)crtc->id);
-    return MakeAtom(name, strlen(name), TRUE);
+    return dixAddAtom(name);
 }
 
 static Bool

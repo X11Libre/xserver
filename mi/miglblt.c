@@ -126,8 +126,7 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
     gcvals[1].val = 1;
     gcvals[2].val = 0;
 
-    ChangeGC(NullClient, pGCtmp, GCFunction | GCForeground | GCBackground,
-             gcvals);
+    ChangeGC(NULL, pGCtmp, GCFunction | GCForeground | GCBackground, gcvals);
 
     nbyLine = BitmapBytePad(width);
     pbits = calloc(height, nbyLine);
@@ -211,13 +210,13 @@ miImageGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngl
     gcvals[0].val = GXcopy;
     gcvals[1].val = pGC->bgPixel;
     gcvals[2].val = FillSolid;
-    ChangeGC(NullClient, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
+    ChangeGC(NULL, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
     ValidateGC(pDrawable, pGC);
     (*pGC->ops->PolyFillRect) (pDrawable, pGC, 1, &backrect);
 
     /* put down the glyphs */
     gcvals[0].val = oldFG;
-    ChangeGC(NullClient, pGC, GCForeground, gcvals);
+    ChangeGC(NULL, pGC, GCForeground, gcvals);
     ValidateGC(pDrawable, pGC);
     (*pGC->ops->PolyGlyphBlt) (pDrawable, pGC, x, y, nglyph, ppci, pglyphBase);
 
@@ -225,7 +224,7 @@ miImageGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngl
     gcvals[0].val = oldAlu;
     gcvals[1].val = oldFG;
     gcvals[2].val = oldFS;
-    ChangeGC(NullClient, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
+    ChangeGC(NULL, pGC, GCFunction | GCForeground | GCFillStyle, gcvals);
     ValidateGC(pDrawable, pGC);
 
 }

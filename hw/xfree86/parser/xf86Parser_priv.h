@@ -6,6 +6,8 @@
 #ifndef _XSERVER_XF86_PARSER_PRIV
 #define _XSERVER_XF86_PARSER_PRIV
 
+#include <stdlib.h>
+
 #include "xf86Parser.h"
 
 void xf86initConfigFiles(void);
@@ -22,5 +24,25 @@ XF86ConfigPtr xf86allocateConfig(void);
 void xf86freeConfig(XF86ConfigPtr p);
 int xf86writeConfigFile(const char *filename, XF86ConfigPtr cptr);
 int xf86layoutAddInputDevices(XF86ConfigPtr config, XF86ConfLayoutPtr layout);
+
+static inline void xf86freeMatchGroup(xf86MatchGroup *group)
+{
+    xorg_list_del(&group->entry);
+    if (group->values) {
+        for (char **list = group->values; *list; list++) {
+            free(*list);
+            *list = NULL;
+        }
+        group->values = NULL;
+    }
+    free(group);
+}
+
+static inline void xf86freeMatchGroupList(struct xorg_list *grouplist) {
+    xf86MatchGroup *group, *next;
+    xorg_list_for_each_entry_safe(group, next, grouplist, entry) {
+        xf86freeMatchGroup(group);
+    }
+}
 
 #endif /* _XSERVER_XF86_PARSER_PRIV */

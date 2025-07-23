@@ -769,7 +769,7 @@ xf86I2CBusInit(I2CBusPtr b)
 }
 
 I2CBusPtr
-xf86I2CFindBus(int scrnIndex, char *name)
+xf86I2CFindBus(int scrnIndex, const char *name)
 {
     I2CBusPtr p;
 

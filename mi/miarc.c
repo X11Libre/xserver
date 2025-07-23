@@ -986,7 +986,7 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
             gcvals[3].val = pGC->lineWidth;
             gcvals[4].val = pGC->capStyle;
             gcvals[5].val = pGC->joinStyle;
-            ChangeGC(NullClient, pGCTo, GCFunction |
+            ChangeGC(NULL, pGCTo, GCFunction |
                      GCForeground | GCBackground | GCLineWidth |
                      GCCapStyle | GCJoinStyle, gcvals);
         }
@@ -1024,12 +1024,12 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
 
         if (iphase == 1) {
             gcval.val = bg;
-            ChangeGC(NullClient, pGC, GCForeground, &gcval);
+            ChangeGC(NULL, pGC, GCForeground, &gcval);
             ValidateGC(pDraw, pGC);
         }
         else if (pGC->lineStyle == LineDoubleDash) {
             gcval.val = fg;
-            ChangeGC(NullClient, pGC, GCForeground, &gcval);
+            ChangeGC(NULL, pGC, GCForeground, &gcval);
             ValidateGC(pDraw, pGC);
         }
         for (i = 0; i < polyArcs[iphase].narcs; i++) {

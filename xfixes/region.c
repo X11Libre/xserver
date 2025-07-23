@@ -609,7 +609,7 @@ SingleXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff)
 
     vals[0].val = stuff->xOrigin;
     vals[1].val = stuff->yOrigin;
-    ChangeGC(NullClient, pGC, GCClipXOrigin | GCClipYOrigin, vals);
+    ChangeGC(NULL, pGC, GCClipXOrigin | GCClipYOrigin, vals);
     (*pGC->funcs->ChangeClip) (pGC, pRegion ? CT_REGION : CT_NONE,
                                (void *) pRegion, 0);
 

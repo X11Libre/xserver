@@ -33,6 +33,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
@@ -205,15 +206,14 @@ CreateClipShape(WindowPtr pWin)
 static int
 ProcShapeQueryVersion(ClientPtr client)
 {
+    REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
+
     xShapeQueryVersionReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_SHAPE_MAJOR_VERSION,
         .minorVersion = SERVER_SHAPE_MINOR_VERSION
     };
-
-    REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -618,53 +618,56 @@ static int
 ProcShapeQueryExtents(ClientPtr client)
 {
     REQUEST(xShapeQueryExtentsReq);
-    WindowPtr pWin;
-    xShapeQueryExtentsReply rep;
-    BoxRec extents, *pExtents;
-    int rc;
-    RegionPtr region;
-
     REQUEST_SIZE_MATCH(xShapeQueryExtentsReq);
-    rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
+
+    WindowPtr pWin;
+    int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
-    rep = (xShapeQueryExtentsReply) {
+
+    RegionPtr boundRegion;
+    BoxRec boundBox;
+    if ((boundRegion = wBoundingShape(pWin))) {
+        /* this is done in two steps because of a compiler bug on SunOS 4.1.3 */
+        BoxRec *pExtents = RegionExtents(boundRegion);
+        boundBox = *pExtents;
+    }
+    else {
+        boundBox.x1 = -wBorderWidth(pWin);
+        boundBox.y1 = -wBorderWidth(pWin);
+        boundBox.x2 = pWin->drawable.width + wBorderWidth(pWin);
+        boundBox.y2 = pWin->drawable.height + wBorderWidth(pWin);
+    }
+
+    RegionPtr shapeRegion;
+    BoxRec shapeBox;
+    if ((shapeRegion = wClipShape(pWin))) {
+        /* this is done in two steps because of a compiler bug on SunOS 4.1.3 */
+        BoxRec *pExtents = RegionExtents(shapeRegion);
+        shapeBox = *pExtents;
+    }
+    else {
+        shapeBox.x1 = 0;
+        shapeBox.y1 = 0;
+        shapeBox.x2 = pWin->drawable.width;
+        shapeBox.y2 = pWin->drawable.height;
+    }
+
+    xShapeQueryExtentsReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .boundingShaped = (wBoundingShape(pWin) != 0),
-        .clipShaped = (wClipShape(pWin) != 0)
+        .clipShaped = (wClipShape(pWin) != 0),
+        .xBoundingShape = boundBox.x1,
+        .yBoundingShape = boundBox.y1,
+        .widthBoundingShape = boundBox.x2 - boundBox.x1,
+        .heightBoundingShape = boundBox.y2 - boundBox.y1,
+        .xClipShape = shapeBox.x1,
+        .yClipShape = shapeBox.y1,
+        .widthClipShape = shapeBox.x2 - shapeBox.x1,
+        .heightClipShape = shapeBox.y2 - shapeBox.y1,
     };
-    if ((region = wBoundingShape(pWin))) {
-        /* this is done in two steps because of a compiler bug on SunOS 4.1.3 */
-        pExtents = RegionExtents(region);
-        extents = *pExtents;
-    }
-    else {
-        extents.x1 = -wBorderWidth(pWin);
-        extents.y1 = -wBorderWidth(pWin);
-        extents.x2 = pWin->drawable.width + wBorderWidth(pWin);
-        extents.y2 = pWin->drawable.height + wBorderWidth(pWin);
-    }
-    rep.xBoundingShape = extents.x1;
-    rep.yBoundingShape = extents.y1;
-    rep.widthBoundingShape = extents.x2 - extents.x1;
-    rep.heightBoundingShape = extents.y2 - extents.y1;
-    if ((region = wClipShape(pWin))) {
-        /* this is done in two steps because of a compiler bug on SunOS 4.1.3 */
-        pExtents = RegionExtents(region);
-        extents = *pExtents;
-    }
-    else {
-        extents.x1 = 0;
-        extents.y1 = 0;
-        extents.x2 = pWin->drawable.width;
-        extents.y2 = pWin->drawable.height;
-    }
-    rep.xClipShape = extents.x1;
-    rep.yClipShape = extents.y1;
-    rep.widthClipShape = extents.x2 - extents.x1;
-    rep.heightClipShape = extents.y2 - extents.y1;
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -901,7 +904,6 @@ ProcShapeInputSelected(ClientPtr client)
     WindowPtr pWin;
     ShapeEventPtr pShapeEvent, *pHead;
     int enabled, rc;
-    xShapeInputSelectedReply rep;
 
     REQUEST_SIZE_MATCH(xShapeInputSelectedReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
@@ -920,12 +922,13 @@ ProcShapeInputSelected(ClientPtr client)
             }
         }
     }
-    rep = (xShapeInputSelectedReply) {
+
+    xShapeInputSelectedReply rep = {
         .type = X_Reply,
         .enabled = enabled,
         .sequenceNumber = client->sequence,
-        .length = 0
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
@@ -939,9 +942,7 @@ ProcShapeGetRectangles(ClientPtr client)
 {
     REQUEST(xShapeGetRectanglesReq);
     WindowPtr pWin;
-    xShapeGetRectanglesReply rep;
-    xRectangle *rects = NULL;
-    int nrects, i, rc;
+    int nrects, rc;
     RegionPtr region;
 
     REQUEST_SIZE_MATCH(xShapeGetRectanglesReq);
@@ -962,65 +963,66 @@ ProcShapeGetRectangles(ClientPtr client)
         client->errorValue = stuff->kind;
         return BadValue;
     }
+
+    struct x_rpcbuf rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!region) {
-        nrects = 1;
-        rects = calloc(1, sizeof(xRectangle));
-        if (!rects)
-            return BadAlloc;
+        xRectangle rect;
         switch (stuff->kind) {
         case ShapeBounding:
-            rects->x = -(int) wBorderWidth(pWin);
-            rects->y = -(int) wBorderWidth(pWin);
-            rects->width = pWin->drawable.width + wBorderWidth(pWin);
-            rects->height = pWin->drawable.height + wBorderWidth(pWin);
+            rect.x = -(int) wBorderWidth(pWin);
+            rect.y = -(int) wBorderWidth(pWin);
+            rect.width = pWin->drawable.width + wBorderWidth(pWin);
+            rect.height = pWin->drawable.height + wBorderWidth(pWin);
             break;
         case ShapeClip:
-            rects->x = 0;
-            rects->y = 0;
-            rects->width = pWin->drawable.width;
-            rects->height = pWin->drawable.height;
+            rect.x = 0;
+            rect.y = 0;
+            rect.width = pWin->drawable.width;
+            rect.height = pWin->drawable.height;
             break;
         case ShapeInput:
-            rects->x = -(int) wBorderWidth(pWin);
-            rects->y = -(int) wBorderWidth(pWin);
-            rects->width = pWin->drawable.width + wBorderWidth(pWin);
-            rects->height = pWin->drawable.height + wBorderWidth(pWin);
+            rect.x = -(int) wBorderWidth(pWin);
+            rect.y = -(int) wBorderWidth(pWin);
+            rect.width = pWin->drawable.width + wBorderWidth(pWin);
+            rect.height = pWin->drawable.height + wBorderWidth(pWin);
             break;
         }
+        nrects = 1;
+        x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&rect, 4);
     }
     else {
-        BoxPtr box;
-
         nrects = RegionNumRects(region);
-        box = RegionRects(region);
-        if (nrects) {
-            rects = calloc(nrects, sizeof(xRectangle));
-            if (!rects)
-                return BadAlloc;
-            for (i = 0; i < nrects; i++, box++) {
-                rects[i].x = box->x1;
-                rects[i].y = box->y1;
-                rects[i].width = box->x2 - box->x1;
-                rects[i].height = box->y2 - box->y1;
-            }
-        }
+        BoxPtr boxes = RegionRects(region);
+        for (int i=0; i < nrects; i++) {
+            xRectangle rect = {
+                .x = boxes[i].x1,
+                .y = boxes[i].y1,
+                .width = boxes[i].x2 - boxes[i].x1,
+                .height = boxes[i].y2 - boxes[i].y1,
+            };
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&rect, 4);
+        };
     }
-    rep = (xShapeGetRectanglesReply) {
+
+    if (rpcbuf.error) /* buffer already cleared */
+        return BadAlloc;
+
+    xShapeGetRectanglesReply rep = {
         .type = X_Reply,
         .ordering = YXBanded,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(nrects * sizeof(xRectangle)),
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .nrects = nrects
     };
+
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.nrects);
-        SwapShorts((short *) rects, (unsigned long) nrects * 4);
     }
     WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, nrects * sizeof(xRectangle), rects);
-    free(rects);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 

@@ -35,6 +35,7 @@
 
 #include <assert.h>
 
+#include "dix/dix_priv.h"
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
@@ -176,8 +177,6 @@ static const glamor_facet glamor_facet_xv_rgb_raw = {
                 "        frag_color = texture2D(sampler, tcs);\n"
                 ),
 };
-
-#define MAKE_ATOM(a) MakeAtom(a, sizeof(a) - 1, TRUE)
 
 XvAttributeRec glamor_xv_attributes[] = {
     {XvSettable | XvGettable, -1000, 1000, (char *)"XV_BRIGHTNESS"},
@@ -865,10 +864,10 @@ glamor_xv_init_port(glamor_port_private *port_priv)
 void
 glamor_xv_core_init(ScreenPtr screen)
 {
-    glamorBrightness = MAKE_ATOM("XV_BRIGHTNESS");
-    glamorContrast = MAKE_ATOM("XV_CONTRAST");
-    glamorSaturation = MAKE_ATOM("XV_SATURATION");
-    glamorHue = MAKE_ATOM("XV_HUE");
-    glamorGamma = MAKE_ATOM("XV_GAMMA");
-    glamorColorspace = MAKE_ATOM("XV_COLORSPACE");
+    glamorBrightness = dixAddAtom("XV_BRIGHTNESS");
+    glamorContrast = dixAddAtom("XV_CONTRAST");
+    glamorSaturation = dixAddAtom("XV_SATURATION");
+    glamorHue = dixAddAtom("XV_HUE");
+    glamorGamma = dixAddAtom("XV_GAMMA");
+    glamorColorspace = dixAddAtom("XV_COLORSPACE");
 }

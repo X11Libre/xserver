@@ -30,7 +30,7 @@
 #include "os/fmt.h"
 
 #include "os.h"
-#include "xf86Parser.h"
+#include "xf86Parser_priv.h"
 #include "xf86tokens.h"
 #include "Configint.h"
 
@@ -50,24 +50,12 @@ xf86freeOutputClassList(XF86ConfOutputClassPtr ptr)
     XF86ConfOutputClassPtr prev;
 
     while (ptr) {
-        xf86MatchGroup *group, *next;
-        char **list;
-
         TestFree(ptr->identifier);
         TestFree(ptr->comment);
         TestFree(ptr->driver);
         TestFree(ptr->modulepath);
 
-        xorg_list_for_each_entry_safe(group, next, &ptr->match_driver, entry) {
-            for (list = group->values; *list; list++) {
-                free(*list);
-                *list = NULL;
-            }
-            xorg_list_del(&group->entry);
-            free(group);
-            group = NULL;
-        }
-
+        xf86freeMatchGroupList(&ptr->match_driver);
         xf86optionListFree(ptr->option_lst);
 
         prev = ptr;

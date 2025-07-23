@@ -3648,8 +3648,8 @@ CloseDownClient(ClientPtr client)
 #endif
         if (client->index < nextFreeClientID)
             nextFreeClientID = client->index;
-        clients[client->index] = NullClient;
-        SmartLastClient = NullClient;
+        clients[client->index] = NULL;
+        SmartLastClient = NULL;
         dixFreeObjectWithPrivates(client, PRIVATE_CLIENT);
 
         while (!clients[currentMaxClients - 1])

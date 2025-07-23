@@ -616,7 +616,7 @@ fillSpans(DrawablePtr pDrawable, GCPtr pGC, unsigned long pixel, Spans * spans,
         oldPixel.val = pGC->fgPixel;
         if (pixel != oldPixel.val) {
             tmpPixel.val = (XID) pixel;
-            ChangeGC(NullClient, pGC, GCForeground, &tmpPixel);
+            ChangeGC(NULL, pGC, GCForeground, &tmpPixel);
             ValidateGC(pDrawable, pGC);
         }
         (*pGC->ops->FillSpans) (pDrawable, pGC, spans->count, spans->points,
@@ -624,7 +624,7 @@ fillSpans(DrawablePtr pDrawable, GCPtr pGC, unsigned long pixel, Spans * spans,
         free(spans->widths);
         free(spans->points);
         if (pixel != oldPixel.val) {
-            ChangeGC(NullClient, pGC, GCForeground, &oldPixel);
+            ChangeGC(NULL, pGC, GCForeground, &oldPixel);
             ValidateGC(pDrawable, pGC);
         }
     }
@@ -746,12 +746,12 @@ miFillRectPolyHelper(DrawablePtr pDrawable,
         oldPixel.val = pGC->fgPixel;
         if (pixel != oldPixel.val) {
             tmpPixel.val = (XID) pixel;
-            ChangeGC(NullClient, pGC, GCForeground, &tmpPixel);
+            ChangeGC(NULL, pGC, GCForeground, &tmpPixel);
             ValidateGC(pDrawable, pGC);
         }
         (*pGC->ops->PolyFillRect) (pDrawable, pGC, 1, &rect);
         if (pixel != oldPixel.val) {
-            ChangeGC(NullClient, pGC, GCForeground, &oldPixel);
+            ChangeGC(NULL, pGC, GCForeground, &oldPixel);
             ValidateGC(pDrawable, pGC);
         }
     }
@@ -1870,13 +1870,13 @@ miCleanupSpanData(DrawablePtr pDrawable, GCPtr pGC, SpanDataPtr spanData)
         pixel.val = pGC->bgPixel;
         oldPixel.val = pGC->fgPixel;
         if (pixel.val != oldPixel.val) {
-            ChangeGC(NullClient, pGC, GCForeground, &pixel);
+            ChangeGC(NULL, pGC, GCForeground, &pixel);
             ValidateGC(pDrawable, pGC);
         }
         miFillUniqueSpanGroup(pDrawable, pGC, &spanData->bgGroup);
         miFreeSpanGroup(&spanData->bgGroup);
         if (pixel.val != oldPixel.val) {
-            ChangeGC(NullClient, pGC, GCForeground, &oldPixel);
+            ChangeGC(NULL, pGC, GCForeground, &oldPixel);
             ValidateGC(pDrawable, pGC);
         }
     }

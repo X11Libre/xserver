@@ -1245,8 +1245,7 @@ MakeDeviceTypeAtoms(void)
     int i;
 
     for (i = 0; i < NUMTYPES; i++)
-        dev_type[i].type =
-            MakeAtom(dev_type[i].name, strlen(dev_type[i].name), 1);
+        dev_type[i].type = dixAddAtom(dev_type[i].name);
 }
 
 /*****************************************************************************

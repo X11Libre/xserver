@@ -32,6 +32,7 @@
 #include <X11/extensions/XIproto.h>
 #include <X11/extensions/XI2proto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
@@ -375,12 +376,8 @@ XIGetKnownProperty(const char *name)
 
     for (i = 0; i < ARRAY_SIZE(dev_properties); i++) {
         if (strcmp(name, dev_properties[i].name) == 0) {
-            if (dev_properties[i].type == None) {
-                dev_properties[i].type =
-                    MakeAtom(dev_properties[i].name,
-                             strlen(dev_properties[i].name), TRUE);
-            }
-
+            if (dev_properties[i].type == None)
+                dev_properties[i].type = dixAddAtom(dev_properties[i].name);
             return dev_properties[i].type;
         }
     }
