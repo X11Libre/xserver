@@ -267,6 +267,28 @@ set_name(int scrnIndex, int fd, char **namep, Bool print_warning, Bool close_fd)
     return fd;
 }
 
+static int
+check_user_devices(const char* dev, char **namep)
+{
+    int fd;
+
+    if (namep) {
+        *namep = NULL;
+    }
+
+    /* try argument (from XF86Config) first */
+    if (dev) {
+        fd = open(dev, O_RDWR);
+    }
+    else {
+        /* second: environment variable */
+        dev = getenv("FRAMEBUFFER");
+        fd = dev ? open(dev, O_RDWR) : -1;
+    }
+
+    return set_name(-1, fd, namep, TRUE, FALSE);
+}
+
 /**
  * Try to find the framebuffer device for a given PCI device
  */
@@ -276,22 +298,11 @@ fbdev_open_pci(struct pci_device *pPci, const char *device, char **namep)
     char filename[256];
     int fd, i;
 
-    if (namep)
-        *namep = NULL;
-
-    /* try argument (from XF86Config) first */
-    if (device) {
-        fd = open(device, O_RDWR);
-    }
-    else {
-        /* second: environment variable */
-        device = getenv("FRAMEBUFFER");
-        fd = device ? open(device, O_RDWR) : -1;
-    }
+    fd = check_user_devices(device, namep);
 
     if (fd != -1) {
         /* fbdev was provided by the user and not guessed, skip pci check */
-        return set_name(-1, fd, namep, TRUE, FALSE);
+        return fd;
     }
 
     for (i = 0; i < 8; i++) {
@@ -352,25 +363,14 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
 {
     int fd;
 
-    if (namep)
-        *namep = NULL;
-
-    /* try argument (from XF86Config) first */
-    if (dev) {
-        fd = open(dev, O_RDWR);
-    }
-    else {
-        /* second: environment variable */
-        dev = getenv("FRAMEBUFFER");
-        fd = dev ? open(dev, O_RDWR) : -1;
-    }
+    fd = check_user_devices(dev, namep);
 
     if (fd != -1) {
         /* fbdev was provided by the user and not guessed, skip non-pci check */
-        return set_name(-1, fd, namep, TRUE, FALSE);
+        return fd;
     }
 
-    /* last try: default device */
+    /* try the default device */
     dev = "/dev/fb0";
     fd = open(dev, O_RDWR);
 
