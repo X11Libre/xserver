@@ -18,7 +18,7 @@
  *
  * Example:
  *
- * struct x_rpcbuf buf = { 0 };
+ * x_rpcbuf_t x_rpcbuf buf = { 0 };
  * x_rpcbuf_write_string(&buf, "hello world");
  * x_rpcbuf_write_CARD1&(&buf, 91126);
  * ...
@@ -41,19 +41,19 @@ typedef struct x_rpcbuf {
 /*
  * make sure there's enough room for `needed` bytes in the buffer.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param needed    amount of free space needed in the buffer
  * @return          TRUE if there (now) is enough room, FALSE on alloc failure
  */
-Bool x_rpcbuf_makeroom(struct x_rpcbuf *rpcbuf, size_t needed)
+Bool x_rpcbuf_makeroom(x_rpcbuf_t *rpcbuf, size_t needed)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
  * clear rpcbuf and free all held memory.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  */
-void x_rpcbuf_clear(struct x_rpcbuf *rpcbuf)
+void x_rpcbuf_clear(x_rpcbuf_t *rpcbuf)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -62,9 +62,9 @@ void x_rpcbuf_clear(struct x_rpcbuf *rpcbuf)
  * this is for reusing existing buffers for different purpose, w/o
  * having to go through new allocatons.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  */
-void x_rpcbuf_reset(struct x_rpcbuf *rpcbuf)
+void x_rpcbuf_reset(x_rpcbuf_t *rpcbuf)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -77,11 +77,11 @@ void x_rpcbuf_reset(struct x_rpcbuf *rpcbuf)
  * buffer that might affect the allocated memory block: when buffer
  * needs to be resized, it may get a new memory location.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param needed    amount of bytes needed
  * @return          pointer to reserved region of NULL on allocation failure
  */
-void *x_rpcbuf_reserve(struct x_rpcbuf *rpcbuf, size_t needed)
+void *x_rpcbuf_reserve(x_rpcbuf_t *rpcbuf, size_t needed)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -90,11 +90,11 @@ void *x_rpcbuf_reserve(struct x_rpcbuf *rpcbuf, size_t needed)
  * allocate a region for the string (padded to 32bits) and copy in the string.
  * if given string is NULL or zero-size, nothing happens.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param needed    string to plain C string
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_string_pad(struct x_rpcbuf *rpcbuf, const char *str)
+Bool x_rpcbuf_write_string_pad(x_rpcbuf_t *rpcbuf, const char *str)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -103,11 +103,11 @@ Bool x_rpcbuf_write_string_pad(struct x_rpcbuf *rpcbuf, const char *str)
  * allocate a region for the string (padded to 32bits) and copy in the string.
  * if given string is NULL or zero-size, only a (CARD32)0 is written.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param needed    string to plain C string
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_string_0t_pad(struct x_rpcbuf *rpcbuf, const char *str)
+Bool x_rpcbuf_write_string_0t_pad(x_rpcbuf_t *rpcbuf, const char *str)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -116,11 +116,11 @@ Bool x_rpcbuf_write_string_0t_pad(struct x_rpcbuf *rpcbuf, const char *str)
  * allocate a region for the string (padded to 32bits) and copy in the data.
  * if given data is NULL or size is zero , nothing happens.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param needed    string to plain C string
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_binary_pad(struct x_rpcbuf *rpcbuf, const void *data,
+Bool x_rpcbuf_write_binary_pad(x_rpcbuf_t *rpcbuf, const void *data,
                                size_t count) _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -130,11 +130,11 @@ Bool x_rpcbuf_write_binary_pad(struct x_rpcbuf *rpcbuf, const void *data,
  *
  * doesn't do any padding.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param value     the CARD16 value to write
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_CARD8(struct x_rpcbuf *rpcbuf, CARD8 value)
+Bool x_rpcbuf_write_CARD8(x_rpcbuf_t *rpcbuf, CARD8 value)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -145,11 +145,11 @@ Bool x_rpcbuf_write_CARD8(struct x_rpcbuf *rpcbuf, CARD8 value)
  *
  * doesn't do any padding.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param value     the CARD16 value to write
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_CARD16(struct x_rpcbuf *rpcbuf, CARD16 value)
+Bool x_rpcbuf_write_CARD16(x_rpcbuf_t *rpcbuf, CARD16 value)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -160,11 +160,11 @@ Bool x_rpcbuf_write_CARD16(struct x_rpcbuf *rpcbuf, CARD16 value)
  *
  * doesn't do any padding.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param value     the CARD32 value to write
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_CARD32(struct x_rpcbuf *rpcbuf, CARD32 value)
+Bool x_rpcbuf_write_CARD32(x_rpcbuf_t *rpcbuf, CARD32 value)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -175,12 +175,12 @@ Bool x_rpcbuf_write_CARD32(struct x_rpcbuf *rpcbuf, CARD32 value)
  *
  * doesn't do any padding.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param values    pointer to CARD16 array to write
  * @param count     number of elements in the array
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_CARD8s(struct x_rpcbuf *rpcbuf, const CARD8 *values,
+Bool x_rpcbuf_write_CARD8s(x_rpcbuf_t *rpcbuf, const CARD8 *values,
     size_t count) _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -192,12 +192,12 @@ Bool x_rpcbuf_write_CARD8s(struct x_rpcbuf *rpcbuf, const CARD8 *values,
  *
  * doesn't do any padding.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param values    pointer to CARD16 array to write
  * @param count     number of elements in the array
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_CARD16s(struct x_rpcbuf *rpcbuf, const CARD16 *values,
+Bool x_rpcbuf_write_CARD16s(x_rpcbuf_t *rpcbuf, const CARD16 *values,
     size_t count) _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
@@ -209,21 +209,21 @@ Bool x_rpcbuf_write_CARD16s(struct x_rpcbuf *rpcbuf, const CARD16 *values,
  *
  * doesn't do any padding.
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @param values    pointer to CARD32 array to write
  * @param count     number of elements in the array
  * @return          TRUE on success, FALSE on allocation failure
  */
-Bool x_rpcbuf_write_CARD32s(struct x_rpcbuf *rpcbuf, const CARD32 *values,
+Bool x_rpcbuf_write_CARD32s(x_rpcbuf_t *rpcbuf, const CARD32 *values,
     size_t count) _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
  * retrieve number of 4-byte-units (padded) of data written in the buffer
  *
- * @param rpcbuf    pointer to struct x_rpcbuf to operate on
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @return          number of 4-byte units (w/ padding) written into the buffer
  */
-static inline size_t x_rpcbuf_wsize_units(struct x_rpcbuf *rpcbuf) {
+static inline size_t x_rpcbuf_wsize_units(x_rpcbuf_t *rpcbuf) {
     return bytes_to_int32(pad_to_int32(rpcbuf->wpos));
 }
 

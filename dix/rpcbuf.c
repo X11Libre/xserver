@@ -8,7 +8,7 @@
 
 #include "dix/rpcbuf_priv.h"
 
-Bool x_rpcbuf_makeroom(struct x_rpcbuf *rpcbuf, size_t needed)
+Bool x_rpcbuf_makeroom(x_rpcbuf_t *rpcbuf, size_t needed)
 {
     /* break out of alreay in error state */
     if (rpcbuf->error)
@@ -48,13 +48,13 @@ err:
     return FALSE;
 }
 
-void x_rpcbuf_clear(struct x_rpcbuf *rpcbuf)
+void x_rpcbuf_clear(x_rpcbuf_t *rpcbuf)
 {
     free(rpcbuf->buffer);
-    memset(rpcbuf, 0, sizeof(struct x_rpcbuf));
+    memset(rpcbuf, 0, sizeof(x_rpcbuf_t));
 }
 
-void x_rpcbuf_reset(struct x_rpcbuf *rpcbuf)
+void x_rpcbuf_reset(x_rpcbuf_t *rpcbuf)
 {
     /* no need to reset if never been actually written to */
     if ((!rpcbuf->buffer) || (!rpcbuf->size) || (!rpcbuf->wpos))
@@ -65,7 +65,7 @@ void x_rpcbuf_reset(struct x_rpcbuf *rpcbuf)
     rpcbuf->wpos = 0;
 }
 
-void *x_rpcbuf_reserve(struct x_rpcbuf *rpcbuf, size_t needed)
+void *x_rpcbuf_reserve(x_rpcbuf_t *rpcbuf, size_t needed)
 {
     if (!x_rpcbuf_makeroom(rpcbuf, needed))
         return NULL;
@@ -76,7 +76,7 @@ void *x_rpcbuf_reserve(struct x_rpcbuf *rpcbuf, size_t needed)
     return pos;
 }
 
-Bool x_rpcbuf_write_string_pad(struct x_rpcbuf *rpcbuf, const char *str)
+Bool x_rpcbuf_write_string_pad(x_rpcbuf_t *rpcbuf, const char *str)
 {
     if (!str)
         return TRUE;
@@ -93,7 +93,7 @@ Bool x_rpcbuf_write_string_pad(struct x_rpcbuf *rpcbuf, const char *str)
     return TRUE;
 }
 
-Bool x_rpcbuf_write_string_0t_pad(struct x_rpcbuf *rpcbuf, const char *str)
+Bool x_rpcbuf_write_string_0t_pad(x_rpcbuf_t *rpcbuf, const char *str)
 {
     if (!str)
         return x_rpcbuf_write_CARD32(rpcbuf, 0);
@@ -110,7 +110,7 @@ Bool x_rpcbuf_write_string_0t_pad(struct x_rpcbuf *rpcbuf, const char *str)
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD8(struct x_rpcbuf *rpcbuf, CARD8 value)
+Bool x_rpcbuf_write_CARD8(x_rpcbuf_t *rpcbuf, CARD8 value)
 {
     CARD8 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(value));
     if (!reserved)
@@ -121,7 +121,7 @@ Bool x_rpcbuf_write_CARD8(struct x_rpcbuf *rpcbuf, CARD8 value)
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD16(struct x_rpcbuf *rpcbuf, CARD16 value)
+Bool x_rpcbuf_write_CARD16(x_rpcbuf_t *rpcbuf, CARD16 value)
 {
     CARD16 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(value));
     if (!reserved)
@@ -135,7 +135,7 @@ Bool x_rpcbuf_write_CARD16(struct x_rpcbuf *rpcbuf, CARD16 value)
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD32(struct x_rpcbuf *rpcbuf, CARD32 value)
+Bool x_rpcbuf_write_CARD32(x_rpcbuf_t *rpcbuf, CARD32 value)
 {
     CARD32 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(value));
     if (!reserved)
@@ -149,7 +149,7 @@ Bool x_rpcbuf_write_CARD32(struct x_rpcbuf *rpcbuf, CARD32 value)
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD8s(struct x_rpcbuf *rpcbuf, const CARD8 *values,
+Bool x_rpcbuf_write_CARD8s(x_rpcbuf_t *rpcbuf, const CARD8 *values,
                            size_t count)
 {
     if ((!values) || (!count))
@@ -164,7 +164,7 @@ Bool x_rpcbuf_write_CARD8s(struct x_rpcbuf *rpcbuf, const CARD8 *values,
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD16s(struct x_rpcbuf *rpcbuf, const CARD16 *values,
+Bool x_rpcbuf_write_CARD16s(x_rpcbuf_t *rpcbuf, const CARD16 *values,
                             size_t count)
 {
     if ((!values) || (!count))
@@ -182,7 +182,7 @@ Bool x_rpcbuf_write_CARD16s(struct x_rpcbuf *rpcbuf, const CARD16 *values,
     return TRUE;
 }
 
-Bool x_rpcbuf_write_CARD32s(struct x_rpcbuf *rpcbuf, const CARD32 *values,
+Bool x_rpcbuf_write_CARD32s(x_rpcbuf_t *rpcbuf, const CARD32 *values,
                             size_t count)
 {
     if ((!values) || (!count))
@@ -200,7 +200,7 @@ Bool x_rpcbuf_write_CARD32s(struct x_rpcbuf *rpcbuf, const CARD32 *values,
     return TRUE;
 }
 
-Bool x_rpcbuf_write_binary_pad(struct x_rpcbuf *rpcbuf, const void *values,
+Bool x_rpcbuf_write_binary_pad(x_rpcbuf_t *rpcbuf, const void *values,
                                size_t size)
 {
     if ((!values) || (!size))
