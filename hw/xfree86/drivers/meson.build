@@ -1,6 +1,4 @@
-if build_modesetting
-   subdir('modesetting')
-endif
+subdir('video')
 
 if get_option('xf86-input-inputtest')
     subdir('inputtest')
