@@ -373,6 +373,13 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
     /* try the default device */
     dev = "/dev/fb0";
     fd = open(dev, O_RDWR);
+    if (fd == -1) {
+        /* last try: default device symlink */
+        /* TODO: we should try this one before /dev/fb0,
+           but we keep it like this to not change old behavior */
+        dev = "/dev/fb";
+        fd = open(dev, O_RDWR);
+    }
 
     if (fd == -1) {
         xf86DrvMsg(scrnIndex, X_ERROR, "open %s: %s\n", dev, strerror(errno));
