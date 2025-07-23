@@ -304,7 +304,6 @@ typedef struct {
 
 typedef struct {
     struct xorg_list entry;
-    char **values;
     struct xorg_list patterns;
     Bool is_negated;
 } xf86MatchGroup;
