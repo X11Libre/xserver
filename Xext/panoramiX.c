@@ -1064,28 +1064,35 @@ ProcXineramaQueryScreens(ClientPtr client)
         swapl(&rep.length);
         swapl(&rep.number);
     }
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
+
+    xXineramaScreenInfo *scratch = NULL;
 
     if (!noPanoramiXExtension) {
-        xXineramaScreenInfo scratch;
-        int i;
+        if (!(scratch = calloc(number, sizeof(xXineramaScreenInfo))))
+            return BadAlloc;
 
+        int i;
+        int idx = 0;
         FOR_NSCREENS_BACKWARD(i) {
-            scratch.x_org = screenInfo.screens[i]->x;
-            scratch.y_org = screenInfo.screens[i]->y;
-            scratch.width = screenInfo.screens[i]->width;
-            scratch.height = screenInfo.screens[i]->height;
+            scratch[idx].x_org = screenInfo.screens[i]->x;
+            scratch[idx].y_org = screenInfo.screens[i]->y;
+            scratch[idx].width = screenInfo.screens[i]->width;
+            scratch[idx].height = screenInfo.screens[i]->height;
 
             if (client->swapped) {
-                swaps(&scratch.x_org);
-                swaps(&scratch.y_org);
-                swaps(&scratch.width);
-                swaps(&scratch.height);
+                swaps(&scratch[idx].x_org);
+                swaps(&scratch[idx].y_org);
+                swaps(&scratch[idx].width);
+                swaps(&scratch[idx].height);
             }
-            WriteToClient(client, sz_XineramaScreenInfo, &scratch);
+
+            idx++;
         }
     }
 
+    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
+    WriteToClient(client, number * sizeof(xXineramaScreenInfo), scratch);
+    free(scratch);
     return Success;
 }
 
