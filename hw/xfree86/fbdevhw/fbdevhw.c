@@ -290,7 +290,7 @@ fbdev_open_pci(struct pci_device *pPci, const char *device, char **namep)
     }
 
     if (fd != -1) {
-        /* fbdev was provided by the user instead of guessed, skip pci check */
+        /* fbdev was provided by the user and not guessed, skip pci check */
         return set_name(-1, fd, namep, TRUE, FALSE);
     }
 
@@ -362,12 +362,17 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
     else {
         /* second: environment variable */
         dev = getenv("FRAMEBUFFER");
-        if ((NULL == dev) || ((fd = open(dev, O_RDWR)) == -1)) {
-            /* last try: default device */
-            dev = "/dev/fb0";
-            fd = open(dev, O_RDWR);
-        }
+        fd = dev ? open(dev, O_RDWR) : -1;
     }
+
+    if (fd != -1) {
+        /* fbdev was provided by the user and not guessed, skip non-pci check */
+        return set_name(-1, fd, namep, TRUE, FALSE);
+    }
+
+    /* last try: default device */
+    dev = "/dev/fb0";
+    fd = open(dev, O_RDWR);
 
     if (fd == -1) {
         xf86DrvMsg(scrnIndex, X_ERROR, "open %s: %s\n", dev, strerror(errno));
