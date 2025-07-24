@@ -1079,18 +1079,21 @@ There are two types of match entries used in
 .B InputClass
 sections. The first allows various tokens to be matched against attributes
 of the device. An entry can be constructed to match attributes from different
-devices by separating arguments with a '|' character. Multiple entries of the
-same type may be supplied to add multiple matching conditions on the same
-attribute. For example:
+devices by separating arguments with a '|' character. If an argument is prepended
+with '!', then it should NOT be contained in an attribute. If one or more '&'
+characters are present in an argument, they split it into parts that ALL must
+be disjoint substrings of an attribute in exactly the same order. Multiple
+entries of the same type may be supplied to add multiple matching conditions
+on the same attribute. For example:
 .PP
 .RS 4
 .nf
 .B  "Section \*qInputClass\*q"
 .B  "    Identifier   \*qMy Class\*q"
-.B  "    # product string must contain example and"
-.B  "    # either gizmo or gadget"
-.B  "    MatchProduct \*qexample\*q"
-.B  "    MatchProduct \*qgizmo\^|\^gadget\*q"
+.B  "    # product string may not contain example and must"
+.B  "    # either contain gizmo and then gremlin, or contain gadget"
+.B  "    MatchProduct \*q!example\*q"
+.B  "    MatchProduct \*qgizmo\^&\^gremlin\^|\^gadget\*q"
 .B  "    NoMatchDriver \*qdrivername\*q"
 .I  "    \&.\|.\|.\&"
 .B  EndSection
@@ -1173,6 +1176,38 @@ and
 .B NoMatchLayout
 directives. These NoMatch directives match if the subsequent match is not
 met by the device.
+.PP
+To apply more sophicticated conditions, an entire attribute can be matched
+against an extended regular expression (see
+.BR regex (7)
+or
+.BR re_format (7)
+):
+.PP
+.RS 4
+.nf
+.B  "    # product string must start with Experimental
+.B  "    # and end with Device
+.B  "    MatchProduct \*q~_^Experimental.*Device$_\*q"
+.fi
+.RE
+.PP
+Such a pattern is prefixed with '~', and the next character, which
+may be arbitrary, is used as a two-side delimiter, i.e. the regular
+expression starts after it and lasts until its next occurrence, or to
+the end of the argument, if the delimiting character has not been found
+again.
+.PP
+Negated and non-negated patterns, strings and regular expressions can be mixed
+in one line, e.g.,
+.PP
+.RS 4
+.nf
+.B  "    # accept product names that either do not end with \*qMouse\*q"
+.B  "    # or contain \*qUSB\*q" and \*qReceiver\*q"
+.B  "    MatchProduct \*q!~@Mouse$@|USB&Receiver\*q"
+.fi
+.RE
 .PP
 The second type of entry is used to match device types. These entries take a
 boolean argument similar to
