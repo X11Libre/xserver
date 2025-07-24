@@ -50,6 +50,7 @@
 #define LOG_AND '&'
 
 #define NEG_FLAG '!'
+#define REGEX_FLAG '~'
 
 
 xf86MatchGroup*
@@ -88,7 +89,37 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
         pattern->is_negated = FALSE;
 
     pattern->str = NULL;
+    pattern->regex = NULL;
 
+    /* Check if there is a regex prefix */
+    if (*str == REGEX_FLAG) {
+        pattern->mode = MATCH_REGEX;
+        str ++;
+        if (*str) {
+            char *last;
+            last = strchr(str+1, *str);
+            if (last)
+                n = last-str-1;
+            else
+                n = strlen(str+1);
+            pattern->str = strndup(str+1, n);
+            if (pattern->str == NULL)
+                goto fail;
+            *(pattern->str+n) = '\0';
+            str += n+1;
+            if (*str) str++;
+        }
+        else {
+        /* no regex, notning to match against */
+            pattern->mode = MATCH_IS_INVALID;
+            LogMessageVerb(X_ERROR, 1,
+                "No regular expression supplied after \'%c\' in \"%s\", ignoring\n",
+                REGEX_FLAG, arg);
+            free(pattern->str);
+            pattern->str = NULL;
+        }
+    }
+    else {
         n = strcspn(str, sep_or);
         if (n > strcspn(str, sep_and)) {
             pattern->mode = MATCH_SUBSTRINGS_SEQUENCE;
@@ -134,6 +165,7 @@ xf86createMatchGroup(const char *arg, xf86MatchMode pref_mode,
             *(pattern->str+n) = '\0'; /* should already be, but to be sure */
             str += n;
         }
+    }
 
     while (*str == LOG_OR)
         str++;
@@ -159,8 +191,11 @@ xf86printMatchPattern(FILE * cf, const xf86MatchPattern *pattern, Bool not_first
     if (pattern->mode == MATCH_IS_INVALID)
         fprintf(cf, "invalid:%s",
             pattern->str ? pattern->str : "(none)");
-    else
-    if (pattern->mode == MATCH_SUBSTRINGS_SEQUENCE) {
+    else if (pattern->mode == MATCH_REGEX)
+    /* FIXME: Hope there is no '~' in the pattern */
+        fprintf(cf, "%c%s%c", REGEX_FLAG,
+            pattern->str ? pattern->str : "(none)", REGEX_FLAG);
+    else if (pattern->mode == MATCH_SUBSTRINGS_SEQUENCE) {
         Bool after = FALSE;
         char *str = pattern->str;
         while (*str) {

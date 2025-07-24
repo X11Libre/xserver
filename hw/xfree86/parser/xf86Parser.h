@@ -67,6 +67,9 @@
 #include "xf86Optrec.h"
 #include "list.h"
 
+#include <sys/types.h>
+#include <regex.h>
+
 #define HAVE_PARSER_DECLS
 
 typedef struct {
@@ -317,6 +320,7 @@ typedef enum {
     MATCH_AS_FILENAME,
     MATCH_AS_PATHNAME,
     MATCH_SUBSTRINGS_SEQUENCE,
+    MATCH_REGEX
 } xf86MatchMode;
 
 typedef struct {
@@ -324,6 +328,7 @@ typedef struct {
     xf86MatchMode mode;
     Bool is_negated;
     char *str;
+    regex_t *regex;
 } xf86MatchPattern;
 
 typedef struct {
