@@ -530,7 +530,9 @@ HostOS(void)
 
 /*
  * Match an attribute against a pattern. Matching mode is
- * determined by pattern->mode member.
+ * determined by pattern->mode member. If the mode is REGEX,
+ * then regex_t is allocated and compiled only during
+ * the first call, to save time and memory.
  */
 
 static int
@@ -569,7 +571,6 @@ match_token(const char *attr, xf86MatchPattern *pattern)
             return (strcmp(attr, pattern->str)) ? 0 : -1;
 #endif
         case MATCH_SUBSTRINGS_SEQUENCE:
-        default:
             {
                 char* str = pattern->str;
                 while (*str) {
@@ -581,6 +582,24 @@ match_token(const char *attr, xf86MatchPattern *pattern)
                 }
             }
             return -1;
+        case MATCH_REGEX:
+        default:
+            if (pattern->regex == NULL) {
+                int r;
+                if ((pattern->regex = malloc(sizeof(regex_t))) == NULL) {
+                    pattern->mode = MATCH_IS_INVALID;
+                    return 0;
+                }
+                r = regcomp(pattern->regex, pattern->str, REG_EXTENDED | REG_NOSUB);
+                if (r) { /* Wrong regex */
+                    regfree(pattern->regex);
+                    free(pattern->regex);
+                    LogMessageVerb(X_ERROR, 1, "Wrong regex: \"%s\"\n", pattern->str);
+                    pattern->mode = MATCH_IS_INVALID;
+                    return 0;
+                }
+            }
+            return (regexec(pattern->regex, attr,0, NULL, 0)) ? 0 : -1;
     }
 }
 
