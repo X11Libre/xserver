@@ -27,9 +27,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef WIN32
+#include <winsock2.h>
+#endif
+
 #include "os/xserver_poll.h"
 
-#include "misc.h"               /* for typedef of pointer */
 #include "ospoll.h"
 #include "list.h"
 
