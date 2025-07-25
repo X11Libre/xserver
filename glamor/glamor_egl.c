@@ -391,8 +391,30 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 
         glamor_get_modifiers(screen, format, &num_modifiers, &modifiers);
 
-        bo = gbm_bo_create_with_modifiers(glamor_egl->gbm, width, height,
-                                          format, modifiers, num_modifiers);
+        if (num_modifiers > 0) {
+#ifdef GBM_BO_WITH_MODIFIERS2
+            /* TODO: Is scanout ever used? If so, where? */
+            bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
+                                               format, modifiers, num_modifiers,
+                                               GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+            if (!bo) {
+                /* something failed, try again without GBM_BO_USE_SCANOUT */
+                /* maybe scanout does work, but modifiers aren't supported */
+                /* we handle this case on the fallback path */
+                bo = gbm_bo_create_with_modifiers2(glamor_egl->gbm, width, height,
+                                                   format, modifiers, num_modifiers,
+                                                   GBM_BO_USE_RENDERING);
+#if 0
+                if (bo) {
+                    /* TODO: scanout failed, but regular buffer succeeded, maybe log something? */
+                }
+#endif
+            }
+#else
+            bo = gbm_bo_create_with_modifiers(glamor_egl->gbm, width, height,
+                                              format, modifiers, num_modifiers);
+#endif
+        }
         if (bo)
             used_modifiers = TRUE;
         free(modifiers);
@@ -401,12 +423,27 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 
     if (!bo)
     {
+        /* TODO: Is scanout ever used? If so, where? */
         bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
 #ifdef GLAMOR_HAS_GBM_LINEAR
                 (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
                  GBM_BO_USE_LINEAR : 0) |
 #endif
                 GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+        if (!bo) {
+            /* something failed, try again without GBM_BO_USE_SCANOUT */
+            bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
+#ifdef GLAMOR_HAS_GBM_LINEAR
+                    (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
+                     GBM_BO_USE_LINEAR : 0) |
+                     GBM_BO_USE_RENDERING);
+#endif
+#if 0
+            if (bo) {
+                /* TODO: scanout failed, but regular buffer succeeded, maybe log something? */
+            }
+#endif
+        }
     }
 
     if (!bo) {
@@ -787,10 +824,12 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
     struct glamor_egl_screen_private *glamor_egl;
     EGLint num;
+#endif
 
-    /* Explicitly zero the count as the caller may ignore the return value */
+    /* Explicitly zero the count and modifiers as the caller may ignore the return value */
     *num_modifiers = 0;
-
+    *modifiers = NULL;
+#ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
     glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
 
     if (!glamor_egl->dmabuf_capable)
@@ -814,11 +853,8 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     }
 
     *num_modifiers = num;
-    return TRUE;
-#else
-    *num_modifiers = 0;
-    return TRUE;
 #endif
+    return TRUE;
 }
 
 const char *
