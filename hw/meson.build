@@ -1,6 +1,4 @@
-if build_xephyr
-    subdir('kdrive')
-endif
+subdir('kdrive')
 
 if build_xvfb
     subdir('vfb')
