@@ -281,7 +281,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
             struct ospollfd *new_fds;
             int new_size = ospoll->size ? ospoll->size * 2 : MAXCLIENTS * 2;
 
-            new_fds = reallocarray(ospoll->fds, new_size, sizeof (ospoll->fds[0]));
+            new_fds = realloc(ospoll->fds, new_size * sizeof (ospoll->fds[0]));
             if (!new_fds)
                 return FALSE;
             ospoll->fds = new_fds;
@@ -311,7 +311,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
             struct ospollfd **new_fds;
             int new_size = ospoll->size ? ospoll->size * 2 : MAXCLIENTS * 2;
 
-            new_fds = reallocarray(ospoll->fds, new_size, sizeof (ospoll->fds[0]));
+            new_fds = realloc(ospoll->fds, new_size * sizeof (ospoll->fds[0]));
             if (!new_fds) {
                 free (osfd);
                 return FALSE;
@@ -349,7 +349,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
             struct ospollfd **new_fds;
             int new_size = ospoll->size ? ospoll->size * 2 : MAXCLIENTS * 2;
 
-            new_fds = reallocarray(ospoll->fds, new_size, sizeof (ospoll->fds[0]));
+            new_fds = realloc(ospoll->fds, new_size * sizeof (ospoll->fds[0]));
             if (!new_fds) {
                 free (osfd);
                 return FALSE;
@@ -387,11 +387,11 @@ ospoll_add(struct ospoll *ospoll, int fd,
             struct ospollfd *new_osfds;
             int             new_size = ospoll->size ? ospoll->size * 2 : MAXCLIENTS * 2;
 
-            new_fds = reallocarray(ospoll->fds, new_size, sizeof (ospoll->fds[0]));
+            new_fds = realloc(ospoll->fds, new_size * sizeof (ospoll->fds[0]));
             if (!new_fds)
                 return FALSE;
             ospoll->fds = new_fds;
-            new_osfds = reallocarray(ospoll->osfds, new_size, sizeof (ospoll->osfds[0]));
+            new_osfds = realloc(ospoll->osfds, new_size * sizeof (ospoll->osfds[0]));
             if (!new_osfds)
                 return FALSE;
             ospoll->osfds = new_osfds;
