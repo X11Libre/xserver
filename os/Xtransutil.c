@@ -250,8 +250,7 @@ int _XSERVTransWSAStartup (void)
  * it's not save if the directory has non-root ownership or the sticky
  * bit cannot be set and fail.
  */
-static int
-trans_mkdir(const char *path, int mode)
+int trans_mkdir(const char *path, int mode)
 {
     struct stat buf;
 

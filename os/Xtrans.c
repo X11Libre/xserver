@@ -53,7 +53,6 @@ from The Open Group.
 #ifdef HAVE_SYSTEMD_DAEMON
 #include <systemd/sd-daemon.h>
 #endif
-#include <sys/utsname.h>
 
 /*
  * The transport table contains a definition for every transport (protocol)
@@ -596,15 +595,10 @@ int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
 #else
 #if defined(WIN32)
 	{
-#ifdef WIN32
-	    u_long arg;
-#else
-	    int arg;
-#endif
-	    arg = 1;
+	    u_long arg_ret = 1;
 /* IBM TCP/IP understands this option too well: it causes _XSERVTransRead to fail
  * eventually with EWOULDBLOCK */
-	    ret = ioctl (fd, FIONBIO, &arg);
+	    ret = ioctl (fd, FIONBIO, &arg_ret);
 	}
 #else
 	    ret = fcntl (fd, F_GETFL, 0);
@@ -613,7 +607,7 @@ int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
 #else
 	    ret = fcntl (fd, F_SETFL, ret | O_NDELAY);
 #endif
-#endif /* AIXV3  || uniosu */
+#endif /* WIN32 */
 #endif /* FIOSNBIO */
 #endif /* O_NONBLOCK */
 	    break;
@@ -1151,8 +1145,22 @@ static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcn
     return total;
 }
 
-#endif /* WIN32 */
+/*
+ * _XSERVTransGetHostname - similar to gethostname but allows special processing.
+ */
+int _XSERVTransGetHostname (char *buf, int maxlen)
+{
+    int len;
 
+    buf[0] = '\0';
+    (void) gethostname (buf, maxlen);
+    buf [maxlen - 1] = '\0';
+    return strlen(buf);
+}
+
+#else /* WIN32 */
+
+#include <sys/utsname.h>
 
 /*
  * _XSERVTransGetHostname - similar to gethostname but allows special processing.
@@ -1168,3 +1176,5 @@ int _XSERVTransGetHostname (char *buf, int maxlen)
     buf[len] = '\0';
     return len;
 }
+
+#endif /* WIN32 */

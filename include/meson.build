@@ -204,6 +204,12 @@ conf_data.set('TCPCONN', '1')
 conf_data.set('UNIXCONN', host_machine.system() != 'windows' ? '1' : false)
 conf_data.set('IPv6', build_ipv6 ? '1' : false)
 
+# potentially tunable - needed also in places that cannot include misc.h
+conf_data.set('MAXCLIENTS', 2048)
+
+# Must be a power of 2 and <= MAXCLIENTS */
+conf_data.set('DIX_LIMITCLIENTS', 256)
+
 # some drivers (eg. xf86-video-intel) still relying on this symbol being set
 conf_data.set('COMPOSITE', '1')
 

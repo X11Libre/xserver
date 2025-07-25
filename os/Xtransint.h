@@ -297,10 +297,7 @@ static int _XSERVTransWriteV(
 
 #endif /* WIN32 */
 
-static int trans_mkdir (
-    const char *,	/* path */
-    int			/* mode */
-);
+int trans_mkdir (const char *path, int mode);
 
 #ifdef __clang__
 #pragma clang diagnostic pop

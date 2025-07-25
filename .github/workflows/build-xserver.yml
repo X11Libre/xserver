@@ -123,6 +123,50 @@ jobs:
             - name: compile drivers
               run: .github/scripts/compile-drivers.sh
 
+    xserver-build-mingw32-ubuntu:
+        runs-on: ubuntu-latest
+        env:
+            MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
+
+            - name: apt cache
+              uses: actions/cache@v4
+              with:
+                path: /var/cache/apt
+                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
+                restore-keys: apt-cache-
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: X11 prereq cache
+              uses: actions/cache@v4
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
+
+            - name: install crosscompiler
+              run: sudo apt-get install -y mingw-w64-tools gcc-mingw-w64 gcc-mingw-w64-i686 libz-mingw-w64-dev
+
+            - name: cross prereq
+              run: sudo .github/scripts/mingw32/cross-prereqs-build.sh i686-w64-mingw32
+
+            - name: build
+              run: .gitlab-ci/meson-build.sh --run-install
+
     xserver-build-macos:
         env:
             MESON_ARGS: -Dprefix=/tmp -Dglx=false -Dxnest=false
