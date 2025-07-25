@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structs    */
@@ -109,6 +110,8 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if ((others = wOtherInputMasks(pWin)) != 0) {
         for (i = 0; i < EMASKSIZE; i++)
             ClassFromMask(NULL, others->dontPropagateMask[i], i, &count, COUNT);
@@ -123,8 +126,14 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
             for (i = 0; i < EMASKSIZE; i++)
                 tbuf = ClassFromMask(tbuf, others->dontPropagateMask[i], i,
                                      NULL, CREATE);
+
+            x_rpcbuf_write_CARD32s(&rpcbuf, buf, count);
+            free(buf);
         }
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -132,12 +141,7 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         swaps(&rep.count);
     }
     WriteToClient(client, sizeof(xGetDeviceDontPropagateListReply), &rep);
-
-    if (count) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, count * sizeof(XEventClass), buf);
-        free(buf);
-    }
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 

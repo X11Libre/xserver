@@ -631,14 +631,6 @@ PanoramiXTranslateCoords(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xTranslateCoordsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .sameScreen = xTrue,
-        .child = None
-    };
-
     if ((pWin == screenInfo.screens[0]->root) ||
         (pWin->drawable.id == screenInfo.screens[0]->screensaver.wid)) {
         x = stuff->srcX - screenInfo.screens[0]->x;
@@ -649,6 +641,8 @@ PanoramiXTranslateCoords(ClientPtr client)
         y = pWin->drawable.y + stuff->srcY;
     }
     pWin = pDst->firstChild;
+
+    XID child = None;
     while (pWin) {
         BoxRec box;
 
@@ -668,19 +662,30 @@ PanoramiXTranslateCoords(ClientPtr client)
                                     x - pWin->drawable.x,
                                     y - pWin->drawable.y, &box))
             ) {
-            rep.child = pWin->drawable.id;
+            child = pWin->drawable.id;
             pWin = (WindowPtr) NULL;
         }
         else
             pWin = pWin->nextSib;
     }
-    rep.dstX = x - pDst->drawable.x;
-    rep.dstY = y - pDst->drawable.y;
+
+    INT16 dstX = x - pDst->drawable.x;
+    INT16 dstY = y - pDst->drawable.y;
     if ((pDst == screenInfo.screens[0]->root) ||
         (pDst->drawable.id == screenInfo.screens[0]->screensaver.wid)) {
-        rep.dstX += screenInfo.screens[0]->x;
-        rep.dstY += screenInfo.screens[0]->y;
+        dstX += screenInfo.screens[0]->x;
+        dstY += screenInfo.screens[0]->y;
     }
+
+    xTranslateCoordsReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .length = 0,
+        .sameScreen = xTrue,
+        .dstX = dstX,
+        .dstY = dstY,
+        .child = child
+    };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -2052,14 +2057,6 @@ PanoramiXGetImage(ClientPtr client)
         length = widthBytesLine * h * Ones(planemask & (plane | (plane - 1)));
     }
 
-    xGetImageReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .visual = wVisual(((WindowPtr) pDraw)),
-        .depth = pDraw->depth,
-        .length = bytes_to_int32(length),
-    };
-
     if (widthBytesLine == 0 || h == 0)
         linesPerBuf = 0;
     else if (widthBytesLine >= XINERAMA_IMAGE_BUFSIZE)
@@ -2070,11 +2067,6 @@ PanoramiXGetImage(ClientPtr client)
             linesPerBuf = h;
     }
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.visual);
-    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -2118,6 +2110,20 @@ PanoramiXGetImage(ClientPtr client)
                 }
             }
         }
+    }
+
+    xGetImageReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .visual = wVisual(((WindowPtr) pDraw)),
+        .depth = pDraw->depth,
+        .length = bytes_to_int32(length),
+    };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.visual);
     }
 
     WriteToClient(client, sizeof(rep), &rep);

@@ -25,13 +25,17 @@
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
 #include "os/bug_priv.h"
+#include "os/osdep.h"
 
 #include "swaprep.h"
 #include "mipointer.h"
 
+/* xFixed is just `int`, so better check whether it's really 32bit */
+__size_assert(xFixed, sizeof(CARD32));
 
 RESTYPE RRCrtcType = 0;
 
@@ -1144,8 +1148,6 @@ ProcRRGetCrtcInfo(ClientPtr client)
 {
     REQUEST(xRRGetCrtcInfoReq);
     RRCrtcPtr crtc;
-    CARD8 *extra = NULL;
-    unsigned long extraLen = 0;
 
     REQUEST_SIZE_MATCH(xRRGetCrtcInfoReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
@@ -1168,6 +1170,9 @@ ProcRRGetCrtcInfo(ClientPtr client)
         .rotation = crtc->rotation,
         .rotations = crtc->rotations,
     };
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (leased) {
         rep.rotation = RR_Rotate_0;
         rep.rotations = RR_Rotate_0;
@@ -1200,37 +1205,24 @@ ProcRRGetCrtcInfo(ClientPtr client)
             }
         }
 
-        extraLen = (rep.nOutput + rep.nPossibleOutput) * sizeof(CARD32);
-        rep.length = bytes_to_int32(extraLen);
-
-        if (extraLen) {
-            extra = calloc(1, extraLen);
-            if (!extra)
-                return BadAlloc;
-        }
-
-        RROutput *outputs = (RROutput *) extra;
-        RROutput *possible = (RROutput *) (outputs + rep.nOutput);
-
         for (int i = 0; i < crtc->numOutputs; i++) {
-            outputs[i] = crtc->outputs[i]->id;
-            if (client->swapped)
-                swapl(&outputs[i]);
+            x_rpcbuf_write_CARD32(&rpcbuf, crtc->outputs[i]->id);
         }
 
-        int k = 0;
         for (int i = 0; i < pScrPriv->numOutputs; i++) {
             if (!RROutputIsLeased(pScrPriv->outputs[i])) {
                 for (int j = 0; j < pScrPriv->outputs[i]->numCrtcs; j++)
                     if (pScrPriv->outputs[i]->crtcs[j] == crtc) {
-                        possible[k] = pScrPriv->outputs[i]->id;
-                        if (client->swapped)
-                            swapl(&possible[k]);
-                        k++;
+                        x_rpcbuf_write_CARD32(&rpcbuf, pScrPriv->outputs[i]->id);
                     }
             }
         }
     }
+
+    rep.length = x_rpcbuf_wsize_units(&rpcbuf);
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (pScrPriv->rrCrtcGet)
         pScrPriv->rrCrtcGet(pScreen, crtc, &rep);
@@ -1249,12 +1241,9 @@ ProcRRGetCrtcInfo(ClientPtr client)
         swaps(&rep.nOutput);
         swaps(&rep.nPossibleOutput);
     }
-    WriteToClient(client, sizeof(xRRGetCrtcInfoReply), &rep);
-    if (extraLen) {
-        WriteToClient(client, extraLen, extra);
-        free(extra);
-    }
 
+    WriteToClient(client, sizeof(xRRGetCrtcInfoReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
@@ -1542,7 +1531,6 @@ int
 ProcRRSetPanning(ClientPtr client)
 {
     REQUEST(xRRSetPanningReq);
-    xRRSetPanningReply rep;
     RRCrtcPtr crtc;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
@@ -1595,18 +1583,16 @@ ProcRRSetPanning(ClientPtr client)
 
     status = RRSetConfigSuccess;
 
- sendReply:
-    rep = (xRRSetPanningReply) {
+sendReply: ;
+    xRRSetPanningReply rep = {
         .type = X_Reply,
         .status = status,
         .sequenceNumber = client->sequence,
-        .length = 0,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds
     };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.newTimestamp);
     }
     WriteToClient(client, sizeof(xRRSetPanningReply), &rep);
@@ -1645,8 +1631,6 @@ ProcRRGetCrtcGamma(ClientPtr client)
 {
     REQUEST(xRRGetCrtcGammaReq);
     RRCrtcPtr crtc;
-    unsigned long len;
-    char *extra = NULL;
 
     REQUEST_SIZE_MATCH(xRRGetCrtcGammaReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
@@ -1655,18 +1639,16 @@ ProcRRGetCrtcGamma(ClientPtr client)
     if (!RRCrtcGammaGet(crtc))
         return RRErrorBase + BadRRCrtc;
 
-    len = crtc->gammaSize * 3 * 2;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (crtc->gammaSize) {
-        extra = calloc(1, len);
-        if (!extra)
-            return BadAlloc;
-    }
+    x_rpcbuf_write_CARD16s(&rpcbuf, crtc->gammaRed, crtc->gammaSize);
+    x_rpcbuf_write_CARD16s(&rpcbuf, crtc->gammaGreen, crtc->gammaSize);
+    x_rpcbuf_write_CARD16s(&rpcbuf, crtc->gammaBlue, crtc->gammaSize);
 
     xRRGetCrtcGammaReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(len),
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .size = crtc->gammaSize
     };
     if (client->swapped) {
@@ -1674,16 +1656,9 @@ ProcRRGetCrtcGamma(ClientPtr client)
         swapl(&reply.length);
         swaps(&reply.size);
     }
-    if (crtc->gammaSize) {
-        memcpy(extra, crtc->gammaRed, len);
-        if (client->swapped)
-            SwapShorts((short*)extra, len/sizeof(CARD16));
-    }
 
     WriteToClient(client, sizeof(xRRGetCrtcGammaReply), &reply);
-    WriteToClient(client, len, extra);
-    free(extra);
-
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
@@ -1753,62 +1728,11 @@ ProcRRSetCrtcTransform(ClientPtr client)
                               filter, nbytes, params, nparams);
 }
 
-static int
-transform_filter_length(RRTransformPtr transform)
-{
-    int nbytes, nparams;
-
-    if (transform->filter == NULL)
-        return 0;
-    nbytes = strlen(transform->filter->name);
-    nparams = transform->nparams;
-    return pad_to_int32(nbytes) + (nparams * sizeof(xFixed));
-}
-
-static int
-transform_filter_encode(ClientPtr client, char *output,
-                        CARD16 *nbytesFilter,
-                        CARD16 *nparamsFilter, RRTransformPtr transform)
-{
-    int nbytes, nparams;
-
-    if (transform->filter == NULL) {
-        *nbytesFilter = 0;
-        *nparamsFilter = 0;
-        return 0;
-    }
-    nbytes = strlen(transform->filter->name);
-    nparams = transform->nparams;
-    *nbytesFilter = nbytes;
-    *nparamsFilter = nparams;
-    memcpy(output, transform->filter->name, nbytes);
-    while ((nbytes & 3) != 0)
-        output[nbytes++] = 0;
-    memcpy(output + nbytes, transform->params, nparams * sizeof(xFixed));
-    if (client->swapped) {
-        swaps(nbytesFilter);
-        swaps(nparamsFilter);
-        SwapLongs((CARD32 *) (output + nbytes), nparams);
-    }
-    nbytes += nparams * sizeof(xFixed);
-    return nbytes;
-}
-
-static void
-transform_encode(ClientPtr client, xRenderTransform * wire,
-                 PictTransform * pict)
-{
-    xRenderTransform_from_PictTransform(wire, pict);
-    if (client->swapped)
-        SwapLongs((CARD32 *) wire, bytes_to_int32(sizeof(xRenderTransform)));
-}
-
 int
 ProcRRGetCrtcTransform(ClientPtr client)
 {
     REQUEST(xRRGetCrtcTransformReq);
     RRCrtcPtr crtc;
-    int nextra;
     RRTransformPtr current, pending;
 
     REQUEST_SIZE_MATCH(xRRGetCrtcTransformReq);
@@ -1817,39 +1741,50 @@ ProcRRGetCrtcTransform(ClientPtr client)
     pending = &crtc->client_pending_transform;
     current = &crtc->client_current_transform;
 
-    nextra = (transform_filter_length(pending) +
-              transform_filter_length(current));
-
-    char *extra_buf = calloc(1, nextra);
-    if (!extra_buf)
-        return BadAlloc;
-
-    char *extra = extra_buf;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     xRRGetCrtcTransformReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xRRGetCrtcTransformReply) - sizeof(xGenericReply) + nextra),
         .hasTransforms = crtc->transforms,
     };
 
-    transform_encode(client, &rep.pendingTransform, &pending->transform);
-    extra += transform_filter_encode(client, extra,
-                                     &rep.pendingNbytesFilter,
-                                     &rep.pendingNparamsFilter, pending);
+    xRenderTransform_from_PictTransform(&rep.pendingTransform, &pending->transform);
+    xRenderTransform_from_PictTransform(&rep.currentTransform, &current->transform);
 
-    transform_encode(client, &rep.currentTransform, &current->transform);
-    extra += transform_filter_encode(client, extra,
-                                     &rep.currentNbytesFilter,
-                                     &rep.currentNparamsFilter, current);
+    if (pending->filter) {
+        rep.pendingNbytesFilter = strlen(pending->filter->name);
+        rep.pendingNparamsFilter = pending->nparams;
+        x_rpcbuf_write_string_pad(&rpcbuf, pending->filter->name);
+        x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)pending->params, pending->nparams);
+    }
+
+    if (current->filter) {
+        rep.currentNbytesFilter = strlen(current->filter->name);
+        rep.currentNparamsFilter = current->nparams;
+        x_rpcbuf_write_string_pad(&rpcbuf, current->filter->name);
+        x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)current->params, current->nparams);
+    }
+
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    rep.length = bytes_to_int32(sizeof(xRRGetCrtcTransformReply) - sizeof(xGenericReply)
+                                + rpcbuf.wpos);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
+        SwapLongs((CARD32 *) &rep.pendingTransform, bytes_to_int32(sizeof(xRenderTransform)));
+        SwapLongs((CARD32 *) &rep.currentTransform, bytes_to_int32(sizeof(xRenderTransform)));
+        swaps(&rep.pendingNbytesFilter);
+        swaps(&rep.currentNbytesFilter);
+        swaps(&rep.pendingNparamsFilter);
+        swaps(&rep.currentNparamsFilter);
     }
+
     WriteToClient(client, sizeof(xRRGetCrtcTransformReply), &rep);
-    WriteToClient(client, nextra, extra_buf);
-    free(extra_buf);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
