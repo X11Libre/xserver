@@ -114,7 +114,7 @@ struct ospoll {
     struct ospollfd     *osfds;
     int                 num;
     int                 size;
-    Bool                changed;
+    bool                changed;
 };
 
 #endif
@@ -268,7 +268,7 @@ ospoll_destroy(struct ospoll *ospoll)
 #endif
 }
 
-Bool
+bool
 ospoll_add(struct ospoll *ospoll, int fd,
            enum ospoll_trigger trigger,
            void (*callback)(int fd, int xevents, void *data),
@@ -283,7 +283,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
 
             new_fds = realloc(ospoll->fds, new_size * sizeof (ospoll->fds[0]));
             if (!new_fds)
-                return FALSE;
+                return false;
             ospoll->fds = new_fds;
             ospoll->size = new_size;
         }
@@ -305,7 +305,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
     if (pos < 0) {
         osfd = calloc(1, sizeof (struct ospollfd));
         if (!osfd)
-            return FALSE;
+            return false;
 
         if (ospoll->num >= ospoll->size) {
             struct ospollfd **new_fds;
@@ -314,7 +314,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
             new_fds = realloc(ospoll->fds, new_size * sizeof (ospoll->fds[0]));
             if (!new_fds) {
                 free (osfd);
-                return FALSE;
+                return false;
             }
             ospoll->fds = new_fds;
             ospoll->size = new_size;
@@ -343,7 +343,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
 
         osfd = calloc(1, sizeof (struct ospollfd));
         if (!osfd)
-            return FALSE;
+            return false;
 
         if (ospoll->num >= ospoll->size) {
             struct ospollfd **new_fds;
@@ -352,7 +352,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
             new_fds = realloc(ospoll->fds, new_size * sizeof (ospoll->fds[0]));
             if (!new_fds) {
                 free (osfd);
-                return FALSE;
+                return false;
             }
             ospoll->fds = new_fds;
             ospoll->size = new_size;
@@ -364,7 +364,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
             ev.events |= EPOLLET;
         if (epoll_ctl(ospoll->epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
             free(osfd);
-            return FALSE;
+            return false;
         }
         osfd->fd = fd;
         osfd->xevents = 0;
@@ -389,11 +389,11 @@ ospoll_add(struct ospoll *ospoll, int fd,
 
             new_fds = realloc(ospoll->fds, new_size * sizeof (ospoll->fds[0]));
             if (!new_fds)
-                return FALSE;
+                return false;
             ospoll->fds = new_fds;
             new_osfds = realloc(ospoll->osfds, new_size * sizeof (ospoll->osfds[0]));
             if (!new_osfds)
-                return FALSE;
+                return false;
             ospoll->osfds = new_osfds;
             ospoll->size = new_size;
         }
@@ -401,7 +401,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
         array_insert(ospoll->fds, ospoll->num, sizeof (ospoll->fds[0]), pos);
         array_insert(ospoll->osfds, ospoll->num, sizeof (ospoll->osfds[0]), pos);
         ospoll->num++;
-        ospoll->changed = TRUE;
+        ospoll->changed = true;
 
         ospoll->fds[pos].fd = fd;
         ospoll->fds[pos].events = 0;
@@ -412,7 +412,7 @@ ospoll_add(struct ospoll *ospoll, int fd,
     ospoll->osfds[pos].callback = callback;
     ospoll->osfds[pos].data = data;
 #endif
-    return TRUE;
+    return true;
 }
 
 void
@@ -457,7 +457,7 @@ ospoll_remove(struct ospoll *ospoll, int fd)
         array_delete(ospoll->fds, ospoll->num, sizeof (ospoll->fds[0]), pos);
         array_delete(ospoll->osfds, ospoll->num, sizeof (ospoll->osfds[0]), pos);
         ospoll->num--;
-        ospoll->changed = TRUE;
+        ospoll->changed = true;
 #endif
     }
 }
@@ -660,7 +660,7 @@ ospoll_wait(struct ospoll *ospoll, int timeout)
 #endif
 #if POLL
     nready = xserver_poll(ospoll->fds, ospoll->num, timeout);
-    ospoll->changed = FALSE;
+    ospoll->changed = false;
     if (nready > 0) {
         int f;
         for (f = 0; f < ospoll->num; f++) {
