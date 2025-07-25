@@ -119,6 +119,8 @@ from the copyright holders.
 #include <X11/Xw32defs.h>
 #undef close
 #define close closesocket
+
+#undef EADDRINUSE
 #define EADDRINUSE WSAEADDRINUSE
 #undef EWOULDBLOCK
 #define EWOULDBLOCK WSAEWOULDBLOCK
