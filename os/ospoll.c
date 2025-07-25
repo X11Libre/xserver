@@ -31,6 +31,7 @@
 #include <winsock2.h>
 #endif
 
+#include "include/fd_notify.h"
 #include "os/xserver_poll.h"
 
 #include "ospoll.h"

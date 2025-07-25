@@ -446,6 +446,7 @@ if build_xorg
             'extension.h',
             'extinit.h',
             'extnsionst.h',
+            'fd_notify.h',
             'fourcc.h',
             'gc.h',
             'gcstruct.h',
