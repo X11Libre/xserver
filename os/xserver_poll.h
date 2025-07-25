@@ -23,6 +23,8 @@
 #ifndef _XSERVER_POLL_H_
 #define _XSERVER_POLL_H_
 
+#include <stddef.h>
+
 #ifndef _DIX_CONFIG_H_
 #error must include dix-config.h to use xserver_poll.h
 #endif
@@ -46,9 +48,7 @@ struct pollfd
     short   revents;
 };
 
-typedef unsigned long nfds_t;
-
-int xserver_poll (struct pollfd *pArray, nfds_t n_fds, int timeout);
+int xserver_poll (struct pollfd *pArray, size_t n_fds, int timeout);
 
 #endif
 
