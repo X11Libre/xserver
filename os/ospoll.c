@@ -24,8 +24,6 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <X11/X.h>
-#include <X11/Xproto.h>
 
 #include "os/xserver_poll.h"
 
