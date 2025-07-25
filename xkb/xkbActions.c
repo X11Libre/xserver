@@ -357,26 +357,83 @@ _XkbFilterLatchState(XkbSrvInfoPtr xkbi,
     return 1;
 }
 
+static int xkbSwitchGroupOnRelease(void)
+{
+    /* TODO: user configuring */
+    return TRUE;
+}
+
+static void xkbUpdateLockedGroup(XkbSrvInfoPtr xkbi, XkbAction* pAction)
+{
+    XkbGroupAction ga = pAction->group;
+    if (ga.flags&XkbSA_GroupAbsolute)
+       xkbi->state.locked_group= XkbSAGroup(&ga);
+    else
+       xkbi->state.locked_group+= XkbSAGroup(&ga);
+}
+
+static XkbFilterPtr _XkbNextFreeFilter(XkbSrvInfoPtr xkbi);
+
 static int
-_XkbFilterLockState(XkbSrvInfoPtr xkbi,
+_XkbFilterLockGroup(XkbSrvInfoPtr xkbi,
                     XkbFilterPtr filter, unsigned keycode, XkbAction *pAction)
 {
+    int sendEvent = 1;
+
     if (filter->keycode == 0) /* initial press */
         AccessXCancelRepeatKey(xkbi, keycode);
-
-    if (pAction && (pAction->type == XkbSA_LockGroup)) {
-        if (pAction->group.flags & XkbSA_GroupAbsolute)
-            xkbi->state.locked_group = XkbSAGroup(&pAction->group);
-        else
-            xkbi->state.locked_group += XkbSAGroup(&pAction->group);
-        return 1;
+    if (!xkbSwitchGroupOnRelease()) {
+       xkbUpdateLockedGroup(xkbi, pAction);
+       return sendEvent;
     }
+    
+    /* Delay switch till button release */
+    if (filter->keycode==0) {          /* initial press */
+       filter->keycode = keycode;
+       filter->active = 1;
+       filter->filterOthers = 0; /* for what? */
+       filter->filter = _XkbFilterLockGroup;
+
+       /* filter->priv = 0; */
+       filter->upAction = *pAction;
+
+       /* Ok, now we need to simulate the action which would go if this action didn't block it.
+          XkbSA_SetMods is the one: it is to set modifier' flag up. */
+       {
+           XkbStateRec fake_state = xkbi->state;
+           XkbAction act;
+
+           fake_state.mods = 0;
+           act = XkbGetKeyAction(xkbi, &fake_state, keycode);
+
+           /* KLUDGE: XkbSA_SetMods only? */
+           if (act.type == XkbSA_SetMods) { 
+               XkbFilterPtr filter = _XkbNextFreeFilter(xkbi);
+               sendEvent = _XkbFilterSetState(xkbi,filter,keycode,&act);
+           }
+       }
+    }
+    else {
+       /* do nothing if some button else is pressed */
+       if (!pAction)
+           xkbUpdateLockedGroup(xkbi, &filter->upAction);
+       filter->active = 0;
+    }
+    return sendEvent;
+}
+
+static int
+_XkbFilterLockMods(    XkbSrvInfoPtr   xkbi,
+                       XkbFilterPtr    filter,
+                       unsigned        keycode,
+                       XkbAction *     pAction)
+{
     if (filter->keycode == 0) { /* initial press */
         filter->keycode = keycode;
         filter->active = 1;
         filter->filterOthers = 0;
         filter->priv = xkbi->state.locked_mods & pAction->mods.mask;
-        filter->filter = _XkbFilterLockState;
+        filter->filter = _XkbFilterLockMods;
         filter->upAction = *pAction;
         if (!(filter->upAction.mods.flags & XkbSA_LockNoLock))
             xkbi->state.locked_mods |= pAction->mods.mask;
@@ -1289,9 +1346,12 @@ XkbActionGetFilter(DeviceIntPtr dev, DeviceEvent *event, KeyCode key,
         *sendEvent = _XkbFilterLatchState(xkbi, filter, key, act);
         break;
     case XkbSA_LockMods:
+        filter = _XkbNextFreeFilter(xkbi);
+        *sendEvent = _XkbFilterLockMods(xkbi, filter, key, act);
+        break;
     case XkbSA_LockGroup:
         filter = _XkbNextFreeFilter(xkbi);
-        *sendEvent = _XkbFilterLockState(xkbi, filter, key, act);
+        *sendEvent = _XkbFilterLockGroup(xkbi, filter, key, act);
         break;
     case XkbSA_ISOLock:
         filter = _XkbNextFreeFilter(xkbi);
