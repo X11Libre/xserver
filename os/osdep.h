@@ -216,8 +216,6 @@ Ones(unsigned long mask)
 }
 #endif
 
-#define LIMITCLIENTS     256     /* Must be a power of 2 and <= MAXCLIENTS */
-
 /* static assert for protocol structure sizes */
 #ifndef __size_assert
 #define __size_assert(what, howmuch) \

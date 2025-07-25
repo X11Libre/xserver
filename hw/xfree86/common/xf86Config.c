@@ -957,7 +957,7 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
 #endif
 
     from = X_DEFAULT;
-    if (LimitClients != LIMITCLIENTS)
+    if (LimitClients != DIX_LIMITCLIENTS)
 	from = X_CMDLINE;
     i = -1;
     if (xf86GetOptValInteger(FlagOptions, FLAG_MAX_CLIENTS, &i)) {
