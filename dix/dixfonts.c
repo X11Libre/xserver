@@ -167,10 +167,9 @@ SetDefaultFont(const char *defaultfontname)
 static void
 QueueFontWakeup(FontPathElementPtr fpe)
 {
-    int i;
     FontPathElementPtr *new;
 
-    for (i = 0; i < num_slept_fpes; i++) {
+    for (int i = 0; i < num_slept_fpes; i++) {
         if (slept_fpes[i] == fpe) {
             return;
         }
@@ -190,11 +189,9 @@ QueueFontWakeup(FontPathElementPtr fpe)
 static void
 RemoveFontWakeup(FontPathElementPtr fpe)
 {
-    int i, j;
-
-    for (i = 0; i < num_slept_fpes; i++) {
+    for (int i = 0; i < num_slept_fpes; i++) {
         if (slept_fpes[i] == fpe) {
-            for (j = i; j < num_slept_fpes; j++) {
+            for (int j = i; j < num_slept_fpes; j++) {
                 slept_fpes[j] = slept_fpes[j + 1];
             }
             num_slept_fpes--;
@@ -206,13 +203,12 @@ RemoveFontWakeup(FontPathElementPtr fpe)
 static void
 FontWakeup(void *data, int count)
 {
-    int i;
     FontPathElementPtr fpe;
 
     if (count < 0)
         return;
     /* wake up any fpe's that may be waiting for information */
-    for (i = 0; i < num_slept_fpes; i++) {
+    for (int i = 0; i < num_slept_fpes; i++) {
         fpe = slept_fpes[i];
         (void) (*fpe_functions[fpe->type]->wakeup_fpe) (fpe);
     }
@@ -243,7 +239,6 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
     FontPathElementPtr fpe = NULL;
     ScreenPtr pScr;
     int err = Successful;
-    int i;
     char *alias, *newname;
     int newlen;
     int aliascount = 20;
@@ -344,7 +339,7 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
     pfont->refcnt++;
     if (pfont->refcnt == 1) {
         UseFPE(pfont->fpe);
-        for (i = 0; i < screenInfo.numScreens; i++) {
+        for (int i = 0; i < screenInfo.numScreens; i++) {
             pScr = screenInfo.screens[i];
             if (pScr->RealizeFont) {
                 if (!(*pScr->RealizeFont) (pScr, pfont)) {
@@ -368,7 +363,7 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
                           c->fontid, FontToXError(err));
     }
     ClientWakeup(c->client);
-    for (i = 0; i < c->num_fpes; i++) {
+    for (int i = 0; i < c->num_fpes; i++) {
         FreeFPE(c->fpe_list[i]);
     }
     free(c->fpe_list);
@@ -381,7 +376,6 @@ int
 OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
          const char *pfontname)
 {
-    int i;
     FontPtr cached = (FontPtr) 0;
 
     if (!lenfname || lenfname > XLFDMAXFONTNAMELEN)
@@ -434,7 +428,7 @@ OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
         return BadAlloc;
     }
     memcpy(c->fontname, pfontname, lenfname);
-    for (i = 0; i < num_fpes; i++) {
+    for (int i = 0; i < num_fpes; i++) {
         c->fpe_list[i] = font_path_elements[i];
         UseFPE(c->fpe_list[i]);
     }
@@ -458,7 +452,6 @@ OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
 int
 CloseFont(void *value, XID fid)
 {
-    int nscr;
     ScreenPtr pscr;
     FontPathElementPtr fpe;
     FontPtr pfont = (FontPtr) value;
@@ -472,7 +465,7 @@ CloseFont(void *value, XID fid)
          * since the last reference is gone, ask each screen to free any
          * storage it may have allocated locally for it.
          */
-        for (nscr = 0; nscr < screenInfo.numScreens; nscr++) {
+        for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
             pscr = screenInfo.screens[nscr];
             if (pscr->UnrealizeFont)
                 (*pscr->UnrealizeFont) (pscr, pfont);
@@ -501,7 +494,7 @@ void
 QueryFont(FontPtr pFont, xQueryFontReply * pReply, int nProtoCCIStructs)
 {
     FontPropPtr pFP;
-    int r, c, i;
+    int i;
     xFontProp *prFP;
     xCharInfo *prCI;
     xCharInfo *charInfos[256];
@@ -536,18 +529,17 @@ QueryFont(FontPtr pFont, xQueryFontReply * pReply, int nProtoCCIStructs)
     ninfos = 0;
     ncols = (unsigned long) (pFont->info.lastCol - pFont->info.firstCol + 1);
     prCI = (xCharInfo *) (prFP);
-    for (r = pFont->info.firstRow;
+    for (int r = pFont->info.firstRow;
          ninfos < nProtoCCIStructs && r <= (int) pFont->info.lastRow; r++) {
         i = 0;
-        for (c = pFont->info.firstCol; c <= (int) pFont->info.lastCol; c++) {
+        for (int c = pFont->info.firstCol; c <= (int) pFont->info.lastCol; c++) {
             chars[i++] = r;
             chars[i++] = c;
         }
         (*pFont->get_metrics) (pFont, ncols, chars,
                                TwoD16Bit, &count, charInfos);
-        i = 0;
-        for (i = 0; i < (int) count && ninfos < nProtoCCIStructs; i++) {
-            *prCI = *charInfos[i];
+        for (int j = 0; j < (int) count && ninfos < nProtoCCIStructs; j++) {
+            *prCI = *charInfos[j];
             prCI++;
             ninfos++;
         }
@@ -565,7 +557,6 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     int namelen, resolvedlen;
     int nnames;
     int stringLens;
-    int i;
     int aliascount = 0;
 
     if (client->clientGone) {
@@ -744,7 +735,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     nnames = names->nnames;
     client = c->client;
     stringLens = 0;
-    for (i = 0; i < nnames; i++)
+    for (int i = 0; i < nnames; i++)
         stringLens += (names->length[i] <= 255) ? names->length[i] : 0;
 
     xListFontsReply rep = {
@@ -765,7 +756,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
      * since WriteToClient long word aligns things, copy to temp buffer and
      * write all at once
      */
-    for (i = 0; i < nnames; i++) {
+    for (int i = 0; i < nnames; i++) {
         if (names->length[i] > 255)
             rep.nFonts--;
         else {
@@ -789,7 +780,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
 
  bail:
     ClientWakeup(client);
-    for (i = 0; i < c->num_fpes; i++)
+    for (int i = 0; i < c->num_fpes; i++)
         FreeFPE(c->fpe_list[i]);
     free(c->fpe_list);
     free(c->savedName);
@@ -803,7 +794,7 @@ int
 ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
           unsigned max_names)
 {
-    int i;
+    int access;
     LFclosurePtr c;
 
     /*
@@ -815,9 +806,9 @@ ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
     if (length > XLFDMAXFONTNAMELEN)
         return BadAlloc;
 
-    i = XaceHookServerAccess(client, DixGetAttrAccess);
-    if (i != Success)
-        return i;
+    access = XaceHookServerAccess(client, DixGetAttrAccess);
+    if (access != Success)
+        return access;
 
     if (!(c = calloc(1, sizeof *c)))
         return BadAlloc;
@@ -833,7 +824,7 @@ ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
         return BadAlloc;
     }
     memmove(c->current.pattern, pattern, length);
-    for (i = 0; i < num_fpes; i++) {
+    for (int i = 0; i < num_fpes; i++) {
         c->fpe_list[i] = font_path_elements[i];
         UseFPE(c->fpe_list[i]);
     }
@@ -862,7 +853,6 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     xListFontsWithInfoReply *reply;
     int length;
     xFontProp *pFP;
-    int i;
     int aliascount = 0;
 
     if (client->clientGone) {
@@ -1009,7 +999,7 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
             reply->fontDescent = pFontInfo->fontDescent;
             reply->nReplies = numFonts;
             pFP = (xFontProp *) (reply + 1);
-            for (i = 0; i < pFontInfo->nprops; i++) {
+            for (int i = 0; i < pFontInfo->nprops; i++) {
                 pFP->name = pFontInfo->props[i].name;
                 pFP->value = pFontInfo->props[i].value;
                 pFP++;
@@ -1040,7 +1030,7 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     WriteToClient(client, length, &rep);
  bail:
     ClientWakeup(client);
-    for (i = 0; i < c->num_fpes; i++)
+    for (int i = 0; i < c->num_fpes; i++)
         FreeFPE(c->fpe_list[i]);
     free(c->reply);
     free(c->fpe_list);
@@ -1053,7 +1043,7 @@ int
 StartListFontsWithInfo(ClientPtr client, int length, unsigned char *pattern,
                        int max_names)
 {
-    int i;
+    int access;
     LFWIclosurePtr c;
 
     /*
@@ -1065,9 +1055,9 @@ StartListFontsWithInfo(ClientPtr client, int length, unsigned char *pattern,
     if (length > XLFDMAXFONTNAMELEN)
         return BadAlloc;
 
-    i = XaceHookServerAccess(client, DixGetAttrAccess);
-    if (i != Success)
-        return i;
+    access = XaceHookServerAccess(client, DixGetAttrAccess);
+    if (access != Success)
+        return access;
 
     if (!(c = calloc(1, sizeof *c)))
         goto badAlloc;
@@ -1077,7 +1067,7 @@ StartListFontsWithInfo(ClientPtr client, int length, unsigned char *pattern,
         goto badAlloc;
     }
     memmove(c->current.pattern, pattern, length);
-    for (i = 0; i < num_fpes; i++) {
+    for (int i = 0; i < num_fpes; i++) {
         c->fpe_list[i] = font_path_elements[i];
         UseFPE(c->fpe_list[i]);
     }
@@ -1538,9 +1528,7 @@ ImageText(ClientPtr client, DrawablePtr pDraw, GCPtr pGC, int nChars,
 static int
 DetermineFPEType(const char *pathname)
 {
-    int i;
-
-    for (i = 0; i < num_fpe_types; i++) {
+    for (int i = 0; i < num_fpe_types; i++) {
         if ((*fpe_functions[i]->name_check) (pathname))
             return i;
     }
@@ -1550,16 +1538,13 @@ DetermineFPEType(const char *pathname)
 static void
 FreeFontPath(FontPathElementPtr * list, int n, Bool force)
 {
-    int i;
-
-    for (i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         if (force) {
             /* Sanity check that all refcounts will be 0 by the time
                we get to the end of the list. */
             int found = 1;      /* the first reference is us */
-            int j;
 
-            for (j = i + 1; j < n; j++) {
+            for (int j = i + 1; j < n; j++) {
                 if (list[j] == list[i])
                     found++;
             }
@@ -1577,9 +1562,8 @@ find_existing_fpe(FontPathElementPtr * list, int num, unsigned char *name,
                   int len)
 {
     FontPathElementPtr fpe;
-    int i;
 
-    for (i = 0; i < num; i++) {
+    for (int i = 0; i < num; i++) {
         fpe = list[i];
         if (fpe->name_length == len && memcmp(name, fpe->name, len) == 0)
             return fpe;
@@ -1777,17 +1761,17 @@ SetDefaultFontPath(const char *path)
 int
 GetFontPath(ClientPtr client, int *count, int *length, unsigned char **result)
 {
-    int i;
+    int access;
     unsigned char *c;
     int len;
     FontPathElementPtr fpe;
 
-    i = XaceHookServerAccess(client, DixGetAttrAccess);
-    if (i != Success)
-        return i;
+    access = XaceHookServerAccess(client, DixGetAttrAccess);
+    if (access != Success)
+        return access;
 
     len = 0;
-    for (i = 0; i < num_fpes; i++) {
+    for (int i = 0; i < num_fpes; i++) {
         fpe = font_path_elements[i];
         len += fpe->name_length + 1;
     }
@@ -1800,7 +1784,7 @@ GetFontPath(ClientPtr client, int *count, int *length, unsigned char **result)
 
     font_path_string = c;
     *length = 0;
-    for (i = 0; i < num_fpes; i++) {
+    for (int i = 0; i < num_fpes; i++) {
         fpe = font_path_elements[i];
         *c = fpe->name_length;
         *length += *c++;
@@ -1815,10 +1799,9 @@ GetFontPath(ClientPtr client, int *count, int *length, unsigned char **result)
 void
 DeleteClientFontStuff(ClientPtr client)
 {
-    int i;
     FontPathElementPtr fpe;
 
-    for (i = 0; i < num_fpes; i++) {
+    for (int i = 0; i < num_fpes; i++) {
         fpe = font_path_elements[i];
         if (fpe_functions[fpe->type]->client_died)
             (*fpe_functions[fpe->type]->client_died) ((void *) client, fpe);

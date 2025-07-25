@@ -397,7 +397,6 @@ DeletePredictableAccelerationProperties(DeviceIntPtr dev,
 {
     DeviceVelocityPtr vel;
     Atom prop;
-    int i;
 
     prop = XIGetKnownProperty(ACCEL_PROP_VELOCITY_SCALING);
     XIDeleteDeviceProperty(dev, prop, FALSE);
@@ -410,7 +409,7 @@ DeletePredictableAccelerationProperties(DeviceIntPtr dev,
 
     vel = GetDevicePredictableAccelData(dev);
     if (vel) {
-        for (i = 0; i < scheme->num_prop_handlers; i++)
+        for (int i = 0; i < scheme->num_prop_handlers; i++)
             if (scheme->prop_handlers[i])
                 XIUnregisterPropertyHandler(dev, scheme->prop_handlers[i]);
     }
