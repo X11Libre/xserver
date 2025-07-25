@@ -205,6 +205,9 @@
 /* byte order */
 #mesondefine X_BYTE_ORDER
 
+/* maximum number of clients */
+#mesondefine MAXCLIENTS
+
 /* announce server API features */
 #define XORG_API_DIX_SCREEN_HOOK_WINDOW_DESTROY 1
 #define XORG_API_DIX_SCREEN_HOOK_WINDOW_POSITION 1
