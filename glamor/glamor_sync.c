@@ -93,7 +93,7 @@ glamor_sync_init(ScreenPtr screen)
 			return FALSE;
 	}
 
-#ifdef HAVE_XSHMFENCE
+#if defined HAVE_XSHMFENCE && defined DRI3
 	if (!miSyncShmScreenInit(screen))
 		return FALSE;
 #else

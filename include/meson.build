@@ -100,7 +100,7 @@ conf_data.set('NEED_DBUS', build_systemd_logind or build_hal ? '1' : false)
 conf_data.set('CONFIG_WSCONS', host_machine.system() in ['openbsd', 'netbsd'] ? '1' : false)
 
 conf_data.set('HAVE_XSHMFENCE', xshmfence_dep.found() ? '1' : false)
-conf_data.set('WITH_LIBDRM', libdrm_required ? '1' : false)
+conf_data.set('WITH_LIBDRM', libdrm_required and libdrm_dep.found() ? '1' : false)
 conf_data.set('GLAMOR_HAS_EGL_QUERY_DMABUF',
               epoxy_dep.found() and epoxy_dep.version().version_compare('>= 1.4.4') ? '1' : false)
 conf_data.set('GLAMOR_HAS_EGL_QUERY_DRIVER',
