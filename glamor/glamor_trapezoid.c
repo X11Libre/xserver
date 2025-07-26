@@ -34,7 +34,6 @@
 #include "glamor_priv.h"
 
 #include "mipict.h"
-#include "fbpict.h"
 
 /**
  * Creates an appropriate picture for temp mask use.

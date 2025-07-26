@@ -34,6 +34,7 @@
 #include <gcstruct.h>
 #include <picturestr.h>
 #include <fb.h>
+#include <fbpict.h>
 #ifdef GLAMOR_FOR_XORG
 #include <xf86xv.h>
 #endif
