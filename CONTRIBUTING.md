@@ -4,12 +4,12 @@
    If additional reviewers gave their ack, a proper attribution
    header may be added.
 
-2. Commit messages should explain what's really done here and their
-   headlines need a short an precise subject. See history for examples.
+2. Commit messages should explain what's really done here, and their
+   headlines need a short and precise subject. See history for examples.
 
    Keep in mind that history is also a piece of documentation.
 
-3. Once release is out, bugfixes should be submitted separately, against
+3. Once a release is out, bugfixes should be submitted separately, against
    the affected release branch(es) as well as master (so multiple pull requests)
 
 4. If new functions or types are introduced, these should be documented
