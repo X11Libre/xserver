@@ -235,51 +235,106 @@ fbdev2xfree_timing(struct fb_var_screeninfo *var, DisplayModePtr mode)
 /* -------------------------------------------------------------------- */
 /* open correct framebuffer device                                      */
 
+static int
+set_name(int scrnIndex, int fd, char **namep, Bool print_warning, Bool close_fd)
+{
+    struct fb_fix_screeninfo fix;
+
+    if (!namep) {
+        return fd;
+    }
+
+    if (fd == -1) {
+        return -1;
+    }
+
+    if (ioctl(fd, FBIOGET_FSCREENINFO, (void *) (&fix)) == -1) {
+        *namep = NULL;
+        if (print_warning) {
+            xf86DrvMsg(scrnIndex, X_ERROR,
+                       "FBIOGET_FSCREENINFO: %s\n", strerror(errno));
+        }
+        if (close_fd) {
+            close(fd);
+            return -1;
+        }
+        return fd;
+    }
+    *namep = malloc(16);
+    if (*namep) {
+        strncpy(*namep, fix.id, 16);
+    }
+    return fd;
+}
+
+static int
+check_user_devices(int scrnIndex, const char* dev, char **namep)
+{
+    int fd;
+
+    if (namep) {
+        *namep = NULL;
+    }
+
+    /* try argument (from XF86Config) first */
+    if (dev) {
+        fd = open(dev, O_RDWR);
+    }
+    else {
+        /* second: environment variable */
+        dev = getenv("FRAMEBUFFER");
+        fd = dev ? open(dev, O_RDWR) : -1;
+    }
+
+    fd = set_name(scrnIndex, fd, namep, TRUE, FALSE);
+    if (dev && fd == -1) {
+        xf86DrvMsg(scrnIndex, X_ERROR,
+                   "Could not use the explicitly provided framebuffer: %s\n", dev);
+    }
+    return fd;
+}
+
 /**
  * Try to find the framebuffer device for a given PCI device
  */
 static int
-fbdev_open_pci(struct pci_device *pPci, char **namep)
+fbdev_open_pci(int scrnIndex, struct pci_device *pPci, const char *device, char **namep)
 {
-    struct fb_fix_screeninfo fix;
     char filename[256];
     int fd, i;
+
+    fd = check_user_devices(scrnIndex, device, namep);
+
+    if (fd != -1) {
+        /* fbdev was provided by the user and not guessed, skip pci check */
+        return fd;
+    }
 
     for (i = 0; i < 8; i++) {
         snprintf(filename, sizeof(filename),
                  "/sys/bus/pci/devices/%04x:%02x:%02x.%d/graphics/fb%d",
                  pPci->domain, pPci->bus, pPci->dev, pPci->func, i);
 
-        fd = open(filename, O_RDONLY, 0);
+        fd = open(filename, O_RDONLY);
         if (fd < 0) {
             snprintf(filename, sizeof(filename),
                      "/sys/bus/pci/devices/%04x:%02x:%02x.%d/graphics:fb%d",
                      pPci->domain, pPci->bus, pPci->dev, pPci->func, i);
-            fd = open(filename, O_RDONLY, 0);
+            fd = open(filename, O_RDONLY);
         }
         if (fd >= 0) {
             close(fd);
             snprintf(filename, sizeof(filename), "/dev/fb%d", i);
 
-            fd = open(filename, O_RDWR, 0);
+            fd = open(filename, O_RDWR);
+            fd = set_name(scrnIndex, fd, namep, FALSE, TRUE);
             if (fd != -1) {
-                if (ioctl(fd, FBIOGET_FSCREENINFO, (void *) &fix) != -1) {
-                    if (namep) {
-                        *namep = XNFalloc(16);
-                        strncpy(*namep, fix.id, 16);
-                    }
-
-                    return fd;
-                }
-                close(fd);
+                return fd;
             }
         }
     }
 
-    if (namep)
-        *namep = NULL;
-
-    xf86DrvMsg(-1, X_ERROR, "Unable to find a valid framebuffer device\n");
+    xf86DrvMsg(scrnIndex, X_ERROR, "Unable to find a valid framebuffer device\n");
     return -1;
 }
 
@@ -302,7 +357,7 @@ resolve_link(const char *filename, char *resolve_buf, size_t resolve_buf_size)
             return filename;
         }
         else {
-            // Have caller handle error condition.
+            /* Have caller handle error condition */
             return NULL;
         }
     }
@@ -311,21 +366,24 @@ resolve_link(const char *filename, char *resolve_buf, size_t resolve_buf_size)
 static int
 fbdev_open(int scrnIndex, const char *dev, char **namep)
 {
-    struct fb_fix_screeninfo fix;
     int fd;
 
-    /* try argument (from XF86Config) first */
-    if (dev) {
-        fd = open(dev, O_RDWR, 0);
+    fd = check_user_devices(scrnIndex, dev, namep);
+
+    if (fd != -1) {
+        /* fbdev was provided by the user and not guessed, skip non-pci check */
+        return fd;
     }
-    else {
-        /* second: environment variable */
-        dev = getenv("FRAMEBUFFER");
-        if ((NULL == dev) || ((fd = open(dev, O_RDWR, 0)) == -1)) {
-            /* last try: default device */
-            dev = "/dev/fb0";
-            fd = open(dev, O_RDWR, 0);
-        }
+
+    /* try the default device symlink */
+    dev = "/dev/fb";
+    fd = open(dev, O_RDWR);
+
+    /* last tries, framebuffers 0 through 7 */
+    char devbuf[] = "/dev/fb0";
+    for (int i = 0; i < 8 && fd == -1; i++) {
+        devbuf[sizeof(devbuf) - 2] = i + '0';
+        fd = open(devbuf, O_RDWR);
     }
 
     if (fd == -1) {
@@ -334,6 +392,7 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
     }
 
     /* only touch non-PCI devices on this path */
+    /* TODO: Should we keep doing this? */
     {
         char device_path_buf[PATH_MAX];
         char buf[PATH_MAX] = {0};
@@ -366,19 +425,7 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
         free(sysfs_path);
     }
 
-    if (namep) {
-        if (-1 == ioctl(fd, FBIOGET_FSCREENINFO, (void *) (&fix))) {
-            *namep = NULL;
-            xf86DrvMsg(scrnIndex, X_ERROR,
-                       "FBIOGET_FSCREENINFO: %s\n", strerror(errno));
-            return -1;
-        }
-        else {
-            *namep = XNFalloc(16);
-            strncpy(*namep, fix.id, 16);
-        }
-    }
-    return fd;
+    return set_name(scrnIndex, fd, namep, TRUE, TRUE);
 }
 
 /* -------------------------------------------------------------------- */
@@ -389,7 +436,7 @@ fbdevHWProbe(struct pci_device *pPci, const char *device, char **namep)
     int fd;
 
     if (pPci)
-        fd = fbdev_open_pci(pPci, namep);
+        fd = fbdev_open_pci(-1, pPci, device, namep);
     else
         fd = fbdev_open(-1, device, namep);
 
@@ -409,7 +456,7 @@ fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, const char *device)
 
     /* open device */
     if (pPci)
-        fPtr->fd = fbdev_open_pci(pPci, NULL);
+        fPtr->fd = fbdev_open_pci(pScrn->scrnIndex, pPci, device, NULL);
     else
         fPtr->fd = fbdev_open(pScrn->scrnIndex, device, NULL);
     if (-1 == fPtr->fd) {
