@@ -320,9 +320,8 @@ Bool
 compIsAlternateVisual(ScreenPtr pScreen, XID visual)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
-    int i;
 
-    for (i = 0; cs && i < cs->numAlternateVisuals; i++)
+    for (int i = 0; cs && i < cs->numAlternateVisuals; i++)
         if (cs->alternateVisuals[i] == visual)
             return TRUE;
     return FALSE;
@@ -333,9 +332,8 @@ CompositeIsImplicitRedirectException(ScreenPtr pScreen,
                                      XID parentVisual, XID winVisual)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
-    int i;
 
-    for (i = 0; i < cs->numImplicitRedirectExceptions; i++)
+    for (int i = 0; i < cs->numImplicitRedirectExceptions; i++)
         if (cs->implicitRedirectExceptions[i].parentVisual == parentVisual &&
             cs->implicitRedirectExceptions[i].winVisual == winVisual)
             return TRUE;
@@ -564,14 +562,13 @@ compCreateWindow(WindowPtr pWin)
     ret = (*pScreen->CreateWindow) (pWin);
     if (pWin->parent && ret) {
         CompSubwindowsPtr csw = GetCompSubwindows(pWin->parent);
-        CompClientWindowPtr ccw;
         PixmapPtr parent_pixmap = (*pScreen->GetWindowPixmap)(pWin->parent);
         PixmapPtr window_pixmap = (*pScreen->GetWindowPixmap)(pWin);
 
         if (window_pixmap != parent_pixmap)
             (*pScreen->SetWindowPixmap) (pWin, parent_pixmap);
         if (csw)
-            for (ccw = csw->clients; ccw; ccw = ccw->next)
+            for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next)
                 compRedirectWindow(dixClientForXID(ccw->id),
                                    pWin, ccw->update);
         if (compImplicitRedirect(pWin, pWin->parent))
@@ -726,12 +723,10 @@ compPaintWindowToParent(WindowPtr pWin)
 void
 compPaintChildrenToWindow(WindowPtr pWin)
 {
-    WindowPtr pChild;
-
     if (!pWin->damagedDescendants)
         return;
 
-    for (pChild = pWin->lastChild; pChild; pChild = pChild->prevSib)
+    for (WindowPtr pChild = pWin->lastChild; pChild; pChild = pChild->prevSib)
         compPaintWindowToParent(pChild);
 
     pWin->damagedDescendants = FALSE;

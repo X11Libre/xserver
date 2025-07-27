@@ -93,9 +93,8 @@ compInstallColormap(ColormapPtr pColormap)
     VisualPtr pVisual = pColormap->pVisual;
     ScreenPtr pScreen = pColormap->pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    int a;
 
-    for (a = 0; a < cs->numAlternateVisuals; a++)
+    for (int a = 0; a < cs->numAlternateVisuals; a++)
         if (pVisual->vid == cs->alternateVisuals[a])
             return;
     pScreen->InstallColormap = cs->InstallColormap;
@@ -160,9 +159,7 @@ compSourceValidate(DrawablePtr pDrawable,
 static DepthPtr
 compFindVisuallessDepth(ScreenPtr pScreen, int d)
 {
-    int i;
-
-    for (i = 0; i < pScreen->numDepths; i++) {
+    for (int i = 0; i < pScreen->numDepths; i++) {
         DepthPtr depth = &pScreen->allowedDepths[i];
 
         if (depth->depth == d) {
@@ -299,12 +296,12 @@ compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
 static Bool
 compAddAlternateVisuals(ScreenPtr pScreen, CompScreenPtr cs)
 {
-    int alt, ret = 0;
+    int ret = 0;
 
-    for (alt = 0; alt < ARRAY_SIZE(altVisuals); alt++)
+    for (int alt = 0; alt < ARRAY_SIZE(altVisuals); alt++)
         ret |= compAddAlternateVisual(pScreen, cs, altVisuals + alt);
 
-    return ! !ret;
+    return ret;
 }
 
 Bool

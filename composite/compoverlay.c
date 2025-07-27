@@ -59,9 +59,9 @@ compFreeOverlayClient(CompOverlayClientPtr pOcToDel)
 {
     ScreenPtr pScreen = pOcToDel->pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);
-    CompOverlayClientPtr *pPrev, pOc;
 
-    for (pPrev = &cs->pOverlayClients; (pOc = *pPrev); pPrev = &pOc->pNext) {
+    for (CompOverlayClientPtr *pPrev = &cs->pOverlayClients, pOc;
+                        (pOc = *pPrev); pPrev = &pOc->pNext) {
         if (pOc == pOcToDel) {
             *pPrev = pOc->pNext;
             free(pOc);
@@ -81,9 +81,9 @@ CompOverlayClientPtr
 compFindOverlayClient(ScreenPtr pScreen, ClientPtr pClient)
 {
     CompScreenPtr cs = GetCompScreen(pScreen);
-    CompOverlayClientPtr pOc;
 
-    for (pOc = cs->pOverlayClients; pOc != NULL; pOc = pOc->pNext)
+    for (CompOverlayClientPtr pOc = cs->pOverlayClients;
+                          pOc != NULL; pOc = pOc->pNext)
         if (pOc->pClient == pClient)
             return pOc;
 

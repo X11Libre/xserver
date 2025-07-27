@@ -266,14 +266,14 @@ compFreeClientWindow(WindowPtr pWin, XID id)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompWindowPtr cw = GetCompWindow(pWin);
-    CompClientWindowPtr ccw, *prev;
     Bool anyMarked = FALSE;
     WindowPtr pLayerWin;
     PixmapPtr pPixmap = NULL;
 
     if (!cw)
         return;
-    for (prev = &cw->clients; (ccw = *prev); prev = &ccw->next) {
+    for (CompClientWindowPtr *prev = &cw->clients, ccw;
+                    (ccw = *prev); prev = &ccw->next) {
         if (ccw->id == id) {
             *prev = ccw->next;
             if (ccw->update == CompositeRedirectManual)
@@ -325,14 +325,13 @@ int
 compUnredirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
 {
     CompWindowPtr cw = GetCompWindow(pWin);
-    CompClientWindowPtr ccw;
 
     BUG_RETURN_VAL(!pClient, BadValue);
 
     if (!cw)
         return BadValue;
 
-    for (ccw = cw->clients; ccw; ccw = ccw->next)
+    for (CompClientWindowPtr ccw = cw->clients; ccw; ccw = ccw->next)
         if (ccw->update == update && dixClientIdForXID(ccw->id) == pClient->index) {
             FreeResource(ccw->id, X11_RESTYPE_NONE);
             return Success;
@@ -348,7 +347,6 @@ int
 compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pWin);
-    WindowPtr pChild;
 
     /*
      * Only one Manual update is allowed
@@ -383,12 +381,12 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
     /*
      * Redirect all existing windows
      */
-    for (pChild = pWin->lastChild; pChild; pChild = pChild->prevSib) {
+    for (WindowPtr pChild = pWin->lastChild; pChild; pChild = pChild->prevSib) {
         int ret = compRedirectWindow(pClient, pChild, update);
 
         if (ret != Success) {
-            for (pChild = pChild->nextSib; pChild; pChild = pChild->nextSib)
-                (void) compUnredirectWindow(pClient, pChild, update);
+            for (WindowPtr pSib = pChild->nextSib; pSib; pSib = pSib->nextSib)
+                (void) compUnredirectWindow(pClient, pSib, update);
             if (!csw->clients) {
                 free(csw);
                 dixSetPrivate(&pWin->devPrivates, CompSubwindowsPrivateKey, 0);
@@ -424,12 +422,11 @@ void
 compFreeClientSubwindows(WindowPtr pWin, XID id)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pWin);
-    CompClientWindowPtr ccw, *prev;
-    WindowPtr pChild;
 
     if (!csw)
         return;
-    for (prev = &csw->clients; (ccw = *prev); prev = &ccw->next) {
+    for (CompClientWindowPtr *prev = &csw->clients, ccw;
+                    (ccw = *prev); prev = &ccw->next) {
         if (ccw->id == id) {
             ClientPtr pClient = dixClientForXID(id);
 
@@ -450,7 +447,8 @@ compFreeClientSubwindows(WindowPtr pWin, XID id)
             /*
              * Unredirect all existing subwindows
              */
-            for (pChild = pWin->lastChild; pChild; pChild = pChild->prevSib)
+            for (WindowPtr pChild = pWin->lastChild;
+                    pChild; pChild = pChild->prevSib)
                 (void) compUnredirectWindow(pClient, pChild, ccw->update);
 
             free(ccw);
@@ -475,11 +473,10 @@ int
 compUnredirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pWin);
-    CompClientWindowPtr ccw;
 
     if (!csw)
         return BadValue;
-    for (ccw = csw->clients; ccw; ccw = ccw->next)
+    for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next)
         if (ccw->update == update && dixClientIdForXID(ccw->id) == pClient->index) {
             FreeResource(ccw->id, X11_RESTYPE_NONE);
             return Success;
@@ -495,11 +492,10 @@ int
 compRedirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pParent);
-    CompClientWindowPtr ccw;
 
     if (!csw)
         return Success;
-    for (ccw = csw->clients; ccw; ccw = ccw->next) {
+    for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next) {
         int ret = compRedirectWindow(dixClientForXID(ccw->id),
                                      pWin, ccw->update);
         if (ret != Success)
@@ -516,11 +512,10 @@ int
 compUnredirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pParent);
-    CompClientWindowPtr ccw;
 
     if (!csw)
         return Success;
-    for (ccw = csw->clients; ccw; ccw = ccw->next) {
+    for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next) {
         int ret = compUnredirectWindow(dixClientForXID(ccw->id),
                                        pWin, ccw->update);
         if (ret != Success)
