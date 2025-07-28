@@ -62,13 +62,16 @@ endif
 os_dep = []
 os_c_args = []
 
-# eg. struct msghdr -> msg_control 
 if host_machine.system() == 'sunos'
+# eg. struct msghdr -> msg_control
     os_c_args += '-D_XOPEN_SOURCE=1'
     os_c_args += '-D_XOPEN_SOURCE_EXTENDED=1'
     os_c_args += '-D__EXTENSIONS__'
     os_dep += cc.find_library('socket')
     os_dep += cc.find_library('nsl')
+
+# enable "%zu" printf pattern on mingw
+    conf_data.set('__USE_MINGW_ANSI_STDIO', 1)
 endif
 
 if get_option('xres')
