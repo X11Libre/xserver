@@ -184,7 +184,7 @@ endif
 
 build_udev = get_option('udev')
 build_udev_kms = get_option('udev_kms')
-if ['windows', 'darwin', 'freebsd', 'netbsd', 'openbsd', 'sunos'].contains(host_machine.system())
+if ['windows', 'darwin', 'netbsd', 'openbsd', 'sunos'].contains(host_machine.system())
     build_udev = false
     build_udev_kms = false
 endif
