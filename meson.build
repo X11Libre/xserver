@@ -182,12 +182,29 @@ if ['windows', 'darwin', 'cygwin'].contains(host_machine.system())
     hal_option = 'false'
 endif
 
-build_udev = get_option('udev')
-build_udev_kms = get_option('udev_kms')
+udev_option = get_option('udev')
+udev_kms_option = get_option('udev_kms')
 if ['windows', 'darwin', 'netbsd', 'openbsd', 'sunos'].contains(host_machine.system())
-    build_udev = false
-    build_udev_kms = false
+    if udev_option == 'auto'
+        udev_option = 'false'
+    endif
+    if udev_kms_option == 'auto'
+        udev_kms_option = 'false'
+    endif
+    if udev_option == 'true' or  udev_kms_option == 'true'
+        message('WARNING: udev is not supported on your platform')
+    endif
+else
+    if udev_option == 'auto'
+        udev_option = 'true'
+    endif
+    if udev_kms_option == 'auto'
+        udev_kms_option = 'true'
+    endif
 endif
+
+build_udev = (udev_option == 'true')
+build_udev_kms = (udev_kms_option == 'true')
 
 if get_option('systemd_logind') == 'auto'
     build_systemd_logind = build_udev_kms and dbus_dep.found()
