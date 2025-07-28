@@ -672,6 +672,9 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
 
     LogMessageVerb(X_INFO, 3, "LoadModule: \"%s\"", module);
 
+    /* Ignore abi check for the nvidia proprietary DDX driver */
+    is_nvidia_proprietary = !memcmp(module, "nvidia", sizeof("nvidia"));
+
     patterns = InitPatterns(NULL);
     name = LoaderGetCanonicalName(module, patterns);
     noncanonical = (name && strcmp(module, name) != 0);

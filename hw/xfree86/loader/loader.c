@@ -148,6 +148,8 @@ LoaderUnload(const char *name, void *handle)
 
 unsigned long LoaderOptions = 0;
 
+Bool is_nvidia_proprietary = FALSE;
+
 void
 LoaderSetOptions(unsigned long opts)
 {
@@ -157,7 +159,8 @@ LoaderSetOptions(unsigned long opts)
 Bool
 LoaderShouldIgnoreABI(void)
 {
-    return (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL) != 0;
+    /* The nvidia proprietary DDX driver calls this deprecated function */
+    return is_nvidia_proprietary || (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL);
 }
 
 int
