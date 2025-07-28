@@ -184,27 +184,13 @@ endif
 
 udev_option = get_option('udev')
 udev_kms_option = get_option('udev_kms')
-if ['windows', 'darwin', 'netbsd', 'openbsd', 'sunos'].contains(host_machine.system())
-    if udev_option == 'auto'
-        udev_option = 'false'
-    endif
-    if udev_kms_option == 'auto'
-        udev_kms_option = 'false'
-    endif
-    if udev_option == 'true' or  udev_kms_option == 'true'
-        message('WARNING: udev is not supported on your platform')
-    endif
-else
-    if udev_option == 'auto'
-        udev_option = 'true'
-    endif
-    if udev_kms_option == 'auto'
-        udev_kms_option = 'true'
-    endif
+if not dependency('libudev', required: (udev_option == 'true' or udev_kms_option == 'true')).found()
+    udev_option = 'false'
+    udev_kms_option = 'false'
 endif
 
-build_udev = (udev_option == 'true')
-build_udev_kms = (udev_kms_option == 'true')
+build_udev = (udev_option != 'false')
+build_udev_kms = (udev_kms_option != 'false')
 
 if get_option('systemd_logind') == 'auto'
     build_systemd_logind = build_udev_kms and dbus_dep.found()
