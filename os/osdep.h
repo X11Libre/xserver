@@ -53,10 +53,6 @@ SOFTWARE.
 
 #include <X11/Xdefs.h>
 
-#if defined(XDMCP) || defined(HASXDMAUTH)
-#include <X11/Xdmcp.h>
-#endif
-
 #include <limits.h>
 #include <stddef.h>
 #include <X11/Xos.h>
