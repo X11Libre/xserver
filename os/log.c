@@ -410,6 +410,10 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
 
         f_idx++;
 
+        if (f[f_idx] == '#')
+        /* silently ignore alternate form */
+            f_idx++;
+
         /* silently ignore reverse justification */
         if (f[f_idx] == '-')
             f_idx++;
