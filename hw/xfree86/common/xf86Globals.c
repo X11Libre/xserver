@@ -190,6 +190,9 @@ Gamma xf86Gamma = { 0.0, 0.0, 0.0 };
 Bool xf86AllowMouseOpenFail = FALSE;
 Bool xf86AutoBindGPUDisabled = FALSE;
 
+Bool xf86UseXDGConfig = TRUE;
+
+
 #ifdef XF86VIDMODE
 Bool xf86VidModeDisabled = FALSE;
 Bool xf86VidModeAllowNonLocal = FALSE;

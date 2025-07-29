@@ -71,4 +71,6 @@ void xf86VTAcquire(int);
 void xf86VTRelease(int);
 #endif
 
+void GetXDGConfigPath(char* out_path);
+
 #endif /* _XSERVER_XF86_OS_SUPPORT */

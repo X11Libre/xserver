@@ -3,6 +3,7 @@ srcs_xorg_os_support = [
     'shared/posix_tty.c',
     'shared/sigio.c',
     'shared/vidmem.c',
+    'shared/xdg.c'
 ]
 
 hdrs_xorg_os_support = [
