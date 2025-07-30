@@ -622,17 +622,7 @@ int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
 	    break;
 	}
 	break;
-    case TRANS_CLOSEONEXEC:
-#ifdef F_SETFD
-#ifdef FD_CLOEXEC
-	ret = fcntl (fd, F_SETFD, FD_CLOEXEC);
-#else
-	ret = fcntl (fd, F_SETFD, 1);
-#endif /* FD_CLOEXEC */
-#endif /* F_SETFD */
-	break;
     }
-
     return ret;
 }
 

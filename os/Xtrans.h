@@ -135,7 +135,6 @@ typedef struct _XtransConnInfo *XtransConnInfo;
  */
 
 #define TRANS_NONBLOCKING	1
-#define	TRANS_CLOSEONEXEC	2
 
 
 /*
