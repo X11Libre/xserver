@@ -1036,14 +1036,12 @@ int _XSERVTransMakeAllCOTSServerListeners (const char *port, int *partial,
  * may be used by it.
  */
 
-
-#ifdef WIN32
-
 /*
  * emulate writev
  */
 static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
 {
+#ifdef WIN32
     int i, len, total;
     char *base;
 
@@ -1063,7 +1061,12 @@ static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcn
 	}
     }
     return total;
+#else
+    return writev(ciptr->fd, iov, iovcnt);
+#endif
 }
+
+#ifdef WIN32
 
 /*
  * _XSERVTransGetHostname - similar to gethostname but allows special processing.

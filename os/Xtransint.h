@@ -253,21 +253,11 @@ typedef struct _Xtransport_table {
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
-#ifdef WIN32
-
-#define WRITEV(ciptr, iov, iovcnt)	_XSERVTransWriteV(ciptr, iov, iovcnt)
-
 static int _XSERVTransWriteV(
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* iov */
     int 		/* iovcnt */
 );
-
-#else
-
-#define WRITEV(ciptr, iov, iovcnt)	writev(ciptr->fd, iov, iovcnt)
-
-#endif /* WIN32 */
 
 static int trans_mkdir (
     const char *,	/* path */
