@@ -682,17 +682,19 @@ ssize_t _XSERVTransWrite (XtransConnInfo ciptr, const char *buf, size_t size)
     return ciptr->transptr->Write (ciptr, buf, size);
 }
 
-#if XTRANS_SEND_FDS
 int _XSERVTransSendFd (XtransConnInfo ciptr, int fd, int do_close)
 {
-    return ciptr->transptr->SendFd(ciptr, fd, do_close);
+    if (ciptr->transptr->SendFd)
+        return ciptr->transptr->SendFd(ciptr, fd, do_close);
+    return -1;
 }
 
 int _XSERVTransRecvFd (XtransConnInfo ciptr)
 {
-    return ciptr->transptr->RecvFd(ciptr);
+    if (ciptr->transptr->RecvFd)
+        return ciptr->transptr->RecvFd(ciptr);
+    return -1;
 }
-#endif
 
 int _XSERVTransDisconnect (XtransConnInfo ciptr)
 {
