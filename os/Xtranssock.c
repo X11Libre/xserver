@@ -1203,8 +1203,6 @@ static int _XSERVTransSocketBytesReadable (
 #endif /* WIN32 */
 }
 
-#if XTRANS_SEND_FDS
-
 static void
 appendFd(struct _XtransConnFd **prev, int fd, int do_close)
 {
@@ -1305,8 +1303,6 @@ union fd_pass {
 	struct cmsghdr	cmsghdr;
 	char		buf[CMSG_SPACE(MAX_FDS * sizeof(int))];
 };
-
-#endif /* XTRANS_SEND_FDS */
 
 static int _XSERVTransSocketRead (
     XtransConnInfo ciptr, char *buf, int size)
@@ -1474,9 +1470,7 @@ static int _XSERVTransSocketUNIXClose (XtransConnInfo ciptr)
 
     prmsg (2,"SocketUNIXClose(%p,%d)\n", (void *) ciptr, ciptr->fd);
 
-#if XTRANS_SEND_FDS
     cleanupFds(ciptr);
-#endif
     ret = socket_close(ciptr->fd);
 
     if (ciptr->flags
@@ -1500,9 +1494,7 @@ static int _XSERVTransSocketUNIXCloseForCloning (XtransConnInfo ciptr)
     prmsg (2,"SocketUNIXCloseForCloning(%p,%d)\n",
 	(void *) ciptr, ciptr->fd);
 
-#if XTRANS_SEND_FDS
     cleanupFds(ciptr);
-#endif
     return socket_close(ciptr->fd);
 }
 
@@ -1533,10 +1525,8 @@ static Xtransport _XSERVTransSocketTCPFuncs = {
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 	_XSERVTransSocketWritev,
-#if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFdInvalid,
 	_XSERVTransSocketRecvFdInvalid,
-#endif
 	_XSERVTransSocketDisconnect,
 	_XSERVTransSocketINETClose,
 	_XSERVTransSocketINETClose,
@@ -1557,10 +1547,8 @@ static Xtransport _XSERVTransSocketINETFuncs = {
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 	_XSERVTransSocketWritev,
-#if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFdInvalid,
 	_XSERVTransSocketRecvFdInvalid,
-#endif
 	_XSERVTransSocketDisconnect,
 	_XSERVTransSocketINETClose,
 	_XSERVTransSocketINETClose,
@@ -1582,10 +1570,8 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 	_XSERVTransSocketWritev,
-#if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFdInvalid,
 	_XSERVTransSocketRecvFdInvalid,
-#endif
 	_XSERVTransSocketDisconnect,
 	_XSERVTransSocketINETClose,
 	_XSERVTransSocketINETClose,
@@ -1614,10 +1600,8 @@ static Xtransport _XSERVTransSocketLocalFuncs = {
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 	_XSERVTransSocketWritev,
-#if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFd,
 	_XSERVTransSocketRecvFd,
-#endif
 	_XSERVTransSocketDisconnect,
 	_XSERVTransSocketUNIXClose,
 	_XSERVTransSocketUNIXCloseForCloning,
@@ -1650,10 +1634,8 @@ static Xtransport _XSERVTransSocketUNIXFuncs = {
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 	_XSERVTransSocketWritev,
-#if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFd,
 	_XSERVTransSocketRecvFd,
-#endif
 	_XSERVTransSocketDisconnect,
 	_XSERVTransSocketUNIXClose,
 	_XSERVTransSocketUNIXCloseForCloning,
