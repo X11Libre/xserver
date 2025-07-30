@@ -1051,7 +1051,7 @@ static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcn
 	base = iov->iov_base;
 	while (len > 0) {
 	    register int nbytes;
-	    nbytes = _XSERVTransWrite (ciptr, base, len);
+	    nbytes = ciptr->transptr->Write (ciptr, buf, size);
 	    if (nbytes < 0 && total == 0)  return -1;
 	    if (nbytes <= 0)  return total;
 	    ESET(0);
