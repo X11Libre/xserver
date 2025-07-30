@@ -100,15 +100,11 @@ from The Open Group.
 
 #define X_TCP_PORT	6000
 
-#if XTRANS_SEND_FDS
-
 struct _XtransConnFd {
     struct _XtransConnFd   *next;
     int                    fd;
     int                    do_close;
 };
-
-#endif
 
 struct _XtransConnInfo {
     struct _Xtransport     *transptr;
@@ -189,7 +185,6 @@ typedef struct _Xtransport {
 
     ssize_t (*Writev)(XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt);
 
-#if XTRANS_SEND_FDS
     int (*SendFd)(
 	XtransConnInfo,		/* connection */
         int,                    /* fd */
@@ -199,7 +194,6 @@ typedef struct _Xtransport {
     int (*RecvFd)(
 	XtransConnInfo		/* connection */
     );
-#endif
 
     int	(*Disconnect)(
 	XtransConnInfo		/* connection */
