@@ -1358,45 +1358,6 @@ static int _XSERVTransSocketRead (
 #endif /* WIN32 */
 }
 
-static int _XSERVTransSocketReadv (
-    XtransConnInfo ciptr, struct iovec *buf, int size)
-{
-    prmsg (2,"SocketReadv(%d,%p,%d)\n", ciptr->fd, (void *) buf, size);
-
-#if XTRANS_SEND_FDS
-    {
-        union fd_pass   cmsgbuf;
-        struct msghdr   msg = {
-            .msg_name = NULL,
-            .msg_namelen = 0,
-            .msg_iov = buf,
-            .msg_iovlen = size,
-            .msg_control = cmsgbuf.buf,
-            .msg_controllen = CMSG_LEN(MAX_FDS * sizeof(int))
-        };
-
-        size = recvmsg(ciptr->fd, &msg, 0);
-        if (size >= 0) {
-            struct cmsghdr *hdr;
-
-            for (hdr = CMSG_FIRSTHDR(&msg); hdr; hdr = CMSG_NXTHDR(&msg, hdr)) {
-                if (hdr->cmsg_level == SOL_SOCKET && hdr->cmsg_type == SCM_RIGHTS) {
-                    int nfd = (hdr->cmsg_len - CMSG_LEN(0)) / sizeof (int);
-                    int i;
-                    int *fd = (int *) CMSG_DATA(hdr);
-
-                    for (i = 0; i < nfd; i++)
-                        appendFd(&ciptr->recv_fds, fd[i], 0);
-                }
-            }
-        }
-        return size;
-    }
-#else
-    return READV (ciptr, buf, size);
-#endif
-}
-
 static int _XSERVTransSocketWritev (
     XtransConnInfo ciptr, struct iovec *buf, int size)
 {
@@ -1577,7 +1538,6 @@ static Xtransport _XSERVTransSocketTCPFuncs = {
 	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
-	_XSERVTransSocketReadv,
 	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFdInvalid,
@@ -1602,7 +1562,6 @@ static Xtransport _XSERVTransSocketINETFuncs = {
 	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
-	_XSERVTransSocketReadv,
 	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFdInvalid,
@@ -1628,7 +1587,6 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
-	_XSERVTransSocketReadv,
 	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFdInvalid,
@@ -1661,7 +1619,6 @@ static Xtransport _XSERVTransSocketLocalFuncs = {
 	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
-	_XSERVTransSocketReadv,
 	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFd,
@@ -1698,7 +1655,6 @@ static Xtransport _XSERVTransSocketUNIXFuncs = {
 	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
-	_XSERVTransSocketReadv,
 	_XSERVTransSocketWritev,
 #if XTRANS_SEND_FDS
 	_XSERVTransSocketSendFd,

@@ -762,11 +762,6 @@ int _XSERVTransWrite (XtransConnInfo ciptr, const char *buf, int size)
     return ciptr->transptr->Write (ciptr, buf, size);
 }
 
-int _XSERVTransReadv (XtransConnInfo ciptr, struct iovec *buf, int size)
-{
-    return ciptr->transptr->Readv (ciptr, buf, size);
-}
-
 int _XSERVTransWritev (XtransConnInfo ciptr, struct iovec *buf, int size)
 {
     return ciptr->transptr->Writev (ciptr, buf, size);
@@ -1092,33 +1087,6 @@ int _XSERVTransMakeAllCOTSServerListeners (const char *port, int *partial,
 
 
 #ifdef WIN32
-
-/*
- * emulate readv
- */
-static int _XSERVTransReadV (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
-{
-    int i, len, total;
-    char *base;
-
-    ESET(0);
-    for (i = 0, total = 0;  i < iovcnt;  i++, iov++) {
-	len = iov->iov_len;
-	base = iov->iov_base;
-	while (len > 0) {
-	    register int nbytes;
-	    nbytes = _XSERVTransRead (ciptr, base, len);
-	    if (nbytes < 0 && total == 0)  return -1;
-	    if (nbytes <= 0)  return total;
-	    ESET(0);
-	    len   -= nbytes;
-	    total += nbytes;
-	    base  += nbytes;
-	}
-    }
-    return total;
-}
-
 
 /*
  * emulate writev

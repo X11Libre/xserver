@@ -761,13 +761,6 @@ static int _XSERVTransLocalWrite(XtransConnInfo ciptr, const char *buf, int size
     return write(ciptr->fd,buf,size);
 }
 
-static int _XSERVTransLocalReadv(XtransConnInfo ciptr, struct iovec *buf, int size)
-{
-    prmsg(2,"LocalReadv(%d,%p,%d)\n", ciptr->fd, (void *) buf, size );
-
-    return READV(ciptr,buf,size);
-}
-
 static int _XSERVTransLocalWritev(XtransConnInfo ciptr, struct iovec *buf, int size)
 {
     prmsg(2,"LocalWritev(%d,%p,%d)\n", ciptr->fd, (const void *) buf, size );
@@ -845,7 +838,6 @@ static Xtransport _XSERVTransLocalFuncs = {
 	_XSERVTransLocalBytesReadable,
 	_XSERVTransLocalRead,
 	_XSERVTransLocalWrite,
-	_XSERVTransLocalReadv,
 	_XSERVTransLocalWritev,
 #if XTRANS_SEND_FDS
 	_XSERVTransLocalSendFdInvalid,
@@ -873,7 +865,6 @@ static Xtransport _XSERVTransNAMEDFuncs = {
 	_XSERVTransLocalBytesReadable,
 	_XSERVTransLocalRead,
 	_XSERVTransLocalWrite,
-	_XSERVTransLocalReadv,
 	_XSERVTransLocalWritev,
 #if XTRANS_SEND_FDS
 	_XSERVTransLocalSendFdInvalid,
@@ -898,7 +889,6 @@ static Xtransport _XSERVTransPIPEFuncs = {
 	_XSERVTransLocalBytesReadable,
 	_XSERVTransLocalRead,
 	_XSERVTransLocalWrite,
-	_XSERVTransLocalReadv,
 	_XSERVTransLocalWritev,
 #if XTRANS_SEND_FDS
 	_XSERVTransLocalSendFdInvalid,

@@ -113,7 +113,7 @@ typedef long BytesReadable_t;
 #if defined(WIN32)
 
 /*
- *      _XSERVTransReadv and _XSERVTransWritev use struct iovec, normally found
+ *      _XSERVTransWritev use struct iovec, normally found
  *      in Berkeley systems in <sys/uio.h>.  See the readv(2) and writev(2)
  *      manual pages for details.
  */
@@ -242,12 +242,6 @@ int _XSERVTransRead (
 int _XSERVTransWrite (
     XtransConnInfo,	/* ciptr */
     const char *,	/* buf */
-    int			/* size */
-);
-
-int _XSERVTransReadv (
-    XtransConnInfo,	/* ciptr */
-    struct iovec *,	/* buf */
     int			/* size */
 );
 
