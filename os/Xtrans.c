@@ -603,11 +603,7 @@ int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
 	}
 #else
 	    ret = fcntl (fd, F_GETFL, 0);
-#ifdef FNDELAY
-	    ret = fcntl (fd, F_SETFL, ret | FNDELAY);
-#else
 	    ret = fcntl (fd, F_SETFL, ret | O_NDELAY);
-#endif
 #endif /* WIN32 */
 #endif /* FIOSNBIO */
 #endif /* O_NONBLOCK */
