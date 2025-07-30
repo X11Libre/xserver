@@ -46,6 +46,7 @@ from The Open Group.
  * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <dix-config.h>
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -53,6 +54,8 @@ from The Open Group.
 #ifdef HAVE_SYSTEMD_DAEMON
 #include <systemd/sd-daemon.h>
 #endif
+
+#include "os/ossock.h"
 
 /*
  * The transport table contains a definition for every transport (protocol)
@@ -401,13 +404,7 @@ _XSERVTransOpen (int type, const char *address)
 
     prmsg (2,"Open(%d,%s)\n", type, address);
 
-#if defined(WIN32) && defined(TCPCONN)
-    if (_XSERVTransWSAStartup())
-    {
-	prmsg (1,"Open: WSAStartup failed\n");
-	return NULL;
-    }
-#endif
+    ossock_init();
 
     /* Parse the Address */
 

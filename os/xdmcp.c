@@ -37,6 +37,7 @@
 
 #include "dix/dix_priv.h"
 #include "os/auth.h"
+#include "os/ossock.h"
 
 #include "misc.h"
 #include "osdep.h"
@@ -1412,9 +1413,7 @@ get_addr_by_name(const char *argtype,
 #ifdef XTHREADS_NEEDS_BYNAMEPARAMS
     _Xgethostbynameparams hparams;
 #endif
-#if defined(WIN32) && defined(TCPCONN)
-    _XSERVTransWSAStartup();
-#endif
+    ossock_init();
     if (!(hep = _XGethostbyname(namestr, hparams))) {
         FatalError("Xserver: %s unknown host: %s\n", argtype, namestr);
     }

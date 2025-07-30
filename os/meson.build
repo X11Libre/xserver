@@ -13,6 +13,7 @@ srcs_os = [
     'mitauth.c',
     'osinit.c',
     'ospoll.c',
+    'ossock.c',
     'serverlock.c',
     'string.c',
     'utils.c',

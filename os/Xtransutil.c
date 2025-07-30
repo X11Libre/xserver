@@ -219,19 +219,6 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
     return 0;
 }
 
-#if defined(WIN32) && defined(TCPCONN)
-int _XSERVTransWSAStartup (void)
-{
-    static WSADATA wsadata;
-
-    prmsg (2,"WSAStartup()\n");
-
-    if (!wsadata.wVersion && WSAStartup(MAKEWORD(2,2), &wsadata))
-        return 1;
-    return 0;
-}
-#endif
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
