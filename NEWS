@@ -1,3 +1,22 @@
+### xlibre-xserver 25.0.0.7
+
+* xserver: os/log.c: ignore alternate forms in log formats
+* meson.build: Enabled udev for FreeBSD.
+* meson.build: Don't silently change the user's option regarding udev support
+* meson.build: Check for libudev directly, instead of our flimsy os-speciffic guessing
+* config: fix build with -Dudev=false -Dudev_kms=true
+
+### xlibre-xserver 25.0.0.6
+
+* Xi: drop unused variable and NULL free in ProcXISelectEvents()
+* vidmode: fix ProcVidModeGetDotClocks() reply size computation
+* modesetting: fix skipping on empty properties in drmmode_output_set_property()
+* os: xdmcp: fix missing include of <X11/Xdmcp.h>
+* render: picture.c.: move PictureScreenClose to post-hooks
+* mi: midispcur.c.: move miDCCloseScreen to post-hooks
+* glamor: Use EGL_LINUX_DMA_BUF_EXT to create GBM bo EGLImages
+* glamor: Enable dma-buf on nvidia
+
 ### xlibre-xserver 25.0.0.5
 
 * .github: util.sh: allow explicit commit on clone_source
