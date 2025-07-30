@@ -1399,7 +1399,7 @@ static int _XSERVTransSocketWritev (
         return i;
     }
 #endif
-    return WRITEV (ciptr, buf, size);
+    return _XSERVTransWriteV(ciptr, buf, size);
 }
 
 static int _XSERVTransSocketWrite (
