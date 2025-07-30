@@ -60,6 +60,7 @@ SOFTWARE.
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #endif
+#include <stdbool.h>
 #include <stdio.h>
 #include "os/Xtrans.h"
 #include <X11/Xmd.h>
@@ -669,6 +670,47 @@ AbortClient(ClientPtr client)
     }
 }
 
+/*
+ * try to make room in the output buffer:
+ * if not enough room, try to flush first.
+ * if that's not giving enough room, increase the buffer size
+ */
+static bool OutputBufferMakeRoom(ClientPtr who, OsCommPtr oc, size_t sz)
+{
+    const size_t padsize = padding_for_int32(sz);
+    const size_t needed = sz + padsize;
+
+    ConnectionOutputPtr oco = oc->output;
+
+    /* check whether it already fits into buffer */
+    if (oco->count + needed <= oco->size)
+        return true;
+
+    /* try flushing the buffer */
+    int ret = FlushClient(who, oc, NULL, 0);
+    if (ret == -1) /* client was aborted */
+        return false;
+
+    /* does it fit this time ? */
+    if (oco->count + needed <= oco->size)
+        return true;
+
+    /* try to resize the buffer */
+    const int newsize = oco->count + (((needed / BUFSIZE)+1)*BUFSIZE);
+
+    void *newbuf = realloc(oco->buf, newsize);
+    if (!newbuf) {
+        AbortClient(who);
+        dixMarkClientException(who);
+        oco->count = 0;
+        return FALSE;
+    }
+
+    oco->buf = newbuf;
+    oco->size = newsize;
+    return true;
+}
+
 /*****************
  * WriteToClient
  *    Copies buf into ClientPtr.buf if it fits (with padding), else
@@ -799,9 +841,11 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
             CriticalOutputPending = FALSE;
             NewOutputPending = FALSE;
         }
-
-        return FlushClient(who, oc, buf, count);
     }
+
+    /* if we fail to make room, the client will be aborted */
+    if (!OutputBufferMakeRoom(who, oc, count))
+        return -1;
 
     NewOutputPending = TRUE;
     output_pending_mark(who);
