@@ -187,11 +187,7 @@ typedef struct _Xtransport {
 	int			/* size */
     );
 
-    int	(*Writev)(
-	XtransConnInfo,		/* connection */
-	struct iovec *,		/* buf */
-	int			/* size */
-    );
+    int (*Writev)(XtransConnInfo connection, const char *buf, size_t size);
 
 #if XTRANS_SEND_FDS
     int (*SendFd)(

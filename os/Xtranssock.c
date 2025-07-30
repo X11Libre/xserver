@@ -1360,9 +1360,14 @@ static int _XSERVTransSocketRead (
 }
 
 static int _XSERVTransSocketWritev (
-    XtransConnInfo ciptr, struct iovec *buf, int size)
+    XtransConnInfo ciptr, const char *buf, size_t size)
 {
-    prmsg (2,"SocketWritev(%d,%p,%d)\n", ciptr->fd, (void *) buf, size);
+    prmsg (2,"SocketWritev(%d,%p,%ld)\n", ciptr->fd, (void *) buf, (unsigned long)size);
+
+    struct iovec iov = {
+        .iov_len = size,
+        .iov_base = (char*)buf,
+    };
 
 #if XTRANS_SEND_FDS
     if (ciptr->send_fds)
@@ -1373,8 +1378,8 @@ static int _XSERVTransSocketWritev (
         struct msghdr           msg = {
             .msg_name = NULL,
             .msg_namelen = 0,
-            .msg_iov = buf,
-            .msg_iovlen = size,
+            .msg_iov = &iov,
+            .msg_iovlen = 1,
             .msg_control = cmsgbuf.buf,
             .msg_controllen = CMSG_LEN(nfd * sizeof(int))
         };
@@ -1399,7 +1404,7 @@ static int _XSERVTransSocketWritev (
         return i;
     }
 #endif
-    return _XSERVTransWriteV(ciptr, buf, size);
+    return _XSERVTransWriteV(ciptr, &iov, 1);
 }
 
 static int _XSERVTransSocketWrite (
@@ -1419,11 +1424,7 @@ static int _XSERVTransSocketWrite (
 #if XTRANS_SEND_FDS
     if (ciptr->send_fds)
     {
-        struct iovec            iov;
-
-        iov.iov_base = (void *) buf;
-        iov.iov_len = size;
-        return _XSERVTransSocketWritev(ciptr, &iov, 1);
+        return _XSERVTransSocketWritev(ciptr, buf, size);
     }
 #endif /* XTRANS_SEND_FDS */
     return write (ciptr->fd, buf, size);
