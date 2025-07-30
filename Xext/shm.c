@@ -371,9 +371,7 @@ ProcShmAttach(ClientPtr client)
         shmdesc = calloc(1, sizeof(ShmDescRec));
         if (!shmdesc)
             return BadAlloc;
-#ifdef SHM_FD_PASSING
         shmdesc->is_fd = FALSE;
-#endif
         shmdesc->addr = shmat(stuff->shmid, 0,
                               stuff->readOnly ? SHM_RDONLY : 0);
         if ((shmdesc->addr == ((char *) -1)) || SHMSTAT(stuff->shmid, &buf)) {
@@ -415,13 +413,11 @@ ShmDetachSegment(void *value, /* must conform to DeleteType */
 
     if (--shmdesc->refcnt)
         return TRUE;
-#if SHM_FD_PASSING
     if (shmdesc->is_fd) {
         if (shmdesc->busfault)
             busfault_unregister(shmdesc->busfault);
         munmap(shmdesc->addr, shmdesc->size);
     } else
-#endif
         shmdt(shmdesc->addr);
     for (prev = &Shmsegs; *prev != shmdesc; prev = &(*prev)->next);
     *prev = shmdesc->next;
@@ -1115,8 +1111,6 @@ ShmCreatePixmap(ClientPtr client, xShmCreatePixmapReq *stuff)
     return BadAlloc;
 }
 
-#ifdef SHM_FD_PASSING
-
 static void
 ShmBusfaultNotify(void *context)
 {
@@ -1320,7 +1314,6 @@ ProcShmCreateSegment(ClientPtr client)
     X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
-#endif /* SHM_FD_PASSING */
 
 static int
 ProcShmDispatch(ClientPtr client)
@@ -1340,12 +1333,10 @@ ProcShmDispatch(ClientPtr client)
         return ProcShmGetImage(client);
     case X_ShmCreatePixmap:
         return ProcShmCreatePixmap(client);
-#ifdef SHM_FD_PASSING
     case X_ShmAttachFd:
         return ProcShmAttachFd(client);
     case X_ShmCreateSegment:
         return ProcShmCreateSegment(client);
-#endif
     default:
         return BadRequest;
     }
@@ -1432,7 +1423,6 @@ SProcShmCreatePixmap(ClientPtr client)
     return ProcShmCreatePixmap(client);
 }
 
-#ifdef SHM_FD_PASSING
 static int _X_COLD
 SProcShmAttachFd(ClientPtr client)
 {
@@ -1452,7 +1442,6 @@ SProcShmCreateSegment(ClientPtr client)
     swapl(&stuff->size);
     return ProcShmCreateSegment(client);
 }
-#endif  /* SHM_FD_PASSING */
 
 static int _X_COLD
 SProcShmDispatch(ClientPtr client)
@@ -1472,12 +1461,10 @@ SProcShmDispatch(ClientPtr client)
         return SProcShmGetImage(client);
     case X_ShmCreatePixmap:
         return SProcShmCreatePixmap(client);
-#ifdef SHM_FD_PASSING
     case X_ShmAttachFd:
         return SProcShmAttachFd(client);
     case X_ShmCreateSegment:
         return SProcShmCreateSegment(client);
-#endif
     default:
         return BadRequest;
     }
