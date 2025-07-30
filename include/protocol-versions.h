@@ -104,11 +104,7 @@
 
 /* SHM */
 #define SERVER_SHM_MAJOR_VERSION		1
-#if XTRANS_SEND_FDS
 #define SERVER_SHM_MINOR_VERSION		2
-#else
-#define SERVER_SHM_MINOR_VERSION		1
-#endif
 
 /* Sync */
 #define SERVER_SYNC_MAJOR_VERSION		3
