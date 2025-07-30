@@ -12,4 +12,4 @@ jobs:
     steps:
       - uses: live627/check-pr-signoff-action@v1
         with:
-          token: ${{ secrets.PR_SIGNOFF_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
