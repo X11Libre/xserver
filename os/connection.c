@@ -701,8 +701,6 @@ EstablishNewConnections(int curconn, int ready, void *data)
     return;
 }
 
-#define NOROOM "Maximum number of clients reached"
-
 /************
  *   ErrorConnMax
  *     Fail a connection due to lack of client or file descriptor space
@@ -717,29 +715,28 @@ ConnMaxNotify(int fd, int events, void *data)
     /* try to read the byte-order of the connection */
     (void) _XSERVTransRead(trans_conn, &order, 1);
     if (order == 'l' || order == 'B' || order == 'r' || order == 'R') {
-        xConnSetupPrefix csp;
-        char pad[3] = { 0, 0, 0 };
         int whichbyte = 1;
-        struct iovec iov[3];
 
-        csp.success = xFalse;
-        csp.lengthReason = sizeof(NOROOM) - 1;
-        csp.length = (sizeof(NOROOM) + 2) >> 2;
-        csp.majorVersion = X_PROTOCOL;
-        csp.minorVersion = X_PROTOCOL_REVISION;
+/* 36 bytes (with zero) -- needs to be padded to 4*n */
+#define ERR_TEXT "Maximum number of clients reached\0\0"
+
+        xConnSetupPrefix csp = {
+            .success = xFalse,
+            .lengthReason = sizeof(ERR_TEXT),
+            .length = sizeof(ERR_TEXT) >> 2,
+            .majorVersion = X_PROTOCOL,
+            .minorVersion = X_PROTOCOL_REVISION,
+        };
+
         if (((*(char *) &whichbyte) && (order == 'B' || order == 'R')) ||
             (!(*(char *) &whichbyte) && (order == 'l' || order == 'r'))) {
             swaps(&csp.majorVersion);
             swaps(&csp.minorVersion);
             swaps(&csp.length);
         }
-        iov[0].iov_len = sz_xConnSetupPrefix;
-        iov[0].iov_base = (char *) &csp;
-        iov[1].iov_len = csp.lengthReason;
-        iov[1].iov_base = (void *) NOROOM;
-        iov[2].iov_len = (4 - (csp.lengthReason & 3)) & 3;
-        iov[2].iov_base = pad;
-        (void) _XSERVTransWritev(trans_conn, iov, 3);
+
+        _XSERVTransWrite(trans_conn, (const char*)&csp, sizeof(csp));
+        _XSERVTransWrite(trans_conn, ERR_TEXT, sizeof(ERR_TEXT));
     }
     RemoveNotifyFd(trans_conn->fd);
     _XSERVTransClose(trans_conn);
