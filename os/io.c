@@ -883,6 +883,15 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
 
     if (!oco)
 	return 0;
+
+    if (!trans_conn) {
+        /* uh, transport not connected ? can only kill the client :( */
+        AbortClient(who);
+        dixMarkClientException(who);
+        oco->count = 0;
+        return -1;
+    }
+
     written = 0;
     padsize = padding_for_int32(extraCount);
     notWritten = oco->count + extraCount + padsize;
@@ -931,7 +940,7 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
             InsertIOV(padBuffer, padsize)
 
             errno = 0;
-        if (trans_conn && (len = _XSERVTransWritev(trans_conn, iov, i)) >= 0) {
+        if ((len = _XSERVTransWritev(trans_conn, iov, i)) >= 0) {
             written += len;
             notWritten -= len;
             todo = notWritten;
