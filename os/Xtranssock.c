@@ -74,6 +74,8 @@ from the copyright holders.
 #include <X11/Xthreads.h>
 #endif
 
+#include "os/ossock.h"
+
 #ifndef WIN32
 
 #if defined(TCPCONN) || defined(UNIXCONN)
@@ -1192,7 +1194,7 @@ static int _XSERVTransSocketBytesReadable (
 	(void *) ciptr, ciptr->fd, (void *) pend);
 #ifdef WIN32
     {
-	int ret = ioctlsocket ((SOCKET) ciptr->fd, FIONREAD, (u_long *) pend);
+	int ret = ossock_ioctl((SOCKET) ciptr->fd, FIONREAD, (u_long *) pend);
 	if (ret == SOCKET_ERROR) errno = WSAGetLastError();
 	return ret;
     }
