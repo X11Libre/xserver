@@ -1,7 +1,6 @@
 name: Check PR Sign-off
 
-on:
-  pull_request_target:
+on: [pull_request]
 
 jobs:
   check-sign-off:
@@ -13,4 +12,4 @@ jobs:
     steps:
       - uses: live627/check-pr-signoff-action@v1
         with:
-          token: ${{ secrets.SECRET_TOKEN }}
+          token: ${{ secrets.PR_SIGNOFF_TOKEN }}
