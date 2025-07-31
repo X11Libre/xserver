@@ -249,12 +249,6 @@ typedef struct _Xtransport_table {
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
-static int _XSERVTransWriteV(
-    XtransConnInfo,	/* ciptr */
-    struct iovec *,	/* iov */
-    int 		/* iovcnt */
-);
-
 static int trans_mkdir (
     const char *,	/* path */
     int			/* mode */
