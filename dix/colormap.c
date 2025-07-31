@@ -1712,8 +1712,7 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     *pbmask <<= pmap->pVisual->offsetBlue;
 
     ppix = rpix + pmap->numPixelsRed[client];
-    for (pDst = pixels, p = ppixRed; (size_t)(p - ppixRed) < npixR; p++) {
-        *ppix++ = *p;
+    for (pDst = pixels, p = ppixRed; p >= ppixRed && (size_t)(p - ppixRed) < npixR; p++) {
         if ((size_t)(p - ppixRed) < c)
             *pDst++ |= *p << pmap->pVisual->offsetRed;
     }
