@@ -122,13 +122,6 @@ Bool TimerForce(OsTimerPtr timer);
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>
-struct utsname {
-    char nodename[512];
-};
-
-static inline void uname(struct utsname *uts) {
-    gethostname(uts->nodename, sizeof(uts->nodename));
-}
 
 const char *Win32TempDir(void);
 
