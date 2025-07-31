@@ -1455,7 +1455,7 @@ preferredMode(ScrnInfoPtr pScrn, xf86OutputPtr output)
     if (preferred_mode)
         return preferred_mode;
   
-    /* Try to find a mode with ~75Hz refresh rate */
+    /* Try to find a high refresh rate mode greater than or equal to ~75hz  */
     DisplayModePtr mode = output->probed_modes;
     while (mode) {
         /* Some drivers don’t populate VRefresh—manually calculate it */
