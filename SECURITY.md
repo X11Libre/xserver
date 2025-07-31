@@ -6,9 +6,7 @@ The XLibre project takes security seriously. If you discover any vulnerabilities
 
 ### How to Report a Security Vulnerability
 
-Send a detailed email to one or more of the following contacts:
-- info@metux.net
-- legendarydood@gmail.com
+Please **DO NOT** file a public issue to report a security vulberability, instead send your report privately to **info@metux.net**. This will help ensure that any vulnerabilities that are found can be [disclosed responsibly](https://en.wikipedia.org/wiki/Responsible_disclosure) to any affected parties.
 
 Include the following information:
 
@@ -43,9 +41,9 @@ Feel free to privately message staff over our official Matrix or Telegram if the
 | `master` branch |  Supported and maintained                        |
 | Tagged Releases |  Recieves security updates, resources permitting |
 
-We recommend using the latest release for best performance and security.
-All versions currently receive security fixes.
-We'll reassess support boundaries as the project grows or resources shift.
+Project versions that are currently being supported with security updates vary per project.
+Please see specific project repositories for details.
+If nothing is specified, only the latest major versions are supported.
 
 ---
 
