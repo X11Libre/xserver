@@ -102,6 +102,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/serverlock.h"
+#include "os/xhostname.h"
 #include "Xext/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
 #include "xkb/xkbsrv_priv.h"
 #include "dixstruct.h"
@@ -796,7 +797,6 @@ set_font_authorizations(char **authorizations, int *authlen, void *client)
     static char *p = NULL;
 
     if (p == NULL) {
-        char hname[1024], *hnameptr;
         unsigned int len;
 
 #if defined(HAVE_GETADDRINFO)
@@ -809,20 +809,23 @@ set_font_authorizations(char **authorizations, int *authlen, void *client)
 #endif
 #endif
 
-        gethostname(hname, 1024);
+        struct xhostname hn;
+        xhostname(&hn);
+
+        char *hnameptr = NULL;
 #if defined(HAVE_GETADDRINFO)
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_CANONNAME;
-        if (getaddrinfo(hname, NULL, &hints, &ai) == 0) {
+        if (getaddrinfo(hn.name, NULL, &hints, &ai) == 0) {
             hnameptr = ai->ai_canonname;
         }
         else {
-            hnameptr = hname;
+            hnameptr = hn.name;
         }
 #else
-        host = _XGethostbyname(hname, hparams);
+        host = _XGethostbyname(hn.name, hparams);
         if (host == NULL)
-            hnameptr = hname;
+            hnameptr = hn.name;
         else
             hnameptr = host->h_name;
 #endif
