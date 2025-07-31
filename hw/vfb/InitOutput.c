@@ -44,6 +44,7 @@ from The Open Group.
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
+#include "os/xhostname.h"
 
 #include "scrnintstr.h"
 #include "servermd.h"
@@ -701,7 +702,6 @@ vfbWriteXWDFileHeader(ScreenPtr pScreen)
 {
     vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
     XWDFileHeader *pXWDHeader = pvfb->pXWDHeader;
-    char hostname[XWD_WINDOW_NAME_LEN];
     unsigned long swaptest = 1;
     int i;
 
@@ -736,12 +736,10 @@ vfbWriteXWDFileHeader(ScreenPtr pScreen)
     pXWDHeader->window_bdrwidth = 0;
 
     /* write xwd "window" name: Xvfb hostname:server.screen */
-
-    if (-1 == gethostname(hostname, sizeof(hostname)))
-        hostname[0] = 0;
-    else
-        hostname[XWD_WINDOW_NAME_LEN - 1] = 0;
-    sprintf((char *) (pXWDHeader + 1), "Xvfb %s:%s.%d", hostname, display,
+    struct xhostname hn;
+    xhostname(&hn);
+    hn.name[XWD_WINDOW_NAME_LEN - 1] = 0;
+    sprintf((char *) (pXWDHeader + 1), "Xvfb %s:%s.%d", hn.name, display,
             pScreen->myNum);
 
     /* write colormap pixel slot values */
