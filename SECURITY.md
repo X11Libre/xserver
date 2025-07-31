@@ -2,7 +2,7 @@
 
 ##  Reporting Vulnerabilities
 
-The XLibre project takes security seriously. If you discover any vulnerabilities, please report them responsibly.
+The XLibre project takes security seriously. If you discover any vulnerabilities, please bring it to our attention right away!
 
 ### How to Report a Security Vulnerability
 
@@ -32,7 +32,7 @@ Include the following information:
 
 Please allow us ample time to validate and patch the issue before disclosing it publicly.
 
-Feel free to privately message staff over our official Matrix or Telegram if the issue is of extreme merit and needs an immediate solution. 
+Feel free to privately message metux over our official Matrix or Telegram if the issue is of extreme merit, our project lead is busy please give ample time for response.
 
 ##  Supported Versions
 
