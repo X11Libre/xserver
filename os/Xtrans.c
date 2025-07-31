@@ -56,6 +56,7 @@ from The Open Group.
 #endif
 
 #include "os/ossock.h"
+#include "os/xhostname.h"
 
 /*
  * The transport table contains a definition for every transport (protocol)
@@ -201,7 +202,6 @@ _XSERVTransParseAddress (const char *address,
     char	*mybuf, *tmpptr = NULL;
     const char	*_protocol = NULL;
     const char	*_host, *_port;
-    char	hostnamebuf[256];
     char	*_host_buf;
     int		_host_len;
 
@@ -305,10 +305,12 @@ _XSERVTransParseAddress (const char *address,
     *mybuf ++= '\0';
 
     _host_len = strlen(_host);
+
+    struct xhostname hn;
     if (_host_len == 0)
     {
-	_XSERVTransGetHostname (hostnamebuf, sizeof (hostnamebuf));
-	_host = hostnamebuf;
+        xhostname(&hn);
+        _host = hn.name;
     }
 #ifdef IPv6
     /* hostname in IPv6 [numeric_addr]:0 form? */
@@ -1058,36 +1060,6 @@ static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcn
 	}
     }
     return total;
-}
-
-/*
- * _XSERVTransGetHostname - similar to gethostname but allows special processing.
- */
-int _XSERVTransGetHostname (char *buf, int maxlen)
-{
-    buf[0] = '\0';
-    (void) gethostname (buf, maxlen);
-    buf [maxlen - 1] = '\0';
-    return strlen(buf);
-}
-
-#else /* WIN32 */
-
-#include <sys/utsname.h>
-
-/*
- * _XSERVTransGetHostname - similar to gethostname but allows special processing.
- */
-int _XSERVTransGetHostname (char *buf, int maxlen)
-{
-    struct utsname name;
-    uname (&name);
-
-    int len = strlen (name.nodename);
-    if (len >= maxlen) len = maxlen - 1;
-    memcpy (buf, name.nodename, len);
-    buf[len] = '\0';
-    return len;
 }
 
 #endif /* WIN32 */

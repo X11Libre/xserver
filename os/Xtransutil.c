@@ -62,6 +62,8 @@ from The Open Group.
 #include <X11/Xwinsock.h>
 #endif
 
+#include "os/xhostname.h"
+
 #if defined(IPv6) && !defined(AF_INET6)
 #error "Cannot build IPv6 support without AF_INET6"
 #endif
@@ -189,8 +191,9 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 	 * host name for authentication.
 	 */
 
-	char hostnamebuf[256];
-	int len = _XSERVTransGetHostname (hostnamebuf, sizeof hostnamebuf);
+        struct xhostname hn;
+        xhostname(&hn);
+        int len = strlen(hn.name);
 
 	if (len > 0) {
 	    if (*addrp && *addrlenp < (len + 1))
@@ -201,7 +204,7 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 	    if (!*addrp)
 		*addrp = malloc (len + 1);
 	    if (*addrp) {
-		strcpy ((char *) *addrp, hostnamebuf);
+		strcpy ((char *) *addrp, hn.name);
 		*addrlenp = len;
 	    } else {
 		*addrlenp = 0;

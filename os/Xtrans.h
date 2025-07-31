@@ -292,9 +292,4 @@ int _XSERVTransConvertAddress (
     Xtransaddr **	/* addrp */
 );
 
-int _XSERVTransGetHostname (
-    char *	/* buf */,
-    int 	/* maxlen */
-);
-
 #endif /* _XTRANS_H_ */
