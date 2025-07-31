@@ -1031,41 +1031,6 @@ int _XSERVTransMakeAllCOTSServerListeners (const char *port, int *partial,
     return 0;
 }
 
-/*
- * These routines are not part of the X Transport Interface, but they
- * may be used by it.
- */
-
-/*
- * emulate writev
- */
-static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
-{
-#ifdef WIN32
-    int i, len, total;
-    char *base;
-
-    ESET(0);
-    for (i = 0, total = 0;  i < iovcnt;  i++, iov++) {
-	len = iov->iov_len;
-	base = iov->iov_base;
-	while (len > 0) {
-	    register int nbytes;
-	    nbytes = ciptr->transptr->Write (ciptr, buf, size);
-	    if (nbytes < 0 && total == 0)  return -1;
-	    if (nbytes <= 0)  return total;
-	    ESET(0);
-	    len   -= nbytes;
-	    total += nbytes;
-	    base  += nbytes;
-	}
-    }
-    return total;
-#else
-    return writev(ciptr->fd, iov, iovcnt);
-#endif
-}
-
 #ifdef WIN32
 
 /*
