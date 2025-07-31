@@ -457,8 +457,10 @@ endif
 
 if host_machine.system() in ['freebsd', 'openbsd']
    epoll_dep = dependency('epoll-shim')
+   epoll_inc = join_paths(epoll_dep.get_variable('prefix'), get_option('includedir'), 'libepoll-shim')
 else
    epoll_dep = []
+   epoll_inc = ''
 endif
 
 have_eventfd = cc.has_header('sys/eventfd.h', dependencies: epoll_dep)
@@ -613,6 +615,7 @@ inc = include_directories(
     'randr',
     'render',
     'xfixes',
+    epoll_inc,
 )
 
 build_xselinux = false
