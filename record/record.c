@@ -518,7 +518,7 @@ RecordARequest(ClientPtr client)
             RecordIsMemberOfSet(pRCAP->pRequestMajorOpSet, majorop)) {
             if (majorop <= 127) {       /* core request */
 
-                if (stuff->length == 0)
+                if (client->req_len == 0)
                     RecordABigRequest(pContext, client, stuff);
                 else
                     RecordAProtocolElement(pContext, client, XRecordFromClient,
@@ -540,7 +540,7 @@ RecordARequest(ClientPtr client)
                         majorop <= pMinorOpInfo->major.last &&
                         RecordIsMemberOfSet(pMinorOpInfo->major.pMinOpSet,
                                             minorop)) {
-                        if (stuff->length == 0)
+                        if (client->req_len == 0)
                             RecordABigRequest(pContext, client, stuff);
                         else
                             RecordAProtocolElement(pContext, client,

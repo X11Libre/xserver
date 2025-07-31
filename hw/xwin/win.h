@@ -145,6 +145,7 @@
 #include <X11/Xprotostr.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/dix_priv.h"
 
 #include "scrnintstr.h"
 #include "pixmapstr.h"

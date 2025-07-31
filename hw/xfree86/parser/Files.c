@@ -78,16 +78,22 @@ static const xf86ConfigSymTabRec FilesTab[] = {
 #define CLEANUP xf86freeFiles
 
 XF86ConfFilesPtr
-xf86parseFilesSection(void)
+xf86parseFilesSection(XF86ConfFilesPtr ptr)
 {
     int i, j;
     int k, l;
     char *str;
     int token;
 
-    parsePrologue(XF86ConfFilesPtr, XF86ConfFilesRec)
+    if (ptr == NULL)
+    {
+        if((ptr=calloc(1, sizeof(XF86ConfFilesRec))) == NULL)
+        {
+            return NULL;
+        }
+    }
 
-        while ((token = xf86getToken(FilesTab)) != ENDSECTION) {
+    while ((token = xf86getToken(FilesTab)) != ENDSECTION) {
         switch (token) {
         case COMMENT:
             ptr->file_comment = xf86addComment(ptr->file_comment, xf86_lex_val.str);
