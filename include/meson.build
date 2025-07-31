@@ -204,6 +204,12 @@ conf_data.set('TCPCONN', '1')
 conf_data.set('UNIXCONN', host_machine.system() != 'windows' ? '1' : false)
 conf_data.set('IPv6', build_ipv6 ? '1' : false)
 
+# potentially tunable - needed also in places that cannot include misc.h
+conf_data.set('MAXCLIENTS', 2048)
+
+# Must be a power of 2 and <= MAXCLIENTS */
+conf_data.set('DIX_LIMITCLIENTS', 256)
+
 # some drivers (eg. xf86-video-intel) still relying on this symbol being set
 conf_data.set('COMPOSITE', '1')
 
@@ -228,7 +234,7 @@ conf_data.set('RES', build_res ? '1' : false)
 conf_data.set('RENDER', '1')
 conf_data.set('SCREENSAVER', build_screensaver ? '1' : false)
 conf_data.set('SHAPE', '1')
-conf_data.set('XACE', build_xace ? '1' : false)
+conf_data.set('XACE', '1')
 conf_data.set('XCMISC', '1')
 conf_data.set('XCSECURITY', build_xsecurity ? '1' : false)
 conf_data.set('CONFIG_NAMESPACE', build_namespace ? '1' : false)
@@ -440,6 +446,7 @@ if build_xorg
             'extension.h',
             'extinit.h',
             'extnsionst.h',
+            'fd_notify.h',
             'fourcc.h',
             'gc.h',
             'gcstruct.h',

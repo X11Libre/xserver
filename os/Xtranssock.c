@@ -119,9 +119,9 @@ from the copyright holders.
 #include <X11/Xw32defs.h>
 #undef close
 #define close closesocket
-#define ECONNREFUSED WSAECONNREFUSED
+
+#undef EADDRINUSE
 #define EADDRINUSE WSAEADDRINUSE
-#define EPROTOTYPE WSAEPROTOTYPE
 #undef EWOULDBLOCK
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define EINPROGRESS WSAEINPROGRESS

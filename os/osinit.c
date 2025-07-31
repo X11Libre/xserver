@@ -75,7 +75,7 @@ SOFTWARE.
 #endif
 
 /* The actual user defined max number of clients */
-int LimitClients = LIMITCLIENTS;
+int LimitClients = DIX_LIMITCLIENTS;
 
 static OsSigWrapperPtr OsSigWrapper = NULL;
 
