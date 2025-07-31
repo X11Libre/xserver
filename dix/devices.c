@@ -2477,7 +2477,7 @@ ProcGetMotionEvents(ClientPtr client)
 {
     WindowPtr pWin;
     xTimecoord *coords = (xTimecoord *) NULL;
-    int i, count, xmin, xmax, ymin, ymax, rc;
+    int count, xmin, xmax, ymin, ymax, rc;
     unsigned long nEvents;
     DeviceIntPtr mouse = PickPointer(client);
     TimeStamp start, stop;
@@ -2513,7 +2513,7 @@ ProcGetMotionEvents(ClientPtr client)
         ymin = pWin->drawable.y - wBorderWidth(pWin);
         ymax = pWin->drawable.y + (int) pWin->drawable.height +
             wBorderWidth(pWin);
-        for (i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
             if ((xmin <= coords[i].x) && (coords[i].x < xmax) &&
                 (ymin <= coords[i].y) && (coords[i].y < ymax)) {
                 coords[nEvents].time = coords[i].time;
@@ -2534,13 +2534,15 @@ ProcGetMotionEvents(ClientPtr client)
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.nEvents);
+        for (int i = 0; i < nEvents; i++) {
+            swapl(&coords[i].time);
+            swaps(&coords[i].x);
+            swaps(&coords[i].y);
+        }
     }
+
     WriteToClient(client, sizeof(xGetMotionEventsReply), &rep);
-    if (nEvents) {
-        client->pSwapReplyFunc = (ReplySwapPtr) SwapTimeCoordWrite;
-        WriteSwappedDataToClient(client, nEvents * sizeof(xTimecoord),
-                                 (char *) coords);
-    }
+    WriteToClient(client, nEvents * sizeof(xTimecoord), coords);
     free(coords);
     return Success;
 }

@@ -311,7 +311,7 @@ int _XSERVTransGetHostname (
 );
 
 #if defined(WIN32) && defined(TCPCONN)
-int _XSERVTransWSAStartup();
+int _XSERVTransWSAStartup(void);
 #endif
 
 #endif /* _XTRANS_H_ */

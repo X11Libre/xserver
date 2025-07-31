@@ -596,15 +596,10 @@ int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
 #else
 #if defined(WIN32)
 	{
-#ifdef WIN32
-	    u_long arg;
-#else
-	    int arg;
-#endif
-	    arg = 1;
+	    u_long arg_ret = 1;
 /* IBM TCP/IP understands this option too well: it causes _XSERVTransRead to fail
  * eventually with EWOULDBLOCK */
-	    ret = ioctl (fd, FIONBIO, &arg);
+	    ret = ioctl (fd, FIONBIO, &arg_ret);
 	}
 #else
 	    ret = fcntl (fd, F_GETFL, 0);
@@ -613,7 +608,7 @@ int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
 #else
 	    ret = fcntl (fd, F_SETFL, ret | O_NDELAY);
 #endif
-#endif /* AIXV3  || uniosu */
+#endif /* WIN32 */
 #endif /* FIOSNBIO */
 #endif /* O_NONBLOCK */
 	    break;

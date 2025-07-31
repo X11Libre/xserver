@@ -120,13 +120,19 @@ xf86parseModuleSubSection(XF86LoadPtr head, char *name)
 }
 
 XF86ConfModulePtr
-xf86parseModuleSection(void)
+xf86parseModuleSection(XF86ConfModulePtr ptr)
 {
     int token;
 
-    parsePrologue(XF86ConfModulePtr, XF86ConfModuleRec)
+    if (ptr == NULL)
+    {
+        if((ptr=calloc(1, sizeof(XF86ConfModuleRec))) == NULL)
+        {
+            return NULL;
+        }
+    }
 
-        while ((token = xf86getToken(ModuleTab)) != ENDSECTION) {
+    while ((token = xf86getToken(ModuleTab)) != ENDSECTION) {
         switch (token) {
         case COMMENT:
             ptr->mod_comment = xf86addComment(ptr->mod_comment, xf86_lex_val.str);

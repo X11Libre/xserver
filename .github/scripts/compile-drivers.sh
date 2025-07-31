@@ -19,7 +19,7 @@ build_drv_ac xf86-input-synaptics   $X11L_DRV_GIT/xf86-input-synaptics   master
 
 build_drv_ac xf86-video-amdgpu      $X11L_DRV_GIT/xf86-video-amdgpu      xf86-video-amdgpu-23.0.0
 build_drv_ac xf86-video-ati         $X11L_DRV_GIT/xf86-video-ati         xf86-video-ati-22.0.0
-build_drv_ac xf86-video-intel       $X11L_DRV_GIT/xf86-video-intel.git   master
+build_drv_ac xf86-video-intel       $X11L_DRV_GIT/xf86-video-intel       master
 build_drv_ac xf86-video-nouveau     $X11L_DRV_GIT/xf86-video-nouveau     xf86-video-nouveau-1.0.18
 build_drv_ac xf86-video-omap        $X11L_DRV_GIT/xf86-video-omap        master
 build_drv_ac xf86-video-qxl         $X11L_DRV_GIT/xf86-video-qxl         master

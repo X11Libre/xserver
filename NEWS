@@ -1,0 +1,125 @@
+### xlibre-xserver 25.0.0.7
+
+* xserver: os/log.c: ignore alternate forms in log formats
+* meson.build: Enabled udev for FreeBSD.
+* meson.build: Don't silently change the user's option regarding udev support
+* meson.build: Check for libudev directly, instead of our flimsy os-speciffic guessing
+* config: fix build with -Dudev=false -Dudev_kms=true
+
+### xlibre-xserver 25.0.0.6
+
+* Xi: drop unused variable and NULL free in ProcXISelectEvents()
+* vidmode: fix ProcVidModeGetDotClocks() reply size computation
+* modesetting: fix skipping on empty properties in drmmode_output_set_property()
+* os: xdmcp: fix missing include of <X11/Xdmcp.h>
+* render: picture.c.: move PictureScreenClose to post-hooks
+* mi: midispcur.c.: move miDCCloseScreen to post-hooks
+* glamor: Use EGL_LINUX_DMA_BUF_EXT to create GBM bo EGLImages
+* glamor: Enable dma-buf on nvidia
+
+### xlibre-xserver 25.0.0.5
+
+* .github: util.sh: allow explicit commit on clone_source
+* .github: use last known good revision of XTS
+* .github: use last known good revision of piglit
+* xfree86: inputtest: use FatalError() instead of abort()
+* xquartz: drop using HAVE_DIX_CONFIG_H
+* miext: damage: document DamageScreenFuncsRec
+* .github: add workflow for github releases
+* Xi: fix wrong assertion in RetrieveTouchDeliveryData()
+* .github: drop obsolete xwayland dependencies
+* dix: fix SetPointerMapping reply success code on busy
+* meson.build: add -Woverride-init
+* .gitlab: merge release into xserver-build workflow
+* minor release 25.0.0.5
+* modesetting: ignore the drmmode if p->atoms is null
+* kdrive: fix incorrect NULL-check
+* kdrive: move a local variable declaration to the top of the scope
+* kdrive: const-qualify KdAddConfig{Keyboard,Pointer}'s argument
+* kdrive: add documenation for mouse arguments
+
+### xlibre-xserver 25.0.0.4
+
+* xfree86: compat: make xf86MsgVerb() a bit less noisier
+* xquartz: drop unused field declarations in request handlers
+* xquartz: fix incomplete prototype of executable_path()
+* vfb: drop unused DarwinHandleGUI()
+* xnest: drop unused DarwinHandleGUI()
+* namespace: drop unused winIsRoot()
+* minor release 25.0.0.4
+* glx: Fix out-of-bounds reads from negative return
+* glx: Don't blindly write 8 bytes in GLX single replies
+* treewide: remove "lib" prefix in static_library names (meson)
+* mi: move miPointerCloseScreen to hookPostClose
+
+### xlibre-xserver 25.0.0.3
+
+* .github: add building mouse driver
+* Xnest: fix analyzer warning on uninitialized `DefaultVisual`
+* xf86bigfont: fix compiler warning on unused variable
+* xfree86: loadmod: locally scope the errtype variable
+* xfree86: compat: consolidate logging
+* os: log: vpnprintf(): ignore reverse justification modifier
+* dix: add screen hook for post-close
+* miext: damage: use dixScreenHookPostClose() instead of dixScreenHookClose()
+* minor release 25.0.0.3
+* xf86vidmode: fix result copying in ProcVidModeGetMonitor()
+* kdrive: ephyr: use c99 struct initialization
+* meson.build: meson_options.txt: add build option to disable building test
+
+### xlibre-xserver 25.0.0.2
+
+* CONTRIBUTION.md: "MR" / "MRs" -> pull request(s)
+* Update build-xserver.yml to have correct permissions to resolve CodeQL alert
+* rootless: fix missing include of dix/screen_hooks_priv.h
+* .github: 01-bug-report: use 25.0.0.X instead of listing all minor releases
+* minor release 25.0.0.2
+* glamor: Fix dual blend on GLES3
+* .github: export MACHINE the right way
+* .github: drop sudo for prerequisites builds
+* .gitlab-ci: only look for files when validating man pages
+* .github: don't override env vars set externally
+* xext: add/fix include guards where missing/broken
+* config: add/fix include guards where missing/broken
+* fb: add/fix include guards where missing/broken
+* hw: add/fix include guards where missing/broken
+* include: add/fix include guards where missing/broken
+* mi: add/fix include guards where missing/broken
+* miext: add/fix include guards where missing/broken
+* pseudoramix: add/fix include guards where missing/broken
+* record: add/fix include guards where missing/broken
+* xquartz: depend on libX11 (includes X11/Xlib.h)
+* xquartz: depend on libXdmcp (includes osdep.h which includes X11/Xdmcp.h)
+* xquartz: add missing include for `DeliverEvents`
+* xquartz: add missing include for `XkbSetRulesDflts`
+* .github: .gitlab-ci: add macos (xquartz) build job
+* .github: add comments explaning the reasons behind xts patching
+* dix: generate-atoms: Changed BASH to POSIX SH for portability.
+* .github: Add new issue forms
+* Xext: Fix typo in xace.h
+* modesetting: Fix typo.
+* modesetting: allow enabling atomic mode.
+* glamor: Enable dmabuf_capable for Zink
+
+### xlibre-xserver 25.0.0.1
+
+* xfree86: provide xf86DisableGeneralHandler() for Nvidia driver
+* meson.build: fix release date variable
+* meson_options: fix mailing list address
+* xfree86: man: fix git URL
+* xorg-server.pc.in: fix source URL
+* randr: fix memleak in provider property update
+* release 25.0.0.1
+* glx: fix correct sizeof GL unsigned int
+* xfree86: compat: fix Ones for compilers where __builtin_popcountl is missing
+
+### xlibre-xserver 25.0.0.0
+
+* Xnamespace extension: a novel approach for isolating clients from
+  different security domains (eg. containers) into separate X11
+  namespaces, where they can't hurt each other (for cases where
+  Xsecurity from 1996 isn't sufficient)
+* Xnest ported to xcb - no more dependency on old Xlib anymore
+* per-ABI driver directories (allows distros installing multiple ABIs at the same time, eg. for smoother upgrades)
+* lots of small fixes and cleanups - too many to list them all here.
+* several CVE fixes
