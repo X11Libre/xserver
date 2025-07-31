@@ -1275,10 +1275,12 @@ static int _XSERVTransSocketSendFdInvalid(
 
 #define MAX_FDS		128
 
+#ifdef XTRANS_SEND_FDS
 union fd_pass {
 	struct cmsghdr	cmsghdr;
 	char		buf[CMSG_SPACE(MAX_FDS * sizeof(int))];
 };
+#endif
 
 static int _XSERVTransSocketRead (
     XtransConnInfo ciptr, char *buf, int size)
