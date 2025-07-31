@@ -210,9 +210,9 @@ LogFilePrep(const char *fname, const char *backup, const char *idstring)
 #pragma GCC diagnostic pop
 
 static inline void doLogSync(void) {
-#ifndef WIN32
+//#ifndef WIN32
     fsync(logFileFd);
-#endif
+//#endif
 }
 
 static void initSyslog(void) {
