@@ -28,12 +28,12 @@ int xf86layoutAddInputDevices(XF86ConfigPtr config, XF86ConfLayoutPtr layout);
 static inline void xf86freeMatchGroup(xf86MatchGroup *group)
 {
     xorg_list_del(&group->entry);
-    if (group->values) {
-        for (char **list = group->values; *list; list++) {
-            free(*list);
-            *list = NULL;
-        }
-        group->values = NULL;
+    xf86MatchPattern *pattern, *next_pattern;
+    xorg_list_for_each_entry_safe(pattern, next_pattern, &group->patterns, entry) {
+        xorg_list_del(&pattern->entry);
+        if (pattern->str)
+            free(pattern->str);
+        free(pattern);
     }
     free(group);
 }
