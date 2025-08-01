@@ -37,18 +37,17 @@
 #include <dix-config.h>
 
 #include <sys/types.h>
-#ifdef MITSHM
-#ifdef SVR4
-#include <sys/sysmacros.h>
-#endif
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/stat.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
-#endif
+
+#ifdef MITSHM
+#include <sys/sysmacros.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#endif /* MITSHM */
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -121,11 +120,7 @@ CheckForShmSyscall(void)
 
 #endif
 
-#endif
-
 /* ========== Management of shared memory segments ========== */
-
-#ifdef MITSHM
 
 #ifdef __linux__
 /* On Linux, shared memory marked as "removed" can still be attached.
@@ -213,13 +208,10 @@ shmdealloc(ShmDescPtr pDesc)
     free(pDesc);
 }
 
-#endif
-
 /* Called when a font is closed. */
 void
 XF86BigfontFreeFontShm(FontPtr pFont)
 {
-#ifdef MITSHM
     ShmDescPtr pDesc;
 
     /* If during shutdown of the server, XF86BigfontCleanup() has already
@@ -231,18 +223,22 @@ XF86BigfontFreeFontShm(FontPtr pFont)
     pDesc = (ShmDescPtr) FontGetPrivate(pFont, FontShmdescIndex);
     if (pDesc)
         shmdealloc(pDesc);
-#endif
 }
 
 /* Called upon fatal signal. */
 void
 XF86BigfontCleanup(void)
 {
-#ifdef MITSHM
     while (ShmList)
         shmdealloc(ShmList);
-#endif
 }
+
+#else /* MITSHM */
+
+void XF86BigfontFreeFontShm(FontPtr pFont) { }
+void XF86BigfontCleanup(void) { }
+
+#endif /* MITSHM */
 
 /* Called when a server generation dies. */
 static void
@@ -277,7 +273,7 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
         .signature = signature,
         .capabilities = (client->local && !client->swapped)
                          ? XF86Bigfont_CAP_LocalShm : 0
-#endif
+#endif /* MITSHM */
     };
     if (client->swapped) {
         swaps(&reply.sequenceNumber);
@@ -326,7 +322,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
     ShmDescPtr pDesc = NULL;
 #else
 #define pDesc 0
-#endif
+#endif /* MITSHM */
     xCharInfo *pCI;
     CARD16 *pIndex2UniqIndex;
     CARD16 *pUniqIndex2Index;
@@ -382,13 +378,13 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                 shmid = pDesc->shmid;
             }
             else {
-#endif
+#endif /* MITSHM */
                 pCI = calloc(nCharInfos, sizeof(xCharInfo));
                 if (!pCI)
                     return BadAlloc;
 #ifdef MITSHM
             }
-#endif
+#endif /* MITSHM */
             /* Fill nCharInfos starting at pCI. */
             {
                 xCharInfo *prCI = pCI;
@@ -427,7 +423,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
                 }
             }
         }
-#endif
+#endif /* MITSHM */
         if (shmid == -1) {
             /* Cannot use shared memory, so remove-duplicates the xCharInfos
                using a temporary hash table. */
@@ -714,6 +710,6 @@ XFree86BigfontExtensionInit(void)
         pagesize = getpagesize();
 #endif
 #endif
-#endif
+#endif /* MITSHM */
     }
 }
