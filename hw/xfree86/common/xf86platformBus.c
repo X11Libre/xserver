@@ -309,6 +309,7 @@ xf86platformProbe(void)
     }
 
     for (i = 0; i < xf86_num_platform_devices; i++) {
+        struct xf86_platform_device *dev = &xf86_platform_devices[i];
         char *busid = xf86_platform_odev_attributes(i)->busid;
 
         if (pci && busid && (strncmp(busid, "pci:", 4) == 0)) {
@@ -331,6 +332,18 @@ xf86platformProbe(void)
                 LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath extended to \"%s\"\n",
                                cl->identifier, path);
                 LoaderSetPath(path);
+            }
+
+            if (xf86CheckBoolOption(cl->option_lst, "IgnoreABI", FALSE)) {
+                if (cl->driver) {
+                    LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" sets %s to ignore ABI for \"%s\" managed by %s\n",
+                               cl->identifier, cl->driver, dev->attribs->path, dev->attribs->driver);
+                    LoaderSetIgnoreABI(cl->driver);
+                } else {
+                    LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" requires to ignore ABI for \"%s\" managed by %s\n"
+                            "   but Option \"Driver\" is not set\n",
+                            cl->identifier, dev->attribs->path, dev->attribs->driver);
+                }
             }
         }
     }

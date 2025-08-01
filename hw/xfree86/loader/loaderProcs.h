@@ -69,6 +69,7 @@ typedef struct module_desc {
 /* External API for the loader */
 
 void LoaderInit(void);
+void LoaderClose(void);
 
 ModuleDescPtr LoadModule(const char *, void *, const XF86ModReqInfo *, int *);
 ModuleDescPtr DuplicateModule(ModuleDescPtr mod, ModuleDescPtr parent);
@@ -78,9 +79,9 @@ void LoaderSetPath(const char *path);
 void LoaderUnload(const char *, void *);
 unsigned long LoaderGetModuleVersion(ModuleDescPtr mod);
 
-void LoaderResetOptions(void);
-
-void LoaderSetIgnoreAbi(void);
+void LoaderSetIgnoreAllABI(void);
+Bool LoaderGetAndFlagIgnoreABI(const char *);
+void LoaderSetIgnoreABI(const char *);
 
 const char **LoaderListDir(const char *, const char **);
 
