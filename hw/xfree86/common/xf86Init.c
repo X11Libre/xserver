@@ -1325,13 +1325,6 @@ xf86GetBppFromDepth(ScrnInfoPtr pScrn, int depth)
         return 0;
 }
 
-#ifdef DDXBEFORERESET
-void
-ddxBeforeReset(void)
-{
-}
-#endif
-
 #if INPUTTHREAD
 /** This function is called in Xserver/os/inputthread.c when starting
     the input thread. */

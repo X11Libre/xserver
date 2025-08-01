@@ -143,12 +143,10 @@ void XwinExtensionInit(void)
     LoadExtensionList(xwinExtensions, ARRAY_SIZE(xwinExtensions), TRUE);
 }
 
-#if defined(DDXBEFORERESET)
 /*
  * Called right before KillAllClients when the server is going to reset,
  * allows us to shutdown our separate threads cleanly.
  */
-
 void
 ddxBeforeReset(void)
 {
@@ -156,7 +154,6 @@ ddxBeforeReset(void)
 
     winClipboardShutdown();
 }
-#endif
 
 #if INPUTTHREAD
 /** This function is called in Xserver/os/inputthread.c when starting

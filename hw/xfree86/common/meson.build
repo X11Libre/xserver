@@ -22,6 +22,7 @@ srcs_xorg_common = [
     'xf86Mode.c',
     'xorgHelper.c',
     'xf86Extensions.c',
+    '../../stubs/ddxBeforeReset.c',
 ]
 
 xorg_sdk_headers = [
