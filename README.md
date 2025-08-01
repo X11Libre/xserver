@@ -108,6 +108,8 @@ That's not enough? Then have a glance on the [good first](https://github.com/X11
     </figure>
 </p>
 
+Together we'll make X great again!
+
 ## Contact
 
 [XLibre Discussions at Github](https://github.com/orgs/X11Libre/discussions) | [XLibre mailing list at FreeLists](https://www.freelists.org/list/xlibre) | [@x11dev channel at Telegram](https://t.me/x11dev) | [#xlibre room at Matrix](https://matrix.to/#/#xlibre:matrix.org) | [XLibre security contact at Github](https://github.com/X11Libre/xserver/security/policy)
