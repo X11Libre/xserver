@@ -979,9 +979,9 @@ ephyrProcessErrorEvent(xcb_generic_event_t *xev)
     xcb_generic_error_t *e = (xcb_generic_error_t *)xev;
 
     FatalError("X11 error\n"
-               "Error code: %hhu\n"
+               "Error code: %hu\n"
                "Sequence number: %hu\n"
-               "Major code: %hhu\tMinor code: %hu\n"
+               "Major code: %hu\tMinor code: %hu\n"
                "Error value: %u\n",
                e->error_code,
                e->sequence,

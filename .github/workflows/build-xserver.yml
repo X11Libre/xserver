@@ -126,7 +126,7 @@ jobs:
     xserver-build-mingw32-ubuntu:
         runs-on: ubuntu-latest
         env:
-            MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true
+            MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4

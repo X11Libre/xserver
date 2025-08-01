@@ -71,6 +71,8 @@ build 'https://gitlab.freedesktop.org/xorg/lib/libXfixes.git' 'libXfixes-5.0.3'
 build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-util.git' 'xcb-util-0.4.1-gitlab'
 build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-image.git' 'xcb-util-image-0.4.1-gitlab'
 build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-wm.git' 'xcb-util-wm-0.4.2'
+build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-render-util.git' 'xcb-util-renderutil-0.3.10'
+build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-keysyms.git' 'xcb-util-keysyms-0.4.1'
 
 # workaround xcb_windefs.h leaking all Windows API types into X server build
 # (some of which clash which types defined by Xmd.h) XXX: This is a bit of a
