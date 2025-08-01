@@ -30,7 +30,9 @@ Include the following information:
 
 Please allow us ample time to validate and patch the issue before disclosing it publicly.
 
-Feel free to privately message metux over our official Matrix or Telegram channel if the issue is of extreme merit, our project lead is busy please give ample time for response.
+Feel free to privately message metux over our official Matrix or Telegram channel if the issue is of extreme importance.
+
+We will get back to you as soon as possible.
 
 ##  Supported Versions
 
