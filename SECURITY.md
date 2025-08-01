@@ -11,7 +11,7 @@ Include the following information:
 1. **Vulnerability description**
    - What did you observe, and why is it a concern?
 
-2. **Reproduction steps**
+2. **Steps to reproduce**
    - Clear, step-by-step instructions
    - Include specific configurations or inputs required
 
