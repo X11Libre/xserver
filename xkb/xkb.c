@@ -33,6 +33,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XKMformat.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbfmisc_priv.h"
@@ -1014,19 +1015,12 @@ XkbSizeKeyTypes(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
-                 char *buf, ClientPtr client)
+static void XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
+                             x_rpcbuf_t *rpcbuf, ClientPtr client)
 {
-    XkbKeyTypePtr type;
-    unsigned i;
-    xkbKeyTypeWireDesc *wire;
-
-    type = &xkb->map->types[firstType];
-    for (i = 0; i < nTypes; i++, type++) {
-        register unsigned n;
-
-        wire = (xkbKeyTypeWireDesc *) buf;
+    XkbKeyTypePtr type = &xkb->map->types[firstType];
+    for (int i = 0; i < nTypes; i++, type++) {
+        xkbKeyTypeWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbKeyTypeWireDesc));
         wire->mask = type->mods.mask;
         wire->realMods = type->mods.real_mods;
         wire->virtualMods = type->mods.vmods;
@@ -1037,13 +1031,14 @@ XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
             swaps(&wire->virtualMods);
         }
 
-        buf = (char *) &wire[1];
-        if (wire->nMapEntries > 0) {
-            xkbKTMapEntryWireDesc *ewire;
-            XkbKTMapEntryPtr entry;
+        if (type->map_count > 0) {
+            void *space = x_rpcbuf_reserve(
+                rpcbuf, sizeof(xkbKTMapEntryWireDesc) * type->map_count);
+            xkbKTMapEntryWireDesc *ewire = space;
+            XkbKTMapEntryPtr entry = type->map;
 
-            ewire = (xkbKTMapEntryWireDesc *) buf;
-            entry = type->map;
+            size_t n;
+
             for (n = 0; n < type->map_count; n++, ewire++, entry++) {
                 ewire->active = entry->active;
                 ewire->mask = entry->mods.mask;
@@ -1054,13 +1049,12 @@ XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
                     swaps(&ewire->virtualMods);
                 }
             }
-            buf = (char *) ewire;
-            if (type->preserve != NULL) {
-                xkbModsWireDesc *pwire;
-                XkbModsPtr preserve;
 
-                pwire = (xkbModsWireDesc *) buf;
-                preserve = type->preserve;
+            if (type->preserve != NULL) {
+                xkbModsWireDesc *pwire = x_rpcbuf_reserve(
+                    rpcbuf, sizeof(xkbModsWireDesc) * type->map_count);
+                XkbModsPtr preserve = type->preserve;
+
                 for (n = 0; n < type->map_count; n++, pwire++, preserve++) {
                     pwire->mask = preserve->mask;
                     pwire->realMods = preserve->real_mods;
@@ -1069,11 +1063,9 @@ XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
                         swaps(&pwire->virtualMods);
                     }
                 }
-                buf = (char *) pwire;
             }
         }
     }
-    return buf;
 }
 
 static int
@@ -1121,44 +1113,29 @@ XkbSizeVirtualMods(XkbDescPtr xkb, xkbGetMapReply * rep)
     return XkbPaddedSize(nMods);
 }
 
-static char *
-XkbWriteKeySyms(XkbDescPtr xkb, KeyCode firstKeySym, CARD8 nKeySyms, char *buf,
-                ClientPtr client)
+static void XkbWriteKeySyms(XkbDescPtr xkb, KeyCode firstKeySym, CARD8 nKeySyms,
+                            x_rpcbuf_t *rpcbuf, ClientPtr client)
 {
-    register KeySym *pSym;
-    XkbSymMapPtr symMap;
-    xkbSymMapWireDesc *outMap;
-    register unsigned i;
-
-    symMap = &xkb->map->key_sym_map[firstKeySym];
-    for (i = 0; i < nKeySyms; i++, symMap++) {
-        outMap = (xkbSymMapWireDesc *) buf;
+    XkbSymMapPtr symMap = &xkb->map->key_sym_map[firstKeySym];
+    for (int i = 0; i < nKeySyms; i++, symMap++) {
+        size_t nSyms = symMap->width * XkbNumGroups(symMap->group_info);
+        xkbSymMapWireDesc *outMap = x_rpcbuf_reserve(rpcbuf, sizeof(xkbSymMapWireDesc));
         outMap->ktIndex[0] = symMap->kt_index[0];
         outMap->ktIndex[1] = symMap->kt_index[1];
         outMap->ktIndex[2] = symMap->kt_index[2];
         outMap->ktIndex[3] = symMap->kt_index[3];
         outMap->groupInfo = symMap->group_info;
         outMap->width = symMap->width;
-        outMap->nSyms = symMap->width * XkbNumGroups(symMap->group_info);
-        buf = (char *) &outMap[1];
-        if (outMap->nSyms == 0)
-            continue;
+        outMap->nSyms = nSyms;
 
-        pSym = &xkb->map->syms[symMap->offset];
-        memcpy((char *) buf, (char *) pSym, outMap->nSyms * 4);
-        if (client->swapped) {
-            register int nSyms = outMap->nSyms;
-
+        if (client->swapped)
             swaps(&outMap->nSyms);
-            while (nSyms-- > 0) {
-                swapl((int *) buf);
-                buf += 4;
-            }
+
+        if (outMap->nSyms) {
+            KeySym *pSym = &xkb->map->syms[symMap->offset];
+            x_rpcbuf_write_CARD32s(rpcbuf, pSym, nSyms);
         }
-        else
-            buf += outMap->nSyms * 4;
     }
-    return buf;
 }
 
 static int
@@ -1184,36 +1161,26 @@ XkbSizeKeyActions(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteKeyActions(XkbDescPtr xkb, KeyCode firstKeyAct, CARD8 nKeyActs, char *buf)
+static void XkbWriteKeyActions(XkbDescPtr xkb, KeyCode firstKeyAct,
+                               CARD8 nKeyActs, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    CARD8 *numDesc;
-    XkbAnyAction *actDesc;
+    CARD8 *numDesc = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(nKeyActs));
 
-    numDesc = (CARD8 *) buf;
-    for (i = 0; i < nKeyActs; i++) {
+    for (int i = 0; i < nKeyActs; i++) {
         if (xkb->server->key_acts[i + firstKeyAct] == 0)
             numDesc[i] = 0;
         else
             numDesc[i] = XkbKeyNumActions(xkb, (i + firstKeyAct));
     }
-    buf += XkbPaddedSize(nKeyActs);
 
-    actDesc = (XkbAnyAction *) buf;
-    for (i = 0; i < nKeyActs; i++) {
+    for (int i = 0; i < nKeyActs; i++) {
         if (xkb->server->key_acts[i + firstKeyAct] != 0) {
-            unsigned int num;
-
-            num = XkbKeyNumActions(xkb, (i + firstKeyAct));
-            memcpy((char *) actDesc,
-                   (char *) XkbKeyActionsPtr(xkb, (i + firstKeyAct)),
-                   num * SIZEOF(xkbActionWireDesc));
-            actDesc += num;
+            size_t num = XkbKeyNumActions(xkb, (i + firstKeyAct));
+            x_rpcbuf_write_CARD8s(rpcbuf,
+                                  (CARD8*)XkbKeyActionsPtr(xkb, (i + firstKeyAct)),
+                                  num * SIZEOF(xkbActionWireDesc));
         }
     }
-    buf = (char *) actDesc;
-    return buf;
 }
 
 static int
@@ -1239,25 +1206,18 @@ XkbSizeKeyBehaviors(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteKeyBehaviors(XkbDescPtr xkb, KeyCode firstKeyBehavior, CARD8 nKeyBehaviors, char *buf)
+static void XkbWriteKeyBehaviors(XkbDescPtr xkb, KeyCode firstKeyBehavior,
+                                 CARD8 nKeyBehaviors, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    xkbBehaviorWireDesc *wire;
-    XkbBehavior *pBhvr;
-
-    wire = (xkbBehaviorWireDesc *) buf;
-    pBhvr = &xkb->server->behaviors[firstKeyBehavior];
-    for (i = 0; i < nKeyBehaviors; i++, pBhvr++) {
+    XkbBehavior *pBhvr = &xkb->server->behaviors[firstKeyBehavior];
+    for (int i = 0; i < nKeyBehaviors; i++, pBhvr++) {
         if (pBhvr->type != XkbKB_Default) {
+            xkbBehaviorWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbBehaviorWireDesc));
             wire->key = i + firstKeyBehavior;
             wire->type = pBhvr->type;
             wire->data = pBhvr->data;
-            wire++;
         }
     }
-    buf = (char *) wire;
-    return buf;
 }
 
 static int
@@ -1282,24 +1242,28 @@ XkbSizeExplicit(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteExplicit(XkbDescPtr xkb, KeyCode firstKeyExplicit, CARD8 nKeyExplicit,
-                 char *buf)
+static void XkbWriteExplicit(XkbDescPtr xkb, KeyCode firstKeyExplicit,
+                             CARD8 nKeyExplicit, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    char *start;
-    unsigned char *pExp;
+    unsigned char *pExp = &xkb->server->explicit[firstKeyExplicit];
 
-    start = buf;
-    pExp = &xkb->server->explicit[firstKeyExplicit];
-    for (i = 0; i < nKeyExplicit; i++, pExp++) {
-        if (*pExp != 0) {
+    /* count how many active entries there will be */
+    size_t count = 0;
+    for (int i = 0; i < nKeyExplicit; i++) {
+        if (pExp[i] != 0)
+            count++;
+    }
+
+    /* reserve buffer space (with padding) */
+    char *buf = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(count * 2));
+
+    /* copy over the active entries */
+    for (int i = 0; i < nKeyExplicit; i++) {
+        if (pExp[i] != 0) {
             *buf++ = i + firstKeyExplicit;
-            *buf++ = *pExp;
+            *buf++ = pExp[i];
         }
     }
-    i = XkbPaddedSize(buf - start) - (buf - start);     /* pad to word boundary */
-    return buf + i;
 }
 
 static int
@@ -1323,24 +1287,27 @@ XkbSizeModifierMap(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteModifierMap(XkbDescPtr xkb, KeyCode firstModMapKey, CARD8 nModMapKeys,
-                    char *buf)
+static void XkbWriteModifierMap(XkbDescPtr xkb, KeyCode firstModMapKey,
+                                CARD8 nModMapKeys, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    char *start;
-    unsigned char *pMap;
+    unsigned char *pMap = &xkb->map->modmap[firstModMapKey];
 
-    start = buf;
-    pMap = &xkb->map->modmap[firstModMapKey];
-    for (i = 0; i < nModMapKeys; i++, pMap++) {
-        if (*pMap != 0) {
+    /* count how many active entries */
+    size_t count = 0;
+    for (int i = 0; i < nModMapKeys; i++) {
+        if (pMap[i] != 0)
+            count++;
+    }
+
+    /* reserve buffer space (padded) */
+    char *buf = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(count));
+
+    for (int i = 0; i < nModMapKeys; i++) {
+        if (pMap[i] != 0) {
             *buf++ = i + firstModMapKey;
-            *buf++ = *pMap;
+            *buf++ = pMap[i];
         }
     }
-    i = XkbPaddedSize(buf - start) - (buf - start);     /* pad to word boundary */
-    return buf + i;
 }
 
 static int
@@ -1364,24 +1331,17 @@ XkbSizeVirtualModMap(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
-                      CARD8 nVModMapKeys, char *buf)
+static void XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
+                                  CARD8 nVModMapKeys, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    xkbVModMapWireDesc *wire;
-    unsigned short *pMap;
-
-    wire = (xkbVModMapWireDesc *) buf;
-    pMap = &xkb->server->vmodmap[firstVModMapKey];
-    for (i = 0; i < nVModMapKeys; i++, pMap++) {
+    unsigned short *pMap = &xkb->server->vmodmap[firstVModMapKey];
+    for (int i = 0; i < nVModMapKeys; i++, pMap++) {
         if (*pMap != 0) {
+            xkbVModMapWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbVModMapWireDesc));
             wire->key = i + firstVModMapKey;
             wire->vmods = *pMap;
-            wire++;
         }
     }
-    return (char *) wire;
 }
 
 static Status
@@ -1403,33 +1363,32 @@ XkbComputeGetMapReplySize(XkbDescPtr xkb, xkbGetMapReply * rep)
     return Success;
 }
 
-static void
-XkbAssembleMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep, char *desc)
+static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
+                           xkbGetMapReply rep, x_rpcbuf_t *rpcbuf)
 {
-    if (rep.nTypes > 0)
-        desc = XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, desc, client);
-    if (rep.nKeySyms > 0)
-        desc = XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, desc, client);
-    if (rep.nKeyActs > 0)
-        desc = XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, desc);
+    XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, rpcbuf, client);
+    XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, rpcbuf, client);
+    XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, rpcbuf);
     if (rep.totalKeyBehaviors > 0)
-        desc = XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, desc);
-    if (rep.virtualMods) {
-        register int sz;
+        XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, rpcbuf);
 
-        for (int i = sz = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
+    if (rep.virtualMods) {
+        CARD8 vmods[XkbPaddedSize(XkbNumVirtualMods)] = { 0 };
+        size_t sz = 0;
+        for (size_t i = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
             if (rep.virtualMods & bit) {
-                desc[sz++] = xkb->server->vmods[i];
+                vmods[sz++] = xkb->server->vmods[i];
             }
         }
-        desc += XkbPaddedSize(sz);
+        x_rpcbuf_write_CARD8s(rpcbuf, vmods, XkbPaddedSize(sz));
     }
+
     if (rep.totalKeyExplicit > 0)
-        desc = XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, desc);
+        XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, rpcbuf);
     if (rep.totalModMapKeys > 0)
-        desc = XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, desc);
+        XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, rpcbuf);
     if (rep.totalVModMapKeys > 0)
-        desc = XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, desc);
+        XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, rpcbuf);
 }
 
 int
@@ -1546,11 +1505,16 @@ ProcXkbGetMap(ClientPtr client)
         return status;
 
     int payload_len = (rep.length * sizeof(CARD32)) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
-    char *payload_buf = calloc(1, payload_len);
-    if (!payload_buf)
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (!x_rpcbuf_makeroom(&rpcbuf, payload_len))
         return BadAlloc;
 
-    XkbAssembleMap(client, xkb, rep, payload_buf);
+    if (rpcbuf.wpos != payload_len)
+        LogMessage(X_WARNING, "ProcXkbGetMap() payload_len mismatch: %ld but shoud be %d\n",
+                   rpcbuf.wpos, payload_len);
+
+    XkbAssembleMap(client, xkb, rep, &rpcbuf);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -1560,9 +1524,11 @@ ProcXkbGetMap(ClientPtr client)
         swaps(&rep.totalActs);
     }
 
+    if (rpcbuf.error)
+        return BadAlloc;
+
     WriteToClient(client, sizeof(xkbGetMapReply), &rep);
-    WriteToClient(client, payload_len, payload_buf);
-    free(payload_buf);
+    WriteToClient(client, payload_len, rpcbuf.buffer);
     return Success;
 }
 
@@ -6053,8 +6019,19 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
 
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
-        char *buf = payload_walk + sizeof(mrep);
-        XkbAssembleMap(client, new, mrep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        /* allocating far too much, but it's just temporary */
+        if (!x_rpcbuf_makeroom(&rpcbuf, payload_length * 4)) {
+            free(payload_buffer);
+            return BadAlloc;
+        }
+
+        XkbAssembleMap(client, new, mrep, &rpcbuf);
+
+        if (rpcbuf.error) {
+            free(payload_buffer);
+            return BadAlloc;
+        }
 
         if (client->swapped) {
             swaps(&mrep.sequenceNumber);
@@ -6064,8 +6041,14 @@ ProcXkbGetKbdByName(ClientPtr client)
             swaps(&mrep.totalActs);
         }
 
+        // struct is 8 bytes (2 units) longer than generic reply, so need to
+        // compute the payload length carefully
+        const size_t payloadBytes = (mrep.length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
         memcpy(payload_walk, &mrep, sizeof(mrep));
-        payload_walk = buf + (mrep.length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
+        payload_walk += sizeof(mrep);
+        memcpy(payload_walk, rpcbuf.buffer, payloadBytes);
+        payload_walk += payloadBytes;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     if (reported & XkbGBN_CompatMapMask) {

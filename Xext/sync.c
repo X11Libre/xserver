@@ -1392,7 +1392,6 @@ static int
 ProcSyncGetPriority(ClientPtr client)
 {
     REQUEST(xSyncGetPriorityReq);
-    xSyncGetPriorityReply rep;
     ClientPtr priorityclient;
     int rc;
 
@@ -1407,7 +1406,7 @@ ProcSyncGetPriority(ClientPtr client)
             return rc;
     }
 
-    rep = (xSyncGetPriorityReply) {
+    xSyncGetPriorityReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
@@ -1676,7 +1675,6 @@ static int
 ProcSyncQueryCounter(ClientPtr client)
 {
     REQUEST(xSyncQueryCounterReq);
-    xSyncQueryCounterReply rep;
     SyncCounter *pCounter;
     int rc;
 
@@ -1693,7 +1691,7 @@ ProcSyncQueryCounter(ClientPtr client)
                                                   &pCounter->value);
     }
 
-    rep = (xSyncQueryCounterReply) {
+    xSyncQueryCounterReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
@@ -1843,7 +1841,6 @@ ProcSyncQueryAlarm(ClientPtr client)
 {
     REQUEST(xSyncQueryAlarmReq);
     SyncAlarm *pAlarm;
-    xSyncQueryAlarmReply rep;
     SyncTrigger *pTrigger;
     int rc;
 
@@ -1855,7 +1852,8 @@ ProcSyncQueryAlarm(ClientPtr client)
         return rc;
 
     pTrigger = &pAlarm->trigger;
-    rep = (xSyncQueryAlarmReply) {
+
+    xSyncQueryAlarmReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length =
@@ -2025,7 +2023,6 @@ static int
 ProcSyncQueryFence(ClientPtr client)
 {
     REQUEST(xSyncQueryFenceReq);
-    xSyncQueryFenceReply rep;
     SyncFence *pFence;
     int rc;
 
@@ -2036,11 +2033,10 @@ ProcSyncQueryFence(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep = (xSyncQueryFenceReply) {
+    xSyncQueryFenceReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
-
         .triggered = pFence->funcs.CheckTriggered(pFence)
     };
 

@@ -2289,8 +2289,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                 pDraw, x, y + linesDone, width,
                                 nlines, format, pBuf);
 
-            /* Note that this is NOT a call to WriteSwappedDataToClient,
-               as we do NOT byte swap */
+            /* Note that we DO NOT byte swap here */
             ReformatImage(pBuf, (int) (nlines * widthBytesLine),
                           BitsPerPixel(pDraw->depth), ClientOrder(client));
 
@@ -2317,8 +2316,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                         pDraw, x, y + linesDone, width,
                                         nlines, format, pBuf);
 
-                    /* Note: NOT a call to WriteSwappedDataToClient,
-                       as we do NOT byte swap */
+                    /* Note that we DO NOT byte swap here */
                     ReformatImage(pBuf, (int) (nlines * widthBytesLine),
                                   1, ClientOrder(client));
 
