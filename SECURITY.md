@@ -1,6 +1,6 @@
 # XLibre Security Policy
 
-The XLibre project takes security seriously. If you discover any vulnerabilities, please bring it to our attention right away!
+The XLibre project takes security seriously. If you discover any vulnerabilities, please bring them to our attention right away!
 
 ### How to Report a Security Vulnerability
 
