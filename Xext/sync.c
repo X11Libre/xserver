@@ -75,10 +75,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "inputstr.h"
 #include "misync_priv.h"
 
-#if !defined(WIN32)
-#include <sys/time.h>
-#endif
-
 /*
  * Local Global Variables
  */
