@@ -108,7 +108,7 @@ That's not enough? Then have a glance on the [good first](https://github.com/X11
     </figure>
 </p>
 
-Together we'll make X great again!
+Anybody who's treating others nicely and interested in bringing X forward is welcome.  Together we'll make X great again!
 
 ## Contact
 
