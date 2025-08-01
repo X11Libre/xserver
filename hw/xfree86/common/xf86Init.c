@@ -332,7 +332,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
         LoaderSetPath(xf86ModulePath);
 
         if (xf86Info.ignoreABI) {
-            LoaderSetIgnoreAbi();
+            LoaderSetOptions(LDR_OPT_ABI_MISMATCH_NONFATAL);
         }
 
         if (xf86DoShowOptions)
@@ -962,7 +962,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
     if (!strcmp(argv[i], "-ignoreABI")) {
-        LoaderSetIgnoreAbi();
+        LoaderSetOptions(LDR_OPT_ABI_MISMATCH_NONFATAL);
         return 1;
     }
     if (!strcmp(argv[i], "-verbose")) {

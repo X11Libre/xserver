@@ -146,22 +146,18 @@ LoaderUnload(const char *name, void *handle)
         dlclose(handle);
 }
 
-Bool LoaderIgnoreAbi = FALSE;
-Bool is_nvidia_proprietary = FALSE;
+unsigned long LoaderOptions = 0;
 
 void
-LoaderSetIgnoreAbi(void)
+LoaderSetOptions(unsigned long opts)
 {
-    /* Only used to keep consistency with the loader api */
-    /* This really doesn't have to be a proc */
-    LoaderIgnoreAbi = TRUE;
+    LoaderOptions |= opts;
 }
 
 Bool
 LoaderShouldIgnoreABI(void)
 {
-    /* The nvidia proprietary DDX driver calls this deprecated function */
-    return is_nvidia_proprietary || LoaderIgnoreAbi;
+    return (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL) != 0;
 }
 
 int
