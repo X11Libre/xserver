@@ -225,6 +225,23 @@ jobs:
             - name: manpage check
               run:  .gitlab-ci/manpages-check
 
+    xserver-build-freebsd:
+        runs-on: ubuntu-latest
+        env:
+            MYTOKEN : ${{ secrets.MYTOKEN }}
+            MYTOKEN2: "value2"
+            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true
+        steps:
+            - uses: actions/checkout@v4
+            - name: run in freebsd VM
+              id: xserver-build
+              uses: vmactions/freebsd-vm@v1
+              with:
+                  envs: 'MYTOKEN MYTOKEN2 MESON_ARGS'
+                  usesh: true
+                  release: "14.3"
+                  run:     ./.github/scripts/freebsd/run-xserver-build.sh
+
     release:
         name: Release pushed tag
         runs-on: ubuntu-latest
