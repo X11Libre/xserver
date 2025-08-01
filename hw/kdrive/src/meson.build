@@ -3,6 +3,7 @@ srcs_kdrive = [
     'kdrive.c',
     'kinfo.c',
     'kinput.c',
+    'kmode.c',
     'kshadow.c',
     '../../../mi/miinitext.c',
     '../../../mi/miinitext.h',
