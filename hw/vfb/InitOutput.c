@@ -66,10 +66,10 @@ from The Open Group.
 #include <sys/param.h>
 #endif
 #include <X11/XWDFile.h>
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#endif                          /* MITSHM */
+#endif /* CONFIG-MITSHM */
 #include "dix.h"
 #include "miline.h"
 #include "glx_extinit.h"
@@ -116,9 +116,9 @@ typedef struct {
     char mmap_file[MAXPATHLEN];
 #endif
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     int shmid;
-#endif
+#endif /* CONFIG_MITSHM */
 } vfbScreenInfo, *vfbScreenInfoPtr;
 
 static int vfbNumScreens;
@@ -228,17 +228,17 @@ freeScreenInfo(vfbScreenInfoPtr pvfb)
         break;
 #endif                          /* HAVE_MMAP */
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     case SHARED_MEMORY_FB:
         if (-1 == shmdt((char *) pvfb->pXWDHeader)) {
             perror("shmdt");
             ErrorF("shmdt failed, %s", strerror(errno));
         }
         break;
-#else                           /* MITSHM */
+#else /* CONFIG_MITSHM */
     case SHARED_MEMORY_FB:
         break;
-#endif                          /* MITSHM */
+#endif /* CONFIG_MITSHM */
 
     case NORMAL_MEMORY_FB:
         free(pvfb->pXWDHeader);
@@ -294,9 +294,9 @@ ddxUseMsg(void)
         ("-fbdir directory       put framebuffers in mmap'ed files in directory\n");
 #endif
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     ErrorF("-shmem                 put framebuffers in shared memory\n");
-#endif
+#endif /* CONFIG_MITSHM */
 
     ErrorF("-crtcs n               number of CRTCs per screen (default: %d)\n",
            VFB_DEFAULT_NUM_CRTCS);
@@ -411,12 +411,12 @@ ddxProcessArgument(int argc, char *argv[], int i)
     }
 #endif                          /* HAVE_MMAP */
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     if (strcmp(argv[i], "-shmem") == 0) {       /* -shmem */
         fbmemtype = SHARED_MEMORY_FB;
         return 1;
     }
-#endif
+#endif /* CONFIG_MITSHM */
 
     if (strcmp(argv[i], "-crtcs") == 0) {       /* -crtcs n */
         int numCrtcs;
@@ -601,7 +601,7 @@ vfbAllocateMmappedFramebuffer(vfbScreenInfoPtr pvfb)
 }
 #endif                          /* HAVE_MMAP */
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 static void
 vfbAllocateSharedMemoryFramebuffer(vfbScreenInfoPtr pvfb)
 {
@@ -627,7 +627,7 @@ vfbAllocateSharedMemoryFramebuffer(vfbScreenInfoPtr pvfb)
 
     ErrorF("screen %d shmid %d\n", (int) (pvfb - vfbScreens), pvfb->shmid);
 }
-#endif                          /* MITSHM */
+#endif /* CONFIG_MITSHM */
 
 static char *
 vfbAllocateFramebufferMemory(vfbScreenInfoPtr pvfb)
@@ -670,14 +670,14 @@ vfbAllocateFramebufferMemory(vfbScreenInfoPtr pvfb)
         break;
 #endif
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     case SHARED_MEMORY_FB:
         vfbAllocateSharedMemoryFramebuffer(pvfb);
         break;
-#else
+#else /* CONFIG_MITSHM */
     case SHARED_MEMORY_FB:
         break;
-#endif
+#endif /* CONFIG_MITSHM */
 
     case NORMAL_MEMORY_FB:
         pvfb->pXWDHeader = (XWDFileHeader *) calloc(1, pvfb->sizeInBytes);
