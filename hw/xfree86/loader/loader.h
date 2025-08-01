@@ -70,6 +70,8 @@ extern const ModuleVersions LoaderVersionInfo;
 
 extern unsigned long LoaderOptions;
 
+extern Bool is_nvidia_proprietary;
+
 /* Internal Functions */
 void *LoaderOpen(const char *, int *);
 

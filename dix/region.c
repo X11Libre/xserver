@@ -278,7 +278,6 @@ void
 RegionPrint(RegionPtr rgn)
 {
     int num, size;
-    int i;
     BoxPtr rects;
 
     num = RegionNumRects(rgn);
@@ -287,7 +286,7 @@ RegionPrint(RegionPtr rgn)
     ErrorF("[mi] num: %d size: %d\n", num, size);
     ErrorF("[mi] extents: %d %d %d %d\n",
            rgn->extents.x1, rgn->extents.y1, rgn->extents.x2, rgn->extents.y2);
-    for (i = 0; i < num; i++)
+    for (int i = 0; i < num; i++)
         ErrorF("[mi] %d %d %d %d \n",
                rects[i].x1, rects[i].y1, rects[i].x2, rects[i].y2);
     ErrorF("[mi] \n");
@@ -297,7 +296,7 @@ RegionPrint(RegionPtr rgn)
 Bool
 RegionIsValid(RegionPtr reg)
 {
-    int i, numRects;
+    int numRects;
 
     if ((reg->extents.x1 > reg->extents.x2) ||
         (reg->extents.y1 > reg->extents.y2))
@@ -317,7 +316,7 @@ RegionIsValid(RegionPtr reg)
         box = *pboxP;
         box.y2 = pboxP[numRects - 1].y2;
         pboxN = pboxP + 1;
-        for (i = numRects; --i > 0; pboxP++, pboxN++) {
+        for (int i = numRects; --i > 0; pboxP++, pboxN++) {
             if ((pboxN->x1 >= pboxN->x2) || (pboxN->y1 >= pboxN->y2))
                 return FALSE;
             if (pboxN->x1 < box.x1)
@@ -1150,8 +1149,6 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     int numRects;               /* Original numRects for badreg         */
     int numRI;                  /* Number of entries used in ri         */
     int sizeRI;                 /* Number of entries available in ri    */
-    int i;                      /* Index into rects                     */
-    int j;                      /* Index into ri                        */
     RegionInfo *rit;            /* &ri[j]                                */
     RegionPtr reg;              /* ri[j].reg                     */
     BoxPtr box;                 /* Current box in rects                 */
@@ -1208,10 +1205,11 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
        forget it.  Try the next region.  If it doesn't fit cleanly into any
        region, make a new one. */
 
-    for (i = numRects; --i > 0;) {
+    for (int i = numRects; --i > 0;) {
         box++;
         /* Look for a region to append box to */
-        for (j = numRI, rit = ri; --j >= 0; rit++) {
+	rit = ri;
+        for (int j = numRI; --j >= 0; rit++) {
             reg = &rit->reg;
             riBox = RegionEnd(reg);
 
@@ -1270,7 +1268,8 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     /* Make a final pass over each region in order to Coalesce and set
        extents.x2 and extents.y2 */
 
-    for (j = numRI, rit = ri; --j >= 0; rit++) {
+    rit = ri;
+    for (int j = numRI; --j >= 0; rit++) {
         reg = &rit->reg;
         riBox = RegionEnd(reg);
         reg->extents.y2 = riBox->y2;
@@ -1287,7 +1286,7 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     while (numRI > 1) {
         int half = numRI / 2;
 
-        for (j = numRI & 1; j < (half + (numRI & 1)); j++) {
+        for (int j = numRI & 1; j < (half + (numRI & 1)); j++) {
             reg = &ri[j].reg;
             hreg = &ri[j + half].reg;
             if (!RegionOp(reg, reg, hreg, RegionUnionO, TRUE, TRUE, pOverlap))
@@ -1309,7 +1308,7 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     good(badreg);
     return ret;
  bail:
-    for (i = 0; i < numRI; i++)
+    for (int i = 0; i < numRI; i++)
         xfreeData(&ri[i].reg);
     free(ri);
     return RegionBreak(badreg);
@@ -1322,7 +1321,6 @@ RegionFromRects(int nrects, xRectangle *prect, int ctype)
     RegionPtr pRgn;
     size_t rgnSize;
     BoxPtr pBox;
-    int i;
     int x1, y1, x2, y2;
 
     pRgn = RegionCreate(NullBox, 0);
@@ -1353,7 +1351,7 @@ RegionFromRects(int nrects, xRectangle *prect, int ctype)
         return pRgn;
     }
     pBox = (BoxPtr) (pData + 1);
-    for (i = nrects; --i >= 0; prect++) {
+    for (int i = nrects; --i >= 0; prect++) {
         x1 = prect->x;
         y1 = prect->y;
         if ((x2 = x1 + (int) prect->width) > MAXSHORT)

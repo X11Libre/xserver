@@ -752,14 +752,13 @@ SwapColorItem(xColorItem * pItem)
 int _X_COLD
 SProcStoreColors(ClientPtr client)
 {
-    long count;
     xColorItem *pItem;
 
     REQUEST(xStoreColorsReq);
     REQUEST_AT_LEAST_SIZE(xStoreColorsReq);
     swapl(&stuff->cmap);
     pItem = (xColorItem *) &stuff[1];
-    for (count = ((client->req_len << 2) - sizeof(xStoreColorsReq)) / sizeof(xColorItem); --count >= 0;)
+    for (long count = ((client->req_len << 2) - sizeof(xStoreColorsReq)) / sizeof(xColorItem); --count >= 0;)
         SwapColorItem(pItem++);
     return ((*ProcVector[X_StoreColors]) (client));
 }

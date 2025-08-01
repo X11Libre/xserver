@@ -282,8 +282,8 @@ GestureSetupListener(DeviceIntPtr dev, GestureInfoPtr gi, InternalEvent *ev)
 
     /* Find the first client with an applicable event selection,
      * going from deepest child window back up to the root window. */
-    for (i = sprite->spriteTraceGood - 1; i >= 0; i--) {
-        win = sprite->spriteTrace[i];
+    for (int j = sprite->spriteTraceGood - 1; j >= 0; j--) {
+        win = sprite->spriteTrace[j];
         GestureAddRegularListener(dev, gi, win, ev);
         if (gi->has_listener)
             return;
@@ -296,13 +296,12 @@ void
 GestureListenerGone(XID resource)
 {
     GestureInfoPtr gi;
-    DeviceIntPtr dev;
     InternalEvent *events = InitEventList(GetMaximumEventsNum());
 
     if (!events)
         FatalError("GestureListenerGone: couldn't allocate events\n");
 
-    for (dev = inputInfo.devices; dev; dev = dev->next) {
+    for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
         if (!dev->gesture)
             continue;
 
@@ -334,12 +333,11 @@ GestureEndActiveGestures(DeviceIntPtr dev)
     input_lock();
     mieqProcessInputEvents();
     if (g->gesture.active) {
-        int j;
         int type = GetXI2Type(GestureTypeToEnd(g->gesture.type));
         int nevents = GetGestureEvents(eventlist, dev, type, g->gesture.num_touches,
                                        0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
-        for (j = 0; j < nevents; j++)
+        for (int j = 0; j < nevents; j++)
             mieqProcessDeviceEvent(dev, eventlist + j, NULL);
     }
     input_unlock();
