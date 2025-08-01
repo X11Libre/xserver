@@ -37,6 +37,11 @@ if build_xv
     xephyr_dep += dependency('xcb-xv')
 endif
 
+# mingw needs this for nanosleep()
+if host_machine.system() == 'windows'
+    xephyr_dep += cc.find_library('pthread', required : true, static: true)
+endif
+
 xephyr_server = executable(
     'Xephyr',
     srcs,
