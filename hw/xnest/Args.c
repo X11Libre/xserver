@@ -52,9 +52,9 @@ int
 ddxProcessArgument(int argc, char *argv[], int i)
 {
     /* disable some extensions we currently don't support yet */
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     noMITShmExtension = TRUE;
-#endif
+#endif /* CONFIG_MITSHM */
 
     noCompositeExtension = TRUE;
 

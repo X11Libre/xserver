@@ -223,6 +223,7 @@ if build_glx
     conf_data.set_quoted('DRI_DRIVER_PATH', dri_dep.get_variable(pkgconfig : 'dridriverdir'))
 endif
 conf_data.set('MITSHM', build_mitshm ? '1' : false)
+conf_data.set('CONFIG_MITSHM', build_mitshm ? '1' : false)
 
 # for backwards compat with drivers, still setting the old PANORAMIX symbol
 conf_data.set('PANORAMIX', build_xinerama ? '1' : false)

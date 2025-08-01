@@ -43,7 +43,7 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 #include <X11/extensions/shmproto.h>
 #include "shmint.h"
 #endif
@@ -737,7 +737,7 @@ ProcXvPutImage(ClientPtr client)
     return SingleXvPutImage(client);
 }
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 
 static int
 SingleXvShmPutImage(ClientPtr client)
@@ -816,12 +816,12 @@ SingleXvShmPutImage(ClientPtr client)
 
 static int XineramaXvShmPutImage(ClientPtr client);
 
-#endif /* MITSHM */
+#endif /* CONFIG_MITSHM */
 
 static int
 ProcXvShmPutImage(ClientPtr client)
 {
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 #ifdef XINERAMA
     if (xvUseXinerama)
         return XineramaXvShmPutImage(client);
@@ -829,7 +829,7 @@ ProcXvShmPutImage(ClientPtr client)
     return SingleXvShmPutImage(client);
 #else
     return BadImplementation;
-#endif
+#endif /* CONFIG_MITSHM */
 }
 
 #ifdef XvMCExtension
@@ -1178,7 +1178,7 @@ SProcXvPutImage(ClientPtr client)
     return ProcXvPutImage(client);
 }
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 static int _X_COLD
 SProcXvShmPutImage(ClientPtr client)
 {
@@ -1202,9 +1202,9 @@ SProcXvShmPutImage(ClientPtr client)
     swaps(&stuff->height);
     return ProcXvShmPutImage(client);
 }
-#else                           /* MITSHM */
+#else /* CONFIG_MITSHM */
 #define SProcXvShmPutImage ProcXvShmPutImage
-#endif
+#endif /* CONFIG_MITSHM */
 
 static int _X_COLD
 SProcXvSelectVideoNotify(ClientPtr client)
@@ -1405,7 +1405,7 @@ XineramaXvSetPortAttribute(ClientPtr client)
     return result;
 }
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 static int
 XineramaXvShmPutImage(ClientPtr client)
 {
@@ -1457,9 +1457,9 @@ XineramaXvShmPutImage(ClientPtr client)
     }
     return result;
 }
-#else
+#else /* CONFIG_MITSHM */
 #define XineramaXvShmPutImage ProcXvShmPutImage
-#endif /* MITSHM */
+#endif /* CONFIG_MITSHM */
 
 static int
 XineramaXvPutImage(ClientPtr client)
