@@ -31,10 +31,12 @@
 #include <string.h>             /* for memset */
 #include <errno.h>
 #include <time.h>
+#ifdef MITSHM
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <sys/time.h>
 #include <sys/mman.h>
+#endif /* MITSHM */
+#include <sys/time.h>
 
 // workaround for name clash between Xlib and Xserver:
 // GL might pull in Xlib.h (why ?), which is definining a type "GC", that's
@@ -454,6 +456,7 @@ hostx_init_shm(void)
 static Bool
 hostx_create_shm_segment(xcb_shm_segment_info_t *shminfo, size_t size)
 {
+#ifdef MITSHM
     shminfo->shmaddr = NULL;
 
     if (HostX.have_shm_fd_passing) {
@@ -506,11 +509,15 @@ hostx_create_shm_segment(xcb_shm_segment_info_t *shminfo, size_t size)
     }
 
     return shminfo->shmaddr != NULL;
+#else
+    return FALSE;
+#endif /* MITSHM */
 }
 
 static void
 hostx_destroy_shm_segment(xcb_shm_segment_info_t *shminfo, size_t size)
 {
+#ifdef MITSHM
     xcb_shm_detach(HostX.conn, shminfo->shmseg);
 
     if (HostX.have_shm_fd_passing)
@@ -519,6 +526,7 @@ hostx_destroy_shm_segment(xcb_shm_segment_info_t *shminfo, size_t size)
         shmdt(shminfo->shmaddr);
 
     shminfo->shmaddr = NULL;
+#endif /* MITSHM */
 }
 
 int
