@@ -1,17 +1,43 @@
+# There are three commands accepted by Xnamespace for the purposes of configuring
+# The "namespace" command changes the current namespace. This changes the namespace the other commands are operating on.
+# The "allow" command configures the current namespace permissions for XLibre resources
+# The "auth" command configures the current namespace to accept protocols and tokens to allow client access
+
+# When no namespace are mentioned, all auths and allows configured affect the "root" namespace
+# By default, all allowable properties are enabled in the root namespace and can't be disabled from the config file.
+# No configuration line can be greater than 1024 8-bit characters after excluding the '\n' and text after '#'
+#   else information after that point is ignored
 
 # auth <proto> <hex-key>
+  # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for "root" namespace
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b0
+
+  # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for "root" namespace
   auth MIT-MAGIC-COOKIE-1 56f8e62b78e58962de0ceefc05ad90b0
 
-# namespace <name> <parent_name>
-namespace xeyes root
+  # To create a "MIT_MAGIC-COOKIE-1", write "xauth generate $DISPLAY MIT-MAGIC-COOKIE-1" will generate and add a token
+    #     for the protocol provided. You can retrieve using "xauth list :1". For more information, use "man xauth".
+
+
+# namespace <name>
+# creates the namespace xeyes, and makes all "auths" and "allow" configurations affect seyex namespace only
+namespace xeyes
+
+  # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for xeyes namespace
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b8
+
+  # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for xeyes namespace
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90a8
+
+  # allow "command" enables a specific resource for the "xeyes" namespace
   allow mouse-motion
   allow shape
   allow xinput
 
-namespace xclock root
+# creates namespace "xclock", and makes all "auths" and "allow" command configurations affect "xclock" namespace only
+namespace xclock
+
+  # set auth key for "xclock" namespace
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b7
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad91b7
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad92b7
