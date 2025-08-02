@@ -71,7 +71,9 @@ static Bool EphyrHostGrabSet = FALSE;
 Bool
 ephyrInitialize(KdCardInfo * card, EphyrPriv * priv)
 {
+#ifndef WIN32
     OsSignal(SIGUSR1, hostx_handle_signal);
+#endif
 
     priv->base = 0;
     priv->bytes_per_line = 0;
