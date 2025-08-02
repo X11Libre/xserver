@@ -25,7 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "config.h"
+#include <xorg-config.h>
 #include <xorg-server.h>
 
 #include "amdgpu_drv.h"

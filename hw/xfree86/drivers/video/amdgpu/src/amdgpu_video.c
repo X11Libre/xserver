@@ -1,4 +1,4 @@
-#include "config.h"
+#include <xorg-config.h>
 #include <xorg-server.h>
 
 #include <stdlib.h>

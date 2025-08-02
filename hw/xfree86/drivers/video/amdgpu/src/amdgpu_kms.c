@@ -24,7 +24,7 @@
  *    Dave Airlie <airlied@redhat.com>
  *
  */
-#include "config.h"
+#include <xorg-config.h>
 #include <xorg-server.h>
 
 #include <errno.h>
