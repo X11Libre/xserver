@@ -294,7 +294,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
         modifier = gbm_bo_get_modifier(gbm);
         gbm_bo_destroy(gbm);
 
-        if (!drmmode_is_format_supported(scrn, format, modifier)) {
+        if (!drmmode_is_format_supported(scrn, format, modifier, !sync_flip)) {
             if (reason)
                 *reason = PRESENT_FLIP_REASON_BUFFER_FORMAT;
             return FALSE;
@@ -321,6 +321,7 @@ ms_present_check_flip(RRCrtcPtr crtc,
     ScreenPtr screen = window->drawable.pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
+    Bool async_flip = !sync_flip;
 
     if (ms->drmmode.sprites_visible > 0)
         goto no_flip;
@@ -328,8 +329,22 @@ ms_present_check_flip(RRCrtcPtr crtc,
     if (ms->drmmode.pending_modeset)
         goto no_flip;
 
-    if(!ms_present_check_unflip(crtc, window, pixmap, sync_flip, reason))
+    if (!ms_present_check_unflip(crtc, window, pixmap, sync_flip, reason)) {
+        if (reason && *reason == PRESENT_FLIP_REASON_BUFFER_FORMAT)
+            ms_window_update_async_flip(window, async_flip);
         goto no_flip;
+    }
+
+    ms_window_update_async_flip(window, async_flip);
+
+    /*
+     * Force a format renegotiation when switching between sync and async,
+     * otherwise we may end up with a working but suboptimal modifier.
+     */
+    if (reason && async_flip != ms_window_has_async_flip_modifiers(window)) {
+        *reason = PRESENT_FLIP_REASON_BUFFER_FORMAT;
+        goto no_flip;
+    }
 
     ms->flip_window = window;
 

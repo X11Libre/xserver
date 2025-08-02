@@ -42,6 +42,7 @@ enum drmmode_plane_property {
     DRMMODE_PLANE_TYPE = 0,
     DRMMODE_PLANE_FB_ID,
     DRMMODE_PLANE_IN_FORMATS,
+    DRMMODE_PLANE_IN_FORMATS_ASYNC,
     DRMMODE_PLANE_CRTC_ID,
     DRMMODE_PLANE_SRC_X,
     DRMMODE_PLANE_SRC_Y,
@@ -118,6 +119,7 @@ typedef struct {
     DevPrivateKeyRec pixmapPrivateKeyRec;
     DevScreenPrivateKeyRec spritePrivateKeyRec;
     DevPrivateKeyRec vrrPrivateKeyRec;
+    DevPrivateKeyRec asyncFlipPrivateKeyRec;
     /* Number of SW cursors currently visible on this screen */
     int sprites_visible;
 
@@ -198,6 +200,7 @@ typedef struct {
     drmmode_mode_ptr current_mode;
     uint32_t num_formats;
     drmmode_format_rec *formats;
+    drmmode_format_rec *formats_async;
 
     drmmode_bo rotate_bo;
     unsigned rotate_fb_id;
@@ -293,7 +296,7 @@ typedef struct _msSpritePriv {
 extern miPointerSpriteFuncRec drmmode_sprite_funcs;
 
 Bool drmmode_is_format_supported(ScrnInfoPtr scrn, uint32_t format,
-                                 uint64_t modifier);
+                                 uint64_t modifier, Bool async_flip);
 int drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
                       uint32_t *fb_id);
 int drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo);
