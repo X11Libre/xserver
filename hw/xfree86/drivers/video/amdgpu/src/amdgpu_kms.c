@@ -342,7 +342,7 @@ amdgpu_event_callback(CallbackListPtr *list,
 	 */
 	client_priv->needs_flush = info->gpu_flushed;
 	server_priv->needs_flush = info->gpu_flushed;
-	
+
 	for (i = 0; i < eventinfo->count; i++) {
 		if (eventinfo->events[i].u.u.type == info->callback_event_type) {
 			client_priv->needs_flush++;
@@ -849,7 +849,7 @@ amdgpu_prime_scanout_flip(PixmapDirtyUpdatePtr ent)
 			   "Failed to get FB for PRIME flip.\n");
 		return;
 	}
-	
+
 	drm_queue_seq = amdgpu_drm_queue_alloc(crtc,
 					       AMDGPU_DRM_QUEUE_CLIENT_DEFAULT,
 					       AMDGPU_DRM_QUEUE_ID_DEFAULT, fb,

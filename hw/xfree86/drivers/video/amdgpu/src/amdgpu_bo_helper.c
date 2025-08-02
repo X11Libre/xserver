@@ -202,7 +202,7 @@ Bool amdgpu_pixmap_get_handle(PixmapPtr pixmap, uint32_t *handle)
 
 	if (priv->handle_valid)
 		goto success;
-	
+
 #ifdef USE_GLAMOR
 	if (info->use_glamor) {
 		AMDGPUEntPtr pAMDGPUEnt = AMDGPUEntPriv(scrn);

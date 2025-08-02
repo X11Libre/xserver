@@ -501,7 +501,7 @@ drmmode_crtc_scanout_create(xf86CrtcPtr crtc, PixmapPtr *scanout,
 
 	if (!amdgpu_pixmap_get_fb(*scanout)) {
 		ErrorF("failed to create CRTC scanout FB\n");
-error:		
+error:
 		drmmode_crtc_scanout_destroy(scanout);
 		return FALSE;
 	}
@@ -649,7 +649,7 @@ drmmode_crtc_prime_scanout_update(xf86CrtcPtr crtc, DisplayModePtr mode,
 	*x = *y = 0;
 	drmmode_crtc->scanout_id = scanout_id;
 }
-	
+
 
 static void
 drmmode_crtc_scanout_update(xf86CrtcPtr crtc, DisplayModePtr mode,
@@ -3451,7 +3451,7 @@ miPointerSpriteFuncRec drmmode_sprite_funcs = {
 	.DeviceCursorCleanup = drmmode_sprite_device_cursor_cleanup,
 };
 
-	
+
 void drmmode_adjust_frame(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int x, int y)
 {
 	xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(pScrn);
