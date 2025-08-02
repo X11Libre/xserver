@@ -47,8 +47,7 @@ static XF86ModuleVersionInfo AMDGPUVersionRec = {
  *
  * This function is called every time the module is loaded.
  */
-static pointer
-AMDGPUSetup(pointer Module, pointer Options, int *ErrorMajor, int *ErrorMinor)
+static void *AMDGPUSetup(void* Module, void* Options, int *ErrorMajor, int *ErrorMinor)
 {
 	static Bool Inited = FALSE;
 
@@ -57,7 +56,7 @@ AMDGPUSetup(pointer Module, pointer Options, int *ErrorMajor, int *ErrorMinor)
 		xf86AddDriver(&AMDGPU, Module, HaveDriverFuncs);
 	}
 
-	return (pointer) TRUE;
+	return (void*) TRUE;
 }
 
 /* The following record must be called amdgpuModuleData */

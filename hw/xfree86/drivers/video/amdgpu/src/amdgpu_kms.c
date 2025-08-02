@@ -319,7 +319,7 @@ callback_needs_flush(AMDGPUInfoPtr info, struct amdgpu_client_priv *client_priv)
 
 static void
 amdgpu_event_callback(CallbackListPtr *list,
-		      pointer user_data, pointer call_data)
+		      void* user_data, void* call_data)
 {
 	EventInfoRec *eventinfo = call_data;
 	ScrnInfoPtr pScrn = user_data;
@@ -354,7 +354,7 @@ amdgpu_event_callback(CallbackListPtr *list,
 
 static void
 amdgpu_flush_callback(CallbackListPtr *list,
-		      pointer user_data, pointer call_data)
+		      void* user_data, void* call_data)
 {
 	ScrnInfoPtr pScrn = user_data;
 	ScreenPtr pScreen = pScrn->pScreen;
@@ -1805,7 +1805,7 @@ static void amdgpu_drop_drm_master(ScrnInfoPtr pScrn)
 
 
 static
-CARD32 cleanup_black_fb(OsTimerPtr timer, CARD32 now, pointer data)
+CARD32 cleanup_black_fb(OsTimerPtr timer, CARD32 now, void* data)
 {
 	ScreenPtr screen = data;
 	ScrnInfoPtr scrn = xf86ScreenToScrn(screen);

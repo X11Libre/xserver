@@ -63,7 +63,7 @@ Bool amdgpu_glamor_create_screen_resources(ScreenPtr screen)
 Bool amdgpu_glamor_pre_init(ScrnInfoPtr scrn)
 {
 	AMDGPUInfoPtr info = AMDGPUPTR(scrn);
-	pointer glamor_module;
+	void* glamor_module;
 	CARD32 version;
 
 	if (scrn->depth < 15) {

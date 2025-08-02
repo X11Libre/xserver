@@ -3073,7 +3073,7 @@ static void drmmode_notify_fd(int fd, int notify, void *data)
 	amdgpu_drm_handle_event(fd, &drmmode->event_context);
 }
 #else
-static void drm_wakeup_handler(pointer data, int err, pointer p)
+static void drm_wakeup_handler(void* data, int err, void* p)
 {
 	drmmode_ptr drmmode = data;
 	AMDGPUEntPtr pAMDGPUEnt = AMDGPUEntPriv(drmmode->scrn);

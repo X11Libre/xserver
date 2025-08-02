@@ -28,7 +28,7 @@
 
 #define HAVE_NOTIFY_FD	1
 
-#define BLOCKHANDLER_ARGS_DECL ScreenPtr pScreen, pointer pTimeout
+#define BLOCKHANDLER_ARGS_DECL ScreenPtr pScreen, void* pTimeout
 #define BLOCKHANDLER_ARGS pScreen, pTimeout
 
 #endif
