@@ -240,7 +240,6 @@ if build_xquartz
     build_rootless = true
 endif
 
-build_xephyr = get_option('xephyr')
 build_xvfb = get_option('xvfb')
 
 summary({
