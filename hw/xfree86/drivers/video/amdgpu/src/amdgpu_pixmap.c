@@ -22,7 +22,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include <xorg-config.h>
-#include <xorg-server.h>
 
 #include <xf86.h>
 #include "amdgpu_pixmap.h"

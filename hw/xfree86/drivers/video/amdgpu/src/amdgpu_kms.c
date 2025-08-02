@@ -25,7 +25,6 @@
  *
  */
 #include <xorg-config.h>
-#include <xorg-server.h>
 
 #include <errno.h>
 #include <sys/ioctl.h>

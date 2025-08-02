@@ -27,8 +27,6 @@
 #ifndef AMDGPU_DRI2_H
 #define AMDGPU_DRI2_H
 
-#include <xorg-server.h>
-
 struct amdgpu_dri2 {
 	drmVersionPtr pKernelDRMVersion;
 	Bool available;

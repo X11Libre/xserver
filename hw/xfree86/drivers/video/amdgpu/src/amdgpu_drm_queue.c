@@ -26,7 +26,6 @@
  *
  */
 #include <xorg-config.h>
-#include <xorg-server.h>
 
 #include <errno.h>
 #include <X11/Xdefs.h>

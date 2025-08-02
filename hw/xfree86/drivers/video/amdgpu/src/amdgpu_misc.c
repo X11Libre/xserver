@@ -20,7 +20,6 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include <xorg-config.h>
-#include <xorg-server.h>
 
 #include "amdgpu_probe.h"
 #include "amdgpu_version.h"

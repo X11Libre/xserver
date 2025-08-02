@@ -21,7 +21,6 @@
  * OF THIS SOFTWARE.
  */
 #include <xorg-config.h>
-#include <xorg-server.h>
 
 #include "amdgpu_drv.h"
 

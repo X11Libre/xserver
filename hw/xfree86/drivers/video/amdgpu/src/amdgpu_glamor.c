@@ -24,7 +24,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include <xorg-config.h>
-#include <xorg-server.h>
 
 #ifdef USE_GLAMOR
 

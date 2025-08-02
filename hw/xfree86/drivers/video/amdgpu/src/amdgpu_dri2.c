@@ -26,7 +26,6 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include <xorg-config.h>
-#include <xorg-server.h>
 
 #include "amdgpu_drv.h"
 #include "amdgpu_dri2.h"
