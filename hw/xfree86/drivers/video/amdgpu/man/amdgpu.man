@@ -1,5 +1,5 @@
 .ds q \N'34'
-.TH AMDGPU 4 2023-09-07 __vendorversion__
+.TH AMDGPU 4 2023-09-07 @vendorversion@
 .SH NAME
 amdgpu \- AMD RADEON GPU video driver
 .SH SYNOPSIS
