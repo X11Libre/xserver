@@ -62,6 +62,7 @@
 #define fbGlyph16 wfbGlyph16
 #define fbGlyph32 wfbGlyph32
 #define fbGlyph8 wfbGlyph8
+#define fbGlyphs wfbGlyphs
 #define fbImageGlyphBlt wfbImageGlyphBlt
 #define fbIn wfbIn
 #define fbInitializeColormap wfbInitializeColormap

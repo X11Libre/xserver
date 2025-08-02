@@ -39,7 +39,7 @@
 
 #include "glamor_priv.h"
 #include "mipict.h"
-#include "fbpict.h"
+
 #if 0
 //#define DEBUGF(str, ...)  do {} while(0)
 #define DEBUGF(str, ...) ErrorF(str, ##__VA_ARGS__)
