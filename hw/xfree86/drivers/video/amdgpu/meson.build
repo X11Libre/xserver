@@ -24,6 +24,7 @@ shared_module(
     c_args: xorg_c_args,
     dependencies: [
         common_dep,
+        dependency('libdrm')
     ],
 
     install: true,
