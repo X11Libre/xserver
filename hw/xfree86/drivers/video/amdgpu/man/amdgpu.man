@@ -12,7 +12,7 @@ amdgpu \- AMD RADEON GPU video driver
 .fi
 .SH DESCRIPTION
 .B amdgpu
-is an Xorg driver for AMD RADEON-based video cards with the
+is an Xlibre driver for AMD RADEON-based video cards with the
 following features:
 .PP
 .PD 0

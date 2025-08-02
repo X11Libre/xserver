@@ -1,4 +1,4 @@
-xf86-video-amdgpu - Xorg driver for AMD Radeon GPUs using the amdgpu kernel driver
+xf86-video-amdgpu - Xlibre driver for AMD Radeon GPUs using the amdgpu kernel driver
 ==================================================================================
 
 Questions regarding this software should be directed at the
