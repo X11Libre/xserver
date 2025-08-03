@@ -74,7 +74,14 @@
  * mask is 0xFFFF0000.
  */
 #define ABI_ANSIC_VERSION	SET_ABI_VERSION(1, 4)
-#define ABI_VIDEODRV_VERSION	SET_ABI_VERSION(28, 0)
+
+/* XXX This is a compile-time option that changes abi XXX */
+/* TODO: Remove this toggle in 26.0 */
+#ifdef CONFIG_LEGACY_NVIDIA_PADDING
+#define ABI_VIDEODRV_VERSION	SET_ABI_VERSION(28, 1)
+#else
+#define ABI_VIDEODRV_VERSION    SET_ABI_VERSION(28, 0)
+#endif
 #define ABI_XINPUT_VERSION	SET_ABI_VERSION(26, 0)
 #define ABI_EXTENSION_VERSION	SET_ABI_VERSION(11, 0)
 
