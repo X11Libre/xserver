@@ -85,6 +85,9 @@
 #define ABI_XINPUT_VERSION	SET_ABI_VERSION(26, 0)
 #define ABI_EXTENSION_VERSION	SET_ABI_VERSION(11, 0)
 
+/* hack to get both modern and ancient nvidia DDX drivers to work at the same time */
+#define ABI_NVIDIA_VERSION      SET_ABI_VERSION(25, 2)
+
 #define MODINFOSTRING1	0xef23fdc5
 #define MODINFOSTRING2	0x10dc023a
 
