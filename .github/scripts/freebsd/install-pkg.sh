@@ -15,6 +15,7 @@ pkg install -y \
     libxcvt \
     libglvnd \
     libepoxy \
+    libudev-devd \
     mesa-dri \
     mesa-libs \
     meson \
