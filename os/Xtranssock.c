@@ -112,8 +112,6 @@ from the copyright holders.
 #include <sys/filio.h>
 #endif
 
-#define socket_close close
-
 #include <unistd.h>
 
 #else /* !WIN32 */
@@ -121,8 +119,6 @@ from the copyright holders.
 #include <X11/Xwinsock.h>
 #include <X11/Xwindows.h>
 #include <X11/Xw32defs.h>
-
-#define socket_close closesocket
 
 #undef EADDRINUSE
 #define EADDRINUSE WSAEADDRINUSE
@@ -679,7 +675,7 @@ static int _XSERVTransSocketCreateListener (XtransConnInfo ciptr,
 
 	if (retry-- == 0) {
 	    prmsg (1, "SocketCreateListener: failed to bind listener\n");
-	    socket_close (fd);
+            ossock_close(fd);
 	    return TRANS_CREATE_LISTENER_FAILED;
 	}
 #ifdef SO_REUSEADDR
@@ -710,7 +706,7 @@ static int _XSERVTransSocketCreateListener (XtransConnInfo ciptr,
     if (listen (fd, BACKLOG) < 0)
     {
 	prmsg (1, "SocketCreateListener: listen() failed\n");
-	socket_close (fd);
+        ossock_close(fd);
 	return TRANS_CREATE_LISTENER_FAILED;
     }
 
@@ -990,7 +986,7 @@ static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
         }
 #endif
 
-	socket_close (ciptr->fd);
+	ossock_close(ciptr->fd);
 	unlink (unsock->sun_path);
 
 	if ((ciptr->fd = socket (AF_UNIX, SOCK_STREAM, 0)) < 0)
@@ -1002,14 +998,14 @@ static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
 
 	if (bind (ciptr->fd, (struct sockaddr *) unsock, ciptr->addrlen) < 0)
 	{
-	    socket_close (ciptr->fd);
+	    ossock_close(ciptr->fd);
 	    _XSERVTransFreeConnInfo (ciptr);
 	    return TRANS_RESET_FAILURE;
 	}
 
 	if (listen (ciptr->fd, BACKLOG) < 0)
 	{
-	    socket_close (ciptr->fd);
+	    ossock_close(ciptr->fd);
 	    _XSERVTransFreeConnInfo (ciptr);
 	    (void) umask (oldUmask);
 	    return TRANS_RESET_FAILURE;
@@ -1077,7 +1073,7 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
     {
 	prmsg (1,
 	    "SocketINETAccept: ...SocketINETGetAddr() failed:\n");
-	socket_close (newciptr->fd);
+	ossock_close(newciptr->fd);
 	free (newciptr);
 	*status = TRANS_ACCEPT_MISC_ERROR;
         return NULL;
@@ -1087,7 +1083,7 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
     {
 	prmsg (1,
 	  "SocketINETAccept: ...SocketINETGetPeerAddr() failed:\n");
-	socket_close (newciptr->fd);
+	ossock_close(newciptr->fd);
 	if (newciptr->addr) free (newciptr->addr);
 	free (newciptr);
 	*status = TRANS_ACCEPT_MISC_ERROR;
@@ -1138,7 +1134,7 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     {
         prmsg (1,
         "SocketUNIXAccept: Can't allocate space for the addr\n");
-	socket_close (newciptr->fd);
+	ossock_close(newciptr->fd);
 	free (newciptr);
 	*status = TRANS_ACCEPT_BAD_MALLOC;
         return NULL;
@@ -1156,7 +1152,7 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     {
         prmsg (1,
 	      "SocketUNIXAccept: Can't allocate space for the addr\n");
-	socket_close (newciptr->fd);
+	ossock_close(newciptr->fd);
 	if (newciptr->addr) free (newciptr->addr);
 	free (newciptr);
 	*status = TRANS_ACCEPT_BAD_MALLOC;
@@ -1193,7 +1189,7 @@ appendFd(struct _XtransConnFd **prev, int fd, int do_close)
     new = malloc (sizeof (struct _XtransConnFd));
     if (!new) {
         /* XXX mark connection as broken */
-        socket_close(fd);
+        ossock_close(fd);
         return;
     }
     new->next = 0;
@@ -1227,7 +1223,7 @@ discardFd(struct _XtransConnFd **prev, struct _XtransConnFd *upto, int do_close)
     for (cf = *prev; cf != upto; cf = next) {
         next = cf->next;
         if (do_close || cf->do_close)
-            socket_close(cf->fd);
+            ossock_close(cf->fd);
         free(cf);
     }
     *prev = upto;
@@ -1431,12 +1427,7 @@ static int _XSERVTransSocketDisconnect (XtransConnInfo ciptr)
 static int _XSERVTransSocketINETClose (XtransConnInfo ciptr)
 {
     prmsg (2,"SocketINETClose(%p,%d)\n", (void *) ciptr, ciptr->fd);
-
-    int ret = socket_close (ciptr->fd);
-#ifdef WIN32
-    if (ret == SOCKET_ERROR) errno = WSAGetLastError();
-#endif
-    return ret;
+    return ossock_close(ciptr->fd);
 }
 
 #endif /* TCPCONN */
@@ -1457,7 +1448,7 @@ static int _XSERVTransSocketUNIXClose (XtransConnInfo ciptr)
 #if XTRANS_SEND_FDS
     cleanupFds(ciptr);
 #endif
-    ret = socket_close(ciptr->fd);
+    ret = ossock_close(ciptr->fd);
 
     if (ciptr->flags
        && sockname
@@ -1483,7 +1474,7 @@ static int _XSERVTransSocketUNIXCloseForCloning (XtransConnInfo ciptr)
 #if XTRANS_SEND_FDS
     cleanupFds(ciptr);
 #endif
-    return socket_close(ciptr->fd);
+    return ossock_close(ciptr->fd);
 }
 
 #endif /* UNIXCONN */

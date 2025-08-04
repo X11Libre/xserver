@@ -4,6 +4,8 @@
  */
 #include <dix-config.h>
 
+#include <unistd.h>
+
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #else
@@ -30,5 +32,17 @@ int ossock_ioctl(int fd, unsigned long request, void *arg)
     return ret;
 #else
     return ioctl(fd, request,arg);
+#endif
+}
+
+int ossock_close(int fd)
+{
+#ifdef WIN32
+    int ret = closesocket(fd);
+    if (ret == SOCKET_ERROR)
+        errno = WSAGetLastError();
+    return ret;
+#else
+    return close(fd);
 #endif
 }

@@ -17,4 +17,9 @@ void ossock_init(void);
  */
 int ossock_ioctl(int fd, unsigned long request, void *arg);
 
+/*
+ * os specific socket close function
+ */
+int ossock_close(int fd);
+
 #endif /* _XSERVER_OS_OSSOCK_H_ */
