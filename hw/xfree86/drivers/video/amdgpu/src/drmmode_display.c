@@ -1752,7 +1752,7 @@ int drmmode_get_crtc_id(xf86CrtcPtr crtc)
 	return drmmode_crtc->hw_id;
 }
 
-void drmmode_crtc_hw_id(xf86CrtcPtr crtc)
+static void drmmode_crtc_hw_id(xf86CrtcPtr crtc)
 {
 	drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 	ScrnInfoPtr pScrn = crtc->scrn;
