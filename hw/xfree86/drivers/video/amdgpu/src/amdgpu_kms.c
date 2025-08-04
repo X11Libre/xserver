@@ -258,8 +258,6 @@ static void AMDGPUFreeRec(ScrnInfoPtr pScrn)
 	}
 
 	if (pAMDGPUEnt->fd > 0) {
-		DevUnion *pPriv;
-		AMDGPUEntPtr pAMDGPUEnt;
 		pPriv = xf86GetEntityPrivate(pScrn->entityList[0],
 					     gAMDGPUEntityIndex);
 
