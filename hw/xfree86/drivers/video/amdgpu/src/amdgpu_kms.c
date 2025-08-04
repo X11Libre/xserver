@@ -633,7 +633,7 @@ amdgpu_prime_scanout_update_abort(xf86CrtcPtr crtc, void *event_data)
 	drmmode_crtc->scanout_update_pending = 0;
 }
 
-void
+static void
 amdgpu_sync_shared_pixmap(PixmapDirtyUpdatePtr dirty)
 {
 	ScreenPtr primary_screen = amdgpu_dirty_primary(dirty);
