@@ -342,7 +342,7 @@ static void amdgpu_dri2_unref_buffer(BufferPtr buffer)
 }
 
 static void
-amdgpu_dri2_client_state_changed(CallbackListPtr * ClientStateCallback,
+amdgpu_dri2_client_state_changed(CallbackListPtr * cbl,
 				 void* data, void* calldata)
 {
 	NewClientInfoRec *clientinfo = calldata;
