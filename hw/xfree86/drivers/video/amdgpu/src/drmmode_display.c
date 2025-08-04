@@ -3645,7 +3645,7 @@ drmmode_find_output(ScrnInfoPtr scrn, int output_id, int *num_dvi,
 	return FALSE;
 }
 
-void
+static void
 amdgpu_mode_hotplug(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 {
 	xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(scrn);
