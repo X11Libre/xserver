@@ -35,10 +35,11 @@
  * Silicon Graphics, Inc.
  */
 
+#include "include/glx_extinit.h"
+
 #include "extension_string.h"
 #include "glxvndabi.h"
 
-typedef struct __GLXconfig __GLXconfig;
 struct __GLXconfig {
     /* Management */
     __GLXconfig *next;
@@ -114,7 +115,6 @@ GLint glxConvertToXVisualType(int visualType);
 ** and DDX layers of the GLX server extension.  The methods provide an
 ** interface for context management on a screen.
 */
-typedef struct __GLXscreen __GLXscreen;
 struct __GLXscreen {
     void (*destroy) (__GLXscreen * screen);
 
