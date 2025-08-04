@@ -378,18 +378,6 @@ static XtransConnInfo _XSERVTransSocketOpen (int i, int type)
     ciptr->fd = socket(Sockettrans2devtab[i].family, type,
                        Sockettrans2devtab[i].protocol);
 
-#ifndef WIN32
-#if !defined(USE_POLL)
-    if (ciptr->fd >= sysconf(_SC_OPEN_MAX))
-    {
-	prmsg (2, "SocketOpen: socket() returned out of range fd %d\n",
-	       ciptr->fd);
-	socket_close (ciptr->fd);
-	ciptr->fd = -1;
-    }
-#endif
-#endif
-
     if (ciptr->fd < 0) {
 #ifdef WIN32
 	errno = WSAGetLastError();
