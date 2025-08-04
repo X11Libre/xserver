@@ -801,8 +801,8 @@ static void drmmode_lut_compose(uint16_t *a_red,
 			 * values in the LUTs are [0, 1<<16)
 			 */
 			j = a_out_ibmax / max_lut;
-			*(uint16_t*)((void*)out + (i*struct_size)) =
-				*(uint16_t*)((void*)b + (j*struct_size));
+			*(uint16_t*)((char*)out + (i*struct_size)) =
+				*(uint16_t*)((char*)b + (j*struct_size));
 		}
 	}
 
