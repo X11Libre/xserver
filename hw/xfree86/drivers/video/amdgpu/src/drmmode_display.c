@@ -2688,7 +2688,7 @@ out_free_encoders:
 	return 0;
 }
 
-uint32_t find_clones(ScrnInfoPtr scrn, xf86OutputPtr output)
+static uint32_t find_clones(ScrnInfoPtr scrn, xf86OutputPtr output)
 {
 	drmmode_output_private_ptr drmmode_output =
 	    output->driver_private, clone_drmout;
