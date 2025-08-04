@@ -351,4 +351,6 @@ extern RRCrtcPtr amdgpu_randr_crtc_covering_drawable(DrawablePtr pDraw);
 
 extern AMDGPUEntPtr AMDGPUEntPriv(ScrnInfoPtr pScrn);
 
+extern int gAMDGPUEntityIndex;
+
 #endif /* _AMDGPU_DRV_H_ */
