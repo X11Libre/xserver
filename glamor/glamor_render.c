@@ -759,21 +759,21 @@ combine_pict_format(PictFormatShort * des, const PictFormatShort src,
 
     switch (in_ca) {
     case glamor_program_alpha_normal:
-        src_type = PICT_FORMAT_TYPE(src);
+        src_type = PIXMAN_FORMAT_TYPE(src);
         mask_type = PICT_TYPE_A;
         break;
     case glamor_program_alpha_ca_first:
-        src_type = PICT_FORMAT_TYPE(src);
-        mask_type = PICT_FORMAT_TYPE(mask);
+        src_type = PIXMAN_FORMAT_TYPE(src);
+        mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
     case glamor_program_alpha_ca_second:
         src_type = PICT_TYPE_A;
-        mask_type = PICT_FORMAT_TYPE(mask);
+        mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
     case glamor_program_alpha_dual_blend:
     case glamor_program_alpha_dual_blend_gles2:
-        src_type = PICT_FORMAT_TYPE(src);
-        mask_type = PICT_FORMAT_TYPE(mask);
+        src_type = PIXMAN_FORMAT_TYPE(src);
+        mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
     default:
         return FALSE;
@@ -1552,7 +1552,7 @@ glamor_composite_clipped_region(CARD8 op,
                  || (PICT_FORMAT_COLOR(dest->format)
                      && PICT_FORMAT_COLOR(source->format)
                      && dest->format == PICT_FORMAT(PIXMAN_FORMAT_BPP(source->format),
-                                                    PICT_FORMAT_TYPE(source->format),
+                                                    PIXMAN_FORMAT_TYPE(source->format),
                                                     0,
                                                     PICT_FORMAT_R(source->format),
                                                     PICT_FORMAT_G(source->format),

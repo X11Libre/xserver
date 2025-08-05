@@ -444,7 +444,7 @@ miIsSolidAlpha(PicturePtr pSrc)
     pScreen = pSrc->pDrawable->pScreen;
 
     /* Alpha-only */
-    if (PICT_FORMAT_TYPE(pSrc->format) != PICT_TYPE_A)
+    if (PIXMAN_FORMAT_TYPE(pSrc->format) != PICT_TYPE_A)
         return FALSE;
     /* repeat */
     if (!pSrc->repeat)

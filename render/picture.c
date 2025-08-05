@@ -292,7 +292,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
         pFormats[f].depth = formats[f].depth;
         format = formats[f].format;
         pFormats[f].format = format;
-        switch (PICT_FORMAT_TYPE(format)) {
+        switch (PIXMAN_FORMAT_TYPE(format)) {
         case PICT_TYPE_ARGB:
             pFormats[f].type = PictTypeDirect;
 

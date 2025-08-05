@@ -601,22 +601,22 @@ glamor_get_rgba_from_pixel(CARD32 pixel,
     bbits = PICT_FORMAT_B(format);
     int abits = PIXMAN_FORMAT_A(format);
 
-    if (PICT_FORMAT_TYPE(format) == PICT_TYPE_A) {
+    if (PIXMAN_FORMAT_TYPE(format) == PICT_TYPE_A) {
         rshift = gshift = bshift = ashift = 0;
     }
-    else if (PICT_FORMAT_TYPE(format) == PICT_TYPE_ARGB) {
+    else if (PIXMAN_FORMAT_TYPE(format) == PICT_TYPE_ARGB) {
         bshift = 0;
         gshift = bbits;
         rshift = gshift + gbits;
         ashift = rshift + rbits;
     }
-    else if (PICT_FORMAT_TYPE(format) == PICT_TYPE_ABGR) {
+    else if (PIXMAN_FORMAT_TYPE(format) == PICT_TYPE_ABGR) {
         rshift = 0;
         gshift = rbits;
         bshift = gshift + gbits;
         ashift = bshift + bbits;
     }
-    else if (PICT_FORMAT_TYPE(format) == PICT_TYPE_BGRA) {
+    else if (PIXMAN_FORMAT_TYPE(format) == PICT_TYPE_BGRA) {
         ashift = 0;
         rshift = abits;
         if (abits == 0)
