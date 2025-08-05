@@ -211,7 +211,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
              */
             if (pVisual->offsetBlue == 0 &&
                 pVisual->offsetGreen == b && pVisual->offsetRed == b + g) {
-                type = PICT_TYPE_ARGB;
+                type = PIXMAN_TYPE_ARGB;
             }
             else if (pVisual->offsetRed == 0 &&
                      pVisual->offsetGreen == r &&
@@ -293,7 +293,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
         format = formats[f].format;
         pFormats[f].format = format;
         switch (PIXMAN_FORMAT_TYPE(format)) {
-        case PICT_TYPE_ARGB:
+        case PIXMAN_TYPE_ARGB:
             pFormats[f].type = PictTypeDirect;
 
             pFormats[f].direct.alphaMask = Mask (PIXMAN_FORMAT_A(format));
@@ -649,7 +649,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
                  formats[n].direct.blueMask | formats[n].direct.greenMask) == 0)
                 type = PICT_TYPE_A;
             else if (formats[n].direct.red > formats[n].direct.blue)
-                type = PICT_TYPE_ARGB;
+                type = PIXMAN_TYPE_ARGB;
             else if (formats[n].direct.red == 0)
                 type = PICT_TYPE_ABGR;
             else
