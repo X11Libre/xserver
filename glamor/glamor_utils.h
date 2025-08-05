@@ -593,11 +593,11 @@ glamor_get_rgba_from_pixel(CARD32 pixel,
                            float *green,
                            float *blue, float *alpha, CARD32 format)
 {
-    int bbits, gbits;
+    int bbits;
     int rshift, bshift, gshift, ashift;
 
     int rbits = PIXMAN_FORMAT_R(format);
-    gbits = PICT_FORMAT_G(format);
+    int gbits = PIXMAN_FORMAT_G(format);
     bbits = PICT_FORMAT_B(format);
     int abits = PIXMAN_FORMAT_A(format);
 

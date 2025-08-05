@@ -300,15 +300,15 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
 
             if (pFormats[f].direct.alphaMask)
                 pFormats[f].direct.alpha = (PIXMAN_FORMAT_R(format) +
-                                            PICT_FORMAT_G(format) +
+                                            PIXMAN_FORMAT_G(format) +
                                             PICT_FORMAT_B(format));
 
             pFormats[f].direct.redMask = Mask (PIXMAN_FORMAT_R(format));
 
-            pFormats[f].direct.red = (PICT_FORMAT_G(format) +
+            pFormats[f].direct.red = (PIXMAN_FORMAT_G(format) +
                                       PICT_FORMAT_B(format));
 
-            pFormats[f].direct.greenMask = Mask (PICT_FORMAT_G(format));
+            pFormats[f].direct.greenMask = Mask (PIXMAN_FORMAT_G(format));
 
             pFormats[f].direct.green = PICT_FORMAT_B(format);
 
@@ -324,15 +324,15 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
 
             if (pFormats[f].direct.alphaMask)
                 pFormats[f].direct.alpha = (PICT_FORMAT_B(format) +
-                                            PICT_FORMAT_G(format) +
+                                            PIXMAN_FORMAT_G(format) +
                                             PIXMAN_FORMAT_R(format));
 
             pFormats[f].direct.blueMask = Mask (PICT_FORMAT_B(format));
 
-            pFormats[f].direct.blue = (PICT_FORMAT_G(format) +
+            pFormats[f].direct.blue = (PIXMAN_FORMAT_G(format) +
                                        PIXMAN_FORMAT_R(format));
 
-            pFormats[f].direct.greenMask = Mask (PICT_FORMAT_G(format));
+            pFormats[f].direct.greenMask = Mask (PIXMAN_FORMAT_G(format));
 
             pFormats[f].direct.green = PIXMAN_FORMAT_R(format);
 
@@ -349,17 +349,17 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
             pFormats[f].direct.blue =
                 (PIXMAN_FORMAT_BPP(format) - PICT_FORMAT_B(format));
 
-            pFormats[f].direct.greenMask = Mask (PICT_FORMAT_G(format));
+            pFormats[f].direct.greenMask = Mask (PIXMAN_FORMAT_G(format));
 
             pFormats[f].direct.green =
                 (PIXMAN_FORMAT_BPP(format) - PICT_FORMAT_B(format) -
-                 PICT_FORMAT_G(format));
+                 PIXMAN_FORMAT_G(format));
 
             pFormats[f].direct.redMask = Mask (PIXMAN_FORMAT_R(format));
 
             pFormats[f].direct.red =
                 (PIXMAN_FORMAT_BPP(format) - PICT_FORMAT_B(format) -
-                 PICT_FORMAT_G(format) - PIXMAN_FORMAT_R(format));
+                 PIXMAN_FORMAT_G(format) - PIXMAN_FORMAT_R(format));
 
             pFormats[f].direct.alphaMask = Mask (PIXMAN_FORMAT_A(format));
 
