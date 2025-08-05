@@ -615,7 +615,7 @@ glamor_get_rgba_from_pixel(CARD32 pixel,
         bshift = gshift + gbits;
         ashift = bshift + bbits;
     }
-    else if (PIXMAN_FORMAT_TYPE(format) == PICT_TYPE_BGRA) {
+    else if (PIXMAN_FORMAT_TYPE(format) == PIXMAN_TYPE_BGRA) {
         ashift = 0;
         rshift = abits;
         if (abits == 0)
