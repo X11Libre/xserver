@@ -19,8 +19,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-#include "config.h"
-#include <xorg-server.h>
+#include <xorg-config.h>
 
 #include "amdgpu_probe.h"
 #include "amdgpu_version.h"

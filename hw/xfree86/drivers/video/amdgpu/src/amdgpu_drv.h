@@ -41,7 +41,7 @@
 #include <unistd.h>		/* For usleep() */
 #include <sys/time.h>		/* For gettimeofday() */
 
-#include "config.h"
+#include <xorg-config.h>
 
 #include "xf86str.h"
 #include "compiler.h"
