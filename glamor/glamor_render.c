@@ -755,7 +755,7 @@ combine_pict_format(PictFormatShort * des, const PictFormatShort src,
 
     assert(src_bpp == PIXMAN_FORMAT_BPP(mask));
 
-    new_vis = PICT_FORMAT_VIS(src) | PICT_FORMAT_VIS(mask);
+    new_vis = PIXMAN_FORMAT_VIS(src) | PIXMAN_FORMAT_VIS(mask);
 
     switch (in_ca) {
     case glamor_program_alpha_normal:

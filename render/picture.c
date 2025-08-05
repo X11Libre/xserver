@@ -379,7 +379,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
         case PICT_TYPE_GRAY:
             pFormats[f].type = PictTypeIndexed;
             pFormats[f].index.vid =
-                pScreen->visuals[PICT_FORMAT_VIS(format)].vid;
+                pScreen->visuals[PIXMAN_FORMAT_VIS(format)].vid;
             break;
         }
     }
