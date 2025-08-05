@@ -204,7 +204,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
             r = Ones(pVisual->redMask);
             g = Ones(pVisual->greenMask);
             b = Ones(pVisual->blueMask);
-            type = PICT_TYPE_OTHER;
+            type = PIXMAN_TYPE_OTHER;
             /*
              * Current rendering code supports only three direct formats,
              * fields must be packed together at the bottom of the pixel
@@ -223,7 +223,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
                      pVisual->offsetBlue == bpp - b) {
                 type = PIXMAN_TYPE_BGRA;
             }
-            if (type != PICT_TYPE_OTHER) {
+            if (type != PIXMAN_TYPE_OTHER) {
                 format = PICT_FORMAT(bpp, type, 0, r, g, b);
                 addFormat(formats, &nformats, format, depth);
             }
