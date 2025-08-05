@@ -132,7 +132,7 @@ typedef struct {
 
 static inline Bool
 glamor_is_component_alpha(PicturePtr mask) {
-    if (mask && mask->componentAlpha && PICT_FORMAT_RGB(mask->format))
+    if (mask && mask->componentAlpha && PIXMAN_FORMAT_RGB(mask->format))
         return TRUE;
     return FALSE;
 }

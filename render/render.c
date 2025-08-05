@@ -989,7 +989,7 @@ typedef struct _GlyphNew {
     unsigned char sha1[20];
 } GlyphNewRec, *GlyphNewPtr;
 
-#define NeedsComponent(f) (PIXMAN_FORMAT_A(f) != 0 && PICT_FORMAT_RGB(f) != 0)
+#define NeedsComponent(f) (PIXMAN_FORMAT_A(f) != 0 && PIXMAN_FORMAT_RGB(f) != 0)
 
 static int
 ProcRenderAddGlyphs(ClientPtr client)

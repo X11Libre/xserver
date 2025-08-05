@@ -550,7 +550,7 @@ glamor_set_composite_op(ScreenPtr screen,
             break;
         }
     } else if (mask && mask->componentAlpha
-               && PICT_FORMAT_RGB(mask->format) != 0 && op_info->source_alpha) {
+               && PIXMAN_FORMAT_RGB(mask->format) != 0 && op_info->source_alpha) {
         switch (dest_blend) {
         case GL_SRC_ALPHA:
             dest_blend = GL_SRC_COLOR;
