@@ -28,7 +28,7 @@
 #define DRMMODE_DISPLAY_H
 
 #include "xf86drmMode.h"
-#ifdef HAVE_LIBUDEV
+#ifdef CONFIG_UDEV
 #include "libudev.h"
 #endif
 
@@ -54,7 +54,7 @@ enum drmmode_cm_prop {
 
 typedef struct {
 	ScrnInfoPtr scrn;
-#ifdef HAVE_LIBUDEV
+#ifdef CONFIG_UDEV
 	struct udev_monitor *uevent_monitor;
 	InputHandlerProc uevent_handler;
 #endif
