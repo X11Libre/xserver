@@ -23,8 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "config.h"
-#include <xorg-server.h>
+#include <xorg-config.h>
 
 #ifdef USE_GLAMOR
 
