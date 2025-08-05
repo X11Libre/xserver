@@ -296,7 +296,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
         case PICT_TYPE_ARGB:
             pFormats[f].type = PictTypeDirect;
 
-            pFormats[f].direct.alphaMask = Mask (PICT_FORMAT_A(format));
+            pFormats[f].direct.alphaMask = Mask (PIXMAN_FORMAT_A(format));
 
             if (pFormats[f].direct.alphaMask)
                 pFormats[f].direct.alpha = (PICT_FORMAT_R(format) +
@@ -320,7 +320,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
         case PICT_TYPE_ABGR:
             pFormats[f].type = PictTypeDirect;
 
-            pFormats[f].direct.alphaMask = Mask (PICT_FORMAT_A(format));
+            pFormats[f].direct.alphaMask = Mask (PIXMAN_FORMAT_A(format));
 
             if (pFormats[f].direct.alphaMask)
                 pFormats[f].direct.alpha = (PICT_FORMAT_B(format) +
@@ -361,7 +361,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
                 (PICT_FORMAT_BPP(format) - PICT_FORMAT_B(format) -
                  PICT_FORMAT_G(format) - PICT_FORMAT_R(format));
 
-            pFormats[f].direct.alphaMask = Mask (PICT_FORMAT_A(format));
+            pFormats[f].direct.alphaMask = Mask (PIXMAN_FORMAT_A(format));
 
             pFormats[f].direct.alpha = 0;
             break;
@@ -370,7 +370,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
             pFormats[f].type = PictTypeDirect;
 
             pFormats[f].direct.alpha = 0;
-            pFormats[f].direct.alphaMask = Mask (PICT_FORMAT_A(format));
+            pFormats[f].direct.alphaMask = Mask (PIXMAN_FORMAT_A(format));
 
             /* remaining fields already set to zero */
             break;
@@ -1431,7 +1431,7 @@ ReduceCompositeOp(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
      * picture.
      */
     no_src_alpha = PICT_FORMAT_COLOR(pSrc->format) &&
-        PICT_FORMAT_A(pSrc->format) == 0 &&
+        PIXMAN_FORMAT_A(pSrc->format) == 0 &&
         (pSrc->repeatType != RepeatNone ||
          (!pSrc->transform &&
           xSrc >= 0 && ySrc >= 0 &&
@@ -1439,7 +1439,7 @@ ReduceCompositeOp(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
           ySrc + height <= pSrc->pDrawable->height)) &&
         pSrc->alphaMap == NULL && pMask == NULL;
     no_dst_alpha = PICT_FORMAT_COLOR(pDst->format) &&
-        PICT_FORMAT_A(pDst->format) == 0 && pDst->alphaMap == NULL;
+        PIXMAN_FORMAT_A(pDst->format) == 0 && pDst->alphaMap == NULL;
 
     /* TODO, maybe: Conjoint and Disjoint op reductions? */
 

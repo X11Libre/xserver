@@ -226,7 +226,7 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         return FALSE;
     }
 
-    if (!PICT_FORMAT_A(format))
+    if (!PIXMAN_FORMAT_A(format))
         swizzle[3] = GL_ONE;
 
     return TRUE;

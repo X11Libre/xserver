@@ -532,7 +532,7 @@ glamor_set_composite_op(ScreenPtr screen,
     /* If there's no dst alpha channel, adjust the blend op so that we'll treat
      * it as always 1.
      */
-    if (PICT_FORMAT_A(dest->format) == 0 && op_info->dest_alpha) {
+    if (PIXMAN_FORMAT_A(dest->format) == 0 && op_info->dest_alpha) {
         if (source_blend == GL_DST_ALPHA)
             source_blend = GL_ONE;
         else if (source_blend == GL_ONE_MINUS_DST_ALPHA)
@@ -640,7 +640,7 @@ glamor_set_composite_texture(glamor_screen_private *glamor_priv, int unit,
      * is RGB (no alpha), which we use for 16bpp textures.
      */
     if (glamor_pixmap_priv_is_large(pixmap_priv) ||
-        (!PICT_FORMAT_A(picture->format) &&
+        (!PIXMAN_FORMAT_A(picture->format) &&
          repeat_type == RepeatNone && picture->transform)) {
         glamor_pixmap_fbo_fix_wh_ratio(wh, pixmap, pixmap_priv);
         glUniform4fv(wh_location, 1, wh);
@@ -941,7 +941,7 @@ glamor_composite_choose_shader(CARD8 op,
             goto fail;
     }
     else {
-        if (PICT_FORMAT_A(source->format))
+        if (PIXMAN_FORMAT_A(source->format))
             key.source = SHADER_SOURCE_TEXTURE_ALPHA;
         else
             key.source = SHADER_SOURCE_TEXTURE;
@@ -959,7 +959,7 @@ glamor_composite_choose_shader(CARD8 op,
                 goto fail;
         }
         else {
-            if (PICT_FORMAT_A(mask->format))
+            if (PIXMAN_FORMAT_A(mask->format))
                 key.mask = SHADER_MASK_TEXTURE_ALPHA;
             else
                 key.mask = SHADER_MASK_TEXTURE;
@@ -1066,12 +1066,12 @@ glamor_composite_choose_shader(CARD8 op,
              * because we wire the alpha to 1.
              *
              **/
-            if (!PICT_FORMAT_A(saved_source_format)
-                && PICT_FORMAT_A(mask->format))
+            if (!PIXMAN_FORMAT_A(saved_source_format)
+                && PIXMAN_FORMAT_A(mask->format))
                 key.source = SHADER_SOURCE_TEXTURE;
 
-            if (!PICT_FORMAT_A(mask->format)
-                && PICT_FORMAT_A(saved_source_format))
+            if (!PIXMAN_FORMAT_A(mask->format)
+                && PIXMAN_FORMAT_A(saved_source_format))
                 key.mask = SHADER_MASK_TEXTURE;
         }
 
@@ -1559,7 +1559,7 @@ glamor_composite_clipped_region(CARD8 op,
                                                     PICT_FORMAT_B(source->format)))))
             || (op == PictOpOver
                 && source->format == dest->format
-                && !PICT_FORMAT_A(source->format)))
+                && !PIXMAN_FORMAT_A(source->format)))
         && x_source >= 0 && y_source >= 0
         && (x_source + width) <= source->pDrawable->width
         && (y_source + height) <= source->pDrawable->height) {

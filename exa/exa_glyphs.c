@@ -138,7 +138,7 @@ exaUnrealizeGlyphCaches(ScreenPtr pScreen, unsigned int format)
     }
 }
 
-#define NeedsComponent(f) (PICT_FORMAT_A(f) != 0 && PICT_FORMAT_RGB(f) != 0)
+#define NeedsComponent(f) (PIXMAN_FORMAT_A(f) != 0 && PICT_FORMAT_RGB(f) != 0)
 
 /* All caches for a single format share a single pixmap for glyph storage,
  * allowing mixing glyphs of different sizes without paying a penalty

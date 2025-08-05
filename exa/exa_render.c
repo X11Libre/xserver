@@ -143,7 +143,7 @@ exaGetPixelFromRGBA(CARD32 *pixel,
                     CARD16 green,
                     CARD16 blue, CARD16 alpha, PictFormatPtr pFormat)
 {
-    int rbits, bbits, gbits, abits;
+    int rbits, bbits, gbits;
     int rshift, bshift, gshift, ashift;
 
     *pixel = 0;
@@ -155,7 +155,7 @@ exaGetPixelFromRGBA(CARD32 *pixel,
     rbits = PICT_FORMAT_R(pFormat->format);
     gbits = PICT_FORMAT_G(pFormat->format);
     bbits = PICT_FORMAT_B(pFormat->format);
-    abits = PICT_FORMAT_A(pFormat->format);
+    int abits = PIXMAN_FORMAT_A(pFormat->format);
 
     rshift = pFormat->direct.red;
     gshift = pFormat->direct.green;
@@ -178,7 +178,7 @@ exaGetRGBAFromPixel(CARD32 pixel,
                     CARD16 *alpha,
                     PictFormatPtr pFormat, PictFormatShort format)
 {
-    int rbits, bbits, gbits, abits;
+    int rbits, bbits, gbits;
     int rshift, bshift, gshift, ashift;
 
     if (!PICT_FORMAT_COLOR(format) && PICT_FORMAT_TYPE(format) != PICT_TYPE_A)
@@ -187,7 +187,7 @@ exaGetRGBAFromPixel(CARD32 pixel,
     rbits = PICT_FORMAT_R(format);
     gbits = PICT_FORMAT_G(format);
     bbits = PICT_FORMAT_B(format);
-    abits = PICT_FORMAT_A(format);
+    int abits = PIXMAN_FORMAT_A(format);
 
     if (pFormat) {
         rshift = pFormat->direct.red;
@@ -889,7 +889,7 @@ exaComposite(CARD8 op,
         pSrc->repeat = 0;
 
     if (!pMask && !pSrc->alphaMap && !pDst->alphaMap &&
-        (op == PictOpSrc || (op == PictOpOver && !PICT_FORMAT_A(pSrc->format))))
+        (op == PictOpSrc || (op == PictOpOver && !PIXMAN_FORMAT_A(pSrc->format))))
     {
         if (pSrc->pDrawable ?
             (pSrc->pDrawable->width == 1 && pSrc->pDrawable->height == 1 &&
@@ -912,7 +912,7 @@ exaComposite(CARD8 op,
                                                  PICT_FORMAT_G(pSrc->format),
                                                  PICT_FORMAT_B(pSrc->format)))))
                   || (op == PictOpOver && pSrc->format == pDst->format &&
-                      !PICT_FORMAT_A(pSrc->format)))) {
+                      !PIXMAN_FORMAT_A(pSrc->format)))) {
             if (!pSrc->repeat && xSrc >= 0 && ySrc >= 0 &&
                 (xSrc + width <= pSrc->pDrawable->width) &&
                 (ySrc + height <= pSrc->pDrawable->height)) {
