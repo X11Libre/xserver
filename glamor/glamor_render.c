@@ -1549,8 +1549,8 @@ glamor_composite_clipped_region(CARD8 op,
         && dest->pDrawable->depth == source->pDrawable->depth
         && ((op == PictOpSrc
              && (source->format == dest->format
-                 || (PICT_FORMAT_COLOR(dest->format)
-                     && PICT_FORMAT_COLOR(source->format)
+                 || (PIXMAN_FORMAT_COLOR(dest->format)
+                     && PIXMAN_FORMAT_COLOR(source->format)
                      && dest->format == PICT_FORMAT(PIXMAN_FORMAT_BPP(source->format),
                                                     PIXMAN_FORMAT_TYPE(source->format),
                                                     0,

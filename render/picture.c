@@ -1430,7 +1430,7 @@ ReduceCompositeOp(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
      * simplest case where there is no transform on the source
      * picture.
      */
-    no_src_alpha = PICT_FORMAT_COLOR(pSrc->format) &&
+    no_src_alpha = PIXMAN_FORMAT_COLOR(pSrc->format) &&
         PIXMAN_FORMAT_A(pSrc->format) == 0 &&
         (pSrc->repeatType != RepeatNone ||
          (!pSrc->transform &&
@@ -1438,7 +1438,7 @@ ReduceCompositeOp(CARD8 op, PicturePtr pSrc, PicturePtr pMask, PicturePtr pDst,
           xSrc + width <= pSrc->pDrawable->width &&
           ySrc + height <= pSrc->pDrawable->height)) &&
         pSrc->alphaMap == NULL && pMask == NULL;
-    no_dst_alpha = PICT_FORMAT_COLOR(pDst->format) &&
+    no_dst_alpha = PIXMAN_FORMAT_COLOR(pDst->format) &&
         PIXMAN_FORMAT_A(pDst->format) == 0 && pDst->alphaMap == NULL;
 
     /* TODO, maybe: Conjoint and Disjoint op reductions? */
