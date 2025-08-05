@@ -1,0 +1,181 @@
+.ds q \N'34'
+.TH AMDGPU 4 2023-09-07 __vendorversion__
+.SH NAME
+amdgpu \- AMD RADEON GPU video driver
+.SH SYNOPSIS
+.nf
+.B "Section \*qDevice\*q"
+.BI "  Identifier \*q"  devname \*q
+.B  "  Driver \*qamdgpu\*q"
+\ \ ...
+.B EndSection
+.fi
+.SH DESCRIPTION
+.B amdgpu
+is an Xorg driver for AMD RADEON-based video cards with the
+following features:
+.PP
+.PD 0
+.TP 2
+\(bu
+Support for 8-, 15-, 16-, 24- and 30-bit pixel depths;
+.TP
+\(bu
+RandR support up to version 1.4;
+.TP
+\(bu
+3D acceleration;
+.PD
+.SH SUPPORTED HARDWARE
+The
+.B amdgpu
+driver supports SI and newer families' video cards.
+.PD
+.SH CONFIGURATION DETAILS
+Please refer to
+.BR xorg.conf (5)
+for general configuration details.
+This section only covers configuration details specific to this driver.
+.PP
+The following driver
+.B Options
+are supported:
+.TP
+.BI "Option \*qSWcursor\*q \*q" boolean \*q
+Selects software cursor.
+.br
+The default is
+.BR off .
+.TP
+.BI "Option \*qAccel\*q \*q" boolean \*q
+Enables or disables all hardware acceleration.
+.br
+The default is
+.BR on .
+.TP
+.BI "Option \*qZaphodHeads\*q \*q" string \*q
+Specify the RandR output(s) to use with zaphod mode for a particular driver
+instance.
+If you use this option you must use this option for all instances of the driver.
+.br
+For example:
+.B
+Option \*qZaphodHeads\*q \*qLVDS,VGA-0\*q
+will assign xrandr outputs LVDS and VGA-0 to this instance of the driver.
+.TP
+.BI "Option \*qDRI\*q \*q" integer \*q
+Define the maximum level of DRI to enable.
+Valid values are 2 for DRI2 or 3 for DRI3.
+The default is
+.B 3 for DRI3
+if the Xorg version is >= 1.18.3, otherwise
+.B 2 for DRI2.
+.TP
+.BI "Option \*qEnablePageFlip\*q \*q" boolean \*q
+Enable DRI2 page flipping.
+.br
+The default is
+.B on.
+.TP
+.BI "Option \*qTearFree\*q \*q" boolean \*q
+Set the default value of the per-output 'TearFree' property, which controls
+tearing prevention using the hardware page flipping mechanism.
+TearFree is on for any CRTC associated with one or more outputs with TearFree on.
+Two separate scanout buffers need to be allocated for each CRTC with TearFree on.
+If this option is set, the default value of the property is 'on' or 'off'
+accordingly.
+If this option isn't set, the default value of the property is
+.B auto,
+which means that TearFree is on for rotated outputs, outputs with RandR
+transforms applied, for RandR 1.4 secondary outputs, and if 'VariableRefresh'
+is enabled, otherwise it's off.
+.TP
+.BI "Option \*qVariableRefresh\*q \*q" boolean \*q
+Enables support for enabling variable refresh on the Screen's CRTCs
+when an suitable application is flipping via the Present extension.
+.br
+The default is
+.BR off .
+.TP
+.BI "Option \*qAsyncFlipSecondaries\*q \*q" boolean \*q
+Use async flips for secondary video outputs on multi-display setups.
+If a screen has multiple displays attached and DRI3 page flipping is used,
+then only one of the displays will have its page flip synchronized to vblank
+for tear-free presentation.
+This is the display that is used for presentation timing and timestamping,
+usually the one covering the biggest pixel area of the screen.
+All other displays ("Secondaries") will not synchronize their flips.
+This may cause some tearing on these displays, but it prevents a permanent or
+periodic slowdown or irritating judder of animations if not all video outputs
+are running synchronized with each other and with the same refresh rate.
+There is no perfect solution apart from perfectly synchronized outputs,
+but this option may give preferrable results if the displays in a
+multi-display setup mirror or clone each other.
+.br
+The default is
+.BR off .
+.TP
+.BI "Option \*qAccelMethod\*q \*q" string \*q
+Setting this option to
+.B none
+disables use of the glamor acceleration architecture.
+In that case, all 2D rendering is done by the CPU,
+but 3D and video hardware acceleration can still work.
+This is mainly useful for OpenGL driver bring-up.
+.br
+The default is to use glamor.
+.PP
+The following driver
+.B Option
+is supported for
+.BR glamor :
+.TP
+.BI "Option \*qShadowPrimary\*q \*q" boolean \*q
+This option enables a so-called "shadow primary" buffer for fast CPU access to
+pixel data, and separate scanout buffers for each display controller (CRTC).
+This may improve performance for some 2D workloads, potentially at the expense
+of other (e.g. 3D, video) workloads.
+Note in particular that enabling this option currently disables page flipping.
+.br
+The default is
+.BR off .
+.SH SEE ALSO
+.BR Xorg (1),
+.BR xorg.conf (5),
+.BR Xserver (1),
+.BR X (7)
+.IP " 1." 4
+Wiki page:
+.RS 4
+https://www.x.org/wiki/radeon
+.RE
+.IP " 2." 4
+Overview about amdgpu development code:
+.RS 4
+https://gitlab.freedesktop.org/xorg/driver/xf86-video-amdgpu
+.RE
+.IP " 3." 4
+Mailing list:
+.RS 4
+https://lists.freedesktop.org/mailman/listinfo/amd-gfx
+.RE
+.IP " 4." 4
+IRC channel:
+.RS 4
+#radeon on irc.freenode.net
+.RE
+.IP " 5." 4
+The bugtracker for amdgpu bugs:
+.RS 4
+https://gitlab.freedesktop.org/xorg/driver/xf86-video-amdgpu/-/issues
+.RE
+.IP " 6." 4
+Submit merge requests:
+.RS 4
+https://gitlab.freedesktop.org/xorg/driver/xf86-video-amdgpu/-/merge_requests
+.RE
+.SH AUTHORS
+.nf
+Authors include:
+Michel D\(:anzer            \fImichel@daenzer.net\fP
+Alex Deucher             \fIalexdeucher@gmail.com\fP
