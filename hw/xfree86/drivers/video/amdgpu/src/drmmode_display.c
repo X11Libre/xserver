@@ -3645,7 +3645,7 @@ drmmode_find_output(ScrnInfoPtr scrn, int output_id, int *num_dvi,
 	return FALSE;
 }
 
-#ifdef HAVE_LIBUDEV
+#ifdef CONFIG_UDEV
 static void
 amdgpu_mode_hotplug(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 {
@@ -3790,7 +3790,7 @@ static void drmmode_handle_uevents(int fd, void *closure)
 
 void drmmode_uevent_init(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 {
-#ifdef HAVE_LIBUDEV
+#ifdef CONFIG_UDEV
 	struct udev *u;
 	struct udev_monitor *mon;
 
@@ -3822,7 +3822,7 @@ void drmmode_uevent_init(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 
 void drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode)
 {
-#ifdef HAVE_LIBUDEV
+#ifdef CONFIG_UDEV
 	if (drmmode->uevent_handler) {
 		struct udev *u = udev_monitor_get_udev(drmmode->uevent_monitor);
 		xf86RemoveGeneralHandler(drmmode->uevent_handler);
