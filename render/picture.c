@@ -230,7 +230,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
             break;
         case StaticColor:
         case PseudoColor:
-            format = PICT_VISFORMAT(bpp, PICT_TYPE_COLOR, v);
+            format = PICT_VISFORMAT(bpp, PIXMAN_TYPE_COLOR, v);
             addFormat(formats, &nformats, format, depth);
             break;
         case StaticGray:
@@ -375,7 +375,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
             /* remaining fields already set to zero */
             break;
 
-        case PICT_TYPE_COLOR:
+        case PIXMAN_TYPE_COLOR:
         case PICT_TYPE_GRAY:
             pFormats[f].type = PictTypeIndexed;
             pFormats[f].index.vid =
@@ -639,7 +639,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
             VisualPtr pVisual =
                 PictureFindVisual(pScreen, formats[n].index.vid);
             if ((pVisual->class | DynamicClass) == PseudoColor)
-                type = PICT_TYPE_COLOR;
+                type = PIXMAN_TYPE_COLOR;
             else
                 type = PICT_TYPE_GRAY;
             a = r = g = b = 0;
