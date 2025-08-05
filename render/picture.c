@@ -235,7 +235,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
             break;
         case StaticGray:
         case GrayScale:
-            format = PICT_VISFORMAT(bpp, PICT_TYPE_GRAY, v);
+            format = PICT_VISFORMAT(bpp, PIXMAN_TYPE_GRAY, v);
             addFormat(formats, &nformats, format, depth);
             break;
         }
@@ -376,7 +376,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
             break;
 
         case PIXMAN_TYPE_COLOR:
-        case PICT_TYPE_GRAY:
+        case PIXMAN_TYPE_GRAY:
             pFormats[f].type = PictTypeIndexed;
             pFormats[f].index.vid =
                 pScreen->visuals[PIXMAN_FORMAT_VIS(format)].vid;
@@ -641,7 +641,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
             if ((pVisual->class | DynamicClass) == PseudoColor)
                 type = PIXMAN_TYPE_COLOR;
             else
-                type = PICT_TYPE_GRAY;
+                type = PIXMAN_TYPE_GRAY;
             a = r = g = b = 0;
         }
         else {
