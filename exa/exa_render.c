@@ -905,7 +905,7 @@ exaComposite(CARD8 op,
                    (pSrc->format == pDst->format ||
                     (PICT_FORMAT_COLOR(pDst->format) &&
                      PICT_FORMAT_COLOR(pSrc->format) &&
-                     pDst->format == PICT_FORMAT(PICT_FORMAT_BPP(pSrc->format),
+                     pDst->format == PICT_FORMAT(PIXMAN_FORMAT_BPP(pSrc->format),
                                                  PICT_FORMAT_TYPE(pSrc->format),
                                                  0,
                                                  PICT_FORMAT_R(pSrc->format),

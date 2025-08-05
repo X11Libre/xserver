@@ -552,7 +552,7 @@ exaBufferGlyph(ScreenPtr pScreen,
     if (buffer->count == GLYPH_BUFFER_SIZE)
         return ExaGlyphNeedFlush;
 
-    if (PICT_FORMAT_BPP(format) == 1)
+    if (PIXMAN_FORMAT_BPP(format) == 1)
         format = PICT_a8;
 
     for (i = 0; i < EXA_NUM_GLYPH_CACHES; i++) {

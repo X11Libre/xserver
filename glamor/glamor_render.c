@@ -751,9 +751,9 @@ combine_pict_format(PictFormatShort * des, const PictFormatShort src,
         *des = src;
         return TRUE;
     }
-    src_bpp = PICT_FORMAT_BPP(src);
+    src_bpp = PIXMAN_FORMAT_BPP(src);
 
-    assert(src_bpp == PICT_FORMAT_BPP(mask));
+    assert(src_bpp == PIXMAN_FORMAT_BPP(mask));
 
     new_vis = PICT_FORMAT_VIS(src) | PICT_FORMAT_VIS(mask);
 
@@ -1551,7 +1551,7 @@ glamor_composite_clipped_region(CARD8 op,
              && (source->format == dest->format
                  || (PICT_FORMAT_COLOR(dest->format)
                      && PICT_FORMAT_COLOR(source->format)
-                     && dest->format == PICT_FORMAT(PICT_FORMAT_BPP(source->format),
+                     && dest->format == PICT_FORMAT(PIXMAN_FORMAT_BPP(source->format),
                                                     PICT_FORMAT_TYPE(source->format),
                                                     0,
                                                     PICT_FORMAT_R(source->format),

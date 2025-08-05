@@ -620,7 +620,7 @@ glamor_get_rgba_from_pixel(CARD32 pixel,
         ashift = 0;
         rshift = abits;
         if (abits == 0)
-            rshift = PICT_FORMAT_BPP(format) - (rbits + gbits + bbits);
+            rshift = PIXMAN_FORMAT_BPP(format) - (rbits + gbits + bbits);
         gshift = rshift + rbits;
         bshift = gshift + gbits;
     }
