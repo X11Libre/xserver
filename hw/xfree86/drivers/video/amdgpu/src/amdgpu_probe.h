@@ -37,7 +37,7 @@
 #define _AMDGPU_PROBE_H_ 1
 
 #include <stdint.h>
-#include "xorg-server.h"
+#include <xorg-config.h>
 #include "xf86str.h"
 #include "xf86DDC.h"
 #include "randrstr.h"
