@@ -1613,7 +1613,7 @@ static void drmmode_show_cursor(xf86CrtcPtr crtc)
 	drmIoctl(pAMDGPUEnt->fd, DRM_IOCTL_MODE_CURSOR, &arg);
 }
 
-/* Xorg expects a non-NULL return value from drmmode_crtc_shadow_allocate, and
+/* Xlibre expects a non-NULL return value from drmmode_crtc_shadow_allocate, and
  * passes that back to drmmode_crtc_scanout_create; it doesn't use it for
  * anything else.
  */
@@ -2781,7 +2781,7 @@ static Bool drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 
 	if (width > xf86_config->maxWidth || height > xf86_config->maxHeight) {
 		xf86DrvMsg(scrn->scrnIndex, X_WARNING,
-			   "Xorg tried resizing screen to %dx%d, but maximum "
+			   "Xlibre tried resizing screen to %dx%d, but maximum "
 			   "supported is %dx%d\n", width, height,
 			   xf86_config->maxWidth, xf86_config->maxHeight);
 		return FALSE;
