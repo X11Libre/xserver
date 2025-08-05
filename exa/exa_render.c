@@ -148,7 +148,7 @@ exaGetPixelFromRGBA(CARD32 *pixel,
     *pixel = 0;
 
     if (!PIXMAN_FORMAT_COLOR(pFormat->format) &&
-        PIXMAN_FORMAT_TYPE(pFormat->format) != PICT_TYPE_A)
+        PIXMAN_FORMAT_TYPE(pFormat->format) != PIXMAN_TYPE_A)
         return FALSE;
 
     int rbits = PIXMAN_FORMAT_R(pFormat->format);
@@ -179,7 +179,7 @@ exaGetRGBAFromPixel(CARD32 pixel,
 {
     int rshift, bshift, gshift, ashift;
 
-    if (!PIXMAN_FORMAT_COLOR(format) && PIXMAN_FORMAT_TYPE(format) != PICT_TYPE_A)
+    if (!PIXMAN_FORMAT_COLOR(format) && PIXMAN_FORMAT_TYPE(format) != PIXMAN_TYPE_A)
         return FALSE;
 
     int rbits = PIXMAN_FORMAT_R(format);

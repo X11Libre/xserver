@@ -175,7 +175,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
     formats[nformats].depth = 1;
     nformats++;
     formats[nformats].format = PICT_FORMAT(BitsPerPixel(8),
-                                           PICT_TYPE_A, 8, 0, 0, 0);
+                                           PIXMAN_TYPE_A, 8, 0, 0, 0);
     formats[nformats].depth = 8;
     nformats++;
     formats[nformats].format = PICT_a8r8g8b8;
@@ -366,7 +366,7 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
             pFormats[f].direct.alpha = 0;
             break;
 
-        case PICT_TYPE_A:
+        case PIXMAN_TYPE_A:
             pFormats[f].type = PictTypeDirect;
 
             pFormats[f].direct.alpha = 0;
@@ -647,7 +647,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
         else {
             if ((formats[n].direct.redMask |
                  formats[n].direct.blueMask | formats[n].direct.greenMask) == 0)
-                type = PICT_TYPE_A;
+                type = PIXMAN_TYPE_A;
             else if (formats[n].direct.red > formats[n].direct.blue)
                 type = PIXMAN_TYPE_ARGB;
             else if (formats[n].direct.red == 0)

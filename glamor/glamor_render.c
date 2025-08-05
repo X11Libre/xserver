@@ -735,8 +735,8 @@ glamor_flush_composite_rects(ScreenPtr screen)
 }
 
 static const int pict_format_combine_tab[][3] = {
-    {PIXMAN_TYPE_ARGB, PICT_TYPE_A, PIXMAN_TYPE_ARGB},
-    {PIXMAN_TYPE_ABGR, PICT_TYPE_A, PIXMAN_TYPE_ABGR},
+    {PIXMAN_TYPE_ARGB, PIXMAN_TYPE_A, PIXMAN_TYPE_ARGB},
+    {PIXMAN_TYPE_ABGR, PIXMAN_TYPE_A, PIXMAN_TYPE_ABGR},
 };
 
 static Bool
@@ -760,14 +760,14 @@ combine_pict_format(PictFormatShort * des, const PictFormatShort src,
     switch (in_ca) {
     case glamor_program_alpha_normal:
         src_type = PIXMAN_FORMAT_TYPE(src);
-        mask_type = PICT_TYPE_A;
+        mask_type = PIXMAN_TYPE_A;
         break;
     case glamor_program_alpha_ca_first:
         src_type = PIXMAN_FORMAT_TYPE(src);
         mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
     case glamor_program_alpha_ca_second:
-        src_type = PICT_TYPE_A;
+        src_type = PIXMAN_TYPE_A;
         mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
     case glamor_program_alpha_dual_blend:
