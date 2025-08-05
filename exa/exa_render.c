@@ -143,7 +143,6 @@ exaGetPixelFromRGBA(CARD32 *pixel,
                     CARD16 green,
                     CARD16 blue, CARD16 alpha, PictFormatPtr pFormat)
 {
-    int bbits;
     int rshift, bshift, gshift, ashift;
 
     *pixel = 0;
@@ -154,7 +153,7 @@ exaGetPixelFromRGBA(CARD32 *pixel,
 
     int rbits = PIXMAN_FORMAT_R(pFormat->format);
     int gbits = PIXMAN_FORMAT_G(pFormat->format);
-    bbits = PICT_FORMAT_B(pFormat->format);
+    int bbits = PIXMAN_FORMAT_B(pFormat->format);
     int abits = PIXMAN_FORMAT_A(pFormat->format);
 
     rshift = pFormat->direct.red;
@@ -178,7 +177,6 @@ exaGetRGBAFromPixel(CARD32 pixel,
                     CARD16 *alpha,
                     PictFormatPtr pFormat, PictFormatShort format)
 {
-    int bbits;
     int rshift, bshift, gshift, ashift;
 
     if (!PIXMAN_FORMAT_COLOR(format) && PIXMAN_FORMAT_TYPE(format) != PICT_TYPE_A)
@@ -186,7 +184,7 @@ exaGetRGBAFromPixel(CARD32 pixel,
 
     int rbits = PIXMAN_FORMAT_R(format);
     int gbits = PIXMAN_FORMAT_G(format);
-    bbits = PICT_FORMAT_B(format);
+    int bbits = PIXMAN_FORMAT_B(format);
     int abits = PIXMAN_FORMAT_A(format);
 
     if (pFormat) {
@@ -910,7 +908,7 @@ exaComposite(CARD8 op,
                                                  0,
                                                  PIXMAN_FORMAT_R(pSrc->format),
                                                  PIXMAN_FORMAT_G(pSrc->format),
-                                                 PICT_FORMAT_B(pSrc->format)))))
+                                                 PIXMAN_FORMAT_B(pSrc->format)))))
                   || (op == PictOpOver && pSrc->format == pDst->format &&
                       !PIXMAN_FORMAT_A(pSrc->format)))) {
             if (!pSrc->repeat && xSrc >= 0 && ySrc >= 0 &&

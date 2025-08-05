@@ -1556,7 +1556,7 @@ glamor_composite_clipped_region(CARD8 op,
                                                     0,
                                                     PIXMAN_FORMAT_R(source->format),
                                                     PIXMAN_FORMAT_G(source->format),
-                                                    PICT_FORMAT_B(source->format)))))
+                                                    PIXMAN_FORMAT_B(source->format)))))
             || (op == PictOpOver
                 && source->format == dest->format
                 && !PIXMAN_FORMAT_A(source->format)))
