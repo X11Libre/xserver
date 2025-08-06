@@ -62,6 +62,7 @@ SOFTWARE.
 #endif
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include "os/Xtrans.h"
 #include <X11/Xmd.h>
 #include <errno.h>
@@ -691,36 +692,54 @@ static bool OutputEnsureBuffer(ClientPtr who, OsCommPtr oc)
     return false;
 }
 
+static inline int
+memcpy_and_flush(ClientPtr who, OsCommPtr oc, const void* extra_buf, size_t extra_size, size_t padsize)
+{
+    ConnectionOutputPtr oco = oc->output;
+
+    memcpy(oco->buf + oco->count, extra_buf, extra_size);
+    oco->count += extra_size;
+    memset(oco->buf + oco->count, 0, padsize);
+    oco->count += padsize;
+    return (FlushClient(who, oc) == -1) ? -1 : extra_size; /* return the requested size, or fail */
+}
+
 /*
  * try to make room in the output buffer:
  * if not enough room, try to flush first.
- * if that's not giving enough room, increase the buffer size
+ * if that's not giving enough room, increase the buffer size.
  */
-static bool OutputBufferMakeRoom(ClientPtr who, OsCommPtr oc, size_t sz)
+static int
+OutputBufferMakeRoomAndFlush(ClientPtr who, OsCommPtr oc, const void* extra_buf, size_t extra_size)
 {
-    const size_t padsize = padding_for_int32(sz);
-    const size_t needed = sz + padsize;
+    const size_t padsize = padding_for_int32(extra_size);
+    const size_t needed = extra_size + padsize;
 
     if (oc->output) {
         /* check whether it already fits into buffer */
-        if (oc->output->count + needed <= oc->output->size)
-            return true;
+        if (oc->output->count + needed <= oc->output->size) {
+            return memcpy_and_flush(who, oc, extra_buf, extra_size, padsize);
+        }
 
         /* try flushing the buffer */
-        int ret = FlushClient(who, oc);
-        if (ret == -1) /* client was aborted */
-            return false;
+        if (FlushClient(who, oc) == -1) {
+            /* client was aborted */
+            return -1;
+        }
     }
 
-    if (!OutputEnsureBuffer(who, oc))
-        return false;
+    if (!OutputEnsureBuffer(who, oc)) {
+        return -1;
+    }
 
     ConnectionOutputPtr oco = oc->output;
 
     /* does it fit this time ? */
-    if (oco->count + needed <= oco->size)
-        return true;
+    if (oco->count + needed <= oco->size) {
+        return memcpy_and_flush(who, oc, extra_buf, extra_size, padsize);
+    }
 
+    /* still not enough */
     /* try to resize the buffer */
     const int newsize = oco->count + (((needed / BUFSIZE)+1)*BUFSIZE);
 
@@ -729,12 +748,13 @@ static bool OutputBufferMakeRoom(ClientPtr who, OsCommPtr oc, size_t sz)
         AbortClient(who);
         dixMarkClientException(who);
         oco->count = 0;
-        return false;
+        return -1;
     }
 
     oco->buf = newbuf;
     oco->size = newsize;
-    return true;
+
+    return memcpy_and_flush(who, oc, extra_buf, extra_size, padsize);
 }
 
 /*****************
@@ -859,13 +879,8 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
             CriticalOutputPending = FALSE;
             NewOutputPending = FALSE;
         }
+        return OutputBufferMakeRoomAndFlush(who, oc, buf, count);
     }
-
-    /* if we fail to make room, the client will be aborted */
-    if (!OutputBufferMakeRoom(who, oc, count))
-        return -1;
-
-    oco = oc->output;
 
     NewOutputPending = TRUE;
     output_pending_mark(who);
