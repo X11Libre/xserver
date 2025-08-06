@@ -556,8 +556,7 @@ Bool KdAllocatePrivates(ScreenPtr pScreen)
     return TRUE;
 }
 
-static Bool
-KdCreateScreenResources(ScreenPtr pScreen)
+Bool KdCreateScreenResources(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdCardInfo *card = pScreenPriv->card;
