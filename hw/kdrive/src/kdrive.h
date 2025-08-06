@@ -393,6 +393,8 @@ Bool KdAllocatePrivates(ScreenPtr pScreen);
 
 Bool KdCreateScreenResources(ScreenPtr pScreen);
 
+Bool KdSaveScreen(ScreenPtr pScreen, int on);
+
 void
  KdInitCard(ScreenInfo * pScreenInfo, KdCardInfo * card, int argc, char **argv);
 

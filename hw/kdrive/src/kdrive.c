@@ -616,8 +616,7 @@ Bool KdCloseScreen(ScreenPtr pScreen)
     return ret;
 }
 
-static Bool
-KdSaveScreen(ScreenPtr pScreen, int on)
+Bool KdSaveScreen(ScreenPtr pScreen, int on)
 {
     return FALSE;
 }
