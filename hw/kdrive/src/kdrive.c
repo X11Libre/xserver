@@ -340,8 +340,7 @@ KdParseScreen(KdScreenInfo * screen, const char *arg)
     }
 }
 
-static void
-KdParseRgba(char *rgba)
+void KdParseRgba(char *rgba)
 {
     if (!strcmp(rgba, "rgb"))
         kdSubpixelOrder = SubPixelHorizontalRGB;

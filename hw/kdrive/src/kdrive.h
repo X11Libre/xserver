@@ -369,6 +369,8 @@ KdKeyboardInfo *KdParseKeyboard(const char *arg);
 const char *
 KdParseFindNext(const char *cur, const char *delim, char *save, char *last);
 
+void KdParseRgba(char *rgba);
+
 void
  KdUseMsg(void);
 
