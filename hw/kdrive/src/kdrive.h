@@ -362,6 +362,8 @@ Rotation KdSubRotation(Rotation a, Rotation b);
 void
  KdParseScreen(KdScreenInfo * screen, const char *arg);
 
+KdPointerInfo *KdParsePointer(const char *arg);
+
 const char *
 KdParseFindNext(const char *cur, const char *delim, char *save, char *last);
 

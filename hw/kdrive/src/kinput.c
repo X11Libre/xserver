@@ -1050,9 +1050,7 @@ KdParsePointerOptions(KdPointerInfo * pi)
  *      2button     emulate middle button
  *      {NMO}       Reorder buttons
  */
-
-static KdPointerInfo *
-KdParsePointer(const char *arg)
+KdPointerInfo *KdParsePointer(const char *arg)
 {
     char save[1024];
     char delim;
