@@ -32,7 +32,7 @@ symbol_test_args = []
 symbol_test_args += join_paths(xorg_build_root, 'libxorgserver.so')
 symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libshadow.so')
 symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libglx.so')
-symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video-chips', 'chips_drv.so')
+symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video', 'chips', 'chips_drv.so')
 
 test('video-chips symbol test',
     xorg_symbol_test,
