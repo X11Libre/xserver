@@ -12,7 +12,7 @@
 
 struct auth_token {
     struct xorg_list entry;
-    const char *authProto;
+    char *authProto;
     char *authTokenData;
     size_t authTokenLen;
     XID authId;

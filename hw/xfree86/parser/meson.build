@@ -12,6 +12,7 @@ srcs_xorg_parser = [
     'Pointer.c',
     'Screen.c',
     'Vendor.c',
+    'patterns.c',
     'read.c',
     'scan.c',
     'write.c',

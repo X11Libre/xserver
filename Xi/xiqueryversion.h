@@ -26,8 +26,6 @@
 #ifndef QUERYVERSION_H
 #define QUERYVERSION_H 1
 
-#include <dix-config.h>
-
 #include <X11/extensions/XI2proto.h>
 
 int SProcXIQueryVersion(ClientPtr client);

@@ -2,6 +2,7 @@
 
 #include <dix-config.h>
 
+#include <inttypes.h>
 #include <X11/Xmd.h>
 
 #include "dix/dix_priv.h"
@@ -23,7 +24,7 @@ void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (!owner) {
         param->status = BadWindow;
         param->skip = TRUE;
-        XNS_HOOK_LOG("owner of window 0x%0x doesn't exist\n", param->window);
+        XNS_HOOK_LOG("owner of window 0x%0" PRIx32 "doesn't exist\n", param->window);
         return;
     }
 

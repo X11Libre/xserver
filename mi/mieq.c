@@ -239,8 +239,8 @@ mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e)
             else if (miEventQueue.dropped % QUEUE_DROP_BACKTRACE_FREQUENCY == 0 &&
                      miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY <=
                      QUEUE_DROP_BACKTRACE_MAX) {
-                ErrorF("[mi] EQ overflow continuing.  %zu events have been "
-                       "dropped.\n", miEventQueue.dropped);
+                ErrorF("[mi] EQ overflow continuing. %lu events have been "
+                       "dropped.\n", (unsigned long)miEventQueue.dropped);
                 if (miEventQueue.dropped / QUEUE_DROP_BACKTRACE_FREQUENCY ==
                     QUEUE_DROP_BACKTRACE_MAX) {
                     ErrorF("[mi] No further overflow reports will be "

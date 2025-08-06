@@ -25,8 +25,6 @@
 #ifndef QUERYDP_H
 #define QUERYDP_H 1
 
-#include <dix-config.h>
-
 int SProcXIQueryPointer(ClientPtr /* client */ );
 int ProcXIQueryPointer(ClientPtr /* client */ );
 

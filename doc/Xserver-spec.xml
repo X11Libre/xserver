@@ -55,80 +55,80 @@
     <pubdate>&xserver.reldate;</pubdate>
     <revhistory>
       <revision>
-	<revnumber>1.0</revnumber>
-	<date>27 Oct 2004</date>
-	<authorinitials>sa</authorinitials>
-	<revremark>Initial Version</revremark>
+        <revnumber>1.0</revnumber>
+        <date>27 Oct 2004</date>
+        <authorinitials>sa</authorinitials>
+        <revremark>Initial Version</revremark>
       </revision>
       <revision>
-	<revnumber>1.1</revnumber>
-	<date>27 Oct 2004</date>
-	<authorinitials>bs</authorinitials>
-	<revremark>Minor Revisions</revremark>
+        <revnumber>1.1</revnumber>
+        <date>27 Oct 2004</date>
+        <authorinitials>bs</authorinitials>
+        <revremark>Minor Revisions</revremark>
       </revision>
       <revision>
-	<revnumber>2.0</revnumber>
-	<date>27 Oct 2004</date>
-	<authorinitials>kp</authorinitials>
-	<revremark>Revised for Release 4 and 5</revremark>
+        <revnumber>2.0</revnumber>
+        <date>27 Oct 2004</date>
+        <authorinitials>kp</authorinitials>
+        <revremark>Revised for Release 4 and 5</revremark>
       </revision>
       <revision>
-	<revnumber>3.0</revnumber>
-	<date>27 Oct 2004</date>
-	<authorinitials>dpw</authorinitials>
-	<revremark>Revised for Release 6</revremark>
+        <revnumber>3.0</revnumber>
+        <date>27 Oct 2004</date>
+        <authorinitials>dpw</authorinitials>
+        <revremark>Revised for Release 6</revremark>
       </revision>
       <revision>
-	<revnumber>3.1</revnumber>
-	<date>27 Oct 2004</date>
-	<authorinitials>jg</authorinitials>
-	<revremark>Revised for Release 6.8.2</revremark>
+        <revnumber>3.1</revnumber>
+        <date>27 Oct 2004</date>
+        <authorinitials>jg</authorinitials>
+        <revremark>Revised for Release 6.8.2</revremark>
       </revision>
       <revision>
-	<revnumber>3.2</revnumber>
-	<date>17 Dec 2006</date>
-	<authorinitials>efw</authorinitials>
-	<revremark>DocBook conversion</revremark>
+        <revnumber>3.2</revnumber>
+        <date>17 Dec 2006</date>
+        <authorinitials>efw</authorinitials>
+        <revremark>DocBook conversion</revremark>
       </revision>
       <revision>
-	<revnumber>3.3</revnumber>
-	<date>17 Feb 2008</date>
-	<authorinitials>aj</authorinitials>
-	<revremark>Revised for backing store changes</revremark>
+        <revnumber>3.3</revnumber>
+        <date>17 Feb 2008</date>
+        <authorinitials>aj</authorinitials>
+        <revremark>Revised for backing store changes</revremark>
       </revision>
       <revision>
-	<revnumber>3.4</revnumber>
-	<date>31 Mar 2008</date>
-	<authorinitials>efw</authorinitials>
-	<revremark>Revised for devPrivates changes</revremark>
+        <revnumber>3.4</revnumber>
+        <date>31 Mar 2008</date>
+        <authorinitials>efw</authorinitials>
+        <revremark>Revised for devPrivates changes</revremark>
       </revision>
       <revision>
-	<revnumber>3.5</revnumber>
-	<date>July 2010</date>
-	<authorinitials>ac</authorinitials>
-	<revremark>Revised for Xorg 1.9 devPrivates changes
-	  and 1.8 CreateNewResourceType changes</revremark>
+        <revnumber>3.5</revnumber>
+        <date>July 2010</date>
+        <authorinitials>ac</authorinitials>
+        <revremark>Revised for Xorg 1.9 devPrivates changes
+          and 1.8 CreateNewResourceType changes</revremark>
       </revision>
       <revision>
-	<revnumber>3.6</revnumber>
-	<date>July 2012</date>
-	<authorinitials>kp</authorinitials>
-	<revremark>Revised for X server 1.13 screen-specific devPrivates changes</revremark>
+        <revnumber>3.6</revnumber>
+        <date>July 2012</date>
+        <authorinitials>kp</authorinitials>
+        <revremark>Revised for X server 1.13 screen-specific devPrivates changes</revremark>
       </revision>
     </revhistory>
     <abstract>
       <para>The following document explains the structure of the X Window System display server and the interfaces among the larger pieces.  It is intended as a reference for programmers who are implementing an X Display Server on their workstation hardware.  It is included with the X Window System source tape, along with the document "Strategies for Porting the X v11 Sample Server."  The order in which you should read these documents is:
       <orderedlist>
-	<listitem><para>Read the first section of the "Strategies for Porting" document (Overview of Porting Process).</para></listitem>
-	<listitem><para>Skim over this document (the Definition document).</para></listitem>
-	<listitem><para>Skim over the remainder of the Strategies document.</para></listitem>
-	<listitem><para>Start planning and working, referring to the Strategies and Definition documents.</para></listitem>
+        <listitem><para>Read the first section of the "Strategies for Porting" document (Overview of Porting Process).</para></listitem>
+        <listitem><para>Skim over this document (the Definition document).</para></listitem>
+        <listitem><para>Skim over the remainder of the Strategies document.</para></listitem>
+        <listitem><para>Start planning and working, referring to the Strategies and Definition documents.</para></listitem>
       </orderedlist>
       You may also want to look at the following documents:
       <itemizedlist>
-	<listitem><para>"The X Window System" for an overview of X.</para></listitem>
-	<listitem><para>"Xlib - C Language X Interface" for a view of what the client programmer sees.</para></listitem>
-	<listitem><para>"X Window System Protocol" for a terse description of the byte stream protocol between the client and server.</para></listitem>
+        <listitem><para>"The X Window System" for an overview of X.</para></listitem>
+        <listitem><para>"Xlib - C Language X Interface" for a view of what the client programmer sees.</para></listitem>
+        <listitem><para>"X Window System Protocol" for a terse description of the byte stream protocol between the client and server.</para></listitem>
       </itemizedlist>
       </para>
       <para>To understand this document and the accompanying source code, you should know the C language.  You should be familiar with 2D graphics and windowing concepts such as clipping, bitmaps, fonts, etc.  You should have a general knowledge of the X Window System.  To implement the server code on your hardware, you need to know a lot about your hardware, its graphic display device(s), and (possibly) its networking and multitasking facilities.  This document depends a lot on the source code, so you should have a listing of the code handy.</para>
@@ -405,8 +405,8 @@ If you need to create a ``private'' resource ID for internal use, you
 can call FakeClientID.
 <blockquote><programlisting>
 
-	XID FakeClientID(client)
-	    int client;
+        XID FakeClientID(client)
+            int client;
 
 </programlisting></blockquote>
 This allocates from ID space reserved for the server.</para>
@@ -414,10 +414,10 @@ This allocates from ID space reserved for the server.</para>
 To associate a resource value with an ID, use AddResource.
 <blockquote><programlisting>
 
-	Bool AddResource(id, type, value)
-	    XID id;
-	    RESTYPE type;
-	    pointer value;
+        Bool AddResource(id, type, value)
+            XID id;
+            RESTYPE type;
+            pointer value;
 
 </programlisting></blockquote>
 The type should be the full type of the resource, including any class
@@ -427,14 +427,14 @@ it will call the deleteFunc for the type, and then return False.</para>
 To free a resource, use one of the following.
 <blockquote><programlisting>
 
-	void FreeResource(id, skipDeleteFuncType)
-	    XID id;
-	    RESTYPE skipDeleteFuncType;
+        void FreeResource(id, skipDeleteFuncType)
+            XID id;
+            RESTYPE skipDeleteFuncType;
 
-	void FreeResourceByType(id, type, skipFree)
-	    XID id;
-	    RESTYPE type;
-	    Bool    skipFree;
+        void FreeResourceByType(id, type, skipFree)
+            XID id;
+            RESTYPE type;
+            Bool    skipFree;
 
 </programlisting></blockquote>
 FreeResource frees all resources matching the given id, regardless of
@@ -451,19 +451,19 @@ and type; if skipFree is true, then the deleteFunc is not called.
 To look up a resource, use one of the following.
 <blockquote><programlisting>
 
-	int dixLookupResourceByType(
-	    pointer *result,
-	    XID id,
-	    RESTYPE rtype,
-	    ClientPtr client,
-	    Mask access_mode);
+        int dixLookupResourceByType(
+            pointer *result,
+            XID id,
+            RESTYPE rtype,
+            ClientPtr client,
+            Mask access_mode);
 
-	int dixLookupResourceByClass(
-	    pointer *result,
-	    XID id,
-	    RESTYPE rclass,
-	    ClientPtr client,
-	    Mask access_mode);
+        int dixLookupResourceByClass(
+            pointer *result,
+            XID id,
+            RESTYPE rclass,
+            ClientPtr client,
+            Mask access_mode);
 
 </programlisting></blockquote>
 dixLookupResourceByType finds a resource with the given id and exact type.
@@ -493,36 +493,36 @@ callback is to notify interested parties when a client's state
 (initial, running, gone) changes.  The callback is "created" in this
 case by simply declaring a variable:
 <blockquote><programlisting>
-	CallbackListPtr ClientStateCallback;
+        CallbackListPtr ClientStateCallback;
 </programlisting></blockquote>
 </para>
 <para>
 Whenever the client's state changes, the following code appears, which notifies
 all interested parties of the change:
 <blockquote><programlisting>
-	if (ClientStateCallback) CallCallbacks(&amp;ClientStateCallback, (pointer)client);
+        if (ClientStateCallback) CallCallbacks(&amp;ClientStateCallback, (pointer)client);
 </programlisting></blockquote>
 </para>
 <para>
 Interested parties subscribe to the ClientStateCallback list by saying:
 <blockquote><programlisting>
-	AddCallback(&amp;ClientStateCallback, func, data);
+        AddCallback(&amp;ClientStateCallback, func, data);
 </programlisting></blockquote>
 </para>
 <para>
 When CallCallbacks is invoked on the list, func will be called thusly:
 <blockquote><programlisting>
-	(*func)(&amp;ClientStateCallback, data, client)
+        (*func)(&amp;ClientStateCallback, data, client)
 </programlisting></blockquote>
 </para>
 <para>
 Now for the details.
 <blockquote><programlisting>
 
-	Bool AddCallback(pcbl, callback, subscriber_data)
-	    CallbackListPtr *pcbl;
-	    CallbackProcPtr callback;
-	    pointer         subscriber_data;
+        Bool AddCallback(pcbl, callback, subscriber_data)
+            CallbackListPtr *pcbl;
+            CallbackProcPtr callback;
+            pointer         subscriber_data;
 
 </programlisting></blockquote>
 Adds the (callback, subscriber_data) pair to the given callback list.  Creates the callback
@@ -530,10 +530,10 @@ list if it doesn't exist.  Returns TRUE if successful.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool DeleteCallback(pcbl, callback, subscriber_data)
-	    CallbackListPtr *pcbl;
-	    CallbackProcPtr callback;
-	    pointer         subscriber_data;
+        Bool DeleteCallback(pcbl, callback, subscriber_data)
+            CallbackListPtr *pcbl;
+            CallbackProcPtr callback;
+            pointer         subscriber_data;
 
 </programlisting></blockquote>
 Removes the (callback, data) pair to the given callback list if present.
@@ -541,22 +541,22 @@ Returns TRUE if (callback, data) was found.</para>
 <para>
 <blockquote><programlisting>
 
-	void CallCallbacks(pcbl, call_data)
-	    CallbackListPtr    *pcbl;
-	    pointer	    call_data;
+        void CallCallbacks(pcbl, call_data)
+            CallbackListPtr    *pcbl;
+            pointer            call_data;
 
 </programlisting></blockquote>
 For each callback currently registered on the given callback list, call
 it as follows:
 <blockquote><programlisting>
 
-	(*callback)(pcbl, subscriber_data, call_data);
+        (*callback)(pcbl, subscriber_data, call_data);
 </programlisting></blockquote>
 </para>
 <para>
 <blockquote><programlisting>
-	void DeleteCallbackList(pcbl)
-	    CallbackListPtr    *pcbl;
+        void DeleteCallbackList(pcbl)
+            CallbackListPtr    *pcbl;
 
 </programlisting></blockquote>
 Destroys the given callback list.</para>
@@ -568,16 +568,16 @@ This function should be called from your extensionInitProc which
 should be called by InitExtensions.
 <blockquote><programlisting>
 
-	ExtensionEntry *AddExtension(name, NumEvents,NumErrors,
-		MainProc, SwappedMainProc, CloseDownProc, MinorOpcodeProc)
+        ExtensionEntry *AddExtension(name, NumEvents,NumErrors,
+                MainProc, SwappedMainProc, CloseDownProc, MinorOpcodeProc)
 
-		const char *name;  /*Null terminate string; case matters*/
-		int NumEvents;
-		int NumErrors;
-		int (* MainProc)(ClientPtr);/*Called if client matches server order*/
-		int (* SwappedMainProc)(ClientPtr);/*Called if client differs from server*/
-		void (* CloseDownProc)(ExtensionEntry *);
-		unsigned short (*MinorOpcodeProc)(ClientPtr);
+                const char *name;  /*Null terminate string; case matters*/
+                int NumEvents;
+                int NumErrors;
+                int (* MainProc)(ClientPtr);/*Called if client matches server order*/
+                int (* SwappedMainProc)(ClientPtr);/*Called if client differs from server*/
+                void (* CloseDownProc)(ExtensionEntry *);
+                unsigned short (*MinorOpcodeProc)(ClientPtr);
 
 </programlisting></blockquote>
 name is the name used by clients to refer to the extension.  NumEvents is the
@@ -638,8 +638,8 @@ is not needed in the server.
 You must supply some of the pieces for proper scheduling between clients.
 <blockquote>
 <programlisting>
-	int WaitForSomething(pClientReady)
-		int *pClientReady;
+        int WaitForSomething(pClientReady)
+                int *pClientReady;
 </programlisting>
 </blockquote>
 </para>
@@ -661,7 +661,7 @@ see if there is anything to do on the work queue; it must call a DIX
 routine called ProcessWorkQueue().
 <blockquote>
 <programlisting>
-	ProcessWorkQueue ();
+        ProcessWorkQueue ();
 </programlisting>
 </blockquote>
 </para>
@@ -671,7 +671,7 @@ If WaitForSomething() decides it is about to do something that might block
 routine called BlockHandler().
 <blockquote>
 <programlisting>
-	void BlockHandler(void *pTimeout)
+        void BlockHandler(void *pTimeout)
 </programlisting>
 </blockquote>
 The types of the arguments are for agreement between the OS and DDX
@@ -686,7 +686,7 @@ The DIX BlockHandler() iterates through the Screens,  for each one calling
 its BlockHandler.  A BlockHandler is declared thus:
 <blockquote>
 <programlisting>
-	void xxxBlockHandler(ScreenPtr pScreen, void *pTimeout)
+        void xxxBlockHandler(ScreenPtr pScreen, void *pTimeout)
 </programlisting>
 </blockquote>
 The arguments are a pointer to the Screen, and the arguments to the
@@ -698,7 +698,7 @@ block,  even if it didn't actually block,  it must call the DIX routine
 WakeupHandler().
 <blockquote>
 <programlisting>
-	void WakeupHandler(int result)
+        void WakeupHandler(int result)
 </programlisting>
 </blockquote>
 Once again,  the types are not specified by DIX.  The result is the
@@ -711,7 +711,7 @@ The DIX WakeupHandler() calls each Screen's
 WakeupHandler.  A WakeupHandler is declared thus:
 <blockquote>
 <programlisting>
-	void xxxWakeupHandler(ScreenPtr pScreen, int result)
+        void xxxWakeupHandler(ScreenPtr pScreen, int result)
 </programlisting>
 </blockquote>
 The arguments are the Screen, of the Screen, and the arguments to
@@ -722,10 +722,10 @@ In addition to the per-screen BlockHandlers, any module may register
 block and wakeup handlers (only together) using:
 <blockquote>
 <programlisting>
-	Bool RegisterBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
-		ServerBlockHandlerProcPtr    blockHandler;
-		ServerWakeupHandlerProcPtr   wakeupHandler;
-		pointer blockData;
+        Bool RegisterBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
+                ServerBlockHandlerProcPtr    blockHandler;
+                ServerWakeupHandlerProcPtr   wakeupHandler;
+                pointer blockData;
 </programlisting>
 </blockquote>
 A FALSE return code indicates that the registration failed for lack of
@@ -733,10 +733,10 @@ memory.  To remove a registered Block handler at other than server reset time
 (when they are all removed automatically), use:
 <blockquote>
 <programlisting>
-	RemoveBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
-		ServerBlockHandlerProcPtr   blockHandler;
-		ServerWakeupHandlerProcPtr  wakeupHandler;
-		pointer blockData;
+        RemoveBlockAndWakeupHandlers (blockHandler, wakeupHandler, blockData)
+                ServerBlockHandlerProcPtr   blockHandler;
+                ServerWakeupHandlerProcPtr  wakeupHandler;
+                pointer blockData;
 </programlisting>
 </blockquote>
 All three arguments must match the values passed to
@@ -746,7 +746,7 @@ RegisterBlockAndWakeupHandlers.
 These registered block handlers are called before the per-screen handlers:
 <blockquote>
 <programlisting>
-	void (*ServerBlockHandler) (void *blockData, void *pTimeout)
+        void (*ServerBlockHandler) (void *blockData, void *pTimeout)
 </programlisting>
 </blockquote>
 </para>
@@ -759,7 +759,7 @@ require modulus arithmetic and correct overflow behavior in the face of
 millisecond wrapping through 32 bits,
 <blockquote><programlisting>
 
-	void AdjustWaitForDelay(void *pTimeout, unsigned long newdelay)
+        void AdjustWaitForDelay(void *pTimeout, unsigned long newdelay)
 
 </programlisting></blockquote>
 has been provided.
@@ -769,7 +769,7 @@ Any wakeup handlers registered with RegisterBlockAndWakeupHandlers will
 be called after the Screen handlers:
 <blockquote><programlisting>
 
-	void (*ServerWakeupHandler) (void *blockData, int result)
+        void (*ServerWakeupHandler) (void *blockData, int result)
 </programlisting></blockquote>
 </para>
 <para>
@@ -814,8 +814,8 @@ whatever mechanism at the transport level).  A new client is created
 by calling the DIX routine:
 <blockquote><programlisting>
 
-	ClientPtr NextAvailableClient(ospriv)
-		pointer ospriv;
+        ClientPtr NextAvailableClient(ospriv)
+                pointer ospriv;
 </programlisting></blockquote>
 This routine returns NULL if a new client cannot be allocated (e.g. maximum
 number of clients reached).  The ospriv argument will be stored into the OS
@@ -839,11 +839,11 @@ be waited for.   fd is an OS dependent type; in the sample server
 it is an open file descriptor.
 <blockquote><programlisting>
 
-	int AddEnabledDevice(fd)
-		int fd;
+        int AddEnabledDevice(fd)
+                int fd;
 
-	int RemoveEnabledDevice(fd)
-		int fd;
+        int RemoveEnabledDevice(fd)
+                int fd;
 </programlisting></blockquote>
 These two routines are
 usually called by DDX from the initialize cases of the
@@ -863,18 +863,18 @@ These functions are TimerInit, TimerForce, TimerSet, TimerCancel,
 and TimerFree, as defined in Xserver/include/os.h. A callback function will be called
 when the timer fires, along with the current time, and a user provided argument.
 <blockquote><programlisting>
-	typedef	struct _OsTimerRec *OsTimerPtr;
+        typedef        struct _OsTimerRec *OsTimerPtr;
 
-	typedef CARD32 (*OsTimerCallback)(
-		OsTimerPtr /* timer */,
-		CARD32 /* time */,
-		pointer /* arg */);
+        typedef CARD32 (*OsTimerCallback)(
+                OsTimerPtr /* timer */,
+                CARD32 /* time */,
+                pointer /* arg */);
 
-	 OsTimerPtr TimerSet( OsTimerPtr /* timer */,
-		int /* flags */,
-		CARD32 /* millis */,
-		OsTimerCallback /* func */,
-		pointer /* arg */);
+         OsTimerPtr TimerSet( OsTimerPtr /* timer */,
+                int /* flags */,
+                CARD32 /* millis */,
+                OsTimerCallback /* func */,
+                pointer /* arg */);
 
 </programlisting></blockquote>
 </para>
@@ -888,13 +888,13 @@ than a time relative to when TimerSet is called.
 TimerFree should be called to free the memory allocated
 for the timer entry.
 <blockquote><programlisting>
-	void TimerInit(void)
+        void TimerInit(void)
 
-	Bool TimerForce(OsTimerPtr /* pTimer */)
+        Bool TimerForce(OsTimerPtr /* pTimer */)
 
-	void TimerCancel(OsTimerPtr /* pTimer */)
+        void TimerCancel(OsTimerPtr /* pTimer */)
 
-	void TimerFree(OsTimerPtr /* pTimer */)
+        void TimerFree(OsTimerPtr /* pTimer */)
 </programlisting></blockquote>
 </para>
 <para>
@@ -981,13 +981,13 @@ The sample server on the distribution tape supports a simple authorization
 scheme.  The only interface seen by DIX is:
 <blockquote><programlisting>
 
-	char *
-	ClientAuthorized(client, proto_n, auth_proto, string_n, auth_string)
-	    ClientPtr client;
-	    unsigned int proto_n;
-	    char *auth_proto;
-	    unsigned int string_n;
-	    char *auth_string;
+        char *
+        ClientAuthorized(client, proto_n, auth_proto, string_n, auth_string)
+            ClientPtr client;
+            unsigned int proto_n;
+            char *auth_proto;
+            unsigned int string_n;
+            char *auth_string;
 </programlisting></blockquote>
 DIX will only call this once per client, once it has read the full initial
 connection data from the client.  If the connection should be
@@ -1012,14 +1012,14 @@ To initialize the methods you choose to allow clients to connect to
 your server, main() calls the routine
 <blockquote><programlisting>
 
-	void CreateWellKnownSockets()
+        void CreateWellKnownSockets()
 </programlisting></blockquote>
 This routine is called only once, and not called when the server
 is reset.  To recreate any sockets during server resets, the following
 routine is called from the main loop:
 <blockquote><programlisting>
 
-	void ResetWellKnownSockets()
+        void ResetWellKnownSockets()
 </programlisting></blockquote>
 Sample implementations of both of these routines are found in
 Xserver/os/connection.c.
@@ -1038,8 +1038,8 @@ Each request carries with it length information.
 It is the responsibility of the following routine to break it up into request blocks.
 <blockquote><programlisting>
 
-	int ReadRequestFromClient(who)
-		ClientPtr who;
+        int ReadRequestFromClient(who)
+                ClientPtr who;
 </programlisting></blockquote>
 </para>
 <para>
@@ -1081,13 +1081,13 @@ DIX can insert data into the client stream, and can cause a "replay" of
 the current request.
 <blockquote><programlisting>
 
-	Bool InsertFakeRequest(client, data, count)
-	    ClientPtr client;
-	    char *data;
-	    int count;
+        Bool InsertFakeRequest(client, data, count)
+            ClientPtr client;
+            char *data;
+            int count;
 
-	int ResetCurrentRequest(client)
-	    ClientPtr client;
+        int ResetCurrentRequest(client)
+            ClientPtr client;
 </programlisting></blockquote>
 </para>
 <para>
@@ -1110,10 +1110,10 @@ request.  ResetCurrentRequest() should always cause a yield (isItTimeToYield).
 <para>
 <blockquote><programlisting>
 
-	int WriteToClient(who, n, buf)
-		ClientPtr who;
-		int n;
-		char *buf;
+        int WriteToClient(who, n, buf)
+                ClientPtr who;
+                int n;
+                char *buf;
 </programlisting></blockquote>
 WriteToClient should write n bytes starting at buf to the
 ClientPtr "who".
@@ -1124,12 +1124,12 @@ The sample server implementation is in Xserver/os/io.c.
 </para>
 <para>
 <blockquote><programlisting>
-	void SendErrorToClient(client, majorCode, minorCode, resId, errorCode)
-	    ClientPtr client;
-	    unsigned int majorCode;
-	    unsigned int minorCode;
-	    XID resId;
-	    int errorCode;
+        void SendErrorToClient(client, majorCode, minorCode, resId, errorCode)
+            ClientPtr client;
+            unsigned int majorCode;
+            unsigned int minorCode;
+            XID resId;
+            int errorCode;
 </programlisting></blockquote>
 SendErrorToClient can be used to send errors back to clients,
 although in most cases your request function should simply return
@@ -1140,11 +1140,11 @@ function with the correct opcodes for you.
 <para>
 <blockquote><programlisting>
 
-	void FlushAllOutput()
+        void FlushAllOutput()
 
-	void FlushIfCriticalOutputPending()
+        void FlushIfCriticalOutputPending()
 
-	void SetCriticalOutputPending()
+        void SetCriticalOutputPending()
 </programlisting></blockquote>
 These three routines may be implemented to support buffered or delayed
 writes to clients, but at the very least, the stubs must exist.
@@ -1214,7 +1214,7 @@ continue processing requests from other clients while waiting for a
 long-term network activity (like loading a font) before continuing with the
 first client.
 <blockquote><programlisting>
-	Bool isItTimeToYield;
+        Bool isItTimeToYield;
 </programlisting></blockquote>
 isItTimeToYield is a global variable you can set
 if you want to tell
@@ -1248,11 +1248,11 @@ The following functions provide the ability to suspend request
 processing on a particular client, resuming it at some later time:
 <blockquote><programlisting>
 
-	int IgnoreClient (who)
-		ClientPtr who;
+        int IgnoreClient (who)
+                ClientPtr who;
 
-	int AttendClient (who)
-		ClientPtr who;
+        int AttendClient (who)
+                ClientPtr who;
 </programlisting></blockquote>
 Ignore client is responsible for pretending that the given client doesn't
 exist.  WaitForSomething should not return this client as ready for reading
@@ -1263,10 +1263,10 @@ whatever IgnoreClient did, setting it up for input again.
 Three functions support "process control" for X clients:
 <blockquote><programlisting>
 
-	Bool ClientSleep (client, function, closure)
-		ClientPtr	client;
-		Bool		(*function)();
-		pointer		closure;
+        Bool ClientSleep (client, function, closure)
+                ClientPtr        client;
+                Bool                (*function)();
+                pointer                closure;
 
 </programlisting></blockquote>
 This suspends the current client (the calling routine is responsible for
@@ -1274,8 +1274,8 @@ making its way back to Dispatch()).  No more X requests will be processed
 for this client until ClientWakeup is called.
 <blockquote><programlisting>
 
-	Bool dixClientSignal (client)
-		ClientPtr	client;
+        Bool dixClientSignal (client)
+                ClientPtr        client;
 
 </programlisting></blockquote>
 This function causes a call to the (*function) parameter passed to
@@ -1283,8 +1283,8 @@ ClientSleep to be queued on the work queue.  This does not automatically
 "wakeup" the client, but the function called is free to do so by calling:
 <blockquote><programlisting>
 
-	ClientWakeup (client)
-		ClientPtr	client;
+        ClientWakeup (client)
+                ClientPtr        client;
 
 </programlisting></blockquote>
 This re-enables X request processing for the specified client.
@@ -1294,11 +1294,11 @@ This re-enables X request processing for the specified client.
   <title>Other OS Functions</title>
 <para>
 <blockquote><programlisting>
-	void
-	ErrorF(char *f, ...)
+        void
+        ErrorF(char *f, ...)
 
-	void
-	FatalError(char *f, ...)
+        void
+        FatalError(char *f, ...)
 </programlisting></blockquote>
 You should write these three routines to provide for diagnostic output
 from the dix and ddx layers, although implementing them to produce no
@@ -1388,7 +1388,7 @@ All of the variants overlap, so that the struct is actually very small in memory
 The main DDX input interface is the following routine:
 <blockquote><programlisting>
 
-	void ProcessInputEvents()
+        void ProcessInputEvents()
 </programlisting></blockquote>
 You must write this routine to deliver input events from the user.
 DIX calls it when input is pending (see next section), and possibly
@@ -1399,10 +1399,10 @@ To deliver the events to DIX, DDX should call the following
 routine:
 <blockquote><programlisting>
 
-	void DevicePtr->processInputProc(pEvent, device, count)
-		    xEventPtr events;
-		    DeviceIntPtr device;
-		    int count;
+        void DevicePtr->processInputProc(pEvent, device, count)
+                    xEventPtr events;
+                    DeviceIntPtr device;
+                    int count;
 </programlisting></blockquote>
 This is the "input proc" for the device, a DIX procedure.
 DIX will fill in this procedure pointer to one of its own routines by
@@ -1434,9 +1434,9 @@ Fill in the following fields in the xEvent record:
 <itemizedlist>
 
 <listitem><para>type - is one of the following: KeyPress, KeyRelease, ButtonPress,
-					ButtonRelease, or MotionNotify</para></listitem>
+                                        ButtonRelease, or MotionNotify</para></listitem>
 <listitem><para>detail - for KeyPress or KeyRelease fields, this should be the
-					key number (not the ASCII code); otherwise unused</para></listitem>
+                                        key number (not the ASCII code); otherwise unused</para></listitem>
 <listitem><para>time - is the time that the event happened (32-bits, in milliseconds, arbitrary origin)</para></listitem>
 <listitem><para>rootX - is the x coordinate of cursor</para></listitem>
 <listitem><para>rootY - is the y coordinate of cursor</para></listitem>
@@ -1487,8 +1487,8 @@ The following procedure
 is used to set these pointers:
 <blockquote><programlisting>
 
-	void SetInputCheck(p1, p2)
-		long *p1, *p2;
+        void SetInputCheck(p1, p2)
+                long *p1, *p2;
 </programlisting></blockquote>
 You should call it sometime during initialization to indicate to DIX the
 correct locations to check.
@@ -1522,7 +1522,7 @@ It passes pointers to the queue's head and tail.  See Xserver/mi/mieq.c.
 </para>
 <para>
 <blockquote><programlisting>
-	int TimeSinceLastInputEvent()
+        int TimeSinceLastInputEvent()
 </programlisting></blockquote>
 DDX must time stamp all hardware input
 events.  But DIX sometimes needs to know the
@@ -1543,12 +1543,12 @@ you pass the procedure pointers to DIX routines.
 <para>
 <blockquote><programlisting>
 
-	int pInternalDevice->valuator->GetMotionProc(pdevice, coords, start, stop, pScreen)
-		DeviceIntPtr pdevice;
-		xTimecoord * coords;
-		unsigned long start;
-		unsigned long stop;
-		ScreenPtr pScreen;
+        int pInternalDevice->valuator->GetMotionProc(pdevice, coords, start, stop, pScreen)
+                DeviceIntPtr pdevice;
+                xTimecoord * coords;
+                unsigned long start;
+                unsigned long stop;
+                ScreenPtr pScreen;
 </programlisting></blockquote>
 You write this DDX routine to fill in coords with all the motion
 events that have times (32-bit count of milliseconds) between time
@@ -1571,11 +1571,11 @@ events be delivered to it through the GetMotionProc routine.
 <para>
 <blockquote><programlisting>
 
-	void pInternalDevice->bell->BellProc(percent, pDevice, ctrl, unknown)
-		int percent;
-		DeviceIntPtr pDevice;
-		pointer ctrl;
-		int class;
+        void pInternalDevice->bell->BellProc(percent, pDevice, ctrl, unknown)
+                int percent;
+                DeviceIntPtr pDevice;
+                pointer ctrl;
+                int class;
 </programlisting></blockquote>
 You need to write this routine to ring the bell on the keyboard.
 loud is a number from 0 to 100, with 100 being the loudest.
@@ -1584,9 +1584,9 @@ Class is either BellFeedbackClass or KbdFeedbackClass (from XI.h).
 <para>
 <blockquote><programlisting>
 
-	void pInternalDevice->somedevice->CtrlProc(device, ctrl)
-		DevicePtr device;
-		SomethingCtrl *ctrl;
+        void pInternalDevice->somedevice->CtrlProc(device, ctrl)
+                DevicePtr device;
+                SomethingCtrl *ctrl;
 
 </programlisting></blockquote>
 You write two versions of this procedure, one for the keyboard and one for the pointing device.
@@ -1616,9 +1616,9 @@ the pointer is the pointer.
 <para>
 <blockquote><programlisting>
 
-	void InitInput(argc, argv)
-	    int argc;
-	    char **argv;
+        void InitInput(argc, argv)
+            int argc;
+            char **argv;
 </programlisting></blockquote>
 InitInput is a DDX routine you must write to initialize the
 input subsystem in DDX.
@@ -1627,9 +1627,9 @@ It must call AddInputDevice() for each device that might generate events.
 <para>
 <blockquote><programlisting>
 
-	DevicePtr AddInputDevice(deviceProc, autoStart)
-		DeviceProc deviceProc;
-		Bool autoStart;
+        DevicePtr AddInputDevice(deviceProc, autoStart)
+                DeviceProc deviceProc;
+                Bool autoStart;
 </programlisting></blockquote>
 AddInputDevice is a DIX routine you call to create a device object.
 deviceProc is a DDX routine that is called by DIX to do various operations.
@@ -1652,14 +1652,14 @@ to DDX implementors.
 <para>
 <blockquote><programlisting>
 
-	DevicePtr LookupKeyboardDevice()
+        DevicePtr LookupKeyboardDevice()
 </programlisting></blockquote>
 LookupKeyboardDevice returns pointer for current main keyboard device.
 </para>
 <para>
 <blockquote><programlisting>
 
-	DevicePtr LookupPointerDevice()
+        DevicePtr LookupPointerDevice()
 </programlisting></blockquote>
 LookupPointerDevice returns pointer for current main pointing device.
 </para>
@@ -1667,9 +1667,9 @@ LookupPointerDevice returns pointer for current main pointing device.
 A DeviceProc (the kind passed to AddInputDevice()) in the following form:
 <blockquote><programlisting>
 
-	Bool pInternalDevice->DeviceProc(device, action);
-		DeviceIntPtr device;
-		int action;
+        Bool pInternalDevice->DeviceProc(device, action);
+                DeviceIntPtr device;
+                int action;
 </programlisting></blockquote>
 You must write a DeviceProc for each device.
 device points to the device record.
@@ -1704,14 +1704,14 @@ be totally closed down.</para></listitem>
 <para>
 <blockquote><programlisting>
 
-	void InitPointerDeviceStruct(device, map, mapLength,
-			GetMotionEvents, ControlProc, numMotionEvents)
-		DevicePtr device;
-		CARD8 *map;
-		int mapLength;
-		ValuatorMotionProcPtr ControlProc;
-		PtrCtrlProcPtr GetMotionEvents;
-		int numMotionEvents;
+        void InitPointerDeviceStruct(device, map, mapLength,
+                        GetMotionEvents, ControlProc, numMotionEvents)
+                DevicePtr device;
+                CARD8 *map;
+                int mapLength;
+                ValuatorMotionProcPtr ControlProc;
+                PtrCtrlProcPtr GetMotionEvents;
+                int numMotionEvents;
 </programlisting></blockquote>
 InitPointerDeviceStruct is a DIX routine you call at DEVICE_INIT time to declare
 some operating routines and data structures for a pointing device.
@@ -1729,12 +1729,12 @@ numMotionEvents to zero.
 <para>
 <blockquote><programlisting>
 
-	void InitKeyboardDeviceStruct(device, pKeySyms, pModifiers, Bell, ControlProc)
-		DevicePtr device;
-		KeySymsPtr pKeySyms;
-		CARD8 *pModifiers;
-		BellProcPtr Bell;
-		KbdCtrlProcPtr ControlProc;
+        void InitKeyboardDeviceStruct(device, pKeySyms, pModifiers, Bell, ControlProc)
+                DevicePtr device;
+                KeySymsPtr pKeySyms;
+                CARD8 *pModifiers;
+                BellProcPtr Bell;
+                KbdCtrlProcPtr ControlProc;
 
 </programlisting></blockquote>
 You call this DIX routine when a keyboard device is initialized and
@@ -1866,10 +1866,10 @@ insists that these must be the same for all screens on the server.</para>
 <para>
 <blockquote><programlisting>
 
-	InitOutput(pScreenInfo, argc, argv)
-		ScreenInfo *pScreenInfo;
-		int argc;
-		char **argv;
+        InitOutput(pScreenInfo, argc, argv)
+                ScreenInfo *pScreenInfo;
+                int argc;
+                char **argv;
 </programlisting></blockquote>
 Upon initialization, your DDX routine InitOutput() is called by DIX.
 It is passed a pointer to screenInfo to initialize.  It is also passed
@@ -1889,10 +1889,10 @@ in the server.</para>
 <para>
 <blockquote><programlisting>
 
-	int AddScreen(scrInitProc, argc, argv)
-		Bool (*scrInitProc)();
-		int argc;
-		char **argv;
+        int AddScreen(scrInitProc, argc, argv)
+                Bool (*scrInitProc)();
+                int argc;
+                char **argv;
 </programlisting></blockquote>
 You should call AddScreen(), a DIX procedure, in InitOutput() once for
 each screen to add it to the screenInfo database.  The first argument
@@ -1905,10 +1905,10 @@ FALSE.</para>
 The scrInitProc should be of the following form:
 <blockquote><programlisting>
 
-	Bool scrInitProc(pScreen, argc, argv)
-		ScreenPtr pScreen;
-		int argc;
-		char **argv;
+        Bool scrInitProc(pScreen, argc, argv)
+                ScreenPtr pScreen;
+                int argc;
+                char **argv;
 </programlisting></blockquote>
 pScreen is the pointer to the screen's new ScreenRec. argc and argv
 are as before.  Your screen initialize procedure should return TRUE
@@ -1964,11 +1964,11 @@ Making direct calls is faster on many architectures.</para>
 <para>
 <blockquote><programlisting>
 
-	RegionPtr pScreen->RegionCreate( rect, size)
-		BoxPtr rect;
-		int size;
+        RegionPtr pScreen->RegionCreate( rect, size)
+                BoxPtr rect;
+                int size;
 
-	macro: RegionPtr RegionCreate(rect, size)
+        macro: RegionPtr RegionCreate(rect, size)
 
 </programlisting></blockquote>
 RegionCreate creates a region that describes ONE rectangle.  The
@@ -1984,12 +1984,12 @@ applicable.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->RegionInit (pRegion, rect, size)
-		RegionPtr	pRegion;
-		BoxPtr		rect;
-		int		size;
+        void pScreen->RegionInit (pRegion, rect, size)
+                RegionPtr        pRegion;
+                BoxPtr                rect;
+                int                size;
 
-	macro: RegionInit(pRegion, rect, size)
+        macro: RegionInit(pRegion, rect, size)
 
 </programlisting></blockquote>
 Given an existing raw region structure (such as an local variable), this
@@ -2000,10 +2000,10 @@ allocation overhead for the region structure itself.
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->RegionCopy(dstrgn, srcrgn)
-		RegionPtr dstrgn, srcrgn;
+        Bool pScreen->RegionCopy(dstrgn, srcrgn)
+                RegionPtr dstrgn, srcrgn;
 
-	macro: Bool RegionCopy(dstrgn, srcrgn)
+        macro: Bool RegionCopy(dstrgn, srcrgn)
 
 </programlisting></blockquote>
 RegionCopy copies the description of one region, srcrgn, to another
@@ -2012,20 +2012,20 @@ dstrgn; returning TRUE if the copy succeeded, and FALSE otherwise.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->RegionDestroy( pRegion)
-		RegionPtr pRegion;
+        void pScreen->RegionDestroy( pRegion)
+                RegionPtr pRegion;
 
-	macro: RegionDestroy(pRegion)
+        macro: RegionDestroy(pRegion)
 
 </programlisting></blockquote>
 RegionDestroy destroys a region and frees all allocated memory.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->RegionUninit (pRegion)
-		RegionPtr pRegion;
+        void pScreen->RegionUninit (pRegion)
+                RegionPtr pRegion;
 
-	macro: RegionUninit(pRegion)
+        macro: RegionUninit(pRegion)
 
 </programlisting></blockquote>
 Frees everything except the region structure itself, useful when the
@@ -2035,26 +2035,26 @@ it has been RegionInit'ed again.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->Intersect(newReg, reg1, reg2)
-		RegionPtr newReg, reg1, reg2;
+        Bool pScreen->Intersect(newReg, reg1, reg2)
+                RegionPtr newReg, reg1, reg2;
 
-	macro: Bool RegionIntersect(newReg, reg1, reg2)
+        macro: Bool RegionIntersect(newReg, reg1, reg2)
 
-	Bool  pScreen->Union(newReg, reg1, reg2)
-		RegionPtr newReg, reg1, reg2;
+        Bool  pScreen->Union(newReg, reg1, reg2)
+                RegionPtr newReg, reg1, reg2;
 
-	macro: Bool RegionUnion(newReg, reg1, reg2)
+        macro: Bool RegionUnion(newReg, reg1, reg2)
 
-	Bool  pScreen->Subtract(newReg, regMinuend, regSubtrahend)
-		RegionPtr newReg, regMinuend, regSubtrahend;
+        Bool  pScreen->Subtract(newReg, regMinuend, regSubtrahend)
+                RegionPtr newReg, regMinuend, regSubtrahend;
 
-	macro: Bool RegionUnion(newReg, regMinuend, regSubtrahend)
+        macro: Bool RegionUnion(newReg, regMinuend, regSubtrahend)
 
-	Bool pScreen->Inverse(newReg, pReg,  pBox)
-		RegionPtr newReg, pReg;
-		BoxPtr pBox;
+        Bool pScreen->Inverse(newReg, pReg,  pBox)
+                RegionPtr newReg, pReg;
+                BoxPtr pBox;
 
-	macro: Bool RegionInverse(newReg, pReg,  pBox)
+        macro: Bool RegionInverse(newReg, pReg,  pBox)
 
 </programlisting></blockquote>
 The above four calls all do basic logical operations on regions.  They
@@ -2076,11 +2076,11 @@ Each routine must return the value TRUE for success.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->RegionReset(pRegion, pBox)
-		RegionPtr pRegion;
-		BoxPtr pBox;
+        void pScreen->RegionReset(pRegion, pBox)
+                RegionPtr pRegion;
+                BoxPtr pBox;
 
-	macro: RegionReset(pRegion, pBox)
+        macro: RegionReset(pRegion, pBox)
 
 </programlisting></blockquote>
 RegionReset sets the region to describe
@@ -2088,11 +2088,11 @@ one rectangle and reallocates it to a size of one rectangle, if applicable.</par
 <para>
 <blockquote><programlisting>
 
-	void  pScreen->TranslateRegion(pRegion, x, y)
-		RegionPtr pRegion;
-		int x, y;
+        void  pScreen->TranslateRegion(pRegion, x, y)
+                RegionPtr pRegion;
+                int x, y;
 
-	macro: RegionTranslate(pRegion, x, y)
+        macro: RegionTranslate(pRegion, x, y)
 
 </programlisting></blockquote>
 TranslateRegion simply moves a region +x in the x direction and +y in the y
@@ -2100,11 +2100,11 @@ direction.</para>
 <para>
 <blockquote><programlisting>
 
-	int  pScreen->RectIn(pRegion, pBox)
-		RegionPtr pRegion;
-		BoxPtr pBox;
+        int  pScreen->RectIn(pRegion, pBox)
+                RegionPtr pRegion;
+                BoxPtr pBox;
 
-	macro: int RegionContainsRect(pRegion, pBox)
+        macro: int RegionContainsRect(pRegion, pBox)
 
 </programlisting></blockquote>
 RectIn returns one of the defined constants rgnIN, rgnOUT, or rgnPART,
@@ -2114,12 +2114,12 @@ These constants are defined in Xserver/include/region.h.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->PointInRegion(pRegion, x, y, pBox)
-		RegionPtr pRegion;
-		int x, y;
-		BoxPtr pBox;
+        Bool pScreen->PointInRegion(pRegion, x, y, pBox)
+                RegionPtr pRegion;
+                int x, y;
+                BoxPtr pBox;
 
-	macro: Bool RegionContainsPoint(pRegion, x, y, pBox)
+        macro: Bool RegionContainsPoint(pRegion, x, y, pBox)
 
 </programlisting></blockquote>
 PointInRegion returns true if the point x, y is in the region.  In
@@ -2139,10 +2139,10 @@ returned box.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->RegionNotEmpty(pRegion)
-		RegionPtr pRegion;
+        Bool pScreen->RegionNotEmpty(pRegion)
+                RegionPtr pRegion;
 
-	macro: Bool RegionNotEmpty(pRegion)
+        macro: Bool RegionNotEmpty(pRegion)
 
 </programlisting></blockquote>
 RegionNotEmpty is a boolean function that returns
@@ -2150,20 +2150,20 @@ true or false depending upon whether the region encloses any pixels.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->RegionEmpty(pRegion)
-		RegionPtr pRegion;
+        void pScreen->RegionEmpty(pRegion)
+                RegionPtr pRegion;
 
-	macro: RegionEmpty(pRegion)
+        macro: RegionEmpty(pRegion)
 
 </programlisting></blockquote>
 RegionEmpty sets the region to be empty.</para>
 <para>
 <blockquote><programlisting>
 
-	BoxPtr pScreen->RegionExtents(pRegion)
-		RegionPtr pRegion;
+        BoxPtr pScreen->RegionExtents(pRegion)
+                RegionPtr pRegion;
 
-	macro: RegionExtents(pRegion)
+        macro: RegionExtents(pRegion)
 
 </programlisting></blockquote>
 RegionExtents returns a rectangle that is the smallest
@@ -2173,17 +2173,17 @@ in your region struct.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->RegionAppend (pDstRgn, pRegion)
-		RegionPtr pDstRgn;
-		RegionPtr pRegion;
+        Bool pScreen->RegionAppend (pDstRgn, pRegion)
+                RegionPtr pDstRgn;
+                RegionPtr pRegion;
 
-	macro: Bool RegionAppend(pDstRgn, pRegion)
+        macro: Bool RegionAppend(pDstRgn, pRegion)
 
-	Bool pScreen->RegionValidate (pRegion, pOverlap)
-		RegionPtr pRegion;
-		Bool *pOverlap;
+        Bool pScreen->RegionValidate (pRegion, pOverlap)
+                RegionPtr pRegion;
+                Bool *pOverlap;
 
-	macro: Bool RegionValidate(pRegion, pOverlap)
+        macro: Bool RegionValidate(pRegion, pOverlap)
 
 </programlisting></blockquote>
 These functions provide an optimization for clip list generation and
@@ -2196,10 +2196,10 @@ regions overlap; FALSE otherwise.</para>
 <para>
 <blockquote><programlisting>
 
-	RegionPtr pScreen->BitmapToRegion (pPixmap)
-		PixmapPtr pPixmap;
+        RegionPtr pScreen->BitmapToRegion (pPixmap)
+                PixmapPtr pPixmap;
 
-	macro: RegionPtr BitmapToRegion(pScreen, pPixmap)
+        macro: RegionPtr BitmapToRegion(pScreen, pPixmap)
 
 </programlisting></blockquote>
 Given a depth-1 pixmap, this routine must create a valid region which
@@ -2208,12 +2208,12 @@ areas filled with 0's.  This routine returns NULL if out of memory.</para>
 <para>
 <blockquote><programlisting>
 
-	RegionPtr pScreen->RectsToRegion (nrects, pRects, ordering)
-		int nrects;
-		xRectangle *pRects;
-		int ordering;
+        RegionPtr pScreen->RectsToRegion (nrects, pRects, ordering)
+                int nrects;
+                xRectangle *pRects;
+                int ordering;
 
-	macro: RegionPtr RegionFromRects(nrects, pRects, ordering)
+        macro: RegionPtr RegionFromRects(nrects, pRects, ordering)
 
 </programlisting></blockquote>
 Given a client-supplied list of rectangles, produces a region which includes
@@ -2224,12 +2224,12 @@ not correct are not defined (core dump is not an option here).</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->SendGraphicsExpose(client,pRegion,drawable,major,minor)
-		ClientPtr client;
-		RegionPtr pRegion;
-		XID drawable;
-		int major;
-		int minor;
+        void pScreen->SendGraphicsExpose(client,pRegion,drawable,major,minor)
+                ClientPtr client;
+                RegionPtr pRegion;
+                XID drawable;
+                int major;
+                int minor;
 
 </programlisting></blockquote>
 SendGraphicsExpose dispatches a list of GraphicsExposure events which
@@ -2279,8 +2279,8 @@ assumption that the realization is independent of the colors used
 private entries for a particular screen and cursor:
 <blockquote><programlisting>
 
-	pCursor->devPriv[pScreen->myNum]
-	pCursor->bits->devPriv[pScreen->myNum]
+        pCursor->devPriv[pScreen->myNum]
+        pCursor->bits->devPriv[pScreen->myNum]
 
 </programlisting></blockquote>
 This is done because the change from one cursor shape to another must
@@ -2290,13 +2290,13 @@ fast as the user moves it across the screen.</para>
 You must implement the following routines for your hardware:
 <blockquote><programlisting>
 
-	Bool pScreen->RealizeCursor( pScr, pCurs)
-		ScreenPtr pScr;
-		CursorPtr pCurs;
+        Bool pScreen->RealizeCursor( pScr, pCurs)
+                ScreenPtr pScr;
+                CursorPtr pCurs;
 
-	Bool pScreen->UnrealizeCursor( pScr, pCurs)
-		ScreenPtr pScr;
-		CursorPtr pCurs;
+        Bool pScreen->UnrealizeCursor( pScr, pCurs)
+                ScreenPtr pScr;
+                CursorPtr pCurs;
 
 </programlisting></blockquote>
 </para>
@@ -2313,9 +2313,9 @@ this happens when the system is reset.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->DisplayCursor( pScr, pCurs)
-		ScreenPtr pScr;
-		CursorPtr pCurs;
+        Bool pScreen->DisplayCursor( pScr, pCurs)
+                ScreenPtr pScr;
+                CursorPtr pCurs;
 
 </programlisting></blockquote>
 DisplayCursor should change the cursor on the given screen to the one
@@ -2325,10 +2325,10 @@ in the cursor should be aligned with the current cursor position.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->RecolorCursor( pScr, pCurs, displayed)
-		ScreenPtr pScr;
-		CursorPtr pCurs;
-		Bool displayed;
+        void pScreen->RecolorCursor( pScr, pCurs, displayed)
+                ScreenPtr pScr;
+                CursorPtr pCurs;
+                Bool displayed;
 </programlisting></blockquote>
 RecolorCursor notifies DDX that the colors in pCurs have changed and
 indicates whether this is the cursor currently being displayed.  If it
@@ -2341,9 +2341,9 @@ TRUE as no error indication is returned here.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->ConstrainCursor( pScr, pBox)
-		ScreenPtr pScr;
-		BoxPtr pBox;
+        void pScreen->ConstrainCursor( pScr, pBox)
+                ScreenPtr pScr;
+                BoxPtr pBox;
 
 </programlisting></blockquote>
 ConstrainCursor should cause the cursor to restrict its motion to the
@@ -2355,9 +2355,9 @@ wandering out of the box, then jumping back, as DIX forces it back.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->PointerNonInterestBox( pScr, pBox)
-		ScreenPtr pScr;
-		BoxPtr pBox;
+        void pScreen->PointerNonInterestBox( pScr, pBox)
+                ScreenPtr pScr;
+                BoxPtr pBox;
 
 </programlisting></blockquote>
 PointerNonInterestBox is DIX's way of telling the pointing device code
@@ -2372,11 +2372,11 @@ Nothing in DIX currently calls PointerNonInterestBox.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->CursorLimits( pScr, pCurs, pHotBox, pTopLeftBox)
-		ScreenPtr pScr;
-		CursorPtr pCurs;
-		BoxPtr pHotBox;
-		BoxPtr pTopLeftBox;	/* return value */
+        void pScreen->CursorLimits( pScr, pCurs, pHotBox, pTopLeftBox)
+                ScreenPtr pScr;
+                CursorPtr pCurs;
+                BoxPtr pHotBox;
+                BoxPtr pTopLeftBox;        /* return value */
 
 </programlisting></blockquote>
 CursorLimits should calculate the box that the cursor hot spot is
@@ -2387,11 +2387,11 @@ informing DIX only; it alters no state within DDX.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->SetCursorPosition( pScr, newx, newy, generateEvent)
-		ScreenPtr pScr;
-		int newx;
-		int newy;
-		Bool generateEvent;
+        Bool pScreen->SetCursorPosition( pScr, newx, newy, generateEvent)
+                ScreenPtr pScr;
+                int newx;
+                int newy;
+                Bool generateEvent;
 
 </programlisting></blockquote>
 SetCursorPosition should artificially move the cursor as though the
@@ -2404,9 +2404,9 @@ value for absolute pointing devices such as a tablet.</para>
 <para>
 <blockquote><programlisting>
 
-	void NewCurrentScreen(newScreen, x, y)
-	    ScreenPtr newScreen;
-	    int x,y;
+        void NewCurrentScreen(newScreen, x, y)
+            ScreenPtr newScreen;
+            int x,y;
 
 </programlisting></blockquote>
 If your ddx provides some mechanism for the user to magically move the
@@ -2594,8 +2594,8 @@ many of these routines are in fbcmap.c.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->CreateColormap(pColormap)
-		ColormapPtr pColormap;
+        Bool pScreen->CreateColormap(pColormap)
+                ColormapPtr pColormap;
 
 </programlisting></blockquote>
 This routine is called by the DIX CreateColormap routine after it has allocated
@@ -2611,8 +2611,8 @@ information, we attached the field to the colormap and not the visual.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->DestroyColormap(pColormap)
-		ColormapPtr pColormap;
+        void pScreen->DestroyColormap(pColormap)
+                ColormapPtr pColormap;
 
 </programlisting></blockquote>
 This routine is called by the DIX FreeColormap routine after it has uninstalled
@@ -2622,8 +2622,8 @@ It is the DDX layer's chance to free any data it added to the colormap.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->InstallColormap(pColormap)
-		ColormapPtr pColormap;
+        void pScreen->InstallColormap(pColormap)
+                ColormapPtr pColormap;
 
 </programlisting></blockquote>
 InstallColormap should
@@ -2640,8 +2640,8 @@ See the note, below, about uninstalling maps.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->UninstallColormap(pColormap)
-		ColormapPtr pColormap;
+        void pScreen->UninstallColormap(pColormap)
+                ColormapPtr pColormap;
 
 </programlisting></blockquote>
 UninstallColormap should
@@ -2659,9 +2659,9 @@ Xserver/dix/colormap.c.)</para>
 <para>
 <blockquote><programlisting>
 
-	int pScreen->ListInstalledColormaps(pScreen, pCmapList)
-		ScreenPtr pScreen;
-		XID *pCmapList;
+        int pScreen->ListInstalledColormaps(pScreen, pCmapList)
+                ScreenPtr pScreen;
+                XID *pCmapList;
 
 
 </programlisting></blockquote>
@@ -2672,10 +2672,10 @@ by the caller.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->StoreColors (pmap, ndef, pdefs)
-		ColormapPtr pmap;
-		int ndef;
-		xColorItem *pdefs;
+        void pScreen->StoreColors (pmap, ndef, pdefs)
+                ColormapPtr pmap;
+                int ndef;
+                xColorItem *pdefs;
 
 </programlisting></blockquote>
 StoreColors changes some of the entries in the colormap pmap.
@@ -2693,9 +2693,9 @@ more details.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->ResolveColor(pRed, pGreen, pBlue, pVisual)
-		unsigned short *pRed, *pGreen, *pBlue;
-		VisualPtr pVisual;
+        void pScreen->ResolveColor(pRed, pGreen, pBlue, pVisual)
+                unsigned short *pRed, *pGreen, *pBlue;
+                VisualPtr pVisual;
 
 
 </programlisting></blockquote>
@@ -2850,13 +2850,13 @@ in the devPrivate storage.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->RealizeFont(pScr, pFont)
-		ScreenPtr pScr;
-		FontPtr pFont;
+        Bool pScreen->RealizeFont(pScr, pFont)
+                ScreenPtr pScr;
+                FontPtr pFont;
 
-	Bool pScreen->UnrealizeFont(pScr, pFont)
-		ScreenPtr pScr;
-		FontPtr pFont;
+        Bool pScreen->UnrealizeFont(pScr, pFont)
+                ScreenPtr pScr;
+                FontPtr pFont;
 
 </programlisting></blockquote>
 RealizeFont and UnrealizeFont should calculate and allocate these extra data structures and
@@ -2887,10 +2887,10 @@ The CreateGC() routine is described under Graphics Contexts.</para></listitem>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->QueryBestSize(kind, pWidth, pHeight)
-		int kind;
-		unsigned short *pWidth, *pHeight;
-		ScreenPtr pScreen;
+        void pScreen->QueryBestSize(kind, pWidth, pHeight)
+                int kind;
+                unsigned short *pWidth, *pHeight;
+                ScreenPtr pScreen;
 
 </programlisting></blockquote>
 QueryBestSize() returns the best sizes for cursors, tiles, and stipples
@@ -2906,10 +2906,10 @@ The sample server implementation is in Xserver/fb/fbscreen.c.</para>
 <para>
 <blockquote><programlisting>
 
-	pScreen->SourceValidate(pDrawable, x, y, width, height)
-		DrawablePtr pDrawable;
-		int x, y, width, height;
-		unsigned int subWindowMode;
+        pScreen->SourceValidate(pDrawable, x, y, width, height)
+                DrawablePtr pDrawable;
+                int x, y, width, height;
+                unsigned int subWindowMode;
 
 </programlisting></blockquote>
 SourceValidate should be called by any primitive that reads from pDrawable.
@@ -2923,9 +2923,9 @@ for the copy operation.  subWindowMode comes from the GC or source Picture.
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->SaveScreen(pScreen, on)
-		ScreenPtr pScreen;
-		int on;
+        Bool pScreen->SaveScreen(pScreen, on)
+                ScreenPtr pScreen;
+                int on;
 
 </programlisting></blockquote>
 SaveScreen() is used for Screen Saver support (see WaitForSomething()).
@@ -2933,16 +2933,16 @@ pScreen is the screen to save.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->CloseScreen(pScreen)
-	    ScreenPtr pScreen;
+        Bool pScreen->CloseScreen(pScreen)
+            ScreenPtr pScreen;
 
 </programlisting></blockquote>
 When the server is reset, it calls this routine for each screen.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->CreateScreenResources(pScreen)
-	    ScreenPtr pScreen;
+        Bool pScreen->CreateScreenResources(pScreen)
+            ScreenPtr pScreen;
 
 </programlisting></blockquote>
 If this routine is not NULL, it will be called once per screen per
@@ -3026,9 +3026,9 @@ A bitmap is a pixmap that is one bit deep.</para>
 <para>
 <blockquote><programlisting>
 
-	PixmapPtr pScreen->CreatePixmap(pScreen, width, height, depth)
-		ScreenPtr pScreen;
-		int width, height, depth;
+        PixmapPtr pScreen->CreatePixmap(pScreen, width, height, depth)
+                ScreenPtr pScreen;
+                int width, height, depth;
 
 </programlisting></blockquote>
 This ScreenRec procedure must create a pixmap of the size
@@ -3044,8 +3044,8 @@ See Xserver/fb/fbpixmap.c for the sample server implementation.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->DestroyPixmap(pPixmap)
-		PixmapPtr pPixmap;
+        Bool pScreen->DestroyPixmap(pPixmap)
+                PixmapPtr pPixmap;
 
 </programlisting></blockquote>
 This ScreenRec procedure must "destroy" a pixmap.
@@ -3064,15 +3064,15 @@ an half-initialized state (error pathes), so no extra unwrapping magic necessary
 <para>
 <blockquote><programlisting>
 
-	Bool
-	pScreen->ModifyPixmapHeader(pPixmap, width, height, depth, bitsPerPixel, devKind, pPixData)
-		PixmapPtr   pPixmap;
-		int	    width;
-		int	    height;
-		int	    depth;
-		int	    bitsPerPixel;
-		int	    devKind;
-		pointer     pPixData;
+        Bool
+        pScreen->ModifyPixmapHeader(pPixmap, width, height, depth, bitsPerPixel, devKind, pPixData)
+                PixmapPtr   pPixmap;
+                int            width;
+                int            height;
+                int            depth;
+                int            bitsPerPixel;
+                int            devKind;
+                pointer     pPixData;
 
 </programlisting></blockquote>
 This routine takes a pixmap header and initializes the fields of the PixmapRec to the
@@ -3086,18 +3086,18 @@ server implementation.</para>
 <para>
 <blockquote><programlisting>
 
-	PixmapPtr
-	GetScratchPixmapHeader(pScreen, width, height, depth, bitsPerPixel, devKind, pPixData)
-		ScreenPtr   pScreen;
-		int	    width;
-		int	    height;
-		int	    depth;
-		int	    bitsPerPixel;
-		int	    devKind;
-		pointer     pPixData;
+        PixmapPtr
+        GetScratchPixmapHeader(pScreen, width, height, depth, bitsPerPixel, devKind, pPixData)
+                ScreenPtr   pScreen;
+                int            width;
+                int            height;
+                int            depth;
+                int            bitsPerPixel;
+                int            devKind;
+                pointer     pPixData;
 
-	void FreeScratchPixmapHeader(pPixmap)
-		PixmapPtr pPixmap;
+        void FreeScratchPixmapHeader(pPixmap)
+                PixmapPtr pPixmap;
 
 </programlisting></blockquote>
 DDX should use these two DIX routines when it has a buffer of raw
@@ -3228,8 +3228,8 @@ they do not change the window tree, which is only changed by DIX.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->CreateWindow(pWin)
-		WindowPtr pWin;
+        Bool pScreen->CreateWindow(pWin)
+                WindowPtr pWin;
 
 </programlisting></blockquote>
 This routine is a hook for when DIX creates a window.
@@ -3240,8 +3240,8 @@ See Xserver/fb/fbwindow.c for the sample server implementation.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->DestroyWindow(pWin);
-		WindowPtr pWin;
+        Bool pScreen->DestroyWindow(pWin);
+                WindowPtr pWin;
 
 </programlisting></blockquote>
 This routine is a hook for when DIX destroys a window.
@@ -3252,9 +3252,9 @@ See Xserver/fb/fbwindow.c for the sample server implementation.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->PositionWindow(pWin, x, y);
-		WindowPtr pWin;
-		int x, y;
+        Bool pScreen->PositionWindow(pWin, x, y);
+                WindowPtr pWin;
+                int x, y;
 
 </programlisting></blockquote>
 This routine is a hook for when DIX moves or resizes a window.
@@ -3269,11 +3269,11 @@ See Xserver/fb/fbwindow.c for the sample server implementation.</para>
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->RealizeWindow(pWin);
-		WindowPtr pWin;
+        Bool pScreen->RealizeWindow(pWin);
+                WindowPtr pWin;
 
-	Bool  pScreen->UnrealizeWindow(pWin);
-		WindowPtr pWin;
+        Bool  pScreen->UnrealizeWindow(pWin);
+                WindowPtr pWin;
 
 </programlisting></blockquote>
 These routines are hooks for when DIX maps (makes visible) and unmaps
@@ -3287,9 +3287,9 @@ for underlying windows; this is taken care of by DIX.
 <para>
 <blockquote><programlisting>
 
-	Bool pScreen->ChangeWindowAttributes(pWin, vmask)
-		WindowPtr pWin;
-		unsigned long vmask;
+        Bool pScreen->ChangeWindowAttributes(pWin, vmask)
+                WindowPtr pWin;
+                unsigned long vmask;
 
 </programlisting></blockquote>
 ChangeWindowAttributes is called whenever DIX changes window
@@ -3301,9 +3301,9 @@ the set of routines stored in the WindowRec.)</para>
 <para>
 <blockquote><programlisting>
 
-	int pScreen->ValidateTree(pParent,  pChild, kind)
-		WindowPtr pParent, pChild;
-		VTKind kind;
+        int pScreen->ValidateTree(pParent,  pChild, kind)
+                WindowPtr pParent, pChild;
+                VTKind kind;
 
 </programlisting></blockquote>
 ValidateTree calculates the clipping region for the parent window and
@@ -3313,9 +3313,9 @@ a very difficult routine to replace.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->PostValidateTree(pParent,  pChild, kind)
-		WindowPtr pParent, pChild;
-		VTKind kind;
+        void pScreen->PostValidateTree(pParent,  pChild, kind)
+                WindowPtr pParent, pChild;
+                VTKind kind;
 
 </programlisting></blockquote>
 If this routine is not NULL, DIX calls it shortly after calling
@@ -3325,10 +3325,10 @@ The sample server sets this to NULL.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->WindowExposures(pWin, pRegion, pBSRegion)
-		WindowPtr pWin;
-		RegionPtr pRegion;
-		RegionPtr pBSRegion;
+        void pScreen->WindowExposures(pWin, pRegion, pBSRegion)
+                WindowPtr pWin;
+                RegionPtr pRegion;
+                RegionPtr pBSRegion;
 
 </programlisting></blockquote>
 The WindowExposures() routine
@@ -3346,9 +3346,9 @@ server has a machine-independent version in Xserver/mi/miexpose.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->ClipNotify (pWin, dx, dy)
-		WindowPtr pWin;
-		int dx, dy;
+        void pScreen->ClipNotify (pWin, dx, dy)
+                WindowPtr pWin;
+                int dx, dy;
 
 </programlisting></blockquote>
 Whenever the cliplist for a window is changed, this function is called to
@@ -3367,10 +3367,10 @@ as solid backgrounds/borders or tiles that are 8, 16 or 32 pixels square.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->ClearToBackground(pWin, x, y, w, h, generateExposures);
-		WindowPtr pWin;
-		int x, y, w, h;
-		Bool generateExposures;
+        void pScreen->ClearToBackground(pWin, x, y, w, h, generateExposures);
+                WindowPtr pWin;
+                int x, y, w, h;
+                Bool generateExposures;
 
 </programlisting></blockquote>
 This routine is called on a window in response to a ClearToBackground request
@@ -3394,10 +3394,10 @@ The sample server implementation is in Xserver/mi/miwindow.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->CopyWindow(pWin, oldpt, oldRegion);
-		WindowPtr pWin;
-		DDXPointRec oldpt;
-		RegionPtr oldRegion;
+        void pScreen->CopyWindow(pWin, oldpt, oldRegion);
+                WindowPtr pWin;
+                DDXPointRec oldpt;
+                RegionPtr oldRegion;
 
 </programlisting></blockquote>
 CopyWindow is called when a window is moved, and graphically moves to
@@ -3434,7 +3434,7 @@ in mi/miwindow.c.  This can be easily accomplished by calling miScreenInit.</par
 <blockquote><programlisting>
 
     void pScreen->MarkWindow(pWin)
-	WindowPtr pWin;
+        WindowPtr pWin;
 
 </programlisting></blockquote>
 This formerly dix function MarkWindow has moved to ddx and is accessed
@@ -3445,9 +3445,9 @@ that ValidateTree has the information it needs to validate the window.</para>
 <blockquote><programlisting>
 
     Bool pScreen->MarkOverlappedWindows(parent, firstChild, ppLayerWin)
-	WindowPtr parent;
-	WindowPtr firstChild;
-	WindowPtr * ppLayerWin;
+        WindowPtr parent;
+        WindowPtr firstChild;
+        WindowPtr * ppLayerWin;
 
 </programlisting></blockquote>
 This formerly dix function MarkWindow has moved to ddx and is accessed
@@ -3459,8 +3459,8 @@ single-layered framebuffer case, pLayerWin == pWin.</para>
 <blockquote><programlisting>
 
     Bool pScreen->ChangeSaveUnder(pLayerWin, firstChild)
-	WindowPtr pLayerWin;
-	WindowPtr firstChild;
+        WindowPtr pLayerWin;
+        WindowPtr firstChild;
 
 </programlisting></blockquote>
 The dix functions ChangeSaveUnder and CheckSaveUnder have moved to ddx and
@@ -3473,8 +3473,8 @@ needs to be called to finish turning off backing store.</para>
 <blockquote><programlisting>
 
     void pScreen->PostChangeSaveUnder(pLayerWin, firstChild)
-	WindowPtr pLayerWin;
-	WindowPtr firstChild;
+        WindowPtr pLayerWin;
+        WindowPtr firstChild;
 
 </programlisting></blockquote>
 The dix function DoChangeSaveUnder has moved to ddx and is accessed via
@@ -3484,11 +3484,11 @@ backing store that was started by ChangeSaveUnder.</para>
 <blockquote><programlisting>
 
     void pScreen->MoveWindow(pWin, x, y, pSib, kind)
-	WindowPtr pWin;
-	int x;
-	int y;
-	WindowPtr pSib;
-	VTKind kind;
+        WindowPtr pWin;
+        int x;
+        int y;
+        WindowPtr pSib;
+        VTKind kind;
 
 </programlisting></blockquote>
 The formerly dix function MoveWindow has moved to ddx and is accessed via
@@ -3499,12 +3499,12 @@ the border is also changing.</para>
 <blockquote><programlisting>
 
     void pScreen->ResizeWindow(pWin, x, y, w, h, pSib)
-	WindowPtr pWin;
-	int x;
-	int y;
-	unsigned int w;
-	unsigned int h;
-	WindowPtr pSib;
+        WindowPtr pWin;
+        int x;
+        int y;
+        unsigned int w;
+        unsigned int h;
+        WindowPtr pSib;
 
 </programlisting></blockquote>
 The formerly dix function SlideAndSizeWindow has moved to ddx and is accessed via
@@ -3514,7 +3514,7 @@ is given by w,h.</para>
 <blockquote><programlisting>
 
     WindowPtr pScreen->GetLayerWindow(pWin)
-	WindowPtr pWin
+        WindowPtr pWin
 
 </programlisting></blockquote>
 This is a new function which returns a child of the layer parent of pWin.</para>
@@ -3522,7 +3522,7 @@ This is a new function which returns a child of the layer parent of pWin.</para>
 <blockquote><programlisting>
 
     void pScreen->HandleExposures(pWin)
-	WindowPtr pWin;
+        WindowPtr pWin;
 
 </programlisting></blockquote>
 The formerly dix function HandleExposures has moved to ddx and is accessed via
@@ -3532,8 +3532,8 @@ uses the information contained in valdata to send exposures to windows.</para>
 <blockquote><programlisting>
 
     void pScreen->ReparentWindow(pWin, pPriorParent)
-	WindowPtr pWin;
-	WindowPtr pPriorParent;
+        WindowPtr pWin;
+        WindowPtr pPriorParent;
 
 </programlisting></blockquote>
 This function will be called when a window is reparented.  At the time of
@@ -3544,7 +3544,7 @@ can be NULL.</para>
 <blockquote><programlisting>
 
     void pScreen->SetShape(pWin)
-	WindowPtr pWin;
+        WindowPtr pWin;
 
 </programlisting></blockquote>
 The formerly dix function SetShape has moved to ddx and is accessed via
@@ -3554,8 +3554,8 @@ stored in the window when this function is called.</para>
 <blockquote><programlisting>
 
     void pScreen->ChangeBorderWidth(pWin, width)
-	WindowPtr pWin;
-	unsigned int width;
+        WindowPtr pWin;
+        unsigned int width;
 
 </programlisting></blockquote>
 The formerly dix function ChangeBorderWidth has moved to ddx and is accessed via
@@ -3564,9 +3564,9 @@ this screen function.  The new border width is given by width.</para>
 <blockquote><programlisting>
 
     void pScreen->MarkUnrealizedWindow(pChild, pWin, fromConfigure)
-	WindowPtr pChild;
-	WindowPtr pWin;
-	Bool fromConfigure;
+        WindowPtr pChild;
+        WindowPtr pWin;
+        Bool fromConfigure;
 
 </programlisting></blockquote>
 This function is called for windows that are being unrealized as part of
@@ -3627,45 +3627,45 @@ The DIX routines available for manipulating GCs are
 CreateGC, ChangeGC, ChangeGCXIDs, CopyGC, SetClipRects, SetDashes, and FreeGC.
 <blockquote><programlisting>
 
-	GCPtr CreateGC(pDrawable, mask, pval, pStatus)
-	    DrawablePtr pDrawable;
-	    BITS32 mask;
-	    XID *pval;
-	    int *pStatus;
+        GCPtr CreateGC(pDrawable, mask, pval, pStatus)
+            DrawablePtr pDrawable;
+            BITS32 mask;
+            XID *pval;
+            int *pStatus;
 
-	int ChangeGC(client, pGC, mask, pUnion)
-	    ClientPtr client;
-	    GCPtr pGC;
-	    BITS32 mask;
-	    ChangeGCValPtr pUnion;
+        int ChangeGC(client, pGC, mask, pUnion)
+            ClientPtr client;
+            GCPtr pGC;
+            BITS32 mask;
+            ChangeGCValPtr pUnion;
 
-	int ChangeGCXIDs(client, pGC, mask, pC32)
-	    ClientPtr client;
-	    GCPtr pGC;
-	    BITS32 mask;
-	    CARD32 *pC32;
+        int ChangeGCXIDs(client, pGC, mask, pC32)
+            ClientPtr client;
+            GCPtr pGC;
+            BITS32 mask;
+            CARD32 *pC32;
 
-	int CopyGC(pgcSrc, pgcDst, mask)
-	    GCPtr pgcSrc;
-	    GCPtr pgcDst;
-	    BITS32 mask;
+        int CopyGC(pgcSrc, pgcDst, mask)
+            GCPtr pgcSrc;
+            GCPtr pgcDst;
+            BITS32 mask;
 
-	int SetClipRects(pGC, xOrigin, yOrigin, nrects, prects, ordering)
-	    GCPtr pGC;
-	    int xOrigin, yOrigin;
-	    int nrects;
-	    xRectangle *prects;
-	    int ordering;
+        int SetClipRects(pGC, xOrigin, yOrigin, nrects, prects, ordering)
+            GCPtr pGC;
+            int xOrigin, yOrigin;
+            int nrects;
+            xRectangle *prects;
+            int ordering;
 
-	SetDashes(pGC, offset, ndash, pdash)
-	    GCPtr pGC;
-	    unsigned offset;
-	    unsigned ndash;
-	    unsigned char *pdash;
+        SetDashes(pGC, offset, ndash, pdash)
+            GCPtr pGC;
+            unsigned offset;
+            unsigned ndash;
+            unsigned char *pdash;
 
-	int FreeGC(pGC, gid)
-	    GCPtr pGC;
-	    GContext gid;
+        int FreeGC(pGC, gid)
+            GCPtr pGC;
+            GContext gid;
 
 </programlisting></blockquote>
 </para>
@@ -3676,12 +3676,12 @@ These are particularly useful in the mi code.  Two DIX routines
 must be used to get these GCs:
 <blockquote><programlisting>
 
-	GCPtr GetScratchGC(depth, pScreen)
-	    int depth;
-	    ScreenPtr pScreen;
+        GCPtr GetScratchGC(depth, pScreen)
+            int depth;
+            ScreenPtr pScreen;
 
-	FreeScratchGC(pGC)
-	    GCPtr pGC;
+        FreeScratchGC(pGC)
+            GCPtr pGC;
 
 </programlisting></blockquote>
 Always use these two routines, don't try to extract the scratch
@@ -3695,9 +3695,9 @@ This leaves the ones in the pool free for routines that only need it for
 a little while and don't want to pay a heavy cost to get it.
 <blockquote><programlisting>
 
-	GCPtr CreateScratchGC(pScreen, depth)
-	    ScreenPtr pScreen;
-	    int depth;
+        GCPtr CreateScratchGC(pScreen, depth)
+            ScreenPtr pScreen;
+            int depth;
 
 </programlisting></blockquote>
 NULL is returned if the GC cannot be created.
@@ -3748,8 +3748,8 @@ The ScreenRec data structure has a pointer for
 CreateGC().
 <blockquote><programlisting>
 
-	Bool pScreen->CreateGC(pGC)
-		GCPtr pGC;
+        Bool pScreen->CreateGC(pGC)
+                GCPtr pGC;
 </programlisting></blockquote>
 This routine must fill in the fields of
 a dynamically allocated GC that is passed in.
@@ -3765,9 +3765,9 @@ The GC funcs vector contains pointers to 7
 routines and a devPrivate field:
 <blockquote><programlisting>
 
-	pGC->funcs->ChangeGC(pGC, changes)
-		GCPtr pGC;
-		unsigned long changes;
+        pGC->funcs->ChangeGC(pGC, changes)
+                GCPtr pGC;
+                unsigned long changes;
 
 </programlisting></blockquote>
 This GC func is called immediately after a field in the GC is changed.
@@ -3780,10 +3780,10 @@ system, and a validate is not necessary.</para>
 <para>
 <blockquote><programlisting>
 
-	pGC->funcs->ValidateGC(pGC, changes, pDraw)
-		GCPtr pGC;
-		unsigned long changes;
-		DrawablePtr pDraw;
+        pGC->funcs->ValidateGC(pGC, changes, pDraw)
+                GCPtr pGC;
+                unsigned long changes;
+                DrawablePtr pDraw;
 
 </programlisting></blockquote>
 ValidateGC is called by DIX just before the GC will be used when one
@@ -3811,10 +3811,10 @@ this routine.</para>
 <para>
 <blockquote><programlisting>
 
-	pGC->funcs->CopyGC(pGCSrc, mask, pGCDst)
-		GCPtr pGCSrc;
-		unsigned long mask;
-		GCPtr pGCDst;
+        pGC->funcs->CopyGC(pGCSrc, mask, pGCDst)
+                GCPtr pGCSrc;
+                unsigned long mask;
+                GCPtr pGCDst;
 
 </programlisting></blockquote>
 This routine is called by DIX when a GC is being copied to another GC.
@@ -3824,8 +3824,8 @@ the destination GC.</para>
 <para>
 <blockquote><programlisting>
 
-	pGC->funcs->DestroyGC(pGC)
-		GCPtr pGC;
+        pGC->funcs->DestroyGC(pGC)
+                GCPtr pGC;
 
 </programlisting></blockquote>
 This routine is called before the GC is destroyed for the
@@ -3847,11 +3847,11 @@ clientClip field of the GC, but requires it to do all manipulation itself.</para
 <para>
 <blockquote><programlisting>
 
-	void pGC->funcs->ChangeClip(pGC, type, pValue, nrects)
-		GCPtr pGC;
-		int type;
-		char *pValue;
-		int nrects;
+        void pGC->funcs->ChangeClip(pGC, type, pValue, nrects)
+                GCPtr pGC;
+                int type;
+                char *pValue;
+                int nrects;
 
 </programlisting></blockquote>
 This routine is called whenever the client changes the client clip
@@ -3880,8 +3880,8 @@ at a composite clip region before any drawing is done.)</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->funcs->DestroyClip(pGC)
-		GCPtr pGC;
+        void pGC->funcs->DestroyClip(pGC)
+                GCPtr pGC;
 
 </programlisting></blockquote>
 This routine is called whenever the client clip region must be destroyed.
@@ -3893,8 +3893,8 @@ by this routine after destroying the region, so that other software
 <para>
 <blockquote><programlisting>
 
-	void pGC->funcs->CopyClip(pgcDst, pgcSrc)
-		GCPtr pgcDst, pgcSrc;
+        void pGC->funcs->CopyClip(pgcDst, pgcSrc)
+                GCPtr pgcDst, pgcSrc;
 
 </programlisting></blockquote>
 This routine makes a copy of the clipMask and clipType from pgcSrc
@@ -4027,10 +4027,10 @@ The Drawing Primitives are as follows:
 
 <blockquote><programlisting>
 
-	RegionPtr pGC->ops->CopyArea(src, dst, pGC, srcx, srcy, w, h, dstx, dsty)
-		DrawablePtr dst, src;
-		GCPtr pGC;
-		int srcx, srcy, w, h, dstx, dsty;
+        RegionPtr pGC->ops->CopyArea(src, dst, pGC, srcx, srcy, w, h, dstx, dsty)
+                DrawablePtr dst, src;
+                GCPtr pGC;
+                int srcx, srcy, w, h, dstx, dsty;
 
 </programlisting></blockquote>
 CopyArea copies a rectangle of pixels from one drawable to another of
@@ -4062,11 +4062,11 @@ An example implementation is fbCopyArea() in Xserver/fb/fbcopy.c.</para>
 <para>
 <blockquote><programlisting>
 
-	RegionPtr pGC->ops->CopyPlane(src, dst, pGC, srcx, srcy, w, h, dstx, dsty, plane)
-		DrawablePtr dst, src;
-		GCPtr pGC;
-		int srcx, srcy, w, h, dstx, dsty;
-		unsigned long plane;
+        RegionPtr pGC->ops->CopyPlane(src, dst, pGC, srcx, srcy, w, h, dstx, dsty, plane)
+                DrawablePtr dst, src;
+                GCPtr pGC;
+                int srcx, srcy, w, h, dstx, dsty;
+                unsigned long plane;
 
 </programlisting></blockquote>
 CopyPlane must copy one plane of a rectangle from the source drawable
@@ -4082,12 +4082,12 @@ Xserver/fb/fbcopy.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PolyPoint(dst, pGC, mode, n, pPoint)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int mode;
-		int n;
-		DDXPointPtr pPoint;
+        void pGC->ops->PolyPoint(dst, pGC, mode, n, pPoint)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int mode;
+                int n;
+                DDXPointPtr pPoint;
 
 </programlisting></blockquote>
 PolyPoint draws a set of one-pixel dots (foreground color)
@@ -4101,12 +4101,12 @@ miPolyPoint in Xserver/mi/mipolypnt.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->Polylines(dst, pGC, mode, n, pPoint)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int mode;
-		int n;
-		DDXPointPtr pPoint;
+        void pGC->ops->Polylines(dst, pGC, mode, n, pPoint)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int mode;
+                int n;
+                DDXPointPtr pPoint;
 
 </programlisting></blockquote>
 Similar to PolyPoint, Polylines draws lines between the locations given in the array.
@@ -4121,11 +4121,11 @@ mi/miwideline.c and miZeroLine() in mi/mizerline.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PolySegment(dst, pGC, n, pPoint)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int n;
-		xSegment *pSegments;
+        void pGC->ops->PolySegment(dst, pGC, n, pPoint)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int n;
+                xSegment *pSegments;
 
 </programlisting></blockquote>
 PolySegments draws unconnected
@@ -4136,11 +4136,11 @@ An example implementation is miPolySegment() in mipolyseg.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PolyRectangle(dst, pGC, n, pRect)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int n;
-		xRectangle *pRect;
+        void pGC->ops->PolyRectangle(dst, pGC, n, pRect)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int n;
+                xRectangle *pRect;
 
 </programlisting></blockquote>
 PolyRectangle draws outlines of rectangles for each rectangle in the array.</para>
@@ -4149,11 +4149,11 @@ An example implementation is miPolyRectangle() in Xserver/mi/mipolyrect.c.</para
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PolyArc(dst, pGC, n, pArc)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int n;
-		xArc*pArc;
+        void pGC->ops->PolyArc(dst, pGC, n, pArc)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int n;
+                xArc*pArc;
 
 </programlisting></blockquote>
 PolyArc draws connected conic arcs according to the descriptions in the array.
@@ -4164,13 +4164,13 @@ miPolyArc() in Xserver/mi/miarc.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->FillPolygon(dst, pGC, shape, mode, count, pPoint)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int shape;
-		int mode;
-		int count;
-		DDXPointPtr pPoint;
+        void pGC->ops->FillPolygon(dst, pGC, shape, mode, count, pPoint)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int shape;
+                int mode;
+                int count;
+                DDXPointPtr pPoint;
 
 </programlisting></blockquote>
 FillPolygon fills a polygon specified by the points in the array
@@ -4188,11 +4188,11 @@ An example implementation is miFillPolygon() in Xserver/mi/mipoly.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PolyFillRect(dst, pGC, n, pRect)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int n;
-		xRectangle *pRect;
+        void pGC->ops->PolyFillRect(dst, pGC, n, pRect)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int n;
+                xRectangle *pRect;
 
 </programlisting></blockquote>
 PolyFillRect fills multiple rectangles.</para>
@@ -4202,11 +4202,11 @@ miPolyFillRect() in Xserver/mi/mifillrct.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PolyFillArc(dst, pGC, n, pArc)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int n;
-		xArc *pArc;
+        void pGC->ops->PolyFillArc(dst, pGC, n, pArc)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int n;
+                xArc *pArc;
 
 </programlisting></blockquote>
 PolyFillArc fills a shape for each arc in the
@@ -4217,12 +4217,12 @@ An example implementation is miPolyFillArc() in Xserver/mi/mifillarc.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PutImage(dst, pGC, depth, x, y, w, h, leftPad, format, pBinImage)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int x, y, w, h;
-		int format;
-		char *pBinImage;
+        void pGC->ops->PutImage(dst, pGC, depth, x, y, w, h, leftPad, format, pBinImage)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int x, y, w, h;
+                int format;
+                char *pBinImage;
 
 </programlisting></blockquote>
 PutImage copies a pixmap image into the drawable.  The pixmap image
@@ -4238,12 +4238,12 @@ An example implementation is fbPutImage() in Xserver/fb/fbimage.c.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->GetImage(src, x, y, w, h, format, planeMask, pBinImage)
-		 DrawablePtr src;
-		 int x, y, w, h;
-		 unsigned int format;
-		 unsigned long planeMask;
-		 char *pBinImage;
+        void pScreen->GetImage(src, x, y, w, h, format, planeMask, pBinImage)
+                 DrawablePtr src;
+                 int x, y, w, h;
+                 unsigned int format;
+                 unsigned long planeMask;
+                 char *pBinImage;
 
 </programlisting></blockquote>
 GetImage copies the bits from the source drawable into
@@ -4263,12 +4263,12 @@ Bitmap format, which is the format for a single plane of an XYPixmap.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->ImageText8(pDraw, pGC, x, y, count, chars)
-		DrawablePtr pDraw;
-		GCPtr pGC;
-		int x, y;
-		int count;
-		char *chars;
+        void pGC->ops->ImageText8(pDraw, pGC, x, y, count, chars)
+                DrawablePtr pDraw;
+                GCPtr pGC;
+                int x, y;
+                int count;
+                char *chars;
 
 </programlisting></blockquote>
 ImageText8 draws text.  The text is drawn in the foreground color; the
@@ -4279,12 +4279,12 @@ An example implementation is miImageText8() in Xserver/mi/mipolytext.c.</para>
 <para>
 <blockquote><programlisting>
 
-	int pGC->ops->PolyText8(pDraw, pGC, x, y, count, chars)
-		DrawablePtr pDraw;
-		GCPtr pGC;
-		int x, y;
-		int count;
-		char *chars;
+        int pGC->ops->PolyText8(pDraw, pGC, x, y, count, chars)
+                DrawablePtr pDraw;
+                GCPtr pGC;
+                int x, y;
+                int count;
+                char *chars;
 
 </programlisting></blockquote>
 PolyText8 works like ImageText8, except it draws with
@@ -4296,19 +4296,19 @@ An example implementation is miPolyText8() in Xserver/mi/mipolytext.c.</para>
 <para>
 <blockquote><programlisting>
 
-	int pGC->ops->PolyText16(pDraw, pGC, x, y, count, chars)
-		DrawablePtr pDraw;
-		GCPtr pGC;
-		int x, y;
-		int count;
-		unsigned short *chars;
+        int pGC->ops->PolyText16(pDraw, pGC, x, y, count, chars)
+                DrawablePtr pDraw;
+                GCPtr pGC;
+                int x, y;
+                int count;
+                unsigned short *chars;
 
-	void pGC->ops->ImageText16(pDraw, pGC, x, y, count, chars)
-		DrawablePtr pDraw;
-		GCPtr pGC;
-		int x, y;
-		int count;
-		unsigned short *chars;
+        void pGC->ops->ImageText16(pDraw, pGC, x, y, count, chars)
+                DrawablePtr pDraw;
+                GCPtr pGC;
+                int x, y;
+                int count;
+                unsigned short *chars;
 
 </programlisting></blockquote>
 These two routines are the same as the "8" versions,
@@ -4443,13 +4443,13 @@ of starting points and the list of widths of spans.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->FillSpans(dst, pGC, nSpans, pPoints, pWidths, sorted)
-		DrawablePtr dst;
-		GCPtr pGC;
-		int nSpans;
-		DDXPointPtr pPoints;
-		int *pWidths;
-		int sorted;
+        void pGC->ops->FillSpans(dst, pGC, nSpans, pPoints, pWidths, sorted)
+                DrawablePtr dst;
+                GCPtr pGC;
+                int nSpans;
+                DDXPointPtr pPoints;
+                int *pWidths;
+                int sorted;
 
 </programlisting></blockquote>
 FillSpans should fill horizontal rows of pixels with
@@ -4467,14 +4467,14 @@ and stipple, patOrg, fgPixel and bgPixel (for fillStyle OpaqueStipple).</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->SetSpans(pDrawable, pGC, pSrc, ppt, pWidths, nSpans, sorted)
-		DrawablePtr pDrawable;
-		GCPtr pGC;
-		char *pSrc;
-		DDXPointPtr pPoints;
-		int *pWidths;
-		int nSpans;
-		int sorted;
+        void pGC->ops->SetSpans(pDrawable, pGC, pSrc, ppt, pWidths, nSpans, sorted)
+                DrawablePtr pDrawable;
+                GCPtr pGC;
+                char *pSrc;
+                DDXPointPtr pPoints;
+                int *pWidths;
+                int nSpans;
+                int sorted;
 
 </programlisting></blockquote>
 For each span, this routine should copy pWidths bits from pSrc to
@@ -4497,13 +4497,13 @@ at validate time, as with the other output functions.</para>
 <para>
 <blockquote><programlisting>
 
-	void pScreen->GetSpans(pDrawable, wMax, pPoints, pWidths, nSpans)
-		DrawablePtr pDrawable;
-		int wMax;
-		DDXPointPtr pPoints;
-		int *pWidths;
-		int nSpans;
-		char *pDst;
+        void pScreen->GetSpans(pDrawable, wMax, pPoints, pWidths, nSpans)
+                DrawablePtr pDrawable;
+                int wMax;
+                DDXPointPtr pPoints;
+                int *pWidths;
+                int nSpans;
+                char *pDst;
 
 </programlisting></blockquote>
 For each span, GetSpans gets bits from the drawable starting at pPoints
@@ -4539,13 +4539,13 @@ text drawing will work, it will be very slow.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PolyGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
-		DrawablePtr pDrawable;
-		GCPtr pGC;
-		int x , y;
-		unsigned int nglyph;
-		CharInfoRec **ppci;		/* array of character info */
-		pointer unused;			/* unused since R5 */
+        void pGC->ops->PolyGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
+                DrawablePtr pDrawable;
+                GCPtr pGC;
+                int x , y;
+                unsigned int nglyph;
+                CharInfoRec **ppci;                /* array of character info */
+                pointer unused;                        /* unused since R5 */
 
 </programlisting></blockquote>
 GC components: alu, clipOrg, clientClip, font, and fillStyle.</para>
@@ -4556,13 +4556,13 @@ and stipple, patOrg, fgPixel and bgPixel (for fillStyle OpaqueStipple).</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->ImageGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
-		DrawablePtr pDrawable;
-		GCPtr pGC;
-		int x , y;
-		unsigned int nglyph;
-		CharInfoRec **ppci;	/* array of character info */
-		pointer unused;		/* unused since R5 */
+        void pGC->ops->ImageGlyphBlt(pDrawable, pGC, x, y, nglyph, ppci, pglyphBase)
+                DrawablePtr pDrawable;
+                GCPtr pGC;
+                int x , y;
+                unsigned int nglyph;
+                CharInfoRec **ppci;        /* array of character info */
+                pointer unused;                /* unused since R5 */
 
 </programlisting></blockquote>
 GC components: clipOrg, clientClip, font, fgPixel, bgPixel</para>
@@ -4599,9 +4599,9 @@ using a second stipple.  You can thing of it as pushing the fillStyle
 through a stencil.  PushPixels is not used by any of the mi rendering code,
 but is used by the mi software cursor code.
 <blockquote><para>
-	Suppose the stencil is:	00111100
-	and the stipple is:	10101010
-	PushPixels result:	00101000
+        Suppose the stencil is:        00111100
+        and the stipple is:        10101010
+        PushPixels result:        00101000
 </para></blockquote>
 </para>
 <para>
@@ -4611,11 +4611,11 @@ Although it will work, it will be slow.</para>
 <para>
 <blockquote><programlisting>
 
-	void pGC->ops->PushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
-		GCPtr pGC;
-		PixmapPtr pBitMap;
-		DrawablePtr pDrawable;
-		int dx, dy, xOrg, yOrg;
+        void pGC->ops->PushPixels(pGC, pBitMap, pDrawable, dx, dy, xOrg, yOrg)
+                GCPtr pGC;
+                PixmapPtr pBitMap;
+                DrawablePtr pDrawable;
+                int dx, dy, xOrg, yOrg;
 
 </programlisting></blockquote>
 GC components: alu, clipOrg, clientClip, and fillStyle.</para>
@@ -4641,7 +4641,7 @@ An Example implementation is miPushPixels() in Xserver/mi/mipushpxl.c.</para>
   <title>Shutdown Procedures</title>
 <para>
 <blockquote><programlisting>
-	void ddxGiveUp(enum ExitCode error)
+        void ddxGiveUp(enum ExitCode error)
 </programlisting></blockquote>
 Some hardware may require special work to be done before the server
 exits so that it is not left in an intermediate state.  As explained
@@ -4655,13 +4655,13 @@ accomplish before termination.</para>
   <title>Command Line Procedures</title>
 <para>
 <blockquote><programlisting>
-	int ddxProcessArgument(argc, argv, i)
-	    int argc;
-	    char *argv[];
-	    int i;
+        int ddxProcessArgument(argc, argv, i)
+            int argc;
+            char *argv[];
+            int i;
 
-	void
-	ddxUseMsg()
+        void
+        ddxUseMsg()
 
 </programlisting></blockquote>
 You should write these routines to deal with device-dependent command line
@@ -4701,7 +4701,7 @@ lists which of these cases applies to each structure containing
 <para>
 To request private space, use
 <blockquote><programlisting>
-	Bool dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size);
+        Bool dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size);
 </programlisting></blockquote>
 The first argument is a pointer to a <type>DevPrivateKeyRec</type> which
 will serve as the unique identifier for the private data.  Typically this is
@@ -4719,7 +4719,7 @@ the same value for <type>size</type> or the server will abort.</para>
 <para>
 To request per-screen private space in an object, use
 <blockquote><programlisting>
-	Bool dixRegisterScreenPrivateKey(DevScreenPrivateKey key, ScreenPtr pScreen, DevPrivateType type, unsigned size);
+        Bool dixRegisterScreenPrivateKey(DevScreenPrivateKey key, ScreenPtr pScreen, DevPrivateType type, unsigned size);
 </programlisting></blockquote>
 The <parameter>type</parameter> and <parameter>size</parameter> arguments are
 the same as those to <function>dixRegisterPrivateKey</function> but this
@@ -4748,7 +4748,7 @@ that are otherwise equivalent to the following Private functions.</para>
 <para>
 To attach a piece of private data to an object, use:
 <blockquote><programlisting>
-	void dixSetPrivate(PrivateRec **privates, const DevPrivateKey key, pointer val)
+        void dixSetPrivate(PrivateRec **privates, const DevPrivateKey key, pointer val)
 </programlisting></blockquote>
 The first argument is the address of the <structfield>devPrivates</structfield>
 field in the target structure.  This field is managed privately by the DIX
@@ -4768,8 +4768,8 @@ new one.</para>
 <para>
 To look up a piece of private data, use one of:
 <blockquote><programlisting>
-	pointer dixLookupPrivate(PrivateRec **privates, const DevPrivateKey key)
-	pointer *dixLookupPrivateAddr(PrivateRec **privates, const DevPrivateKey key)
+        pointer dixLookupPrivate(PrivateRec **privates, const DevPrivateKey key)
+        pointer *dixLookupPrivateAddr(PrivateRec **privates, const DevPrivateKey key)
 </programlisting></blockquote>
 The first argument is the address of the <structfield>devPrivates</structfield> field
 in the target structure.  The second argument is the key to look up.
@@ -4802,28 +4802,28 @@ modules; in particular software cursors needed more
 control over the activity.  The general mechanism for using wrappers is:
 <blockquote><programlisting>
 privateWrapperFunction (object, ...)
-	ObjectPtr	object;
+        ObjectPtr        object;
 {
-	pre-wrapped-function-stuff ...
+        pre-wrapped-function-stuff ...
 
-	object->functionVector = dixLookupPrivate(&amp;object->devPrivates, privateKey);
-	(*object->functionVector) (object, ...);
-	/*
-	 * this next line is occasionally required by the rules governing
-	 * wrapper functions.  Always using it will not cause problems.
-	 * Not using it when necessary can cause severe troubles.
-	 */
-	dixSetPrivate(&amp;object->devPrivates, privateKey, object->functionVector);
-	object->functionVector = privateWrapperFunction;
+        object->functionVector = dixLookupPrivate(&amp;object->devPrivates, privateKey);
+        (*object->functionVector) (object, ...);
+        /*
+         * this next line is occasionally required by the rules governing
+         * wrapper functions.  Always using it will not cause problems.
+         * Not using it when necessary can cause severe troubles.
+         */
+        dixSetPrivate(&amp;object->devPrivates, privateKey, object->functionVector);
+        object->functionVector = privateWrapperFunction;
 
-	post-wrapped-function-stuff ...
+        post-wrapped-function-stuff ...
 }
 
 privateInitialize (object)
-	ObjectPtr	object;
+        ObjectPtr        object;
 {
-	dixSetPrivate(&amp;object->devPrivates, privateKey, object->functionVector);
-	object->functionVector = privateWrapperFunction;
+        dixSetPrivate(&amp;object->devPrivates, privateKey, object->functionVector);
+        object->functionVector = privateWrapperFunction;
 }
 </programlisting></blockquote>
 </para>
@@ -4861,17 +4861,17 @@ chain will be maintained when wrappers adjust the funcs/ops tables they use.</pa
 To queue work for execution when all clients are in a stable state (i.e.
 just before calling select() in WaitForSomething), call:
 <blockquote><programlisting>
-	Bool QueueWorkProc(function,client,closure)
-		Bool		(*function)();
-		ClientPtr	client;
-		pointer		closure;
+        Bool QueueWorkProc(function,client,closure)
+                Bool                (*function)();
+                ClientPtr        client;
+                pointer                closure;
 </programlisting></blockquote>
 </para>
 <para>
 When the server is about to suspend itself, the given function will be
 executed:
 <blockquote><programlisting>
-	(*function) (client, closure)
+        (*function) (client, closure)
 </programlisting></blockquote>
 </para>
 <para>
@@ -4890,25 +4890,25 @@ categories.  Notice that many of the graphics routines have both
 mi and fb implementations.</para>
 <para>
 <itemizedlist>
-<listitem><para>dix	portable to all systems; do not attempt to rewrite (Xserver/dix)</para></listitem>
-<listitem><para>os	routine provided in Xserver/os or Xserver/include/os.h</para></listitem>
-<listitem><para>ddx	frame buffer dependent (examples in Xserver/fb)</para></listitem>
-<listitem><para>mi	routine provided in Xserver/mi</para></listitem>
-<listitem><para>hd	hardware dependent (examples in many Xserver/hw directories)</para></listitem>
-<listitem><para>none	not implemented in sample implementation</para></listitem>
+<listitem><para>dix        portable to all systems; do not attempt to rewrite (Xserver/dix)</para></listitem>
+<listitem><para>os        routine provided in Xserver/os or Xserver/include/os.h</para></listitem>
+<listitem><para>ddx        frame buffer dependent (examples in Xserver/fb)</para></listitem>
+<listitem><para>mi        routine provided in Xserver/mi</para></listitem>
+<listitem><para>hd        hardware dependent (examples in many Xserver/hw directories)</para></listitem>
+<listitem><para>none        not implemented in sample implementation</para></listitem>
 </itemizedlist>
 </para>
-	<table frame="all" id="routines-1">
-	  <title>Server Routines (Page 1)</title>
-	  <tgroup cols='3' align='left' colsep='1' rowsep='1'>
-	    <thead>
-	      <row>
-		<entry>Procedure</entry>
-		<entry>Port</entry>
-		<entry>Struct</entry>
-	      </row>
-	    </thead>
-	    <tbody>
+        <table frame="all" id="routines-1">
+          <title>Server Routines (Page 1)</title>
+          <tgroup cols='3' align='left' colsep='1' rowsep='1'>
+            <thead>
+              <row>
+                <entry>Procedure</entry>
+                <entry>Port</entry>
+                <entry>Struct</entry>
+              </row>
+            </thead>
+            <tbody>
 <row><entry><function>ALLOCATE_LOCAL</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
 <row><entry><function>AddCallback</function></entry><entry><literal>dix</literal></entry><entry><para></para></entry></row>
 <row><entry><function>AddEnabledDevice</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
@@ -4957,21 +4957,21 @@ mi and fb implementations.</para>
 <row><entry><function>GetScratchPixmapHeader</function></entry><entry><literal>dix</literal></entry><entry><para></para></entry></row>
 <row><entry><function>GetSpans</function></entry><entry><literal>ddx</literal></entry><entry><para>Screen</para></entry></row>
 <row><entry><function>GetStaticColormap</function></entry><entry><literal>ddx</literal></entry><entry><para>Screen</para></entry></row>
-	    </tbody>
-	  </tgroup>
-	</table>
+            </tbody>
+          </tgroup>
+        </table>
 
-	<table frame="all" id="routines-2">
-	  <title>Server Routines (Page 2)</title>
-	  <tgroup cols='3' align='left' colsep='1' rowsep='1'>
-	    <thead>
-	      <row>
-		<entry>Procedure</entry>
-		<entry>Port</entry>
-		<entry>Struct</entry>
-	      </row>
-	    </thead>
-	    <tbody>
+        <table frame="all" id="routines-2">
+          <title>Server Routines (Page 2)</title>
+          <tgroup cols='3' align='left' colsep='1' rowsep='1'>
+            <thead>
+              <row>
+                <entry>Procedure</entry>
+                <entry>Port</entry>
+                <entry>Struct</entry>
+              </row>
+            </thead>
+            <tbody>
 <row><entry><function>ImageGlyphBlt</function></entry><entry><literal>mi</literal></entry><entry><para>GC op</para></entry></row>
 <row><entry><function>ImageText16</function></entry><entry><literal>mi</literal></entry><entry><para>GC op</para></entry></row>
 <row><entry><function>ImageText8</function></entry><entry><literal>mi</literal></entry><entry><para>GC op</para></entry></row>
@@ -5020,21 +5020,21 @@ mi and fb implementations.</para>
 <row><entry><function>RegionNotEmpty</function></entry><entry><literal>mi</literal></entry><entry><para>Screen</para></entry></row>
 <row><entry><function>RegionReset</function></entry><entry><literal>mi</literal></entry><entry><para>Screen</para></entry></row>
 <row><entry><function>ResolveColor</function></entry><entry><literal>ddx</literal></entry><entry><para>Screen</para></entry></row>
-	    </tbody>
-	  </tgroup>
-	</table>
+            </tbody>
+          </tgroup>
+        </table>
 
-	<table frame="all" id="routines-3">
-	  <title>Server Routines (Page 3)</title>
-	  <tgroup cols='3' align='left' colsep='1' rowsep='1'>
-	    <thead>
-	      <row>
-		<entry>Procedure</entry>
-		<entry>Port</entry>
-		<entry>Struct</entry>
-	      </row>
-	    </thead>
-	    <tbody>
+        <table frame="all" id="routines-3">
+          <title>Server Routines (Page 3)</title>
+          <tgroup cols='3' align='left' colsep='1' rowsep='1'>
+            <thead>
+              <row>
+                <entry>Procedure</entry>
+                <entry>Port</entry>
+                <entry>Struct</entry>
+              </row>
+            </thead>
+            <tbody>
 <row><entry><function>RemoveEnabledDevice</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
 <row><entry><function>ResetCurrentRequest</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
 <row><entry><function>SaveScreen</function></entry><entry><literal>ddx</literal></entry><entry><para>Screen</para></entry></row>
@@ -5061,8 +5061,8 @@ mi and fb implementations.</para>
 <row><entry><function>WaitForSomething</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
 <row><entry><function>WindowExposures</function></entry><entry><literal>mi</literal></entry><entry><para>Window</para></entry></row>
 <row><entry><function>WriteToClient</function></entry><entry><literal>os</literal></entry><entry><para></para></entry></row>
-	    </tbody>
-	  </tgroup>
-	</table>
+            </tbody>
+          </tgroup>
+    </table>
 </section>
 </article>

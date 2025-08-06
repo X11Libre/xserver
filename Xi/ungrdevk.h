@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef UNGRDEVK_H
 #define UNGRDEVK_H 1
 
-#include <dix-config.h>
-
 int SProcXUngrabDeviceKey(ClientPtr     /* client */
     );
 

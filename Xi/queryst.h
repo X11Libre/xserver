@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef QUERYST_H
 #define QUERYST_H 1
 
-#include <dix-config.h>
-
 int ProcXQueryDeviceState(ClientPtr     /* client */
     );
 

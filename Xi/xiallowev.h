@@ -25,8 +25,6 @@
 #ifndef XIALLOWEV_H
 #define XIALLOWEV_H 1
 
-#include <dix-config.h>
-
 int ProcXIAllowEvents(ClientPtr client);
 int SProcXIAllowEvents(ClientPtr client);
 

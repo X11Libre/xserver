@@ -36,6 +36,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
+#include "dix/rpcbuf_priv.h"
 
 #include "dix.h"
 #include "inputstr.h"
@@ -209,31 +210,6 @@ send_property_event(DeviceIntPtr dev, Atom property, int what)
 
     SendEventToAllWindows(dev, GetEventFilter(dev, (xEvent *) &xi2),
                           (xEvent *) &xi2, 1);
-}
-
-static int
-list_atoms(DeviceIntPtr dev, int *natoms, Atom **atoms_return)
-{
-    XIPropertyPtr prop;
-    Atom *atoms = NULL;
-    int nprops = 0;
-
-    for (prop = dev->properties.properties; prop; prop = prop->next)
-        nprops++;
-    if (nprops) {
-        Atom *a;
-
-        atoms = calloc(nprops, sizeof(Atom));
-        if (!atoms)
-            return BadAlloc;
-        a = atoms;
-        for (prop = dev->properties.properties; prop; prop = prop->next, a++)
-            *a = prop->propertyName;
-    }
-
-    *natoms = nprops;
-    *atoms_return = atoms;
-    return Success;
 }
 
 static int
@@ -843,22 +819,33 @@ XISetDevicePropertyDeletable(DeviceIntPtr dev, Atom property, Bool deletable)
     return Success;
 }
 
-int
-ProcXListDeviceProperties(ClientPtr client)
-{
-    Atom *atoms;
-    int natoms;
+/* rpcbuf->err_clear needs to be TRUE */
+static int _writeDevProps(x_rpcbuf_t *rpcbuf, XID devId,
+                          ClientPtr pClient, size_t *natoms) {
     DeviceIntPtr dev;
-    int rc = Success;
-
-    REQUEST(xListDevicePropertiesReq);
-    REQUEST_SIZE_MATCH(xListDevicePropertiesReq);
-
-    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixListPropAccess);
+    int rc = dixLookupDevice(&dev, devId, pClient, DixListPropAccess);
     if (rc != Success)
         return rc;
 
-    rc = list_atoms(dev, &natoms, &atoms);
+    size_t n = 0;
+    for (XIPropertyPtr p = dev->properties.properties; p; p = p->next) {
+        if (!x_rpcbuf_write_CARD32(rpcbuf, p->propertyName))
+            return BadAlloc;
+    }
+    *natoms = n;
+    return Success;
+}
+
+int
+ProcXListDeviceProperties(ClientPtr client)
+{
+    REQUEST(xListDevicePropertiesReq);
+    REQUEST_SIZE_MATCH(xListDevicePropertiesReq);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    size_t natoms = 0;
+    int rc = _writeDevProps(&rpcbuf, stuff->deviceid, client, &natoms);
     if (rc != Success)
         return rc;
 
@@ -876,12 +863,8 @@ ProcXListDeviceProperties(ClientPtr client)
         swaps(&rep.nAtoms);
     }
     WriteToClient(client, sizeof(xListDevicePropertiesReply), &rep);
-    if (natoms) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, natoms * sizeof(Atom), atoms);
-        free(atoms);
-    }
-    return rc;
+    WriteRpcbufToClient(client, &rpcbuf);
+    return Success;
 }
 
 int
@@ -986,22 +969,25 @@ ProcXGetDeviceProperty(ClientPtr client)
         swapl(&rep.bytesAfter);
         swapl(&rep.nItems);
     }
-    WriteToClient(client, sizeof(xGenericReply), &rep);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (length) {
-        switch (rep.format) {
+        switch (format) {
         case 32:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
+            x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)data, length / 4);
             break;
         case 16:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap16Write;
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)data, length / 2);
             break;
         default:
-            client->pSwapReplyFunc = (ReplySwapPtr) WriteToClient;
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)data, length);
             break;
         }
-        WriteSwappedDataToClient(client, length, data);
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     /* delete the Property */
     if (stuff->delete && (rep.bytesAfter == 0)) {
@@ -1016,6 +1002,9 @@ ProcXGetDeviceProperty(ClientPtr client)
             }
         }
     }
+
+    WriteToClient(client, sizeof(xGenericReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
@@ -1058,19 +1047,13 @@ SProcXGetDeviceProperty(ClientPtr client)
 int
 ProcXIListProperties(ClientPtr client)
 {
-    Atom *atoms;
-    int natoms;
-    DeviceIntPtr dev;
-    int rc = Success;
-
     REQUEST(xXIListPropertiesReq);
     REQUEST_SIZE_MATCH(xXIListPropertiesReq);
 
-    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixListPropAccess);
-    if (rc != Success)
-        return rc;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    rc = list_atoms(dev, &natoms, &atoms);
+    size_t natoms = 0;
+    int rc = _writeDevProps(&rpcbuf, stuff->deviceid, client, &natoms);
     if (rc != Success)
         return rc;
 
@@ -1087,13 +1070,10 @@ ProcXIListProperties(ClientPtr client)
         swapl(&rep.length);
         swaps(&rep.num_properties);
     }
+
     WriteToClient(client, sizeof(xXIListPropertiesReply), &rep);
-    if (natoms) {
-        client->pSwapReplyFunc = (ReplySwapPtr) Swap32Write;
-        WriteSwappedDataToClient(client, natoms * sizeof(Atom), atoms);
-        free(atoms);
-    }
-    return rc;
+    WriteRpcbufToClient(client, &rpcbuf);
+    return Success;
 }
 
 int
@@ -1198,22 +1178,28 @@ ProcXIGetProperty(ClientPtr client)
         swapl(&rep.bytes_after);
         swapl(&rep.num_items);
     }
-    WriteToClient(client, sizeof(xXIGetPropertyReply), &rep);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (length) {
-        switch (rep.format) {
+        switch (format) {
         case 32:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap32Write;
+            x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)data, length / 4);
             break;
         case 16:
-            client->pSwapReplyFunc = (ReplySwapPtr) CopySwap16Write;
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)data, length / 2);
             break;
         default:
-            client->pSwapReplyFunc = (ReplySwapPtr) WriteToClient;
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)data, length);
             break;
         }
-        WriteSwappedDataToClient(client, length, data);
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    WriteToClient(client, sizeof(xXIGetPropertyReply), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
 
     /* delete the Property */
     if (stuff->delete && (rep.bytes_after == 0)) {

@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef LISTDEV_H
 #define LISTDEV_H 1
 
-#include <dix-config.h>
-
 #define VPC	20              /* Max # valuators per chunk */
 
 int ProcXListInputDevices(ClientPtr     /* client */

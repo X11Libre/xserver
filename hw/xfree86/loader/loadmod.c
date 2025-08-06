@@ -457,27 +457,19 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
             vermaj = GET_ABI_MAJOR(ver);
             vermin = GET_ABI_MINOR(ver);
             if (abimaj != vermaj) {
-                MessageType errtype;
-                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
-                    errtype = X_WARNING;
-                else
-                    errtype = X_ERROR;
-                LogMessageVerb(errtype, 0, "%s: module ABI major version (%d) "
+                LogMessageVerb(LoaderIgnoreAbi ? X_WARNING : X_ERROR, 0,
+                               "%s: module ABI major version (%d) "
                                "doesn't match the server's version (%d)\n",
                                module, abimaj, vermaj);
-                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                if (!LoaderIgnoreAbi)
                     return FALSE;
             }
             else if (abimin > vermin) {
-                MessageType errtype;
-                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
-                    errtype = X_WARNING;
-                else
-                    errtype = X_ERROR;
-                LogMessageVerb(errtype, 0, "%s: module ABI minor version (%d) "
+                LogMessageVerb(LoaderIgnoreAbi ? X_WARNING : X_ERROR, 0,
+                               "%s: module ABI minor version (%d) "
                                "is newer than the server's version (%d)\n",
                                module, abimin, vermin);
-                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                if (!LoaderIgnoreAbi)
                     return FALSE;
             }
         }
@@ -672,6 +664,9 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
 
     LogMessageVerb(X_INFO, 3, "LoadModule: \"%s\"", module);
 
+    /* Ignore abi check for the nvidia proprietary DDX driver */
+    is_nvidia_proprietary = !memcmp(module, "nvidia", sizeof("nvidia"));
+
     patterns = InitPatterns(NULL);
     name = LoaderGetCanonicalName(module, patterns);
     noncanonical = (name && strcmp(module, name) != 0);
@@ -685,6 +680,12 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
     else {
         LogMessageVerb(X_NONE, 3, "\n");
         m = (char *) module;
+    }
+
+    if (is_nvidia_proprietary && !LoaderIgnoreAbi) {
+        /* warn every time this is hit */
+        LogMessage(X_WARNING, "LoadModule: Implicitly ignoring abi mismatch "
+                   "for the nvidia proprierary DDX driver\n");
     }
 
     /* Backward compatibility, vbe and int10 are merged into int10 now */

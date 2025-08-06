@@ -35,6 +35,9 @@
 #include <dixstruct.h>
 #include "privates.h"
 
+/* workaround for <windows.h> being included somewhere and conflicting with us */
+#undef CreateWindow
+
 #ifdef RANDR
 #include <randrstr.h>
 #endif

@@ -78,14 +78,13 @@ static void
 PrintPropertys(WindowPtr pWin)
 {
     PropertyPtr pProp;
-    int j;
 
     pProp = pWin->properties;
     while (pProp) {
         ErrorF("[dix] %x %x\n", pProp->propertyName, pProp->type);
         ErrorF("[dix] property format: %d\n", pProp->format);
         ErrorF("[dix] property data: \n");
-        for (j = 0; j < (pProp->format / 8) * pProp->size; j++)
+        for (int j = 0; j < (pProp->format / 8) * pProp->size; j++)
             ErrorF("[dix] %c\n", pProp->data[j]);
         pProp = pProp->next;
     }
@@ -660,7 +659,6 @@ ProcListProperties(ClientPtr client)
     Atom *pAtoms = NULL, *temppAtoms;
     int rc, numProps = 0;
     WindowPtr pWin;
-    PropertyPtr pProp, realProp;
 
     REQUEST(xResourceReq);
 
@@ -669,7 +667,7 @@ ProcListProperties(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    for (pProp = pWin->properties; pProp; pProp = pProp->next)
+    for (PropertyPtr pProp = pWin->properties; pProp; pProp = pProp->next)
         numProps++;
 
     if (numProps) {
@@ -679,7 +677,7 @@ ProcListProperties(ClientPtr client)
 
         numProps = 0;
         temppAtoms = pAtoms;
-        for (pProp = pWin->properties; pProp; pProp = pProp->next) {
+        for (PropertyPtr realProp, pProp = pWin->properties; pProp; pProp = pProp->next) {
             realProp = pProp;
             rc = XaceHookPropertyAccess(client, pWin, &realProp, DixGetAttrAccess);
             if (rc == Success && realProp == pProp) {

@@ -964,7 +964,7 @@ ProcShapeGetRectangles(ClientPtr client)
         return BadValue;
     }
 
-    struct x_rpcbuf rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!region) {
         xRectangle rect;

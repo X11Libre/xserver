@@ -58,6 +58,7 @@
 
 /* Support MIT-SHM Extension */
 #mesondefine MITSHM
+#mesondefine CONFIG_MITSHM
 
 /* Internal define for Xinerama */
 #mesondefine PANORAMIX

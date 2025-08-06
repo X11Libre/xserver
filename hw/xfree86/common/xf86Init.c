@@ -332,7 +332,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
         LoaderSetPath(xf86ModulePath);
 
         if (xf86Info.ignoreABI) {
-            LoaderSetOptions(LDR_OPT_ABI_MISMATCH_NONFATAL);
+            LoaderSetIgnoreAbi();
         }
 
         if (xf86DoShowOptions)
@@ -962,7 +962,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
     if (!strcmp(argv[i], "-ignoreABI")) {
-        LoaderSetOptions(LDR_OPT_ABI_MISMATCH_NONFATAL);
+        LoaderSetIgnoreAbi();
         return 1;
     }
     if (!strcmp(argv[i], "-verbose")) {
@@ -1324,13 +1324,6 @@ xf86GetBppFromDepth(ScrnInfoPtr pScrn, int depth)
     else
         return 0;
 }
-
-#ifdef DDXBEFORERESET
-void
-ddxBeforeReset(void)
-{
-}
-#endif
 
 #if INPUTTHREAD
 /** This function is called in Xserver/os/inputthread.c when starting

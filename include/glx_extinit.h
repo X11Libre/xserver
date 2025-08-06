@@ -29,8 +29,11 @@
 /* this is separate due to sdksyms pulling in extinit.h */
 /* XXX this comment no longer makes sense i think */
 #ifdef GLXEXT
+
 typedef struct __GLXprovider __GLXprovider;
 typedef struct __GLXscreen __GLXscreen;
+typedef struct __GLXconfig __GLXconfig;
+
 struct __GLXprovider {
     __GLXscreen *(*screenProbe) (ScreenPtr pScreen);
     const char *name;

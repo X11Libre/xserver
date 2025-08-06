@@ -333,9 +333,7 @@ ProcListExtensions(ClientPtr client)
     buffer = NULL;
 
     if (NumExtensions && extensions) {
-        int i;
-
-        for (i = 0; i < NumExtensions; i++) {
+        for (int i = 0; i < NumExtensions; i++) {
             /* call callbacks to find out whether to show extension */
             if (!ExtensionAvailable(client, extensions[i]))
                 continue;
@@ -347,7 +345,7 @@ ProcListExtensions(ClientPtr client)
         buffer = bufptr = calloc(1, total_length);
         if (!buffer)
             return BadAlloc;
-        for (i = 0; i < NumExtensions; i++) {
+        for (int i = 0; i < NumExtensions; i++) {
             int len;
 
             if (!ExtensionAvailable(client, extensions[i]))

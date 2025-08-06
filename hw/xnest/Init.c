@@ -166,14 +166,6 @@ OsVendorFatalError(const char *f, va_list args)
     return;
 }
 
-#if defined(DDXBEFORERESET)
-void
-ddxBeforeReset(void)
-{
-    return;
-}
-#endif
-
 #if INPUTTHREAD
 /** This function is called in Xserver/os/inputthread.c when starting
     the input thread. */

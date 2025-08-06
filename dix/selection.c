@@ -126,9 +126,7 @@ CallSelectionCallback(Selection * pSel, ClientPtr client,
 void
 DeleteWindowFromAnySelections(WindowPtr pWin)
 {
-    Selection *pSel;
-
-    for (pSel = CurrentSelections; pSel; pSel = pSel->next)
+    for (Selection *pSel = CurrentSelections; pSel; pSel = pSel->next)
         if (pSel->pWin == pWin) {
             CallSelectionCallback(pSel, NULL, SelectionWindowDestroy);
 
@@ -141,9 +139,7 @@ DeleteWindowFromAnySelections(WindowPtr pWin)
 void
 DeleteClientFromAnySelections(ClientPtr client)
 {
-    Selection *pSel;
-
-    for (pSel = CurrentSelections; pSel; pSel = pSel->next)
+    for (Selection *pSel = CurrentSelections; pSel; pSel = pSel->next)
         if (pSel->client == client) {
             CallSelectionCallback(pSel, NULL, SelectionClientClose);
 

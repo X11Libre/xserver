@@ -190,7 +190,6 @@ static const char *
 get_window_name(WindowPtr pWin)
 {
 #define WINDOW_NAME_BUF_LEN 512
-    PropertyPtr prop;
     static char buf[WINDOW_NAME_BUF_LEN];
     int len;
 
@@ -199,7 +198,7 @@ get_window_name(WindowPtr pWin)
     if (comp_screen && pWin == comp_screen->pOverlayWin)
         return overlay_win_name;
 
-    for (prop = pWin->properties; prop; prop = prop->next) {
+    for (PropertyPtr prop = pWin->properties; prop; prop = prop->next) {
         if (prop->propertyName == XA_WM_NAME && prop->type == XA_STRING &&
             prop->data) {
             len = min(prop->size, WINDOW_NAME_BUF_LEN - 1);
@@ -216,11 +215,10 @@ get_window_name(WindowPtr pWin)
 static void
 log_window_info(WindowPtr pWin, int depth)
 {
-    int i;
     const char *win_name, *visibility;
     BoxPtr rects;
 
-    for (i = 0; i < (depth << 2); i++)
+    for (int i = 0; i < (depth << 2); i++)
         ErrorF(" ");
 
     win_name = get_window_name(pWin);
@@ -258,7 +256,7 @@ log_window_info(WindowPtr pWin, int depth)
     if (RegionNotEmpty(&pWin->clipList)) {
         ErrorF(", clip list:");
         rects = RegionRects(&pWin->clipList);
-        for (i = 0; i < RegionNumRects(&pWin->clipList); i++)
+        for (int i = 0; i < RegionNumRects(&pWin->clipList); i++)
             ErrorF(" [(%d, %d) to (%d, %d)]",
                    rects[i].x1, rects[i].y1, rects[i].x2, rects[i].y2);
         ErrorF("; extents [(%d, %d) to (%d, %d)]",
@@ -302,7 +300,6 @@ grab_type_to_text(GrabPtr pGrab)
 static void
 log_grab_info(void *value, XID id, void *cdata)
 {
-    int i, j;
     GrabPtr pGrab = (GrabPtr)value;
 
     ErrorF("  grab 0x%lx (%s), type '%s' on window 0x%lx\n",
@@ -329,12 +326,12 @@ log_grab_info(void *value, XID id, void *cdata)
                (unsigned long) pGrab->eventMask);
     }
     else if (pGrab->grabtype == XI2) {
-        for (i = 0; i < xi2mask_num_masks(pGrab->xi2mask); i++) {
+        for (int i = 0; i < xi2mask_num_masks(pGrab->xi2mask); i++) {
             const unsigned char *mask;
             int print;
 
             print = 0;
-            for (j = 0; j < XI2MASKSIZE; j++) {
+            for (int j = 0; j < XI2MASKSIZE; j++) {
                 mask = xi2mask_get_one_mask(pGrab->xi2mask, i);
                 if (mask[j]) {
                     print = 1;
@@ -344,7 +341,7 @@ log_grab_info(void *value, XID id, void *cdata)
             if (!print)
                 continue;
             ErrorF("      xi2 event mask 0x");
-            for (j = 0; j < xi2mask_mask_size(pGrab->xi2mask); j++)
+            for (int j = 0; j < xi2mask_mask_size(pGrab->xi2mask); j++)
                 ErrorF("%x ", mask[j]);
             ErrorF("\n");
         }
@@ -359,7 +356,6 @@ log_grab_info(void *value, XID id, void *cdata)
 void
 PrintPassiveGrabs(void)
 {
-    int i;
     LocalClientCredRec *lcc;
     pid_t clientpid;
     const char *cmdname;
@@ -367,7 +363,7 @@ PrintPassiveGrabs(void)
 
     ErrorF("Printing all currently registered grabs\n");
 
-    for (i = 1; i < currentMaxClients; i++) {
+    for (int i = 1; i < currentMaxClients; i++) {
         if (!clients[i] || clients[i]->clientState != ClientStateRunning)
             continue;
 
@@ -397,11 +393,11 @@ PrintPassiveGrabs(void)
 void
 PrintWindowTree(void)
 {
-    int scrnum, depth;
+    int depth;
     ScreenPtr pScreen;
     WindowPtr pWin;
 
-    for (scrnum = 0; scrnum < screenInfo.numScreens; scrnum++) {
+    for (int scrnum = 0; scrnum < screenInfo.numScreens; scrnum++) {
         pScreen = screenInfo.screens[scrnum];
         ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", scrnum,
                (unsigned) pScreen->GetScreenPixmap(pScreen)->drawable.id);
@@ -509,7 +505,6 @@ MakeRootTile(WindowPtr pWin)
     unsigned char back[128];
     int len = BitmapBytePad(sizeof(long));
     unsigned char *from, *to;
-    int i, j;
 
     pWin->background.pixmap = (*pScreen->CreatePixmap) (pScreen, 4, 4,
                                                         pScreen->rootDepth, 0);
@@ -534,8 +529,8 @@ MakeRootTile(WindowPtr pWin)
     from = (screenInfo.bitmapBitOrder == LSBFirst) ? _back_lsb : _back_msb;
     to = back;
 
-    for (i = 4; i > 0; i--, from++)
-        for (j = len; j > 0; j--)
+    for (int i = 4; i > 0; i--, from++)
+        for (int j = len; j > 0; j--)
             *to++ = *from;
 
     (*pGC->ops->PutImage) ((DrawablePtr) pWin->background.pixmap, pGC, 1,
@@ -747,7 +742,6 @@ dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
     WindowPtr pWin;
     WindowPtr pHead;
     ScreenPtr pScreen;
-    int idepth, ivisual;
     Bool fOK;
     DepthPtr pDepth;
     PixmapFormatRec *format;
@@ -785,10 +779,10 @@ dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
     /* Find out if the depth and visual are acceptable for this Screen */
     if ((visual != ancwopt->visual) || (depth != pParent->drawable.depth)) {
         fOK = FALSE;
-        for (idepth = 0; idepth < pScreen->numDepths; idepth++) {
+        for (int idepth = 0; idepth < pScreen->numDepths; idepth++) {
             pDepth = (DepthPtr) &pScreen->allowedDepths[idepth];
             if ((depth == pDepth->depth) || (depth == 0)) {
-                for (ivisual = 0; ivisual < pDepth->numVids; ivisual++) {
+                for (int ivisual = 0; ivisual < pDepth->numVids; ivisual++) {
                     if (visual == pDepth->vids[ivisual]) {
                         fOK = TRUE;
                         break;
@@ -1141,7 +1135,6 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
     Pixmap pixID;
     CursorPtr pCursor, pOldCursor;
     Cursor cursorID;
-    WindowPtr pChild;
     Colormap cmap;
     ColormapPtr pCmap;
     xEvent xE;
@@ -1428,7 +1421,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                  * inheriting it
                  */
 
-                for (pChild = pWin->firstChild; pChild;
+                for (WindowPtr pChild = pWin->firstChild; pChild;
                      pChild = pChild->nextSib) {
                     if (!MakeWindowOptional(pChild)) {
                         error = BadAlloc;
@@ -1442,7 +1435,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                  * check on any children now matching the new colormap
                  */
 
-                for (pChild = pWin->firstChild; pChild;
+                for (WindowPtr pChild = pWin->firstChild; pChild;
                      pChild = pChild->nextSib) {
                     if (pChild->optional->colormap == cmap)
                         CheckWindowOptionalNeed(pChild);
@@ -1485,7 +1478,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                  * patch up child windows so they don't lose cursors.
                  */
 
-                for (pChild = pWin->firstChild; pChild;
+                for (WindowPtr pChild = pWin->firstChild; pChild;
                      pChild = pChild->nextSib) {
                     if (!pChild->optional && !pChild->cursorIsNone &&
                         !MakeWindowOptional(pChild)) {
@@ -1519,7 +1512,7 @@ ChangeWindowAttributes(WindowPtr pWin, Mask vmask, XID *vlist, ClientPtr client)
                      * check on any children now matching the new cursor
                      */
 
-                    for (pChild = pWin->firstChild; pChild;
+                    for (WindowPtr pChild = pWin->firstChild; pChild;
                          pChild = pChild->nextSib) {
                         if (pChild->optional &&
                             (pChild->optional->cursor == pCursor))
@@ -1833,10 +1826,10 @@ GravityTranslate(int x, int y, int oldx, int oldy,
 void
 ResizeChildrenWinSize(WindowPtr pWin, int dx, int dy, int dw, int dh)
 {
-    WindowPtr pSib, pChild;
+    WindowPtr pChild;
     Bool resized = (dw || dh);
 
-    for (pSib = pWin->firstChild; pSib; pSib = pSib->nextSib) {
+    for (WindowPtr pSib = pWin->firstChild; pSib; pSib = pSib->nextSib) {
         if (resized && (pSib->winGravity > NorthWestGravity)) {
             int cwsx, cwsy;
 
@@ -1978,11 +1971,10 @@ ShapeOverlap(WindowPtr pWin, BoxPtr pWinBox, WindowPtr pSib, BoxPtr pSibBox)
 static Bool
 AnyWindowOverlapsMe(WindowPtr pWin, WindowPtr pHead, BoxPtr box)
 {
-    WindowPtr pSib;
     BoxRec sboxrec;
     BoxPtr sbox;
 
-    for (pSib = pWin->prevSib; pSib != pHead; pSib = pSib->prevSib) {
+    for (WindowPtr pSib = pWin->prevSib; pSib != pHead; pSib = pSib->prevSib) {
         if (pSib->mapped) {
             sbox = WindowExtents(pSib, &sboxrec);
             if (BOXES_OVERLAP(sbox, box)
@@ -1996,11 +1988,10 @@ AnyWindowOverlapsMe(WindowPtr pWin, WindowPtr pHead, BoxPtr box)
 static Bool
 IOverlapAnyWindow(WindowPtr pWin, BoxPtr box)
 {
-    WindowPtr pSib;
     BoxRec sboxrec;
     BoxPtr sbox;
 
-    for (pSib = pWin->nextSib; pSib; pSib = pSib->nextSib) {
+    for (WindowPtr pSib = pWin->nextSib; pSib; pSib = pSib->nextSib) {
         if (pSib->mapped) {
             sbox = WindowExtents(pSib, &sboxrec);
             if (BOXES_OVERLAP(sbox, box)
@@ -2712,7 +2703,6 @@ MapWindow(WindowPtr pWin, ClientPtr client)
 void
 MapSubwindows(WindowPtr pParent, ClientPtr client)
 {
-    WindowPtr pWin;
     WindowPtr pFirstMapped = NullWindow;
     ScreenPtr pScreen;
     Mask parentRedirect;
@@ -2724,7 +2714,7 @@ MapSubwindows(WindowPtr pParent, ClientPtr client)
     parentRedirect = RedirectSend(pParent);
     parentNotify = SubSend(pParent);
     anyMarked = FALSE;
-    for (pWin = pParent->firstChild; pWin; pWin = pWin->nextSib) {
+    for (WindowPtr pWin = pParent->firstChild; pWin; pWin = pWin->nextSib) {
         if (!pWin->mapped) {
             if (parentRedirect && !pWin->overrideRedirect)
                 if (MaybeDeliverMapRequest(pWin, pParent, client))
@@ -2871,7 +2861,7 @@ UnmapWindow(WindowPtr pWin, Bool fromConfigure)
 void
 UnmapSubwindows(WindowPtr pWin)
 {
-    WindowPtr pChild, pHead;
+    WindowPtr pHead;
     Bool wasRealized = (Bool) pWin->realized;
     Bool wasViewable = (Bool) pWin->viewable;
     Bool anyMarked = FALSE;
@@ -2887,7 +2877,7 @@ UnmapSubwindows(WindowPtr pWin)
     if (wasViewable)
         pLayerWin = (*pScreen->GetLayerWindow) (pWin);
 
-    for (pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib) {
+    for (WindowPtr pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib) {
         if (pChild->mapped) {
             if (parentNotify || StrSend(pChild))
                 DeliverUnmapNotify(pChild, xFalse);
@@ -2933,9 +2923,8 @@ void
 HandleSaveSet(ClientPtr client)
 {
     WindowPtr pParent, pWin;
-    int j;
 
-    for (j = 0; j < client->numSaved; j++) {
+    for (int j = 0; j < client->numSaved; j++) {
         pWin = SaveSetWindow(client->saveSet[j]);
         if (SaveSetToRoot(client->saveSet[j]))
             pParent = pWin->drawable.pScreen->root;
@@ -3081,7 +3070,7 @@ SendVisibilityNotify(WindowPtr pWin)
 int
 dixSaveScreens(ClientPtr client, int on, int mode)
 {
-    int rc, i, what, type;
+    int rc, what, type;
     XID vlist[2];
 
     if (on == SCREEN_SAVER_FORCER) {
@@ -3098,13 +3087,13 @@ dixSaveScreens(ClientPtr client, int on, int mode)
             type = SCREEN_SAVER_CYCLE;
     }
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
+    for (int i = 0; i < screenInfo.numScreens; i++) {
         rc = XaceHookScreensaverAccess(client, screenInfo.screens[i],
                       DixShowAccess | DixHideAccess);
         if (rc != Success)
             return rc;
     }
-    for (i = 0; i < screenInfo.numScreens; i++) {
+    for (int i = 0; i < screenInfo.numScreens; i++) {
         ScreenPtr pScreen = screenInfo.screens[i];
 
         if (on == SCREEN_SAVER_FORCER)
@@ -3193,7 +3182,6 @@ SaveScreens(int on, int mode)
 static Bool
 TileScreenSaver(ScreenPtr pScreen, int kind)
 {
-    int j;
     int result;
     XID attributes[3];
     Mask mask;
@@ -3244,7 +3232,7 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
         cursor = 0;
     }
     else {
-        for (j = 0; j < BitmapBytePad(32) * 16; j++)
+        for (int j = 0; j < BitmapBytePad(32) * 16; j++)
             srcbits[j] = mskbits[j] = 0x0;
         result = AllocARGBCursor(srcbits, mskbits, NULL, &cm, 0, 0, 0, 0, 0, 0,
                                  &cursor, serverClient, (XID) 0);
@@ -3428,7 +3416,6 @@ ChangeWindowDeviceCursor(WindowPtr pWin, DeviceIntPtr pDev, CursorPtr pCursor)
     DevCursNodePtr pNode, pPrev;
     CursorPtr pOldCursor = NULL;
     ScreenPtr pScreen;
-    WindowPtr pChild;
 
     if (!MakeWindowOptional(pWin))
         return BadAlloc;
@@ -3491,7 +3478,7 @@ ChangeWindowDeviceCursor(WindowPtr pWin, DeviceIntPtr pDev, CursorPtr pCursor)
 
     pNode = pPrev = NULL;
     /* fix up children */
-    for (pChild = pWin->firstChild; pChild; pChild = pChild->nextSib) {
+    for (WindowPtr pChild = pWin->firstChild; pChild; pChild = pChild->nextSib) {
         if (WindowSeekDeviceCursor(pChild, pDev, &pNode, &pPrev)) {
             if (pNode->cursor == None) {        /* inherited from parent */
                 pNode->cursor = RefCursor(pOldCursor);
@@ -3616,7 +3603,6 @@ void
 SetRootClip(ScreenPtr pScreen, int enable)
 {
     WindowPtr pWin = pScreen->root;
-    WindowPtr pChild;
     Bool WasViewable;
     Bool anyMarked = FALSE;
     WindowPtr pLayerWin;
@@ -3627,7 +3613,7 @@ SetRootClip(ScreenPtr pScreen, int enable)
         return;
     WasViewable = (Bool) (pWin->viewable);
     if (WasViewable && mode != ROOT_CLIP_INPUT_ONLY) {
-        for (pChild = pWin->firstChild; pChild; pChild = pChild->nextSib) {
+        for (WindowPtr pChild = pWin->firstChild; pChild; pChild = pChild->nextSib) {
             (void) (*pScreen->MarkOverlappedWindows) (pChild,
                                                       pChild, &pLayerWin);
         }
@@ -3708,9 +3694,8 @@ WindowGetVisual(WindowPtr pWin)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     VisualID vid = wVisual(pWin);
-    int i;
 
-    for (i = 0; i < pScreen->numVisuals; i++)
+    for (int i = 0; i < pScreen->numVisuals; i++)
         if (pScreen->visuals[i].vid == vid)
             return &pScreen->visuals[i];
     return 0;

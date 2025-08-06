@@ -60,6 +60,7 @@ SOFTWARE.
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 #endif
+#include <stdbool.h>
 #include <stdio.h>
 #include "os/Xtrans.h"
 #include <X11/Xmd.h>
@@ -630,7 +631,7 @@ FlushAllOutput(void)
             continue;
         if (!client_is_ready(client)) {
             oc = (OsCommPtr) client->osPrivate;
-            (void) FlushClient(client, oc, (char *) NULL, 0);
+            (void) FlushClient(client, oc);
         } else
             NewOutputPending = TRUE;
     }
@@ -667,6 +668,47 @@ AbortClient(ClientPtr client)
         CloseDownFileDescriptor(oc);
         mark_client_ready(client);
     }
+}
+
+/*
+ * try to make room in the output buffer:
+ * if not enough room, try to flush first.
+ * if that's not giving enough room, increase the buffer size
+ */
+static bool OutputBufferMakeRoom(ClientPtr who, OsCommPtr oc, size_t sz)
+{
+    const size_t padsize = padding_for_int32(sz);
+    const size_t needed = sz + padsize;
+
+    ConnectionOutputPtr oco = oc->output;
+
+    /* check whether it already fits into buffer */
+    if (oco->count + needed <= oco->size)
+        return true;
+
+    /* try flushing the buffer */
+    int ret = FlushClient(who, oc);
+    if (ret == -1) /* client was aborted */
+        return false;
+
+    /* does it fit this time ? */
+    if (oco->count + needed <= oco->size)
+        return true;
+
+    /* try to resize the buffer */
+    const int newsize = oco->count + (((needed / BUFSIZE)+1)*BUFSIZE);
+
+    void *newbuf = realloc(oco->buf, newsize);
+    if (!newbuf) {
+        AbortClient(who);
+        dixMarkClientException(who);
+        oco->count = 0;
+        return FALSE;
+    }
+
+    oco->buf = newbuf;
+    oco->size = newsize;
+    return true;
 }
 
 /*****************
@@ -799,9 +841,11 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
             CriticalOutputPending = FALSE;
             NewOutputPending = FALSE;
         }
-
-        return FlushClient(who, oc, buf, count);
     }
+
+    /* if we fail to make room, the client will be aborted */
+    if (!OutputBufferMakeRoom(who, oc, count))
+        return -1;
 
     NewOutputPending = TRUE;
     output_pending_mark(who);
@@ -825,69 +869,38 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
  **********************/
 
 int
-FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
+FlushClient(ClientPtr who, OsCommPtr oc)
 {
     ConnectionOutputPtr oco = oc->output;
     XtransConnInfo trans_conn = oc->trans_conn;
-    struct iovec iov[3];
-    static char padBuffer[3];
-    const char *extraBuf = __extraBuf;
-    long written;
-    long padsize;
-    long notWritten;
-    long todo;
 
+    /* if no output buffer, then nothing to do */
     if (!oco)
 	return 0;
-    written = 0;
-    padsize = padding_for_int32(extraCount);
-    notWritten = oco->count + extraCount + padsize;
+
+    if (!trans_conn) {
+        /* uh, transport not connected ? can only kill the client :( */
+        AbortClient(who);
+        dixMarkClientException(who);
+        oco->count = 0;
+        return -1;
+    }
+
+    size_t written = 0;
+    size_t notWritten = oco->count;
+
+    /* do nothing if we haven't anything to write */
     if (!notWritten)
         return 0;
 
     if (FlushCallback)
         CallCallbacks(&FlushCallback, who);
 
-    todo = notWritten;
+    size_t todo = notWritten; /* trying to write that much this time */
     while (notWritten) {
-        long before = written;  /* amount of whole thing written */
-        long remain = todo;     /* amount to try this time, <= notWritten */
-        int i = 0;
-        long len;
-
-        /* You could be very general here and have "in" and "out" iovecs
-         * and write a loop without using a macro, but what the heck.  This
-         * translates to:
-         *
-         *     how much of this piece is new?
-         *     if more new then we are trying this time, clamp
-         *     if nothing new
-         *         then bump down amount already written, for next piece
-         *         else put new stuff in iovec, will need all of next piece
-         *
-         * Note that todo had better be at least 1 or else we'll end up
-         * writing 0 iovecs.
-         */
-#define InsertIOV(pointer, length) \
-	len = (length) - before; \
-	if (len > remain) \
-	    len = remain; \
-	if (len <= 0) { \
-	    before = (-len); \
-	} else { \
-	    iov[i].iov_len = len; \
-	    iov[i].iov_base = (pointer) + before;	\
-	    i++; \
-	    remain -= len; \
-	    before = 0; \
-	}
-
-        InsertIOV((char *) oco->buf, oco->count)
-            InsertIOV((char *) extraBuf, extraCount)
-            InsertIOV(padBuffer, padsize)
-
-            errno = 0;
-        if (trans_conn && (len = _XSERVTransWritev(trans_conn, iov, i)) >= 0) {
+        errno = 0;
+        size_t len = _XSERVTransWrite(trans_conn, (const char*)oco->buf + written, todo);
+        if (len >= 0) {
             written += len;
             notWritten -= len;
             todo = notWritten;
@@ -915,36 +928,14 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
                 oco->count = 0;
             }
 
-            if (notWritten > oco->size) {
-                unsigned char *obuf = NULL;
-
-                if (notWritten + BUFSIZE <= INT_MAX) {
-                    obuf = realloc(oco->buf, notWritten + BUFSIZE);
-                }
-                if (!obuf) {
-                    AbortClient(who);
-                    dixMarkClientException(who);
-                    oco->count = 0;
-                    return -1;
-                }
-                oco->size = notWritten + BUFSIZE;
-                oco->buf = obuf;
-            }
-
-            /* If the amount written extended into the padBuffer, then the
-               difference "extraCount - written" may be less than 0 */
-            if ((len = extraCount - written) > 0)
-                memmove((char *) oco->buf + oco->count,
-                        extraBuf + written, len);
-
-            oco->count = notWritten;    /* this will include the pad */
             ospoll_listen(server_poll, oc->fd, X_NOTIFY_WRITE);
 
             /* return only the amount explicitly requested */
-            return extraCount;
+            return 0;
         }
 #ifdef EMSGSIZE                 /* check for another brain-damaged OS bug */
         else if (errno == EMSGSIZE) {
+            /* making separate try with half of the size */
             todo >>= 1;
         }
 #endif
@@ -969,7 +960,7 @@ FlushClient(ClientPtr who, OsCommPtr oc, const void *__extraBuf, int extraCount)
         FreeOutputs = oco;
     }
     oc->output = (ConnectionOutputPtr) NULL;
-    return extraCount;          /* return only the amount explicitly requested */
+    return 0;          /* return only the amount explicitly requested */
 }
 
 static ConnectionInputPtr

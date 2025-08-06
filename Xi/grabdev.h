@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GRABDEV_H
 #define GRABDEV_H 1
 
-#include <dix-config.h>
-
 int SProcXGrabDevice(ClientPtr  /* client */
     );
 
