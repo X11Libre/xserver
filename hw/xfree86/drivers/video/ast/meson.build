@@ -29,7 +29,7 @@ symbol_test_args = []
 symbol_test_args += join_paths(xorg_build_root, 'libxorgserver.so')
 symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libshadow.so')
 symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libglx.so')
-symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video-ast', 'ast_drv.so')
+symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video', 'ast', 'ast_drv.so')
 
 test('video-ast symbol test',
     xorg_symbol_test,
