@@ -364,6 +364,8 @@ void
 
 KdPointerInfo *KdParsePointer(const char *arg);
 
+KdKeyboardInfo *KdParseKeyboard(const char *arg);
+
 const char *
 KdParseFindNext(const char *cur, const char *delim, char *save, char *last);
 

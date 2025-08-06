@@ -930,8 +930,7 @@ KdParseKbdOptions(KdKeyboardInfo * ki)
     }
 }
 
-static KdKeyboardInfo *
-KdParseKeyboard(const char *arg)
+KdKeyboardInfo *KdParseKeyboard(const char *arg)
 {
     char save[1024];
     char delim;
