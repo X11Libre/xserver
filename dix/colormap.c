@@ -245,8 +245,9 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
     int class, size;
     unsigned long sizebytes;
     ColormapPtr pmap;
-    int access;
-    Pixel *ppix;
+    EntryPtr pent;
+    int i;
+    Pixel *ppix, **pptr;
 
     if (!pClient)
         return BadMatch;
@@ -298,13 +299,13 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
     pmap->freeRed = size;
     memset((char *) pmap->red, 0, (int) sizebytes);
     memset((char *) pmap->numPixelsRed, 0, LimitClients * sizeof(int));
-    for (Pixel **pptr = &pmap->clientPixelsRed[LimitClients];
+    for (pptr = &pmap->clientPixelsRed[LimitClients];
          --pptr >= pmap->clientPixelsRed;)
         *pptr = (Pixel *) NULL;
     if (alloc == AllocAll) {
         if (class & DynamicClass)
             pmap->flags |= CM_AllAllocated;
-        for (EntryPtr pent = &pmap->red[size - 1]; pent >= pmap->red; pent--)
+        for (pent = &pmap->red[size - 1]; pent >= pmap->red; pent--)
             pent->refcnt = AllocPrivate;
         pmap->freeRed = 0;
         ppix = calloc(size, sizeof(Pixel));
@@ -313,7 +314,7 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
             return BadAlloc;
         }
         pmap->clientPixelsRed[clientIndex] = ppix;
-        for (int i = 0; i < size; i++)
+        for (i = 0; i < size; i++)
             ppix[i] = i;
         pmap->numPixelsRed[clientIndex] = size;
     }
@@ -345,7 +346,7 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
         /* If every cell is allocated, mark its refcnt */
         if (alloc == AllocAll) {
             size = pmap->freeGreen;
-            for (EntryPtr pent = &pmap->green[size - 1]; pent >= pmap->green; pent--)
+            for (pent = &pmap->green[size - 1]; pent >= pmap->green; pent--)
                 pent->refcnt = AllocPrivate;
             pmap->freeGreen = 0;
             ppix = calloc(size, sizeof(Pixel));
@@ -355,12 +356,12 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
                 return BadAlloc;
             }
             pmap->clientPixelsGreen[clientIndex] = ppix;
-            for (int i = 0; i < size; i++)
+            for (i = 0; i < size; i++)
                 ppix[i] = i;
             pmap->numPixelsGreen[clientIndex] = size;
 
             size = pmap->freeBlue;
-            for (EntryPtr pent = &pmap->blue[size - 1]; pent >= pmap->blue; pent--)
+            for (pent = &pmap->blue[size - 1]; pent >= pmap->blue; pent--)
                 pent->refcnt = AllocPrivate;
             pmap->freeBlue = 0;
             ppix = calloc(size, sizeof(Pixel));
@@ -371,7 +372,7 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
                 return BadAlloc;
             }
             pmap->clientPixelsBlue[clientIndex] = ppix;
-            for (int i = 0; i < size; i++)
+            for (i = 0; i < size; i++)
                 ppix[i] = i;
             pmap->numPixelsBlue[clientIndex] = size;
         }
@@ -384,11 +385,11 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
     /*
      * Security creation/labeling check
      */
-    access = XaceHookResourceAccess(pClient, mid, X11_RESTYPE_COLORMAP,
+    i = XaceHookResourceAccess(pClient, mid, X11_RESTYPE_COLORMAP,
                  pmap, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (access != Success) {
+    if (i != Success) {
         FreeResource(mid, X11_RESTYPE_NONE);
-        return access;
+        return i;
     }
 
     /* If the device wants a chance to initialize the colormap in any way,
@@ -410,6 +411,8 @@ dixCreateColormap(Colormap mid, ScreenPtr pScreen, VisualPtr pVisual,
 int
 FreeColormap(void *value, XID mid)
 {
+    int i;
+    EntryPtr pent;
     ColormapPtr pmap = (ColormapPtr) value;
 
     if (!dixResouceIsServerOwned(mid)) {
@@ -422,12 +425,12 @@ FreeColormap(void *value, XID mid)
     (*pmap->pScreen->DestroyColormap) (pmap);
 
     if (pmap->clientPixelsRed) {
-        for (int i = 0; i < LimitClients; i++)
+        for (i = 0; i < LimitClients; i++)
             free(pmap->clientPixelsRed[i]);
     }
 
     if ((pmap->class == PseudoColor) || (pmap->class == GrayScale)) {
-        for (EntryPtr pent = &pmap->red[pmap->pVisual->ColormapEntries - 1];
+        for (pent = &pmap->red[pmap->pVisual->ColormapEntries - 1];
              pent >= pmap->red; pent--) {
             if (pent->fShared) {
                 if (--pent->co.shco.red->refcnt == 0)
@@ -440,7 +443,7 @@ FreeColormap(void *value, XID mid)
         }
     }
     if ((pmap->class | DynamicClass) == DirectColor) {
-        for (int i = 0; i < LimitClients; i++) {
+        for (i = 0; i < LimitClients; i++) {
             free(pmap->clientPixelsGreen[i]);
             free(pmap->clientPixelsBlue[i]);
         }
@@ -580,7 +583,7 @@ CopyColormapAndFree(Colormap mid, ColormapPtr pSrc, int client)
 static void
 CopyFree(int channel, int client, ColormapPtr pmapSrc, ColormapPtr pmapDst)
 {
-    int npix;
+    int z, npix;
     EntryPtr pentSrcFirst, pentDstFirst;
     EntryPtr pentSrc, pentDst;
     Pixel *ppix;
@@ -609,7 +612,7 @@ CopyFree(int channel, int client, ColormapPtr pmapSrc, ColormapPtr pmapDst)
     }
     nalloc = 0;
     if (pmapSrc->class & DynamicClass) {
-        for (int z = npix; --z >= 0; ppix++) {
+        for (z = npix; --z >= 0; ppix++) {
             /* Copy entries */
             pentSrc = pentSrcFirst + *ppix;
             pentDst = pentDstFirst + *ppix;
@@ -705,8 +708,9 @@ doUpdateColors(ColormapPtr pmap)
 {
     xColorItem *defs;
     xColorItem *pdef;
+    EntryPtr pent;
     VisualPtr pVisual;
-    int n, size;
+    int i, n, size;
 
     pVisual = pmap->pVisual;
     size = pVisual->ColormapEntries;
@@ -716,7 +720,7 @@ doUpdateColors(ColormapPtr pmap)
     n = 0;
     pdef = defs;
     if (pmap->class == DirectColor) {
-        for (int i = 0; i < size; i++) {
+        for (i = 0; i < size; i++) {
             if (!pmap->red[i].refcnt &&
                 !pmap->green[i].refcnt && !pmap->blue[i].refcnt)
                 continue;
@@ -732,8 +736,7 @@ doUpdateColors(ColormapPtr pmap)
         }
     }
     else {
-        int i = 0;
-        for (EntryPtr pent = pmap->red; i < size; i++, pent++) {
+        for (i = 0, pent = pmap->red; i < size; i++, pent++) {
             if (!pent->refcnt)
                 continue;
             pdef->pixel = i;
@@ -1429,14 +1432,15 @@ QueryColors(ColormapPtr pmap, int count, Pixel * ppixIn, xrgb * prgbList,
 static void
 FreePixels(ColormapPtr pmap, int client)
 {
-    Pixel *ppixStart;
+    Pixel *ppix, *ppixStart;
+    int n;
     int class;
 
     class = pmap->class;
     ppixStart = pmap->clientPixelsRed[client];
     if (class & DynamicClass) {
-        int n = pmap->numPixelsRed[client];
-        for (Pixel *ppix = ppixStart; --n >= 0;) {
+        n = pmap->numPixelsRed[client];
+        for (ppix = ppixStart; --n >= 0;) {
             FreeCell(pmap, *ppix, REDMAP);
             ppix++;
         }
@@ -1447,21 +1451,17 @@ FreePixels(ColormapPtr pmap, int client)
     pmap->numPixelsRed[client] = 0;
     if ((class | DynamicClass) == DirectColor) {
         ppixStart = pmap->clientPixelsGreen[client];
-        if (class & DynamicClass) {
-            int n = pmap->numPixelsGreen[client];
-            for (Pixel *ppix = ppixStart; --n >= 0;)
+        if (class & DynamicClass)
+            for (ppix = ppixStart, n = pmap->numPixelsGreen[client]; --n >= 0;)
                 FreeCell(pmap, *ppix++, GREENMAP);
-        }
         free(ppixStart);
         pmap->clientPixelsGreen[client] = (Pixel *) NULL;
         pmap->numPixelsGreen[client] = 0;
 
         ppixStart = pmap->clientPixelsBlue[client];
-        if (class & DynamicClass) {
-            int n = pmap->numPixelsBlue[client];
-            for (Pixel* ppix = ppixStart; --n >= 0;)
+        if (class & DynamicClass)
+            for (ppix = ppixStart, n = pmap->numPixelsBlue[client]; --n >= 0;)
                 FreeCell(pmap, *ppix++, BLUEMAP);
-        }
         free(ppixStart);
         pmap->clientPixelsBlue[client] = (Pixel *) NULL;
         pmap->numPixelsBlue[client] = 0;
@@ -1493,8 +1493,8 @@ int
 AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
                 Bool contig, Pixel * ppix, Pixel * masks)
 {
-    Pixel rmask, gmask, bmask, *ppixFirst;
-    int class;
+    Pixel rmask, gmask, bmask, *ppixFirst, r, g, b;
+    int n, class;
     int ok;
     int oldcount;
     const int client = pClient->index;
@@ -1516,7 +1516,7 @@ AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
         ok = AllocDirect(client, pmap, colors, planes, planes, planes,
                          contig, ppix, &rmask, &gmask, &bmask);
         if (ok == Success) {
-            for (int r = 1, g = 1, b = 1, n = planes; --n >= 0; r += r, g += g, b += b) {
+            for (r = g = b = 1, n = planes; --n >= 0; r += r, g += g, b += b) {
                 while (!(rmask & r))
                     r += r;
                 while (!(gmask & g))
@@ -1531,7 +1531,7 @@ AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
         ok = AllocPseudo(client, pmap, colors, planes, contig, ppix, &rmask,
                          &ppixFirst);
         if (ok == Success) {
-            for (int r = 1, n = planes; --n >= 0; r += r) {
+            for (r = 1, n = planes; --n >= 0; r += r) {
                 while (!(rmask & r))
                     r += r;
                 *masks++ = r;
@@ -1562,6 +1562,7 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
     int ok;
     Pixel mask, *ppixFirst;
     Pixel shift;
+    int i;
     int class;
     int oldcount;
     colorResource *pcr = (colorResource *) NULL;
@@ -1595,17 +1596,17 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
             /* now split that mask into three */
             *prmask = *pgmask = *pbmask = 0;
             shift = 1;
-            for (int i = r; --i >= 0; shift += shift) {
+            for (i = r; --i >= 0; shift += shift) {
                 while (!(mask & shift))
                     shift += shift;
                 *prmask |= shift;
             }
-            for (int i = g; --i >= 0; shift += shift) {
+            for (i = g; --i >= 0; shift += shift) {
                 while (!(mask & shift))
                     shift += shift;
                 *pgmask |= shift;
             }
-            for (int i = b; --i >= 0; shift += shift) {
+            for (i = b; --i >= 0; shift += shift) {
                 while (!(mask & shift))
                     shift += shift;
                 *pbmask |= shift;
@@ -1641,10 +1642,8 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
             Pixel * pbmask)
 {
     Pixel *ppixRed, *ppixGreen, *ppixBlue;
-    Pixel *ppix;
-    Pixel *p;       // loop iterator for pixel arrays
-    Pixel *pDst;    // pointer into the destination 'pixels' array
-    int npixR, npixG, npixB;
+    Pixel *ppix, *pDst, *p;
+    int npix, npixR, npixG, npixB;
     Bool okR, okG, okB;
     Pixel *rpix = 0, *gpix = 0, *bpix = 0;
 
@@ -1693,21 +1692,15 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     }
 
     if (!okR || !okG || !okB || !rpix || !gpix || !bpix) {
-        if (okR) {
-            ppix = ppixRed;
-            for (int npix = npixR; --npix >= 0; ppix++)
+        if (okR)
+            for (ppix = ppixRed, npix = npixR; --npix >= 0; ppix++)
                 pmap->red[*ppix].refcnt = 0;
-        }
-        if (okG) {
-            ppix = ppixGreen;
-            for (int npix = npixG; --npix >= 0; ppix++)
+        if (okG)
+            for (ppix = ppixGreen, npix = npixG; --npix >= 0; ppix++)
                 pmap->green[*ppix].refcnt = 0;
-        }
-        if (okB) {
-            ppix = ppixBlue;
-            for (int npix = npixB; --npix >= 0; ppix++)
+        if (okB)
+            for (ppix = ppixBlue, npix = npixB; --npix >= 0; ppix++)
                 pmap->blue[*ppix].refcnt = 0;
-        }
         free(ppixBlue);
         free(ppixGreen);
         free(ppixRed);
@@ -1719,7 +1712,6 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     *pbmask <<= pmap->pVisual->offsetBlue;
 
     ppix = rpix + pmap->numPixelsRed[client];
-    memcpy(ppix, ppixRed, npixR * sizeof(Pixel));
     for (pDst = pixels, p = ppixRed; p >= ppixRed && (size_t)(p - ppixRed) < npixR; p++) {
         if ((size_t)(p - ppixRed) < c)
             *pDst++ |= *p << pmap->pVisual->offsetRed;
@@ -1728,7 +1720,6 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     pmap->freeRed -= npixR;
 
     ppix = gpix + pmap->numPixelsGreen[client];
-    memcpy(ppix, ppixGreen, npixG * sizeof(Pixel));
     for (pDst = pixels, p = ppixGreen; (size_t)(p - ppixGreen) < npixG; p++) {
         *ppix++ = *p;
         if ((size_t)(p - ppixGreen) < c)
@@ -1738,7 +1729,6 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     pmap->freeGreen -= npixG;
 
     ppix = bpix + pmap->numPixelsBlue[client];
-    memcpy(ppix, ppixBlue, npixB * sizeof(Pixel));
     for (pDst = pixels, p = ppixBlue; (size_t)(p - ppixBlue) < npixB; p++) {
         *ppix++ = *p;
         if ((size_t)(p - ppixBlue) < c)
@@ -1761,7 +1751,7 @@ static int
 AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
             Pixel * pixels, Pixel * pmask, Pixel ** pppixFirst)
 {
-    Pixel *ppix, *pDst, *ppixTemp;
+    Pixel *ppix, *p, *pDst, *ppixTemp;
     int npix;
     Bool ok;
 
@@ -1973,8 +1963,8 @@ static Bool
 AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
             Pixel rmask, Pixel gmask, Pixel bmask, Pixel * ppixFirst)
 {
-    Pixel *pptr;
-    int npix,  npixClientNew, npixShared;
+    Pixel *pptr, *cptr;
+    int npix, z, npixClientNew, npixShared;
     Pixel basemask, base, bits, common;
     SHAREDCOLOR *pshared, **ppshared, **psharedList;
 
@@ -1984,7 +1974,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
     if (!psharedList)
         return FALSE;
     ppshared = psharedList;
-    for (int z = npixShared; --z >= 0;) {
+    for (z = npixShared; --z >= 0;) {
         if (!(ppshared[z] = calloc(1, sizeof(SHAREDCOLOR)))) {
             for (z++; z < npixShared; z++)
                 free(ppshared[z]);
@@ -2001,8 +1991,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
             while (1) {
                 pshared = *ppshared++;
                 pshared->refcnt = 1 << (g + b);
-                int z = npixClientNew;
-                for (Pixel *cptr = ppixFirst; --z >= 0; cptr++) {
+                for (cptr = ppixFirst, z = npixClientNew; --z >= 0; cptr++) {
                     if ((*cptr & basemask) == (common | bits)) {
                         pmap->red[*cptr].fShared = TRUE;
                         pmap->red[*cptr].co.shco.red = pshared;
@@ -2014,8 +2003,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
         else {
             pshared = *ppshared++;
             pshared->refcnt = 1 << (g + b);
-            int z = npixClientNew;
-            for (Pixel *cptr = ppixFirst; --z >= 0; cptr++) {
+            for (cptr = ppixFirst, z = npixClientNew; --z >= 0; cptr++) {
                 if ((*cptr & basemask) == common) {
                     pmap->red[*cptr].fShared = TRUE;
                     pmap->red[*cptr].co.shco.red = pshared;
@@ -2030,8 +2018,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
             while (1) {
                 pshared = *ppshared++;
                 pshared->refcnt = 1 << (r + b);
-                int z = npixClientNew;
-                for (Pixel *cptr = ppixFirst; --z >= 0; cptr++) {
+                for (cptr = ppixFirst, z = npixClientNew; --z >= 0; cptr++) {
                     if ((*cptr & basemask) == (common | bits)) {
                         pmap->red[*cptr].co.shco.green = pshared;
                     }
@@ -2042,8 +2029,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
         else {
             pshared = *ppshared++;
             pshared->refcnt = 1 << (g + b);
-            int z = npixClientNew;
-            for (Pixel* cptr = ppixFirst; --z >= 0; cptr++) {
+            for (cptr = ppixFirst, z = npixClientNew; --z >= 0; cptr++) {
                 if ((*cptr & basemask) == common) {
                     pmap->red[*cptr].co.shco.green = pshared;
                 }
@@ -2057,8 +2043,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
             while (1) {
                 pshared = *ppshared++;
                 pshared->refcnt = 1 << (r + g);
-                int z = npixClientNew;
-                for (Pixel* cptr = ppixFirst; --z >= 0; cptr++) {
+                for (cptr = ppixFirst, z = npixClientNew; --z >= 0; cptr++) {
                     if ((*cptr & basemask) == (common | bits)) {
                         pmap->red[*cptr].co.shco.blue = pshared;
                     }
@@ -2069,8 +2054,7 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
         else {
             pshared = *ppshared++;
             pshared->refcnt = 1 << (g + b);
-            int z = npixClientNew;
-            for (Pixel* cptr = ppixFirst; --z >= 0; cptr++) {
+            for (cptr = ppixFirst, z = npixClientNew; --z >= 0; cptr++) {
                 if ((*cptr & basemask) == common) {
                     pmap->red[*cptr].co.shco.blue = pshared;
                 }
@@ -2139,7 +2123,7 @@ FreeCo(ColormapPtr pmap, int client, int color, int npixIn, Pixel * ppixIn,
     int npixClient, npixNew, npix;
     Pixel bits, base, cmask, rgbbad;
     Pixel *pptr, *cptr;
-    int zapped;
+    int n, zapped;
     int errVal = Success;
     int offset, numents;
 
@@ -2188,8 +2172,7 @@ FreeCo(ColormapPtr pmap, int client, int color, int npixIn, Pixel * ppixIn,
     /* zap all pixels which match */
     while (1) {
         /* go through pixel list */
-        pptr = ppixIn;
-        for (int n = npixIn; --n >= 0; pptr++) {
+        for (pptr = ppixIn, n = npixIn; --n >= 0; pptr++) {
             pixTest = ((*pptr | bits) & cmask) >> offset;
             if ((pixTest >= numents) || (*pptr & rgbbad)) {
                 clients[client]->errorValue = *pptr | bits;
@@ -2265,10 +2248,11 @@ int
 StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
 {
     Pixel pix;
+    xColorItem *pdef;
     EntryPtr pent, pentT, pentLast;
     VisualPtr pVisual;
     SHAREDCOLOR *pred, *pgreen, *pblue;
-    int ChgRed, ChgGreen, ChgBlue, idef;
+    int n, ChgRed, ChgGreen, ChgBlue, idef;
     int class, errVal = Success;
     int ok;
 
@@ -2287,8 +2271,7 @@ StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
         numgreen = NUMGREEN(pVisual);
         numblue = NUMBLUE(pVisual);
         rgbbad = ~RGBMASK(pVisual);
-        int n = 0;
-        for (xColorItem *pdef = defs; n < count; pdef++, n++) {
+        for (pdef = defs, n = 0; n < count; pdef++, n++) {
             ok = TRUE;
             (*pmap->pScreen->ResolveColor)
                 (&pdef->red, &pdef->green, &pdef->blue, pmap->pVisual);
@@ -2359,8 +2342,7 @@ StoreColors(ColormapPtr pmap, int count, xColorItem * defs, ClientPtr client)
         }
     }
     else {
-        int n = 0;
-        for (xColorItem *pdef = defs; n < count; pdef++, n++) {
+        for (pdef = defs, n = 0; n < count; pdef++, n++) {
 
             ok = TRUE;
             if (pdef->pixel >= pVisual->ColormapEntries) {
@@ -2495,7 +2477,7 @@ int
 IsMapInstalled(Colormap map, WindowPtr pWin)
 {
     Colormap *pmaps;
-    int nummaps, found;
+    int imap, nummaps, found;
 
     pmaps = calloc(pWin->drawable.pScreen->maxInstalledCmaps,
                    sizeof(Colormap));
@@ -2504,7 +2486,7 @@ IsMapInstalled(Colormap map, WindowPtr pWin)
     nummaps = (*pWin->drawable.pScreen->ListInstalledColormaps)
         (pWin->drawable.pScreen, pmaps);
     found = FALSE;
-    for (int imap = 0; imap < nummaps; imap++) {
+    for (imap = 0; imap < nummaps; imap++) {
         if (pmaps[imap] == map) {
             found = TRUE;
             break;
@@ -2544,7 +2526,7 @@ ResizeVisualArray(ScreenPtr pScreen, int new_visual_count, DepthPtr depth)
     int numVisuals;
     VisualPtr visuals;
     XID *vids, vid;
-    int first_new_vid, first_new_visual;
+    int first_new_vid, first_new_visual, i;
 
     first_new_vid = depth->numVids;
     first_new_visual = pScreen->numVisuals;
@@ -2570,7 +2552,7 @@ ResizeVisualArray(ScreenPtr pScreen, int new_visual_count, DepthPtr depth)
 
     pScreen->visuals = visuals;
 
-    for (int i = 0; i < new_visual_count; i++) {
+    for (i = 0; i < new_visual_count; i++) {
         vid = dixAllocServerXID();
         pScreen->visuals[first_new_visual + i].vid = vid;
         vids[first_new_vid + i] = vid;
