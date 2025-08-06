@@ -39,9 +39,9 @@
 
 DevPrivateKeyRec exaScreenPrivateKeyRec;
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 static ShmFuncs exaShmFuncs = { NULL, NULL };
-#endif
+#endif /* CONFIG_MITSHM */
 
 /**
  * exaGetPixmapOffset() returns the offset (in bytes) within the framebuffer of
@@ -910,12 +910,12 @@ exaDriverInit(ScreenPtr pScreen, ExaDriverPtr pScreenInfo)
         wrap(pExaScr, ps, AddTraps, ExaCheckAddTraps);
     }
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     /*
      * Don't allow shared pixmaps.
      */
     ShmRegisterFuncs(pScreen, &exaShmFuncs);
-#endif
+#endif /* CONFIG_MITSHM */
     /*
      * Hookup offscreen pixmaps
      */

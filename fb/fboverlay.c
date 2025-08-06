@@ -285,9 +285,9 @@ fbOverlayFinishScreenInit(ScreenPtr pScreen,
         return FALSE;
     }
     /* MI thinks there's no frame buffer */
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     ShmRegisterFbFuncs(pScreen);
-#endif
+#endif /* CONFIG_MITSHM */
     pScreen->minInstalledCmaps = 1;
     pScreen->maxInstalledCmaps = 2;
 

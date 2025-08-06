@@ -38,10 +38,10 @@ from The Open Group.
 #include "pixmapstr.h"
 #include "dix.h"
 #include "miline.h"
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 #include <X11/extensions/shm.h>
 #include "shmint.h"
-#endif
+#endif /* CONFIG_MITSHM */
 
 /* We use this structure to propagate some information from miScreenInit to
  * miCreateScreenResources.  miScreenInit allocates the structure, fills it
@@ -254,9 +254,9 @@ miScreenInit(ScreenPtr pScreen, void *pbits,  /* pointer to screen bits */
     pScreen->numVisuals = numVisuals;
     pScreen->visuals = visuals;
     if (width) {
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
         ShmRegisterFbFuncs(pScreen);
-#endif
+#endif /* CONFIG_MITSHM */
         pScreen->CloseScreen = miCloseScreen;
     }
     /* else CloseScreen */

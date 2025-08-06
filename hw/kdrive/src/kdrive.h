@@ -296,8 +296,11 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 #define kdScreenPrivateKey (&kdScreenPrivateKeyRec)
 
+extern unsigned long kdGeneration;
+extern Bool kdEnabled;
 extern Bool kdEmulateMiddleButton;
 extern Bool kdDisableZaphod;
+extern char *kdSwitchCmd;
 
 /*
  * pointer to OS/platform specific callbacks from kdrive core back
@@ -331,11 +334,20 @@ int
 void
  KdStoreColors(ColormapPtr pCmap, int ndef, xColorItem * pdefs);
 
+void KdSetColormap(ScreenPtr pScreen);
+
 /* kdrive.c */
 extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
+void KdSuspend(void);
+
+void KdInitScreen(ScreenInfo * pScreenInfo,
+                  KdScreenInfo * screen, int argc, char **argv);
+
 void
  KdDisableScreen(ScreenPtr pScreen);
+
+void KdDisableScreens(void);
 
 Bool
  KdEnableScreen(ScreenPtr pScreen);
@@ -353,8 +365,14 @@ Rotation KdSubRotation(Rotation a, Rotation b);
 void
  KdParseScreen(KdScreenInfo * screen, const char *arg);
 
+KdPointerInfo *KdParsePointer(const char *arg);
+
+KdKeyboardInfo *KdParseKeyboard(const char *arg);
+
 const char *
 KdParseFindNext(const char *cur, const char *delim, char *save, char *last);
+
+void KdParseRgba(char *rgba);
 
 void
  KdUseMsg(void);
@@ -373,6 +391,14 @@ void KdOsInit(const KdOsFuncs * pOsFuncs);
 
 void
  KdOsAddInputDrivers(void);
+
+Bool KdAllocatePrivates(ScreenPtr pScreen);
+
+Bool KdCreateScreenResources(ScreenPtr pScreen);
+
+Bool KdSaveScreen(ScreenPtr pScreen, int on);
+
+Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv);
 
 void
  KdInitCard(ScreenInfo * pScreenInfo, KdCardInfo * card, int argc, char **argv);
@@ -422,6 +448,11 @@ void
 KdEnqueuePointerEvent(KdPointerInfo * pi, unsigned long flags, int rx, int ry,
                       int rz);
 
+void _KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
+                            int b, int absrel, Bool force);
+
+void KdSetLed(KdKeyboardInfo * ki, int led, Bool on);
+
 void
  KdSetPointerMatrix(KdPointerMatrix *pointer);
 
@@ -440,6 +471,8 @@ void
 
 void
  KdEnableInput(void);
+
+void KdRingBell(KdKeyboardInfo * ki, int volume, int pitch, int duration);
 
 /* kshadow.c */
 Bool

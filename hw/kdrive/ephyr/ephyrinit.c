@@ -111,13 +111,6 @@ ddxInputThreadInit(void)
 }
 #endif
 
-#ifdef DDXBEFORERESET
-void
-ddxBeforeReset(void)
-{
-}
-#endif
-
 void
 ddxUseMsg(void)
 {

@@ -25,8 +25,6 @@
 #ifndef XIPASSIVEGRAB_H
 #define XIPASSIVEGRAB_H 1
 
-#include <dix-config.h>
-
 int SProcXIPassiveUngrabDevice(ClientPtr client);
 int ProcXIPassiveUngrabDevice(ClientPtr client);
 int ProcXIPassiveGrabDevice(ClientPtr client);

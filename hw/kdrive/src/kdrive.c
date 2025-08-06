@@ -77,14 +77,14 @@ KdDepths kdDepths[] = {
 #define KD_DEFAULT_BUTTONS 5
 
 DevPrivateKeyRec kdScreenPrivateKeyRec;
-static unsigned long kdGeneration;
+unsigned long kdGeneration;
 
 Bool kdEmulateMiddleButton;
 Bool kdRawPointerCoordinates;
 Bool kdDisableZaphod;
-static Bool kdEnabled;
+Bool kdEnabled;
 static int kdSubpixelOrder;
-static char *kdSwitchCmd;
+char *kdSwitchCmd;
 static DDXPointRec kdOrigin;
 Bool kdHasPointer = FALSE;
 Bool kdHasKbd = FALSE;
@@ -136,8 +136,7 @@ KdDoSwitchCmd(const char *reason)
     }
 }
 
-static void
-KdSuspend(void)
+void KdSuspend(void)
 {
     KdCardInfo *card;
     KdScreenInfo *screen;
@@ -153,8 +152,7 @@ KdSuspend(void)
     }
 }
 
-static void
-KdDisableScreens(void)
+void KdDisableScreens(void)
 {
     KdSuspend();
     if (kdEnabled && (kdOsFuncs->Disable))
@@ -342,8 +340,7 @@ KdParseScreen(KdScreenInfo * screen, const char *arg)
     }
 }
 
-static void
-KdParseRgba(char *rgba)
+void KdParseRgba(char *rgba)
 {
     if (!strcmp(rgba, "rgb"))
         kdSubpixelOrder = SubPixelHorizontalRGB;
@@ -542,8 +539,7 @@ KdOsInit(const KdOsFuncs * pOsFuncs)
     }
 }
 
-static Bool
-KdAllocatePrivates(ScreenPtr pScreen)
+Bool KdAllocatePrivates(ScreenPtr pScreen)
 {
     KdPrivScreenPtr pScreenPriv;
 
@@ -560,8 +556,7 @@ KdAllocatePrivates(ScreenPtr pScreen)
     return TRUE;
 }
 
-static Bool
-KdCreateScreenResources(ScreenPtr pScreen)
+Bool KdCreateScreenResources(ScreenPtr pScreen)
 {
     KdScreenPriv(pScreen);
     KdCardInfo *card = pScreenPriv->card;
@@ -621,8 +616,7 @@ Bool KdCloseScreen(ScreenPtr pScreen)
     return ret;
 }
 
-static Bool
-KdSaveScreen(ScreenPtr pScreen, int on)
+Bool KdSaveScreen(ScreenPtr pScreen, int on)
 {
     return FALSE;
 }
@@ -699,8 +693,7 @@ KdSetSubpixelOrder(ScreenPtr pScreen, Rotation randr)
 /* Pass through AddScreen, which doesn't take any closure */
 static KdScreenInfo *kdCurrentScreen;
 
-static Bool
-KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
+Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
     KdScreenInfo *screen = kdCurrentScreen;
     KdCardInfo *card = screen->card;
@@ -839,9 +832,8 @@ KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     return TRUE;
 }
 
-static void
-KdInitScreen(ScreenInfo * pScreenInfo,
-             KdScreenInfo * screen, int argc, char **argv)
+void KdInitScreen(ScreenInfo * pScreenInfo,
+                  KdScreenInfo * screen, int argc, char **argv)
 {
     KdCardInfo *card = screen->card;
 

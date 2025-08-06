@@ -85,6 +85,7 @@ SOFTWARE.
 
 #ifdef DISABLE_EXT_MITSHM
 #undef MITSHM
+#undef CONFIG_MITSHM
 #endif
 
 #include "miext/extinit_priv.h"
@@ -101,9 +102,9 @@ SOFTWARE.
 static const ExtensionModule staticExtensions[] = {
     {GEExtensionInit, "Generic Event Extension", NULL},
     {ShapeExtensionInit, "SHAPE", &noShapeExtension},
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     {ShmExtensionInit, "MIT-SHM", &noMITShmExtension},
-#endif
+#endif /* CONFIG_MITSHM */
     {XInputExtensionInit, "XInputExtension", NULL},
 #ifdef XTEST
     {XTestExtensionInit, "XTEST", &noTestExtensions},

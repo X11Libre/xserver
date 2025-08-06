@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef CHGKBD_H
 #define CHGKBD_H 1
 
-#include <dix-config.h>
-
 int ProcXChangeKeyboardDevice(ClientPtr /* client */
     );
 

@@ -22,4 +22,6 @@ void xf86AddInputEventDrainCallback(CallbackProcPtr callback, void *param);
 
 void xf86RemoveInputEventDrainCallback(CallbackProcPtr callback, void *param);
 
+Bool MatchAttrToken(const char *attr, struct xorg_list *groups);
+
 #endif /* _XSERVER__XF86XINPUT_H */
