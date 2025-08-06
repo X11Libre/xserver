@@ -152,8 +152,7 @@ void KdSuspend(void)
     }
 }
 
-static void
-KdDisableScreens(void)
+void KdDisableScreens(void)
 {
     KdSuspend();
     if (kdEnabled && (kdOsFuncs->Disable))

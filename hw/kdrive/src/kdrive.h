@@ -344,6 +344,8 @@ void KdInitScreen(ScreenInfo * pScreenInfo,
 void
  KdDisableScreen(ScreenPtr pScreen);
 
+void KdDisableScreens(void);
+
 Bool
  KdEnableScreen(ScreenPtr pScreen);
 
