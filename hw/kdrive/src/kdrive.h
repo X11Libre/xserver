@@ -331,6 +331,8 @@ int
 void
  KdStoreColors(ColormapPtr pCmap, int ndef, xColorItem * pdefs);
 
+void KdSetColormap(ScreenPtr pScreen);
+
 /* kdrive.c */
 extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
