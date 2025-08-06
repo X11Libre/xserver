@@ -27,7 +27,7 @@ symbol_test_args = []
 symbol_test_args += join_paths(xorg_build_root, 'libxorgserver.so')
 symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libshadow.so')
 symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libglx.so')
-symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video-apm', 'apm_drv.so')
+symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video', 'apm', 'apm_drv.so')
 
 install_man(configure_file(
     input: 'man/apm.man',
