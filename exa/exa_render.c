@@ -176,7 +176,8 @@ exaGetRGBAFromPixel(CARD32 pixel,
                     CARD16 *green,
                     CARD16 *blue,
                     CARD16 *alpha,
-                    PictFormatPtr pFormat, PictFormatShort format)
+                    PictFormatPtr pFormat,
+                    pixman_format_code_t format)
 {
     int rshift, bshift, gshift, ashift;
 

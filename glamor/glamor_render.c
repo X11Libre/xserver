@@ -740,10 +740,12 @@ static const int pict_format_combine_tab[][3] = {
 };
 
 static Bool
-combine_pict_format(PictFormatShort * des, const PictFormatShort src,
-                    const PictFormatShort mask, glamor_program_alpha in_ca)
+combine_pict_format(pixman_format_code_t *des,
+                    const pixman_format_code_t src,
+                    const pixman_format_code_t mask,
+                    glamor_program_alpha in_ca)
 {
-    PictFormatShort new_vis;
+    pixman_format_code_t new_vis;
     int src_type, mask_type, src_bpp;
     int i;
 
@@ -842,7 +844,7 @@ glamor_set_normalize_tcoords_generic(PixmapPtr pixmap,
 static Bool
 glamor_render_format_is_supported(PicturePtr picture)
 {
-    PictFormatShort storage_format;
+    pixman_format_code_t storage_format;
     glamor_screen_private *glamor_priv;
     struct glamor_format *f;
 
@@ -899,14 +901,14 @@ glamor_composite_choose_shader(CARD8 op,
                                struct shader_key *s_key,
                                glamor_composite_shader ** shader,
                                struct blendinfo *op_info,
-                               PictFormatShort *psaved_source_format,
+                               pixman_format_code_t *psaved_source_format,
                                enum ca_state ca_state)
 {
     ScreenPtr screen = dest->pDrawable->pScreen;
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
     Bool source_needs_upload = FALSE;
     Bool mask_needs_upload = FALSE;
-    PictFormatShort saved_source_format = 0;
+    pixman_format_code_t saved_source_format = 0;
     struct shader_key key;
     GLfloat source_solid_color[4];
     GLfloat mask_solid_color[4];
@@ -1228,7 +1230,7 @@ glamor_composite_with_shader(CARD8 op,
     int dest_x_off, dest_y_off;
     int source_x_off, source_y_off;
     int mask_x_off, mask_y_off;
-    PictFormatShort saved_source_format = 0;
+    pixman_format_code_t saved_source_format = 0;
     float src_matrix[9], mask_matrix[9];
     float *psrc_matrix = NULL, *pmask_matrix = NULL;
     int nrect_max;
@@ -1441,7 +1443,7 @@ glamor_convert_gradient_picture(ScreenPtr screen,
     PicturePtr dst = NULL;
     int error;
     PictFormatPtr pFormat;
-    PictFormatShort format;
+    pixman_format_code_t format;
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
 
     if (source->pDrawable) {

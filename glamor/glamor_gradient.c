@@ -820,7 +820,7 @@ glamor_generate_radial_gradient_picture(ScreenPtr screen,
                                         PicturePtr src_picture,
                                         int x_source, int y_source,
                                         int width, int height,
-                                        PictFormatShort format)
+                                        pixman_format_code_t format)
 {
     glamor_screen_private *glamor_priv;
     PicturePtr dst_picture = NULL;
@@ -1125,7 +1125,7 @@ glamor_generate_linear_gradient_picture(ScreenPtr screen,
                                         PicturePtr src_picture,
                                         int x_source, int y_source,
                                         int width, int height,
-                                        PictFormatShort format)
+                                        pixman_format_code_t format)
 {
     glamor_screen_private *glamor_priv;
     PicturePtr dst_picture = NULL;

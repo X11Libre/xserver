@@ -68,8 +68,8 @@ static void byte_swap_swizzle(GLenum *swizzle)
  */
 static Bool
 glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
-                                           PictFormatShort format,
-                                           PictFormatShort *temp_format,
+                                           pixman_format_code_t format,
+                                           pixman_format_code_t *temp_format,
                                            GLenum *tex_format,
                                            GLenum *tex_type,
                                            GLenum *swizzle)
@@ -237,8 +237,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
  * in-memory pixman image of those bits in a destination format.
  */
 static pixman_image_t *
-glamor_get_converted_image(PictFormatShort dst_format,
-                           PictFormatShort src_format,
+glamor_get_converted_image(pixman_format_code_t dst_format,
+                           pixman_format_code_t src_format,
                            void *src_bits,
                            int src_stride,
                            int w, int h)
@@ -276,7 +276,7 @@ glamor_upload_picture_to_texture(PicturePtr picture)
     ScreenPtr screen = pixmap->drawable.pScreen;
     glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
     glamor_pixmap_private *pixmap_priv = glamor_get_pixmap_private(pixmap);
-    PictFormatShort converted_format;
+    pixman_format_code_t converted_format;
     void *bits = pixmap->devPrivate.ptr;
     int stride = pixmap->devKind;
     GLenum format, type;

@@ -725,12 +725,12 @@ PicturePtr glamor_generate_linear_gradient_picture(ScreenPtr screen,
                                                    PicturePtr src_picture,
                                                    int x_source, int y_source,
                                                    int width, int height,
-                                                   PictFormatShort format);
+                                                   pixman_format_code_t format);
 PicturePtr glamor_generate_radial_gradient_picture(ScreenPtr screen,
                                                    PicturePtr src_picture,
                                                    int x_source, int y_source,
                                                    int width, int height,
-                                                   PictFormatShort format);
+                                                   pixman_format_code_t format);
 
 /* glamor_triangles.c */
 void glamor_triangles(CARD8 op,

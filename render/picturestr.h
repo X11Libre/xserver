@@ -121,7 +121,7 @@ typedef union _SourcePict {
 typedef struct _Picture {
     DrawablePtr pDrawable;
     PictFormatPtr pFormat;
-    PictFormatShort format;     /* PIXMAN_FORMAT */
+    pixman_format_code_t format;     /* PIXMAN_FORMAT */
     int refcnt;
     CARD32 id;
     unsigned int repeat:1;
