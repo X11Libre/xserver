@@ -718,11 +718,6 @@ int _XSERVTransWrite (XtransConnInfo ciptr, const char *buf, int size)
     return ciptr->transptr->Write (ciptr, buf, size);
 }
 
-int _XSERVTransWritev (XtransConnInfo ciptr, struct iovec *buf, int size)
-{
-    return ciptr->transptr->Writev (ciptr, buf, size);
-}
-
 #if XTRANS_SEND_FDS
 int _XSERVTransSendFd (XtransConnInfo ciptr, int fd, int do_close)
 {
@@ -1036,39 +1031,7 @@ int _XSERVTransMakeAllCOTSServerListeners (const char *port, int *partial,
     return 0;
 }
 
-/*
- * These routines are not part of the X Transport Interface, but they
- * may be used by it.
- */
-
-
 #ifdef WIN32
-
-/*
- * emulate writev
- */
-static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
-{
-    int i, len, total;
-    char *base;
-
-    ESET(0);
-    for (i = 0, total = 0;  i < iovcnt;  i++, iov++) {
-	len = iov->iov_len;
-	base = iov->iov_base;
-	while (len > 0) {
-	    register int nbytes;
-	    nbytes = _XSERVTransWrite (ciptr, base, len);
-	    if (nbytes < 0 && total == 0)  return -1;
-	    if (nbytes <= 0)  return total;
-	    ESET(0);
-	    len   -= nbytes;
-	    total += nbytes;
-	    base  += nbytes;
-	}
-    }
-    return total;
-}
 
 /*
  * _XSERVTransGetHostname - similar to gethostname but allows special processing.
