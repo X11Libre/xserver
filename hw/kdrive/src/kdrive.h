@@ -296,8 +296,11 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 #define kdScreenPrivateKey (&kdScreenPrivateKeyRec)
 
+extern unsigned long kdGeneration;
+extern Bool kdEnabled;
 extern Bool kdEmulateMiddleButton;
 extern Bool kdDisableZaphod;
+extern char *kdSwitchCmd;
 
 /*
  * pointer to OS/platform specific callbacks from kdrive core back

@@ -77,14 +77,14 @@ KdDepths kdDepths[] = {
 #define KD_DEFAULT_BUTTONS 5
 
 DevPrivateKeyRec kdScreenPrivateKeyRec;
-static unsigned long kdGeneration;
+unsigned long kdGeneration;
 
 Bool kdEmulateMiddleButton;
 Bool kdRawPointerCoordinates;
 Bool kdDisableZaphod;
-static Bool kdEnabled;
+Bool kdEnabled;
 static int kdSubpixelOrder;
-static char *kdSwitchCmd;
+char *kdSwitchCmd;
 static DDXPointRec kdOrigin;
 Bool kdHasPointer = FALSE;
 Bool kdHasKbd = FALSE;
