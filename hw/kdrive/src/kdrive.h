@@ -338,6 +338,9 @@ extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
 void KdSuspend(void);
 
+void KdInitScreen(ScreenInfo * pScreenInfo,
+                  KdScreenInfo * screen, int argc, char **argv);
+
 void
  KdDisableScreen(ScreenPtr pScreen);
 

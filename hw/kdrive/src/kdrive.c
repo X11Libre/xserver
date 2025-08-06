@@ -838,9 +838,8 @@ KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     return TRUE;
 }
 
-static void
-KdInitScreen(ScreenInfo * pScreenInfo,
-             KdScreenInfo * screen, int argc, char **argv)
+void KdInitScreen(ScreenInfo * pScreenInfo,
+                  KdScreenInfo * screen, int argc, char **argv)
 {
     KdCardInfo *card = screen->card;
 
