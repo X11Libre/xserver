@@ -1724,6 +1724,7 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     pmap->numPixelsRed[client] += npixR;
     pmap->freeRed -= npixR;
 
+    pDst = pixels;
     ppix = gpix + pmap->numPixelsGreen[client];
     for (pDst = pixels, p = ppixGreen; (size_t)(p - ppixGreen) < npixG; p++) {
         *ppix++ = *p;
