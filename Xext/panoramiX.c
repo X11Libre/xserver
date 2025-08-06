@@ -1298,3 +1298,20 @@ XineramaGetImageData(DrawablePtr *pDrawables,
     RegionUninit(&SrcRegion);
     RegionUninit(&GrabRegion);
 }
+
+// work around broken X11 proto headers
+#define sz_xXineramaQueryScreensReply sz_XineramaQueryScreensReply
+#define sz_xXineramaIsActiveReply sz_XineramaIsActiveReply
+#define sz_xPanoramiXGetScreenSizeReply sz_panoramiXGetScreenSizeReply
+#define sz_xPanoramiXGetScreenCountReply sz_panoramiXGetScreenCountReply
+#define sz_xPanoramiXGetStateReply sz_panoramiXGetStateReply
+
+XTYPE_SIZE_ASSERT(xPanoramiXQueryVersionReply);
+XTYPE_SIZE_ASSERT(xPanoramiXGetStateReply);
+XTYPE_SIZE_ASSERT(xPanoramiXGetScreenCountReply);
+XTYPE_SIZE_ASSERT(xPanoramiXGetScreenSizeReply);
+XTYPE_SIZE_ASSERT(xXineramaIsActiveReply);
+XTYPE_SIZE_ASSERT(xTranslateCoordsReply);
+XTYPE_SIZE_ASSERT(xXineramaQueryScreensReply);
+XTYPE_SIZE_ASSERT(xGetGeometryReply);
+XTYPE_SIZE_ASSERT(xGetImageReply);

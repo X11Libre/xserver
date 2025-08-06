@@ -25,8 +25,6 @@
 #ifndef SETCPTR_H
 #define SETCPTR_H 1
 
-#include <dix-config.h>
-
 int SProcXISetClientPointer(ClientPtr /* client */ );
 int ProcXISetClientPointer(ClientPtr /* client */ );
 

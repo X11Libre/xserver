@@ -25,8 +25,6 @@
 #ifndef XISETDEVFOCUS_H
 #define XISETDEVFOCUS_H 1
 
-#include <dix-config.h>
-
 int SProcXISetFocus(ClientPtr client);
 int ProcXISetFocus(ClientPtr client);
 

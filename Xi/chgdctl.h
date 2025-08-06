@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef CHGDCTL_H
 #define CHGDCTL_H 1
 
-#include <dix-config.h>
-
 int SProcXChangeDeviceControl(ClientPtr /* client */
     );
 

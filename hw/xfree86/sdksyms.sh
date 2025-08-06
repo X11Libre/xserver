@@ -53,9 +53,9 @@ cat > sdksyms.c << EOF
 #include "xvdix.h"
 #include "xvmcext.h"
 #endif
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 #include "shmint.h"
-#endif
+#endif /* CONFIG_MITSHM */
 #include "syncsdk.h"
 
 /* glx/Makefile.am */

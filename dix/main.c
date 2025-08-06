@@ -130,7 +130,6 @@ CallbackListPtr PostInitRootWindowCallback = NULL;
 int
 dix_main(int argc, char *argv[], char *envp[])
 {
-    int i;
     HWEventQueueType alwaysCheckForInput[2];
 
     display = "0";
@@ -157,7 +156,7 @@ dix_main(int argc, char *argv[], char *envp[])
         OsInit();
         if (serverGeneration == 1) {
             CreateWellKnownSockets();
-            for (i = 1; i < LimitClients; i++)
+            for (int i = 1; i < LimitClients; i++)
                 clients[i] = NULL;
             serverClient = calloc(1, sizeof(ClientRec));
             if (!serverClient)
@@ -202,7 +201,7 @@ dix_main(int argc, char *argv[], char *envp[])
         InitExtensions(argc, argv);
         LogMessageVerb(X_INFO, 1, "Extensions initialized\n");
 
-        for (i = 0; i < screenInfo.numGPUScreens; i++) {
+        for (int i = 0; i < screenInfo.numGPUScreens; i++) {
             ScreenPtr pScreen = screenInfo.gpuscreens[i];
             if (!PixmapScreenInit(pScreen))
                 FatalError("failed to create screen pixmap properties");
@@ -210,7 +209,7 @@ dix_main(int argc, char *argv[], char *envp[])
                 FatalError("failed to create screen resources");
         }
 
-        for (i = 0; i < screenInfo.numScreens; i++) {
+        for (int i = 0; i < screenInfo.numScreens; i++) {
             ScreenPtr pScreen = screenInfo.screens[i];
 
             if (!PixmapScreenInit(pScreen))
@@ -248,7 +247,7 @@ dix_main(int argc, char *argv[], char *envp[])
             PanoramiXConsolidate();
 #endif /* XINERAMA */
 
-        for (i = 0; i < screenInfo.numScreens; i++) {
+        for (int i = 0; i < screenInfo.numScreens; i++) {
             InitRootWindow(screenInfo.screens[i]->root);
             CallCallbacks(&PostInitRootWindowCallback, screenInfo.screens[i]);
         }
@@ -313,20 +312,20 @@ dix_main(int argc, char *argv[], char *envp[])
 
         InputThreadFini();
 
-        for (i = 0; i < screenInfo.numScreens; i++)
+        for (int i = 0; i < screenInfo.numScreens; i++)
             screenInfo.screens[i]->root = NullWindow;
 
         CloseDownDevices();
 
         CloseDownEvents();
 
-        for (i = screenInfo.numGPUScreens - 1; i >= 0; i--) {
+        for (int i = screenInfo.numGPUScreens - 1; i >= 0; i--) {
             dixFreeScreen(screenInfo.gpuscreens[i]);
             screenInfo.numGPUScreens = i;
         }
         memset(&screenInfo.numGPUScreens, 0, sizeof(screenInfo.numGPUScreens));
 
-        for (i = screenInfo.numScreens - 1; i >= 0; i--) {
+        for (int i = screenInfo.numScreens - 1; i >= 0; i--) {
             dixFreeScreen(screenInfo.screens[i]);
             screenInfo.numScreens = i;
         }

@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef UNGRDEVB_H
 #define UNGRDEVB_H 1
 
-#include <dix-config.h>
-
 int SProcXUngrabDeviceButton(ClientPtr  /* client */
     );
 

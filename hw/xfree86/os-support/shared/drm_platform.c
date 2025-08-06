@@ -28,7 +28,7 @@ get_drm_info(struct OdevAttributes *attribs, char *path, int delayed_index)
     drmVersionPtr v;
     int fd;
     int err = 0;
-    Bool paused, server_fd = FALSE;
+    Bool paused = FALSE, server_fd = FALSE;
 
     LogMessage(X_INFO, "Platform probe for %s\n", attribs->syspath);
 

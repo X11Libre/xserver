@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETFCTL_H
 #define GETFCTL_H 1
 
-#include <dix-config.h>
-
 int ProcXGetFeedbackControl(ClientPtr   /* client */
     );
 

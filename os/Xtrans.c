@@ -53,7 +53,6 @@ from The Open Group.
 #ifdef HAVE_SYSTEMD_DAEMON
 #include <systemd/sd-daemon.h>
 #endif
-#include <sys/utsname.h>
 
 /*
  * The transport table contains a definition for every transport (protocol)
@@ -554,33 +553,10 @@ _XSERVTransReopenCOTSServer (int trans_id, int fd, const char *port)
     return _XSERVTransReopen (XTRANS_OPEN_COTS_SERVER, trans_id, fd, port);
 }
 
-int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
-
+int _XSERVTransNonBlock(XtransConnInfo ciptr)
 {
     int	fd = ciptr->fd;
     int	ret = 0;
-
-    prmsg (2,"SetOption(%d,%d,%d)\n", fd, option, arg);
-
-    /*
-     * For now, all transport type use the same stuff for setting options.
-     * As long as this is true, we can put the common code here. Once a more
-     * complicated transport such as shared memory or an OSI implementation
-     * that uses the session and application libraries is implemented, this
-     * code may have to move to a transport dependent function.
-     *
-     * ret = ciptr->transptr->SetOption (ciptr, option, arg);
-     */
-
-    switch (option)
-    {
-    case TRANS_NONBLOCKING:
-	switch (arg)
-	{
-	case 0:
-	    /* Set to blocking mode */
-	    break;
-	case 1: /* Set to non-blocking mode */
 
 #if defined(O_NONBLOCK)
 	    ret = fcntl (fd, F_GETFL, 0);
@@ -603,30 +579,10 @@ int _XSERVTransSetOption (XtransConnInfo ciptr, int option, int arg)
 	}
 #else
 	    ret = fcntl (fd, F_GETFL, 0);
-#ifdef FNDELAY
-	    ret = fcntl (fd, F_SETFL, ret | FNDELAY);
-#else
 	    ret = fcntl (fd, F_SETFL, ret | O_NDELAY);
-#endif
 #endif /* WIN32 */
 #endif /* FIOSNBIO */
 #endif /* O_NONBLOCK */
-	    break;
-	default:
-	    /* Unknown option */
-	    break;
-	}
-	break;
-    case TRANS_CLOSEONEXEC:
-#ifdef F_SETFD
-#ifdef FD_CLOEXEC
-	ret = fcntl (fd, F_SETFD, FD_CLOEXEC);
-#else
-	ret = fcntl (fd, F_SETFD, 1);
-#endif /* FD_CLOEXEC */
-#endif /* F_SETFD */
-	break;
-    }
 
     return ret;
 }
@@ -760,11 +716,6 @@ int _XSERVTransRead (XtransConnInfo ciptr, char *buf, int size)
 int _XSERVTransWrite (XtransConnInfo ciptr, const char *buf, int size)
 {
     return ciptr->transptr->Write (ciptr, buf, size);
-}
-
-int _XSERVTransReadv (XtransConnInfo ciptr, struct iovec *buf, int size)
-{
-    return ciptr->transptr->Readv (ciptr, buf, size);
 }
 
 int _XSERVTransWritev (XtransConnInfo ciptr, struct iovec *buf, int size)
@@ -1094,33 +1045,6 @@ int _XSERVTransMakeAllCOTSServerListeners (const char *port, int *partial,
 #ifdef WIN32
 
 /*
- * emulate readv
- */
-static int _XSERVTransReadV (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
-{
-    int i, len, total;
-    char *base;
-
-    ESET(0);
-    for (i = 0, total = 0;  i < iovcnt;  i++, iov++) {
-	len = iov->iov_len;
-	base = iov->iov_base;
-	while (len > 0) {
-	    register int nbytes;
-	    nbytes = _XSERVTransRead (ciptr, base, len);
-	    if (nbytes < 0 && total == 0)  return -1;
-	    if (nbytes <= 0)  return total;
-	    ESET(0);
-	    len   -= nbytes;
-	    total += nbytes;
-	    base  += nbytes;
-	}
-    }
-    return total;
-}
-
-
-/*
  * emulate writev
  */
 static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
@@ -1146,8 +1070,20 @@ static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcn
     return total;
 }
 
-#endif /* WIN32 */
+/*
+ * _XSERVTransGetHostname - similar to gethostname but allows special processing.
+ */
+int _XSERVTransGetHostname (char *buf, int maxlen)
+{
+    buf[0] = '\0';
+    (void) gethostname (buf, maxlen);
+    buf [maxlen - 1] = '\0';
+    return strlen(buf);
+}
 
+#else /* WIN32 */
+
+#include <sys/utsname.h>
 
 /*
  * _XSERVTransGetHostname - similar to gethostname but allows special processing.
@@ -1163,3 +1099,5 @@ int _XSERVTransGetHostname (char *buf, int maxlen)
     buf[len] = '\0';
     return len;
 }
+
+#endif /* WIN32 */

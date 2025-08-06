@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GETFOCUS_H
 #define GETFOCUS_H 1
 
-#include <dix-config.h>
-
 int ProcXGetDeviceFocus(ClientPtr       /* client */
     );
 

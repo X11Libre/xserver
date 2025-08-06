@@ -2,6 +2,7 @@
 
 #include <dix-config.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>
@@ -34,7 +35,7 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
     xorg_list_for_each_entry(walk, &ns_list, entry) {
         if (strcmp(walk->name, NS_NAME_ROOT)==0) {
             walk->rootWindow = realRoot;
-            XNS_LOG("<%s> actual root 0x%0x\n", walk->name, walk->rootWindow->drawable.id);
+            XNS_LOG("<%s> actual root 0x%0" PRIx32 "\n", walk->name, walk->rootWindow->drawable.id);
             continue;
         }
 
@@ -66,6 +67,6 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
         snprintf(buf, sizeof(buf)-1, "XNS-ROOT:%s", walk->name);
         setWinStrProp(pWin, XA_WM_NAME, buf);
 
-        XNS_LOG("<%s> virtual root 0x%0x\n", walk->name, walk->rootWindow->drawable.id);
+        XNS_LOG("<%s> virtual root 0x%0" PRIx32 "\n", walk->name, walk->rootWindow->drawable.id);
     }
 }

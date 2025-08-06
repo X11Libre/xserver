@@ -25,8 +25,6 @@
 #ifndef XISELECTEVENTS_H
 #define XISELECTEVENTS_H 1
 
-#include <dix-config.h>
-
 int SProcXISelectEvents(ClientPtr client);
 int ProcXISelectEvents(ClientPtr client);
 int SProcXIGetSelectedEvents(ClientPtr client);

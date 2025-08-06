@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SETBMAP_H
 #define SETBMAP_H 1
 
-#include <dix-config.h>
-
 int ProcXSetDeviceButtonMapping(ClientPtr       /* client */
     );
 

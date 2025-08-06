@@ -44,10 +44,6 @@
 void
 winSetShapeMultiWindow(WindowPtr pWin, int kind)
 {
-    ScreenPtr pScreen = pWin->drawable.pScreen;
-
-    winScreenPriv(pScreen);
-
 #if ENABLE_DEBUG
     ErrorF("winSetShapeMultiWindow - pWin: %p kind: %i\n", pWin, kind);
 #endif

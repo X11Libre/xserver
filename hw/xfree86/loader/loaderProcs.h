@@ -79,11 +79,9 @@ void LoaderUnload(const char *, void *);
 unsigned long LoaderGetModuleVersion(ModuleDescPtr mod);
 
 void LoaderResetOptions(void);
-void LoaderSetOptions(unsigned long);
+
+void LoaderSetIgnoreAbi(void);
 
 const char **LoaderListDir(const char *, const char **);
-
-/* Options for LoaderSetOptions */
-#define LDR_OPT_ABI_MISMATCH_NONFATAL		0x0001
 
 #endif                          /* _LOADERPROCS_H */

@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef SETMODE_H
 #define SETMODE_H 1
 
-#include <dix-config.h>
-
 int ProcXSetDeviceMode(ClientPtr        /* client */
     );
 

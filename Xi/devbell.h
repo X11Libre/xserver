@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef DEVBELL_H
 #define DEVBELL_H 1
 
-#include <dix-config.h>
-
 int ProcXDeviceBell(ClientPtr   /* client */
     );
 

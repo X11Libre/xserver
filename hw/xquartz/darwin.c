@@ -75,9 +75,9 @@
 #include "input_priv.h"
 #include "screenint_priv.h"
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
 #include "shmint.h"
-#endif
+#endif /* CONFIG_MITSHM */
 
 #include "darwin.h"
 #include "darwinEvents.h"
@@ -259,9 +259,9 @@ DarwinScreenInit(ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
     }
 
-#ifdef MITSHM
+#ifdef CONFIG_MITSHM
     ShmRegisterFbFuncs(pScreen);
-#endif
+#endif /* CONFIG_MITSHM */
 
     // finish mode dependent screen setup including cursor support
     if (!QuartzSetupScreen(pScreen->myNum, pScreen)) {

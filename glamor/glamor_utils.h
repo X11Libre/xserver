@@ -564,7 +564,9 @@
         (c)[1] = (float)y;				\
     } while(0)
 
+#ifndef ALIGN /* FreeBSD already has it */
 #define ALIGN(i,m)	(((i) + (m) - 1) & ~((m) - 1))
+#endif
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 #define MAX(a,b)	((a) > (b) ? (a) : (b))
 

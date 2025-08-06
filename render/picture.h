@@ -66,70 +66,50 @@ typedef struct _Picture *PicturePtr;
 
 #define PICT_FORMAT_COLOR(f)	PIXMAN_FORMAT_COLOR(f)
 
-/* 32bpp formats */
-typedef enum _PictFormatShort {
-    PICT_a2r10g10b10 = PIXMAN_a2r10g10b10,
-    PICT_x2r10g10b10 = PIXMAN_x2r10g10b10,
-    PICT_a2b10g10r10 = PIXMAN_a2b10g10r10,
-    PICT_x2b10g10r10 = PIXMAN_x2b10g10r10,
+typedef pixman_format_code_t PictFormatShort;
 
-    PICT_a8r8g8b8 = PIXMAN_a8r8g8b8,
-    PICT_x8r8g8b8 = PIXMAN_x8r8g8b8,
-    PICT_a8b8g8r8 = PIXMAN_a8b8g8r8,
-    PICT_x8b8g8r8 = PIXMAN_x8b8g8r8,
-    PICT_b8g8r8a8 = PIXMAN_b8g8r8a8,
-    PICT_b8g8r8x8 = PIXMAN_b8g8r8x8,
-
-/* 24bpp formats */
-    PICT_r8g8b8 = PIXMAN_r8g8b8,
-    PICT_b8g8r8 = PIXMAN_b8g8r8,
-
-/* 16bpp formats */
-    PICT_r5g6b5 = PIXMAN_r5g6b5,
-    PICT_b5g6r5 = PIXMAN_b5g6r5,
-
-    PICT_a1r5g5b5 = PIXMAN_a1r5g5b5,
-    PICT_x1r5g5b5 = PIXMAN_x1r5g5b5,
-    PICT_a1b5g5r5 = PIXMAN_a1b5g5r5,
-    PICT_x1b5g5r5 = PIXMAN_x1b5g5r5,
-    PICT_a4r4g4b4 = PIXMAN_a4r4g4b4,
-    PICT_x4r4g4b4 = PIXMAN_x4r4g4b4,
-    PICT_a4b4g4r4 = PIXMAN_a4b4g4r4,
-    PICT_x4b4g4r4 = PIXMAN_x4b4g4r4,
-
-/* 8bpp formats */
-    PICT_a8 = PIXMAN_a8,
-    PICT_r3g3b2 = PIXMAN_r3g3b2,
-    PICT_b2g3r3 = PIXMAN_b2g3r3,
-    PICT_a2r2g2b2 = PIXMAN_a2r2g2b2,
-    PICT_a2b2g2r2 = PIXMAN_a2b2g2r2,
-
-    PICT_c8 = PIXMAN_c8,
-    PICT_g8 = PIXMAN_g8,
-
-    PICT_x4a4 = PIXMAN_x4a4,
-
-    PICT_x4c4 = PIXMAN_x4c4,
-    PICT_x4g4 = PIXMAN_x4g4,
-
-/* 4bpp formats */
-    PICT_a4 = PIXMAN_a4,
-    PICT_r1g2b1 = PIXMAN_r1g2b1,
-    PICT_b1g2r1 = PIXMAN_b1g2r1,
-    PICT_a1r1g1b1 = PIXMAN_a1r1g1b1,
-    PICT_a1b1g1r1 = PIXMAN_a1b1g1r1,
-
-    PICT_c4 = PIXMAN_c4,
-    PICT_g4 = PIXMAN_g4,
-
-/* 1bpp formats */
-    PICT_a1 = PIXMAN_a1,
-
-    PICT_g1 = PIXMAN_g1,
-
-/* YCbCr formats */
-    PICT_yuv2 = PIXMAN_yuy2
-} PictFormatShort;
+#define PICT_a2r10g10b10    PIXMAN_a2r10g10b10
+#define PICT_x2r10g10b10    PIXMAN_x2r10g10b10
+#define PICT_a2b10g10r10    PIXMAN_a2b10g10r10
+#define PICT_x2b10g10r10    PIXMAN_x2b10g10r10
+#define PICT_a8r8g8b8       PIXMAN_a8r8g8b8
+#define PICT_x8r8g8b8       PIXMAN_x8r8g8b8
+#define PICT_a8b8g8r8       PIXMAN_a8b8g8r8
+#define PICT_x8b8g8r8       PIXMAN_x8b8g8r8
+#define PICT_b8g8r8a8       PIXMAN_b8g8r8a8
+#define PICT_b8g8r8x8       PIXMAN_b8g8r8x8
+#define PICT_r8g8b8         PIXMAN_r8g8b8
+#define PICT_b8g8r8         PIXMAN_b8g8r8
+#define PICT_r5g6b5         PIXMAN_r5g6b5
+#define PICT_b5g6r5         PIXMAN_b5g6r5
+#define PICT_a1r5g5b5       PIXMAN_a1r5g5b5
+#define PICT_x1r5g5b5       PIXMAN_x1r5g5b5
+#define PICT_a1b5g5r5       PIXMAN_a1b5g5r5
+#define PICT_x1b5g5r5       PIXMAN_x1b5g5r5
+#define PICT_a4r4g4b4       PIXMAN_a4r4g4b4
+#define PICT_x4r4g4b4       PIXMAN_x4r4g4b4
+#define PICT_a4b4g4r4       PIXMAN_a4b4g4r4
+#define PICT_x4b4g4r4       PIXMAN_x4b4g4r4
+#define PICT_a8             PIXMAN_a8
+#define PICT_r3g3b2         PIXMAN_r3g3b2
+#define PICT_b2g3r3         PIXMAN_b2g3r3
+#define PICT_a2r2g2b2       PIXMAN_a2r2g2b2
+#define PICT_a2b2g2r2       PIXMAN_a2b2g2r2
+#define PICT_c8             PIXMAN_c8
+#define PICT_g8             PIXMAN_g8
+#define PICT_x4a4           PIXMAN_x4a4
+#define PICT_x4c4           PIXMAN_x4c4
+#define PICT_x4g4           PIXMAN_x4g4
+#define PICT_a4             PIXMAN_a4
+#define PICT_r1g2b1         PIXMAN_r1g2b1
+#define PICT_b1g2r1         PIXMAN_b1g2r1
+#define PICT_a1r1g1b1       PIXMAN_a1r1g1b1
+#define PICT_a1b1g1r1       PIXMAN_a1b1g1r1
+#define PICT_c4             PIXMAN_c4
+#define PICT_g4             PIXMAN_g4
+#define PICT_a1             PIXMAN_a1
+#define PICT_g1             PIXMAN_g1
+#define PICT_yuv2           PIXMAN_yuy2
 
 /*
  * For dynamic indexed visuals (GrayScale and PseudoColor), these control the

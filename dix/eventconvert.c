@@ -411,9 +411,8 @@ static int
 countValuators(DeviceEvent *ev, int *first)
 {
     int first_valuator = -1, last_valuator = -1, num_valuators = 0;
-    int i;
 
-    for (i = 0; i < sizeof(ev->valuators.mask) * 8; i++) {
+    for (int i = 0; i < sizeof(ev->valuators.mask) * 8; i++) {
         if (BitIsOn(ev->valuators.mask, i)) {
             if (first_valuator == -1)
                 first_valuator = i;
@@ -432,7 +431,6 @@ countValuators(DeviceEvent *ev, int *first)
 static int
 getValuatorEvents(DeviceEvent *ev, deviceValuator * xv)
 {
-    int i;
     int state = 0;
     int first_valuator, num_valuators;
 
@@ -448,9 +446,8 @@ getValuatorEvents(DeviceEvent *ev, deviceValuator * xv)
         state |= (dev && dev->button) ? (dev->button->state) : 0;
     }
 
-    for (i = 0; i < num_valuators; i += 6, xv++) {
+    for (int i = 0; i < num_valuators; i += 6, xv++) {
         INT32 *valuators = &xv->valuator0;      // Treat all 6 vals as an array
-        int j;
 
         xv->type = DeviceValuator;
         xv->first_valuator = first_valuator + i;
@@ -460,7 +457,7 @@ getValuatorEvents(DeviceEvent *ev, deviceValuator * xv)
 
         /* Unset valuators in masked valuator events have the proper data values
          * in the case of an absolute axis in between two set valuators. */
-        for (j = 0; j < xv->num_valuators; j++)
+        for (int j = 0; j < xv->num_valuators; j++)
             valuators[j] = ev->valuators.data[xv->first_valuator + j];
 
         if (i + 6 < num_valuators)
@@ -474,7 +471,6 @@ static int
 appendKeyInfo(DeviceChangedEvent *dce, xXIKeyInfo * info)
 {
     uint32_t *kc;
-    int i;
 
     info->type = XIKeyClass;
     info->num_keycodes = dce->keys.max_keycode - dce->keys.min_keycode + 1;
@@ -482,7 +478,7 @@ appendKeyInfo(DeviceChangedEvent *dce, xXIKeyInfo * info)
     info->sourceid = dce->sourceid;
 
     kc = (uint32_t *) &info[1];
-    for (i = 0; i < info->num_keycodes; i++)
+    for (int i = 0; i < info->num_keycodes; i++)
         *kc++ = i + dce->keys.min_keycode;
 
     return info->length * 4;
@@ -581,11 +577,9 @@ eventToDeviceChanged(DeviceChangedEvent *dce, xEvent **xi)
         len += pad_to_int32(bits_to_bytes(dce->buttons.num_buttons));
     }
     if (dce->num_valuators) {
-        int i;
-
         len += sizeof(xXIValuatorInfo) * dce->num_valuators;
 
-        for (i = 0; i < dce->num_valuators; i++)
+        for (int i = 0; i < dce->num_valuators; i++)
             if (dce->valuators[i].scroll.type != SCROLL_TYPE_NONE)
                 len += sizeof(xXIScrollInfo);
     }
@@ -626,13 +620,11 @@ eventToDeviceChanged(DeviceChangedEvent *dce, xEvent **xi)
     }
 
     if (dce->num_valuators) {
-        int i;
-
         dcce->num_classes += dce->num_valuators;
-        for (i = 0; i < dce->num_valuators; i++)
+        for (int i = 0; i < dce->num_valuators; i++)
             ptr += appendValuatorInfo(dce, (xXIValuatorInfo *) ptr, i);
 
-        for (i = 0; i < dce->num_valuators; i++) {
+        for (int i = 0; i < dce->num_valuators; i++) {
             if (dce->valuators[i].scroll.type != SCROLL_TYPE_NONE) {
                 dcce->num_classes++;
                 ptr += appendScrollInfo(dce, (xXIScrollInfo *) ptr, i);
@@ -649,10 +641,9 @@ static int
 count_bits(unsigned char *ptr, int len)
 {
     int bits = 0;
-    unsigned int i;
     unsigned char x;
 
-    for (i = 0; i < len; i++) {
+    for (unsigned int i = 0; i < len; i++) {
         x = ptr[i];
         while (x > 0) {
             bits += (x & 0x1);
@@ -667,7 +658,7 @@ eventToDeviceEvent(DeviceEvent *ev, xEvent **xi)
 {
     int len = sizeof(xXIDeviceEvent);
     xXIDeviceEvent *xde;
-    int i, btlen, vallen;
+    int btlen, vallen;
     char *ptr;
     FP3232 *axisval;
 
@@ -728,14 +719,14 @@ eventToDeviceEvent(DeviceEvent *ev, xEvent **xi)
     xde->group.effective_group = ev->group.effective;
 
     ptr = (char *) &xde[1];
-    for (i = 0; i < sizeof(ev->buttons) * 8; i++) {
+    for (int i = 0; i < sizeof(ev->buttons) * 8; i++) {
         if (BitIsOn(ev->buttons, i))
             SetBit(ptr, i);
     }
 
     ptr += xde->buttons_len * 4;
     axisval = (FP3232 *) (ptr + xde->valuators_len * 4);
-    for (i = 0; i < MAX_VALUATORS; i++) {
+    for (int i = 0; i < MAX_VALUATORS; i++) {
         if (BitIsOn(ev->valuators.mask, i)) {
             SetBit(ptr, i);
             *axisval = double_to_fp3232(ev->valuators.data[i]);
@@ -774,7 +765,7 @@ eventToRawEvent(RawDeviceEvent *ev, xEvent **xi)
 {
     xXIRawEvent *raw;
     int vallen, nvals;
-    int i, len = sizeof(xXIRawEvent);
+    int len = sizeof(xXIRawEvent);
     char *ptr;
     FP3232 *axisval, *axisval_raw;
 
@@ -802,7 +793,7 @@ eventToRawEvent(RawDeviceEvent *ev, xEvent **xi)
     ptr = (char *) &raw[1];
     axisval = (FP3232 *) (ptr + raw->valuators_len * 4);
     axisval_raw = axisval + nvals;
-    for (i = 0; i < MAX_VALUATORS; i++) {
+    for (int i = 0; i < MAX_VALUATORS; i++) {
         if (BitIsOn(ev->valuators.mask, i)) {
             SetBit(ptr, i);
             *axisval = double_to_fp3232(ev->valuators.data[i]);

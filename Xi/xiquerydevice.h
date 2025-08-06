@@ -26,8 +26,6 @@
 #ifndef QUERYDEV_H
 #define QUERYDEV_H 1
 
-#include <dix-config.h>
-
 #include <X11/extensions/XI2proto.h>
 
 int SProcXIQueryDevice(ClientPtr client);

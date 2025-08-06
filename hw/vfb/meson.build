@@ -3,6 +3,7 @@ srcs = [
     'InitOutput.c',
     '../../mi/miinitext.c',
     '../../mi/miinitext.h',
+    '../stubs/ddxBeforeReset.c',
 ]
 
 xvfb_server = executable(

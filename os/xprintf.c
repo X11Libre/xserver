@@ -59,11 +59,13 @@
 #include <dix-config.h>
 
 #include <X11/Xos.h>
-#include "os.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+
+#include "include/os.h"
+#include "include/Xprintf.h"
 
 /**
  * Varargs sprintf that allocates a string buffer the right size for

@@ -23,6 +23,8 @@
 #ifndef _OSPOLL_H_
 #define _OSPOLL_H_
 
+#include <stdbool.h>
+
 /* Forward declaration */
 struct ospoll;
 
@@ -64,7 +66,7 @@ ospoll_destroy(struct ospoll *ospoll);
  * @param       callback        Function to call when triggered
  * @param       data            Extra data to pass callback
  */
-Bool
+bool
 ospoll_add(struct ospoll *ospoll, int fd,
            enum ospoll_trigger trigger,
            void (*callback)(int fd, int xevents, void *data),

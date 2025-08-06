@@ -67,10 +67,8 @@ static void SwapCharInfo(xCharInfo * pInfo);
 void _X_COLD
 Swap32Write(ClientPtr pClient, int size, CARD32 *pbuf)
 {
-    int i;
-
     size >>= 2;
-    for (i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
         /* brackets are mandatory here, because "swapl" macro expands
            to several statements */
     {
@@ -209,7 +207,6 @@ SwapFontInfo(xQueryFontReply * pr)
 void _X_COLD
 SwapFont(xQueryFontReply * pr, Bool hasGlyphs)
 {
-    unsigned i;
     xCharInfo *pxci;
     unsigned nchars, nprops;
     char *pby;
@@ -222,7 +219,7 @@ SwapFont(xQueryFontReply * pr, Bool hasGlyphs)
     pby = (char *) &pr[1];
     /* Font properties are an atom and either an int32 or a CARD32, so
      * they are always 2 4 byte values */
-    for (i = 0; i < nprops; i++) {
+    for (unsigned i = 0; i < nprops; i++) {
         swapl((int *) pby);
         pby += 4;
         swapl((int *) pby);
@@ -230,7 +227,7 @@ SwapFont(xQueryFontReply * pr, Bool hasGlyphs)
     }
     if (hasGlyphs) {
         pxci = (xCharInfo *) pby;
-        for (i = 0; i < nchars; i++, pxci++)
+        for (unsigned i = 0; i < nchars; i++, pxci++)
             SwapCharInfo(pxci);
     }
 }
@@ -659,7 +656,7 @@ SwapVisual(xVisualType * pVis, xVisualType * pVisT)
 void _X_COLD
 SwapConnSetupInfo(char *pInfo, char *pInfoT)
 {
-    int i, j, k;
+    int nbytesVendor;
     xConnSetup *pConnSetup = (xConnSetup *) pInfo;
     xDepth *depth;
     xWindowRoot *root;
@@ -669,30 +666,30 @@ SwapConnSetupInfo(char *pInfo, char *pInfoT)
     pInfoT += sizeof(xConnSetup);
 
     /* Copy the vendor string */
-    i = pad_to_int32(pConnSetup->nbytesVendor);
-    memcpy(pInfoT, pInfo, i);
-    pInfo += i;
-    pInfoT += i;
+    nbytesVendor = pad_to_int32(pConnSetup->nbytesVendor);
+    memcpy(pInfoT, pInfo, nbytesVendor);
+    pInfo += nbytesVendor;
+    pInfoT += nbytesVendor;
 
     /* The Pixmap formats don't need to be swapped, just copied. */
-    i = sizeof(xPixmapFormat) * pConnSetup->numFormats;
-    memcpy(pInfoT, pInfo, i);
-    pInfo += i;
-    pInfoT += i;
+    nbytesVendor = sizeof(xPixmapFormat) * pConnSetup->numFormats;
+    memcpy(pInfoT, pInfo, nbytesVendor);
+    pInfo += nbytesVendor;
+    pInfoT += nbytesVendor;
 
-    for (i = 0; i < pConnSetup->numRoots; i++) {
+    for (int i = 0; i < pConnSetup->numRoots; i++) {
         root = (xWindowRoot *) pInfo;
         SwapWinRoot(root, (xWindowRoot *) pInfoT);
         pInfo += sizeof(xWindowRoot);
         pInfoT += sizeof(xWindowRoot);
 
-        for (j = 0; j < root->nDepths; j++) {
+        for (int j = 0; j < root->nDepths; j++) {
             depth = (xDepth *) pInfo;
             ((xDepth *) pInfoT)->depth = depth->depth;
             cpswaps(depth->nVisuals, ((xDepth *) pInfoT)->nVisuals);
             pInfo += sizeof(xDepth);
             pInfoT += sizeof(xDepth);
-            for (k = 0; k < depth->nVisuals; k++) {
+            for (int k = 0; k < depth->nVisuals; k++) {
                 SwapVisual((xVisualType *) pInfo, (xVisualType *) pInfoT);
                 pInfo += sizeof(xVisualType);
                 pInfoT += sizeof(xVisualType);

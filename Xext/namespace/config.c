@@ -115,6 +115,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         new_token->authTokenLen = strlen(token)/2;
         new_token->authTokenData = calloc(1, new_token->authTokenLen);
         if (!new_token->authTokenData) {
+            free(new_token->authProto);
             free(new_token);
             return;
         }

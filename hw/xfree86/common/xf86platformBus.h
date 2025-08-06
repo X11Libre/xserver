@@ -98,8 +98,6 @@ _xf86_get_platform_device_attrib(struct xf86_platform_device *device, int attrib
 _X_EXPORT int
 _xf86_get_platform_device_int_attrib(struct xf86_platform_device *device, int attrib, int (*fake)[0]);
 
-#ifndef _XORG_CONFIG_H_
-
 /* Protect against a mismatch attribute type by generating a compiler
  * error using a negative array size when an incorrect attribute is
  * passed
@@ -120,8 +118,6 @@ _xf86_get_platform_device_int_attrib(struct xf86_platform_device *device, int at
 #define _ODEV_ATTRIB_INT_CHECK(x,def)           ((int (*)[_ODEV_ATTRIB_IS_INT(x)*_ODEV_ATTRIB_DEFAULT_CHECK(x,def)-1]) 0)
 
 #define xf86_get_platform_device_int_attrib(device, attrib, def) _xf86_get_platform_device_int_attrib(device,attrib,_ODEV_ATTRIB_INT_CHECK(attrib,def))
-
-#endif
 
 extern _X_EXPORT Bool
 xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *busid);

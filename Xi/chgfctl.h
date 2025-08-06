@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef CHGFCTL_H
 #define CHGFCTL_H 1
 
-#include <dix-config.h>
-
 int SProcXChangeFeedbackControl(ClientPtr       /* client */
     );
 

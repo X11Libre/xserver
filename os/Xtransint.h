@@ -187,12 +187,6 @@ typedef struct _Xtransport {
 	int			/* size */
     );
 
-    int	(*Readv)(
-	XtransConnInfo,		/* connection */
-	struct iovec *,		/* buf */
-	int			/* size */
-    );
-
     int	(*Writev)(
 	XtransConnInfo,		/* connection */
 	struct iovec *,		/* buf */
@@ -258,28 +252,6 @@ typedef struct _Xtransport_table {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
-
-/*
- * readv() and writev() don't exist or don't work correctly on some
- * systems, so they may be emulated.
- */
-
-#ifdef WIN32
-
-#define READV(ciptr, iov, iovcnt)	_XSERVTransReadV(ciptr, iov, iovcnt)
-
-static	int _XSERVTransReadV(
-    XtransConnInfo,	/* ciptr */
-    struct iovec *,	/* iov */
-    int			/* iovcnt */
-);
-
-#else
-
-#define READV(ciptr, iov, iovcnt)	readv(ciptr->fd, iov, iovcnt)
-
-#endif /* WIN32 */
-
 
 #ifdef WIN32
 

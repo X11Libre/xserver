@@ -25,8 +25,6 @@
 #ifndef XIPROPERTY_H
 #define XIPROPERTY_H 1
 
-#include <dix-config.h>
-
 int ProcXListDeviceProperties(ClientPtr client);
 int ProcXChangeDeviceProperty(ClientPtr client);
 int ProcXDeleteDeviceProperty(ClientPtr client);

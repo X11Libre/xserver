@@ -9,13 +9,13 @@
 /* Stubs for the static server on platforms that don't support fbdev */
 
 Bool
-fbdevHWProbe(struct pci_device *pPci, char *device, char **namep)
+fbdevHWProbe(struct pci_device *pPci, const char *device, char **namep)
 {
     return FALSE;
 }
 
 Bool
-fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, char *device)
+fbdevHWInit(ScrnInfoPtr pScrn, struct pci_device *pPci, const char *device)
 {
     LogMessageVerb(X_ERROR, 1, "fbdevhw is not available on this platform\n");
     return FALSE;

@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef GRABDEVB_H
 #define GRABDEVB_H 1
 
-#include <dix-config.h>
-
 int SProcXGrabDeviceButton(ClientPtr    /* client */
     );
 

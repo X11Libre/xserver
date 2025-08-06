@@ -28,7 +28,7 @@ typedef struct _XvPortNotifyRec {
     struct _XvPortNotifyRec *next;
     ClientPtr client;
     unsigned long id;
-} XvPortNotifyRec, *XvPortNotifyPtr;
+} XvPortNotifyRec;
 
 extern int XvReqCode;
 extern int XvErrorBase;

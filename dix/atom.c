@@ -76,12 +76,11 @@ Atom
 MakeAtom(const char *string, unsigned len, Bool makeit)
 {
     NodePtr *np;
-    unsigned i;
     int comp;
     unsigned int fp = 0;
 
     np = &atomRoot;
-    for (i = 0; i < (len + 1) / 2; i++) {
+    for (unsigned int i = 0; i < (len + 1) / 2; i++) {
         fp = fp * 27 + string[i];
         fp = fp * 27 + string[len - 1 - i];
     }

@@ -28,8 +28,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * Globals referenced elsewhere in the server.
  *
  */
-#include <dix-config.h>
-
 #include "privates.h"
 
 #ifndef EXGLOBALS_H

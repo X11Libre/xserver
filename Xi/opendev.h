@@ -25,8 +25,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef OPENDEV_H
 #define OPENDEV_H 1
 
-#include <dix-config.h>
-
 int ProcXOpenDevice(ClientPtr   /* client */
     );
 

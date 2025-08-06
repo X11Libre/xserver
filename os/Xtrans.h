@@ -113,7 +113,7 @@ typedef long BytesReadable_t;
 #if defined(WIN32)
 
 /*
- *      _XSERVTransReadv and _XSERVTransWritev use struct iovec, normally found
+ *      _XSERVTransWritev use struct iovec, normally found
  *      in Berkeley systems in <sys/uio.h>.  See the readv(2) and writev(2)
  *      manual pages for details.
  */
@@ -128,15 +128,6 @@ struct iovec {
 #endif
 
 typedef struct _XtransConnInfo *XtransConnInfo;
-
-
-/*
- * Transport Option definitions
- */
-
-#define TRANS_NONBLOCKING	1
-#define	TRANS_CLOSEONEXEC	2
-
 
 /*
  * Return values of Connect (0 is success)
@@ -191,11 +182,13 @@ XtransConnInfo _XSERVTransReopenCOTSServer(
     const char *	/* port */
 );
 
-int _XSERVTransSetOption(
-    XtransConnInfo,	/* ciptr */
-    int,		/* option */
-    int			/* arg */
-);
+/*
+ * set connection to non-blocking mode
+ *
+ * @param conn      the connection to set to non-blocking mode
+ * @return zero on success or errno value
+ */
+int _XSERVTransNonBlock(XtransConnInfo conn);
 
 int _XSERVTransCreateListener(
     XtransConnInfo,	/* ciptr */
@@ -242,12 +235,6 @@ int _XSERVTransRead (
 int _XSERVTransWrite (
     XtransConnInfo,	/* ciptr */
     const char *,	/* buf */
-    int			/* size */
-);
-
-int _XSERVTransReadv (
-    XtransConnInfo,	/* ciptr */
-    struct iovec *,	/* buf */
     int			/* size */
 );
 
