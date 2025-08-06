@@ -671,6 +671,27 @@ AbortClient(ClientPtr client)
 }
 
 /*
+ * make sure we have an output buffer in the OsComm
+ */
+static bool OutputEnsureBuffer(ClientPtr who, OsCommPtr oc)
+{
+    if (oc->output)
+        return true;
+
+    if ((oc->output = FreeOutputs)) {
+        FreeOutputs = oc->output->next;
+        return true;
+    }
+
+    if ((oc->output = AllocateOutputBuffer()))
+        return true;
+
+    AbortClient(who);
+    dixMarkClientException(who);
+    return false;
+}
+
+/*
  * try to make room in the output buffer:
  * if not enough room, try to flush first.
  * if that's not giving enough room, increase the buffer size
@@ -680,16 +701,21 @@ static bool OutputBufferMakeRoom(ClientPtr who, OsCommPtr oc, size_t sz)
     const size_t padsize = padding_for_int32(sz);
     const size_t needed = sz + padsize;
 
-    ConnectionOutputPtr oco = oc->output;
+    if (oc->output) {
+        /* check whether it already fits into buffer */
+        if (oc->output->count + needed <= oc->output->size)
+            return true;
 
-    /* check whether it already fits into buffer */
-    if (oco->count + needed <= oco->size)
-        return true;
+        /* try flushing the buffer */
+        int ret = FlushClient(who, oc);
+        if (ret == -1) /* client was aborted */
+            return false;
+    }
 
-    /* try flushing the buffer */
-    int ret = FlushClient(who, oc);
-    if (ret == -1) /* client was aborted */
+    if (!OutputEnsureBuffer(who, oc))
         return false;
+
+    ConnectionOutputPtr oco = oc->output;
 
     /* does it fit this time ? */
     if (oco->count + needed <= oco->size)
@@ -703,7 +729,7 @@ static bool OutputBufferMakeRoom(ClientPtr who, OsCommPtr oc, size_t sz)
         AbortClient(who);
         dixMarkClientException(who);
         oco->count = 0;
-        return FALSE;
+        return false;
     }
 
     oco->buf = newbuf;
@@ -726,7 +752,6 @@ int
 WriteToClient(ClientPtr who, int count, const void *__buf)
 {
     OsCommPtr oc;
-    ConnectionOutputPtr oco;
     int padBytes;
     const char *buf = __buf;
 
@@ -739,7 +764,6 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
     if (!count || !who || who == serverClient || who->clientGone)
         return 0;
     oc = who->osPrivate;
-    oco = oc->output;
 #ifdef DEBUG_COMMUNICATION
     {
         char info[128];
@@ -780,18 +804,6 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
             multicount = TRUE;
     }
 #endif
-
-    if (!oco) {
-        if ((oco = FreeOutputs)) {
-            FreeOutputs = oco->next;
-        }
-        else if (!(oco = AllocateOutputBuffer())) {
-            AbortClient(who);
-            dixMarkClientException(who);
-            return -1;
-        }
-        oc->output = oco;
-    }
 
     padBytes = padding_for_int32(count);
 
@@ -835,6 +847,12 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
         }
     }
 #endif
+
+    if (!OutputEnsureBuffer(who, oc))
+        return -1;
+
+    ConnectionOutputPtr oco = oc->output;
+
     if ((oco->count == 0 && who->local) || oco->count + count + padBytes > oco->size) {
         output_pending_clear(who);
         if (!any_output_pending()) {
@@ -846,6 +864,8 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
     /* if we fail to make room, the client will be aborted */
     if (!OutputBufferMakeRoom(who, oc, count))
         return -1;
+
+    oco = oc->output;
 
     NewOutputPending = TRUE;
     output_pending_mark(who);
