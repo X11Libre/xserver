@@ -351,8 +351,7 @@ KdPointerProc(DeviceIntPtr pDevice, int onoff)
     return BadImplementation;
 }
 
-static void
-KdRingBell(KdKeyboardInfo * ki, int volume, int pitch, int duration)
+void KdRingBell(KdKeyboardInfo * ki, int volume, int pitch, int duration)
 {
     if (!ki || !ki->driver || !ki->driver->Bell)
         return;
@@ -406,8 +405,7 @@ KdSetLeds(KdKeyboardInfo * ki, int leds)
     }
 }
 
-static void
-KdSetLed(KdKeyboardInfo * ki, int led, Bool on)
+void KdSetLed(KdKeyboardInfo * ki, int led, Bool on)
 {
     if (!ki || !ki->dixdev || !ki->dixdev->kbdfeed)
         return;
@@ -930,8 +928,7 @@ KdParseKbdOptions(KdKeyboardInfo * ki)
     }
 }
 
-static KdKeyboardInfo *
-KdParseKeyboard(const char *arg)
+KdKeyboardInfo *KdParseKeyboard(const char *arg)
 {
     char save[1024];
     char delim;
@@ -1050,9 +1047,7 @@ KdParsePointerOptions(KdPointerInfo * pi)
  *      2button     emulate middle button
  *      {NMO}       Reorder buttons
  */
-
-static KdPointerInfo *
-KdParsePointer(const char *arg)
+KdPointerInfo *KdParsePointer(const char *arg)
 {
     char save[1024];
     char delim;
@@ -1527,9 +1522,6 @@ KdClassifyInput(KdPointerInfo * pi, int type, int x, int y, int z, int b)
     return keyboard;
 }
 
-static void
-_KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
-                       int b, int absrel, Bool force);
 /* We return true if we're stealing the event. */
 static Bool
 KdRunMouseMachine(KdPointerInfo * pi, KdInputClass c, int type, int x, int y,
@@ -1603,9 +1595,8 @@ KdHandlePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z, int b,
     return FALSE;
 }
 
-static void
-_KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
-                       int b, int absrel, Bool force)
+void _KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
+                            int b, int absrel, Bool force)
 {
     int valuators[3] = { x, y, z };
     ValuatorMask mask;
