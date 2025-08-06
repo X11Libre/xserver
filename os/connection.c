@@ -784,7 +784,7 @@ CloseDownConnection(ClientPtr client)
         CallCallbacks(&FlushCallback, client);
 
     if (oc->output)
-	FlushClient(client, oc);
+	FlushClient(client, oc, (char *) NULL, 0);
     CloseDownFileDescriptor(oc);
     FreeOsBuffers(oc);
     free(client->osPrivate);

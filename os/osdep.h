@@ -95,7 +95,11 @@ typedef struct _osComm {
 #define OS_COMM_GRAB_IMPERVIOUS 1
 #define OS_COMM_IGNORED         2
 
-int FlushClient(ClientPtr who, OsCommPtr oc);
+extern int FlushClient(ClientPtr /*who */ ,
+                       OsCommPtr /*oc */ ,
+                       const void * /*extraBuf */ ,
+                       int      /*extraCount */
+    );
 
 extern void FreeOsBuffers(OsCommPtr     /*oc */
     );
