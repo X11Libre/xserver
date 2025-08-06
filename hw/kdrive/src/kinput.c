@@ -1524,9 +1524,6 @@ KdClassifyInput(KdPointerInfo * pi, int type, int x, int y, int z, int b)
     return keyboard;
 }
 
-static void
-_KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
-                       int b, int absrel, Bool force);
 /* We return true if we're stealing the event. */
 static Bool
 KdRunMouseMachine(KdPointerInfo * pi, KdInputClass c, int type, int x, int y,
@@ -1600,9 +1597,8 @@ KdHandlePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z, int b,
     return FALSE;
 }
 
-static void
-_KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
-                       int b, int absrel, Bool force)
+void _KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
+                            int b, int absrel, Bool force)
 {
     int valuators[3] = { x, y, z };
     ValuatorMask mask;

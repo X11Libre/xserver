@@ -445,6 +445,9 @@ void
 KdEnqueuePointerEvent(KdPointerInfo * pi, unsigned long flags, int rx, int ry,
                       int rz);
 
+void _KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
+                            int b, int absrel, Bool force);
+
 void
  KdSetPointerMatrix(KdPointerMatrix *pointer);
 
