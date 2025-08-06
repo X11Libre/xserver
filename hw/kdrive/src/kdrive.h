@@ -469,6 +469,8 @@ void
 void
  KdEnableInput(void);
 
+void KdRingBell(KdKeyboardInfo * ki, int volume, int pitch, int duration);
+
 /* kshadow.c */
 Bool
  KdShadowFbAlloc(KdScreenInfo * screen, Bool rotate);

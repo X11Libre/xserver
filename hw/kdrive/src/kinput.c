@@ -351,8 +351,7 @@ KdPointerProc(DeviceIntPtr pDevice, int onoff)
     return BadImplementation;
 }
 
-static void
-KdRingBell(KdKeyboardInfo * ki, int volume, int pitch, int duration)
+void KdRingBell(KdKeyboardInfo * ki, int volume, int pitch, int duration)
 {
     if (!ki || !ki->driver || !ki->driver->Bell)
         return;
