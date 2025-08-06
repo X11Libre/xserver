@@ -693,8 +693,7 @@ KdSetSubpixelOrder(ScreenPtr pScreen, Rotation randr)
 /* Pass through AddScreen, which doesn't take any closure */
 static KdScreenInfo *kdCurrentScreen;
 
-static Bool
-KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
+Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
     KdScreenInfo *screen = kdCurrentScreen;
     KdCardInfo *card = screen->card;
