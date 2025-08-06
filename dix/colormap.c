@@ -1642,6 +1642,8 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
 {
     Pixel *ppixRed, *ppixGreen, *ppixBlue;
     Pixel *ppix;
+    Pixel *p;       // loop iterator for pixel arrays
+    Pixel *pDst;    // pointer into the destination 'pixels' array
     int npixR, npixG, npixB;
     Bool okR, okG, okB;
     Pixel *rpix = 0, *gpix = 0, *bpix = 0;
