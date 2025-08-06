@@ -406,8 +406,7 @@ KdSetLeds(KdKeyboardInfo * ki, int leds)
     }
 }
 
-static void
-KdSetLed(KdKeyboardInfo * ki, int led, Bool on)
+void KdSetLed(KdKeyboardInfo * ki, int led, Bool on)
 {
     if (!ki || !ki->dixdev || !ki->dixdev->kbdfeed)
         return;

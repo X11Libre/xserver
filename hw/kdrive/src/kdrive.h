@@ -448,6 +448,8 @@ KdEnqueuePointerEvent(KdPointerInfo * pi, unsigned long flags, int rx, int ry,
 void _KdEnqueuePointerEvent(KdPointerInfo * pi, int type, int x, int y, int z,
                             int b, int absrel, Bool force);
 
+void KdSetLed(KdKeyboardInfo * ki, int led, Bool on);
+
 void
  KdSetPointerMatrix(KdPointerMatrix *pointer);
 
