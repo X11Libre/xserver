@@ -389,6 +389,8 @@ void KdOsInit(const KdOsFuncs * pOsFuncs);
 void
  KdOsAddInputDrivers(void);
 
+Bool KdAllocatePrivates(ScreenPtr pScreen);
+
 void
  KdInitCard(ScreenInfo * pScreenInfo, KdCardInfo * card, int argc, char **argv);
 

@@ -539,8 +539,7 @@ KdOsInit(const KdOsFuncs * pOsFuncs)
     }
 }
 
-static Bool
-KdAllocatePrivates(ScreenPtr pScreen)
+Bool KdAllocatePrivates(ScreenPtr pScreen)
 {
     KdPrivScreenPtr pScreenPriv;
 
