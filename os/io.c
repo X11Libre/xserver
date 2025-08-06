@@ -631,7 +631,7 @@ FlushAllOutput(void)
             continue;
         if (!client_is_ready(client)) {
             oc = (OsCommPtr) client->osPrivate;
-            (void) FlushClient(client, oc);
+            FlushClient(client, oc);
         } else
             NewOutputPending = TRUE;
     }
@@ -932,19 +932,14 @@ FlushClient(ClientPtr who, OsCommPtr oc)
                the rest. */
             output_pending_mark(who);
 
-            if (written < oco->count) {
-                if (written > 0) {
-                    oco->count -= written;
-                    memmove((char *) oco->buf,
-                            (char *) oco->buf + written, oco->count);
-                    written = 0;
-                }
-            }
-            else {
-                written -= oco->count;
-                oco->count = 0;
+            if (written > 0) {
+                oco->count -= written;
+                memmove((char *) oco->buf,
+                        (char *) oco->buf + written, oco->count);
+                written = 0;
             }
 
+            oco->count = notWritten;
             ospoll_listen(server_poll, oc->fd, X_NOTIFY_WRITE);
 
             /* return only the amount explicitly requested */
