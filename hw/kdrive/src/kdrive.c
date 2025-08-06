@@ -136,8 +136,7 @@ KdDoSwitchCmd(const char *reason)
     }
 }
 
-static void
-KdSuspend(void)
+void KdSuspend(void)
 {
     KdCardInfo *card;
     KdScreenInfo *screen;
