@@ -4451,10 +4451,21 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 
     drmmode_probe_cursor_size(xf86_config->crtc[0]);
 
+    /* probe for cursor pitch, using minimum pixel size and then assuming
+       that pitch for other sizes is always max(min_cursor_pitch_px, cursor_width) */
+
+    struct dumb_bo *bo = dumb_bo_create(drmmode->fd,ms->min_cursor_width, ms->min_cursor_height, bpp);
+
+    ms->min_cursor_pitch_px = bo->pitch / (bpp / 8);
+
+    dumb_bo_destroy(drmmode->fd, bo);
+
+
     xf86DrvMsgVerb(pScrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
-                   "Supported cursor sizes %dx%d -> %dx%d\n",
+                   "Supported cursor sizes %dx%d -> %dx%d (minimum pitch %d px)\n",
                    ms->min_cursor_width, ms->min_cursor_height,
-                   ms->max_cursor_width, ms->max_cursor_height);
+                   ms->max_cursor_width, ms->max_cursor_height,
+                   ms->min_cursor_pitch_px);
 
     return TRUE;
 }
