@@ -754,14 +754,14 @@ static int _XSERVTransLocalRead(XtransConnInfo ciptr, char *buf, int size)
     return read(ciptr->fd,buf,size);
 }
 
-static int _XSERVTransLocalWrite(XtransConnInfo ciptr, const char *buf, int size)
+static ssize_t _XSERVTransLocalWrite(XtransConnInfo ciptr, const char *buf, size_t size)
 {
     prmsg(2,"LocalWrite(%d,%p,%d)\n", ciptr->fd, (const void *) buf, size );
 
     return write(ciptr->fd,buf,size);
 }
 
-static int _XSERVTransLocalWritev(XtransConnInfo ciptr, struct iovec *buf, int size)
+static ssize_t _XSERVTransLocalWritev(XtransConnInfo ciptr, struct iovec *buf, int size)
 {
     prmsg(2,"LocalWritev(%d,%p,%d)\n", ciptr->fd, (const void *) buf, size );
 

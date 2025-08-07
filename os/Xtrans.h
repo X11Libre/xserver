@@ -232,13 +232,13 @@ int _XSERVTransRead (
     int			/* size */
 );
 
-int _XSERVTransWrite (
+ssize_t _XSERVTransWrite (
     XtransConnInfo,	/* ciptr */
     const char *,	/* buf */
-    int			/* size */
+    size_t		/* size */
 );
 
-int _XSERVTransWritev (
+ssize_t _XSERVTransWritev (
     XtransConnInfo,	/* ciptr */
     struct iovec *,	/* buf */
     int			/* size */

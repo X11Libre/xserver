@@ -181,13 +181,13 @@ typedef struct _Xtransport {
 	int			/* size */
     );
 
-    int	(*Write)(
+    ssize_t	(*Write)(
 	XtransConnInfo,		/* connection */
 	const char *,		/* buf */
-	int			/* size */
+	size_t			/* size */
     );
 
-    int	(*Writev)(
+    ssize_t	(*Writev)(
 	XtransConnInfo,		/* connection */
 	struct iovec *,		/* buf */
 	int			/* size */

@@ -1337,7 +1337,7 @@ static int _XSERVTransSocketRead (
 #endif /* WIN32 */
 }
 
-static int _XSERVTransSocketWritev (
+static ssize_t _XSERVTransSocketWritev (
     XtransConnInfo ciptr, struct iovec *buf, int size)
 {
     prmsg (2,"SocketWritev(%d,%p,%d)\n", ciptr->fd, (void *) buf, size);
@@ -1357,7 +1357,7 @@ static int _XSERVTransSocketWritev (
             .msg_controllen = CMSG_LEN(nfd * sizeof(int))
         };
         struct cmsghdr          *hdr = CMSG_FIRSTHDR(&msg);
-        int                     i;
+        ssize_t                 i;
         int                     *fds;
 
         hdr->cmsg_len = msg.msg_controllen;
@@ -1380,17 +1380,15 @@ static int _XSERVTransSocketWritev (
     return WRITEV (ciptr, buf, size);
 }
 
-static int _XSERVTransSocketWrite (
-    XtransConnInfo ciptr, const char *buf, int size)
+static ssize_t _XSERVTransSocketWrite (
+    XtransConnInfo ciptr, const char *buf, size_t size)
 {
-    prmsg (2,"SocketWrite(%d,%p,%d)\n", ciptr->fd, (const void *) buf, size);
+    prmsg (2,"SocketWrite(%d,%p,%lu)\n", ciptr->fd, (const void *) buf, (unsigned long)size);
 
-#if defined(WIN32)
-    {
-	int ret = send ((SOCKET)ciptr->fd, buf, size, 0);
 #ifdef WIN32
+    {
+	ssize_t ret = send ((SOCKET)ciptr->fd, buf, size, 0);
 	if (ret == SOCKET_ERROR) errno = WSAGetLastError();
-#endif
 	return ret;
     }
 #else
