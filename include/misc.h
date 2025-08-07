@@ -193,8 +193,8 @@ bits_to_bytes(const int bits)
  * @param bytes The minimum number of bytes needed.
  * @return The number of 4-byte units needed to hold bytes.
  */
-static inline int
-bytes_to_int32(const int bytes)
+static inline size_t
+bytes_to_int32(const size_t bytes)
 {
     return (((bytes) + 3) >> 2);
 }
