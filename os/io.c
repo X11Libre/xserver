@@ -928,20 +928,14 @@ FlushClient(ClientPtr who, OsCommPtr oc)
     if (FlushCallback)
         CallCallbacks(&FlushCallback, who);
 
-    size_t todo = notWritten; /* trying to write that much this time */
     while (notWritten) {
         errno = 0;
-        ssize_t len = _XSERVTransWrite(trans_conn, ((const char*)oco->buf) + written, todo);
+        ssize_t len = _XSERVTransWrite(trans_conn, ((const char*)oco->buf) + written, notWritten);
         if (len >= 0) {
             written += len;
             notWritten -= len;
-            todo = notWritten;
         }
-        else if (ETEST(errno)
-#ifdef EMSGSIZE                 /* check for another brain-damaged OS bug */
-                 || ((errno == EMSGSIZE) && (todo == 1))
-#endif
-            ) {
+        else if (ETEST(errno)) {
             /* If we've arrived here, then the client is stuffed to the gills
                and not ready to accept more.  Make a note of it and buffer
                the rest. */
@@ -960,12 +954,6 @@ FlushClient(ClientPtr who, OsCommPtr oc)
             /* return only the amount explicitly requested */
             return 0;
         }
-#ifdef EMSGSIZE                 /* check for another brain-damaged OS bug */
-        else if (errno == EMSGSIZE) {
-            /* making separate try with half of the size */
-            todo /= 2;
-        }
-#endif
         else {
             goto abortClient;
         }
