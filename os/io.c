@@ -948,7 +948,7 @@ FlushClient(ClientPtr who, OsCommPtr oc)
 #ifdef EMSGSIZE                 /* check for another brain-damaged OS bug */
         else if (errno == EMSGSIZE) {
             /* making separate try with half of the size */
-            todo >>= 1;
+            todo /= 2;
         }
 #endif
         else {
