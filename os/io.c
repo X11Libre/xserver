@@ -916,7 +916,7 @@ FlushClient(ClientPtr who, OsCommPtr oc)
     size_t todo = notWritten; /* trying to write that much this time */
     while (notWritten) {
         errno = 0;
-        size_t len = _XSERVTransWrite(trans_conn, (const char*)oco->buf + written, todo);
+        ssize_t len = _XSERVTransWrite(trans_conn, ((const char*)oco->buf) + written, todo);
         if (len >= 0) {
             written += len;
             notWritten -= len;
