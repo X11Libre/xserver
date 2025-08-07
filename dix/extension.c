@@ -72,7 +72,7 @@ static ExtensionEntry **extensions = (ExtensionEntry **) NULL;
 
 int lastEvent = EXTENSION_EVENT_BASE;
 static int lastError = FirstExtensionError;
-static unsigned int NumExtensions = RESERVED_EXTENSIONS;
+static size_t NumExtensions = RESERVED_EXTENSIONS;
 
 static struct { const char *name; int id; } reservedExt[] = {
     { "BIG-REQUESTS",               EXTENSION_MAJOR_BIG_REQUESTS },
@@ -115,7 +115,7 @@ static struct { const char *name; int id; } reservedExt[] = {
 
 static int checkReserved(const char* name)
 {
-    for (int i=0; i<ARRAY_SIZE(reservedExt); i++) {
+    for (size_t i=0; i<ARRAY_SIZE(reservedExt); i++) {
         if (strcmp(name, reservedExt[i].name) == 0) {
             if (reservedExt[i].id < (RESERVED_EXTENSIONS + EXTENSION_BASE))
                 return reservedExt[i].id;
@@ -155,26 +155,28 @@ AddExtension(const char *name, int NumEvents, int NumErrors,
     if (!ext->name)
         goto badalloc;
 
-    int i = checkReserved(ext->name);
-    if (i == -1) {
-        i = NumExtensions;
-        ExtensionEntry **newexts = reallocarray(extensions, i + 1, sizeof(ExtensionEntry *));
+    int ret = checkReserved(ext->name);
+    size_t idx;
+    if (ret < 0) {
+        idx = NumExtensions;
+        ExtensionEntry **newexts = reallocarray(extensions, idx + 1, sizeof(ExtensionEntry *));
         if (!newexts)
             goto badalloc;
 
         NumExtensions++;
         extensions = newexts;
     } else {
-        i = i - EXTENSION_BASE;
+        /* ret is always >= EXTENSION_BASE */
+        idx = (size_t) ret - EXTENSION_BASE;
     }
 
-    extensions[i] = ext;
-    ext->index = i;
-    ext->base = i + EXTENSION_BASE;
+    extensions[idx] = ext;
+    ext->index = (int)idx;
+    ext->base = (int)idx + EXTENSION_BASE;
     ext->CloseDown = CloseDownProc;
     ext->MinorOpcode = MinorOpcodeProc;
-    ProcVector[i + EXTENSION_BASE] = MainProc;
-    SwappedProcVector[i + EXTENSION_BASE] = SwappedMainProc;
+    ProcVector[idx + EXTENSION_BASE] = MainProc;
+    SwappedProcVector[idx + EXTENSION_BASE] = SwappedMainProc;
     if (NumEvents) {
         ext->eventBase = lastEvent;
         ext->eventLast = lastEvent + NumEvents;
@@ -218,7 +220,7 @@ CheckExtension(const char *extname)
     if (!extensions)
         return NULL;
 
-    for (int i = 0; i < NumExtensions; i++) {
+    for (size_t i = 0; i < NumExtensions; i++) {
         if (extensions[i] &&
             extensions[i]->name &&
             strcmp(extensions[i]->name, extname) == 0) {
@@ -232,8 +234,9 @@ CheckExtension(const char *extname)
  * Added as part of Xace.
  */
 ExtensionEntry *
-GetExtensionEntry(int major)
+GetExtensionEntry(int imajor)
 {
+    size_t major = (size_t)imajor;
     if ((major < EXTENSION_BASE) || !extensions)
         return NULL;
     major -= EXTENSION_BASE;
@@ -254,7 +257,7 @@ CloseDownExtensions(void)
     if (!extensions)
         return;
 
-    for (int i = NumExtensions - 1; i >= 0; i--) {
+    for (size_t i = NumExtensions - 1; i >= 0; i--) {
         if (!extensions[i])
             continue;
         if (extensions[i]->CloseDown)
