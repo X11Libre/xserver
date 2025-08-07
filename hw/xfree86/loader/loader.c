@@ -68,6 +68,9 @@
 extern void *xorg_symbols[];
 #endif
 
+Bool LoaderIgnoresAllABI;
+Bool LoaderIgnoresABI;
+
 void
 LoaderInit(void)
 {
@@ -87,6 +90,8 @@ LoaderInit(void)
     LogMessageVerb(X_NONE, 2, "\t%s : %d.%d\n", ABI_CLASS_EXTENSION,
                    GET_ABI_MAJOR(LoaderVersionInfo.extensionVersion),
                    GET_ABI_MINOR(LoaderVersionInfo.extensionVersion));
+    LoaderIgnoresAllABI = FALSE;
+    LoaderIgnoresABI = FALSE;
 }
 
 /* Public Interface to the loader. */
@@ -146,18 +151,29 @@ LoaderUnload(const char *name, void *handle)
         dlclose(handle);
 }
 
-unsigned long LoaderOptions = 0;
+void
+LoaderSetIgnoreAllABI(void)
+{
+    LoaderIgnoresAllABI = TRUE;
+}
+
+Bool
+LoaderGetAndFlagIgnoreABI(const char *name)
+{
+    if (LoaderIgnoresAllABI)
+        LoaderIgnoresABI = TRUE;
+    return LoaderIgnoresABI;
+}
 
 void
-LoaderSetOptions(unsigned long opts)
+LoaderSetIgnoreABI(const char *name)
 {
-    LoaderOptions |= opts;
 }
 
 Bool
 LoaderShouldIgnoreABI(void)
 {
-    return (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL) != 0;
+    return LoaderIgnoresABI;
 }
 
 int

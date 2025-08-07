@@ -458,26 +458,26 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
             vermin = GET_ABI_MINOR(ver);
             if (abimaj != vermaj) {
                 MessageType errtype;
-                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
+                if (LoaderIgnoresABI)
                     errtype = X_WARNING;
                 else
                     errtype = X_ERROR;
                 LogMessageVerb(errtype, 0, "%s: module ABI major version (%d) "
                                "doesn't match the server's version (%d)\n",
                                module, abimaj, vermaj);
-                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                if (!LoaderIgnoresABI)
                     return FALSE;
             }
             else if (abimin > vermin) {
                 MessageType errtype;
-                if (LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL)
+                if (LoaderIgnoresABI)
                     errtype = X_WARNING;
                 else
                     errtype = X_ERROR;
                 LogMessageVerb(errtype, 0, "%s: module ABI minor version (%d) "
                                "is newer than the server's version (%d)\n",
                                module, abimin, vermin);
-                if (!(LoaderOptions & LDR_OPT_ABI_MISMATCH_NONFATAL))
+                if (!LoaderIgnoresABI)
                     return FALSE;
             }
         }
@@ -777,6 +777,9 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
         vers = initdata->vers;
         setup = initdata->setup;
         teardown = initdata->teardown;
+
+        if (LoaderGetAndFlagIgnoreABI(name))
+            LogMessageVerb(X_INFO, 3, "ABI ignored for module \"%s\"\n", name);
 
         if (vers) {
             if (!CheckVersion(module, vers, modreq)) {

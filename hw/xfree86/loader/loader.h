@@ -68,7 +68,8 @@ typedef struct {
 } ModuleVersions;
 extern const ModuleVersions LoaderVersionInfo;
 
-extern unsigned long LoaderOptions;
+extern Bool LoaderIgnoresAllABI;
+extern Bool LoaderIgnoresABI;
 
 /* Internal Functions */
 void *LoaderOpen(const char *, int *);
