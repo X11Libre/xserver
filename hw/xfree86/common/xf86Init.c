@@ -931,6 +931,10 @@ ddxProcessArgument(int argc, char **argv, int i)
         xf86LogFileFrom = X_CMDLINE;
         return 2;
     }
+    if (!strcmp(argv[i], "-noXDGconfig")) {
+        xf86UseXDGConfig = FALSE;
+        return 1;
+    }
     if (!strcmp(argv[i], "-config") || !strcmp(argv[i], "-xf86config")) {
         CHECK_FOR_REQUIRED_ARGUMENTS(1);
         xf86CheckPrivs(argv[i], argv[i + 1]);

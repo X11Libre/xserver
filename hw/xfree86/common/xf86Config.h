@@ -72,6 +72,7 @@ void xf86SetLogVerbosity(int verb);
 
 extern confDRIRec xf86ConfigDRI;
 
+extern Bool xf86UseXDGConfig;
 extern const char *xf86ConfigFile;
 extern const char *xf86ConfigDir;
 

@@ -69,6 +69,7 @@
 #include "xf86Xinput.h"
 #include "loaderProcs.h"
 #include "xf86Xinput_priv.h"
+#include "xf86_os_support.h"
 
 #include "picture.h"
 #ifdef DPMSExtension
@@ -2335,6 +2336,21 @@ xf86HandleConfigFile(Bool autoconfig)
                                             PROJECTROOT);
         dirname = xf86openConfigDirFiles(dirsearch, xf86ConfigDir, PROJECTROOT);
         filename = xf86openConfigFile(filesearch, xf86ConfigFile, PROJECTROOT);
+
+        if(xf86UseXDGConfig) {
+            char userdir[PATH_MAX] = {0};
+            GetXDGConfigPath(userdir);
+            if (userdir[0]) {
+                size_t userdirlen = strlen(userdir);
+                Bool endsWithSlash =  userdir[userdirlen] == '/';
+                strncat(userdir, endsWithSlash ? "X11/%X" : "/X11/%X", PATH_MAX-1);
+                userdir[PATH_MAX-1] = '\0';
+                char* userdirname = xf86openConfigDirFiles(userdir, NULL, PROJECTROOT);
+                if (userdirname) {
+                    LogMessageVerb(X_NOTICE, 0, "Using user config dir: \"%s\"\n", userdirname);
+                }
+            }
+        }
         if (filename) {
             LogMessageVerb(filefrom, 0, "Using config file: \"%s\"\n", filename);
             xf86ConfigFile = XNFstrdup(filename);
