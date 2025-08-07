@@ -69,6 +69,7 @@ typedef struct module_desc {
 /* External API for the loader */
 
 void LoaderInit(void);
+void LoaderClose(void);
 
 ModuleDescPtr LoadModule(const char *, void *, const XF86ModReqInfo *, int *);
 ModuleDescPtr DuplicateModule(ModuleDescPtr mod, ModuleDescPtr parent);
