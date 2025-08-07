@@ -880,10 +880,7 @@ FlushClient(ClientPtr who, OsCommPtr oc)
 
     if (!trans_conn) {
         /* uh, transport not connected ? can only kill the client :( */
-        AbortClient(who);
-        dixMarkClientException(who);
-        oco->count = 0;
-        return -1;
+        goto abortClient;
     }
 
     size_t written = 0;
@@ -940,10 +937,7 @@ FlushClient(ClientPtr who, OsCommPtr oc)
         }
 #endif
         else {
-            AbortClient(who);
-            dixMarkClientException(who);
-            oco->count = 0;
-            return -1;
+            goto abortClient;
         }
     }
 
@@ -961,6 +955,12 @@ FlushClient(ClientPtr who, OsCommPtr oc)
     }
     oc->output = (ConnectionOutputPtr) NULL;
     return 0;          /* return only the amount explicitly requested */
+
+abortClient:
+    AbortClient(who);
+    dixMarkClientException(who);
+    oco->count = 0;
+    return -1;
 }
 
 static ConnectionInputPtr
