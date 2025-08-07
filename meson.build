@@ -14,6 +14,8 @@ cc = meson.get_compiler('c')
 add_project_arguments('-fno-strict-aliasing', language : 'c')
 add_project_arguments('-fvisibility=hidden', language : 'c')
 add_project_arguments('-Wvla', language: 'c')
+add_project_arguments('-Wconversion', language: 'c')
+add_project_arguments('-Wsign-compare', language: 'c')
 
 add_project_link_arguments('-fvisibility=hidden', language : 'c')
 
