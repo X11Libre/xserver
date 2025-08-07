@@ -1292,11 +1292,11 @@ When an output device has been matched to the
 .B OutputClass
 section, any
 .B Option
-entries are applied to the device. One
+entries are applied to the device. Three
 .B OutputClass
-specific
+specific kinds of
 .B Option
-is recognized. See the
+are recognized. See the
 .B Device
 section below for a description of the remaining
 .B Option
@@ -1321,7 +1321,7 @@ If multiple output devices match an
 section with the
 .B HotplugDriver
 option, the first one enumerated becomes the hotplug driver.
-A
+An
 .B OutputClass
 Section may contain
 .B ModulePath
@@ -1336,6 +1336,31 @@ are pre-pended to the search path for loadable Xorg server modules. See
 in the
 .B Files
 section for more info.
+.TP 7
+.BI "Option \*qIgnoreABI\*q \*q" boolean \*q
+If set, this option makes driver loader ignore module ABI, which may be necessary
+to use legacy proprietary NVidia drivers. If
+.PP
+.RS 7
+.nf
+.B  "Section \*qOutputClass\*q"
+.BI  "    Identifier  \*q" AnyName \*q
+.BI  "    MatchDriver  \*q" drm_driver \*q
+.BI  "    Driver  \*q" X_driver \*q
+.BI  "    Option  \*q" IgnoreABI \*q
+.B  "EndSection
+.fi
+.RE
+.PP
+.RS 7
+appears, and a DRM device with a kernel
+.I drm_driver
+is found, then
+.I X_driver
+for it will be loaded regardless of its ABI version. Please note that this has
+no effect if DRM for a GPU is not enabled. See
+.IR /usr/share/X11/xorg.conf.d/10-nvidia.conf
+for an example.
 .SH "DEVICE SECTION"
 The config file may have multiple
 .B Device
