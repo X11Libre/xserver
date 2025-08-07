@@ -768,6 +768,7 @@ OutputBufferMakeRoomAndFlush(ClientPtr who, OsCommPtr oc, const void* extra_buf,
  *    this routine as int.
  *****************/
 
+// make this ssize_t
 int
 WriteToClient(ClientPtr who, int count, const void *__buf)
 {
