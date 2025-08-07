@@ -17,6 +17,8 @@ add_project_arguments('-Wvla', language: 'c')
 add_project_arguments('-fno-common', language: 'c')
 add_project_arguments('-Wshift-negative-value', language: 'c')
 add_project_arguments('-Wchar-subscripts', language: 'c')
+add_project_arguments('-Wconversion', language: 'c')
+add_project_arguments('-Wsign-compare', language: 'c')
 
 # workaround for mesa bug causing GLsync to be typedef'ed multiple times
 # this is breaking -Werror on FreeBSD
