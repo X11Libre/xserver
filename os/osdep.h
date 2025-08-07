@@ -118,7 +118,11 @@ extern Bool ComputeLocalClient(ClientPtr client);
 
 /* OsTimer functions */
 void TimerInit(void);
-Bool TimerForce(OsTimerPtr timer);
+
+/* must be exported for backwards compatibility with legacy nvidia390,
+ * not for use in maintained drivers
+ */
+_X_EXPORT Bool TimerForce(OsTimerPtr);
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>
