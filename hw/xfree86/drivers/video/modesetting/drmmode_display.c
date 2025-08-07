@@ -1848,7 +1848,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     modesettingPtr ms = modesettingPTR(crtc->scrn);
     CursorPtr cursor = xf86CurrentCursor(crtc->scrn->pScreen);
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    int width, height, x, y, i;
+    int width, height, x, y;
     uint32_t *ptr;
 
     /* cursor should be mapped already */
@@ -1872,14 +1872,20 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
         height = ms->max_cursor_height;
     }
 
-    i = 0;
+    const int cursor_pitch = max(ms->min_cursor_pitch_px, width);
+
     for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++)
-            ptr[i++] = image[y * ms->max_cursor_width + x];      // cpu_to_le32(image[i]);
+        for (x = 0; x < width; x++) {
+            ptr[y * cursor_pitch + x ] = image[y * ms->max_cursor_width + x];      // cpu_to_le32(image[i]);
+        }
     }
+
     /* clear the remainder for good measure */
-    for (; i < ms->max_cursor_width * ms->max_cursor_height; i++)
-        ptr[i++] = 0;
+    for (; y < height; y++) {
+        for (; x < width; x++){
+            ptr[y * cursor_pitch + x ] = 0;
+        }
+    }
 
     if (drmmode_crtc->cursor_up)
         return drmmode_set_cursor(crtc, width, height);
