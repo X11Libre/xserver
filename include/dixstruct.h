@@ -81,7 +81,7 @@ typedef struct _Client {
     struct xorg_list ready;      /* List of clients ready to run */
     struct xorg_list output_pending; /* List of clients with output queued */
     Mask clientAsMask;
-    short index;
+    unsigned short index;
     unsigned char majorOp, minorOp;
     unsigned int swapped:1;
     unsigned int local:1;
