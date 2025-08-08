@@ -73,6 +73,7 @@ Equipment Corporation.
 #include "closestr.h"
 #include "dixfont.h"
 #include "xace.h"
+#include <limits.h>  // for SIZE_MAX
 
 #ifdef XF86BIGFONT
 #include "xf86bigfontsrv.h"
@@ -745,7 +746,12 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
         .sequenceNumber = client->sequence
     };
 
-    char *bufferStart = calloc(1, rep.length << 2);
+    size_t bufsize = (size_t)rep.length << 2;
+    if (rep.length > (SIZE_MAX >> 2)) {
+	SendErrorToClient(client, X_ListFonts, 0, 0, BadAlloc);
+	goto bail;
+    }
+    char *bufferStart = calloc(1, bufsize);
     char *bufptr = bufferStart;
 
     if (!bufptr && rep.length) {
