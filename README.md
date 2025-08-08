@@ -1,3 +1,5 @@
+<img src="./XLibre_Logo_Extended.svg" alt="XLibre Logo" width="600"/>
+
 # XLibre Xserver
 
 <p>

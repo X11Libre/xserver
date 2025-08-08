@@ -309,6 +309,13 @@ extern char *kdSwitchCmd;
  */
 extern const KdOsFuncs *kdOsFuncs;
 
+/*
+ * pointer to OS/platform specific callbacks from kdrive core back
+ * into the individual Xserver implementations.
+ * Initialized via KdOSInit()
+ */
+extern const KdOsFuncs *kdOsFuncs;
+
 #define KdGetScreenPriv(pScreen) ((KdPrivScreenPtr) \
     dixLookupPrivate(&(pScreen)->devPrivates, kdScreenPrivateKey))
 #define KdSetScreenPriv(pScreen,v) \
