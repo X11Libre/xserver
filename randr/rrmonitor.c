@@ -34,7 +34,7 @@ RRMonitorCrtcName(RRCrtcPtr crtc)
 
     if (crtc->numOutputs) {
         RROutputPtr     output = crtc->outputs[0];
-        return MakeAtom(output->name, output->nameLength, TRUE);
+        return MakeAtom(output->name, (unsigned int)output->nameLength, TRUE);
     }
     sprintf(name, "Monitor-%08lx", (unsigned long int)crtc->id);
     return dixAddAtom(name);

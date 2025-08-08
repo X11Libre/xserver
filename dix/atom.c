@@ -81,8 +81,8 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
 
     np = &atomRoot;
     for (unsigned int i = 0; i < (len + 1) / 2; i++) {
-        fp = fp * 27 + string[i];
-        fp = fp * 27 + string[len - 1 - i];
+        fp = fp * 27 + (unsigned int)string[i];
+        fp = fp * 27 + (unsigned int)string[len - 1 - i];
     }
     while (*np != NULL) {
         if (fp < (*np)->fingerPrint)
@@ -90,7 +90,7 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         else if (fp > (*np)->fingerPrint)
             np = &((*np)->right);
         else {                  /* now start testing the strings */
-            comp = strncmp(string, (*np)->string, (int) len);
+            comp = strncmp(string, (*np)->string, len);
             if ((comp < 0) || ((comp == 0) && (len < strlen((*np)->string))))
                 np = &((*np)->left);
             else if (comp > 0)
