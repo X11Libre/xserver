@@ -20,7 +20,7 @@
 #define SERVER_BIT           (Mask)0x40000000        /* use illegal bit */
 
 /* client field */
-#define RESOURCE_CLIENT_MASK   (((1 << ResourceClientBits()) - 1) << CLIENTOFFSET)
+#define RESOURCE_CLIENT_MASK   ((((1u << ResourceClientBits())) - 1) << CLIENTOFFSET)
 
 /* bits and fields within a resource id */
 #define RESOURCE_AND_CLIENT_COUNT   29  /* 29 bits for XIDs */
@@ -30,7 +30,7 @@
 #define CLIENT_BITS(id) ((id) & RESOURCE_CLIENT_MASK)
 
 /* resource field */
-#define RESOURCE_ID_MASK        ((1 << CLIENTOFFSET) - 1)
+#define RESOURCE_ID_MASK        ((1u << CLIENTOFFSET) - 1)
 
 /*
  * @brief retrieve client that owns given window
@@ -87,8 +87,8 @@ ClientPtr dixClientForOtherClients(OtherClientsPtr pOtherClients);
  * @param XID the ID of the resource whose client is retrieved
  * @return index of the client (within client or resource table)
  */
-static inline int dixClientIdForXID(XID xid) {
-    return ((int)(CLIENT_BITS(xid) >> CLIENTOFFSET));
+static inline unsigned short dixClientIdForXID(XID xid) {
+    return (unsigned short)((CLIENT_BITS(xid) >> CLIENTOFFSET));
 }
 
 /*
