@@ -274,7 +274,7 @@ SRRNotifyEvent(xEvent *from, xEvent *to)
     }
 }
 
-static int RRGeneration;
+static x_server_generation_t RRGeneration;
 
 Bool
 RRInit(void)

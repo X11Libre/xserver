@@ -80,7 +80,7 @@ static Bool xf86RandR12Init12(ScreenPtr pScreen);
 static Bool xf86RandR12CreateScreenResources12(ScreenPtr pScreen);
 #endif
 
-static int xf86RandR12Generation;
+static x_server_generation_t xf86RandR12Generation;
 
 static DevPrivateKeyRec xf86RandR12KeyRec;
 

@@ -30,7 +30,7 @@
 #include "glamor_font.h"
 #include <dixfontstr.h>
 
-static int glamor_font_generation;
+static x_server_generation_t glamor_font_generation;
 static int glamor_font_private_index;
 static int glamor_font_screen_count;
 

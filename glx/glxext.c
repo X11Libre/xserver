@@ -51,7 +51,7 @@
 /*
 ** X resources.
 */
-static int glxGeneration;
+static x_server_generation_t glxGeneration;
 RESTYPE __glXContextRes;
 RESTYPE __glXDrawableRes;
 

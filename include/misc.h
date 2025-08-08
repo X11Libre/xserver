@@ -337,7 +337,9 @@ typedef struct _CharInfo *CharInfoPtr;  /* also in fonts/include/font.h */
 #define _XTYPEDEF_CHARINFOPTR
 #endif
 
+typedef unsigned long x_server_generation_t;
+
 extern _X_EXPORT unsigned long globalSerialNumber;
-extern _X_EXPORT unsigned long serverGeneration;
+extern _X_EXPORT x_server_generation_t serverGeneration;
 
 #endif                          /* MISC_H */

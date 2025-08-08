@@ -30,7 +30,7 @@
 static int dri3_request;
 DevPrivateKeyRec dri3_screen_private_key;
 
-static int dri3_screen_generation;
+static x_server_generation_t dri3_screen_generation;
 
 static void dri3_screen_close(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {

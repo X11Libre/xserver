@@ -82,7 +82,7 @@ static DevPrivateKeyRec DRIScreenPrivKeyRec;
 static DevPrivateKeyRec DRIWindowPrivKeyRec;
 
 #define DRIWindowPrivKey (&DRIWindowPrivKeyRec)
-static unsigned long DRIGeneration = 0;
+static x_server_generation_t DRIGeneration = 0;
 static unsigned int DRIDrawableValidationStamp = 0;
 
 static RESTYPE DRIDrawablePrivResType;

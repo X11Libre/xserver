@@ -296,7 +296,7 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 #define kdScreenPrivateKey (&kdScreenPrivateKeyRec)
 
-extern unsigned long kdGeneration;
+extern x_server_generation_t kdGeneration;
 extern Bool kdEnabled;
 extern Bool kdEmulateMiddleButton;
 extern Bool kdDisableZaphod;

@@ -59,11 +59,11 @@ extern Bool no_configure_window;
     (pScreen->y + rootlessGlobalOffsetY)
 
 #define DEFINE_ATOM_HELPER(func,atom_name)                      \
-  static Atom func (void) {                                       \
-    static unsigned int generation = 0;                             \
+  static Atom func (void) {                                     \
+    static x_server_generation_t generation = 0;                \
     static Atom atom;                                           \
     if (generation != serverGeneration) {                       \
-      generation = serverGeneration;                          \
+      generation = serverGeneration;                            \
       atom = dixAddAtom(atom_name);                             \
     }                                                           \
     return atom;                                                \

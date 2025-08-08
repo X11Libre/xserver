@@ -99,7 +99,7 @@ typedef struct {
 static PseudoramiXScreenRec *pseudoramiXScreens = NULL;
 static int pseudoramiXScreensAllocated = 0;
 static int pseudoramiXNumScreens = 0;
-static unsigned long pseudoramiXGeneration = 0;
+static x_server_generation_t pseudoramiXGeneration = 0;
 
 // Add a PseudoramiX screen.
 // The rest of the X server will know nothing about this screen.

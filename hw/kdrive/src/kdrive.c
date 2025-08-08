@@ -77,7 +77,7 @@ KdDepths kdDepths[] = {
 #define KD_DEFAULT_BUTTONS 5
 
 DevPrivateKeyRec kdScreenPrivateKeyRec;
-unsigned long kdGeneration;
+x_server_generation_t kdGeneration;
 
 Bool kdEmulateMiddleButton;
 Bool kdRawPointerCoordinates;

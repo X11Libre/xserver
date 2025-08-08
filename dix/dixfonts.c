@@ -1919,7 +1919,7 @@ _client_auth_generation(ClientPtr client)
 }
 
 static int fs_handlers_installed = 0;
-static unsigned int last_server_gen;
+static x_server_generation_t last_server_gen;
 
 static void fs_block_handler(void *blockData, void *timeout)
 {

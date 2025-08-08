@@ -444,7 +444,7 @@ XdmcpSetAuthentication(const ARRAY8Ptr name)
 
 static ARRAY16 ConnectionTypes;
 static ARRAYofARRAY8 ConnectionAddresses;
-static long xdmcpGeneration;
+static x_server_generation_t xdmcpGeneration;
 
 void
 XdmcpRegisterConnection(int type, const char *address, int addrlen)
