@@ -87,6 +87,12 @@ PixmapScreenInit(ScreenPtr pScreen)
     pScreen->totalPixmapSize =
         BitmapBytePad(pixmap_size * 8);
 
+#ifdef LEGACY_NVIDIA_PADDING
+    /* This field is used by the 470 proprietary nvidia DDX driver, and should always be NULL */
+    /* NULL this out as it is no longer used */
+    pScreen->reserved_for_legacy_nvidia = NULL;
+#endif /* LEGACY_NVIDIA_PADDING */
+
     return TRUE;
 }
 
