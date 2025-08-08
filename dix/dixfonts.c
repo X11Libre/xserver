@@ -587,6 +587,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                 if (!ClientIsAsleep(client))
                     ClientSleep(client,
                                 (ClientSleepProcPtr) doListFontsAndAliases, c);
+                free(resolved);
                 return TRUE;
             }
 
@@ -612,6 +613,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                         ClientSleep(client,
                                     (ClientSleepProcPtr) doListFontsAndAliases,
                                     c);
+                    free(resolved);
                     return TRUE;
                 }
                 if (err == Successful)
@@ -629,6 +631,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                         ClientSleep(client,
                                     (ClientSleepProcPtr) doListFontsAndAliases,
                                     c);
+                    free(resolved);
                     return TRUE;
                 }
                 if (err == FontNameAlias) {
