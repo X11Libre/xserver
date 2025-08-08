@@ -53,10 +53,10 @@ struct OdevAttributes {
     int         fd;
 
     /* Major number of the device node pointed to by ODEV_ATTRIB_PATH */
-    int         major;
+    unsigned int major;
 
     /* Minor number of the device node pointed to by ODEV_ATTRIB_PATH */
-    int         minor;
+    unsigned int minor;
 
     /* kernel driver name */
     char        *driver;
@@ -80,7 +80,7 @@ void DeleteGPUDeviceRequest(struct OdevAttributes *attribs);
 #define ServerIsNotSeat0() (SeatId && strcmp(SeatId, "seat0"))
 
 struct xf86_platform_device *
-xf86_find_platform_device_by_devnum(int major, int minor);
+xf86_find_platform_device_by_devnum(unsigned int major, unsigned int minor);
 
 void config_pre_init(void);
 
