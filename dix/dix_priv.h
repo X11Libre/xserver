@@ -704,9 +704,13 @@ static inline ClientPtr dixLookupXIDOwner(XID xid)
  * @param rpcbuf  the buffer whose contents will be written
  * @return the result of WriteToClient() call
  */
-static inline int WriteRpcbufToClient(ClientPtr pClient,
-                                      x_rpcbuf_t *rpcbuf) {
-    int ret = WriteToClient(pClient, rpcbuf->wpos, rpcbuf->buffer);
+static inline ssize_t WriteRpcbufToClient(ClientPtr pClient,
+                                          x_rpcbuf_t *rpcbuf) {
+    /* explicitly casting between (s)size_t and int - should be safe,
+       since payloads are always small enough to easily fit into int. */
+    ssize_t ret = WriteToClient(pClient,
+                                (int)rpcbuf->wpos,
+                                rpcbuf->buffer);
     x_rpcbuf_clear(rpcbuf);
     return ret;
 }
