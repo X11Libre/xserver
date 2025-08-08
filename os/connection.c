@@ -279,6 +279,7 @@ CreateWellKnownSockets(void)
         int fd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
 
         ListenTransFds[i] = fd;
+        _XSERVTransSetOption(ListenTransConns[i], TRANS_CLOSEONEXEC, 0);
         SetNotifyFd(fd, EstablishNewConnections, X_NOTIFY_READ, NULL);
 
         if (!_XSERVTransIsLocal(ListenTransConns[i]))
@@ -690,7 +691,7 @@ EstablishNewConnections(int curconn, int ready, void *data)
 
     newconn = _XSERVTransGetConnectionNumber(new_trans_conn);
 
-    _XSERVTransNonBlock(new_trans_conn);
+    _XSERVTransSetOption(new_trans_conn, TRANS_NONBLOCKING, 1);
 
     if (trans_conn->flags & TRANS_NOXAUTH)
         new_trans_conn->flags = new_trans_conn->flags | TRANS_NOXAUTH;
@@ -1068,7 +1069,7 @@ AddClientOnOpenFD(int fd)
     if (ciptr == NULL)
         return FALSE;
 
-    _XSERVTransNonBlock(ciptr);
+    _XSERVTransSetOption(ciptr, TRANS_NONBLOCKING, 1);
     ciptr->flags |= TRANS_NOXAUTH;
 
     connect_time = GetTimeInMillis();
