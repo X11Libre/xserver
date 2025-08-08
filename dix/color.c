@@ -858,7 +858,7 @@ dixLookupBuiltinColor(int screen,
     while (high >= low) {
         int mid = (low + high) / 2;
         const BuiltinColor *c = &BuiltinColors[mid];
-        const int currentLen = strlen(c->name);
+        const size_t currentLen = strlen(c->name);
         const int r = strncasecmp(c->name, name, min(len, currentLen));
 
         if (r == 0) {
