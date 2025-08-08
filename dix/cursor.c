@@ -235,8 +235,8 @@ RealizeCursorAllScreens(CursorPtr pCurs)
 int
 AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
                 CARD32 *argb, CursorMetricPtr cm,
-                unsigned foreRed, unsigned foreGreen, unsigned foreBlue,
-                unsigned backRed, unsigned backGreen, unsigned backBlue,
+                unsigned short foreRed, unsigned short foreGreen, unsigned short foreBlue,
+                unsigned short backRed, unsigned short backGreen, unsigned short backBlue,
                 CursorPtr *ppCurs, ClientPtr client, XID cid)
 {
     CursorBitsPtr bits;
@@ -320,9 +320,9 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
 }
 
 int
-AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
-                 unsigned foreRed, unsigned foreGreen, unsigned foreBlue,
-                 unsigned backRed, unsigned backGreen, unsigned backBlue,
+AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned short maskChar,
+                 unsigned short foreRed, unsigned short foreGreen, unsigned short foreBlue,
+                 unsigned short backRed, unsigned short backGreen, unsigned short backBlue,
                  CursorPtr *ppCurs, ClientPtr client, XID cid)
 {
     FontPtr sourcefont, maskfont;
@@ -369,15 +369,14 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
             return BadValue;
         }
         if (!maskfont) {
-            long n;
             unsigned char *mskptr;
 
-            n = BitmapBytePad(cm.width) * (long) cm.height;
+            size_t n = BitmapBytePad(cm.width) * (long) cm.height;
             mskptr = mskbits = calloc(1, n);
             if (!mskptr)
                 return BadAlloc;
             while (--n >= 0)
-                *mskptr++ = ~0;
+                *mskptr++ = 0xFF;
         }
         else {
             if (!CursorMetricsFromGlyph(maskfont, maskChar, &cm)) {
@@ -504,7 +503,7 @@ CreateRootCursor(void)
                                   serverClient, DixReadAccess);
     if (err != Success)
         return NullCursor;
-    if (AllocGlyphCursor(fontID, 0, fontID, 1, 0, 0, 0, ~0, ~0, ~0,
+    if (AllocGlyphCursor(fontID, 0, fontID, 1, 0, 0, 0, 0xFFFF, 0xFFFF, 0xFFFF,
                          &curs, serverClient, (XID) 0) != Success)
         return NullCursor;
 
