@@ -204,10 +204,10 @@ bytes_to_int32(const size_t bytes)
  * @param bytes The minimum number of bytes needed.
  * @return The closest multiple of 4 that is equal or higher than bytes.
  */
-static inline size_t
-pad_to_int32(const size_t bytes)
+static inline int
+pad_to_int32(const int bytes)
 {
-    return (((bytes) + 3) & ~((size_t)3));
+    return (((bytes) + 3) & ~3);
 }
 
 /**
