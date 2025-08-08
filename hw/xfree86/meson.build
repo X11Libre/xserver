@@ -1,4 +1,4 @@
-module_abi_tag = 'xlibre-25.0'
+module_abi_tag = 'xlibre-25'
 module_abi_dir = join_paths(module_dir, module_abi_tag)
 
 xorg_inc = include_directories(

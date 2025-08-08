@@ -180,6 +180,12 @@ static const char *stdSubdirs[] = {
     XORG_MODULE_ABI_TAG "/input/",
     XORG_MODULE_ABI_TAG "/drivers/",
     XORG_MODULE_ABI_TAG "/extensions/",
+    // next try loading from legacy xlibre-25.0 ABI subdir
+    // TODO remove this in version 26
+    "xlibre-25.0/",
+    "xlibre-25.0/input/",
+    "xlibre-25.0/drivers/",
+    "xlibre-25.0/extensions/",
     // now try loading from legacy / unversioned directories
     "",
     "input/",
