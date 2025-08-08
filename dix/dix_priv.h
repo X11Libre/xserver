@@ -720,7 +720,7 @@ static inline int WriteRpcbufToClient(ClientPtr pClient,
  * @return atom ID
  */
 static inline Atom dixAddAtom(const char *name) {
-    return MakeAtom(name, strlen(name), TRUE);
+    return MakeAtom(name, (unsigned int)strlen(name), TRUE);
 }
 
 /*
@@ -732,7 +732,7 @@ static inline Atom dixAddAtom(const char *name) {
  * @return atom ID
  */
 static inline Atom dixGetAtomID(const char *name) {
-    return MakeAtom(name, strlen(name), FALSE);
+    return MakeAtom(name, (unsigned int)strlen(name), FALSE);
 }
 
 #endif /* _XSERVER_DIX_PRIV_H */

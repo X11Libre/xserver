@@ -49,7 +49,7 @@ XkbInternAtom(char *str, Bool only_if_exists)
 {
     if (str == NULL)
         return None;
-    return MakeAtom(str, strlen(str), !only_if_exists);
+    return MakeAtom(str, (unsigned int)strlen(str), !only_if_exists);
 }
 
 /***====================================================================***/
