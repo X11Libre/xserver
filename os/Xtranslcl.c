@@ -761,11 +761,11 @@ static ssize_t _XSERVTransLocalWrite(XtransConnInfo ciptr, const char *buf, size
     return write(ciptr->fd,buf,size);
 }
 
-static ssize_t _XSERVTransLocalWritev(XtransConnInfo ciptr, struct iovec *buf, int size)
+static ssize_t _XSERVTransLocalWritev(XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt)
 {
-    prmsg(2,"LocalWritev(%d,%p,%d)\n", ciptr->fd, (const void *) buf, size );
+    prmsg(2,"LocalWritev(%d,%p,%d)\n", ciptr->fd, (const void *) iov, iovcnt);
 
-    return WRITEV(ciptr,buf,size);
+    return WRITEV(ciptr,iov,iovcnt);
 }
 
 static int _XSERVTransLocalDisconnect(XtransConnInfo ciptr)

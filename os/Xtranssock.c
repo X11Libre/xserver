@@ -1338,9 +1338,9 @@ static int _XSERVTransSocketRead (
 }
 
 static ssize_t _XSERVTransSocketWritev (
-    XtransConnInfo ciptr, struct iovec *buf, int size)
+    XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt)
 {
-    prmsg (2,"SocketWritev(%d,%p,%d)\n", ciptr->fd, (void *) buf, size);
+    prmsg (2,"SocketWritev(%d,%p,%d)\n", ciptr->fd, (void *) iov, iovcnt);
 
 #if XTRANS_SEND_FDS
     if (ciptr->send_fds)
@@ -1351,8 +1351,8 @@ static ssize_t _XSERVTransSocketWritev (
         struct msghdr           msg = {
             .msg_name = NULL,
             .msg_namelen = 0,
-            .msg_iov = buf,
-            .msg_iovlen = size,
+            .msg_iov = iov,
+            .msg_iovlen = iovcnt,
             .msg_control = cmsgbuf.buf,
             .msg_controllen = CMSG_LEN(nfd * sizeof(int))
         };
@@ -1377,7 +1377,7 @@ static ssize_t _XSERVTransSocketWritev (
         return i;
     }
 #endif
-    return WRITEV (ciptr, buf, size);
+    return WRITEV (ciptr, iov, iovcnt);
 }
 
 static ssize_t _XSERVTransSocketWrite (

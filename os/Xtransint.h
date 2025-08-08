@@ -187,11 +187,7 @@ typedef struct _Xtransport {
 	size_t			/* size */
     );
 
-    ssize_t	(*Writev)(
-	XtransConnInfo,		/* connection */
-	struct iovec *,		/* buf */
-	int			/* size */
-    );
+    ssize_t (*Writev)(XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt);
 
 #if XTRANS_SEND_FDS
     int (*SendFd)(
@@ -257,11 +253,7 @@ typedef struct _Xtransport_table {
 
 #define WRITEV(ciptr, iov, iovcnt)	_XSERVTransWriteV(ciptr, iov, iovcnt)
 
-static int _XSERVTransWriteV(
-    XtransConnInfo,	/* ciptr */
-    struct iovec *,	/* iov */
-    int 		/* iovcnt */
-);
+static int _XSERVTransWriteV(XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt);
 
 #else
 

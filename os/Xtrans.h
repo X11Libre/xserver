@@ -238,11 +238,7 @@ ssize_t _XSERVTransWrite (
     size_t		/* size */
 );
 
-ssize_t _XSERVTransWritev (
-    XtransConnInfo,	/* ciptr */
-    struct iovec *,	/* buf */
-    int			/* size */
-);
+ssize_t _XSERVTransWritev (XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt);
 
 int _XSERVTransSendFd (XtransConnInfo ciptr, int fd, int do_close);
 
