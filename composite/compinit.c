@@ -221,9 +221,9 @@ typedef struct _alternateVisual {
 
 static CompAlternateVisual altVisuals[] = {
 #if COMP_INCLUDE_RGB24_VISUAL
-    {24, PICT_r8g8b8},
+    {24, PIXMAN_r8g8b8},
 #endif
-    {32, PICT_a8r8g8b8},
+    {32, PIXMAN_a8r8g8b8},
 };
 
 static Bool

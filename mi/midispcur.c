@@ -188,7 +188,7 @@ miDCRealize(ScreenPtr pScreen, CursorPtr pCursor)
         int error;
         PicturePtr  pPicture;
 
-        pFormat = PictureMatchFormat(pScreen, 32, PICT_a8r8g8b8);
+        pFormat = PictureMatchFormat(pScreen, 32, PIXMAN_a8r8g8b8);
         if (!pFormat)
             return FALSE;
 

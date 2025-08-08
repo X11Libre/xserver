@@ -171,23 +171,23 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
 
     nformats = 0;
     /* formats required by protocol */
-    formats[nformats].format = PICT_a1;
+    formats[nformats].format = PIXMAN_a1;
     formats[nformats].depth = 1;
     nformats++;
     formats[nformats].format = PICT_FORMAT(BitsPerPixel(8),
                                            PIXMAN_TYPE_A, 8, 0, 0, 0);
     formats[nformats].depth = 8;
     nformats++;
-    formats[nformats].format = PICT_a8r8g8b8;
+    formats[nformats].format = PIXMAN_a8r8g8b8;
     formats[nformats].depth = 32;
     nformats++;
-    formats[nformats].format = PICT_x8r8g8b8;
+    formats[nformats].format = PIXMAN_x8r8g8b8;
     formats[nformats].depth = 32;
     nformats++;
-    formats[nformats].format = PICT_b8g8r8a8;
+    formats[nformats].format = PIXMAN_b8g8r8a8;
     formats[nformats].depth = 32;
     nformats++;
-    formats[nformats].format = PICT_b8g8r8x8;
+    formats[nformats].format = PIXMAN_b8g8r8x8;
     formats[nformats].depth = 32;
     nformats++;
 
@@ -251,34 +251,34 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
         case 16:
             /* depth 12 formats */
             if (pDepth->depth >= 12) {
-                addFormat(formats, &nformats, PICT_x4r4g4b4, pDepth->depth);
-                addFormat(formats, &nformats, PICT_x4b4g4r4, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_x4r4g4b4, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_x4b4g4r4, pDepth->depth);
             }
             /* depth 15 formats */
             if (pDepth->depth >= 15) {
-                addFormat(formats, &nformats, PICT_x1r5g5b5, pDepth->depth);
-                addFormat(formats, &nformats, PICT_x1b5g5r5, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_x1r5g5b5, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_x1b5g5r5, pDepth->depth);
             }
             /* depth 16 formats */
             if (pDepth->depth >= 16) {
-                addFormat(formats, &nformats, PICT_a1r5g5b5, pDepth->depth);
-                addFormat(formats, &nformats, PICT_a1b5g5r5, pDepth->depth);
-                addFormat(formats, &nformats, PICT_r5g6b5, pDepth->depth);
-                addFormat(formats, &nformats, PICT_b5g6r5, pDepth->depth);
-                addFormat(formats, &nformats, PICT_a4r4g4b4, pDepth->depth);
-                addFormat(formats, &nformats, PICT_a4b4g4r4, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_a1r5g5b5, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_a1b5g5r5, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_r5g6b5, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_b5g6r5, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_a4r4g4b4, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_a4b4g4r4, pDepth->depth);
             }
             break;
         case 32:
             if (pDepth->depth >= 24) {
-                addFormat(formats, &nformats, PICT_x8r8g8b8, pDepth->depth);
-                addFormat(formats, &nformats, PICT_x8b8g8r8, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_x8r8g8b8, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_x8b8g8r8, pDepth->depth);
             }
             if (pDepth->depth >= 30) {
-                addFormat(formats, &nformats, PICT_a2r10g10b10, pDepth->depth);
-                addFormat(formats, &nformats, PICT_x2r10g10b10, pDepth->depth);
-                addFormat(formats, &nformats, PICT_a2b10g10r10, pDepth->depth);
-                addFormat(formats, &nformats, PICT_x2b10g10r10, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_a2r10g10b10, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_x2r10g10b10, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_a2b10g10r10, pDepth->depth);
+                addFormat(formats, &nformats, PIXMAN_x2b10g10r10, pDepth->depth);
             }
             break;
         }
@@ -838,7 +838,7 @@ createSourcePicture(void)
     pPicture->pDrawable = 0;
     pPicture->pFormat = 0;
     pPicture->pNext = 0;
-    pPicture->format = PICT_a8r8g8b8;
+    pPicture->format = PIXMAN_a8r8g8b8;
 
     SetPictureToDefaults(pPicture);
     return pPicture;

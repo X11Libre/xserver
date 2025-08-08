@@ -1508,7 +1508,7 @@ ProcRenderCreateCursor(ClientPtr client)
         pScreen->SourceValidate(pSrc->pDrawable, 0, 0, width, height,
                                 IncludeInferiors);
 
-    if (pSrc->format == PICT_a8r8g8b8) {
+    if (pSrc->format == PIXMAN_a8r8g8b8) {
         (*pScreen->GetImage) (pSrc->pDrawable,
                               0, 0, width, height, ZPixmap,
                               0xffffffff, (void *) argbbits);
@@ -1519,7 +1519,7 @@ ProcRenderCreateCursor(ClientPtr client)
         PictFormatPtr pFormat;
         int error;
 
-        pFormat = PictureMatchFormat(pScreen, 32, PICT_a8r8g8b8);
+        pFormat = PictureMatchFormat(pScreen, 32, PIXMAN_a8r8g8b8);
         if (!pFormat) {
             free(argbbits);
             free(srcbits);
