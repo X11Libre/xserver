@@ -240,8 +240,8 @@ Bool x_rpcbuf_write_CARD32s(x_rpcbuf_t *rpcbuf, const CARD32 *values,
  * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @return          number of 4-byte units (w/ padding) written into the buffer
  */
-static inline size_t x_rpcbuf_wsize_units(x_rpcbuf_t *rpcbuf) {
-    return bytes_to_int32(pad_to_int32(rpcbuf->wpos));
+static inline CARD32 x_rpcbuf_wsize_units(x_rpcbuf_t *rpcbuf) {
+    return (CARD32)((rpcbuf->wpos + 3) / 4);
 }
 
 #endif /* _XSERVER_DIX_RPCBUF_PRIV_H */
