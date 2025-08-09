@@ -78,9 +78,9 @@ void LoaderSetPath(const char *path);
 void LoaderUnload(const char *, void *);
 unsigned long LoaderGetModuleVersion(ModuleDescPtr mod);
 
-void LoaderResetOptions(void);
-
-void LoaderSetIgnoreAbi(void);
+void LoaderSetIgnoreAllABI(void);
+Bool LoaderGetAndFlagIgnoreABI(const char *);
+void LoaderSetIgnoreABI(const char *);
 
 const char **LoaderListDir(const char *, const char **);
 

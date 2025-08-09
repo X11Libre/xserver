@@ -68,6 +68,12 @@
 extern void *xorg_symbols[];
 #endif
 
+Bool LoaderIgnoreAllABI;
+Bool LoaderIgnoreABI;
+#ifdef LEGACY_NVIDIA_PADDING
+Bool is_nvidia_proprietary;
+#endif /* LEGACY_NVIDIA_PADDING */
+
 void
 LoaderInit(void)
 {
@@ -87,6 +93,11 @@ LoaderInit(void)
     LogMessageVerb(X_NONE, 2, "\t%s : %d.%d\n", ABI_CLASS_EXTENSION,
                    GET_ABI_MAJOR(LoaderVersionInfo.extensionVersion),
                    GET_ABI_MINOR(LoaderVersionInfo.extensionVersion));
+    LoaderIgnoreAllABI = FALSE;
+    LoaderIgnoreABI = FALSE;
+#ifdef LEGACY_NVIDIA_PADDING
+    is_nvidia_proprietary = FALSE;
+#endif /* LEGACY_NVIDIA_PADDING */
 }
 
 /* Public Interface to the loader. */
@@ -146,22 +157,29 @@ LoaderUnload(const char *name, void *handle)
         dlclose(handle);
 }
 
-Bool LoaderIgnoreAbi = FALSE;
-Bool is_nvidia_proprietary = FALSE;
+void
+LoaderSetIgnoreAllABI(void)
+{
+    LoaderIgnoreAllABI = TRUE;
+}
+
+Bool
+LoaderGetAndFlagIgnoreABI(const char *name)
+{
+    if (LoaderIgnoreAllABI)
+        LoaderIgnoreABI = TRUE;
+    return LoaderIgnoreABI;
+}
 
 void
-LoaderSetIgnoreAbi(void)
+LoaderSetIgnoreABI(const char *name)
 {
-    /* Only used to keep consistency with the loader api */
-    /* This really doesn't have to be a proc */
-    LoaderIgnoreAbi = TRUE;
 }
 
 Bool
 LoaderShouldIgnoreABI(void)
 {
-    /* The nvidia proprietary DDX driver calls this deprecated function */
-    return is_nvidia_proprietary || LoaderIgnoreAbi;
+    return LoaderIgnoreABI;
 }
 
 int
