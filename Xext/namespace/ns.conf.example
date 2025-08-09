@@ -1,17 +1,38 @@
+# When no container are mentioned, all auths and allows configured affect the "root" namespace
+# By default, all allowable properties are enabled in the root namespace and can't be disabled from the config file.
+# No configuration line can be greater than 1024 8-bit character after excluding the '\n' and text after '#'
+#   else information after that point is ignored
 
 # auth <proto> <hex-key>
+  # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for "root" namespace
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b0
+
+  # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for "root" namespace
   auth MIT-MAGIC-COOKIE-1 56f8e62b78e58962de0ceefc05ad90b0
 
-# container <name> <parent_name>
-container xeyes root
+  # To create a "MIT_MAGIC-COOKIE-1", write "xauth generate $DISPLAY MIT-MAGIC-COOKIE-1" will generate and add a token
+    #     for the protocol provided. You can retrieve using "xauth list :1". For more information, use "man xauth".
+
+
+# container <name>
+# creates the namespace xeyes, and makes all "auths" and "allow" configurations affect xeyes namespace only
+container xeyes
+
+  # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for xeyes namespace
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b8
+
+  # sets an auth key using the "MIT-MAGIC-COOKIE-1" protocol for xeyes namespace
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90a8
+
+  # allow "property" enables a specific property for the "xeyes" namespace
   allow mouse-motion
   allow shape
   allow xinput
 
-container xclock root
+# creates the namespace "xclock", and makes all "auths" and "allow" configurations affect "xclock" namespace only
+container xclock
+
+  # set auth key for "xclock" namespace
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b7
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad91b7
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad92b7
