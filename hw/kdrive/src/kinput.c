@@ -2120,7 +2120,7 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
     int n_best_x, n_best_y;
     CARD32 ms;
 
-    if (kdDisableZaphod || screenInfo.numScreens <= 1)
+    if (kdDisableZaphod || (!dixGetScreenPtr(1)))
         return FALSE;
 
     if (0 <= *x && *x < pScreen->width && 0 <= *y && *y < pScreen->height)
@@ -2172,7 +2172,7 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
     if (n_best_x == -1)
         return FALSE;
 
-    ScreenPtr pNewScreen = screenInfo.screens[n_best_x];
+    ScreenPtr pNewScreen = dixGetScreenPtr(n_best_x);
 
     if (*x < 0)
         *x += pNewScreen->width;

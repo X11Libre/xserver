@@ -31,6 +31,19 @@ static inline ScreenPtr dixGetMasterScreen(void) {
 }
 
 /*
+ * retrieve pointer to screen by it's index. If index is above the total
+ * number of screens, returns NULL
+ *
+ * @param idx screen index
+ * @return pointer to idx'th screen or NULL
+ */
+static inline ScreenPtr dixGetScreenPtr(unsigned int idx) {
+    if (idx < screenInfo.numScreens)
+        return screenInfo.screens[idx];
+    return NULL;
+}
+
+/*
  * macro for looping over all screens (up to `screenInfo.numScreens`).
  * Makes a new scopes and declares `walkScreenIdx` as the current screen's
  * index number as well as `walkScreen` as poiner to current ScreenRec
