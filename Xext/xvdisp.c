@@ -1543,6 +1543,7 @@ matchAdaptor(ScreenPtr pScreen, XvAdaptorPtr refAdapt, Bool isOverlay)
 void
 XineramifyXv(void)
 {
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
     XvScreenPtr xvsp0 =
         dixLookupPrivate(&(dixGetFirstScreenPtr()->devPrivates), XvGetScreenKey());
     XvAdaptorPtr MatchingAdaptors[MAXSCREENS];

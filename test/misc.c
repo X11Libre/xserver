@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 #include "dix/input_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/fmt.h"
 
 #include "misc.h"

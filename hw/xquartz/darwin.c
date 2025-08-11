@@ -582,25 +582,26 @@ CloseInput(void)
  *  menus down instead of left, which still looks funny but is an
  *  easier target to hit.
  */
-void
-DarwinAdjustScreenOrigins(ScreenInfo *pScreenInfo)
+void DarwinAdjustScreenOrigins(void)
 {
-    int i, left, top;
-
     ScreenPtr firstScreen = dixGetFirstScreenPtr();
 
-    left = firstScreen->x;
-    top = firstScreen->y;
+    int left = firstScreen->x;
+    int top = firstScreen->y;
 
     /* Find leftmost screen. If there's a tie, take the topmost of the two. */
-    for (i = 1; i < pScreenInfo->numScreens; i++) {
-        if (pScreenInfo->screens[i]->x < left ||
-            (pScreenInfo->screens[i]->x == left &&
-             pScreenInfo->screens[i]->y < top)) {
-            left = pScreenInfo->screens[i]->x;
-            top = pScreenInfo->screens[i]->y;
+    DIX_FOR_EACH_SCREEN({
+        if (!walkScreenIdx) { /* on first screen */
+            left = walkScreen->x;
+            top = walkScreen->y;
+        } else {
+            if (walkScreen->x < left ||
+               (walkScreen->x == left && walkScreen->y < top)) {
+                left = walkScreen->x;
+                top = walkScreen->y;
+            }
         }
-    }
+    });
 
     darwinMainScreenX = left;
     darwinMainScreenY = top;
@@ -613,12 +614,11 @@ DarwinAdjustScreenOrigins(ScreenInfo *pScreenInfo)
      */
 
     if (darwinMainScreenX != 0 || darwinMainScreenY != 0) {
-        for (i = 0; i < pScreenInfo->numScreens; i++) {
-            pScreenInfo->screens[i]->x -= darwinMainScreenX;
-            pScreenInfo->screens[i]->y -= darwinMainScreenY;
+        DIX_FOR_EACH_SCREEN({
+            walkScreen->x -= darwinMainScreenX;
+            walkScreen->y -= darwinMainScreenY;
             DEBUG_LOG("Screen %d placed at X11 coordinate (%d,%d).\n",
-                      i, pScreenInfo->screens[i]->x,
-                      pScreenInfo->screens[i]->y);
+                      i, walkScreen->x, walkScreen->y);
         }
     }
 

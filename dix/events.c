@@ -533,15 +533,16 @@ static Bool
 XineramaSetCursorPosition(DeviceIntPtr pDev, int x, int y, Bool generateEvent)
 {
     ScreenPtr pScreen;
+    int i;
     SpritePtr pSprite = pDev->spriteInfo->sprite;
 
     /* x,y are in Screen 0 coordinates.  We need to decide what Screen
        to send the message too and what the coordinates relative to
        that screen are. */
 
-    pScreen = pSprite->screen;
-
+    ScreenPtr pScreen = pSprite->screen;
     ScreenPtr firstScreen = dixGetFirstScreenPtr();
+
     x += firstScreen->x;
     y += firstScreen->y;
 
@@ -590,6 +591,7 @@ static Bool
 XineramaSetWindowPntrs(DeviceIntPtr pDev, WindowPtr pWin)
 {
     SpritePtr pSprite = pDev->spriteInfo->sprite;
+    ScreenPtr firstScreen = dixGetFirstScreenPtr();
 
     if (pWin == dixGetFirstScreenPtr()->root) {
         XINERAMA_FOR_EACH_SCREEN_BACKWARD({
@@ -631,15 +633,17 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
 
     unsigned int walkScreenIdx = PanoramiXNumScreens - 1;
 
-    RegionCopy(&pSprite->Reg1, &pSprite->windows[walkScreenIdx]->borderSize);
-    ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-    off_x = walkScreen->x;
-    off_y = walkScreen->y;
+    RegionCopy(&pSprite->Reg1, &pSprite->windows[i]->borderSize);
 
-    while (walkScreenIdx--) {
-        walkScreen = screenInfo.screens[walkScreenIdx];
-        x = off_x - walkScreen->x;
-        y = off_y - walkScreen->y;
+    ScreenPtr pScreen = dixGetScreenPtr(i);
+    off_x = pScreen->x;
+    off_y = pScreen->y;
+
+    while (i--) {
+        pScreen = dixGetScreenPtr(i);
+
+        x = off_x - pScreen->x;
+        y = off_y - pScreen->y;
 
         if (x || y)
             RegionTranslate(&pSprite->Reg1, x, y);
@@ -647,8 +651,8 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
         RegionUnion(&pSprite->Reg1, &pSprite->Reg1,
                     &pSprite->windows[walkScreenIdx]->borderSize);
 
-        off_x = walkScreen->x;
-        off_y = walkScreen->y;
+        off_x = pScreen->x;
+        off_y = pScreen->y;
     }
 
     pSprite->hotLimits = *RegionExtents(&pSprite->Reg1);
@@ -837,15 +841,16 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
 
             unsigned int walkScreenIdx = PanoramiXNumScreens - 1;
 
-            RegionCopy(&pSprite->Reg2, &pSprite->windows[walkScreenIdx]->borderSize);
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-            off_x = walkScreen->x;
-            off_y = walkScreen->y;
+            ScreenPtr pScreen = dixGetScreenPtr(i);
 
-            while (walkScreenIdx--) {
-                walkScreen = screenInfo.screens[walkScreenIdx];
-                x = off_x - walkScreen->x;
-                y = off_y - walkScreen->y;
+            RegionCopy(&pSprite->Reg2, &pSprite->windows[i]->borderSize);
+            off_x = pScreen->x;
+            off_y = pScreen->y;
+
+            while (i--) {
+                pScreen = dixGetScreenPtr(i);
+                x = off_x - pScreen->x;
+                y = off_y - pScreen->y;
 
                 if (x || y)
                     RegionTranslate(&pSprite->Reg2, x, y);
@@ -853,8 +858,8 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
                 RegionUnion(&pSprite->Reg2, &pSprite->Reg2,
                             &pSprite->windows[walkScreenIdx]->borderSize);
 
-                off_x = walkScreen->x;
-                off_y = walkScreen->y;
+                off_x = pScreen->x;
+                off_y = pScreen->y;
             }
         }
         else
@@ -1241,6 +1246,10 @@ PlayReleasedEvents(void)
     DeviceIntPtr pDev;
 #ifdef XINERAMA
     ScreenPtr firstScreen = dixGetFirstScreenPtr();
+#endif
+
+#ifdef XINERAMA
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
 #endif
 
  restart:
@@ -2485,8 +2494,7 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
 
     filter = GetEventFilter(device, xi);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         InputClients *inputclients;
 
         WindowPtr root = walkScreen->root;
@@ -2510,7 +2518,7 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
                 DeliverEventToInputClients(device, &ic, root, xi, 1,
                                            filter, NULL, &c, &m);
         }
-    }
+    });
 
     free(xi);
 }
@@ -3019,6 +3027,7 @@ PointInBorderSize(WindowPtr pWin, int x, int y)
         SpritePtr pSprite = inputInfo.pointer->spriteInfo->sprite;
         ScreenPtr firstScreen = dixGetFirstScreenPtr();
 
+        ScreenPtr firstScreen = GetScreenPtr(0);
         XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
             if (RegionContainsPoint(&pSprite->windows[walkScreenIdx]->borderSize,
                                     x + firstScreen->x -
@@ -3505,11 +3514,9 @@ NewCurrentScreen(DeviceIntPtr pDev, ScreenPtr newScreen, int x, int y)
                 (*pSprite->screen->SetCursorPosition) (ptr,
                                                        pSprite->screen,
                                                        pSprite->hotPhys.x +
-                                                       firstScreen->
-                                                       x - pSprite->screen->x,
+                                                       firstScreen->x - pSprite->screen->x,
                                                        pSprite->hotPhys.y +
-                                                       firstScreen->
-                                                       y - pSprite->screen->y,
+                                                       firstScreen->y - pSprite->screen->y,
                                                        FALSE);
         }
     }
@@ -3544,8 +3551,9 @@ XineramaPointInWindowIsVisible(WindowPtr pWin, int x, int y)
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         pWin = inputInfo.pointer->spriteInfo->sprite->windows[walkScreenIdx];
 
-        x = xoff - walkScreen->x;
-        y = yoff - walkScreen->y;
+        ScreenPtr pScreen = dixGetScreenPtr(i);
+        x = xoff - pScreen->x;
+        y = yoff - pScreen->y;
 
         if (RegionContainsPoint(&pWin->borderClip, x, y, &box)
             && (!wInputShape(pWin) ||
@@ -5993,17 +6001,16 @@ ProcRecolorCursor(ClientPtr client)
     pCursor->backGreen = stuff->backGreen;
     pCursor->backBlue = stuff->backBlue;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
 #ifdef XINERAMA
         if (!noPanoramiXExtension)
             displayed = (walkScreen == pSprite->screen);
         else
 #endif /* XINERAMA */
             displayed = (walkScreen == pSprite->hotPhys.pScreen);
-        (*walkScreen->RecolorCursor) (PickPointer(client), walkScreen, pCursor,
+        walkScreen->RecolorCursor(PickPointer(client), walkScreen, pCursor,
                                 (pCursor == pSprite->current) && displayed);
-    }
+    });
     return Success;
 }
 

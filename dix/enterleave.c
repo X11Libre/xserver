@@ -36,6 +36,7 @@
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 
 #include "inputstr.h"
@@ -1267,12 +1268,23 @@ CoreFocusPointerRootNoneSwitch(DeviceIntPtr dev,
                                WindowPtr B,     /* NoneWin or PointerRootWin */
                                int mode)
 {
-    int nscreens = screenInfo.numScreens;
+    DIX_FOR_EACH_SCREEN_XINERAMA({
+        CoreFocusPointerRootNoneSwitchScr(walkScreen, dev, A, B, mode);
+    });
+}
 
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        nscreens = 1;
-#endif /* XINERAMA */
+/**
+ * Focus moves from window A to PointerRoot or to None.
+ * Assumption: A is a valid window and not PointerRoot or None.
+ */
+static void CoreFocusToPointerRootOrNoneScr(
+    ScreenPtr pScreen,
+    DeviceIntPtr dev,
+    WindowPtr A,
+    WindowPtr B,        /* PointerRootWin or NoneWin */
+    int mode)
+{
+    WindowPtr root = pScreen->root;
 
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < nscreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
@@ -1311,13 +1323,6 @@ CoreFocusToPointerRootOrNone(DeviceIntPtr dev, WindowPtr A,
                              WindowPtr B,        /* PointerRootWin or NoneWin */
                              int mode)
 {
-    int nscreens = screenInfo.numScreens;
-
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        nscreens = 1;
-#endif /* XINERAMA */
-
     if (!HasFocus(A)) {
         WindowPtr child = FirstFocusChild(A);
 
@@ -1336,10 +1341,37 @@ CoreFocusToPointerRootOrNone(DeviceIntPtr dev, WindowPtr A,
     /* NullWindow means we include the root window */
     CoreFocusOutEvents(dev, A, NullWindow, mode, NotifyNonlinearVirtual);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < nscreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN_XINERAMA({
         CoreFocusToPointerRootOrNoneScr(walkScreen, dev, A, B, mode);
+    });
+}
+
+/**
+ * Focus moves from PointerRoot or None to a window B.
+ * Assumption: B is a valid window and not PointerRoot or None.
+ */
+static void CoreFocusFromPointerRootOrNoneScr(
+    ScreenPtr pScreen,
+    DeviceIntPtr dev,
+    WindowPtr A,   /* PointerRootWin or NoneWin */
+    WindowPtr B, int mode)
+{
+    WindowPtr root = pScreen->root;
+
+    if (HasFocus(root) || FirstFocusChild(root))
+        return;
+
+    /* If pointer was on PointerRootWin and changes to NoneWin, and
+     * the pointer paired with dev is below the current root window,
+     * do a NotifyPointer run. */
+    if (dev->focus && dev->focus->win == PointerRootWin &&
+        B != PointerRootWin) {
+        WindowPtr ptrwin = PointerWin(GetMaster(dev, POINTER_OR_FLOAT));
+        if (ptrwin)
+            CoreFocusOutNotifyPointerEvents(dev, root, None, mode, TRUE);
     }
+    CoreFocusEvent(dev, FocusOut, mode,
+                   A ? NotifyPointerRoot : NotifyDetailNone, root);
 }
 
 /**
@@ -1379,17 +1411,9 @@ CoreFocusFromPointerRootOrNone(DeviceIntPtr dev,
                                WindowPtr A,   /* PointerRootWin or NoneWin */
                                WindowPtr B, int mode)
 {
-    int nscreens = screenInfo.numScreens;
-
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        nscreens = 1;
-#endif /* XINERAMA */
-
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < nscreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN_XINERAMA({
         CoreFocusFromPointerRootOrNoneScr(walkScreen, dev, A, B, mode);
-    }
+    });
 
     WindowPtr root = B;                   /* get B's root window */
     while (root->parent)
@@ -1414,7 +1438,6 @@ CoreFocusFromPointerRootOrNone(DeviceIntPtr dev,
             CoreFocusInNotifyPointerEvents(dev, B, None, mode, FALSE);
         }
     }
-
 }
 
 static void
@@ -1447,7 +1470,6 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
 {
     int out, in;                /* for holding details for to/from
                                    PointerRoot/None */
-    int nscreens = screenInfo.numScreens;
     SpritePtr sprite = dev->spriteInfo->sprite;
 
     if (from == to)
@@ -1455,11 +1477,6 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
     out = (from == NoneWin) ? NotifyDetailNone : NotifyPointerRoot;
     in = (to == NoneWin) ? NotifyDetailNone : NotifyPointerRoot;
     /* wrong values if neither, but then not referenced */
-
-#ifdef XINERAMA
-    if (!noPanoramiXExtension)
-        nscreens = 1;
-#endif /* XINERAMA */
 
     if ((to == NullWindow) || (to == PointerRootWin)) {
         if ((from == NullWindow) || (from == PointerRootWin)) {
@@ -1471,10 +1488,9 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
                                      NotifyPointer);
             }
             /* Notify all the roots */
-            for (unsigned int walkScreenIdx = 0; walkScreenIdx < nscreens; walkScreenIdx++) {
-                ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            DIX_FOR_EACH_SCREEN_XINERAMA({
                 DeviceFocusEvent(dev, XI_FocusOut, mode, out, walkScreen->root);
-            }
+            });
         }
         else {
             if (WindowIsParent(from, sprite->win)) {
@@ -1488,11 +1504,12 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
             DeviceFocusOutEvents(dev, from, NullWindow, mode,
                                  NotifyNonlinearVirtual);
         }
+
         /* Notify all the roots */
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < nscreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        DIX_FOR_EACH_SCREEN_XINERAMA({
             DeviceFocusEvent(dev, XI_FocusIn, mode, in, walkScreen->root);
-        }
+        });
+
         if (to == PointerRootWin) {
             DeviceFocusInEvents(dev, InputDevCurrentRootWindow(dev), sprite->win,
                                 mode, NotifyPointer);
@@ -1508,10 +1525,11 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
                                      InputDevCurrentRootWindow(dev), mode,
                                      NotifyPointer);
             }
-            for (unsigned int walkScreenIdx = 0; walkScreenIdx < nscreens; walkScreenIdx++) {
-                ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-                DeviceFocusEvent(dev, XI_FocusOut, mode, out, walkScreen->root);
-            }
+
+            DIX_FOR_EACH_SCREEN_XINERAMA({
+                DeviceFocusEvent(dev, XI_FocusOut, mode, out, walkScreen);
+            });
+
             if (to->parent != NullWindow)
                 DeviceFocusInEvents(dev, InputDevCurrentRootWindow(dev), to, mode,
                                     NotifyNonlinearVirtual);

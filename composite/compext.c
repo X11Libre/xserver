@@ -505,8 +505,7 @@ CompositeExtensionInit(void)
     /* Assume initialization is going to fail */
     noCompositeExtension = TRUE;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         VisualPtr vis;
 
         /* Composite on 8bpp pseudocolor root windows appears to fail, so
@@ -521,7 +520,7 @@ CompositeExtensionInit(void)
          */
         if (GetPictureScreenIfSet(walkScreen) == NULL)
             return;
-    }
+    });
 
     CompositeClientWindowType = CreateNewResourceType
         (FreeCompositeClientWindow, "CompositeClientWindow");
@@ -545,11 +544,10 @@ CompositeExtensionInit(void)
                                sizeof(CompositeClientRec)))
         return;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (!compScreenInit(walkScreen))
             return;
-    }
+    });
 
     extEntry = AddExtension(COMPOSITE_NAME, 0, 0,
                             ProcCompositeDispatch, SProcCompositeDispatch,
@@ -776,7 +774,6 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
     xCompositeGetOverlayWindowReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
-    CompScreenPtr cs;
     CompOverlayClientPtr pOc;
     int rc;
     PanoramiXRes *win, *overlayWin = NULL;
@@ -787,7 +784,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         return rc;
     }
 
-    cs = GetCompScreen(dixGetFirstScreenPtr());
+    CompScreenPtr cs = GetCompScreen(dixGetFirstScreenPtr());
     if (!cs->pOverlayWin) {
         if (!(overlayWin = calloc(1, sizeof(PanoramiXRes))))
             return BadAlloc;
