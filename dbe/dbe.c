@@ -1270,7 +1270,6 @@ DbeExtensionInit(void)
 {
     ExtensionEntry *extEntry;
     register int i, j;
-    ScreenPtr pScreen = NULL;
     DbeScreenPrivPtr pDbeScreenPriv;
     int nStubbedScreens = 0;
     Bool ddxInitSuccess;
@@ -1303,7 +1302,7 @@ DbeExtensionInit(void)
          * interface.
          */
 
-        pScreen = screenInfo.screens[i];
+        ScreenPtr pScreen = screenInfo.screens[i];
 
         if (!(pDbeScreenPriv = calloc(1, sizeof(DbeScreenPrivRec)))) {
             /* If we can not alloc a window or screen private,
@@ -1358,8 +1357,8 @@ DbeExtensionInit(void)
         /* All screens stubbed.  Clean up and return. */
 
         for (i = 0; i < screenInfo.numScreens; i++) {
-            free(dixLookupPrivate(&screenInfo.screens[i]->devPrivates,
-                                  dbeScreenPrivKey));
+            ScreenPtr pScreen = screenInfo.screens[i];
+            free(dixLookupPrivate(&pScreen->devPrivates, dbeScreenPrivKey));
             dixSetPrivate(&pScreen->devPrivates, dbeScreenPrivKey, NULL);
         }
         return;
