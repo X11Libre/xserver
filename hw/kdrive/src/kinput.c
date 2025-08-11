@@ -40,6 +40,7 @@
 #include "config/hotplug_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
@@ -1924,13 +1925,11 @@ static Bool
 KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 {
     ScreenPtr pScreen = *ppScreen;
-    int n;
-    int dx, dy;
     int best_x, best_y;
     int n_best_x, n_best_y;
     CARD32 ms;
 
-    if (kdDisableZaphod || screenInfo.numScreens <= 1)
+    if (kdDisableZaphod || (!dixGetScreenPtr(1)))
         return FALSE;
 
     if (0 <= *x && *x < pScreen->width && 0 <= *y && *y < pScreen->height)
@@ -1945,43 +1944,44 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
     best_x = 32767;
     n_best_y = -1;
     best_y = 32767;
-    for (n = 0; n < screenInfo.numScreens; n++) {
-        ScreenPtr walkScreen = screenInfo.screens[n];
+
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen == pScreen)
             continue;
-        dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(walkScreen)->x;
-        dy = KdScreenOrigin(walkScreen)->y - KdScreenOrigin(walkScreen)->y;
+        int dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(pScreen)->x;
+        int dy = KdScreenOrigin(walkScreen)->y - KdScreenOrigin(pScreen)->y;
         if (*x < 0) {
             if (dx < 0 && -dx < best_x) {
                 best_x = -dx;
-                n_best_x = n;
+                n_best_x = walkScreenIdx;
             }
         }
         else if (*x >= pScreen->width) {
             if (dx > 0 && dx < best_x) {
                 best_x = dx;
-                n_best_x = n;
+                n_best_x = walkScreenIdx;
             }
         }
         if (*y < 0) {
             if (dy < 0 && -dy < best_y) {
                 best_y = -dy;
-                n_best_y = n;
+                n_best_y = walkScreenIdx;
             }
         }
         else if (*y >= pScreen->height) {
             if (dy > 0 && dy < best_y) {
                 best_y = dy;
-                n_best_y = n;
+                n_best_y = walkScreenIdx;
             }
         }
-    }
+    });
+
     if (best_y < best_x)
         n_best_x = n_best_y;
     if (n_best_x == -1)
         return FALSE;
 
-    ScreenPtr pNewScreen = screenInfo.screens[n_best_x];
+    ScreenPtr pNewScreen = dixGetScreenPtr(n_best_x);
 
     if (*x < 0)
         *x += pNewScreen->width;

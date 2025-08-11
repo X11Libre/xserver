@@ -33,6 +33,7 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -66,7 +67,6 @@ PanoramiXCreateWindow(ClientPtr client)
     int result, len;
     int orig_x, orig_y;
     XID orig_visual, tmp;
-    Bool parentIsRoot;
 
     REQUEST_AT_LEAST_SIZE(xCreateWindowReq);
 
@@ -131,8 +131,11 @@ PanoramiXCreateWindow(ClientPtr client)
     orig_visual = stuff->visual;
     orig_x = stuff->x;
     orig_y = stuff->y;
-    parentIsRoot = (stuff->parent == screenInfo.screens[0]->root->drawable.id)
-        || (stuff->parent == screenInfo.screens[0]->screensaver.wid);
+
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
+
+    Bool parentIsRoot = (stuff->parent == firstScreen->root->drawable.id)
+                     || (stuff->parent == firstScreen->screensaver.wid);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->wid = newWin->info[walkScreenIdx].id;
@@ -323,7 +326,6 @@ PanoramiXReparentWindow(ClientPtr client)
     PanoramiXRes *win, *parent;
     int result;
     int x, y;
-    Bool parentIsRoot;
 
     REQUEST(xReparentWindowReq);
 
@@ -341,8 +343,10 @@ PanoramiXReparentWindow(ClientPtr client)
 
     x = stuff->x;
     y = stuff->y;
-    parentIsRoot = (stuff->parent == screenInfo.screens[0]->root->drawable.id)
-        || (stuff->parent == screenInfo.screens[0]->screensaver.wid);
+
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
+    Bool parentIsRoot = (stuff->parent == firstScreen->root->drawable.id)
+                     || (stuff->parent == firstScreen->screensaver.wid);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->window = win->info[walkScreenIdx].id;
@@ -500,9 +504,10 @@ PanoramiXConfigureWindow(ClientPtr client)
         }
     }
 
-    if (pWin->parent && ((pWin->parent == screenInfo.screens[0]->root) ||
-                         (pWin->parent->drawable.id ==
-                          screenInfo.screens[0]->screensaver.wid))) {
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
+
+    if (pWin->parent && ((pWin->parent == firstScreen->root) ||
+                         (pWin->parent->drawable.id == firstScreen->screensaver.wid))) {
         if ((Mask) stuff->mask & CWX) {
             x_offset = 0;
             x = *((CARD32 *) &stuff[1]);
@@ -569,11 +574,13 @@ PanoramiXGetGeometry(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
+
     xGetGeometryReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0,
-        .root = screenInfo.screens[0]->root->drawable.id,
+        .root = firstScreen->root->drawable.id,
         .depth = pDraw->depth,
         .width = pDraw->width,
         .height = pDraw->height,
@@ -594,11 +601,10 @@ PanoramiXGetGeometry(ClientPtr client)
 
         rep.x = pWin->origin.x - wBorderWidth(pWin);
         rep.y = pWin->origin.y - wBorderWidth(pWin);
-        if ((pWin->parent == screenInfo.screens[0]->root) ||
-            (pWin->parent->drawable.id ==
-             screenInfo.screens[0]->screensaver.wid)) {
-            rep.x += screenInfo.screens[0]->x;
-            rep.y += screenInfo.screens[0]->y;
+        if ((pWin->parent == firstScreen->root) ||
+            (pWin->parent->drawable.id == firstScreen->screensaver.wid)) {
+            rep.x += firstScreen->x;
+            rep.y += firstScreen->y;
         }
         rep.borderWidth = pWin->borderWidth;
     }
@@ -633,10 +639,12 @@ PanoramiXTranslateCoords(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    if ((pWin == screenInfo.screens[0]->root) ||
-        (pWin->drawable.id == screenInfo.screens[0]->screensaver.wid)) {
-        x = stuff->srcX - screenInfo.screens[0]->x;
-        y = stuff->srcY - screenInfo.screens[0]->y;
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
+
+    if ((pWin == firstScreen->root) ||
+        (pWin->drawable.id == firstScreen->screensaver.wid)) {
+        x = stuff->srcX - firstScreen->x;
+        y = stuff->srcY - firstScreen->y;
     }
     else {
         x = pWin->drawable.x + stuff->srcX;
@@ -673,10 +681,10 @@ PanoramiXTranslateCoords(ClientPtr client)
 
     INT16 dstX = x - pDst->drawable.x;
     INT16 dstY = y - pDst->drawable.y;
-    if ((pDst == screenInfo.screens[0]->root) ||
-        (pDst->drawable.id == screenInfo.screens[0]->screensaver.wid)) {
-        dstX += screenInfo.screens[0]->x;
-        dstY += screenInfo.screens[0]->y;
+    if ((pDst == firstScreen->root) ||
+        (pDst->drawable.id == firstScreen->screensaver.wid)) {
+        dstX += firstScreen->x;
+        dstY += firstScreen->y;
     }
 
     xTranslateCoordsReply rep = {
@@ -1166,8 +1174,9 @@ PanoramiXCopyArea(ClientPtr client)
             dx = drawables[0]->x;
             dy = drawables[0]->y;
             if (srcIsRoot) {
-                dx += screenInfo.screens[0]->x;
-                dy += screenInfo.screens[0]->y;
+                ScreenPtr firstScreen = dixGetScreenPtr(0);
+                dx += firstScreen->x;
+                dy += firstScreen->y;
             }
 
             sourceBox.x1 = min(srcx + dx, 0);
@@ -2031,11 +2040,12 @@ PanoramiXGetImage(ClientPtr client)
             return BadMatch;
     }
     else {
+        ScreenPtr firstScreen = dixGetScreenPtr(0);
         /* check for being onscreen and inside of border */
-        if (screenInfo.screens[0]->x + pDraw->x + x < 0 ||
-            screenInfo.screens[0]->x + pDraw->x + x + w > PanoramiXPixWidth ||
-            screenInfo.screens[0]->y + pDraw->y + y < 0 ||
-            screenInfo.screens[0]->y + pDraw->y + y + h > PanoramiXPixHeight ||
+        if (firstScreen->x + pDraw->x + x < 0 ||
+            firstScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||
+            firstScreen->y + pDraw->y + y < 0 ||
+            firstScreen->y + pDraw->y + y + h > PanoramiXPixHeight ||
             x < -wBorderWidth((WindowPtr) pDraw) ||
             x + w > wBorderWidth((WindowPtr) pDraw) + (int) pDraw->width ||
             y < -wBorderWidth((WindowPtr) pDraw) ||

@@ -35,6 +35,7 @@ Equipment Corporation.
 #include "dix/resource_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -400,9 +401,9 @@ XineramaInitData(void)
         RegionUninit(&ScreenRegion);
     });
 
-    PanoramiXPixWidth = screenInfo.screens[0]->x + screenInfo.screens[0]->width;
-    PanoramiXPixHeight =
-        screenInfo.screens[0]->y + screenInfo.screens[0]->height;
+    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    PanoramiXPixWidth = firstScreen->x + firstScreen->width;
+    PanoramiXPixHeight = firstScreen->y + firstScreen->height;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         int w = walkScreen->x + walkScreen->width;
@@ -428,7 +429,7 @@ PanoramiXExtensionInit(void)
     int i;
     Bool success = FALSE;
     ExtensionEntry *extEntry;
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetFirstScreenPtr();
 
     if (noPanoramiXExtension)
         return;
@@ -594,22 +595,24 @@ PanoramiXCreateConnectionBlock(void)
         return FALSE;
     }
 
-    for (unsigned int walkScreenIdx = 1; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (walkScreen->rootDepth != screenInfo.screens[0]->rootDepth) {
+    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    DIX_FOR_EACH_SCREEN({
+        if (!walkScreenIdx)
+            continue;  /* skip the first one */
+
+        if (walkScreen->rootDepth != firstScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
             return FALSE;
         }
         if (walkScreen->backingStoreSupport !=
-            screenInfo.screens[0]->backingStoreSupport)
+            firstScreen->backingStoreSupport)
             disable_backing_store = TRUE;
-    }
+    });
 
     if (disable_backing_store) {
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        DIX_FOR_EACH_SCREEN({
             walkScreen->backingStoreSupport = NotUseful;
-        }
+        });
     }
 
     i = screenInfo.numScreens;
@@ -748,7 +751,7 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
 
             if ((*XineramaVisualsEqualPtr) (pVisual, walkScreen, candidate)
 #ifdef GLXPROXY
-                && glxMatchVisual(screenInfo.screens[0], pVisual, walkScreen)
+                && glxMatchVisual(firstScreen, pVisual, walkScreen)
 #endif
                 ) {
                 found = TRUE;
@@ -784,7 +787,7 @@ extern void
 PanoramiXConsolidate(void)
 {
     int i;
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetFirstScreenPtr();
     DepthPtr pDepth = pScreen->allowedDepths;
     VisualPtr pVisual = pScreen->visuals;
 
@@ -834,7 +837,7 @@ PanoramiXConsolidate(void)
 VisualID
 PanoramiXTranslateVisualID(int screen, VisualID orig)
 {
-    ScreenPtr pOtherScreen = screenInfo.screens[screen];
+    ScreenPtr pOtherScreen = dixGetScreenPtr(screen);
     VisualPtr pVisual = NULL;
     int i;
 
@@ -976,12 +979,14 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+
     xPanoramiXGetScreenSizeReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         /* screen dimensions */
-        .width = screenInfo.screens[stuff->screen]->width,
-        .height = screenInfo.screens[stuff->screen]->height,
+        .width = pScreen->width,
+        .height = pScreen->height,
         .window = stuff->window,
         .screen = stuff->screen
     };

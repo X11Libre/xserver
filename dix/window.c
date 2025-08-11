@@ -108,6 +108,7 @@ Equipment Corporation.
 #include "dix/property_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/selection_priv.h"
+#include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"         /* miPaintWindow */
 #include "os/auth.h"
@@ -393,15 +394,11 @@ PrintPassiveGrabs(void)
 void
 PrintWindowTree(void)
 {
-    int depth;
-    WindowPtr pWin;
-
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", walkScreenIdx,
                (unsigned) walkScreen->GetScreenPixmap(walkScreen)->drawable.id);
-        pWin = walkScreen->root;
-        depth = 1;
+        WindowPtr pWin = walkScreen->root;
+        int depth = 1;
         while (pWin) {
             log_window_info(pWin, depth);
             if (pWin->firstChild) {
@@ -417,7 +414,7 @@ PrintWindowTree(void)
                 break;
             pWin = pWin->nextSib;
         }
-    }
+    });
 }
 
 int
@@ -3088,16 +3085,14 @@ dixSaveScreens(ClientPtr client, int on, int mode)
             type = SCREEN_SAVER_CYCLE;
     }
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         int rc = XaceHookScreensaverAccess(client, walkScreen,
                       DixShowAccess | DixHideAccess);
         if (rc != Success)
             return rc;
-    }
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    });
 
+    DIX_FOR_EACH_SCREEN({
         if (on == SCREEN_SAVER_FORCER)
             walkScreen->SaveScreen(walkScreen, on);
         if (walkScreen->screensaver.ExternalScreenSaver) {
@@ -3161,7 +3156,8 @@ dixSaveScreens(ClientPtr client, int on, int mode)
                 walkScreen->screensaver.blanked = SCREEN_ISNT_SAVED;
             break;
         }
-    }
+    });
+
     screenIsSaved = what;
     if (mode == ScreenSaverReset) {
         if (on == SCREEN_SAVER_FORCER) {
