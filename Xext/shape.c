@@ -316,7 +316,7 @@ ProcShapeRectangles(ClientPtr client)
     }
     return result;
 #else
-    return ShapeRectangles(client);
+    return ShapeRectangles(client, stuff);
 #endif
 }
 
