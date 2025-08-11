@@ -44,6 +44,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -504,8 +505,7 @@ CompositeExtensionInit(void)
     /* Assume initialization is going to fail */
     noCompositeExtension = TRUE;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         VisualPtr vis;
 
         /* Composite on 8bpp pseudocolor root windows appears to fail, so
@@ -520,7 +520,7 @@ CompositeExtensionInit(void)
          */
         if (GetPictureScreenIfSet(walkScreen) == NULL)
             return;
-    }
+    });
 
     CompositeClientWindowType = CreateNewResourceType
         (FreeCompositeClientWindow, "CompositeClientWindow");
@@ -544,11 +544,10 @@ CompositeExtensionInit(void)
                                sizeof(CompositeClientRec)))
         return;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (!compScreenInit(walkScreen))
             return;
-    }
+    });
 
     extEntry = AddExtension(COMPOSITE_NAME, 0, 0,
                             ProcCompositeDispatch, SProcCompositeDispatch,
@@ -775,7 +774,6 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
     xCompositeGetOverlayWindowReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
-    CompScreenPtr cs;
     CompOverlayClientPtr pOc;
     int rc;
     PanoramiXRes *win, *overlayWin = NULL;
@@ -786,7 +784,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         return rc;
     }
 
-    cs = GetCompScreen(screenInfo.screens[0]);
+    CompScreenPtr cs = GetCompScreen(dixGetScreenPtr(0));
     if (!cs->pOverlayWin) {
         if (!(overlayWin = calloc(1, sizeof(PanoramiXRes))))
             return BadAlloc;
@@ -847,7 +845,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         AddResource(overlayWin->info[0].id, XRT_WINDOW, overlayWin);
     }
 
-    cs = GetCompScreen(screenInfo.screens[0]);
+    cs = GetCompScreen(dixGetScreenPtr(0));
 
     rep = (xCompositeGetOverlayWindowReply) {
         .overlayWin = cs->pOverlayWin->drawable.id

@@ -24,6 +24,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "Xext/panoramiX.h"
@@ -707,10 +708,9 @@ DamageExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         DamageSetup(walkScreen);
-    }
+    });
 
     DamageExtType = CreateNewResourceType(FreeDamageExt, "DamageExt");
     if (!DamageExtType)

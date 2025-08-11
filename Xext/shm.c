@@ -44,6 +44,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/busfault.h"
@@ -228,12 +229,9 @@ ShmRegisterPrivates(void)
  /*ARGSUSED*/ static void
 ShmResetProc(ExtensionEntry * extEntry)
 {
-    int i;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         ShmRegisterFuncs(walkScreen, NULL);
-    }
+    });
 }
 
 void
@@ -812,12 +810,12 @@ ProcShmGetImage(ClientPtr client)
             return BadMatch;
     }
     else {
+        ScreenPtr firstScreen = dixGetScreenPtr(0);
         if (                    /* check for being onscreen */
-               screenInfo.screens[0]->x + pDraw->x + x < 0 ||
-               screenInfo.screens[0]->x + pDraw->x + x + w > PanoramiXPixWidth
-               || screenInfo.screens[0]->y + pDraw->y + y < 0 ||
-               screenInfo.screens[0]->y + pDraw->y + y + h > PanoramiXPixHeight
-               ||
+               firstScreen->x + pDraw->x + x < 0 ||
+               firstScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||
+               firstScreen->y + pDraw->y + y < 0 ||
+               firstScreen->y + pDraw->y + y + h > PanoramiXPixHeight ||
                /* check for being inside of border */
                x < -wBorderWidth((WindowPtr) pDraw) ||
                x + w > wBorderWidth((WindowPtr) pDraw) + (int) pDraw->width ||
@@ -1513,22 +1511,19 @@ ShmExtensionInit(void)
     sharedPixmaps = xFalse;
     {
         sharedPixmaps = xTrue;
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
-            ShmScrPrivateRec *screen_priv =
-                ShmInitScreenPriv(walkScreen);
+        DIX_FOR_EACH_SCREEN({
+            ShmScrPrivateRec *screen_priv = ShmInitScreenPriv(walkScreen);
             if (!screen_priv)
                 continue;
             if (!screen_priv->shmFuncs)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
                 sharedPixmaps = xFalse;
-        }
+        });
         if (sharedPixmaps)
-            for (i = 0; i < screenInfo.numScreens; i++) {
-                ScreenPtr walkScreen = screenInfo.screens[i];
+            DIX_FOR_EACH_SCREEN({
                 dixScreenHookPixmapDestroy(walkScreen, ShmPixmapDestroy);
-            }
+            });
     }
     ShmSegType = CreateNewResourceType(ShmDetachSegment, "ShmSeg");
     if (ShmSegType &&

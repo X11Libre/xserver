@@ -1332,10 +1332,10 @@ ScreenSaverExtensionInit(void)
     SaverEventType = CreateNewResourceType(ScreenSaverFreeEvents, "SaverEvent");
     SuspendType = CreateNewResourceType(ScreenSaverFreeSuspend, "SaverSuspend");
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         SetScreenPrivate(walkScreen, NULL);
-    }
+    });
+
     if (AttrType && SaverEventType && SuspendType &&
         (extEntry = AddExtension(ScreenSaverName, ScreenSaverNumberEvents, 0,
                                  ProcScreenSaverDispatch,
