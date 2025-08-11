@@ -510,19 +510,16 @@ GetCompositeWindowBytes(void *value, XID id, ResourceSizePtr size)
 void
 CompositeExtensionInit(void)
 {
-    ExtensionEntry *extEntry;
-    int s;
-
     /* Assume initialization is going to fail */
     noCompositeExtension = TRUE;
 
-    for (s = 0; s < screenInfo.numScreens; s++) {
+    for (int s = 0; s < screenInfo.numScreens; s++) {
         ScreenPtr pScreen = screenInfo.screens[s];
-        VisualPtr vis;
 
         /* Composite on 8bpp pseudocolor root windows appears to fail, so
          * just disable it on anything pseudocolor for safety.
          */
+        VisualPtr vis;
         for (vis = pScreen->visuals; vis->vid != pScreen->rootVisual; vis++);
         if ((vis->class | DynamicClass) == PseudoColor)
             return;
@@ -556,11 +553,11 @@ CompositeExtensionInit(void)
                                sizeof(CompositeClientRec)))
         return;
 
-    for (s = 0; s < screenInfo.numScreens; s++)
+    for (int s = 0; s < screenInfo.numScreens; s++)
         if (!compScreenInit(screenInfo.screens[s]))
             return;
 
-    extEntry = AddExtension(COMPOSITE_NAME, 0, 0,
+    ExtensionEntry *extEntry = AddExtension(COMPOSITE_NAME, 0, 0,
                             ProcCompositeDispatch, SProcCompositeDispatch,
                             NULL, StandardMinorOpcode);
     if (!extEntry)
