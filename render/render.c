@@ -2103,13 +2103,13 @@ PanoramiXRenderCompositeGlyphs(ClientPtr client, xRenderCompositeGlyphsReq *stuf
         XINERAMA_FOR_EACH_SCREEN_FORWARD({
             stuff->src = src->info[walkScreenIdx].id;
             if (src->u.pict.root) {
-                stuff->xSrc = xSrc - walkScreen->x;
-                stuff->ySrc = ySrc - walkScreen->y;
+                stuff->xSrc = xSrc - pScreen->x;
+                stuff->ySrc = ySrc - pScreen->y;
             }
             stuff->dst = dst->info[walkScreenIdx].id;
             if (dst->u.pict.root) {
-                elt->deltax = origElt.deltax - walkScreen->x;
-                elt->deltay = origElt.deltay - walkScreen->y;
+                elt->deltax = origElt.deltax - pScreen->x;
+                elt->deltay = origElt.deltay - pScreen->y;
             }
             result = SingleRenderCompositeGlyphs(client, stuff);
             if (result != Success)
@@ -2137,8 +2137,9 @@ PanoramiXRenderFillRectangles(ClientPtr client, xRenderFillRectanglesReq *stuff)
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = walkScreen->x;
-                int y_off = walkScreen->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xRectangle *rects = (xRectangle *) (stuff + 1);
@@ -2184,8 +2185,9 @@ PanoramiXRenderTrapezoids(ClientPtr client, xRenderTrapezoidsReq *stuff)
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = walkScreen->x;
-                int y_off = walkScreen->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xTrapezoid *trap = (xTrapezoid *) (stuff + 1);
@@ -2242,8 +2244,9 @@ PanoramiXRenderTriangles(ClientPtr client, xRenderTrianglesReq *stuff)
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = walkScreen->x;
-                int y_off = walkScreen->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xTriangle *tri = (xTriangle *) (stuff + 1);
@@ -2296,8 +2299,9 @@ PanoramiXRenderTriStrip(ClientPtr client, xRenderTriStripReq *stuff)
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = walkScreen->x;
-                int y_off = walkScreen->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xPointFixed *fixed = (xPointFixed *) (stuff + 1);
@@ -2345,8 +2349,9 @@ PanoramiXRenderTriFan(ClientPtr client, xRenderTriFanReq *stuff)
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = walkScreen->x;
-                int y_off = walkScreen->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xPointFixed *fixed = (xPointFixed *) (stuff + 1);

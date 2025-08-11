@@ -108,10 +108,8 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 
     Bool isCapable;
 
-    if (!DRIQueryDirectRenderingCapable(pScreen,
-                                        &isCapable)) {
+    if (!DRIQueryDirectRenderingCapable(pScreen, &isCapable))
         return BadValue;
-    }
 
     if (!client->local || client->swapped)
         isCapable = 0;
@@ -138,10 +136,8 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
         return BadValue;
     }
 
-    if (!DRIOpenConnection(pScreen,
-                           &hSAREA, &busIdString)) {
+    if (!DRIOpenConnection(pScreen, &hSAREA, &busIdString))
         return BadValue;
-    }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     if (busIdString) {
@@ -263,9 +259,8 @@ ProcXF86DRIDestroyContext(register ClientPtr client)
         return BadValue;
     }
 
-    if (!DRIDestroyContext(pScreen, stuff->context)) {
+    if (!DRIDestroyContext(pScreen, stuff->context))
         return BadValue;
-    }
 
     return Success;
 }
@@ -294,7 +289,6 @@ ProcXF86DRICreateDrawable(ClientPtr client)
                            pDrawable,
                            (drm_drawable_t *) &reply.hHWDrawable)) {
         return BadValue;
-    }
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -318,10 +312,8 @@ ProcXF86DRIDestroyDrawable(register ClientPtr client)
     if (rc != Success)
         return rc;
 
-    if (!DRIDestroyDrawable(pScreen, client,
-                            pDrawable)) {
+    if (!DRIDestroyDrawable(pScreen, client, pDrawable)) {
         return BadValue;
-    }
 
     return Success;
 }

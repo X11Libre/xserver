@@ -196,21 +196,20 @@ RealizeCursorAllScreens(CursorPtr pCurs)
                     DeviceIntPtr pDevIt = inputInfo.devices;    /*dev iterator */
 
                     while (pDevIt && pDevIt != pDev) {
-                        if (DevHasCursor(pDevIt) && walkScreen->UnrealizeCursor)
+                        if (DevHasCursor(pDevIt))
                             walkScreen->UnrealizeCursor(pDevIt, walkScreen, pCurs);
                         pDevIt = pDevIt->next;
                     }
-                    while (--walkScreenIdx>= 0) {
+                    while (--walkScreenIdx >= 0) {
                         walkScreen = dixGetScreenPtr(walkScreenIdx);
                         /* now unrealize all devices on previous screens */
                         pDevIt = inputInfo.devices;
                         while (pDevIt) {
-                            if (DevHasCursor(pDevIt) && walkScreen->UnrealizeCursor)
+                            if (DevHasCursor(pDevIt))
                                 walkScreen->UnrealizeCursor(pDevIt, walkScreen, pCurs);
                             pDevIt = pDevIt->next;
                         }
-                        if (walkScreen->UnrealizeCursor)
-                            walkScreen->UnrealizeCursor(pDev, walkScreen, pCurs);
+                        walkScreen->UnrealizeCursor(pDev, walkScreen, pCurs);
                     }
                     return BadAlloc;
                 }

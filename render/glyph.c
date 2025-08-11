@@ -239,7 +239,7 @@ FreeGlyphPicture(GlyphPtr glyph)
 
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps)
-            (*ps->UnrealizeGlyph) (walkScreen, glyph);
+            ps->UnrealizeGlyph(walkScreen, glyph);
     });
 }
 
@@ -353,13 +353,13 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     glyph->info = *gi;
     dixInitPrivates(glyph, (char *) glyph + head_size, PRIVATE_GLYPH);
 
-    unsigned int i = 0;
+    unsigned lastOne = 0;
     DIX_FOR_EACH_SCREEN({
         SetGlyphPicture(glyph, walkScreen, NULL);
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps) {
             if (!(ps->RealizeGlyph(walkScreen, glyph))) {
-                i = walkScreenIdx;
+                lastOne = walkScreenIdx;
                 goto bail;
             }
         }
@@ -368,11 +368,11 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     return glyph;
 
  bail:
-    while (i--) {
-        ScreenPtr walkScreen = dixGetScreenPtr(i);
-        PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
+    while (lastOne--) {
+        ScreenPtr pScreen = dixGetScreenPtr(lastOne);
+        PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
         if (ps)
-            ps->UnrealizeGlyph(walkScreen, glyph);
+            ps->UnrealizeGlyph(pScreen, glyph);
     }
 
     dixFreeObjectWithPrivates(glyph, PRIVATE_GLYPH);

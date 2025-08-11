@@ -1306,25 +1306,31 @@ static void
 DGAClientStateChange(CallbackListPtr *pcbl, void *nulldata, void *calldata)
 {
     NewClientInfoRec *pci = (NewClientInfoRec *) calldata;
+    ClientPtr client = NULL;
+
+    unsigned foundIdx = 0;
 
     DIX_FOR_EACH_SCREEN({
-        if (pci->client && (DGA_GETCLIENT(walkScreenIdx) == pci->client)) {
-            if ((pci->client->clientState == ClientStateGone) ||
-                (pci->client->clientState == ClientStateRetained))
-            {
-                XDGAModeRec mode;
-                PixmapPtr pPix;
-
-                DGA_SETCLIENT(walkScreenIdx, NULL);
-                DGASelectInput(walkScreenIdx, NULL, 0);
-                DGASetMode(walkScreenIdx, 0, &mode, &pPix);
-
-                if (--DGACallbackRefCount == 0)
-                    DeleteCallback(&ClientStateCallback, DGAClientStateChange, NULL);
-            }
+        if (DGA_GETCLIENT(walkScreenIdx) == pci->client) {
+            client = pci->client;
+            foundIdx = walkScreenIdx;
             break;
         }
     });
+
+    if (client &&
+        ((client->clientState == ClientStateGone) ||
+         (client->clientState == ClientStateRetained))) {
+        XDGAModeRec mode;
+        PixmapPtr pPix;
+
+        DGA_SETCLIENT(foundIdx, NULL);
+        DGASelectInput(foundIdx, NULL, 0);
+        DGASetMode(foundIdx, 0, &mode, &pPix);
+
+        if (--DGACallbackRefCount == 0)
+            DeleteCallback(&ClientStateCallback, DGAClientStateChange, NULL);
+    }
 }
 
 static int

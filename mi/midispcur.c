@@ -473,7 +473,7 @@ miDCDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
         continue;
 
 failure:
-        miDCDeviceCleanup(pDev, walkScreen);
+        miDCDeviceCleanup(pDev, pScreen);
         return FALSE;
     });
 

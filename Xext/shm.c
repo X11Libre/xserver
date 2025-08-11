@@ -1402,7 +1402,9 @@ ShmExtensionInit(void)
     {
         sharedPixmaps = xTrue;
         DIX_FOR_EACH_SCREEN({
-            ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(walkScreen);
+            ShmScrPrivateRec *screen_priv = ShmInitScreenPriv(walkScreen);
+            if (!screen_priv)
+                continue;
             if (!screen_priv->shmFuncs)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)

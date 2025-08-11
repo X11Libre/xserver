@@ -1287,6 +1287,25 @@ static void CoreFocusToPointerRootOrNoneScr(
 {
     WindowPtr root = pScreen->root;
 
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < nscreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        CoreFocusPointerRootNoneSwitchScr(walkScreen, dev, A, B, mode);
+    });
+}
+
+/**
+ * Focus moves from window A to PointerRoot or to None.
+ * Assumption: A is a valid window and not PointerRoot or None.
+ */
+static void CoreFocusToPointerRootOrNoneScr(
+    ScreenPtr pScreen,
+    DeviceIntPtr dev,
+    WindowPtr A,
+    WindowPtr B,        /* PointerRootWin or NoneWin */
+    int mode)
+{
+    WindowPtr root = pScreen->root;
+
     if (HasFocus(root) || FirstFocusChild(root))
         return;
 
@@ -1360,6 +1379,34 @@ static void CoreFocusFromPointerRootOrNoneScr(
  * Focus moves from PointerRoot or None to a window B.
  * Assumption: B is a valid window and not PointerRoot or None.
  */
+static void CoreFocusFromPointerRootOrNoneScr(
+    ScreenPtr pScreen,
+    DeviceIntPtr dev,
+    WindowPtr A,   /* PointerRootWin or NoneWin */
+    WindowPtr B, int mode)
+{
+    WindowPtr root = pScreen->root;
+
+    if (HasFocus(root) || FirstFocusChild(root))
+        return;
+
+    /* If pointer was on PointerRootWin and changes to NoneWin, and
+     * the pointer paired with dev is below the current root window,
+     * do a NotifyPointer run. */
+    if (dev->focus && dev->focus->win == PointerRootWin &&
+        B != PointerRootWin) {
+        WindowPtr ptrwin = PointerWin(GetMaster(dev, POINTER_OR_FLOAT));
+        if (ptrwin)
+            CoreFocusOutNotifyPointerEvents(dev, root, None, mode, TRUE);
+    }
+    CoreFocusEvent(dev, FocusOut, mode,
+                   A ? NotifyPointerRoot : NotifyDetailNone, root);
+}
+
+/**
+ * Focus moves from PointerRoot or None to a window B.
+ * Assumption: B is a valid window and not PointerRoot or None.
+ */
 static void
 CoreFocusFromPointerRootOrNone(DeviceIntPtr dev,
                                WindowPtr A,   /* PointerRootWin or NoneWin */
@@ -1392,7 +1439,6 @@ CoreFocusFromPointerRootOrNone(DeviceIntPtr dev,
             CoreFocusInNotifyPointerEvents(dev, B, None, mode, FALSE);
         }
     }
-
 }
 
 static void
@@ -1482,7 +1528,7 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
             }
 
             DIX_FOR_EACH_SCREEN_XINERAMA({
-                DeviceFocusEvent(dev, XI_FocusOut, mode, out, walkScreen->root);
+                DeviceFocusEvent(dev, XI_FocusOut, mode, out, walkScreen);
             });
 
             if (to->parent != NullWindow)

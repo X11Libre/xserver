@@ -487,7 +487,7 @@ QuartzSetRootClip(int mode)
     if (!XQuartzServerVisible)
         return;
 
-    DIX_FOR_EACH_SCREEN({ SetRootClip(walkScreen, mode); });
+    DIX_FOR_EACH_SCREEN({ SetRootClip(screenInfo.screens[i], mode); });
 }
 
 /*

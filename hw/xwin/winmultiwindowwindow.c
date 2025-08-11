@@ -1072,8 +1072,7 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
     DIX_FOR_EACH_SCREEN({
         winScreenPriv(walkScreen);
         winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
-        if (pScreenInfo->pfb == pPixData)
-            {
+        if (pScreenInfo->pfb == pPixData) {
                 /* and initialize pixmap privates from screen privates */
                 pPixmapPriv->hBitmap = pScreenPriv->hbmpShadow;
                 pPixmapPriv->pbBits = pScreenInfo->pfb;
