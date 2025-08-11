@@ -381,7 +381,6 @@ SendScreenSaverNotify(ScreenPtr pScreen, int state, Bool forced)
     mask = ScreenSaverNotifyMask;
     if (state == ScreenSaverCycle)
         mask = ScreenSaverCycleMask;
-    pScreen = screenInfo.screens[pScreen->myNum];
     pPriv = GetScreenPrivate(pScreen);
     if (!pPriv)
         return;
