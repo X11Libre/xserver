@@ -352,7 +352,7 @@ xf86CursorOffScreen(ScreenPtr *pScreen, int *x, int *y)
     xf86EdgePtr edge;
     int tmp;
 
-    if (screenInfo.numScreens == 1)
+    if (!dixGetScreenPtr(1))
         return FALSE;
 
     if (*x < 0) {

@@ -6,6 +6,7 @@
 #ifndef _XSERVER_DIX_SCREENINT_PRIV_H
 #define _XSERVER_DIX_SCREENINT_PRIV_H
 
+#include <stdbool.h>
 #include <X11/Xdefs.h>
 
 #include "include/callback.h"
@@ -29,6 +30,30 @@ void InitOutput(int argc, char **argv);
 
 static inline ScreenPtr dixGetMasterScreen(void) {
     return screenInfo.screens[0];
+}
+
+/*
+ * retrieve pointer to screen by it's index. If index is above the total
+ * number of screens, returns NULL
+ *
+ * @param idx screen index
+ * @return pointer to idx'th screen or NULL
+ */
+static inline ScreenPtr dixGetScreenPtr(unsigned int idx) {
+    if (idx < screenInfo.numScreens)
+        return screenInfo.screens[idx];
+    return NULL;
+}
+
+/*
+ * check whether screen with given index exists
+ *
+ * @param idx screen index
+ * @return TRUE if the screen at this index exists
+ */
+static inline bool dixScreenExists(unsigned int idx) {
+    return ((idx < screenInfo.numScreens) &&
+            (screenInfo.screens[idx] != NULL));
 }
 
 /*

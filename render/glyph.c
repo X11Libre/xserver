@@ -369,7 +369,7 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
 
  bail:
     while (i--) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = dixGetScreenPtr(i);
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps)
             ps->UnrealizeGlyph(walkScreen, glyph);
