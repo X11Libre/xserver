@@ -831,13 +831,11 @@ FreeGCperDepth(ScreenPtr pScreen)
 }
 
 Bool
-CreateGCperDepth(int screenNum)
+CreateGCperDepth(ScreenPtr pScreen)
 {
-    ScreenPtr pScreen;
     DepthPtr pDepth;
     GCPtr *ppGC;
 
-    pScreen = screenInfo.screens[screenNum];
     ppGC = pScreen->GCperDepth;
     /* do depth 1 separately because it's not included in list */
     if (!(ppGC[0] = CreateScratchGC(pScreen, 1)))

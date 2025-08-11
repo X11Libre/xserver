@@ -216,7 +216,7 @@ dix_main(int argc, char *argv[], char *envp[])
                 FatalError("failed to create screen pixmap properties");
             if (!dixScreenRaiseCreateResources(pScreen))
                 FatalError("failed to create screen resources");
-            if (!CreateGCperDepth(i))
+            if (!CreateGCperDepth(pScreen))
                 FatalError("failed to create scratch GCs");
             if (!CreateDefaultStipple(i))
                 FatalError("failed to create default stipple");
