@@ -41,6 +41,7 @@
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "scrnintstr.h"
@@ -945,17 +946,14 @@ static void miDbeWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowP
 static void
 DbeResetProc(ExtensionEntry * extEntry)
 {
-
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         DbeScreenPrivPtr pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
-
         if (pDbeScreenPriv) {
             dixScreenUnhookWindowDestroy(walkScreen, miDbeWindowDestroy);
             dixScreenUnhookWindowPosition(walkScreen, miDbeWindowPosition);
             free(pDbeScreenPriv);
         }
-    }
+    });
 }
 
 /**
@@ -1025,13 +1023,10 @@ DbeExtensionInit(void)
     if (!dixRegisterPrivateKey(&dbeWindowPrivKeyRec, PRIVATE_WINDOW, 0))
         return;
 
-    for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+    DIX_FOR_EACH_SCREEN({
         /* For each screen, set up DBE screen privates and init DIX and DDX
          * interface.
          */
-
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
         if (!(pDbeScreenPriv = calloc(1, sizeof(DbeScreenPrivRec)))) {
             /* If we can not alloc a window or screen private,
              * then free any privates that we already alloc'ed and return
@@ -1077,17 +1072,14 @@ DbeExtensionInit(void)
 #endif
 
         }
-
-    }                           /* for (i = 0; i < screenInfo.numScreens; i++) */
+    });
 
     if (nStubbedScreens == screenInfo.numScreens) {
         /* All screens stubbed.  Clean up and return. */
-
-        for (int i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
+        DIX_FOR_EACH_SCREEN({
             free(dixLookupPrivate(&walkScreen->devPrivates, &dbeScreenPrivKeyRec));
             dixSetPrivate(&walkScreen->devPrivates, &dbeScreenPrivKeyRec, NULL);
-        }
+        });
         return;
     }
 

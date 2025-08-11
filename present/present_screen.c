@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "present/present_priv.h"
 
@@ -258,11 +259,11 @@ present_extension_init(void)
     if (!present_event_init())
         goto bail;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (!present_screen_init(walkScreen, NULL))
             goto bail;
-    }
+    });
+
     return;
 
 bail:

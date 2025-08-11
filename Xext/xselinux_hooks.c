@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dix/input_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
 #include "os/client_priv.h"
@@ -171,7 +172,6 @@ SELinuxLabelClient(ClientPtr client)
 static void
 SELinuxLabelInitial(void)
 {
-    int i;
     XaceScreenAccessRec srec;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
@@ -198,9 +198,7 @@ SELinuxLabelInitial(void)
     srec.access_mode = DixCreateAccess;
     srec.status = Success;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-
+    DIX_FOR_EACH_SCREEN({
         /* Do the screen object */
         srec.screen = walkScreen;
         SELinuxScreen(NULL, NULL, &srec);
@@ -208,7 +206,7 @@ SELinuxLabelInitial(void)
         /* Do the default colormap */
         dixLookupResourceByType(&unused, walkScreen->defColormap,
                                 X11_RESTYPE_COLORMAP, serverClient, DixCreateAccess);
-    }
+    });
 }
 
 /*
