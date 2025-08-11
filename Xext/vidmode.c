@@ -1265,8 +1265,8 @@ ProcVidModeGetMonitor(ClientPtr client)
     const int vendorLength = (vendorStr ? strlen(vendorStr) : 0);
     const int modelLength = (modelStr ? strlen(modelStr) : 0);
 
-    const int nVendorItems = bytes_to_int32(pad_to_int32(vendorLength));
-    const int nModelItems = bytes_to_int32(pad_to_int32(modelLength));
+    const int nVendorItems = bytes_to_int32(vendorLength);
+    const int nModelItems = bytes_to_int32(modelLength);
 
     xXF86VidModeGetMonitorReply rep = {
         .type = X_Reply,
