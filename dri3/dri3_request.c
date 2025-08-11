@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/client_priv.h"
 
 #include "dri3_priv.h"
@@ -72,8 +73,7 @@ proc_dri3_query_version(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xDRI3QueryVersionReq);
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         if (!dri3_screen_can_one_point_two(walkScreen)) {
             rep.minorVersion = 0;
             break;
@@ -82,10 +82,9 @@ proc_dri3_query_version(ClientPtr client)
             rep.minorVersion = 2;
             break;
         }
-    }
+    });
 
-    for (int i = 0; i < screenInfo.numGPUScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+    DIX_FOR_EACH_GPU_SCREEN({
         if (!dri3_screen_can_one_point_two(walkScreen)) {
             rep.minorVersion = 0;
             break;
@@ -94,7 +93,7 @@ proc_dri3_query_version(ClientPtr client)
             rep.minorVersion = 2;
             break;
         }
-    }
+    });
 
     /* From DRI3 proto:
      *

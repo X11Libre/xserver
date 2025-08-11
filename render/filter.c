@@ -25,6 +25,8 @@
 #define  XK_LATIN1
 #include <X11/keysymdef.h>
 
+#include "dix/screenint_priv.h"
+
 #include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
@@ -329,7 +331,7 @@ SetPictureFilter(PicturePtr pPicture, char *name, int len, xFixed * params,
     if (pPicture->pDrawable != NULL)
         pScreen = pPicture->pDrawable->pScreen;
     else
-        pScreen = screenInfo.screens[0];
+        pScreen = dixGetScreenPtr(0);
 
     pFilter = PictureFindFilter(pScreen, name, len);
 
@@ -340,14 +342,14 @@ SetPictureFilter(PicturePtr pPicture, char *name, int len, xFixed * params,
         /* For source pictures, the picture isn't tied to a screen.  So, ensure
          * that all screens can handle a filter we set for the picture.
          */
-        for (unsigned int walkScreenIdx = 1; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-            PictFilterPtr pScreenFilter;
+        DIX_FOR_EACH_SCREEN({
+            if (!walkScreenIdx)
+                continue; // skip the first screen
 
-            pScreenFilter = PictureFindFilter(walkScreen, name, len);
+            PictFilterPtr pScreenFilter = PictureFindFilter(walkScreen, name, len);
             if (!pScreenFilter || pScreenFilter->id != pFilter->id)
                 return BadMatch;
-        }
+        });
     }
     return SetPicturePictFilter(pPicture, pFilter, params, nparams);
 }

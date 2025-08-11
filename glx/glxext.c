@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/client_priv.h"
 
 #include "glxserver.h"
@@ -284,17 +285,14 @@ GlxPushProvider(__GLXprovider * provider)
 static Bool
 checkScreenVisuals(void)
 {
-    int i, j;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        for (j = 0; j < walkScreen->numVisuals; j++) {
+    DIX_FOR_EACH_SCREEN({
+        for (int j = 0; j < walkScreen->numVisuals; j++) {
             if ((walkScreen->visuals[j].class == TrueColor ||
                  walkScreen->visuals[j].class == DirectColor) &&
                 walkScreen->visuals[j].nplanes > 12)
                 return TRUE;
         }
-    }
+    });
 
     return FALSE;
 }
@@ -332,15 +330,6 @@ xorgGlxHandleRequest(ClientPtr client)
     return __glXDispatch(client);
 }
 
-static ScreenPtr
-screenNumToScreen(int screen)
-{
-    if (screen < 0 || screen >= screenInfo.numScreens)
-        return NULL;
-
-    return screenInfo.screens[screen];
-}
-
 static int
 maybe_swap32(ClientPtr client, int x)
 {
@@ -352,7 +341,7 @@ vendorForScreen(ClientPtr client, int screen)
 {
     screen = maybe_swap32(client, screen);
 
-    return glxServer.getVendorForScreen(client, screenNumToScreen(screen));
+    return glxServer.getVendorForScreen(client, dixGetScreenPtr(screen));
 }
 
 /* this ought to be generated */
@@ -525,7 +514,6 @@ static void
 xorgGlxServerInit(CallbackListPtr *pcbl, void *param, void *ext)
 {
     const ExtensionEntry *extEntry = ext;
-    int i;
 
     if (!xorgGlxServerPreInit(extEntry)) {
         return;
@@ -536,13 +524,12 @@ xorgGlxServerInit(CallbackListPtr *pcbl, void *param, void *ext)
         return;
     }
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         __GLXprovider *p;
 
         if (glxServer.getVendorForScreen(NULL, walkScreen) != NULL) {
             // There's already a vendor registered.
-            LogMessage(X_INFO, "GLX: Another vendor is already registered for screen %d\n", i);
+            LogMessage(X_INFO, "GLX: Another vendor is already registered for screen %d\n", walkScreenIdx);
             continue;
         }
 
@@ -551,7 +538,7 @@ xorgGlxServerInit(CallbackListPtr *pcbl, void *param, void *ext)
             if (glxScreen != NULL) {
                 LogMessage(X_INFO,
                            "GLX: Initialized %s GL provider for screen %d\n",
-                           p->name, i);
+                           p->name, walkScreenIdx);
                 break;
             }
 
@@ -561,9 +548,9 @@ xorgGlxServerInit(CallbackListPtr *pcbl, void *param, void *ext)
             glxServer.setScreenVendor(walkScreen, glvnd_vendor);
         } else {
             LogMessage(X_INFO,
-                       "GLX: no usable GL providers found for screen %d\n", i);
+                       "GLX: no usable GL providers found for screen %d\n", walkScreenIdx);
         }
-    }
+    });
 }
 
 Bool

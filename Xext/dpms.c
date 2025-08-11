@@ -33,6 +33,7 @@ Equipment Corporation.
 #include <X11/extensions/dpmsproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/screensaver.h"
 #include "Xext/geext_priv.h"
@@ -231,17 +232,15 @@ Bool
 DPMSSupported(void)
 {
     /* For each screen, check if DPMS is supported */
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen->DPMS != NULL)
             return TRUE;
-    }
+    });
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    DIX_FOR_EACH_GPU_SCREEN({
         if (walkScreen->DPMS != NULL)
             return TRUE;
-    }
+    });
 
     return FALSE;
 }
@@ -281,17 +280,15 @@ DPMSSet(ClientPtr client, int level)
             return rc;
     }
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen->DPMS != NULL)
             walkScreen->DPMS(walkScreen, level);
-    }
+    });
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    DIX_FOR_EACH_GPU_SCREEN({
         if (walkScreen->DPMS != NULL)
             walkScreen->DPMS(walkScreen, level);
-    }
+    });
 
     if (DPMSPowerLevel != old_level)
         SendDPMSInfoNotify();

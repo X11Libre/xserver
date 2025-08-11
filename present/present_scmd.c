@@ -21,6 +21,7 @@
  */
 #include <dix-config.h>
 
+#include "dix/screenint_priv.h"
 #include "randr/randrstr_priv.h"
 
 #include "present_priv.h"
@@ -408,8 +409,7 @@ present_event_notify(uint64_t event_id, uint64_t ust, uint64_t msc)
         }
     }
 
-    for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         present_screen_priv_ptr screen_priv = present_screen_priv(walkScreen);
 
         if (event_id == screen_priv->unflip_event_id) {
@@ -419,7 +419,7 @@ present_event_notify(uint64_t event_id, uint64_t ust, uint64_t msc)
             present_flip_try_ready(walkScreen);
             return;
         }
-    }
+    });
 }
 
 /*
