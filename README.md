@@ -32,7 +32,7 @@ The easiest way to install and run XLibre is to use your distribution's provided
 
 ### Building XLibre
 
-Note: For Debian 13 users have had success in installing Xlibre by instsalling the following packages, some are run during the following steps but most are required for the build to succeed. At this time may be some redundant or unneeded entries in the list, and other distros may require some subsitutions:
+Note: On Debian 13 Xlibre builds have succeeded after pre-installing the packages listed below. The list may contain redundant or unnecessary entries, and other distributions may require equivalent package substitutions.
 ```shell
 git build-essential meson autoconf sudo xtrans-dev libpixman-1-dev libxkbcommon-x11-dev libxfont-dev libxcvt-dev libdrm-dev libepoxy-dev x11proto-present-dev x11proto-dev libxkbfile-dev libudev-dev libxshmfence-dev libbsd-dev x11proto-xf86dri-dev libgl1-mesa-dev libglu1-mesa-dev libgl-dev libdrm-dev xutils-dev libx11-dev libxcb1-dev libxrandr-dev libxrender-dev libxinerama-dev libxext-dev xutils-dev libpciaccess-dev libxpresent-dev cmake ninja-build pkg-config libx11-dev libxcb1-dev libxrandr-dev libxrender-dev libxinerama-dev libxext-dev xutils-dev libxcb-util-dev libxcb-shape0-dev libxcb-icccm4-dev libpciaccess-dev libxpresent-dev mesa-common-dev cmake
 ```
