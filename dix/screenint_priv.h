@@ -78,8 +78,21 @@ void DetachOffloadGPU(ScreenPtr slave);
         } \
     } while (0);
 
+/*
+ * retrieve pointer to screen by it's index. If index is above the total
+ * number of screens, returns NULL
+ *
+ * @param idx screen index
+ * @return pointer to idx'th screen or NULL
+ */
+static inline ScreenPtr dixGetScreenPtr(unsigned int idx) {
+    if (idx < screenInfo.numScreens)
+        return screenInfo.screens[idx];
+    return NULL;
+}
+
 static inline ScreenPtr dixGetFirstScreenPtr(void) {
-    return screenInfo.screens[0];
+    return dixGetScreenPtr(0);
 }
 
 #endif /* _XSERVER_DIX_SCREENINT_PRIV_H */

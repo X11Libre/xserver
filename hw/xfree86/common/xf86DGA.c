@@ -1184,7 +1184,8 @@ ProcXDGAOpenFramebuffer(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGAOpenFramebufferReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (!DGAAvailable(stuff->screen))
@@ -1214,7 +1215,8 @@ ProcXDGACloseFramebuffer(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGACloseFramebufferReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (!DGAAvailable(stuff->screen))
@@ -1236,7 +1238,8 @@ ProcXDGAQueryModes(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGAQueryModesReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if ((!DGAAvailable(stuff->screen)) ||
@@ -1333,7 +1336,8 @@ ProcXDGASetMode(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGASetModeReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
     owner = DGA_GETCLIENT(stuff->screen);
 
@@ -1423,7 +1427,8 @@ ProcXDGASetViewport(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGASetViewportReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1444,7 +1449,8 @@ ProcXDGAInstallColormap(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGAInstallColormapReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1465,7 +1471,8 @@ ProcXDGASelectInput(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGASelectInputReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1484,7 +1491,8 @@ ProcXDGAFillRectangle(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGAFillRectangleReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1504,7 +1512,8 @@ ProcXDGACopyArea(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGACopyAreaReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1525,7 +1534,8 @@ ProcXDGACopyTransparentArea(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGACopyTransparentAreaReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1546,7 +1556,8 @@ ProcXDGAGetViewportStatus(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGAGetViewportStatusReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1566,7 +1577,8 @@ ProcXDGASync(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGASyncReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1607,7 +1619,8 @@ ProcXDGAChangePixmapMode(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGAChangePixmapModeReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
@@ -1635,7 +1648,8 @@ ProcXDGACreateColormap(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXDGACreateColormapReq);
 
-    if (stuff->screen >= screenInfo.numScreens)
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
 
     if (DGA_GETCLIENT(stuff->screen) != client)
