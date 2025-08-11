@@ -1004,7 +1004,7 @@ ProcRenderAddGlyphs(ClientPtr client)
     int err;
     int i;
     PicturePtr pSrc = NULL, pDst = NULL;
-    PixmapPtr pSrcPix = NULL, pDstPix = NULL;
+    PixmapPtr pSrcPix = NULL;
     CARD32 component_alpha;
 
     REQUEST_AT_LEAST_SIZE(xRenderAddGlyphsReq);
@@ -1086,8 +1086,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                 goto bail;
             }
 
-            for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-                ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            DIX_FOR_EACH_SCREEN({
                 int width = gi[i].width;
                 int height = gi[i].height;
                 int depth = glyphSet->format->depth;
@@ -1113,7 +1112,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                     goto bail;
                 }
 
-                pDstPix = walkScreen->CreatePixmap(walkScreen,
+                PixmapPtr pDstPix = walkScreen->CreatePixmap(walkScreen,
                                                    width, height, depth,
                                                    CREATE_PIXMAP_USAGE_GLYPH_PICTURE);
 
@@ -1146,7 +1145,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                 pSrc = NULL;
                 FreeScratchPixmapHeader(pSrcPix);
                 pSrcPix = NULL;
-            }
+            });
 
             memcpy(glyph_new->glyph->sha1, glyph_new->sha1, 20);
         }
@@ -2589,7 +2588,7 @@ PanoramiXRenderCreatePicture(ClientPtr client)
     panoramix_setup_ids(newPict, client, stuff->pid);
 
     if (refDraw->type == XRT_WINDOW &&
-        stuff->drawable == screenInfo.screens[0]->root->drawable.id) {
+        stuff->drawable == dixGetFirstScreenPtr()->root->drawable.id) {
         newPict->u.pict.root = TRUE;
     }
     else

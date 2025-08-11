@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -121,7 +122,7 @@ DeleteEventsFromChildren(DeviceIntPtr dev, WindowPtr p1, ClientPtr client)
 int
 ProcXCloseDevice(ClientPtr client)
 {
-    int rc, i;
+    int rc;
     DeviceIntPtr d;
 
     REQUEST(xCloseDeviceReq);
@@ -138,13 +139,10 @@ ProcXCloseDevice(ClientPtr client)
      * and selected by this client.
      * Delete passive grabs from all windows for this device.      */
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        WindowPtr pWin = walkScreen->root;
-        DeleteDeviceEvents(d, pWin, client);
-        WindowPtr p1 = pWin->firstChild;
-        DeleteEventsFromChildren(d, p1, client);
-    }
+    DIX_FOR_EACH_SCREEN({
+        DeleteDeviceEvents(d, walkScreen->root, client);
+        DeleteEventsFromChildren(d, walkScreen->root->firstChild, client);
+    });
 
     return Success;
 }

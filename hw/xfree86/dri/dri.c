@@ -49,6 +49,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "xf86.h"
 #include "xf86drm.h"
@@ -1710,29 +1711,21 @@ DRIDestroyInfoRec(DRIInfoPtr DRIInfo)
 void
 DRIWakeupHandler(void *wakeupData, int result)
 {
-    int i;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(walkScreen);
-
         if (pDRIPriv && pDRIPriv->pDriverInfo->wrap.WakeupHandler)
             (*pDRIPriv->pDriverInfo->wrap.WakeupHandler) (walkScreen, result);
-    }
+    });
 }
 
 void
 DRIBlockHandler(void *blockData, void *pTimeout)
 {
-    int i;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(walkScreen);
-
         if (pDRIPriv && pDRIPriv->pDriverInfo->wrap.BlockHandler)
             (*pDRIPriv->pDriverInfo->wrap.BlockHandler) (walkScreen, pTimeout);
-    }
+    });
 }
 
 void

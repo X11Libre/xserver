@@ -40,6 +40,7 @@
 
 #include <X11/X.h>
 
+#include "dix/screenint_priv.h"
 #include "os/log_priv.h"
 
 #include "os.h"
@@ -442,7 +443,6 @@ xf86VidModeInit(ScreenPtr pScreen)
 void
 XFree86VidModeExtensionInit(void)
 {
-    int i;
     Bool enabled = FALSE;
 
     DebugF("XFree86VidModeExtensionInit");
@@ -451,11 +451,11 @@ XFree86VidModeExtensionInit(void)
     if (!xf86Info.vidModeEnabled)
         return;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         if (xf86VidModeInit(walkScreen))
             enabled = TRUE;
-    }
+    });
+
     /* This means that the DDX doesn't want the vidmode extension enabled */
     if (!enabled)
         return;

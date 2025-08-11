@@ -1076,13 +1076,10 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
     */
 
     /* Look for which screen this pixmap corresponds to */
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         winScreenPriv(walkScreen);
         winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
-
-        if (pScreenInfo->pfb == pPixData)
-            {
+        if (pScreenInfo->pfb == pPixData) {
                 /* and initialize pixmap privates from screen privates */
                 pPixmapPriv->hBitmap = pScreenPriv->hbmpShadow;
                 pPixmapPriv->pbBits = pScreenInfo->pfb;
@@ -1093,7 +1090,7 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
 
                 return TRUE;
             }
-    }
+    });
 
     /* Otherwise, since creating a DIBSection from arbitrary memory is not
      * possible, fallback to normal.  If needed, we can create a DIBSection with

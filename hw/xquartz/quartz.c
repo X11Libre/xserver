@@ -34,6 +34,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "quartzRandR.h"
 #include "inputstr.h"
@@ -387,12 +388,11 @@ QuartzShowFullscreen(int state)
 
     if (XQuartzFullscreenVisible) {
         RootlessShowAllWindows();
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
+        DIX_FOR_EACH_SCREEN({
             RootlessRepositionWindows(walkScreen);
             // JH: I don't think this is necessary, but keeping it here as a reminder
             //RootlessUpdateScreenPixmap(walkScreen);
-        }
+        });
     }
 
     /* Somehow the menubar manages to interfere with our event stream
@@ -447,17 +447,12 @@ QuartzSetRootless(Bool state)
 void
 QuartzShow(void)
 {
-    int i;
-
     if (XQuartzServerVisible)
         return;
 
     XQuartzServerVisible = TRUE;
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        if (walkScreen)
-            quartzProcs->ResumeScreen(walkScreen);
-    }
+
+    DIX_FOR_EACH_SCREEN({ quartzProcs->ResumeScreen(walkScreen); });
 
     if (!XQuartzIsRootless)
         QuartzShowFullscreen(TRUE);
@@ -475,11 +470,7 @@ QuartzHide(void)
     int i;
 
     if (XQuartzServerVisible) {
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
-            if (walkScreen)
-                quartzProcs->SuspendScreen(walkScreen);
-        }
+        DIX_FOR_EACH_SCREEN({ quartzProcs->SuspendScreen(walkScreen); });
     }
 
     if (!XQuartzIsRootless)
@@ -494,16 +485,10 @@ QuartzHide(void)
 void
 QuartzSetRootClip(int mode)
 {
-    int i;
-
     if (!XQuartzServerVisible)
         return;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        if (walkScreen)
-            SetRootClip(walkScreen, mode);
-    }
+    DIX_FOR_EACH_SCREEN({ SetRootClip(screenInfo.screens[i], mode); });
 }
 
 /*

@@ -33,6 +33,8 @@
 
 #include <dix-config.h>
 
+#include "dix/screenint_priv.h"
+
 #include "quartzRandR.h"
 #include "quartz.h"
 #include "darwin.h"
@@ -459,29 +461,23 @@ QuartzRandRInit(ScreenPtr pScreen)
 void
 QuartzRandRSetFakeRootless(void)
 {
-    int i;
-
     DEBUG_LOG("QuartzRandRSetFakeRootless called.\n");
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(walkScreen);
         QuartzRandRSetMode(walkScreen, &pQuartzScreen->rootlessMode, TRUE);
-    }
+    });
 }
 
 void
 QuartzRandRSetFakeFullscreen(BOOL state)
 {
-    int i;
-
     DEBUG_LOG("QuartzRandRSetFakeFullscreen called.\n");
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(walkScreen);
         QuartzRandRSetMode(walkScreen, &pQuartzScreen->fullscreenMode, TRUE);
-    }
+    });
 
     QuartzShowFullscreen(state);
 }
