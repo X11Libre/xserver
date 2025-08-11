@@ -44,6 +44,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/busfault.h"
@@ -228,10 +229,9 @@ ShmRegisterPrivates(void)
  /*ARGSUSED*/ static void
 ShmResetProc(ExtensionEntry * extEntry)
 {
-    int i;
-
-    for (i = 0; i < screenInfo.numScreens; i++)
-        ShmRegisterFuncs(screenInfo.screens[i], NULL);
+    DIX_FOR_EACH_SCREEN({
+        ShmRegisterFuncs(walkScreen, NULL);
+    });
 }
 
 void
@@ -749,8 +749,9 @@ ProcShmPutImage(ClientPtr client)
         stuff->drawable = draw->info[j].id;
         stuff->gc = gc->info[j].id;
         if (isRoot) {
-            stuff->dstX = orig_x - screenInfo.screens[j]->x;
-            stuff->dstY = orig_y - screenInfo.screens[j]->y;
+            ScreenPtr pScreen = dixGetScreenPtr(j);
+            stuff->dstX = orig_x - pScreen->x;
+            stuff->dstY = orig_y - pScreen->y;
         }
         result = ShmPutImage(client, stuff);
         if (result != Success)
@@ -819,12 +820,12 @@ ProcShmGetImage(ClientPtr client)
             return BadMatch;
     }
     else {
+        ScreenPtr firstScreen = dixGetScreenPtr(0);
         if (                    /* check for being onscreen */
-               screenInfo.screens[0]->x + pDraw->x + x < 0 ||
-               screenInfo.screens[0]->x + pDraw->x + x + w > PanoramiXPixWidth
-               || screenInfo.screens[0]->y + pDraw->y + y < 0 ||
-               screenInfo.screens[0]->y + pDraw->y + y + h > PanoramiXPixHeight
-               ||
+               firstScreen->x + pDraw->x + x < 0 ||
+               firstScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||
+               firstScreen->y + pDraw->y + y < 0 ||
+               firstScreen->y + pDraw->y + y + h > PanoramiXPixHeight ||
                /* check for being inside of border */
                x < -wBorderWidth((WindowPtr) pDraw) ||
                x + w > wBorderWidth((WindowPtr) pDraw) + (int) pDraw->width ||
@@ -926,7 +927,6 @@ ProcShmCreatePixmap(ClientPtr client)
     if (noPanoramiXExtension)
         return ShmCreatePixmap(client, stuff);
 
-    ScreenPtr pScreen = NULL;
     PixmapPtr pMap = NULL;
     DrawablePtr pDraw;
     DepthPtr pDepth;
@@ -988,11 +988,8 @@ ProcShmCreatePixmap(ClientPtr client)
     result = Success;
 
     FOR_NSCREENS_BACKWARD(j) {
-        ShmScrPrivateRec *screen_priv;
-
-        pScreen = screenInfo.screens[j];
-
-        screen_priv = ShmGetScreenPriv(pScreen);
+        ScreenPtr pScreen = dixGetScreenPtr(j);
+        ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
         pMap = (*screen_priv->shmFuncs->CreatePixmap) (pScreen,
                                                        stuff->width,
                                                        stuff->height,
@@ -1530,19 +1527,19 @@ ShmExtensionInit(void)
     sharedPixmaps = xFalse;
     {
         sharedPixmaps = xTrue;
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ShmScrPrivateRec *screen_priv =
-                ShmInitScreenPriv(screenInfo.screens[i]);
+        DIX_FOR_EACH_SCREEN({
+            ShmScrPrivateRec *screen_priv = ShmInitScreenPriv(walkScreen);
             if (!screen_priv)
                 continue;
             if (!screen_priv->shmFuncs)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
                 sharedPixmaps = xFalse;
-        }
+        });
         if (sharedPixmaps)
-            for (i = 0; i < screenInfo.numScreens; i++)
-                dixScreenHookPixmapDestroy(screenInfo.screens[i], ShmPixmapDestroy);
+            DIX_FOR_EACH_SCREEN({
+                dixScreenHookPixmapDestroy(walkScreen, ShmPixmapDestroy);
+            });
     }
     ShmSegType = CreateNewResourceType(ShmDetachSegment, "ShmSeg");
     if (ShmSegType &&

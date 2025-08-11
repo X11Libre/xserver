@@ -1027,8 +1027,6 @@ SProcXFixesDestroyPointerBarrier(ClientPtr client)
 Bool
 XFixesCursorInit(void)
 {
-    int i;
-
     if (party_like_its_1989)
         CursorVisible = EnableCursor;
     else
@@ -1037,13 +1035,13 @@ XFixesCursorInit(void)
     if (!dixRegisterPrivateKey(&CursorScreenPrivateKeyRec, PRIVATE_SCREEN, sizeof(CursorScreenRec)))
         return FALSE;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        CursorScreenPtr cs = GetCursorScreen(pScreen);
-        dixScreenHookClose(pScreen, CursorScreenClose);
-        Wrap(cs, pScreen, DisplayCursor, CursorDisplayCursor);
+    DIX_FOR_EACH_SCREEN({
+        CursorScreenPtr cs = GetCursorScreen(walkScreen);
+        dixScreenHookClose(walkScreen, CursorScreenClose);
+        Wrap(cs, walkScreen, DisplayCursor, CursorDisplayCursor);
         cs->pCursorHideCounts = NULL;
-    }
+    });
+
     CursorClientType = CreateNewResourceType(CursorFreeClient,
                                              "XFixesCursorClient");
     CursorHideCountType = CreateNewResourceType(CursorFreeHideCount,

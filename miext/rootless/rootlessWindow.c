@@ -38,6 +38,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "fb/fb_priv.h"
 #include "mi/mi_priv.h"
 
@@ -1169,17 +1170,13 @@ RootlessChangeBorderWidth(WindowPtr pWin, unsigned int width)
 void
 RootlessOrderAllWindows(Bool include_unhitable)
 {
-    int i;
-    WindowPtr pWin;
-
     if (windows_hidden)
         return;
 
     RL_DEBUG_MSG("RootlessOrderAllWindows() ");
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        if (screenInfo.screens[i] == NULL)
-            continue;
-        pWin = screenInfo.screens[i]->root;
+
+    DIX_FOR_EACH_SCREEN({
+        WindowPtr pWin = walkScreen->root;
         if (pWin == NULL)
             continue;
 
@@ -1192,7 +1189,8 @@ RootlessOrderAllWindows(Bool include_unhitable)
                 continue;
             RootlessReorderWindow(pWin);
         }
-    }
+    });
+
     RL_DEBUG_MSG("RootlessOrderAllWindows() done");
 }
 
@@ -1227,9 +1225,6 @@ RootlessDisableRoot(ScreenPtr pScreen)
 void
 RootlessHideAllWindows(void)
 {
-    int i;
-    ScreenPtr pScreen;
-    WindowPtr pWin;
     RootlessWindowRec *winRec;
 
     if (windows_hidden)
@@ -1237,11 +1232,8 @@ RootlessHideAllWindows(void)
 
     windows_hidden = TRUE;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
-        if (pScreen == NULL)
-            continue;
-        pWin = pScreen->root;
+    DIX_FOR_EACH_SCREEN({
+        WindowPtr pWin = walkScreen->root;
         if (pWin == NULL)
             continue;
 
@@ -1253,19 +1245,16 @@ RootlessHideAllWindows(void)
 
             winRec = WINREC(pWin);
             if (winRec != NULL) {
-                if (SCREENREC(pScreen)->imp->HideWindow)
-                    SCREENREC(pScreen)->imp->HideWindow(winRec->wid);
+                if (SCREENREC(walkScreen)->imp->HideWindow)
+                    SCREENREC(walkScreen)->imp->HideWindow(winRec->wid);
             }
         }
-    }
+    });
 }
 
 void
 RootlessShowAllWindows(void)
 {
-    int i;
-    ScreenPtr pScreen;
-    WindowPtr pWin;
     RootlessWindowRec *winRec;
 
     if (!windows_hidden)
@@ -1273,11 +1262,8 @@ RootlessShowAllWindows(void)
 
     windows_hidden = FALSE;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
-        if (pScreen == NULL)
-            continue;
-        pWin = pScreen->root;
+    DIX_FOR_EACH_SCREEN({
+        WindowPtr pWin = pScreen->root;
         if (pWin == NULL)
             continue;
 
@@ -1292,7 +1278,7 @@ RootlessShowAllWindows(void)
             RootlessReorderWindow(pWin);
         }
 
-        RootlessScreenExpose(pScreen);
+        RootlessScreenExpose(walkScreen);
     }
 }
 

@@ -59,6 +59,7 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "dix/screenint_priv.h"
 #include "include/swaprep.h"
 #include "os/auth.h"
 #include "os/log_priv.h"
@@ -237,7 +238,6 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
 {
     FontPtr pfont = NullFont;
     FontPathElementPtr fpe = NULL;
-    ScreenPtr pScr;
     int err = Successful;
     char *alias, *newname;
     int newlen;
@@ -339,16 +339,15 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
     pfont->refcnt++;
     if (pfont->refcnt == 1) {
         UseFPE(pfont->fpe);
-        for (int i = 0; i < screenInfo.numScreens; i++) {
-            pScr = screenInfo.screens[i];
-            if (pScr->RealizeFont) {
-                if (!(*pScr->RealizeFont) (pScr, pfont)) {
+        DIX_FOR_EACH_SCREEN({
+            if (walkScreen->RealizeFont) {
+                if (!(*walkScreen->RealizeFont) (walkScreen, pfont)) {
                     CloseFont(pfont, (Font) 0);
                     err = AllocError;
                     goto bail;
                 }
             }
-        }
+        });
     }
     if (!AddResource(c->fontid, X11_RESTYPE_FONT, (void *) pfont)) {
         err = AllocError;
@@ -452,7 +451,6 @@ OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
 int
 CloseFont(void *value, XID fid)
 {
-    ScreenPtr pscr;
     FontPathElementPtr fpe;
     FontPtr pfont = (FontPtr) value;
 
@@ -465,11 +463,10 @@ CloseFont(void *value, XID fid)
          * since the last reference is gone, ask each screen to free any
          * storage it may have allocated locally for it.
          */
-        for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
-            pscr = screenInfo.screens[nscr];
-            if (pscr->UnrealizeFont)
-                (*pscr->UnrealizeFont) (pscr, pfont);
-        }
+        DIX_FOR_EACH_SCREEN({
+            if (walkScreen->UnrealizeFont)
+                walkScreen->UnrealizeFont(walkScreen, pfont);
+        });
         if (pfont == defaultFont)
             defaultFont = NULL;
 #ifdef XF86BIGFONT

@@ -312,7 +312,6 @@ ProcRenderQueryPictFormats(ClientPtr client)
     xPictVisual *pictVisual;
     xPictFormInfo *pictForm;
     CARD32 *pictSubpixel;
-    ScreenPtr pScreen;
     VisualPtr pVisual;
     DepthPtr pDepth;
     int v, d;
@@ -340,7 +339,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
 #endif /* XINERAMA */
     ndepth = nformat = nvisual = 0;
     for (s = 0; s < numScreens; s++) {
-        pScreen = screenInfo.screens[s];
+        ScreenPtr pScreen = dixGetScreenPtr(s);
         for (d = 0; d < pScreen->numDepths; d++) {
             pDepth = pScreen->allowedDepths + d;
             ++ndepth;
@@ -382,7 +381,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
     pictForm = (xPictFormInfo *) (reply + 1);
 
     for (s = 0; s < numScreens; s++) {
-        pScreen = screenInfo.screens[s];
+        ScreenPtr pScreen = dixGetScreenPtr(s);
         ps = GetPictureScreenIfSet(pScreen);
         if (ps) {
             for (nformat = 0, pFormat = ps->formats;
@@ -422,7 +421,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
 
     pictScreen = (xPictScreen *) pictForm;
     for (s = 0; s < numScreens; s++) {
-        pScreen = screenInfo.screens[s];
+        ScreenPtr pScreen = dixGetScreenPtr(s);
         pictDepth = (xPictDepth *) (pictScreen + 1);
         ndepth = 0;
         for (d = 0; d < pScreen->numDepths; d++) {
@@ -468,7 +467,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
     pictSubpixel = (CARD32 *) pictScreen;
 
     for (s = 0; s < numSubpixel; s++) {
-        pScreen = screenInfo.screens[s];
+        ScreenPtr pScreen = dixGetScreenPtr(s);
         ps = GetPictureScreenIfSet(pScreen);
         if (ps)
             *pictSubpixel = ps->subpixel;
@@ -1007,7 +1006,7 @@ ProcRenderAddGlyphs(ClientPtr client)
     int err;
     int i, screen;
     PicturePtr pSrc = NULL, pDst = NULL;
-    PixmapPtr pSrcPix = NULL, pDstPix = NULL;
+    PixmapPtr pSrcPix = NULL;
     CARD32 component_alpha;
 
     REQUEST_AT_LEAST_SIZE(xRenderAddGlyphsReq);
@@ -1089,19 +1088,17 @@ ProcRenderAddGlyphs(ClientPtr client)
                 goto bail;
             }
 
-            for (screen = 0; screen < screenInfo.numScreens; screen++) {
+            DIX_FOR_EACH_SCREEN({
                 int width = gi[i].width;
                 int height = gi[i].height;
                 int depth = glyphSet->format->depth;
-                ScreenPtr pScreen;
                 int error;
 
                 /* Skip work if it's invisibly small anyway */
                 if (!width || !height)
                     break;
 
-                pScreen = screenInfo.screens[screen];
-                pSrcPix = GetScratchPixmapHeader(pScreen,
+                pSrcPix = GetScratchPixmapHeader(walkScreen,
                                                  width, height,
                                                  depth, depth, -1, bits);
                 if (!pSrcPix) {
@@ -1117,7 +1114,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                     goto bail;
                 }
 
-                pDstPix = (pScreen->CreatePixmap) (pScreen,
+                PixmapPtr pDstPix = walkScreen->CreatePixmap(walkScreen,
                                                    width, height, depth,
                                                    CREATE_PIXMAP_USAGE_GLYPH_PICTURE);
 
@@ -1130,7 +1127,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                                   glyphSet->format,
                                   CPComponentAlpha, &component_alpha,
                                   serverClient, &error);
-                SetGlyphPicture(glyph, pScreen, pDst);
+                SetGlyphPicture(glyph, walkScreen, pDst);
 
                 /* The picture takes a reference to the pixmap, so we
                    drop ours. */
@@ -1150,7 +1147,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                 pSrc = NULL;
                 FreeScratchPixmapHeader(pSrcPix);
                 pSrcPix = NULL;
-            }
+            });
 
             memcpy(glyph_new->glyph->sha1, glyph_new->sha1, 20);
         }
@@ -2593,7 +2590,7 @@ PanoramiXRenderCreatePicture(ClientPtr client)
     panoramix_setup_ids(newPict, client, stuff->pid);
 
     if (refDraw->type == XRT_WINDOW &&
-        stuff->drawable == screenInfo.screens[0]->root->drawable.id) {
+        stuff->drawable == dixGetScreenPtr(0)->root->drawable.id) {
         newPict->u.pict.root = TRUE;
     }
     else
@@ -2749,21 +2746,22 @@ PanoramiXRenderComposite(ClientPtr client)
     orig = *stuff;
 
     FOR_NSCREENS_FORWARD(j) {
+        ScreenPtr pScreen = dixGetScreenPtr(j);
         stuff->src = src->info[j].id;
         if (src->u.pict.root) {
-            stuff->xSrc = orig.xSrc - screenInfo.screens[j]->x;
-            stuff->ySrc = orig.ySrc - screenInfo.screens[j]->y;
+            stuff->xSrc = orig.xSrc - pScreen->x;
+            stuff->ySrc = orig.ySrc - pScreen->y;
         }
         stuff->dst = dst->info[j].id;
         if (dst->u.pict.root) {
-            stuff->xDst = orig.xDst - screenInfo.screens[j]->x;
-            stuff->yDst = orig.yDst - screenInfo.screens[j]->y;
+            stuff->xDst = orig.xDst - pScreen->x;
+            stuff->yDst = orig.yDst - pScreen->y;
         }
         if (msk) {
             stuff->mask = msk->info[j].id;
             if (msk->u.pict.root) {
-                stuff->xMask = orig.xMask - screenInfo.screens[j]->x;
-                stuff->yMask = orig.yMask - screenInfo.screens[j]->y;
+                stuff->xMask = orig.xMask - pScreen->x;
+                stuff->yMask = orig.yMask - pScreen->y;
             }
         }
         result = (*PanoramiXSaveRenderVector[X_RenderComposite]) (client);
@@ -2795,15 +2793,16 @@ PanoramiXRenderCompositeGlyphs(ClientPtr client)
         xSrc = stuff->xSrc;
         ySrc = stuff->ySrc;
         FOR_NSCREENS_FORWARD(j) {
+            ScreenPtr pScreen = dixGetScreenPtr(j);
             stuff->src = src->info[j].id;
             if (src->u.pict.root) {
-                stuff->xSrc = xSrc - screenInfo.screens[j]->x;
-                stuff->ySrc = ySrc - screenInfo.screens[j]->y;
+                stuff->xSrc = xSrc - pScreen->x;
+                stuff->ySrc = ySrc - pScreen->y;
             }
             stuff->dst = dst->info[j].id;
             if (dst->u.pict.root) {
-                elt->deltax = origElt.deltax - screenInfo.screens[j]->x;
-                elt->deltay = origElt.deltay - screenInfo.screens[j]->y;
+                elt->deltax = origElt.deltax - pScreen->x;
+                elt->deltay = origElt.deltay - pScreen->y;
             }
             result =
                 (*PanoramiXSaveRenderVector[stuff->renderReqType]) (client);
@@ -2834,8 +2833,9 @@ PanoramiXRenderFillRectangles(ClientPtr client)
             if (j)
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = screenInfo.screens[j]->x;
-                int y_off = screenInfo.screens[j]->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xRectangle *rects = (xRectangle *) (stuff + 1);
@@ -2884,8 +2884,9 @@ PanoramiXRenderTrapezoids(ClientPtr client)
             if (j)
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = screenInfo.screens[j]->x;
-                int y_off = screenInfo.screens[j]->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xTrapezoid *trap = (xTrapezoid *) (stuff + 1);
@@ -2945,8 +2946,9 @@ PanoramiXRenderTriangles(ClientPtr client)
             if (j)
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = screenInfo.screens[j]->x;
-                int y_off = screenInfo.screens[j]->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xTriangle *tri = (xTriangle *) (stuff + 1);
@@ -3002,8 +3004,9 @@ PanoramiXRenderTriStrip(ClientPtr client)
             if (j)
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = screenInfo.screens[j]->x;
-                int y_off = screenInfo.screens[j]->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xPointFixed *fixed = (xPointFixed *) (stuff + 1);
@@ -3055,8 +3058,9 @@ PanoramiXRenderTriFan(ClientPtr client)
             if (j)
                 memcpy(stuff + 1, extra, extra_len);
             if (dst->u.pict.root) {
-                int x_off = screenInfo.screens[j]->x;
-                int y_off = screenInfo.screens[j]->y;
+                ScreenPtr pScreen = dixGetScreenPtr(j);
+                int x_off = pScreen->x;
+                int y_off = pScreen->y;
 
                 if (x_off || y_off) {
                     xPointFixed *fixed = (xPointFixed *) (stuff + 1);
@@ -3103,13 +3107,14 @@ PanoramiXRenderAddTraps(ClientPtr client)
         x_off = stuff->xOff;
         y_off = stuff->yOff;
         FOR_NSCREENS_FORWARD(j) {
+            ScreenPtr pScreen = dixGetScreenPtr(j);
             if (j)
                 memcpy(stuff + 1, extra, extra_len);
             stuff->picture = picture->info[j].id;
 
             if (picture->u.pict.root) {
-                stuff->xOff = x_off + screenInfo.screens[j]->x;
-                stuff->yOff = y_off + screenInfo.screens[j]->y;
+                stuff->xOff = x_off + pScreen->x;
+                stuff->yOff = y_off + pScreen->y;
             }
             result = (*PanoramiXSaveRenderVector[X_RenderAddTraps]) (client);
             if (result != Success)

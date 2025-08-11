@@ -28,6 +28,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 
 #include "exglobals.h"
@@ -842,14 +843,12 @@ update_desktop_dimensions(void)
     int x1 = INT_MAX, y1 = INT_MAX;     /* top-left */
     int x2 = INT_MIN, y2 = INT_MIN;     /* bottom-right */
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr screen = screenInfo.screens[i];
-
-        x1 = min(x1, screen->x);
-        y1 = min(y1, screen->y);
-        x2 = max(x2, screen->x + screen->width);
-        y2 = max(y2, screen->y + screen->height);
-    }
+    DIX_FOR_EACH_SCREEN({
+        x1 = min(x1, walkScreen->x);
+        y1 = min(y1, walkScreen->y);
+        x2 = max(x2, walkScreen->x + walkScreen->width);
+        y2 = max(y2, walkScreen->y + walkScreen->height);
+    });
 
     screenInfo.x = x1;
     screenInfo.y = y1;

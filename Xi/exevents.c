@@ -3307,17 +3307,13 @@ FindInterestedChildren(DeviceIntPtr dev, WindowPtr p1, Mask mask,
 void
 SendEventToAllWindows(DeviceIntPtr dev, Mask mask, xEvent *ev, int count)
 {
-    int i;
-    WindowPtr pWin, p1;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        pWin = screenInfo.screens[i]->root;
+    DIX_FOR_EACH_SCREEN({
+        WindowPtr pWin = walkScreen->root;
         if (!pWin)
             continue;
         DeliverEventsToWindow(dev, pWin, ev, count, mask, NullGrab);
-        p1 = pWin->firstChild;
-        FindInterestedChildren(dev, p1, mask, ev, count);
-    }
+        FindInterestedChildren(dev, pWin->firstChild, mask, ev, count);
+    });
 }
 
 /**

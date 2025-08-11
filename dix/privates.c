@@ -53,6 +53,7 @@ from The Open Group.
 #include <stddef.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "windowstr.h"
 #include "resource.h"
@@ -211,13 +212,14 @@ fixupOneScreen(ScreenPtr pScreen, FixupFunc fixup, unsigned bytes)
 static Bool
 fixupScreens(FixupFunc fixup, unsigned bytes)
 {
-    for (int s = 0; s < screenInfo.numScreens; s++)
-        if (!fixupOneScreen (screenInfo.screens[s], fixup, bytes))
+    DIX_FOR_EACH_SCREEN({
+        if (!fixupOneScreen (walkScreen, fixup, bytes))
             return FALSE;
-
-    for (int s = 0; s < screenInfo.numGPUScreens; s++)
-        if (!fixupOneScreen (screenInfo.gpuscreens[s], fixup, bytes))
+    });
+    DIX_FOR_EACH_SCREEN({
+        if (!fixupOneScreen (walkScreen, fixup, bytes))
             return FALSE;
+    });
     return TRUE;
 }
 
@@ -246,16 +248,15 @@ fixupExtensions(FixupFunc fixup, unsigned bytes)
 static Bool
 fixupDefaultColormaps(FixupFunc fixup, unsigned bytes)
 {
-    for (int s = 0; s < screenInfo.numScreens; s++) {
+    DIX_FOR_EACH_SCREEN({
         ColormapPtr cmap;
-
         dixLookupResourceByType((void **) &cmap,
-                                screenInfo.screens[s]->defColormap, X11_RESTYPE_COLORMAP,
+                                walkScreen->defColormap, X11_RESTYPE_COLORMAP,
                                 serverClient, DixCreateAccess);
         if (cmap &&
-            !fixup(&cmap->devPrivates, screenInfo.screens[s]->screenSpecificPrivates[PRIVATE_COLORMAP].offset, bytes))
+            !fixup(&cmap->devPrivates, walkScreen->screenSpecificPrivates[PRIVATE_COLORMAP].offset, bytes))
             return FALSE;
-    }
+    });
     return TRUE;
 }
 
@@ -297,16 +298,12 @@ static void
 grow_screen_specific_set(DevPrivateType type, unsigned bytes)
 {
     /* Update offsets for all screen-specific keys */
-    for (int s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr       pScreen = screenInfo.screens[s];
-
-        grow_private_set(&pScreen->screenSpecificPrivates[type], bytes);
-    }
-    for (int s = 0; s < screenInfo.numGPUScreens; s++) {
-        ScreenPtr       pScreen = screenInfo.gpuscreens[s];
-
-        grow_private_set(&pScreen->screenSpecificPrivates[type], bytes);
-    }
+    DIX_FOR_EACH_SCREEN({
+        grow_private_set(&walkScreen->screenSpecificPrivates[type], bytes);
+    });
+    DIX_FOR_EACH_SCREEN({
+        grow_private_set(&walkScreen->screenSpecificPrivates[type], bytes);
+    });
 }
 
 /*

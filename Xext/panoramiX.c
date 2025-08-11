@@ -35,6 +35,7 @@ Equipment Corporation.
 #include "dix/resource_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -390,7 +391,7 @@ XineramaInitData(void)
         BoxRec TheBox;
         RegionRec ScreenRegion;
 
-        ScreenPtr pScreen = screenInfo.screens[i];
+        ScreenPtr pScreen = dixGetScreenPtr(i);
 
         TheBox.x1 = pScreen->x;
         TheBox.x2 = TheBox.x1 + pScreen->width;
@@ -403,14 +404,14 @@ XineramaInitData(void)
         RegionUninit(&ScreenRegion);
     }
 
-    PanoramiXPixWidth = screenInfo.screens[0]->x + screenInfo.screens[0]->width;
-    PanoramiXPixHeight =
-        screenInfo.screens[0]->y + screenInfo.screens[0]->height;
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
+    PanoramiXPixWidth = firstScreen->x + firstScreen->width;
+    PanoramiXPixHeight = firstScreen->y + firstScreen->height;
 
     FOR_NSCREENS_FORWARD(i) {
         if (!i)
             continue; /* skip screen #0 */
-        ScreenPtr pScreen = screenInfo.screens[i];
+        ScreenPtr pScreen = dixGetScreenPtr(i);
 
         w = pScreen->x + pScreen->width;
         h = pScreen->y + pScreen->height;
@@ -435,7 +436,7 @@ PanoramiXExtensionInit(void)
     int i;
     Bool success = FALSE;
     ExtensionEntry *extEntry;
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetScreenPtr(0);
 
     if (noPanoramiXExtension)
         return;
@@ -471,7 +472,7 @@ PanoramiXExtensionInit(void)
          */
 
         FOR_NSCREENS_BACKWARD(i) {
-            pScreen = screenInfo.screens[i];
+            pScreen = dixGetScreenPtr(i);
             PanoramiXScreenPtr pScreenPriv = calloc(1, sizeof(PanoramiXScreenRec));
             dixSetPrivate(&pScreen->devPrivates, PanoramiXScreenKey,
                           pScreenPriv);
@@ -585,7 +586,7 @@ PanoramiXExtensionInit(void)
 Bool
 PanoramiXCreateConnectionBlock(void)
 {
-    int i, j, length;
+    int j, length;
     Bool disable_backing_store = FALSE;
     int old_width, old_height;
     float width_mult, height_mult;
@@ -593,7 +594,6 @@ PanoramiXCreateConnectionBlock(void)
     xVisualType *visual;
     xDepth *depth;
     VisualPtr pVisual;
-    ScreenPtr pScreen;
 
     /*
      *  Do normal CreateConnectionBlock but faking it for only one screen
@@ -604,25 +604,26 @@ PanoramiXCreateConnectionBlock(void)
         return FALSE;
     }
 
-    for (i = 1; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
-        if (pScreen->rootDepth != screenInfo.screens[0]->rootDepth) {
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
+    DIX_FOR_EACH_SCREEN({
+        if (!walkScreenIdx)
+            continue;  /* skip the first one */
+
+        if (walkScreen != firstScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
             return FALSE;
         }
-        if (pScreen->backingStoreSupport !=
-            screenInfo.screens[0]->backingStoreSupport)
+        if (walkScreen->backingStoreSupport != firstScreen->backingStoreSupport)
             disable_backing_store = TRUE;
-    }
+    });
 
     if (disable_backing_store) {
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            pScreen = screenInfo.screens[i];
-            pScreen->backingStoreSupport = NotUseful;
-        }
+        DIX_FOR_EACH_SCREEN({
+            walkScreen->backingStoreSupport = NotUseful;
+        });
     }
 
-    i = screenInfo.numScreens;
+    int i = screenInfo.numScreens;
     screenInfo.numScreens = 1;
     if (!CreateConnectionBlock()) {
         screenInfo.numScreens = i;
@@ -720,14 +721,13 @@ VisualsEqual(VisualPtr a, ScreenPtr pScreenB, VisualPtr b)
 static void
 PanoramiXMaybeAddDepth(DepthPtr pDepth)
 {
-    ScreenPtr pScreen;
     int j, k;
     Bool found = FALSE;
 
     FOR_NSCREENS_FORWARD(j) {
         if (!j)
             continue; /* skip screen #0 */
-        pScreen = screenInfo.screens[j];
+        ScreenPtr pScreen = dixGetScreenPtr(j);
         for (k = 0; k < pScreen->numDepths; k++) {
             if (pScreen->allowedDepths[k].depth == pDepth->depth) {
                 found = TRUE;
@@ -751,14 +751,14 @@ PanoramiXMaybeAddDepth(DepthPtr pDepth)
 static void
 PanoramiXMaybeAddVisual(VisualPtr pVisual)
 {
-    ScreenPtr pScreen;
     int j, k;
     Bool found = FALSE;
 
+    ScreenPtr firstScreen = dixGetScreenPtr(0);
     FOR_NSCREENS_FORWARD(j) {
         if (!j)
             continue; /* skip screen #0 */
-        pScreen = screenInfo.screens[j];
+        ScreenPtr pScreen = dixGetScreenPtr(j);
         found = FALSE;
 
         for (k = 0; k < pScreen->numVisuals; k++) {
@@ -766,7 +766,7 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
 
             if ((*XineramaVisualsEqualPtr) (pVisual, pScreen, candidate)
 #ifdef GLXPROXY
-                && glxMatchVisual(screenInfo.screens[0], pVisual, pScreen)
+                && glxMatchVisual(firstScreen, pVisual, pScreen)
 #endif
                 ) {
                 found = TRUE;
@@ -802,7 +802,7 @@ extern void
 PanoramiXConsolidate(void)
 {
     int i;
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetScreenPtr(0);
     DepthPtr pDepth = pScreen->allowedDepths;
     VisualPtr pVisual = pScreen->visuals;
 
@@ -835,7 +835,7 @@ PanoramiXConsolidate(void)
     saver->type = XRT_WINDOW;
 
     FOR_NSCREENS_BACKWARD(i) {
-        ScreenPtr scr = screenInfo.screens[i];
+        ScreenPtr scr = dixGetScreenPtr(i);
 
         root->info[i].id = scr->root->drawable.id;
         root->u.win.class = InputOutput;
@@ -854,7 +854,7 @@ PanoramiXConsolidate(void)
 VisualID
 PanoramiXTranslateVisualID(int screen, VisualID orig)
 {
-    ScreenPtr pOtherScreen = screenInfo.screens[screen];
+    ScreenPtr pOtherScreen = dixGetScreenPtr(screen);
     VisualPtr pVisual = NULL;
     int i;
 
@@ -996,12 +996,14 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+
     xPanoramiXGetScreenSizeReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         /* screen dimensions */
-        .width = screenInfo.screens[stuff->screen]->width,
-        .height = screenInfo.screens[stuff->screen]->height,
+        .width = pScreen->width,
+        .height = pScreen->height,
         .window = stuff->window,
         .screen = stuff->screen
     };
@@ -1068,11 +1070,12 @@ ProcXineramaQueryScreens(ClientPtr client)
     if (!noPanoramiXExtension) {
         int i;
         FOR_NSCREENS_BACKWARD(i) {
+            ScreenPtr pScreen = dixGetScreenPtr(i);
             xXineramaScreenInfo scratch = {
-                .x_org = screenInfo.screens[i]->x,
-                .y_org = screenInfo.screens[i]->y,
-                .width = screenInfo.screens[i]->width,
-                .height = screenInfo.screens[i]->height,
+                .x_org = pScreen->x,
+                .y_org = pScreen->y,
+                .width = pScreen->width,
+                .height = pScreen->height,
             };
             /* scratch consists of 4x CARD16 */
             if (!x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&scratch, 4))
@@ -1150,8 +1153,9 @@ XineramaGetImageData(DrawablePtr *pDrawables,
     SrcBox.x1 = left;
     SrcBox.y1 = top;
     if (!isRoot) {
-        SrcBox.x1 += pDraw->x + screenInfo.screens[0]->x;
-        SrcBox.y1 += pDraw->y + screenInfo.screens[0]->y;
+        ScreenPtr firstScreen = dixGetScreenPtr(0);
+        SrcBox.x1 += pDraw->x + firstScreen->x;
+        SrcBox.y1 += pDraw->y + firstScreen->y;
     }
     SrcBox.x2 = SrcBox.x1 + width;
     SrcBox.y2 = SrcBox.y1 + height;
@@ -1182,6 +1186,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
         RegionUninit(&ScreenRegion);
 
         if (inOut == rgnIN) {
+            ScreenPtr pScreen = dixGetScreenPtr(i);
             pScreen->GetImage(pWalkDraw,
                                   SrcBox.x1 - pWalkDraw->x -
                                   walkScreen->x,
@@ -1214,6 +1219,57 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                 ScratchMem = realloc(ScratchMem, sizeNeeded);
                 if (ScratchMem)
                     size = sizeNeeded;
+
+                int x = pbox->x1 - pWalkDraw->x - walkScreen->x;
+                int y = pbox->y1 - pWalkDraw->y - walkScreen->y;
+
+                walkScreen->GetImage(pWalkDraw, x, y, w, h,
+                                      format, planemask, ScratchMem);
+
+                /* copy the memory over */
+
+                if (depth == 1) {
+                    int shift, leftover;
+
+                    x = pbox->x1 - SrcBox.x1;
+                    y = pbox->y1 - SrcBox.y1;
+                    shift = x & 7;
+                    x >>= 3;
+                    leftover = w & 7;
+                    w >>= 3;
+
+                    /* clean up the edge */
+                    if (leftover) {
+                        int mask = (1 << leftover) - 1;
+
+                        for (int j = h, k = w; j--; k += ScratchPitch)
+                            ScratchMem[k] &= mask;
+                    }
+
+                    for (int j = 0, index = (pitch * y) + x, index2 = 0; j < h;
+                         j++, index += pitch, index2 += ScratchPitch) {
+                        if (w) {
+                            if (!shift) {
+                                assert(ScratchMem);
+                                memcpy(data + index, ScratchMem + index2, w);
+                            }
+                            else {
+                                assert(ScratchMem);
+                                CopyBits(data + index, shift,
+                                         ScratchMem + index2, w);
+                            }
+                        }
+
+                        if (leftover) {
+                            data[index + w] |=
+                                SHIFT_L(ScratchMem[index2 + w], shift);
+                            if ((shift + leftover) > 8)
+                                data[index + w + 1] |=
+                                    SHIFT_R(ScratchMem[index2 + w],
+                                            (8 - shift));
+                        }
+                    }
+                }
                 else {
                     ScratchMem = tmpdata;
                     break;

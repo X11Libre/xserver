@@ -650,12 +650,12 @@ CreateConnectionBlock(void)
     connBlockScreenStart = sizesofar;
     memset(&depth, 0, sizeof(xDepth));
     memset(&visual, 0, sizeof(xVisualType));
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen;
+
+    DIX_FOR_EACH_SCREEN({
+        ScreenPtr pScreen = walkScreen;
         DepthPtr pDepth;
         VisualPtr pVisual;
 
-        pScreen = screenInfo.screens[i];
         root.windowId = pScreen->root->drawable.id;
         root.defaultColormap = pScreen->defColormap;
         root.whitePixel = pScreen->whitePixel;
@@ -708,7 +708,7 @@ CreateConnectionBlock(void)
                 sizesofar += sizeof(xVisualType);
             }
         }
-    }
+    });
     connSetupPrefix.success = xTrue;
     connSetupPrefix.length = lenofblock / 4;
     connSetupPrefix.majorVersion = X_PROTOCOL;
@@ -3225,17 +3225,16 @@ ProcQueryBestSize(ClientPtr client)
 int
 ProcSetScreenSaver(ClientPtr client)
 {
-    int rc, blankingOption, exposureOption;
+    int blankingOption, exposureOption;
 
     REQUEST(xSetScreenSaverReq);
     REQUEST_SIZE_MATCH(xSetScreenSaverReq);
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        rc = XaceHookScreensaverAccess(client, screenInfo.screens[i],
-                      DixSetAttrAccess);
+    DIX_FOR_EACH_SCREEN({
+        int rc = XaceHookScreensaverAccess(client, walkScreen, DixSetAttrAccess);
         if (rc != Success)
             return rc;
-    }
+    });
 
     blankingOption = stuff->preferBlank;
     if ((blankingOption != DontPreferBlanking) &&
@@ -3285,16 +3284,13 @@ ProcSetScreenSaver(ClientPtr client)
 int
 ProcGetScreenSaver(ClientPtr client)
 {
-    int rc;
-
     REQUEST_SIZE_MATCH(xReq);
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        rc = XaceHookScreensaverAccess(client, screenInfo.screens[i],
-                      DixGetAttrAccess);
+    DIX_FOR_EACH_SCREEN({
+        int rc = XaceHookScreensaverAccess(client, walkScreen, DixGetAttrAccess);
         if (rc != Success)
             return rc;
-    }
+    });
 
     xGetScreenSaverReply rep = {
         .type = X_Reply,

@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "present_priv.h"
 
@@ -240,7 +241,6 @@ void
 present_extension_init(void)
 {
     ExtensionEntry *extension;
-    int i;
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension)
@@ -261,10 +261,11 @@ present_extension_init(void)
     if (!present_event_init())
         goto bail;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        if (!present_screen_init(screenInfo.screens[i], NULL))
+    DIX_FOR_EACH_SCREEN({
+        if (!present_screen_init(walkScreen, NULL))
             goto bail;
-    }
+    });
+
     return;
 
 bail:

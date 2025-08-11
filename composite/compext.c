@@ -44,6 +44,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -516,23 +517,22 @@ CompositeExtensionInit(void)
     /* Assume initialization is going to fail */
     noCompositeExtension = TRUE;
 
-    for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr pScreen = screenInfo.screens[s];
+    DIX_FOR_EACH_SCREEN({
         VisualPtr vis;
 
         /* Composite on 8bpp pseudocolor root windows appears to fail, so
          * just disable it on anything pseudocolor for safety.
          */
-        for (vis = pScreen->visuals; vis->vid != pScreen->rootVisual; vis++);
+        for (vis = walkScreen->visuals; vis->vid != walkScreen->rootVisual; vis++);
         if ((vis->class | DynamicClass) == PseudoColor)
             return;
 
         /* Ensure that Render is initialized, which is required for automatic
          * compositing.
          */
-        if (GetPictureScreenIfSet(pScreen) == NULL)
+        if (GetPictureScreenIfSet(walkScreen) == NULL)
             return;
-    }
+    });
 
     CompositeClientWindowType = CreateNewResourceType
         (FreeCompositeClientWindow, "CompositeClientWindow");
@@ -556,9 +556,10 @@ CompositeExtensionInit(void)
                                sizeof(CompositeClientRec)))
         return;
 
-    for (s = 0; s < screenInfo.numScreens; s++)
-        if (!compScreenInit(screenInfo.screens[s]))
+    DIX_FOR_EACH_SCREEN({
+        if (!compScreenInit(walkScreen))
             return;
+    });
 
     extEntry = AddExtension(COMPOSITE_NAME, 0, 0,
                             ProcCompositeDispatch, SProcCompositeDispatch,
@@ -786,7 +787,6 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
     xCompositeGetOverlayWindowReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
-    CompScreenPtr cs;
     CompOverlayClientPtr pOc;
     int rc;
     PanoramiXRes *win, *overlayWin = NULL;
@@ -798,7 +798,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         return rc;
     }
 
-    cs = GetCompScreen(screenInfo.screens[0]);
+    CompScreenPtr cs = GetCompScreen(dixGetScreenPtr(0));
     if (!cs->pOverlayWin) {
         if (!(overlayWin = calloc(1, sizeof(PanoramiXRes))))
             return BadAlloc;
@@ -852,14 +852,14 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
 
     if (overlayWin) {
         FOR_NSCREENS_BACKWARD(i) {
-            cs = GetCompScreen(screenInfo.screens[i]);
+            cs = GetCompScreen(dixGetScreenPtr(i));
             overlayWin->info[i].id = cs->pOverlayWin->drawable.id;
         }
 
         AddResource(overlayWin->info[0].id, XRT_WINDOW, overlayWin);
     }
 
-    cs = GetCompScreen(screenInfo.screens[0]);
+    cs = GetCompScreen(dixGetScreenPtr(0));
 
     rep = (xCompositeGetOverlayWindowReply) {
         .type = X_Reply,

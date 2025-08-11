@@ -24,6 +24,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "Xext/panoramiX.h"
@@ -652,7 +653,7 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
                                              PanoramiXDamageExtDestroy,
                                              DamageReportRawRegion,
                                              FALSE,
-                                             screenInfo.screens[i],
+                                             dixGetScreenPtr(i),
                                              damage);
             if (!pDamage) {
                 rc = BadAlloc;
@@ -714,10 +715,10 @@ void
 DamageExtensionInit(void)
 {
     ExtensionEntry *extEntry;
-    int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++)
-        DamageSetup(screenInfo.screens[s]);
+    DIX_FOR_EACH_SCREEN({
+        DamageSetup(walkScreen);
+    });
 
     DamageExtType = CreateNewResourceType(FreeDamageExt, "DamageExt");
     if (!DamageExtType)

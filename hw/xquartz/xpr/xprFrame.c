@@ -30,6 +30,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "xpr.h"
 #include "rootlessCommon.h"
@@ -528,12 +529,11 @@ xprIsX11Window(int windowNumber)
 void
 xprHideWindows(Bool hide)
 {
-    int screen;
-    WindowPtr pRoot, pWin;
+    WindowPtr pWin;
 
-    for (screen = 0; screen < screenInfo.numScreens; screen++) {
+    DIX_FOR_EACH_SCREEN({
         RootlessFrameID prevWid = NULL;
-        pRoot = screenInfo.screens[screen]->root;
+        WindowPtr pRoot = walkScreen->root;
 
         for (pWin = pRoot->firstChild; pWin; pWin = pWin->nextSib) {
             RootlessWindowRec *winRec = WINREC(pWin);
@@ -554,11 +554,11 @@ xprHideWindows(Bool hide)
                     box.y2 = winRec->height;
 
                     xprDamageRects(winRec->wid, 1, &box, 0, 0);
-                    RootlessQueueRedisplay(screenInfo.screens[screen]);
+                    RootlessQueueRedisplay(walkScreen);
                 }
             }
         }
-    }
+    });
 }
 
 // XXX: identical to x_cvt_vptr_to_uint ?

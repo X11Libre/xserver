@@ -37,6 +37,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 
 #include "glxserver.h"
@@ -61,12 +62,13 @@ validGlxScreen(ClientPtr client, int screen, __GLXscreen ** pGlxScreen,
     /*
      ** Check if screen exists.
      */
-    if (screen < 0 || screen >= screenInfo.numScreens) {
+    ScreenPtr pScreen = dixGetScreenPtr(screen);
+    if (!pScreen) {
         client->errorValue = screen;
         *err = BadValue;
         return FALSE;
     }
-    *pGlxScreen = glxGetScreen(screenInfo.screens[screen]);
+    *pGlxScreen = glxGetScreen(pScreen);
 
     return TRUE;
 }
