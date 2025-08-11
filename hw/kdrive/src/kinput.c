@@ -40,6 +40,7 @@
 #include "config/hotplug_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
@@ -2119,7 +2120,7 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
     int n_best_x, n_best_y;
     CARD32 ms;
 
-    if (kdDisableZaphod || screenInfo.numScreens <= 1)
+    if (kdDisableZaphod || (!dixGetScreenPtr(1)))
         return FALSE;
 
     if (0 <= *x && *x < pScreen->width && 0 <= *y && *y < pScreen->height)
@@ -2134,8 +2135,8 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
     best_x = 32767;
     n_best_y = -1;
     best_y = 32767;
-    for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen == pScreen)
             continue;
         int dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(pScreen)->x;
@@ -2164,13 +2165,14 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
                 n_best_y = walkScreenIdx;
             }
         }
-    }
+    });
+
     if (best_y < best_x)
         n_best_x = n_best_y;
     if (n_best_x == -1)
         return FALSE;
 
-    ScreenPtr pNewScreen = screenInfo.screens[n_best_x];
+    ScreenPtr pNewScreen = dixGetScreenPtr(n_best_x);
 
     if (*x < 0)
         *x += pNewScreen->width;

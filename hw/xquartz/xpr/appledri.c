@@ -42,6 +42,7 @@
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "misc.h"
 #include "dixstruct.h"
@@ -114,9 +115,9 @@ ProcAppleDRIQueryDirectRenderingCapable(register ClientPtr client)
     REQUEST(xAppleDRIQueryDirectRenderingCapableReq);
     REQUEST_SIZE_MATCH(xAppleDRIQueryDirectRenderingCapableReq);
 
-    if (stuff->screen >= screenInfo.numScreens) {
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
+    if (!pScreen)
         return BadValue;
-    }
 
     if (!DRIQueryDirectRenderingCapable(screenInfo.screens[stuff->screen],
                                         &isCapable)) {

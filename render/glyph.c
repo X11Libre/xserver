@@ -24,6 +24,7 @@
 
 #include <dix-config.h>
 
+#include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 #include "os/xsha1.h"
 
@@ -232,16 +233,14 @@ CheckDuplicates(GlyphHashPtr hash, char *where)
 static void
 FreeGlyphPicture(GlyphPtr glyph)
 {
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+    DIX_FOR_EACH_SCREEN({
         if (GetGlyphPicture(glyph, walkScreen))
             FreePicture((void *) GetGlyphPicture(glyph, walkScreen), 0);
 
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps)
-            (*ps->UnrealizeGlyph) (walkScreen, glyph);
-    }
+            ps->UnrealizeGlyph(walkScreen, glyph);
+    });
 }
 
 void
@@ -354,28 +353,26 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     glyph->info = *gi;
     dixInitPrivates(glyph, (char *) glyph + head_size, PRIVATE_GLYPH);
 
-    unsigned int i;
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    unsigned lastOne = 0;
+    DIX_FOR_EACH_SCREEN({
         SetGlyphPicture(glyph, walkScreen, NULL);
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
-
         if (ps) {
             if (!(ps->RealizeGlyph(walkScreen, glyph))) {
-                i = walkScreenIdx;
+                lastOne = walkScreenIdx;
                 goto bail;
             }
         }
-    }
+    });
 
     return glyph;
 
  bail:
-    while (i--) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
+    while (lastOne--) {
+        ScreenPtr pScreen = dixGetScreenPtr(lastOne);
+        PictureScreenPtr ps = GetPictureScreenIfSet(pScreen);
         if (ps)
-            ps->UnrealizeGlyph(walkScreen, glyph);
+            ps->UnrealizeGlyph(pScreen, glyph);
     }
 
     dixFreeObjectWithPrivates(glyph, PRIVATE_GLYPH);

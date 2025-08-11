@@ -583,20 +583,24 @@ CloseInput(void)
  */
 void DarwinAdjustScreenOrigins(void)
 {
-    ScreenPtr masterScreen = dixGetMasterScreen();
+    ScreenPtr firstScreen = dixGetMasterScreen();
 
-    int left = masterScreen->x;
-    int top = masterScreen->y;
+    int left = firstScreen->x;
+    int top = firstScreen->y;
 
     /* Find leftmost screen. If there's a tie, take the topmost of the two. */
-    for (int i = 1; i < screenInfo.numScreens; i++) {
-        if (screenInfo.screens[i]->x < left ||
-            (screenInfo.screens[i]->x == left &&
-             screenInfo.screens[i]->y < top)) {
-            left = screenInfo.screens[i]->x;
-            top = screenInfo.screens[i]->y;
+    DIX_FOR_EACH_SCREEN({
+        if (!walkScreenIdx) { /* on first screen */
+            left = walkScreen->x;
+            top = walkScreen->y;
+        } else {
+            if (walkScreen->x < left ||
+               (walkScreen->x == left && walkScreen->y < top)) {
+                left = walkScreen->x;
+                top = walkScreen->y;
+            }
         }
-    }
+    });
 
     darwinMainScreenX = left;
     darwinMainScreenY = top;
@@ -609,12 +613,11 @@ void DarwinAdjustScreenOrigins(void)
      */
 
     if (darwinMainScreenX != 0 || darwinMainScreenY != 0) {
-        for (int i = 0; i < screenInfo.numScreens; i++) {
-            screenInfo.screens[i]->x -= darwinMainScreenX;
-            screenInfo.screens[i]->y -= darwinMainScreenY;
+        DIX_FOR_EACH_SCREEN({
+            walkScreen->x -= darwinMainScreenX;
+            walkScreen->y -= darwinMainScreenY;
             DEBUG_LOG("Screen %d placed at X11 coordinate (%d,%d).\n",
-                      i, screenInfo.screens[i]->x,
-                      screenInfo.screens[i]->y);
+                      i, walkScreen->x, walkScreen->y);
         }
     }
 
