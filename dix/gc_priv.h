@@ -26,7 +26,7 @@ void FreeGCperDepth(ScreenPtr pScreen);
 
 Bool CreateGCperDepth(int screenNum);
 
-Bool CreateDefaultStipple(int screenNum);
+Bool CreateDefaultStipple(ScreenPtr pScreen);
 
 int SetDashes(GCPtr pGC, unsigned offset, unsigned ndash, unsigned char *pdash);
 

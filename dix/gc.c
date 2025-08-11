@@ -858,15 +858,12 @@ CreateGCperDepth(int screenNum)
 }
 
 Bool
-CreateDefaultStipple(int screenNum)
+CreateDefaultStipple(ScreenPtr pScreen)
 {
-    ScreenPtr pScreen;
     ChangeGCVal tmpval[3];
     xRectangle rect;
     CARD16 w, h;
     GCPtr pgcScratch;
-
-    pScreen = screenInfo.screens[screenNum];
 
     w = 16;
     h = 16;

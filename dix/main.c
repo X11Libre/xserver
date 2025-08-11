@@ -218,7 +218,7 @@ dix_main(int argc, char *argv[], char *envp[])
                 FatalError("failed to create screen resources");
             if (!CreateGCperDepth(i))
                 FatalError("failed to create scratch GCs");
-            if (!CreateDefaultStipple(i))
+            if (!CreateDefaultStipple(pScreen))
                 FatalError("failed to create default stipple");
             if (!CreateRootWindow(pScreen))
                 FatalError("failed to create root window");
