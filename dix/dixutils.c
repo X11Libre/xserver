@@ -88,6 +88,7 @@ Author:  Adobe Systems Incorporated
 #include "dix/callback_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "misc.h"
 #include "windowstr.h"
@@ -343,17 +344,15 @@ BlockHandler(void *pTimeout)
         if (!handlers[i].deleted)
             (*handlers[i].BlockHandler) (handlers[i].blockData, pTimeout);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    DIX_FOR_EACH_GPU_SCREEN({
         if (walkScreen->BlockHandler)
             walkScreen->BlockHandler(walkScreen, pTimeout);
-    }
+    });
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen->BlockHandler)
             walkScreen->BlockHandler(walkScreen, pTimeout);
-    }
+    });
 
     if (handlerDeleted) {
         for (int i = 0; i < numHandlers;)
@@ -378,16 +377,16 @@ void
 WakeupHandler(int result)
 {
     ++inHandler;
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen->WakeupHandler)
             walkScreen->WakeupHandler(walkScreen, result);
-    }
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    });
+
+    DIX_FOR_EACH_GPU_SCREEN({
         if (walkScreen->WakeupHandler)
             walkScreen->WakeupHandler(walkScreen, result);
-    }
+    });
 
     for (int i = numHandlers - 1; i >= 0; i--)
         if (!handlers[i].deleted)

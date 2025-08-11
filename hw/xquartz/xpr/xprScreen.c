@@ -31,6 +31,8 @@
 
 #include <dix-config.h>
 
+#include "dix/screenint_priv.h"
+
 #include "inputstr.h"
 #include "quartz.h"
 #include "quartzRandR.h"
@@ -474,15 +476,12 @@ xprUpdateScreen(ScreenPtr pScreen)
 static void
 xprInitInput(int argc, char **argv)
 {
-    int i;
-
     rootlessGlobalOffsetX = darwinMainScreenX;
     rootlessGlobalOffsetY = darwinMainScreenY;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        AppleWMSetScreenOrigin(screenInfo.screens[i]->root);
-    }
+    DIX_FOR_EACH_SCREEN({
+        AppleWMSetScreenOrigin(walkScreen->root);
+    });
 }
 
 /*

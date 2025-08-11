@@ -932,21 +932,17 @@ ProcXIBarrierReleasePointer(ClientPtr client)
 Bool
 XIBarrierInit(void)
 {
-    int i;
-
     if (!dixRegisterPrivateKey(&BarrierScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         BarrierScreenPtr cs;
-
         cs = (BarrierScreenPtr) calloc(1, sizeof(BarrierScreenRec));
         if (!cs)
             return FALSE;
         xorg_list_init(&cs->barriers);
         SetBarrierScreen(walkScreen, cs);
-    }
+    });
 
     PointerBarrierType = CreateNewResourceType(BarrierFreeBarrier,
                                                "XIPointerBarrier");
@@ -957,11 +953,9 @@ XIBarrierInit(void)
 void
 XIBarrierReset(void)
 {
-    int i;
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         BarrierScreenPtr cs = GetBarrierScreen(walkScreen);
         free(cs);
         SetBarrierScreen(walkScreen, NULL);
-    }
+    });
 }
