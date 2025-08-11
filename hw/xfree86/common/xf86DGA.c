@@ -843,20 +843,15 @@ DGACopyModeInfo(DGAModePtr mode, XDGAModePtr xmode)
 Bool
 DGAVTSwitch(void)
 {
-    int i;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-
+    DIX_FOR_EACH_SCREEN({
         /* Alternatively, this could send events to DGA clients */
 
         if (DGAScreenKeyRegistered) {
             DGAScreenPtr pScreenPriv = DGA_GET_SCREEN_PRIV(walkScreen);
-
             if (pScreenPriv && pScreenPriv->current)
                 return FALSE;
         }
-    }
+    });
 
     return TRUE;
 }
@@ -1306,7 +1301,7 @@ DGAClientStateChange(CallbackListPtr *pcbl, void *nulldata, void *calldata)
 {
     NewClientInfoRec *pci = (NewClientInfoRec *) calldata;
 
-    for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+    DIX_FOR_EACH_SCREEN({
         if (pci->client && (DGA_GETCLIENT(walkScreenIdx) == pci->client)) {
             if ((pci->client->clientState == ClientStateGone) ||
                 (pci->client->clientState == ClientStateRetained))
@@ -1323,7 +1318,7 @@ DGAClientStateChange(CallbackListPtr *pcbl, void *nulldata, void *calldata)
             }
             break;
         }
-    }
+    });
 }
 
 static int
