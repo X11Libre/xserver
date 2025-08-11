@@ -38,6 +38,7 @@
 
 #include "dix/colormap_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
 
 #include "scrnintstr.h"
@@ -707,18 +708,10 @@ RootlessInit(ScreenPtr pScreen, RootlessFrameProcsPtr procs)
 void
 RootlessUpdateRooted(Bool state)
 {
-    int i;
-
     if (!state) {
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
-            RootlessDisableRoot(walkScreen);
-        }
+        DIX_FOR_EACH_SCREEN({ RootlessDisableRoot(walkScreen); });
     }
     else {
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
-            RootlessEnableRoot(walkScreen);
-        }
+        DIX_FOR_EACH_SCREEN({ RootlessEnableRoot(walkScreen); });
     }
 }

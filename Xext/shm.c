@@ -46,6 +46,7 @@ in this Software without prior written authorization from The Open Group.
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/busfault.h"
@@ -230,12 +231,9 @@ ShmRegisterPrivates(void)
  /*ARGSUSED*/ static void
 ShmResetProc(ExtensionEntry * extEntry)
 {
-    int i;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         ShmRegisterFuncs(walkScreen, NULL);
-    }
+    });
 }
 
 void
@@ -1380,7 +1378,6 @@ void
 ShmExtensionInit(void)
 {
     ExtensionEntry *extEntry;
-    int i;
 
 #ifdef MUST_CHECK_FOR_SHM_SYSCALL
     if (!CheckForShmSyscall()) {
@@ -1395,8 +1392,7 @@ ShmExtensionInit(void)
     sharedPixmaps = xFalse;
     {
         sharedPixmaps = xTrue;
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
+        DIX_FOR_EACH_SCREEN({
             ShmScrPrivateRec *screen_priv =
                 ShmInitScreenPriv(walkScreen);
             if (!screen_priv)
@@ -1405,12 +1401,11 @@ ShmExtensionInit(void)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
                 sharedPixmaps = xFalse;
-        }
+        });
         if (sharedPixmaps)
-            for (i = 0; i < screenInfo.numScreens; i++) {
-                ScreenPtr walkScreen = screenInfo.screens[i];
+            DIX_FOR_EACH_SCREEN({
                 dixScreenHookPixmapDestroy(walkScreen, ShmPixmapDestroy);
-            }
+            });
     }
     ShmSegType = CreateNewResourceType(ShmDetachSegment, "ShmSeg");
     if (ShmSegType &&
