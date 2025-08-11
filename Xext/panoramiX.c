@@ -828,7 +828,7 @@ PanoramiXConsolidate(void)
 VisualID
 PanoramiXTranslateVisualID(int screen, VisualID orig)
 {
-    ScreenPtr pOtherScreen = screenInfo.screens[screen];
+    ScreenPtr pOtherScreen = dixGetScreenPtr(screen);
     VisualPtr pVisual = NULL;
     int i;
 
@@ -971,7 +971,7 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    ScreenPtr pScreen = screenInfo.screens[stuff->screen];
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
 
     xPanoramiXGetScreenSizeReply reply = {
         /* screen dimensions */

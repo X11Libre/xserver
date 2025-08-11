@@ -601,8 +601,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (int i = 0; i < count; i++) {
-        ScreenPtr pScreen = (stuff->n == 0) ? screenInfo.screens[i] :
-            pDrawables[i]->pScreen;
+        ScreenPtr pScreen = (stuff->n == 0) ? dixGetScreenPtr(i) : pDrawables[i]->pScreen;
         pDbeScreenPriv = DBE_SCREEN_PRIV(pScreen);
 
         rc = dixCallScreenAccessCallback(client, pScreen, DixGetAttrAccess);
@@ -1033,7 +1032,7 @@ DbeExtensionInit(void)
              */
 
             for (int j = 0; j < walkScreenIdx; j++) {
-                ScreenPtr pScreen = screenInfo.screens[j];
+                ScreenPtr pScreen = dixGetScreenPtr(j);
                 free(dixLookupPrivate(&pScreen->devPrivates, &dbeScreenPrivKeyRec));
                 dixSetPrivate(&pScreen->devPrivates, &dbeScreenPrivKeyRec, NULL);
             }
