@@ -342,12 +342,14 @@ SetPictureFilter(PicturePtr pPicture, char *name, int len, xFixed * params,
         /* For source pictures, the picture isn't tied to a screen.  So, ensure
          * that all screens can handle a filter we set for the picture.
          */
-        for (unsigned int walkScreenIdx = 1; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        DIX_FOR_EACH_SCREEN({
+            if (!walkScreenIdx)
+                continue; // skip the first screen
+
             PictFilterPtr pScreenFilter = PictureFindFilter(walkScreen, name, len);
             if (!pScreenFilter || pScreenFilter->id != pFilter->id)
                 return BadMatch;
-        }
+        });
     }
     return SetPicturePictFilter(pPicture, pFilter, params, nparams);
 }

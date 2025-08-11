@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "dri3_priv.h"
@@ -76,7 +77,6 @@ void
 dri3_extension_init(void)
 {
     ExtensionEntry *extension;
-    int i;
 
     /* If no screens support DRI3, there's no point offering the
      * extension at all
@@ -97,11 +97,10 @@ dri3_extension_init(void)
 
     dri3_request = extension->base;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         if (!dri3_screen_init(walkScreen, NULL))
             goto bail;
-    }
+    });
 
     dri3_syncobj_type = CreateNewResourceType(dri3_syncobj_free, "DRI3Syncobj");
     if (!dri3_syncobj_type)

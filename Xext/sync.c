@@ -60,6 +60,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/bug_priv.h"
 #include "os/osdep.h"
@@ -2248,12 +2249,10 @@ void
 SyncExtensionInit(void)
 {
     ExtensionEntry *extEntry;
-    int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr walkScreen = screenInfo.screens[s];
+    DIX_FOR_EACH_SCREEN({
         miSyncSetup(walkScreen);
-    }
+    });
 
     RTCounter = CreateNewResourceType(FreeCounter, "SyncCounter");
     xorg_list_init(&SysCounterList);

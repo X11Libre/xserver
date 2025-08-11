@@ -29,6 +29,7 @@
 #include <dix-config.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
@@ -71,17 +72,13 @@ RRClientCallback(CallbackListPtr *list, void *closure, void *data)
     pRRClient->major_version = 0;
     pRRClient->minor_version = 0;
 
-    unsigned int walkScreenIdx;
-    for (walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+    DIX_FOR_EACH_SCREEN({
         rrScrPriv(walkScreen);
-
         if (pScrPriv) {
             pTimes[walkScreenIdx].setTime = pScrPriv->lastSetTime;
             pTimes[walkScreenIdx].configTime = pScrPriv->lastConfigTime;
         }
-    }
+    });
 }
 
 static void RRCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)

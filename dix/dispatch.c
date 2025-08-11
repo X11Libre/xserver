@@ -667,10 +667,10 @@ CreateConnectionBlock(void)
     connBlockScreenStart = sizesofar;
     memset(&depth, 0, sizeof(xDepth));
     memset(&visual, 0, sizeof(xVisualType));
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+
+    DIX_FOR_EACH_SCREEN({
         DepthPtr pDepth;
         VisualPtr pVisual;
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
         root.windowId = walkScreen->root->drawable.id;
         root.defaultColormap = walkScreen->defColormap;
@@ -724,7 +724,7 @@ CreateConnectionBlock(void)
                 sizesofar += sizeof(xVisualType);
             }
         }
-    }
+    });
     connSetupPrefix.success = xTrue;
     connSetupPrefix.length = lenofblock / 4;
     connSetupPrefix.majorVersion = X_PROTOCOL;
@@ -3224,12 +3224,11 @@ ProcSetScreenSaver(ClientPtr client)
     REQUEST(xSetScreenSaverReq);
     REQUEST_SIZE_MATCH(xSetScreenSaverReq);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         int rc = XaceHookScreensaverAccess(client, walkScreen, DixSetAttrAccess);
         if (rc != Success)
             return rc;
-    }
+    });
 
     blankingOption = stuff->preferBlank;
     if ((blankingOption != DontPreferBlanking) &&
@@ -3281,12 +3280,11 @@ ProcGetScreenSaver(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xReq);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         int rc = XaceHookScreensaverAccess(client, walkScreen, DixGetAttrAccess);
         if (rc != Success)
             return rc;
-    }
+    });
 
     xGetScreenSaverReply rep = {
         .timeout = ScreenSaverTime / MILLI_PER_SECOND,
