@@ -2483,8 +2483,7 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
 
     filter = GetEventFilter(device, xi);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         InputClients *inputclients;
 
         WindowPtr root = walkScreen->root;
@@ -2508,7 +2507,7 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
                 DeliverEventToInputClients(device, &ic, root, xi, 1,
                                            filter, NULL, &c, &m);
         }
-    }
+    });
 
     free(xi);
 }
@@ -5991,8 +5990,7 @@ ProcRecolorCursor(ClientPtr client)
     pCursor->backGreen = stuff->backGreen;
     pCursor->backBlue = stuff->backBlue;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
 #ifdef XINERAMA
         if (!noPanoramiXExtension)
             displayed = (walkScreen == pSprite->screen);
@@ -6001,7 +5999,7 @@ ProcRecolorCursor(ClientPtr client)
             displayed = (walkScreen == pSprite->hotPhys.pScreen);
         (*walkScreen->RecolorCursor) (PickPointer(client), walkScreen, pCursor,
                                 (pCursor == pSprite->current) && displayed);
-    }
+    });
     return Success;
 }
 

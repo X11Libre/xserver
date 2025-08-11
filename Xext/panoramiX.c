@@ -593,9 +593,10 @@ PanoramiXCreateConnectionBlock(void)
     }
 
     ScreenPtr masterScreen = dixGetMasterScreen();
+    DIX_FOR_EACH_SCREEN({
+        if (!walkScreenIdx)
+            continue;  /* skip the first one */
 
-    for (unsigned int walkScreenIdx = 1; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (walkScreen->rootDepth != masterScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
             return FALSE;
@@ -603,13 +604,12 @@ PanoramiXCreateConnectionBlock(void)
         if (walkScreen->backingStoreSupport !=
             masterScreen->backingStoreSupport)
             disable_backing_store = TRUE;
-    }
+    });
 
     if (disable_backing_store) {
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        DIX_FOR_EACH_SCREEN({
             walkScreen->backingStoreSupport = NotUseful;
-        }
+        });
     }
 
     i = screenInfo.numScreens;
