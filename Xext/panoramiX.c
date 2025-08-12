@@ -1130,41 +1130,21 @@ CopyBits(char *dst, int shiftL, char *src, int bytes)
    1 bpp and planar data to be already cleared when presented
    to this function */
 
-void
-XineramaGetImageData(DrawablePtr *pDrawables,
-                     int left,
-                     int top,
-                     int width,
-                     int height,
-                     unsigned int format,
-                     unsigned long planemask,
-                     char *data, int pitch, Bool isRoot)
+static Bool XineramaGetImageDataScr(BoxRec SrcBox,
+                                    RegionPtr GrabRegion,
+                                    RegionPtr SrcRegion,
+                                    const int width,
+                                    const int height,
+                                    const unsigned int format,
+                                    const unsigned long planemask,
+                                    char *data,
+                                    const int depth,
+                                    const int pitch,
+                                    ScreenPtr walkScreen,
+                                    DrawablePtr pWalkDraw)
 {
-    RegionRec SrcRegion, GrabRegion;
-    BoxRec SrcBox;
-    DrawablePtr pDraw = pDrawables[0];
-
-    /* find box in logical screen space */
-    SrcBox.x1 = left;
-    SrcBox.y1 = top;
-    if (!isRoot) {
-        SrcBox.x1 += pDraw->x + screenInfo.screens[0]->x;
-        SrcBox.y1 += pDraw->y + screenInfo.screens[0]->y;
-    }
-    SrcBox.x2 = SrcBox.x1 + width;
-    SrcBox.y2 = SrcBox.y1 + height;
-
-    RegionInit(&SrcRegion, &SrcBox, 1);
-    RegionNull(&GrabRegion);
-
-    int depth = (format == XYPixmap) ? 1 : pDraw->depth;
-
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         BoxRec TheBox;
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
-        DrawablePtr pWalkDraw = pDrawables[walkScreenIdx];
         ScreenPtr pScreen = pWalkDraw->pScreen;
 
         TheBox.x1 = pScreen->x;
@@ -1176,7 +1156,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
         RegionInit(&ScreenRegion, &TheBox, 1);
         int inOut = RegionContainsRect(&ScreenRegion, &SrcBox);
         if (inOut == rgnPART)
-            RegionIntersect(&GrabRegion, &SrcRegion, &ScreenRegion);
+            RegionIntersect(GrabRegion, SrcRegion, &ScreenRegion);
         RegionUninit(&ScreenRegion);
 
         if (inOut == rgnIN) {
@@ -1186,16 +1166,16 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                                   SrcBox.y1 - pWalkDraw->y -
                                   walkScreen->y, width, height,
                                   format, planemask, data);
-            break;
+            return FALSE;
         }
         else if (inOut == rgnOUT)
-            continue;
+            return TRUE;
 
-        int nbox = RegionNumRects(&GrabRegion);
+        int nbox = RegionNumRects(GrabRegion);
         if (!nbox)
-            continue;
+            return TRUE;
 
-        BoxRec *pbox = RegionRects(&GrabRegion);
+        BoxRec *pbox = RegionRects(GrabRegion);
 
         int size = 0;
         char *ScratchMem = NULL;
@@ -1284,8 +1264,57 @@ XineramaGetImageData(DrawablePtr *pDrawables,
         }
 
         free(ScratchMem);
-        RegionSubtract(&SrcRegion, &SrcRegion, &GrabRegion);
-        if (!RegionNotEmpty(&SrcRegion))
+        RegionSubtract(SrcRegion, SrcRegion, GrabRegion);
+        if (!RegionNotEmpty(SrcRegion))
+            return FALSE;
+
+    return TRUE;
+}
+
+void
+XineramaGetImageData(DrawablePtr *pDrawables,
+                     int left,
+                     int top,
+                     int width,
+                     int height,
+                     unsigned int format,
+                     unsigned long planemask,
+                     char *data, int pitch, Bool isRoot)
+{
+    RegionRec SrcRegion, GrabRegion;
+    BoxRec SrcBox;
+    DrawablePtr pDraw = pDrawables[0];
+
+    /* find box in logical screen space */
+    SrcBox.x1 = left;
+    SrcBox.y1 = top;
+    if (!isRoot) {
+        SrcBox.x1 += pDraw->x + screenInfo.screens[0]->x;
+        SrcBox.y1 += pDraw->y + screenInfo.screens[0]->y;
+    }
+    SrcBox.x2 = SrcBox.x1 + width;
+    SrcBox.y2 = SrcBox.y1 + height;
+
+    RegionInit(&SrcRegion, &SrcBox, 1);
+    RegionNull(&GrabRegion);
+
+    int depth = (format == XYPixmap) ? 1 : pDraw->depth;
+
+    int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        if (!XineramaGetImageDataScr(
+                SrcBox,
+                &GrabRegion,
+                &SrcRegion,
+                width,
+                height,
+                format,
+                planemask,
+                data,
+                depth,
+                pitch,
+                screenInfo.screens[walkScreenIdx],
+                pDrawables[walkScreenIdx]))
             break;
     }
 
