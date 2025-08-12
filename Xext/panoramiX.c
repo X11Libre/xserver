@@ -1138,7 +1138,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 {
     RegionRec SrcRegion, GrabRegion;
     BoxRec SrcBox, *pbox;
-    int i, j, size, sizeNeeded, ScratchPitch, depth;
+    int size, sizeNeeded, ScratchPitch, depth;
     DrawablePtr pDraw = pDrawables[0];
     char *ScratchMem = NULL;
 
@@ -1159,6 +1159,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 
     depth = (format == XYPixmap) ? 1 : pDraw->depth;
 
+    int i;
     FOR_NSCREENS_BACKWARD(i) {
         BoxRec TheBox;
 
@@ -1220,7 +1221,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                 /* copy the memory over */
 
                 if (depth == 1) {
-                    int k, shift, leftover, index, index2;
+                    int shift, leftover;
 
                     x = pbox->x1 - SrcBox.x1;
                     y = pbox->y1 - SrcBox.y1;
@@ -1233,11 +1234,11 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                     if (leftover) {
                         int mask = (1 << leftover) - 1;
 
-                        for (j = h, k = w; j--; k += ScratchPitch)
+                        for (int j = h, k = w; j--; k += ScratchPitch)
                             ScratchMem[k] &= mask;
                     }
 
-                    for (j = 0, index = (pitch * y) + x, index2 = 0; j < h;
+                    for (int j = 0, index = (pitch * y) + x, index2 = 0; j < h;
                          j++, index += pitch, index2 += ScratchPitch) {
                         if (w) {
                             if (!shift) {
@@ -1262,12 +1263,12 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                     }
                 }
                 else {
-                    j = BitsPerPixel(depth) >> 3;
-                    x = (pbox->x1 - SrcBox.x1) * j;
+                    int bpp = BitsPerPixel(depth) >> 3;
+                    x = (pbox->x1 - SrcBox.x1) * bpp;
                     y = pbox->y1 - SrcBox.y1;
-                    w *= j;
+                    w *= bpp;
 
-                    for (j = 0; j < h; j++) {
+                    for (int j = 0; j < h; j++) {
                         assert(ScratchMem);
                         memcpy(data + (pitch * (y + j)) + x,
                                ScratchMem + (ScratchPitch * j), w);
