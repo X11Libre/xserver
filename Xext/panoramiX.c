@@ -1161,10 +1161,9 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 
     FOR_NSCREENS_BACKWARD(i) {
         BoxRec TheBox;
-        ScreenPtr pScreen;
 
-        pDraw = pDrawables[i];
-        pScreen = pDraw->pScreen;
+        DrawablePtr pWalkDraw = pDrawables[i];
+        ScreenPtr pScreen = pWalkDraw->pScreen;
 
         TheBox.x1 = pScreen->x;
         TheBox.x2 = TheBox.x1 + pScreen->width;
@@ -1179,10 +1178,10 @@ XineramaGetImageData(DrawablePtr *pDrawables,
         RegionUninit(&ScreenRegion);
 
         if (inOut == rgnIN) {
-            (*pScreen->GetImage) (pDraw,
-                                  SrcBox.x1 - pDraw->x -
+            pScreen->GetImage(pWalkDraw,
+                                  SrcBox.x1 - pWalkDraw->x -
                                   screenInfo.screens[i]->x,
-                                  SrcBox.y1 - pDraw->y -
+                                  SrcBox.y1 - pWalkDraw->y -
                                   screenInfo.screens[i]->y, width, height,
                                   format, planemask, data);
             break;
@@ -1212,10 +1211,10 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                     }
                 }
 
-                x = pbox->x1 - pDraw->x - screenInfo.screens[i]->x;
-                y = pbox->y1 - pDraw->y - screenInfo.screens[i]->y;
+                x = pbox->x1 - pWalkDraw->x - screenInfo.screens[i]->x;
+                y = pbox->y1 - pWalkDraw->y - screenInfo.screens[i]->y;
 
-                (*pScreen->GetImage) (pDraw, x, y, w, h,
+                (*pScreen->GetImage) (pWalkDraw, x, y, w, h,
                                       format, planemask, ScratchMem);
 
                 /* copy the memory over */
