@@ -545,10 +545,11 @@ XineramaSetCursorPosition(DeviceIntPtr pDev, int x, int y, Bool generateEvent)
 
     if (!point_on_screen(pScreen, x, y)) {
         FOR_NSCREENS_BACKWARD(i) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
             if (i == pScreen->myNum)
                 continue;
-            if (point_on_screen(screenInfo.screens[i], x, y)) {
-                pScreen = screenInfo.screens[i];
+            if (point_on_screen(walkScreen, x, y)) {
+                pScreen = walkScreen;
                 break;
             }
         }
@@ -593,8 +594,10 @@ XineramaSetWindowPntrs(DeviceIntPtr pDev, WindowPtr pWin)
     if (pWin == screenInfo.screens[0]->root) {
         int i;
 
-        FOR_NSCREENS_BACKWARD(i)
-            pSprite->windows[i] = screenInfo.screens[i]->root;
+        FOR_NSCREENS_BACKWARD(i) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            pSprite->windows[i] = walkScreen->root;
+        }
     }
     else {
         PanoramiXRes *win;
@@ -631,12 +634,14 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
     i = PanoramiXNumScreens - 1;
 
     RegionCopy(&pSprite->Reg1, &pSprite->windows[i]->borderSize);
-    off_x = screenInfo.screens[i]->x;
-    off_y = screenInfo.screens[i]->y;
+    ScreenPtr walkScreen = screenInfo.screens[i];
+    off_x = walkScreen->x;
+    off_y = walkScreen->y;
 
     while (i--) {
-        x = off_x - screenInfo.screens[i]->x;
-        y = off_y - screenInfo.screens[i]->y;
+        walkScreen = screenInfo.screens[i];
+        x = off_x - walkScreen->x;
+        y = off_y - walkScreen->y;
 
         if (x || y)
             RegionTranslate(&pSprite->Reg1, x, y);
@@ -644,8 +649,8 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
         RegionUnion(&pSprite->Reg1, &pSprite->Reg1,
                     &pSprite->windows[i]->borderSize);
 
-        off_x = screenInfo.screens[i]->x;
-        off_y = screenInfo.screens[i]->y;
+        off_x = walkScreen->x;
+        off_y = walkScreen->y;
     }
 
     pSprite->hotLimits = *RegionExtents(&pSprite->Reg1);
@@ -835,12 +840,14 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
             i = PanoramiXNumScreens - 1;
 
             RegionCopy(&pSprite->Reg2, &pSprite->windows[i]->borderSize);
-            off_x = screenInfo.screens[i]->x;
-            off_y = screenInfo.screens[i]->y;
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            off_x = walkScreen->x;
+            off_y = walkScreen->y;
 
             while (i--) {
-                x = off_x - screenInfo.screens[i]->x;
-                y = off_y - screenInfo.screens[i]->y;
+                walkScreen = screenInfo.screens[i];
+                x = off_x - walkScreen->x;
+                y = off_y - walkScreen->y;
 
                 if (x || y)
                     RegionTranslate(&pSprite->Reg2, x, y);
@@ -848,8 +855,8 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
                 RegionUnion(&pSprite->Reg2, &pSprite->Reg2,
                             &pSprite->windows[i]->borderSize);
 
-                off_x = screenInfo.screens[i]->x;
-                off_y = screenInfo.screens[i]->y;
+                off_x = walkScreen->x;
+                off_y = walkScreen->y;
             }
         }
         else
@@ -2479,10 +2486,10 @@ DeliverRawEvent(RawDeviceEvent *ev, DeviceIntPtr device)
     filter = GetEventFilter(device, xi);
 
     for (int i = 0; i < screenInfo.numScreens; i++) {
-        WindowPtr root;
+        ScreenPtr walkScreen = screenInfo.screens[i];
         InputClients *inputclients;
 
-        root = screenInfo.screens[i]->root;
+        WindowPtr root = walkScreen->root;
         if (!GetClientsForDelivery(device, root, xi, filter, &inputclients))
             continue;
 
@@ -3013,13 +3020,14 @@ PointInBorderSize(WindowPtr pWin, int x, int y)
         int i;
 
         FOR_NSCREENS_FORWARD(i) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
             if (!i)
                 continue; /* skip screen #0 */
             if (RegionContainsPoint(&pSprite->windows[i]->borderSize,
                                     x + screenInfo.screens[0]->x -
-                                    screenInfo.screens[i]->x,
+                                    walkScreen->x,
                                     y + screenInfo.screens[0]->y -
-                                    screenInfo.screens[i]->y, &box))
+                                    walkScreen->y, &box))
                 return TRUE;
         }
     }
@@ -3532,12 +3540,14 @@ XineramaPointInWindowIsVisible(WindowPtr pWin, int x, int y)
     yoff = y + screenInfo.screens[0]->y;
 
     FOR_NSCREENS_FORWARD(i) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
         if (!i)
             continue; /* skip screen #0 */
+
         pWin = inputInfo.pointer->spriteInfo->sprite->windows[i];
 
-        x = xoff - screenInfo.screens[i]->x;
-        y = yoff - screenInfo.screens[i]->y;
+        x = xoff - walkScreen->x;
+        y = yoff - walkScreen->y;
 
         if (RegionContainsPoint(&pWin->borderClip, x, y, &box)
             && (!wInputShape(pWin) ||
@@ -5989,7 +5999,6 @@ ProcRecolorCursor(ClientPtr client)
 {
     CursorPtr pCursor;
     int rc;
-    ScreenPtr pscr;
     Bool displayed;
     SpritePtr pSprite = PickPointer(client)->spriteInfo->sprite;
 
@@ -6012,14 +6021,14 @@ ProcRecolorCursor(ClientPtr client)
     pCursor->backBlue = stuff->backBlue;
 
     for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
-        pscr = screenInfo.screens[nscr];
+        ScreenPtr walkScreen = screenInfo.screens[nscr];
 #ifdef XINERAMA
         if (!noPanoramiXExtension)
-            displayed = (pscr == pSprite->screen);
+            displayed = (walkScreen == pSprite->screen);
         else
 #endif /* XINERAMA */
-            displayed = (pscr == pSprite->hotPhys.pScreen);
-        (*pscr->RecolorCursor) (PickPointer(client), pscr, pCursor,
+            displayed = (walkScreen == pSprite->hotPhys.pScreen);
+        (*walkScreen->RecolorCursor) (PickPointer(client), walkScreen, pCursor,
                                 (pCursor == pSprite->current) && displayed);
     }
     return Success;

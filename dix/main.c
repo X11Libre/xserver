@@ -202,27 +202,27 @@ dix_main(int argc, char *argv[], char *envp[])
         LogMessageVerb(X_INFO, 1, "Extensions initialized\n");
 
         for (int i = 0; i < screenInfo.numGPUScreens; i++) {
-            ScreenPtr pScreen = screenInfo.gpuscreens[i];
-            if (!PixmapScreenInit(pScreen))
+            ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+            if (!PixmapScreenInit(walkScreen))
                 FatalError("failed to create screen pixmap properties");
-            if (!dixScreenRaiseCreateResources(pScreen))
+            if (!dixScreenRaiseCreateResources(walkScreen))
                 FatalError("failed to create screen resources");
         }
 
         for (int i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr pScreen = screenInfo.screens[i];
+            ScreenPtr walkScreen = screenInfo.screens[i];
 
-            if (!PixmapScreenInit(pScreen))
+            if (!PixmapScreenInit(walkScreen))
                 FatalError("failed to create screen pixmap properties");
-            if (!dixScreenRaiseCreateResources(pScreen))
+            if (!dixScreenRaiseCreateResources(walkScreen))
                 FatalError("failed to create screen resources");
-            if (!CreateGCperDepth(pScreen))
+            if (!CreateGCperDepth(walkScreen))
                 FatalError("failed to create scratch GCs");
-            if (!CreateDefaultStipple(pScreen))
+            if (!CreateDefaultStipple(walkScreen))
                 FatalError("failed to create default stipple");
-            if (!CreateRootWindow(pScreen))
+            if (!CreateRootWindow(walkScreen))
                 FatalError("failed to create root window");
-            CallCallbacks(&RootWindowFinalizeCallback, pScreen);
+            CallCallbacks(&RootWindowFinalizeCallback, walkScreen);
         }
 
         if (SetDefaultFontPath(defaultFontPath) != Success) {
@@ -248,8 +248,9 @@ dix_main(int argc, char *argv[], char *envp[])
 #endif /* XINERAMA */
 
         for (int i = 0; i < screenInfo.numScreens; i++) {
-            InitRootWindow(screenInfo.screens[i]->root);
-            CallCallbacks(&PostInitRootWindowCallback, screenInfo.screens[i]);
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            InitRootWindow(walkScreen->root);
+            CallCallbacks(&PostInitRootWindowCallback, walkScreen);
         }
 
         LogMessageVerb(X_INFO, 1, "Screen(s) initialized\n");
@@ -312,21 +313,25 @@ dix_main(int argc, char *argv[], char *envp[])
 
         InputThreadFini();
 
-        for (int i = 0; i < screenInfo.numScreens; i++)
-            screenInfo.screens[i]->root = NullWindow;
+        for (int i = 0; i < screenInfo.numScreens; i++) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            walkScreen->root = NullWindow;
+        }
 
         CloseDownDevices();
 
         CloseDownEvents();
 
         for (int i = screenInfo.numGPUScreens - 1; i >= 0; i--) {
-            dixFreeScreen(screenInfo.gpuscreens[i]);
+            ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+            dixFreeScreen(walkScreen);
             screenInfo.numGPUScreens = i;
         }
         memset(&screenInfo.gpuscreens, 0, sizeof(screenInfo.gpuscreens));
 
         for (int i = screenInfo.numScreens - 1; i >= 0; i--) {
-            dixFreeScreen(screenInfo.screens[i]);
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            dixFreeScreen(walkScreen);
             screenInfo.numScreens = i;
         }
         memset(&screenInfo.screens, 0, sizeof(screenInfo.screens));

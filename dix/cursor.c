@@ -106,10 +106,7 @@ int
 FreeCursor(void *value, XID cid)
 {
     CursorPtr pCurs = (CursorPtr) value;
-
-    ScreenPtr pscr;
     DeviceIntPtr pDev = NULL;   /* unused anyway */
-
 
     UnrefCursor(pCurs);
     if (CursorRefCount(pCurs) != 0)
@@ -118,8 +115,9 @@ FreeCursor(void *value, XID cid)
     BUG_WARN(CursorRefCount(pCurs) < 0);
 
     for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
-        pscr = screenInfo.screens[nscr];
-        (void) (*pscr->UnrealizeCursor) (pDev, pscr, pCurs);
+        ScreenPtr walkScreen = screenInfo.screens[nscr];
+        if (walkScreen->UnrealizeCursor)
+            walkScreen->UnrealizeCursor(pDev, walkScreen, pCurs);
     }
     FreeCursorBits(pCurs->bits);
     dixFiniPrivates(pCurs, PRIVATE_CURSOR);
@@ -184,14 +182,12 @@ CheckForEmptyMask(CursorBitsPtr bits)
 static int
 RealizeCursorAllScreens(CursorPtr pCurs)
 {
-    ScreenPtr pscr;
-
     for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
-        pscr = screenInfo.screens[nscr];
+        ScreenPtr walkScreen = screenInfo.screens[nscr];
         for (DeviceIntPtr pDev = inputInfo.devices; pDev; pDev = pDev->next) {
             if (DevHasCursor(pDev)) {
-                if (!(*pscr->RealizeCursor) (pDev, pscr, pCurs)) {
-                    /* Realize failed for device pDev on screen pscr.
+                if (!(*walkScreen->RealizeCursor) (pDev, walkScreen, pCurs)) {
+                    /* Realize failed for device pDev on screen walkScreen.
                      * We have to assume that for all devices before, realize
                      * worked. We need to rollback all devices so far on the
                      * current screen and then all devices on previous
@@ -200,20 +196,21 @@ RealizeCursorAllScreens(CursorPtr pCurs)
                     DeviceIntPtr pDevIt = inputInfo.devices;    /*dev iterator */
 
                     while (pDevIt && pDevIt != pDev) {
-                        if (DevHasCursor(pDevIt))
-                            (*pscr->UnrealizeCursor) (pDevIt, pscr, pCurs);
+                        if (DevHasCursor(pDevIt) && walkScreen->UnrealizeCursor)
+                            walkScreen->UnrealizeCursor(pDevIt, walkScreen, pCurs);
                         pDevIt = pDevIt->next;
                     }
                     while (--nscr >= 0) {
-                        pscr = screenInfo.screens[nscr];
+                        walkScreen = screenInfo.screens[nscr];
                         /* now unrealize all devices on previous screens */
                         pDevIt = inputInfo.devices;
                         while (pDevIt) {
-                            if (DevHasCursor(pDevIt))
-                                (*pscr->UnrealizeCursor) (pDevIt, pscr, pCurs);
+                            if (DevHasCursor(pDevIt) && walkScreen->UnrealizeCursor)
+                                walkScreen->UnrealizeCursor(pDevIt, walkScreen, pCurs);
                             pDevIt = pDevIt->next;
                         }
-                        (*pscr->UnrealizeCursor) (pDev, pscr, pCurs);
+                        if (walkScreen->UnrealizeCursor)
+                            walkScreen->UnrealizeCursor(pDev, walkScreen, pCurs);
                     }
                     return BadAlloc;
                 }

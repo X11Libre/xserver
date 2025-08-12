@@ -237,7 +237,6 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
 {
     FontPtr pfont = NullFont;
     FontPathElementPtr fpe = NULL;
-    ScreenPtr pScr;
     int err = Successful;
     char *alias, *newname;
     int newlen;
@@ -340,9 +339,9 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
     if (pfont->refcnt == 1) {
         UseFPE(pfont->fpe);
         for (int i = 0; i < screenInfo.numScreens; i++) {
-            pScr = screenInfo.screens[i];
-            if (pScr->RealizeFont) {
-                if (!(*pScr->RealizeFont) (pScr, pfont)) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            if (walkScreen->RealizeFont) {
+                if (!(*walkScreen->RealizeFont) (walkScreen, pfont)) {
                     CloseFont(pfont, (Font) 0);
                     err = AllocError;
                     goto bail;
