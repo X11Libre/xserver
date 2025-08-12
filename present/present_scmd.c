@@ -410,14 +410,14 @@ present_event_notify(uint64_t event_id, uint64_t ust, uint64_t msc)
     }
 
     for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr               screen = screenInfo.screens[s];
-        present_screen_priv_ptr screen_priv = present_screen_priv(screen);
+        ScreenPtr walkScreen = screenInfo.screens[s];
+        present_screen_priv_ptr screen_priv = present_screen_priv(walkScreen);
 
         if (event_id == screen_priv->unflip_event_id) {
             DebugPresent(("\tun %" PRIu64 "\n", event_id));
             screen_priv->unflip_event_id = 0;
-            present_flip_idle(screen);
-            present_flip_try_ready(screen);
+            present_flip_idle(walkScreen);
+            present_flip_try_ready(walkScreen);
             return;
         }
     }
