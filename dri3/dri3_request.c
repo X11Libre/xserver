@@ -75,22 +75,24 @@ proc_dri3_query_version(ClientPtr client)
     REQUEST_SIZE_MATCH(xDRI3QueryVersionReq);
 
     for (int i = 0; i < screenInfo.numScreens; i++) {
-        if (!dri3_screen_can_one_point_two(screenInfo.screens[i])) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (!dri3_screen_can_one_point_two(walkScreen)) {
             rep.minorVersion = 0;
             break;
         }
-        if (!dri3_screen_can_one_point_four(screenInfo.screens[i])) {
+        if (!dri3_screen_can_one_point_four(walkScreen)) {
             rep.minorVersion = 2;
             break;
         }
     }
 
     for (int i = 0; i < screenInfo.numGPUScreens; i++) {
-        if (!dri3_screen_can_one_point_two(screenInfo.gpuscreens[i])) {
+        ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+        if (!dri3_screen_can_one_point_two(walkScreen)) {
             rep.minorVersion = 0;
             break;
         }
-        if (!dri3_screen_can_one_point_four(screenInfo.gpuscreens[i])) {
+        if (!dri3_screen_can_one_point_four(walkScreen)) {
             rep.minorVersion = 2;
             break;
         }
