@@ -1077,8 +1077,8 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
 
     /* Look for which screen this pixmap corresponds to */
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        winScreenPriv(pScreen);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        winScreenPriv(walkScreen);
         winScreenInfo *pScreenInfo = pScreenPriv->pScreenInfo;
 
         if (pScreenInfo->pfb == pPixData)
