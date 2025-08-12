@@ -453,9 +453,10 @@ PictureFinishInit(void)
     int s;
 
     for (s = 0; s < screenInfo.numScreens; s++) {
-        if (!PictureInitIndexedFormats(screenInfo.screens[s]))
+        ScreenPtr walkScreen = screenInfo.screens[s];
+        if (!PictureInitIndexedFormats(walkScreen))
             return FALSE;
-        (void) AnimCurInit(screenInfo.screens[s]);
+        (void) AnimCurInit(walkScreen);
     }
 
     return TRUE;
