@@ -407,7 +407,9 @@ XineramaInitData(void)
     PanoramiXPixHeight =
         screenInfo.screens[0]->y + screenInfo.screens[0]->height;
 
-    FOR_NSCREENS_FORWARD_SKIP(i) {
+    FOR_NSCREENS_FORWARD(i) {
+        if (!i)
+            continue; /* skip screen #0 */
         ScreenPtr pScreen = screenInfo.screens[i];
 
         w = pScreen->x + pScreen->width;
@@ -722,7 +724,9 @@ PanoramiXMaybeAddDepth(DepthPtr pDepth)
     int j, k;
     Bool found = FALSE;
 
-    FOR_NSCREENS_FORWARD_SKIP(j) {
+    FOR_NSCREENS_FORWARD(j) {
+        if (!j)
+            continue; /* skip screen #0 */
         pScreen = screenInfo.screens[j];
         for (k = 0; k < pScreen->numDepths; k++) {
             if (pScreen->allowedDepths[k].depth == pDepth->depth) {
@@ -751,7 +755,9 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
     int j, k;
     Bool found = FALSE;
 
-    FOR_NSCREENS_FORWARD_SKIP(j) {
+    FOR_NSCREENS_FORWARD(j) {
+        if (!j)
+            continue; /* skip screen #0 */
         pScreen = screenInfo.screens[j];
         found = FALSE;
 

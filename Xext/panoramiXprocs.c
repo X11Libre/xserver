@@ -2032,7 +2032,9 @@ PanoramiXGetImage(ClientPtr client)
     }
 
     drawables[0] = pDraw;
-    FOR_NSCREENS_FORWARD_SKIP(i) {
+    FOR_NSCREENS_FORWARD(i) {
+        if (!i)
+            continue; /* skip screen #0 */
         rc = dixLookupDrawable(drawables + i, draw->info[i].id, client, 0,
                                DixGetAttrAccess);
         if (rc != Success)

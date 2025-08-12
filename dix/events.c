@@ -3012,7 +3012,9 @@ PointInBorderSize(WindowPtr pWin, int x, int y)
         SpritePtr pSprite = inputInfo.pointer->spriteInfo->sprite;
         int i;
 
-        FOR_NSCREENS_FORWARD_SKIP(i) {
+        FOR_NSCREENS_FORWARD(i) {
+            if (!i)
+                continue; /* skip screen #0 */
             if (RegionContainsPoint(&pSprite->windows[i]->borderSize,
                                     x + screenInfo.screens[0]->x -
                                     screenInfo.screens[i]->x,
@@ -3529,7 +3531,9 @@ XineramaPointInWindowIsVisible(WindowPtr pWin, int x, int y)
     xoff = x + screenInfo.screens[0]->x;
     yoff = y + screenInfo.screens[0]->y;
 
-    FOR_NSCREENS_FORWARD_SKIP(i) {
+    FOR_NSCREENS_FORWARD(i) {
+        if (!i)
+            continue; /* skip screen #0 */
         pWin = inputInfo.pointer->spriteInfo->sprite->windows[i];
 
         x = xoff - screenInfo.screens[i]->x;
@@ -3734,7 +3738,9 @@ BorderSizeNotEmpty(DeviceIntPtr pDev, WindowPtr pWin)
     if (!noPanoramiXExtension && XineramaSetWindowPntrs(pDev, pWin)) {
         int i;
 
-        FOR_NSCREENS_FORWARD_SKIP(i) {
+        FOR_NSCREENS_FORWARD(i) {
+            if (!i)
+                continue; /* skip screen #0 */
             if (RegionNotEmpty
                 (&pDev->spriteInfo->sprite->windows[i]->borderSize))
                 return TRUE;

@@ -1624,9 +1624,12 @@ XineramifyXv(void)
 
         MatchingAdaptors[0] = refAdapt;
         isOverlay = hasOverlay(refAdapt);
-        FOR_NSCREENS_FORWARD_SKIP(j)
+        FOR_NSCREENS_FORWARD(j) {
+            if (!j)
+                continue; /* skip screen #0 */
             MatchingAdaptors[j] =
             matchAdaptor(screenInfo.screens[j], refAdapt, isOverlay);
+        }
 
         /* now create a resource for each port */
         for (j = 0; j < refAdapt->nPorts; j++) {
