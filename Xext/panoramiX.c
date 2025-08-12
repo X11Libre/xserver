@@ -1136,7 +1136,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                      unsigned long planemask,
                      char *data, int pitch, Bool isRoot)
 {
-    RegionRec SrcRegion, ScreenRegion, GrabRegion;
+    RegionRec SrcRegion, GrabRegion;
     BoxRec SrcBox, *pbox;
     int x, y, w, h, i, j, nbox, size, sizeNeeded, ScratchPitch, inOut, depth;
     DrawablePtr pDraw = pDrawables[0];
@@ -1171,6 +1171,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
         TheBox.y1 = pScreen->y;
         TheBox.y2 = TheBox.y1 + pScreen->height;
 
+        RegionRec ScreenRegion;
         RegionInit(&ScreenRegion, &TheBox, 1);
         inOut = RegionContainsRect(&ScreenRegion, &SrcBox);
         if (inOut == rgnPART)
