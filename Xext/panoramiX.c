@@ -1138,7 +1138,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 {
     RegionRec SrcRegion, GrabRegion;
     BoxRec SrcBox;
-    int size, sizeNeeded, depth;
+    int size, sizeNeeded;
     DrawablePtr pDraw = pDrawables[0];
     char *ScratchMem = NULL;
 
@@ -1157,7 +1157,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
     RegionInit(&SrcRegion, &SrcBox, 1);
     RegionNull(&GrabRegion);
 
-    depth = (format == XYPixmap) ? 1 : pDraw->depth;
+    int depth = (format == XYPixmap) ? 1 : pDraw->depth;
 
     int i;
     FOR_NSCREENS_BACKWARD(i) {
