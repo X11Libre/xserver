@@ -232,18 +232,17 @@ CheckDuplicates(GlyphHashPtr hash, char *where)
 static void
 FreeGlyphPicture(GlyphPtr glyph)
 {
-    PictureScreenPtr ps;
     int i;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
 
-        if (GetGlyphPicture(glyph, pScreen))
-            FreePicture((void *) GetGlyphPicture(glyph, pScreen), 0);
+        if (GetGlyphPicture(glyph, walkScreen))
+            FreePicture((void *) GetGlyphPicture(glyph, walkScreen), 0);
 
-        ps = GetPictureScreenIfSet(pScreen);
+        PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps)
-            (*ps->UnrealizeGlyph) (pScreen, glyph);
+            (*ps->UnrealizeGlyph) (walkScreen, glyph);
     }
 }
 
@@ -344,7 +343,6 @@ FindGlyph(GlyphSetPtr glyphSet, Glyph id)
 GlyphPtr
 AllocateGlyph(xGlyphInfo * gi, int fdepth)
 {
-    PictureScreenPtr ps;
     int size;
     int i;
     int head_size;
@@ -360,12 +358,12 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     dixInitPrivates(glyph, (char *) glyph + head_size, PRIVATE_GLYPH);
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        SetGlyphPicture(glyph, pScreen, NULL);
-        ps = GetPictureScreenIfSet(pScreen);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        SetGlyphPicture(glyph, walkScreen, NULL);
+        PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
 
         if (ps) {
-            if (!(*ps->RealizeGlyph) (pScreen, glyph))
+            if (!(ps->RealizeGlyph(walkScreen, glyph)))
                 goto bail;
         }
     }
@@ -374,9 +372,10 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
 
  bail:
     while (i--) {
-        ps = GetPictureScreenIfSet(screenInfo.screens[i]);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps)
-            (*ps->UnrealizeGlyph) (screenInfo.screens[i], glyph);
+            ps->UnrealizeGlyph(walkScreen, glyph);
     }
 
     dixFreeObjectWithPrivates(glyph, PRIVATE_GLYPH);
