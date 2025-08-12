@@ -517,20 +517,20 @@ CompositeExtensionInit(void)
     noCompositeExtension = TRUE;
 
     for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr pScreen = screenInfo.screens[s];
+        ScreenPtr walkScreen = screenInfo.screens[s];
         VisualPtr vis;
 
         /* Composite on 8bpp pseudocolor root windows appears to fail, so
          * just disable it on anything pseudocolor for safety.
          */
-        for (vis = pScreen->visuals; vis->vid != pScreen->rootVisual; vis++);
+        for (vis = walkScreen->visuals; vis->vid != walkScreen->rootVisual; vis++);
         if ((vis->class | DynamicClass) == PseudoColor)
             return;
 
         /* Ensure that Render is initialized, which is required for automatic
          * compositing.
          */
-        if (GetPictureScreenIfSet(pScreen) == NULL)
+        if (GetPictureScreenIfSet(walkScreen) == NULL)
             return;
     }
 
@@ -556,9 +556,11 @@ CompositeExtensionInit(void)
                                sizeof(CompositeClientRec)))
         return;
 
-    for (s = 0; s < screenInfo.numScreens; s++)
-        if (!compScreenInit(screenInfo.screens[s]))
+    for (s = 0; s < screenInfo.numScreens; s++) {
+        ScreenPtr walkScreen = screenInfo.screens[s];
+        if (!compScreenInit(walkScreen))
             return;
+    }
 
     extEntry = AddExtension(COMPOSITE_NAME, 0, 0,
                             ProcCompositeDispatch, SProcCompositeDispatch,
@@ -852,7 +854,8 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
 
     if (overlayWin) {
         FOR_NSCREENS_BACKWARD(i) {
-            cs = GetCompScreen(screenInfo.screens[i]);
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            cs = GetCompScreen(walkScreen);
             overlayWin->info[i].id = cs->pOverlayWin->drawable.id;
         }
 
