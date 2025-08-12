@@ -529,11 +529,12 @@ void
 xprHideWindows(Bool hide)
 {
     int screen;
-    WindowPtr pRoot, pWin;
+    WindowPtr pWin;
 
     for (screen = 0; screen < screenInfo.numScreens; screen++) {
+        ScreenPtr walkScreen = screenInfo.screens[screen];
         RootlessFrameID prevWid = NULL;
-        pRoot = screenInfo.screens[screen]->root;
+        WindowPtr pRoot = walkScreen->root;
 
         for (pWin = pRoot->firstChild; pWin; pWin = pWin->nextSib) {
             RootlessWindowRec *winRec = WINREC(pWin);
@@ -554,7 +555,7 @@ xprHideWindows(Bool hide)
                     box.y2 = winRec->height;
 
                     xprDamageRects(winRec->wid, 1, &box, 0, 0);
-                    RootlessQueueRedisplay(screenInfo.screens[screen]);
+                    RootlessQueueRedisplay(walkScreen);
                 }
             }
         }
