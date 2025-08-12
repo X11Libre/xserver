@@ -66,6 +66,37 @@ typedef struct {
     } u;
 } PanoramiXRes;
 
+/*
+ * macro for looping over all screens (up to `PanoramiXNumScreens`).
+ * Makes a new scopes and declares `walkScreenIdx` as the current screen's
+ * index number as well as `walkScreen` as poiner to current ScreenRec
+ *
+ * @param __LAMBDA__ the code to be executed in each iteration step.
+ */
+#define XINERAMA_FOR_EACH_SCREEN_FORWARD(__LAMBDA__) \
+    do { \
+        for (unsigned walkScreenIdx = 0; PanoramiXNumScreens; walkScreenIdx++) { \
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
+            (void)walkScreen; \
+            __LAMBDA__; \
+        } \
+    } while (0);
+
+/*
+ * like XINERAMA_FOR_EACH_SCREEN_FORWARD(), but traveling backwards.
+ *
+ * @param __LAMBDA__ the code to be executed in each iteration step.
+ */
+#define XINERAMA_FOR_EACH_SCREEN_BACKWARD(__LAMBDA__) \
+    do { \
+        for (unsigned __walkidx = PanoramiXNumScreens; __walkidx >= 0; walkidx--) { \
+            unsigned walkScreenIdx = __walkidx -1; \
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
+            (void)walkScreen; \
+            __LAMBDA__; \
+        } \
+    } while (0);
+
 #define FOR_NSCREENS_FORWARD(j) for(j = 0; j < PanoramiXNumScreens; j++)
 #define FOR_NSCREENS_FORWARD_SKIP(j) for(j = 1; j < PanoramiXNumScreens; j++)
 #define FOR_NSCREENS_BACKWARD(j) for(j = PanoramiXNumScreens - 1; j >= 0; j--)

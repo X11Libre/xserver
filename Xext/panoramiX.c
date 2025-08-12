@@ -384,43 +384,39 @@ XineramaRegisterConnectionBlockCallback(void (*func) (void))
 static void
 XineramaInitData(void)
 {
-    int i, w, h;
-
     RegionNull(&PanoramiXScreenRegion);
-    FOR_NSCREENS_BACKWARD(i) {
+
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         BoxRec TheBox;
         RegionRec ScreenRegion;
 
-        ScreenPtr pScreen = dixGetScreenPtr(i);
-
-        TheBox.x1 = pScreen->x;
-        TheBox.x2 = TheBox.x1 + pScreen->width;
-        TheBox.y1 = pScreen->y;
-        TheBox.y2 = TheBox.y1 + pScreen->height;
+        TheBox.x1 = walkScreen->x;
+        TheBox.x2 = TheBox.x1 + walkScreen->width;
+        TheBox.y1 = walkScreen->y;
+        TheBox.y2 = TheBox.y1 + walkScreen->height;
 
         RegionInit(&ScreenRegion, &TheBox, 1);
         RegionUnion(&PanoramiXScreenRegion, &PanoramiXScreenRegion,
                     &ScreenRegion);
         RegionUninit(&ScreenRegion);
-    }
+    });
 
     ScreenPtr firstScreen = dixGetScreenPtr(0);
     PanoramiXPixWidth = firstScreen->x + firstScreen->width;
     PanoramiXPixHeight = firstScreen->y + firstScreen->height;
 
-    FOR_NSCREENS_FORWARD(i) {
-        if (!i)
-            continue; /* skip screen #0 */
-        ScreenPtr pScreen = dixGetScreenPtr(i);
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
+        if (!walkScreenIdx) /* skip first screen */
+            continue;
 
-        w = pScreen->x + pScreen->width;
-        h = pScreen->y + pScreen->height;
+        int w = walkScreen->x + walkScreen->width;
+        int h = walkScreen->y + walkScreen->height;
 
         if (PanoramiXPixWidth < w)
             PanoramiXPixWidth = w;
         if (PanoramiXPixHeight < h)
             PanoramiXPixHeight = h;
-    }
+    });
 }
 
 /*
@@ -609,7 +605,7 @@ PanoramiXCreateConnectionBlock(void)
         if (!walkScreenIdx)
             continue;  /* skip the first one */
 
-        if (walkScreen != firstScreen->rootDepth) {
+        if (walkScreen->rootDepth != firstScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
             return FALSE;
         }
@@ -721,25 +717,24 @@ VisualsEqual(VisualPtr a, ScreenPtr pScreenB, VisualPtr b)
 static void
 PanoramiXMaybeAddDepth(DepthPtr pDepth)
 {
-    int j, k;
     Bool found = FALSE;
 
-    FOR_NSCREENS_FORWARD(j) {
-        if (!j)
-            continue; /* skip screen #0 */
-        ScreenPtr pScreen = dixGetScreenPtr(j);
-        for (k = 0; k < pScreen->numDepths; k++) {
-            if (pScreen->allowedDepths[k].depth == pDepth->depth) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
+        if (!walkScreenIdx) /* skip first screen */
+            continue;
+
+        for (int k = 0; k < walkScreen->numDepths; k++) {
+            if (walkScreen->allowedDepths[k].depth == pDepth->depth) {
                 found = TRUE;
                 break;
             }
         }
-    }
+    });
 
     if (!found)
         return;
 
-    j = PanoramiXNumDepths;
+    int j = PanoramiXNumDepths;
     PanoramiXNumDepths++;
     PanoramiXDepths = reallocarray(PanoramiXDepths,
                                    PanoramiXNumDepths, sizeof(DepthRec));
@@ -751,22 +746,21 @@ PanoramiXMaybeAddDepth(DepthPtr pDepth)
 static void
 PanoramiXMaybeAddVisual(VisualPtr pVisual)
 {
-    int j, k;
     Bool found = FALSE;
 
     ScreenPtr firstScreen = dixGetScreenPtr(0);
-    FOR_NSCREENS_FORWARD(j) {
-        if (!j)
-            continue; /* skip screen #0 */
-        ScreenPtr pScreen = dixGetScreenPtr(j);
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
+        if (!walkScreenIdx) /* skip first screen */
+            continue;
+
         found = FALSE;
 
-        for (k = 0; k < pScreen->numVisuals; k++) {
-            VisualPtr candidate = &pScreen->visuals[k];
+        for (int k = 0; k < walkScreen->numVisuals; k++) {
+            VisualPtr candidate = &walkScreen->visuals[k];
 
-            if ((*XineramaVisualsEqualPtr) (pVisual, pScreen, candidate)
+            if ((*XineramaVisualsEqualPtr) (pVisual, walkScreen, candidate)
 #ifdef GLXPROXY
-                && glxMatchVisual(firstScreen, pVisual, pScreen)
+                && glxMatchVisual(firstScreen, pVisual, walkScreen)
 #endif
                 ) {
                 found = TRUE;
@@ -776,17 +770,17 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
 
         if (!found)
             return;
-    }
+    });
 
     /* found a matching visual on all screens, add it to the subset list */
-    j = PanoramiXNumVisuals;
+    int j = PanoramiXNumVisuals;
     PanoramiXNumVisuals++;
     PanoramiXVisuals = reallocarray(PanoramiXVisuals,
                                     PanoramiXNumVisuals, sizeof(VisualRec));
 
     memcpy(&PanoramiXVisuals[j], pVisual, sizeof(VisualRec));
 
-    for (k = 0; k < PanoramiXNumDepths; k++) {
+    for (int k = 0; k < PanoramiXNumDepths; k++) {
         if (PanoramiXDepths[k].depth == pVisual->nplanes) {
             PanoramiXDepths[k].vids = reallocarray(PanoramiXDepths[k].vids,
                                                    PanoramiXDepths[k].numVids + 1,
@@ -1165,8 +1159,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 
     int depth = (format == XYPixmap) ? 1 : pDraw->depth;
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         BoxRec TheBox;
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
@@ -1186,8 +1179,8 @@ XineramaGetImageData(DrawablePtr *pDrawables,
         RegionUninit(&ScreenRegion);
 
         if (inOut == rgnIN) {
-            ScreenPtr pScreen = dixGetScreenPtr(i);
-            pScreen->GetImage(pWalkDraw,
+            ScreenPtr walkScreen = dixGetScreenPtr(i);
+            walkScreen->GetImage(pWalkDraw,
                                   SrcBox.x1 - pWalkDraw->x -
                                   walkScreen->x,
                                   SrcBox.y1 - pWalkDraw->y -
@@ -1340,12 +1333,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
             }
             pbox++;
         }
-
-        free(ScratchMem);
-        RegionSubtract(&SrcRegion, &SrcRegion, &GrabRegion);
-        if (!RegionNotEmpty(&SrcRegion))
-            break;
-    }
+    });
 
     RegionUninit(&SrcRegion);
     RegionUninit(&GrabRegion);
