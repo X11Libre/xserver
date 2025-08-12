@@ -116,7 +116,8 @@ FreeCursor(void *value, XID cid)
 
     for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
         ScreenPtr walkScreen = screenInfo.screens[nscr];
-        (void) (*walkScreen->UnrealizeCursor) (pDev, walkScreen, pCurs);
+        if (walkScreen->UnrealizeCursor)
+            walkScreen->UnrealizeCursor(pDev, walkScreen, pCurs);
     }
     FreeCursorBits(pCurs->bits);
     dixFiniPrivates(pCurs, PRIVATE_CURSOR);
@@ -195,8 +196,8 @@ RealizeCursorAllScreens(CursorPtr pCurs)
                     DeviceIntPtr pDevIt = inputInfo.devices;    /*dev iterator */
 
                     while (pDevIt && pDevIt != pDev) {
-                        if (DevHasCursor(pDevIt))
-                            (*walkScreen->UnrealizeCursor) (pDevIt, walkScreen, pCurs);
+                        if (DevHasCursor(pDevIt) && walkScreen->UnrealizeCursor)
+                            walkScreen->UnrealizeCursor(pDevIt, walkScreen, pCurs);
                         pDevIt = pDevIt->next;
                     }
                     while (--nscr >= 0) {
@@ -204,11 +205,12 @@ RealizeCursorAllScreens(CursorPtr pCurs)
                         /* now unrealize all devices on previous screens */
                         pDevIt = inputInfo.devices;
                         while (pDevIt) {
-                            if (DevHasCursor(pDevIt))
-                                (*walkScreen->UnrealizeCursor) (pDevIt, walkScreen, pCurs);
+                            if (DevHasCursor(pDevIt) && walkScreen->UnrealizeCursor)
+                                walkScreen->UnrealizeCursor(pDevIt, walkScreen, pCurs);
                             pDevIt = pDevIt->next;
                         }
-                        (*walkScreen->UnrealizeCursor) (pDev, walkScreen, pCurs);
+                        if (walkScreen->UnrealizeCursor)
+                            walkScreen->UnrealizeCursor(pDev, walkScreen, pCurs);
                     }
                     return BadAlloc;
                 }
