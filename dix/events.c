@@ -543,16 +543,14 @@ XineramaSetCursorPosition(DeviceIntPtr pDev, int x, int y, Bool generateEvent)
     y += screenInfo.screens[0]->y;
 
     if (!point_on_screen(pScreen, x, y)) {
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             if (walkScreenIdx == pScreen->myNum)
                 continue;
             if (point_on_screen(walkScreen, x, y)) {
                 pScreen = walkScreen;
                 break;
             }
-        }
+        });
     }
 
     pSprite->screen = pScreen;
@@ -592,11 +590,9 @@ XineramaSetWindowPntrs(DeviceIntPtr pDev, WindowPtr pWin)
     SpritePtr pSprite = pDev->spriteInfo->sprite;
 
     if (pWin == screenInfo.screens[0]->root) {
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             pSprite->windows[walkScreenIdx] = walkScreen->root;
-        }
+        });
     }
     else {
         PanoramiXRes *win;
@@ -607,14 +603,13 @@ XineramaSetWindowPntrs(DeviceIntPtr pDev, WindowPtr pWin)
         if (rc != Success)
             return FALSE;
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             rc = dixLookupWindow(pSprite->windows + walkScreenIdx,
                                  win->info[walkScreenIdx].id,
                                  serverClient, DixReadAccess);
             if (rc != Success)  /* window is being unmapped */
                 return FALSE;
-        }
+        });
     }
     return TRUE;
 }
@@ -3019,18 +3014,14 @@ PointInBorderSize(WindowPtr pWin, int x, int y)
         XineramaSetWindowPntrs(inputInfo.pointer, pWin)) {
         SpritePtr pSprite = inputInfo.pointer->spriteInfo->sprite;
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-            if (!walkScreenIdx)
-                continue; /* skip screen #0 */
+        XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
             if (RegionContainsPoint(&pSprite->windows[walkScreenIdx]->borderSize,
                                     x + screenInfo.screens[0]->x -
                                     walkScreen->x,
                                     y + screenInfo.screens[0]->y -
                                     walkScreen->y, &box))
                 return TRUE;
-        }
+        });
     }
 #endif /* XINERAMA */
     return FALSE;
@@ -3540,12 +3531,7 @@ XineramaPointInWindowIsVisible(WindowPtr pWin, int x, int y)
     xoff = x + screenInfo.screens[0]->x;
     yoff = y + screenInfo.screens[0]->y;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (!walkScreenIdx)
-            continue; /* skip screen #0 */
-
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         pWin = inputInfo.pointer->spriteInfo->sprite->windows[walkScreenIdx];
 
         x = xoff - walkScreen->x;
@@ -3557,8 +3543,7 @@ XineramaPointInWindowIsVisible(WindowPtr pWin, int x, int y)
                                     x - pWin->drawable.x,
                                     y - pWin->drawable.y, &box)))
             return TRUE;
-
-    }
+    });
 
     return FALSE;
 }
@@ -3748,15 +3733,11 @@ BorderSizeNotEmpty(DeviceIntPtr pDev, WindowPtr pWin)
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension && XineramaSetWindowPntrs(pDev, pWin)) {
-
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            if (!walkScreenIdx)
-                continue; /* skip screen #0 */
+        XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
             if (RegionNotEmpty
                 (&pDev->spriteInfo->sprite->windows[walkScreenIdx]->borderSize))
                 return TRUE;
-        }
+        });
     }
 #endif /* XINERAMA */
     return FALSE;

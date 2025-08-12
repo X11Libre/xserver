@@ -843,13 +843,12 @@ PanoramiXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff
         return result;
     }
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->gc = gc->info[walkScreenIdx].id;
         result = SingleXFixesSetGCClipRegion(client, stuff);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -871,9 +870,7 @@ PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegion
     if (win->u.win.root)
         VERIFY_REGION_OR_NONE(reg, stuff->region, client, DixReadAccess);
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->dest = win->info[walkScreenIdx].id;
 
         if (reg)
@@ -886,7 +883,7 @@ PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegion
 
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -908,9 +905,7 @@ PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegion
     if (pict->u.pict.root)
         VERIFY_REGION_OR_NONE(reg, stuff->region, client, DixReadAccess);
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->picture = pict->info[walkScreenIdx].id;
 
         if (reg)
@@ -923,7 +918,7 @@ PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegion
 
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }

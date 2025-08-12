@@ -51,11 +51,9 @@ static inline void
 panoramix_setup_ids(PanoramiXRes * resource, ClientPtr client, XID base_id)
 {
     resource->info[0].id = base_id;
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        if (walkScreenIdx) /* skip screen #0 */
-            resource->info[walkScreenIdx].id = FakeClientID(client->index);
-    }
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
+        resource->info[walkScreenIdx].id = FakeClientID(client->index);
+    });
 }
 
 #endif                          /* _PANORAMIXSRV_H_ */

@@ -134,9 +134,7 @@ PanoramiXCreateWindow(ClientPtr client)
     parentIsRoot = (stuff->parent == screenInfo.screens[0]->root->drawable.id)
         || (stuff->parent == screenInfo.screens[0]->screensaver.wid);
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->wid = newWin->info[walkScreenIdx].id;
         stuff->parent = parent->info[walkScreenIdx].id;
         if (parentIsRoot) {
@@ -154,7 +152,7 @@ PanoramiXCreateWindow(ClientPtr client)
         result = (*SavedProcVector[X_CreateWindow]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     if (result == Success)
         AddResource(newWin->info[0].id, XRT_WINDOW, newWin);
@@ -224,8 +222,7 @@ PanoramiXChangeWindowAttributes(ClientPtr client)
         }
     }
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->window = win->info[walkScreenIdx].id;
         if (backPix)
             *((CARD32 *) &stuff[1] + pback_offset) = backPix->info[walkScreenIdx].id;
@@ -234,7 +231,7 @@ PanoramiXChangeWindowAttributes(ClientPtr client)
         if (cmap)
             *((CARD32 *) &stuff[1] + cmap_offset) = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_ChangeWindowAttributes]) (client);
-    }
+    });
 
     return result;
 }
@@ -254,13 +251,12 @@ PanoramiXDestroyWindow(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->id = win->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_DestroyWindow]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     /* Since ProcDestroyWindow is using FreeResource, it will free
        our resource for us on the last pass through the loop above */
@@ -283,13 +279,12 @@ PanoramiXDestroySubwindows(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->id = win->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_DestroySubwindows]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     /* DestroySubwindows is using FreeResource which will free
        our resources for us on the last pass through the loop above */
@@ -312,13 +307,12 @@ PanoramiXChangeSaveSet(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->window = win->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_ChangeSaveSet]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -349,9 +343,8 @@ PanoramiXReparentWindow(ClientPtr client)
     y = stuff->y;
     parentIsRoot = (stuff->parent == screenInfo.screens[0]->root->drawable.id)
         || (stuff->parent == screenInfo.screens[0]->screensaver.wid);
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->window = win->info[walkScreenIdx].id;
         stuff->parent = parent->info[walkScreenIdx].id;
         if (parentIsRoot) {
@@ -361,7 +354,7 @@ PanoramiXReparentWindow(ClientPtr client)
         result = (*SavedProcVector[X_ReparentWindow]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -381,13 +374,12 @@ PanoramiXMapWindow(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->id = win->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_MapWindow]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -407,13 +399,12 @@ PanoramiXMapSubwindows(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->id = win->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_MapSubwindows]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -433,13 +424,12 @@ PanoramiXUnmapWindow(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->id = win->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_UnmapWindow]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -459,13 +449,12 @@ PanoramiXUnmapSubwindows(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->id = win->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_UnmapSubwindows]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -526,9 +515,7 @@ PanoramiXConfigureWindow(ClientPtr client)
 
     /* have to go forward or you get expose events before
        ConfigureNotify events */
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->window = win->info[walkScreenIdx].id;
         if (sib)
             *((CARD32 *) &stuff[1] + sib_offset) = sib->info[walkScreenIdx].id;
@@ -539,7 +526,7 @@ PanoramiXConfigureWindow(ClientPtr client)
         result = (*SavedProcVector[X_ConfigureWindow]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -559,13 +546,12 @@ PanoramiXCirculateWindow(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->window = win->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_CirculateWindow]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -736,14 +722,13 @@ PanoramiXCreatePixmap(ClientPtr client)
     newPix->u.pix.shared = FALSE;
     panoramix_setup_ids(newPix, client, stuff->pid);
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->pid = newPix->info[walkScreenIdx].id;
         stuff->drawable = refDraw->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_CreatePixmap]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     if (result == Success)
         AddResource(newPix->info[0].id, XRT_PIXMAP, newPix);
@@ -770,13 +755,12 @@ PanoramiXFreePixmap(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->id = pix->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_FreePixmap]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     /* Since ProcFreePixmap is using FreeResource, it will free
        our resource for us on the last pass through the loop above */
@@ -844,8 +828,7 @@ PanoramiXCreateGC(ClientPtr client)
     newGC->type = XRT_GC;
     panoramix_setup_ids(newGC, client, stuff->gc);
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->gc = newGC->info[walkScreenIdx].id;
         stuff->drawable = refDraw->info[walkScreenIdx].id;
         if (tile)
@@ -857,7 +840,7 @@ PanoramiXCreateGC(ClientPtr client)
         result = (*SavedProcVector[X_CreateGC]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     if (result == Success)
         AddResource(newGC->info[0].id, XRT_GC, newGC);
@@ -919,8 +902,7 @@ PanoramiXChangeGC(ClientPtr client)
         }
     }
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->gc = gc->info[walkScreenIdx].id;
         if (tile)
             *((CARD32 *) &stuff[1] + tile_offset) = tile->info[walkScreenIdx].id;
@@ -931,7 +913,7 @@ PanoramiXChangeGC(ClientPtr client)
         result = (*SavedProcVector[X_ChangeGC]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -956,14 +938,13 @@ PanoramiXCopyGC(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->srcGC = srcGC->info[walkScreenIdx].id;
         stuff->dstGC = dstGC->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_CopyGC]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -983,13 +964,12 @@ PanoramiXSetDashes(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->gc = gc->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_SetDashes]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -1009,13 +989,12 @@ PanoramiXSetClipRectangles(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->gc = gc->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_SetClipRectangles]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -1035,13 +1014,12 @@ PanoramiXFreeGC(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->id = gc->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_FreeGC]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     /* Since ProcFreeGC is using FreeResource, it will free
        our resource for us on the last pass through the loop above */
@@ -1068,9 +1046,8 @@ PanoramiXClearToBackground(ClientPtr client)
     x = stuff->x;
     y = stuff->y;
     isRoot = win->u.win.root;
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->window = win->info[walkScreenIdx].id;
         if (isRoot) {
             stuff->x = x - walkScreen->x;
@@ -1079,7 +1056,7 @@ PanoramiXClearToBackground(ClientPtr client)
         result = (*SavedProcVector[X_ClearArea]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     return result;
 }
@@ -1147,8 +1124,7 @@ PanoramiXCopyArea(ClientPtr client)
         char *data;
         int pitch, rc;
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             rc = dixLookupDrawable(drawables + walkScreenIdx, src->info[walkScreenIdx].id, client, 0,
                                    DixGetAttrAccess);
             if (rc != Success)
@@ -1157,7 +1133,7 @@ PanoramiXCopyArea(ClientPtr client)
                                                   drawables[walkScreenIdx]->width,
                                                   drawables[walkScreenIdx]->height,
                                                   IncludeInferiors);
-        }
+        });
 
         pitch = PixmapBytePad(width, drawables[0]->depth);
         if (!(data = calloc(height, pitch)))
@@ -1166,7 +1142,7 @@ PanoramiXCopyArea(ClientPtr client)
         XineramaGetImageData(drawables, srcx, srcy, width, height, ZPixmap, ~0,
                              data, pitch, srcIsRoot);
 
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             stuff->gc = gc->info[walkScreenIdx].id;
             VALIDATE_DRAWABLE_AND_GC(dst->info[walkScreenIdx].id, pDst, DixWriteAccess);
             if (drawables[0]->depth != pDst->depth) {
@@ -1179,7 +1155,7 @@ PanoramiXCopyArea(ClientPtr client)
                                    width, height, 0, ZPixmap, data);
             if (dstShared)
                 break;
-        }
+        });
         free(data);
 
         if (pGC && pGC->graphicsExposures) {
@@ -1202,8 +1178,7 @@ PanoramiXCopyArea(ClientPtr client)
             RegionInit(&rgn, &sourceBox, 1);
 
             /* subtract the (screen-space) clips of the source drawables */
-            FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-                ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            XINERAMA_FOR_EACH_SCREEN_BACKWARD({
                 RegionPtr sd;
 
                 if (pGC->subWindowMode == IncludeInferiors)
@@ -1221,7 +1196,7 @@ PanoramiXCopyArea(ClientPtr client)
 
                 if (pGC->subWindowMode == IncludeInferiors)
                     RegionDestroy(sd);
-            }
+            });
 
             /* -dx/-dy to get back to dest-relative, plus request offsets */
             RegionTranslate(&rgn, -dx + dstx, -dy + dsty);
@@ -1241,9 +1216,8 @@ PanoramiXCopyArea(ClientPtr client)
         int rc;
 
         RegionNull(&totalReg);
-        unsigned walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             RegionPtr pRgn;
 
             stuff->dstDrawable = dst->info[walkScreenIdx].id;
@@ -1289,7 +1263,7 @@ PanoramiXCopyArea(ClientPtr client)
 
             if (dstShared)
                 break;
-        }
+        });
 
         if (pGC->graphicsExposures) {
             Bool overlap;
@@ -1353,9 +1327,8 @@ PanoramiXCopyPlane(ClientPtr client)
     dsty = stuff->dstY;
 
     RegionNull(&totalReg);
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         RegionPtr pRgn;
 
         stuff->dstDrawable = dst->info[walkScreenIdx].id;
@@ -1403,7 +1376,7 @@ PanoramiXCopyPlane(ClientPtr client)
 
         if (dstShared)
             break;
-    }
+    });
 
     if (pGC->graphicsExposures) {
         Bool overlap;
@@ -1450,9 +1423,7 @@ PanoramiXPolyPoint(ClientPtr client)
 
         memcpy((char *) origPts, (char *) &stuff[1], npoint * sizeof(xPoint));
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx)
                 memcpy(&stuff[1], origPts, npoint * sizeof(xPoint));
 
@@ -1478,7 +1449,8 @@ PanoramiXPolyPoint(ClientPtr client)
             result = (*SavedProcVector[X_PolyPoint]) (client);
             if (result != Success)
                 break;
-        }
+        });
+
         free(origPts);
         return result;
     }
@@ -1518,9 +1490,7 @@ PanoramiXPolyLine(ClientPtr client)
             return BadAlloc;
         memcpy((char *) origPts, (char *) &stuff[1], npoint * sizeof(xPoint));
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx)
                 memcpy(&stuff[1], origPts, npoint * sizeof(xPoint));
 
@@ -1546,7 +1516,8 @@ PanoramiXPolyLine(ClientPtr client)
             result = (*SavedProcVector[X_PolyLine]) (client);
             if (result != Success)
                 break;
-        }
+        });
+
         free(origPts);
         return result;
     }
@@ -1590,9 +1561,7 @@ PanoramiXPolySegment(ClientPtr client)
             return BadAlloc;
         memcpy((char *) origSegs, (char *) &stuff[1], nsegs * sizeof(xSegment));
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip on screen #0 */
                 memcpy(&stuff[1], origSegs, nsegs * sizeof(xSegment));
 
@@ -1617,7 +1586,8 @@ PanoramiXPolySegment(ClientPtr client)
             result = (*SavedProcVector[X_PolySegment]) (client);
             if (result != Success)
                 break;
-        }
+        });
+
         free(origSegs);
         return result;
     }
@@ -1662,10 +1632,7 @@ PanoramiXPolyRectangle(ClientPtr client)
         memcpy((char *) origRecs, (char *) &stuff[1],
                nrects * sizeof(xRectangle));
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+        XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip on screen #0 */
                 memcpy(&stuff[1], origRecs, nrects * sizeof(xRectangle));
 
@@ -1688,7 +1655,8 @@ PanoramiXPolyRectangle(ClientPtr client)
             result = (*SavedProcVector[X_PolyRectangle]) (client);
             if (result != Success)
                 break;
-        }
+        });
+
         free(origRecs);
         return result;
     }
@@ -1732,10 +1700,7 @@ PanoramiXPolyArc(ClientPtr client)
             return BadAlloc;
         memcpy((char *) origArcs, (char *) &stuff[1], narcs * sizeof(xArc));
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+        XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(&stuff[1], origArcs, narcs * sizeof(xArc));
 
@@ -1757,7 +1722,8 @@ PanoramiXPolyArc(ClientPtr client)
             result = (*SavedProcVector[X_PolyArc]) (client);
             if (result != Success)
                 break;
-        }
+        });
+
         free(origArcs);
         return result;
     }
@@ -1799,10 +1765,7 @@ PanoramiXFillPoly(ClientPtr client)
         memcpy((char *) locPts, (char *) &stuff[1],
                count * sizeof(DDXPointRec));
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+        XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(&stuff[1], locPts, count * sizeof(DDXPointRec));
 
@@ -1827,7 +1790,8 @@ PanoramiXFillPoly(ClientPtr client)
             result = (*SavedProcVector[X_FillPoly]) (client);
             if (result != Success)
                 break;
-        }
+        });
+
         free(locPts);
         return result;
     }
@@ -1871,10 +1835,7 @@ PanoramiXPolyFillRectangle(ClientPtr client)
         memcpy((char *) origRects, (char *) &stuff[1],
                things * sizeof(xRectangle));
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+        XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(&stuff[1], origRects, things * sizeof(xRectangle));
 
@@ -1897,7 +1858,8 @@ PanoramiXPolyFillRectangle(ClientPtr client)
             result = (*SavedProcVector[X_PolyFillRectangle]) (client);
             if (result != Success)
                 break;
-        }
+        });
+
         free(origRects);
         return result;
     }
@@ -1941,10 +1903,7 @@ PanoramiXPolyFillArc(ClientPtr client)
             return BadAlloc;
         memcpy((char *) origArcs, (char *) &stuff[1], narcs * sizeof(xArc));
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_FORWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+        XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip screen #0 */
                 memcpy(&stuff[1], origArcs, narcs * sizeof(xArc));
 
@@ -1967,7 +1926,8 @@ PanoramiXPolyFillArc(ClientPtr client)
             result = (*SavedProcVector[X_PolyFillArc]) (client);
             if (result != Success)
                 break;
-        }
+        });
+
         free(origArcs);
         return result;
     }
@@ -2004,10 +1964,7 @@ PanoramiXPutImage(ClientPtr client)
     orig_x = stuff->dstX;
     orig_y = stuff->dstY;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         if (isRoot) {
             stuff->dstX = orig_x - walkScreen->x;
             stuff->dstY = orig_y - walkScreen->y;
@@ -2017,7 +1974,8 @@ PanoramiXPutImage(ClientPtr client)
         result = (*SavedProcVector[X_PutImage]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2087,23 +2045,19 @@ PanoramiXGetImage(ClientPtr client)
 
     drawables[0] = pDraw;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        if (!walkScreenIdx)
-            continue; /* skip screen #0 */
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         rc = dixLookupDrawable(drawables + walkScreenIdx,
                                draw->info[walkScreenIdx].id,
                                client, 0,
                                DixGetAttrAccess);
         if (rc != Success)
             return rc;
-    }
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        drawables[walkScreenIdx]->pScreen->SourceValidate(drawables[walkScreenIdx], 0, 0,
-                                              drawables[walkScreenIdx]->width,
-                                              drawables[walkScreenIdx]->height,
-                                              IncludeInferiors);
-    }
+    });
+
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
+        DrawablePtr d = drawables[walkScreenIdx];
+        d->pScreen->SourceValidate(d, 0, 0, d->width, d->height, IncludeInferiors);
+    });
 
     size_t length;
     if (format == ZPixmap) {
@@ -2225,9 +2179,7 @@ PanoramiXPolyText8(ClientPtr client)
     orig_x = stuff->x;
     orig_y = stuff->y;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->drawable = draw->info[walkScreenIdx].id;
         stuff->gc = gc->info[walkScreenIdx].id;
         if (isRoot) {
@@ -2237,7 +2189,8 @@ PanoramiXPolyText8(ClientPtr client)
         result = (*SavedProcVector[X_PolyText8]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2271,10 +2224,7 @@ PanoramiXPolyText16(ClientPtr client)
     orig_x = stuff->x;
     orig_y = stuff->y;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->drawable = draw->info[walkScreenIdx].id;
         stuff->gc = gc->info[walkScreenIdx].id;
         if (isRoot) {
@@ -2284,7 +2234,8 @@ PanoramiXPolyText16(ClientPtr client)
         result = (*SavedProcVector[X_PolyText16]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2318,9 +2269,7 @@ PanoramiXImageText8(ClientPtr client)
     orig_x = stuff->x;
     orig_y = stuff->y;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->drawable = draw->info[walkScreenIdx].id;
         stuff->gc = gc->info[walkScreenIdx].id;
         if (isRoot) {
@@ -2330,7 +2279,8 @@ PanoramiXImageText8(ClientPtr client)
         result = (*SavedProcVector[X_ImageText8]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2364,10 +2314,7 @@ PanoramiXImageText16(ClientPtr client)
     orig_x = stuff->x;
     orig_y = stuff->y;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->drawable = draw->info[walkScreenIdx].id;
         stuff->gc = gc->info[walkScreenIdx].id;
         if (isRoot) {
@@ -2377,7 +2324,8 @@ PanoramiXImageText16(ClientPtr client)
         result = (*SavedProcVector[X_ImageText16]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2404,15 +2352,14 @@ PanoramiXCreateColormap(ClientPtr client)
 
     orig_visual = stuff->visual;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->mid = newCmap->info[walkScreenIdx].id;
         stuff->window = win->info[walkScreenIdx].id;
         stuff->visual = PanoramiXTranslateVisualID(walkScreenIdx, orig_visual);
         result = (*SavedProcVector[X_CreateColormap]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     if (result == Success)
         AddResource(newCmap->info[0].id, XRT_COLORMAP, newCmap);
@@ -2439,13 +2386,12 @@ PanoramiXFreeColormap(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->id = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_FreeColormap]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     /* Since ProcFreeColormap is using FreeResource, it will free
        our resource for us on the last pass through the loop above */
@@ -2477,14 +2423,13 @@ PanoramiXCopyColormapAndFree(ClientPtr client)
     newCmap->type = XRT_COLORMAP;
     panoramix_setup_ids(newCmap, client, stuff->mid);
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->srcCmap = cmap->info[walkScreenIdx].id;
         stuff->mid = newCmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_CopyColormapAndFree]) (client);
         if (result != Success)
             break;
-    }
+    });
 
     if (result == Success)
         AddResource(newCmap->info[0].id, XRT_COLORMAP, newCmap);
@@ -2510,13 +2455,13 @@ PanoramiXInstallColormap(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->id = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_InstallColormap]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2536,13 +2481,13 @@ PanoramiXUninstallColormap(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->id = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_UninstallColormap]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2563,13 +2508,13 @@ PanoramiXAllocColor(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->cmap = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_AllocColor]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2590,13 +2535,13 @@ PanoramiXAllocNamedColor(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->cmap = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_AllocNamedColor]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2617,13 +2562,13 @@ PanoramiXAllocColorCells(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->cmap = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_AllocColorCells]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2644,13 +2589,13 @@ PanoramiXAllocColorPlanes(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->cmap = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_AllocColorPlanes]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2671,11 +2616,11 @@ PanoramiXFreeColors(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->cmap = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_FreeColors]) (client);
-    }
+    });
+
     return result;
 }
 
@@ -2696,13 +2641,13 @@ PanoramiXStoreColors(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->cmap = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_StoreColors]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
 
@@ -2723,12 +2668,12 @@ PanoramiXStoreNamedColor(ClientPtr client)
     if (result != Success)
         return result;
 
-    unsigned walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->cmap = cmap->info[walkScreenIdx].id;
         result = (*SavedProcVector[X_StoreNamedColor]) (client);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 }
