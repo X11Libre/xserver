@@ -580,13 +580,12 @@ ProcCompositeRedirectWindow(ClientPtr client)
         return rc;
     }
 
-    int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->window = win->info[walkScreenIdx].id;
         rc = SingleCompositeRedirectWindow(client, stuff);
         if (rc != Success)
             break;
-    }
+    });
 
     return rc;
 #else
@@ -613,13 +612,12 @@ ProcCompositeRedirectSubwindows(ClientPtr client)
         return rc;
     }
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->window = win->info[walkScreenIdx].id;
         rc = SingleRedirectSubwindows(client, stuff);
         if (rc != Success)
             break;
-    }
+    });
 
     return rc;
 #else
@@ -646,13 +644,12 @@ ProcCompositeUnredirectWindow(ClientPtr client)
         return rc;
     }
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->window = win->info[walkScreenIdx].id;
         rc = SingleCompositeUnredirectWindow(client, stuff);
         if (rc != Success)
             break;
-    }
+    });
 
     return rc;
 #else
@@ -679,13 +676,12 @@ ProcCompositeUnredirectSubwindows(ClientPtr client)
         return rc;
     }
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->window = win->info[walkScreenIdx].id;
         rc = SingleCompositeUnredirectSubwindows(client, stuff);
         if (rc != Success)
             break;
-    }
+    });
 
     return rc;
 #else
@@ -724,8 +720,7 @@ ProcCompositeNameWindowPixmap(ClientPtr client)
     newPix->u.pix.shared = FALSE;
     panoramix_setup_ids(newPix, client, stuff->pixmap);
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         rc = dixLookupResourceByType((void **) &pWin, win->info[walkScreenIdx].id,
                                      X11_RESTYPE_WINDOW, client,
                                      DixGetAttrAccess);
@@ -756,7 +751,7 @@ ProcCompositeNameWindowPixmap(ClientPtr client)
             return BadAlloc;
 
         ++pPixmap->refcnt;
-    }
+    });
 
     if (!AddResource(stuff->pixmap, XRT_PIXMAP, (void *) newPix))
         return BadAlloc;
@@ -800,8 +795,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         overlayWin->u.win.root = FALSE;
     }
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         rc = dixLookupResourceByType((void **) &pWin, win->info[walkScreenIdx].id,
                                      X11_RESTYPE_WINDOW, client,
                                      DixGetAttrAccess);
@@ -842,14 +836,13 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
             free(overlayWin);
             return rc;
         }
-    }
+    });
 
     if (overlayWin) {
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             cs = GetCompScreen(walkScreen);
             overlayWin->info[walkScreenIdx].id = cs->pOverlayWin->drawable.id;
-        }
+        });
 
         AddResource(overlayWin->info[0].id, XRT_WINDOW, overlayWin);
     }
@@ -891,8 +884,7 @@ ProcCompositeReleaseOverlayWindow(ClientPtr client)
         return rc;
     }
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         if ((rc = dixLookupResourceByType((void **) &pWin, win->info[walkScreenIdx].id,
                                           XRT_WINDOW, client,
                                           DixUnknownAccess))) {
@@ -910,7 +902,7 @@ ProcCompositeReleaseOverlayWindow(ClientPtr client)
 
         /* The delete function will free the client structure */
         FreeResource(pOc->resource, X11_RESTYPE_NONE);
-    }
+    });
 
     return Success;
 #else

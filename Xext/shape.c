@@ -311,13 +311,13 @@ ProcShapeRectangles(ClientPtr client)
     if (result != Success)
         return result;
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->dest = win->info[walkScreenIdx].id;
         result = ShapeRectangles(client, stuff);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 #else
     return ShapeRectangles(client, stuff);
@@ -425,15 +425,15 @@ ProcShapeMask(ClientPtr client)
     else
         pmap = NULL;
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->dest = win->info[walkScreenIdx].id;
         if (pmap)
             stuff->src = pmap->info[walkScreenIdx].id;
         result = ShapeMask(client, stuff);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 #else
     return ShapeMask(client, stuff);
@@ -557,14 +557,14 @@ ProcShapeCombine(ClientPtr client)
     if (result != Success)
         return result;
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->dest = win->info[walkScreenIdx].id;
         stuff->src = win2->info[walkScreenIdx].id;
         result = ShapeCombine(client, stuff);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 #else
     return ShapeCombine(client, stuff);
@@ -628,13 +628,13 @@ ProcShapeOffset(ClientPtr client)
     if (result != Success)
         return result;
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->dest = win->info[walkScreenIdx].id;
         result = ShapeOffset(client, stuff);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 #else
     return ShapeOffset(client, stuff);

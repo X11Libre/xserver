@@ -380,12 +380,9 @@ XineramaInitData(void)
 {
     RegionNull(&PanoramiXScreenRegion);
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         BoxRec TheBox;
         RegionRec ScreenRegion;
-
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
         TheBox.x1 = walkScreen->x;
         TheBox.x2 = TheBox.x1 + walkScreen->width;
@@ -396,17 +393,13 @@ XineramaInitData(void)
         RegionUnion(&PanoramiXScreenRegion, &PanoramiXScreenRegion,
                     &ScreenRegion);
         RegionUninit(&ScreenRegion);
-    }
+    });
 
     PanoramiXPixWidth = screenInfo.screens[0]->x + screenInfo.screens[0]->width;
     PanoramiXPixHeight =
         screenInfo.screens[0]->y + screenInfo.screens[0]->height;
 
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (!walkScreenIdx)
-            continue; /* skip screen #0 */
-
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         int w = walkScreen->x + walkScreen->width;
         int h = walkScreen->y + walkScreen->height;
 
@@ -414,7 +407,7 @@ XineramaInitData(void)
             PanoramiXPixWidth = w;
         if (PanoramiXPixHeight < h)
             PanoramiXPixHeight = h;
-    }
+    });
 }
 
 /*
@@ -464,9 +457,7 @@ PanoramiXExtensionInit(void)
          *      First make sure all the basic allocations succeed.  If not,
          *      run in non-PanoramiXeen mode.
          */
-        int walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             PanoramiXScreenPtr pScreenPriv = calloc(1, sizeof(PanoramiXScreenRec));
             dixSetPrivate(&walkScreen->devPrivates, PanoramiXScreenKey,
                           pScreenPriv);
@@ -479,7 +470,7 @@ PanoramiXExtensionInit(void)
 
             pScreenPriv->CreateGC = pScreen->CreateGC;
             walkScreen->CreateGC = XineramaCreateGC;
-        }
+        });
 
         XRC_DRAWABLE = CreateNewResourceClass();
         XRT_WINDOW = CreateNewResourceType(XineramaDeleteResource,
@@ -717,18 +708,14 @@ PanoramiXMaybeAddDepth(DepthPtr pDepth)
     int k;
     Bool found = FALSE;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (!walkScreenIdx)
-            continue; /* skip screen #0 */
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         for (k = 0; k < walkScreen->numDepths; k++) {
             if (walkScreen->allowedDepths[k].depth == pDepth->depth) {
                 found = TRUE;
                 break;
             }
         }
-    }
+    });
 
     if (!found)
         return;
@@ -748,11 +735,7 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
     int k;
     Bool found = FALSE;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (!walkScreenIdx)
-            continue; /* skip screen #0 */
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         found = FALSE;
 
         for (k = 0; k < walkScreen->numVisuals; k++) {
@@ -766,7 +749,7 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
 
         if (!found)
             return;
-    }
+    });
 
     /* found a matching visual on all screens, add it to the subset list */
     int j = PanoramiXNumVisuals;
@@ -824,10 +807,7 @@ PanoramiXConsolidate(void)
     }
     saver->type = XRT_WINDOW;
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         root->info[walkScreenIdx].id = walkScreen->root->drawable.id;
         root->u.win.class = InputOutput;
         root->u.win.root = TRUE;
@@ -835,7 +815,7 @@ PanoramiXConsolidate(void)
         saver->u.win.class = InputOutput;
         saver->u.win.root = TRUE;
         defmap->info[walkScreenIdx].id = walkScreen->defColormap;
-    }
+    });
 
     AddResource(root->info[0].id, XRT_WINDOW, root);
     AddResource(saver->info[0].id, XRT_WINDOW, saver);
@@ -1037,16 +1017,14 @@ ProcXineramaQueryScreens(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!noPanoramiXExtension) {
-        int walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             /* xXineramaScreenInfo is the same as xRectangle */
             x_rpcbuf_write_rect(&rpcbuf,
                                 walkScreen->x,
                                 walkScreen->y,
                                 walkScreen->width,
                                 walkScreen->height);
-        }
+        });
     }
 
     return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
@@ -1269,8 +1247,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 
     int depth = (format == XYPixmap) ? 1 : pDraw->depth;
 
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         if (!XineramaGetImageDataScr(
                 SrcBox,
                 &GrabRegion,
@@ -1282,10 +1259,10 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                 data,
                 depth,
                 pitch,
-                screenInfo.screens[walkScreenIdx],
+                walkScreen,
                 pDrawables[walkScreenIdx]))
             break;
-    }
+    });
 
     RegionUninit(&SrcRegion);
     RegionUninit(&GrabRegion);
