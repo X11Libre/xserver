@@ -394,14 +394,13 @@ void
 PrintWindowTree(void)
 {
     int depth;
-    ScreenPtr pScreen;
     WindowPtr pWin;
 
     for (int scrnum = 0; scrnum < screenInfo.numScreens; scrnum++) {
-        pScreen = screenInfo.screens[scrnum];
+        ScreenPtr walkScreen = screenInfo.screens[scrnum];
         ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", scrnum,
-               (unsigned) pScreen->GetScreenPixmap(pScreen)->drawable.id);
-        pWin = pScreen->root;
+               (unsigned) walkScreen->GetScreenPixmap(walkScreen)->drawable.id);
+        pWin = walkScreen->root;
         depth = 1;
         while (pWin) {
             log_window_info(pWin, depth);
@@ -3070,7 +3069,7 @@ SendVisibilityNotify(WindowPtr pWin)
 int
 dixSaveScreens(ClientPtr client, int on, int mode)
 {
-    int rc, what, type;
+    int what, type;
     XID vlist[2];
 
     if (on == SCREEN_SAVER_FORCER) {
@@ -3088,36 +3087,37 @@ dixSaveScreens(ClientPtr client, int on, int mode)
     }
 
     for (int i = 0; i < screenInfo.numScreens; i++) {
-        rc = XaceHookScreensaverAccess(client, screenInfo.screens[i],
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        int rc = XaceHookScreensaverAccess(client, walkScreen,
                       DixShowAccess | DixHideAccess);
         if (rc != Success)
             return rc;
     }
     for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
 
         if (on == SCREEN_SAVER_FORCER)
-            (*pScreen->SaveScreen) (pScreen, on);
-        if (pScreen->screensaver.ExternalScreenSaver) {
-            if ((*pScreen->screensaver.ExternalScreenSaver)
-                (pScreen, type, on == SCREEN_SAVER_FORCER))
+            walkScreen->SaveScreen(walkScreen, on);
+        if (walkScreen->screensaver.ExternalScreenSaver) {
+            if (walkScreen->screensaver.ExternalScreenSaver
+                (walkScreen, type, on == SCREEN_SAVER_FORCER))
                 continue;
         }
         if (type == screenIsSaved)
             continue;
         switch (type) {
         case SCREEN_SAVER_OFF:
-            if (pScreen->screensaver.blanked == SCREEN_IS_BLANKED) {
-                (*pScreen->SaveScreen) (pScreen, what);
+            if (walkScreen->screensaver.blanked == SCREEN_IS_BLANKED) {
+                walkScreen->SaveScreen(walkScreen, what);
             }
-            else if (HasSaverWindow(pScreen)) {
-                pScreen->screensaver.pWindow = NullWindow;
-                FreeResource(pScreen->screensaver.wid, X11_RESTYPE_NONE);
+            else if (HasSaverWindow(walkScreen)) {
+                walkScreen->screensaver.pWindow = NullWindow;
+                FreeResource(walkScreen->screensaver.wid, X11_RESTYPE_NONE);
             }
             break;
         case SCREEN_SAVER_CYCLE:
-            if (pScreen->screensaver.blanked == SCREEN_IS_TILED) {
-                WindowPtr pWin = pScreen->screensaver.pWindow;
+            if (walkScreen->screensaver.blanked == SCREEN_IS_TILED) {
+                WindowPtr pWin = walkScreen->screensaver.pWindow;
 
                 /* make it look like screen saver is off, so that
                  * NotClippedByChildren will compute a clip list
@@ -3135,28 +3135,28 @@ dixSaveScreens(ClientPtr client, int on, int mode)
              * Call the DDX saver in case it wants to do something
              * at cycle time
              */
-            else if (pScreen->screensaver.blanked == SCREEN_IS_BLANKED) {
-                (*pScreen->SaveScreen) (pScreen, type);
+            else if (walkScreen->screensaver.blanked == SCREEN_IS_BLANKED) {
+                walkScreen->SaveScreen(walkScreen, type);
             }
             break;
         case SCREEN_SAVER_ON:
             if (ScreenSaverBlanking != DontPreferBlanking) {
-                if ((*pScreen->SaveScreen) (pScreen, what)) {
-                    pScreen->screensaver.blanked = SCREEN_IS_BLANKED;
+                if (walkScreen->SaveScreen(walkScreen, what)) {
+                    walkScreen->screensaver.blanked = SCREEN_IS_BLANKED;
                     continue;
                 }
                 if ((ScreenSaverAllowExposures != DontAllowExposures) &&
-                    TileScreenSaver(pScreen, SCREEN_IS_BLACK)) {
-                    pScreen->screensaver.blanked = SCREEN_IS_BLACK;
+                    TileScreenSaver(walkScreen, SCREEN_IS_BLACK)) {
+                    walkScreen->screensaver.blanked = SCREEN_IS_BLACK;
                     continue;
                 }
             }
             if ((ScreenSaverAllowExposures != DontAllowExposures) &&
-                TileScreenSaver(pScreen, SCREEN_IS_TILED)) {
-                pScreen->screensaver.blanked = SCREEN_IS_TILED;
+                TileScreenSaver(walkScreen, SCREEN_IS_TILED)) {
+                walkScreen->screensaver.blanked = SCREEN_IS_TILED;
             }
             else
-                pScreen->screensaver.blanked = SCREEN_ISNT_SAVED;
+                walkScreen->screensaver.blanked = SCREEN_ISNT_SAVED;
             break;
         }
     }
