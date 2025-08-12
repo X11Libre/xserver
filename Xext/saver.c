@@ -1111,8 +1111,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
 
         orig_visual = stuff->visualID;
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             stuff->drawable = draw->info[walkScreenIdx].id;
             if (backPix)
                 *((CARD32 *) &stuff[1] + pback_offset) = backPix->info[walkScreenIdx].id;
@@ -1125,7 +1124,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
                 stuff->visualID = PanoramiXTranslateVisualID(walkScreenIdx, orig_visual);
 
             status = ScreenSaverSetAttributes(client, stuff);
-        }
+        });
 
         return status;
     }

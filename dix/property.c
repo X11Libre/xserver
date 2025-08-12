@@ -137,13 +137,12 @@ notifyVRRMode(ClientPtr pClient, WindowPtr pWindow, int state, PropertyPtr pProp
         if (rc != Success)
             goto no_panoramix;
 
-        unsigned int walkScreenIdx;
-        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
             WindowPtr pWin;
             rc = dixLookupWindow(&pWin, win->info[walkScreenIdx].id, pClient, DixSetPropAccess);
             if (rc == Success)
                 setVRRMode(pWin, mode);
-        }
+        });
     }
     return;
 no_panoramix:
