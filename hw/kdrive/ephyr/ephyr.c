@@ -958,8 +958,8 @@ screen_from_window(Window w)
     int i = 0;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        KdPrivScreenPtr kdscrpriv = KdGetScreenPriv(pScreen);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        KdPrivScreenPtr kdscrpriv = KdGetScreenPriv(walkScreen);
         KdScreenInfo *screen = kdscrpriv->screen;
         EphyrScrPriv *scrpriv = screen->driver;
 
