@@ -1188,100 +1188,101 @@ XineramaGetImageData(DrawablePtr *pDrawables,
             continue;
 
         int nbox = RegionNumRects(&GrabRegion);
-        if (nbox) {
-            BoxRec *pbox = RegionRects(&GrabRegion);
+        if (!nbox)
+            continue;
 
-            int size = 0;
-            char *ScratchMem = NULL;
+        BoxRec *pbox = RegionRects(&GrabRegion);
 
-            while (nbox--) {
-                int w = pbox->x2 - pbox->x1;
-                int h = pbox->y2 - pbox->y1;
-                int ScratchPitch = PixmapBytePad(w, depth);
-                int sizeNeeded = ScratchPitch * h;
+        int size = 0;
+        char *ScratchMem = NULL;
 
-                if (sizeNeeded > size) {
-                    char *tmpdata = ScratchMem;
+        while (nbox--) {
+            int w = pbox->x2 - pbox->x1;
+            int h = pbox->y2 - pbox->y1;
+            int ScratchPitch = PixmapBytePad(w, depth);
+            int sizeNeeded = ScratchPitch * h;
 
-                    ScratchMem = realloc(ScratchMem, sizeNeeded);
-                    if (ScratchMem)
-                        size = sizeNeeded;
-                    else {
-                        ScratchMem = tmpdata;
-                        break;
-                    }
-                }
+            if (sizeNeeded > size) {
+                char *tmpdata = ScratchMem;
 
-                int x = pbox->x1 - pWalkDraw->x - walkScreen->x;
-                int y = pbox->y1 - pWalkDraw->y - walkScreen->y;
-
-                (*pScreen->GetImage) (pWalkDraw, x, y, w, h,
-                                      format, planemask, ScratchMem);
-
-                /* copy the memory over */
-
-                if (depth == 1) {
-                    int shift, leftover;
-
-                    x = pbox->x1 - SrcBox.x1;
-                    y = pbox->y1 - SrcBox.y1;
-                    shift = x & 7;
-                    x >>= 3;
-                    leftover = w & 7;
-                    w >>= 3;
-
-                    /* clean up the edge */
-                    if (leftover) {
-                        int mask = (1 << leftover) - 1;
-
-                        for (int j = h, k = w; j--; k += ScratchPitch)
-                            ScratchMem[k] &= mask;
-                    }
-
-                    for (int j = 0, index = (pitch * y) + x, index2 = 0; j < h;
-                         j++, index += pitch, index2 += ScratchPitch) {
-                        if (w) {
-                            if (!shift) {
-                                assert(ScratchMem);
-                                memcpy(data + index, ScratchMem + index2, w);
-                            }
-                            else {
-                                assert(ScratchMem);
-                                CopyBits(data + index, shift,
-                                         ScratchMem + index2, w);
-                            }
-                        }
-
-                        if (leftover) {
-                            data[index + w] |=
-                                SHIFT_L(ScratchMem[index2 + w], shift);
-                            if ((shift + leftover) > 8)
-                                data[index + w + 1] |=
-                                    SHIFT_R(ScratchMem[index2 + w],
-                                            (8 - shift));
-                        }
-                    }
-                }
+                ScratchMem = realloc(ScratchMem, sizeNeeded);
+                if (ScratchMem)
+                    size = sizeNeeded;
                 else {
-                    int bpp = BitsPerPixel(depth) >> 3;
-                    x = (pbox->x1 - SrcBox.x1) * bpp;
-                    y = pbox->y1 - SrcBox.y1;
-                    w *= bpp;
-
-                    for (int j = 0; j < h; j++) {
-                        assert(ScratchMem);
-                        memcpy(data + (pitch * (y + j)) + x,
-                               ScratchMem + (ScratchPitch * j), w);
-                    }
+                    ScratchMem = tmpdata;
+                    break;
                 }
-                pbox++;
             }
 
-            free(ScratchMem);
-            RegionSubtract(&SrcRegion, &SrcRegion, &GrabRegion);
-            if (!RegionNotEmpty(&SrcRegion))
-                break;
+            int x = pbox->x1 - pWalkDraw->x - walkScreen->x;
+            int y = pbox->y1 - pWalkDraw->y - walkScreen->y;
+
+            (*pScreen->GetImage) (pWalkDraw, x, y, w, h,
+                                  format, planemask, ScratchMem);
+
+            /* copy the memory over */
+
+            if (depth == 1) {
+                int shift, leftover;
+
+                x = pbox->x1 - SrcBox.x1;
+                y = pbox->y1 - SrcBox.y1;
+                shift = x & 7;
+                x >>= 3;
+                leftover = w & 7;
+                w >>= 3;
+
+                /* clean up the edge */
+                if (leftover) {
+                    int mask = (1 << leftover) - 1;
+
+                    for (int j = h, k = w; j--; k += ScratchPitch)
+                        ScratchMem[k] &= mask;
+                }
+
+                for (int j = 0, index = (pitch * y) + x, index2 = 0; j < h;
+                         j++, index += pitch, index2 += ScratchPitch) {
+                    if (w) {
+                        if (!shift) {
+                            assert(ScratchMem);
+                            memcpy(data + index, ScratchMem + index2, w);
+                        }
+                        else {
+                            assert(ScratchMem);
+                            CopyBits(data + index, shift,
+                                     ScratchMem + index2, w);
+                        }
+                    }
+
+                    if (leftover) {
+                        data[index + w] |=
+                            SHIFT_L(ScratchMem[index2 + w], shift);
+                        if ((shift + leftover) > 8)
+                            data[index + w + 1] |=
+                                SHIFT_R(ScratchMem[index2 + w],
+                                        (8 - shift));
+                    }
+                }
+            }
+            else {
+                int bpp = BitsPerPixel(depth) >> 3;
+                x = (pbox->x1 - SrcBox.x1) * bpp;
+                y = pbox->y1 - SrcBox.y1;
+                w *= bpp;
+
+                for (int j = 0; j < h; j++) {
+                    assert(ScratchMem);
+                    memcpy(data + (pitch * (y + j)) + x,
+                           ScratchMem + (ScratchPitch * j), w);
+                }
+            }
+            pbox++;
         }
+
+        free(ScratchMem);
+        RegionSubtract(&SrcRegion, &SrcRegion, &GrabRegion);
+        if (!RegionNotEmpty(&SrcRegion))
+            break;
     }
 
     RegionUninit(&SrcRegion);
