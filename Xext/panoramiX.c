@@ -1138,7 +1138,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 {
     RegionRec SrcRegion, GrabRegion;
     BoxRec SrcBox;
-    int size, sizeNeeded, ScratchPitch, depth;
+    int size, sizeNeeded, depth;
     DrawablePtr pDraw = pDrawables[0];
     char *ScratchMem = NULL;
 
@@ -1197,7 +1197,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
             while (nbox--) {
                 int w = pbox->x2 - pbox->x1;
                 int h = pbox->y2 - pbox->y1;
-                ScratchPitch = PixmapBytePad(w, depth);
+                int ScratchPitch = PixmapBytePad(w, depth);
                 sizeNeeded = ScratchPitch * h;
 
                 if (sizeNeeded > size) {
