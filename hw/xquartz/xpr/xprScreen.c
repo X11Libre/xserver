@@ -479,8 +479,10 @@ xprInitInput(int argc, char **argv)
     rootlessGlobalOffsetX = darwinMainScreenX;
     rootlessGlobalOffsetY = darwinMainScreenY;
 
-    for (i = 0; i < screenInfo.numScreens; i++)
+    for (i = 0; i < screenInfo.numScreens; i++) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
         AppleWMSetScreenOrigin(screenInfo.screens[i]->root);
+    }
 }
 
 /*
