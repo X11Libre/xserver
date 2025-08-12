@@ -262,7 +262,8 @@ present_extension_init(void)
         goto bail;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        if (!present_screen_init(screenInfo.screens[i], NULL))
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (!present_screen_init(walkScreen, NULL))
             goto bail;
     }
     return;
