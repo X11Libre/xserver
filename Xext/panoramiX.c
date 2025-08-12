@@ -1155,12 +1155,12 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 
     int depth = (format == XYPixmap) ? 1 : pDraw->depth;
 
-    int i;
-    FOR_NSCREENS_BACKWARD(i) {
+    int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         BoxRec TheBox;
-        ScreenPtr walkScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
-        DrawablePtr pWalkDraw = pDrawables[i];
+        DrawablePtr pWalkDraw = pDrawables[walkScreenIdx];
         ScreenPtr pScreen = pWalkDraw->pScreen;
 
         TheBox.x1 = pScreen->x;
