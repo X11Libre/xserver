@@ -1038,10 +1038,10 @@ XFixesCursorInit(void)
         return FALSE;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        CursorScreenPtr cs = GetCursorScreen(pScreen);
-        dixScreenHookClose(pScreen, CursorScreenClose);
-        Wrap(cs, pScreen, DisplayCursor, CursorDisplayCursor);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        CursorScreenPtr cs = GetCursorScreen(walkScreen);
+        dixScreenHookClose(walkScreen, CursorScreenClose);
+        Wrap(cs, walkScreen, DisplayCursor, CursorDisplayCursor);
         cs->pCursorHideCounts = NULL;
     }
     CursorClientType = CreateNewResourceType(CursorFreeClient,

@@ -871,16 +871,16 @@ PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegion
         VERIFY_REGION_OR_NONE(reg, stuff->region, client, DixReadAccess);
 
     FOR_NSCREENS_FORWARD(j) {
-        ScreenPtr screen = screenInfo.screens[j];
+        ScreenPtr walkScreen = screenInfo.screens[j];
         stuff->dest = win->info[j].id;
 
         if (reg)
-            RegionTranslate(reg, -screen->x, -screen->y);
+            RegionTranslate(reg, -walkScreen->x, -walkScreen->y);
 
         result = SingleXFixesSetWindowShapeRegion(client, stuff);
 
         if (reg)
-            RegionTranslate(reg, screen->x, screen->y);
+            RegionTranslate(reg, walkScreen->x, walkScreen->y);
 
         if (result != Success)
             break;
@@ -907,16 +907,16 @@ PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegion
         VERIFY_REGION_OR_NONE(reg, stuff->region, client, DixReadAccess);
 
     FOR_NSCREENS_BACKWARD(j) {
-        ScreenPtr screen = screenInfo.screens[j];
+        ScreenPtr walkScreen = screenInfo.screens[j];
         stuff->picture = pict->info[j].id;
 
         if (reg)
-            RegionTranslate(reg, -screen->x, -screen->y);
+            RegionTranslate(reg, -walkScreen->x, -walkScreen->y);
 
         result = SingleXFixesSetPictureClipRegion(client, stuff);
 
         if (reg)
-            RegionTranslate(reg, screen->x, screen->y);
+            RegionTranslate(reg, walkScreen->x, walkScreen->y);
 
         if (result != Success)
             break;
