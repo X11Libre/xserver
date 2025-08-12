@@ -435,22 +435,21 @@ Bool
 miDCDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
 {
     miDCBufferPtr pBuffer;
-    WindowPtr pWin;
     int i;
 
     if (!DevHasCursor(pDev))
         return TRUE;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
 
         pBuffer = calloc(1, sizeof(miDCBufferRec));
         if (!pBuffer)
             goto failure;
 
-        dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, pScreen,
+        dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, walkScreen,
                             pBuffer);
-        pWin = pScreen->root;
+        WindowPtr pWin = walkScreen->root;
 
         pBuffer->pSourceGC = miDCMakeGC(pWin);
         if (!pBuffer->pSourceGC)
@@ -472,28 +471,25 @@ miDCDeviceInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)
 
         /* (re)allocated lazily depending on the cursor size */
         pBuffer->pSave = NULL;
+
+        continue;
+failure:
+        miDCDeviceCleanup(pDev, walkScreen);
+        return FALSE;
     }
 
     return TRUE;
-
- failure:
-
-    miDCDeviceCleanup(pDev, pScreen);
-
-    return FALSE;
 }
 
 void
 miDCDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
 {
-    miDCBufferPtr pBuffer;
     int i;
 
     if (DevHasCursor(pDev)) {
         for (i = 0; i < screenInfo.numScreens; i++) {
-            pScreen = screenInfo.screens[i];
-
-            pBuffer = miGetDCDevice(pDev, pScreen);
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            miDCBufferPtr pBuffer = miGetDCDevice(pDev, walkScreen);
 
             if (pBuffer) {
                 if (pBuffer->pSourceGC)
@@ -512,7 +508,7 @@ miDCDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
                 dixDestroyPixmap(pBuffer->pSave, 0);
 
                 free(pBuffer);
-                dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, pScreen,
+                dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, walkScreen,
                                     NULL);
             }
         }
