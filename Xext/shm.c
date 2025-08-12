@@ -735,9 +735,7 @@ ProcShmPutImage(ClientPtr client)
     sendEvent = stuff->sendEvent;
     stuff->sendEvent = 0;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         if (!walkScreenIdx)
             stuff->sendEvent = sendEvent;
         stuff->drawable = draw->info[walkScreenIdx].id;
@@ -749,7 +747,8 @@ ProcShmPutImage(ClientPtr client)
         result = ShmPutImage(client, stuff);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 #else
     return ShmPutImage(client, stuff);
@@ -845,10 +844,7 @@ ProcShmGetImage(ClientPtr client)
         return BadAlloc;
 
     drawables[0] = pDraw;
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
-        if (!walkScreenIdx)
-            continue; /* skip screen #0 */
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         rc = dixLookupDrawable(drawables + walkScreenIdx,
                                draw->info[walkScreenIdx].id,
                                client, 0,
@@ -857,13 +853,14 @@ ProcShmGetImage(ClientPtr client)
             free(drawables);
             return rc;
         }
-    }
-    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+    });
+
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
         drawables[walkScreenIdx]->pScreen->SourceValidate(drawables[walkScreenIdx], 0, 0,
                                               drawables[walkScreenIdx]->width,
                                               drawables[walkScreenIdx]->height,
                                               IncludeInferiors);
-    }
+    });
 
     xgi = (xShmGetImageReply) {
         .visual = wVisual(((WindowPtr) pDraw)),
@@ -976,9 +973,9 @@ ProcShmCreatePixmap(ClientPtr client)
 
     result = Success;
 
-    unsigned int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    unsigned int lastOne = 0;
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
+        lastOne = walkScreenIdx;
         ShmScrPrivateRec *screen_priv;
 
         screen_priv = ShmGetScreenPriv(walkScreen);
@@ -1009,11 +1006,11 @@ ProcShmCreatePixmap(ClientPtr client)
             result = BadAlloc;
             break;
         }
-    }
+    });
 
     if (result != Success) {
-        while (walkScreenIdx--)
-            FreeResource(newPix->info[walkScreenIdx].id, X11_RESTYPE_NONE);
+        while (lastOne--)
+            FreeResource(newPix->info[lastOne].id, X11_RESTYPE_NONE);
         free(newPix);
     }
     else
