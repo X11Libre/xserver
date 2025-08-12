@@ -232,10 +232,8 @@ CheckDuplicates(GlyphHashPtr hash, char *where)
 static void
 FreeGlyphPicture(GlyphPtr glyph)
 {
-    int i;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
         if (GetGlyphPicture(glyph, walkScreen))
             FreePicture((void *) GetGlyphPicture(glyph, walkScreen), 0);
@@ -344,7 +342,6 @@ GlyphPtr
 AllocateGlyph(xGlyphInfo * gi, int fdepth)
 {
     int size;
-    int i;
     int head_size;
 
     head_size = sizeof(GlyphRec) + screenInfo.numScreens * sizeof(PicturePtr);
@@ -357,14 +354,17 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
     glyph->info = *gi;
     dixInitPrivates(glyph, (char *) glyph + head_size, PRIVATE_GLYPH);
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    unsigned int i;
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         SetGlyphPicture(glyph, walkScreen, NULL);
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
 
         if (ps) {
-            if (!(ps->RealizeGlyph(walkScreen, glyph)))
+            if (!(ps->RealizeGlyph(walkScreen, glyph))) {
+                i = walkScreenIdx;
                 goto bail;
+            }
         }
     }
 
