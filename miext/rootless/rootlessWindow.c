@@ -1170,16 +1170,16 @@ void
 RootlessOrderAllWindows(Bool include_unhitable)
 {
     int i;
-    WindowPtr pWin;
 
     if (windows_hidden)
         return;
 
     RL_DEBUG_MSG("RootlessOrderAllWindows() ");
     for (i = 0; i < screenInfo.numScreens; i++) {
-        if (screenInfo.screens[i] == NULL)
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (walkScreen == NULL)
             continue;
-        pWin = screenInfo.screens[i]->root;
+        WindowPtr pWin = walkScreen->root;
         if (pWin == NULL)
             continue;
 
@@ -1228,8 +1228,6 @@ void
 RootlessHideAllWindows(void)
 {
     int i;
-    ScreenPtr pScreen;
-    WindowPtr pWin;
     RootlessWindowRec *winRec;
 
     if (windows_hidden)
@@ -1238,10 +1236,10 @@ RootlessHideAllWindows(void)
     windows_hidden = TRUE;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
-        if (pScreen == NULL)
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (walkScreen == NULL)
             continue;
-        pWin = pScreen->root;
+        WindowPtr pWin = walkScreen->root;
         if (pWin == NULL)
             continue;
 
@@ -1253,8 +1251,8 @@ RootlessHideAllWindows(void)
 
             winRec = WINREC(pWin);
             if (winRec != NULL) {
-                if (SCREENREC(pScreen)->imp->HideWindow)
-                    SCREENREC(pScreen)->imp->HideWindow(winRec->wid);
+                if (SCREENREC(walkScreen)->imp->HideWindow)
+                    SCREENREC(walkScreen)->imp->HideWindow(winRec->wid);
             }
         }
     }
@@ -1264,8 +1262,6 @@ void
 RootlessShowAllWindows(void)
 {
     int i;
-    ScreenPtr pScreen;
-    WindowPtr pWin;
     RootlessWindowRec *winRec;
 
     if (!windows_hidden)
@@ -1274,10 +1270,10 @@ RootlessShowAllWindows(void)
     windows_hidden = FALSE;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
-        if (pScreen == NULL)
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (walkScreen == NULL)
             continue;
-        pWin = pScreen->root;
+        WindowPtr pWin = walkScreen->root;
         if (pWin == NULL)
             continue;
 
@@ -1292,7 +1288,7 @@ RootlessShowAllWindows(void)
             RootlessReorderWindow(pWin);
         }
 
-        RootlessScreenExpose(pScreen);
+        RootlessScreenExpose(walkScreen);
     }
 }
 
