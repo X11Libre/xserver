@@ -1379,6 +1379,7 @@ XineramaXvShmPutImage(ClientPtr client)
     y = stuff->drw_y;
 
     FOR_NSCREENS_BACKWARD(i) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
         if (port->info[i].id) {
             stuff->drawable = draw->info[i].id;
             stuff->port = port->info[i].id;
@@ -1386,8 +1387,8 @@ XineramaXvShmPutImage(ClientPtr client)
             stuff->drw_x = x;
             stuff->drw_y = y;
             if (isRoot) {
-                stuff->drw_x -= screenInfo.screens[i]->x;
-                stuff->drw_y -= screenInfo.screens[i]->y;
+                stuff->drw_x -= walkScreen->x;
+                stuff->drw_y -= walkScreen->y;
             }
             stuff->send_event = (send_event && !i) ? 1 : 0;
 
@@ -1431,6 +1432,7 @@ XineramaXvPutImage(ClientPtr client)
     y = stuff->drw_y;
 
     FOR_NSCREENS_BACKWARD(i) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
         if (port->info[i].id) {
             stuff->drawable = draw->info[i].id;
             stuff->port = port->info[i].id;
@@ -1438,8 +1440,8 @@ XineramaXvPutImage(ClientPtr client)
             stuff->drw_x = x;
             stuff->drw_y = y;
             if (isRoot) {
-                stuff->drw_x -= screenInfo.screens[i]->x;
-                stuff->drw_y -= screenInfo.screens[i]->y;
+                stuff->drw_x -= walkScreen->x;
+                stuff->drw_y -= walkScreen->y;
             }
 
             result = SingleXvPutImage(client);
@@ -1479,6 +1481,7 @@ XineramaXvPutVideo(ClientPtr client)
     y = stuff->drw_y;
 
     FOR_NSCREENS_BACKWARD(i) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
         if (port->info[i].id) {
             stuff->drawable = draw->info[i].id;
             stuff->port = port->info[i].id;
@@ -1486,8 +1489,8 @@ XineramaXvPutVideo(ClientPtr client)
             stuff->drw_x = x;
             stuff->drw_y = y;
             if (isRoot) {
-                stuff->drw_x -= screenInfo.screens[i]->x;
-                stuff->drw_y -= screenInfo.screens[i]->y;
+                stuff->drw_x -= walkScreen->x;
+                stuff->drw_y -= walkScreen->y;
             }
 
             result = SingleXvPutVideo(client);
@@ -1527,6 +1530,7 @@ XineramaXvPutStill(ClientPtr client)
     y = stuff->drw_y;
 
     FOR_NSCREENS_BACKWARD(i) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
         if (port->info[i].id) {
             stuff->drawable = draw->info[i].id;
             stuff->port = port->info[i].id;
@@ -1534,8 +1538,8 @@ XineramaXvPutStill(ClientPtr client)
             stuff->drw_x = x;
             stuff->drw_y = y;
             if (isRoot) {
-                stuff->drw_x -= screenInfo.screens[i]->x;
-                stuff->drw_y -= screenInfo.screens[i]->y;
+                stuff->drw_x -= walkScreen->x;
+                stuff->drw_y -= walkScreen->y;
             }
 
             result = SingleXvPutStill(client);
@@ -1625,10 +1629,11 @@ XineramifyXv(void)
         MatchingAdaptors[0] = refAdapt;
         isOverlay = hasOverlay(refAdapt);
         FOR_NSCREENS_FORWARD(j) {
+            ScreenPtr walkScreen = screenInfo.screens[j];
             if (!j)
                 continue; /* skip screen #0 */
             MatchingAdaptors[j] =
-            matchAdaptor(screenInfo.screens[j], refAdapt, isOverlay);
+            matchAdaptor(walkScreen, refAdapt, isOverlay);
         }
 
         /* now create a resource for each port */

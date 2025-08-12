@@ -230,8 +230,10 @@ ShmResetProc(ExtensionEntry * extEntry)
 {
     int i;
 
-    for (i = 0; i < screenInfo.numScreens; i++)
-        ShmRegisterFuncs(screenInfo.screens[i], NULL);
+    for (i = 0; i < screenInfo.numScreens; i++) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        ShmRegisterFuncs(walkScreen, NULL);
+    }
 }
 
 void
@@ -744,13 +746,15 @@ ProcShmPutImage(ClientPtr client)
     sendEvent = stuff->sendEvent;
     stuff->sendEvent = 0;
     FOR_NSCREENS_BACKWARD(j) {
+        ScreenPtr walkScreen = screenInfo.screens[j];
+
         if (!j)
             stuff->sendEvent = sendEvent;
         stuff->drawable = draw->info[j].id;
         stuff->gc = gc->info[j].id;
         if (isRoot) {
-            stuff->dstX = orig_x - screenInfo.screens[j]->x;
-            stuff->dstY = orig_y - screenInfo.screens[j]->y;
+            stuff->dstX = orig_x - walkScreen->x;
+            stuff->dstY = orig_y - walkScreen->y;
         }
         result = ShmPutImage(client, stuff);
         if (result != Success)
@@ -926,7 +930,6 @@ ProcShmCreatePixmap(ClientPtr client)
     if (noPanoramiXExtension)
         return ShmCreatePixmap(client, stuff);
 
-    ScreenPtr pScreen = NULL;
     PixmapPtr pMap = NULL;
     DrawablePtr pDraw;
     DepthPtr pDepth;
@@ -988,12 +991,10 @@ ProcShmCreatePixmap(ClientPtr client)
     result = Success;
 
     FOR_NSCREENS_BACKWARD(j) {
-        ShmScrPrivateRec *screen_priv;
+        ScreenPtr walkScreen = screenInfo.screens[j];
 
-        pScreen = screenInfo.screens[j];
-
-        screen_priv = ShmGetScreenPriv(pScreen);
-        pMap = (*screen_priv->shmFuncs->CreatePixmap) (pScreen,
+        ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(walkScreen);
+        pMap = (*screen_priv->shmFuncs->CreatePixmap) (walkScreen,
                                                        stuff->width,
                                                        stuff->height,
                                                        stuff->depth,
@@ -1531,8 +1532,9 @@ ShmExtensionInit(void)
     {
         sharedPixmaps = xTrue;
         for (i = 0; i < screenInfo.numScreens; i++) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
             ShmScrPrivateRec *screen_priv =
-                ShmInitScreenPriv(screenInfo.screens[i]);
+                ShmInitScreenPriv(walkScreen);
             if (!screen_priv)
                 continue;
             if (!screen_priv->shmFuncs)
@@ -1541,8 +1543,10 @@ ShmExtensionInit(void)
                 sharedPixmaps = xFalse;
         }
         if (sharedPixmaps)
-            for (i = 0; i < screenInfo.numScreens; i++)
-                dixScreenHookPixmapDestroy(screenInfo.screens[i], ShmPixmapDestroy);
+            for (i = 0; i < screenInfo.numScreens; i++) {
+                ScreenPtr walkScreen = screenInfo.screens[i];
+                dixScreenHookPixmapDestroy(walkScreen, ShmPixmapDestroy);
+            }
     }
     ShmSegType = CreateNewResourceType(ShmDetachSegment, "ShmSeg");
     if (ShmSegType &&
