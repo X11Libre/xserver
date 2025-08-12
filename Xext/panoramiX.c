@@ -1138,7 +1138,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 {
     RegionRec SrcRegion, GrabRegion;
     BoxRec SrcBox, *pbox;
-    int x, y, w, h, i, j, size, sizeNeeded, ScratchPitch, inOut, depth;
+    int x, y, w, h, i, j, size, sizeNeeded, ScratchPitch, depth;
     DrawablePtr pDraw = pDrawables[0];
     char *ScratchMem = NULL;
 
@@ -1173,7 +1173,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
 
         RegionRec ScreenRegion;
         RegionInit(&ScreenRegion, &TheBox, 1);
-        inOut = RegionContainsRect(&ScreenRegion, &SrcBox);
+        int inOut = RegionContainsRect(&ScreenRegion, &SrcBox);
         if (inOut == rgnPART)
             RegionIntersect(&GrabRegion, &SrcRegion, &ScreenRegion);
         RegionUninit(&ScreenRegion);
