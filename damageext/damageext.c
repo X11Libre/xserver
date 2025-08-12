@@ -647,12 +647,13 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     damage->ext = doDamageCreate(client, &rc, stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
         FOR_NSCREENS_FORWARD(i) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
             DrawablePtr pDrawable;
             DamagePtr pDamage = DamageCreate(PanoramiXDamageReport,
                                              PanoramiXDamageExtDestroy,
                                              DamageReportRawRegion,
                                              FALSE,
-                                             screenInfo.screens[i],
+                                             walkScreen,
                                              damage);
             if (!pDamage) {
                 rc = BadAlloc;
@@ -716,8 +717,10 @@ DamageExtensionInit(void)
     ExtensionEntry *extEntry;
     int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++)
-        DamageSetup(screenInfo.screens[s]);
+    for (s = 0; s < screenInfo.numScreens; s++) {
+        ScreenPtr walkScreen = screenInfo.screens[s];
+        DamageSetup(walkScreen);
+    }
 
     DamageExtType = CreateNewResourceType(FreeDamageExt, "DamageExt");
     if (!DamageExtType)
