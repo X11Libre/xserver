@@ -611,10 +611,23 @@ ProcGetProperty(ClientPtr client)
         notifyVRRMode(client, pWin, PropertyDelete, pProp);
     }
 
-    void *payload = calloc(1, len);
-    if (!payload)
+    const char *dataptr = ((char*)pProp->data) + ind;
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    switch (pProp->format) {
+        case 32:
+            x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)dataptr, len / 4);
+        break;
+        case 16:
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)dataptr, len / 2);
+        break;
+        default:
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)dataptr, len);
+        break;
+    }
+
+    if (rpcbuf.error)
         return BadAlloc;
-    memcpy(payload, (char*)(pProp->data) + ind, len);
 
     if (p.delete && (rep.bytesAfter == 0)) {
         /* Delete the Property */
@@ -641,15 +654,10 @@ ProcGetProperty(ClientPtr client)
         swapl(&rep.propertyType);
         swapl(&rep.bytesAfter);
         swapl(&rep.nItems);
-        if (rep.format == 32)
-            SwapLongs(payload, len / 4);
-        else if (rep.format == 16)
-            SwapShorts(payload, len / 2);
     }
 
     WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, len, payload);
-    free(payload);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
