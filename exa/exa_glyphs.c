@@ -250,7 +250,7 @@ exaGlyphCacheHashLookup(ExaGlyphCachePtr cache, GlyphPtr pGlyph)
 {
     int slot;
 
-    slot = (*(CARD32 *) pGlyph->sha1) % cache->hashSize;
+    slot = (*(CARD32 *) pGlyph->dgst) % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
         int entryPos = cache->hashEntries[slot];
@@ -259,8 +259,8 @@ exaGlyphCacheHashLookup(ExaGlyphCachePtr cache, GlyphPtr pGlyph)
             return -1;
 
         if (memcmp
-            (pGlyph->sha1, cache->glyphs[entryPos].sha1,
-             sizeof(pGlyph->sha1)) == 0) {
+            (pGlyph->dgst, cache->glyphs[entryPos].dgst,
+             sizeof(pGlyph->dgst)) == 0) {
             return entryPos;
         }
 
@@ -275,9 +275,9 @@ exaGlyphCacheHashInsert(ExaGlyphCachePtr cache, GlyphPtr pGlyph, int pos)
 {
     int slot;
 
-    memcpy(cache->glyphs[pos].sha1, pGlyph->sha1, sizeof(pGlyph->sha1));
+    memcpy(cache->glyphs[pos].dgst, pGlyph->dgst, sizeof(pGlyph->dgst));
 
-    slot = (*(CARD32 *) pGlyph->sha1) % cache->hashSize;
+    slot = (*(CARD32 *) pGlyph->dgst) % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
         if (cache->hashEntries[slot] == -1) {
@@ -297,7 +297,7 @@ exaGlyphCacheHashRemove(ExaGlyphCachePtr cache, int pos)
     int slot;
     int emptiedSlot = -1;
 
-    slot = (*(CARD32 *) cache->glyphs[pos].sha1) % cache->hashSize;
+    slot = (*(CARD32 *) cache->glyphs[pos].dgst) % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
         int entryPos = cache->hashEntries[slot];
@@ -327,7 +327,7 @@ exaGlyphCacheHashRemove(ExaGlyphCachePtr cache, int pos)
              */
 
             int entrySlot =
-                (*(CARD32 *) cache->glyphs[entryPos].sha1) % cache->hashSize;
+                (*(CARD32 *) cache->glyphs[entryPos].dgst) % cache->hashSize;
 
             if (!((entrySlot >= slot && entrySlot < emptiedSlot) ||
                   (emptiedSlot < slot &&
@@ -446,7 +446,7 @@ exaGlyphCacheBufferGlyph(ScreenPtr pScreen,
     DBG_GLYPH_CACHE(("(%d,%d,%s): buffering glyph %lx\n",
                      cache->glyphWidth, cache->glyphHeight,
                      cache->format == PIXMAN_a8 ? "A" : "ARGB",
-                     (long) *(CARD32 *) pGlyph->sha1));
+                     (long) *(CARD32 *) pGlyph->dgst));
 
     pos = exaGlyphCacheHashLookup(cache, pGlyph);
     if (pos != -1) {
