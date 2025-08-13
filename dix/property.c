@@ -664,41 +664,34 @@ ProcGetProperty(ClientPtr client)
 int
 ProcListProperties(ClientPtr client)
 {
-    Atom *pAtoms = NULL, *temppAtoms;
-    int rc, numProps = 0;
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
 
     REQUEST_SIZE_MATCH(xResourceReq);
-    rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
+    int rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
     if (rc != Success)
         return rc;
 
-    for (PropertyPtr pProp = pWin->properties; pProp; pProp = pProp->next)
-        numProps++;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (numProps) {
-        pAtoms = calloc(numProps, sizeof(Atom));
-        if (!pAtoms)
-            return BadAlloc;
-
-        numProps = 0;
-        temppAtoms = pAtoms;
-        for (PropertyPtr realProp, pProp = pWin->properties; pProp; pProp = pProp->next) {
-            realProp = pProp;
-            rc = XaceHookPropertyAccess(client, pWin, &realProp, DixGetAttrAccess);
-            if (rc == Success && realProp == pProp) {
-                *temppAtoms++ = pProp->propertyName;
-                numProps++;
-            }
+    size_t numProps = 0;
+    for (PropertyPtr realProp, pProp = pWin->properties; pProp; pProp = pProp->next) {
+        realProp = pProp;
+        rc = XaceHookPropertyAccess(client, pWin, &realProp, DixGetAttrAccess);
+        if (rc == Success && realProp == pProp) {
+            x_rpcbuf_write_CARD32(&rpcbuf, pProp->propertyName);
+            numProps++;
         }
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     xListPropertiesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(numProps * sizeof(Atom)),
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .nProperties = numProps
     };
 
@@ -706,13 +699,10 @@ ProcListProperties(ClientPtr client)
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swaps(&rep.nProperties);
-        SwapLongs(pAtoms, numProps);
     }
 
     WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, numProps * sizeof(Atom), pAtoms);
-    free(pAtoms);
-
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
