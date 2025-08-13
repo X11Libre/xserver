@@ -244,4 +244,15 @@ static inline CARD32 x_rpcbuf_wsize_units(x_rpcbuf_t *rpcbuf) {
     return (CARD32)((rpcbuf->wpos + 3) / 4);
 }
 
+/*
+ * pad the buffer to 4-byte-units (ie. write extra zeros if necessary)
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ */
+static inline void x_rpcbuf_pad(x_rpcbuf_t *rpcbuf) {
+    x_rpcbuf_reserve0(
+        rpcbuf,
+        (((rpcbuf->wpos + 3) / 4) * 4) - rpcbuf->wpos);
+}
+
 #endif /* _XSERVER_DIX_RPCBUF_PRIV_H */
