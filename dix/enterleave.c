@@ -805,7 +805,7 @@ DeviceFocusEvent(DeviceIntPtr dev, int type, int mode, int detail,
     }
 
     FixUpEventFromWindow(dev->spriteInfo->sprite, (xEvent *) xi2event, pWin,
-                         None, FALSE);
+                         None, FALSE, XI2);
 
     DeliverEventsToWindow(dev, pWin, (xEvent *) xi2event, 1,
                           GetEventFilter(dev, (xEvent *) xi2event), NullGrab);
