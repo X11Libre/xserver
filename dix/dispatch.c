@@ -1019,9 +1019,8 @@ ProcGetGeometry(ClientPtr client)
 int
 ProcQueryTree(ClientPtr client)
 {
-    int rc, numChildren = 0;
+    int rc;
     WindowPtr pWin, pHead;
-    Window *childIDs = (Window *) NULL;
 
     REQUEST(xResourceReq);
 
@@ -1031,18 +1030,17 @@ ProcQueryTree(ClientPtr client)
         return rc;
 
     pHead = RealChildHead(pWin);
-    for (WindowPtr pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib)
-        numChildren++;
-    if (numChildren) {
-        int curChild = 0;
 
-        childIDs = calloc(numChildren, sizeof(Window));
-        if (!childIDs)
-            return BadAlloc;
-        for (WindowPtr pChild = pWin->lastChild; pChild != pHead;
-             pChild = pChild->prevSib)
-            childIDs[curChild++] = pChild->drawable.id;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    CARD32 numChildren = 0;
+    for (WindowPtr pChild = pWin->lastChild; pChild != pHead; pChild = pChild->prevSib) {
+        x_rpcbuf_write_CARD32(&rpcbuf, pChild->drawable.id);
+        numChildren++;
     }
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     xQueryTreeReply rep = {
         .type = X_Reply,
@@ -1050,20 +1048,19 @@ ProcQueryTree(ClientPtr client)
         .root = pWin->drawable.pScreen->root->drawable.id,
         .parent = (pWin->parent) ? pWin->parent->drawable.id : (Window) None,
         .nChildren = numChildren,
-        .length = bytes_to_int32(numChildren * sizeof(Window)),
+        .length = x_rpcbuf_wsize_units(&rpcbuf)
     };
 
     if (client->swapped) {
-        SwapLongs(childIDs, rep.length);
         swaps(&rep.sequenceNumber);
         swapl(&rep.length);
         swapl(&rep.root);
         swapl(&rep.parent);
         swaps(&rep.nChildren);
     }
+
     WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, numChildren * sizeof(Window), childIDs);
-    free(childIDs);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
