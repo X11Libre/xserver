@@ -535,7 +535,6 @@ ProcRRGetProviderProperty(ClientPtr client)
         .type = X_Reply,
         .sequenceNumber = client->sequence
     };
-    char *extra = NULL;
 
     REQUEST_SIZE_MATCH(xRRGetProviderPropertyReq);
     if (stuff->delete)
@@ -608,11 +607,6 @@ ProcRRGetProviderProperty(ClientPtr client)
 
     len = min(n - ind, 4 * stuff->longLength);
 
-    if (len) {
-        extra = calloc(1, len);
-        if (!extra)
-            return BadAlloc;
-    }
     reply.bytesAfter = n - (ind + len);
     reply.format = prop_value->format;
     reply.length = bytes_to_int32(len);
@@ -639,25 +633,29 @@ ProcRRGetProviderProperty(ClientPtr client)
         swapl(&reply.bytesAfter);
         swapl(&reply.nItems);
     }
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (len) {
-        memcpy(extra, (char *) prop_value->data + ind, len);
-        switch (reply.format) {
+        const char *dataptr = ((char*)prop_value->data) + ind;
+        switch (prop_value->format) {
         case 32:
-            if (client->swapped)
-                SwapLongs((CARD32*) extra, len/sizeof(CARD32));
+            x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)dataptr, len/sizeof(CARD32));
             break;
         case 16:
-            if (client->swapped)
-                SwapShorts((short*) extra, len/sizeof(CARD16));
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)dataptr, len/sizeof(CARD16));
             break;
         default:
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)dataptr, len);
             break;
         }
     }
 
+    if (rpcbuf.error)
+        return BadAlloc;
+
     WriteToClient(client, sizeof(xGenericReply), &reply);
-    WriteToClient(client, len, extra);
-    free(extra);
+    WriteRpcbufToClient(client, &rpcbuf);
 
     if (stuff->delete && (reply.bytesAfter == 0)) {     /* delete the Property */
         *prev = prop->next;
