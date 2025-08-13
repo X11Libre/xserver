@@ -638,7 +638,7 @@ ProcRRGetProviderProperty(ClientPtr client)
 
     if (len) {
         const char *dataptr = ((char*)prop_value->data) + ind;
-        switch (prop_value->format) {
+        switch (prop_value.format) {
         case 32:
             x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)dataptr, len/sizeof(CARD32));
             break;
