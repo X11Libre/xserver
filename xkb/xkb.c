@@ -1292,22 +1292,15 @@ static void XkbWriteModifierMap(XkbDescPtr xkb, KeyCode firstModMapKey,
 {
     unsigned char *pMap = &xkb->map->modmap[firstModMapKey];
 
-    /* count how many active entries */
-    size_t count = 0;
-    for (int i = 0; i < nModMapKeys; i++) {
-        if (pMap[i] != 0)
-            count++;
-    }
-
-    /* reserve buffer space (padded) */
-    char *buf = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(count));
-
     for (int i = 0; i < nModMapKeys; i++) {
         if (pMap[i] != 0) {
-            *buf++ = i + firstModMapKey;
-            *buf++ = pMap[i];
+            x_rpcbuf_write_CARD8(rpcbuf, i + firstModMapKey);
+            x_rpcbuf_write_CARD8(rpcbuf, pMap[i]);
         }
     }
+
+    /* make sure the just written data is properly padded */
+    x_rpcbuf_pad(rpcbuf);
 }
 
 static int
