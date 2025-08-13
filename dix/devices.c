@@ -1937,14 +1937,6 @@ ProcGetKeyboardMapping(ClientPtr client)
         return BadAlloc;
 
     const int count = syms->mapWidth * stuff->count;
-    const int size = count * sizeof(KeySym);
-    void *payload = calloc(count, sizeof(KeySym));
-    if (!payload)
-        return BadAlloc;
-
-    memcpy(payload,
-           &syms->map[syms->mapWidth * (stuff->firstKeyCode - syms->minKeyCode)],
-           size);
 
     xGetKeyboardMappingReply rep = {
         .type = X_Reply,
@@ -1954,19 +1946,25 @@ ProcGetKeyboardMapping(ClientPtr client)
         .length = count
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        SwapLongs(payload, count);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, size, payload);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(
+        &rpcbuf,
+        &syms->map[syms->mapWidth * (stuff->firstKeyCode - syms->minKeyCode)],
+        count);
 
     free(syms->map);
     free(syms);
-    free(payload);
 
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
+
+    WriteToClient(client, sizeof(rep), &rep);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
