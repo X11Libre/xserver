@@ -38,7 +38,7 @@
 typedef struct _Glyph {
     CARD32 refcnt;
     PrivateRec *devPrivates;
-    unsigned char sha1[20];
+    unsigned char dgst[16];
     CARD32 size;                /* info + bitmap */
     xGlyphInfo info;
     /* per-screen pixmaps follow */

@@ -102,7 +102,7 @@ enum ExaMigrationHeuristic {
 };
 
 typedef struct {
-    unsigned char sha1[20];
+    unsigned char dgst[16];
 } ExaCachedGlyphRec, *ExaCachedGlyphPtr;
 
 typedef struct {
@@ -113,7 +113,7 @@ typedef struct {
 
     int size;                   /* Size of cache; eventually this should be dynamically determined */
 
-    /* Hash table mapping from glyph sha1 to position in the glyph; we use
+    /* Hash table mapping from glyph digest to position in the glyph; we use
      * open addressing with a hash table size determined based on size and large
      * enough so that we always have a good amount of free space, so we can
      * use linear probing. (Linear probing is preferable to double hashing

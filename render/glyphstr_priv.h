@@ -50,8 +50,8 @@ typedef struct {
     dixSetPrivate(&(pGlyphSet)->devPrivates, k, ptr)
 
 void GlyphUninit(ScreenPtr pScreen);
-GlyphPtr FindGlyphByHash(unsigned char sha1[20], int format);
-int HashGlyph(xGlyphInfo * gi, CARD8 *bits, unsigned long size, unsigned char sha1[20]);
+GlyphPtr FindGlyphByHash(unsigned char dgst[16], int format);
+int HashGlyph(xGlyphInfo * gi, CARD8 *bits, unsigned long size, unsigned char dgst[16]);
 void AddGlyph(GlyphSetPtr glyphSet, GlyphPtr glyph, Glyph id);
 Bool DeleteGlyph(GlyphSetPtr glyphSet, Glyph id);
 GlyphPtr FindGlyph(GlyphSetPtr glyphSet, Glyph id);

@@ -984,7 +984,7 @@ typedef struct _GlyphNew {
     Glyph id;
     GlyphPtr glyph;
     Bool found;
-    unsigned char sha1[20];
+    unsigned char dgst[16];
 } GlyphNewRec, *GlyphNewPtr;
 
 #define NeedsComponent(f) (PIXMAN_FORMAT_A(f) != 0 && PIXMAN_FORMAT_RGB(f) != 0)
@@ -1067,11 +1067,11 @@ ProcRenderAddGlyphs(ClientPtr client)
         if (remain < size)
             break;
 
-        err = HashGlyph(&gi[i], bits, size, glyph_new->sha1);
+        err = HashGlyph(&gi[i], bits, size, glyph_new->dgst);
         if (err)
             goto bail;
 
-        glyph_new->glyph = FindGlyphByHash(glyph_new->sha1, glyphSet->fdepth);
+        glyph_new->glyph = FindGlyphByHash(glyph_new->dgst, glyphSet->fdepth);
 
         if (glyph_new->glyph && glyph_new->glyph != DeletedGlyph) {
             glyph_new->found = TRUE;
@@ -1149,7 +1149,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                 pSrcPix = NULL;
             }
 
-            memcpy(glyph_new->glyph->sha1, glyph_new->sha1, 20);
+            memcpy(glyph_new->glyph->dgst, glyph_new->dgst, 16);
         }
 
         glyph_new->id = gids[i];
