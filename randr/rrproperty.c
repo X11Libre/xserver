@@ -434,20 +434,14 @@ ProcRRListOutputProperties(ClientPtr client)
         return BadAlloc;
 
     xRRListOutputPropertiesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .nAtoms = numProps
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nAtoms);
     }
 
-    WriteToClient(client, sizeof(xRRListOutputPropertiesReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -472,21 +466,12 @@ ProcRRQueryOutputProperty(ClientPtr client)
         return BadAlloc;
 
     xRRQueryOutputPropertyReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .pending = prop->is_pending,
         .range = prop->range,
         .immutable = prop->immutable
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(xRRQueryOutputPropertyReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 

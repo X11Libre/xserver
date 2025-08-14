@@ -1163,9 +1163,7 @@ ProcRRGetCrtcInfo(ClientPtr client)
     RRModePtr mode = crtc->mode;
 
     xRRGetCrtcInfoReply rep = {
-        .type = X_Reply,
         .status = RRSetConfigSuccess,
-        .sequenceNumber = client->sequence,
         .timestamp = pScrPriv->lastSetTime.milliseconds,
         .rotation = crtc->rotation,
         .rotations = crtc->rotations,
@@ -1219,8 +1217,6 @@ ProcRRGetCrtcInfo(ClientPtr client)
         }
     }
 
-    rep.length = x_rpcbuf_wsize_units(&rpcbuf);
-
     if (rpcbuf.error)
         return BadAlloc;
 
@@ -1228,8 +1224,6 @@ ProcRRGetCrtcInfo(ClientPtr client)
         pScrPriv->rrCrtcGet(pScreen, crtc, &rep);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swaps(&rep.x);
         swaps(&rep.y);
@@ -1242,8 +1236,7 @@ ProcRRGetCrtcInfo(ClientPtr client)
         swaps(&rep.nPossibleOutput);
     }
 
-    WriteToClient(client, sizeof(xRRGetCrtcInfoReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -1646,19 +1639,14 @@ ProcRRGetCrtcGamma(ClientPtr client)
     x_rpcbuf_write_CARD16s(&rpcbuf, crtc->gammaBlue, crtc->gammaSize);
 
     xRRGetCrtcGammaReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .size = crtc->gammaSize
     };
+
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swaps(&reply.size);
     }
 
-    WriteToClient(client, sizeof(xRRGetCrtcGammaReply), &reply);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -1744,8 +1732,6 @@ ProcRRGetCrtcTransform(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     xRRGetCrtcTransformReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .hasTransforms = crtc->transforms,
     };
 
@@ -1769,12 +1755,7 @@ ProcRRGetCrtcTransform(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    rep.length = bytes_to_int32(sizeof(xRRGetCrtcTransformReply) - sizeof(xGenericReply)
-                                + rpcbuf.wpos);
-
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         SwapLongs((CARD32 *) &rep.pendingTransform, bytes_to_int32(sizeof(xRenderTransform)));
         SwapLongs((CARD32 *) &rep.currentTransform, bytes_to_int32(sizeof(xRenderTransform)));
         swaps(&rep.pendingNbytesFilter);
@@ -1783,8 +1764,7 @@ ProcRRGetCrtcTransform(ClientPtr client)
         swaps(&rep.currentNparamsFilter);
     }
 
-    WriteToClient(client, sizeof(xRRGetCrtcTransformReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
