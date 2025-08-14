@@ -643,7 +643,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
     xDbeGetVisualInfoReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(rpcbuf.wpos),
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .m = count
     };
 
