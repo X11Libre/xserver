@@ -215,4 +215,11 @@ Ones(unsigned long mask)
   typedef char what##_size_wrong_[( !!(sizeof(what) == howmuch) )*2-1 ]
 #endif
 
+/*
+ * like strlen(), but checking for NULL and return 0 in this case
+ */
+static inline size_t x_safe_strlen(const char *str) {
+    return (str ? strlen(str) : 0);
+}
+
 #endif                          /* _OSDEP_H_ */
