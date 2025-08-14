@@ -531,10 +531,6 @@ ProcRRGetProviderProperty(ClientPtr client)
     RRPropertyValuePtr prop_value;
     unsigned long n, len, ind;
     RRProviderPtr provider;
-    xRRGetProviderPropertyReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence
-    };
 
     REQUEST_SIZE_MATCH(xRRGetProviderPropertyReq);
     if (stuff->delete)
@@ -559,13 +555,12 @@ ProcRRGetProviderProperty(ClientPtr client)
         if (prop->propertyName == stuff->property)
             break;
 
-    if (!prop) {
-        if (client->swapped) {
-            swaps(&reply.sequenceNumber);
-        }
-        WriteToClient(client, sizeof(xRRGetProviderPropertyReply), &reply);
-        return Success;
-    }
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    xRRGetProviderPropertyReply reply = { 0 };
+
+    if (!prop)
+        goto sendout;
 
     if (prop->immutable && stuff->delete)
         return BadAccess;
@@ -583,12 +578,11 @@ ProcRRGetProviderProperty(ClientPtr client)
         reply.format = prop_value->format;
         reply.propertyType = prop_value->type;
         if (client->swapped) {
-            swaps(&reply.sequenceNumber);
             swapl(&reply.propertyType);
             swapl(&reply.bytesAfter);
         }
-        WriteToClient(client, sizeof(xRRGetProviderPropertyReply), &reply);
-        return Success;
+
+        goto sendout;
     }
 
 /*
@@ -609,7 +603,6 @@ ProcRRGetProviderProperty(ClientPtr client)
 
     reply.bytesAfter = n - (ind + len);
     reply.format = prop_value->format;
-    reply.length = bytes_to_int32(len);
     if (prop_value->format)
         reply.nItems = len / (prop_value->format / 8);
     reply.propertyType = prop_value->type;
@@ -627,14 +620,10 @@ ProcRRGetProviderProperty(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.propertyType);
         swapl(&reply.bytesAfter);
         swapl(&reply.nItems);
     }
-
-    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (len) {
         const char *dataptr = ((char*)prop_value->data) + ind;
@@ -654,12 +643,12 @@ ProcRRGetProviderProperty(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    WriteToClient(client, sizeof(reply), &reply);
-    WriteRpcbufToClient(client, &rpcbuf);
-
     if (stuff->delete && (reply.bytesAfter == 0)) {     /* delete the Property */
         *prev = prop->next;
         RRDestroyProviderProperty(prop);
     }
+
+sendout:
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }

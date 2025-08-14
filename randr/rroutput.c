@@ -460,10 +460,7 @@ ProcRRGetOutputInfo(ClientPtr client)
     pScrPriv = rrGetScrPriv(pScreen);
 
     xRRGetOutputInfoReply rep = {
-        .type = X_Reply,
         .status = RRSetConfigSuccess,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xRRGetOutputInfoReply)-sizeof(xReply)),
         .timestamp = pScrPriv->lastSetTime.milliseconds,
         .nameLength = output->nameLength,
     };
@@ -500,11 +497,7 @@ ProcRRGetOutputInfo(ClientPtr client)
 
     x_rpcbuf_write_string_pad(&rpcbuf, output->name); /* indeed 0-terminated */
 
-    rep.length += x_rpcbuf_wsize_units(&rpcbuf);
-
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swapl(&rep.crtc);
         swapl(&rep.mmWidth);
@@ -516,8 +509,7 @@ ProcRRGetOutputInfo(ClientPtr client)
         swaps(&rep.nameLength);
     }
 
-    WriteToClient(client, sizeof(xRRGetOutputInfoReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
