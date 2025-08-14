@@ -1521,7 +1521,7 @@ ProcXkbGetMap(ClientPtr client)
         return BadAlloc;
 
     WriteToClient(client, sizeof(xkbGetMapReply), &rep);
-    WriteToClient(client, payload_len, rpcbuf.buffer);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
