@@ -40,6 +40,7 @@ from Kaleb S. KEITHLEY
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/log_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "dixstruct.h"
@@ -1228,24 +1229,6 @@ ProcVidModeGetMonitor(ClientPtr client)
     const char *vendorStr = (const char*)pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0).ptr;
     const char *modelStr = (const char*)pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0).ptr;
 
-    const int vendorLength = (vendorStr ? strlen(vendorStr) : 0);
-    const int modelLength = (modelStr ? strlen(modelStr) : 0);
-
-    const int nVendorItems = bytes_to_int32(vendorLength);
-    const int nModelItems = bytes_to_int32(modelLength);
-
-    xXF86VidModeGetMonitorReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .nhsync = nHsync,
-        .nvsync = nVrefresh,
-        .vendorLength = vendorLength,
-        .modelLength = modelLength,
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetMonitorReply) -
-                                 sizeof(xGenericReply))
-                  + nHsync + nVrefresh + nVendorItems + nModelItems
-    };
-
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (int i = 0; i < nHsync; i++) {
@@ -1267,6 +1250,18 @@ ProcVidModeGetMonitor(ClientPtr client)
 
     if (rpcbuf.error)
         return BadAlloc;
+
+    xXF86VidModeGetMonitorReply rep = {
+        .type = X_Reply,
+        .sequenceNumber = client->sequence,
+        .nhsync = nHsync,
+        .nvsync = nVrefresh,
+        .vendorLength = x_safe_strlen(vendorStr),
+        .modelLength = x_safe_strlen(modelStr),
+        .length = bytes_to_int32(sizeof(xXF86VidModeGetMonitorReply) -
+                                 sizeof(xGenericReply)) +
+                  x_rpcbuf_wsize_units(&rpcbuf)
+    };
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
