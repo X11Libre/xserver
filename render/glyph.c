@@ -167,7 +167,6 @@ int
 HashGlyph(xGlyphInfo * gi,
           CARD8 *bits, unsigned long size, unsigned char dgst[16])
 {
-	uint64_t *dgstp;
 	XXH128_hash_t h;
 	XXH3_state_t state;
 
@@ -176,9 +175,8 @@ HashGlyph(xGlyphInfo * gi,
 	XXH3_128bits_update(&state, (void*)bits, size);
 	h = XXH3_128bits_digest(&state);
 
-	dgstp = (void*)dgst;
-	dgstp[0] = h.low64;
-	dgstp[1] = h.high64;
+	memcpy(dgst, &(h.low64), sizeof(h.low64));
+	memcpy(dgst+sizeof(h.low64), &(h.high64), sizeof(h.high64));
 
 	return Success;
 }
@@ -187,7 +185,9 @@ GlyphPtr
 FindGlyphByHash(unsigned char dgst[16], int format)
 {
     GlyphRefPtr gr;
-    CARD32 signature = *(CARD32 *) dgst;
+	 CARD32 signature;
+
+	 memcpy(&signature, dgst, sizeof(CARD32));
 
     if (!globalGlyphs[format].hashSet)
         return NULL;
@@ -263,7 +263,7 @@ FreeGlyph(GlyphPtr glyph, int format)
                 first = i;
             }
 
-        signature = *(CARD32 *) glyph->dgst;
+		  memcpy(&signature, &(glyph->dgst), sizeof(CARD32));
         gr = FindGlyphRef(&globalGlyphs[format], signature, TRUE, glyph->dgst);
         if (gr - globalGlyphs[format].table != first)
             DuplicateRef(glyph, "Found wrong one");
@@ -286,7 +286,7 @@ AddGlyph(GlyphSetPtr glyphSet, GlyphPtr glyph, Glyph id)
 
     CheckDuplicates(&globalGlyphs[glyphSet->fdepth], "AddGlyph top global");
     /* Locate existing matching glyph */
-    signature = *(CARD32 *) glyph->dgst;
+	 memcpy(&signature, &(glyph->dgst), sizeof(CARD32));
     gr = FindGlyphRef(&globalGlyphs[glyphSet->fdepth], signature,
                       TRUE, glyph->dgst);
     if (gr->glyph && gr->glyph != DeletedGlyph && gr->glyph != glyph) {
