@@ -641,21 +641,15 @@ ProcDbeGetVisualInfo(ClientPtr client)
     }
 
     xDbeGetVisualInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(rpcbuf.wpos),
         .m = count
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.m);
     }
 
     rc = Success;
-    WriteToClient(client, sizeof(xDbeGetVisualInfoReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
 clearRpcBuf:
     x_rpcbuf_clear(&rpcbuf);
