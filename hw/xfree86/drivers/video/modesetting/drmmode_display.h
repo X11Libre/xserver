@@ -51,6 +51,7 @@ enum drmmode_plane_property {
     DRMMODE_PLANE_CRTC_Y,
     DRMMODE_PLANE_CRTC_W,
     DRMMODE_PLANE_CRTC_H,
+    DRMMODE_PLANE_SIZE_HINTS,
     DRMMODE_PLANE__COUNT
 };
 
@@ -182,6 +183,17 @@ typedef struct {
     uint32_t back_idx;
     uint32_t flip_seq;
 } drmmode_tearfree_rec, *drmmode_tearfree_ptr;
+
+typedef struct {
+    uint16_t width, height;
+} drmmode_cursor_dim_rec, *drmmode_cursor_dim_ptr;
+
+typedef struct {
+    uint16_t num_dimensions;
+
+    drmmode_cursor_dim_rec* dimensions;
+    struct dumb_bo *bo;
+} drmmode_cursor_rec, *drmmode_cursor_ptr;
 
 typedef struct {
     drmmode_ptr drmmode;
