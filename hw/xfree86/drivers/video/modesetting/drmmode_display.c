@@ -4590,6 +4590,40 @@ drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled)
         drmmode_crtc->vrr_enabled = enabled;
 }
 
+Bool drmmode_get_cursor_limit(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor_lim)
+{
+    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+    int max_width = 0, max_height = 0, i;
+
+    if (!cursor_lim)
+        return FALSE;
+
+    for (i = 0; i < xf86_config->num_crtc; i++) {
+        xf86CrtcPtr crtc = xf86_config->crtc[i];
+        drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+        drmmode_cursor_rec cursor = drmmode_crtc->cursor;
+
+        /* Very ugly. */
+        drmmode_cursor_dim_rec largest = cursor.dimensions[cursor.num_dimensions - 1];
+
+        int width  = largest.width;
+        int height = largest.height;
+
+        /**
+         * TODO: We should only let sizes that all CRTCs support.
+         */
+        if (width > max_width && height > max_height)
+        {
+            max_width  = width;
+            max_height = height;
+        }
+    }
+
+    cursor_lim->width  = max_width;
+    cursor_lim->height = max_height;
+    return TRUE;
+}
+
 /*
  * We hook the screen's cursor-sprite (swcursor) functions to see if a swcursor
  * is active. When a swcursor is active we disable page-flipping.
