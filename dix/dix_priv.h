@@ -748,4 +748,32 @@ static inline Atom dixGetAtomID(const char *name) {
 #define X_REPLY_HEADER_UNITS(hdrtype) \
     (pad_to_int32((sizeof(hdrtype) - sizeof(xGenericReply))))
 
+static inline void __write_reply_hdr_and_rpcbuf(
+    ClientPtr pClient, void *hdrData, size_t hdrLen, x_rpcbuf_t *rpcbuf)
+{
+    xGenericReply *reply = hdrData;
+    reply->type = X_Reply;
+    reply->length = (pad_to_int32(hdrLen - sizeof(xGenericReply)))
+                  + x_rpcbuf_wsize_units(rpcbuf);
+    reply->sequenceNumber = pClient->sequence;
+
+    if (pClient->swapped) {
+         swaps(&reply->sequenceNumber);
+         swapl(&reply->length);
+    }
+
+    WriteToClient(pClient, hdrLen, hdrData);
+    WriteRpcbufToClient(pClient, rpcbuf);
+}
+
+/*
+ * send reply with header struct (not pointer!) along with rpcbuf payload
+ *
+ * @param client      pointer to the client (ClientPtr)
+ * @param hdrstruct   the header struct (not pointer, the struct itself!)
+ * @param rpcbuf      the rpcbuf to send (not pointer, the struct itself!)
+ */
+#define X_SEND_REPLY_WITH_RPCBUF(client, hdrstruct, rpcbuf) \
+    __write_reply_hdr_and_rpcbuf(client, &hdrstruct, sizeof(hdrstruct), &rpcbuf);
+
 #endif /* _XSERVER_DIX_PRIV_H */
