@@ -6056,6 +6056,8 @@ ProcXkbGetKbdByName(ClientPtr client)
         char *buf = payload_walk + sizeof(mrep);
         XkbAssembleMap(client, new, mrep, buf);
 
+        const size_t mrep_length = mrep.length; /* save before swapping */
+
         if (client->swapped) {
             swaps(&mrep.sequenceNumber);
             swapl(&mrep.length);
@@ -6065,12 +6067,14 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &mrep, sizeof(mrep));
-        payload_walk = buf + (mrep.length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
+        payload_walk = buf + (mrep_length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
     }
 
     if (reported & XkbGBN_CompatMapMask) {
         char *buf = payload_walk + sizeof(crep);
         XkbAssembleCompatMap(client, new->compat, crep, buf);
+
+        const size_t crep_length = crep.length; /* save before swapping */
 
         if (client->swapped) {
             swaps(&crep.sequenceNumber);
@@ -6081,12 +6085,14 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &crep, sizeof(crep));
-        payload_walk = buf + (crep.length * 4) - (sizeof(crep) - sizeof(xGenericReply));
+        payload_walk = buf + (crep_length * 4) - (sizeof(crep) - sizeof(xGenericReply));
     }
 
     if (reported & XkbGBN_IndicatorMapMask) {
         char *buf = payload_walk + sizeof(irep);
         XkbAssembleIndicatorMap(client, new->indicators, irep, buf);
+
+        const size_t irep_length = irep.length;
 
         if (client->swapped) {
             swaps(&irep.sequenceNumber);
@@ -6096,12 +6102,14 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &irep, sizeof(irep));
-        payload_walk = buf + (irep.length * 4) - (sizeof(irep) - sizeof(xGenericReply));
+        payload_walk = buf + (irep_length * 4) - (sizeof(irep) - sizeof(xGenericReply));
     }
 
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask)) {
         char *buf = payload_walk + sizeof(nrep);
         XkbAssembleNames(client, new, nrep, buf);
+
+        const size_t nrep_length = nrep.length; /* save before swapping */
 
         if (client->swapped) {
             swaps(&nrep.sequenceNumber);
@@ -6112,12 +6120,14 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &nrep, sizeof(nrep));
-        payload_walk = buf + (nrep.length * 4) - (sizeof(nrep) - sizeof(xGenericReply));
+        payload_walk = buf + (nrep_length * 4) - (sizeof(nrep) - sizeof(xGenericReply));
     }
 
     if (reported & XkbGBN_GeometryMask) {
         char *buf = payload_walk + sizeof(grep);
         XkbAssembleGeometry(client, new->geom, grep, buf);
+
+        const size_t grep_length = grep.length; /* save before swapping */
 
         if (client->swapped) {
             swaps(&grep.sequenceNumber);
@@ -6134,7 +6144,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &grep, sizeof(grep));
-        payload_walk = buf + (grep.length * 4) - (sizeof(grep) - sizeof(xGenericReply));
+        payload_walk = buf + (grep_length * 4) - (sizeof(grep) - sizeof(xGenericReply));
     }
 
     WriteToClient(client, sizeof(xkbGetKbdByNameReply), &rep);
