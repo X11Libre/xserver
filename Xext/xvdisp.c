@@ -136,7 +136,7 @@ ProcXvQueryAdaptors(ClientPtr client)
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_adaptors = numAdaptors,
-        .length = bytes_to_int32(rpcbuf.wpos)
+        .length = x_rpcbuf_wsize_units(&rpcbuf)
     };
 
     if (client->swapped) {
@@ -184,7 +184,7 @@ ProcXvQueryEncodings(ClientPtr client)
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_encodings = pPort->pAdaptor->nEncodings,
-        .length = bytes_to_int32(rpcbuf.wpos),
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
     };
 
     if (client->swapped) {
@@ -592,7 +592,7 @@ ProcXvQueryPortAttributes(ClientPtr client)
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_attributes = pPort->pAdaptor->nAttributes,
-        .length = bytes_to_int32(rpcbuf.wpos),
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .text_size = textSize,
     };
 
@@ -827,7 +827,7 @@ ProcXvQueryImageAttributes(ClientPtr client)
     xvQueryImageAttributesReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(rpcbuf.wpos), /* in 32bit units */
+        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .num_planes = num_planes,
         .width = width,
         .height = height,
@@ -841,7 +841,9 @@ ProcXvQueryImageAttributes(ClientPtr client)
         swapl(&rep.data_size);
         swaps(&rep.width);
         swaps(&rep.height);
-        SwapLongs((CARD32 *) offsets, rep.length);
+        /* needed here, because ddQueryImageAttributes() directly wrote into
+           our rpcbuf area */
+        SwapLongs((CARD32 *) offsets, x_rpcbuf_wsize_units(&rpcbuf));
     }
 
     WriteToClient(client, sz_xvQueryImageAttributesReply, &rep);
@@ -904,6 +906,7 @@ ProcXvListImageFormats(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
+    /* use rpc.wpos here, in order to get how much we've really written */
     if (rpcbuf.wpos != (pPort->pAdaptor->nImages*sz_xvImageFormatInfo))
         LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %ld but shoud be %d\n",
                    rpcbuf.wpos, (pPort->pAdaptor->nImages*sz_xvImageFormatInfo));
@@ -912,7 +915,7 @@ ProcXvListImageFormats(ClientPtr client)
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .num_formats = pPort->pAdaptor->nImages,
-        .length = bytes_to_int32(rpcbuf.wpos)
+        .length = x_rpcbuf_wsize_units(&rpcbuf)
     };
 
     if (client->swapped) {

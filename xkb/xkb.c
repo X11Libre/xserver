@@ -1503,6 +1503,7 @@ ProcXkbGetMap(ClientPtr client)
     if (!x_rpcbuf_makeroom(&rpcbuf, payload_len))
         return BadAlloc;
 
+    /* use rpcbuf.wpos here, in order to get how much we've really written */
     if (rpcbuf.wpos != payload_len)
         LogMessage(X_WARNING, "ProcXkbGetMap() payload_len mismatch: %ld but shoud be %d\n",
                    rpcbuf.wpos, payload_len);
