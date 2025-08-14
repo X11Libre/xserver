@@ -191,6 +191,7 @@ typedef struct {
 typedef struct {
     uint16_t num_dimensions;
 
+    /* Sorted from smallest to largest. */
     drmmode_cursor_dim_rec* dimensions;
     struct dumb_bo *bo;
 } drmmode_cursor_rec, *drmmode_cursor_ptr;
@@ -200,7 +201,7 @@ typedef struct {
     drmModeCrtcPtr mode_crtc;
     uint32_t vblank_pipe;
     int dpms_mode;
-    struct dumb_bo *cursor_bo;
+    drmmode_cursor_rec cursor;
     Bool cursor_up;
     uint16_t lut_r[256], lut_g[256], lut_b[256];
 
@@ -355,6 +356,6 @@ Bool drmmode_crtc_get_fb_id(xf86CrtcPtr crtc, uint32_t *fb_id, int *x, int *y);
 void drmmode_set_dpms(ScrnInfoPtr scrn, int PowerManagementMode, int flags);
 void drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled);
 
-Bool drmmode_get_cursor_limit(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor_lim);
+Bool drmmode_get_largest_cursor(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor_lim);
 
 #endif
