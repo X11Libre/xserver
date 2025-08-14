@@ -1852,8 +1852,7 @@ ProcSyncQueryAlarm(ClientPtr client)
     xSyncQueryAlarmReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length =
-          bytes_to_int32(sizeof(xSyncQueryAlarmReply) - sizeof(xGenericReply)),
+        .length = X_REPLY_HEADER_UNITS(xSyncQueryAlarmReply),
         .counter = (pTrigger->pSync) ? pTrigger->pSync->id : None,
 
 #if 0  /* XXX unclear what to do, depends on whether relative value-types

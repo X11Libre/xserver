@@ -55,6 +55,7 @@
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
+#include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "misc.h"
@@ -529,8 +530,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
         xXF86BigfontQueryFontReply rep = {
             .type = X_Reply,
-            .length = bytes_to_int32(sizeof(xXF86BigfontQueryFontReply)
-                                     - sizeof(xGenericReply) + rlength),
+            .length = X_REPLY_HEADER_UNITS(xXF86BigfontQueryFontReply) + rlength,
             .sequenceNumber = client->sequence,
             .minBounds = pFont->info.ink_minbounds,
             .maxBounds = pFont->info.ink_maxbounds,

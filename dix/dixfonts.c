@@ -980,8 +980,8 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
             }
             reply->type = X_Reply;
             reply->length =
-                bytes_to_int32(sizeof *reply - sizeof(xGenericReply) +
-                               pFontInfo->nprops * sizeof(xFontProp) + namelen);
+                X_REPLY_HEADER_UNITS(xListFontsWithInfoReply)
+                + bytes_to_int32(pFontInfo->nprops*sizeof(xFontProp)+namelen);
             reply->sequenceNumber = client->sequence;
             reply->nameLength = namelen;
             reply->minBounds = pFontInfo->ink_minbounds;
@@ -1020,8 +1020,7 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     xListFontsWithInfoReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xListFontsWithInfoReply)
-                                 - sizeof(xGenericReply))
+        .length = X_REPLY_HEADER_UNITS(xListFontsWithInfoReply)
     };
     if (client->swapped) {
         SwapFont((xQueryFontReply *) &rep, FALSE);

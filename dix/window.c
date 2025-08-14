@@ -1578,8 +1578,7 @@ ProcGetWindowAttributes(ClientPtr client)
         .bitGravity = pWin->bitGravity,
         .winGravity = pWin->winGravity,
         .backingStore = pWin->backingStore,
-        .length = bytes_to_int32(sizeof(xGetWindowAttributesReply) -
-                                 sizeof(xGenericReply)),
+        .length = X_REPLY_HEADER_UNITS(xGetWindowAttributesReply),
         .sequenceNumber = client->sequence,
         .backingBitPlanes = wBackingBitPlanes(pWin),
         .backingPixel = wBackingPixel(pWin),
