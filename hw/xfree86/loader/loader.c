@@ -113,6 +113,7 @@ LoaderInit(void)
 #endif /* LEGACY_NVIDIA_PADDING */
 
     xorg_list_init(&LoaderIgnoreABIList);
+    LoaderInitPath();
 }
 
 void
@@ -124,6 +125,7 @@ LoaderClose(void)
         free(item->name);
         free(item);
     }
+    LoaderClosePath();
 }
 
 /* Public Interface to the loader. */

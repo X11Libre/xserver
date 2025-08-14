@@ -329,7 +329,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
         LoaderInit();
 
         /* Tell the loader the default module search path */
-        LoaderSetPath(NULL, xf86ModulePath);
+        LoaderSetPath(xf86ModulePath);
 
         if (xf86Info.ignoreABI)
             LoaderSetIgnoreAllABI();
