@@ -1769,8 +1769,8 @@ ProcRRGetCrtcTransform(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    rep.length = bytes_to_int32(sizeof(xRRGetCrtcTransformReply) - sizeof(xGenericReply)
-                                + rpcbuf.wpos);
+    rep.length = X_REPLY_HEADER_UNITS(xRRGetCrtcTransformReply)
+               + x_rpcbuf_wsize_units(&rpcbuf);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);

@@ -709,8 +709,7 @@ ProcXkbGetControls(ClientPtr client)
         .type = X_Reply,
         .deviceID = ((DeviceIntPtr) dev)->id,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xkbGetControlsReply) -
-                                 sizeof(xGenericReply)),
+        .length = X_REPLY_HEADER_UNITS(xkbGetControlsReply),
         .mkDfltBtn = xkb->mk_dflt_btn,
         .numGroups = xkb->num_groups,
         .groupsWrap = xkb->groups_wrap,
@@ -1408,7 +1407,7 @@ ProcXkbGetMap(ClientPtr client)
         .type = X_Reply,
         .deviceID = dev->id,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xkbGetMapReply) - sizeof(xGenericReply)),
+        .length = X_REPLY_HEADER_UNITS(xkbGetMapReply),
         .present = stuff->partial | stuff->full,
         .minKeyCode = xkb->min_key_code,
         .maxKeyCode = xkb->max_key_code,
@@ -1497,7 +1496,8 @@ ProcXkbGetMap(ClientPtr client)
     if ((status = XkbComputeGetMapReplySize(xkb, &rep)) != Success)
         return status;
 
-    int payload_len = (rep.length * sizeof(CARD32)) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
+    /* rep.length was computed by XkbComputeGetMapReplySize() */
+    int payload_len = (rep.length - X_REPLY_HEADER_UNITS(xkbGetMapReply)) * 4;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     if (!x_rpcbuf_makeroom(&rpcbuf, payload_len))
@@ -5901,8 +5901,7 @@ ProcXkbGetKbdByName(ClientPtr client)
             reported &= ~(XkbGBN_SymbolsMask | XkbGBN_TypesMask);
         else if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
             mrep.deviceID = dev->id;
-            mrep.length =
-                ((SIZEOF(xkbGetMapReply) - SIZEOF(xGenericReply)) >> 2);
+            mrep.length = X_REPLY_HEADER_UNITS(xkbGetMapReply);
             mrep.minKeyCode = new->min_key_code;
             mrep.maxKeyCode = new->max_key_code;
             mrep.totalSyms = mrep.totalActs =
@@ -6038,7 +6037,7 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         // struct is 8 bytes (2 units) longer than generic reply, so need to
         // compute the payload length carefully
-        const size_t payloadBytes = (mrep_length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
+        const size_t payloadBytes = ((mrep_length - X_REPLY_HEADER_UNITS(mrep)) * 4);
         memcpy(payload_walk, &mrep, sizeof(mrep));
         payload_walk += sizeof(mrep);
         memcpy(payload_walk, rpcbuf.buffer, payloadBytes);
@@ -6061,7 +6060,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &crep, sizeof(crep));
-        payload_walk = buf + (crep_length * 4) - (sizeof(crep) - sizeof(xGenericReply));
+        payload_walk = buf + ((crep_length - X_REPLY_HEADER_UNITS(crep)) * 4);
     }
 
     if (reported & XkbGBN_IndicatorMapMask) {

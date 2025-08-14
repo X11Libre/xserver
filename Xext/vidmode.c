@@ -37,6 +37,7 @@ from Kaleb S. KEITHLEY
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86vmproto.h>
 
+#include "dix/dix_priv.h"
 #include "os/log_priv.h"
 
 #include "misc.h"
@@ -253,8 +254,7 @@ ProcVidModeGetModeLine(ClientPtr client)
         .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
         .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
         .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetModeLineReply) -
-                                    sizeof(xGenericReply)),
+        .length = X_REPLY_HEADER_UNITS(xXF86VidModeGetModeLineReply),
         /*
          * Older servers sometimes had server privates that the VidMode
          * extension made available. So to be compatible pretend that
@@ -291,8 +291,7 @@ ProcVidModeGetModeLine(ClientPtr client)
         xXF86OldVidModeGetModeLineReply oldrep = {
             .type = rep.type,
             .sequenceNumber = rep.sequenceNumber,
-            .length = bytes_to_int32(sizeof(xXF86OldVidModeGetModeLineReply) -
-                                     sizeof(xGenericReply)),
+            .length = X_REPLY_HEADER_UNITS(xXF86OldVidModeGetModeLineReply),
             .dotclock = rep.dotclock,
             .hdisplay = rep.hdisplay,
             .hsyncstart = rep.hsyncstart,
@@ -413,8 +412,8 @@ ProcVidModeGetAllModeLines(ClientPtr client)
 
     xXF86VidModeGetAllModeLinesReply rep = {
         .type = X_Reply,
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetAllModeLinesReply) -
-                                 sizeof(xGenericReply) + payload_len),
+        .length = X_REPLY_HEADER_UNITS(xXF86VidModeGetAllModeLinesReply)
+                + bytes_to_int32(payload_len),
         .sequenceNumber = client->sequence,
         .modecount = modecount
     };
@@ -1040,8 +1039,7 @@ VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff
     xXF86VidModeValidateModeLineReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xXF86VidModeValidateModeLineReply)
-                                 - sizeof(xGenericReply)),
+        .length = X_REPLY_HEADER_UNITS(xXF86VidModeValidateModeLineReply),
         .status = status
     };
     if (client->swapped) {
@@ -1275,8 +1273,7 @@ ProcVidModeGetMonitor(ClientPtr client)
         .nvsync = nVrefresh,
         .vendorLength = vendorLength,
         .modelLength = modelLength,
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetMonitorReply) -
-                                 sizeof(xGenericReply))
+        .length = X_REPLY_HEADER_UNITS(xXF86VidModeGetMonitorReply)
                   + nHsync + nVrefresh + nVendorItems + nModelItems
     };
 
@@ -1431,8 +1428,7 @@ ProcVidModeGetDotClocks(ClientPtr client)
     xXF86VidModeGetDotClocksReply rep = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetDotClocksReply)
-                                 - sizeof(xGenericReply)) + numClocks,
+        .length = X_REPLY_HEADER_UNITS(xXF86VidModeGetDotClocksReply) + numClocks,
         .clocks = numClocks,
         .maxclocks = MAXCLOCKS,
         .flags = (ClockProg ? CLKFLAG_PROGRAMABLE : 0),
