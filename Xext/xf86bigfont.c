@@ -299,6 +299,15 @@ swapCharInfo(xCharInfo * pCI)
     swaps(&pCI->attributes);
 }
 
+static inline void writeCharInfo(x_rpcbuf_t *rpcbuf, xCharInfo CI) {
+    x_rpcbuf_write_INT16(rpcbuf, CI.leftSideBearing);
+    x_rpcbuf_write_INT16(rpcbuf, CI.rightSideBearing);
+    x_rpcbuf_write_INT16(rpcbuf, CI.characterWidth);
+    x_rpcbuf_write_INT16(rpcbuf, CI.ascent);
+    x_rpcbuf_write_INT16(rpcbuf, CI.descent);
+    x_rpcbuf_write_CARD16(rpcbuf, CI.attributes);
+}
+
 /* static CARD32 hashCI (xCharInfo *p); */
 #define hashCI(p) \
 	(CARD32)(((p->leftSideBearing << 27) + (p->leftSideBearing >> 5) + \
@@ -567,53 +576,27 @@ ProcXF86BigfontQueryFont(ClientPtr client)
         }
 
         int rc = Success;
-        char *buf = calloc(1, rlength);
-        if (!buf) {
+
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+        for (int i = 0; i < nfontprops; i++) {
+            x_rpcbuf_write_CARD32(&rpcbuf, pFont->info.props[i].name);
+            x_rpcbuf_write_CARD32(&rpcbuf, pFont->info.props[i].value);
+        }
+
+        if (nCharInfos > 0 && shmid == -1) {
+            for (int i = 0; i < nUniqCharInfos; i++)
+                writeCharInfo(&rpcbuf, pCI[pUniqIndex2Index[i]]);
+            x_rpcbuf_write_CARD16s(&rpcbuf, pIndex2UniqIndex, nCharInfos);
+        }
+
+        if (rpcbuf.error) {
             rc = BadAlloc;
             goto out;
         }
 
-        char *p = buf;
-
-        {
-            FontPropPtr pFP;
-            xFontProp *prFP;
-            int i;
-
-            for (i = 0, pFP = pFont->info.props, prFP = (xFontProp *) p;
-                 i < nfontprops; i++, pFP++, prFP++) {
-                prFP->name = pFP->name;
-                prFP->value = pFP->value;
-                if (client->swapped) {
-                    swapl(&prFP->name);
-                    swapl(&prFP->value);
-                }
-            }
-            p = (char *) prFP;
-        }
-        if (nCharInfos > 0 && shmid == -1) {
-            xCharInfo *pci;
-            CARD16 *ps;
-            int i, j;
-
-            pci = (xCharInfo *) p;
-            for (i = 0; i < nUniqCharInfos; i++, pci++) {
-                *pci = pCI[pUniqIndex2Index[i]];
-                if (client->swapped)
-                    swapCharInfo(pci);
-            }
-            ps = (CARD16 *) pci;
-            for (j = 0; j < nCharInfos; j++, ps++) {
-                *ps = pIndex2UniqIndex[j];
-                if (client->swapped) {
-                    swaps(ps);
-                }
-            }
-        }
-
         WriteToClient(client, sizeof(xXF86BigfontQueryFontReply), &rep);
-        WriteToClient(client, rlength, buf);
-        free(buf);
+        WriteRpcbufToClient(client, &rpcbuf);
 out:
         if (nCharInfos > 0) {
             if (shmid == -1)
