@@ -396,9 +396,9 @@ PrintWindowTree(void)
     int depth;
     WindowPtr pWin;
 
-    for (int scrnum = 0; scrnum < screenInfo.numScreens; scrnum++) {
-        ScreenPtr walkScreen = screenInfo.screens[scrnum];
-        ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", scrnum,
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", walkScreenIdx,
                (unsigned) walkScreen->GetScreenPixmap(walkScreen)->drawable.id);
         pWin = walkScreen->root;
         depth = 1;
@@ -2999,7 +2999,7 @@ SendVisibilityNotify(WindowPtr pWin)
     if (!noPanoramiXExtension) {
         PanoramiXRes *win;
         WindowPtr pWin2;
-        int rc, i, Scrnum;
+        int rc, Scrnum;
 
         Scrnum = pWin->drawable.pScreen->myNum;
 
@@ -3009,21 +3009,23 @@ SendVisibilityNotify(WindowPtr pWin)
             return;
 
         switch (visibility) {
-        case VisibilityUnobscured:
-        FOR_NSCREENS_BACKWARD(i) {
-            if (i == Scrnum)
+        case VisibilityUnobscured: {
+        unsigned int walkScreenIdx;
+        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+            if (walkScreenIdx == Scrnum)
                 continue;
 
-            rc = dixLookupWindow(&pWin2, win->info[i].id, serverClient,
+            rc = dixLookupWindow(&pWin2, win->info[walkScreenIdx].id, serverClient,
                                  DixWriteAccess);
 
             if (rc == Success) {
                 if (pWin2->visibility == VisibilityPartiallyObscured)
                     return;
 
-                if (!i)
+                if (!walkScreenIdx)
                     pWin = pWin2;
             }
+        }
         }
             break;
         case VisibilityPartiallyObscured:
@@ -3034,23 +3036,25 @@ SendVisibilityNotify(WindowPtr pWin)
                     pWin = pWin2;
             }
             break;
-        case VisibilityFullyObscured:
-        FOR_NSCREENS_BACKWARD(i) {
-            if (i == Scrnum)
+        case VisibilityFullyObscured: {
+        unsigned int walkScreenIdx;
+        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+            if (walkScreenIdx == Scrnum)
                 continue;
 
-            rc = dixLookupWindow(&pWin2, win->info[i].id, serverClient,
+            rc = dixLookupWindow(&pWin2, win->info[walkScreenIdx].id, serverClient,
                                  DixWriteAccess);
 
             if (rc == Success) {
                 if (pWin2->visibility != VisibilityFullyObscured)
                     return;
 
-                if (!i)
+                if (!walkScreenIdx)
                     pWin = pWin2;
             }
         }
             break;
+        }
         }
 
         win->u.win.visibility = visibility;
@@ -3086,15 +3090,15 @@ dixSaveScreens(ClientPtr client, int on, int mode)
             type = SCREEN_SAVER_CYCLE;
     }
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         int rc = XaceHookScreensaverAccess(client, walkScreen,
                       DixShowAccess | DixHideAccess);
         if (rc != Success)
             return rc;
     }
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
         if (on == SCREEN_SAVER_FORCER)
             walkScreen->SaveScreen(walkScreen, on);

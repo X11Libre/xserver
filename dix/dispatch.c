@@ -650,10 +650,10 @@ CreateConnectionBlock(void)
     connBlockScreenStart = sizesofar;
     memset(&depth, 0, sizeof(xDepth));
     memset(&visual, 0, sizeof(xVisualType));
-    for (int i = 0; i < screenInfo.numScreens; i++) {
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
         DepthPtr pDepth;
         VisualPtr pVisual;
-        ScreenPtr walkScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
         root.windowId = walkScreen->root->drawable.id;
         root.defaultColormap = walkScreen->defColormap;
@@ -3229,8 +3229,8 @@ ProcSetScreenSaver(ClientPtr client)
     REQUEST(xSetScreenSaverReq);
     REQUEST_SIZE_MATCH(xSetScreenSaverReq);
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         int rc = XaceHookScreensaverAccess(client, walkScreen, DixSetAttrAccess);
         if (rc != Success)
             return rc;
@@ -3286,8 +3286,8 @@ ProcGetScreenSaver(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xReq);
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         int rc = XaceHookScreensaverAccess(client, walkScreen, DixGetAttrAccess);
         if (rc != Success)
             return rc;
@@ -3810,8 +3810,8 @@ SendConnSetup(ClientPtr client, const char *reason)
         numScreens = ((xConnSetup *) ConnectionInfo)->numRoots;
 #endif /* XINERAMA */
 
-    for (int i = 0; i < numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         xDepth *pDepth;
         WindowPtr pRoot = walkScreen->root;
 

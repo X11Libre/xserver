@@ -130,16 +130,17 @@ notifyVRRMode(ClientPtr pClient, WindowPtr pWindow, int state, PropertyPtr pProp
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
         PanoramiXRes *win;
-        int rc, j;
+        int rc;
 
         rc = dixLookupResourceByType((void **) &win, pWindow->drawable.id, XRT_WINDOW,
                                      pClient, DixWriteAccess);
         if (rc != Success)
             goto no_panoramix;
 
-        FOR_NSCREENS_BACKWARD(j) {
+        unsigned int walkScreenIdx;
+        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
             WindowPtr pWin;
-            rc = dixLookupWindow(&pWin, win->info[j].id, pClient, DixSetPropAccess);
+            rc = dixLookupWindow(&pWin, win->info[walkScreenIdx].id, pClient, DixSetPropAccess);
             if (rc == Success)
                 setVRRMode(pWin, mode);
         }
