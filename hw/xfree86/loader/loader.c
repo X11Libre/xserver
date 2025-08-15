@@ -52,6 +52,7 @@
 
 #include <string.h>
 #include "os.h"
+#include "list.h"
 #include "loader.h"
 #include "loaderProcs.h"
 
@@ -67,6 +68,24 @@
 #ifndef XORG_NO_SDKSYMS
 extern void *xorg_symbols[];
 #endif
+
+/* ABI versions for all modules are ignored */
+Bool LoaderIgnoreAllABI;
+/* ABI version for a currently loaded module is ignored */
+Bool LoaderIgnoreABI;
+#ifdef LEGACY_NVIDIA_PADDING
+/* Legacy proprietary nvidia drivers need hacks */
+Bool is_nvidia_proprietary;
+#endif /* LEGACY_NVIDIA_PADDING */
+
+/* ABI for a module with this canonical name is ignored */
+typedef struct {
+    struct xorg_list entry;
+    char * name;
+} LoaderIgnoreABIItem;
+
+/* List of such modules */
+struct xorg_list LoaderIgnoreABIList;
 
 void
 LoaderInit(void)
@@ -87,6 +106,26 @@ LoaderInit(void)
     LogMessageVerb(X_NONE, 2, "\t%s : %d.%d\n", ABI_CLASS_EXTENSION,
                    GET_ABI_MAJOR(LoaderVersionInfo.extensionVersion),
                    GET_ABI_MINOR(LoaderVersionInfo.extensionVersion));
+    LoaderIgnoreAllABI = FALSE;
+    LoaderIgnoreABI = FALSE;
+#ifdef LEGACY_NVIDIA_PADDING
+    is_nvidia_proprietary = FALSE;
+#endif /* LEGACY_NVIDIA_PADDING */
+
+    xorg_list_init(&LoaderIgnoreABIList);
+    LoaderInitPath();
+}
+
+void
+LoaderClose(void)
+{
+    LoaderIgnoreABIItem *item, *next;
+    xorg_list_for_each_entry_safe(item, next, &LoaderIgnoreABIList, entry) {
+        xorg_list_del(&item->entry);
+        free(item->name);
+        free(item);
+    }
+    LoaderClosePath();
 }
 
 /* Public Interface to the loader. */
@@ -146,22 +185,74 @@ LoaderUnload(const char *name, void *handle)
         dlclose(handle);
 }
 
-Bool LoaderIgnoreAbi = FALSE;
-Bool is_nvidia_proprietary = FALSE;
+/*
+ * The functions below are necessary to load some modules, e.g., nvidia proprietary drivers,
+ * regardless of their ABI versions
+ */
 
+
+/* ABI versions for all modules will be ignored */
 void
-LoaderSetIgnoreAbi(void)
+LoaderSetIgnoreAllABI(void)
 {
-    /* Only used to keep consistency with the loader api */
-    /* This really doesn't have to be a proc */
-    LoaderIgnoreAbi = TRUE;
+    LoaderIgnoreAllABI = TRUE;
 }
 
+/* Check whether ABI for a currently loaded module is ignored and set the flag respectively */
+Bool
+LoaderGetAndFlagIgnoreABI(const char *name)
+{
+    LoaderIgnoreABIItem *item;
+
+    if (LoaderIgnoreAllABI) {
+        LoaderIgnoreABI = TRUE;
+        return TRUE;
+    }
+
+    xorg_list_for_each_entry(item, &LoaderIgnoreABIList, entry) {
+        if (!strcmp(item->name, name)) {
+            LoaderIgnoreABI = TRUE;
+            return TRUE;
+        }
+    }
+
+    LoaderIgnoreABI = FALSE;
+    return FALSE;
+}
+
+/* Add the module with this name to the list of modules with ignored ABI */
+void
+LoaderSetIgnoreABI(const char *name)
+{
+    LoaderIgnoreABIItem *item;
+
+    if (LoaderIgnoreAllABI)
+        return;
+
+    xorg_list_for_each_entry(item, &LoaderIgnoreABIList, entry) {
+        if (!strcmp(item->name, name))
+            goto out;
+    }
+
+    item = malloc(sizeof(LoaderIgnoreABIItem));
+    if (item)
+        item->name = strdup(name);
+    if (item && item->name)
+        xorg_list_add(&item->entry, &LoaderIgnoreABIList);
+    else {
+        LogMessage(X_ERROR, "Failed to allocate memory to store ignore ABI for module %s\n", name);
+        if (item)
+            free(item);
+    }
+
+  out:
+}
+
+/* These two functions are called by legacy nvidia drivers */
 Bool
 LoaderShouldIgnoreABI(void)
 {
-    /* The nvidia proprietary DDX driver calls this deprecated function */
-    return is_nvidia_proprietary || LoaderIgnoreAbi;
+    return LoaderIgnoreABI;
 }
 
 int
@@ -172,7 +263,46 @@ LoaderGetABIVersion(const char *abiclass)
         int version;
     } classes[] = {
         {ABI_CLASS_ANSIC, LoaderVersionInfo.ansicVersion},
+        /*
+         * XXX This is a hack. XXX
+         *
+         * The 470 nvidia driver only knows about an older abi
+         * where struct _Screen has an extra field.
+         *
+         * The modern nvidia drivers (e.g. 570) know about both
+         * abi's, and have different code paths for supporting
+         * both abi's.
+         *
+         * The modern nvidia drivers use this function to determine
+         * what video abi the X server uses, so it knows whether or
+         * not to use the newer abi, or the older abi, where
+         * struct _Screen has an extra field.
+         *
+         * The X server implements the older abi for struct _Screen,
+         * that the 470 driver knows, and we lie to the nvidia drivers
+         * that we use that older abi for the entire X server, so that
+         * modern nvidia drivers know to use the code path for supporting
+         * this older abi.
+         *
+         * We lie to the nvidia driver and claim to have an older abi
+         * so that both modern and old nvidia drivers work.
+         *
+         * In the future, nvidia might remove the code path for supporting
+         * the old abi from it's DDX driver.
+         *
+         * When that happens, unless we want to add major hacks and
+         * complexity to the codebase, we will no longer be able to
+         * support both abi's at once.
+         *
+         * Therefore a configure option that switches between abi's
+         * is added.
+         */
+#ifdef LEGACY_NVIDIA_PADDING
+        {ABI_CLASS_VIDEODRV, is_nvidia_proprietary ?
+                             ABI_NVIDIA_VERSION : LoaderVersionInfo.videodrvVersion},
+#else
         {ABI_CLASS_VIDEODRV, LoaderVersionInfo.videodrvVersion},
+#endif /* LEGACY_NVIDIA_PADDING */
         {ABI_CLASS_XINPUT, LoaderVersionInfo.xinputVersion},
         {ABI_CLASS_EXTENSION, LoaderVersionInfo.extensionVersion},
         {NULL, 0}

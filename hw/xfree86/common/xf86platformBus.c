@@ -200,9 +200,11 @@ xf86OutputClassDriverList(int index, XF86MatchedDrivers *md)
 
             LogMessageVerb(X_INFO, 1, "Applying OutputClass \"%s\" to %s\n",
                            cl->identifier, path);
-            LogMessageVerb(X_NONE, 1, "\tloading driver: %s\n", cl->driver);
-
-            xf86AddMatchedDriver(md, cl->driver);
+            if (cl->driver != NULL && *(cl->driver)) {
+                LogMessageVerb(X_NONE, 1, "\tloading driver: %s\n", cl->driver);
+                xf86AddMatchedDriver(md, cl->driver);
+            } else
+                LogMessageVerb(X_NONE, 1, "\tno driver specified\n");
         }
     }
 }
@@ -264,7 +266,8 @@ xf86platformProbe(void)
     Bool pci = TRUE;
     XF86ConfOutputClassPtr cl, cl_head = (xf86configptr) ?
             xf86configptr->conf_outputclass_lst : NULL;
-    char *old_path, *path = NULL;
+    char *driver_path, *path = NULL;
+    char *curr, *next, *copy;
 
     config_odev_probe(xf86PlatformDeviceProbe);
 
@@ -273,6 +276,7 @@ xf86platformProbe(void)
     }
 
     for (i = 0; i < xf86_num_platform_devices; i++) {
+        struct xf86_platform_device *dev = &xf86_platform_devices[i];
         char *busid = xf86_platform_odev_attributes(i)->busid;
 
         if (pci && busid && (strncmp(busid, "pci:", 4) == 0)) {
@@ -287,19 +291,113 @@ xf86platformProbe(void)
             if (!OutputClassMatches(cl, &xf86_platform_devices[i]))
                 continue;
 
-            if (cl->modulepath && xf86ModPathFrom != X_CMDLINE) {
-                old_path = path;
-                XNFasprintf(&path, "%s,%s", cl->modulepath,
-                            path ? path : xf86ModulePath);
-                free(old_path);
-                LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath extended to \"%s\"\n",
-                               cl->identifier, path);
-                LoaderSetPath(path);
+            if (xf86ModPathFrom != X_CMDLINE) {
+                if (cl->driver) {
+                    if (cl->modulepath) {
+                        if (*(cl->modulepath)) {
+                            XNFasprintf(&driver_path, "%s,%s", cl->modulepath, xf86ModulePath);
+                            LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for driver %s overridden with \"%s\"\n",
+                                    cl->identifier, cl->driver, driver_path);
+                        } else {
+                            XNFasprintf(&driver_path, "%s", xf86ModulePath);
+                            LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for driver %s reset to standard \"%s\"\n",
+                                    cl->identifier, cl->driver, driver_path);
+                        }
+                    } else {
+                        driver_path = NULL;
+                        LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for driver %s reset to default\n",
+                                cl->identifier, cl->driver);
+                    }
+                    if (*(cl->driver)) LoaderSetPath(cl->driver, driver_path);
+                    if (cl->modules) {
+                        LogMessageVerb(X_CONFIG, 1, "    and for modules \"%s\" as well\n",
+                                cl->modules);
+                        XNFasprintf(&copy, "%s", cl->modules);
+                        curr = copy;
+                        while ((curr = strtok_r(curr, ",", &next))) {
+                            if (*curr) LoaderSetPath(curr, driver_path);
+                            curr = NULL;
+                        }
+                        free(copy);
+                    }
+                    free(driver_path);
+                }
+                else if (cl->modules) {
+                    if (cl->modulepath) {
+                        if (*(cl->modulepath)) {
+                            XNFasprintf(&driver_path, "%s,%s", cl->modulepath, xf86ModulePath);
+                            LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for modules %s overridden with \"%s\"\n",
+                                    cl->identifier, cl->modules, driver_path);
+                        } else {
+                            XNFasprintf(&driver_path, "%s", xf86ModulePath);
+                            LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for modules %s reset to standard \"%s\"\n",
+                                    cl->identifier, cl->modules, driver_path);
+                        }
+                    } else {
+                        driver_path = NULL;
+                        LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for modules %s reset to default\n",
+                                cl->identifier, cl->modules);
+                    }
+                    XNFasprintf(&copy, "%s", cl->modules);
+                    curr = copy;
+                    while ((curr = strtok_r(curr, ",", &next))) {
+                        if (*curr) LoaderSetPath(curr, driver_path);
+                        curr = NULL;
+                    }
+                    free(copy);
+                } else {
+                        driver_path = path; /* Reuse for temporary storage */
+                        XNFasprintf(&path, "%s,%s", cl->modulepath,
+                                path ? path : xf86ModulePath);
+                        LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" default ModulePath extended to \"%s\"\n",
+                                cl->identifier, path);
+                }
+                /* Otherwise global module search path is left unchanged */
+            }
+
+            if (xf86CheckBoolOption(cl->option_lst, "IgnoreABI", FALSE)) {
+                if (cl->driver) {
+                    LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" sets driver %s to ignore ABI for \"%s\" managed by %s\n",
+                               cl->identifier, cl->driver, dev->attribs->path, dev->attribs->driver);
+                    if (*(cl->driver)) LoaderSetIgnoreABI(cl->driver);
+                    if (cl->modules) {
+                        LogMessageVerb(X_CONFIG, 1, "    and for modules \"%s\" as well\n",
+                                cl->modules);
+                        XNFasprintf(&copy, "%s", cl->modules);
+                        curr = copy;
+                        while ((curr = strtok_r(curr, ",", &next))) {
+                            if (*curr) LoaderSetIgnoreABI(curr);
+                            curr = NULL;
+                        }
+                        free(copy);
+                    }
+                } else if (cl->modules) {
+                    LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" sets modules %s to ignore ABI for \"%s\" managed by %s\n",
+                               cl->identifier, cl->modules, dev->attribs->path, dev->attribs->driver);
+                    XNFasprintf(&copy, "%s", cl->modules);
+                    curr = copy;
+                    while ((curr = strtok_r(curr, ",", &next))) {
+                        if (*curr) LoaderSetIgnoreABI(curr);
+                        curr = NULL;
+                    }
+                    free(copy);
+
+                } else {
+                    LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" requires to ignore ABI for \"%s\" managed by %s\n"
+                            "   but neither \"Driver\" nor \"Module\" is not set\n",
+                            cl->identifier, dev->attribs->path, dev->attribs->driver);
+                }
             }
         }
     }
 
-    free(path);
+    if (xf86ModPathFrom != X_CMDLINE) {
+        if (path) {
+            LoaderSetPath(NULL, path);
+            free(path);
+        } else
+            LoaderSetPath(NULL, xf86ModulePath);
+    }
 
     /* First see if there is an OutputClass match marking a device as primary */
     for (i = 0; i < xf86_num_platform_devices; i++) {
