@@ -297,15 +297,16 @@ ProcShapeRectangles(ClientPtr client)
         return ShapeRectangles(client, stuff);
 
     PanoramiXRes *win;
-    int j, result;
+    int result;
 
     result = dixLookupResourceByType((void **) &win, stuff->dest, XRT_WINDOW,
                                      client, DixWriteAccess);
     if (result != Success)
         return result;
 
-    FOR_NSCREENS_BACKWARD(j) {
-        stuff->dest = win->info[j].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        stuff->dest = win->info[walkScreenIdx].id;
         result = ShapeRectangles(client, stuff);
         if (result != Success)
             break;
@@ -394,7 +395,7 @@ ProcShapeMask(ClientPtr client)
         return ShapeMask(client, stuff);
 
     PanoramiXRes *win, *pmap;
-    int j, result;
+    int result;
 
     result = dixLookupResourceByType((void **) &win, stuff->dest, XRT_WINDOW,
                                      client, DixWriteAccess);
@@ -410,10 +411,11 @@ ProcShapeMask(ClientPtr client)
     else
         pmap = NULL;
 
-    FOR_NSCREENS_BACKWARD(j) {
-        stuff->dest = win->info[j].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        stuff->dest = win->info[walkScreenIdx].id;
         if (pmap)
-            stuff->src = pmap->info[j].id;
+            stuff->src = pmap->info[walkScreenIdx].id;
         result = ShapeMask(client, stuff);
         if (result != Success)
             break;
@@ -522,7 +524,7 @@ ProcShapeCombine(ClientPtr client)
         return ShapeCombine(client, stuff);
 
     PanoramiXRes *win, *win2;
-    int j, result;
+    int result;
 
     result = dixLookupResourceByType((void **) &win, stuff->dest, XRT_WINDOW,
                                      client, DixWriteAccess);
@@ -534,9 +536,10 @@ ProcShapeCombine(ClientPtr client)
     if (result != Success)
         return result;
 
-    FOR_NSCREENS_BACKWARD(j) {
-        stuff->dest = win->info[j].id;
-        stuff->src = win2->info[j].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        stuff->dest = win->info[walkScreenIdx].id;
+        stuff->src = win2->info[walkScreenIdx].id;
         result = ShapeCombine(client, stuff);
         if (result != Success)
             break;
@@ -588,7 +591,7 @@ ProcShapeOffset(ClientPtr client)
 
 #ifdef XINERAMA
     PanoramiXRes *win;
-    int j, result;
+    int result;
 
     if (noPanoramiXExtension)
         return ShapeOffset(client, stuff);
@@ -598,8 +601,9 @@ ProcShapeOffset(ClientPtr client)
     if (result != Success)
         return result;
 
-    FOR_NSCREENS_BACKWARD(j) {
-        stuff->dest = win->info[j].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        stuff->dest = win->info[walkScreenIdx].id;
         result = ShapeOffset(client, stuff);
         if (result != Success)
             break;
