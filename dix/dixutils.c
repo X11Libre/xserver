@@ -343,14 +343,14 @@ BlockHandler(void *pTimeout)
         if (!handlers[i].deleted)
             (*handlers[i].BlockHandler) (handlers[i].blockData, pTimeout);
 
-    for (int i = 0; i < screenInfo.numGPUScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
         if (walkScreen->BlockHandler)
             walkScreen->BlockHandler(walkScreen, pTimeout);
     }
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (walkScreen->BlockHandler)
             walkScreen->BlockHandler(walkScreen, pTimeout);
     }
@@ -378,13 +378,13 @@ void
 WakeupHandler(int result)
 {
     ++inHandler;
-    for (int i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (walkScreen->WakeupHandler)
             walkScreen->WakeupHandler(walkScreen, result);
     }
-    for (int i = 0; i < screenInfo.numGPUScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
         if (walkScreen->WakeupHandler)
             walkScreen->WakeupHandler(walkScreen, result);
     }
