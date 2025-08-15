@@ -201,16 +201,16 @@ dix_main(int argc, char *argv[], char *envp[])
         InitExtensions(argc, argv);
         LogMessageVerb(X_INFO, 1, "Extensions initialized\n");
 
-        for (int i = 0; i < screenInfo.numGPUScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
+            ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
             if (!PixmapScreenInit(walkScreen))
                 FatalError("failed to create screen pixmap properties");
             if (!dixScreenRaiseCreateResources(walkScreen))
                 FatalError("failed to create screen resources");
         }
 
-        for (int i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
+        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
             if (!PixmapScreenInit(walkScreen))
                 FatalError("failed to create screen pixmap properties");
@@ -247,8 +247,8 @@ dix_main(int argc, char *argv[], char *envp[])
             PanoramiXConsolidate();
 #endif /* XINERAMA */
 
-        for (int i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
+        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
             InitRootWindow(walkScreen->root);
             CallCallbacks(&PostInitRootWindowCallback, walkScreen);
         }
@@ -313,8 +313,8 @@ dix_main(int argc, char *argv[], char *envp[])
 
         InputThreadFini();
 
-        for (int i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
+        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
             walkScreen->root = NullWindow;
         }
 
@@ -322,17 +322,21 @@ dix_main(int argc, char *argv[], char *envp[])
 
         CloseDownEvents();
 
-        for (int i = screenInfo.numGPUScreens - 1; i >= 0; i--) {
-            ScreenPtr walkScreen = screenInfo.gpuscreens[i];
-            dixFreeScreen(walkScreen);
-            screenInfo.numGPUScreens = i;
+        if (screenInfo.numGPUScreens > 0) {
+            for (unsigned int walkScreenIdx = screenInfo.numGPUScreens - 1; walkScreenIdx >= 0; walkScreenIdx--) {
+                ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+                dixFreeScreen(walkScreen);
+                screenInfo.numGPUScreens = walkScreenIdx;
+            }
         }
         memset(&screenInfo.gpuscreens, 0, sizeof(screenInfo.gpuscreens));
 
-        for (int i = screenInfo.numScreens - 1; i >= 0; i--) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
-            dixFreeScreen(walkScreen);
-            screenInfo.numScreens = i;
+        if (screenInfo.numScreens > 0) {
+            for (unsigned int walkScreenIdx = screenInfo.numScreens - 1; walkScreenIdx >= 0; walkScreenIdx--) {
+                ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+                dixFreeScreen(walkScreen);
+                screenInfo.numScreens = walkScreenIdx;
+            }
         }
         memset(&screenInfo.screens, 0, sizeof(screenInfo.screens));
 

@@ -338,8 +338,8 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
     pfont->refcnt++;
     if (pfont->refcnt == 1) {
         UseFPE(pfont->fpe);
-        for (int i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
+        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
             if (walkScreen->RealizeFont) {
                 if (!(*walkScreen->RealizeFont) (walkScreen, pfont)) {
                     CloseFont(pfont, (Font) 0);
