@@ -181,13 +181,7 @@ typedef struct _Xtransport {
 	int			/* size */
     );
 
-    ssize_t	(*Write)(
-	XtransConnInfo,		/* connection */
-	const char *,		/* buf */
-	size_t			/* size */
-    );
-
-    ssize_t (*Writev)(XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt);
+    ssize_t (*Write)(XtransConnInfo ciptr, const char *buf, size_t size);
 
 #if XTRANS_SEND_FDS
     int (*SendFd)(
@@ -248,18 +242,6 @@ typedef struct _Xtransport_table {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
-
-#ifdef WIN32
-
-#define WRITEV(ciptr, iov, iovcnt)	_XSERVTransWriteV(ciptr, iov, iovcnt)
-
-static int _XSERVTransWriteV(XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt);
-
-#else
-
-#define WRITEV(ciptr, iov, iovcnt)	writev(ciptr->fd, iov, iovcnt)
-
-#endif /* WIN32 */
 
 static int trans_mkdir (
     const char *,	/* path */
