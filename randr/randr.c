@@ -67,18 +67,19 @@ RRClientCallback(CallbackListPtr *list, void *closure, void *data)
 
     rrClientPriv(pClient);
     RRTimesPtr pTimes = (RRTimesPtr) (pRRClient + 1);
-    int i;
 
     pRRClient->major_version = 0;
     pRRClient->minor_version = 0;
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+
+    unsigned int walkScreenIdx;
+    for (walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
         rrScrPriv(walkScreen);
 
         if (pScrPriv) {
-            pTimes[i].setTime = pScrPriv->lastSetTime;
-            pTimes[i].configTime = pScrPriv->lastConfigTime;
+            pTimes[walkScreenIdx].setTime = pScrPriv->lastSetTime;
+            pTimes[walkScreenIdx].configTime = pScrPriv->lastConfigTime;
         }
     }
 }
