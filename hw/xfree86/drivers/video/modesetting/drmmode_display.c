@@ -64,6 +64,8 @@ static PixmapPtr drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int 
                                               int depth, int bitsPerPixel, int devKind,
                                               void *pPixData);
 
+static void drmmode_probe_cursor_size(xf86CrtcPtr crtc, int cursor_bpp);
+
 static const struct drm_color_ctm ctm_identity = { {
     1ULL << 32, 0, 0,
     0, 1ULL << 32, 0,
@@ -1769,9 +1771,20 @@ drmmode_set_mode_major(xf86CrtcPtr crtc, DisplayModePtr mode,
         crtc->rotation = saved_rotation;
         crtc->mode = saved_mode;
         drmmode_create_tearfree_shadow(crtc);
-    } else
+    } else {
         crtc->active = TRUE;
+        if (ms->cursor_probed == FALSE){
+            ms->cursor_probed = TRUE;
+            int cursor_bpp = 32;
+            drmmode_probe_cursor_size(crtc, cursor_bpp);
 
+            xf86DrvMsgVerb(crtc->scrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
+                           "Supported cursor sizes %dx%d -> %dx%d (minimum pitch %d pixels)\n",
+                           ms->min_cursor_width, ms->min_cursor_height,
+                           ms->max_cursor_width, ms->max_cursor_height,ms->min_cursor_pitch_px);
+
+        }
+    }
     return ret;
 }
 
@@ -4464,14 +4477,6 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         drmmode_crtc->cursor_bo =
             dumb_bo_create(drmmode->fd, width, height, bpp);
     }
-
-    drmmode_probe_cursor_size(xf86_config->crtc[0], bpp);
-    ms->cursor_probed = TRUE;
-
-    xf86DrvMsgVerb(pScrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
-                   "Supported cursor sizes %dx%d -> %dx%d\n",
-                   ms->min_cursor_width, ms->min_cursor_height,
-                   ms->max_cursor_width, ms->max_cursor_height);
 
     return TRUE;
 }
