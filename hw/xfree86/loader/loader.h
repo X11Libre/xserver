@@ -68,9 +68,8 @@ typedef struct {
 } ModuleVersions;
 extern const ModuleVersions LoaderVersionInfo;
 
-extern Bool LoaderIgnoreAbi;
-
-extern Bool is_nvidia_proprietary;
+extern Bool LoaderIgnoresAllABI;
+extern Bool LoaderIgnoresABI;
 
 /* Internal Functions */
 void *LoaderOpen(const char *, int *);
