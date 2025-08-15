@@ -909,63 +909,51 @@ FlushClient(ClientPtr who, OsCommPtr oc)
     ConnectionOutputPtr oco = oc->output;
     XtransConnInfo trans_conn = oc->trans_conn;
 
+    size_t written = 0;
+
     /* if no output buffer, then nothing to do */
-    if (!oco)
-	return 0;
+    if (!oco) {
+        return 0;
+    }
+
+    /* do nothing if we don't have anything to write */
+    if (!oco->count) {
+        return 0;
+    }
 
     if (!trans_conn) {
         /* uh, transport not connected ? can only kill the client :( */
         goto abortClient;
     }
 
-    size_t written = 0;
-    size_t notWritten = oco->count;
-
-    /* do nothing if we haven't anything to write */
-    if (!notWritten)
-        return 0;
-
-    if (FlushCallback)
+    if (FlushCallback) {
         CallCallbacks(&FlushCallback, who);
+    }
 
-    size_t todo = notWritten; /* trying to write that much this time */
-    while (notWritten) {
+    while (written < oco->count) {
         errno = 0;
-        ssize_t len = _XSERVTransWrite(trans_conn, ((const char*)oco->buf) + written, todo);
+        ssize_t len = _XSERVTransWrite(trans_conn, ((const char*)oco->buf) + written, oco->count - written);
         if (len >= 0) {
             written += len;
-            notWritten -= len;
-            todo = notWritten;
         }
-        else if (ETEST(errno)
-#ifdef EMSGSIZE                 /* check for another brain-damaged OS bug */
-                 || ((errno == EMSGSIZE) && (todo == 1))
-#endif
-            ) {
+        else if (ETEST(errno)) {
             /* If we've arrived here, then the client is stuffed to the gills
                and not ready to accept more.  Make a note of it and buffer
                the rest. */
             output_pending_mark(who);
 
             if (written > 0) {
-                oco->count -= written;
                 memmove((char *) oco->buf,
-                        (char *) oco->buf + written, oco->count);
+                        (char *) oco->buf + written, oco->count - written);
+                oco->count -= written;
                 written = 0;
             }
 
-            oco->count = notWritten;
             ospoll_listen(server_poll, oc->fd, X_NOTIFY_WRITE);
 
             /* return only the amount explicitly requested */
             return 0;
         }
-#ifdef EMSGSIZE                 /* check for another brain-damaged OS bug */
-        else if (errno == EMSGSIZE) {
-            /* making separate try with half of the size */
-            todo /= 2;
-        }
-#endif
         else {
             goto abortClient;
         }
