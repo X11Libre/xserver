@@ -1239,6 +1239,11 @@ PreInit(ScrnInfoPtr pScrn, int flags)
         ms->max_cursor_height = value;
     }
 
+    ms->min_cursor_width  = ms->max_cursor_width;
+    ms->min_cursor_height = ms->max_cursor_height;
+
+    ms->min_cursor_pitch_px  = ms->min_cursor_width;
+
     try_enable_glamor(pScrn);
 
     if (!ms->drmmode.glamor) {
