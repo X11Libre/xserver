@@ -464,10 +464,9 @@ QuartzRandRSetFakeRootless(void)
     DEBUG_LOG("QuartzRandRSetFakeRootless called.\n");
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(pScreen);
-
-        QuartzRandRSetMode(pScreen, &pQuartzScreen->rootlessMode, TRUE);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(walkScreen);
+        QuartzRandRSetMode(walkScreen, &pQuartzScreen->rootlessMode, TRUE);
     }
 }
 
@@ -479,10 +478,9 @@ QuartzRandRSetFakeFullscreen(BOOL state)
     DEBUG_LOG("QuartzRandRSetFakeFullscreen called.\n");
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(pScreen);
-
-        QuartzRandRSetMode(pScreen, &pQuartzScreen->fullscreenMode, TRUE);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(walkScreen);
+        QuartzRandRSetMode(walkScreen, &pQuartzScreen->fullscreenMode, TRUE);
     }
 
     QuartzShowFullscreen(state);

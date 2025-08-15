@@ -390,12 +390,12 @@ XineramaInitData(void)
         BoxRec TheBox;
         RegionRec ScreenRegion;
 
-        ScreenPtr pScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
 
-        TheBox.x1 = pScreen->x;
-        TheBox.x2 = TheBox.x1 + pScreen->width;
-        TheBox.y1 = pScreen->y;
-        TheBox.y2 = TheBox.y1 + pScreen->height;
+        TheBox.x1 = walkScreen->x;
+        TheBox.x2 = TheBox.x1 + walkScreen->width;
+        TheBox.y1 = walkScreen->y;
+        TheBox.y2 = TheBox.y1 + walkScreen->height;
 
         RegionInit(&ScreenRegion, &TheBox, 1);
         RegionUnion(&PanoramiXScreenRegion, &PanoramiXScreenRegion,
@@ -408,12 +408,12 @@ XineramaInitData(void)
         screenInfo.screens[0]->y + screenInfo.screens[0]->height;
 
     FOR_NSCREENS_FORWARD(i) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
         if (!i)
             continue; /* skip screen #0 */
-        ScreenPtr pScreen = screenInfo.screens[i];
 
-        w = pScreen->x + pScreen->width;
-        h = pScreen->y + pScreen->height;
+        w = walkScreen->x + walkScreen->width;
+        h = walkScreen->y + walkScreen->height;
 
         if (PanoramiXPixWidth < w)
             PanoramiXPixWidth = w;
@@ -471,19 +471,19 @@ PanoramiXExtensionInit(void)
          */
 
         FOR_NSCREENS_BACKWARD(i) {
-            pScreen = screenInfo.screens[i];
+            ScreenPtr walkScreen = screenInfo.screens[i];
             PanoramiXScreenPtr pScreenPriv = calloc(1, sizeof(PanoramiXScreenRec));
-            dixSetPrivate(&pScreen->devPrivates, PanoramiXScreenKey,
+            dixSetPrivate(&walkScreen->devPrivates, PanoramiXScreenKey,
                           pScreenPriv);
             if (!pScreenPriv) {
                 noPanoramiXExtension = TRUE;
                 return;
             }
 
-            dixScreenHookClose(pScreen, XineramaCloseScreen);
+            dixScreenHookClose(walkScreen, XineramaCloseScreen);
 
             pScreenPriv->CreateGC = pScreen->CreateGC;
-            pScreen->CreateGC = XineramaCreateGC;
+            walkScreen->CreateGC = XineramaCreateGC;
         }
 
         XRC_DRAWABLE = CreateNewResourceClass();
@@ -593,7 +593,6 @@ PanoramiXCreateConnectionBlock(void)
     xVisualType *visual;
     xDepth *depth;
     VisualPtr pVisual;
-    ScreenPtr pScreen;
 
     /*
      *  Do normal CreateConnectionBlock but faking it for only one screen
@@ -605,20 +604,20 @@ PanoramiXCreateConnectionBlock(void)
     }
 
     for (i = 1; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
-        if (pScreen->rootDepth != screenInfo.screens[0]->rootDepth) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (walkScreen->rootDepth != screenInfo.screens[0]->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
             return FALSE;
         }
-        if (pScreen->backingStoreSupport !=
+        if (walkScreen->backingStoreSupport !=
             screenInfo.screens[0]->backingStoreSupport)
             disable_backing_store = TRUE;
     }
 
     if (disable_backing_store) {
         for (i = 0; i < screenInfo.numScreens; i++) {
-            pScreen = screenInfo.screens[i];
-            pScreen->backingStoreSupport = NotUseful;
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            walkScreen->backingStoreSupport = NotUseful;
         }
     }
 
@@ -720,16 +719,15 @@ VisualsEqual(VisualPtr a, ScreenPtr pScreenB, VisualPtr b)
 static void
 PanoramiXMaybeAddDepth(DepthPtr pDepth)
 {
-    ScreenPtr pScreen;
     int j, k;
     Bool found = FALSE;
 
     FOR_NSCREENS_FORWARD(j) {
+        ScreenPtr walkScreen = screenInfo.screens[j];
         if (!j)
             continue; /* skip screen #0 */
-        pScreen = screenInfo.screens[j];
-        for (k = 0; k < pScreen->numDepths; k++) {
-            if (pScreen->allowedDepths[k].depth == pDepth->depth) {
+        for (k = 0; k < walkScreen->numDepths; k++) {
+            if (walkScreen->allowedDepths[k].depth == pDepth->depth) {
                 found = TRUE;
                 break;
             }
@@ -751,20 +749,19 @@ PanoramiXMaybeAddDepth(DepthPtr pDepth)
 static void
 PanoramiXMaybeAddVisual(VisualPtr pVisual)
 {
-    ScreenPtr pScreen;
     int j, k;
     Bool found = FALSE;
 
     FOR_NSCREENS_FORWARD(j) {
+        ScreenPtr walkScreen = screenInfo.screens[j];
         if (!j)
             continue; /* skip screen #0 */
-        pScreen = screenInfo.screens[j];
         found = FALSE;
 
-        for (k = 0; k < pScreen->numVisuals; k++) {
-            VisualPtr candidate = &pScreen->visuals[k];
+        for (k = 0; k < walkScreen->numVisuals; k++) {
+            VisualPtr candidate = &walkScreen->visuals[k];
 
-            if ((*XineramaVisualsEqualPtr) (pVisual, pScreen, candidate)
+            if ((*XineramaVisualsEqualPtr) (pVisual, walkScreen, candidate)
 #ifdef GLXPROXY
                 && glxMatchVisual(screenInfo.screens[0], pVisual, pScreen)
 #endif
@@ -835,15 +832,15 @@ PanoramiXConsolidate(void)
     saver->type = XRT_WINDOW;
 
     FOR_NSCREENS_BACKWARD(i) {
-        ScreenPtr scr = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
 
-        root->info[i].id = scr->root->drawable.id;
+        root->info[i].id = walkScreen->root->drawable.id;
         root->u.win.class = InputOutput;
         root->u.win.root = TRUE;
-        saver->info[i].id = scr->screensaver.wid;
+        saver->info[i].id = walkScreen->screensaver.wid;
         saver->u.win.class = InputOutput;
         saver->u.win.root = TRUE;
-        defmap->info[i].id = scr->defColormap;
+        defmap->info[i].id = walkScreen->defColormap;
     }
 
     AddResource(root->info[0].id, XRT_WINDOW, root);
@@ -1068,11 +1065,12 @@ ProcXineramaQueryScreens(ClientPtr client)
     if (!noPanoramiXExtension) {
         int i;
         FOR_NSCREENS_BACKWARD(i) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
             xXineramaScreenInfo scratch = {
-                .x_org = screenInfo.screens[i]->x,
-                .y_org = screenInfo.screens[i]->y,
-                .width = screenInfo.screens[i]->width,
-                .height = screenInfo.screens[i]->height,
+                .x_org = walkScreen->x,
+                .y_org = walkScreen->y,
+                .width = walkScreen->width,
+                .height = walkScreen->height,
             };
             /* scratch consists of 4x CARD16 */
             if (!x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&scratch, 4))

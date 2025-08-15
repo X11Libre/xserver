@@ -1233,7 +1233,6 @@ CoreFocusPointerRootNoneSwitch(DeviceIntPtr dev,
                                WindowPtr B,     /* NoneWin or PointerRootWin */
                                int mode)
 {
-    WindowPtr root;
     int nscreens = screenInfo.numScreens;
 
 #ifdef XINERAMA
@@ -1242,7 +1241,8 @@ CoreFocusPointerRootNoneSwitch(DeviceIntPtr dev,
 #endif /* XINERAMA */
 
     for (int i = 0; i < nscreens; i++) {
-        root = screenInfo.screens[i]->root;
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        WindowPtr root = walkScreen->root;
         if (!HasOtherPointer(root, GetMaster(dev, POINTER_OR_FLOAT)) &&
             !FirstFocusChild(root)) {
             /* If pointer was on PointerRootWin and changes to NoneWin, and
@@ -1276,7 +1276,6 @@ CoreFocusToPointerRootOrNone(DeviceIntPtr dev, WindowPtr A,
                              WindowPtr B,        /* PointerRootWin or NoneWin */
                              int mode)
 {
-    WindowPtr root;
     int nscreens = screenInfo.numScreens;
 
 #ifdef XINERAMA
@@ -1303,7 +1302,8 @@ CoreFocusToPointerRootOrNone(DeviceIntPtr dev, WindowPtr A,
     CoreFocusOutEvents(dev, A, NullWindow, mode, NotifyNonlinearVirtual);
 
     for (int i = 0; i < nscreens; i++) {
-        root = screenInfo.screens[i]->root;
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        WindowPtr root = walkScreen->root;
         if (!HasFocus(root) && !FirstFocusChild(root)) {
             CoreFocusEvent(dev, FocusIn, mode,
                            B ? NotifyPointerRoot : NotifyDetailNone, root);
@@ -1322,7 +1322,6 @@ CoreFocusFromPointerRootOrNone(DeviceIntPtr dev,
                                WindowPtr A,   /* PointerRootWin or NoneWin */
                                WindowPtr B, int mode)
 {
-    WindowPtr root;
     int nscreens = screenInfo.numScreens;
 
 #ifdef XINERAMA
@@ -1331,7 +1330,8 @@ CoreFocusFromPointerRootOrNone(DeviceIntPtr dev,
 #endif /* XINERAMA */
 
     for (int i = 0; i < nscreens; i++) {
-        root = screenInfo.screens[i]->root;
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        WindowPtr root = walkScreen->root;
         if (!HasFocus(root) && !FirstFocusChild(root)) {
             /* If pointer was on PointerRootWin and changes to NoneWin, and
              * the pointer paired with dev is below the current root window,
@@ -1349,7 +1349,7 @@ CoreFocusFromPointerRootOrNone(DeviceIntPtr dev,
         }
     }
 
-    root = B;                   /* get B's root window */
+    WindowPtr root = B;                   /* get B's root window */
     while (root->parent)
         root = root->parent;
 
@@ -1429,9 +1429,10 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
                                      NotifyPointer);
             }
             /* Notify all the roots */
-            for (int i = 0; i < nscreens; i++)
-                DeviceFocusEvent(dev, XI_FocusOut, mode, out,
-                                 screenInfo.screens[i]->root);
+            for (int i = 0; i < nscreens; i++) {
+                ScreenPtr walkScreen = screenInfo.screens[i];
+                DeviceFocusEvent(dev, XI_FocusOut, mode, out, walkScreen->root);
+            }
         }
         else {
             if (WindowIsParent(from, sprite->win)) {
@@ -1446,9 +1447,10 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
                                  NotifyNonlinearVirtual);
         }
         /* Notify all the roots */
-        for (int i = 0; i < nscreens; i++)
-            DeviceFocusEvent(dev, XI_FocusIn, mode, in,
-                             screenInfo.screens[i]->root);
+        for (int i = 0; i < nscreens; i++) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            DeviceFocusEvent(dev, XI_FocusIn, mode, in, walkScreen->root);
+        }
         if (to == PointerRootWin) {
             DeviceFocusInEvents(dev, InputDevCurrentRootWindow(dev), sprite->win,
                                 mode, NotifyPointer);
@@ -1464,9 +1466,10 @@ DeviceFocusEvents(DeviceIntPtr dev, WindowPtr from, WindowPtr to, int mode)
                                      InputDevCurrentRootWindow(dev), mode,
                                      NotifyPointer);
             }
-            for (int i = 0; i < nscreens; i++)
-                DeviceFocusEvent(dev, XI_FocusOut, mode, out,
-                                 screenInfo.screens[i]->root);
+            for (int i = 0; i < nscreens; i++) {
+                ScreenPtr walkScreen = screenInfo.screens[i];
+                DeviceFocusEvent(dev, XI_FocusOut, mode, out, walkScreen->root);
+            }
             if (to->parent != NullWindow)
                 DeviceFocusInEvents(dev, InputDevCurrentRootWindow(dev), to, mode,
                                     NotifyNonlinearVirtual);

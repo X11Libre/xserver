@@ -72,9 +72,9 @@ RRClientCallback(CallbackListPtr *list, void *closure, void *data)
     pRRClient->major_version = 0;
     pRRClient->minor_version = 0;
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
 
-        rrScrPriv(pScreen);
+        rrScrPriv(walkScreen);
 
         if (pScrPriv) {
             pTimes[i].setTime = pScrPriv->lastSetTime;

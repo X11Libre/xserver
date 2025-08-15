@@ -98,7 +98,8 @@ dri3_extension_init(void)
     dri3_request = extension->base;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        if (!dri3_screen_init(screenInfo.screens[i], NULL))
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (!dri3_screen_init(walkScreen, NULL))
             goto bail;
     }
 

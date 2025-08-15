@@ -2477,8 +2477,10 @@ SyncExtensionInit(void)
     ExtensionEntry *extEntry;
     int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++)
-        miSyncSetup(screenInfo.screens[s]);
+    for (s = 0; s < screenInfo.numScreens; s++) {
+        ScreenPtr walkScreen = screenInfo.screens[s];
+        miSyncSetup(walkScreen);
+    }
 
     RTCounter = CreateNewResourceType(FreeCounter, "SyncCounter");
     xorg_list_init(&SysCounterList);

@@ -343,9 +343,10 @@ SetPictureFilter(PicturePtr pPicture, char *name, int len, xFixed * params,
          * that all screens can handle a filter we set for the picture.
          */
         for (s = 1; s < screenInfo.numScreens; s++) {
+            ScreenPtr walkScreen = screenInfo.screens[s];
             PictFilterPtr pScreenFilter;
 
-            pScreenFilter = PictureFindFilter(screenInfo.screens[s], name, len);
+            pScreenFilter = PictureFindFilter(walkScreen, name, len);
             if (!pScreenFilter || pScreenFilter->id != pFilter->id)
                 return BadMatch;
         }

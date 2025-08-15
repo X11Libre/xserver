@@ -938,14 +938,14 @@ XIBarrierInit(void)
         return FALSE;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
         BarrierScreenPtr cs;
 
         cs = (BarrierScreenPtr) calloc(1, sizeof(BarrierScreenRec));
         if (!cs)
             return FALSE;
         xorg_list_init(&cs->barriers);
-        SetBarrierScreen(pScreen, cs);
+        SetBarrierScreen(walkScreen, cs);
     }
 
     PointerBarrierType = CreateNewResourceType(BarrierFreeBarrier,
@@ -959,9 +959,9 @@ XIBarrierReset(void)
 {
     int i;
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        BarrierScreenPtr cs = GetBarrierScreen(pScreen);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        BarrierScreenPtr cs = GetBarrierScreen(walkScreen);
         free(cs);
-        SetBarrierScreen(pScreen, NULL);
+        SetBarrierScreen(walkScreen, NULL);
     }
 }

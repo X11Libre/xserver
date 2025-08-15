@@ -388,10 +388,10 @@ QuartzShowFullscreen(int state)
     if (XQuartzFullscreenVisible) {
         RootlessShowAllWindows();
         for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr pScreen = screenInfo.screens[i];
-            RootlessRepositionWindows(pScreen);
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            RootlessRepositionWindows(walkScreen);
             // JH: I don't think this is necessary, but keeping it here as a reminder
-            //RootlessUpdateScreenPixmap(pScreen);
+            //RootlessUpdateScreenPixmap(walkScreen);
         }
     }
 
@@ -454,9 +454,9 @@ QuartzShow(void)
 
     XQuartzServerVisible = TRUE;
     for (i = 0; i < screenInfo.numScreens; i++) {
-        if (screenInfo.screens[i]) {
-            quartzProcs->ResumeScreen(screenInfo.screens[i]);
-        }
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (walkScreen)
+            quartzProcs->ResumeScreen(walkScreen);
     }
 
     if (!XQuartzIsRootless)
@@ -476,9 +476,9 @@ QuartzHide(void)
 
     if (XQuartzServerVisible) {
         for (i = 0; i < screenInfo.numScreens; i++) {
-            if (screenInfo.screens[i]) {
-                quartzProcs->SuspendScreen(screenInfo.screens[i]);
-            }
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            if (walkScreen)
+                quartzProcs->SuspendScreen(walkScreen);
         }
     }
 
@@ -500,9 +500,9 @@ QuartzSetRootClip(int mode)
         return;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        if (screenInfo.screens[i]) {
-            SetRootClip(screenInfo.screens[i], mode);
-        }
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (walkScreen)
+            SetRootClip(walkScreen, mode);
     }
 }
 

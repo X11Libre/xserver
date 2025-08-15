@@ -1924,7 +1924,6 @@ static Bool
 KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 {
     ScreenPtr pScreen = *ppScreen;
-    ScreenPtr pNewScreen;
     int n;
     int dx, dy;
     int best_x, best_y;
@@ -1947,11 +1946,11 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
     n_best_y = -1;
     best_y = 32767;
     for (n = 0; n < screenInfo.numScreens; n++) {
-        pNewScreen = screenInfo.screens[n];
-        if (pNewScreen == pScreen)
+        ScreenPtr walkScreen = screenInfo.screens[n];
+        if (walkScreen == pScreen)
             continue;
-        dx = KdScreenOrigin(pNewScreen)->x - KdScreenOrigin(pScreen)->x;
-        dy = KdScreenOrigin(pNewScreen)->y - KdScreenOrigin(pScreen)->y;
+        dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(walkScreen)->x;
+        dy = KdScreenOrigin(walkScreen)->y - KdScreenOrigin(walkScreen)->y;
         if (*x < 0) {
             if (dx < 0 && -dx < best_x) {
                 best_x = -dx;
@@ -1981,7 +1980,8 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
         n_best_x = n_best_y;
     if (n_best_x == -1)
         return FALSE;
-    pNewScreen = screenInfo.screens[n_best_x];
+
+    ScreenPtr pNewScreen = screenInfo.screens[n_best_x];
 
     if (*x < 0)
         *x += pNewScreen->width;
