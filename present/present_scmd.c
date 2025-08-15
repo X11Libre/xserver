@@ -387,7 +387,6 @@ void
 present_event_notify(uint64_t event_id, uint64_t ust, uint64_t msc)
 {
     present_vblank_ptr  vblank;
-    int                 s;
 
     if (!event_id)
         return;
@@ -409,8 +408,8 @@ present_event_notify(uint64_t event_id, uint64_t ust, uint64_t msc)
         }
     }
 
-    for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr walkScreen = screenInfo.screens[s];
+    for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         present_screen_priv_ptr screen_priv = present_screen_priv(walkScreen);
 
         if (event_id == screen_priv->unflip_event_id) {
