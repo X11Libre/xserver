@@ -133,6 +133,9 @@ typedef struct _modesettingRec {
 
     uint32_t min_cursor_width, min_cursor_height;
     uint32_t max_cursor_width, max_cursor_height;
+    uint32_t min_cursor_pitch_px;
+
+    Bool cursor_probed;
 
     Bool has_queue_sequence;
     Bool tried_queue_sequence;
