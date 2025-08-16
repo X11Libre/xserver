@@ -172,7 +172,42 @@ LoaderGetABIVersion(const char *abiclass)
         int version;
     } classes[] = {
         {ABI_CLASS_ANSIC, LoaderVersionInfo.ansicVersion},
-        {ABI_CLASS_VIDEODRV, LoaderVersionInfo.videodrvVersion},
+        /*
+         * XXX This is a hack. XXX
+         *
+         * The 470 nvidia driver only knows about an older abi
+         * where struct _Screen has an extra field.
+         *
+         * The modern nvidia drivers (e.g. 570) know about both
+         * abi's, and have different code paths for supporting
+         * both abi's.
+         *
+         * The modern nvidia drivers use this function to determine
+         * what video abi the X server uses, so it knows whether or
+         * not to use the newer abi, or the older abi, where
+         * struct _Screen has an extra field.
+         *
+         * The X server implements the older abi for struct _Screen,
+         * that the 470 driver knows, and we lie to the nvidia drivers
+         * that we use that older abi for the entire X server, so that
+         * modern nvidia drivers know to use the code path for supporting
+         * this older abi.
+         *
+         * We lie to the nvidia driver and claim to have an older abi
+         * so that both modern and old nvidia drivers work.
+         *
+         * In the future, nvidia might remove the code path for supporting
+         * the old abi from it's DDX driver.
+         *
+         * When that happens, unless we want to add major hacks and
+         * complexity to the codebase, we will no longer be able to
+         * support both abi's at once.
+         *
+         * We will probably have to add a compile-time flag that switches
+         * between abi's.
+         */
+        {ABI_CLASS_VIDEODRV, is_nvidia_proprietary ? ABI_NVIDIA_VERSION :
+                             LoaderVersionInfo.videodrvVersion},
         {ABI_CLASS_XINPUT, LoaderVersionInfo.xinputVersion},
         {ABI_CLASS_EXTENSION, LoaderVersionInfo.extensionVersion},
         {NULL, 0}
