@@ -53,7 +53,6 @@ build 'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git' 'xorgproto-2024.
 build 'https://gitlab.freedesktop.org/xorg/lib/libXau.git' 'libXau-1.0.9'
 build 'https://gitlab.freedesktop.org/xorg/proto/xcbproto.git'      'xcb-proto-1.17.0'
 build 'https://gitlab.freedesktop.org/xorg/lib/libxcb.git' 'libxcb-1.17.0'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxtrans.git' 'xtrans-1.6.0'
 # the default value of keysymdefdir is taken from the includedir variable for
 # xproto, which isn't adjusted by pkg-config for the sysroot
 # Using -fcommon to address build failure when cross-compiling for windows.
