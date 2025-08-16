@@ -620,6 +620,11 @@ typedef struct _Screen {
     SetScreenPixmapProcPtr SetScreenPixmap;
     NameWindowPixmapProcPtr NameWindowPixmap;
 
+#ifdef LEGACY_NVIDIA_PADDING
+    /* This field is a padding that corrects fields position for legacy proprietary nvidia drivers */
+    void* reserved_for_legacy_nvidia;   /* should always be NULL */
+#endif /* LEGACY_NVIDIA_PADDING */
+
     unsigned int totalPixmapSize;
 
     MarkWindowProcPtr MarkWindow;

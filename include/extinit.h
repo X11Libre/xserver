@@ -56,6 +56,11 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 /* required by: libglx */
 extern _X_EXPORT Bool noCompositeExtension;
 
+/* required by: the 470 nvidia DDX driver */
+#ifdef DAMAGE
+extern _X_EXPORT Bool noDamageExtension;
+#endif
+
 /* required by: several video drivers (eg. vmware and sis) */
 #ifdef XINERAMA
 extern _X_EXPORT Bool noPanoramiXExtension;
