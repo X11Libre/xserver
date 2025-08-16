@@ -574,6 +574,41 @@ LogSyslogWrite(int verb, const char *buf, size_t len, Bool end_line) {
 #endif
 }
 
+static void
+LogFailedWrite(const void * buf, size_t len)
+{
+    if (write(STDERR_FILENO, buf, len)==-1)
+    {
+        /* We can't even write to stderr, something really bad is happening. */
+        AbortServer();
+    }
+}
+
+static void
+LogWrite(int fd, const void * buf, size_t len)
+{
+    if (write(fd, buf, len)==-1)
+    {
+        /* If the write() calls fail we obviously can not log this event to the
+         * log file, but we still have the stderr.
+         */
+        {
+            char error[]="Can't write to log file: ";
+            LogFailedWrite(error,sizeof(error));
+        }
+        char dsc[256]={0};
+        strerror_r(errno,dsc,sizeof(dsc));
+        LogFailedWrite(dsc,strlen(dsc));
+        LogFailedWrite("\n",1);
+        {
+            char error[]="Intended to write the following to log file:\n";
+            LogFailedWrite(error,sizeof(error));
+        }
+        LogFailedWrite(buf,len);
+    }
+
+}
+
 /* This function does the actual log message writes. It must be signal safe.
  * When attempting to call non-signal-safe functions, guard them with a check
  * of the inSignalContext global variable. */
@@ -581,52 +616,55 @@ static void
 LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 {
     static Bool newline = TRUE;
-    int ret;
 
     LogSyslogWrite(verb, buf, len, end_line);
 
-    if (verb < 0 || xorgLogVerbosity >= verb)
-        ret = write(2, buf, len);
+    if (verb < 0 || xorgLogVerbosity >= verb) {
+        LogWrite(2, buf, len);
+    }
 
     if (verb < 0 || xorgLogFileVerbosity >= verb) {
         if (inSignalContext && logFileFd >= 0) {
-            ret = write(logFileFd, buf, len);
-            if (xorgLogSync)
+            LogWrite(logFileFd, buf, len);
+            if (xorgLogSync){
                 doLogSync();
+            }
         }
         else if (!inSignalContext && logFileFd != -1) {
             if (newline) {
                 time_t t = time(NULL);
                 struct tm tm;
                 char fmt_tm[32];
+                size_t fmt_len;
 
                 localtime_r(&t, &tm);
-                strftime(fmt_tm, sizeof(fmt_tm) - 1, "[%Y-%m-%d %H:%M:%S] ", &tm);
-                write(logFileFd, fmt_tm, strlen(fmt_tm));
+                fmt_len = strftime(
+                                fmt_tm,
+                                sizeof(fmt_tm),
+                                "[%Y-%m-%d %H:%M:%S] ",
+                                &tm);
+                LogWrite(logFileFd, fmt_tm, fmt_len);
             }
             newline = end_line;
-            write(logFileFd, buf, len);
-            if (xorgLogSync)
+            LogWrite(logFileFd, buf, len);
+            if (xorgLogSync) {
                 doLogSync();
+            }
         }
         else if (!inSignalContext && needBuffer) {
             if (len > bufferUnused) {
                 bufferSize += 1024;
                 bufferUnused += 1024;
                 saveBuffer = realloc(saveBuffer, bufferSize);
-                if (!saveBuffer)
+                if (!saveBuffer) {
                     FatalError("realloc() failed while saving log messages\n");
+                }
             }
             bufferUnused -= len;
             memcpy(saveBuffer + bufferPos, buf, len);
             bufferPos += len;
         }
     }
-
-    /* There's no place to log an error message if the log write
-     * fails...
-     */
-    (void) ret;
 }
 
 /* Returns the Message Type string to prepend to a logging message, or NULL
