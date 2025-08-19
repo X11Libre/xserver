@@ -5998,11 +5998,6 @@ ProcXkbGetKbdByName(ClientPtr client)
 
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
         x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-        /* allocating far too much, but it's just temporary */
-        if (!x_rpcbuf_makeroom(&rpcbuf, payload_length * 4)) {
-            free(payload_buffer);
-            return BadAlloc;
-        }
 
         XkbAssembleMap(client, new, mrep, &rpcbuf);
 
