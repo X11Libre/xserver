@@ -6026,8 +6026,6 @@ ProcXkbGetKbdByName(ClientPtr client)
             return BadAlloc;
         }
 
-        const size_t mrep_length = mrep.length; /* save before swapping */
-
         if (client->swapped) {
             swaps(&mrep.sequenceNumber);
             swapl(&mrep.length);
@@ -6036,13 +6034,10 @@ ProcXkbGetKbdByName(ClientPtr client)
             swaps(&mrep.totalActs);
         }
 
-        // struct is 8 bytes (2 units) longer than generic reply, so need to
-        // compute the payload length carefully
-        const size_t payloadBytes = (mrep_length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
         memcpy(payload_walk, &mrep, sizeof(mrep));
         payload_walk += sizeof(mrep);
-        memcpy(payload_walk, rpcbuf.buffer, payloadBytes);
-        payload_walk += payloadBytes;
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
         x_rpcbuf_clear(&rpcbuf);
     }
 
