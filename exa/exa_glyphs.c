@@ -251,7 +251,7 @@ exaGlyphCacheHashLookup(ExaGlyphCachePtr cache, GlyphPtr pGlyph)
     int slot;
     CARD32 signature;
 
-	 memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
+    memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
     slot = signature % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
@@ -280,7 +280,7 @@ exaGlyphCacheHashInsert(ExaGlyphCachePtr cache, GlyphPtr pGlyph, int pos)
 
     memcpy(cache->glyphs[pos].dgst, pGlyph->dgst, sizeof(pGlyph->dgst));
 
-	 memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
+    memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
     slot = signature % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
@@ -302,7 +302,7 @@ exaGlyphCacheHashRemove(ExaGlyphCachePtr cache, int pos)
     int emptiedSlot = -1;
     CARD32 signature;
 
-	 memcpy(&signature, &(cache->glyphs[pos].dgst), sizeof(CARD32));
+    memcpy(&signature, &(cache->glyphs[pos].dgst), sizeof(CARD32));
     slot = signature % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
@@ -335,7 +335,7 @@ exaGlyphCacheHashRemove(ExaGlyphCachePtr cache, int pos)
             int entrySlot;
 
             memcpy(&signature, &(cache->glyphs[entryPos].dgst), sizeof(CARD32));
-				entrySlot = signature % cache->hashSize;
+            entrySlot = signature % cache->hashSize;
 
             if (!((entrySlot >= slot && entrySlot < emptiedSlot) ||
                   (emptiedSlot < slot &&
@@ -454,12 +454,12 @@ exaGlyphCacheBufferGlyph(ScreenPtr pScreen,
 #if DEBUG_GLYPH_CACHE
     {
         CARD32 signature;
-		  memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
+        memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
         DBG_GLYPH_CACHE(("(%d,%d,%s): buffering glyph %lx\n",
                      cache->glyphWidth, cache->glyphHeight,
                      cache->format == PIXMAN_a8 ? "A" : "ARGB",
                      (long) signature);
-	 }
+     }
 #endif
 
     pos = exaGlyphCacheHashLookup(cache, pGlyph);

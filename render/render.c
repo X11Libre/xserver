@@ -955,7 +955,7 @@ typedef struct _GlyphNew {
     Glyph id;
     GlyphPtr glyph;
     Bool found;
-    unsigned char dgst[16];
+    unsigned char dgst[20];
 } GlyphNewRec, *GlyphNewPtr;
 
 #define NeedsComponent(f) (PIXMAN_FORMAT_A(f) != 0 && PIXMAN_FORMAT_RGB(f) != 0)
@@ -1121,7 +1121,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                 FreeScratchPixmapHeader(pSrcPix);
             }
 
-            memcpy(glyph_new->glyph->dgst, glyph_new->dgst, 16);
+            memcpy(glyph_new->glyph->dgst, glyph_new->dgst, 20);
         }
 
         glyph_new->id = gids[i];

@@ -102,7 +102,7 @@ enum ExaMigrationHeuristic {
 };
 
 typedef struct {
-    unsigned char dgst[16];
+    unsigned char dgst[20];
 } ExaCachedGlyphRec, *ExaCachedGlyphPtr;
 
 typedef struct {
