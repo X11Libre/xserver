@@ -4592,59 +4592,53 @@ XkbSizeGeomDoodads(int num_doodads, XkbDoodadPtr doodad)
     return size;
 }
 
-static char *
-XkbWriteGeomDoodads(char *wire, int num_doodads, XkbDoodadPtr doodad, Bool swap)
+static void XkbWriteGeomDoodads(x_rpcbuf_t *rpcbuf, int num_doodads, XkbDoodadPtr doodad)
 {
     register int i;
-    xkbDoodadWireDesc *doodadWire;
 
     for (i = 0; i < num_doodads; i++, doodad++) {
-        doodadWire = (xkbDoodadWireDesc *) wire;
-        wire = (char *) &doodadWire[1];
-        memset(doodadWire, 0, SIZEOF(xkbDoodadWireDesc));
-        doodadWire->any.name = doodad->any.name;
-        doodadWire->any.type = doodad->any.type;
-        doodadWire->any.priority = doodad->any.priority;
-        doodadWire->any.top = doodad->any.top;
-        doodadWire->any.left = doodad->any.left;
-        if (swap) {
-            swapl(&doodadWire->any.name);
-            swaps(&doodadWire->any.top);
-            swaps(&doodadWire->any.left);
-        }
+        /* write xkbAnyDoodadWireDesc head part */
+        x_rpcbuf_write_CARD32(rpcbuf, doodad->any.name);
+        x_rpcbuf_write_CARD8(rpcbuf, doodad->any.type);
+        x_rpcbuf_write_CARD8(rpcbuf, doodad->any.priority);
+        x_rpcbuf_write_INT16(rpcbuf, doodad->any.top);
+        x_rpcbuf_write_INT16(rpcbuf, doodad->any.left);
+        x_rpcbuf_write_INT16(rpcbuf, doodad->any.angle);
+
         switch (doodad->any.type) {
         case XkbOutlineDoodad:
         case XkbSolidDoodad:
-            doodadWire->shape.angle = doodad->shape.angle;
-            doodadWire->shape.colorNdx = doodad->shape.color_ndx;
-            doodadWire->shape.shapeNdx = doodad->shape.shape_ndx;
-            if (swap) {
-                swaps(&doodadWire->shape.angle);
-            }
+            /* write xkbShapeDoodadWireDesc head part */
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->shape.color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->shape.shape_ndx);
+            x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD32(rpcbuf, 0); /* pad2 */
             break;
         case XkbTextDoodad:
-            doodadWire->text.angle = doodad->text.angle;
-            doodadWire->text.width = doodad->text.width;
-            doodadWire->text.height = doodad->text.height;
-            doodadWire->text.colorNdx = doodad->text.color_ndx;
-            if (swap) {
-                swaps(&doodadWire->text.angle);
-                swaps(&doodadWire->text.width);
-                swaps(&doodadWire->text.height);
-            }
-            wire = XkbWriteCountedString(wire, doodad->text.text, swap);
-            wire = XkbWriteCountedString(wire, doodad->text.font, swap);
+            /* write xkbTextDoodadWireDesc head part */
+            x_rpcbuf_write_CARD16(rpcbuf, doodad->text.width);
+            x_rpcbuf_write_CARD16(rpcbuf, doodad->text.height);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->text.color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad2 */
+            x_rpcbuf_write_counted_string_pad(rpcbuf, doodad->text.text);
+            x_rpcbuf_write_counted_string_pad(rpcbuf, doodad->text.font);
             break;
         case XkbIndicatorDoodad:
-            doodadWire->indicator.shapeNdx = doodad->indicator.shape_ndx;
-            doodadWire->indicator.onColorNdx = doodad->indicator.on_color_ndx;
-            doodadWire->indicator.offColorNdx = doodad->indicator.off_color_ndx;
+            /* write xkbIndicatorDoodadWireDesc head part */
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->indicator.shape_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->indicator.on_color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->indicator.off_color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD32(rpcbuf, 0); /* pad2 */
             break;
         case XkbLogoDoodad:
-            doodadWire->logo.angle = doodad->logo.angle;
-            doodadWire->logo.colorNdx = doodad->logo.color_ndx;
-            doodadWire->logo.shapeNdx = doodad->logo.shape_ndx;
-            wire = XkbWriteCountedString(wire, doodad->logo.logo_name, swap);
+            /* write xkbLogoDoodadWireDesc head part */
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->logo.color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->logo.shape_ndx);
+            x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD32(rpcbuf, 0); /* pad2 */
+            x_rpcbuf_write_counted_string_pad(rpcbuf, doodad->logo.logo_name);
             break;
         default:
             ErrorF("[xkb] Unknown doodad type %d in XkbWriteGeomDoodads\n",
@@ -4653,7 +4647,6 @@ XkbWriteGeomDoodads(char *wire, int num_doodads, XkbDoodadPtr doodad, Bool swap)
             break;
         }
     }
-    return wire;
 }
 
 static char *
@@ -4801,10 +4794,13 @@ XkbWriteGeomSections(char *wire, XkbGeometryPtr geom, Bool swap)
                 }
             }
         }
+
         if (section->doodads) {
-            wire = XkbWriteGeomDoodads(wire,
-                                       section->num_doodads, section->doodads,
-                                       swap);
+            x_rpcbuf_t rpcbuf = { .swapped = swap, .err_clear = TRUE };
+            XkbWriteGeomDoodads(&rpcbuf, section->num_doodads, section->doodads);
+            memcpy(wire, rpcbuf.buffer, rpcbuf.wpos);
+            wire += rpcbuf.wpos;
+            x_rpcbuf_clear(&rpcbuf);
         }
         if (section->overlays) {
             register int o;
@@ -4876,9 +4872,13 @@ XkbAssembleGeometry(ClientPtr client,
         desc = XkbWriteGeomShapes(desc, geom, client->swapped);
     if (rep.nSections > 0)
         desc = XkbWriteGeomSections(desc, geom, client->swapped);
-    if (rep.nDoodads > 0)
-        desc = XkbWriteGeomDoodads(desc, geom->num_doodads, geom->doodads,
-                                   client->swapped);
+    if (rep.nDoodads > 0) {
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        XkbWriteGeomDoodads(&rpcbuf, geom->num_doodads, geom->doodads);
+        memcpy(desc, rpcbuf.buffer, rpcbuf.wpos);
+        desc += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
+    }
     if (rep.nKeyAliases > 0)
         desc = XkbWriteGeomKeyAliases(desc, geom, client->swapped);
 }
