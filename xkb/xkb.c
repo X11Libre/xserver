@@ -2761,42 +2761,33 @@ static void
 XkbAssembleCompatMap(ClientPtr client,
                      XkbCompatMapPtr compat,
                      xkbGetCompatMapReply rep,
-                     char *buf)
+                     x_rpcbuf_t *rpcbuf)
 {
-    if (rep.length) {
         register unsigned i, bit;
-        xkbModsWireDesc *grp;
         XkbSymInterpretPtr sym = &compat->sym_interpret[rep.firstSI];
-        xkbSymInterpretWireDesc *wire = (xkbSymInterpretWireDesc *) buf;
 
-        for (i = 0; i < rep.nSI; i++, sym++, wire++) {
-            wire->sym = sym->sym;
-            wire->mods = sym->mods;
-            wire->match = sym->match;
-            wire->virtualMod = sym->virtual_mod;
-            wire->flags = sym->flags;
-            memcpy((char *) &wire->act, (char *) &sym->act,
-                   sz_xkbActionWireDesc);
-            if (client->swapped) {
-                swapl(&wire->sym);
-            }
+        for (i = 0; i < rep.nSI; i++, sym++) {
+            /* write xkbSymInterpretWireDesc */
+            x_rpcbuf_write_CARD32(rpcbuf, sym->sym);
+            x_rpcbuf_write_CARD8(rpcbuf, sym->mods);
+            x_rpcbuf_write_CARD8(rpcbuf, sym->match);
+            x_rpcbuf_write_CARD8(rpcbuf, sym->virtual_mod);
+            x_rpcbuf_write_CARD8(rpcbuf, sym->flags);
+            /* write xkbActionWireDesc */
+            x_rpcbuf_write_binary_pad(rpcbuf, &sym->act, sizeof(xkbActionWireDesc));
         }
+
         if (rep.groups) {
-            grp = (xkbModsWireDesc *) wire;
             for (i = 0, bit = 1; i < XkbNumKbdGroups; i++, bit <<= 1) {
                 if (rep.groups & bit) {
-                    grp->mask = compat->groups[i].mask;
-                    grp->realMods = compat->groups[i].real_mods;
-                    grp->virtualMods = compat->groups[i].vmods;
-                    if (client->swapped) {
-                        swaps(&grp->virtualMods);
-                    }
-                    grp++;
+                    /* write xkbModsWireDesc */
+                    x_rpcbuf_write_CARD8(rpcbuf, compat->groups[i].mask);
+                    x_rpcbuf_write_CARD8(rpcbuf, compat->groups[i].real_mods);
+                    x_rpcbuf_write_CARD16(rpcbuf, compat->groups[i].vmods);
                 }
             }
-            wire = (xkbSymInterpretWireDesc *) grp;
         }
-    }
+        x_rpcbuf_pad(rpcbuf);
 }
 
 int
@@ -2837,12 +2828,11 @@ ProcXkbGetCompatMap(ClientPtr client)
     }
     XkbComputeGetCompatMapReplySize(compat, &rep);
 
-    int sz = rep.length * sizeof(CARD32);
-    char *buf = calloc(1, sz);
-    if (rep.length && (!buf)) // rep.length = 0 is valid here
-        return BadAlloc;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    XkbAssembleCompatMap(client, compat, rep, &rpcbuf);
 
-    XkbAssembleCompatMap(client, compat, rep, buf);
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -2853,8 +2843,7 @@ ProcXkbGetCompatMap(ClientPtr client)
     }
 
     WriteToClient(client, sizeof(xkbGetCompatMapReply), &rep);
-    WriteToClient(client, sz, buf);
-    free(buf);
+    WriteRpcbufToClient(client, &rpcbuf);
     return Success;
 }
 
@@ -6047,10 +6036,9 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
 
     if (reported & XkbGBN_CompatMapMask) {
-        char *buf = payload_walk + sizeof(crep);
-        XkbAssembleCompatMap(client, new->compat, crep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        const size_t crep_length = crep.length; /* save before swapping */
+        XkbAssembleCompatMap(client, new->compat, crep, &rpcbuf);
 
         if (client->swapped) {
             swaps(&crep.sequenceNumber);
@@ -6061,7 +6049,10 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &crep, sizeof(crep));
-        payload_walk = buf + (crep_length * 4) - (sizeof(crep) - sizeof(xGenericReply));
+        payload_walk += sizeof(crep);
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     if (reported & XkbGBN_IndicatorMapMask) {
