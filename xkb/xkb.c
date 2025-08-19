@@ -6090,6 +6090,10 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         XkbAssembleGeometry(client, new->geom, grep, &childbuf);
 
+        if (childbuf.wpos != (grep.length * 4))
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch nrep size (%ld // %d units)\n",
+                       (unsigned long)childbuf.wpos, (unsigned long)grep.length * 4, grep.length);
+
         if (client->swapped) {
             swaps(&grep.sequenceNumber);
             swapl(&grep.length);
