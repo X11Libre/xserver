@@ -235,7 +235,8 @@ typedef struct {
 
     uint64_t next_msc;
 
-    int cursor_width, cursor_height;
+    int cursor_width;
+    int cursor_height;
 
     Bool need_modeset;
     struct xorg_list mode_list;
@@ -359,7 +360,4 @@ Bool drmmode_crtc_get_fb_id(xf86CrtcPtr crtc, uint32_t *fb_id, int *x, int *y);
 
 void drmmode_set_dpms(ScrnInfoPtr scrn, int PowerManagementMode, int flags);
 void drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled);
-
-Bool drmmode_get_largest_cursor(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor_lim);
-
 #endif
