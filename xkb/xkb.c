@@ -1387,22 +1387,19 @@ static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
 int
 ProcXkbGetMap(ClientPtr client)
 {
-    DeviceIntPtr dev;
-    XkbDescRec *xkb;
-    int status;
-
     REQUEST(xkbGetMapReq);
     REQUEST_SIZE_MATCH(xkbGetMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
+    DeviceIntPtr dev;
     CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixGetAttrAccess);
     CHK_MASK_OVERLAP(0x01, stuff->full, stuff->partial);
     CHK_MASK_LEGAL(0x02, stuff->full, XkbAllMapComponentsMask);
     CHK_MASK_LEGAL(0x03, stuff->partial, XkbAllMapComponentsMask);
 
-    xkb = dev->key->xkbInfo->desc;
+    XkbDescRec *xkb = dev->key->xkbInfo->desc;
 
     xkbGetMapReply rep = {
         .deviceID = dev->id,
@@ -1491,20 +1488,21 @@ ProcXkbGetMap(ClientPtr client)
         rep.nVModMapKeys = stuff->nVModMapKeys;
     }
 
-    if ((status = XkbComputeGetMapReplySize(xkb, &rep)) != Success)
-        return status;
+    int rc = XkbComputeGetMapReplySize(xkb, &rep);
+    if (rc != Success)
+        return rc;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     XkbAssembleMap(client, xkb, rep, &rpcbuf);
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (client->swapped) {
         swaps(&rep.present);
         swaps(&rep.totalSyms);
         swaps(&rep.totalActs);
     }
-
-    if (rpcbuf.error)
-        return BadAlloc;
 
     X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
