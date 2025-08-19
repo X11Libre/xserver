@@ -1405,10 +1405,7 @@ ProcXkbGetMap(ClientPtr client)
     xkb = dev->key->xkbInfo->desc;
 
     xkbGetMapReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xkbGetMapReply) - sizeof(xGenericReply)),
         .present = stuff->partial | stuff->full,
         .minKeyCode = xkb->min_key_code,
         .maxKeyCode = xkb->max_key_code,
@@ -1497,22 +1494,10 @@ ProcXkbGetMap(ClientPtr client)
     if ((status = XkbComputeGetMapReplySize(xkb, &rep)) != Success)
         return status;
 
-    int payload_len = (rep.length * sizeof(CARD32)) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
-
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    if (!x_rpcbuf_makeroom(&rpcbuf, payload_len))
-        return BadAlloc;
-
-    /* use rpcbuf.wpos here, in order to get how much we've really written */
-    if (rpcbuf.wpos != payload_len)
-        LogMessage(X_WARNING, "ProcXkbGetMap() payload_len mismatch: %ld but shoud be %d\n",
-                   rpcbuf.wpos, payload_len);
-
     XkbAssembleMap(client, xkb, rep, &rpcbuf);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.present);
         swaps(&rep.totalSyms);
         swaps(&rep.totalActs);
@@ -1521,8 +1506,7 @@ ProcXkbGetMap(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    WriteToClient(client, sizeof(xkbGetMapReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
