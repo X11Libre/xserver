@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "dix/window_priv.h"
 #include "render/picturestr_priv.h"
 #include "Xext/panoramiX.h"
@@ -523,21 +524,17 @@ ProcXFixesFetchRegion(ClientPtr client)
     pBox = RegionRects(pRegion);
     nBox = RegionNumRects(pRegion);
 
-    xRectangle *pRect = calloc(nBox, sizeof(xRectangle));
-    if (!pRect)
-        return BadAlloc;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (i = 0; i < nBox; i++) {
-        pRect[i].x = pBox[i].x1;
-        pRect[i].y = pBox[i].y1;
-        pRect[i].width = pBox[i].x2 - pBox[i].x1;
-        pRect[i].height = pBox[i].y2 - pBox[i].y1;
+        x_rpcbuf_write_rect(&rpcbuf,
+                            pBox[i].x1,
+                            pBox[i].y1,
+                            pBox[i].x2 - pBox[i].x1,
+                            pBox[i].y2 - pBox[i].y1);
     }
 
     xXFixesFetchRegionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = nBox << 1,
         .x = pExtent->x1,
         .y = pExtent->y1,
         .width = pExtent->x2 - pExtent->x1,
@@ -551,11 +548,9 @@ ProcXFixesFetchRegion(ClientPtr client)
         swaps(&rep.y);
         swaps(&rep.width);
         swaps(&rep.height);
-        SwapShorts((INT16 *) pRect, nBox * 4);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, nBox * sizeof(xRectangle), pRect);
-    free(pRect);
+
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
