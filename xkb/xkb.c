@@ -2793,37 +2793,37 @@ XkbAssembleCompatMap(ClientPtr client,
 int
 ProcXkbGetCompatMap(ClientPtr client)
 {
-    DeviceIntPtr dev;
-    XkbDescPtr xkb;
-    XkbCompatMapPtr compat;
-
     REQUEST(xkbGetCompatMapReq);
     REQUEST_SIZE_MATCH(xkbGetCompatMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
+    DeviceIntPtr dev;
     CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixGetAttrAccess);
 
-    xkb = dev->key->xkbInfo->desc;
-    compat = xkb->compat;
+    XkbCompatMapPtr compat = dev->key->xkbInfo->desc->compat;
 
-    xkbGetCompatMapReply rep = {
-        .deviceID = dev->id,
-        .firstSI = stuff->firstSI,
-        .nSI = stuff->nSI,
-        .nTotalSI = compat->num_si,
-        .groups = stuff->groups,
-    };
+    CARD16 firstSI = stuff->firstSI;
+    CARD16 nSI = stuff->nSI;
+
     if (stuff->getAllSI) {
-        rep.firstSI = 0;
-        rep.nSI = compat->num_si;
+        firstSI = 0;
+        nSI = compat->num_si;
     }
     else if ((((unsigned) stuff->nSI) > 0) &&
              ((unsigned) (stuff->firstSI + stuff->nSI - 1) >= compat->num_si)) {
         client->errorValue = _XkbErrCode2(0x05, compat->num_si);
         return BadValue;
     }
+
+    xkbGetCompatMapReply rep = {
+        .deviceID = dev->id,
+        .firstSI = firstSI,
+        .nSI = nSI,
+        .nTotalSI = compat->num_si,
+        .groups = stuff->groups,
+    };
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     XkbAssembleCompatMap(client, compat, rep, &rpcbuf);
