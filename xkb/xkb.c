@@ -5862,11 +5862,11 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
 
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        x_rpcbuf_t childbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        XkbAssembleMap(client, new, mrep, &rpcbuf);
+        XkbAssembleMap(client, new, mrep, &childbuf);
 
-        if (rpcbuf.error) {
+        if (childbuf.error) {
             free(payload_buffer);
             return BadAlloc;
         }
@@ -5885,15 +5885,15 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         memcpy(payload_walk, &mrep, sizeof(mrep));
         payload_walk += sizeof(mrep);
-        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
-        payload_walk += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        memcpy(payload_walk, childbuf.buffer, childbuf.wpos);
+        payload_walk += childbuf.wpos;
+        x_rpcbuf_clear(&childbuf);
     }
 
     if (reported & XkbGBN_CompatMapMask) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        x_rpcbuf_t childbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        XkbAssembleCompatMap(client, new->compat, crep, &rpcbuf);
+        XkbAssembleCompatMap(client, new->compat, crep, &childbuf);
 
         if (childbuf.wpos != (crep.length * 4))
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch crep size (%ld // %d units)\n",
@@ -5909,17 +5909,17 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         memcpy(payload_walk, &crep, sizeof(crep));
         payload_walk += sizeof(crep);
-        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
-        payload_walk += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        memcpy(payload_walk, childbuf.buffer, childbuf.wpos);
+        payload_walk += childbuf.wpos;
+        x_rpcbuf_clear(&childbuf);
     }
 
     if (reported & XkbGBN_IndicatorMapMask) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        x_rpcbuf_t childbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        XkbAssembleIndicatorMap(client, new->indicators, irep, &rpcbuf);
+        XkbAssembleIndicatorMap(client, new->indicators, irep, &childbuf);
 
-        if (rpcbuf.error) {
+        if (childbuf.error) {
             free(payload_buffer);
             return BadAlloc;
         }
@@ -5937,15 +5937,15 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         memcpy(payload_walk, &irep, sizeof(irep));
         payload_walk += sizeof(irep);
-        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
-        payload_walk += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        memcpy(payload_walk, childbuf.buffer, childbuf.wpos);
+        payload_walk += childbuf.wpos;
+        x_rpcbuf_clear(&childbuf);
     }
 
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask)) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        x_rpcbuf_t childbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        XkbAssembleNames(client, new, nrep, &rpcbuf);
+        XkbAssembleNames(client, new, nrep, &childbuf);
 
         if (childbuf.wpos != (nrep.length * 4))
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch nrep size (%ld // %d units)\n",
@@ -5961,15 +5961,15 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         memcpy(payload_walk, &nrep, sizeof(nrep));
         payload_walk += sizeof(nrep);
-        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
-        payload_walk += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        memcpy(payload_walk, childbuf.buffer, childbuf.wpos);
+        payload_walk += childbuf.wpos;
+        x_rpcbuf_clear(&childbuf);
     }
 
     if (reported & XkbGBN_GeometryMask) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        x_rpcbuf_t childbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        XkbAssembleGeometry(client, new->geom, grep, &rpcbuf);
+        XkbAssembleGeometry(client, new->geom, grep, &childbuf);
 
         if (childbuf.wpos != (grep.length * 4))
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch nrep size (%ld // %d units)\n",
@@ -5991,9 +5991,9 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         memcpy(payload_walk, &nrep, sizeof(grep));
         payload_walk += sizeof(grep);
-        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
-        payload_walk += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        memcpy(payload_walk, childbuf.buffer, childbuf.wpos);
+        payload_walk += childbuf.wpos;
+        x_rpcbuf_clear(&childbuf);
     }
 
     WriteToClient(client, sizeof(xkbGetKbdByNameReply), &rep);
