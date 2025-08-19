@@ -271,4 +271,24 @@ static inline void x_rpcbuf_pad(x_rpcbuf_t *rpcbuf) {
         (((rpcbuf->wpos + 3) / 4) * 4) - rpcbuf->wpos);
 }
 
+/*
+ * write a Pascal-like counted string, starting with CARD16 couter,
+ * followed by the char bytes, padded to full protocol units (4-bytes).
+ *
+ * if str is NULL, don't write anything
+ *
+ * @param rpcbuf    pointer to the x_rpcbuf_t to operate on
+ * @param str       zero-terminated string to write into the buffer
+ */
+static inline void x_rpcbuf_write_counted_string_pad(
+        x_rpcbuf_t *rpcbuf, const char *str)
+{
+    if (str) {
+        CARD16 len = strlen(str);
+        x_rpcbuf_write_CARD16(rpcbuf, len);
+        x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)str, len);
+        x_rpcbuf_pad(rpcbuf);
+    }
+}
+
 #endif /* _XSERVER_DIX_RPCBUF_PRIV_H */
