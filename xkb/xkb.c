@@ -4503,57 +4503,41 @@ XkbSizeGeomShapes(XkbGeometryPtr geom)
     return size;
 }
 
-static char *
-XkbWriteGeomShapes(char *wire, XkbGeometryPtr geom, Bool swap)
+static void XkbWriteGeomShapes(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
     int i;
     XkbShapePtr shape;
-    xkbShapeWireDesc *shapeWire;
 
     for (i = 0, shape = geom->shapes; i < geom->num_shapes; i++, shape++) {
         register int o;
         XkbOutlinePtr ol;
-        xkbOutlineWireDesc *olWire;
 
-        shapeWire = (xkbShapeWireDesc *) wire;
-        shapeWire->name = shape->name;
-        shapeWire->nOutlines = shape->num_outlines;
-        if (shape->primary != NULL)
-            shapeWire->primaryNdx = XkbOutlineIndex(shape, shape->primary);
-        else
-            shapeWire->primaryNdx = XkbNoShape;
-        if (shape->approx != NULL)
-            shapeWire->approxNdx = XkbOutlineIndex(shape, shape->approx);
-        else
-            shapeWire->approxNdx = XkbNoShape;
-        shapeWire->pad = 0;
-        if (swap) {
-            swapl(&shapeWire->name);
-        }
-        wire = (char *) &shapeWire[1];
+        /* write xkbShapeWireDesc */
+        x_rpcbuf_write_CARD32(rpcbuf, shape->name);
+        x_rpcbuf_write_CARD8(rpcbuf, shape->num_outlines);
+        x_rpcbuf_write_CARD8(
+            rpcbuf,
+            shape->primary ? XkbOutlineIndex(shape, shape->primary) : XkbNoShape);
+        x_rpcbuf_write_CARD8(rpcbuf,
+            shape->approx ? XkbOutlineIndex(shape, shape->approx) : XkbNoShape);
+        x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
+
         for (o = 0, ol = shape->outlines; o < shape->num_outlines; o++, ol++) {
             register int p;
             XkbPointPtr pt;
-            xkbPointWireDesc *ptWire;
 
-            olWire = (xkbOutlineWireDesc *) wire;
-            olWire->nPoints = ol->num_points;
-            olWire->cornerRadius = ol->corner_radius;
-            olWire->pad = 0;
-            wire = (char *) &olWire[1];
-            ptWire = (xkbPointWireDesc *) wire;
+            /* write xkbOutlineWireDesc */
+            x_rpcbuf_write_CARD8(rpcbuf, ol->num_points);
+            x_rpcbuf_write_CARD8(rpcbuf, ol->corner_radius);
+            x_rpcbuf_pad(rpcbuf);
+
             for (p = 0, pt = ol->points; p < ol->num_points; p++, pt++) {
-                ptWire[p].x = pt->x;
-                ptWire[p].y = pt->y;
-                if (swap) {
-                    swaps(&ptWire[p].x);
-                    swaps(&ptWire[p].y);
-                }
+                /* write xkbPointWireDesc */
+                x_rpcbuf_write_INT16(rpcbuf, pt->x);
+                x_rpcbuf_write_INT16(rpcbuf, pt->y);
             }
-            wire = (char *) &ptWire[ol->num_points];
         }
     }
-    return wire;
 }
 
 static int
@@ -4848,8 +4832,14 @@ XkbAssembleGeometry(ClientPtr client,
         desc = XkbWriteGeomProperties(desc, geom, client->swapped);
     if (rep.nColors > 0)
         desc = XkbWriteGeomColors(desc, geom, client->swapped);
-    if (rep.nShapes > 0)
-        desc = XkbWriteGeomShapes(desc, geom, client->swapped);
+    if (rep.nShapes > 0) {
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        XkbWriteGeomShapes(&rpcbuf, geom);
+        if (!rpcbuf.error)
+            memcpy(desc, rpcbuf.buffer, rpcbuf.wpos);
+        desc += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
+    }
     if (rep.nSections > 0)
         desc = XkbWriteGeomSections(desc, geom, client->swapped);
     if (rep.nDoodads > 0)
