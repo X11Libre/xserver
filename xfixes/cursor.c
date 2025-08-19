@@ -47,6 +47,7 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 
 #include "xfixesint.h"
@@ -369,16 +370,17 @@ ProcXFixesGetCursorImage(ClientPtr client)
     height = pCursor->bits->height;
     npixels = width * height;
 
-    CARD32 *image = calloc(npixels, sizeof(CARD32));
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    CARD32 *image = x_rpcbuf_reserve(&rpcbuf, npixels * sizeof(CARD32));
     if (!image)
         return BadAlloc;
 
     CopyCursorToImage(pCursor, image);
+    if (client->swapped)
+        SwapLongs(image, npixels);
 
     xXFixesGetCursorImageReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = npixels,
         .width = width,
         .height = height,
         .x = x,
@@ -389,8 +391,6 @@ ProcXFixesGetCursorImage(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.x);
         swaps(&rep.y);
         swaps(&rep.width);
@@ -398,11 +398,9 @@ ProcXFixesGetCursorImage(ClientPtr client)
         swaps(&rep.xhot);
         swaps(&rep.yhot);
         swapl(&rep.cursorSerial);
-        SwapLongs(image, npixels);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, npixels * sizeof(CARD32), image);
-    free(image);
+
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -443,7 +441,6 @@ ProcXFixesGetCursorName(ClientPtr client)
 
     CursorPtr pCursor;
     const char *str;
-    int len;
 
     REQUEST_SIZE_MATCH(xXFixesGetCursorNameReq);
     VERIFY_CURSOR(pCursor, stuff->cursor, client, DixGetAttrAccess);
@@ -451,24 +448,19 @@ ProcXFixesGetCursorName(ClientPtr client)
         str = NameForAtom(pCursor->name);
     else
         str = "";
-    len = strlen(str);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_string_pad(&rpcbuf, str);
 
     xXFixesGetCursorNameReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(len),
         .atom = pCursor->name,
-        .nbytes = len
+        .nbytes = strlen(str)
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.atom);
         swaps(&rep.nbytes);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, len, str);
-
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -488,7 +480,6 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     CursorPtr pCursor;
     int npixels;
     const char *name;
-    int nbytes;
     int width, height;
     int rc, x, y;
 
@@ -505,21 +496,23 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     height = pCursor->bits->height;
     npixels = width * height;
     name = pCursor->name ? NameForAtom(pCursor->name) : "";
-    nbytes = strlen(name);
 
-    // pixmap plus name (padded to 4 bytes)
-    const size_t image_size = (npixels + bytes_to_int32(nbytes)) * sizeof(CARD32);
-    CARD32 *image = calloc(1, image_size);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    CARD32 *image = x_rpcbuf_reserve(&rpcbuf, npixels * sizeof(CARD32));
     if (!image)
         return BadAlloc;
 
     CopyCursorToImage(pCursor, image);
-    memcpy((image + npixels), name, nbytes);
+    if (client->swapped)
+        SwapLongs(image, npixels);
+
+    x_rpcbuf_write_string_pad(&rpcbuf, name);
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     xXFixesGetCursorImageAndNameReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(image_size),
         .width = width,
         .height = height,
         .x = x,
@@ -528,12 +521,10 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
         .yhot = pCursor->bits->yhot,
         .cursorSerial = pCursor->serialNumber,
         .cursorName = pCursor->name,
-        .nbytes = nbytes,
+        .nbytes = strlen(name),
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.x);
         swaps(&rep.y);
         swaps(&rep.width);
@@ -543,11 +534,9 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
         swapl(&rep.cursorSerial);
         swapl(&rep.cursorName);
         swaps(&rep.nbytes);
-        SwapLongs(image, npixels);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, image_size, image);
-    free(image);
+
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
