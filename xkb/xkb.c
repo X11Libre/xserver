@@ -2809,8 +2809,6 @@ ProcXkbGetCompatMap(ClientPtr client)
     compat = xkb->compat;
 
     xkbGetCompatMapReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .deviceID = dev->id,
         .firstSI = stuff->firstSI,
         .nSI = stuff->nSI,
@@ -2826,7 +2824,6 @@ ProcXkbGetCompatMap(ClientPtr client)
         client->errorValue = _XkbErrCode2(0x05, compat->num_si);
         return BadValue;
     }
-    XkbComputeGetCompatMapReplySize(compat, &rep);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     XkbAssembleCompatMap(client, compat, rep, &rpcbuf);
@@ -2835,15 +2832,12 @@ ProcXkbGetCompatMap(ClientPtr client)
         return BadAlloc;
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.firstSI);
         swaps(&rep.nSI);
         swaps(&rep.nTotalSI);
     }
 
-    WriteToClient(client, sizeof(xkbGetCompatMapReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
