@@ -4725,55 +4725,30 @@ static void
 XkbAssembleGeometry(ClientPtr client,
                     XkbGeometryPtr geom,
                     xkbGetGeometryReply rep,
-                    char *desc)
+                    x_rpcbuf_t *rpcbuf)
 {
     if (geom == NULL)
         return;
 
-    desc = XkbWriteCountedString(desc, geom->label_font, client->swapped);
+    x_rpcbuf_write_counted_string_pad(rpcbuf, geom->label_font);
 
     if (rep.nProperties > 0) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-        XkbWriteGeomProperties(&rpcbuf, geom);
-        memcpy(desc, rpcbuf.buffer, rpcbuf.wpos);
-        desc += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        XkbWriteGeomProperties(rpcbuf, geom);
     }
     if (rep.nColors > 0) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-        XkbWriteGeomColors(&rpcbuf, geom);
-        memcpy(desc, rpcbuf.buffer, rpcbuf.wpos);
-        desc += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        XkbWriteGeomColors(rpcbuf, geom);
     }
     if (rep.nShapes > 0) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-        XkbWriteGeomShapes(&rpcbuf, geom);
-        if (!rpcbuf.error)
-            memcpy(desc, rpcbuf.buffer, rpcbuf.wpos);
-        desc += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        XkbWriteGeomShapes(rpcbuf, geom);
     }
     if (rep.nSections > 0) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-        XkbWriteGeomSections(&rpcbuf, geom);
-        memcpy(desc, rpcbuf.buffer, rpcbuf.wpos);
-        desc += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        XkbWriteGeomSections(rpcbuf, geom);
     }
     if (rep.nDoodads > 0) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-        XkbWriteGeomDoodads(&rpcbuf, geom->num_doodads, geom->doodads);
-        memcpy(desc, rpcbuf.buffer, rpcbuf.wpos);
-        desc += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        XkbWriteGeomDoodads(rpcbuf, geom->num_doodads, geom->doodads);
     }
     if (rep.nKeyAliases > 0) {
-        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-        XkbWriteGeomKeyAliases(&rpcbuf, geom);
-        memcpy(desc, rpcbuf.buffer, rpcbuf.wpos);
-        desc += rpcbuf.wpos;
-        x_rpcbuf_clear(&rpcbuf);
+        XkbWriteGeomKeyAliases(rpcbuf, geom);
     }
 }
 
@@ -4805,14 +4780,13 @@ ProcXkbGetGeometry(ClientPtr client)
     if (status != Success)
         goto free_out;
 
-    int len = rep.length * sizeof(CARD32);
-    char *buf = calloc(1, len);
-    if (!buf) {
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    XkbAssembleGeometry(client, geom, rep, &rpcbuf);
+
+    if (rpcbuf.error) {
         status = BadAlloc;
         goto free_out;
     }
-
-    XkbAssembleGeometry(client, geom, rep, buf);
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
@@ -4828,9 +4802,7 @@ ProcXkbGetGeometry(ClientPtr client)
         swaps(&rep.nKeyAliases);
     }
 
-    WriteToClient(client, sizeof(xkbGetGeometryReply), &rep);
-    WriteToClient(client, len, buf);
-    free(buf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
 free_out:
     if (shouldFree)
@@ -5995,10 +5967,9 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
 
     if (reported & XkbGBN_GeometryMask) {
-        char *buf = payload_walk + sizeof(grep);
-        XkbAssembleGeometry(client, new->geom, grep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        const size_t grep_length = grep.length; /* save before swapping */
+        XkbAssembleGeometry(client, new->geom, grep, &rpcbuf);
 
         if (childbuf.wpos != (grep.length * 4))
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch nrep size (%ld // %d units)\n",
@@ -6018,8 +5989,11 @@ ProcXkbGetKbdByName(ClientPtr client)
             swaps(&grep.nKeyAliases);
         }
 
-        memcpy(payload_walk, &grep, sizeof(grep));
-        payload_walk = buf + (grep_length * 4) - (sizeof(grep) - sizeof(xGenericReply));
+        memcpy(payload_walk, &nrep, sizeof(grep));
+        payload_walk += sizeof(grep);
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     WriteToClient(client, sizeof(xkbGetKbdByNameReply), &rep);
