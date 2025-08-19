@@ -131,6 +131,9 @@ typedef struct _modesettingRec {
     DamagePtr damage;
     Bool dirty_enabled;
 
+    uint32_t cursor_image_width;
+    uint32_t cursor_image_height;
+
     Bool has_queue_sequence;
     Bool tried_queue_sequence;
 

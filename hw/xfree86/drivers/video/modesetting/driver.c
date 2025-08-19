@@ -2001,17 +2001,12 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         PointPriv->spriteFuncs = &drmmode_sprite_funcs;
     }
 
-    /* Get the maximum cursor size. */
-    drmmode_cursor_dim_rec cursor_dim = { 0 };
-    if (!drmmode_get_largest_cursor(pScrn, &cursor_dim))
-        return FALSE;
-
     /* Need to extend HWcursor support to handle mask interleave */
     if (!ms->drmmode.sw_cursor) {
         /* XXX Is there any spec that says we should interleave the cursor bits? XXX */
         int interleave = modesetting_get_cursor_interleave(pScrn->scrnIndex);
 
-        xf86_cursors_init(pScreen, cursor_dim.width, cursor_dim.height,
+        xf86_cursors_init(pScreen, ms->cursor_image_width, ms->cursor_image_height,
                           interleave |
                           HARDWARE_CURSOR_UPDATE_UNHIDDEN |
                           HARDWARE_CURSOR_ARGB);
