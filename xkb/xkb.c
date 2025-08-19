@@ -1389,7 +1389,7 @@ ProcXkbGetMap(ClientPtr client)
 {
     DeviceIntPtr dev;
     XkbDescRec *xkb;
-    int n, status;
+    int status;
 
     REQUEST(xkbGetMapReq);
     REQUEST_SIZE_MATCH(xkbGetMapReq);
@@ -1425,10 +1425,10 @@ ProcXkbGetMap(ClientPtr client)
         rep.nTypes = stuff->nTypes;
     }
 
-    n = XkbNumKeys(xkb);
+    int numKeys = XkbNumKeys(xkb);
     if (stuff->full & XkbKeySymsMask) {
         rep.firstKeySym = xkb->min_key_code;
-        rep.nKeySyms = n;
+        rep.nKeySyms = numKeys;
     }
     else if (stuff->partial & XkbKeySymsMask) {
         CHK_KEY_RANGE(0x05, stuff->firstKeySym, stuff->nKeySyms, xkb);
@@ -1438,7 +1438,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbKeyActionsMask) {
         rep.firstKeyAct = xkb->min_key_code;
-        rep.nKeyActs = n;
+        rep.nKeyActs = numKeys;
     }
     else if (stuff->partial & XkbKeyActionsMask) {
         CHK_KEY_RANGE(0x07, stuff->firstKeyAct, stuff->nKeyActs, xkb);
@@ -1448,7 +1448,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbKeyBehaviorsMask) {
         rep.firstKeyBehavior = xkb->min_key_code;
-        rep.nKeyBehaviors = n;
+        rep.nKeyBehaviors = numKeys;
     }
     else if (stuff->partial & XkbKeyBehaviorsMask) {
         CHK_KEY_RANGE(0x09, stuff->firstKeyBehavior, stuff->nKeyBehaviors, xkb);
@@ -1463,7 +1463,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbExplicitComponentsMask) {
         rep.firstKeyExplicit = xkb->min_key_code;
-        rep.nKeyExplicit = n;
+        rep.nKeyExplicit = numKeys;
     }
     else if (stuff->partial & XkbExplicitComponentsMask) {
         CHK_KEY_RANGE(0x0B, stuff->firstKeyExplicit, stuff->nKeyExplicit, xkb);
@@ -1473,7 +1473,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbModifierMapMask) {
         rep.firstModMapKey = xkb->min_key_code;
-        rep.nModMapKeys = n;
+        rep.nModMapKeys = numKeys;
     }
     else if (stuff->partial & XkbModifierMapMask) {
         CHK_KEY_RANGE(0x0D, stuff->firstModMapKey, stuff->nModMapKeys, xkb);
@@ -1483,7 +1483,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbVirtualModMapMask) {
         rep.firstVModMapKey = xkb->min_key_code;
-        rep.nVModMapKeys = n;
+        rep.nVModMapKeys = numKeys;
     }
     else if (stuff->partial & XkbVirtualModMapMask) {
         CHK_KEY_RANGE(0x0F, stuff->firstVModMapKey, stuff->nVModMapKeys, xkb);
