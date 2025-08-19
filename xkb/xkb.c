@@ -3117,31 +3117,22 @@ static void
 XkbAssembleIndicatorMap(ClientPtr client,
                         XkbIndicatorPtr indicators,
                         xkbGetIndicatorMapReply rep,
-                        char *buf)
+                        x_rpcbuf_t *rpcbuf)
 {
-    CARD8 *map = (CARD8*)buf;
     register int i;
     register unsigned bit;
 
-    if (rep.length > 0) {
-        xkbIndicatorMapWireDesc *wire = (xkbIndicatorMapWireDesc *) map;
-
-        for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
-            if (rep.which & bit) {
-                wire->flags = indicators->maps[i].flags;
-                wire->whichGroups = indicators->maps[i].which_groups;
-                wire->groups = indicators->maps[i].groups;
-                wire->whichMods = indicators->maps[i].which_mods;
-                wire->mods = indicators->maps[i].mods.mask;
-                wire->realMods = indicators->maps[i].mods.real_mods;
-                wire->virtualMods = indicators->maps[i].mods.vmods;
-                wire->ctrls = indicators->maps[i].ctrls;
-                if (client->swapped) {
-                    swaps(&wire->virtualMods);
-                    swapl(&wire->ctrls);
-                }
-                wire++;
-            }
+    for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
+        if (rep.which & bit) {
+            XkbIndicatorMapPtr entry = &indicators->maps[i];
+            x_rpcbuf_write_CARD8(rpcbuf, entry->flags);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->which_groups);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->groups);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->which_mods);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->mods.mask);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->mods.real_mods);
+            x_rpcbuf_write_CARD16(rpcbuf, entry->mods.vmods);
+            x_rpcbuf_write_CARD32(rpcbuf, entry->ctrls);
         }
     }
 }
@@ -3165,30 +3156,25 @@ ProcXkbGetIndicatorMap(ClientPtr client)
     leds = xkb->indicators;
 
     xkbGetIndicatorMapReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .which = stuff->which
     };
     XkbComputeGetIndicatorMapReplySize(leds, &rep);
 
-    int sz = rep.length * sizeof(CARD32);
-    char *buf = calloc(1, sz);
-    if (!buf)
-        return BadAlloc;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    XkbAssembleIndicatorMap(client, leds, rep, buf);
+    XkbAssembleIndicatorMap(client, leds, rep, &rpcbuf);
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.which);
         swapl(&rep.realIndicators);
     }
 
-    WriteToClient(client, sizeof(xkbGetIndicatorMapReply), &rep);
-    WriteToClient(client, sz, buf);
-    free(buf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -6047,10 +6033,14 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
 
     if (reported & XkbGBN_IndicatorMapMask) {
-        char *buf = payload_walk + sizeof(irep);
-        XkbAssembleIndicatorMap(client, new->indicators, irep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        const size_t irep_length = irep.length;
+        XkbAssembleIndicatorMap(client, new->indicators, irep, &rpcbuf);
+
+        if (rpcbuf.error) {
+            free(payload_buffer);
+            return BadAlloc;
+        }
 
         if (client->swapped) {
             swaps(&irep.sequenceNumber);
@@ -6060,7 +6050,10 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &irep, sizeof(irep));
-        payload_walk = buf + (irep_length * 4) - (sizeof(irep) - sizeof(xGenericReply));
+        payload_walk += sizeof(irep);
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask)) {
