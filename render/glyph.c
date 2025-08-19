@@ -117,7 +117,7 @@ FindGlyphHashSet(CARD32 filled)
 
 static GlyphRefPtr
 FindGlyphRef(GlyphHashPtr hash,
-             CARD32 signature, Bool match, unsigned char dgst[16])
+             CARD32 signature, Bool match, unsigned char dgst[20])
 {
     CARD32 elt, step, s;
     GlyphPtr glyph;
@@ -148,7 +148,7 @@ FindGlyphRef(GlyphHashPtr hash,
                 break;
         }
         else if (s == signature &&
-                 (!match || memcmp(glyph->dgst, dgst, 16) == 0)) {
+                 (!match || memcmp(glyph->dgst, dgst, 20) == 0)) {
             break;
         }
         if (!step) {
@@ -165,29 +165,33 @@ FindGlyphRef(GlyphHashPtr hash,
 
 int
 HashGlyph(xGlyphInfo * gi,
-          CARD8 *bits, unsigned long size, unsigned char dgst[16])
+          CARD8 *bits, unsigned long size, unsigned char dgst[20])
 {
-	XXH128_hash_t h;
-	XXH3_state_t state;
+    XXH128_hash_t h;
+    XXH3_state_t state;
 
-	XXH3_128bits_reset(&state);
-	XXH3_128bits_update(&state, gi, sizeof(xGlyphInfo));
-	XXH3_128bits_update(&state, (void*)bits, size);
-	h = XXH3_128bits_digest(&state);
+    XXH3_128bits_reset(&state);
+    XXH3_128bits_update(&state, gi, sizeof(xGlyphInfo));
+    XXH3_128bits_update(&state, (void*)bits, size);
+    h = XXH3_128bits_digest(&state);
 
-	memcpy(dgst, &(h.low64), sizeof(h.low64));
-	memcpy(dgst+sizeof(h.low64), &(h.high64), sizeof(h.high64));
+    memcpy(dgst, &(h.low64), sizeof(h.low64));
+    memcpy(dgst+sizeof(h.low64), &(h.high64), sizeof(h.high64));
+    dgst[16] = dgst[0] ^ dgst[1] ^ dgst[8] ^ dgst[9];
+    dgst[17] = dgst[2] ^ dgst[3] ^ dgst[10] ^ dgst[11];
+    dgst[18] = dgst[4] ^ dgst[5] ^ dgst[12] ^ dgst[13];
+    dgst[19] = dgst[6] ^ dgst[7] ^ dgst[14] ^ dgst[15];
 
-	return Success;
+    return Success;
 }
 
 GlyphPtr
 FindGlyphByHash(unsigned char dgst[16], int format)
 {
     GlyphRefPtr gr;
-	 CARD32 signature;
+    CARD32 signature;
 
-	 memcpy(&signature, dgst, sizeof(CARD32));
+    memcpy(&signature, dgst, sizeof(CARD32));
 
     if (!globalGlyphs[format].hashSet)
         return NULL;
@@ -263,7 +267,7 @@ FreeGlyph(GlyphPtr glyph, int format)
                 first = i;
             }
 
-		  memcpy(&signature, &(glyph->dgst), sizeof(CARD32));
+        memcpy(&signature, &(glyph->dgst), sizeof(CARD32));
         gr = FindGlyphRef(&globalGlyphs[format], signature, TRUE, glyph->dgst);
         if (gr - globalGlyphs[format].table != first)
             DuplicateRef(glyph, "Found wrong one");
@@ -286,7 +290,7 @@ AddGlyph(GlyphSetPtr glyphSet, GlyphPtr glyph, Glyph id)
 
     CheckDuplicates(&globalGlyphs[glyphSet->fdepth], "AddGlyph top global");
     /* Locate existing matching glyph */
-	 memcpy(&signature, &(glyph->dgst), sizeof(CARD32));
+    memcpy(&signature, &(glyph->dgst), sizeof(CARD32));
     gr = FindGlyphRef(&globalGlyphs[glyphSet->fdepth], signature,
                       TRUE, glyph->dgst);
     if (gr->glyph && gr->glyph != DeletedGlyph && gr->glyph != glyph) {
