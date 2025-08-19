@@ -3592,23 +3592,12 @@ _XkbCountAtoms(Atom *atoms, int maxAtoms, int *count)
     return atomsPresent;
 }
 
-static char *
-_XkbWriteAtoms(char *wire, Atom *atoms, int maxAtoms, int swap)
+static void __rpcbuf_write_atoms(x_rpcbuf_t *rpcbuf, Atom *atoms, size_t maxAtoms)
 {
-    register unsigned int i;
-    Atom *atm;
-
-    atm = (Atom *) wire;
-    for (i = 0; i < maxAtoms; i++) {
-        if (atoms[i] != None) {
-            *atm = atoms[i];
-            if (swap) {
-                swapl(atm);
-            }
-            atm++;
-        }
+    for (size_t i = 0; i < maxAtoms; i++) {
+        if (atoms[i] != None)
+            x_rpcbuf_write_CARD32(rpcbuf, atoms[i]);
     }
-    return (char *) atm;
 }
 
 static Status
@@ -3729,97 +3718,76 @@ XkbComputeGetNamesReplySize(XkbDescPtr xkb, xkbGetNamesReply * rep)
     return Success;
 }
 
-#define _ADD_CARD32(val) \
-    do { \
-        *((CARD32 *) desc) = (val); \
-        if (client->swapped) { swapl((int *)desc); } \
-        desc += sizeof(CARD32); \
-    } while (0)
-
 static void
-XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, char *buf)
+XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, x_rpcbuf_t *rpcbuf)
 {
     register unsigned i, which;
-    char *desc = buf;
 
     which = rep.which;
 
     if (xkb->names) {
         if (which & XkbKeycodesNameMask) {
-            _ADD_CARD32(xkb->names->keycodes);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->keycodes);
         }
         if (which & XkbGeometryNameMask) {
-            _ADD_CARD32(xkb->names->geometry);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->geometry);
         }
         if (which & XkbSymbolsNameMask) {
-            _ADD_CARD32(xkb->names->symbols);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->symbols);
         }
         if (which & XkbPhysSymbolsNameMask) {
-            _ADD_CARD32(xkb->names->phys_symbols);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->phys_symbols);
         }
         if (which & XkbTypesNameMask) {
-            _ADD_CARD32(xkb->names->types);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->types);
         }
         if (which & XkbCompatNameMask) {
-            _ADD_CARD32(xkb->names->compat);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->compat);
         }
         if (which & XkbKeyTypeNamesMask) {
             for (i = 0; i < xkb->map->num_types; i++) {
-                _ADD_CARD32(xkb->map->types[i].name);
+                x_rpcbuf_write_CARD32(rpcbuf, xkb->map->types[i].name);
             }
         }
         if (which & XkbKTLevelNamesMask && xkb->map) {
             XkbKeyTypePtr type = xkb->map->types;
 
             for (i = 0; i < rep.nTypes; i++, type++) {
-                *desc++ = type->num_levels;
+                x_rpcbuf_write_CARD8(rpcbuf, type->num_levels);
             }
-            desc += XkbPaddedSize(rep.nTypes) - rep.nTypes;
+            x_rpcbuf_pad(rpcbuf);
 
             type = xkb->map->types;
             for (i = 0; i < xkb->map->num_types; i++, type++) {
                 for (int l = 0; l < type->num_levels; l++) {
-                    _ADD_CARD32(type->level_names[l]);
+                    x_rpcbuf_write_CARD32(rpcbuf, type->level_names[l]);
                 }
             }
         }
         if (which & XkbIndicatorNamesMask) {
-            desc =
-                _XkbWriteAtoms(desc, xkb->names->indicators, XkbNumIndicators,
-                               client->swapped);
+            __rpcbuf_write_atoms(rpcbuf, xkb->names->indicators, XkbNumIndicators);
         }
         if (which & XkbVirtualModNamesMask) {
-            desc = _XkbWriteAtoms(desc, xkb->names->vmods, XkbNumVirtualMods,
-                                  client->swapped);
+            __rpcbuf_write_atoms(rpcbuf, xkb->names->vmods, XkbNumVirtualMods);
         }
         if (which & XkbGroupNamesMask) {
-            desc = _XkbWriteAtoms(desc, xkb->names->groups, XkbNumKbdGroups,
-                                  client->swapped);
+            __rpcbuf_write_atoms(rpcbuf, xkb->names->groups, XkbNumKbdGroups);
         }
         if (which & XkbKeyNamesMask) {
-            for (i = 0; i < rep.nKeys; i++, desc += sizeof(XkbKeyNameRec)) {
-                *((XkbKeyNamePtr) desc) = xkb->names->keys[i + rep.firstKey];
-            }
+            x_rpcbuf_write_binary_pad(rpcbuf,
+                                      &(xkb->names->keys[rep.firstKey]),
+                                      sizeof(XkbKeyNameRec) * rep.nKeys);
         }
         if (which & XkbKeyAliasesMask) {
-            XkbKeyAliasPtr pAl;
-
-            pAl = xkb->names->key_aliases;
-            for (i = 0; i < rep.nKeyAliases;
-                 i++, pAl++, desc += 2 * XkbKeyNameLength) {
-                *((XkbKeyAliasPtr) desc) = *pAl;
-            }
+            x_rpcbuf_write_binary_pad(rpcbuf,
+                                      xkb->names->key_aliases,
+                                      sizeof(XkbKeyAliasRec) * rep.nKeyAliases);
         }
         if ((which & XkbRGNamesMask) && (rep.nRadioGroups > 0)) {
-            register CARD32 *atm = (CARD32 *) desc;
-
-            for (i = 0; i < rep.nRadioGroups; i++, atm++) {
-                _ADD_CARD32(xkb->names->radio_groups[i]);
-            }
+            x_rpcbuf_write_CARD32s(rpcbuf, xkb->names->radio_groups, rep.nRadioGroups);
         }
     }
 }
-#undef _ADD_CARD32
 
 int
 ProcXkbGetNames(ClientPtr client)
@@ -3839,9 +3807,7 @@ ProcXkbGetNames(ClientPtr client)
     xkb = dev->key->xkbInfo->desc;
 
     xkbGetNamesReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .which = stuff->which,
         .nTypes = xkb->map->num_types,
         .firstKey = xkb->min_key_code,
@@ -3851,24 +3817,20 @@ ProcXkbGetNames(ClientPtr client)
     };
     XkbComputeGetNamesReplySize(xkb, &rep);
 
-    int sz = rep.length * sizeof(CARD32);
-    char *payload_buf = calloc(1, sz);
-    if (!payload_buf)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    XkbAssembleNames(client, xkb, rep, &rpcbuf);
+
+    if (rpcbuf.error)
         return BadAlloc;
 
-    XkbAssembleNames(client, xkb, rep, payload_buf);
-
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.which);
         swaps(&rep.virtualMods);
         swapl(&rep.indicators);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, sz, payload_buf);
-    free(payload_buf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -6064,10 +6026,9 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
 
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask)) {
-        char *buf = payload_walk + sizeof(nrep);
-        XkbAssembleNames(client, new, nrep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        const size_t nrep_length = nrep.length; /* save before swapping */
+        XkbAssembleNames(client, new, nrep, &rpcbuf);
 
         if (client->swapped) {
             swaps(&nrep.sequenceNumber);
@@ -6078,7 +6039,10 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &nrep, sizeof(nrep));
-        payload_walk = buf + (nrep_length * 4) - (sizeof(nrep) - sizeof(xGenericReply));
+        payload_walk += sizeof(nrep);
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     if (reported & XkbGBN_GeometryMask) {
