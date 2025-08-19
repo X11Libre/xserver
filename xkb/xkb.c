@@ -4638,42 +4638,32 @@ XkbWriteGeomDoodads(char *wire, int num_doodads, XkbDoodadPtr doodad, Bool swap)
     return wire;
 }
 
-static char *
-XkbWriteGeomOverlay(char *wire, XkbOverlayPtr ol, Bool swap)
+static void XkbWriteGeomOverlay(x_rpcbuf_t *rpcbuf, XkbOverlayPtr ol)
 {
     register int r;
     XkbOverlayRowPtr row;
-    xkbOverlayWireDesc *olWire;
 
-    olWire = (xkbOverlayWireDesc *) wire;
-    olWire->name = ol->name;
-    olWire->nRows = ol->num_rows;
-    olWire->pad1 = 0;
-    olWire->pad2 = 0;
-    if (swap) {
-        swapl(&olWire->name);
-    }
-    wire = (char *) &olWire[1];
+    /* write xkbOverlayWireDesc */
+    x_rpcbuf_write_CARD32(rpcbuf, ol->name);
+    x_rpcbuf_write_CARD8(rpcbuf, ol->num_rows);
+    x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
+    x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad2 */
+
     for (r = 0, row = ol->rows; r < ol->num_rows; r++, row++) {
         unsigned int k;
         XkbOverlayKeyPtr key;
-        xkbOverlayRowWireDesc *rowWire;
 
-        rowWire = (xkbOverlayRowWireDesc *) wire;
-        rowWire->rowUnder = row->row_under;
-        rowWire->nKeys = row->num_keys;
-        rowWire->pad1 = 0;
-        wire = (char *) &rowWire[1];
+        /* write xkbOverlayRowWireDesc */
+        x_rpcbuf_write_CARD8(rpcbuf, row->row_under);
+        x_rpcbuf_write_CARD8(rpcbuf, row->num_keys);
+        x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
+
         for (k = 0, key = row->keys; k < row->num_keys; k++, key++) {
-            xkbOverlayKeyWireDesc *keyWire;
-
-            keyWire = (xkbOverlayKeyWireDesc *) wire;
-            memcpy(keyWire->over, key->over.name, XkbKeyNameLength);
-            memcpy(keyWire->under, key->under.name, XkbKeyNameLength);
-            wire = (char *) &keyWire[1];
+            /* write xkbOverlayKeyWireDesc */
+            x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)key->over.name, XkbKeyNameLength);
+            x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)key->under.name, XkbKeyNameLength);
         }
     }
-    return wire;
 }
 
 static int
@@ -4789,11 +4779,15 @@ XkbWriteGeomSections(char *wire, XkbGeometryPtr geom, Bool swap)
                                        swap);
         }
         if (section->overlays) {
-            register int o;
+            x_rpcbuf_t rpcbuf = { .swapped = swap, .err_clear = TRUE };
 
+            register int o;
             for (o = 0; o < section->num_overlays; o++) {
-                wire = XkbWriteGeomOverlay(wire, &section->overlays[o], swap);
+                XkbWriteGeomOverlay(&rpcbuf, &section->overlays[o]);
             }
+            memcpy(wire, rpcbuf.buffer, rpcbuf.wpos);
+            wire += rpcbuf.wpos;
+            x_rpcbuf_clear(&rpcbuf);
         }
     }
     return wire;
