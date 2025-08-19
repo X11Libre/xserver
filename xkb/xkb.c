@@ -4881,22 +4881,23 @@ XkbAssembleGeometry(ClientPtr client,
                     xkbGetGeometryReply rep,
                     char *desc)
 {
-    if (geom != NULL) {
-        desc = XkbWriteCountedString(desc, geom->label_font, client->swapped);
-        if (rep.nProperties > 0)
-            desc = XkbWriteGeomProperties(desc, geom, client->swapped);
-        if (rep.nColors > 0)
-            desc = XkbWriteGeomColors(desc, geom, client->swapped);
-        if (rep.nShapes > 0)
-            desc = XkbWriteGeomShapes(desc, geom, client->swapped);
-        if (rep.nSections > 0)
-            desc = XkbWriteGeomSections(desc, geom, client->swapped);
-        if (rep.nDoodads > 0)
-            desc = XkbWriteGeomDoodads(desc, geom->num_doodads, geom->doodads,
-                                       client->swapped);
-        if (rep.nKeyAliases > 0)
-            desc = XkbWriteGeomKeyAliases(desc, geom, client->swapped);
-    }
+    if (geom == NULL)
+        return;
+
+    desc = XkbWriteCountedString(desc, geom->label_font, client->swapped);
+    if (rep.nProperties > 0)
+        desc = XkbWriteGeomProperties(desc, geom, client->swapped);
+    if (rep.nColors > 0)
+        desc = XkbWriteGeomColors(desc, geom, client->swapped);
+    if (rep.nShapes > 0)
+        desc = XkbWriteGeomShapes(desc, geom, client->swapped);
+    if (rep.nSections > 0)
+        desc = XkbWriteGeomSections(desc, geom, client->swapped);
+    if (rep.nDoodads > 0)
+        desc = XkbWriteGeomDoodads(desc, geom->num_doodads, geom->doodads,
+                                   client->swapped);
+    if (rep.nKeyAliases > 0)
+        desc = XkbWriteGeomKeyAliases(desc, geom, client->swapped);
 }
 
 int
