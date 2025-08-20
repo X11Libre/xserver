@@ -245,6 +245,8 @@ typedef struct {
 
     Bool vrr_enabled;
     Bool use_gamma_lut;
+
+    int* cursor_pitches;
 } drmmode_crtc_private_rec, *drmmode_crtc_private_ptr;
 
 typedef struct {
