@@ -2532,6 +2532,10 @@ drmmode_crtc_probe_size_hint(xf86CrtcPtr crtc, int num)
     drmModePlane *kplane = NULL;
     uint32_t i, type;
 
+    if (drmmode_crtc->cursor_probed) {
+        return;
+    }
+
     static drmmode_prop_enum_info_rec plane_type_enums[] = {
         [DRMMODE_PLANE_TYPE_PRIMARY] = {
             .name = "Primary",
@@ -2817,13 +2821,11 @@ drmmode_crtc_vrr_init(int drm_fd, xf86CrtcPtr crtc)
     drmModeFreeObjectProperties(drm_props);
 }
 
-static drmmode_cursor_dim_rec
-drmmode_cursor_get_fallback(drmmode_crtc_private_ptr drmmode_crtc)
+static inline drmmode_cursor_dim_rec
+drmmode_get_kms_default(drmmode_ptr drmmode)
 {
-    drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    drmmode_cursor_dim_rec fallback;
-
     uint64_t value = 0;
+    drmmode_cursor_dim_rec fallback;
 
     /* We begin by using the largest supported cursor, and change it later,
        when we can reliably probe for the smallest suppored cursor size */
@@ -2840,6 +2842,43 @@ drmmode_cursor_get_fallback(drmmode_crtc_private_ptr drmmode_crtc)
         fallback.height = 64;
     }
 
+    return fallback;
+}
+
+static drmmode_cursor_dim_rec
+drmmode_cursor_get_fallback(drmmode_crtc_private_ptr drmmode_crtc)
+{
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
+    drmmode_cursor_dim_rec fallback;
+
+    const char *cursor_size_str = xf86GetOptValString(drmmode->Options,
+                                                      OPTION_CURSOR_SIZE);
+
+    char *height;
+
+    if (!cursor_size_str) {
+        return drmmode_get_kms_default(drmmode);
+    }
+
+    errno = 0;
+    fallback.width = strtol(cursor_size_str, &height, 10);
+    if (errno || fallback.width == 0) {
+        return drmmode_get_kms_default(drmmode);
+    }
+
+    if (*height == '\0') {
+        /* we have a width, but don't have a height */
+        fallback.height = fallback.width;
+        drmmode_crtc->cursor_probed = TRUE;
+        return fallback;
+    }
+
+    fallback.height = strtol(height + 1, NULL, 10);
+    if (errno || fallback.height == 0) {
+        return drmmode_get_kms_default(drmmode);
+    }
+
+    drmmode_crtc->cursor_probed = TRUE;
     return fallback;
 }
 
@@ -4788,8 +4827,17 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
         }
 
     }
+
+    void *tmp = realloc(drmmode_cursor->dimensions, num_dimensions * sizeof(drmmode_cursor_dim_rec));
+    if (!tmp) {
+        xf86DrvMsgVerb(crtc->scrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
+                       "Cursor size: %dx%d\n",
+                       max_width, max_height);
+        return;
+    }
+
+    drmmode_cursor->dimensions = tmp;
     drmmode_cursor->num_dimensions = num_dimensions;
-    drmmode_cursor->dimensions = xnfrealloc(drmmode_cursor->dimensions, num_dimensions * sizeof(drmmode_cursor_dim_rec));
 
     if (min_width > min_height) {
         int idx = 0;
