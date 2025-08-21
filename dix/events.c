@@ -2692,7 +2692,7 @@ FixUpEventFromWindow(SpritePtr pSprite,
         child = FindChildForEvent(pSprite, pWin);
 
     if ((evtype = xi2_get_type(xE))) {
-       if(XILevel == XI2) {
+       if(XILevel >= XI) {
           switch (evtype) {
              case XI_RawKeyPress:
              case XI_RawKeyRelease:
