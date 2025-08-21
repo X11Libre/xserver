@@ -1574,12 +1574,9 @@ ProcGetWindowAttributes(ClientPtr client)
         return rc;
 
     xGetWindowAttributesReply rep = {
-        .type = X_Reply,
         .bitGravity = pWin->bitGravity,
         .winGravity = pWin->winGravity,
         .backingStore = pWin->backingStore,
-        .length = X_REPLY_HEADER_UNITS(xGetWindowAttributesReply),
-        .sequenceNumber = client->sequence,
         .backingBitPlanes = wBackingBitPlanes(pWin),
         .backingPixel = wBackingPixel(pWin),
         .saveUnder = (BOOL) pWin->saveUnder,
@@ -1597,8 +1594,6 @@ ProcGetWindowAttributes(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.visualID);
         swaps(&rep.class);
         swapl(&rep.backingBitPlanes);
@@ -1608,7 +1603,7 @@ ProcGetWindowAttributes(ClientPtr client)
         swapl(&rep.yourEventMask);
         swaps(&rep.doNotPropagateMask);
     }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 

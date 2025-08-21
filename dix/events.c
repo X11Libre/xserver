@@ -4982,9 +4982,6 @@ ProcGetInputFocus(ClientPtr client)
         return rc;
 
     xGetInputFocusReply rep = {
-        .type = X_Reply,
-        .length = 0,
-        .sequenceNumber = client->sequence,
         .revertTo = focus->revert
     };
 
@@ -4996,10 +4993,9 @@ ProcGetInputFocus(ClientPtr client)
         rep.focus = focus->win->drawable.id;
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.focus);
     }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -5052,16 +5048,10 @@ ProcGrabPointer(ClientPtr client)
         return rc;
 
     xGrabPointerReply rep = {
-        .type = X_Reply,
         .status = status,
-        .sequenceNumber = client->sequence,
-        .length = 0
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -5298,17 +5288,10 @@ ProcGrabKeyboard(ClientPtr client)
         return result;
 
     xGrabKeyboardReply rep = {
-        .type = X_Reply,
         .status = status,
-        .sequenceNumber = client->sequence,
-        .length = 0
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -5371,9 +5354,6 @@ ProcQueryPointer(ClientPtr client)
         MaybeStopHint(mouse, client);
 
     xQueryPointerReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .mask = event_get_corestate(mouse, keyboard),
         .root = (InputDevCurrentRootWindow(mouse))->drawable.id,
         .rootX = pSprite->hot.x,
@@ -5392,8 +5372,6 @@ ProcQueryPointer(ClientPtr client)
     }
     else {
         rep.sameScreen = xFalse;
-        rep.winX = 0;
-        rep.winY = 0;
     }
 
 #ifdef XINERAMA
@@ -5417,7 +5395,6 @@ ProcQueryPointer(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.root);
         swapl(&rep.child);
         swaps(&rep.rootX);
@@ -5426,7 +5403,7 @@ ProcQueryPointer(ClientPtr client)
         swaps(&rep.winY);
         swaps(&rep.mask);
     }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
