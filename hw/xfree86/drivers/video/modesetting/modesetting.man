@@ -49,6 +49,16 @@ are supported:
 Selects software cursor.  The default is
 .B off.
 .TP
+.BI "Option \*qCursorSize\*q \*q" string \*q
+The size of the cursor.
+By default we use various probes to determine what cursor size to use.
+If for some reason these probes don't work, or you just want to use
+a different size, use this option.
+The value is passed as either "<width>x<height>", or "<one number for square size>"
+
+Note: On failure (for example the hardware doesn't support the chosen size)
+the X server silently falls back to software cursor.
+.TP
 .BI "Option \*qkmsdev\*q \*q" string \*q
 The framebuffer device to use. Default: /dev/dri/card0.
 .TP
