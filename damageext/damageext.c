@@ -182,15 +182,11 @@ static int
 ProcDamageQueryVersion(ClientPtr client)
 {
     DamageClientPtr pDamageClient = GetDamageClient(client);
-    xDamageQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
 
     REQUEST(xDamageQueryVersionReq);
-
     REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
 
+    xDamageQueryVersionReply rep = { 0 };
     if (stuff->majorVersion < SERVER_DAMAGE_MAJOR_VERSION) {
         rep.majorVersion = stuff->majorVersion;
         rep.minorVersion = stuff->minorVersion;
@@ -206,12 +202,10 @@ ProcDamageQueryVersion(ClientPtr client)
     pDamageClient->major_version = rep.majorVersion;
     pDamageClient->minor_version = rep.minorVersion;
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xDamageQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
