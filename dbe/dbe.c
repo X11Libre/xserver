@@ -114,21 +114,13 @@ ProcDbeGetVersion(ClientPtr client)
 {
     /* REQUEST(xDbeGetVersionReq); */
     xDbeGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = DBE_MAJOR_VERSION,
         .minorVersion = DBE_MINOR_VERSION
     };
 
     REQUEST_SIZE_MATCH(xDbeGetVersionReq);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-
-    WriteToClient(client, sizeof(xDbeGetVersionReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 
 }                               /* ProcDbeGetVersion() */
@@ -678,11 +670,6 @@ static int
 ProcDbeGetBackBufferAttributes(ClientPtr client)
 {
     REQUEST(xDbeGetBackBufferAttributesReq);
-    xDbeGetBackBufferAttributesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
     DbeWindowPrivPtr pDbeWindowPriv;
     int rc;
 
@@ -691,6 +678,9 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
     rc = dixLookupResourceByType((void **) &pDbeWindowPriv, stuff->buffer,
                                  dbeWindowPrivResType, client,
                                  DixGetAttrAccess);
+
+    xDbeGetBackBufferAttributesReply rep = { 0 };
+
     if (rc == Success) {
         rep.attributes = pDbeWindowPriv->pWindow->drawable.id;
     }
@@ -699,14 +689,11 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.attributes);
     }
 
-    WriteToClient(client, sizeof(xDbeGetBackBufferAttributesReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
-
 }                               /* ProcDbeGetbackBufferAttributes() */
 
 /******************************************************************************
