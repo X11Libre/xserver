@@ -56,19 +56,15 @@ ProcXCMiscGetVersion(ClientPtr client)
     }
 
     xXCMiscGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = XCMiscMajorVersion,
         .minorVersion = XCMiscMinorVersion
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swaps(&rep.majorVersion);
         swaps(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xXCMiscGetVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -81,18 +77,14 @@ ProcXCMiscGetXIDRange(ClientPtr client)
     GetXIDRange(client->index, FALSE, &min_id, &max_id);
 
     xXCMiscGetXIDRangeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .start_id = min_id,
         .count = max_id - min_id + 1
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.start_id);
         swapl(&rep.count);
     }
-    WriteToClient(client, sizeof(xXCMiscGetXIDRangeReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
