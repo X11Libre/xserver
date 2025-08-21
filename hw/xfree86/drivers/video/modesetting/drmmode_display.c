@@ -2793,8 +2793,63 @@ drmmode_crtc_vrr_init(int drm_fd, xf86CrtcPtr crtc)
     drmModeFreeObjectProperties(drm_props);
 }
 
+static drmmode_cursor_dim_rec
+drmmode_cursor_get_fallback(drmmode_ptr drmmode)
+{
+    drmmode_cursor_dim_rec fallback;
+
+    const char *fallback_cursor_str = xf86GetOptValString(drmmode->Options,
+                                                          OPTION_FALLBACK_CURSOR);
+
+    char *height;
+
+    if (!fallback_cursor_str) {
+        goto kms_default;
+    }
+
+    errno = 0;
+    fallback.width = strtol(fallback_cursor_str, &height, 10);
+    if (errno || fallback.width == 0) {
+        goto kms_default;
+    }
+
+    if (*height == '\0') {
+        /* we have a width, but don't have a height */
+        fallback.height = fallback.width;
+        return fallback;
+    }
+
+    fallback.height = strtol(height + 1, NULL, 10);
+    if (errno || fallback.height == 0) {
+        goto kms_default;
+    }
+
+    return fallback;
+kms_default:
+    /* This is the safest fallback value as
+     * it is the default value that KMS uses.  */
+    fallback = (drmmode_cursor_dim_rec){
+        .width  = 64,
+        .height = 64,
+    };
+
+#if 0 /* We could instead use the largest possible cursor, but that uses more power */
+    ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &value);
+    if (!ret) {
+        fallback.width = value;
+    }
+
+    ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &value);
+    if (!ret) {
+        fallback.height = value;
+    }
+#endif
+
+    return fallback;
+}
+
 static unsigned int
-drmmode_crtc_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, drmModeResPtr mode_res, drmmode_cursor_dim_rec fallback, int num)
+drmmode_crtc_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, drmModeResPtr mode_res, int num)
 {
     xf86CrtcPtr crtc;
     drmmode_crtc_private_ptr drmmode_crtc;
@@ -2825,8 +2880,7 @@ drmmode_crtc_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, drmModeResPtr mode_res
     drmmode_crtc->cursor.num_dimensions = 1;
     drmmode_crtc->cursor.dimensions = xnfalloc(sizeof(drmmode_cursor_dim_rec));
 
-    drmmode_crtc->cursor.dimensions[0].width = fallback.width;
-    drmmode_crtc->cursor.dimensions[0].height = fallback.height;
+    drmmode_crtc->cursor.dimensions[0] = drmmode_cursor_get_fallback(drmmode);
 
     props = drmModeObjectGetProperties(drmmode->fd, mode_res->crtcs[num],
                                        DRM_MODE_OBJECT_CRTC);
@@ -4151,29 +4205,12 @@ drmmode_pre_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int cpp)
     xf86DrvMsgVerb(pScrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
                    "Up to %d crtcs needed for screen.\n", crtcs_needed);
 
-    /* This is the safest fallback value as
-     * it is the default value that KMS uses.  */
-    drmmode_cursor_dim_rec fallback = {
-        .width  = 64,
-        .height = 64,
-    };
-
-    ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &value);
-    if (!ret) {
-        fallback.width = value;
-    }
-
-    ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &value);
-    if (!ret) {
-        fallback.height = value;
-    }
-
     xf86CrtcSetSizeRange(pScrn, 320, 200, mode_res->max_width,
                          mode_res->max_height);
     for (i = 0; i < mode_res->count_crtcs; i++)
         if (!xf86IsEntityShared(pScrn->entityList[0]) ||
             (crtcs_needed && !(ms_ent->assigned_crtcs & (1 << i))))
-            crtcs_needed -= drmmode_crtc_init(pScrn, drmmode, mode_res, fallback, i);
+            crtcs_needed -= drmmode_crtc_init(pScrn, drmmode, mode_res, i);
 
     /* All ZaphodHeads outputs provided with matching crtcs? */
     if (xf86IsEntityShared(pScrn->entityList[0]) && (crtcs_needed > 0))

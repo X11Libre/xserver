@@ -54,6 +54,7 @@ struct ms_vrr_priv {
 
 typedef enum {
     OPTION_SW_CURSOR,
+    OPTION_FALLBACK_CURSOR,
     OPTION_DEVICE_PATH,
     OPTION_SHADOW_FB,
     OPTION_ACCEL_METHOD,

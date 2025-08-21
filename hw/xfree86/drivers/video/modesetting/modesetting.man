@@ -49,6 +49,10 @@ are supported:
 Selects software cursor.  The default is
 .B off.
 .TP
+.BI "Option \*qFallbackCursor\*q \*q" string \*q
+The size of the cursor to use if SIZE_HINTS isn't available.
+The default is "64x64".
+.TP
 .BI "Option \*qkmsdev\*q \*q" string \*q
 The framebuffer device to use. Default: /dev/dri/card0.
 .TP
