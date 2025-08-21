@@ -252,6 +252,8 @@ typedef struct {
     uint32_t cursor_glyph_height;
     int old_pitch;
 
+    Bool cursor_probed;
+
     int* cursor_pitches;
 } drmmode_crtc_private_rec, *drmmode_crtc_private_ptr;
 
