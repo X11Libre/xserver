@@ -35,6 +35,7 @@
 #include <X11/X.h>
 #include <X11/extensions/XI2proto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "os/fmt.h"
 
@@ -113,20 +114,16 @@ ProcXIQueryVersion(ClientPtr client)
     }
 
     xXIQueryVersionReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIQueryVersion,
-        .sequenceNumber = client->sequence,
         .major_version = major,
         .minor_version = minor
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swaps(&rep.major_version);
         swaps(&rep.minor_version);
     }
-    WriteToClient(client, sizeof(xXIQueryVersionReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
