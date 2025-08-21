@@ -263,8 +263,6 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xXF86BigfontQueryVersionReq);
 
     xXF86BigfontQueryVersionReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .majorVersion = SERVER_XF86BIGFONT_MAJOR_VERSION,
         .minorVersion = SERVER_XF86BIGFONT_MINOR_VERSION,
         .uid = geteuid(),
@@ -276,15 +274,13 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
 #endif /* CONFIG_MITSHM */
     };
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swaps(&reply.majorVersion);
         swaps(&reply.minorVersion);
         swapl(&reply.uid);
         swapl(&reply.gid);
         swapl(&reply.signature);
     }
-    WriteToClient(client, sizeof(xXF86BigfontQueryVersionReply), &reply);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
