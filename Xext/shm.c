@@ -255,10 +255,7 @@ static int
 ProcShmQueryVersion(ClientPtr client)
 {
     xShmQueryVersionReply rep = {
-        .type = X_Reply,
         .sharedPixmaps = sharedPixmaps,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_SHM_MAJOR_VERSION,
         .minorVersion = SERVER_SHM_MINOR_VERSION,
         .uid = geteuid(),
@@ -269,14 +266,12 @@ ProcShmQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xShmQueryVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.majorVersion);
         swaps(&rep.minorVersion);
         swaps(&rep.uid);
         swaps(&rep.gid);
     }
-    WriteToClient(client, sizeof(xShmQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -648,9 +643,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
         visual = None;
     }
     xgi = (xShmGetImageReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .visual = visual,
         .depth = pDraw->depth
     };
@@ -702,13 +694,10 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
     }
 
     if (client->swapped) {
-        swaps(&xgi.sequenceNumber);
-        swapl(&xgi.length);
         swapl(&xgi.visual);
         swapl(&xgi.size);
     }
-    WriteToClient(client, sizeof(xShmGetImageReply), &xgi);
-
+    X_SEND_REPLY_SIMPLE(client, xgi);
     return Success;
 }
 
@@ -873,14 +862,10 @@ ProcShmGetImage(ClientPtr client)
     }
 
     xgi = (xShmGetImageReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .visual = wVisual(((WindowPtr) pDraw)),
-        .depth = pDraw->depth
+        .depth = pDraw->depth,
+        .size = length
     };
-
-    xgi.size = length;
 
     if (length == 0) {          /* nothing to do */
     }
@@ -904,13 +889,10 @@ ProcShmGetImage(ClientPtr client)
     free(drawables);
 
     if (client->swapped) {
-        swaps(&xgi.sequenceNumber);
-        swapl(&xgi.length);
         swapl(&xgi.visual);
         swapl(&xgi.size);
     }
-    WriteToClient(client, sizeof(xShmGetImageReply), &xgi);
-
+    X_SEND_REPLY_SIMPLE(client, xgi);
     return Success;
 #else
     return ShmGetImage(client, stuff);
@@ -1278,10 +1260,7 @@ ProcShmCreateSegment(ClientPtr client)
     int fd;
     ShmDescPtr shmdesc;
     xShmCreateSegmentReply rep = {
-        .type = X_Reply,
         .nfd = 1,
-        .sequenceNumber = client->sequence,
-        .length = 0,
     };
 
     LEGAL_NEW_RESOURCE(stuff->shmseg, client);
@@ -1338,7 +1317,7 @@ ProcShmCreateSegment(ClientPtr client)
         close(fd);
         return BadAlloc;
     }
-    WriteToClient(client, sizeof (xShmCreateSegmentReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 #endif /* SHM_FD_PASSING */
