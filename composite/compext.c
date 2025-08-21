@@ -104,11 +104,7 @@ ProcCompositeQueryVersion(ClientPtr client)
 
     CompositeClientPtr pCompositeClient = GetCompositeClient(client);
 
-    xCompositeQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
+    xCompositeQueryVersionReply rep = { 0 };
 
     if (stuff->majorVersion < SERVER_COMPOSITE_MAJOR_VERSION) {
         rep.majorVersion = stuff->majorVersion;
@@ -121,12 +117,10 @@ ProcCompositeQueryVersion(ClientPtr client)
     pCompositeClient->major_version = rep.majorVersion;
     pCompositeClient->minor_version = rep.minorVersion;
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xCompositeQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -299,19 +293,13 @@ SingleCompositeGetOverlayWindow(ClientPtr client, xCompositeGetOverlayWindowReq 
     }
 
     xCompositeGetOverlayWindowReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.overlayWin);
     }
-    WriteToClient(client, sz_xCompositeGetOverlayWindowReply, &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -865,18 +853,13 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
     cs = GetCompScreen(screenInfo.screens[0]);
 
     rep = (xCompositeGetOverlayWindowReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.overlayWin);
     }
-    WriteToClient(client, sz_xCompositeGetOverlayWindowReply, &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 #else
     return SingleCompositeGetOverlayWindow(client, stuff);
