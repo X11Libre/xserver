@@ -28,6 +28,7 @@
 #include <X11/extensions/ge.h>
 #include <X11/extensions/geproto.h>
 
+#include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/geext_priv.h"
 
@@ -68,18 +69,12 @@ static int
 ProcGEQueryVersion(ClientPtr client)
 {
     GEClientInfoPtr pGEClient = GEGetClient(client);
-    xGEQueryVersionReply rep;
 
     REQUEST(xGEQueryVersionReq);
-
     REQUEST_SIZE_MATCH(xGEQueryVersionReq);
 
-    rep = (xGEQueryVersionReply) {
-        .repType = X_Reply,
+    xGEQueryVersionReply rep = {
         .RepType = X_GEQueryVersion,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-
         /* return the supported version by the server */
         .majorVersion = SERVER_GE_MAJOR_VERSION,
         .minorVersion = SERVER_GE_MINOR_VERSION
@@ -90,13 +85,11 @@ ProcGEQueryVersion(ClientPtr client)
     pGEClient->minor_version = stuff->minorVersion;
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.majorVersion);
         swaps(&rep.minorVersion);
     }
 
-    WriteToClient(client, sizeof(xGEQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
