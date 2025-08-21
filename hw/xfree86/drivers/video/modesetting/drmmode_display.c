@@ -1907,6 +1907,7 @@ drmmode_paint_cursor(CARD32 * restrict cursor, int cursor_pitch, int cursor_widt
 }
 
 static void drmmode_hide_cursor(xf86CrtcPtr crtc);
+static void drmmode_probe_cursor_size(xf86CrtcPtr crtc);
 
 /*
  * The load_cursor_argb_check driver hook.
@@ -1928,6 +1929,13 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     /* We need to know what our limit is for HW cursors.*/
     max_width  = ms->cursor_image_width;
     max_height = ms->cursor_image_height;
+
+    if (drmmode_crtc->cursor_up) {
+        /* we probe the cursor so late, because we want to make sure that
+           the screen is fully initialized and something is already drawn on it.
+           Otherwise, we can't get reliable results with the probe. */
+        drmmode_probe_cursor_size(crtc);
+    }
 
     /* Find the most compatiable size. */
     for (i = 0; i < drmmode_cursor.num_dimensions; i++)
@@ -2494,6 +2502,8 @@ populate_cursor_sizes(drmmode_ptr drmmode, drmmode_crtc_private_ptr drmmode_crtc
         drmmode_crtc->cursor.dimensions[idx].width = size_hint.width;
         drmmode_crtc->cursor.dimensions[idx].height = size_hint.height;
     }
+
+    drmmode_crtc->cursor_probed = TRUE;
 fail:
     drmModeFreePropertyBlob(blob);
 }
@@ -2826,24 +2836,19 @@ drmmode_cursor_get_fallback(drmmode_ptr drmmode)
 
     return fallback;
 kms_default:
-    /* This is the safest fallback value as
-     * it is the default value that KMS uses.  */
-    fallback = (drmmode_cursor_dim_rec){
-        .width  = 64,
-        .height = 64,
-    };
+    /* 64x64 is the safest fallback value to use when we can't probe in any other way,
+     * as it is the default value that KMS uses.  */
 
-#if 0 /* We could instead use the largest possible cursor, but that uses more power */
+    int ret;
+    uint64_t value = 0;
+
+    /* We begin by using the largest supported cursor, and change it later,
+       when we can reliably probe for the smallest suppored cursor size */
     ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &value);
-    if (!ret) {
-        fallback.width = value;
-    }
+    fallback.width = ret ? 64 : value;
 
     ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &value);
-    if (!ret) {
-        fallback.height = value;
-    }
-#endif
+    fallback.height = ret ? 64 : value;
 
     return fallback;
 }
@@ -4676,6 +4681,100 @@ drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode)
         udev_unref(u);
     }
 #endif
+}
+
+static inline void
+drmmode_reset_cursor(drmmode_crtc_private_ptr drmmode_crtc)
+{
+    /* Mark the entire cursor buffer as dirty */
+    drmmode_crtc->cursor_glyph_width = 0;
+    drmmode_crtc->cursor_glyph_height = 0;
+
+    /* If we had any cursor pitches for the old cursor, they are no longer valid now */
+    free(drmmode_crtc->cursor_pitches);
+    drmmode_crtc->cursor_pitches = NULL;
+}
+
+/*
+ * This is the old probe method for the minimum cursor size.
+ * This is only used if the SIZE_HINTS probe fails.
+ */
+static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
+{
+    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+    uint32_t handle = drmmode_crtc->cursor.bo->handle;
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
+    drmmode_cursor_ptr drmmode_cursor = &drmmode_crtc->cursor;
+    int width, height, size;
+    int max_width, max_height;
+    int min_width, min_height;
+
+    if (drmmode_crtc->cursor_probed) {
+        return;
+    }
+
+    drmmode_crtc->cursor_probed = TRUE;
+
+    xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
+               "Probing the cursor size using the old method\n");
+
+    /* If we're here, we only have one size, the fallback size */
+    max_width = drmmode_cursor->dimensions[0].width;
+    max_height = drmmode_cursor->dimensions[0].height;
+
+    min_width = max_width;
+    min_height = max_height;
+
+    /* probe square min first */
+    for (size = 1; size <= max_width &&
+             size <= max_height; size *= 2) {
+        int ret;
+
+        ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                                handle, size, size, 0, 0);
+        if (ret == 0) {
+            min_width = size;
+            min_height = size;
+            break;
+        }
+    }
+
+    /* check if smaller width works with non-square */
+    for (width = 1; width <= size; width *= 2) {
+        int ret;
+
+        ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                                handle, width, size, 0, 0);
+        if (ret == 0) {
+            min_width = width;
+            break;
+        }
+    }
+
+    /* check if smaller height works with non-square */
+    for (height = 1; height <= size; height *= 2) {
+        int ret;
+
+        ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
+                                handle, size, height, 0, 0);
+        if (ret == 0) {
+            min_height = height;
+            break;
+        }
+    }
+
+    drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0, 0, 0, 0, 0);
+
+    if (min_width != max_width || min_height != max_height) {
+        drmmode_reset_cursor(drmmode_crtc);
+    }
+
+    drmmode_cursor->dimensions[0].width = min_width;
+    drmmode_cursor->dimensions[0].height = min_height;
+
+    xf86DrvMsgVerb(crtc->scrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
+                   "Cursor size: %dx%d\n",
+                   min_width, min_height);
 }
 
 static void
