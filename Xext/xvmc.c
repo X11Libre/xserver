@@ -9,6 +9,7 @@
 #include <X11/extensions/Xvproto.h>
 #include <X11/extensions/XvMCproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/xvdix_priv.h"
@@ -110,8 +111,6 @@ static int
 ProcXvMCQueryVersion(ClientPtr client)
 {
     xvmcQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .major = SERVER_XVMC_MAJOR_VERSION,
         .minor = SERVER_XVMC_MINOR_VERSION
     };
@@ -119,7 +118,7 @@ ProcXvMCQueryVersion(ClientPtr client)
     /* REQUEST(xvmcQueryVersionReq); */
     REQUEST_SIZE_MATCH(xvmcQueryVersionReq);
 
-    WriteToClient(client, sizeof(xvmcQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
