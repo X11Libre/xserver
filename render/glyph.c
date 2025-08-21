@@ -177,6 +177,10 @@ HashGlyph(xGlyphInfo * gi,
 
     memcpy(dgst, &(h.low64), sizeof(h.low64));
     memcpy(dgst+sizeof(h.low64), &(h.high64), sizeof(h.high64));
+
+	 /* We have to keep 20 bytes of digest so as not break ABI.
+	  * Make a simple computation so as to make the 4 remaining bytes
+	  * of dgst dependent on the 16 first. */
     dgst[16] = dgst[0] ^ dgst[1] ^ dgst[8] ^ dgst[9];
     dgst[17] = dgst[2] ^ dgst[3] ^ dgst[10] ^ dgst[11];
     dgst[18] = dgst[4] ^ dgst[5] ^ dgst[12] ^ dgst[13];
