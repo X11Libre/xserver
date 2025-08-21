@@ -62,21 +62,16 @@ ProcXvQueryExtension(ClientPtr client)
     REQUEST_SIZE_MATCH(xvQueryExtensionReq);
 
     xvQueryExtensionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .version = XvVersion,
         .revision = XvRevision
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.version);
         swaps(&rep.revision);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -389,18 +384,10 @@ ProcXvGrabPort(ClientPtr client)
         return status;
     }
     xvGrabPortReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .result = result
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sz_xvGrabPortReply, &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -511,18 +498,14 @@ ProcXvGetPortAttribute(ClientPtr client)
     }
 
     xvGetPortAttributeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .value = value
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.value);
     }
 
-    WriteToClient(client, sz_xvGetPortAttributeReply, &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -543,20 +526,16 @@ ProcXvQueryBestSize(ClientPtr client)
                                          &actual_width, &actual_height);
 
     xvQueryBestSizeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .actual_width = actual_width,
         .actual_height = actual_height
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.actual_width);
         swaps(&rep.actual_height);
     }
 
-    WriteToClient(client, sz_xvQueryBestSizeReply, &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
