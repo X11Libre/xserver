@@ -184,19 +184,15 @@ ProcXResQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xXResQueryVersionReq);
 
     xXResQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .server_major = SERVER_XRES_MAJOR_VERSION,
         .server_minor = SERVER_XRES_MINOR_VERSION
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.server_major);
         swaps(&rep.server_minor);
     }
-    WriteToClient(client, sizeof(xXResQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -355,21 +351,16 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
                            (void *) (&bytes));
 
     xXResQueryClientPixmapBytesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .bytes = bytes,
 #ifdef _XSERVER64
         .bytes_overflow = bytes >> 32
 #endif
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.bytes);
         swapl(&rep.bytes_overflow);
     }
-    WriteToClient(client, sizeof(xXResQueryClientPixmapBytesReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
