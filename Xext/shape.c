@@ -209,19 +209,15 @@ ProcShapeQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
 
     xShapeQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .majorVersion = SERVER_SHAPE_MAJOR_VERSION,
         .minorVersion = SERVER_SHAPE_MINOR_VERSION
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.majorVersion);
         swaps(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xShapeQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -654,8 +650,6 @@ ProcShapeQueryExtents(ClientPtr client)
     }
 
     xShapeQueryExtentsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .boundingShaped = (wBoundingShape(pWin) != 0),
         .clipShaped = (wClipShape(pWin) != 0),
         .xBoundingShape = boundBox.x1,
@@ -669,8 +663,6 @@ ProcShapeQueryExtents(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.xBoundingShape);
         swaps(&rep.yBoundingShape);
         swaps(&rep.widthBoundingShape);
@@ -680,7 +672,7 @@ ProcShapeQueryExtents(ClientPtr client)
         swaps(&rep.widthClipShape);
         swaps(&rep.heightClipShape);
     }
-    WriteToClient(client, sizeof(xShapeQueryExtentsReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -924,16 +916,10 @@ ProcShapeInputSelected(ClientPtr client)
     }
 
     xShapeInputSelectedReply rep = {
-        .type = X_Reply,
         .enabled = enabled,
-        .sequenceNumber = client->sequence,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xShapeInputSelectedReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
