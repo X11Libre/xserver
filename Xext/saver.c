@@ -589,8 +589,6 @@ static int
 ProcScreenSaverQueryVersion(ClientPtr client)
 {
     xScreenSaverQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .majorVersion = SERVER_SAVER_MAJOR_VERSION,
         .minorVersion = SERVER_SAVER_MINOR_VERSION
     };
@@ -598,11 +596,10 @@ ProcScreenSaverQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xScreenSaverQueryVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swaps(&rep.majorVersion);
         swaps(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xScreenSaverQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -632,8 +629,6 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     lastInput = GetTimeInMillis() - LastEventTime(XIAllDevices).milliseconds;
 
     xScreenSaverQueryInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .window = pSaver->wid
     };
     if (screenIsSaved != SCREEN_SAVER_OFF) {
@@ -660,13 +655,12 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     else
         rep.kind = ScreenSaverInternal;
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.window);
         swapl(&rep.tilOrSince);
         swapl(&rep.idle);
         swapl(&rep.eventMask);
     }
-    WriteToClient(client, sizeof(xScreenSaverQueryInfoReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
