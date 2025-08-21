@@ -2517,6 +2517,10 @@ drmmode_crtc_probe_size_hint(xf86CrtcPtr crtc, int num)
     drmModePlane *kplane = NULL;
     uint32_t i, type;
 
+    if (drmmode_crtc->cursor_probed) {
+        return;
+    }
+
     static drmmode_prop_enum_info_rec plane_type_enums[] = {
         [DRMMODE_PLANE_TYPE_PRIMARY] = {
             .name = "Primary",
@@ -2807,6 +2811,38 @@ drmmode_cursor_get_fallback(drmmode_crtc_private_ptr drmmode_crtc)
 {
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     drmmode_cursor_dim_rec fallback;
+
+    const char *cursor_size_str = xf86GetOptValString(drmmode->Options,
+                                                      OPTION_CURSOR_SIZE);
+
+    char *height;
+
+    if (!cursor_size_str) {
+        goto kms_default;
+    }
+
+    errno = 0;
+    fallback.width = strtol(cursor_size_str, &height, 10);
+    if (errno || fallback.width == 0) {
+        goto kms_default;
+    }
+
+    if (*height == '\0') {
+        /* we have a width, but don't have a height */
+        fallback.height = fallback.width;
+        drmmode_crtc->cursor_probed = TRUE;
+        return fallback;
+    }
+
+    fallback.height = strtol(height + 1, NULL, 10);
+    if (errno || fallback.height == 0) {
+        goto kms_default;
+    }
+
+    drmmode_crtc->cursor_probed = TRUE;
+    return fallback;
+
+kms_default:
 
     uint64_t value = 0;
 
