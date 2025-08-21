@@ -1523,9 +1523,6 @@ ProcVidModeSetGammaRamp(ClientPtr client)
 static int
 ProcVidModeGetGammaRamp(ClientPtr client)
 {
-    CARD16 *ramp = NULL;
-    size_t ramplen = 0;
-
     REQUEST(xXF86VidModeGetGammaRampReq);
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaRampReq);
 
@@ -1542,34 +1539,32 @@ ProcVidModeGetGammaRamp(ClientPtr client)
 
     const int length = (stuff->size + 1) & ~1;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (stuff->size) {
-        if (!(ramp = calloc(length, 3 * sizeof(CARD16))))
+        size_t ramplen = length * 3 * sizeof(CARD16);
+        CARD16 *ramp = x_rpcbuf_reserve(&rpcbuf, ramplen);
+        if (!ramp)
             return BadAlloc;
-        ramplen = length * 3 * sizeof(CARD16);
 
         if (!pVidMode->GetGammaRamp(pScreen, stuff->size,
                                  ramp, ramp + length, ramp + (length * 2))) {
-            free(ramp);
+            x_rpcbuf_clear(&rpcbuf);
             return BadValue;
         }
+
+        if (rpcbuf.swapped)
+            SwapShorts((short *) rpcbuf.buffer, rpcbuf.wpos / sizeof(CARD16));
     }
 
     xXF86VidModeGetGammaRampReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(ramplen),
         .size = stuff->size
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.size);
-        SwapShorts((short *) ramp, length * 3);
     }
-    WriteToClient(client, sizeof(xXF86VidModeGetGammaRampReply), &rep);
-    WriteToClient(client, ramplen, ramp);
-    free(ramp);
 
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
