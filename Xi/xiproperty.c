@@ -829,6 +829,7 @@ static int _writeDevProps(x_rpcbuf_t *rpcbuf, XID devId,
 
     size_t n = 0;
     for (XIPropertyPtr p = dev->properties.properties; p; p = p->next) {
+        n++;
         if (!x_rpcbuf_write_CARD32(rpcbuf, p->propertyName))
             return BadAlloc;
     }
