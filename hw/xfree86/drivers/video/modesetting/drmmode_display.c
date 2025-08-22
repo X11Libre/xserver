@@ -1042,7 +1042,7 @@ drmmode_bo_get_handle(drmmode_bo *bo)
 }
 
 static void *
-drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo, Bool map_glamor)
+drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
 {
     int ret;
 
@@ -1051,9 +1051,6 @@ drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo, Bool map_glamor)
 
 #ifdef GLAMOR_HAS_GBM
     if (bo->gbm) {
-        if (!map_glamor) {
-            return FALSE;
-        }
         void *map_data = NULL;
         uint32_t stride = 0;
 
@@ -1199,13 +1196,15 @@ drmmode_create_cursor_bo(drmmode_ptr drmmode, drmmode_bo *bo,
     bo->height = height;
 
 #ifdef GLAMOR_HAS_GBM
-    uint32_t format = gbm_format_for_depth(bpp);
+    if (drmmode->gbm) {
+        uint32_t format = gbm_format_for_depth(bpp);
 
-    bo->gbm = gbm_bo_create(drmmode->gbm, bo->width, bo->height,
-                            format,
-                            GBM_BO_USE_CURSOR | GBM_BO_USE_WRITE);
-    if (bo->gbm) {
-        return TRUE;
+        bo->gbm = gbm_bo_create(drmmode->gbm, bo->width, bo->height,
+                                format,
+                                GBM_BO_USE_CURSOR | GBM_BO_USE_WRITE);
+        if (bo->gbm) {
+            return TRUE;
+        }
     }
 #endif
 
@@ -2332,7 +2331,7 @@ drmmode_shadow_fb_create(xf86CrtcPtr crtc, void *data, int width, int height,
         return NULL;
     }
 
-    pPixData = drmmode_bo_map(drmmode, bo, FALSE);
+    pPixData = drmmode_bo_map(drmmode, bo);
     pitch = drmmode_bo_get_pitch(bo);
 
     pixmap = drmmode_create_pixmap_header(scrn->pScreen,
@@ -4879,7 +4878,7 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 void *
 drmmode_map_front_bo(drmmode_ptr drmmode)
 {
-    return drmmode_bo_map(drmmode, &drmmode->front_bo, FALSE);
+    return drmmode_bo_map(drmmode, &drmmode->front_bo);
 }
 
 void *
@@ -4907,7 +4906,7 @@ drmmode_map_cursor_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         xf86CrtcPtr crtc = xf86_config->crtc[i];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 
-        if (!drmmode_bo_map(drmmode_crtc->drmmode, &drmmode_crtc->cursor.cursor_bo, TRUE)) {
+        if (!drmmode_bo_map(drmmode_crtc->drmmode, &drmmode_crtc->cursor.cursor_bo)) {
             return FALSE;
         }
     }
