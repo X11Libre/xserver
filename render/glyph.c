@@ -172,7 +172,7 @@ HashGlyph(xGlyphInfo * gi,
 
     XXH3_128bits_reset(&state);
     XXH3_128bits_update(&state, gi, sizeof(xGlyphInfo));
-    XXH3_128bits_update(&state, (void*)bits, size);
+    XXH3_128bits_update(&state, bits, size);
     h = XXH3_128bits_digest(&state);
 
     memcpy(dgst, &(h.low64), sizeof(h.low64));
