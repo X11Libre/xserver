@@ -190,7 +190,7 @@ HashGlyph(xGlyphInfo * gi,
 }
 
 GlyphPtr
-FindGlyphByHash(unsigned char dgst[16], int format)
+FindGlyphByHash(unsigned char dgst[20], int format)
 {
     GlyphRefPtr gr;
     CARD32 signature;
