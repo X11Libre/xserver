@@ -48,7 +48,7 @@
 #include "glyphstr_priv.h"
 #include "mipict.h"
 
-#if DEBUG_GLYPH_CACHE
+#ifdef DEBUG_GLYPH_CACHE
 #define DBG_GLYPH_CACHE(a) ErrorF a
 #else
 #define DBG_GLYPH_CACHE(a)
