@@ -203,10 +203,13 @@ LoaderGetABIVersion(const char *abiclass)
          * complexity to the codebase, we will no longer be able to
          * support both abi's at once.
          *
-         * We will probably have to add a compile-time flag that switches
+         * Therefore we have added a compile-time flag that switches
          * between abi's.
          */
-        {ABI_CLASS_VIDEODRV, is_nvidia_proprietary ? ABI_NVIDIA_VERSION :
+        {ABI_CLASS_VIDEODRV,
+#ifdef CONFIG_LEGACY_NVIDIA_PADDING
+                             is_nvidia_proprietary ? ABI_NVIDIA_VERSION :
+#endif
                              LoaderVersionInfo.videodrvVersion},
         {ABI_CLASS_XINPUT, LoaderVersionInfo.xinputVersion},
         {ABI_CLASS_EXTENSION, LoaderVersionInfo.extensionVersion},
