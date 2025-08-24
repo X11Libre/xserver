@@ -749,6 +749,8 @@ CloseInput(void)
 {
     config_fini();
     mieqFini();
+    /* strictly speaking the below is not related to input, but ... */
+    LoaderClose();
 }
 
 /*
