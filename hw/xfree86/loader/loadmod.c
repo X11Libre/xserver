@@ -83,7 +83,7 @@ const ModuleVersions LoaderVersionInfo = {
     ABI_EXTENSION_VERSION,
 };
 
-static int ModuleDuplicated[] = { };
+static int ModuleDuplicated[] = { 0 };
 
 static void
 FreeStringList(char **paths)
