@@ -16,3 +16,7 @@
    in-code, so we can generate docs directly from the code :)
 
 5. Use pull request tags if you can - if we need some more, just ask.
+
+6. Use C99, follow warnings (strict flags). Clean up and improve code. Optimize.
+   Add features. Propose extensions? Port to new platforms. Debug. Close issues.
+   Write documentation.
