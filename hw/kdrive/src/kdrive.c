@@ -1165,7 +1165,7 @@ DeleteGPUDeviceRequest(struct OdevAttributes *attribs)
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
 struct xf86_platform_device *
-xf86_find_platform_device_by_devnum(int major, int minor)
+xf86_find_platform_device_by_devnum(unsigned int major, unsigned int minor)
 {
     return NULL;
 }

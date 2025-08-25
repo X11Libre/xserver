@@ -101,13 +101,11 @@ xf86_get_platform_device_unowned(int index)
 }
 
 struct xf86_platform_device *
-xf86_find_platform_device_by_devnum(int major, int minor)
+xf86_find_platform_device_by_devnum(unsigned int major, unsigned int minor)
 {
-    int i, attr_major, attr_minor;
-
-    for (i = 0; i < xf86_num_platform_devices; i++) {
-        attr_major = xf86_platform_odev_attributes(i)->major;
-        attr_minor = xf86_platform_odev_attributes(i)->minor;
+    for (unsigned int i = 0; i < xf86_num_platform_devices; i++) {
+        unsigned int attr_major = xf86_platform_odev_attributes(i)->major;
+        unsigned int attr_minor = xf86_platform_odev_attributes(i)->minor;
         if (attr_major == major && attr_minor == minor)
             return &xf86_platform_devices[i];
     }

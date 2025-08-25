@@ -62,17 +62,9 @@ static struct udev_monitor *udev_monitor;
 #ifdef CONFIG_UDEV_KMS
 static void
 config_udev_odev_setup_attribs(struct udev_device *udev_device, const char *path, const char *syspath,
-                               int major, int minor,
+                               unsigned int major, unsigned int minor,
                                config_odev_probe_proc_ptr probe_callback);
 #endif
-
-static char itoa_buf[16];
-
-static const char *itoa(int i)
-{
-    snprintf(itoa_buf, sizeof(itoa_buf), "%d", i);
-    return itoa_buf;
-}
 
 static Bool
 check_seat(struct udev_device *udev_device)
@@ -197,11 +189,15 @@ device_added(struct udev_device *udev_device)
         name = "(unnamed)";
     else
         attrs.product = strdup(name);
+
+    char buf[128];
     input_options = input_option_new(input_options, "name", name);
     input_options = input_option_new(input_options, "path", path);
     input_options = input_option_new(input_options, "device", path);
-    input_options = input_option_new(input_options, "major", itoa(major(devnum)));
-    input_options = input_option_new(input_options, "minor", itoa(minor(devnum)));
+    sprintf(buf, "%u", major(devnum));
+    input_options = input_option_new(input_options, "major", buf);
+    sprintf(buf, "%u", minor(devnum));
+    input_options = input_option_new(input_options, "minor", buf);
     if (path)
         attrs.device = strdup(path);
 
@@ -533,7 +529,7 @@ config_udev_get_fallback_bus_id(struct udev_device *udev_device)
 
 static void
 config_udev_odev_setup_attribs(struct udev_device *udev_device, const char *path, const char *syspath,
-                               int major, int minor,
+                               unsigned int major, unsigned int minor,
                                config_odev_probe_proc_ptr probe_callback)
 {
     struct OdevAttributes *attribs = config_odev_allocate_attributes();
