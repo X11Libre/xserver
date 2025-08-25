@@ -32,7 +32,8 @@ brew install \
 	xdpyinfo \
 	xkbcomp \
 	xkeyboard-config \
-	xtrans
+	xtrans \
+	xxhash
 
 pip3 install --break-system-packages \
 	mako
