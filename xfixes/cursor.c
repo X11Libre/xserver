@@ -1016,8 +1016,6 @@ SProcXFixesDestroyPointerBarrier(ClientPtr client)
 Bool
 XFixesCursorInit(void)
 {
-    int i;
-
     if (party_like_its_1989)
         CursorVisible = EnableCursor;
     else
@@ -1026,8 +1024,8 @@ XFixesCursorInit(void)
     if (!dixRegisterPrivateKey(&CursorScreenPrivateKeyRec, PRIVATE_SCREEN, sizeof(CursorScreenRec)))
         return FALSE;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         CursorScreenPtr cs = GetCursorScreen(walkScreen);
         dixScreenHookClose(walkScreen, CursorScreenClose);
         Wrap(cs, walkScreen, DisplayCursor, CursorDisplayCursor);
