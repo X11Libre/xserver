@@ -527,7 +527,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
     {
         int nfontprops = pFont->info.nprops;
-        xXF86BigfontQueryFontReply rep = {
+        xXF86BigfontQueryFontReply reply = {
             .minBounds = pFont->info.ink_minbounds,
             .maxBounds = pFont->info.ink_maxbounds,
             .minCharOrByte2 = pFont->info.firstCol,
@@ -546,18 +546,18 @@ ProcXF86BigfontQueryFont(ClientPtr client)
         };
 
         if (client->swapped) {
-            swapCharInfo(&rep.minBounds);
-            swapCharInfo(&rep.maxBounds);
-            swaps(&rep.minCharOrByte2);
-            swaps(&rep.maxCharOrByte2);
-            swaps(&rep.defaultChar);
-            swaps(&rep.nFontProps);
-            swaps(&rep.fontAscent);
-            swaps(&rep.fontDescent);
-            swapl(&rep.nCharInfos);
-            swapl(&rep.nUniqCharInfos);
-            swapl(&rep.shmid);
-            swapl(&rep.shmsegoffset);
+            swapCharInfo(&reply.minBounds);
+            swapCharInfo(&reply.maxBounds);
+            swaps(&reply.minCharOrByte2);
+            swaps(&reply.maxCharOrByte2);
+            swaps(&reply.defaultChar);
+            swaps(&reply.nFontProps);
+            swaps(&reply.fontAscent);
+            swaps(&reply.fontDescent);
+            swapl(&reply.nCharInfos);
+            swapl(&reply.nUniqCharInfos);
+            swapl(&reply.shmid);
+            swapl(&reply.shmsegoffset);
         }
 
         int rc = Success;
@@ -580,7 +580,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             goto out;
         }
 
-        X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+        X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 out:
         if (nCharInfos > 0) {
             if (shmid == -1)

@@ -73,7 +73,7 @@ ProcGEQueryVersion(ClientPtr client)
     REQUEST(xGEQueryVersionReq);
     REQUEST_SIZE_MATCH(xGEQueryVersionReq);
 
-    xGEQueryVersionReply rep = {
+    xGEQueryVersionReply reply = {
         .RepType = X_GEQueryVersion,
         /* return the supported version by the server */
         .majorVersion = SERVER_GE_MAJOR_VERSION,
@@ -85,11 +85,11 @@ ProcGEQueryVersion(ClientPtr client)
     pGEClient->minor_version = stuff->minorVersion;
 
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

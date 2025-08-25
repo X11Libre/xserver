@@ -903,17 +903,17 @@ int
 ProcPanoramiXQueryVersion(ClientPtr client)
 {
     /* REQUEST(xPanoramiXQueryVersionReq); */
-    xPanoramiXQueryVersionReply rep = {
+    xPanoramiXQueryVersionReply reply = {
         .majorVersion = SERVER_PANORAMIX_MAJOR_VERSION,
         .minorVersion = SERVER_PANORAMIX_MINOR_VERSION
     };
 
     REQUEST_SIZE_MATCH(xPanoramiXQueryVersionReq);
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -929,15 +929,15 @@ ProcPanoramiXGetState(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xPanoramiXGetStateReply rep = {
+    xPanoramiXGetStateReply reply = {
         .state = !noPanoramiXExtension,
         .window = stuff->window
     };
 
     if (client->swapped) {
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 
 }
@@ -954,15 +954,15 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xPanoramiXGetScreenCountReply rep = {
+    xPanoramiXGetScreenCountReply reply = {
         .ScreenCount = PanoramiXNumScreens,
         .window = stuff->window
     };
 
     if (client->swapped) {
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -982,7 +982,7 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xPanoramiXGetScreenSizeReply rep = {
+    xPanoramiXGetScreenSizeReply reply = {
         /* screen dimensions */
         .width = screenInfo.screens[stuff->screen]->width,
         .height = screenInfo.screens[stuff->screen]->height,
@@ -991,12 +991,12 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.width);
-        swapl(&rep.height);
-        swapl(&rep.window);
-        swapl(&rep.screen);
+        swapl(&reply.width);
+        swapl(&reply.height);
+        swapl(&reply.window);
+        swapl(&reply.screen);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1006,7 +1006,7 @@ ProcXineramaIsActive(ClientPtr client)
     /* REQUEST(xXineramaIsActiveReq); */
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
-    xXineramaIsActiveReply rep = {
+    xXineramaIsActiveReply reply = {
 #if 1
         /* The following hack fools clients into thinking that Xinerama
          * is disabled even though it is not. */
@@ -1017,9 +1017,9 @@ ProcXineramaIsActive(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.state);
+        swapl(&reply.state);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1028,14 +1028,14 @@ ProcXineramaQueryScreens(ClientPtr client)
 {
     /* REQUEST(xXineramaQueryScreensReq); */
     CARD32 number = (noPanoramiXExtension) ? 0 : PanoramiXNumScreens;
-    xXineramaQueryScreensReply rep = {
+    xXineramaQueryScreensReply reply = {
         .number = number
     };
 
     REQUEST_SIZE_MATCH(xXineramaQueryScreensReq);
 
     if (client->swapped) {
-        swapl(&rep.number);
+        swapl(&reply.number);
     }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
@@ -1056,7 +1056,7 @@ ProcXineramaQueryScreens(ClientPtr client)
         }
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 

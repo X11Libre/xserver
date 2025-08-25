@@ -570,7 +570,7 @@ PanoramiXGetGeometry(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xGetGeometryReply rep = {
+    xGetGeometryReply reply = {
         .root = screenInfo.screens[0]->root->drawable.id,
         .depth = pDraw->depth,
         .width = pDraw->width,
@@ -580,36 +580,36 @@ PanoramiXGetGeometry(ClientPtr client)
         .borderWidth = 0
     };
 
-    if (stuff->id == rep.root) {
+    if (stuff->id == reply.root) {
         xWindowRoot *root = (xWindowRoot *)
             (ConnectionInfo + connBlockScreenStart);
 
-        rep.width = root->pixWidth;
-        rep.height = root->pixHeight;
+        reply.width = root->pixWidth;
+        reply.height = root->pixHeight;
     }
     else if (WindowDrawable(pDraw->type)) {
         WindowPtr pWin = (WindowPtr) pDraw;
 
-        rep.x = pWin->origin.x - wBorderWidth(pWin);
-        rep.y = pWin->origin.y - wBorderWidth(pWin);
+        reply.x = pWin->origin.x - wBorderWidth(pWin);
+        reply.y = pWin->origin.y - wBorderWidth(pWin);
         if ((pWin->parent == screenInfo.screens[0]->root) ||
             (pWin->parent->drawable.id ==
              screenInfo.screens[0]->screensaver.wid)) {
-            rep.x += screenInfo.screens[0]->x;
-            rep.y += screenInfo.screens[0]->y;
+            reply.x += screenInfo.screens[0]->x;
+            reply.y += screenInfo.screens[0]->y;
         }
-        rep.borderWidth = pWin->borderWidth;
+        reply.borderWidth = pWin->borderWidth;
     }
 
     if (client->swapped) {
-        swapl(&rep.root);
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.borderWidth);
+        swapl(&reply.root);
+        swaps(&reply.x);
+        swaps(&reply.y);
+        swaps(&reply.width);
+        swaps(&reply.height);
+        swaps(&reply.borderWidth);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -676,7 +676,7 @@ PanoramiXTranslateCoords(ClientPtr client)
         dstY += screenInfo.screens[0]->y;
     }
 
-    xTranslateCoordsReply rep = {
+    xTranslateCoordsReply reply = {
         .sameScreen = xTrue,
         .dstX = dstX,
         .dstY = dstY,
@@ -684,11 +684,11 @@ PanoramiXTranslateCoords(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.child);
-        swaps(&rep.dstX);
-        swaps(&rep.dstY);
+        swapl(&reply.child);
+        swaps(&reply.dstX);
+        swaps(&reply.dstY);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -2119,17 +2119,17 @@ PanoramiXGetImage(ClientPtr client)
         }
     }
 
-    xGetImageReply rep = {
+    xGetImageReply reply = {
         .visual = wVisual(((WindowPtr) pDraw)),
         .depth = pDraw->depth,
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.visual);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.visual);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
