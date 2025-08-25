@@ -614,6 +614,7 @@ ProcGetProperty(ClientPtr client)
         break;
     }
 
+    /* don't delete if there's an error */
     if (rpcbuf.error)
         return BadAlloc;
 
@@ -642,8 +643,7 @@ ProcGetProperty(ClientPtr client)
         swapl(&rep.nItems);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -670,9 +670,6 @@ ProcListProperties(ClientPtr client)
         }
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xListPropertiesReply rep = {
         .nProperties = numProps
     };
@@ -681,8 +678,7 @@ ProcListProperties(ClientPtr client)
         swaps(&rep.nProperties);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int

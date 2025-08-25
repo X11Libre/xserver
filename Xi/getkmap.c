@@ -117,14 +117,10 @@ ProcXGetDeviceKeyMapping(ClientPtr client)
     free(syms->map);
     free(syms);
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xGetDeviceKeyMappingReply rep = {
         .RepType = X_GetDeviceKeyMapping,
         .keySymsPerKeyCode = mapWidth,
     };
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }

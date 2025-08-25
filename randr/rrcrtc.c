@@ -1217,9 +1217,6 @@ ProcRRGetCrtcInfo(ClientPtr client)
         }
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     if (pScrPriv->rrCrtcGet)
         pScrPriv->rrCrtcGet(pScreen, crtc, &rep);
 
@@ -1236,8 +1233,7 @@ ProcRRGetCrtcInfo(ClientPtr client)
         swaps(&rep.nPossibleOutput);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -1626,8 +1622,7 @@ ProcRRGetCrtcGamma(ClientPtr client)
         swaps(&reply.size);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -1732,9 +1727,6 @@ ProcRRGetCrtcTransform(ClientPtr client)
         x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)current->params, current->nparams);
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     if (client->swapped) {
         SwapLongs((CARD32 *) &rep.pendingTransform, bytes_to_int32(sizeof(xRenderTransform)));
         SwapLongs((CARD32 *) &rep.currentTransform, bytes_to_int32(sizeof(xRenderTransform)));
@@ -1744,8 +1736,7 @@ ProcRRGetCrtcTransform(ClientPtr client)
         swaps(&rep.currentNparamsFilter);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static Bool

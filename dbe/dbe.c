@@ -627,11 +627,6 @@ ProcDbeGetVisualInfo(ClientPtr client)
         free(visualInfo.visinfo);
     }
 
-    if (rpcbuf.error) {
-        rc = BadAlloc;
-        goto clearRpcBuf;
-    }
-
     xDbeGetVisualInfoReply rep = {
         .m = count
     };
@@ -640,8 +635,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
         swapl(&rep.m);
     }
 
-    rc = Success;
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    rc = X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
 clearRpcBuf:
     x_rpcbuf_clear(&rpcbuf);

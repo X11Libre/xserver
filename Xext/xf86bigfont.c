@@ -575,13 +575,8 @@ ProcXF86BigfontQueryFont(ClientPtr client)
             x_rpcbuf_write_CARD16s(&rpcbuf, pIndex2UniqIndex, nCharInfos);
         }
 
-        if (rpcbuf.error) {
-            rc = BadAlloc;
-            goto out;
-        }
+        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
-        X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-out:
         if (nCharInfos > 0) {
             if (shmid == -1)
                 free(pIndex2UniqIndex);

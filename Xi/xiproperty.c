@@ -858,8 +858,8 @@ ProcXListDeviceProperties(ClientPtr client)
     if (client->swapped) {
         swaps(&rep.nAtoms);
     }
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -976,9 +976,6 @@ ProcXGetDeviceProperty(ClientPtr client)
         }
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     /* delete the Property */
     if (stuff->delete && (rep.bytesAfter == 0)) {
         XIPropertyPtr prop, *prev;
@@ -993,8 +990,7 @@ ProcXGetDeviceProperty(ClientPtr client)
         }
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int _X_COLD
@@ -1055,8 +1051,7 @@ ProcXIListProperties(ClientPtr client)
         swaps(&rep.num_properties);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -1173,10 +1168,9 @@ ProcXIGetProperty(ClientPtr client)
         }
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    rc = X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    if (rc != Success)
+        return rc;
 
     /* delete the Property */
     if (stuff->delete && (rep.bytes_after == 0)) {
@@ -1192,7 +1186,7 @@ ProcXIGetProperty(ClientPtr client)
         }
     }
 
-    return Success;
+    return rc;
 }
 
 int _X_COLD
