@@ -89,7 +89,7 @@ static int XTestSwapFakeInput(ClientPtr /* client */ ,
 static int
 ProcXTestGetVersion(ClientPtr client)
 {
-    xXTestGetVersionReply rep = {
+    xXTestGetVersionReply reply = {
         .majorVersion = XTestMajorVersion,
         .minorVersion = XTestMinorVersion
     };
@@ -97,9 +97,9 @@ ProcXTestGetVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xXTestGetVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.minorVersion);
+        swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -133,11 +133,11 @@ ProcXTestCompareCursor(ClientPtr client)
         }
     }
 
-    xXTestCompareCursorReply rep = {
+    xXTestCompareCursorReply reply = {
         .same = (wCursor(pWin) == pCursor)
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

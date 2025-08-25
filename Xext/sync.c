@@ -1262,14 +1262,14 @@ FreeAlarmClient(void *value, XID id)
 static int
 ProcSyncInitialize(ClientPtr client)
 {
-    xSyncInitializeReply rep = {
+    xSyncInitializeReply reply = {
         .majorVersion = SERVER_SYNC_MAJOR_VERSION,
         .minorVersion = SERVER_SYNC_MINOR_VERSION,
     };
 
     REQUEST_SIZE_MATCH(xSyncInitializeReq);
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1307,15 +1307,15 @@ ProcSyncListSystemCounters(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    xSyncListSystemCountersReply rep = {
+    xSyncListSystemCountersReply reply = {
         .nCounters = nCounters
     };
 
     if (client->swapped) {
-        swapl(&rep.nCounters);
+        swapl(&reply.nCounters);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -1376,15 +1376,15 @@ ProcSyncGetPriority(ClientPtr client)
             return rc;
     }
 
-    xSyncGetPriorityReply rep = {
+    xSyncGetPriorityReply reply = {
         .priority = priorityclient->priority
     };
 
     if (client->swapped) {
-        swapl(&rep.priority);
+        swapl(&reply.priority);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1656,16 +1656,16 @@ ProcSyncQueryCounter(ClientPtr client)
                                                   &pCounter->value);
     }
 
-    xSyncQueryCounterReply rep = {
+    xSyncQueryCounterReply reply = {
         .value_hi = pCounter->value >> 32,
         .value_lo = pCounter->value
     };
 
     if (client->swapped) {
-        swapl(&rep.value_hi);
-        swapl(&rep.value_lo);
+        swapl(&reply.value_hi);
+        swapl(&reply.value_lo);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1813,7 +1813,7 @@ ProcSyncQueryAlarm(ClientPtr client)
 
     pTrigger = &pAlarm->trigger;
 
-    xSyncQueryAlarmReply rep = {
+    xSyncQueryAlarmReply reply = {
         .counter = (pTrigger->pSync) ? pTrigger->pSync->id : None,
 
 #if 0  /* XXX unclear what to do, depends on whether relative value-types
@@ -1837,15 +1837,15 @@ ProcSyncQueryAlarm(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.counter);
-        swapl(&rep.wait_value_hi);
-        swapl(&rep.wait_value_lo);
-        swapl(&rep.test_type);
-        swapl(&rep.delta_hi);
-        swapl(&rep.delta_lo);
+        swapl(&reply.counter);
+        swapl(&reply.wait_value_hi);
+        swapl(&reply.wait_value_lo);
+        swapl(&reply.test_type);
+        swapl(&reply.delta_hi);
+        swapl(&reply.delta_lo);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1987,11 +1987,11 @@ ProcSyncQueryFence(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xSyncQueryFenceReply rep = {
+    xSyncQueryFenceReply reply = {
         .triggered = pFence->funcs.CheckTriggered(pFence)
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

@@ -254,7 +254,7 @@ ShmRegisterFbFuncs(ScreenPtr pScreen)
 static int
 ProcShmQueryVersion(ClientPtr client)
 {
-    xShmQueryVersionReply rep = {
+    xShmQueryVersionReply reply = {
         .sharedPixmaps = sharedPixmaps,
         .majorVersion = SERVER_SHM_MAJOR_VERSION,
         .minorVersion = SERVER_SHM_MINOR_VERSION,
@@ -266,12 +266,12 @@ ProcShmQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xShmQueryVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-        swaps(&rep.uid);
-        swaps(&rep.gid);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
+        swaps(&reply.uid);
+        swaps(&reply.gid);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1259,7 +1259,7 @@ ProcShmCreateSegment(ClientPtr client)
 
     int fd;
     ShmDescPtr shmdesc;
-    xShmCreateSegmentReply rep = {
+    xShmCreateSegmentReply reply = {
         .nfd = 1,
     };
 
@@ -1317,7 +1317,7 @@ ProcShmCreateSegment(ClientPtr client)
         close(fd);
         return BadAlloc;
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 #endif /* SHM_FD_PASSING */

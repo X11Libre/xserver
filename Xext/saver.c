@@ -588,7 +588,7 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 static int
 ProcScreenSaverQueryVersion(ClientPtr client)
 {
-    xScreenSaverQueryVersionReply rep = {
+    xScreenSaverQueryVersionReply reply = {
         .majorVersion = SERVER_SAVER_MAJOR_VERSION,
         .minorVersion = SERVER_SAVER_MINOR_VERSION
     };
@@ -596,10 +596,10 @@ ProcScreenSaverQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xScreenSaverQueryVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -628,39 +628,39 @@ ProcScreenSaverQueryInfo(ClientPtr client)
     UpdateCurrentTime();
     lastInput = GetTimeInMillis() - LastEventTime(XIAllDevices).milliseconds;
 
-    xScreenSaverQueryInfoReply rep = {
+    xScreenSaverQueryInfoReply reply = {
         .window = pSaver->wid
     };
     if (screenIsSaved != SCREEN_SAVER_OFF) {
-        rep.state = ScreenSaverOn;
+        reply.state = ScreenSaverOn;
         if (ScreenSaverTime)
-            rep.tilOrSince = lastInput - ScreenSaverTime;
+            reply.tilOrSince = lastInput - ScreenSaverTime;
     }
     else {
         if (ScreenSaverTime) {
-            rep.state = ScreenSaverOff;
+            reply.state = ScreenSaverOff;
             if (ScreenSaverTime >= lastInput)
-                rep.tilOrSince = ScreenSaverTime - lastInput;
+                reply.tilOrSince = ScreenSaverTime - lastInput;
         }
         else {
-            rep.state = ScreenSaverDisabled;
+            reply.state = ScreenSaverDisabled;
         }
     }
-    rep.idle = lastInput;
-    rep.eventMask = getEventMask(pDraw->pScreen, client);
+    reply.idle = lastInput;
+    reply.eventMask = getEventMask(pDraw->pScreen, client);
     if (pPriv && pPriv->attr)
-        rep.kind = ScreenSaverExternal;
+        reply.kind = ScreenSaverExternal;
     else if (ScreenSaverBlanking != DontPreferBlanking)
-        rep.kind = ScreenSaverBlanked;
+        reply.kind = ScreenSaverBlanked;
     else
-        rep.kind = ScreenSaverInternal;
+        reply.kind = ScreenSaverInternal;
     if (client->swapped) {
-        swapl(&rep.window);
-        swapl(&rep.tilOrSince);
-        swapl(&rep.idle);
-        swapl(&rep.eventMask);
+        swapl(&reply.window);
+        swapl(&reply.tilOrSince);
+        swapl(&reply.idle);
+        swapl(&reply.eventMask);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

@@ -305,7 +305,7 @@ static int
 ProcDPMSGetVersion(ClientPtr client)
 {
     /* REQUEST(xDPMSGetVersionReq); */
-    xDPMSGetVersionReply rep = {
+    xDPMSGetVersionReply reply = {
         .majorVersion = SERVER_DPMS_MAJOR_VERSION,
         .minorVersion = SERVER_DPMS_MINOR_VERSION
     };
@@ -313,10 +313,10 @@ ProcDPMSGetVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -324,13 +324,13 @@ static int
 ProcDPMSCapable(ClientPtr client)
 {
     /* REQUEST(xDPMSCapableReq); */
-    xDPMSCapableReply rep = {
+    xDPMSCapableReply reply = {
         .capable = TRUE
     };
 
     REQUEST_SIZE_MATCH(xDPMSCapableReq);
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -338,7 +338,7 @@ static int
 ProcDPMSGetTimeouts(ClientPtr client)
 {
     /* REQUEST(xDPMSGetTimeoutsReq); */
-    xDPMSGetTimeoutsReply rep = {
+    xDPMSGetTimeoutsReply reply = {
         .standby = DPMSStandbyTime / MILLI_PER_SECOND,
         .suspend = DPMSSuspendTime / MILLI_PER_SECOND,
         .off = DPMSOffTime / MILLI_PER_SECOND
@@ -347,11 +347,11 @@ ProcDPMSGetTimeouts(ClientPtr client)
     REQUEST_SIZE_MATCH(xDPMSGetTimeoutsReq);
 
     if (client->swapped) {
-        swaps(&rep.standby);
-        swaps(&rep.suspend);
-        swaps(&rep.off);
+        swaps(&reply.standby);
+        swaps(&reply.suspend);
+        swaps(&reply.off);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -439,7 +439,7 @@ static int
 ProcDPMSInfo(ClientPtr client)
 {
     /* REQUEST(xDPMSInfoReq); */
-    xDPMSInfoReply rep = {
+    xDPMSInfoReply reply = {
         .power_level = DPMSPowerLevel,
         .state = DPMSEnabled
     };
@@ -447,9 +447,9 @@ ProcDPMSInfo(ClientPtr client)
     REQUEST_SIZE_MATCH(xDPMSInfoReq);
 
     if (client->swapped) {
-        swaps(&rep.power_level);
+        swaps(&reply.power_level);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
