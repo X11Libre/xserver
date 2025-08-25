@@ -152,55 +152,33 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
         }
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     int num_surfaces = (adaptor) ? adaptor->num_surfaces : 0;
-    xvmcSurfaceInfo *info = NULL;
-    if (num_surfaces) {
-        info = calloc(sizeof(xvmcSurfaceInfo), num_surfaces);
-        if (!info)
-            return BadAlloc;
+    for (int i = 0; i < num_surfaces; i++) {
+        XvMCSurfaceInfoPtr surface = adaptor->surfaces[i];
 
-        for (int i = 0; i < num_surfaces; i++) {
-            XvMCSurfaceInfoPtr surface = adaptor->surfaces[i];
-            info[i].surface_type_id = surface->surface_type_id;
-            info[i].chroma_format = surface->chroma_format;
-            info[i].max_width = surface->max_width;
-            info[i].max_height = surface->max_height;
-            info[i].subpicture_max_width = surface->subpicture_max_width;
-            info[i].subpicture_max_height = surface->subpicture_max_height;
-            info[i].mc_type = surface->mc_type;
-            info[i].flags = surface->flags;
-
-            if (client->swapped) {
-                swapl(&info[i].surface_type_id);
-                swaps(&info[i].chroma_format);
-                swaps(&info[i].max_width);
-                swaps(&info[i].max_height);
-                swaps(&info[i].subpicture_max_width);
-                swaps(&info[i].subpicture_max_height);
-                swapl(&info[i].mc_type);
-                swapl(&info[i].flags);
-            }
-        }
+        /* write xvmcSurfaceInfo */
+        x_rpcbuf_write_CARD32(&rpcbuf, surface->surface_type_id);
+        x_rpcbuf_write_CARD16(&rpcbuf, surface->chroma_format);
+        x_rpcbuf_write_CARD16(&rpcbuf, 0);
+        x_rpcbuf_write_CARD16(&rpcbuf, surface->max_width);
+        x_rpcbuf_write_CARD16(&rpcbuf, surface->max_height);
+        x_rpcbuf_write_CARD16(&rpcbuf, surface->subpicture_max_width);
+        x_rpcbuf_write_CARD16(&rpcbuf, surface->subpicture_max_height);
+        x_rpcbuf_write_CARD32(&rpcbuf, surface->mc_type);
+        x_rpcbuf_write_CARD32(&rpcbuf, surface->flags);
     }
 
     xvmcListSurfaceTypesReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .num = num_surfaces,
-        .length = bytes_to_int32(sizeof(xvmcSurfaceInfo) * num_surfaces),
     };
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.num);
     }
 
-    WriteToClient(client, sizeof(xvmcListSurfaceTypesReply), &reply);
-    WriteToClient(client, sizeof(xvmcSurfaceInfo) * num_surfaces, info);
-    free(info);
-
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -279,31 +257,23 @@ ProcXvMCCreateContext(ClientPtr client)
         return BadAlloc;
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(&rpcbuf, data, dwords);
+    free(data);
+
     xvmcCreateContextReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = dwords,
         .width_actual = pContext->width,
         .height_actual = pContext->height,
         .flags_return = pContext->flags
     };
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swaps(&reply.width_actual);
         swaps(&reply.height_actual);
         swapl(&reply.flags_return);
-        SwapLongs(data, dwords);
     }
 
-    WriteToClient(client, sizeof(xvmcCreateContextReply), &reply);
-    if (dwords)
-        WriteToClient(client, dwords << 2, data);
-
-    free(data);
-
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -366,26 +336,15 @@ ProcXvMCCreateSurface(ClientPtr client)
         return BadAlloc;
     }
 
-    xvmcCreateSurfaceReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = dwords
-    };
-
-    if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
-    }
-
-    WriteToClient(client, sizeof(xvmcCreateSurfaceReply), &reply);
-    if (dwords)
-        WriteToClient(client, dwords << 2, data);
-
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(&rpcbuf, data, dwords);
     free(data);
+
+    xvmcCreateSurfaceReply reply = { 0 };
 
     pContext->refcnt++;
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -490,10 +449,11 @@ ProcXvMCCreateSubpicture(ClientPtr client)
         return BadAlloc;
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(&rpcbuf, data, dwords);
+    free(data);
+
     xvmcCreateSubpictureReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = dwords,
         .width_actual = pSubpicture->width,
         .height_actual = pSubpicture->height,
         .num_palette_entries = pSubpicture->num_palette_entries,
@@ -505,23 +465,15 @@ ProcXvMCCreateSubpicture(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swaps(&reply.width_actual);
         swaps(&reply.height_actual);
         swaps(&reply.num_palette_entries);
         swaps(&reply.entry_bytes);
     }
 
-    WriteToClient(client, sizeof(xvmcCreateSubpictureReply), &reply);
-    if (dwords)
-        WriteToClient(client, dwords << 2, data);
-
-    free(data);
-
     pContext->refcnt++;
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -589,12 +541,9 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
     int num = (surface->compatible_subpictures ?
                surface->compatible_subpictures->num_xvimages : 0);
 
-    xvImageFormatInfo *info = NULL;
-    if (num) {
-        info = calloc(sizeof(xvImageFormatInfo), num);
-        if (!info)
-            return BadAlloc;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
+    if (num) {
         for (int i = 0; i < num; i++) {
             pImage = NULL;
             for (int j = 0; j < adaptor->num_subpictures; j++) {
@@ -605,67 +554,54 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
                 }
             }
             if (!pImage) {
-                free(info);
                 return BadImplementation;
             }
 
-            info[i].id = pImage->id;
-            info[i].type = pImage->type;
-            info[i].byte_order = pImage->byte_order;
-            memcpy(&info[i].guid, pImage->guid, 16);
-            info[i].bpp = pImage->bits_per_pixel;
-            info[i].num_planes = pImage->num_planes;
-            info[i].depth = pImage->depth;
-            info[i].red_mask = pImage->red_mask;
-            info[i].green_mask = pImage->green_mask;
-            info[i].blue_mask = pImage->blue_mask;
-            info[i].format = pImage->format;
-            info[i].y_sample_bits = pImage->y_sample_bits;
-            info[i].u_sample_bits = pImage->u_sample_bits;
-            info[i].v_sample_bits = pImage->v_sample_bits;
-            info[i].horz_y_period = pImage->horz_y_period;
-            info[i].horz_u_period = pImage->horz_u_period;
-            info[i].horz_v_period = pImage->horz_v_period;
-            info[i].vert_y_period = pImage->vert_y_period;
-            info[i].vert_u_period = pImage->vert_u_period;
-            info[i].vert_v_period = pImage->vert_v_period;
-            memcpy(&info[i].comp_order, pImage->component_order, 32);
-            info[i].scanline_order = pImage->scanline_order;
-
-            if (client->swapped) {
-                swapl(&info[i].id);
-                swapl(&info[i].red_mask);
-                swapl(&info[i].green_mask);
-                swapl(&info[i].blue_mask);
-                swapl(&info[i].y_sample_bits);
-                swapl(&info[i].u_sample_bits);
-                swapl(&info[i].v_sample_bits);
-                swapl(&info[i].horz_y_period);
-                swapl(&info[i].horz_u_period);
-                swapl(&info[i].horz_v_period);
-                swapl(&info[i].vert_y_period);
-                swapl(&info[i].vert_u_period);
-                swapl(&info[i].vert_v_period);
-            }
+            /* xvImageFormatInfo */
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->id);
+            x_rpcbuf_write_CARD8(&rpcbuf, pImage->type);
+            x_rpcbuf_write_CARD8(&rpcbuf, pImage->byte_order);
+            x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)pImage->guid, 16);
+            x_rpcbuf_write_CARD8(&rpcbuf, pImage->bits_per_pixel);
+            x_rpcbuf_write_CARD8(&rpcbuf, pImage->num_planes);
+            x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad2 */
+            x_rpcbuf_write_CARD8(&rpcbuf, pImage->depth);
+            x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad3 */
+            x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad4 */
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->red_mask);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->green_mask);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->blue_mask);
+            x_rpcbuf_write_CARD8(&rpcbuf, pImage->format);
+            x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad5 */
+            x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad6 */
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->y_sample_bits);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->u_sample_bits);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->v_sample_bits);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->horz_y_period);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->horz_u_period);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->horz_v_period);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->vert_y_period);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->vert_u_period);
+            x_rpcbuf_write_CARD32(&rpcbuf, pImage->vert_v_period);
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)pImage->component_order, 32);
+            x_rpcbuf_write_CARD8(&rpcbuf,  pImage->scanline_order);
+            x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad7 */
+            x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad8 */
+            x_rpcbuf_write_CARD32(&rpcbuf, 0); /* pad9 */
+            x_rpcbuf_write_CARD32(&rpcbuf, 0); /* pad10 */
         }
     }
 
     xvmcListSubpictureTypesReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .num = num,
-        .length = bytes_to_int32(num * sizeof(xvImageFormatInfo)),
     };
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.num);
     }
-    WriteToClient(client, sizeof(xvmcListSubpictureTypesReply), &reply);
-    WriteToClient(client, sizeof(xvImageFormatInfo) * num, info);
-    free(info);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -690,24 +626,16 @@ ProcXvMCGetDRInfo(ClientPtr client)
     int nameLen = strlen(pScreenPriv->clientDriverName) + 1;
     int busIDLen = strlen(pScreenPriv->busID) + 1;
 
-    // buffer holds two zero-terminated strings, padded to 4-byte ints
-    const size_t buflen = pad_to_int32(nameLen+busIDLen);
-    char *buf = calloc(1, buflen);
-    if (!buf)
-        return BadAlloc;
-
-    memcpy(buf, pScreenPriv->clientDriverName, nameLen);
-    memcpy(buf+nameLen, pScreenPriv->busID, busIDLen);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)pScreenPriv->clientDriverName, nameLen);
+    x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)pScreenPriv->busID, busIDLen);
 
     xvmcGetDRInfoReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .major = pScreenPriv->major,
         .minor = pScreenPriv->minor,
         .patchLevel = pScreenPriv->patchLevel,
         .nameLen = nameLen,
         .busIDLen = busIDLen,
-        .length = bytes_to_int32(sizeof(buf)),
         .isLocal = 1
     };
 
@@ -738,8 +666,6 @@ ProcXvMCGetDRInfo(ClientPtr client)
 #endif                          /* HAS_XVMCSHM */
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.major);
         swapl(&reply.minor);
         swapl(&reply.patchLevel);
@@ -748,10 +674,7 @@ ProcXvMCGetDRInfo(ClientPtr client)
         swapl(&reply.isLocal);
     }
 
-    WriteToClient(client, sizeof(xvmcGetDRInfoReply), &reply);
-    WriteToClient(client, buflen, buf);
-    free(buf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
