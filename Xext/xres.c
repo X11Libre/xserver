@@ -272,23 +272,17 @@ ProcXResQueryClientResources(ClientPtr client)
 
     FindAllClientResources(resClient, ResFindAllRes, counts);
 
-    xXResType *scratch = calloc(sizeof(xXResType), lastResourceType + 1);
-    if (!scratch) {
-        free(counts);
-        return BadAlloc;
-    }
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     int num_types = 0;
     for (int i = 0; i < num_types; i++) {
         if (!(counts[i]))
             continue;
 
-        scratch[num_types].resource_type = resourceTypeAtom(i + 1);
-        scratch[num_types].count = counts[i];
-        if (client->swapped) {
-            swapl(&scratch[num_types].resource_type);
-            swapl(&scratch[num_types].count);
-        }
+        /* write xXResType */
+        x_rpcbuf_write_CARD32(&rpcbuf, resourceTypeAtom(i + 1));
+        x_rpcbuf_write_CARD32(&rpcbuf, counts[i]);
+
         num_types++;
     }
 
@@ -306,10 +300,7 @@ ProcXResQueryClientResources(ClientPtr client)
         swapl(&rep.num_types);
     }
 
-    WriteToClient(client, sizeof(xXResQueryClientResourcesReply), &rep);
-    WriteToClient(client, num_types * sizeof(xXResType), scratch);
-    free(scratch);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static void
