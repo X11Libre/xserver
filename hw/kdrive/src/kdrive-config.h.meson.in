@@ -1,0 +1,10 @@
+/* kdrive-config.h.in: not at all generated.                      -*- c -*-
+ *
+ */
+
+#ifndef _KDRIVE_CONFIG_H_
+#define _KDRIVE_CONFIG_H_
+
+#include <dix-config.h>
+
+#endif /* _KDRIVE_CONFIG_H_ */

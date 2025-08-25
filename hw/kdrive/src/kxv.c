@@ -35,7 +35,7 @@ of the copyright holder.
 
 */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>

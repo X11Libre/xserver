@@ -20,7 +20,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 
 #include "config/hotplug_priv.h"
 #include "dix/screenint_priv.h"

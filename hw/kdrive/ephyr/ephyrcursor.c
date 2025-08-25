@@ -24,7 +24,7 @@
  *      Adam Jackson <ajax@redhat.com>
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 
 #include <xcb/render.h>
 #include <xcb/xcb_renderutil.h>

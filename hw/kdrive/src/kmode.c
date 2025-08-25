@@ -21,7 +21,7 @@
  * Author:  Keith Packard, SuSE, Inc.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 #include "kdrive.h"
 
 const KdMonitorTiming kdMonitorTimings[] = {

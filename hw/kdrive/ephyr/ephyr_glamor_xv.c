@@ -21,7 +21,7 @@
  * IN THE SOFTWARE.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 
 #include "kdrive.h"
 #include "kxv.h"

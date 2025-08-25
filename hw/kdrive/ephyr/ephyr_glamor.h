@@ -25,7 +25,7 @@
 #define XSERVER_KDRIVE_EPHYR_GLAMOR_H
 
 #include <xcb/xcb.h>
-#include "dix-config.h"
+#include "kdrive-config.h"
 
 struct ephyr_glamor;
 struct pixman_region16;

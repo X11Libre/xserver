@@ -25,7 +25,7 @@
  *
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 
 #include "ephyr.h"
 #include "exa_priv.h"
