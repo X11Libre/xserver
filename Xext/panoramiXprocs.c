@@ -2129,8 +2129,7 @@ PanoramiXGetImage(ClientPtr client)
         swapl(&rep.visual);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 /* The text stuff should be rewritten so that duplication happens

@@ -1034,9 +1034,6 @@ ProcQueryTree(ClientPtr client)
         numChildren++;
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xQueryTreeReply rep = {
         .root = pWin->drawable.pScreen->root->drawable.id,
         .parent = (pWin->parent) ? pWin->parent->drawable.id : (Window) None,
@@ -1049,8 +1046,7 @@ ProcQueryTree(ClientPtr client)
         swaps(&rep.nChildren);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int

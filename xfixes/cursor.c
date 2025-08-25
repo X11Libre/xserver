@@ -400,8 +400,7 @@ ProcXFixesGetCursorImage(ClientPtr client)
         swapl(&rep.cursorSerial);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -460,8 +459,8 @@ ProcXFixesGetCursorName(ClientPtr client)
         swapl(&rep.atom);
         swaps(&rep.nbytes);
     }
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int _X_COLD
@@ -536,8 +535,7 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
         swaps(&rep.nbytes);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 /*

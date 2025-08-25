@@ -148,13 +148,10 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
         free(buf);
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     if (client->swapped) {
         swaps(&rep.this_client_count);
         swaps(&rep.all_clients_count);
     }
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }

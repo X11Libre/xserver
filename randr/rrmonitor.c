@@ -647,8 +647,7 @@ ProcRRGetMonitors(ClientPtr client)
         swapl(&rep.noutputs);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int

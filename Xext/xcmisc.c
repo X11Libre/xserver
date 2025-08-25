@@ -112,9 +112,6 @@ ProcXCMiscGetXIDList(ClientPtr client)
     x_rpcbuf_write_CARD32s(&rpcbuf, pids, count);
     free(pids);
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xXCMiscGetXIDListReply rep = {
         .count = count
     };
@@ -122,8 +119,7 @@ ProcXCMiscGetXIDList(ClientPtr client)
         swapl(&rep.count);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
