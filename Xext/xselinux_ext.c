@@ -67,15 +67,15 @@ SELinuxCopyContext(char *ptr, unsigned len)
 static int
 ProcSELinuxQueryVersion(ClientPtr client)
 {
-    SELinuxQueryVersionReply rep = {
+    SELinuxQueryVersionReply reply = {
         .server_major = SELINUX_MAJOR_VERSION,
         .server_minor = SELINUX_MINOR_VERSION
     };
     if (client->swapped) {
-        swaps(&rep.server_major);
-        swaps(&rep.server_minor);
+        swaps(&reply.server_major);
+        swaps(&reply.server_minor);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -91,7 +91,7 @@ SELinuxSendContextReply(ClientPtr client, security_id_t sid)
         len = strlen(ctx) + 1;
     }
 
-    SELinuxGetContextReply rep = {
+    SELinuxGetContextReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(len),
@@ -99,12 +99,12 @@ SELinuxSendContextReply(ClientPtr client, security_id_t sid)
     };
 
     if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.context_len);
+        swapl(&reply.length);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.context_len);
     }
 
-    WriteToClient(client, sizeof(SELinuxGetContextReply), &rep);
+    WriteToClient(client, sizeof(SELinuxGetContextReply), &reply);
     WriteToClient(client, len, ctx);
     freecon(ctx);
     return Success;
@@ -377,7 +377,7 @@ SELinuxSendItemsToClient(ClientPtr client, SELinuxListItemRec * items,
 
 sendreply: ;
     /* Send reply to client */
-    SELinuxListItemsReply rep = {
+    SELinuxListItemsReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = size,
@@ -385,12 +385,12 @@ sendreply: ;
     };
 
     if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.count);
+        swapl(&reply.length);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.count);
     }
 
-    WriteToClient(client, sizeof(SELinuxListItemsReply), &rep);
+    WriteToClient(client, sizeof(SELinuxListItemsReply), &reply);
     WriteToClient(client, size * 4, buf);
 
     /* Free stuff and return */

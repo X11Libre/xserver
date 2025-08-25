@@ -61,17 +61,17 @@ ProcXvQueryExtension(ClientPtr client)
     /* REQUEST(xvQueryExtensionReq); */
     REQUEST_SIZE_MATCH(xvQueryExtensionReq);
 
-    xvQueryExtensionReply rep = {
+    xvQueryExtensionReply reply = {
         .version = XvVersion,
         .revision = XvRevision
     };
 
     if (client->swapped) {
-        swaps(&rep.version);
-        swaps(&rep.revision);
+        swaps(&reply.version);
+        swaps(&reply.revision);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -127,15 +127,15 @@ ProcXvQueryAdaptors(ClientPtr client)
         }
     }
 
-    xvQueryAdaptorsReply rep = {
+    xvQueryAdaptorsReply reply = {
         .num_adaptors = numAdaptors,
     };
 
     if (client->swapped) {
-        swaps(&rep.num_adaptors);
+        swaps(&reply.num_adaptors);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -169,15 +169,15 @@ ProcXvQueryEncodings(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    xvQueryEncodingsReply rep = {
+    xvQueryEncodingsReply reply = {
         .num_encodings = pPort->pAdaptor->nEncodings,
     };
 
     if (client->swapped) {
-        swaps(&rep.num_encodings);
+        swaps(&reply.num_encodings);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -371,11 +371,11 @@ ProcXvGrabPort(ClientPtr client)
     if (status != Success) {
         return status;
     }
-    xvGrabPortReply rep = {
+    xvGrabPortReply reply = {
         .result = result
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -485,15 +485,15 @@ ProcXvGetPortAttribute(ClientPtr client)
         return status;
     }
 
-    xvGetPortAttributeReply rep = {
+    xvGetPortAttributeReply reply = {
         .value = value
     };
 
     if (client->swapped) {
-        swapl(&rep.value);
+        swapl(&reply.value);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -513,17 +513,17 @@ ProcXvQueryBestSize(ClientPtr client)
                                          stuff->drw_w, stuff->drw_h,
                                          &actual_width, &actual_height);
 
-    xvQueryBestSizeReply rep = {
+    xvQueryBestSizeReply reply = {
         .actual_width = actual_width,
         .actual_height = actual_height
     };
 
     if (client->swapped) {
-        swaps(&rep.actual_width);
-        swaps(&rep.actual_height);
+        swaps(&reply.actual_width);
+        swaps(&reply.actual_height);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -555,17 +555,17 @@ ProcXvQueryPortAttributes(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    xvQueryPortAttributesReply rep = {
+    xvQueryPortAttributesReply reply = {
         .num_attributes = pPort->pAdaptor->nAttributes,
         .text_size = textSize,
     };
 
     if (client->swapped) {
-        swapl(&rep.num_attributes);
-        swapl(&rep.text_size);
+        swapl(&reply.num_attributes);
+        swapl(&reply.text_size);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -785,7 +785,7 @@ ProcXvQueryImageAttributes(ClientPtr client)
                                                        &width, &height, offsets,
                                                        pitches);
 
-    xvQueryImageAttributesReply rep = {
+    xvQueryImageAttributesReply reply = {
         .num_planes = num_planes,
         .width = width,
         .height = height,
@@ -793,16 +793,16 @@ ProcXvQueryImageAttributes(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.num_planes);
-        swapl(&rep.data_size);
-        swaps(&rep.width);
-        swaps(&rep.height);
+        swapl(&reply.num_planes);
+        swapl(&reply.data_size);
+        swaps(&reply.width);
+        swaps(&reply.height);
         /* needed here, because ddQueryImageAttributes() directly wrote into
            our rpcbuf area */
         SwapLongs((CARD32 *) offsets, x_rpcbuf_wsize_units(&rpcbuf));
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -866,15 +866,15 @@ ProcXvListImageFormats(ClientPtr client)
         LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %ld but shoud be %d\n",
                    rpcbuf.wpos, (pPort->pAdaptor->nImages*sz_xvImageFormatInfo));
 
-    xvListImageFormatsReply rep = {
+    xvListImageFormatsReply reply = {
         .num_formats = pPort->pAdaptor->nImages,
     };
 
     if (client->swapped) {
-        swapl(&rep.num_formats);
+        swapl(&reply.num_formats);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 

@@ -348,7 +348,7 @@ static int
 ProcSecurityQueryVersion(ClientPtr client)
 {
     /* REQUEST(xSecurityQueryVersionReq); */
-    xSecurityQueryVersionReply rep = {
+    xSecurityQueryVersionReply reply = {
         .majorVersion = SERVER_SECURITY_MAJOR_VERSION,
         .minorVersion = SERVER_SECURITY_MINOR_VERSION
     };
@@ -356,10 +356,10 @@ ProcSecurityQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xSecurityQueryVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }                               /* ProcSecurityQueryVersion */
 
@@ -403,7 +403,7 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     Bool removeAuth = FALSE;    /* if bailout, call RemoveAuthorization? */
     int err;                    /* error to return from this function */
     XID authId;                 /* authorization ID assigned by os layer */
-    xSecurityGenerateAuthorizationReply rep;    /* reply struct */
+    xSecurityGenerateAuthorizationReply reply;    /* reply struct */
     unsigned int trustLevel;    /* trust level of new auth */
     XID group;                  /* group of new auth */
     CARD32 timeout;             /* timeout of new auth */
@@ -533,7 +533,7 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
 
     /* tell client the auth id and data */
 
-    rep = (xSecurityGenerateAuthorizationReply) {
+    reply = (xSecurityGenerateAuthorizationReply) {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = bytes_to_int32(authdata_len),
@@ -542,13 +542,13 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.authId);
-        swaps(&rep.dataLength);
+        swapl(&reply.length);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.authId);
+        swaps(&reply.dataLength);
     }
 
-    WriteToClient(client, SIZEOF(xSecurityGenerateAuthorizationReply), &rep);
+    WriteToClient(client, SIZEOF(xSecurityGenerateAuthorizationReply), &reply);
     WriteToClient(client, authdata_len, pAuthdata);
 
     SecurityAudit

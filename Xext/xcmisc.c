@@ -55,16 +55,16 @@ ProcXCMiscGetVersion(ClientPtr client)
         swaps(&stuff->minorVersion);
     }
 
-    xXCMiscGetVersionReply rep = {
+    xXCMiscGetVersionReply reply = {
         .majorVersion = XCMiscMajorVersion,
         .minorVersion = XCMiscMinorVersion
     };
 
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -76,15 +76,15 @@ ProcXCMiscGetXIDRange(ClientPtr client)
     XID min_id, max_id;
     GetXIDRange(client->index, FALSE, &min_id, &max_id);
 
-    xXCMiscGetXIDRangeReply rep = {
+    xXCMiscGetXIDRangeReply reply = {
         .start_id = min_id,
         .count = max_id - min_id + 1
     };
     if (client->swapped) {
-        swapl(&rep.start_id);
-        swapl(&rep.count);
+        swapl(&reply.start_id);
+        swapl(&reply.count);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -115,14 +115,14 @@ ProcXCMiscGetXIDList(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    xXCMiscGetXIDListReply rep = {
+    xXCMiscGetXIDListReply reply = {
         .count = count
     };
     if (client->swapped) {
-        swapl(&rep.count);
+        swapl(&reply.count);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 

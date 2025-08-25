@@ -208,16 +208,16 @@ ProcShapeQueryVersion(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
 
-    xShapeQueryVersionReply rep = {
+    xShapeQueryVersionReply reply = {
         .majorVersion = SERVER_SHAPE_MAJOR_VERSION,
         .minorVersion = SERVER_SHAPE_MINOR_VERSION
     };
 
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -649,7 +649,7 @@ ProcShapeQueryExtents(ClientPtr client)
         shapeBox.y2 = pWin->drawable.height;
     }
 
-    xShapeQueryExtentsReply rep = {
+    xShapeQueryExtentsReply reply = {
         .boundingShaped = (wBoundingShape(pWin) != 0),
         .clipShaped = (wClipShape(pWin) != 0),
         .xBoundingShape = boundBox.x1,
@@ -663,16 +663,16 @@ ProcShapeQueryExtents(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.xBoundingShape);
-        swaps(&rep.yBoundingShape);
-        swaps(&rep.widthBoundingShape);
-        swaps(&rep.heightBoundingShape);
-        swaps(&rep.xClipShape);
-        swaps(&rep.yClipShape);
-        swaps(&rep.widthClipShape);
-        swaps(&rep.heightClipShape);
+        swaps(&reply.xBoundingShape);
+        swaps(&reply.yBoundingShape);
+        swaps(&reply.widthBoundingShape);
+        swaps(&reply.heightBoundingShape);
+        swaps(&reply.xClipShape);
+        swaps(&reply.yClipShape);
+        swaps(&reply.widthClipShape);
+        swaps(&reply.heightClipShape);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -915,11 +915,11 @@ ProcShapeInputSelected(ClientPtr client)
         }
     }
 
-    xShapeInputSelectedReply rep = {
+    xShapeInputSelectedReply reply = {
         .enabled = enabled,
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -994,16 +994,16 @@ ProcShapeGetRectangles(ClientPtr client)
     if (rpcbuf.error) /* buffer already cleared */
         return BadAlloc;
 
-    xShapeGetRectanglesReply rep = {
+    xShapeGetRectanglesReply reply = {
         .ordering = YXBanded,
         .nrects = nrects
     };
 
     if (client->swapped) {
-        swapl(&rep.nrects);
+        swapl(&reply.nrects);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
