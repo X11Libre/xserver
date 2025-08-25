@@ -1051,13 +1051,11 @@ ProcXineramaQueryScreens(ClientPtr client)
                 .height = walkScreen->height,
             };
             /* scratch consists of 4x CARD16 */
-            if (!x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&scratch, 4))
-                return BadAlloc;
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&scratch, 4);
         }
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int

@@ -376,9 +376,6 @@ ProcVidModeGetAllModeLines(ClientPtr client)
             fillModeInfoV2(&rpcbuf, dotClock, mode);
     } while (pVidMode->GetNextModeline(pScreen, &mode, &dotClock));
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xXF86VidModeGetAllModeLinesReply reply = {
         .modecount = modecount
     };
@@ -387,8 +384,7 @@ ProcVidModeGetAllModeLines(ClientPtr client)
         swapl(&reply.modecount);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 #define MODEMATCH(mode,stuff)	  \
@@ -1221,9 +1217,6 @@ ProcVidModeGetMonitor(ClientPtr client)
     x_rpcbuf_write_string_pad(&rpcbuf, vendorStr);
     x_rpcbuf_write_string_pad(&rpcbuf, modelStr);
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xXF86VidModeGetMonitorReply reply = {
         .nhsync = nHsync,
         .nvsync = nVrefresh,
@@ -1231,8 +1224,7 @@ ProcVidModeGetMonitor(ClientPtr client)
         .modelLength = x_safe_strlen(modelStr),
     };
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -1339,9 +1331,6 @@ ProcVidModeGetDotClocks(ClientPtr client)
         free(Clocks);
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xXF86VidModeGetDotClocksReply reply = {
         .clocks = numClocks,
         .maxclocks = MAXCLOCKS,
@@ -1354,8 +1343,7 @@ ProcVidModeGetDotClocks(ClientPtr client)
         swapl(&reply.flags);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -1510,10 +1498,8 @@ ProcVidModeGetGammaRamp(ClientPtr client)
         swaps(&reply.size);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
-
 
 static int
 ProcVidModeGetGammaRampSize(ClientPtr client)

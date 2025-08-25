@@ -1492,8 +1492,7 @@ ProcXkbGetMap(ClientPtr client)
         swaps(&rep.totalActs);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 /***====================================================================***/
@@ -2808,8 +2807,7 @@ ProcXkbGetCompatMap(ClientPtr client)
         swaps(&rep.nTotalSI);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 /**
@@ -3141,8 +3139,7 @@ ProcXkbGetIndicatorMap(ClientPtr client)
         swapl(&rep.realIndicators);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 /**
@@ -3778,8 +3775,7 @@ ProcXkbGetNames(ClientPtr client)
         swapl(&rep.indicators);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 /***====================================================================***/
@@ -5928,7 +5924,7 @@ ProcXkbGetKbdByName(ClientPtr client)
         x_rpcbuf_write_rpcbuf_pad(&childbuf, &childbuf);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    status = X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
     if (loaded) {
         XkbDescPtr old_xkb;
@@ -5986,7 +5982,7 @@ ProcXkbGetKbdByName(ClientPtr client)
     XkbSetCauseXkbReq(&cause, X_kbGetKbdByName, client);
     XkbUpdateAllDeviceIndicators(NULL, &cause);
 
-    return Success;
+    return status;
 }
 
 /***====================================================================***/

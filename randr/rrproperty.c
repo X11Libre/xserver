@@ -430,9 +430,6 @@ ProcRRListOutputProperties(ClientPtr client)
         x_rpcbuf_write_CARD32(&rpcbuf, prop->propertyName);
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xRRListOutputPropertiesReply rep = {
         .nAtoms = numProps
     };
@@ -441,8 +438,7 @@ ProcRRListOutputProperties(ClientPtr client)
         swaps(&rep.nAtoms);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -462,17 +458,13 @@ ProcRRQueryOutputProperty(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)prop->valid_values, prop->num_valid);
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xRRQueryOutputPropertyReply rep = {
         .pending = prop->is_pending,
         .range = prop->range,
         .immutable = prop->immutable
     };
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int

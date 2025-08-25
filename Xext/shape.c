@@ -991,9 +991,6 @@ ProcShapeGetRectangles(ClientPtr client)
         };
     }
 
-    if (rpcbuf.error) /* buffer already cleared */
-        return BadAlloc;
-
     xShapeGetRectanglesReply reply = {
         .ordering = YXBanded,
         .nrects = nrects
@@ -1003,8 +1000,7 @@ ProcShapeGetRectangles(ClientPtr client)
         swapl(&reply.nrects);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int

@@ -135,8 +135,7 @@ ProcXvQueryAdaptors(ClientPtr client)
         swaps(&reply.num_adaptors);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -166,9 +165,6 @@ ProcXvQueryEncodings(ClientPtr client)
         pe++;
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xvQueryEncodingsReply reply = {
         .num_encodings = pPort->pAdaptor->nEncodings,
     };
@@ -177,8 +173,7 @@ ProcXvQueryEncodings(ClientPtr client)
         swaps(&reply.num_encodings);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -552,9 +547,6 @@ ProcXvQueryPortAttributes(ClientPtr client)
         x_rpcbuf_write_string_0t_pad(&rpcbuf, pAtt->name);
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     xvQueryPortAttributesReply reply = {
         .num_attributes = pPort->pAdaptor->nAttributes,
         .text_size = textSize,
@@ -565,8 +557,7 @@ ProcXvQueryPortAttributes(ClientPtr client)
         swapl(&reply.text_size);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -802,8 +793,7 @@ ProcXvQueryImageAttributes(ClientPtr client)
         SwapLongs((CARD32 *) offsets, x_rpcbuf_wsize_units(&rpcbuf));
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -854,9 +844,6 @@ ProcXvListImageFormats(ClientPtr client)
         x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)+(sizeof(CARD32)*2)); /* pad7, pad8, pad9, pad10 */
     }
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
     /* use rpc.wpos here, in order to get how much we've really written */
     if (rpcbuf.wpos != (pPort->pAdaptor->nImages*sz_xvImageFormatInfo))
         LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %ld but shoud be %d\n",
@@ -870,8 +857,7 @@ ProcXvListImageFormats(ClientPtr client)
         swapl(&reply.num_formats);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
