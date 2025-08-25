@@ -1315,8 +1315,7 @@ ProcSyncListSystemCounters(ClientPtr client)
         swapl(&reply.nCounters);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 /*
