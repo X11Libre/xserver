@@ -26,7 +26,7 @@
  *    Dodji Seketeli <dodji@openedhand.com>
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 #include <string.h>
 #include <X11/extensions/Xv.h>
 #include <xcb/xcb.h>

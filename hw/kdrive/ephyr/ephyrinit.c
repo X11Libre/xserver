@@ -23,7 +23,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 
 #include "dix/dix_priv.h"
 #include "os/cmdline.h"

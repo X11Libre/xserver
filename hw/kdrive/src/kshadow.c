@@ -20,7 +20,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 #include "kdrive.h"
 
 Bool

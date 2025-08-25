@@ -21,7 +21,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 #include <xkb-config.h>
 #include "kdrive.h"
 #include "inputstr.h"
@@ -153,8 +153,6 @@ void KdAssertSigioBlocked(char *where)
 #define KdAssertSigioBlocked(s)
 
 #endif
-
-static int kdnFds;
 #endif
 
 #ifdef FNONBLOCK
