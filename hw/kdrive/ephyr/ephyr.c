@@ -23,7 +23,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 
 #include <xcb/xcb_keysyms.h>
 #include <X11/keysym.h>

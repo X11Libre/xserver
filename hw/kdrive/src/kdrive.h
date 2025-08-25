@@ -343,6 +343,8 @@ extern Bool kdEnabled;
 extern Bool kdSwitchPending;
 extern Bool kdEmulateMiddleButton;
 extern Bool kdDisableZaphod;
+extern Bool kdAllowZap;
+extern int kdVirtualTerminal;
 extern char *kdSwitchCmd;
 
 /*
@@ -351,9 +353,6 @@ extern char *kdSwitchCmd;
  * Initialized via KdOSInit()
  */
 extern const KdOsFuncs *kdOsFuncs;
-
-extern Bool kdAllowZap;
-extern int kdVirtualTerminal;
 
 #define KdGetScreenPriv(pScreen) ((KdPrivScreenPtr) \
     dixLookupPrivate(&(pScreen)->devPrivates, kdScreenPrivateKey))
@@ -538,7 +537,6 @@ const KdMonitorTiming *KdFindMode(KdScreenInfo * screen,
                                                      const KdMonitorTiming *));
 
 Bool
-
 KdTuneMode(KdScreenInfo * screen,
            Bool (*usable) (KdScreenInfo *),
            Bool (*supported) (KdScreenInfo *, const KdMonitorTiming *));

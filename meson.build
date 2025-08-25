@@ -248,6 +248,7 @@ summary({
         'Xvfb': build_xvfb,
         'Xwin': build_xwin,
         'Xquartz': build_xquartz,
+        'Xephyr': get_option('xephyr'),
     },
     section: 'DDX',
     bool_yn: true,
