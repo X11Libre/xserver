@@ -273,23 +273,17 @@ ProcXResQueryClientResources(ClientPtr client)
 
     FindAllClientResources(resClient, ResFindAllRes, counts);
 
-    xXResType *scratch = calloc(lastResourceType + 1, sizeof(xXResType));
-    if (!scratch) {
-        free(counts);
-        return BadAlloc;
-    }
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     int num_types = 0;
-    for (int i = 0; i <= lastResourceType; i++) {
+    for (int i = 0; i < num_types; i++) {
         if (!(counts[i]))
             continue;
 
-        scratch[num_types].resource_type = resourceTypeAtom(i + 1);
-        scratch[num_types].count = counts[i];
-        if (client->swapped) {
-            swapl(&scratch[num_types].resource_type);
-            swapl(&scratch[num_types].count);
-        }
+        /* write xXResType */
+        x_rpcbuf_write_CARD32(&rpcbuf, resourceTypeAtom(i + 1));
+        x_rpcbuf_write_CARD32(&rpcbuf, counts[i]);
+
         num_types++;
     }
 
@@ -307,10 +301,7 @@ ProcXResQueryClientResources(ClientPtr client)
         swapl(&reply.num_types);
     }
 
-    WriteToClient(client, sizeof(xXResQueryClientResourcesReply), &reply);
-    WriteToClient(client, num_types * sizeof(xXResType), scratch);
-    free(scratch);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static void
@@ -523,43 +514,31 @@ ProcXResQueryClientIds (ClientPtr client)
     REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
                        stuff->numSpecs * sizeof(specs[0]));
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     int rc = ConstructClientIds(client, stuff->numSpecs, specs, &ctx);
-
     if (rc == Success) {
-        char *buf = calloc(1, ctx.resultBytes);
-        if (!buf) {
-            rc = BadAlloc;
-            goto out;
-        }
-        char *walk = buf;
-
         FragmentList *it;
         xorg_list_for_each_entry(it, &ctx.response, l) {
-            memcpy(walk, FRAGMENT_DATA(it), it->bytes);
-            walk += it->bytes;
+            x_rpcbuf_write_CARD8s(&rpcbuf, FRAGMENT_DATA(it), it->bytes);
         }
 
+        if (rpcbuf.wpos != ctx.resultBytes)
+            LogMessage(X_WARNING, "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
+                       (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
+
         xXResQueryClientIdsReply reply = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
-            .length = bytes_to_int32(ctx.resultBytes),
             .numIds = ctx.numIds
         };
 
         if (client->swapped) {
-            swaps (&reply.sequenceNumber);
-            swapl (&reply.length);
             swapl (&reply.numIds);
         }
 
-        WriteToClient(client, sizeof(reply), &reply);
-        WriteToClient(client, ctx.resultBytes, buf);
-        free(buf);
+        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }
 
-out:
     DestroyConstructClientIdCtx(&ctx);
-
     return rc;
 }
 
@@ -908,6 +887,8 @@ ProcXResQueryResourceBytes (ClientPtr client)
         return BadAlloc;
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     int rc = ConstructResourceBytes(stuff->client, &ctx);
 
     if (rc == Success) {
@@ -926,26 +907,19 @@ ProcXResQueryResourceBytes (ClientPtr client)
             SwapXResQueryResourceBytes(&ctx.response);
         }
 
-        char *buf = calloc(1, ctx.resultBytes);
-        if (!buf) {
-            rc = BadAlloc;
-            goto out;
-        }
-
-        char *walk = buf;
         FragmentList *it;
         xorg_list_for_each_entry(it, &ctx.response, l) {
-            memcpy(walk, FRAGMENT_DATA(it), it->bytes);
-            walk += it->bytes;
+            x_rpcbuf_write_CARD8s(&rpcbuf, FRAGMENT_DATA(it), it->bytes);
         }
-        WriteToClient(client, sizeof(reply), &reply);
-        WriteToClient(client, ctx.resultBytes, buf);
-        free(buf);
+
+        if (rpcbuf.wpos != ctx.resultBytes)
+            LogMessage(X_WARNING, "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
+                       (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
+
+        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     }
 
-out:
     DestroyConstructResourceBytesCtx(&ctx);
-
     return rc;
 }
 
