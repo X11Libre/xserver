@@ -118,6 +118,11 @@ ProcXvMCQueryVersion(ClientPtr client)
     /* REQUEST(xvmcQueryVersionReq); */
     REQUEST_SIZE_MATCH(xvmcQueryVersionReq);
 
+    if (client->swapped) {
+        swapl(&rep.major);
+        swapl(&rep.minor);
+    }
+
     X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
@@ -164,6 +169,17 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
             info[i].subpicture_max_height = surface->subpicture_max_height;
             info[i].mc_type = surface->mc_type;
             info[i].flags = surface->flags;
+
+            if (client->swapped) {
+                swapl(&info[i].surface_type_id);
+                swaps(&info[i].chroma_format);
+                swaps(&info[i].max_width);
+                swaps(&info[i].max_height);
+                swaps(&info[i].subpicture_max_width);
+                swaps(&info[i].subpicture_max_height);
+                swapl(&info[i].mc_type);
+                swapl(&info[i].flags);
+            }
         }
     }
 
@@ -173,6 +189,12 @@ ProcXvMCListSurfaceTypes(ClientPtr client)
         .num = num_surfaces,
         .length = bytes_to_int32(sizeof(xvmcSurfaceInfo) * num_surfaces),
     };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.num);
+    }
 
     WriteToClient(client, sizeof(xvmcListSurfaceTypesReply), &rep);
     WriteToClient(client, sizeof(xvmcSurfaceInfo) * num_surfaces, info);
@@ -266,6 +288,15 @@ ProcXvMCCreateContext(ClientPtr client)
         .flags_return = pContext->flags
     };
 
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.width_actual);
+        swaps(&rep.height_actual);
+        swapl(&rep.flags_return);
+        SwapLongs(data, dwords);
+    }
+
     WriteToClient(client, sizeof(xvmcCreateContextReply), &rep);
     if (dwords)
         WriteToClient(client, dwords << 2, data);
@@ -340,6 +371,11 @@ ProcXvMCCreateSurface(ClientPtr client)
         .sequenceNumber = client->sequence,
         .length = dwords
     };
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+    }
 
     WriteToClient(client, sizeof(xvmcCreateSurfaceReply), &rep);
     if (dwords)
@@ -468,6 +504,15 @@ ProcXvMCCreateSubpicture(ClientPtr client)
         .component_order[3] = pSubpicture->component_order[3]
     };
 
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swaps(&rep.width_actual);
+        swaps(&rep.height_actual);
+        swaps(&rep.num_palette_entries);
+        swaps(&rep.entry_bytes);
+    }
+
     WriteToClient(client, sizeof(xvmcCreateSubpictureReply), &rep);
     if (dwords)
         WriteToClient(client, dwords << 2, data);
@@ -586,6 +631,22 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
             info[i].vert_v_period = pImage->vert_v_period;
             memcpy(&info[i].comp_order, pImage->component_order, 32);
             info[i].scanline_order = pImage->scanline_order;
+
+            if (client->swapped) {
+                swapl(&info[i].id);
+                swapl(&info[i].red_mask);
+                swapl(&info[i].green_mask);
+                swapl(&info[i].blue_mask);
+                swapl(&info[i].y_sample_bits);
+                swapl(&info[i].u_sample_bits);
+                swapl(&info[i].v_sample_bits);
+                swapl(&info[i].horz_y_period);
+                swapl(&info[i].horz_u_period);
+                swapl(&info[i].horz_v_period);
+                swapl(&info[i].vert_y_period);
+                swapl(&info[i].vert_u_period);
+                swapl(&info[i].vert_v_period);
+            }
         }
     }
 
@@ -595,6 +656,10 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
         .num = num,
         .length = bytes_to_int32(num * sizeof(xvImageFormatInfo)),
     };
+
+    swaps(&rep.sequenceNumber);
+    swapl(&rep.length);
+    swapl(&rep.num);
 
     WriteToClient(client, sizeof(xvmcListSubpictureTypesReply), &rep);
     WriteToClient(client, sizeof(xvImageFormatInfo) * num, info);
@@ -670,6 +735,17 @@ ProcXvMCGetDRInfo(ClientPtr client)
         shmdt((char *) patternP);
     }
 #endif                          /* HAS_XVMCSHM */
+
+    if (client->swapped) {
+        swaps(&rep.sequenceNumber);
+        swapl(&rep.length);
+        swapl(&rep.major);
+        swapl(&rep.minor);
+        swapl(&rep.patchLevel);
+        swapl(&rep.nameLen);
+        swapl(&rep.busIDLen);
+        swapl(&rep.isLocal);
+    }
 
     WriteToClient(client, sizeof(xvmcGetDRInfoReply), &rep);
     WriteToClient(client, buflen, buf);
