@@ -289,7 +289,8 @@ void FixUpEventFromWindow(SpritePtr pSprite,
                           xEvent *xE,
                           WindowPtr pWin,
                           Window child,
-                          Bool calcChild);
+                          Bool calcChild,
+                          enum InputLevel XILevel);
 Bool PointInBorderSize(WindowPtr pWin, int x, int y);
 WindowPtr XYToWindow(SpritePtr pSprite, int x, int y);
 int EventIsDeliverable(DeviceIntPtr dev, int evtype, WindowPtr win);
