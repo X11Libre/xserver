@@ -8,7 +8,6 @@ pkg install -y \
     git \
     libdrm \
     libepoll-shim \
-    libX11 \
     libxkbfile \
     libxshmfence \
     libXfont2 \
