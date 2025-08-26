@@ -4,7 +4,6 @@
 #include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
-#include "Xext/xvdix_priv.h"
 
 #include "xvmcext.h"
 
@@ -69,40 +68,6 @@ XvMCScreenInit(ScreenPtr pScreen, int num, XvMCAdaptorPtr pAdapt)
     pScreenPriv->patchLevel = 0;
 
     return Success;
-}
-
-XvImagePtr
-XvMCFindXvImage(XvPortPtr pPort, CARD32 id)
-{
-    XvImagePtr pImage = NULL;
-    ScreenPtr pScreen = pPort->pAdaptor->pScreen;
-    XvMCScreenPtr pScreenPriv;
-    XvMCAdaptorPtr adaptor = NULL;
-
-    if (!dixPrivateKeyRegistered(XvMCScreenKey))
-        return NULL;
-
-    if (!(pScreenPriv = XVMC_GET_PRIVATE(pScreen)))
-        return NULL;
-
-    for (int i = 0; i < pScreenPriv->num_adaptors; i++) {
-        if (pPort->pAdaptor == pScreenPriv->adaptors[i].xv_adaptor) {
-            adaptor = &(pScreenPriv->adaptors[i]);
-            break;
-        }
-    }
-
-    if (!adaptor)
-        return NULL;
-
-    for (int i = 0; i < adaptor->num_subpictures; i++) {
-        if (adaptor->subpictures[i]->id == id) {
-            pImage = adaptor->subpictures[i];
-            break;
-        }
-    }
-
-    return pImage;
 }
 
 int
