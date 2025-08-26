@@ -24,12 +24,6 @@
 #include "servermd.h"
 #include "xvmcext.h"
 
-#ifdef HAS_XVMCSHM
-#include <sys/ipc.h>
-#include <sys/types.h>
-#include <sys/shm.h>
-#endif                          /* HAS_XVMCSHM */
-
 #define SERVER_XVMC_MAJOR_VERSION               1
 #define SERVER_XVMC_MINOR_VERSION               1
 
@@ -609,10 +603,6 @@ ProcXvMCGetDRInfo(ClientPtr client)
     ScreenPtr pScreen;
     XvMCScreenPtr pScreenPriv;
 
-#ifdef HAS_XVMCSHM
-    volatile CARD32 *patternP;
-#endif
-
     REQUEST(xvmcGetDRInfoReq);
     REQUEST_SIZE_MATCH(xvmcGetDRInfoReq);
 
@@ -641,28 +631,6 @@ ProcXvMCGetDRInfo(ClientPtr client)
      * Read back to the client what she has put in the shared memory
      * segment she prepared for us.
      */
-
-#ifdef HAS_XVMCSHM
-    patternP = (CARD32 *) shmat(stuff->shmKey, NULL, SHM_RDONLY);
-    if (-1 != (long) patternP) {
-        volatile CARD32 *patternC = patternP;
-        int i;
-        CARD32 magic = stuff->magic;
-
-        reply.isLocal = 1;
-        i = 1024 / sizeof(CARD32);
-
-        while (i--) {
-            if (*patternC++ != magic) {
-                reply.isLocal = 0;
-                break;
-            }
-            magic = ~magic;
-        }
-        shmdt((char *) patternP);
-    }
-#endif                          /* HAS_XVMCSHM */
-
     if (client->swapped) {
         swapl(&reply.major);
         swapl(&reply.minor);
