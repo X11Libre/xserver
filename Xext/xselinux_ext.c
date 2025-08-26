@@ -82,32 +82,27 @@ ProcSELinuxQueryVersion(ClientPtr client)
 static int
 SELinuxSendContextReply(ClientPtr client, security_id_t sid)
 {
-    char *ctx = NULL;
-    int len = 0;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
+    int len = 0;
     if (sid) {
+        char *ctx;
         if (avc_sid_to_context_raw(sid, &ctx) < 0)
             return BadValue;
         len = strlen(ctx) + 1;
+        x_rpcbuf_write_string_0t_pad(&rpcbuf, ctx);
+        free(ctx);
     }
 
     SELinuxGetContextReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(len),
         .context_len = len
     };
 
     if (client->swapped) {
-        swapl(&reply.length);
-        swaps(&reply.sequenceNumber);
         swapl(&reply.context_len);
     }
 
-    WriteToClient(client, sizeof(SELinuxGetContextReply), &reply);
-    WriteToClient(client, len, ctx);
-    freecon(ctx);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -343,62 +338,28 @@ static int
 SELinuxSendItemsToClient(ClientPtr client, SELinuxListItemRec * items,
                          int size, int count)
 {
-    int rc = BadAlloc, k, pos = 0;
-    CARD32 *buf = calloc(size, sizeof(CARD32));
-    if (size && !buf) {
-        goto out;
-    }
-
-    if (!buf) // silence analyzer warning
-        goto sendreply;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     /* Fill in the buffer */
-    for (k = 0; k < count; k++) {
-        buf[pos] = items[k].id;
-        if (client->swapped)
-            swapl(buf + pos);
-        pos++;
-
-        buf[pos] = items[k].octx_len * 4;
-        if (client->swapped)
-            swapl(buf + pos);
-        pos++;
-
-        buf[pos] = items[k].dctx_len * 4;
-        if (client->swapped)
-            swapl(buf + pos);
-        pos++;
-
-        memcpy((char *) (buf + pos), items[k].octx, strlen(items[k].octx) + 1);
-        pos += items[k].octx_len;
-        memcpy((char *) (buf + pos), items[k].dctx, strlen(items[k].dctx) + 1);
-        pos += items[k].dctx_len;
+    for (int k = 0; k < count; k++) {
+        x_rpcbuf_write_CARD32(&rpcbuf, items[k].id);
+        x_rpcbuf_write_CARD32(&rpcbuf, items[k].octx_len * 4);
+        x_rpcbuf_write_CARD32(&rpcbuf, items[k].dctx_len * 4);
+        x_rpcbuf_write_string_0t_pad(&rpcbuf, items[k].octx);
+        x_rpcbuf_write_string_0t_pad(&rpcbuf, items[k].dctx);
     }
 
-sendreply: ;
     /* Send reply to client */
     SELinuxListItemsReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = size,
         .count = count
     };
 
     if (client->swapped) {
-        swapl(&reply.length);
-        swaps(&reply.sequenceNumber);
         swapl(&reply.count);
     }
 
-    WriteToClient(client, sizeof(SELinuxListItemsReply), &reply);
-    WriteToClient(client, size * 4, buf);
-
-    /* Free stuff and return */
-    rc = Success;
-    free(buf);
- out:
     SELinuxFreeItems(items, count);
-    return rc;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
