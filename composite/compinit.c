@@ -221,9 +221,9 @@ typedef struct _alternateVisual {
 
 static CompAlternateVisual altVisuals[] = {
 #if COMP_INCLUDE_RGB24_VISUAL
-    {24, PICT_r8g8b8},
+    {24, PIXMAN_r8g8b8},
 #endif
-    {32, PICT_a8r8g8b8},
+    {32, PIXMAN_a8r8g8b8},
 };
 
 static Bool
@@ -260,9 +260,9 @@ compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
 
     /* Initialize the visual */
     visual->bitsPerRGBValue = 8;
-    if (PICT_FORMAT_TYPE(alt->format) == PICT_TYPE_COLOR) {
+    if (PIXMAN_FORMAT_TYPE(alt->format) == PIXMAN_TYPE_COLOR) {
         visual->class = PseudoColor;
-        visual->nplanes = PICT_FORMAT_BPP(alt->format);
+        visual->nplanes = PIXMAN_FORMAT_BPP(alt->format);
         visual->ColormapEntries = 1 << visual->nplanes;
     }
     else {

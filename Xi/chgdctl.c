@@ -55,6 +55,7 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>     /* control constants */
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/resource_priv.h"
@@ -128,7 +129,6 @@ ProcXChangeDeviceControl(ClientPtr client)
 
     xChangeDeviceControlReply rep = {
         .RepType = X_ChangeDeviceControl,
-        .sequenceNumber = client->sequence,
         .status = Success,
     };
 
@@ -230,10 +230,7 @@ ProcXChangeDeviceControl(ClientPtr client)
         SendEventToAllWindows(dev, DevicePresenceNotifyMask,
                               (xEvent *) &dpn, 1);
 
-        if (client->swapped) {
-            swaps(&rep.sequenceNumber);
-        }
-        WriteToClient(client, sizeof(xChangeDeviceControlReply), &rep);
+        X_SEND_REPLY_SIMPLE(client, rep);
     }
 
     return ret;

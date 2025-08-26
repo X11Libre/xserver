@@ -118,17 +118,14 @@ extern Bool ComputeLocalClient(ClientPtr client);
 
 /* OsTimer functions */
 void TimerInit(void);
-Bool TimerForce(OsTimerPtr timer);
+
+/* must be exported for backwards compatibility with legacy nvidia390,
+ * not for use in maintained drivers
+ */
+_X_EXPORT Bool TimerForce(OsTimerPtr);
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>
-struct utsname {
-    char nodename[512];
-};
-
-static inline void uname(struct utsname *uts) {
-    gethostname(uts->nodename, sizeof(uts->nodename));
-}
 
 const char *Win32TempDir(void);
 
@@ -217,5 +214,12 @@ Ones(unsigned long mask)
 #define __size_assert(what, howmuch) \
   typedef char what##_size_wrong_[( !!(sizeof(what) == howmuch) )*2-1 ]
 #endif
+
+/*
+ * like strlen(), but checking for NULL and return 0 in this case
+ */
+static inline size_t x_safe_strlen(const char *str) {
+    return (str ? strlen(str) : 0);
+}
 
 #endif                          /* _OSDEP_H_ */

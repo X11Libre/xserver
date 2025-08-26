@@ -53,7 +53,7 @@ typedef struct _Sertafied {
 static SertafiedPtr pPending;
 static RESTYPE SertafiedResType;
 static Bool BlockHandlerRegistered;
-static int SertafiedGeneration;
+static x_server_generation_t SertafiedGeneration;
 
 static void ClientAwaken(ClientPtr /* client */ ,
                          void *    /* closure */

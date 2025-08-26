@@ -53,8 +53,9 @@ panoramix_setup_ids(PanoramiXRes * resource, ClientPtr client, XID base_id)
     int j;
 
     resource->info[0].id = base_id;
-    FOR_NSCREENS_FORWARD_SKIP(j) {
-        resource->info[j].id = FakeClientID(client->index);
+    FOR_NSCREENS_FORWARD(j) {
+        if (j) /* skip screen #0 */
+            resource->info[j].id = FakeClientID(client->index);
     }
 }
 

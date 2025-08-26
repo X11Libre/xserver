@@ -74,9 +74,19 @@
  * mask is 0xFFFF0000.
  */
 #define ABI_ANSIC_VERSION	SET_ABI_VERSION(1, 4)
-#define ABI_VIDEODRV_VERSION	SET_ABI_VERSION(28, 0)
+
+/* XXX This is a compile-time option that changes abi XXX */
+/* TODO: Remove this toggle in 26.0 */
+#ifdef CONFIG_LEGACY_NVIDIA_PADDING
+#define ABI_VIDEODRV_VERSION	SET_ABI_VERSION(28, 1)
+#else
+#define ABI_VIDEODRV_VERSION    SET_ABI_VERSION(28, 0)
+#endif
 #define ABI_XINPUT_VERSION	SET_ABI_VERSION(26, 0)
 #define ABI_EXTENSION_VERSION	SET_ABI_VERSION(11, 0)
+
+/* hack to get both modern and ancient nvidia DDX drivers to work at the same time */
+#define ABI_NVIDIA_VERSION      SET_ABI_VERSION(25, 2)
 
 #define MODINFOSTRING1	0xef23fdc5
 #define MODINFOSTRING2	0x10dc023a

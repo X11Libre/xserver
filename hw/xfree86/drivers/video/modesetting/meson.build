@@ -35,7 +35,7 @@ symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libglx.so')
 if gbm_dep.found()
     symbol_test_args += join_paths(xorg_build_root, 'glamor_egl', 'libglamoregl.so')
 endif
-symbol_test_args += join_paths(xorg_build_root, 'drivers', 'modesetting', 'modesetting_drv.so')
+symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video', 'modesetting', 'modesetting_drv.so')
 
 install_man(configure_file(
     input: 'modesetting.man',

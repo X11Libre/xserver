@@ -30,7 +30,7 @@
 static int dri3_request;
 DevPrivateKeyRec dri3_screen_private_key;
 
-static int dri3_screen_generation;
+static x_server_generation_t dri3_screen_generation;
 
 static void dri3_screen_close(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
@@ -98,7 +98,8 @@ dri3_extension_init(void)
     dri3_request = extension->base;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        if (!dri3_screen_init(screenInfo.screens[i], NULL))
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (!dri3_screen_init(walkScreen, NULL))
             goto bail;
     }
 

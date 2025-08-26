@@ -136,7 +136,7 @@ ephyrRealizeARGBCursor(EphyrScrPriv *scr, CursorPtr cursor)
     xcb_image_t *image;
     int w = cursor->bits->width, h = cursor->bits->height;
 
-    /* dix' storage is PICT_a8r8g8b8 */
+    /* dix' storage is PIXMAN_a8r8g8b8 */
     source = xcb_generate_id(conn);
     xcb_create_pixmap(conn, 32, source, scr->win, w, h);
 

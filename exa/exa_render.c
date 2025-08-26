@@ -45,28 +45,28 @@ exaCompositeFallbackPictDesc(PicturePtr pict, char *string, int n)
     }
 
     switch (pict->format) {
-    case PICT_a8r8g8b8:
+    case PIXMAN_a8r8g8b8:
         snprintf(format, 20, "ARGB8888");
         break;
-    case PICT_x8r8g8b8:
+    case PIXMAN_x8r8g8b8:
         snprintf(format, 20, "XRGB8888");
         break;
-    case PICT_b8g8r8a8:
+    case PIXMAN_b8g8r8a8:
         snprintf(format, 20, "BGRA8888");
         break;
-    case PICT_b8g8r8x8:
+    case PIXMAN_b8g8r8x8:
         snprintf(format, 20, "BGRX8888");
         break;
-    case PICT_r5g6b5:
+    case PIXMAN_r5g6b5:
         snprintf(format, 20, "RGB565  ");
         break;
-    case PICT_x1r5g5b5:
+    case PIXMAN_x1r5g5b5:
         snprintf(format, 20, "RGB555  ");
         break;
-    case PICT_a8:
+    case PIXMAN_a8:
         snprintf(format, 20, "A8      ");
         break;
-    case PICT_a1:
+    case PIXMAN_a1:
         snprintf(format, 20, "A1      ");
         break;
     default:
@@ -143,19 +143,18 @@ exaGetPixelFromRGBA(CARD32 *pixel,
                     CARD16 green,
                     CARD16 blue, CARD16 alpha, PictFormatPtr pFormat)
 {
-    int rbits, bbits, gbits, abits;
     int rshift, bshift, gshift, ashift;
 
     *pixel = 0;
 
-    if (!PICT_FORMAT_COLOR(pFormat->format) &&
-        PICT_FORMAT_TYPE(pFormat->format) != PICT_TYPE_A)
+    if (!PIXMAN_FORMAT_COLOR(pFormat->format) &&
+        PIXMAN_FORMAT_TYPE(pFormat->format) != PIXMAN_TYPE_A)
         return FALSE;
 
-    rbits = PICT_FORMAT_R(pFormat->format);
-    gbits = PICT_FORMAT_G(pFormat->format);
-    bbits = PICT_FORMAT_B(pFormat->format);
-    abits = PICT_FORMAT_A(pFormat->format);
+    int rbits = PIXMAN_FORMAT_R(pFormat->format);
+    int gbits = PIXMAN_FORMAT_G(pFormat->format);
+    int bbits = PIXMAN_FORMAT_B(pFormat->format);
+    int abits = PIXMAN_FORMAT_A(pFormat->format);
 
     rshift = pFormat->direct.red;
     gshift = pFormat->direct.green;
@@ -178,16 +177,15 @@ exaGetRGBAFromPixel(CARD32 pixel,
                     CARD16 *alpha,
                     PictFormatPtr pFormat, PictFormatShort format)
 {
-    int rbits, bbits, gbits, abits;
     int rshift, bshift, gshift, ashift;
 
-    if (!PICT_FORMAT_COLOR(format) && PICT_FORMAT_TYPE(format) != PICT_TYPE_A)
+    if (!PIXMAN_FORMAT_COLOR(format) && PIXMAN_FORMAT_TYPE(format) != PIXMAN_TYPE_A)
         return FALSE;
 
-    rbits = PICT_FORMAT_R(format);
-    gbits = PICT_FORMAT_G(format);
-    bbits = PICT_FORMAT_B(format);
-    abits = PICT_FORMAT_A(format);
+    int rbits = PIXMAN_FORMAT_R(format);
+    int gbits = PIXMAN_FORMAT_G(format);
+    int bbits = PIXMAN_FORMAT_B(format);
+    int abits = PIXMAN_FORMAT_A(format);
 
     if (pFormat) {
         rshift = pFormat->direct.red;
@@ -195,7 +193,7 @@ exaGetRGBAFromPixel(CARD32 pixel,
         bshift = pFormat->direct.blue;
         ashift = pFormat->direct.alpha;
     }
-    else if (format == PICT_a8r8g8b8) {
+    else if (format == PIXMAN_a8r8g8b8) {
         rshift = 16;
         gshift = 8;
         bshift = 0;
@@ -889,7 +887,7 @@ exaComposite(CARD8 op,
         pSrc->repeat = 0;
 
     if (!pMask && !pSrc->alphaMap && !pDst->alphaMap &&
-        (op == PictOpSrc || (op == PictOpOver && !PICT_FORMAT_A(pSrc->format))))
+        (op == PictOpSrc || (op == PictOpOver && !PIXMAN_FORMAT_A(pSrc->format))))
     {
         if (pSrc->pDrawable ?
             (pSrc->pDrawable->width == 1 && pSrc->pDrawable->height == 1 &&
@@ -903,16 +901,16 @@ exaComposite(CARD8 op,
         else if (pSrc->pDrawable && !pSrc->transform &&
                  ((op == PictOpSrc &&
                    (pSrc->format == pDst->format ||
-                    (PICT_FORMAT_COLOR(pDst->format) &&
-                     PICT_FORMAT_COLOR(pSrc->format) &&
-                     pDst->format == PICT_FORMAT(PICT_FORMAT_BPP(pSrc->format),
-                                                 PICT_FORMAT_TYPE(pSrc->format),
+                    (PIXMAN_FORMAT_COLOR(pDst->format) &&
+                     PIXMAN_FORMAT_COLOR(pSrc->format) &&
+                     pDst->format == PICT_FORMAT(PIXMAN_FORMAT_BPP(pSrc->format),
+                                                 PIXMAN_FORMAT_TYPE(pSrc->format),
                                                  0,
-                                                 PICT_FORMAT_R(pSrc->format),
-                                                 PICT_FORMAT_G(pSrc->format),
-                                                 PICT_FORMAT_B(pSrc->format)))))
+                                                 PIXMAN_FORMAT_R(pSrc->format),
+                                                 PIXMAN_FORMAT_G(pSrc->format),
+                                                 PIXMAN_FORMAT_B(pSrc->format)))))
                   || (op == PictOpOver && pSrc->format == pDst->format &&
-                      !PICT_FORMAT_A(pSrc->format)))) {
+                      !PIXMAN_FORMAT_A(pSrc->format)))) {
             if (!pSrc->repeat && xSrc >= 0 && ySrc >= 0 &&
                 (xSrc + width <= pSrc->pDrawable->width) &&
                 (ySrc + height <= pSrc->pDrawable->height)) {
@@ -1069,9 +1067,9 @@ exaCreateAlphaPicture(ScreenPtr pScreen,
 
     if (!pPictFormat) {
         if (pDst->polyEdge == PolyEdgeSharp)
-            pPictFormat = PictureMatchFormat(pScreen, 1, PICT_a1);
+            pPictFormat = PictureMatchFormat(pScreen, 1, PIXMAN_a1);
         else
-            pPictFormat = PictureMatchFormat(pScreen, 8, PICT_a8);
+            pPictFormat = PictureMatchFormat(pScreen, 8, PIXMAN_a8);
         if (!pPictFormat)
             return 0;
     }
@@ -1155,9 +1153,9 @@ exaTrapezoids(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
     }
     else {
         if (pDst->polyEdge == PolyEdgeSharp)
-            maskFormat = PictureMatchFormat(pScreen, 1, PICT_a1);
+            maskFormat = PictureMatchFormat(pScreen, 1, PIXMAN_a1);
         else
-            maskFormat = PictureMatchFormat(pScreen, 8, PICT_a8);
+            maskFormat = PictureMatchFormat(pScreen, 8, PIXMAN_a8);
         for (; ntrap; ntrap--, traps++)
             exaTrapezoids(op, pSrc, pDst, maskFormat, xSrc, ySrc, 1, traps);
     }
@@ -1217,9 +1215,9 @@ exaTriangles(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
     }
     else {
         if (pDst->polyEdge == PolyEdgeSharp)
-            maskFormat = PictureMatchFormat(pScreen, 1, PICT_a1);
+            maskFormat = PictureMatchFormat(pScreen, 1, PIXMAN_a1);
         else
-            maskFormat = PictureMatchFormat(pScreen, 8, PICT_a8);
+            maskFormat = PictureMatchFormat(pScreen, 8, PIXMAN_a8);
 
         for (; ntri; ntri--, tris++)
             exaTriangles(op, pSrc, pDst, maskFormat, xSrc, ySrc, 1, tris);

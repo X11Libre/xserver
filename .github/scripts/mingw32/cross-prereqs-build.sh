@@ -20,6 +20,42 @@ chmod +x /usr/local/bin/${HOST}-pkg-config
 # --enable-malloc0returnsnull
 export xorg_cv_malloc0_returns_null=yes
 
+die() {
+    echo "FAILED: $*" >&1
+    exit 1
+}
+
+# retry <max_attempts> <sleep_seconds> <command...>
+retry() {
+    local max_attempts=$1
+    local sleep_time=$2
+    shift 2
+
+    local attempt=1
+    while true; do
+        "$@" && return 0   # success → return immediately
+        if [ $attempt -ge $max_attempts ]; then
+            return 1       # failed after all attempts
+        fi
+        attempt=$((attempt+1))
+        sleep "$sleep_time"
+    done
+}
+
+try_clone() {
+    local url="$1"
+    local commit="$2"
+    local name="$3"
+
+    if [[ $commit =~ ^[[:xdigit:]]{1,}$ ]]
+    then
+        git clone ${url} ${name} || return 1
+        git -C ${name} checkout ${commit} || return 1
+    else
+        git clone --depth 1 --branch ${commit:-master} --recurse-submodules -c advice.detachedHead=false ${url} ${name} || return 1
+    fi
+}
+
 build() {
     url=$1
     commit=$2
@@ -27,13 +63,7 @@ build() {
 
     name=$(basename ${url} .git)
 
-    if [[ $commit =~ ^[[:xdigit:]]{1,}$ ]]
-    then
-        git clone ${url} ${name}
-        git -C ${name} checkout ${commit}
-    else
-        git clone --depth 1 --branch ${commit:-master} --recurse-submodules -c advice.detachedHead=false ${url} ${name}
-    fi
+    retry 10 10 try_clone "$url" "$commit" "$name" || die "failed cloning $url - $commit"
 
     pushd ${name}
     NOCONFIGURE=1 ./autogen.sh || ./.bootstrap

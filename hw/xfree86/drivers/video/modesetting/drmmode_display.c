@@ -4218,11 +4218,19 @@ drmmode_update_kms_state(drmmode_ptr drmmode)
                     drmmode_set_mode_major(crtc, &crtc->mode, crtc->rotation,
                                            crtc->x, crtc->y);
 
-                    xf86DrvMsg(scrn->scrnIndex, X_WARNING,
-                               "hotplug event: connector %u's link-state is BAD, "
-                               "tried resetting the current mode. You may be left"
-                               "with a black screen if this fails...\n",
-                               drmmode_output->mode_output->connector_id);
+                    drmModeConnectorPtr mode_output = drmmode_output->mode_output;
+                    if (mode_output) {
+                        xf86DrvMsg(scrn->scrnIndex, X_WARNING,
+                                   "hotplug event: connector %u's link-state is BAD, "
+                                   "tried resetting the current mode. You may be left "
+                                   "with a black screen if this fails...\n",
+                                   mode_output->connector_id);
+                    } else {
+                        xf86DrvMsg(scrn->scrnIndex, X_WARNING,
+                                   "hotplug event: NULL connector's link-state is BAD, "
+                                   "tried resetting the current mode. You may be left "
+                                   "with a black screen if this fails...\n");
+                    }
                 }
                 break;
             }

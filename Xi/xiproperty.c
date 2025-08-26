@@ -829,6 +829,7 @@ static int _writeDevProps(x_rpcbuf_t *rpcbuf, XID devId,
 
     size_t n = 0;
     for (XIPropertyPtr p = dev->properties.properties; p; p = p->next) {
+        n++;
         if (!x_rpcbuf_write_CARD32(rpcbuf, p->propertyName))
             return BadAlloc;
     }
@@ -850,20 +851,14 @@ ProcXListDeviceProperties(ClientPtr client)
         return rc;
 
     xListDevicePropertiesReply rep = {
-        .repType = X_Reply,
         .RepType = X_ListDeviceProperties,
-        .sequenceNumber = client->sequence,
-        .length = natoms,
         .nAtoms = natoms
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nAtoms);
     }
-    WriteToClient(client, sizeof(xListDevicePropertiesReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -948,10 +943,7 @@ ProcXGetDeviceProperty(ClientPtr client)
         return rc;
 
     xGetDevicePropertyReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceProperty,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(length),
         .propertyType = type,
         .bytesAfter = bytes_after,
         .nItems = nitems,
@@ -963,8 +955,6 @@ ProcXGetDeviceProperty(ClientPtr client)
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.propertyType);
         swapl(&rep.bytesAfter);
         swapl(&rep.nItems);
@@ -1003,8 +993,7 @@ ProcXGetDeviceProperty(ClientPtr client)
         }
     }
 
-    WriteToClient(client, sizeof(xGenericReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -1058,21 +1047,15 @@ ProcXIListProperties(ClientPtr client)
         return rc;
 
     xXIListPropertiesReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIListProperties,
-        .sequenceNumber = client->sequence,
-        .length = natoms,
         .num_properties = natoms
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.num_properties);
     }
 
-    WriteToClient(client, sizeof(xXIListPropertiesReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -1158,10 +1141,7 @@ ProcXIGetProperty(ClientPtr client)
         return rc;
 
     xXIGetPropertyReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIGetProperty,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(length),
         .type = type,
         .bytes_after = bytes_after,
         .num_items = nitems,
@@ -1172,8 +1152,6 @@ ProcXIGetProperty(ClientPtr client)
         send_property_event(dev, stuff->property, XIPropertyDeleted);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.type);
         swapl(&rep.bytes_after);
         swapl(&rep.num_items);
@@ -1198,8 +1176,7 @@ ProcXIGetProperty(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    WriteToClient(client, sizeof(xXIGetPropertyReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
     /* delete the Property */
     if (stuff->delete && (rep.bytes_after == 0)) {

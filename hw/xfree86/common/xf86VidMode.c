@@ -452,7 +452,8 @@ XFree86VidModeExtensionInit(void)
         return;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        if (xf86VidModeInit (screenInfo.screens[i]))
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (xf86VidModeInit(walkScreen))
             enabled = TRUE;
     }
     /* This means that the DDX doesn't want the vidmode extension enabled */

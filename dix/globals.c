@@ -86,7 +86,7 @@ int currentMaxClients;          /* current size of clients array */
 long maxBigRequestSize = MAX_BIG_REQUEST_SIZE;
 
 unsigned long globalSerialNumber = 0;
-unsigned long serverGeneration = 0;
+x_server_generation_t serverGeneration = 0;
 
 /* these next four are initialized in main.c */
 CARD32 ScreenSaverTime;

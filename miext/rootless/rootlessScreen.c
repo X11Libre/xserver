@@ -710,11 +710,15 @@ RootlessUpdateRooted(Bool state)
     int i;
 
     if (!state) {
-        for (i = 0; i < screenInfo.numScreens; i++)
-            RootlessDisableRoot(screenInfo.screens[i]);
+        for (i = 0; i < screenInfo.numScreens; i++) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            RootlessDisableRoot(walkScreen);
+        }
     }
     else {
-        for (i = 0; i < screenInfo.numScreens; i++)
-            RootlessEnableRoot(screenInfo.screens[i]);
+        for (i = 0; i < screenInfo.numScreens; i++) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            RootlessEnableRoot(walkScreen);
+        }
     }
 }

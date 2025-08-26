@@ -101,9 +101,7 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
 
     xGetDeviceDontPropagateListReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceDontPropagateList,
-        .sequenceNumber = client->sequence,
     };
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
@@ -120,7 +118,6 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
             buf = calloc(rep.count, sizeof(XEventClass));
             if (!buf)
                 return BadAlloc;
-            rep.length = bytes_to_int32(rep.count * sizeof(XEventClass));
 
             tbuf = buf;
             for (i = 0; i < EMASKSIZE; i++)
@@ -136,12 +133,9 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         return BadAlloc;
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.count);
     }
-    WriteToClient(client, sizeof(xGetDeviceDontPropagateListReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 

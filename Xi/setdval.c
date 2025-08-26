@@ -55,6 +55,7 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/resource_priv.h"
 
@@ -79,9 +80,7 @@ ProcXSetDeviceValuators(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xSetDeviceValuatorsReq);
 
     xSetDeviceValuatorsReply rep = {
-        .repType = X_Reply,
         .RepType = X_SetDeviceValuators,
-        .sequenceNumber = client->sequence,
         .status = Success
     };
 
@@ -111,9 +110,6 @@ ProcXSetDeviceValuators(ClientPtr client)
     if (rep.status != Success && rep.status != AlreadyGrabbed)
         return rep.status;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xSetDeviceValuatorsReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }

@@ -90,14 +90,6 @@ SOFTWARE.
             return(BadLength);                                          \
     } while (0)
 
-#define WriteSwappedDataToClient(pClient, size, pbuf)                   \
-    do {                                                                \
-        if ((pClient)->swapped)                                         \
-            (*(pClient)->pSwapReplyFunc)(pClient, (int)(size), pbuf);   \
-        else                                                            \
-            WriteToClient(pClient, (int)(size), (pbuf));                \
-    } while (0)
-
 typedef struct _TimeStamp *TimeStampPtr;
 
 #ifndef _XTYPEDEF_CLIENTPTR

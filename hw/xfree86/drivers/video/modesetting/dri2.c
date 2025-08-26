@@ -77,7 +77,7 @@ typedef struct {
 
 static DevPrivateKeyRec ms_dri2_client_key;
 static RESTYPE frame_event_client_type, frame_event_drawable_type;
-static int ms_dri2_server_generation;
+static x_server_generation_t ms_dri2_server_generation;
 
 struct ms_dri2_resource {
     XID id;

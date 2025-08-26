@@ -831,13 +831,11 @@ FreeGCperDepth(ScreenPtr pScreen)
 }
 
 Bool
-CreateGCperDepth(int screenNum)
+CreateGCperDepth(ScreenPtr pScreen)
 {
-    ScreenPtr pScreen;
     DepthPtr pDepth;
     GCPtr *ppGC;
 
-    pScreen = screenInfo.screens[screenNum];
     ppGC = pScreen->GCperDepth;
     /* do depth 1 separately because it's not included in list */
     if (!(ppGC[0] = CreateScratchGC(pScreen, 1)))
@@ -858,15 +856,12 @@ CreateGCperDepth(int screenNum)
 }
 
 Bool
-CreateDefaultStipple(int screenNum)
+CreateDefaultStipple(ScreenPtr pScreen)
 {
-    ScreenPtr pScreen;
     ChangeGCVal tmpval[3];
     xRectangle rect;
     CARD16 w, h;
     GCPtr pgcScratch;
-
-    pScreen = screenInfo.screens[screenNum];
 
     w = 16;
     h = 16;

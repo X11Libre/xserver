@@ -103,9 +103,7 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
 
     xGetSelectedExtensionEventsReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetSelectedExtensionEvents,
-        .sequenceNumber = client->sequence,
     };
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
@@ -130,7 +128,6 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
 
         size_t total_count = rep.all_clients_count + rep.this_client_count;
         size_t total_length = total_count * sizeof(XEventClass);
-        rep.length = bytes_to_int32(total_length);
         buf = calloc(1, total_length);
         if (!buf) /* rpcbuf still empty */
             return BadAlloc;
@@ -155,12 +152,9 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
         return BadAlloc;
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.this_client_count);
         swaps(&rep.all_clients_count);
     }
-    WriteToClient(client, sizeof(xGetSelectedExtensionEventsReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }

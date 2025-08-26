@@ -38,7 +38,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         }
     }
 
-    // resource access inside same container is always permitted
+    // resource access inside same namespace is always permitted
     if (XnsClientSameNS(subj, obj))
         goto pass;
 

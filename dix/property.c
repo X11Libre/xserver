@@ -547,14 +547,8 @@ ProcGetProperty(ClientPtr client)
 
     rc = dixLookupProperty(&pProp, pWin, p.property, p.client, prop_mode);
     if (rc == BadMatch) {
-        xGetPropertyReply rep = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
-        };
-        if (client->swapped) {
-            swaps(&rep.sequenceNumber);
-        }
-        WriteToClient(client, sizeof(rep), &rep);
+        xGetPropertyReply rep = { 0 };
+        X_SEND_REPLY_SIMPLE(client, rep);
         return Success;
     }
     else if (rc != Success)
@@ -565,18 +559,15 @@ ProcGetProperty(ClientPtr client)
 
     if (((p.type != pProp->type) && (p.type != AnyPropertyType))) {
         xGetPropertyReply rep = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
             .bytesAfter = pProp->size,
             .format = pProp->format,
             .propertyType = pProp->type
         };
         if (client->swapped) {
-            swaps(&rep.sequenceNumber);
             swapl(&rep.propertyType);
             swapl(&rep.bytesAfter);
         }
-        WriteToClient(client, sizeof(rep), &rep);
+        X_SEND_REPLY_SIMPLE(client, rep);
         return Success;
     }
 
@@ -597,11 +588,8 @@ ProcGetProperty(ClientPtr client)
     len = min(n - ind, 4 * p.longLength);
 
     xGetPropertyReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .bytesAfter = n - (ind + len),
         .format = pProp->format,
-        .length = bytes_to_int32(len),
         .nItems = len / (pProp->format / 8),
         .propertyType = pProp->type
     };
@@ -611,10 +599,23 @@ ProcGetProperty(ClientPtr client)
         notifyVRRMode(client, pWin, PropertyDelete, pProp);
     }
 
-    void *payload = calloc(1, len);
-    if (!payload)
+    const char *dataptr = ((char*)pProp->data) + ind;
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    switch (pProp->format) {
+        case 32:
+            x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)dataptr, len / 4);
+        break;
+        case 16:
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)dataptr, len / 2);
+        break;
+        default:
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)dataptr, len);
+        break;
+    }
+
+    if (rpcbuf.error)
         return BadAlloc;
-    memcpy(payload, (char*)(pProp->data) + ind, len);
 
     if (p.delete && (rep.bytesAfter == 0)) {
         /* Delete the Property */
@@ -636,75 +637,51 @@ ProcGetProperty(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.propertyType);
         swapl(&rep.bytesAfter);
         swapl(&rep.nItems);
-        if (rep.format == 32)
-            SwapLongs(payload, len / 4);
-        else if (rep.format == 16)
-            SwapShorts(payload, len / 2);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, len, payload);
-    free(payload);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
 int
 ProcListProperties(ClientPtr client)
 {
-    Atom *pAtoms = NULL, *temppAtoms;
-    int rc, numProps = 0;
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
 
     REQUEST_SIZE_MATCH(xResourceReq);
-    rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
+    int rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
     if (rc != Success)
         return rc;
 
-    for (PropertyPtr pProp = pWin->properties; pProp; pProp = pProp->next)
-        numProps++;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (numProps) {
-        pAtoms = calloc(numProps, sizeof(Atom));
-        if (!pAtoms)
-            return BadAlloc;
-
-        numProps = 0;
-        temppAtoms = pAtoms;
-        for (PropertyPtr realProp, pProp = pWin->properties; pProp; pProp = pProp->next) {
-            realProp = pProp;
-            rc = XaceHookPropertyAccess(client, pWin, &realProp, DixGetAttrAccess);
-            if (rc == Success && realProp == pProp) {
-                *temppAtoms++ = pProp->propertyName;
-                numProps++;
-            }
+    size_t numProps = 0;
+    for (PropertyPtr realProp, pProp = pWin->properties; pProp; pProp = pProp->next) {
+        realProp = pProp;
+        rc = XaceHookPropertyAccess(client, pWin, &realProp, DixGetAttrAccess);
+        if (rc == Success && realProp == pProp) {
+            x_rpcbuf_write_CARD32(&rpcbuf, pProp->propertyName);
+            numProps++;
         }
     }
 
+    if (rpcbuf.error)
+        return BadAlloc;
+
     xListPropertiesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(numProps * sizeof(Atom)),
         .nProperties = numProps
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nProperties);
-        SwapLongs(pAtoms, numProps);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, numProps * sizeof(Atom), pAtoms);
-    free(pAtoms);
-
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 

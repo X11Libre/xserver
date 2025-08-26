@@ -620,6 +620,11 @@ typedef struct _Screen {
     SetScreenPixmapProcPtr SetScreenPixmap;
     NameWindowPixmapProcPtr NameWindowPixmap;
 
+#ifdef CONFIG_LEGACY_NVIDIA_PADDING
+    /* This field is used by the 470 and 390 proprietary nvidia DDX driver, and should always be NULL */
+    void* reserved_for_nvidia_470_and_390;
+#endif
+
     unsigned int totalPixmapSize;
 
     MarkWindowProcPtr MarkWindow;

@@ -583,10 +583,10 @@ glamor_composite_glyphs_init(ScreenPtr screen)
     /* Don't stick huge glyphs in the atlases */
     glamor_priv->glyph_max_dim = glamor_priv->glyph_atlas_dim / 8;
 
-    glamor_priv->glyph_atlas_a = glamor_alloc_glyph_atlas(screen, 8, PICT_a8);
+    glamor_priv->glyph_atlas_a = glamor_alloc_glyph_atlas(screen, 8, PIXMAN_a8);
     if (!glamor_priv->glyph_atlas_a)
         return FALSE;
-    glamor_priv->glyph_atlas_argb = glamor_alloc_glyph_atlas(screen, 32, PICT_a8r8g8b8);
+    glamor_priv->glyph_atlas_argb = glamor_alloc_glyph_atlas(screen, 32, PIXMAN_a8r8g8b8);
     if (!glamor_priv->glyph_atlas_argb) {
         free (glamor_priv->glyph_atlas_a);
         return FALSE;

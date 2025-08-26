@@ -65,7 +65,8 @@ xnestWindowPtr(xcb_window_t window)
     wm.window = window;
 
     for (i = 0; i < xnestNumScreens; i++) {
-        WalkTree(screenInfo.screens[i], xnestFindWindowMatch, (void *) &wm);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        WalkTree(walkScreen, xnestFindWindowMatch, (void *) &wm);
         if (wm.pWin)
             break;
     }

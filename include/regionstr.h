@@ -85,13 +85,13 @@ RegionNar(RegionPtr reg)
 static inline int
 RegionNumRects(RegionPtr reg)
 {
-    return ((reg)->data ? (reg)->data->numRects : 1);
+    return (int)(reg->data ? reg->data->numRects : 1);
 }
 
 static inline int
 RegionSize(RegionPtr reg)
 {
-    return ((reg)->data ? (reg)->data->size : 0);
+    return (int)(reg->data ? reg->data->size : 0);
 }
 
 static inline BoxPtr
@@ -115,13 +115,13 @@ RegionBox(RegionPtr reg, int i)
 static inline BoxPtr
 RegionTop(RegionPtr reg)
 {
-    return RegionBox(reg, (reg)->data->numRects);
+    return RegionBox(reg, (int)reg->data->numRects);
 }
 
 static inline BoxPtr
 RegionEnd(RegionPtr reg)
 {
-    return RegionBox(reg, (reg)->data->numRects - 1);
+    return RegionBox(reg, (int)reg->data->numRects - 1);
 }
 
 static inline size_t
@@ -134,7 +134,7 @@ RegionSizeof(size_t n)
 }
 
 static inline void
-RegionInit(RegionPtr _pReg, BoxPtr _rect, int _size)
+RegionInit(RegionPtr _pReg, BoxPtr _rect, size_t _size)
 {
     if ((_rect) != NULL) {
         (_pReg)->extents = *(_rect);
@@ -145,7 +145,7 @@ RegionInit(RegionPtr _pReg, BoxPtr _rect, int _size)
         (_pReg)->extents = RegionEmptyBox;
         if (((_size) > 1) && ((rgnSize = RegionSizeof(_size)) > 0) &&
             (((_pReg)->data = (RegDataPtr) calloc(1, rgnSize)) != NULL)) {
-            (_pReg)->data->size = (_size);
+            (_pReg)->data->size = (long)(_size);
             (_pReg)->data->numRects = 0;
         }
         else

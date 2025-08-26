@@ -51,9 +51,9 @@ glamor_create_mask_picture(ScreenPtr screen,
 
     if (!pict_format) {
         if (dst->polyEdge == PolyEdgeSharp)
-            pict_format = PictureMatchFormat(screen, 1, PICT_a1);
+            pict_format = PictureMatchFormat(screen, 1, PIXMAN_a1);
         else
-            pict_format = PictureMatchFormat(screen, 8, PICT_a8);
+            pict_format = PictureMatchFormat(screen, 8, PIXMAN_a8);
         if (!pict_format)
             return 0;
     }
@@ -94,9 +94,9 @@ glamor_trapezoids(CARD8 op,
      */
     if (!mask_format) {
         if (dst->polyEdge == PolyEdgeSharp)
-            mask_format = PictureMatchFormat(screen, 1, PICT_a1);
+            mask_format = PictureMatchFormat(screen, 1, PIXMAN_a1);
         else
-            mask_format = PictureMatchFormat(screen, 8, PICT_a8);
+            mask_format = PictureMatchFormat(screen, 8, PIXMAN_a8);
         for (; ntrap; ntrap--, traps++)
             glamor_trapezoids(op, src, dst, mask_format, x_src,
                               y_src, 1, traps);

@@ -532,7 +532,7 @@ glamor_set_composite_op(ScreenPtr screen,
     /* If there's no dst alpha channel, adjust the blend op so that we'll treat
      * it as always 1.
      */
-    if (PICT_FORMAT_A(dest->format) == 0 && op_info->dest_alpha) {
+    if (PIXMAN_FORMAT_A(dest->format) == 0 && op_info->dest_alpha) {
         if (source_blend == GL_DST_ALPHA)
             source_blend = GL_ONE;
         else if (source_blend == GL_ONE_MINUS_DST_ALPHA)
@@ -550,7 +550,7 @@ glamor_set_composite_op(ScreenPtr screen,
             break;
         }
     } else if (mask && mask->componentAlpha
-               && PICT_FORMAT_RGB(mask->format) != 0 && op_info->source_alpha) {
+               && PIXMAN_FORMAT_RGB(mask->format) != 0 && op_info->source_alpha) {
         switch (dest_blend) {
         case GL_SRC_ALPHA:
             dest_blend = GL_SRC_COLOR;
@@ -640,7 +640,7 @@ glamor_set_composite_texture(glamor_screen_private *glamor_priv, int unit,
      * is RGB (no alpha), which we use for 16bpp textures.
      */
     if (glamor_pixmap_priv_is_large(pixmap_priv) ||
-        (!PICT_FORMAT_A(picture->format) &&
+        (!PIXMAN_FORMAT_A(picture->format) &&
          repeat_type == RepeatNone && picture->transform)) {
         glamor_pixmap_fbo_fix_wh_ratio(wh, pixmap, pixmap_priv);
         glUniform4fv(wh_location, 1, wh);
@@ -735,8 +735,8 @@ glamor_flush_composite_rects(ScreenPtr screen)
 }
 
 static const int pict_format_combine_tab[][3] = {
-    {PICT_TYPE_ARGB, PICT_TYPE_A, PICT_TYPE_ARGB},
-    {PICT_TYPE_ABGR, PICT_TYPE_A, PICT_TYPE_ABGR},
+    {PIXMAN_TYPE_ARGB, PIXMAN_TYPE_A, PIXMAN_TYPE_ARGB},
+    {PIXMAN_TYPE_ABGR, PIXMAN_TYPE_A, PIXMAN_TYPE_ABGR},
 };
 
 static Bool
@@ -751,29 +751,29 @@ combine_pict_format(PictFormatShort * des, const PictFormatShort src,
         *des = src;
         return TRUE;
     }
-    src_bpp = PICT_FORMAT_BPP(src);
+    src_bpp = PIXMAN_FORMAT_BPP(src);
 
-    assert(src_bpp == PICT_FORMAT_BPP(mask));
+    assert(src_bpp == PIXMAN_FORMAT_BPP(mask));
 
-    new_vis = PICT_FORMAT_VIS(src) | PICT_FORMAT_VIS(mask);
+    new_vis = PIXMAN_FORMAT_VIS(src) | PIXMAN_FORMAT_VIS(mask);
 
     switch (in_ca) {
     case glamor_program_alpha_normal:
-        src_type = PICT_FORMAT_TYPE(src);
-        mask_type = PICT_TYPE_A;
+        src_type = PIXMAN_FORMAT_TYPE(src);
+        mask_type = PIXMAN_TYPE_A;
         break;
     case glamor_program_alpha_ca_first:
-        src_type = PICT_FORMAT_TYPE(src);
-        mask_type = PICT_FORMAT_TYPE(mask);
+        src_type = PIXMAN_FORMAT_TYPE(src);
+        mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
     case glamor_program_alpha_ca_second:
-        src_type = PICT_TYPE_A;
-        mask_type = PICT_FORMAT_TYPE(mask);
+        src_type = PIXMAN_TYPE_A;
+        mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
     case glamor_program_alpha_dual_blend:
     case glamor_program_alpha_dual_blend_gles2:
-        src_type = PICT_FORMAT_TYPE(src);
-        mask_type = PICT_FORMAT_TYPE(mask);
+        src_type = PIXMAN_FORMAT_TYPE(src);
+        mask_type = PIXMAN_FORMAT_TYPE(mask);
         break;
     default:
         return FALSE;
@@ -859,13 +859,13 @@ glamor_render_format_is_supported(PicturePtr picture)
     storage_format = f->render_format;
 
     switch (picture->format) {
-    case PICT_a2r10g10b10:
-        return storage_format == PICT_x2r10g10b10;
-    case PICT_a8r8g8b8:
-    case PICT_x8r8g8b8:
-        return storage_format == PICT_a8r8g8b8 || storage_format == PICT_x8r8g8b8;
-    case PICT_a1r5g5b5:
-        return storage_format == PICT_x1r5g5b5;
+    case PIXMAN_a2r10g10b10:
+        return storage_format == PIXMAN_x2r10g10b10;
+    case PIXMAN_a8r8g8b8:
+    case PIXMAN_x8r8g8b8:
+        return storage_format == PIXMAN_a8r8g8b8 || storage_format == PIXMAN_x8r8g8b8;
+    case PIXMAN_a1r5g5b5:
+        return storage_format == PIXMAN_x1r5g5b5;
     default:
         return picture->format == storage_format;
     }
@@ -941,7 +941,7 @@ glamor_composite_choose_shader(CARD8 op,
             goto fail;
     }
     else {
-        if (PICT_FORMAT_A(source->format))
+        if (PIXMAN_FORMAT_A(source->format))
             key.source = SHADER_SOURCE_TEXTURE_ALPHA;
         else
             key.source = SHADER_SOURCE_TEXTURE;
@@ -959,7 +959,7 @@ glamor_composite_choose_shader(CARD8 op,
                 goto fail;
         }
         else {
-            if (PICT_FORMAT_A(mask->format))
+            if (PIXMAN_FORMAT_A(mask->format))
                 key.mask = SHADER_MASK_TEXTURE_ALPHA;
             else
                 key.mask = SHADER_MASK_TEXTURE;
@@ -1066,12 +1066,12 @@ glamor_composite_choose_shader(CARD8 op,
              * because we wire the alpha to 1.
              *
              **/
-            if (!PICT_FORMAT_A(saved_source_format)
-                && PICT_FORMAT_A(mask->format))
+            if (!PIXMAN_FORMAT_A(saved_source_format)
+                && PIXMAN_FORMAT_A(mask->format))
                 key.source = SHADER_SOURCE_TEXTURE;
 
-            if (!PICT_FORMAT_A(mask->format)
-                && PICT_FORMAT_A(saved_source_format))
+            if (!PIXMAN_FORMAT_A(mask->format)
+                && PIXMAN_FORMAT_A(saved_source_format))
                 key.mask = SHADER_MASK_TEXTURE;
         }
 
@@ -1446,7 +1446,7 @@ glamor_convert_gradient_picture(ScreenPtr screen,
         pFormat = source->pFormat;
         format = pFormat->format;
     } else {
-        format = PICT_a8r8g8b8;
+        format = PIXMAN_a8r8g8b8;
         pFormat = PictureMatchFormat(screen, 32, format);
     }
 
@@ -1549,17 +1549,17 @@ glamor_composite_clipped_region(CARD8 op,
         && dest->pDrawable->depth == source->pDrawable->depth
         && ((op == PictOpSrc
              && (source->format == dest->format
-                 || (PICT_FORMAT_COLOR(dest->format)
-                     && PICT_FORMAT_COLOR(source->format)
-                     && dest->format == PICT_FORMAT(PICT_FORMAT_BPP(source->format),
-                                                    PICT_FORMAT_TYPE(source->format),
+                 || (PIXMAN_FORMAT_COLOR(dest->format)
+                     && PIXMAN_FORMAT_COLOR(source->format)
+                     && dest->format == PICT_FORMAT(PIXMAN_FORMAT_BPP(source->format),
+                                                    PIXMAN_FORMAT_TYPE(source->format),
                                                     0,
-                                                    PICT_FORMAT_R(source->format),
-                                                    PICT_FORMAT_G(source->format),
-                                                    PICT_FORMAT_B(source->format)))))
+                                                    PIXMAN_FORMAT_R(source->format),
+                                                    PIXMAN_FORMAT_G(source->format),
+                                                    PIXMAN_FORMAT_B(source->format)))))
             || (op == PictOpOver
                 && source->format == dest->format
-                && !PICT_FORMAT_A(source->format)))
+                && !PIXMAN_FORMAT_A(source->format)))
         && x_source >= 0 && y_source >= 0
         && (x_source + width) <= source->pDrawable->width
         && (y_source + height) <= source->pDrawable->height) {

@@ -1262,19 +1262,14 @@ FreeAlarmClient(void *value, XID id)
 static int
 ProcSyncInitialize(ClientPtr client)
 {
-    xSyncInitializeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xSyncInitializeReply reply = {
         .majorVersion = SERVER_SYNC_MAJOR_VERSION,
         .minorVersion = SERVER_SYNC_MINOR_VERSION,
     };
 
     REQUEST_SIZE_MATCH(xSyncInitializeReq);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1284,66 +1279,43 @@ ProcSyncInitialize(ClientPtr client)
 static int
 ProcSyncListSystemCounters(ClientPtr client)
 {
-    xSyncListSystemCountersReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
     SysCounterInfo *psci;
-    int len = 0;
-    xSyncSystemCounter *list = NULL, *walklist = NULL;
 
     REQUEST_SIZE_MATCH(xSyncListSystemCountersReq);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    CARD32 nCounters = 0;
     xorg_list_for_each_entry(psci, &SysCounterList, entry) {
-        /* pad to 4 byte boundary */
-        len += pad_to_int32(sz_xSyncSystemCounter + strlen(psci->name));
-        ++rep.nCounters;
+        CARD16 namelen = strlen(psci->name);
+
+        /* write xSyncSystemCounter:
+           the name chars (`namelen` amount of bytes) are directly written
+           after the header fields, then the whole thing is padded to
+           full protocol units.
+        */
+        x_rpcbuf_write_CARD32(&rpcbuf, psci->pCounter->sync.id);
+        x_rpcbuf_write_INT32(&rpcbuf, psci->resolution >> 32);
+        x_rpcbuf_write_INT32(&rpcbuf, psci->resolution);
+        x_rpcbuf_write_CARD16(&rpcbuf, namelen);
+        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)psci->name, namelen);
+        x_rpcbuf_pad(&rpcbuf);
+
+        nCounters++;
     }
 
-    if (len) {
-        walklist = list = calloc(1, len);
-        if (!list)
-            return BadAlloc;
-    }
+    if (rpcbuf.error)
+        return BadAlloc;
 
-    rep.length = bytes_to_int32(len);
+    xSyncListSystemCountersReply reply = {
+        .nCounters = nCounters
+    };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.nCounters);
+        swapl(&reply.nCounters);
     }
 
-    xorg_list_for_each_entry(psci, &SysCounterList, entry) {
-        int namelen;
-        char *pname_in_reply;
-
-        walklist->counter = psci->pCounter->sync.id;
-        walklist->resolution_hi = psci->resolution >> 32;
-        walklist->resolution_lo = psci->resolution;
-        namelen = strlen(psci->name);
-        walklist->name_length = namelen;
-
-        if (client->swapped) {
-            swapl(&walklist->counter);
-            swapl(&walklist->resolution_hi);
-            swapl(&walklist->resolution_lo);
-            swaps(&walklist->name_length);
-        }
-
-        pname_in_reply = ((char *) walklist) + sz_xSyncSystemCounter;
-        strncpy(pname_in_reply, psci->name, namelen);
-        walklist = (xSyncSystemCounter *) (((char *) walklist) +
-                                           pad_to_int32(sz_xSyncSystemCounter +
-                                                        namelen));
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    if (len) {
-        WriteToClient(client, len, list);
-        free(list);
-    }
-
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -1404,19 +1376,15 @@ ProcSyncGetPriority(ClientPtr client)
             return rc;
     }
 
-    xSyncGetPriorityReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xSyncGetPriorityReply reply = {
         .priority = priorityclient->priority
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.priority);
+        swapl(&reply.priority);
     }
 
-    WriteToClient(client, sizeof(xSyncGetPriorityReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1688,20 +1656,16 @@ ProcSyncQueryCounter(ClientPtr client)
                                                   &pCounter->value);
     }
 
-    xSyncQueryCounterReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xSyncQueryCounterReply reply = {
         .value_hi = pCounter->value >> 32,
         .value_lo = pCounter->value
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.value_hi);
-        swapl(&rep.value_lo);
+        swapl(&reply.value_hi);
+        swapl(&reply.value_lo);
     }
-    WriteToClient(client, sizeof(xSyncQueryCounterReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1849,11 +1813,7 @@ ProcSyncQueryAlarm(ClientPtr client)
 
     pTrigger = &pAlarm->trigger;
 
-    xSyncQueryAlarmReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length =
-          bytes_to_int32(sizeof(xSyncQueryAlarmReply) - sizeof(xGenericReply)),
+    xSyncQueryAlarmReply reply = {
         .counter = (pTrigger->pSync) ? pTrigger->pSync->id : None,
 
 #if 0  /* XXX unclear what to do, depends on whether relative value-types
@@ -1877,17 +1837,15 @@ ProcSyncQueryAlarm(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.counter);
-        swapl(&rep.wait_value_hi);
-        swapl(&rep.wait_value_lo);
-        swapl(&rep.test_type);
-        swapl(&rep.delta_hi);
-        swapl(&rep.delta_lo);
+        swapl(&reply.counter);
+        swapl(&reply.wait_value_hi);
+        swapl(&reply.wait_value_lo);
+        swapl(&reply.test_type);
+        swapl(&reply.delta_hi);
+        swapl(&reply.delta_lo);
     }
 
-    WriteToClient(client, sizeof(xSyncQueryAlarmReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -2029,18 +1987,11 @@ ProcSyncQueryFence(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xSyncQueryFenceReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xSyncQueryFenceReply reply = {
         .triggered = pFence->funcs.CheckTriggered(pFence)
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(xSyncQueryFenceReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -2477,8 +2428,10 @@ SyncExtensionInit(void)
     ExtensionEntry *extEntry;
     int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++)
-        miSyncSetup(screenInfo.screens[s]);
+    for (s = 0; s < screenInfo.numScreens; s++) {
+        ScreenPtr walkScreen = screenInfo.screens[s];
+        miSyncSetup(walkScreen);
+    }
 
     RTCounter = CreateNewResourceType(FreeCounter, "SyncCounter");
     xorg_list_init(&SysCounterList);

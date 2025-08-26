@@ -66,11 +66,10 @@
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
 #include <limits.h>
-#include "xf86Parser_priv.h"
 
-#if !defined(MAXHOSTNAMELEN)
-#define MAXHOSTNAMELEN 32
-#endif                          /* !MAXHOSTNAMELEN */
+#include "os/xhostname.h"
+
+#include "xf86Parser_priv.h"
 
 /* For PATH_MAX */
 #include "misc.h"
@@ -625,15 +624,9 @@ DoSubstitution(const char *template, const char *cmdline, const char *projroot,
                 break;
             case 'H':
                 if (!hostname) {
-                    if ((hostname = calloc(1, MAXHOSTNAMELEN + 1))) {
-                        if (gethostname(hostname, MAXHOSTNAMELEN) == 0) {
-                            hostname[MAXHOSTNAMELEN] = '\0';
-                        }
-                        else {
-                            free(hostname);
-                            hostname = NULL;
-                        }
-                    }
+                    struct xhostname hn;
+                    if (xhostname(&hn))
+                        hostname = strdup(hn.name);
                 }
                 if (hostname)
                     APPEND_STR(hostname);

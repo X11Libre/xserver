@@ -52,12 +52,14 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "windowstr.h"          /* focus struct      */
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
-#include "exglobals.h"
 
+#include "dix/dix_priv.h"
+
+#include "windowstr.h"          /* focus struct      */
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include "exglobals.h"
 #include "getfocus.h"
 
 /***********************************************************************
@@ -85,9 +87,7 @@ ProcXGetDeviceFocus(ClientPtr client)
     focus = dev->focus;
 
     xGetDeviceFocusReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceFocus,
-        .sequenceNumber = client->sequence,
         .time = focus->time.milliseconds,
         .revertTo = focus->revert,
     };
@@ -102,11 +102,9 @@ ProcXGetDeviceFocus(ClientPtr client)
         rep.focus = focus->win->drawable.id;
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.focus);
         swapl(&rep.time);
     }
-    WriteToClient(client, sizeof(xGetDeviceFocusReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }

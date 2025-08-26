@@ -59,7 +59,7 @@
 
 #define DEFINE_ATOM_HELPER(func, atom_name)                      \
     static Atom func(void) {                                       \
-        static int generation;                                      \
+        static x_server_generation_t generation;                    \
         static Atom atom;                                           \
         if (generation != serverGeneration) {                       \
             generation = serverGeneration;                          \

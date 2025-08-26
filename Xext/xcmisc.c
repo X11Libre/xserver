@@ -55,20 +55,16 @@ ProcXCMiscGetVersion(ClientPtr client)
         swaps(&stuff->minorVersion);
     }
 
-    xXCMiscGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xXCMiscGetVersionReply reply = {
         .majorVersion = XCMiscMajorVersion,
         .minorVersion = XCMiscMinorVersion
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    WriteToClient(client, sizeof(xXCMiscGetVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -80,19 +76,15 @@ ProcXCMiscGetXIDRange(ClientPtr client)
     XID min_id, max_id;
     GetXIDRange(client->index, FALSE, &min_id, &max_id);
 
-    xXCMiscGetXIDRangeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xXCMiscGetXIDRangeReply reply = {
         .start_id = min_id,
         .count = max_id - min_id + 1
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.start_id);
-        swapl(&rep.count);
+        swapl(&reply.start_id);
+        swapl(&reply.count);
     }
-    WriteToClient(client, sizeof(xXCMiscGetXIDRangeReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -123,20 +115,14 @@ ProcXCMiscGetXIDList(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    xXCMiscGetXIDListReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = count,
+    xXCMiscGetXIDListReply reply = {
         .count = count
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.count);
+        swapl(&reply.count);
     }
 
-    WriteToClient(client, sizeof(xXCMiscGetXIDListReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 

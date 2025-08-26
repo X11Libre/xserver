@@ -162,9 +162,8 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
     rep = (xXF86DRIOpenConnectionReply) {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(SIZEOF(xXF86DRIOpenConnectionReply) -
-                                 SIZEOF(xGenericReply) +
-                                 pad_to_int32(busIdStringLength)),
+        .length = X_REPLY_HEADER_UNITS(xXF86DRIOpenConnectionReply)
+                + bytes_to_int32(busIdStringLength),
         .busIdStringLength = busIdStringLength,
 
         .hSAREALow = (CARD32) (hSAREA & 0xffffffff),
@@ -246,9 +245,8 @@ ProcXF86DRIGetClientDriverName(register ClientPtr client)
 
     if (clientDriverName)
         rep.clientDriverNameLength = strlen(clientDriverName);
-    rep.length = bytes_to_int32(SIZEOF(xXF86DRIGetClientDriverNameReply) -
-                                SIZEOF(xGenericReply) +
-                                pad_to_int32(rep.clientDriverNameLength));
+    rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetClientDriverNameReply)
+               + bytes_to_int32(rep.clientDriverNameLength);
 
     WriteToClient(client, sizeof(xXF86DRIGetClientDriverNameReply), &rep);
     if (rep.clientDriverNameLength)
@@ -407,8 +405,7 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     rep.drawableY = Y;
     rep.drawableWidth = W;
     rep.drawableHeight = H;
-    rep.length = (SIZEOF(xXF86DRIGetDrawableInfoReply) - SIZEOF(xGenericReply));
-
+    rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetDrawableInfoReply);
     rep.backX = backX;
     rep.backY = backY;
 
@@ -498,9 +495,8 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
 #endif
 
     if (rep.devPrivateSize) {
-        rep.length = bytes_to_int32(SIZEOF(xXF86DRIGetDeviceInfoReply) -
-                                    SIZEOF(xGenericReply) +
-                                    pad_to_int32(rep.devPrivateSize));
+        rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetDeviceInfoReply)
+                   + bytes_to_int32(rep.devPrivateSize);
     }
 
     WriteToClient(client, sizeof(xXF86DRIGetDeviceInfoReply), &rep);

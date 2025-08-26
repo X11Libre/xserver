@@ -261,11 +261,7 @@ ProcGetSelectionOwner(ClientPtr client)
         goto out;
     }
 
-    xGetSelectionOwnerReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-    };
+    xGetSelectionOwnerReply rep = { 0 };
 
     param.status = dixLookupSelection(&pSel, param.selection, param.client, DixGetAttrAccess);
     if (param.status == Success)
@@ -276,11 +272,10 @@ ProcGetSelectionOwner(ClientPtr client)
         goto out;
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.owner);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 
 out:

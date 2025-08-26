@@ -74,18 +74,14 @@ ProcXIGetClientPointer(ClientPtr client)
         winclient = client;
 
     xXIGetClientPointerReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIGetClientPointer,
-        .sequenceNumber = client->sequence,
         .set = (winclient->clientPtr != NULL),
         .deviceid = (winclient->clientPtr) ? winclient->clientPtr->id : 0
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.deviceid);
     }
-    WriteToClient(client, sizeof(xXIGetClientPointerReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }

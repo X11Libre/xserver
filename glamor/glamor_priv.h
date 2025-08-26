@@ -634,7 +634,7 @@ const struct glamor_format *glamor_format_for_pixmap(PixmapPtr pixmap);
 /* Return whether 'picture' is alpha-only */
 static inline Bool glamor_picture_is_alpha(PicturePtr picture)
 {
-    return picture->format == PICT_a1 || picture->format == PICT_a8;
+    return picture->format == PIXMAN_a1 || picture->format == PIXMAN_a8;
 }
 
 /* Return whether 'picture' is storing alpha bits in the red channel */
