@@ -82,7 +82,7 @@ static DevPrivateKeyRec DRIScreenPrivKeyRec;
 static DevPrivateKeyRec DRIWindowPrivKeyRec;
 
 #define DRIWindowPrivKey (&DRIWindowPrivKeyRec)
-static unsigned long DRIGeneration = 0;
+static x_server_generation_t DRIGeneration = 0;
 static unsigned int DRIDrawableValidationStamp = 0;
 
 static RESTYPE DRIDrawablePrivResType;
@@ -1713,11 +1713,11 @@ DRIWakeupHandler(void *wakeupData, int result)
     int i;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(pScreen);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(walkScreen);
 
         if (pDRIPriv && pDRIPriv->pDriverInfo->wrap.WakeupHandler)
-            (*pDRIPriv->pDriverInfo->wrap.WakeupHandler) (pScreen, result);
+            (*pDRIPriv->pDriverInfo->wrap.WakeupHandler) (walkScreen, result);
     }
 }
 
@@ -1727,11 +1727,11 @@ DRIBlockHandler(void *blockData, void *pTimeout)
     int i;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr pScreen = screenInfo.screens[i];
-        DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(pScreen);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(walkScreen);
 
         if (pDRIPriv && pDRIPriv->pDriverInfo->wrap.BlockHandler)
-            (*pDRIPriv->pDriverInfo->wrap.BlockHandler) (pScreen, pTimeout);
+            (*pDRIPriv->pDriverInfo->wrap.BlockHandler) (walkScreen, pTimeout);
     }
 }
 

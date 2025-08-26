@@ -47,7 +47,7 @@
 
 #define DEFINE_ATOM_HELPER(func, atom_name)                      \
     static Atom func(void) {                                       \
-        static int generation;                                      \
+        static x_server_generation_t generation;                    \
         static Atom atom;                                           \
         if (generation != serverGeneration) {                       \
             generation = serverGeneration;                          \
@@ -529,11 +529,12 @@ void
 xprHideWindows(Bool hide)
 {
     int screen;
-    WindowPtr pRoot, pWin;
+    WindowPtr pWin;
 
     for (screen = 0; screen < screenInfo.numScreens; screen++) {
+        ScreenPtr walkScreen = screenInfo.screens[screen];
         RootlessFrameID prevWid = NULL;
-        pRoot = screenInfo.screens[screen]->root;
+        WindowPtr pRoot = walkScreen->root;
 
         for (pWin = pRoot->firstChild; pWin; pWin = pWin->nextSib) {
             RootlessWindowRec *winRec = WINREC(pWin);
@@ -554,7 +555,7 @@ xprHideWindows(Bool hide)
                     box.y2 = winRec->height;
 
                     xprDamageRects(winRec->wid, 1, &box, 0, 0);
-                    RootlessQueueRedisplay(screenInfo.screens[screen]);
+                    RootlessQueueRedisplay(walkScreen);
                 }
             }
         }

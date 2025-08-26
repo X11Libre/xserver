@@ -531,11 +531,6 @@ ProcRRGetProviderProperty(ClientPtr client)
     RRPropertyValuePtr prop_value;
     unsigned long n, len, ind;
     RRProviderPtr provider;
-    xRRGetProviderPropertyReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence
-    };
-    char *extra = NULL;
 
     REQUEST_SIZE_MATCH(xRRGetProviderPropertyReq);
     if (stuff->delete)
@@ -560,13 +555,12 @@ ProcRRGetProviderProperty(ClientPtr client)
         if (prop->propertyName == stuff->property)
             break;
 
-    if (!prop) {
-        if (client->swapped) {
-            swaps(&reply.sequenceNumber);
-        }
-        WriteToClient(client, sizeof(xRRGetProviderPropertyReply), &reply);
-        return Success;
-    }
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    xRRGetProviderPropertyReply reply = { 0 };
+
+    if (!prop)
+        goto sendout;
 
     if (prop->immutable && stuff->delete)
         return BadAccess;
@@ -584,12 +578,11 @@ ProcRRGetProviderProperty(ClientPtr client)
         reply.format = prop_value->format;
         reply.propertyType = prop_value->type;
         if (client->swapped) {
-            swaps(&reply.sequenceNumber);
             swapl(&reply.propertyType);
             swapl(&reply.bytesAfter);
         }
-        WriteToClient(client, sizeof(xRRGetProviderPropertyReply), &reply);
-        return Success;
+
+        goto sendout;
     }
 
 /*
@@ -608,14 +601,8 @@ ProcRRGetProviderProperty(ClientPtr client)
 
     len = min(n - ind, 4 * stuff->longLength);
 
-    if (len) {
-        extra = calloc(1, len);
-        if (!extra)
-            return BadAlloc;
-    }
     reply.bytesAfter = n - (ind + len);
     reply.format = prop_value->format;
-    reply.length = bytes_to_int32(len);
     if (prop_value->format)
         reply.nItems = len / (prop_value->format / 8);
     reply.propertyType = prop_value->type;
@@ -633,35 +620,35 @@ ProcRRGetProviderProperty(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.propertyType);
         swapl(&reply.bytesAfter);
         swapl(&reply.nItems);
     }
+
     if (len) {
-        memcpy(extra, (char *) prop_value->data + ind, len);
-        switch (reply.format) {
+        const char *dataptr = ((char*)prop_value->data) + ind;
+        switch (prop_value->format) {
         case 32:
-            if (client->swapped)
-                SwapLongs((CARD32*) extra, len/sizeof(CARD32));
+            x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)dataptr, len/sizeof(CARD32));
             break;
         case 16:
-            if (client->swapped)
-                SwapShorts((short*) extra, len/sizeof(CARD16));
+            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)dataptr, len/sizeof(CARD16));
             break;
         default:
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)dataptr, len);
             break;
         }
     }
 
-    WriteToClient(client, sizeof(xGenericReply), &reply);
-    WriteToClient(client, len, extra);
-    free(extra);
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (stuff->delete && (reply.bytesAfter == 0)) {     /* delete the Property */
         *prev = prop->next;
         RRDestroyProviderProperty(prop);
     }
+
+sendout:
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }

@@ -182,15 +182,11 @@ static int
 ProcDamageQueryVersion(ClientPtr client)
 {
     DamageClientPtr pDamageClient = GetDamageClient(client);
-    xDamageQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
 
     REQUEST(xDamageQueryVersionReq);
-
     REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
 
+    xDamageQueryVersionReply rep = { 0 };
     if (stuff->majorVersion < SERVER_DAMAGE_MAJOR_VERSION) {
         rep.majorVersion = stuff->majorVersion;
         rep.minorVersion = stuff->minorVersion;
@@ -206,12 +202,10 @@ ProcDamageQueryVersion(ClientPtr client)
     pDamageClient->major_version = rep.majorVersion;
     pDamageClient->minor_version = rep.minorVersion;
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xDamageQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -647,12 +641,13 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
     damage->ext = doDamageCreate(client, &rc, stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
         FOR_NSCREENS_FORWARD(i) {
+            ScreenPtr walkScreen = screenInfo.screens[i];
             DrawablePtr pDrawable;
             DamagePtr pDamage = DamageCreate(PanoramiXDamageReport,
                                              PanoramiXDamageExtDestroy,
                                              DamageReportRawRegion,
                                              FALSE,
-                                             screenInfo.screens[i],
+                                             walkScreen,
                                              damage);
             if (!pDamage) {
                 rc = BadAlloc;
@@ -716,8 +711,10 @@ DamageExtensionInit(void)
     ExtensionEntry *extEntry;
     int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++)
-        DamageSetup(screenInfo.screens[s]);
+    for (s = 0; s < screenInfo.numScreens; s++) {
+        ScreenPtr walkScreen = screenInfo.screens[s];
+        DamageSetup(walkScreen);
+    }
 
     DamageExtType = CreateNewResourceType(FreeDamageExt, "DamageExt");
     if (!DamageExtType)

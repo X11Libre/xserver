@@ -127,7 +127,7 @@ Bool
 winAllocateCmapPrivates(ColormapPtr pCmap)
 {
     winPrivCmapPtr pCmapPriv;
-    static unsigned long s_ulPrivateGeneration = 0;
+    static x_server_generation_t s_ulPrivateGeneration = 0;
 
 #if ENABLE_DEBUG
     winDebug("winAllocateCmapPrivates\n");

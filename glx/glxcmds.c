@@ -713,19 +713,10 @@ __glXDisp_IsDirect(__GLXclientState * cl, GLbyte * pc)
         return err;
 
     xGLXIsDirectReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .isDirect = glxc->isDirect
     };
 
-    if (client->swapped) {
-        __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-    }
-    WriteToClient(client, sizeof(xGLXIsDirectReply), &reply);
-
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -748,22 +739,17 @@ __glXDisp_QueryVersion(__GLXclientState * cl, GLbyte * pc)
      ** implementation the server just returns its version number.
      */
     xGLXQueryVersionReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_GLX_MAJOR_VERSION,
         .minorVersion = SERVER_GLX_MINOR_VERSION
     };
 
     if (client->swapped) {
         __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
         __GLX_SWAP_INT(&reply.majorVersion);
         __GLX_SWAP_INT(&reply.minorVersion);
     }
 
-    WriteToClient(client, sizeof(xGLXQueryVersionReply), &reply);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

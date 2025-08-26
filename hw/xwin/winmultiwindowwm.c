@@ -1715,7 +1715,7 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
     static xcb_atom_t hiddenState, fullscreenState, belowState, aboveState,
         skiptaskbarState;
     static xcb_atom_t splashType;
-    static int generation;
+    static x_server_generation_t generation;
 
     unsigned long hint = 0, maxmin = 0;
     unsigned long style, exStyle;

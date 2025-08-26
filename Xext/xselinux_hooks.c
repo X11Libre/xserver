@@ -197,12 +197,14 @@ SELinuxLabelInitial(void)
     srec.status = Success;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
+
         /* Do the screen object */
-        srec.screen = screenInfo.screens[i];
+        srec.screen = walkScreen;
         SELinuxScreen(NULL, NULL, &srec);
 
         /* Do the default colormap */
-        dixLookupResourceByType(&unused, screenInfo.screens[i]->defColormap,
+        dixLookupResourceByType(&unused, walkScreen->defColormap,
                                 X11_RESTYPE_COLORMAP, serverClient, DixCreateAccess);
     }
 }

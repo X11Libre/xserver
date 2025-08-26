@@ -71,7 +71,7 @@ typedef struct
 {
     int fd;
     int fd_ref;
-    unsigned long fd_wakeup_registered; /* server generation for which fd has been registered for wakeup handling */
+    x_server_generation_t fd_wakeup_registered; /* server generation for which fd has been registered for wakeup handling */
     int fd_wakeup_ref;
     unsigned int assigned_crtcs;
 } modesettingEntRec, *modesettingEntPtr;
@@ -109,7 +109,7 @@ typedef struct _modesettingRec {
     Bool noAccel;
     CloseScreenProcPtr CloseScreen;
     CreateWindowProcPtr CreateWindow;
-    unsigned int SaveGeneration;
+    x_server_generation_t SaveGeneration;
 
     ScreenBlockHandlerProcPtr BlockHandler;
     miPointerSpriteFuncPtr SpriteFuncs;

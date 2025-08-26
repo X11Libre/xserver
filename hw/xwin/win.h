@@ -239,7 +239,7 @@ ErrorF (#point ": PROFILEPOINT hit %u times\n", PROFPT##point);\
 
 #define DEFINE_ATOM_HELPER(func,atom_name)			\
 static Atom func (void) {					\
-    static int generation;					\
+    static x_server_generation_t generation;			\
     static Atom atom;						\
     if (generation != serverGeneration) {			\
 	generation = serverGeneration;				\
@@ -539,7 +539,7 @@ extern DevPrivateKeyRec g_iWindowPrivateKeyRec;
 
 #define g_iWindowPrivateKey 	(&g_iWindowPrivateKeyRec)
 
-extern unsigned long g_ulServerGeneration;
+extern x_server_generation_t g_ulServerGeneration;
 extern DWORD g_dwEnginesSupported;
 extern HINSTANCE g_hInstance;
 extern int g_copyROP[];

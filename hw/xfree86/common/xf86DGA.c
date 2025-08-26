@@ -862,16 +862,15 @@ DGACopyModeInfo(DGAModePtr mode, XDGAModePtr xmode)
 Bool
 DGAVTSwitch(void)
 {
-    ScreenPtr pScreen;
     int i;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
 
         /* Alternatively, this could send events to DGA clients */
 
         if (DGAScreenKeyRegistered) {
-            DGAScreenPtr pScreenPriv = DGA_GET_SCREEN_PRIV(pScreen);
+            DGAScreenPtr pScreenPriv = DGA_GET_SCREEN_PRIV(walkScreen);
 
             if (pScreenPriv && pScreenPriv->current)
                 return FALSE;

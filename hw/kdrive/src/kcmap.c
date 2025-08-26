@@ -70,6 +70,11 @@ void KdSetColormap(ScreenPtr pScreen)
     (*pScreenPriv->card->cfuncs->putColors) (pCmap->pScreen,
                                              (1 << pScreenPriv->screen->fb.
                                               depth), defs);
+
+
+    /* recolor hardware cursor */
+    if (pScreenPriv->card->cfuncs->recolorCursor)
+        (*pScreenPriv->card->cfuncs->recolorCursor) (pCmap->pScreen, 0, 0);
 }
 
 /*
@@ -229,4 +234,9 @@ KdStoreColors(ColormapPtr pCmap, int ndef, xColorItem * pdefs)
     }
 
     (*pScreenPriv->card->cfuncs->putColors) (pCmap->pScreen, ndef, pdefs);
+
+    /* recolor hardware cursor */
+    if (pScreenPriv->card->cfuncs->recolorCursor)
+        (*pScreenPriv->card->cfuncs->recolorCursor) (pCmap->pScreen, ndef,
+                                                     pdefs);
 }

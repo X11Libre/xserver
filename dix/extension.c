@@ -49,6 +49,7 @@ SOFTWARE.
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/registry_priv.h"
 
@@ -285,12 +286,7 @@ ProcQueryExtension(ClientPtr client)
     REQUEST(xQueryExtensionReq);
     REQUEST_FIXED_SIZE(xQueryExtensionReq, stuff->nbytes);
 
-    xQueryExtensionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .major_opcode = 0
-    };
+    xQueryExtensionReply rep = { 0 };
 
     if (!NumExtensions || !extensions)
         rep.present = xFalse;
@@ -309,10 +305,7 @@ ProcQueryExtension(ClientPtr client)
         }
     }
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 

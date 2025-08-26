@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 #include <X11/extensions/dpmsproto.h>
 
+#include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/screensaver.h"
 #include "Xext/geext_priv.h"
@@ -232,13 +233,17 @@ DPMSSupported(void)
     int i;
 
     /* For each screen, check if DPMS is supported */
-    for (i = 0; i < screenInfo.numScreens; i++)
-        if (screenInfo.screens[i]->DPMS != NULL)
+    for (i = 0; i < screenInfo.numScreens; i++) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (walkScreen->DPMS != NULL)
             return TRUE;
+    }
 
-    for (i = 0; i < screenInfo.numGPUScreens; i++)
-        if (screenInfo.gpuscreens[i]->DPMS != NULL)
+    for (i = 0; i < screenInfo.numGPUScreens; i++) {
+        ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+        if (walkScreen->DPMS != NULL)
             return TRUE;
+    }
 
     return FALSE;
 }
@@ -278,13 +283,17 @@ DPMSSet(ClientPtr client, int level)
             return rc;
     }
 
-    for (i = 0; i < screenInfo.numScreens; i++)
-        if (screenInfo.screens[i]->DPMS != NULL)
-            screenInfo.screens[i]->DPMS(screenInfo.screens[i], level);
+    for (i = 0; i < screenInfo.numScreens; i++) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        if (walkScreen->DPMS != NULL)
+            walkScreen->DPMS(walkScreen, level);
+    }
 
-    for (i = 0; i < screenInfo.numGPUScreens; i++)
-        if (screenInfo.gpuscreens[i]->DPMS != NULL)
-            screenInfo.gpuscreens[i]->DPMS(screenInfo.gpuscreens[i], level);
+    for (i = 0; i < screenInfo.numGPUScreens; i++) {
+        ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+        if (walkScreen->DPMS != NULL)
+            walkScreen->DPMS(walkScreen, level);
+    }
 
     if (DPMSPowerLevel != old_level)
         SendDPMSInfoNotify();
@@ -296,10 +305,7 @@ static int
 ProcDPMSGetVersion(ClientPtr client)
 {
     /* REQUEST(xDPMSGetVersionReq); */
-    xDPMSGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDPMSGetVersionReply reply = {
         .majorVersion = SERVER_DPMS_MAJOR_VERSION,
         .minorVersion = SERVER_DPMS_MINOR_VERSION
     };
@@ -307,11 +313,10 @@ ProcDPMSGetVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    WriteToClient(client, sizeof(xDPMSGetVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -319,19 +324,13 @@ static int
 ProcDPMSCapable(ClientPtr client)
 {
     /* REQUEST(xDPMSCapableReq); */
-    xDPMSCapableReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDPMSCapableReply reply = {
         .capable = TRUE
     };
 
     REQUEST_SIZE_MATCH(xDPMSCapableReq);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xDPMSCapableReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -339,10 +338,7 @@ static int
 ProcDPMSGetTimeouts(ClientPtr client)
 {
     /* REQUEST(xDPMSGetTimeoutsReq); */
-    xDPMSGetTimeoutsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDPMSGetTimeoutsReply reply = {
         .standby = DPMSStandbyTime / MILLI_PER_SECOND,
         .suspend = DPMSSuspendTime / MILLI_PER_SECOND,
         .off = DPMSOffTime / MILLI_PER_SECOND
@@ -351,12 +347,11 @@ ProcDPMSGetTimeouts(ClientPtr client)
     REQUEST_SIZE_MATCH(xDPMSGetTimeoutsReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.standby);
-        swaps(&rep.suspend);
-        swaps(&rep.off);
+        swaps(&reply.standby);
+        swaps(&reply.suspend);
+        swaps(&reply.off);
     }
-    WriteToClient(client, sizeof(xDPMSGetTimeoutsReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -444,10 +439,7 @@ static int
 ProcDPMSInfo(ClientPtr client)
 {
     /* REQUEST(xDPMSInfoReq); */
-    xDPMSInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDPMSInfoReply reply = {
         .power_level = DPMSPowerLevel,
         .state = DPMSEnabled
     };
@@ -455,10 +447,9 @@ ProcDPMSInfo(ClientPtr client)
     REQUEST_SIZE_MATCH(xDPMSInfoReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.power_level);
+        swaps(&reply.power_level);
     }
-    WriteToClient(client, sizeof(xDPMSInfoReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

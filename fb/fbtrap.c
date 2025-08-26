@@ -126,7 +126,7 @@ fbShapes(CompositeShapesFunc composite,
             }
         }
         else {
-            switch (PICT_FORMAT_A(maskFormat->format)) {
+            switch (PIXMAN_FORMAT_A(maskFormat->format)) {
             case 1:
                 format = PIXMAN_a1;
                 break;

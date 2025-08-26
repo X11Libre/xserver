@@ -33,6 +33,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XKMformat.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbfmisc_priv.h"
@@ -708,8 +709,7 @@ ProcXkbGetControls(ClientPtr client)
         .type = X_Reply,
         .deviceID = ((DeviceIntPtr) dev)->id,
         .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xkbGetControlsReply) -
-                                 sizeof(xGenericReply)),
+        .length = X_REPLY_HEADER_UNITS(xkbGetControlsReply),
         .mkDfltBtn = xkb->mk_dflt_btn,
         .numGroups = xkb->num_groups,
         .groupsWrap = xkb->groups_wrap,
@@ -1014,19 +1014,12 @@ XkbSizeKeyTypes(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
-                 char *buf, ClientPtr client)
+static void XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
+                             x_rpcbuf_t *rpcbuf, ClientPtr client)
 {
-    XkbKeyTypePtr type;
-    unsigned i;
-    xkbKeyTypeWireDesc *wire;
-
-    type = &xkb->map->types[firstType];
-    for (i = 0; i < nTypes; i++, type++) {
-        register unsigned n;
-
-        wire = (xkbKeyTypeWireDesc *) buf;
+    XkbKeyTypePtr type = &xkb->map->types[firstType];
+    for (int i = 0; i < nTypes; i++, type++) {
+        xkbKeyTypeWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbKeyTypeWireDesc));
         wire->mask = type->mods.mask;
         wire->realMods = type->mods.real_mods;
         wire->virtualMods = type->mods.vmods;
@@ -1037,13 +1030,14 @@ XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
             swaps(&wire->virtualMods);
         }
 
-        buf = (char *) &wire[1];
-        if (wire->nMapEntries > 0) {
-            xkbKTMapEntryWireDesc *ewire;
-            XkbKTMapEntryPtr entry;
+        if (type->map_count > 0) {
+            void *space = x_rpcbuf_reserve(
+                rpcbuf, sizeof(xkbKTMapEntryWireDesc) * type->map_count);
+            xkbKTMapEntryWireDesc *ewire = space;
+            XkbKTMapEntryPtr entry = type->map;
 
-            ewire = (xkbKTMapEntryWireDesc *) buf;
-            entry = type->map;
+            size_t n;
+
             for (n = 0; n < type->map_count; n++, ewire++, entry++) {
                 ewire->active = entry->active;
                 ewire->mask = entry->mods.mask;
@@ -1054,13 +1048,12 @@ XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
                     swaps(&ewire->virtualMods);
                 }
             }
-            buf = (char *) ewire;
-            if (type->preserve != NULL) {
-                xkbModsWireDesc *pwire;
-                XkbModsPtr preserve;
 
-                pwire = (xkbModsWireDesc *) buf;
-                preserve = type->preserve;
+            if (type->preserve != NULL) {
+                xkbModsWireDesc *pwire = x_rpcbuf_reserve(
+                    rpcbuf, sizeof(xkbModsWireDesc) * type->map_count);
+                XkbModsPtr preserve = type->preserve;
+
                 for (n = 0; n < type->map_count; n++, pwire++, preserve++) {
                     pwire->mask = preserve->mask;
                     pwire->realMods = preserve->real_mods;
@@ -1069,11 +1062,9 @@ XkbWriteKeyTypes(XkbDescPtr xkb, CARD8 firstType, CARD8 nTypes,
                         swaps(&pwire->virtualMods);
                     }
                 }
-                buf = (char *) pwire;
             }
         }
     }
-    return buf;
 }
 
 static int
@@ -1121,44 +1112,29 @@ XkbSizeVirtualMods(XkbDescPtr xkb, xkbGetMapReply * rep)
     return XkbPaddedSize(nMods);
 }
 
-static char *
-XkbWriteKeySyms(XkbDescPtr xkb, KeyCode firstKeySym, CARD8 nKeySyms, char *buf,
-                ClientPtr client)
+static void XkbWriteKeySyms(XkbDescPtr xkb, KeyCode firstKeySym, CARD8 nKeySyms,
+                            x_rpcbuf_t *rpcbuf, ClientPtr client)
 {
-    register KeySym *pSym;
-    XkbSymMapPtr symMap;
-    xkbSymMapWireDesc *outMap;
-    register unsigned i;
-
-    symMap = &xkb->map->key_sym_map[firstKeySym];
-    for (i = 0; i < nKeySyms; i++, symMap++) {
-        outMap = (xkbSymMapWireDesc *) buf;
+    XkbSymMapPtr symMap = &xkb->map->key_sym_map[firstKeySym];
+    for (int i = 0; i < nKeySyms; i++, symMap++) {
+        size_t nSyms = symMap->width * XkbNumGroups(symMap->group_info);
+        xkbSymMapWireDesc *outMap = x_rpcbuf_reserve(rpcbuf, sizeof(xkbSymMapWireDesc));
         outMap->ktIndex[0] = symMap->kt_index[0];
         outMap->ktIndex[1] = symMap->kt_index[1];
         outMap->ktIndex[2] = symMap->kt_index[2];
         outMap->ktIndex[3] = symMap->kt_index[3];
         outMap->groupInfo = symMap->group_info;
         outMap->width = symMap->width;
-        outMap->nSyms = symMap->width * XkbNumGroups(symMap->group_info);
-        buf = (char *) &outMap[1];
-        if (outMap->nSyms == 0)
-            continue;
+        outMap->nSyms = nSyms;
 
-        pSym = &xkb->map->syms[symMap->offset];
-        memcpy((char *) buf, (char *) pSym, outMap->nSyms * 4);
-        if (client->swapped) {
-            register int nSyms = outMap->nSyms;
-
+        if (client->swapped)
             swaps(&outMap->nSyms);
-            while (nSyms-- > 0) {
-                swapl((int *) buf);
-                buf += 4;
-            }
+
+        if (outMap->nSyms) {
+            KeySym *pSym = &xkb->map->syms[symMap->offset];
+            x_rpcbuf_write_CARD32s(rpcbuf, pSym, nSyms);
         }
-        else
-            buf += outMap->nSyms * 4;
     }
-    return buf;
 }
 
 static int
@@ -1184,36 +1160,26 @@ XkbSizeKeyActions(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteKeyActions(XkbDescPtr xkb, KeyCode firstKeyAct, CARD8 nKeyActs, char *buf)
+static void XkbWriteKeyActions(XkbDescPtr xkb, KeyCode firstKeyAct,
+                               CARD8 nKeyActs, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    CARD8 *numDesc;
-    XkbAnyAction *actDesc;
+    CARD8 *numDesc = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(nKeyActs));
 
-    numDesc = (CARD8 *) buf;
-    for (i = 0; i < nKeyActs; i++) {
+    for (int i = 0; i < nKeyActs; i++) {
         if (xkb->server->key_acts[i + firstKeyAct] == 0)
             numDesc[i] = 0;
         else
             numDesc[i] = XkbKeyNumActions(xkb, (i + firstKeyAct));
     }
-    buf += XkbPaddedSize(nKeyActs);
 
-    actDesc = (XkbAnyAction *) buf;
-    for (i = 0; i < nKeyActs; i++) {
+    for (int i = 0; i < nKeyActs; i++) {
         if (xkb->server->key_acts[i + firstKeyAct] != 0) {
-            unsigned int num;
-
-            num = XkbKeyNumActions(xkb, (i + firstKeyAct));
-            memcpy((char *) actDesc,
-                   (char *) XkbKeyActionsPtr(xkb, (i + firstKeyAct)),
-                   num * SIZEOF(xkbActionWireDesc));
-            actDesc += num;
+            size_t num = XkbKeyNumActions(xkb, (i + firstKeyAct));
+            x_rpcbuf_write_CARD8s(rpcbuf,
+                                  (CARD8*)XkbKeyActionsPtr(xkb, (i + firstKeyAct)),
+                                  num * SIZEOF(xkbActionWireDesc));
         }
     }
-    buf = (char *) actDesc;
-    return buf;
 }
 
 static int
@@ -1239,25 +1205,18 @@ XkbSizeKeyBehaviors(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteKeyBehaviors(XkbDescPtr xkb, KeyCode firstKeyBehavior, CARD8 nKeyBehaviors, char *buf)
+static void XkbWriteKeyBehaviors(XkbDescPtr xkb, KeyCode firstKeyBehavior,
+                                 CARD8 nKeyBehaviors, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    xkbBehaviorWireDesc *wire;
-    XkbBehavior *pBhvr;
-
-    wire = (xkbBehaviorWireDesc *) buf;
-    pBhvr = &xkb->server->behaviors[firstKeyBehavior];
-    for (i = 0; i < nKeyBehaviors; i++, pBhvr++) {
+    XkbBehavior *pBhvr = &xkb->server->behaviors[firstKeyBehavior];
+    for (int i = 0; i < nKeyBehaviors; i++, pBhvr++) {
         if (pBhvr->type != XkbKB_Default) {
+            xkbBehaviorWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbBehaviorWireDesc));
             wire->key = i + firstKeyBehavior;
             wire->type = pBhvr->type;
             wire->data = pBhvr->data;
-            wire++;
         }
     }
-    buf = (char *) wire;
-    return buf;
 }
 
 static int
@@ -1282,24 +1241,28 @@ XkbSizeExplicit(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteExplicit(XkbDescPtr xkb, KeyCode firstKeyExplicit, CARD8 nKeyExplicit,
-                 char *buf)
+static void XkbWriteExplicit(XkbDescPtr xkb, KeyCode firstKeyExplicit,
+                             CARD8 nKeyExplicit, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    char *start;
-    unsigned char *pExp;
+    unsigned char *pExp = &xkb->server->explicit[firstKeyExplicit];
 
-    start = buf;
-    pExp = &xkb->server->explicit[firstKeyExplicit];
-    for (i = 0; i < nKeyExplicit; i++, pExp++) {
-        if (*pExp != 0) {
+    /* count how many active entries there will be */
+    size_t count = 0;
+    for (int i = 0; i < nKeyExplicit; i++) {
+        if (pExp[i] != 0)
+            count++;
+    }
+
+    /* reserve buffer space (with padding) */
+    char *buf = x_rpcbuf_reserve(rpcbuf, XkbPaddedSize(count * 2));
+
+    /* copy over the active entries */
+    for (int i = 0; i < nKeyExplicit; i++) {
+        if (pExp[i] != 0) {
             *buf++ = i + firstKeyExplicit;
-            *buf++ = *pExp;
+            *buf++ = pExp[i];
         }
     }
-    i = XkbPaddedSize(buf - start) - (buf - start);     /* pad to word boundary */
-    return buf + i;
 }
 
 static int
@@ -1323,24 +1286,20 @@ XkbSizeModifierMap(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteModifierMap(XkbDescPtr xkb, KeyCode firstModMapKey, CARD8 nModMapKeys,
-                    char *buf)
+static void XkbWriteModifierMap(XkbDescPtr xkb, KeyCode firstModMapKey,
+                                CARD8 nModMapKeys, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    char *start;
-    unsigned char *pMap;
+    unsigned char *pMap = &xkb->map->modmap[firstModMapKey];
 
-    start = buf;
-    pMap = &xkb->map->modmap[firstModMapKey];
-    for (i = 0; i < nModMapKeys; i++, pMap++) {
-        if (*pMap != 0) {
-            *buf++ = i + firstModMapKey;
-            *buf++ = *pMap;
+    for (int i = 0; i < nModMapKeys; i++) {
+        if (pMap[i] != 0) {
+            x_rpcbuf_write_CARD8(rpcbuf, i + firstModMapKey);
+            x_rpcbuf_write_CARD8(rpcbuf, pMap[i]);
         }
     }
-    i = XkbPaddedSize(buf - start) - (buf - start);     /* pad to word boundary */
-    return buf + i;
+
+    /* make sure the just written data is properly padded */
+    x_rpcbuf_pad(rpcbuf);
 }
 
 static int
@@ -1364,24 +1323,17 @@ XkbSizeVirtualModMap(XkbDescPtr xkb, xkbGetMapReply * rep)
     return len;
 }
 
-static char *
-XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
-                      CARD8 nVModMapKeys, char *buf)
+static void XkbWriteVirtualModMap(XkbDescPtr xkb, KeyCode firstVModMapKey,
+                                  CARD8 nVModMapKeys, x_rpcbuf_t *rpcbuf)
 {
-    unsigned i;
-    xkbVModMapWireDesc *wire;
-    unsigned short *pMap;
-
-    wire = (xkbVModMapWireDesc *) buf;
-    pMap = &xkb->server->vmodmap[firstVModMapKey];
-    for (i = 0; i < nVModMapKeys; i++, pMap++) {
+    unsigned short *pMap = &xkb->server->vmodmap[firstVModMapKey];
+    for (int i = 0; i < nVModMapKeys; i++, pMap++) {
         if (*pMap != 0) {
+            xkbVModMapWireDesc *wire = x_rpcbuf_reserve(rpcbuf, sizeof(xkbVModMapWireDesc));
             wire->key = i + firstVModMapKey;
             wire->vmods = *pMap;
-            wire++;
         }
     }
-    return (char *) wire;
 }
 
 static Status
@@ -1403,60 +1355,53 @@ XkbComputeGetMapReplySize(XkbDescPtr xkb, xkbGetMapReply * rep)
     return Success;
 }
 
-static void
-XkbAssembleMap(ClientPtr client, XkbDescPtr xkb, xkbGetMapReply rep, char *desc)
+static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
+                           xkbGetMapReply rep, x_rpcbuf_t *rpcbuf)
 {
-    if (rep.nTypes > 0)
-        desc = XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, desc, client);
-    if (rep.nKeySyms > 0)
-        desc = XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, desc, client);
-    if (rep.nKeyActs > 0)
-        desc = XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, desc);
+    XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, rpcbuf, client);
+    XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, rpcbuf, client);
+    XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, rpcbuf);
     if (rep.totalKeyBehaviors > 0)
-        desc = XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, desc);
-    if (rep.virtualMods) {
-        register int sz;
+        XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, rpcbuf);
 
-        for (int i = sz = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
+    if (rep.virtualMods) {
+        CARD8 vmods[XkbPaddedSize(XkbNumVirtualMods)] = { 0 };
+        size_t sz = 0;
+        for (size_t i = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
             if (rep.virtualMods & bit) {
-                desc[sz++] = xkb->server->vmods[i];
+                vmods[sz++] = xkb->server->vmods[i];
             }
         }
-        desc += XkbPaddedSize(sz);
+        x_rpcbuf_write_CARD8s(rpcbuf, vmods, XkbPaddedSize(sz));
     }
+
     if (rep.totalKeyExplicit > 0)
-        desc = XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, desc);
+        XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, rpcbuf);
     if (rep.totalModMapKeys > 0)
-        desc = XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, desc);
+        XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, rpcbuf);
     if (rep.totalVModMapKeys > 0)
-        desc = XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, desc);
+        XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, rpcbuf);
 }
 
 int
 ProcXkbGetMap(ClientPtr client)
 {
-    DeviceIntPtr dev;
-    XkbDescRec *xkb;
-    int n, status;
-
     REQUEST(xkbGetMapReq);
     REQUEST_SIZE_MATCH(xkbGetMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
+    DeviceIntPtr dev;
     CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixGetAttrAccess);
     CHK_MASK_OVERLAP(0x01, stuff->full, stuff->partial);
     CHK_MASK_LEGAL(0x02, stuff->full, XkbAllMapComponentsMask);
     CHK_MASK_LEGAL(0x03, stuff->partial, XkbAllMapComponentsMask);
 
-    xkb = dev->key->xkbInfo->desc;
+    XkbDescRec *xkb = dev->key->xkbInfo->desc;
 
     xkbGetMapReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xkbGetMapReply) - sizeof(xGenericReply)),
         .present = stuff->partial | stuff->full,
         .minKeyCode = xkb->min_key_code,
         .maxKeyCode = xkb->max_key_code,
@@ -1476,10 +1421,10 @@ ProcXkbGetMap(ClientPtr client)
         rep.nTypes = stuff->nTypes;
     }
 
-    n = XkbNumKeys(xkb);
+    int numKeys = XkbNumKeys(xkb);
     if (stuff->full & XkbKeySymsMask) {
         rep.firstKeySym = xkb->min_key_code;
-        rep.nKeySyms = n;
+        rep.nKeySyms = numKeys;
     }
     else if (stuff->partial & XkbKeySymsMask) {
         CHK_KEY_RANGE(0x05, stuff->firstKeySym, stuff->nKeySyms, xkb);
@@ -1489,7 +1434,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbKeyActionsMask) {
         rep.firstKeyAct = xkb->min_key_code;
-        rep.nKeyActs = n;
+        rep.nKeyActs = numKeys;
     }
     else if (stuff->partial & XkbKeyActionsMask) {
         CHK_KEY_RANGE(0x07, stuff->firstKeyAct, stuff->nKeyActs, xkb);
@@ -1499,7 +1444,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbKeyBehaviorsMask) {
         rep.firstKeyBehavior = xkb->min_key_code;
-        rep.nKeyBehaviors = n;
+        rep.nKeyBehaviors = numKeys;
     }
     else if (stuff->partial & XkbKeyBehaviorsMask) {
         CHK_KEY_RANGE(0x09, stuff->firstKeyBehavior, stuff->nKeyBehaviors, xkb);
@@ -1514,7 +1459,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbExplicitComponentsMask) {
         rep.firstKeyExplicit = xkb->min_key_code;
-        rep.nKeyExplicit = n;
+        rep.nKeyExplicit = numKeys;
     }
     else if (stuff->partial & XkbExplicitComponentsMask) {
         CHK_KEY_RANGE(0x0B, stuff->firstKeyExplicit, stuff->nKeyExplicit, xkb);
@@ -1524,7 +1469,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbModifierMapMask) {
         rep.firstModMapKey = xkb->min_key_code;
-        rep.nModMapKeys = n;
+        rep.nModMapKeys = numKeys;
     }
     else if (stuff->partial & XkbModifierMapMask) {
         CHK_KEY_RANGE(0x0D, stuff->firstModMapKey, stuff->nModMapKeys, xkb);
@@ -1534,7 +1479,7 @@ ProcXkbGetMap(ClientPtr client)
 
     if (stuff->full & XkbVirtualModMapMask) {
         rep.firstVModMapKey = xkb->min_key_code;
-        rep.nVModMapKeys = n;
+        rep.nVModMapKeys = numKeys;
     }
     else if (stuff->partial & XkbVirtualModMapMask) {
         CHK_KEY_RANGE(0x0F, stuff->firstVModMapKey, stuff->nVModMapKeys, xkb);
@@ -1542,27 +1487,23 @@ ProcXkbGetMap(ClientPtr client)
         rep.nVModMapKeys = stuff->nVModMapKeys;
     }
 
-    if ((status = XkbComputeGetMapReplySize(xkb, &rep)) != Success)
-        return status;
+    int rc = XkbComputeGetMapReplySize(xkb, &rep);
+    if (rc != Success)
+        return rc;
 
-    int payload_len = (rep.length * sizeof(CARD32)) - (sizeof(xkbGetMapReply) - sizeof(xGenericReply));
-    char *payload_buf = calloc(1, payload_len);
-    if (!payload_buf)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    XkbAssembleMap(client, xkb, rep, &rpcbuf);
+
+    if (rpcbuf.error)
         return BadAlloc;
 
-    XkbAssembleMap(client, xkb, rep, payload_buf);
-
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.present);
         swaps(&rep.totalSyms);
         swaps(&rep.totalActs);
     }
 
-    WriteToClient(client, sizeof(xkbGetMapReply), &rep);
-    WriteToClient(client, payload_len, payload_buf);
-    free(payload_buf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -2802,100 +2743,83 @@ static void
 XkbAssembleCompatMap(ClientPtr client,
                      XkbCompatMapPtr compat,
                      xkbGetCompatMapReply rep,
-                     char *buf)
+                     x_rpcbuf_t *rpcbuf)
 {
-    if (rep.length) {
         register unsigned i, bit;
-        xkbModsWireDesc *grp;
         XkbSymInterpretPtr sym = &compat->sym_interpret[rep.firstSI];
-        xkbSymInterpretWireDesc *wire = (xkbSymInterpretWireDesc *) buf;
 
-        for (i = 0; i < rep.nSI; i++, sym++, wire++) {
-            wire->sym = sym->sym;
-            wire->mods = sym->mods;
-            wire->match = sym->match;
-            wire->virtualMod = sym->virtual_mod;
-            wire->flags = sym->flags;
-            memcpy((char *) &wire->act, (char *) &sym->act,
-                   sz_xkbActionWireDesc);
-            if (client->swapped) {
-                swapl(&wire->sym);
-            }
+        for (i = 0; i < rep.nSI; i++, sym++) {
+            /* write xkbSymInterpretWireDesc */
+            x_rpcbuf_write_CARD32(rpcbuf, sym->sym);
+            x_rpcbuf_write_CARD8(rpcbuf, sym->mods);
+            x_rpcbuf_write_CARD8(rpcbuf, sym->match);
+            x_rpcbuf_write_CARD8(rpcbuf, sym->virtual_mod);
+            x_rpcbuf_write_CARD8(rpcbuf, sym->flags);
+            /* write xkbActionWireDesc */
+            x_rpcbuf_write_binary_pad(rpcbuf, &sym->act, sizeof(xkbActionWireDesc));
         }
+
         if (rep.groups) {
-            grp = (xkbModsWireDesc *) wire;
             for (i = 0, bit = 1; i < XkbNumKbdGroups; i++, bit <<= 1) {
                 if (rep.groups & bit) {
-                    grp->mask = compat->groups[i].mask;
-                    grp->realMods = compat->groups[i].real_mods;
-                    grp->virtualMods = compat->groups[i].vmods;
-                    if (client->swapped) {
-                        swaps(&grp->virtualMods);
-                    }
-                    grp++;
+                    /* write xkbModsWireDesc */
+                    x_rpcbuf_write_CARD8(rpcbuf, compat->groups[i].mask);
+                    x_rpcbuf_write_CARD8(rpcbuf, compat->groups[i].real_mods);
+                    x_rpcbuf_write_CARD16(rpcbuf, compat->groups[i].vmods);
                 }
             }
-            wire = (xkbSymInterpretWireDesc *) grp;
         }
-    }
+        x_rpcbuf_pad(rpcbuf);
 }
 
 int
 ProcXkbGetCompatMap(ClientPtr client)
 {
-    DeviceIntPtr dev;
-    XkbDescPtr xkb;
-    XkbCompatMapPtr compat;
-
     REQUEST(xkbGetCompatMapReq);
     REQUEST_SIZE_MATCH(xkbGetCompatMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
+    DeviceIntPtr dev;
     CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixGetAttrAccess);
 
-    xkb = dev->key->xkbInfo->desc;
-    compat = xkb->compat;
+    XkbCompatMapPtr compat = dev->key->xkbInfo->desc->compat;
 
-    xkbGetCompatMapReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .deviceID = dev->id,
-        .firstSI = stuff->firstSI,
-        .nSI = stuff->nSI,
-        .nTotalSI = compat->num_si,
-        .groups = stuff->groups,
-    };
+    CARD16 firstSI = stuff->firstSI;
+    CARD16 nSI = stuff->nSI;
+
     if (stuff->getAllSI) {
-        rep.firstSI = 0;
-        rep.nSI = compat->num_si;
+        firstSI = 0;
+        nSI = compat->num_si;
     }
     else if ((((unsigned) stuff->nSI) > 0) &&
              ((unsigned) (stuff->firstSI + stuff->nSI - 1) >= compat->num_si)) {
         client->errorValue = _XkbErrCode2(0x05, compat->num_si);
         return BadValue;
     }
-    XkbComputeGetCompatMapReplySize(compat, &rep);
 
-    int sz = rep.length * sizeof(CARD32);
-    char *buf = calloc(1, sz);
-    if (rep.length && (!buf)) // rep.length = 0 is valid here
+    xkbGetCompatMapReply rep = {
+        .deviceID = dev->id,
+        .firstSI = firstSI,
+        .nSI = nSI,
+        .nTotalSI = compat->num_si,
+        .groups = stuff->groups,
+    };
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    XkbAssembleCompatMap(client, compat, rep, &rpcbuf);
+
+    if (rpcbuf.error)
         return BadAlloc;
 
-    XkbAssembleCompatMap(client, compat, rep, buf);
-
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.firstSI);
         swaps(&rep.nSI);
         swaps(&rep.nTotalSI);
     }
 
-    WriteToClient(client, sizeof(xkbGetCompatMapReply), &rep);
-    WriteToClient(client, sz, buf);
-    free(buf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -3174,31 +3098,22 @@ static void
 XkbAssembleIndicatorMap(ClientPtr client,
                         XkbIndicatorPtr indicators,
                         xkbGetIndicatorMapReply rep,
-                        char *buf)
+                        x_rpcbuf_t *rpcbuf)
 {
-    CARD8 *map = (CARD8*)buf;
     register int i;
     register unsigned bit;
 
-    if (rep.length > 0) {
-        xkbIndicatorMapWireDesc *wire = (xkbIndicatorMapWireDesc *) map;
-
-        for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
-            if (rep.which & bit) {
-                wire->flags = indicators->maps[i].flags;
-                wire->whichGroups = indicators->maps[i].which_groups;
-                wire->groups = indicators->maps[i].groups;
-                wire->whichMods = indicators->maps[i].which_mods;
-                wire->mods = indicators->maps[i].mods.mask;
-                wire->realMods = indicators->maps[i].mods.real_mods;
-                wire->virtualMods = indicators->maps[i].mods.vmods;
-                wire->ctrls = indicators->maps[i].ctrls;
-                if (client->swapped) {
-                    swaps(&wire->virtualMods);
-                    swapl(&wire->ctrls);
-                }
-                wire++;
-            }
+    for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
+        if (rep.which & bit) {
+            XkbIndicatorMapPtr entry = &indicators->maps[i];
+            x_rpcbuf_write_CARD8(rpcbuf, entry->flags);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->which_groups);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->groups);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->which_mods);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->mods.mask);
+            x_rpcbuf_write_CARD8(rpcbuf, entry->mods.real_mods);
+            x_rpcbuf_write_CARD16(rpcbuf, entry->mods.vmods);
+            x_rpcbuf_write_CARD32(rpcbuf, entry->ctrls);
         }
     }
 }
@@ -3222,30 +3137,25 @@ ProcXkbGetIndicatorMap(ClientPtr client)
     leds = xkb->indicators;
 
     xkbGetIndicatorMapReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .which = stuff->which
     };
     XkbComputeGetIndicatorMapReplySize(leds, &rep);
 
-    int sz = rep.length * sizeof(CARD32);
-    char *buf = calloc(1, sz);
-    if (!buf)
-        return BadAlloc;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    XkbAssembleIndicatorMap(client, leds, rep, buf);
+    XkbAssembleIndicatorMap(client, leds, rep, &rpcbuf);
+
+    if (rpcbuf.error)
+        return BadAlloc;
 
     if (client->swapped) {
         swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.which);
         swapl(&rep.realIndicators);
     }
 
-    WriteToClient(client, sizeof(xkbGetIndicatorMapReply), &rep);
-    WriteToClient(client, sz, buf);
-    free(buf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -3649,23 +3559,12 @@ _XkbCountAtoms(Atom *atoms, int maxAtoms, int *count)
     return atomsPresent;
 }
 
-static char *
-_XkbWriteAtoms(char *wire, Atom *atoms, int maxAtoms, int swap)
+static void __rpcbuf_write_atoms(x_rpcbuf_t *rpcbuf, Atom *atoms, size_t maxAtoms)
 {
-    register unsigned int i;
-    Atom *atm;
-
-    atm = (Atom *) wire;
-    for (i = 0; i < maxAtoms; i++) {
-        if (atoms[i] != None) {
-            *atm = atoms[i];
-            if (swap) {
-                swapl(atm);
-            }
-            atm++;
-        }
+    for (size_t i = 0; i < maxAtoms; i++) {
+        if (atoms[i] != None)
+            x_rpcbuf_write_CARD32(rpcbuf, atoms[i]);
     }
-    return (char *) atm;
 }
 
 static Status
@@ -3786,97 +3685,76 @@ XkbComputeGetNamesReplySize(XkbDescPtr xkb, xkbGetNamesReply * rep)
     return Success;
 }
 
-#define _ADD_CARD32(val) \
-    do { \
-        *((CARD32 *) desc) = (val); \
-        if (client->swapped) { swapl((int *)desc); } \
-        desc += sizeof(CARD32); \
-    } while (0)
-
 static void
-XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, char *buf)
+XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, x_rpcbuf_t *rpcbuf)
 {
     register unsigned i, which;
-    char *desc = buf;
 
     which = rep.which;
 
     if (xkb->names) {
         if (which & XkbKeycodesNameMask) {
-            _ADD_CARD32(xkb->names->keycodes);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->keycodes);
         }
         if (which & XkbGeometryNameMask) {
-            _ADD_CARD32(xkb->names->geometry);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->geometry);
         }
         if (which & XkbSymbolsNameMask) {
-            _ADD_CARD32(xkb->names->symbols);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->symbols);
         }
         if (which & XkbPhysSymbolsNameMask) {
-            _ADD_CARD32(xkb->names->phys_symbols);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->phys_symbols);
         }
         if (which & XkbTypesNameMask) {
-            _ADD_CARD32(xkb->names->types);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->types);
         }
         if (which & XkbCompatNameMask) {
-            _ADD_CARD32(xkb->names->compat);
+            x_rpcbuf_write_CARD32(rpcbuf, xkb->names->compat);
         }
         if (which & XkbKeyTypeNamesMask) {
             for (i = 0; i < xkb->map->num_types; i++) {
-                _ADD_CARD32(xkb->map->types[i].name);
+                x_rpcbuf_write_CARD32(rpcbuf, xkb->map->types[i].name);
             }
         }
         if (which & XkbKTLevelNamesMask && xkb->map) {
             XkbKeyTypePtr type = xkb->map->types;
 
             for (i = 0; i < rep.nTypes; i++, type++) {
-                *desc++ = type->num_levels;
+                x_rpcbuf_write_CARD8(rpcbuf, type->num_levels);
             }
-            desc += XkbPaddedSize(rep.nTypes) - rep.nTypes;
+            x_rpcbuf_pad(rpcbuf);
 
             type = xkb->map->types;
             for (i = 0; i < xkb->map->num_types; i++, type++) {
                 for (int l = 0; l < type->num_levels; l++) {
-                    _ADD_CARD32(type->level_names[l]);
+                    x_rpcbuf_write_CARD32(rpcbuf, type->level_names[l]);
                 }
             }
         }
         if (which & XkbIndicatorNamesMask) {
-            desc =
-                _XkbWriteAtoms(desc, xkb->names->indicators, XkbNumIndicators,
-                               client->swapped);
+            __rpcbuf_write_atoms(rpcbuf, xkb->names->indicators, XkbNumIndicators);
         }
         if (which & XkbVirtualModNamesMask) {
-            desc = _XkbWriteAtoms(desc, xkb->names->vmods, XkbNumVirtualMods,
-                                  client->swapped);
+            __rpcbuf_write_atoms(rpcbuf, xkb->names->vmods, XkbNumVirtualMods);
         }
         if (which & XkbGroupNamesMask) {
-            desc = _XkbWriteAtoms(desc, xkb->names->groups, XkbNumKbdGroups,
-                                  client->swapped);
+            __rpcbuf_write_atoms(rpcbuf, xkb->names->groups, XkbNumKbdGroups);
         }
         if (which & XkbKeyNamesMask) {
-            for (i = 0; i < rep.nKeys; i++, desc += sizeof(XkbKeyNameRec)) {
-                *((XkbKeyNamePtr) desc) = xkb->names->keys[i + rep.firstKey];
-            }
+            x_rpcbuf_write_binary_pad(rpcbuf,
+                                      &(xkb->names->keys[rep.firstKey]),
+                                      sizeof(XkbKeyNameRec) * rep.nKeys);
         }
         if (which & XkbKeyAliasesMask) {
-            XkbKeyAliasPtr pAl;
-
-            pAl = xkb->names->key_aliases;
-            for (i = 0; i < rep.nKeyAliases;
-                 i++, pAl++, desc += 2 * XkbKeyNameLength) {
-                *((XkbKeyAliasPtr) desc) = *pAl;
-            }
+            x_rpcbuf_write_binary_pad(rpcbuf,
+                                      xkb->names->key_aliases,
+                                      sizeof(XkbKeyAliasRec) * rep.nKeyAliases);
         }
         if ((which & XkbRGNamesMask) && (rep.nRadioGroups > 0)) {
-            register CARD32 *atm = (CARD32 *) desc;
-
-            for (i = 0; i < rep.nRadioGroups; i++, atm++) {
-                _ADD_CARD32(xkb->names->radio_groups[i]);
-            }
+            x_rpcbuf_write_CARD32s(rpcbuf, xkb->names->radio_groups, rep.nRadioGroups);
         }
     }
 }
-#undef _ADD_CARD32
 
 int
 ProcXkbGetNames(ClientPtr client)
@@ -3896,9 +3774,7 @@ ProcXkbGetNames(ClientPtr client)
     xkb = dev->key->xkbInfo->desc;
 
     xkbGetNamesReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .which = stuff->which,
         .nTypes = xkb->map->num_types,
         .firstKey = xkb->min_key_code,
@@ -3908,24 +3784,20 @@ ProcXkbGetNames(ClientPtr client)
     };
     XkbComputeGetNamesReplySize(xkb, &rep);
 
-    int sz = rep.length * sizeof(CARD32);
-    char *payload_buf = calloc(1, sz);
-    if (!payload_buf)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    XkbAssembleNames(client, xkb, rep, &rpcbuf);
+
+    if (rpcbuf.error)
         return BadAlloc;
 
-    XkbAssembleNames(client, xkb, rep, payload_buf);
-
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.which);
         swaps(&rep.virtualMods);
         swapl(&rep.indicators);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, sz, payload_buf);
-    free(payload_buf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -4503,17 +4375,15 @@ XkbSizeGeomProperties(XkbGeometryPtr geom)
     return size;
 }
 
-static char *
-XkbWriteGeomProperties(char *wire, XkbGeometryPtr geom, Bool swap)
+static inline void XkbWriteGeomProperties(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
     register int i;
     register XkbPropertyPtr prop;
 
     for (i = 0, prop = geom->properties; i < geom->num_properties; i++, prop++) {
-        wire = XkbWriteCountedString(wire, prop->name, swap);
-        wire = XkbWriteCountedString(wire, prop->value, swap);
+        x_rpcbuf_write_counted_string_pad(rpcbuf, prop->name);
+        x_rpcbuf_write_counted_string_pad(rpcbuf, prop->value);
     }
-    return wire;
 }
 
 static int
@@ -4522,17 +4392,11 @@ XkbSizeGeomKeyAliases(XkbGeometryPtr geom)
     return geom->num_key_aliases * (2 * XkbKeyNameLength);
 }
 
-static char *
-XkbWriteGeomKeyAliases(char *wire, XkbGeometryPtr geom, Bool swap)
+static inline void XkbWriteGeomKeyAliases(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
-    register int sz;
-
-    sz = geom->num_key_aliases * (XkbKeyNameLength * 2);
-    if (sz > 0) {
-        memcpy(wire, (char *) geom->key_aliases, sz);
-        wire += sz;
-    }
-    return wire;
+    x_rpcbuf_write_CARD8s(rpcbuf,
+                          (CARD8*) geom->key_aliases,
+                          geom->num_key_aliases * sizeof(XkbKeyAliasRec));
 }
 
 static int
@@ -4547,16 +4411,14 @@ XkbSizeGeomColors(XkbGeometryPtr geom)
     return size;
 }
 
-static char *
-XkbWriteGeomColors(char *wire, XkbGeometryPtr geom, Bool swap)
+static inline void XkbWriteGeomColors(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
     register int i;
     register XkbColorPtr color;
 
     for (i = 0, color = geom->colors; i < geom->num_colors; i++, color++) {
-        wire = XkbWriteCountedString(wire, color->spec, swap);
+        x_rpcbuf_write_counted_string_pad(rpcbuf, color->spec);
     }
-    return wire;
 }
 
 static int
@@ -4578,57 +4440,41 @@ XkbSizeGeomShapes(XkbGeometryPtr geom)
     return size;
 }
 
-static char *
-XkbWriteGeomShapes(char *wire, XkbGeometryPtr geom, Bool swap)
+static void XkbWriteGeomShapes(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
     int i;
     XkbShapePtr shape;
-    xkbShapeWireDesc *shapeWire;
 
     for (i = 0, shape = geom->shapes; i < geom->num_shapes; i++, shape++) {
         register int o;
         XkbOutlinePtr ol;
-        xkbOutlineWireDesc *olWire;
 
-        shapeWire = (xkbShapeWireDesc *) wire;
-        shapeWire->name = shape->name;
-        shapeWire->nOutlines = shape->num_outlines;
-        if (shape->primary != NULL)
-            shapeWire->primaryNdx = XkbOutlineIndex(shape, shape->primary);
-        else
-            shapeWire->primaryNdx = XkbNoShape;
-        if (shape->approx != NULL)
-            shapeWire->approxNdx = XkbOutlineIndex(shape, shape->approx);
-        else
-            shapeWire->approxNdx = XkbNoShape;
-        shapeWire->pad = 0;
-        if (swap) {
-            swapl(&shapeWire->name);
-        }
-        wire = (char *) &shapeWire[1];
+        /* write xkbShapeWireDesc */
+        x_rpcbuf_write_CARD32(rpcbuf, shape->name);
+        x_rpcbuf_write_CARD8(rpcbuf, shape->num_outlines);
+        x_rpcbuf_write_CARD8(
+            rpcbuf,
+            shape->primary ? XkbOutlineIndex(shape, shape->primary) : XkbNoShape);
+        x_rpcbuf_write_CARD8(rpcbuf,
+            shape->approx ? XkbOutlineIndex(shape, shape->approx) : XkbNoShape);
+        x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
+
         for (o = 0, ol = shape->outlines; o < shape->num_outlines; o++, ol++) {
             register int p;
             XkbPointPtr pt;
-            xkbPointWireDesc *ptWire;
 
-            olWire = (xkbOutlineWireDesc *) wire;
-            olWire->nPoints = ol->num_points;
-            olWire->cornerRadius = ol->corner_radius;
-            olWire->pad = 0;
-            wire = (char *) &olWire[1];
-            ptWire = (xkbPointWireDesc *) wire;
+            /* write xkbOutlineWireDesc */
+            x_rpcbuf_write_CARD8(rpcbuf, ol->num_points);
+            x_rpcbuf_write_CARD8(rpcbuf, ol->corner_radius);
+            x_rpcbuf_pad(rpcbuf);
+
             for (p = 0, pt = ol->points; p < ol->num_points; p++, pt++) {
-                ptWire[p].x = pt->x;
-                ptWire[p].y = pt->y;
-                if (swap) {
-                    swaps(&ptWire[p].x);
-                    swaps(&ptWire[p].y);
-                }
+                /* write xkbPointWireDesc */
+                x_rpcbuf_write_INT16(rpcbuf, pt->x);
+                x_rpcbuf_write_INT16(rpcbuf, pt->y);
             }
-            wire = (char *) &ptWire[ol->num_points];
         }
     }
-    return wire;
 }
 
 static int
@@ -4649,59 +4495,53 @@ XkbSizeGeomDoodads(int num_doodads, XkbDoodadPtr doodad)
     return size;
 }
 
-static char *
-XkbWriteGeomDoodads(char *wire, int num_doodads, XkbDoodadPtr doodad, Bool swap)
+static void XkbWriteGeomDoodads(x_rpcbuf_t *rpcbuf, int num_doodads, XkbDoodadPtr doodad)
 {
     register int i;
-    xkbDoodadWireDesc *doodadWire;
 
     for (i = 0; i < num_doodads; i++, doodad++) {
-        doodadWire = (xkbDoodadWireDesc *) wire;
-        wire = (char *) &doodadWire[1];
-        memset(doodadWire, 0, SIZEOF(xkbDoodadWireDesc));
-        doodadWire->any.name = doodad->any.name;
-        doodadWire->any.type = doodad->any.type;
-        doodadWire->any.priority = doodad->any.priority;
-        doodadWire->any.top = doodad->any.top;
-        doodadWire->any.left = doodad->any.left;
-        if (swap) {
-            swapl(&doodadWire->any.name);
-            swaps(&doodadWire->any.top);
-            swaps(&doodadWire->any.left);
-        }
+        /* write xkbAnyDoodadWireDesc head part */
+        x_rpcbuf_write_CARD32(rpcbuf, doodad->any.name);
+        x_rpcbuf_write_CARD8(rpcbuf, doodad->any.type);
+        x_rpcbuf_write_CARD8(rpcbuf, doodad->any.priority);
+        x_rpcbuf_write_INT16(rpcbuf, doodad->any.top);
+        x_rpcbuf_write_INT16(rpcbuf, doodad->any.left);
+        x_rpcbuf_write_INT16(rpcbuf, doodad->any.angle);
+
         switch (doodad->any.type) {
         case XkbOutlineDoodad:
         case XkbSolidDoodad:
-            doodadWire->shape.angle = doodad->shape.angle;
-            doodadWire->shape.colorNdx = doodad->shape.color_ndx;
-            doodadWire->shape.shapeNdx = doodad->shape.shape_ndx;
-            if (swap) {
-                swaps(&doodadWire->shape.angle);
-            }
+            /* write xkbShapeDoodadWireDesc head part */
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->shape.color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->shape.shape_ndx);
+            x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD32(rpcbuf, 0); /* pad2 */
             break;
         case XkbTextDoodad:
-            doodadWire->text.angle = doodad->text.angle;
-            doodadWire->text.width = doodad->text.width;
-            doodadWire->text.height = doodad->text.height;
-            doodadWire->text.colorNdx = doodad->text.color_ndx;
-            if (swap) {
-                swaps(&doodadWire->text.angle);
-                swaps(&doodadWire->text.width);
-                swaps(&doodadWire->text.height);
-            }
-            wire = XkbWriteCountedString(wire, doodad->text.text, swap);
-            wire = XkbWriteCountedString(wire, doodad->text.font, swap);
+            /* write xkbTextDoodadWireDesc head part */
+            x_rpcbuf_write_CARD16(rpcbuf, doodad->text.width);
+            x_rpcbuf_write_CARD16(rpcbuf, doodad->text.height);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->text.color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad2 */
+            x_rpcbuf_write_counted_string_pad(rpcbuf, doodad->text.text);
+            x_rpcbuf_write_counted_string_pad(rpcbuf, doodad->text.font);
             break;
         case XkbIndicatorDoodad:
-            doodadWire->indicator.shapeNdx = doodad->indicator.shape_ndx;
-            doodadWire->indicator.onColorNdx = doodad->indicator.on_color_ndx;
-            doodadWire->indicator.offColorNdx = doodad->indicator.off_color_ndx;
+            /* write xkbIndicatorDoodadWireDesc head part */
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->indicator.shape_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->indicator.on_color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->indicator.off_color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD32(rpcbuf, 0); /* pad2 */
             break;
         case XkbLogoDoodad:
-            doodadWire->logo.angle = doodad->logo.angle;
-            doodadWire->logo.colorNdx = doodad->logo.color_ndx;
-            doodadWire->logo.shapeNdx = doodad->logo.shape_ndx;
-            wire = XkbWriteCountedString(wire, doodad->logo.logo_name, swap);
+            /* write xkbLogoDoodadWireDesc head part */
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->logo.color_ndx);
+            x_rpcbuf_write_CARD8(rpcbuf, doodad->logo.shape_ndx);
+            x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
+            x_rpcbuf_write_CARD32(rpcbuf, 0); /* pad2 */
+            x_rpcbuf_write_counted_string_pad(rpcbuf, doodad->logo.logo_name);
             break;
         default:
             ErrorF("[xkb] Unknown doodad type %d in XkbWriteGeomDoodads\n",
@@ -4710,45 +4550,34 @@ XkbWriteGeomDoodads(char *wire, int num_doodads, XkbDoodadPtr doodad, Bool swap)
             break;
         }
     }
-    return wire;
 }
 
-static char *
-XkbWriteGeomOverlay(char *wire, XkbOverlayPtr ol, Bool swap)
+static void XkbWriteGeomOverlay(x_rpcbuf_t *rpcbuf, XkbOverlayPtr ol)
 {
     register int r;
     XkbOverlayRowPtr row;
-    xkbOverlayWireDesc *olWire;
 
-    olWire = (xkbOverlayWireDesc *) wire;
-    olWire->name = ol->name;
-    olWire->nRows = ol->num_rows;
-    olWire->pad1 = 0;
-    olWire->pad2 = 0;
-    if (swap) {
-        swapl(&olWire->name);
-    }
-    wire = (char *) &olWire[1];
+    /* write xkbOverlayWireDesc */
+    x_rpcbuf_write_CARD32(rpcbuf, ol->name);
+    x_rpcbuf_write_CARD8(rpcbuf, ol->num_rows);
+    x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
+    x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad2 */
+
     for (r = 0, row = ol->rows; r < ol->num_rows; r++, row++) {
         unsigned int k;
         XkbOverlayKeyPtr key;
-        xkbOverlayRowWireDesc *rowWire;
 
-        rowWire = (xkbOverlayRowWireDesc *) wire;
-        rowWire->rowUnder = row->row_under;
-        rowWire->nKeys = row->num_keys;
-        rowWire->pad1 = 0;
-        wire = (char *) &rowWire[1];
+        /* write xkbOverlayRowWireDesc */
+        x_rpcbuf_write_CARD8(rpcbuf, row->row_under);
+        x_rpcbuf_write_CARD8(rpcbuf, row->num_keys);
+        x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
+
         for (k = 0, key = row->keys; k < row->num_keys; k++, key++) {
-            xkbOverlayKeyWireDesc *keyWire;
-
-            keyWire = (xkbOverlayKeyWireDesc *) wire;
-            memcpy(keyWire->over, key->over.name, XkbKeyNameLength);
-            memcpy(keyWire->under, key->under.name, XkbKeyNameLength);
-            wire = (char *) &keyWire[1];
+            /* write xkbOverlayKeyWireDesc */
+            x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)key->over.name, XkbKeyNameLength);
+            x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)key->under.name, XkbKeyNameLength);
         }
     }
-    return wire;
 }
 
 static int
@@ -4791,87 +4620,64 @@ XkbSizeGeomSections(XkbGeometryPtr geom)
     return size;
 }
 
-static char *
-XkbWriteGeomSections(char *wire, XkbGeometryPtr geom, Bool swap)
+static void XkbWriteGeomSections(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
     register int i;
     XkbSectionPtr section;
-    xkbSectionWireDesc *sectionWire;
 
     for (i = 0, section = geom->sections; i < geom->num_sections;
          i++, section++) {
-        sectionWire = (xkbSectionWireDesc *) wire;
-        sectionWire->name = section->name;
-        sectionWire->top = section->top;
-        sectionWire->left = section->left;
-        sectionWire->width = section->width;
-        sectionWire->height = section->height;
-        sectionWire->angle = section->angle;
-        sectionWire->priority = section->priority;
-        sectionWire->nRows = section->num_rows;
-        sectionWire->nDoodads = section->num_doodads;
-        sectionWire->nOverlays = section->num_overlays;
-        sectionWire->pad = 0;
-        if (swap) {
-            swapl(&sectionWire->name);
-            swaps(&sectionWire->top);
-            swaps(&sectionWire->left);
-            swaps(&sectionWire->width);
-            swaps(&sectionWire->height);
-            swaps(&sectionWire->angle);
-        }
-        wire = (char *) &sectionWire[1];
+
+        /* write xkbSectionWireDesc */
+        x_rpcbuf_write_CARD32(rpcbuf, section->name);
+        x_rpcbuf_write_INT16(rpcbuf, section->top);
+        x_rpcbuf_write_INT16(rpcbuf, section->left);
+        x_rpcbuf_write_CARD16(rpcbuf, section->width);
+        x_rpcbuf_write_CARD16(rpcbuf, section->height);
+        x_rpcbuf_write_INT16(rpcbuf, section->angle);
+        x_rpcbuf_write_CARD8(rpcbuf, section->priority);
+        x_rpcbuf_write_CARD8(rpcbuf, section->num_rows);
+        x_rpcbuf_write_CARD8(rpcbuf, section->num_doodads);
+        x_rpcbuf_write_CARD8(rpcbuf, section->num_overlays);
+        x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
+
         if (section->rows) {
             int r;
             XkbRowPtr row;
-            xkbRowWireDesc *rowWire;
 
             for (r = 0, row = section->rows; r < section->num_rows; r++, row++) {
-                rowWire = (xkbRowWireDesc *) wire;
-                rowWire->top = row->top;
-                rowWire->left = row->left;
-                rowWire->nKeys = row->num_keys;
-                rowWire->vertical = row->vertical;
-                rowWire->pad = 0;
-                if (swap) {
-                    swaps(&rowWire->top);
-                    swaps(&rowWire->left);
-                }
-                wire = (char *) &rowWire[1];
+                /* write xkbRowWireDesc */
+                x_rpcbuf_write_INT16(rpcbuf, row->top);
+                x_rpcbuf_write_INT16(rpcbuf, row->left),
+                x_rpcbuf_write_CARD8(rpcbuf, row->num_keys);
+                x_rpcbuf_write_CARD8(rpcbuf, row->vertical);
+                x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
+
                 if (row->keys) {
                     int k;
                     XkbKeyPtr key;
-                    xkbKeyWireDesc *keyWire;
 
-                    keyWire = (xkbKeyWireDesc *) wire;
                     for (k = 0, key = row->keys; k < row->num_keys; k++, key++) {
-                        memcpy(keyWire[k].name, key->name.name,
-                               XkbKeyNameLength);
-                        keyWire[k].gap = key->gap;
-                        keyWire[k].shapeNdx = key->shape_ndx;
-                        keyWire[k].colorNdx = key->color_ndx;
-                        if (swap) {
-                            swaps(&keyWire[k].gap);
-                        }
+                        /* xkbKeyWireDesc */
+                        x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)key->name.name, XkbKeyNameLength);
+                        x_rpcbuf_write_INT16(rpcbuf, key->gap);
+                        x_rpcbuf_write_CARD8(rpcbuf, key->shape_ndx);
+                        x_rpcbuf_write_CARD8(rpcbuf, key->color_ndx);
                     }
-                    wire = (char *) &keyWire[row->num_keys];
                 }
             }
         }
+
         if (section->doodads) {
-            wire = XkbWriteGeomDoodads(wire,
-                                       section->num_doodads, section->doodads,
-                                       swap);
+            XkbWriteGeomDoodads(rpcbuf, section->num_doodads, section->doodads);
         }
         if (section->overlays) {
             register int o;
-
             for (o = 0; o < section->num_overlays; o++) {
-                wire = XkbWriteGeomOverlay(wire, &section->overlays[o], swap);
+                XkbWriteGeomOverlay(rpcbuf, &section->overlays[o]);
             }
         }
     }
-    return wire;
 }
 
 static Status
@@ -4919,23 +4725,30 @@ static void
 XkbAssembleGeometry(ClientPtr client,
                     XkbGeometryPtr geom,
                     xkbGetGeometryReply rep,
-                    char *desc)
+                    x_rpcbuf_t *rpcbuf)
 {
-    if (geom != NULL) {
-        desc = XkbWriteCountedString(desc, geom->label_font, client->swapped);
-        if (rep.nProperties > 0)
-            desc = XkbWriteGeomProperties(desc, geom, client->swapped);
-        if (rep.nColors > 0)
-            desc = XkbWriteGeomColors(desc, geom, client->swapped);
-        if (rep.nShapes > 0)
-            desc = XkbWriteGeomShapes(desc, geom, client->swapped);
-        if (rep.nSections > 0)
-            desc = XkbWriteGeomSections(desc, geom, client->swapped);
-        if (rep.nDoodads > 0)
-            desc = XkbWriteGeomDoodads(desc, geom->num_doodads, geom->doodads,
-                                       client->swapped);
-        if (rep.nKeyAliases > 0)
-            desc = XkbWriteGeomKeyAliases(desc, geom, client->swapped);
+    if (geom == NULL)
+        return;
+
+    x_rpcbuf_write_counted_string_pad(rpcbuf, geom->label_font);
+
+    if (rep.nProperties > 0) {
+        XkbWriteGeomProperties(rpcbuf, geom);
+    }
+    if (rep.nColors > 0) {
+        XkbWriteGeomColors(rpcbuf, geom);
+    }
+    if (rep.nShapes > 0) {
+        XkbWriteGeomShapes(rpcbuf, geom);
+    }
+    if (rep.nSections > 0) {
+        XkbWriteGeomSections(rpcbuf, geom);
+    }
+    if (rep.nDoodads > 0) {
+        XkbWriteGeomDoodads(rpcbuf, geom->num_doodads, geom->doodads);
+    }
+    if (rep.nKeyAliases > 0) {
+        XkbWriteGeomKeyAliases(rpcbuf, geom);
     }
 }
 
@@ -4961,24 +4774,15 @@ ProcXkbGetGeometry(ClientPtr client)
     xkbGetGeometryReply rep = {
         .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
     };
     status = XkbComputeGetGeometryReplySize(geom, &rep, stuff->name);
     if (status != Success)
         goto free_out;
 
-    int len = rep.length * sizeof(CARD32);
-    char *buf = calloc(1, len);
-    if (!buf) {
-        status = BadAlloc;
-        goto free_out;
-    }
-
-    XkbAssembleGeometry(client, geom, rep, buf);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    XkbAssembleGeometry(client, geom, rep, &rpcbuf);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.name);
         swaps(&rep.widthMM);
         swaps(&rep.heightMM);
@@ -4990,9 +4794,7 @@ ProcXkbGetGeometry(ClientPtr client)
         swaps(&rep.nKeyAliases);
     }
 
-    WriteToClient(client, sizeof(xkbGetGeometryReply), &rep);
-    WriteToClient(client, len, buf);
-    free(buf);
+    status = X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
 free_out:
     if (shouldFree)
@@ -5942,8 +5744,7 @@ ProcXkbGetKbdByName(ClientPtr client)
             reported &= ~(XkbGBN_SymbolsMask | XkbGBN_TypesMask);
         else if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
             mrep.deviceID = dev->id;
-            mrep.length =
-                ((SIZEOF(xkbGetMapReply) - SIZEOF(xGenericReply)) >> 2);
+            mrep.length = X_REPLY_HEADER_UNITS(xkbGetMapReply);
             mrep.minKeyCode = new->min_key_code;
             mrep.maxKeyCode = new->max_key_code;
             mrep.totalSyms = mrep.totalActs =
@@ -6053,8 +5854,18 @@ ProcXkbGetKbdByName(ClientPtr client)
     }
 
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
-        char *buf = payload_walk + sizeof(mrep);
-        XkbAssembleMap(client, new, mrep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+        XkbAssembleMap(client, new, mrep, &rpcbuf);
+
+        if (rpcbuf.error) {
+            free(payload_buffer);
+            return BadAlloc;
+        }
+
+        if (rpcbuf.wpos != (mrep.length * 4))
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch mrep size (%ld // %d units)\n",
+                       (unsigned long)rpcbuf.wpos, (unsigned long)mrep.length * 4, mrep.length);
 
         if (client->swapped) {
             swaps(&mrep.sequenceNumber);
@@ -6065,12 +5876,20 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &mrep, sizeof(mrep));
-        payload_walk = buf + (mrep.length * 4) - (sizeof(mrep) - sizeof(xGenericReply));
+        payload_walk += sizeof(mrep);
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     if (reported & XkbGBN_CompatMapMask) {
-        char *buf = payload_walk + sizeof(crep);
-        XkbAssembleCompatMap(client, new->compat, crep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+        XkbAssembleCompatMap(client, new->compat, crep, &rpcbuf);
+
+        if (rpcbuf.wpos != (crep.length * 4))
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch crep size (%ld // %d units)\n",
+                       (unsigned long)rpcbuf.wpos, (unsigned long)crep.length * 4, crep.length);
 
         if (client->swapped) {
             swaps(&crep.sequenceNumber);
@@ -6081,12 +5900,25 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &crep, sizeof(crep));
-        payload_walk = buf + (crep.length * 4) - (sizeof(crep) - sizeof(xGenericReply));
+        payload_walk += sizeof(crep);
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     if (reported & XkbGBN_IndicatorMapMask) {
-        char *buf = payload_walk + sizeof(irep);
-        XkbAssembleIndicatorMap(client, new->indicators, irep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+        XkbAssembleIndicatorMap(client, new->indicators, irep, &rpcbuf);
+
+        if (rpcbuf.error) {
+            free(payload_buffer);
+            return BadAlloc;
+        }
+
+        if (rpcbuf.wpos != (irep.length * 4))
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch irep size (%ld // %d units)\n",
+                       (unsigned long)rpcbuf.wpos, (unsigned long)irep.length * 4, irep.length);
 
         if (client->swapped) {
             swaps(&irep.sequenceNumber);
@@ -6096,12 +5928,20 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &irep, sizeof(irep));
-        payload_walk = buf + (irep.length * 4) - (sizeof(irep) - sizeof(xGenericReply));
+        payload_walk += sizeof(irep);
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     if (reported & (XkbGBN_KeyNamesMask | XkbGBN_OtherNamesMask)) {
-        char *buf = payload_walk + sizeof(nrep);
-        XkbAssembleNames(client, new, nrep, buf);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+        XkbAssembleNames(client, new, nrep, &rpcbuf);
+
+        if (rpcbuf.wpos != (nrep.length * 4))
+            LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch nrep size (%ld // %d units)\n",
+                       (unsigned long)rpcbuf.wpos, (unsigned long)nrep.length * 4, nrep.length);
 
         if (client->swapped) {
             swaps(&nrep.sequenceNumber);
@@ -6112,12 +5952,16 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &nrep, sizeof(nrep));
-        payload_walk = buf + (nrep.length * 4) - (sizeof(nrep) - sizeof(xGenericReply));
+        payload_walk += sizeof(nrep);
+        memcpy(payload_walk, rpcbuf.buffer, rpcbuf.wpos);
+        payload_walk += rpcbuf.wpos;
+        x_rpcbuf_clear(&rpcbuf);
     }
 
     if (reported & XkbGBN_GeometryMask) {
-        char *buf = payload_walk + sizeof(grep);
-        XkbAssembleGeometry(client, new->geom, grep, buf);
+        x_rpcbuf_t childbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+        XkbAssembleGeometry(client, new->geom, grep, &childbuf);
 
         if (client->swapped) {
             swaps(&grep.sequenceNumber);
@@ -6134,7 +5978,10 @@ ProcXkbGetKbdByName(ClientPtr client)
         }
 
         memcpy(payload_walk, &grep, sizeof(grep));
-        payload_walk = buf + (grep.length * 4) - (sizeof(grep) - sizeof(xGenericReply));
+        payload_walk += sizeof(grep);
+        memcpy(payload_walk, childbuf.buffer, childbuf.wpos);
+        payload_walk += childbuf.wpos;
+        x_rpcbuf_clear(&childbuf);
     }
 
     WriteToClient(client, sizeof(xkbGetKbdByNameReply), &rep);
@@ -6304,30 +6151,17 @@ CheckDeviceLedFBs(DeviceIntPtr dev,
 }
 
 static int
-FillDeviceLedInfo(XkbSrvLedInfoPtr sli, char *buffer, ClientPtr client)
+FillDeviceLedInfo(XkbSrvLedInfoPtr sli, x_rpcbuf_t *rpcbuf, ClientPtr client)
 {
-    int length = 0;
-    xkbDeviceLedsWireDesc wire = {
-        .ledClass = sli->class,
-        .ledID = sli->id,
-        .namesPresent = sli->namesPresent,
-        .mapsPresent = sli->mapsPresent,
-        .physIndicators = sli->physIndicators,
-        .state = sli->effectiveState,
-    };
+    size_t oldpos = rpcbuf->wpos;
 
-    if (client->swapped) {
-        swaps(&wire.ledClass);
-        swaps(&wire.ledID);
-        swapl(&wire.namesPresent);
-        swapl(&wire.mapsPresent);
-        swapl(&wire.physIndicators);
-        swapl(&wire.state);
-    }
-
-    memcpy(buffer, &wire, sizeof(wire));
-    buffer += sizeof(wire);
-    length += sizeof(wire);
+    /* write xkbDeviceLedsWireDesc */
+    x_rpcbuf_write_CARD16(rpcbuf, sli->class);
+    x_rpcbuf_write_CARD16(rpcbuf, sli->id);
+    x_rpcbuf_write_CARD32(rpcbuf, sli->namesPresent);
+    x_rpcbuf_write_CARD32(rpcbuf, sli->mapsPresent);
+    x_rpcbuf_write_CARD32(rpcbuf, sli->physIndicators);
+    x_rpcbuf_write_CARD32(rpcbuf, sli->effectiveState);
 
     if (sli->namesPresent | sli->mapsPresent) {
         register unsigned i, bit;
@@ -6335,41 +6169,27 @@ FillDeviceLedInfo(XkbSrvLedInfoPtr sli, char *buffer, ClientPtr client)
         if (sli->namesPresent) {
             for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
                 if (sli->namesPresent & bit) {
-                    CARD32 *val = (CARD32*)buffer;
-                    *val = sli->names[i];
-                    if (client->swapped) {
-                        swapl(val);
-                    }
-                    length += sizeof(CARD32);
-                    buffer += sizeof(CARD32);
+                    x_rpcbuf_write_CARD32(rpcbuf, sli->names[i]);
                 }
             }
         }
         if (sli->mapsPresent) {
             for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
                 if (sli->mapsPresent & bit) {
-                    xkbIndicatorMapWireDesc iwire = {
-                        .flags = sli->maps[i].flags,
-                        .whichGroups = sli->maps[i].which_groups,
-                        .groups = sli->maps[i].groups,
-                        .whichMods = sli->maps[i].which_mods,
-                        .mods = sli->maps[i].mods.mask,
-                        .realMods = sli->maps[i].mods.real_mods,
-                        .virtualMods = sli->maps[i].mods.vmods,
-                        .ctrls = sli->maps[i].ctrls,
-                    };
-                    if (client->swapped) {
-                        swaps(&iwire.virtualMods);
-                        swapl(&iwire.ctrls);
-                    }
-                    memcpy(buffer, &iwire, sizeof(iwire));
-                    buffer += sizeof(iwire);
-                    length += sizeof(iwire);
+                    /* write xkbIndicatorMapWireDesc */
+                    x_rpcbuf_write_CARD8(rpcbuf, sli->maps[i].flags);
+                    x_rpcbuf_write_CARD8(rpcbuf, sli->maps[i].which_groups);
+                    x_rpcbuf_write_CARD8(rpcbuf, sli->maps[i].groups);
+                    x_rpcbuf_write_CARD8(rpcbuf, sli->maps[i].which_mods);
+                    x_rpcbuf_write_CARD8(rpcbuf, sli->maps[i].mods.mask);
+                    x_rpcbuf_write_CARD8(rpcbuf, sli->maps[i].mods.real_mods);
+                    x_rpcbuf_write_CARD16(rpcbuf, sli->maps[i].mods.vmods);
+                    x_rpcbuf_write_CARD32(rpcbuf, sli->maps[i].ctrls);
                 }
             }
         }
     }
-    return length;
+    return rpcbuf->wpos - oldpos;
 }
 
 static int
@@ -6391,7 +6211,12 @@ FillDeviceLedFBs(DeviceIntPtr dev, int class, int id, unsigned wantLength,
         for (kf = dev->kbdfeed; (kf); kf = kf->next) {
             if ((id == XkbAllXIIds) || (id == XkbDfltXIId) ||
                 (id == kf->ctrl.id)) {
-                int written = FillDeviceLedInfo(kf->xkb_sli, buffer, client);
+
+                x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+                int written = FillDeviceLedInfo(kf->xkb_sli, &rpcbuf, client);
+                memcpy(buffer, rpcbuf.buffer, rpcbuf.wpos);
+                x_rpcbuf_clear(&rpcbuf);
+
                 buffer += written;
                 length += written;
                 if (id != XkbAllXIIds)
@@ -6406,7 +6231,11 @@ FillDeviceLedFBs(DeviceIntPtr dev, int class, int id, unsigned wantLength,
         for (lf = dev->leds; (lf); lf = lf->next) {
             if ((id == XkbAllXIIds) || (id == XkbDfltXIId) ||
                 (id == lf->ctrl.id)) {
-                int written = FillDeviceLedInfo(lf->xkb_sli, buffer, client);
+                x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+                int written = FillDeviceLedInfo(lf->xkb_sli, &rpcbuf, client);
+                memcpy(buffer, rpcbuf.buffer, rpcbuf.wpos);
+                x_rpcbuf_clear(&rpcbuf);
+
                 buffer += written;
                 length += written;
                 if (id != XkbAllXIIds)

@@ -67,7 +67,7 @@ winWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     static ScreenPtr s_pScreen = NULL;
     static HWND s_hwndLastPrivates = NULL;
     static Bool s_fTracking = FALSE;
-    static unsigned long s_ulServerGeneration = 0;
+    static x_server_generation_t s_ulServerGeneration = 0;
     static UINT s_uTaskbarRestart = 0;
     int iScanCode;
     int i;

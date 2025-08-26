@@ -114,21 +114,13 @@ ProcDbeGetVersion(ClientPtr client)
 {
     /* REQUEST(xDbeGetVersionReq); */
     xDbeGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = DBE_MAJOR_VERSION,
         .minorVersion = DBE_MINOR_VERSION
     };
 
     REQUEST_SIZE_MATCH(xDbeGetVersionReq);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-
-    WriteToClient(client, sizeof(xDbeGetVersionReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 
 }                               /* ProcDbeGetVersion() */
@@ -641,21 +633,15 @@ ProcDbeGetVisualInfo(ClientPtr client)
     }
 
     xDbeGetVisualInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(rpcbuf.wpos),
         .m = count
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.m);
     }
 
     rc = Success;
-    WriteToClient(client, sizeof(xDbeGetVisualInfoReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
 clearRpcBuf:
     x_rpcbuf_clear(&rpcbuf);
@@ -684,11 +670,6 @@ static int
 ProcDbeGetBackBufferAttributes(ClientPtr client)
 {
     REQUEST(xDbeGetBackBufferAttributesReq);
-    xDbeGetBackBufferAttributesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
     DbeWindowPrivPtr pDbeWindowPriv;
     int rc;
 
@@ -697,6 +678,9 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
     rc = dixLookupResourceByType((void **) &pDbeWindowPriv, stuff->buffer,
                                  dbeWindowPrivResType, client,
                                  DixGetAttrAccess);
+
+    xDbeGetBackBufferAttributesReply rep = { 0 };
+
     if (rc == Success) {
         rep.attributes = pDbeWindowPriv->pWindow->drawable.id;
     }
@@ -705,14 +689,11 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.attributes);
     }
 
-    WriteToClient(client, sizeof(xDbeGetBackBufferAttributesReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
-
 }                               /* ProcDbeGetbackBufferAttributes() */
 
 /******************************************************************************
@@ -1181,16 +1162,15 @@ static void
 DbeResetProc(ExtensionEntry * extEntry)
 {
     int i;
-    ScreenPtr pScreen;
     DbeScreenPrivPtr pDbeScreenPriv;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        pScreen = screenInfo.screens[i];
-        pDbeScreenPriv = DBE_SCREEN_PRIV(pScreen);
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
 
         if (pDbeScreenPriv) {
-            dixScreenUnhookWindowDestroy(pScreen, miDbeWindowDestroy);
-            dixScreenUnhookWindowPosition(pScreen, miDbeWindowPosition);
+            dixScreenUnhookWindowDestroy(walkScreen, miDbeWindowDestroy);
+            dixScreenUnhookWindowPosition(walkScreen, miDbeWindowPosition);
             free(pDbeScreenPriv);
         }
     }
@@ -1237,7 +1217,6 @@ DbeExtensionInit(void)
 {
     ExtensionEntry *extEntry;
     register int i, j;
-    ScreenPtr pScreen = NULL;
     DbeScreenPrivPtr pDbeScreenPriv;
     int nStubbedScreens = 0;
     Bool ddxInitSuccess;
@@ -1270,7 +1249,7 @@ DbeExtensionInit(void)
          * interface.
          */
 
-        pScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[i];
 
         if (!(pDbeScreenPriv = calloc(1, sizeof(DbeScreenPrivRec)))) {
             /* If we can not alloc a window or screen private,
@@ -1278,15 +1257,16 @@ DbeExtensionInit(void)
              */
 
             for (j = 0; j < i; j++) {
-                free(dixLookupPrivate(&screenInfo.screens[j]->devPrivates,
+                walkScreen = screenInfo.screens[j];
+                free(dixLookupPrivate(&walkScreen->devPrivates,
                                       dbeScreenPrivKey));
-                dixSetPrivate(&screenInfo.screens[j]->devPrivates,
+                dixSetPrivate(&walkScreen->devPrivates,
                               dbeScreenPrivKey, NULL);
             }
             return;
         }
 
-        dixSetPrivate(&pScreen->devPrivates, dbeScreenPrivKey, pDbeScreenPriv);
+        dixSetPrivate(&walkScreen->devPrivates, dbeScreenPrivKey, pDbeScreenPriv);
 
         {
             /* We don't have DDX support for DBE anymore */
@@ -1296,18 +1276,18 @@ DbeExtensionInit(void)
             pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
 
             /* Setup DDX. */
-            ddxInitSuccess = miDbeInit(pScreen, pDbeScreenPriv);
+            ddxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
 
             /* DDX DBE initialization may have the side affect of
              * reallocating pDbeScreenPriv, so we need to update it.
              */
-            pDbeScreenPriv = DBE_SCREEN_PRIV(pScreen);
+            pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
 
             if (ddxInitSuccess) {
                 /* Hook in our window destructor. The DDX initialization function
                  * already added WindowPosition hook for us.
                  */
-                dixScreenHookWindowDestroy(pScreen, miDbeWindowDestroy);
+                dixScreenHookWindowDestroy(walkScreen, miDbeWindowDestroy);
             }
             else {
                 /* DDX initialization failed.  Stub the screen. */
@@ -1325,9 +1305,9 @@ DbeExtensionInit(void)
         /* All screens stubbed.  Clean up and return. */
 
         for (i = 0; i < screenInfo.numScreens; i++) {
-            free(dixLookupPrivate(&screenInfo.screens[i]->devPrivates,
-                                  dbeScreenPrivKey));
-            dixSetPrivate(&pScreen->devPrivates, dbeScreenPrivKey, NULL);
+            ScreenPtr walkScreen = screenInfo.screens[i];
+            free(dixLookupPrivate(&walkScreen->devPrivates, dbeScreenPrivKey));
+            dixSetPrivate(&walkScreen->devPrivates, dbeScreenPrivKey, NULL);
         }
         return;
     }

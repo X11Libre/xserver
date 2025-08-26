@@ -62,6 +62,7 @@ SOFTWARE.
 #endif
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include "os/Xtrans.h"
 #include <X11/Xmd.h>
 #include <errno.h>
@@ -631,7 +632,7 @@ FlushAllOutput(void)
             continue;
         if (!client_is_ready(client)) {
             oc = (OsCommPtr) client->osPrivate;
-            (void) FlushClient(client, oc);
+            FlushClient(client, oc);
         } else
             NewOutputPending = TRUE;
     }
@@ -671,30 +672,74 @@ AbortClient(ClientPtr client)
 }
 
 /*
+ * make sure we have an output buffer in the OsComm
+ */
+static bool OutputEnsureBuffer(ClientPtr who, OsCommPtr oc)
+{
+    if (oc->output)
+        return true;
+
+    if ((oc->output = FreeOutputs)) {
+        FreeOutputs = oc->output->next;
+        return true;
+    }
+
+    if ((oc->output = AllocateOutputBuffer()))
+        return true;
+
+    AbortClient(who);
+    dixMarkClientException(who);
+    return false;
+}
+
+static inline int
+memcpy_and_flush(ClientPtr who, OsCommPtr oc, const void* extra_buf, size_t extra_size, size_t padsize)
+{
+    ConnectionOutputPtr oco = oc->output;
+
+    memcpy(oco->buf + oco->count, extra_buf, extra_size);
+    oco->count += extra_size;
+    memset(oco->buf + oco->count, 0, padsize);
+    oco->count += padsize;
+    return (FlushClient(who, oc) == -1) ? -1 : extra_size; /* return the requested size, or fail */
+}
+
+/*
  * try to make room in the output buffer:
  * if not enough room, try to flush first.
- * if that's not giving enough room, increase the buffer size
+ * if that's not giving enough room, increase the buffer size.
  */
-static bool OutputBufferMakeRoom(ClientPtr who, OsCommPtr oc, size_t sz)
+static int
+OutputBufferMakeRoomAndFlush(ClientPtr who, OsCommPtr oc, const void* extra_buf, size_t extra_size)
 {
-    const size_t padsize = padding_for_int32(sz);
-    const size_t needed = sz + padsize;
+    const size_t padsize = padding_for_int32(extra_size);
+    const size_t needed = extra_size + padsize;
+
+    if (oc->output) {
+        /* check whether it already fits into buffer */
+        if (oc->output->count + needed <= oc->output->size) {
+            return memcpy_and_flush(who, oc, extra_buf, extra_size, padsize);
+        }
+
+        /* try flushing the buffer */
+        if (FlushClient(who, oc) == -1) {
+            /* client was aborted */
+            return -1;
+        }
+    }
+
+    if (!OutputEnsureBuffer(who, oc)) {
+        return -1;
+    }
 
     ConnectionOutputPtr oco = oc->output;
 
-    /* check whether it already fits into buffer */
-    if (oco->count + needed <= oco->size)
-        return true;
-
-    /* try flushing the buffer */
-    int ret = FlushClient(who, oc);
-    if (ret == -1) /* client was aborted */
-        return false;
-
     /* does it fit this time ? */
-    if (oco->count + needed <= oco->size)
-        return true;
+    if (oco->count + needed <= oco->size) {
+        return memcpy_and_flush(who, oc, extra_buf, extra_size, padsize);
+    }
 
+    /* still not enough */
     /* try to resize the buffer */
     const int newsize = oco->count + (((needed / BUFSIZE)+1)*BUFSIZE);
 
@@ -703,12 +748,13 @@ static bool OutputBufferMakeRoom(ClientPtr who, OsCommPtr oc, size_t sz)
         AbortClient(who);
         dixMarkClientException(who);
         oco->count = 0;
-        return FALSE;
+        return -1;
     }
 
     oco->buf = newbuf;
     oco->size = newsize;
-    return true;
+
+    return memcpy_and_flush(who, oc, extra_buf, extra_size, padsize);
 }
 
 /*****************
@@ -726,7 +772,6 @@ int
 WriteToClient(ClientPtr who, int count, const void *__buf)
 {
     OsCommPtr oc;
-    ConnectionOutputPtr oco;
     int padBytes;
     const char *buf = __buf;
 
@@ -739,7 +784,6 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
     if (!count || !who || who == serverClient || who->clientGone)
         return 0;
     oc = who->osPrivate;
-    oco = oc->output;
 #ifdef DEBUG_COMMUNICATION
     {
         char info[128];
@@ -780,18 +824,6 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
             multicount = TRUE;
     }
 #endif
-
-    if (!oco) {
-        if ((oco = FreeOutputs)) {
-            FreeOutputs = oco->next;
-        }
-        else if (!(oco = AllocateOutputBuffer())) {
-            AbortClient(who);
-            dixMarkClientException(who);
-            return -1;
-        }
-        oc->output = oco;
-    }
 
     padBytes = padding_for_int32(count);
 
@@ -835,17 +867,20 @@ WriteToClient(ClientPtr who, int count, const void *__buf)
         }
     }
 #endif
+
+    if (!OutputEnsureBuffer(who, oc))
+        return -1;
+
+    ConnectionOutputPtr oco = oc->output;
+
     if ((oco->count == 0 && who->local) || oco->count + count + padBytes > oco->size) {
         output_pending_clear(who);
         if (!any_output_pending()) {
             CriticalOutputPending = FALSE;
             NewOutputPending = FALSE;
         }
+        return OutputBufferMakeRoomAndFlush(who, oc, buf, count);
     }
-
-    /* if we fail to make room, the client will be aborted */
-    if (!OutputBufferMakeRoom(who, oc, count))
-        return -1;
 
     NewOutputPending = TRUE;
     output_pending_mark(who);
@@ -880,10 +915,7 @@ FlushClient(ClientPtr who, OsCommPtr oc)
 
     if (!trans_conn) {
         /* uh, transport not connected ? can only kill the client :( */
-        AbortClient(who);
-        dixMarkClientException(who);
-        oco->count = 0;
-        return -1;
+        goto abortClient;
     }
 
     size_t written = 0;
@@ -899,7 +931,7 @@ FlushClient(ClientPtr who, OsCommPtr oc)
     size_t todo = notWritten; /* trying to write that much this time */
     while (notWritten) {
         errno = 0;
-        size_t len = _XSERVTransWrite(trans_conn, (const char*)oco->buf + written, todo);
+        ssize_t len = _XSERVTransWrite(trans_conn, ((const char*)oco->buf) + written, todo);
         if (len >= 0) {
             written += len;
             notWritten -= len;
@@ -915,19 +947,14 @@ FlushClient(ClientPtr who, OsCommPtr oc)
                the rest. */
             output_pending_mark(who);
 
-            if (written < oco->count) {
-                if (written > 0) {
-                    oco->count -= written;
-                    memmove((char *) oco->buf,
-                            (char *) oco->buf + written, oco->count);
-                    written = 0;
-                }
-            }
-            else {
-                written -= oco->count;
-                oco->count = 0;
+            if (written > 0) {
+                oco->count -= written;
+                memmove((char *) oco->buf,
+                        (char *) oco->buf + written, oco->count);
+                written = 0;
             }
 
+            oco->count = notWritten;
             ospoll_listen(server_poll, oc->fd, X_NOTIFY_WRITE);
 
             /* return only the amount explicitly requested */
@@ -936,14 +963,11 @@ FlushClient(ClientPtr who, OsCommPtr oc)
 #ifdef EMSGSIZE                 /* check for another brain-damaged OS bug */
         else if (errno == EMSGSIZE) {
             /* making separate try with half of the size */
-            todo >>= 1;
+            todo /= 2;
         }
 #endif
         else {
-            AbortClient(who);
-            dixMarkClientException(who);
-            oco->count = 0;
-            return -1;
+            goto abortClient;
         }
     }
 
@@ -961,6 +985,12 @@ FlushClient(ClientPtr who, OsCommPtr oc)
     }
     oc->output = (ConnectionOutputPtr) NULL;
     return 0;          /* return only the amount explicitly requested */
+
+abortClient:
+    AbortClient(who);
+    dixMarkClientException(who);
+    oco->count = 0;
+    return -1;
 }
 
 static ConnectionInputPtr

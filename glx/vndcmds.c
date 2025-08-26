@@ -87,17 +87,6 @@ static GlxServerDispatchProc GetVendorDispatchFunc(CARD8 opcode, CARD32 vendorCo
     return DispatchBadRequest;
 }
 
-static void SetReplyHeader(ClientPtr client, void *replyPtr)
-{
-    xGenericReply *rep = (xGenericReply *) replyPtr;
-    rep->type = X_Reply;
-    rep->sequenceNumber = client->sequence;
-    if (client->swapped) {
-	swaps(&rep->sequenceNumber);
-    }
-    rep->length = 0;
-}
-
 /* Include the trivial dispatch handlers */
 #include "vnd_dispatch_stubs.c"
 
@@ -106,11 +95,10 @@ static int dispatch_GLXQueryVersion(ClientPtr client)
     xGLXQueryVersionReply reply;
     REQUEST_SIZE_MATCH(xGLXQueryVersionReq);
 
-    SetReplyHeader(client, &reply);
     reply.majorVersion = GlxCheckSwap(client, 1);
     reply.minorVersion = GlxCheckSwap(client, 4);
 
-    WriteToClient(client, sizeof(xGLXQueryVersionReply), &reply);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -213,8 +201,6 @@ static int CommonMakeCurrent(ClientPtr client,
     readdrawable = GlxCheckSwap(client, readdrawable);
     context = GlxCheckSwap(client, context);
 
-    SetReplyHeader(client, &reply);
-
     if (oldContextTag != 0) {
         oldTag = GlxLookupContextTag(client, oldContextTag);
         if (oldTag == NULL) {
@@ -271,7 +257,7 @@ static int CommonMakeCurrent(ClientPtr client,
     }
 
     reply.contextTag = GlxCheckSwap(client, reply.contextTag);
-    WriteToClient(client, sizeof(xGLXMakeCurrentReply), &reply);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

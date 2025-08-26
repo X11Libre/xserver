@@ -46,6 +46,7 @@ from The Open Group.
  * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <dix-config.h>
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -53,6 +54,9 @@ from The Open Group.
 #ifdef HAVE_SYSTEMD_DAEMON
 #include <systemd/sd-daemon.h>
 #endif
+
+#include "os/ossock.h"
+#include "os/xhostname.h"
 
 /*
  * The transport table contains a definition for every transport (protocol)
@@ -114,13 +118,6 @@ Xtransport_table Xtransports[] = {
 
 #define NUMTRANS	(sizeof(Xtransports)/sizeof(Xtransport_table))
 
-
-#ifdef WIN32
-#define ioctl ioctlsocket
-#endif
-
-
-
 /*
  * These are a few utility function used by the public interface functions.
  */
@@ -205,7 +202,6 @@ _XSERVTransParseAddress (const char *address,
     char	*mybuf, *tmpptr = NULL;
     const char	*_protocol = NULL;
     const char	*_host, *_port;
-    char	hostnamebuf[256];
     char	*_host_buf;
     int		_host_len;
 
@@ -309,10 +305,12 @@ _XSERVTransParseAddress (const char *address,
     *mybuf ++= '\0';
 
     _host_len = strlen(_host);
+
+    struct xhostname hn;
     if (_host_len == 0)
     {
-	_XSERVTransGetHostname (hostnamebuf, sizeof (hostnamebuf));
-	_host = hostnamebuf;
+        xhostname(&hn);
+        _host = hn.name;
     }
 #ifdef IPv6
     /* hostname in IPv6 [numeric_addr]:0 form? */
@@ -401,13 +399,7 @@ _XSERVTransOpen (int type, const char *address)
 
     prmsg (2,"Open(%d,%s)\n", type, address);
 
-#if defined(WIN32) && defined(TCPCONN)
-    if (_XSERVTransWSAStartup())
-    {
-	prmsg (1,"Open: WSAStartup failed\n");
-	return NULL;
-    }
-#endif
+    ossock_init();
 
     /* Parse the Address */
 
@@ -567,7 +559,7 @@ int _XSERVTransNonBlock(XtransConnInfo ciptr)
 	{
 	    int arg;
 	    arg = 1;
-	    ret = ioctl (fd, FIOSNBIO, &arg);
+	    ret = ossock_ioctl (fd, FIOSNBIO, &arg);
 	}
 #else
 #if defined(WIN32)
@@ -575,7 +567,7 @@ int _XSERVTransNonBlock(XtransConnInfo ciptr)
 	    u_long arg_ret = 1;
 /* IBM TCP/IP understands this option too well: it causes _XSERVTransRead to fail
  * eventually with EWOULDBLOCK */
-	    ret = ioctl (fd, FIONBIO, &arg_ret);
+	    ret = ossock_ioctl (fd, FIONBIO, &arg_ret);
 	}
 #else
 	    ret = fcntl (fd, F_GETFL, 0);
@@ -713,14 +705,14 @@ int _XSERVTransRead (XtransConnInfo ciptr, char *buf, int size)
     return ciptr->transptr->Read (ciptr, buf, size);
 }
 
-int _XSERVTransWrite (XtransConnInfo ciptr, const char *buf, int size)
+ssize_t _XSERVTransWrite (XtransConnInfo ciptr, const char *buf, size_t size)
 {
     return ciptr->transptr->Write (ciptr, buf, size);
 }
 
-int _XSERVTransWritev (XtransConnInfo ciptr, struct iovec *buf, int size)
+ssize_t _XSERVTransWritev (XtransConnInfo ciptr, struct iovec *buf, size_t iovcnt)
 {
-    return ciptr->transptr->Writev (ciptr, buf, size);
+    return ciptr->transptr->Writev (ciptr, buf, iovcnt);
 }
 
 #if XTRANS_SEND_FDS
@@ -1047,7 +1039,7 @@ int _XSERVTransMakeAllCOTSServerListeners (const char *port, int *partial,
 /*
  * emulate writev
  */
-static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcnt)
+static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt)
 {
     int i, len, total;
     char *base;
@@ -1068,36 +1060,6 @@ static int _XSERVTransWriteV (XtransConnInfo ciptr, struct iovec *iov, int iovcn
 	}
     }
     return total;
-}
-
-/*
- * _XSERVTransGetHostname - similar to gethostname but allows special processing.
- */
-int _XSERVTransGetHostname (char *buf, int maxlen)
-{
-    buf[0] = '\0';
-    (void) gethostname (buf, maxlen);
-    buf [maxlen - 1] = '\0';
-    return strlen(buf);
-}
-
-#else /* WIN32 */
-
-#include <sys/utsname.h>
-
-/*
- * _XSERVTransGetHostname - similar to gethostname but allows special processing.
- */
-int _XSERVTransGetHostname (char *buf, int maxlen)
-{
-    struct utsname name;
-    uname (&name);
-
-    int len = strlen (name.nodename);
-    if (len >= maxlen) len = maxlen - 1;
-    memcpy (buf, name.nodename, len);
-    buf[len] = '\0';
-    return len;
 }
 
 #endif /* WIN32 */

@@ -99,7 +99,7 @@ static DevPrivateKeyRec KdXVWindowKeyRec;
 #define KdXVWindowKey (&KdXVWindowKeyRec)
 static DevPrivateKey KdXvScreenKey;
 static DevPrivateKeyRec KdXVScreenPrivateKey;
-static unsigned long KdXVGeneration = 0;
+static x_server_generation_t KdXVGeneration = 0;
 static unsigned long PortResource = 0;
 
 #define GET_XV_SCREEN(pScreen) ((XvScreenPtr) \

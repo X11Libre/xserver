@@ -60,7 +60,7 @@ static void byte_swap_swizzle(GLenum *swizzle)
  * Returns the GL format and type for uploading our bits to a given PictFormat.
  *
  * We may need to tell the caller to translate the bits to another
- * format, as in PICT_a1 (which GL doesn't support).  We may also need
+ * format, as in PIXMAN_a1 (which GL doesn't support).  We may also need
  * to tell the GL to swizzle the texture on sampling, because GLES3
  * doesn't support the GL_UNSIGNED_INT_8_8_8_8{,_REV} types, so we
  * don't have enough channel reordering options at upload time without
@@ -84,14 +84,14 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
     swizzle[3] = GL_ALPHA;
 
     switch (format) {
-    case PICT_a1:
+    case PIXMAN_a1:
         *tex_format = glamor_priv->formats[1].format;
         *tex_type = GL_UNSIGNED_BYTE;
-        *temp_format = PICT_a8;
+        *temp_format = PIXMAN_a8;
         break;
 
-    case PICT_b8g8r8x8:
-    case PICT_b8g8r8a8:
+    case PIXMAN_b8g8r8x8:
+    case PIXMAN_b8g8r8a8:
         if (!glamor_priv->is_gles) {
             *tex_format = GL_BGRA;
             *tex_type = GL_UNSIGNED_INT_8_8_8_8;
@@ -109,8 +109,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_x8r8g8b8:
-    case PICT_a8r8g8b8:
+    case PIXMAN_x8r8g8b8:
+    case PIXMAN_a8r8g8b8:
         if (!glamor_priv->is_gles) {
             *tex_format = GL_BGRA;
             *tex_type = GL_UNSIGNED_INT_8_8_8_8_REV;
@@ -124,8 +124,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_x8b8g8r8:
-    case PICT_a8b8g8r8:
+    case PIXMAN_x8b8g8r8:
+    case PIXMAN_a8b8g8r8:
         *tex_format = GL_RGBA;
         if (!glamor_priv->is_gles) {
             *tex_type = GL_UNSIGNED_INT_8_8_8_8_REV;
@@ -138,8 +138,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_x2r10g10b10:
-    case PICT_a2r10g10b10:
+    case PIXMAN_x2r10g10b10:
+    case PIXMAN_a2r10g10b10:
         if (!glamor_priv->is_gles) {
             *tex_format = GL_BGRA;
             *tex_type = GL_UNSIGNED_INT_2_10_10_10_REV;
@@ -148,8 +148,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_x2b10g10r10:
-    case PICT_a2b10g10r10:
+    case PIXMAN_x2b10g10r10:
+    case PIXMAN_a2b10g10r10:
         if (!glamor_priv->is_gles) {
             *tex_format = GL_RGBA;
             *tex_type = GL_UNSIGNED_INT_2_10_10_10_REV;
@@ -158,11 +158,11 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_r5g6b5:
+    case PIXMAN_r5g6b5:
         *tex_format = GL_RGB;
         *tex_type = GL_UNSIGNED_SHORT_5_6_5;
         break;
-    case PICT_b5g6r5:
+    case PIXMAN_b5g6r5:
         *tex_format = GL_RGB;
         if (!glamor_priv->is_gles) {
             *tex_type = GL_UNSIGNED_SHORT_5_6_5_REV;
@@ -173,8 +173,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_x1b5g5r5:
-    case PICT_a1b5g5r5:
+    case PIXMAN_x1b5g5r5:
+    case PIXMAN_a1b5g5r5:
         *tex_format = GL_RGBA;
         if (!glamor_priv->is_gles) {
             *tex_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
@@ -183,8 +183,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_x1r5g5b5:
-    case PICT_a1r5g5b5:
+    case PIXMAN_x1r5g5b5:
+    case PIXMAN_a1r5g5b5:
         if (!glamor_priv->is_gles) {
             *tex_format = GL_BGRA;
             *tex_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
@@ -193,13 +193,13 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_a8:
+    case PIXMAN_a8:
         *tex_format = glamor_priv->formats[8].format;
         *tex_type = GL_UNSIGNED_BYTE;
         break;
 
-    case PICT_x4r4g4b4:
-    case PICT_a4r4g4b4:
+    case PIXMAN_x4r4g4b4:
+    case PIXMAN_a4r4g4b4:
         if (!glamor_priv->is_gles) {
             *tex_format = GL_BGRA;
             *tex_type = GL_UNSIGNED_SHORT_4_4_4_4_REV;
@@ -210,8 +210,8 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         }
         break;
 
-    case PICT_x4b4g4r4:
-    case PICT_a4b4g4r4:
+    case PIXMAN_x4b4g4r4:
+    case PIXMAN_a4b4g4r4:
         if (!glamor_priv->is_gles) {
             *tex_format = GL_RGBA;
             *tex_type = GL_UNSIGNED_SHORT_4_4_4_4_REV;
@@ -226,7 +226,7 @@ glamor_get_tex_format_type_from_pictformat(ScreenPtr pScreen,
         return FALSE;
     }
 
-    if (!PICT_FORMAT_A(format))
+    if (!PIXMAN_FORMAT_A(format))
         swizzle[3] = GL_ONE;
 
     return TRUE;

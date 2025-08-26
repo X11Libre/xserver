@@ -119,9 +119,9 @@ static DevPrivateKeyRec XvScreenKeyRec;
 Bool noXvExtension = FALSE;
 
 #define XvScreenKey (&XvScreenKeyRec)
-static unsigned long XvExtensionGeneration = 0;
-static unsigned long XvScreenGeneration = 0;
-static unsigned long XvResourceGeneration = 0;
+static x_server_generation_t XvExtensionGeneration = 0;
+static x_server_generation_t XvScreenGeneration = 0;
+static x_server_generation_t XvResourceGeneration = 0;
 
 int XvReqCode;
 static int XvEventBase;

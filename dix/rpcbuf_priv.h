@@ -170,6 +170,22 @@ Bool x_rpcbuf_write_CARD16(x_rpcbuf_t *rpcbuf, CARD16 value)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
+ * write a INT16 and do byte-swapping (when needed).
+ *
+ * allocate a region for INT16, write it into the buffer and do byte-swap
+ * if buffer is configured to do so (`swapped` field is TRUE).
+ *
+ * doesn't do any padding.
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ * @param value     the CARD16 value to write
+ * @return          TRUE on success, FALSE on allocation failure
+ */
+static inline Bool x_rpcbuf_write_INT16(x_rpcbuf_t *rpcbuf, INT16 value) {
+    return x_rpcbuf_write_CARD16(rpcbuf, (CARD16)value);
+}
+
+/*
  * write a CARD32 and do byte-swapping (when needed).
  *
  * allocate a region for CARD32, write it into the buffer and do byte-swap
@@ -183,6 +199,22 @@ Bool x_rpcbuf_write_CARD16(x_rpcbuf_t *rpcbuf, CARD16 value)
  */
 Bool x_rpcbuf_write_CARD32(x_rpcbuf_t *rpcbuf, CARD32 value)
     _X_ATTRIBUTE_NONNULL_ARG(1);
+
+/*
+ * write a INT32 and do byte-swapping (when needed).
+ *
+ * allocate a region for INT32, write it into the buffer and do byte-swap
+ * if buffer is configured to do so (`swapped` field is TRUE).
+ *
+ * doesn't do any padding.
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ * @param value     the CARD16 value to write
+ * @return          TRUE on success, FALSE on allocation failure
+ */
+static inline Bool x_rpcbuf_write_INT32(x_rpcbuf_t *rpcbuf, INT32 value) {
+    return x_rpcbuf_write_CARD32(rpcbuf, (CARD32)value);
+}
 
 /*
  * write array of CARD8s and do byte-swapping (when needed).
@@ -240,8 +272,81 @@ Bool x_rpcbuf_write_CARD32s(x_rpcbuf_t *rpcbuf, const CARD32 *values,
  * @param rpcbuf    pointer to x_rpcbuf_t to operate on
  * @return          number of 4-byte units (w/ padding) written into the buffer
  */
-static inline size_t x_rpcbuf_wsize_units(x_rpcbuf_t *rpcbuf) {
-    return bytes_to_int32(pad_to_int32(rpcbuf->wpos));
+static inline CARD32 x_rpcbuf_wsize_units(x_rpcbuf_t *rpcbuf) {
+    return (CARD32)((rpcbuf->wpos + 3) / 4);
+}
+
+/*
+ * pad the buffer to 4-byte-units (ie. write extra zeros if necessary)
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ */
+static inline void x_rpcbuf_pad(x_rpcbuf_t *rpcbuf) {
+    x_rpcbuf_reserve0(
+        rpcbuf,
+        (((rpcbuf->wpos + 3) / 4) * 4) - rpcbuf->wpos);
+}
+
+/*
+ * write a Pascal-like counted string, starting with CARD16 couter,
+ * followed by the char bytes, padded to full protocol units (4-bytes).
+ *
+ * if str is NULL, don't write anything
+ *
+ * @param rpcbuf    pointer to the x_rpcbuf_t to operate on
+ * @param str       zero-terminated string to write into the buffer
+ */
+static inline void x_rpcbuf_write_counted_string_pad(
+        x_rpcbuf_t *rpcbuf, const char *str)
+{
+    if (str) {
+        CARD16 len = strlen(str);
+        x_rpcbuf_write_CARD16(rpcbuf, len);
+        x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)str, len);
+        x_rpcbuf_pad(rpcbuf);
+    }
+}
+
+/*
+ * write contents of an rpcbuf into another one (padded) and clear the source buffer
+ *
+ * @param rpcbuf    pointer to the x_rpcbuf_t to operate on
+ * @param source    pointer to source x_rpcbuf_t
+ */
+static inline void x_rpcbuf_write_rpcbuf_pad(
+        x_rpcbuf_t *rpcbuf, x_rpcbuf_t *source)
+{
+    if (!source)
+        return;
+
+    if (source->error) {
+        rpcbuf->error = TRUE;
+        if (rpcbuf->err_clear) {
+            free(rpcbuf->buffer);
+            rpcbuf->buffer = NULL;
+        }
+    } else {
+        x_rpcbuf_write_binary_pad(rpcbuf, source->buffer, source->wpos);
+    }
+    x_rpcbuf_clear(source);
+}
+
+/*
+ * write an X11 RECTANGLE protocol structure into the buffer
+ *
+ * @param rpcbuf    pointer to the x_rpcbuf_t to operate on
+ * @param x         X value of the rectangle
+ * @param y         Y value of the rectangle
+ * @param width     WIDTH value of the rectangle
+ * @param height    HEIGHT value of the rectangle
+ */
+static inline void x_rpcbuf_write_rect(
+        x_rpcbuf_t *rpcbuf, INT16 x, INT16 y, CARD16 width, CARD16 height)
+{
+    x_rpcbuf_write_INT16(rpcbuf, x);
+    x_rpcbuf_write_INT16(rpcbuf, y);
+    x_rpcbuf_write_CARD16(rpcbuf, width);
+    x_rpcbuf_write_CARD16(rpcbuf, height);
 }
 
 #endif /* _XSERVER_DIX_RPCBUF_PRIV_H */

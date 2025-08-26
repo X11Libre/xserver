@@ -37,7 +37,10 @@ from Kaleb S. KEITHLEY
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86vmproto.h>
 
+#include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "os/log_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "dixstruct.h"
@@ -196,21 +199,16 @@ ProcVidModeQueryVersion(ClientPtr client)
     DEBUG_P("XF86VidModeQueryVersion");
     REQUEST_SIZE_MATCH(xXF86VidModeQueryVersionReq);
 
-    xXF86VidModeQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xXF86VidModeQueryVersionReply reply = {
         .majorVersion = SERVER_XF86VIDMODE_MAJOR_VERSION,
         .minorVersion = SERVER_XF86VIDMODE_MINOR_VERSION
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    WriteToClient(client, sizeof(xXF86VidModeQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -239,9 +237,7 @@ ProcVidModeGetModeLine(ClientPtr client)
     if (!pVidMode->GetCurrentModeline(pScreen, &mode, &dotClock))
         return BadValue;
 
-    xXF86VidModeGetModeLineReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xXF86VidModeGetModeLineReply reply = {
         .dotclock = dotClock,
         .hdisplay = VidModeGetModeValue(mode, VIDMODE_H_DISPLAY),
         .hsyncstart = VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART),
@@ -253,8 +249,6 @@ ProcVidModeGetModeLine(ClientPtr client)
         .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
         .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
         .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetModeLineReply) -
-                                    sizeof(xGenericReply)),
         /*
          * Older servers sometimes had server privates that the VidMode
          * extension made available. So to be compatible pretend that
@@ -264,119 +258,83 @@ ProcVidModeGetModeLine(ClientPtr client)
     };
 
     DebugF("GetModeLine - scrn: %d clock: %ld\n",
-           stuff->screen, (unsigned long) rep.dotclock);
+           stuff->screen, (unsigned long) reply.dotclock);
     DebugF("GetModeLine - hdsp: %d hbeg: %d hend: %d httl: %d\n",
-           rep.hdisplay, rep.hsyncstart, rep.hsyncend, rep.htotal);
+           reply.hdisplay, reply.hsyncstart, reply.hsyncend, reply.htotal);
     DebugF("              vdsp: %d vbeg: %d vend: %d vttl: %d flags: %ld\n",
-           rep.vdisplay, rep.vsyncstart, rep.vsyncend,
-           rep.vtotal, (unsigned long) rep.flags);
+           reply.vdisplay, reply.vsyncstart, reply.vsyncend,
+           reply.vtotal, (unsigned long) reply.flags);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.dotclock);
-        swaps(&rep.hdisplay);
-        swaps(&rep.hsyncstart);
-        swaps(&rep.hsyncend);
-        swaps(&rep.htotal);
-        swaps(&rep.hskew);
-        swaps(&rep.vdisplay);
-        swaps(&rep.vsyncstart);
-        swaps(&rep.vsyncend);
-        swaps(&rep.vtotal);
-        swapl(&rep.flags);
-        swapl(&rep.privsize);
+        swapl(&reply.dotclock);
+        swaps(&reply.hdisplay);
+        swaps(&reply.hsyncstart);
+        swaps(&reply.hsyncend);
+        swaps(&reply.htotal);
+        swaps(&reply.hskew);
+        swaps(&reply.vdisplay);
+        swaps(&reply.vsyncstart);
+        swaps(&reply.vsyncend);
+        swaps(&reply.vtotal);
+        swapl(&reply.flags);
+        swapl(&reply.privsize);
     }
     if (ver < 2) {
         xXF86OldVidModeGetModeLineReply oldrep = {
-            .type = rep.type,
-            .sequenceNumber = rep.sequenceNumber,
-            .length = bytes_to_int32(sizeof(xXF86OldVidModeGetModeLineReply) -
-                                     sizeof(xGenericReply)),
-            .dotclock = rep.dotclock,
-            .hdisplay = rep.hdisplay,
-            .hsyncstart = rep.hsyncstart,
-            .hsyncend = rep.hsyncend,
-            .htotal = rep.htotal,
-            .vdisplay = rep.vdisplay,
-            .vsyncstart = rep.vsyncstart,
-            .vsyncend = rep.vsyncend,
-            .vtotal = rep.vtotal,
-            .flags = rep.flags,
-            .privsize = rep.privsize
+            .dotclock = reply.dotclock,
+            .hdisplay = reply.hdisplay,
+            .hsyncstart = reply.hsyncstart,
+            .hsyncend = reply.hsyncend,
+            .htotal = reply.htotal,
+            .vdisplay = reply.vdisplay,
+            .vsyncstart = reply.vsyncstart,
+            .vsyncend = reply.vsyncend,
+            .vtotal = reply.vtotal,
+            .flags = reply.flags,
+            .privsize = reply.privsize
         };
-        WriteToClient(client, sizeof(xXF86OldVidModeGetModeLineReply), &oldrep);
+        X_SEND_REPLY_SIMPLE(client, oldrep);
     }
     else {
-        WriteToClient(client, sizeof(xXF86VidModeGetModeLineReply), &rep);
+        X_SEND_REPLY_SIMPLE(client, reply);
     }
     return Success;
 }
 
-static char *fillModeInfoV1(ClientPtr client, char *buf, int dotClock, DisplayModePtr mode)
+static void fillModeInfoV1(x_rpcbuf_t *rpcbuf, int dotClock,
+                           DisplayModePtr mode)
 {
-    xXF86OldVidModeModeInfo info = {
-        .dotclock = dotClock,
-        .hdisplay = VidModeGetModeValue(mode, VIDMODE_H_DISPLAY),
-        .hsyncstart = VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART),
-        .hsyncend = VidModeGetModeValue(mode, VIDMODE_H_SYNCEND),
-        .htotal = VidModeGetModeValue(mode, VIDMODE_H_TOTAL),
-        .vdisplay = VidModeGetModeValue(mode, VIDMODE_V_DISPLAY),
-        .vsyncstart = VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART),
-        .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
-        .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
-        .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
-    };
-
-    if (client->swapped) {
-        swapl(&info.dotclock);
-        swaps(&info.hdisplay);
-        swaps(&info.hsyncstart);
-        swaps(&info.hsyncend);
-        swaps(&info.htotal);
-        swaps(&info.vdisplay);
-        swaps(&info.vsyncstart);
-        swaps(&info.vsyncend);
-        swaps(&info.vtotal);
-        swapl(&info.flags);
-    }
-
-    memcpy(buf, &info, sizeof(info));
-    return buf + sizeof(info);
+    /* 0.x version -- xXF86OldVidModeModeInfo */
+    x_rpcbuf_write_CARD32(rpcbuf, dotClock);
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_DISPLAY));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SYNCEND));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_TOTAL));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_DISPLAY));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCEND));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_TOTAL));
+    x_rpcbuf_write_CARD32(rpcbuf, VidModeGetModeValue(mode, VIDMODE_FLAGS));
+    x_rpcbuf_reserve0(rpcbuf, sizeof(CARD32)); /* unused ? */
 }
 
-static char *fillModeInfoV2(ClientPtr client, char *buf, int dotClock, DisplayModePtr mode)
+static void fillModeInfoV2(x_rpcbuf_t *rpcbuf, int dotClock,
+                           DisplayModePtr mode)
 {
-    xXF86VidModeModeInfo info = {
-        .dotclock = dotClock,
-        .hdisplay = VidModeGetModeValue(mode, VIDMODE_H_DISPLAY),
-        .hsyncstart = VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART),
-        .hsyncend = VidModeGetModeValue(mode, VIDMODE_H_SYNCEND),
-        .htotal = VidModeGetModeValue(mode, VIDMODE_H_TOTAL),
-        .hskew = VidModeGetModeValue(mode, VIDMODE_H_SKEW),
-        .vdisplay = VidModeGetModeValue(mode, VIDMODE_V_DISPLAY),
-        .vsyncstart = VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART),
-        .vsyncend = VidModeGetModeValue(mode, VIDMODE_V_SYNCEND),
-        .vtotal = VidModeGetModeValue(mode, VIDMODE_V_TOTAL),
-        .flags = VidModeGetModeValue(mode, VIDMODE_FLAGS),
-    };
-
-    if (client->swapped) {
-        swapl(&info.dotclock);
-        swaps(&info.hdisplay);
-        swaps(&info.hsyncstart);
-        swaps(&info.hsyncend);
-        swaps(&info.htotal);
-        swapl(&info.hskew);
-        swaps(&info.vdisplay);
-        swaps(&info.vsyncstart);
-        swaps(&info.vsyncend);
-        swaps(&info.vtotal);
-        swapl(&info.flags);
-    }
-
-    memcpy(buf, &info, sizeof(info));
-    return buf + sizeof(info);
+    /* xXF86VidModeModeInfo -- v2 */
+    x_rpcbuf_write_CARD32(rpcbuf, dotClock);
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_DISPLAY));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SYNCSTART));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SYNCEND));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_TOTAL));
+    x_rpcbuf_write_CARD32(rpcbuf, VidModeGetModeValue(mode, VIDMODE_H_SKEW));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_DISPLAY));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCSTART));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCEND));
+    x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_TOTAL));
+    x_rpcbuf_reserve0(rpcbuf, sizeof(CARD16)); /* pad1 */
+    x_rpcbuf_write_CARD32(rpcbuf, VidModeGetModeValue(mode, VIDMODE_FLAGS));
+    x_rpcbuf_reserve0(rpcbuf, sizeof(CARD32) * 4); /* reserved[1,2,3], privsize */
 }
 
 static int
@@ -408,38 +366,27 @@ ProcVidModeGetAllModeLines(ClientPtr client)
     if (!pVidMode->GetFirstModeline(pScreen, &mode, &dotClock))
         return BadValue;
 
-    int payload_len = modecount * ((ver < 2) ? sizeof(xXF86OldVidModeModeInfo)
-                                             : sizeof(xXF86VidModeModeInfo));
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    xXF86VidModeGetAllModeLinesReply rep = {
-        .type = X_Reply,
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetAllModeLinesReply) -
-                                 sizeof(xGenericReply) + payload_len),
-        .sequenceNumber = client->sequence,
+    do {
+        if (ver < 2)
+            fillModeInfoV1(&rpcbuf, dotClock, mode);
+        else
+            fillModeInfoV2(&rpcbuf, dotClock, mode);
+    } while (pVidMode->GetNextModeline(pScreen, &mode, &dotClock));
+
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    xXF86VidModeGetAllModeLinesReply reply = {
         .modecount = modecount
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.modecount);
+        swapl(&reply.modecount);
     }
 
-    char *payload = calloc(1, payload_len);
-    if (!payload)
-        return BadAlloc;
-
-    char *walk = payload;
-
-    do {
-        walk = (ver < 2) ? fillModeInfoV1(client, walk, dotClock, mode)
-                         : fillModeInfoV2(client, walk, dotClock, mode);
-    } while (pVidMode->GetNextModeline(pScreen, &mode, &dotClock));
-
-    WriteToClient(client, sizeof(xXF86VidModeGetAllModeLinesReply), &rep);
-    WriteToClient(client, payload_len, payload);
-    free(payload);
-
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -1037,19 +984,13 @@ VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff
  status_reply:
     free(modetmp);
 
-    xXF86VidModeValidateModeLineReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xXF86VidModeValidateModeLineReply)
-                                 - sizeof(xGenericReply)),
+    xXF86VidModeValidateModeLineReply reply = {
         .status = status
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.status);
+        swapl(&reply.status);
     }
-    WriteToClient(client, sizeof(xXF86VidModeValidateModeLineReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     DebugF("ValidateModeLine - Succeeded (status = %d)\n", status);
 
     return Success;
@@ -1229,13 +1170,11 @@ ProcVidModeLockModeSwitch(ClientPtr client)
     return Success;
 }
 
-static inline CARD32 _combine_f(vidMonitorValue a, vidMonitorValue b, Bool swapped)
+static inline CARD32 _combine_f(vidMonitorValue a, vidMonitorValue b)
 {
     CARD32 buf =
         ((unsigned short) a.f) |
         ((unsigned short) b.f << 16);
-    if (swapped)
-        swapl(&buf);
     return buf;
 }
 
@@ -1262,65 +1201,36 @@ ProcVidModeGetMonitor(ClientPtr client)
     const char *vendorStr = (const char*)pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0).ptr;
     const char *modelStr = (const char*)pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0).ptr;
 
-    const int vendorLength = (vendorStr ? strlen(vendorStr) : 0);
-    const int modelLength = (modelStr ? strlen(modelStr) : 0);
-
-    const int nVendorItems = bytes_to_int32(pad_to_int32(vendorLength));
-    const int nModelItems = bytes_to_int32(pad_to_int32(modelLength));
-
-    xXF86VidModeGetMonitorReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .nhsync = nHsync,
-        .nvsync = nVrefresh,
-        .vendorLength = vendorLength,
-        .modelLength = modelLength,
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetMonitorReply) -
-                                 sizeof(xGenericReply))
-                  + nHsync + nVrefresh + nVendorItems + nModelItems
-    };
-
-    const int buflen = nHsync + nVrefresh + nVendorItems + nModelItems;
-
-    CARD32 *sendbuf = calloc(buflen, sizeof(CARD32));
-    if (!sendbuf)
-        return BadAlloc;
-
-    CARD32 *bufwalk = sendbuf;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (int i = 0; i < nHsync; i++) {
-        *bufwalk = _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_LO, i),
-                              pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_HI, i),
-                              client->swapped);
-        bufwalk++;
+        x_rpcbuf_write_CARD32(
+            &rpcbuf,
+            _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_LO, i),
+                       pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_HSYNC_HI, i)));
     }
 
     for (int i = 0; i < nVrefresh; i++) {
-        *bufwalk = _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_LO, i),
-                              pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_HI, i),
-                              client->swapped);
-        bufwalk++;
+        x_rpcbuf_write_CARD32(
+            &rpcbuf,
+            _combine_f(pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_LO, i),
+                       pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VREFRESH_HI, i)));
     }
 
-    memcpy(bufwalk,
-           pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_VENDOR, 0).ptr,
-           vendorLength);
-    bufwalk += nVendorItems;
+    x_rpcbuf_write_string_pad(&rpcbuf, vendorStr);
+    x_rpcbuf_write_string_pad(&rpcbuf, modelStr);
 
-    memcpy(bufwalk,
-           pVidMode->GetMonitorValue(pScreen, VIDMODE_MON_MODEL, 0).ptr,
-           modelLength);
-    bufwalk += nModelItems;
+    if (rpcbuf.error)
+        return BadAlloc;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
+    xXF86VidModeGetMonitorReply reply = {
+        .nhsync = nHsync,
+        .nvsync = nVrefresh,
+        .vendorLength = x_safe_strlen(vendorStr),
+        .modelLength = x_safe_strlen(modelStr),
+    };
 
-    WriteToClient(client, sizeof(xXF86VidModeGetMonitorReply), &rep);
-    WriteToClient(client, buflen * sizeof(CARD32), sendbuf);
-
-    free(sendbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -1346,20 +1256,16 @@ ProcVidModeGetViewPort(ClientPtr client)
 
     pVidMode->GetViewPort(pScreen, &x, &y);
 
-    xXF86VidModeGetViewPortReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xXF86VidModeGetViewPortReply reply = {
         .x = x,
         .y = y
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.x);
-        swapl(&rep.y);
+        swapl(&reply.x);
+        swapl(&reply.y);
     }
-    WriteToClient(client, SIZEOF(xXF86VidModeGetViewPortReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1398,10 +1304,7 @@ ProcVidModeGetDotClocks(ClientPtr client)
     REQUEST(xXF86VidModeGetDotClocksReq);
     ScreenPtr pScreen;
     VidModePtr pVidMode;
-    int n;
     int numClocks;
-    CARD32 dotclock;
-    int *Clocks = NULL;
     Bool ClockProg;
 
     DEBUG_P("XF86VidModeGetDotClocks");
@@ -1418,42 +1321,39 @@ ProcVidModeGetDotClocks(ClientPtr client)
 
     numClocks = pVidMode->GetNumOfClocks(pScreen, &ClockProg);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!ClockProg) {
-        Clocks = calloc(numClocks, sizeof(int));
+        int *Clocks = calloc(numClocks, sizeof(int));
         if (!Clocks)
             return BadValue;
         if (!pVidMode->GetClocks(pScreen, Clocks)) {
             free(Clocks);
             return BadValue;
         }
+
+        for (int n = 0; n < numClocks; n++)
+            x_rpcbuf_write_CARD32(&rpcbuf, Clocks[n]);
+
+        free(Clocks);
     }
 
-    xXF86VidModeGetDotClocksReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(xXF86VidModeGetDotClocksReply)
-                                 - sizeof(xGenericReply)) + numClocks,
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    xXF86VidModeGetDotClocksReply reply = {
         .clocks = numClocks,
         .maxclocks = MAXCLOCKS,
         .flags = (ClockProg ? CLKFLAG_PROGRAMABLE : 0),
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.clocks);
-        swapl(&rep.maxclocks);
-        swapl(&rep.flags);
-    }
-    WriteToClient(client, sizeof(xXF86VidModeGetDotClocksReply), &rep);
-    if (!ClockProg && Clocks) {
-        for (n = 0; n < numClocks; n++) {
-            dotclock = Clocks[n];
-            WriteSwappedDataToClient(client, 4, (char *) &dotclock);
-        }
+        swapl(&reply.clocks);
+        swapl(&reply.maxclocks);
+        swapl(&reply.flags);
     }
 
-    free(Clocks);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -1511,22 +1411,17 @@ ProcVidModeGetGamma(ClientPtr client)
     if (!pVidMode->GetGamma(pScreen, &red, &green, &blue))
         return BadValue;
 
-    xXF86VidModeGetGammaReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xXF86VidModeGetGammaReply reply = {
         .red = (CARD32) (red * 10000.),
         .green = (CARD32) (green * 10000.),
         .blue = (CARD32) (blue * 10000.)
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.red);
-        swapl(&rep.green);
-        swapl(&rep.blue);
+        swapl(&reply.red);
+        swapl(&reply.green);
+        swapl(&reply.blue);
     }
-    WriteToClient(client, sizeof(xXF86VidModeGetGammaReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1573,9 +1468,6 @@ ProcVidModeSetGammaRamp(ClientPtr client)
 static int
 ProcVidModeGetGammaRamp(ClientPtr client)
 {
-    CARD16 *ramp = NULL;
-    size_t ramplen = 0;
-
     REQUEST(xXF86VidModeGetGammaRampReq);
     REQUEST_SIZE_MATCH(xXF86VidModeGetGammaRampReq);
 
@@ -1592,34 +1484,32 @@ ProcVidModeGetGammaRamp(ClientPtr client)
 
     const int length = (stuff->size + 1) & ~1;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (stuff->size) {
-        if (!(ramp = calloc(length, 3 * sizeof(CARD16))))
+        size_t ramplen = length * 3 * sizeof(CARD16);
+        CARD16 *ramp = x_rpcbuf_reserve(&rpcbuf, ramplen);
+        if (!ramp)
             return BadAlloc;
-        ramplen = length * 3 * sizeof(CARD16);
 
         if (!pVidMode->GetGammaRamp(pScreen, stuff->size,
                                  ramp, ramp + length, ramp + (length * 2))) {
-            free(ramp);
+            x_rpcbuf_clear(&rpcbuf);
             return BadValue;
         }
+
+        if (rpcbuf.swapped)
+            SwapShorts((short *) rpcbuf.buffer, rpcbuf.wpos / sizeof(CARD16));
     }
 
-    xXF86VidModeGetGammaRampReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(ramplen),
+    xXF86VidModeGetGammaRampReply reply = {
         .size = stuff->size
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.size);
-        SwapShorts((short *) ramp, length * 3);
+        swaps(&reply.size);
     }
-    WriteToClient(client, sizeof(xXF86VidModeGetGammaRampReply), &rep);
-    WriteToClient(client, ramplen, ramp);
-    free(ramp);
 
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 
@@ -1642,18 +1532,13 @@ ProcVidModeGetGammaRampSize(ClientPtr client)
     if (pVidMode == NULL)
         return BadImplementation;
 
-    xXF86VidModeGetGammaRampSizeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xXF86VidModeGetGammaRampSizeReply reply = {
         .size = pVidMode->GetGammaRampSize(pScreen)
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.size);
+        swaps(&reply.size);
     }
-    WriteToClient(client, sizeof(xXF86VidModeGetGammaRampSizeReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1666,21 +1551,16 @@ ProcVidModeGetPermissions(ClientPtr client)
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
 
-    xXF86VidModeGetPermissionsReply rep =  {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xXF86VidModeGetPermissionsReply reply =  {
         .permissions = (XF86VM_READ_PERMISSION |
                         ((VidModeAllowNonLocal || client->local) ?
                             XF86VM_WRITE_PERMISSION : 0)),
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.permissions);
+        swapl(&reply.permissions);
     }
-    WriteToClient(client, sizeof(xXF86VidModeGetPermissionsReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

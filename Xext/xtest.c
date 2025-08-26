@@ -89,10 +89,7 @@ static int XTestSwapFakeInput(ClientPtr /* client */ ,
 static int
 ProcXTestGetVersion(ClientPtr client)
 {
-    xXTestGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xXTestGetVersionReply reply = {
         .majorVersion = XTestMajorVersion,
         .minorVersion = XTestMinorVersion
     };
@@ -100,10 +97,9 @@ ProcXTestGetVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xXTestGetVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.minorVersion);
+        swaps(&reply.minorVersion);
     }
-    WriteToClient(client, sizeof(xXTestGetVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -111,7 +107,6 @@ static int
 ProcXTestCompareCursor(ClientPtr client)
 {
     REQUEST(xXTestCompareCursorReq);
-    xXTestCompareCursorReply rep;
     WindowPtr pWin;
     CursorPtr pCursor;
     int rc;
@@ -137,16 +132,12 @@ ProcXTestCompareCursor(ClientPtr client)
             return rc;
         }
     }
-    rep = (xXTestCompareCursorReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+
+    xXTestCompareCursorReply reply = {
         .same = (wCursor(pWin) == pCursor)
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xXTestCompareCursorReply), &rep);
+
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

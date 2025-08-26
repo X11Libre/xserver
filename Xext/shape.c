@@ -208,20 +208,16 @@ ProcShapeQueryVersion(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
 
-    xShapeQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xShapeQueryVersionReply reply = {
         .majorVersion = SERVER_SHAPE_MAJOR_VERSION,
         .minorVersion = SERVER_SHAPE_MINOR_VERSION
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    WriteToClient(client, sizeof(xShapeQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -316,7 +312,7 @@ ProcShapeRectangles(ClientPtr client)
     }
     return result;
 #else
-    return ShapeRectangles(client);
+    return ShapeRectangles(client, stuff);
 #endif
 }
 
@@ -653,9 +649,7 @@ ProcShapeQueryExtents(ClientPtr client)
         shapeBox.y2 = pWin->drawable.height;
     }
 
-    xShapeQueryExtentsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xShapeQueryExtentsReply reply = {
         .boundingShaped = (wBoundingShape(pWin) != 0),
         .clipShaped = (wClipShape(pWin) != 0),
         .xBoundingShape = boundBox.x1,
@@ -669,18 +663,16 @@ ProcShapeQueryExtents(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.xBoundingShape);
-        swaps(&rep.yBoundingShape);
-        swaps(&rep.widthBoundingShape);
-        swaps(&rep.heightBoundingShape);
-        swaps(&rep.xClipShape);
-        swaps(&rep.yClipShape);
-        swaps(&rep.widthClipShape);
-        swaps(&rep.heightClipShape);
+        swaps(&reply.xBoundingShape);
+        swaps(&reply.yBoundingShape);
+        swaps(&reply.widthBoundingShape);
+        swaps(&reply.heightBoundingShape);
+        swaps(&reply.xClipShape);
+        swaps(&reply.yClipShape);
+        swaps(&reply.widthClipShape);
+        swaps(&reply.heightClipShape);
     }
-    WriteToClient(client, sizeof(xShapeQueryExtentsReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -923,17 +915,11 @@ ProcShapeInputSelected(ClientPtr client)
         }
     }
 
-    xShapeInputSelectedReply rep = {
-        .type = X_Reply,
+    xShapeInputSelectedReply reply = {
         .enabled = enabled,
-        .sequenceNumber = client->sequence,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xShapeInputSelectedReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1008,21 +994,16 @@ ProcShapeGetRectangles(ClientPtr client)
     if (rpcbuf.error) /* buffer already cleared */
         return BadAlloc;
 
-    xShapeGetRectanglesReply rep = {
-        .type = X_Reply,
+    xShapeGetRectanglesReply reply = {
         .ordering = YXBanded,
-        .sequenceNumber = client->sequence,
-        .length = x_rpcbuf_wsize_units(&rpcbuf),
         .nrects = nrects
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.nrects);
+        swapl(&reply.nrects);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
+
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
     return Success;
 }
 

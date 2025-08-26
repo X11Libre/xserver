@@ -1742,16 +1742,10 @@ ProcSetModifierMapping(ClientPtr client)
         return rc;
 
     xSetModifierMappingReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .success = rc,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -1892,16 +1886,10 @@ ProcSetPointerMapping(ClientPtr client)
         return ret;
 
     xSetPointerMappingReply rep = {
-        .type = X_Reply,
         .success = (ret == MappingBusy) ? MappingBusy : MappingSuccess,
-        .sequenceNumber = client->sequence,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -1937,36 +1925,24 @@ ProcGetKeyboardMapping(ClientPtr client)
         return BadAlloc;
 
     const int count = syms->mapWidth * stuff->count;
-    const int size = count * sizeof(KeySym);
-    void *payload = calloc(count, sizeof(KeySym));
-    if (!payload)
-        return BadAlloc;
-
-    memcpy(payload,
-           &syms->map[syms->mapWidth * (stuff->firstKeyCode - syms->minKeyCode)],
-           size);
 
     xGetKeyboardMappingReply rep = {
-        .type = X_Reply,
         .keySymsPerKeyCode = syms->mapWidth,
-        .sequenceNumber = client->sequence,
-        /* length is a count of 4 byte quantities and KeySyms are 4 bytes */
-        .length = count
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        SwapLongs(payload, count);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, size, payload);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(
+        &rpcbuf,
+        &syms->map[syms->mapWidth * (stuff->firstKeyCode - syms->minKeyCode)],
+        count);
 
     free(syms->map);
     free(syms);
-    free(payload);
 
+    if (rpcbuf.error)
+        return BadAlloc;
+
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
     return Success;
 }
 
@@ -2237,10 +2213,7 @@ ProcGetKeyboardControl(ClientPtr client)
         return rc;
 
     xGetKeyboardControlReply rep = {
-        .type = X_Reply,
         .globalAutoRepeat = ctrl->autoRepeat,
-        .sequenceNumber = client->sequence,
-        .length = 5,
         .ledMask = ctrl->leds,
         .keyClickPercent = ctrl->click,
         .bellPercent = ctrl->bell,
@@ -2251,13 +2224,11 @@ ProcGetKeyboardControl(ClientPtr client)
         rep.map[i] = ctrl->autoRepeats[i];
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.ledMask);
         swaps(&rep.bellPitch);
         swaps(&rep.bellDuration);
     }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -2397,21 +2368,17 @@ ProcGetPointerControl(ClientPtr client)
         return rc;
 
     xGetPointerControlReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .accelNumerator = ctrl->num,
         .accelDenominator = ctrl->den,
         .threshold = ctrl->threshold
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swaps(&rep.accelNumerator);
         swaps(&rep.accelDenominator);
         swaps(&rep.threshold);
     }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -2515,11 +2482,7 @@ ProcQueryKeymap(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xReq);
 
-    xQueryKeymapReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 2
-    };
+    xQueryKeymapReply rep = { 0 };
 
     rc = XaceHookDeviceAccess(client, keybd, DixReadAccess);
     /* If rc is Success, we're allowed to copy out the keymap.
@@ -2532,12 +2495,7 @@ ProcQueryKeymap(ClientPtr client)
     else if (rc != BadAccess)
         return rc;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
