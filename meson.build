@@ -512,10 +512,6 @@ build_xsecurity = get_option('xcsecurity')
 build_namespace = get_option('namespace')
 
 build_xv = get_option('xv')
-build_xvmc = get_option('xvmc')
-if not build_xv
-    build_xvmc = false
-endif
 
 build_dga = false
 xf86dgaproto_dep = dependency('', required: false)

@@ -133,9 +133,6 @@
 /* Build Xv Extension */
 #mesondefine XvExtension
 
-/* Build XvMC Extension */
-#mesondefine XvMCExtension
-
 /* Support XSync extension */
 #mesondefine XSYNC
 

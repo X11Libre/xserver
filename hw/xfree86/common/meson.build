@@ -60,8 +60,8 @@ if build_dga
 endif
 
 if build_xv
-    srcs_xorg_common += ['xf86xv.c', 'xf86xvmc.c']
-    xorg_sdk_headers += ['xf86xv.h', 'xf86xvmc.h']
+    srcs_xorg_common += ['xf86xv.c']
+    xorg_sdk_headers += ['xf86xv.h']
 endif
 
 if build_udev
