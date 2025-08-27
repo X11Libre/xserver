@@ -333,6 +333,7 @@ static void fillModeInfoV2(x_rpcbuf_t *rpcbuf, int dotClock,
     x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_SYNCEND));
     x_rpcbuf_write_CARD16(rpcbuf, VidModeGetModeValue(mode, VIDMODE_V_TOTAL));
     x_rpcbuf_reserve0(rpcbuf, sizeof(CARD16)); /* pad1 */
+    x_rpcbuf_reserve0(rpcbuf, sizeof(CARD16)); /* XXX extra padding not explicitly defined in struct XXX */
     x_rpcbuf_write_CARD32(rpcbuf, VidModeGetModeValue(mode, VIDMODE_FLAGS));
     x_rpcbuf_reserve0(rpcbuf, sizeof(CARD32) * 4); /* reserved[1,2,3], privsize */
 }
