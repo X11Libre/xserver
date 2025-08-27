@@ -851,11 +851,7 @@ ProcXvListImageFormats(ClientPtr client)
         x_rpcbuf_write_CARD32(&rpcbuf, pImage->vert_v_period);
         x_rpcbuf_write_binary_pad(&rpcbuf, pImage->component_order, 32);
         x_rpcbuf_write_CARD8(&rpcbuf, pImage->scanline_order);
-        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)+(sizeof(CARD32)*2));
-        x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad7; */
-        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad8; */
-        x_rpcbuf_write_CARD32(&rpcbuf, 0); /* pad9; */
-        x_rpcbuf_write_CARD32(&rpcbuf, 0); /* pad10; */
+        x_rpcbuf_reserve(&rpcbuf, sizeof(CARD8)+sizeof(CARD16)+(sizeof(CARD32)*2)); /* pad7, pad8, pad9, pad10 */
     }
 
     if (rpcbuf.error)
