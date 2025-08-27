@@ -795,7 +795,7 @@ static inline int __write_reply_hdr_simple(
  * return             X11 result code
  */
 #define X_SEND_REPLY_WITH_RPCBUF(client, hdrstruct, rpcbuf) \
-    __write_reply_hdr_and_rpcbuf(client, &hdrstruct, sizeof(hdrstruct), &rpcbuf);
+    __write_reply_hdr_and_rpcbuf(client, &(hdrstruct), sizeof(hdrstruct), &(rpcbuf));
 
 /*
  * send reply with header struct (not pointer!) without any payload
@@ -805,6 +805,6 @@ static inline int __write_reply_hdr_simple(
  * @return            X11 result code (=Success)
  */
 #define X_SEND_REPLY_SIMPLE(client, hdrstruct) \
-    __write_reply_hdr_simple(client, &hdrstruct, sizeof(hdrstruct));
+    __write_reply_hdr_simple(client, &(hdrstruct), sizeof(hdrstruct));
 
 #endif /* _XSERVER_DIX_PRIV_H */

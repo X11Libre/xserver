@@ -273,11 +273,27 @@ ProcXResQueryClientResources(ClientPtr client)
 
     FindAllClientResources(resClient, ResFindAllRes, counts);
 
+    xXResType *scratch = calloc(lastResourceType + 1, sizeof(xXResType));
+    if (!scratch) {
+        free(counts);
+        return BadAlloc;
+    }
+
     int num_types = 0;
     for (int i = 0; i <= lastResourceType; i++) {
-        if (counts[i])
-            num_types++;
+        if (!(counts[i]))
+            continue;
+
+        scratch[num_types].resource_type = resourceTypeAtom(i + 1);
+        scratch[num_types].count = counts[i];
+        if (client->swapped) {
+            swapl(&scratch[num_types].resource_type);
+            swapl(&scratch[num_types].count);
+        }
+        num_types++;
     }
+
+    free(counts);
 
     xXResQueryClientResourcesReply reply = {
         .type = X_Reply,
@@ -290,24 +306,6 @@ ProcXResQueryClientResources(ClientPtr client)
         swapl(&reply.length);
         swapl(&reply.num_types);
     }
-
-    xXResType *scratch = calloc(sizeof(xXResType), num_types);
-    if (!scratch) {
-        free(counts);
-        return BadAlloc;
-    }
-
-    for (int i = 0; i < num_types; i++) {
-        scratch[i].resource_type = resourceTypeAtom(i + 1);
-        scratch[i].count = counts[i];
-
-        if (client->swapped) {
-            swapl(&scratch[i].resource_type);
-            swapl(&scratch[i].count);
-        }
-    }
-
-    free(counts);
 
     WriteToClient(client, sizeof(xXResQueryClientResourcesReply), &reply);
     WriteToClient(client, num_types * sizeof(xXResType), scratch);

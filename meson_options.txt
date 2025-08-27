@@ -148,3 +148,7 @@ option('docs-pdf', type: 'combo', choices: ['true', 'false', 'auto'], value: 'au
 
 option('legacy_nvidia_padding', type: 'boolean', value: false,
         description: 'EXPERT ONLY: Add a padding to ScreenRec to match an older ABI for legacy NVidia drivers')
+
+# testsuite fine tuning - some things might not run everywhere
+option('test_rendercheck_triangles', type: 'boolean', value: false,
+       description: 'testsuite: run rendercheck triangles tests (might fail on Xephyr)')
