@@ -7,4 +7,16 @@
 
 #include <dix-config.h>
 
+/* Build the kdrive keyboard input driver */
+#mesondefine KDRIVE_KBD
+
+/* Build the kdrive mouse input driver */
+#mesondefine KDRIVE_MOUSE
+
+/* Build the kdrive evdev input driver */
+#mesondefine KDRIVE_EVDEV
+
+/* Build the kdrive tslib input driver */
+#mesondefine KDRIVE_TSLIB
+
 #endif /* _KDRIVE_CONFIG_H_ */
