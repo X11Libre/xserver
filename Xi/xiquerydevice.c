@@ -34,9 +34,11 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/XI2proto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "os/fmt.h"
 
 #include "inputstr.h"
@@ -70,7 +72,7 @@ ProcXIQueryDevice(ClientPtr client)
     DeviceIntPtr dev = NULL;
     int rc = Success;
     int i = 0, len = 0;
-    char *info, *ptr;
+    char *info;
     Bool *skip = NULL;
 
     REQUEST(xXIQueryDeviceReq);
@@ -103,20 +105,18 @@ ProcXIQueryDevice(ClientPtr client)
         }
     }
 
-    info = calloc(1, len);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    info = x_rpcbuf_reserve(&rpcbuf, len);
     if (!info) {
         free(skip);
         return BadAlloc;
     }
 
     xXIQueryDeviceReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIQueryDevice,
-        .sequenceNumber = client->sequence,
-        .length = len / 4,
     };
 
-    ptr = info;
     if (dev) {
         len = ListDeviceInfo(client, dev, (xXIDeviceInfo *) info);
         if (client->swapped)
@@ -147,18 +147,13 @@ ProcXIQueryDevice(ClientPtr client)
         }
     }
 
-    len = rep.length * 4;
+    free(skip);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.num_devices);
     }
-    WriteToClient(client, sizeof(xXIQueryDeviceReply), &rep);
-    WriteToClient(client, len, ptr);
-    free(ptr);
-    free(skip);
-    return rc;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 /**
