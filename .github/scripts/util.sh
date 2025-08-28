@@ -18,12 +18,12 @@ clone_source() {
     local url="$2"
     local ref="$3"
 
-    log_group "Cloning $pkgname"
+#    log_group "Cloning $pkgname"
     $SOURCE_DIR/.github/scripts/git-smart-checkout.sh \
         --name "$pkgname" \
         --url "$url" \
         --ref "$ref"
-    log_endgroup
+#    log_endgroup
 }
 
 build_meson() {
