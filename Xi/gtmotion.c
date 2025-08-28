@@ -55,7 +55,9 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
@@ -102,19 +104,15 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
         MaybeStopDeviceHint(dev, client);
 
     xGetDeviceMotionEventsReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetDeviceMotionEvents,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .nEvents = 0,
         .axes = v->numAxes,
         .mode = Absolute        /* XXX we don't do relative at the moment */
     };
 
     TimeStamp start = ClientTimeToServerTime(stuff->start);
     TimeStamp stop = ClientTimeToServerTime(stuff->stop);
-    int length = 0;
-    INT32 *coords = NULL;
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (CompareTimeStamps(start, stop) != LATER &&
         CompareTimeStamps(start, currentTime) != LATER) {
@@ -122,23 +120,18 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
             stop = currentTime;
         if (v->numMotionEvents) {
             const int size = sizeof(Time) + (v->numAxes * sizeof(INT32));
+            INT32 *coords = NULL;
             rep.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
                                            start.milliseconds, stop.milliseconds,
                                            (ScreenPtr) NULL, FALSE);
-            length = rep.nEvents * size;
-            rep.length = bytes_to_int32(length);
+            x_rpcbuf_write_INT32s(&rpcbuf, coords, bytes_to_int32(rep.nEvents * size));
+            free(coords);
         }
     }
 
     if (client->swapped) {
-        SwapLongs((CARD32*) coords, rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.nEvents);
     }
 
-    WriteToClient(client, sizeof(xGetDeviceMotionEventsReply), &rep);
-    WriteToClient(client, length, coords);
-    free(coords);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
