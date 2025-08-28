@@ -85,65 +85,45 @@ SProcXGetDeviceControl(ClientPtr client)
  */
 
 static void
-CopySwapDeviceResolution(ClientPtr client, ValuatorClassPtr v, char *buf,
-                         int length)
+_writeDeviceResolution(ClientPtr client, ValuatorClassPtr v, x_rpcbuf_t *rpcbuf)
 {
     AxisInfoPtr a;
-    xDeviceResolutionState *r;
-    int i, *iptr;
+    int i;
 
-    r = (xDeviceResolutionState *) buf;
-    r->control = DEVICE_RESOLUTION;
-    r->length = length;
-    r->num_valuators = v->numAxes;
-    buf += sizeof(xDeviceResolutionState);
-    iptr = (int *) buf;
+    /* write xDeviceResolutionState */
+    x_rpcbuf_write_CARD16(rpcbuf, DEVICE_RESOLUTION);
+    x_rpcbuf_write_CARD16(rpcbuf,
+        sizeof(xDeviceResolutionState) + (3*sizeof(CARD32)*v->numAxes));
+    x_rpcbuf_write_CARD32(rpcbuf, v->numAxes);
+
     for (i = 0, a = v->axes; i < v->numAxes; i++, a++)
-        *iptr++ = a->resolution;
+        x_rpcbuf_write_CARD32(rpcbuf, a->resolution);
     for (i = 0, a = v->axes; i < v->numAxes; i++, a++)
-        *iptr++ = a->min_resolution;
+        x_rpcbuf_write_CARD32(rpcbuf, a->min_resolution);
     for (i = 0, a = v->axes; i < v->numAxes; i++, a++)
-        *iptr++ = a->max_resolution;
-    if (client->swapped) {
-        swaps(&r->control);
-        swaps(&r->length);
-        swapl(&r->num_valuators);
-        iptr = (int *) buf;
-        for (i = 0; i < (3 * v->numAxes); i++, iptr++) {
-            swapl(iptr);
-        }
-    }
+        x_rpcbuf_write_CARD32(rpcbuf, a->max_resolution);
 }
 
 static void
-CopySwapDeviceCore(ClientPtr client, DeviceIntPtr dev, char *buf)
+_writeDeviceCore(ClientPtr client, DeviceIntPtr dev, x_rpcbuf_t *rpcbuf)
 {
-    xDeviceCoreState *c = (xDeviceCoreState *) buf;
-
-    c->control = DEVICE_CORE;
-    c->length = sizeof(xDeviceCoreState);
-    c->status = dev->coreEvents;
-    c->iscore = (dev == inputInfo.keyboard || dev == inputInfo.pointer);
-
-    if (client->swapped) {
-        swaps(&c->control);
-        swaps(&c->length);
-    }
+    /* write xDeviceCoreState */
+    x_rpcbuf_write_CARD16(rpcbuf, DEVICE_CORE);
+    x_rpcbuf_write_CARD16(rpcbuf, sizeof(xDeviceCoreState));
+    x_rpcbuf_write_CARD8(rpcbuf, dev->coreEvents);
+    x_rpcbuf_write_CARD8(rpcbuf, (dev == inputInfo.keyboard || dev == inputInfo.pointer));
+    x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
 }
 
 static void
-CopySwapDeviceEnable(ClientPtr client, DeviceIntPtr dev, char *buf)
+_writeDeviceEnable(ClientPtr client, DeviceIntPtr dev, x_rpcbuf_t *rpcbuf)
 {
-    xDeviceEnableState *e = (xDeviceEnableState *) buf;
-
-    e->control = DEVICE_ENABLE;
-    e->length = sizeof(xDeviceEnableState);
-    e->enable = dev->enabled;
-
-    if (client->swapped) {
-        swaps(&e->control);
-        swaps(&e->length);
-    }
+    /* write xDeviceEnableState */
+    x_rpcbuf_write_CARD16(rpcbuf, DEVICE_ENABLE);
+    x_rpcbuf_write_CARD16(rpcbuf, sizeof(xDeviceEnableState));
+    x_rpcbuf_write_CARD8(rpcbuf, dev->enabled);
+    x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad0 */
+    x_rpcbuf_write_CARD16(rpcbuf, 0); /* pad1 */
 }
 
 /***********************************************************************
@@ -155,53 +135,34 @@ CopySwapDeviceEnable(ClientPtr client, DeviceIntPtr dev, char *buf)
 int
 ProcXGetDeviceControl(ClientPtr client)
 {
-    int rc, total_length = 0;
     DeviceIntPtr dev;
 
     REQUEST(xGetDeviceControlReq);
     REQUEST_SIZE_MATCH(xGetDeviceControlReq);
 
-    rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
+    int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
         if (!dev->valuator)
             return BadMatch;
-        total_length = sizeof(xDeviceResolutionState) +
-            (3 * sizeof(int) * dev->valuator->numAxes);
+        _writeDeviceResolution(client, dev->valuator, &rpcbuf);
+        break;
+    case DEVICE_CORE:
+        _writeDeviceCore(client, dev, &rpcbuf);
+        break;
+    case DEVICE_ENABLE:
+        _writeDeviceEnable(client, dev, &rpcbuf);
         break;
     case DEVICE_ABS_CALIB:
     case DEVICE_ABS_AREA:
         return BadMatch;
-    case DEVICE_CORE:
-        total_length = sizeof(xDeviceCoreState);
-        break;
-    case DEVICE_ENABLE:
-        total_length = sizeof(xDeviceEnableState);
-        break;
     default:
         return BadValue;
-    }
-
-    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
-    if (!buf)
-        return BadAlloc;
-
-    switch (stuff->control) {
-    case DEVICE_RESOLUTION:
-        CopySwapDeviceResolution(client, dev->valuator, buf, total_length);
-        break;
-    case DEVICE_CORE:
-        CopySwapDeviceCore(client, dev, buf);
-        break;
-    case DEVICE_ENABLE:
-        CopySwapDeviceEnable(client, dev, buf);
-        break;
-    default:
-        break;
     }
 
     xGetDeviceControlReply reply = {
