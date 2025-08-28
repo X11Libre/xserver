@@ -55,6 +55,12 @@ SOFTWARE.
 #include "events.h"
 #include <X11/extensions/XI.h>
 
+#ifdef HAVE_DIX_CONFIG_H
+#include <dix-config.h>
+#else
+#include <xorg/xorg-server.h>
+#endif
+
 #define EARLIER -1
 #define SAMETIME 0
 #define LATER 1
