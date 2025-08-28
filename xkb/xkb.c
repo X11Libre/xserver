@@ -199,19 +199,16 @@ ProcXkbUseExtension(ClientPtr client)
     }
 
     xkbUseExtensionReply rep = {
-        .type = X_Reply,
         .supported = supported,
-        .sequenceNumber = client->sequence,
         .serverMajor = SERVER_XKB_MAJOR_VERSION,
         .serverMinor = SERVER_XKB_MINOR_VERSION
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swaps(&rep.serverMajor);
         swaps(&rep.serverMinor);
     }
-    WriteToClient(client, SIZEOF(xkbUseExtensionReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /***====================================================================***/
@@ -595,9 +592,7 @@ ProcXkbGetState(ClientPtr client)
     xkb = &dev->key->xkbInfo->state;
 
     xkbGetStateReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .mods = XkbStateFieldFromRec(xkb) & 0xff,
         .baseMods = xkb->base_mods,
         .latchedMods = xkb->latched_mods,
@@ -610,11 +605,10 @@ ProcXkbGetState(ClientPtr client)
         .ptrBtnState = xkb->ptr_buttons
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swaps(&rep.ptrBtnState);
     }
-    WriteToClient(client, SIZEOF(xkbGetStateReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /***====================================================================***/
@@ -706,10 +700,7 @@ ProcXkbGetControls(ClientPtr client)
     xkb = dev->key->xkbInfo->desc->ctrls;
 
     xkbGetControlsReply rep = {
-        .type = X_Reply,
         .deviceID = ((DeviceIntPtr) dev)->id,
-        .sequenceNumber = client->sequence,
-        .length = X_REPLY_HEADER_UNITS(xkbGetControlsReply),
         .mkDfltBtn = xkb->mk_dflt_btn,
         .numGroups = xkb->num_groups,
         .groupsWrap = xkb->groups_wrap,
@@ -738,8 +729,6 @@ ProcXkbGetControls(ClientPtr client)
     };
     memcpy(rep.perKeyRepeat, xkb->per_key_repeat, XkbPerKeyBitArraySize);
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.internalVMods);
         swaps(&rep.ignoreLockVMods);
         swapl(&rep.enabledCtrls);
@@ -759,8 +748,8 @@ ProcXkbGetControls(ClientPtr client)
         swaps(&rep.axtOptsValues);
         swaps(&rep.axOptions);
     }
-    WriteToClient(client, SIZEOF(xkbGetControlsReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -3061,18 +3050,15 @@ ProcXkbGetIndicatorState(ClientPtr client)
         return BadAlloc;
 
     xkbGetIndicatorStateReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
         .state = sli->effectiveState
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.state);
     }
-    WriteToClient(client, SIZEOF(xkbGetIndicatorStateReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /***====================================================================***/
@@ -3304,8 +3290,6 @@ ProcXkbGetNamedIndicator(ClientPtr client)
     }
 
     xkbGetNamedIndicatorReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .deviceID = dev->id,
         .indicator = stuff->indicator,
         .supported = TRUE,
@@ -3326,15 +3310,12 @@ ProcXkbGetNamedIndicator(ClientPtr client)
         rep.ctrls = map->ctrls;
     }
     if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
         swapl(&rep.indicator);
         swaps(&rep.virtualMods);
         swapl(&rep.ctrls);
     }
 
-    WriteToClient(client, SIZEOF(xkbGetNamedIndicatorReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /**
@@ -5437,22 +5418,19 @@ ProcXkbPerClientFlags(ClientPtr client)
     }
 
     xkbPerClientFlagsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .supported = XkbPCF_AllFlagsMask,
         .value = client->xkbClientFlags & XkbPCF_AllFlagsMask,
         .autoCtrls = interest ? interest->autoCtrls : 0,
         .autoCtrlValues =  interest ? interest->autoCtrlValues : 0,
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.supported);
         swapl(&rep.value);
         swapl(&rep.autoCtrls);
         swapl(&rep.autoCtrlValues);
     }
-    WriteToClient(client, SIZEOF(xkbPerClientFlagsReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /***====================================================================***/
@@ -5562,16 +5540,10 @@ ProcXkbListComponents(ClientPtr client)
         return BadLength;
 
     xkbListComponentsReply rep = {
-        .type = X_Reply,
         .deviceID = dev->id,
-        .sequenceNumber = client->sequence,
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, SIZEOF(xkbListComponentsReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static unsigned
@@ -6783,22 +6755,19 @@ ProcXkbSetDebuggingFlags(ClientPtr client)
     xkbDebugCtrls = newCtrls;
 
     xkbSetDebuggingFlagsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .currentFlags = newFlags,
         .currentCtrls = newCtrls,
         .supportedFlags = ~0,
         .supportedCtrls = ~0
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.currentFlags);
         swapl(&rep.currentCtrls);
         swapl(&rep.supportedFlags);
         swapl(&rep.supportedCtrls);
     }
-    WriteToClient(client, SIZEOF(xkbSetDebuggingFlagsReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /***====================================================================***/
