@@ -38,6 +38,7 @@
 #include "dix/dixgrabs_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -87,7 +88,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     };
     int i, ret = Success;
     uint32_t *modifiers;
-    xXIGrabModifierInfo *modifiers_failed = NULL;
     GrabMask mask = { 0 };
     GrabParameters param;
     void *tmp;
@@ -178,6 +178,8 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         }
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     ret =
         dixLookupWindow((WindowPtr *) &tmp, stuff->grab_window, client,
                         DixSetAttrAccess);
@@ -189,13 +191,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         goto out;
 
     modifiers = (uint32_t *) &stuff[1] + stuff->mask_len;
-    modifiers_failed =
-        calloc(stuff->num_modifiers, sizeof(xXIGrabModifierInfo));
-    if (!modifiers_failed) {
-        ret = BadAlloc;
-        goto out;
-    }
-
     mod_dev = (InputDevIsFloating(dev)) ? dev : GetMaster(dev, MASTER_KEYBOARD);
 
     for (i = 0; i < stuff->num_modifiers; i++, modifiers++) {
@@ -234,31 +229,27 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         }
 
         if (status != GrabSuccess) {
-            xXIGrabModifierInfo *info = modifiers_failed + rep.num_modifiers;
-
-            info->status = status;
-            info->modifiers = *modifiers;
-            if (client->swapped)
-                swapl(&info->modifiers);
+            /* write xXIGrabModifierInfo */
+            x_rpcbuf_write_CARD32(&rpcbuf, *modifiers);
+            x_rpcbuf_write_CARD8(&rpcbuf, status);
+            x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad0 */
+            x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad1 */
 
             rep.num_modifiers++;
-            rep.length += bytes_to_int32(sizeof(xXIGrabModifierInfo));
         }
     }
 
-    uint32_t length = rep.length; /* save it before swapping */
+    xi2mask_free(&mask.xi2mask);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.num_modifiers);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, length * 4, modifiers_failed);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
  out:
-    free(modifiers_failed);
     xi2mask_free(&mask.xi2mask);
+    x_rpcbuf_clear(&rpcbuf);
     return ret;
 }
 
