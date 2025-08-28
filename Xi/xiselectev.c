@@ -344,10 +344,8 @@ ProcXIGetSelectedEvents(ClientPtr client)
 {
     int rc, i;
     WindowPtr win;
-    char *buffer = NULL;
     OtherInputMasks *masks;
     InputClientsPtr others = NULL;
-    xXIEventMask *evmask = NULL;
     DeviceIntPtr dev;
 
     REQUEST(xXIGetSelectedEventsReq);
@@ -358,9 +356,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
         return rc;
 
     xXIGetSelectedEventsReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIGetSelectedEvents,
-        .sequenceNumber = client->sequence,
     };
 
     masks = wOtherInputMasks(win);
@@ -373,15 +369,11 @@ ProcXIGetSelectedEvents(ClientPtr client)
         }
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!others)
         goto finish;
 
-    buffer =
-        calloc(MAXDEVICES, sizeof(xXIEventMask) + pad_to_int32(XI2MASKSIZE));
-    if (!buffer)
-        return BadAlloc;
-
-    evmask = (xXIEventMask *) buffer;
     for (i = 0; i < MAXDEVICES; i++) {
         int j;
         const unsigned char *devmask = xi2mask_get_one_mask(others->xi2mask, i);
@@ -393,38 +385,33 @@ ProcXIGetSelectedEvents(ClientPtr client)
         }
 
         for (j = xi2mask_mask_size(others->xi2mask) - 1; j >= 0; j--) {
+            /* scan backwards to skip trailing zeros. mask is always written in 32bit granularity */
             if (devmask[j] != 0) {
+
                 int mask_len = (j + 4) / 4;     /* j is an index, hence + 4, not + 3 */
 
-                evmask->deviceid = i;
-                evmask->mask_len = mask_len;
+                /* write xXIEventMask */
+                x_rpcbuf_write_CARD16(&rpcbuf, i);
+                x_rpcbuf_write_CARD16(&rpcbuf, mask_len);
+
+                /* write mask -- be prepared for original mask not 32bit aligned */
+                x_rpcbuf_write_CARD8s(&rpcbuf, devmask, j+1);
+                CARD8 zero[8] = { 0 };
+                x_rpcbuf_write_CARD8s(&rpcbuf, zero, (mask_len*4) - (j+1));
+
                 rep.num_masks++;
-                rep.length += sizeof(xXIEventMask) / 4 + evmask->mask_len;
 
-                if (client->swapped) {
-                    swaps(&evmask->deviceid);
-                    swaps(&evmask->mask_len);
-                }
-
-                memcpy(&evmask[1], devmask, j + 1);
-                evmask = (xXIEventMask *) ((char *) evmask +
-                                           sizeof(xXIEventMask) + mask_len * 4);
+                /* found out the mask size and written it, so break out here */
                 break;
             }
         }
     }
 
 finish: ;
-    uint32_t length = rep.length; /* save before swapping it */
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.num_masks);
     }
-    WriteToClient(client, sizeof(xXIGetSelectedEventsReply), &rep);
-    WriteToClient(client, length * 4, buffer);
 
-    free(buffer);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
