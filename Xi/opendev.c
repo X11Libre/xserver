@@ -55,7 +55,9 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
@@ -73,11 +75,16 @@ extern CARD8 event_base[];
  *
  */
 
+#define WRITE_ICI(cls) do { \
+        x_rpcbuf_write_CARD8(&rpcbuf, cls); \
+        x_rpcbuf_write_CARD8(&rpcbuf, event_base[cls]); \
+        num_classes++; \
+    } while (0)
+
 int
 ProcXOpenDevice(ClientPtr client)
 {
-    xInputClassInfo evbase[numInputClasses];
-    int j = 0;
+    int num_classes = 0;
     int status = Success;
     DeviceIntPtr dev;
 
@@ -102,48 +109,33 @@ ProcXOpenDevice(ClientPtr client)
     if (status != Success)
         return status;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (dev->key != NULL) {
-        evbase[j].class = KeyClass;
-        evbase[j++].event_type_base = event_base[KeyClass];
+        WRITE_ICI(KeyClass);
     }
     if (dev->button != NULL) {
-        evbase[j].class = ButtonClass;
-        evbase[j++].event_type_base = event_base[ButtonClass];
+        WRITE_ICI(ButtonClass);
     }
     if (dev->valuator != NULL) {
-        evbase[j].class = ValuatorClass;
-        evbase[j++].event_type_base = event_base[ValuatorClass];
+        WRITE_ICI(ValuatorClass);
     }
     if (dev->kbdfeed != NULL || dev->ptrfeed != NULL || dev->leds != NULL ||
         dev->intfeed != NULL || dev->bell != NULL || dev->stringfeed != NULL) {
-        evbase[j].class = FeedbackClass;
-        evbase[j++].event_type_base = event_base[FeedbackClass];
+        WRITE_ICI(FeedbackClass);
     }
     if (dev->focus != NULL) {
-        evbase[j].class = FocusClass;
-        evbase[j++].event_type_base = event_base[FocusClass];
+        WRITE_ICI(FocusClass);
     }
     if (dev->proximity != NULL) {
-        evbase[j].class = ProximityClass;
-        evbase[j++].event_type_base = event_base[ProximityClass];
+        WRITE_ICI(ProximityClass);
     }
-    evbase[j].class = OtherClass;
-    evbase[j++].event_type_base = event_base[OtherClass];
+    WRITE_ICI(OtherClass);
 
-    xOpenDeviceReply rep = {
-        .repType = X_Reply,
+    xOpenDeviceReply reply = {
         .RepType = X_OpenDevice,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(j * sizeof(xInputClassInfo)),
-        .num_classes = j
+        .num_classes = num_classes
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(xOpenDeviceReply), &rep);
-    WriteToClient(client, j * sizeof(xInputClassInfo), evbase);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
