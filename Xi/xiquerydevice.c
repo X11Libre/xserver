@@ -523,6 +523,9 @@ GetDeviceUse(DeviceIntPtr dev, uint16_t * attachment)
     return use;
 }
 
+static int ListDeviceClasses(ClientPtr client, DeviceIntPtr dev, char *any,
+                             uint16_t * nclasses);
+
 /**
  * Write the info for device dev into the buffer pointed to by info.
  *
@@ -556,7 +559,7 @@ ListDeviceInfo(ClientPtr client, DeviceIntPtr dev, xXIDeviceInfo * info)
  * nclasses to the number of classes in total and return the number of bytes
  * written.
  */
-int
+static int
 ListDeviceClasses(ClientPtr client, DeviceIntPtr dev,
                   char *any, uint16_t * nclasses)
 {
