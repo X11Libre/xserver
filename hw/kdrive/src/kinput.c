@@ -153,8 +153,6 @@ void KdAssertSigioBlocked(char *where)
 #define KdAssertSigioBlocked(s)
 
 #endif
-
-static int kdnFds;
 #endif
 
 #ifdef FNONBLOCK
