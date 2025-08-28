@@ -52,11 +52,14 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
-#include "exglobals.h"
 
+#include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
+#include "exglobals.h"
 #include "getdctl.h"
 
 /***********************************************************************
@@ -153,7 +156,6 @@ int
 ProcXGetDeviceControl(ClientPtr client)
 {
     int rc, total_length = 0;
-    char *savbuf;
     DeviceIntPtr dev;
 
     REQUEST(xGetDeviceControlReq);
@@ -183,10 +185,10 @@ ProcXGetDeviceControl(ClientPtr client)
         return BadValue;
     }
 
-    char *buf = calloc(1, total_length);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
     if (!buf)
         return BadAlloc;
-    savbuf = buf;
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
@@ -202,19 +204,9 @@ ProcXGetDeviceControl(ClientPtr client)
         break;
     }
 
-    xGetDeviceControlReply rep = {
-        .repType = X_Reply,
+    xGetDeviceControlReply reply = {
         .RepType = X_GetDeviceControl,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(total_length),
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xGetDeviceControlReply), &rep);
-    WriteToClient(client, total_length, savbuf);
-    free(savbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
