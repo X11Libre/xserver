@@ -6317,9 +6317,10 @@ ProcXkbGetDeviceInfo(ClientPtr client)
     }
 
     length = rep.length * 4;
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    if (rpcbuf.swapped) {
         swaps(&rep.present);
         swaps(&rep.supported);
         swaps(&rep.unsupported);
@@ -6328,10 +6329,9 @@ ProcXkbGetDeviceInfo(ClientPtr client)
         swaps(&rep.dfltLedFB);
         swapl(&rep.devType);
     }
-    WriteToClient(client, SIZEOF(xkbGetDeviceInfoReply), &rep);
 
     int sz = nameLen + rep.nBtnsRtrn * sizeof(xkbActionWireDesc) + led_len;
-    char *buf = calloc(1, sz);
+    char *buf = x_rpcbuf_reserve(&rpcbuf, sz);
     if (!buf)
         return BadAlloc;
     char *walk = buf;
@@ -6350,18 +6350,20 @@ ProcXkbGetDeviceInfo(ClientPtr client)
 
     if (nDeviceLedFBs > 0) {
         status = FillDeviceLedFBs(dev, ledClass, ledID, length, walk, client);
-        if (status != Success)
+        if (status != Success) {
+            x_rpcbuf_clear(&rpcbuf);
             return status;
+        }
     }
     else if (length != 0) {
         ErrorF("[xkb] Internal Error!  BadLength in ProcXkbGetDeviceInfo\n");
         ErrorF("[xkb]                  Wrote %d fewer bytes than expected\n",
                length);
+        x_rpcbuf_clear(&rpcbuf);
         return BadLength;
     }
 
-    WriteToClient(client, sz, buf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static char *
