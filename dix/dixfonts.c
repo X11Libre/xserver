@@ -738,16 +738,14 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
         stringLens += (names->length[i] <= 255) ? names->length[i] : 0;
 
     xListFontsReply rep = {
-        .type = X_Reply,
-        .length = bytes_to_int32(stringLens + nnames),
         .nFonts = nnames,
-        .sequenceNumber = client->sequence
     };
 
-    char *bufferStart = calloc(1, rep.length << 2);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    char *bufferStart = x_rpcbuf_reserve(&rpcbuf, stringLens + nnames);
     char *bufptr = bufferStart;
 
-    if (!bufptr && rep.length) {
+    if (!bufptr && (stringLens + nnames)) {
         SendErrorToClient(client, X_ListFonts, 0, 0, BadAlloc);
         goto bail;
     }
@@ -764,18 +762,12 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
             bufptr += names->length[i];
         }
     }
-    nnames = rep.nFonts;
-    rep.length = bytes_to_int32(stringLens + nnames);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nFonts);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, stringLens + nnames, bufferStart);
-    free(bufferStart);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
  bail:
     ClientWakeup(client);
@@ -786,6 +778,7 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     xfont2_free_font_names(names);
     free(c);
     free(resolved);
+    x_rpcbuf_clear(&rpcbuf);
     return TRUE;
 }
 
