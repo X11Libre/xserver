@@ -239,7 +239,7 @@ dix_check_grab_values(void)
 static void
 dix_event_to_core(int type)
 {
-    DeviceEvent ev = {};
+    DeviceEvent ev = { 0 };
     xEvent *core;
     int time;
     int x, y;

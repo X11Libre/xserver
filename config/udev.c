@@ -104,7 +104,7 @@ device_added(struct udev_device *udev_device)
     const char *subsys = NULL;
 #endif
     InputOption *input_options;
-    InputAttributes attrs = { };
+    InputAttributes attrs = { 0 };
     DeviceIntPtr dev = NULL;
     struct udev_list_entry *set, *entry;
     struct udev_device *parent;
