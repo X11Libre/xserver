@@ -37,6 +37,7 @@
 
 #include <X11/Xfuncproto.h>
 
+#include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "pseudoramiX.h"
@@ -206,7 +207,6 @@ ProcPseudoramiXGetState(ClientPtr client)
 {
     REQUEST(xPanoramiXGetStateReq);
     WindowPtr pWin;
-    xPanoramiXGetStateReply rep;
     register int rc;
 
     TRACE;
@@ -216,18 +216,16 @@ ProcPseudoramiXGetState(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.state = !noPseudoramiXExtension;
-    rep.window = stuff->window;
+    xPanoramiXGetStateReply reply = {
+        .state = !noPseudoramiXExtension,
+        .window = stuff->window
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetStateReply),&rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 // was PanoramiX
@@ -236,7 +234,6 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenCountReq);
     WindowPtr pWin;
-    xPanoramiXGetScreenCountReply rep;
     register int rc;
 
     TRACE;
@@ -246,18 +243,16 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.ScreenCount = pseudoramiXNumScreens;
-    rep.window = stuff->window;
+    xPanoramiXGetScreenCountReply reply = {
+        .ScreenCount = pseudoramiXNumScreens,
+        .window = stuff->window
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenCountReply),&rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 // was PanoramiX
@@ -266,7 +261,6 @@ ProcPseudoramiXGetScreenSize(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenSizeReq);
     WindowPtr pWin;
-    xPanoramiXGetScreenSizeReply rep;
     register int rc;
 
     TRACE;
@@ -280,26 +274,21 @@ ProcPseudoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    /* screen dimensions */
-    rep.width = pseudoramiXScreens[stuff->screen].w;
-    // was screenInfo.screens[stuff->screen]->width;
-    rep.height = pseudoramiXScreens[stuff->screen].h;
-    // was screenInfo.screens[stuff->screen]->height;
-    rep.window = stuff->window;
-    rep.screen = stuff->screen;
+    xPanoramiXGetScreenSizeReply reply = {
+        .width = pseudoramiXScreens[stuff->screen].w,
+        .height = pseudoramiXScreens[stuff->screen].h,
+        .window = stuff->window,
+        .screen = stuff->screen
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.width);
-        swapl(&rep.height);
-        swapl(&rep.window);
-        swapl(&rep.screen);
+        swapl(&reply.width);
+        swapl(&reply.height);
+        swapl(&reply.window);
+        swapl(&reply.screen);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenSizeReply),&rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 // was Xinerama
@@ -307,23 +296,18 @@ static int
 ProcPseudoramiXIsActive(ClientPtr client)
 {
     /* REQUEST(xXineramaIsActiveReq); */
-    xXineramaIsActiveReply rep;
-
     TRACE;
-
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.state = !noPseudoramiXExtension;
+    xXineramaIsActiveReply reply = {
+        .state = !noPseudoramiXExtension
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.state);
+        swapl(&reply.state);
     }
-    WriteToClient(client, sizeof(xXineramaIsActiveReply),&rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 // was Xinerama
