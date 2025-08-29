@@ -47,7 +47,7 @@ typedef struct GlxVendorPrivDispatchRec {
     HashTable hh;
 } GlxVendorPrivDispatch;
 
-static GlxServerDispatchProc dispatchFuncs[OPCODE_ARRAY_LEN] = {};
+static GlxServerDispatchProc dispatchFuncs[OPCODE_ARRAY_LEN] = { 0 };
 static HashTable vendorPrivHash = NULL;
 static HtGenericHashSetupRec vendorPrivSetup = {
     .keySize = sizeof(CARD32)
@@ -192,7 +192,7 @@ static int CommonMakeCurrent(ClientPtr client,
         GLXDrawable readdrawable,
         GLXContextID context)
 {
-    xGLXMakeCurrentReply reply = {};
+    xGLXMakeCurrentReply reply = { 0 };
     GlxContextTagInfo *oldTag = NULL;
     GlxServerVendor *newVendor = NULL;
 
