@@ -1760,25 +1760,16 @@ ProcGetModifierMapping(ClientPtr client)
     generate_modkeymap(client, PickKeyboard(client), &modkeymap,
                        &max_keys_per_mod);
 
-    xGetModifierMappingReply rep = {
-        .type = X_Reply,
-        .numKeyPerModifier = max_keys_per_mod,
-        .sequenceNumber = client->sequence,
-        /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
-        .length = max_keys_per_mod << 1
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, max_keys_per_mod * 8, modkeymap);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_binary_pad(&rpcbuf, modkeymap, max_keys_per_mod * 8);
 
     free(modkeymap);
 
-    return Success;
+    xGetModifierMappingReply reply = {
+        .numKeyPerModifier = max_keys_per_mod,
+    };
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -1965,21 +1956,14 @@ ProcGetPointerMapping(ClientPtr client)
 
     nElts = (butc) ? butc->numButtons : 0;
 
-    xGetPointerMappingReply rep = {
-        .type = X_Reply,
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_binary_pad(&rpcbuf, &butc->map[1], nElts);
+
+    xGetPointerMappingReply reply = {
         .nElts = nElts,
-        .sequenceNumber = client->sequence,
-        .length = ((unsigned) nElts + (4 - 1)) / 4
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, nElts, &butc->map[1]);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 void
