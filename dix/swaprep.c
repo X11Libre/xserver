@@ -60,24 +60,6 @@ static void SwapFontInfo(xQueryFontReply * pr);
 static void SwapCharInfo(xCharInfo * pInfo);
 
 /**
- * Thanks to Jack Palevich for testing and subsequently rewriting all this
- *
- *  \param size size in bytes
- */
-void _X_COLD
-Swap32Write(ClientPtr pClient, int size, CARD32 *pbuf)
-{
-    size >>= 2;
-    for (int i = 0; i < size; i++)
-        /* brackets are mandatory here, because "swapl" macro expands
-           to several statements */
-    {
-        swapl(&pbuf[i]);
-    }
-    WriteToClient(pClient, size << 2, pbuf);
-}
-
-/**
  *
  * \param size size in bytes
  */
