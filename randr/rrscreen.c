@@ -204,10 +204,7 @@ ProcRRGetScreenSizeRange(ClientPtr client)
     pScreen = pWin->drawable.pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
 
-    xRRGetScreenSizeRangeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xRRGetScreenSizeRangeReply rep = { 0 };
 
     if (pScrPriv) {
         if (!RRGetInfo(pScreen, FALSE))
@@ -222,15 +219,12 @@ ProcRRGetScreenSizeRange(ClientPtr client)
         rep.maxHeight = rep.minHeight = pScreen->height;
     }
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.minWidth);
         swaps(&rep.minHeight);
         swaps(&rep.maxWidth);
         swaps(&rep.maxHeight);
     }
-    WriteToClient(client, sizeof(xRRGetScreenSizeRangeReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -1081,9 +1075,7 @@ ProcRRSetScreenConfig(ClientPtr client)
     free(pData);
 
     xRRSetScreenConfigReply rep = {
-        .type = X_Reply,
         .status = status,
-        .sequenceNumber = client->sequence,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds,
         .newConfigTimestamp = pScrPriv->lastConfigTime.milliseconds,
         .root = pDraw->pScreen->root->drawable.id,
@@ -1091,15 +1083,11 @@ ProcRRSetScreenConfig(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.newTimestamp);
         swapl(&rep.newConfigTimestamp);
         swapl(&rep.root);
     }
-    WriteToClient(client, sizeof(xRRSetScreenConfigReply), &rep);
-
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static CARD16

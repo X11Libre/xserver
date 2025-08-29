@@ -87,13 +87,12 @@ ProcRRGetProviders (ClientPtr client)
 
     if (!pScrPriv)
     {
-        xRRGetProvidersReply rep = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
+        xRRGetProvidersReply reply = {
             .timestamp = currentTime.milliseconds,
         };
-        WriteToClient(client, sizeof(rep), &rep);
-        return Success;
+        if (client->swapped)
+            swapl(&reply.timestamp);
+        return X_SEND_REPLY_SIMPLE(client, reply);
     }
 
     extraLen = total_providers * sizeof(CARD32);
