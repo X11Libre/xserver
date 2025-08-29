@@ -44,12 +44,6 @@ SOFTWARE.
 
 ********************************************************/
 
-/********************************************************************
- *
- *  Get Device control attributes for an extension device.
- *
- */
-
 #include <dix-config.h>
 
 #include <X11/extensions/XI.h>
@@ -61,28 +55,6 @@ SOFTWARE.
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 #include "getdctl.h"
-
-/***********************************************************************
- *
- * This procedure gets the control attributes for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceControl(ClientPtr client)
-{
-    REQUEST(xGetDeviceControlReq);
-    REQUEST_SIZE_MATCH(xGetDeviceControlReq);
-    swaps(&stuff->control);
-    return (ProcXGetDeviceControl(client));
-}
-
-/***********************************************************************
- *
- * This procedure copies DeviceResolution data, swapping if necessary.
- *
- */
 
 static void
 _writeDeviceResolution(ClientPtr client, ValuatorClassPtr v, x_rpcbuf_t *rpcbuf)
@@ -145,6 +117,9 @@ ProcXGetDeviceControl(ClientPtr client)
         return rc;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    if (rpcbuf.swapped)
+        swaps(&stuff->control);
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
