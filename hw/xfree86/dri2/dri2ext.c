@@ -75,9 +75,6 @@ static int
 ProcDRI2QueryVersion(ClientPtr client)
 {
     xDRI2QueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = dri2_major,
         .minorVersion = dri2_minor
     };
@@ -85,15 +82,11 @@ ProcDRI2QueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xDRI2QueryVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
 
-    WriteToClient(client, sizeof(xDRI2QueryVersionReply), &rep);
-
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
@@ -138,7 +131,6 @@ static int
 ProcDRI2Authenticate(ClientPtr client)
 {
     REQUEST(xDRI2AuthenticateReq);
-    xDRI2AuthenticateReply rep;
     DrawablePtr pDraw;
     int status;
 
@@ -147,15 +139,11 @@ ProcDRI2Authenticate(ClientPtr client)
                        &pDraw, &status))
         return status;
 
-    rep = (xDRI2AuthenticateReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDRI2AuthenticateReply reply = {
         .authenticated = DRI2Authenticate(client, pDraw->pScreen, stuff->magic)
     };
-    WriteToClient(client, sizeof(xDRI2AuthenticateReply), &rep);
 
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void
@@ -322,7 +310,6 @@ static int
 ProcDRI2CopyRegion(ClientPtr client)
 {
     REQUEST(xDRI2CopyRegionReq);
-    xDRI2CopyRegionReply rep;
     DrawablePtr pDrawable;
     int status;
     RegionPtr pRegion;
@@ -346,15 +333,8 @@ ProcDRI2CopyRegion(ClientPtr client)
      * that yet.
      */
 
-    rep = (xDRI2CopyRegionReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
-
-    WriteToClient(client, sizeof(xDRI2CopyRegionReply), &rep);
-
-    return Success;
+    xDRI2CopyRegionReply reply = { 0 };
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void
@@ -393,11 +373,6 @@ static int
 ProcDRI2SwapBuffers(ClientPtr client)
 {
     REQUEST(xDRI2SwapBuffersReq);
-    xDRI2SwapBuffersReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
     DrawablePtr pDrawable;
     CARD64 target_msc, divisor, remainder, swap_target;
     int status;
@@ -424,11 +399,11 @@ ProcDRI2SwapBuffers(ClientPtr client)
     if (status != Success)
         return BadDrawable;
 
-    load_swap_reply(&rep, swap_target);
+    xDRI2SwapBuffersReply reply = { 0 };
 
-    WriteToClient(client, sizeof(xDRI2SwapBuffersReply), &rep);
+    load_swap_reply(&reply, swap_target);
 
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void
@@ -446,11 +421,6 @@ static int
 ProcDRI2GetMSC(ClientPtr client)
 {
     REQUEST(xDRI2GetMSCReq);
-    xDRI2MSCReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
     DrawablePtr pDrawable;
     CARD64 ust, msc, sbc;
     int status;
@@ -465,11 +435,11 @@ ProcDRI2GetMSC(ClientPtr client)
     if (status != Success)
         return status;
 
-    load_msc_reply(&rep, ust, msc, sbc);
+    xDRI2MSCReply reply = { 0 };
 
-    WriteToClient(client, sizeof(xDRI2MSCReply), &rep);
+    load_msc_reply(&reply, ust, msc, sbc);
 
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
