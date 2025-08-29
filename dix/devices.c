@@ -2386,7 +2386,6 @@ int
 ProcGetMotionEvents(ClientPtr client)
 {
     WindowPtr pWin;
-    xTimecoord *coords = (xTimecoord *) NULL;
     int count, xmin, xmax, ymin, ymax, rc;
     unsigned long nEvents;
     DeviceIntPtr mouse = PickPointer(client);
@@ -2406,6 +2405,8 @@ ProcGetMotionEvents(ClientPtr client)
     if (mouse->valuator->motionHintWindow)
         MaybeStopHint(mouse, client);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     nEvents = 0;
     start = ClientTimeToServerTime(stuff->start);
     stop = ClientTimeToServerTime(stuff->stop);
@@ -2414,6 +2415,9 @@ ProcGetMotionEvents(ClientPtr client)
         mouse->valuator->numMotionEvents) {
         if (CompareTimeStamps(stop, currentTime) == LATER)
             stop = currentTime;
+
+        xTimecoord *coords = NULL;
+
         count = GetMotionHistory(mouse, &coords, start.milliseconds,
                                  stop.milliseconds, pWin->drawable.pScreen,
                                  TRUE);
@@ -2426,35 +2430,26 @@ ProcGetMotionEvents(ClientPtr client)
         for (int i = 0; i < count; i++)
             if ((xmin <= coords[i].x) && (coords[i].x < xmax) &&
                 (ymin <= coords[i].y) && (coords[i].y < ymax)) {
-                coords[nEvents].time = coords[i].time;
-                coords[nEvents].x = coords[i].x - pWin->drawable.x;
-                coords[nEvents].y = coords[i].y - pWin->drawable.y;
                 nEvents++;
+
+                /* write xTimecoord */
+                x_rpcbuf_write_CARD32(&rpcbuf, coords[i].time);
+                x_rpcbuf_write_INT16(&rpcbuf, coords[i].x - pWin->drawable.x);
+                x_rpcbuf_write_INT16(&rpcbuf, coords[i].y - pWin->drawable.y);
             }
+
+        free(coords);
     }
 
-    xGetMotionEventsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = nEvents * bytes_to_int32(sizeof(xTimecoord)),
+    xGetMotionEventsReply reply = {
         .nEvents = nEvents,
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.nEvents);
-        for (int i = 0; i < nEvents; i++) {
-            swapl(&coords[i].time);
-            swaps(&coords[i].x);
-            swaps(&coords[i].y);
-        }
+        swapl(&reply.nEvents);
     }
 
-    WriteToClient(client, sizeof(xGetMotionEventsReply), &rep);
-    WriteToClient(client, nEvents * sizeof(xTimecoord), coords);
-    free(coords);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
