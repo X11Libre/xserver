@@ -329,11 +329,10 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
         LoaderInit();
 
         /* Tell the loader the default module search path */
-        LoaderSetPath(xf86ModulePath);
+        LoaderSetPath(NULL, xf86ModulePath);
 
-        if (xf86Info.ignoreABI) {
-            LoaderSetIgnoreAbi();
-        }
+        if (xf86Info.ignoreABI)
+            LoaderSetIgnoreAllABI();
 
         if (xf86DoShowOptions)
             DoShowOptions();
@@ -750,6 +749,8 @@ CloseInput(void)
 {
     config_fini();
     mieqFini();
+    /* strictly speaking the below is not related to input, but ... */
+    LoaderClose();
 }
 
 /*
@@ -962,7 +963,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
     if (!strcmp(argv[i], "-ignoreABI")) {
-        LoaderSetIgnoreAbi();
+        LoaderSetIgnoreAllABI();
         return 1;
     }
     if (!strcmp(argv[i], "-verbose")) {
