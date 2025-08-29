@@ -40,6 +40,9 @@
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
+
+#include "dix/dix_priv.h"
+
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
@@ -85,24 +88,20 @@ AppleDRIResetProc(ExtensionEntry* extEntry)
 static int
 ProcAppleDRIQueryVersion(register ClientPtr client)
 {
-    xAppleDRIQueryVersionReply rep;
-
     REQUEST_SIZE_MATCH(xAppleDRIQueryVersionReq);
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.majorVersion = SERVER_APPLEDRI_MAJOR_VERSION;
-    rep.minorVersion = SERVER_APPLEDRI_MINOR_VERSION;
-    rep.patchVersion = SERVER_APPLEDRI_PATCH_VERSION;
+
+    xAppleDRIQueryVersionReply reply = {
+        .majorVersion = SERVER_APPLEDRI_MAJOR_VERSION,
+        .minorVersion = SERVER_APPLEDRI_MINOR_VERSION,
+        .patchVersion = SERVER_APPLEDRI_PATCH_VERSION,
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-        swapl(&rep.patchVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
+        swapl(&reply.patchVersion);
     }
-    WriteToClient(client, sizeof(xAppleDRIQueryVersionReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /* surfaces */
@@ -110,14 +109,10 @@ ProcAppleDRIQueryVersion(register ClientPtr client)
 static int
 ProcAppleDRIQueryDirectRenderingCapable(register ClientPtr client)
 {
-    xAppleDRIQueryDirectRenderingCapableReply rep;
     Bool isCapable;
 
     REQUEST(xAppleDRIQueryDirectRenderingCapableReq);
     REQUEST_SIZE_MATCH(xAppleDRIQueryDirectRenderingCapableReq);
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
 
     if (stuff->screen >= screenInfo.numScreens) {
         return BadValue;
@@ -127,49 +122,38 @@ ProcAppleDRIQueryDirectRenderingCapable(register ClientPtr client)
                                         &isCapable)) {
         return BadValue;
     }
-    rep.isCapable = isCapable;
 
     if (!client->local)
-        rep.isCapable = 0;
+        isCapable = FALSE;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
+    xAppleDRIQueryDirectRenderingCapableReply reply = {
+        .isCapable = isCapable,
+    };
 
-    WriteToClient(client,
-                  sizeof(xAppleDRIQueryDirectRenderingCapableReply),
-                  &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcAppleDRIAuthConnection(register ClientPtr client)
 {
-    xAppleDRIAuthConnectionReply rep;
-
     REQUEST(xAppleDRIAuthConnectionReq);
     REQUEST_SIZE_MATCH(xAppleDRIAuthConnectionReq);
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.authenticated = 1;
+    xAppleDRIAuthConnectionReply reply = {
+        .authenticated = 1
+    };
 
     if (!DRIAuthConnection(screenInfo.screens[stuff->screen],
                            stuff->magic)) {
         ErrorF("Failed to authenticate %u\n", (unsigned int)stuff->magic);
-        rep.authenticated = 0;
+        reply.authenticated = 0;
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.authenticated); /* Yes, this is a CARD32 ... sigh */
+        swapl(&reply.authenticated); /* Yes, this is a CARD32 ... sigh */
     }
 
-    WriteToClient(client, sizeof(xAppleDRIAuthConnectionReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void
@@ -193,7 +177,6 @@ surface_notify(void *_arg,
 static int
 ProcAppleDRICreateSurface(ClientPtr client)
 {
-    xAppleDRICreateSurfaceReply rep;
     DrawablePtr pDrawable;
     xp_surface_id sid;
     unsigned int key[2];
@@ -201,16 +184,12 @@ ProcAppleDRICreateSurface(ClientPtr client)
 
     REQUEST(xAppleDRICreateSurfaceReq);
     REQUEST_SIZE_MATCH(xAppleDRICreateSurfaceReq);
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
 
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixReadAccess);
     if (rc != Success)
         return rc;
 
-    rep.key_0 = rep.key_1 = rep.uid = 0;
 
     if (!DRICreateSurface(screenInfo.screens[stuff->screen],
                           (Drawable)stuff->drawable, pDrawable,
@@ -220,20 +199,19 @@ ProcAppleDRICreateSurface(ClientPtr client)
         return BadValue;
     }
 
-    rep.key_0 = key[0];
-    rep.key_1 = key[1];
-    rep.uid = sid;
+    xAppleDRICreateSurfaceReply reply = {
+        .key_0 = key[0],
+        .key_1 = key[1],
+        .uid = sid,
+    };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.key_0);
-        swapl(&rep.key_1);
-        swapl(&rep.uid);
+        swapl(&reply.key_0);
+        swapl(&reply.key_1);
+        swapl(&reply.uid);
     }
 
-    WriteToClient(client, sizeof(xAppleDRICreateSurfaceReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
