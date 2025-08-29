@@ -300,7 +300,10 @@ mieqSetHandler(int event, mieqHandler handler)
 {
     if (handler && miEventQueue.handlers[event] != handler)
         ErrorF("[mi] mieq: warning: overriding existing handler %p with %p for "
-               "event %d\n", miEventQueue.handlers[event], handler, event);
+               "event %d\n",
+               (void*) miEventQueue.handlers[event],
+               (void*) handler,
+               event);
 
     miEventQueue.handlers[event] = handler;
 }
