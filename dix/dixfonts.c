@@ -961,7 +961,7 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
                 break;
         }
         else if (err == Successful) {
-            length = sizeof(*reply) + pFontInfo->nprops * sizeof(xFontProp);
+            length = sizeof(xListFontsWithInfoReply) + pFontInfo->nprops * sizeof(xFontProp);
             reply = c->reply;
             if (c->length < length) {
                 reply = (xListFontsWithInfoReply *) realloc(c->reply, length);
@@ -1015,17 +1015,10 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
             --c->current.max_names;
         }
     }
- finish:
-    length = sizeof(xListFontsWithInfoReply);
-    xListFontsWithInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = X_REPLY_HEADER_UNITS(xListFontsWithInfoReply)
-    };
-    if (client->swapped) {
-        SwapFont((xQueryFontReply *) &rep, FALSE);
-    }
-    WriteToClient(client, length, &rep);
+ finish: ;
+    /* finish it the replies series sending an empty reply */
+    xListFontsWithInfoReply rep = { 0 };
+    X_SEND_REPLY_SIMPLE(client, rep);
  bail:
     ClientWakeup(client);
     for (int i = 0; i < c->num_fpes; i++)
