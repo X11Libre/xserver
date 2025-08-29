@@ -25,13 +25,13 @@
         DeleteCallback(&pScreen->FIELD, (CallbackProcPtr)func, pScreen); \
     }
 
-DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcPtr);
-DECLARE_HOOK_PROC(WindowPosition, hookWindowPosition, XorgScreenWindowPositionProcPtr);
-DECLARE_HOOK_PROC(Close, hookClose, XorgScreenCloseProcPtr);
-DECLARE_HOOK_PROC(PostClose, hookPostClose, XorgScreenCloseProcPtr);
-DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr);
+DECLARE_HOOK_PROC(WindowDestroy, hookWindowDestroy, XorgScreenWindowDestroyProcPtr)
+DECLARE_HOOK_PROC(WindowPosition, hookWindowPosition, XorgScreenWindowPositionProcPtr)
+DECLARE_HOOK_PROC(Close, hookClose, XorgScreenCloseProcPtr)
+DECLARE_HOOK_PROC(PostClose, hookPostClose, XorgScreenCloseProcPtr)
+DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr)
 DECLARE_HOOK_PROC(PostCreateResources, hookPostCreateResources,
-                  XorgScreenPostCreateResourcesProcPtr);
+                  XorgScreenPostCreateResourcesProcPtr)
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
