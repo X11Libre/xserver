@@ -44,6 +44,7 @@
 
 #include <dix-config.h>
 
+#include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/fmt.h"
 
@@ -65,11 +66,6 @@ ProcXFixesQueryVersion(ClientPtr client)
 {
     int major, minor;
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
-    xXFixesQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
 
     REQUEST(xXFixesQueryVersionReq);
 
@@ -87,16 +83,18 @@ ProcXFixesQueryVersion(ClientPtr client)
     }
 
     pXFixesClient->major_version = major;
-    rep.majorVersion = min(stuff->majorVersion, major);
-    rep.minorVersion = minor;
+
+    xXFixesQueryVersionReply reply = {
+        .majorVersion = min(stuff->majorVersion, major),
+        .minorVersion = minor
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
-    WriteToClient(client, sizeof(xXFixesQueryVersionReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /* Major version controls available requests */
