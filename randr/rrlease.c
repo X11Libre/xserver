@@ -335,19 +335,10 @@ leaseReturned:
     RRLeaseChangeState(lease, RRLeaseCreating, RRLeaseRunning);
 
     xRRCreateLeaseReply rep = {
-        .type = X_Reply,
         .nfd = 1,
-        .sequenceNumber = client->sequence,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof (rep), &rep);
-
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 
 bail_lease:
     free(lease);

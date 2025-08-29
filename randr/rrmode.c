@@ -315,20 +315,17 @@ ProcRRCreateMode(ClientPtr client)
         return error;
 
     xRRCreateModeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .mode = mode->mode.id
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.mode);
-    }
-    WriteToClient(client, sizeof(xRRCreateModeReply), &rep);
     /* Drop out reference to this mode */
     RRModeDestroy(mode);
-    return Success;
+
+    if (client->swapped) {
+        swapl(&rep.mode);
+    }
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
