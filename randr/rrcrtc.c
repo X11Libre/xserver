@@ -1436,20 +1436,15 @@ ProcRRSetCrtcConfig(ClientPtr client)
     free(outputs);
 
     xRRSetCrtcConfigReply rep = {
-        .type = X_Reply,
         .status = status,
-        .sequenceNumber = client->sequence,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.newTimestamp);
     }
-    WriteToClient(client, sizeof(xRRSetCrtcConfigReply), &rep);
 
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -1476,10 +1471,7 @@ ProcRRGetPanning(ClientPtr client)
         return RRErrorBase + BadRRCrtc;
 
     xRRGetPanningReply rep = {
-        .type = X_Reply,
         .status = RRSetConfigSuccess,
-        .sequenceNumber = client->sequence,
-        .length = 1,
         .timestamp = pScrPriv->lastSetTime.milliseconds
     };
 
@@ -1500,8 +1492,6 @@ ProcRRGetPanning(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swaps(&rep.left);
         swaps(&rep.top);
@@ -1516,8 +1506,7 @@ ProcRRGetPanning(ClientPtr client)
         swaps(&rep.border_right);
         swaps(&rep.border_bottom);
     }
-    WriteToClient(client, sizeof(xRRGetPanningReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -1578,18 +1567,14 @@ ProcRRSetPanning(ClientPtr client)
 
 sendReply: ;
     xRRSetPanningReply rep = {
-        .type = X_Reply,
         .status = status,
-        .sequenceNumber = client->sequence,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.newTimestamp);
     }
-    WriteToClient(client, sizeof(xRRSetPanningReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -1606,17 +1591,12 @@ ProcRRGetCrtcGammaSize(ClientPtr client)
         return RRErrorBase + BadRRCrtc;
 
     xRRGetCrtcGammaSizeReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .size = crtc->gammaSize
     };
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swaps(&reply.size);
     }
-    WriteToClient(client, sizeof(xRRGetCrtcGammaSizeReply), &reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
