@@ -91,19 +91,15 @@ ProcXFixesGetClientDisconnectMode(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXFixesGetClientDisconnectModeReq);
 
-    xXFixesGetClientDisconnectModeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xXFixesGetClientDisconnectModeReply reply = {
         .disconnect_mode = pDisconnect->disconnect_mode,
     };
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.disconnect_mode);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
 
-    return Success;
+    if (client->swapped) {
+        swapl(&reply.disconnect_mode);
+    }
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 Bool
