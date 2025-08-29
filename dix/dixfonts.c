@@ -554,8 +554,6 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     FontNamesPtr names = NULL;
     char *name, *resolved = NULL;
     int namelen, resolvedlen;
-    int nnames;
-    int stringLens;
     int aliascount = 0;
 
     if (client->clientGone) {
@@ -731,51 +729,33 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
  finish:
 
     names = c->names;
-    nnames = names->nnames;
     client = c->client;
-    stringLens = 0;
-    for (int i = 0; i < nnames; i++)
-        stringLens += (names->length[i] <= 255) ? names->length[i] : 0;
 
     xListFontsReply rep = {
-        .type = X_Reply,
-        .length = bytes_to_int32(stringLens + nnames),
-        .nFonts = nnames,
-        .sequenceNumber = client->sequence
+        .nFonts = names->nnames,
     };
 
-    char *bufferStart = calloc(1, rep.length << 2);
-    char *bufptr = bufferStart;
-
-    if (!bufptr && rep.length) {
-        SendErrorToClient(client, X_ListFonts, 0, 0, BadAlloc);
-        goto bail;
-    }
-    /*
-     * since WriteToClient long word aligns things, copy to temp buffer and
-     * write all at once
-     */
-    for (int i = 0; i < nnames; i++) {
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    for (int i = 0; i < names->nnames; i++) {
         if (names->length[i] > 255)
             rep.nFonts--;
         else {
-            *bufptr++ = names->length[i];
-            memcpy(bufptr, names->names[i], names->length[i]);
-            bufptr += names->length[i];
+            /* write a pascal string */
+            x_rpcbuf_write_CARD8(&rpcbuf, names->length[i]);
+            x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)names->names[i], names->length[i]);
         }
     }
-    nnames = rep.nFonts;
-    rep.length = bytes_to_int32(stringLens + nnames);
+
+    if (rpcbuf.error) {
+        SendErrorToClient(client, X_ListFonts, 0, 0, BadAlloc);
+        goto bail;
+    }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nFonts);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, stringLens + nnames, bufferStart);
-    free(bufferStart);
+    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 
  bail:
     ClientWakeup(client);
