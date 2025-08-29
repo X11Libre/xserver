@@ -33,9 +33,6 @@ proc_present_query_version(ClientPtr client)
 {
     REQUEST(xPresentQueryVersionReq);
     xPresentQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_PRESENT_MAJOR_VERSION,
         .minorVersion = SERVER_PRESENT_MINOR_VERSION
     };
@@ -55,13 +52,11 @@ proc_present_query_version(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 #define VERIFY_FENCE_OR_NONE(fence_ptr, fence_id, client, access) do {  \
@@ -255,11 +250,6 @@ static int
 proc_present_query_capabilities (ClientPtr client)
 {
     REQUEST(xPresentQueryCapabilitiesReq);
-    xPresentQueryCapabilitiesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-    };
     WindowPtr   window;
     RRCrtcPtr   crtc = NULL;
     int         r;
@@ -277,15 +267,14 @@ proc_present_query_capabilities (ClientPtr client)
         return r;
     }
 
-    rep.capabilities = present_query_capabilities(crtc);
+    xPresentQueryCapabilitiesReply rep = {
+        .capabilities = present_query_capabilities(crtc)
+    };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.capabilities);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 #ifdef DRI3
