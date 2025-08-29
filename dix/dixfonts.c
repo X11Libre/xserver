@@ -1993,7 +1993,7 @@ _init_fs_handlers(FontPathElementPtr fpe, FontBlockHandlerProcPtr block_handler)
     }
     if (fs_handlers_installed == 0) {
         if (!RegisterBlockAndWakeupHandlers(fs_block_handler,
-                                            FontWakeup, (void *) block_handler))
+                                            FontWakeup, block_handler))
             return AllocError;
         xorg_list_init(&fs_fd_list);
         fs_handlers_installed++;
