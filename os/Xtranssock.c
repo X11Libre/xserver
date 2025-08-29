@@ -1340,7 +1340,7 @@ static int _XSERVTransSocketRead (
 static ssize_t _XSERVTransSocketWritev (
     XtransConnInfo ciptr, struct iovec *iov, size_t iovcnt)
 {
-    prmsg (2,"SocketWritev(%d,%p,%d)\n", ciptr->fd, (void *) iov, iovcnt);
+    prmsg (2,"SocketWritev(%d,%p,%ld)\n", ciptr->fd, (void *) iov, (unsigned long)iovcnt);
 
 #if XTRANS_SEND_FDS
     if (ciptr->send_fds)
