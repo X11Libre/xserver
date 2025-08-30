@@ -1058,7 +1058,7 @@ ProcScreenSaverSetAttributes(ClientPtr client)
         PanoramiXRes *backPix = NULL;
         PanoramiXRes *bordPix = NULL;
         PanoramiXRes *cmap = NULL;
-        int i, status, len;
+        int status, len;
         int pback_offset = 0, pbord_offset = 0, cmap_offset = 0;
         XID orig_visual, tmp;
 
@@ -1111,17 +1111,18 @@ ProcScreenSaverSetAttributes(ClientPtr client)
 
         orig_visual = stuff->visualID;
 
-        FOR_NSCREENS_BACKWARD(i) {
-            stuff->drawable = draw->info[i].id;
+        unsigned int walkScreenIdx;
+        FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+            stuff->drawable = draw->info[walkScreenIdx].id;
             if (backPix)
-                *((CARD32 *) &stuff[1] + pback_offset) = backPix->info[i].id;
+                *((CARD32 *) &stuff[1] + pback_offset) = backPix->info[walkScreenIdx].id;
             if (bordPix)
-                *((CARD32 *) &stuff[1] + pbord_offset) = bordPix->info[i].id;
+                *((CARD32 *) &stuff[1] + pbord_offset) = bordPix->info[walkScreenIdx].id;
             if (cmap)
-                *((CARD32 *) &stuff[1] + cmap_offset) = cmap->info[i].id;
+                *((CARD32 *) &stuff[1] + cmap_offset) = cmap->info[walkScreenIdx].id;
 
             if (orig_visual != CopyFromParent)
-                stuff->visualID = PanoramiXTranslateVisualID(i, orig_visual);
+                stuff->visualID = PanoramiXTranslateVisualID(walkScreenIdx, orig_visual);
 
             status = ScreenSaverSetAttributes(client, stuff);
         }

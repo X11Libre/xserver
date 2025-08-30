@@ -1242,7 +1242,7 @@ SProcXvDispatch(ClientPtr client)
 static int
 XineramaXvStopVideo(ClientPtr client)
 {
-    int result, i;
+    int result;
     PanoramiXRes *draw, *port;
 
     REQUEST(xvStopVideoReq);
@@ -1258,10 +1258,11 @@ XineramaXvStopVideo(ClientPtr client)
     if (result != Success)
         return result;
 
-    FOR_NSCREENS_BACKWARD(i) {
-        if (port->info[i].id) {
-            stuff->drawable = draw->info[i].id;
-            stuff->port = port->info[i].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        if (port->info[walkScreenIdx].id) {
+            stuff->drawable = draw->info[walkScreenIdx].id;
+            stuff->port = port->info[walkScreenIdx].id;
             result = SingleXvStopVideo(client);
         }
     }
@@ -1274,7 +1275,7 @@ XineramaXvSetPortAttribute(ClientPtr client)
 {
     REQUEST(xvSetPortAttributeReq);
     PanoramiXRes *port;
-    int result, i;
+    int result;
 
     REQUEST_SIZE_MATCH(xvSetPortAttributeReq);
 
@@ -1283,9 +1284,10 @@ XineramaXvSetPortAttribute(ClientPtr client)
     if (result != Success)
         return result;
 
-    FOR_NSCREENS_BACKWARD(i) {
-        if (port->info[i].id) {
-            stuff->port = port->info[i].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        if (port->info[walkScreenIdx].id) {
+            stuff->port = port->info[walkScreenIdx].id;
             result = SingleXvSetPortAttribute(client);
         }
     }
@@ -1300,7 +1302,7 @@ XineramaXvShmPutImage(ClientPtr client)
     PanoramiXRes *draw, *gc, *port;
     Bool send_event;
     Bool isRoot;
-    int result, i, x, y;
+    int result, x, y;
 
     REQUEST_SIZE_MATCH(xvShmPutImageReq);
 
@@ -1326,19 +1328,21 @@ XineramaXvShmPutImage(ClientPtr client)
     x = stuff->drw_x;
     y = stuff->drw_y;
 
-    FOR_NSCREENS_BACKWARD(i) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        if (port->info[i].id) {
-            stuff->drawable = draw->info[i].id;
-            stuff->port = port->info[i].id;
-            stuff->gc = gc->info[i].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+        if (port->info[walkScreenIdx].id) {
+            stuff->drawable = draw->info[walkScreenIdx].id;
+            stuff->port = port->info[walkScreenIdx].id;
+            stuff->gc = gc->info[walkScreenIdx].id;
             stuff->drw_x = x;
             stuff->drw_y = y;
             if (isRoot) {
                 stuff->drw_x -= walkScreen->x;
                 stuff->drw_y -= walkScreen->y;
             }
-            stuff->send_event = (send_event && !i) ? 1 : 0;
+            stuff->send_event = (send_event && !walkScreenIdx) ? 1 : 0;
 
             result = SingleXvShmPutImage(client);
         }
@@ -1355,7 +1359,7 @@ XineramaXvPutImage(ClientPtr client)
     REQUEST(xvPutImageReq);
     PanoramiXRes *draw, *gc, *port;
     Bool isRoot;
-    int result, i, x, y;
+    int result, x, y;
 
     REQUEST_AT_LEAST_SIZE(xvPutImageReq);
 
@@ -1379,12 +1383,13 @@ XineramaXvPutImage(ClientPtr client)
     x = stuff->drw_x;
     y = stuff->drw_y;
 
-    FOR_NSCREENS_BACKWARD(i) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        if (port->info[i].id) {
-            stuff->drawable = draw->info[i].id;
-            stuff->port = port->info[i].id;
-            stuff->gc = gc->info[i].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        if (port->info[walkScreenIdx].id) {
+            stuff->drawable = draw->info[walkScreenIdx].id;
+            stuff->port = port->info[walkScreenIdx].id;
+            stuff->gc = gc->info[walkScreenIdx].id;
             stuff->drw_x = x;
             stuff->drw_y = y;
             if (isRoot) {
@@ -1404,7 +1409,7 @@ XineramaXvPutVideo(ClientPtr client)
     REQUEST(xvPutImageReq);
     PanoramiXRes *draw, *gc, *port;
     Bool isRoot;
-    int result, i, x, y;
+    int result, x, y;
 
     REQUEST_AT_LEAST_SIZE(xvPutVideoReq);
 
@@ -1428,12 +1433,13 @@ XineramaXvPutVideo(ClientPtr client)
     x = stuff->drw_x;
     y = stuff->drw_y;
 
-    FOR_NSCREENS_BACKWARD(i) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        if (port->info[i].id) {
-            stuff->drawable = draw->info[i].id;
-            stuff->port = port->info[i].id;
-            stuff->gc = gc->info[i].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        if (port->info[walkScreenIdx].id) {
+            stuff->drawable = draw->info[walkScreenIdx].id;
+            stuff->port = port->info[walkScreenIdx].id;
+            stuff->gc = gc->info[walkScreenIdx].id;
             stuff->drw_x = x;
             stuff->drw_y = y;
             if (isRoot) {
@@ -1453,7 +1459,7 @@ XineramaXvPutStill(ClientPtr client)
     REQUEST(xvPutImageReq);
     PanoramiXRes *draw, *gc, *port;
     Bool isRoot;
-    int result, i, x, y;
+    int result, x, y;
 
     REQUEST_AT_LEAST_SIZE(xvPutImageReq);
 
@@ -1477,12 +1483,13 @@ XineramaXvPutStill(ClientPtr client)
     x = stuff->drw_x;
     y = stuff->drw_y;
 
-    FOR_NSCREENS_BACKWARD(i) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-        if (port->info[i].id) {
-            stuff->drawable = draw->info[i].id;
-            stuff->port = port->info[i].id;
-            stuff->gc = gc->info[i].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        if (port->info[walkScreenIdx].id) {
+            stuff->drawable = draw->info[walkScreenIdx].id;
+            stuff->port = port->info[walkScreenIdx].id;
+            stuff->gc = gc->info[walkScreenIdx].id;
             stuff->drw_x = x;
             stuff->drw_y = y;
             if (isRoot) {
@@ -1559,7 +1566,7 @@ XineramifyXv(void)
     XvScreenPtr xvsp0 =
         dixLookupPrivate(&screenInfo.screens[0]->devPrivates, XvGetScreenKey());
     XvAdaptorPtr MatchingAdaptors[MAXSCREENS];
-    int i, j, k;
+    int i;
 
     XvXRTPort = CreateNewResourceType(XineramaDeleteResource, "XvXRTPort");
 
@@ -1576,26 +1583,27 @@ XineramifyXv(void)
 
         MatchingAdaptors[0] = refAdapt;
         isOverlay = hasOverlay(refAdapt);
-        FOR_NSCREENS_FORWARD(j) {
-            ScreenPtr walkScreen = screenInfo.screens[j];
-            if (!j)
+
+        unsigned int walkScreenIdx;
+        FOR_NSCREENS_FORWARD(walkScreenIdx) {
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            if (!walkScreenIdx)
                 continue; /* skip screen #0 */
-            MatchingAdaptors[j] =
-            matchAdaptor(walkScreen, refAdapt, isOverlay);
+            MatchingAdaptors[walkScreenIdx] = matchAdaptor(walkScreen, refAdapt, isOverlay);
         }
 
         /* now create a resource for each port */
-        for (j = 0; j < refAdapt->nPorts; j++) {
+        for (int j = 0; j < refAdapt->nPorts; j++) {
             PanoramiXRes *port = calloc(1, sizeof(PanoramiXRes));
 
             if (!port)
                 break;
 
-            FOR_NSCREENS_BACKWARD(k) {
-                if (MatchingAdaptors[k] && (MatchingAdaptors[k]->nPorts > j))
-                    port->info[k].id = MatchingAdaptors[k]->base_id + j;
+            FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+                if (MatchingAdaptors[walkScreenIdx] && (MatchingAdaptors[walkScreenIdx]->nPorts > j))
+                    port->info[walkScreenIdx].id = MatchingAdaptors[walkScreenIdx]->base_id + j;
                 else
-                    port->info[k].id = 0;
+                    port->info[walkScreenIdx].id = 0;
             }
             AddResource(port->info[0].id, XvXRTPort, port);
         }

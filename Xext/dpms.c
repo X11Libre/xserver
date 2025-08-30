@@ -230,17 +230,15 @@ SendDPMSInfoNotify(void)
 Bool
 DPMSSupported(void)
 {
-    int i;
-
     /* For each screen, check if DPMS is supported */
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (walkScreen->DPMS != NULL)
             return TRUE;
     }
 
-    for (i = 0; i < screenInfo.numGPUScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
         if (walkScreen->DPMS != NULL)
             return TRUE;
     }
@@ -266,7 +264,7 @@ isUnblank(int mode)
 int
 DPMSSet(ClientPtr client, int level)
 {
-    int rc, i;
+    int rc;
     int old_level = DPMSPowerLevel;
 
     DPMSPowerLevel = level;
@@ -283,14 +281,14 @@ DPMSSet(ClientPtr client, int level)
             return rc;
     }
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (walkScreen->DPMS != NULL)
             walkScreen->DPMS(walkScreen, level);
     }
 
-    for (i = 0; i < screenInfo.numGPUScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[i];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
         if (walkScreen->DPMS != NULL)
             walkScreen->DPMS(walkScreen, level);
     }
