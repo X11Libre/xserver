@@ -268,7 +268,7 @@ LogInit(const char *fname, const char *backup)
 
         /* Flush saved log information. */
         if (saveBuffer && bufferSize > 0) {
-            write(logFileFd, saveBuffer, bufferPos);
+            (void)write(logFileFd, saveBuffer, bufferPos);
             doLogSync();
         }
     }
@@ -602,7 +602,7 @@ LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 
                 localtime_r(&t, &tm);
                 strftime(fmt_tm, sizeof(fmt_tm) - 1, "[%Y-%m-%d %H:%M:%S] ", &tm);
-                write(logFileFd, fmt_tm, strlen(fmt_tm));
+                (void)write(logFileFd, fmt_tm, strlen(fmt_tm));
             }
             newline = end_line;
             write(logFileFd, buf, len);
