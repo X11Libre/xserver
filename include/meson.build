@@ -257,7 +257,6 @@ conf_data.set('XSYNC', '1')
 conf_data.set('XTEST', '1')
 conf_data.set('XV', build_xv ? '1' : false)
 conf_data.set('XvExtension', build_xv ? '1' : false)
-conf_data.set('XvMCExtension', build_xvmc ? '1' : false)
 
 # needed by several extensions
 build_registry_resource = (build_xselinux or build_res or build_namespace)
