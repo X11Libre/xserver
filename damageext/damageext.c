@@ -327,7 +327,6 @@ DamageExtSubtractWindowClip(DamageExtPtr pDamageExt)
     WindowPtr win = (WindowPtr)pDamageExt->pDrawable;
     PanoramiXRes *res = NULL;
     RegionPtr ret;
-    int i;
 
     if (!win->parent)
         return &PanoramiXScreenRegion;
@@ -341,9 +340,10 @@ DamageExtSubtractWindowClip(DamageExtPtr pDamageExt)
     if (!ret)
         return NULL;
 
-    FOR_NSCREENS_FORWARD(i) {
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_FORWARD(walkScreenIdx) {
         ScreenPtr screen;
-        if (Success != dixLookupWindow(&win, res->info[i].id, serverClient,
+        if (Success != dixLookupWindow(&win, res->info[walkScreenIdx].id, serverClient,
                                        DixReadAccess))
             goto out;
 
@@ -624,7 +624,7 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
 {
     PanoramiXDamageRes *damage;
     PanoramiXRes *draw;
-    int i, rc;
+    int rc;
 
     LEGAL_NEW_RESOURCE(stuff->damage, client);
     rc = dixLookupResourceByClass((void **)&draw, stuff->drawable, XRC_DRAWABLE,
@@ -640,8 +640,9 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
 
     damage->ext = doDamageCreate(client, &rc, stuff);
     if (rc == Success && draw->type == XRT_WINDOW) {
-        FOR_NSCREENS_FORWARD(i) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
+        unsigned int walkScreenIdx;
+        FOR_NSCREENS_FORWARD(walkScreenIdx) {
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
             DrawablePtr pDrawable;
             DamagePtr pDamage = DamageCreate(PanoramiXDamageReport,
                                              PanoramiXDamageExtDestroy,
@@ -652,15 +653,15 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
             if (!pDamage) {
                 rc = BadAlloc;
             } else {
-                damage->damage[i] = pDamage;
-                rc = dixLookupDrawable(&pDrawable, draw->info[i].id, client,
+                damage->damage[walkScreenIdx] = pDamage;
+                rc = dixLookupDrawable(&pDrawable, draw->info[walkScreenIdx].id, client,
                                        M_WINDOW,
                                        DixGetAttrAccess | DixReadAccess);
             }
             if (rc != Success)
                 break;
 
-            DamageExtRegister(pDrawable, pDamage, i != 0);
+            DamageExtRegister(pDrawable, pDamage, walkScreenIdx != 0);
         }
     }
 
@@ -673,13 +674,13 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
 static int
 PanoramiXDamageDelete(void *res, XID id)
 {
-    int i;
     PanoramiXDamageRes *damage = res;
 
-    FOR_NSCREENS_BACKWARD(i) {
-        if (damage->damage[i]) {
-            DamageDestroy(damage->damage[i]);
-            damage->damage[i] = NULL;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        if (damage->damage[walkScreenIdx]) {
+            DamageDestroy(damage->damage[walkScreenIdx]);
+            damage->damage[walkScreenIdx] = NULL;
         }
     }
 
@@ -709,10 +710,9 @@ void
 DamageExtensionInit(void)
 {
     ExtensionEntry *extEntry;
-    int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr walkScreen = screenInfo.screens[s];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         DamageSetup(walkScreen);
     }
 
