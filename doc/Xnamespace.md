@@ -53,7 +53,7 @@ An authentification token for the **MIT_MAGIC-COOKIE-1** is a 16-byte UTF-8 hexa
 To generate a valid token, you have to options depending whether the X server is already running.
 
 If you have access to a working X server, use the command `xauth generate $DISPLAY MIT-MAGIC-COOKIE-1`.
-Then use `xauth list` to view the generated token. This will generate a valid in
+Then, use `xauth list` to view the generated token.
 
 Else, if you don't have access to X server, use any of the commands below to generate a valid token.
 
@@ -69,7 +69,7 @@ For more information on implementing the protocol, please see the [Appendix](#mi
 An authentification token for the **XDM-AUTHORIZATION-1** is a 16-byte UTF-8 hexadecimal string where the 17th and
 18th character are 0.
 
-`xauth` provides no means to generate this protocol so it has to be done by hand.
+`xauth` provides no means to generate a token for this protocol; so, it has to be done by hand.
 
 Any of the commands shown in [**MIT-MAGIC-COOKIE-1**](#mit_magic-cookie-1-protocol) followed by
 `| sed 's/^\(.\{16\}\)../\1 00/' | tr -d ' '` will
