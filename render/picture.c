@@ -450,10 +450,8 @@ PictureInitIndexedFormats(ScreenPtr pScreen)
 Bool
 PictureFinishInit(void)
 {
-    int s;
-
-    for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr walkScreen = screenInfo.screens[s];
+    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (!PictureInitIndexedFormats(walkScreen))
             return FALSE;
         (void) AnimCurInit(walkScreen);
