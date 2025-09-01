@@ -754,11 +754,11 @@ ProcRRGetScreenInfo(ClientPtr client)
 
     output = RRFirstOutput(pScreen);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!pScrPriv || !output) {
         rep = (xRRGetScreenInfoReply) {
-            .type = X_Reply,
             .setOfRotations = RR_Rotate_0,
-            .sequenceNumber = client->sequence,
             .root = pWin->drawable.pScreen->root->drawable.id,
             .timestamp = currentTime.milliseconds,
             .configTimestamp = currentTime.milliseconds,
@@ -777,9 +777,7 @@ ProcRRGetScreenInfo(ClientPtr client)
             return BadAlloc;
 
         rep = (xRRGetScreenInfoReply) {
-            .type = X_Reply,
             .setOfRotations = output->crtc->rotations,
-            .sequenceNumber = client->sequence,
             .root = pWin->drawable.pScreen->root->drawable.id,
             .timestamp = pScrPriv->lastSetTime.milliseconds,
             .configTimestamp = pScrPriv->lastConfigTime.milliseconds,
@@ -797,7 +795,7 @@ ProcRRGetScreenInfo(ClientPtr client)
         if (!extraLen)
             goto finish; // no extra payload
 
-        extra = calloc(1, extraLen);
+        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
         if (!extra) {
             free(pData);
             return BadAlloc;
@@ -842,14 +840,11 @@ ProcRRGetScreenInfo(ClientPtr client)
         if (data8 - (CARD8 *) extra != extraLen)
             FatalError("RRGetScreenInfo bad extra len %ld != %ld\n",
                        (unsigned long) (data8 - (CARD8 *) extra), extraLen);
-        rep.length = bytes_to_int32(extraLen);
 
 finish:
         free(pData);
     }
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swapl(&rep.configTimestamp);
         swaps(&rep.rotation);
@@ -858,12 +853,7 @@ finish:
         swaps(&rep.rate);
         swaps(&rep.nrateEnts);
     }
-    WriteToClient(client, sizeof(xRRGetScreenInfoReply), &rep);
-    if (extraLen) {
-        WriteToClient(client, extraLen, extra);
-        free(extra);
-    }
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
