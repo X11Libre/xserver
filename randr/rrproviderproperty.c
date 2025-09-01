@@ -340,7 +340,6 @@ int
 ProcRRListProviderProperties(ClientPtr client)
 {
     REQUEST(xRRListProviderPropertiesReq);
-    Atom *pAtoms = NULL;
     int numProps = 0;
     RRProviderPtr provider;
     RRPropertyPtr prop;
@@ -349,40 +348,21 @@ ProcRRListProviderProperties(ClientPtr client)
 
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
-    for (prop = provider->properties; prop; prop = prop->next)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    for (prop = provider->properties; prop; prop = prop->next) {
+        x_rpcbuf_write_CARD32(&rpcbuf, prop->propertyName);
         numProps++;
-
-    const Bool swapped = client->swapped;
-
-    if (numProps) {
-        if (!(pAtoms = calloc(numProps, sizeof(Atom))))
-            return BadAlloc;
-        Atom *temppAtoms = pAtoms;
-        for (prop = provider->properties; prop; prop = prop->next) {
-            *temppAtoms = prop->propertyName;
-            if (swapped)
-                swapl(temppAtoms);
-            temppAtoms++;
-        }
     }
 
     xRRListProviderPropertiesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(numProps * sizeof(Atom)),
         .nAtoms = numProps
     };
-    if (swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
+
+    if (client->swapped)
         swaps(&rep.nAtoms);
-    }
 
-    WriteToClient(client, sizeof(xRRListProviderPropertiesReply), (char *) &rep);
-    WriteToClient(client, numProps * sizeof(Atom), pAtoms);
-
-    free(pAtoms);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
