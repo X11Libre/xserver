@@ -46,9 +46,7 @@ RRProviderInitErrorValue(void)
 #define ADD_PROVIDER(_pScreen) do {                                 \
     pScrPriv = rrGetScrPriv((_pScreen));                            \
     if (pScrPriv->provider) {                                   \
-        providers[count_providers] = pScrPriv->provider->id;    \
-        if (client->swapped)                                    \
-            swapl(&providers[count_providers]);                 \
+        x_rpcbuf_write_CARD32(&rpcbuf, pScrPriv->provider->id); \
         count_providers++;                                      \
     }                                                           \
     } while(0)
@@ -61,10 +59,6 @@ ProcRRGetProviders (ClientPtr client)
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int rc;
-    CARD8 *extra;
-    unsigned int extraLen;
-    RRProvider *providers;
-    int total_providers = 0, count_providers = 0;
     ScreenPtr iter;
 
     REQUEST_SIZE_MATCH(xRRGetProvidersReq);
@@ -75,16 +69,6 @@ ProcRRGetProviders (ClientPtr client)
     pScreen = pWin->drawable.pScreen;
 
     pScrPriv = rrGetScrPriv(pScreen);
-
-    if (pScrPriv->provider)
-        total_providers++;
-    xorg_list_for_each_entry(iter, &pScreen->secondary_list, secondary_head) {
-        pScrPriv = rrGetScrPriv(iter);
-        total_providers += pScrPriv->provider ? 1 : 0;
-    }
-
-    pScrPriv = rrGetScrPriv(pScreen);
-
     if (!pScrPriv)
     {
         xRRGetProvidersReply reply = {
@@ -95,42 +79,24 @@ ProcRRGetProviders (ClientPtr client)
         return X_SEND_REPLY_SIMPLE(client, reply);
     }
 
-    extraLen = total_providers * sizeof(CARD32);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    xRRGetProvidersReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .timestamp = pScrPriv->lastSetTime.milliseconds,
-        .nProviders = total_providers,
-        .length = bytes_to_int32(extraLen),
-    };
-
-    if (extraLen) {
-        extra = calloc(1, extraLen);
-        if (!extra)
-            return BadAlloc;
-    } else
-        extra = NULL;
-
-    providers = (RRProvider *)extra;
+    CARD16 count_providers = 0;
     ADD_PROVIDER(pScreen);
     xorg_list_for_each_entry(iter, &pScreen->secondary_list, secondary_head) {
         ADD_PROVIDER(iter);
     }
 
+    xRRGetProvidersReply rep = {
+        .timestamp = pScrPriv->lastSetTime.milliseconds,
+        .nProviders = count_providers,
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swaps(&rep.nProviders);
     }
-    WriteToClient(client, sizeof(xRRGetProvidersReply), (char *)&rep);
-    if (extraLen)
-    {
-        WriteToClient (client, extraLen, (char *) extra);
-        free(extra);
-    }
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
