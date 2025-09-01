@@ -220,26 +220,6 @@ ProcRRXineramaIsActive(ClientPtr client)
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
-static void
-RRXineramaWriteMonitor(ClientPtr client, RRMonitorPtr monitor)
-{
-    xXineramaScreenInfo scratch = {
-        .x_org = monitor->geometry.box.x1,
-        .y_org = monitor->geometry.box.y1,
-        .width = monitor->geometry.box.x2 - monitor->geometry.box.x1,
-        .height = monitor->geometry.box.y2 - monitor->geometry.box.y1,
-    };
-
-    if (client->swapped) {
-        swaps(&scratch.x_org);
-        swaps(&scratch.y_org);
-        swaps(&scratch.width);
-        swaps(&scratch.height);
-    }
-
-    WriteToClient(client, sz_XineramaScreenInfo, &scratch);
-}
-
 int
 ProcRRXineramaQueryScreens(ClientPtr client)
 {
@@ -256,26 +236,27 @@ ProcRRXineramaQueryScreens(ClientPtr client)
             return BadAlloc;
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     xXineramaQueryScreensReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(nmonitors * sz_XineramaScreenInfo),
         .number = nmonitors
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.number);
     }
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
 
-    for (m = 0; m < nmonitors; m++)
-        RRXineramaWriteMonitor(client, &monitors[m]);
+    for (m = 0; m < nmonitors; m++) {
+        /* write xXineramaScreenInfo */
+        x_rpcbuf_write_INT16(&rpcbuf, monitors[m].geometry.box.x1);
+        x_rpcbuf_write_INT16(&rpcbuf, monitors[m].geometry.box.y1);
+        x_rpcbuf_write_CARD16(&rpcbuf, monitors[m].geometry.box.x2 - monitors[m].geometry.box.x1);
+        x_rpcbuf_write_CARD16(&rpcbuf, monitors[m].geometry.box.y2 - monitors[m].geometry.box.y1);
+    }
 
     if (monitors)
         RRMonitorFreeList(monitors, nmonitors);
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
