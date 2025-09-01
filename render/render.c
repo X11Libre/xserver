@@ -1680,19 +1680,15 @@ ProcRenderQueryFilters(ClientPtr client)
         nnames = ps->nfilters + ps->nfilterAliases;
     }
     len = ((nnames + 1) >> 1) + bytes_to_int32(nbytesName);
-    total_bytes = sizeof(xRenderQueryFiltersReply) + (len << 2);
+    total_bytes = (len << 2);
 
-    xRenderQueryFiltersReply *reply = calloc(1, total_bytes);
-    if (!reply)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    aliases = (INT16 *) x_rpcbuf_reserve(&rpcbuf, total_bytes);
+    if (!aliases)
         return BadAlloc;
-    aliases = (INT16 *) (reply + 1);
+
     names = (char *) (aliases + ((nnames + 1) & ~1));
 
-    reply->type = X_Reply;
-    reply->sequenceNumber = client->sequence;
-    reply->length = len;
-    reply->numAliases = nnames;
-    reply->numFilters = nnames;
     if (ps) {
 
         /* fill in alias values */
@@ -1733,19 +1729,20 @@ ProcRenderQueryFilters(ClientPtr client)
         }
     }
 
+    xRenderQueryFiltersReply reply = {
+        .numAliases = nnames,
+        .numFilters = nnames
+    };
+
     if (client->swapped) {
-        for (i = 0; i < reply->numAliases; i++) {
+        for (i = 0; i < nnames; i++) {
             swaps(&aliases[i]);
         }
-        swaps(&reply->sequenceNumber);
-        swapl(&reply->length);
-        swapl(&reply->numAliases);
-        swapl(&reply->numFilters);
+        swapl(&reply.numAliases);
+        swapl(&reply.numFilters);
     }
-    WriteToClient(client, total_bytes, reply);
-    free(reply);
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
