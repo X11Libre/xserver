@@ -33,6 +33,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "os/log_priv.h"
@@ -176,15 +177,13 @@ XkbSendNewKeyboardNotify(DeviceIntPtr kbd, xkbNewKeyboardNotify * pNKN)
         if (!(clients[i]->newKeyboardNotifyMask & changed))
             continue;
 
-        pNKN->sequenceNumber = clients[i]->sequence;
         pNKN->time = time;
         pNKN->changed = changed;
         if (clients[i]->swapped) {
-            swaps(&pNKN->sequenceNumber);
             swapl(&pNKN->time);
             swaps(&pNKN->changed);
         }
-        WriteToClient(clients[i], sizeof(xEvent), pNKN);
+        xmitClientEvent(clients[i], *(xEvent*)pNKN);
 
         if (changed & XkbNKN_KeycodesMask) {
             clients[i]->minKC = pNKN->minKeyCode;
@@ -240,17 +239,15 @@ XkbSendStateNotify(DeviceIntPtr kbd, xkbStateNotify * pSN)
         if ((!interest->client->clientGone) &&
             (interest->client->xkbClientFlags & _XkbClientInitialized) &&
             (interest->stateNotifyMask & changed)) {
-            pSN->sequenceNumber = interest->client->sequence;
             pSN->time = time;
             pSN->changed = changed;
             pSN->ptrBtnState = bState;
             if (interest->client->swapped) {
-                swaps(&pSN->sequenceNumber);
                 swapl(&pSN->time);
                 swaps(&pSN->changed);
                 swaps(&pSN->ptrBtnState);
             }
-            WriteToClient(interest->client, sizeof(xEvent), pSN);
+            xmitClientEvent(interest->client, *(xEvent*)pSN);
         }
         interest = interest->next;
     }
@@ -286,15 +283,13 @@ XkbSendMapNotify(DeviceIntPtr kbd, xkbMapNotify * pMN)
             continue;
 
         pMN->time = time;
-        pMN->sequenceNumber = clients[i]->sequence;
         pMN->changed = changed;
 
         if (clients[i]->swapped) {
-            swaps(&pMN->sequenceNumber);
             swapl(&pMN->time);
             swaps(&pMN->changed);
         }
-        WriteToClient(clients[i], sizeof(xEvent), pMN);
+        xmitClientEvent(clients[i], *(xEvent*)pMN);
     }
 
     XkbSendLegacyMapNotify(kbd, XkbMapNotify, changed, pMN->firstKeySym,
@@ -413,16 +408,14 @@ XkbSendControlsNotify(DeviceIntPtr kbd, xkbControlsNotify * pCN)
             pCN->changedControls = changedControls;
             pCN->enabledControls = enabledControls;
             pCN->enabledControlChanges = enabledChanges;
-            pCN->sequenceNumber = interest->client->sequence;
             pCN->time = time;
             if (interest->client->swapped) {
-                swaps(&pCN->sequenceNumber);
                 swapl(&pCN->changedControls);
                 swapl(&pCN->enabledControls);
                 swapl(&pCN->enabledControlChanges);
                 swapl(&pCN->time);
             }
-            WriteToClient(interest->client, sizeof(xEvent), pCN);
+            xmitClientEvent(interest->client, *(xEvent*)pCN);
         }
         interest = interest->next;
     }
@@ -458,17 +451,15 @@ XkbSendIndicatorNotify(DeviceIntPtr kbd, int xkbType, xkbIndicatorNotify * pEv)
                 pEv->time = time = GetTimeInMillis();
                 initialized = 1;
             }
-            pEv->sequenceNumber = interest->client->sequence;
             pEv->time = time;
             pEv->changed = changed;
             pEv->state = state;
             if (interest->client->swapped) {
-                swaps(&pEv->sequenceNumber);
                 swapl(&pEv->time);
                 swapl(&pEv->changed);
                 swapl(&pEv->state);
             }
-            WriteToClient(interest->client, sizeof(xEvent), pEv);
+            xmitClientEvent(interest->client, *(xEvent*)pEv);
         }
         interest = interest->next;
     }
@@ -540,21 +531,19 @@ XkbHandleBell(BOOL force,
                 winID = (pWin ? pWin->drawable.id : None);
                 initialized = 1;
             }
-            bn.sequenceNumber = interest->client->sequence;
             bn.time = time;
             bn.pitch = pitch;
             bn.duration = duration;
             bn.name = name;
             bn.window = winID;
             if (interest->client->swapped) {
-                swaps(&bn.sequenceNumber);
                 swapl(&bn.time);
                 swaps(&bn.pitch);
                 swaps(&bn.duration);
                 swapl(&bn.name);
                 swapl(&bn.window);
             }
-            WriteToClient(interest->client, sizeof(xEvent), &bn);
+            xmitClientEvent(interest->client, *(xEvent*)&bn);
         }
         interest = interest->next;
     }
@@ -587,17 +576,15 @@ XkbSendAccessXNotify(DeviceIntPtr kbd, xkbAccessXNotify * pEv)
                 pEv->time = time = GetTimeInMillis();
                 initialized = 1;
             }
-            pEv->sequenceNumber = interest->client->sequence;
             pEv->time = time;
             pEv->slowKeysDelay = sk_delay;
             pEv->debounceDelay = db_delay;
             if (interest->client->swapped) {
-                swaps(&pEv->sequenceNumber);
                 swapl(&pEv->time);
                 swaps(&pEv->slowKeysDelay);
                 swaps(&pEv->debounceDelay);
             }
-            WriteToClient(interest->client, sizeof(xEvent), pEv);
+            xmitClientEvent(interest->client, *(xEvent*)pEv);
         }
         interest = interest->next;
     }
@@ -644,7 +631,7 @@ XkbSendNamesNotify(DeviceIntPtr kbd, xkbNamesNotify * pEv)
                 swapl(&pEv->changedIndicators);
                 swaps(&pEv->changedVirtualMods);
             }
-            WriteToClient(interest->client, sizeof(xEvent), pEv);
+            xmitClientEvent(interest->client, *(xEvent*)pEv);
         }
         interest = interest->next;
     }
@@ -678,19 +665,17 @@ XkbSendCompatMapNotify(DeviceIntPtr kbd, xkbCompatMapNotify * pEv)
                 nTotalSI = pEv->nTotalSI;
                 initialized = 1;
             }
-            pEv->sequenceNumber = interest->client->sequence;
             pEv->time = time;
             pEv->firstSI = firstSI;
             pEv->nSI = nSI;
             pEv->nTotalSI = nTotalSI;
             if (interest->client->swapped) {
-                swaps(&pEv->sequenceNumber);
                 swapl(&pEv->time);
                 swaps(&pEv->firstSI);
                 swaps(&pEv->nSI);
                 swaps(&pEv->nTotalSI);
             }
-            WriteToClient(interest->client, sizeof(xEvent), pEv);
+            xmitClientEvent(interest->client, *(xEvent*)pEv);
         }
         interest = interest->next;
     }
@@ -722,17 +707,14 @@ XkbSendActionMessage(DeviceIntPtr kbd, xkbActionMessage * pEv)
                 pEv->type = XkbEventCode + XkbEventBase;
                 pEv->xkbType = XkbActionMessage;
                 pEv->deviceID = kbd->id;
-                pEv->sequenceNumber = interest->client->sequence;
                 pEv->time = time = GetTimeInMillis();
                 initialized = 1;
             }
-            pEv->sequenceNumber = interest->client->sequence;
             pEv->time = time;
             if (interest->client->swapped) {
-                swaps(&pEv->sequenceNumber);
                 swapl(&pEv->time);
             }
-            WriteToClient(interest->client, sizeof(xEvent), pEv);
+            xmitClientEvent(interest->client, *(xEvent*)pEv);
         }
         interest = interest->next;
     }
@@ -765,12 +747,10 @@ XkbSendExtensionDeviceNotify(DeviceIntPtr dev,
                 pEv->type = XkbEventCode + XkbEventBase;
                 pEv->xkbType = XkbExtensionDeviceNotify;
                 pEv->deviceID = dev->id;
-                pEv->sequenceNumber = interest->client->sequence;
                 pEv->time = time = GetTimeInMillis();
                 initialized = 1;
             }
             else {
-                pEv->sequenceNumber = interest->client->sequence;
                 pEv->time = time;
                 pEv->ledsDefined = defined;
                 pEv->ledState = state;
@@ -778,14 +758,13 @@ XkbSendExtensionDeviceNotify(DeviceIntPtr dev,
                 pEv->supported = XkbXI_AllFeaturesMask;
             }
             if (interest->client->swapped) {
-                swaps(&pEv->sequenceNumber);
                 swapl(&pEv->time);
                 swapl(&pEv->ledsDefined);
                 swapl(&pEv->ledState);
                 swaps(&pEv->reason);
                 swaps(&pEv->supported);
             }
-            WriteToClient(interest->client, sizeof(xEvent), pEv);
+            xmitClientEvent(interest->client, *(xEvent*)pEv);
         }
         interest = interest->next;
     }
