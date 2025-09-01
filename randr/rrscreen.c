@@ -499,10 +499,10 @@ rrGetScreenResources(ClientPtr client, Bool query)
     if (pScreen->output_secondarys)
         return rrGetMultiScreenResources(client, query, pScreen);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!pScrPriv) {
         rep = (xRRGetScreenResourcesReply) {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
             .timestamp = currentTime.milliseconds,
             .configTimestamp = currentTime.milliseconds,
         };
@@ -516,8 +516,6 @@ rrGetScreenResources(ClientPtr client, Bool query)
             return BadAlloc;
 
         rep = (xRRGetScreenResourcesReply) {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
             .timestamp = pScrPriv->lastSetTime.milliseconds,
             .configTimestamp = pScrPriv->lastConfigTime.milliseconds,
             .nCrtcs = pScrPriv->numCrtcs,
@@ -537,7 +535,7 @@ rrGetScreenResources(ClientPtr client, Bool query)
         if (!extraLen)
             goto finish;
 
-        extra = calloc(1, extraLen);
+        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
         if (!extra) {
             free(modes);
             return BadAlloc;
@@ -600,8 +598,6 @@ finish:
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swapl(&rep.configTimestamp);
         swaps(&rep.nCrtcs);
@@ -609,12 +605,7 @@ finish:
         swaps(&rep.nModes);
         swaps(&rep.nbytesNames);
     }
-    WriteToClient(client, sizeof(xRRGetScreenResourcesReply), (char *) &rep);
-    if (extraLen) {
-        WriteToClient(client, extraLen, (char *) extra);
-        free(extra);
-    }
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
