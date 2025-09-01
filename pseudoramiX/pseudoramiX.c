@@ -315,7 +315,6 @@ static int
 ProcPseudoramiXQueryScreens(ClientPtr client)
 {
     /* REQUEST(xXineramaQueryScreensReq); */
-    xXineramaQueryScreensReply rep;
 
     DEBUG_LOG("noPseudoramiXExtension=%d, pseudoramiXNumScreens=%d\n",
               noPseudoramiXExtension,
@@ -323,38 +322,27 @@ ProcPseudoramiXQueryScreens(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXineramaQueryScreensReq);
 
-    rep.type = X_Reply;
-    rep.sequenceNumber = client->sequence;
-    rep.number = noPseudoramiXExtension ? 0 : pseudoramiXNumScreens;
-    rep.length = bytes_to_int32(rep.number * sz_XineramaScreenInfo);
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.number);
-    }
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply),&rep);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!noPseudoramiXExtension) {
-        xXineramaScreenInfo scratch;
-        int i;
-
-        for (i = 0; i < pseudoramiXNumScreens; i++) {
-            scratch.x_org = pseudoramiXScreens[i].x;
-            scratch.y_org = pseudoramiXScreens[i].y;
-            scratch.width = pseudoramiXScreens[i].w;
-            scratch.height = pseudoramiXScreens[i].h;
-
-            if (client->swapped) {
-                swaps(&scratch.x_org);
-                swaps(&scratch.y_org);
-                swaps(&scratch.width);
-                swaps(&scratch.height);
-            }
-            WriteToClient(client, sz_XineramaScreenInfo,&scratch);
+        for (int i = 0; i < pseudoramiXNumScreens; i++) {
+            /* xXineramaScreenInfo is the same as xRectangle */
+            x_rpcbuf_write_rect(&rpcbuf,
+                                pseudoramiXScreens[i].x,
+                                pseudoramiXScreens[i].y,
+                                pseudoramiXScreens[i].w,
+                                pseudoramiXScreens[i].h);
         }
     }
 
-    return Success;
+    xXineramaQueryScreensReply reply = {
+        .number = noPseudoramiXExtension ? 0 : pseudoramiXNumScreens
+    };
+
+    if (client->swapped)
+        swapl(&reply.number);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 // was PanoramiX
