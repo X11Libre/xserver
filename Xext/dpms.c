@@ -126,11 +126,15 @@ static int
 ProcDPMSSelectInput(register ClientPtr client)
 {
     REQUEST(xDPMSSelectInputReq);
+    REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
+
+    if (client->swapped)
+        swapl(&stuff->eventMask);
+
     DPMSEventPtr pEvent, pNewEvent, *pHead;
     XID clientResource;
     int i;
 
-    REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
     i = dixLookupResourceByType((void **)&pHead, eventResource, DPMSEventType,
                                 client,
                                 DixWriteAccess);
@@ -304,13 +308,19 @@ DPMSSet(ClientPtr client, int level)
 static int
 ProcDPMSGetVersion(ClientPtr client)
 {
+    REQUEST(xDPMSGetVersionReq);
+    REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
+
+    if (client->swapped) {
+        swaps(&stuff->majorVersion);
+        swaps(&stuff->minorVersion);
+    }
+
     /* REQUEST(xDPMSGetVersionReq); */
     xDPMSGetVersionReply reply = {
         .majorVersion = SERVER_DPMS_MAJOR_VERSION,
         .minorVersion = SERVER_DPMS_MINOR_VERSION
     };
-
-    REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
 
     if (client->swapped) {
         swaps(&reply.majorVersion);
@@ -359,8 +369,13 @@ static int
 ProcDPMSSetTimeouts(ClientPtr client)
 {
     REQUEST(xDPMSSetTimeoutsReq);
-
     REQUEST_SIZE_MATCH(xDPMSSetTimeoutsReq);
+
+    if (client->swapped) {
+        swaps(&stuff->standby);
+        swaps(&stuff->suspend);
+        swaps(&stuff->off);
+    }
 
     if ((stuff->off != 0) && (stuff->off < stuff->suspend)) {
         client->errorValue = stuff->off;
@@ -417,11 +432,14 @@ static int
 ProcDPMSForceLevel(ClientPtr client)
 {
     REQUEST(xDPMSForceLevelReq);
-
     REQUEST_SIZE_MATCH(xDPMSForceLevelReq);
 
     if (!DPMSEnabled)
         return BadMatch;
+
+    if (client->swapped) {
+        swaps(&stuff->level);
+    }
 
     if (stuff->level != DPMSModeOn &&
         stuff->level != DPMSModeStandby &&
@@ -482,78 +500,6 @@ ProcDPMSDispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcDPMSGetVersion(ClientPtr client)
-{
-    REQUEST(xDPMSGetVersionReq);
-    REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
-    swaps(&stuff->majorVersion);
-    swaps(&stuff->minorVersion);
-    return ProcDPMSGetVersion(client);
-}
-
-static int _X_COLD
-SProcDPMSSetTimeouts(ClientPtr client)
-{
-    REQUEST(xDPMSSetTimeoutsReq);
-    REQUEST_SIZE_MATCH(xDPMSSetTimeoutsReq);
-
-    swaps(&stuff->standby);
-    swaps(&stuff->suspend);
-    swaps(&stuff->off);
-    return ProcDPMSSetTimeouts(client);
-}
-
-static int _X_COLD
-SProcDPMSForceLevel(ClientPtr client)
-{
-    REQUEST(xDPMSForceLevelReq);
-    REQUEST_SIZE_MATCH(xDPMSForceLevelReq);
-
-    swaps(&stuff->level);
-
-    return ProcDPMSForceLevel(client);
-}
-
-static int _X_COLD
-SProcDPMSSelectInput(ClientPtr client)
-{
-    REQUEST(xDPMSSelectInputReq);
-    REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
-    swapl(&stuff->eventMask);
-    return ProcDPMSSelectInput(client);
-}
-
-
-
-static int _X_COLD
-SProcDPMSDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-    case X_DPMSGetVersion:
-        return SProcDPMSGetVersion(client);
-    case X_DPMSCapable:
-        return ProcDPMSCapable(client);
-    case X_DPMSGetTimeouts:
-        return ProcDPMSGetTimeouts(client);
-    case X_DPMSSetTimeouts:
-        return SProcDPMSSetTimeouts(client);
-    case X_DPMSEnable:
-        return ProcDPMSEnable(client);
-    case X_DPMSDisable:
-        return ProcDPMSDisable(client);
-    case X_DPMSForceLevel:
-        return SProcDPMSForceLevel(client);
-    case X_DPMSInfo:
-        return ProcDPMSInfo(client);
-    case X_DPMSSelectInput:
-        return SProcDPMSSelectInput(client);
-    default:
-        return BadRequest;
-    }
-}
-
 static void
 DPMSCloseDownExtension(ExtensionEntry *e)
 {
@@ -583,7 +529,7 @@ DPMSExtensionInit(void)
 
     if (DPMSEnabled && ClientType && DPMSEventType &&
         (extEntry = AddExtension(DPMSExtensionName, 0, 0,
-                                 ProcDPMSDispatch, SProcDPMSDispatch,
+                                 ProcDPMSDispatch, ProcDPMSDispatch,
                                  DPMSCloseDownExtension, StandardMinorOpcode))) {
         DPMSReqCode = extEntry->base;
         GERegisterExtension(DPMSReqCode, SDPMSInfoNotifyEvent);
