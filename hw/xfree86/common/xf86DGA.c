@@ -1184,7 +1184,6 @@ static int
 ProcXDGAOpenFramebuffer(ClientPtr client)
 {
     REQUEST(xXDGAOpenFramebufferReq);
-    xXDGAOpenFramebufferReply rep;
     char *deviceName;
     int nameSize;
 
@@ -1196,9 +1195,7 @@ ProcXDGAOpenFramebuffer(ClientPtr client)
     if (!DGAAvailable(stuff->screen))
         return DGAErrorBase + XF86DGANoDirectVideoMode;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
+    xXDGAOpenFramebufferReply rep = { 0 };
 
     if (!DGAOpenFramebuffer(stuff->screen, &deviceName,
                             (unsigned char **) (&rep.mem1),
@@ -1208,13 +1205,11 @@ ProcXDGAOpenFramebuffer(ClientPtr client)
     }
 
     nameSize = deviceName ? (strlen(deviceName) + 1) : 0;
-    rep.length = bytes_to_int32(nameSize);
 
-    WriteToClient(client, sizeof(xXDGAOpenFramebufferReply), (char *) &rep);
-    if (rep.length)
-        WriteToClient(client, nameSize, deviceName);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)deviceName, nameSize);
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
