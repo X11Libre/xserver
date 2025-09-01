@@ -810,82 +810,76 @@ XkbSendNotification(DeviceIntPtr kbd,
         XkbSendStateNotify(kbd, &sn);
     }
     if (pChanges->map.changed) {
-        xkbMapNotify mn;
-
-        memset(&mn, 0, sizeof(xkbMapNotify));
-        mn.changed = pChanges->map.changed;
-        mn.firstType = pChanges->map.first_type;
-        mn.nTypes = pChanges->map.num_types;
-        mn.firstKeySym = pChanges->map.first_key_sym;
-        mn.nKeySyms = pChanges->map.num_key_syms;
-        mn.firstKeyAct = pChanges->map.first_key_act;
-        mn.nKeyActs = pChanges->map.num_key_acts;
-        mn.firstKeyBehavior = pChanges->map.first_key_behavior;
-        mn.nKeyBehaviors = pChanges->map.num_key_behaviors;
-        mn.virtualMods = pChanges->map.vmods;
-        mn.firstKeyExplicit = pChanges->map.first_key_explicit;
-        mn.nKeyExplicit = pChanges->map.num_key_explicit;
-        mn.firstModMapKey = pChanges->map.first_modmap_key;
-        mn.nModMapKeys = pChanges->map.num_modmap_keys;
-        mn.firstVModMapKey = pChanges->map.first_vmodmap_key;
-        mn.nVModMapKeys = pChanges->map.num_vmodmap_keys;
+        xkbMapNotify mn = {
+            .changed = pChanges->map.changed,
+            .firstType = pChanges->map.first_type,
+            .nTypes = pChanges->map.num_types,
+            .firstKeySym = pChanges->map.first_key_sym,
+            .nKeySyms = pChanges->map.num_key_syms,
+            .firstKeyAct = pChanges->map.first_key_act,
+            .nKeyActs = pChanges->map.num_key_acts,
+            .firstKeyBehavior = pChanges->map.first_key_behavior,
+            .nKeyBehaviors = pChanges->map.num_key_behaviors,
+            .virtualMods = pChanges->map.vmods,
+            .firstKeyExplicit = pChanges->map.first_key_explicit,
+            .nKeyExplicit = pChanges->map.num_key_explicit,
+            .firstModMapKey = pChanges->map.first_modmap_key,
+            .nModMapKeys = pChanges->map.num_modmap_keys,
+            .firstVModMapKey = pChanges->map.first_vmodmap_key,
+            .nVModMapKeys = pChanges->map.num_vmodmap_keys,
+        };
         XkbSendMapNotify(kbd, &mn);
     }
     if ((pChanges->ctrls.changed_ctrls) ||
         (pChanges->ctrls.enabled_ctrls_changes)) {
-        xkbControlsNotify cn;
-
-        memset(&cn, 0, sizeof(xkbControlsNotify));
-        cn.changedControls = pChanges->ctrls.changed_ctrls;
-        cn.enabledControlChanges = pChanges->ctrls.enabled_ctrls_changes;
-        cn.keycode = cause->kc;
-        cn.eventType = cause->event;
-        cn.requestMajor = cause->mjr;
-        cn.requestMinor = cause->mnr;
+        xkbControlsNotify cn = {
+            .changedControls = pChanges->ctrls.changed_ctrls,
+            .enabledControlChanges = pChanges->ctrls.enabled_ctrls_changes,
+            .keycode = cause->kc,
+            .eventType = cause->event,
+            .requestMajor = cause->mjr,
+            .requestMinor = cause->mnr
+        };
         XkbSendControlsNotify(kbd, &cn);
     }
     if (pChanges->indicators.map_changes) {
-        xkbIndicatorNotify in;
-
         if (sli == NULL)
             sli = XkbFindSrvLedInfo(kbd, XkbDfltXIClass, XkbDfltXIId, 0);
-        memset(&in, 0, sizeof(xkbIndicatorNotify));
-        in.state = sli->effectiveState;
-        in.changed = pChanges->indicators.map_changes;
+        xkbIndicatorNotify in = {
+            .state = sli->effectiveState,
+            .changed = pChanges->indicators.map_changes,
+        };
         XkbSendIndicatorNotify(kbd, XkbIndicatorMapNotify, &in);
     }
     if (pChanges->indicators.state_changes) {
-        xkbIndicatorNotify in;
-
         if (sli == NULL)
             sli = XkbFindSrvLedInfo(kbd, XkbDfltXIClass, XkbDfltXIId, 0);
-        memset(&in, 0, sizeof(xkbIndicatorNotify));
-        in.state = sli->effectiveState;
-        in.changed = pChanges->indicators.state_changes;
+        xkbIndicatorNotify in = {
+            .state = sli->effectiveState,
+            .changed = pChanges->indicators.state_changes
+        };
         XkbSendIndicatorNotify(kbd, XkbIndicatorStateNotify, &in);
     }
     if (pChanges->names.changed) {
-        xkbNamesNotify nn;
-
-        memset(&nn, 0, sizeof(xkbNamesNotify));
-        nn.changed = pChanges->names.changed;
-        nn.firstType = pChanges->names.first_type;
-        nn.nTypes = pChanges->names.num_types;
-        nn.firstLevelName = pChanges->names.first_lvl;
-        nn.nLevelNames = pChanges->names.num_lvls;
-        nn.nRadioGroups = pChanges->names.num_rg;
-        nn.changedVirtualMods = pChanges->names.changed_vmods;
-        nn.changedIndicators = pChanges->names.changed_indicators;
+        xkbNamesNotify nn = {
+            .changed = pChanges->names.changed,
+            .firstType = pChanges->names.first_type,
+            .nTypes = pChanges->names.num_types,
+            .firstLevelName = pChanges->names.first_lvl,
+            .nLevelNames = pChanges->names.num_lvls,
+            .nRadioGroups = pChanges->names.num_rg,
+            .changedVirtualMods = pChanges->names.changed_vmods,
+            .changedIndicators = pChanges->names.changed_indicators,
+        };
         XkbSendNamesNotify(kbd, &nn);
     }
     if ((pChanges->compat.changed_groups) || (pChanges->compat.num_si > 0)) {
-        xkbCompatMapNotify cmn;
-
-        memset(&cmn, 0, sizeof(xkbCompatMapNotify));
-        cmn.changedGroups = pChanges->compat.changed_groups;
-        cmn.firstSI = pChanges->compat.first_si;
-        cmn.nSI = pChanges->compat.num_si;
-        cmn.nTotalSI = kbd->key->xkbInfo->desc->compat->num_si;
+        xkbCompatMapNotify cmn = {
+            .changedGroups = pChanges->compat.changed_groups,
+            .firstSI = pChanges->compat.first_si,
+            .nSI = pChanges->compat.num_si,
+            .nTotalSI = kbd->key->xkbInfo->desc->compat->num_si,
+        };
         XkbSendCompatMapNotify(kbd, &cmn);
     }
     return;
