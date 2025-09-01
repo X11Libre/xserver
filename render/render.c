@@ -489,13 +489,9 @@ static int
 ProcRenderQueryPictIndexValues(ClientPtr client)
 {
     PictFormatPtr pFormat;
-    int rc, num;
-    int rlength;
-    int i;
+    int rc;
 
     REQUEST(xRenderQueryPictIndexValuesReq);
-    xIndexValue *values;
-
     REQUEST_AT_LEAST_SIZE(xRenderQueryPictIndexValuesReq);
 
     rc = dixLookupResourceByType((void **) &pFormat, stuff->format,
@@ -507,39 +503,27 @@ ProcRenderQueryPictIndexValues(ClientPtr client)
         client->errorValue = stuff->format;
         return BadMatch;
     }
-    num = pFormat->index.nvalues;
-    rlength = (sizeof(xRenderQueryPictIndexValuesReply) +
-               num * sizeof(xIndexValue));
 
-    xRenderQueryPictIndexValuesReply *reply = calloc(1, rlength);
-    if (!reply)
-        return BadAlloc;
-
-    reply->type = X_Reply;
-    reply->sequenceNumber = client->sequence;
-    reply->length = bytes_to_int32(rlength - sizeof(xGenericReply));
-    reply->numIndexValues = num;
-
-    values = (xIndexValue *) (reply + 1);
-
-    memcpy(reply + 1, pFormat->index.pValues, num * sizeof(xIndexValue));
-
-    if (client->swapped) {
-        for (i = 0; i < num; i++) {
-            swapl(&values[i].pixel);
-            swaps(&values[i].red);
-            swaps(&values[i].green);
-            swaps(&values[i].blue);
-            swaps(&values[i].alpha);
-        }
-        swaps(&reply->sequenceNumber);
-        swapl(&reply->length);
-        swapl(&reply->numIndexValues);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    for (int i = 0; i < pFormat->index.nvalues; i++) {
+        /* write xIndexValue */
+        xIndexValue *iv = &(pFormat->index.pValues[i]);
+        x_rpcbuf_write_CARD32(&rpcbuf, iv->pixel);
+        x_rpcbuf_write_CARD16(&rpcbuf, iv->red);
+        x_rpcbuf_write_CARD16(&rpcbuf, iv->green);
+        x_rpcbuf_write_CARD16(&rpcbuf, iv->blue);
+        x_rpcbuf_write_CARD16(&rpcbuf, iv->alpha);
     }
 
-    WriteToClient(client, rlength, reply);
-    free(reply);
-    return Success;
+    xRenderQueryPictIndexValuesReply reply = {
+        .numIndexValues = pFormat->index.nvalues
+    };
+
+    if (client->swapped) {
+        swapl(&reply.numIndexValues);
+    }
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
