@@ -157,9 +157,7 @@ ProcRRGetProviderInfo (ClientPtr client)
     pScrPriv = rrGetScrPriv(pScreen);
 
     xRRGetProviderInfoReply rep = {
-        .type = X_Reply,
         .status = RRSetConfigSuccess,
-        .sequenceNumber = client->sequence,
         .capabilities = provider->capabilities,
         .nameLength = provider->nameLength,
         .timestamp = pScrPriv->lastSetTime.milliseconds,
@@ -181,9 +179,11 @@ ProcRRGetProviderInfo (ClientPtr client)
     rep.length = (pScrPriv->numCrtcs + pScrPriv->numOutputs +
                   (rep.nAssociatedProviders * 2) + bytes_to_int32(rep.nameLength));
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     extraLen = rep.length << 2;
     if (extraLen) {
-        extra = calloc(1, extraLen);
+        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
         if (!extra)
             return BadAlloc;
     }
@@ -246,20 +246,13 @@ ProcRRGetProviderInfo (ClientPtr client)
 
     memcpy(name, provider->name, rep.nameLength);
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.capabilities);
         swaps(&rep.nCrtcs);
         swaps(&rep.nOutputs);
         swaps(&rep.nameLength);
     }
-    WriteToClient(client, sizeof(xRRGetProviderInfoReply), (char *)&rep);
-    if (extraLen)
-    {
-        WriteToClient (client, extraLen, (char *) extra);
-        free(extra);
-    }
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static void
