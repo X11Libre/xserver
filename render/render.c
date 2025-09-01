@@ -303,7 +303,6 @@ ProcRenderQueryPictFormats(ClientPtr client)
     xPictScreen *pictScreen;
     xPictDepth *pictDepth;
     xPictVisual *pictVisual;
-    xPictFormInfo *pictForm;
     CARD32 *pictSubpixel;
     VisualPtr pVisual;
     DepthPtr pDepth;
@@ -351,25 +350,16 @@ ProcRenderQueryPictFormats(ClientPtr client)
     else
         numSubpixel = numScreens;
 
-    rlength = (sizeof(xRenderQueryPictFormatsReply) +
-               nformat * sizeof(xPictFormInfo) +
+    rlength = (nformat * sizeof(xPictFormInfo) +
                numScreens * sizeof(xPictScreen) +
                ndepth * sizeof(xPictDepth) +
                nvisual * sizeof(xPictVisual) + numSubpixel * sizeof(CARD32));
 
-    xRenderQueryPictFormatsReply *reply = calloc(1, rlength);
-    if (!reply)
-        return BadAlloc;
-    reply->type = X_Reply;
-    reply->sequenceNumber = client->sequence;
-    reply->length = bytes_to_int32(rlength - sizeof(xGenericReply));
-    reply->numFormats = nformat;
-    reply->numScreens = numScreens;
-    reply->numDepths = ndepth;
-    reply->numVisuals = nvisual;
-    reply->numSubpixel = numSubpixel;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    pictForm = (xPictFormInfo *) (reply + 1);
+    xPictFormInfo *pictForm = x_rpcbuf_reserve(&rpcbuf, rlength);
+    if (!pictForm)
+        return BadAlloc;
 
     for (s = 0; s < numScreens; s++) {
         ScreenPtr walkScreen = screenInfo.screens[s];
@@ -471,18 +461,23 @@ ProcRenderQueryPictFormats(ClientPtr client)
         ++pictSubpixel;
     }
 
+    xRenderQueryPictFormatsReply reply = {
+        .numFormats = nformat,
+        .numScreens = numScreens,
+        .numDepths = ndepth,
+        .numVisuals = nvisual,
+        .numSubpixel = numSubpixel,
+    };
+
     if (client->swapped) {
-        swaps(&reply->sequenceNumber);
-        swapl(&reply->length);
-        swapl(&reply->numFormats);
-        swapl(&reply->numScreens);
-        swapl(&reply->numDepths);
-        swapl(&reply->numVisuals);
-        swapl(&reply->numSubpixel);
+        swapl(&reply.numFormats);
+        swapl(&reply.numScreens);
+        swapl(&reply.numDepths);
+        swapl(&reply.numVisuals);
+        swapl(&reply.numSubpixel);
     }
-    WriteToClient(client, rlength, reply);
-    free(reply);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
