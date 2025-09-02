@@ -272,6 +272,9 @@ int CorePointerProc(DeviceIntPtr dev, int what);
 
 int CoreKeyboardProc(DeviceIntPtr dev, int what);
 
+typedef struct _xQueryFontReply *xQueryFontReplyPtr;
+void QueryFont(FontPtr pFont, xQueryFontReplyPtr pReply, int nProtoCCIStructs);
+
 extern Bool whiteRoot;
 
 extern volatile char isItTimeToYield;

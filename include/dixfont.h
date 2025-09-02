@@ -43,12 +43,6 @@ extern _X_EXPORT int OpenFont(ClientPtr /*client */ ,
 extern _X_EXPORT int CloseFont(void *pfont,
                                XID fid);
 
-typedef struct _xQueryFontReply *xQueryFontReplyPtr;
-
-extern _X_EXPORT void QueryFont(FontPtr /*pFont */ ,
-                                xQueryFontReplyPtr /*pReply */ ,
-                                int /*nProtoCCIStructs */ );
-
 extern _X_EXPORT int ListFonts(ClientPtr /*client */ ,
                                unsigned char * /*pattern */ ,
                                unsigned int /*length */ ,
