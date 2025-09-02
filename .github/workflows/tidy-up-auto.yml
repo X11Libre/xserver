@@ -2,13 +2,18 @@ name: delete old workflow runs
 on:
     schedule:
         - cron: '0 0 * * *' # nightly
+    push:
+
+permissions:
+    actions: write
+    contents: read
+
+env:
+    GH_TOKEN: ${{ github.token }}
 
 jobs:
-    delete_old_workflow_runs:
+    delete_old_workflow_runs_timeout:
         runs-on: ubuntu-latest
-        permissions:
-            actions: write
-            contents: read
         steps:
             - name: delete workflow runs
               uses: Mattraks/delete-workflow-runs@v2
@@ -17,3 +22,24 @@ jobs:
                 repository: ${{ github.repository }}
                 retain_days: 14
                 keep_minimum_runs: 2
+
+    delete_old_workflow_runs_branches:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                version:
+                    - master
+                    - maint-25.0
+                    - wip/xkb
+                    - wip/cleanup
+                    - wip/screenproc
+                    - wip/swapping_new
+        steps:
+            - uses: actions/checkout@v4
+            - name: purge older runs on ${{ github.event.repository.name }} branch
+              run: |
+                .github/scripts/gh-purge-pipelines.sh \
+                    --org ${{ github.repository_owner }} \
+                    --repo ${{ github.event.repository.name }} \
+                    --branch master \
+                    --keep 2
