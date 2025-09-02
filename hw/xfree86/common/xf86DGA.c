@@ -1233,7 +1233,7 @@ ProcXDGACloseFramebuffer(ClientPtr client)
 static int
 ProcXDGAQueryModes(ClientPtr client)
 {
-    int i, num, size;
+    int num;
 
     REQUEST(xXDGAQueryModesReq);
     xXDGAModeInfo info;
@@ -1244,34 +1244,27 @@ ProcXDGAQueryModes(ClientPtr client)
     if (stuff->screen >= screenInfo.numScreens)
         return BadValue;
 
-    xXDGAQueryModesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence
-    };
-
-    if (!DGAAvailable(stuff->screen))
-        return X_SEND_REPLY_SIMPLE(client, rep);
-
-    if (!(num = DGAGetModes(stuff->screen)))
-        return X_SEND_REPLY_SIMPLE(client, rep);
+    if ((!DGAAvailable(stuff->screen)) ||
+        (!(num = DGAGetModes(stuff->screen))))
+    {
+        xXDGAQueryModesReply reply = { 0 };
+        return X_SEND_REPLY_SIMPLE(client, reply);
+    }
 
     if (!(mode = calloc(num, sizeof(XDGAModeRec))))
         return BadAlloc;
 
-    for (i = 0; i < num; i++)
+    for (int i = 0; i < num; i++)
         DGAGetModeInfo(stuff->screen, mode + i, i + 1);
 
-    size = num * sz_xXDGAModeInfo;
-    for (i = 0; i < num; i++)
-        size += pad_to_int32(strlen(mode[i].name) + 1); /* plus NULL */
+    xXDGAQueryModesReply rep = {
+        .number = num
+    };
 
-    rep.number = num;
-    rep.length = bytes_to_int32(size);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    WriteToClient(client, sz_xXDGAQueryModesReply, (char *) &rep);
-
-    for (i = 0; i < num; i++) {
-        size = strlen(mode[i].name) + 1;
+    for (int i = 0; i < num; i++) {
+        size_t size = strlen(mode[i].name) + 1;
 
         info.byte_order = mode[i].byteOrder;
         info.depth = mode[i].depth;
@@ -1300,13 +1293,13 @@ ProcXDGAQueryModes(ClientPtr client)
         info.reserved1 = mode[i].reserved1;
         info.reserved2 = mode[i].reserved2;
 
-        WriteToClient(client, sz_xXDGAModeInfo, (char *) (&info));
-        WriteToClient(client, size, mode[i].name);
+        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)&info, sz_xXDGAModeInfo);
+        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)mode[i].name, size);
     }
 
     free(mode);
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static void
