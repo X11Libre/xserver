@@ -145,6 +145,20 @@ Bool x_rpcbuf_write_CARD32(x_rpcbuf_t *rpcbuf, CARD32 value)
     return TRUE;
 }
 
+Bool x_rpcbuf_write_CARD64(x_rpcbuf_t *rpcbuf, CARD64 value)
+{
+    CARD64 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(value));
+    if (!reserved)
+        return FALSE;
+
+    *reserved = value;
+
+    if (rpcbuf->swapped)
+        swapll(reserved);
+
+    return TRUE;
+}
+
 Bool x_rpcbuf_write_CARD8s(x_rpcbuf_t *rpcbuf, const CARD8 *values,
                            size_t count)
 {
@@ -192,6 +206,25 @@ Bool x_rpcbuf_write_CARD32s(x_rpcbuf_t *rpcbuf, const CARD32 *values,
 
     if (rpcbuf->swapped)
         SwapLongs(reserved, count);
+
+    return TRUE;
+}
+
+Bool x_rpcbuf_write_CARD64s(x_rpcbuf_t *rpcbuf, const CARD64 *values,
+                            size_t count)
+{
+    if ((!values) || (!count))
+        return TRUE;
+
+    CARD64 *reserved = x_rpcbuf_reserve(rpcbuf, sizeof(CARD64) * count);
+    if (!reserved)
+        return FALSE;
+
+    memcpy(reserved, values, sizeof(CARD64) * count);
+
+    if (rpcbuf->swapped)
+        for (size_t x=0; x<count; x++)
+            swapll(&reserved[x]);
 
     return TRUE;
 }
