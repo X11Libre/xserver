@@ -616,33 +616,27 @@ ProcXkbGetState(ClientPtr client)
 int
 ProcXkbLatchLockState(ClientPtr client)
 {
-    int status;
-    DeviceIntPtr dev, tmpd;
-    XkbStateRec oldState, *newState;
-    CARD16 changed;
-    xkbStateNotify sn;
-    XkbEventCauseRec cause;
-
     REQUEST(xkbLatchLockStateReq);
     REQUEST_SIZE_MATCH(xkbLatchLockStateReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
+    DeviceIntPtr dev;
     CHK_KBD_DEVICE(dev, stuff->deviceSpec, client, DixSetAttrAccess);
     CHK_MASK_MATCH(0x01, stuff->affectModLocks, stuff->modLocks);
     CHK_MASK_MATCH(0x01, stuff->affectModLatches, stuff->modLatches);
 
-    status = Success;
+    int status = Success;
 
-    for (tmpd = inputInfo.devices; tmpd; tmpd = tmpd->next) {
+    for (DeviceIntPtr tmpd = inputInfo.devices; tmpd; tmpd = tmpd->next) {
         if ((tmpd == dev) ||
             (!InputDevIsMaster(tmpd) && GetMaster(tmpd, MASTER_KEYBOARD) == dev)) {
             if (!tmpd->key || !tmpd->key->xkbInfo)
                 continue;
 
-            oldState = tmpd->key->xkbInfo->state;
-            newState = &tmpd->key->xkbInfo->state;
+			XkbStateRec oldState = tmpd->key->xkbInfo->state;
+			XkbStateRec *newState = &tmpd->key->xkbInfo->state;
             if (stuff->affectModLocks) {
                 newState->locked_mods &= ~stuff->affectModLocks;
                 newState->locked_mods |=
@@ -661,16 +655,19 @@ ProcXkbLatchLockState(ClientPtr client)
 
             XkbComputeDerivedState(tmpd->key->xkbInfo);
 
-            changed = XkbStateChangedFlags(&oldState, newState);
+            CARD16 changed = XkbStateChangedFlags(&oldState, newState);
             if (changed) {
-                sn.keycode = 0;
-                sn.eventType = 0;
-                sn.requestMajor = XkbReqCode;
-                sn.requestMinor = X_kbLatchLockState;
-                sn.changed = changed;
+				xkbStateNotify sn = {
+					.keycode = 0,
+					.eventType = 0,
+					.requestMajor = XkbReqCode,
+					.requestMinor = X_kbLatchLockState,
+					.changed = changed
+				};
                 XkbSendStateNotify(tmpd, &sn);
                 changed = XkbIndicatorsToUpdate(tmpd, changed, FALSE);
                 if (changed) {
+					XkbEventCauseRec cause;
                     XkbSetCauseXkbReq(&cause, X_kbLatchLockState, client);
                     XkbUpdateIndicators(tmpd, changed, TRUE, NULL, &cause);
                 }
