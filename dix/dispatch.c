@@ -2688,14 +2688,17 @@ ProcAllocColorCells(ClientPtr client)
         }
         nmasks = stuff->planes;
         length = ((long) npixels + (long) nmasks) * sizeof(Pixel);
-        Pixel *ppixels = calloc(1, length);
+
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+        Pixel *ppixels = x_rpcbuf_reserve(&rpcbuf, length);
         if (!ppixels)
             return BadAlloc;
         pmasks = ppixels + npixels;
 
         if ((rc = AllocColorCells(client, pcmp, npixels, nmasks,
                                   (Bool) stuff->contiguous, ppixels, pmasks))) {
-            free(ppixels);
+            x_rpcbuf_clear(&rpcbuf);
             return rc;
         }
 #ifdef XINERAMA
@@ -2703,23 +2706,18 @@ ProcAllocColorCells(ClientPtr client)
 #endif /* XINERAMA */
         {
             xAllocColorCellsReply rep = {
-                .type = X_Reply,
-                .sequenceNumber = client->sequence,
-                .length = bytes_to_int32(length),
                 .nPixels = npixels,
                 .nMasks = nmasks
             };
             if (client->swapped) {
-                swaps(&rep.sequenceNumber);
-                swapl(&rep.length);
                 swaps(&rep.nPixels);
                 swaps(&rep.nMasks);
                 SwapLongs(ppixels, length / 4);
             }
-            WriteToClient(client, sizeof(rep), &rep);
-            WriteToClient(client, length, ppixels);
+
+            return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
         }
-        free(ppixels);
+        x_rpcbuf_clear(&rpcbuf);
         return Success;
     }
     else {
