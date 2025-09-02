@@ -2555,24 +2555,19 @@ ProcListInstalledColormaps(ClientPtr client)
     const ScreenPtr pScreen = pWin->drawable.pScreen;
     const int nummaps = pScreen->ListInstalledColormaps(pScreen, cm);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(&rpcbuf, cm, nummaps); /* Colormap is an XID, thus CARD32  */
+    free(cm);
+
     xListInstalledColormapsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .nColormaps = nummaps,
-        .length = nummaps,
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nColormaps);
-        SwapLongs(cm, nummaps * sizeof(Colormap) / 4);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, nummaps * sizeof(Colormap), cm);
-    free(cm);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
