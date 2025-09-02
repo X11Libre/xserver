@@ -59,14 +59,6 @@ static void SwapFontInfo(xQueryFontReply * pr);
 
 static void SwapCharInfo(xCharInfo * pInfo);
 
-/* Extra-small reply */
-void _X_COLD
-SGenericReply(ClientPtr pClient, int size, xGenericReply * pRep)
-{
-    swaps(&pRep->sequenceNumber);
-    WriteToClient(pClient, size, pRep);
-}
-
 static void _X_COLD
 SwapCharInfo(xCharInfo * pInfo)
 {
