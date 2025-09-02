@@ -1092,21 +1092,19 @@ ProcGetAtomName(ClientPtr client)
     }
 
     const int len = strlen(str);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)str, len);
+
     xGetAtomNameReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(len),
         .nameLength = len
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nameLength);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, len, str);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
