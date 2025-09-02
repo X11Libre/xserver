@@ -192,7 +192,7 @@ __glXDispSwap_RenderMode(__GLXclientState * cl, GLbyte * pc)
         }
         retBytes = nitems * __GLX_SIZE_CARD32;
         retBuffer = (GLubyte *) cx->selectBuf;
-        __GLX_SWAP_INT_ARRAY((GLbyte *) retBuffer, nitems);
+        SwapLongs((CARD32*)retBuffer, nitems);
         cx->renderMode = newMode;
         break;
     }

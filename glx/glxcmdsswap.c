@@ -263,7 +263,6 @@ __glXDispSwap_CreatePixmap(__GLXclientState * cl, GLbyte * pc)
     CARD32 *attribs;
 
     __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
 
     REQUEST_AT_LEAST_SIZE(xGLXCreatePixmapReq);
 
@@ -280,7 +279,7 @@ __glXDispSwap_CreatePixmap(__GLXclientState * cl, GLbyte * pc)
     }
     REQUEST_FIXED_SIZE(xGLXCreatePixmapReq, req->numAttribs << 3);
     attribs = (CARD32 *) (req + 1);
-    __GLX_SWAP_INT_ARRAY(attribs, req->numAttribs << 1);
+    SwapLongs(attribs, req->numAttribs << 1);
 
     return __glXDisp_CreatePixmap(cl, pc);
 }
@@ -352,7 +351,6 @@ __glXDispSwap_CreatePbuffer(__GLXclientState * cl, GLbyte * pc)
     xGLXCreatePbufferReq *req = (xGLXCreatePbufferReq *) pc;
 
     __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
     CARD32 *attribs;
 
     REQUEST_AT_LEAST_SIZE(xGLXCreatePbufferReq);
@@ -368,7 +366,7 @@ __glXDispSwap_CreatePbuffer(__GLXclientState * cl, GLbyte * pc)
     }
     REQUEST_FIXED_SIZE(xGLXCreatePbufferReq, req->numAttribs << 3);
     attribs = (CARD32 *) (req + 1);
-    __GLX_SWAP_INT_ARRAY(attribs, req->numAttribs << 1);
+    SwapLongs(attribs, req->numAttribs << 1);
 
     return __glXDisp_CreatePbuffer(cl, pc);
 }
@@ -426,7 +424,6 @@ __glXDispSwap_ChangeDrawableAttributes(__GLXclientState * cl, GLbyte * pc)
     xGLXChangeDrawableAttributesReq *req =
         (xGLXChangeDrawableAttributesReq *) pc;
     __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
     CARD32 *attribs;
 
     REQUEST_AT_LEAST_SIZE(xGLXChangeDrawableAttributesReq);
@@ -443,7 +440,7 @@ __glXDispSwap_ChangeDrawableAttributes(__GLXclientState * cl, GLbyte * pc)
         return BadLength;
 
     attribs = (CARD32 *) (req + 1);
-    __GLX_SWAP_INT_ARRAY(attribs, req->numAttribs << 1);
+    SwapLongs(attribs, req->numAttribs << 1);
 
     return __glXDisp_ChangeDrawableAttributes(cl, pc);
 }
@@ -455,7 +452,6 @@ __glXDispSwap_ChangeDrawableAttributesSGIX(__GLXclientState * cl, GLbyte * pc)
     xGLXChangeDrawableAttributesSGIXReq *req =
         (xGLXChangeDrawableAttributesSGIXReq *) pc;
     __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
     CARD32 *attribs;
 
     REQUEST_AT_LEAST_SIZE(xGLXChangeDrawableAttributesSGIXReq);
@@ -470,7 +466,7 @@ __glXDispSwap_ChangeDrawableAttributesSGIX(__GLXclientState * cl, GLbyte * pc)
     REQUEST_FIXED_SIZE(xGLXChangeDrawableAttributesSGIXReq,
                        req->numAttribs << 3);
     attribs = (CARD32 *) (req + 1);
-    __GLX_SWAP_INT_ARRAY(attribs, req->numAttribs << 1);
+    SwapLongs(attribs, req->numAttribs << 1);
 
     return __glXDisp_ChangeDrawableAttributesSGIX(cl, pc);
 }
@@ -482,7 +478,6 @@ __glXDispSwap_CreateWindow(__GLXclientState * cl, GLbyte * pc)
     xGLXCreateWindowReq *req = (xGLXCreateWindowReq *) pc;
 
     __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
     CARD32 *attribs;
 
     REQUEST_AT_LEAST_SIZE(xGLXCreateWindowReq);
@@ -499,7 +494,7 @@ __glXDispSwap_CreateWindow(__GLXclientState * cl, GLbyte * pc)
     }
     REQUEST_FIXED_SIZE(xGLXCreateWindowReq, req->numAttribs << 3);
     attribs = (CARD32 *) (req + 1);
-    __GLX_SWAP_INT_ARRAY(attribs, req->numAttribs << 1);
+    SwapLongs(attribs, req->numAttribs << 1);
 
     return __glXDisp_CreateWindow(cl, pc);
 }

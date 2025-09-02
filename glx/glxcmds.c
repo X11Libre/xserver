@@ -899,7 +899,6 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
     int p, i, err;
 
     __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
 
     if (!validGlxScreen(cl->client, req->screen, &pGlxScreen, &err))
         return err;
@@ -984,7 +983,7 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
 
         assert(p == GLX_VIS_CONFIG_TOTAL);
         if (client->swapped) {
-            __GLX_SWAP_INT_ARRAY(buf, p);
+            SwapLongs(buf, p);
         }
         WriteToClient(client, __GLX_SIZE_CARD32 * p, buf);
     }
@@ -1013,7 +1012,6 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
     __GLXconfig *modes;
 
     __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
 
     if (!validGlxScreen(cl->client, screen, &pGlxScreen, &err))
         return err;
@@ -1107,7 +1105,7 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
         assert(p == __GLX_FBCONFIG_ATTRIBS_LENGTH);
 
         if (client->swapped) {
-            __GLX_SWAP_INT_ARRAY(buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);
+            SwapLongs((CARD32*)buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);
         }
         WriteToClient(client, __GLX_SIZE_CARD32 * __GLX_FBCONFIG_ATTRIBS_LENGTH,
                       (char *) buf);
@@ -1915,12 +1913,11 @@ DoGetDrawableAttributes(__GLXclientState * cl, XID drawId)
         int length = reply.length;
 
         __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
         swaps(&reply.sequenceNumber);
         __GLX_SWAP_INT(&reply.length);
         __GLX_SWAP_INT(&reply.numAttribs);
         WriteToClient(client, sizeof(xGLXGetDrawableAttributesReply), &reply);
-        __GLX_SWAP_INT_ARRAY((int *) attributes, length);
+        SwapLongs(attributes, length);
         WriteToClient(client, length << 2, attributes);
     }
     else {
@@ -2376,12 +2373,11 @@ __glXDisp_QueryExtensionsString(__GLXclientState * cl, GLbyte * pc)
 
     if (client->swapped) {
         __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
         swaps(&reply.sequenceNumber);
         __GLX_SWAP_INT(&reply.length);
         __GLX_SWAP_INT(&reply.n);
         WriteToClient(client, sizeof(xGLXQueryExtensionsStringReply), &reply);
-        __GLX_SWAP_INT_ARRAY((int *) buf, length);
+        SwapLongs((CARD32*)buf, length);
         WriteToClient(client, length << 2, buf);
     }
     else {
@@ -2454,7 +2450,6 @@ __glXDisp_QueryServerString(__GLXclientState * cl, GLbyte * pc)
         __GLX_SWAP_INT(&reply.n);
         WriteToClient(client, sizeof(xGLXQueryServerStringReply), &reply);
         /** no swap is needed for an array of chars **/
-        /* __GLX_SWAP_INT_ARRAY((int *)buf, length); */
         WriteToClient(client, length << 2, buf);
     }
     else {

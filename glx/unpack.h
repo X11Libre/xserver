@@ -152,14 +152,6 @@
   	((GLbyte *)(pc))[1] = ((GLbyte *)(pc))[2]; 	\
   	((GLbyte *)(pc))[2] = sw;
 
-#define __GLX_SWAP_INT_ARRAY(pc, count) \
-  	swapPC = ((GLbyte *)(pc));		\
-  	swapEnd = ((GLbyte *)(pc)) + (count)*__GLX_SIZE_INT32;\
-  	while (swapPC < swapEnd) {		\
-	    __GLX_SWAP_INT(swapPC);		\
-	    swapPC += __GLX_SIZE_INT32;		\
-	}
-
 #define __GLX_SWAP_DOUBLE_ARRAY(pc, count) \
   	swapPC = ((GLbyte *)(pc));		\
   	swapEnd = ((GLbyte *)(pc)) + (count)*__GLX_SIZE_FLOAT64;\
