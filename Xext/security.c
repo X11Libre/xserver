@@ -452,6 +452,15 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
         return BadValue;
     }
 
+    if (client->swapped) {
+        swaps(&stuff->nbytesAuthProto);
+        swaps(&stuff->nbytesAuthData);
+        swapl(&stuff->valueMask);
+
+        unsigned long nvalues = (((CARD32 *) stuff) + client->req_len) - values;
+        SwapLongs(values, nvalues);
+    }
+
     /* check timeout */
     timeout = 60;
     if (stuff->valueMask & XSecurityTimeout) {
