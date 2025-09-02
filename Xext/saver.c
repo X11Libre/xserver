@@ -607,13 +607,17 @@ static int
 ProcScreenSaverQueryInfo(ClientPtr client)
 {
     REQUEST(xScreenSaverQueryInfoReq);
+    REQUEST_SIZE_MATCH(xScreenSaverQueryInfoReq);
+
+    if (client->swapped)
+        swapl(&stuff->drawable);
+
     int rc;
     ScreenSaverStuffPtr pSaver;
     DrawablePtr pDraw;
     CARD32 lastInput;
     ScreenSaverScreenPrivatePtr pPriv;
 
-    REQUEST_SIZE_MATCH(xScreenSaverQueryInfoReq);
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success)
@@ -1249,15 +1253,6 @@ ProcScreenSaverDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcScreenSaverQueryInfo(ClientPtr client)
-{
-    REQUEST(xScreenSaverQueryInfoReq);
-    REQUEST_SIZE_MATCH(xScreenSaverQueryInfoReq);
-    swapl(&stuff->drawable);
-    return ProcScreenSaverQueryInfo(client);
-}
-
-static int _X_COLD
 SProcScreenSaverSelectInput(ClientPtr client)
 {
     REQUEST(xScreenSaverSelectInputReq);
@@ -1310,7 +1305,7 @@ SProcScreenSaverDispatch(ClientPtr client)
         case X_ScreenSaverQueryVersion:
             return ProcScreenSaverQueryVersion(client);
         case X_ScreenSaverQueryInfo:
-            return SProcScreenSaverQueryInfo(client);
+            return ProcScreenSaverQueryInfo(client);
         case X_ScreenSaverSelectInput:
             return SProcScreenSaverSelectInput(client);
         case X_ScreenSaverSetAttributes:
