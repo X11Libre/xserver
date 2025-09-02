@@ -6,12 +6,16 @@ on:
         branches:
             - master
 
+permissions:
+    actions: write
+    contents: read
+
+env:
+    GH_TOKEN: ${{ github.token }}
+
 jobs:
-    delete_old_workflow_runs:
+    delete_old_workflow_runs_timeout:
         runs-on: ubuntu-latest
-        permissions:
-            actions: write
-            contents: read
         steps:
             - name: delete workflow runs
               uses: Mattraks/delete-workflow-runs@v2
@@ -33,3 +37,109 @@ jobs:
               run: .github/scripts/github/gh-purge-deleted-branch-workflows.sh X11Libre/xserver
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    delete_old_workflow_runs_branches:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                version:
+                    - master
+                    - maint-25.0
+                    - wip/AllocColor
+                    - wip/ReadRequestFromClient
+                    - wip/ReplyNotSwappd
+                    - wip/XvPortNotifyPtr
+                    - wip/always-pciaccess
+                    - wip/build-rootless
+                    - wip/ci
+                    - wip/ci-deps
+                    - wip/clang-tidy
+                    - wip/cleanup
+                    - wip/cleanup-api-xfree86
+                    - wip/cleanup-api-xfree86-backup
+                    - wip/cleanup-grabs
+                    - wip/cleanup-os-export
+                    - wip/client_array
+                    - wip/conflict-notify
+                    - wip/conv-warnings
+                    - wip/deps1
+                    - wip/dix-config
+                    - wip/dixLookupWindowByXID
+                    - wip/dixconf-1
+                    - wip/dixconfig-2
+                    - wip/dixgetproperty
+                    - wip/fix-xnest
+                    - wip/fix_347
+                    - wip/generations
+                    - wip/geode
+                    - wip/github-build
+                    - wip/github-macos-deps
+                    - wip/github-releases
+                    - wip/glx_deferred
+                    - wip/grouping
+                    - wip/includes
+                    - wip/includes-2
+                    - wip/intel-2
+                    - wip/io
+                    - wip/log_req_len
+                    - wip/logging
+                    - wip/logging_submitted_1
+                    - wip/maint-xnest
+                    - wip/malloc
+                    - wip/marshal
+                    - wip/matrix-test
+                    - wip/meson
+                    - wip/misc.h
+                    - wip/mpbt
+                    - wip/netbsd
+                    - wip/new-cleanups
+                    - wip/no-libsystemd
+                    - wip/os-unexport
+                    - wip/pciaccess
+                    - wip/pedantic
+                    - wip/pixmap-lifecycle
+                    - wip/purge-master
+                    - wip/reallocarray
+                    - wip/redv
+                    - wip/requests
+                    - wip/rootless
+                    - wip/saveset
+                    - wip/screenkey
+                    - wip/screenproc
+                    - wip/screenproc-old
+                    - wip/screenproc-wrap
+                    - wip/screenproc-wrap-debug
+                    - wip/sdk
+                    - wip/swap0
+                    - wip/swapping
+                    - wip/swapping_new
+                    - wip/troubleshoot-randr
+                    - wip/warn-conv
+                    - wip/werror
+                    - wip/win32_2
+                    - wip/xcb-marshal
+                    - wip/xcb-visuals
+                    - wip/xcb-xnest
+                    - wip/xf86_platform_bus_newabi
+                    - wip/xf86bigfont
+                    - wip/xi-properties
+                    - wip/xnest-multi
+                    - wip/xnest-render
+                    - wip/xnest-rootless
+                    - wip/xnest-rootless-old
+                    - wip/xnest-shm
+                    - wip/xrandr-bug
+                    - wip/xrandr-new-one
+                    - wip/xv-fix
+                    - wip/xv-generation
+                    - wip/xwin
+                    - wip/xwin-2
+        steps:
+            - uses: actions/checkout@v4
+            - name: purge older runs on ${{ github.event.repository.name }} branch
+              run: |
+                .github/scripts/gh-purge-pipelines.sh \
+                    --org ${{ github.repository_owner }} \
+                    --repo ${{ github.event.repository.name }} \
+                    --branch master \
+                    --keep 2
