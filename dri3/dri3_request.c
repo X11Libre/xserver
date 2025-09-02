@@ -532,19 +532,12 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
         }
     }
 
-    const size_t bufsz = num_fds * 2 * sizeof(CARD32);
-    CARD32 *buf = calloc(1, bufsz);
-    if (!buf)
-        return BadAlloc;
-
-    memcpy(buf, strides, num_fds * sizeof(CARD32));
-    memcpy(&buf[num_fds], offsets, num_fds * sizeof(CARD32));
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD32s(&rpcbuf, strides, num_fds);
+    x_rpcbuf_write_CARD32s(&rpcbuf, offsets, num_fds);
 
     xDRI3BuffersFromPixmapReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .nfd = num_fds,
-        .length = bytes_to_int32(bufsz),
         .width = pixmap->drawable.width,
         .height = pixmap->drawable.height,
         .depth = pixmap->drawable.depth,
@@ -553,19 +546,12 @@ proc_dri3_buffers_from_pixmap(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.width);
         swaps(&rep.height);
         swapll(&rep.modifier);
-        for (i = 0; i < num_fds * 2; i++)
-            swapl(&buf[i]);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, bufsz, buf);
-    free(buf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
