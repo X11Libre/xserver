@@ -59,53 +59,6 @@ static void SwapFontInfo(xQueryFontReply * pr);
 
 static void SwapCharInfo(xCharInfo * pInfo);
 
-/**
- *
- * \param size size in bytes
- */
-void _X_COLD
-CopySwap16Write(ClientPtr pClient, int size, short *pbuf)
-{
-    int bufsize = size;
-    short *pbufT;
-    short *from, *to, *fromLast, *toLast;
-    short tmpbuf[2];
-
-    /* Allocate as big a buffer as we can... */
-    while (!(pbufT = calloc(1, bufsize))) {
-        bufsize >>= 1;
-        if (bufsize == 4) {
-            pbufT = tmpbuf;
-            break;
-        }
-    }
-
-    /* convert lengths from # of bytes to # of shorts */
-    size >>= 1;
-    bufsize >>= 1;
-
-    from = pbuf;
-    fromLast = from + size;
-    while (from < fromLast) {
-        int nbytes;
-
-        to = pbufT;
-        toLast = to + min(bufsize, fromLast - from);
-        nbytes = (toLast - to) << 1;
-        while (to < toLast) {
-            /* can't write "cpswaps(*from++, *to++)" because cpswaps is a macro
-               that evaluates its args more than once */
-            cpswaps(*from, *to);
-            from++;
-            to++;
-        }
-        WriteToClient(pClient, nbytes, pbufT);
-    }
-
-    if (pbufT != tmpbuf)
-        free(pbufT);
-}
-
 /* Extra-small reply */
 void _X_COLD
 SGenericReply(ClientPtr pClient, int size, xGenericReply * pRep)
