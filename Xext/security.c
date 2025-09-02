@@ -347,13 +347,18 @@ SecurityStartAuthorizationTimer(SecurityAuthorizationPtr pAuth)
 static int
 ProcSecurityQueryVersion(ClientPtr client)
 {
-    /* REQUEST(xSecurityQueryVersionReq); */
     xSecurityQueryVersionReply reply = {
         .majorVersion = SERVER_SECURITY_MAJOR_VERSION,
         .minorVersion = SERVER_SECURITY_MINOR_VERSION
     };
 
+    REQUEST(xSecurityQueryVersionReq);
     REQUEST_SIZE_MATCH(xSecurityQueryVersionReq);
+
+    if (client->swapped) {
+        swaps(&stuff->majorVersion);
+        swaps(&stuff->minorVersion);
+    }
 
     if (client->swapped) {
         swaps(&reply.majorVersion);
@@ -416,6 +421,13 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     /* check request length */
 
     REQUEST_AT_LEAST_SIZE(xSecurityGenerateAuthorizationReq);
+
+    if (client->swapped) {
+        swaps(&stuff->nbytesAuthProto);
+        swaps(&stuff->nbytesAuthData);
+        swapl(&stuff->valueMask);
+    }
+
     len = bytes_to_int32(SIZEOF(xSecurityGenerateAuthorizationReq));
     len += bytes_to_int32(stuff->nbytesAuthProto);
     len += bytes_to_int32(stuff->nbytesAuthData);
@@ -423,6 +435,11 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     len += Ones(stuff->valueMask);
     if (client->req_len != len)
         return BadLength;
+
+    if (client->swapped) {
+        unsigned long nvalues = (((CARD32 *) stuff) + client->req_len) - values;
+        SwapLongs(values, nvalues);
+    }
 
     /* check valuemask */
     if (stuff->valueMask & ~XSecurityAllAuthorizationAttributes) {
@@ -570,6 +587,9 @@ ProcSecurityRevokeAuthorization(ClientPtr client)
     int rc;
 
     REQUEST_SIZE_MATCH(xSecurityRevokeAuthorizationReq);
+    if (client->swapped) {
+        swapl(&stuff->authId);
+    }
 
     rc = dixLookupResourceByType((void **) &pAuth, stuff->authId,
                                  SecurityAuthorizationResType, client,
@@ -597,64 +617,6 @@ ProcSecurityDispatch(ClientPtr client)
         return BadRequest;
     }
 }                               /* ProcSecurityDispatch */
-
-static int _X_COLD
-SProcSecurityQueryVersion(ClientPtr client)
-{
-    REQUEST(xSecurityQueryVersionReq);
-    REQUEST_SIZE_MATCH(xSecurityQueryVersionReq);
-    swaps(&stuff->majorVersion);
-    swaps(&stuff->minorVersion);
-    return ProcSecurityQueryVersion(client);
-}                               /* SProcSecurityQueryVersion */
-
-static int _X_COLD
-SProcSecurityGenerateAuthorization(ClientPtr client)
-{
-    REQUEST(xSecurityGenerateAuthorizationReq);
-    CARD32 *values;
-    unsigned long nvalues;
-    int values_offset;
-    REQUEST_AT_LEAST_SIZE(xSecurityGenerateAuthorizationReq);
-    swaps(&stuff->nbytesAuthProto);
-    swaps(&stuff->nbytesAuthData);
-    swapl(&stuff->valueMask);
-    values_offset = bytes_to_int32(stuff->nbytesAuthProto) +
-        bytes_to_int32(stuff->nbytesAuthData);
-    if (values_offset >
-        client->req_len - bytes_to_int32(sz_xSecurityGenerateAuthorizationReq))
-        return BadLength;
-    values = (CARD32 *) (&stuff[1]) + values_offset;
-    nvalues = (((CARD32 *) stuff) + client->req_len) - values;
-    SwapLongs(values, nvalues);
-    return ProcSecurityGenerateAuthorization(client);
-}                               /* SProcSecurityGenerateAuthorization */
-
-static int _X_COLD
-SProcSecurityRevokeAuthorization(ClientPtr client)
-{
-    REQUEST(xSecurityRevokeAuthorizationReq);
-    REQUEST_SIZE_MATCH(xSecurityRevokeAuthorizationReq);
-    swapl(&stuff->authId);
-    return ProcSecurityRevokeAuthorization(client);
-}                               /* SProcSecurityRevokeAuthorization */
-
-static int _X_COLD
-SProcSecurityDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_SecurityQueryVersion:
-        return SProcSecurityQueryVersion(client);
-    case X_SecurityGenerateAuthorization:
-        return SProcSecurityGenerateAuthorization(client);
-    case X_SecurityRevokeAuthorization:
-        return SProcSecurityRevokeAuthorization(client);
-    default:
-        return BadRequest;
-    }
-}                               /* SProcSecurityDispatch */
 
 static void _X_COLD
 SwapSecurityAuthorizationRevokedEvent(xSecurityAuthorizationRevokedEvent * from,
@@ -1067,7 +1029,7 @@ SecurityExtensionInit(void)
     /* Add extension to server */
     extEntry = AddExtension(SECURITY_EXTENSION_NAME,
                             XSecurityNumberEvents, XSecurityNumberErrors,
-                            ProcSecurityDispatch, SProcSecurityDispatch,
+                            ProcSecurityDispatch, ProcSecurityDispatch,
                             SecurityResetProc, StandardMinorOpcode);
 
     SecurityErrorBase = extEntry->errorBase;
