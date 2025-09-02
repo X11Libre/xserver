@@ -2105,14 +2105,13 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
            Mask planemask)
 {
     DrawablePtr pDraw, pBoundingDraw;
-    int nlines, linesPerBuf, rc;
+    int linesPerBuf, rc;
     int linesDone;
 
     /* coordinates relative to the bounding drawable */
     int relx, rely;
     long widthBytesLine, length;
     Mask plane = 0;
-    char *pBuf;
     RegionPtr pVisibleRegion = NULL;
 
     if ((format != XYPixmap) && (format != ZPixmap)) {
@@ -2123,10 +2122,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     if (rc != Success)
         return rc;
 
-    xGetImageReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xGetImageReply rep = { 0 };
 
     relx = x;
     rely = y;
@@ -2187,7 +2183,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(width, pDraw->depth);
         length = widthBytesLine * height;
-
     }
     else {
         widthBytesLine = BitmapBytePad(width);
@@ -2195,7 +2190,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         /* only planes asked for */
         length = widthBytesLine * height *
             Ones(planemask & (plane | (plane - 1)));
-
     }
 
     rep.length = bytes_to_int32(length);
@@ -2222,15 +2216,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
             length += widthBytesLine;
         }
     }
-    if (!(pBuf = calloc(1, length)))
-        return BadAlloc;
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.visual);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
 
     if (pDraw->type == DRAWABLE_WINDOW) {
         pVisibleRegion = &((WindowPtr) pDraw)->borderClip;
@@ -2238,13 +2223,22 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                                        IncludeInferiors);
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (linesPerBuf == 0) {
         /* nothing to do */
     }
     else if (format == ZPixmap) {
         linesDone = 0;
         while (height - linesDone > 0) {
-            nlines = min(linesPerBuf, height - linesDone);
+            size_t nlines = min(linesPerBuf, height - linesDone);
+
+            char *pBuf = x_rpcbuf_reserve(&rpcbuf, (nlines * widthBytesLine));
+            if (!pBuf) {
+                x_rpcbuf_clear(&rpcbuf);
+                return BadAlloc;
+            }
+
             (*pDraw->pScreen->GetImage) (pDraw,
                                          x,
                                          y + linesDone,
@@ -2260,7 +2254,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
             ReformatImage(pBuf, (int) (nlines * widthBytesLine),
                           BitsPerPixel(pDraw->depth), ClientOrder(client));
 
-            WriteToClient(client, (int) (nlines * widthBytesLine), pBuf);
             linesDone += nlines;
         }
     }
@@ -2270,7 +2263,14 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
             if (planemask & plane) {
                 linesDone = 0;
                 while (height - linesDone > 0) {
-                    nlines = min(linesPerBuf, height - linesDone);
+                    size_t nlines = min(linesPerBuf, height - linesDone);
+
+                    char *pBuf = x_rpcbuf_reserve(&rpcbuf, (nlines * widthBytesLine));
+                    if (!pBuf) {
+                        x_rpcbuf_clear(&rpcbuf);
+                        return BadAlloc;
+                    }
+
                     (*pDraw->pScreen->GetImage) (pDraw,
                                                  x,
                                                  y + linesDone,
@@ -2287,14 +2287,17 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                     ReformatImage(pBuf, (int) (nlines * widthBytesLine),
                                   1, ClientOrder(client));
 
-                    WriteToClient(client, (int)(nlines * widthBytesLine), pBuf);
                     linesDone += nlines;
                 }
             }
         }
     }
-    free(pBuf);
-    return Success;
+
+    if (client->swapped) {
+        swapl(&rep.visual);
+    }
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
