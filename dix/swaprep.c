@@ -64,53 +64,6 @@ static void SwapCharInfo(xCharInfo * pInfo);
  * \param size size in bytes
  */
 void _X_COLD
-CopySwap32Write(ClientPtr pClient, int size, CARD32 *pbuf)
-{
-    int bufsize = size;
-    CARD32 *pbufT;
-    CARD32 *from, *to, *fromLast, *toLast;
-    CARD32 tmpbuf[1];
-
-    /* Allocate as big a buffer as we can... */
-    while (!(pbufT = calloc(1, bufsize))) {
-        bufsize >>= 1;
-        if (bufsize == 4) {
-            pbufT = tmpbuf;
-            break;
-        }
-    }
-
-    /* convert lengths from # of bytes to # of longs */
-    size >>= 2;
-    bufsize >>= 2;
-
-    from = pbuf;
-    fromLast = from + size;
-    while (from < fromLast) {
-        int nbytes;
-
-        to = pbufT;
-        toLast = to + min(bufsize, fromLast - from);
-        nbytes = (toLast - to) << 2;
-        while (to < toLast) {
-            /* can't write "cpswapl(*from++, *to++)" because cpswapl is a macro
-               that evaluates its args more than once */
-            cpswapl(*from, *to);
-            from++;
-            to++;
-        }
-        WriteToClient(pClient, nbytes, pbufT);
-    }
-
-    if (pbufT != tmpbuf)
-        free(pbufT);
-}
-
-/**
- *
- * \param size size in bytes
- */
-void _X_COLD
 CopySwap16Write(ClientPtr pClient, int size, short *pbuf)
 {
     int bufsize = size;

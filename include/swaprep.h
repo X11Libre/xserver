@@ -28,10 +28,6 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 void SwapFont(xQueryFontReply * pr, Bool hasGlyphs);
 
-extern void CopySwap32Write(ClientPtr /* pClient */ ,
-                            int /* size */ ,
-                            CARD32 * /* pbuf */ );
-
 extern void CopySwap16Write(ClientPtr /* pClient */ ,
                             int /* size */ ,
                             short * /* pbuf */ );
