@@ -376,8 +376,9 @@ ProcRenderQueryPictFormats(ClientPtr client)
         ScreenPtr walkScreen = screenInfo.screens[s];
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps) {
-            for (nformat = 0, pFormat = ps->formats;
-                 nformat < ps->nformats; nformat++, pFormat++) {
+            size_t idx;
+            for (idx = 0, pFormat = ps->formats;
+                 idx < ps->nformats; idx++, pFormat++) {
                 pictForm->id = pFormat->id;
                 pictForm->type = pFormat->type;
                 pictForm->depth = pFormat->depth;
@@ -415,12 +416,11 @@ ProcRenderQueryPictFormats(ClientPtr client)
     for (s = 0; s < numScreens; s++) {
         ScreenPtr walkScreen = screenInfo.screens[s];
         pictDepth = (xPictDepth *) (pictScreen + 1);
-        ndepth = 0;
+        pictScreen->nDepth = 0; /* counting in here */
         for (d = 0; d < walkScreen->numDepths; d++) {
             pictVisual = (xPictVisual *) (pictDepth + 1);
             pDepth = walkScreen->allowedDepths + d;
-
-            nvisual = 0;
+            pictDepth->nPictVisuals = 0; /* counting in here */
             for (v = 0; v < pDepth->numVids; v++) {
                 pVisual = findVisual(walkScreen, pDepth->vids[v]);
                 if (pVisual && (pFormat = PictureMatchVisual(walkScreen,
@@ -433,18 +433,16 @@ ProcRenderQueryPictFormats(ClientPtr client)
                         swapl(&pictVisual->format);
                     }
                     pictVisual++;
-                    nvisual++;
+                    pictDepth->nPictVisuals++;
                 }
             }
             pictDepth->depth = pDepth->depth;
-            pictDepth->nPictVisuals = nvisual;
             if (client->swapped) {
                 swaps(&pictDepth->nPictVisuals);
             }
-            ndepth++;
+            pictScreen->nDepth++;
             pictDepth = (xPictDepth *) pictVisual;
         }
-        pictScreen->nDepth = ndepth;
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps)
             pictScreen->fallback = ps->fallback->id;
