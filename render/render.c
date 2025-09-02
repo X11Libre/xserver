@@ -308,7 +308,6 @@ ProcRenderQueryPictFormats(ClientPtr client)
     VisualPtr pVisual;
     DepthPtr pDepth;
     int v, d;
-    PictFormatPtr pFormat;
     int nformat;
     int ndepth;
     int nvisual;
@@ -377,6 +376,7 @@ ProcRenderQueryPictFormats(ClientPtr client)
         PictureScreenPtr ps = GetPictureScreenIfSet(walkScreen);
         if (ps) {
             size_t idx;
+            PictFormatPtr pFormat;
             for (idx = 0, pFormat = ps->formats;
                  idx < ps->nformats; idx++, pFormat++) {
                 pictForm->id = pFormat->id;
@@ -422,6 +422,8 @@ ProcRenderQueryPictFormats(ClientPtr client)
             pDepth = walkScreen->allowedDepths + d;
             pictDepth->nPictVisuals = 0; /* counting in here */
             for (v = 0; v < pDepth->numVids; v++) {
+                PictFormatPtr pFormat;
+
                 pVisual = findVisual(walkScreen, pDepth->vids[v]);
                 if (pVisual && (pFormat = PictureMatchVisual(walkScreen,
                                                              pDepth->depth,
