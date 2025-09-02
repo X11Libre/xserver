@@ -94,6 +94,8 @@ void CloseDownClient(ClientPtr client);
 ClientPtr GetCurrentClient(void);
 void InitClient(ClientPtr client, int i, void *ospriv);
 
+int FillFontPath(x_rpcbuf_t *rpcbuf);
+
 /* lookup builtin color by name */
 Bool dixLookupBuiltinColor(int screen,
                            char *name,

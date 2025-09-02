@@ -3419,31 +3419,24 @@ ProcSetFontPath(ClientPtr client)
 int
 ProcGetFontPath(ClientPtr client)
 {
-    int rc, stringLens, numpaths;
-    unsigned char *bufferStart;
-
     /* REQUEST (xReq); */
-
     REQUEST_SIZE_MATCH(xReq);
-    rc = GetFontPath(client, &numpaths, &stringLens, &bufferStart);
+
+    int rc = XaceHookServerAccess(client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     xGetFontPathReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(stringLens + numpaths),
-        .nPaths = numpaths
+        .nPaths = FillFontPath(&rpcbuf)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nPaths);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, stringLens + numpaths, bufferStart);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int

@@ -59,6 +59,7 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "include/swaprep.h"
 #include "os/auth.h"
 #include "os/log_priv.h"
@@ -1777,6 +1778,17 @@ DeleteClientFontStuff(ClientPtr client)
         if (fpe_functions[fpe->type]->client_died)
             (*fpe_functions[fpe->type]->client_died) ((void *) client, fpe);
     }
+}
+
+int FillFontPath(x_rpcbuf_t *rpcbuf)
+{
+    for (int i = 0; i < num_fpes; i++) {
+        FontPathElementPtr fpe = font_path_elements[i];
+        /* write a pascal-string */
+        x_rpcbuf_write_CARD8(rpcbuf, fpe->name_length);
+        x_rpcbuf_write_CARD8s(rpcbuf, (CARD8*)fpe->name, fpe->name_length);
+    }
+    return num_fpes;
 }
 
 static int
