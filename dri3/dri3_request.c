@@ -355,7 +355,6 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
     CARD32 nwindowmodifiers = 0;
     CARD32 nscreenmodifiers = 0;
     int status;
-    int i;
 
     REQUEST_SIZE_MATCH(xDRI3GetSupportedModifiersReq);
 
@@ -369,41 +368,24 @@ proc_dri3_get_supported_modifiers(ClientPtr client)
                                  &nwindowmodifiers, &window_modifiers,
                                  &nscreenmodifiers, &screen_modifiers);
 
-    const size_t bufsz = (nwindowmodifiers + nscreenmodifiers) * sizeof(CARD64);
-    CARD64 *buf = calloc(1, bufsz);
-    if (!buf) {
-        free(window_modifiers);
-        free(screen_modifiers);
-        return BadAlloc;
-    }
-
-    memcpy(buf, window_modifiers, sizeof(CARD64) * nwindowmodifiers);
-    memcpy(&buf[nwindowmodifiers], screen_modifiers, sizeof(CARD64) * nscreenmodifiers);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD64s(&rpcbuf, window_modifiers, nwindowmodifiers);
+    x_rpcbuf_write_CARD64s(&rpcbuf, screen_modifiers, nscreenmodifiers);
 
     free(window_modifiers);
     free(screen_modifiers);
 
     xDRI3GetSupportedModifiersReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .numWindowModifiers = nwindowmodifiers,
         .numScreenModifiers = nscreenmodifiers,
-        .length = bytes_to_int32(bufsz),
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.numWindowModifiers);
         swapl(&rep.numScreenModifiers);
-        for (i = 0; i < nwindowmodifiers+nscreenmodifiers; i++)
-            swapll(&buf[i]);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, bufsz, buf);
-    free(buf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
