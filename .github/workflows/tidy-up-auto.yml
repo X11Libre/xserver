@@ -6,12 +6,16 @@ on:
         branches:
             - master
 
+permissions:
+    actions: write
+    contents: read
+
+env:
+    GH_TOKEN: ${{ github.token }}
+
 jobs:
-    delete_old_workflow_runs:
+    delete_old_workflow_runs_timeout:
         runs-on: ubuntu-latest
-        permissions:
-            actions: write
-            contents: read
         steps:
             - name: delete workflow runs
               uses: Mattraks/delete-workflow-runs@v2
@@ -33,3 +37,35 @@ jobs:
               run: .github/scripts/github/gh-purge-deleted-branch-workflows.sh X11Libre/xserver
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    delete_old_workflow_runs_branches:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                version:
+                    - master
+                    - maint-25.0
+                    - wip/cleanup
+                    - wip/client-destroy-hook
+                    - wip/conv-warnings
+                    - wip/dix-config
+                    - wip/grouping
+                    - wip/privates
+                    - wip/purge-master
+                    - wip/reallocarray
+                    - wip/requests
+                    - wip/screenproc
+                    - wip/swapping_new
+                    - wip/use-pixman
+                    - wip/warn-conv
+                    - wip/xinerama-walkScreen
+                    - wip/xwin-2
+        steps:
+            - uses: actions/checkout@v4
+            - name: purge older runs on ${{ github.event.repository.name }} branch
+              run: |
+                .github/scripts/gh-purge-pipelines.sh \
+                    --org ${{ github.repository_owner }} \
+                    --repo ${{ github.event.repository.name }} \
+                    --branch master \
+                    --keep 2
