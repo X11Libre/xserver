@@ -122,14 +122,6 @@
   	GLbyte *swapPC;		\
   	GLbyte *swapEnd
 
-#define __GLX_SWAP_INT(pc) 			\
-  	sw = ((GLbyte *)(pc))[0]; 		\
-  	((GLbyte *)(pc))[0] = ((GLbyte *)(pc))[3]; 	\
-  	((GLbyte *)(pc))[3] = sw; 		\
-  	sw = ((GLbyte *)(pc))[1]; 		\
-  	((GLbyte *)(pc))[1] = ((GLbyte *)(pc))[2]; 	\
-  	((GLbyte *)(pc))[2] = sw;
-
 #define __GLX_SWAP_DOUBLE(pc) \
   	sw = ((GLbyte *)(pc))[0]; 		\
   	((GLbyte *)(pc))[0] = ((GLbyte *)(pc))[7]; 	\
@@ -170,12 +162,12 @@
 
 #define __GLX_SWAP_REPLY_HEADER() \
 	swaps(&reply.sequenceNumber); \
-	__GLX_SWAP_INT(&reply.length);
+	swapl(&reply.length);
 
 #define __GLX_SWAP_REPLY_RETVAL() \
-	__GLX_SWAP_INT(&reply.retval)
+	swpal(&reply.retval)
 
 #define __GLX_SWAP_REPLY_SIZE() \
-	__GLX_SWAP_INT(&reply.size)
+	swapl(&reply.size)
 
 #endif                          /* !__GLX_unpack_h__ */

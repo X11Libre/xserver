@@ -46,8 +46,8 @@ __glXDispSwap_Map1f(GLbyte * pc)
     __GLX_DECLARE_SWAP_VARIABLES;
     __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
 
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 12);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 12));
     __GLX_SWAP_FLOAT(pc + 4);
     __GLX_SWAP_FLOAT(pc + 8);
 
@@ -81,9 +81,9 @@ __glXDispSwap_Map2f(GLbyte * pc)
     __GLX_DECLARE_SWAP_VARIABLES;
     __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
 
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 12);
-    __GLX_SWAP_INT(pc + 24);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 12));
+    swapl((CARD32*)(pc + 24));
     __GLX_SWAP_FLOAT(pc + 4);
     __GLX_SWAP_FLOAT(pc + 8);
     __GLX_SWAP_FLOAT(pc + 16);
@@ -126,8 +126,8 @@ __glXDispSwap_Map1d(GLbyte * pc)
 
     __GLX_SWAP_DOUBLE(pc + 0);
     __GLX_SWAP_DOUBLE(pc + 8);
-    __GLX_SWAP_INT(pc + 16);
-    __GLX_SWAP_INT(pc + 20);
+    swapl((CARD32*)(pc + 16));
+    swapl((CARD32*)(pc + 20));
 
     target = *(GLenum *) (pc + 16);
     order = *(GLint *) (pc + 20);
@@ -176,9 +176,9 @@ __glXDispSwap_Map2d(GLbyte * pc)
     __GLX_SWAP_DOUBLE(pc + 8);
     __GLX_SWAP_DOUBLE(pc + 16);
     __GLX_SWAP_DOUBLE(pc + 24);
-    __GLX_SWAP_INT(pc + 32);
-    __GLX_SWAP_INT(pc + 36);
-    __GLX_SWAP_INT(pc + 40);
+    swapl((CARD32*)(pc + 32));
+    swapl((CARD32*)(pc + 36));
+    swapl((CARD32*)(pc + 40));
 
     target = *(GLenum *) (pc + 32);
     uorder = *(GLint *) (pc + 36);
@@ -248,7 +248,7 @@ swapArray(GLint numVals, GLenum datatype,
             GLint *pVal = (GLint *) pc;
 
             for (j = 0; j < numVals; j++) {
-                __GLX_SWAP_INT(&pVal[j]);
+                swapl(&pVal[j]);
             }
             pc += stride;
         }
@@ -289,11 +289,9 @@ __glXDispSwap_DrawArrays(GLbyte * pc)
     GLint stride = 0;
     int i;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
-
-    __GLX_SWAP_INT(&numVertexes);
-    __GLX_SWAP_INT(&numComponents);
-    __GLX_SWAP_INT(&primType);
+    swapl(&numVertexes);
+    swapl(&numComponents);
+    swapl(&primType);
 
     pc += sizeof(__GLXdispatchDrawArraysHeader);
     compHeader = (__GLXdispatchDrawArraysComponentHeader *) pc;
@@ -304,9 +302,9 @@ __glXDispSwap_DrawArrays(GLbyte * pc)
         GLint numVals = compHeader[i].numVals;
         GLenum component = compHeader[i].component;
 
-        __GLX_SWAP_INT(&datatype);
-        __GLX_SWAP_INT(&numVals);
-        __GLX_SWAP_INT(&component);
+        swapl(&datatype);
+        swapl(&numVals);
+        swapl(&component);
 
         stride += __GLX_PAD(numVals * __glXTypeSize(datatype));
     }
@@ -319,9 +317,9 @@ __glXDispSwap_DrawArrays(GLbyte * pc)
         GLint numVals = compHeader[i].numVals;
         GLenum component = compHeader[i].component;
 
-        __GLX_SWAP_INT(&datatype);
-        __GLX_SWAP_INT(&numVals);
-        __GLX_SWAP_INT(&component);
+        swapl(&datatype);
+        swapl(&numVals);
+        swapl(&component);
 
         swapArray(numVals, datatype, stride, numVertexes, pc);
 
