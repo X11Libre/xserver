@@ -1044,14 +1044,12 @@ ProcXineramaQueryScreens(ClientPtr client)
         int i;
         FOR_NSCREENS_BACKWARD(i) {
             ScreenPtr walkScreen = screenInfo.screens[i];
-            xXineramaScreenInfo scratch = {
-                .x_org = walkScreen->x,
-                .y_org = walkScreen->y,
-                .width = walkScreen->width,
-                .height = walkScreen->height,
-            };
-            /* scratch consists of 4x CARD16 */
-            x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&scratch, 4);
+            /* xXineramaScreenInfo is the same as xRectangle */
+            x_rpcbuf_write_rect(&rpcbuf,
+                                walkScreen->x,
+                                walkScreen->y,
+                                walkScreen->width,
+                                walkScreen->height);
         }
     }
 

@@ -246,11 +246,13 @@ ProcRRXineramaQueryScreens(ClientPtr client)
     }
 
     for (m = 0; m < nmonitors; m++) {
+        BoxRec box = monitors[m].geometry.box;
         /* write xXineramaScreenInfo */
-        x_rpcbuf_write_INT16(&rpcbuf, monitors[m].geometry.box.x1);
-        x_rpcbuf_write_INT16(&rpcbuf, monitors[m].geometry.box.y1);
-        x_rpcbuf_write_CARD16(&rpcbuf, monitors[m].geometry.box.x2 - monitors[m].geometry.box.x1);
-        x_rpcbuf_write_CARD16(&rpcbuf, monitors[m].geometry.box.y2 - monitors[m].geometry.box.y1);
+        x_rpcbuf_write_rect(&rpcbuf,
+                            box.x1,
+                            box.y1,
+                            box.x2 - box.x1,
+                            box.y2 - box.y1);
     }
 
     if (monitors)
