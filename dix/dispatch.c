@@ -3298,12 +3298,11 @@ ProcListHosts(ClientPtr client)
         return result;
 
     xListHostsReply rep = {
-        .type = X_Reply,
         .enabled = enabled,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(len),
         .nHosts = nHosts
     };
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (client->swapped) {
         char *bufT = pdata;
@@ -3316,16 +3315,13 @@ ProcListHosts(ClientPtr client)
             bufT += sizeof(xHostEntry) + pad_to_int32(l1);
         }
 
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.nHosts);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, len, pdata);
-
+    x_rpcbuf_write_CARD8s(&rpcbuf, pdata, len);
     free(pdata);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
