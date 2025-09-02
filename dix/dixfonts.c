@@ -984,7 +984,44 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
                 pFP++;
             }
             if (client->swapped) {
-                SwapFont((xQueryFontReply *) reply, FALSE);
+                swaps(&reply->sequenceNumber);
+                swapl(&reply->length);
+                unsigned nprops = reply->nFontProps;
+
+                /* from SwapInfo() */
+                swaps(&reply->minCharOrByte2);
+                swaps(&reply->maxCharOrByte2);
+                swaps(&reply->defaultChar);
+                swaps(&reply->nFontProps);
+                swaps(&reply->fontAscent);
+                swaps(&reply->fontDescent);
+                swapl(&reply->nReplies);
+
+                /* from SwapCharInfo */
+                swaps(&reply->minBounds.leftSideBearing);
+                swaps(&reply->minBounds.rightSideBearing);
+                swaps(&reply->minBounds.characterWidth);
+                swaps(&reply->minBounds.ascent);
+                swaps(&reply->minBounds.descent);
+                swaps(&reply->minBounds.attributes);
+
+                /* from SwapCharInfo */
+                swaps(&reply->maxBounds.leftSideBearing);
+                swaps(&reply->maxBounds.rightSideBearing);
+                swaps(&reply->maxBounds.characterWidth);
+                swaps(&reply->maxBounds.ascent);
+                swaps(&reply->maxBounds.descent);
+                swaps(&reply->maxBounds.attributes);
+
+                char *pby = (char *) &reply[1];
+                /* Font properties are an atom and either an int32 or a CARD32, so
+                 * they are always 2 4 byte values */
+                for (unsigned i = 0; i < nprops; i++) {
+                    swapl((int *) pby);
+                    pby += 4;
+                    swapl((int *) pby);
+                    pby += 4;
+                }
             }
             WriteToClient(client, length, reply);
             WriteToClient(client, namelen, name);
