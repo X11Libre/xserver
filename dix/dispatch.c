@@ -2754,13 +2754,12 @@ ProcAllocColorPlanes(ClientPtr client)
         }
 
         xAllocColorPlanesReply rep = {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
             .nPixels = npixels
         };
         length = (long) npixels *sizeof(Pixel);
 
-        Pixel *ppixels = calloc(1, length);
+        x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+        Pixel *ppixels = x_rpcbuf_reserve(&rpcbuf, length);
         if (!ppixels)
             return BadAlloc;
         if ((rc = AllocColorPlanes(client->index, pcmp, npixels,
@@ -2768,15 +2767,12 @@ ProcAllocColorPlanes(ClientPtr client)
                                    (int) stuff->blue, (Bool) stuff->contiguous,
                                    ppixels, &rep.redMask, &rep.greenMask,
                                    &rep.blueMask))) {
-            free(ppixels);
+            x_rpcbuf_clear(&rpcbuf);
             return rc;
         }
-        rep.length = bytes_to_int32(length);
 
         if (client->swapped) {
-            SwapLongs(ppixels, rep.length);
-            swaps(&rep.sequenceNumber);
-            swapl(&rep.length);
+            SwapLongs(ppixels, length / 4);
             swaps(&rep.nPixels);
             swapl(&rep.redMask);
             swapl(&rep.greenMask);
@@ -2787,10 +2783,9 @@ ProcAllocColorPlanes(ClientPtr client)
         if (noPanoramiXExtension || !pcmp->pScreen->myNum)
 #endif /* XINERAMA */
         {
-            WriteToClient(client, sizeof(rep), &rep);
-            WriteToClient(client, length, ppixels);
+            return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
         }
-        free(ppixels);
+        x_rpcbuf_clear(&rpcbuf);
         return Success;
     }
     else {
