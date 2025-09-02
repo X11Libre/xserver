@@ -237,7 +237,7 @@ swapArray(GLint numVals, GLenum datatype,
             GLshort *pVal = (GLshort *) pc;
 
             for (j = 0; j < numVals; j++) {
-                __GLX_SWAP_SHORT(&pVal[j]);
+                swaps(&pVal[j]);
             }
             pc += stride;
         }

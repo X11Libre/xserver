@@ -210,7 +210,7 @@ __glXDispSwap_RenderMode(__GLXclientState * cl, GLbyte * pc)
         .size = nitems,
         .newMode = newMode
     };
-    __GLX_SWAP_SHORT(&reply.sequenceNumber);
+    swaps(&reply.sequenceNumber);
     __GLX_SWAP_INT(&reply.length);
     __GLX_SWAP_INT(&reply.retval);
     __GLX_SWAP_INT(&reply.size);
