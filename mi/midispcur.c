@@ -491,24 +491,25 @@ miDCDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
         ScreenPtr walkScreen = screenInfo.screens[i];
         miDCBufferPtr pBuffer = miGetDCDevice(pDev, walkScreen);
 
-        if (pBuffer) {
-            if (pBuffer->pSourceGC)
-                FreeGC(pBuffer->pSourceGC, (GContext) 0);
-            if (pBuffer->pMaskGC)
-                FreeGC(pBuffer->pMaskGC, (GContext) 0);
-            if (pBuffer->pSaveGC)
-                FreeGC(pBuffer->pSaveGC, (GContext) 0);
-            if (pBuffer->pRestoreGC)
-                FreeGC(pBuffer->pRestoreGC, (GContext) 0);
+        if (!pBuffer)
+            continue;
 
-            /* If a pRootPicture was allocated for a root window, it
-             * is freed when that root window is destroyed, so don't
-             * free it again here. */
+        if (pBuffer->pSourceGC)
+            FreeGC(pBuffer->pSourceGC, (GContext) 0);
+        if (pBuffer->pMaskGC)
+            FreeGC(pBuffer->pMaskGC, (GContext) 0);
+        if (pBuffer->pSaveGC)
+            FreeGC(pBuffer->pSaveGC, (GContext) 0);
+        if (pBuffer->pRestoreGC)
+            FreeGC(pBuffer->pRestoreGC, (GContext) 0);
 
-            dixDestroyPixmap(pBuffer->pSave, 0);
+        /* If a pRootPicture was allocated for a root window, it
+         * is freed when that root window is destroyed, so don't
+         * free it again here. */
 
-            free(pBuffer);
-            dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, walkScreen, NULL);
-        }
+        dixDestroyPixmap(pBuffer->pSave, 0);
+
+        free(pBuffer);
+        dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, walkScreen, NULL);
     }
 }
