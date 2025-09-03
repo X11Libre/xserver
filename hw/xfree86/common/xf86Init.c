@@ -284,7 +284,7 @@ xf86EnsureRANDR(ScreenPtr pScreen)
  *      collecting the pixmap formats.
  */
 void
-InitOutput(ScreenInfo *unused, int argc, char **argv)
+InitOutput(int argc, char **argv)
 {
     int i, j, k, scr_index;
     const char **modulelist;

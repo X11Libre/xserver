@@ -65,7 +65,7 @@ Bool noGlxExtension = FALSE;
 #endif
 
 void
-InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
+InitOutput(int argc, char *argv[])
 {
     int i;
 

@@ -1865,14 +1865,12 @@ insists that these must be the same for all screens on the server.</para>
 <para>
 <blockquote><programlisting>
 
-        InitOutput(pScreenInfo, argc, argv)
-                ScreenInfo *pScreenInfo;
+        InitOutput(argc, argv)
                 int argc;
                 char **argv;
 </programlisting></blockquote>
 Upon initialization, your DDX routine InitOutput() is called by DIX.
-It is passed a pointer to screenInfo to initialize.  It is also passed
-the argc and argv from main() for your server for the command-line
+It is passed the argc and argv from main() for your server for the command-line
 arguments.  These arguments may indicate what or how many screen
 device(s) to use or in what way to use them.  For instance, your
 server command line may allow a "-D" flag followed by the name of the

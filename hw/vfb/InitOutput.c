@@ -1046,7 +1046,7 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 }                               /* end vfbScreenInit */
 
 void
-InitOutput(ScreenInfo *unused, int argc, char **argv)
+InitOutput(int argc, char **argv)
 {
     int i;
     int NumFormats = 0;

@@ -192,7 +192,7 @@ dix_main(int argc, char *argv[], char *envp[])
         dixResetRegistry();
         InitFonts();
         InitCallbackManager();
-        InitOutput(&screenInfo, argc, argv);
+        InitOutput(argc, argv);
 
         if (screenInfo.numScreens < 1)
             FatalError("no screens found");

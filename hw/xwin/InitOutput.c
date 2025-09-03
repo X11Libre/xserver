@@ -786,7 +786,7 @@ ddxUseMsg(void)
  */
 
 void
-InitOutput(ScreenInfo * pScreenInfo, int argc, char *argv[])
+InitOutput(int argc, char *argv[])
 {
     int i;
 

@@ -732,8 +732,4 @@ typedef struct _ScreenInfo {
 
 extern _X_EXPORT ScreenInfo screenInfo;
 
-extern _X_EXPORT void InitOutput(ScreenInfo * /*pScreenInfo */ ,
-                                 int /*argc */ ,
-                                 char ** /*argv */ );
-
 #endif                          /* SCREENINTSTRUCT_H */
