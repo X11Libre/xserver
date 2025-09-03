@@ -116,7 +116,7 @@ linux_parse_vt_settings(int may_fail)
         if (fd < 0) {
             if (may_fail)
                 return 0;
-            FatalError("parse_vt_settings: Cannot open /dev/tty0 (%s)\n",
+            FatalError("parse_vt_settings: Cannot open /dev/tty0 (%s), maybe missing fot ex. '-seat seat0' parameter? (in case trying to run in rootless mode) \n",
                        strerror(errno));
         }
 
@@ -215,13 +215,14 @@ xf86OpenConsole(void)
             i++;
         }
 
-        if (xf86Info.consoleFd < 0)
-            FatalError("xf86OpenConsole: Cannot open virtual console"
-                       " %d (%s)\n", xf86Info.vtno, strerror(errno));
 
         /* If libseat is in control, it handles VT switching. */
         if (seatd_libseat_controls_session())
             return;
+
+        if (xf86Info.consoleFd < 0)
+            FatalError("xf86OpenConsole: Cannot open virtual console"
+                       " %d (%s)\n", xf86Info.vtno, strerror(errno));
 
         /*
          * Linux doesn't switch to an active vt after the last close of a vt,
