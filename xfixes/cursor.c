@@ -49,6 +49,7 @@
 #include "dix/input_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "xfixesint.h"
 #include "scrnintstr.h"
@@ -618,7 +619,7 @@ ReplaceCursor(CursorPtr pCursor, TestCursorFunc testCursor, void *closure)
         }
     }
     /* this "knows" that WindowHasNewCursor doesn't depend on its argument */
-    WindowHasNewCursor(screenInfo.screens[0]->root);
+    WindowHasNewCursor(dixGetFirstScreenPtr()->root);
 }
 
 static Bool

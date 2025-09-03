@@ -35,6 +35,7 @@
 #include <xwin-config.h>
 #endif
 
+#include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
 
 #include "win.h"
@@ -256,8 +257,8 @@ winRestoreModeKeyStates(void)
 
     /* Only process events if the rootwindow is mapped. The keyboard events
      * will cause segfaults otherwise */
-    if (screenInfo.screens[0]->root &&
-        screenInfo.screens[0]->root->mapped == FALSE)
+    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    if (firstScreen->root && firstScreen->root->mapped == FALSE)
         processEvents = FALSE;
 
     /* Force to process all pending events in the mi event queue */

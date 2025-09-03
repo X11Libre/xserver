@@ -61,6 +61,7 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/ptrveloc_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "xf86_priv.h"
 #include "xf86Priv.h"
@@ -1525,11 +1526,11 @@ void
 xf86InitValuatorDefaults(DeviceIntPtr dev, int axnum)
 {
     if (axnum == 0) {
-        dev->valuator->axisVal[0] = screenInfo.screens[0]->width / 2;
+        dev->valuator->axisVal[0] = dixGetFirstScreenPtr()->width / 2;
         dev->last.valuators[0] = dev->valuator->axisVal[0];
     }
     else if (axnum == 1) {
-        dev->valuator->axisVal[1] = screenInfo.screens[0]->height / 2;
+        dev->valuator->axisVal[1] = dixGetFirstScreenPtr()->height / 2;
         dev->last.valuators[1] = dev->valuator->axisVal[1];
     }
 }

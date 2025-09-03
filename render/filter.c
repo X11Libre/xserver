@@ -25,6 +25,8 @@
 #define  XK_LATIN1
 #include <X11/keysymdef.h>
 
+#include "dix/screenint_priv.h"
+
 #include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
@@ -329,7 +331,7 @@ SetPictureFilter(PicturePtr pPicture, char *name, int len, xFixed * params,
     if (pPicture->pDrawable != NULL)
         pScreen = pPicture->pDrawable->pScreen;
     else
-        pScreen = screenInfo.screens[0];
+        pScreen = dixGetFirstScreenPtr();
 
     pFilter = PictureFindFilter(pScreen, name, len);
 
@@ -360,7 +362,7 @@ SetPicturePictFilter(PicturePtr pPicture, PictFilterPtr pFilter,
     if (pPicture->pDrawable)
         pScreen = pPicture->pDrawable->pScreen;
     else
-        pScreen = screenInfo.screens[0];
+        pScreen = dixGetFirstScreenPtr();
 
     if (pFilter->ValidateParams) {
         int width, height;

@@ -44,6 +44,7 @@ and Jim Haggerty of Metheus.
 #include "dix/eventconvert.h"
 #include "dix/input_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
@@ -725,12 +726,13 @@ RecordSendProtocolEvents(RecordClientsAndProtocolPtr pRCAP,
                  pev->u.u.type == ButtonRelease ||
                  pev->u.u.type == KeyPress || pev->u.u.type == KeyRelease)) {
                 int scr = inputInfo.pointer->spriteInfo->sprite->screen->myNum;
+                ScreenPtr firstScreen = dixGetFirstScreenPtr();
 
                 memcpy(&shiftedEvent, pev, sizeof(xEvent));
                 shiftedEvent.u.keyButtonPointer.rootX +=
-                    screenInfo.screens[scr]->x - screenInfo.screens[0]->x;
+                    screenInfo.screens[scr]->x - firstScreen->x;
                 shiftedEvent.u.keyButtonPointer.rootY +=
-                    screenInfo.screens[scr]->y - screenInfo.screens[0]->y;
+                    screenInfo.screens[scr]->y - firstScreen->y;
                 pEvToRecord = &shiftedEvent;
             }
 #endif /* XINERAMA */

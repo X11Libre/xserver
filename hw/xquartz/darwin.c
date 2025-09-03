@@ -34,6 +34,7 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
@@ -586,8 +587,10 @@ DarwinAdjustScreenOrigins(ScreenInfo *pScreenInfo)
 {
     int i, left, top;
 
-    left = pScreenInfo->screens[0]->x;
-    top = pScreenInfo->screens[0]->y;
+    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+
+    left = firstScreen->x;
+    top = firstScreen->y;
 
     /* Find leftmost screen. If there's a tie, take the topmost of the two. */
     for (i = 1; i < pScreenInfo->numScreens; i++) {

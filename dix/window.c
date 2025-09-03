@@ -107,6 +107,7 @@ Equipment Corporation.
 #include "dix/inpututils_priv.h"
 #include "dix/property_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"         /* miPaintWindow */
@@ -2268,8 +2269,9 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         event.u.u.detail = (mask & CWStackMode) ? smode : Above;
 #ifdef XINERAMA
         if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
-            event.u.configureRequest.x += screenInfo.screens[0]->x;
-            event.u.configureRequest.y += screenInfo.screens[0]->y;
+            ScreenPtr firstScreen = dixGetFirstScreenPtr();
+            event.u.configureRequest.x += firstScreen->x;
+            event.u.configureRequest.y += firstScreen->y;
         }
 #endif /* XINERAMA */
         if (MaybeDeliverEventToClient(pParent, &event,
@@ -2351,8 +2353,9 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         event.u.u.type = ConfigureNotify;
 #ifdef XINERAMA
         if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
-            event.u.configureNotify.x += screenInfo.screens[0]->x;
-            event.u.configureNotify.y += screenInfo.screens[0]->y;
+            ScreenPtr firstScreen = dixGetFirstScreenPtr();
+            event.u.configureNotify.x += firstScreen->x;
+            event.u.configureNotify.y += firstScreen->y;
         }
 #endif /* XINERAMA */
         DeliverEvents(pWin, &event, 1, NullWindow);
@@ -2496,8 +2499,9 @@ ReparentWindow(WindowPtr pWin, WindowPtr pParent,
     event.u.u.type = ReparentNotify;
 #ifdef XINERAMA
     if (!noPanoramiXExtension && !pParent->parent) {
-        event.u.reparent.x += screenInfo.screens[0]->x;
-        event.u.reparent.y += screenInfo.screens[0]->y;
+        ScreenPtr firstScreen = dixGetFirstScreenPtr();
+        event.u.reparent.x += firstScreen->x;
+        event.u.reparent.y += firstScreen->y;
     }
 #endif /* XINERAMA */
     DeliverEvents(pWin, &event, 1, pParent);
