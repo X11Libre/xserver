@@ -66,6 +66,8 @@
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "../os-support/linux/systemd-logind.h"
+#include "seatd-libseat.h"
+
 #include "xf86VGAarbiter_priv.h"
 #include "loaderProcs.h"
 
@@ -340,6 +342,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
             DoShowOptions();
 
         dbus_core_init();
+        seatd_libseat_init();
         systemd_logind_init();
 
         /* Do a general bus probe.  This will be a PCI probe for x86 platforms */
@@ -848,6 +851,7 @@ ddxGiveUp(enum ExitCode error)
     if (xorgHWOpenConsole)
         xf86CloseConsole();
 
+    seatd_libseat_fini();
     systemd_logind_fini();
     dbus_core_fini();
 
