@@ -37,10 +37,10 @@ extern void seatd_libseat_close_device(InputInfoPtr p);
 extern int seatd_libseat_switch_session(int session);
 extern Bool seatd_libseat_controls_session(void);
 #else
-#define seatd_libseat_init()
+#define seatd_libseat_init() -1
 #define seatd_libseat_fini()
 #define seatd_libseat_open_graphics(path) -1
-#define seatd_libseat_open_device(p,x,y)
+#define seatd_libseat_open_device(p,x,y) -1
 #define seatd_libseat_close_device(p)
 #define seatd_libseat_switch_session(int) -1
 #define seatd_libseat_controls_session() FALSE

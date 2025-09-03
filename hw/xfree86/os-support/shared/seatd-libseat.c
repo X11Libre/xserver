@@ -36,12 +36,16 @@
 #include <libseat.h>
 
 #include "os.h"
-#include "linux.h"
 #include "xf86.h"
+#include "xf86_priv.h"
 #include "xf86platformBus.h"
 #include "xf86Xinput.h"
+#include "xf86Xinput_priv.h"
 #include "xf86Priv.h"
 #include "globals.h"
+
+#include "config/hotplug_priv.h"
+
 #include "seatd-libseat.h"
 
 // ============ libseat client adapter ======================
@@ -160,7 +164,7 @@ event_handler(int fd, int ready, void *data)
 /*
  * Handle libseat logging.
  */
-static void
+static _X_ATTRIBUTE_PRINTF(2, 0)  void
 log_libseat(enum libseat_log_level level, const char *fmt, va_list args)
 {
     MessageType xmt;
@@ -201,7 +205,7 @@ log_libseat(enum libseat_log_level level, const char *fmt, va_list args)
 int
 seatd_libseat_init(void)
 {
-    if (!ServerIsNotSeat0() && xf86HasTTYs() && linux_parse_vt_settings(TRUE) && !linux_get_keeptty()) {
+    if (!ServerIsNotSeat0() && xf86HasTTYs() ) {
         LogMessage(X_INFO,
             "seat-libseat: libseat integration requires -keeptty which "
             "was not provided, disabling\n");
@@ -304,7 +308,7 @@ check_duplicate_device(int maj, int min) {
 void
 seatd_libseat_open_device(InputInfoPtr p, int *pfd, Bool *paused)
 {
-    int id, fd;
+    int id = -1, fd = -1;
     char *path = xf86CheckStrOption(p->options, "Device", NULL);
 
     if (!libseat_active()) {
