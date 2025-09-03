@@ -1222,19 +1222,19 @@ DbeExtensionInit(void)
     if (!dixRegisterPrivateKey(&dbeWindowPrivKeyRec, PRIVATE_WINDOW, 0))
         return;
 
-    for (int i = 0; i < screenInfo.numScreens; i++) {
+    for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
         /* For each screen, set up DBE screen privates and init DIX and DDX
          * interface.
          */
 
-        ScreenPtr walkScreen = screenInfo.screens[i];
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
         if (!(pDbeScreenPriv = calloc(1, sizeof(DbeScreenPrivRec)))) {
             /* If we can not alloc a window or screen private,
              * then free any privates that we already alloc'ed and return
              */
 
-            for (int j = 0; j < i; j++) {
+            for (int j = 0; j < walkScreenIdx; j++) {
                 ScreenPtr pScreen = screenInfo.screens[j];
                 free(dixLookupPrivate(&pScreen->devPrivates, dbeScreenPrivKey));
                 dixSetPrivate(&pScreen->devPrivates, dbeScreenPrivKey, NULL);
