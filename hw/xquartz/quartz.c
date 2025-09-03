@@ -34,6 +34,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "quartzRandR.h"
 #include "inputstr.h"
@@ -251,7 +252,7 @@ QuartzUpdateScreens(void)
         return;
     }
 
-    pScreen = screenInfo.screens[0];
+    pScreen = dixGetFirstScreenPtr();
 
     PseudoramiXResetScreens();
     quartzProcs->AddPseudoramiXScreens(&x, &y, &width, &height, pScreen);

@@ -42,6 +42,7 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/screenint_priv.h"
 #include "os/fmt.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -172,11 +173,12 @@ ProcXIQueryPointer(ClientPtr client)
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
-        rep.root_x += double_to_fp1616(screenInfo.screens[0]->x);
-        rep.root_y += double_to_fp1616(screenInfo.screens[0]->y);
+        ScreenPtr firstScreen = dixGetFirstScreenPtr();
+        rep.root_x += double_to_fp1616(firstScreen->x);
+        rep.root_y += double_to_fp1616(firstScreen->y);
         if (stuff->win == rep.root) {
-            rep.win_x += double_to_fp1616(screenInfo.screens[0]->x);
-            rep.win_y += double_to_fp1616(screenInfo.screens[0]->y);
+            rep.win_x += double_to_fp1616(firstScreen->x);
+            rep.win_y += double_to_fp1616(firstScreen->y);
         }
     }
 #endif /* XINERAMA */

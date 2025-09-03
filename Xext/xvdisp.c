@@ -32,6 +32,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/screenint_priv.h"
 #include "Xext/xvdix_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -1543,7 +1544,7 @@ void
 XineramifyXv(void)
 {
     XvScreenPtr xvsp0 =
-        dixLookupPrivate(&screenInfo.screens[0]->devPrivates, XvGetScreenKey());
+        dixLookupPrivate(&(dixGetFirstScreenPtr()->devPrivates), XvGetScreenKey());
     XvAdaptorPtr MatchingAdaptors[MAXSCREENS];
     int i;
 

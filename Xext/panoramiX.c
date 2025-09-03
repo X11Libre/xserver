@@ -35,6 +35,7 @@ Equipment Corporation.
 #include "dix/resource_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -395,9 +396,10 @@ XineramaInitData(void)
         RegionUninit(&ScreenRegion);
     });
 
-    PanoramiXPixWidth = screenInfo.screens[0]->x + screenInfo.screens[0]->width;
-    PanoramiXPixHeight =
-        screenInfo.screens[0]->y + screenInfo.screens[0]->height;
+    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+
+    PanoramiXPixWidth = firstScreen->x + firstScreen->width;
+    PanoramiXPixHeight = firstScreen->y + firstScreen->height;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         int w = walkScreen->x + walkScreen->width;
@@ -423,7 +425,7 @@ PanoramiXExtensionInit(void)
     int i;
     Bool success = FALSE;
     ExtensionEntry *extEntry;
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetFirstScreenPtr();
 
     if (noPanoramiXExtension)
         return;
@@ -589,14 +591,16 @@ PanoramiXCreateConnectionBlock(void)
         return FALSE;
     }
 
+    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+
     for (unsigned int walkScreenIdx = 1; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (walkScreen->rootDepth != screenInfo.screens[0]->rootDepth) {
+        if (walkScreen->rootDepth != firstScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
             return FALSE;
         }
         if (walkScreen->backingStoreSupport !=
-            screenInfo.screens[0]->backingStoreSupport)
+            firstScreen->backingStoreSupport)
             disable_backing_store = TRUE;
     }
 
@@ -775,7 +779,7 @@ extern void
 PanoramiXConsolidate(void)
 {
     int i;
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetFirstScreenPtr();
     DepthPtr pDepth = pScreen->allowedDepths;
     VisualPtr pVisual = pScreen->visuals;
 
@@ -1236,8 +1240,9 @@ XineramaGetImageData(DrawablePtr *pDrawables,
     SrcBox.x1 = left;
     SrcBox.y1 = top;
     if (!isRoot) {
-        SrcBox.x1 += pDraw->x + screenInfo.screens[0]->x;
-        SrcBox.y1 += pDraw->y + screenInfo.screens[0]->y;
+        ScreenPtr firstScreen = dixGetFirstScreenPtr();
+        SrcBox.x1 += pDraw->x + firstScreen->x;
+        SrcBox.y1 += pDraw->y + firstScreen->y;
     }
     SrcBox.x2 = SrcBox.x1 + width;
     SrcBox.y2 = SrcBox.y1 + height;

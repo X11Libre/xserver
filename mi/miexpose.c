@@ -79,6 +79,7 @@ Equipment Corporation.
 #include <X11/Xprotostr.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -327,7 +328,7 @@ miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy)
         if (!pWin->parent) {
             x = screenInfo.screens[scrnum]->x;
             y = screenInfo.screens[scrnum]->y;
-            pWin = screenInfo.screens[0]->root;
+            pWin = dixGetFirstScreenPtr()->root;
             realWin = pWin->drawable.id;
         }
         else if (scrnum) {

@@ -43,6 +43,7 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/Xfuncproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/auth.h"
@@ -812,12 +813,12 @@ ProcShmGetImage(ClientPtr client)
             return BadMatch;
     }
     else {
+        ScreenPtr firstScreen = dixGetFirstScreenPtr();
         if (                    /* check for being onscreen */
-               screenInfo.screens[0]->x + pDraw->x + x < 0 ||
-               screenInfo.screens[0]->x + pDraw->x + x + w > PanoramiXPixWidth
-               || screenInfo.screens[0]->y + pDraw->y + y < 0 ||
-               screenInfo.screens[0]->y + pDraw->y + y + h > PanoramiXPixHeight
-               ||
+               firstScreen->x + pDraw->x + x < 0 ||
+               firstScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||
+               firstScreen->y + pDraw->y + y < 0 ||
+               firstScreen->y + pDraw->y + y + h > PanoramiXPixHeight ||
                /* check for being inside of border */
                x < -wBorderWidth((WindowPtr) pDraw) ||
                x + w > wBorderWidth((WindowPtr) pDraw) + (int) pDraw->width ||

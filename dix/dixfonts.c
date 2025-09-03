@@ -60,6 +60,7 @@ Equipment Corporation.
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/screenint_priv.h"
 #include "include/swaprep.h"
 #include "os/auth.h"
 #include "os/log_priv.h"
@@ -1868,7 +1869,7 @@ get_client_resolutions(int *num)
     static struct _FontResolution res;
     ScreenPtr pScreen;
 
-    pScreen = screenInfo.screens[0];
+    pScreen = dixGetFirstScreenPtr();
     res.x_resolution = (pScreen->width * 25.4) / pScreen->mmWidth;
     /*
      * XXX - we'll want this as long as bitmap instances are prevalent

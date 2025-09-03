@@ -33,6 +33,7 @@
 #include "dix/atom_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "xkb/xkbsrv_priv.h"    /* for XkbInitPrivates */
 
@@ -109,9 +110,10 @@ TestPointerProc(DeviceIntPtr pDev, int what)
                    pDev->name);
             return BadAlloc;
         }
-        pDev->valuator->axisVal[0] = screenInfo.screens[0]->width / 2;
+        ScreenPtr firstScreen = dixGetFirstScreenPtr();
+        pDev->valuator->axisVal[0] = firstScreen->width / 2;
         pDev->last.valuators[0] = pDev->valuator->axisVal[0];
-        pDev->valuator->axisVal[1] = screenInfo.screens[0]->height / 2;
+        pDev->valuator->axisVal[1] = firstScreen->height / 2;
         pDev->last.valuators[1] = pDev->valuator->axisVal[1];
 
         /* protocol-xiquerydevice.c relies on these increment */

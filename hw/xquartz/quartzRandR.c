@@ -33,6 +33,8 @@
 
 #include <dix-config.h>
 
+#include "dix/screenint_priv.h"
+
 #include "quartzRandR.h"
 #include "quartz.h"
 #include "darwin.h"
@@ -424,7 +426,7 @@ _QuartzRandRUpdateFakeModes(ScreenPtr pScreen)
 Bool
 QuartzRandRUpdateFakeModes(BOOL force_update)
 {
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetFirstScreenPtr();
 
     if (ignore_next_fake_mode_update) {
         DEBUG_LOG(
@@ -494,7 +496,7 @@ QuartzRandRSetFakeFullscreen(BOOL state)
 void
 QuartzRandRToggleFullscreen(void)
 {
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetFirstScreenPtr();
     QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(pScreen);
 
     if (pQuartzScreen->currentMode.ref == NULL) {

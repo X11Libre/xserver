@@ -61,6 +61,7 @@ SOFTWARE.
 #include "dix/input_priv.h"
 #include "dix/ptrveloc_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/log_priv.h"
@@ -378,9 +379,10 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
         if (InputDevIsMaster(dev)) {
             /* Sprites appear on first root window, so we can hardcode it */
             if (dev->spriteInfo->spriteOwner) {
-                InitializeSprite(dev, screenInfo.screens[0]->root);
+                ScreenPtr firstScreen = dixGetFirstScreenPtr();
+                InitializeSprite(dev, firstScreen->root);
                 /* mode doesn't matter */
-                EnterWindow(dev, screenInfo.screens[0]->root, NotifyAncestor);
+                EnterWindow(dev, firstScreen->root, NotifyAncestor);
             }
             else {
                 other = NextFreePointerDevice();
@@ -589,7 +591,7 @@ int
 ActivateDevice(DeviceIntPtr dev, BOOL sendevent)
 {
     int ret = Success;
-    ScreenPtr pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetFirstScreenPtr();
 
     if (!dev || !dev->deviceProc)
         return BadImplementation;
@@ -672,7 +674,7 @@ CorePointerProc(DeviceIntPtr pDev, int what)
     BYTE map[NBUTTONS + 1];
     Atom btn_labels[NBUTTONS] = { 0 };
     Atom axes_labels[NAXES] = { 0 };
-    ScreenPtr scr = screenInfo.screens[0];
+    ScreenPtr scr = dixGetFirstScreenPtr();
 
     switch (what) {
     case DEVICE_INIT:
@@ -987,7 +989,7 @@ FreePendingFrozenDeviceEvents(DeviceIntPtr dev)
 static void
 CloseDevice(DeviceIntPtr dev)
 {
-    ScreenPtr screen = screenInfo.screens[0];
+    ScreenPtr screen = dixGetFirstScreenPtr();
     ClassesPtr classes;
 
     if (!dev)
@@ -1142,7 +1144,7 @@ AbortDevices(void)
 void
 UndisplayDevices(void)
 {
-    ScreenPtr screen = screenInfo.screens[0];
+    ScreenPtr screen = dixGetFirstScreenPtr();
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next)
         screen->DisplayCursor(dev, screen, NullCursor);
@@ -1184,7 +1186,7 @@ int
 RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
 {
     int ret = BadMatch;
-    ScreenPtr screen = screenInfo.screens[0];
+    ScreenPtr screen = dixGetFirstScreenPtr();
     int deviceid;
     int initialized;
     int flags[MAXDEVICES] = { 0 };
@@ -2632,7 +2634,7 @@ AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
         if (dev->spriteInfo->sprite)
             currentRoot = InputDevCurrentRootWindow(dev);
         else                    /* new device auto-set to floating */
-            currentRoot = screenInfo.screens[0]->root;
+            currentRoot = dixGetFirstScreenPtr()->root;
 
         /* we need to init a fake sprite */
         screen = currentRoot->drawable.pScreen;

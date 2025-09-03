@@ -47,6 +47,7 @@ SOFTWARE.
 #include <dix-config.h>
 
 #include "dix/cursor_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "misc.h"
 #include <X11/fonts/fontstruct.h>
@@ -74,7 +75,6 @@ int
 ServerBitsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm,
                     unsigned char **ppbits)
 {
-    ScreenPtr pScreen;
     GCPtr pGC;
     xRectangle rect;
     PixmapPtr ppix;
@@ -86,7 +86,7 @@ ServerBitsFromGlyph(FontPtr pfont, unsigned ch, CursorMetricPtr cm,
     char2b[0] = (unsigned char) (ch >> 8);
     char2b[1] = (unsigned char) (ch & 0xff);
 
-    pScreen = screenInfo.screens[0];
+    ScreenPtr pScreen = dixGetFirstScreenPtr();
     pbits = calloc(BitmapBytePad(cm->width), cm->height);
     if (!pbits)
         return BadAlloc;

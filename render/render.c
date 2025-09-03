@@ -34,6 +34,7 @@
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
@@ -2555,7 +2556,7 @@ PanoramiXRenderCreatePicture(ClientPtr client)
     panoramix_setup_ids(newPict, client, stuff->pid);
 
     if (refDraw->type == XRT_WINDOW &&
-        stuff->drawable == screenInfo.screens[0]->root->drawable.id) {
+        stuff->drawable == dixGetFirstScreenPtr()->root->drawable.id) {
         newPict->u.pict.root = TRUE;
     }
     else
