@@ -29,7 +29,7 @@
 
 #ifdef SEATD_LIBSEAT
 #include <xf86Xinput.h>
-extern int seatd_libseat_init(void);
+extern int seatd_libseat_init(Bool KeepTty_state);
 extern void seatd_libseat_fini(void);
 extern int seatd_libseat_open_graphics(const char *path);
 extern void seatd_libseat_open_device(InputInfoPtr p,int *fd,Bool *paus);
@@ -37,13 +37,15 @@ extern void seatd_libseat_close_device(InputInfoPtr p);
 extern int seatd_libseat_switch_session(int session);
 extern Bool seatd_libseat_controls_session(void);
 #else
-#define seatd_libseat_init()
-#define seatd_libseat_fini()
-#define seatd_libseat_open_graphics(path) -1
-#define seatd_libseat_open_device(p,x,y)
-#define seatd_libseat_close_device(p)
-#define seatd_libseat_switch_session(int) -1
-#define seatd_libseat_controls_session() FALSE
+
+static inline int seatd_libseat_init(bool KeepTty_state) {(void)KeepTty_state; return -1; };
+static inline void seatd_libseat_fini(void) {};
+static inline int seatd_libseat_open_graphics(const char *path) {(void)path; return -1; }
+static inline void seatd_libseat_open_device(void *p,int *fd, Bool *paus) { (void)p;(void)fd;(void)paus; };
+static inline void seatd_libseat_close_device(void *p) { (void)p;};
+static inline int seatd_libseat_switch_session(int session) { return -1; };
+static inline Bool seatd_libseat_controls_session(void) { return FALSE; };
+
 #endif
 
 #endif
