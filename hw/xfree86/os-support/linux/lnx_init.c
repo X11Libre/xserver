@@ -40,6 +40,8 @@
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
+#include "seatd-libseat.h"
+
 
 #include <sys/stat.h>
 #ifdef HAVE_SYS_SYSMACROS_H
@@ -217,6 +219,10 @@ xf86OpenConsole(void)
             FatalError("xf86OpenConsole: Cannot open virtual console"
                        " %d (%s)\n", xf86Info.vtno, strerror(errno));
 
+        /* If libseat is in control, it handles VT switching. */
+        if (seatd_libseat_controls_session())
+            return;
+
         /*
          * Linux doesn't switch to an active vt after the last close of a vt,
          * so we do this ourselves by remembering which is active now.
@@ -306,7 +312,7 @@ xf86CloseConsole(void)
     struct vt_stat vts;
     int ret;
 
-    if (xf86Info.ShareVTs) {
+    if (xf86Info.ShareVTs || seatd_libseat_controls_session()) {
         close(xf86Info.consoleFd);
         return;
     }
