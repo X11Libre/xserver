@@ -1306,28 +1306,25 @@ static void
 DGAClientStateChange(CallbackListPtr *pcbl, void *nulldata, void *calldata)
 {
     NewClientInfoRec *pci = (NewClientInfoRec *) calldata;
-    ClientPtr client = NULL;
     int i;
 
     for (i = 0; i < screenInfo.numScreens; i++) {
-        if (DGA_GETCLIENT(i) == pci->client) {
-            client = pci->client;
+        if (pci->client && (DGA_GETCLIENT(i) == pci->client)) {
+            if ((pci->client->clientState == ClientStateGone) ||
+                (pci->client->clientState == ClientStateRetained))
+            {
+                XDGAModeRec mode;
+                PixmapPtr pPix;
+
+                DGA_SETCLIENT(i, NULL);
+                DGASelectInput(i, NULL, 0);
+                DGASetMode(i, 0, &mode, &pPix);
+
+                if (--DGACallbackRefCount == 0)
+                    DeleteCallback(&ClientStateCallback, DGAClientStateChange, NULL);
+            }
             break;
         }
-    }
-
-    if (client &&
-        ((client->clientState == ClientStateGone) ||
-         (client->clientState == ClientStateRetained))) {
-        XDGAModeRec mode;
-        PixmapPtr pPix;
-
-        DGA_SETCLIENT(i, NULL);
-        DGASelectInput(i, NULL, 0);
-        DGASetMode(i, 0, &mode, &pPix);
-
-        if (--DGACallbackRefCount == 0)
-            DeleteCallback(&ClientStateCallback, DGAClientStateChange, NULL);
     }
 }
 
