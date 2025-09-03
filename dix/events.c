@@ -570,11 +570,8 @@ static void
 XineramaConstrainCursor(DeviceIntPtr pDev)
 {
     SpritePtr pSprite = pDev->spriteInfo->sprite;
-    ScreenPtr pScreen;
-    BoxRec newBox;
-
-    pScreen = pSprite->screen;
-    newBox = pSprite->physLimits;
+    ScreenPtr pScreen = pSprite->screen;
+    BoxRec newBox = pSprite->physLimits;
 
     /* Translate the constraining box to the screen
        the sprite is actually on */
