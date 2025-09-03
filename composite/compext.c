@@ -776,7 +776,6 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
     xCompositeGetOverlayWindowReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
-    CompScreenPtr cs;
     CompOverlayClientPtr pOc;
     int rc;
     PanoramiXRes *win, *overlayWin = NULL;
@@ -787,7 +786,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         return rc;
     }
 
-    cs = GetCompScreen(dixGetFirstScreenPtr());
+    CompScreenPtr cs = GetCompScreen(dixGetFirstScreenPtr());
     if (!cs->pOverlayWin) {
         if (!(overlayWin = calloc(1, sizeof(PanoramiXRes))))
             return BadAlloc;
