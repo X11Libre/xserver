@@ -2115,7 +2115,6 @@ static Bool
 KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 {
     ScreenPtr pScreen = *ppScreen;
-    int n;
     int best_x, best_y;
     int n_best_x, n_best_y;
     CARD32 ms;
@@ -2135,8 +2134,8 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
     best_x = 32767;
     n_best_y = -1;
     best_y = 32767;
-    for (n = 0; n < screenInfo.numScreens; n++) {
-        ScreenPtr walkScreen = screenInfo.screens[n];
+    for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (walkScreen == pScreen)
             continue;
         int dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(pScreen)->x;
@@ -2144,25 +2143,25 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
         if (*x < 0) {
             if (dx < 0 && -dx < best_x) {
                 best_x = -dx;
-                n_best_x = n;
+                n_best_x = walkScreenIdx;
             }
         }
         else if (*x >= pScreen->width) {
             if (dx > 0 && dx < best_x) {
                 best_x = dx;
-                n_best_x = n;
+                n_best_x = walkScreenIdx;
             }
         }
         if (*y < 0) {
             if (dy < 0 && -dy < best_y) {
                 best_y = -dy;
-                n_best_y = n;
+                n_best_y = walkScreenIdx;
             }
         }
         else if (*y >= pScreen->height) {
             if (dy > 0 && dy < best_y) {
                 best_y = dy;
-                n_best_y = n;
+                n_best_y = walkScreenIdx;
             }
         }
     }
