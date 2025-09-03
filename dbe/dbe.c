@@ -1142,11 +1142,10 @@ static void miDbeWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowP
 static void
 DbeResetProc(ExtensionEntry * extEntry)
 {
-    DbeScreenPrivPtr pDbeScreenPriv;
 
     for (int i = 0; i < screenInfo.numScreens; i++) {
         ScreenPtr walkScreen = screenInfo.screens[i];
-        pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
+        DbeScreenPrivPtr pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
 
         if (pDbeScreenPriv) {
             dixScreenUnhookWindowDestroy(walkScreen, miDbeWindowDestroy);
