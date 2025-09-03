@@ -45,6 +45,8 @@
 
 #include "os/osdep.h"
 
+#include "seatd-libseat.h"
+
 static Bool KeepTty = FALSE;
 
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
@@ -157,6 +159,12 @@ xf86OpenConsole(void)
 #endif
 
     if (serverGeneration == 1) {
+
+        /* If libseat is in control, it handles VT switching. */
+        if (seatd_libseat_controls_session()) {
+            return;
+        }
+
         /* check if we are run with euid==0 */
         if (geteuid() != 0) {
             FatalError("xf86OpenConsole: Server must be suid root");
