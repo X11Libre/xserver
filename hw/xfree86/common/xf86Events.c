@@ -368,7 +368,7 @@ void xf86DisableGeneralHandler(void *handler) {
     _xf86DisableGeneralHandler(handler);
 }
 
-static void
+void
 xf86VTLeave(void)
 {
     int i;

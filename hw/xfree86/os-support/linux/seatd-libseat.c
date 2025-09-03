@@ -44,6 +44,10 @@
 #include "globals.h"
 #include "seatd-libseat.h"
 
+#include "xf86_priv.h"
+#include "xf86Xinput_priv.h"
+#include "config/hotplug_priv.h"
+
 // ============ libseat client adapter ======================
 
 struct libseat_info {

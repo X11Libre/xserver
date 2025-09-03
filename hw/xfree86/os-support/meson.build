@@ -51,6 +51,11 @@ if host_machine.system() == 'linux'
         srcs_xorg_os_support += 'linux/systemd-logind.c'
     endif
 
+    if build_seatd_libseat
+       srcs_xorg_os_support  += 'linux/seatd-libseat.c'
+       os_dep += seat_libseat_dep
+    endif
+
     # this is ugly because the code is also
     if build_apm or build_acpi
         srcs_xorg_os_support += 'linux/lnx_apm.c'
