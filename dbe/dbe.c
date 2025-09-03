@@ -1236,11 +1236,9 @@ DbeExtensionInit(void)
              */
 
             for (int j = 0; j < i; j++) {
-                walkScreen = screenInfo.screens[j];
-                free(dixLookupPrivate(&walkScreen->devPrivates,
-                                      dbeScreenPrivKey));
-                dixSetPrivate(&walkScreen->devPrivates,
-                              dbeScreenPrivKey, NULL);
+                ScreenPtr pScreen = screenInfo.screens[j];
+                free(dixLookupPrivate(&pScreen->devPrivates, dbeScreenPrivKey));
+                dixSetPrivate(&pScreen->devPrivates, dbeScreenPrivKey, NULL);
             }
             return;
         }
