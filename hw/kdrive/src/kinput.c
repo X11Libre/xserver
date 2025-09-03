@@ -2116,7 +2116,6 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 {
     ScreenPtr pScreen = *ppScreen;
     int n;
-    int dx, dy;
     int best_x, best_y;
     int n_best_x, n_best_y;
     CARD32 ms;
@@ -2140,8 +2139,8 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
         ScreenPtr walkScreen = screenInfo.screens[n];
         if (walkScreen == pScreen)
             continue;
-        dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(pScreen)->x;
-        dy = KdScreenOrigin(walkScreen)->y - KdScreenOrigin(pScreen)->y;
+        int dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(pScreen)->x;
+        int dy = KdScreenOrigin(walkScreen)->y - KdScreenOrigin(pScreen)->y;
         if (*x < 0) {
             if (dx < 0 && -dx < best_x) {
                 best_x = -dx;
