@@ -342,9 +342,7 @@ SetPictureFilter(PicturePtr pPicture, char *name, int len, xFixed * params,
          */
         for (unsigned int walkScreenIdx = 1; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-            PictFilterPtr pScreenFilter;
-
-            pScreenFilter = PictureFindFilter(walkScreen, name, len);
+            PictFilterPtr pScreenFilter = PictureFindFilter(walkScreen, name, len);
             if (!pScreenFilter || pScreenFilter->id != pFilter->id)
                 return BadMatch;
         }
