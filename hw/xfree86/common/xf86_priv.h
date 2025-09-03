@@ -65,6 +65,7 @@ InputHandlerProc xf86SetConsoleHandler(InputHandlerProc handler, void *data);
 void xf86ProcessActionEvent(ActionEvent action, void *arg);
 Bool xf86VTOwner(void);
 void xf86VTEnter(void);
+void xf86VTLeave(void);
 void xf86EnableInputDeviceForVTSwitch(InputInfoPtr pInfo);
 void xf86Wakeup(void *blockData, int err);
 void xf86HandlePMEvents(int fd, void *data);
