@@ -59,11 +59,6 @@ Equipment Corporation.
 #include "compint.h"
 #include "protocol-versions.h"
 
-#ifdef GLXPROXY
-extern VisualPtr glxMatchVisual(ScreenPtr pScreen,
-                                VisualPtr pVisual, ScreenPtr pMatchScreen);
-#endif
-
 /* Xinerama is disabled by default unless enabled via +xinerama */
 Bool noPanoramiXExtension = TRUE;
 
@@ -761,11 +756,7 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
         for (k = 0; k < walkScreen->numVisuals; k++) {
             VisualPtr candidate = &walkScreen->visuals[k];
 
-            if ((*XineramaVisualsEqualPtr) (pVisual, walkScreen, candidate)
-#ifdef GLXPROXY
-                && glxMatchVisual(screenInfo.screens[0], pVisual, pScreen)
-#endif
-                ) {
+            if ((*XineramaVisualsEqualPtr) (pVisual, walkScreen, candidate)) {
                 found = TRUE;
                 break;
             }
