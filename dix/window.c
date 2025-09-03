@@ -393,15 +393,12 @@ PrintPassiveGrabs(void)
 void
 PrintWindowTree(void)
 {
-    int depth;
-    WindowPtr pWin;
-
     for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", walkScreenIdx,
                (unsigned) walkScreen->GetScreenPixmap(walkScreen)->drawable.id);
-        pWin = walkScreen->root;
-        depth = 1;
+        WindowPtr pWin = walkScreen->root;
+        int depth = 1;
         while (pWin) {
             log_window_info(pWin, depth);
             if (pWin->firstChild) {
