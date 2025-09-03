@@ -638,7 +638,7 @@ void DarwinAdjustScreenOrigins(void)
  *  SetupScreen function can be called to finalize screen setup.
  */
 void
-InitOutput(ScreenInfo *pScreenInfo, int argc, char **argv)
+InitOutput(int argc, char **argv)
 {
     int i;
 

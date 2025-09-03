@@ -1865,8 +1865,7 @@ insists that these must be the same for all screens on the server.</para>
 <para>
 <blockquote><programlisting>
 
-        InitOutput(pScreenInfo, argc, argv)
-                ScreenInfo *pScreenInfo;
+        InitOutput(argc, argv)
                 int argc;
                 char **argv;
 </programlisting></blockquote>
