@@ -484,33 +484,32 @@ failure:
 void
 miDCDeviceCleanup(DeviceIntPtr pDev, ScreenPtr pScreen)
 {
-    int i;
+    if (!DevHasCursor(pDev))
+        return;
 
-    if (DevHasCursor(pDev)) {
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
-            miDCBufferPtr pBuffer = miGetDCDevice(pDev, walkScreen);
+    for (int i = 0; i < screenInfo.numScreens; i++) {
+        ScreenPtr walkScreen = screenInfo.screens[i];
+        miDCBufferPtr pBuffer = miGetDCDevice(pDev, walkScreen);
 
-            if (pBuffer) {
-                if (pBuffer->pSourceGC)
-                    FreeGC(pBuffer->pSourceGC, (GContext) 0);
-                if (pBuffer->pMaskGC)
-                    FreeGC(pBuffer->pMaskGC, (GContext) 0);
-                if (pBuffer->pSaveGC)
-                    FreeGC(pBuffer->pSaveGC, (GContext) 0);
-                if (pBuffer->pRestoreGC)
-                    FreeGC(pBuffer->pRestoreGC, (GContext) 0);
+        if (pBuffer) {
+            if (pBuffer->pSourceGC)
+                FreeGC(pBuffer->pSourceGC, (GContext) 0);
+            if (pBuffer->pMaskGC)
+                FreeGC(pBuffer->pMaskGC, (GContext) 0);
+            if (pBuffer->pSaveGC)
+                FreeGC(pBuffer->pSaveGC, (GContext) 0);
+            if (pBuffer->pRestoreGC)
+                FreeGC(pBuffer->pRestoreGC, (GContext) 0);
 
-                /* If a pRootPicture was allocated for a root window, it
-                 * is freed when that root window is destroyed, so don't
-                 * free it again here. */
+            /* If a pRootPicture was allocated for a root window, it
+             * is freed when that root window is destroyed, so don't
+             * free it again here. */
 
-                dixDestroyPixmap(pBuffer->pSave, 0);
+            dixDestroyPixmap(pBuffer->pSave, 0);
 
-                free(pBuffer);
-                dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, walkScreen,
-                                    NULL);
-            }
+            free(pBuffer);
+            dixSetScreenPrivate(&pDev->devPrivates, miDCDeviceKey, walkScreen,
+                                NULL);
         }
     }
 }
