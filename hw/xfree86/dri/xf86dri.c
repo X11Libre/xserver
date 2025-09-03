@@ -353,7 +353,9 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     if (rc != Success)
         return rc;
 
-    if (!DRIGetDrawableInfo(screenInfo.screens[stuff->screen],
+    ScreenPtr pScreen = screenInfo.screens[stuff->screen];
+
+    if (!DRIGetDrawableInfo(pScreen,
                             pDrawable,
                             (unsigned int *) &rep.drawableTableIndex,
                             (unsigned int *) &rep.drawableTableStamp,
@@ -389,7 +391,6 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
         if (!pClippedRects)
             return BadAlloc;
 
-        ScreenPtr pScreen = screenInfo.screens[stuff->screen];
         int i, j;
 
         for (i = 0, j = 0; i < rep.numClipRects; i++) {
