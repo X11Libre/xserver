@@ -982,10 +982,12 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
+    ScreenPtr pScreen = screenInfo.screens[stuff->screen];
+
     xPanoramiXGetScreenSizeReply reply = {
         /* screen dimensions */
-        .width = screenInfo.screens[stuff->screen]->width,
-        .height = screenInfo.screens[stuff->screen]->height,
+        .width = pScreen->width,
+        .height = pScreen->height,
         .window = stuff->window,
         .screen = stuff->screen
     };
