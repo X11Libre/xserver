@@ -532,14 +532,12 @@ static void PostNewCursor(DeviceIntPtr pDev);
 static Bool
 XineramaSetCursorPosition(DeviceIntPtr pDev, int x, int y, Bool generateEvent)
 {
-    ScreenPtr pScreen;
     SpritePtr pSprite = pDev->spriteInfo->sprite;
+    ScreenPtr pScreen = pSprite->screen;
 
     /* x,y are in Screen 0 coordinates.  We need to decide what Screen
        to send the message too and what the coordinates relative to
        that screen are. */
-
-    pScreen = pSprite->screen;
 
     ScreenPtr firstScreen = dixGetFirstScreenPtr();
     x += firstScreen->x;
