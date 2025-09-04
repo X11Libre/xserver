@@ -583,27 +583,22 @@ CloseInput(void)
  */
 void DarwinAdjustScreenOrigins(void)
 {
-    int i, left, top;
-
-    ScreenPtr firstScreen = dixGetFirstScreenPtr();
-
-    left = firstScreen->x;
-    top = firstScreen->y;
+    int i;
 
     /* Find leftmost screen. If there's a tie, take the topmost of the two. */
-    for (i = 1; i < screenInfo.numScreens; i++) {
-        if (screenInfo.screens[i]->x < left ||
-            (screenInfo.screens[i]->x == left &&
-             screenInfo.screens[i]->y < top)) {
-            left = screenInfo.screens[i]->x;
-            top = screenInfo.screens[i]->y;
+    for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        if (i == 0) {
+            darwinMainScreenX  = walkScreen->x;
+            darwinMainScreenY = walkScreen->y;
+            continue;
+        }
+        if ((walkScreen->x < darwinMainScreenX) ||
+            ((walkScreen->x == darwinMainScreenX) &&
+             (walkScreen->y < darwinMainScreenY))) {
+            darwinMainScreenX  = walkScreen->x;
+            darwinMainScreenY = walkScreen->y;
         }
     }
-
-    darwinMainScreenX = left;
-    darwinMainScreenY = top;
-
-    DEBUG_LOG("top = %d, left=%d\n", top, left);
 
     /* Shift all screens so that there is a screen whose top left
      * is at X11 (0,0) and at global screen coordinate
@@ -611,12 +606,12 @@ void DarwinAdjustScreenOrigins(void)
      */
 
     if (darwinMainScreenX != 0 || darwinMainScreenY != 0) {
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            screenInfo.screens[i]->x -= darwinMainScreenX;
-            screenInfo.screens[i]->y -= darwinMainScreenY;
+        for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            walkScreen->x -= darwinMainScreenX;
+            walkScreen->y -= darwinMainScreenY;
             DEBUG_LOG("Screen %d placed at X11 coordinate (%d,%d).\n",
-                      i, screenInfo.screens[i]->x,
-                      screenInfo.screens[i]->y);
+                      walkScreenIdx, walkScreen->x, walkScreen->y);
         }
     }
 
