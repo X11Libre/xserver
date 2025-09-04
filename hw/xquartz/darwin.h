@@ -43,8 +43,7 @@ void
 DarwinPrintBanner(void);
 int
 DarwinParseModifierList(const char *constmodifiers, int separatelr);
-void
-DarwinAdjustScreenOrigins(ScreenInfo *pScreenInfo);
+void DarwinAdjustScreenOrigins(void);
 
 #define SCREEN_PRIV(pScreen) ((DarwinFramebufferPtr) \
                               dixLookupPrivate(&pScreen->devPrivates, \
