@@ -128,12 +128,13 @@ exaOpReadsDestination(CARD8 op)
      * That's just Clear and Src.  ReduceCompositeOp() will already have
      * converted con/disjoint clear/src to Clear or Src.
      */
-    switch (op) {
-    case PictOpClear:
-    case PictOpSrc:
-        return FALSE;
-    default:
-        return TRUE;
+    switch(op)
+    {
+        case PictOpClear:
+        case PictOpSrc:
+            return FALSE;
+        default:
+            return TRUE;
     }
 }
 
