@@ -101,7 +101,6 @@ const Mask DeviceButtonGrabMask = (1L << 17);
 const Mask DeviceOwnerGrabButtonMask = (1L << 17);
 const Mask DevicePresenceNotifyMask = (1L << 18);
 const Mask DevicePropertyNotifyMask = (1L << 19);
-const Mask XIAllMasks = (1L << 20) - 1;
 
 int ExtEventIndex;
 
