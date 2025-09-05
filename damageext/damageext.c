@@ -660,6 +660,8 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
             }
             if (rc != Success)
                 break;
+            if (!pDrawable)
+                break;
 
             DamageExtRegister(pDrawable, pDamage, walkScreenIdx != 0);
         }
