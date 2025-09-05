@@ -2682,7 +2682,7 @@ FixUpXI2SwipeEventFromWindow(SpritePtr pSprite, xXIGestureSwipeEvent *event,
  */
 void
 FixUpEventFromWindow(SpritePtr pSprite,
-                     xEvent *xE, WindowPtr pWin, Window child, Bool calcChild)
+                     xEvent *xE, WindowPtr pWin, Window child, Bool calcChild, enum InputLevel XILevel)
 {
     int evtype;
 
@@ -2690,38 +2690,40 @@ FixUpEventFromWindow(SpritePtr pSprite,
         child = FindChildForEvent(pSprite, pWin);
 
     if ((evtype = xi2_get_type(xE))) {
-        switch (evtype) {
-        case XI_RawKeyPress:
-        case XI_RawKeyRelease:
-        case XI_RawButtonPress:
-        case XI_RawButtonRelease:
-        case XI_RawMotion:
-        case XI_RawTouchBegin:
-        case XI_RawTouchUpdate:
-        case XI_RawTouchEnd:
-        case XI_DeviceChanged:
-        case XI_HierarchyChanged:
-        case XI_PropertyEvent:
-        case XI_BarrierHit:
-        case XI_BarrierLeave:
-            return;
-        case XI_GesturePinchBegin:
-        case XI_GesturePinchUpdate:
-        case XI_GesturePinchEnd:
-            FixUpXI2PinchEventFromWindow(pSprite,
-                                         (xXIGesturePinchEvent*) xE, pWin, child);
-            break;
-        case XI_GestureSwipeBegin:
-        case XI_GestureSwipeUpdate:
-        case XI_GestureSwipeEnd:
-            FixUpXI2SwipeEventFromWindow(pSprite,
-                                         (xXIGestureSwipeEvent*) xE, pWin, child);
-            break;
-        default:
-            FixUpXI2DeviceEventFromWindow(pSprite, evtype,
-                                          (xXIDeviceEvent*) xE, pWin, child);
-            break;
-        }
+       if(XILevel >= XI) {
+          switch (evtype) {
+             case XI_RawKeyPress:
+             case XI_RawKeyRelease:
+             case XI_RawButtonPress:
+             case XI_RawButtonRelease:
+             case XI_RawMotion:
+             case XI_RawTouchBegin:
+             case XI_RawTouchUpdate:
+             case XI_RawTouchEnd:
+             case XI_DeviceChanged:
+             case XI_HierarchyChanged:
+             case XI_PropertyEvent:
+             case XI_BarrierHit:
+             case XI_BarrierLeave:
+                return;
+             case XI_GesturePinchBegin:
+             case XI_GesturePinchUpdate:
+             case XI_GesturePinchEnd:
+                FixUpXI2PinchEventFromWindow(pSprite,
+                      (xXIGesturePinchEvent*) xE, pWin, child);
+                break;
+             case XI_GestureSwipeBegin:
+             case XI_GestureSwipeUpdate:
+             case XI_GestureSwipeEnd:
+                FixUpXI2SwipeEventFromWindow(pSprite,
+                      (xXIGestureSwipeEvent*) xE, pWin, child);
+                break;
+             default:
+                FixUpXI2DeviceEventFromWindow(pSprite, evtype,
+                      (xXIDeviceEvent*) xE, pWin, child);
+                break;
+          }
+       }
     }
     else {
         XE_KBPTR.root = RootWindow(pSprite)->drawable.id;
@@ -2800,7 +2802,7 @@ EventIsDeliverable(DeviceIntPtr dev, int evtype, WindowPtr win)
 
 static int
 DeliverEvent(DeviceIntPtr dev, xEvent *xE, int count,
-             WindowPtr win, Window child, GrabPtr grab)
+             WindowPtr win, Window child, GrabPtr grab, enum InputLevel XILevel)
 {
     SpritePtr pSprite = dev->spriteInfo->sprite;
     Mask filter;
@@ -2808,7 +2810,7 @@ DeliverEvent(DeviceIntPtr dev, xEvent *xE, int count,
 
     if (XaceHookSendAccess(NULL, dev, win, xE, count) == Success) {
         filter = GetEventFilter(dev, xE);
-        FixUpEventFromWindow(pSprite, xE, win, child, FALSE);
+        FixUpEventFromWindow(pSprite, xE, win, child, FALSE, XILevel);
         deliveries = DeliverEventsToWindow(dev, win, xE, count, filter, grab);
     }
 
@@ -2841,7 +2843,7 @@ DeliverOneEvent(InternalEvent *event, DeviceIntPtr dev, enum InputLevel level,
     }
 
     if (rc == Success) {
-        deliveries = DeliverEvent(dev, xE, count, win, child, grab);
+        deliveries = DeliverEvent(dev, xE, count, win, child, grab, level);
         free(xE);
     }
     else
@@ -3828,7 +3830,7 @@ ActivatePassiveGrab(DeviceIntPtr device, GrabPtr grab, InternalEvent *event,
     ActivateGrabNoDelivery(device, grab, event, real_event);
 
     if (xE) {
-        FixUpEventFromWindow(pSprite, xE, grab->window, None, TRUE);
+        FixUpEventFromWindow(pSprite, xE, grab->window, None, TRUE, grab->grabtype);
 
         /* XXX: XACE? */
         TryClientEvents(dixClientForGrab(grab), device, xE, count,
@@ -4226,7 +4228,7 @@ DeliverFocusedEvent(DeviceIntPtr keybd, InternalEvent *event, WindowPtr window)
         /* XXX: XACE */
         int filter = GetEventFilter(keybd, xi2);
 
-        FixUpEventFromWindow(ptr->spriteInfo->sprite, xi2, focus, None, FALSE);
+        FixUpEventFromWindow(ptr->spriteInfo->sprite, xi2, focus, None, FALSE, XI2);
         deliveries = DeliverEventsToWindow(keybd, focus, xi2, 1,
                                            filter, NullGrab);
         if (deliveries > 0)
@@ -4240,7 +4242,7 @@ DeliverFocusedEvent(DeviceIntPtr keybd, InternalEvent *event, WindowPtr window)
     rc = EventToXI(event, &xE, &count);
     if (rc == Success &&
         XaceHookSendAccess(NULL, keybd, focus, xE, count) == Success) {
-        FixUpEventFromWindow(ptr->spriteInfo->sprite, xE, focus, None, FALSE);
+        FixUpEventFromWindow(ptr->spriteInfo->sprite, xE, focus, None, FALSE, XI);
         deliveries = DeliverEventsToWindow(keybd, focus, xE, count,
                                            GetEventFilter(keybd, xE), NullGrab);
 
@@ -4257,8 +4259,7 @@ DeliverFocusedEvent(DeviceIntPtr keybd, InternalEvent *event, WindowPtr window)
         if (rc == Success) {
             if (XaceHookSendAccess(NULL, keybd, focus, core, count) ==
                 Success) {
-                FixUpEventFromWindow(keybd->spriteInfo->sprite, core, focus,
-                                     None, FALSE);
+                FixUpEventFromWindow(keybd->spriteInfo->sprite, core, focus, None, FALSE, CORE);
                 deliveries =
                     DeliverEventsToWindow(keybd, focus, core, count,
                                           GetEventFilter(keybd, core),
@@ -4301,7 +4302,6 @@ DeliverOneGrabbedEvent(InternalEvent *event, DeviceIntPtr dev,
         count = 1;
         if (rc == Success) {
             int evtype = xi2_get_type(xE);
-
             mask = GetXI2MaskByte(grab->xi2mask, dev, evtype);
             filter = GetEventFilter(dev, xE);
         }
@@ -4327,7 +4327,7 @@ DeliverOneGrabbedEvent(InternalEvent *event, DeviceIntPtr dev,
     }
 
     if (rc == Success) {
-        FixUpEventFromWindow(pSprite, xE, grab->window, None, TRUE);
+        FixUpEventFromWindow(pSprite, xE, grab->window, None, TRUE, level);
         if (XaceHookSendAccess(NULL, dev, grab->window, xE, count) ||
             XaceHookReceiveAccess(dixClientForGrab(grab), grab->window, xE, count))
             deliveries = 1;     /* don't send, but pretend we did */
@@ -4666,7 +4666,7 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
 {
     xEvent event = {
         .u.u.type = type,
-        .u.u.detail = detail
+        .u.u.detail = detail,
     };
     WindowPtr focus;
     DeviceIntPtr keybd;
@@ -4691,7 +4691,7 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
     event.u.enterLeave.rootX = mouse->spriteInfo->sprite->hot.x;
     event.u.enterLeave.rootY = mouse->spriteInfo->sprite->hot.y;
     /* Counts on the same initial structure of crossing & button events! */
-    FixUpEventFromWindow(mouse->spriteInfo->sprite, &event, pWin, None, FALSE);
+    FixUpEventFromWindow(mouse->spriteInfo->sprite, &event, pWin, None, FALSE, CORE);
     /* Enter/Leave events always set child */
     event.u.enterLeave.child = child;
     event.u.enterLeave.flags = event.u.keyButtonPointer.sameScreen ?
@@ -4793,8 +4793,7 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
         ((pWin == focus) || (focus == PointerRootWin) || WindowIsParent(focus, pWin)))
         event->focus = TRUE;
 
-    FixUpEventFromWindow(mouse->spriteInfo->sprite, (xEvent *) event, pWin,
-                         None, FALSE);
+    FixUpEventFromWindow(mouse->spriteInfo->sprite, (xEvent *) event, pWin, None, FALSE, XI);
 
     filter = GetEventFilter(mouse, (xEvent *) event);
 
