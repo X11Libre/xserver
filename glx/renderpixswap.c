@@ -41,21 +41,19 @@ __glXDispSwap_SeparableFilter2D(GLbyte * pc)
         (__GLXdispatchConvolutionFilterHeader *) pc;
     GLint hdrlen, image1len;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
-
     hdrlen = __GLX_PAD(__GLX_CONV_FILT_CMD_HDR_SIZE);
 
-    __GLX_SWAP_INT((GLbyte *) &hdr->rowLength);
-    __GLX_SWAP_INT((GLbyte *) &hdr->skipRows);
-    __GLX_SWAP_INT((GLbyte *) &hdr->skipPixels);
-    __GLX_SWAP_INT((GLbyte *) &hdr->alignment);
+    swapl(&hdr->rowLength);
+    swapl(&hdr->skipRows);
+    swapl(&hdr->skipPixels);
+    swapl(&hdr->alignment);
 
-    __GLX_SWAP_INT((GLbyte *) &hdr->target);
-    __GLX_SWAP_INT((GLbyte *) &hdr->internalformat);
-    __GLX_SWAP_INT((GLbyte *) &hdr->width);
-    __GLX_SWAP_INT((GLbyte *) &hdr->height);
-    __GLX_SWAP_INT((GLbyte *) &hdr->format);
-    __GLX_SWAP_INT((GLbyte *) &hdr->type);
+    swapl(&hdr->target);
+    swapl(&hdr->internalformat);
+    swapl(&hdr->width);
+    swapl(&hdr->height);
+    swapl(&hdr->format);
+    swapl(&hdr->type);
 
     /*
      ** Just invert swapBytes flag; the GL will figure out if it needs to swap

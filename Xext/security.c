@@ -348,10 +348,7 @@ static int
 ProcSecurityQueryVersion(ClientPtr client)
 {
     /* REQUEST(xSecurityQueryVersionReq); */
-    xSecurityQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xSecurityQueryVersionReply reply = {
         .majorVersion = SERVER_SECURITY_MAJOR_VERSION,
         .minorVersion = SERVER_SECURITY_MINOR_VERSION
     };
@@ -359,11 +356,10 @@ ProcSecurityQueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xSecurityQueryVersionReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    WriteToClient(client, SIZEOF(xSecurityQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }                               /* ProcSecurityQueryVersion */
 
@@ -407,7 +403,6 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     Bool removeAuth = FALSE;    /* if bailout, call RemoveAuthorization? */
     int err;                    /* error to return from this function */
     XID authId;                 /* authorization ID assigned by os layer */
-    xSecurityGenerateAuthorizationReply rep;    /* reply struct */
     unsigned int trustLevel;    /* trust level of new auth */
     XID group;                  /* group of new auth */
     CARD32 timeout;             /* timeout of new auth */
@@ -537,23 +532,18 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
 
     /* tell client the auth id and data */
 
-    rep = (xSecurityGenerateAuthorizationReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(authdata_len),
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_binary_pad(&rpcbuf, pAuthdata, authdata_len);
+
+    xSecurityGenerateAuthorizationReply reply = {
         .authId = authId,
         .dataLength = authdata_len
     };
 
     if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.authId);
-        swaps(&rep.dataLength);
+        swapl(&reply.authId);
+        swaps(&reply.dataLength);
     }
-
-    WriteToClient(client, SIZEOF(xSecurityGenerateAuthorizationReply), &rep);
-    WriteToClient(client, authdata_len, pAuthdata);
 
     SecurityAudit
         ("client %d generated authorization %lu trust %d timeout %lu group %lu events %lu\n",
@@ -561,7 +551,7 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
          (unsigned long)pAuth->group, (unsigned long)eventMask);
 
     /* the request succeeded; don't call RemoveAuthorization or free pAuth */
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
  bailout:
     if (removeAuth)

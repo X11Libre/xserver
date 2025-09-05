@@ -43,12 +43,8 @@ xnestCreatePixmap(ScreenPtr pScreen, int width, int height, int depth,
     if (!pPixmap)
         return NullPixmap;
     pPixmap->drawable.type = DRAWABLE_PIXMAP;
-    pPixmap->drawable.class = 0;
     pPixmap->drawable.depth = depth;
     pPixmap->drawable.bitsPerPixel = depth;
-    pPixmap->drawable.id = 0;
-    pPixmap->drawable.x = 0;
-    pPixmap->drawable.y = 0;
     pPixmap->drawable.width = width;
     pPixmap->drawable.height = height;
     pPixmap->drawable.pScreen = pScreen;

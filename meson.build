@@ -248,6 +248,7 @@ summary({
         'Xvfb': build_xvfb,
         'Xwin': build_xwin,
         'Xquartz': build_xquartz,
+        'Xephyr': get_option('xephyr'),
     },
     section: 'DDX',
     bool_yn: true,
@@ -552,6 +553,8 @@ if get_option('mitshm') == 'auto'
 elif get_option('mitshm') == 'true'
     build_mitshm = true
 endif
+
+legacy_nvidia_padding = get_option('legacy_nvidia_padding')
 
 m_dep = cc.find_library('m', required : false)
 dl_dep = cc.find_library('dl', required : false)

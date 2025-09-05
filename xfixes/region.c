@@ -23,6 +23,7 @@
 #include <dix-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "dix/window_priv.h"
 #include "render/picturestr_priv.h"
 #include "Xext/panoramiX.h"
@@ -523,21 +524,17 @@ ProcXFixesFetchRegion(ClientPtr client)
     pBox = RegionRects(pRegion);
     nBox = RegionNumRects(pRegion);
 
-    xRectangle *pRect = calloc(nBox, sizeof(xRectangle));
-    if (!pRect)
-        return BadAlloc;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (i = 0; i < nBox; i++) {
-        pRect[i].x = pBox[i].x1;
-        pRect[i].y = pBox[i].y1;
-        pRect[i].width = pBox[i].x2 - pBox[i].x1;
-        pRect[i].height = pBox[i].y2 - pBox[i].y1;
+        x_rpcbuf_write_rect(&rpcbuf,
+                            pBox[i].x1,
+                            pBox[i].y1,
+                            pBox[i].x2 - pBox[i].x1,
+                            pBox[i].y2 - pBox[i].y1);
     }
 
     xXFixesFetchRegionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = nBox << 1,
         .x = pExtent->x1,
         .y = pExtent->y1,
         .width = pExtent->x2 - pExtent->x1,
@@ -551,12 +548,9 @@ ProcXFixesFetchRegion(ClientPtr client)
         swaps(&rep.y);
         swaps(&rep.width);
         swaps(&rep.height);
-        SwapShorts((INT16 *) pRect, nBox * 4);
     }
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, nBox * sizeof(xRectangle), pRect);
-    free(pRect);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int _X_COLD
@@ -834,7 +828,7 @@ SProcXFixesExpandRegion(ClientPtr client)
 static int
 PanoramiXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff)
 {
-    int result = Success, j;
+    int result = Success;
     PanoramiXRes *gc;
 
     if ((result = dixLookupResourceByType((void **) &gc, stuff->gc, XRT_GC,
@@ -843,8 +837,9 @@ PanoramiXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff
         return result;
     }
 
-    FOR_NSCREENS_BACKWARD(j) {
-        stuff->gc = gc->info[j].id;
+    int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        stuff->gc = gc->info[walkScreenIdx].id;
         result = SingleXFixesSetGCClipRegion(client, stuff);
         if (result != Success)
             break;
@@ -856,7 +851,7 @@ PanoramiXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff
 static int
 PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegionReq *stuff)
 {
-    int result = Success, j;
+    int result = Success;
     PanoramiXRes *win;
     RegionPtr reg = NULL;
 
@@ -870,9 +865,10 @@ PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegion
     if (win->u.win.root)
         VERIFY_REGION_OR_NONE(reg, stuff->region, client, DixReadAccess);
 
-    FOR_NSCREENS_FORWARD(j) {
-        ScreenPtr walkScreen = screenInfo.screens[j];
-        stuff->dest = win->info[j].id;
+    unsigned int walkScreenIdx;
+    FOR_NSCREENS_FORWARD(walkScreenIdx) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        stuff->dest = win->info[walkScreenIdx].id;
 
         if (reg)
             RegionTranslate(reg, -walkScreen->x, -walkScreen->y);
@@ -892,7 +888,7 @@ PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegion
 static int
 PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegionReq *stuff)
 {
-    int result = Success, j;
+    int result = Success;
     PanoramiXRes *pict;
     RegionPtr reg = NULL;
 
@@ -906,9 +902,10 @@ PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegion
     if (pict->u.pict.root)
         VERIFY_REGION_OR_NONE(reg, stuff->region, client, DixReadAccess);
 
-    FOR_NSCREENS_BACKWARD(j) {
-        ScreenPtr walkScreen = screenInfo.screens[j];
-        stuff->picture = pict->info[j].id;
+    int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        stuff->picture = pict->info[walkScreenIdx].id;
 
         if (reg)
             RegionTranslate(reg, -walkScreen->x, -walkScreen->y);

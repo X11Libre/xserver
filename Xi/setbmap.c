@@ -55,6 +55,7 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -95,16 +96,10 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
         return ret;
 
     xSetDeviceButtonMappingReply rep = {
-        .repType = X_Reply,
         .RepType = X_SetDeviceButtonMapping,
-        .sequenceNumber = client->sequence,
         .status = (ret == Success ? MappingSuccess : MappingBusy),
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xSetDeviceButtonMappingReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }

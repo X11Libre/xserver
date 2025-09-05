@@ -59,11 +59,6 @@ Equipment Corporation.
 #include "compint.h"
 #include "protocol-versions.h"
 
-#ifdef GLXPROXY
-extern VisualPtr glxMatchVisual(ScreenPtr pScreen,
-                                VisualPtr pVisual, ScreenPtr pMatchScreen);
-#endif
-
 /* Xinerama is disabled by default unless enabled via +xinerama */
 Bool noPanoramiXExtension = TRUE;
 
@@ -761,11 +756,7 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
         for (k = 0; k < walkScreen->numVisuals; k++) {
             VisualPtr candidate = &walkScreen->visuals[k];
 
-            if ((*XineramaVisualsEqualPtr) (pVisual, walkScreen, candidate)
-#ifdef GLXPROXY
-                && glxMatchVisual(screenInfo.screens[0], pVisual, pScreen)
-#endif
-                ) {
+            if ((*XineramaVisualsEqualPtr) (pVisual, walkScreen, candidate)) {
                 found = TRUE;
                 break;
             }
@@ -903,22 +894,17 @@ int
 ProcPanoramiXQueryVersion(ClientPtr client)
 {
     /* REQUEST(xPanoramiXQueryVersionReq); */
-    xPanoramiXQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xPanoramiXQueryVersionReply reply = {
         .majorVersion = SERVER_PANORAMIX_MAJOR_VERSION,
         .minorVersion = SERVER_PANORAMIX_MINOR_VERSION
     };
 
     REQUEST_SIZE_MATCH(xPanoramiXQueryVersionReq);
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    WriteToClient(client, sizeof(xPanoramiXQueryVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -934,18 +920,15 @@ ProcPanoramiXGetState(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xPanoramiXGetStateReply rep = {
-        .type = X_Reply,
+    xPanoramiXGetStateReply reply = {
         .state = !noPanoramiXExtension,
-        .sequenceNumber = client->sequence,
         .window = stuff->window
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetStateReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 
 }
@@ -962,18 +945,15 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xPanoramiXGetScreenCountReply rep = {
-        .type = X_Reply,
+    xPanoramiXGetScreenCountReply reply = {
         .ScreenCount = PanoramiXNumScreens,
-        .sequenceNumber = client->sequence,
         .window = stuff->window
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenCountReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -993,24 +973,23 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xPanoramiXGetScreenSizeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    ScreenPtr pScreen = screenInfo.screens[stuff->screen];
+
+    xPanoramiXGetScreenSizeReply reply = {
         /* screen dimensions */
-        .width = screenInfo.screens[stuff->screen]->width,
-        .height = screenInfo.screens[stuff->screen]->height,
+        .width = pScreen->width,
+        .height = pScreen->height,
         .window = stuff->window,
         .screen = stuff->screen
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.width);
-        swapl(&rep.height);
-        swapl(&rep.window);
-        swapl(&rep.screen);
+        swapl(&reply.width);
+        swapl(&reply.height);
+        swapl(&reply.window);
+        swapl(&reply.screen);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenSizeReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1020,9 +999,7 @@ ProcXineramaIsActive(ClientPtr client)
     /* REQUEST(xXineramaIsActiveReq); */
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
-    xXineramaIsActiveReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
+    xXineramaIsActiveReply reply = {
 #if 1
         /* The following hack fools clients into thinking that Xinerama
          * is disabled even though it is not. */
@@ -1033,10 +1010,9 @@ ProcXineramaIsActive(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.state);
+        swapl(&reply.state);
     }
-    WriteToClient(client, sizeof(xXineramaIsActiveReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -1045,19 +1021,14 @@ ProcXineramaQueryScreens(ClientPtr client)
 {
     /* REQUEST(xXineramaQueryScreensReq); */
     CARD32 number = (noPanoramiXExtension) ? 0 : PanoramiXNumScreens;
-    xXineramaQueryScreensReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(number * sz_XineramaScreenInfo),
+    xXineramaQueryScreensReply reply = {
         .number = number
     };
 
     REQUEST_SIZE_MATCH(xXineramaQueryScreensReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.number);
+        swapl(&reply.number);
     }
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
@@ -1066,21 +1037,16 @@ ProcXineramaQueryScreens(ClientPtr client)
         int i;
         FOR_NSCREENS_BACKWARD(i) {
             ScreenPtr walkScreen = screenInfo.screens[i];
-            xXineramaScreenInfo scratch = {
-                .x_org = walkScreen->x,
-                .y_org = walkScreen->y,
-                .width = walkScreen->width,
-                .height = walkScreen->height,
-            };
-            /* scratch consists of 4x CARD16 */
-            if (!x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&scratch, 4))
-                return BadAlloc;
+            /* xXineramaScreenInfo is the same as xRectangle */
+            x_rpcbuf_write_rect(&rpcbuf,
+                                walkScreen->x,
+                                walkScreen->y,
+                                walkScreen->width,
+                                walkScreen->height);
         }
     }
 
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -1130,41 +1096,21 @@ CopyBits(char *dst, int shiftL, char *src, int bytes)
    1 bpp and planar data to be already cleared when presented
    to this function */
 
-void
-XineramaGetImageData(DrawablePtr *pDrawables,
-                     int left,
-                     int top,
-                     int width,
-                     int height,
-                     unsigned int format,
-                     unsigned long planemask,
-                     char *data, int pitch, Bool isRoot)
+static Bool XineramaGetImageDataScr(BoxRec SrcBox,
+                                    RegionPtr GrabRegion,
+                                    RegionPtr SrcRegion,
+                                    const int width,
+                                    const int height,
+                                    const unsigned int format,
+                                    const unsigned long planemask,
+                                    char *data,
+                                    const int depth,
+                                    const int pitch,
+                                    ScreenPtr walkScreen,
+                                    DrawablePtr pWalkDraw)
 {
-    RegionRec SrcRegion, GrabRegion;
-    BoxRec SrcBox;
-    DrawablePtr pDraw = pDrawables[0];
-
-    /* find box in logical screen space */
-    SrcBox.x1 = left;
-    SrcBox.y1 = top;
-    if (!isRoot) {
-        SrcBox.x1 += pDraw->x + screenInfo.screens[0]->x;
-        SrcBox.y1 += pDraw->y + screenInfo.screens[0]->y;
-    }
-    SrcBox.x2 = SrcBox.x1 + width;
-    SrcBox.y2 = SrcBox.y1 + height;
-
-    RegionInit(&SrcRegion, &SrcBox, 1);
-    RegionNull(&GrabRegion);
-
-    int depth = (format == XYPixmap) ? 1 : pDraw->depth;
-
-    int walkScreenIdx;
-    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         BoxRec TheBox;
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
 
-        DrawablePtr pWalkDraw = pDrawables[walkScreenIdx];
         ScreenPtr pScreen = pWalkDraw->pScreen;
 
         TheBox.x1 = pScreen->x;
@@ -1176,7 +1122,7 @@ XineramaGetImageData(DrawablePtr *pDrawables,
         RegionInit(&ScreenRegion, &TheBox, 1);
         int inOut = RegionContainsRect(&ScreenRegion, &SrcBox);
         if (inOut == rgnPART)
-            RegionIntersect(&GrabRegion, &SrcRegion, &ScreenRegion);
+            RegionIntersect(GrabRegion, SrcRegion, &ScreenRegion);
         RegionUninit(&ScreenRegion);
 
         if (inOut == rgnIN) {
@@ -1186,16 +1132,16 @@ XineramaGetImageData(DrawablePtr *pDrawables,
                                   SrcBox.y1 - pWalkDraw->y -
                                   walkScreen->y, width, height,
                                   format, planemask, data);
-            break;
+            return FALSE;
         }
         else if (inOut == rgnOUT)
-            continue;
+            return TRUE;
 
-        int nbox = RegionNumRects(&GrabRegion);
+        int nbox = RegionNumRects(GrabRegion);
         if (!nbox)
-            continue;
+            return TRUE;
 
-        BoxRec *pbox = RegionRects(&GrabRegion);
+        BoxRec *pbox = RegionRects(GrabRegion);
 
         int size = 0;
         char *ScratchMem = NULL;
@@ -1284,8 +1230,57 @@ XineramaGetImageData(DrawablePtr *pDrawables,
         }
 
         free(ScratchMem);
-        RegionSubtract(&SrcRegion, &SrcRegion, &GrabRegion);
-        if (!RegionNotEmpty(&SrcRegion))
+        RegionSubtract(SrcRegion, SrcRegion, GrabRegion);
+        if (!RegionNotEmpty(SrcRegion))
+            return FALSE;
+
+    return TRUE;
+}
+
+void
+XineramaGetImageData(DrawablePtr *pDrawables,
+                     int left,
+                     int top,
+                     int width,
+                     int height,
+                     unsigned int format,
+                     unsigned long planemask,
+                     char *data, int pitch, Bool isRoot)
+{
+    RegionRec SrcRegion, GrabRegion;
+    BoxRec SrcBox;
+    DrawablePtr pDraw = pDrawables[0];
+
+    /* find box in logical screen space */
+    SrcBox.x1 = left;
+    SrcBox.y1 = top;
+    if (!isRoot) {
+        SrcBox.x1 += pDraw->x + screenInfo.screens[0]->x;
+        SrcBox.y1 += pDraw->y + screenInfo.screens[0]->y;
+    }
+    SrcBox.x2 = SrcBox.x1 + width;
+    SrcBox.y2 = SrcBox.y1 + height;
+
+    RegionInit(&SrcRegion, &SrcBox, 1);
+    RegionNull(&GrabRegion);
+
+    int depth = (format == XYPixmap) ? 1 : pDraw->depth;
+
+    int walkScreenIdx;
+    FOR_NSCREENS_BACKWARD(walkScreenIdx) {
+        if (!XineramaGetImageDataScr(
+                SrcBox,
+                &GrabRegion,
+                &SrcRegion,
+                width,
+                height,
+                format,
+                planemask,
+                data,
+                depth,
+                pitch,
+                screenInfo.screens[walkScreenIdx],
+                pDrawables[walkScreenIdx]))
             break;
     }
 

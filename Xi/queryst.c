@@ -37,8 +37,10 @@ from The Open Group.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -59,7 +61,6 @@ ProcXQueryDeviceState(ClientPtr client)
     int rc, i;
     int num_classes = 0;
     int total_length = 0;
-    char *buf, *savbuf;
     KeyClassPtr k;
     xKeyState *tk;
     ButtonClassPtr b;
@@ -96,10 +97,11 @@ ProcXQueryDeviceState(ClientPtr client)
         total_length += (sizeof(xValuatorState) + (v->numAxes * sizeof(int)));
         num_classes++;
     }
-    buf = (char *) calloc(total_length, 1);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
     if (!buf)
         return BadAlloc;
-    savbuf = buf;
 
     if (k != NULL) {
         tk = (xKeyState *) buf;
@@ -143,20 +145,10 @@ ProcXQueryDeviceState(ClientPtr client)
         }
     }
 
-    xQueryDeviceStateReply rep = {
-        .repType = X_Reply,
+    xQueryDeviceStateReply reply = {
         .RepType = X_QueryDeviceState,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(total_length),
         .num_classes = num_classes
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xQueryDeviceStateReply), &rep);
-    WriteToClient(client, total_length, savbuf);
-    free(savbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

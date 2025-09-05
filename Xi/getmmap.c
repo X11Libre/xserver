@@ -52,9 +52,13 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>     /* Request macro     */
+
+#include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 
 #include "getmmap.h"
@@ -83,23 +87,15 @@ ProcXGetDeviceModifierMapping(ClientPtr client)
     if (ret != Success)
         return ret;
 
-    xGetDeviceModifierMappingReply rep = {
-        .repType = X_Reply,
-        .RepType = X_GetDeviceModifierMapping,
-        .sequenceNumber = client->sequence,
-        .numKeyPerModifier = max_keys_per_mod,
-        /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
-        .length = max_keys_per_mod << 1
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xGetDeviceModifierMappingReply), &rep);
-    WriteToClient(client, max_keys_per_mod * 8, modkeymap);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_binary_pad(&rpcbuf, modkeymap, max_keys_per_mod * 8);
 
     free(modkeymap);
 
-    return Success;
+    xGetDeviceModifierMappingReply reply = {
+        .RepType = X_GetDeviceModifierMapping,
+        .numKeyPerModifier = max_keys_per_mod,
+    };
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

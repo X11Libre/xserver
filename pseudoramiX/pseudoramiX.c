@@ -37,6 +37,7 @@
 
 #include <X11/Xfuncproto.h>
 
+#include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "pseudoramiX.h"
@@ -206,7 +207,6 @@ ProcPseudoramiXGetState(ClientPtr client)
 {
     REQUEST(xPanoramiXGetStateReq);
     WindowPtr pWin;
-    xPanoramiXGetStateReply rep;
     register int rc;
 
     TRACE;
@@ -216,18 +216,16 @@ ProcPseudoramiXGetState(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.state = !noPseudoramiXExtension;
-    rep.window = stuff->window;
+    xPanoramiXGetStateReply reply = {
+        .state = !noPseudoramiXExtension,
+        .window = stuff->window
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetStateReply),&rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 // was PanoramiX
@@ -236,7 +234,6 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenCountReq);
     WindowPtr pWin;
-    xPanoramiXGetScreenCountReply rep;
     register int rc;
 
     TRACE;
@@ -246,18 +243,16 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.ScreenCount = pseudoramiXNumScreens;
-    rep.window = stuff->window;
+    xPanoramiXGetScreenCountReply reply = {
+        .ScreenCount = pseudoramiXNumScreens,
+        .window = stuff->window
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.window);
+        swapl(&reply.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenCountReply),&rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 // was PanoramiX
@@ -266,7 +261,6 @@ ProcPseudoramiXGetScreenSize(ClientPtr client)
 {
     REQUEST(xPanoramiXGetScreenSizeReq);
     WindowPtr pWin;
-    xPanoramiXGetScreenSizeReply rep;
     register int rc;
 
     TRACE;
@@ -280,26 +274,21 @@ ProcPseudoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    /* screen dimensions */
-    rep.width = pseudoramiXScreens[stuff->screen].w;
-    // was screenInfo.screens[stuff->screen]->width;
-    rep.height = pseudoramiXScreens[stuff->screen].h;
-    // was screenInfo.screens[stuff->screen]->height;
-    rep.window = stuff->window;
-    rep.screen = stuff->screen;
+    xPanoramiXGetScreenSizeReply reply = {
+        .width = pseudoramiXScreens[stuff->screen].w,
+        .height = pseudoramiXScreens[stuff->screen].h,
+        .window = stuff->window,
+        .screen = stuff->screen
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.width);
-        swapl(&rep.height);
-        swapl(&rep.window);
-        swapl(&rep.screen);
+        swapl(&reply.width);
+        swapl(&reply.height);
+        swapl(&reply.window);
+        swapl(&reply.screen);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenSizeReply),&rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 // was Xinerama
@@ -307,23 +296,18 @@ static int
 ProcPseudoramiXIsActive(ClientPtr client)
 {
     /* REQUEST(xXineramaIsActiveReq); */
-    xXineramaIsActiveReply rep;
-
     TRACE;
-
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.state = !noPseudoramiXExtension;
+    xXineramaIsActiveReply reply = {
+        .state = !noPseudoramiXExtension
+    };
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.state);
+        swapl(&reply.state);
     }
-    WriteToClient(client, sizeof(xXineramaIsActiveReply),&rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 // was Xinerama
@@ -331,7 +315,6 @@ static int
 ProcPseudoramiXQueryScreens(ClientPtr client)
 {
     /* REQUEST(xXineramaQueryScreensReq); */
-    xXineramaQueryScreensReply rep;
 
     DEBUG_LOG("noPseudoramiXExtension=%d, pseudoramiXNumScreens=%d\n",
               noPseudoramiXExtension,
@@ -339,38 +322,27 @@ ProcPseudoramiXQueryScreens(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXineramaQueryScreensReq);
 
-    rep.type = X_Reply;
-    rep.sequenceNumber = client->sequence;
-    rep.number = noPseudoramiXExtension ? 0 : pseudoramiXNumScreens;
-    rep.length = bytes_to_int32(rep.number * sz_XineramaScreenInfo);
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.number);
-    }
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply),&rep);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (!noPseudoramiXExtension) {
-        xXineramaScreenInfo scratch;
-        int i;
-
-        for (i = 0; i < pseudoramiXNumScreens; i++) {
-            scratch.x_org = pseudoramiXScreens[i].x;
-            scratch.y_org = pseudoramiXScreens[i].y;
-            scratch.width = pseudoramiXScreens[i].w;
-            scratch.height = pseudoramiXScreens[i].h;
-
-            if (client->swapped) {
-                swaps(&scratch.x_org);
-                swaps(&scratch.y_org);
-                swaps(&scratch.width);
-                swaps(&scratch.height);
-            }
-            WriteToClient(client, sz_XineramaScreenInfo,&scratch);
+        for (int i = 0; i < pseudoramiXNumScreens; i++) {
+            /* xXineramaScreenInfo is the same as xRectangle */
+            x_rpcbuf_write_rect(&rpcbuf,
+                                pseudoramiXScreens[i].x,
+                                pseudoramiXScreens[i].y,
+                                pseudoramiXScreens[i].w,
+                                pseudoramiXScreens[i].h);
         }
     }
 
-    return Success;
+    xXineramaQueryScreensReply reply = {
+        .number = noPseudoramiXExtension ? 0 : pseudoramiXNumScreens
+    };
+
+    if (client->swapped)
+        swapl(&reply.number);
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 // was PanoramiX

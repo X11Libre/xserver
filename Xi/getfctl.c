@@ -52,9 +52,13 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
 
 #include "getfctl.h"
@@ -244,7 +248,6 @@ int
 ProcXGetFeedbackControl(ClientPtr client)
 {
     int rc, total_length = 0;
-    char *savbuf;
     DeviceIntPtr dev;
     KbdFeedbackPtr k;
     PtrFeedbackPtr p;
@@ -261,9 +264,7 @@ ProcXGetFeedbackControl(ClientPtr client)
         return rc;
 
     xGetFeedbackControlReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetFeedbackControl,
-        .sequenceNumber = client->sequence,
     };
 
     for (k = dev->kbdfeed; k; k = k->next) {
@@ -295,10 +296,8 @@ ProcXGetFeedbackControl(ClientPtr client)
     if (total_length == 0)
         return BadMatch;
 
-    char *buf = (char *) calloc(1, total_length);
-    if (!buf)
-        return BadAlloc;
-    savbuf = buf;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    char *buf = x_rpcbuf_reserve(&rpcbuf, total_length);
 
     for (k = dev->kbdfeed; k; k = k->next)
         CopySwapKbdFeedback(client, k, &buf);
@@ -313,15 +312,8 @@ ProcXGetFeedbackControl(ClientPtr client)
     for (b = dev->bell; b; b = b->next)
         CopySwapBellFeedback(client, b, &buf);
 
-    rep.length = bytes_to_int32(total_length);
-
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.num_feedbacks);
     }
-    WriteToClient(client, sizeof(xGetFeedbackControlReply), &rep);
-    WriteToClient(client, total_length, savbuf);
-    free(savbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }

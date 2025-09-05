@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XI2.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -95,15 +96,10 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
         return ret;
 
     xSetDeviceModifierMappingReply rep = {
-        .repType = X_Reply,
         .RepType = X_SetDeviceModifierMapping,
-        .sequenceNumber = client->sequence,
         .success = ret,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xSetDeviceModifierMappingReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }

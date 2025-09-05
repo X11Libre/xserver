@@ -713,19 +713,10 @@ __glXDisp_IsDirect(__GLXclientState * cl, GLbyte * pc)
         return err;
 
     xGLXIsDirectReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .isDirect = glxc->isDirect
     };
 
-    if (client->swapped) {
-        __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-    }
-    WriteToClient(client, sizeof(xGLXIsDirectReply), &reply);
-
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -748,22 +739,16 @@ __glXDisp_QueryVersion(__GLXclientState * cl, GLbyte * pc)
      ** implementation the server just returns its version number.
      */
     xGLXQueryVersionReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .majorVersion = SERVER_GLX_MAJOR_VERSION,
         .minorVersion = SERVER_GLX_MINOR_VERSION
     };
 
     if (client->swapped) {
-        __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-        __GLX_SWAP_INT(&reply.majorVersion);
-        __GLX_SWAP_INT(&reply.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
 
-    WriteToClient(client, sizeof(xGLXQueryVersionReply), &reply);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -912,9 +897,6 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
     CARD32 buf[GLX_VIS_CONFIG_TOTAL];
     int p, i, err;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
-
     if (!validGlxScreen(cl->client, req->screen, &pGlxScreen, &err))
         return err;
 
@@ -928,10 +910,10 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
     };
 
     if (client->swapped) {
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-        __GLX_SWAP_INT(&reply.numVisuals);
-        __GLX_SWAP_INT(&reply.numProps);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.numVisuals);
+        swapl(&reply.numProps);
     }
 
     WriteToClient(client, sizeof(xGLXGetVisualConfigsReply), &reply);
@@ -998,7 +980,7 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
 
         assert(p == GLX_VIS_CONFIG_TOTAL);
         if (client->swapped) {
-            __GLX_SWAP_INT_ARRAY(buf, p);
+            SwapLongs(buf, p);
         }
         WriteToClient(client, __GLX_SIZE_CARD32 * p, buf);
     }
@@ -1026,9 +1008,6 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
     int p, err;
     __GLXconfig *modes;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
-    __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
-
     if (!validGlxScreen(cl->client, screen, &pGlxScreen, &err))
         return err;
 
@@ -1041,10 +1020,10 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
     };
 
     if (client->swapped) {
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-        __GLX_SWAP_INT(&reply.numFBConfigs);
-        __GLX_SWAP_INT(&reply.numAttribs);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.numFBConfigs);
+        swapl(&reply.numAttribs);
     }
 
     WriteToClient(client, sizeof(xGLXGetFBConfigsReply), &reply);
@@ -1121,7 +1100,7 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
         assert(p == __GLX_FBCONFIG_ATTRIBS_LENGTH);
 
         if (client->swapped) {
-            __GLX_SWAP_INT_ARRAY(buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);
+            SwapLongs((CARD32*)buf, __GLX_FBCONFIG_ATTRIBS_LENGTH);
         }
         WriteToClient(client, __GLX_SIZE_CARD32 * __GLX_FBCONFIG_ATTRIBS_LENGTH,
                       (char *) buf);
@@ -1928,13 +1907,11 @@ DoGetDrawableAttributes(__GLXclientState * cl, XID drawId)
     if (client->swapped) {
         int length = reply.length;
 
-        __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-        __GLX_SWAP_INT(&reply.numAttribs);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.numAttribs);
         WriteToClient(client, sizeof(xGLXGetDrawableAttributesReply), &reply);
-        __GLX_SWAP_INT_ARRAY((int *) attributes, length);
+        SwapLongs(attributes, length);
         WriteToClient(client, length << 2, attributes);
     }
     else {
@@ -2002,14 +1979,12 @@ __glXDisp_Render(__GLXclientState * cl, GLbyte * pc)
     __GLXrenderHeader *hdr;
     __GLXcontext *glxc;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
-
     REQUEST_AT_LEAST_SIZE(xGLXRenderReq);
 
     req = (xGLXRenderReq *) pc;
     if (client->swapped) {
-        __GLX_SWAP_SHORT(&req->length);
-        __GLX_SWAP_INT(&req->contextTag);
+        swaps(&req->length);
+        swapl(&req->contextTag);
     }
 
     glxc = __glXForceCurrent(cl, req->contextTag, &error);
@@ -2035,8 +2010,8 @@ __glXDisp_Render(__GLXclientState * cl, GLbyte * pc)
          */
         hdr = (__GLXrenderHeader *) pc;
         if (client->swapped) {
-            __GLX_SWAP_SHORT(&hdr->length);
-            __GLX_SWAP_SHORT(&hdr->opcode);
+            swaps(&hdr->length);
+            swaps(&hdr->opcode);
         }
         cmdlen = hdr->length;
         opcode = hdr->opcode;
@@ -2104,17 +2079,15 @@ __glXDisp_RenderLarge(__GLXclientState * cl, GLbyte * pc)
     int error;
     CARD16 opcode;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
-
     REQUEST_AT_LEAST_SIZE(xGLXRenderLargeReq);
 
     req = (xGLXRenderLargeReq *) pc;
     if (client->swapped) {
-        __GLX_SWAP_SHORT(&req->length);
-        __GLX_SWAP_INT(&req->contextTag);
-        __GLX_SWAP_INT(&req->dataBytes);
-        __GLX_SWAP_SHORT(&req->requestNumber);
-        __GLX_SWAP_SHORT(&req->requestTotal);
+        swaps(&req->length);
+        swapl(&req->contextTag);
+        swapl(&req->dataBytes);
+        swaps(&req->requestNumber);
+        swaps(&req->requestTotal);
     }
 
     glxc = __glXForceCurrent(cl, req->contextTag, &error);
@@ -2157,8 +2130,8 @@ __glXDisp_RenderLarge(__GLXclientState * cl, GLbyte * pc)
 
         hdr = (__GLXrenderLargeHeader *) pc;
         if (client->swapped) {
-            __GLX_SWAP_INT(&hdr->length);
-            __GLX_SWAP_INT(&hdr->opcode);
+            swapl(&hdr->length);
+            swapl(&hdr->opcode);
         }
         opcode = hdr->opcode;
         if ((cmdlen = safe_pad(hdr->length)) < 0)
@@ -2389,13 +2362,11 @@ __glXDisp_QueryExtensionsString(__GLXclientState * cl, GLbyte * pc)
     memcpy(buf, pGlxScreen->GLXextensions, n);
 
     if (client->swapped) {
-        __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_DECLARE_SWAP_ARRAY_VARIABLES;
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-        __GLX_SWAP_INT(&reply.n);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.n);
         WriteToClient(client, sizeof(xGLXQueryExtensionsStringReply), &reply);
-        __GLX_SWAP_INT_ARRAY((int *) buf, length);
+        SwapLongs((CARD32*)buf, length);
         WriteToClient(client, length << 2, buf);
     }
     else {
@@ -2462,13 +2433,11 @@ __glXDisp_QueryServerString(__GLXclientState * cl, GLbyte * pc)
     memcpy(buf, ptr, n);
 
     if (client->swapped) {
-        __GLX_DECLARE_SWAP_VARIABLES;
-        __GLX_SWAP_SHORT(&reply.sequenceNumber);
-        __GLX_SWAP_INT(&reply.length);
-        __GLX_SWAP_INT(&reply.n);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.n);
         WriteToClient(client, sizeof(xGLXQueryServerStringReply), &reply);
         /** no swap is needed for an array of chars **/
-        /* __GLX_SWAP_INT_ARRAY((int *)buf, length); */
         WriteToClient(client, length << 2, buf);
     }
     else {

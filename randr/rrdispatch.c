@@ -40,10 +40,6 @@ RRClientKnowsRates(ClientPtr pClient)
 int
 ProcRRQueryVersion(ClientPtr client)
 {
-    xRRQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
     REQUEST(xRRQueryVersionReq);
     rrClientPriv(client);
 
@@ -51,25 +47,24 @@ ProcRRQueryVersion(ClientPtr client)
     pRRClient->major_version = stuff->majorVersion;
     pRRClient->minor_version = stuff->minorVersion;
 
+    xRRQueryVersionReply rep = {
+        .majorVersion = SERVER_RANDR_MAJOR_VERSION,
+        .minorVersion = SERVER_RANDR_MINOR_VERSION
+    };
+
     if (version_compare(stuff->majorVersion, stuff->minorVersion,
                         SERVER_RANDR_MAJOR_VERSION,
                         SERVER_RANDR_MINOR_VERSION) < 0) {
         rep.majorVersion = stuff->majorVersion;
         rep.minorVersion = stuff->minorVersion;
     }
-    else {
-        rep.majorVersion = SERVER_RANDR_MAJOR_VERSION;
-        rep.minorVersion = SERVER_RANDR_MINOR_VERSION;
-    }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xRRQueryVersionReply), &rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int

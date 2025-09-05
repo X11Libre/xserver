@@ -328,7 +328,6 @@ DoGetString(__GLXclientState * cl, GLbyte * pc, GLboolean need_swap)
     GLenum name;
     const char *string;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
     int error;
     char *buf = NULL, *buf1 = NULL;
     GLint length = 0;
@@ -339,8 +338,8 @@ DoGetString(__GLXclientState * cl, GLbyte * pc, GLboolean need_swap)
      * the name.
      */
     if (need_swap) {
-        __GLX_SWAP_INT(pc + 4);
-        __GLX_SWAP_INT(pc + __GLX_SINGLE_HDR_SIZE);
+        swapl((CARD32*)(pc + 4));
+        swapl((CARD32*)(pc + __GLX_SINGLE_HDR_SIZE));
     }
 
     cx = __glXForceCurrent(cl, __GLX_GET_SINGLE_CONTEXT_TAG(pc), &error);

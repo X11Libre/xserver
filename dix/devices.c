@@ -1742,16 +1742,10 @@ ProcSetModifierMapping(ClientPtr client)
         return rc;
 
     xSetModifierMappingReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .success = rc,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -1766,25 +1760,16 @@ ProcGetModifierMapping(ClientPtr client)
     generate_modkeymap(client, PickKeyboard(client), &modkeymap,
                        &max_keys_per_mod);
 
-    xGetModifierMappingReply rep = {
-        .type = X_Reply,
-        .numKeyPerModifier = max_keys_per_mod,
-        .sequenceNumber = client->sequence,
-        /* length counts 4 byte quantities - there are 8 modifiers 1 byte big */
-        .length = max_keys_per_mod << 1
-    };
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, max_keys_per_mod * 8, modkeymap);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_binary_pad(&rpcbuf, modkeymap, max_keys_per_mod * 8);
 
     free(modkeymap);
 
-    return Success;
+    xGetModifierMappingReply reply = {
+        .numKeyPerModifier = max_keys_per_mod,
+    };
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -1892,16 +1877,10 @@ ProcSetPointerMapping(ClientPtr client)
         return ret;
 
     xSetPointerMappingReply rep = {
-        .type = X_Reply,
         .success = (ret == MappingBusy) ? MappingBusy : MappingSuccess,
-        .sequenceNumber = client->sequence,
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -1939,11 +1918,7 @@ ProcGetKeyboardMapping(ClientPtr client)
     const int count = syms->mapWidth * stuff->count;
 
     xGetKeyboardMappingReply rep = {
-        .type = X_Reply,
         .keySymsPerKeyCode = syms->mapWidth,
-        .sequenceNumber = client->sequence,
-        /* length is a count of 4 byte quantities and KeySyms are 4 bytes */
-        .length = count
     };
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
@@ -1955,17 +1930,7 @@ ProcGetKeyboardMapping(ClientPtr client)
     free(syms->map);
     free(syms);
 
-    if (rpcbuf.error)
-        return BadAlloc;
-
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteRpcbufToClient(client, &rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -1987,21 +1952,14 @@ ProcGetPointerMapping(ClientPtr client)
 
     nElts = (butc) ? butc->numButtons : 0;
 
-    xGetPointerMappingReply rep = {
-        .type = X_Reply,
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_binary_pad(&rpcbuf, &butc->map[1], nElts);
+
+    xGetPointerMappingReply reply = {
         .nElts = nElts,
-        .sequenceNumber = client->sequence,
-        .length = ((unsigned) nElts + (4 - 1)) / 4
     };
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, nElts, &butc->map[1]);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 void
@@ -2235,10 +2193,7 @@ ProcGetKeyboardControl(ClientPtr client)
         return rc;
 
     xGetKeyboardControlReply rep = {
-        .type = X_Reply,
         .globalAutoRepeat = ctrl->autoRepeat,
-        .sequenceNumber = client->sequence,
-        .length = 5,
         .ledMask = ctrl->leds,
         .keyClickPercent = ctrl->click,
         .bellPercent = ctrl->bell,
@@ -2249,13 +2204,11 @@ ProcGetKeyboardControl(ClientPtr client)
         rep.map[i] = ctrl->autoRepeats[i];
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.ledMask);
         swaps(&rep.bellPitch);
         swaps(&rep.bellDuration);
     }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -2395,21 +2348,17 @@ ProcGetPointerControl(ClientPtr client)
         return rc;
 
     xGetPointerControlReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
         .accelNumerator = ctrl->num,
         .accelDenominator = ctrl->den,
         .threshold = ctrl->threshold
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swaps(&rep.accelNumerator);
         swaps(&rep.accelDenominator);
         swaps(&rep.threshold);
     }
-    WriteToClient(client, sizeof(rep), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 
@@ -2433,7 +2382,6 @@ int
 ProcGetMotionEvents(ClientPtr client)
 {
     WindowPtr pWin;
-    xTimecoord *coords = (xTimecoord *) NULL;
     int count, xmin, xmax, ymin, ymax, rc;
     unsigned long nEvents;
     DeviceIntPtr mouse = PickPointer(client);
@@ -2453,6 +2401,8 @@ ProcGetMotionEvents(ClientPtr client)
     if (mouse->valuator->motionHintWindow)
         MaybeStopHint(mouse, client);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     nEvents = 0;
     start = ClientTimeToServerTime(stuff->start);
     stop = ClientTimeToServerTime(stuff->stop);
@@ -2461,6 +2411,9 @@ ProcGetMotionEvents(ClientPtr client)
         mouse->valuator->numMotionEvents) {
         if (CompareTimeStamps(stop, currentTime) == LATER)
             stop = currentTime;
+
+        xTimecoord *coords = NULL;
+
         count = GetMotionHistory(mouse, &coords, start.milliseconds,
                                  stop.milliseconds, pWin->drawable.pScreen,
                                  TRUE);
@@ -2473,35 +2426,26 @@ ProcGetMotionEvents(ClientPtr client)
         for (int i = 0; i < count; i++)
             if ((xmin <= coords[i].x) && (coords[i].x < xmax) &&
                 (ymin <= coords[i].y) && (coords[i].y < ymax)) {
-                coords[nEvents].time = coords[i].time;
-                coords[nEvents].x = coords[i].x - pWin->drawable.x;
-                coords[nEvents].y = coords[i].y - pWin->drawable.y;
                 nEvents++;
+
+                /* write xTimecoord */
+                x_rpcbuf_write_CARD32(&rpcbuf, coords[i].time);
+                x_rpcbuf_write_INT16(&rpcbuf, coords[i].x - pWin->drawable.x);
+                x_rpcbuf_write_INT16(&rpcbuf, coords[i].y - pWin->drawable.y);
             }
+
+        free(coords);
     }
 
-    xGetMotionEventsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = nEvents * bytes_to_int32(sizeof(xTimecoord)),
+    xGetMotionEventsReply reply = {
         .nEvents = nEvents,
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.nEvents);
-        for (int i = 0; i < nEvents; i++) {
-            swapl(&coords[i].time);
-            swaps(&coords[i].x);
-            swaps(&coords[i].y);
-        }
+        swapl(&reply.nEvents);
     }
 
-    WriteToClient(client, sizeof(xGetMotionEventsReply), &rep);
-    WriteToClient(client, nEvents * sizeof(xTimecoord), coords);
-    free(coords);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -2513,11 +2457,7 @@ ProcQueryKeymap(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xReq);
 
-    xQueryKeymapReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 2
-    };
+    xQueryKeymapReply rep = { 0 };
 
     rc = XaceHookDeviceAccess(client, keybd, DixReadAccess);
     /* If rc is Success, we're allowed to copy out the keymap.
@@ -2530,12 +2470,7 @@ ProcQueryKeymap(ClientPtr client)
     else if (rc != BadAccess)
         return rc;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(rep), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 

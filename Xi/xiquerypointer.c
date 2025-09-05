@@ -41,6 +41,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "os/fmt.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -78,8 +79,6 @@ ProcXIQueryPointer(ClientPtr client)
     WindowPtr pWin, t;
     SpritePtr pSprite;
     XkbStatePtr state;
-    char *buttons = NULL;
-    int buttons_size = 0;       /* size of buttons array */
     XIClientPtr xi_client;
     Bool have_xi22 = FALSE;
 
@@ -124,14 +123,10 @@ ProcXIQueryPointer(ClientPtr client)
     pSprite = pDev->spriteInfo->sprite;
 
     xXIQueryPointerReply rep = {
-        .repType = X_Reply,
         .RepType = X_XIQueryPointer,
-        .sequenceNumber = client->sequence,
-        .length = 6,
         .root = (InputDevCurrentRootWindow(pDev))->drawable.id,
         .root_x = double_to_fp1616(pSprite->hot.x),
         .root_y = double_to_fp1616(pSprite->hot.y),
-        .child = None
     };
 
     if (kbd) {
@@ -145,15 +140,16 @@ ProcXIQueryPointer(ClientPtr client)
         rep.group.locked_group = state->locked_group;
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (pDev->button) {
         int i;
 
-        rep.buttons_len = bytes_to_int32(bits_to_bytes(256)); /* button map up to 255 */
-        rep.length += rep.buttons_len;
-        buttons = calloc(rep.buttons_len, 4);
+        const int buttons_size = bits_to_bytes(256); /* button map up to 255 */
+        rep.buttons_len = bytes_to_int32(buttons_size);
+        char *buttons = x_rpcbuf_reserve(&rpcbuf, buttons_size);
         if (!buttons)
             return BadAlloc;
-        buttons_size = rep.buttons_len * 4;
 
         for (i = 1; i < pDev->button->numButtons; i++)
             if (BitIsOn(pDev->button->down, i))
@@ -162,8 +158,6 @@ ProcXIQueryPointer(ClientPtr client)
         if (!have_xi22 && pDev->touch && pDev->touch->buttonsDown > 0)
             SetBit(buttons, pDev->button->map[1]);
     }
-    else
-        rep.buttons_len = 0;
 
     if (pSprite->hot.pScreen == pWin->drawable.pScreen) {
         rep.same_screen = xTrue;
@@ -174,11 +168,6 @@ ProcXIQueryPointer(ClientPtr client)
                 rep.child = t->drawable.id;
                 break;
             }
-    }
-    else {
-        rep.same_screen = xFalse;
-        rep.win_x = 0;
-        rep.win_y = 0;
     }
 
 #ifdef XINERAMA
@@ -193,8 +182,6 @@ ProcXIQueryPointer(ClientPtr client)
 #endif /* XINERAMA */
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.root);
         swapl(&rep.child);
         swapl(&rep.root_x);
@@ -203,10 +190,6 @@ ProcXIQueryPointer(ClientPtr client)
         swapl(&rep.win_y);
         swaps(&rep.buttons_len);
     }
-    WriteToClient(client, sizeof(xXIQueryPointerReply), &rep);
-    WriteToClient(client, buttons_size, buttons);
 
-    free(buttons);
-
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }

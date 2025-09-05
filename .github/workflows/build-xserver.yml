@@ -15,7 +15,10 @@ on:
 jobs:
     xserver-build-ubuntu:
         env:
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true
+            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dtest_xephyr_gles=false
+            LIBGL_ALWAYS_SOFTWARE: 1
+            GALLIUM_DRIVER: llvmpipe
+            PIGLIT_PLATFORM: x11_egl
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
@@ -54,9 +57,8 @@ jobs:
             - name: build
               run:  .gitlab-ci/meson-build.sh
 
-            - name: tests (may fail)
-              continue-on-error: true
-              run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs || true
+            - name: tests
+              run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs
               env:
                   XTEST_DIR:  ${{ env.X11_BUILD_DIR }}/xts
                   PIGLIT_DIR: ${{ env.X11_BUILD_DIR }}/piglit
@@ -67,6 +69,8 @@ jobs:
                   name: build-logs
                   path: |
                       build/meson-logs/*
+                      build/test/piglit-results/*
+
             - name: ddx build check
               run:  .gitlab-ci/check-ddx-build.sh
             - name: manpage check
@@ -220,6 +224,8 @@ jobs:
                   name: build-logs-macos
                   path: |
                       build/meson-logs/*
+                      build/test/piglit-results/*
+
             - name: ddx build check
               run:  .gitlab-ci/check-ddx-build.sh
             - name: manpage check
@@ -246,6 +252,12 @@ jobs:
         name: Release pushed tag
         runs-on: ubuntu-latest
         if: ${{ startsWith(github.ref, 'refs/tags/xlibre-xserver-') }}
+        needs:
+            - xserver-build-ubuntu
+            - drivers-build-ubuntu
+            - xserver-build-mingw32-ubuntu
+            - xserver-build-macos
+            - xserver-build-freebsd
         steps:
             - name: Checkout
               uses: actions/checkout@v4

@@ -3314,8 +3314,7 @@ SendEventToAllWindows(DeviceIntPtr dev, Mask mask, xEvent *ev, int count)
         if (!pWin)
             continue;
         DeliverEventsToWindow(dev, pWin, ev, count, mask, NullGrab);
-        WindowPtr p1 = pWin->firstChild;
-        FindInterestedChildren(dev, p1, mask, ev, count);
+        FindInterestedChildren(dev, pWin->firstChild, mask, ev, count);
     }
 }
 

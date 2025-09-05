@@ -64,23 +64,30 @@ dix_version_compare(void)
     assert(rc < 0);
 }
 
+static inline void set_screen(unsigned int idx, short x, short y, short w, short h)
+{
+    ScreenPtr pScreen = screenInfo.screens[idx];
+    pScreen->x = x;
+    pScreen->y = y;
+    pScreen->width = w;
+    pScreen->height = h;
+}
+
 static void
 dix_update_desktop_dimensions(void)
 {
     int i;
-    int x, y, w, h;
-    int w2, h2;
     ScreenRec screens[MAXSCREENS];
 
     for (i = 0; i < MAXSCREENS; i++)
         screenInfo.screens[i] = &screens[i];
 
-    x = 0;
-    y = 0;
-    w = 10;
-    h = 5;
-    w2 = 35;
-    h2 = 25;
+    short x = 0;
+    short y = 0;
+    short w = 10;
+    short h = 5;
+    short w2 = 35;
+    short h2 = 25;
 
 #define assert_dimensions(_x, _y, _w, _h) \
     update_desktop_dimensions();          \
@@ -88,12 +95,6 @@ dix_update_desktop_dimensions(void)
     assert(screenInfo.y == _y);           \
     assert(screenInfo.width == _w);       \
     assert(screenInfo.height == _h);
-
-#define set_screen(idx, _x, _y, _w, _h)   \
-    screenInfo.screens[idx]->x = _x;      \
-    screenInfo.screens[idx]->y = _y;      \
-    screenInfo.screens[idx]->width = _w;  \
-    screenInfo.screens[idx]->height = _h; \
 
     /* single screen */
     screenInfo.numScreens = 1;

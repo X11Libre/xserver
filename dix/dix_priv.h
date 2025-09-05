@@ -5,8 +5,6 @@
 #ifndef _XSERVER_DIX_PRIV_H
 #define _XSERVER_DIX_PRIV_H
 
-#include <X11/Xdefs.h>
-
 /* This file holds global DIX settings to be used inside the Xserver,
  *  but NOT supposed to be accessed directly by external server modules like
  *  drivers or extension modules. Thus the definitions here are not part of the
@@ -95,6 +93,8 @@ void ProcessWorkQueueZombies(void);
 void CloseDownClient(ClientPtr client);
 ClientPtr GetCurrentClient(void);
 void InitClient(ClientPtr client, int i, void *ospriv);
+
+int FillFontPath(x_rpcbuf_t *rpcbuf);
 
 /* lookup builtin color by name */
 Bool dixLookupBuiltinColor(int screen,
@@ -273,6 +273,9 @@ void CopyKeyClass(DeviceIntPtr device, DeviceIntPtr master);
 int CorePointerProc(DeviceIntPtr dev, int what);
 
 int CoreKeyboardProc(DeviceIntPtr dev, int what);
+
+typedef struct _xQueryFontReply *xQueryFontReplyPtr;
+void QueryFont(FontPtr pFont, xQueryFontReplyPtr pReply, int nProtoCCIStructs);
 
 extern Bool whiteRoot;
 
@@ -746,11 +749,14 @@ static inline Atom dixGetAtomID(const char *name) {
  *
  */
 #define X_REPLY_HEADER_UNITS(hdrtype) \
-    (pad_to_int32((sizeof(hdrtype) - sizeof(xGenericReply))))
+    (bytes_to_int32((sizeof(hdrtype) - sizeof(xGenericReply))))
 
-static inline void __write_reply_hdr_and_rpcbuf(
+static inline int __write_reply_hdr_and_rpcbuf(
     ClientPtr pClient, void *hdrData, size_t hdrLen, x_rpcbuf_t *rpcbuf)
 {
+    if (rpcbuf->error)
+        return BadAlloc;
+
     xGenericReply *reply = hdrData;
     reply->type = X_Reply;
     reply->length = (bytes_to_int32(hdrLen - sizeof(xGenericReply)))
@@ -764,6 +770,25 @@ static inline void __write_reply_hdr_and_rpcbuf(
 
     WriteToClient(pClient, hdrLen, hdrData);
     WriteRpcbufToClient(pClient, rpcbuf);
+
+    return Success;
+}
+
+static inline int __write_reply_hdr_simple(
+    ClientPtr pClient, void *hdrData, size_t hdrLen)
+{
+    xGenericReply *reply = hdrData;
+    reply->type = X_Reply;
+    reply->length = (bytes_to_int32(hdrLen - sizeof(xGenericReply)));
+    reply->sequenceNumber = pClient->sequence;
+
+    if (pClient->swapped) {
+         swaps(&reply->sequenceNumber);
+         swapl(&reply->length);
+    }
+
+    WriteToClient(pClient, hdrLen, hdrData);
+    return Success;
 }
 
 /*
@@ -772,8 +797,40 @@ static inline void __write_reply_hdr_and_rpcbuf(
  * @param client      pointer to the client (ClientPtr)
  * @param hdrstruct   the header struct (not pointer, the struct itself!)
  * @param rpcbuf      the rpcbuf to send (not pointer, the struct itself!)
+ * return             X11 result code
  */
 #define X_SEND_REPLY_WITH_RPCBUF(client, hdrstruct, rpcbuf) \
-    __write_reply_hdr_and_rpcbuf(client, &hdrstruct, sizeof(hdrstruct), &rpcbuf);
+    __write_reply_hdr_and_rpcbuf(client, &(hdrstruct), sizeof(hdrstruct), &(rpcbuf));
+
+/*
+ * send reply with header struct (not pointer!) without any payload
+ *
+ * @param client      pointer to the client (ClientPtr)
+ * @param hdrstruct   the header struct (not pointer, the struct itself!)
+ * @return            X11 result code (=Success)
+ */
+#define X_SEND_REPLY_SIMPLE(client, hdrstruct) \
+    __write_reply_hdr_simple(client, &(hdrstruct), sizeof(hdrstruct));
+
+/*
+ * transmit raw event into client's buffer
+ * the struct already needs to be filled with all on-wire data, and
+ * byte-swapping must have been done (if client is swapped)
+ *
+ * the sequenceNumber field is automatically filled and byte-swapped
+ *
+ * @param client      pointer to the client (ClientPtr)
+ * @param event       pointer to the event
+ * @return            return value of WriteToClient
+ */
+static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
+{
+    ev.u.u.sequenceNumber = pClient->sequence;
+
+    if (pClient->swapped)
+        swaps(&ev.u.u.sequenceNumber);
+
+    return WriteToClient(pClient, sizeof(xEvent), &ev);
+}
 
 #endif /* _XSERVER_DIX_PRIV_H */

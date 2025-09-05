@@ -45,7 +45,6 @@ __glXDispSwap_ReadPixels(__GLXclientState * cl, GLbyte * pc)
     GLboolean swapBytes, lsbFirst;
     GLint compsize;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
     __GLXcontext *cx;
     ClientPtr client = cl->client;
     int error;
@@ -54,19 +53,19 @@ __glXDispSwap_ReadPixels(__GLXclientState * cl, GLbyte * pc)
 
     REQUEST_FIXED_SIZE(xGLXSingleReq, 28);
 
-    __GLX_SWAP_INT(&((xGLXSingleReq *) pc)->contextTag);
+    swapl(&((xGLXSingleReq *) pc)->contextTag);
     cx = __glXForceCurrent(cl, __GLX_GET_SINGLE_CONTEXT_TAG(pc), &error);
     if (!cx) {
         return error;
     }
 
     pc += __GLX_SINGLE_HDR_SIZE;
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 4);
-    __GLX_SWAP_INT(pc + 8);
-    __GLX_SWAP_INT(pc + 12);
-    __GLX_SWAP_INT(pc + 16);
-    __GLX_SWAP_INT(pc + 20);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 4));
+    swapl((CARD32*)(pc + 8));
+    swapl((CARD32*)(pc + 12));
+    swapl((CARD32*)(pc + 16));
+    swapl((CARD32*)(pc + 20));
 
     width = *(GLsizei *) (pc + 8);
     height = *(GLsizei *) (pc + 12);
@@ -107,7 +106,6 @@ __glXDispSwap_GetTexImage(__GLXclientState * cl, GLbyte * pc)
     GLenum format, type, target;
     GLboolean swapBytes;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
     __GLXcontext *cx;
     ClientPtr client = cl->client;
     int error;
@@ -117,17 +115,17 @@ __glXDispSwap_GetTexImage(__GLXclientState * cl, GLbyte * pc)
 
     REQUEST_FIXED_SIZE(xGLXSingleReq, 20);
 
-    __GLX_SWAP_INT(&((xGLXSingleReq *) pc)->contextTag);
+    swapl(&((xGLXSingleReq *) pc)->contextTag);
     cx = __glXForceCurrent(cl, __GLX_GET_SINGLE_CONTEXT_TAG(pc), &error);
     if (!cx) {
         return error;
     }
 
     pc += __GLX_SINGLE_HDR_SIZE;
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 4);
-    __GLX_SWAP_INT(pc + 8);
-    __GLX_SWAP_INT(pc + 12);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 4));
+    swapl((CARD32*)(pc + 8));
+    swapl((CARD32*)(pc + 12));
 
     level = *(GLint *) (pc + 4);
     format = *(GLenum *) (pc + 8);
@@ -163,9 +161,9 @@ __glXDispSwap_GetTexImage(__GLXclientState * cl, GLbyte * pc)
     else {
         __GLX_BEGIN_REPLY(compsize);
         __GLX_SWAP_REPLY_HEADER();
-        __GLX_SWAP_INT(&width);
-        __GLX_SWAP_INT(&height);
-        __GLX_SWAP_INT(&depth);
+        swapl(&width);
+        swapl(&height);
+        swapl(&depth);
         ((xGLXGetTexImageReply *) &reply)->width = width;
         ((xGLXGetTexImageReply *) &reply)->height = height;
         ((xGLXGetTexImageReply *) &reply)->depth = depth;
@@ -186,11 +184,9 @@ __glXDispSwap_GetPolygonStipple(__GLXclientState * cl, GLbyte * pc)
     char *answer;
     xGLXSingleReply reply = { 0, };
 
-    __GLX_DECLARE_SWAP_VARIABLES;
-
     REQUEST_FIXED_SIZE(xGLXSingleReq, 4);
 
-    __GLX_SWAP_INT(&((xGLXSingleReq *) pc)->contextTag);
+    swapl(&((xGLXSingleReq *) pc)->contextTag);
     cx = __glXForceCurrent(cl, __GLX_GET_SINGLE_CONTEXT_TAG(pc), &error);
     if (!cx) {
         return error;
@@ -227,7 +223,6 @@ GetSeparableFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     ClientPtr client = cl->client;
     int error;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
     char *answer, answerBuffer[200];
     GLint width = 0, height = 0;
     xGLXSingleReply reply = { 0, };
@@ -237,9 +232,9 @@ GetSeparableFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
         return error;
     }
 
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 4);
-    __GLX_SWAP_INT(pc + 8);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 4));
+    swapl((CARD32*)(pc + 8));
 
     format = *(GLenum *) (pc + 4);
     type = *(GLenum *) (pc + 8);
@@ -276,8 +271,8 @@ GetSeparableFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     else {
         __GLX_BEGIN_REPLY(compsize + compsize2);
         __GLX_SWAP_REPLY_HEADER();
-        __GLX_SWAP_INT(&width);
-        __GLX_SWAP_INT(&height);
+        swapl(&width);
+        swapl(&height);
         ((xGLXGetSeparableFilterReply *) &reply)->width = width;
         ((xGLXGetSeparableFilterReply *) &reply)->height = height;
         __GLX_SEND_VOID_ARRAY(compsize + compsize2);
@@ -316,7 +311,6 @@ GetConvolutionFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     ClientPtr client = cl->client;
     int error;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
     char *answer, answerBuffer[200];
     GLint width = 0, height = 0;
     xGLXSingleReply reply = { 0, };
@@ -326,9 +320,9 @@ GetConvolutionFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
         return error;
     }
 
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 4);
-    __GLX_SWAP_INT(pc + 8);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 4));
+    swapl((CARD32*)(pc + 8));
 
     format = *(GLenum *) (pc + 4);
     type = *(GLenum *) (pc + 8);
@@ -363,8 +357,8 @@ GetConvolutionFilter(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     else {
         __GLX_BEGIN_REPLY(compsize);
         __GLX_SWAP_REPLY_HEADER();
-        __GLX_SWAP_INT(&width);
-        __GLX_SWAP_INT(&height);
+        swapl(&width);
+        swapl(&height);
         ((xGLXGetConvolutionFilterReply *) &reply)->width = width;
         ((xGLXGetConvolutionFilterReply *) &reply)->height = height;
         __GLX_SEND_VOID_ARRAY(compsize);
@@ -403,7 +397,6 @@ GetHistogram(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     ClientPtr client = cl->client;
     int error;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
     char *answer, answerBuffer[200];
     GLint width = 0;
     xGLXSingleReply reply = { 0, };
@@ -413,9 +406,9 @@ GetHistogram(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
         return error;
     }
 
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 4);
-    __GLX_SWAP_INT(pc + 8);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 4));
+    swapl((CARD32*)(pc + 8));
 
     format = *(GLenum *) (pc + 4);
     type = *(GLenum *) (pc + 8);
@@ -444,7 +437,7 @@ GetHistogram(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     else {
         __GLX_BEGIN_REPLY(compsize);
         __GLX_SWAP_REPLY_HEADER();
-        __GLX_SWAP_INT(&width);
+        swapl(&width);
         ((xGLXGetHistogramReply *) &reply)->width = width;
         __GLX_SEND_VOID_ARRAY(compsize);
     }
@@ -482,7 +475,6 @@ GetMinmax(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     ClientPtr client = cl->client;
     int error;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
     char *answer, answerBuffer[200];
     xGLXSingleReply reply = { 0, };
 
@@ -491,9 +483,9 @@ GetMinmax(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
         return error;
     }
 
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 4);
-    __GLX_SWAP_INT(pc + 8);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 4));
+    swapl((CARD32*)(pc + 8));
 
     format = *(GLenum *) (pc + 4);
     type = *(GLenum *) (pc + 8);
@@ -553,7 +545,6 @@ GetColorTable(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     ClientPtr client = cl->client;
     int error;
 
-    __GLX_DECLARE_SWAP_VARIABLES;
     char *answer, answerBuffer[200];
     GLint width = 0;
     xGLXSingleReply reply = { 0, };
@@ -563,9 +554,9 @@ GetColorTable(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
         return error;
     }
 
-    __GLX_SWAP_INT(pc + 0);
-    __GLX_SWAP_INT(pc + 4);
-    __GLX_SWAP_INT(pc + 8);
+    swapl((CARD32*)(pc + 0));
+    swapl((CARD32*)(pc + 4));
+    swapl((CARD32*)(pc + 8));
 
     format = *(GLenum *) (pc + 4);
     type = *(GLenum *) (pc + 8);
@@ -594,7 +585,7 @@ GetColorTable(__GLXclientState * cl, GLbyte * pc, GLXContextTag tag)
     else {
         __GLX_BEGIN_REPLY(compsize);
         __GLX_SWAP_REPLY_HEADER();
-        __GLX_SWAP_INT(&width);
+        swapl(&width);
         ((xGLXGetColorTableReply *) &reply)->width = width;
         __GLX_SEND_VOID_ARRAY(compsize);
     }

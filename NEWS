@@ -1,3 +1,44 @@
+### xlibre-xserver 25.0.0.9
+
+[25.0] dbe: fix screen cleanup
+Xext: shape: fix non-xinerama build
+xkb: fix swapping bug in ProcXkbGetKbdByName()
+
+### xlibre-xserver 25.0.0.8
+
+[25.0] Xnamespace: fix possible memleak
+glx: fix duplicate typedef
+xfree86: drivers: common: remove incorrect #ifndef XORG_CONFIG_H
+kdrive: xephyr: link pthread on mingw for nanosleep()
+kdrive: ephyr: include glamor_priv.h only when glamor is enabled
+glamor: don't redefine ALIGN macro if it exists
+kdrive: ephyr: don't use %hhu in error messages
+dix: inpututils: don't use %hhx printf pattern
+xwin: fix unused variables in winSetShapeMultiWindow()
+os: xprintf: fix includes
+kdrive: allow win32 build w/o sysv ipc
+Xnamespace: fix printf patterns
+xwin: win.h: missing include of dix/dix_priv.h
+os: ospoll: drop not needed including of X11 headers
+mi: use %lu instead of %zu in ErrorF() call
+xfree86: drm_platform: fix warning on potentially unitialized variable
+xfree86: fix xf86I2CBusInit() prototype
+xserver: miext/sync/meson.build: compile misyncshm.c if xshmfence found
+meson: move MAXCLIENTS and LIMITCLIENTS into dix-config.h
+xfree86: fbdevhw: fix fbdevHWProbe() parameter
+xfree86: i2c: constify I2CBusRec::name
+xfree86: fbdevhw: fix bdevHWInit() parameter
+screen: initialize rootDepth to zero to fix uninitialized-variable wa…
+xwin: fix missing prototype of parse_file()
+os: ospoll: use realloc() instead of reallocarray()
+XKBMAlloc: Solve CodeQL Alert Potential use after double free
+os: ospoll: add missing include of <string.h>
+os: ospoll: use stdbool instead of X11's Bool
+record: stop using request length fields
+os: ospoll: add missing include of <assert.h>
+os: xserver_poll: skip defining symbols already defined by mingw
+Xext: xv: fix redefinition of typedef 'XvPortNotifyPtr'
+
 ### xlibre-xserver 25.0.0.7
 
 * xserver: os/log.c: ignore alternate forms in log formats

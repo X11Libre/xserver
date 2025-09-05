@@ -101,6 +101,7 @@ conf_data.set('CONFIG_WSCONS', host_machine.system() in ['openbsd', 'netbsd'] ? 
 
 conf_data.set('HAVE_XSHMFENCE', xshmfence_dep.found() ? '1' : false)
 conf_data.set('WITH_LIBDRM', libdrm_required ? '1' : false)
+conf_data.set('LIBDRM_HAS_PLANE_SIZE_HINTS', libdrm_required ? libdrm_dep.version().version_compare('>= 2.4.122') : false)
 conf_data.set('GLAMOR_HAS_EGL_QUERY_DMABUF',
               epoxy_dep.found() and epoxy_dep.version().version_compare('>= 1.4.4') ? '1' : false)
 conf_data.set('GLAMOR_HAS_EGL_QUERY_DRIVER',
@@ -209,6 +210,9 @@ conf_data.set('MAXCLIENTS', 2048)
 
 # Must be a power of 2 and <= MAXCLIENTS */
 conf_data.set('DIX_LIMITCLIENTS', 256)
+
+# Legacy NVidia drivers (390, 470) use an older ABI and expect an additional field in ScreenRec */
+conf_data.set('CONFIG_LEGACY_NVIDIA_PADDING', legacy_nvidia_padding ? '1' : false)
 
 # some drivers (eg. xf86-video-intel) still relying on this symbol being set
 conf_data.set('COMPOSITE', '1')

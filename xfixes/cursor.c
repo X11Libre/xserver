@@ -400,8 +400,7 @@ ProcXFixesGetCursorImage(ClientPtr client)
         swapl(&rep.cursorSerial);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -460,8 +459,8 @@ ProcXFixesGetCursorName(ClientPtr client)
         swapl(&rep.atom);
         swaps(&rep.nbytes);
     }
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int _X_COLD
@@ -536,8 +535,7 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
         swaps(&rep.nbytes);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 /*
@@ -1016,8 +1014,6 @@ SProcXFixesDestroyPointerBarrier(ClientPtr client)
 Bool
 XFixesCursorInit(void)
 {
-    int i;
-
     if (party_like_its_1989)
         CursorVisible = EnableCursor;
     else
@@ -1026,8 +1022,8 @@ XFixesCursorInit(void)
     if (!dixRegisterPrivateKey(&CursorScreenPrivateKeyRec, PRIVATE_SCREEN, sizeof(CursorScreenRec)))
         return FALSE;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         CursorScreenPtr cs = GetCursorScreen(walkScreen);
         dixScreenHookClose(walkScreen, CursorScreenClose);
         Wrap(cs, walkScreen, DisplayCursor, CursorDisplayCursor);

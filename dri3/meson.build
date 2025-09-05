@@ -1,11 +1,11 @@
 srcs_dri3 = [
-	'dri3.c',
-	'dri3_request.c',
-	'dri3_screen.c',
+    'dri3.c',
+    'dri3_request.c',
+    'dri3_screen.c',
 ]
 
 hdrs_dri3 = [
-	'dri3.h',
+    'dri3.h',
 ]
 
 libxserver_dri3 = []

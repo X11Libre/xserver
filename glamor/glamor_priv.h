@@ -93,20 +93,20 @@ typedef struct glamor_composite_shader {
     GLint source_repeat_mode;
     GLint mask_repeat_mode;
     union {
-        float source_solid_color[4];
+        float solid_color[4];
         struct {
-            PixmapPtr source_pixmap;
-            PicturePtr source;
-        };
-    };
+            PixmapPtr pixmap;
+            PicturePtr picture;
+        } pict;
+    } source;
 
     union {
-        float mask_solid_color[4];
+        float solid_color[4];
         struct {
-            PixmapPtr mask_pixmap;
-            PicturePtr mask;
-        };
-    };
+            PixmapPtr pixmap;
+            PicturePtr picture;
+        } pict;
+    } mask;
 } glamor_composite_shader;
 
 enum ca_state {

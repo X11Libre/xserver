@@ -146,21 +146,15 @@ AppleWMDoReorderWindow(WindowPtr pWin)
 static int
 ProcAppleWMQueryVersion(register ClientPtr client)
 {
-    xAppleWMQueryVersionReply rep;
-
     REQUEST_SIZE_MATCH(xAppleWMQueryVersionReq);
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
-    rep.majorVersion = SERVER_APPLEWM_MAJOR_VERSION;
-    rep.minorVersion = SERVER_APPLEWM_MINOR_VERSION;
-    rep.patchVersion = SERVER_APPLEWM_PATCH_VERSION;
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xAppleWMQueryVersionReply),&rep);
-    return Success;
+
+    xAppleWMQueryVersionReply reply = {
+        .majorVersion = SERVER_APPLEWM_MAJOR_VERSION,
+        .minorVersion = SERVER_APPLEWM_MINOR_VERSION,
+        .patchVersion = SERVER_APPLEWM_PATCH_VERSION,
+    };
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /* events */
@@ -528,14 +522,10 @@ ProcAppleWMSetCanQuit(register ClientPtr client)
 static int
 ProcAppleWMFrameGetRect(register ClientPtr client)
 {
-    xAppleWMFrameGetRectReply rep;
     BoxRec ir, or, rr;
     REQUEST(xAppleWMFrameGetRectReq);
 
     REQUEST_SIZE_MATCH(xAppleWMFrameGetRectReq);
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
 
     ir = make_box(stuff->ix, stuff->iy, stuff->iw, stuff->ih);
     or = make_box(stuff->ox, stuff->oy, stuff->ow, stuff->oh);
@@ -546,27 +536,24 @@ ProcAppleWMFrameGetRect(register ClientPtr client)
         return BadValue;
     }
 
-    rep.x = rr.x1;
-    rep.y = rr.y1;
-    rep.w = rr.x2 - rr.x1;
-    rep.h = rr.y2 - rr.y1;
+    xAppleWMFrameGetRectReply reply = {
+        .x = rr.x1,
+        .y = rr.y1,
+        .w = rr.x2 - rr.x1,
+        .h = rr.y2 - rr.y1,
+    };
 
-    WriteToClient(client, sizeof(xAppleWMFrameGetRectReply),&rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcAppleWMFrameHitTest(register ClientPtr client)
 {
-    xAppleWMFrameHitTestReply rep;
     BoxRec ir, or;
     int ret;
     REQUEST(xAppleWMFrameHitTestReq);
 
     REQUEST_SIZE_MATCH(xAppleWMFrameHitTestReq);
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.sequenceNumber = client->sequence;
 
     ir = make_box(stuff->ix, stuff->iy, stuff->iw, stuff->ih);
     or = make_box(stuff->ox, stuff->oy, stuff->ow, stuff->oh);
@@ -576,10 +563,11 @@ ProcAppleWMFrameHitTest(register ClientPtr client)
         return BadValue;
     }
 
-    rep.ret = ret;
+    xAppleWMFrameHitTestReply reply = {
+        .ret = ret
+    };
 
-    WriteToClient(client, sizeof(xAppleWMFrameHitTestReply),&rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int

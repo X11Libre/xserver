@@ -112,9 +112,7 @@ ProcXGrabDevice(ClientPtr client)
         return BadLength;
 
     xGrabDeviceReply rep = {
-        .repType = X_Reply,
         .RepType = X_GrabDevice,
-        .sequenceNumber = client->sequence,
     };
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
@@ -136,11 +134,7 @@ ProcXGrabDevice(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-    }
-    WriteToClient(client, sizeof(xGrabDeviceReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }
 

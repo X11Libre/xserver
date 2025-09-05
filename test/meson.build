@@ -46,10 +46,17 @@ rendercheck_tests_noblend = [
     ['mask coordinates', '-t mcoords'],
     ['translated source coordinates', '-t tscoords'],
     ['translated mask coordinates', '-t tmcoords'],
-    ['triangles', '-t triangles'],
     ['LibreOffice xRGB', '-t libreoffice_xrgb'],
     ['GTK ARGB vs xBGR', '-t gtk_argb_xbgr'],
 ]
+
+if get_option('test_rendercheck_triangles')
+    message('testsuite: rendercheck triangles enabled - expected to fail on Xephyr')
+    rendercheck_tests_noblend += [ ['triangles', '-t triangles'] ]
+else
+    message('testsuite: rendercheck triangles disabled')
+endif
+
 rendercheck_blend = [
     ['blend/Clear', '-t blend -o clear'],
     ['blend/Src', '-t blend -o src'],
@@ -69,6 +76,8 @@ rendercheck_tests = rendercheck_blend + rendercheck_tests_noblend + rendercheck_
 rendercheck_tests_gles2_success = rendercheck_blend_gles2 + rendercheck_tests_noblend
 rendercheck_tests_gles3 = rendercheck_blend_gles2 + rendercheck_tests_noblend + rendercheck_a8
 rendercheck = find_program('rendercheck', required:false)
+
+subdir('info')
 
 if get_option('xvfb')
     xvfb_args = [
@@ -103,7 +112,11 @@ if get_option('xvfb')
     endif
 
     if get_option('xephyr') and build_glamor
-        foreach testsuite : ['','-gles2','-gles3']
+        glamor_tests = ['']
+        if get_option('test_xephyr_gles')
+            glamor_tests += ['-gles2','-gles3']
+        endif
+        foreach testsuite : glamor_tests
             test_env = piglit_env
             if(testsuite == '-gles2')
                 test_env = gles20_env

@@ -465,7 +465,7 @@ SProcIDispatch(ClientPtr client)
         case X_SetDeviceValuators:
             return ProcXSetDeviceValuators(client);
         case X_GetDeviceControl:
-            return SProcXGetDeviceControl(client);
+            return ProcXGetDeviceControl(client);
         case X_ChangeDeviceControl:
             return SProcXChangeDeviceControl(client);
         /* XI 1.5 */

@@ -140,10 +140,8 @@ ProcXCloseDevice(ClientPtr client)
 
     for (i = 0; i < screenInfo.numScreens; i++) {
         ScreenPtr walkScreen = screenInfo.screens[i];
-        WindowPtr pWin = walkScreen->root;
-        DeleteDeviceEvents(d, pWin, client);
-        WindowPtr p1 = pWin->firstChild;
-        DeleteEventsFromChildren(d, p1, client);
+        DeleteDeviceEvents(d, walkScreen->root, client);
+        DeleteEventsFromChildren(d, walkScreen->root->firstChild, client);
     }
 
     return Success;

@@ -97,21 +97,16 @@ int
 ProcRRXineramaQueryVersion(ClientPtr client)
 {
     xPanoramiXQueryVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .majorVersion = SERVER_RRXINERAMA_MAJOR_VERSION,
         .minorVersion = SERVER_RRXINERAMA_MINOR_VERSION
     };
 
     REQUEST_SIZE_MATCH(xPanoramiXQueryVersionReq);
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.majorVersion);
         swaps(&rep.minorVersion);
     }
-    WriteToClient(client, sizeof(xPanoramiXQueryVersionReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -137,18 +132,13 @@ ProcRRXineramaGetState(ClientPtr client)
     }
 
     xPanoramiXGetStateReply rep = {
-        .type = X_Reply,
         .state = active,
-        .sequenceNumber = client->sequence,
         .window = stuff->window
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetStateReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
@@ -176,18 +166,13 @@ ProcRRXineramaGetScreenCount(ClientPtr client)
         return rc;
 
     xPanoramiXGetScreenCountReply rep = {
-        .type = X_Reply,
         .ScreenCount = RRXineramaScreenCount(pWin->drawable.pScreen),
-        .sequenceNumber = client->sequence,
         .window = stuff->window
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.window);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenCountReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -207,63 +192,32 @@ ProcRRXineramaGetScreenSize(ClientPtr client)
     pRoot = pScreen->root;
 
     xPanoramiXGetScreenSizeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .width = pRoot->drawable.width,
         .height = pRoot->drawable.height,
         .window = stuff->window,
         .screen = stuff->screen
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.width);
         swapl(&rep.height);
         swapl(&rep.window);
         swapl(&rep.screen);
     }
-    WriteToClient(client, sizeof(xPanoramiXGetScreenSizeReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
 ProcRRXineramaIsActive(ClientPtr client)
 {
-
     REQUEST_SIZE_MATCH(xXineramaIsActiveReq);
 
     xXineramaIsActiveReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .state = RRXineramaScreenActive(screenInfo.screens[RR_XINERAMA_SCREEN])
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.state);
     }
-    WriteToClient(client, sizeof(xXineramaIsActiveReply), &rep);
-    return Success;
-}
-
-static void
-RRXineramaWriteMonitor(ClientPtr client, RRMonitorPtr monitor)
-{
-    xXineramaScreenInfo scratch = {
-        .x_org = monitor->geometry.box.x1,
-        .y_org = monitor->geometry.box.y1,
-        .width = monitor->geometry.box.x2 - monitor->geometry.box.x1,
-        .height = monitor->geometry.box.y2 - monitor->geometry.box.y1,
-    };
-
-    if (client->swapped) {
-        swaps(&scratch.x_org);
-        swaps(&scratch.y_org);
-        swaps(&scratch.width);
-        swaps(&scratch.height);
-    }
-
-    WriteToClient(client, sz_XineramaScreenInfo, &scratch);
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -282,26 +236,29 @@ ProcRRXineramaQueryScreens(ClientPtr client)
             return BadAlloc;
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     xXineramaQueryScreensReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(nmonitors * sz_XineramaScreenInfo),
         .number = nmonitors
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.number);
     }
-    WriteToClient(client, sizeof(xXineramaQueryScreensReply), &rep);
 
-    for (m = 0; m < nmonitors; m++)
-        RRXineramaWriteMonitor(client, &monitors[m]);
+    for (m = 0; m < nmonitors; m++) {
+        BoxRec box = monitors[m].geometry.box;
+        /* write xXineramaScreenInfo */
+        x_rpcbuf_write_rect(&rpcbuf,
+                            box.x1,
+                            box.y1,
+                            box.x2 - box.x1,
+                            box.y2 - box.y1);
+    }
 
     if (monitors)
         RRMonitorFreeList(monitors, nmonitors);
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int

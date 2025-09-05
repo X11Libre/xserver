@@ -51,17 +51,13 @@ ProcBigReqDispatch(ClientPtr client)
         return BadRequest;
     client->big_requests = TRUE;
 
-    xBigReqEnableReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xBigReqEnableReply reply = {
         .max_request_size = maxBigRequestSize
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.max_request_size);
+        swapl(&reply.max_request_size);
     }
-    WriteToClient(client, sizeof(xBigReqEnableReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 

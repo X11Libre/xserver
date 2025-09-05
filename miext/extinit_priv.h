@@ -8,7 +8,9 @@
 
 #include "extinit.h"
 
-extern Bool noDamageExtension;
+/* required by: the 470 and 390 nvidia DDX drivers */
+extern _X_EXPORT Bool noDamageExtension;
+
 extern Bool noDbeExtension;
 extern Bool noDPMSExtension;
 extern Bool noGlxExtension;

@@ -509,8 +509,7 @@ ProcRRGetOutputInfo(ClientPtr client)
         swaps(&rep.nameLength);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static void
@@ -604,17 +603,12 @@ ProcRRGetOutputPrimary(ClientPtr client)
         primary = pScrPriv->primaryOutput;
 
     xRRGetOutputPrimaryReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .output = primary ? primary->id : None
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
         swapl(&rep.output);
     }
 
-    WriteToClient(client, sizeof(xRRGetOutputPrimaryReply), &rep);
-
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }

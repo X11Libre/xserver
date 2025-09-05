@@ -127,6 +127,8 @@ _X_EXPORT Bool TimerForce(OsTimerPtr);
 #ifdef WIN32
 #include <X11/Xwinsock.h>
 
+#undef CreateWindow
+
 const char *Win32TempDir(void);
 
 static inline void Fclose(void *f) { fclose(f); }

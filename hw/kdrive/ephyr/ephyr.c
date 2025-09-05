@@ -23,7 +23,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 
 #include <xcb/xcb_keysyms.h>
 #include <X11/keysym.h>
@@ -667,6 +667,7 @@ ephyrSetGrabShortcut(char const* const desc)
     }
     else {
         const uint8_t fixed_bound = 255;
+        (void)fixed_bound;
         char buf[16];
         uint8_t j = 0;
         for (uint8_t i = 0;; ++i) {

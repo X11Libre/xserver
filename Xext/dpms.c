@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 #include <X11/extensions/dpmsproto.h>
 
+#include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/screensaver.h"
 #include "Xext/geext_priv.h"
@@ -125,11 +126,15 @@ static int
 ProcDPMSSelectInput(register ClientPtr client)
 {
     REQUEST(xDPMSSelectInputReq);
+    REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
+
+    if (client->swapped)
+        swapl(&stuff->eventMask);
+
     DPMSEventPtr pEvent, pNewEvent, *pHead;
     XID clientResource;
     int i;
 
-    REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
     i = dixLookupResourceByType((void **)&pHead, eventResource, DPMSEventType,
                                 client,
                                 DixWriteAccess);
@@ -303,23 +308,25 @@ DPMSSet(ClientPtr client, int level)
 static int
 ProcDPMSGetVersion(ClientPtr client)
 {
+    REQUEST(xDPMSGetVersionReq);
+    REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
+
+    if (client->swapped) {
+        swaps(&stuff->majorVersion);
+        swaps(&stuff->minorVersion);
+    }
+
     /* REQUEST(xDPMSGetVersionReq); */
-    xDPMSGetVersionReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDPMSGetVersionReply reply = {
         .majorVersion = SERVER_DPMS_MAJOR_VERSION,
         .minorVersion = SERVER_DPMS_MINOR_VERSION
     };
 
-    REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
-
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
-    WriteToClient(client, sizeof(xDPMSGetVersionReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -327,19 +334,13 @@ static int
 ProcDPMSCapable(ClientPtr client)
 {
     /* REQUEST(xDPMSCapableReq); */
-    xDPMSCapableReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDPMSCapableReply reply = {
         .capable = TRUE
     };
 
     REQUEST_SIZE_MATCH(xDPMSCapableReq);
 
-    if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-    }
-    WriteToClient(client, sizeof(xDPMSCapableReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -347,10 +348,7 @@ static int
 ProcDPMSGetTimeouts(ClientPtr client)
 {
     /* REQUEST(xDPMSGetTimeoutsReq); */
-    xDPMSGetTimeoutsReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDPMSGetTimeoutsReply reply = {
         .standby = DPMSStandbyTime / MILLI_PER_SECOND,
         .suspend = DPMSSuspendTime / MILLI_PER_SECOND,
         .off = DPMSOffTime / MILLI_PER_SECOND
@@ -359,12 +357,11 @@ ProcDPMSGetTimeouts(ClientPtr client)
     REQUEST_SIZE_MATCH(xDPMSGetTimeoutsReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.standby);
-        swaps(&rep.suspend);
-        swaps(&rep.off);
+        swaps(&reply.standby);
+        swaps(&reply.suspend);
+        swaps(&reply.off);
     }
-    WriteToClient(client, sizeof(xDPMSGetTimeoutsReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -372,8 +369,13 @@ static int
 ProcDPMSSetTimeouts(ClientPtr client)
 {
     REQUEST(xDPMSSetTimeoutsReq);
-
     REQUEST_SIZE_MATCH(xDPMSSetTimeoutsReq);
+
+    if (client->swapped) {
+        swaps(&stuff->standby);
+        swaps(&stuff->suspend);
+        swaps(&stuff->off);
+    }
 
     if ((stuff->off != 0) && (stuff->off < stuff->suspend)) {
         client->errorValue = stuff->off;
@@ -430,11 +432,14 @@ static int
 ProcDPMSForceLevel(ClientPtr client)
 {
     REQUEST(xDPMSForceLevelReq);
-
     REQUEST_SIZE_MATCH(xDPMSForceLevelReq);
 
     if (!DPMSEnabled)
         return BadMatch;
+
+    if (client->swapped) {
+        swaps(&stuff->level);
+    }
 
     if (stuff->level != DPMSModeOn &&
         stuff->level != DPMSModeStandby &&
@@ -452,10 +457,7 @@ static int
 ProcDPMSInfo(ClientPtr client)
 {
     /* REQUEST(xDPMSInfoReq); */
-    xDPMSInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
+    xDPMSInfoReply reply = {
         .power_level = DPMSPowerLevel,
         .state = DPMSEnabled
     };
@@ -463,10 +465,9 @@ ProcDPMSInfo(ClientPtr client)
     REQUEST_SIZE_MATCH(xDPMSInfoReq);
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.power_level);
+        swaps(&reply.power_level);
     }
-    WriteToClient(client, sizeof(xDPMSInfoReply), &rep);
+    X_SEND_REPLY_SIMPLE(client, reply);
     return Success;
 }
 
@@ -494,78 +495,6 @@ ProcDPMSDispatch(ClientPtr client)
         return ProcDPMSInfo(client);
     case X_DPMSSelectInput:
         return ProcDPMSSelectInput(client);
-    default:
-        return BadRequest;
-    }
-}
-
-static int _X_COLD
-SProcDPMSGetVersion(ClientPtr client)
-{
-    REQUEST(xDPMSGetVersionReq);
-    REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
-    swaps(&stuff->majorVersion);
-    swaps(&stuff->minorVersion);
-    return ProcDPMSGetVersion(client);
-}
-
-static int _X_COLD
-SProcDPMSSetTimeouts(ClientPtr client)
-{
-    REQUEST(xDPMSSetTimeoutsReq);
-    REQUEST_SIZE_MATCH(xDPMSSetTimeoutsReq);
-
-    swaps(&stuff->standby);
-    swaps(&stuff->suspend);
-    swaps(&stuff->off);
-    return ProcDPMSSetTimeouts(client);
-}
-
-static int _X_COLD
-SProcDPMSForceLevel(ClientPtr client)
-{
-    REQUEST(xDPMSForceLevelReq);
-    REQUEST_SIZE_MATCH(xDPMSForceLevelReq);
-
-    swaps(&stuff->level);
-
-    return ProcDPMSForceLevel(client);
-}
-
-static int _X_COLD
-SProcDPMSSelectInput(ClientPtr client)
-{
-    REQUEST(xDPMSSelectInputReq);
-    REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
-    swapl(&stuff->eventMask);
-    return ProcDPMSSelectInput(client);
-}
-
-
-
-static int _X_COLD
-SProcDPMSDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-    case X_DPMSGetVersion:
-        return SProcDPMSGetVersion(client);
-    case X_DPMSCapable:
-        return ProcDPMSCapable(client);
-    case X_DPMSGetTimeouts:
-        return ProcDPMSGetTimeouts(client);
-    case X_DPMSSetTimeouts:
-        return SProcDPMSSetTimeouts(client);
-    case X_DPMSEnable:
-        return ProcDPMSEnable(client);
-    case X_DPMSDisable:
-        return ProcDPMSDisable(client);
-    case X_DPMSForceLevel:
-        return SProcDPMSForceLevel(client);
-    case X_DPMSInfo:
-        return ProcDPMSInfo(client);
-    case X_DPMSSelectInput:
-        return SProcDPMSSelectInput(client);
     default:
         return BadRequest;
     }
@@ -600,7 +529,7 @@ DPMSExtensionInit(void)
 
     if (DPMSEnabled && ClientType && DPMSEventType &&
         (extEntry = AddExtension(DPMSExtensionName, 0, 0,
-                                 ProcDPMSDispatch, SProcDPMSDispatch,
+                                 ProcDPMSDispatch, ProcDPMSDispatch,
                                  DPMSCloseDownExtension, StandardMinorOpcode))) {
         DPMSReqCode = extEntry->base;
         GERegisterExtension(DPMSReqCode, SDPMSInfoNotifyEvent);

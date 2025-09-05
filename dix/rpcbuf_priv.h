@@ -201,6 +201,37 @@ Bool x_rpcbuf_write_CARD32(x_rpcbuf_t *rpcbuf, CARD32 value)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*
+ * write a INT32 and do byte-swapping (when needed).
+ *
+ * allocate a region for INT32, write it into the buffer and do byte-swap
+ * if buffer is configured to do so (`swapped` field is TRUE).
+ *
+ * doesn't do any padding.
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ * @param value     the CARD16 value to write
+ * @return          TRUE on success, FALSE on allocation failure
+ */
+static inline Bool x_rpcbuf_write_INT32(x_rpcbuf_t *rpcbuf, INT32 value) {
+    return x_rpcbuf_write_CARD32(rpcbuf, (CARD32)value);
+}
+
+/*
+ * write a CARD64 and do byte-swapping (when needed).
+ *
+ * allocate a region for CARD64, write it into the buffer and do byte-swap
+ * if buffer is configured to do so (`swapped` field is TRUE).
+ *
+ * doesn't do any padding.
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ * @param value     the CARD64 value to write
+ * @return          TRUE on success, FALSE on allocation failure
+ */
+Bool x_rpcbuf_write_CARD64(x_rpcbuf_t *rpcbuf, CARD64 value)
+    _X_ATTRIBUTE_NONNULL_ARG(1);
+
+/*
  * write array of CARD8s and do byte-swapping (when needed).
  *
  * allocate a region for CARD8, write them into the buffer.
@@ -248,6 +279,43 @@ Bool x_rpcbuf_write_CARD16s(x_rpcbuf_t *rpcbuf, const CARD16 *values,
  * @return          TRUE on success, FALSE on allocation failure
  */
 Bool x_rpcbuf_write_CARD32s(x_rpcbuf_t *rpcbuf, const CARD32 *values,
+    size_t count) _X_ATTRIBUTE_NONNULL_ARG(1);
+
+/*
+ * write array of INT32s and do byte-swapping (when needed).
+ *
+ * allocate a region for INT32s, write them into the buffer and do byte-swap
+ * if buffer is configured to do so (`swapped` field is TRUE).
+ * when `values` or `count` are zero, does nothing.
+ *
+ * doesn't do any padding.
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ * @param values    pointer to INT32 array to write
+ * @param count     number of elements in the array
+ * @return          TRUE on success, FALSE on allocation failure
+ */
+static inline Bool x_rpcbuf_write_INT32s(x_rpcbuf_t *rpcbuf,
+                                         const INT32 *values, size_t count)
+{
+    return x_rpcbuf_write_CARD32s(rpcbuf, (CARD32*)values, count);
+}
+
+/*
+ * write array of CARD64s and do byte-swapping (when needed).
+ *
+ * allocate a region for CARD64s, write them into the buffer and do byte-swap
+ * if buffer is configured to do so (`swapped` field is TRUE).
+ * when `values` or `count` are zero, does nothing.
+ *
+ * doesn't do any padding.
+ *
+ * @param rpcbuf    pointer to x_rpcbuf_t to operate on
+ * @param values    pointer to CARD64 array to write
+ * @param count     number of elements in the array
+ * @return          TRUE on success, FALSE on allocation failure
+ */
+Bool x_rpcbuf_write_CARD64s(x_rpcbuf_t *rpcbuf, const CARD64 *values,
     size_t count) _X_ATTRIBUTE_NONNULL_ARG(1);
 
 /*

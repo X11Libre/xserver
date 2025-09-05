@@ -204,10 +204,7 @@ ProcRRGetScreenSizeRange(ClientPtr client)
     pScreen = pWin->drawable.pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
 
-    xRRGetScreenSizeRangeReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-    };
+    xRRGetScreenSizeRangeReply rep = { 0 };
 
     if (pScrPriv) {
         if (!RRGetInfo(pScreen, FALSE))
@@ -222,15 +219,12 @@ ProcRRGetScreenSizeRange(ClientPtr client)
         rep.maxHeight = rep.minHeight = pScreen->height;
     }
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.minWidth);
         swaps(&rep.minHeight);
         swaps(&rep.maxWidth);
         swaps(&rep.maxHeight);
     }
-    WriteToClient(client, sizeof(xRRGetScreenSizeRangeReply), &rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -406,8 +400,6 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
     pScrPriv = rrGetScrPriv(pScreen);
 
     xRRGetScreenResourcesReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .timestamp = pScrPriv->lastSetTime.milliseconds,
         .configTimestamp = pScrPriv->lastConfigTime.milliseconds,
         .nCrtcs = total_crtcs,
@@ -420,9 +412,11 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
                   total_modes * bytes_to_int32(SIZEOF(xRRModeInfo)) +
                   bytes_to_int32(total_name_len));
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     extraLen = rep.length << 2;
     if (extraLen) {
-        extra = calloc(1, extraLen);
+        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
         if (!extra) {
             return BadAlloc;
         }
@@ -460,9 +454,8 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
     }
 
     assert(bytes_to_int32((char *) names - (char *) extra) == rep.length);
+
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swapl(&rep.configTimestamp);
         swaps(&rep.nCrtcs);
@@ -470,12 +463,8 @@ rrGetMultiScreenResources(ClientPtr client, Bool query, ScreenPtr pScreen)
         swaps(&rep.nModes);
         swaps(&rep.nbytesNames);
     }
-    WriteToClient(client, sizeof(xRRGetScreenResourcesReply), &rep);
-    if (extraLen) {
-        WriteToClient(client, extraLen, extra);
-        free(extra);
-    }
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
@@ -505,10 +494,10 @@ rrGetScreenResources(ClientPtr client, Bool query)
     if (pScreen->output_secondarys)
         return rrGetMultiScreenResources(client, query, pScreen);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!pScrPriv) {
         rep = (xRRGetScreenResourcesReply) {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
             .timestamp = currentTime.milliseconds,
             .configTimestamp = currentTime.milliseconds,
         };
@@ -522,8 +511,6 @@ rrGetScreenResources(ClientPtr client, Bool query)
             return BadAlloc;
 
         rep = (xRRGetScreenResourcesReply) {
-            .type = X_Reply,
-            .sequenceNumber = client->sequence,
             .timestamp = pScrPriv->lastSetTime.milliseconds,
             .configTimestamp = pScrPriv->lastConfigTime.milliseconds,
             .nCrtcs = pScrPriv->numCrtcs,
@@ -543,7 +530,7 @@ rrGetScreenResources(ClientPtr client, Bool query)
         if (!extraLen)
             goto finish;
 
-        extra = calloc(1, extraLen);
+        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
         if (!extra) {
             free(modes);
             return BadAlloc;
@@ -606,8 +593,6 @@ finish:
     }
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swapl(&rep.configTimestamp);
         swaps(&rep.nCrtcs);
@@ -615,12 +600,7 @@ finish:
         swaps(&rep.nModes);
         swaps(&rep.nbytesNames);
     }
-    WriteToClient(client, sizeof(xRRGetScreenResourcesReply), (char *) &rep);
-    if (extraLen) {
-        WriteToClient(client, extraLen, (char *) extra);
-        free(extra);
-    }
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -760,11 +740,11 @@ ProcRRGetScreenInfo(ClientPtr client)
 
     output = RRFirstOutput(pScreen);
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
     if (!pScrPriv || !output) {
         rep = (xRRGetScreenInfoReply) {
-            .type = X_Reply,
             .setOfRotations = RR_Rotate_0,
-            .sequenceNumber = client->sequence,
             .root = pWin->drawable.pScreen->root->drawable.id,
             .timestamp = currentTime.milliseconds,
             .configTimestamp = currentTime.milliseconds,
@@ -783,9 +763,7 @@ ProcRRGetScreenInfo(ClientPtr client)
             return BadAlloc;
 
         rep = (xRRGetScreenInfoReply) {
-            .type = X_Reply,
             .setOfRotations = output->crtc->rotations,
-            .sequenceNumber = client->sequence,
             .root = pWin->drawable.pScreen->root->drawable.id,
             .timestamp = pScrPriv->lastSetTime.milliseconds,
             .configTimestamp = pScrPriv->lastConfigTime.milliseconds,
@@ -803,7 +781,7 @@ ProcRRGetScreenInfo(ClientPtr client)
         if (!extraLen)
             goto finish; // no extra payload
 
-        extra = calloc(1, extraLen);
+        extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
         if (!extra) {
             free(pData);
             return BadAlloc;
@@ -848,14 +826,11 @@ ProcRRGetScreenInfo(ClientPtr client)
         if (data8 - (CARD8 *) extra != extraLen)
             FatalError("RRGetScreenInfo bad extra len %ld != %ld\n",
                        (unsigned long) (data8 - (CARD8 *) extra), extraLen);
-        rep.length = bytes_to_int32(extraLen);
 
 finish:
         free(pData);
     }
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.timestamp);
         swapl(&rep.configTimestamp);
         swaps(&rep.rotation);
@@ -864,12 +839,7 @@ finish:
         swaps(&rep.rate);
         swaps(&rep.nrateEnts);
     }
-    WriteToClient(client, sizeof(xRRGetScreenInfoReply), &rep);
-    if (extraLen) {
-        WriteToClient(client, extraLen, extra);
-        free(extra);
-    }
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 int
@@ -1081,9 +1051,7 @@ ProcRRSetScreenConfig(ClientPtr client)
     free(pData);
 
     xRRSetScreenConfigReply rep = {
-        .type = X_Reply,
         .status = status,
-        .sequenceNumber = client->sequence,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds,
         .newConfigTimestamp = pScrPriv->lastConfigTime.milliseconds,
         .root = pDraw->pScreen->root->drawable.id,
@@ -1091,15 +1059,11 @@ ProcRRSetScreenConfig(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.newTimestamp);
         swapl(&rep.newConfigTimestamp);
         swapl(&rep.root);
     }
-    WriteToClient(client, sizeof(xRRSetScreenConfigReply), &rep);
-
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static CARD16

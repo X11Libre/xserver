@@ -52,9 +52,12 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "dix/dix_priv.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "exevents.h"
 #include "exglobals.h"
 
@@ -94,22 +97,17 @@ ProcXGetExtensionVersion(ClientPtr client)
         return BadLength;
 
     xGetExtensionVersionReply rep = {
-        .repType = X_Reply,
         .RepType = X_GetExtensionVersion,
-        .sequenceNumber = client->sequence,
         .major_version = XIVersion.major_version,
         .minor_version = XIVersion.minor_version,
         .present = TRUE
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swaps(&rep.major_version);
         swaps(&rep.minor_version);
     }
 
-    WriteToClient(client, sizeof(xGetExtensionVersionReply), &rep);
-
+    X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
 }

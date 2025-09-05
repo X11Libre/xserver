@@ -21,7 +21,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <dix-config.h>
+#include <kdrive-config.h>
 #include <xkb-config.h>
 #include "kdrive.h"
 #include "inputstr.h"
@@ -51,6 +51,15 @@
 #include "eventstr.h"
 #include "xserver-properties.h"
 #include "optionstr.h"
+
+#if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
+#include "hotplug.h"
+#endif
+
+#ifdef KDRIVE_EVDEV
+#define DEV_INPUT_EVENT_PREFIX "/dev/input/event"
+#define DEV_INPUT_EVENT_PREFIX_LEN (sizeof(DEV_INPUT_EVENT_PREFIX) - 1)
+#endif
 
 #define AtomFromName(x) MakeAtom(x, strlen(x), 1)
 
@@ -107,6 +116,43 @@ static void KdSigio(int sig)
     for (int i = 0; i < kdNumInputFds; i++)
         (*kdInputFds[i].read) (kdInputFds[i].fd, kdInputFds[i].closure);
 }
+
+static void KdBlockSigio(void)
+{
+    sigset_t set;
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGIO);
+    sigprocmask(SIG_BLOCK, &set, 0);
+}
+
+static void KdUnblockSigio(void)
+{
+    sigset_t set;
+
+    sigemptyset(&set);
+    sigaddset(&set, SIGIO);
+    sigprocmask(SIG_UNBLOCK, &set, 0);
+}
+
+#undef VERIFY_SIGIO
+#ifdef VERIFY_SIGIO
+
+void KdAssertSigioBlocked(char *where)
+{
+    sigset_t set, old;
+
+    sigemptyset(&set);
+    sigprocmask(SIG_BLOCK, &set, &old);
+    if (!sigismember(&old, SIGIO))
+        ErrorF("SIGIO not blocked at %s\n", where);
+}
+
+#else
+
+#define KdAssertSigioBlocked(s)
+
+#endif
 #endif
 
 #ifdef FNONBLOCK
@@ -154,6 +200,7 @@ static void KdAddFd(int fd, int i)
     KdNonBlockFd(fd);
     InputThreadRegisterDev(fd, KdNotifyFd, (void *) (intptr_t) i);
 #ifdef KDRIVE_KBD
+/*  AddEnabledDevice(fd); */
     memset(&act, '\0', sizeof act);
     act.sa_handler = KdSigio;
 
@@ -231,8 +278,13 @@ KdDisableInput(void)
 {
     KdKeyboardInfo *ki;
     KdPointerInfo *pi;
+    int found = 0, i = 0;
 
+#ifndef KDRIVE_KBD
     input_lock();
+#else
+    KdBlockSigio();
+#endif
 
     for (ki = kdKeyboards; ki; ki = ki->next) {
         if (ki->driver && ki->driver->Disable)
@@ -242,6 +294,49 @@ KdDisableInput(void)
     for (pi = kdPointers; pi; pi = pi->next) {
         if (pi->driver && pi->driver->Disable)
             (*pi->driver->Disable) (pi);
+    }
+
+    if (kdNumInputFds) {
+        ErrorF("[KdDisableInput] Buggy drivers: still %d input fds left!",
+               kdNumInputFds);
+        i = 0;
+        while (i < kdNumInputFds) {
+            found = 0;
+            for (ki = kdKeyboards; ki; ki = ki->next) {
+                if (ki == kdInputFds[i].closure) {
+                    ErrorF("    fd %d belongs to keybd driver %s\n",
+                           kdInputFds[i].fd,
+                           ki->driver && ki->driver->name ?
+                           ki->driver->name : "(unnamed!)");
+                    found = 1;
+                    break;
+                }
+            }
+
+            if (found) {
+                i++;
+                continue;
+            }
+
+            for (pi = kdPointers; pi; pi = pi->next) {
+                if (pi == kdInputFds[i].closure) {
+                    ErrorF("    fd %d belongs to pointer driver %s\n",
+                           kdInputFds[i].fd,
+                           pi->driver && pi->driver->name ?
+                           pi->driver->name : "(unnamed!)");
+                    break;
+                }
+            }
+
+            if (found) {
+                i++;
+                continue;
+            }
+
+            ErrorF("    fd %d not claimed by any active device!\n",
+                   kdInputFds[i].fd);
+            KdUnregisterFd(kdInputFds[i].closure, kdInputFds[i].fd, TRUE);
+        }
     }
 
     kdInputEnabled = FALSE;
@@ -272,7 +367,11 @@ KdEnableInput(void)
         NoticeEventTime (&ev, pi->dixdev);
     }
 
+#ifndef KDRIVE_KBD
     input_unlock();
+#else
+    KdUnblockSigio();
+#endif
 }
 
 static KdKeyboardDriver *
@@ -592,6 +691,20 @@ KdComputePointerMatrix(KdPointerMatrix * m, Rotation randr, int width,
     }
 }
 
+void
+KdScreenToPointerCoords(int *x, int *y)
+{
+    int (*m)[3] = kdPointerMatrix.matrix;
+    int div = m[0][1] * m[1][0] - m[1][1] * m[0][0];
+    int sx = *x;
+    int sy = *y;
+
+    *x = (m[0][1] * sy - m[0][1] * m[1][2] + m[1][1] * m[0][2] -
+          m[1][1] * sx) / div;
+    *y = (m[1][0] * sx + m[0][0] * m[1][2] - m[1][0] * m[0][2] -
+          m[0][0] * sy) / div;
+}
+
 static void
 KdKbdCtrl(DeviceIntPtr pDevice, KeybdCtrl * ctrl)
 {
@@ -657,6 +770,10 @@ KdKeyboardProc(DeviceIntPtr pDevice, int onoff)
         if (!ki->driver->Init) {
             ErrorF("Keyboard %s: no init function\n", ki->name);
             return BadImplementation;
+        }
+
+        if (ki->driver->PreInit) {
+            (*ki->driver->PreInit)(ki);
         }
 
         memset(&rmlvo, 0, sizeof(rmlvo));
@@ -1050,6 +1167,16 @@ KdParseKbdOptions(KdKeyboardInfo * ki)
             ErrorF("Kbd option key (%s) of value (%s) not assigned!\n",
                    key, value);
     }
+
+#ifdef KDRIVE_EVDEV
+    if (!ki->driver && ki->path != NULL &&
+        strncasecmp(ki->path,
+                    DEV_INPUT_EVENT_PREFIX,
+                    DEV_INPUT_EVENT_PREFIX_LEN) == 0) {
+            ki->driver = KdFindKeyboardDriver("evdev");
+            ki->options = input_option_new(ki->options, "driver", "evdev");
+    }
+#endif
 }
 
 KdKeyboardInfo *KdParseKeyboard(const char *arg)
@@ -1159,6 +1286,16 @@ KdParsePointerOptions(KdPointerInfo * pi)
             ErrorF("Pointer option key (%s) of value (%s) not assigned!\n",
                    key, value);
     }
+
+#ifdef KDRIVE_EVDEV
+    if (!pi->driver && pi->path != NULL &&
+        strncasecmp(pi->path,
+                    DEV_INPUT_EVENT_PREFIX,
+                    DEV_INPUT_EVENT_PREFIX_LEN) == 0) {
+            pi->driver = KdFindPointerDriver("evdev");
+            pi->options = input_option_new(pi->options, "driver", "evdev");
+    }
+#endif
 }
 
 /*
@@ -1254,10 +1391,26 @@ KdInitInput(void)
     KdKeyboardInfo *ki;
     struct KdConfigDevice *dev;
 
+#ifndef KDRIVE_KBD
     if (kdConfigPointers || kdConfigKeyboards)
         InputThreadPreInit();
+#else
+    InputThreadEnable = FALSE;
+#endif
 
     kdInputEnabled = TRUE;
+
+#ifdef KDRIVE_KBD
+    if (!kdConfigKeyboards) {
+        KdAddConfigKeyboard("keyboard");
+    }
+#endif
+
+#ifdef KDRIVE_MOUSE
+    if (!kdConfigPointers) {
+        KdAddConfigPointer("mouse");
+    }
+#endif
 
     for (dev = kdConfigPointers; dev; dev = dev->next) {
         pi = KdParsePointer(dev->line);
@@ -1740,7 +1893,35 @@ KdReceiveTimeout(KdPointerInfo * pi)
     KdRunMouseMachine(pi, timeout, 0, 0, 0, 0, 0, 0);
 }
 
-extern int nClients;
+void
+KdReleaseAllKeys(void)
+{
+#if 0
+    int key;
+    KdKeyboardInfo *ki;
+
+#ifndef KDRIVE_KBD
+    input_lock();
+#else
+    KdBlockSigio();
+#endif
+
+    for (ki = kdKeyboards; ki; ki = ki->next) {
+        for (key = ki->keySyms.minKeyCode; key < ki->keySyms.maxKeyCode; key++) {
+            if (key_is_down(ki->dixdev, key, KEY_POSTED | KEY_PROCESSED)) {
+                KdHandleKeyboardEvent(ki, KeyRelease, key);
+                QueueGetKeyboardEvents(ki->dixdev, KeyRelease, key, NULL);
+            }
+        }
+    }
+
+#ifndef KDRIVE_KBD
+    input_unlock();
+#else
+    KdUnblockSigio();
+#endif
+#endif
+}
 
 static void
 KdCheckLock(void)
@@ -1910,12 +2091,22 @@ KdWakeupHandler(ScreenPtr pScreen, int result)
         if (pi->timeoutPending) {
             if ((long) (GetTimeInMillis() - pi->emulationTimeout) >= 0) {
                 pi->timeoutPending = FALSE;
+#ifndef KDRIVE_KBD
                 input_lock();
+#else
+                KdBlockSigio();
+#endif
                 KdReceiveTimeout(pi);
+#ifndef KDRIVE_KBD
                 input_unlock();
+#else
+                KdUnblockSigio();
+#endif
             }
         }
     }
+    if (kdSwitchPending)
+        KdProcessSwitch();
 }
 
 #define KdScreenOrigin(pScreen) (&(KdGetScreenPriv(pScreen)->screen->origin))
@@ -1924,8 +2115,6 @@ static Bool
 KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
 {
     ScreenPtr pScreen = *ppScreen;
-    int n;
-    int dx, dy;
     int best_x, best_y;
     int n_best_x, n_best_y;
     CARD32 ms;
@@ -1945,34 +2134,34 @@ KdCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y)
     best_x = 32767;
     n_best_y = -1;
     best_y = 32767;
-    for (n = 0; n < screenInfo.numScreens; n++) {
-        ScreenPtr walkScreen = screenInfo.screens[n];
+    for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
+        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (walkScreen == pScreen)
             continue;
-        dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(walkScreen)->x;
-        dy = KdScreenOrigin(walkScreen)->y - KdScreenOrigin(walkScreen)->y;
+        int dx = KdScreenOrigin(walkScreen)->x - KdScreenOrigin(pScreen)->x;
+        int dy = KdScreenOrigin(walkScreen)->y - KdScreenOrigin(pScreen)->y;
         if (*x < 0) {
             if (dx < 0 && -dx < best_x) {
                 best_x = -dx;
-                n_best_x = n;
+                n_best_x = walkScreenIdx;
             }
         }
         else if (*x >= pScreen->width) {
             if (dx > 0 && dx < best_x) {
                 best_x = dx;
-                n_best_x = n;
+                n_best_x = walkScreenIdx;
             }
         }
         if (*y < 0) {
             if (dy < 0 && -dy < best_y) {
                 best_y = -dy;
-                n_best_y = n;
+                n_best_y = walkScreenIdx;
             }
         }
         else if (*y >= pScreen->height) {
             if (dy > 0 && dy < best_y) {
                 best_y = dy;
-                n_best_y = n;
+                n_best_y = walkScreenIdx;
             }
         }
     }
@@ -2002,12 +2191,23 @@ KdCrossScreen(ScreenPtr pScreen, Bool entering)
 {
 }
 
+int KdCurScreen;                /* current event screen */
+
 static void
 KdWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
 {
+#ifndef KDRIVE_KBD
     input_lock();
+#else
+    KdBlockSigio();
+#endif
+    KdCurScreen = pScreen->myNum;
     miPointerWarpCursor(pDev, pScreen, x, y);
+#ifndef KDRIVE_KBD
     input_unlock();
+#else
+    KdUnblockSigio();
+#endif
 }
 
 miPointerScreenFuncRec kdPointerScreenFuncs = {
@@ -2020,6 +2220,8 @@ void
 ProcessInputEvents(void)
 {
     mieqProcessInputEvents();
+    if (kdSwitchPending)
+        KdProcessSwitch();
     KdCheckLock();
 }
 
