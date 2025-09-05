@@ -725,10 +725,6 @@ ProcXvShmPutImage(ClientPtr client)
 #endif /* CONFIG_MITSHM */
 }
 
-#ifdef XvMCExtension
-#include "xvmcext.h"
-#endif
-
 static int
 ProcXvQueryImageAttributes(ClientPtr client)
 {
@@ -749,11 +745,6 @@ ProcXvQueryImageAttributes(ClientPtr client)
             break;
         }
     }
-
-#ifdef XvMCExtension
-    if (!pImage)
-        pImage = XvMCFindXvImage(pPort, stuff->id);
-#endif
 
     if (!pImage)
         return BadMatch;
