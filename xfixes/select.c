@@ -135,6 +135,12 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
     REQUEST(xXFixesSelectSelectionInputReq);
     REQUEST_SIZE_MATCH(xXFixesSelectSelectionInputReq);
 
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->selection);
+        swapl(&stuff->eventMask);
+    }
+
     /* allow extensions to intercept */
     SelectionFilterParamRec param = {
         .client = client,
@@ -214,17 +220,6 @@ ProcXFixesSelectSelectionInput(ClientPtr client)
     }
     e->eventMask = stuff->eventMask;
     return Success;
-}
-
-int _X_COLD
-SProcXFixesSelectSelectionInput(ClientPtr client)
-{
-    REQUEST(xXFixesSelectSelectionInputReq);
-    REQUEST_SIZE_MATCH(xXFixesSelectSelectionInputReq);
-    swapl(&stuff->window);
-    swapl(&stuff->selection);
-    swapl(&stuff->eventMask);
-    return ProcXFixesSelectSelectionInput(client);
 }
 
 void _X_COLD
