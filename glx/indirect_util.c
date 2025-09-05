@@ -30,6 +30,9 @@
 #include <GL/gl.h>
 #include <GL/glxproto.h>
 
+#include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
+
 #include "indirect_size.h"
 #include "indirect_size_get.h"
 #include "indirect_dispatch.h"
@@ -120,10 +123,11 @@ __glXSendReply(ClientPtr client, const void *data, size_t elements,
         reply_ints = bytes_to_int32(elements * element_size);
     }
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    /* data should already be padded */
+    x_rpcbuf_write_CARD8s(&rpcbuf, data, reply_ints * 4);
+
     xGLXSingleReply reply = {
-        .length = reply_ints,
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
         .size = elements,
         .retval = retval,
     };
@@ -132,11 +136,8 @@ __glXSendReply(ClientPtr client, const void *data, size_t elements,
     if (elements == 1) {
         (void) memcpy(&reply.pad3, data, element_size);
     }
-    WriteToClient(client, sizeof(xGLXSingleReply), &reply);
 
-    if (reply_ints != 0) {
-        WriteToClient(client, reply_ints * 4, data);
-    }
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 /**
