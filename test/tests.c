@@ -1,4 +1,3 @@
-#include <string.h>
 #include "tests.h"
 #include "tests-common.h"
 

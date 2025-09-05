@@ -44,7 +44,6 @@ from The Open Group.
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include "exglobals.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
 #include "queryst.h"

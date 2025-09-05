@@ -32,18 +32,14 @@
  */
 
 #include <X11/X.h>
-#include <X11/Xproto.h>
 #include <X11/Xmd.h>
 #include <misc.h>
 #include <dixstruct.h>
 #include <pixmapstr.h>
-#include <gcstruct.h>
-#include <extnsionst.h>
 #include <resource.h>
 #include <scrnintstr.h>
 
 #include <GL/gl.h>
-#include <GL/glext.h>
 #include <GL/glxproto.h>
 
 #ifndef GLX_CONTEXT_OPENGL_NO_ERROR_ARB
@@ -61,9 +57,6 @@ typedef struct __GLXdrawable __GLXdrawable;
 typedef struct __GLXcontext __GLXcontext;
 
 #include "glxscreens.h"
-#include "glxdrawable.h"
-#include "glxcontext.h"
-#include "glx_extinit.h"
 
 extern __GLXscreen *glxGetScreen(ScreenPtr pScreen);
 extern __GLXclientState *glxGetClient(ClientPtr pClient);

@@ -32,20 +32,17 @@
 #ifndef XSERVER_XFREE86_DRIVER_H
 #define XSERVER_XFREE86_DRIVER_H
 
-#include <errno.h>
-#include <drm.h>
 #include <xf86drm.h>
 #include <xf86Crtc.h>
 #include <damage.h>
-#include <X11/extensions/dpmsconst.h>
 #include <shadow.h>
 #ifdef GLAMOR_HAS_GBM
 #define GLAMOR_FOR_XORG 1
 #include "glamor.h"
-#include <gbm.h>
 #endif
 
 #include "drmmode_display.h"
+#include "randrstr.h"
 #define MS_LOGLEVEL_DEBUG 4
 
 struct ms_vrr_priv {

@@ -23,9 +23,12 @@
 
 #include "os/bug_priv.h"
 
-#include "glamor_priv.h"
 #include <dixfontstr.h>
+
+#include "glamor_priv.h"
+#include "glamor_font.h"
 #include "glamor_transform.h"
+#include "glamor_utils.h"
 
 /*
  * Fill in the array of charinfo pointers for the provided characters. For

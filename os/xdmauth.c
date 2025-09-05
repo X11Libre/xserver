@@ -52,7 +52,6 @@ from The Open Group.
 static Bool authFromXDMCP;
 
 #ifdef XDMCP
-#include <X11/Xmd.h>
 #undef REQUEST
 #include <X11/Xdmcp.h>
 

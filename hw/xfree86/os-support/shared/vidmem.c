@@ -26,15 +26,8 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
-#include <X11/X.h>
-#include "input.h"
-#include "scrnintstr.h"
-
-#include "xf86.h"
-#include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
 

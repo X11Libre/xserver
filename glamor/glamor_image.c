@@ -23,7 +23,8 @@
 
 #include "glamor_priv.h"
 #include "glamor_transfer.h"
-#include "glamor_transform.h"
+#include "glamor_prepare.h"
+#include "glamor_utils.h"
 
 /*
  * PutImage. Only does ZPixmap right now as other formats are quite a bit harder

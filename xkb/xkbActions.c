@@ -29,10 +29,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <ctype.h>
 #include <stdio.h>
 #include <math.h>
-#include <ctype.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#include <X11/keysym.h>
 
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
@@ -45,7 +43,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "misc.h"
 #include "inputstr.h"
-#include "exevents.h"
 #include "eventstr.h"
 #include "mipointer.h"
 

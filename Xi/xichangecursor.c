@@ -43,7 +43,6 @@
 #include "windowstr.h"          /* window structure  */
 #include "scrnintstr.h"         /* screen structure  */
 #include "extnsionst.h"
-#include "exevents.h"
 #include "exglobals.h"
 #include "input.h"
 #include "xichangecursor.h"

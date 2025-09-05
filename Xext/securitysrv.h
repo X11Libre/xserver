@@ -30,10 +30,7 @@ from The Open Group.
 #ifndef _SECURITY_SRV_H
 #define _SECURITY_SRV_H
 
-#include <X11/extensions/secur.h>
-
 #include "input.h"              /* for DeviceIntPtr */
-#include "pixmap.h"             /* for DrawablePtr */
 #include "resource.h"           /* for RESTYPE */
 
 /* resource type to pass in LookupIDByType for authorizations */

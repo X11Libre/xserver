@@ -6,7 +6,6 @@
 #ifndef _XSERVER_DIX_CLIENT_PRIV_H
 #define _XSERVER_DIX_CLIENT_PRIV_H
 
-#include <sys/types.h>
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
 

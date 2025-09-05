@@ -27,7 +27,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "extnsionst.h"
 #include "pixmap.h"
-#include "region.h"
 #include "window.h"
 #include "property.h"
 

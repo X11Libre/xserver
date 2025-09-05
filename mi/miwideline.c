@@ -70,6 +70,7 @@ SOFTWARE.
 #include "gcstruct.h"
 #include "regionstr.h"
 #include "miwideline.h"
+#include "mifpoly.h"
 
 typedef struct {
     int count;                  /* number of spans                  */

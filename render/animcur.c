@@ -40,12 +40,10 @@
 #include "dix/input_priv.h"
 #include "dix/screen_hooks_priv.h"
 
-#include "servermd.h"
 #include "scrnintstr.h"
 #include "dixstruct.h"
 #include "cursorstr.h"
 #include "dixfontstr.h"
-#include "opaque.h"
 #include "picturestr_priv.h"
 #include "inputstr.h"
 #include "xace.h"

@@ -49,18 +49,10 @@
 #ifndef _XFIXESINT_H_
 #define _XFIXESINT_H_
 
-#include <X11/X.h>
-#include <X11/Xproto.h>
-#include <X11/extensions/xfixesproto.h>
-
-#include "dix/selection_priv.h"
-
-#include "misc.h"
-#include "os.h"
 #include "dixstruct.h"
-#include "extnsionst.h"
-#include "windowstr.h"
-#include "xfixes.h"
+
+#include <X11/extensions/xfixesproto.h>
+#include <X11/Xdefs.h>
 
 extern int XFixesEventBase;
 extern int XFixesUseXinerama;

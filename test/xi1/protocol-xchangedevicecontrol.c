@@ -37,6 +37,7 @@
 #include "chgdctl.h"
 
 #include "protocol-common.h"
+#include "tests.h"
 
 DECLARE_WRAP_FUNCTION(WriteToClient, void, ClientPtr client, int len, void *data);
 

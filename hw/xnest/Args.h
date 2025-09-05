@@ -15,7 +15,6 @@ is" without express or implied warranty.
 #ifndef XNESTARGS_H
 #define XNESTARGS_H
 
-#include <X11/X.h>
 #include <X11/Xdefs.h>
 
 #include <xcb/xcb.h>

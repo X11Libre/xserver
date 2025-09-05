@@ -48,7 +48,6 @@
 #include "misc.h"
 #include "eventstr.h"
 #include "exglobals.h"
-#include "xiquerydevice.h"
 #include "xkbsrv.h"
 
 static int countValuators(DeviceEvent *ev, int *first);

@@ -10,8 +10,6 @@
 #include "glyphstr.h"
 #include "picture.h"
 #include "screenint.h"
-#include "regionstr.h"
-#include "miscstruct.h"
 #include "privates.h"
 
 #define GlyphPicture(glyph) ((PicturePtr *) ((glyph) + 1))

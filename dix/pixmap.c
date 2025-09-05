@@ -37,7 +37,6 @@ from The Open Group.
 #include "misc.h"
 #include "os.h"
 #include "windowstr.h"
-#include "resource.h"
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "servermd.h"

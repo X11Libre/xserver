@@ -31,7 +31,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <math.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#include <X11/keysym.h>
 
 #include "dix/input_priv.h"
 #include "os/log_priv.h"
@@ -39,7 +38,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "misc.h"
 #include "inputstr.h"
-#include "exevents.h"
 #include "eventstr.h"
 #include "events.h"
 

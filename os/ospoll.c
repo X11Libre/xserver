@@ -32,7 +32,6 @@
 #endif
 
 #include "include/fd_notify.h"
-#include "os/xserver_poll.h"
 
 #include "ospoll.h"
 #include "list.h"

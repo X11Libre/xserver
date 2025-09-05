@@ -31,7 +31,6 @@
 #include <list.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <sys/mman.h>
 #include <signal.h>
 

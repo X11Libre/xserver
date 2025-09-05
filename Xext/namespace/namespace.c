@@ -12,6 +12,7 @@
 
 #include "namespace.h"
 #include "hooks.h"
+#include "xace.h"
 
 Bool noNamespaceExtension = TRUE;
 

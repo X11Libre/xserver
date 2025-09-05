@@ -50,7 +50,6 @@ from The Open Group.
 #include "servermd.h"
 #define PSZ 8
 #include "fb.h"
-#include "gcstruct.h"
 #include "input.h"
 #include "mipointer.h"
 #include "micmap.h"

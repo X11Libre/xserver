@@ -56,7 +56,6 @@
 #include "xf86.h"
 #include "xf86str.h"
 #include "inputstr.h"
-#include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
 /* Input device flags */

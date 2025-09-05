@@ -41,7 +41,6 @@ Equipment Corporation.
 
 #include "misc.h"
 #include "cursor.h"
-#include "cursorstr.h"
 #include "extnsionst.h"
 #include "dixstruct.h"
 #include "gc.h"

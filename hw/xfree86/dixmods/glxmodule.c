@@ -38,9 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xf86Module.h"
 #include "xf86Priv.h"
 #include "xf86.h"
-#include "colormap.h"
 #include "micmap.h"
-#include "globals.h"
 #include "glxserver.h"
 #include "glx_extinit.h"
 

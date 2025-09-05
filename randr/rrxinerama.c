@@ -75,7 +75,6 @@
 #include "dix/dix_priv.h"
 #include "randr/randrstr_priv.h"
 
-#include "swaprep.h"
 #include "protocol-versions.h"
 
 /* Xinerama is not multi-screen capable; just report about screen 0 */

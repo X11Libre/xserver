@@ -35,7 +35,6 @@
 #include "singlesize.h"
 #include "unpack.h"
 #include "indirect_dispatch.h"
-#include "indirect_size_get.h"
 
 int
 __glXDispSwap_ReadPixels(__GLXclientState * cl, GLbyte * pc)

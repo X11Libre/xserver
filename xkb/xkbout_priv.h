@@ -6,7 +6,6 @@
 #define _XSERVER_XKB_XKBFOUT_PRIV_H
 
 #include <stdio.h>
-#include <X11/X.h>
 #include <X11/Xdefs.h>
 
 #include "xkbstr.h"

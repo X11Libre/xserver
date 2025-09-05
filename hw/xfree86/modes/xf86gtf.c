@@ -61,12 +61,10 @@
 /* Ruthlessly converted to server code by Adam Jackson <ajax@redhat.com> */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include "xf86.h"
 #include "xf86Modes.h"
-#include <string.h>
 
 #define MARGIN_PERCENT    1.8   /* % of active vertical image                */
 #define CELL_GRAN         8.0   /* assumed character cell granularity        */

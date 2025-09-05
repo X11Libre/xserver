@@ -81,7 +81,6 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <X11/X.h>
@@ -94,7 +93,6 @@
 #include "servermd.h"
 #include "globals.h"
 #include "xf86_priv.h"
-#include "xf86Priv.h"
 #include "edid.h"
 
 static void

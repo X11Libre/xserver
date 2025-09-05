@@ -43,7 +43,6 @@
 // conflicting with Xserver's "GC" type.
 #define GC XlibGC
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #undef GC
 
 #include "dix/input_priv.h"
@@ -52,7 +51,6 @@
 
 #define X_INCLUDE_STRING_H
 #include <X11/Xos_r.h>
-#include <X11/keysym.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #include <xcb/xcb_icccm.h>
@@ -60,13 +58,11 @@
 #include <xcb/shm.h>
 #include <xcb/xcb_image.h>
 #include <xcb/shape.h>
-#include <xcb/xcb_keysyms.h>
 #include <xcb/randr.h>
 #include <xcb/xkb.h>
 #ifdef GLAMOR
 #include <xcb/glx.h>
 #include <epoxy/common.h>
-#include <epoxy/gl.h>
 #include "glamor_glx_provider.h"
 #include "ephyr_glamor.h"
 #include "glamor/glamor_priv.h"

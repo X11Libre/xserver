@@ -77,7 +77,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <sys/wait.h>
 #endif
 #if !defined(WIN32)
-#include <sys/resource.h>
 #endif
 #include <sys/stat.h>
 #include <ctype.h>              /* for isspace */
@@ -100,7 +99,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/client_priv.h"
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
-#include "os/osdep.h"
 #include "os/serverlock.h"
 #include "os/xhostname.h"
 #include "Xext/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
@@ -113,7 +111,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "dpmsproc.h"
 
 #define X_INCLUDE_NETDB_H
-#include <X11/Xos_r.h>
 
 #include <errno.h>
 

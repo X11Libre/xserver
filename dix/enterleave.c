@@ -32,7 +32,6 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
-#include "dix/eventconvert.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
