@@ -1363,126 +1363,6 @@ SShmCompletionEvent(xShmCompletionEvent * from, xShmCompletionEvent * to)
     cpswapl(from->offset, to->offset);
 }
 
-static int _X_COLD
-SProcShmAttach(ClientPtr client)
-{
-    REQUEST(xShmAttachReq);
-    REQUEST_SIZE_MATCH(xShmAttachReq);
-    swapl(&stuff->shmseg);
-    swapl(&stuff->shmid);
-    return ProcShmAttach(client);
-}
-
-static int _X_COLD
-SProcShmDetach(ClientPtr client)
-{
-    REQUEST(xShmDetachReq);
-    REQUEST_SIZE_MATCH(xShmDetachReq);
-    swapl(&stuff->shmseg);
-    return ProcShmDetach(client);
-}
-
-static int _X_COLD
-SProcShmPutImage(ClientPtr client)
-{
-    REQUEST(xShmPutImageReq);
-    REQUEST_SIZE_MATCH(xShmPutImageReq);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    swaps(&stuff->totalWidth);
-    swaps(&stuff->totalHeight);
-    swaps(&stuff->srcX);
-    swaps(&stuff->srcY);
-    swaps(&stuff->srcWidth);
-    swaps(&stuff->srcHeight);
-    swaps(&stuff->dstX);
-    swaps(&stuff->dstY);
-    swapl(&stuff->shmseg);
-    swapl(&stuff->offset);
-    return ProcShmPutImage(client);
-}
-
-static int _X_COLD
-SProcShmGetImage(ClientPtr client)
-{
-    REQUEST(xShmGetImageReq);
-    REQUEST_SIZE_MATCH(xShmGetImageReq);
-    swapl(&stuff->drawable);
-    swaps(&stuff->x);
-    swaps(&stuff->y);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    swapl(&stuff->planeMask);
-    swapl(&stuff->shmseg);
-    swapl(&stuff->offset);
-    return ProcShmGetImage(client);
-}
-
-static int _X_COLD
-SProcShmCreatePixmap(ClientPtr client)
-{
-    REQUEST(xShmCreatePixmapReq);
-    REQUEST_SIZE_MATCH(xShmCreatePixmapReq);
-    swapl(&stuff->pid);
-    swapl(&stuff->drawable);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    swapl(&stuff->shmseg);
-    swapl(&stuff->offset);
-    return ProcShmCreatePixmap(client);
-}
-
-#ifdef SHM_FD_PASSING
-static int _X_COLD
-SProcShmAttachFd(ClientPtr client)
-{
-    REQUEST(xShmAttachFdReq);
-    SetReqFds(client, 1);
-    REQUEST_SIZE_MATCH(xShmAttachFdReq);
-    swapl(&stuff->shmseg);
-    return ProcShmAttachFd(client);
-}
-
-static int _X_COLD
-SProcShmCreateSegment(ClientPtr client)
-{
-    REQUEST(xShmCreateSegmentReq);
-    REQUEST_SIZE_MATCH(xShmCreateSegmentReq);
-    swapl(&stuff->shmseg);
-    swapl(&stuff->size);
-    return ProcShmCreateSegment(client);
-}
-#endif  /* SHM_FD_PASSING */
-
-static int _X_COLD
-SProcShmDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_ShmQueryVersion:
-        return ProcShmQueryVersion(client);
-    case X_ShmAttach:
-        return SProcShmAttach(client);
-    case X_ShmDetach:
-        return SProcShmDetach(client);
-    case X_ShmPutImage:
-        return SProcShmPutImage(client);
-    case X_ShmGetImage:
-        return SProcShmGetImage(client);
-    case X_ShmCreatePixmap:
-        return SProcShmCreatePixmap(client);
-#ifdef SHM_FD_PASSING
-    case X_ShmAttachFd:
-        return SProcShmAttachFd(client);
-    case X_ShmCreateSegment:
-        return SProcShmCreateSegment(client);
-#endif
-    default:
-        return BadRequest;
-    }
-}
-
 static void ShmPixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr pPixmap)
 {
     ShmDetachSegment(
@@ -1530,7 +1410,7 @@ ShmExtensionInit(void)
     ShmSegType = CreateNewResourceType(ShmDetachSegment, "ShmSeg");
     if (ShmSegType &&
         (extEntry = AddExtension(SHMNAME, ShmNumberEvents, ShmNumberErrors,
-                                 ProcShmDispatch, SProcShmDispatch,
+                                 ProcShmDispatch, ProcShmDispatch,
                                  ShmResetProc, StandardMinorOpcode))) {
         ShmReqCode = (unsigned char) extEntry->base;
         ShmCompletionCode = extEntry->eventBase;
