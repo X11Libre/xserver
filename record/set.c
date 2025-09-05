@@ -171,7 +171,7 @@ BitVectorIterateSet(RecordSetPtr pSet, RecordSetIteratePtr pIter,
 
     b = BitVectorFindBit(pSet, b, FALSE);
     pInterval->last = (b < 0) ? ((BitVectorSetPtr) pSet)->maxMember : b - 1;
-    return (RecordSetIteratePtr) (long) (pInterval->last + 1);
+    return (RecordSetIteratePtr) (long)pInterval->last + 1;
 }
 
 static RecordSetOperations BitVectorSetOperations = {
