@@ -60,7 +60,6 @@ SOFTWARE.
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structs    */
-#include "exglobals.h"
 #include "swaprep.h"
 #include "getprop.h"
 

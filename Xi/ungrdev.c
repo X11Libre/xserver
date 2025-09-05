@@ -58,7 +58,6 @@ SOFTWARE.
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include "exglobals.h"
 #include "ungrdev.h"
 
 /***********************************************************************

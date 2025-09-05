@@ -60,7 +60,6 @@ SOFTWARE.
 #include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "exglobals.h"
 #include "gtmotion.h"
 
 /***********************************************************************
