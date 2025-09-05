@@ -55,6 +55,7 @@
 #include "protocol-versions.h"
 
 Bool noRenderExtension = FALSE;
+Bool usePanoramiX = FALSE;
 
 static int ProcRenderQueryVersion(ClientPtr pClient);
 static int ProcRenderQueryPictFormats(ClientPtr pClient);
@@ -527,7 +528,7 @@ ProcRenderQueryDithers(ClientPtr client)
 }
 
 static int
-ProcRenderCreatePicture(ClientPtr client)
+SingleRenderCreatePicture(ClientPtr client)
 {
     PicturePtr pPicture;
     DrawablePtr pDrawable;
@@ -567,7 +568,7 @@ ProcRenderCreatePicture(ClientPtr client)
 }
 
 static int
-ProcRenderChangePicture(ClientPtr client)
+SingleRenderChangePicture(ClientPtr client)
 {
     PicturePtr pPicture;
 
@@ -586,7 +587,7 @@ ProcRenderChangePicture(ClientPtr client)
 }
 
 static int
-ProcRenderSetPictureClipRectangles(ClientPtr client)
+SingleRenderSetPictureClipRectangles(ClientPtr client)
 {
     REQUEST(xRenderSetPictureClipRectanglesReq);
     PicturePtr pPicture;
@@ -607,7 +608,7 @@ ProcRenderSetPictureClipRectangles(ClientPtr client)
 }
 
 static int
-ProcRenderFreePicture(ClientPtr client)
+SingleRenderFreePicture(ClientPtr client)
 {
     PicturePtr pPicture;
 
@@ -635,7 +636,7 @@ PictOpValid(CARD8 op)
 }
 
 static int
-ProcRenderComposite(ClientPtr client)
+SingleRenderComposite(ClientPtr client)
 {
     PicturePtr pSrc, pMask, pDst;
 
@@ -681,7 +682,7 @@ ProcRenderScale(ClientPtr client)
 }
 
 static int
-ProcRenderTrapezoids(ClientPtr client)
+SingleRenderTrapezoids(ClientPtr client)
 {
     int rc, ntraps;
     PicturePtr pSrc, pDst;
@@ -720,7 +721,7 @@ ProcRenderTrapezoids(ClientPtr client)
 }
 
 static int
-ProcRenderTriangles(ClientPtr client)
+SingleRenderTriangles(ClientPtr client)
 {
     int rc, ntris;
     PicturePtr pSrc, pDst;
@@ -759,7 +760,7 @@ ProcRenderTriangles(ClientPtr client)
 }
 
 static int
-ProcRenderTriStrip(ClientPtr client)
+SingleRenderTriStrip(ClientPtr client)
 {
     int rc, npoints;
     PicturePtr pSrc, pDst;
@@ -798,7 +799,7 @@ ProcRenderTriStrip(ClientPtr client)
 }
 
 static int
-ProcRenderTriFan(ClientPtr client)
+SingleRenderTriFan(ClientPtr client)
 {
     int rc, npoints;
     PicturePtr pSrc, pDst;
@@ -1196,7 +1197,7 @@ ProcRenderFreeGlyphs(ClientPtr client)
 }
 
 static int
-ProcRenderCompositeGlyphs(ClientPtr client)
+SingleRenderCompositeGlyphs(ClientPtr client)
 {
     GlyphSetPtr glyphSet;
     GlyphSet gs;
@@ -1363,7 +1364,7 @@ ProcRenderCompositeGlyphs(ClientPtr client)
 }
 
 static int
-ProcRenderFillRectangles(ClientPtr client)
+SingleRenderFillRectangles(ClientPtr client)
 {
     PicturePtr pDst;
     int things;
@@ -1614,7 +1615,7 @@ ProcRenderCreateCursor(ClientPtr client)
 }
 
 static int
-ProcRenderSetPictureTransform(ClientPtr client)
+SingleRenderSetPictureTransform(ClientPtr client)
 {
     REQUEST(xRenderSetPictureTransformReq);
     PicturePtr pPicture;
@@ -1721,7 +1722,7 @@ ProcRenderQueryFilters(ClientPtr client)
 }
 
 static int
-ProcRenderSetPictureFilter(ClientPtr client)
+SingleRenderSetPictureFilter(ClientPtr client)
 {
     REQUEST(xRenderSetPictureFilterReq);
     PicturePtr pPicture;
@@ -1790,7 +1791,7 @@ ProcRenderCreateAnimCursor(ClientPtr client)
 }
 
 static int
-ProcRenderAddTraps(ClientPtr client)
+SingleRenderAddTraps(ClientPtr client)
 {
     int ntraps;
     PicturePtr pPicture;
@@ -1812,7 +1813,7 @@ ProcRenderAddTraps(ClientPtr client)
 }
 
 static int
-ProcRenderCreateSolidFill(ClientPtr client)
+SingleRenderCreateSolidFill(ClientPtr client)
 {
     PicturePtr pPicture;
     int error = 0;
@@ -1837,7 +1838,7 @@ ProcRenderCreateSolidFill(ClientPtr client)
 }
 
 static int
-ProcRenderCreateLinearGradient(ClientPtr client)
+SingleRenderCreateLinearGradient(ClientPtr client)
 {
     PicturePtr pPicture;
     int len;
@@ -1876,7 +1877,7 @@ ProcRenderCreateLinearGradient(ClientPtr client)
 }
 
 static int
-ProcRenderCreateRadialGradient(ClientPtr client)
+SingleRenderCreateRadialGradient(ClientPtr client)
 {
     PicturePtr pPicture;
     int len;
@@ -1916,7 +1917,7 @@ ProcRenderCreateRadialGradient(ClientPtr client)
 }
 
 static int
-ProcRenderCreateConicalGradient(ClientPtr client)
+SingleRenderCreateConicalGradient(ClientPtr client)
 {
     PicturePtr pPicture;
     int len;
@@ -2565,7 +2566,7 @@ PanoramiXRenderCreatePicture(ClientPtr client)
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
         stuff->drawable = refDraw->info[walkScreenIdx].id;
-        result = ProcRenderCreatePicture(client);
+        result = SingleRenderCreatePicture(client);
         if (result != Success)
             break;
     }
@@ -2593,7 +2594,7 @@ PanoramiXRenderChangePicture(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = ProcRenderChangePicture(client);
+        result = SingleRenderChangePicture(client);
         if (result != Success)
             break;
     }
@@ -2615,7 +2616,7 @@ PanoramiXRenderSetPictureClipRectangles(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = ProcRenderSetPictureClipRectangles(client);
+        result = SingleRenderSetPictureClipRectangles(client);
         if (result != Success)
             break;
     }
@@ -2637,7 +2638,7 @@ PanoramiXRenderSetPictureTransform(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = ProcRenderSetPictureTransform(client);
+        result = SingleRenderSetPictureTransform(client);
         if (result != Success)
             break;
     }
@@ -2659,7 +2660,7 @@ PanoramiXRenderSetPictureFilter(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = ProcRenderSetPictureFilter(client);
+        result = SingleRenderSetPictureFilter(client);
         if (result != Success)
             break;
     }
@@ -2684,7 +2685,7 @@ PanoramiXRenderFreePicture(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = ProcRenderFreePicture(client);
+        result = SingleRenderFreePicture(client);
         if (result != Success)
             break;
     }
@@ -2732,7 +2733,7 @@ PanoramiXRenderComposite(ClientPtr client)
                 stuff->yMask = orig.yMask - walkScreen->y;
             }
         }
-        result = ProcRenderComposite(client);
+        result = SingleRenderComposite(client);
         if (result != Success)
             break;
     }
@@ -2773,7 +2774,7 @@ PanoramiXRenderCompositeGlyphs(ClientPtr client)
                 elt->deltax = origElt.deltax - walkScreen->x;
                 elt->deltay = origElt.deltay - walkScreen->y;
             }
-            result = ProcRenderCompositeGlyphs(client);
+            result = SingleRenderCompositeGlyphs(client);
             if (result != Success)
                 break;
         }
@@ -2818,7 +2819,7 @@ PanoramiXRenderFillRectangles(ClientPtr client)
                 }
             }
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = ProcRenderFillRectangles(client);
+            result = SingleRenderFillRectangles(client);
             if (result != Success)
                 break;
         }
@@ -2879,7 +2880,7 @@ PanoramiXRenderTrapezoids(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = ProcRenderTrapezoids(client);
+            result = SingleRenderTrapezoids(client);
 
             if (result != Success)
                 break;
@@ -2938,7 +2939,7 @@ PanoramiXRenderTriangles(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = ProcRenderTriangles(client);
+            result = SingleRenderTriangles(client);
 
             if (result != Success)
                 break;
@@ -2993,7 +2994,7 @@ PanoramiXRenderTriStrip(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = ProcRenderTriStrip(client);
+            result = SingleRenderTriStrip(client);
 
             if (result != Success)
                 break;
@@ -3048,7 +3049,7 @@ PanoramiXRenderTriFan(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = ProcRenderTriFan(client);
+            result = SingleRenderTriFan(client);
 
             if (result != Success)
                 break;
@@ -3090,7 +3091,7 @@ PanoramiXRenderAddTraps(ClientPtr client)
                 stuff->xOff = x_off + walkScreen->x;
                 stuff->yOff = y_off + walkScreen->y;
             }
-            result = ProcRenderAddTraps(client);
+            result = SingleRenderAddTraps(client);
             if (result != Success)
                 break;
         }
@@ -3119,7 +3120,7 @@ PanoramiXRenderCreateSolidFill(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = ProcRenderCreateSolidFill(client);
+        result = SingleRenderCreateSolidFill(client);
         if (result != Success)
             break;
     }
@@ -3151,7 +3152,7 @@ PanoramiXRenderCreateLinearGradient(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = ProcRenderCreateLinearGradient(client);
+        result = SingleRenderCreateLinearGradient(client);
         if (result != Success)
             break;
     }
@@ -3183,7 +3184,7 @@ PanoramiXRenderCreateRadialGradient(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = ProcRenderCreateRadialGradient(client);
+        result = SingleRenderCreateRadialGradient(client);
         if (result != Success)
             break;
     }
@@ -3215,7 +3216,7 @@ PanoramiXRenderCreateConicalGradient(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = ProcRenderCreateConicalGradient(client);
+        result = SingleRenderCreateConicalGradient(client);
         if (result != Success)
             break;
     }
@@ -3231,57 +3232,217 @@ PanoramiXRenderCreateConicalGradient(ClientPtr client)
 void
 PanoramiXRenderInit(void)
 {
-    int i;
-
     XRT_PICTURE = CreateNewResourceType(XineramaDeleteResource,
                                         "XineramaPicture");
     if (RenderErrBase)
         SetResourceTypeErrorValue(XRT_PICTURE, RenderErrBase + BadPicture);
-    for (i = 0; i < RenderNumberRequests; i++)
-        PanoramiXSaveRenderVector[i] = ProcRenderVector[i];
-    /*
-     * Stuff in Xinerama aware request processing hooks
-     */
-    ProcRenderVector[X_RenderCreatePicture] = PanoramiXRenderCreatePicture;
-    ProcRenderVector[X_RenderChangePicture] = PanoramiXRenderChangePicture;
-    ProcRenderVector[X_RenderSetPictureTransform] =
-        PanoramiXRenderSetPictureTransform;
-    ProcRenderVector[X_RenderSetPictureFilter] =
-        PanoramiXRenderSetPictureFilter;
-    ProcRenderVector[X_RenderSetPictureClipRectangles] =
-        PanoramiXRenderSetPictureClipRectangles;
-    ProcRenderVector[X_RenderFreePicture] = PanoramiXRenderFreePicture;
-    ProcRenderVector[X_RenderComposite] = PanoramiXRenderComposite;
-    ProcRenderVector[X_RenderCompositeGlyphs8] = PanoramiXRenderCompositeGlyphs;
-    ProcRenderVector[X_RenderCompositeGlyphs16] =
-        PanoramiXRenderCompositeGlyphs;
-    ProcRenderVector[X_RenderCompositeGlyphs32] =
-        PanoramiXRenderCompositeGlyphs;
-    ProcRenderVector[X_RenderFillRectangles] = PanoramiXRenderFillRectangles;
 
-    ProcRenderVector[X_RenderTrapezoids] = PanoramiXRenderTrapezoids;
-    ProcRenderVector[X_RenderTriangles] = PanoramiXRenderTriangles;
-    ProcRenderVector[X_RenderTriStrip] = PanoramiXRenderTriStrip;
-    ProcRenderVector[X_RenderTriFan] = PanoramiXRenderTriFan;
-    ProcRenderVector[X_RenderAddTraps] = PanoramiXRenderAddTraps;
-
-    ProcRenderVector[X_RenderCreateSolidFill] = PanoramiXRenderCreateSolidFill;
-    ProcRenderVector[X_RenderCreateLinearGradient] =
-        PanoramiXRenderCreateLinearGradient;
-    ProcRenderVector[X_RenderCreateRadialGradient] =
-        PanoramiXRenderCreateRadialGradient;
-    ProcRenderVector[X_RenderCreateConicalGradient] =
-        PanoramiXRenderCreateConicalGradient;
+    usePanoramiX = TRUE;
 }
 
 void
 PanoramiXRenderReset(void)
 {
-    int i;
-
-    for (i = 0; i < RenderNumberRequests; i++)
-        ProcRenderVector[i] = PanoramiXSaveRenderVector[i];
     RenderErrBase = 0;
+    usePanoramiX = FALSE;
 }
 
 #endif /* XINERAMA */
+
+static int
+ProcRenderCreatePicture(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderCreatePicture(client)
+                         : SingleRenderCreatePicture(client));
+#else
+    return SingleRenderCreatePicture(client);
+#endif
+}
+
+static int
+ProcRenderChangePicture(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderChangePicture(client)
+                         : SingleRenderChangePicture(client));
+#else
+    return SingleRenderChangePicture(client);
+#endif
+}
+
+static int
+ProcRenderSetPictureClipRectangles(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderSetPictureClipRectangles(client)
+                         : SingleRenderSetPictureClipRectangles(client));
+#else
+    return SingleRenderSetPictureClipRectangles(client);
+#endif
+}
+
+static int
+ProcRenderFreePicture(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderFreePicture(client)
+                         : SingleRenderFreePicture(client));
+#else
+    return SingleRenderFreePicture(client);
+#endif
+}
+
+static int
+ProcRenderComposite(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderComposite(client)
+                         : SingleRenderComposite(client));
+#else
+    return SingleRenderComposite(client);
+#endif
+}
+
+static int
+ProcRenderTrapezoids(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderTrapezoids(client)
+                         : SingleRenderTrapezoids(client));
+#else
+    return SingleRenderTrapezoids(client);
+#endif
+}
+
+static int
+ProcRenderTriangles(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderTriangles(client)
+                         : SingleRenderTriangles(client));
+#else
+    return SingleRenderTriangles(client);
+#endif
+}
+
+static int
+ProcRenderTriStrip(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderTriStrip(client)
+                         : SingleRenderTriStrip(client));
+#else
+    return SingleRenderTriStrip(client);
+#endif
+}
+
+static int
+ProcRenderTriFan(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderTriFan(client)
+                         : SingleRenderTriFan(client));
+#else
+    return SingleRenderTriFan(client);
+#endif
+}
+
+static int
+ProcRenderCompositeGlyphs(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderCompositeGlyphs(client)
+                         : SingleRenderCompositeGlyphs(client));
+#else
+    return SingleRenderCompositeGlyphs(client);
+#endif
+}
+
+static int
+ProcRenderFillRectangles(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderFillRectangles(client)
+                         : SingleRenderFillRectangles(client));
+#else
+    return SingleRenderFillRectangles(client);
+#endif
+}
+
+static int
+ProcRenderSetPictureTransform(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderSetPictureTransform(client)
+                         : SingleRenderSetPictureTransform(client));
+#else
+    return SingleRenderSetPictureTransform(client);
+#endif
+}
+
+static int
+ProcRenderSetPictureFilter(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderSetPictureFilter(client)
+                         : SingleRenderSetPictureFilter(client));
+#else
+    return SingleRenderSetPictureFilter(client);
+#endif
+}
+
+static int
+ProcRenderAddTraps(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderAddTraps(client)
+                         : SingleRenderAddTraps(client));
+#else
+    return SingleRenderAddTraps(client);
+#endif
+}
+
+static int
+ProcRenderCreateSolidFill(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderCreateSolidFill(client)
+                         : SingleRenderCreateSolidFill(client));
+#else
+    return SingleRenderCreateSolidFill(client);
+#endif
+}
+
+static int
+ProcRenderCreateLinearGradient(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderCreateLinearGradient(client)
+                         : SingleRenderCreateLinearGradient(client));
+#else
+    return SingleRenderCreateLinearGradient(client);
+#endif
+}
+
+static int
+ProcRenderCreateRadialGradient(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderCreateRadialGradient(client)
+                         : SingleRenderCreateRadialGradient(client));
+#else
+    return SingleRenderCreateRadialGradient(client);
+#endif
+}
+
+static int
+ProcRenderCreateConicalGradient(ClientPtr client)
+{
+#ifdef XINERAMA
+    return (usePanoramiX ? PanoramiXRenderCreateConicalGradient(client)
+                         : SingleRenderCreateConicalGradient(client));
+#else
+    return SingleRenderCreateConicalGradient(client);
+#endif
+}
