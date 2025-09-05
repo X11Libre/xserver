@@ -65,6 +65,8 @@ SOFTWARE.
 #include "grabdev.h"
 #include "selectev.h"
 
+#define XIAllMasks ((Mask)((1L << 20) - 1))
+
 static int
 HandleDevicePresenceMask(ClientPtr client, WindowPtr win,
                          XEventClass * cls, CARD16 *count)

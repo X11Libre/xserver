@@ -49,7 +49,6 @@ extern const Mask DeviceButtonGrabMask;
 extern const Mask DeviceButtonMotionMask;
 extern const Mask DevicePresenceNotifyMask;
 extern const Mask DevicePropertyNotifyMask;
-extern const Mask XIAllMasks;
 
 extern int DeviceValuator;
 extern int DeviceKeyPress;
