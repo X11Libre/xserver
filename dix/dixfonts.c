@@ -1869,6 +1869,9 @@ get_client_resolutions(int *num)
     ScreenPtr pScreen;
 
     pScreen = screenInfo.screens[0];
+    if (!pScreen)
+        return NULL;
+
     res.x_resolution = (pScreen->width * 25.4) / pScreen->mmWidth;
     /*
      * XXX - we'll want this as long as bitmap instances are prevalent
