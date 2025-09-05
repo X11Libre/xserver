@@ -199,6 +199,8 @@ RegisterExtensionNames(ExtensionEntry * extEntry)
         case PROT_ERROR:
             RegisterErrorName(extEntry->errorBase + offset, lineobj);
             continue;
+        default:
+            break;
         }
 
  invalid:
