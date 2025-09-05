@@ -73,6 +73,11 @@ ProcGEQueryVersion(ClientPtr client)
     REQUEST(xGEQueryVersionReq);
     REQUEST_SIZE_MATCH(xGEQueryVersionReq);
 
+    if (client->swapped) {
+        swaps(&stuff->majorVersion);
+        swaps(&stuff->minorVersion);
+    }
+
     xGEQueryVersionReply reply = {
         .RepType = X_GEQueryVersion,
         /* return the supported version by the server */
@@ -94,19 +99,6 @@ ProcGEQueryVersion(ClientPtr client)
 }
 
 /************************************************************/
-/*                swapped request handlers                  */
-/************************************************************/
-static int _X_COLD
-SProcGEQueryVersion(ClientPtr client)
-{
-    REQUEST(xGEQueryVersionReq);
-    REQUEST_SIZE_MATCH(xGEQueryVersionReq);
-    swaps(&stuff->majorVersion);
-    swaps(&stuff->minorVersion);
-    return ProcGEQueryVersion(client);
-}
-
-/************************************************************/
 /*                callbacks                                 */
 /************************************************************/
 
@@ -119,20 +111,6 @@ ProcGEDispatch(ClientPtr client)
     switch (stuff->data) {
     case X_GEQueryVersion:
         return ProcGEQueryVersion(client);
-    default:
-        return BadRequest;
-    }
-}
-
-/* dispatch swapped requests */
-static int _X_COLD
-SProcGEDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_GEQueryVersion:
-        return SProcGEQueryVersion(client);
     default:
         return BadRequest;
     }
@@ -178,7 +156,7 @@ GEExtensionInit(void)
         (&GEClientPrivateKeyRec, PRIVATE_CLIENT, sizeof(GEClientInfoRec)))
         FatalError("GEExtensionInit: GE private request failed.\n");
 
-    if (!AddExtension(GE_NAME, 0, GENumberErrors, ProcGEDispatch, SProcGEDispatch,
+    if (!AddExtension(GE_NAME, 0, GENumberErrors, ProcGEDispatch, ProcGEDispatch,
                       GEResetProc, StandardMinorOpcode))
         FatalError("GEInit: AddExtensions failed.\n");
 
