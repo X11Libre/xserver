@@ -41,7 +41,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/log_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
-#include "exglobals.h"
 #include "inputstr.h"
 #include "eventstr.h"
 

@@ -65,7 +65,6 @@
 #include "micmap.h"
 #include "xkbsrv.h"
 #include "xf86Xinput.h"
-#include "exglobals.h"
 #include "eventstr.h"
 #include "xf86Extensions.h"
 #include "misc.h"

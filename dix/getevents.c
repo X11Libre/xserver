@@ -61,7 +61,6 @@
 #include "windowstr.h"
 #include "xkbsrv.h"
 #include "exglobals.h"
-#include "exevents.h"
 #include "extnsionst.h"
 #include "listdev.h"            /* for sizing up DeviceClassesChangedEvent */
 

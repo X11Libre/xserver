@@ -58,7 +58,6 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "exevents.h"
 #include "exglobals.h"
 
 #include "getvers.h"

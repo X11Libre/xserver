@@ -60,7 +60,6 @@ SOFTWARE.
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exevents.h"
-#include "exglobals.h"
 #include "setbmap.h"
 
 /***********************************************************************

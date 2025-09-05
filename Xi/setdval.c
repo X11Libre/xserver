@@ -61,7 +61,6 @@ SOFTWARE.
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
-#include "exglobals.h"
 #include "setdval.h"
 
 /***********************************************************************

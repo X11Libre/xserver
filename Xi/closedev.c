@@ -61,7 +61,6 @@ SOFTWARE.
 #include "windowstr.h"          /* window structure  */
 #include "scrnintstr.h"         /* screen structure  */
 #include "XIstubs.h"
-#include "exglobals.h"
 
 #include "closedev.h"
 

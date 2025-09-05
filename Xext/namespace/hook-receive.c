@@ -8,7 +8,6 @@
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "Xext/xacestr.h"
-#include "Xi/exglobals.h"
 
 #include "namespace.h"
 #include "hooks.h"

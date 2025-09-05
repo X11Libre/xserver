@@ -59,7 +59,6 @@ SOFTWARE.
 #include "dix/rpcbuf_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "exglobals.h"
 #include "swaprep.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
