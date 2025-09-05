@@ -108,8 +108,13 @@ option('agp', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'AGP support')
 option('sha1', type: 'combo', choices: ['libc', 'CommonCrypto', 'CryptoAPI', 'libmd', 'libsha1', 'libnettle', 'libgcrypt', 'libcrypto', 'auto'], value: 'auto',
        description: 'SHA1 implementation')
+
+# xfree86 DDX drivers
 option('xf86-input-inputtest', type: 'boolean', value: true,
        description: 'Test input driver support on Xorg')
+option('xf86-video-amdgpu', type: 'boolean', value: true,
+       description: 'xf86 video driver for AMD graphics chips')
+
 option('tests', type: 'boolean', value: true,
        description: 'Build tests for the X server on platforms that support it')
 
