@@ -3133,9 +3133,15 @@ PanoramiXRenderCreateSolidFill(ClientPtr client)
     return result;
 }
 
+#endif
+
 static int
-PanoramiXRenderCreateLinearGradient(ClientPtr client)
+ProcRenderCreateLinearGradient(ClientPtr client)
 {
+#ifdef XINERAMA
+    if (!usePanoramiX)
+        goto single;
+
     REQUEST(xRenderCreateLinearGradientReq);
     PanoramiXRes *newPict;
     int result = Success;
@@ -3163,11 +3169,18 @@ PanoramiXRenderCreateLinearGradient(ClientPtr client)
         free(newPict);
 
     return result;
+#endif /* XINERAMA */
+single:
+    return SingleRenderCreateLinearGradient(client);
 }
 
 static int
-PanoramiXRenderCreateRadialGradient(ClientPtr client)
+ProcRenderCreateRadialGradient(ClientPtr client)
 {
+#ifdef XINERAMA
+    if (!usePanoramiX)
+        goto single;
+
     REQUEST(xRenderCreateRadialGradientReq);
     PanoramiXRes *newPict;
     int result = Success;
@@ -3195,11 +3208,18 @@ PanoramiXRenderCreateRadialGradient(ClientPtr client)
         free(newPict);
 
     return result;
+#endif /* XINERAMA */
+single:
+    return SingleRenderCreateRadialGradient(client);
 }
 
 static int
-PanoramiXRenderCreateConicalGradient(ClientPtr client)
+ProcRenderCreateConicalGradient(ClientPtr client)
 {
+#ifdef XINERAMA
+    if (usePanoramiX)
+        goto single;
+
     REQUEST(xRenderCreateConicalGradientReq);
     PanoramiXRes *newPict;
     int result = Success;
@@ -3227,7 +3247,12 @@ PanoramiXRenderCreateConicalGradient(ClientPtr client)
         free(newPict);
 
     return result;
+#endif /* XINERAMA */
+single:
+    return SingleRenderCreateConicalGradient(client);
 }
+
+#ifdef XINERAMA
 
 void
 PanoramiXRenderInit(void)
@@ -3411,38 +3436,5 @@ ProcRenderCreateSolidFill(ClientPtr client)
                          : SingleRenderCreateSolidFill(client));
 #else
     return SingleRenderCreateSolidFill(client));
-#endif
-}
-
-static int
-ProcRenderCreateLinearGradient(ClientPtr client)
-{
-#ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateLinearGradient(client)
-                         : SingleRenderCreateLinearGradient(client));
-#else
-    return SingleRenderCreateLinearGradient(client));
-#endif
-}
-
-static int
-ProcRenderCreateRadialGradient(ClientPtr client)
-{
-#ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateRadialGradient(client)
-                         : SingleRenderCreateRadialGradient(client));
-#else
-    return SingleRenderCreateRadialGradient(client));
-#endif
-}
-
-static int
-ProcRenderCreateConicalGradient(ClientPtr client)
-{
-#ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateConicalGradient(client)
-                         : SingleRenderCreateConicalGradient(client));
-#else
-    return SingleRenderCreateConicalGradient(client));
 #endif
 }
