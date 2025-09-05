@@ -249,8 +249,10 @@ static int
 exaGlyphCacheHashLookup(ExaGlyphCachePtr cache, GlyphPtr pGlyph)
 {
     int slot;
+    CARD32 signature;
 
-    slot = (*(CARD32 *) pGlyph->sha1) % cache->hashSize;
+    memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
+    slot = signature % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
         int entryPos = cache->hashEntries[slot];
@@ -259,8 +261,8 @@ exaGlyphCacheHashLookup(ExaGlyphCachePtr cache, GlyphPtr pGlyph)
             return -1;
 
         if (memcmp
-            (pGlyph->sha1, cache->glyphs[entryPos].sha1,
-             sizeof(pGlyph->sha1)) == 0) {
+            (pGlyph->dgst, cache->glyphs[entryPos].dgst,
+             sizeof(pGlyph->dgst)) == 0) {
             return entryPos;
         }
 
@@ -274,10 +276,12 @@ static void
 exaGlyphCacheHashInsert(ExaGlyphCachePtr cache, GlyphPtr pGlyph, int pos)
 {
     int slot;
+    CARD32 signature;
 
-    memcpy(cache->glyphs[pos].sha1, pGlyph->sha1, sizeof(pGlyph->sha1));
+    memcpy(cache->glyphs[pos].dgst, pGlyph->dgst, sizeof(pGlyph->dgst));
 
-    slot = (*(CARD32 *) pGlyph->sha1) % cache->hashSize;
+    memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
+    slot = signature % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
         if (cache->hashEntries[slot] == -1) {
@@ -296,8 +300,10 @@ exaGlyphCacheHashRemove(ExaGlyphCachePtr cache, int pos)
 {
     int slot;
     int emptiedSlot = -1;
+    CARD32 signature;
 
-    slot = (*(CARD32 *) cache->glyphs[pos].sha1) % cache->hashSize;
+    memcpy(&signature, &(cache->glyphs[pos].dgst), sizeof(CARD32));
+    slot = signature % cache->hashSize;
 
     while (TRUE) {              /* hash table can never be full */
         int entryPos = cache->hashEntries[slot];
@@ -326,8 +332,10 @@ exaGlyphCacheHashRemove(ExaGlyphCachePtr cache, int pos)
              * (Knuth 6.4R)
              */
 
-            int entrySlot =
-                (*(CARD32 *) cache->glyphs[entryPos].sha1) % cache->hashSize;
+            int entrySlot;
+
+            memcpy(&signature, &(cache->glyphs[entryPos].dgst), sizeof(CARD32));
+            entrySlot = signature % cache->hashSize;
 
             if (!((entrySlot >= slot && entrySlot < emptiedSlot) ||
                   (emptiedSlot < slot &&
@@ -443,10 +451,16 @@ exaGlyphCacheBufferGlyph(ScreenPtr pScreen,
             return ExaGlyphFail;
     }
 
-    DBG_GLYPH_CACHE(("(%d,%d,%s): buffering glyph %lx\n",
+#if DEBUG_GLYPH_CACHE
+    {
+        CARD32 signature;
+        memcpy(&signature, &(pGlyph->dgst), sizeof(CARD32));
+        DBG_GLYPH_CACHE(("(%d,%d,%s): buffering glyph %lx\n",
                      cache->glyphWidth, cache->glyphHeight,
                      cache->format == PIXMAN_a8 ? "A" : "ARGB",
-                     (long) *(CARD32 *) pGlyph->sha1));
+                     (long) signature);
+     }
+#endif
 
     pos = exaGlyphCacheHashLookup(cache, pGlyph);
     if (pos != -1) {
