@@ -53,6 +53,7 @@ SOFTWARE.
 #include "input.h"
 #include "cursor.h"
 #include "events.h"
+#include <xorg/xorg-server.h>
 #include <X11/extensions/XI.h>
 
 #define EARLIER -1
