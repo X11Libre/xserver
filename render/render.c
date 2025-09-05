@@ -2565,7 +2565,7 @@ PanoramiXRenderCreatePicture(ClientPtr client)
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
         stuff->drawable = refDraw->info[walkScreenIdx].id;
-        result = (*PanoramiXSaveRenderVector[X_RenderCreatePicture]) (client);
+        result = ProcRenderCreatePicture(client);
         if (result != Success)
             break;
     }
@@ -2593,7 +2593,7 @@ PanoramiXRenderChangePicture(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = (*PanoramiXSaveRenderVector[X_RenderChangePicture]) (client);
+        result = ProcRenderChangePicture(client);
         if (result != Success)
             break;
     }
@@ -2615,9 +2615,7 @@ PanoramiXRenderSetPictureClipRectangles(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result =
-            (*PanoramiXSaveRenderVector[X_RenderSetPictureClipRectangles])
-            (client);
+        result = ProcRenderSetPictureClipRectangles(client);
         if (result != Success)
             break;
     }
@@ -2639,8 +2637,7 @@ PanoramiXRenderSetPictureTransform(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result =
-            (*PanoramiXSaveRenderVector[X_RenderSetPictureTransform]) (client);
+        result = ProcRenderSetPictureTransform(client);
         if (result != Success)
             break;
     }
@@ -2662,8 +2659,7 @@ PanoramiXRenderSetPictureFilter(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result =
-            (*PanoramiXSaveRenderVector[X_RenderSetPictureFilter]) (client);
+        result = ProcRenderSetPictureFilter(client);
         if (result != Success)
             break;
     }
@@ -2688,7 +2684,7 @@ PanoramiXRenderFreePicture(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = (*PanoramiXSaveRenderVector[X_RenderFreePicture]) (client);
+        result = ProcRenderFreePicture(client);
         if (result != Success)
             break;
     }
@@ -2736,7 +2732,7 @@ PanoramiXRenderComposite(ClientPtr client)
                 stuff->yMask = orig.yMask - walkScreen->y;
             }
         }
-        result = (*PanoramiXSaveRenderVector[X_RenderComposite]) (client);
+        result = ProcRenderComposite(client);
         if (result != Success)
             break;
     }
@@ -2777,8 +2773,7 @@ PanoramiXRenderCompositeGlyphs(ClientPtr client)
                 elt->deltax = origElt.deltax - walkScreen->x;
                 elt->deltay = origElt.deltay - walkScreen->y;
             }
-            result =
-                (*PanoramiXSaveRenderVector[stuff->renderReqType]) (client);
+            result = ProcRenderCompositeGlyphs(client);
             if (result != Success)
                 break;
         }
@@ -2823,8 +2818,7 @@ PanoramiXRenderFillRectangles(ClientPtr client)
                 }
             }
             stuff->dst = dst->info[walkScreenIdx].id;
-            result =
-                (*PanoramiXSaveRenderVector[X_RenderFillRectangles]) (client);
+            result = ProcRenderFillRectangles(client);
             if (result != Success)
                 break;
         }
@@ -2885,7 +2879,7 @@ PanoramiXRenderTrapezoids(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = (*PanoramiXSaveRenderVector[X_RenderTrapezoids]) (client);
+            result = ProcRenderTrapezoids(client);
 
             if (result != Success)
                 break;
@@ -2944,7 +2938,7 @@ PanoramiXRenderTriangles(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = (*PanoramiXSaveRenderVector[X_RenderTriangles]) (client);
+            result = ProcRenderTriangles(client);
 
             if (result != Success)
                 break;
@@ -2999,7 +2993,7 @@ PanoramiXRenderTriStrip(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = (*PanoramiXSaveRenderVector[X_RenderTriStrip]) (client);
+            result = ProcRenderTriStrip(client);
 
             if (result != Success)
                 break;
@@ -3054,7 +3048,7 @@ PanoramiXRenderTriFan(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = (*PanoramiXSaveRenderVector[X_RenderTriFan]) (client);
+            result = ProcRenderTriFan(client);
 
             if (result != Success)
                 break;
@@ -3096,7 +3090,7 @@ PanoramiXRenderAddTraps(ClientPtr client)
                 stuff->xOff = x_off + walkScreen->x;
                 stuff->yOff = y_off + walkScreen->y;
             }
-            result = (*PanoramiXSaveRenderVector[X_RenderAddTraps]) (client);
+            result = ProcRenderAddTraps(client);
             if (result != Success)
                 break;
         }
@@ -3125,7 +3119,7 @@ PanoramiXRenderCreateSolidFill(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = (*PanoramiXSaveRenderVector[X_RenderCreateSolidFill]) (client);
+        result = ProcRenderCreateSolidFill(client);
         if (result != Success)
             break;
     }
@@ -3157,8 +3151,7 @@ PanoramiXRenderCreateLinearGradient(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result =
-            (*PanoramiXSaveRenderVector[X_RenderCreateLinearGradient]) (client);
+        result = ProcRenderCreateLinearGradient(client);
         if (result != Success)
             break;
     }
@@ -3190,8 +3183,7 @@ PanoramiXRenderCreateRadialGradient(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result =
-            (*PanoramiXSaveRenderVector[X_RenderCreateRadialGradient]) (client);
+        result = ProcRenderCreateRadialGradient(client);
         if (result != Success)
             break;
     }
@@ -3223,9 +3215,7 @@ PanoramiXRenderCreateConicalGradient(ClientPtr client)
     int walkScreenIdx;
     FOR_NSCREENS_BACKWARD(walkScreenIdx) {
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result =
-            (*PanoramiXSaveRenderVector[X_RenderCreateConicalGradient])
-            (client);
+        result = ProcRenderCreateConicalGradient(client);
         if (result != Success)
             break;
     }
