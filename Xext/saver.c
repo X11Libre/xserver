@@ -676,6 +676,12 @@ ProcScreenSaverSelectInput(ClientPtr client)
     int rc;
 
     REQUEST_SIZE_MATCH(xScreenSaverSelectInputReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->eventMask);
+    }
+
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success)
@@ -1056,6 +1062,18 @@ ProcScreenSaverSetAttributes(ClientPtr client)
     REQUEST(xScreenSaverSetAttributesReq);
     REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
 
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swaps(&stuff->x);
+        swaps(&stuff->y);
+        swaps(&stuff->width);
+        swaps(&stuff->height);
+        swaps(&stuff->borderWidth);
+        swapl(&stuff->visualID);
+        swapl(&stuff->mask);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
         PanoramiXRes *draw;
@@ -1143,6 +1161,9 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
     REQUEST(xScreenSaverUnsetAttributesReq);
     REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
 
+    if (client->swapped)
+        swapl(&stuff->drawable);
+
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
         PanoramiXRes *draw;
@@ -1173,6 +1194,9 @@ ProcScreenSaverSuspend(ClientPtr client)
 
     REQUEST(xScreenSaverSuspendReq);
     REQUEST_SIZE_MATCH(xScreenSaverSuspendReq);
+
+    if (client->swapped)
+        swapl(&stuff->suspend);
 
     /*
      * Old versions of XCB encode suspend as 1 byte followed by three
@@ -1252,73 +1276,6 @@ ProcScreenSaverDispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcScreenSaverSelectInput(ClientPtr client)
-{
-    REQUEST(xScreenSaverSelectInputReq);
-    REQUEST_SIZE_MATCH(xScreenSaverSelectInputReq);
-    swapl(&stuff->drawable);
-    swapl(&stuff->eventMask);
-    return ProcScreenSaverSelectInput(client);
-}
-
-static int _X_COLD
-SProcScreenSaverSetAttributes(ClientPtr client)
-{
-    REQUEST(xScreenSaverSetAttributesReq);
-    REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
-    swapl(&stuff->drawable);
-    swaps(&stuff->x);
-    swaps(&stuff->y);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    swaps(&stuff->borderWidth);
-    swapl(&stuff->visualID);
-    swapl(&stuff->mask);
-    SwapRestL(stuff);
-    return ProcScreenSaverSetAttributes(client);
-}
-
-static int _X_COLD
-SProcScreenSaverUnsetAttributes(ClientPtr client)
-{
-    REQUEST(xScreenSaverUnsetAttributesReq);
-    REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
-    swapl(&stuff->drawable);
-    return ProcScreenSaverUnsetAttributes(client);
-}
-
-static int _X_COLD
-SProcScreenSaverSuspend(ClientPtr client)
-{
-    REQUEST(xScreenSaverSuspendReq);
-    REQUEST_SIZE_MATCH(xScreenSaverSuspendReq);
-    swapl(&stuff->suspend);
-    return ProcScreenSaverSuspend(client);
-}
-
-static int _X_COLD
-SProcScreenSaverDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-        case X_ScreenSaverQueryVersion:
-            return ProcScreenSaverQueryVersion(client);
-        case X_ScreenSaverQueryInfo:
-            return ProcScreenSaverQueryInfo(client);
-        case X_ScreenSaverSelectInput:
-            return SProcScreenSaverSelectInput(client);
-        case X_ScreenSaverSetAttributes:
-            return SProcScreenSaverSetAttributes(client);
-        case X_ScreenSaverUnsetAttributes:
-            return SProcScreenSaverUnsetAttributes(client);
-        case X_ScreenSaverSuspend:
-            return SProcScreenSaverSuspend(client);
-        default:
-            return BadRequest;
-    }
-}
-
 void
 ScreenSaverExtensionInit(void)
 {
@@ -1339,7 +1296,7 @@ ScreenSaverExtensionInit(void)
     if (AttrType && SaverEventType && SuspendType &&
         (extEntry = AddExtension(ScreenSaverName, ScreenSaverNumberEvents, 0,
                                  ProcScreenSaverDispatch,
-                                 SProcScreenSaverDispatch, NULL,
+                                 ProcScreenSaverDispatch, NULL,
                                  StandardMinorOpcode))) {
         ScreenSaverEventBase = extEntry->eventBase;
         EventSwapVector[ScreenSaverEventBase] =
