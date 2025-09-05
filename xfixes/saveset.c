@@ -35,8 +35,11 @@ ProcXFixesChangeSaveSet(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xXFixesChangeSaveSetReq);
-
     REQUEST_SIZE_MATCH(xXFixesChangeSaveSetReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     result = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
     if (result != Success)
         return result;
@@ -57,14 +60,4 @@ ProcXFixesChangeSaveSet(ClientPtr client)
     toRoot = (stuff->target == SaveSetRoot);
     map = (stuff->map == SaveSetMap);
     return AlterSaveSetForClient(client, pWin, stuff->mode, toRoot, map);
-}
-
-int _X_COLD
-SProcXFixesChangeSaveSet(ClientPtr client)
-{
-    REQUEST(xXFixesChangeSaveSetReq);
-    REQUEST_SIZE_MATCH(xXFixesChangeSaveSetReq);
-
-    swapl(&stuff->window);
-    return ProcXFixesChangeSaveSet(client);
 }
