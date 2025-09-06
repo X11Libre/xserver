@@ -635,7 +635,7 @@ exaTryDriverComposite(CARD8 op,
     RegionRec region;
     BoxPtr pbox;
     int nbox;
-    int src_off_x, src_off_y, mask_off_x = 0, mask_off_y = 0, dst_off_x, dst_off_y;
+    int src_off_x = 0, src_off_y = 0, mask_off_x = 0, mask_off_y = 0, dst_off_x, dst_off_y;
     PixmapPtr pSrcPix = NULL, pMaskPix = NULL, pDstPix;
     ExaPixmapPrivPtr pSrcExaPix = NULL, pMaskExaPix = NULL, pDstExaPix;
 

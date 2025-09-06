@@ -643,7 +643,7 @@ PanoramiXDamageCreate(ClientPtr client, xDamageCreateReq *stuff)
         unsigned int walkScreenIdx;
         FOR_NSCREENS_FORWARD(walkScreenIdx) {
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-            DrawablePtr pDrawable;
+            DrawablePtr pDrawable = NULL;
             DamagePtr pDamage = DamageCreate(PanoramiXDamageReport,
                                              PanoramiXDamageExtDestroy,
                                              DamageReportRawRegion,
