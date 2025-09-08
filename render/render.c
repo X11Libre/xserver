@@ -96,7 +96,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderQueryPictIndexValues(ClientPtr pClient);
 static int SProcRenderCreatePicture(ClientPtr pClient);
 static int SProcRenderChangePicture(ClientPtr pClient);
 static int SProcRenderSetPictureClipRectangles(ClientPtr pClient);
@@ -167,7 +166,7 @@ ProcRenderQueryVersion,
 int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderQueryVersion,
         ProcRenderQueryPictFormats,
-        SProcRenderQueryPictIndexValues,
+        ProcRenderQueryPictIndexValues,
         _not_implemented, /* SProcRenderQueryDithers */
         SProcRenderCreatePicture,
         SProcRenderChangePicture,
@@ -485,6 +484,9 @@ ProcRenderQueryPictIndexValues(ClientPtr client)
 
     REQUEST(xRenderQueryPictIndexValuesReq);
     REQUEST_AT_LEAST_SIZE(xRenderQueryPictIndexValuesReq);
+
+    if (client->swapped)
+        swapl(&stuff->format);
 
     rc = dixLookupResourceByType((void **) &pFormat, stuff->format,
                                  PictFormatType, client, DixReadAccess);
@@ -1925,15 +1927,6 @@ ProcRenderDispatch(ClientPtr client)
         return (*ProcRenderVector[stuff->data]) (client);
     else
         return BadRequest;
-}
-
-static int _X_COLD
-SProcRenderQueryPictIndexValues(ClientPtr client)
-{
-    REQUEST(xRenderQueryPictIndexValuesReq);
-    REQUEST_AT_LEAST_SIZE(xRenderQueryPictIndexValuesReq);
-    swapl(&stuff->format);
-    return ProcRenderQueryPictIndexValues(client);
 }
 
 static int _X_COLD
