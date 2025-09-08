@@ -96,7 +96,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderAddTraps(ClientPtr pClient);
 static int SProcRenderCreateSolidFill(ClientPtr pClient);
 static int SProcRenderCreateLinearGradient(ClientPtr pClient);
 static int SProcRenderCreateRadialGradient(ClientPtr pClient);
@@ -175,7 +174,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderQueryFilters,
         ProcRenderSetPictureFilter,
         ProcRenderCreateAnimCursor,
-        SProcRenderAddTraps,
+        ProcRenderAddTraps,
         SProcRenderCreateSolidFill,
         SProcRenderCreateLinearGradient,
         SProcRenderCreateRadialGradient, SProcRenderCreateConicalGradient};
@@ -1763,14 +1762,11 @@ ProcRenderCreateAnimCursor(ClientPtr client)
 }
 
 static int
-SingleRenderAddTraps(ClientPtr client)
+SingleRenderAddTraps(ClientPtr client, xRenderAddTrapsReq *stuff)
 {
     int ntraps;
     PicturePtr pPicture;
 
-    REQUEST(xRenderAddTrapsReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixWriteAccess);
     if (!pPicture->pDrawable)
         return BadDrawable;
@@ -1936,19 +1932,6 @@ ProcRenderDispatch(ClientPtr client)
         return (*ProcRenderVector[stuff->data]) (client);
     else
         return BadRequest;
-}
-
-static int _X_COLD
-SProcRenderAddTraps(ClientPtr client)
-{
-    REQUEST(xRenderAddTrapsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
-
-    swapl(&stuff->picture);
-    swaps(&stuff->xOff);
-    swaps(&stuff->yOff);
-    SwapRestL(stuff);
-    return ProcRenderAddTraps(client);
 }
 
 static int _X_COLD
@@ -2560,17 +2543,14 @@ PanoramiXRenderTriFan(ClientPtr client, xRenderTriFanReq *stuff)
 }
 
 static int
-PanoramiXRenderAddTraps(ClientPtr client)
+PanoramiXRenderAddTraps(ClientPtr client, xRenderAddTrapsReq *stuff)
 {
     PanoramiXRes *picture;
     int result = Success;
-
-    REQUEST(xRenderAddTrapsReq);
     char *extra;
     int extra_len;
     INT16 x_off, y_off;
 
-    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
     VERIFY_XIN_PICTURE(picture, stuff->picture, client, DixWriteAccess);
     extra_len = (client->req_len << 2) - sizeof(xRenderAddTrapsReq);
     if (extra_len && (extra = calloc(1, extra_len))) {
@@ -2587,7 +2567,7 @@ PanoramiXRenderAddTraps(ClientPtr client)
                 stuff->xOff = x_off + walkScreen->x;
                 stuff->yOff = y_off + walkScreen->y;
             }
-            result = SingleRenderAddTraps(client);
+            result = SingleRenderAddTraps(client, stuff);
             if (result != Success)
                 break;
         });
@@ -3105,11 +3085,21 @@ ProcRenderSetPictureFilter(ClientPtr client)
 static int
 ProcRenderAddTraps(ClientPtr client)
 {
+    REQUEST(xRenderAddTrapsReq);
+    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->picture);
+        swaps(&stuff->xOff);
+        swaps(&stuff->yOff);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderAddTraps(client)
-                         : SingleRenderAddTraps(client));
+    return (usePanoramiX ? PanoramiXRenderAddTraps(client, stuff)
+                         : SingleRenderAddTraps(client, stuff));
 #else
-    return SingleRenderAddTraps(client);
+    return SingleRenderAddTraps(client, stuff);
 #endif
 }
 
