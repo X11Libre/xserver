@@ -98,7 +98,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderTriangles(ClientPtr pClient);
 static int SProcRenderTriStrip(ClientPtr pClient);
 static int SProcRenderTriFan(ClientPtr pClient);
 static int SProcRenderCompositeGlyphs(ClientPtr pClient);
@@ -163,7 +162,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderComposite,
         _not_implemented, /* SProcRenderScale */
         ProcRenderTrapezoids,
-        SProcRenderTriangles,
+        ProcRenderTriangles,
         SProcRenderTriStrip,
         SProcRenderTriFan,
         _not_implemented, /* SProcRenderColorTrapezoids */
@@ -681,15 +680,12 @@ SingleRenderTrapezoids(ClientPtr client, xRenderTrapezoidsReq *stuff)
 }
 
 static int
-SingleRenderTriangles(ClientPtr client)
+SingleRenderTriangles(ClientPtr client, xRenderTrianglesReq *stuff)
 {
     int rc, ntris;
     PicturePtr pSrc, pDst;
     PictFormatPtr pFormat;
 
-    REQUEST(xRenderTrianglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -1962,21 +1958,6 @@ ProcRenderDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderTriangles(ClientPtr client)
-{
-    REQUEST(xRenderTrianglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    SwapRestL(stuff);
-    return ProcRenderTriangles(client);
-}
-
-static int _X_COLD
 SProcRenderTriStrip(ClientPtr client)
 {
     REQUEST(xRenderTriStripReq);
@@ -2612,16 +2593,13 @@ PanoramiXRenderTrapezoids(ClientPtr client, xRenderTrapezoidsReq *stuff)
 }
 
 static int
-PanoramiXRenderTriangles(ClientPtr client)
+PanoramiXRenderTriangles(ClientPtr client, xRenderTrianglesReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
 
-    REQUEST(xRenderTrianglesReq);
     char *extra;
     int extra_len;
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
 
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
@@ -2656,7 +2634,7 @@ PanoramiXRenderTriangles(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = SingleRenderTriangles(client);
+            result = SingleRenderTriangles(client, stuff);
 
             if (result != Success)
                 break;
@@ -3091,11 +3069,23 @@ ProcRenderTrapezoids(ClientPtr client)
 static int
 ProcRenderTriangles(ClientPtr client)
 {
+    REQUEST(xRenderTrianglesReq);
+    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
+
+    if (client->swapped) {
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderTriangles(client)
-                         : SingleRenderTriangles(client));
+    return (usePanoramiX ? PanoramiXRenderTriangles(client, stuff)
+                         : SingleRenderTriangles(client, stuff));
 #else
-    return SingleRenderTriangles(client);
+    return SingleRenderTriangles(client, stuff);
 #endif
 }
 
