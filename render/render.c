@@ -117,7 +117,6 @@ static int SProcRenderCreateCursor(ClientPtr pClient);
 static int SProcRenderSetPictureTransform(ClientPtr pClient);
 static int SProcRenderQueryFilters(ClientPtr pClient);
 static int SProcRenderSetPictureFilter(ClientPtr pClient);
-static int SProcRenderCreateAnimCursor(ClientPtr pClient);
 static int SProcRenderAddTraps(ClientPtr pClient);
 static int SProcRenderCreateSolidFill(ClientPtr pClient);
 static int SProcRenderCreateLinearGradient(ClientPtr pClient);
@@ -196,7 +195,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         SProcRenderSetPictureTransform,
         SProcRenderQueryFilters,
         SProcRenderSetPictureFilter,
-        SProcRenderCreateAnimCursor,
+        ProcRenderCreateAnimCursor,
         SProcRenderAddTraps,
         SProcRenderCreateSolidFill,
         SProcRenderCreateLinearGradient,
@@ -1708,13 +1707,19 @@ static int
 ProcRenderCreateAnimCursor(ClientPtr client)
 {
     REQUEST(xRenderCreateAnimCursorReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCreateAnimCursorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cid);
+        SwapRestL(stuff);
+    }
+
     CARD32 *deltas;
     CursorPtr pCursor;
     xAnimCursorElt *elt;
     int i;
     int ret;
 
-    REQUEST_AT_LEAST_SIZE(xRenderCreateAnimCursorReq);
     LEGAL_NEW_RESOURCE(stuff->cid, client);
     if (client->req_len & 1)
         return BadLength;
@@ -2278,17 +2283,6 @@ SProcRenderSetPictureFilter(ClientPtr client)
     swapl(&stuff->picture);
     swaps(&stuff->nbytes);
     return ProcRenderSetPictureFilter(client);
-}
-
-static int _X_COLD
-SProcRenderCreateAnimCursor(ClientPtr client)
-{
-    REQUEST(xRenderCreateAnimCursorReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateAnimCursorReq);
-
-    swapl(&stuff->cid);
-    SwapRestL(stuff);
-    return ProcRenderCreateAnimCursor(client);
 }
 
 static int _X_COLD
