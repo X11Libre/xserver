@@ -609,7 +609,10 @@ PictOpValid(CARD8 op)
 }
 
 static int
-SingleRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
+SingleRenderComposite(ClientPtr client, xRenderCompositeReq *stuff,
+                      Picture srcID, Picture maskID, Picture dstID,
+                      INT16 xSrc, INT16 ySrc, INT16 xMask, INT16 yMask,
+                      INT16 xDst, INT16 yDst)
 {
     PicturePtr pSrc, pMask, pDst;
 
@@ -617,11 +620,11 @@ SingleRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
         client->errorValue = stuff->op;
         return BadValue;
     }
-    VERIFY_PICTURE(pDst, stuff->dst, client, DixWriteAccess);
+    VERIFY_PICTURE(pDst, dstID, client, DixWriteAccess);
     if (!pDst->pDrawable)
         return BadDrawable;
-    VERIFY_PICTURE(pSrc, stuff->src, client, DixReadAccess);
-    VERIFY_ALPHA(pMask, stuff->mask, client, DixReadAccess);
+    VERIFY_PICTURE(pSrc, srcID, client, DixReadAccess);
+    VERIFY_ALPHA(pMask, maskID, client, DixReadAccess);
     if ((pSrc->pDrawable &&
          pSrc->pDrawable->pScreen != pDst->pDrawable->pScreen) || (pMask &&
                                                                    pMask->
@@ -2448,37 +2451,35 @@ PanoramiXRenderFreePicture(ClientPtr client)
 }
 
 static int
-PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
+PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *stuff,
+                         Picture srcID, Picture maskID, Picture dstID,
+                         INT16 xSrc, INT16 ySrc, INT16 xMask, INT16 yMask,
+                         INT16 xDst, INT16 yDst)
 {
     PanoramiXRes *src, *msk, *dst;
     int result = Success;
     xRenderCompositeReq orig;
 
-    VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
-    VERIFY_XIN_ALPHA(msk, stuff->mask, client, DixReadAccess);
-    VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
+    VERIFY_XIN_PICTURE(src, srcID, client, DixReadAccess);
+    VERIFY_XIN_ALPHA(msk, maskID, client, DixReadAccess);
+    VERIFY_XIN_PICTURE(dst, dstID, client, DixWriteAccess);
 
     orig = *stuff;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
-        stuff->src = src->info[walkScreenIdx].id;
-        if (src->u.pict.root) {
-            stuff->xSrc = orig.xSrc - walkScreen->x;
-            stuff->ySrc = orig.ySrc - walkScreen->y;
-        }
-        stuff->dst = dst->info[walkScreenIdx].id;
-        if (dst->u.pict.root) {
-            stuff->xDst = orig.xDst - walkScreen->x;
-            stuff->yDst = orig.yDst - walkScreen->y;
-        }
-        if (msk) {
-            stuff->mask = msk->info[walkScreenIdx].id;
-            if (msk->u.pict.root) {
-                stuff->xMask = orig.xMask - walkScreen->x;
-                stuff->yMask = orig.yMask - walkScreen->y;
-            }
-        }
-        result = SingleRenderComposite(client, stuff);
+        result = SingleRenderComposite(
+                    client,
+                    stuff,
+                    src->info[walkScreenIdx].id,
+                    (msk ? msk->info[walkScreenIdx].id : maskID),
+                    dst->info[walkScreenIdx].id,
+                    (src->u.pict.root ? orig.xSrc - walkScreen->x : xSrc),
+                    (src->u.pict.root ? orig.ySrc - walkScreen->y : ySrc),
+                    (msk ? orig.xMask - walkScreen->x : xMask),
+                    (msk ? orig.yMask - walkScreen->y : yMask),
+                    (dst->u.pict.root ? orig.xSrc - walkScreen->x : xDst),
+                    (dst->u.pict.root ? orig.ySrc - walkScreen->y : yDst));
+
         if (result != Success)
             break;
     });
@@ -3081,10 +3082,17 @@ ProcRenderComposite(ClientPtr client)
     }
 
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderComposite(client, stuff)
-                         : SingleRenderComposite(client, stuff));
+    return (usePanoramiX ?
+        PanoramiXRenderComposite(client, stuff, stuff->src, stuff->mask, stuff->dst,
+                                 stuff->xSrc, stuff->ySrc, stuff->xMask, stuff->yMask,
+                                 stuff->xDst, stuff->yDst)
+      : SingleRenderComposite(client, stuff, stuff->src, stuff->mask, stuff->dst,
+                              stuff->xSrc, stuff->ySrc, stuff->xMask, stuff->yMask,
+                              stuff->xDst, stuff->yDst));
 #else
-    return SingleRenderComposite(client, stuff);
+    return SingleRenderComposite(client, stuff, stuff->src, stuff->mask, stuff->dst,
+                                 stuff->xSrc, stuff->ySrc, stuff->xMask, stuff->yMask,
+                                 stuff->xDst, stuff->yDst);
 #endif
 }
 
