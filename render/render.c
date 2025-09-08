@@ -98,7 +98,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderCompositeGlyphs(ClientPtr pClient);
 static int SProcRenderFillRectangles(ClientPtr pClient);
 static int SProcRenderSetPictureTransform(ClientPtr pClient);
 static int SProcRenderSetPictureFilter(ClientPtr pClient);
@@ -172,9 +171,9 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderAddGlyphs,
         _not_implemented, /* SProcRenderAddGlyphsFromPicture */
         ProcRenderFreeGlyphs,
-        SProcRenderCompositeGlyphs,
-        SProcRenderCompositeGlyphs,
-        SProcRenderCompositeGlyphs,
+        ProcRenderCompositeGlyphs,
+        ProcRenderCompositeGlyphs,
+        ProcRenderCompositeGlyphs,
         SProcRenderFillRectangles,
         ProcRenderCreateCursor,
         SProcRenderSetPictureTransform,
@@ -1162,7 +1161,7 @@ ProcRenderFreeGlyphs(ClientPtr client)
 }
 
 static int
-SingleRenderCompositeGlyphs(ClientPtr client)
+SingleRenderCompositeGlyphs(ClientPtr client, xRenderCompositeGlyphsReq *stuff)
 {
     GlyphSetPtr glyphSet;
     GlyphSet gs;
@@ -1180,10 +1179,6 @@ SingleRenderCompositeGlyphs(ClientPtr client)
     int space;
     int size;
     int rc, n;
-
-    REQUEST(xRenderCompositeGlyphsReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
 
     switch (stuff->renderReqType) {
     default:
@@ -1950,86 +1945,6 @@ ProcRenderDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderCompositeGlyphs(ClientPtr client)
-{
-    xGlyphElt *elt;
-    CARD8 *buffer;
-    CARD8 *end;
-    int space;
-    int i;
-    int size;
-
-    REQUEST(xRenderCompositeGlyphsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
-
-    switch (stuff->renderReqType) {
-    default:
-        size = 1;
-        break;
-    case X_RenderCompositeGlyphs16:
-        size = 2;
-        break;
-    case X_RenderCompositeGlyphs32:
-        size = 4;
-        break;
-    }
-
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swapl(&stuff->glyphset);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    buffer = (CARD8 *) (stuff + 1);
-    end = (CARD8 *) stuff + (client->req_len << 2);
-    while (buffer + sizeof(xGlyphElt) < end) {
-        elt = (xGlyphElt *) buffer;
-        buffer += sizeof(xGlyphElt);
-
-        swaps(&elt->deltax);
-        swaps(&elt->deltay);
-
-        i = elt->len;
-        if (i == 0xff) {
-            if (buffer + 4 > end) {
-                return BadLength;
-            }
-            swapl((int *) buffer);
-            buffer += 4;
-        }
-        else {
-            space = size * i;
-            switch (size) {
-            case 1:
-                buffer += i;
-                break;
-            case 2:
-                if (buffer + i * 2 > end) {
-                    return BadLength;
-                }
-                while (i--) {
-                    swaps((short *) buffer);
-                    buffer += 2;
-                }
-                break;
-            case 4:
-                if (buffer + i * 4 > end) {
-                    return BadLength;
-                }
-                while (i--) {
-                    swapl((int *) buffer);
-                    buffer += 4;
-                }
-                break;
-            }
-            if (space & 3)
-                buffer += 4 - (space & 3);
-        }
-    }
-    return ProcRenderCompositeGlyphs(client);
-}
-
-static int _X_COLD
 SProcRenderFillRectangles(ClientPtr client)
 {
     REQUEST(xRenderFillRectanglesReq);
@@ -2410,16 +2325,14 @@ PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
 }
 
 static int
-PanoramiXRenderCompositeGlyphs(ClientPtr client)
+PanoramiXRenderCompositeGlyphs(ClientPtr client, xRenderCompositeGlyphsReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
 
-    REQUEST(xRenderCompositeGlyphsReq);
     xGlyphElt origElt, *elt;
     INT16 xSrc, ySrc;
 
-    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
 
@@ -2441,7 +2354,7 @@ PanoramiXRenderCompositeGlyphs(ClientPtr client)
                 elt->deltax = origElt.deltax - walkScreen->x;
                 elt->deltay = origElt.deltay - walkScreen->y;
             }
-            result = SingleRenderCompositeGlyphs(client);
+            result = SingleRenderCompositeGlyphs(client, stuff);
             if (result != Success)
                 break;
         });
@@ -3093,11 +3006,84 @@ ProcRenderTriFan(ClientPtr client)
 static int
 ProcRenderCompositeGlyphs(ClientPtr client)
 {
+    REQUEST(xRenderCompositeGlyphsReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
+
+    if (client->swapped) {
+        int size = 0;
+
+        switch (stuff->renderReqType) {
+            default:
+                size = 1;
+                break;
+            case X_RenderCompositeGlyphs16:
+                size = 2;
+            break;
+            case X_RenderCompositeGlyphs32:
+                size = 4;
+            break;
+        }
+
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swapl(&stuff->glyphset);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+
+        CARD8 *buffer = (CARD8 *) (stuff + 1);
+        CARD8 *end = (CARD8 *) stuff + (client->req_len << 2);
+        while (buffer + sizeof(xGlyphElt) < end) {
+            xGlyphElt *elt = (xGlyphElt *) buffer;
+            buffer += sizeof(xGlyphElt);
+
+            swaps(&elt->deltax);
+            swaps(&elt->deltay);
+
+            int i = elt->len;
+            if (i == 0xff) {
+                if (buffer + 4 > end) {
+                    return BadLength;
+                }
+                swapl((int *) buffer);
+                buffer += 4;
+            }
+            else {
+                int space = size * i;
+                switch (size) {
+                    case 1:
+                        buffer += i;
+                    break;
+                    case 2:
+                        if (buffer + i * 2 > end) {
+                            return BadLength;
+                        }
+                        while (i--) {
+                            swaps((short *) buffer);
+                            buffer += 2;
+                        }
+                    break;
+                    case 4:
+                        if (buffer + i * 4 > end) {
+                            return BadLength;
+                        }
+                        while (i--) {
+                            swapl((int *) buffer);
+                            buffer += 4;
+                        }
+                    break;
+                }
+                if (space & 3)
+                    buffer += 4 - (space & 3);
+            }
+        }
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCompositeGlyphs(client)
-                         : SingleRenderCompositeGlyphs(client));
+    return (usePanoramiX ? PanoramiXRenderCompositeGlyphs(client, stuff)
+                         : SingleRenderCompositeGlyphs(client, stuff));
 #else
-    return SingleRenderCompositeGlyphs(client);
+    return SingleRenderCompositeGlyphs(client, stuff);
 #endif
 }
 
