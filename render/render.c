@@ -96,7 +96,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderChangePicture(ClientPtr pClient);
 static int SProcRenderSetPictureClipRectangles(ClientPtr pClient);
 static int SProcRenderFreePicture(ClientPtr pClient);
 static int SProcRenderComposite(ClientPtr pClient);
@@ -160,7 +159,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderQueryPictIndexValues,
         _not_implemented,
         ProcRenderCreatePicture,
-        SProcRenderChangePicture,
+        ProcRenderChangePicture,
         SProcRenderSetPictureClipRectangles,
         SProcRenderFreePicture,
         SProcRenderComposite,
@@ -548,14 +547,12 @@ SingleRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
 }
 
 static int
-SingleRenderChangePicture(ClientPtr client)
+SingleRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
 {
     PicturePtr pPicture;
 
-    REQUEST(xRenderChangePictureReq);
     int len;
 
-    REQUEST_AT_LEAST_SIZE(xRenderChangePictureReq);
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
 
     len = client->req_len - bytes_to_int32(sizeof(xRenderChangePictureReq));
@@ -1977,17 +1974,6 @@ ProcRenderDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderChangePicture(ClientPtr client)
-{
-    REQUEST(xRenderChangePictureReq);
-    REQUEST_AT_LEAST_SIZE(xRenderChangePictureReq);
-    swapl(&stuff->picture);
-    swapl(&stuff->mask);
-    SwapRestL(stuff);
-    return ProcRenderChangePicture(client);
-}
-
-static int _X_COLD
 SProcRenderSetPictureClipRectangles(ClientPtr client)
 {
     REQUEST(xRenderSetPictureClipRectanglesReq);
@@ -2405,20 +2391,16 @@ PanoramiXRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
 }
 
 static int
-PanoramiXRenderChangePicture(ClientPtr client)
+PanoramiXRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
 {
     PanoramiXRes *pict;
     int result = Success;
-
-    REQUEST(xRenderChangePictureReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderChangePictureReq);
 
     VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderChangePicture(client);
+        result = SingleRenderChangePicture(client, stuff);
         if (result != Success)
             break;
     });
@@ -3078,11 +3060,20 @@ ProcRenderCreatePicture(ClientPtr client)
 static int
 ProcRenderChangePicture(ClientPtr client)
 {
+    REQUEST(xRenderChangePictureReq);
+    REQUEST_AT_LEAST_SIZE(xRenderChangePictureReq);
+
+    if (client->swapped) {
+        swapl(&stuff->picture);
+        swapl(&stuff->mask);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderChangePicture(client)
-                         : SingleRenderChangePicture(client));
+    return (usePanoramiX ? PanoramiXRenderChangePicture(client, stuff)
+                         : SingleRenderChangePicture(client, stuff));
 #else
-    return SingleRenderChangePicture(client);
+    return SingleRenderChangePicture(client, stuff);
 #endif
 }
 
