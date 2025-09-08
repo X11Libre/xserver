@@ -103,7 +103,6 @@ static int SProcRenderTrapezoids(ClientPtr pClient);
 static int SProcRenderTriangles(ClientPtr pClient);
 static int SProcRenderTriStrip(ClientPtr pClient);
 static int SProcRenderTriFan(ClientPtr pClient);
-static int SProcRenderReferenceGlyphSet(ClientPtr pClient);
 static int SProcRenderFreeGlyphSet(ClientPtr pClient);
 static int SProcRenderAddGlyphs(ClientPtr pClient);
 static int SProcRenderFreeGlyphs(ClientPtr pClient);
@@ -176,7 +175,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         _not_implemented, /* SProcRenderColorTriangles */
         _not_implemented, /* SProcRenderTransform */
         ProcRenderCreateGlyphSet,
-        SProcRenderReferenceGlyphSet,
+        ProcRenderReferenceGlyphSet,
         SProcRenderFreeGlyphSet,
         SProcRenderAddGlyphs,
         _not_implemented, /* SProcRenderAddGlyphsFromPicture */
@@ -873,8 +872,12 @@ ProcRenderReferenceGlyphSet(ClientPtr client)
     int rc;
 
     REQUEST(xRenderReferenceGlyphSetReq);
-
     REQUEST_SIZE_MATCH(xRenderReferenceGlyphSetReq);
+
+    if (client->swapped) {
+        swapl(&stuff->gsid);
+        swapl(&stuff->existing);
+    }
 
     LEGAL_NEW_RESOURCE(stuff->gsid, client);
 
@@ -2028,16 +2031,6 @@ SProcRenderTriFan(ClientPtr client)
     swaps(&stuff->ySrc);
     SwapRestL(stuff);
     return ProcRenderTriFan(client);
-}
-
-static int _X_COLD
-SProcRenderReferenceGlyphSet(ClientPtr client)
-{
-    REQUEST(xRenderReferenceGlyphSetReq);
-    REQUEST_SIZE_MATCH(xRenderReferenceGlyphSetReq);
-    swapl(&stuff->gsid);
-    swapl(&stuff->existing);
-    return ProcRenderReferenceGlyphSet(client);
 }
 
 static int _X_COLD
