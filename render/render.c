@@ -96,7 +96,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderQueryVersion(ClientPtr pClient);
 static int SProcRenderQueryPictIndexValues(ClientPtr pClient);
 static int SProcRenderCreatePicture(ClientPtr pClient);
 static int SProcRenderChangePicture(ClientPtr pClient);
@@ -166,7 +165,7 @@ ProcRenderQueryVersion,
         ProcRenderCreateRadialGradient, ProcRenderCreateConicalGradient};
 
 int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
-SProcRenderQueryVersion,
+        ProcRenderQueryVersion,
         ProcRenderQueryPictFormats,
         SProcRenderQueryPictIndexValues,
         ProcRenderQueryDithers,
@@ -253,8 +252,12 @@ ProcRenderQueryVersion(ClientPtr client)
     RenderClientPtr pRenderClient = GetRenderClient(client);
 
     REQUEST(xRenderQueryVersionReq);
-
     REQUEST_SIZE_MATCH(xRenderQueryVersionReq);
+
+    if (client->swapped) {
+        swapl(&stuff->majorVersion);
+        swapl(&stuff->minorVersion);
+    }
 
     pRenderClient->major_version = stuff->majorVersion;
     pRenderClient->minor_version = stuff->minorVersion;
@@ -1958,16 +1961,6 @@ ProcRenderDispatch(ClientPtr client)
         return (*ProcRenderVector[stuff->data]) (client);
     else
         return BadRequest;
-}
-
-static int _X_COLD
-SProcRenderQueryVersion(ClientPtr client)
-{
-    REQUEST(xRenderQueryVersionReq);
-    REQUEST_SIZE_MATCH(xRenderQueryVersionReq);
-    swapl(&stuff->majorVersion);
-    swapl(&stuff->minorVersion);
-    return ProcRenderQueryVersion(client);
 }
 
 static int _X_COLD
