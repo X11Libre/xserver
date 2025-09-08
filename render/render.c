@@ -115,7 +115,6 @@ static int SProcRenderCompositeGlyphs(ClientPtr pClient);
 static int SProcRenderFillRectangles(ClientPtr pClient);
 static int SProcRenderCreateCursor(ClientPtr pClient);
 static int SProcRenderSetPictureTransform(ClientPtr pClient);
-static int SProcRenderQueryFilters(ClientPtr pClient);
 static int SProcRenderSetPictureFilter(ClientPtr pClient);
 static int SProcRenderCreateAnimCursor(ClientPtr pClient);
 static int SProcRenderAddTraps(ClientPtr pClient);
@@ -194,7 +193,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         SProcRenderFillRectangles,
         SProcRenderCreateCursor,
         SProcRenderSetPictureTransform,
-        SProcRenderQueryFilters,
+        ProcRenderQueryFilters,
         SProcRenderSetPictureFilter,
         SProcRenderCreateAnimCursor,
         SProcRenderAddTraps,
@@ -1590,6 +1589,11 @@ static int
 ProcRenderQueryFilters(ClientPtr client)
 {
     REQUEST(xRenderQueryFiltersReq);
+    REQUEST_SIZE_MATCH(xRenderQueryFiltersReq);
+
+    if (client->swapped)
+        swapl(&stuff->drawable);
+
     DrawablePtr pDrawable;
     int nbytesName;
     int nnames;
@@ -1599,7 +1603,6 @@ ProcRenderQueryFilters(ClientPtr client)
     INT16 *aliases;
     char *names;
 
-    REQUEST_SIZE_MATCH(xRenderQueryFiltersReq);
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success)
@@ -2257,16 +2260,6 @@ SProcRenderSetPictureTransform(ClientPtr client)
     swapl(&stuff->transform.matrix32);
     swapl(&stuff->transform.matrix33);
     return ProcRenderSetPictureTransform(client);
-}
-
-static int _X_COLD
-SProcRenderQueryFilters(ClientPtr client)
-{
-    REQUEST(xRenderQueryFiltersReq);
-    REQUEST_SIZE_MATCH(xRenderQueryFiltersReq);
-
-    swapl(&stuff->drawable);
-    return ProcRenderQueryFilters(client);
 }
 
 static int _X_COLD
