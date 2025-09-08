@@ -113,7 +113,6 @@ static int SProcRenderAddGlyphs(ClientPtr pClient);
 static int SProcRenderFreeGlyphs(ClientPtr pClient);
 static int SProcRenderCompositeGlyphs(ClientPtr pClient);
 static int SProcRenderFillRectangles(ClientPtr pClient);
-static int SProcRenderCreateCursor(ClientPtr pClient);
 static int SProcRenderSetPictureTransform(ClientPtr pClient);
 static int SProcRenderQueryFilters(ClientPtr pClient);
 static int SProcRenderSetPictureFilter(ClientPtr pClient);
@@ -192,7 +191,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         SProcRenderCompositeGlyphs,
         SProcRenderCompositeGlyphs,
         SProcRenderFillRectangles,
-        SProcRenderCreateCursor,
+        ProcRenderCreateCursor,
         SProcRenderSetPictureTransform,
         SProcRenderQueryFilters,
         SProcRenderSetPictureFilter,
@@ -1382,6 +1381,15 @@ static int
 ProcRenderCreateCursor(ClientPtr client)
 {
     REQUEST(xRenderCreateCursorReq);
+    REQUEST_SIZE_MATCH(xRenderCreateCursorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cid);
+        swapl(&stuff->src);
+        swaps(&stuff->x);
+        swaps(&stuff->y);
+    }
+
     PicturePtr pSrc;
     ScreenPtr pScreen;
     unsigned short width, height;
@@ -1396,7 +1404,6 @@ ProcRenderCreateCursor(ClientPtr client)
     CARD32 twocolor[3];
     int rc, ncolor;
 
-    REQUEST_SIZE_MATCH(xRenderCreateCursorReq);
     LEGAL_NEW_RESOURCE(stuff->cid, client);
 
     VERIFY_PICTURE(pSrc, stuff->src, client, DixReadAccess);
@@ -2225,19 +2232,6 @@ SProcRenderFillRectangles(ClientPtr client)
     swaps(&stuff->color.alpha);
     SwapRestS(stuff);
     return ProcRenderFillRectangles(client);
-}
-
-static int _X_COLD
-SProcRenderCreateCursor(ClientPtr client)
-{
-    REQUEST(xRenderCreateCursorReq);
-    REQUEST_SIZE_MATCH(xRenderCreateCursorReq);
-
-    swapl(&stuff->cid);
-    swapl(&stuff->src);
-    swaps(&stuff->x);
-    swaps(&stuff->y);
-    return ProcRenderCreateCursor(client);
 }
 
 static int _X_COLD
