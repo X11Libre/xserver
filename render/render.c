@@ -96,7 +96,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderCreateSolidFill(ClientPtr pClient);
 static int SProcRenderCreateLinearGradient(ClientPtr pClient);
 static int SProcRenderCreateRadialGradient(ClientPtr pClient);
 static int SProcRenderCreateConicalGradient(ClientPtr pClient);
@@ -175,7 +174,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderSetPictureFilter,
         ProcRenderCreateAnimCursor,
         ProcRenderAddTraps,
-        SProcRenderCreateSolidFill,
+        ProcRenderCreateSolidFill,
         SProcRenderCreateLinearGradient,
         SProcRenderCreateRadialGradient, SProcRenderCreateConicalGradient};
 
@@ -1781,14 +1780,10 @@ SingleRenderAddTraps(ClientPtr client, xRenderAddTrapsReq *stuff)
 }
 
 static int
-SingleRenderCreateSolidFill(ClientPtr client)
+SingleRenderCreateSolidFill(ClientPtr client, xRenderCreateSolidFillReq *stuff)
 {
     PicturePtr pPicture;
     int error = 0;
-
-    REQUEST(xRenderCreateSolidFillReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
 
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
@@ -1932,20 +1927,6 @@ ProcRenderDispatch(ClientPtr client)
         return (*ProcRenderVector[stuff->data]) (client);
     else
         return BadRequest;
-}
-
-static int _X_COLD
-SProcRenderCreateSolidFill(ClientPtr client)
-{
-    REQUEST(xRenderCreateSolidFillReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
-
-    swapl(&stuff->pid);
-    swaps(&stuff->color.alpha);
-    swaps(&stuff->color.red);
-    swaps(&stuff->color.green);
-    swaps(&stuff->color.blue);
-    return ProcRenderCreateSolidFill(client);
 }
 
 static void _X_COLD
@@ -2579,13 +2560,10 @@ PanoramiXRenderAddTraps(ClientPtr client, xRenderAddTrapsReq *stuff)
 }
 
 static int
-PanoramiXRenderCreateSolidFill(ClientPtr client)
+PanoramiXRenderCreateSolidFill(ClientPtr client, xRenderCreateSolidFillReq *stuff)
 {
-    REQUEST(xRenderCreateSolidFillReq);
     PanoramiXRes *newPict;
     int result = Success;
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
 
     if (!(newPict = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
@@ -2596,7 +2574,7 @@ PanoramiXRenderCreateSolidFill(ClientPtr client)
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = SingleRenderCreateSolidFill(client);
+        result = SingleRenderCreateSolidFill(client, stuff);
         if (result != Success)
             break;
     });
@@ -3106,11 +3084,22 @@ ProcRenderAddTraps(ClientPtr client)
 static int
 ProcRenderCreateSolidFill(ClientPtr client)
 {
+    REQUEST(xRenderCreateSolidFillReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
+
+    if (client->swapped) {
+        swapl(&stuff->pid);
+        swaps(&stuff->color.alpha);
+        swaps(&stuff->color.red);
+        swaps(&stuff->color.green);
+        swaps(&stuff->color.blue);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateSolidFill(client)
-                         : SingleRenderCreateSolidFill(client));
+    return (usePanoramiX ? PanoramiXRenderCreateSolidFill(client, stuff)
+                         : SingleRenderCreateSolidFill(client, stuff));
 #else
-    return SingleRenderCreateSolidFill(client);
+    return SingleRenderCreateSolidFill(client, stuff);
 #endif
 }
 
