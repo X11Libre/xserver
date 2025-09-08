@@ -2097,17 +2097,18 @@ PanoramiXRenderFreePicture(ClientPtr client)
 }
 
 static int
-PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
+PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *orig_req)
 {
     PanoramiXRes *src, *msk, *dst;
     int result = Success;
-    xRenderCompositeReq orig;
+    xRenderCompositeReq orig = *orig_req;
 
-    VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
-    VERIFY_XIN_ALPHA(msk, stuff->mask, client, DixReadAccess);
-    VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
+    VERIFY_XIN_PICTURE(src, orig.src, client, DixReadAccess);
+    VERIFY_XIN_ALPHA(msk, orig.mask, client, DixReadAccess);
+    VERIFY_XIN_PICTURE(dst, orig.dst, client, DixWriteAccess);
 
-    orig = *stuff;
+    xRenderCompositeReq sub_req = orig;
+    xRenderCompositeReq *stuff = &sub_req;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
         stuff->src = src->info[walkScreenIdx].id;
