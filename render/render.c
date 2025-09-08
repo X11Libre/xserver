@@ -105,7 +105,6 @@ static int SProcRenderTrapezoids(ClientPtr pClient);
 static int SProcRenderTriangles(ClientPtr pClient);
 static int SProcRenderTriStrip(ClientPtr pClient);
 static int SProcRenderTriFan(ClientPtr pClient);
-static int SProcRenderFreeGlyphs(ClientPtr pClient);
 static int SProcRenderCompositeGlyphs(ClientPtr pClient);
 static int SProcRenderFillRectangles(ClientPtr pClient);
 static int SProcRenderCreateCursor(ClientPtr pClient);
@@ -182,7 +181,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderFreeGlyphSet,
         ProcRenderAddGlyphs,
         _not_implemented,
-        SProcRenderFreeGlyphs,
+        ProcRenderFreeGlyphs,
         SProcRenderCompositeGlyphs,
         SProcRenderCompositeGlyphs,
         SProcRenderCompositeGlyphs,
@@ -1166,12 +1165,18 @@ static int
 ProcRenderFreeGlyphs(ClientPtr client)
 {
     REQUEST(xRenderFreeGlyphsReq);
+    REQUEST_AT_LEAST_SIZE(xRenderFreeGlyphsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->glyphset);
+        SwapRestL(stuff);
+    }
+
     GlyphSetPtr glyphSet;
     int rc, nglyph;
     CARD32 *gids;
     CARD32 glyph;
 
-    REQUEST_AT_LEAST_SIZE(xRenderFreeGlyphsReq);
     rc = dixLookupResourceByType((void **) &glyphSet, stuff->glyphset,
                                  GlyphSetType, client, DixRemoveAccess);
     if (rc != Success) {
@@ -2083,16 +2088,6 @@ SProcRenderTriFan(ClientPtr client)
     swaps(&stuff->ySrc);
     SwapRestL(stuff);
     return ProcRenderTriFan(client);
-}
-
-static int _X_COLD
-SProcRenderFreeGlyphs(ClientPtr client)
-{
-    REQUEST(xRenderFreeGlyphsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderFreeGlyphsReq);
-    swapl(&stuff->glyphset);
-    SwapRestL(stuff);
-    return ProcRenderFreeGlyphs(client);
 }
 
 static int _X_COLD
