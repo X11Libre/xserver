@@ -540,13 +540,13 @@ SingleRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
 }
 
 static int
-SingleRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
+SingleRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff, Picture pictID)
 {
     PicturePtr pPicture;
 
     int len;
 
-    VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
+    VERIFY_PICTURE(pPicture, pictID, client, DixSetAttrAccess);
 
     len = client->req_len - bytes_to_int32(sizeof(xRenderChangePictureReq));
     if (Ones(stuff->mask) != len)
@@ -2163,16 +2163,15 @@ PanoramiXRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
 }
 
 static int
-PanoramiXRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
+PanoramiXRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff, Picture pictID)
 {
     PanoramiXRes *pict;
     int result = Success;
 
-    VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
+    VERIFY_XIN_PICTURE(pict, pictID, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
-        stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderChangePicture(client, stuff);
+        result = SingleRenderChangePicture(client, stuff, pict->info[walkScreenIdx].id);
         if (result != Success)
             break;
     });
@@ -2816,10 +2815,10 @@ ProcRenderChangePicture(ClientPtr client)
     }
 
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderChangePicture(client, stuff)
-                         : SingleRenderChangePicture(client, stuff));
+    return (usePanoramiX ? PanoramiXRenderChangePicture(client, stuff, stuff->picture)
+                         : SingleRenderChangePicture(client, stuff, stuff->picture));
 #else
-    return SingleRenderChangePicture(client, stuff);
+    return SingleRenderChangePicture(client, stuff, stuff->picture);
 #endif
 }
 
