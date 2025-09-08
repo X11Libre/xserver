@@ -97,7 +97,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderFreePicture(ClientPtr pClient);
 static int SProcRenderTrapezoids(ClientPtr pClient);
 static int SProcRenderTriangles(ClientPtr pClient);
 static int SProcRenderTriStrip(ClientPtr pClient);
@@ -160,7 +159,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderCreatePicture,
         ProcRenderChangePicture,
         ProcRenderSetPictureClipRectangles,
-        SProcRenderFreePicture,
+        ProcRenderFreePicture,
         ProcRenderComposite,
         _not_implemented, /* SProcRenderScale */
         SProcRenderTrapezoids,
@@ -588,8 +587,6 @@ SingleRenderFreePicture(ClientPtr client)
     PicturePtr pPicture;
 
     REQUEST(xRenderFreePictureReq);
-
-    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
 
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixDestroyAccess);
     FreeResource(stuff->picture, X11_RESTYPE_NONE);
@@ -1969,15 +1966,6 @@ ProcRenderDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderFreePicture(ClientPtr client)
-{
-    REQUEST(xRenderFreePictureReq);
-    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
-    swapl(&stuff->picture);
-    return ProcRenderFreePicture(client);
-}
-
-static int _X_COLD
 SProcRenderTrapezoids(ClientPtr client)
 {
     REQUEST(xRenderTrapezoidsReq);
@@ -2440,8 +2428,6 @@ PanoramiXRenderFreePicture(ClientPtr client)
     int result = Success;
 
     REQUEST(xRenderFreePictureReq);
-
-    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
 
     client->errorValue = stuff->picture;
 
@@ -3059,6 +3045,12 @@ ProcRenderSetPictureClipRectangles(ClientPtr client)
 static int
 ProcRenderFreePicture(ClientPtr client)
 {
+    REQUEST(xRenderFreePictureReq);
+    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
+
+    if (client->swapped)
+        swapl(&stuff->picture);
+
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderFreePicture(client)
                          : SingleRenderFreePicture(client));
