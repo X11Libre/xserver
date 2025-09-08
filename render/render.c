@@ -58,28 +58,28 @@
 Bool noRenderExtension = FALSE;
 Bool usePanoramiX = FALSE;
 
+static int
+_not_implemented(ClientPtr client)
+{
+    return BadImplementation;
+}
+
 static int ProcRenderQueryVersion(ClientPtr pClient);
 static int ProcRenderQueryPictFormats(ClientPtr pClient);
 static int ProcRenderQueryPictIndexValues(ClientPtr pClient);
-static int ProcRenderQueryDithers(ClientPtr pClient);
 static int ProcRenderCreatePicture(ClientPtr pClient);
 static int ProcRenderChangePicture(ClientPtr pClient);
 static int ProcRenderSetPictureClipRectangles(ClientPtr pClient);
 static int ProcRenderFreePicture(ClientPtr pClient);
 static int ProcRenderComposite(ClientPtr pClient);
-static int ProcRenderScale(ClientPtr pClient);
 static int ProcRenderTrapezoids(ClientPtr pClient);
 static int ProcRenderTriangles(ClientPtr pClient);
 static int ProcRenderTriStrip(ClientPtr pClient);
 static int ProcRenderTriFan(ClientPtr pClient);
-static int ProcRenderColorTrapezoids(ClientPtr pClient);
-static int ProcRenderColorTriangles(ClientPtr pClient);
-static int ProcRenderTransform(ClientPtr pClient);
 static int ProcRenderCreateGlyphSet(ClientPtr pClient);
 static int ProcRenderReferenceGlyphSet(ClientPtr pClient);
 static int ProcRenderFreeGlyphSet(ClientPtr pClient);
 static int ProcRenderAddGlyphs(ClientPtr pClient);
-static int ProcRenderAddGlyphsFromPicture(ClientPtr pClient);
 static int ProcRenderFreeGlyphs(ClientPtr pClient);
 static int ProcRenderCompositeGlyphs(ClientPtr pClient);
 static int ProcRenderFillRectangles(ClientPtr pClient);
@@ -130,25 +130,25 @@ int (*ProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
 ProcRenderQueryVersion,
         ProcRenderQueryPictFormats,
         ProcRenderQueryPictIndexValues,
-        ProcRenderQueryDithers,
+        _not_implemented,
         ProcRenderCreatePicture,
         ProcRenderChangePicture,
         ProcRenderSetPictureClipRectangles,
         ProcRenderFreePicture,
         ProcRenderComposite,
-        ProcRenderScale,
+        _not_implemented,
         ProcRenderTrapezoids,
         ProcRenderTriangles,
         ProcRenderTriStrip,
         ProcRenderTriFan,
-        ProcRenderColorTrapezoids,
-        ProcRenderColorTriangles,
-        ProcRenderTransform,
+        _not_implemented,
+        _not_implemented,
+        _not_implemented,
         ProcRenderCreateGlyphSet,
         ProcRenderReferenceGlyphSet,
         ProcRenderFreeGlyphSet,
         ProcRenderAddGlyphs,
-        ProcRenderAddGlyphsFromPicture,
+        _not_implemented,
         ProcRenderFreeGlyphs,
         ProcRenderCompositeGlyphs,
         ProcRenderCompositeGlyphs,
@@ -168,25 +168,25 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderQueryVersion,
         ProcRenderQueryPictFormats,
         SProcRenderQueryPictIndexValues,
-        ProcRenderQueryDithers,
+        _not_implemented,
         SProcRenderCreatePicture,
         SProcRenderChangePicture,
         SProcRenderSetPictureClipRectangles,
         SProcRenderFreePicture,
         SProcRenderComposite,
-        ProcRenderScale,
+        _not_implemented,
         SProcRenderTrapezoids,
         SProcRenderTriangles,
         SProcRenderTriStrip,
         SProcRenderTriFan,
-        ProcRenderColorTrapezoids,
-        ProcRenderColorTriangles,
-        ProcRenderTransform,
+        _not_implemented,
+        _not_implemented,
+        _not_implemented,
         SProcRenderCreateGlyphSet,
         SProcRenderReferenceGlyphSet,
         SProcRenderFreeGlyphSet,
         SProcRenderAddGlyphs,
-        ProcRenderAddGlyphsFromPicture,
+        _not_implemented,
         SProcRenderFreeGlyphs,
         SProcRenderCompositeGlyphs,
         SProcRenderCompositeGlyphs,
@@ -519,12 +519,6 @@ ProcRenderQueryPictIndexValues(ClientPtr client)
 }
 
 static int
-ProcRenderQueryDithers(ClientPtr client)
-{
-    return BadImplementation;
-}
-
-static int
 SingleRenderCreatePicture(ClientPtr client)
 {
     PicturePtr pPicture;
@@ -670,12 +664,6 @@ SingleRenderComposite(ClientPtr client)
                      stuff->yMask,
                      stuff->xDst, stuff->yDst, stuff->width, stuff->height);
     return Success;
-}
-
-static int
-ProcRenderScale(ClientPtr client)
-{
-    return BadImplementation;
 }
 
 static int
@@ -832,24 +820,6 @@ SingleRenderTriFan(ClientPtr client)
                         stuff->xSrc, stuff->ySrc,
                         npoints, (xPointFixed *) &stuff[1]);
     return Success;
-}
-
-static int
-ProcRenderColorTrapezoids(ClientPtr client)
-{
-    return BadImplementation;
-}
-
-static int
-ProcRenderColorTriangles(ClientPtr client)
-{
-    return BadImplementation;
-}
-
-static int
-ProcRenderTransform(ClientPtr client)
-{
-    return BadImplementation;
 }
 
 static int
@@ -1156,12 +1126,6 @@ ProcRenderAddGlyphs(ClientPtr client)
     if (glyphsBase != glyphsLocal)
         free(glyphsBase);
     return err;
-}
-
-static int
-ProcRenderAddGlyphsFromPicture(ClientPtr client)
-{
-    return BadImplementation;
 }
 
 static int
