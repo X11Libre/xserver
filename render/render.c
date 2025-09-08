@@ -97,7 +97,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderTrapezoids(ClientPtr pClient);
 static int SProcRenderTriangles(ClientPtr pClient);
 static int SProcRenderTriStrip(ClientPtr pClient);
 static int SProcRenderTriFan(ClientPtr pClient);
@@ -162,7 +161,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderFreePicture,
         ProcRenderComposite,
         _not_implemented, /* SProcRenderScale */
-        SProcRenderTrapezoids,
+        ProcRenderTrapezoids,
         SProcRenderTriangles,
         SProcRenderTriStrip,
         SProcRenderTriFan,
@@ -645,15 +644,12 @@ SingleRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
 }
 
 static int
-SingleRenderTrapezoids(ClientPtr client)
+SingleRenderTrapezoids(ClientPtr client, xRenderTrapezoidsReq *stuff)
 {
     int rc, ntraps;
     PicturePtr pSrc, pDst;
     PictFormatPtr pFormat;
 
-    REQUEST(xRenderTrapezoidsReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -1966,21 +1962,6 @@ ProcRenderDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderTrapezoids(ClientPtr client)
-{
-    REQUEST(xRenderTrapezoidsReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    SwapRestL(stuff);
-    return ProcRenderTrapezoids(client);
-}
-
-static int _X_COLD
 SProcRenderTriangles(ClientPtr client)
 {
     REQUEST(xRenderTrianglesReq);
@@ -2573,16 +2554,13 @@ PanoramiXRenderFillRectangles(ClientPtr client)
 }
 
 static int
-PanoramiXRenderTrapezoids(ClientPtr client)
+PanoramiXRenderTrapezoids(ClientPtr client, xRenderTrapezoidsReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
 
-    REQUEST(xRenderTrapezoidsReq);
     char *extra;
     int extra_len;
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
 
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
@@ -2621,7 +2599,7 @@ PanoramiXRenderTrapezoids(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = SingleRenderTrapezoids(client);
+            result = SingleRenderTrapezoids(client, stuff);
 
             if (result != Success)
                 break;
@@ -3090,11 +3068,23 @@ ProcRenderComposite(ClientPtr client)
 static int
 ProcRenderTrapezoids(ClientPtr client)
 {
+    REQUEST(xRenderTrapezoidsReq);
+    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderTrapezoids(client)
-                         : SingleRenderTrapezoids(client));
+    return (usePanoramiX ? PanoramiXRenderTrapezoids(client, stuff)
+                         : SingleRenderTrapezoids(client, stuff));
 #else
-    return SingleRenderTrapezoids(client);
+    return SingleRenderTrapezoids(client, stuff);
 #endif
 }
 
