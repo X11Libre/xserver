@@ -98,8 +98,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderDispatch(ClientPtr pClient);
-
 int (*ProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
 ProcRenderQueryVersion,
         ProcRenderQueryPictFormats,
@@ -138,45 +136,6 @@ ProcRenderQueryVersion,
         ProcRenderCreateLinearGradient,
         ProcRenderCreateRadialGradient, ProcRenderCreateConicalGradient};
 
-int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
-        ProcRenderQueryVersion,
-        ProcRenderQueryPictFormats,
-        ProcRenderQueryPictIndexValues,
-        _not_implemented, /* SProcRenderQueryDithers */
-        ProcRenderCreatePicture,
-        ProcRenderChangePicture,
-        ProcRenderSetPictureClipRectangles,
-        ProcRenderFreePicture,
-        ProcRenderComposite,
-        _not_implemented, /* SProcRenderScale */
-        ProcRenderTrapezoids,
-        ProcRenderTriangles,
-        ProcRenderTriStrip,
-        ProcRenderTriFan,
-        _not_implemented, /* SProcRenderColorTrapezoids */
-        _not_implemented, /* SProcRenderColorTriangles */
-        _not_implemented, /* SProcRenderTransform */
-        ProcRenderCreateGlyphSet,
-        ProcRenderReferenceGlyphSet,
-        ProcRenderFreeGlyphSet,
-        ProcRenderAddGlyphs,
-        _not_implemented, /* SProcRenderAddGlyphsFromPicture */
-        ProcRenderFreeGlyphs,
-        ProcRenderCompositeGlyphs,
-        ProcRenderCompositeGlyphs,
-        ProcRenderCompositeGlyphs,
-        ProcRenderFillRectangles,
-        ProcRenderCreateCursor,
-        ProcRenderSetPictureTransform,
-        ProcRenderQueryFilters,
-        ProcRenderSetPictureFilter,
-        ProcRenderCreateAnimCursor,
-        ProcRenderAddTraps,
-        ProcRenderCreateSolidFill,
-        ProcRenderCreateLinearGradient,
-        ProcRenderCreateRadialGradient,
-        ProcRenderCreateConicalGradient};
-
 int RenderErrBase;
 static DevPrivateKeyRec RenderClientPrivateKeyRec;
 
@@ -207,7 +166,7 @@ RenderExtensionInit(void)
         return;
 
     extEntry = AddExtension(RENDER_NAME, 0, RenderNumberErrors,
-                            ProcRenderDispatch, SProcRenderDispatch,
+                            ProcRenderDispatch, ProcRenderDispatch,
                             NULL, StandardMinorOpcode);
     if (!extEntry)
         return;
@@ -1931,17 +1890,6 @@ swapStops(void *stuff, int num)
         swaps(colors);
         ++colors;
     }
-}
-
-static int _X_COLD
-SProcRenderDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    if (stuff->data < RenderNumberRequests)
-        return (*SProcRenderVector[stuff->data]) (client);
-    else
-        return BadRequest;
 }
 
 #ifdef XINERAMA
