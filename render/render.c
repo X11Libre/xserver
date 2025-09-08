@@ -98,7 +98,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderCreateLinearGradient(ClientPtr pClient);
 static int SProcRenderCreateRadialGradient(ClientPtr pClient);
 static int SProcRenderCreateConicalGradient(ClientPtr pClient);
 
@@ -177,7 +176,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderCreateAnimCursor,
         ProcRenderAddTraps,
         ProcRenderCreateSolidFill,
-        SProcRenderCreateLinearGradient,
+        ProcRenderCreateLinearGradient,
         SProcRenderCreateRadialGradient, SProcRenderCreateConicalGradient};
 
 int RenderErrBase;
@@ -1798,17 +1797,13 @@ SingleRenderCreateSolidFill(ClientPtr client, xRenderCreateSolidFillReq *stuff)
 }
 
 static int
-SingleRenderCreateLinearGradient(ClientPtr client)
+SingleRenderCreateLinearGradient(ClientPtr client, xRenderCreateLinearGradientReq *stuff)
 {
     PicturePtr pPicture;
     int len;
     int error = 0;
     xFixed *stops;
     xRenderColor *colors;
-
-    REQUEST(xRenderCreateLinearGradientReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
 
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
@@ -1943,32 +1938,6 @@ swapStops(void *stuff, int num)
         swaps(colors);
         ++colors;
     }
-}
-
-static int _X_COLD
-SProcRenderCreateLinearGradient(ClientPtr client)
-{
-    int len;
-
-    REQUEST(xRenderCreateLinearGradientReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
-
-    swapl(&stuff->pid);
-    swapl(&stuff->p1.x);
-    swapl(&stuff->p1.y);
-    swapl(&stuff->p2.x);
-    swapl(&stuff->p2.y);
-    swapl(&stuff->nStops);
-
-    len = (client->req_len << 2) - sizeof(xRenderCreateLinearGradientReq);
-    if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
-        return BadLength;
-    if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
-        return BadLength;
-
-    swapStops(stuff + 1, stuff->nStops);
-
-    return ProcRenderCreateLinearGradient(client);
 }
 
 static int _X_COLD
@@ -2585,13 +2554,11 @@ PanoramiXRenderCreateSolidFill(ClientPtr client, xRenderCreateSolidFillReq *stuf
 }
 
 static int
-PanoramiXRenderCreateLinearGradient(ClientPtr client)
+PanoramiXRenderCreateLinearGradient(ClientPtr client,
+                                    xRenderCreateLinearGradientReq *stuff)
 {
-    REQUEST(xRenderCreateLinearGradientReq);
     PanoramiXRes *newPict;
     int result = Success;
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
 
     if (!(newPict = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
@@ -2602,7 +2569,7 @@ PanoramiXRenderCreateLinearGradient(ClientPtr client)
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = SingleRenderCreateLinearGradient(client);
+        result = SingleRenderCreateLinearGradient(client, stuff);
         if (result != Success)
             break;
     });
@@ -3096,11 +3063,31 @@ ProcRenderCreateSolidFill(ClientPtr client)
 static int
 ProcRenderCreateLinearGradient(ClientPtr client)
 {
+    REQUEST(xRenderCreateLinearGradientReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
+
+    if (client->swapped) {
+        swapl(&stuff->pid);
+        swapl(&stuff->p1.x);
+        swapl(&stuff->p1.y);
+        swapl(&stuff->p2.x);
+        swapl(&stuff->p2.y);
+        swapl(&stuff->nStops);
+
+        int len = (client->req_len << 2) - sizeof(xRenderCreateLinearGradientReq);
+        if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
+            return BadLength;
+        if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
+            return BadLength;
+
+        swapStops(stuff + 1, stuff->nStops);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateLinearGradient(client)
-                         : SingleRenderCreateLinearGradient(client));
+    return (usePanoramiX ? PanoramiXRenderCreateLinearGradient(client, stuff)
+                         : SingleRenderCreateLinearGradient(client, stuff));
 #else
-    return SingleRenderCreateLinearGradient(client);
+    return SingleRenderCreateLinearGradient(client, stuff);
 #endif
 }
 
