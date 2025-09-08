@@ -96,7 +96,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderSetPictureFilter(ClientPtr pClient);
 static int SProcRenderAddTraps(ClientPtr pClient);
 static int SProcRenderCreateSolidFill(ClientPtr pClient);
 static int SProcRenderCreateLinearGradient(ClientPtr pClient);
@@ -174,7 +173,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderCreateCursor,
         ProcRenderSetPictureTransform,
         ProcRenderQueryFilters,
-        SProcRenderSetPictureFilter,
+        ProcRenderSetPictureFilter,
         ProcRenderCreateAnimCursor,
         SProcRenderAddTraps,
         SProcRenderCreateSolidFill,
@@ -1691,16 +1690,14 @@ ProcRenderQueryFilters(ClientPtr client)
 }
 
 static int
-SingleRenderSetPictureFilter(ClientPtr client)
+SingleRenderSetPictureFilter(ClientPtr client, xRenderSetPictureFilterReq *stuff)
 {
-    REQUEST(xRenderSetPictureFilterReq);
     PicturePtr pPicture;
     int result;
     xFixed *params;
     int nparams;
     char *name;
 
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
     name = (char *) (stuff + 1);
     params = (xFixed *) (name + pad_to_int32(stuff->nbytes));
@@ -1939,17 +1936,6 @@ ProcRenderDispatch(ClientPtr client)
         return (*ProcRenderVector[stuff->data]) (client);
     else
         return BadRequest;
-}
-
-static int _X_COLD
-SProcRenderSetPictureFilter(ClientPtr client)
-{
-    REQUEST(xRenderSetPictureFilterReq);
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
-
-    swapl(&stuff->picture);
-    swaps(&stuff->nbytes);
-    return ProcRenderSetPictureFilter(client);
 }
 
 static int _X_COLD
@@ -2201,19 +2187,16 @@ PanoramiXRenderSetPictureTransform(ClientPtr client, xRenderSetPictureTransformR
 }
 
 static int
-PanoramiXRenderSetPictureFilter(ClientPtr client)
+PanoramiXRenderSetPictureFilter(ClientPtr client, xRenderSetPictureFilterReq *stuff)
 {
-    REQUEST(xRenderSetPictureFilterReq);
     int result = Success;
     PanoramiXRes *pict;
-
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
 
     VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderSetPictureFilter(client);
+        result = SingleRenderSetPictureFilter(client, stuff);
         if (result != Success)
             break;
     });
@@ -3103,11 +3086,19 @@ ProcRenderSetPictureTransform(ClientPtr client)
 static int
 ProcRenderSetPictureFilter(ClientPtr client)
 {
+    REQUEST(xRenderSetPictureFilterReq);
+    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
+
+    if (client->swapped) {
+        swapl(&stuff->picture);
+        swaps(&stuff->nbytes);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderSetPictureFilter(client)
-                         : SingleRenderSetPictureFilter(client));
+    return (usePanoramiX ? PanoramiXRenderSetPictureFilter(client, stuff)
+                         : SingleRenderSetPictureFilter(client, stuff));
 #else
-    return SingleRenderSetPictureFilter(client);
+    return SingleRenderSetPictureFilter(client, stuff);
 #endif
 }
 
