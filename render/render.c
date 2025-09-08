@@ -98,7 +98,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderSetPictureTransform(ClientPtr pClient);
 static int SProcRenderSetPictureFilter(ClientPtr pClient);
 static int SProcRenderAddTraps(ClientPtr pClient);
 static int SProcRenderCreateSolidFill(ClientPtr pClient);
@@ -175,7 +174,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderCompositeGlyphs,
         ProcRenderFillRectangles,
         ProcRenderCreateCursor,
-        SProcRenderSetPictureTransform,
+        ProcRenderSetPictureTransform,
         ProcRenderQueryFilters,
         SProcRenderSetPictureFilter,
         ProcRenderCreateAnimCursor,
@@ -1579,12 +1578,11 @@ ProcRenderCreateCursor(ClientPtr client)
 }
 
 static int
-SingleRenderSetPictureTransform(ClientPtr client)
+SingleRenderSetPictureTransform(ClientPtr client,
+                                xRenderSetPictureTransformReq *stuff)
 {
-    REQUEST(xRenderSetPictureTransformReq);
     PicturePtr pPicture;
 
-    REQUEST_SIZE_MATCH(xRenderSetPictureTransformReq);
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
     return SetPictureTransform(pPicture, (PictTransform *) &stuff->transform);
 }
@@ -1941,25 +1939,6 @@ ProcRenderDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderSetPictureTransform(ClientPtr client)
-{
-    REQUEST(xRenderSetPictureTransformReq);
-    REQUEST_SIZE_MATCH(xRenderSetPictureTransformReq);
-
-    swapl(&stuff->picture);
-    swapl(&stuff->transform.matrix11);
-    swapl(&stuff->transform.matrix12);
-    swapl(&stuff->transform.matrix13);
-    swapl(&stuff->transform.matrix21);
-    swapl(&stuff->transform.matrix22);
-    swapl(&stuff->transform.matrix23);
-    swapl(&stuff->transform.matrix31);
-    swapl(&stuff->transform.matrix32);
-    swapl(&stuff->transform.matrix33);
-    return ProcRenderSetPictureTransform(client);
-}
-
-static int _X_COLD
 SProcRenderSetPictureFilter(ClientPtr client)
 {
     REQUEST(xRenderSetPictureFilterReq);
@@ -2199,19 +2178,16 @@ PanoramiXRenderSetPictureClipRectangles(ClientPtr client,
 }
 
 static int
-PanoramiXRenderSetPictureTransform(ClientPtr client)
+PanoramiXRenderSetPictureTransform(ClientPtr client, xRenderSetPictureTransformReq *stuff)
 {
-    REQUEST(xRenderSetPictureTransformReq);
     int result = Success;
     PanoramiXRes *pict;
-
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureTransformReq);
 
     VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderSetPictureTransform(client);
+        result = SingleRenderSetPictureTransform(client, stuff);
         if (result != Success)
             break;
     });
@@ -3090,11 +3066,27 @@ ProcRenderFillRectangles(ClientPtr client)
 static int
 ProcRenderSetPictureTransform(ClientPtr client)
 {
+    REQUEST(xRenderSetPictureTransformReq);
+    REQUEST_SIZE_MATCH(xRenderSetPictureTransformReq);
+
+    if (client->swapped) {
+        swapl(&stuff->picture);
+        swapl(&stuff->transform.matrix11);
+        swapl(&stuff->transform.matrix12);
+        swapl(&stuff->transform.matrix13);
+        swapl(&stuff->transform.matrix21);
+        swapl(&stuff->transform.matrix22);
+        swapl(&stuff->transform.matrix23);
+        swapl(&stuff->transform.matrix31);
+        swapl(&stuff->transform.matrix32);
+        swapl(&stuff->transform.matrix33);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderSetPictureTransform(client)
-                         : SingleRenderSetPictureTransform(client));
+    return (usePanoramiX ? PanoramiXRenderSetPictureTransform(client, stuff)
+                         : SingleRenderSetPictureTransform(client, stuff));
 #else
-    return SingleRenderSetPictureTransform(client);
+    return SingleRenderSetPictureTransform(client, stuff);
 #endif
 }
 
