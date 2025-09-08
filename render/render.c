@@ -60,12 +60,6 @@
 Bool noRenderExtension = FALSE;
 Bool usePanoramiX = FALSE;
 
-static int
-_not_implemented(ClientPtr client)
-{
-    return BadImplementation;
-}
-
 static int ProcRenderQueryVersion(ClientPtr pClient);
 static int ProcRenderQueryPictFormats(ClientPtr pClient);
 static int ProcRenderQueryPictIndexValues(ClientPtr pClient);
@@ -97,44 +91,6 @@ static int ProcRenderCreateRadialGradient(ClientPtr pClient);
 static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
-
-int (*ProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
-ProcRenderQueryVersion,
-        ProcRenderQueryPictFormats,
-        ProcRenderQueryPictIndexValues,
-        _not_implemented, /* ProcRenderQueryDithers */
-        ProcRenderCreatePicture,
-        ProcRenderChangePicture,
-        ProcRenderSetPictureClipRectangles,
-        ProcRenderFreePicture,
-        ProcRenderComposite,
-        _not_implemented, /* ProcRenderScale */
-        ProcRenderTrapezoids,
-        ProcRenderTriangles,
-        ProcRenderTriStrip,
-        ProcRenderTriFan,
-        _not_implemented, /* ProcRenderColorTrapezoids */
-        _not_implemented, /* ProcRenderColorTriangles */
-        _not_implemented, /* ProcRenderTransform */
-        ProcRenderCreateGlyphSet,
-        ProcRenderReferenceGlyphSet,
-        ProcRenderFreeGlyphSet,
-        ProcRenderAddGlyphs,
-        _not_implemented, /* ProcRenderAddGlyphsFromPicture */
-        ProcRenderFreeGlyphs,
-        ProcRenderCompositeGlyphs,
-        ProcRenderCompositeGlyphs,
-        ProcRenderCompositeGlyphs,
-        ProcRenderFillRectangles,
-        ProcRenderCreateCursor,
-        ProcRenderSetPictureTransform,
-        ProcRenderQueryFilters,
-        ProcRenderSetPictureFilter,
-        ProcRenderCreateAnimCursor,
-        ProcRenderAddTraps,
-        ProcRenderCreateSolidFill,
-        ProcRenderCreateLinearGradient,
-        ProcRenderCreateRadialGradient, ProcRenderCreateConicalGradient};
 
 int RenderErrBase;
 static DevPrivateKeyRec RenderClientPrivateKeyRec;
@@ -1867,10 +1823,53 @@ ProcRenderDispatch(ClientPtr client)
 {
     REQUEST(xReq);
 
-    if (stuff->data < RenderNumberRequests)
-        return (*ProcRenderVector[stuff->data]) (client);
-    else
-        return BadRequest;
+    switch (stuff->data) {
+        case X_RenderQueryVersion:             return ProcRenderQueryVersion(client);
+        case X_RenderQueryPictFormats:         return ProcRenderQueryPictFormats(client);
+        /* 0.7 */
+        case X_RenderQueryPictIndexValues:     return ProcRenderQueryPictIndexValues(client);
+        case X_RenderQueryDithers:             return BadImplementation;
+        case X_RenderCreatePicture:            return ProcRenderCreatePicture(client);
+        case X_RenderChangePicture:            return ProcRenderChangePicture(client);
+        case X_RenderSetPictureClipRectangles: return ProcRenderSetPictureClipRectangles(client);
+        case X_RenderFreePicture:              return ProcRenderFreePicture(client);
+        case X_RenderComposite:                return ProcRenderComposite(client);
+        case X_RenderScale:                    return BadImplementation;
+        case X_RenderTrapezoids:               return ProcRenderTrapezoids(client);
+        case X_RenderTriangles:                return ProcRenderTriangles(client);
+        case X_RenderTriStrip:                 return ProcRenderTriStrip(client);
+        case X_RenderTriFan:                   return ProcRenderTriFan(client);
+        case X_RenderColorTrapezoids:          return BadImplementation;
+        case X_RenderColorTriangles:           return BadImplementation;
+/*      case X_RenderTransform:                return BadImplementation;            --> doesn't actually exist */
+        case X_RenderCreateGlyphSet:           return ProcRenderCreateGlyphSet(client);
+        case X_RenderReferenceGlyphSet:        return ProcRenderReferenceGlyphSet(client);
+        case X_RenderFreeGlyphSet:             return ProcRenderFreeGlyphSet(client);
+        case X_RenderAddGlyphs:                return ProcRenderAddGlyphs(client);
+        case X_RenderAddGlyphsFromPicture:     return BadImplementation;
+        case X_RenderFreeGlyphs:               return ProcRenderFreeGlyphs(client);
+        case X_RenderCompositeGlyphs8:         return ProcRenderCompositeGlyphs(client);
+        case X_RenderCompositeGlyphs16:        return ProcRenderCompositeGlyphs(client);
+        case X_RenderCompositeGlyphs32:        return ProcRenderCompositeGlyphs(client);
+        case X_RenderFillRectangles:           return ProcRenderFillRectangles(client);
+        /* 0.5 */
+        case X_RenderCreateCursor:             return ProcRenderCreateCursor(client);
+        /* 0.6 */
+        case X_RenderSetPictureTransform:      return ProcRenderSetPictureTransform(client);
+        case X_RenderQueryFilters:             return ProcRenderQueryFilters(client);
+        case X_RenderSetPictureFilter:         return ProcRenderSetPictureFilter(client);
+        /* 0.8 */
+        case X_RenderCreateAnimCursor:         return ProcRenderCreateAnimCursor(client);
+        /* 0.9 */
+        case X_RenderAddTraps:                 return ProcRenderAddTraps(client);
+        /* 0.10 */
+        case X_RenderCreateSolidFill:          return ProcRenderCreateSolidFill(client);
+        case X_RenderCreateLinearGradient:     return ProcRenderCreateLinearGradient(client);
+        case X_RenderCreateRadialGradient:     return ProcRenderCreateRadialGradient(client);
+        case X_RenderCreateConicalGradient:    return ProcRenderCreateConicalGradient(client);
+    }
+
+    return BadRequest;
 }
 
 static void _X_COLD
@@ -1907,8 +1906,6 @@ swapStops(void *stuff, int num)
 	VERIFY_XIN_PICTURE(pPicture, pid, client, mode); \
     } \
 } \
-
-int (*PanoramiXSaveRenderVector[RenderNumberRequests]) (ClientPtr);
 
 static int
 PanoramiXRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
