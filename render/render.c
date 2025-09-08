@@ -98,7 +98,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderTriFan(ClientPtr pClient);
 static int SProcRenderCompositeGlyphs(ClientPtr pClient);
 static int SProcRenderFillRectangles(ClientPtr pClient);
 static int SProcRenderSetPictureTransform(ClientPtr pClient);
@@ -163,7 +162,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderTrapezoids,
         ProcRenderTriangles,
         ProcRenderTriStrip,
-        SProcRenderTriFan,
+        ProcRenderTriFan,
         _not_implemented, /* SProcRenderColorTrapezoids */
         _not_implemented, /* SProcRenderColorTriangles */
         _not_implemented, /* SProcRenderTransform */
@@ -751,15 +750,12 @@ SingleRenderTriStrip(ClientPtr client, xRenderTriStripReq *stuff)
 }
 
 static int
-SingleRenderTriFan(ClientPtr client)
+SingleRenderTriFan(ClientPtr client, xRenderTriFanReq *stuff)
 {
     int rc, npoints;
     PicturePtr pSrc, pDst;
     PictFormatPtr pFormat;
 
-    REQUEST(xRenderTrianglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -1954,21 +1950,6 @@ ProcRenderDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderTriFan(ClientPtr client)
-{
-    REQUEST(xRenderTriFanReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTriFanReq);
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    SwapRestL(stuff);
-    return ProcRenderTriFan(client);
-}
-
-static int _X_COLD
 SProcRenderCompositeGlyphs(ClientPtr client)
 {
     xGlyphElt *elt;
@@ -2678,16 +2659,12 @@ PanoramiXRenderTriStrip(ClientPtr client, xRenderTriStripReq *stuff)
 }
 
 static int
-PanoramiXRenderTriFan(ClientPtr client)
+PanoramiXRenderTriFan(ClientPtr client, xRenderTriFanReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
-
-    REQUEST(xRenderTriFanReq);
     char *extra;
     int extra_len;
-
-    REQUEST_AT_LEAST_SIZE(xRenderTriFanReq);
 
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
@@ -2718,7 +2695,7 @@ PanoramiXRenderTriFan(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = SingleRenderTriFan(client);
+            result = SingleRenderTriFan(client, stuff);
 
             if (result != Success)
                 break;
@@ -3093,11 +3070,23 @@ ProcRenderTriStrip(ClientPtr client)
 static int
 ProcRenderTriFan(ClientPtr client)
 {
+    REQUEST(xRenderTriFanReq);
+    REQUEST_AT_LEAST_SIZE(xRenderTriFanReq);
+
+    if (client->swapped) {
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderTriFan(client)
-                         : SingleRenderTriFan(client));
+    return (usePanoramiX ? PanoramiXRenderTriFan(client, stuff)
+                         : SingleRenderTriFan(client, stuff));
 #else
-    return SingleRenderTriFan(client);
+    return SingleRenderTriFan(client, stuff);
 #endif
 }
 
