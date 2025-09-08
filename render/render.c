@@ -562,12 +562,13 @@ SingleRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
 
 static int
 SingleRenderSetPictureClipRectangles(ClientPtr client,
-                                     xRenderSetPictureClipRectanglesReq *stuff)
+                                     xRenderSetPictureClipRectanglesReq *stuff,
+                                     Picture pictID)
 {
     PicturePtr pPicture;
     int nr;
 
-    VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
+    VERIFY_PICTURE(pPicture, pictID, client, DixSetAttrAccess);
     if (!pPicture->pDrawable)
         return RenderErrBase + BadPicture;
 
@@ -2327,16 +2328,17 @@ PanoramiXRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
 
 static int
 PanoramiXRenderSetPictureClipRectangles(ClientPtr client,
-                                        xRenderSetPictureClipRectanglesReq *stuff)
+                                        xRenderSetPictureClipRectanglesReq *stuff,
+                                        Picture pictID)
 {
     int result = Success;
     PanoramiXRes *pict;
 
-    VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
+    VERIFY_XIN_PICTURE(pict, pictID, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderSetPictureClipRectangles(client, stuff);
+        result = SingleRenderSetPictureClipRectangles(client, stuff, pict->info[walkScreenIdx].id);
         if (result != Success)
             break;
     });
@@ -2992,10 +2994,10 @@ ProcRenderSetPictureClipRectangles(ClientPtr client)
     }
 
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderSetPictureClipRectangles(client, stuff)
-                         : SingleRenderSetPictureClipRectangles(client, stuff));
+    return (usePanoramiX ? PanoramiXRenderSetPictureClipRectangles(client, stuff, stuff->picture)
+                         : SingleRenderSetPictureClipRectangles(client, stuff, stuff->picture));
 #else
-    return SingleRenderSetPictureClipRectangles(client, stuff);
+    return SingleRenderSetPictureClipRectangles(client, stuff, stuff->picture);
 #endif
 }
 
