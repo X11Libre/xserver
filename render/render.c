@@ -103,7 +103,6 @@ static int SProcRenderTrapezoids(ClientPtr pClient);
 static int SProcRenderTriangles(ClientPtr pClient);
 static int SProcRenderTriStrip(ClientPtr pClient);
 static int SProcRenderTriFan(ClientPtr pClient);
-static int SProcRenderAddGlyphs(ClientPtr pClient);
 static int SProcRenderFreeGlyphs(ClientPtr pClient);
 static int SProcRenderCompositeGlyphs(ClientPtr pClient);
 static int SProcRenderFillRectangles(ClientPtr pClient);
@@ -176,7 +175,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderCreateGlyphSet,
         ProcRenderReferenceGlyphSet,
         ProcRenderFreeGlyphSet,
-        SProcRenderAddGlyphs,
+        ProcRenderAddGlyphs,
         _not_implemented, /* SProcRenderAddGlyphsFromPicture */
         SProcRenderFreeGlyphs,
         SProcRenderCompositeGlyphs,
@@ -927,9 +926,34 @@ typedef struct _GlyphNew {
 static int
 ProcRenderAddGlyphs(ClientPtr client)
 {
+    REQUEST(xRenderAddGlyphsReq);
+    REQUEST_AT_LEAST_SIZE(xRenderAddGlyphsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->glyphset);
+        swapl(&stuff->nglyphs);
+        if (stuff->nglyphs & 0xe0000000)
+            return BadLength;
+        void *end = (CARD8 *) stuff + (client->req_len << 2);
+        CARD32 *gids = (CARD32 *) (stuff + 1);
+        xGlyphInfo *gi = (xGlyphInfo *) (gids + stuff->nglyphs);
+        if ((char *) end - (char *) (gids + stuff->nglyphs) < 0)
+            return BadLength;
+        if ((char *) end - (char *) (gi + stuff->nglyphs) < 0)
+            return BadLength;
+        for (int i = 0; i < stuff->nglyphs; i++) {
+            swapl(&gids[i]);
+            swaps(&gi[i].width);
+            swaps(&gi[i].height);
+            swaps(&gi[i].x);
+            swaps(&gi[i].y);
+            swaps(&gi[i].xOff);
+            swaps(&gi[i].yOff);
+        }
+    }
+
     GlyphSetPtr glyphSet;
 
-    REQUEST(xRenderAddGlyphsReq);
     GlyphNewRec glyphsLocal[NLOCALGLYPH];
     GlyphNewPtr glyphsBase, glyphs, glyph_new;
     int remain, nglyphs;
@@ -2020,39 +2044,6 @@ SProcRenderTriFan(ClientPtr client)
     swaps(&stuff->ySrc);
     SwapRestL(stuff);
     return ProcRenderTriFan(client);
-}
-
-static int _X_COLD
-SProcRenderAddGlyphs(ClientPtr client)
-{
-    register int i;
-    CARD32 *gids;
-    void *end;
-    xGlyphInfo *gi;
-
-    REQUEST(xRenderAddGlyphsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderAddGlyphsReq);
-    swapl(&stuff->glyphset);
-    swapl(&stuff->nglyphs);
-    if (stuff->nglyphs & 0xe0000000)
-        return BadLength;
-    end = (CARD8 *) stuff + (client->req_len << 2);
-    gids = (CARD32 *) (stuff + 1);
-    gi = (xGlyphInfo *) (gids + stuff->nglyphs);
-    if ((char *) end - (char *) (gids + stuff->nglyphs) < 0)
-        return BadLength;
-    if ((char *) end - (char *) (gi + stuff->nglyphs) < 0)
-        return BadLength;
-    for (i = 0; i < stuff->nglyphs; i++) {
-        swapl(&gids[i]);
-        swaps(&gi[i].width);
-        swaps(&gi[i].height);
-        swaps(&gi[i].x);
-        swaps(&gi[i].y);
-        swaps(&gi[i].xOff);
-        swaps(&gi[i].yOff);
-    }
-    return ProcRenderAddGlyphs(client);
 }
 
 static int _X_COLD
