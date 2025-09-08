@@ -97,7 +97,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 static int ProcRenderDispatch(ClientPtr pClient);
 
 static int SProcRenderFreePicture(ClientPtr pClient);
-static int SProcRenderComposite(ClientPtr pClient);
 static int SProcRenderTrapezoids(ClientPtr pClient);
 static int SProcRenderTriangles(ClientPtr pClient);
 static int SProcRenderTriStrip(ClientPtr pClient);
@@ -161,7 +160,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderChangePicture,
         ProcRenderSetPictureClipRectangles,
         SProcRenderFreePicture,
-        SProcRenderComposite,
+        ProcRenderComposite,
         _not_implemented,
         SProcRenderTrapezoids,
         SProcRenderTriangles,
@@ -612,13 +611,10 @@ PictOpValid(CARD8 op)
 }
 
 static int
-SingleRenderComposite(ClientPtr client)
+SingleRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
 {
     PicturePtr pSrc, pMask, pDst;
 
-    REQUEST(xRenderCompositeReq);
-
-    REQUEST_SIZE_MATCH(xRenderCompositeReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -1982,25 +1978,6 @@ SProcRenderFreePicture(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderComposite(ClientPtr client)
-{
-    REQUEST(xRenderCompositeReq);
-    REQUEST_SIZE_MATCH(xRenderCompositeReq);
-    swapl(&stuff->src);
-    swapl(&stuff->mask);
-    swapl(&stuff->dst);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    swaps(&stuff->xMask);
-    swaps(&stuff->yMask);
-    swaps(&stuff->xDst);
-    swaps(&stuff->yDst);
-    swaps(&stuff->width);
-    swaps(&stuff->height);
-    return ProcRenderComposite(client);
-}
-
-static int _X_COLD
 SProcRenderTrapezoids(ClientPtr client)
 {
     REQUEST(xRenderTrapezoidsReq);
@@ -2485,15 +2462,11 @@ PanoramiXRenderFreePicture(ClientPtr client)
 }
 
 static int
-PanoramiXRenderComposite(ClientPtr client)
+PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
 {
     PanoramiXRes *src, *msk, *dst;
     int result = Success;
     xRenderCompositeReq orig;
-
-    REQUEST(xRenderCompositeReq);
-
-    REQUEST_SIZE_MATCH(xRenderCompositeReq);
 
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_ALPHA(msk, stuff->mask, client, DixReadAccess);
@@ -2519,7 +2492,7 @@ PanoramiXRenderComposite(ClientPtr client)
                 stuff->yMask = orig.yMask - walkScreen->y;
             }
         }
-        result = SingleRenderComposite(client);
+        result = SingleRenderComposite(client, stuff);
         if (result != Success)
             break;
     });
@@ -3098,11 +3071,28 @@ ProcRenderFreePicture(ClientPtr client)
 static int
 ProcRenderComposite(ClientPtr client)
 {
+    REQUEST(xRenderCompositeReq);
+    REQUEST_SIZE_MATCH(xRenderCompositeReq);
+
+    if (client->swapped) {
+        swapl(&stuff->src);
+        swapl(&stuff->mask);
+        swapl(&stuff->dst);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+        swaps(&stuff->xMask);
+        swaps(&stuff->yMask);
+        swaps(&stuff->xDst);
+        swaps(&stuff->yDst);
+        swaps(&stuff->width);
+        swaps(&stuff->height);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderComposite(client)
-                         : SingleRenderComposite(client));
+    return (usePanoramiX ? PanoramiXRenderComposite(client, stuff)
+                         : SingleRenderComposite(client, stuff));
 #else
-    return SingleRenderComposite(client);
+    return SingleRenderComposite(client, stuff);
 #endif
 }
 
