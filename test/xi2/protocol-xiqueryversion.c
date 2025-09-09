@@ -204,7 +204,6 @@ test_XIQueryVersion_multiple(void)
 {
     xXIQueryVersionReq request;
     ClientRec client;
-    XIClientPtr pXIClient;
     int rc;
 
     init_simple();
@@ -261,7 +260,7 @@ test_XIQueryVersion_multiple(void)
     assert(rc == Success);
 
     /* real version is changed, too! */
-    pXIClient = dixLookupPrivate(&client.devPrivates, XIClientPrivateKey);
+    XIClientPtr pXIClient = XIClientPriv(&client);
     assert(pXIClient->minor_version == 3);
 
     /* client tries to set lower version, no change */
@@ -286,7 +285,7 @@ test_XIQueryVersion_multiple(void)
     assert(rc == Success);
 
     /* but real client version must not be lowered */
-    pXIClient = dixLookupPrivate(&client.devPrivates, XIClientPrivateKey);
+    pXIClient = XIClientPriv(&client);
     assert(pXIClient->minor_version == 3);
 
     request.major_version = 2;

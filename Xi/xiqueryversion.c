@@ -55,7 +55,6 @@ extern XExtensionVersion XIVersion;     /* defined in getvers.c */
 int
 ProcXIQueryVersion(ClientPtr client)
 {
-    XIClientPtr pXIClient;
     int major, minor;
 
     REQUEST(xXIQueryVersionReq);
@@ -67,7 +66,7 @@ ProcXIQueryVersion(ClientPtr client)
         return BadValue;
     }
 
-    pXIClient = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr pXIClient = XIClientPriv(client);
 
     if (version_compare(XIVersion.major_version, XIVersion.minor_version,
                 stuff->major_version, stuff->minor_version) > 0) {

@@ -75,7 +75,7 @@ ProcXIAllowEvents(ClientPtr client)
     Window grabWindow = 0;
     uint32_t touchId = 0;
 
-    XIClientPtr xi_client = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr xi_client = XIClientPriv(client);
     if (!xi_client)
         return BadImplementation;
 

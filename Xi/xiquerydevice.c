@@ -465,7 +465,7 @@ static Bool ShouldListGestureInfo(ClientPtr client)
      * and then a completely separate module within the client uses broken libxcb to call
      * XIQueryDevice.
      */
-    XIClientPtr pXIClient = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr pXIClient = XIClientPriv(client);
     if (pXIClient->major_version) {
         return version_compare(pXIClient->major_version, pXIClient->minor_version, 2, 4) >= 0;
     }

@@ -79,7 +79,6 @@ ProcXIQueryPointer(ClientPtr client)
     WindowPtr pWin, t;
     SpritePtr pSprite;
     XkbStatePtr state;
-    XIClientPtr xi_client;
     Bool have_xi22 = FALSE;
 
     REQUEST(xXIQueryPointerReq);
@@ -89,7 +88,8 @@ ProcXIQueryPointer(ClientPtr client)
      * do not know about touches, so we must report emulated button presses. 2.2
      * and later clients are aware of touches, so we don't include emulated
      * button presses in the reply. */
-    xi_client = dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr xi_client = XIClientPriv(client);
+
     if (version_compare(xi_client->major_version,
                         xi_client->minor_version, 2, 2) >= 0)
         have_xi22 = TRUE;

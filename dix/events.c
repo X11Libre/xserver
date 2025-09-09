@@ -2429,15 +2429,13 @@ DeliverEventsToWindow(DeviceIntPtr pDev, WindowPtr pWin, xEvent
 static BOOL
 FilterRawEvents(const ClientPtr client, const GrabPtr grab, WindowPtr root)
 {
-    XIClientPtr client_xi_version;
     int cmp;
 
     /* device not grabbed -> don't filter */
     if (!grab)
         return FALSE;
 
-    client_xi_version =
-        dixLookupPrivate(&client->devPrivates, XIClientPrivateKey);
+    XIClientPtr client_xi_version = XIClientPriv(client);
 
     cmp = version_compare(client_xi_version->major_version,
                           client_xi_version->minor_version, 2, 0);
