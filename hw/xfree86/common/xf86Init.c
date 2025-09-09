@@ -284,7 +284,7 @@ xf86EnsureRANDR(ScreenPtr pScreen)
  *      collecting the pixmap formats.
  */
 void
-InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
+InitOutput(ScreenInfo *unused, int argc, char **argv)
 {
     int i, j, k, scr_index;
     const char **modulelist;
@@ -592,16 +592,16 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
         AddCallback(&RootWindowFinalizeCallback, AddSeatId, SeatId);
 
     /*
-     * Use the previously collected parts to setup pScreenInfo
+     * Use the previously collected parts to setup screenInfo
      */
 
-    pScreenInfo->imageByteOrder = xf86Screens[0]->imageByteOrder;
-    pScreenInfo->bitmapScanlinePad = xf86Screens[0]->bitmapScanlinePad;
-    pScreenInfo->bitmapScanlineUnit = xf86Screens[0]->bitmapScanlineUnit;
-    pScreenInfo->bitmapBitOrder = xf86Screens[0]->bitmapBitOrder;
-    pScreenInfo->numPixmapFormats = numFormats;
+    screenInfo.imageByteOrder = xf86Screens[0]->imageByteOrder;
+    screenInfo.bitmapScanlinePad = xf86Screens[0]->bitmapScanlinePad;
+    screenInfo.bitmapScanlineUnit = xf86Screens[0]->bitmapScanlineUnit;
+    screenInfo.bitmapBitOrder = xf86Screens[0]->bitmapBitOrder;
+    screenInfo.numPixmapFormats = numFormats;
     for (i = 0; i < numFormats; i++)
-        pScreenInfo->formats[i] = formats[i];
+        screenInfo.formats[i] = formats[i];
 
     /* Make sure the server's VT is active */
 
