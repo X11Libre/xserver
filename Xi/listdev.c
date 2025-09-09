@@ -70,6 +70,8 @@ SOFTWARE.
 #include "xkbstr.h"
 #include "listdev.h"
 
+#define VPC        20              /* Max # valuators per chunk */
+
 /***********************************************************************
  *
  * This procedure calculates the size of the information to be returned
