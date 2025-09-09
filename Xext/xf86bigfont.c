@@ -281,8 +281,7 @@ ProcXF86BigfontQueryVersion(ClientPtr client)
         swapl(&reply.gid);
         swapl(&reply.signature);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void
