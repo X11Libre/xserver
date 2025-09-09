@@ -58,12 +58,12 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"
 #include "grabdev.h"
-#include "selectev.h"
 
 static int
 HandleDevicePresenceMask(ClientPtr client, WindowPtr win,

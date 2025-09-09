@@ -54,12 +54,12 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "miext/extinit_priv.h"            /* for XInputExtensionInit */
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "exglobals.h"
-#include "xiselectev.h"
 
 #include "protocol-common.h"
 

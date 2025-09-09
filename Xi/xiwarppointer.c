@@ -40,6 +40,7 @@
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "mi/mipointer_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -48,7 +49,6 @@
 #include "exevents.h"
 #include "exglobals.h"
 #include "mipointer.h"          /* for miPointerUpdateSprite */
-#include "xiwarppointer.h"
 
 /***********************************************************************
  *

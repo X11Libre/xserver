@@ -57,12 +57,12 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"
 #include "exevents.h"
 #include "exglobals.h"
-#include "chgprop.h"
 #include "grabdev.h"
 
 /***********************************************************************

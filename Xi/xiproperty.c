@@ -37,6 +37,7 @@
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "dix.h"
 #include "inputstr.h"

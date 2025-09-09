@@ -60,6 +60,7 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
@@ -68,7 +69,6 @@ SOFTWARE.
 #include "xace.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
-#include "listdev.h"
 
 #define VPC        20              /* Max # valuators per chunk */
 

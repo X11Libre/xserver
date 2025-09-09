@@ -59,11 +59,11 @@ SOFTWARE.
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/resource_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "exglobals.h"
-#include "chgdctl.h"
 
 /***********************************************************************
  *

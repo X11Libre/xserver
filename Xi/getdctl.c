@@ -51,9 +51,9 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "getdctl.h"
 
 static void
 _writeDeviceResolution(ClientPtr client, ValuatorClassPtr v, x_rpcbuf_t *rpcbuf)

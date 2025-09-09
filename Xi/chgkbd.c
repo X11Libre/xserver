@@ -52,16 +52,16 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "inputstr.h"           /* DeviceIntPtr      */
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
+
+#include "Xi/handlers.h"
+
+#include "inputstr.h"           /* DeviceIntPtr      */
 #include "XIstubs.h"
 #include "globals.h"
-
 #include "exevents.h"
 #include "exglobals.h"
-
-#include "chgkbd.h"
 #include "chgptr.h"
 
 /***********************************************************************

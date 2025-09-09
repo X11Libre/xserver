@@ -44,10 +44,10 @@
 
 #include "dix/exevents_priv.h"
 #include "miext/extinit_priv.h"            /* for XInputExtensionInit */
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "scrnintstr.h"
-#include "xiqueryversion.h"
 #include "protocol-common.h"
 #include "exglobals.h"
 

@@ -56,13 +56,12 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/resource_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "scrnintstr.h"         /* screen structure  */
 #include "XIstubs.h"
-
-#include "closedev.h"
 
 /***********************************************************************
  *

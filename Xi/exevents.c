@@ -111,7 +111,6 @@ SOFTWARE.
 #include "exglobals.h"
 #include "eventstr.h"
 #include "scrnintstr.h"
-#include "listdev.h"            /* for CopySwapXXXClass */
 #include "xace.h"
 #include "xiquerydevice.h"      /* For List*Info */
 #include "eventstr.h"

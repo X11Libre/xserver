@@ -38,10 +38,10 @@
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "os/fmt.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "exglobals.h"
-#include "xiqueryversion.h"
 #include "misc.h"
 
 extern XExtensionVersion XIVersion;     /* defined in getvers.c */

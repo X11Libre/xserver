@@ -56,11 +56,10 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/exevents_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
-
-#include "chgkmap.h"
 
 /***********************************************************************
  *

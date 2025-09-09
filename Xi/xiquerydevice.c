@@ -40,6 +40,7 @@
 #include "dix/inpututils_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/fmt.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "xkbstr.h"

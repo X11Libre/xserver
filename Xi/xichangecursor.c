@@ -38,6 +38,7 @@
 
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -46,7 +47,6 @@
 #include "exevents.h"
 #include "exglobals.h"
 #include "input.h"
-#include "xichangecursor.h"
 
 /***********************************************************************
  *

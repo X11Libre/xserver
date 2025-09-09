@@ -33,10 +33,12 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2proto.h>
+
+#include "Xi/handlers.h"
+
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
-#include "xigetclientpointer.h"
 #include "exevents.h"
 
 #include "protocol-common.h"

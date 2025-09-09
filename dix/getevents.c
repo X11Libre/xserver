@@ -63,7 +63,6 @@
 #include "xkbsrv.h"
 #include "exglobals.h"
 #include "extnsionst.h"
-#include "listdev.h"            /* for sizing up DeviceClassesChangedEvent */
 
 /* Number of motion history events to store. */
 #define MOTION_HISTORY_SIZE 256
