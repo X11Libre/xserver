@@ -972,8 +972,7 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     return TRUE;
 }
 
-void KdInitScreen(ScreenInfo * pScreenInfo,
-                  KdScreenInfo * screen, int argc, char **argv)
+void KdInitScreen(KdScreenInfo * screen, int argc, char **argv)
 {
     KdCardInfo *card = screen->card;
 
@@ -986,8 +985,7 @@ void KdInitScreen(ScreenInfo * pScreenInfo,
         screen->softCursor = TRUE;
 }
 
-static Bool
-KdSetPixmapFormats(ScreenInfo * pScreenInfo)
+static Bool KdSetPixmapFormats(void)
 {
     CARD8 depthToBpp[33];       /* depth -> bpp map */
     KdCardInfo *card;
@@ -1024,16 +1022,15 @@ KdSetPixmapFormats(ScreenInfo * pScreenInfo)
         if (!depthToBpp[kdDepths[i].depth])
             depthToBpp[kdDepths[i].depth] = kdDepths[i].bpp;
 
-    pScreenInfo->imageByteOrder = IMAGE_BYTE_ORDER;
-    pScreenInfo->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
-    pScreenInfo->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
-    pScreenInfo->bitmapBitOrder = BITMAP_BIT_ORDER;
-
-    pScreenInfo->numPixmapFormats = 0;
+    screenInfo.imageByteOrder = IMAGE_BYTE_ORDER;
+    screenInfo.bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
+    screenInfo.bitmapScanlinePad = BITMAP_SCANLINE_PAD;
+    screenInfo.bitmapBitOrder = BITMAP_BIT_ORDER;
+    screenInfo.numPixmapFormats = 0;
 
     for (i = 1; i <= 32; i++) {
         if (depthToBpp[i]) {
-            format = &pScreenInfo->formats[pScreenInfo->numPixmapFormats++];
+            format = &screenInfo.formats[screenInfo.numPixmapFormats++];
             format->depth = i;
             format->bitsPerPixel = depthToBpp[i];
             format->scanlinePad = BITMAP_SCANLINE_PAD;
@@ -1043,28 +1040,26 @@ KdSetPixmapFormats(ScreenInfo * pScreenInfo)
     return TRUE;
 }
 
-static void
-KdAddScreen(ScreenInfo * pScreenInfo,
-            KdScreenInfo * screen, int argc, char **argv)
+static void KdAddScreen(KdScreenInfo * screen, int argc, char **argv)
 {
     int i;
 
     /*
      * Fill in fb visual type masks for this screen
      */
-    for (i = 0; i < pScreenInfo->numPixmapFormats; i++) {
+    for (i = 0; i < screenInfo.numPixmapFormats; i++) {
         unsigned long visuals;
         Pixel rm, gm, bm;
 
         visuals = 0;
         rm = gm = bm = 0;
-        if (pScreenInfo->formats[i].depth == screen->fb.depth) {
+        if (screenInfo.formats[i].depth == screen->fb.depth) {
             visuals = screen->fb.visuals;
             rm = screen->fb.redMask;
             gm = screen->fb.greenMask;
             bm = screen->fb.blueMask;
         }
-        fbSetVisualTypesAndMasks(pScreenInfo->formats[i].depth,
+        fbSetVisualTypesAndMasks(screenInfo.formats[i].depth,
                                  visuals, 8, rm, gm, bm);
     }
 
@@ -1095,7 +1090,7 @@ KdSignalWrapper(int signum)
 }
 
 void
-KdInitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
+KdInitOutput(int argc, char **argv)
 {
     KdCardInfo *card;
     KdScreenInfo *screen;
@@ -1117,7 +1112,7 @@ KdInitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
             ret = (*card->cfuncs->cardinit) (card);
         if (ret) {
             for (screen = card->screenList; screen; screen = screen->next)
-                KdInitScreen(pScreenInfo, screen, argc, argv);
+                KdInitScreen(screen, argc, argv);
         }
     }
 
@@ -1125,7 +1120,7 @@ KdInitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
      * Merge the various pixmap formats together, this can fail
      * when two screens share depth but not bitsPerPixel
      */
-    if (!KdSetPixmapFormats(pScreenInfo))
+    if (!KdSetPixmapFormats())
         return;
 
     /*
@@ -1133,7 +1128,7 @@ KdInitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
      */
     for (card = kdCardInfo; card; card = card->next)
         for (screen = card->screenList; screen; screen = screen->next)
-            KdAddScreen(pScreenInfo, screen, argc, argv);
+            KdAddScreen(screen, argc, argv);
 
     OsRegisterSigWrapper(KdSignalWrapper);
     xorgGlxCreateVendor();

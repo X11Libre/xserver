@@ -65,7 +65,7 @@ InitCard(char *name)
 void
 InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
 {
-    KdInitOutput(pScreenInfo, argc, argv);
+    KdInitOutput(argc, argv);
 }
 
 void

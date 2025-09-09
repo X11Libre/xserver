@@ -59,7 +59,7 @@ InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
     if (serverGeneration == 1)
         ephyrExtensionInit();
 
-    KdInitOutput(pScreenInfo, argc, argv);
+    KdInitOutput(argc, argv);
 }
 
 void

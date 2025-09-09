@@ -386,8 +386,7 @@ extern miPointerScreenFuncRec kdPointerScreenFuncs;
 
 void KdSuspend(void);
 
-void KdInitScreen(ScreenInfo * pScreenInfo,
-                  KdScreenInfo * screen, int argc, char **argv);
+void KdInitScreen(KdScreenInfo * screen, int argc, char **argv);
 
 void
  KdDisableScreen(ScreenPtr pScreen);
@@ -450,8 +449,7 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv);
 void
  KdInitCard(ScreenInfo * pScreenInfo, KdCardInfo * card, int argc, char **argv);
 
-void
- KdInitOutput(ScreenInfo * pScreenInfo, int argc, char **argv);
+void KdInitOutput(int argc, char **argv);
 
 void
  KdSetSubpixelOrder(ScreenPtr pScreen, Rotation randr);
