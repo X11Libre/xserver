@@ -39,7 +39,11 @@
 
 #include <stdlib.h>
 
+#include "x86emu/debug.h"
+#include "x86emu/regs.h"
+#include "x86emu/ops.h"
 #include "x86emu/x86emui.h"
+#include "x86emu/prim_ops.h"
 
 /*----------------------------- Implementation ----------------------------*/
 

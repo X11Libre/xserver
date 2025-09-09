@@ -38,7 +38,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <X11/extensions/randr.h>
-#include <X11/extensions/Xv.h>
 
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
@@ -47,17 +46,13 @@
 #include "xf86.h"
 #include "xf86Priv.h"
 #include "xf86_OSproc.h"
-#include "compiler.h"
-#include "xf86Pci.h"
 #include "mipointer.h"
 #include "mipointrst.h"
 #include "micmap.h"
 #include "fb.h"
 #include "edid.h"
-#include "xf86i2c.h"
 #include "xf86Crtc.h"
 #include "miscstruct.h"
-#include "dixstruct.h"
 #include "xf86xv.h"
 #include <xorg-config.h>
 #ifdef XSERVER_PLATFORM_BUS
@@ -67,6 +62,8 @@
 #include <pciaccess.h>
 #endif
 #include "driver.h"
+
+#include "xorgVersion.h"
 
 static void AdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 static Bool CloseScreen(ScreenPtr pScreen);

@@ -30,7 +30,6 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/XI2proto.h>
-#include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"

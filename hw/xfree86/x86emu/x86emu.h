@@ -51,7 +51,6 @@ typedef int X86EMU_pioAddr;
 #define	X86API
 #define	X86APIP	*
 #endif
-#include "x86emu/regs.h"
 
 /*---------------------- Macros and type definitions ----------------------*/
 

@@ -58,17 +58,12 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #ifndef _Configint_h_
 #define _Configint_h_
 
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include "xf86Parser.h"
+#include <stdlib.h>
 
 typedef enum { PARSE_DECIMAL, PARSE_OCTAL, PARSE_HEX } ParserNumType;
 
@@ -88,9 +83,6 @@ extern LexRec xf86_lex_val;
 #ifndef FALSE
 #define FALSE 0
 #endif
-
-#include "configProcs.h"
-#include <stdlib.h>
 
 #define TestFree(a) if (a) { free ((void *) a); a = NULL; }
 

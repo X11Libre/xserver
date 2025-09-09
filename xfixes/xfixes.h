@@ -20,13 +20,10 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _XFIXES_H_
 #define _XFIXES_H_
 
+#include "regionstr.h"
 #include "resource.h"
 
 extern RESTYPE RegionResType;
@@ -50,7 +47,5 @@ extern int XFixesErrorBase;
 
 extern RegionPtr
  XFixesRegionCopy(RegionPtr pRegion);
-
-#include "xibarriers.h"
 
 #endif                          /* _XFIXES_H_ */

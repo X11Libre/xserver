@@ -129,8 +129,6 @@ Equipment Corporation.
 #include "dix/resource_priv.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
-#include "Xext/panoramiX.h"
-#include "Xext/panoramiXsrv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -140,7 +138,6 @@ Equipment Corporation.
 #include "windowstr.h"
 #include "dixfont.h"
 #include "colormap.h"
-#include "inputstr.h"
 #include "cursor.h"
 #include "xace.h"
 #include <assert.h>

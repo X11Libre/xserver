@@ -27,6 +27,7 @@
 #include "present_priv.h"
 #include "randrstr_priv.h"
 #include <protocol-versions.h>
+#include "xfixes.h"
 
 static int
 proc_present_query_version(ClientPtr client)

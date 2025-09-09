@@ -1,11 +1,7 @@
 /* Prototypes for functions that the DDX must provide */
 
-#include <dix-config.h>
-
 #ifndef _DPMSPROC_H_
 #define _DPMSPROC_H_
-
-#include "dixstruct.h"
 
 extern int DPMSSet(ClientPtr client, int level);
 extern Bool DPMSSupported(void);

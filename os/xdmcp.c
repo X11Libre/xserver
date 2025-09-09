@@ -29,7 +29,6 @@
 #include <netdb.h>
 #endif
 
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <X11/X.h>
@@ -43,7 +42,6 @@
 #include "osdep.h"
 #include "xdmcp.h"
 #include "xdmauth.h"
-#include "input.h"
 #include "dixstruct.h"
 
 #include "os/Xtrans.h"
@@ -58,7 +56,6 @@
 #include <X11/Xdmcp.h>
 
 #define X_INCLUDE_NETDB_H
-#include <X11/Xos_r.h>
 
 static const char *defaultDisplayClass = "MIT-unspecified";
 

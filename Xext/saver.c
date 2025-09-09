@@ -51,7 +51,6 @@ in this Software without prior written authorization from the X Consortium.
 #include "extnsionst.h"
 #include "dixstruct.h"
 #include "resource.h"
-#include "gcstruct.h"
 #include "cursorstr.h"
 #include "xace.h"
 #include "inputstr.h"

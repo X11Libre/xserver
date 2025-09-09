@@ -58,7 +58,6 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "cursorstr.h"
 #include "dixfontstr.h"
-#include "opaque.h"
 #include "inputstr.h"
 #include "xace.h"
 

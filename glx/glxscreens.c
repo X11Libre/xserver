@@ -42,9 +42,6 @@
 
 #include "privates.h"
 #include "glxserver.h"
-#include "glxutil.h"
-#include "glxext.h"
-#include "protocol-versions.h"
 #include "compositeext.h"
 
 static DevPrivateKeyRec glxScreenPrivateKeyRec;

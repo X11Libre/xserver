@@ -37,7 +37,6 @@
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "eventstr.h"
-#include "exevents.h"
 #include "exglobals.h"
 #include "windowstr.h"
 

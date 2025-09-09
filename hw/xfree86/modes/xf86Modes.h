@@ -28,14 +28,9 @@
 #ifndef _XF86MODES_H_
 #define _XF86MODES_H_
 
-#include <stddef.h>
-#include <string.h>
-#include <stdio.h>
-
 #include "xf86.h"
-#include "xorgVersion.h"
-#include "edid.h"
 #include "xf86Parser.h"
+#include "edid.h"
 
 extern _X_EXPORT double xf86ModeHSync(const DisplayModeRec * mode);
 extern _X_EXPORT double xf86ModeVRefresh(const DisplayModeRec * mode);

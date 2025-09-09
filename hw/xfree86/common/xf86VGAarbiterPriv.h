@@ -28,12 +28,10 @@
 #define XSERVER_XFREE86_XF86VGAARBITERPRIV_H
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include "misc.h"
 #include "xf86.h"
-#include "xf86_OSproc.h"
 #include <X11/X.h>
 #include "scrnintstr.h"
 #include "screenint.h"
@@ -44,8 +42,8 @@
 #include "window.h"
 #include "xf86str.h"
 #include "mipointer.h"
-#include "mipointrst.h"
 #include "picturestr.h"
+#include "xf86Pci.h"
 
 #define WRAP_SCREEN(x,y) {pScreenPriv->x = pScreen->x; pScreen->x = y;}
 

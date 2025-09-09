@@ -23,6 +23,7 @@
 
 #include "glamor_priv.h"
 #include "glamor_transform.h"
+#include "glamor_utils.h"
 
 
 /*

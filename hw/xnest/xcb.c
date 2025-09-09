@@ -19,7 +19,6 @@
 #include "xnest-xcb.h"
 #include "xnest-xkb.h"
 #include "XNGC.h"
-#include "Display.h"
 
 struct xnest_upstream_info xnestUpstreamInfo = { 0 };
 xnest_visual_t *xnestVisualMap;

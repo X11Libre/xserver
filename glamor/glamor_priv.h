@@ -37,7 +37,6 @@
 #include "xvdix.h"
 
 #if XSYNC
-#include "misyncshm.h"
 #include "misyncstr.h"
 #endif
 
@@ -73,11 +72,8 @@
 
 #include "glyphstr.h"
 
-#include "glamor_debug.h"
 #include "glamor_context.h"
 #include "glamor_program.h"
-
-#include <list.h>
 
 struct glamor_pixmap_private;
 
@@ -1068,12 +1064,8 @@ Bool glamor_change_window_attributes(WindowPtr pWin, unsigned long mask);
 
 void glamor_copy_window(WindowPtr window, DDXPointRec old_origin, RegionPtr src_region);
 
-#include "glamor_utils.h"
-
 #if 0
 #define MAX_FBO_SIZE 32         /* For test purpose only. */
 #endif
-
-#include "glamor_font.h"
 
 #endif                          /* GLAMOR_PRIV_H */

@@ -4,7 +4,6 @@
 #include "dix/registry_priv.h"
 #include "include/misc.h"
 
-#include "namespace.h"
 
 #define XNS_HOOK_LOG(...) do { \
         printf("XNS [" HOOK_NAME "] (#%d@%d) {%s} <%s>: ", \

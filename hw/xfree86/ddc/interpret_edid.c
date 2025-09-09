@@ -25,12 +25,10 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include "misc.h"
 #include "xf86.h"
-#include "xf86_OSproc.h"
 #define _PARSE_EDID_
 #include "xf86DDC_priv.h"
 #include <string.h>

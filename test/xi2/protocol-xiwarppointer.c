@@ -41,6 +41,7 @@
 #include "exglobals.h"
 
 #include "protocol-common.h"
+#include "tests.h"
 
 static int expected_x = SPRITE_X;
 static int expected_y = SPRITE_Y;

@@ -14,8 +14,8 @@ is" without express or implied warranty.
 #include <dix-config.h>
 
 #include <stddef.h>
+
 #include <X11/X.h>
-#include <X11/Xatom.h>
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 #include <X11/fonts/font.h>
@@ -25,13 +25,10 @@ is" without express or implied warranty.
 #include "dix/dix_priv.h"
 
 #include "misc.h"
-#include "regionstr.h"
-#include "dixfontstr.h"
 #include "scrnintstr.h"
 
 #include "xnest-xcb.h"
 
-#include "Display.h"
 #include "XNFont.h"
 
 int xnestFontPrivateIndex;

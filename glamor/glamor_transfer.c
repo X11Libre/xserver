@@ -22,11 +22,14 @@
 #include <dix-config.h>
 
 #include <assert.h>
+#include <sys/param.h>
 
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
 #include "glamor_transfer.h"
+
+#include "glamor_utils.h"
 
 /*
  * Write a region of bits into a drawable's backing pixmap

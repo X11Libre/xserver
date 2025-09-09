@@ -7,7 +7,6 @@
 #include <xf86drm.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <errno.h>
 #include <string.h>
 
 #include "config/hotplug_priv.h"
@@ -19,6 +18,7 @@
 #include "xf86_os_support.h"
 #include "xf86platformBus.h"
 #include "xf86Bus.h"
+#include "xf86Pci.h"
 
 #include "../linux/systemd-logind.h"
 

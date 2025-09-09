@@ -25,7 +25,6 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 /* XXX kinda gross */
@@ -33,7 +32,6 @@
 
 #include "misc.h"
 #include "xf86.h"
-#include "xf86_OSproc.h"
 #include "xf86DDC_priv.h"
 #include "edid.h"
 

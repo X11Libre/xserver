@@ -48,15 +48,12 @@ SOFTWARE.
 #define MI_H
 #include <X11/X.h>
 #include "region.h"
-#include "validate.h"
 #include "window.h"
 #include "gc.h"
 #include <X11/fonts/font.h>
 #include "input.h"
 #include "cursor.h"
-#include "privates.h"
 #include "colormap.h"
-#include "events.h"
 
 #define MiBits	CARD32
 

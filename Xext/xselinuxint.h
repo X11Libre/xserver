@@ -23,13 +23,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <selinux/selinux.h>
 #include <selinux/avc.h>
 
-#include "globals.h"
 #include "dixaccess.h"
-#include "dixstruct.h"
 #include "privates.h"
 #include "resource.h"
-#include "inputstr.h"
-#include "xselinux.h"
 
 /*
  * Types

@@ -21,18 +21,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+
 
 #ifndef _MISYNCSTR_H_
 #define _MISYNCSTR_H_
 
 #include <stdint.h>
-#include "dix.h"
 #include "misync.h"
 #include "scrnintstr.h"
-#include <X11/extensions/syncconst.h>
 
 /* Sync object types */
 #define SYNC_COUNTER		0

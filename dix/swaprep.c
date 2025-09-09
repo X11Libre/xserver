@@ -53,7 +53,6 @@ SOFTWARE.
 #include <X11/fonts/fontstruct.h>
 #include "scrnintstr.h"
 #include "swaprep.h"
-#include "globals.h"
 
 static void SwapFontInfo(xQueryFontReply * pr);
 

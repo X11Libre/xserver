@@ -26,12 +26,10 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <X11/X.h>
 #include <X11/Xmd.h>
-#include <X11/extensions/XIproto.h>
 
 #include "dix/input_priv.h"
 #include "mi/mipointer_priv.h"
@@ -48,7 +46,6 @@
 #include "xf86Xinput.h"
 
 #ifdef XFreeXDGA
-#include "dgaproc.h"
 #include "dgaproc_priv.h"
 #endif
 

@@ -28,8 +28,7 @@
  *
  */
 
-#include "xorg-config.h"
-
+#include "mipointrst.h"
 #include "dix/colormap_priv.h"
 
 #include "xf86VGAarbiter_priv.h"

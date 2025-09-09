@@ -22,13 +22,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dix/selection_priv.h"
 
-#include "dix.h"
 #include "resource.h"
 #include "extnsionst.h"
 #include "window.h"
 #include "input.h"
 #include "property.h"
-#include "xace.h"
 
 /* XACE_RESOURCE_ACCESS */
 typedef struct {

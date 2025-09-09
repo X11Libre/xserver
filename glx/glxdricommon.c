@@ -35,12 +35,10 @@
 #include <GL/internal/dri_interface.h>
 
 #include "miext/extinit_priv.h"
+#include "extinit.h"
 
 #include <os.h>
 #include "glxserver.h"
-#include "glxext.h"
-#include "glxcontext.h"
-#include "glxscreens.h"
 #include "glxdricommon.h"
 
 #define __ATTRIB(attrib, field) \

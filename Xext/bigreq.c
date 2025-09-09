@@ -39,7 +39,6 @@ from The Open Group.
 #include "os.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "opaque.h"
 
 static int
 ProcBigReqDispatch(ClientPtr client)

@@ -16,7 +16,6 @@ is" without express or implied warranty.
 #include <stddef.h>
 #include <X11/X.h>
 #include <X11/Xdefs.h>
-#include <X11/Xproto.h>
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
@@ -24,16 +23,11 @@ is" without express or implied warranty.
 #include "mi/mi_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/ddx_priv.h"
-#include "os/log_priv.h"
 #include "os/osdep.h"
 
-#include "screenint.h"
 #include "input.h"
 #include "misc.h"
 #include "scrnintstr.h"
-#include "windowstr.h"
-#include "servermd.h"
-#include "dixfontstr.h"
 
 #include "xnest-xcb.h"
 #include "Display.h"
@@ -44,11 +38,8 @@ is" without express or implied warranty.
 #include "Events.h"
 #include "Init.h"
 #include "Args.h"
-#include "Drawable.h"
-#include "XNGC.h"
 #include "XNFont.h"
 #ifdef DPMSExtension
-#include "dpmsproc.h"
 #endif
 
 Bool xnestDoFullGeneration = TRUE;

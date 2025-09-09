@@ -55,17 +55,14 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <errno.h>
 #include <fcntl.h>
-#include <stdbool.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "dix/dix_priv.h"
 #include "os/serverlock.h"
 #include "os/osdep.h"
 
 #include "os.h"
-#include "opaque.h"
 
 /*
  * Explicit support for a server lock file like the ones used for UUCP.

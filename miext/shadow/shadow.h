@@ -26,8 +26,6 @@
 
 #include "scrnintstr.h"
 
-#include "picturestr.h"
-
 #include "damage.h"
 #include "damagestr.h"
 typedef struct _shadowBuf *shadowBufPtr;

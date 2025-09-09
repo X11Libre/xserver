@@ -34,9 +34,12 @@
 
 #include <stdlib.h>
 
+#include "glamor_debug.h"
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
+#include "glamor_prepare.h"
+#include "glamor_utils.h"
 
 Bool
 glamor_get_drawable_location(const DrawablePtr drawable)

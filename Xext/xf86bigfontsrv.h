@@ -25,8 +25,6 @@
 #ifndef _XF86BIGFONTSRV_H_
 #define _XF86BIGFONTSRV_H_
 
-#include <X11/fonts/font.h>
-
 extern void XF86BigfontFreeFontShm(FontPtr);
 extern void XF86BigfontCleanup(void);
 

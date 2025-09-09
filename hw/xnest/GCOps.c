@@ -28,14 +28,11 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "region.h"
 #include "servermd.h"
 
 #include "xnest-xcb.h"
 
-#include "Display.h"
 #include "Screen.h"
-#include "XNGC.h"
 #include "XNFont.h"
 #include "GCOps.h"
 #include "Drawable.h"

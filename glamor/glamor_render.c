@@ -34,10 +34,14 @@
 #include <dix-config.h>
 
 #include <assert.h>
+#include <sys/param.h>
 
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
+#include "glamor_prepare.h"
+#include "glamor_debug.h"
+#include "glamor_utils.h"
 #include "mipict.h"
 #include "fbpict.h"
 #if 0

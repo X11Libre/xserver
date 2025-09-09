@@ -41,6 +41,8 @@
 #include "os/bug_priv.h"
 
 #include "glxserver.h"
+#include "glxcontext.h"
+#include "glxdrawable.h"
 #include <unpack.h>
 #include <pixmapstr.h>
 #include <windowstr.h>
@@ -2456,8 +2458,6 @@ __glXDisp_ClientInfo(__GLXclientState * cl, GLbyte * pc)
 
     return Success;
 }
-
-#include <GL/glxtokens.h>
 
 void
 __glXsendSwapEvent(__GLXdrawable *drawable, int type, CARD64 ust,

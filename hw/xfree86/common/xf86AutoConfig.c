@@ -35,13 +35,11 @@
 
 #include "xf86.h"
 #include "xf86Parser_priv.h"
-#include "xf86tokens.h"
 #include "xf86Config.h"
 #include "xf86MatchDrivers.h"
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
-#include "xf86platformBus.h"
 #include "xf86pciBus.h"
 #ifdef __sparc__
 #include "xf86sbusBus_priv.h"

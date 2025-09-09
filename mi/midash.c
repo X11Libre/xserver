@@ -43,12 +43,8 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
 SOFTWARE.
 
 ******************************************************************/
-#include <dix-config.h>
 
 #include "mi/mi_priv.h"
-
-#include "regionstr.h"
-#include "mistruct.h"
 
 void
 miStepDash(int dist,            /* distance to step */

@@ -34,7 +34,6 @@
 
 #include "os/bug_priv.h"
 
-#include "glamor_prepare.h"
 #include "mipict.h"
 
 #define v_from_x_coord_x(_xscale_, _x_)          ( 2 * (_x_) * (_xscale_) - 1.0)

@@ -35,8 +35,6 @@ is" without express or implied warranty.
 #include "Display.h"
 #include "Screen.h"
 #include "XNCursor.h"
-#include "Keyboard.h"
-#include "Args.h"
 
 xnestCursorFuncRec xnestCursorFuncs = { NULL };
 

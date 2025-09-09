@@ -22,7 +22,6 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <X11/X.h>
@@ -34,7 +33,6 @@
 #include "globals.h"
 #include "xf86_priv.h"
 #include "xf86str.h"
-#include "xf86Priv.h"
 #include "xf86DDC.h"
 #include "mipointer.h"
 #include <randrstr.h>

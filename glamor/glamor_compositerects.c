@@ -31,6 +31,8 @@
 #include "glamor_priv.h"
 #include "mipict.h"
 #include "damage.h"
+#include "glamor_debug.h"
+#include "glamor_utils.h"
 
 /** @file glamor_compositerects.
  *

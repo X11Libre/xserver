@@ -52,7 +52,6 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
 #include "windowstr.h"          /* focus struct      */

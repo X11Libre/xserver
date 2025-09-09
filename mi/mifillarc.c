@@ -31,7 +31,6 @@ Author:  Bob Scheifler, MIT X Consortium
 #include <math.h>
 #include <X11/X.h>
 #include <X11/Xprotostr.h>
-#include "regionstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
 #include "mi.h"

@@ -28,8 +28,6 @@
 #ifndef	_xisb_H_
 #define _xisb_H_
 
-#include <unistd.h>
-
 /******************************************************************************
  *		Definitions
  *									structs, typedefs, #defines, enums

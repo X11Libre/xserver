@@ -31,13 +31,11 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/dri2proto.h>
-#include <X11/extensions/xfixeswire.h>
 
 #include "dix/dix_priv.h"
 
@@ -48,9 +46,12 @@
 #include "xfixes.h"
 #include "dri2_priv.h"
 #include "dri2int.h"
-#include "protocol-versions.h"
 
 /* The only xf86 includes */
+#include <X11/extensions/dri2tokens.h>
+
+#include "dri2.h"
+#include "extinit.h"
 #include "xf86Module.h"
 #include "xf86Extensions.h"
 

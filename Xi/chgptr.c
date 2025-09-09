@@ -53,13 +53,9 @@ SOFTWARE.
 #include <dix-config.h>
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
-#include "XIstubs.h"
 #include "windowstr.h"          /* window structure  */
-#include "scrnintstr.h"         /* screen structure  */
 
-#include "exevents.h"
 #include "exglobals.h"
 
 #include "chgptr.h"

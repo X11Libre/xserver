@@ -47,7 +47,11 @@
 #include "dirent.h"             /* DIR, FILE type definitions */
 
 /* Bus-specific headers */
+#include "xf86pciBus.h"
+#include "xf86Pci.h"
 #include "xf86Bus.h"
+#include "xf86MatchDrivers.h"
+#include "xf86platformBus.h"
 
 #include "xf86_OSproc.h"
 

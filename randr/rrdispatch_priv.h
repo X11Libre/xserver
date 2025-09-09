@@ -7,8 +7,6 @@
 #ifndef _XSERVER_RANDR_RRDISPATCH_H
 #define _XSERVER_RANDR_RRDISPATCH_H
 
-#include "include/dix.h"
-
 /* screen related dispatch */
 int ProcRRGetScreenSizeRange(ClientPtr client);
 int ProcRRSetScreenSize(ClientPtr client);

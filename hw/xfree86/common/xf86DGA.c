@@ -38,7 +38,6 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <string.h>
@@ -55,26 +54,21 @@
 
 #include "xf86.h"
 #include "xf86str.h"
-#include "xf86Priv.h"
 #include "dgaproc.h"
 #include "dgaproc_priv.h"
 #include "pixmapstr.h"
 #include "inputstr.h"
 #include "globals.h"
 #include "servermd.h"
-#include "micmap.h"
 #include "xkbsrv.h"
-#include "xf86Xinput.h"
 #include "exglobals.h"
 #include "eventstr.h"
+#include "events.h"
 #include "xf86Extensions.h"
 #include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
-#include "cursorstr.h"
 #include "scrnintstr.h"
-#include "swaprep.h"
-#include "dgaproc.h"
 #include "protocol-versions.h"
 
 static DevPrivateKeyRec DGAScreenKeyRec;

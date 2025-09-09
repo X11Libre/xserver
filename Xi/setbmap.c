@@ -59,7 +59,6 @@ SOFTWARE.
 #include "dix/input_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-#include "exevents.h"
 #include "exglobals.h"
 #include "setbmap.h"
 

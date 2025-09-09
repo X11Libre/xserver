@@ -29,8 +29,11 @@
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
+#include "xfixes.h"
 #include "xfixesint.h"
 #include "scrnintstr.h"
+#include "windowstr.h"
+#include "pixmapstr.h"
 
 #include <regionstr.h>
 #include <gcstruct.h>

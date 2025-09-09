@@ -35,7 +35,6 @@
 
 #include <GL/gl.h>
 #include <GL/internal/dri_interface.h>
-#include <GL/glxtokens.h>
 
 #include "scrnintstr.h"
 #include "pixmapstr.h"
@@ -43,6 +42,9 @@
 #include "os.h"
 
 #include "glxserver.h"
+#include "glxcontext.h"
+#include "glxdrawable.h"
+#include "glx_extinit.h"
 #include "glxutil.h"
 #include "glxdricommon.h"
 

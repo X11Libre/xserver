@@ -1,11 +1,6 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H 1
 
-#include <dix-config.h>
-#include <X11/Xfuncproto.h>
-#include <X11/Xdefs.h>
-#include "list.h"
-
 /** @brief A hashing function.
 
   @param[in/out] cdata  Opaque data that can be passed to HtInit that will

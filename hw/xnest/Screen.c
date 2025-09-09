@@ -27,7 +27,6 @@ is" without express or implied warranty.
 
 #include "scrnintstr.h"
 #include "dix.h"
-#include "micmap.h"
 #include "resource.h"
 
 #include "xnest-xcb.h"

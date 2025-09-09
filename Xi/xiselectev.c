@@ -34,7 +34,6 @@
 
 #include "dixstruct.h"
 #include "windowstr.h"
-#include "exglobals.h"
 #include "xiselectev.h"
 
 /**

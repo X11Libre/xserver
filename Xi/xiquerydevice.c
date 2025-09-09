@@ -31,7 +31,6 @@
 #include <dix-config.h>
 
 #include <X11/X.h>
-#include <X11/Xatom.h>
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
@@ -44,7 +43,6 @@
 #include "inputstr.h"
 #include "xkbstr.h"
 #include "xkbsrv.h"
-#include "xserver-properties.h"
 #include "xace.h"
 #include "exglobals.h"
 #include "privates.h"

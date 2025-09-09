@@ -61,7 +61,6 @@
 #include <sys/types.h>
 #include <regex.h>
 #include <dirent.h>
-#include <limits.h>
 
 typedef struct _pattern {
     const char *pattern;

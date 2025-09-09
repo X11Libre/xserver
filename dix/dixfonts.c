@@ -67,7 +67,6 @@ Equipment Corporation.
 #include "scrnintstr.h"
 #include "resource.h"
 #include "dixstruct.h"
-#include "cursorstr.h"
 #include "misc.h"
 #include "opaque.h"
 #include "dixfontstr.h"

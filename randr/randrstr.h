@@ -28,17 +28,12 @@
 #ifndef _RANDRSTR_H_
 #define _RANDRSTR_H_
 
-#include <X11/X.h>
-#include <X11/Xproto.h>
 #include "misc.h"
-#include "os.h"
 #include "dixstruct.h"
 #include "resource.h"
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "extnsionst.h"
-#include "servermd.h"
 #include "rrtransform.h"
 #include <X11/extensions/randr.h>
 #include <X11/extensions/randrproto.h>

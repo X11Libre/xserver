@@ -36,12 +36,12 @@
 #include "os/client_priv.h"
 
 #include "glxserver.h"
+#include "glxcontext.h"
+#include "glxdrawable.h"
 #include <windowstr.h>
-#include <propertyst.h>
 #include "privates.h"
 #include <os.h>
 #include "glx_extinit.h"
-#include "unpack.h"
 #include "glxutil.h"
 #include "glxext.h"
 #include "indirect_table.h"

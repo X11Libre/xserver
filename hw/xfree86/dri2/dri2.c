@@ -31,7 +31,6 @@
  */
 
 #ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
 #endif
 
 #include <errno.h>
@@ -42,6 +41,10 @@
 #ifdef WITH_LIBDRM
 #include <xf86drm.h>
 #endif
+#include "dri2.h"
+
+#include <X11/extensions/dri2tokens.h>
+
 #include "list.h"
 #include "scrnintstr.h"
 #include "windowstr.h"

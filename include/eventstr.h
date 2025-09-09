@@ -223,6 +223,7 @@ struct _DGAEvent {
     int screen;           /**<  Screen number this event applies to */
     uint16_t state;       /**<  Core modifier/button state */
 };
+typedef struct _DGAEvent DGAEvent;
 #endif
 
 /**

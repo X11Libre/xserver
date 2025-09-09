@@ -27,7 +27,6 @@
 #include "glxserver.h"
 #include "glxext.h"
 #include "misc.h"
-#include "singlesize.h"
 #include "unpack.h"
 #include "indirect_size_get.h"
 #include "indirect_dispatch.h"

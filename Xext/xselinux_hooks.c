@@ -45,7 +45,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "propertyst.h"
 #include "extnsionst.h"
 #include "xacestr.h"
+#include "xace.h"
+
 #define _XSELINUX_NEED_FLASK_MAP
+#include "xselinux.h"
 #include "xselinuxint.h"
 
 /* structure passed to auditing callback */

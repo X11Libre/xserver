@@ -29,10 +29,7 @@
 
 #include "scrnintstr.h"
 #include "windowstr.h"
-#include "exevents.h"
 #include <assert.h>
-
-#include "tests.h"
 
 #ifndef PROTOCOL_COMMON_H
 #define PROTOCOL_COMMON_H

@@ -9,9 +9,7 @@
 #ifndef _XSERVER_XF86INT10_H
 #define _XSERVER_XF86INT10_H
 
-#include <X11/Xmd.h>
 #include <X11/Xdefs.h>
-#include "xf86Pci.h"
 #include "xf86int10.h"
 
 #ifdef _INT10_PRIVATE

@@ -22,7 +22,9 @@
  */
 #include <dix-config.h>
 
+#include "glamor_debug.h"
 #include "glamor_priv.h"
+#include "glamor_utils.h"
 
 /** @file glamor_window.c
  *

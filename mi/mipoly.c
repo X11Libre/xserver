@@ -57,7 +57,6 @@ SOFTWARE.
 #include "mi.h"
 #include "miscanfill.h"
 #include "mipoly.h"
-#include "regionstr.h"
 
 /*
  * Insert the given edge into the edge table.  First we must find the correct
