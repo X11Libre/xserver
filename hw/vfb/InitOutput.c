@@ -1046,7 +1046,7 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 }                               /* end vfbScreenInit */
 
 void
-InitOutput(ScreenInfo * screen_info, int argc, char **argv)
+InitOutput(ScreenInfo *unused, int argc, char **argv)
 {
     int i;
     int NumFormats = 0;
@@ -1084,18 +1084,18 @@ InitOutput(ScreenInfo * screen_info, int argc, char **argv)
         if (vfbPixmapDepths[i]) {
             if (NumFormats >= MAXFORMATS)
                 FatalError("MAXFORMATS is too small for this server\n");
-            screen_info->formats[NumFormats].depth = i;
-            screen_info->formats[NumFormats].bitsPerPixel = vfbBitsPerPixel(i);
-            screen_info->formats[NumFormats].scanlinePad = BITMAP_SCANLINE_PAD;
+            screenInfo.formats[NumFormats].depth = i;
+            screenInfo.formats[NumFormats].bitsPerPixel = vfbBitsPerPixel(i);
+            screenInfo.formats[NumFormats].scanlinePad = BITMAP_SCANLINE_PAD;
             NumFormats++;
         }
     }
 
-    screen_info->imageByteOrder = IMAGE_BYTE_ORDER;
-    screen_info->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
-    screen_info->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
-    screen_info->bitmapBitOrder = BITMAP_BIT_ORDER;
-    screen_info->numPixmapFormats = NumFormats;
+    screenInfo.imageByteOrder = IMAGE_BYTE_ORDER;
+    screenInfo.bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
+    screenInfo.bitmapScanlinePad = BITMAP_SCANLINE_PAD;
+    screenInfo.bitmapBitOrder = BITMAP_BIT_ORDER;
+    screenInfo.numPixmapFormats = NumFormats;
 
     /* initialize screens */
 
