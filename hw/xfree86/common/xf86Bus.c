@@ -48,6 +48,7 @@
 
 #include "xf86Bus.h"
 #include "xf86sbusBus_priv.h"
+#include "xf86platformBus_priv.h"
 
 #include "xf86_OSproc.h"
 #ifdef XSERVER_LIBPCIACCESS

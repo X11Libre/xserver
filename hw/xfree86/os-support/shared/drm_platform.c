@@ -17,7 +17,7 @@
 
 #include "xf86_priv.h"
 #include "xf86_os_support.h"
-#include "xf86platformBus.h"
+#include "xf86platformBus_priv.h"
 #include "xf86Bus.h"
 
 #include "../linux/systemd-logind.h"

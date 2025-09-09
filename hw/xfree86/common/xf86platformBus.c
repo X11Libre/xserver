@@ -53,7 +53,7 @@
 #include "xf86str.h"
 #include "xf86Bus.h"
 #include "Pci.h"
-#include "xf86platformBus.h"
+#include "xf86platformBus_priv.h"
 #include "xf86Xinput_priv.h"
 #include "xf86Config.h"
 #include "xf86Crtc.h"
