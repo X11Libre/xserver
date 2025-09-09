@@ -2355,7 +2355,6 @@ __glXDisp_QueryExtensionsString(__GLXclientState * cl, GLbyte * pc)
         swapl(&reply.length);
         swapl(&reply.n);
         WriteToClient(client, sizeof(xGLXQueryExtensionsStringReply), &reply);
-        SwapLongs((CARD32*)buf, length);
         WriteToClient(client, length << 2, buf);
     }
     else {
