@@ -36,7 +36,8 @@
 #include "input.h"
 #include "inputstr.h"
 #include "os.h"
-#include "config-backends.h"
+
+#include "config/config-wscons.h"
 
 #define WSCONS_KBD_DEVICE "/dev/wskbd"
 #define WSCONS_MOUSE_PREFIX "/dev/wsmouse"
