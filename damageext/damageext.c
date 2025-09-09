@@ -23,16 +23,45 @@
 
 #include <dix-config.h>
 
+#include <X11/Xproto.h>
+#include <X11/extensions/damageproto.h>
+
 #include "dix/dix_priv.h"
+#include "include/pixmapstr.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
+#include "xfixes/xfixes.h"
 
 #include "damageextint.h"
 #include "damagestr.h"
 #include "protocol-versions.h"
 #include "dixstruct_priv.h"
+
+typedef struct _DamageClient {
+    CARD32 major_version;
+    CARD32 minor_version;
+    int critical;
+} DamageClientRec, *DamageClientPtr;
+
+typedef struct _DamageExt {
+    DamagePtr pDamage;
+    DrawablePtr pDrawable;
+    DamageReportLevel level;
+    ClientPtr pClient;
+    XID id;
+    XID drawable;
+} DamageExtRec, *DamageExtPtr;
+
+#define VERIFY_DAMAGEEXT(pDamageExt, rid, client, mode) { \
+    int rc = dixLookupResourceByType((void **)&(pDamageExt), rid, \
+                                     DamageExtType, client, mode); \
+    if (rc != Success) \
+        return rc; \
+}
+
+#define GetDamageClient(pClient) ((DamageClientPtr)dixLookupPrivate(&(pClient)->devPrivates, DamageClientPrivateKey))
 
 #ifdef XINERAMA
 

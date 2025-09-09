@@ -22,46 +22,9 @@
 #ifndef _DAMAGEEXTINT_H_
 #define _DAMAGEEXTINT_H_
 
-#include <dix-config.h>
-
 #include <X11/X.h>
-#include <X11/Xproto.h>
-#include <X11/extensions/damageproto.h>
 
-#include "dix/selection_priv.h"
-
-#include "misc.h"
-#include "os.h"
-#include "dixstruct.h"
-#include "extnsionst.h"
-#include "windowstr.h"
-#include "scrnintstr.h"
-#include "damage.h"
-#include "xfixes.h"
-
-typedef struct _DamageClient {
-    CARD32 major_version;
-    CARD32 minor_version;
-    int critical;
-} DamageClientRec, *DamageClientPtr;
-
-#define GetDamageClient(pClient) ((DamageClientPtr)dixLookupPrivate(&(pClient)->devPrivates, DamageClientPrivateKey))
-
-typedef struct _DamageExt {
-    DamagePtr pDamage;
-    DrawablePtr pDrawable;
-    DamageReportLevel level;
-    ClientPtr pClient;
-    XID id;
-    XID drawable;
-} DamageExtRec, *DamageExtPtr;
-
-#define VERIFY_DAMAGEEXT(pDamageExt, rid, client, mode) { \
-    int rc = dixLookupResourceByType((void **)&(pDamageExt), rid, \
-                                     DamageExtType, client, mode); \
-    if (rc != Success) \
-        return rc; \
-}
+#include "include/dix.h"
 
 void
  DamageExtSetCritical(ClientPtr pClient, Bool critical);
