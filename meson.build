@@ -602,7 +602,6 @@ inc = include_directories(
     'Xext',
     'Xi',
     'composite',
-    'damageext',
     'exa',
     'fb',
     'glamor',
@@ -713,7 +712,6 @@ subdir('mi')
 subdir('os')
 # X extensions
 subdir('composite')
-subdir('damageext')
 subdir('dbe')
 subdir('miext/damage')
 subdir('miext/shadow')

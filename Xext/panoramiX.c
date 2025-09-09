@@ -56,7 +56,7 @@ Equipment Corporation.
 #include "resource.h"
 #include "picturestr_priv.h"
 #include "xfixesint.h"
-#include "damageextint.h"
+#include "Xext/damage/damageextint.h"
 #include "compint.h"
 #include "protocol-versions.h"
 
