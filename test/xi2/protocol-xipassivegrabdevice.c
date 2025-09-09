@@ -35,11 +35,11 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/exevents_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
-#include "xipassivegrab.h"
 #include "exglobals.h"
 
 #include "protocol-common.h"

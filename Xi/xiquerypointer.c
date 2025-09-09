@@ -45,6 +45,7 @@
 #include "dix/screenint_priv.h"
 #include "os/fmt.h"
 #include "Xext/panoramiXsrv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -52,8 +53,6 @@
 #include "exglobals.h"
 #include "scrnintstr.h"
 #include "xkbsrv.h"
-
-#include "xiquerypointer.h"
 
 /***********************************************************************
  *

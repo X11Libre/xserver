@@ -38,13 +38,13 @@
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "os/fmt.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "mi.h"
 #include "eventstr.h"
 #include "exglobals.h"          /* BadDevice */
-#include "xiallowev.h"
 
 int _X_COLD
 SProcXIAllowEvents(ClientPtr client)

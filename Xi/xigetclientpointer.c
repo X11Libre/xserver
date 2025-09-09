@@ -31,6 +31,7 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
@@ -38,7 +39,6 @@
 #include "extnsionst.h"
 #include "exevents.h"
 #include "exglobals.h"
-#include "xigetclientpointer.h"
 
 /***********************************************************************
  * This procedure allows a client to query another client's client pointer

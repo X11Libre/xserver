@@ -57,10 +57,9 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
-
-#include "getfctl.h"
 
 /***********************************************************************
  *

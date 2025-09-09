@@ -43,6 +43,7 @@
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "os/bug_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */

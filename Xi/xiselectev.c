@@ -31,10 +31,10 @@
 #include "dix/exevents_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
+#include "Xi/handlers.h"
 
 #include "dixstruct.h"
 #include "windowstr.h"
-#include "xiselectev.h"
 
 /**
  * Ruleset:

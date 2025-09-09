@@ -49,6 +49,7 @@
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
+#include "Xi/handlers.h"
 
 #include "xibarriers.h"
 #include "scrnintstr.h"

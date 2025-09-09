@@ -56,12 +56,12 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/exevents_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* Window            */
 #include "extnsionst.h"         /* EventSwapPtr      */
 #include "grabdev.h"
-#include "sendexev.h"
 
 extern int lastEvent;           /* Defined in extension.c */
 

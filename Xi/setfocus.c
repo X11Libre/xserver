@@ -59,9 +59,9 @@ SOFTWARE.
 #include "inputstr.h"           /* DeviceIntPtr      */
 
 #include "dix/dix_priv.h"
+#include "Xi/handlers.h"
 
 #include "exglobals.h"
-#include "setfocus.h"
 
 /***********************************************************************
  *

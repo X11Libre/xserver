@@ -38,11 +38,11 @@
 #include "dix/exevents_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"          /* BadDevice */
-#include "xigrabdev.h"
 
 int _X_COLD
 SProcXIGrabDevice(ClientPtr client)

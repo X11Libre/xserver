@@ -34,11 +34,11 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/dix_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"          /* BadDevice */
-#include "xisetdevfocus.h"
 
 int _X_COLD
 SProcXISetFocus(ClientPtr client)

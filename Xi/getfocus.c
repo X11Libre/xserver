@@ -56,11 +56,11 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/dix_priv.h"
+#include "Xi/handlers.h"
 
 #include "windowstr.h"          /* focus struct      */
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "exglobals.h"
-#include "getfocus.h"
 
 /***********************************************************************
  *

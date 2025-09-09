@@ -41,12 +41,12 @@ from The Open Group.
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
 #include "xkbsrv.h"
 #include "xkbstr.h"
-#include "queryst.h"
 
 /***********************************************************************
  *
