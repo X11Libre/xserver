@@ -71,11 +71,11 @@ InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
 
     xnestOpenDisplay(argc, argv);
 
-    screen_info->imageByteOrder = xnestUpstreamInfo.setup->image_byte_order;
-    screen_info->bitmapScanlineUnit = xnestUpstreamInfo.setup->bitmap_format_scanline_unit;
-    screen_info->bitmapScanlinePad = xnestUpstreamInfo.setup->bitmap_format_scanline_pad;
-    screen_info->bitmapBitOrder = xnestUpstreamInfo.setup->bitmap_format_bit_order;
-    screen_info->numPixmapFormats = 0;
+    screenInfo.imageByteOrder = xnestUpstreamInfo.setup->image_byte_order;
+    screenInfo.bitmapScanlineUnit = xnestUpstreamInfo.setup->bitmap_format_scanline_unit;
+    screenInfo.bitmapScanlinePad = xnestUpstreamInfo.setup->bitmap_format_scanline_pad;
+    screenInfo.bitmapBitOrder = xnestUpstreamInfo.setup->bitmap_format_bit_order;
+    screenInfo.numPixmapFormats = 0;
 
     xcb_format_t *fmt = xcb_setup_pixmap_formats(xnestUpstreamInfo.setup);
     const xcb_format_t *fmtend = fmt + xcb_setup_pixmap_formats_length(xnestUpstreamInfo.setup);
@@ -87,13 +87,13 @@ InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
         {
             if ((fmt->depth == 1) ||
                 (fmt->depth == depth_iter.data->depth)) {
-                screen_info->formats[screen_info->numPixmapFormats].depth =
+                screenInfo.formats[screenInfo.numPixmapFormats].depth =
                     fmt->depth;
-                screen_info->formats[screen_info->numPixmapFormats].bitsPerPixel =
+                screenInfo.formats[screenInfo.numPixmapFormats].bitsPerPixel =
                     fmt->bits_per_pixel;
-                screen_info->formats[screen_info->numPixmapFormats].scanlinePad =
+                screenInfo.formats[screenInfo.numPixmapFormats].scanlinePad =
                     fmt->scanline_pad;
-                screen_info->numPixmapFormats++;
+                screenInfo.numPixmapFormats++;
                 break;
             }
         }
@@ -107,7 +107,7 @@ InitOutput(ScreenInfo * screen_info, int argc, char *argv[])
     for (i = 0; i < xnestNumScreens; i++)
         AddScreen(xnestOpenScreen, argc, argv);
 
-    xnestNumScreens = screen_info->numScreens;
+    xnestNumScreens = screenInfo.numScreens;
 
     xnestDoFullGeneration = xnestFullGeneration;
 }
