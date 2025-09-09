@@ -39,8 +39,6 @@
 
 DevPrivateKeyRec GEClientPrivateKeyRec;
 
-#define GEClientPrivateKey (&GEClientPrivateKeyRec)
-
 /** Struct to keep information about registered extensions */
 typedef struct _GEExtension {
     /** Event swapping routine */
@@ -54,7 +52,7 @@ typedef struct _GEClientInfo {
     CARD32 minor_version;
 } GEClientInfoRec, *GEClientInfoPtr;
 
-#define GEGetClient(pClient)    ((GEClientInfoPtr)(dixLookupPrivate(&((pClient)->devPrivates), GEClientPrivateKey)))
+#define GEGetClient(pClient)    ((GEClientInfoPtr)(dixLookupPrivate(&((pClient)->devPrivates), &GEClientPrivateKeyRec)))
 
 /* Forward declarations */
 static void SGEGenericEvent(xEvent *from, xEvent *to);
