@@ -582,8 +582,7 @@ CloseInput(void)
  *  menus down instead of left, which still looks funny but is an
  *  easier target to hit.
  */
-void
-DarwinAdjustScreenOrigins(ScreenInfo *pScreenInfo)
+void DarwinAdjustScreenOrigins(void)
 {
     int i, left, top;
 
@@ -593,12 +592,12 @@ DarwinAdjustScreenOrigins(ScreenInfo *pScreenInfo)
     top = firstScreen->y;
 
     /* Find leftmost screen. If there's a tie, take the topmost of the two. */
-    for (i = 1; i < pScreenInfo->numScreens; i++) {
-        if (pScreenInfo->screens[i]->x < left ||
-            (pScreenInfo->screens[i]->x == left &&
-             pScreenInfo->screens[i]->y < top)) {
-            left = pScreenInfo->screens[i]->x;
-            top = pScreenInfo->screens[i]->y;
+    for (i = 1; i < screenInfo.numScreens; i++) {
+        if (screenInfo.screens[i]->x < left ||
+            (screenInfo.screens[i]->x == left &&
+             screenInfo.screens[i]->y < top)) {
+            left = screenInfo.screens[i]->x;
+            top = screenInfo.screens[i]->y;
         }
     }
 
@@ -613,12 +612,12 @@ DarwinAdjustScreenOrigins(ScreenInfo *pScreenInfo)
      */
 
     if (darwinMainScreenX != 0 || darwinMainScreenY != 0) {
-        for (i = 0; i < pScreenInfo->numScreens; i++) {
-            pScreenInfo->screens[i]->x -= darwinMainScreenX;
-            pScreenInfo->screens[i]->y -= darwinMainScreenY;
+        for (i = 0; i < screenInfo.numScreens; i++) {
+            screenInfo.screens[i]->x -= darwinMainScreenX;
+            screenInfo.screens[i]->y -= darwinMainScreenY;
             DEBUG_LOG("Screen %d placed at X11 coordinate (%d,%d).\n",
-                      i, pScreenInfo->screens[i]->x,
-                      pScreenInfo->screens[i]->y);
+                      i, screenInfo.screens[i]->x,
+                      screenInfo.screens[i]->y);
         }
     }
 
@@ -644,15 +643,15 @@ InitOutput(ScreenInfo *pScreenInfo, int argc, char **argv)
 {
     int i;
 
-    pScreenInfo->imageByteOrder = IMAGE_BYTE_ORDER;
-    pScreenInfo->bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
-    pScreenInfo->bitmapScanlinePad = BITMAP_SCANLINE_PAD;
-    pScreenInfo->bitmapBitOrder = BITMAP_BIT_ORDER;
+    screenInfo.imageByteOrder = IMAGE_BYTE_ORDER;
+    screenInfo.bitmapScanlineUnit = BITMAP_SCANLINE_UNIT;
+    screenInfo.bitmapScanlinePad = BITMAP_SCANLINE_PAD;
+    screenInfo.bitmapBitOrder = BITMAP_BIT_ORDER;
 
     // List how we want common pixmap formats to be padded
-    pScreenInfo->numPixmapFormats = ARRAY_SIZE(formats);
+    screenInfo.numPixmapFormats = ARRAY_SIZE(formats);
     for (i = 0; i < ARRAY_SIZE(formats); i++)
-        pScreenInfo->formats[i] = formats[i];
+        screenInfo.formats[i] = formats[i];
 
     // Discover screens and do mode specific initialization
     QuartzInitOutput(argc, argv);
@@ -664,7 +663,7 @@ InitOutput(ScreenInfo *pScreenInfo, int argc, char **argv)
 
     xorgGlxCreateVendor();
 
-    DarwinAdjustScreenOrigins(pScreenInfo);
+    DarwinAdjustScreenOrigins();
 }
 
 /*

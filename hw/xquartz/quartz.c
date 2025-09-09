@@ -264,7 +264,7 @@ QuartzUpdateScreens(void)
     pScreen->width = width;
     pScreen->height = height;
 
-    DarwinAdjustScreenOrigins(&screenInfo);
+    DarwinAdjustScreenOrigins();
 
     /* DarwinAdjustScreenOrigins or UpdateScreen may change pScreen->x/y,
      * so use it rather than x/y
