@@ -31,12 +31,12 @@
  * video drivers must not include this file.
  */
 
+#ifndef _XF86_BUS_H
+#define _XF86_BUS_H
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _XF86_BUS_H
-#define _XF86_BUS_H
 
 #include "xf86pciBus.h"
 #if defined(__sparc__) || defined(__sparc)

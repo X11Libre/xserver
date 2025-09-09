@@ -28,10 +28,10 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * Globals referenced elsewhere in the server.
  *
  */
-#include "privates.h"
-
 #ifndef EXGLOBALS_H
 #define EXGLOBALS_H 1
+
+#include "privates.h"
 
 extern int IEventBase;
 extern int BadDevice;

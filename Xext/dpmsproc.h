@@ -1,9 +1,9 @@
 /* Prototypes for functions that the DDX must provide */
 
-#include <dix-config.h>
-
 #ifndef _DPMSPROC_H_
 #define _DPMSPROC_H_
+
+#include <dix-config.h>
 
 #include "dixstruct.h"
 
