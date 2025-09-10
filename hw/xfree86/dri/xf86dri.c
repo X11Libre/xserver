@@ -121,7 +121,6 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 static int
 ProcXF86DRIOpenConnection(register ClientPtr client)
 {
-    xXF86DRIOpenConnectionReply rep;
     drm_handle_t hSAREA;
     char *busIdString;
     CARD32 busIdStringLength = 0;
@@ -138,16 +137,14 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
         return BadValue;
     }
 
-    if (busIdString)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (busIdString) {
         busIdStringLength = strlen(busIdString);
+        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)busIdString, strlen(busIdString));
+    }
 
-    rep = (xXF86DRIOpenConnectionReply) {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = X_REPLY_HEADER_UNITS(xXF86DRIOpenConnectionReply)
-                + bytes_to_int32(busIdStringLength),
+    xXF86DRIOpenConnectionReply reply = {
         .busIdStringLength = busIdStringLength,
-
         .hSAREALow = (CARD32) (hSAREA & 0xffffffff),
 #if defined(LONG64) && !defined(__linux__)
         .hSAREAHigh = (CARD32) (hSAREA >> 32),
@@ -156,10 +153,7 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
 #endif
     };
 
-    WriteToClient(client, sizeof(xXF86DRIOpenConnectionReply), &rep);
-    if (busIdStringLength)
-        WriteToClient(client, busIdStringLength, busIdString);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
