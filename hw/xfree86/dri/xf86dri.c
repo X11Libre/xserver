@@ -203,11 +203,6 @@ ProcXF86DRICloseConnection(register ClientPtr client)
 static int
 ProcXF86DRIGetClientDriverName(register ClientPtr client)
 {
-    xXF86DRIGetClientDriverNameReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .clientDriverNameLength = 0
-    };
     char *clientDriverName;
 
     REQUEST(xXF86DRIGetClientDriverNameReq);
@@ -217,21 +212,21 @@ ProcXF86DRIGetClientDriverName(register ClientPtr client)
         return BadValue;
     }
 
+    xXF86DRIGetClientDriverNameReply rep = { 0 };
+
     DRIGetClientDriverName(screenInfo.screens[stuff->screen],
                            (int *) &rep.ddxDriverMajorVersion,
                            (int *) &rep.ddxDriverMinorVersion,
                            (int *) &rep.ddxDriverPatchVersion,
                            &clientDriverName);
 
-    if (clientDriverName)
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    if (clientDriverName) {
         rep.clientDriverNameLength = strlen(clientDriverName);
-    rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetClientDriverNameReply)
-               + bytes_to_int32(rep.clientDriverNameLength);
+        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)clientDriverName, rep.clientDriverNameLength);
+    }
 
-    WriteToClient(client, sizeof(xXF86DRIGetClientDriverNameReply), &rep);
-    if (rep.clientDriverNameLength)
-        WriteToClient(client, rep.clientDriverNameLength, clientDriverName);
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
