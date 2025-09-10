@@ -243,10 +243,8 @@ ProcAppleDRICreatePixmap(ClientPtr client)
     DrawablePtr pDrawable;
     int rc;
     char path[PATH_MAX];
-    xAppleDRICreatePixmapReply rep;
     int width, height, pitch, bpp;
     void *ptr;
-    CARD32 stringLength;
 
     REQUEST_SIZE_MATCH(xAppleDRICreatePixmapReq);
 
@@ -268,24 +266,21 @@ ProcAppleDRICreatePixmap(ClientPtr client)
         return BadValue;
     }
 
-    rep.stringLength = strlen(path) + 1;
+    CARD32 stringLength = strlen(path) + 1;
 
-    rep.type = X_Reply;
-    rep.length = bytes_to_int32(rep.stringLength);
-    rep.sequenceNumber = client->sequence;
-    rep.width = width;
-    rep.height = height;
-    rep.pitch = pitch;
-    rep.bpp = bpp;
-    rep.size = pitch * height;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD8s(&rpcbuf, path, stringLength);
 
-    if (sizeof(rep) != sz_xAppleDRICreatePixmapReply)
-        ErrorF("error sizeof(rep) is %zu\n", sizeof(rep));
+    xAppleDRICreatePixmapReply rep = {
+        .stringLength = stringLength,
+        .width = width,
+        .height = height,
+        .pitch = pitch,
+        .bpp = bpp,
+        .size = pitch * height,
+    };
 
-    stringLength = rep.stringLength;  /* save unswapped value */
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
         swapl(&rep.stringLength);
         swapl(&rep.width);
         swapl(&rep.height);
@@ -294,10 +289,7 @@ ProcAppleDRICreatePixmap(ClientPtr client)
         swapl(&rep.size);
     }
 
-    WriteToClient(client, sizeof(rep), &rep);
-    WriteToClient(client, stringLength, path);
-
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
