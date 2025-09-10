@@ -432,11 +432,6 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 static int
 ProcXF86DRIGetDeviceInfo(register ClientPtr client)
 {
-    xXF86DRIGetDeviceInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
     drm_handle_t hFrameBuffer;
     void *pDevPrivate;
 
@@ -446,6 +441,8 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
         client->errorValue = stuff->screen;
         return BadValue;
     }
+
+    xXF86DRIGetDeviceInfoReply rep = { 0 };
 
     if (!DRIGetDeviceInfo(screenInfo.screens[stuff->screen],
                           &hFrameBuffer,
@@ -463,16 +460,10 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
     rep.hFrameBufferHigh = 0;
 #endif
 
-    if (rep.devPrivateSize) {
-        rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetDeviceInfoReply)
-                   + bytes_to_int32(rep.devPrivateSize);
-    }
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_CARD8s(&rpcbuf, pDevPrivate, rep.devPrivateSize);
 
-    WriteToClient(client, sizeof(xXF86DRIGetDeviceInfoReply), &rep);
-    if (rep.length) {
-        WriteToClient(client, rep.devPrivateSize, pDevPrivate);
-    }
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
