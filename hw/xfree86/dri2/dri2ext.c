@@ -93,13 +93,6 @@ static int
 ProcDRI2Connect(ClientPtr client)
 {
     REQUEST(xDRI2ConnectReq);
-    xDRI2ConnectReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .driverNameLength = 0,
-        .deviceNameLength = 0
-    };
     DrawablePtr pDraw;
     int fd, status;
     const char *driverName;
@@ -110,21 +103,19 @@ ProcDRI2Connect(ClientPtr client)
                        &pDraw, &status))
         return status;
 
-    if (!DRI2Connect(client, pDraw->pScreen,
-                     stuff->driverType, &fd, &driverName, &deviceName))
-        goto fail;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    xDRI2ConnectReply reply = { 0 };
 
-    rep.driverNameLength = strlen(driverName);
-    rep.deviceNameLength = strlen(deviceName);
-    rep.length = (rep.driverNameLength + 3) / 4 +
-        (rep.deviceNameLength + 3) / 4;
+    if (DRI2Connect(client, pDraw->pScreen,
+                    stuff->driverType, &fd, &driverName, &deviceName)) {
+        reply.driverNameLength = strlen(driverName);
+        reply.deviceNameLength = strlen(deviceName);
 
- fail:
-    WriteToClient(client, sizeof(xDRI2ConnectReply), &rep);
-    WriteToClient(client, rep.driverNameLength, driverName);
-    WriteToClient(client, rep.deviceNameLength, deviceName);
+        x_rpcbuf_write_string_pad(&rpcbuf, driverName);
+        x_rpcbuf_write_string_pad(&rpcbuf, deviceName);
+    }
 
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
