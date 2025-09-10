@@ -319,14 +319,9 @@ ProcXF86DRIDestroyDrawable(register ClientPtr client)
 static int
 ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 {
-    xXF86DRIGetDrawableInfoReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
     DrawablePtr pDrawable;
     int X, Y, W, H;
-    drm_clip_rect_t *pClipRects, *pClippedRects;
+    drm_clip_rect_t *pClipRects;
     drm_clip_rect_t *pBackClipRects;
     int backX, backY, rc;
 
@@ -343,6 +338,8 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
         return rc;
 
     ScreenPtr pScreen = screenInfo.screens[stuff->screen];
+
+    xXF86DRIGetDrawableInfoReply rep = { 0 };
 
     if (!DRIGetDrawableInfo(pScreen,
                             pDrawable,
@@ -364,58 +361,42 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     rep.drawableY = Y;
     rep.drawableWidth = W;
     rep.drawableHeight = H;
-    rep.length = X_REPLY_HEADER_UNITS(xXF86DRIGetDrawableInfoReply);
     rep.backX = backX;
     rep.backY = backY;
 
-    if (rep.numBackClipRects)
-        rep.length += sizeof(drm_clip_rect_t) * rep.numBackClipRects;
-
-    pClippedRects = pClipRects;
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (rep.numClipRects) {
-        /* Clip cliprects to screen dimensions (redirected windows) */
-        pClippedRects = calloc(rep.numClipRects, sizeof(drm_clip_rect_t));
+        int j = 0;
 
-        if (!pClippedRects)
-            return BadAlloc;
+        for (int i = 0; i < rep.numClipRects; i++) {
+            /* Clip cliprects to screen dimensions (redirected windows) */
+            CARD16 x1 = max(pClipRects[i].x1, 0);
+            CARD16 y1 = max(pClipRects[i].y1, 0);
+            CARD16 x2 = min(pClipRects[i].x2, pScreen->width);
+            CARD16 y2 = min(pClipRects[i].y2, pScreen->height);
 
-        int i, j;
-
-        for (i = 0, j = 0; i < rep.numClipRects; i++) {
-            pClippedRects[j].x1 = max(pClipRects[i].x1, 0);
-            pClippedRects[j].y1 = max(pClipRects[i].y1, 0);
-            pClippedRects[j].x2 = min(pClipRects[i].x2, pScreen->width);
-            pClippedRects[j].y2 = min(pClipRects[i].y2, pScreen->height);
-
-            if (pClippedRects[j].x1 < pClippedRects[j].x2 &&
-                pClippedRects[j].y1 < pClippedRects[j].y2) {
+            /* only write visible ones */
+            if (x1 < x2 && y1 < y2) {
+                x_rpcbuf_write_CARD16(&rpcbuf, x1);
+                x_rpcbuf_write_CARD16(&rpcbuf, y1);
+                x_rpcbuf_write_CARD16(&rpcbuf, x2);
+                x_rpcbuf_write_CARD16(&rpcbuf, y2);
                 j++;
             }
         }
 
         rep.numClipRects = j;
-        rep.length += sizeof(drm_clip_rect_t) * rep.numClipRects;
     }
 
-    rep.length = bytes_to_int32(rep.length);
-
-    WriteToClient(client, sizeof(xXF86DRIGetDrawableInfoReply), &rep);
-
-    if (rep.numClipRects) {
-        WriteToClient(client,
-                      sizeof(drm_clip_rect_t) * rep.numClipRects,
-                      pClippedRects);
-        free(pClippedRects);
+    for (int i = 0; i < rep.numBackClipRects; i++) {
+        x_rpcbuf_write_CARD16(&rpcbuf, pBackClipRects[i].x1);
+        x_rpcbuf_write_CARD16(&rpcbuf, pBackClipRects[i].y1);
+        x_rpcbuf_write_CARD16(&rpcbuf, pBackClipRects[i].x2);
+        x_rpcbuf_write_CARD16(&rpcbuf, pBackClipRects[i].y2);
     }
 
-    if (rep.numBackClipRects) {
-        WriteToClient(client,
-                      sizeof(drm_clip_rect_t) * rep.numBackClipRects,
-                      pBackClipRects);
-    }
-
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
