@@ -56,7 +56,7 @@ int XkbKeyboardErrorCode;
 CARD32 xkbDebugFlags = 0;
 static CARD32 xkbDebugCtrls = 0;
 
-static RESTYPE RT_XKBCLIENT;
+RESTYPE RT_XKBCLIENT = 0;
 
 /***====================================================================***/
 

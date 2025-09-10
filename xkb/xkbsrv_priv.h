@@ -98,6 +98,8 @@
         device->public.realInputProc = oldprocs->realInputProc; \
         device->unwrapProc = oldprocs->unwrapProc;
 
+extern RESTYPE RT_XKBCLIENT;
+
 void xkbUnwrapProc(DeviceIntPtr, DeviceHandleProc, void *);
 
 void XkbForceUpdateDeviceLEDs(DeviceIntPtr keybd);
