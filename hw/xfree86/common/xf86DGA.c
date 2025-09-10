@@ -1330,12 +1330,10 @@ static int
 ProcXDGASetMode(ClientPtr client)
 {
     REQUEST(xXDGASetModeReq);
-    xXDGASetModeReply rep;
     XDGAModeRec mode;
     xXDGAModeInfo info;
     PixmapPtr pPix;
     ClientPtr owner;
-    int size;
 
     REQUEST_SIZE_MATCH(xXDGASetModeReq);
 
@@ -1343,17 +1341,13 @@ ProcXDGASetMode(ClientPtr client)
         return BadValue;
     owner = DGA_GETCLIENT(stuff->screen);
 
-    rep.type = X_Reply;
-    rep.length = 0;
-    rep.offset = 0;
-    rep.flags = 0;
-    rep.sequenceNumber = client->sequence;
-
     if (!DGAAvailable(stuff->screen))
         return DGAErrorBase + XF86DGANoDirectVideoMode;
 
     if (owner && owner != client)
         return DGAErrorBase + XF86DGANoDirectVideoMode;
+
+    xXDGASetModeReply rep = { 0 };
 
     if (!stuff->mode) {
         if (owner) {
@@ -1384,13 +1378,11 @@ ProcXDGASetMode(ClientPtr client)
         }
     }
 
-    size = strlen(mode.name) + 1;
-
     info.byte_order = mode.byteOrder;
     info.depth = mode.depth;
     info.num = mode.num;
     info.bpp = mode.bitsPerPixel;
-    info.name_size = (size + 3) & ~3L;
+    info.name_size = ((strlen(mode.name) + 1) + 3) & ~3L;
     info.vsync_num = mode.VSync_num;
     info.vsync_den = mode.VSync_den;
     info.flags = mode.flags;
@@ -1413,13 +1405,11 @@ ProcXDGASetMode(ClientPtr client)
     info.reserved1 = mode.reserved1;
     info.reserved2 = mode.reserved2;
 
-    rep.length = bytes_to_int32(sz_xXDGAModeInfo + info.name_size);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    x_rpcbuf_write_binary_pad(&rpcbuf, &info, sizeof(info));
+    x_rpcbuf_write_string_0t_pad(&rpcbuf, mode.name);
 
-    WriteToClient(client, sz_xXDGASetModeReply, (char *) &rep);
-    WriteToClient(client, sz_xXDGAModeInfo, (char *) (&info));
-    WriteToClient(client, size, mode.name);
-
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
 static int
