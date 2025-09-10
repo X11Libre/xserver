@@ -83,7 +83,6 @@ _X_EXPORT /* only for internal int10 module - not supposed to be used by OOT dri
 ScrnInfoPtr xf86FindScreenForEntity(int entityIndex);
 
 Bool xf86BusConfig(void);
-void xf86PostProbe(void);
 void xf86ClearEntityListForScreen(ScrnInfoPtr pScrn);
 void xf86RemoveDevFromEntity(int entityIndex, GDevPtr dev);
 

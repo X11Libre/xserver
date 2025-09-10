@@ -769,8 +769,6 @@ DoConfigure(void)
         goto bail;
     }
 
-    xf86PostProbe();
-
     for (j = 0; j < xf86NumScreens; j++) {
         xf86Screens[j]->scrnIndex = j;
     }
