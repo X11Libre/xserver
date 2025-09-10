@@ -34,6 +34,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "dix/dix_priv.h"
+#include "dix/rpcbuf_priv.h"
+
 #include "glxserver.h"
 #include "glxutil.h"
 #include "glxext.h"
@@ -107,8 +110,7 @@ __glXDisp_RenderMode(__GLXclientState * cl, GLbyte * pc)
 {
     ClientPtr client = cl->client;
     __GLXcontext *cx;
-    GLint nitems = 0, retBytes = 0, retval, newModeCheck;
-    GLubyte *retBuffer = NULL;
+    GLint nitems = 0, retval, newModeCheck;
     GLenum newMode;
     int error;
 
@@ -122,6 +124,8 @@ __glXDisp_RenderMode(__GLXclientState * cl, GLbyte * pc)
     pc += __GLX_SINGLE_HDR_SIZE;
     newMode = *(GLenum *) pc;
     retval = glRenderMode(newMode);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     /* Check that render mode worked */
     glGetIntegerv(GL_RENDER_MODE, &newModeCheck);
@@ -149,8 +153,7 @@ __glXDisp_RenderMode(__GLXclientState * cl, GLbyte * pc)
         else {
             nitems = retval;
         }
-        retBytes = nitems * __GLX_SIZE_FLOAT32;
-        retBuffer = (GLubyte *) cx->feedbackBuf;
+        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)cx->feedbackBuf, nitems * __GLX_SIZE_FLOAT32);
         cx->renderMode = newMode;
         break;
     case GL_SELECT:
@@ -179,8 +182,8 @@ __glXDisp_RenderMode(__GLXclientState * cl, GLbyte * pc)
             }
             nitems = bp - cx->selectBuf;
         }
-        retBytes = nitems * __GLX_SIZE_CARD32;
-        retBuffer = (GLubyte *) cx->selectBuf;
+        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)cx->selectBuf, nitems * __GLX_SIZE_CARD32);
+
         cx->renderMode = newMode;
         break;
     }
@@ -191,18 +194,12 @@ __glXDisp_RenderMode(__GLXclientState * cl, GLbyte * pc)
      */
  noChangeAllowed:;
     xGLXRenderModeReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = nitems,
         .retval = retval,
         .size = nitems,
         .newMode = newMode
     };
-    WriteToClient(client, sizeof(xGLXRenderModeReply), &reply);
-    if (retBytes) {
-        WriteToClient(client, retBytes, retBuffer);
-    }
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int

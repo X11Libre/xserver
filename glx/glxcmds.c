@@ -37,6 +37,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "os/bug_priv.h"
 
 #include "glxserver.h"
@@ -1635,51 +1636,39 @@ __glXDisp_SwapBuffers(__GLXclientState * cl, GLbyte * pc)
     return Success;
 }
 
-#define GLX_QUERY_NPROPS 5
-
 static int
 DoQueryContext(__GLXclientState * cl, GLXContextID gcId)
 {
     ClientPtr client = cl->client;
     __GLXcontext *ctx;
-    CARD32 sendBuf[GLX_QUERY_NPROPS * 2];
     int err;
 
     if (!validGlxContext(cl->client, gcId, DixReadAccess, &ctx, &err))
         return err;
 
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+
+    x_rpcbuf_write_CARD32(&rpcbuf, GLX_SHARE_CONTEXT_EXT);
+    x_rpcbuf_write_CARD32(&rpcbuf, (int) (ctx->share_id));
+    x_rpcbuf_write_CARD32(&rpcbuf, GLX_VISUAL_ID_EXT);
+    x_rpcbuf_write_CARD32(&rpcbuf, (int) (ctx->config ? ctx->config->visualID : 0));
+    x_rpcbuf_write_CARD32(&rpcbuf, GLX_SCREEN_EXT);
+    x_rpcbuf_write_CARD32(&rpcbuf, (int) (ctx->pGlxScreen->pScreen->myNum));
+    x_rpcbuf_write_CARD32(&rpcbuf, GLX_FBCONFIG_ID);
+    x_rpcbuf_write_CARD32(&rpcbuf, (int) (ctx->config ? ctx->config->fbconfigID : 0));
+    x_rpcbuf_write_CARD32(&rpcbuf, GLX_RENDER_TYPE);
+    x_rpcbuf_write_CARD32(&rpcbuf, (int) (ctx->renderType));
+
     xGLXQueryContextInfoEXTReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = bytes_to_int32(sizeof(sendBuf)),
-        .n = GLX_QUERY_NPROPS,
+        .n = (rpcbuf.wpos / sizeof(CARD32)) / 2,
     };
 
-    sendBuf[0] = GLX_SHARE_CONTEXT_EXT;
-    sendBuf[1] = (int) (ctx->share_id);
-    sendBuf[2] = GLX_VISUAL_ID_EXT;
-    sendBuf[3] = (int) (ctx->config ? ctx->config->visualID : 0);
-    sendBuf[4] = GLX_SCREEN_EXT;
-    sendBuf[5] = (int) (ctx->pGlxScreen->pScreen->myNum);
-    sendBuf[6] = GLX_FBCONFIG_ID;
-    sendBuf[7] = (int) (ctx->config ? ctx->config->fbconfigID : 0);
-    sendBuf[8] = GLX_RENDER_TYPE;
-    sendBuf[9] = (int) (ctx->renderType);
-
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.n);
-        SwapLongs(sendBuf, sizeof(sendBuf) / 4);
     }
 
-    WriteToClient(client, sizeof(xGLXQueryContextInfoEXTReply), &reply);
-    WriteToClient(client, sizeof(sendBuf), sendBuf);
-
-    return Success;
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf)
 }
-
-#undef GLX_QUERY_NPROPS
 
 int
 __glXDisp_QueryContextInfoEXT(__GLXclientState * cl, GLbyte * pc)

@@ -50,13 +50,10 @@ void XineramaGetImageData(DrawablePtr *pDrawables,
 static inline void
 panoramix_setup_ids(PanoramiXRes * resource, ClientPtr client, XID base_id)
 {
-    int j;
-
     resource->info[0].id = base_id;
-    FOR_NSCREENS_FORWARD(j) {
-        if (j) /* skip screen #0 */
-            resource->info[j].id = FakeClientID(client->index);
-    }
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
+        resource->info[walkScreenIdx].id = FakeClientID(client->index);
+    });
 }
 
 #endif                          /* _PANORAMIXSRV_H_ */

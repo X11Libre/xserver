@@ -2272,11 +2272,13 @@ drmmode_crtc_destroy(xf86CrtcPtr crtc)
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     modesettingPtr ms = modesettingPTR(crtc->scrn);
 
+    /* Used even without atomic modesetting */
+    free(drmmode_crtc->cursor.dimensions);
+
     if (!ms->atomic_modeset)
         return;
 
     drmmode_prop_info_free(drmmode_crtc->props_plane, DRMMODE_PLANE__COUNT);
-    free(drmmode_crtc->cursor.dimensions);
     xorg_list_for_each_entry_safe(iterator, next, &drmmode_crtc->mode_list, entry) {
         drm_mode_destroy(crtc, iterator);
     }

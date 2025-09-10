@@ -711,7 +711,7 @@ ProcShmPutImage(ClientPtr client)
         return BadRequest;
 
 #ifdef XINERAMA
-    int j, result, orig_x, orig_y;
+    int result, orig_x, orig_y;
     PanoramiXRes *draw, *gc;
     Bool sendEvent, isRoot;
 
@@ -734,13 +734,12 @@ ProcShmPutImage(ClientPtr client)
     orig_y = stuff->dstY;
     sendEvent = stuff->sendEvent;
     stuff->sendEvent = 0;
-    FOR_NSCREENS_BACKWARD(j) {
-        ScreenPtr walkScreen = screenInfo.screens[j];
 
-        if (!j)
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
+        if (!walkScreenIdx)
             stuff->sendEvent = sendEvent;
-        stuff->drawable = draw->info[j].id;
-        stuff->gc = gc->info[j].id;
+        stuff->drawable = draw->info[walkScreenIdx].id;
+        stuff->gc = gc->info[walkScreenIdx].id;
         if (isRoot) {
             stuff->dstX = orig_x - walkScreen->x;
             stuff->dstY = orig_y - walkScreen->y;
@@ -748,7 +747,8 @@ ProcShmPutImage(ClientPtr client)
         result = ShmPutImage(client, stuff);
         if (result != Success)
             break;
-    }
+    });
+
     return result;
 #else
     return ShmPutImage(client, stuff);
@@ -769,7 +769,7 @@ ProcShmGetImage(ClientPtr client)
     DrawablePtr pDraw;
     xShmGetImageReply xgi;
     ShmDescPtr shmdesc;
-    int i, x, y, w, h, format, rc;
+    int x, y, w, h, format, rc;
     Mask plane = 0, planemask;
     long lenPer = 0, length, widthBytesLine;
     Bool isRoot;
@@ -844,22 +844,23 @@ ProcShmGetImage(ClientPtr client)
         return BadAlloc;
 
     drawables[0] = pDraw;
-    FOR_NSCREENS_FORWARD(i) {
-        if (!i)
-            continue; /* skip screen #0 */
-        rc = dixLookupDrawable(drawables + i, draw->info[i].id, client, 0,
+    XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
+        rc = dixLookupDrawable(drawables + walkScreenIdx,
+                               draw->info[walkScreenIdx].id,
+                               client, 0,
                                DixReadAccess);
         if (rc != Success) {
             free(drawables);
             return rc;
         }
-    }
-    FOR_NSCREENS_FORWARD(i) {
-        drawables[i]->pScreen->SourceValidate(drawables[i], 0, 0,
-                                              drawables[i]->width,
-                                              drawables[i]->height,
+    });
+
+    XINERAMA_FOR_EACH_SCREEN_FORWARD({
+        drawables[walkScreenIdx]->pScreen->SourceValidate(drawables[walkScreenIdx], 0, 0,
+                                              drawables[walkScreenIdx]->width,
+                                              drawables[walkScreenIdx]->height,
                                               IncludeInferiors);
-    }
+    });
 
     xgi = (xShmGetImageReply) {
         .visual = wVisual(((WindowPtr) pDraw)),
@@ -915,7 +916,7 @@ ProcShmCreatePixmap(ClientPtr client)
     PixmapPtr pMap = NULL;
     DrawablePtr pDraw;
     DepthPtr pDepth;
-    int i, j, result, rc;
+    int i, result, rc;
     ShmDescPtr shmdesc;
     unsigned int width, height, depth;
     unsigned long size;
@@ -972,10 +973,12 @@ ProcShmCreatePixmap(ClientPtr client)
 
     result = Success;
 
-    FOR_NSCREENS_BACKWARD(j) {
-        ScreenPtr walkScreen = screenInfo.screens[j];
+    unsigned int lastOne = 0;
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
+        lastOne = walkScreenIdx;
+        ShmScrPrivateRec *screen_priv;
 
-        ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(walkScreen);
+        screen_priv = ShmGetScreenPriv(walkScreen);
         pMap = (*screen_priv->shmFuncs->CreatePixmap) (walkScreen,
                                                        stuff->width,
                                                        stuff->height,
@@ -993,8 +996,8 @@ ProcShmCreatePixmap(ClientPtr client)
             dixSetPrivate(&pMap->devPrivates, shmPixmapPrivateKey, shmdesc);
             shmdesc->refcnt++;
             pMap->drawable.serialNumber = NEXT_SERIAL_NUMBER;
-            pMap->drawable.id = newPix->info[j].id;
-            if (!AddResource(newPix->info[j].id, X11_RESTYPE_PIXMAP, (void *) pMap)) {
+            pMap->drawable.id = newPix->info[walkScreenIdx].id;
+            if (!AddResource(newPix->info[walkScreenIdx].id, X11_RESTYPE_PIXMAP, (void *) pMap)) {
                 result = BadAlloc;
                 break;
             }
@@ -1003,11 +1006,11 @@ ProcShmCreatePixmap(ClientPtr client)
             result = BadAlloc;
             break;
         }
-    }
+    });
 
     if (result != Success) {
-        while (j--)
-            FreeResource(newPix->info[j].id, X11_RESTYPE_NONE);
+        while (lastOne--)
+            FreeResource(newPix->info[lastOne].id, X11_RESTYPE_NONE);
         free(newPix);
     }
     else

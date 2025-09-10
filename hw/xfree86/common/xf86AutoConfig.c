@@ -303,7 +303,7 @@ listPossibleVideoDrivers(XF86MatchedDrivers *md)
 #if defined(__linux__)
     xf86AddMatchedDriver(md, "fbdev");
 #endif
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__DragonFly__)
     xf86AddMatchedDriver(md, "scfb");
 #endif
 
