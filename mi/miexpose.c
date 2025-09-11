@@ -328,7 +328,7 @@ miSendExposures(WindowPtr pWin, RegionPtr pRgn, int dx, int dy)
         if (!pWin->parent) {
             x = screenInfo.screens[scrnum]->x;
             y = screenInfo.screens[scrnum]->y;
-            pWin = dixGetFirstScreenPtr()->root;
+            pWin = dixGetMasterScreen()->root;
             realWin = pWin->drawable.id;
         }
         else if (scrnum) {

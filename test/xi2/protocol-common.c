@@ -110,7 +110,7 @@ TestPointerProc(DeviceIntPtr pDev, int what)
                    pDev->name);
             return BadAlloc;
         }
-        ScreenPtr firstScreen = dixGetFirstScreenPtr();
+        ScreenPtr firstScreen = dixGetMasterScreen();
         pDev->valuator->axisVal[0] = firstScreen->width / 2;
         pDev->last.valuators[0] = pDev->valuator->axisVal[0];
         pDev->valuator->axisVal[1] = firstScreen->height / 2;

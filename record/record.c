@@ -726,7 +726,7 @@ RecordSendProtocolEvents(RecordClientsAndProtocolPtr pRCAP,
                  pev->u.u.type == ButtonRelease ||
                  pev->u.u.type == KeyPress || pev->u.u.type == KeyRelease)) {
                 int scr = inputInfo.pointer->spriteInfo->sprite->screen->myNum;
-                ScreenPtr firstScreen = dixGetFirstScreenPtr();
+                ScreenPtr firstScreen = dixGetMasterScreen();
 
                 memcpy(&shiftedEvent, pev, sizeof(xEvent));
                 shiftedEvent.u.keyButtonPointer.rootX +=

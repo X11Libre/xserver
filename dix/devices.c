@@ -379,7 +379,7 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
         if (InputDevIsMaster(dev)) {
             /* Sprites appear on first root window, so we can hardcode it */
             if (dev->spriteInfo->spriteOwner) {
-                ScreenPtr firstScreen = dixGetFirstScreenPtr();
+                ScreenPtr firstScreen = dixGetMasterScreen();
                 InitializeSprite(dev, firstScreen->root);
                 /* mode doesn't matter */
                 EnterWindow(dev, firstScreen->root, NotifyAncestor);
@@ -591,7 +591,7 @@ int
 ActivateDevice(DeviceIntPtr dev, BOOL sendevent)
 {
     int ret = Success;
-    ScreenPtr pScreen = dixGetFirstScreenPtr();
+    ScreenPtr pScreen = dixGetMasterScreen();
 
     if (!dev || !dev->deviceProc)
         return BadImplementation;
@@ -674,7 +674,7 @@ CorePointerProc(DeviceIntPtr pDev, int what)
     BYTE map[NBUTTONS + 1];
     Atom btn_labels[NBUTTONS] = { 0 };
     Atom axes_labels[NAXES] = { 0 };
-    ScreenPtr scr = dixGetFirstScreenPtr();
+    ScreenPtr scr = dixGetMasterScreen();
 
     switch (what) {
     case DEVICE_INIT:
@@ -989,7 +989,7 @@ FreePendingFrozenDeviceEvents(DeviceIntPtr dev)
 static void
 CloseDevice(DeviceIntPtr dev)
 {
-    ScreenPtr screen = dixGetFirstScreenPtr();
+    ScreenPtr screen = dixGetMasterScreen();
     ClassesPtr classes;
 
     if (!dev)
@@ -1144,7 +1144,7 @@ AbortDevices(void)
 void
 UndisplayDevices(void)
 {
-    ScreenPtr screen = dixGetFirstScreenPtr();
+    ScreenPtr screen = dixGetMasterScreen();
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next)
         screen->DisplayCursor(dev, screen, NullCursor);
@@ -1186,7 +1186,7 @@ int
 RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
 {
     int ret = BadMatch;
-    ScreenPtr screen = dixGetFirstScreenPtr();
+    ScreenPtr screen = dixGetMasterScreen();
     int deviceid;
     int initialized;
     int flags[MAXDEVICES] = { 0 };
@@ -2634,7 +2634,7 @@ AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
         if (dev->spriteInfo->sprite)
             currentRoot = InputDevCurrentRootWindow(dev);
         else                    /* new device auto-set to floating */
-            currentRoot = dixGetFirstScreenPtr()->root;
+            currentRoot = dixGetMasterScreen()->root;
 
         /* we need to init a fake sprite */
         screen = currentRoot->drawable.pScreen;

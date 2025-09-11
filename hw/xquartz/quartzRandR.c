@@ -426,7 +426,7 @@ _QuartzRandRUpdateFakeModes(ScreenPtr pScreen)
 Bool
 QuartzRandRUpdateFakeModes(BOOL force_update)
 {
-    ScreenPtr pScreen = dixGetFirstScreenPtr();
+    ScreenPtr pScreen = dixGetMasterScreen();
 
     if (ignore_next_fake_mode_update) {
         DEBUG_LOG(
@@ -496,7 +496,7 @@ QuartzRandRSetFakeFullscreen(BOOL state)
 void
 QuartzRandRToggleFullscreen(void)
 {
-    ScreenPtr pScreen = dixGetFirstScreenPtr();
+    ScreenPtr pScreen = dixGetMasterScreen();
     QuartzScreenPtr pQuartzScreen = QUARTZ_PRIV(pScreen);
 
     if (pQuartzScreen->currentMode.ref == NULL) {

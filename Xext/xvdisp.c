@@ -1544,7 +1544,7 @@ void
 XineramifyXv(void)
 {
     XvScreenPtr xvsp0 =
-        dixLookupPrivate(&(dixGetFirstScreenPtr()->devPrivates), XvGetScreenKey());
+        dixLookupPrivate(&(dixGetMasterScreen()->devPrivates), XvGetScreenKey());
     XvAdaptorPtr MatchingAdaptors[MAXSCREENS];
     int i;
 
