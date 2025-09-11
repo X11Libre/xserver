@@ -89,30 +89,39 @@ static int XTestSwapFakeInput(ClientPtr /* client */ ,
 static int
 ProcXTestGetVersion(ClientPtr client)
 {
+    REQUEST(xXTestGetVersionReq);
+    REQUEST_SIZE_MATCH(xXTestGetVersionReq);
+
+    if (client->swapped)
+        swaps(&stuff->minorVersion);
+
     xXTestGetVersionReply reply = {
         .majorVersion = XTestMajorVersion,
         .minorVersion = XTestMinorVersion
     };
 
-    REQUEST_SIZE_MATCH(xXTestGetVersionReq);
-
-    if (client->swapped) {
+    if (client->swapped)
         swaps(&reply.minorVersion);
-    }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
 ProcXTestCompareCursor(ClientPtr client)
 {
     REQUEST(xXTestCompareCursorReq);
+    REQUEST_SIZE_MATCH(xXTestCompareCursorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->cursor);
+    }
+
     WindowPtr pWin;
     CursorPtr pCursor;
     int rc;
     DeviceIntPtr ptr = PickPointer(client);
 
-    REQUEST_SIZE_MATCH(xXTestCompareCursorReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -137,8 +146,7 @@ ProcXTestCompareCursor(ClientPtr client)
         .same = (wCursor(pWin) == pCursor)
     };
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 void
@@ -173,6 +181,13 @@ XTestDeviceSendEvents(DeviceIntPtr dev,
 static int
 ProcXTestFakeInput(ClientPtr client)
 {
+    if (client->swapped) {
+        REQUEST(xReq);
+        int n = XTestSwapFakeInput(client, stuff);
+        if (n != Success)
+            return n;
+    }
+
     REQUEST(xXTestFakeInputReq);
     int nev, n, type, rc;
     xEvent *ev;
@@ -473,25 +488,6 @@ ProcXTestDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXTestGetVersion(ClientPtr client)
-{
-    REQUEST(xXTestGetVersionReq);
-    REQUEST_SIZE_MATCH(xXTestGetVersionReq);
-    swaps(&stuff->minorVersion);
-    return ProcXTestGetVersion(client);
-}
-
-static int _X_COLD
-SProcXTestCompareCursor(ClientPtr client)
-{
-    REQUEST(xXTestCompareCursorReq);
-    REQUEST_SIZE_MATCH(xXTestCompareCursorReq);
-    swapl(&stuff->window);
-    swapl(&stuff->cursor);
-    return ProcXTestCompareCursor(client);
-}
-
-static int _X_COLD
 XTestSwapFakeInput(ClientPtr client, xReq * req)
 {
     int nev;
@@ -513,37 +509,6 @@ XTestSwapFakeInput(ClientPtr client, xReq * req)
         *ev = sev;
     }
     return Success;
-}
-
-static int _X_COLD
-SProcXTestFakeInput(ClientPtr client)
-{
-    int n;
-
-    REQUEST(xReq);
-
-    n = XTestSwapFakeInput(client, stuff);
-    if (n != Success)
-        return n;
-    return ProcXTestFakeInput(client);
-}
-
-static int _X_COLD
-SProcXTestDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-    case X_XTestGetVersion:
-        return SProcXTestGetVersion(client);
-    case X_XTestCompareCursor:
-        return SProcXTestCompareCursor(client);
-    case X_XTestFakeInput:
-        return SProcXTestFakeInput(client);
-    case X_XTestGrabControl:
-        return ProcXTestGrabControl(client);
-    default:
-        return BadRequest;
-    }
 }
 
 /**
@@ -677,7 +642,7 @@ void
 XTestExtensionInit(void)
 {
     AddExtension(XTestExtensionName, 0, 0,
-                 ProcXTestDispatch, SProcXTestDispatch,
+                 ProcXTestDispatch, ProcXTestDispatch,
                  XTestExtensionTearDown, StandardMinorOpcode);
 
     xtest_evlist = InitEventList(GetMaximumEventsNum());
