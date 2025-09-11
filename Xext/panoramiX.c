@@ -396,10 +396,10 @@ XineramaInitData(void)
         RegionUninit(&ScreenRegion);
     });
 
-    ScreenPtr firstScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
-    PanoramiXPixWidth = firstScreen->x + firstScreen->width;
-    PanoramiXPixHeight = firstScreen->y + firstScreen->height;
+    PanoramiXPixWidth = masterScreen->x + masterScreen->width;
+    PanoramiXPixHeight = masterScreen->y + masterScreen->height;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         int w = walkScreen->x + walkScreen->width;
@@ -425,7 +425,7 @@ PanoramiXExtensionInit(void)
     int i;
     Bool success = FALSE;
     ExtensionEntry *extEntry;
-    ScreenPtr pScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
     if (noPanoramiXExtension)
         return;
@@ -470,7 +470,7 @@ PanoramiXExtensionInit(void)
 
             dixScreenHookClose(walkScreen, XineramaCloseScreen);
 
-            pScreenPriv->CreateGC = pScreen->CreateGC;
+            pScreenPriv->CreateGC = masterScreen->CreateGC;
             walkScreen->CreateGC = XineramaCreateGC;
         });
 
@@ -591,16 +591,16 @@ PanoramiXCreateConnectionBlock(void)
         return FALSE;
     }
 
-    ScreenPtr firstScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
     for (unsigned int walkScreenIdx = 1; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
         ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        if (walkScreen->rootDepth != firstScreen->rootDepth) {
+        if (walkScreen->rootDepth != masterScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
             return FALSE;
         }
         if (walkScreen->backingStoreSupport !=
-            firstScreen->backingStoreSupport)
+            masterScreen->backingStoreSupport)
             disable_backing_store = TRUE;
     }
 
@@ -778,18 +778,17 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
 extern void
 PanoramiXConsolidate(void)
 {
-    int i;
-    ScreenPtr pScreen = dixGetMasterScreen();
-    DepthPtr pDepth = pScreen->allowedDepths;
-    VisualPtr pVisual = pScreen->visuals;
+    ScreenPtr masterScreen = dixGetMasterScreen();
+    DepthPtr pDepth = masterScreen->allowedDepths;
+    VisualPtr pVisual = masterScreen->visuals;
 
     PanoramiXNumDepths = 0;
     PanoramiXNumVisuals = 0;
 
-    for (i = 0; i < pScreen->numDepths; i++)
+    for (int i = 0; i < masterScreen->numDepths; i++)
         PanoramiXMaybeAddDepth(pDepth++);
 
-    for (i = 0; i < pScreen->numVisuals; i++)
+    for (int i = 0; i < masterScreen->numVisuals; i++)
         PanoramiXMaybeAddVisual(pVisual++);
 
     PanoramiXRes *root = calloc(1, sizeof(PanoramiXRes));
@@ -1240,9 +1239,9 @@ XineramaGetImageData(DrawablePtr *pDrawables,
     SrcBox.x1 = left;
     SrcBox.y1 = top;
     if (!isRoot) {
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        SrcBox.x1 += pDraw->x + firstScreen->x;
-        SrcBox.y1 += pDraw->y + firstScreen->y;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        SrcBox.x1 += pDraw->x + masterScreen->x;
+        SrcBox.y1 += pDraw->y + masterScreen->y;
     }
     SrcBox.x2 = SrcBox.x1 + width;
     SrcBox.y2 = SrcBox.y1 + height;

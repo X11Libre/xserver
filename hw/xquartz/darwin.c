@@ -583,15 +583,13 @@ CloseInput(void)
  */
 void DarwinAdjustScreenOrigins(void)
 {
-    int i, left, top;
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
-    ScreenPtr firstScreen = dixGetMasterScreen();
-
-    left = firstScreen->x;
-    top = firstScreen->y;
+    int left = masterScreen->x;
+    int top = masterScreen->y;
 
     /* Find leftmost screen. If there's a tie, take the topmost of the two. */
-    for (i = 1; i < screenInfo.numScreens; i++) {
+    for (int i = 1; i < screenInfo.numScreens; i++) {
         if (screenInfo.screens[i]->x < left ||
             (screenInfo.screens[i]->x == left &&
              screenInfo.screens[i]->y < top)) {
@@ -611,7 +609,7 @@ void DarwinAdjustScreenOrigins(void)
      */
 
     if (darwinMainScreenX != 0 || darwinMainScreenY != 0) {
-        for (i = 0; i < screenInfo.numScreens; i++) {
+        for (int i = 0; i < screenInfo.numScreens; i++) {
             screenInfo.screens[i]->x -= darwinMainScreenX;
             screenInfo.screens[i]->y -= darwinMainScreenY;
             DEBUG_LOG("Screen %d placed at X11 coordinate (%d,%d).\n",

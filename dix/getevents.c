@@ -2119,9 +2119,9 @@ PostSyntheticMotion(DeviceIntPtr pDev,
        will translate from sprite screen to screen 0 upon reentry
        to the DIX layer. */
     if (!noPanoramiXExtension) {
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        x += firstScreen->x - screenInfo.screens[screen]->x;
-        y += firstScreen->y - screenInfo.screens[screen]->y;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        x += masterScreen->x - screenInfo.screens[screen]->x;
+        y += masterScreen->y - screenInfo.screens[screen]->y;
     }
 #endif /* XINERAMA */
 

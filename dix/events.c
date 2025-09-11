@@ -539,9 +539,9 @@ XineramaSetCursorPosition(DeviceIntPtr pDev, int x, int y, Bool generateEvent)
        to send the message too and what the coordinates relative to
        that screen are. */
 
-    ScreenPtr firstScreen = dixGetMasterScreen();
-    x += firstScreen->x;
-    y += firstScreen->y;
+    ScreenPtr masterScreen = dixGetMasterScreen();
+    x += masterScreen->x;
+    y += masterScreen->y;
 
     if (!point_on_screen(pScreen, x, y)) {
         XINERAMA_FOR_EACH_SCREEN_BACKWARD({
@@ -555,8 +555,8 @@ XineramaSetCursorPosition(DeviceIntPtr pDev, int x, int y, Bool generateEvent)
     }
 
     pSprite->screen = pScreen;
-    pSprite->hotPhys.x = x - firstScreen->x;
-    pSprite->hotPhys.y = y - firstScreen->y;
+    pSprite->hotPhys.x = x - masterScreen->x;
+    pSprite->hotPhys.y = y - masterScreen->y;
     x -= pScreen->x;
     y -= pScreen->y;
 
@@ -572,14 +572,14 @@ XineramaConstrainCursor(DeviceIntPtr pDev)
     ScreenPtr pScreen = pSprite->screen;
     BoxRec newBox = pSprite->physLimits;
 
-    ScreenPtr firstScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
     /* Translate the constraining box to the screen
        the sprite is actually on */
-    newBox.x1 += firstScreen->x - pScreen->x;
-    newBox.x2 += firstScreen->x - pScreen->x;
-    newBox.y1 += firstScreen->y - pScreen->y;
-    newBox.y2 += firstScreen->y - pScreen->y;
+    newBox.x1 += masterScreen->x - pScreen->x;
+    newBox.x2 += masterScreen->x - pScreen->x;
+    newBox.y1 += masterScreen->y - pScreen->y;
+    newBox.y2 += masterScreen->y - pScreen->y;
 
     (*pScreen->ConstrainCursor) (pDev, pScreen, &newBox);
 }
@@ -1185,9 +1185,9 @@ EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
     if (event->type == ET_Motion) {
 #ifdef XINERAMA
         if (!noPanoramiXExtension) {
-            ScreenPtr firstScreen = dixGetMasterScreen();
-            event->root_x += pSprite->screen->x - firstScreen->x;
-            event->root_y += pSprite->screen->y - firstScreen->y;
+            ScreenPtr masterScreen = dixGetMasterScreen();
+            event->root_x += pSprite->screen->x - masterScreen->x;
+            event->root_y += pSprite->screen->y - masterScreen->y;
         }
 #endif /* XINERAMA */
         pSprite->hotPhys.x = event->root_x;
@@ -1238,7 +1238,7 @@ PlayReleasedEvents(void)
     DeviceIntPtr dev;
     DeviceIntPtr pDev;
 #ifdef XINERAMA
-    ScreenPtr firstScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 #endif
 
  restart:
@@ -1268,9 +1268,9 @@ PlayReleasedEvents(void)
                 case ET_TouchBegin:
                 case ET_TouchUpdate:
                 case ET_TouchEnd:
-                    ev->root_x += firstScreen->x -
+                    ev->root_x += masterScreen->x -
                         pDev->spriteInfo->sprite->screen->x;
-                    ev->root_y += firstScreen->y -
+                    ev->root_y += masterScreen->y -
                         pDev->spriteInfo->sprite->screen->y;
                     break;
                 default:
@@ -3015,13 +3015,13 @@ PointInBorderSize(WindowPtr pWin, int x, int y)
     if (!noPanoramiXExtension &&
         XineramaSetWindowPntrs(inputInfo.pointer, pWin)) {
         SpritePtr pSprite = inputInfo.pointer->spriteInfo->sprite;
-        ScreenPtr firstScreen = dixGetMasterScreen();
+        ScreenPtr masterScreen = dixGetMasterScreen();
 
         XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
             if (RegionContainsPoint(&pSprite->windows[walkScreenIdx]->borderSize,
-                                    x + firstScreen->x -
+                                    x + masterScreen->x -
                                     walkScreen->x,
-                                    y + firstScreen->y -
+                                    y + masterScreen->y -
                                     walkScreen->y, &box))
                 return TRUE;
         });
@@ -3171,9 +3171,9 @@ CheckMotion(DeviceEvent *ev, DeviceIntPtr pDev)
             /* Motion events entering DIX get translated to Screen 0
                coordinates.  Replayed events have already been
                translated since they've entered DIX before */
-            ScreenPtr firstScreen = dixGetMasterScreen();
-            ev->root_x += pSprite->screen->x - firstScreen->x;
-            ev->root_y += pSprite->screen->y - firstScreen->y;
+            ScreenPtr masterScreen = dixGetMasterScreen();
+            ev->root_x += pSprite->screen->x - masterScreen->x;
+            ev->root_y += pSprite->screen->y - masterScreen->y;
         }
         else
 #endif /* XINERAMA */
@@ -3365,11 +3365,11 @@ InitializeSprite(DeviceIntPtr pDev, WindowPtr pWin)
     }
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        pSprite->hotLimits.x1 = -firstScreen->x;
-        pSprite->hotLimits.y1 = -firstScreen->y;
-        pSprite->hotLimits.x2 = PanoramiXPixWidth - firstScreen->x;
-        pSprite->hotLimits.y2 = PanoramiXPixHeight - firstScreen->y;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        pSprite->hotLimits.x1 = -masterScreen->x;
+        pSprite->hotLimits.y1 = -masterScreen->y;
+        pSprite->hotLimits.x2 = PanoramiXPixWidth - masterScreen->x;
+        pSprite->hotLimits.y2 = PanoramiXPixHeight - masterScreen->y;
         pSprite->physLimits = pSprite->hotLimits;
         pSprite->confineWin = NullWindow;
         pSprite->hotShape = NullRegion;
@@ -3446,11 +3446,11 @@ UpdateSpriteForScreen(DeviceIntPtr pDev, ScreenPtr pScreen)
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        pSprite->hotLimits.x1 = -firstScreen->x;
-        pSprite->hotLimits.y1 = -firstScreen->y;
-        pSprite->hotLimits.x2 = PanoramiXPixWidth - firstScreen->x;
-        pSprite->hotLimits.y2 = PanoramiXPixHeight - firstScreen->y;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        pSprite->hotLimits.x1 = -masterScreen->x;
+        pSprite->hotLimits.y1 = -masterScreen->y;
+        pSprite->hotLimits.x2 = PanoramiXPixWidth - masterScreen->x;
+        pSprite->hotLimits.y2 = PanoramiXPixHeight - masterScreen->y;
         pSprite->physLimits = pSprite->hotLimits;
         pSprite->screen = pScreen;
     }
@@ -3487,26 +3487,26 @@ NewCurrentScreen(DeviceIntPtr pDev, ScreenPtr newScreen, int x, int y)
     pSprite->hotPhys.y = y;
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        pSprite->hotPhys.x += newScreen->x - firstScreen->x;
-        pSprite->hotPhys.y += newScreen->y - firstScreen->y;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        pSprite->hotPhys.x += newScreen->x - masterScreen->x;
+        pSprite->hotPhys.y += newScreen->y - masterScreen->y;
         if (newScreen != pSprite->screen) {
             pSprite->screen = newScreen;
             /* Make sure we tell the DDX to update its copy of the screen */
             if (pSprite->confineWin)
                 XineramaConfineCursorToWindow(ptr, pSprite->confineWin, TRUE);
             else
-                XineramaConfineCursorToWindow(ptr, firstScreen->root, TRUE);
+                XineramaConfineCursorToWindow(ptr, masterScreen->root, TRUE);
             /* if the pointer wasn't confined, the DDX won't get
                told of the pointer warp so we reposition it here */
             if (!syncEvents.playingEvents)
                 (*pSprite->screen->SetCursorPosition) (ptr,
                                                        pSprite->screen,
                                                        pSprite->hotPhys.x +
-                                                       firstScreen->
+                                                       masterScreen->
                                                        x - pSprite->screen->x,
                                                        pSprite->hotPhys.y +
-                                                       firstScreen->
+                                                       masterScreen->
                                                        y - pSprite->screen->y,
                                                        FALSE);
         }
@@ -3534,10 +3534,10 @@ XineramaPointInWindowIsVisible(WindowPtr pWin, int x, int y)
     if (!XineramaSetWindowPntrs(inputInfo.pointer, pWin))
          return FALSE;
 
-    ScreenPtr firstScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
-    xoff = x + firstScreen->x;
-    yoff = y + firstScreen->y;
+    xoff = x + masterScreen->x;
+    yoff = y + masterScreen->y;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD_SKIP0({
         pWin = inputInfo.pointer->spriteInfo->sprite->windows[walkScreenIdx];
@@ -3573,7 +3573,7 @@ XineramaWarpPointer(ClientPtr client)
     x = pSprite->hotPhys.x;
     y = pSprite->hotPhys.y;
 
-    ScreenPtr firstScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
     if (stuff->srcWid != None) {
         int winX, winY;
@@ -3586,9 +3586,9 @@ XineramaWarpPointer(ClientPtr client)
 
         winX = source->drawable.x;
         winY = source->drawable.y;
-        if (source == firstScreen->root) {
-            winX -= firstScreen->x;
-            winY -= firstScreen->y;
+        if (source == masterScreen->root) {
+            winX -= masterScreen->x;
+            winY -= masterScreen->y;
         }
         if (x < winX + stuff->srcX ||
             y < winY + stuff->srcY ||
@@ -3602,9 +3602,9 @@ XineramaWarpPointer(ClientPtr client)
     if (dest) {
         x = dest->drawable.x;
         y = dest->drawable.y;
-        if (dest == firstScreen->root) {
-            x -= firstScreen->x;
-            y -= firstScreen->y;
+        if (dest == masterScreen->root) {
+            x -= masterScreen->x;
+            y -= masterScreen->y;
         }
     }
 
@@ -5369,12 +5369,12 @@ ProcQueryPointer(ClientPtr client)
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        rep.rootX += firstScreen->x;
-        rep.rootY += firstScreen->y;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        rep.rootX += masterScreen->x;
+        rep.rootY += masterScreen->y;
         if (stuff->id == rep.root) {
-            rep.winX += firstScreen->x;
-            rep.winY += firstScreen->y;
+            rep.winX += masterScreen->x;
+            rep.winY += masterScreen->y;
         }
     }
 #endif /* XINERAMA */
@@ -6039,8 +6039,8 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
     XkbFilterEvents(pClient, count, events);
 
 #ifdef XINERAMA
-    ScreenPtr firstScreen = dixGetMasterScreen();
-    if (!noPanoramiXExtension && (firstScreen->x || firstScreen->y)) {
+    ScreenPtr masterScreen = dixGetMasterScreen();
+    if (!noPanoramiXExtension && (masterScreen->x || masterScreen->y)) {
         switch (events->u.u.type) {
         case MotionNotify:
         case ButtonPress:
@@ -6056,12 +6056,12 @@ WriteEventsToClient(ClientPtr pClient, int count, xEvent *events)
              */
             count = 1;          /* should always be 1 */
             memcpy(&eventCopy, events, sizeof(xEvent));
-            eventCopy.u.keyButtonPointer.rootX += firstScreen->x;
-            eventCopy.u.keyButtonPointer.rootY += firstScreen->y;
+            eventCopy.u.keyButtonPointer.rootX += masterScreen->x;
+            eventCopy.u.keyButtonPointer.rootY += masterScreen->y;
             if (eventCopy.u.keyButtonPointer.event ==
                 eventCopy.u.keyButtonPointer.root) {
-                eventCopy.u.keyButtonPointer.eventX += firstScreen->x;
-                eventCopy.u.keyButtonPointer.eventY += firstScreen->y;
+                eventCopy.u.keyButtonPointer.eventX += masterScreen->x;
+                eventCopy.u.keyButtonPointer.eventY += masterScreen->y;
             }
             events = &eventCopy;
             break;

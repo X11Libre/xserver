@@ -172,12 +172,12 @@ ProcXIQueryPointer(ClientPtr client)
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        rep.root_x += double_to_fp1616(firstScreen->x);
-        rep.root_y += double_to_fp1616(firstScreen->y);
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        rep.root_x += double_to_fp1616(masterScreen->x);
+        rep.root_y += double_to_fp1616(masterScreen->y);
         if (stuff->win == rep.root) {
-            rep.win_x += double_to_fp1616(firstScreen->x);
-            rep.win_y += double_to_fp1616(firstScreen->y);
+            rep.win_x += double_to_fp1616(masterScreen->x);
+            rep.win_y += double_to_fp1616(masterScreen->y);
         }
     }
 #endif /* XINERAMA */

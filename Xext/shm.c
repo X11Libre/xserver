@@ -813,12 +813,12 @@ ProcShmGetImage(ClientPtr client)
             return BadMatch;
     }
     else {
-        ScreenPtr firstScreen = dixGetMasterScreen();
+        ScreenPtr masterScreen = dixGetMasterScreen();
         if (                    /* check for being onscreen */
-               firstScreen->x + pDraw->x + x < 0 ||
-               firstScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||
-               firstScreen->y + pDraw->y + y < 0 ||
-               firstScreen->y + pDraw->y + y + h > PanoramiXPixHeight ||
+               masterScreen->x + pDraw->x + x < 0 ||
+               masterScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||
+               masterScreen->y + pDraw->y + y < 0 ||
+               masterScreen->y + pDraw->y + y + h > PanoramiXPixHeight ||
                /* check for being inside of border */
                x < -wBorderWidth((WindowPtr) pDraw) ||
                x + w > wBorderWidth((WindowPtr) pDraw) + (int) pDraw->width ||
