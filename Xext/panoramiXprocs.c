@@ -132,7 +132,7 @@ PanoramiXCreateWindow(ClientPtr client)
     orig_x = stuff->x;
     orig_y = stuff->y;
 
-    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    ScreenPtr firstScreen = dixGetMasterScreen();
 
     Bool parentIsRoot = (stuff->parent == firstScreen->root->drawable.id)
                      || (stuff->parent == firstScreen->screensaver.wid);
@@ -344,7 +344,7 @@ PanoramiXReparentWindow(ClientPtr client)
     x = stuff->x;
     y = stuff->y;
 
-    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    ScreenPtr firstScreen = dixGetMasterScreen();
 
     Bool parentIsRoot = (stuff->parent == firstScreen->root->drawable.id)
                      || (stuff->parent == firstScreen->screensaver.wid);
@@ -505,7 +505,7 @@ PanoramiXConfigureWindow(ClientPtr client)
         }
     }
 
-    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    ScreenPtr firstScreen = dixGetMasterScreen();
 
     if (pWin->parent && ((pWin->parent == firstScreen->root) ||
                          (pWin->parent->drawable.id == firstScreen->screensaver.wid))) {
@@ -575,7 +575,7 @@ PanoramiXGetGeometry(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    ScreenPtr firstScreen = dixGetMasterScreen();
 
     xGetGeometryReply reply = {
         .root = firstScreen->root->drawable.id,
@@ -636,7 +636,7 @@ PanoramiXTranslateCoords(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    ScreenPtr firstScreen = dixGetMasterScreen();
 
     if ((pWin == firstScreen->root) ||
         (pWin->drawable.id == firstScreen->screensaver.wid)) {
@@ -1167,7 +1167,7 @@ PanoramiXCopyArea(ClientPtr client)
             dx = drawables[0]->x;
             dy = drawables[0]->y;
             if (srcIsRoot) {
-                ScreenPtr firstScreen = dixGetFirstScreenPtr();
+                ScreenPtr firstScreen = dixGetMasterScreen();
                 dx += firstScreen->x;
                 dy += firstScreen->y;
             }
@@ -2033,7 +2033,7 @@ PanoramiXGetImage(ClientPtr client)
             return BadMatch;
     }
     else {
-        ScreenPtr firstScreen = dixGetFirstScreenPtr();
+        ScreenPtr firstScreen = dixGetMasterScreen();
         /* check for being onscreen and inside of border */
         if (firstScreen->x + pDraw->x + x < 0 ||
             firstScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||

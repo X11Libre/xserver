@@ -1526,11 +1526,11 @@ void
 xf86InitValuatorDefaults(DeviceIntPtr dev, int axnum)
 {
     if (axnum == 0) {
-        dev->valuator->axisVal[0] = dixGetFirstScreenPtr()->width / 2;
+        dev->valuator->axisVal[0] = dixGetMasterScreen()->width / 2;
         dev->last.valuators[0] = dev->valuator->axisVal[0];
     }
     else if (axnum == 1) {
-        dev->valuator->axisVal[1] = dixGetFirstScreenPtr()->height / 2;
+        dev->valuator->axisVal[1] = dixGetMasterScreen()->height / 2;
         dev->last.valuators[1] = dev->valuator->axisVal[1];
     }
 }

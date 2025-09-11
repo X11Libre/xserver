@@ -193,7 +193,7 @@ XkbWriteRulesProp(void)
         ErrorF("[xkb] Internal Error! bad size (%d!=%d) for _XKB_RULES_NAMES\n",
                out, len);
     }
-    dixChangeWindowProperty(serverClient, dixGetFirstScreenPtr()->root, name,
+    dixChangeWindowProperty(serverClient, dixGetMasterScreen()->root, name,
                             XA_STRING, 8, PropModeReplace, len, pval, TRUE);
     free(pval);
     return TRUE;

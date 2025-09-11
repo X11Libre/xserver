@@ -58,7 +58,7 @@ winMsgWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
            has set the DE_TERMINATE flag so exits the msg dispatch loop.
          */
         {
-            ScreenPtr pScreen = dixGetFirstScreenPtr();
+            ScreenPtr pScreen = dixGetMasterScreen();
 
             winScreenPriv(pScreen);
             PostMessage(pScreenPriv->hwndScreen, WM_GIVEUP, 0, 0);

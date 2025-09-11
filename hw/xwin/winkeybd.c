@@ -257,7 +257,7 @@ winRestoreModeKeyStates(void)
 
     /* Only process events if the rootwindow is mapped. The keyboard events
      * will cause segfaults otherwise */
-    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    ScreenPtr firstScreen = dixGetMasterScreen();
     if (firstScreen->root && firstScreen->root->mapped == FALSE)
         processEvents = FALSE;
 

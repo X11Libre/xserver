@@ -2506,7 +2506,7 @@ PanoramiXRenderCreatePicture(ClientPtr client)
     panoramix_setup_ids(newPict, client, stuff->pid);
 
     if (refDraw->type == XRT_WINDOW &&
-        stuff->drawable == dixGetFirstScreenPtr()->root->drawable.id) {
+        stuff->drawable == dixGetMasterScreen()->root->drawable.id) {
         newPict->u.pict.root = TRUE;
     }
     else

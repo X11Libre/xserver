@@ -331,7 +331,7 @@ SetPictureFilter(PicturePtr pPicture, char *name, int len, xFixed * params,
     if (pPicture->pDrawable != NULL)
         pScreen = pPicture->pDrawable->pScreen;
     else
-        pScreen = dixGetFirstScreenPtr();
+        pScreen = dixGetMasterScreen();
 
     pFilter = PictureFindFilter(pScreen, name, len);
 
@@ -362,7 +362,7 @@ SetPicturePictFilter(PicturePtr pPicture, PictFilterPtr pFilter,
     if (pPicture->pDrawable)
         pScreen = pPicture->pDrawable->pScreen;
     else
-        pScreen = dixGetFirstScreenPtr();
+        pScreen = dixGetMasterScreen();
 
     if (pFilter->ValidateParams) {
         int width, height;

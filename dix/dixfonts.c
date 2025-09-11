@@ -1869,7 +1869,7 @@ get_client_resolutions(int *num)
     static struct _FontResolution res;
     ScreenPtr pScreen;
 
-    pScreen = dixGetFirstScreenPtr();
+    pScreen = dixGetMasterScreen();
     res.x_resolution = (pScreen->width * 25.4) / pScreen->mmWidth;
     /*
      * XXX - we'll want this as long as bitmap instances are prevalent

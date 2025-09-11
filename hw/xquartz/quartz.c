@@ -252,7 +252,7 @@ QuartzUpdateScreens(void)
         return;
     }
 
-    pScreen = dixGetFirstScreenPtr();
+    pScreen = dixGetMasterScreen();
 
     PseudoramiXResetScreens();
     quartzProcs->AddPseudoramiXScreens(&x, &y, &width, &height, pScreen);

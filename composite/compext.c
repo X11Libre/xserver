@@ -787,7 +787,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         return rc;
     }
 
-    cs = GetCompScreen(dixGetFirstScreenPtr());
+    cs = GetCompScreen(dixGetMasterScreen());
     if (!cs->pOverlayWin) {
         if (!(overlayWin = calloc(1, sizeof(PanoramiXRes))))
             return BadAlloc;
@@ -848,7 +848,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
         AddResource(overlayWin->info[0].id, XRT_WINDOW, overlayWin);
     }
 
-    cs = GetCompScreen(dixGetFirstScreenPtr());
+    cs = GetCompScreen(dixGetMasterScreen());
 
     rep = (xCompositeGetOverlayWindowReply) {
         .overlayWin = cs->pOverlayWin->drawable.id

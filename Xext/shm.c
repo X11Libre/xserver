@@ -813,7 +813,7 @@ ProcShmGetImage(ClientPtr client)
             return BadMatch;
     }
     else {
-        ScreenPtr firstScreen = dixGetFirstScreenPtr();
+        ScreenPtr firstScreen = dixGetMasterScreen();
         if (                    /* check for being onscreen */
                firstScreen->x + pDraw->x + x < 0 ||
                firstScreen->x + pDraw->x + x + w > PanoramiXPixWidth ||

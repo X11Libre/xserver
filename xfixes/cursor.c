@@ -619,7 +619,7 @@ ReplaceCursor(CursorPtr pCursor, TestCursorFunc testCursor, void *closure)
         }
     }
     /* this "knows" that WindowHasNewCursor doesn't depend on its argument */
-    WindowHasNewCursor(dixGetFirstScreenPtr()->root);
+    WindowHasNewCursor(dixGetMasterScreen()->root);
 }
 
 static Bool

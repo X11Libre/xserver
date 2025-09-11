@@ -585,7 +585,7 @@ void DarwinAdjustScreenOrigins(void)
 {
     int i, left, top;
 
-    ScreenPtr firstScreen = dixGetFirstScreenPtr();
+    ScreenPtr firstScreen = dixGetMasterScreen();
 
     left = firstScreen->x;
     top = firstScreen->y;
