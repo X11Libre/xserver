@@ -520,7 +520,7 @@ endif
 build_namespace = get_option('namespace')
 if build_namespace
     if not build_xace
-        error('cannot build Container extension without X-ACE')
+        error('cannot build Namespace extension without X-ACE')
     endif
 endif
 
