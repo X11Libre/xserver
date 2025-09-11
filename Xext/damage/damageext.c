@@ -210,10 +210,15 @@ DamageExtSetCritical(ClientPtr pClient, Bool critical)
 static int
 ProcDamageQueryVersion(ClientPtr client)
 {
-    DamageClientPtr pDamageClient = GetDamageClient(client);
-
     REQUEST(xDamageQueryVersionReq);
     REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
+
+    if (client->swapped) {
+        swapl(&stuff->majorVersion);
+        swapl(&stuff->minorVersion);
+    }
+
+    DamageClientPtr pDamageClient = GetDamageClient(client);
 
     xDamageQueryVersionReply rep = { 0 };
     if (stuff->majorVersion < SERVER_DAMAGE_MAJOR_VERSION) {
@@ -323,9 +328,15 @@ doDamageCreate(ClientPtr client, int *rc, xDamageCreateReq *stuff)
 static int
 ProcDamageCreate(ClientPtr client)
 {
-    int rc;
     REQUEST(xDamageCreateReq);
     REQUEST_SIZE_MATCH(xDamageCreateReq);
+
+    if (client->swapped) {
+        swapl(&stuff->damage);
+        swapl(&stuff->drawable);
+    }
+
+    int rc;
 
 #ifdef XINERAMA
     if (damageUseXinerama)
@@ -341,9 +352,12 @@ static int
 ProcDamageDestroy(ClientPtr client)
 {
     REQUEST(xDamageDestroyReq);
-    DamageExtPtr pDamageExt;
-
     REQUEST_SIZE_MATCH(xDamageDestroyReq);
+
+    if (client->swapped)
+        swapl(&stuff->damage);
+
+    DamageExtPtr pDamageExt;
     VERIFY_DAMAGEEXT(pDamageExt, stuff->damage, client, DixDestroyAccess);
     FreeResource(stuff->damage, X11_RESTYPE_NONE);
     return Success;
@@ -434,11 +448,18 @@ static int
 ProcDamageSubtract(ClientPtr client)
 {
     REQUEST(xDamageSubtractReq);
+    REQUEST_SIZE_MATCH(xDamageSubtractReq);
+
+    if (client->swapped) {
+        swapl(&stuff->damage);
+        swapl(&stuff->repair);
+        swapl(&stuff->parts);
+    }
+
     DamageExtPtr pDamageExt;
     RegionPtr pRepair;
     RegionPtr pParts;
 
-    REQUEST_SIZE_MATCH(xDamageSubtractReq);
     VERIFY_DAMAGEEXT(pDamageExt, stuff->damage, client, DixWriteAccess);
     VERIFY_REGION_OR_NONE(pRepair, stuff->repair, client, DixWriteAccess);
     VERIFY_REGION_OR_NONE(pParts, stuff->parts, client, DixWriteAccess);
@@ -467,11 +488,17 @@ static int
 ProcDamageAdd(ClientPtr client)
 {
     REQUEST(xDamageAddReq);
+    REQUEST_SIZE_MATCH(xDamageSubtractReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->region);
+    }
+
     DrawablePtr pDrawable;
     RegionPtr pRegion;
     int rc;
 
-    REQUEST_SIZE_MATCH(xDamageAddReq);
     VERIFY_REGION(pRegion, stuff->region, client, DixWriteAccess);
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
                            DixWriteAccess);
@@ -505,78 +532,6 @@ ProcDamageDispatch(ClientPtr client)
         /* version 1.1 */
         case X_DamageAdd:
             return ProcDamageAdd(client);
-        default:
-            return BadRequest;
-    }
-}
-
-static int _X_COLD
-SProcDamageQueryVersion(ClientPtr client)
-{
-    REQUEST(xDamageQueryVersionReq);
-    REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
-    swapl(&stuff->majorVersion);
-    swapl(&stuff->minorVersion);
-    return ProcDamageQueryVersion(client);
-}
-
-static int _X_COLD
-SProcDamageCreate(ClientPtr client)
-{
-    REQUEST(xDamageCreateReq);
-    REQUEST_SIZE_MATCH(xDamageCreateReq);
-    swapl(&stuff->damage);
-    swapl(&stuff->drawable);
-    return ProcDamageCreate(client);
-}
-
-static int _X_COLD
-SProcDamageDestroy(ClientPtr client)
-{
-    REQUEST(xDamageDestroyReq);
-    REQUEST_SIZE_MATCH(xDamageDestroyReq);
-    swapl(&stuff->damage);
-    return ProcDamageDestroy(client);
-}
-
-static int _X_COLD
-SProcDamageSubtract(ClientPtr client)
-{
-    REQUEST(xDamageSubtractReq);
-    REQUEST_SIZE_MATCH(xDamageSubtractReq);
-    swapl(&stuff->damage);
-    swapl(&stuff->repair);
-    swapl(&stuff->parts);
-    return ProcDamageSubtract(client);
-}
-
-static int _X_COLD
-SProcDamageAdd(ClientPtr client)
-{
-    REQUEST(xDamageAddReq);
-    REQUEST_SIZE_MATCH(xDamageSubtractReq);
-    swapl(&stuff->drawable);
-    swapl(&stuff->region);
-    return ProcDamageAdd(client);
-}
-
-static int _X_COLD
-SProcDamageDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-    switch (stuff->data) {
-        /* version 1 */
-        case X_DamageQueryVersion:
-            return SProcDamageQueryVersion(client);
-        case X_DamageCreate:
-            return SProcDamageCreate(client);
-        case X_DamageDestroy:
-            return SProcDamageDestroy(client);
-        case X_DamageSubtract:
-            return SProcDamageSubtract(client);
-        /* version 1.1 */
-        case X_DamageAdd:
-            return SProcDamageAdd(client);
         default:
             return BadRequest;
     }
@@ -751,7 +706,7 @@ DamageExtensionInit(void)
 
     if ((extEntry = AddExtension(DAMAGE_NAME, XDamageNumberEvents,
                                  XDamageNumberErrors,
-                                 ProcDamageDispatch, SProcDamageDispatch,
+                                 ProcDamageDispatch, ProcDamageDispatch,
                                  NULL, StandardMinorOpcode)) != 0) {
         DamageReqCode = (unsigned char) extEntry->base;
         DamageEventBase = extEntry->eventBase;
