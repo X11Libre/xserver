@@ -726,13 +726,13 @@ RecordSendProtocolEvents(RecordClientsAndProtocolPtr pRCAP,
                  pev->u.u.type == ButtonRelease ||
                  pev->u.u.type == KeyPress || pev->u.u.type == KeyRelease)) {
                 int scr = inputInfo.pointer->spriteInfo->sprite->screen->myNum;
-                ScreenPtr firstScreen = dixGetMasterScreen();
+                ScreenPtr masterScreen = dixGetMasterScreen();
 
                 memcpy(&shiftedEvent, pev, sizeof(xEvent));
                 shiftedEvent.u.keyButtonPointer.rootX +=
-                    screenInfo.screens[scr]->x - firstScreen->x;
+                    screenInfo.screens[scr]->x - masterScreen->x;
                 shiftedEvent.u.keyButtonPointer.rootY +=
-                    screenInfo.screens[scr]->y - firstScreen->y;
+                    screenInfo.screens[scr]->y - masterScreen->y;
                 pEvToRecord = &shiftedEvent;
             }
 #endif /* XINERAMA */

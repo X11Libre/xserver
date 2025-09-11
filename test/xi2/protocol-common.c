@@ -110,10 +110,10 @@ TestPointerProc(DeviceIntPtr pDev, int what)
                    pDev->name);
             return BadAlloc;
         }
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        pDev->valuator->axisVal[0] = firstScreen->width / 2;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        pDev->valuator->axisVal[0] = masterScreen->width / 2;
         pDev->last.valuators[0] = pDev->valuator->axisVal[0];
-        pDev->valuator->axisVal[1] = firstScreen->height / 2;
+        pDev->valuator->axisVal[1] = masterScreen->height / 2;
         pDev->last.valuators[1] = pDev->valuator->axisVal[1];
 
         /* protocol-xiquerydevice.c relies on these increment */

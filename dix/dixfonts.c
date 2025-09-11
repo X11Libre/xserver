@@ -1867,10 +1867,9 @@ static FontResolutionPtr
 get_client_resolutions(int *num)
 {
     static struct _FontResolution res;
-    ScreenPtr pScreen;
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
-    pScreen = dixGetMasterScreen();
-    res.x_resolution = (pScreen->width * 25.4) / pScreen->mmWidth;
+    res.x_resolution = (masterScreen->width * 25.4) / masterScreen->mmWidth;
     /*
      * XXX - we'll want this as long as bitmap instances are prevalent
      so that we can match them from scalable fonts
@@ -1879,7 +1878,7 @@ get_client_resolutions(int *num)
         res.x_resolution = 75;
     else
         res.x_resolution = 100;
-    res.y_resolution = (pScreen->height * 25.4) / pScreen->mmHeight;
+    res.y_resolution = (masterScreen->height * 25.4) / masterScreen->mmHeight;
     if (res.y_resolution < 88)
         res.y_resolution = 75;
     else

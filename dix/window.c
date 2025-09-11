@@ -2269,9 +2269,9 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         event.u.u.detail = (mask & CWStackMode) ? smode : Above;
 #ifdef XINERAMA
         if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
-            ScreenPtr firstScreen = dixGetMasterScreen();
-            event.u.configureRequest.x += firstScreen->x;
-            event.u.configureRequest.y += firstScreen->y;
+            ScreenPtr masterScreen = dixGetMasterScreen();
+            event.u.configureRequest.x += masterScreen->x;
+            event.u.configureRequest.y += masterScreen->y;
         }
 #endif /* XINERAMA */
         if (MaybeDeliverEventToClient(pParent, &event,
@@ -2353,9 +2353,9 @@ ConfigureWindow(WindowPtr pWin, Mask mask, XID *vlist, ClientPtr client)
         event.u.u.type = ConfigureNotify;
 #ifdef XINERAMA
         if (!noPanoramiXExtension && (!pParent || !pParent->parent)) {
-            ScreenPtr firstScreen = dixGetMasterScreen();
-            event.u.configureNotify.x += firstScreen->x;
-            event.u.configureNotify.y += firstScreen->y;
+            ScreenPtr masterScreen = dixGetMasterScreen();
+            event.u.configureNotify.x += masterScreen->x;
+            event.u.configureNotify.y += masterScreen->y;
         }
 #endif /* XINERAMA */
         DeliverEvents(pWin, &event, 1, NullWindow);
@@ -2499,9 +2499,9 @@ ReparentWindow(WindowPtr pWin, WindowPtr pParent,
     event.u.u.type = ReparentNotify;
 #ifdef XINERAMA
     if (!noPanoramiXExtension && !pParent->parent) {
-        ScreenPtr firstScreen = dixGetMasterScreen();
-        event.u.reparent.x += firstScreen->x;
-        event.u.reparent.y += firstScreen->y;
+        ScreenPtr masterScreen = dixGetMasterScreen();
+        event.u.reparent.x += masterScreen->x;
+        event.u.reparent.y += masterScreen->y;
     }
 #endif /* XINERAMA */
     DeliverEvents(pWin, &event, 1, pParent);

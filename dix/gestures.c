@@ -53,12 +53,12 @@ GestureInitGestureInfo(GestureInfoPtr gi)
     if (!gi->sprite.spriteTrace) {
         return FALSE;
     }
-    ScreenPtr firstScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
     gi->sprite.spriteTraceSize = 32;
-    gi->sprite.spriteTrace[0] = firstScreen->root;
-    gi->sprite.hot.pScreen = firstScreen;
-    gi->sprite.hotPhys.pScreen = firstScreen;
+    gi->sprite.spriteTrace[0] = masterScreen->root;
+    gi->sprite.hot.pScreen = masterScreen;
+    gi->sprite.hotPhys.pScreen = masterScreen;
 
     return TRUE;
 }

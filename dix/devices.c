@@ -379,10 +379,10 @@ EnableDevice(DeviceIntPtr dev, BOOL sendevent)
         if (InputDevIsMaster(dev)) {
             /* Sprites appear on first root window, so we can hardcode it */
             if (dev->spriteInfo->spriteOwner) {
-                ScreenPtr firstScreen = dixGetMasterScreen();
-                InitializeSprite(dev, firstScreen->root);
+                ScreenPtr masterScreen = dixGetMasterScreen();
+                InitializeSprite(dev, masterScreen->root);
                 /* mode doesn't matter */
-                EnterWindow(dev, firstScreen->root, NotifyAncestor);
+                EnterWindow(dev, masterScreen->root, NotifyAncestor);
             }
             else {
                 other = NextFreePointerDevice();
@@ -591,7 +591,7 @@ int
 ActivateDevice(DeviceIntPtr dev, BOOL sendevent)
 {
     int ret = Success;
-    ScreenPtr pScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
     if (!dev || !dev->deviceProc)
         return BadImplementation;
@@ -605,7 +605,7 @@ ActivateDevice(DeviceIntPtr dev, BOOL sendevent)
 
     /* Initialize memory for sprites. */
     if (InputDevIsMaster(dev) && dev->spriteInfo->spriteOwner)
-        if (!pScreen->DeviceCursorInitialize(dev, pScreen))
+        if (!masterScreen->DeviceCursorInitialize(dev, masterScreen))
             ret = BadAlloc;
 
     SendDevicePresenceEvent(dev->id, DeviceAdded);
@@ -674,7 +674,7 @@ CorePointerProc(DeviceIntPtr pDev, int what)
     BYTE map[NBUTTONS + 1];
     Atom btn_labels[NBUTTONS] = { 0 };
     Atom axes_labels[NAXES] = { 0 };
-    ScreenPtr scr = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
     switch (what) {
     case DEVICE_INIT:
@@ -702,10 +702,10 @@ CorePointerProc(DeviceIntPtr pDev, int what)
             return BadAlloc;    /* IPDS only fails on allocs */
         }
         /* axisVal is per-screen, last.valuators is desktop-wide */
-        pDev->valuator->axisVal[0] = scr->width / 2;
-        pDev->last.valuators[0] = pDev->valuator->axisVal[0] + scr->x;
-        pDev->valuator->axisVal[1] = scr->height / 2;
-        pDev->last.valuators[1] = pDev->valuator->axisVal[1] + scr->y;
+        pDev->valuator->axisVal[0] = masterScreen->width / 2;
+        pDev->last.valuators[0] = pDev->valuator->axisVal[0] + masterScreen->x;
+        pDev->valuator->axisVal[1] = masterScreen->height / 2;
+        pDev->last.valuators[1] = pDev->valuator->axisVal[1] + masterScreen->y;
         break;
 
     case DEVICE_CLOSE:
@@ -989,7 +989,7 @@ FreePendingFrozenDeviceEvents(DeviceIntPtr dev)
 static void
 CloseDevice(DeviceIntPtr dev)
 {
-    ScreenPtr screen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
     ClassesPtr classes;
 
     if (!dev)
@@ -1003,7 +1003,7 @@ CloseDevice(DeviceIntPtr dev)
     FreeSprite(dev);
 
     if (InputDevIsMaster(dev))
-        screen->DeviceCursorCleanup(dev, screen);
+        masterScreen->DeviceCursorCleanup(dev, masterScreen);
 
     /* free acceleration info */
     if (dev->valuator && dev->valuator->accelScheme.AccelCleanupProc)
@@ -1144,10 +1144,10 @@ AbortDevices(void)
 void
 UndisplayDevices(void)
 {
-    ScreenPtr screen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
     for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next)
-        screen->DisplayCursor(dev, screen, NullCursor);
+        masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
 }
 
 static int
@@ -1186,7 +1186,7 @@ int
 RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
 {
     int ret = BadMatch;
-    ScreenPtr screen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
     int deviceid;
     int initialized;
     int flags[MAXDEVICES] = { 0 };
@@ -1202,7 +1202,7 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
 
     if (initialized) {
         if (DevHasCursor(dev))
-            screen->DisplayCursor(dev, screen, NullCursor);
+            masterScreen->DisplayCursor(dev, masterScreen, NullCursor);
 
         DisableDevice(dev, sendevent);
         flags[dev->id] = XIDeviceDisabled;

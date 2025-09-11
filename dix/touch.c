@@ -223,11 +223,11 @@ TouchInitTouchPoint(TouchClassPtr t, ValuatorClassPtr v, int index)
     }
     ti->sprite.spriteTraceSize = 32;
 
-    ScreenPtr firstScreen = dixGetMasterScreen();
+    ScreenPtr masterScreen = dixGetMasterScreen();
 
-    ti->sprite.spriteTrace[0] = firstScreen->root;
-    ti->sprite.hot.pScreen = firstScreen;
-    ti->sprite.hotPhys.pScreen = firstScreen;
+    ti->sprite.spriteTrace[0] = masterScreen->root;
+    ti->sprite.hot.pScreen = masterScreen;
+    ti->sprite.hotPhys.pScreen = masterScreen;
 
     ti->client_id = -1;
 
