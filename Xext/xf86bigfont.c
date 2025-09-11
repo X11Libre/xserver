@@ -314,9 +314,14 @@ static inline void writeCharInfo(x_rpcbuf_t *rpcbuf, xCharInfo CI) {
 static int
 ProcXF86BigfontQueryFont(ClientPtr client)
 {
+    REQUEST(xXF86BigfontQueryFontReq);
+    REQUEST_SIZE_MATCH(xXF86BigfontQueryFontReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     FontPtr pFont;
 
-    REQUEST(xXF86BigfontQueryFontReq);
     CARD32 stuff_flags;
     xCharInfo *pmax;
     xCharInfo *pmin;
@@ -601,30 +606,6 @@ ProcXF86BigfontDispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcXF86BigfontQueryFont(ClientPtr client)
-{
-    REQUEST(xXF86BigfontQueryFontReq);
-    REQUEST_SIZE_MATCH(xXF86BigfontQueryFontReq);
-    swapl(&stuff->id);
-    return ProcXF86BigfontQueryFont(client);
-}
-
-static int _X_COLD
-SProcXF86BigfontDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_XF86BigfontQueryVersion:
-        return ProcXF86BigfontQueryVersion(client);
-    case X_XF86BigfontQueryFont:
-        return SProcXF86BigfontQueryFont(client);
-    default:
-        return BadRequest;
-    }
-}
-
 void
 XFree86BigfontExtensionInit(void)
 {
@@ -632,7 +613,7 @@ XFree86BigfontExtensionInit(void)
                      XF86BigfontNumberEvents,
                      XF86BigfontNumberErrors,
                      ProcXF86BigfontDispatch,
-                     SProcXF86BigfontDispatch,
+                     ProcXF86BigfontDispatch,
                      XF86BigfontResetProc, StandardMinorOpcode)) {
 #ifdef CONFIG_MITSHM
 #ifdef MUST_CHECK_FOR_SHM_SYSCALL
