@@ -4722,6 +4722,7 @@ CoreEnterLeaveEvent(DeviceIntPtr mouse,
             .type = KeymapNotify
         };
         ClientPtr client = grab ? dixClientForGrab(grab) : dixClientForWindow(pWin);
+        (void)client;
         int rc;
 
         rc = dixCallDeviceAccessCallback(client, keybd, DixReadAccess);
@@ -4834,6 +4835,7 @@ CoreFocusEvent(DeviceIntPtr dev, int type, int mode, int detail, WindowPtr pWin)
             .type = KeymapNotify
         };
         ClientPtr client = dixClientForWindow(pWin);
+        (void)client;
         int rc;
 
         rc = dixCallDeviceAccessCallback(client, dev, DixReadAccess);
