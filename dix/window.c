@@ -251,6 +251,8 @@ log_window_info(WindowPtr pWin, int depth)
     case VisibilityNotViewable:
         visibility = "unviewable";
         break;
+    default:
+        break;
     }
     ErrorF(", %s", visibility);
 
@@ -3047,6 +3049,8 @@ SendVisibilityNotify(WindowPtr pWin)
             }
         });
             break;
+        default:
+            break;
         }
         }
 
@@ -3155,6 +3159,8 @@ dixSaveScreens(ClientPtr client, int on, int mode)
             else
                 walkScreen->screensaver.blanked = SCREEN_ISNT_SAVED;
             break;
+        default:
+            break;
         }
     }
     screenIsSaved = what;
@@ -3208,6 +3214,8 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
     case SCREEN_IS_BLACK:
         attributes[attri++] = pScreen->root->drawable.pScreen->blackPixel;
         mask |= CWBackPixel;
+        break;
+    default:
         break;
     }
     mask |= CWOverrideRedirect;

@@ -470,6 +470,8 @@ SClientMessageEvent(xEvent *from, xEvent *to)
         cpswapl(from->u.clientMessage.u.l.longs4,
                 to->u.clientMessage.u.l.longs4);
         break;
+    default:
+        break;
     }
 }
 
