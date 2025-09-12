@@ -255,6 +255,9 @@ typedef enum {
     NOMATCH_DRIVER,
     NOMATCH_TAG,
     NOMATCH_LAYOUT,
+
+    /* OutputClass Tokens */
+    MODULE,
 } ParserTokens;
 
 #endif                          /* _xf86_tokens_h */
