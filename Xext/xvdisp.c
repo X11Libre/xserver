@@ -763,12 +763,12 @@ ProcXvQueryImageAttributes(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    // allocating for `offsets` as well as `pitches` in one block
-    // both having CARD32 * num_planes (actually int32_t put into CARD32)
-    INT32 *offsets = x_rpcbuf_reserve(&rpcbuf, 2 * num_planes * sizeof(INT32));
+    /* allocating for `offsets` as well as `pitches` in one block */
+    /* both having CARD32 * num_planes (actually int32_t put into CARD32) */
+    int *offsets = x_rpcbuf_reserve(&rpcbuf, 2 * num_planes * sizeof(int));
     if (!offsets)
         return BadAlloc;
-    INT32 *pitches = offsets + num_planes;
+    int *pitches = offsets + num_planes;
 
     width = stuff->width;
     height = stuff->height;
