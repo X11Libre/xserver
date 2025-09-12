@@ -130,7 +130,7 @@ static int dispatch_GLXClientInfo(ClientPtr client)
     // modify the request data in place (e.g., for byte swapping), make a copy
     // of the request first.
     void *requestCopy = calloc(1, requestSize);
-    if (requestCopy == NULL) {
+    if (!requestCopy) {
         return BadAlloc;
     }
     memcpy(requestCopy, client->requestBuffer, requestSize);

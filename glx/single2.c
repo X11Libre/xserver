@@ -270,22 +270,31 @@ __glXcombine_strings(const char *cext_string, const char *sext_string)
     slen = strlen(sext_string);
     if (clen > slen) {
         combo_string = (char *) calloc(1, slen + 2);
+        if (!combo_string) {
+            return NULL;
+        }
         s1 = (char *) calloc(1, slen + 2);
-        if (s1)
-            strcpy(s1, sext_string);
+        if (!s1) {
+            free(combo_string);
+            return NULL;
+        }
+
+        strcpy(s1, sext_string);
         s2 = cext_string;
     }
     else {
         combo_string = (char *) calloc(1, clen + 2);
+        if (!combo_string) {
+            return NULL;
+        }
         s1 = (char *) calloc(1, clen + 2);
-        if (s1)
-            strcpy(s1, cext_string);
+        if (!s1) {
+            free(combo_string);
+            return NULL;
+        }
+
+        strcpy(s1, cext_string);
         s2 = sext_string;
-    }
-    if (!combo_string || !s1) {
-        free(combo_string);
-        free(s1);
-        return NULL;
     }
     combo_string[0] = '\0';
 

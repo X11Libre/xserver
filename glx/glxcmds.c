@@ -226,7 +226,7 @@ __glXdirectContextCreate(__GLXscreen * screen,
     __GLXcontext *context;
 
     context = calloc(1, sizeof(__GLXcontext));
-    if (context == NULL)
+    if (!context)
         return NULL;
 
     context->config = modes;
@@ -2346,7 +2346,7 @@ __glXDisp_QueryExtensionsString(__GLXclientState * cl, GLbyte * pc)
 
     /* Allocate buffer to make sure it's a multiple of 4 bytes big. */
     buf = calloc(length, 4);
-    if (buf == NULL)
+    if (!buf)
         return BadAlloc;
     memcpy(buf, pGlxScreen->GLXextensions, n);
 
@@ -2415,7 +2415,7 @@ __glXDisp_QueryServerString(__GLXclientState * cl, GLbyte * pc)
     };
 
     buf = calloc(length, 4);
-    if (buf == NULL) {
+    if (!buf) {
         return BadAlloc;
     }
     memcpy(buf, ptr, n);
