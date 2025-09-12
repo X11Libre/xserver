@@ -800,7 +800,7 @@ glamor_get_formats(ScreenPtr screen,
         return TRUE;
 
     *formats = calloc(num, sizeof(CARD32));
-    if (*formats == NULL)
+    if (!(*formats))
         return FALSE;
 
     if (!eglQueryDmaBufFormatsEXT(glamor_egl->display, num,
@@ -843,7 +843,7 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
         return TRUE;
 
     *modifiers = calloc(num, sizeof(uint64_t));
-    if (*modifiers == NULL)
+    if (!(*modifiers))
         return FALSE;
 
     if (!eglQueryDmaBufModifiersEXT(glamor_egl->display, format, num,
@@ -1202,7 +1202,7 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     const char *glvnd_vendor = NULL;
 
     glamor_egl = calloc(1, sizeof(*glamor_egl));
-    if (glamor_egl == NULL)
+    if (!glamor_egl)
         return FALSE;
     if (xf86GlamorEGLPrivateIndex == -1)
         xf86GlamorEGLPrivateIndex = xf86AllocateScrnInfoPrivateIndex();
