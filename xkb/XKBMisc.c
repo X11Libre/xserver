@@ -366,11 +366,7 @@ _XkbSetActionKeyMods(XkbDescPtr xkb, XkbAction *act, unsigned mods)
 Bool
 XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
 {
-    KeySym *syms;
-    unsigned char explicit, mods;
     XkbSymInterpretPtr *interps, ibuf[IBUF_SIZE];
-    int n, nSyms, found;
-    unsigned changed, tmp;
 
     if ((!xkb) || (!xkb->map) || (!xkb->map->key_sym_map) ||
         (!xkb->compat) || (!xkb->compat->sym_interpret) ||
@@ -381,13 +377,17 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
         (XkbAllocServerMap(xkb, XkbAllServerInfoMask, 0) != Success)) {
         return FALSE;
     }
-    changed = 0;                /* keeps track of what has changed in _this_ call */
-    explicit = xkb->server->explicit[key];
+
+    unsigned int changed = 0;   /* keeps track of what has changed in _this_ call */
+    unsigned char explicit = xkb->server->explicit[key];
+
     if (explicit & XkbExplicitInterpretMask)    /* nothing to do */
         return TRUE;
-    mods = (xkb->map->modmap ? xkb->map->modmap[key] : 0);
-    nSyms = XkbKeyNumSyms(xkb, key);
-    syms = XkbKeySymsPtr(xkb, key);
+
+    unsigned char mods = (xkb->map->modmap ? xkb->map->modmap[key] : 0);
+    int nSyms = XkbKeyNumSyms(xkb, key);
+    KeySym *syms = XkbKeySymsPtr(xkb, key);
+
     if (nSyms > IBUF_SIZE) {
         interps = calloc(nSyms, sizeof(XkbSymInterpretPtr));
         if (interps == NULL) {
@@ -398,8 +398,9 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
     else {
         interps = ibuf;
     }
-    found = 0;
-    for (n = 0; n < nSyms; n++) {
+
+    int found = 0;
+    for (int n = 0; n < nSyms; n++) {
         unsigned level = (n % XkbKeyGroupsWidth(xkb, key));
 
         interps[n] = NULL;
@@ -419,20 +420,18 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
         }
     }
     else {
-        XkbAction *pActs;
-        unsigned int new_vmodmask;
+        XkbAction *pActs = XkbResizeKeyActions(xkb, key, nSyms);
+        unsigned int new_vmodmask = 0;
 
         changed |= XkbKeyActionsMask;
-        pActs = XkbResizeKeyActions(xkb, key, nSyms);
         if (!pActs) {
             if (nSyms > IBUF_SIZE)
                 free(interps);
             return FALSE;
         }
-        new_vmodmask = 0;
-        for (n = 0; n < nSyms; n++) {
+        for (int n = 0; n < nSyms; n++) {
             if (interps[n]) {
-                unsigned effMods;
+                unsigned effMods = 0;
 
                 pActs[n] = *((XkbAction *) &interps[n]->act);
                 if ((n == 0) || ((interps[n]->match & XkbSI_LevelOneOnly) == 0)) {
@@ -440,8 +439,6 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
                     if (interps[n]->virtual_mod != XkbNoModifier)
                         new_vmodmask |= (1 << interps[n]->virtual_mod);
                 }
-                else
-                    effMods = 0;
                 _XkbSetActionKeyMods(xkb, &pActs[n], effMods);
             }
             else
@@ -459,9 +456,7 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
                 changed |= XkbKeyBehaviorsMask;
             }
             if (((explicit & XkbExplicitAutoRepeatMask) == 0) && (xkb->ctrls)) {
-                CARD8 old;
-
-                old = BitIsOn(xkb->ctrls->per_key_repeat, key);
+                CARD8 old = BitIsOn(xkb->ctrls->per_key_repeat, key);
                 if (interps[0]->flags & XkbSI_AutoRepeat)
                     SetBit(xkb->ctrls->per_key_repeat, key);
                 else
@@ -473,9 +468,8 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
     }
     if ((!found) || (interps[0] == NULL)) {
         if (((explicit & XkbExplicitAutoRepeatMask) == 0) && (xkb->ctrls)) {
-            CARD8 old;
+            CARD8 old = BitIsOn(xkb->ctrls->per_key_repeat, key);
 
-            old = BitIsOn(xkb->ctrls->per_key_repeat, key);
             SetBit(xkb->ctrls->per_key_repeat, key);
             if (changes && (old != BitIsOn(xkb->ctrls->per_key_repeat, key)))
                 changes->ctrls.changed_ctrls |= XkbPerKeyRepeatMask;
@@ -487,10 +481,9 @@ XkbApplyCompatMapToKey(XkbDescPtr xkb, KeyCode key, XkbChangesPtr changes)
         }
     }
     if (changes) {
-        XkbMapChangesPtr mc;
+        XkbMapChangesPtr mc = &changes->map;
+        unsigned int tmp = (changed & mc->changed);
 
-        mc = &changes->map;
-        tmp = (changed & mc->changed);
         if (tmp & XkbKeyActionsMask)
             _XkbAddKeyChange(&mc->first_key_act, &mc->num_key_acts, key);
         else if (changed & XkbKeyActionsMask) {
