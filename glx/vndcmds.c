@@ -225,9 +225,6 @@ static int CommonMakeCurrent(ClientPtr client,
         // The old and new values are all the same, so send a successful reply.
         reply.contextTag = oldTag->tag;
     } else {
-        // TODO: For switching contexts in a single vendor, just make one
-        // makeCurrent call?
-
         // TODO: When changing vendors, would it be better to do the
         // MakeCurrent(new) first, then the LoseCurrent(old)?
         // If the MakeCurrent(new) fails, then the old context will still be current.
@@ -236,7 +233,7 @@ static int CommonMakeCurrent(ClientPtr client,
         // But, if the recovery LoseCurrent(old) fails, then we're really in a bad state.
 
         // Clear the old context first.
-        if (oldTag != NULL) {
+        if (oldTag != NULL && oldTag->vendor != newVendor) {
             int ret = CommonLoseCurrent(client, oldTag);
             if (ret != Success) {
                 return ret;
