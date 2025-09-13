@@ -67,11 +67,6 @@ extern BusRec primaryBus;
 int xf86AllocateEntity(void);
 BusType StringToBusType(const char *busID, const char **retID);
 
-extern Bool fbSlotClaimed;
-extern Bool sbusSlotClaimed;
-extern int platformSlotClaimed;
-extern int pciSlotClaimed;
-
 Bool xf86ComparePciBusString(const char *busID, int bus, int device, int func);
 Bool xf86DriverHasEntities(DriverPtr drvp);
 void xf86RemoveEntityFromScreen(ScrnInfoPtr pScrn, int entityIndex);

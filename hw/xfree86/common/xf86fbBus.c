@@ -44,8 +44,6 @@
 #include "xf86Bus.h"
 #include "xf86_OSproc.h"
 
-Bool fbSlotClaimed = FALSE;
-
 int
 xf86ClaimFbSlot(DriverPtr drvp, int chipset, GDevPtr dev, Bool active)
 {
@@ -61,6 +59,5 @@ xf86ClaimFbSlot(DriverPtr drvp, int chipset, GDevPtr dev, Bool active)
     p->inUse = FALSE;
     xf86AddDevToEntity(num, dev);
 
-    fbSlotClaimed = TRUE;
     return num;
 }
