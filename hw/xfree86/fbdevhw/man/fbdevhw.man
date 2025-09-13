@@ -14,6 +14,12 @@ module is currently available for linux framebuffer devices.
 is a non-accelerated driver which runs on top of the
 fbdevhw module.  fbdevhw can be used by other drivers too, this
 is usually activated with `Option "UseFBDev"' in the device section.
+.SH CONFIGURATION DETAILS
+Drivers using this module, like fbdev, usually have options
+for setting the desired framebuffer device in xorg.conf.
+For drivers that don't, or if this isn't set in xorg.conf,
+fbdevhw also reads the FRAMEBUFFER environment variable for
+the path to the framebuffer device it should use.
 .SH "SEE ALSO"
 .BR Xorg (@appmansuffix@),
 .BR xorg.conf (@filemansuffix@),
