@@ -67,11 +67,6 @@ extern BusRec primaryBus;
 int xf86AllocateEntity(void);
 BusType StringToBusType(const char *busID, const char **retID);
 
-extern Bool fbSlotClaimed;
-extern Bool sbusSlotClaimed;
-extern int platformSlotClaimed;
-extern int pciSlotClaimed;
-
 Bool xf86ComparePciBusString(const char *busID, int bus, int device, int func);
 Bool xf86DriverHasEntities(DriverPtr drvp);
 void xf86RemoveEntityFromScreen(ScrnInfoPtr pScrn, int entityIndex);
@@ -83,7 +78,6 @@ _X_EXPORT /* only for internal int10 module - not supposed to be used by OOT dri
 ScrnInfoPtr xf86FindScreenForEntity(int entityIndex);
 
 Bool xf86BusConfig(void);
-void xf86PostProbe(void);
 void xf86ClearEntityListForScreen(ScrnInfoPtr pScrn);
 void xf86RemoveDevFromEntity(int entityIndex, GDevPtr dev);
 

@@ -444,7 +444,6 @@ InitOutput(int argc, char **argv)
         if (xf86BusConfig() == FALSE)
             return;
 
-        xf86PostProbe();
 
         /*
          * Sort the drivers to match the requested ording.  Using a slow
