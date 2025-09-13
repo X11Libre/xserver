@@ -236,7 +236,7 @@ fbdev2xfree_timing(struct fb_var_screeninfo *var, DisplayModePtr mode)
 /* open correct framebuffer device                                      */
 
 static int
-set_name(int scrnIndex, int fd, char **namep, Bool print_warning, Bool close_fd)
+fbdev_set_name(int scrnIndex, int fd, char **namep, Bool print_warning, Bool close_fd_on_error)
 {
     struct fb_fix_screeninfo fix;
 
@@ -254,7 +254,7 @@ set_name(int scrnIndex, int fd, char **namep, Bool print_warning, Bool close_fd)
             xf86DrvMsg(scrnIndex, X_ERROR,
                        "FBIOGET_FSCREENINFO: %s\n", strerror(errno));
         }
-        if (close_fd) {
+        if (close_fd_on_error) {
             close(fd);
             return -1;
         }
@@ -268,7 +268,7 @@ set_name(int scrnIndex, int fd, char **namep, Bool print_warning, Bool close_fd)
 }
 
 static int
-check_user_devices(int scrnIndex, const char* dev, char **namep)
+fbdev_check_user_devices(int scrnIndex, const char* dev, char **namep)
 {
     int fd;
 
@@ -286,7 +286,7 @@ check_user_devices(int scrnIndex, const char* dev, char **namep)
         fd = dev ? open(dev, O_RDWR) : -1;
     }
 
-    fd = set_name(scrnIndex, fd, namep, TRUE, FALSE);
+    fd = fbdev_set_name(scrnIndex, fd, namep, TRUE, FALSE);
     if (dev && fd == -1) {
         xf86DrvMsg(scrnIndex, X_ERROR,
                    "Could not use the explicitly provided framebuffer: %s\n", dev);
@@ -303,7 +303,7 @@ fbdev_open_pci(int scrnIndex, struct pci_device *pPci, const char *device, char 
     char filename[256];
     int fd, i;
 
-    fd = check_user_devices(scrnIndex, device, namep);
+    fd = fbdev_check_user_devices(scrnIndex, device, namep);
 
     if (fd != -1) {
         /* fbdev was provided by the user and not guessed, skip pci check */
@@ -327,7 +327,7 @@ fbdev_open_pci(int scrnIndex, struct pci_device *pPci, const char *device, char 
             snprintf(filename, sizeof(filename), "/dev/fb%d", i);
 
             fd = open(filename, O_RDWR);
-            fd = set_name(scrnIndex, fd, namep, FALSE, TRUE);
+            fd = fbdev_set_name(scrnIndex, fd, namep, FALSE, TRUE);
             if (fd != -1) {
                 return fd;
             }
@@ -343,7 +343,7 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
 {
     int fd;
 
-    fd = check_user_devices(scrnIndex, dev, namep);
+    fd = fbdev_check_user_devices(scrnIndex, dev, namep);
 
     if (fd != -1) {
         /* fbdev was provided by the user and not guessed, just return it */
@@ -366,7 +366,7 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
         return -1;
     }
 
-    return set_name(scrnIndex, fd, namep, TRUE, TRUE);
+    return fbdev_set_name(scrnIndex, fd, namep, TRUE, TRUE);
 }
 
 /* -------------------------------------------------------------------- */
