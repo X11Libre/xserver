@@ -362,7 +362,7 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
     }
 
     if (fd == -1) {
-        xf86DrvMsg(scrnIndex, X_ERROR, "open %s: %s\n", dev, strerror(errno));
+        xf86DrvMsg(scrnIndex, X_ERROR, "Unable to find a valid framebuffer device\n");
         return -1;
     }
 
