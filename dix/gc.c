@@ -77,7 +77,7 @@ ValidateGC(DrawablePtr pDraw, GCPtr pGC)
 {
     (*pGC->funcs->ValidateGC) (pGC, pGC->stateChanges, pDraw);
     pGC->stateChanges = 0;
-    pGC->serialNumber = pDraw->serialNumber;
+    pGC->serialNumber = (unsigned)pDraw->serialNumber;
 }
 
 /*
