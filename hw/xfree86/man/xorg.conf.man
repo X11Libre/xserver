@@ -1290,20 +1290,38 @@ module from the first
 .B Driver
 entry will be enabled when using the loadable server.
 .PP
-When an output device is automatically added, its characteristics are
+When an output device is automatically added, its characteristics and the active layout are
 checked against all
 .B OutputClass
 sections.
 Each section can contain optional entries to narrow the match of the class.
+.RE
+.TP 7
+.BI "MatchDriver \*q" matchdriver \*q
+Check the case-sensitive string
+.RI \*q matchdriver \*q
+against the kernel driver of the device.
+.RE
+.TP 7
+.BI "MatchLayout \*q" matchlayout \*q
+Check the case-sensitive string
+.RI \*q matchlayout \*q
+against the currently active
+.B ServerLayout
+section or against
+.RI \*q\*q
+, if no named
+.B ScreenLayout
+sections are present.
+.PP
 If none of the optional entries appear, the
 .B OutputClass
 section is generic and will match any output device.
 If more than one of these entries appear, they all must match for the
 configuration to apply.
 .PP
-The following list of tokens can be matched against attributes of the device.
-An entry can be constructed to match attributes from different devices by
-separating arguments with a '|' character.
+An entry can be constructed to match attributes from different devices or
+different screen layouts by separating arguments with a '|' character.
 .PP
 For example:
 .PP
@@ -1313,15 +1331,12 @@ For example:
 .B  "    Identifier   \*qMy Class\*q"
 .B  "    # kernel driver must be either foo or bar"
 .B  "    MatchDriver \*qfoo\^|\^bar\*q"
+.B  "    # active layout must be either Seat1 or implicit"
+.B  "    MatchLayout \*qSeat1|\*q"
 .I  "    \&.\|.\|.\&"
 .B  EndSection
 .fi
 .RE
-.TP 7
-.BI "MatchDriver \*q" matchdriver \*q
-Check the case-sensitive string
-.RI \*q matchdriver \*q
-against the kernel driver of the device.
 .PP
 When an output device has been matched to the
 .B OutputClass
