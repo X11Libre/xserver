@@ -768,7 +768,7 @@ static inline int __write_reply_hdr_and_rpcbuf(
          swapl(&reply->length);
     }
 
-    WriteToClient(pClient, hdrLen, hdrData);
+    WriteToClient(pClient, (int)hdrLen, hdrData);
     WriteRpcbufToClient(pClient, rpcbuf);
 
     return Success;
@@ -787,7 +787,7 @@ static inline int __write_reply_hdr_simple(
          swapl(&reply->length);
     }
 
-    WriteToClient(pClient, hdrLen, hdrData);
+    WriteToClient(pClient, (int)hdrLen, hdrData);
     return Success;
 }
 
