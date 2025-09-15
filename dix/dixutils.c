@@ -645,7 +645,7 @@ ClientIsAsleep(ClientPtr client)
 
 /* ===== Private Procedures ===== */
 
-static int numCallbackListsToCleanup = 0;
+static size_t numCallbackListsToCleanup = 0;
 static CallbackListPtr **listsToCleanup = NULL;
 
 static Bool
@@ -751,7 +751,7 @@ void DeleteCallbackList(CallbackListPtr *pcbl)
         return;
     }
 
-    for (int i = 0; i < numCallbackListsToCleanup; i++) {
+    for (size_t i = 0; i < numCallbackListsToCleanup; i++) {
         if (listsToCleanup[i] == pcbl) {
             listsToCleanup[i] = NULL;
             break;
@@ -781,7 +781,7 @@ CreateCallbackList(CallbackListPtr *pcbl)
     cbl->list = NULL;
     *pcbl = cbl;
 
-    for (int i = 0; i < numCallbackListsToCleanup; i++) {
+    for (size_t i = 0; i < numCallbackListsToCleanup; i++) {
         if (!listsToCleanup[i]) {
             listsToCleanup[i] = pcbl;
             return TRUE;
@@ -822,7 +822,7 @@ DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 void
 DeleteCallbackManager(void)
 {
-    for (int i = 0; i < numCallbackListsToCleanup; i++) {
+    for (size_t i = 0; i < numCallbackListsToCleanup; i++) {
         DeleteCallbackList(listsToCleanup[i]);
     }
     free(listsToCleanup);
