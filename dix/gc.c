@@ -984,8 +984,8 @@ VerifyRectOrder(int nrects, xRectangle *prects, int ordering)
 }
 
 int
-SetClipRects(GCPtr pGC, int xOrigin, int yOrigin, int nrects,
-             xRectangle *prects, int ordering)
+SetClipRects(GCPtr pGC, INT16 xOrigin, INT16 yOrigin, size_t nrects,
+             xRectangle *prects, BYTE ordering)
 {
     int newct, size;
 

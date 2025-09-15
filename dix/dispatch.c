@@ -1612,7 +1612,7 @@ ProcSetDashes(ClientPtr client)
 int
 ProcSetClipRectangles(ClientPtr client)
 {
-    int nr, result;
+    int result;
     GCPtr pGC;
 
     REQUEST(xSetClipRectanglesReq);
@@ -1627,12 +1627,12 @@ ProcSetClipRectangles(ClientPtr client)
     if (result != Success)
         return result;
 
-    nr = (client->req_len << 2) - sizeof(xSetClipRectanglesReq);
+    size_t nr = (client->req_len << 2) - sizeof(xSetClipRectanglesReq);
     if (nr & 4)
         return BadLength;
     nr >>= 3;
     return SetClipRects(pGC, stuff->xOrigin, stuff->yOrigin,
-                        nr, (xRectangle *) &stuff[1], (int) stuff->ordering);
+                        nr, (xRectangle *) &stuff[1], stuff->ordering);
 }
 
 int
