@@ -232,8 +232,8 @@ RealizeCursorAllScreens(CursorPtr pCurs)
 int
 AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
                 CARD32 *argb, CursorMetricPtr cm,
-                unsigned foreRed, unsigned foreGreen, unsigned foreBlue,
-                unsigned backRed, unsigned backGreen, unsigned backBlue,
+                unsigned short foreRed, unsigned short foreGreen, unsigned short foreBlue,
+                unsigned short backRed, unsigned short backGreen, unsigned short backBlue,
                 CursorPtr *ppCurs, ClientPtr client, XID cid)
 {
     CursorBitsPtr bits;
