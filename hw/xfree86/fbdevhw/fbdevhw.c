@@ -3,8 +3,24 @@
 #include <xorg-config.h>
 #endif
 
+#include <fcntl.h>
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <glob.h>
+
+#include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/ioctl.h>
+
+#ifdef HAVE_SYS_SYSMACROS_H
+#include <sys/sysmacros.h>
+#endif
+#ifdef HAVE_SYS_MKDEV_H
+#include <sys/mkdev.h>          /* for minor() on Solaris */
+#endif
 
 #include "xf86.h"
 #include "xf86Modes.h"
@@ -38,14 +54,6 @@ static XF86ModuleVersionInfo fbdevHWVersRec = {
 _X_EXPORT XF86ModuleData fbdevhwModuleData = {
     .vers = &fbdevHWVersRec
 };
-
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/mman.h>
-#include <sys/ioctl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 /* -------------------------------------------------------------------- */
 /* our private data, and two functions to allocate/free this            */
@@ -289,42 +297,110 @@ fbdev_check_user_devices(int scrnIndex, const char* dev, char **namep)
 
 /**
  * Try to find the framebuffer device for a given PCI device
+ * This probe works in the following way:
+ *
+ * 1. If we have device passed by the user, we store it's minor number.
+ * We then look through the framebuffers associated to the pPci pci device.
+ * If we find one that has the same minor as the one passed by the user, we
+ * open the filename passed by the user and return an fd to it.
+ * Otherwise, we return -1;
+ *
+ * 2. If we don't have a device passed by the user,
+ * we look through the framebuffers associated to the pPci pci device.
+ * If we find one that is valid, we return an fd to it.
+ * Otherwise, we return -1;
  */
 static int
 fbdev_open_pci(int scrnIndex, struct pci_device *pPci, const char *device, char **namep)
 {
-    char filename[256];
-    int fd, i;
+    /*
+     * We really don't care what pci slot we claim when using the fbdev driver
+     * However, due to how the probe interface is designed,
+     * we have to be careful to not claim the wrong pci slot.
+     */
+    char pattern[PATH_MAX];
+    int fd;
+    int fbdev_minor = -1;
 
     fd = fbdev_check_user_devices(scrnIndex, device, namep);
 
+    int tfd;
+    snprintf(pattern, sizeof(pattern),
+             "/sys/bus/pci/devices/%04x:%02x:%02x.%d",
+             pPci->domain, pPci->bus, pPci->dev, pPci->func);
+    tfd = open(pattern, O_RDONLY);
+    if (tfd == -1) {
+        xf86DrvMsg(scrnIndex, X_WARNING,
+                   "Sysfs interface cannot be used."
+                   "Pci probe for framebuffer devices cannot function properly.\n");
+        if (fd != -1) {
+            xf86DrvMsg(scrnIndex, X_WARNING,
+                       "Using device: %s without further checks\n", device);
+            return fd;
+        }
+        xf86DrvMsg(scrnIndex, X_ERROR, "Unable to find a valid framebuffer device\n");
+        return -1;
+    }
+    close(tfd);
+
     if (fd != -1) {
-        /* fbdev was provided by the user and not guessed, skip pci check */
-        return fd;
-    }
-
-    for (i = 0; i < 8; i++) {
-        snprintf(filename, sizeof(filename),
-                 "/sys/bus/pci/devices/%04x:%02x:%02x.%d/graphics/fb%d",
-                 pPci->domain, pPci->bus, pPci->dev, pPci->func, i);
-
-        fd = open(filename, O_RDONLY);
-        if (fd < 0) {
-            snprintf(filename, sizeof(filename),
-                     "/sys/bus/pci/devices/%04x:%02x:%02x.%d/graphics:fb%d",
-                     pPci->domain, pPci->bus, pPci->dev, pPci->func, i);
-            fd = open(filename, O_RDONLY);
+        struct stat res;
+        if (fstat(fd, &res) == 0) {
+            fbdev_minor = minor(res.st_rdev);
         }
-        if (fd >= 0) {
-            close(fd);
-            snprintf(filename, sizeof(filename), "/dev/fb%d", i);
-
-            fd = fbdev_open_device(scrnIndex, filename, namep);
-            if (fd != -1) {
-                return fd;
-            }
+        close(fd);
+        fd = -1;
+        if (namep) {
+            free(*namep);
+            *namep = NULL;
         }
     }
+
+#define FBDEV_CHECK_PCI_GLOB(glob_pattern) \
+    do { \
+        glob_t res; \
+        snprintf(pattern, sizeof(pattern), \
+                 "/sys/bus/pci/devices/%04x:%02x:%02x.%d/" glob_pattern "/dev", \
+                 pPci->domain, pPci->bus, pPci->dev, pPci->func); \
+        if (!glob(pattern, GLOB_NOSORT | GLOB_NOESCAPE, NULL, &res)) { \
+            char filename[PATH_MAX] = "/dev/"; \
+            for (int i = 0; i < res.gl_pathc; i++) { \
+                int maj, min = -1; \
+                FILE *f = fopen(res.gl_pathv[i], "r"); \
+                if (f) { \
+                    fscanf(f, "%d:%d", &maj, &min); \
+                    fclose(f); \
+                } \
+                if (fbdev_minor != -1) { \
+                    if (fbdev_minor != min) { \
+                        continue; \
+                    } \
+                    /* We have determined the the device the user gave us matches this pci device */ \
+                    /* However, the name could be different than /dev/fb* */ \
+                    /* Since we already have a filename from the user, use that instead of guessing */ \
+                    return fbdev_check_user_devices(scrnIndex, device, namep); \
+                } \
+                char *src = strstr(res.gl_pathv[i], "graphics") + sizeof("graphics/") - 1; /* Has to match */ \
+                char *dst = filename + sizeof("/dev/") - 1; \
+                while (*src != '/') { \
+                    *dst++ = *src++; \
+                } \
+                *dst = '\0'; \
+                fd = fbdev_open_device(scrnIndex, filename, namep); \
+                if (fd != -1) { \
+                    return fd; \
+                } \
+            } \
+        } \
+        globfree(&res); \
+    } while(0)
+
+    FBDEV_CHECK_PCI_GLOB("graphics/fb*");
+    FBDEV_CHECK_PCI_GLOB("graphics:fb*");
+    FBDEV_CHECK_PCI_GLOB("*/graphics/fb*");
+    FBDEV_CHECK_PCI_GLOB("*/graphics:fb*");
+
+#undef FBDEV_CHECK_PCI_GLOB
 
     xf86DrvMsg(scrnIndex, X_ERROR, "Unable to find a valid framebuffer device\n");
     return -1;
