@@ -2918,7 +2918,7 @@ HandleSaveSet(ClientPtr client)
 {
     WindowPtr pParent, pWin;
 
-    for (int j = 0; j < client->numSaved; j++) {
+    for (unsigned j = 0; j < client->numSaved; j++) {
         pWin = SaveSetWindow(client->saveSet[j]);
         if (SaveSetToRoot(client->saveSet[j]))
             pParent = pWin->drawable.pScreen->root;

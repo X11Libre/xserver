@@ -96,7 +96,7 @@ typedef struct _Client {
     XID errorValue;
     int sequence;
     int ignoreCount;            /* count for Attend/IgnoreClient */
-    int numSaved;
+    unsigned numSaved;          /* amount of windows in saveSet */
     SaveSetElt *saveSet;
     int (**requestVector) (ClientPtr /* pClient */ );
     CARD32 req_len;             /* length of current request */

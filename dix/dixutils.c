@@ -248,7 +248,7 @@ XRetCode
 AlterSaveSetForClient(ClientPtr client, WindowPtr pWin, unsigned mode,
                       Bool toRoot, Bool map)
 {
-    int numnow;
+    unsigned numnow;
     SaveSetElt *pTmp = NULL;
     int j;
 
