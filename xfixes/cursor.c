@@ -321,7 +321,7 @@ CopyCursorToImage(CursorPtr pCursor, CARD32 *image)
     {
         unsigned char *srcLine = pCursor->bits->source;
         unsigned char *mskLine = pCursor->bits->mask;
-        int stride = BitmapBytePad(width);
+        size_t stride = BitmapBytePad(width);
         int x, y;
         CARD32 fg, bg;
 
