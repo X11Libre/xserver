@@ -422,10 +422,11 @@ fbdev_open(int scrnIndex, const char *dev, char **namep)
     dev = "/dev/fb";
     fd = fbdev_open_device(scrnIndex, dev, namep);
 
-    /* last tries, framebuffers 0 through 7 */
-    char devbuf[] = "/dev/fb0";
-    for (int i = 0; i < 8 && fd == -1; i++) {
-        devbuf[sizeof(devbuf) - 2] = i + '0';
+    /* last tries, framebuffers 0 through 31 */
+    char devbuf[] = "/dev/fbxx";
+    for (int i = 0; i <= 31 && fd == -1; i++) {
+        snprintf(devbuf, sizeof(devbuf),
+                 "/dev/fb%d", i);
         fd = fbdev_open_device(scrnIndex, devbuf, namep);
     }
 
