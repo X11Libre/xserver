@@ -124,6 +124,6 @@ extern _X_EXPORT PaddingInfo PixmapWidthPaddingInfo[];
     (PixmapWidthInPadUnits(w, d) << PixmapWidthPaddingInfo[d].padBytesLog2)
 
 #define BitmapBytePad(w) \
-    (((int)((w) + BITMAP_SCANLINE_PAD - 1) >> LOG2_BITMAP_PAD) << LOG2_BYTES_PER_SCANLINE_PAD)
+    (((unsigned int)((w) + BITMAP_SCANLINE_PAD - 1) >> LOG2_BITMAP_PAD) << LOG2_BYTES_PER_SCANLINE_PAD)
 
 #endif                          /* SERVERMD_H */
