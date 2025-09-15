@@ -326,8 +326,8 @@ typedef struct _BlockHandler {
 } BlockHandlerRec, *BlockHandlerPtr;
 
 static BlockHandlerPtr handlers;
-static int numHandlers;
-static int sizeHandlers;
+static size_t numHandlers;
+static size_t sizeHandlers;
 static Bool inHandler;
 static Bool handlerDeleted;
 
@@ -339,7 +339,7 @@ void
 BlockHandler(void *pTimeout)
 {
     ++inHandler;
-    for (int i = 0; i < numHandlers; i++)
+    for (size_t i = 0; i < numHandlers; i++)
         if (!handlers[i].deleted)
             (*handlers[i].BlockHandler) (handlers[i].blockData, pTimeout);
 
@@ -356,9 +356,9 @@ BlockHandler(void *pTimeout)
     }
 
     if (handlerDeleted) {
-        for (int i = 0; i < numHandlers;)
+        for (size_t i = 0; i < numHandlers;)
             if (handlers[i].deleted) {
-                for (int j = i; j < numHandlers - 1; j++)
+                for (size_t j = i; j < numHandlers - 1; j++)
                     handlers[j] = handlers[j + 1];
                 numHandlers--;
             }
@@ -389,13 +389,13 @@ WakeupHandler(int result)
             walkScreen->WakeupHandler(walkScreen, result);
     }
 
-    for (int i = numHandlers - 1; i >= 0; i--)
-        if (!handlers[i].deleted)
-            (*handlers[i].WakeupHandler) (handlers[i].blockData, result);
+    for (size_t i = numHandlers; i > 0; i--)
+        if (!handlers[i-1].deleted)
+            handlers[i-1].WakeupHandler(handlers[i-1].blockData, result);
     if (handlerDeleted) {
-        for (int i = 0; i < numHandlers;)
+        for (size_t i = 0; i < numHandlers;)
             if (handlers[i].deleted) {
-                for (int j = i; j < numHandlers - 1; j++)
+                for (size_t j = i; j < numHandlers - 1; j++)
                     handlers[j] = handlers[j + 1];
                 numHandlers--;
             }
@@ -438,7 +438,7 @@ RemoveBlockAndWakeupHandlers(ServerBlockHandlerProcPtr blockHandler,
                              ServerWakeupHandlerProcPtr wakeupHandler,
                              void *blockData)
 {
-    for (int i = 0; i < numHandlers; i++)
+    for (size_t i = 0; i < numHandlers; i++)
         if (handlers[i].BlockHandler == blockHandler &&
             handlers[i].WakeupHandler == wakeupHandler &&
             handlers[i].blockData == blockData) {
