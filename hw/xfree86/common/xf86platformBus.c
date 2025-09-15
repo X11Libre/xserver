@@ -179,9 +179,22 @@ OutputClassMatches(const XF86ConfOutputClassPtr oclass,
                    struct xf86_platform_device *dev)
 {
     char *driver = dev->attribs->driver;
+    const char *layout;
 
     if (!MatchAttrToken(driver, &oclass->match_driver))
         return FALSE;
+
+    /* MatchLayout string
+     *
+     * If no Layout section is found, xf86ServerLayout.id becomes "(implicit)"
+     * It is convenient that "" in patterns means "no explicit layout"
+     */
+    if (strcmp(xf86ConfigLayout.id,"(implicit)"))
+        layout = xf86ConfigLayout.id;
+    else
+        layout = "";
+    if (!MatchAttrToken(layout, &oclass->match_layout))
+            return FALSE;
 
     return TRUE;
 }

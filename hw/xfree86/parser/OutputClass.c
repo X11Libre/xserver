@@ -42,6 +42,7 @@ static const xf86ConfigSymTabRec OutputClassTab[] = {
     {MODULEPATH, "modulepath"},
     {OPTION, "option"},
     {MATCH_DRIVER, "matchdriver"},
+    {MATCH_LAYOUT, "matchlayout"},
     {-1, ""},
 };
 
@@ -58,6 +59,8 @@ xf86freeOutputClassList(XF86ConfOutputClassPtr ptr)
         TestFree(ptr->modulepath);
 
         xf86freeMatchGroupList(&ptr->match_driver);
+        xf86freeMatchGroupList(&ptr->match_layout);
+
         xf86optionListFree(ptr->option_lst);
 
         prev = ptr;
@@ -77,8 +80,8 @@ xf86parseOutputClassSection(void)
 
     parsePrologue(XF86ConfOutputClassPtr, XF86ConfOutputClassRec)
 
-    /* Initialize MatchGroup lists */
-    xorg_list_init(&ptr->match_driver);
+    /* MatchGroup and MatchLayout lists are zeroed by parsePrologue(),
+     * which is equivalent to xorg_list_init() */
 
     while ((token = xf86getToken(OutputClassTab)) != ENDSECTION) {
         switch (token) {
@@ -140,6 +143,16 @@ xf86parseOutputClassSection(void)
                 free(xf86_lex_val.str);
             }
             break;
+        case MATCH_LAYOUT:
+            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
+                Error(QUOTE_MSG, "MatchLayout");
+            else {
+                group = xf86createMatchGroup(xf86_lex_val.str, MATCH_EXACT, FALSE);
+                if (group)
+                    xorg_list_add(&group->entry, &ptr->match_layout);
+                free(xf86_lex_val.str);
+            }
+            break;
         case EOF_TOKEN:
             Error(UNEXPECTED_EOF_MSG);
             break;
@@ -181,6 +194,16 @@ xf86printOutputClassSection(FILE * cf, XF86ConfOutputClassPtr ptr)
 
         xorg_list_for_each_entry(group, &ptr->match_driver, entry) {
             fprintf(cf, "\tMatchDriver     \"");
+            not_first = FALSE;
+            xorg_list_for_each_entry(pattern, &group->patterns, entry) {
+                xf86printMatchPattern(cf, pattern, not_first);
+                not_first = TRUE;
+            }
+            fprintf(cf, "\"\n");
+        }
+
+        xorg_list_for_each_entry(group, &ptr->match_layout, entry) {
+            fprintf(cf, "\tMatchLayout     \"");
             not_first = FALSE;
             xorg_list_for_each_entry(pattern, &group->patterns, entry) {
                 xf86printMatchPattern(cf, pattern, not_first);
