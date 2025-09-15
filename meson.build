@@ -50,6 +50,7 @@ if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
         '-Woverride-init',
         '-Wvla',
         '-Wincompatible-pointer-types',
+        '-Wconversion',
     ]
 else
     test_wflags = []
