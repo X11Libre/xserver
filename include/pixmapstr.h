@@ -98,22 +98,12 @@ typedef struct _PixmapDirtyUpdate {
 } PixmapDirtyUpdateRec;
 
 static inline void
-PixmapBox(BoxPtr box, PixmapPtr pixmap)
-{
-    box->x1 = 0;
-    box->x2 = pixmap->drawable.width;
-
-    box->y1 = 0;
-    box->y2 = pixmap->drawable.height;
-}
-
-
-static inline void
 PixmapRegionInit(RegionPtr region, PixmapPtr pixmap)
 {
-    BoxRec box;
-
-    PixmapBox(&box, pixmap);
+    BoxRec box = {
+        .x2 = (int16_t)pixmap->drawable.width,
+        .y2 = (int16_t)pixmap->drawable.height,
+    };
     RegionInit(region, &box, 1);
 }
 
