@@ -34,7 +34,7 @@ fbPutImage(DrawablePtr pDrawable,
 {
     FbGCPrivPtr pPriv = fbGetGCPrivate(pGC);
     unsigned long i;
-    FbStride srcStride;
+    unsigned srcStride;
     FbStip *src = (FbStip *) pImage;
 
     x += pDrawable->x;
@@ -211,7 +211,7 @@ fbGetImage(DrawablePtr pDrawable,
     int srcBpp;
     int srcXoff, srcYoff;
     FbStip *dst;
-    FbStride dstStride;
+    unsigned dstStride;
 
     /*
      * XFree86 DDX empties the root borderClip when the VT is

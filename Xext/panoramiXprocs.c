@@ -1994,7 +1994,6 @@ PanoramiXGetImage(ClientPtr client)
     int x, y, w, h, format, rc;
     Mask plane = 0, planemask;
     int linesDone, nlines, linesPerBuf;
-    long widthBytesLine;
 
     REQUEST(xGetImageReq);
 
@@ -2066,6 +2065,8 @@ PanoramiXGetImage(ClientPtr client)
     });
 
     size_t length;
+    size_t widthBytesLine;
+
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(w, pDraw->depth);
         length = widthBytesLine * h;
