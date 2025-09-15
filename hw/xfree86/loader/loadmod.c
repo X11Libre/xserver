@@ -101,6 +101,32 @@ FreeStringList(char **paths)
 
 static char **defaultPathList = NULL;
 
+typedef struct {
+    struct xorg_list entry;
+    char *name;
+    char **paths;
+} LoaderModulePathListItem;
+
+struct xorg_list modulePathLists;
+
+void LoaderInitPath(void) {
+    /* defaultPathList is already set in xf86Init */
+    xorg_list_init(&modulePathLists);
+}
+
+void LoaderClosePath(void) {
+    LoaderModulePathListItem *item, *next;
+    xorg_list_for_each_entry_safe(item, next, &modulePathLists, entry) {
+        xorg_list_del(&item->entry);
+        free(item->name);
+        if (item->paths)
+            FreeStringList(item->paths);
+        free(item);
+    }
+    xorg_list_del(&modulePathLists);
+    FreeStringList(defaultPathList);
+}
+
 static Bool
 PathIsAbsolute(const char *path)
 {
@@ -163,14 +189,72 @@ InitPathList(const char *path)
     return list;
 }
 
+/*
+ * Set a default search path or a search path for a specific driver
+ */
 void
-LoaderSetPath(const char *path)
+LoaderSetPath(const char *driver, const char *path)
 {
-    if (!path)
-        return;
+    LoaderModulePathListItem *item;
 
-    FreeStringList(defaultPathList);
-    defaultPathList = InitPathList(path);
+    if (!driver) {
+        if (path) {
+            FreeStringList(defaultPathList);
+            defaultPathList = InitPathList(path);
+        }
+        return;
+    }
+
+    xorg_list_for_each_entry(item, &modulePathLists, entry) {
+        if (!strcmp(item->name, driver)) {
+            FreeStringList(item->paths);
+            if (path)
+                item->paths = InitPathList(path);
+            else
+                item->paths = NULL;
+            return;
+        }
+    }
+
+    item = malloc(sizeof(LoaderModulePathListItem));
+    if (item) {
+        item->name = strdup(driver);
+        if (path)
+            item->paths = InitPathList(path);
+        else
+            item->paths = NULL;
+    }
+    if (item && item->name && (!path || item->paths))
+        xorg_list_add(&item->entry, &modulePathLists);
+    else {
+        LogMessage(X_ERROR, "Failed to store module search path \"%s\" for module %s\n", path, driver);
+        if (item) {
+            if (item->name) free(item->name);
+            if (item->paths) FreeStringList(item->paths);
+            free(item);
+        }
+    }
+}
+
+/*
+ * Get a default search path or a search path for a specific driver
+ * and make it effective
+ */
+static char **
+LoaderGetPath(const char *module)
+{
+    LoaderModulePathListItem *item;
+
+    xorg_list_for_each_entry(item, &modulePathLists, entry) {
+        if (!strcmp(item->name, module)) {
+            if (item->paths)
+                return item->paths;
+            else
+                return defaultPathList;
+        }
+    }
+
+    return defaultPathList;
 }
 
 /* Standard set of module subdirectories to search, in order of preference */
@@ -725,7 +809,7 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
         goto LoadModule_fail;
     }
 
-    pathlist = defaultPathList;
+    pathlist = LoaderGetPath(name);
     if (!pathlist) {
         /* This could be a calloc failure too */
         if (errmaj)

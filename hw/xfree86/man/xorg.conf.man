@@ -435,7 +435,7 @@ searches for loadable modules loading in the order specified.
 Multiple
 .B ModulePath
 entries may be specified, and they will be concatenated to build the
-module search path used by the server.  The default module path is
+module search path used by the server.  The standard default module path is
 .PP
 .RS 11
 @modulepath@
@@ -1327,11 +1327,11 @@ When an output device has been matched to the
 .B OutputClass
 section, any
 .B Option
-entries are applied to the device. One
+entries are applied to the device. Two
 .B OutputClass
-specific
+specific kinds of
 .B Option
-is recognized. See the
+are recognized. See the
 .B Device
 section below for a description of the remaining
 .B Option
@@ -1356,21 +1356,90 @@ If multiple output devices match an
 section with the
 .B HotplugDriver
 option, the first one enumerated becomes the hotplug driver.
-A
+.RE
+.PP
+.TP 7
+An
 .B OutputClass
-Section may contain
-.B ModulePath
-entries. When an output device matches an
+section may contain multiple
+.TP 7
+.BI "ModulePath \*q" path \*q
+entries. When an output device with DRM enabled matches an
 .B OutputClass
-section, any
+section and
+.B Driver
+.I \*qdriver\*q
+is set, then for this driver module, and all modules loaded until the next driver
+for a DRM-enabled GPU, a search path is created by prepending all
 .B ModulePath
 entries in that
 .B OutputClass
-are pre-pended to the search path for loadable Xorg server modules. See
+to the
+.I standard
+search path \(lq@modulepath@\(rq for loadable Xorg server modules (not the
+.I effective
+default set path, which can undergo changes, see below). If there is a single
+.PP
+.RS 11
+.nf
+.B "    ModulePath  \*q\*q
+.fi
+.RE
+.PP
+.RS 7
+entry in an
+.B OutputClass
+for a
+.I driver
+, then only the
+.I standard
+path \(lq@modulepath@\(rq is searched from now on. It there no
+.B ModulePath
+entries at all, then the
+.I effective
+default search path (set globally) becomes active. Note that each
+.B OutputClass
+.I overrides
+search path for a
+.I driver
+, not
+.I extends
+it.
+.PP
+If a matching
+.B OutputClass
+contains
+.B ModulePath
+entries, but not a
+.B Driver
+entry, then paths are
+.I prepended
+to the
+.I effective
+default search path, which initially is standard \(lq@modulepath@\(rq, thus extending it.
+.PP
+These entries have no effect if a search path for loadable modules is set through command line. See
 .B ModulePath
 in the
 .B Files
 section for more info.
+.RE
+.PP
+.B OutputClass
+section may contain an arbitrary number of
+.PP
+.RS 4
+.nf
+.BI "    Module  \*q" module\*q
+.fi
+.RE
+.PP
+entries, which are quite equivalent to
+.B Driver
+except that
+.I \*qmodule\*q
+is not added to the list of autoconfigured video drivers. This may be useful to extend
+ABI version ignoring and special search paths to modules like "glx".
 .SH "DEVICE SECTION"
 The config file may have multiple
 .B Device
