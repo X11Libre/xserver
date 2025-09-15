@@ -761,7 +761,7 @@ static inline int __write_reply_hdr_and_rpcbuf(
     reply->type = X_Reply;
     reply->length = (bytes_to_int32(hdrLen - sizeof(xGenericReply)))
                   + x_rpcbuf_wsize_units(rpcbuf);
-    reply->sequenceNumber = pClient->sequence;
+    reply->sequenceNumber = (CARD16)pClient->sequence; /* shouldn't go above 64k */
 
     if (pClient->swapped) {
          swaps(&reply->sequenceNumber);
@@ -780,7 +780,7 @@ static inline int __write_reply_hdr_simple(
     xGenericReply *reply = hdrData;
     reply->type = X_Reply;
     reply->length = (bytes_to_int32(hdrLen - sizeof(xGenericReply)));
-    reply->sequenceNumber = pClient->sequence;
+    reply->sequenceNumber = (CARD16)pClient->sequence; /* shouldn't go above 64k */
 
     if (pClient->swapped) {
          swaps(&reply->sequenceNumber);
@@ -825,7 +825,7 @@ static inline int __write_reply_hdr_simple(
  */
 static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
 {
-    ev.u.u.sequenceNumber = pClient->sequence;
+    ev.u.u.sequenceNumber = (CARD16)pClient->sequence; /* shouldn't go above 64k */
 
     if (pClient->swapped)
         swaps(&ev.u.u.sequenceNumber);
