@@ -16,6 +16,7 @@
 #include "dix/registry_priv.h"
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/rpcbuf_priv.h"
 #include "os/client_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/xace.h"
@@ -52,9 +53,8 @@ typedef struct {
            ProcXResQueryClientIds; used by ConstructClientId* -functions */
 typedef struct {
     int           numIds;
-    int           resultBytes;
-    struct xorg_list   response;
     int           sentClientMasks[MAXCLIENTS];
+    x_rpcbuf_t    rpcbuf;
 } ConstructClientIdCtx;
 
 /** @brief Holds the structure for information required to
@@ -128,25 +128,6 @@ DestroyFragments(struct xorg_list *frags)
             free(it);
         }
     }
-}
-
-/** @brief Constructs a context record for ConstructClientId* functions
-           to use */
-static void
-InitConstructClientIdCtx(ConstructClientIdCtx *ctx)
-{
-    ctx->numIds = 0;
-    ctx->resultBytes = 0;
-    xorg_list_init(&ctx->response);
-    memset(ctx->sentClientMasks, 0, sizeof(ctx->sentClientMasks));
-}
-
-/** @brief Destroys a context record, releases all memory (except the storage
-           for *ctx itself) */
-static void
-DestroyConstructClientIdCtx(ConstructClientIdCtx *ctx)
-{
-    DestroyFragments(&ctx->response);
 }
 
 static Bool
@@ -396,57 +377,43 @@ static Bool
 ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
                        ConstructClientIdCtx *ctx)
 {
-    xXResClientIdValue reply = {
-        .spec.client = client->clientAsMask,
-    };
-
-    if (client->swapped) {
-        swapl (&reply.spec.client);
-    }
-
     if (WillConstructMask(client, mask, ctx, X_XResClientXIDMask)) {
-        void *ptr = AddFragment(&ctx->response, sizeof(reply));
-        if (!ptr) {
-            return FALSE;
-        }
+        xXResClientIdValue reply = {
+            .spec.client = client->clientAsMask,
+            .spec.mask = X_XResClientXIDMask
+        };
 
-        reply.spec.mask = X_XResClientXIDMask;
-        if (sendClient->swapped) {
+        if (client->swapped) {
+            swapl (&reply.spec.client);
             swapl (&reply.spec.mask);
             /* swapl (&reply.length, n); - not required for reply.length = 0 */
         }
 
-        memcpy(ptr, &reply, sizeof(reply));
-
-        ctx->resultBytes += sizeof(reply);
+        x_rpcbuf_write_CARD8s(&ctx->rpcbuf, (CARD8*)&reply, sizeof(reply));
         ++ctx->numIds;
     }
     if (WillConstructMask(client, mask, ctx, X_XResLocalClientPIDMask)) {
         pid_t pid = GetClientPid(client);
 
-        if (pid != -1) {
-            void *ptr = AddFragment(&ctx->response,
-                                    sizeof(reply) + sizeof(CARD32));
-            CARD32 *value = (void*) ((char*) ptr + sizeof(reply));
+        if (pid == -1)
+            return TRUE;
 
-            if (!ptr) {
-                return FALSE;
-            }
+        xXResClientIdValue reply = {
+            .spec.client = client->clientAsMask,
+            .spec.mask = X_XResLocalClientPIDMask,
+            .length = 4
+        };
 
-            reply.spec.mask = X_XResLocalClientPIDMask;
-            reply.length = 4;
-
-            if (sendClient->swapped) {
-                swapl (&reply.spec.mask);
-                swapl (&reply.length);
-                swapl (value);
-            }
-            memcpy(ptr, &reply, sizeof(reply));
-            *value = pid;
-
-            ctx->resultBytes += sizeof(reply) + sizeof(CARD32);
-            ++ctx->numIds;
+        if (client->swapped) {
+            swapl (&reply.spec.client);
+            swapl (&reply.spec.mask);
+            swapl (&reply.length);
         }
+
+        x_rpcbuf_write_CARD8s(&ctx->rpcbuf, (CARD8*)&reply, sizeof(reply));
+        x_rpcbuf_write_CARD32(&ctx->rpcbuf, pid);
+
+        ++ctx->numIds;
     }
 
     /* memory allocation errors earlier may return with FALSE */
@@ -517,23 +484,14 @@ ProcXResQueryClientIds (ClientPtr client)
                        (uint64_t)stuff->numSpecs * sizeof(xXResClientIdSpec));
 
     xXResClientIdSpec        *specs = (void*) ((char*) stuff + sizeof(xXResQueryClientIdsReq));
-    ConstructClientIdCtx      ctx;
 
-    InitConstructClientIdCtx(&ctx);
-
-    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
+    ConstructClientIdCtx      ctx = {
+        .rpcbuf.swapped = client->swapped,
+        .rpcbuf.err_clear = TRUE
+    };
 
     int rc = ConstructClientIds(client, stuff->numSpecs, specs, &ctx);
     if (rc == Success) {
-        FragmentList *it;
-        xorg_list_for_each_entry(it, &ctx.response, l) {
-            x_rpcbuf_write_CARD8s(&rpcbuf, FRAGMENT_DATA(it), it->bytes);
-        }
-
-        if (rpcbuf.wpos != ctx.resultBytes)
-            LogMessage(X_WARNING, "ProcXResQueryClientIds() rpcbuf size (%ld) context size (%ld)\n",
-                       (unsigned long)rpcbuf.wpos, (unsigned long)ctx.resultBytes);
-
         xXResQueryClientIdsReply reply = {
             .numIds = ctx.numIds
         };
@@ -542,10 +500,10 @@ ProcXResQueryClientIds (ClientPtr client)
             swapl (&reply.numIds);
         }
 
-        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
+        rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, ctx.rpcbuf);
     }
 
-    DestroyConstructClientIdCtx(&ctx);
+    x_rpcbuf_clear(&ctx.rpcbuf);
     return rc;
 }
 
