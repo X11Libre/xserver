@@ -88,7 +88,6 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
 {
     int width, height;
     PixmapPtr pPixmap;
-    int nbyLine;                /* bytes per line of padded pixmap */
     FontPtr pfont;
     GCPtr pGCtmp;
     int i;
@@ -99,7 +98,6 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
     unsigned char *pglyph;      /* pointer bits in glyph */
     int gWidth, gHeight;        /* width and height of glyph */
     int nbyGlyphWidth;          /* bytes per scanline of glyph */
-    int nbyPadGlyph;            /* server padded line of glyph */
 
     ChangeGCVal gcvals[3];
 
@@ -131,7 +129,7 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
 
     ChangeGC(NULL, pGCtmp, GCFunction | GCForeground | GCBackground, gcvals);
 
-    nbyLine = BitmapBytePad(width);
+    size_t nbyLine = BitmapBytePad(width);
     pbits = calloc(height, nbyLine);
     if (!pbits) {
         dixDestroyPixmap(pPixmap, 0);
@@ -145,7 +143,7 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
         gHeight = GLYPHHEIGHTPIXELS(pci);
         if (gWidth && gHeight) {
             nbyGlyphWidth = GLYPHWIDTHBYTESPADDED(pci);
-            nbyPadGlyph = BitmapBytePad(gWidth);
+            size_t nbyPadGlyph = BitmapBytePad(gWidth);
 
             if (nbyGlyphWidth == nbyPadGlyph) {
                 pb = pglyph;

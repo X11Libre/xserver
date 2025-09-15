@@ -94,7 +94,6 @@ RegionPtr
 xnestPixmapToRegion(PixmapPtr pPixmap)
 {
     register RegionPtr pReg, pTmpReg;
-    register int x, y;
     unsigned long previousPixel, currentPixel;
     BoxRec Box = { 0, 0, 0, 0 };
     Bool overlap;
@@ -139,13 +138,13 @@ xnestPixmapToRegion(PixmapPtr pPixmap)
     }
 
     uint8_t *image_data = xcb_get_image_data(reply);
-    for (y = 0; y < pPixmap->drawable.height; y++) {
+    for (size_t y = 0; y < pPixmap->drawable.height; y++) {
         Box.y1 = y;
         Box.y2 = y + 1;
         previousPixel = 0L;
-        const int line_start = BitmapBytePad(pPixmap->drawable.width) * y;
+        const size_t line_start = BitmapBytePad(pPixmap->drawable.width) * y;
 
-        for (x = 0; x < pPixmap->drawable.width; x++) {
+        for (size_t x = 0; x < pPixmap->drawable.width; x++) {
             currentPixel = ((image_data[line_start + (x/8)]) >> (x % 8)) & 1;
             if (previousPixel != currentPixel) {
                 if (previousPixel == 0L) {
