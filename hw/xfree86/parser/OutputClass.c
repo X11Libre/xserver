@@ -38,6 +38,7 @@ static const xf86ConfigSymTabRec OutputClassTab[] = {
     {ENDSECTION, "endsection"},
     {IDENTIFIER, "identifier"},
     {DRIVER, "driver"},
+    {MODULE, "module"},
     {MODULEPATH, "modulepath"},
     {OPTION, "option"},
     {MATCH_DRIVER, "matchdriver"},
@@ -53,6 +54,7 @@ xf86freeOutputClassList(XF86ConfOutputClassPtr ptr)
         TestFree(ptr->identifier);
         TestFree(ptr->comment);
         TestFree(ptr->driver);
+        TestFree(ptr->modules);
         TestFree(ptr->modulepath);
 
         xf86freeMatchGroupList(&ptr->match_driver);
@@ -98,6 +100,19 @@ xf86parseOutputClassSection(void)
                 Error(QUOTE_MSG, "Driver");
             else
                 ptr->driver = xf86_lex_val.str;
+            break;
+        case MODULE:
+            if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
+                Error(QUOTE_MSG, "Module");
+            if (ptr->modules) {
+                char *path;
+                XNFasprintf(&path, "%s,%s", ptr->modules, xf86_lex_val.str);
+                free(xf86_lex_val.str);
+                free(ptr->modules);
+                ptr->modules = path;
+            } else {
+                ptr->modules = xf86_lex_val.str;
+            }
             break;
         case MODULEPATH:
             if (xf86getSubToken(&(ptr->comment)) != XF86_TOKEN_STRING)
@@ -159,6 +174,10 @@ xf86printOutputClassSection(FILE * cf, XF86ConfOutputClassPtr ptr)
             fprintf(cf, "\tIdentifier      \"%s\"\n", ptr->identifier);
         if (ptr->driver)
             fprintf(cf, "\tDriver          \"%s\"\n", ptr->driver);
+        if (ptr->modules)
+            fprintf(cf, "\tModule          \"%s\"\n", ptr->modules);
+        if (ptr->modulepath)
+            fprintf(cf, "\tModulePath      \"%s\"\n", ptr->modulepath);
 
         xorg_list_for_each_entry(group, &ptr->match_driver, entry) {
             fprintf(cf, "\tMatchDriver     \"");
