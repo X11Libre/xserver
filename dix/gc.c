@@ -176,8 +176,8 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
             break;
         case GCLineStyle:
         {
-            unsigned int newlinestyle;
-            NEXTVAL(unsigned int, newlinestyle);
+            unsigned newlinestyle;
+            NEXTVAL(unsigned char, newlinestyle);
 
             if (newlinestyle <= LineDoubleDash)
                 pGC->lineStyle = newlinestyle;
@@ -190,8 +190,8 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
         }
         case GCCapStyle:
         {
-            unsigned int newcapstyle;
-            NEXTVAL(unsigned int, newcapstyle);
+            unsigned char newcapstyle;
+            NEXTVAL(unsigned char, newcapstyle);
 
             if (newcapstyle <= CapProjecting)
                 pGC->capStyle = newcapstyle;
@@ -204,8 +204,8 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
         }
         case GCJoinStyle:
         {
-            unsigned int newjoinstyle;
-            NEXTVAL(unsigned int, newjoinstyle);
+            unsigned char newjoinstyle;
+            NEXTVAL(unsigned char, newjoinstyle);
 
             if (newjoinstyle <= JoinBevel)
                 pGC->joinStyle = newjoinstyle;
@@ -218,8 +218,8 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
         }
         case GCFillStyle:
         {
-            unsigned int newfillstyle;
-            NEXTVAL(unsigned int, newfillstyle);
+            unsigned char newfillstyle;
+            NEXTVAL(unsigned char, newfillstyle);
 
             if (newfillstyle <= FillOpaqueStippled)
                 pGC->fillStyle = newfillstyle;
@@ -232,8 +232,8 @@ ChangeGC(ClientPtr client, GCPtr pGC, BITS32 mask, ChangeGCValPtr pUnion)
         }
         case GCFillRule:
         {
-            unsigned int newfillrule;
-            NEXTVAL(unsigned int, newfillrule);
+            unsigned char newfillrule;
+            NEXTVAL(unsigned char, newfillrule);
 
             if (newfillrule <= WindingRule)
                 pGC->fillRule = newfillrule;
