@@ -11,7 +11,7 @@
 
 #include "xf86.h"
 #include "xf86_os_support.h"
-#include "xf86platformBus.h"
+#include "xf86platformBus_priv.h"
 
 Bool
 xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *busid)
