@@ -108,6 +108,7 @@ Equipment Corporation.
 #include "dix/property_priv.h"
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/saveset_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
@@ -2924,11 +2925,11 @@ UnmapSubwindows(WindowPtr pWin)
 void
 HandleSaveSet(ClientPtr client)
 {
-    WindowPtr pParent, pWin;
-
-    for (unsigned j = 0; j < client->numSaved; j++) {
-        pWin = SaveSetWindow(client->saveSet[j]);
-        if (SaveSetToRoot(client->saveSet[j]))
+    SaveSetEntry *walk, *tmp;
+    xorg_list_for_each_entry_safe(walk, tmp, &client->saveSets, entry) {
+        WindowPtr pParent = NULL;
+        WindowPtr pWin = walk->windowPtr;
+        if (walk->toRoot)
             pParent = pWin->drawable.pScreen->root;
         else
         {
@@ -2939,7 +2940,7 @@ HandleSaveSet(ClientPtr client)
         if (pParent) {
             if (pParent != pWin->parent) {
                 /* unmap first so that ReparentWindow doesn't remap */
-                if (!SaveSetShouldMap(client->saveSet[j]))
+                if (!walk->map)
                     UnmapWindow(pWin, FALSE);
                 ReparentWindow(pWin, pParent,
                                pWin->drawable.x - wBorderWidth(pWin) -
@@ -2949,13 +2950,13 @@ HandleSaveSet(ClientPtr client)
                 if (!pWin->realized && pWin->mapped)
                     pWin->mapped = FALSE;
             }
-            if (SaveSetShouldMap(client->saveSet[j]))
+            if (walk->map)
                 MapWindow(pWin, client);
         }
+
+        xorg_list_del(&walk->entry);
+        free(walk);
     }
-    free(client->saveSet);
-    client->numSaved = 0;
-    client->saveSet = NULL;
 }
 
 /**
