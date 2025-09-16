@@ -156,7 +156,4 @@ extern _X_EXPORT int (*SwappedProcVector[256]) (ClientPtr /*client */ );
 /* fixme: still needed by (public) dix.h */
 extern ReplySwapPtr ReplySwapVector[256];
 
-extern _X_EXPORT int
-ProcBadRequest(ClientPtr /*client */ );
-
 #endif                          /* DIXSTRUCT_H */
