@@ -72,7 +72,6 @@ int ProcXUngrabDeviceKey(ClientPtr client);
 int SProcXAllowDeviceEvents(ClientPtr client);
 int SProcXChangeDeviceControl(ClientPtr client);
 int SProcXChangeDeviceDontPropagateList(ClientPtr client);
-int SProcXChangeDeviceKeyMapping(ClientPtr client);
 int SProcXChangeDeviceProperty(ClientPtr client);
 int SProcXChangeFeedbackControl(ClientPtr client);
 int SProcXDeleteDeviceProperty(ClientPtr client);

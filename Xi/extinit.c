@@ -400,7 +400,7 @@ SProcIDispatch(ClientPtr client)
         case X_GetDeviceKeyMapping:
             return ProcXGetDeviceKeyMapping(client);
         case X_ChangeDeviceKeyMapping:
-            return SProcXChangeDeviceKeyMapping(client);
+            return ProcXChangeDeviceKeyMapping(client);
         case X_GetDeviceModifierMapping:
             return ProcXGetDeviceModifierMapping(client);
         case X_SetDeviceModifierMapping:
