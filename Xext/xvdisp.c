@@ -72,8 +72,7 @@ ProcXvQueryExtension(ClientPtr client)
         swaps(&reply.revision);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -371,8 +370,7 @@ ProcXvGrabPort(ClientPtr client)
         .result = result
     };
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -489,8 +487,7 @@ ProcXvGetPortAttribute(ClientPtr client)
         swapl(&reply.value);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -519,8 +516,7 @@ ProcXvQueryBestSize(ClientPtr client)
         swaps(&reply.actual_height);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
