@@ -67,37 +67,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure changes the control attributes for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXChangeDeviceControl(ClientPtr client)
-{
-    xDeviceCtl *ctl;
-
-    REQUEST(xChangeDeviceControlReq);
-    REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
-    swaps(&stuff->control);
-    ctl = (xDeviceCtl *) &stuff[1];
-    swaps(&ctl->control);
-    swaps(&ctl->length);
-    switch (stuff->control) {
-    case DEVICE_ABS_CALIB:
-    case DEVICE_ABS_AREA:
-    case DEVICE_CORE:
-    case DEVICE_ENABLE:
-    case DEVICE_RESOLUTION:
-        /* hmm. beer. *drool* */
-        break;
-
-    }
-    return (ProcXChangeDeviceControl(client));
-}
-
-/***********************************************************************
- *
  * Change the control attributes.
  *
  */
@@ -105,6 +74,16 @@ SProcXChangeDeviceControl(ClientPtr client)
 int
 ProcXChangeDeviceControl(ClientPtr client)
 {
+    REQUEST(xChangeDeviceControlReq);
+    REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
+
+    if (client->swapped) {
+        swaps(&stuff->control);
+        xDeviceCtl *ctl = (xDeviceCtl *) &stuff[1];
+        swaps(&ctl->control);
+        swaps(&ctl->length);
+    }
+
     unsigned len;
     int i, status, ret = BadValue;
     DeviceIntPtr dev;
@@ -112,9 +91,6 @@ ProcXChangeDeviceControl(ClientPtr client)
     AxisInfoPtr a;
     CARD32 *resolution;
     xDeviceEnableCtl *e;
-
-    REQUEST(xChangeDeviceControlReq);
-    REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
 
     len = client->req_len - bytes_to_int32(sizeof(xChangeDeviceControlReq));
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);

@@ -69,7 +69,6 @@ int ProcXUngrabDeviceButton(ClientPtr client);
 int ProcXUngrabDevice(ClientPtr client);
 int ProcXUngrabDeviceKey(ClientPtr client);
 
-int SProcXChangeDeviceControl(ClientPtr client);
 int SProcXChangeDeviceDontPropagateList(ClientPtr client);
 int SProcXChangeFeedbackControl(ClientPtr client);
 int SProcXGetDeviceDontPropagateList(ClientPtr  client);
