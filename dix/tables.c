@@ -59,6 +59,12 @@ SOFTWARE.
 #include "swaprep.h"
 #include "swapreq.h"
 
+static int
+ProcBadRequest(ClientPtr client)
+{
+    return BadRequest;
+}
+
 int (*InitialVector[3]) (ClientPtr /* client */) = {
     0,
     ProcInitialConnection,

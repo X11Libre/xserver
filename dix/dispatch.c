@@ -716,12 +716,6 @@ CreateConnectionBlock(void)
 }
 
 int
-ProcBadRequest(ClientPtr client)
-{
-    return BadRequest;
-}
-
-int
 ProcCreateWindow(ClientPtr client)
 {
     WindowPtr pParent, pWin;
