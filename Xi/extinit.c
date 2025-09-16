@@ -425,11 +425,11 @@ SProcIDispatch(ClientPtr client)
         case X_ListDeviceProperties:
             return ProcXListDeviceProperties(client);
         case X_ChangeDeviceProperty:
-            return SProcXChangeDeviceProperty(client);
+            return ProcXChangeDeviceProperty(client);
         case X_DeleteDeviceProperty:
-            return SProcXDeleteDeviceProperty(client);
+            return ProcXDeleteDeviceProperty(client);
         case X_GetDeviceProperty:
-            return SProcXGetDeviceProperty(client);
+            return ProcXGetDeviceProperty(client);
         /* XI 2 */
         case X_XIQueryPointer:
             return SProcXIQueryPointer(client);
@@ -464,13 +464,13 @@ SProcIDispatch(ClientPtr client)
         case X_XIPassiveUngrabDevice:
             return SProcXIPassiveUngrabDevice(client);
         case X_XIListProperties:
-            return SProcXIListProperties(client);
+            return ProcXIListProperties(client);
         case X_XIChangeProperty:
-            return SProcXIChangeProperty(client);
+            return ProcXIChangeProperty(client);
         case X_XIDeleteProperty:
-            return SProcXIDeleteProperty(client);
+            return ProcXIDeleteProperty(client);
         case X_XIGetProperty:
-            return SProcXIGetProperty(client);
+            return ProcXIGetProperty(client);
         case X_XIGetSelectedEvents:
             return SProcXIGetSelectedEvents(client);
         case X_XIBarrierReleasePointer:
