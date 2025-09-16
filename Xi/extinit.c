@@ -420,7 +420,7 @@ SProcIDispatch(ClientPtr client)
         case X_GetDeviceControl:
             return ProcXGetDeviceControl(client);
         case X_ChangeDeviceControl:
-            return SProcXChangeDeviceControl(client);
+            return ProcXChangeDeviceControl(client);
         /* XI 1.5 */
         case X_ListDeviceProperties:
             return ProcXListDeviceProperties(client);
