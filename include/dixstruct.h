@@ -59,21 +59,11 @@ typedef enum { ClientStateInitial,
     ClientStateGone
 } ClientState;
 
-typedef struct _saveSet {
-    struct _Window *windowPtr;
-    Bool toRoot;
-    Bool map;
-} SaveSetElt;
-#define SaveSetWindow(ss)   ((ss).windowPtr)
-#define SaveSetToRoot(ss)   ((ss).toRoot)
-#define SaveSetShouldMap(ss)	    ((ss).map)
-#define SaveSetAssignWindow(ss,w)   ((ss).windowPtr = (w))
-#define SaveSetAssignToRoot(ss,tr)  ((ss).toRoot = (tr))
-#define SaveSetAssignMap(ss,m)      ((ss).map = (m))
-
 struct _ClientId;
 
 typedef struct _Client {
+    /* changes in here must be done with great caution, as long as some
+       external drivers might still depend on specific layout */
     void *requestBuffer;
     void *osPrivate;             /* for OS layer, including scheduler */
     struct xorg_list ready;      /* List of clients ready to run */
@@ -94,8 +84,10 @@ typedef struct _Client {
     XID errorValue;
     int sequence;
     int ignoreCount;            /* count for Attend/IgnoreClient */
-    unsigned numSaved;          /* amount of windows in saveSet */
-    SaveSetElt *saveSet;
+
+    int __dummy0;                       /* used to be numSave */
+    void *__dummy1;                     /* used to be saveSet */
+
     int (**requestVector) (ClientPtr /* pClient */ );
     CARD32 req_len;             /* length of current request */
     unsigned int replyBytesRemaining;
@@ -111,6 +103,10 @@ typedef struct _Client {
     DeviceIntPtr clientPtr;
     struct _ClientId *clientIds;
     int req_fds;
+
+    /* driver should NEVER EVER touch anything beyond here */
+
+    struct xorg_list saveSets;
 } ClientRec;
 
 extern _X_EXPORT TimeStamp currentTime;
