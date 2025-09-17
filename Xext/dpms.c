@@ -324,8 +324,8 @@ ProcDPMSGetVersion(ClientPtr client)
         swaps(&reply.majorVersion);
         swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -338,8 +338,7 @@ ProcDPMSCapable(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xDPMSCapableReq);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -359,8 +358,8 @@ ProcDPMSGetTimeouts(ClientPtr client)
         swaps(&reply.suspend);
         swaps(&reply.off);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int

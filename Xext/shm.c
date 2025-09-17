@@ -272,8 +272,8 @@ ProcShmQueryVersion(ClientPtr client)
         swaps(&reply.uid);
         swaps(&reply.gid);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /*
@@ -698,8 +698,8 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
         swapl(&xgi.visual);
         swapl(&xgi.size);
     }
-    X_SEND_REPLY_SIMPLE(client, xgi);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, xgi);
 }
 
 static int
@@ -894,8 +894,8 @@ ProcShmGetImage(ClientPtr client)
         swapl(&xgi.visual);
         swapl(&xgi.size);
     }
-    X_SEND_REPLY_SIMPLE(client, xgi);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, xgi);
 #else
     return ShmGetImage(client, stuff);
 #endif /* XINERAMA */
@@ -1321,8 +1321,8 @@ ProcShmCreateSegment(ClientPtr client)
         close(fd);
         return BadAlloc;
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 #endif /* SHM_FD_PASSING */
 
