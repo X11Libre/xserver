@@ -378,7 +378,7 @@ SProcIDispatch(ClientPtr client)
         case X_GrabDevice:
             return ProcXGrabDevice(client);
         case X_UngrabDevice:
-            return SProcXUngrabDevice(client);
+            return ProcXUngrabDevice(client);
         case X_GrabDeviceKey:
             return ProcXGrabDeviceKey(client);
         case X_UngrabDeviceKey:
