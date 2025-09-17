@@ -69,7 +69,6 @@ int ProcXUngrabDeviceButton(ClientPtr client);
 int ProcXUngrabDevice(ClientPtr client);
 int ProcXUngrabDeviceKey(ClientPtr client);
 
-int SProcXIAllowEvents(ClientPtr client);
 int SProcXIBarrierReleasePointer(ClientPtr client);
 int SProcXIGetClientPointer(ClientPtr client);
 int SProcXIGetSelectedEvents(ClientPtr client);
