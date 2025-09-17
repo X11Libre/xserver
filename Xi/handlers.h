@@ -76,7 +76,6 @@ int SProcXGetDeviceMotionEvents(ClientPtr client);
 int SProcXGetExtensionVersion(ClientPtr client);
 int SProcXGetSelectedExtensionEvents(ClientPtr client);
 int SProcXGrabDeviceButton(ClientPtr client);
-int SProcXGrabDevice(ClientPtr client);
 int SProcXGrabDeviceKey(ClientPtr client);
 int SProcXIAllowEvents(ClientPtr client);
 int SProcXIBarrierReleasePointer(ClientPtr client);

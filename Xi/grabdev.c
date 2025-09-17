@@ -68,31 +68,6 @@ extern int ExtEventIndex;
 
 /***********************************************************************
  *
- * Swap the request if the requestor has a different byte order than us.
- *
- */
-
-int _X_COLD
-SProcXGrabDevice(ClientPtr client)
-{
-    REQUEST(xGrabDeviceReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceReq);
-
-    swapl(&stuff->grabWindow);
-    swapl(&stuff->time);
-    swaps(&stuff->event_count);
-
-    if (client->req_len !=
-        bytes_to_int32(sizeof(xGrabDeviceReq)) + stuff->event_count)
-        return BadLength;
-
-    SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
-
-    return (ProcXGrabDevice(client));
-}
-
-/***********************************************************************
- *
  * Grab an extension device.
  *
  */
@@ -100,17 +75,26 @@ SProcXGrabDevice(ClientPtr client)
 int
 ProcXGrabDevice(ClientPtr client)
 {
-    int rc;
-    DeviceIntPtr dev;
-    GrabMask mask;
-    struct tmask tmp[EMASKSIZE];
-
     REQUEST(xGrabDeviceReq);
     REQUEST_AT_LEAST_SIZE(xGrabDeviceReq);
+
+    if (client->swapped) {
+        swapl(&stuff->grabWindow);
+        swapl(&stuff->time);
+        swaps(&stuff->event_count);
+    }
 
     if (client->req_len !=
         bytes_to_int32(sizeof(xGrabDeviceReq)) + stuff->event_count)
         return BadLength;
+
+    if (client->swapped)
+        SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
+
+    int rc;
+    DeviceIntPtr dev;
+    GrabMask mask;
+    struct tmask tmp[EMASKSIZE];
 
     xGrabDeviceReply rep = {
         .RepType = X_GrabDevice,
