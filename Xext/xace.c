@@ -111,13 +111,6 @@ int XaceHookScreensaverAccess(ClientPtr client, ScreenPtr screen, Mask access_mo
     return rec.status;
 }
 
-int XaceHookAuthAvail(ClientPtr client, XID authId)
-{
-    XaceAuthAvailRec rec = { client, authId };
-    CallCallbacks(&XaceHooks[XACE_AUTH_AVAIL], &rec);
-    return Success;
-}
-
 /* XaceHookIsSet
  *
  * Utility function to determine whether there are any callbacks listening on a

@@ -110,12 +110,6 @@ typedef struct {
     int status;
 } XaceScreenAccessRec;
 
-/* XACE_AUTH_AVAIL */
-typedef struct {
-    ClientPtr client;
-    XID authId;
-} XaceAuthAvailRec;
-
 /* XACE_AUDIT_BEGIN */
 /* XACE_AUDIT_END */
 typedef struct {
