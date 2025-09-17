@@ -110,11 +110,4 @@ typedef struct {
     int status;
 } XaceScreenAccessRec;
 
-/* XACE_AUDIT_BEGIN */
-/* XACE_AUDIT_END */
-typedef struct {
-    ClientPtr client;
-    int requestResult;
-} XaceAuditRec;
-
 #endif                          /* _XACESTR_H */
