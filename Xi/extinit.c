@@ -412,7 +412,7 @@ SProcIDispatch(ClientPtr client)
         case X_QueryDeviceState:
             return ProcXQueryDeviceState(client);
         case X_SendExtensionEvent:
-            return SProcXSendExtensionEvent(client);
+            return ProcXSendExtensionEvent(client);
         case X_DeviceBell:
             return ProcXDeviceBell(client);
         case X_SetDeviceValuators:

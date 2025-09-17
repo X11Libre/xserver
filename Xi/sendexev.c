@@ -67,53 +67,6 @@ extern int lastEvent;           /* Defined in extension.c */
 
 /***********************************************************************
  *
- * Handle requests from clients with a different byte order than us.
- *
- */
-
-int _X_COLD
-SProcXSendExtensionEvent(ClientPtr client)
-{
-    CARD32 *p;
-    int i;
-    xEvent eventT = { .u.u.type = 0 };
-    xEvent *eventP;
-    EventSwapPtr proc;
-
-    REQUEST(xSendExtensionEventReq);
-    REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
-    swapl(&stuff->destination);
-    swaps(&stuff->count);
-
-    if (client->req_len !=
-        bytes_to_int32(sizeof(xSendExtensionEventReq)) + stuff->count +
-        bytes_to_int32(stuff->num_events * sizeof(xEvent)))
-        return BadLength;
-
-    eventP = (xEvent *) &stuff[1];
-    for (i = 0; i < stuff->num_events; i++, eventP++) {
-        if (eventP->u.u.type == GenericEvent) {
-            client->errorValue = eventP->u.u.type;
-            return BadValue;
-        }
-
-        proc = EventSwapVector[eventP->u.u.type & 0177];
-        /* no swapping proc; invalid event type? */
-        if (proc == NotImplemented) {
-            client->errorValue = eventP->u.u.type;
-            return BadValue;
-        }
-        (*proc) (eventP, &eventT);
-        *eventP = eventT;
-    }
-
-    p = (CARD32 *) (((xEvent *) &stuff[1]) + stuff->num_events);
-    SwapLongs(p, stuff->count);
-    return (ProcXSendExtensionEvent(client));
-}
-
-/***********************************************************************
- *
  * Send an event to some client, as if it had come from an extension input
  * device.
  *
@@ -122,19 +75,47 @@ SProcXSendExtensionEvent(ClientPtr client)
 int
 ProcXSendExtensionEvent(ClientPtr client)
 {
-    int ret, i;
-    DeviceIntPtr dev;
-    xEvent *first;
-    XEventClass *list;
-    struct tmask tmp[EMASKSIZE];
-
     REQUEST(xSendExtensionEventReq);
     REQUEST_AT_LEAST_SIZE(xSendExtensionEventReq);
+
+    if (client->swapped) {
+        swapl(&stuff->destination);
+        swaps(&stuff->count);
+    }
 
     if (client->req_len !=
         bytes_to_int32(sizeof(xSendExtensionEventReq)) + stuff->count +
         (stuff->num_events * bytes_to_int32(sizeof(xEvent))))
         return BadLength;
+
+    if (client->swapped) {
+        xEvent *eventP = (xEvent *) &stuff[1];
+        for (int i = 0; i < stuff->num_events; i++, eventP++) {
+            if (eventP->u.u.type == GenericEvent) {
+                client->errorValue = eventP->u.u.type;
+                return BadValue;
+            }
+
+            EventSwapPtr proc = EventSwapVector[eventP->u.u.type & 0177];
+            /* no swapping proc; invalid event type? */
+            if (proc == NotImplemented) {
+                client->errorValue = eventP->u.u.type;
+                return BadValue;
+            }
+            xEvent eventT = { 0 };
+            (*proc) (eventP, &eventT);
+            *eventP = eventT;
+        }
+
+        CARD32 *p = (CARD32 *) (((xEvent *) &stuff[1]) + stuff->num_events);
+        SwapLongs(p, stuff->count);
+    }
+
+    int ret, i;
+    DeviceIntPtr dev;
+    xEvent *first;
+    XEventClass *list;
+    struct tmask tmp[EMASKSIZE];
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixWriteAccess);
     if (ret != Success)
