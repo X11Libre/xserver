@@ -176,6 +176,7 @@ static int nClients;            /* number of authorized clients */
 
 CallbackListPtr ClientStateCallback = NULL;
 CallbackListPtr ServerAccessCallback = NULL;
+CallbackListPtr ClientAccessCallback = NULL;
 
 OsTimerPtr dispatchExceptionTimer;
 
@@ -3438,7 +3439,7 @@ ProcChangeCloseDownMode(ClientPtr client)
     REQUEST(xSetCloseDownModeReq);
     REQUEST_SIZE_MATCH(xSetCloseDownModeReq);
 
-    rc = XaceHookClientAccess(client, client, DixManageAccess);
+    rc = dixCallClientAccessCallback(client, client, DixManageAccess);
     if (rc != Success)
         return rc;
 

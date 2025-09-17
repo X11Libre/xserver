@@ -83,13 +83,6 @@ int XaceHookReceiveAccess(ClientPtr client, WindowPtr win,
     return rec.status;
 }
 
-int XaceHookClientAccess(ClientPtr client, ClientPtr target, Mask access_mode)
-{
-    XaceClientAccessRec rec = { client, target, access_mode, Success };
-    CallCallbacks(&XaceHooks[XACE_CLIENT_ACCESS], &rec);
-    return rec.status;
-}
-
 int XaceHookScreenAccess(ClientPtr client, ScreenPtr screen, Mask access_mode)
 {
     XaceScreenAccessRec rec = { client, screen, access_mode, Success };
