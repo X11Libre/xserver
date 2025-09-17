@@ -75,7 +75,6 @@ int SProcXIChangeCursor(ClientPtr client);
 int SProcXIGetClientPointer(ClientPtr client);
 int SProcXIGetFocus(ClientPtr client);
 int SProcXIGetSelectedEvents(ClientPtr client);
-int SProcXIGrabDevice(ClientPtr client);
 int SProcXIPassiveGrabDevice(ClientPtr client);
 int SProcXIPassiveUngrabDevice(ClientPtr client);
 int SProcXIQueryDevice(ClientPtr client);
@@ -84,7 +83,6 @@ int SProcXIQueryVersion(ClientPtr client);
 int SProcXISelectEvents(ClientPtr client);
 int SProcXISetClientPointer(ClientPtr client);
 int SProcXISetFocus(ClientPtr client);
-int SProcXIUngrabDevice(ClientPtr client);
 int SProcXIWarpPointer(ClientPtr client);
 int SProcXUngrabDeviceKey(ClientPtr client);
 

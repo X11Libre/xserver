@@ -44,28 +44,20 @@
 #include "windowstr.h"          /* window structure  */
 #include "exglobals.h"          /* BadDevice */
 
-int _X_COLD
-SProcXIGrabDevice(ClientPtr client)
-{
-    REQUEST(xXIGrabDeviceReq);
-    /*
-     * Check here for at least the length of the struct we swap, then
-     * let ProcXIGrabDevice check the full size after we swap mask_len.
-     */
-    REQUEST_AT_LEAST_SIZE(xXIGrabDeviceReq);
-
-    swaps(&stuff->deviceid);
-    swapl(&stuff->grab_window);
-    swapl(&stuff->cursor);
-    swapl(&stuff->time);
-    swaps(&stuff->mask_len);
-
-    return ProcXIGrabDevice(client);
-}
-
 int
 ProcXIGrabDevice(ClientPtr client)
 {
+    REQUEST(xXIGrabDeviceReq);
+    REQUEST_AT_LEAST_SIZE(xXIGrabDeviceReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceid);
+        swapl(&stuff->grab_window);
+        swapl(&stuff->cursor);
+        swapl(&stuff->time);
+        swaps(&stuff->mask_len);
+    }
+
     DeviceIntPtr dev;
     int ret = Success;
     uint8_t status;
@@ -74,7 +66,6 @@ ProcXIGrabDevice(ClientPtr client)
     unsigned int keyboard_mode;
     unsigned int pointer_mode;
 
-    REQUEST(xXIGrabDeviceReq);
     REQUEST_FIXED_SIZE(xXIGrabDeviceReq, ((size_t) stuff->mask_len) * 4);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGrabAccess);
@@ -130,28 +121,21 @@ ProcXIGrabDevice(ClientPtr client)
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
-int _X_COLD
-SProcXIUngrabDevice(ClientPtr client)
+int
+ProcXIUngrabDevice(ClientPtr client)
 {
     REQUEST(xXIUngrabDeviceReq);
     REQUEST_SIZE_MATCH(xXIUngrabDeviceReq);
 
-    swaps(&stuff->deviceid);
-    swapl(&stuff->time);
+    if (client->swapped) {
+        swaps(&stuff->deviceid);
+        swapl(&stuff->time);
+    }
 
-    return ProcXIUngrabDevice(client);
-}
-
-int
-ProcXIUngrabDevice(ClientPtr client)
-{
     DeviceIntPtr dev;
     GrabPtr grab;
     int ret = Success;
     TimeStamp time;
-
-    REQUEST(xXIUngrabDeviceReq);
-    REQUEST_SIZE_MATCH(xXIUngrabDeviceReq);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (ret != Success)
