@@ -34,6 +34,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbfmisc_priv.h"
@@ -6680,7 +6681,7 @@ ProcXkbSetDebuggingFlags(ClientPtr client)
     REQUEST(xkbSetDebuggingFlagsReq);
     REQUEST_AT_LEAST_SIZE(xkbSetDebuggingFlagsReq);
 
-    rc = XaceHookServerAccess(client, DixDebugAccess);
+    rc = dixCallServerAccessCallback(client, DixDebugAccess);
     if (rc != Success)
         return rc;
 

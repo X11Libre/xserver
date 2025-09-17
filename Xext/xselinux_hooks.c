@@ -38,6 +38,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/selection_priv.h"
+#include "dix/server_priv.h"
 #include "os/client_priv.h"
 
 #include "inputstr.h"
@@ -732,7 +733,7 @@ SELinuxClient(CallbackListPtr *pcbl, void *unused, void *calldata)
 static void
 SELinuxServer(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XaceServerAccessRec *rec = calldata;
+    ServerAccessCallbackParam *rec = calldata;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
@@ -833,6 +834,7 @@ SELinuxFlaskReset(void)
     DeleteCallback(&ResourceStateCallback, SELinuxResourceState, NULL);
     DeleteCallback(&ExtensionAccessCallback, SELinuxExtension, NULL);
     DeleteCallback(&ExtensionDispatchCallback, SELinuxExtension, NULL);
+    DeleteCallback(&ServerAccessCallback, SELinuxServer, NULL);
 
     XaceDeleteCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
     XaceDeleteCallback(XACE_DEVICE_ACCESS, SELinuxDevice, NULL);
@@ -840,7 +842,6 @@ SELinuxFlaskReset(void)
     XaceDeleteCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     XaceDeleteCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     XaceDeleteCallback(XACE_CLIENT_ACCESS, SELinuxClient, NULL);
-    XaceDeleteCallback(XACE_SERVER_ACCESS, SELinuxServer, NULL);
     XaceDeleteCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
     XaceDeleteCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
     XaceDeleteCallback(XACE_SCREENSAVER_ACCESS, SELinuxScreen, truep);
@@ -927,6 +928,7 @@ SELinuxFlaskInit(void)
     ret &= AddCallback(&ResourceStateCallback, SELinuxResourceState, NULL);
     ret &= AddCallback(&ExtensionAccessCallback, SELinuxExtension, NULL);
     ret &= AddCallback(&ExtensionDispatchCallback, SELinuxExtension, NULL);
+    ret &= AddCallback(&ServerAccessCallback, SELinuxServer, NULL);
 
     ret &= XaceRegisterCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
     ret &= XaceRegisterCallback(XACE_DEVICE_ACCESS, SELinuxDevice, NULL);
@@ -934,7 +936,6 @@ SELinuxFlaskInit(void)
     ret &= XaceRegisterCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     ret &= XaceRegisterCallback(XACE_CLIENT_ACCESS, SELinuxClient, NULL);
-    ret &= XaceRegisterCallback(XACE_SERVER_ACCESS, SELinuxServer, NULL);
     ret &= XaceRegisterCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
     ret &= XaceRegisterCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
     ret &= XaceRegisterCallback(XACE_SCREENSAVER_ACCESS, SELinuxScreen, truep);

@@ -61,6 +61,7 @@ Equipment Corporation.
 #include "dix/gc_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/server_priv.h"
 #include "include/swaprep.h"
 #include "os/auth.h"
 #include "os/log_priv.h"
@@ -787,7 +788,7 @@ ListFonts(ClientPtr client, unsigned char *pattern, unsigned length,
     if (length > XLFDMAXFONTNAMELEN)
         return BadAlloc;
 
-    access = XaceHookServerAccess(client, DixGetAttrAccess);
+    access = dixCallServerAccessCallback(client, DixGetAttrAccess);
     if (access != Success)
         return access;
 
@@ -1065,7 +1066,7 @@ StartListFontsWithInfo(ClientPtr client, int length, unsigned char *pattern,
     if (length > XLFDMAXFONTNAMELEN)
         return BadAlloc;
 
-    access = XaceHookServerAccess(client, DixGetAttrAccess);
+    access = dixCallServerAccessCallback(client, DixGetAttrAccess);
     if (access != Success)
         return access;
 
@@ -1687,7 +1688,7 @@ SetFontPathElements(int npaths, unsigned char *paths, int *bad, Bool persist)
 int
 SetFontPath(ClientPtr client, int npaths, unsigned char *paths)
 {
-    int err = XaceHookServerAccess(client, DixManageAccess);
+    int err = dixCallServerAccessCallback(client, DixManageAccess);
 
     if (err != Success)
         return err;
@@ -1776,7 +1777,7 @@ GetFontPath(ClientPtr client, int *count, int *length, unsigned char **result)
     int len;
     FontPathElementPtr fpe;
 
-    access = XaceHookServerAccess(client, DixGetAttrAccess);
+    access = dixCallServerAccessCallback(client, DixGetAttrAccess);
     if (access != Success)
         return access;
 
