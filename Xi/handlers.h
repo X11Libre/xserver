@@ -86,7 +86,6 @@ int SProcXISetClientPointer(ClientPtr client);
 int SProcXISetFocus(ClientPtr client);
 int SProcXIUngrabDevice(ClientPtr client);
 int SProcXIWarpPointer(ClientPtr client);
-int SProcXUngrabDeviceButton(ClientPtr client);
 int SProcXUngrabDeviceKey(ClientPtr client);
 
 #endif /* _XSERVER_XI_HANDLERS_H */
