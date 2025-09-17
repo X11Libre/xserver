@@ -105,6 +105,6 @@ ProcXGetDeviceFocus(ClientPtr client)
         swapl(&rep.focus);
         swapl(&rep.time);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }

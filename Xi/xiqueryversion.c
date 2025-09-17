@@ -122,8 +122,8 @@ ProcXIQueryVersion(ClientPtr client)
         swaps(&rep.major_version);
         swaps(&rep.minor_version);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /* Swapping routines */
