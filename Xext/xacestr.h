@@ -119,12 +119,6 @@ typedef struct {
     int status;
 } XaceScreenAccessRec;
 
-/* XACE_AUTH_AVAIL */
-typedef struct {
-    ClientPtr client;
-    XID authId;
-} XaceAuthAvailRec;
-
 /* XACE_KEY_AVAIL */
 typedef struct {
     xEventPtr event;
