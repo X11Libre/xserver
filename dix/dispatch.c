@@ -106,6 +106,7 @@ Equipment Corporation.
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
@@ -541,7 +542,16 @@ Dispatch(void)
                 if (result < 0 || result > (maxBigRequestSize << 2))
                     result = BadLength;
                 else {
-                    result = XaceHookDispatch(client, client->majorOp);
+                    result = Success;
+                    /* On extension requests, call the extension dispatch hook */
+                    if ((client->majorOp >= EXTENSION_BASE) && ExtensionDispatchCallback) {
+                        ExtensionEntry *ext = GetExtensionEntry(client->majorOp);
+                        if (ext) {
+                            ExtensionAccessCallbackParam erec = { client, ext, DixUseAccess, Success };
+                            CallCallbacks(&ExtensionDispatchCallback, &erec);
+                            result = erec.status;
+                        }
+                    }
                     if (result == Success) {
                         currentClient = client;
                         result =

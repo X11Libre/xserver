@@ -33,6 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xfuncproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
@@ -454,7 +455,7 @@ SELinuxReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
 static void
 SELinuxExtension(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XaceExtAccessRec *rec = calldata;
+    ExtensionAccessCallbackParam *rec = calldata;
     SELinuxSubjectRec *subj, *serv;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
@@ -830,15 +831,15 @@ SELinuxFlaskReset(void)
     /* Unregister callbacks */
     DeleteCallback(&ClientStateCallback, SELinuxClientState, NULL);
     DeleteCallback(&ResourceStateCallback, SELinuxResourceState, NULL);
+    DeleteCallback(&ExtensionAccessCallback, SELinuxExtension, NULL);
+    DeleteCallback(&ExtensionDispatchCallback, SELinuxExtension, NULL);
 
-    XaceDeleteCallback(XACE_EXT_DISPATCH, SELinuxExtension, NULL);
     XaceDeleteCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
     XaceDeleteCallback(XACE_DEVICE_ACCESS, SELinuxDevice, NULL);
     XaceDeleteCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
     XaceDeleteCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     XaceDeleteCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     XaceDeleteCallback(XACE_CLIENT_ACCESS, SELinuxClient, NULL);
-    XaceDeleteCallback(XACE_EXT_ACCESS, SELinuxExtension, NULL);
     XaceDeleteCallback(XACE_SERVER_ACCESS, SELinuxServer, NULL);
     XaceDeleteCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
     XaceDeleteCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
@@ -924,15 +925,15 @@ SELinuxFlaskInit(void)
     /* Register callbacks */
     ret &= AddCallback(&ClientStateCallback, SELinuxClientState, NULL);
     ret &= AddCallback(&ResourceStateCallback, SELinuxResourceState, NULL);
+    ret &= AddCallback(&ExtensionAccessCallback, SELinuxExtension, NULL);
+    ret &= AddCallback(&ExtensionDispatchCallback, SELinuxExtension, NULL);
 
-    ret &= XaceRegisterCallback(XACE_EXT_DISPATCH, SELinuxExtension, NULL);
     ret &= XaceRegisterCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
     ret &= XaceRegisterCallback(XACE_DEVICE_ACCESS, SELinuxDevice, NULL);
     ret &= XaceRegisterCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
     ret &= XaceRegisterCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     ret &= XaceRegisterCallback(XACE_CLIENT_ACCESS, SELinuxClient, NULL);
-    ret &= XaceRegisterCallback(XACE_EXT_ACCESS, SELinuxExtension, NULL);
     ret &= XaceRegisterCallback(XACE_SERVER_ACCESS, SELinuxServer, NULL);
     ret &= XaceRegisterCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
     ret &= XaceRegisterCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
