@@ -370,7 +370,7 @@ SProcIDispatch(ClientPtr client)
         case X_GetDeviceDontPropagateList:
             return ProcXGetDeviceDontPropagateList(client);
         case X_GetDeviceMotionEvents:
-            return SProcXGetDeviceMotionEvents(client);
+            return ProcXGetDeviceMotionEvents(client);
         case X_ChangeKeyboardDevice:
             return ProcXChangeKeyboardDevice(client);
         case X_ChangePointerDevice:
