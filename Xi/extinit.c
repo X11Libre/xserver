@@ -458,7 +458,7 @@ SProcIDispatch(ClientPtr client)
         case X_XIUngrabDevice:
             return ProcXIUngrabDevice(client);
         case X_XIAllowEvents:
-            return SProcXIAllowEvents(client);
+            return ProcXIAllowEvents(client);
         case X_XIPassiveGrabDevice:
             return SProcXIPassiveGrabDevice(client);
         case X_XIPassiveUngrabDevice:
