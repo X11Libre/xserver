@@ -230,7 +230,7 @@ ProcXChangeDeviceControl(ClientPtr client)
         SendEventToAllWindows(dev, DevicePresenceNotifyMask,
                               (xEvent *) &dpn, 1);
 
-        X_SEND_REPLY_SIMPLE(client, rep);
+        ret = X_SEND_REPLY_SIMPLE(client, rep);
     }
 
     return ret;
