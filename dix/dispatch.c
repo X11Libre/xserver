@@ -1007,8 +1007,8 @@ ProcGetGeometry(ClientPtr client)
         swaps(&rep.height);
         swaps(&rep.borderWidth);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -1074,8 +1074,8 @@ ProcInternAtom(ClientPtr client)
     if (client->swapped) {
         swapl(&rep.atom);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -1241,8 +1241,8 @@ ProcTranslateCoords(ClientPtr client)
         swaps(&rep.dstX);
         swaps(&rep.dstY);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -1380,8 +1380,8 @@ ProcQueryTextExtents(ClientPtr client)
         swapl(&rep.overallLeft);
         swapl(&rep.overallRight);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -2603,9 +2603,11 @@ ProcAllocColor(ClientPtr client)
 
 #ifdef XINERAMA
     if (noPanoramiXExtension || !pmap->pScreen->myNum)
-#endif /* XINERAMA */
-        X_SEND_REPLY_SIMPLE(client, rep);
+        return X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
+#else
+    return X_SEND_REPLY_SIMPLE(client, rep);
+#endif /* XINERAMA */
 }
 
 int
@@ -2652,9 +2654,11 @@ ProcAllocNamedColor(ClientPtr client)
 
 #ifdef XINERAMA
     if (noPanoramiXExtension || !pcmp->pScreen->myNum)
-#endif /* XINERAMA */
-        X_SEND_REPLY_SIMPLE(client, rep);
+        return X_SEND_REPLY_SIMPLE(client, rep);
     return Success;
+#else
+    return X_SEND_REPLY_SIMPLE(client, rep);
+#endif /* XINERAMA */
 }
 
 int
@@ -2954,8 +2958,8 @@ ProcLookupColor(ClientPtr client)
                 swaps(&rep.screenGreen);
                 swaps(&rep.screenBlue);
             }
-            X_SEND_REPLY_SIMPLE(client, rep);
-            return Success;
+
+            return X_SEND_REPLY_SIMPLE(client, rep);
         }
         return BadName;
     }
@@ -3150,8 +3154,8 @@ ProcQueryBestSize(ClientPtr client)
         swaps(&rep.width);
         swaps(&rep.height);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -3237,8 +3241,8 @@ ProcGetScreenSaver(ClientPtr client)
         swaps(&rep.timeout);
         swaps(&rep.interval);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int

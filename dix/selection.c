@@ -275,8 +275,7 @@ ProcGetSelectionOwner(ClientPtr client)
         swapl(&rep.owner);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 
 out:
     if (param.status != Success)
