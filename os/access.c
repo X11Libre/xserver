@@ -92,6 +92,7 @@ SOFTWARE.
 #include <errno.h>
 #include <sys/types.h>
 
+#include "dix/server_priv.h"
 #include "os/xhostname.h"
 
 #ifndef WIN32
@@ -1262,7 +1263,7 @@ AuthorizedClient(ClientPtr client)
         return Success;
 
     /* untrusted clients can't change host access */
-    rc = XaceHookServerAccess(client, DixManageAccess);
+    rc = dixCallServerAccessCallback(client, DixManageAccess);
     if (rc != Success)
         return rc;
 

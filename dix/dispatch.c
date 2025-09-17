@@ -115,6 +115,7 @@ Equipment Corporation.
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/selection_priv.h"
+#include "dix/server_priv.h"
 #include "dix/window_priv.h"
 #include "include/resource.h"
 #include "miext/extinit_priv.h"
@@ -172,7 +173,9 @@ static int nextFreeClientID;    /* always MIN free client ID */
 
 static int nClients;            /* number of authorized clients */
 
-CallbackListPtr ClientStateCallback;
+CallbackListPtr ClientStateCallback = NULL;
+CallbackListPtr ServerAccessCallback = NULL;
+
 OsTimerPtr dispatchExceptionTimer;
 
 /* dispatchException & isItTimeToYield must be declared volatile since they
@@ -3280,7 +3283,7 @@ ProcListHosts(ClientPtr client)
     REQUEST_SIZE_MATCH(xListHostsReq);
 
     /* untrusted clients can't list hosts */
-    result = XaceHookServerAccess(client, DixReadAccess);
+    result = dixCallServerAccessCallback(client, DixReadAccess);
     if (result != Success)
         return result;
 
@@ -3409,7 +3412,7 @@ ProcGetFontPath(ClientPtr client)
     /* REQUEST (xReq); */
     REQUEST_SIZE_MATCH(xReq);
 
-    int rc = XaceHookServerAccess(client, DixGetAttrAccess);
+    int rc = dixCallServerAccessCallback(client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 

@@ -92,6 +92,7 @@ SOFTWARE.
 #endif                          /* WIN32 */
 
 #include "dix/dix_priv.h"
+#include "dix/server_priv.h"
 #include "os/audit.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
@@ -871,7 +872,7 @@ OnlyListenToOneClient(ClientPtr client)
 {
     int rc;
 
-    rc = XaceHookServerAccess(client, DixGrabAccess);
+    rc = dixCallServerAccessCallback(client, DixGrabAccess);
     if (rc != Success)
         return rc;
 

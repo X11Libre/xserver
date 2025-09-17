@@ -7,6 +7,7 @@
 #include "dix/extension_priv.h"
 #include "dix/property_priv.h"
 #include "dix/selection_priv.h"
+#include "dix/server_priv.h"
 #include "include/os.h"
 #include "miext/extinit_priv.h"
 #include "Xext/xacestr.h"
@@ -37,13 +38,13 @@ NamespaceExtensionInit(void)
           AddCallback(&SelectionFilterCallback, hookSelectionFilter, NULL) &&
           AddCallback(&ExtensionAccessCallback, hookExtAccess, NULL) &&
           AddCallback(&ExtensionDispatchCallback, hookExtDispatch, NULL) &&
+          AddCallback(&ServerAccessCallback, hookServerAccess, NULL) &&
           XaceRegisterCallback(XACE_CLIENT_ACCESS, hookClient, NULL) &&
           XaceRegisterCallback(XACE_DEVICE_ACCESS, hookDevice, NULL) &&
           XaceRegisterCallback(XACE_PROPERTY_ACCESS, hookPropertyAccess, NULL) &&
           XaceRegisterCallback(XACE_RECEIVE_ACCESS, hookReceive, NULL) &&
           XaceRegisterCallback(XACE_RESOURCE_ACCESS, hookResourceAccess, NULL) &&
-          XaceRegisterCallback(XACE_SEND_ACCESS, hookSend, NULL) &&
-          XaceRegisterCallback(XACE_SERVER_ACCESS, hookServerAccess, NULL)))
+          XaceRegisterCallback(XACE_SEND_ACCESS, hookSend, NULL)))
         FatalError("NamespaceExtensionInit: allocation failure\n");
 
     /* Do the serverClient */
