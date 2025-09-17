@@ -41,7 +41,7 @@ NamespaceExtensionInit(void)
           AddCallback(&ExtensionDispatchCallback, hookExtDispatch, NULL) &&
           AddCallback(&ServerAccessCallback, hookServerAccess, NULL) &&
           AddCallback(&ClientDestroyCallback, hookClientDestroy, NULL) &&
-          XaceRegisterCallback(XACE_CLIENT_ACCESS, hookClient, NULL) &&
+          AddCallback(&ClientAccessCallback, hookClient, NULL) &&
           XaceRegisterCallback(XACE_DEVICE_ACCESS, hookDevice, NULL) &&
           XaceRegisterCallback(XACE_PROPERTY_ACCESS, hookPropertyAccess, NULL) &&
           XaceRegisterCallback(XACE_RECEIVE_ACCESS, hookReceive, NULL) &&
