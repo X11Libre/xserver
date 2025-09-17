@@ -37,14 +37,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* security hooks */
 /* Constants used to identify the available security hooks
  */
-#define XACE_EXT_DISPATCH		1
 #define XACE_RESOURCE_ACCESS		2
 #define XACE_DEVICE_ACCESS		3
 #define XACE_PROPERTY_ACCESS		4
 #define XACE_SEND_ACCESS		5
 #define XACE_RECEIVE_ACCESS		6
 #define XACE_CLIENT_ACCESS		7
-#define XACE_EXT_ACCESS			8
 #define XACE_SERVER_ACCESS		9
 #define XACE_SELECTION_ACCESS		10
 #define XACE_SCREEN_ACCESS		11
@@ -66,12 +64,6 @@ int XaceHookIsSet(int hook);
 
 /* Special-cased hook functions
  */
-int XaceHookDispatch0(ClientPtr ptr, int major);
-#define XaceHookDispatch(c, m) \
-    ((XaceHooks[XACE_EXT_DISPATCH] && (m) >= EXTENSION_BASE) ? \
-    XaceHookDispatch0((c), (m)) : \
-    Success)
-
 int XaceHookPropertyAccess(ClientPtr ptr, WindowPtr pWin, PropertyPtr *ppProp,
                            Mask access_mode);
 int XaceHookSelectionAccess(ClientPtr ptr, Selection ** ppSel, Mask access_mode);
@@ -86,7 +78,6 @@ int XaceHookSendAccess(ClientPtr client, DeviceIntPtr dev, WindowPtr win,
                        xEventPtr ev, int count);
 int XaceHookReceiveAccess(ClientPtr client, WindowPtr win, xEventPtr ev, int count);
 int XaceHookClientAccess(ClientPtr client, ClientPtr target, Mask access_mode);
-int XaceHookExtAccess(ClientPtr client, ExtensionEntry *ext);
 int XaceHookServerAccess(ClientPtr client, Mask access_mode);
 int XaceHookScreenAccess(ClientPtr client, ScreenPtr screen, Mask access_mode);
 int XaceHookScreensaverAccess(ClientPtr client, ScreenPtr screen, Mask access_mode);

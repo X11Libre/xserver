@@ -64,6 +64,9 @@ SOFTWARE.
 
 #define LAST_ERROR 255
 
+CallbackListPtr ExtensionAccessCallback = NULL;
+CallbackListPtr ExtensionDispatchCallback = NULL;
+
 static ExtensionEntry **extensions = (ExtensionEntry **) NULL;
 
 int lastEvent = EXTENSION_EVENT_BASE;
@@ -273,8 +276,12 @@ ExtensionAvailable(ClientPtr client, ExtensionEntry *ext)
 {
     if (!ext)
         return FALSE;
-    if (XaceHookExtAccess(client, ext) != Success)
+
+    ExtensionAccessCallbackParam rec = { client, ext, DixGetAttrAccess, Success };
+    CallCallbacks(&ExtensionAccessCallback, &rec);
+    if (rec.status != Success)
         return FALSE;
+
     if (!ext->base)
         return FALSE;
     return TRUE;

@@ -4,6 +4,7 @@
 #include <X11/Xmd.h>
 
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/property_priv.h"
 #include "dix/selection_priv.h"
 #include "include/os.h"
@@ -34,10 +35,10 @@ NamespaceExtensionInit(void)
           AddCallback(&PostInitRootWindowCallback, hookInitRootWindow, NULL) &&
           AddCallback(&PropertyFilterCallback, hookWindowProperty, NULL) &&
           AddCallback(&SelectionFilterCallback, hookSelectionFilter, NULL) &&
+          AddCallback(&ExtensionAccessCallback, hookExtAccess, NULL) &&
+          AddCallback(&ExtensionDispatchCallback, hookExtDispatch, NULL) &&
           XaceRegisterCallback(XACE_CLIENT_ACCESS, hookClient, NULL) &&
           XaceRegisterCallback(XACE_DEVICE_ACCESS, hookDevice, NULL) &&
-          XaceRegisterCallback(XACE_EXT_DISPATCH, hookExtDispatch, NULL) &&
-          XaceRegisterCallback(XACE_EXT_ACCESS, hookExtAccess, NULL) &&
           XaceRegisterCallback(XACE_PROPERTY_ACCESS, hookPropertyAccess, NULL) &&
           XaceRegisterCallback(XACE_RECEIVE_ACCESS, hookReceive, NULL) &&
           XaceRegisterCallback(XACE_RESOURCE_ACCESS, hookResourceAccess, NULL) &&
