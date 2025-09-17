@@ -392,7 +392,7 @@ SProcIDispatch(ClientPtr client)
         case X_GetDeviceFocus:
             return ProcXGetDeviceFocus(client);
         case X_SetDeviceFocus:
-            return SProcXSetDeviceFocus(client);
+            return ProcXSetDeviceFocus(client);
         case X_GetFeedbackControl:
             return ProcXGetFeedbackControl(client);
         case X_ChangeFeedbackControl:
