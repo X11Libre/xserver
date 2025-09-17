@@ -352,7 +352,7 @@ SProcIDispatch(ClientPtr client)
 
     switch (stuff->data) {
         case X_GetExtensionVersion:
-            return SProcXGetExtensionVersion(client);
+            return ProcXGetExtensionVersion(client);
         case X_ListInputDevices:
             return ProcXListInputDevices(client);
         case X_OpenDevice:
