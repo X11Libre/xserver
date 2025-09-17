@@ -384,7 +384,7 @@ SProcIDispatch(ClientPtr client)
         case X_UngrabDeviceKey:
             return SProcXUngrabDeviceKey(client);
         case X_GrabDeviceButton:
-            return SProcXGrabDeviceButton(client);
+            return ProcXGrabDeviceButton(client);
         case X_UngrabDeviceButton:
             return SProcXUngrabDeviceButton(client);
         case X_AllowDeviceEvents:
