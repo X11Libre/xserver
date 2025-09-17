@@ -103,6 +103,7 @@ Equipment Corporation.
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
+#include "dix/client_priv.h"
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
@@ -173,6 +174,7 @@ static int nClients;            /* number of authorized clients */
 
 CallbackListPtr ClientStateCallback = NULL;
 CallbackListPtr ServerAccessCallback = NULL;
+CallbackListPtr ClientAccessCallback = NULL;
 
 OsTimerPtr dispatchExceptionTimer;
 
@@ -3435,7 +3437,7 @@ ProcChangeCloseDownMode(ClientPtr client)
     REQUEST(xSetCloseDownModeReq);
     REQUEST_SIZE_MATCH(xSetCloseDownModeReq);
 
-    rc = XaceHookClientAccess(client, client, DixManageAccess);
+    rc = dixCallClientAccessCallback(client, client, DixManageAccess);
     if (rc != Success)
         return rc;
 
