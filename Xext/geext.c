@@ -92,8 +92,7 @@ ProcGEQueryVersion(ClientPtr client)
         swaps(&reply.minorVersion);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /************************************************************/

@@ -123,8 +123,7 @@ ProcXvMCQueryVersion(ClientPtr client)
         swapl(&reply.minor);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
