@@ -63,22 +63,6 @@ SOFTWARE.
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 
-/***********************************************************************
- *
- * Swap the request if server and client have different byte ordering.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceMotionEvents(ClientPtr client)
-{
-    REQUEST(xGetDeviceMotionEventsReq);
-    REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
-    swapl(&stuff->start);
-    swapl(&stuff->stop);
-    return (ProcXGetDeviceMotionEvents(client));
-}
-
 /****************************************************************************
  *
  * Get the motion history for an extension pointer devices.
@@ -90,6 +74,11 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
 {
     REQUEST(xGetDeviceMotionEventsReq);
     REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->start);
+        swapl(&stuff->stop);
+    }
 
     DeviceIntPtr dev;
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
