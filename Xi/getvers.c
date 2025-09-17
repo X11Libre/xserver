@@ -65,21 +65,6 @@ XExtensionVersion XIVersion;
 
 /***********************************************************************
  *
- * Handle a request from a client with a different byte order than us.
- *
- */
-
-int _X_COLD
-SProcXGetExtensionVersion(ClientPtr client)
-{
-    REQUEST(xGetExtensionVersionReq);
-    REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
-    swaps(&stuff->nbytes);
-    return (ProcXGetExtensionVersion(client));
-}
-
-/***********************************************************************
- *
  * This procedure returns the major/minor version of the X Input extension.
  *
  */
@@ -89,6 +74,9 @@ ProcXGetExtensionVersion(ClientPtr client)
 {
     REQUEST(xGetExtensionVersionReq);
     REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
+
+    if (client->swapped)
+        swaps(&stuff->nbytes);
 
     if (client->req_len != bytes_to_int32(sizeof(xGetExtensionVersionReq) +
                                         stuff->nbytes))
