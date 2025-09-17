@@ -366,7 +366,7 @@ SProcIDispatch(ClientPtr client)
         case X_GetSelectedExtensionEvents:
             return SProcXGetSelectedExtensionEvents(client);
         case X_ChangeDeviceDontPropagateList:
-            return SProcXChangeDeviceDontPropagateList(client);
+            return ProcXChangeDeviceDontPropagateList(client);
         case X_GetDeviceDontPropagateList:
             return SProcXGetDeviceDontPropagateList(client);
         case X_GetDeviceMotionEvents:
