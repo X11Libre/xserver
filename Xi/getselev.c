@@ -68,21 +68,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * This procedure gets the current selected extension events.
- *
- */
-
-int _X_COLD
-SProcXGetSelectedExtensionEvents(ClientPtr client)
-{
-    REQUEST(xGetSelectedExtensionEventsReq);
-    REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
-    swapl(&stuff->window);
-    return (ProcXGetSelectedExtensionEvents(client));
-}
-
-/***********************************************************************
- *
  * This procedure gets the current device select mask,
  * if the client and server have a different byte ordering.
  *
@@ -91,6 +76,12 @@ SProcXGetSelectedExtensionEvents(ClientPtr client)
 int
 ProcXGetSelectedExtensionEvents(ClientPtr client)
 {
+    REQUEST(xGetSelectedExtensionEventsReq);
+    REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     int i, rc = 0;
     WindowPtr pWin;
     XEventClass *buf = NULL;
@@ -98,9 +89,6 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     XEventClass *aclient;
     OtherInputMasks *pOthers;
     InputClientsPtr others;
-
-    REQUEST(xGetSelectedExtensionEventsReq);
-    REQUEST_SIZE_MATCH(xGetSelectedExtensionEventsReq);
 
     xGetSelectedExtensionEventsReply rep = {
         .RepType = X_GetSelectedExtensionEvents,
