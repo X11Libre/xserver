@@ -396,7 +396,7 @@ SProcIDispatch(ClientPtr client)
         case X_GetFeedbackControl:
             return ProcXGetFeedbackControl(client);
         case X_ChangeFeedbackControl:
-            return SProcXChangeFeedbackControl(client);
+            return ProcXChangeFeedbackControl(client);
         case X_GetDeviceKeyMapping:
             return ProcXGetDeviceKeyMapping(client);
         case X_ChangeDeviceKeyMapping:

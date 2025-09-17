@@ -60,22 +60,6 @@ SOFTWARE.
 
 #define DO_ALL    (-1)
 
-/***********************************************************************
- *
- * This procedure changes the control attributes for an extension device,
- * for clients on machines with a different byte ordering than the server.
- *
- */
-
-int _X_COLD
-SProcXChangeFeedbackControl(ClientPtr client)
-{
-    REQUEST(xChangeFeedbackControlReq);
-    REQUEST_AT_LEAST_SIZE(xChangeFeedbackControlReq);
-    swapl(&stuff->mask);
-    return (ProcXChangeFeedbackControl(client));
-}
-
 /******************************************************************************
  *
  * This procedure changes KbdFeedbackClass data.
@@ -420,6 +404,12 @@ ChangeLedFeedback(ClientPtr client, DeviceIntPtr dev, long unsigned int mask,
 int
 ProcXChangeFeedbackControl(ClientPtr client)
 {
+    REQUEST(xChangeFeedbackControlReq);
+    REQUEST_AT_LEAST_SIZE(xChangeFeedbackControlReq);
+
+    if (client->swapped)
+        swapl(&stuff->mask);
+
     unsigned len;
     DeviceIntPtr dev;
     KbdFeedbackPtr k;
@@ -429,9 +419,6 @@ ProcXChangeFeedbackControl(ClientPtr client)
     BellFeedbackPtr b;
     LedFeedbackPtr l;
     int rc;
-
-    REQUEST(xChangeFeedbackControlReq);
-    REQUEST_AT_LEAST_SIZE(xChangeFeedbackControlReq);
 
     len = client->req_len - bytes_to_int32(sizeof(xChangeFeedbackControlReq));
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixManageAccess);
