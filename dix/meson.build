@@ -1,5 +1,6 @@
 srcs_dix = [
     'atom.c',
+    'client.c',
     'colormap.c',
     'color.c',
     'cursor.c',
