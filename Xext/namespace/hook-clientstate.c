@@ -33,13 +33,23 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         break;
 
     case ClientStateRetained:
-        XnamespaceAssignClient(subj, NULL);
         break;
     case ClientStateGone:
-        XnamespaceAssignClient(subj, NULL);
         break;
     default:
         XNS_HOOK_LOG("unknown state =%d\n", client->clientState);
         break;
     }
+}
+
+void hookClientDestroy(CallbackListPtr *pcbl, void *unused, void *calldata)
+{
+    ClientPtr client = calldata;
+    struct XnamespaceClientPriv *subj = XnsClientPriv(client);
+
+    if (!subj)
+        return; /* no XNS devprivate assigned ? */
+
+    XnamespaceAssignClient(subj, NULL);
+    /* the devprivate is embedded, so no free() necessary */
 }
