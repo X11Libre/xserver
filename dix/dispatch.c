@@ -3632,17 +3632,21 @@ CloseDownClient(ClientPtr client)
             SetDispatchExceptionTimer();
 
         client->clientState = ClientStateGone;
-        if (ClientStateCallback) {
-            NewClientInfoRec clientinfo;
-
-            clientinfo.client = client;
-            clientinfo.prefix = (xConnSetupPrefix *) NULL;
-            clientinfo.setup = (xConnSetup *) NULL;
+        NewClientInfoRec clientinfo = { /* only used by CallCallbacks() */
+            .client = client, .state = NewClientInfoStateGone
+        };
+        if (ClientStateCallback)
             CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
-        }
+
         TouchListenerGone(client->clientAsMask);
         GestureListenerGone(client->clientAsMask);
         FreeClientResources(client);
+
+        /* change `state` and call callbacks again. this should NEVER be done
+         * before FreeClientResources() if xnamespace extension is enabled */
+        clientinfo.state = NewClientInfoStateFreedResources;
+        if (ClientStateCallback)
+            CallCallbacks((&ClientStateCallback), (void *) &clientinfo);
         /* Disable client ID tracking. This must be done after
          * ClientStateCallback. */
         ReleaseClientIds(client);

@@ -13,13 +13,13 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(NewClientInfoRec);
 
-    switch (client->clientState) {
-    case ClientStateInitial:
+    switch (param->state) {
+    case NewClientInfoStateInitial:
         // better assign *someting* than null -- clients can't do anything yet anyways
         XnamespaceAssignClient(subj, &ns_anon);
         break;
 
-    case ClientStateRunning:
+    case NewClientInfoStateRunning:
         subj->authId = AuthorizationIDOfClient(client);
 
         short unsigned int name_len = 0, data_len = 0;
@@ -32,10 +32,10 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         }
         break;
 
-    case ClientStateRetained:
-        XnamespaceAssignClient(subj, NULL);
-        break;
-    case ClientStateGone:
+    case NewClientInfoStateRetained:
+    case NewClientInfoStateGone:
+        break; /* do nothing */
+    case NewClientInfoStateFreedResources:
         XnamespaceAssignClient(subj, NULL);
         break;
     default:

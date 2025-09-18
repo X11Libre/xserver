@@ -7,13 +7,13 @@
 #include "namespace.h"
 
 #define XNS_HOOK_LOG(...) do { \
-        printf("XNS [" HOOK_NAME "] (#%d@%d) {%s} <%s>: ", \
+        LogMessage(X_INFO, "XNS [" HOOK_NAME "] (#%d@%d) {%s} <%s>: ", \
             (client ? client->index : -1), \
             (client ? client->sequence : -1), \
             (subj ? (subj->ns ? subj->ns->name : "(no ns)") : "<no client>"), \
             LookupRequestName(client ? client->majorOp : 0, \
                               client ? client->minorOp : 0)); \
-        printf(__VA_ARGS__); \
+        LogMessage(X_INFO, __VA_ARGS__); \
     } while (0)
 
 #define XNS_HOOK_HEAD(t) \

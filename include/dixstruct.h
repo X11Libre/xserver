@@ -40,10 +40,19 @@ SOFTWARE.
 
 extern _X_EXPORT CallbackListPtr ClientStateCallback;
 
+typedef enum {
+    NewClientInfoStateInitial,
+    NewClientInfoStateRunning,
+    NewClientInfoStateRetained,
+    NewClientInfoStateGone,
+    NewClientInfoStateFreedResources
+} NewClientInfoState;
+
 typedef struct {
     ClientPtr client;
     xConnSetupPrefix *prefix;
     xConnSetup *setup;
+    unsigned int state:3; /* added temporarily for use by xnamespace only */
 } NewClientInfoRec;
 
 typedef void (*ReplySwapPtr) (ClientPtr /* pClient */ ,

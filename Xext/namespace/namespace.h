@@ -68,7 +68,10 @@ static inline Bool XnsClientSameNS(struct XnamespaceClientPriv *p1, struct Xname
     return (p1->ns == p2->ns);
 }
 
-#define XNS_LOG(...) do { printf("XNS "); printf(__VA_ARGS__); } while (0)
+#define XNS_LOG(...) do {                               \
+        LogMessage(X_INFO, "XNS ");                     \
+        LogMessage(X_INFO, __VA_ARGS__);                \
+    } while (0)
 
 static inline Bool streq(const char *a, const char *b)
 {
