@@ -111,6 +111,15 @@ typedef long BytesReadable_t;
 
 typedef struct _XtransConnInfo *XtransConnInfo;
 
+
+/*
+ * Transport Option definitions
+ */
+
+#define TRANS_NONBLOCKING	1
+#define	TRANS_CLOSEONEXEC	2
+
+
 /*
  * Return values of Connect (0 is success)
  */
@@ -164,13 +173,11 @@ XtransConnInfo _XSERVTransReopenCOTSServer(
     const char *	/* port */
 );
 
-/*
- * set connection to non-blocking mode
- *
- * @param conn      the connection to set to non-blocking mode
- * @return zero on success or errno value
- */
-int _XSERVTransNonBlock(XtransConnInfo conn);
+int _XSERVTransSetOption(
+    XtransConnInfo,	/* ciptr */
+    int,		/* option */
+    int			/* arg */
+);
 
 int _XSERVTransCreateListener(
     XtransConnInfo,	/* ciptr */
