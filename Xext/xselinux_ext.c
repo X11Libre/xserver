@@ -71,12 +71,13 @@ ProcSELinuxQueryVersion(ClientPtr client)
         .server_major = SELINUX_MAJOR_VERSION,
         .server_minor = SELINUX_MINOR_VERSION
     };
+
     if (client->swapped) {
         swaps(&reply.server_major);
         swaps(&reply.server_minor);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
