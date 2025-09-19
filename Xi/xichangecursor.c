@@ -54,27 +54,22 @@
  *
  */
 
-int _X_COLD
-SProcXIChangeCursor(ClientPtr client)
-{
-    REQUEST(xXIChangeCursorReq);
-    REQUEST_SIZE_MATCH(xXIChangeCursorReq);
-    swapl(&stuff->win);
-    swapl(&stuff->cursor);
-    swaps(&stuff->deviceid);
-    return (ProcXIChangeCursor(client));
-}
-
 int
 ProcXIChangeCursor(ClientPtr client)
 {
+    REQUEST(xXIChangeCursorReq);
+    REQUEST_SIZE_MATCH(xXIChangeCursorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->win);
+        swapl(&stuff->cursor);
+        swaps(&stuff->deviceid);
+    }
+
     int rc;
     WindowPtr pWin = NULL;
     DeviceIntPtr pDev = NULL;
     CursorPtr pCursor = NULL;
-
-    REQUEST(xXIChangeCursorReq);
-    REQUEST_SIZE_MATCH(xXIChangeCursorReq);
 
     rc = dixLookupDevice(&pDev, stuff->deviceid, client, DixSetAttrAccess);
     if (rc != Success)
