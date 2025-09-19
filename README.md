@@ -78,12 +78,12 @@ chmod 0770 testx.sh
 ./testx.sh
 ```
 
-This should give you glorious 10 seconds of a black and beautyful and empty screen. Afterwards the Xserver complains about being killed but there should be no other critical errors for a "test passed". For more details please see [Building XLibre (X11Libre/xserver Wiki)](https://github.com/X11Libre/xserver/wiki/Building-XLibre).
+This should give you glorious 10 seconds of a black and beautiful and empty screen. Afterwards the Xserver complains about being killed but there should be no other critical errors for a "test passed". For more details please see [Building XLibre (X11Libre/xserver Wiki)](https://github.com/X11Libre/xserver/wiki/Building-XLibre).
 
 
 ## Our roadmap
 
-Roughly speaking: We will continue to cleanup and modernize the codebase, enhance our continous integration, add static code analysis and improve manual and automated testing. Therefore, we will consolidate our build infrastructure and release process and also add more platforms to the test cycle. We will also further look into separating X clients by the Xnamespace extension and providing practical examples of how to use it.
+Roughly speaking: We will continue to cleanup and modernize the codebase, enhance our continuous integration, add static code analysis and improve manual and automated testing. Therefore, we will consolidate our build infrastructure and release process and also add more platforms to the test cycle. We will also further look into separating X clients by the Xnamespace extension and providing practical examples of how to use it.
 
 Some of the many ideas and feature requests we received will be refined and prepared for implementation and we will go on to integrate relevant but unreleased Xorg and Xwayland features as well. Our documentation will see improvements on how to build, configure and switch to XLibre. A revamp of our website, the creation of a logo and more rebranding to XLibre are also on the map. End of roughly speaking.
 
@@ -92,7 +92,7 @@ One of the very next steps is to concretize our roadmap by using the Github Proj
 
 ## I want to help!
 
-That's great, there's enough to do for everyone. You may consider [one](https://github.com/orgs/X11Libre/discussions/categories/1-new-ideas) of the [many](https://github.com/orgs/X11Libre/discussions/categories/2-rfcs-of-the-core-team) [ideas](https://github.com/orgs/X11Libre/discussions/categories/3-ideas-soon-to-be-addressed) and [feature requests](https://github.com/X11Libre/xserver/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement) out there like [adding static code analysis/coverage](https://github.com/orgs/X11Libre/discussions/239) or [creating a logo for XLibre](https://github.com/X11Libre/xserver/issues/112) or becoming a [XLibre Test Driver](https://github.com/orgs/X11Libre/discussions/240).
+That's great, there's enough to do for everyone. You may consider [one](https://github.com/orgs/X11Libre/discussions/categories/1-new-ideas) of the [many](https://github.com/orgs/X11Libre/discussions/categories/2-rfcs-of-the-core-team) [ideas](https://github.com/orgs/X11Libre/discussions/categories/3-ideas-soon-to-be-addressed) and [feature requests](https://github.com/X11Libre/xserver/issues?q=is%3Aissue%20state%3Aopen%20label%3Aenhancement) out there like [adding static code analysis/coverage](https://github.com/orgs/X11Libre/discussions/239) or [creating a logo for XLibre](https://github.com/X11Libre/xserver/issues/112) or becoming a [XLibre Test Driver](https://github.com/X11Libre/xserver/wiki/XLibre-Test-Drivers).
 
 There is also a good chance to [enhance the documentation of Xnamespace](https://github.com/X11Libre/xserver/issues/458) and add more details to the [Building XLibre](https://github.com/X11Libre/xserver/wiki/Building-XLibre) and [Graphics devices & drivers](https://github.com/X11Libre/xserver/wiki/Graphics-devices-&-drivers) wiki pages. Or to update the [desktop environments](https://github.com/X11Libre/xserver/wiki/Are-We-XLibre-Yet%3F#desktop-environments) and [display managers](https://github.com/X11Libre/xserver/wiki/Are-We-XLibre-Yet%3F#display-managers) lists as things work for you.
 
