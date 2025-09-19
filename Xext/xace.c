@@ -35,18 +35,6 @@ CallbackListPtr XaceHooks[XACE_NUM_HOOKS] = { 0 };
 /* Special-cased hook functions.  Called by Xserver.
  */
 int
-XaceHookDispatch0(ClientPtr client, int major)
-{
-    /* Call the extension dispatch hook */
-    ExtensionEntry *ext = GetExtensionEntry(major);
-    XaceExtAccessRec erec = { client, ext, DixUseAccess, Success };
-    if (ext)
-        CallCallbacks(&XaceHooks[XACE_EXT_DISPATCH], &erec);
-    /* On error, pretend extension doesn't exist */
-    return (erec.status == Success) ? Success : BadRequest;
-}
-
-int
 XaceHookPropertyAccess(ClientPtr client, WindowPtr pWin,
                        PropertyPtr *ppProp, Mask access_mode)
 {
@@ -99,13 +87,6 @@ int XaceHookClientAccess(ClientPtr client, ClientPtr target, Mask access_mode)
 {
     XaceClientAccessRec rec = { client, target, access_mode, Success };
     CallCallbacks(&XaceHooks[XACE_CLIENT_ACCESS], &rec);
-    return rec.status;
-}
-
-int XaceHookExtAccess(ClientPtr client, ExtensionEntry *ext)
-{
-    XaceExtAccessRec rec = { client, ext, DixGetAttrAccess, Success };
-    CallCallbacks(&XaceHooks[XACE_EXT_ACCESS], &rec);
     return rec.status;
 }
 

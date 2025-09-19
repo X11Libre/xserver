@@ -31,6 +31,7 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/Xfuncproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "miext/extinit_priv.h"
@@ -742,7 +743,7 @@ denied:
 static void
 SecurityExtension(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XaceExtAccessRec *rec = calldata;
+    ExtensionAccessCallbackParam *rec = calldata;
     SecurityStateRec *subj;
     int i = 0;
 
@@ -964,15 +965,15 @@ SecurityResetProc(ExtensionEntry * extEntry)
 {
     /* Unregister callbacks */
     DeleteCallback(&ClientStateCallback, SecurityClientState, NULL);
+    DeleteCallback(&ExtensionAccessCallback, SecurityExtension, NULL);
+    DeleteCallback(&ExtensionDispatchCallback, SecurityExtension, NULL);
 
-    XaceDeleteCallback(XACE_EXT_DISPATCH, SecurityExtension, NULL);
     XaceDeleteCallback(XACE_RESOURCE_ACCESS, SecurityResource, NULL);
     XaceDeleteCallback(XACE_DEVICE_ACCESS, SecurityDevice, NULL);
     XaceDeleteCallback(XACE_PROPERTY_ACCESS, SecurityProperty, NULL);
     XaceDeleteCallback(XACE_SEND_ACCESS, SecuritySend, NULL);
     XaceDeleteCallback(XACE_RECEIVE_ACCESS, SecurityReceive, NULL);
     XaceDeleteCallback(XACE_CLIENT_ACCESS, SecurityClient, NULL);
-    XaceDeleteCallback(XACE_EXT_ACCESS, SecurityExtension, NULL);
     XaceDeleteCallback(XACE_SERVER_ACCESS, SecurityServer, NULL);
 }
 
@@ -1012,15 +1013,15 @@ SecurityExtensionInit(void)
 
     /* Register callbacks */
     ret &= AddCallback(&ClientStateCallback, SecurityClientState, NULL);
+    ret &= AddCallback(&ExtensionAccessCallback, SecurityExtension, NULL);
+    ret &= AddCallback(&ExtensionDispatchCallback, SecurityExtension, NULL);
 
-    ret &= XaceRegisterCallback(XACE_EXT_DISPATCH, SecurityExtension, NULL);
     ret &= XaceRegisterCallback(XACE_RESOURCE_ACCESS, SecurityResource, NULL);
     ret &= XaceRegisterCallback(XACE_DEVICE_ACCESS, SecurityDevice, NULL);
     ret &= XaceRegisterCallback(XACE_PROPERTY_ACCESS, SecurityProperty, NULL);
     ret &= XaceRegisterCallback(XACE_SEND_ACCESS, SecuritySend, NULL);
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SecurityReceive, NULL);
     ret &= XaceRegisterCallback(XACE_CLIENT_ACCESS, SecurityClient, NULL);
-    ret &= XaceRegisterCallback(XACE_EXT_ACCESS, SecurityExtension, NULL);
     ret &= XaceRegisterCallback(XACE_SERVER_ACCESS, SecurityServer, NULL);
 
     if (!ret)
