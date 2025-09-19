@@ -114,6 +114,6 @@ ProcXIGetFocus(ClientPtr client)
     if (client->swapped) {
         swapl(&rep.focus);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }

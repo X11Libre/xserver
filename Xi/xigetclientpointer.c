@@ -82,6 +82,6 @@ ProcXIGetClientPointer(ClientPtr client)
     if (client->swapped) {
         swaps(&rep.deviceid);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
