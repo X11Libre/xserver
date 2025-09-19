@@ -130,13 +130,6 @@ int XaceHookScreensaverAccess(ClientPtr client, ScreenPtr screen, Mask access_mo
     return rec.status;
 }
 
-int XaceHookAuthAvail(ClientPtr client, XID authId)
-{
-    XaceAuthAvailRec rec = { client, authId };
-    CallCallbacks(&XaceHooks[XACE_AUTH_AVAIL], &rec);
-    return Success;
-}
-
 int XaceHookKeyAvail(xEventPtr ev, DeviceIntPtr dev, int count)
 {
     XaceKeyAvailRec rec = { ev, dev, count };
