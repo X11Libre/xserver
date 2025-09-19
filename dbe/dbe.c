@@ -112,19 +112,16 @@ DbeStubScreen(DbeScreenPrivPtr pDbeScreenPriv, int *nStubbedScreens)
 static int
 ProcDbeGetVersion(ClientPtr client)
 {
-    /* REQUEST(xDbeGetVersionReq); */
+    REQUEST_SIZE_MATCH(xDbeGetVersionReq);
+
     xDbeGetVersionReply rep = {
         .majorVersion = DBE_MAJOR_VERSION,
         .minorVersion = DBE_MINOR_VERSION
     };
 
-    REQUEST_SIZE_MATCH(xDbeGetVersionReq);
+    return X_SEND_REPLY_SIMPLE(client, rep);
+}
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
-
-}                               /* ProcDbeGetVersion() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeAllocateBackBufferName
@@ -712,10 +709,9 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
         swapl(&rep.attributes);
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
-}                               /* ProcDbeGetbackBufferAttributes() */
-
+    return X_SEND_REPLY_SIMPLE(client, rep);
+}
+
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeDispatch
