@@ -4779,15 +4779,16 @@ XFree86 common layer.
 
       <blockquote><para>
 	  <programlisting>
-    void LoaderSetPath(const char *path);
+    void LoaderSetPath(const char *driver, const char *path);
 	  </programlisting>
 	  <blockquote><para>
-    The <function>LoaderSetPath()</function> function initialises a default
-    module search path.  This must be called if calls to other functions
-    are to be made without explicitly specifying a module search path.
-    The search path <parameter>path</parameter> must be a string of one or more
-    comma separated absolute paths.  Modules are expected to be located
-    below these paths, possibly in subdirectories of these paths.
+    The <function>LoaderSetPath()</function> function initialises a search path
+    for <parameter>driver</parameter> module, if it is non-NULL,
+    or a default module search path otherwise.  This must be called if calls
+    to other functions are to be made without explicitly specifying a module
+    search path. The search path <parameter>path</parameter> must be a string
+    of one or more comma separated absolute paths.  Modules are expected to be
+    located below these paths, possibly in subdirectories of these paths.
 	    </para>
 
 	  </blockquote></para></blockquote>
