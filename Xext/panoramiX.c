@@ -891,8 +891,8 @@ ProcPanoramiXQueryVersion(ClientPtr client)
         swaps(&reply.majorVersion);
         swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -919,9 +919,8 @@ ProcPanoramiXGetState(ClientPtr client)
     if (client->swapped) {
         swapl(&reply.window);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
 
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -948,8 +947,8 @@ ProcPanoramiXGetScreenCount(ClientPtr client)
     if (client->swapped) {
         swapl(&reply.window);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -989,8 +988,8 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
         swapl(&reply.window);
         swapl(&reply.screen);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1012,8 +1011,8 @@ ProcXineramaIsActive(ClientPtr client)
     if (client->swapped) {
         swapl(&reply.state);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int

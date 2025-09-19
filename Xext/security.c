@@ -364,8 +364,8 @@ ProcSecurityQueryVersion(ClientPtr client)
         swaps(&reply.majorVersion);
         swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }                               /* ProcSecurityQueryVersion */
 
 static int

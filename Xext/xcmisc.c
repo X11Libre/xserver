@@ -64,8 +64,8 @@ ProcXCMiscGetVersion(ClientPtr client)
         swaps(&reply.majorVersion);
         swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -84,8 +84,8 @@ ProcXCMiscGetXIDRange(ClientPtr client)
         swapl(&reply.start_id);
         swapl(&reply.count);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int

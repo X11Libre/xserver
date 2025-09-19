@@ -217,8 +217,8 @@ ProcShapeQueryVersion(ClientPtr client)
         swaps(&reply.majorVersion);
         swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -706,8 +706,8 @@ ProcShapeQueryExtents(ClientPtr client)
         swaps(&reply.widthClipShape);
         swaps(&reply.heightClipShape);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
  /*ARGSUSED*/ static int
@@ -961,8 +961,7 @@ ProcShapeInputSelected(ClientPtr client)
         .enabled = enabled,
     };
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int

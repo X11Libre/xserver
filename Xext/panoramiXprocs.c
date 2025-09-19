@@ -615,8 +615,8 @@ PanoramiXGetGeometry(ClientPtr client)
         swaps(&reply.height);
         swaps(&reply.borderWidth);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -696,8 +696,8 @@ PanoramiXTranslateCoords(ClientPtr client)
         swaps(&reply.dstX);
         swaps(&reply.dstY);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
