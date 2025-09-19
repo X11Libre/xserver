@@ -317,9 +317,9 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
 }
 
 int
-AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
-                 unsigned foreRed, unsigned foreGreen, unsigned foreBlue,
-                 unsigned backRed, unsigned backGreen, unsigned backBlue,
+AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned short maskChar,
+                 unsigned short foreRed, unsigned short foreGreen, unsigned short foreBlue,
+                 unsigned short backRed, unsigned short backGreen, unsigned short backBlue,
                  CursorPtr *ppCurs, ClientPtr client, XID cid)
 {
     FontPtr sourcefont, maskfont;
@@ -374,7 +374,7 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
             if (!mskptr)
                 return BadAlloc;
             while (--n >= 0)
-                *mskptr++ = ~0;
+                *mskptr++ = (unsigned char)~0U;
         }
         else {
             if (!CursorMetricsFromGlyph(maskfont, maskChar, &cm)) {
@@ -501,7 +501,7 @@ CreateRootCursor(void)
                                   serverClient, DixReadAccess);
     if (err != Success)
         return NullCursor;
-    if (AllocGlyphCursor(fontID, 0, fontID, 1, 0, 0, 0, ~0, ~0, ~0,
+    if (AllocGlyphCursor(fontID, 0, fontID, 1, 0, 0, 0, (unsigned short)~0U, (unsigned short)~0U, (unsigned short)~0U,
                          &curs, serverClient, (XID) 0) != Success)
         return NullCursor;
 
