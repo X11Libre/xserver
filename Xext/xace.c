@@ -137,13 +137,6 @@ int XaceHookAuthAvail(ClientPtr client, XID authId)
     return Success;
 }
 
-int XaceHookKeyAvail(xEventPtr ev, DeviceIntPtr dev, int count)
-{
-    XaceKeyAvailRec rec = { ev, dev, count };
-    CallCallbacks(&XaceHooks[XACE_KEY_AVAIL], &rec);
-    return Success;
-}
-
 /* XaceHookIsSet
  *
  * Utility function to determine whether there are any callbacks listening on a

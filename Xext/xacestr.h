@@ -125,13 +125,6 @@ typedef struct {
     XID authId;
 } XaceAuthAvailRec;
 
-/* XACE_KEY_AVAIL */
-typedef struct {
-    xEventPtr event;
-    DeviceIntPtr keybd;
-    int count;
-} XaceKeyAvailRec;
-
 /* XACE_AUDIT_BEGIN */
 /* XACE_AUDIT_END */
 typedef struct {

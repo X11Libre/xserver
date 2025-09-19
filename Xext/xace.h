@@ -50,8 +50,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define XACE_SCREEN_ACCESS		11
 #define XACE_SCREENSAVER_ACCESS		12
 #define XACE_AUTH_AVAIL			13
-#define XACE_KEY_AVAIL			14
-#define XACE_NUM_HOOKS			15
+#define XACE_NUM_HOOKS			14
 
 extern CallbackListPtr XaceHooks[XACE_NUM_HOOKS];
 
@@ -91,7 +90,6 @@ int XaceHookServerAccess(ClientPtr client, Mask access_mode);
 int XaceHookScreenAccess(ClientPtr client, ScreenPtr screen, Mask access_mode);
 int XaceHookScreensaverAccess(ClientPtr client, ScreenPtr screen, Mask access_mode);
 int XaceHookAuthAvail(ClientPtr client, XID authId);
-int XaceHookKeyAvail(xEventPtr ev, DeviceIntPtr dev, int count);
 
 /* Register / unregister a callback for a given hook. */
 
