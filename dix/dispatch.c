@@ -103,6 +103,7 @@ Equipment Corporation.
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
 
+#include "dix/client_priv.h"
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
@@ -3546,6 +3547,7 @@ CloseDownClient(ClientPtr client)
         TouchListenerGone(client->clientAsMask);
         GestureListenerGone(client->clientAsMask);
         FreeClientResources(client);
+        CallCallbacks(&ClientDestroyCallback, client);
         /* Disable client ID tracking. This must be done after
          * ClientStateCallback. */
         ReleaseClientIds(client);
