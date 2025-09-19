@@ -155,7 +155,7 @@ static void
 CheckForEmptyMask(CursorBitsPtr bits)
 {
     unsigned char *msk = bits->mask;
-    int n = BitmapBytePad(bits->width) * bits->height;
+    unsigned n = BitmapBytePad(bits->width) * bits->height;
 
     bits->emptyMask = FALSE;
     while (n--)
@@ -366,10 +366,9 @@ AllocGlyphCursor(Font source, unsigned sourceChar, Font mask, unsigned maskChar,
             return BadValue;
         }
         if (!maskfont) {
-            long n;
             unsigned char *mskptr;
 
-            n = BitmapBytePad(cm.width) * (long) cm.height;
+            unsigned n = BitmapBytePad(cm.width) * (long) cm.height;
             mskptr = mskbits = calloc(1, n);
             if (!mskptr)
                 return BadAlloc;
