@@ -114,8 +114,8 @@ proc_dri3_query_version(ClientPtr client)
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -130,8 +130,7 @@ dri3_send_open_reply(ClientPtr client, int fd)
         return BadAlloc;
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
@@ -282,8 +281,7 @@ proc_dri3_buffer_from_pixmap(ClientPtr client)
         return BadAlloc;
     }
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
@@ -340,8 +338,7 @@ proc_dri3_fd_from_fence(ClientPtr client)
     if (WriteFdToClient(client, fd, FALSE) < 0)
         return BadAlloc;
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static int
