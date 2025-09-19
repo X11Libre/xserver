@@ -4988,8 +4988,8 @@ ProcGetInputFocus(ClientPtr client)
     if (client->swapped) {
         swapl(&rep.focus);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /**
@@ -5044,8 +5044,7 @@ ProcGrabPointer(ClientPtr client)
         .status = status,
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /**
@@ -5284,8 +5283,7 @@ ProcGrabKeyboard(ClientPtr client)
         .status = status,
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /**
@@ -5397,8 +5395,8 @@ ProcQueryPointer(ClientPtr client)
         swaps(&rep.winY);
         swaps(&rep.mask);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /**

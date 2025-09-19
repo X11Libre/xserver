@@ -548,8 +548,7 @@ ProcGetProperty(ClientPtr client)
     rc = dixLookupProperty(&pProp, pWin, p.property, p.client, prop_mode);
     if (rc == BadMatch) {
         xGetPropertyReply rep = { 0 };
-        X_SEND_REPLY_SIMPLE(client, rep);
-        return Success;
+        return X_SEND_REPLY_SIMPLE(client, rep);
     }
     else if (rc != Success)
         return rc;
@@ -567,8 +566,7 @@ ProcGetProperty(ClientPtr client)
             swapl(&rep.propertyType);
             swapl(&rep.bytesAfter);
         }
-        X_SEND_REPLY_SIMPLE(client, rep);
-        return Success;
+        return X_SEND_REPLY_SIMPLE(client, rep);
     }
 
 /*
