@@ -436,7 +436,7 @@ SProcIDispatch(ClientPtr client)
         case X_XIWarpPointer:
             return SProcXIWarpPointer(client);
         case X_XIChangeCursor:
-            return SProcXIChangeCursor(client);
+            return ProcXIChangeCursor(client);
         case X_XIChangeHierarchy:
             return ProcXIChangeHierarchy(client);
         case X_XISetClientPointer:
