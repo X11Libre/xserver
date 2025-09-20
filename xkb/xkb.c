@@ -1341,32 +1341,38 @@ XkbComputeGetMapReplySize(XkbDescPtr xkb, xkbGetMapReply * rep)
     return Success;
 }
 
-static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb,
-                           xkbGetMapReply rep, x_rpcbuf_t *rpcbuf)
+static void XkbAssembleMap(ClientPtr client, XkbDescPtr xkb, CARD8 firstType,
+                           CARD8 nTypes, KeySym firstKeySym, CARD8 nKeySyms,
+                           KeyCode firstKeyAct, CARD8 nKeyActs, KeyCode firstKeyBehavior,
+                           CARD8 nKeyBehaviors, CARD16 virtualMods, KeyCode firstKeyExplicit,
+                           CARD8 nKeyExplicit, KeyCode firstModMapKey, CARD8 nModMapKeys,
+                           KeyCode firstVModMapKey, CARD8 nVModMapKeys, CARD8 totalKeyBehaviors,
+                           CARD8 totalKeyExplicit, CARD8 totalModMapKeys, CARD8 totalVModMapKeys,
+                           x_rpcbuf_t *rpcbuf)
 {
-    XkbWriteKeyTypes(xkb, rep.firstType, rep.nTypes, rpcbuf, client);
-    XkbWriteKeySyms(xkb, rep.firstKeySym, rep.nKeySyms, rpcbuf, client);
-    XkbWriteKeyActions(xkb, rep.firstKeyAct, rep.nKeyActs, rpcbuf);
-    if (rep.totalKeyBehaviors > 0)
-        XkbWriteKeyBehaviors(xkb, rep.firstKeyBehavior, rep.nKeyBehaviors, rpcbuf);
+    XkbWriteKeyTypes(xkb, firstType, nTypes, rpcbuf, client);
+    XkbWriteKeySyms(xkb, firstKeySym, nKeySyms, rpcbuf, client);
+    XkbWriteKeyActions(xkb, firstKeyAct, nKeyActs, rpcbuf);
+    if (totalKeyBehaviors > 0)
+        XkbWriteKeyBehaviors(xkb, firstKeyBehavior, nKeyBehaviors, rpcbuf);
 
-    if (rep.virtualMods) {
+    if (virtualMods) {
         CARD8 vmods[XkbPaddedSize(XkbNumVirtualMods)] = { 0 };
         size_t sz = 0;
         for (size_t i = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
-            if (rep.virtualMods & bit) {
+            if (virtualMods & bit) {
                 vmods[sz++] = xkb->server->vmods[i];
             }
         }
         x_rpcbuf_write_CARD8s(rpcbuf, vmods, XkbPaddedSize(sz));
     }
 
-    if (rep.totalKeyExplicit > 0)
-        XkbWriteExplicit(xkb, rep.firstKeyExplicit, rep.nKeyExplicit, rpcbuf);
-    if (rep.totalModMapKeys > 0)
-        XkbWriteModifierMap(xkb, rep.firstModMapKey, rep.nModMapKeys, rpcbuf);
-    if (rep.totalVModMapKeys > 0)
-        XkbWriteVirtualModMap(xkb, rep.firstVModMapKey, rep.nVModMapKeys, rpcbuf);
+    if (totalKeyExplicit > 0)
+        XkbWriteExplicit(xkb, firstKeyExplicit, nKeyExplicit, rpcbuf);
+    if (totalModMapKeys > 0)
+        XkbWriteModifierMap(xkb, firstModMapKey, nModMapKeys, rpcbuf);
+    if (totalVModMapKeys > 0)
+        XkbWriteVirtualModMap(xkb, firstVModMapKey, nVModMapKeys, rpcbuf);
 }
 
 int
@@ -1478,7 +1484,11 @@ ProcXkbGetMap(ClientPtr client)
         return rc;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    XkbAssembleMap(client, xkb, rep, &rpcbuf);
+    XkbAssembleMap(client, xkb, rep.firstType, rep.nTypes, rep.firstKeySym, rep.nKeySyms,
+                   rep.firstKeyAct, rep.nKeyActs, rep.firstKeyBehavior, rep.nKeyBehaviors,
+                   rep.virtualMods, rep.firstKeyExplicit, rep.nKeyExplicit, rep.firstModMapKey,
+                   rep.nModMapKeys, rep.firstVModMapKey, rep.nVModMapKeys, rep.totalKeyBehaviors,
+                   rep.totalKeyExplicit, rep.totalModMapKeys, rep.totalVModMapKeys, &rpcbuf);
 
     if (rpcbuf.error)
         return BadAlloc;
@@ -5806,7 +5816,12 @@ ProcXkbGetKbdByName(ClientPtr client)
     if (reported & (XkbGBN_SymbolsMask | XkbGBN_TypesMask)) {
         x_rpcbuf_t childbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-        XkbAssembleMap(client, new, mrep, &childbuf);
+        XkbAssembleMap(client, new, mrep.firstType, mrep.nTypes, mrep.firstKeySym,
+                       mrep.nKeySyms, mrep.firstKeyAct, mrep.nKeyActs, mrep.firstKeyBehavior,
+                       mrep.nKeyBehaviors, mrep.virtualMods, mrep.firstKeyExplicit,
+                       mrep.nKeyExplicit, mrep.firstModMapKey, mrep.nModMapKeys,
+                       mrep.firstVModMapKey, mrep.nVModMapKeys, mrep.totalKeyBehaviors,
+                       mrep.totalKeyExplicit, mrep.totalModMapKeys, mrep.totalVModMapKeys, &rpcbuf);
 
         if (childbuf.error)
             return BadAlloc;
