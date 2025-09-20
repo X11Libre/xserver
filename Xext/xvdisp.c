@@ -207,7 +207,9 @@ SingleXvPutVideo(ClientPtr client)
                         stuff->drw_w, stuff->drw_h);
 }
 
+#ifdef XINERAMA
 static int XineramaXvPutVideo(ClientPtr client);
+#endif
 
 static int
 ProcXvPutVideo(ClientPtr client)
@@ -249,7 +251,9 @@ SingleXvPutStill(ClientPtr client)
                         stuff->drw_w, stuff->drw_h);
 }
 
+#ifdef XINERAMA
 static int XineramaXvPutStill(ClientPtr client);
+#endif
 
 static int
 ProcXvPutStill(ClientPtr client)
@@ -407,7 +411,9 @@ SingleXvStopVideo(ClientPtr client)
     return XvdiStopVideo(client, pPort, pDraw);
 }
 
+#ifdef XINERAMA
 static int XineramaXvStopVideo(ClientPtr client);
+#endif
 
 static int
 ProcXvStopVideo(ClientPtr client)
@@ -446,7 +452,9 @@ SingleXvSetPortAttribute(ClientPtr client)
     return status;
 }
 
+#ifdef XINERAMA
 static int XineramaXvSetPortAttribute(ClientPtr client);
+#endif
 
 static int
 ProcXvSetPortAttribute(ClientPtr client)
@@ -618,8 +626,10 @@ SingleXvPutImage(ClientPtr client)
                         stuff->width, stuff->height);
 }
 
+#ifdef XINERAMA
 static int
 XineramaXvPutImage(ClientPtr client);
+#endif
 
 static int
 ProcXvPutImage(ClientPtr client)
@@ -708,7 +718,9 @@ SingleXvShmPutImage(ClientPtr client)
     return status;
 }
 
+#ifdef XINERAMA
 static int XineramaXvShmPutImage(ClientPtr client);
+#endif
 
 #endif /* CONFIG_MITSHM */
 

@@ -497,8 +497,10 @@ ProcXFixesFetchRegion(ClientPtr client)
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
+#ifdef XINERAMA
 static int
 PanoramiXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff);
+#endif
 
 static int
 SingleXFixesSetGCClipRegion(ClientPtr client, xXFixesSetGCClipRegionReq *stuff);
@@ -625,8 +627,10 @@ SingleXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegionRe
     return Success;
 }
 
+#ifdef XINERAMA
 static int
 PanoramiXFixesSetWindowShapeRegion(ClientPtr client, xXFixesSetWindowShapeRegionReq *stuff);
+#endif
 
 int
 ProcXFixesSetWindowShapeRegion(ClientPtr client)
@@ -651,8 +655,10 @@ ProcXFixesSetWindowShapeRegion(ClientPtr client)
 static int
 SingleXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegionReq *stuff);
 
+#ifdef XINERAMA
 static int
 PanoramiXFixesSetPictureClipRegion(ClientPtr client, xXFixesSetPictureClipRegionReq *stuff);
+#endif
 
 int
 ProcXFixesSetPictureClipRegion(ClientPtr client)

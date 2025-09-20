@@ -55,7 +55,9 @@
 static CARD8 CompositeReqCode;
 static DevPrivateKeyRec CompositeClientPrivateKeyRec;
 
+#ifdef XINERAMA
 static int compositeUseXinerama = 0;
+#endif
 
 #define CompositeClientPrivateKey (&CompositeClientPrivateKeyRec)
 RESTYPE CompositeClientWindowType;
