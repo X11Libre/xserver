@@ -79,6 +79,7 @@ typedef struct {
 
     /* saved video mode */
     struct fb_var_screeninfo saved_var;
+    uint32_t saved_accel;
 
     /* buildin video mode */
     DisplayModeRec buildin;
@@ -726,6 +727,7 @@ fbdevHWMapMMIO(ScrnInfoPtr pScrn)
 
     if (NULL == fPtr->mmio) {
         /* tell the kernel not to use accels to speed up console scrolling */
+        fPtr->saved_accel = fPtr->var.accel_flags;
         fPtr->var.accel_flags = 0;
         if (0 != ioctl(fPtr->fd, FBIOPUT_VSCREENINFO, (void *) (&fPtr->var))) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -762,7 +764,12 @@ fbdevHWUnmapMMIO(ScrnInfoPtr pScrn)
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "munmap mmio: %s\n",
                        strerror(errno));
         fPtr->mmio = NULL;
-        /* FIXME: restore var.accel_flags [geert] */
+        fPtr->var.accel_flags = fPtr->saved_accel;
+        if (0 != ioctl(fPtr->fd, FBIOPUT_VSCREENINFO, (void *) (&fPtr->var))) {
+            xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
+                       "FBIOPUT_VSCREENINFO: %s\n", strerror(errno));
+            return FALSE;
+        }
     }
     return TRUE;
 }
