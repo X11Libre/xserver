@@ -368,7 +368,7 @@ fbdev_open_pci(int scrnIndex, struct pci_device *pPci, const char *device, char 
                 int maj, min = -1; \
                 FILE *f = fopen(res.gl_pathv[i], "r"); \
                 if (f) { \
-                    fscanf(f, "%d:%d", &maj, &min); \
+                    (void)!fscanf(f, "%d:%d", &maj, &min); \
                     fclose(f); \
                 } \
                 if (fbdev_minor != -1) { \
