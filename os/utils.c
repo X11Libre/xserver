@@ -70,7 +70,11 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "dixfont.h"
 #include <X11/fonts/libxfont2.h>
 #include "osdep.h"
+
+#ifdef XDMCP
 #include "xdmcp.h"
+#endif
+
 #include "extension.h"
 #include <signal.h>
 #ifndef WIN32

@@ -55,7 +55,7 @@ if conf_data.get('HAVE_SIGACTION').to_int() != 0
     srcs_os += 'busfault.c'
 endif
 
-if get_option('xdmcp')
+if build_xdmcp
     srcs_os += 'xdmcp.c'
 endif
 
