@@ -427,10 +427,8 @@ else
     endif
 endif
 
-xdmcp_dep = dependency('', required : false)
-if get_option('xdmcp')
-    xdmcp_dep = dependency('xdmcp')
-endif
+build_xdmcp = get_option('xdmcp')
+xdmcp_dep = dependency('xdmcp', required : build_xdmcp)
 
 has_xdm_auth = get_option('xdm-auth-1')
 

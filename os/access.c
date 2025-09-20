@@ -180,7 +180,10 @@ SOFTWARE.
 #include "dixstruct.h"
 
 #include "xace.h"
+
+#ifdef XDMCP
 #include "xdmcp.h"
+#endif
 
 Bool defeatAccessControl = FALSE;
 

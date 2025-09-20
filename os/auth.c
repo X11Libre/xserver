@@ -48,7 +48,10 @@ from The Open Group.
 
 #include "os/auth.h"
 
+#ifdef XDMCP
 #include "xdmcp.h"
+#endif
+
 #include "xdmauth.h"
 #include "mitauth.h"
 
