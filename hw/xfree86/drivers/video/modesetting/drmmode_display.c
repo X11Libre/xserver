@@ -1852,7 +1852,7 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
             struct dumb_bo *bo = dumb_bo_create(drmmode->fd, width, height, drmmode->kbpp);
             if (!bo) {
                 /* We couldn't allocate a bo, so we try to guess the pitch */
-                return width > 64 ? width : 64;
+                return MAX(width, 64);
             }
 
             ret = bo->pitch / drmmode->cpp;
@@ -1870,7 +1870,7 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
     struct dumb_bo *bo = dumb_bo_create(drmmode->fd, width, height, drmmode->kbpp);
     if (!bo) {
         /* We couldn't allocate a bo, so we try to guess the pitch */
-        return width > 64 ? width : 64;
+        return MAX(width, 64);
     }
 
     drmmode_crtc->cursor_pitches[idx] = bo->pitch / drmmode->cpp;
