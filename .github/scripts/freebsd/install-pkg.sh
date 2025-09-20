@@ -26,4 +26,5 @@ pkg install -y \
     xcb-util-renderutil \
     xcb-util-wm \
     xkbcomp \
-    xorgproto
+    xorgproto \
+    xxhash
