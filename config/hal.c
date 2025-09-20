@@ -31,6 +31,7 @@
 #include <dbus/dbus.h>
 #include <hal/libhal.h>
 
+#include "config/config-hal.h"
 #include "config/hotplug_priv.h"
 #include "config/dbus-core.h"
 #include "os/fmt.h"
