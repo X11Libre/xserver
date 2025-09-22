@@ -107,12 +107,13 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "os/osdep.h"
 #include "os/serverlock.h"
 #include "os/xhostname.h"
+#include "present/present_priv.h"
 #include "Xext/xf86bigfontsrv.h" /* XF86BigfontCleanup() */
 #include "xkb/xkbsrv_priv.h"
+
 #include "dixstruct.h"
 #include "picture.h"
 #include "miinitext.h"
-#include "present.h"
 #include "dixstruct_priv.h"
 #include "dpmsproc.h"
 

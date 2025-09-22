@@ -23,14 +23,16 @@
 #ifndef _PRESENT_PRIV_H_
 #define _PRESENT_PRIV_H_
 
-#include "dix-config.h"
 #include <X11/X.h>
+#include <X11/Xmd.h>
+
+#include "present/present.h"
+
 #include "scrnintstr.h"
 #include "misc.h"
 #include "list.h"
 #include "windowstr.h"
 #include "dixstruct.h"
-#include "present.h"
 #include <syncsdk.h>
 #include <syncsrv.h>
 #include <xfixes.h>
@@ -527,5 +529,23 @@ present_vblank_scrap(present_vblank_ptr vblank);
 
 void
 present_vblank_destroy(present_vblank_ptr vblank);
+
+/* only for in-tree modesetting */ _X_EXPORT
+void present_check_flips(WindowPtr window);
+
+typedef void (*present_complete_notify_proc)(WindowPtr window,
+                                             CARD8 kind,
+                                             CARD8 mode,
+                                             CARD32 serial,
+                                             uint64_t ust,
+                                             uint64_t msc);
+
+/* only for in-tree GLX module */ _X_EXPORT
+void present_register_complete_notify(present_complete_notify_proc proc);
+
+/* only for in-tree modesetting */ _X_EXPORT
+Bool present_can_window_flip(WindowPtr window);
+
+extern uint32_t FakeScreenFps;
 
 #endif /*  _PRESENT_PRIV_H_ */
