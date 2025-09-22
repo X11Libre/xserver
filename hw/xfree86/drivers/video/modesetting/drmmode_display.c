@@ -4165,21 +4165,19 @@ drmmode_pre_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int cpp)
     xf86DrvMsgVerb(pScrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
                    "Up to %d crtcs needed for screen.\n", crtcs_needed);
 
+    drmmode_cursor_dim_rec fallback;
+
+    int ret1 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &value);
+    fallback.width = value;
+
+    int ret2 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &value);
+    fallback.height = value;
+
     /* This is the safest fallback value as
      * it is the default value that KMS uses.  */
-    drmmode_cursor_dim_rec fallback = {
-        .width  = 64,
-        .height = 64,
-    };
-
-    ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &value);
-    if (!ret) {
-        fallback.width = value;
-    }
-
-    ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &value);
-    if (!ret) {
-        fallback.height = value;
+    if (ret1 || ret2) {
+        fallback.width  = 64;
+        fallback.height = 64;
     }
 
     xf86CrtcSetSizeRange(pScrn, 320, 200, mode_res->max_width,
