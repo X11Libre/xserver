@@ -70,19 +70,12 @@ from The Open Group.
  * Always add to the end of the list.
  */
 
-#define TRANS_TLI_INET_INDEX		1
-#define TRANS_TLI_TCP_INDEX		2
-#define TRANS_TLI_TLI_INDEX		3
 #define TRANS_SOCKET_UNIX_INDEX		4
 #define TRANS_SOCKET_LOCAL_INDEX	5
 #define TRANS_SOCKET_INET_INDEX		6
 #define TRANS_SOCKET_TCP_INDEX		7
-#define TRANS_DNET_INDEX		8
 #define TRANS_LOCAL_LOCAL_INDEX		9
-/* 10 used to be PTS, but that's gone. */
 #define TRANS_LOCAL_NAMED_INDEX		11
-/* 12 used to be ISC, but that's gone. */
-/* 13 used to be SCO, but that's gone. */
 #define TRANS_SOCKET_INET6_INDEX	14
 #define TRANS_LOCAL_PIPE_INDEX		15
 
