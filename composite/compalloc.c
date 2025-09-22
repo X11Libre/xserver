@@ -579,7 +579,6 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
         PictFormatPtr pDstFormat = PictureWindowFormat(pWin);
         XID inferiors = IncludeInferiors;
         int error;
-        
         PicturePtr pSrcPicture = CreatePicture(None,
                                                &pParent->drawable,
                                                pSrcFormat,
@@ -689,7 +688,6 @@ compReallocPixmap(WindowPtr pWin, int draw_x, int draw_y,
     CompWindowPtr cw = GetCompWindow(pWin);
     int pix_x, pix_y;
     int pix_w, pix_h;
-    
     assert(cw);
     assert(pWin->redirectDraw != RedirectDrawNone);
     cw->oldx = pOld->screen_x;
