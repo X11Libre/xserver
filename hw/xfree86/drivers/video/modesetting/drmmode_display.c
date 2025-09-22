@@ -4679,8 +4679,8 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         xf86CrtcPtr crtc = xf86_config->crtc[i];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
         drmmode_cursor_rec cursor = drmmode_crtc->cursor;
-        
-        /* If we don't have any dimensions then 
+
+        /* If we don't have any dimensions then
          * something has gone terribly wrong. */
         assert(cursor.num_dimensions);
 
@@ -4829,8 +4829,7 @@ Bool drmmode_get_largest_cursor(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 
-    /* We need the cursor image to be at least 64x64 */
-    int max_width = 64, max_height = 64;
+    int max_width = 0, max_height = 0;
 
     if (!cursor_lim)
         return FALSE;
