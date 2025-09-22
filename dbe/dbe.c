@@ -236,7 +236,7 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
             pDbeWindowPriv->IDs[i] = DBE_FREE_ID_ELEMENT;
 
         /* Actually connect the window priv to the window. */
-        dixSetPrivate(&pWin->devPrivates, dbeWindowPrivKey, pDbeWindowPriv);
+        dixSetPrivate(&pWin->devPrivates, &dbeWindowPrivKeyRec, pDbeWindowPriv);
     } else {
         /* A buffer is already associated with the window.
          * Add the new buffer ID to the array, reallocating the array memory
@@ -327,7 +327,7 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
     return status;
 
  out_free:
-    dixSetPrivate(&pWin->devPrivates, dbeWindowPrivKey, NULL);
+    dixSetPrivate(&pWin->devPrivates, &dbeWindowPrivKeyRec, NULL);
     free(pDbeWindowPriv);
     return status;
 
@@ -919,7 +919,7 @@ DbeWindowPrivDelete(void *pDbeWinPriv, XID id)
 
     if (pDbeWindowPriv->nBufferIDs == 0) {
         /* Reset the DBE window priv pointer. */
-        dixSetPrivate(&pDbeWindowPriv->pWindow->devPrivates, dbeWindowPrivKey,
+        dixSetPrivate(&pDbeWindowPriv->pWindow->devPrivates, &dbeWindowPrivKeyRec,
                       NULL);
 
         /* We are done with the window priv. */
@@ -1039,13 +1039,13 @@ DbeExtensionInit(void)
 
             for (int j = 0; j < walkScreenIdx; j++) {
                 ScreenPtr pScreen = screenInfo.screens[j];
-                free(dixLookupPrivate(&pScreen->devPrivates, dbeScreenPrivKey));
-                dixSetPrivate(&pScreen->devPrivates, dbeScreenPrivKey, NULL);
+                free(dixLookupPrivate(&pScreen->devPrivates, &dbeScreenPrivKeyRec));
+                dixSetPrivate(&pScreen->devPrivates, &dbeScreenPrivKeyRec, NULL);
             }
             return;
         }
 
-        dixSetPrivate(&walkScreen->devPrivates, dbeScreenPrivKey, pDbeScreenPriv);
+        dixSetPrivate(&walkScreen->devPrivates, &dbeScreenPrivKeyRec, pDbeScreenPriv);
 
         {
             /* We don't have DDX support for DBE anymore */
@@ -1085,8 +1085,8 @@ DbeExtensionInit(void)
 
         for (int i = 0; i < screenInfo.numScreens; i++) {
             ScreenPtr walkScreen = screenInfo.screens[i];
-            free(dixLookupPrivate(&walkScreen->devPrivates, dbeScreenPrivKey));
-            dixSetPrivate(&walkScreen->devPrivates, dbeScreenPrivKey, NULL);
+            free(dixLookupPrivate(&walkScreen->devPrivates, &dbeScreenPrivKeyRec));
+            dixSetPrivate(&walkScreen->devPrivates, &dbeScreenPrivKeyRec, NULL);
         }
         return;
     }
