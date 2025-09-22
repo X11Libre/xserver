@@ -38,6 +38,7 @@
 #include <X11/Xfuncproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "pseudoramiX.h"

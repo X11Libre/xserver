@@ -27,6 +27,7 @@
 #include <X11/extensions/damageproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "include/pixmapstr.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"

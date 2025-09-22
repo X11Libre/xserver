@@ -60,6 +60,7 @@ SOFTWARE.
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/ptrveloc_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"

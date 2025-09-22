@@ -56,6 +56,7 @@
 #include <X11/fonts/libxfont2.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "misc.h"

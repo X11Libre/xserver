@@ -40,6 +40,7 @@
 #include <X11/extensions/xfixeswire.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "dixstruct.h"
 #include "scrnintstr.h"

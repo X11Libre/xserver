@@ -10,6 +10,7 @@
 #include <X11/extensions/XvMCproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/xvdix_priv.h"

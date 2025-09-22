@@ -32,6 +32,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
 #include "Xext/xvdix_priv.h"
 #include "Xext/panoramiX.h"

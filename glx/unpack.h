@@ -1,6 +1,8 @@
 #ifndef __GLX_unpack_h__
 #define __GLX_unpack_h__
 
+#include "dix/request_priv.h"
+
 /*
  * SGI FREE SOFTWARE LICENSE B (Version 2.0, Sept. 18, 2008)
  * Copyright (C) 1991-2000 Silicon Graphics, Inc. All Rights Reserved.

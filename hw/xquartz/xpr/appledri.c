@@ -42,6 +42,7 @@
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 
 #include "misc.h"
 #include "dixstruct.h"

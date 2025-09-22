@@ -30,6 +30,8 @@
 
 #include <dix-config.h>
 
+#include "dix/request_priv.h"
+
 #include "glxserver.h"
 #include "glxutil.h"
 #include "glxext.h"

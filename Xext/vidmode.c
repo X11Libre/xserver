@@ -38,6 +38,7 @@ from Kaleb S. KEITHLEY
 #include <X11/extensions/xf86vmproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"

@@ -24,6 +24,7 @@
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "randr/rrdispatch_priv.h"
 
 #include "randrstr_priv.h"

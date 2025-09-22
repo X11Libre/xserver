@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/osdep.h"

@@ -29,6 +29,8 @@
 
 #include <dix-config.h>
 
+#include "dix/request_priv.h"
+
 #include "hashtable.h"
 #include "vndserver_priv.h"
 #include "vndservervendor.h"

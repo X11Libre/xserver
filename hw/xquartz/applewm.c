@@ -36,6 +36,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/property_priv.h"
+#include "dix/request_priv.h"
 
 #include "quartz.h"
 

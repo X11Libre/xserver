@@ -30,6 +30,7 @@
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "Xi/handlers.h"
 

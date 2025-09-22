@@ -50,6 +50,7 @@
 #include "dix/dix_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "mi/mi_priv.h"
 

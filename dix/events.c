@@ -127,6 +127,7 @@ Equipment Corporation.
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/reqhandlers_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"

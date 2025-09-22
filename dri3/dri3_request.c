@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "os/client_priv.h"
 
 #include "dri3_priv.h"

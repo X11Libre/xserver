@@ -39,6 +39,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */

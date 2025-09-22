@@ -59,6 +59,7 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/swaprep.h"

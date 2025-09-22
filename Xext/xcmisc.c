@@ -34,6 +34,7 @@ from The Open Group.
 #include <X11/extensions/xcmiscproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "miext/extinit_priv.h"

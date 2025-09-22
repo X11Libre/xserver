@@ -106,6 +106,7 @@ Equipment Corporation.
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/property_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/selection_priv.h"

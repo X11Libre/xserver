@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"

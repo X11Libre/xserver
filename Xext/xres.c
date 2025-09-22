@@ -13,6 +13,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/registry_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "os/client_priv.h"
 #include "miext/extinit_priv.h"

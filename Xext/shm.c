@@ -43,6 +43,7 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/Xfuncproto.h>
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "miext/extinit_priv.h"

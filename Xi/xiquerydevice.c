@@ -38,6 +38,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/fmt.h"
 #include "Xi/handlers.h"

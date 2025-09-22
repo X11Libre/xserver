@@ -37,6 +37,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 #include "os/fmt.h"
 #include "Xi/handlers.h"
 

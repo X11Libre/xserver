@@ -52,6 +52,7 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/property_priv.h"
+#include "dix/request_priv.h"
 #include "dix/window_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
