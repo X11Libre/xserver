@@ -1965,11 +1965,25 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
 
     /* Need to extend HWcursor support to handle mask interleave */
-    if (!ms->drmmode.sw_cursor)
+    if (!ms->drmmode.sw_cursor) {
+        /* XXX Is there any spec that says we should interleave the cursor bits? XXX */
+        int interleave;
+        if (cursor_dim.width >= 64)
+            interleave = HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64;
+        else if (cursor_dim.width >= 32)
+            interleave = HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32;
+        else if (cursor_dim.width >= 16)
+            interleave = HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_16;
+        else if (cursor_dim.width >= 8)
+            interleave = HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_8;
+        else
+            interleave = HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1;
+
         xf86_cursors_init(pScreen, cursor_dim.width, cursor_dim.height,
-                          HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
+                          interleave |
                           HARDWARE_CURSOR_UPDATE_UNHIDDEN |
                           HARDWARE_CURSOR_ARGB);
+    }
 
     /* Must force it before EnterVT, so we are in control of VT and
      * later memory should be bound when allocating, e.g rotate_mem */
