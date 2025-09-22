@@ -51,15 +51,12 @@
 static Bool
 compScreenUpdate(ClientPtr pClient, void *closure)
 {
-    /* It Check's To Ensure Pointers Are Not Null */
     ScreenPtr pScreen = closure; 
-    CompScreenPtr cs;
+    CompScreenPtr cs = GetCompScreen(pScreen);
 
     if (!pScreen) {
         return FALSE;
     }
-
-    cs = GetCompScreen(pScreen);
 
     if (!cs) {
         return FALSE;
