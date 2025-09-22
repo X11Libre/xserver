@@ -100,7 +100,7 @@ compReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
     cw->damaged = TRUE;
 
     compMarkAncestors(pWin);
-}/* It Check's To Ensure Pointers Are Not Null */
+}
 
 static void
 compDestroyDamage(DamagePtr pDamage, void *closure)
