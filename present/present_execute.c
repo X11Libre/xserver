@@ -21,8 +21,10 @@
  */
 #include <dix-config.h>
 
-#include "present_priv.h"
 #include <unistd.h>
+
+#include "present/present_priv.h"
+
 #ifdef DRI3
 #include <sys/eventfd.h>
 #endif /* DRI3 */

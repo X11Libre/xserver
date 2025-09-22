@@ -40,6 +40,7 @@
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/bug_priv.h"
+#include "present/present_priv.h"
 
 #include "glxserver.h"
 #include <unpack.h>

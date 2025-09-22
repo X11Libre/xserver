@@ -21,7 +21,8 @@
  */
 #include <dix-config.h>
 
-#include "present_priv.h"
+#include "present/present_priv.h"
+
 #include <gcstruct.h>
 #include <misync.h>
 #include <misyncstr.h>

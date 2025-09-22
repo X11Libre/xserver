@@ -21,9 +21,9 @@
  */
 #include <dix-config.h>
 
+#include "present/present_priv.h"
 #include "randr/randrstr_priv.h"
 
-#include "present_priv.h"
 #include <gcstruct.h>
 
 uint32_t

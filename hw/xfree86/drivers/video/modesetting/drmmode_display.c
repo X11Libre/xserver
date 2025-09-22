@@ -36,6 +36,7 @@
 
 #include "dix/dix_priv.h"
 #include "os/fmt.h"
+#include "present/present_priv.h"
 
 #include "dumb_bo.h"
 #include "inputstr.h"
@@ -51,7 +52,6 @@
 #include <xf86drm.h>
 #include "xf86Crtc.h"
 #include "drmmode_display.h"
-#include "present.h"
 
 #include <cursorstr.h>
 
