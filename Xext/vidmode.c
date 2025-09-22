@@ -208,8 +208,8 @@ ProcVidModeQueryVersion(ClientPtr client)
         swaps(&reply.majorVersion);
         swaps(&reply.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -297,12 +297,10 @@ ProcVidModeGetModeLine(ClientPtr client)
             .flags = reply.flags,
             .privsize = reply.privsize
         };
-        X_SEND_REPLY_SIMPLE(client, oldrep);
+        return X_SEND_REPLY_SIMPLE(client, oldrep);
     }
-    else {
-        X_SEND_REPLY_SIMPLE(client, reply);
-    }
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void fillModeInfoV1(x_rpcbuf_t *rpcbuf, int dotClock,
@@ -1150,10 +1148,10 @@ VidModeValidateModeLine(ClientPtr client, xXF86VidModeValidateModeLineReq *stuff
     if (client->swapped) {
         swapl(&reply.status);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
+
     DebugF("ValidateModeLine - Succeeded (status = %d)\n", status);
 
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -1442,8 +1440,8 @@ ProcVidModeGetViewPort(ClientPtr client)
         swapl(&reply.x);
         swapl(&reply.y);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -1613,8 +1611,8 @@ ProcVidModeGetGamma(ClientPtr client)
         swapl(&reply.green);
         swapl(&reply.blue);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -1767,8 +1765,8 @@ ProcVidModeGetPermissions(ClientPtr client)
     if (client->swapped) {
         swapl(&reply.permissions);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int

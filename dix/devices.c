@@ -1747,8 +1747,7 @@ ProcSetModifierMapping(ClientPtr client)
         .success = rc,
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -1882,8 +1881,7 @@ ProcSetPointerMapping(ClientPtr client)
         .success = (ret == MappingBusy) ? MappingBusy : MappingSuccess,
     };
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -2210,8 +2208,8 @@ ProcGetKeyboardControl(ClientPtr client)
         swaps(&rep.bellPitch);
         swaps(&rep.bellDuration);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
@@ -2360,8 +2358,8 @@ ProcGetPointerControl(ClientPtr client)
         swaps(&rep.accelDenominator);
         swaps(&rep.threshold);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 void
@@ -2472,8 +2470,7 @@ ProcQueryKeymap(ClientPtr client)
     else if (rc != BadAccess)
         return rc;
 
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 /**

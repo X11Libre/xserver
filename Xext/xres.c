@@ -192,8 +192,8 @@ ProcXResQueryVersion(ClientPtr client)
         swaps(&reply.server_major);
         swaps(&reply.server_minor);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -339,8 +339,8 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
         swapl(&reply.bytes);
         swapl(&reply.bytes_overflow);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /** @brief Finds out if a client's information need to be put into the

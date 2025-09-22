@@ -3,8 +3,8 @@
  * Copyright © 2024 Enrico Weigelt, metux IT consult <info@metux.net>
  * Copyright © 2010 Nokia Corporation and/or its subsidiary(-ies).
  */
-#ifndef _XSERVER_DIX_CLIENT_PRIV_H
-#define _XSERVER_DIX_CLIENT_PRIV_H
+#ifndef _XSERVER_OS_CLIENT_PRIV_H
+#define _XSERVER_OS_CLIENT_PRIV_H
 
 #include <sys/types.h>
 #include <X11/Xdefs.h>

@@ -41,7 +41,7 @@
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
-#include "xf86platformBus.h"
+#include "xf86platformBus_priv.h"
 #include "xf86pciBus.h"
 #ifdef __sparc__
 #include "xf86sbusBus_priv.h"

@@ -59,6 +59,8 @@
 
 #include "driver.h"
 
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+
 static Bool drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height);
 static PixmapPtr drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int height,
                                               int depth, int bitsPerPixel, int devKind,
@@ -1878,15 +1880,29 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
 
 static void
 drmmode_paint_cursor(CARD32 * restrict cursor, int cursor_pitch, int cursor_width, int cursor_height,
-                     const CARD32 * restrict image, int image_width, int image_height)
+                     const CARD32 * restrict image, int image_width, int image_height,
+                     drmmode_crtc_private_ptr restrict drmmode_crtc, int glyph_width, int glyph_height)
 {
-    if (cursor_width == image_width && cursor_pitch == cursor_width) {
-        /* we can speed things up in this case */
-        memcpy(cursor, image, cursor_width * cursor_height * sizeof(*cursor));
+    int width_todo;
+    int height_todo;
+
+    if (drmmode_crtc->cursor_glyph_width == 0 &&
+        drmmode_crtc->cursor_glyph_height == 0) {
+        /* If this is the first time we paint the cursor, assume the entire cursor buffer is dirty */
+        width_todo = cursor_width;
+        height_todo = cursor_height;
     } else {
-        for (int i = 0; i < cursor_height; i++) {
-            memcpy(cursor + i * cursor_pitch, image + i * image_width, cursor_width * sizeof(*cursor));    /* cpu_to_le32(image[i]); */
-        }
+        /* Paint only what we need to */
+        width_todo = MAX(drmmode_crtc->cursor_glyph_width, glyph_width);
+        height_todo = MAX(drmmode_crtc->cursor_glyph_height, glyph_height);
+    }
+
+    /* remember the size of the current cursor glyph */
+    drmmode_crtc->cursor_glyph_width = glyph_width;
+    drmmode_crtc->cursor_glyph_height = glyph_height;
+
+    for (int i = 0; i < height_todo; i++) {
+        memcpy(cursor + i * cursor_pitch, image + i * image_width, width_todo * sizeof(*cursor));    /* cpu_to_le32(image[i]); */
     }
 }
 
@@ -1929,9 +1945,20 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     {
         drmmode_cursor_dim_rec dimensions = drmmode_cursor.dimensions[i];
 
-        if (dimensions.width > cursor->bits->width &&
-            dimensions.height > cursor->bits->height)
+        if (dimensions.width >= cursor->bits->width &&
+            dimensions.height >= cursor->bits->height) {
+                break;
+        }
+
+        if (dimensions.width > max_width ||
+            dimensions.height > max_height) {
+
+            /* If this ever happens, i should not be 0, but check for good measure */
+            if (i > 0) {
+                i--;
+            }
             break;
+        }
     }
 
     /* Get the resolution of the cursor. */
@@ -1942,7 +1969,8 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
 
     /* cursor should be mapped already */
     drmmode_paint_cursor(drmmode_cursor.bo->ptr, cursor_pitch, width, height,
-                         image, max_width, max_height);
+                         image, max_width, max_height,
+                         drmmode_crtc, cursor->bits->width, cursor->bits->height);
 
     /* set cursor width and height here for drmmode_show_cursor */
     drmmode_crtc->cursor_width = width;
@@ -4798,12 +4826,14 @@ drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled)
 Bool drmmode_get_largest_cursor(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor_lim)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    int max_width = 0, max_height = 0, i;
+
+    /* We need the cursor image to be at least 64x64 */
+    int max_width = 64, max_height = 64;
 
     if (!cursor_lim)
         return FALSE;
 
-    for (i = 0; i < xf86_config->num_crtc; i++) {
+    for (int i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
         drmmode_cursor_rec cursor = drmmode_crtc->cursor;
@@ -4816,11 +4846,8 @@ Bool drmmode_get_largest_cursor(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor
 
         /* Future work:
          * - We should only let sizes that all CRTCs support. */
-        if (width > max_width && height > max_height)
-        {
-            max_width  = width;
-            max_height = height;
-        }
+        max_width = MAX(width, max_width);
+        max_height = MAX(height, max_height);
     }
 
     cursor_lim->width  = max_width;

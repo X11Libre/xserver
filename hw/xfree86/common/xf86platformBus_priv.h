@@ -9,6 +9,16 @@
 
 #ifdef XSERVER_PLATFORM_BUS
 
+extern int xf86_num_platform_devices;
+extern struct xf86_platform_device *xf86_platform_devices;
+
+static inline struct OdevAttributes *
+xf86_platform_odev_attributes(int index)
+{
+    struct xf86_platform_device *device = &xf86_platform_devices[index];
+    return device->attribs;
+}
+
 int xf86platformProbe(void);
 int xf86platformProbeDev(DriverPtr drvp);
 int xf86platformAddGPUDevices(DriverPtr drvp);

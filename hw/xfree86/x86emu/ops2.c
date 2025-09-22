@@ -2477,6 +2477,7 @@ x86emuOp2_bsf(u8 X86EMU_UNUSED(op2))
         }
         else {
             u16 *dec = DECODE_RM_WORD_REGISTER(rl);
+            (void)dec;
             assert(dec);
             u16 srcval = *DECODE_RM_WORD_REGISTER(rl);
             DECODE_PRINTF(",");

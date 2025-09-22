@@ -115,7 +115,9 @@ SOFTWARE.
 #include <systemd/sd-daemon.h>
 #endif
 
+#ifdef XDMCP
 #include "xdmcp.h"
+#endif
 
 #define MAX_CONNECTIONS (1<<16)
 

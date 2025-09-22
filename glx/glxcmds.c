@@ -717,8 +717,7 @@ __glXDisp_IsDirect(__GLXclientState * cl, GLbyte * pc)
         .isDirect = glxc->isDirect
     };
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -749,8 +748,7 @@ __glXDisp_QueryVersion(__GLXclientState * cl, GLbyte * pc)
         swapl(&reply.minorVersion);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int

@@ -239,8 +239,8 @@ ProcDamageQueryVersion(ClientPtr client)
         swapl(&rep.majorVersion);
         swapl(&rep.minorVersion);
     }
-    X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 static void

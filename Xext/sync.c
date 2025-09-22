@@ -1269,8 +1269,7 @@ ProcSyncInitialize(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xSyncInitializeReq);
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /*
@@ -1391,8 +1390,7 @@ ProcSyncGetPriority(ClientPtr client)
         swapl(&reply.priority);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /*
@@ -1699,8 +1697,8 @@ ProcSyncQueryCounter(ClientPtr client)
         swapl(&reply.value_hi);
         swapl(&reply.value_lo);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /*
@@ -1894,8 +1892,7 @@ ProcSyncQueryAlarm(ClientPtr client)
         swapl(&reply.delta_lo);
     }
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -2059,8 +2056,7 @@ ProcSyncQueryFence(ClientPtr client)
         .triggered = pFence->funcs.CheckTriggered(pFence)
     };
 
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int

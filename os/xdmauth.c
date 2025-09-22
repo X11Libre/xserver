@@ -43,7 +43,11 @@ from The Open Group.
 
 #include "os.h"
 #include "osdep.h"
+
+#ifdef XDMCP
 #include "xdmcp.h"
+#endif
+
 #include "xdmauth.h"
 #include "dixstruct.h"
 

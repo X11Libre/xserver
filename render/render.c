@@ -96,7 +96,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderCreatePicture(ClientPtr pClient);
 static int SProcRenderChangePicture(ClientPtr pClient);
 static int SProcRenderSetPictureClipRectangles(ClientPtr pClient);
 static int SProcRenderFreePicture(ClientPtr pClient);
@@ -104,7 +103,6 @@ static int SProcRenderTrapezoids(ClientPtr pClient);
 static int SProcRenderTriangles(ClientPtr pClient);
 static int SProcRenderTriStrip(ClientPtr pClient);
 static int SProcRenderTriFan(ClientPtr pClient);
-static int SProcRenderReferenceGlyphSet(ClientPtr pClient);
 static int SProcRenderFreeGlyphSet(ClientPtr pClient);
 static int SProcRenderAddGlyphs(ClientPtr pClient);
 static int SProcRenderFreeGlyphs(ClientPtr pClient);
@@ -163,7 +161,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         ProcRenderQueryPictFormats,
         ProcRenderQueryPictIndexValues,
         _not_implemented, /* SProcRenderQueryDithers */
-        SProcRenderCreatePicture,
+        ProcRenderCreatePicture,
         SProcRenderChangePicture,
         SProcRenderSetPictureClipRectangles,
         SProcRenderFreePicture,
@@ -177,7 +175,7 @@ int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
         _not_implemented, /* SProcRenderColorTriangles */
         _not_implemented, /* SProcRenderTransform */
         ProcRenderCreateGlyphSet,
-        SProcRenderReferenceGlyphSet,
+        ProcRenderReferenceGlyphSet,
         SProcRenderFreeGlyphSet,
         SProcRenderAddGlyphs,
         _not_implemented, /* SProcRenderAddGlyphsFromPicture */
@@ -516,16 +514,12 @@ ProcRenderQueryPictIndexValues(ClientPtr client)
 }
 
 static int
-SingleRenderCreatePicture(ClientPtr client)
+SingleRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
 {
     PicturePtr pPicture;
     DrawablePtr pDrawable;
     PictFormatPtr pFormat;
     int len, error, rc;
-
-    REQUEST(xRenderCreatePictureReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreatePictureReq);
 
     LEGAL_NEW_RESOURCE(stuff->pid, client);
     rc = dixLookupDrawable(&pDrawable, stuff->drawable, client, 0,
@@ -878,8 +872,12 @@ ProcRenderReferenceGlyphSet(ClientPtr client)
     int rc;
 
     REQUEST(xRenderReferenceGlyphSetReq);
-
     REQUEST_SIZE_MATCH(xRenderReferenceGlyphSetReq);
+
+    if (client->swapped) {
+        swapl(&stuff->gsid);
+        swapl(&stuff->existing);
+    }
 
     LEGAL_NEW_RESOURCE(stuff->gsid, client);
 
@@ -1944,19 +1942,6 @@ ProcRenderDispatch(ClientPtr client)
 }
 
 static int _X_COLD
-SProcRenderCreatePicture(ClientPtr client)
-{
-    REQUEST(xRenderCreatePictureReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreatePictureReq);
-    swapl(&stuff->pid);
-    swapl(&stuff->drawable);
-    swapl(&stuff->format);
-    swapl(&stuff->mask);
-    SwapRestL(stuff);
-    return ProcRenderCreatePicture(client);
-}
-
-static int _X_COLD
 SProcRenderChangePicture(ClientPtr client)
 {
     REQUEST(xRenderChangePictureReq);
@@ -2046,16 +2031,6 @@ SProcRenderTriFan(ClientPtr client)
     swaps(&stuff->ySrc);
     SwapRestL(stuff);
     return ProcRenderTriFan(client);
-}
-
-static int _X_COLD
-SProcRenderReferenceGlyphSet(ClientPtr client)
-{
-    REQUEST(xRenderReferenceGlyphSetReq);
-    REQUEST_SIZE_MATCH(xRenderReferenceGlyphSetReq);
-    swapl(&stuff->gsid);
-    swapl(&stuff->existing);
-    return ProcRenderReferenceGlyphSet(client);
 }
 
 static int _X_COLD
@@ -2390,13 +2365,11 @@ SProcRenderDispatch(ClientPtr client)
 int (*PanoramiXSaveRenderVector[RenderNumberRequests]) (ClientPtr);
 
 static int
-PanoramiXRenderCreatePicture(ClientPtr client)
+PanoramiXRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
 {
-    REQUEST(xRenderCreatePictureReq);
     PanoramiXRes *refDraw, *newPict;
     int result;
 
-    REQUEST_AT_LEAST_SIZE(xRenderCreatePictureReq);
     result = dixLookupResourceByClass((void **) &refDraw, stuff->drawable,
                                       XRC_DRAWABLE, client, DixWriteAccess);
     if (result != Success)
@@ -2416,7 +2389,7 @@ PanoramiXRenderCreatePicture(ClientPtr client)
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->pid = newPict->info[walkScreenIdx].id;
         stuff->drawable = refDraw->info[walkScreenIdx].id;
-        result = SingleRenderCreatePicture(client);
+        result = SingleRenderCreatePicture(client, stuff);
         if (result != Success)
             break;
     });
@@ -3077,11 +3050,22 @@ PanoramiXRenderReset(void)
 static int
 ProcRenderCreatePicture(ClientPtr client)
 {
+    REQUEST(xRenderCreatePictureReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCreatePictureReq);
+
+    if (client->swapped) {
+        swapl(&stuff->pid);
+        swapl(&stuff->drawable);
+        swapl(&stuff->format);
+        swapl(&stuff->mask);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreatePicture(client)
-                         : SingleRenderCreatePicture(client));
+    return (usePanoramiX ? PanoramiXRenderCreatePicture(client, stuff)
+                         : SingleRenderCreatePicture(client, stuff));
 #else
-    return SingleRenderCreatePicture(client);
+    return SingleRenderCreatePicture(client, stuff);
 #endif
 }
 

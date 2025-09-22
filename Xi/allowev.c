@@ -66,30 +66,18 @@ SOFTWARE.
  *
  */
 
-int _X_COLD
-SProcXAllowDeviceEvents(ClientPtr client)
-{
-    REQUEST(xAllowDeviceEventsReq);
-    REQUEST_SIZE_MATCH(xAllowDeviceEventsReq);
-    swapl(&stuff->time);
-    return (ProcXAllowDeviceEvents(client));
-}
-
-/***********************************************************************
- *
- * This procedure allows frozen events to be routed.
- *
- */
-
 int
 ProcXAllowDeviceEvents(ClientPtr client)
 {
+    REQUEST(xAllowDeviceEventsReq);
+    REQUEST_SIZE_MATCH(xAllowDeviceEventsReq);
+
+    if (client->swapped)
+        swapl(&stuff->time);
+
     TimeStamp time;
     DeviceIntPtr thisdev;
     int rc;
-
-    REQUEST(xAllowDeviceEventsReq);
-    REQUEST_SIZE_MATCH(xAllowDeviceEventsReq);
 
     rc = dixLookupDevice(&thisdev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)

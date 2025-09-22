@@ -57,8 +57,8 @@ ProcBigReqDispatch(ClientPtr client)
     if (client->swapped) {
         swapl(&reply.max_request_size);
     }
-    X_SEND_REPLY_SIMPLE(client, reply);
-    return Success;
+
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 void
