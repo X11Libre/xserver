@@ -170,11 +170,6 @@ typedef struct _Xtransport {
         int *			/* status */
     );
 
-    int	(*BytesReadable)(
-	XtransConnInfo,		/* connection */
-	BytesReadable_t *	/* pend */
-    );
-
     int	(*Read)(
 	XtransConnInfo,		/* connection */
 	char *,			/* buf */

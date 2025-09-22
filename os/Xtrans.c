@@ -695,11 +695,6 @@ XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr, int *status)
     return newciptr;
 }
 
-int _XSERVTransBytesReadable (XtransConnInfo ciptr, BytesReadable_t *pend)
-{
-    return ciptr->transptr->BytesReadable (ciptr, pend);
-}
-
 int _XSERVTransRead (XtransConnInfo ciptr, char *buf, int size)
 {
     return ciptr->transptr->Read (ciptr, buf, size);

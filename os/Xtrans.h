@@ -103,12 +103,6 @@ typedef	struct {
 } Xtransaddr;
 #endif
 
-#ifdef LONG64
-typedef int BytesReadable_t;
-#else
-typedef long BytesReadable_t;
-#endif
-
 typedef struct _XtransConnInfo *XtransConnInfo;
 
 /*
@@ -201,11 +195,6 @@ int _XSERVTransResetListener (
 XtransConnInfo _XSERVTransAccept (
     XtransConnInfo,	/* ciptr */
     int *		/* status */
-);
-
-int _XSERVTransBytesReadable (
-    XtransConnInfo,	/* ciptr */
-    BytesReadable_t *	/* pend */
 );
 
 int _XSERVTransRead (

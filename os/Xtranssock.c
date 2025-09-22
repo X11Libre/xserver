@@ -1171,14 +1171,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
 
 #endif /* UNIXCONN */
 
-static int _XSERVTransSocketBytesReadable (
-    XtransConnInfo ciptr, BytesReadable_t *pend)
-{
-    prmsg (2,"SocketBytesReadable(%p,%d,%p)\n",
-	(void *) ciptr, ciptr->fd, (void *) pend);
-    return ossock_ioctl (ciptr->fd, FIONREAD, pend);
-}
-
 #if XTRANS_SEND_FDS
 
 static void
@@ -1483,7 +1475,6 @@ static Xtransport _XSERVTransSocketTCPFuncs = {
 	_XSERVTransSocketINETCreateListener,
 	NULL,		       			/* ResetListener */
 	_XSERVTransSocketINETAccept,
-	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 #if XTRANS_SEND_FDS
@@ -1506,7 +1497,6 @@ static Xtransport _XSERVTransSocketINETFuncs = {
 	_XSERVTransSocketINETCreateListener,
 	NULL,		       			/* ResetListener */
 	_XSERVTransSocketINETAccept,
-	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 #if XTRANS_SEND_FDS
@@ -1530,7 +1520,6 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 	_XSERVTransSocketINETCreateListener,
 	NULL,					/* ResetListener */
 	_XSERVTransSocketINETAccept,
-	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 #if XTRANS_SEND_FDS
@@ -1561,7 +1550,6 @@ static Xtransport _XSERVTransSocketLocalFuncs = {
 	_XSERVTransSocketUNIXCreateListener,
 	_XSERVTransSocketUNIXResetListener,
 	_XSERVTransSocketUNIXAccept,
-	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 #if XTRANS_SEND_FDS
@@ -1596,7 +1584,6 @@ static Xtransport _XSERVTransSocketUNIXFuncs = {
 	_XSERVTransSocketUNIXCreateListener,
 	_XSERVTransSocketUNIXResetListener,
 	_XSERVTransSocketUNIXAccept,
-	_XSERVTransSocketBytesReadable,
 	_XSERVTransSocketRead,
 	_XSERVTransSocketWrite,
 #if XTRANS_SEND_FDS

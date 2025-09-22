@@ -739,14 +739,6 @@ static XtransConnInfo _XSERVTransLocalAccept(XtransConnInfo ciptr, int *status)
     return newciptr;
 }
 
-static int _XSERVTransLocalBytesReadable(XtransConnInfo ciptr, BytesReadable_t *pend )
-{
-    prmsg(2,"LocalBytesReadable(%p->%d,%p)\n",
-          (void *) ciptr, ciptr->fd, (void *) pend);
-
-    return ioctl(ciptr->fd, FIONREAD, (char *)pend);
-}
-
 static int _XSERVTransLocalRead(XtransConnInfo ciptr, char *buf, int size)
 {
     prmsg(2,"LocalRead(%d,%p,%d)\n", ciptr->fd, (void *) buf, size );
@@ -828,7 +820,6 @@ static Xtransport _XSERVTransLocalFuncs = {
 	_XSERVTransLocalCreateListener,
 	_XSERVTransLocalResetListener,
 	_XSERVTransLocalAccept,
-	_XSERVTransLocalBytesReadable,
 	_XSERVTransLocalRead,
 	_XSERVTransLocalWrite,
 #if XTRANS_SEND_FDS
@@ -854,7 +845,6 @@ static Xtransport _XSERVTransNAMEDFuncs = {
 	_XSERVTransLocalCreateListener,
 	_XSERVTransLocalResetListener,
 	_XSERVTransLocalAccept,
-	_XSERVTransLocalBytesReadable,
 	_XSERVTransLocalRead,
 	_XSERVTransLocalWrite,
 #if XTRANS_SEND_FDS
@@ -877,7 +867,6 @@ static Xtransport _XSERVTransPIPEFuncs = {
 	_XSERVTransLocalCreateListener,
 	_XSERVTransLocalResetListener,
 	_XSERVTransLocalAccept,
-	_XSERVTransLocalBytesReadable,
 	_XSERVTransLocalRead,
 	_XSERVTransLocalWrite,
 #if XTRANS_SEND_FDS
