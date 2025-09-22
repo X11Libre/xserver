@@ -30,8 +30,6 @@
  *
  *****************************************************************************/
 
-/* INCLUDES */
-
 #include <dix-config.h>
 
 #include <string.h>
@@ -90,9 +88,8 @@ DbeStubScreen(DbeScreenPrivPtr pDbeScreenPriv, int *nStubbedScreens)
     pDbeScreenPriv->WinPrivDelete = NULL;
 
     (*nStubbedScreens)++;
+}
 
-}                               /* DbeStubScreen() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeGetVersion
@@ -239,17 +236,14 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
 
         /* Actually connect the window priv to the window. */
         dixSetPrivate(&pWin->devPrivates, dbeWindowPrivKey, pDbeWindowPriv);
-
-    }                           /* if -- There is no buffer associated with the window. */
-
-    else {
-        int i=0;
+    } else {
         /* A buffer is already associated with the window.
          * Add the new buffer ID to the array, reallocating the array memory
          * if necessary.
          */
 
         /* Determine if there is a free element in the ID array. */
+        int i=0;
         for (i = 0; i < pDbeWindowPriv->maxAvailableIDs; i++) {
             if (pDbeWindowPriv->IDs[i] == DBE_FREE_ID_ELEMENT) {
                 /* There is still room in the ID array. */
@@ -296,8 +290,7 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
         }
 
         add_index = i;
-
-    }                           /* else -- A buffer is already associated with the window. */
+    }
 
     /* Call the DDX routine to allocate the back buffer. */
     status = (*pDbeScreenPriv->AllocBackBufferName) (pWin, stuff->buffer,
@@ -337,8 +330,8 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
     free(pDbeWindowPriv);
     return status;
 
-}                               /* ProcDbeAllocateBackBufferName() */
-
+}
+
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeDeallocateBackBufferName
@@ -402,9 +395,8 @@ ProcDbeDeallocateBackBufferName(ClientPtr client)
     FreeResource(stuff->buffer, X11_RESTYPE_NONE);
 
     return Success;
+}
 
-}                               /* ProcDbeDeallocateBackBufferName() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeSwapBuffers
@@ -542,9 +534,8 @@ ProcDbeSwapBuffers(ClientPtr client)
 
     free(swapInfo);
     return Success;
+}
 
-}                               /* ProcDbeSwapBuffers() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeGetVisualInfo
@@ -662,9 +653,8 @@ clearRpcBuf:
     free(pDrawables);
 
     return rc;
+}
 
-}                               /* ProcDbeGetVisualInfo() */
-
 /******************************************************************************
  *
  * DBE DIX Procedure: ProcDbeGetbackBufferAttributes
@@ -755,8 +745,7 @@ ProcDbeDispatch(ClientPtr client)
     default:
         return BadRequest;
     }
-
-}                               /* ProcDbeDispatch() */
+}
 
 /******************************************************************************
  *
@@ -818,8 +807,8 @@ DbeSetupBackgroundPainter(WindowPtr pWin, GCPtr pGC)
     }
 
     return ChangeGC(NULL, pGC, gcmask, gcvalues) == 0;
-}                               /* DbeSetupBackgroundPainter() */
-
+}
+
 /******************************************************************************
  *
  * DBE DIX Procedure: DbeDrawableDelete
@@ -841,8 +830,8 @@ DbeDrawableDelete(void *pDrawable, XID id)
 {
     return Success;
 
-}                               /* DbeDrawableDelete() */
-
+}
+
 /******************************************************************************
  *
  * DBE DIX Procedure: DbeWindowPrivDelete
@@ -937,8 +926,7 @@ DbeWindowPrivDelete(void *pDbeWinPriv, XID id)
     }
 
     return Success;
-
-}                               /* DbeWindowPrivDelete() */
+}
 
 static void miDbeWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin);
 
@@ -1111,5 +1099,4 @@ DbeExtensionInit(void)
     SetResourceTypeErrorValue(dbeWindowPrivResType,
                               dbeErrorBase + DbeBadBuffer);
     SetResourceTypeErrorValue(dbeDrawableResType, dbeErrorBase + DbeBadBuffer);
-
-}                               /* DbeExtensionInit() */
+}

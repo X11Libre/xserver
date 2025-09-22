@@ -36,8 +36,6 @@
 #include "dix/screen_hooks_priv.h"
 #include "include/privates.h"
 
-/* EXTERNS */
-
 extern Bool miDbeInit(ScreenPtr pScreen, DbeScreenPrivPtr pDbeScreenPriv);
 
 extern DevPrivateKeyRec dbeScreenPrivKeyRec;
