@@ -51,7 +51,7 @@
 static Bool
 compScreenUpdate(ClientPtr pClient, void *closure)
 {
-    ScreenPtr pScreen = closure; 
+    ScreenPtr pScreen = closure;
     CompScreenPtr cs = GetCompScreen(pScreen);
 
     if (!pScreen) {
