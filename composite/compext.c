@@ -133,15 +133,15 @@ ProcCompositeQueryVersion(ClientPtr client)
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
-#define VERIFY_WINDOW(pWindow, wid, client, mode)			\
-    do {								\
-	int err;							\
-	err = dixLookupResourceByType((void **) &pWindow, wid,	\
-				      X11_RESTYPE_WINDOW, client, mode);\
-	if (err != Success) {						\
-	    client->errorValue = wid;					\
-	    return err;							\
-	}								\
+#define VERIFY_WINDOW(pWindow, wid, client, mode)                       \
+    do {                                                                \
+        int err;                                                        \
+        err = dixLookupResourceByType((void **) &pWindow, wid,          \
+                                      X11_RESTYPE_WINDOW, client, mode);\
+        if (err != Success) {                                           \
+            client->errorValue = wid;                                   \
+            return err;                                                 \
+        }                                                               \
     } while (0)
 
 static int
