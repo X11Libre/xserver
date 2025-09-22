@@ -1879,23 +1879,25 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
 }
 
 static void
-drmmode_paint_cursor(CARD32 * restrict cursor, int cursor_pitch, int cursor_width, int cursor_height,
+drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_width, int cursor_height,
                      const CARD32 * restrict image, int image_width, int image_height,
                      drmmode_crtc_private_ptr restrict drmmode_crtc, int glyph_width, int glyph_height)
 {
     int width_todo;
     int height_todo;
 
+    CARD32 *cursor = cursor_bo->ptr;
+
     if (drmmode_crtc->cursor_glyph_width == 0 &&
         drmmode_crtc->cursor_glyph_height == 0) {
         /* If this is the first time we paint the cursor, assume the entire cursor buffer is dirty */
-        width_todo = cursor_width;
-        height_todo = cursor_height;
-    } else {
-        /* Paint only what we need to */
-        width_todo = MAX(drmmode_crtc->cursor_glyph_width, glyph_width);
-        height_todo = MAX(drmmode_crtc->cursor_glyph_height, glyph_height);
+        /* XXX Do we really need to do this? XXX */
+        memset(cursor, 0, cursor_bo->size);
     }
+
+    /* Paint only what we need to */
+    width_todo = MAX(drmmode_crtc->cursor_glyph_width, glyph_width);
+    height_todo = MAX(drmmode_crtc->cursor_glyph_height, glyph_height);
 
     /* remember the size of the current cursor glyph */
     drmmode_crtc->cursor_glyph_width = glyph_width;
@@ -1968,7 +1970,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     const int cursor_pitch = drmmode_cursor_get_pitch(drmmode_crtc, i);
 
     /* cursor should be mapped already */
-    drmmode_paint_cursor(drmmode_cursor.bo->ptr, cursor_pitch, width, height,
+    drmmode_paint_cursor(drmmode_cursor.bo, cursor_pitch, width, height,
                          image, max_width, max_height,
                          drmmode_crtc, cursor->bits->width, cursor->bits->height);
 
