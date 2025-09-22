@@ -151,7 +151,7 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
     CompWindowPtr cw = GetCompWindow(pWin);
     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);
     WindowPtr pLayerWin;
-    Bool anyMarked = FALSE;rebase to squash
+    Bool anyMarked = FALSE;
     int status = Success;
 
     if (pWin == cs->pOverlayWin) {
