@@ -51,7 +51,8 @@
 static Bool
 compScreenUpdate(ClientPtr pClient, void *closure)
 {
-    ScreenPtr pScreen = closure; /* It Check's To Ensure Pointers Are Not Null */
+    /* It Check's To Ensure Pointers Are Not Null */
+    ScreenPtr pScreen = closure; 
     CompScreenPtr cs;
 
     if (!pScreen) {
@@ -66,8 +67,9 @@ compScreenUpdate(ClientPtr pClient, void *closure)
 
     compCheckTree(pScreen);
     compPaintChildrenToWindow(pScreen->root);
-
-    cs->pendingScreenUpdate = FALSE; /* Next damage will restore the worker */
+    
+    /* Next damage will restore the worker */
+    cs->pendingScreenUpdate = FALSE;
     return TRUE;
 }
 
@@ -98,7 +100,7 @@ compReportDamage(DamagePtr pDamage, RegionPtr pRegion, void *closure)
     cw->damaged = TRUE;
 
     compMarkAncestors(pWin);
-}
+}/* It Check's To Ensure Pointers Are Not Null */
 
 static void
 compDestroyDamage(DamagePtr pDamage, void *closure)
@@ -577,6 +579,7 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
         PictFormatPtr pDstFormat = PictureWindowFormat(pWin);
         XID inferiors = IncludeInferiors;
         int error;
+        
         PicturePtr pSrcPicture = CreatePicture(None,
                                                &pParent->drawable,
                                                pSrcFormat,
