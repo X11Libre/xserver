@@ -67,7 +67,6 @@ compScreenUpdate(ClientPtr pClient, void *closure)
 
     compCheckTree(pScreen);
     compPaintChildrenToWindow(pScreen->root);
-    
     /* Next damage will restore the worker */
     cs->pendingScreenUpdate = FALSE;
     return TRUE;
