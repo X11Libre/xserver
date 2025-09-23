@@ -47,7 +47,9 @@ SOFTWARE.
 #ifndef OS_H
 #define OS_H
 
+#include "callback.h"
 #include "misc.h"
+
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>

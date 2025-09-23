@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define XACE_MINOR_VERSION		0
 
 #include "dix/selection_priv.h"
+#include "include/callback.h"
 
 #include "extnsionst.h"
 #include "pixmap.h"

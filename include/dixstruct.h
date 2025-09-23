@@ -24,6 +24,10 @@ SOFTWARE.
 #ifndef DIXSTRUCT_H
 #define DIXSTRUCT_H
 
+#include <X11/Xmd.h>
+
+#include "callback.h"
+
 #include "client.h"
 #include "dix.h"
 #include "resource.h"
@@ -31,7 +35,6 @@ SOFTWARE.
 #include "gc.h"
 #include "pixmap.h"
 #include "privates.h"
-#include <X11/Xmd.h>
 
 /*
  * 	direct-mapped hash table, used by resource manager to store

@@ -115,12 +115,6 @@ typedef int XRetCode;
 #define FALSE 0
 #endif
 
-#ifndef _XTYPEDEF_CALLBACKLISTPTR
-typedef struct _CallbackList *CallbackListPtr;  /* also in dix.h */
-
-#define _XTYPEDEF_CALLBACKLISTPTR
-#endif
-
 typedef struct _xReq *xReqPtr;
 
 #include "os.h"                 /* for ALLOCATE_LOCAL and DEALLOCATE_LOCAL */
