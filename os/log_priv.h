@@ -89,4 +89,9 @@ extern int xorgSyslogVerbosity;
  */
 extern const char *xorgSyslogIdent;
 
+/*
+ * print log markers into the log file
+ */
+void LogPrintMarkers(void);
+
 #endif /* __XORG_OS_LOGGING_H */

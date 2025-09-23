@@ -302,8 +302,6 @@ extern _X_EXPORT void
 ErrorF(const char *f, ...)
 _X_ATTRIBUTE_PRINTF(1, 2);
 
-void LogPrintMarkers(void);
-
 extern _X_EXPORT void
 xorg_backtrace(void);
 
