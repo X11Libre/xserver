@@ -36,6 +36,7 @@
 #include <xwin-config.h>
 #endif
 
+#include "include/extinit.h"
 #include "mi/mi_priv.h"
 
 #include "win.h"
