@@ -82,7 +82,7 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "misc.h"
 
-CallbackListPtr ReplyCallback;
+CallbackListPtr ReplyCallback = NULL;
 CallbackListPtr FlushCallback;
 
 typedef struct _connectionInput {

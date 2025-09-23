@@ -10,6 +10,8 @@
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
 
+#include "include/callback.h"
+
 /* Client IDs. Use GetClientPid, GetClientCmdName and GetClientCmdArgs
  * instead of accessing the fields directly. */
 struct _ClientId {
@@ -59,5 +61,16 @@ _X_EXPORT void SetCriticalOutputPending(void);
 
 /* exported only for DRI module, but should not be used by external drivers */
 _X_EXPORT void ResetCurrentRequest(struct _Client *client);
+
+/* stuff for ReplyCallback */
+extern CallbackListPtr ReplyCallback;
+typedef struct {
+    ClientPtr client;
+    const void *replyData;
+    unsigned long dataLenBytes; /* actual bytes from replyData + pad bytes */
+    unsigned long bytesRemaining;
+    Bool startOfReply;
+    unsigned long padBytes;     /* pad bytes from zeroed array */
+} ReplyInfoRec;
 
 #endif /* _XSERVER_DIX_CLIENT_PRIV_H */
