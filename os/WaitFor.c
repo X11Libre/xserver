@@ -63,6 +63,7 @@ SOFTWARE.
 #include <X11/X.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screensaver_priv.h"
 #include "os/busfault.h"
 #include "os/client_priv.h"
 #include "os/screensaver.h"
