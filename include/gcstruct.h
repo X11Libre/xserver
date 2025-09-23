@@ -58,6 +58,11 @@ SOFTWARE.
 
 #define GCAllBits ((1 << (GCLastBit + 1)) - 1)
 
+#ifndef _XTYPEDEF_CHARINFOPTR
+typedef struct _CharInfo *CharInfoPtr;  /* also in fonts/include/font.h */
+#define _XTYPEDEF_CHARINFOPTR
+#endif
+
 /*
  * functions which modify the state of the GC
  */
