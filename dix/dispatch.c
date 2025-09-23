@@ -114,6 +114,7 @@ Equipment Corporation.
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
 #include "dix/window_priv.h"
