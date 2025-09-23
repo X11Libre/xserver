@@ -280,12 +280,6 @@ extern _X_EXPORT void
 LogMessage(MessageType type, const char *format, ...)
 _X_ATTRIBUTE_PRINTF(2, 3);
 
-void
-LogVHdrMessageVerb(MessageType type, int verb,
-                   const char *msg_format, va_list msg_args,
-                   const char *hdr_format, va_list hdr_args)
-_X_ATTRIBUTE_PRINTF(3, 0)
-_X_ATTRIBUTE_PRINTF(5, 0);
 extern _X_EXPORT void
 LogHdrMessageVerb(MessageType type, int verb,
                   const char *msg_format, va_list msg_args,
