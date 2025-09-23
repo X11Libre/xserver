@@ -51,6 +51,7 @@ SOFTWARE.
 #include <X11/Xdefs.h>
 
 #include <limits.h>
+#include <signal.h>
 #include <stddef.h>
 #include <X11/Xos.h>
 #include <X11/Xmd.h>
@@ -240,5 +241,7 @@ enum ExitCode {
     EXIT_ERR_CONFIGURE = 2,
     EXIT_ERR_DRIVERS = 3,
 };
+
+extern sig_atomic_t inSignalContext;
 
 #endif                          /* _OSDEP_H_ */
