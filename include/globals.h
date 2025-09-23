@@ -17,7 +17,6 @@ extern _X_EXPORT int defaultColorVisualClass;
 
 extern _X_EXPORT int GrabInProgress;
 extern _X_EXPORT char *SeatId;
-extern _X_EXPORT char *ConnectionInfo;
 
 #ifdef XINERAMA
 extern _X_EXPORT Bool PanoramiXExtensionDisabledHack;
