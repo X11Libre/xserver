@@ -432,7 +432,6 @@ static XtransConnInfo _XSERVTransSocketReopen (
     int i _X_UNUSED, int type, int fd, const char *port)
 {
     XtransConnInfo	ciptr;
-    int portlen;
     struct sockaddr *addr;
     size_t addrlen;
 
@@ -443,16 +442,17 @@ static XtransConnInfo _XSERVTransSocketReopen (
       return NULL;
     }
 
-    portlen = strlen(port) + 1; // include space for trailing null
+    size_t portnamelen = strlen(port) + 1;
+    size_t portlen = portnamelen;
 #ifdef SOCK_MAXADDRLEN
-    if (portlen < 0 || portlen > (SOCK_MAXADDRLEN + 2)) {
+    if (portlen > (SOCK_MAXADDRLEN + 2)) {
       prmsg (1, "SocketReopen: invalid portlen %d\n", portlen);
       return NULL;
     }
     if (portlen < 14) portlen = 14;
 #else
-    if (portlen < 0 || portlen > 14) {
-      prmsg (1, "SocketReopen: invalid portlen %d\n", portlen);
+    if (portlen > 14) {
+      prmsg (1, "SocketReopen: invalid portlen %ld\n", (unsigned long)portlen);
       return NULL;
     }
 #endif /*SOCK_MAXADDRLEN*/
@@ -488,11 +488,9 @@ static XtransConnInfo _XSERVTransSocketReopen (
     addr->sa_len = addrlen;
 #endif
     addr->sa_family = AF_UNIX;
-#if defined(HAVE_STRLCPY) || defined(HAS_STRLCPY)
-    strlcpy(addr->sa_data, port, portlen);
-#else
-    strncpy(addr->sa_data, port, portlen);
-#endif
+
+    memcpy(addr->sa_data, port, portnamelen);
+
     ciptr->family = AF_UNIX;
     memcpy(ciptr->peeraddr, ciptr->addr, addrlen);
     ciptr->port = rindex(addr->sa_data, ':');
