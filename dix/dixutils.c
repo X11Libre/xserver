@@ -469,6 +469,13 @@ InitBlockAndWakeupHandlers(void)
  * sleeps for input.
  */
 
+typedef struct _WorkQueue {
+    struct _WorkQueue *next;
+    Bool (*function) (ClientPtr pClient, void *closure);
+    ClientPtr client;
+    void *closure;
+} *WorkQueuePtr;
+
 WorkQueuePtr workQueue;
 static WorkQueuePtr *workQueueLast = &workQueue;
 

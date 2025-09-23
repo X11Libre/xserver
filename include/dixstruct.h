@@ -115,15 +115,6 @@ typedef struct _Client {
     int req_fds;
 } ClientRec;
 
-typedef struct _WorkQueue {
-    struct _WorkQueue *next;
-    Bool (*function) (ClientPtr /* pClient */ ,
-                      void *    /* closure */
-        );
-    ClientPtr client;
-    void *closure;
-} WorkQueueRec;
-
 extern _X_EXPORT TimeStamp currentTime;
 
 extern _X_EXPORT int
