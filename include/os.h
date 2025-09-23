@@ -276,12 +276,6 @@ _X_ATTRIBUTE_PRINTF(1, 2);
 extern _X_EXPORT void
 xorg_backtrace(void);
 
-#include <signal.h>
-
-#if defined(WIN32)
-typedef _sigset_t sigset_t;
-#endif
-
 /* should not be used anymore, just for backwards compat with drivers */
 #define LogVMessageVerbSigSafe(...) LogVMessageVerb(__VA_ARGS__)
 #define LogMessageVerbSigSafe(...) LogMessageVerb(__VA_ARGS__)
