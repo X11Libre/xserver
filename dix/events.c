@@ -132,6 +132,7 @@ Equipment Corporation.
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
+#include "include/extinit.h"
 #include "os/bug_priv.h"
 #include "os/client_priv.h"
 #include "os/fmt.h"
