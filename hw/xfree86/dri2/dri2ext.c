@@ -41,6 +41,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "include/extinit.h"
 
 #include "dixstruct.h"
 #include "scrnintstr.h"
