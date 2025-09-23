@@ -46,6 +46,9 @@ SOFTWARE.
 
 #ifndef RESOURCE_H
 #define RESOURCE_H 1
+
+#include "callback.h"
+
 #include "misc.h"
 #include "dixaccess.h"
 
@@ -102,20 +105,6 @@ typedef uint32_t RESTYPE;
 extern _X_EXPORT unsigned int ResourceClientBits(void);
 
 #define BAD_RESOURCE 0xe0000000
-
-/* Resource state callback */
-extern _X_EXPORT CallbackListPtr ResourceStateCallback;
-
-typedef enum { ResourceStateAdding,
-    ResourceStateFreeing
-} ResourceState;
-
-typedef struct {
-    ResourceState state;
-    XID id;
-    RESTYPE type;
-    void *value;
-} ResourceStateInfoRec;
 
 typedef int (*DeleteType) (void *value,
                            XID id);
