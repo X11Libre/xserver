@@ -52,6 +52,7 @@ SOFTWARE.
 #include <string.h>
 #include <strings.h>
 
+#include "include/extinit.h"
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
