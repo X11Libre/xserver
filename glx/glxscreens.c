@@ -36,6 +36,7 @@
 #include <GL/glxtokens.h>
 
 #include "dix/colormap_priv.h"
+#include "include/extinit.h"
 
 #include <windowstr.h>
 #include <os.h>

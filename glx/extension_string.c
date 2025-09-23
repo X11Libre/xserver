@@ -33,6 +33,8 @@
 
 #include <dix-config.h>
 
+#include "include/extinit.h"
+
 #include "extension_string.h"
 #include "opaque.h"
 
