@@ -5,6 +5,7 @@
 #ifndef _XSERVER_XF86_PRIV_H
 #define _XSERVER_XF86_PRIV_H
 
+#include "os/osdep.h"
 #include "xf86.h"
 
 extern Bool xf86DoConfigure;

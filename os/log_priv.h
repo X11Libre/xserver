@@ -5,7 +5,7 @@
 #ifndef __XORG_OS_LOGGING_H
 #define __XORG_OS_LOGGING_H
 
-#include "include/os.h"
+#include "os/osdep.h"
 
 /**
  * @brief initialize logging and open log files

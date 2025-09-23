@@ -213,13 +213,6 @@ typedef struct {
 /* stuff for FlushCallback */
 extern _X_EXPORT CallbackListPtr FlushCallback;
 
-enum ExitCode {
-    EXIT_NO_ERROR = 0,
-    EXIT_ERR_ABORT = 1,
-    EXIT_ERR_CONFIGURE = 2,
-    EXIT_ERR_DRIVERS = 3,
-};
-
 extern _X_EXPORT int
 TimeSinceLastInputEvent(void);
 
