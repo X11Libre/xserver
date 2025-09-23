@@ -34,6 +34,7 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "dix/screensaver_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/screensaver.h"
 #include "Xext/geext_priv.h"
