@@ -44,6 +44,7 @@
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/extinit.h"
 #include "os/fmt.h"
 #include "Xext/panoramiXsrv.h"
 #include "Xi/handlers.h"
