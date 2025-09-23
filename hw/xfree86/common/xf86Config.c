@@ -52,6 +52,7 @@
 
 #include "dix/resource_priv.h"
 #include "dix/screensaver_priv.h"
+#include "include/extinit.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbsrv_priv.h"

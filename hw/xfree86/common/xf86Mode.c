@@ -86,6 +86,7 @@
 
 #include <X11/X.h>
 
+#include "include/extinit.h"
 #include "os/log_priv.h"
 
 #include "xf86Modes.h"

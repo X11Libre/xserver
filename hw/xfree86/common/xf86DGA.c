@@ -52,6 +52,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "include/extinit.h"
 #include "mi/mi_priv.h"
 
 #include "xf86.h"
