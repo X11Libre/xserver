@@ -137,6 +137,9 @@ _X_EXPORT Bool TimerForce(OsTimerPtr);
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>
+#include <signal.h>
+
+typedef _sigset_t sigset_t;
 
 #undef CreateWindow
 
