@@ -127,20 +127,6 @@ CompareTimeStamps(TimeStamp /*a */ ,
 extern _X_EXPORT TimeStamp
 ClientTimeToServerTime(CARD32 /*c */ );
 
-typedef struct _CallbackRec {
-    CallbackProcPtr proc;
-    void *data;
-    Bool deleted;
-    struct _CallbackRec *next;
-} CallbackRec, *CallbackPtr;
-
-typedef struct _CallbackList {
-    int inCallback;
-    Bool deleted;
-    int numDeleted;
-    CallbackPtr list;
-} CallbackListRec;
-
 /* proc vectors */
 
 extern _X_EXPORT int (*ProcVector[256]) (ClientPtr /*client */ );
