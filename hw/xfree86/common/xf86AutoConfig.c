@@ -33,6 +33,8 @@
 #include <xorg-config.h>
 #endif
 
+#include "os/osdep.h"
+
 #include "xf86.h"
 #include "xf86Parser_priv.h"
 #include "xf86tokens.h"

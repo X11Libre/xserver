@@ -40,6 +40,7 @@
 #include "config/hotplug_priv.h"
 #include "dix/screenint_priv.h"
 #include "randr/randrstr_priv.h"
+#include "os/osdep.h"
 
 #include "os.h"
 #include "../os-support/linux/systemd-logind.h"
