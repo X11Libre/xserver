@@ -26,6 +26,7 @@
 
 #include "dix/colormap_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "include/extinit.h"
 #include "os/osdep.h"
 
 #include "misc.h"
