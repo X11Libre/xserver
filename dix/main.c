@@ -93,6 +93,7 @@ Equipment Corporation.
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/selection_priv.h"
+#include "dix/server_priv.h"
 #include "os/audit_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
