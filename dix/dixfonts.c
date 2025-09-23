@@ -633,8 +633,11 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                 if (err == FontNameAlias) {
                     free(resolved);
                     resolved = calloc(1, resolvedlen + 1);
-                    if (resolved)
-                        memcpy(resolved, tmpname, resolvedlen + 1);
+                    if (!resolved) {
+                        err = AllocError;
+                        goto bail;
+                    }
+                    memcpy(resolved, tmpname, resolvedlen + 1);
                 }
             }
 
@@ -683,8 +686,11 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                     c->haveSaved = TRUE;
                     free(c->savedName);
                     c->savedName = calloc(1, namelen + 1);
-                    if (c->savedName)
-                        memcpy(c->savedName, name, namelen + 1);
+                    if (!c->savedName) {
+                        err = AllocError;
+                        goto bail;
+                    }
+                    memcpy(c->savedName, name, namelen + 1);
                     c->savedNameLen = namelen;
                     aliascount = 20;
                 }
@@ -909,8 +915,11 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
                 c->savedNumFonts = numFonts;
                 free(c->savedName);
                 c->savedName = calloc(1, namelen + 1);
-                if (c->savedName)
-                    memcpy(c->savedName, name, namelen + 1);
+                if (!c->savedName) {
+                    err = AllocError;
+                    goto bail;
+                }
+                memcpy(c->savedName, name, namelen + 1);
                 aliascount = 20;
             }
             memmove(c->current.pattern, name, namelen);

@@ -428,11 +428,15 @@ void
 InitTrackers(DeviceVelocityPtr vel, int ntracker)
 {
     if (ntracker < 1) {
-        ErrorF("invalid number of trackers\n");
+        ErrorF("[dix] invalid number of trackers\n");
         return;
     }
     free(vel->tracker);
     vel->tracker = (MotionTrackerPtr) calloc(ntracker, sizeof(MotionTracker));
+    if (!vel->tracker) {
+        ErrorF("[dix] out of memory number of trackers (%d ntracker).\n", ntracker);
+        return;
+    }
     vel->num_tracker = ntracker;
 }
 

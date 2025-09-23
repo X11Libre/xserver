@@ -343,12 +343,12 @@ generate_modkeymap(ClientPtr client, DeviceIntPtr dev,
 InputAttributes *
 DuplicateInputAttributes(InputAttributes * attrs)
 {
+    if (!attrs)
+        return NULL;
+
     InputAttributes *new_attr;
     int ntags = 0;
     char **tags, **new_tags;
-
-    if (!attrs)
-        return NULL;
 
     if (!(new_attr = calloc(1, sizeof(InputAttributes))))
         goto unwind;
@@ -426,8 +426,7 @@ valuator_mask_new(int num_valuators)
      * flying-car future, when we can dynamically alloc the masks and are
      * not constrained by signals, we can start using num_valuators */
     ValuatorMask *mask = calloc(1, sizeof(ValuatorMask));
-
-    if (mask == NULL)
+    if (!mask)
         return NULL;
 
     mask->last_bit = -1;
@@ -1062,7 +1061,6 @@ xi2mask_new_with_size(size_t nmasks, size_t size)
 	       + nmasks * size;
 
     mask = calloc(1, alloc_size);
-
     if (!mask)
         return NULL;
 
