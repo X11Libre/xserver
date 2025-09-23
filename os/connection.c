@@ -93,7 +93,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/server_priv.h"
-#include "os/audit.h"
+#include "os/audit_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
 #include "os/log_priv.h"

@@ -94,7 +94,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
-#include "os/audit.h"
+#include "os/audit_priv.h"
 #include "os/bug_priv.h"
 #include "os/ddx_priv.h"
 #include "os/fmt.h"

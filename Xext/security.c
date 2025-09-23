@@ -37,7 +37,7 @@ in this Software without prior written authorization from The Open Group.
 #include "dix/resource_priv.h"
 #include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
-#include "os/audit.h"
+#include "os/audit_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
