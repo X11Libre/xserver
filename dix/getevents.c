@@ -43,6 +43,7 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/extinit.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/probes_priv.h"

@@ -36,6 +36,7 @@
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "include/extinit.h"
 #include "os/bug_priv.h"
 
 #include "inputstr.h"
