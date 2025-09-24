@@ -4843,13 +4843,18 @@ XkbAssembleGeometry(ClientPtr client,
 int
 ProcXkbGetGeometry(ClientPtr client)
 {
+    REQUEST(xkbGetGeometryReq);
+    REQUEST_SIZE_MATCH(xkbGetGeometryReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swapl(&stuff->name);
+    }
+
     DeviceIntPtr dev;
     XkbGeometryPtr geom;
     Bool shouldFree;
     Status status;
-
-    REQUEST(xkbGetGeometryReq);
-    REQUEST_SIZE_MATCH(xkbGetGeometryReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
