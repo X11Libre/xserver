@@ -3029,11 +3029,14 @@ ProcXkbSetCompatMap(ClientPtr client)
 int
 ProcXkbGetIndicatorState(ClientPtr client)
 {
-    XkbSrvLedInfoPtr sli;
-    DeviceIntPtr dev;
-
     REQUEST(xkbGetIndicatorStateReq);
     REQUEST_SIZE_MATCH(xkbGetIndicatorStateReq);
+
+    if (client->swapped)
+        swaps(&stuff->deviceSpec);
+
+    XkbSrvLedInfoPtr sli;
+    DeviceIntPtr dev;
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
