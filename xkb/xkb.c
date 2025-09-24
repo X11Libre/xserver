@@ -3499,13 +3499,22 @@ _XkbSetNamedIndicator(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetNamedIndicator(ClientPtr client)
 {
+    REQUEST(xkbSetNamedIndicatorReq);
+    REQUEST_SIZE_MATCH(xkbSetNamedIndicatorReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->ledClass);
+        swaps(&stuff->ledID);
+        swapl(&stuff->indicator);
+        swaps(&stuff->virtualMods);
+        swapl(&stuff->ctrls);
+    }
+
     int rc;
     DeviceIntPtr dev;
     int led = 0;
     XkbIndicatorMapPtr map;
-
-    REQUEST(xkbSetNamedIndicatorReq);
-    REQUEST_SIZE_MATCH(xkbSetNamedIndicatorReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
