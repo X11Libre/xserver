@@ -684,11 +684,14 @@ ProcXkbLatchLockState(ClientPtr client)
 int
 ProcXkbGetControls(ClientPtr client)
 {
-    XkbControlsPtr xkb;
-    DeviceIntPtr dev;
-
     REQUEST(xkbGetControlsReq);
     REQUEST_SIZE_MATCH(xkbGetControlsReq);
+
+    if (client->swapped)
+        swaps(&stuff->deviceSpec);
+
+    XkbControlsPtr xkb;
+    DeviceIntPtr dev;
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
