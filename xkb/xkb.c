@@ -597,10 +597,13 @@ int
 ProcXkbGetState(ClientPtr client)
 {
     REQUEST(xkbGetStateReq);
+    REQUEST_SIZE_MATCH(xkbGetStateReq);
+
+    if (client->swapped)
+        swaps(&stuff->deviceSpec);
+
     DeviceIntPtr dev;
     XkbStateRec *xkb;
-
-    REQUEST_SIZE_MATCH(xkbGetStateReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
