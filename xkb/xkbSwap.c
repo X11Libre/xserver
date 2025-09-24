@@ -119,16 +119,6 @@ SProcXkbSelectEvents(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbLatchLockState(ClientPtr client)
-{
-    REQUEST(xkbLatchLockStateReq);
-    REQUEST_SIZE_MATCH(xkbLatchLockStateReq);
-    swaps(&stuff->deviceSpec);
-    swaps(&stuff->groupLatch);
-    return ProcXkbLatchLockState(client);
-}
-
-static int _X_COLD
 SProcXkbSetMap(ClientPtr client)
 {
     REQUEST(xkbSetMapReq);
@@ -209,7 +199,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbGetState:
         return ProcXkbGetState(client);
     case X_kbLatchLockState:
-        return SProcXkbLatchLockState(client);
+        return ProcXkbLatchLockState(client);
     case X_kbGetControls:
         return ProcXkbGetControls(client);
     case X_kbSetControls:
