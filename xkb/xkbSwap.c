@@ -203,18 +203,6 @@ SProcXkbSetControls(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbGetMap(ClientPtr client)
-{
-    REQUEST(xkbGetMapReq);
-    REQUEST_SIZE_MATCH(xkbGetMapReq);
-    swaps(&stuff->deviceSpec);
-    swaps(&stuff->full);
-    swaps(&stuff->partial);
-    swaps(&stuff->virtualMods);
-    return ProcXkbGetMap(client);
-}
-
-static int _X_COLD
 SProcXkbSetMap(ClientPtr client)
 {
     REQUEST(xkbSetMapReq);
@@ -445,7 +433,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbSetControls:
         return SProcXkbSetControls(client);
     case X_kbGetMap:
-        return SProcXkbGetMap(client);
+        return ProcXkbGetMap(client);
     case X_kbSetMap:
         return SProcXkbSetMap(client);
     case X_kbGetCompatMap:

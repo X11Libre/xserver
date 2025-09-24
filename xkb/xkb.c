@@ -1376,6 +1376,13 @@ ProcXkbGetMap(ClientPtr client)
     REQUEST(xkbGetMapReq);
     REQUEST_SIZE_MATCH(xkbGetMapReq);
 
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->full);
+        swaps(&stuff->partial);
+        swaps(&stuff->virtualMods);
+    }
+
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
