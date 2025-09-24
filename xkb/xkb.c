@@ -3273,14 +3273,19 @@ _XkbSetIndicatorMap(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetIndicatorMap(ClientPtr client)
 {
+    REQUEST(xkbSetIndicatorMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetIndicatorMapReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swapl(&stuff->which);
+    }
+
     int i, bit;
     int nIndicators;
     DeviceIntPtr dev;
     xkbIndicatorMapWireDesc *from;
     int rc;
-
-    REQUEST(xkbSetIndicatorMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetIndicatorMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
