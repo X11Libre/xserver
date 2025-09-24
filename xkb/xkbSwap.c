@@ -130,16 +130,6 @@ SProcXkbSetCompatMap(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbSetIndicatorMap(ClientPtr client)
-{
-    REQUEST(xkbSetIndicatorMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetIndicatorMapReq);
-    swaps(&stuff->deviceSpec);
-    swapl(&stuff->which);
-    return ProcXkbSetIndicatorMap(client);
-}
-
-static int _X_COLD
 SProcXkbGetKbdByName(ClientPtr client)
 {
     REQUEST(xkbGetKbdByNameReq);
@@ -182,7 +172,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbGetIndicatorMap:
         return ProcXkbGetIndicatorMap(client);
     case X_kbSetIndicatorMap:
-        return SProcXkbSetIndicatorMap(client);
+        return ProcXkbSetIndicatorMap(client);
     case X_kbGetNamedIndicator:
         return ProcXkbGetNamedIndicator(client);
     case X_kbSetNamedIndicator:
