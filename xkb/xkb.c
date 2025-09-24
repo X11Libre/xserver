@@ -5470,12 +5470,21 @@ ProcXkbSetGeometry(ClientPtr client)
 int
 ProcXkbPerClientFlags(ClientPtr client)
 {
+    REQUEST(xkbPerClientFlagsReq);
+    REQUEST_SIZE_MATCH(xkbPerClientFlagsReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swapl(&stuff->change);
+        swapl(&stuff->value);
+        swapl(&stuff->ctrlsToChange);
+        swapl(&stuff->autoCtrls);
+        swapl(&stuff->autoCtrlValues);
+    }
+
     DeviceIntPtr dev;
     XkbInterestPtr interest;
     Mask access_mode = DixGetAttrAccess | DixSetAttrAccess;
-
-    REQUEST(xkbPerClientFlagsReq);
-    REQUEST_SIZE_MATCH(xkbPerClientFlagsReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;

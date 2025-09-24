@@ -174,20 +174,6 @@ SProcXkbGetGeometry(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbPerClientFlags(ClientPtr client)
-{
-    REQUEST(xkbPerClientFlagsReq);
-    REQUEST_SIZE_MATCH(xkbPerClientFlagsReq);
-    swaps(&stuff->deviceSpec);
-    swapl(&stuff->change);
-    swapl(&stuff->value);
-    swapl(&stuff->ctrlsToChange);
-    swapl(&stuff->autoCtrls);
-    swapl(&stuff->autoCtrlValues);
-    return ProcXkbPerClientFlags(client);
-}
-
-static int _X_COLD
 SProcXkbGetKbdByName(ClientPtr client)
 {
     REQUEST(xkbGetKbdByNameReq);
@@ -255,7 +241,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbSetGeometry:
         return ProcXkbSetGeometry(client);
     case X_kbPerClientFlags:
-        return SProcXkbPerClientFlags(client);
+        return ProcXkbPerClientFlags(client);
     case X_kbListComponents:
         return ProcXkbListComponents(client);
     case X_kbGetKbdByName:
