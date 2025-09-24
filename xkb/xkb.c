@@ -6748,11 +6748,17 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetDeviceInfo(ClientPtr client)
 {
-    DeviceIntPtr dev;
-    int rc;
-
     REQUEST(xkbSetDeviceInfoReq);
     REQUEST_AT_LEAST_SIZE(xkbSetDeviceInfoReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->change);
+        swaps(&stuff->nDeviceLedFBs);
+    }
+
+    DeviceIntPtr dev;
+    int rc;
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
