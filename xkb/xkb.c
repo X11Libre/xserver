@@ -2764,6 +2764,12 @@ ProcXkbGetCompatMap(ClientPtr client)
     REQUEST(xkbGetCompatMapReq);
     REQUEST_SIZE_MATCH(xkbGetCompatMapReq);
 
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->firstSI);
+        swaps(&stuff->nSI);
+    }
+
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
