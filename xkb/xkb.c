@@ -2670,12 +2670,21 @@ _XkbSetMap(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req, char *values)
 int
 ProcXkbSetMap(ClientPtr client)
 {
+    REQUEST(xkbSetMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetMapReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->present);
+        swaps(&stuff->flags);
+        swaps(&stuff->totalSyms);
+        swaps(&stuff->totalActs);
+        swaps(&stuff->virtualMods);
+    }
+
     DeviceIntPtr dev, master;
     char *tmp;
     int rc;
-
-    REQUEST(xkbSetMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
