@@ -138,37 +138,6 @@ SProcXkbLatchLockState(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbSetControls(ClientPtr client)
-{
-    REQUEST(xkbSetControlsReq);
-    REQUEST_SIZE_MATCH(xkbSetControlsReq);
-    swaps(&stuff->deviceSpec);
-    swaps(&stuff->affectInternalVMods);
-    swaps(&stuff->internalVMods);
-    swaps(&stuff->affectIgnoreLockVMods);
-    swaps(&stuff->ignoreLockVMods);
-    swaps(&stuff->axOptions);
-    swapl(&stuff->affectEnabledCtrls);
-    swapl(&stuff->enabledCtrls);
-    swapl(&stuff->changeCtrls);
-    swaps(&stuff->repeatDelay);
-    swaps(&stuff->repeatInterval);
-    swaps(&stuff->slowKeysDelay);
-    swaps(&stuff->debounceDelay);
-    swaps(&stuff->mkDelay);
-    swaps(&stuff->mkInterval);
-    swaps(&stuff->mkTimeToMax);
-    swaps(&stuff->mkMaxSpeed);
-    swaps(&stuff->mkCurve);
-    swaps(&stuff->axTimeout);
-    swapl(&stuff->axtCtrlsMask);
-    swapl(&stuff->axtCtrlsValues);
-    swaps(&stuff->axtOptsMask);
-    swaps(&stuff->axtOptsValues);
-    return ProcXkbSetControls(client);
-}
-
-static int _X_COLD
 SProcXkbSetMap(ClientPtr client)
 {
     REQUEST(xkbSetMapReq);
@@ -280,7 +249,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbGetControls:
         return ProcXkbGetControls(client);
     case X_kbSetControls:
-        return SProcXkbSetControls(client);
+        return ProcXkbSetControls(client);
     case X_kbGetMap:
         return ProcXkbGetMap(client);
     case X_kbSetMap:
