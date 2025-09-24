@@ -6793,11 +6793,19 @@ ProcXkbSetDeviceInfo(ClientPtr client)
 int
 ProcXkbSetDebuggingFlags(ClientPtr client)
 {
-    CARD32 newFlags, newCtrls, extraLength;
-    int rc;
-
     REQUEST(xkbSetDebuggingFlagsReq);
     REQUEST_AT_LEAST_SIZE(xkbSetDebuggingFlagsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->affectFlags);
+        swapl(&stuff->flags);
+        swapl(&stuff->affectCtrls);
+        swapl(&stuff->ctrls);
+        swaps(&stuff->msgLength);
+    }
+
+    CARD32 newFlags, newCtrls, extraLength;
+    int rc;
 
     rc = dixCallServerAccessCallback(client, DixDebugAccess);
     if (rc != Success)

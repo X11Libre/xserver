@@ -209,19 +209,6 @@ SProcXkbSetDeviceInfo(ClientPtr client)
     return ProcXkbSetDeviceInfo(client);
 }
 
-static int _X_COLD
-SProcXkbSetDebuggingFlags(ClientPtr client)
-{
-    REQUEST(xkbSetDebuggingFlagsReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetDebuggingFlagsReq);
-    swapl(&stuff->affectFlags);
-    swapl(&stuff->flags);
-    swapl(&stuff->affectCtrls);
-    swapl(&stuff->ctrls);
-    swaps(&stuff->msgLength);
-    return ProcXkbSetDebuggingFlags(client);
-}
-
 int _X_COLD
 SProcXkbDispatch(ClientPtr client)
 {
@@ -278,7 +265,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbSetDeviceInfo:
         return SProcXkbSetDeviceInfo(client);
     case X_kbSetDebuggingFlags:
-        return SProcXkbSetDebuggingFlags(client);
+        return ProcXkbSetDebuggingFlags(client);
     default:
         return BadRequest;
     }
