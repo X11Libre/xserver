@@ -204,20 +204,6 @@ SProcXkbSetIndicatorMap(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbSetNamedIndicator(ClientPtr client)
-{
-    REQUEST(xkbSetNamedIndicatorReq);
-    REQUEST_SIZE_MATCH(xkbSetNamedIndicatorReq);
-    swaps(&stuff->deviceSpec);
-    swaps(&stuff->ledClass);
-    swaps(&stuff->ledID);
-    swapl(&stuff->indicator);
-    swaps(&stuff->virtualMods);
-    swapl(&stuff->ctrls);
-    return ProcXkbSetNamedIndicator(client);
-}
-
-static int _X_COLD
 SProcXkbGetGeometry(ClientPtr client)
 {
     REQUEST(xkbGetGeometryReq);
@@ -312,7 +298,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbGetNamedIndicator:
         return ProcXkbGetNamedIndicator(client);
     case X_kbSetNamedIndicator:
-        return SProcXkbSetNamedIndicator(client);
+        return ProcXkbSetNamedIndicator(client);
     case X_kbGetNames:
         return ProcXkbGetNames(client);
     case X_kbSetNames:
