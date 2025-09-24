@@ -3255,13 +3255,20 @@ ProcXkbSetIndicatorMap(ClientPtr client)
 int
 ProcXkbGetNamedIndicator(ClientPtr client)
 {
+    REQUEST(xkbGetNamedIndicatorReq);
+    REQUEST_SIZE_MATCH(xkbGetNamedIndicatorReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->ledClass);
+        swaps(&stuff->ledID);
+        swapl(&stuff->indicator);
+    }
+
     DeviceIntPtr dev;
     register int i = 0;
     XkbSrvLedInfoPtr sli;
     XkbIndicatorMapPtr map = NULL;
-
-    REQUEST(xkbGetNamedIndicatorReq);
-    REQUEST_SIZE_MATCH(xkbGetNamedIndicatorReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;

@@ -280,18 +280,6 @@ SProcXkbSetIndicatorMap(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbGetNamedIndicator(ClientPtr client)
-{
-    REQUEST(xkbGetNamedIndicatorReq);
-    REQUEST_SIZE_MATCH(xkbGetNamedIndicatorReq);
-    swaps(&stuff->deviceSpec);
-    swaps(&stuff->ledClass);
-    swaps(&stuff->ledID);
-    swapl(&stuff->indicator);
-    return ProcXkbGetNamedIndicator(client);
-}
-
-static int _X_COLD
 SProcXkbSetNamedIndicator(ClientPtr client)
 {
     REQUEST(xkbSetNamedIndicatorReq);
@@ -459,7 +447,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbSetIndicatorMap:
         return SProcXkbSetIndicatorMap(client);
     case X_kbGetNamedIndicator:
-        return SProcXkbGetNamedIndicator(client);
+        return ProcXkbGetNamedIndicator(client);
     case X_kbSetNamedIndicator:
         return SProcXkbSetNamedIndicator(client);
     case X_kbGetNames:
