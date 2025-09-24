@@ -773,6 +773,35 @@ ProcXkbGetControls(ClientPtr client)
 int
 ProcXkbSetControls(ClientPtr client)
 {
+    REQUEST(xkbSetControlsReq);
+    REQUEST_SIZE_MATCH(xkbSetControlsReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->affectInternalVMods);
+        swaps(&stuff->internalVMods);
+        swaps(&stuff->affectIgnoreLockVMods);
+        swaps(&stuff->ignoreLockVMods);
+        swaps(&stuff->axOptions);
+        swapl(&stuff->affectEnabledCtrls);
+        swapl(&stuff->enabledCtrls);
+        swapl(&stuff->changeCtrls);
+        swaps(&stuff->repeatDelay);
+        swaps(&stuff->repeatInterval);
+        swaps(&stuff->slowKeysDelay);
+        swaps(&stuff->debounceDelay);
+        swaps(&stuff->mkDelay);
+        swaps(&stuff->mkInterval);
+        swaps(&stuff->mkTimeToMax);
+        swaps(&stuff->mkMaxSpeed);
+        swaps(&stuff->mkCurve);
+        swaps(&stuff->axTimeout);
+        swapl(&stuff->axtCtrlsMask);
+        swapl(&stuff->axtCtrlsValues);
+        swaps(&stuff->axtOptsMask);
+        swaps(&stuff->axtOptsValues);
+    }
+
     DeviceIntPtr dev, tmpd;
     XkbSrvInfoPtr xkbi;
     XkbControlsPtr ctrl;
@@ -780,9 +809,6 @@ ProcXkbSetControls(ClientPtr client)
     xkbControlsNotify cn;
     XkbEventCauseRec cause;
     XkbSrvLedInfoPtr sli;
-
-    REQUEST(xkbSetControlsReq);
-    REQUEST_SIZE_MATCH(xkbSetControlsReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
