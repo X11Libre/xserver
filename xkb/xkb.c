@@ -5323,11 +5323,22 @@ _XkbSetGeometry(ClientPtr client, DeviceIntPtr dev, xkbSetGeometryReq * stuff)
 int
 ProcXkbSetGeometry(ClientPtr client)
 {
-    DeviceIntPtr dev;
-    int rc;
-
     REQUEST(xkbSetGeometryReq);
     REQUEST_AT_LEAST_SIZE(xkbSetGeometryReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swapl(&stuff->name);
+        swaps(&stuff->widthMM);
+        swaps(&stuff->heightMM);
+        swaps(&stuff->nProperties);
+        swaps(&stuff->nColors);
+        swaps(&stuff->nDoodads);
+        swaps(&stuff->nKeyAliases);
+    }
+
+    DeviceIntPtr dev;
+    int rc;
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
