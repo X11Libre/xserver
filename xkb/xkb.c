@@ -640,6 +640,11 @@ ProcXkbLatchLockState(ClientPtr client)
     REQUEST(xkbLatchLockStateReq);
     REQUEST_SIZE_MATCH(xkbLatchLockStateReq);
 
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->groupLatch);
+    }
+
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
 
