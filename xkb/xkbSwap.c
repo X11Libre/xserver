@@ -42,16 +42,6 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
          * REQUEST SWAPPING
          */
 static int _X_COLD
-SProcXkbUseExtension(ClientPtr client)
-{
-    REQUEST(xkbUseExtensionReq);
-    REQUEST_SIZE_MATCH(xkbUseExtensionReq);
-    swaps(&stuff->wantedMajor);
-    swaps(&stuff->wantedMinor);
-    return ProcXkbUseExtension(client);
-}
-
-static int _X_COLD
 SProcXkbSelectEvents(ClientPtr client)
 {
     REQUEST(xkbSelectEventsReq);
@@ -431,7 +421,7 @@ SProcXkbDispatch(ClientPtr client)
     REQUEST(xReq);
     switch (stuff->data) {
     case X_kbUseExtension:
-        return SProcXkbUseExtension(client);
+        return ProcXkbUseExtension(client);
     case X_kbSelectEvents:
         return SProcXkbSelectEvents(client);
     case X_kbBell:

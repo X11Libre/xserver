@@ -175,9 +175,15 @@ int
 ProcXkbUseExtension(ClientPtr client)
 {
     REQUEST(xkbUseExtensionReq);
+    REQUEST_SIZE_MATCH(xkbUseExtensionReq);
+
+    if (client->swapped) {
+        swaps(&stuff->wantedMajor);
+        swaps(&stuff->wantedMinor);
+    }
+
     int supported;
 
-    REQUEST_SIZE_MATCH(xkbUseExtensionReq);
     if (stuff->wantedMajor != SERVER_XKB_MAJOR_VERSION) {
         /* pre-release version 0.65 is compatible with 1.00 */
         supported = ((SERVER_XKB_MAJOR_VERSION == 1) &&
