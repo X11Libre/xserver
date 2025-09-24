@@ -5502,14 +5502,19 @@ GetComponentSpec(ClientPtr client, xkbGetKbdByNameReq *stuff,
 int
 ProcXkbListComponents(ClientPtr client)
 {
+    REQUEST(xkbListComponentsReq);
+    REQUEST_AT_LEAST_SIZE(xkbListComponentsReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->maxNames);
+    }
+
     DeviceIntPtr dev;
     unsigned len;
     unsigned char *str;
     uint8_t size;
     int i;
-
-    REQUEST(xkbListComponentsReq);
-    REQUEST_AT_LEAST_SIZE(xkbListComponentsReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
