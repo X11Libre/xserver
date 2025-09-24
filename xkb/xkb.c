@@ -3735,11 +3735,16 @@ XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, x_rpcbu
 int
 ProcXkbGetNames(ClientPtr client)
 {
-    DeviceIntPtr dev;
-    XkbDescPtr xkb;
-
     REQUEST(xkbGetNamesReq);
     REQUEST_SIZE_MATCH(xkbGetNamesReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swapl(&stuff->which);
+    }
+
+    DeviceIntPtr dev;
+    XkbDescPtr xkb;
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
@@ -4180,13 +4185,21 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
 int
 ProcXkbSetNames(ClientPtr client)
 {
+    REQUEST(xkbSetNamesReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetNamesReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->virtualMods);
+        swapl(&stuff->which);
+        swapl(&stuff->indicators);
+        swaps(&stuff->totalKTLevelNames);
+    }
+
     DeviceIntPtr dev;
     CARD32 *tmp;
     Atom bad;
     int rc;
-
-    REQUEST(xkbSetNamesReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetNamesReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;

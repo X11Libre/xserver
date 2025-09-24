@@ -306,29 +306,6 @@ SProcXkbSetNamedIndicator(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbGetNames(ClientPtr client)
-{
-    REQUEST(xkbGetNamesReq);
-    REQUEST_SIZE_MATCH(xkbGetNamesReq);
-    swaps(&stuff->deviceSpec);
-    swapl(&stuff->which);
-    return ProcXkbGetNames(client);
-}
-
-static int _X_COLD
-SProcXkbSetNames(ClientPtr client)
-{
-    REQUEST(xkbSetNamesReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetNamesReq);
-    swaps(&stuff->deviceSpec);
-    swaps(&stuff->virtualMods);
-    swapl(&stuff->which);
-    swapl(&stuff->indicators);
-    swaps(&stuff->totalKTLevelNames);
-    return ProcXkbSetNames(client);
-}
-
-static int _X_COLD
 SProcXkbGetGeometry(ClientPtr client)
 {
     REQUEST(xkbGetGeometryReq);
@@ -463,9 +440,9 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbSetNamedIndicator:
         return SProcXkbSetNamedIndicator(client);
     case X_kbGetNames:
-        return SProcXkbGetNames(client);
+        return ProcXkbGetNames(client);
     case X_kbSetNames:
-        return SProcXkbSetNames(client);
+        return ProcXkbSetNames(client);
     case X_kbGetGeometry:
         return SProcXkbGetGeometry(client);
     case X_kbSetGeometry:
