@@ -492,11 +492,21 @@ int
 ProcXkbBell(ClientPtr client)
 {
     REQUEST(xkbBellReq);
+    REQUEST_SIZE_MATCH(xkbBellReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->bellClass);
+        swaps(&stuff->bellID);
+        swapl(&stuff->name);
+        swapl(&stuff->window);
+        swaps(&stuff->pitch);
+        swaps(&stuff->duration);
+    }
+
     DeviceIntPtr dev;
     WindowPtr pWin;
     int rc;
-
-    REQUEST_SIZE_MATCH(xkbBellReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
