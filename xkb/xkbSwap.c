@@ -160,17 +160,6 @@ SProcXkbGetKbdByName(ClientPtr client)
     return ProcXkbGetKbdByName(client);
 }
 
-static int _X_COLD
-SProcXkbSetDeviceInfo(ClientPtr client)
-{
-    REQUEST(xkbSetDeviceInfoReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetDeviceInfoReq);
-    swaps(&stuff->deviceSpec);
-    swaps(&stuff->change);
-    swaps(&stuff->nDeviceLedFBs);
-    return ProcXkbSetDeviceInfo(client);
-}
-
 int _X_COLD
 SProcXkbDispatch(ClientPtr client)
 {
@@ -225,7 +214,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbGetDeviceInfo:
         return ProcXkbGetDeviceInfo(client);
     case X_kbSetDeviceInfo:
-        return SProcXkbSetDeviceInfo(client);
+        return ProcXkbSetDeviceInfo(client);
     case X_kbSetDebuggingFlags:
         return ProcXkbSetDebuggingFlags(client);
     default:
