@@ -3139,12 +3139,17 @@ XkbAssembleIndicatorMap(ClientPtr client,
 int
 ProcXkbGetIndicatorMap(ClientPtr client)
 {
+    REQUEST(xkbGetIndicatorMapReq);
+    REQUEST_SIZE_MATCH(xkbGetIndicatorMapReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swapl(&stuff->which);
+    }
+
     DeviceIntPtr dev;
     XkbDescPtr xkb;
     XkbIndicatorPtr leds;
-
-    REQUEST(xkbGetIndicatorMapReq);
-    REQUEST_SIZE_MATCH(xkbGetIndicatorMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
