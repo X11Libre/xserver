@@ -6181,14 +6181,21 @@ FillDeviceLedFBs(DeviceIntPtr dev, int class, int id, unsigned wantLength,
 int
 ProcXkbGetDeviceInfo(ClientPtr client)
 {
+    REQUEST(xkbGetDeviceInfoReq);
+    REQUEST_SIZE_MATCH(xkbGetDeviceInfoReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->wanted);
+        swaps(&stuff->ledClass);
+        swaps(&stuff->ledID);
+    }
+
     DeviceIntPtr dev;
     int status;
     unsigned length, nameLen;
     CARD16 ledClass, ledID;
     unsigned wanted;
-
-    REQUEST(xkbGetDeviceInfoReq);
-    REQUEST_SIZE_MATCH(xkbGetDeviceInfoReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
