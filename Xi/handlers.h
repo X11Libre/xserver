@@ -71,7 +71,6 @@ int ProcXUngrabDeviceKey(ClientPtr client);
 
 int SProcXIGetSelectedEvents(ClientPtr client);
 int SProcXIQueryPointer(ClientPtr client);
-int SProcXIQueryVersion(ClientPtr client);
 int SProcXISelectEvents(ClientPtr client);
 int SProcXIWarpPointer(ClientPtr client);
 
