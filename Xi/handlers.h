@@ -71,6 +71,5 @@ int ProcXUngrabDeviceKey(ClientPtr client);
 
 int SProcXIGetSelectedEvents(ClientPtr client);
 int SProcXISelectEvents(ClientPtr client);
-int SProcXIWarpPointer(ClientPtr client);
 
 #endif /* _XSERVER_XI_HANDLERS_H */
