@@ -79,6 +79,5 @@ int SProcXIQueryVersion(ClientPtr client);
 int SProcXISelectEvents(ClientPtr client);
 int SProcXISetClientPointer(ClientPtr client);
 int SProcXIWarpPointer(ClientPtr client);
-int SProcXUngrabDeviceKey(ClientPtr client);
 
 #endif /* _XSERVER_XI_HANDLERS_H */
