@@ -71,22 +71,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * Handle requests from a client with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXUngrabDeviceKey(ClientPtr client)
-{
-    REQUEST(xUngrabDeviceKeyReq);
-    REQUEST_SIZE_MATCH(xUngrabDeviceKeyReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->modifiers);
-    return (ProcXUngrabDeviceKey(client));
-}
-
-/***********************************************************************
- *
  * Release a grab of a key on an extension device.
  *
  */
@@ -94,14 +78,19 @@ SProcXUngrabDeviceKey(ClientPtr client)
 int
 ProcXUngrabDeviceKey(ClientPtr client)
 {
+    REQUEST(xUngrabDeviceKeyReq);
+    REQUEST_SIZE_MATCH(xUngrabDeviceKeyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->grabWindow);
+        swaps(&stuff->modifiers);
+    }
+
     DeviceIntPtr dev;
     DeviceIntPtr mdev;
     WindowPtr pWin;
     GrabPtr temporaryGrab;
     int rc;
-
-    REQUEST(xUngrabDeviceKeyReq);
-    REQUEST_SIZE_MATCH(xUngrabDeviceKeyReq);
 
     rc = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
     if (rc != Success)
