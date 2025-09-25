@@ -651,8 +651,11 @@ ProcListProperties(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
     if (rc != Success)
         return rc;

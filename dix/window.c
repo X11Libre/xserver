@@ -1567,6 +1567,9 @@ ProcGetWindowAttributes(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
+    if (client->swapped)
+        swapl(&stuff->id);
+
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
