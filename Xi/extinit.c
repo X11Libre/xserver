@@ -450,9 +450,9 @@ SProcIDispatch(ClientPtr client)
         case X_XIQueryDevice:
             return SProcXIQueryDevice(client);
         case X_XISetFocus:
-            return SProcXISetFocus(client);
+            return ProcXISetFocus(client);
         case X_XIGetFocus:
-            return SProcXIGetFocus(client);
+            return ProcXIGetFocus(client);
         case X_XIGrabDevice:
             return ProcXIGrabDevice(client);
         case X_XIUngrabDevice:
