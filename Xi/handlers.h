@@ -80,7 +80,6 @@ int SProcXIGetClientPointer(ClientPtr client);
 int SProcXIGetSelectedEvents(ClientPtr client);
 int SProcXIPassiveGrabDevice(ClientPtr client);
 int SProcXIPassiveUngrabDevice(ClientPtr client);
-int SProcXIQueryDevice(ClientPtr client);
 int SProcXIQueryPointer(ClientPtr client);
 int SProcXIQueryVersion(ClientPtr client);
 int SProcXISelectEvents(ClientPtr client);
