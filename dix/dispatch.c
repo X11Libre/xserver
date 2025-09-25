@@ -795,9 +795,13 @@ ProcDestroyWindow(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
+    REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     int rc;
 
-    REQUEST_SIZE_MATCH(xResourceReq);
     rc = dixLookupWindow(&pWin, stuff->id, client, DixDestroyAccess);
     if (rc != Success)
         return rc;
@@ -817,9 +821,13 @@ ProcDestroySubwindows(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
+    REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     int rc;
 
-    REQUEST_SIZE_MATCH(xResourceReq);
     rc = dixLookupWindow(&pWin, stuff->id, client, DixRemoveAccess);
     if (rc != Success)
         return rc;
@@ -833,9 +841,13 @@ ProcChangeSaveSet(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xChangeSaveSetReq);
+    REQUEST_SIZE_MATCH(xChangeSaveSetReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     int rc;
 
-    REQUEST_SIZE_MATCH(xChangeSaveSetReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixManageAccess);
     if (rc != Success)
         return rc;
@@ -880,9 +892,12 @@ ProcMapWindow(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
-    int rc;
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
+    int rc;
     rc = dixLookupWindow(&pWin, stuff->id, client, DixShowAccess);
     if (rc != Success)
         return rc;
@@ -897,9 +912,13 @@ ProcMapSubwindows(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
+    REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     int rc;
 
-    REQUEST_SIZE_MATCH(xResourceReq);
     rc = dixLookupWindow(&pWin, stuff->id, client, DixListAccess);
     if (rc != Success)
         return rc;
@@ -914,9 +933,13 @@ ProcUnmapWindow(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
+    REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     int rc;
 
-    REQUEST_SIZE_MATCH(xResourceReq);
     rc = dixLookupWindow(&pWin, stuff->id, client, DixHideAccess);
     if (rc != Success)
         return rc;
@@ -931,9 +954,13 @@ ProcUnmapSubwindows(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
+    REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     int rc;
 
-    REQUEST_SIZE_MATCH(xResourceReq);
     rc = dixLookupWindow(&pWin, stuff->id, client, DixListAccess);
     if (rc != Success)
         return rc;
@@ -966,9 +993,13 @@ ProcCirculateWindow(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xCirculateWindowReq);
+    REQUEST_SIZE_MATCH(xCirculateWindowReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     int rc;
 
-    REQUEST_SIZE_MATCH(xCirculateWindowReq);
     if ((stuff->direction != RaiseLowest) && (stuff->direction != LowerHighest)) {
         client->errorValue = stuff->direction;
         return BadValue;
@@ -988,6 +1019,9 @@ ProcGetGeometry(ClientPtr client)
 
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
 
     rc = dixLookupDrawable(&pDraw, stuff->id, client, M_ANY, DixGetAttrAccess);
     if (rc != Success)
@@ -1027,8 +1061,11 @@ ProcQueryTree(ClientPtr client)
     WindowPtr pWin, pHead;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     rc = dixLookupWindow(&pWin, stuff->id, client, DixListAccess);
     if (rc != Success)
         return rc;
@@ -1093,8 +1130,11 @@ ProcGetAtomName(ClientPtr client)
     const char *str;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     if (!(str = NameForAtom(stuff->id))) {
         client->errorValue = stuff->id;
         return BadAtom;
@@ -1280,8 +1320,11 @@ ProcCloseFont(ClientPtr client)
     int rc;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     rc = dixLookupResourceByType((void **) &pFont, stuff->id, X11_RESTYPE_FONT,
                                  client, DixDestroyAccess);
     if (rc == Success) {
@@ -1303,6 +1346,9 @@ ProcQueryFont(ClientPtr client)
 
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
 
     rc = dixLookupFontable(&pFont, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
@@ -1354,6 +1400,9 @@ ProcQueryTextExtents(ClientPtr client)
 
     REQUEST(xQueryTextExtentsReq);
     REQUEST_AT_LEAST_SIZE(xQueryTextExtentsReq);
+
+    if (client->swapped)
+        swapl(&stuff->fid);
 
     rc = dixLookupFontable(&pFont, stuff->fid, client, DixGetAttrAccess);
     if (rc != Success)
@@ -1505,6 +1554,9 @@ ProcFreePixmap(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
+    if (client->swapped)
+        swapl(&stuff->id);
+
     rc = dixLookupResourceByType((void **) &pMap, stuff->id, X11_RESTYPE_PIXMAP,
                                  client, DixDestroyAccess);
     if (rc == Success) {
@@ -1652,6 +1704,9 @@ ProcFreeGC(ClientPtr client)
 
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
 
     rc = dixLookupGC(&pGC, stuff->id, client, DixDestroyAccess);
     if (rc != Success)
@@ -2441,8 +2496,11 @@ ProcFreeColormap(ClientPtr client)
     int rc;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     rc = dixLookupResourceByType((void **) &pmap, stuff->id, X11_RESTYPE_COLORMAP,
                                  client, DixDestroyAccess);
     if (rc == Success) {
@@ -2487,6 +2545,9 @@ ProcInstallColormap(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
+    if (client->swapped)
+        swapl(&stuff->id);
+
     rc = dixLookupResourceByType((void **) &pcmp, stuff->id, X11_RESTYPE_COLORMAP,
                                  client, DixInstallAccess);
     if (rc != Success)
@@ -2515,6 +2576,9 @@ ProcUninstallColormap(ClientPtr client)
 
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
 
     rc = dixLookupResourceByType((void **) &pcmp, stuff->id, X11_RESTYPE_COLORMAP,
                                  client, DixUninstallAccess);
@@ -2545,6 +2609,9 @@ ProcListInstalledColormaps(ClientPtr client)
 
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
 
     rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
@@ -3107,8 +3174,11 @@ ProcFreeCursor(ClientPtr client)
     int rc;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     rc = dixLookupResourceByType((void **) &pCursor, stuff->id, X11_RESTYPE_CURSOR,
                                  client, DixDestroyAccess);
     if (rc == Success) {
@@ -3355,10 +3425,14 @@ int
 ProcKillClient(ClientPtr client)
 {
     REQUEST(xResourceReq);
+    REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     ClientPtr killclient;
     int rc;
 
-    REQUEST_SIZE_MATCH(xResourceReq);
     if (stuff->id == AllTemporary) {
         CloseDownRetainedResources();
         return Success;
