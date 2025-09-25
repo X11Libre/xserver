@@ -47,17 +47,6 @@
 #include "exevents.h"
 #include "exglobals.h"
 
-int _X_COLD
-SProcXISetClientPointer(ClientPtr client)
-{
-    REQUEST(xXISetClientPointerReq);
-    REQUEST_SIZE_MATCH(xXISetClientPointerReq);
-
-    swapl(&stuff->win);
-    swaps(&stuff->deviceid);
-    return (ProcXISetClientPointer(client));
-}
-
 int
 ProcXISetClientPointer(ClientPtr client)
 {
@@ -67,6 +56,11 @@ ProcXISetClientPointer(ClientPtr client)
 
     REQUEST(xXISetClientPointerReq);
     REQUEST_SIZE_MATCH(xXISetClientPointerReq);
+
+    if (client->swapped) {
+        swapl(&stuff->win);
+        swaps(&stuff->deviceid);
+    }
 
     rc = dixLookupDevice(&pDev, stuff->deviceid, client, DixManageAccess);
     if (rc != Success) {
