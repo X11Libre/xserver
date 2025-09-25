@@ -446,7 +446,7 @@ SProcIDispatch(ClientPtr client)
         case X_XISelectEvents:
             return SProcXISelectEvents(client);
         case X_XIQueryVersion:
-            return SProcXIQueryVersion(client);
+            return ProcXIQueryVersion(client);
         case X_XIQueryDevice:
             return ProcXIQueryDevice(client);
         case X_XISetFocus:
