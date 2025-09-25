@@ -62,29 +62,23 @@
  *
  */
 
-int _X_COLD
-SProcXIQueryPointer(ClientPtr client)
+int
+ProcXIQueryPointer(ClientPtr client)
 {
     REQUEST(xXIQueryPointerReq);
     REQUEST_SIZE_MATCH(xXIQueryPointerReq);
 
-    swaps(&stuff->deviceid);
-    swapl(&stuff->win);
-    return (ProcXIQueryPointer(client));
-}
+    if (client->swapped) {
+        swaps(&stuff->deviceid);
+        swapl(&stuff->win);
+    }
 
-int
-ProcXIQueryPointer(ClientPtr client)
-{
     int rc;
     DeviceIntPtr pDev, kbd;
     WindowPtr pWin, t;
     SpritePtr pSprite;
     XkbStatePtr state;
     Bool have_xi22 = FALSE;
-
-    REQUEST(xXIQueryPointerReq);
-    REQUEST_SIZE_MATCH(xXIQueryPointerReq);
 
     /* Check if client is compliant with XInput 2.2 or later. Earlier clients
      * do not know about touches, so we must report emulated button presses. 2.2
