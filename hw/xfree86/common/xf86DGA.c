@@ -1649,12 +1649,6 @@ ProcXDGACreateColormap(ClientPtr client)
     return Success;
 }
 
-static int _X_COLD
-SProcXDGADispatch(ClientPtr client)
-{
-    return DGAErrorBase + XF86DGAClientNotLocal;
-}
-
 #if 0
 #define DGA_REQ_DEBUG
 #endif
@@ -1760,7 +1754,7 @@ XFree86DGAExtensionInit(void)
                                  XF86DGANumberEvents,
                                  XF86DGANumberErrors,
                                  ProcXDGADispatch,
-                                 SProcXDGADispatch,
+                                 ProcXDGADispatch,
                                  XDGAResetProc, StandardMinorOpcode))) {
         int i;
 
