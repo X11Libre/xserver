@@ -432,7 +432,7 @@ SProcIDispatch(ClientPtr client)
             return ProcXGetDeviceProperty(client);
         /* XI 2 */
         case X_XIQueryPointer:
-            return SProcXIQueryPointer(client);
+            return ProcXIQueryPointer(client);
         case X_XIWarpPointer:
             return ProcXIWarpPointer(client);
         case X_XIChangeCursor:
