@@ -544,6 +544,13 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
         return pPixmap;
     }
 
+    /*
+     * Copy bits from the parent into the new pixmap so that it will
+     * have "reasonable" contents in case for background None areas.
+     *
+     * This can be very expensive, so we only do it when we absolutely have to.
+     */
+
     if (pParent->drawable.depth == pWin->drawable.depth) {
         GCPtr pGC = GetScratchGC(pWin->drawable.depth, pScreen);
 
