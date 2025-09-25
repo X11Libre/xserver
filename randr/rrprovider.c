@@ -56,13 +56,17 @@ int
 ProcRRGetProviders (ClientPtr client)
 {
     REQUEST(xRRGetProvidersReq);
+    REQUEST_SIZE_MATCH(xRRGetProvidersReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     WindowPtr pWin;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int rc;
     ScreenPtr iter;
 
-    REQUEST_SIZE_MATCH(xRRGetProvidersReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -104,6 +108,13 @@ int
 ProcRRGetProviderInfo (ClientPtr client)
 {
     REQUEST(xRRGetProviderInfoReq);
+    REQUEST_SIZE_MATCH(xRRGetProviderInfoReq);
+
+    if (client->swapped) {
+        swapl(&stuff->provider);
+        swapl(&stuff->configTimestamp);
+    }
+
     rrScrPrivPtr pScrPriv, pScrProvPriv;
     RRProviderPtr provider;
     ScreenPtr pScreen;
@@ -117,7 +128,6 @@ ProcRRGetProviderInfo (ClientPtr client)
     RRProvider *providers;
     uint32_t *prov_cap;
 
-    REQUEST_SIZE_MATCH(xRRGetProviderInfoReq);
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
     pScreen = provider->pScreen;
@@ -278,11 +288,17 @@ int
 ProcRRSetProviderOutputSource(ClientPtr client)
 {
     REQUEST(xRRSetProviderOutputSourceReq);
+    REQUEST_SIZE_MATCH(xRRSetProviderOutputSourceReq);
+
+    if (client->swapped) {
+        swapl(&stuff->provider);
+        swapl(&stuff->source_provider);
+        swapl(&stuff->configTimestamp);
+    }
+
     rrScrPrivPtr pScrPriv;
     RRProviderPtr provider, source_provider = NULL;
     ScreenPtr pScreen;
-
-    REQUEST_SIZE_MATCH(xRRSetProviderOutputSourceReq);
 
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
@@ -318,11 +334,17 @@ int
 ProcRRSetProviderOffloadSink(ClientPtr client)
 {
     REQUEST(xRRSetProviderOffloadSinkReq);
+    REQUEST_SIZE_MATCH(xRRSetProviderOffloadSinkReq);
+
+    if (client->swapped) {
+        swapl(&stuff->provider);
+        swapl(&stuff->sink_provider);
+        swapl(&stuff->configTimestamp);
+    }
+
     rrScrPrivPtr pScrPriv;
     RRProviderPtr provider, sink_provider = NULL;
     ScreenPtr pScreen;
-
-    REQUEST_SIZE_MATCH(xRRSetProviderOffloadSinkReq);
 
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
     if (!(provider->capabilities & RR_Capability_SourceOffload))

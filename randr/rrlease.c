@@ -215,6 +215,15 @@ int
 ProcRRCreateLease(ClientPtr client)
 {
     REQUEST(xRRCreateLeaseReq);
+    REQUEST_AT_LEAST_SIZE(xRRCreateLeaseReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swaps(&stuff->nCrtcs);
+        swaps(&stuff->nOutputs);
+        SwapRestL(stuff);
+    }
+
     WindowPtr window;
     ScreenPtr screen;
     rrScrPrivPtr scr_priv;
@@ -225,8 +234,6 @@ ProcRRCreateLease(ClientPtr client)
     int rc;
     unsigned long len;
     int c, o;
-
-    REQUEST_AT_LEAST_SIZE(xRRCreateLeaseReq);
 
     LEGAL_NEW_RESOURCE(stuff->lid, client);
 
@@ -350,10 +357,12 @@ int
 ProcRRFreeLease(ClientPtr client)
 {
     REQUEST(xRRFreeLeaseReq);
-    RRLeasePtr lease;
-
     REQUEST_SIZE_MATCH(xRRFreeLeaseReq);
 
+    if (client->swapped)
+        swapl(&stuff->lid);
+
+    RRLeasePtr lease;
     VERIFY_RR_LEASE(stuff->lid, lease, DixDestroyAccess);
 
     if (stuff->terminate)

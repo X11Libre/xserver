@@ -1148,9 +1148,14 @@ int
 ProcRRGetCrtcInfo(ClientPtr client)
 {
     REQUEST(xRRGetCrtcInfoReq);
-    RRCrtcPtr crtc;
-
     REQUEST_SIZE_MATCH(xRRGetCrtcInfoReq);
+
+    if (client->swapped) {
+        swapl(&stuff->crtc);
+        swapl(&stuff->configTimestamp);
+    }
+
+    RRCrtcPtr crtc;
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
 
     Bool leased = RRCrtcIsLeased(crtc);
@@ -1241,6 +1246,19 @@ int
 ProcRRSetCrtcConfig(ClientPtr client)
 {
     REQUEST(xRRSetCrtcConfigReq);
+    REQUEST_AT_LEAST_SIZE(xRRSetCrtcConfigReq);
+
+    if (client->swapped) {
+        swapl(&stuff->crtc);
+        swapl(&stuff->timestamp);
+        swapl(&stuff->configTimestamp);
+        swaps(&stuff->x);
+        swaps(&stuff->y);
+        swapl(&stuff->mode);
+        swaps(&stuff->rotation);
+        SwapRestL(stuff);
+    }
+
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     RRCrtcPtr crtc;
@@ -1253,7 +1271,6 @@ ProcRRSetCrtcConfig(ClientPtr client)
     int ret, i, j;
     CARD8 status;
 
-    REQUEST_AT_LEAST_SIZE(xRRSetCrtcConfigReq);
     numOutputs = (client->req_len - bytes_to_int32(sizeof(xRRSetCrtcConfigReq)));
 
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixSetAttrAccess);
@@ -1448,6 +1465,11 @@ int
 ProcRRGetPanning(ClientPtr client)
 {
     REQUEST(xRRGetPanningReq);
+    REQUEST_SIZE_MATCH(xRRGetPanningReq);
+
+    if (client->swapped)
+        swapl(&stuff->crtc);
+
     RRCrtcPtr crtc;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
@@ -1455,7 +1477,6 @@ ProcRRGetPanning(ClientPtr client)
     BoxRec tracking;
     INT16 border[4];
 
-    REQUEST_SIZE_MATCH(xRRGetPanningReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
 
     /* All crtcs must be associated with screens before client
@@ -1510,6 +1531,25 @@ int
 ProcRRSetPanning(ClientPtr client)
 {
     REQUEST(xRRSetPanningReq);
+    REQUEST_SIZE_MATCH(xRRSetPanningReq);
+
+    if (client->swapped) {
+        swapl(&stuff->crtc);
+        swapl(&stuff->timestamp);
+        swaps(&stuff->left);
+        swaps(&stuff->top);
+        swaps(&stuff->width);
+        swaps(&stuff->height);
+        swaps(&stuff->track_left);
+        swaps(&stuff->track_top);
+        swaps(&stuff->track_width);
+        swaps(&stuff->track_height);
+        swaps(&stuff->border_left);
+        swaps(&stuff->border_top);
+        swaps(&stuff->border_right);
+        swaps(&stuff->border_bottom);
+    }
+
     RRCrtcPtr crtc;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
@@ -1519,7 +1559,6 @@ ProcRRSetPanning(ClientPtr client)
     INT16 border[4];
     CARD8 status;
 
-    REQUEST_SIZE_MATCH(xRRSetPanningReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
 
     if (RRCrtcIsLeased(crtc))
@@ -1578,9 +1617,13 @@ int
 ProcRRGetCrtcGammaSize(ClientPtr client)
 {
     REQUEST(xRRGetCrtcGammaSizeReq);
+    REQUEST_SIZE_MATCH(xRRGetCrtcGammaSizeReq);
+
+    if (client->swapped)
+        swapl(&stuff->crtc);
+
     RRCrtcPtr crtc;
 
-    REQUEST_SIZE_MATCH(xRRGetCrtcGammaSizeReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
 
     /* Gamma retrieval failed, any better error? */
@@ -1600,9 +1643,12 @@ int
 ProcRRGetCrtcGamma(ClientPtr client)
 {
     REQUEST(xRRGetCrtcGammaReq);
-    RRCrtcPtr crtc;
-
     REQUEST_SIZE_MATCH(xRRGetCrtcGammaReq);
+
+    if (client->swapped)
+        swapl(&stuff->crtc);
+
+    RRCrtcPtr crtc;
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
 
     /* Gamma retrieval failed, any better error? */
@@ -1630,11 +1676,18 @@ int
 ProcRRSetCrtcGamma(ClientPtr client)
 {
     REQUEST(xRRSetCrtcGammaReq);
+    REQUEST_AT_LEAST_SIZE(xRRSetCrtcGammaReq);
+
+    if (client->swapped) {
+        swapl(&stuff->crtc);
+        swaps(&stuff->size);
+        SwapRestS(stuff);
+    }
+
     RRCrtcPtr crtc;
     unsigned long len;
     CARD16 *red, *green, *blue;
 
-    REQUEST_AT_LEAST_SIZE(xRRSetCrtcGammaReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
 
     if (RRCrtcIsLeased(crtc))
@@ -1662,6 +1715,22 @@ int
 ProcRRSetCrtcTransform(ClientPtr client)
 {
     REQUEST(xRRSetCrtcTransformReq);
+    REQUEST_AT_LEAST_SIZE(xRRSetCrtcTransformReq);
+
+    if (client->swapped) {
+        swapl(&stuff->crtc);
+        SwapLongs((CARD32 *) &stuff->transform,
+                  bytes_to_int32(sizeof(xRenderTransform)));
+        swaps(&stuff->nbytesFilter);
+        char *filter = (char *) (stuff + 1);
+        CARD32 *params = (CARD32 *) (filter + pad_to_int32(stuff->nbytesFilter));
+        int nparams = ((CARD32 *) stuff + client->req_len) - params;
+        if (nparams < 0)
+            return BadLength;
+
+        SwapLongs(params, nparams);
+    }
+
     RRCrtcPtr crtc;
     PictTransform transform;
     struct pixman_f_transform f_transform, f_inverse;
@@ -1670,7 +1739,6 @@ ProcRRSetCrtcTransform(ClientPtr client)
     xFixed *params;
     int nparams;
 
-    REQUEST_AT_LEAST_SIZE(xRRSetCrtcTransformReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
 
     if (RRCrtcIsLeased(crtc))
@@ -1696,10 +1764,14 @@ int
 ProcRRGetCrtcTransform(ClientPtr client)
 {
     REQUEST(xRRGetCrtcTransformReq);
+    REQUEST_SIZE_MATCH(xRRGetCrtcTransformReq);
+
+    if (client->swapped)
+        swapl(&stuff->crtc);
+
     RRCrtcPtr crtc;
     RRTransformPtr current, pending;
 
-    REQUEST_SIZE_MATCH(xRRGetCrtcTransformReq);
     VERIFY_RR_CRTC(stuff->crtc, crtc, DixReadAccess);
 
     pending = &crtc->client_pending_transform;

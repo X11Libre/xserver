@@ -414,7 +414,7 @@ RRExtensionInit(void)
     if (!RREventType)
         return;
     extEntry = AddExtension(RANDR_NAME, RRNumberEvents, RRNumberErrors,
-                            ProcRRDispatch, SProcRRDispatch,
+                            ProcRRDispatch, ProcRRDispatch,
                             NULL, StandardMinorOpcode);
     if (!extEntry)
         return;

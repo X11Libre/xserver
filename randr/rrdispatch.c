@@ -42,9 +42,15 @@ int
 ProcRRQueryVersion(ClientPtr client)
 {
     REQUEST(xRRQueryVersionReq);
+    REQUEST_SIZE_MATCH(xRRQueryVersionReq);
+
+    if (client->swapped) {
+        swapl(&stuff->majorVersion);
+        swapl(&stuff->minorVersion);
+    }
+
     rrClientPriv(client);
 
-    REQUEST_SIZE_MATCH(xRRQueryVersionReq);
     pRRClient->major_version = stuff->majorVersion;
     pRRClient->minor_version = stuff->minorVersion;
 
@@ -72,6 +78,13 @@ int
 ProcRRSelectInput(ClientPtr client)
 {
     REQUEST(xRRSelectInputReq);
+    REQUEST_SIZE_MATCH(xRRSelectInputReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swaps(&stuff->enable);
+    }
+
     rrClientPriv(client);
     RRTimesPtr pTimes;
     WindowPtr pWin;
@@ -79,7 +92,6 @@ ProcRRSelectInput(ClientPtr client)
     XID clientResource;
     int rc;
 
-    REQUEST_SIZE_MATCH(xRRSelectInputReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (rc != Success)
         return rc;
