@@ -446,13 +446,19 @@ int
 ProcRRGetOutputInfo(ClientPtr client)
 {
     REQUEST(xRRGetOutputInfoReq);
+    REQUEST_SIZE_MATCH(xRRGetOutputInfoReq);
+
+    if (client->swapped) {
+        swapl(&stuff->output);
+        swapl(&stuff->configTimestamp);
+    }
+
     RROutputPtr output;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int i;
     Bool leased;
 
-    REQUEST_SIZE_MATCH(xRRGetOutputInfoReq);
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
     leased = RROutputIsLeased(output);
@@ -540,13 +546,18 @@ int
 ProcRRSetOutputPrimary(ClientPtr client)
 {
     REQUEST(xRRSetOutputPrimaryReq);
+    REQUEST_SIZE_MATCH(xRRSetOutputPrimaryReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->output);
+    }
+
     RROutputPtr output = NULL;
     WindowPtr pWin;
     rrScrPrivPtr pScrPriv;
     int ret;
     ScreenPtr secondary;
-
-    REQUEST_SIZE_MATCH(xRRSetOutputPrimaryReq);
 
     ret = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (ret != Success)
@@ -588,12 +599,15 @@ int
 ProcRRGetOutputPrimary(ClientPtr client)
 {
     REQUEST(xRRGetOutputPrimaryReq);
+    REQUEST_SIZE_MATCH(xRRGetOutputPrimaryReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     WindowPtr pWin;
     rrScrPrivPtr pScrPriv;
     RROutputPtr primary = NULL;
     int rc;
-
-    REQUEST_SIZE_MATCH(xRRGetOutputPrimaryReq);
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)

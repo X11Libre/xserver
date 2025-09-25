@@ -12,7 +12,6 @@ srcs_randr = [
     'rrprovider.c',
     'rrproviderproperty.c',
     'rrscreen.c',
-    'rrsdispatch.c',
     'rrtransform.c',
 ]
 

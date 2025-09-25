@@ -420,6 +420,9 @@ ProcRRListOutputProperties(ClientPtr client)
     REQUEST(xRRListOutputPropertiesReq);
     REQUEST_SIZE_MATCH(xRRListOutputPropertiesReq);
 
+    if (client->swapped)
+        swapl(&stuff->output);
+
     RROutputPtr output;
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
@@ -446,10 +449,16 @@ int
 ProcRRQueryOutputProperty(ClientPtr client)
 {
     REQUEST(xRRQueryOutputPropertyReq);
+    REQUEST_SIZE_MATCH(xRRQueryOutputPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->output);
+        swapl(&stuff->property);
+    }
+
     RROutputPtr output;
     RRPropertyPtr prop;
 
-    REQUEST_SIZE_MATCH(xRRQueryOutputPropertyReq);
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
     prop = RRQueryOutputProperty(output, stuff->property);
@@ -472,10 +481,16 @@ int
 ProcRRConfigureOutputProperty(ClientPtr client)
 {
     REQUEST(xRRConfigureOutputPropertyReq);
+    REQUEST_AT_LEAST_SIZE(xRRConfigureOutputPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->output);
+        swapl(&stuff->property);
+        SwapRestL(stuff);
+    }
+
     RROutputPtr output;
     int num_valid;
-
-    REQUEST_AT_LEAST_SIZE(xRRConfigureOutputPropertyReq);
 
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
@@ -493,6 +508,28 @@ int
 ProcRRChangeOutputProperty(ClientPtr client)
 {
     REQUEST(xRRChangeOutputPropertyReq);
+    REQUEST_AT_LEAST_SIZE(xRRChangeOutputPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->output);
+        swapl(&stuff->property);
+        swapl(&stuff->type);
+        swapl(&stuff->nUnits);
+        switch (stuff->format) {
+            case 8:
+                break;
+            case 16:
+                SwapRestS(stuff);
+                break;
+            case 32:
+                SwapRestL(stuff);
+                break;
+            default:
+                client->errorValue = stuff->format;
+                return BadValue;
+        }
+    }
+
     RROutputPtr output;
     char format, mode;
     unsigned long len;
@@ -500,7 +537,6 @@ ProcRRChangeOutputProperty(ClientPtr client)
     uint64_t totalSize;
     int err;
 
-    REQUEST_AT_LEAST_SIZE(xRRChangeOutputPropertyReq);
     UpdateCurrentTime();
     format = stuff->format;
     mode = stuff->mode;
@@ -545,10 +581,16 @@ int
 ProcRRDeleteOutputProperty(ClientPtr client)
 {
     REQUEST(xRRDeleteOutputPropertyReq);
+    REQUEST_SIZE_MATCH(xRRDeleteOutputPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->output);
+        swapl(&stuff->property);
+    }
+
     RROutputPtr output;
     RRPropertyPtr prop;
 
-    REQUEST_SIZE_MATCH(xRRDeleteOutputPropertyReq);
     UpdateCurrentTime();
     VERIFY_RR_OUTPUT(stuff->output, output, DixReadAccess);
 
@@ -579,12 +621,21 @@ int
 ProcRRGetOutputProperty(ClientPtr client)
 {
     REQUEST(xRRGetOutputPropertyReq);
+    REQUEST_SIZE_MATCH(xRRGetOutputPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->output);
+        swapl(&stuff->property);
+        swapl(&stuff->type);
+        swapl(&stuff->longOffset);
+        swapl(&stuff->longLength);
+    }
+
     RRPropertyPtr prop, *prev;
     RRPropertyValuePtr prop_value;
     unsigned long n, ind;
     RROutputPtr output;
 
-    REQUEST_SIZE_MATCH(xRRGetOutputPropertyReq);
     if (stuff->delete)
         UpdateCurrentTime();
     VERIFY_RR_OUTPUT(stuff->output, output,
