@@ -594,49 +594,6 @@ ProcDRI2Dispatch(ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcDRI2Connect(ClientPtr client)
-{
-    REQUEST(xDRI2ConnectReq);
-    xDRI2ConnectReply rep = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0,
-        .driverNameLength = 0,
-        .deviceNameLength = 0
-    };
-
-    /* If the client is swapped, it's not local.  Talk to the hand. */
-
-    if (sizeof(*stuff) / 4 != client->req_len)
-        return BadLength;
-
-    swaps(&rep.sequenceNumber);
-
-    WriteToClient(client, sizeof(xDRI2ConnectReply), &rep);
-
-    return Success;
-}
-
-static int _X_COLD
-SProcDRI2Dispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    /*
-     * Only local clients are allowed DRI access, but remote clients
-     * still need these requests to find out cleanly.
-     */
-    switch (stuff->data) {
-    case X_DRI2QueryVersion:
-        return ProcDRI2QueryVersion(client);
-    case X_DRI2Connect:
-        return SProcDRI2Connect(client);
-    default:
-        return BadRequest;
-    }
-}
-
 void
 DRI2ExtensionInit(void)
 {
@@ -651,7 +608,9 @@ DRI2ExtensionInit(void)
                                  DRI2NumberEvents,
                                  DRI2NumberErrors,
                                  ProcDRI2Dispatch,
-                                 SProcDRI2Dispatch, NULL, StandardMinorOpcode);
+                                 ProcDRI2Dispatch,
+                                 NULL,
+                                 StandardMinorOpcode);
 
     DRI2EventBase = dri2Extension->eventBase;
 

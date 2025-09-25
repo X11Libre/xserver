@@ -99,6 +99,10 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 
     REQUEST(xXF86DRIQueryDirectRenderingCapableReq);
     REQUEST_SIZE_MATCH(xXF86DRIQueryDirectRenderingCapableReq);
+
+    if (client->swapped)
+        swapl(&stuff->screen);
+
     if (stuff->screen >= screenInfo.numScreens) {
         client->errorValue = stuff->screen;
         return BadValue;
@@ -479,34 +483,6 @@ ProcXF86DRIDispatch(register ClientPtr client)
     }
 }
 
-static int _X_COLD
-SProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
-{
-    REQUEST(xXF86DRIQueryDirectRenderingCapableReq);
-    REQUEST_SIZE_MATCH(xXF86DRIQueryDirectRenderingCapableReq);
-    swapl(&stuff->screen);
-    return ProcXF86DRIQueryDirectRenderingCapable(client);
-}
-
-static int _X_COLD
-SProcXF86DRIDispatch(register ClientPtr client)
-{
-    REQUEST(xReq);
-
-    /*
-     * Only local clients are allowed DRI access, but remote clients still need
-     * these requests to find out cleanly.
-     */
-    switch (stuff->data) {
-    case X_XF86DRIQueryVersion:
-        return ProcXF86DRIQueryVersion(client);
-    case X_XF86DRIQueryDirectRenderingCapable:
-        return SProcXF86DRIQueryDirectRenderingCapable(client);
-    default:
-        return DRIErrorBase + XF86DRIClientNotLocal;
-    }
-}
-
 void
 XFree86DRIExtensionInit(void)
 {
@@ -517,7 +493,7 @@ XFree86DRIExtensionInit(void)
                                  XF86DRINumberEvents,
                                  XF86DRINumberErrors,
                                  ProcXF86DRIDispatch,
-                                 SProcXF86DRIDispatch,
+                                 ProcXF86DRIDispatch,
                                  XF86DRIResetProc, StandardMinorOpcode))) {
         DRIErrorBase = extEntry->errorBase;
     }
