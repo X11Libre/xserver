@@ -1942,8 +1942,11 @@ ProcAllowEvents(ClientPtr client)
     DeviceIntPtr keybd = NULL;
 
     REQUEST(xAllowEventsReq);
-
     REQUEST_SIZE_MATCH(xAllowEventsReq);
+
+    if (client->swapped)
+        swapl(&stuff->time);
+
     UpdateCurrentTime();
     time = ClientTimeToServerTime(stuff->time);
 
@@ -5115,8 +5118,11 @@ ProcUngrabPointer(ClientPtr client)
     TimeStamp time;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     UpdateCurrentTime();
     grab = device->deviceGrab.grab;
 
@@ -5300,8 +5306,11 @@ ProcUngrabKeyboard(ClientPtr client)
     TimeStamp time;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     UpdateCurrentTime();
 
     grab = device->deviceGrab.grab;
@@ -5331,6 +5340,9 @@ ProcQueryPointer(ClientPtr client)
 
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
 
     rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
     if (rc != Success)
