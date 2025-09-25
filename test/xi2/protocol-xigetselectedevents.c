@@ -151,7 +151,7 @@ request_XIGetSelectedEvents(xXIGetSelectedEventsReq * req, int error)
     */
 
     swapl(&req->win);
-    rc = SProcXIGetSelectedEvents(&client);
+    rc = ProcXIGetSelectedEvents(&client);
     assert(rc == error);
 }
 
