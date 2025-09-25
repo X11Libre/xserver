@@ -5737,6 +5737,15 @@ XkbConvertGetByNameComponents(Bool toXkm, unsigned orig)
 int
 ProcXkbGetKbdByName(ClientPtr client)
 {
+    REQUEST(xkbGetKbdByNameReq);
+    REQUEST_AT_LEAST_SIZE(xkbGetKbdByNameReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->want);
+        swaps(&stuff->need);
+    }
+
     DeviceIntPtr dev;
     DeviceIntPtr tmpd;
     DeviceIntPtr master;
@@ -5751,9 +5760,6 @@ ProcXkbGetKbdByName(ClientPtr client)
     XkbSrvLedInfoPtr old_sli;
     XkbSrvLedInfoPtr sli;
     Mask access_mode = DixGetAttrAccess | DixManageAccess;
-
-    REQUEST(xkbGetKbdByNameReq);
-    REQUEST_AT_LEAST_SIZE(xkbGetKbdByNameReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
