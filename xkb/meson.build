@@ -12,7 +12,6 @@ srcs_xkb = [
     'xkbUtils.c',
     'xkbEvents.c',
     'xkbAccessX.c',
-    'xkbSwap.c',
     'xkbLEDs.c',
     'xkbInit.c',
     'xkbActions.c',
