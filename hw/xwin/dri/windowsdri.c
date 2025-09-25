@@ -71,6 +71,9 @@ ProcWindowsDRIQueryDirectRenderingCapable(ClientPtr client)
     REQUEST(xWindowsDRIQueryDirectRenderingCapableReq);
     REQUEST_SIZE_MATCH(xWindowsDRIQueryDirectRenderingCapableReq);
 
+    if (client->swapped)
+        swapl(&stuff->screen);
+
     xWindowsDRIQueryDirectRenderingCapableReply reply = {
         .isCapable = client->local &&
                      glxWinGetScreenAiglxIsActive(screenInfo.screens[stuff->screen])
@@ -82,10 +85,15 @@ ProcWindowsDRIQueryDirectRenderingCapable(ClientPtr client)
 static int
 ProcWindowsDRIQueryDrawable(ClientPtr client)
 {
-    int rc;
-
     REQUEST(xWindowsDRIQueryDrawableReq);
     REQUEST_SIZE_MATCH(xWindowsDRIQueryDrawableReq);
+
+    if (client->swapped) {
+        swapl(&stuff->screen);
+        swapl(&stuff->drawable);
+    }
+
+    int rc;
 
     xWindowsDRIQueryDrawableReply reply = { 0 };
     rc = glxWinQueryDrawable(client, stuff->drawable, &(reply.drawable_type), &(reply.handle));
@@ -106,6 +114,11 @@ ProcWindowsDRIFBConfigToPixelFormat(ClientPtr client)
 {
     REQUEST(xWindowsDRIFBConfigToPixelFormatReq);
     REQUEST_SIZE_MATCH(xWindowsDRIFBConfigToPixelFormatReq);
+
+    if (client->swapped) {
+        swapl(&stuff->screen);
+        swapl(&stuff->fbConfigID);
+    }
 
     xWindowsDRIFBConfigToPixelFormatReply reply = {
         .pixelFormatIndex = glxWinFBConfigIDToPixelFormatIndex(stuff->screen, stuff->fbConfigID)
@@ -158,67 +171,6 @@ SNotifyEvent(xWindowsDRINotifyEvent *from,
     cpswapl(from->time, to->time);
 }
 
-static int
-SProcWindowsDRIQueryVersion(ClientPtr client)
-{
-    REQUEST(xWindowsDRIQueryVersionReq);
-    return ProcWindowsDRIQueryVersion(client);
-}
-
-static int
-SProcWindowsDRIQueryDirectRenderingCapable(ClientPtr client)
-{
-    REQUEST(xWindowsDRIQueryDirectRenderingCapableReq);
-    swapl(&stuff->screen);
-    return ProcWindowsDRIQueryDirectRenderingCapable(client);
-}
-
-static int
-SProcWindowsDRIQueryDrawable(ClientPtr client)
-{
-    REQUEST(xWindowsDRIQueryDrawableReq);
-    swapl(&stuff->screen);
-    swapl(&stuff->drawable);
-    return ProcWindowsDRIQueryDrawable(client);
-}
-
-static int
-SProcWindowsDRIFBConfigToPixelFormat(ClientPtr client)
-{
-    REQUEST(xWindowsDRIFBConfigToPixelFormatReq);
-    swapl(&stuff->screen);
-    swapl(&stuff->fbConfigID);
-    return ProcWindowsDRIFBConfigToPixelFormat(client);
-}
-
-static int
-SProcWindowsDRIDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    switch (stuff->data) {
-    case X_WindowsDRIQueryVersion:
-        return SProcWindowsDRIQueryVersion(client);
-
-    case X_WindowsDRIQueryDirectRenderingCapable:
-        return SProcWindowsDRIQueryDirectRenderingCapable(client);
-    }
-
-    if (!client->local)
-        return WindowsDRIErrorBase + WindowsDRIClientNotLocal;
-
-    switch (stuff->data) {
-    case X_WindowsDRIQueryDrawable:
-        return SProcWindowsDRIQueryDrawable(client);
-
-    case X_WindowsDRIFBConfigToPixelFormat:
-        return SProcWindowsDRIFBConfigToPixelFormat(client);
-
-    default:
-        return BadRequest;
-    }
-}
-
 void
 WindowsDRIExtensionInit(void)
 {
@@ -228,7 +180,7 @@ WindowsDRIExtensionInit(void)
                                  WindowsDRINumberEvents,
                                  WindowsDRINumberErrors,
                                  ProcWindowsDRIDispatch,
-                                 SProcWindowsDRIDispatch,
+                                 ProcWindowsDRIDispatch,
                                  WindowsDRIResetProc,
                                  StandardMinorOpcode))) {
         size_t i;
