@@ -3042,12 +3042,18 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
 int
 ProcXkbSetCompatMap(ClientPtr client)
 {
+    REQUEST(xkbSetCompatMapReq);
+    REQUEST_AT_LEAST_SIZE(xkbSetCompatMapReq);
+
+    if (client->swapped) {
+        swaps(&stuff->deviceSpec);
+        swaps(&stuff->firstSI);
+        swaps(&stuff->nSI);
+    }
+
     DeviceIntPtr dev;
     char *data;
     int rc;
-
-    REQUEST(xkbSetCompatMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetCompatMapReq);
 
     if (!(client->xkbClientFlags & _XkbClientInitialized))
         return BadAccess;
