@@ -121,7 +121,7 @@ request_XISelectEvent(xXISelectEventsReq * req, int error)
 
     swapl(&req->win);
     swaps(&req->num_masks);
-    rc = SProcXISelectEvents(&client);
+    rc = ProcXISelectEvents(&client);
     assert(rc == error);
 }
 
