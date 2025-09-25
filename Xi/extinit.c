@@ -440,9 +440,9 @@ SProcIDispatch(ClientPtr client)
         case X_XIChangeHierarchy:
             return ProcXIChangeHierarchy(client);
         case X_XISetClientPointer:
-            return SProcXISetClientPointer(client);
+            return ProcXISetClientPointer(client);
         case X_XIGetClientPointer:
-            return SProcXIGetClientPointer(client);
+            return ProcXIGetClientPointer(client);
         case X_XISelectEvents:
             return SProcXISelectEvents(client);
         case X_XIQueryVersion:
