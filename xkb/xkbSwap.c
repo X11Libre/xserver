@@ -119,17 +119,6 @@ SProcXkbSelectEvents(ClientPtr client)
 }
 
 static int _X_COLD
-SProcXkbSetCompatMap(ClientPtr client)
-{
-    REQUEST(xkbSetCompatMapReq);
-    REQUEST_AT_LEAST_SIZE(xkbSetCompatMapReq);
-    swaps(&stuff->deviceSpec);
-    swaps(&stuff->firstSI);
-    swaps(&stuff->nSI);
-    return ProcXkbSetCompatMap(client);
-}
-
-static int _X_COLD
 SProcXkbGetKbdByName(ClientPtr client)
 {
     REQUEST(xkbGetKbdByNameReq);
@@ -166,7 +155,7 @@ SProcXkbDispatch(ClientPtr client)
     case X_kbGetCompatMap:
         return ProcXkbGetCompatMap(client);
     case X_kbSetCompatMap:
-        return SProcXkbSetCompatMap(client);
+        return ProcXkbSetCompatMap(client);
     case X_kbGetIndicatorState:
         return ProcXkbGetIndicatorState(client);
     case X_kbGetIndicatorMap:
