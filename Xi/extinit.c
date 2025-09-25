@@ -444,7 +444,7 @@ SProcIDispatch(ClientPtr client)
         case X_XIGetClientPointer:
             return ProcXIGetClientPointer(client);
         case X_XISelectEvents:
-            return SProcXISelectEvents(client);
+            return ProcXISelectEvents(client);
         case X_XIQueryVersion:
             return ProcXIQueryVersion(client);
         case X_XIQueryDevice:
@@ -472,7 +472,7 @@ SProcIDispatch(ClientPtr client)
         case X_XIGetProperty:
             return ProcXIGetProperty(client);
         case X_XIGetSelectedEvents:
-            return SProcXIGetSelectedEvents(client);
+            return ProcXIGetSelectedEvents(client);
         case X_XIBarrierReleasePointer:
             return ProcXIBarrierReleasePointer(client);
         default:

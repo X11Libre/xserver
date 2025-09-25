@@ -69,7 +69,4 @@ int ProcXUngrabDeviceButton(ClientPtr client);
 int ProcXUngrabDevice(ClientPtr client);
 int ProcXUngrabDeviceKey(ClientPtr client);
 
-int SProcXIGetSelectedEvents(ClientPtr client);
-int SProcXISelectEvents(ClientPtr client);
-
 #endif /* _XSERVER_XI_HANDLERS_H */
