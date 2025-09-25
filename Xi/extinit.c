@@ -474,7 +474,7 @@ SProcIDispatch(ClientPtr client)
         case X_XIGetSelectedEvents:
             return SProcXIGetSelectedEvents(client);
         case X_XIBarrierReleasePointer:
-            return SProcXIBarrierReleasePointer(client);
+            return ProcXIBarrierReleasePointer(client);
         default:
             return BadRequest;
     }
