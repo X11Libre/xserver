@@ -46,16 +46,6 @@
  * setting.
  */
 
-int _X_COLD
-SProcXIGetClientPointer(ClientPtr client)
-{
-    REQUEST(xXIGetClientPointerReq);
-    REQUEST_SIZE_MATCH(xXIGetClientPointerReq);
-
-    swapl(&stuff->win);
-    return ProcXIGetClientPointer(client);
-}
-
 int
 ProcXIGetClientPointer(ClientPtr client)
 {
@@ -64,6 +54,9 @@ ProcXIGetClientPointer(ClientPtr client)
 
     REQUEST(xXIGetClientPointerReq);
     REQUEST_SIZE_MATCH(xXIGetClientPointerReq);
+
+    if (client->swapped)
+        swapl(&stuff->win);
 
     if (stuff->win != None) {
         rc = dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess);
