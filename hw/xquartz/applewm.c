@@ -676,31 +676,6 @@ SNotifyEvent(xAppleWMNotifyEvent *from, xAppleWMNotifyEvent *to)
     cpswapl(from->arg, to->arg);
 }
 
-static int
-SProcAppleWMQueryVersion(register ClientPtr client)
-{
-    return ProcAppleWMQueryVersion(client);
-}
-
-static int
-SProcAppleWMDispatch(register ClientPtr client)
-{
-    REQUEST(xReq);
-
-    /* It is bound to be non-local when there is byte swapping */
-    if (!client->local)
-        return WMErrorBase + AppleWMClientNotLocal;
-
-    /* only local clients are allowed WM access */
-    switch (stuff->data) {
-    case X_AppleWMQueryVersion:
-        return SProcAppleWMQueryVersion(client);
-
-    default:
-        return BadRequest;
-    }
-}
-
 void
 AppleWMExtensionInit(AppleWMProcsPtr procsPtr)
 {
@@ -715,7 +690,7 @@ AppleWMExtensionInit(AppleWMProcsPtr procsPtr)
                                  AppleWMNumberEvents,
                                  AppleWMNumberErrors,
                                  ProcAppleWMDispatch,
-                                 SProcAppleWMDispatch,
+                                 ProcAppleWMDispatch,
                                  NULL,
                                  StandardMinorOpcode))) {
         size_t i;
