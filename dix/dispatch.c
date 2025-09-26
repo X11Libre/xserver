@@ -2978,51 +2978,50 @@ ProcQueryColors(ClientPtr client)
 int
 ProcLookupColor(ClientPtr client)
 {
-    ColormapPtr pcmp;
-    int rc;
-
     REQUEST(xLookupColorReq);
-
     REQUEST_FIXED_SIZE(xLookupColorReq, stuff->nbytes);
-    rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
+
+    ColormapPtr pcmp;
+    int rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixReadAccess);
-    if (rc == Success) {
-        CARD16 exactRed, exactGreen, exactBlue;
-
-        if (dixLookupBuiltinColor(pcmp->pScreen->myNum,
-                                  (char *) &stuff[1],
-                                  stuff->nbytes,
-                                  &exactRed,
-                                  &exactGreen,
-                                  &exactBlue)) {
-            xLookupColorReply rep = {
-                .exactRed = exactRed,
-                .exactGreen = exactGreen,
-                .exactBlue = exactBlue,
-                .screenRed = exactRed,
-                .screenGreen = exactGreen,
-                .screenBlue = exactBlue
-            };
-            (*pcmp->pScreen->ResolveColor) (&rep.screenRed,
-                                            &rep.screenGreen,
-                                            &rep.screenBlue, pcmp->pVisual);
-            if (client->swapped) {
-                swaps(&rep.exactRed);
-                swaps(&rep.exactGreen);
-                swaps(&rep.exactBlue);
-                swaps(&rep.screenRed);
-                swaps(&rep.screenGreen);
-                swaps(&rep.screenBlue);
-            }
-
-            return X_SEND_REPLY_SIMPLE(client, rep);
-        }
-        return BadName;
-    }
-    else {
+    if (rc != Success) {
         client->errorValue = stuff->cmap;
         return rc;
     }
+
+    CARD16 exactRed, exactGreen, exactBlue;
+    if (!dixLookupBuiltinColor(pcmp->pScreen->myNum,
+                               (char *) &stuff[1],
+                               stuff->nbytes,
+                               &exactRed,
+                               &exactGreen,
+                               &exactBlue))
+        return BadName;
+
+    xLookupColorReply rep = {
+        .exactRed = exactRed,
+        .exactGreen = exactGreen,
+        .exactBlue = exactBlue,
+        .screenRed = exactRed,
+        .screenGreen = exactGreen,
+        .screenBlue = exactBlue
+    };
+
+    pcmp->pScreen->ResolveColor(&rep.screenRed,
+                                &rep.screenGreen,
+                                &rep.screenBlue,
+                                pcmp->pVisual);
+
+    if (client->swapped) {
+        swaps(&rep.exactRed);
+        swaps(&rep.exactGreen);
+        swaps(&rep.exactBlue);
+        swaps(&rep.screenRed);
+        swaps(&rep.screenGreen);
+        swaps(&rep.screenBlue);
+    }
+
+    return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
 int
