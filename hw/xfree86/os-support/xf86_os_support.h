@@ -30,6 +30,12 @@ typedef void (*PMClose) (void);
 
 void xf86OpenConsole(void);
 void xf86CloseConsole(void);
+
+/**
+ * @brief get keeptty switch state
+ **/
+Bool xf86VTKeepTtyIsSet(void);
+
 Bool xf86VTActivate(int vtno);
 Bool xf86VTSwitchPending(void);
 Bool xf86VTSwitchAway(void);
