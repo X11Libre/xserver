@@ -37,7 +37,6 @@ extern RESTYPE XvRTPort;
 
 /* dispatch functions */
 int ProcXvDispatch(ClientPtr);
-int SProcXvDispatch(ClientPtr);
 
 void XvFreeAdaptor(XvAdaptorPtr pAdaptor);
 
