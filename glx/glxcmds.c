@@ -895,97 +895,82 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
     ClientPtr client = cl->client;
     __GLXscreen *pGlxScreen;
     __GLXconfig *modes;
-    CARD32 buf[GLX_VIS_CONFIG_TOTAL];
-    int p, i, err;
+    int err;
 
     if (!validGlxScreen(cl->client, req->screen, &pGlxScreen, &err))
         return err;
 
     xGLXGetVisualConfigsReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = (pGlxScreen->numVisuals *
-                   __GLX_SIZE_CARD32 * GLX_VIS_CONFIG_TOTAL) >> 2,
         .numVisuals = pGlxScreen->numVisuals,
         .numProps = GLX_VIS_CONFIG_TOTAL
     };
 
     if (client->swapped) {
-        swaps(&reply.sequenceNumber);
-        swapl(&reply.length);
         swapl(&reply.numVisuals);
         swapl(&reply.numProps);
     }
 
-    WriteToClient(client, sizeof(xGLXGetVisualConfigsReply), &reply);
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    for (i = 0; i < pGlxScreen->numVisuals; i++) {
+    for (int i = 0; i < pGlxScreen->numVisuals; i++) {
         modes = pGlxScreen->visuals[i];
 
-        p = 0;
-        buf[p++] = modes->visualID;
-        buf[p++] = glxConvertToXVisualType(modes->visualType);
-        buf[p++] = (modes->renderType & GLX_RGBA_BIT) ? GL_TRUE : GL_FALSE;
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->visualID);
+        x_rpcbuf_write_CARD32(&rpcbuf, glxConvertToXVisualType(modes->visualType));
+        x_rpcbuf_write_CARD32(&rpcbuf, (modes->renderType & GLX_RGBA_BIT) ? GL_TRUE : GL_FALSE);
 
-        buf[p++] = modes->redBits;
-        buf[p++] = modes->greenBits;
-        buf[p++] = modes->blueBits;
-        buf[p++] = modes->alphaBits;
-        buf[p++] = modes->accumRedBits;
-        buf[p++] = modes->accumGreenBits;
-        buf[p++] = modes->accumBlueBits;
-        buf[p++] = modes->accumAlphaBits;
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->redBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->greenBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->blueBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->alphaBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->accumRedBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->accumGreenBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->accumBlueBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->accumAlphaBits);
 
-        buf[p++] = modes->doubleBufferMode;
-        buf[p++] = modes->stereoMode;
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->doubleBufferMode);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->stereoMode);
 
-        buf[p++] = modes->rgbBits;
-        buf[p++] = modes->depthBits;
-        buf[p++] = modes->stencilBits;
-        buf[p++] = modes->numAuxBuffers;
-        buf[p++] = modes->level;
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->rgbBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->depthBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->stencilBits);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->numAuxBuffers);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->level);
 
-        assert(p == GLX_VIS_CONFIG_UNPAIRED);
         /*
          ** Add token/value pairs for extensions.
          */
-        buf[p++] = GLX_VISUAL_CAVEAT_EXT;
-        buf[p++] = modes->visualRating;
-        buf[p++] = GLX_TRANSPARENT_TYPE;
-        buf[p++] = modes->transparentPixel;
-        buf[p++] = GLX_TRANSPARENT_RED_VALUE;
-        buf[p++] = modes->transparentRed;
-        buf[p++] = GLX_TRANSPARENT_GREEN_VALUE;
-        buf[p++] = modes->transparentGreen;
-        buf[p++] = GLX_TRANSPARENT_BLUE_VALUE;
-        buf[p++] = modes->transparentBlue;
-        buf[p++] = GLX_TRANSPARENT_ALPHA_VALUE;
-        buf[p++] = modes->transparentAlpha;
-        buf[p++] = GLX_TRANSPARENT_INDEX_VALUE;
-        buf[p++] = modes->transparentIndex;
-        buf[p++] = GLX_SAMPLES_SGIS;
-        buf[p++] = modes->samples;
-        buf[p++] = GLX_SAMPLE_BUFFERS_SGIS;
-        buf[p++] = modes->sampleBuffers;
-        buf[p++] = GLX_VISUAL_SELECT_GROUP_SGIX;
-        buf[p++] = modes->visualSelectGroup;
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_VISUAL_CAVEAT_EXT);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->visualRating);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_TYPE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentPixel);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_RED_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentRed);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_GREEN_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentGreen);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_BLUE_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentBlue);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_ALPHA_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentAlpha);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_TRANSPARENT_INDEX_VALUE);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->transparentIndex);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_SAMPLES_SGIS);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->samples);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_SAMPLE_BUFFERS_SGIS);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->sampleBuffers);
+        x_rpcbuf_write_CARD32(&rpcbuf, GLX_VISUAL_SELECT_GROUP_SGIX);
+        x_rpcbuf_write_CARD32(&rpcbuf, modes->visualSelectGroup);
         /* Add attribute only if its value is not default. */
         if (modes->sRGBCapable != GL_FALSE) {
-            buf[p++] = GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT;
-            buf[p++] = modes->sRGBCapable;
+            x_rpcbuf_write_CARD32(&rpcbuf, GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT);
+            x_rpcbuf_write_CARD32(&rpcbuf, modes->sRGBCapable);
+        } else {
+            /* Pad with zeroes, so that attributes count is constant. */
+            x_rpcbuf_reserve0(&rpcbuf, sizeof(CARD32) * 2);
         }
-        /* Pad with zeroes, so that attributes count is constant. */
-        while (p < GLX_VIS_CONFIG_TOTAL) {
-            buf[p++] = 0;
-        }
-
-        assert(p == GLX_VIS_CONFIG_TOTAL);
-        if (client->swapped) {
-            SwapLongs(buf, p);
-        }
-        WriteToClient(client, __GLX_SIZE_CARD32 * p, buf);
     }
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 #define __GLX_TOTAL_FBCONFIG_ATTRIBS (44)
