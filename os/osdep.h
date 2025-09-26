@@ -203,6 +203,12 @@ extern Bool CoreDump;
 extern Bool NoListenAll;
 extern Bool AllowByteSwappedClients;
 
+/*
+ * This function reallocarray(3)s passed buffer, terminating the server if
+ * there is not enough memory or the arguments overflow when multiplied.
+ */
+void *XNFreallocarray(void *ptr, size_t nmemb, size_t size);
+
 #if __has_builtin(__builtin_popcountl)
 # define Ones __builtin_popcountl
 #else

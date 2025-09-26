@@ -39,6 +39,7 @@
 #include <X11/X.h>
 
 #include "config/hotplug_priv.h"
+#include "os/osdep.h"
 
 #include "os.h"
 #include "xf86_priv.h"
