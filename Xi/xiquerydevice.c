@@ -34,6 +34,7 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/XI2proto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
@@ -47,7 +48,6 @@
 #include "xkbstr.h"
 #include "xkbsrv.h"
 #include "xserver-properties.h"
-#include "xace.h"
 #include "exglobals.h"
 #include "privates.h"
 #include "xiquerydevice.h"
@@ -159,8 +159,7 @@ ShouldSkipDevice(ClientPtr client, int deviceid, DeviceIntPtr dev)
 {
     /* if all devices are not being queried, only master devices are */
     if (deviceid == XIAllDevices || InputDevIsMaster(dev)) {
-        int rc = XaceHookDeviceAccess(client, dev, DixGetAttrAccess);
-
+        int rc = dixCallDeviceAccessCallback(client, dev, DixGetAttrAccess);
         if (rc == Success)
             return FALSE;
     }
@@ -556,11 +555,9 @@ ListDeviceClasses(ClientPtr client, DeviceIntPtr dev,
     int total_len = 0;
     int len;
     int i;
-    int rc;
 
     /* Check if the current device state should be suppressed */
-    rc = XaceHookDeviceAccess(client, dev, DixReadAccess);
-
+    int rc = dixCallDeviceAccessCallback(client, dev, DixReadAccess);
     if (dev->button) {
         (*nclasses)++;
         len = ListButtonInfo(dev, (xXIButtonInfo *) any, rc == Success);

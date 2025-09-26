@@ -60,13 +60,6 @@ int XaceHookResourceAccess(ClientPtr client, XID id, RESTYPE rtype, void *res,
     return rec.status;
 }
 
-int XaceHookDeviceAccess(ClientPtr client, DeviceIntPtr dev, Mask access_mode)
-{
-    XaceDeviceAccessRec rec = { client, dev, access_mode, Success };
-    CallCallbacks(&XaceHooks[XACE_DEVICE_ACCESS], &rec);
-    return rec.status;
-}
-
 int XaceHookSendAccess(ClientPtr client, DeviceIntPtr dev, WindowPtr win,
                        xEventPtr ev, int count)
 {
