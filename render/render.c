@@ -36,6 +36,7 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"

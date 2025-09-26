@@ -37,6 +37,7 @@ Equipment Corporation.
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
