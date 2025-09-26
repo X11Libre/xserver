@@ -96,6 +96,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/screensaver_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/audit_priv.h"
 #include "os/auth.h"
