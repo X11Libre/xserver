@@ -81,6 +81,7 @@ void *x_rpcbuf_reserve(x_rpcbuf_t *rpcbuf, size_t needed)
     return pos;
 }
 
+_X_EXPORT /* only for GLX, not part of public ABI */
 void *x_rpcbuf_reserve0(x_rpcbuf_t *rpcbuf, size_t needed)
 {
     void *buf = x_rpcbuf_reserve(rpcbuf, needed);
