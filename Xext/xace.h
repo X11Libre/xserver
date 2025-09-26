@@ -20,6 +20,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef _XACE_H
 #define _XACE_H
 
+#ifdef XACE
+
 #define XACE_MAJOR_VERSION		2
 #define XACE_MINOR_VERSION		0
 
@@ -90,5 +92,50 @@ void XaceCensorImage(ClientPtr client,
                      DrawablePtr pDraw,
                      int x, int y, int w, int h,
                      unsigned int format, char *pBuf);
+
+#else                           /* XACE */
+
+/* Default window background */
+#define XaceBackgroundNoneState(w)		None
+
+/* Define calls away when XACE is not being built. */
+
+#ifdef __GNUC__
+#define XaceHookIsSet(args...) 0
+#define XaceHookDispatch(args...) Success
+#define XaceHookPropertyAccess(args...) Success
+#define XaceHookSelectionAccess(args...) Success
+#define XaceHookResourceAccess(args...) Success
+#define XaceHookDeviceAccess(args...) Success
+#define XaceHookSendAccess(args...) Success
+#define XaceHookReceiveAccess(args...) Success
+#define XaceHookClientAccess(args...) Success
+#define XaceHookExtAccess(args...) Success
+#define XaceHookServerAccess(args...) Success
+#define XaceHookScreenAccess(args...) Success
+#define XaceHookScreensaverAccess(args...) Success
+#define XaceHookAuthAvail(args...) Success
+#define XaceHookKeyAvail(args...) Success
+#define XaceCensorImage(args...) { ; }
+#else
+#define XaceHookIsSet(...) 0
+#define XaceHookDispatch(...) Success
+#define XaceHookPropertyAccess(...) Success
+#define XaceHookSelectionAccess(...) Success
+#define XaceHookResourceAccess(...) Success
+#define XaceHookDeviceAccess(...) Success
+#define XaceHookSendAccess(...) Success
+#define XaceHookReceiveAccess(...) Success
+#define XaceHookClientAccess(...) Success
+#define XaceHookExtAccess(...) Success
+#define XaceHookServerAccess(...) Success
+#define XaceHookScreenAccess(...) Success
+#define XaceHookScreensaverAccess(...) Success
+#define XaceHookAuthAvail(...) Success
+#define XaceHookKeyAvail(...) Success
+#define XaceCensorImage(...) { ; }
+#endif
+
+#endif                          /* XACE */
 
 #endif                          /* _XACE_H */
