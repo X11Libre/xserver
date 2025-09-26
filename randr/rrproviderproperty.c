@@ -341,11 +341,14 @@ int
 ProcRRListProviderProperties(ClientPtr client)
 {
     REQUEST(xRRListProviderPropertiesReq);
+    REQUEST_SIZE_MATCH(xRRListProviderPropertiesReq);
+
+    if (client->swapped)
+        swapl(&stuff->provider);
+
     int numProps = 0;
     RRProviderPtr provider;
     RRPropertyPtr prop;
-
-    REQUEST_SIZE_MATCH(xRRListProviderPropertiesReq);
 
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
@@ -370,10 +373,15 @@ int
 ProcRRQueryProviderProperty(ClientPtr client)
 {
     REQUEST(xRRQueryProviderPropertyReq);
+    REQUEST_SIZE_MATCH(xRRQueryProviderPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->provider);
+        swapl(&stuff->property);
+    }
+
     RRProviderPtr provider;
     RRPropertyPtr prop;
-
-    REQUEST_SIZE_MATCH(xRRQueryProviderPropertyReq);
 
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
@@ -397,10 +405,17 @@ int
 ProcRRConfigureProviderProperty(ClientPtr client)
 {
     REQUEST(xRRConfigureProviderPropertyReq);
+    REQUEST_AT_LEAST_SIZE(xRRConfigureProviderPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->provider);
+        swapl(&stuff->property);
+        /* TODO: no way to specify format? */
+        SwapRestL(stuff);
+    }
+
     RRProviderPtr provider;
     int num_valid;
-
-    REQUEST_AT_LEAST_SIZE(xRRConfigureProviderPropertyReq);
 
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
@@ -415,6 +430,25 @@ int
 ProcRRChangeProviderProperty(ClientPtr client)
 {
     REQUEST(xRRChangeProviderPropertyReq);
+    REQUEST_AT_LEAST_SIZE(xRRChangeProviderPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->provider);
+        swapl(&stuff->property);
+        swapl(&stuff->type);
+        swapl(&stuff->nUnits);
+        switch (stuff->format) {
+            case 8:
+                break;
+            case 16:
+                SwapRestS(stuff);
+                break;
+            case 32:
+                SwapRestL(stuff);
+                break;
+        }
+    }
+
     RRProviderPtr provider;
     char format, mode;
     unsigned long len;
@@ -422,7 +456,6 @@ ProcRRChangeProviderProperty(ClientPtr client)
     uint64_t totalSize;
     int err;
 
-    REQUEST_AT_LEAST_SIZE(xRRChangeProviderPropertyReq);
     UpdateCurrentTime();
     format = stuff->format;
     mode = stuff->mode;
@@ -467,10 +500,16 @@ int
 ProcRRDeleteProviderProperty(ClientPtr client)
 {
     REQUEST(xRRDeleteProviderPropertyReq);
+    REQUEST_SIZE_MATCH(xRRDeleteProviderPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->provider);
+        swapl(&stuff->property);
+    }
+
     RRProviderPtr provider;
     RRPropertyPtr prop;
 
-    REQUEST_SIZE_MATCH(xRRDeleteProviderPropertyReq);
     UpdateCurrentTime();
     VERIFY_RR_PROVIDER(stuff->provider, provider, DixReadAccess);
 
@@ -498,12 +537,21 @@ int
 ProcRRGetProviderProperty(ClientPtr client)
 {
     REQUEST(xRRGetProviderPropertyReq);
+    REQUEST_SIZE_MATCH(xRRGetProviderPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->provider);
+        swapl(&stuff->property);
+        swapl(&stuff->type);
+        swapl(&stuff->longOffset);
+        swapl(&stuff->longLength);
+    }
+
     RRPropertyPtr prop, *prev;
     RRPropertyValuePtr prop_value;
     unsigned long n, len, ind;
     RRProviderPtr provider;
 
-    REQUEST_SIZE_MATCH(xRRGetProviderPropertyReq);
     if (stuff->delete)
         UpdateCurrentTime();
     VERIFY_RR_PROVIDER(stuff->provider, provider,

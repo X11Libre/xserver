@@ -192,12 +192,15 @@ int
 ProcRRGetScreenSizeRange(ClientPtr client)
 {
     REQUEST(xRRGetScreenSizeRangeReq);
+    REQUEST_SIZE_MATCH(xRRGetScreenSizeRangeReq);
+    if (client->swapped)
+        swapl(&stuff->window);
+
     WindowPtr pWin;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int rc;
 
-    REQUEST_SIZE_MATCH(xRRGetScreenSizeRangeReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -232,12 +235,20 @@ int
 ProcRRSetScreenSize(ClientPtr client)
 {
     REQUEST(xRRSetScreenSizeReq);
+    REQUEST_SIZE_MATCH(xRRSetScreenSizeReq);
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swaps(&stuff->width);
+        swaps(&stuff->height);
+        swapl(&stuff->widthInMillimeters);
+        swapl(&stuff->heightInMillimeters);
+    }
+
     WindowPtr pWin;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     int i, rc;
 
-    REQUEST_SIZE_MATCH(xRRSetScreenSizeReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -472,6 +483,11 @@ static int
 rrGetScreenResources(ClientPtr client, Bool query)
 {
     REQUEST(xRRGetScreenResourcesReq);
+    REQUEST_SIZE_MATCH(xRRGetScreenResourcesReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     xRRGetScreenResourcesReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
@@ -480,7 +496,6 @@ rrGetScreenResources(ClientPtr client, Bool query)
     unsigned long extraLen = 0;
     int i, rc, has_primary = 0;
 
-    REQUEST_SIZE_MATCH(xRRGetScreenResourcesReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -718,6 +733,10 @@ int
 ProcRRGetScreenInfo(ClientPtr client)
 {
     REQUEST(xRRGetScreenInfoReq);
+    REQUEST_SIZE_MATCH(xRRGetScreenInfoReq);
+    if (client->swapped)
+        swapl(&stuff->window);
+
     xRRGetScreenInfoReply rep;
     WindowPtr pWin;
     int rc;
@@ -727,7 +746,6 @@ ProcRRGetScreenInfo(ClientPtr client)
     unsigned long extraLen = 0;
     RROutputPtr output;
 
-    REQUEST_SIZE_MATCH(xRRGetScreenInfoReq);
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
@@ -847,6 +865,24 @@ int
 ProcRRSetScreenConfig(ClientPtr client)
 {
     REQUEST(xRRSetScreenConfigReq);
+
+    int rate = 0;
+    if (RRClientKnowsRates(client)) {
+        REQUEST_SIZE_MATCH(xRRSetScreenConfigReq);
+        if (client->swapped) swaps(&stuff->rate);
+        rate = stuff->rate;
+    }
+    else {
+        REQUEST_SIZE_MATCH(xRR1_0SetScreenConfigReq);
+    }
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->timestamp);
+        swaps(&stuff->sizeID);
+        swaps(&stuff->rotation);
+    }
+
     DrawablePtr pDraw;
     int rc;
     ScreenPtr pScreen;
@@ -854,8 +890,6 @@ ProcRRSetScreenConfig(ClientPtr client)
     TimeStamp time;
     int i;
     Rotation rotation;
-    int rate;
-    Bool has_rate;
     CARD8 status;
     RROutputPtr output;
     RRCrtcPtr crtc;
@@ -865,15 +899,6 @@ ProcRRSetScreenConfig(ClientPtr client)
     int width, height;
 
     UpdateCurrentTime();
-
-    if (RRClientKnowsRates(client)) {
-        REQUEST_SIZE_MATCH(xRRSetScreenConfigReq);
-        has_rate = TRUE;
-    }
-    else {
-        REQUEST_SIZE_MATCH(xRR1_0SetScreenConfigReq);
-        has_rate = FALSE;
-    }
 
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixWriteAccess);
     if (rc != Success)
@@ -959,14 +984,6 @@ ProcRRSetScreenConfig(ClientPtr client)
         free(pData);
         return BadMatch;
     }
-
-    /*
-     * Validate requested refresh
-     */
-    if (has_rate)
-        rate = (int) stuff->rate;
-    else
-        rate = 0;
 
     if (rate) {
         for (i = 0; i < pSize->nRates; i++) {
