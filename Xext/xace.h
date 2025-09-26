@@ -43,7 +43,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define XACE_PROPERTY_ACCESS		4
 #define XACE_SEND_ACCESS		5
 #define XACE_RECEIVE_ACCESS		6
-#define XACE_CLIENT_ACCESS		7
 #define XACE_SELECTION_ACCESS		10
 #define XACE_SCREEN_ACCESS		11
 #define XACE_SCREENSAVER_ACCESS		12
@@ -75,7 +74,6 @@ int XaceHookDeviceAccess(ClientPtr client, DeviceIntPtr dev, Mask access_mode);
 int XaceHookSendAccess(ClientPtr client, DeviceIntPtr dev, WindowPtr win,
                        xEventPtr ev, int count);
 int XaceHookReceiveAccess(ClientPtr client, WindowPtr win, xEventPtr ev, int count);
-int XaceHookClientAccess(ClientPtr client, ClientPtr target, Mask access_mode);
 int XaceHookScreenAccess(ClientPtr client, ScreenPtr screen, Mask access_mode);
 int XaceHookScreensaverAccess(ClientPtr client, ScreenPtr screen, Mask access_mode);
 

@@ -11,6 +11,7 @@
 #include <X11/Xproto.h>
 #include <X11/extensions/XResproto.h>
 
+#include "dix/client_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/request_priv.h"
@@ -208,7 +209,7 @@ ProcXResQueryClients(ClientPtr client)
     for (int i = 0; i < currentMaxClients; i++) {
         ClientPtr walkClient = clients[i];
         if (walkClient &&
-            (XaceHookClientAccess(client, walkClient, DixReadAccess) == Success)) {
+            (dixCallClientAccessCallback(client, walkClient, DixReadAccess) == Success)) {
             x_rpcbuf_write_CARD32(&rpcbuf, walkClient->clientAsMask); /* resource_base */
             x_rpcbuf_write_CARD32(&rpcbuf, RESOURCE_ID_MASK);         /* resource_mask */
             num_clients++;
@@ -261,7 +262,7 @@ ProcXResQueryClientResources(ClientPtr client)
     ClientPtr resClient = dixClientForXID(stuff->xid);
 
     if ((!resClient) ||
-        (XaceHookClientAccess(client, resClient, DixReadAccess)
+        (dixCallClientAccessCallback(client, resClient, DixReadAccess)
                               != Success)) {
         client->errorValue = stuff->xid;
         return BadValue;
@@ -320,7 +321,7 @@ ProcXResQueryClientPixmapBytes(ClientPtr client)
 
     ClientPtr owner = dixClientForXID(stuff->xid);
     if ((!owner) ||
-        (XaceHookClientAccess(client, owner, DixReadAccess)
+        (dixCallClientAccessCallback(client, owner, DixReadAccess)
                               != Success)) {
         client->errorValue = stuff->xid;
         return BadValue;
@@ -465,7 +466,7 @@ ConstructClientIds(ClientPtr client,
             int c;
             for (c = 0; c < currentMaxClients; ++c) {
                 if (clients[c] &&
-                    (XaceHookClientAccess(client, clients[c], DixReadAccess)
+                    (dixCallClientAccessCallback(client, clients[c], DixReadAccess)
                                           == Success)) {
                     if (!ConstructClientIdValue(client, clients[c],
                                                 specs[specIdx].mask, ctx)) {
@@ -476,7 +477,7 @@ ConstructClientIds(ClientPtr client,
         } else {
             ClientPtr owner = dixClientForXID(specs[specIdx].client);
             if (owner &&
-                (XaceHookClientAccess(client, owner, DixReadAccess)
+                (dixCallClientAccessCallback(client, owner, DixReadAccess)
                                       == Success)) {
                 if (!ConstructClientIdValue(client, owner,
                                             specs[specIdx].mask, ctx)) {

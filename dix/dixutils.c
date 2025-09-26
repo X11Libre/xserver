@@ -86,6 +86,7 @@ Author:  Adobe Systems Incorporated
 #include <X11/Xmd.h>
 
 #include "dix/callback_priv.h"
+#include "dix/client_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
 
@@ -231,7 +232,7 @@ dixLookupResourceOwner(ClientPtr *result, XID id, ClientPtr client, Mask access_
     if (rc != Success)
         goto bad;
 
-    rc = XaceHookClientAccess(client, clients[clientIndex], access_mode);
+    rc = dixCallClientAccessCallback(client, clients[clientIndex], access_mode);
     if (rc != Success)
         goto bad;
 
