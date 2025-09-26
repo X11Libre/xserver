@@ -1825,9 +1825,10 @@ drmmode_set_cursor(xf86CrtcPtr crtc, int width, int height)
         drmmode_crtc->drmmode->sw_cursor = TRUE;
     }
 
-    if (ret)
+    if (ret) {
         /* fallback to swcursor */
         return FALSE;
+    }
 
     return TRUE;
 }
@@ -1879,23 +1880,25 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
 }
 
 static void
-drmmode_paint_cursor(CARD32 * restrict cursor, int cursor_pitch, int cursor_width, int cursor_height,
+drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_width, int cursor_height,
                      const CARD32 * restrict image, int image_width, int image_height,
                      drmmode_crtc_private_ptr restrict drmmode_crtc, int glyph_width, int glyph_height)
 {
     int width_todo;
     int height_todo;
 
+    CARD32 *cursor = cursor_bo->ptr;
+
     if (drmmode_crtc->cursor_glyph_width == 0 &&
         drmmode_crtc->cursor_glyph_height == 0) {
         /* If this is the first time we paint the cursor, assume the entire cursor buffer is dirty */
-        width_todo = cursor_width;
-        height_todo = cursor_height;
-    } else {
-        /* Paint only what we need to */
-        width_todo = MAX(drmmode_crtc->cursor_glyph_width, glyph_width);
-        height_todo = MAX(drmmode_crtc->cursor_glyph_height, glyph_height);
+        /* XXX Do we really need to do this? XXX */
+        memset(cursor, 0, cursor_bo->size);
     }
+
+    /* Paint only what we need to */
+    width_todo = MAX(drmmode_crtc->cursor_glyph_width, glyph_width);
+    height_todo = MAX(drmmode_crtc->cursor_glyph_height, glyph_height);
 
     /* remember the size of the current cursor glyph */
     drmmode_crtc->cursor_glyph_width = glyph_width;
@@ -1968,7 +1971,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     const int cursor_pitch = drmmode_cursor_get_pitch(drmmode_crtc, i);
 
     /* cursor should be mapped already */
-    drmmode_paint_cursor(drmmode_cursor.bo->ptr, cursor_pitch, width, height,
+    drmmode_paint_cursor(drmmode_cursor.bo, cursor_pitch, width, height,
                          image, max_width, max_height,
                          drmmode_crtc, cursor->bits->width, cursor->bits->height);
 
@@ -4162,21 +4165,19 @@ drmmode_pre_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int cpp)
     xf86DrvMsgVerb(pScrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
                    "Up to %d crtcs needed for screen.\n", crtcs_needed);
 
+    drmmode_cursor_dim_rec fallback;
+
+    int ret1 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &value);
+    fallback.width = value;
+
+    int ret2 = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &value);
+    fallback.height = value;
+
     /* This is the safest fallback value as
      * it is the default value that KMS uses.  */
-    drmmode_cursor_dim_rec fallback = {
-        .width  = 64,
-        .height = 64,
-    };
-
-    ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_WIDTH, &value);
-    if (!ret) {
-        fallback.width = value;
-    }
-
-    ret = drmGetCap(drmmode->fd, DRM_CAP_CURSOR_HEIGHT, &value);
-    if (!ret) {
-        fallback.height = value;
+    if (ret1 || ret2) {
+        fallback.width  = 64;
+        fallback.height = 64;
     }
 
     xf86CrtcSetSizeRange(pScrn, 320, 200, mode_res->max_width,
@@ -4677,8 +4678,8 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         xf86CrtcPtr crtc = xf86_config->crtc[i];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
         drmmode_cursor_rec cursor = drmmode_crtc->cursor;
-        
-        /* If we don't have any dimensions then 
+
+        /* If we don't have any dimensions then
          * something has gone terribly wrong. */
         assert(cursor.num_dimensions);
 
@@ -4827,8 +4828,7 @@ Bool drmmode_get_largest_cursor(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
 
-    /* We need the cursor image to be at least 64x64 */
-    int max_width = 64, max_height = 64;
+    int max_width = 0, max_height = 0;
 
     if (!cursor_lim)
         return FALSE;
