@@ -2423,10 +2423,19 @@ int
 ProcPolyText(ClientPtr client)
 {
     REQUEST(xPolyTextReq);
+    REQUEST_AT_LEAST_SIZE(xPolyTextReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->gc);
+        swaps(&stuff->x);
+        swaps(&stuff->y);
+    }
+
+    int err;
     DrawablePtr pDraw;
     GCPtr pGC;
 
-    REQUEST_AT_LEAST_SIZE(xPolyTextReq);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
 
     return PolyText(client,
