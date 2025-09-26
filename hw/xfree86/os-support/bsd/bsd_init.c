@@ -134,6 +134,13 @@ static xf86ConsOpen_t xf86ConsTab[] = {
     (xf86ConsOpen_t) NULL
 };
 
+
+Bool
+xf86VTKeepTtyIsSet(void)
+{
+     return KeepTty;
+}
+
 void
 xf86OpenConsole(void)
 {

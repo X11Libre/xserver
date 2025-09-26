@@ -167,8 +167,8 @@ linux_parse_vt_settings(int may_fail)
     return 1;
 }
 
-int
-linux_get_keeptty(void)
+Bool
+xf86VTKeepTtyIsSet(void)
 {
     return KeepTty;
 }
