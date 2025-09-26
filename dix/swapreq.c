@@ -557,19 +557,6 @@ SProcCopyPlane(ClientPtr client)
     return ((*ProcVector[X_CopyPlane]) (client));
 }
 
-/* The following routine is used for all Poly drawing requests
-   (except FillPoly, which uses a different request format) */
-int _X_COLD
-SProcPoly(ClientPtr client)
-{
-    REQUEST(xPolyPointReq);
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    SwapRestS(stuff);
-    return ((*ProcVector[stuff->reqType]) (client));
-}
-
 /* cannot use SProcPoly for this one, because xFillPolyReq
    is longer than xPolyPointReq, and we don't want to swap
    the difference as shorts! */

@@ -1876,13 +1876,19 @@ ProcCopyPlane(ClientPtr client)
 int
 ProcPolyPoint(ClientPtr client)
 {
+    REQUEST(xPolyPointReq);
+    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->gc);
+        SwapRestS(stuff);
+    }
+
     int npoint;
     GCPtr pGC;
     DrawablePtr pDraw;
 
-    REQUEST(xPolyPointReq);
-
-    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
     if ((stuff->coordMode != CoordModeOrigin) &&
         (stuff->coordMode != CoordModePrevious)) {
         client->errorValue = stuff->coordMode;
@@ -1899,13 +1905,19 @@ ProcPolyPoint(ClientPtr client)
 int
 ProcPolyLine(ClientPtr client)
 {
+    REQUEST(xPolyPointReq);
+    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->gc);
+        SwapRestS(stuff);
+    }
+
     int npoint;
     GCPtr pGC;
     DrawablePtr pDraw;
 
-    REQUEST(xPolyLineReq);
-
-    REQUEST_AT_LEAST_SIZE(xPolyLineReq);
     if ((stuff->coordMode != CoordModeOrigin) &&
         (stuff->coordMode != CoordModePrevious)) {
         client->errorValue = stuff->coordMode;
@@ -1922,13 +1934,19 @@ ProcPolyLine(ClientPtr client)
 int
 ProcPolySegment(ClientPtr client)
 {
+    REQUEST(xPolyPointReq);
+    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->gc);
+        SwapRestS(stuff);
+    }
+
     int nsegs;
     GCPtr pGC;
     DrawablePtr pDraw;
 
-    REQUEST(xPolySegmentReq);
-
-    REQUEST_AT_LEAST_SIZE(xPolySegmentReq);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     nsegs = (client->req_len << 2) - sizeof(xPolySegmentReq);
     if (nsegs & 4)
@@ -1942,13 +1960,19 @@ ProcPolySegment(ClientPtr client)
 int
 ProcPolyRectangle(ClientPtr client)
 {
+    REQUEST(xPolyPointReq);
+    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->gc);
+        SwapRestS(stuff);
+    }
+
     int nrects;
     GCPtr pGC;
     DrawablePtr pDraw;
 
-    REQUEST(xPolyRectangleReq);
-
-    REQUEST_AT_LEAST_SIZE(xPolyRectangleReq);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     nrects = (client->req_len << 2) - sizeof(xPolyRectangleReq);
     if (nrects & 4)
@@ -1963,13 +1987,19 @@ ProcPolyRectangle(ClientPtr client)
 int
 ProcPolyArc(ClientPtr client)
 {
+    REQUEST(xPolyPointReq);
+    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->gc);
+        SwapRestS(stuff);
+    }
+
     int narcs;
     GCPtr pGC;
     DrawablePtr pDraw;
 
-    REQUEST(xPolyArcReq);
-
-    REQUEST_AT_LEAST_SIZE(xPolyArcReq);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     narcs = (client->req_len << 2) - sizeof(xPolyArcReq);
     if (narcs % sizeof(xArc))
@@ -2013,13 +2043,19 @@ ProcFillPoly(ClientPtr client)
 int
 ProcPolyFillRectangle(ClientPtr client)
 {
+    REQUEST(xPolyPointReq);
+    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->gc);
+        SwapRestS(stuff);
+    }
+
     int things;
     GCPtr pGC;
     DrawablePtr pDraw;
 
-    REQUEST(xPolyFillRectangleReq);
-
-    REQUEST_AT_LEAST_SIZE(xPolyFillRectangleReq);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     things = (client->req_len << 2) - sizeof(xPolyFillRectangleReq);
     if (things & 4)
@@ -2035,13 +2071,19 @@ ProcPolyFillRectangle(ClientPtr client)
 int
 ProcPolyFillArc(ClientPtr client)
 {
+    REQUEST(xPolyPointReq);
+    REQUEST_AT_LEAST_SIZE(xPolyPointReq);
+
+    if (client->swapped) {
+        swapl(&stuff->drawable);
+        swapl(&stuff->gc);
+        SwapRestS(stuff);
+    }
+
     int narcs;
     GCPtr pGC;
     DrawablePtr pDraw;
 
-    REQUEST(xPolyFillArcReq);
-
-    REQUEST_AT_LEAST_SIZE(xPolyFillArcReq);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
     narcs = (client->req_len << 2) - sizeof(xPolyFillArcReq);
     if (narcs % sizeof(xArc))

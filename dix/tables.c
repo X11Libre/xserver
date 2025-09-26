@@ -395,14 +395,14 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     SProcClearToBackground,
     SProcCopyArea,
     SProcCopyPlane,
-    SProcPoly,                          /* PolyPoint, */
-    SProcPoly,                          /* 65 PolyLine */
-    SProcPoly,                          /* PolySegment, */
-    SProcPoly,                          /* PolyRectangle, */
-    SProcPoly,                          /* PolyArc, */
+    ProcPolyPoint,
+    ProcPolyLine,                       /* 65 */
+    ProcPolySegment,
+    ProcPolyRectangle,
+    ProcPolyArc,
     SProcFillPoly,
-    SProcPoly,                          /* 70 PolyFillRectangle */
-    SProcPoly,                          /* PolyFillArc, */
+    ProcPolyFillRectangle,              /* 70 */
+    ProcPolyFillArc,
     SProcPutImage,
     SProcGetImage,
     SProcPolyText,
