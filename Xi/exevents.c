@@ -1097,7 +1097,7 @@ DeliverOneTouchEvent(ClientPtr client, DeviceIntPtr dev, TouchPointInfoPtr ti,
         FatalError("[Xi] %s: XI2 conversion failed in %s"
                    " (%d)\n", dev->name, __func__, err);
 
-    FixUpEventFromWindow(&ti->sprite, xi2, win, child, FALSE);
+    FixUpEventFromWindow(&ti->sprite, xi2, win, child, FALSE, XI2);
     filter = GetEventFilter(dev, xi2);
     if (XaceHookReceiveAccess(client, win, xi2, 1) != Success)
         return FALSE;
@@ -2236,7 +2236,7 @@ DeliverOneGestureEvent(ClientPtr client, DeviceIntPtr dev, GestureInfoPtr gi,
         FatalError("[Xi] %s: XI2 conversion failed in %s"
                    " (%d)\n", dev->name, __func__, err);
 
-    FixUpEventFromWindow(&gi->sprite, xi2, win, child, FALSE);
+    FixUpEventFromWindow(&gi->sprite, xi2, win, child, FALSE, XI2);
     filter = GetEventFilter(dev, xi2);
     if (XaceHookReceiveAccess(client, win, xi2, 1) != Success)
         return FALSE;
