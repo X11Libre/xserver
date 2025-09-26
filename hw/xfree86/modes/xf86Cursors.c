@@ -379,7 +379,7 @@ xf86_crtc_transform_cursor_position(xf86CrtcPtr crtc, int *x, int *y)
     xf86CursorInfoPtr cursor_info = xf86_config->cursor_info;
     xf86CursorScreenPtr ScreenPriv =
         (xf86CursorScreenPtr) dixLookupPrivate(&screen->devPrivates,
-                                               xf86CursorScreenKey);
+                                               &xf86CursorScreenKeyRec);
     int dx, dy, t;
     Bool swap_reflection = FALSE;
 
