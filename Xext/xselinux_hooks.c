@@ -33,6 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xfuncproto.h>
 
 #include "dix/client_priv.h"
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
@@ -338,7 +339,7 @@ SELinuxLog(int type, const char *fmt, ...)
 static void
 SELinuxDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XaceDeviceAccessRec *rec = calldata;
+    DeviceAccessCallbackParam *rec = calldata;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client,.dev = rec->dev };
@@ -835,9 +836,9 @@ SELinuxFlaskReset(void)
     DeleteCallback(&ExtensionDispatchCallback, SELinuxExtension, NULL);
     DeleteCallback(&ServerAccessCallback, SELinuxServer, NULL);
     DeleteCallback(&ClientAccessCallback, SELinuxClient, NULL);
+    DeleteCallback(&DeviceAccessCallback, SELinuxDevice, NULL);
 
     XaceDeleteCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
-    XaceDeleteCallback(XACE_DEVICE_ACCESS, SELinuxDevice, NULL);
     XaceDeleteCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
     XaceDeleteCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     XaceDeleteCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
@@ -929,9 +930,9 @@ SELinuxFlaskInit(void)
     ret &= AddCallback(&ExtensionDispatchCallback, SELinuxExtension, NULL);
     ret &= AddCallback(&ServerAccessCallback, SELinuxServer, NULL);
     ret &= AddCallback(&ClientAccessCallback, SELinuxClient, NULL);
+    ret &= AddCallback(&DeviceAccessCallback, SELinuxDevice, NULL);
 
     ret &= XaceRegisterCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
-    ret &= XaceRegisterCallback(XACE_DEVICE_ACCESS, SELinuxDevice, NULL);
     ret &= XaceRegisterCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
     ret &= XaceRegisterCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);

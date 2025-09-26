@@ -4,6 +4,7 @@
 #include <X11/Xmd.h>
 
 #include "dix/client_priv.h"
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/property_priv.h"
@@ -42,7 +43,7 @@ NamespaceExtensionInit(void)
           AddCallback(&ServerAccessCallback, hookServerAccess, NULL) &&
           AddCallback(&ClientDestroyCallback, hookClientDestroy, NULL) &&
           AddCallback(&ClientAccessCallback, hookClient, NULL) &&
-          XaceRegisterCallback(XACE_DEVICE_ACCESS, hookDevice, NULL) &&
+          AddCallback(&DeviceAccessCallback, hookDevice, NULL) &&
           XaceRegisterCallback(XACE_PROPERTY_ACCESS, hookPropertyAccess, NULL) &&
           XaceRegisterCallback(XACE_RECEIVE_ACCESS, hookReceive, NULL) &&
           XaceRegisterCallback(XACE_RESOURCE_ACCESS, hookResourceAccess, NULL) &&
