@@ -66,27 +66,6 @@ SOFTWARE.
 
 /***********************************************************************
  *
- * Handle requests from clients with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXGrabDeviceButton(ClientPtr client)
-{
-    REQUEST(xGrabDeviceButtonReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceButtonReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->modifiers);
-    swaps(&stuff->event_count);
-    REQUEST_FIXED_SIZE(xGrabDeviceButtonReq,
-                       stuff->event_count * sizeof(CARD32));
-    SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
-
-    return (ProcXGrabDeviceButton(client));
-}
-
-/***********************************************************************
- *
  * Grab a button on an extension device.
  *
  */
@@ -94,15 +73,27 @@ SProcXGrabDeviceButton(ClientPtr client)
 int
 ProcXGrabDeviceButton(ClientPtr client)
 {
+    REQUEST(xGrabDeviceButtonReq);
+    REQUEST_AT_LEAST_SIZE(xGrabDeviceButtonReq);
+
+    if (client->swapped) {
+        swapl(&stuff->grabWindow);
+        swaps(&stuff->modifiers);
+        swaps(&stuff->event_count);
+    }
+
+    REQUEST_FIXED_SIZE(xGrabDeviceButtonReq,
+                       stuff->event_count * sizeof(CARD32));
+
+    if (client->swapped)
+        SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
+
     int ret;
     DeviceIntPtr dev;
     DeviceIntPtr mdev;
     XEventClass *class;
     struct tmask tmp[EMASKSIZE];
     GrabMask mask;
-
-    REQUEST(xGrabDeviceButtonReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceButtonReq);
 
     if (client->req_len !=
         bytes_to_int32(sizeof(xGrabDeviceButtonReq)) + stuff->event_count)
