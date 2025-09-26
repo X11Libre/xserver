@@ -83,7 +83,6 @@ int SProcXIPassiveGrabDevice(ClientPtr client);
 int SProcXIPassiveUngrabDevice(ClientPtr client);
 int SProcXIQueryDevice(ClientPtr client);
 int SProcXIQueryPointer(ClientPtr client);
-int SProcXIQueryVersion(ClientPtr client);
 int SProcXISelectEvents(ClientPtr client);
 int SProcXISetClientPointer(ClientPtr client);
 int SProcXISetFocus(ClientPtr client);
