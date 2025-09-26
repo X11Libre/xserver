@@ -124,18 +124,6 @@ SProcSimpleReq(ClientPtr client)
     return (*ProcVector[stuff->reqType]) (client);
 }
 
-/* The following is used for all requests that have
-   only a single 32-bit field to be swapped, coming
-   right after the "length" field */
-int _X_COLD
-SProcResourceReq(ClientPtr client)
-{
-    REQUEST(xResourceReq);
-    REQUEST_AT_LEAST_SIZE(xResourceReq);        /* not EXACT */
-    swapl(&stuff->id);
-    return (*ProcVector[stuff->reqType]) (client);
-}
-
 int _X_COLD
 SProcCreateWindow(ClientPtr client)
 {

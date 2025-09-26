@@ -246,6 +246,9 @@ ProcGetSelectionOwner(ClientPtr client)
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
 
+    if (client->swapped)
+        swapl(&stuff->id);
+
     /* allow extensions to intercept */
     SelectionFilterParamRec param = {
         .client = client,
