@@ -251,6 +251,7 @@ xf86XVScreenInit(ScreenPtr pScreen, XF86VideoAdaptorPtr * adaptors, int num)
 
     pScrn = xf86ScreenToScrn(pScreen);
 
+    dixScreenHookWindowDestroy(pScreen, xf86XVWindowDestroy);
     dixScreenHookClose(pScreen, xf86XVCloseScreen);
 
     ScreenPriv->WindowExposures = pScreen->WindowExposures;
