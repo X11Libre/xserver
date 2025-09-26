@@ -405,8 +405,8 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcPolyFillArc,
     SProcPutImage,
     SProcGetImage,
-    SProcPolyText,
-    SProcPolyText,                      /* 75 */
+    ProcPolyText,
+    ProcPolyText,                       /* 75 */
     SProcImageText,
     SProcImageText,
     SProcCreateColormap,
