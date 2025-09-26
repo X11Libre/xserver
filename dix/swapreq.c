@@ -600,20 +600,6 @@ SProcGetImage(ClientPtr client)
     return ((*ProcVector[X_GetImage]) (client));
 }
 
-/* ProcPolyText used for both PolyText8 and PolyText16 */
-
-int _X_COLD
-SProcPolyText(ClientPtr client)
-{
-    REQUEST(xPolyTextReq);
-    REQUEST_AT_LEAST_SIZE(xPolyTextReq);
-    swapl(&stuff->drawable);
-    swapl(&stuff->gc);
-    swaps(&stuff->x);
-    swaps(&stuff->y);
-    return ((*ProcVector[stuff->reqType]) (client));
-}
-
 /* ProcImageText used for both ImageText8 and ImageText16 */
 
 int _X_COLD
