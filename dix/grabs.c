@@ -52,6 +52,7 @@ SOFTWARE.
 #include <X11/extensions/XI2.h>
 
 #include "dix/cursor_priv.h"
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
 #include "dix/exevents_priv.h"
@@ -65,7 +66,6 @@ SOFTWARE.
 #include "windowstr.h"
 #include "inputstr.h"
 #include "cursorstr.h"
-#include "xace.h"
 #include "exglobals.h"
 
 #define MasksPerDetailMask 8    /* 256 keycodes and 256 possible
@@ -544,7 +544,7 @@ AddPassiveGrabToList(ClientPtr client, GrabPtr pGrab)
     if (pGrab->keyboardMode == GrabModeSync ||
         pGrab->pointerMode == GrabModeSync)
         access_mode |= DixFreezeAccess;
-    rc = XaceHookDeviceAccess(client, pGrab->device, access_mode);
+    rc = dixCallDeviceAccessCallback(client, pGrab->device, access_mode);
     if (rc != Success)
         return rc;
 

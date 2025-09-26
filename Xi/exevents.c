@@ -80,9 +80,6 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "dix/cursor_priv.h"
-#include "os/bug_priv.h"
-
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/geproto.h>
@@ -91,6 +88,8 @@ SOFTWARE.
 #include <X11/extensions/XI2proto.h>
 #include <X11/extensions/XKBproto.h>
 
+#include "dix/cursor_priv.h"
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
 #include "dix/eventconvert.h"
@@ -100,6 +99,7 @@ SOFTWARE.
 #include "dix/resource_priv.h"
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
+#include "os/bug_priv.h"
 #include "os/log_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
@@ -2511,7 +2511,7 @@ GrabButton(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
     if (param->this_device_mode == GrabModeSync ||
         param->other_devices_mode == GrabModeSync)
         access_mode |= DixFreezeAccess;
-    rc = XaceHookDeviceAccess(client, dev, access_mode);
+    rc = dixCallDeviceAccessCallback(client, dev, access_mode);
     if (rc != Success)
         return rc;
     rc = dixLookupWindow(&pWin, param->grabWindow, client, DixSetAttrAccess);
@@ -2567,7 +2567,7 @@ GrabKey(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
     if (param->this_device_mode == GrabModeSync ||
         param->other_devices_mode == GrabModeSync)
         access_mode |= DixFreezeAccess;
-    rc = XaceHookDeviceAccess(client, dev, access_mode);
+    rc = dixCallDeviceAccessCallback(client, dev, access_mode);
     if (rc != Success)
         return rc;
 
@@ -2610,7 +2610,7 @@ GrabWindow(ClientPtr client, DeviceIntPtr dev, int type,
     if (param->this_device_mode == GrabModeSync ||
         param->other_devices_mode == GrabModeSync)
         access_mode |= DixFreezeAccess;
-    rc = XaceHookDeviceAccess(client, dev, access_mode);
+    rc = dixCallDeviceAccessCallback(client, dev, access_mode);
     if (rc != Success)
         return rc;
 
@@ -2641,7 +2641,7 @@ GrabTouchOrGesture(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr mod_dev,
     rc = dixLookupWindow(&pWin, param->grabWindow, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
-    rc = XaceHookDeviceAccess(client, dev, DixGrabAccess);
+    rc = dixCallDeviceAccessCallback(client, dev, DixGrabAccess);
     if (rc != Success)
         return rc;
 

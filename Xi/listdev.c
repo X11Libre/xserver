@@ -57,6 +57,7 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/request_priv.h"
@@ -67,7 +68,6 @@ SOFTWARE.
 #include "XIstubs.h"
 #include "extnsionst.h"
 #include "exevents.h"
-#include "xace.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
 
@@ -300,7 +300,7 @@ ShouldSkipDevice(ClientPtr client, DeviceIntPtr d)
 {
     /* don't send master devices other than VCP/VCK */
     if (!InputDevIsMaster(d) || d == inputInfo.pointer ||d == inputInfo.keyboard) {
-        int rc = XaceHookDeviceAccess(client, d, DixGetAttrAccess);
+        int rc = dixCallDeviceAccessCallback(client, d, DixGetAttrAccess);
 
         if (rc == Success)
             return FALSE;
