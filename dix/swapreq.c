@@ -116,15 +116,6 @@ SwapShorts(short *list, unsigned long count)
 }
 
 /* The following is used for all requests that have
-   no fields to be swapped (except "length") */
-int _X_COLD
-SProcSimpleReq(ClientPtr client)
-{
-    REQUEST(xReq);
-    return (*ProcVector[stuff->reqType]) (client);
-}
-
-/* The following is used for all requests that have
    only a single 32-bit field to be swapped, coming
    right after the "length" field */
 int _X_COLD

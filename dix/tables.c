@@ -367,15 +367,15 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     SProcGrabKey,
     SProcUngrabKey,
     SProcResourceReq,                   /* 35 SProcAllowEvents, */
-    SProcSimpleReq,                     /* SProcGrabServer, */
-    SProcSimpleReq,                     /* SProcUngrabServer, */
+    ProcGrabServer,
+    ProcUngrabServer,
     SProcResourceReq,                   /* SProcQueryPointer, */
     SProcGetMotionEvents,
     SProcTranslateCoords,               /*40 */
     SProcWarpPointer,
     SProcSetInputFocus,
-    SProcSimpleReq,                     /* SProcGetInputFocus, */
-    SProcSimpleReq,                     /* QueryKeymap, */
+    ProcGetInputFocus,
+    ProcQueryKeymap,
     SProcOpenFont,                      /* 45 */
     SProcResourceReq,                   /* SProcCloseFont, */
     SProcResourceReq,                   /* SProcQueryFont, */
@@ -383,7 +383,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     SProcListFonts,
     SProcListFontsWithInfo,             /* 50 */
     SProcSetFontPath,
-    SProcSimpleReq,                     /* GetFontPath, */
+    ProcGetFontPath,
     SProcCreatePixmap,
     SProcResourceReq,                   /* SProcFreePixmap, */
     SProcCreateGC,                      /* 55 */
@@ -430,27 +430,27 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     SProcRecolorCursor,
     SProcQueryBestSize,
     SProcQueryExtension,
-    SProcSimpleReq,                     /* ListExtensions, */
+    ProcListExtensions,
     SProcChangeKeyboardMapping,         /* 100 */
-    SProcSimpleReq,                     /* GetKeyboardMapping, */
+    ProcGetKeyboardMapping,
     SProcChangeKeyboardControl,
-    SProcSimpleReq,                     /* GetKeyboardControl, */
-    SProcSimpleReq,                     /* Bell, */
+    ProcGetKeyboardControl,
+    ProcBell,
     SProcChangePointerControl,          /* 105 */
-    SProcSimpleReq,                     /* GetPointerControl, */
+    ProcGetPointerControl,
     SProcSetScreenSaver,
-    SProcSimpleReq,                     /* GetScreenSaver, */
+    ProcGetScreenSaver,
     SProcChangeHosts,
-    SProcSimpleReq,                     /* 110 ListHosts, */
-    SProcSimpleReq,                     /* SProcChangeAccessControl, */
-    SProcSimpleReq,                     /* SProcChangeCloseDownMode, */
+    ProcListHosts,                      /* 110 */
+    ProcChangeAccessControl,
+    ProcChangeCloseDownMode,
     SProcResourceReq,                   /* SProcKillClient, */
     SProcRotateProperties,
-    SProcSimpleReq,                     /* 115 ForceScreenSaver */
-    SProcSimpleReq,                     /* SetPointerMapping, */
-    SProcSimpleReq,                     /* GetPointerMapping, */
-    SProcSimpleReq,                     /* SetModifierMapping, */
-    SProcSimpleReq,                     /* GetModifierMapping, */
+    ProcForceScreenSaver,               /* 115 */
+    ProcSetPointerMapping,
+    ProcGetPointerMapping,
+    ProcSetModifierMapping,
+    ProcGetModifierMapping,
     ProcBadRequest,                     /* 120 */
     ProcBadRequest,
     ProcBadRequest,
