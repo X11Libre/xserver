@@ -40,6 +40,7 @@
 #include <GL/glxproto.h>
 #include "vndservervendor.h"
 
+#include "dix/callback_priv.h"
 #include "dix/dix_priv.h"
 #include "miext/extinit_priv.h"
 
@@ -47,8 +48,7 @@ Bool noGlxExtension = FALSE;
 
 ExtensionEntry *GlxExtensionEntry;
 int GlxErrorBase = 0;
-static CallbackListRec vndInitCallbackList;
-static CallbackListPtr vndInitCallbackListPtr = &vndInitCallbackList;
+static CallbackListPtr vndInitCallbackListPtr = NULL;
 static DevPrivateKeyRec glvXGLVScreenPrivKey;
 static DevPrivateKeyRec glvXGLVClientPrivKey;
 
@@ -209,11 +209,7 @@ GLXReset(ExtensionEntry *extEntry)
     GlxMappingReset();
 
     if ((dispatchException & DE_TERMINATE) == DE_TERMINATE) {
-        while (vndInitCallbackList.list != NULL) {
-            CallbackPtr next = vndInitCallbackList.list->next;
-            free(vndInitCallbackList.list);
-            vndInitCallbackList.list = next;
-        }
+        DeleteCallbackList(&vndInitCallbackListPtr);
     }
 }
 
