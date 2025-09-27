@@ -196,6 +196,8 @@ GLXClientCallback(CallbackListPtr *list, void *closure, void *data)
         case ClientStateGone:
             GlxFreeClientData(client);
             break;
+        default:
+            break;
     }
 }
 
