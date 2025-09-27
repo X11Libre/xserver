@@ -70,6 +70,11 @@
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
 #endif
+
+#ifdef SEATD_LIBSEAT
+#include "seatd-libseat.h"
+#endif
+
 #include "driver.h"
 
 static void AdjustFrame(ScrnInfoPtr pScrn, int x, int y);
@@ -238,6 +243,8 @@ open_hw(const char *dev)
     if ((fd = get_passed_fd()) != -1)
         return fd;
 
+
+
     if (dev)
         fd = open(dev, O_RDWR | O_CLOEXEC, 0);
     else {
@@ -247,6 +254,31 @@ open_hw(const char *dev)
             fd = open(dev, O_RDWR | O_CLOEXEC, 0);
         }
     }
+
+#ifdef SEATD_LIBSEAT
+    /* try get device from seatd arbiter */
+    if (fd == -1 && seatd_libseat_controls_session()){
+        if (dev){
+            fd = seatd_libseat_open_graphics(dev);
+            if (fd != -1){
+                return fd;
+            }
+
+        } else {
+            const char *dev_env = getenv("KMSDEVICE");
+            if (dev_env == NULL){
+                dev_env = "/dev/dri/card0";
+            }
+
+            fd = seatd_libseat_open_graphics(dev_env);
+
+            if (fd != -1) {
+                return fd;
+            }
+        }
+    }
+#endif
+
     if (fd == -1)
         xf86DrvMsg(-1, X_ERROR, "open %s: %s\n", dev, strerror(errno));
 
