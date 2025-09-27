@@ -66,6 +66,11 @@
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
 #endif
+
+#ifdef SEATD_LIBSEAT
+#include "seatd-libseat.h"
+#endif
+
 #include "driver.h"
 
 static void AdjustFrame(ScrnInfoPtr pScrn, int x, int y);
@@ -225,6 +230,28 @@ open_hw(const char *dev)
 
     if ((fd = get_passed_fd()) != -1)
         return fd;
+
+#ifdef SEATD_LIBSEAT
+   // try get device from seatd arbiter
+   if (dev){
+     fd = seatd_libseat_open_graphics(dev);
+     if (fd != -1){
+       return fd;
+     }
+
+   } else {
+        const char *dev_env = getenv("KMSDEVICE");
+        if (dev_env == NULL){
+            dev_env = "/dev/dri/card0";
+        }
+
+        fd = seatd_libseat_open_graphics(dev_env);
+
+        if (fd != -1) {
+          return fd;
+        }
+   }
+#endif
 
     if (dev)
         fd = open(dev, O_RDWR | O_CLOEXEC, 0);
