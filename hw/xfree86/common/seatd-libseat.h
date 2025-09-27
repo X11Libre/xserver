@@ -31,11 +31,11 @@
 #include <xf86Xinput.h>
 extern int seatd_libseat_init(BOOL KeepTty_state);
 extern void seatd_libseat_fini(void);
-extern int seatd_libseat_open_graphics(const char *path);
+extern _X_EXPORT int seatd_libseat_open_graphics(const char *path);
 extern void seatd_libseat_open_device(InputInfoPtr p,int *fd,Bool *paus);
 extern void seatd_libseat_close_device(InputInfoPtr p);
 extern int seatd_libseat_switch_session(int session);
-extern Bool seatd_libseat_controls_session(void);
+extern _X_EXPORT Bool seatd_libseat_controls_session(void);
 #else
 
 static inline int seatd_libseat_init(BOOL KeepTty_state) {(void)KeepTty_state; return -1; };
