@@ -380,11 +380,11 @@ AllocateMotionHistory(DeviceIntPtr pDev)
     size += sizeof(Time);
 
     pDev->valuator->motion = calloc(pDev->valuator->numMotionEvents, size);
-    pDev->valuator->first_motion = 0;
-    pDev->valuator->last_motion = 0;
     if (!pDev->valuator->motion)
         ErrorF("[dix] %s: Failed to alloc motion history (%d bytes).\n",
                pDev->name, size * pDev->valuator->numMotionEvents);
+    pDev->valuator->first_motion = 0;
+    pDev->valuator->last_motion = 0;
 }
 
 /**
@@ -1127,6 +1127,8 @@ InternalEvent *
 InitEventList(int num_events)
 {
     InternalEvent *events = calloc(num_events, sizeof(InternalEvent));
+    if (!events)
+        ErrorF("[dix]: Failed to allocate event list (%d num_events).\n", num_events);
 
     return events;
 }
