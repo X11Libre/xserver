@@ -585,18 +585,6 @@ SProcCopyColormapAndFree(ClientPtr client)
 }
 
 int _X_COLD
-SProcAllocColor(ClientPtr client)
-{
-    REQUEST(xAllocColorReq);
-    REQUEST_SIZE_MATCH(xAllocColorReq);
-    swapl(&stuff->cmap);
-    swaps(&stuff->red);
-    swaps(&stuff->green);
-    swaps(&stuff->blue);
-    return ((*ProcVector[X_AllocColor]) (client));
-}
-
-int _X_COLD
 SProcAllocNamedColor(ClientPtr client)
 {
     REQUEST(xAllocNamedColorReq);

@@ -2710,6 +2710,13 @@ ProcAllocColor(ClientPtr client)
     REQUEST(xAllocColorReq);
     REQUEST_SIZE_MATCH(xAllocColorReq);
 
+    if (client->swapped) {
+        swapl(&stuff->cmap);
+        swaps(&stuff->red);
+        swaps(&stuff->green);
+        swaps(&stuff->blue);
+    }
+
     xAllocColorReply rep = {
         .red = stuff->red,
         .green = stuff->green,
