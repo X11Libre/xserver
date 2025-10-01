@@ -3267,7 +3267,7 @@ ProcSetScreenSaver(ClientPtr client)
     REQUEST_SIZE_MATCH(xSetScreenSaverReq);
 
     DIX_FOR_EACH_SCREEN({
-        int rc = XaceHookScreensaverAccess(client, walkScreen, DixSetAttrAccess);
+        int rc = dixCallScreensaverAccessCallback(client, walkScreen, DixSetAttrAccess);
         if (rc != Success)
             return rc;
     });
@@ -3323,7 +3323,7 @@ ProcGetScreenSaver(ClientPtr client)
     REQUEST_SIZE_MATCH(xReq);
 
     DIX_FOR_EACH_SCREEN({
-        int rc = XaceHookScreensaverAccess(client, walkScreen, DixGetAttrAccess);
+        int rc = dixCallScreensaverAccessCallback(client, walkScreen, DixGetAttrAccess);
         if (rc != Success)
             return rc;
     });

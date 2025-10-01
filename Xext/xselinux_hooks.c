@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
 #include "os/client_priv.h"
@@ -837,6 +838,7 @@ SELinuxFlaskReset(void)
     DeleteCallback(&ServerAccessCallback, SELinuxServer, NULL);
     DeleteCallback(&ClientAccessCallback, SELinuxClient, NULL);
     DeleteCallback(&DeviceAccessCallback, SELinuxDevice, NULL);
+    DeleteCallback(&ScreenSaverAccessCallback, SELinuxScreen, truep);
 
     XaceDeleteCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
     XaceDeleteCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
@@ -844,7 +846,6 @@ SELinuxFlaskReset(void)
     XaceDeleteCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     XaceDeleteCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
     XaceDeleteCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
-    XaceDeleteCallback(XACE_SCREENSAVER_ACCESS, SELinuxScreen, truep);
 
     /* Tear down SELinux stuff */
     audit_close(audit_fd);
@@ -931,6 +932,7 @@ SELinuxFlaskInit(void)
     ret &= AddCallback(&ServerAccessCallback, SELinuxServer, NULL);
     ret &= AddCallback(&ClientAccessCallback, SELinuxClient, NULL);
     ret &= AddCallback(&DeviceAccessCallback, SELinuxDevice, NULL);
+    ret &= AddCallback(&ScreenSaverAccessCallback, SELinuxScreen, truep);
 
     ret &= XaceRegisterCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
     ret &= XaceRegisterCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
@@ -938,7 +940,6 @@ SELinuxFlaskInit(void)
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     ret &= XaceRegisterCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
     ret &= XaceRegisterCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
-    ret &= XaceRegisterCallback(XACE_SCREENSAVER_ACCESS, SELinuxScreen, truep);
     if (!ret)
         FatalError("SELinux: Failed to register one or more callbacks\n");
 

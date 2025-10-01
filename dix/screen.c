@@ -7,8 +7,11 @@
 #include "dix/callback_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/gc_priv.h"
+#include "dix/screensaver_priv.h"
 #include "include/screenint.h"
 #include "include/scrnintstr.h"
+
+CallbackListPtr ScreenSaverAccessCallback = NULL;
 
 void dixFreeScreen(ScreenPtr pScreen)
 {

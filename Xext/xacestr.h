@@ -79,7 +79,6 @@ typedef struct {
 } XaceSelectionAccessRec;
 
 /* XACE_SCREEN_ACCESS */
-/* XACE_SCREENSAVER_ACCESS */
 typedef struct {
     ClientPtr client;
     ScreenPtr screen;
