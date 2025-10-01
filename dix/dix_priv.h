@@ -745,4 +745,20 @@ static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
     return WriteToClient(pClient, sizeof(xEvent), &ev);
 }
 
+/*
+ * allocate color for given client
+ * the colors channel values need to be filled into the fields pointed
+ * to by the parameters, and the actually allocated ones are returned there
+ *
+ * @param client  pointer to client
+ * @param cmap    XID of the cmap to use
+ * @param red     pointer to red channel value
+ * @param green   pointer to green channel value
+ * @param blue    pointer to blue channel value
+ * @param pixel   pointer to return buffer for pixel value
+ * @return        X11 error code
+ */
+int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
+                  CARD16 *green, CARD16 *blue, CARD32 *pixel);
+
 #endif /* _XSERVER_DIX_PRIV_H */

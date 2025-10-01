@@ -2682,21 +2682,26 @@ ProcListInstalledColormaps(ClientPtr client)
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
 
+int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
+                  CARD16 *green, CARD16 *blue, CARD32 *pixel)
+{
+    ColormapPtr pmap;
+    int rc = dixLookupResourceByType((void **) &pmap,
+                                     cmap,
+                                     X11_RESTYPE_COLORMAP,
+                                     client,
+                                     DixAddAccess);
+    if (rc != Success)
+        return rc;
+
+    return AllocColor(pmap, red, green, blue, pixel, client->index);
+}
+
 int
 ProcAllocColor(ClientPtr client)
 {
-    ColormapPtr pmap;
-    int rc;
-
     REQUEST(xAllocColorReq);
-
     REQUEST_SIZE_MATCH(xAllocColorReq);
-    rc = dixLookupResourceByType((void **) &pmap, stuff->cmap, X11_RESTYPE_COLORMAP,
-                                 client, DixAddAccess);
-    if (rc != Success) {
-        client->errorValue = stuff->cmap;
-        return rc;
-    }
 
     xAllocColorReply rep = {
         .red = stuff->red,
@@ -2704,9 +2709,11 @@ ProcAllocColor(ClientPtr client)
         .blue = stuff->blue,
     };
 
-    if ((rc = AllocColor(pmap, &rep.red, &rep.green, &rep.blue,
-                         &rep.pixel, client->index)))
+    int rc = dixAllocColor(client, stuff->cmap, &rep.red, &rep.green, &rep.blue, &rep.pixel);
+    if (rc != Success) {
+        client->errorValue = stuff->cmap;
         return rc;
+    }
 
     if (client->swapped) {
         swaps(&rep.red);
@@ -2715,13 +2722,7 @@ ProcAllocColor(ClientPtr client)
         swapl(&rep.pixel);
     }
 
-#ifdef XINERAMA
-    if (noPanoramiXExtension || !pmap->pScreen->myNum)
-        return X_SEND_REPLY_SIMPLE(client, rep);
-    return Success;
-#else
     return X_SEND_REPLY_SIMPLE(client, rep);
-#endif /* XINERAMA */
 }
 
 int
