@@ -907,9 +907,8 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
                 c->haveSaved = TRUE;
                 c->savedNumFonts = numFonts;
                 free(c->savedName);
-                c->savedName = calloc(1, namelen + 1);
-                if (c->savedName)
-                    memcpy(c->savedName, name, namelen + 1);
+                c->savedName = XNFalloc(namelen + 1);
+                memcpy(c->savedName, name, namelen + 1);
                 aliascount = 20;
             }
             memmove(c->current.pattern, name, namelen);
