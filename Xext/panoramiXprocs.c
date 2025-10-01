@@ -2509,12 +2509,31 @@ PanoramiXAllocColor(ClientPtr client)
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->cmap = cmap->info[walkScreenIdx].id;
-        result = (*SavedProcVector[X_AllocColor]) (client);
+
+        CARD16 red = stuff->red;
+        CARD16 green = stuff->green;
+        CARD16 blue = stuff->blue;
+        CARD32 pixel = 0;
+
+        result = dixAllocColor(client, stuff->cmap, &red, &green, &blue, &pixel);
         if (result != Success)
-            break;
+            return result;
+
+        /* only send out reply for on first screen */
+        if (walkScreenIdx) {
+            xAllocColorReply rep; /* static init would confuse preprocessor */
+            rep.red = red;
+            rep.green = green;
+            rep.blue = blue;
+            rep.pixel = pixel;
+
+            /* iterating backwards, first screen comes last, so we can return here */
+            return X_SEND_REPLY_SIMPLE(client, rep);
+        }
     });
 
-    return result;
+    /* shouldn't ever reach here */
+    return Success;
 }
 
 int
