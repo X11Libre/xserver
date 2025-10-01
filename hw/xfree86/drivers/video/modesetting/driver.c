@@ -138,6 +138,7 @@ static SymTabRec Chipsets[] = {
 
 static const OptionInfoRec Options[] = {
     {OPTION_SW_CURSOR, "SWcursor", OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_CURSOR_SIZE, "CursorSize", OPTV_STRING, {0}, FALSE},
     {OPTION_DEVICE_PATH, "kmsdev", OPTV_STRING, {0}, FALSE},
     {OPTION_SHADOW_FB, "ShadowFB", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_ACCEL_METHOD, "AccelMethod", OPTV_STRING, {0}, FALSE},
@@ -1959,14 +1960,9 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         PointPriv->spriteFuncs = &drmmode_sprite_funcs;
     }
 
-    /* Get the maximum cursor size. */
-    drmmode_cursor_dim_rec cursor_dim = { 0 };
-    if (!drmmode_get_largest_cursor(pScrn, &cursor_dim))
-        return FALSE;
-
     /* Need to extend HWcursor support to handle mask interleave */
     if (!ms->drmmode.sw_cursor)
-        xf86_cursors_init(pScreen, cursor_dim.width, cursor_dim.height,
+        xf86_cursors_init(pScreen, ms->cursor_image_width, ms->cursor_image_height,
                           HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
                           HARDWARE_CURSOR_UPDATE_UNHIDDEN |
                           HARDWARE_CURSOR_ARGB);
