@@ -39,7 +39,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* Constants used to identify the available security hooks
  */
 #define XACE_RESOURCE_ACCESS		2
-#define XACE_DEVICE_ACCESS		3
 #define XACE_PROPERTY_ACCESS		4
 #define XACE_SEND_ACCESS		5
 #define XACE_RECEIVE_ACCESS		6
@@ -68,8 +67,6 @@ int XaceHookSelectionAccess(ClientPtr ptr, Selection ** ppSel, Mask access_mode)
 /* needs to be exported for in-tree modesetting, but not part of public API */
 _X_EXPORT int XaceHookResourceAccess(ClientPtr client, XID id, RESTYPE rtype, void *res,
                            RESTYPE ptype, void *parent, Mask access_mode);
-
-int XaceHookDeviceAccess(ClientPtr client, DeviceIntPtr dev, Mask access_mode);
 
 int XaceHookSendAccess(ClientPtr client, DeviceIntPtr dev, WindowPtr win,
                        xEventPtr ev, int count);

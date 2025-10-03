@@ -31,6 +31,7 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/Xfuncproto.h>
 
 #include "dix/client_priv.h"
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/registry_priv.h"
@@ -651,7 +652,7 @@ SwapSecurityAuthorizationRevokedEvent(xSecurityAuthorizationRevokedEvent * from,
 static void
 SecurityDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XaceDeviceAccessRec *rec = calldata;
+    DeviceAccessCallbackParam *rec = calldata;
     SecurityStateRec *subj, *obj;
     Mask requested = rec->access_mode;
     Mask allowed = SecurityDeviceMask;
@@ -972,9 +973,9 @@ SecurityResetProc(ExtensionEntry * extEntry)
     DeleteCallback(&ExtensionDispatchCallback, SecurityExtension, NULL);
     DeleteCallback(&ServerAccessCallback, SecurityServer, NULL);
     DeleteCallback(&ClientAccessCallback, SecurityClient, NULL);
+    DeleteCallback(&DeviceAccessCallback, SecurityDevice, NULL);
 
     XaceDeleteCallback(XACE_RESOURCE_ACCESS, SecurityResource, NULL);
-    XaceDeleteCallback(XACE_DEVICE_ACCESS, SecurityDevice, NULL);
     XaceDeleteCallback(XACE_PROPERTY_ACCESS, SecurityProperty, NULL);
     XaceDeleteCallback(XACE_SEND_ACCESS, SecuritySend, NULL);
     XaceDeleteCallback(XACE_RECEIVE_ACCESS, SecurityReceive, NULL);
@@ -1020,9 +1021,9 @@ SecurityExtensionInit(void)
     ret &= AddCallback(&ExtensionDispatchCallback, SecurityExtension, NULL);
     ret &= AddCallback(&ServerAccessCallback, SecurityServer, NULL);
     ret &= AddCallback(&ClientAccessCallback, SecurityClient, NULL);
+    ret &= AddCallback(&DeviceAccessCallback, SecurityDevice, NULL);
 
     ret &= XaceRegisterCallback(XACE_RESOURCE_ACCESS, SecurityResource, NULL);
-    ret &= XaceRegisterCallback(XACE_DEVICE_ACCESS, SecurityDevice, NULL);
     ret &= XaceRegisterCallback(XACE_PROPERTY_ACCESS, SecurityProperty, NULL);
     ret &= XaceRegisterCallback(XACE_SEND_ACCESS, SecuritySend, NULL);
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SecurityReceive, NULL);

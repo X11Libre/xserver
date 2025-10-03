@@ -42,14 +42,6 @@ typedef struct {
     int status;
 } XaceResourceAccessRec;
 
-/* XACE_DEVICE_ACCESS */
-typedef struct {
-    ClientPtr client;
-    DeviceIntPtr dev;
-    Mask access_mode;
-    int status;
-} XaceDeviceAccessRec;
-
 /* XACE_PROPERTY_ACCESS */
 typedef struct {
     ClientPtr client;
