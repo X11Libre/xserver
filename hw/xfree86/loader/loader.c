@@ -87,6 +87,14 @@ LoaderInit(void)
     LogMessageVerb(X_NONE, 2, "\t%s : %d.%d\n", ABI_CLASS_EXTENSION,
                    GET_ABI_MAJOR(LoaderVersionInfo.extensionVersion),
                    GET_ABI_MINOR(LoaderVersionInfo.extensionVersion));
+
+    LoaderInitPath();
+}
+
+void
+LoaderClose(void)
+{
+    LoaderClosePath();
 }
 
 /* Public Interface to the loader. */

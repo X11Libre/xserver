@@ -359,8 +359,10 @@ typedef struct {
     GenericListRec list;
     char *identifier;
     char *driver;
+    char *modules;
     char *modulepath;
     struct xorg_list match_driver;
+    struct xorg_list match_layout;
     XF86OptionPtr option_lst;
     char *comment;
 } XF86ConfOutputClassRec, *XF86ConfOutputClassPtr;
