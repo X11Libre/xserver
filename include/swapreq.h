@@ -66,7 +66,6 @@ int SProcListFonts(ClientPtr client);
 int SProcListFontsWithInfo(ClientPtr client);
 int SProcLookupColor(ClientPtr client);
 int SProcOpenFont(ClientPtr client);
-int SProcPoly(ClientPtr client);
 int SProcPolyText(ClientPtr client);
 int SProcPutImage(ClientPtr client);
 int SProcQueryBestSize(ClientPtr client);
