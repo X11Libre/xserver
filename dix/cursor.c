@@ -201,7 +201,7 @@ RealizeCursorAllScreens(CursorPtr pCurs)
                         pDevIt = pDevIt->next;
                     }
                     while (--walkScreenIdx>= 0) {
-                        walkScreen = screenInfo.screens[walkScreenIdx];
+                        walkScreen = dixGetScreenPtr(walkScreenIdx);
                         /* now unrealize all devices on previous screens */
                         pDevIt = inputInfo.devices;
                         while (pDevIt) {
