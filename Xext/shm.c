@@ -99,6 +99,7 @@ in this Software without prior written authorization from The Open Group.
 
 
 typedef struct _ShmScrPrivateRec {
+    Bool initialized;
     ShmFuncsPtr shmFuncs;
 } ShmScrPrivateRec;
 
@@ -200,9 +201,9 @@ static void
 ShmScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
     ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
-
-    dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, NULL);
-    free(screen_priv);
+    if (screen_priv->initialized) {
+        screen_priv->initialized = FALSE;
+    }
 }
 
 static ShmScrPrivateRec *
@@ -210,10 +211,8 @@ ShmInitScreenPriv(ScreenPtr pScreen)
 {
     ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
 
-    if (!screen_priv) {
-        screen_priv = calloc(1, sizeof(ShmScrPrivateRec));
-        dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, screen_priv);
-        dixScreenHookClose(pScreen, ShmScreenClose);
+    if (!screen_priv->initialized) {
+        screen_priv->initialized = TRUE;
     }
     return screen_priv;
 }
@@ -221,7 +220,7 @@ ShmInitScreenPriv(ScreenPtr pScreen)
 static Bool
 ShmRegisterPrivates(void)
 {
-    if (!dixRegisterPrivateKey(&shmScrPrivateKeyRec, PRIVATE_SCREEN, 0))
+    if (!dixRegisterPrivateKey(&shmScrPrivateKeyRec, PRIVATE_SCREEN, sizeof(ShmScrPrivateRec)))
         return FALSE;
     if (!dixRegisterPrivateKey(&shmPixmapPrivateKeyRec, PRIVATE_PIXMAP, 0))
         return FALSE;
