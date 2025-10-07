@@ -37,8 +37,6 @@
 #define DR_BUSID_SIZE 48
 
 static DevPrivateKeyRec XvMCScreenKeyRec;
-
-#define XvMCScreenKey (&XvMCScreenKeyRec)
 static Bool XvMCInUse;
 
 int XvMCReqCode;
@@ -59,7 +57,7 @@ typedef struct {
 } XvMCScreenRec, *XvMCScreenPtr;
 
 #define XVMC_GET_PRIVATE(pScreen) \
-    (XvMCScreenPtr)(dixLookupPrivate(&(pScreen)->devPrivates, XvMCScreenKey))
+    (XvMCScreenPtr)(dixLookupPrivate(&(pScreen)->devPrivates, &XvMCScreenKeyRec))
 
 static int
 XvMCDestroyContextRes(void *data, XID id)
@@ -512,7 +510,7 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
 
     pScreen = pPort->pAdaptor->pScreen;
 
-    if (!dixPrivateKeyRegistered(XvMCScreenKey))
+    if (!dixPrivateKeyRegistered(&XvMCScreenKeyRec))
         return BadMatch;        /* No XvMC adaptors */
 
     if (!(pScreenPriv = XVMC_GET_PRIVATE(pScreen)))
@@ -716,7 +714,7 @@ XvMCExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    if (!dixPrivateKeyRegistered(XvMCScreenKey))
+    if (!dixPrivateKeyRegistered(&XvMCScreenKeyRec))
         return;
 
     if (!(XvMCRTContext = CreateNewResourceType(XvMCDestroyContextRes,
@@ -752,7 +750,7 @@ static void XvMCScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unus
 {
     XvMCScreenPtr pScreenPriv = XVMC_GET_PRIVATE(pScreen);
     free(pScreenPriv);
-    dixSetPrivate(&pScreen->devPrivates, XvMCScreenKey, NULL);
+    dixSetPrivate(&pScreen->devPrivates, &XvMCScreenKeyRec, NULL);
     dixScreenUnhookClose(pScreen, XvMCScreenClose);
 }
 
@@ -767,7 +765,7 @@ XvMCScreenInit(ScreenPtr pScreen, int num, XvMCAdaptorPtr pAdapt)
     if (!(pScreenPriv = calloc(1, sizeof(XvMCScreenRec))))
         return BadAlloc;
 
-    dixSetPrivate(&pScreen->devPrivates, XvMCScreenKey, pScreenPriv);
+    dixSetPrivate(&pScreen->devPrivates, &XvMCScreenKeyRec, pScreenPriv);
 
     dixScreenHookClose(pScreen, XvMCScreenClose);
 
@@ -792,7 +790,7 @@ XvMCFindXvImage(XvPortPtr pPort, CARD32 id)
     XvMCScreenPtr pScreenPriv;
     XvMCAdaptorPtr adaptor = NULL;
 
-    if (!dixPrivateKeyRegistered(XvMCScreenKey))
+    if (!dixPrivateKeyRegistered(&XvMCScreenKeyRec))
         return NULL;
 
     if (!(pScreenPriv = XVMC_GET_PRIVATE(pScreen)))
