@@ -1029,7 +1029,7 @@ SyncCreateSystemCounter(const char *name,
         SysCounterInfo *psci = calloc(1, sizeof(SysCounterInfo));
         if (!psci) {
             FreeResource(pCounter->sync.id, X11_RESTYPE_NONE);
-            return pCounter;
+            return NULL;
         }
         pCounter->pSysCounterInfo = psci;
         psci->pCounter = pCounter;
