@@ -3233,9 +3233,14 @@ DeviceEventSuppressForWindow(WindowPtr pWin, ClientPtr client, Mask mask,
             inputMasks->dontPropagateMask[maskndx] = mask;
     }
     else {
-        if (!inputMasks)
-            AddExtensionClient(pWin, client, 0, 0);
-        inputMasks = wOtherInputMasks(pWin);
+        if (!inputMasks) {
+            int ret = AddExtensionClient(pWin, client, 0, 0);
+
+            if (ret != Success)
+                return ret;
+            inputMasks = wOtherInputMasks(pWin);
+            BUG_RETURN_VAL(!inputMasks, BadAlloc);
+        }
         inputMasks->dontPropagateMask[maskndx] = mask;
     }
     RecalculateDeviceDeliverableEvents(pWin);
