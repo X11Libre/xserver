@@ -137,8 +137,12 @@ SELinuxAtomToSID(Atom atom, int prop, SELinuxObjectRec ** obj_rtn)
     rec = SELinuxArrayGet(&arr_atoms, atom);
     if (!rec) {
         rec = calloc(1, sizeof(SELinuxAtomRec));
-        if (!rec || !SELinuxArraySet(&arr_atoms, atom, rec))
+        if (!rec)
             return BadAlloc;
+        if (!SELinuxArraySet(&arr_atoms, atom, rec)) {
+            free(rec);
+            return BadAlloc;
+        }
     }
 
     if (prop) {
