@@ -1,0 +1,143 @@
+Geode 2.18.1 (2025-03-01)
+=========================
+Extensive driver cleanup by Connor Behan:
+
+ * A configure option to disable the GX component was added.
+ * Remaining XAA support in the GX component was removed.
+ * Compiler warnings were cleaned up.
+
+Extensive driver cleanup by Enrico Weigelt:
+
+ * Conditionals that enabled building against older X server versions
+   were removed. The minimal Xserver version thereafter is 1.18. This
+   Geode driver's version was bumped to 2.18.x to reflect this.
+
+Geode 2.11.16 (2014-07-17)
+==========================
+No user-visible change:
+
+ * This release restores compatibility with xserver-1.15 and newer
+   by adding a missing xf86Modes.h include to src/geode_dcon.c
+
+Geode 2.11.15 (2013-10-09)
+==========================
+No user-visible change:
+
+ * This release restores compatibility with xserver-1.14 by removing
+   mibstore.h includes and miInitializeBackingStore() functions.
+   Since Nov.2010 (commit c4c4676) the only purpose of mibstore.h
+   was to define an empty function for backward compatibility.
+
+ * Build helpers migrate to contemporary [build-aux] and [m4].
+
+Geode 2.11.14 (2012-11-25)
+==========================
+Better compatibility with xserver-1.13, cairo-1.12 and gtk3:
+
+ * Fix building on Xservers without XAA (Maarten Lankhorst)
+   xserver-1.13 dropped XAA acceleration method, as it does not accel
+   anything important used on modern desktops.
+   The geode driver now supports configuring whether to include XAA
+   support - by default it is automatically disabled with newest
+   xservers that do not support it, but can be explicitly disabled for
+   older xservers as well if desired (particularly for LX deployments).
+   XAA support remains in place for the time being for older xservers,
+   as the EXA support for GX2 GPUs is of unknown quality and speed.
+
+ * Fix building with new xserver-1.13 API (Maarten Lankhorst)
+   xserver-1.13 changed API, including moving various global symbols
+   behind function calls, to better support multiple switchable graphics
+   cards and hotplugged (USB) graphics cards. Work done to support both
+   pre-1.13 and 1.13+ APIs in other drivers is reused to bring the same
+   support to the Geode driver.
+
+ * Implement solid source pictures acceleration (Mart Raudsepp)
+   cairo-1.12 uses these extensively for text rendering, instead of 1x1
+   repeating images that cairo-1.10 used and we already accelerate.
+   Without acceleration, in addition to being slow, we'd hit a fallback
+   handling bug in EXA with xserver older than 1.13.1, which results in
+   very visible text corruption in many instances.
+
+ * Handle negative srcX and srcY parameters better in EXA Composite
+   operations, used via the RENDER extension (Mart Raudsepp)
+   Handling of source picture coordinates outside actual source pixmap
+   area is still subpar and ignoring spec in some corner cases, but
+   a more specific case is improved to provide correct results in more
+   situations. In particular this fixes GtkTrayIcon drawing via cairo as
+   used by gtk3, specifically as seen in GNOME3 fallback desktop.
+   Previously no icon was drawn at all if the icon needed centering to the
+   drawing area, which in the end is achieved via a negative srcX/srcY.
+   https://bugs.freedesktop.org/show_bug.cgi?id=51360
+
+ * Fix builds for exotic and/or non-target platforms (Dave Airlie)
+
+ * Clarify the copyright of older AMD commits (Martin-Éric Racine)
+
+VALIDATION PLATFORMS
+ * Debian (X server 1.7.7) on Artec DBE61 and Hercules EC-800.
+ * Debian (X server 1.12.14) on FIC ION603A.
+ * Fedora (X server 1.13) on OLPC XO-1.
+
+Geode 2.11.13 (2011-12-26)
+==========================
+This release mainly features a complete overhaul of the building scripts plus
+a cleanup of deprecated macros. The key benefit is that this Geode driver can
+finally build on FreeBSD and on other platforms not offering V4L2 support and
+that it can also build on a 64-bit host using its 32-bit personality.
+
+Support for the Video Input Port (VIP) feature of the Geode LX found in 'ztv'
+is now documented and the source code saw the removal of deprecated Linux 2.4
+backward compatibility code. Compiling is skipped on platforms without V4L2.
+
+Configuration for laptops featuring WXGA resolutions is finally documented.
+
+Setting the GEODE_TRACE_FALL macro now enables composite operation tracing on
+this driver. This can be used to profile the performance during development.
+
+Fixes to keep this driver compilable on recent X servers are also included.
+
+VALIDATION PLATFORMS
+* Debian (X server 1.7.7) on Artec DBE61 and Hercules EC-800.
+* Ubuntu (X server 1.10.4) on FIC ION603A.
+
+Geode 2.11.12 (2011-02-13)
+==========================
+This release drops the "linux/videodev.h" include in z4l.c because
+V4L1 support was dropped as of Linux kernel 2.6.38, and it fixes 
+packed overlay offscreen allocations.
+
+Geode 2.11.11 (2010-12-27)
+==========================
+This release restores code compatibility down to X server 1.4, it fixes
+compilation under 1.9.99 and newer, and it improves handling of gamma
+correction in video vs graphics
+
+Geode 2.11.10 (2010-11-09)
+==========================
+This release migrates deprecated xalloc/xrealloc/xfree/xcalloc calls
+to malloc/realloc/free/calloc, fixes several DCON-specific issues, 
+improves mode validation and adds support for one WXGA resolution.
+
+Geode 2.11.9 (2010-08-23)
+=========================
+We are pleased to announce this maintenance release of xf86-video-geode.
+It features a plethora of bug fixes, a few documentation updates and one
+performance enhancement.
+
+This release also marks the return of AMD to the development team. 
+
+Noticeable changes compared to 2.11.8
+-------------------------------------
+ * Fixes all known rendering bugs, most notably those pertaining to the
+   GNOME and KDE desktop environments, to video player applications and
+   to the Chrome and Firefox browsers.
+
+ * Dramatically improves the performance:
+                      Before         After
+    -aa10text         4660/sec       53300/sec
+    -aa24text         2740/sec       16200/sec
+
+ * Validates resolutions rather than resorts to virtual screen sizes.
+   Adds a new screen resolution at 106.50MHz to those we know about.
+
+ * Clarifies the copyrights of each file and updates COPYING to match.
