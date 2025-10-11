@@ -451,8 +451,10 @@ ProcSELinuxListSelections(ClientPtr client)
     count = 0;
     for (pSel = CurrentSelections; pSel; pSel = pSel->next)
         count++;
+    if (count == 0)
+        return SELinuxSendItemsToClient(client, NULL, 0, 0);
     items = calloc(count, sizeof(SELinuxListItemRec));
-    if (count && !items)
+    if (!items)
         return BadAlloc;
 
     /* Fill in the items and calculate size */
