@@ -200,33 +200,23 @@ CheckForShmSyscall(void)
 static void
 ShmScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
-
-    dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, NULL);
-    free(screen_priv);
     dixScreenUnhookClose(pScreen, ShmScreenClose);
 }
 
-static ShmScrPrivateRec *
-ShmInitScreenPriv(ScreenPtr pScreen)
-{
-    ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
-
-    if (!screen_priv) {
-        screen_priv = calloc(1, sizeof(ShmScrPrivateRec));
-        dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, screen_priv);
-        dixScreenHookClose(pScreen, ShmScreenClose);
-    }
-    return screen_priv;
-}
+static Bool privatesRegistered = FALSE;
 
 static Bool
 ShmRegisterPrivates(void)
 {
-    if (!dixRegisterPrivateKey(&shmScrPrivateKeyRec, PRIVATE_SCREEN, 0))
+    if (privatesRegistered)
+        return TRUE;
+
+    if (!dixRegisterPrivateKey(&shmScrPrivateKeyRec, PRIVATE_SCREEN, sizeof(ShmScrPrivateRec)))
         return FALSE;
     if (!dixRegisterPrivateKey(&shmPixmapPrivateKeyRec, PRIVATE_PIXMAP, 0))
         return FALSE;
+
+    privatesRegistered = TRUE;
     return TRUE;
 }
 
@@ -241,11 +231,12 @@ ShmResetProc(ExtensionEntry * extEntry)
 void
 ShmRegisterFuncs(ScreenPtr pScreen, ShmFuncsPtr funcs)
 {
+    /* we could be called before the extension initialized,
+       so make sure the privates are already registered. */
     if (!ShmRegisterPrivates())
         return;
-    ShmInitScreenPriv(pScreen)->shmFuncs = funcs;
+    ShmGetScreenPriv(pScreen)->shmFuncs = funcs;
 }
-
 
 void
 ShmRegisterFbFuncs(ScreenPtr pScreen)
@@ -1395,10 +1386,7 @@ ShmExtensionInit(void)
     {
         sharedPixmaps = xTrue;
         DIX_FOR_EACH_SCREEN({
-            ShmScrPrivateRec *screen_priv =
-                ShmInitScreenPriv(walkScreen);
-            if (!screen_priv)
-                continue;
+            ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(walkScreen);
             if (!screen_priv->shmFuncs)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
