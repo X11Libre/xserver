@@ -203,6 +203,7 @@ ShmScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 
     dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, NULL);
     free(screen_priv);
+    dixScreenUnhookClose(pScreen, ShmScreenClose);
 }
 
 static ShmScrPrivateRec *
@@ -1401,6 +1402,7 @@ ShmExtensionInit(void)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
                 sharedPixmaps = xFalse;
+            dixScreenHookClose(walkScreen, ShmScreenClose);
         });
         if (sharedPixmaps)
             DIX_FOR_EACH_SCREEN({
