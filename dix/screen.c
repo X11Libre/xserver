@@ -12,6 +12,7 @@
 #include "include/scrnintstr.h"
 
 CallbackListPtr ScreenSaverAccessCallback = NULL;
+CallbackListPtr ScreenAccessCallback = NULL;
 
 void dixFreeScreen(ScreenPtr pScreen)
 {

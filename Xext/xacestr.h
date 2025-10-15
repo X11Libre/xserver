@@ -78,12 +78,4 @@ typedef struct {
     int status;
 } XaceSelectionAccessRec;
 
-/* XACE_SCREEN_ACCESS */
-typedef struct {
-    ClientPtr client;
-    ScreenPtr screen;
-    Mask access_mode;
-    int status;
-} XaceScreenAccessRec;
-
 #endif                          /* _XACESTR_H */

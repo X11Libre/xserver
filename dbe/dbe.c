@@ -605,7 +605,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
             pDrawables[i]->pScreen;
         pDbeScreenPriv = DBE_SCREEN_PRIV(pScreen);
 
-        rc = XaceHookScreenAccess(client, pScreen, DixGetAttrAccess);
+        rc = dixCallScreenAccessCallback(client, pScreen, DixGetAttrAccess);
         if (rc != Success)
             goto clearRpcBuf;
 

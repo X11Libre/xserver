@@ -43,7 +43,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define XACE_SEND_ACCESS		5
 #define XACE_RECEIVE_ACCESS		6
 #define XACE_SELECTION_ACCESS		10
-#define XACE_SCREEN_ACCESS		11
 #define XACE_NUM_HOOKS			13
 
 extern CallbackListPtr XaceHooks[XACE_NUM_HOOKS];
@@ -70,7 +69,6 @@ _X_EXPORT int XaceHookResourceAccess(ClientPtr client, XID id, RESTYPE rtype, vo
 int XaceHookSendAccess(ClientPtr client, DeviceIntPtr dev, WindowPtr win,
                        xEventPtr ev, int count);
 int XaceHookReceiveAccess(ClientPtr client, WindowPtr win, xEventPtr ev, int count);
-int XaceHookScreenAccess(ClientPtr client, ScreenPtr screen, Mask access_mode);
 
 /* Register / unregister a callback for a given hook. */
 

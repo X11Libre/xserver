@@ -175,7 +175,7 @@ SELinuxLabelClient(ClientPtr client)
 static void
 SELinuxLabelInitial(void)
 {
-    XaceScreenAccessRec srec;
+    ScreenAccessCallbackParam srec;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     char *ctx;
@@ -684,7 +684,7 @@ SELinuxResource(CallbackListPtr *pcbl, void *unused, void *calldata)
 static void
 SELinuxScreen(CallbackListPtr *pcbl, void *is_saver, void *calldata)
 {
-    XaceScreenAccessRec *rec = calldata;
+    ScreenAccessCallbackParam *rec = calldata;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
@@ -839,13 +839,13 @@ SELinuxFlaskReset(void)
     DeleteCallback(&ClientAccessCallback, SELinuxClient, NULL);
     DeleteCallback(&DeviceAccessCallback, SELinuxDevice, NULL);
     DeleteCallback(&ScreenSaverAccessCallback, SELinuxScreen, truep);
+    DeleteCallback(&ScreenAccessCallback, SELinuxScreen, NULL);
 
     XaceDeleteCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
     XaceDeleteCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
     XaceDeleteCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     XaceDeleteCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     XaceDeleteCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
-    XaceDeleteCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
 
     /* Tear down SELinux stuff */
     audit_close(audit_fd);
@@ -933,13 +933,13 @@ SELinuxFlaskInit(void)
     ret &= AddCallback(&ClientAccessCallback, SELinuxClient, NULL);
     ret &= AddCallback(&DeviceAccessCallback, SELinuxDevice, NULL);
     ret &= AddCallback(&ScreenSaverAccessCallback, SELinuxScreen, truep);
+    ret &= AddCallback(&ScreenAccessCallback, SELinuxScreen, NULL);
 
     ret &= XaceRegisterCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
     ret &= XaceRegisterCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
     ret &= XaceRegisterCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
     ret &= XaceRegisterCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
-    ret &= XaceRegisterCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
     if (!ret)
         FatalError("SELinux: Failed to register one or more callbacks\n");
 

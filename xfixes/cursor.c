@@ -812,7 +812,7 @@ ProcXFixesHideCursor(ClientPtr client)
      * This is the first time this client has hid the cursor
      * for this screen.
      */
-    ret = XaceHookScreenAccess(client, pWin->drawable.pScreen, DixHideAccess);
+    ret = dixCallScreenAccessCallback(client, pWin->drawable.pScreen, DixHideAccess);
     if (ret != Success)
         return ret;
 
@@ -860,7 +860,7 @@ ProcXFixesShowCursor(ClientPtr client)
         return BadMatch;
     }
 
-    rc = XaceHookScreenAccess(client, pWin->drawable.pScreen, DixShowAccess);
+    rc = dixCallScreenAccessCallback(client, pWin->drawable.pScreen, DixShowAccess);
     if (rc != Success)
         return rc;
 
