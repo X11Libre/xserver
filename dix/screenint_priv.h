@@ -8,6 +8,7 @@
 
 #include <X11/Xdefs.h>
 
+#include "include/callback.h"
 #include "include/screenint.h"
 #include "include/scrnintstr.h" /* for screenInfo */
 
@@ -83,5 +84,21 @@ static inline ScreenPtr dixGetMasterScreen(void) {
             __LAMBDA__; \
         } \
     } while (0);
+
+extern CallbackListPtr ScreenAccessCallback;
+
+typedef struct {
+    ClientPtr client;
+    ScreenPtr screen;
+    Mask access_mode;
+    int status;
+} ScreenAccessCallbackParam;
+
+static inline int dixCallScreenAccessCallback(ClientPtr client, ScreenPtr screen, Mask access_mode)
+{
+    ScreenAccessCallbackParam rec = { client, screen, access_mode, Success };
+    CallCallbacks(&ScreenAccessCallback, &rec);
+    return rec.status;
+}
 
 #endif /* _XSERVER_DIX_SCREENINT_PRIV_H */
