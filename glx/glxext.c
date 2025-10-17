@@ -330,15 +330,6 @@ xorgGlxHandleRequest(ClientPtr client)
     return __glXDispatch(client);
 }
 
-static ScreenPtr
-screenNumToScreen(int screen)
-{
-    if (screen < 0 || screen >= screenInfo.numScreens)
-        return NULL;
-
-    return screenInfo.screens[screen];
-}
-
 static int
 maybe_swap32(ClientPtr client, int x)
 {
@@ -350,7 +341,7 @@ vendorForScreen(ClientPtr client, int screen)
 {
     screen = maybe_swap32(client, screen);
 
-    return glxServer.getVendorForScreen(client, screenNumToScreen(screen));
+    return glxServer.getVendorForScreen(client, dixGetScreenPtr(screen));
 }
 
 /* this ought to be generated */

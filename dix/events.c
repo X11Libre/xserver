@@ -633,12 +633,14 @@ XineramaConfineCursorToWindow(DeviceIntPtr pDev,
     unsigned int walkScreenIdx = PanoramiXNumScreens - 1;
 
     RegionCopy(&pSprite->Reg1, &pSprite->windows[walkScreenIdx]->borderSize);
-    ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+    ScreenPtr walkScreen = dixGetScreenPtr(walkScreenIdx);
     off_x = walkScreen->x;
     off_y = walkScreen->y;
 
     while (walkScreenIdx--) {
-        walkScreen = screenInfo.screens[walkScreenIdx];
+        walkScreen = dixGetScreenPtr(walkScreenIdx);
+
         x = off_x - walkScreen->x;
         y = off_y - walkScreen->y;
 
@@ -839,12 +841,12 @@ CheckVirtualMotion(DeviceIntPtr pDev, QdEventPtr qe, WindowPtr pWin)
             unsigned int walkScreenIdx = PanoramiXNumScreens - 1;
 
             RegionCopy(&pSprite->Reg2, &pSprite->windows[walkScreenIdx]->borderSize);
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            ScreenPtr walkScreen = dixGetScreenPtr(walkScreenIdx);
             off_x = walkScreen->x;
             off_y = walkScreen->y;
 
             while (walkScreenIdx--) {
-                walkScreen = screenInfo.screens[walkScreenIdx];
+                walkScreen = dixGetScreenPtr(walkScreenIdx);
                 x = off_x - walkScreen->x;
                 y = off_y - walkScreen->y;
 
