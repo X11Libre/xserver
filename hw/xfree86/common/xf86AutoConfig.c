@@ -288,7 +288,7 @@ listPossibleVideoDrivers(XF86MatchedDrivers *md)
     }
 #endif
 #ifdef __sparc__
-    char *sbusDriver = sparcDriverName();
+    const char *sbusDriver = sparcDriverName();
 
     if (sbusDriver)
         xf86AddMatchedDriver(md, sbusDriver);
