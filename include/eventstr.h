@@ -101,6 +101,7 @@ enum DeviceEventSource {
  */
 struct _DeviceEvent {
     unsigned char header; /**< Always ET_Internal */
+    int16_t root_x;       /**< Pos relative to root window in integral data */
     enum EventType type;  /**< One of EventType */
     int length;           /**< Length in bytes */
     Time time;            /**< Time in ms */
@@ -112,10 +113,10 @@ struct _DeviceEvent {
         uint32_t key;     /**< Key code */
     } detail;
     uint32_t touchid;     /**< Touch ID (client_id) */
-    int16_t root_x;       /**< Pos relative to root window in integral data */
-    float root_x_frac;    /**< Pos relative to root window in frac part */
     int16_t root_y;       /**< Pos relative to root window in integral part */
+    float root_x_frac;    /**< Pos relative to root window in frac part */
     float root_y_frac;    /**< Pos relative to root window in frac part */
+    enum DeviceEventSource source_type; /**< How this event was provoked */
     uint8_t buttons[(MAX_BUTTONS + 7) / 8];  /**< Button mask */
     struct {
         uint8_t mask[(MAX_VALUATORS + 7) / 8];/**< Valuator mask */
@@ -139,7 +140,6 @@ struct _DeviceEvent {
     int key_repeat;   /**< Internally-generated key repeat event */
     uint32_t flags;   /**< Flags to be copied into the generated event */
     uint32_t resource; /**< Touch event resource, only for TOUCH_REPLAYING */
-    enum DeviceEventSource source_type; /**< How this event was provoked */
 };
 
 /**
@@ -239,12 +239,12 @@ struct _RawDeviceEvent {
         uint32_t button;  /**< Button number */
         uint32_t key;     /**< Key code */
     } detail;
+    uint32_t flags;       /**< Flags to be copied into the generated event */
     struct {
         uint8_t mask[(MAX_VALUATORS + 7) / 8];/**< Valuator mask */
         double data[MAX_VALUATORS];           /**< Valuator data */
         double data_raw[MAX_VALUATORS];       /**< Valuator data as posted */
     } valuators;
-    uint32_t flags;       /**< Flags to be copied into the generated event */
 };
 
 struct _BarrierEvent {
