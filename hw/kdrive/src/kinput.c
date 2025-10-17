@@ -32,6 +32,7 @@
 #include <X11/XF86keysym.h>
 #endif
 #include <stdio.h>
+#include <signal.h>
 #include <sys/file.h>           /* needed for FNONBLOCK & FASYNC */
 
 #include <X11/extensions/XI.h>
