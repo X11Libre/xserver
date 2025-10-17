@@ -624,7 +624,7 @@ ProcScreenSaverQueryInfo(ClientPtr client)
                            DixGetAttrAccess);
     if (rc != Success)
         return rc;
-    rc = XaceHookScreensaverAccess(client, pDraw->pScreen, DixGetAttrAccess);
+    rc = dixCallScreensaverAccessCallback(client, pDraw->pScreen, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -689,7 +689,7 @@ ProcScreenSaverSelectInput(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rc = XaceHookScreensaverAccess(client, pDraw->pScreen, DixSetAttrAccess);
+    rc = dixCallScreensaverAccessCallback(client, pDraw->pScreen, DixSetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -730,7 +730,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
     pScreen = pDraw->pScreen;
     pParent = pScreen->root;
 
-    ret = XaceHookScreensaverAccess(client, pScreen, DixSetAttrAccess);
+    ret = dixCallScreensaverAccessCallback(client, pScreen, DixSetAttrAccess);
     if (ret != Success)
         return ret;
 

@@ -83,13 +83,6 @@ int XaceHookScreenAccess(ClientPtr client, ScreenPtr screen, Mask access_mode)
     return rec.status;
 }
 
-int XaceHookScreensaverAccess(ClientPtr client, ScreenPtr screen, Mask access_mode)
-{
-    XaceScreenAccessRec rec = { client, screen, access_mode, Success };
-    CallCallbacks(&XaceHooks[XACE_SCREENSAVER_ACCESS], &rec);
-    return rec.status;
-}
-
 /* XaceHookIsSet
  *
  * Utility function to determine whether there are any callbacks listening on a

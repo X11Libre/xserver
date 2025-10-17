@@ -109,6 +109,7 @@ Equipment Corporation.
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
@@ -3089,7 +3090,7 @@ dixSaveScreens(ClientPtr client, int on, int mode)
     }
 
     DIX_FOR_EACH_SCREEN({
-        int rc = XaceHookScreensaverAccess(client, walkScreen,
+        int rc = dixCallScreensaverAccessCallback(client, walkScreen,
                       DixShowAccess | DixHideAccess);
         if (rc != Success)
             return rc;
