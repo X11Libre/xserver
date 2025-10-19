@@ -1895,12 +1895,27 @@ drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_wid
      * This means that we can't clear the cursor by copying '\0' bytes
      * from the image buffer, because we might read out of bounds.
      */
-    if (drmmode_crtc->cursor_glyph_width == 0 &&
-        drmmode_crtc->cursor_glyph_height == 0) {
-        /* If this is the first time we paint the cursor, assume the entire cursor buffer is dirty */
-        /* XXX Do we really need to do this? XXX */
+    if (
+        /* If the buffer is uninitialized, assume it is dirty */
+        (drmmode_crtc->cursor_glyph_width == 0 &&
+         drmmode_crtc->cursor_glyph_height == 0) ||
+
+        /* Sanity check so we don't read from the image out of bounds */
+        (drmmode_crtc->cursor_glyph_width > image_width ||
+         drmmode_crtc->cursor_glyph_height > image_height) ||
+
+        /* If the pitch changed, the memory layout of the cursor data changed, so the buffer is dirty */
+        /* See: https://github.com/X11Libre/xserver/pull/1234 */
+        (drmmode_crtc->old_pitch != cursor_pitch)
+       ) {
         memset(cursor, 0, cursor_bo->size);
+
+        /* Since we already cleared the buffer, no need to clear it again bellow */
+        drmmode_crtc->cursor_glyph_width = 0;
+        drmmode_crtc->cursor_glyph_height = 0;
     }
+
+    drmmode_crtc->old_pitch = cursor_pitch;
 
     /* Paint only what we need to */
     width_todo = MAX(drmmode_crtc->cursor_glyph_width, glyph_width);
