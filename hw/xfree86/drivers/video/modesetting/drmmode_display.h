@@ -247,9 +247,12 @@ typedef struct {
     Bool vrr_enabled;
     Bool use_gamma_lut;
 
-    int* cursor_pitches;
+    /* For damage-like tracking of the cursor buffer */
     uint32_t cursor_glyph_width;
     uint32_t cursor_glyph_height;
+    int old_pitch;
+
+    int* cursor_pitches;
 } drmmode_crtc_private_rec, *drmmode_crtc_private_ptr;
 
 typedef struct {
