@@ -60,20 +60,6 @@ typedef struct _ShmFuncs {
 #define SHM_FD_PASSING  1
 #endif
 
-typedef struct _ShmDesc {
-    struct _ShmDesc *next;
-    int shmid;
-    int refcnt;
-    char *addr;
-    Bool writable;
-    unsigned long size;
-#ifdef SHM_FD_PASSING
-    Bool is_fd;
-    struct busfault *busfault;
-    XID resource;
-#endif
-} ShmDescRec, *ShmDescPtr;
-
 #ifdef SHM_FD_PASSING
 #define SHMDESC_IS_FD(shmdesc)  ((shmdesc)->is_fd)
 #else
