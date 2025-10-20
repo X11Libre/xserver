@@ -86,7 +86,6 @@ extern _X_EXPORT void
 extern _X_EXPORT void
  ShmRegisterFbFuncs(ScreenPtr pScreen);
 
-extern _X_EXPORT RESTYPE ShmSegType;
 extern _X_EXPORT int ShmCompletionCode;
 extern _X_EXPORT int BadShmSegCode;
 
