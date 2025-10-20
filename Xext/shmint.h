@@ -80,11 +80,8 @@ typedef struct _ShmDesc {
 #define SHMDESC_IS_FD(shmdesc)  (0)
 #endif
 
-extern _X_EXPORT void
- ShmRegisterFuncs(ScreenPtr pScreen, ShmFuncsPtr funcs);
-
-extern _X_EXPORT void
- ShmRegisterFbFuncs(ScreenPtr pScreen);
+_X_EXPORT void ShmRegisterFuncs(ScreenPtr pScreen, ShmFuncsPtr funcs);
+_X_EXPORT void ShmRegisterFbFuncs(ScreenPtr pScreen);
 
 extern _X_EXPORT int ShmCompletionCode;
 extern _X_EXPORT int BadShmSegCode;
