@@ -608,7 +608,7 @@ ProcRRGetProviderProperty(ClientPtr client)
  *  Return type, format, value to client
  */
     n = (prop_value->format / 8) * prop_value->size;    /* size (bytes) of prop */
-    ind = stuff->longOffset << 2;
+    ind = (unsigned long)stuff->longOffset << 2;
 
     /* If longOffset is invalid such that it causes "len" to
        be negative, it's a value error. */
