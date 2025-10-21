@@ -39,6 +39,11 @@
 #include <sys/kd.h>
 #endif
 
+#if !defined(__i386__) && !defined(__i386) && !defined(__x86)
+#include <sys/fbio.h>
+#include <sys/mman.h>
+#endif
+
 #include "os/osdep.h"
 
 /*
