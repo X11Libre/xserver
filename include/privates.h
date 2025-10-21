@@ -24,8 +24,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 typedef struct _Private PrivateRec, *PrivatePtr;
 
+/* WARNING: the values, as well as the total number are part of public ABI.
+   Adding a new one will lead to increased size as well as different field
+   offsets within ScreenRec.
+*/
 typedef enum {
-    /* XSELinux uses the same private keys for numerous objects */
+    /* XSELinux uses the same private keys for numerous objects
+
+       This black magic - keys of this type have very special handling:
+       their corresponding space is allocated at the top of the private
+       areas, in *several* object types (see xselinux_private[] array),
+       and xselinux uses the same keys for all object types
+    */
     PRIVATE_XSELINUX,
 
     /* Otherwise, you get a private in just the requested structure
