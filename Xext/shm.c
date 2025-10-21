@@ -197,12 +197,6 @@ CheckForShmSyscall(void)
 
 #endif
 
-static void
-ShmScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
-{
-    dixScreenUnhookClose(pScreen, ShmScreenClose);
-}
-
 static Bool privatesRegistered = FALSE;
 
 static Bool
@@ -1391,7 +1385,6 @@ ShmExtensionInit(void)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
                 sharedPixmaps = xFalse;
-            dixScreenHookClose(walkScreen, ShmScreenClose);
         });
         if (sharedPixmaps)
             DIX_FOR_EACH_SCREEN({
