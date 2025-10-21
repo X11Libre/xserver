@@ -337,6 +337,9 @@ dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
     if (type == PRIVATE_XSELINUX) {
 
         /* Resize if we can, or make sure nothing's allocated if we can't
+         *
+         * special magic for PRIVATE_XSELINUX type keys - those are registered
+         * at the same offset in several object types.
          */
         for (DevPrivateType t = PRIVATE_XSELINUX; t < PRIVATE_LAST; t++)
             if (xselinux_private[t]) {
