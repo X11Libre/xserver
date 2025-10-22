@@ -229,6 +229,8 @@ static int CommonMakeCurrent(ClientPtr client,
         // TODO: For switching contexts in a single vendor, just make one
         // makeCurrent call?
 
+        // Apparently, the answer is 'no': https://github.com/X11Libre/xserver/issues/1246
+
         // TODO: When changing vendors, would it be better to do the
         // MakeCurrent(new) first, then the LoseCurrent(old)?
         // If the MakeCurrent(new) fails, then the old context will still be current.
