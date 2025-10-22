@@ -2432,7 +2432,6 @@ ProcPolyText(ClientPtr client)
         swaps(&stuff->y);
     }
 
-    int err;
     DrawablePtr pDraw;
     GCPtr pGC;
 
