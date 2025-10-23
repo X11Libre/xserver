@@ -61,7 +61,6 @@ int SProcGetImage(ClientPtr client);
 int SProcGetMotionEvents(ClientPtr client);
 int SProcGetProperty(ClientPtr client);
 int SProcImageText(ClientPtr client);
-int SProcInternAtom(ClientPtr client);
 int SProcListFonts(ClientPtr client);
 int SProcListFontsWithInfo(ClientPtr client);
 int SProcLookupColor(ClientPtr client);

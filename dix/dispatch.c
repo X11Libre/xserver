@@ -1104,6 +1104,9 @@ ProcInternAtom(ClientPtr client)
     char *tchar;
 
     REQUEST(xInternAtomReq);
+    REQUEST_AT_LEAST_SIZE(xInternAtomReq);
+    if (client->swapped)
+        swaps(&stuff->nbytes);
 
     REQUEST_FIXED_SIZE(xInternAtomReq, stuff->nbytes);
     if ((stuff->onlyIfExists != xTrue) && (stuff->onlyIfExists != xFalse)) {
