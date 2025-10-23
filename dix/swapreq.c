@@ -215,17 +215,6 @@ SProcGetProperty(ClientPtr client)
 }
 
 int _X_COLD
-SProcSetSelectionOwner(ClientPtr client)
-{
-    REQUEST(xSetSelectionOwnerReq);
-    REQUEST_SIZE_MATCH(xSetSelectionOwnerReq);
-    swapl(&stuff->window);
-    swapl(&stuff->selection);
-    swapl(&stuff->time);
-    return ((*ProcVector[X_SetSelectionOwner]) (client));
-}
-
-int _X_COLD
 SProcConvertSelection(ClientPtr client)
 {
     REQUEST(xConvertSelectionReq);

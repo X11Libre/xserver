@@ -161,6 +161,12 @@ ProcSetSelectionOwner(ClientPtr client)
     REQUEST(xSetSelectionOwnerReq);
     REQUEST_SIZE_MATCH(xSetSelectionOwnerReq);
 
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->selection);
+        swapl(&stuff->time);
+    }
+
     UpdateCurrentTime();
     time = ClientTimeToServerTime(stuff->time);
 
