@@ -54,7 +54,6 @@ int SProcCreateGC(ClientPtr client);
 int SProcCreateGlyphCursor(ClientPtr client);
 int SProcCreatePixmap(ClientPtr client);
 int SProcCreateWindow(ClientPtr client);
-int SProcDeleteProperty(ClientPtr client);
 int SProcFillPoly(ClientPtr client);
 int SProcFreeColors(ClientPtr client);
 int SProcGetImage(ClientPtr client);

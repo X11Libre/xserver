@@ -690,6 +690,11 @@ ProcDeleteProperty(ClientPtr client)
     REQUEST(xDeletePropertyReq);
     REQUEST_SIZE_MATCH(xDeletePropertyReq);
 
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->property);
+    }
+
     UpdateCurrentTime();
     if (!ValidAtom(stuff->property)) {
         client->errorValue = stuff->property;
