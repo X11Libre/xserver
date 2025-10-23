@@ -350,7 +350,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcInternAtom,
     ProcGetAtomName,
     SProcChangeProperty,
-    SProcDeleteProperty,
+    ProcDeleteProperty,
     SProcGetProperty,                   /* 20 */
     ProcListProperties,
     ProcSetSelectionOwner,
