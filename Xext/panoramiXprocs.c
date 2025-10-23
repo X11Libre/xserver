@@ -36,6 +36,7 @@ Equipment Corporation.
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/server_priv.h"
+#include "dix/window_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -154,7 +155,7 @@ PanoramiXCreateWindow(ClientPtr client)
             *((CARD32 *) &stuff[1] + cmap_offset) = cmap->info[walkScreenIdx].id;
         if (orig_visual != CopyFromParent)
             stuff->visual = PanoramiXTranslateVisualID(walkScreenIdx, orig_visual);
-        result = (*SavedProcVector[X_CreateWindow]) (client);
+        result = DoCreateWindowReq(client, stuff, (XID*)&stuff[1]);
         if (result != Success)
             break;
     });
