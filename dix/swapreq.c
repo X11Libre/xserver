@@ -192,16 +192,6 @@ SProcChangeProperty(ClientPtr client)
 }
 
 int _X_COLD
-SProcDeleteProperty(ClientPtr client)
-{
-    REQUEST(xDeletePropertyReq);
-    REQUEST_SIZE_MATCH(xDeletePropertyReq);
-    swapl(&stuff->window);
-    swapl(&stuff->property);
-    return ((*ProcVector[X_DeleteProperty]) (client));
-}
-
-int _X_COLD
 SProcGetProperty(ClientPtr client)
 {
     REQUEST(xGetPropertyReq);
