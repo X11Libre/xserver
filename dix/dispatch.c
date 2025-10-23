@@ -732,23 +732,15 @@ CreateConnectionBlock(void)
     return TRUE;
 }
 
-int
-ProcCreateWindow(ClientPtr client)
+int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids)
 {
     WindowPtr pParent, pWin;
-
-    REQUEST(xCreateWindowReq);
-    int len, rc;
-
-    REQUEST_AT_LEAST_SIZE(xCreateWindowReq);
+    int rc;
 
     LEGAL_NEW_RESOURCE(stuff->wid, client);
     rc = dixLookupWindow(&pParent, stuff->parent, client, DixAddAccess);
     if (rc != Success)
         return rc;
-    len = client->req_len - bytes_to_int32(sizeof(xCreateWindowReq));
-    if (Ones(stuff->mask) != len)
-        return BadLength;
     if (!stuff->width || !stuff->height) {
         client->errorValue = 0;
         return BadValue;
@@ -756,7 +748,7 @@ ProcCreateWindow(ClientPtr client)
     pWin = dixCreateWindow(stuff->wid, pParent, stuff->x,
                         stuff->y, stuff->width, stuff->height,
                         stuff->borderWidth, stuff->class,
-                        stuff->mask, (XID *) &stuff[1],
+                        stuff->mask, (XID *) xids,
                         (int) stuff->depth, client, stuff->visual, &rc);
     if (pWin) {
         Mask mask = pWin->eventMask;
@@ -767,6 +759,19 @@ ProcCreateWindow(ClientPtr client)
         pWin->eventMask = mask;
     }
     return rc;
+}
+
+int
+ProcCreateWindow(ClientPtr client)
+{
+    REQUEST(xCreateWindowReq);
+    REQUEST_AT_LEAST_SIZE(xCreateWindowReq);
+
+    int len = client->req_len - bytes_to_int32(sizeof(xCreateWindowReq));
+    if (Ones(stuff->mask) != len)
+        return BadLength;
+
+    return DoCreateWindowReq(client, stuff, (XID*)&stuff[1]);
 }
 
 int
