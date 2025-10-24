@@ -2506,8 +2506,12 @@ populate_cursor_sizes(drmmode_ptr drmmode, drmmode_crtc_private_ptr drmmode_crtc
     if (!size_hints_len)
         goto fail;
 
+    void *tmp = realloc(drmmode_crtc->cursor.dimensions, size_hints_len * sizeof(drmmode_cursor_dim_rec));
+    if (!tmp)
+        goto fail;
+
+    drmmode_crtc->cursor.dimensions = tmp;
     drmmode_crtc->cursor.num_dimensions = size_hints_len;
-    drmmode_crtc->cursor.dimensions = xnfrealloc(drmmode_crtc->cursor.dimensions, size_hints_len * sizeof(drmmode_cursor_dim_rec));
 
     for (int idx = 0; idx < size_hints_len; idx++)
     {
@@ -2911,8 +2915,11 @@ drmmode_crtc_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, drmModeResPtr mode_res
     drmmode_crtc->next_msc = UINT64_MAX;
 
     /* Setup the fallback cursor immediately. */
+    drmmode_crtc->cursor.dimensions = malloc(sizeof(drmmode_cursor_dim_rec));
+    if (drmmode_crtc->cursor.dimensions == NULL)
+        return 0;
+
     drmmode_crtc->cursor.num_dimensions = 1;
-    drmmode_crtc->cursor.dimensions = xnfalloc(sizeof(drmmode_cursor_dim_rec));
 
     drmmode_crtc->cursor.dimensions[0] = drmmode_cursor_get_fallback(drmmode_crtc);
 
