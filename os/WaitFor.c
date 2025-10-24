@@ -106,7 +106,6 @@ struct _OsTimerRec {
 };
 
 static void DoTimer(OsTimerPtr timer, CARD32 now);
-static void DoTimers(CARD32 now);
 static void CheckAllTimers(void);
 static volatile struct xorg_list timers;
 
@@ -277,8 +276,7 @@ DoTimer(OsTimerPtr timer, CARD32 now)
         TimerSet(timer, 0, newTime, timer->callback, timer->arg);
 }
 
-static void
-DoTimers(CARD32 now)
+void DoTimers(CARD32 now)
 {
     OsTimerPtr  timer;
 
