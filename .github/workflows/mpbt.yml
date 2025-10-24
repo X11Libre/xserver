@@ -19,7 +19,6 @@ jobs:
             - name: Check out repository code
               uses: actions/checkout@v4
 
-            # FIXME: move these to MPBT ?
             - name: pkg install
               run:  sudo .github/scripts/ubuntu/install-pkg.sh
 
