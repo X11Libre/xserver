@@ -1,0 +1,3 @@
+provides: x11/xfree86-type1
+type: system
+pkg-config: xfree86-type1

@@ -1,0 +1,11 @@
+provides: sys/libdrm
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xlibre_git}/drm
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/*:refs/tags/*
+buildsystem: meson
+ref: libdrm-2.4.121

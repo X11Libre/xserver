@@ -1,0 +1,3 @@
+provides: x11/libxcvt
+type: system
+pkg-config: libxcvt

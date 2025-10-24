@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# cd .mpbt && ~/go/bin/mpbt-builder -root . -solution cf/xlibre/solutions/github.yaml build
+
+~/go/bin/mpbt-builder -root .mpbt -solution .mpbt/cf/xlibre/solutions/github.yaml build

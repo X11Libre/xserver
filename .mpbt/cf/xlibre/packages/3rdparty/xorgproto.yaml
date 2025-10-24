@@ -1,0 +1,13 @@
+provides: x11/xorgproto
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xorg_git}/proto/xorgproto.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/heads/master:refs/remotes/origin/master
+buildsystem: autotools
+build-depends:
+    - x11/util-macros
+ref: origin/master

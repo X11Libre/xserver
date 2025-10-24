@@ -1,0 +1,6 @@
+provides: x11/xproto
+type: system
+check:
+    # the xorgproto package provides many .pc files, but for checking
+    # whether it's there, only need to look for one of them
+    pkg-config: xproto

@@ -1,0 +1,10 @@
+provides: x11/font-util
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xorg_git}/font/util.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/*:refs/tags/*
+ref: font-util-1.4.1

@@ -1,0 +1,10 @@
+provides: x11/xkbcomp
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xorg_git}/app/xkbcomp.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/*:refs/tags/*
+ref: xkbcomp-1.4.7

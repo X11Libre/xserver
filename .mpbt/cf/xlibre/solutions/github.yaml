@@ -1,0 +1,109 @@
+pathes:
+    PREFIX: ${@PROJECT::@workdir}/DESTDIR
+    ACLOCAL_PATH: ${pathes::PREFIX}/share/aclocal
+
+# needed by several sources
+xlibre_git:     https://github.com/X11Libre
+xorg_git:       https://gitlab.freedesktop.org/xorg
+
+# override points for CI
+# xserver_commit: origin/maint-25.0
+xserver_commit: feb50d22932bb3466a8c5c7085c835123eae4d98
+xserver_repo:   ${@SOLUTION::xlibre_git}/xserver-DISABLED
+
+# tell which actual packages for resolving `provides`
+package-mapping:
+    x11/font-util:        system/font-util
+    x11/libxcb-util:      system/libxcb-util
+    x11/libxcb-wm:        system/libxcb-wm
+    x11/libxcvt:          3rdparty/libxcvt
+    x11/libx11:           system/libx11
+    x11/xcbproto:         3rdparty/xcbproto
+    x11/xfree86-type1:    system/xfree86-type1
+    x11/xkbcomp:          system/xkbcomp
+    buildtool/c-compiler: os-installed/gcc
+    sys/libdrm:           3rdparty/libdrm
+    x11/util-macros:      3rdparty/util-macros
+
+# per package configuration
+package-config:
+    xserver/xlibre-xserver:
+        ref: ${xserver_commit}
+        url: ${xserver_repo}
+        meson-extra-args:
+            - -Dc_args="-fno-common"
+            - -Dxephyr=true
+            - -Dxnest=true
+            - -Dxvfb=true
+            - -Dxorg=true
+            - -Dglamor=true
+            - -Dxselinux=true
+            - -Dxf86bigfont=true
+            - -Dxcsecurity=true
+            - -Dxfbdev=true
+            - -Ddri2=true
+            - -Ddri3=true
+    3rdparty/libdrm:
+        meson-extra-args:
+            - -Domap=enabled
+
+    xserver/xf86-input-libinput:
+        ref: xlibre-xf86-input-libinput-1.5.1.0
+    xserver/xf86-input-joystick:
+        ref: xlibre-xf86-input-joystick-1.6.4.2
+    xserver/xf86-input-evdev:
+        ref: xlibre-xf86-input-evdev-2.11.0.2
+    xserver/xf86-input-mouse:
+        ref: xlibre-xf86-input-mouse-1.9.5.2
+    xserver/xf86-input-synaptics:
+        ref: xlibre-xf86-input-synaptics-1.10.0.2
+    xserver/xf86-input-elographics:
+        ref: xlibre-xf86-input-elographics-1.4.4.2
+    xserver/xf86-video-amdgpu:
+        ref: xlibre-xf86-video-amdgpu-23.0.0.5
+    xserver/xf86-video-ati:
+        ref: xlibre-xf86-video-ati-22.0.0.3
+    xserver/xf86-video-intel:
+        ref: xlibre-xf86-video-intel-3.0.0.3
+    xserver/xf86-video-mach64:
+        ref: xlibre-xf86-video-mach64-6.10.0.1
+    xserver/xf86-video-nouveau:
+        ref: xlibre-xf86-video-nouveau-1.0.18.3
+    xserver/xf86-video-omap:
+        ref: xlibre-xf86-video-omap-0.4.5.2
+    xserver/xf86-video-qxl:
+        ref: xlibre-xf86-video-qxl-0.1.6.2
+    xserver/xf86-video-r128:
+        ref: xlibre-xf86-video-r128-6.13.0.2
+    xserver/xf86-video-vesa:
+        ref: xlibre-xf86-video-vesa-2.6.0.2
+    xserver/xf86-video-vmware:
+        ref: xlibre-xf86-video-vmware-13.4.0.3
+
+# what to build (can use packages or provides here)
+build:
+    - x11/xserver-sdk
+    - xserver/xf86-input-libinput
+    - xserver/xf86-input-joystick
+    - xserver/xf86-input-evdev
+    - xserver/xf86-input-mouse
+    - xserver/xf86-input-synaptics
+    - xserver/xf86-input-elographics
+    - xserver/xf86-video-amdgpu
+    - xserver/xf86-video-ati
+    - xserver/xf86-video-intel
+    - xserver/xf86-video-mach64
+    - xserver/xf86-video-nouveau
+    - xserver/xf86-video-omap
+    - xserver/xf86-video-qxl
+    - xserver/xf86-video-r128
+    - xserver/xf86-video-vesa
+    - xserver/xf86-video-vmware
+
+# extra environment variables
+env:
+    PKG_CONFIG_PATH: ${pathes::PREFIX}/share/pkgconfig:${pathes::PREFIX}/lib/pkgconfig:${pathes::PREFIX}/lib/${@PROJECT::@machine}/pkgconfig/
+    ACLOCAL_PATH: ${pathes::PREFIX}/share/aclocal
+
+packages:
+    - ${@PROJECT::@rootdir}/cf/xlibre/packages

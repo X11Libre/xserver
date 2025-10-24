@@ -1,0 +1,12 @@
+provides: x11/libxcb-wm
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xorg_git}/lib/libxcb-wm.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/*:refs/tags/*
+build-depends:
+    - libxcb
+ref: xcb-util-wm-0.4.2

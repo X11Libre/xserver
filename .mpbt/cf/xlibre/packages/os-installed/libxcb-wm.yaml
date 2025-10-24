@@ -1,0 +1,3 @@
+provides: x11/libxcb-wm
+type: system
+pkg-config: libxcb-wm

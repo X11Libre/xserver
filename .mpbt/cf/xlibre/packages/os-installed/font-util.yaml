@@ -1,0 +1,3 @@
+provides: x11/font-util
+type: system
+pkg-config: font-util

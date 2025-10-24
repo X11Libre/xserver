@@ -1,0 +1,11 @@
+provides: x11/libxcvt
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xorg_git}/lib/libxcvt.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/*:refs/tags/*
+buildsystem: meson
+ref: libxcvt-0.1.0

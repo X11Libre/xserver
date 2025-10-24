@@ -1,0 +1,47 @@
+name: Build via MPBT
+
+permissions:
+    contents: write
+
+env:
+    MESON_BUILDDIR:  "build"
+    X11_PREFIX:      /home/runner/x11
+    X11_BUILD_DIR:   /home/runner/build-deps
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    via-mpbt:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            # FIXME: move these to MPBT ?
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: install golang
+              run:  sudo apt-get install golang-go
+
+            - name: install mpbt package
+              run: go install github.com/metux/mpbt/cmd/mpbt-builder@latest
+
+            - run: echo "XSERVER_REPO=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+
+            - run: echo "XSERVER_COMMIT=${GITHUB_SHA}"
+
+            - run: echo "XSERVER_BRANCH=${GITHUB_BRANCH}"
+
+            - run: echo "XSERVER_REF=${GITHUB_REF}"
+
+            - name: build it
+              run: |
+                    cd .mpbt && ~/go/bin/mpbt-builder \
+                        -root . \
+                        -solution cf/xlibre/solutions/github.yaml \
+                        -solution-define xserver_commit=${GITHUB_SHA} \
+                        -solution-define xserver_repo=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git \
+                        build

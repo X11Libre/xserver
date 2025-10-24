@@ -1,0 +1,26 @@
+provides:
+    - x11/xserver-sdk
+    - xlibre-xserver
+
+sources:
+    git:
+        url:    ${url}
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/heads/*:refs/remotes/origin/*
+          - refs/tags/*:refs/tags/*
+
+ref: origin/master
+url: ${@SOLUTION::xlibre_git}/xserver
+
+buildsystem: meson
+
+depends:
+    - sys/pciaccess
+    - x11/libxcvt
+    - sys/libdrm
+
+build-depends:
+    - x11/xorgproto
+    - x11/xcbproto

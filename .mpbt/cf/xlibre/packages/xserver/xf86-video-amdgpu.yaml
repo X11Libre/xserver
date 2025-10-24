@@ -1,0 +1,17 @@
+sources:
+    git:
+        url:    ${@SOLUTION::xlibre_git}/xf86-video-amdgpu.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/heads/*:refs/remotes/origin/*
+          - refs/tags/*:refs/tags/*
+
+buildsystem: autotools
+
+build-depends:
+    - x11/xserver-sdk
+    - 3rdparty/util-macros
+    - sys/libdrm
+
+ref: origin/master

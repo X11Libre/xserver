@@ -1,0 +1,11 @@
+provides: x11/xcbproto
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xorg_git}/proto/xcbproto.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/*:refs/tags/*
+buildsystem: autotools
+ref: xcb-proto-1.17.0
