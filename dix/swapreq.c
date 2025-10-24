@@ -170,15 +170,6 @@ SProcConfigureWindow(ClientPtr client)
 }
 
 int _X_COLD
-SProcInternAtom(ClientPtr client)
-{
-    REQUEST(xInternAtomReq);
-    REQUEST_AT_LEAST_SIZE(xInternAtomReq);
-    swaps(&stuff->nbytes);
-    return ((*ProcVector[X_InternAtom]) (client));
-}
-
-int _X_COLD
 SProcChangeProperty(ClientPtr client)
 {
     REQUEST(xChangePropertyReq);
