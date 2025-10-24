@@ -883,10 +883,6 @@ ProcXvShmPutImage(ClientPtr client)
 #endif /* CONFIG_MITSHM */
 }
 
-#ifdef XvMCExtension
-#include "xvmcext.h"
-#endif
-
 __size_assert(int, sizeof(INT32));
 
 static int
@@ -915,11 +911,6 @@ ProcXvQueryImageAttributes(ClientPtr client)
             break;
         }
     }
-
-#ifdef XvMCExtension
-    if (!pImage)
-        pImage = XvMCFindXvImage(pPort, stuff->id);
-#endif
 
     if (!pImage)
         return BadMatch;

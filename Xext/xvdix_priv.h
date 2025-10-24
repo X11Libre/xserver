@@ -80,6 +80,4 @@ int XvdiMatchPort(XvPortPtr pPort, DrawablePtr pDraw);
 int XvdiGrabPort(ClientPtr client, XvPortPtr pPort, Time ctime, int *p_result);
 int XvdiUngrabPort(ClientPtr client, XvPortPtr pPort, Time ctime);
 
-XvImagePtr XvMCFindXvImage(XvPortPtr pPort, CARD32 id);
-
 #endif /* _XORG_XVDIX_PRIV_H */
