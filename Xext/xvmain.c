@@ -163,7 +163,7 @@ XvExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, 0))
+    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, sizeof(XvScreenRec)))
         return;
 
     /* Look to see if any screens were initialized; if not then
@@ -279,22 +279,8 @@ XvScreenInit(ScreenPtr pScreen)
         XvScreenGeneration = serverGeneration;
     }
 
-    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, 0))
+    if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, sizeof(XvScreenRec)))
         return BadAlloc;
-
-    if (dixLookupPrivate(&pScreen->devPrivates, &XvScreenKeyRec)) {
-        ErrorF("XvScreenInit: screen devPrivates ptr non-NULL before init\n");
-    }
-
-    /* ALLOCATE SCREEN PRIVATE RECORD */
-
-    XvScreenPtr pxvs = calloc(1, sizeof(XvScreenRec));
-    if (!pxvs) {
-        ErrorF("XvScreenInit: Unable to allocate screen private structure\n");
-        return BadAlloc;
-    }
-
-    dixSetPrivate(&pScreen->devPrivates, &XvScreenKeyRec, pxvs);
 
     dixScreenHookWindowDestroy(pScreen, XvWindowDestroy);
     dixScreenHookClose(pScreen, XvScreenClose);
@@ -305,17 +291,9 @@ XvScreenInit(ScreenPtr pScreen)
 
 static void XvScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
 {
-    XvScreenPtr pxvs;
-
-    pxvs = (XvScreenPtr) dixLookupPrivate(&pScreen->devPrivates, &XvScreenKeyRec);
-
     dixScreenUnhookWindowDestroy(pScreen, XvWindowDestroy);
     dixScreenUnhookClose(pScreen, XvScreenClose);
     dixScreenUnhookPixmapDestroy(pScreen, XvPixmapDestroy);
-
-    free(pxvs);
-
-    dixSetPrivate(&pScreen->devPrivates, &XvScreenKeyRec, NULL);
 }
 
 static void
