@@ -53,4 +53,10 @@ Bool MakeWindowOptional(WindowPtr pWin);
  */
 Bool dixWindowIsRoot(Window window);
 
+/*
+ * @brief lower part of X_CreateWindow request handler.
+ * Called by ProcCreateWindow() as well as PanoramiXCreateWindow()
+ */
+int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids);
+
 #endif /* _XSERVER_DIX_WINDOW_PRIV_H */
