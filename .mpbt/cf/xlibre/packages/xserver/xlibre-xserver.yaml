@@ -6,7 +6,7 @@ sources:
     git:
         url:    ${url}
         ref:    ${ref}
-#        depth:  1
+        depth:  100
         fetch:
           - refs/heads/*:refs/remotes/origin/*
           - refs/tags/*:refs/tags/*
