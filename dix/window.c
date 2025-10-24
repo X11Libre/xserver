@@ -503,7 +503,6 @@ MakeRootTile(WindowPtr pWin)
     ScreenPtr pScreen = pWin->drawable.pScreen;
     GCPtr pGC;
     unsigned char back[128];
-    int len = BitmapBytePad(sizeof(long));
     unsigned char *from, *to;
 
     pWin->background.pixmap = (*pScreen->CreatePixmap) (pScreen, 4, 4,
@@ -529,6 +528,7 @@ MakeRootTile(WindowPtr pWin)
     from = (screenInfo.bitmapBitOrder == LSBFirst) ? _back_lsb : _back_msb;
     to = back;
 
+    unsigned len = BitmapBytePad(sizeof(long));
     for (int i = 4; i > 0; i--, from++)
         for (int j = len; j > 0; j--)
             *to++ = *from;
