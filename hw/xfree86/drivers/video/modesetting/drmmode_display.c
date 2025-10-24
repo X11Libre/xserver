@@ -2428,7 +2428,11 @@ populate_format_modifiers(xf86CrtcPtr crtc, const drmModePlane *kplane,
 
             if ((i < mod->offset) || (i > mod->offset + 63))
                 continue;
+
             if (!(mod->formats & (1 << (i - mod->offset))))
+                continue;
+
+            if (mod->modifier == DRM_FORMAT_MOD_INVALID)
                 continue;
 
             num_modifiers++;
