@@ -74,6 +74,14 @@ static char consoleDev[PATH_MAX] = "/dev/fb";
    Used by hw/xfree86/common/xf86AutoConfig.c for VIS_GETIDENTIFIER */
 char xf86SolarisFbDev[PATH_MAX] = "/dev/fb";
 
+
+Bool
+xf86VTKeepTtyIsSet(void)
+{
+     return KeepTty;
+}
+
+
 #ifdef HAS_USL_VTS
 static void
 switch_to(int vt, const char *from)
