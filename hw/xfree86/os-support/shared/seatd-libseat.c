@@ -44,7 +44,7 @@
 #include "globals.h"
 #include "seatd-libseat.h"
 
-// ============ libseat client adapter ======================
+/* ============ libseat client adapter ====================== */
 
 struct libseat_info {
     char *session;
@@ -78,13 +78,13 @@ enable_seat(struct libseat *seat, void *userdata)
     for (pInfo = xf86InputDevs; pInfo; pInfo = pInfo->next)
         if (pInfo->flags & XI86_SERVER_FD){
             if (xf86CheckIntOption(pInfo->options, "libseat_id", -1) > 0){
-		int fd = -1, paused = FALSE;
+                int fd = -1, paused = FALSE;
                 seatd_libseat_open_device(pInfo, &fd, &paused);
                 xf86EnableInputDeviceForVTSwitch(pInfo);
             }
         }
-    xf86InputEnableVTProbe(); // Add any paused input devices
-    xf86platformVTProbe(); // Probe for outputs
+    xf86InputEnableVTProbe(); /* Add any paused input devices */
+    xf86platformVTProbe(); /* Probe for outputs */
 }
 
 /*
@@ -187,7 +187,7 @@ log_libseat(enum libseat_log_level level, const char *fmt, va_list args)
     free(xfmt);
 }
 
-// ============== seatd-libseat.h API functions =============
+/* ============== seatd-libseat.h API functions ============= */
 
 /*
  * Initialise the libseat client.
@@ -311,10 +311,10 @@ seatd_libseat_open_device(InputInfoPtr p, int *pfd, Bool *paused)
         return;
     }
     if (!seat_info.vt_active) {
-	*pfd = -2; /* Invalid, but not -1. See xf86NewInputDevice() */
-	*paused = TRUE;
+        *pfd = -2; /* Invalid, but not -1. See xf86NewInputDevice() */
+        *paused = TRUE;
         LogMessage(X_INFO, "seatd_libseat paused %s\n", path);
-	return;
+        return;
     }
     fd = check_duplicate_device(p->major,p->minor);
     if (fd < 0) {
