@@ -4899,9 +4899,9 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
          * something has gone terribly wrong. */
         assert(cursor.num_dimensions);
 
-        /* Use the minimum available size. */
-        width  = cursor.dimensions[0].width;
-        height = cursor.dimensions[0].height;
+        /* Use the maximum available size. */
+        width  = cursor.dimensions[cursor.num_dimensions - 1].width;
+        height = cursor.dimensions[cursor.num_dimensions - 1].height;
 
         /* We take the minimum of the sizes here
          * so that we don't get a cursor glyph larger
