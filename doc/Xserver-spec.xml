@@ -4716,7 +4716,7 @@ the same value for <type>size</type> or the server will abort.</para>
 <para>
 To request per-screen private space in an object, use
 <blockquote><programlisting>
-        Bool dixRegisterScreenPrivateKey(DevScreenPrivateKey key, ScreenPtr pScreen, DevPrivateType type, unsigned size);
+        Bool dixRegisterScreenPrivateKey(DevScreenPrivateKeyPtr key, ScreenPtr pScreen, DevPrivateType type, unsigned size);
 </programlisting></blockquote>
 The <parameter>type</parameter> and <parameter>size</parameter> arguments are
 the same as those to <function>dixRegisterPrivateKey</function> but this
