@@ -388,7 +388,7 @@ dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
 }
 
 Bool
-dixRegisterScreenPrivateKey(DevScreenPrivateKey screenKey, ScreenPtr pScreen,
+dixRegisterScreenPrivateKey(DevScreenPrivateKeyPtr screenKey, ScreenPtr pScreen,
                             DevPrivateType type, unsigned size)
 {
     DevPrivateKey key;
@@ -414,7 +414,7 @@ dixRegisterScreenPrivateKey(DevScreenPrivateKey screenKey, ScreenPtr pScreen,
 }
 
 DevPrivateKey
-_dixGetScreenPrivateKey(const DevScreenPrivateKey key, ScreenPtr pScreen)
+_dixGetScreenPrivateKey(const DevScreenPrivateKeyPtr key, ScreenPtr pScreen)
 {
     return dixGetPrivate(&pScreen->devPrivates, &key->screenKey);
 }
