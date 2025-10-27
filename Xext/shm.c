@@ -197,12 +197,12 @@ CheckForShmSyscall(void)
 
 #endif
 
-static Bool privatesRegistered = FALSE;
+static Bool shmPrivatesRegistered = FALSE;
 
 static Bool
 ShmRegisterPrivates(void)
 {
-    if (privatesRegistered)
+    if (shmPrivatesRegistered)
         return TRUE;
 
     if (!dixRegisterPrivateKey(&shmScrPrivateKeyRec, PRIVATE_SCREEN, sizeof(ShmScrPrivateRec)))
@@ -210,7 +210,7 @@ ShmRegisterPrivates(void)
     if (!dixRegisterPrivateKey(&shmPixmapPrivateKeyRec, PRIVATE_PIXMAP, 0))
         return FALSE;
 
-    privatesRegistered = TRUE;
+    shmPrivatesRegistered = TRUE;
     return TRUE;
 }
 
@@ -1361,6 +1361,12 @@ static void ShmPixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr
     dixSetPrivate(&pPixmap->devPrivates, shmPixmapPrivateKey, NULL);
 }
 
+static void ShmCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
+{
+    shmPrivatesRegistered = FALSE;
+    dixScreenUnhookClose(pScreen, ShmCloseScreen);
+}
+
 void
 ShmExtensionInit(void)
 {
@@ -1385,6 +1391,7 @@ ShmExtensionInit(void)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
                 sharedPixmaps = xFalse;
+            dixScreenHookClose(walkScreen, ShmCloseScreen);
         });
         if (sharedPixmaps)
             DIX_FOR_EACH_SCREEN({
