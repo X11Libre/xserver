@@ -94,7 +94,7 @@ typedef struct _DevScreenPrivateKeyRec {
 #define HAS_DIXREGISTERPRIVATEKEY	1
 
 /*
- * Register a new private index for the private type.
+ * @brief Register a new private index for the private type.
  *
  * This initializes the specified key and optionally requests pre-allocated
  * private space for your driver/module. If you request no extra space, you
@@ -102,14 +102,19 @@ typedef struct _DevScreenPrivateKeyRec {
  * you can get the address of the extra space and store whatever data you like
  * there.
  *
- * You may call dixRegisterPrivateKey more than once on the same key, but the
- * size and type must match or the server will abort.
+ * Maybe called multiple times on the same key, but the size and type must
+ * match or the server will abort.
  *
- * dixRegisterPrivateKey returns FALSE if it fails to allocate memory
- * during its operation.
+ * Note: this may move around the private storage area to different address,
+ * thus any pointers taken by GetPrivateAddr() et al have to be considered
+ * invalid after calling this function.
+ *
+ * @param key   pointer to key (will be written to)
+ * @param type  the object type the key is used for
+ * @param size  size of the storage reserved for that key (zero => void*)
+ * @return      FALSE if it fails to allocate memory during its operation.
  */
-extern _X_EXPORT Bool
- dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size);
+_X_EXPORT Bool  dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size);
 
 /*
  * Check whether a private key has been registered

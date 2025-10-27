@@ -306,14 +306,6 @@ grow_screen_specific_set(DevPrivateType type, unsigned bytes)
     });
 }
 
-/*
- * Register a private key. This takes the type of object the key will
- * be used with, which may be PRIVATE_ALL indicating that this key
- * will be used with all of the private objects. If 'size' is
- * non-zero, then the specified amount of space will be allocated in
- * the private storage. Otherwise, space for a single pointer will
- * be allocated which can be set with dixSetPrivate
- */
 Bool
 dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
 {
