@@ -4910,6 +4910,16 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         min_height = MIN(height, min_height);
 
         drmmode_crtc->cursor.bo = dumb_bo_create(drmmode->fd, width, height, bpp);
+        if (!drmmode_crtc->cursor.bo) {
+            drmmode_bo_destroy(drmmode, &drmmode->front_bo);
+            for (int j = 0; j < i; j++) {
+                xf86CrtcPtr free_crtc = xf86_config->crtc[j];
+                drmmode_crtc_private_ptr free_drmmode_crtc = free_crtc->driver_private;
+                dumb_bo_destroy(drmmode->fd, free_drmmode_crtc->cursor.bo);
+                free_drmmode_crtc->cursor.bo = NULL;
+            }
+            return FALSE;
+        }
     }
 
     ms->cursor_image_width  = min_width;
