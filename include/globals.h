@@ -18,8 +18,4 @@ extern _X_EXPORT int defaultColorVisualClass;
 extern _X_EXPORT int GrabInProgress;
 extern _X_EXPORT char *SeatId;
 
-#ifdef XINERAMA
-extern _X_EXPORT Bool PanoramiXExtensionDisabledHack;
-#endif /* XINERAMA */
-
 #endif                          /* !_XSERV_GLOBAL_H_ */
