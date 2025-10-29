@@ -2,6 +2,9 @@
 #ifndef _XSERV_GLOBAL_H_
 #define _XSERV_GLOBAL_H_
 
+#include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
+
 #include "window.h"             /* for WindowPtr */
 #include "extinit.h"
 #ifdef DPMSExtension
