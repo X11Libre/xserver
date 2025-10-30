@@ -39,7 +39,6 @@ int SProcChangeHosts(ClientPtr client);
 int SProcChangeKeyboardControl(ClientPtr client);
 int SProcChangeKeyboardMapping(ClientPtr client);
 int SProcChangePointerControl(ClientPtr client);
-int SProcChangeProperty(ClientPtr client);
 int SProcChangeWindowAttributes(ClientPtr client);
 int SProcClearToBackground(ClientPtr client);
 int SProcConfigureWindow(ClientPtr client);

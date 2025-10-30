@@ -257,14 +257,31 @@ ProcRotateProperties(ClientPtr client)
 int
 ProcChangeProperty(ClientPtr client)
 {
+    REQUEST(xChangePropertyReq);
+    REQUEST_AT_LEAST_SIZE(xChangePropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->property);
+        swapl(&stuff->type);
+        swapl(&stuff->nUnits);
+        switch (stuff->format) {
+        case 8:
+            break;
+        case 16:
+            SwapRestS(stuff);
+            break;
+        case 32:
+            SwapRestL(stuff);
+            break;
+        }
+    }
+
     char format, mode;
     unsigned long len;
     int sizeInBytes, err;
     uint64_t totalSize;
 
-    REQUEST(xChangePropertyReq);
-
-    REQUEST_AT_LEAST_SIZE(xChangePropertyReq);
     UpdateCurrentTime();
     format = stuff->format;
     mode = stuff->mode;
