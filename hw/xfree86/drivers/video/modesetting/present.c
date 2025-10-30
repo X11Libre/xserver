@@ -323,6 +323,9 @@ ms_present_check_flip(RRCrtcPtr crtc,
     modesettingPtr ms = modesettingPTR(scrn);
     Bool async_flip = !sync_flip;
 
+    if (reason)
+        *reason = PRESENT_FLIP_REASON_UNKNOWN;
+
     if (ms->drmmode.sprites_visible > 0)
         goto no_flip;
 
