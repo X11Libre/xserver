@@ -322,6 +322,9 @@ ms_present_check_flip(RRCrtcPtr crtc,
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
 
+    if (reason)
+        *reason = PRESENT_FLIP_REASON_UNKNOWN;
+
     if (ms->drmmode.sprites_visible > 0)
         goto no_flip;
 
@@ -337,7 +340,7 @@ ms_present_check_flip(RRCrtcPtr crtc,
 
 no_flip:
     /* Export some info about TearFree if Present can't flip anyway */
-    if (reason) {
+    if (reason && *reason == PRESENT_FLIP_REASON_UNKNOWN) {
         xf86CrtcPtr xf86_crtc = crtc->devPrivate;
         drmmode_crtc_private_ptr drmmode_crtc = xf86_crtc->driver_private;
         drmmode_tearfree_ptr trf = &drmmode_crtc->tearfree;
