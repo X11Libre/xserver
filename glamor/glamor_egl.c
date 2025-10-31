@@ -53,11 +53,11 @@ struct glamor_egl_screen_private {
     EGLDisplay display;
     EGLContext context;
     char *device_path;
+    char *glvnd_vendor; /* GLVND vendor if forced from options or NULL otherwise */
 
-    int fd;
     struct gbm_device *gbm;
+    int fd;
     int dmabuf_capable;
-    Bool force_vendor; /* if GLVND vendor is forced from options */
 
     xf86FreeScreenProc *saved_free_screen;
 };
@@ -1022,11 +1022,13 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
     glamor_ctx->make_current = glamor_egl_make_current;
 
     /* Use dynamic logic only if vendor is not forced via xorg.conf */
-    if (!glamor_egl->force_vendor) {
+    if (!glamor_egl->glvnd_vendor) {
         gbm_backend_name = gbm_device_get_backend_name(glamor_egl->gbm);
         /* Mesa uses "drm" as backend name, in that case, just do nothing */
         if (gbm_backend_name && strcmp(gbm_backend_name, "drm") != 0)
             glamor_set_glvnd_vendor(screen, gbm_backend_name);
+    } else {
+        glamor_set_glvnd_vendor(screen, glamor_egl->glvnd_vendor);
     }
 #ifdef DRI3
     /* Tell the core that we have the interfaces for import/export
@@ -1077,6 +1079,7 @@ static void glamor_egl_cleanup(struct glamor_egl_screen_private *glamor_egl)
     if (glamor_egl->gbm)
         gbm_device_destroy(glamor_egl->gbm);
     free(glamor_egl->device_path);
+    free(glamor_egl->glvnd_vendor);
     free(glamor_egl);
 }
 
@@ -1214,8 +1217,10 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     xf86ProcessOptions(scrn->scrnIndex, scrn->options, options);
     glvnd_vendor = xf86GetOptValString(options, GLAMOREGLOPT_VENDOR_LIBRARY);
     if (glvnd_vendor) {
-        glamor_set_glvnd_vendor(xf86ScrnToScreen(scrn), glvnd_vendor);
-        glamor_egl->force_vendor = TRUE;
+        glamor_egl->glvnd_vendor = strdup(glvnd_vendor);
+        if (!glamor_egl->glvnd_vendor) {
+            xf86DrvMsg(scrn->scrnIndex, X_WARNING, "Couldn't set gl vendor to: %s\n", glvnd_vendor);
+        }
     }
     api = xf86GetOptValString(options, GLAMOREGLOPT_RENDERING_API);
     if (api && !strncasecmp(api, "es", 2))
