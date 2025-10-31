@@ -2127,37 +2127,37 @@ PanoramiXRenderFreePicture(ClientPtr client)
 }
 
 static int
-PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
+PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *orig_req)
 {
     PanoramiXRes *src, *msk, *dst;
     int result = Success;
-    xRenderCompositeReq orig;
+    xRenderCompositeReq orig = *orig_req;
 
-    VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
-    VERIFY_XIN_ALPHA(msk, stuff->mask, client, DixReadAccess);
-    VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
+    VERIFY_XIN_PICTURE(src, orig.src, client, DixReadAccess);
+    VERIFY_XIN_ALPHA(msk, orig.mask, client, DixReadAccess);
+    VERIFY_XIN_PICTURE(dst, orig.dst, client, DixWriteAccess);
 
-    orig = *stuff;
+    xRenderCompositeReq sub_req = orig;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
-        stuff->src = src->info[walkScreenIdx].id;
+        sub_req.src = src->info[walkScreenIdx].id;
         if (src->u.pict.root) {
-            stuff->xSrc = orig.xSrc - walkScreen->x;
-            stuff->ySrc = orig.ySrc - walkScreen->y;
+            sub_req.xSrc = orig.xSrc - walkScreen->x;
+            sub_req.ySrc = orig.ySrc - walkScreen->y;
         }
-        stuff->dst = dst->info[walkScreenIdx].id;
+        sub_req.dst = dst->info[walkScreenIdx].id;
         if (dst->u.pict.root) {
-            stuff->xDst = orig.xDst - walkScreen->x;
-            stuff->yDst = orig.yDst - walkScreen->y;
+            sub_req.xDst = orig.xDst - walkScreen->x;
+            sub_req.yDst = orig.yDst - walkScreen->y;
         }
         if (msk) {
-            stuff->mask = msk->info[walkScreenIdx].id;
+            sub_req.mask = msk->info[walkScreenIdx].id;
             if (msk->u.pict.root) {
-                stuff->xMask = orig.xMask - walkScreen->x;
-                stuff->yMask = orig.yMask - walkScreen->y;
+                sub_req.xMask = orig.xMask - walkScreen->x;
+                sub_req.yMask = orig.yMask - walkScreen->y;
             }
         }
-        result = SingleRenderComposite(client, stuff);
+        result = SingleRenderComposite(client, &sub_req);
         if (result != Success)
             break;
     });
