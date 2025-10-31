@@ -501,7 +501,7 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
         return NULL;
 
     return gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
-                         pixmap_priv->image, 0);
+                         pixmap_priv->image, GBM_BO_USE_RENDERING);
 }
 
 struct gbm_bo *
@@ -686,7 +686,8 @@ glamor_back_pixmap_from_fd(PixmapPtr pixmap,
     import_data.width = width;
     import_data.height = height;
     import_data.stride = stride;
-    bo = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD, &import_data, 0);
+    bo = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD, &import_data,
+                       GBM_BO_USE_RENDERING);
     if (!bo)
         return FALSE;
 
@@ -732,7 +733,8 @@ glamor_pixmap_from_fds(ScreenPtr screen,
             import_data.strides[i] = strides[i];
             import_data.offsets[i] = offsets[i];
         }
-        bo = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD_MODIFIER, &import_data, 0);
+        bo = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD_MODIFIER, &import_data,
+                           GBM_BO_USE_RENDERING);
         if (bo) {
             screen->ModifyPixmapHeader(pixmap, width, height, 0, 0, strides[0], NULL);
             ret = glamor_egl_create_textured_pixmap_from_gbm_bo(pixmap, bo, TRUE);
