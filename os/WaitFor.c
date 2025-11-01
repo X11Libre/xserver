@@ -197,8 +197,15 @@ WaitForSomething(Bool are_ready)
             timeout = 0;
 
         BlockHandler(&timeout);
-        if (NewOutputPending)
-            FlushAllOutput();
+
+        /* Always try to flush out anything we have, even for clients that had
+           been stuck for a short while because we've tried to send out too
+           much at once. If we'd only do it when someting *new* is in the queue,
+           then those clients might get stuck for long time, until something else
+           triggers the flush by mere accident.
+        */
+        FlushAllOutput();
+
         /* keep this check close to select() call to minimize race */
         if (dispatchException)
             i = -1;
