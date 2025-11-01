@@ -33,7 +33,6 @@ typedef struct _CallbackList {
  *
  * @param pcbl pointer to the list head (CallbackListPtr)
  */
-_X_EXPORT /* only for GLX module */
 void DeleteCallbackList(CallbackListPtr *pcbl);
 
 #endif /* _XSERVER_CALLBACK_PRIV_H */
