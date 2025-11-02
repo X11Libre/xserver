@@ -31,6 +31,18 @@
 #include <xf86Xinput.h>
 extern int seatd_libseat_init(Bool KeepTty_state);
 extern void seatd_libseat_fini(void);
+
+/**
+ * @brief seatd_libseat_open_graphics returns opened fd via rpc call through seatd
+ * @param path node path
+ * @warning this function returns <0 in case of error (for example -2)
+ * @return file descriptior or <0
+ *
+ * @warning _X_EXPORT is only for internal consuption (currently for modesetting only, because its `open_hw` function calls open directly)
+ *
+ * @note XXX: maybe in future Xlibre public api could gain function for opening device nodes by path?
+ **/
+_X_EXPORT
 extern int seatd_libseat_open_graphics(const char *path);
 extern void seatd_libseat_open_device(InputInfoPtr p,int *fd,Bool *paus);
 extern void seatd_libseat_close_device(InputInfoPtr p);

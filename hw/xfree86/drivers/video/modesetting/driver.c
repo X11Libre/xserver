@@ -70,6 +70,11 @@
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
 #endif
+
+#ifdef SEATD_LIBSEAT
+#include "seatd-libseat.h"
+#endif
+
 #include "driver.h"
 
 static void AdjustFrame(ScrnInfoPtr pScrn, int x, int y);
@@ -240,17 +245,32 @@ open_hw(const char *dev)
     if ((fd = get_passed_fd()) != -1)
         return fd;
 
-    if (dev)
+    if (dev){
         fd = open(dev, O_RDWR | O_CLOEXEC, 0);
-    else {
+	#ifdef SEATD_LIBSEAT
+	/* try to open dev node via libseat */
+	if (fd == -1) {
+	    fd = seatd_libseat_open_graphics(dev);
+	}
+	#endif
+    } else {
         dev = getenv("KMSDEVICE");
         if ((NULL == dev) || ((fd = open(dev, O_RDWR | O_CLOEXEC, 0)) == -1)) {
             dev = "/dev/dri/card0";
             fd = open(dev, O_RDWR | O_CLOEXEC, 0);
+	    #ifdef SEATD_LIBSEAT
+	    if (fd == -1){
+                fd = seatd_libseat_open_graphics(dev);
+	    }
+	    #endif
         }
     }
-    if (fd == -1)
+    if (fd == -1) {
         xf86DrvMsg(-1, X_ERROR, "open %s: %s\n", dev, strerror(errno));
+    } else if (fd < -1) {
+        xf86DrvMsg(-1, X_ERROR, "open %s: failed to open, tried seatd_libseat_open_graphics and opening node directly",dev);
+	fd = -1;
+    }
 
     return fd;
 }
