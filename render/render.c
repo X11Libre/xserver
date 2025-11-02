@@ -2804,7 +2804,7 @@ ProcRenderTriStrip(ClientPtr client)
     return (usePanoramiX ? PanoramiXRenderTriStrip(client, stuff)
                          : SingleRenderTriStrip(client, stuff));
 #else
-    return SingleRenderTriStrip(client, stuff));
+    return SingleRenderTriStrip(client, stuff);
 #endif
 }
 
