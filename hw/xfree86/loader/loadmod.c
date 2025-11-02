@@ -883,6 +883,7 @@ RemoveChild(ModuleDescPtr child)
     parent = child->parent;
     if (parent->child == child) {
         parent->child = child->sib;
+        child->sib = NULL;
         return;
     }
 
