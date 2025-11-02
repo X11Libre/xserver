@@ -72,6 +72,8 @@
 #include "mipointer.h"
 #include "loaderProcs.h"
 #include "../os-support/linux/systemd-logind.h"
+#include "seatd-libseat.h"
+
 #include "exevents.h"           /* AddInputDevice */
 #include "exglobals.h"
 #include "eventstr.h"
@@ -858,9 +860,10 @@ xf86DeleteInput(InputInfoPtr pInp, int flags)
 
     FreeInputAttributes(pInp->attrs);
 
-    if (pInp->flags & XI86_SERVER_FD)
+    if (pInp->flags & XI86_SERVER_FD){
+        seatd_libseat_close_device(pInp);
         systemd_logind_release_fd(pInp->major, pInp->minor, pInp->fd);
-
+    }
     /* Remove the entry from the list. */
     if (pInp == xf86InputDevs)
         xf86InputDevs = pInp->next;
@@ -987,6 +990,7 @@ xf86NewInputDevice(InputInfoPtr pInfo, DeviceIntPtr *pdev, BOOL enable)
     if (path && (drv->capabilities & XI86_DRV_CAP_SERVER_FD)){
         int fd = systemd_logind_take_fd(pInfo->major, pInfo->minor,
                                         path, &paused);
+        seatd_libseat_open_device(pInfo,&fd,&paused);
         if (fd != -1) {
             if (paused) {
                 /* Put on new_input_devices list for delayed probe */

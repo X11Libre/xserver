@@ -66,6 +66,8 @@
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "../os-support/linux/systemd-logind.h"
+#include "seatd-libseat.h"
+
 #include "xf86VGAarbiter_priv.h"
 #include "loaderProcs.h"
 
@@ -339,6 +341,7 @@ InitOutput(int argc, char **argv)
             DoShowOptions();
 
         dbus_core_init();
+        seatd_libseat_init(xf86VTKeepTtyIsSet());
         systemd_logind_init();
 
         /* Do a general bus probe.  This will be a PCI probe for x86 platforms */
@@ -432,9 +435,11 @@ InitOutput(int argc, char **argv)
                 xorgHWOpenConsole = TRUE;
         }
 
-        if (xorgHWOpenConsole)
-            xf86OpenConsole();
-        else
+        if (xorgHWOpenConsole) {
+            if (!seatd_libseat_controls_session()) {
+                xf86OpenConsole();
+            }
+        } else
             xf86Info.dontVTSwitch = TRUE;
 
 	/* Enable full I/O access */
@@ -566,8 +571,11 @@ InitOutput(int argc, char **argv)
         /*
          * serverGeneration != 1; some OSs have to do things here, too.
          */
-        if (xorgHWOpenConsole)
-            xf86OpenConsole();
+        if (xorgHWOpenConsole) {
+            if (!seatd_libseat_controls_session()) {
+                xf86OpenConsole();
+            }
+        }
 
         /*
            should we reopen it here? We need to deal with an already opened
@@ -845,9 +853,13 @@ ddxGiveUp(enum ExitCode error)
         xf86Screens[i]->vtSema = FALSE;
     }
 
-    if (xorgHWOpenConsole)
-        xf86CloseConsole();
+    if (xorgHWOpenConsole) {
+        if (!seatd_libseat_controls_session()) {
+            xf86CloseConsole();
+        }
+    }
 
+    seatd_libseat_fini();
     systemd_logind_fini();
     dbus_core_fini();
 
