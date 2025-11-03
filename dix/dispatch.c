@@ -3948,7 +3948,7 @@ dixMarkClientException(ClientPtr client)
  * of the number of pixels that fit in a scanline pad unit?"
  * Note that ~0 is an invalid entry (mostly for the benefit of the reader).
  */
-static int answer[6][4] = {
+static const int answer[6][4] = {
     /* pad   pad   pad     pad */
     /*  8     16    32    64 */
 
@@ -3965,7 +3965,7 @@ static int answer[6][4] = {
  * the answer array above given the number of bits per pixel?"
  * Note that ~0 is an invalid entry (mostly for the benefit of the reader).
  */
-static int indexForBitsPerPixel[33] = {
+static const int indexForBitsPerPixel[33] = {
     ~0, 0, ~0, ~0,              /* 1 bit per pixel */
     1, ~0, ~0, ~0,              /* 4 bits per pixel */
     2, ~0, ~0, ~0,              /* 8 bits per pixel */
@@ -3981,7 +3981,7 @@ static int indexForBitsPerPixel[33] = {
  * This array gives the bytesperPixel value for cases where the number
  * of bits per pixel is a multiple of 8 but not a power of 2.
  */
-static int answerBytesPerPixel[33] = {
+static const int answerBytesPerPixel[33] = {
     ~0, 0, ~0, ~0,              /* 1 bit per pixel */
     0, ~0, ~0, ~0,              /* 4 bits per pixel */
     0, ~0, ~0, ~0,              /* 8 bits per pixel */
@@ -3998,7 +3998,7 @@ static int answerBytesPerPixel[33] = {
  * the answer array above given the number of bits per scanline pad unit?"
  * Note that ~0 is an invalid entry (mostly for the benefit of the reader).
  */
-static int indexForScanlinePad[65] = {
+static const int indexForScanlinePad[65] = {
     ~0, ~0, ~0, ~0,
     ~0, ~0, ~0, ~0,
     0, ~0, ~0, ~0,              /* 8 bits per scanline pad unit */
