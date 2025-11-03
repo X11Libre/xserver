@@ -154,8 +154,8 @@ Equipment Corporation.
 
 Bool bgNoneRoot = FALSE;
 
-static unsigned char _back_lsb[4] = { 0x88, 0x22, 0x44, 0x11 };
-static unsigned char _back_msb[4] = { 0x11, 0x44, 0x22, 0x88 };
+static const unsigned char _back_lsb[4] = { 0x88, 0x22, 0x44, 0x11 };
+static const unsigned char _back_msb[4] = { 0x11, 0x44, 0x22, 0x88 };
 
 static Bool WindowParentHasDeviceCursor(WindowPtr pWin,
                                         DeviceIntPtr pDev, CursorPtr pCurs);
