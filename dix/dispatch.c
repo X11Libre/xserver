@@ -1203,6 +1203,7 @@ UngrabServer(ClientPtr client)
     int i;
 
     grabState = GrabNone;
+    grabClient = NULL;
     ListenToAllClients();
     mark_client_ungrab();
     for (i = mskcnt; --i >= 0 && !grabWaiters[i];);
