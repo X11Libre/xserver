@@ -786,10 +786,12 @@ glamor_get_formats(ScreenPtr screen,
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
     struct glamor_egl_screen_private *glamor_egl;
     EGLint num;
+#endif
 
-    /* Explicitly zero the count as the caller may ignore the return value */
+    /* Explicitly zero the count and formats as the caller may ignore the return value */
     *num_formats = 0;
-
+    *formats = NULL;
+#ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
     glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
 
     if (!glamor_egl->dmabuf_capable)
@@ -812,11 +814,8 @@ glamor_get_formats(ScreenPtr screen,
     }
 
     *num_formats = num;
-    return TRUE;
-#else
-    *num_formats = 0;
-    return TRUE;
 #endif
+    return TRUE;
 }
 
 Bool
