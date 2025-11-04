@@ -492,7 +492,7 @@ CreateSaverWindow(ScreenPtr pScreen)
 
     pPriv->installedMap = None;
 
-    if (GrabInProgress && GrabInProgress != pAttr->client->index) {
+    if (dixAnyOtherGrabbed(pAttr->client)) {
         return FALSE;
     }
 
