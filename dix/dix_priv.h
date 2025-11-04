@@ -10,6 +10,7 @@
  *  drivers or extension modules. Thus the definitions here are not part of the
  *  Xserver's module API/ABI.
  */
+#include <stdbool.h>
 
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
@@ -771,5 +772,20 @@ int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
                   CARD16 *green, CARD16 *blue, CARD32 *pixel);
 
 void ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)  _X_NORETURN;
+
+/*
+ * retrieve current grab client or NULL (if no grab)
+ *
+ */
+ClientPtr dixGetGrabClient(void);
+
+/*
+ * Check whether any client has grabbed the server and it's not
+ * the given client.
+ *
+ * @param client    the client to check against
+ * @return          TRUE if any client, except the given one, has grabbed
+ */
+bool dixAnyOtherGrabbed(ClientPtr client);
 
 #endif /* _XSERVER_DIX_PRIV_H */
