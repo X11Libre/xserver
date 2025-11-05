@@ -688,7 +688,11 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
         LogMessage(X_WARNING, "LoadModule: Otherwise, you will get a "
                               "segmentation fault due to the abi mismatch "
                               "between the new X server abi and the one these "
-                              "old drivers are compiled against\n");
+                              "old drivers are compiled against.\n");
+        LogMessage(X_WARNING, "LoadModule: If you are using one of the maintained "
+                              "branches of the nvidia nvidia kernel drivers,\n");
+        LogMessage(X_WARNING, "LoadModule: you can try using the in-tree, open-source modesetting "
+                              "DDX driver instead of the proprietary nvidia DDX driver.\n");
         if (!LoaderIgnoreAbi) {
             /* warn every time this is hit */
             LogMessage(X_WARNING, "LoadModule: Implicitly ignoring abi mismatch "
