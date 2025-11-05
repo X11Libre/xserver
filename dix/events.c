@@ -5982,7 +5982,7 @@ int
 ProcRecolorCursor(ClientPtr client)
 {
     CursorPtr pCursor;
-    int rc;
+    int rc, xin = 1;
     Bool displayed;
     SpritePtr pSprite = PickPointer(client)->spriteInfo->sprite;
 
@@ -6004,12 +6004,14 @@ ProcRecolorCursor(ClientPtr client)
     pCursor->backGreen = stuff->backGreen;
     pCursor->backBlue = stuff->backBlue;
 
+#ifndef XINERAMA
+    xin = 0;
+#endif
     DIX_FOR_EACH_SCREEN({
-#ifdef XINERAMA
-        if (!noPanoramiXExtension)
+    
+        if (xin && !noPanoramiXExtension)
             displayed = (walkScreen == pSprite->screen);
         else
-#endif /* XINERAMA */
             displayed = (walkScreen == pSprite->hotPhys.pScreen);
         (*walkScreen->RecolorCursor) (PickPointer(client), walkScreen, pCursor,
                                 (pCursor == pSprite->current) && displayed);
