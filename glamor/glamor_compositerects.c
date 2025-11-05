@@ -92,7 +92,7 @@ _pixman_region_init_clipped_rectangles(pixman_region16_t * region,
         free(boxes);
 
     DEBUGF("%s: nrects=%d, region=(%d, %d), (%d, %d) x %d\n",
-           __FUNCTION__, num_rects,
+           __func__, num_rects,
            region->extents.x1, region->extents.y1,
            region->extents.x2, region->extents.y2, j);
     return ret;
@@ -113,7 +113,7 @@ glamor_composite_rectangles(CARD8 op,
     Bool need_free_region = FALSE;
 
     DEBUGF("%s(op=%d, %08x x %d [(%d, %d)x(%d, %d) ...])\n",
-           __FUNCTION__, op,
+           __func__, op,
            (color->alpha >> 8 << 24) |
            (color->red >> 8 << 16) |
            (color->green >> 8 << 8) |
@@ -124,7 +124,7 @@ glamor_composite_rectangles(CARD8 op,
         return;
 
     if (RegionNil(dst->pCompositeClip)) {
-        DEBUGF("%s: empty clip, skipping\n", __FUNCTION__);
+        DEBUGF("%s: empty clip, skipping\n", __func__);
         return;
     }
 
@@ -180,7 +180,7 @@ glamor_composite_rectangles(CARD8 op,
             break;
         }
     }
-    DEBUGF("%s: converted to op %d\n", __FUNCTION__, op);
+    DEBUGF("%s: converted to op %d\n", __func__, op);
 
     if (!_pixman_region_init_clipped_rectangles(&region,
                                                 num_rects, rects,
@@ -188,7 +188,7 @@ glamor_composite_rectangles(CARD8 op,
                                                 dst->pDrawable->y,
                                                 &dst->pCompositeClip->extents))
     {
-        DEBUGF("%s: allocation failed for region\n", __FUNCTION__);
+        DEBUGF("%s: allocation failed for region\n", __func__);
         return;
     }
 
@@ -198,14 +198,14 @@ glamor_composite_rectangles(CARD8 op,
     if (!GLAMOR_PIXMAP_PRIV_HAS_FBO(priv))
         goto fallback;
     if (dst->alphaMap) {
-        DEBUGF("%s: fallback, dst has an alpha-map\n", __FUNCTION__);
+        DEBUGF("%s: fallback, dst has an alpha-map\n", __func__);
         goto fallback;
     }
 
     need_free_region = TRUE;
 
     DEBUGF("%s: drawable extents (%d, %d),(%d, %d) x %d\n",
-           __FUNCTION__,
+           __func__,
            RegionExtents(&region)->x1, RegionExtents(&region)->y1,
            RegionExtents(&region)->x2, RegionExtents(&region)->y2,
            RegionNumRects(&region));
@@ -214,13 +214,13 @@ glamor_composite_rectangles(CARD8 op,
         (!pixman_region_intersect(&region, &region, dst->pCompositeClip) ||
          RegionNil(&region))) {
         DEBUGF("%s: zero-intersection between rectangles and clip\n",
-               __FUNCTION__);
+               __func__);
         pixman_region_fini(&region);
         return;
     }
 
     DEBUGF("%s: clipped extents (%d, %d),(%d, %d) x %d\n",
-           __FUNCTION__,
+           __func__,
            RegionExtents(&region)->x1, RegionExtents(&region)->y1,
            RegionExtents(&region)->x2, RegionExtents(&region)->y2,
            RegionNumRects(&region));
@@ -232,7 +232,7 @@ glamor_composite_rectangles(CARD8 op,
         pixman_region_translate(&region, -dst->pDrawable->x, -dst->pDrawable->y);
 
         DEBUGF("%s: drawable extents (%d, %d),(%d, %d)\n",
-               __FUNCTION__, dst_x, dst_y,
+               __func__, dst_x, dst_y,
                RegionExtents(&region)->x1, RegionExtents(&region)->y1,
                RegionExtents(&region)->x2, RegionExtents(&region)->y2);
 

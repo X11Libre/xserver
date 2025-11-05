@@ -34,7 +34,7 @@
 #define EPHYR_TRACE_DRAW 0
 
 #if EPHYR_TRACE_DRAW
-#define TRACE_DRAW() ErrorF("%s\n", __FUNCTION__);
+#define TRACE_DRAW() ErrorF("%s\n", __func__);
 #else
 #define TRACE_DRAW() do { } while (0)
 #endif

@@ -49,7 +49,7 @@
 #include <X11/extensions/panoramiXproto.h>
 #include "globals.h"
 
-#define TRACE LogMessageVerb(X_NONE, 10, "TRACE " __FILE__ ":%s", __FUNCTION__)
+#define TRACE LogMessageVerb(X_NONE, 10, "TRACE " __FILE__ ":%s", __func__)
 #define DEBUG_LOG(...) LogMessageVerb(X_NONE, 3, __VA_ARGS__);
 
 Bool noPseudoramiXExtension = FALSE;
