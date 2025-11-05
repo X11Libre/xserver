@@ -679,10 +679,21 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
         m = (char *) module;
     }
 
-    if (is_nvidia_proprietary && !LoaderIgnoreAbi) {
-        /* warn every time this is hit */
-        LogMessage(X_WARNING, "LoadModule: Implicitly ignoring abi mismatch "
-                   "for the nvidia proprierary DDX driver\n");
+    if (is_nvidia_proprietary) {
+        LogMessage(X_WARNING, "LoadModule: If you are using one of the legacy "
+                              "branches of the nvidia proprierary DDX driver "
+                              "(e.g. 470, 390, 340, etc.)\n");
+        LogMessage(X_WARNING, "LoadModule: you need to build Xlibre "
+                              "with -Dlegacy_nvidia_padding=true\n");
+        LogMessage(X_WARNING, "LoadModule: Otherwise, you will get a "
+                              "segmentation fault due to the abi mismatch "
+                              "between the new X server abi and the one these "
+                              "old drivers are compiled against\n");
+        if (!LoaderIgnoreAbi) {
+            /* warn every time this is hit */
+            LogMessage(X_WARNING, "LoadModule: Implicitly ignoring abi mismatch "
+                       "for the nvidia proprierary DDX driver\n");
+        }
     }
 
     /* Backward compatibility, vbe and int10 are merged into int10 now */
