@@ -59,7 +59,7 @@
 #if DEBUG_TRACE_FALL
 #define EXA_FALLBACK(x)     					\
 do {								\
-	ErrorF("EXA fallback at %s: ", __FUNCTION__);		\
+	ErrorF("EXA fallback at %s: ", __func__);		\
 	ErrorF x;						\
 } while (0)
 

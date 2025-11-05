@@ -176,7 +176,7 @@ winScreenInit(ScreenPtr pScreen, int argc, char **argv)
     miClearVisualTypes();
 
     if (!winFinishScreenInitFB(pScreen->myNum, pScreen, argc, argv)) {
-        ErrorF("%s(): winFinishScreenInitFB () failed\n", __FUNCTION__);
+        ErrorF("%s(): winFinishScreenInitFB () failed\n", __func__);
 
         /* call the engine dependent screen close procedure to clean up from a failure */
         pScreenPriv->pwinCloseScreen(pScreen);
