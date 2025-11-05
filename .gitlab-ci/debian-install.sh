@@ -121,8 +121,7 @@ apt-get install -y \
 	weston \
 	x11-xkb-utils \
 	xfonts-utils \
-	xkb-data \
-	xutils-dev
+	xkb-data 
 
 .gitlab-ci/cross-prereqs-build.sh i686-w64-mingw32
 

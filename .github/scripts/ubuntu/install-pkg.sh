@@ -88,6 +88,5 @@ apt-get install -y \
 	x11-xkb-utils \
 	xfonts-utils \
 	xkb-data \
-	xutils-dev \
 	libxaw7-dev \
 	python3-mako
