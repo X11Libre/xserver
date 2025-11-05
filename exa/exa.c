@@ -398,7 +398,7 @@ exaFinishAccess(DrawablePtr pDrawable, int index)
 
     /* Catch unbalanced Prepare/FinishAccess calls. */
     if (i == EXA_NUM_PREPARE_INDICES)
-        EXA_FatalErrorDebugWithRet(("EXA bug: FinishAccess called without PrepareAccess for pixmap 0x%p.\n", pPixmap),);
+        EXA_FatalErrorDebugWithRet(("EXA bug: FinishAccess called without PrepareAccess for pixmap 0x%p.\n", (void *)pPixmap),);
 
     pExaScr->access[i].pixmap = NULL;
 
