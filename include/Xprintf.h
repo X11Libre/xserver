@@ -55,16 +55,4 @@ extern _X_EXPORT int
 XNFvasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, va_list va)
 _X_ATTRIBUTE_PRINTF(2, 0);
 
-/*
- * These functions provide a portable implementation of the linux kernel
- * scnprintf & vscnprintf routines that return the number of bytes actually
- * copied during a snprintf, (excluding the final '\0').
- */
-extern _X_EXPORT int
-Xscnprintf(char *s, int n, const char * _X_RESTRICT_KYWD fmt, ...)
-_X_ATTRIBUTE_PRINTF(3,4);
-extern _X_EXPORT int
-Xvscnprintf(char *s, int n, const char * _X_RESTRICT_KYWD fmt, va_list va)
-_X_ATTRIBUTE_PRINTF(3,0);
-
 #endif                          /* XPRINTF_H */
