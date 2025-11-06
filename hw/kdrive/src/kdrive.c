@@ -23,6 +23,7 @@
 #include <kdrive-config.h>
 
 #include "config/hotplug_priv.h"
+#include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/settings_priv.h"
 #include "mi/mi_priv.h"
