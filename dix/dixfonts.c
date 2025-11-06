@@ -254,18 +254,7 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
         ((screenInfo.bitmapBitOrder == LSBFirst) ?
          BitmapFormatBitOrderLSB : BitmapFormatBitOrderMSB) |
         BitmapFormatImageRectMin |
-#if GLYPHPADBYTES == 1
-        BitmapFormatScanlinePad8 |
-#endif
-#if GLYPHPADBYTES == 2
-        BitmapFormatScanlinePad16 |
-#endif
-#if GLYPHPADBYTES == 4
         BitmapFormatScanlinePad32 |
-#endif
-#if GLYPHPADBYTES == 8
-        BitmapFormatScanlinePad64 |
-#endif
         BitmapFormatScanlineUnit8;
 
     if (client->clientGone) {
