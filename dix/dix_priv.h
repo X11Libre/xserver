@@ -29,6 +29,9 @@
 #include "include/resource.h"
 #include "include/window.h"
 
+/* pad scanline to a longword */
+#define BITMAP_SCANLINE_UNIT    32
+
 #define LEGAL_NEW_RESOURCE(id,client)           \
     do {                                        \
         if (!LegalNewID((id), (client))) {      \
