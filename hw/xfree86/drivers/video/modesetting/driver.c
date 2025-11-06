@@ -933,8 +933,6 @@ msSetWindowVRRMode(WindowPtr window, WindowVRRMode mode)
 Bool
 ms_window_has_async_flip(WindowPtr win)
 {
-    ScrnInfoPtr scrn = xf86ScreenToScrn(win->drawable.pScreen);
-    modesettingPtr ms = modesettingPTR(scrn);
     struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
                                                        &asyncFlipPrivateKeyRec);
 
@@ -944,8 +942,6 @@ ms_window_has_async_flip(WindowPtr win)
 void
 ms_window_update_async_flip(WindowPtr win, Bool async_flip)
 {
-    ScrnInfoPtr scrn = xf86ScreenToScrn(win->drawable.pScreen);
-    modesettingPtr ms = modesettingPTR(scrn);
     struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
                                                        &asyncFlipPrivateKeyRec);
 
@@ -955,8 +951,6 @@ ms_window_update_async_flip(WindowPtr win, Bool async_flip)
 Bool
 ms_window_has_async_flip_modifiers(WindowPtr win)
 {
-    ScrnInfoPtr scrn = xf86ScreenToScrn(win->drawable.pScreen);
-    modesettingPtr ms = modesettingPTR(scrn);
     struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
                                                        &asyncFlipPrivateKeyRec);
 
@@ -966,8 +960,6 @@ ms_window_has_async_flip_modifiers(WindowPtr win)
 void
 ms_window_update_async_flip_modifiers(WindowPtr win, Bool async_flip)
 {
-    ScrnInfoPtr scrn = xf86ScreenToScrn(win->drawable.pScreen);
-    modesettingPtr ms = modesettingPTR(scrn);
     struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
                                                        &asyncFlipPrivateKeyRec);
 
