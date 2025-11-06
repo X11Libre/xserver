@@ -359,7 +359,7 @@ drmmode_prop_info_update(drmmode_ptr drmmode,
             continue;
 
         for (j = 0; j < num_infos; j++) {
-            if (!strcmp(prop->name, info[j].name))
+            if (info[j].name != NULL && !strcmp(prop->name, info[j].name))
                 break;
         }
 
