@@ -2558,8 +2558,8 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
     drmModePlaneRes *kplane_res;
     drmModePlane *kplane, *best_kplane = NULL;
     drmModeObjectProperties *props;
-    uint32_t i, type, blob_id, async_blob_id;
-    int current_crtc, best_plane = 0;
+    uint32_t blob_id, async_blob_id;
+    int best_plane = 0;
 
     static drmmode_prop_enum_info_rec plane_type_enums[] = {
         [DRMMODE_PLANE_TYPE_PRIMARY] = {
@@ -2610,15 +2610,14 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
         return;
     }
 
-    Bool primary_plane_found = FALSE;
-
-    for (i = 0; i < kplane_res->count_planes; i++) {
+    for (int i = 0; i < kplane_res->count_planes; i++) {
         int plane_id;
 
         kplane = drmModeGetPlane(drmmode->fd, kplane_res->planes[i]);
         if (!kplane)
             continue;
 
+        /* If this plane cannot be used on the current crtc, skip it */
         if (!(kplane->possible_crtcs & (1 << num)) ||
             is_plane_assigned(drmmode->scrn, kplane->plane_id)) {
             drmModeFreePlane(kplane);
@@ -2638,62 +2637,62 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
 
         drmmode_prop_info_update(drmmode, tmp_props, DRMMODE_PLANE__COUNT, props);
 
-        /* Only primary planes are important for atomic page-flipping */
-        type = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_TYPE],
-                                      props, DRMMODE_PLANE_TYPE__COUNT);
+        int plane_crtc = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_CRTC_ID],
+                                                props, 0);
 
+        uint32_t type = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_TYPE],
+                                               props, DRMMODE_PLANE_TYPE__COUNT);
+
+        switch (type) {
+        case DRMMODE_PLANE_TYPE_CURSOR:
+        {
+            /* For some reason, cursor planes may not have prop_crtc_id set, so we don't check it */
 #ifdef LIBDRM_HAS_PLANE_SIZE_HINTS
-        /* Get the SIZE_HINT dimensions, if supported. */
-        if (type == DRMMODE_PLANE_TYPE_CURSOR) {
+            /* Get the SIZE_HINT dimensions, if supported. */
             int size_hint = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_SIZE_HINTS], props, 0);
             drmmode_populate_cursor_size_hints(drmmode, drmmode_crtc, size_hint);
             drmModeFreePlane(kplane);
             drmModeFreeObjectProperties(props);
-            continue;
-        }
 #endif
-
-        if (primary_plane_found || type != DRMMODE_PLANE_TYPE_PRIMARY) {
-            drmModeFreePlane(kplane);
-            drmModeFreeObjectProperties(props);
             continue;
         }
+        case DRMMODE_PLANE_TYPE_PRIMARY:
+        {
+            /* If this plane is not on this crtc, skip it */
+            if (plane_crtc != drmmode_crtc->mode_crtc->crtc_id) {
+                drmModeFreePlane(kplane);
+                drmModeFreeObjectProperties(props);
+                continue;
+            }
 
-        /* Check if plane is already on this CRTC */
-        current_crtc = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_CRTC_ID],
-                                              props, 0);
-        if (current_crtc == drmmode_crtc->mode_crtc->crtc_id) {
-            if (best_plane) {
+            /* Only primary planes are important for atomic page-flipping */
+            if (best_plane) { /* Can we have more that one primary plane on a crtc? */
                 drmModeFreePlane(best_kplane);
                 drmmode_prop_info_free(drmmode_crtc->props_plane, DRMMODE_PLANE__COUNT);
             }
             best_plane = plane_id;
             best_kplane = kplane;
-            blob_id = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_IN_FORMATS],
-                                             props, 0);
-            async_blob_id = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_IN_FORMATS_ASYNC],
-                                                   props, 0);
+            blob_id = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_IN_FORMATS], props, 0);
+            async_blob_id = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_IN_FORMATS_ASYNC], props, 0);
             drmmode_prop_info_copy(drmmode_crtc->props_plane, tmp_props,
                                    DRMMODE_PLANE__COUNT, 1);
             drmModeFreeObjectProperties(props);
-            primary_plane_found = TRUE;
             continue;
         }
-
-        if (!best_plane) {
-            best_plane = plane_id;
-            best_kplane = kplane;
-            blob_id = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_IN_FORMATS],
-                                             props, 0);
-            async_blob_id = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_IN_FORMATS_ASYNC],
-                                                   props, 0);
-            drmmode_prop_info_copy(drmmode_crtc->props_plane, tmp_props,
-                                   DRMMODE_PLANE__COUNT, 1);
-        } else {
+        case DRMMODE_PLANE_TYPE_OVERLAY:
+        {
             drmModeFreePlane(kplane);
+            drmModeFreeObjectProperties(props);
+            continue;
         }
-
-        drmModeFreeObjectProperties(props);
+        default:
+        {
+            xf86DrvMsg(drmmode->scrn->scrnIndex, X_WARNING, "Plane with id: %d has unknown plane type: %d\n", plane_id, type);
+            drmModeFreePlane(kplane);
+            drmModeFreeObjectProperties(props);
+            continue;
+        }
+        }
     }
 
     drmmode_crtc->plane_id = best_plane;
@@ -2703,7 +2702,7 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
                                        sizeof(drmmode_format_rec));
         if (!populate_format_modifiers(crtc, best_kplane,
                                        drmmode_crtc->formats, blob_id)) {
-            for (i = 0; i < best_kplane->count_formats; i++)
+            for (int i = 0; i < best_kplane->count_formats; i++)
                 drmmode_crtc->formats[i].format = best_kplane->formats[i];
         } else {
             drmmode_crtc->formats_async = calloc(best_kplane->count_formats,
