@@ -51,8 +51,5 @@
 extern _X_EXPORT int
 XNFasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, ...)
 _X_ATTRIBUTE_PRINTF(2, 3);
-extern _X_EXPORT int
-XNFvasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, va_list va)
-_X_ATTRIBUTE_PRINTF(2, 0);
 
 #endif                          /* XPRINTF_H */
