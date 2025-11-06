@@ -2512,6 +2512,9 @@ drmmode_populate_cursor_size_hints(drmmode_ptr drmmode, drmmode_crtc_private_ptr
     if (!drmmode_crtc)
         return;
 
+    if (drmmode_crtc->cursor_probed)
+        return;
+
     if (!size_hints_blob)
         return;
 
