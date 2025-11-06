@@ -144,11 +144,7 @@ miPolyGlyphBlt(DrawablePtr pDrawable, GCPtr pGC, int x, int y, unsigned int ngly
             nbyGlyphWidth = GLYPHWIDTHBYTESPADDED(pci);
             nbyPadGlyph = BitmapBytePad(gWidth);
 
-            if (nbyGlyphWidth == nbyPadGlyph
-#if GLYPHPADBYTES != 4
-                && (((int) pglyph) & 3) == 0
-#endif
-                ) {
+            if (nbyGlyphWidth == nbyPadGlyph) {
                 pb = pglyph;
             }
             else {
