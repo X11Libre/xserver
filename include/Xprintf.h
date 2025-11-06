@@ -48,7 +48,7 @@
  * argument.   The return value is the size of the allocated buffer, or -1
  * on failure.
  */
-extern _X_EXPORT int
+extern _X_EXPORT int /* deprecated */
 XNFasprintf(char **ret, const char *_X_RESTRICT_KYWD fmt, ...)
 _X_ATTRIBUTE_PRINTF(2, 3);
 extern _X_EXPORT int
