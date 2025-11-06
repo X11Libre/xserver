@@ -2505,7 +2505,7 @@ populate_format_modifiers(xf86CrtcPtr crtc, const drmModePlane *kplane,
 
 #ifdef LIBDRM_HAS_PLANE_SIZE_HINTS
 static void
-populate_cursor_sizes(drmmode_ptr drmmode, drmmode_crtc_private_ptr drmmode_crtc, int size_hints_blob)
+drmmode_populate_cursor_size_hints(drmmode_ptr drmmode, drmmode_crtc_private_ptr drmmode_crtc, int size_hints_blob)
 {
     drmModePropertyBlobRes *blob;
 
@@ -2547,115 +2547,6 @@ populate_cursor_sizes(drmmode_ptr drmmode, drmmode_crtc_private_ptr drmmode_crtc
     drmmode_crtc->cursor_probed = TRUE;
 fail:
     drmModeFreePropertyBlob(blob);
-}
-
-static void
-drmmode_crtc_probe_size_hint(xf86CrtcPtr crtc, int num)
-{
-    drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    drmModePlaneRes *kplane_res;
-    drmModeObjectProperties *props;
-    drmModePlane *kplane = NULL;
-    uint32_t i, type;
-
-    if (drmmode_crtc->cursor_probed) {
-        return;
-    }
-
-    static drmmode_prop_enum_info_rec plane_type_enums[] = {
-        [DRMMODE_PLANE_TYPE_PRIMARY] = {
-            .name = "Primary",
-        },
-        [DRMMODE_PLANE_TYPE_OVERLAY] = {
-            .name = "Overlay",
-        },
-        [DRMMODE_PLANE_TYPE_CURSOR] = {
-            .name = "Cursor",
-        },
-    };
-    static const drmmode_prop_info_rec plane_props[] = {
-        [DRMMODE_PLANE_TYPE] = {
-            .name = "type",
-            .enum_values = plane_type_enums,
-            .num_enum_values = DRMMODE_PLANE_TYPE__COUNT,
-        },
-        [DRMMODE_PLANE_FB_ID] = { .name = "FB_ID", },
-        [DRMMODE_PLANE_CRTC_ID] = { .name = "CRTC_ID", },
-        [DRMMODE_PLANE_IN_FORMATS] = { .name = "IN_FORMATS", },
-        [DRMMODE_PLANE_SRC_X] = { .name = "SRC_X", },
-        [DRMMODE_PLANE_SRC_Y] = { .name = "SRC_Y", },
-        [DRMMODE_PLANE_SRC_W] = { .name = "SRC_W", },
-        [DRMMODE_PLANE_SRC_H] = { .name = "SRC_H", },
-        [DRMMODE_PLANE_CRTC_X] = { .name = "CRTC_X", },
-        [DRMMODE_PLANE_CRTC_Y] = { .name = "CRTC_Y", },
-        [DRMMODE_PLANE_CRTC_W] = { .name = "CRTC_W", },
-        [DRMMODE_PLANE_CRTC_H] = { .name = "CRTC_H", },
-        [DRMMODE_PLANE_SIZE_HINTS] = { .name = "SIZE_HINTS" }
-    };
-    drmmode_prop_info_rec tmp_props[DRMMODE_PLANE__COUNT];
-
-    if (!drmmode_prop_info_copy(tmp_props, plane_props, DRMMODE_PLANE__COUNT, 0)) {
-        xf86DrvMsg(drmmode->scrn->scrnIndex, X_ERROR,
-                   "failed to copy plane property info\n");
-        drmmode_prop_info_free(tmp_props, DRMMODE_PLANE__COUNT);
-        return;
-    }
-
-    kplane_res = drmModeGetPlaneResources(drmmode->fd);
-    if (!kplane_res) {
-        xf86DrvMsg(drmmode->scrn->scrnIndex, X_ERROR,
-                   "failed to get plane resources: %s\n", strerror(errno));
-        drmmode_prop_info_free(tmp_props, DRMMODE_PLANE__COUNT);
-        return;
-    }
-
-    for (i = 0; i < kplane_res->count_planes; i++) {
-        int plane_id;
-
-        kplane = drmModeGetPlane(drmmode->fd, kplane_res->planes[i]);
-        if (!kplane)
-            continue;
-
-        if (!(kplane->possible_crtcs & (1 << num)) ||
-            is_plane_assigned(drmmode->scrn, kplane->plane_id)) {
-            drmModeFreePlane(kplane);
-            continue;
-        }
-
-        plane_id = kplane->plane_id;
-
-        props = drmModeObjectGetProperties(drmmode->fd, plane_id,
-                                           DRM_MODE_OBJECT_PLANE);
-        if (!props) {
-            xf86DrvMsg(drmmode->scrn->scrnIndex, X_ERROR,
-                    "couldn't get plane properties\n");
-            drmModeFreePlane(kplane);
-            continue;
-        }
-
-        drmmode_prop_info_update(drmmode, tmp_props, DRMMODE_PLANE__COUNT, props);
-
-        /* We need cursor planes only. */
-        type = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_TYPE],
-                                      props, DRMMODE_PLANE_TYPE__COUNT);
-
-        if (type != DRMMODE_PLANE_TYPE_CURSOR) {
-            drmModeFreePlane(kplane);
-            drmModeFreeObjectProperties(props);
-            continue;
-        }
-
-        int size_hint = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_SIZE_HINTS], props, 0);
-        populate_cursor_sizes(drmmode, drmmode_crtc, size_hint);
-
-        drmModeFreePlane(kplane);
-        drmModeFreeObjectProperties(props);
-        break;
-    }
-
-    drmmode_prop_info_free(tmp_props, DRMMODE_PLANE__COUNT);
-    drmModeFreePlaneResources(kplane_res);
 }
 #endif
 
@@ -2719,6 +2610,8 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
         return;
     }
 
+    Bool primary_plane_found = FALSE;
+
     for (i = 0; i < kplane_res->count_planes; i++) {
         int plane_id;
 
@@ -2749,7 +2642,18 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
         type = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_TYPE],
                                       props, DRMMODE_PLANE_TYPE__COUNT);
 
-        if (type != DRMMODE_PLANE_TYPE_PRIMARY) {
+#ifdef LIBDRM_HAS_PLANE_SIZE_HINTS
+        /* Get the SIZE_HINT dimensions, if supported. */
+        if (type == DRMMODE_PLANE_TYPE_CURSOR) {
+            int size_hint = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_SIZE_HINTS], props, 0);
+            drmmode_populate_cursor_size_hints(drmmode, drmmode_crtc, size_hint);
+            drmModeFreePlane(kplane);
+            drmModeFreeObjectProperties(props);
+            continue;
+        }
+#endif
+
+        if (primary_plane_found || type != DRMMODE_PLANE_TYPE_PRIMARY) {
             drmModeFreePlane(kplane);
             drmModeFreeObjectProperties(props);
             continue;
@@ -2772,7 +2676,8 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
             drmmode_prop_info_copy(drmmode_crtc->props_plane, tmp_props,
                                    DRMMODE_PLANE__COUNT, 1);
             drmModeFreeObjectProperties(props);
-            break;
+            primary_plane_found = TRUE;
+            continue;
         }
 
         if (!best_plane) {
@@ -2973,11 +2878,6 @@ drmmode_crtc_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, drmModeResPtr mode_res
                              DRMMODE_CRTC__COUNT, props);
     drmModeFreeObjectProperties(props);
     drmmode_crtc_create_planes(crtc, num);
-
-#ifdef LIBDRM_HAS_PLANE_SIZE_HINTS
-    /* Get the SIZE_HINT dimensions, if supported. */
-    drmmode_crtc_probe_size_hint(crtc, num);
-#endif
 
     /* Hide any cursors which may be active from previous users */
     drmModeSetCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0, 0, 0);
