@@ -717,7 +717,7 @@ void
 xf86SbusConfigureNewDev(void *busData, sbusDevicePtr sBus, GDevRec * GDev)
 {
     char *promPath = NULL;
-    char *tmp;
+    char *tmp = NULL;
 
     sBus = (sbusDevicePtr) busData;
     GDev->identifier = sBus->descr;
@@ -726,11 +726,11 @@ xf86SbusConfigureNewDev(void *busData, sbusDevicePtr sBus, GDevRec * GDev)
         sparcPromClose();
     }
     if (promPath) {
-        XNFasprintf(&tmp, "SBUS:%s", promPath);
+        asprintf(&tmp, "SBUS:%s", promPath);
         free(promPath);
     }
     else {
-        XNFasprintf(&tmp, "SBUS:fb%d", sBus->fbNum);
+        asprintf(&tmp, "SBUS:fb%d", sBus->fbNum);
     }
     GDev->busID = tmp;
 }

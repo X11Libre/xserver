@@ -1444,14 +1444,15 @@ xf86PciConfigureNewDev(void *busData, struct pci_device *pVideo,
                        GDevRec * GDev, int *chipset)
 {
     char busnum[8];
-    char *tmp;
+    char *tmp = NULL;
 
     pVideo = (struct pci_device *) busData;
 
     snprintf(busnum, sizeof(busnum), "%d", pVideo->bus);
 
-    XNFasprintf(&tmp, "PCI:%s:%d:%d",
-                busnum, pVideo->dev, pVideo->func);
+    if (asprintf(&tmp, "PCI:%s:%d:%d",
+                busnum, pVideo->dev, pVideo->func) == -1)
+        FatalError("malloc failed\n");
     GDev->busID = tmp;
 
     GDev->chipID = pVideo->device_id;
