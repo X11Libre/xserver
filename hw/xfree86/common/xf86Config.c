@@ -204,7 +204,10 @@ xf86ValidateFontPath(char *path)
                 continue;
             }
             else {
-                XNFasprintf(&p1, "%s%s", dir_elem, DIR_FILE);
+                if (asprintf(&p1, "%s%s", dir_elem, DIR_FILE) == -1) {
+                    xf86ErrorF("malloc failed\n");
+                    continue;
+                }
                 flag = stat(p1, &stat_buf);
                 if (flag == 0)
                     if (!S_ISREG(stat_buf.st_mode))
