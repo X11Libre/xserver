@@ -68,16 +68,9 @@ SOFTWARE.
 #define GLYPHPADBYTES           4
 #endif
 
-/* pad scanline to a longword */
-#ifndef BITMAP_SCANLINE_UNIT
-#define BITMAP_SCANLINE_UNIT	32
-#endif
-
-#ifndef BITMAP_SCANLINE_PAD
 #define BITMAP_SCANLINE_PAD  32
 #define LOG2_BITMAP_PAD		5
 #define LOG2_BYTES_PER_SCANLINE_PAD	2
-#endif
 
 #include <X11/Xfuncproto.h>
 /*
