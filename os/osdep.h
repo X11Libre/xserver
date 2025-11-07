@@ -188,7 +188,6 @@ extern Bool PartialNetwork;
 
 extern Bool CoreDump;
 extern Bool NoListenAll;
-extern Bool AllowByteSwappedClients;
 
 /*
  * This function reallocarray(3)s passed buffer, terminating the server if
