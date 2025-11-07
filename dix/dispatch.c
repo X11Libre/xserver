@@ -117,6 +117,7 @@ Equipment Corporation.
 #include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
+#include "dix/settings_priv.h"
 #include "dix/window_priv.h"
 #include "include/resource.h"
 #include "miext/extinit_priv.h"
@@ -3906,7 +3907,7 @@ ProcEstablishConnection(ClientPtr client)
 
     prefix = (xConnClientPrefix *) ((char *) stuff + sz_xReq);
 
-    if (client->swapped && !AllowByteSwappedClients) {
+    if (client->swapped && !dixSettingAllowByteSwappedClients) {
         reason = "Prohibited client endianess, see the Xserver man page ";
     } else if ((client->req_len << 2) != sz_xReq + sz_xConnClientPrefix +
             pad_to_int32(prefix->nbytesAuthProto) +

@@ -51,6 +51,7 @@ SOFTWARE.
 
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/settings_priv.h"
 
 #include "misc.h"
 #include "windowstr.h"
