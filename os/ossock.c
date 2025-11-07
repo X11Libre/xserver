@@ -46,3 +46,12 @@ int ossock_close(int fd)
     return close(fd);
 #endif
 }
+
+int ossock_wouldblock(int err)
+{
+#ifdef WIN32
+    return ((err == EAGAIN) || (err == WSAEWOULDBLOCK));
+#else
+    return ((err == EAGAIN) || (err == EWOULDBLOCK));
+#endif
+}

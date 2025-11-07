@@ -66,6 +66,7 @@ SOFTWARE.
 #include "dix/screensaver_priv.h"
 #include "os/busfault.h"
 #include "os/client_priv.h"
+#include "os/ossock.h"
 #include "os/screensaver.h"
 
 #include "misc.h"
@@ -210,7 +211,7 @@ WaitForSomething(Bool are_ready)
             if (dispatchException)
                 return FALSE;
             if (i < 0) {
-                if (pollerr != EINTR && !ETEST(pollerr)) {
+                if (pollerr != EINTR && ossock_wouldblock(pollerr)) {
                     ErrorF("WaitForSomething(): poll: %s\n",
                            strerror(pollerr));
                 }
