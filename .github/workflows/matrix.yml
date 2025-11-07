@@ -23,7 +23,7 @@ jobs:
           - name: Erstelle Matrix (pro Level)
             id: matrix
             run: |
-              MATRIX=$(cat .github/matrix.json)
+              MATRIX=$(cat .github/matrix.json | jq -c .)
               echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
 
     matrix-build:
