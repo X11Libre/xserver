@@ -1,0 +1,43 @@
+name: matrix test
+
+permissions:
+    contents: write
+
+env:
+    MESON_BUILDDIR:  "build"
+    X11_PREFIX:      /home/runner/x11
+    X11_BUILD_DIR:   /home/runner/build-deps
+
+on:
+    push:
+    pull_request:
+
+jobs:
+    generate-graph:
+        runs-on: ubuntu-latest
+        outputs:
+            matrix: ${{ steps.generate.outputs.matrix }}
+        steps:
+          - uses: actions/checkout@v4
+
+          - name: Erstelle Matrix (pro Level)
+            id: matrix
+            run: |
+              MATRIX=$(cat .github/matrix.json)
+              echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+    matrix-build:
+        needs: generate-graph
+        runs-on: ubuntu-latest
+        strategy:
+            matrix: ${{ fromJson(needs.generate-graph.outputs.matrix) }}
+            max-parallel: 10
+        steps:
+          - name: Check out repository code
+            uses: actions/checkout@v4
+
+          - name: Baue Paket ${{ matrix.package }}
+            run: |
+              echo "package: ${{matrix.packge}}"
+              echo "depends: ${{matrix.depends_on}}"
+              echo "level: ${{matrix.level}}"
