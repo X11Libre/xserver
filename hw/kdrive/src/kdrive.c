@@ -24,10 +24,10 @@
 
 #include "config/hotplug_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/settings_priv.h"
+#include "mi/mi_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
-
-#include "mi/mi_priv.h"
 #include "os/osdep.h"
 
 #include "kdrive.h"
@@ -1134,7 +1134,7 @@ KdInitOutput(int argc, char **argv)
     xorgGlxCreateVendor();
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-    if (SeatId) /* Enable input hot-plugging */
+    if (dixSettingSeatId) /* Enable input hot-plugging */
         config_pre_init();
 #endif
 }
