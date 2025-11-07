@@ -116,4 +116,6 @@ void AccessUsingXdmcp(void);
 
 extern Bool defeatAccessControl;
 
+Bool ComputeLocalClient(ClientPtr client);
+
 #endif /* _XSERVER_OS_AUTH_H */
