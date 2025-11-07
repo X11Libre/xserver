@@ -336,12 +336,12 @@ glamor_create_composite_fs(glamor_screen_private *glamor_priv, struct shader_key
     }
 
     if (asprintf(&source,
-                "%s"
-                GLAMOR_DEFAULT_PRECISION
-                "%s%s%s%s%s%s%s%s", header, GLAMOR_COMPAT_DEFINES_FS,
-                repeat_define, relocate_texture,
-                enable_rel_sampler ? rel_sampler : stub_rel_sampler,
-                source_fetch, mask_fetch, dest_swizzle, in) == -1)
+                 "%s"
+                 GLAMOR_DEFAULT_PRECISION
+                 "%s%s%s%s%s%s%s%s", header, GLAMOR_COMPAT_DEFINES_FS,
+                 repeat_define, relocate_texture,
+                 enable_rel_sampler ? rel_sampler : stub_rel_sampler,
+                 source_fetch, mask_fetch, dest_swizzle, in) == -1)
         FatalError("Memory allocation on asprintf() failed\n");
 
     prog = glamor_compile_glsl_prog(GL_FRAGMENT_SHADER, source);
@@ -387,11 +387,11 @@ glamor_create_composite_vs(glamor_screen_private* priv, struct shader_key *key)
         version = version_gles3;
 
     if (asprintf(&source,
-                "%s"
-                GLAMOR_DEFAULT_PRECISION
-                "%s%s%s%s%s",
-                version, defines, main_opening, source_coords_setup,
-                mask_coords_setup, main_closing) == -1)
+                 "%s"
+                 GLAMOR_DEFAULT_PRECISION
+                 "%s%s%s%s%s",
+                 version, defines, main_opening, source_coords_setup,
+                 mask_coords_setup, main_closing) == -1)
         FatalError("malloc on asprintf() failed\n");
 
     prog = glamor_compile_glsl_prog(GL_VERTEX_SHADER, source);
