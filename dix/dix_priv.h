@@ -68,6 +68,8 @@ extern _X_EXPORT Bool enableIndirectGLX;
 
 extern int defaultColorVisualClass;
 
+extern const char *defaultFontPath;
+
 /*
  * @brief callback right after one screen's root window has been initialized
  *
