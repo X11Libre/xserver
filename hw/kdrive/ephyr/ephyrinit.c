@@ -26,6 +26,7 @@
 #include <kdrive-config.h>
 
 #include "dix/dix_priv.h"
+#include "dix/settings_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
@@ -385,7 +386,7 @@ OsVendorInit(void)
 {
     EPHYR_DBG("mark");
 
-    if (SeatId)
+    if (dixSettingSeatId)
         hostx_use_sw_cursor();
 
     if (hostx_want_host_cursor())
