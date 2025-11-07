@@ -1,4 +1,3 @@
-#ifndef IRIS
 CHIPSET(0x29A2, i965,    "Intel(R) 965G")
 CHIPSET(0x2992, i965,    "Intel(R) 965Q")
 CHIPSET(0x2982, i965,    "Intel(R) 965G")
@@ -96,7 +95,6 @@ CHIPSET(0x22B0, chv,     "Intel(R) HD Graphics (Cherrytrail)")
 CHIPSET(0x22B1, chv,     "Intel(R) HD Graphics XXX (Braswell)") /* Overridden in brw_get_renderer_string */
 CHIPSET(0x22B2, chv,     "Intel(R) HD Graphics (Cherryview)")
 CHIPSET(0x22B3, chv,     "Intel(R) HD Graphics (Cherryview)")
-#endif
 CHIPSET(0x1602, bdw_gt1, "Intel(R) Broadwell GT1")
 CHIPSET(0x1606, bdw_gt1, "Intel(R) Broadwell GT1")
 CHIPSET(0x160A, bdw_gt1, "Intel(R) Broadwell GT1")
