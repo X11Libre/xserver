@@ -41,3 +41,4 @@ jobs:
               echo "package: ${{matrix.packge}}"
               echo "depends: ${{matrix.depends_on}}"
               echo "level: ${{matrix.level}}"
+              sleep 30
