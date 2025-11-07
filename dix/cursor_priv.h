@@ -16,6 +16,9 @@
 #include "include/input.h"
 #include "include/window.h"
 
+#define CURSOR_BITS_SIZE (sizeof(CursorBits) + (size_t)dixPrivatesSize(PRIVATE_CURSOR_BITS))
+#define CURSOR_REC_SIZE (sizeof(CursorRec) + (size_t)dixPrivatesSize(PRIVATE_CURSOR))
+
 extern CursorPtr rootCursor;
 
 /* reference counting */
