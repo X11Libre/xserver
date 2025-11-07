@@ -29,6 +29,7 @@
 
 #include <errno.h>
 
+#include "dix/dix_priv.h"
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 #include "os/serverlock.h"
