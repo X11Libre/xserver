@@ -74,9 +74,6 @@ typedef struct _osComm {
     int flags;
 } OsCommRec, *OsCommPtr;
 
-#define OS_COMM_GRAB_IMPERVIOUS 1
-#define OS_COMM_IGNORED         2
-
 int FlushClient(ClientPtr who, OsCommPtr oc);
 
 extern void FreeOsBuffers(OsCommPtr     /*oc */
