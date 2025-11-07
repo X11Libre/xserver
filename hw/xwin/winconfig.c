@@ -31,6 +31,9 @@
 #ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
 #endif
+
+#include "dix/dix_priv.h"
+
 #include "win.h"
 #include "winconfig.h"
 #include "winmsg.h"
