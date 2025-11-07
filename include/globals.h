@@ -8,6 +8,4 @@
 
 extern _X_EXPORT int monitorResolution;
 
-extern _X_EXPORT char *SeatId;
-
 #endif                          /* !_XSERV_GLOBAL_H_ */
