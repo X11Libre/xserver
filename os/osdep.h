@@ -78,11 +78,6 @@ SOFTWARE.
 typedef struct _connectionInput *ConnectionInputPtr;
 typedef struct _connectionOutput *ConnectionOutputPtr;
 
-struct _osComm;
-
-typedef int (*OsFlushFunc) (ClientPtr who, struct _osComm * oc, char *extraBuf,
-                            int extraCount);
-
 typedef struct _osComm {
     int fd;
     ConnectionInputPtr input;
