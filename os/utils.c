@@ -142,8 +142,6 @@ Bool enableIndirectGLX = FALSE;
 Bool PanoramiXExtensionDisabledHack = FALSE;
 #endif /* XINERAMA */
 
-char *SeatId = NULL;
-
 sig_atomic_t inSignalContext = FALSE;
 
 #ifdef MONOTONIC_CLOCK
@@ -422,7 +420,7 @@ ProcessCommandLine(int argc, char *argv[])
                     ErrorF("Failed to disable listen for %s transport",
                            defaultNoListenList[i]);
     }
-    SeatId = getenv("XDG_SEAT");
+    dixSettingSeatId = getenv("XDG_SEAT");
 
 #ifdef CONFIG_SYSLOG
     xorgSyslogIdent = getenv("SYSLOG_IDENT");
@@ -644,7 +642,7 @@ ProcessCommandLine(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "-seat") == 0) {
             if (++i < argc)
-                SeatId = argv[i];
+                dixSettingSeatId = argv[i];
             else
                 UseMsg();
         }
