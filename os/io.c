@@ -76,6 +76,7 @@ SOFTWARE.
 #include "os/bug_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
+#include "os/ossock.h"
 
 #include "os.h"
 #include "opaque.h"
@@ -360,7 +361,7 @@ ReadRequestFromClient(ClientPtr client)
         result = _XSERVTransRead(oc->trans_conn, oci->buffer + oci->bufcnt,
                                  oci->size - oci->bufcnt);
         if (result <= 0) {
-            if ((result < 0) && ETEST(errno)) {
+            if ((result < 0) && ossock_wouldblock(errno)) {
                 mark_client_not_ready(client);
                 YieldControlNoInput(client);
                 return 0;
@@ -937,11 +938,7 @@ FlushClient(ClientPtr who, OsCommPtr oc)
             notWritten -= len;
             todo = notWritten;
         }
-        else if (ETEST(errno)
-#ifdef EMSGSIZE                 /* check for another brain-damaged OS bug */
-                 || ((errno == EMSGSIZE) && (todo == 1))
-#endif
-            ) {
+        else if (ossock_wouldblock(errno)) {
             /* If we've arrived here, then the client is stuffed to the gills
                and not ready to accept more.  Make a note of it and buffer
                the rest. */
