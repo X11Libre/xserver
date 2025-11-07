@@ -240,7 +240,7 @@ xf86ValidateFontPath(char *path)
         pointertype _l, _p;                                                                  \
                                                                                              \
         for (_l = (listhead), _p = NULL; !_p && _l; _l = (pointertype)_l->list.next) {       \
-            if (!_l->match_seat || (SeatId && xf86nameCompare(_l->match_seat, SeatId) == 0)) \
+            if (!_l->match_seat || (dixSettingSeatId && xf86nameCompare(_l->match_seat, dixSettingSeatId) == 0)) \
                 _p = _l;                                                                     \
         }                                                                                    \
                                                                                              \

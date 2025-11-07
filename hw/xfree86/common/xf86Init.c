@@ -595,8 +595,8 @@ InitOutput(int argc, char **argv)
     if (xf86Info.vtno >= 0)
         AddCallback(&RootWindowFinalizeCallback, AddVTAtoms, NULL);
 
-    if (SeatId)
-        AddCallback(&RootWindowFinalizeCallback, AddSeatId, SeatId);
+    if (dixSettingSeatId)
+        AddCallback(&RootWindowFinalizeCallback, AddSeatId, dixSettingSeatId);
 
     /*
      * Use the previously collected parts to setup screenInfo
