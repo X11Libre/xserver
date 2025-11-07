@@ -461,25 +461,24 @@ ms_present_unflip(ScreenPtr screen, uint64_t event_id)
 
     for (i = 0; i < config->num_crtc; i++) {
         xf86CrtcPtr crtc = config->crtc[i];
-	drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+        drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 
-	if (!crtc->enabled)
-	    continue;
+        if (!crtc->enabled)
+            continue;
 
-	/* info->drmmode.fb_id still points to the FB for the last flipped BO.
-	 * Clear it, drmmode_set_mode_major will re-create it
-	 */
-	if (drmmode_crtc->drmmode->fb_id) {
-		drmModeRmFB(drmmode_crtc->drmmode->fd,
-			    drmmode_crtc->drmmode->fb_id);
-		drmmode_crtc->drmmode->fb_id = 0;
-	}
+        /* info->drmmode.fb_id still points to the FB for the last flipped BO.
+         * Clear it, drmmode_set_mode_major will re-create it
+         */
+        if (drmmode_crtc->drmmode->fb_id) {
+            drmModeRmFB(drmmode_crtc->drmmode->fd, drmmode_crtc->drmmode->fb_id);
+            drmmode_crtc->drmmode->fb_id = 0;
+        }
 
-	if (drmmode_crtc->dpms_mode == DPMSModeOn)
-	    crtc->funcs->set_mode_major(crtc, &crtc->mode, crtc->rotation,
-					crtc->x, crtc->y);
-	else
-	    drmmode_crtc->need_modeset = TRUE;
+        if (drmmode_crtc->dpms_mode == DPMSModeOn)
+            crtc->funcs->set_mode_major(crtc, &crtc->mode, crtc->rotation,
+                                        crtc->x, crtc->y);
+        else
+            drmmode_crtc->need_modeset = TRUE;
     }
 
     present_event_notify(event_id, 0, 0);
