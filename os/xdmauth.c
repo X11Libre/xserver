@@ -39,6 +39,7 @@ from The Open Group.
 #include <X11/X.h>
 
 #include "os/auth.h"
+#include "os/io_priv.h"
 #include "os/Xtrans.h"
 
 #include "os.h"

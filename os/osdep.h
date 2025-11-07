@@ -70,27 +70,6 @@ SOFTWARE.
 # define __has_builtin(x) 0     /* Compatibility with older compilers */
 #endif
 
-typedef struct _connectionInput *ConnectionInputPtr;
-typedef struct _connectionOutput *ConnectionOutputPtr;
-
-typedef struct _osComm {
-    int fd;
-    ConnectionInputPtr input;
-    ConnectionOutputPtr output;
-    XID auth_id;                /* authorization id */
-    CARD32 conn_time;           /* timestamp if not established, else 0  */
-    struct _XtransConnInfo *trans_conn; /* transport connection object */
-    int flags;
-} OsCommRec, *OsCommPtr;
-
-int FlushClient(ClientPtr who, OsCommPtr oc);
-
-extern void FreeOsBuffers(OsCommPtr     /*oc */
-    );
-
-void
-CloseDownFileDescriptor(OsCommPtr oc);
-
 #define MILLI_PER_MIN (1000 * 60)
 #define MILLI_PER_SECOND (1000)
 
