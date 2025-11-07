@@ -339,10 +339,10 @@ _glamor_create_radial_gradient_program(ScreenPtr screen, int stops_count,
                                           (stops_count > 0));
 
     if (asprintf(&gradient_fs,
-                gradient_radial_fs_template,
-                PIXMAN_REPEAT_NONE, PIXMAN_REPEAT_NORMAL,
-                PIXMAN_REPEAT_REFLECT,
-                fs_getcolor_source) == -1)
+                 gradient_radial_fs_template,
+                 PIXMAN_REPEAT_NONE, PIXMAN_REPEAT_NORMAL,
+                 PIXMAN_REPEAT_REFLECT,
+                 fs_getcolor_source) == -1)
         return FALSE;
 
     fs_prog = glamor_compile_glsl_prog(GL_FRAGMENT_SHADER, gradient_fs);
@@ -527,9 +527,9 @@ _glamor_create_linear_gradient_program(ScreenPtr screen, int stops_count,
         _glamor_create_getcolor_fs_source(screen, stops_count, stops_count > 0);
 
     if (asprintf(&gradient_fs,
-                gradient_fs_template,
-                PIXMAN_REPEAT_NORMAL, PIXMAN_REPEAT_REFLECT,
-                fs_getcolor_source) == -1)
+                 gradient_fs_template,
+                 PIXMAN_REPEAT_NORMAL, PIXMAN_REPEAT_REFLECT,
+                 fs_getcolor_source) == -1)
         return FALSE;
 
     fs_prog = glamor_compile_glsl_prog(GL_FRAGMENT_SHADER, gradient_fs);
