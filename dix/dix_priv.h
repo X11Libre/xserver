@@ -72,6 +72,8 @@ extern bool enableFontServerConnections;
 extern size_t ConnectionInfoSize;
 extern size_t dixConnBlockScreenStart(const char *connInfo);
 
+extern const char *defaultFontPath;
+
 /*
  * @brief callback right after one screen's root window has been initialized
  *
