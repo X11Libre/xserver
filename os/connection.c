@@ -97,6 +97,7 @@ SOFTWARE.
 #include "os/audit_priv.h"
 #include "os/auth.h"
 #include "os/client_priv.h"
+#include "os/io_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
@@ -582,11 +583,7 @@ AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
         return NULL;
     oc->trans_conn = trans_conn;
     oc->fd = fd;
-    oc->input = (ConnectionInputPtr) NULL;
-    oc->output = (ConnectionOutputPtr) NULL;
-    oc->auth_id = None;
     oc->conn_time = conn_time;
-    oc->flags = 0;
     if (!(client = NextAvailableClient((void *) oc))) {
         free(oc);
         return NULL;
