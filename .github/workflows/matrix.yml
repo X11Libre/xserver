@@ -16,12 +16,12 @@ jobs:
     generate-graph:
         runs-on: ubuntu-latest
         outputs:
-            matrix: ${{ steps.generate-graph.outputs.matrix }}
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
         steps:
           - uses: actions/checkout@v4
 
           - name: Erstelle Matrix (pro Level)
-            id: matrix
+            id: set-matrix
             run: |
               MATRIX=$(cat .github/matrix.json | jq -c .)
               echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
