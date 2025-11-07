@@ -209,11 +209,11 @@ get_modifiers_set(ScrnInfoPtr scrn, uint32_t format, uint64_t **modifiers,
             for (j = 0; j < iter->num_modifiers; j++) {
                 Bool found = FALSE;
 
-		/* Don't choose multi-plane formats for our screen pixmap.
-		 * These will get used with frontbuffer rendering, which will
-		 * lead to worse-than-tearing with multi-plane formats, as the
-		 * primary and auxiliary planes go out of sync. */
-		if (exclude_multiplane &&
+                /* Don't choose multi-plane formats for our screen pixmap.
+                 * These will get used with frontbuffer rendering, which will
+                 * lead to worse-than-tearing with multi-plane formats, as the
+                 * primary and auxiliary planes go out of sync. */
+                if (exclude_multiplane &&
                     gbm_device_get_format_modifier_plane_count(drmmode->gbm,
                                                                format,
                                                                iter->modifiers[j]) > 1) {
@@ -413,9 +413,9 @@ drmmode_prop_info_update(drmmode_ptr drmmode,
 
 static Bool
 drmmode_prop_info_copy(drmmode_prop_info_ptr dst,
-		       const drmmode_prop_info_rec *src,
-		       unsigned int num_props,
-		       Bool copy_prop_id)
+                       const drmmode_prop_info_rec *src,
+                       unsigned int num_props,
+                       Bool copy_prop_id)
 {
     unsigned int i;
 
@@ -1822,7 +1822,7 @@ drmmode_set_cursor(xf86CrtcPtr crtc, int width, int height)
     int ret = -EINVAL;
 
     if (cursor == NullCursor)
-	    return TRUE;
+        return TRUE;
 
     ret = drmModeSetCursor2(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id,
                             handle, width, height,
@@ -3710,7 +3710,7 @@ static int parse_path_blob(drmModePropertyBlobPtr path_blob, int *conn_base_id, 
 
 static void
 drmmode_create_name(ScrnInfoPtr pScrn, drmModeConnectorPtr koutput, char *name,
-		    drmModePropertyBlobPtr path_blob)
+                    drmModePropertyBlobPtr path_blob)
 {
     int ret;
     char *extra_path;
@@ -3903,7 +3903,7 @@ drmmode_output_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode, drmModeResPtr mode_r
     }
 
     ms->is_connector_vrr_capable |=
-	         drmmode_connector_check_vrr_capable(drmmode->fd,
+              drmmode_connector_check_vrr_capable(drmmode->fd,
                                                   drmmode_output->output_id);
     return 1;
 

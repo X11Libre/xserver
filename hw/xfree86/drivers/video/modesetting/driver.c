@@ -538,7 +538,7 @@ rotate_clip(PixmapPtr pixmap, xf86CrtcPtr crtc, BoxPtr rect, drmModeClip *clip,
     int x1, y1, x2, y2;
 
     if (rotation == RR_Rotate_90 || rotation == RR_Rotate_270) {
-	/* width and height are swapped if rotated 90 or 270 degrees */
+        /* width and height are swapped if rotated 90 or 270 degrees */
         w = pixmap->drawable.height;
         h = pixmap->drawable.width;
     } else {
@@ -745,7 +745,7 @@ dispatch_dirty(ScreenPtr pScreen)
         if (!drmmode_crtc)
             continue;
 
-	drmmode_crtc_get_fb_id(crtc, &fb_id, &x, &y);
+        drmmode_crtc_get_fb_id(crtc, &fb_id, &x, &y);
 
         if (crtc->rotatedPixmap)
             pmap = crtc->rotatedPixmap;
@@ -909,9 +909,8 @@ msBlockHandler_oneshot(ScreenPtr pScreen, void *pTimeout)
 
 Bool
 ms_window_has_variable_refresh(modesettingPtr ms, WindowPtr win) {
-	struct ms_vrr_priv *priv = dixLookupPrivate(&win->devPrivates, &ms->drmmode.vrrPrivateKeyRec);
-
-	return priv->variable_refresh;
+        struct ms_vrr_priv *priv = dixLookupPrivate(&win->devPrivates, &ms->drmmode.vrrPrivateKeyRec);
+        return priv->variable_refresh;
 }
 
 static void
