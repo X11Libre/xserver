@@ -60,6 +60,8 @@ extern HWEventQueuePtr checkForInput[2];
  /* -retro mode */
 extern Bool party_like_its_1989;
 
+extern const char *defaultFontPath;
+
 /*
  * @brief callback right after one screen's root window has been initialized
  *
