@@ -14,7 +14,6 @@
 
 /* Global X server variables that are visible to mi, dix, os, and ddx */
 
-extern _X_EXPORT const char *defaultFontPath;
 extern _X_EXPORT int monitorResolution;
 extern _X_EXPORT int defaultColorVisualClass;
 
