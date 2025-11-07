@@ -43,6 +43,7 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/settings_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
@@ -1397,7 +1398,7 @@ KdInitInput(void)
     mieqInit();
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-    if (SeatId) /* Enable input hot-plugging */
+    if (dixSettingSeatId) /* Enable input hot-plugging */
         config_init();
 #endif
 }
@@ -1406,7 +1407,7 @@ void
 KdCloseInput(void)
 {
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-    if (SeatId) /* Input hot-plugging is enabled */
+    if (dixSettingSeatId) /* Input hot-plugging is enabled */
         config_fini();
 #endif
 
@@ -2422,7 +2423,7 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
 #ifdef CONFIG_HAL
         else if (strcmp(key, "_source") == 0 &&
                  strcmp(value, "server/hal") == 0) {
-            if (SeatId) {
+            if (dixSettingSeatId) {
                 /* Input hot-plugging is enabled */
                 if (attrs->flags & ATTR_POINTER) {
                     pi = KdNewPointer();
@@ -2449,7 +2450,7 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
 #ifdef CONFIG_UDEV
         else if (strcmp(key, "_source") == 0 &&
                  strcmp(value, "server/udev") == 0) {
-            if (SeatId) {
+            if (dixSettingSeatId) {
                 /* Input hot-plugging is enabled */
                 if (attrs->flags & ATTR_POINTER) {
                     pi = KdNewPointer();
