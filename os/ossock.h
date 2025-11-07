@@ -22,4 +22,9 @@ int ossock_ioctl(int fd, unsigned long request, void *arg);
  */
 int ossock_close(int fd);
 
+/*
+ * os specific check for errno indicating operation would block
+ */
+int ossock_wouldblock(int err);
+
 #endif /* _XSERVER_OS_OSSOCK_H_ */
