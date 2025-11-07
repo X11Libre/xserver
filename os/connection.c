@@ -122,6 +122,9 @@ SOFTWARE.
 
 #define MAX_CONNECTIONS (1<<16)
 
+#define OS_COMM_GRAB_IMPERVIOUS 1
+#define OS_COMM_IGNORED         2
+
 struct ospoll   *server_poll;
 
 Bool NewOutputPending;          /* not yet attempted to write some new output */
