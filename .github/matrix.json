@@ -1,0 +1,28 @@
+{
+  "include": [
+    {
+      "package": "core",
+      "path": "packages/core",
+      "level": 0,
+      "depends_on": []
+    },
+    {
+      "package": "utils",
+      "path": "packages/utils",
+      "level": 1,
+      "depends_on": ["core"]
+    },
+    {
+      "package": "api",
+      "path": "packages/api",
+      "level": 2,
+      "depends_on": ["utils"]
+    },
+    {
+      "package": "web",
+      "path": "packages/web",
+      "level": 2,
+      "depends_on": ["api", "utils"]
+    }
+  ]
+}
