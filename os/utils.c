@@ -97,6 +97,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
+#include "dix/settings_priv.h"
 #include "dix/screensaver_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/audit_priv.h"
@@ -127,8 +128,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 Bool CoreDump;
 
 Bool enableIndirectGLX = FALSE;
-
-Bool AllowByteSwappedClients = FALSE;
 
 #ifdef XINERAMA
 Bool PanoramiXExtensionDisabledHack = FALSE;
@@ -474,9 +473,9 @@ ProcessCommandLine(int argc, char *argv[])
                 UseMsg();
         }
         else if (strcmp(argv[i], "-byteswappedclients") == 0) {
-            AllowByteSwappedClients = FALSE;
+            dixSettingAllowByteSwappedClients = FALSE;
         } else if (strcmp(argv[i], "+byteswappedclients") == 0) {
-            AllowByteSwappedClients = TRUE;
+            dixSettingAllowByteSwappedClients = TRUE;
         }
         else if (strcmp(argv[i], "-br") == 0);  /* default */
         else if (strcmp(argv[i], "+bs") == 0)

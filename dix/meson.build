@@ -33,6 +33,7 @@ srcs_dix = [
     'screen_hooks.c',
     'selection.c',
     'screen.c',
+    'settings.c',
     'swaprep.c',
     'swapreq.c',
     'tables.c',
