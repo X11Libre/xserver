@@ -200,6 +200,8 @@ GLXReset(ExtensionEntry *extEntry)
 
     if ((dispatchException & DE_TERMINATE) == DE_TERMINATE) {
         DeleteCallbackList(&vndInitCallbackListPtr);
+        // glxServer needs a non-null .extensionInitCallback
+        CreateCallbackList(&vndInitCallbackListPtr);
     }
 }
 

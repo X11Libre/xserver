@@ -787,7 +787,7 @@ void DeleteCallbackList(CallbackListPtr *pcbl)
     *pcbl = NULL;
 }
 
-static Bool
+Bool
 CreateCallbackList(CallbackListPtr *pcbl)
 {
     if (!pcbl)

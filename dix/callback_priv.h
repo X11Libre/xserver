@@ -22,4 +22,7 @@ void DeleteCallbackManager(void);
 _X_EXPORT /* only for GLX module */
 void DeleteCallbackList(CallbackListPtr *pcbl);
 
+_X_EXPORT /* only for GLX module */
+Bool CreateCallbackList(CallbackListPtr *pcbl);
+
 #endif /* _XSERVER_CALLBACK_PRIV_H */
