@@ -104,6 +104,7 @@ typedef struct {
     drmEventContext event_context;
     drmmode_bo front_bo;
     Bool sw_cursor;
+    Bool set_cursor_failed;
 
     /* Broken-out options. */
     OptionInfoPtr Options;
