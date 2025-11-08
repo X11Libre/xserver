@@ -1843,6 +1843,7 @@ drmmode_set_cursor(xf86CrtcPtr crtc, int width, int height)
 
         cursor_info->MaxWidth = cursor_info->MaxHeight = 0;
         drmmode_crtc->drmmode->sw_cursor = TRUE;
+        drmmode_crtc->drmmode->set_cursor_failed = TRUE;
     }
 
     if (ret) {
