@@ -1126,8 +1126,8 @@ drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
 }
 
 static Bool
-drmmode_create_bo(drmmode_ptr drmmode, drmmode_bo *bo,
-                  unsigned width, unsigned height, unsigned bpp)
+drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
+                        unsigned width, unsigned height, unsigned bpp)
 {
     bo->width = width;
     bo->height = height;
@@ -1151,6 +1151,10 @@ drmmode_create_bo(drmmode_ptr drmmode, drmmode_bo *bo,
             break;
         }
 
+#ifndef GBM_BO_USE_FRONT_RENDERING
+#define GBM_BO_USE_FRONT_RENDERING 0
+#endif
+
 #ifdef GBM_BO_WITH_MODIFIERS
         uint32_t num_modifiers;
         uint64_t *modifiers = NULL;
@@ -1160,7 +1164,8 @@ drmmode_create_bo(drmmode_ptr drmmode, drmmode_bo *bo,
 #ifdef GBM_BO_WITH_MODIFIERS2
             bo->gbm = gbm_bo_create_with_modifiers2(drmmode->gbm, width, height,
                                                     format, modifiers, num_modifiers,
-                                                    GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+                                                    GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT |
+                                                    GBM_BO_USE_FRONT_RENDERING);
 #else
             bo->gbm = gbm_bo_create_with_modifiers(drmmode->gbm, width, height,
                                                    format, modifiers,
@@ -1175,7 +1180,8 @@ drmmode_create_bo(drmmode_ptr drmmode, drmmode_bo *bo,
 #endif
 
         bo->gbm = gbm_bo_create(drmmode->gbm, width, height, format,
-                                GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
+                                GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT |
+                                GBM_BO_USE_FRONT_RENDERING);
         bo->used_modifiers = FALSE;
         return bo->gbm != NULL;
     }
@@ -2238,7 +2244,8 @@ drmmode_shadow_fb_allocate(xf86CrtcPtr crtc, int width, int height,
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     int ret;
 
-    if (!drmmode_create_bo(drmmode, bo, width, height, drmmode->kbpp)) {
+    /* If we're using shadow fb, we're not using glamor, so no gbm bo's */
+    if (!drmmode_create_front_bo(drmmode, bo, width, height, drmmode->kbpp)) {
         xf86DrvMsg(crtc->scrn->scrnIndex, X_ERROR,
                "Couldn't allocate shadow memory for rotated CRTC\n");
         return NULL;
@@ -3942,8 +3949,8 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     old_fb_id = drmmode->fb_id;
     drmmode->fb_id = 0;
 
-    if (!drmmode_create_bo(drmmode, &drmmode->front_bo,
-                           width, height, drmmode->kbpp))
+    if (!drmmode_create_front_bo(drmmode, &drmmode->front_bo,
+                                 width, height, drmmode->kbpp))
         goto fail;
 
     pitch = drmmode_bo_get_pitch(&drmmode->front_bo);
@@ -4827,7 +4834,7 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     width = pScrn->virtualX;
     height = pScrn->virtualY;
 
-    if (!drmmode_create_bo(drmmode, &drmmode->front_bo, width, height, bpp))
+    if (!drmmode_create_front_bo(drmmode, &drmmode->front_bo, width, height, bpp))
         return FALSE;
     pScrn->displayWidth = drmmode_bo_get_pitch(&drmmode->front_bo) / cpp;
 
