@@ -72,7 +72,7 @@ extern _X_EXPORT Bool SetScrollValuator(DeviceIntPtr /* dev */ ,
                                         int /* flags */ );
 
 /* Input device properties */
-extern _X_EXPORT void XIDeleteAllDeviceProperties(DeviceIntPtr  /* device */
+extern void XIDeleteAllDeviceProperties(DeviceIntPtr  /* device */
     );
 
 extern _X_EXPORT int XIDeleteDeviceProperty(DeviceIntPtr /* device */ ,
@@ -118,7 +118,7 @@ extern _X_EXPORT long XIRegisterPropertyHandler(DeviceIntPtr dev,
                                                  Atom property)
     );
 
-extern _X_EXPORT void XIUnregisterPropertyHandler(DeviceIntPtr dev, long id);
+void XIUnregisterPropertyHandler(DeviceIntPtr dev, long id);
 
 extern _X_EXPORT Atom XIGetKnownProperty(const char *name);
 

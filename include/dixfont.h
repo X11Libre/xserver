@@ -32,15 +32,15 @@ SOFTWARE.
 
 typedef struct _DIXFontProp *DIXFontPropPtr;
 
-extern _X_EXPORT Bool SetDefaultFont(const char * /*defaultfontname */ );
+extern Bool SetDefaultFont(const char * /*defaultfontname */ );
 
-extern _X_EXPORT int OpenFont(ClientPtr /*client */ ,
+extern int OpenFont(ClientPtr /*client */ ,
                               XID /*fid */ ,
                               Mask /*flags */ ,
                               unsigned /*lenfname */ ,
                               const char * /*pfontname */ );
 
-extern _X_EXPORT int CloseFont(void *pfont,
+extern int CloseFont(void *pfont,
                                XID fid);
 
 extern _X_EXPORT int ListFonts(ClientPtr /*client */ ,
@@ -68,27 +68,28 @@ extern _X_EXPORT int ImageText(ClientPtr /*client */ ,
                                int /*reqType */ ,
                                XID /*did */ );
 
-extern _X_EXPORT int SetFontPath(ClientPtr /*client */ ,
+extern int SetFontPath(ClientPtr /*client */ ,
                                  int /*npaths */ ,
                                  unsigned char * /*paths */ );
 
-extern _X_EXPORT int SetDefaultFontPath(const char * /*path */ );
+extern int SetDefaultFontPath(const char * /*path */ );
 
 /* not used by any known external driver, so can be removed soon */
 extern _X_EXPORT int GetFontPath(ClientPtr client,
                                  int *count,
                                  int *length, unsigned char **result) _X_DEPRECATED;
 
-extern _X_EXPORT void DeleteClientFontStuff(ClientPtr /*client */ );
+extern void DeleteClientFontStuff(ClientPtr /*client */ );
 
 /* Quartz support on Mac OS X pulls in the QuickDraw
    framework whose InitFonts function conflicts here. */
+// rename InitFonts completely
 #ifdef __APPLE__
 #define InitFonts Darwin_X_InitFonts
 #endif
-extern _X_EXPORT void InitFonts(void);
+extern void InitFonts(void);
 
-extern _X_EXPORT void FreeFonts(void);
+extern void FreeFonts(void);
 
 extern _X_EXPORT void GetGlyphs(FontPtr /*font */ ,
                                 unsigned long /*count */ ,
