@@ -429,6 +429,8 @@ drmmode_prop_info_copy(drmmode_prop_info_ptr dst,
         else
             dst[i].prop_id = 0;
 
+        strcpy(dst[i].name, src[i].name);
+
         if (src[i].num_enum_values == 0)
             continue;
 

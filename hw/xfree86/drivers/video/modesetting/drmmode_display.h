@@ -152,7 +152,7 @@ typedef struct {
 } drmmode_prop_enum_info_rec, *drmmode_prop_enum_info_ptr;
 
 typedef struct {
-    const char *name;
+    char name[DRM_PROP_NAME_LEN];
     uint32_t prop_id;
     uint64_t value;
     unsigned int num_enum_values;
