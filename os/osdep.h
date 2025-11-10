@@ -57,6 +57,15 @@ SOFTWARE.
 #include <X11/Xmd.h>
 #include <X11/Xdefs.h>
 
+/*
+ * return the least significant bit in x which is set
+ *
+ * This works on 1's complement and 2's complement machines.
+ * If you care about the extra instruction on 2's complement
+ * machines, change to ((x) & (-(x)))
+ */
+#define lowbit(x) ((x) & (~(x) + 1))
+
 #ifndef __has_builtin
 # define __has_builtin(x) 0     /* Compatibility with older compilers */
 #endif
