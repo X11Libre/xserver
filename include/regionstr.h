@@ -211,8 +211,6 @@ RegionNull(RegionPtr _pReg)
     (_pReg)->data = &RegionEmptyData;
 }
 
-extern _X_EXPORT void InitRegions(void);
-
 extern _X_EXPORT RegionPtr RegionCreate(BoxPtr /*rect */ ,
                                         int /*size */ );
 
@@ -327,17 +325,6 @@ RegionEqual(RegionPtr reg1, RegionPtr reg2)
 {
     return pixman_region_equal(reg1, reg2);
 }
-
-extern _X_EXPORT Bool RegionRectAlloc(RegionPtr /*pRgn */ ,
-                                      int       /*n */
-    );
-
-#ifdef DEBUG
-extern _X_EXPORT Bool RegionIsValid(RegionPtr   /*prgn */
-    );
-#endif
-
-extern _X_EXPORT void RegionPrint(RegionPtr /*pReg */ );
 
 #define INCLUDE_LEGACY_REGION_DEFINES
 #ifdef INCLUDE_LEGACY_REGION_DEFINES
