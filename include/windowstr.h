@@ -169,8 +169,6 @@ typedef struct _Window {
  * fields (or filling the appropriate default value)
  */
 
-extern _X_EXPORT Mask DontPropagateMasks[];
-
 #define wTrackParent(w,field)	((w)->optional ? \
 				    (w)->optional->field \
  				 : FindWindowWithOptional(w)->optional->field)
@@ -181,7 +179,6 @@ extern _X_EXPORT Mask DontPropagateMasks[];
 #define wVisual(w)		wTrackParent(w, visual)
 #define wCursor(w)		((w)->cursorIsNone ? None : wTrackParent(w, cursor))
 #define wColormap(w)		((w)->drawable.class == InputOnly ? None : wTrackParent(w, colormap))
-#define wDontPropagateMask(w)	wUseDefault(w, dontPropagateMask, DontPropagateMasks[(w)->dontPropagate])
 #define wOtherEventMasks(w)	wUseDefault(w, otherEventMasks, 0)
 #define wOtherClients(w)	wUseDefault(w, otherClients, NULL)
 #define wOtherInputMasks(w)	wUseDefault(w, inputMasks, NULL)
