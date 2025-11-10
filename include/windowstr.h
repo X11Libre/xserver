@@ -157,8 +157,6 @@ struct _Window {
     PropertyPtr properties;     /* default: NULL */
 };
 
-extern _X_EXPORT Mask DontPropagateMasks[];
-
 #define wBorderWidth(w)		((int) (w)->borderWidth)
 
 static inline PropertyPtr wUserProps(WindowPtr pWin) { return pWin->properties; }
