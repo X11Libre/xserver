@@ -37,6 +37,7 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "os/bug_priv.h"
 
