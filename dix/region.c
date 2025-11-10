@@ -77,11 +77,13 @@ Equipment Corporation.
 
 #include <dix-config.h>
 
-#include "regionstr.h"
+#include <pixman.h>
 #include <X11/Xprotostr.h>
 #include <X11/Xfuncproto.h>
+
+#include "dix/region_priv.h"
+
 #include "gc.h"
-#include <pixman.h>
 
 #undef assert
 #ifdef REGION_DEBUG
