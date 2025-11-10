@@ -21,11 +21,14 @@
  */
 
 #include <kdrive-config.h>
-#include "fbdev.h"
-#include "fb/fb_priv.h"
-#include <sys/ioctl.h>
 
+#include <sys/ioctl.h>
 #include <errno.h>
+
+#include "fb/fb_priv.h"
+#include "os/osdep.h"
+
+#include "fbdev.h"
 
 #ifndef xallocarray
 #define xallocarray(num, size) reallocarray(NULL, (num), (size))
