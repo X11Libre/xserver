@@ -58,4 +58,12 @@ typedef struct {
 extern CallbackListPtr ExtensionAccessCallback;
 extern CallbackListPtr ExtensionDispatchCallback;
 
+void EnableDisableExtensionError(const char *name, Bool enable);
+void InitExtensions(int argc, char **argv);
+void CloseDownExtensions(void);
+
+ExtensionEntry *GetExtensionEntry(int major);
+
+void NotImplemented(xEvent *, xEvent *) _X_NORETURN;
+
 #endif /* _XSERVER_EXTENSION_PRIV_H */
