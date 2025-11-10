@@ -21,6 +21,7 @@ is" without express or implied warranty.
 
 #include "dix/colormap_priv.h"
 #include "os/osdep.h"
+#include "dix/window_priv.h"
 
 #include "scrnintstr.h"
 #include "window.h"
