@@ -34,6 +34,13 @@ extern Mask DontPropagateMasks[];
 #define wClipShape(w)           wUseDefault(w, clipShape, NULL)
 #define wInputShape(w)          wUseDefault(w, inputShape, NULL)
 
+#define SameBackground(as, a, bs, b)				\
+    ((as) == (bs) && ((as) == None ||				\
+                      (as) == ParentRelative ||			\
+                      SamePixUnion(a,b,as == BackgroundPixel)))
+
+#define SameBorder(as, a, bs, b) EqualPixUnion(as, a, bs, b)
+
 /*
  * @brief create a window
  *
