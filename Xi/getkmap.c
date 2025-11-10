@@ -59,6 +59,7 @@ SOFTWARE.
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "Xi/handlers.h"
+#include "xkb/xkbsrv_priv.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "swaprep.h"
