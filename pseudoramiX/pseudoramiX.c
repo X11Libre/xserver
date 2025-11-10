@@ -43,7 +43,6 @@
 
 #include "pseudoramiX.h"
 #include "extnsionst.h"
-#include "nonsdk_extinit.h"
 #include "dixstruct.h"
 #include "window.h"
 #include <X11/extensions/panoramiXproto.h>

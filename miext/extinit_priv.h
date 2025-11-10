@@ -29,6 +29,8 @@ extern Bool noNamespaceExtension;
 
 extern Bool PanoramiXExtensionDisabledHack;
 
+extern Bool noPseudoramiXExtension;
+
 extern char *namespaceConfigFile;
 
 void CompositeExtensionInit(void);

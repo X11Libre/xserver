@@ -35,6 +35,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "quartzRandR.h"
 #include "inputstr.h"
@@ -43,7 +44,6 @@
 #include "darwinEvents.h"
 #include "pseudoramiX.h"
 #include "extension.h"
-#include "nonsdk_extinit.h"
 #include "glx_extinit.h"
 #define _APPLEWM_SERVER_
 #include "applewmExt.h"
