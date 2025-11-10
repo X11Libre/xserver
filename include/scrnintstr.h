@@ -88,7 +88,7 @@ typedef struct _ScreenSaverStuff {
     Bool (*ExternalScreenSaver) (ScreenPtr /*pScreen */ ,
                                  int /*xstate */ ,
                                  Bool /*force */ );
-} ScreenSaverStuffRec;
+} ScreenSaverStuffRec, *ScreenSaverStuffPtr;
 
 typedef enum {
     WINDOW_VRR_DISABLED = 0,
