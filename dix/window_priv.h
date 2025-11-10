@@ -10,6 +10,10 @@
 #include "include/dix.h"
 #include "include/window.h"
 
+extern Mask DontPropagateMasks[];
+
+#define wDontPropagateMask(w)   wUseDefault(w, dontPropagateMask, DontPropagateMasks[(w)->dontPropagate])
+
 /*
  * @brief create a window
  *
