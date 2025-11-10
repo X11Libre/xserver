@@ -95,6 +95,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #endif
 
 #include "dix/dix_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/settings_priv.h"
 #include "dix/screensaver_priv.h"
