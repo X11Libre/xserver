@@ -229,9 +229,6 @@ extern _X_EXPORT int dixLookupResourceByClass(void **result,
                                               ClientPtr client,
                                               Mask access_mode);
 
-extern _X_EXPORT RESTYPE lastResourceType;
-extern _X_EXPORT RESTYPE TypeMask;
-
 /*
  * @brief allocate a XID (resource ID) for the server itself
  *
