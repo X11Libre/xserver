@@ -35,9 +35,9 @@
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
-#include "dix/input_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/extension_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screensaver_priv.h"
