@@ -63,8 +63,8 @@ Equipment Corporation.
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/server_priv.h"
+#include "dix/swaprep.h"
 #include "include/extinit.h"
-#include "include/swaprep.h"
 #include "os/auth.h"
 #include "os/log_priv.h"
 
