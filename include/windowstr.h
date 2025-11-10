@@ -60,14 +60,6 @@ SOFTWARE.
 #include "opaque.h"
 
 
-#define SameBackground(as, a, bs, b)				\
-    ((as) == (bs) && ((as) == None ||				\
-		      (as) == ParentRelative ||			\
- 		      SamePixUnion(a,b,as == BackgroundPixel)))
-
-#define SameBorder(as, a, bs, b)				\
-    EqualPixUnion(as, a, bs, b)
-
 /* used as NULL-terminated list */
 typedef struct _DevCursorNode {
     CursorPtr cursor;
