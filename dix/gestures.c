@@ -32,6 +32,7 @@
 #include "dix/inpututils_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 

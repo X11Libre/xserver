@@ -33,11 +33,11 @@
 #include <xwin-config.h>
 #endif
 
+#include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 
 #include "win.h"
 
-#include "mi/mi_priv.h"
 
 /*
  * Prototypes for local functions

@@ -9,6 +9,28 @@
 
 #include "include/dix.h"
 #include "include/window.h"
+#include "include/windowstr.h"
+
+#define wTrackParent(w,field)   ((w)->optional ? \
+                                    (w)->optional->field \
+                                 : FindWindowWithOptional(w)->optional->field)
+#define wUseDefault(w,field,def)        ((w)->optional ? \
+                                    (w)->optional->field \
+                                 : def)
+
+#define wVisual(w)              wTrackParent(w, visual)
+#define wCursor(w)              ((w)->cursorIsNone ? None : wTrackParent(w, cursor))
+#define wColormap(w)            ((w)->drawable.class == InputOnly ? None : wTrackParent(w, colormap))
+#define wDontPropagateMask(w)   wUseDefault(w, dontPropagateMask, DontPropagateMasks[(w)->dontPropagate])
+#define wOtherEventMasks(w)     wUseDefault(w, otherEventMasks, 0)
+#define wOtherClients(w)        wUseDefault(w, otherClients, NULL)
+#define wOtherInputMasks(w)     wUseDefault(w, inputMasks, NULL)
+#define wPassiveGrabs(w)        wUseDefault(w, passiveGrabs, NULL)
+#define wBackingBitPlanes(w)    wUseDefault(w, backingBitPlanes, ~0L)
+#define wBackingPixel(w)        wUseDefault(w, backingPixel, 0)
+#define wBoundingShape(w)       wUseDefault(w, boundingShape, NULL)
+#define wClipShape(w)           wUseDefault(w, clipShape, NULL)
+#define wInputShape(w)          wUseDefault(w, inputShape, NULL)
 
 #define SameBackground(as, a, bs, b)				\
     ((as) == (bs) && ((as) == None ||				\

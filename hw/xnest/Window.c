@@ -21,6 +21,7 @@ is" without express or implied warranty.
 #include <X11/Xdefs.h>
 #include <X11/Xproto.h>
 
+#include "dix/window_priv.h"
 #include "include/regionstr.h"
 #include "mi/mi_priv.h"
 
