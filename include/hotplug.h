@@ -26,9 +26,4 @@
 #ifndef HOTPLUG_H
 #define HOTPLUG_H
 
-#include <X11/Xfuncproto.h>
-
-extern _X_EXPORT void config_init(void);
-extern _X_EXPORT void config_fini(void);
-
 #endif                          /* HOTPLUG_H */

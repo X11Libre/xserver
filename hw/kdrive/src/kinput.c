@@ -56,7 +56,7 @@
 #include "optionstr.h"
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-#include "hotplug.h"
+#include "config/hotplug_priv.h"
 #endif
 
 #ifdef KDRIVE_EVDEV
