@@ -56,6 +56,7 @@ SOFTWARE.
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/window_priv.h"
 #include "os/osdep.h"
 #include "os/bug_priv.h"
 

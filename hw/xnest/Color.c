@@ -20,6 +20,7 @@ is" without express or implied warranty.
 #include <xcb/xcb.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/window_priv.h"
 
 #include "scrnintstr.h"
 #include "window.h"
