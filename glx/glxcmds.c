@@ -40,6 +40,7 @@
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "os/bug_priv.h"
 #include "present/present_priv.h"
 
