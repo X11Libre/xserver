@@ -92,7 +92,8 @@ Equipment Corporation.
 
 #include    <X11/X.h>
 
-#include    "mi/mi_priv.h"
+#include "dix/window_priv.h"
+#include "mi/mi_priv.h"
 
 #include    "scrnintstr.h"
 #include    "validate.h"

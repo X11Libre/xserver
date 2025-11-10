@@ -94,6 +94,7 @@ Equipment Corporation.
 #include <stddef.h>             /* For NULL */
 #include <X11/X.h>
 
+#include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 
 #include    "scrnintstr.h"

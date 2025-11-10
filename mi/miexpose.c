@@ -80,6 +80,7 @@ Equipment Corporation.
 
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "mi/mi_priv.h"
 #include "Xext/panoramiX.h"
