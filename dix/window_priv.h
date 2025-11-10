@@ -10,6 +10,13 @@
 #include "include/dix.h"
 #include "include/window.h"
 
+#define SameBackground(as, a, bs, b)				\
+    ((as) == (bs) && ((as) == None ||				\
+                      (as) == ParentRelative ||			\
+                      SamePixUnion(a,b,as == BackgroundPixel)))
+
+#define SameBorder(as, a, bs, b) EqualPixUnion(as, a, bs, b)
+
 /*
  * @brief create a window
  *
