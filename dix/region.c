@@ -81,9 +81,9 @@ Equipment Corporation.
 #include <X11/Xfuncproto.h>
 #include <pixman.h>
 
+#include "dix/region_priv.h"
 #include "os/mathx_priv.h"
 
-#include "regionstr.h"
 #include "gc.h"
 
 #undef assert
