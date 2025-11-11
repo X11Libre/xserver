@@ -67,15 +67,16 @@ glamor_compile_glsl_prog(GLenum type, const char *source)
 
         glGetShaderiv(prog, GL_INFO_LOG_LENGTH, &size);
         GLchar *info = calloc(1, size);
-        if (info) {
-            glGetShaderInfoLog(prog, size, NULL, info);
-            ErrorF("Failed to compile %s: %s\n",
-                   type == GL_FRAGMENT_SHADER ? "FS" : "VS", info);
-            ErrorF("Program source:\n%s", source);
-            free(info);
+        if (!info) {
+            ErrorF("[glamor] alloc fail: Failed to get shader compilation info for compile.\n");
+            FatalError("GLSL compile failure\n");
         }
-        else
-            ErrorF("Failed to get shader compilation info.\n");
+
+        glGetShaderInfoLog(prog, size, NULL, info);
+        ErrorF("Failed to compile %s: %s\n",
+               type == GL_FRAGMENT_SHADER ? "FS" : "VS", info);
+        ErrorF("Program source:\n%s", source);
+        free(info);
         FatalError("GLSL compile failure\n");
     }
 
@@ -110,6 +111,10 @@ glamor_link_glsl_prog(ScreenPtr screen, GLint prog, const char *format, ...)
 
         glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &size);
         GLchar *info = calloc(1, size);
+        if (!info) {
+            ErrorF("[glamor] alloc fail: Failed to get shader compilation info for link.\n");
+            return FALSE;
+        }
 
         glGetProgramInfoLog(prog, size, NULL, info);
         ErrorF("Failed to link: %s\n", info);
