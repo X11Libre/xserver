@@ -294,7 +294,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
         modifier = gbm_bo_get_modifier(gbm);
         gbm_bo_destroy(gbm);
 
-        if (!drmmode_is_format_supported(scrn, format, modifier)) {
+        if (!drmmode_is_format_supported(scrn, format, modifier, !sync_flip)) {
             if (reason)
                 *reason = PRESENT_FLIP_REASON_BUFFER_FORMAT;
             return FALSE;
@@ -321,6 +321,7 @@ ms_present_check_flip(RRCrtcPtr crtc,
     ScreenPtr screen = window->drawable.pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
+    Bool async_flip = !sync_flip;
 
     if (ms->drmmode.sprites_visible > 0)
         goto no_flip;
@@ -328,8 +329,22 @@ ms_present_check_flip(RRCrtcPtr crtc,
     if (ms->drmmode.pending_modeset)
         goto no_flip;
 
-    if(!ms_present_check_unflip(crtc, window, pixmap, sync_flip, reason))
+    if (!ms_present_check_unflip(crtc, window, pixmap, sync_flip, reason)) {
+        if (reason && *reason == PRESENT_FLIP_REASON_BUFFER_FORMAT)
+            ms_window_update_async_flip(window, async_flip);
         goto no_flip;
+    }
+
+    ms_window_update_async_flip(window, async_flip);
+
+    /*
+     * Force a format renegotiation when switching between sync and async,
+     * otherwise we may end up with a working but suboptimal modifier.
+     */
+    if (reason && async_flip != ms_window_has_async_flip_modifiers(window)) {
+        *reason = PRESENT_FLIP_REASON_BUFFER_FORMAT;
+        goto no_flip;
+    }
 
     ms->flip_window = window;
 
@@ -337,7 +352,7 @@ ms_present_check_flip(RRCrtcPtr crtc,
 
 no_flip:
     /* Export some info about TearFree if Present can't flip anyway */
-    if (reason) {
+    if (reason && *reason == PRESENT_FLIP_REASON_UNKNOWN) {
         xf86CrtcPtr xf86_crtc = crtc->devPrivate;
         drmmode_crtc_private_ptr drmmode_crtc = xf86_crtc->driver_private;
         drmmode_tearfree_ptr trf = &drmmode_crtc->tearfree;
@@ -446,25 +461,24 @@ ms_present_unflip(ScreenPtr screen, uint64_t event_id)
 
     for (i = 0; i < config->num_crtc; i++) {
         xf86CrtcPtr crtc = config->crtc[i];
-	drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
+        drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 
-	if (!crtc->enabled)
-	    continue;
+        if (!crtc->enabled)
+            continue;
 
-	/* info->drmmode.fb_id still points to the FB for the last flipped BO.
-	 * Clear it, drmmode_set_mode_major will re-create it
-	 */
-	if (drmmode_crtc->drmmode->fb_id) {
-		drmModeRmFB(drmmode_crtc->drmmode->fd,
-			    drmmode_crtc->drmmode->fb_id);
-		drmmode_crtc->drmmode->fb_id = 0;
-	}
+        /* info->drmmode.fb_id still points to the FB for the last flipped BO.
+         * Clear it, drmmode_set_mode_major will re-create it
+         */
+        if (drmmode_crtc->drmmode->fb_id) {
+            drmModeRmFB(drmmode_crtc->drmmode->fd, drmmode_crtc->drmmode->fb_id);
+            drmmode_crtc->drmmode->fb_id = 0;
+        }
 
-	if (drmmode_crtc->dpms_mode == DPMSModeOn)
-	    crtc->funcs->set_mode_major(crtc, &crtc->mode, crtc->rotation,
-					crtc->x, crtc->y);
-	else
-	    drmmode_crtc->need_modeset = TRUE;
+        if (drmmode_crtc->dpms_mode == DPMSModeOn)
+            crtc->funcs->set_mode_major(crtc, &crtc->mode, crtc->rotation,
+                                        crtc->x, crtc->y);
+        else
+            drmmode_crtc->need_modeset = TRUE;
     }
 
     present_event_notify(event_id, 0, 0);

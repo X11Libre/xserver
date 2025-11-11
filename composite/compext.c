@@ -403,8 +403,7 @@ CompositeExtensionInit(void)
     /* Assume initialization is going to fail */
     noCompositeExtension = TRUE;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
 
         /* Composite on 8bpp pseudocolor root windows appears to fail, so
          * just disable it on anything pseudocolor for safety.
@@ -419,7 +418,7 @@ CompositeExtensionInit(void)
          */
         if (GetPictureScreenIfSet(walkScreen) == NULL)
             return;
-    }
+    });
 
     CompositeClientWindowType = CreateNewResourceType
         (FreeCompositeClientWindow, "CompositeClientWindow");
@@ -443,11 +442,10 @@ CompositeExtensionInit(void)
                                sizeof(CompositeClientRec)))
         return;
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (!compScreenInit(walkScreen))
             return;
-    }
+    });
 
     ExtensionEntry *extEntry = AddExtension(COMPOSITE_NAME, 0, 0,
                             ProcCompositeDispatch,

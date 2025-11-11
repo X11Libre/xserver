@@ -36,6 +36,7 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
@@ -97,23 +98,6 @@ static int ProcRenderCreateConicalGradient(ClientPtr pClient);
 
 static int ProcRenderDispatch(ClientPtr pClient);
 
-static int SProcRenderFreePicture(ClientPtr pClient);
-static int SProcRenderTrapezoids(ClientPtr pClient);
-static int SProcRenderTriangles(ClientPtr pClient);
-static int SProcRenderTriStrip(ClientPtr pClient);
-static int SProcRenderTriFan(ClientPtr pClient);
-static int SProcRenderCompositeGlyphs(ClientPtr pClient);
-static int SProcRenderFillRectangles(ClientPtr pClient);
-static int SProcRenderSetPictureTransform(ClientPtr pClient);
-static int SProcRenderSetPictureFilter(ClientPtr pClient);
-static int SProcRenderAddTraps(ClientPtr pClient);
-static int SProcRenderCreateSolidFill(ClientPtr pClient);
-static int SProcRenderCreateLinearGradient(ClientPtr pClient);
-static int SProcRenderCreateRadialGradient(ClientPtr pClient);
-static int SProcRenderCreateConicalGradient(ClientPtr pClient);
-
-static int SProcRenderDispatch(ClientPtr pClient);
-
 int (*ProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
 ProcRenderQueryVersion,
         ProcRenderQueryPictFormats,
@@ -152,44 +136,6 @@ ProcRenderQueryVersion,
         ProcRenderCreateLinearGradient,
         ProcRenderCreateRadialGradient, ProcRenderCreateConicalGradient};
 
-int (*SProcRenderVector[RenderNumberRequests]) (ClientPtr) = {
-        ProcRenderQueryVersion,
-        ProcRenderQueryPictFormats,
-        ProcRenderQueryPictIndexValues,
-        _not_implemented, /* SProcRenderQueryDithers */
-        ProcRenderCreatePicture,
-        ProcRenderChangePicture,
-        ProcRenderSetPictureClipRectangles,
-        SProcRenderFreePicture,
-        ProcRenderComposite,
-        _not_implemented, /* SProcRenderScale */
-        SProcRenderTrapezoids,
-        SProcRenderTriangles,
-        SProcRenderTriStrip,
-        SProcRenderTriFan,
-        _not_implemented, /* SProcRenderColorTrapezoids */
-        _not_implemented, /* SProcRenderColorTriangles */
-        _not_implemented, /* SProcRenderTransform */
-        ProcRenderCreateGlyphSet,
-        ProcRenderReferenceGlyphSet,
-        ProcRenderFreeGlyphSet,
-        ProcRenderAddGlyphs,
-        _not_implemented, /* SProcRenderAddGlyphsFromPicture */
-        ProcRenderFreeGlyphs,
-        SProcRenderCompositeGlyphs,
-        SProcRenderCompositeGlyphs,
-        SProcRenderCompositeGlyphs,
-        SProcRenderFillRectangles,
-        ProcRenderCreateCursor,
-        SProcRenderSetPictureTransform,
-        ProcRenderQueryFilters,
-        SProcRenderSetPictureFilter,
-        ProcRenderCreateAnimCursor,
-        SProcRenderAddTraps,
-        SProcRenderCreateSolidFill,
-        SProcRenderCreateLinearGradient,
-        SProcRenderCreateRadialGradient, SProcRenderCreateConicalGradient};
-
 int RenderErrBase;
 static DevPrivateKeyRec RenderClientPrivateKeyRec;
 
@@ -220,7 +166,7 @@ RenderExtensionInit(void)
         return;
 
     extEntry = AddExtension(RENDER_NAME, 0, RenderNumberErrors,
-                            ProcRenderDispatch, SProcRenderDispatch,
+                            ProcRenderDispatch, ProcRenderDispatch,
                             NULL, StandardMinorOpcode);
     if (!extEntry)
         return;
@@ -546,13 +492,13 @@ SingleRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
 }
 
 static int
-SingleRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
+SingleRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff, Picture pictID)
 {
     PicturePtr pPicture;
 
     int len;
 
-    VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
+    VERIFY_PICTURE(pPicture, pictID, client, DixSetAttrAccess);
 
     len = client->req_len - bytes_to_int32(sizeof(xRenderChangePictureReq));
     if (Ones(stuff->mask) != len)
@@ -564,12 +510,13 @@ SingleRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
 
 static int
 SingleRenderSetPictureClipRectangles(ClientPtr client,
-                                     xRenderSetPictureClipRectanglesReq *stuff)
+                                     xRenderSetPictureClipRectanglesReq *stuff,
+                                     Picture pictID)
 {
     PicturePtr pPicture;
     int nr;
 
-    VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
+    VERIFY_PICTURE(pPicture, pictID, client, DixSetAttrAccess);
     if (!pPicture->pDrawable)
         return RenderErrBase + BadPicture;
 
@@ -588,8 +535,6 @@ SingleRenderFreePicture(ClientPtr client)
     PicturePtr pPicture;
 
     REQUEST(xRenderFreePictureReq);
-
-    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
 
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixDestroyAccess);
     FreeResource(stuff->picture, X11_RESTYPE_NONE);
@@ -648,15 +593,12 @@ SingleRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
 }
 
 static int
-SingleRenderTrapezoids(ClientPtr client)
+SingleRenderTrapezoids(ClientPtr client, xRenderTrapezoidsReq *stuff)
 {
     int rc, ntraps;
     PicturePtr pSrc, pDst;
     PictFormatPtr pFormat;
 
-    REQUEST(xRenderTrapezoidsReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -687,15 +629,12 @@ SingleRenderTrapezoids(ClientPtr client)
 }
 
 static int
-SingleRenderTriangles(ClientPtr client)
+SingleRenderTriangles(ClientPtr client, xRenderTrianglesReq *stuff)
 {
     int rc, ntris;
     PicturePtr pSrc, pDst;
     PictFormatPtr pFormat;
 
-    REQUEST(xRenderTrianglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -726,15 +665,12 @@ SingleRenderTriangles(ClientPtr client)
 }
 
 static int
-SingleRenderTriStrip(ClientPtr client)
+SingleRenderTriStrip(ClientPtr client, xRenderTriStripReq *stuff)
 {
     int rc, npoints;
     PicturePtr pSrc, pDst;
     PictFormatPtr pFormat;
 
-    REQUEST(xRenderTrianglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -765,15 +701,12 @@ SingleRenderTriStrip(ClientPtr client)
 }
 
 static int
-SingleRenderTriFan(ClientPtr client)
+SingleRenderTriFan(ClientPtr client, xRenderTriFanReq *stuff)
 {
     int rc, npoints;
     PicturePtr pSrc, pDst;
     PictFormatPtr pFormat;
 
-    REQUEST(xRenderTrianglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -1041,8 +974,7 @@ ProcRenderAddGlyphs(ClientPtr client)
                 goto bail;
             }
 
-            for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-                ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            DIX_FOR_EACH_SCREEN({
                 int width = gi[i].width;
                 int height = gi[i].height;
                 int depth = glyphSet->format->depth;
@@ -1104,7 +1036,7 @@ ProcRenderAddGlyphs(ClientPtr client)
 
                 FreePicture((void *) pSrc, 0);
                 FreeScratchPixmapHeader(pSrcPix);
-            }
+            });
 
             memcpy(glyph_new->glyph->sha1, glyph_new->sha1, 20);
         }
@@ -1181,7 +1113,7 @@ ProcRenderFreeGlyphs(ClientPtr client)
 }
 
 static int
-SingleRenderCompositeGlyphs(ClientPtr client)
+SingleRenderCompositeGlyphs(ClientPtr client, xRenderCompositeGlyphsReq *stuff)
 {
     GlyphSetPtr glyphSet;
     GlyphSet gs;
@@ -1199,10 +1131,6 @@ SingleRenderCompositeGlyphs(ClientPtr client)
     int space;
     int size;
     int rc, n;
-
-    REQUEST(xRenderCompositeGlyphsReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
 
     switch (stuff->renderReqType) {
     default:
@@ -1348,14 +1276,11 @@ SingleRenderCompositeGlyphs(ClientPtr client)
 }
 
 static int
-SingleRenderFillRectangles(ClientPtr client)
+SingleRenderFillRectangles(ClientPtr client, xRenderFillRectanglesReq *stuff)
 {
     PicturePtr pDst;
     int things;
 
-    REQUEST(xRenderFillRectanglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderFillRectanglesReq);
     if (!PictOpValid(stuff->op)) {
         client->errorValue = stuff->op;
         return BadValue;
@@ -1607,12 +1532,11 @@ ProcRenderCreateCursor(ClientPtr client)
 }
 
 static int
-SingleRenderSetPictureTransform(ClientPtr client)
+SingleRenderSetPictureTransform(ClientPtr client,
+                                xRenderSetPictureTransformReq *stuff)
 {
-    REQUEST(xRenderSetPictureTransformReq);
     PicturePtr pPicture;
 
-    REQUEST_SIZE_MATCH(xRenderSetPictureTransformReq);
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
     return SetPictureTransform(pPicture, (PictTransform *) &stuff->transform);
 }
@@ -1718,16 +1642,14 @@ ProcRenderQueryFilters(ClientPtr client)
 }
 
 static int
-SingleRenderSetPictureFilter(ClientPtr client)
+SingleRenderSetPictureFilter(ClientPtr client, xRenderSetPictureFilterReq *stuff)
 {
-    REQUEST(xRenderSetPictureFilterReq);
     PicturePtr pPicture;
     int result;
     xFixed *params;
     int nparams;
     char *name;
 
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixSetAttrAccess);
     name = (char *) (stuff + 1);
     params = (xFixed *) (name + pad_to_int32(stuff->nbytes));
@@ -1793,14 +1715,11 @@ ProcRenderCreateAnimCursor(ClientPtr client)
 }
 
 static int
-SingleRenderAddTraps(ClientPtr client)
+SingleRenderAddTraps(ClientPtr client, xRenderAddTrapsReq *stuff)
 {
     int ntraps;
     PicturePtr pPicture;
 
-    REQUEST(xRenderAddTrapsReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
     VERIFY_PICTURE(pPicture, stuff->picture, client, DixWriteAccess);
     if (!pPicture->pDrawable)
         return BadDrawable;
@@ -1815,14 +1734,10 @@ SingleRenderAddTraps(ClientPtr client)
 }
 
 static int
-SingleRenderCreateSolidFill(ClientPtr client)
+SingleRenderCreateSolidFill(ClientPtr client, xRenderCreateSolidFillReq *stuff)
 {
     PicturePtr pPicture;
     int error = 0;
-
-    REQUEST(xRenderCreateSolidFillReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
 
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
@@ -1840,17 +1755,13 @@ SingleRenderCreateSolidFill(ClientPtr client)
 }
 
 static int
-SingleRenderCreateLinearGradient(ClientPtr client)
+SingleRenderCreateLinearGradient(ClientPtr client, xRenderCreateLinearGradientReq *stuff)
 {
     PicturePtr pPicture;
     int len;
     int error = 0;
     xFixed *stops;
     xRenderColor *colors;
-
-    REQUEST(xRenderCreateLinearGradientReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
 
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
@@ -1879,17 +1790,14 @@ SingleRenderCreateLinearGradient(ClientPtr client)
 }
 
 static int
-SingleRenderCreateRadialGradient(ClientPtr client)
+SingleRenderCreateRadialGradient(ClientPtr client,
+                                 xRenderCreateRadialGradientReq *stuff)
 {
     PicturePtr pPicture;
     int len;
     int error = 0;
     xFixed *stops;
     xRenderColor *colors;
-
-    REQUEST(xRenderCreateRadialGradientReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateRadialGradientReq);
 
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
@@ -1919,17 +1827,14 @@ SingleRenderCreateRadialGradient(ClientPtr client)
 }
 
 static int
-SingleRenderCreateConicalGradient(ClientPtr client)
+SingleRenderCreateConicalGradient(ClientPtr client,
+                                  xRenderCreateConicalGradientReq *stuff)
 {
     PicturePtr pPicture;
     int len;
     int error = 0;
     xFixed *stops;
     xRenderColor *colors;
-
-    REQUEST(xRenderCreateConicalGradientReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateConicalGradientReq);
 
     LEGAL_NEW_RESOURCE(stuff->pid, client);
 
@@ -1968,227 +1873,6 @@ ProcRenderDispatch(ClientPtr client)
         return BadRequest;
 }
 
-static int _X_COLD
-SProcRenderFreePicture(ClientPtr client)
-{
-    REQUEST(xRenderFreePictureReq);
-    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
-    swapl(&stuff->picture);
-    return ProcRenderFreePicture(client);
-}
-
-static int _X_COLD
-SProcRenderTrapezoids(ClientPtr client)
-{
-    REQUEST(xRenderTrapezoidsReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    SwapRestL(stuff);
-    return ProcRenderTrapezoids(client);
-}
-
-static int _X_COLD
-SProcRenderTriangles(ClientPtr client)
-{
-    REQUEST(xRenderTrianglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    SwapRestL(stuff);
-    return ProcRenderTriangles(client);
-}
-
-static int _X_COLD
-SProcRenderTriStrip(ClientPtr client)
-{
-    REQUEST(xRenderTriStripReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTriStripReq);
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    SwapRestL(stuff);
-    return ProcRenderTriStrip(client);
-}
-
-static int _X_COLD
-SProcRenderTriFan(ClientPtr client)
-{
-    REQUEST(xRenderTriFanReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderTriFanReq);
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    SwapRestL(stuff);
-    return ProcRenderTriFan(client);
-}
-
-static int _X_COLD
-SProcRenderCompositeGlyphs(ClientPtr client)
-{
-    xGlyphElt *elt;
-    CARD8 *buffer;
-    CARD8 *end;
-    int space;
-    int i;
-    int size;
-
-    REQUEST(xRenderCompositeGlyphsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
-
-    switch (stuff->renderReqType) {
-    default:
-        size = 1;
-        break;
-    case X_RenderCompositeGlyphs16:
-        size = 2;
-        break;
-    case X_RenderCompositeGlyphs32:
-        size = 4;
-        break;
-    }
-
-    swapl(&stuff->src);
-    swapl(&stuff->dst);
-    swapl(&stuff->maskFormat);
-    swapl(&stuff->glyphset);
-    swaps(&stuff->xSrc);
-    swaps(&stuff->ySrc);
-    buffer = (CARD8 *) (stuff + 1);
-    end = (CARD8 *) stuff + (client->req_len << 2);
-    while (buffer + sizeof(xGlyphElt) < end) {
-        elt = (xGlyphElt *) buffer;
-        buffer += sizeof(xGlyphElt);
-
-        swaps(&elt->deltax);
-        swaps(&elt->deltay);
-
-        i = elt->len;
-        if (i == 0xff) {
-            if (buffer + 4 > end) {
-                return BadLength;
-            }
-            swapl((int *) buffer);
-            buffer += 4;
-        }
-        else {
-            space = size * i;
-            switch (size) {
-            case 1:
-                buffer += i;
-                break;
-            case 2:
-                if (buffer + i * 2 > end) {
-                    return BadLength;
-                }
-                while (i--) {
-                    swaps((short *) buffer);
-                    buffer += 2;
-                }
-                break;
-            case 4:
-                if (buffer + i * 4 > end) {
-                    return BadLength;
-                }
-                while (i--) {
-                    swapl((int *) buffer);
-                    buffer += 4;
-                }
-                break;
-            }
-            if (space & 3)
-                buffer += 4 - (space & 3);
-        }
-    }
-    return ProcRenderCompositeGlyphs(client);
-}
-
-static int _X_COLD
-SProcRenderFillRectangles(ClientPtr client)
-{
-    REQUEST(xRenderFillRectanglesReq);
-
-    REQUEST_AT_LEAST_SIZE(xRenderFillRectanglesReq);
-    swapl(&stuff->dst);
-    swaps(&stuff->color.red);
-    swaps(&stuff->color.green);
-    swaps(&stuff->color.blue);
-    swaps(&stuff->color.alpha);
-    SwapRestS(stuff);
-    return ProcRenderFillRectangles(client);
-}
-
-static int _X_COLD
-SProcRenderSetPictureTransform(ClientPtr client)
-{
-    REQUEST(xRenderSetPictureTransformReq);
-    REQUEST_SIZE_MATCH(xRenderSetPictureTransformReq);
-
-    swapl(&stuff->picture);
-    swapl(&stuff->transform.matrix11);
-    swapl(&stuff->transform.matrix12);
-    swapl(&stuff->transform.matrix13);
-    swapl(&stuff->transform.matrix21);
-    swapl(&stuff->transform.matrix22);
-    swapl(&stuff->transform.matrix23);
-    swapl(&stuff->transform.matrix31);
-    swapl(&stuff->transform.matrix32);
-    swapl(&stuff->transform.matrix33);
-    return ProcRenderSetPictureTransform(client);
-}
-
-static int _X_COLD
-SProcRenderSetPictureFilter(ClientPtr client)
-{
-    REQUEST(xRenderSetPictureFilterReq);
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
-
-    swapl(&stuff->picture);
-    swaps(&stuff->nbytes);
-    return ProcRenderSetPictureFilter(client);
-}
-
-static int _X_COLD
-SProcRenderAddTraps(ClientPtr client)
-{
-    REQUEST(xRenderAddTrapsReq);
-    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
-
-    swapl(&stuff->picture);
-    swaps(&stuff->xOff);
-    swaps(&stuff->yOff);
-    SwapRestL(stuff);
-    return ProcRenderAddTraps(client);
-}
-
-static int _X_COLD
-SProcRenderCreateSolidFill(ClientPtr client)
-{
-    REQUEST(xRenderCreateSolidFillReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
-
-    swapl(&stuff->pid);
-    swaps(&stuff->color.alpha);
-    swaps(&stuff->color.red);
-    swaps(&stuff->color.green);
-    swaps(&stuff->color.blue);
-    return ProcRenderCreateSolidFill(client);
-}
-
 static void _X_COLD
 swapStops(void *stuff, int num)
 {
@@ -2206,96 +1890,6 @@ swapStops(void *stuff, int num)
         swaps(colors);
         ++colors;
     }
-}
-
-static int _X_COLD
-SProcRenderCreateLinearGradient(ClientPtr client)
-{
-    int len;
-
-    REQUEST(xRenderCreateLinearGradientReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
-
-    swapl(&stuff->pid);
-    swapl(&stuff->p1.x);
-    swapl(&stuff->p1.y);
-    swapl(&stuff->p2.x);
-    swapl(&stuff->p2.y);
-    swapl(&stuff->nStops);
-
-    len = (client->req_len << 2) - sizeof(xRenderCreateLinearGradientReq);
-    if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
-        return BadLength;
-    if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
-        return BadLength;
-
-    swapStops(stuff + 1, stuff->nStops);
-
-    return ProcRenderCreateLinearGradient(client);
-}
-
-static int _X_COLD
-SProcRenderCreateRadialGradient(ClientPtr client)
-{
-    int len;
-
-    REQUEST(xRenderCreateRadialGradientReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateRadialGradientReq);
-
-    swapl(&stuff->pid);
-    swapl(&stuff->inner.x);
-    swapl(&stuff->inner.y);
-    swapl(&stuff->outer.x);
-    swapl(&stuff->outer.y);
-    swapl(&stuff->inner_radius);
-    swapl(&stuff->outer_radius);
-    swapl(&stuff->nStops);
-
-    len = (client->req_len << 2) - sizeof(xRenderCreateRadialGradientReq);
-    if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
-        return BadLength;
-    if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
-        return BadLength;
-
-    swapStops(stuff + 1, stuff->nStops);
-
-    return ProcRenderCreateRadialGradient(client);
-}
-
-static int _X_COLD
-SProcRenderCreateConicalGradient(ClientPtr client)
-{
-    int len;
-
-    REQUEST(xRenderCreateConicalGradientReq);
-    REQUEST_AT_LEAST_SIZE(xRenderCreateConicalGradientReq);
-
-    swapl(&stuff->pid);
-    swapl(&stuff->center.x);
-    swapl(&stuff->center.y);
-    swapl(&stuff->angle);
-    swapl(&stuff->nStops);
-
-    len = (client->req_len << 2) - sizeof(xRenderCreateConicalGradientReq);
-    if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
-        return BadLength;
-    if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
-        return BadLength;
-
-    swapStops(stuff + 1, stuff->nStops);
-
-    return ProcRenderCreateConicalGradient(client);
-}
-
-static int _X_COLD
-SProcRenderDispatch(ClientPtr client)
-{
-    REQUEST(xReq);
-
-    if (stuff->data < RenderNumberRequests)
-        return (*SProcRenderVector[stuff->data]) (client);
-    else
-        return BadRequest;
 }
 
 #ifdef XINERAMA
@@ -2355,16 +1949,15 @@ PanoramiXRenderCreatePicture(ClientPtr client, xRenderCreatePictureReq *stuff)
 }
 
 static int
-PanoramiXRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
+PanoramiXRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff, Picture pictID)
 {
     PanoramiXRes *pict;
     int result = Success;
 
-    VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
+    VERIFY_XIN_PICTURE(pict, pictID, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
-        stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderChangePicture(client, stuff);
+        result = SingleRenderChangePicture(client, stuff, pict->info[walkScreenIdx].id);
         if (result != Success)
             break;
     });
@@ -2374,16 +1967,16 @@ PanoramiXRenderChangePicture(ClientPtr client, xRenderChangePictureReq *stuff)
 
 static int
 PanoramiXRenderSetPictureClipRectangles(ClientPtr client,
-                                        xRenderSetPictureClipRectanglesReq *stuff)
+                                        xRenderSetPictureClipRectanglesReq *stuff,
+                                        Picture pictID)
 {
     int result = Success;
     PanoramiXRes *pict;
 
-    VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
+    VERIFY_XIN_PICTURE(pict, pictID, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
-        stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderSetPictureClipRectangles(client, stuff);
+        result = SingleRenderSetPictureClipRectangles(client, stuff, pict->info[walkScreenIdx].id);
         if (result != Success)
             break;
     });
@@ -2392,19 +1985,16 @@ PanoramiXRenderSetPictureClipRectangles(ClientPtr client,
 }
 
 static int
-PanoramiXRenderSetPictureTransform(ClientPtr client)
+PanoramiXRenderSetPictureTransform(ClientPtr client, xRenderSetPictureTransformReq *stuff)
 {
-    REQUEST(xRenderSetPictureTransformReq);
     int result = Success;
     PanoramiXRes *pict;
-
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureTransformReq);
 
     VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderSetPictureTransform(client);
+        result = SingleRenderSetPictureTransform(client, stuff);
         if (result != Success)
             break;
     });
@@ -2413,19 +2003,16 @@ PanoramiXRenderSetPictureTransform(ClientPtr client)
 }
 
 static int
-PanoramiXRenderSetPictureFilter(ClientPtr client)
+PanoramiXRenderSetPictureFilter(ClientPtr client, xRenderSetPictureFilterReq *stuff)
 {
-    REQUEST(xRenderSetPictureFilterReq);
     int result = Success;
     PanoramiXRes *pict;
-
-    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
 
     VERIFY_XIN_PICTURE(pict, stuff->picture, client, DixWriteAccess);
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->picture = pict->info[walkScreenIdx].id;
-        result = SingleRenderSetPictureFilter(client);
+        result = SingleRenderSetPictureFilter(client, stuff);
         if (result != Success)
             break;
     });
@@ -2440,8 +2027,6 @@ PanoramiXRenderFreePicture(ClientPtr client)
     int result = Success;
 
     REQUEST(xRenderFreePictureReq);
-
-    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
 
     client->errorValue = stuff->picture;
 
@@ -2461,37 +2046,37 @@ PanoramiXRenderFreePicture(ClientPtr client)
 }
 
 static int
-PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
+PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *orig_req)
 {
     PanoramiXRes *src, *msk, *dst;
     int result = Success;
-    xRenderCompositeReq orig;
+    xRenderCompositeReq orig = *orig_req;
 
-    VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
-    VERIFY_XIN_ALPHA(msk, stuff->mask, client, DixReadAccess);
-    VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
+    VERIFY_XIN_PICTURE(src, orig.src, client, DixReadAccess);
+    VERIFY_XIN_ALPHA(msk, orig.mask, client, DixReadAccess);
+    VERIFY_XIN_PICTURE(dst, orig.dst, client, DixWriteAccess);
 
-    orig = *stuff;
+    xRenderCompositeReq sub_req = orig;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
-        stuff->src = src->info[walkScreenIdx].id;
+        sub_req.src = src->info[walkScreenIdx].id;
         if (src->u.pict.root) {
-            stuff->xSrc = orig.xSrc - walkScreen->x;
-            stuff->ySrc = orig.ySrc - walkScreen->y;
+            sub_req.xSrc = orig.xSrc - walkScreen->x;
+            sub_req.ySrc = orig.ySrc - walkScreen->y;
         }
-        stuff->dst = dst->info[walkScreenIdx].id;
+        sub_req.dst = dst->info[walkScreenIdx].id;
         if (dst->u.pict.root) {
-            stuff->xDst = orig.xDst - walkScreen->x;
-            stuff->yDst = orig.yDst - walkScreen->y;
+            sub_req.xDst = orig.xDst - walkScreen->x;
+            sub_req.yDst = orig.yDst - walkScreen->y;
         }
         if (msk) {
-            stuff->mask = msk->info[walkScreenIdx].id;
+            sub_req.mask = msk->info[walkScreenIdx].id;
             if (msk->u.pict.root) {
-                stuff->xMask = orig.xMask - walkScreen->x;
-                stuff->yMask = orig.yMask - walkScreen->y;
+                sub_req.xMask = orig.xMask - walkScreen->x;
+                sub_req.yMask = orig.yMask - walkScreen->y;
             }
         }
-        result = SingleRenderComposite(client, stuff);
+        result = SingleRenderComposite(client, &sub_req);
         if (result != Success)
             break;
     });
@@ -2500,16 +2085,14 @@ PanoramiXRenderComposite(ClientPtr client, xRenderCompositeReq *stuff)
 }
 
 static int
-PanoramiXRenderCompositeGlyphs(ClientPtr client)
+PanoramiXRenderCompositeGlyphs(ClientPtr client, xRenderCompositeGlyphsReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
 
-    REQUEST(xRenderCompositeGlyphsReq);
     xGlyphElt origElt, *elt;
     INT16 xSrc, ySrc;
 
-    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
 
@@ -2531,7 +2114,7 @@ PanoramiXRenderCompositeGlyphs(ClientPtr client)
                 elt->deltax = origElt.deltax - walkScreen->x;
                 elt->deltay = origElt.deltay - walkScreen->y;
             }
-            result = SingleRenderCompositeGlyphs(client);
+            result = SingleRenderCompositeGlyphs(client, stuff);
             if (result != Success)
                 break;
         });
@@ -2541,16 +2124,13 @@ PanoramiXRenderCompositeGlyphs(ClientPtr client)
 }
 
 static int
-PanoramiXRenderFillRectangles(ClientPtr client)
+PanoramiXRenderFillRectangles(ClientPtr client, xRenderFillRectanglesReq *stuff)
 {
     PanoramiXRes *dst;
     int result = Success;
-
-    REQUEST(xRenderFillRectanglesReq);
     char *extra;
     int extra_len;
 
-    REQUEST_AT_LEAST_SIZE(xRenderFillRectanglesReq);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
     extra_len = (client->req_len << 2) - sizeof(xRenderFillRectanglesReq);
     if (extra_len && (extra = calloc(1, extra_len))) {
@@ -2575,7 +2155,7 @@ PanoramiXRenderFillRectangles(ClientPtr client)
                 }
             }
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = SingleRenderFillRectangles(client);
+            result = SingleRenderFillRectangles(client, stuff);
             if (result != Success)
                 break;
         });
@@ -2587,16 +2167,13 @@ PanoramiXRenderFillRectangles(ClientPtr client)
 }
 
 static int
-PanoramiXRenderTrapezoids(ClientPtr client)
+PanoramiXRenderTrapezoids(ClientPtr client, xRenderTrapezoidsReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
 
-    REQUEST(xRenderTrapezoidsReq);
     char *extra;
     int extra_len;
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
 
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
@@ -2635,7 +2212,7 @@ PanoramiXRenderTrapezoids(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = SingleRenderTrapezoids(client);
+            result = SingleRenderTrapezoids(client, stuff);
 
             if (result != Success)
                 break;
@@ -2648,16 +2225,13 @@ PanoramiXRenderTrapezoids(ClientPtr client)
 }
 
 static int
-PanoramiXRenderTriangles(ClientPtr client)
+PanoramiXRenderTriangles(ClientPtr client, xRenderTrianglesReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
 
-    REQUEST(xRenderTrianglesReq);
     char *extra;
     int extra_len;
-
-    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
 
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
@@ -2692,7 +2266,7 @@ PanoramiXRenderTriangles(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = SingleRenderTriangles(client);
+            result = SingleRenderTriangles(client, stuff);
 
             if (result != Success)
                 break;
@@ -2705,16 +2279,13 @@ PanoramiXRenderTriangles(ClientPtr client)
 }
 
 static int
-PanoramiXRenderTriStrip(ClientPtr client)
+PanoramiXRenderTriStrip(ClientPtr client, xRenderTriStripReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
 
-    REQUEST(xRenderTriStripReq);
     char *extra;
     int extra_len;
-
-    REQUEST_AT_LEAST_SIZE(xRenderTriStripReq);
 
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
@@ -2745,7 +2316,7 @@ PanoramiXRenderTriStrip(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = SingleRenderTriStrip(client);
+            result = SingleRenderTriStrip(client, stuff);
 
             if (result != Success)
                 break;
@@ -2758,16 +2329,12 @@ PanoramiXRenderTriStrip(ClientPtr client)
 }
 
 static int
-PanoramiXRenderTriFan(ClientPtr client)
+PanoramiXRenderTriFan(ClientPtr client, xRenderTriFanReq *stuff)
 {
     PanoramiXRes *src, *dst;
     int result = Success;
-
-    REQUEST(xRenderTriFanReq);
     char *extra;
     int extra_len;
-
-    REQUEST_AT_LEAST_SIZE(xRenderTriFanReq);
 
     VERIFY_XIN_PICTURE(src, stuff->src, client, DixReadAccess);
     VERIFY_XIN_PICTURE(dst, stuff->dst, client, DixWriteAccess);
@@ -2798,7 +2365,7 @@ PanoramiXRenderTriFan(ClientPtr client)
 
             stuff->src = src->info[walkScreenIdx].id;
             stuff->dst = dst->info[walkScreenIdx].id;
-            result = SingleRenderTriFan(client);
+            result = SingleRenderTriFan(client, stuff);
 
             if (result != Success)
                 break;
@@ -2811,17 +2378,14 @@ PanoramiXRenderTriFan(ClientPtr client)
 }
 
 static int
-PanoramiXRenderAddTraps(ClientPtr client)
+PanoramiXRenderAddTraps(ClientPtr client, xRenderAddTrapsReq *stuff)
 {
     PanoramiXRes *picture;
     int result = Success;
-
-    REQUEST(xRenderAddTrapsReq);
     char *extra;
     int extra_len;
     INT16 x_off, y_off;
 
-    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
     VERIFY_XIN_PICTURE(picture, stuff->picture, client, DixWriteAccess);
     extra_len = (client->req_len << 2) - sizeof(xRenderAddTrapsReq);
     if (extra_len && (extra = calloc(1, extra_len))) {
@@ -2838,7 +2402,7 @@ PanoramiXRenderAddTraps(ClientPtr client)
                 stuff->xOff = x_off + walkScreen->x;
                 stuff->yOff = y_off + walkScreen->y;
             }
-            result = SingleRenderAddTraps(client);
+            result = SingleRenderAddTraps(client, stuff);
             if (result != Success)
                 break;
         });
@@ -2850,13 +2414,10 @@ PanoramiXRenderAddTraps(ClientPtr client)
 }
 
 static int
-PanoramiXRenderCreateSolidFill(ClientPtr client)
+PanoramiXRenderCreateSolidFill(ClientPtr client, xRenderCreateSolidFillReq *stuff)
 {
-    REQUEST(xRenderCreateSolidFillReq);
     PanoramiXRes *newPict;
     int result = Success;
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
 
     if (!(newPict = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
@@ -2867,7 +2428,7 @@ PanoramiXRenderCreateSolidFill(ClientPtr client)
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = SingleRenderCreateSolidFill(client);
+        result = SingleRenderCreateSolidFill(client, stuff);
         if (result != Success)
             break;
     });
@@ -2881,13 +2442,11 @@ PanoramiXRenderCreateSolidFill(ClientPtr client)
 }
 
 static int
-PanoramiXRenderCreateLinearGradient(ClientPtr client)
+PanoramiXRenderCreateLinearGradient(ClientPtr client,
+                                    xRenderCreateLinearGradientReq *stuff)
 {
-    REQUEST(xRenderCreateLinearGradientReq);
     PanoramiXRes *newPict;
     int result = Success;
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
 
     if (!(newPict = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
@@ -2898,7 +2457,7 @@ PanoramiXRenderCreateLinearGradient(ClientPtr client)
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = SingleRenderCreateLinearGradient(client);
+        result = SingleRenderCreateLinearGradient(client, stuff);
         if (result != Success)
             break;
     });
@@ -2912,13 +2471,11 @@ PanoramiXRenderCreateLinearGradient(ClientPtr client)
 }
 
 static int
-PanoramiXRenderCreateRadialGradient(ClientPtr client)
+PanoramiXRenderCreateRadialGradient(ClientPtr client,
+                                    xRenderCreateRadialGradientReq *stuff)
 {
-    REQUEST(xRenderCreateRadialGradientReq);
     PanoramiXRes *newPict;
     int result = Success;
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateRadialGradientReq);
 
     if (!(newPict = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
@@ -2929,7 +2486,7 @@ PanoramiXRenderCreateRadialGradient(ClientPtr client)
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = SingleRenderCreateRadialGradient(client);
+        result = SingleRenderCreateRadialGradient(client, stuff);
         if (result != Success)
             break;
     });
@@ -2943,13 +2500,11 @@ PanoramiXRenderCreateRadialGradient(ClientPtr client)
 }
 
 static int
-PanoramiXRenderCreateConicalGradient(ClientPtr client)
+PanoramiXRenderCreateConicalGradient(ClientPtr client,
+                                     xRenderCreateConicalGradientReq *stuff)
 {
-    REQUEST(xRenderCreateConicalGradientReq);
     PanoramiXRes *newPict;
     int result = Success;
-
-    REQUEST_AT_LEAST_SIZE(xRenderCreateConicalGradientReq);
 
     if (!(newPict = calloc(1, sizeof(PanoramiXRes))))
         return BadAlloc;
@@ -2960,7 +2515,7 @@ PanoramiXRenderCreateConicalGradient(ClientPtr client)
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
         stuff->pid = newPict->info[walkScreenIdx].id;
-        result = SingleRenderCreateConicalGradient(client);
+        result = SingleRenderCreateConicalGradient(client, stuff);
         if (result != Success)
             break;
     });
@@ -3028,10 +2583,10 @@ ProcRenderChangePicture(ClientPtr client)
     }
 
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderChangePicture(client, stuff)
-                         : SingleRenderChangePicture(client, stuff));
+    return (usePanoramiX ? PanoramiXRenderChangePicture(client, stuff, stuff->picture)
+                         : SingleRenderChangePicture(client, stuff, stuff->picture));
 #else
-    return SingleRenderChangePicture(client, stuff);
+    return SingleRenderChangePicture(client, stuff, stuff->picture);
 #endif
 }
 
@@ -3049,16 +2604,22 @@ ProcRenderSetPictureClipRectangles(ClientPtr client)
     }
 
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderSetPictureClipRectangles(client, stuff)
-                         : SingleRenderSetPictureClipRectangles(client, stuff));
+    return (usePanoramiX ? PanoramiXRenderSetPictureClipRectangles(client, stuff, stuff->picture)
+                         : SingleRenderSetPictureClipRectangles(client, stuff, stuff->picture));
 #else
-    return SingleRenderSetPictureClipRectangles(client, stuff);
+    return SingleRenderSetPictureClipRectangles(client, stuff, stuff->picture);
 #endif
 }
 
 static int
 ProcRenderFreePicture(ClientPtr client)
 {
+    REQUEST(xRenderFreePictureReq);
+    REQUEST_SIZE_MATCH(xRenderFreePictureReq);
+
+    if (client->swapped)
+        swapl(&stuff->picture);
+
 #ifdef XINERAMA
     return (usePanoramiX ? PanoramiXRenderFreePicture(client)
                          : SingleRenderFreePicture(client));
@@ -3098,142 +2659,381 @@ ProcRenderComposite(ClientPtr client)
 static int
 ProcRenderTrapezoids(ClientPtr client)
 {
+    REQUEST(xRenderTrapezoidsReq);
+    REQUEST_AT_LEAST_SIZE(xRenderTrapezoidsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderTrapezoids(client)
-                         : SingleRenderTrapezoids(client));
+    return (usePanoramiX ? PanoramiXRenderTrapezoids(client, stuff)
+                         : SingleRenderTrapezoids(client, stuff));
 #else
-    return SingleRenderTrapezoids(client);
+    return SingleRenderTrapezoids(client, stuff);
 #endif
 }
 
 static int
 ProcRenderTriangles(ClientPtr client)
 {
+    REQUEST(xRenderTrianglesReq);
+    REQUEST_AT_LEAST_SIZE(xRenderTrianglesReq);
+
+    if (client->swapped) {
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderTriangles(client)
-                         : SingleRenderTriangles(client));
+    return (usePanoramiX ? PanoramiXRenderTriangles(client, stuff)
+                         : SingleRenderTriangles(client, stuff));
 #else
-    return SingleRenderTriangles(client);
+    return SingleRenderTriangles(client, stuff);
 #endif
 }
 
 static int
 ProcRenderTriStrip(ClientPtr client)
 {
+    REQUEST(xRenderTriStripReq);
+    REQUEST_AT_LEAST_SIZE(xRenderTriStripReq);
+
+    if (client->swapped) {
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderTriStrip(client)
-                         : SingleRenderTriStrip(client));
+    return (usePanoramiX ? PanoramiXRenderTriStrip(client, stuff)
+                         : SingleRenderTriStrip(client, stuff));
 #else
-    return SingleRenderTriStrip(client);
+    return SingleRenderTriStrip(client, stuff);
 #endif
 }
 
 static int
 ProcRenderTriFan(ClientPtr client)
 {
+    REQUEST(xRenderTriFanReq);
+    REQUEST_AT_LEAST_SIZE(xRenderTriFanReq);
+
+    if (client->swapped) {
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderTriFan(client)
-                         : SingleRenderTriFan(client));
+    return (usePanoramiX ? PanoramiXRenderTriFan(client, stuff)
+                         : SingleRenderTriFan(client, stuff));
 #else
-    return SingleRenderTriFan(client);
+    return SingleRenderTriFan(client, stuff);
 #endif
 }
 
 static int
 ProcRenderCompositeGlyphs(ClientPtr client)
 {
+    REQUEST(xRenderCompositeGlyphsReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCompositeGlyphsReq);
+
+    if (client->swapped) {
+        int size = 0;
+
+        switch (stuff->renderReqType) {
+            default:
+                size = 1;
+                break;
+            case X_RenderCompositeGlyphs16:
+                size = 2;
+            break;
+            case X_RenderCompositeGlyphs32:
+                size = 4;
+            break;
+        }
+
+        swapl(&stuff->src);
+        swapl(&stuff->dst);
+        swapl(&stuff->maskFormat);
+        swapl(&stuff->glyphset);
+        swaps(&stuff->xSrc);
+        swaps(&stuff->ySrc);
+
+        CARD8 *buffer = (CARD8 *) (stuff + 1);
+        CARD8 *end = (CARD8 *) stuff + (client->req_len << 2);
+        while (buffer + sizeof(xGlyphElt) < end) {
+            xGlyphElt *elt = (xGlyphElt *) buffer;
+            buffer += sizeof(xGlyphElt);
+
+            swaps(&elt->deltax);
+            swaps(&elt->deltay);
+
+            int i = elt->len;
+            if (i == 0xff) {
+                if (buffer + 4 > end) {
+                    return BadLength;
+                }
+                swapl((int *) buffer);
+                buffer += 4;
+            }
+            else {
+                int space = size * i;
+                switch (size) {
+                    case 1:
+                        buffer += i;
+                    break;
+                    case 2:
+                        if (buffer + i * 2 > end) {
+                            return BadLength;
+                        }
+                        while (i--) {
+                            swaps((short *) buffer);
+                            buffer += 2;
+                        }
+                    break;
+                    case 4:
+                        if (buffer + i * 4 > end) {
+                            return BadLength;
+                        }
+                        while (i--) {
+                            swapl((int *) buffer);
+                            buffer += 4;
+                        }
+                    break;
+                }
+                if (space & 3)
+                    buffer += 4 - (space & 3);
+            }
+        }
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCompositeGlyphs(client)
-                         : SingleRenderCompositeGlyphs(client));
+    return (usePanoramiX ? PanoramiXRenderCompositeGlyphs(client, stuff)
+                         : SingleRenderCompositeGlyphs(client, stuff));
 #else
-    return SingleRenderCompositeGlyphs(client);
+    return SingleRenderCompositeGlyphs(client, stuff);
 #endif
 }
 
 static int
 ProcRenderFillRectangles(ClientPtr client)
 {
+    REQUEST(xRenderFillRectanglesReq);
+    REQUEST_AT_LEAST_SIZE(xRenderFillRectanglesReq);
+
+    if (client->swapped) {
+        swapl(&stuff->dst);
+        swaps(&stuff->color.red);
+        swaps(&stuff->color.green);
+        swaps(&stuff->color.blue);
+        swaps(&stuff->color.alpha);
+        SwapRestS(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderFillRectangles(client)
-                         : SingleRenderFillRectangles(client));
+    return (usePanoramiX ? PanoramiXRenderFillRectangles(client, stuff)
+                         : SingleRenderFillRectangles(client, stuff));
 #else
-    return SingleRenderFillRectangles(client);
+    return SingleRenderFillRectangles(client, stuff);
 #endif
 }
 
 static int
 ProcRenderSetPictureTransform(ClientPtr client)
 {
+    REQUEST(xRenderSetPictureTransformReq);
+    REQUEST_SIZE_MATCH(xRenderSetPictureTransformReq);
+
+    if (client->swapped) {
+        swapl(&stuff->picture);
+        swapl(&stuff->transform.matrix11);
+        swapl(&stuff->transform.matrix12);
+        swapl(&stuff->transform.matrix13);
+        swapl(&stuff->transform.matrix21);
+        swapl(&stuff->transform.matrix22);
+        swapl(&stuff->transform.matrix23);
+        swapl(&stuff->transform.matrix31);
+        swapl(&stuff->transform.matrix32);
+        swapl(&stuff->transform.matrix33);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderSetPictureTransform(client)
-                         : SingleRenderSetPictureTransform(client));
+    return (usePanoramiX ? PanoramiXRenderSetPictureTransform(client, stuff)
+                         : SingleRenderSetPictureTransform(client, stuff));
 #else
-    return SingleRenderSetPictureTransform(client);
+    return SingleRenderSetPictureTransform(client, stuff);
 #endif
 }
 
 static int
 ProcRenderSetPictureFilter(ClientPtr client)
 {
+    REQUEST(xRenderSetPictureFilterReq);
+    REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
+
+    if (client->swapped) {
+        swapl(&stuff->picture);
+        swaps(&stuff->nbytes);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderSetPictureFilter(client)
-                         : SingleRenderSetPictureFilter(client));
+    return (usePanoramiX ? PanoramiXRenderSetPictureFilter(client, stuff)
+                         : SingleRenderSetPictureFilter(client, stuff));
 #else
-    return SingleRenderSetPictureFilter(client);
+    return SingleRenderSetPictureFilter(client, stuff);
 #endif
 }
 
 static int
 ProcRenderAddTraps(ClientPtr client)
 {
+    REQUEST(xRenderAddTrapsReq);
+    REQUEST_AT_LEAST_SIZE(xRenderAddTrapsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->picture);
+        swaps(&stuff->xOff);
+        swaps(&stuff->yOff);
+        SwapRestL(stuff);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderAddTraps(client)
-                         : SingleRenderAddTraps(client));
+    return (usePanoramiX ? PanoramiXRenderAddTraps(client, stuff)
+                         : SingleRenderAddTraps(client, stuff));
 #else
-    return SingleRenderAddTraps(client);
+    return SingleRenderAddTraps(client, stuff);
 #endif
 }
 
 static int
 ProcRenderCreateSolidFill(ClientPtr client)
 {
+    REQUEST(xRenderCreateSolidFillReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCreateSolidFillReq);
+
+    if (client->swapped) {
+        swapl(&stuff->pid);
+        swaps(&stuff->color.alpha);
+        swaps(&stuff->color.red);
+        swaps(&stuff->color.green);
+        swaps(&stuff->color.blue);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateSolidFill(client)
-                         : SingleRenderCreateSolidFill(client));
+    return (usePanoramiX ? PanoramiXRenderCreateSolidFill(client, stuff)
+                         : SingleRenderCreateSolidFill(client, stuff));
 #else
-    return SingleRenderCreateSolidFill(client);
+    return SingleRenderCreateSolidFill(client, stuff);
 #endif
 }
 
 static int
 ProcRenderCreateLinearGradient(ClientPtr client)
 {
+    REQUEST(xRenderCreateLinearGradientReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCreateLinearGradientReq);
+
+    if (client->swapped) {
+        swapl(&stuff->pid);
+        swapl(&stuff->p1.x);
+        swapl(&stuff->p1.y);
+        swapl(&stuff->p2.x);
+        swapl(&stuff->p2.y);
+        swapl(&stuff->nStops);
+
+        int len = (client->req_len << 2) - sizeof(xRenderCreateLinearGradientReq);
+        if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
+            return BadLength;
+        if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
+            return BadLength;
+
+        swapStops(stuff + 1, stuff->nStops);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateLinearGradient(client)
-                         : SingleRenderCreateLinearGradient(client));
+    return (usePanoramiX ? PanoramiXRenderCreateLinearGradient(client, stuff)
+                         : SingleRenderCreateLinearGradient(client, stuff));
 #else
-    return SingleRenderCreateLinearGradient(client);
+    return SingleRenderCreateLinearGradient(client, stuff);
 #endif
 }
 
 static int
 ProcRenderCreateRadialGradient(ClientPtr client)
 {
+    REQUEST(xRenderCreateRadialGradientReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCreateRadialGradientReq);
+
+    if (client->swapped) {
+        swapl(&stuff->pid);
+        swapl(&stuff->inner.x);
+        swapl(&stuff->inner.y);
+        swapl(&stuff->outer.x);
+        swapl(&stuff->outer.y);
+        swapl(&stuff->inner_radius);
+        swapl(&stuff->outer_radius);
+        swapl(&stuff->nStops);
+
+        int len = (client->req_len << 2) - sizeof(xRenderCreateRadialGradientReq);
+        if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
+            return BadLength;
+        if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
+            return BadLength;
+
+        swapStops(stuff + 1, stuff->nStops);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateRadialGradient(client)
-                         : SingleRenderCreateRadialGradient(client));
+    return (usePanoramiX ? PanoramiXRenderCreateRadialGradient(client, stuff)
+                         : SingleRenderCreateRadialGradient(client, stuff));
 #else
-    return SingleRenderCreateRadialGradient(client);
+    return SingleRenderCreateRadialGradient(client, stuff);
 #endif
 }
 
 static int
 ProcRenderCreateConicalGradient(ClientPtr client)
 {
+    REQUEST(xRenderCreateConicalGradientReq);
+    REQUEST_AT_LEAST_SIZE(xRenderCreateConicalGradientReq);
+
+    if (client->swapped) {
+        swapl(&stuff->pid);
+        swapl(&stuff->center.x);
+        swapl(&stuff->center.y);
+        swapl(&stuff->angle);
+        swapl(&stuff->nStops);
+
+        int len = (client->req_len << 2) - sizeof(xRenderCreateConicalGradientReq);
+        if (stuff->nStops > UINT32_MAX / (sizeof(xFixed) + sizeof(xRenderColor)))
+            return BadLength;
+        if (len != stuff->nStops * (sizeof(xFixed) + sizeof(xRenderColor)))
+            return BadLength;
+
+        swapStops(stuff + 1, stuff->nStops);
+    }
+
 #ifdef XINERAMA
-    return (usePanoramiX ? PanoramiXRenderCreateConicalGradient(client)
-                         : SingleRenderCreateConicalGradient(client));
+    return (usePanoramiX ? PanoramiXRenderCreateConicalGradient(client, stuff)
+                         : SingleRenderCreateConicalGradient(client, stuff));
 #else
-    return SingleRenderCreateConicalGradient(client);
+    return SingleRenderCreateConicalGradient(client, stuff);
 #endif
 }

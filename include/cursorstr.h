@@ -67,8 +67,6 @@ typedef struct _CursorBits {
     CARD32 *argb;               /* full-color alpha blended */
 } CursorBits, *CursorBitsPtr;
 
-#define CURSOR_BITS_SIZE (sizeof(CursorBits) + (size_t)dixPrivatesSize(PRIVATE_CURSOR_BITS))
-
 typedef struct _Cursor {
     CursorBitsPtr bits;
     unsigned short foreRed, foreGreen, foreBlue;        /* device-independent color */
@@ -79,8 +77,6 @@ typedef struct _Cursor {
     CARD32 serialNumber;
     Atom name;
 } CursorRec;
-
-#define CURSOR_REC_SIZE (sizeof(CursorRec) + (size_t)dixPrivatesSize(PRIVATE_CURSOR))
 
 typedef struct _CursorMetric {
     unsigned short width, height, xhot, yhot;

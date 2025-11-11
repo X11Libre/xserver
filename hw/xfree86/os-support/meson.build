@@ -16,7 +16,7 @@ os_c_args = []
 
 if get_option('pciaccess')
     srcs_xorg_os_support += 'bus/Pci.c'
-    if host_machine.cpu() == 'sparc' or host_machine.cpu() == 'sparc64'
+    if host_machine.cpu_family() in ['sparc', 'sparc64']
         srcs_xorg_os_support += 'bus/Sbus.c'
         install_data('bus/xf86Sbus.h', install_dir: xorgsdkdir)
     endif
@@ -82,7 +82,7 @@ elif host_machine.system() == 'sunos'
         srcs_xorg_os_support += 'shared/agp_noop.c'
     endif
 
-    if host_machine.cpu_family() == 'sparc'
+    if host_machine.cpu_family() in ['sparc', 'sparc64']
         srcs_xorg_os_support += 'solaris/solaris-sparcv8plus.S'
     elif host_machine.cpu_family() == 'x86_64'
         srcs_xorg_os_support += 'solaris/solaris-amd64.S'

@@ -55,35 +55,14 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
 #include "windowstr.h"          /* window structure  */
-#include "xace.h"
 #include "grabdev.h"
-
-/***********************************************************************
- *
- * Handle requests from clients with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXGrabDeviceButton(ClientPtr client)
-{
-    REQUEST(xGrabDeviceButtonReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceButtonReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->modifiers);
-    swaps(&stuff->event_count);
-    REQUEST_FIXED_SIZE(xGrabDeviceButtonReq,
-                       stuff->event_count * sizeof(CARD32));
-    SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
-
-    return (ProcXGrabDeviceButton(client));
-}
 
 /***********************************************************************
  *
@@ -94,15 +73,27 @@ SProcXGrabDeviceButton(ClientPtr client)
 int
 ProcXGrabDeviceButton(ClientPtr client)
 {
+    REQUEST(xGrabDeviceButtonReq);
+    REQUEST_AT_LEAST_SIZE(xGrabDeviceButtonReq);
+
+    if (client->swapped) {
+        swapl(&stuff->grabWindow);
+        swaps(&stuff->modifiers);
+        swaps(&stuff->event_count);
+    }
+
+    REQUEST_FIXED_SIZE(xGrabDeviceButtonReq,
+                       stuff->event_count * sizeof(CARD32));
+
+    if (client->swapped)
+        SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
+
     int ret;
     DeviceIntPtr dev;
     DeviceIntPtr mdev;
     XEventClass *class;
     struct tmask tmp[EMASKSIZE];
     GrabMask mask;
-
-    REQUEST(xGrabDeviceButtonReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceButtonReq);
 
     if (client->req_len !=
         bytes_to_int32(sizeof(xGrabDeviceButtonReq)) + stuff->event_count)
@@ -122,7 +113,7 @@ ProcXGrabDeviceButton(ClientPtr client)
     }
     else {
         mdev = PickKeyboard(client);
-        ret = XaceHookDeviceAccess(client, mdev, DixUseAccess);
+        ret = dixCallDeviceAccessCallback(client, mdev, DixUseAccess);
         if (ret != Success)
             return ret;
     }

@@ -34,6 +34,7 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/XI2proto.h>
 
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
@@ -47,7 +48,6 @@
 #include "xkbstr.h"
 #include "xkbsrv.h"
 #include "xserver-properties.h"
-#include "xace.h"
 #include "exglobals.h"
 #include "privates.h"
 #include "xiquerydevice.h"
@@ -57,28 +57,21 @@ static int
  ListDeviceInfo(ClientPtr client, DeviceIntPtr dev, xXIDeviceInfo * info);
 static int SizeDeviceInfo(DeviceIntPtr dev);
 static void SwapDeviceInfo(DeviceIntPtr dev, xXIDeviceInfo * info);
-int _X_COLD
-SProcXIQueryDevice(ClientPtr client)
-{
-    REQUEST(xXIQueryDeviceReq);
-    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
-
-    swaps(&stuff->deviceid);
-
-    return ProcXIQueryDevice(client);
-}
 
 int
 ProcXIQueryDevice(ClientPtr client)
 {
+    REQUEST(xXIQueryDeviceReq);
+    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
+
+    if (client->swapped)
+        swaps(&stuff->deviceid);
+
     DeviceIntPtr dev = NULL;
     int rc = Success;
     int i = 0, len = 0;
     char *info;
     Bool *skip = NULL;
-
-    REQUEST(xXIQueryDeviceReq);
-    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
 
     if (stuff->deviceid != XIAllDevices &&
         stuff->deviceid != XIAllMasterDevices) {
@@ -166,8 +159,7 @@ ShouldSkipDevice(ClientPtr client, int deviceid, DeviceIntPtr dev)
 {
     /* if all devices are not being queried, only master devices are */
     if (deviceid == XIAllDevices || InputDevIsMaster(dev)) {
-        int rc = XaceHookDeviceAccess(client, dev, DixGetAttrAccess);
-
+        int rc = dixCallDeviceAccessCallback(client, dev, DixGetAttrAccess);
         if (rc == Success)
             return FALSE;
     }
@@ -563,11 +555,9 @@ ListDeviceClasses(ClientPtr client, DeviceIntPtr dev,
     int total_len = 0;
     int len;
     int i;
-    int rc;
 
     /* Check if the current device state should be suppressed */
-    rc = XaceHookDeviceAccess(client, dev, DixReadAccess);
-
+    int rc = dixCallDeviceAccessCallback(client, dev, DixReadAccess);
     if (dev->button) {
         (*nclasses)++;
         len = ListButtonInfo(dev, (xXIButtonInfo *) any, rc == Success);

@@ -237,7 +237,7 @@ sparcPromGetBool(sbusPromNodePtr pnode, const char *prop)
     return promGetBool(prop);
 }
 
-static char *
+static const char *
 promWalkGetDriverName(int node, int oldnode)
 {
     int nextnode;
@@ -267,7 +267,7 @@ promWalkGetDriverName(int node, int oldnode)
 
     nextnode = promGetChild(node);
     if (nextnode) {
-        char *name;
+        const char *name;
 
         name = promWalkGetDriverName(nextnode, node);
         if (name)
@@ -280,10 +280,10 @@ promWalkGetDriverName(int node, int oldnode)
     return NULL;
 }
 
-char *
+const char *
 sparcDriverName(void)
 {
-    char *name;
+    const char *name;
 
     if (sparcPromInit() < 0)
         return NULL;
@@ -393,7 +393,7 @@ sparcPromAssignNodes(void)
         int fbNum, devId;
         static struct {
             int devId;
-            char *prefix;
+            const char *prefix;
         } procFbPrefixes[] = {
             {SBUS_DEVICE_CG14, "CGfourteen"},
             {SBUS_DEVICE_CG6, "CGsix"},

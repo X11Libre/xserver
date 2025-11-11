@@ -63,6 +63,7 @@ Equipment Corporation.
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/server_priv.h"
+#include "include/extinit.h"
 #include "include/swaprep.h"
 #include "os/auth.h"
 #include "os/log_priv.h"
@@ -342,8 +343,7 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
     pfont->refcnt++;
     if (pfont->refcnt == 1) {
         UseFPE(pfont->fpe);
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        DIX_FOR_EACH_SCREEN({
             if (walkScreen->RealizeFont) {
                 if (!(*walkScreen->RealizeFont) (walkScreen, pfont)) {
                     CloseFont(pfont, (Font) 0);
@@ -351,7 +351,7 @@ doOpenFont(ClientPtr client, OFclosurePtr c)
                     goto bail;
                 }
             }
-        }
+        });
     }
     if (!AddResource(c->fontid, X11_RESTYPE_FONT, (void *) pfont)) {
         err = AllocError;
@@ -455,7 +455,6 @@ OpenFont(ClientPtr client, XID fid, Mask flags, unsigned lenfname,
 int
 CloseFont(void *value, XID fid)
 {
-    ScreenPtr pscr;
     FontPathElementPtr fpe;
     FontPtr pfont = (FontPtr) value;
 
@@ -468,11 +467,10 @@ CloseFont(void *value, XID fid)
          * since the last reference is gone, ask each screen to free any
          * storage it may have allocated locally for it.
          */
-        for (int nscr = 0; nscr < screenInfo.numScreens; nscr++) {
-            pscr = screenInfo.screens[nscr];
-            if (pscr->UnrealizeFont)
-                (*pscr->UnrealizeFont) (pscr, pfont);
-        }
+        DIX_FOR_EACH_SCREEN({
+            if (walkScreen->UnrealizeFont)
+                walkScreen->UnrealizeFont(walkScreen, pfont);
+        });
         if (pfont == defaultFont)
             defaultFont = NULL;
 #ifdef XF86BIGFONT
@@ -910,9 +908,8 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
                 c->haveSaved = TRUE;
                 c->savedNumFonts = numFonts;
                 free(c->savedName);
-                c->savedName = calloc(1, namelen + 1);
-                if (c->savedName)
-                    memcpy(c->savedName, name, namelen + 1);
+                c->savedName = XNFalloc(namelen + 1);
+                memcpy(c->savedName, name, namelen + 1);
                 aliascount = 20;
             }
             memmove(c->current.pattern, name, namelen);

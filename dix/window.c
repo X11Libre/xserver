@@ -109,8 +109,11 @@ Equipment Corporation.
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
+#include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
+#include "include/extinit.h"
 #include "mi/mi_priv.h"         /* miPaintWindow */
 #include "os/auth.h"
 #include "os/client_priv.h"
@@ -151,8 +154,8 @@ Equipment Corporation.
 
 Bool bgNoneRoot = FALSE;
 
-static unsigned char _back_lsb[4] = { 0x88, 0x22, 0x44, 0x11 };
-static unsigned char _back_msb[4] = { 0x11, 0x44, 0x22, 0x88 };
+static const unsigned char _back_lsb[4] = { 0x88, 0x22, 0x44, 0x11 };
+static const unsigned char _back_msb[4] = { 0x11, 0x44, 0x22, 0x88 };
 
 static Bool WindowParentHasDeviceCursor(WindowPtr pWin,
                                         DeviceIntPtr pDev, CursorPtr pCurs);
@@ -395,8 +398,7 @@ PrintPassiveGrabs(void)
 void
 PrintWindowTree(void)
 {
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         ErrorF("[dix] Dumping windows for screen %d (pixmap %x):\n", walkScreenIdx,
                (unsigned) walkScreen->GetScreenPixmap(walkScreen)->drawable.id);
         WindowPtr pWin = walkScreen->root;
@@ -416,7 +418,7 @@ PrintWindowTree(void)
                 break;
             pWin = pWin->nextSib;
         }
-    }
+    });
 }
 
 int
@@ -502,7 +504,7 @@ MakeRootTile(WindowPtr pWin)
     GCPtr pGC;
     unsigned char back[128];
     int len = BitmapBytePad(sizeof(long));
-    unsigned char *from, *to;
+    unsigned char *to;
 
     pWin->background.pixmap = (*pScreen->CreatePixmap) (pScreen, 4, 4,
                                                         pScreen->rootDepth, 0);
@@ -524,7 +526,8 @@ MakeRootTile(WindowPtr pWin)
 
     ValidateGC((DrawablePtr) pWin->background.pixmap, pGC);
 
-    from = (screenInfo.bitmapBitOrder == LSBFirst) ? _back_lsb : _back_msb;
+    const unsigned char *from
+        = (screenInfo.bitmapBitOrder == LSBFirst) ? _back_lsb : _back_msb;
     to = back;
 
     for (int i = 4; i > 0; i--, from++)
@@ -1566,6 +1569,9 @@ ProcGetWindowAttributes(ClientPtr client)
 {
     REQUEST(xResourceReq);
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
 
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixGetAttrAccess);
@@ -3084,16 +3090,14 @@ dixSaveScreens(ClientPtr client, int on, int mode)
             type = SCREEN_SAVER_CYCLE;
     }
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
-        int rc = XaceHookScreensaverAccess(client, walkScreen,
+    DIX_FOR_EACH_SCREEN({
+        int rc = dixCallScreensaverAccessCallback(client, walkScreen,
                       DixShowAccess | DixHideAccess);
         if (rc != Success)
             return rc;
-    }
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    });
 
+    DIX_FOR_EACH_SCREEN({
         if (on == SCREEN_SAVER_FORCER)
             walkScreen->SaveScreen(walkScreen, on);
         if (walkScreen->screensaver.ExternalScreenSaver) {
@@ -3157,7 +3161,8 @@ dixSaveScreens(ClientPtr client, int on, int mode)
                 walkScreen->screensaver.blanked = SCREEN_ISNT_SAVED;
             break;
         }
-    }
+    });
+
     screenIsSaved = what;
     if (mode == ScreenSaverReset) {
         if (on == SCREEN_SAVER_FORCER) {

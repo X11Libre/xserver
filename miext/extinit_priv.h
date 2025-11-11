@@ -27,6 +27,8 @@ extern Bool noXFixesExtension;
 extern Bool noXFree86BigfontExtension;
 extern Bool noNamespaceExtension;
 
+extern Bool PanoramiXExtensionDisabledHack;
+
 extern char *namespaceConfigFile;
 
 void CompositeExtensionInit(void);

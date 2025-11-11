@@ -54,6 +54,7 @@ SOFTWARE.
 #include "dix/property_priv.h"
 #include "dix/request_priv.h"
 #include "dix/window_priv.h"
+#include "include/extinit.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -256,14 +257,31 @@ ProcRotateProperties(ClientPtr client)
 int
 ProcChangeProperty(ClientPtr client)
 {
+    REQUEST(xChangePropertyReq);
+    REQUEST_AT_LEAST_SIZE(xChangePropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->property);
+        swapl(&stuff->type);
+        swapl(&stuff->nUnits);
+        switch (stuff->format) {
+        case 8:
+            break;
+        case 16:
+            SwapRestS(stuff);
+            break;
+        case 32:
+            SwapRestL(stuff);
+            break;
+        }
+    }
+
     char format, mode;
     unsigned long len;
     int sizeInBytes, err;
     uint64_t totalSize;
 
-    REQUEST(xChangePropertyReq);
-
-    REQUEST_AT_LEAST_SIZE(xChangePropertyReq);
     UpdateCurrentTime();
     format = stuff->format;
     mode = stuff->mode;
@@ -651,8 +669,11 @@ ProcListProperties(ClientPtr client)
     WindowPtr pWin;
 
     REQUEST(xResourceReq);
-
     REQUEST_SIZE_MATCH(xResourceReq);
+
+    if (client->swapped)
+        swapl(&stuff->id);
+
     int rc = dixLookupWindow(&pWin, stuff->id, client, DixListPropAccess);
     if (rc != Success)
         return rc;
@@ -685,6 +706,11 @@ ProcDeleteProperty(ClientPtr client)
 {
     REQUEST(xDeletePropertyReq);
     REQUEST_SIZE_MATCH(xDeletePropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->property);
+    }
 
     UpdateCurrentTime();
     if (!ValidAtom(stuff->property)) {

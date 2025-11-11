@@ -37,7 +37,9 @@ Equipment Corporation.
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
+#include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -590,9 +592,10 @@ PanoramiXCreateConnectionBlock(void)
     }
 
     ScreenPtr masterScreen = dixGetMasterScreen();
+    DIX_FOR_EACH_SCREEN({
+        if (!walkScreenIdx)
+            continue;  /* skip the first one */
 
-    for (unsigned int walkScreenIdx = 1; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
         if (walkScreen->rootDepth != masterScreen->rootDepth) {
             ErrorF("Xinerama error: Root window depths differ\n");
             return FALSE;
@@ -600,13 +603,12 @@ PanoramiXCreateConnectionBlock(void)
         if (walkScreen->backingStoreSupport !=
             masterScreen->backingStoreSupport)
             disable_backing_store = TRUE;
-    }
+    });
 
     if (disable_backing_store) {
-        for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+        DIX_FOR_EACH_SCREEN({
             walkScreen->backingStoreSupport = NotUseful;
-        }
+        });
     }
 
     i = screenInfo.numScreens;
@@ -724,8 +726,8 @@ PanoramiXMaybeAddDepth(DepthPtr pDepth)
 
     int j = PanoramiXNumDepths;
     PanoramiXNumDepths++;
-    PanoramiXDepths = reallocarray(PanoramiXDepths,
-                                   PanoramiXNumDepths, sizeof(DepthRec));
+    PanoramiXDepths = XNFreallocarray(PanoramiXDepths,
+                                      PanoramiXNumDepths, sizeof(DepthRec));
     PanoramiXDepths[j].depth = pDepth->depth;
     PanoramiXDepths[j].numVids = 0;
     PanoramiXDepths[j].vids = NULL;
@@ -826,7 +828,7 @@ PanoramiXConsolidate(void)
 VisualID
 PanoramiXTranslateVisualID(int screen, VisualID orig)
 {
-    ScreenPtr pOtherScreen = screenInfo.screens[screen];
+    ScreenPtr pOtherScreen = dixGetScreenPtr(screen);
     VisualPtr pVisual = NULL;
     int i;
 
@@ -969,7 +971,7 @@ ProcPanoramiXGetScreenSize(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    ScreenPtr pScreen = screenInfo.screens[stuff->screen];
+    ScreenPtr pScreen = dixGetScreenPtr(stuff->screen);
 
     xPanoramiXGetScreenSizeReply reply = {
         /* screen dimensions */

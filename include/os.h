@@ -167,13 +167,6 @@ extern _X_EXPORT void *
 XNFrealloc(void * /*ptr */ , unsigned long /*amount */ );
 
 /*
- * This function reallocarray(3)s passed buffer, terminating the server if
- * there is not enough memory or the arguments overflow when multiplied.
- */
-extern _X_EXPORT void *
-XNFreallocarray(void *ptr, size_t nmemb, size_t size);
-
-/*
  * This function strdup(3)s passed string. The only difference from the library
  * function that it is safe to pass NULL, as NULL will be returned.
  */
@@ -200,17 +193,6 @@ PrivsElevated(void);
 
 extern _X_EXPORT int
 GetClientFd(ClientPtr);
-
-/* stuff for ReplyCallback */
-extern _X_EXPORT CallbackListPtr ReplyCallback;
-typedef struct {
-    ClientPtr client;
-    const void *replyData;
-    unsigned long dataLenBytes; /* actual bytes from replyData + pad bytes */
-    unsigned long bytesRemaining;
-    Bool startOfReply;
-    unsigned long padBytes;     /* pad bytes from zeroed array */
-} ReplyInfoRec;
 
 /* stuff for FlushCallback */
 extern _X_EXPORT CallbackListPtr FlushCallback;
@@ -293,12 +275,6 @@ _X_ATTRIBUTE_PRINTF(1, 2);
 
 extern _X_EXPORT void
 xorg_backtrace(void);
-
-#include <signal.h>
-
-#if defined(WIN32)
-typedef _sigset_t sigset_t;
-#endif
 
 /* should not be used anymore, just for backwards compat with drivers */
 #define LogVMessageVerbSigSafe(...) LogVMessageVerb(__VA_ARGS__)

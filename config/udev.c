@@ -349,6 +349,9 @@ device_removed(struct udev_device *device)
 static void
 socket_handler(int fd, int ready, void *data)
 {
+    (void) fd;
+    (void) ready;
+    (void) data;
     struct udev_device *udev_device;
     const char *action;
 

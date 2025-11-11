@@ -35,6 +35,8 @@ Equipment Corporation.
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/server_priv.h"
+#include "dix/window_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -153,7 +155,7 @@ PanoramiXCreateWindow(ClientPtr client)
             *((CARD32 *) &stuff[1] + cmap_offset) = cmap->info[walkScreenIdx].id;
         if (orig_visual != CopyFromParent)
             stuff->visual = PanoramiXTranslateVisualID(walkScreenIdx, orig_visual);
-        result = (*SavedProcVector[X_CreateWindow]) (client);
+        result = DoCreateWindowReq(client, stuff, (XID*)&stuff[1]);
         if (result != Success)
             break;
     });
@@ -2507,13 +2509,40 @@ PanoramiXAllocColor(ClientPtr client)
         return result;
 
     XINERAMA_FOR_EACH_SCREEN_BACKWARD({
-        stuff->cmap = cmap->info[walkScreenIdx].id;
-        result = (*SavedProcVector[X_AllocColor]) (client);
+        Colormap childCmap = cmap->info[walkScreenIdx].id;
+
+        CARD16 red = stuff->red;
+        CARD16 green = stuff->green;
+        CARD16 blue = stuff->blue;
+        CARD32 pixel = 0;
+
+        result = dixAllocColor(client, childCmap, &red, &green, &blue, &pixel);
         if (result != Success)
-            break;
+            return result;
+
+        /* only send out reply for on first screen */
+        if (!walkScreenIdx) {
+            xAllocColorReply rep; /* static init would confuse preprocessor */
+            rep.red = red;
+            rep.green = green;
+            rep.blue = blue;
+            rep.pixel = pixel;
+
+            if (client->swapped) {
+                swaps(&rep.red);
+                swaps(&rep.green);
+                swaps(&rep.blue);
+                swapl(&rep.pixel);
+            }
+
+            /* iterating backwards, first screen comes last, so we can return here */
+            return X_SEND_REPLY_SIMPLE(client, rep);
+        }
     });
 
-    return result;
+    /* shouldn't ever reach here, because we already returned from within the loop
+       if this ever happens, PanoramiXNumScreens must be 0 */
+    return BadImplementation;
 }
 
 int

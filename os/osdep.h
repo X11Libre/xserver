@@ -61,27 +61,8 @@ SOFTWARE.
 # define __has_builtin(x) 0     /* Compatibility with older compilers */
 #endif
 
-/* If EAGAIN and EWOULDBLOCK are distinct errno values, then we check errno
- * for both EAGAIN and EWOULDBLOCK, because some supposedly POSIX
- * systems are broken and return EWOULDBLOCK when they should return EAGAIN
- */
-#ifndef WIN32
-# if (EAGAIN != EWOULDBLOCK)
-#  define ETEST(err) (err == EAGAIN || err == EWOULDBLOCK)
-# else
-#  define ETEST(err) (err == EAGAIN)
-# endif
-#else   /* WIN32 The socket errorcodes differ from the normal errors */
-#define ETEST(err) (err == EAGAIN || err == WSAEWOULDBLOCK)
-#endif
-
 typedef struct _connectionInput *ConnectionInputPtr;
 typedef struct _connectionOutput *ConnectionOutputPtr;
-
-struct _osComm;
-
-typedef int (*OsFlushFunc) (ClientPtr who, struct _osComm * oc, char *extraBuf,
-                            int extraCount);
 
 typedef struct _osComm {
     int fd;
@@ -92,9 +73,6 @@ typedef struct _osComm {
     struct _XtransConnInfo *trans_conn; /* transport connection object */
     int flags;
 } OsCommRec, *OsCommPtr;
-
-#define OS_COMM_GRAB_IMPERVIOUS 1
-#define OS_COMM_IGNORED         2
 
 int FlushClient(ClientPtr who, OsCommPtr oc);
 
@@ -137,6 +115,9 @@ _X_EXPORT Bool TimerForce(OsTimerPtr);
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>
+#include <signal.h>
+
+typedef _sigset_t sigset_t;
 
 #undef CreateWindow
 
@@ -203,6 +184,12 @@ extern Bool CoreDump;
 extern Bool NoListenAll;
 extern Bool AllowByteSwappedClients;
 
+/*
+ * This function reallocarray(3)s passed buffer, terminating the server if
+ * there is not enough memory or the arguments overflow when multiplied.
+ */
+void *XNFreallocarray(void *ptr, size_t nmemb, size_t size);
+
 #if __has_builtin(__builtin_popcountl)
 # define Ones __builtin_popcountl
 #else
@@ -243,5 +230,8 @@ enum ExitCode {
 };
 
 extern sig_atomic_t inSignalContext;
+
+/* run timers that are expired at timestamp `now` */
+void DoTimers(CARD32 now);
 
 #endif                          /* _OSDEP_H_ */

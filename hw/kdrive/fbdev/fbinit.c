@@ -54,7 +54,7 @@ ddxInputThreadInit(void)
 #endif
 
 void
-InitOutput(ScreenInfo * pScreenInfo, int argc, char **argv)
+InitOutput(int argc, char **argv)
 {
     if (serverGeneration == 1)
         ephyrExtensionInit();

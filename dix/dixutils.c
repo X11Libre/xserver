@@ -86,8 +86,10 @@ Author:  Adobe Systems Incorporated
 #include <X11/Xmd.h>
 
 #include "dix/callback_priv.h"
+#include "dix/client_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "misc.h"
 #include "windowstr.h"
@@ -231,7 +233,7 @@ dixLookupResourceOwner(ClientPtr *result, XID id, ClientPtr client, Mask access_
     if (rc != Success)
         goto bad;
 
-    rc = XaceHookClientAccess(client, clients[clientIndex], access_mode);
+    rc = dixCallClientAccessCallback(client, clients[clientIndex], access_mode);
     if (rc != Success)
         goto bad;
 
@@ -343,17 +345,15 @@ BlockHandler(void *pTimeout)
         if (!handlers[i].deleted)
             (*handlers[i].BlockHandler) (handlers[i].blockData, pTimeout);
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    DIX_FOR_EACH_GPU_SCREEN({
         if (walkScreen->BlockHandler)
             walkScreen->BlockHandler(walkScreen, pTimeout);
-    }
+    });
 
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen->BlockHandler)
             walkScreen->BlockHandler(walkScreen, pTimeout);
-    }
+    });
 
     if (handlerDeleted) {
         for (size_t i = 0; i < numHandlers;)
@@ -378,16 +378,16 @@ void
 WakeupHandler(int result)
 {
     ++inHandler;
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+
+    DIX_FOR_EACH_SCREEN({
         if (walkScreen->WakeupHandler)
             walkScreen->WakeupHandler(walkScreen, result);
-    }
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    });
+
+    DIX_FOR_EACH_GPU_SCREEN({
         if (walkScreen->WakeupHandler)
             walkScreen->WakeupHandler(walkScreen, result);
-    }
+    });
 
     for (size_t i = numHandlers; i > 0; i--)
         if (!handlers[i-1].deleted)
@@ -651,6 +651,20 @@ ClientIsAsleep(ClientPtr client)
  */
 
 /* ===== Private Procedures ===== */
+
+typedef struct _CallbackRec {
+    CallbackProcPtr proc;
+    void *data;
+    Bool deleted;
+    struct _CallbackRec *next;
+} CallbackRec, *CallbackPtr;
+
+typedef struct _CallbackList {
+    int inCallback;
+    Bool deleted;
+    int numDeleted;
+    CallbackPtr list;
+} CallbackListRec;
 
 static size_t numCallbackListsToCleanup = 0;
 static CallbackListPtr **listsToCleanup = NULL;

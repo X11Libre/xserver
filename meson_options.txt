@@ -157,8 +157,11 @@ option('devel-docs', type: 'combo', choices: ['true', 'false', 'auto'], value: '
 option('docs-pdf', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
         description: 'Whether to build PDF version of documentation. Setting is ignored if documentation is not built.')
 
+# legacy nvidia driver quirks
 option('legacy_nvidia_padding', type: 'boolean', value: false,
         description: 'EXPERT ONLY: Add a padding to ScreenRec to match an older ABI for legacy NVidia drivers')
+option('legacy_nvidia_340x', type: 'boolean', value: true,
+        description: 'Extra entrypoints for old Nvidia 340x proprietary driver')
 
 # testsuite fine tuning - some things might not run everywhere
 option('test_rendercheck_triangles', type: 'boolean', value: false,

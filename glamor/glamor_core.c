@@ -93,7 +93,11 @@ glamor_link_glsl_prog(ScreenPtr screen, GLint prog, const char *format, ...)
         va_list va;
 
         va_start(va, format);
-        XNFvasprintf(&label, format, va);
+        if (vasprintf(&label, format, va) == -1) {
+            ErrorF("glamor_link_glsl_prog() memory allocation failed\n");
+            va_end(va);
+            return FALSE;
+        }
         glObjectLabel(GL_PROGRAM, prog, -1, label);
         free(label);
         va_end(va);

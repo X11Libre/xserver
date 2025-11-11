@@ -27,6 +27,5 @@ build_drv_ac xf86-video-r128        $X11L_DRV_GIT/xf86-video-r128        xlibre-
 build_drv_ac xf86-video-vesa        $X11L_DRV_GIT/xf86-video-vesa        xlibre-xf86-video-vesa-2.6.0.2
 build_drv_ac xf86-video-vmware      $X11L_DRV_GIT/xf86-video-vmware      xlibre-xf86-video-vmware-13.4.0.3
 
-# doesn't compile on Linux
-# build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       master
-# build_drv_ac xf86-input-keyboard    $X11L_DRV_GIT/xf86-input-keyboard    master
+build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       master
+build_drv_ac xf86-input-keyboard    $X11L_DRV_GIT/xf86-input-keyboard    master

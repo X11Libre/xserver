@@ -46,6 +46,7 @@ in this Software without prior written authorization from The Open Group.
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/busfault.h"
@@ -54,6 +55,7 @@ in this Software without prior written authorization from The Open Group.
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
+#include "Xext/shm_priv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -195,57 +197,36 @@ CheckForShmSyscall(void)
 
 #endif
 
-static void
-ShmScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unused)
-{
-    ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
 
-    dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, NULL);
-    free(screen_priv);
-}
-
-static ShmScrPrivateRec *
-ShmInitScreenPriv(ScreenPtr pScreen)
-{
-    ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(pScreen);
-
-    if (!screen_priv) {
-        screen_priv = calloc(1, sizeof(ShmScrPrivateRec));
-        dixSetPrivate(&pScreen->devPrivates, shmScrPrivateKey, screen_priv);
-        dixScreenHookClose(pScreen, ShmScreenClose);
-    }
-    return screen_priv;
-}
-
+/* Multiple calls to dixRegisterPrivateKey with the same arguments are allowed */
 static Bool
 ShmRegisterPrivates(void)
 {
-    if (!dixRegisterPrivateKey(&shmScrPrivateKeyRec, PRIVATE_SCREEN, 0))
+    if (!dixRegisterPrivateKey(&shmScrPrivateKeyRec, PRIVATE_SCREEN, sizeof(ShmScrPrivateRec)))
         return FALSE;
     if (!dixRegisterPrivateKey(&shmPixmapPrivateKeyRec, PRIVATE_PIXMAP, 0))
         return FALSE;
+
     return TRUE;
 }
 
  /*ARGSUSED*/ static void
 ShmResetProc(ExtensionEntry * extEntry)
 {
-    int i;
-
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         ShmRegisterFuncs(walkScreen, NULL);
-    }
+    });
 }
 
 void
 ShmRegisterFuncs(ScreenPtr pScreen, ShmFuncsPtr funcs)
 {
+    /* we could be called before the extension initialized,
+       so make sure the privates are already registered. */
     if (!ShmRegisterPrivates())
         return;
-    ShmInitScreenPriv(pScreen)->shmFuncs = funcs;
+    ShmGetScreenPriv(pScreen)->shmFuncs = funcs;
 }
-
 
 void
 ShmRegisterFbFuncs(ScreenPtr pScreen)
@@ -1380,7 +1361,6 @@ void
 ShmExtensionInit(void)
 {
     ExtensionEntry *extEntry;
-    int i;
 
 #ifdef MUST_CHECK_FOR_SHM_SYSCALL
     if (!CheckForShmSyscall()) {
@@ -1395,22 +1375,17 @@ ShmExtensionInit(void)
     sharedPixmaps = xFalse;
     {
         sharedPixmaps = xTrue;
-        for (i = 0; i < screenInfo.numScreens; i++) {
-            ScreenPtr walkScreen = screenInfo.screens[i];
-            ShmScrPrivateRec *screen_priv =
-                ShmInitScreenPriv(walkScreen);
-            if (!screen_priv)
-                continue;
+        DIX_FOR_EACH_SCREEN({
+            ShmScrPrivateRec *screen_priv = ShmGetScreenPriv(walkScreen);
             if (!screen_priv->shmFuncs)
                 screen_priv->shmFuncs = &miFuncs;
             if (!screen_priv->shmFuncs->CreatePixmap)
                 sharedPixmaps = xFalse;
-        }
+        });
         if (sharedPixmaps)
-            for (i = 0; i < screenInfo.numScreens; i++) {
-                ScreenPtr walkScreen = screenInfo.screens[i];
+            DIX_FOR_EACH_SCREEN({
                 dixScreenHookPixmapDestroy(walkScreen, ShmPixmapDestroy);
-            }
+            });
     }
     ShmSegType = CreateNewResourceType(ShmDetachSegment, "ShmSeg");
     if (ShmSegType &&

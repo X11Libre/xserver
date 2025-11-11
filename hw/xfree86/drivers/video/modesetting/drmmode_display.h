@@ -42,6 +42,7 @@ enum drmmode_plane_property {
     DRMMODE_PLANE_TYPE = 0,
     DRMMODE_PLANE_FB_ID,
     DRMMODE_PLANE_IN_FORMATS,
+    DRMMODE_PLANE_IN_FORMATS_ASYNC,
     DRMMODE_PLANE_CRTC_ID,
     DRMMODE_PLANE_SRC_X,
     DRMMODE_PLANE_SRC_Y,
@@ -103,6 +104,7 @@ typedef struct {
     drmEventContext event_context;
     drmmode_bo front_bo;
     Bool sw_cursor;
+    Bool set_cursor_failed;
 
     /* Broken-out options. */
     OptionInfoPtr Options;
@@ -211,6 +213,7 @@ typedef struct {
     drmmode_mode_ptr current_mode;
     uint32_t num_formats;
     drmmode_format_rec *formats;
+    drmmode_format_rec *formats_async;
 
     drmmode_bo rotate_bo;
     unsigned rotate_fb_id;
@@ -235,7 +238,8 @@ typedef struct {
 
     uint64_t next_msc;
 
-    int cursor_width, cursor_height;
+    int cursor_width;
+    int cursor_height;
 
     Bool need_modeset;
     struct xorg_list mode_list;
@@ -246,9 +250,14 @@ typedef struct {
     Bool vrr_enabled;
     Bool use_gamma_lut;
 
-    int* cursor_pitches;
+    /* For damage-like tracking of the cursor buffer */
     uint32_t cursor_glyph_width;
     uint32_t cursor_glyph_height;
+    int old_pitch;
+
+    Bool cursor_probed;
+
+    int* cursor_pitches;
 } drmmode_crtc_private_rec, *drmmode_crtc_private_ptr;
 
 typedef struct {
@@ -310,7 +319,7 @@ typedef struct _msSpritePriv {
 extern miPointerSpriteFuncRec drmmode_sprite_funcs;
 
 Bool drmmode_is_format_supported(ScrnInfoPtr scrn, uint32_t format,
-                                 uint64_t modifier);
+                                 uint64_t modifier, Bool async_flip);
 int drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
                       uint32_t *fb_id);
 int drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo);
@@ -359,7 +368,4 @@ Bool drmmode_crtc_get_fb_id(xf86CrtcPtr crtc, uint32_t *fb_id, int *x, int *y);
 
 void drmmode_set_dpms(ScrnInfoPtr scrn, int PowerManagementMode, int flags);
 void drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled);
-
-Bool drmmode_get_largest_cursor(ScrnInfoPtr pScrn, drmmode_cursor_dim_ptr cursor_lim);
-
 #endif

@@ -29,6 +29,7 @@
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/extinit.h"
 
 #include "xf86.h"
 #include "os.h"

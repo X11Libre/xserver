@@ -56,27 +56,24 @@
  *
  */
 
-int _X_COLD
-SProcXIWarpPointer(ClientPtr client)
+int
+ProcXIWarpPointer(ClientPtr client)
 {
     REQUEST(xXIWarpPointerReq);
     REQUEST_SIZE_MATCH(xXIWarpPointerReq);
 
-    swapl(&stuff->src_win);
-    swapl(&stuff->dst_win);
-    swapl(&stuff->src_x);
-    swapl(&stuff->src_y);
-    swaps(&stuff->src_width);
-    swaps(&stuff->src_height);
-    swapl(&stuff->dst_x);
-    swapl(&stuff->dst_y);
-    swaps(&stuff->deviceid);
-    return (ProcXIWarpPointer(client));
-}
+    if (client->swapped) {
+        swapl(&stuff->src_win);
+        swapl(&stuff->dst_win);
+        swapl(&stuff->src_x);
+        swapl(&stuff->src_y);
+        swaps(&stuff->src_width);
+        swaps(&stuff->src_height);
+        swapl(&stuff->dst_x);
+        swapl(&stuff->dst_y);
+        swaps(&stuff->deviceid);
+    }
 
-int
-ProcXIWarpPointer(ClientPtr client)
-{
     int rc;
     int x, y;
     WindowPtr dest = NULL;
@@ -85,9 +82,6 @@ ProcXIWarpPointer(ClientPtr client)
     ScreenPtr newScreen;
     int src_x, src_y;
     int dst_x, dst_y;
-
-    REQUEST(xXIWarpPointerReq);
-    REQUEST_SIZE_MATCH(xXIWarpPointerReq);
 
     /* FIXME: panoramix stuff is missing, look at ProcWarpPointer */
 

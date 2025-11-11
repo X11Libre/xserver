@@ -263,25 +263,26 @@ get_index(char *str, int *ndx)
 static void
 SetUpRemap(InputLine * line, RemapSpec * remap)
 {
-    char *tok, *str;
-    unsigned present, l_ndx_present, v_ndx_present;
-    int len, ndx;
+    char *tok;
     _Xstrtokparams strtok_buf;
-    Bool found;
 
-    l_ndx_present = v_ndx_present = present = 0;
-    str = &line->line[1];
-    len = remap->number;
+    unsigned l_ndx_present = 0;
+    unsigned v_ndx_present = 0;
+    unsigned present = 0;
+    char *str = &line->line[1];
+    int len = remap->number;
+
     memset((char *) remap, 0, sizeof(RemapSpec));
     remap->number = len;
     while ((tok = _XStrtok(str, " ", strtok_buf)) != NULL) {
-        found = FALSE;
+        Bool found = FALSE;
         str = NULL;
         if (strcmp(tok, "=") == 0)
             continue;
         for (int i = 0; i < MAX_WORDS; i++) {
             len = strlen(cname[i]);
             if (strncmp(cname[i], tok, len) == 0) {
+                int ndx;
                 if (strlen(tok) > len) {
                     char *end = get_index(tok + len, &ndx);
 

@@ -42,14 +42,6 @@ typedef struct {
     int status;
 } XaceResourceAccessRec;
 
-/* XACE_DEVICE_ACCESS */
-typedef struct {
-    ClientPtr client;
-    DeviceIntPtr dev;
-    Mask access_mode;
-    int status;
-} XaceDeviceAccessRec;
-
 /* XACE_PROPERTY_ACCESS */
 typedef struct {
     ClientPtr client;
@@ -78,14 +70,6 @@ typedef struct {
     int status;
 } XaceReceiveAccessRec;
 
-/* XACE_CLIENT_ACCESS */
-typedef struct {
-    ClientPtr client;
-    ClientPtr target;
-    Mask access_mode;
-    int status;
-} XaceClientAccessRec;
-
 /* XACE_SELECTION_ACCESS */
 typedef struct {
     ClientPtr client;
@@ -93,14 +77,5 @@ typedef struct {
     Mask access_mode;
     int status;
 } XaceSelectionAccessRec;
-
-/* XACE_SCREEN_ACCESS */
-/* XACE_SCREENSAVER_ACCESS */
-typedef struct {
-    ClientPtr client;
-    ScreenPtr screen;
-    Mask access_mode;
-    int status;
-} XaceScreenAccessRec;
 
 #endif                          /* _XACESTR_H */

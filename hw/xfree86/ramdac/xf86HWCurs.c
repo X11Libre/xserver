@@ -512,9 +512,9 @@ RealizeCursorInterleave0(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
 static unsigned char *
 RealizeCursorInterleave1(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
 {
-    unsigned char *DstS, *DstM;
-    unsigned char *pntr;
-    unsigned char *mem, *mem2;
+    CARD8 *DstS, *DstM;
+    CARD8 *pntr;
+    void *mem, *mem2;
     int count;
     int size = (infoPtr->MaxWidth * infoPtr->MaxHeight) >> 2;
 
@@ -532,7 +532,7 @@ RealizeCursorInterleave1(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
     DstM = DstS + (size >> 1);
     pntr = mem;
     count = size;
-    while (count) {
+    while (count > 1) {
         *pntr++ = ((*DstS & 0x01)) | ((*DstM & 0x01) << 1) |
             ((*DstS & 0x02) << 1) | ((*DstM & 0x02) << 2) |
             ((*DstS & 0x04) << 2) | ((*DstM & 0x04) << 3) |
@@ -552,144 +552,43 @@ RealizeCursorInterleave1(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
     return mem;
 }
 
-static unsigned char *
-RealizeCursorInterleave8(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
-{
-    unsigned char *DstS, *DstM;
-    unsigned char *pntr;
-    unsigned char *mem, *mem2;
-    int count;
-    int size = (infoPtr->MaxWidth * infoPtr->MaxHeight) >> 2;
+#define _RealizeCursorInterleave(x) \
+static unsigned char * \
+RealizeCursorInterleave##x(xf86CursorInfoPtr infoPtr, CursorPtr pCurs) \
+{ \
+    CARD##x *DstS, *DstM; \
+    CARD##x *pntr; \
+    void *mem, *mem2; \
+    int size = (infoPtr->MaxWidth * infoPtr->MaxHeight) / 4; /* XXX bytes per pixel? XXX */ \
+\
+    /* Realize the cursor without interleaving */ \
+    if (!(mem2 = RealizeCursorInterleave0(infoPtr, pCurs))) \
+        return NULL; \
+\
+    if (!(mem = calloc((size + sizeof(CARD##x) - 1) / sizeof(CARD##x), sizeof(CARD##x)))) { \
+        free(mem2); \
+        return NULL; \
+    } \
+\
+    /* x bit interleave */ \
+    size /= sizeof(CARD##x); /* Array size of the hw cursor */ \
+    size /= 2; /* Half of the array size */ \
+    DstS = mem2; \
+    DstM = DstS + size; \
+    pntr = mem; \
+    for (int i = 0; i < size; i++) { \
+        *pntr++ = *DstS++; \
+        *pntr++ = *DstM++; \
+    } \
+\
+    /* Free the uninterleaved cursor */ \
+    free(mem2); \
+\
+    return mem; \
+} \
 
-    /* Realize the cursor without interleaving */
-    if (!(mem2 = RealizeCursorInterleave0(infoPtr, pCurs)))
-        return NULL;
 
-    if (!(mem = calloc(1, size))) {
-        free(mem2);
-        return NULL;
-    }
-
-    /* 8 bit interleave */
-    DstS = mem2;
-    DstM = DstS + (size >> 1);
-    pntr = mem;
-    count = size;
-    while (count) {
-        *pntr++ = *DstS++;
-        *pntr++ = *DstM++;
-        count -= 2;
-    }
-
-    /* Free the uninterleaved cursor */
-    free(mem2);
-
-    return mem;
-}
-
-static unsigned char *
-RealizeCursorInterleave16(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
-{
-    unsigned short *DstS, *DstM;
-    unsigned short *pntr;
-    unsigned char *mem, *mem2;
-    int count;
-    int size = (infoPtr->MaxWidth * infoPtr->MaxHeight) >> 2;
-
-    /* Realize the cursor without interleaving */
-    if (!(mem2 = RealizeCursorInterleave0(infoPtr, pCurs)))
-        return NULL;
-
-    if (!(mem = calloc(1, size))) {
-        free(mem2);
-        return NULL;
-    }
-
-    /* 16 bit interleave */
-    DstS = (void *) mem2;
-    DstM = DstS + (size >> 2);
-    pntr = (void *) mem;
-    count = (size >> 1);
-    while (count) {
-        *pntr++ = *DstS++;
-        *pntr++ = *DstM++;
-        count -= 2;
-    }
-
-    /* Free the uninterleaved cursor */
-    free(mem2);
-
-    return mem;
-}
-
-static unsigned char *
-RealizeCursorInterleave32(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
-{
-    CARD32 *DstS, *DstM;
-    CARD32 *pntr;
-    unsigned char *mem, *mem2;
-    int count;
-    int size = (infoPtr->MaxWidth * infoPtr->MaxHeight) >> 2;
-
-    /* Realize the cursor without interleaving */
-    if (!(mem2 = RealizeCursorInterleave0(infoPtr, pCurs)))
-        return NULL;
-
-    if (!(mem = calloc(1, size))) {
-        free(mem2);
-        return NULL;
-    }
-
-    /* 32 bit interleave */
-    DstS = (void *) mem2;
-    DstM = DstS + (size >> 3);
-    pntr = (void *) mem;
-    count = (size >> 2);
-    while (count) {
-        *pntr++ = *DstS++;
-        *pntr++ = *DstM++;
-        count -= 2;
-    }
-
-    /* Free the uninterleaved cursor */
-    free(mem2);
-
-    return mem;
-}
-
-static unsigned char *
-RealizeCursorInterleave64(xf86CursorInfoPtr infoPtr, CursorPtr pCurs)
-{
-    CARD32 *DstS, *DstM;
-    CARD32 *pntr;
-    unsigned char *mem, *mem2;
-    int count;
-    int size = (infoPtr->MaxWidth * infoPtr->MaxHeight) >> 2;
-
-    /* Realize the cursor without interleaving */
-    if (!(mem2 = RealizeCursorInterleave0(infoPtr, pCurs)))
-        return NULL;
-
-    if (!(mem = calloc(1, size))) {
-        free(mem2);
-        return NULL;
-    }
-
-    /* 64 bit interleave */
-    DstS = (void *) mem2;
-    DstM = DstS + (size >> 3);
-    pntr = (void *) mem;
-    count = (size >> 2);
-    while (count) {
-        *pntr++ = *DstS++;
-        *pntr++ = *DstS++;
-        *pntr++ = *DstM++;
-        *pntr++ = *DstM++;
-        count -= 4;
-    }
-
-    /* Free the uninterleaved cursor */
-    free(mem2);
-
-    return mem;
-}
+_RealizeCursorInterleave(8)
+_RealizeCursorInterleave(16)
+_RealizeCursorInterleave(32)
+_RealizeCursorInterleave(64)

@@ -15,7 +15,7 @@ on:
 jobs:
     xserver-build-ubuntu:
         env:
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dtest_xephyr_gles=false
+            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
             LIBGL_ALWAYS_SOFTWARE: 1
             GALLIUM_DRIVER: llvmpipe
             PIGLIT_PLATFORM: x11_egl
@@ -78,7 +78,7 @@ jobs:
 
     drivers-build-ubuntu:
         env:
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false
+            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
@@ -130,7 +130,7 @@ jobs:
     xserver-build-mingw32-ubuntu:
         runs-on: ubuntu-latest
         env:
-            MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true
+            MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
@@ -173,7 +173,7 @@ jobs:
 
     xserver-build-macos:
         env:
-            MESON_ARGS: -Dprefix=/tmp -Dglx=false -Dxnest=false
+            MESON_ARGS: -Dprefix=/tmp -Dglx=false -Dxnest=false -Dxfbdev=false
             X11_PREFIX: /Users/runner/x11
             X11_BUILD_DIR: /Users/runner/build-deps
         runs-on: macos-latest
@@ -236,7 +236,7 @@ jobs:
         env:
             MYTOKEN : ${{ secrets.MYTOKEN }}
             MYTOKEN2: "value2"
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true
+            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
             - name: run in freebsd VM
@@ -250,7 +250,7 @@ jobs:
     xserver-build-dragonflybsd:
         runs-on: ubuntu-latest
         env:
-            MESON_ARGS: -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true
+            MESON_ARGS: -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
             - name: run in DragonFlyBSD VM

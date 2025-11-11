@@ -38,6 +38,7 @@
 #include <X11/extensions/Xvproto.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "include/extinit.h"
 #include "Xext/xvdix_priv.h"
 
 #include "misc.h"

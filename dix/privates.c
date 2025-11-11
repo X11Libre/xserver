@@ -53,6 +53,7 @@ from The Open Group.
 #include <stddef.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/screenint_priv.h"
 
 #include "windowstr.h"
 #include "resource.h"
@@ -211,16 +212,14 @@ fixupOneScreen(ScreenPtr pScreen, FixupFunc fixup, unsigned bytes)
 static Bool
 fixupScreens(FixupFunc fixup, unsigned bytes)
 {
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         if (!fixupOneScreen (walkScreen, fixup, bytes))
             return FALSE;
-    }
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    });
+    DIX_FOR_EACH_GPU_SCREEN({
         if (!fixupOneScreen (walkScreen, fixup, bytes))
             return FALSE;
-    }
+    });
     return TRUE;
 }
 
@@ -249,8 +248,7 @@ fixupExtensions(FixupFunc fixup, unsigned bytes)
 static Bool
 fixupDefaultColormaps(FixupFunc fixup, unsigned bytes)
 {
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         ColormapPtr cmap;
         dixLookupResourceByType((void **) &cmap,
                                 walkScreen->defColormap, X11_RESTYPE_COLORMAP,
@@ -258,7 +256,7 @@ fixupDefaultColormaps(FixupFunc fixup, unsigned bytes)
         if (cmap &&
             !fixup(&cmap->devPrivates, walkScreen->screenSpecificPrivates[PRIVATE_COLORMAP].offset, bytes))
             return FALSE;
-    }
+    });
     return TRUE;
 }
 
@@ -300,24 +298,14 @@ static void
 grow_screen_specific_set(DevPrivateType type, unsigned bytes)
 {
     /* Update offsets for all screen-specific keys */
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+    DIX_FOR_EACH_SCREEN({
         grow_private_set(&walkScreen->screenSpecificPrivates[type], bytes);
-    }
-    for (unsigned int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) {
-        ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx];
+    });
+    DIX_FOR_EACH_GPU_SCREEN({
         grow_private_set(&walkScreen->screenSpecificPrivates[type], bytes);
-    }
+    });
 }
 
-/*
- * Register a private key. This takes the type of object the key will
- * be used with, which may be PRIVATE_ALL indicating that this key
- * will be used with all of the private objects. If 'size' is
- * non-zero, then the specified amount of space will be allocated in
- * the private storage. Otherwise, space for a single pointer will
- * be allocated which can be set with dixSetPrivate
- */
 Bool
 dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
 {
@@ -341,6 +329,9 @@ dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
     if (type == PRIVATE_XSELINUX) {
 
         /* Resize if we can, or make sure nothing's allocated if we can't
+         *
+         * special magic for PRIVATE_XSELINUX type keys - those are registered
+         * at the same offset in several object types.
          */
         for (DevPrivateType t = PRIVATE_XSELINUX; t < PRIVATE_LAST; t++)
             if (xselinux_private[t]) {
@@ -389,7 +380,7 @@ dixRegisterPrivateKey(DevPrivateKey key, DevPrivateType type, unsigned size)
 }
 
 Bool
-dixRegisterScreenPrivateKey(DevScreenPrivateKey screenKey, ScreenPtr pScreen,
+dixRegisterScreenPrivateKey(DevScreenPrivateKeyPtr screenKey, ScreenPtr pScreen,
                             DevPrivateType type, unsigned size)
 {
     DevPrivateKey key;
@@ -415,7 +406,7 @@ dixRegisterScreenPrivateKey(DevScreenPrivateKey screenKey, ScreenPtr pScreen,
 }
 
 DevPrivateKey
-_dixGetScreenPrivateKey(const DevScreenPrivateKey key, ScreenPtr pScreen)
+_dixGetScreenPrivateKey(const DevScreenPrivateKeyPtr key, ScreenPtr pScreen)
 {
     return dixGetPrivate(&pScreen->devPrivates, &key->screenKey);
 }

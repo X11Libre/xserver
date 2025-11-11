@@ -63,8 +63,10 @@ SOFTWARE.
 #include <X11/X.h>
 
 #include "dix/dix_priv.h"
+#include "dix/screensaver_priv.h"
 #include "os/busfault.h"
 #include "os/client_priv.h"
+#include "os/ossock.h"
 #include "os/screensaver.h"
 
 #include "misc.h"
@@ -105,7 +107,6 @@ struct _OsTimerRec {
 };
 
 static void DoTimer(OsTimerPtr timer, CARD32 now);
-static void DoTimers(CARD32 now);
 static void CheckAllTimers(void);
 static volatile struct xorg_list timers;
 
@@ -210,7 +211,7 @@ WaitForSomething(Bool are_ready)
             if (dispatchException)
                 return FALSE;
             if (i < 0) {
-                if (pollerr != EINTR && !ETEST(pollerr)) {
+                if (pollerr != EINTR && ossock_wouldblock(pollerr)) {
                     ErrorF("WaitForSomething(): poll: %s\n",
                            strerror(pollerr));
                 }
@@ -276,8 +277,7 @@ DoTimer(OsTimerPtr timer, CARD32 now)
         TimerSet(timer, 0, newTime, timer->callback, timer->arg);
 }
 
-static void
-DoTimers(CARD32 now)
+void DoTimers(CARD32 now)
 {
     OsTimerPtr  timer;
 

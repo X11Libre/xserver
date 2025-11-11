@@ -40,6 +40,10 @@
 #include <X11/extensions/randr.h>
 #include <X11/extensions/Xv.h>
 
+#ifdef GLAMOR_HAS_EGL
+#include <epoxy/egl.h>
+#endif
+
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
 #include "mi/mi_priv.h"
@@ -138,6 +142,7 @@ static SymTabRec Chipsets[] = {
 
 static const OptionInfoRec Options[] = {
     {OPTION_SW_CURSOR, "SWcursor", OPTV_BOOLEAN, {0}, FALSE},
+    {OPTION_CURSOR_SIZE, "CursorSize", OPTV_STRING, {0}, FALSE},
     {OPTION_DEVICE_PATH, "kmsdev", OPTV_STRING, {0}, FALSE},
     {OPTION_SHADOW_FB, "ShadowFB", OPTV_BOOLEAN, {0}, FALSE},
     {OPTION_ACCEL_METHOD, "AccelMethod", OPTV_STRING, {0}, FALSE},
@@ -153,6 +158,8 @@ static const OptionInfoRec Options[] = {
 };
 
 int ms_entity_index = -1;
+
+DevPrivateKeyRec asyncFlipPrivateKeyRec;
 
 static MODULESETUPPROTO(Setup);
 
@@ -531,7 +538,7 @@ rotate_clip(PixmapPtr pixmap, xf86CrtcPtr crtc, BoxPtr rect, drmModeClip *clip,
     int x1, y1, x2, y2;
 
     if (rotation == RR_Rotate_90 || rotation == RR_Rotate_270) {
-	/* width and height are swapped if rotated 90 or 270 degrees */
+        /* width and height are swapped if rotated 90 or 270 degrees */
         w = pixmap->drawable.height;
         h = pixmap->drawable.width;
     } else {
@@ -738,7 +745,7 @@ dispatch_dirty(ScreenPtr pScreen)
         if (!drmmode_crtc)
             continue;
 
-	drmmode_crtc_get_fb_id(crtc, &fb_id, &x, &y);
+        drmmode_crtc_get_fb_id(crtc, &fb_id, &x, &y);
 
         if (crtc->rotatedPixmap)
             pmap = crtc->rotatedPixmap;
@@ -902,9 +909,8 @@ msBlockHandler_oneshot(ScreenPtr pScreen, void *pTimeout)
 
 Bool
 ms_window_has_variable_refresh(modesettingPtr ms, WindowPtr win) {
-	struct ms_vrr_priv *priv = dixLookupPrivate(&win->devPrivates, &ms->drmmode.vrrPrivateKeyRec);
-
-	return priv->variable_refresh;
+        struct ms_vrr_priv *priv = dixLookupPrivate(&win->devPrivates, &ms->drmmode.vrrPrivateKeyRec);
+        return priv->variable_refresh;
 }
 
 static void
@@ -920,6 +926,43 @@ msSetWindowVRRMode(WindowPtr window, WindowVRRMode mode)
 
     if (ms->flip_window == window && ms->drmmode.present_flipping)
         ms_present_set_screen_vrr(scrn, variable_refresh);
+}
+
+
+Bool
+ms_window_has_async_flip(WindowPtr win)
+{
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &asyncFlipPrivateKeyRec);
+
+    return priv->async_flip;
+}
+
+void
+ms_window_update_async_flip(WindowPtr win, Bool async_flip)
+{
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &asyncFlipPrivateKeyRec);
+
+    priv->async_flip = async_flip;
+}
+
+Bool
+ms_window_has_async_flip_modifiers(WindowPtr win)
+{
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &asyncFlipPrivateKeyRec);
+
+    return priv->async_flip_modifiers;
+}
+
+void
+ms_window_update_async_flip_modifiers(WindowPtr win, Bool async_flip)
+{
+    struct ms_async_flip_priv *priv = dixLookupPrivate(&win->devPrivates,
+                                                       &asyncFlipPrivateKeyRec);
+
+    priv->async_flip_modifiers = async_flip;
 }
 
 static void
@@ -1706,6 +1749,11 @@ modesetCreateScreenResources(ScreenPtr pScreen)
                                sizeof(struct ms_vrr_priv)))
             return FALSE;
 
+    if (!dixRegisterPrivateKey(&asyncFlipPrivateKeyRec,
+                               PRIVATE_WINDOW,
+                               sizeof(struct ms_async_flip_priv)))
+            return FALSE;
+
     return ret;
 }
 
@@ -1852,6 +1900,44 @@ CreateWindow_oneshot(WindowPtr pWin)
     return ret;
 }
 
+static int
+modesetting_get_cursor_interleave(int scrnIndex)
+{
+#ifdef GLAMOR_HAS_EGL
+    const char* renderer = (const char*)glGetString(GL_RENDERER);
+    if (!renderer) {
+        /* Something went really wrong */
+        xf86DrvMsg(scrnIndex, X_WARNING,
+                   "glGetString(GL_RENDERER) returned NULL, your GL is broken or not initialized\n");
+    }
+
+    const char* vendor = (const char*)glGetString(GL_VENDOR);
+    if (!vendor) {
+        /* Something went really wrong */
+        xf86DrvMsg(scrnIndex, X_WARNING,
+                   "glGetString(GL_VENDOR) returned NULL, your GL is broken or not initialized\n");
+    }
+
+#define CHECK_GL_NAME(name) ((renderer && strstr(renderer, name)) || (vendor && strstr(vendor, name)))
+
+    if (CHECK_GL_NAME("Intel")) {
+        /* from xf86-video-intel */
+        return HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64;
+    }
+    if (CHECK_GL_NAME("NVIDIA")) {
+        /* from xf86-video-{nouveau,nv} */
+        return HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32;
+    }
+    if (CHECK_GL_NAME("AMD")) {
+        /* from xf86-video-{amdgpu,ati} */
+        return HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1;
+    }
+
+#undef CHECK_GL_NAME
+#endif
+    return HARDWARE_CURSOR_SOURCE_MASK_NOT_INTERLEAVED;
+}
+
 static Bool
 ScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
@@ -1959,17 +2045,16 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         PointPriv->spriteFuncs = &drmmode_sprite_funcs;
     }
 
-    /* Get the maximum cursor size. */
-    drmmode_cursor_dim_rec cursor_dim = { 0 };
-    if (!drmmode_get_largest_cursor(pScrn, &cursor_dim))
-        return FALSE;
-
     /* Need to extend HWcursor support to handle mask interleave */
-    if (!ms->drmmode.sw_cursor)
-        xf86_cursors_init(pScreen, cursor_dim.width, cursor_dim.height,
-                          HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64 |
+    if (!ms->drmmode.sw_cursor) {
+        /* XXX Is there any spec that says we should interleave the cursor bits? XXX */
+        int interleave = modesetting_get_cursor_interleave(pScrn->scrnIndex);
+
+        xf86_cursors_init(pScreen, ms->cursor_image_width, ms->cursor_image_height,
+                          interleave |
                           HARDWARE_CURSOR_UPDATE_UNHIDDEN |
                           HARDWARE_CURSOR_ARGB);
+    }
 
     /* Must force it before EnterVT, so we are in control of VT and
      * later memory should be bound when allocating, e.g rotate_mem */
@@ -2181,6 +2266,10 @@ CloseScreen(ScreenPtr pScreen)
         ms->drmmode.shadow_fb = NULL;
         free(ms->drmmode.shadow_fb2);
         ms->drmmode.shadow_fb2 = NULL;
+    }
+
+    if (!ms->drmmode.sw_cursor || ms->drmmode.set_cursor_failed) {
+        xf86_cursors_fini(pScreen);
     }
 
     drmmode_uevent_fini(pScrn, &ms->drmmode);

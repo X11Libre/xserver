@@ -60,6 +60,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/bug_priv.h"
 #include "os/osdep.h"
@@ -1028,7 +1029,7 @@ SyncCreateSystemCounter(const char *name,
         SysCounterInfo *psci = calloc(1, sizeof(SysCounterInfo));
         if (!psci) {
             FreeResource(pCounter->sync.id, X11_RESTYPE_NONE);
-            return pCounter;
+            return NULL;
         }
         pCounter->pSysCounterInfo = psci;
         psci->pCounter = pCounter;
@@ -2248,12 +2249,10 @@ void
 SyncExtensionInit(void)
 {
     ExtensionEntry *extEntry;
-    int s;
 
-    for (s = 0; s < screenInfo.numScreens; s++) {
-        ScreenPtr walkScreen = screenInfo.screens[s];
+    DIX_FOR_EACH_SCREEN({
         miSyncSetup(walkScreen);
-    }
+    });
 
     RTCounter = CreateNewResourceType(FreeCounter, "SyncCounter");
     xorg_list_init(&SysCounterList);
@@ -2425,8 +2424,7 @@ IdleTimeBlockHandler(void *pCounter, void *wt)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
-    if (!priv)
-        return;
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     int64_t idle, old_idle;
@@ -2517,8 +2515,7 @@ IdleTimeWakeupHandler(void *pCounter, int rc)
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
-    if (!priv)
-        return;
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     int64_t idle;
@@ -2552,8 +2549,7 @@ IdleTimeBracketValues(void *pCounter, int64_t *pbracket_less,
 {
     SyncCounter *counter = pCounter;
     IdleCounterPriv *priv = SysCounterGetPrivate(counter);
-    if (!priv)
-        return;
+    BUG_RETURN(priv == NULL);
     int64_t *less = priv->value_less;
     int64_t *greater = priv->value_greater;
     Bool registered = (less || greater);

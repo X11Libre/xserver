@@ -37,6 +37,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "dix/screensaver_priv.h"
 #include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
@@ -623,7 +624,7 @@ ProcScreenSaverQueryInfo(ClientPtr client)
                            DixGetAttrAccess);
     if (rc != Success)
         return rc;
-    rc = XaceHookScreensaverAccess(client, pDraw->pScreen, DixGetAttrAccess);
+    rc = dixCallScreensaverAccessCallback(client, pDraw->pScreen, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -688,7 +689,7 @@ ProcScreenSaverSelectInput(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    rc = XaceHookScreensaverAccess(client, pDraw->pScreen, DixSetAttrAccess);
+    rc = dixCallScreensaverAccessCallback(client, pDraw->pScreen, DixSetAttrAccess);
     if (rc != Success)
         return rc;
 
@@ -729,7 +730,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
     pScreen = pDraw->pScreen;
     pParent = pScreen->root;
 
-    ret = XaceHookScreensaverAccess(client, pScreen, DixSetAttrAccess);
+    ret = dixCallScreensaverAccessCallback(client, pScreen, DixSetAttrAccess);
     if (ret != Success)
         return ret;
 
@@ -1281,7 +1282,6 @@ void
 ScreenSaverExtensionInit(void)
 {
     ExtensionEntry *extEntry;
-    int i;
 
     if (!dixRegisterPrivateKey(&ScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return;
@@ -1290,10 +1290,10 @@ ScreenSaverExtensionInit(void)
     SaverEventType = CreateNewResourceType(ScreenSaverFreeEvents, "SaverEvent");
     SuspendType = CreateNewResourceType(ScreenSaverFreeSuspend, "SaverSuspend");
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         SetScreenPrivate(walkScreen, NULL);
-    }
+    });
+
     if (AttrType && SaverEventType && SuspendType &&
         (extEntry = AddExtension(ScreenSaverName, ScreenSaverNumberEvents, 0,
                                  ProcScreenSaverDispatch,

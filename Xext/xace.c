@@ -60,13 +60,6 @@ int XaceHookResourceAccess(ClientPtr client, XID id, RESTYPE rtype, void *res,
     return rec.status;
 }
 
-int XaceHookDeviceAccess(ClientPtr client, DeviceIntPtr dev, Mask access_mode)
-{
-    XaceDeviceAccessRec rec = { client, dev, access_mode, Success };
-    CallCallbacks(&XaceHooks[XACE_DEVICE_ACCESS], &rec);
-    return rec.status;
-}
-
 int XaceHookSendAccess(ClientPtr client, DeviceIntPtr dev, WindowPtr win,
                        xEventPtr ev, int count)
 {
@@ -80,27 +73,6 @@ int XaceHookReceiveAccess(ClientPtr client, WindowPtr win,
 {
     XaceReceiveAccessRec rec = { client, win, ev, count, Success };
     CallCallbacks(&XaceHooks[XACE_RECEIVE_ACCESS], &rec);
-    return rec.status;
-}
-
-int XaceHookClientAccess(ClientPtr client, ClientPtr target, Mask access_mode)
-{
-    XaceClientAccessRec rec = { client, target, access_mode, Success };
-    CallCallbacks(&XaceHooks[XACE_CLIENT_ACCESS], &rec);
-    return rec.status;
-}
-
-int XaceHookScreenAccess(ClientPtr client, ScreenPtr screen, Mask access_mode)
-{
-    XaceScreenAccessRec rec = { client, screen, access_mode, Success };
-    CallCallbacks(&XaceHooks[XACE_SCREEN_ACCESS], &rec);
-    return rec.status;
-}
-
-int XaceHookScreensaverAccess(ClientPtr client, ScreenPtr screen, Mask access_mode)
-{
-    XaceScreenAccessRec rec = { client, screen, access_mode, Success };
-    CallCallbacks(&XaceHooks[XACE_SCREENSAVER_ACCESS], &rec);
     return rec.status;
 }
 

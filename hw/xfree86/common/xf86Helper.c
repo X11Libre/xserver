@@ -43,8 +43,10 @@
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "include/extinit.h"
 #include "mi/mi_priv.h"
 #include "os/log_priv.h"
+#include "os/osdep.h"
 
 #include "os.h"
 #include "servermd.h"

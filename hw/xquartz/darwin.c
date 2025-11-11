@@ -583,25 +583,20 @@ CloseInput(void)
  */
 void DarwinAdjustScreenOrigins(void)
 {
-    ScreenPtr masterScreen = dixGetMasterScreen();
-
-    int left = masterScreen->x;
-    int top = masterScreen->y;
-
     /* Find leftmost screen. If there's a tie, take the topmost of the two. */
-    for (int i = 1; i < screenInfo.numScreens; i++) {
-        if (screenInfo.screens[i]->x < left ||
-            (screenInfo.screens[i]->x == left &&
-             screenInfo.screens[i]->y < top)) {
-            left = screenInfo.screens[i]->x;
-            top = screenInfo.screens[i]->y;
+    DIX_FOR_EACH_SCREEN({
+        if (walkScreenIdx  == 0) {
+            darwinMainScreenX  = walkScreen->x;
+            darwinMainScreenY = walkScreen->y;
+            continue;
         }
-    }
-
-    darwinMainScreenX = left;
-    darwinMainScreenY = top;
-
-    DEBUG_LOG("top = %d, left=%d\n", top, left);
+        if ((walkScreen->x < darwinMainScreenX) ||
+            ((walkScreen->x == darwinMainScreenX) &&
+             (walkScreen->y < darwinMainScreenY))) {
+            darwinMainScreenX  = walkScreen->x;
+            darwinMainScreenY = walkScreen->y;
+        }
+    });
 
     /* Shift all screens so that there is a screen whose top left
      * is at X11 (0,0) and at global screen coordinate
@@ -609,13 +604,13 @@ void DarwinAdjustScreenOrigins(void)
      */
 
     if (darwinMainScreenX != 0 || darwinMainScreenY != 0) {
-        for (int i = 0; i < screenInfo.numScreens; i++) {
-            screenInfo.screens[i]->x -= darwinMainScreenX;
-            screenInfo.screens[i]->y -= darwinMainScreenY;
+        DIX_FOR_EACH_SCREEN({
+            ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx];
+            walkScreen->x -= darwinMainScreenX;
+            walkScreen->y -= darwinMainScreenY;
             DEBUG_LOG("Screen %d placed at X11 coordinate (%d,%d).\n",
-                      i, screenInfo.screens[i]->x,
-                      screenInfo.screens[i]->y);
-        }
+                      walkScreenIdx, walkScreen->x, walkScreen->y);
+        });
     }
 
     /* Update screenInfo.x/y */

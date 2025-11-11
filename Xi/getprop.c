@@ -70,21 +70,6 @@ extern int ExtEventIndex;
 
 /***********************************************************************
  *
- * Handle a request from a client with a different byte order.
- *
- */
-
-int _X_COLD
-SProcXGetDeviceDontPropagateList(ClientPtr client)
-{
-    REQUEST(xGetDeviceDontPropagateListReq);
-    REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
-    swapl(&stuff->window);
-    return (ProcXGetDeviceDontPropagateList(client));
-}
-
-/***********************************************************************
- *
  * This procedure lists the input devices available to the server.
  *
  */
@@ -92,14 +77,17 @@ SProcXGetDeviceDontPropagateList(ClientPtr client)
 int
 ProcXGetDeviceDontPropagateList(ClientPtr client)
 {
+    REQUEST(xGetDeviceDontPropagateListReq);
+    REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
+
+    if (client->swapped)
+        swapl(&stuff->window);
+
     CARD16 count = 0;
     int i, rc;
     XEventClass *buf = NULL, *tbuf;
     WindowPtr pWin;
     OtherInputMasks *others;
-
-    REQUEST(xGetDeviceDontPropagateListReq);
-    REQUEST_SIZE_MATCH(xGetDeviceDontPropagateListReq);
 
     xGetDeviceDontPropagateListReply rep = {
         .RepType = X_GetDeviceDontPropagateList,

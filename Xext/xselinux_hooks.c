@@ -32,11 +32,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xatom.h>
 #include <X11/Xfuncproto.h>
 
+#include "dix/client_priv.h"
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screenint_priv.h"
+#include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
 #include "os/client_priv.h"
@@ -171,8 +175,7 @@ SELinuxLabelClient(ClientPtr client)
 static void
 SELinuxLabelInitial(void)
 {
-    int i;
-    XaceScreenAccessRec srec;
+    ScreenAccessCallbackParam srec;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     char *ctx;
@@ -198,9 +201,7 @@ SELinuxLabelInitial(void)
     srec.access_mode = DixCreateAccess;
     srec.status = Success;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
-
+    DIX_FOR_EACH_SCREEN({
         /* Do the screen object */
         srec.screen = walkScreen;
         SELinuxScreen(NULL, NULL, &srec);
@@ -208,7 +209,7 @@ SELinuxLabelInitial(void)
         /* Do the default colormap */
         dixLookupResourceByType(&unused, walkScreen->defColormap,
                                 X11_RESTYPE_COLORMAP, serverClient, DixCreateAccess);
-    }
+    });
 }
 
 /*
@@ -339,7 +340,7 @@ SELinuxLog(int type, const char *fmt, ...)
 static void
 SELinuxDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XaceDeviceAccessRec *rec = calldata;
+    DeviceAccessCallbackParam *rec = calldata;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client,.dev = rec->dev };
@@ -683,7 +684,7 @@ SELinuxResource(CallbackListPtr *pcbl, void *unused, void *calldata)
 static void
 SELinuxScreen(CallbackListPtr *pcbl, void *is_saver, void *calldata)
 {
-    XaceScreenAccessRec *rec = calldata;
+    ScreenAccessCallbackParam *rec = calldata;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
@@ -715,7 +716,7 @@ SELinuxScreen(CallbackListPtr *pcbl, void *is_saver, void *calldata)
 static void
 SELinuxClient(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
-    XaceClientAccessRec *rec = calldata;
+    ClientAccessCallbackParam *rec = calldata;
     SELinuxSubjectRec *subj;
     SELinuxObjectRec *obj;
     SELinuxAuditRec auditdata = {.client = rec->client };
@@ -835,16 +836,16 @@ SELinuxFlaskReset(void)
     DeleteCallback(&ExtensionAccessCallback, SELinuxExtension, NULL);
     DeleteCallback(&ExtensionDispatchCallback, SELinuxExtension, NULL);
     DeleteCallback(&ServerAccessCallback, SELinuxServer, NULL);
+    DeleteCallback(&ClientAccessCallback, SELinuxClient, NULL);
+    DeleteCallback(&DeviceAccessCallback, SELinuxDevice, NULL);
+    DeleteCallback(&ScreenSaverAccessCallback, SELinuxScreen, truep);
+    DeleteCallback(&ScreenAccessCallback, SELinuxScreen, NULL);
 
     XaceDeleteCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
-    XaceDeleteCallback(XACE_DEVICE_ACCESS, SELinuxDevice, NULL);
     XaceDeleteCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
     XaceDeleteCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     XaceDeleteCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
-    XaceDeleteCallback(XACE_CLIENT_ACCESS, SELinuxClient, NULL);
     XaceDeleteCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
-    XaceDeleteCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
-    XaceDeleteCallback(XACE_SCREENSAVER_ACCESS, SELinuxScreen, truep);
 
     /* Tear down SELinux stuff */
     audit_close(audit_fd);
@@ -929,16 +930,16 @@ SELinuxFlaskInit(void)
     ret &= AddCallback(&ExtensionAccessCallback, SELinuxExtension, NULL);
     ret &= AddCallback(&ExtensionDispatchCallback, SELinuxExtension, NULL);
     ret &= AddCallback(&ServerAccessCallback, SELinuxServer, NULL);
+    ret &= AddCallback(&ClientAccessCallback, SELinuxClient, NULL);
+    ret &= AddCallback(&DeviceAccessCallback, SELinuxDevice, NULL);
+    ret &= AddCallback(&ScreenSaverAccessCallback, SELinuxScreen, truep);
+    ret &= AddCallback(&ScreenAccessCallback, SELinuxScreen, NULL);
 
     ret &= XaceRegisterCallback(XACE_RESOURCE_ACCESS, SELinuxResource, NULL);
-    ret &= XaceRegisterCallback(XACE_DEVICE_ACCESS, SELinuxDevice, NULL);
     ret &= XaceRegisterCallback(XACE_PROPERTY_ACCESS, SELinuxProperty, NULL);
     ret &= XaceRegisterCallback(XACE_SEND_ACCESS, SELinuxSend, NULL);
     ret &= XaceRegisterCallback(XACE_RECEIVE_ACCESS, SELinuxReceive, NULL);
-    ret &= XaceRegisterCallback(XACE_CLIENT_ACCESS, SELinuxClient, NULL);
     ret &= XaceRegisterCallback(XACE_SELECTION_ACCESS, SELinuxSelection, NULL);
-    ret &= XaceRegisterCallback(XACE_SCREEN_ACCESS, SELinuxScreen, NULL);
-    ret &= XaceRegisterCallback(XACE_SCREENSAVER_ACCESS, SELinuxScreen, truep);
     if (!ret)
         FatalError("SELinux: Failed to register one or more callbacks\n");
 

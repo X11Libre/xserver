@@ -80,9 +80,6 @@ SOFTWARE.
 
 #include <dix-config.h>
 
-#include "dix/cursor_priv.h"
-#include "os/bug_priv.h"
-
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/geproto.h>
@@ -91,6 +88,8 @@ SOFTWARE.
 #include <X11/extensions/XI2proto.h>
 #include <X11/extensions/XKBproto.h>
 
+#include "dix/cursor_priv.h"
+#include "dix/devices_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
 #include "dix/eventconvert.h"
@@ -100,7 +99,9 @@ SOFTWARE.
 #include "dix/resource_priv.h"
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"
+#include "os/bug_priv.h"
 #include "os/log_priv.h"
+#include "os/osdep.h"
 #include "xkb/xkbsrv_priv.h"
 
 #include "inputstr.h"
@@ -1097,7 +1098,7 @@ DeliverOneTouchEvent(ClientPtr client, DeviceIntPtr dev, TouchPointInfoPtr ti,
         FatalError("[Xi] %s: XI2 conversion failed in %s"
                    " (%d)\n", dev->name, __func__, err);
 
-    FixUpEventFromWindow(&ti->sprite, xi2, win, child, FALSE);
+    FixUpEventFromWindow(&ti->sprite, xi2, win, child, FALSE, XI2);
     filter = GetEventFilter(dev, xi2);
     if (XaceHookReceiveAccess(client, win, xi2, 1) != Success)
         return FALSE;
@@ -2236,7 +2237,7 @@ DeliverOneGestureEvent(ClientPtr client, DeviceIntPtr dev, GestureInfoPtr gi,
         FatalError("[Xi] %s: XI2 conversion failed in %s"
                    " (%d)\n", dev->name, __func__, err);
 
-    FixUpEventFromWindow(&gi->sprite, xi2, win, child, FALSE);
+    FixUpEventFromWindow(&gi->sprite, xi2, win, child, FALSE, XI2);
     filter = GetEventFilter(dev, xi2);
     if (XaceHookReceiveAccess(client, win, xi2, 1) != Success)
         return FALSE;
@@ -2511,7 +2512,7 @@ GrabButton(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
     if (param->this_device_mode == GrabModeSync ||
         param->other_devices_mode == GrabModeSync)
         access_mode |= DixFreezeAccess;
-    rc = XaceHookDeviceAccess(client, dev, access_mode);
+    rc = dixCallDeviceAccessCallback(client, dev, access_mode);
     if (rc != Success)
         return rc;
     rc = dixLookupWindow(&pWin, param->grabWindow, client, DixSetAttrAccess);
@@ -2567,7 +2568,7 @@ GrabKey(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr modifier_device,
     if (param->this_device_mode == GrabModeSync ||
         param->other_devices_mode == GrabModeSync)
         access_mode |= DixFreezeAccess;
-    rc = XaceHookDeviceAccess(client, dev, access_mode);
+    rc = dixCallDeviceAccessCallback(client, dev, access_mode);
     if (rc != Success)
         return rc;
 
@@ -2610,7 +2611,7 @@ GrabWindow(ClientPtr client, DeviceIntPtr dev, int type,
     if (param->this_device_mode == GrabModeSync ||
         param->other_devices_mode == GrabModeSync)
         access_mode |= DixFreezeAccess;
-    rc = XaceHookDeviceAccess(client, dev, access_mode);
+    rc = dixCallDeviceAccessCallback(client, dev, access_mode);
     if (rc != Success)
         return rc;
 
@@ -2641,7 +2642,7 @@ GrabTouchOrGesture(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr mod_dev,
     rc = dixLookupWindow(&pWin, param->grabWindow, client, DixSetAttrAccess);
     if (rc != Success)
         return rc;
-    rc = XaceHookDeviceAccess(client, dev, DixGrabAccess);
+    rc = dixCallDeviceAccessCallback(client, dev, DixGrabAccess);
     if (rc != Success)
         return rc;
 
@@ -3232,9 +3233,14 @@ DeviceEventSuppressForWindow(WindowPtr pWin, ClientPtr client, Mask mask,
             inputMasks->dontPropagateMask[maskndx] = mask;
     }
     else {
-        if (!inputMasks)
-            AddExtensionClient(pWin, client, 0, 0);
-        inputMasks = wOtherInputMasks(pWin);
+        if (!inputMasks) {
+            int ret = AddExtensionClient(pWin, client, 0, 0);
+
+            if (ret != Success)
+                return ret;
+            inputMasks = wOtherInputMasks(pWin);
+            BUG_RETURN_VAL(!inputMasks, BadAlloc);
+        }
         inputMasks->dontPropagateMask[maskndx] = mask;
     }
     RecalculateDeviceDeliverableEvents(pWin);
@@ -3294,15 +3300,13 @@ FindInterestedChildren(DeviceIntPtr dev, WindowPtr p1, Mask mask,
 void
 SendEventToAllWindows(DeviceIntPtr dev, Mask mask, xEvent *ev, int count)
 {
-    int i;
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         WindowPtr pWin = walkScreen->root;
         if (!pWin)
             continue;
         DeliverEventsToWindow(dev, pWin, ev, count, mask, NullGrab);
         FindInterestedChildren(dev, pWin->firstChild, mask, ev, count);
-    }
+    });
 }
 
 /**

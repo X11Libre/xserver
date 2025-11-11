@@ -2,6 +2,9 @@
 #ifndef _XSERV_GLOBAL_H_
 #define _XSERV_GLOBAL_H_
 
+#include <X11/Xdefs.h>
+#include <X11/Xfuncproto.h>
+
 #include "window.h"             /* for WindowPtr */
 #include "extinit.h"
 #ifdef DPMSExtension
@@ -11,25 +14,11 @@
 
 /* Global X server variables that are visible to mi, dix, os, and ddx */
 
-extern _X_EXPORT CARD32 defaultScreenSaverTime;
-extern _X_EXPORT CARD32 defaultScreenSaverInterval;
-extern _X_EXPORT CARD32 ScreenSaverTime;
-extern _X_EXPORT CARD32 ScreenSaverInterval;
-
-#ifdef SCREENSAVER
-extern _X_EXPORT Bool screenSaverSuspended;
-#endif
-
 extern _X_EXPORT const char *defaultFontPath;
 extern _X_EXPORT int monitorResolution;
 extern _X_EXPORT int defaultColorVisualClass;
 
 extern _X_EXPORT int GrabInProgress;
 extern _X_EXPORT char *SeatId;
-extern _X_EXPORT char *ConnectionInfo;
-
-#ifdef XINERAMA
-extern _X_EXPORT Bool PanoramiXExtensionDisabledHack;
-#endif /* XINERAMA */
 
 #endif                          /* !_XSERV_GLOBAL_H_ */

@@ -69,27 +69,4 @@ int ProcXUngrabDeviceButton(ClientPtr client);
 int ProcXUngrabDevice(ClientPtr client);
 int ProcXUngrabDeviceKey(ClientPtr client);
 
-int SProcXGetDeviceDontPropagateList(ClientPtr  client);
-int SProcXGetDeviceMotionEvents(ClientPtr client);
-int SProcXGetExtensionVersion(ClientPtr client);
-int SProcXGetSelectedExtensionEvents(ClientPtr client);
-int SProcXGrabDeviceButton(ClientPtr client);
-int SProcXIAllowEvents(ClientPtr client);
-int SProcXIBarrierReleasePointer(ClientPtr client);
-int SProcXIGetClientPointer(ClientPtr client);
-int SProcXIGetFocus(ClientPtr client);
-int SProcXIGetSelectedEvents(ClientPtr client);
-int SProcXIPassiveGrabDevice(ClientPtr client);
-int SProcXIPassiveUngrabDevice(ClientPtr client);
-int SProcXIQueryDevice(ClientPtr client);
-int SProcXIQueryPointer(ClientPtr client);
-int SProcXIQueryVersion(ClientPtr client);
-int SProcXISelectEvents(ClientPtr client);
-int SProcXISetClientPointer(ClientPtr client);
-int SProcXISetFocus(ClientPtr client);
-int SProcXIWarpPointer(ClientPtr client);
-int SProcXSetDeviceFocus(ClientPtr client);
-int SProcXUngrabDeviceButton(ClientPtr client);
-int SProcXUngrabDeviceKey(ClientPtr client);
-
 #endif /* _XSERVER_XI_HANDLERS_H */

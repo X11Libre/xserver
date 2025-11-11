@@ -850,44 +850,33 @@ XIDestroyPointerBarrier(ClientPtr client,
     return Success;
 }
 
-int _X_COLD
-SProcXIBarrierReleasePointer(ClientPtr client)
+int
+ProcXIBarrierReleasePointer(ClientPtr client)
 {
-    xXIBarrierReleasePointerInfo *info;
     REQUEST(xXIBarrierReleasePointerReq);
-    int i;
-
     REQUEST_AT_LEAST_SIZE(xXIBarrierReleasePointerReq);
 
-    swapl(&stuff->num_barriers);
+    if (client->swapped)
+        swapl(&stuff->num_barriers);
+
     if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
         return BadLength;
     REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
 
-    info = (xXIBarrierReleasePointerInfo*) &stuff[1];
-    for (i = 0; i < stuff->num_barriers; i++, info++) {
-        swaps(&info->deviceid);
-        swapl(&info->barrier);
-        swapl(&info->eventid);
+    if (client->swapped) {
+        xXIBarrierReleasePointerInfo *info = (xXIBarrierReleasePointerInfo*) &stuff[1];
+        for (int i = 0; i < stuff->num_barriers; i++, info++) {
+            swaps(&info->deviceid);
+            swapl(&info->barrier);
+            swapl(&info->eventid);
+        }
     }
 
-    return (ProcXIBarrierReleasePointer(client));
-}
-
-int
-ProcXIBarrierReleasePointer(ClientPtr client)
-{
     int i;
     int err;
     struct PointerBarrierClient *barrier;
     struct PointerBarrier *b;
     xXIBarrierReleasePointerInfo *info;
-
-    REQUEST(xXIBarrierReleasePointerReq);
-    REQUEST_AT_LEAST_SIZE(xXIBarrierReleasePointerReq);
-    if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
-        return BadLength;
-    REQUEST_FIXED_SIZE(xXIBarrierReleasePointerReq, stuff->num_barriers * sizeof(xXIBarrierReleasePointerInfo));
 
     info = (xXIBarrierReleasePointerInfo*) &stuff[1];
     for (i = 0; i < stuff->num_barriers; i++, info++) {
@@ -933,21 +922,17 @@ ProcXIBarrierReleasePointer(ClientPtr client)
 Bool
 XIBarrierInit(void)
 {
-    int i;
-
     if (!dixRegisterPrivateKey(&BarrierScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         BarrierScreenPtr cs;
-
         cs = (BarrierScreenPtr) calloc(1, sizeof(BarrierScreenRec));
         if (!cs)
             return FALSE;
         xorg_list_init(&cs->barriers);
         SetBarrierScreen(walkScreen, cs);
-    }
+    });
 
     PointerBarrierType = CreateNewResourceType(BarrierFreeBarrier,
                                                "XIPointerBarrier");
@@ -958,11 +943,9 @@ XIBarrierInit(void)
 void
 XIBarrierReset(void)
 {
-    int i;
-    for (i = 0; i < screenInfo.numScreens; i++) {
-        ScreenPtr walkScreen = screenInfo.screens[i];
+    DIX_FOR_EACH_SCREEN({
         BarrierScreenPtr cs = GetBarrierScreen(walkScreen);
         free(cs);
         SetBarrierScreen(walkScreen, NULL);
-    }
+    });
 }
