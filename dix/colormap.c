@@ -1478,6 +1478,7 @@ FreePixels(ColormapPtr pmap, int client)
 int
 FreeClientPixels(void *value, XID fakeid)
 {
+    (void) fakeid;
     void *pmap;
     colorResource *pcr = value;
     int rc;
