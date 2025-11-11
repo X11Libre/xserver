@@ -576,7 +576,7 @@ xf86InitOrigins(void)
 
     memset(xf86ScreenLayout, 0, MAXSCREENS * sizeof(xf86ScreenLayoutRec));
 
-    screensLeft = prevScreensLeft = (1 << xf86NumScreens) - 1;
+    screensLeft = prevScreensLeft = (1UL << xf86NumScreens) - 1;
 
     while (1) {
         for (mask = screensLeft, i = 0; mask; mask >>= 1, i++) {
@@ -587,7 +587,7 @@ xf86InitOrigins(void)
 
             if (screen->refscreen != NULL &&
                 screen->refscreen->screennum >= xf86NumScreens) {
-                screensLeft &= ~(1 << i);
+                screensLeft &= ~(1UL << i);
                 LogMessageVerb(X_WARNING, 1,
                                "Not including screen \"%s\" in origins calculation.\n",
                                screen->screen->id);
@@ -649,7 +649,7 @@ xf86InitOrigins(void)
             case PosAbsolute:
                 pScreen->x = screen->x;
                 pScreen->y = screen->y;
-                screensLeft &= ~(1 << i);
+                screensLeft &= ~(1UL << i);
                 break;
             case PosRelative:
                 ref = screen->refscreen->screennum;
@@ -662,7 +662,7 @@ xf86InitOrigins(void)
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x + screen->x;
                 pScreen->y = refScreen->y + screen->y;
-                screensLeft &= ~(1 << i);
+                screensLeft &= ~(1UL << i);
                 break;
             case PosRightOf:
                 ref = screen->refscreen->screennum;
@@ -675,7 +675,7 @@ xf86InitOrigins(void)
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x + refScreen->width;
                 pScreen->y = refScreen->y;
-                screensLeft &= ~(1 << i);
+                screensLeft &= ~(1UL << i);
                 break;
             case PosLeftOf:
                 ref = screen->refscreen->screennum;
@@ -688,7 +688,7 @@ xf86InitOrigins(void)
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x - pScreen->width;
                 pScreen->y = refScreen->y;
-                screensLeft &= ~(1 << i);
+                screensLeft &= ~(1UL << i);
                 break;
             case PosBelow:
                 ref = screen->refscreen->screennum;
@@ -701,7 +701,7 @@ xf86InitOrigins(void)
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x;
                 pScreen->y = refScreen->y + refScreen->height;
-                screensLeft &= ~(1 << i);
+                screensLeft &= ~(1UL << i);
                 break;
             case PosAbove:
                 ref = screen->refscreen->screennum;
@@ -714,7 +714,7 @@ xf86InitOrigins(void)
                 refScreen = xf86Screens[ref]->pScreen;
                 pScreen->x = refScreen->x;
                 pScreen->y = refScreen->y - pScreen->height;
-                screensLeft &= ~(1 << i);
+                screensLeft &= ~(1UL << i);
                 break;
             default:
                 ErrorF("Illegal placement keyword in Layout!\n");
@@ -736,7 +736,7 @@ xf86InitOrigins(void)
 
             ref = xf86ConfigLayout.screens[i].refscreen->screennum;
             xf86Screens[ref]->pScreen->x = xf86Screens[ref]->pScreen->y = 0;
-            screensLeft &= ~(1 << ref);
+            screensLeft &= ~(1UL << ref);
         }
 
         prevScreensLeft = screensLeft;
