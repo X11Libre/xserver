@@ -54,11 +54,7 @@ compScreenUpdate(ClientPtr pClient, void *closure)
     ScreenPtr pScreen = closure;
     CompScreenPtr cs = GetCompScreen(pScreen);
 
-    if (!pScreen) {
-        return FALSE;
-    }
-
-    if (!cs) {
+    if (!pScreen || !cs) {
         return FALSE;
     }
 
