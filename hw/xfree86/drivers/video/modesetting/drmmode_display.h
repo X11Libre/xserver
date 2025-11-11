@@ -84,6 +84,7 @@ typedef struct {
 #ifdef GLAMOR_HAS_GBM
     Bool used_modifiers;
     struct gbm_bo *gbm;
+    void* map;
 #endif
     void* map;
 } drmmode_bo;
@@ -293,7 +294,7 @@ typedef struct {
 
 typedef struct _msPixmapPriv {
     uint32_t fb_id;
-    struct dumb_bo *backing_bo; /* if this pixmap is backed by a dumb bo */
+    drmmode_bo backing_bo; /* backing bo for this pixmap, if there is one */
 
     DamagePtr secondary_damage;
 
