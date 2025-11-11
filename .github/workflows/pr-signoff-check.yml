@@ -1,0 +1,15 @@
+name: Check PR Sign-off
+
+on: [pull_request]
+
+jobs:
+  check-sign-off:
+    name: Write comment if unsigned commits found
+    env:
+      FORCE_COLOR: 1
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: live627/check-pr-signoff-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
