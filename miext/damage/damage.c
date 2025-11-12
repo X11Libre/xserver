@@ -127,7 +127,7 @@ getDrawableDamageRef(DrawablePtr pDrawable)
 static void
 _damageRegionAppend(DrawablePtr pDrawable, RegionPtr pRegion, Bool clip,
                     int subWindowMode, const char *where)
-#define damageRegionAppend(d,r,c,m) _damageRegionAppend(d,r,c,m,__FUNCTION__)
+#define damageRegionAppend(d,r,c,m) _damageRegionAppend(d,r,c,m,__func__)
 #else
 static void
 damageRegionAppend(DrawablePtr pDrawable, RegionPtr pRegion, Bool clip,
@@ -298,7 +298,7 @@ damageRegionProcessPending(DrawablePtr pDrawable)
 }
 
 #if DAMAGE_DEBUG_ENABLE
-#define damageDamageBox(d,b,m) _damageDamageBox(d,b,m,__FUNCTION__)
+#define damageDamageBox(d,b,m) _damageDamageBox(d,b,m,__func__)
 static void
 _damageDamageBox(DrawablePtr pDrawable, BoxPtr pBox, int subWindowMode,
                  const char *where)

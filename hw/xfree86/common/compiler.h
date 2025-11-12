@@ -72,10 +72,6 @@
 #define __inline /**/
 #endif
 #endif                          /* __inline */
-/* Support gcc's __FUNCTION__ for people using other compilers */
-#if !defined(__GNUC__) && !defined(__FUNCTION__)
-#define __FUNCTION__ __func__   /* C99 */
-#endif
 
 #ifdef __GNUC__
 #ifdef __i386__

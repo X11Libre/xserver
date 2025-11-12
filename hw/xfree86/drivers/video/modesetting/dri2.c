@@ -753,7 +753,7 @@ ms_dri2_schedule_wait_msc(ClientPtr client, DrawablePtr draw, CARD64 target_msc,
             if (limit) {
                 xf86DrvMsg(scrn->scrnIndex, X_WARNING,
                            "%s:%d get vblank counter failed: %s\n",
-                           __FUNCTION__, __LINE__,
+                           __func__, __LINE__,
                            strerror(errno));
                 limit--;
             }
@@ -791,7 +791,7 @@ ms_dri2_schedule_wait_msc(ClientPtr client, DrawablePtr draw, CARD64 target_msc,
         if (limit) {
             xf86DrvMsg(scrn->scrnIndex, X_WARNING,
                        "%s:%d get vblank counter failed: %s\n",
-                       __FUNCTION__, __LINE__,
+                       __func__, __LINE__,
                        strerror(errno));
             limit--;
         }

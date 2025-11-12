@@ -454,7 +454,7 @@ DarwinSendTabletEvents(DeviceIntPtr pDev, int ev_type, int ev_button,
     screen = miPointerGetScreen(pDev);
     if (!screen) {
         DEBUG_LOG("%s called before screen was initialized\n",
-                  __FUNCTION__);
+                  __func__);
         return;
     }
 
@@ -497,7 +497,7 @@ DarwinSendPointerEvents(DeviceIntPtr pDev, int ev_type, int ev_button,
     screen = miPointerGetScreen(pDev);
     if (!screen) {
         DEBUG_LOG("%s called before screen was initialized\n",
-                  __FUNCTION__);
+                  __func__);
         return;
     }
 
