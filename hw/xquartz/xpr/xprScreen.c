@@ -32,6 +32,7 @@
 #include <dix-config.h>
 
 #include "dix/screenint_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "inputstr.h"
 #include "quartz.h"
@@ -52,9 +53,6 @@
 #ifdef DAMAGE
 #include "damage.h"
 #endif
-
-#include "nonsdk_extinit.h"
-#include "miext/extinit_priv.h"
 
 /* 10.4's deferred update makes X slower.. have to live with the tearing
  * for now.. */
