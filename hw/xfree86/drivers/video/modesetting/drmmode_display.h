@@ -197,7 +197,7 @@ typedef struct {
 
     /* Sorted from smallest to largest. */
     drmmode_cursor_dim_rec* dimensions;
-    struct dumb_bo *bo;
+    drmmode_bo bo;
 } drmmode_cursor_rec, *drmmode_cursor_ptr;
 
 typedef struct {
