@@ -1478,6 +1478,7 @@ FreePixels(ColormapPtr pmap, int client)
 int
 FreeClientPixels(void *value, XID fakeid)
 {
+    (void) fakeid;
     void *pmap;
     colorResource *pcr = value;
     int rc;
@@ -2520,6 +2521,7 @@ struct colormap_lookup_data {
 static void
 _colormap_find_resource(void *value, XID id, void *cdata)
 {
+    (void) id;
     struct colormap_lookup_data *cmap_data = cdata;
     VisualPtr visuals = cmap_data->visuals;
     ScreenPtr pScreen = cmap_data->pScreen;
