@@ -241,9 +241,6 @@ with
 This option may be issued multiple times to enable listening to different
 transport types.
 .TP 8
-.B \-noreset
-prevents a server reset when the last client connection is closed.  This
-overrides a previous
 .B \-terminate
 command line option.
 .TP 8
@@ -392,10 +389,6 @@ specifies the local address to connect from (useful if the connecting host
 has multiple network interfaces).  The \fIlocal-address\fP may be expressed
 in any form acceptable to the host platform's \fIgethostbyname\fP(3)
 implementation.
-.TP 8
-.B \-once
-causes the server to terminate (rather than reset) when the XDMCP session
-ends.
 .TP 8
 .B \-class \fIdisplay-class\fP
 XDMCP has an additional display qualifier used in resource lookup for

@@ -160,18 +160,6 @@ OsSignal(int sig, OsSigHandlerPtr handler)
 #endif
 }
 
-/* Force connections to close on SIGHUP from init */
-
-void
-AutoResetServer(int sig)
-{
-    int olderrno = errno;
-
-    dispatchException |= DE_RESET;
-    isItTimeToYield = TRUE;
-    errno = olderrno;
-}
-
 /* Force connections to close and then exit on SIGTERM, SIGINT */
 
 void
@@ -305,9 +293,7 @@ UseMsg(void)
     ErrorF("-maxclients n          set maximum number of clients (power of two)\n");
     ErrorF("-nolisten string       don't listen on protocol\n");
     ErrorF("-listen string         listen on protocol\n");
-    ErrorF("-noreset               don't reset after last client exists\n");
     ErrorF("-background [none]     create root window with no background\n");
-    ErrorF("-reset                 reset after last client exists\n");
     ErrorF("-p #                   screen-saver pattern duration (minutes)\n");
     ErrorF("-pn                    accept failure to listen on all ports\n");
     ErrorF("-nopn                  reject failure to listen on all ports\n");
@@ -613,12 +599,6 @@ ProcessCommandLine(int argc, char *argv[])
             }
             else
                 UseMsg();
-        }
-        else if (strcmp(argv[i], "-noreset") == 0) {
-            dispatchExceptionAtReset = 0;
-        }
-        else if (strcmp(argv[i], "-reset") == 0) {
-            dispatchExceptionAtReset = DE_RESET;
         }
         else if (strcmp(argv[i], "-p") == 0) {
             if (++i < argc)

@@ -595,7 +595,6 @@ Dispatch(void)
     }
     ddxBeforeReset();
     KillAllClients();
-    dispatchException &= ~DE_RESET;
     SmartScheduleLatencyLimited = 0;
     ResetOsBuffers();
 }
@@ -3604,7 +3603,7 @@ ProcNoOperation(ClientPtr client)
  *  then killed again, the client is really destroyed.
  *********************/
 
-char dispatchExceptionAtReset = DE_RESET;
+char dispatchExceptionAtReset = 0;
 int terminateDelay = 0;
 
 void

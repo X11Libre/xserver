@@ -147,8 +147,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
     alwaysCheckForInput[0] = 0;
     alwaysCheckForInput[1] = 1;
-    while (1) {
-        serverGeneration++;
+
         ScreenSaverTime = defaultScreenSaverTime;
         ScreenSaverInterval = defaultScreenSaverInterval;
         ScreenSaverBlanking = defaultScreenSaverBlanking;
@@ -157,7 +156,7 @@ dix_main(int argc, char *argv[], char *envp[])
         InitBlockAndWakeupHandlers();
         /* Perform any operating system dependent initializations you'd like */
         OsInit();
-        if (serverGeneration == 1) {
+
             CreateWellKnownSockets();
             for (int i = 1; i < LimitClients; i++)
                 clients[i] = NULL;
@@ -165,9 +164,7 @@ dix_main(int argc, char *argv[], char *envp[])
             if (!serverClient)
                 FatalError("couldn't create server client");
             InitClient(serverClient, 0, (void *) NULL);
-        }
-        else
-            ResetWellKnownSockets();
+
         clients[0] = serverClient;
         currentMaxClients = 1;
 
@@ -352,19 +349,13 @@ dix_main(int argc, char *argv[], char *envp[])
 
         ClearWorkQueue();
 
-        if (dispatchException & DE_TERMINATE) {
-            CloseWellKnownConnections();
-        }
+        CloseWellKnownConnections();
+        OsCleanup(TRUE);
 
-        OsCleanup((dispatchException & DE_TERMINATE) != 0);
-
-        if (dispatchException & DE_TERMINATE) {
-            ddxGiveUp(EXIT_NO_ERROR);
-            break;
-        }
+        ddxGiveUp(EXIT_NO_ERROR);
 
         free(ConnectionInfo);
         ConnectionInfo = NULL;
-    }
+
     return 0;
 }
