@@ -94,7 +94,6 @@ static XineramaVisualsEqualProcPtr XineramaVisualsEqualPtr = &VisualsEqual;
  *	Function prototypes
  */
 
-static x_server_generation_t panoramiXGeneration;
 static int ProcPanoramiXDispatch(ClientPtr client);
 
 static void PanoramiXResetProc(ExtensionEntry *);
@@ -446,14 +445,13 @@ PanoramiXExtensionInit(void)
         return;
     }
 
-    while (panoramiXGeneration != serverGeneration) {
         extEntry = AddExtension(PANORAMIX_PROTOCOL_NAME, 0, 0,
                                 ProcPanoramiXDispatch,
                                 ProcPanoramiXDispatch,
                                 PanoramiXResetProc,
                                 StandardMinorOpcode);
         if (!extEntry)
-            break;
+            return;
 
         /*
          *      First make sure all the basic allocations succeed.  If not,
@@ -488,14 +486,12 @@ PanoramiXExtensionInit(void)
                                              "XineramaColormap");
 
         if (XRT_WINDOW && XRT_PIXMAP && XRT_GC && XRT_COLORMAP) {
-            panoramiXGeneration = serverGeneration;
             success = TRUE;
         }
         SetResourceTypeErrorValue(XRT_WINDOW, BadWindow);
         SetResourceTypeErrorValue(XRT_PIXMAP, BadPixmap);
         SetResourceTypeErrorValue(XRT_GC, BadGC);
         SetResourceTypeErrorValue(XRT_COLORMAP, BadColor);
-    }
 
     if (!success) {
         noPanoramiXExtension = TRUE;
