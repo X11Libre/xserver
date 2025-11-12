@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>
 
 #include "dix/exevents_priv.h"
+#include "dix/extension_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
