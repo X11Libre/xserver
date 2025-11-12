@@ -199,8 +199,6 @@ static inline PropertyPtr wUserProps(WindowPtr pWin) { return pWin->properties; 
 
 #define HasBorder(w)	((w)->borderWidth || wClipShape(w))
 
-typedef struct _ScreenSaverStuff *ScreenSaverStuffPtr;
-
 #define SCREEN_IS_BLANKED   0
 #define SCREEN_ISNT_SAVED   1
 #define SCREEN_IS_TILED     2
