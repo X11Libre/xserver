@@ -17,7 +17,6 @@ void XdmcpRegisterConnection(int type, const char *address, int addrlen);
 void XdmcpRegisterAuthorizations(void);
 void XdmcpRegisterAuthorization(const char *name);
 void XdmcpInit(void);
-void XdmcpReset(void);
 void XdmcpOpenDisplay(int sock);
 void XdmcpCloseDisplay(int sock);
 void XdmcpRegisterAuthentication(const char *name,
