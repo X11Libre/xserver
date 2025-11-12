@@ -103,6 +103,7 @@ Equipment Corporation.
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
+#include "os/serverlock.h"
 #include "Xext/panoramiXsrv.h"
 
 #include "scrnintstr.h"
@@ -350,7 +351,7 @@ dix_main(int argc, char *argv[], char *envp[])
         ClearWorkQueue();
 
         CloseWellKnownConnections();
-        OsCleanup(TRUE);
+        UnlockServer();
 
         ddxGiveUp(EXIT_NO_ERROR);
 
