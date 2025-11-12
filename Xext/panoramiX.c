@@ -94,7 +94,6 @@ static XineramaVisualsEqualProcPtr XineramaVisualsEqualPtr = &VisualsEqual;
  *	Function prototypes
  */
 
-static x_server_generation_t panoramiXGeneration;
 static int ProcPanoramiXDispatch(ClientPtr client);
 
 static void PanoramiXResetProc(ExtensionEntry *);
@@ -423,7 +422,6 @@ PanoramiXExtensionInit(void)
 {
     int i;
     Bool success = FALSE;
-    ExtensionEntry *extEntry;
     ScreenPtr masterScreen = dixGetMasterScreen();
 
     if (noPanoramiXExtension)
@@ -446,56 +444,56 @@ PanoramiXExtensionInit(void)
         return;
     }
 
-    while (panoramiXGeneration != serverGeneration) {
-        extEntry = AddExtension(PANORAMIX_PROTOCOL_NAME, 0, 0,
-                                ProcPanoramiXDispatch,
-                                ProcPanoramiXDispatch,
-                                PanoramiXResetProc,
-                                StandardMinorOpcode);
-        if (!extEntry)
-            break;
+    ExtensionEntry *extEntry = AddExtension(
+        PANORAMIX_PROTOCOL_NAME, 0, 0,
+        ProcPanoramiXDispatch,
+        ProcPanoramiXDispatch,
+        PanoramiXResetProc,
+        StandardMinorOpcode);
 
-        /*
-         *      First make sure all the basic allocations succeed.  If not,
-         *      run in non-PanoramiXeen mode.
-         */
-        XINERAMA_FOR_EACH_SCREEN_BACKWARD({
-            PanoramiXScreenPtr pScreenPriv = calloc(1, sizeof(PanoramiXScreenRec));
-            dixSetPrivate(&walkScreen->devPrivates, &PanoramiXScreenKeyRec,
-                          pScreenPriv);
-            if (!pScreenPriv) {
-                noPanoramiXExtension = TRUE;
-                return;
-            }
+    if (!extEntry)
+        return;
 
-            dixScreenHookClose(walkScreen, XineramaCloseScreen);
+    /*
+     *      First make sure all the basic allocations succeed.  If not,
+     *      run in non-PanoramiXeen mode.
+     */
+    XINERAMA_FOR_EACH_SCREEN_BACKWARD({
+        PanoramiXScreenPtr pScreenPriv = calloc(1, sizeof(PanoramiXScreenRec));
+        dixSetPrivate(&walkScreen->devPrivates, &PanoramiXScreenKeyRec,
+                      pScreenPriv);
+        if (!pScreenPriv) {
+            noPanoramiXExtension = TRUE;
+            return;
+        }
 
-            pScreenPriv->CreateGC = masterScreen->CreateGC;
-            walkScreen->CreateGC = XineramaCreateGC;
-        });
+        dixScreenHookClose(walkScreen, XineramaCloseScreen);
+        pScreenPriv->CreateGC = masterScreen->CreateGC;
+        walkScreen->CreateGC = XineramaCreateGC;
+    });
 
-        XRC_DRAWABLE = CreateNewResourceClass();
-        XRT_WINDOW = CreateNewResourceType(XineramaDeleteResource,
+    XRC_DRAWABLE = CreateNewResourceClass();
+    XRT_WINDOW = CreateNewResourceType(XineramaDeleteResource,
                                            "XineramaWindow");
-        if (XRT_WINDOW)
-            XRT_WINDOW |= XRC_DRAWABLE;
-        XRT_PIXMAP = CreateNewResourceType(XineramaDeleteResource,
+    if (XRT_WINDOW)
+        XRT_WINDOW |= XRC_DRAWABLE;
+
+    XRT_PIXMAP = CreateNewResourceType(XineramaDeleteResource,
                                            "XineramaPixmap");
-        if (XRT_PIXMAP)
-            XRT_PIXMAP |= XRC_DRAWABLE;
-        XRT_GC = CreateNewResourceType(XineramaDeleteResource, "XineramaGC");
-        XRT_COLORMAP = CreateNewResourceType(XineramaDeleteResource,
+    if (XRT_PIXMAP)
+        XRT_PIXMAP |= XRC_DRAWABLE;
+
+    XRT_GC = CreateNewResourceType(XineramaDeleteResource, "XineramaGC");
+    XRT_COLORMAP = CreateNewResourceType(XineramaDeleteResource,
                                              "XineramaColormap");
 
-        if (XRT_WINDOW && XRT_PIXMAP && XRT_GC && XRT_COLORMAP) {
-            panoramiXGeneration = serverGeneration;
-            success = TRUE;
-        }
-        SetResourceTypeErrorValue(XRT_WINDOW, BadWindow);
-        SetResourceTypeErrorValue(XRT_PIXMAP, BadPixmap);
-        SetResourceTypeErrorValue(XRT_GC, BadGC);
-        SetResourceTypeErrorValue(XRT_COLORMAP, BadColor);
-    }
+    if (XRT_WINDOW && XRT_PIXMAP && XRT_GC && XRT_COLORMAP)
+        success = TRUE;
+
+    SetResourceTypeErrorValue(XRT_WINDOW, BadWindow);
+    SetResourceTypeErrorValue(XRT_PIXMAP, BadPixmap);
+    SetResourceTypeErrorValue(XRT_GC, BadGC);
+    SetResourceTypeErrorValue(XRT_COLORMAP, BadColor);
 
     if (!success) {
         noPanoramiXExtension = TRUE;
