@@ -135,8 +135,6 @@ int Pclose(void *f);
 
 #endif /* WIN32 */
 
-void AutoResetServer(int sig);
-
 /* clone fd so it gets out of our select mask */
 int os_move_fd(int fd);
 

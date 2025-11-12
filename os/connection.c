@@ -297,7 +297,6 @@ CreateWellKnownSockets(void)
 
 #if !defined(WIN32)
     OsSignal(SIGPIPE, SIG_IGN);
-    OsSignal(SIGHUP, AutoResetServer);
 #endif
     OsSignal(SIGINT, GiveUp);
     OsSignal(SIGTERM, GiveUp);
