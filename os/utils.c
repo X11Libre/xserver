@@ -1462,7 +1462,7 @@ AbortServer(void)
     XF86BigfontCleanup();
 #endif
     CloseWellKnownConnections();
-    OsCleanup(TRUE);
+    UnlockServer();
     AbortDevices();
     ddxGiveUp(EXIT_ERR_ABORT);
     fflush(stderr);

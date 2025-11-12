@@ -226,11 +226,3 @@ OsInit(void)
     LogInit(NULL, NULL);
     SmartScheduleInit();
 }
-
-void
-OsCleanup(Bool terminating)
-{
-    if (terminating) {
-        UnlockServer();
-    }
-}
