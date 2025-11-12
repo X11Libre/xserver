@@ -12,7 +12,6 @@ export PIGLIT_RESULTS_DIR=$XSERVER_BUILDDIR/test/piglit-results/xephyr-glamor
 export SERVER_COMMAND="$XSERVER_BUILDDIR/hw/kdrive/ephyr/Xephyr \
         -glamor \
         -glamor-skip-present \
-        -noreset \
         -schedMax 2000 \
         -screen 1280x1024"
 
