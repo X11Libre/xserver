@@ -604,14 +604,6 @@ XdmcpInit(void)
     }
 }
 
-void
-XdmcpReset(void)
-{
-    state = XDM_INIT_STATE;
-    if (state != XDM_OFF)
-        xdmcp_reset();
-}
-
 /*
  * Called whenever a new connection is created; notices the
  * first connection and saves it to terminate the session

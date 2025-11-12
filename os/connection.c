@@ -46,7 +46,7 @@ SOFTWARE.
 /*****************************************************************
  *  Stuff to create connections --- OS dependent
  *
- *      EstablishNewConnections, CreateWellKnownSockets, ResetWellKnownSockets,
+ *      EstablishNewConnections, CreateWellKnownSockets
  *      CloseDownConnection,
  *	OnlyListToOneClient,
  *      ListenToAllClients,
@@ -307,54 +307,6 @@ CreateWellKnownSockets(void)
 
 #ifdef XDMCP
     XdmcpInit();
-#endif
-}
-
-void
-ResetWellKnownSockets(void)
-{
-    int i;
-
-    ResetOsBuffers();
-
-    for (i = 0; i < ListenTransCount; i++) {
-        int status = _XSERVTransResetListener(ListenTransConns[i]);
-
-        if (status != TRANS_RESET_NOOP) {
-            if (status == TRANS_RESET_FAILURE) {
-                /*
-                 * ListenTransConns[i] freed by xtrans.
-                 * Remove it from out list.
-                 */
-
-                RemoveNotifyFd(ListenTransFds[i]);
-                ListenTransFds[i] = ListenTransFds[ListenTransCount - 1];
-                ListenTransConns[i] = ListenTransConns[ListenTransCount - 1];
-                ListenTransCount -= 1;
-                i -= 1;
-            }
-            else if (status == TRANS_RESET_NEW_FD) {
-                /*
-                 * A new file descriptor was allocated (the old one was closed)
-                 */
-
-                int newfd = _XSERVTransGetConnectionNumber(ListenTransConns[i]);
-
-                ListenTransFds[i] = newfd;
-            }
-        }
-    }
-    for (i = 0; i < ListenTransCount; i++)
-        SetNotifyFd(ListenTransFds[i], EstablishNewConnections, X_NOTIFY_READ,
-                    NULL);
-
-    ResetAuthorization();
-    ResetHosts(display);
-    /*
-     * restart XDMCP
-     */
-#ifdef XDMCP
-    XdmcpReset();
 #endif
 }
 
