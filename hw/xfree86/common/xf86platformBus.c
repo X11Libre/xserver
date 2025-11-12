@@ -286,8 +286,9 @@ xf86platformProbe(void)
 
             if (cl->modulepath && xf86ModPathFrom != X_CMDLINE) {
                 old_path = path;
-                XNFasprintf(&path, "%s,%s", cl->modulepath,
-                            path ? path : xf86ModulePath);
+                if (asprintf(&path, "%s,%s", cl->modulepath,
+                            path ? path : xf86ModulePath) == -1)
+                    FatalError("malloc failed\n");
                 free(old_path);
                 LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath extended to \"%s\"\n",
                                cl->identifier, path);
