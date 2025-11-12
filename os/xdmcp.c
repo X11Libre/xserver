@@ -438,7 +438,6 @@ XdmcpSetAuthentication(const ARRAY8Ptr name)
 
 static ARRAY16 ConnectionTypes;
 static ARRAYofARRAY8 ConnectionAddresses;
-static x_server_generation_t xdmcpGeneration;
 
 void
 XdmcpRegisterConnection(int type, const char *address, int addrlen)
@@ -446,11 +445,9 @@ XdmcpRegisterConnection(int type, const char *address, int addrlen)
     int i;
     CARD8 *newAddress;
 
-    if (xdmcpGeneration != serverGeneration) {
-        XdmcpDisposeARRAY16(&ConnectionTypes);
-        XdmcpDisposeARRAYofARRAY8(&ConnectionAddresses);
-        xdmcpGeneration = serverGeneration;
-    }
+    XdmcpDisposeARRAY16(&ConnectionTypes);
+    XdmcpDisposeARRAYofARRAY8(&ConnectionAddresses);
+
     if (xdm_from != NULL) {     /* Only register the requested address */
         const void *regAddr = address;
         const void *fromAddr = NULL;
