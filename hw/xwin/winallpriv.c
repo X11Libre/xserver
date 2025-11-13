@@ -47,16 +47,6 @@ winAllocatePrivates(ScreenPtr pScreen)
 {
     winPrivScreenPtr pScreenPriv;
 
-#if ENABLE_DEBUG
-    winDebug("winAllocateScreenPrivates - g_ulServerGeneration: %lu "
-             "serverGeneration: %lu\n", g_ulServerGeneration, serverGeneration);
-#endif
-
-    /* We need a new slot for our privates if the screen gen has changed */
-    if (g_ulServerGeneration != serverGeneration) {
-        g_ulServerGeneration = serverGeneration;
-    }
-
     /* Allocate memory for the screen private structure */
     pScreenPriv = calloc(1, sizeof(winPrivScreenRec));
     if (!pScreenPriv) {
@@ -127,17 +117,10 @@ Bool
 winAllocateCmapPrivates(ColormapPtr pCmap)
 {
     winPrivCmapPtr pCmapPriv;
-    static x_server_generation_t s_ulPrivateGeneration = 0;
 
 #if ENABLE_DEBUG
     winDebug("winAllocateCmapPrivates\n");
 #endif
-
-    /* Get a new privates index when the server generation changes */
-    if (s_ulPrivateGeneration != serverGeneration) {
-        /* Save the new server generation */
-        s_ulPrivateGeneration = serverGeneration;
-    }
 
     /* Allocate memory for our private structure */
     pCmapPriv = calloc(1, sizeof(winPrivCmapRec));

@@ -239,13 +239,7 @@ ErrorF (#point ": PROFILEPOINT hit %u times\n", PROFPT##point);\
 
 #define DEFINE_ATOM_HELPER(func,atom_name)			\
 static Atom func (void) {					\
-    static x_server_generation_t generation;			\
-    static Atom atom;						\
-    if (generation != serverGeneration) {			\
-	generation = serverGeneration;				\
-	atom = dixAddAtom(atom_name);				\
-    }								\
-    return atom;						\
+    return dixAddAtom(atom_name);				\
 }
 
 /*
@@ -539,7 +533,6 @@ extern DevPrivateKeyRec g_iWindowPrivateKeyRec;
 
 #define g_iWindowPrivateKey 	(&g_iWindowPrivateKeyRec)
 
-extern x_server_generation_t g_ulServerGeneration;
 extern DWORD g_dwEnginesSupported;
 extern HINSTANCE g_hInstance;
 extern int g_copyROP[];
