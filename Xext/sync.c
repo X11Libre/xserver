@@ -438,7 +438,7 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
     if (newSyncObject) {
         SyncAddTriggerToSyncObject(pTrigger);
     }
-    else if (pCounter && IsSystemCounter(pCounter)) {
+    else if (IsSystemCounter(pCounter)) {
         SyncComputeBracketValues(pCounter);
     }
 
