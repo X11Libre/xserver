@@ -471,7 +471,7 @@ CreateSaverWindow(ScreenPtr pScreen)
     if (GrabInProgress && GrabInProgress != pAttr->client->index)
         return FALSE;
 
-    pWin = dixCreateWindow(pSaver->wid, pScreen->root,
+    pWin = CreateWindow(pSaver->wid, pScreen->root,
                         pAttr->x, pAttr->y, pAttr->width, pAttr->height,
                         pAttr->borderWidth, pAttr->class,
                         pAttr->mask, (XID *) pAttr->values,

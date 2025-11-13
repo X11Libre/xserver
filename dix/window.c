@@ -736,7 +736,7 @@ RealChildHead(WindowPtr pWin)
 }
 
 WindowPtr
-dixCreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
+CreateWindow(Window wid, WindowPtr pParent, int x, int y, unsigned w,
              unsigned h, unsigned bw, unsigned class, Mask vmask, XID *vlist,
              int depth, ClientPtr client, VisualID visual, int *error)
 {
@@ -3255,7 +3255,7 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
     }
 
     pWin = pScreen->screensaver.pWindow =
-        dixCreateWindow(pScreen->screensaver.wid,
+        CreateWindow(pScreen->screensaver.wid,
                      pScreen->root,
                      -RANDOM_WIDTH, -RANDOM_WIDTH,
                      (unsigned short) pScreen->width + RANDOM_WIDTH,

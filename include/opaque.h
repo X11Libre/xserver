@@ -37,4 +37,7 @@ from The Open Group.
 extern _X_EXPORT Bool enableIndirectGLX;
 extern _X_EXPORT Bool bgNoneRoot;
 
+// needed by libvnc.so from tigervnc
+extern _X_EXPORT char *display;
+
 #endif                          /* OPAQUE_H */

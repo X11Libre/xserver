@@ -105,6 +105,8 @@ SOFTWARE.
 #include "globals.h"
 #include "xace.h"
 
+#include <opaque.h>
+
 #ifdef HAVE_GETPEERUCRED
 #include <ucred.h>
 #include <zone.h>

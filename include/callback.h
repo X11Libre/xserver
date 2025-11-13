@@ -51,12 +51,12 @@ SOFTWARE.
 #include <X11/Xdefs.h>          /* for Bool */
 #include <X11/Xproto.h>
 #include <X11/Xfuncproto.h>
-
 /*
  *  callback manager stuff
  */
 
 typedef struct _CallbackList *CallbackListPtr;
+typedef struct _Selection Selection;
 
 typedef void (*CallbackProcPtr) (CallbackListPtr *, void *, void *);
 
@@ -78,5 +78,10 @@ CallCallbacks(CallbackListPtr *pcbl, void *call_data)
         return;
     _CallCallbacks(pcbl, call_data);
 }
+
+extern _X_EXPORT CallbackListPtr SelectionCallback;
+extern _X_EXPORT Selection *CurrentSelections;
+_X_EXPORT int dixLookupSelection(Selection ** result, Atom name,
+                                        ClientPtr client, Mask access_mode);
 
 #endif                          /* CALLBACK_H */

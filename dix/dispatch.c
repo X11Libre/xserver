@@ -144,6 +144,7 @@ Equipment Corporation.
 #include "xkbsrv.h"
 #include "xfixesint.h"
 #include "dixstruct_priv.h"
+#include <window.h>
 
 #define mskcnt ((MAXCLIENTS + 31) / 32)
 #define BITMASK(i) (1U << ((i) & 31))
@@ -745,7 +746,7 @@ int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids)
         client->errorValue = 0;
         return BadValue;
     }
-    pWin = dixCreateWindow(stuff->wid, pParent, stuff->x,
+    pWin = CreateWindow(stuff->wid, pParent, stuff->x,
                         stuff->y, stuff->width, stuff->height,
                         stuff->borderWidth, stuff->class,
                         stuff->mask, (XID *) xids,
@@ -4257,4 +4258,3 @@ DetachOffloadGPU(ScreenPtr secondary)
     assert(secondary->is_offload_secondary);
     secondary->is_offload_secondary = FALSE;
 }
-

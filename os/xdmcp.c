@@ -47,7 +47,7 @@
 #include "dixstruct.h"
 
 #include "os/Xtrans.h"
-
+#include <opaque.h>
 #ifdef XDMCP
 #undef REQUEST
 

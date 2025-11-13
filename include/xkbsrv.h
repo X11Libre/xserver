@@ -37,6 +37,9 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "inputstr.h"
 #include "events.h"
 
+
+#define XkbChangeTypesOfKey            SrvXkbChangeTypesOfKey
+
 typedef struct _XkbInterest {
     DeviceIntPtr dev;
     ClientPtr client;
@@ -227,6 +230,23 @@ extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
 
 extern _X_EXPORT Bool XkbCopyDeviceKeymap(DeviceIntPtr /* dst */,
 					  DeviceIntPtr /* src */);
+
+extern _X_EXPORT void XkbConvertCase(KeySym /* sym */ ,
+                                     KeySym * /* lower */ ,
+                                     KeySym *   /* upper */
+    );
+
+
+extern _X_EXPORT Status SrvXkbChangeTypesOfKey(XkbDescPtr /* xkb */ ,
+                                            int /* key */ ,
+                                            int /* nGroups */ ,
+                                            unsigned int /* groups */ ,
+                                            int * /* newTypesIn */ ,
+                                            XkbMapChangesPtr    /* changes */
+    );
+
+void _X_EXPORT XkbSendNotification(DeviceIntPtr kbd, XkbChangesPtr pChanges,
+                         XkbEventCausePtr cause);
 
 #include "xkbstr.h"
 #include "xkbrules.h"

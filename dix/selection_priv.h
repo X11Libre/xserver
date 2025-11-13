@@ -12,7 +12,7 @@
 #include "include/dixstruct.h"
 #include "include/privates.h"
 
-typedef struct _Selection {
+struct _Selection {
     Atom selection;
     TimeStamp lastTimeChanged;
     Window window;
@@ -20,7 +20,7 @@ typedef struct _Selection {
     ClientPtr client;
     struct _Selection *next;
     PrivateRec *devPrivates;
-} Selection;
+};
 
 typedef enum {
     SelectionSetOwner,
@@ -56,18 +56,9 @@ typedef struct {
     Atom target;
 } SelectionFilterParamRec, *SelectionFilterParamPtr;
 
-extern Selection *CurrentSelections;
-
-extern CallbackListPtr SelectionCallback;
 extern CallbackListPtr SelectionFilterCallback;
 
-int dixLookupSelection(Selection **result,
-                       Atom name,
-                       ClientPtr client,
-                       Mask access_mode);
-
 void InitSelections(void);
-void DeleteWindowFromAnySelections(WindowPtr pWin);
 void DeleteClientFromAnySelections(ClientPtr client);
 
 #endif /* _XSERVER_DIX_SELECTION_PRIV_H */

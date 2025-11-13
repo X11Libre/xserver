@@ -65,4 +65,7 @@ extern _X_EXPORT int DeleteProperty(ClientPtr /*client */ ,
                                     WindowPtr /*pWin */ ,
                                     Atom /*propName */ );
 
+_X_EXPORT int dixLookupProperty(PropertyPtr *result, WindowPtr pWin, Atom proprty,
+                      ClientPtr pClient, Mask access_mode);
+
 #endif                          /* PROPERTY_H */

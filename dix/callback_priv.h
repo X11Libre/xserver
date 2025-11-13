@@ -6,6 +6,7 @@
 #define _XSERVER_CALLBACK_PRIV_H
 
 #include "callback.h"
+#include <dix.h>
 
 void InitCallbackManager(void);
 void DeleteCallbackManager(void);

@@ -135,7 +135,7 @@ dix_main(int argc, char *argv[], char *envp[])
 {
     HWEventQueueType alwaysCheckForInput[2];
 
-    display = "0";
+    display = (char *)"0";
 
     InitRegions();
 
