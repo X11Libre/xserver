@@ -1039,15 +1039,15 @@ drmmode_bo_get_pitch(drmmode_bo *bo)
     return bo->dumb->pitch;
 }
 
-static Bool
-drmmode_bo_has_bo(drmmode_bo *bo)
+static void*
+drmmode_bo_get_bo(drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
     if (bo->gbm)
-        return TRUE;
+        return bo->gbm;
 #endif
 
-    return bo->dumb != NULL;
+    return bo->dumb;
 }
 
 uint32_t
@@ -2257,11 +2257,7 @@ drmmode_shadow_fb_allocate(xf86CrtcPtr crtc, int width, int height,
         return NULL;
     }
 
-#ifdef GLAMOR_HAS_GBM
-    if (drmmode->gbm)
-        return bo->gbm;
-#endif
-    return bo->dumb;
+    return drmmode_bo_get_bo(bo);
 }
 
 static void *
@@ -2316,7 +2312,7 @@ drmmode_shadow_fb_create(xf86CrtcPtr crtc, void *data, int width, int height,
         }
     }
 
-    if (!drmmode_bo_has_bo(bo)) {
+    if (!drmmode_bo_get_bo(bo)) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                    "Couldn't allocate shadow pixmap for CRTC\n");
         return NULL;
