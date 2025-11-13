@@ -1009,7 +1009,7 @@ drmmode_crtc_flip(xf86CrtcPtr crtc, uint32_t fb_id, int x, int y,
                            fb_id, flags, data);
 }
 
-int
+void
 drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
 {
     int ret;
@@ -1026,8 +1026,6 @@ drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
         if (ret == 0)
             bo->dumb = NULL;
     }
-
-    return 0;
 }
 
 uint32_t
