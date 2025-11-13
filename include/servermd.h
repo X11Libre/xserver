@@ -47,6 +47,8 @@ SOFTWARE.
 #ifndef SERVERMD_H
 #define SERVERMD_H 1
 
+#include <stddef.h>
+
 #if !defined(_DIX_CONFIG_H_) && !defined(_XORG_SERVER_H_)
 #error Drivers must include xorg-server.h before any other xserver headers
 #error xserver code must include dix-config.h before any other headers
@@ -115,7 +117,8 @@ extern _X_EXPORT PaddingInfo PixmapWidthPaddingInfo[];
 #define PixmapBytePad(w, d) \
     (PixmapWidthInPadUnits(w, d) << PixmapWidthPaddingInfo[d].padBytesLog2)
 
-#define BitmapBytePad(w) \
-    (((int)((w) + BITMAP_SCANLINE_PAD - 1) >> LOG2_BITMAP_PAD) << LOG2_BYTES_PER_SCANLINE_PAD)
+static inline size_t BitmapBytePad(size_t w) {
+    return ((((w) + BITMAP_SCANLINE_PAD - 1) >> LOG2_BITMAP_PAD) << LOG2_BYTES_PER_SCANLINE_PAD);
+}
 
 #endif                          /* SERVERMD_H */
