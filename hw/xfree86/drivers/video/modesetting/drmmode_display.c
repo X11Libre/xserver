@@ -1127,6 +1127,27 @@ drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
                         drmmode_bo_get_handle(bo), fb_id);
 }
 
+#ifdef GLAMOR_HAS_GBM
+/* formats taken from glamor/glamor_egl.c */
+static inline uint32_t
+drmmode_gbm_format_for_depth(int depth)
+{
+    switch (depth) {
+    case 8:
+        return GBM_FORMAT_R8;
+    case 15:
+        return GBM_FORMAT_ARGB1555;
+    case 16:
+        return GBM_FORMAT_RGB565;
+    case 30:
+        /* XXX Is this format right? https://github.com/X11Libre/xserver/pull/1396/files#r2523698616 XXX */
+        return GBM_FORMAT_ARGB2101010;
+    default:
+        return GBM_FORMAT_ARGB8888;
+    }
+}
+#endif
+
 static Bool
 drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
                         unsigned width, unsigned height, unsigned bpp)
@@ -1136,22 +1157,7 @@ drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
 
 #ifdef GLAMOR_HAS_GBM
     if (drmmode->glamor) {
-        uint32_t format;
-
-        switch (drmmode->scrn->depth) {
-        case 15:
-            format = GBM_FORMAT_ARGB1555;
-            break;
-        case 16:
-            format = GBM_FORMAT_RGB565;
-            break;
-        case 30:
-            format = GBM_FORMAT_ARGB2101010;
-            break;
-        default:
-            format = GBM_FORMAT_ARGB8888;
-            break;
-        }
+        uint32_t format = drmmode_gbm_format_for_depth(drmmode->scrn->depth);
 
 #ifdef GBM_BO_WITH_MODIFIERS
         uint32_t num_modifiers;
