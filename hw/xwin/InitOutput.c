@@ -534,8 +534,7 @@ OsVendorInit(void)
     xorgLogFileVerbosity = g_iLogVerbose;
 
     /* Log the version information */
-    if (serverGeneration == 1)
-        winLogVersionInfo();
+    winLogVersionInfo();
 
     /* Add a default screen if no screens were specified */
     if (g_iNumScreens == 0) {
@@ -789,8 +788,7 @@ InitOutput(int argc, char *argv[])
 {
     int i;
 
-    if (serverGeneration == 1)
-        XwinExtensionInit();
+    XwinExtensionInit();
 
     /* Log the command line */
     winLogCommandLine(argc, argv);
@@ -800,7 +798,7 @@ InitOutput(int argc, char *argv[])
 #endif
 
     /* Validate command-line arguments */
-    if (serverGeneration == 1 && !winValidateArgs()) {
+    if (!winValidateArgs()) {
         FatalError("InitOutput - Invalid command-line arguments found.  "
                    "Exiting.\n");
     }
@@ -843,8 +841,7 @@ InitOutput(int argc, char *argv[])
     g_hInstance = GetModuleHandle(NULL);
 
     /* Create the messaging window */
-    if (serverGeneration == 1)
-        winCreateMsgWindowThread();
+    winCreateMsgWindowThread();
 
     /* Initialize each screen */
     for (i = 0; i < g_iNumScreens; ++i) {
