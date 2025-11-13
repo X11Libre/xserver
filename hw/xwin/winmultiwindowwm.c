@@ -1715,7 +1715,6 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
     static xcb_atom_t hiddenState, fullscreenState, belowState, aboveState,
         skiptaskbarState;
     static xcb_atom_t splashType;
-    static x_server_generation_t generation;
 
     unsigned long hint = 0, maxmin = 0;
     unsigned long style, exStyle;
@@ -1725,8 +1724,7 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
     if (!IsWindow(hWnd))
         return;
 
-    if (generation != serverGeneration) {
-        generation = serverGeneration;
+    {
         windowState = intern_atom(conn, "_NET_WM_STATE");
         motif_wm_hints = intern_atom(conn, "_MOTIF_WM_HINTS");
         hiddenState = intern_atom(conn, "_NET_WM_STATE_HIDDEN");

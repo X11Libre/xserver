@@ -385,7 +385,6 @@ winXIconToHICON(xcb_connection_t *conn, xcb_window_t id, int iconSize)
     HICON hIcon = NULL;
     uint32_t *biggest_icon = NULL;
     static xcb_atom_t _XA_NET_WM_ICON;
-    static int generation;
     uint32_t *icon, *icon_data = NULL;
     unsigned long int size;
 
@@ -395,12 +394,10 @@ winXIconToHICON(xcb_connection_t *conn, xcb_window_t id, int iconSize)
     ReleaseDC(GetDesktopWindow(), hDC);
 
     /* Always prefer _NET_WM_ICON icons */
-    if (generation != serverGeneration) {
+    {
         xcb_intern_atom_reply_t *atom_reply;
         xcb_intern_atom_cookie_t atom_cookie;
         const char *atomName = "_NET_WM_ICON";
-
-        generation = serverGeneration;
 
         _XA_NET_WM_ICON = XCB_NONE;
 

@@ -67,7 +67,6 @@ winWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     static ScreenPtr s_pScreen = NULL;
     static HWND s_hwndLastPrivates = NULL;
     static Bool s_fTracking = FALSE;
-    static x_server_generation_t s_ulServerGeneration = 0;
     static UINT s_uTaskbarRestart = 0;
     int iScanCode;
     int i;
@@ -75,12 +74,6 @@ winWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 #if ENABLE_DEBUG
     winDebugWin32Message("winWindowProc", hwnd, message, wParam, lParam);
 #endif
-
-    /* Watch for server regeneration */
-    if (g_ulServerGeneration != s_ulServerGeneration) {
-        /* Store new server generation */
-        s_ulServerGeneration = g_ulServerGeneration;
-    }
 
     /* Only retrieve new privates pointers if window handle is null or changed */
     if ((s_pScreenPriv == NULL || hwnd != s_hwndLastPrivates)

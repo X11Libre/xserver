@@ -47,7 +47,6 @@ DevPrivateKeyRec g_iCmapPrivateKeyRec;
 DevPrivateKeyRec g_iGCPrivateKeyRec;
 DevPrivateKeyRec g_iPixmapPrivateKeyRec;
 DevPrivateKeyRec g_iWindowPrivateKeyRec;
-x_server_generation_t g_ulServerGeneration = 0;
 DWORD g_dwEnginesSupported = 0;
 HINSTANCE g_hInstance = 0;
 HWND g_hDlgDepthChange = NULL;

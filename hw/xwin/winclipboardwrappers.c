@@ -54,7 +54,6 @@ winProcEstablishConnection(ClientPtr client)
 {
     int iReturn;
     static int s_iCallCount = 0;
-    static x_server_generation_t s_ulServerGeneration = 0;
 
     if (s_iCallCount == 0)
         winDebug("winProcEstablishConnection - Hello\n");
@@ -71,14 +70,8 @@ winProcEstablishConnection(ClientPtr client)
         return iReturn;
     }
 
-    /* Watch for server reset */
-    if (s_ulServerGeneration != serverGeneration) {
-        /* Save new generation number */
-        s_ulServerGeneration = serverGeneration;
-
-        /* Reset call count */
-        s_iCallCount = 0;
-    }
+    /* Reset call count */
+    s_iCallCount = 0;
 
     /* Increment call count */
     ++s_iCallCount;
