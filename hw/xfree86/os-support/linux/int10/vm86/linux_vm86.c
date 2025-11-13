@@ -5,6 +5,9 @@
 #include <errno.h>
 #include <string.h>
 
+#include <sys/syscall.h>
+#include <unistd.h>
+
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86Pci.h"
@@ -17,7 +20,7 @@
 #ifdef _VM86_LINUX
 #include "int10Defines.h"
 
-static int vm86_rep(struct vm86_struct *ptr);
+static int vm86_old(struct vm86_struct *ptr);
 static struct vm86_struct vm86_s;
 
 Bool
@@ -233,7 +236,7 @@ do_vm86(xf86Int10InfoPtr pInt)
 {
     int retval;
 
-    retval = vm86_rep(VM86S);
+    retval = vm86_old(VM86S);
 
     switch (VM86_TYPE(retval)) {
     case VM86_UNKNOWN:
@@ -290,34 +293,18 @@ xf86ExecX86int10(xf86Int10InfoPtr pInt)
     finish_int(pInt, sig);
 }
 
+/* syscall with no libc wrapper */
 static int
-vm86_rep(struct vm86_struct *ptr)
+vm86_old(struct vm86_struct *ptr)
 {
-    int __res;
-
-#ifdef __PIC__
-    /* When compiling with -fPIC, we can't use asm constraint "b" because
-       %ebx is already taken by gcc. */
-    __asm__ __volatile__("pushl %%ebx\n\t"
-                         "push %%gs\n\t"
-                         "movl %2,%%ebx\n\t"
-                         "movl %1,%%eax\n\t"
-                         "int $0x80\n\t" "pop %%gs\n\t" "popl %%ebx":"=a"(__res)
-                         :"n"((int) 113), "r"((struct vm86_struct *) ptr));
+#ifdef SYS_vm86old
+    /* syscall() sets errno */
+    return syscall(SYS_vm86old, ptr);
 #else
-    __asm__ __volatile__("push %%gs\n\t"
-                         "int $0x80\n\t"
-                         "pop %%gs":"=a"(__res):"a"((int) 113),
-                         "b"((struct vm86_struct *) ptr));
+    /* vm86 and vm86old are only implemented on 32-bit x86 kernels*/
+    errno = ENOSYS;
+    return -1;
 #endif
-
-    if (__res < 0) {
-        errno = -__res;
-        __res = -1;
-    }
-    else
-        errno = 0;
-    return __res;
 }
 
 #endif
