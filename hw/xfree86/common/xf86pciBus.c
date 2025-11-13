@@ -268,15 +268,15 @@ xf86ParsePciBusString(const char *busID, int *bus, int *device, int *func)
      * omitted and assumed to be zero, although doing this isn't encouraged.
      */
 
-    char *p, *s, *d;
+    char *p, *s, *d, *last;
     const char *id;
     int i;
 
     if (StringToBusType(busID, &id) != BUS_PCI)
         return FALSE;
 
-    s = Xstrdup(id);
-    p = strtok(s, ":");
+    s = last = Xstrdup(id);
+    p = strtok_r(last, ":", &last);
     if (p == NULL || *p == 0) {
         free(s);
         return FALSE;
@@ -300,7 +300,7 @@ xf86ParsePciBusString(const char *busID, int *bus, int *device, int *func)
     *bus = atoi(p);
     if (d != NULL && *d != 0)
         *bus += atoi(d) << 8;
-    p = strtok(NULL, ":");
+    p = strtok_r(NULL, ":", &last);
     if (p == NULL || *p == 0) {
         free(s);
         return FALSE;
@@ -313,7 +313,7 @@ xf86ParsePciBusString(const char *busID, int *bus, int *device, int *func)
     }
     *device = atoi(p);
     *func = 0;
-    p = strtok(NULL, ":");
+    p = strtok_r(NULL, ":", &last);
     if (p == NULL || *p == 0) {
         free(s);
         return TRUE;
