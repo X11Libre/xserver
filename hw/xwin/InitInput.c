@@ -83,9 +83,6 @@ InitInput(int argc, char *argv[])
     winDebug("InitInput\n");
 #endif
 
-    /*
-     * Wrap some functions at every generation of the server.
-     */
     if (InitialVector[2] != winProcEstablishConnection) {
         winProcEstablishConnectionOrig = InitialVector[2];
         InitialVector[2] = winProcEstablishConnection;
