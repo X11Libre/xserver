@@ -62,6 +62,10 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
+#ifndef GBM_BO_USE_FRONT_RENDERING
+#define GBM_BO_USE_FRONT_RENDERING 0
+#endif
+
 static Bool drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height);
 static PixmapPtr drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int height,
                                               int depth, int bitsPerPixel, int devKind,
@@ -1005,7 +1009,7 @@ drmmode_crtc_flip(xf86CrtcPtr crtc, uint32_t fb_id, int x, int y,
                            fb_id, flags, data);
 }
 
-int
+void
 drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
 {
     int ret;
@@ -1022,8 +1026,6 @@ drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
         if (ret == 0)
             bo->dumb = NULL;
     }
-
-    return 0;
 }
 
 uint32_t
@@ -1037,15 +1039,15 @@ drmmode_bo_get_pitch(drmmode_bo *bo)
     return bo->dumb->pitch;
 }
 
-static Bool
-drmmode_bo_has_bo(drmmode_bo *bo)
+static void*
+drmmode_bo_get_bo(drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
     if (bo->gbm)
-        return TRUE;
+        return bo->gbm;
 #endif
 
-    return bo->dumb != NULL;
+    return bo->dumb;
 }
 
 uint32_t
@@ -1125,6 +1127,27 @@ drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
                         drmmode_bo_get_handle(bo), fb_id);
 }
 
+#ifdef GLAMOR_HAS_GBM
+/* formats taken from glamor/glamor_egl.c */
+static inline uint32_t
+drmmode_gbm_format_for_depth(int depth)
+{
+    switch (depth) {
+    case 8:
+        return GBM_FORMAT_R8;
+    case 15:
+        return GBM_FORMAT_ARGB1555;
+    case 16:
+        return GBM_FORMAT_RGB565;
+    case 30:
+        /* XXX Is this format right? https://github.com/X11Libre/xserver/pull/1396/files#r2523698616 XXX */
+        return GBM_FORMAT_ARGB2101010;
+    default:
+        return GBM_FORMAT_ARGB8888;
+    }
+}
+#endif
+
 static Bool
 drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
                         unsigned width, unsigned height, unsigned bpp)
@@ -1134,26 +1157,7 @@ drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
 
 #ifdef GLAMOR_HAS_GBM
     if (drmmode->glamor) {
-        uint32_t format;
-
-        switch (drmmode->scrn->depth) {
-        case 15:
-            format = GBM_FORMAT_ARGB1555;
-            break;
-        case 16:
-            format = GBM_FORMAT_RGB565;
-            break;
-        case 30:
-            format = GBM_FORMAT_ARGB2101010;
-            break;
-        default:
-            format = GBM_FORMAT_ARGB8888;
-            break;
-        }
-
-#ifndef GBM_BO_USE_FRONT_RENDERING
-#define GBM_BO_USE_FRONT_RENDERING 0
-#endif
+        uint32_t format = drmmode_gbm_format_for_depth(drmmode->scrn->depth);
 
 #ifdef GBM_BO_WITH_MODIFIERS
         uint32_t num_modifiers;
@@ -2259,11 +2263,7 @@ drmmode_shadow_fb_allocate(xf86CrtcPtr crtc, int width, int height,
         return NULL;
     }
 
-#ifdef GLAMOR_HAS_GBM
-    if (drmmode->gbm)
-        return bo->gbm;
-#endif
-    return bo->dumb;
+    return drmmode_bo_get_bo(bo);
 }
 
 static void *
@@ -2318,7 +2318,7 @@ drmmode_shadow_fb_create(xf86CrtcPtr crtc, void *data, int width, int height,
         }
     }
 
-    if (!drmmode_bo_has_bo(bo)) {
+    if (!drmmode_bo_get_bo(bo)) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                    "Couldn't allocate shadow pixmap for CRTC\n");
         return NULL;

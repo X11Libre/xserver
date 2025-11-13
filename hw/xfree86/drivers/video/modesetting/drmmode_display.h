@@ -322,7 +322,7 @@ Bool drmmode_is_format_supported(ScrnInfoPtr scrn, uint32_t format,
                                  uint64_t modifier, Bool async_flip);
 int drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
                       uint32_t *fb_id);
-int drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo);
+void drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo);
 uint32_t drmmode_bo_get_pitch(drmmode_bo *bo);
 uint32_t drmmode_bo_get_handle(drmmode_bo *bo);
 Bool drmmode_glamor_handle_new_screen_pixmap(drmmode_ptr drmmode);
