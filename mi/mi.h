@@ -51,6 +51,7 @@ SOFTWARE.
 #include "validate.h"
 #include "window.h"
 #include "gc.h"
+#include <X11/Xfuncproto.h>
 #include <X11/fonts/font.h>
 #include "input.h"
 #include "cursor.h"
@@ -307,5 +308,17 @@ extern _X_EXPORT void miPolyFillArc(DrawablePtr /*pDraw */ ,
                                     int /*narcs */ ,
                                     xArc *      /*parcs */
     );
+
+
+/**
+ * Custom input event handler. If you need to process input events in some
+ * other way than the default path, register an input event handler for the
+ * given internal event type.
+ */
+typedef void (*mieqHandler) (int screen, InternalEvent *event,
+                             DeviceIntPtr dev);
+
+void _X_EXPORT mieqSetHandler(int event, mieqHandler handler);
+void _X_EXPORT mieqProcessInputEvents(void);
 
 #endif                          /* MI_H */

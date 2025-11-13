@@ -40,7 +40,7 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
         }
 
         int rc = 0;
-        WindowPtr pWin = dixCreateWindow(
+        WindowPtr pWin = CreateWindow(
             FakeClientID(0), realRoot, 0, 0, 23, 23,
             0, /* bw */
             InputOutput,

@@ -215,4 +215,25 @@ extern _X_EXPORT void PrintWindowTree(void);
 extern _X_EXPORT void PrintPassiveGrabs(void);
 
 extern _X_EXPORT VisualPtr WindowGetVisual(WindowPtr /*pWin*/);
+
+extern _X_EXPORT WindowPtr CreateWindow(Window /*wid */ ,
+                                        WindowPtr /*pParent */ ,
+                                        int /*x */ ,
+                                        int /*y */ ,
+                                        unsigned int /*w */ ,
+                                        unsigned int /*h */ ,
+                                        unsigned int /*bw */ ,
+                                        unsigned int /*class */ ,
+                                        Mask /*vmask */ ,
+                                        XID * /*vlist */ ,
+                                        int /*depth */ ,
+                                        ClientPtr /*client */ ,
+                                        VisualID /*visual */ ,
+                                        int * /*error */ );
+
+
+_X_EXPORT void DeleteWindowFromAnySelections(WindowPtr pWin);
+
+#define disCreateWindow CreateWindow
+
 #endif                          /* WINDOW_H */

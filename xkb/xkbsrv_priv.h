@@ -165,11 +165,8 @@ Bool XkbEnableDisableControls(XkbSrvInfoPtr xkbi, unsigned long change,
                               XkbEventCausePtr cause);
 void XkbDisableComputedAutoRepeats(DeviceIntPtr pXDev, unsigned int key);
 XkbGeometryPtr XkbLookupNamedGeometry(DeviceIntPtr dev, Atom name, Bool *shouldFree);
-void XkbConvertCase(KeySym sym, KeySym *lower, KeySym *upper);
 int XkbChangeKeycodeRange(XkbDescPtr xkb, int minKC, int maxKC, XkbChangesPtr changes);
 void XkbFreeInfo(XkbSrvInfoPtr xkbi);
-int XkbChangeTypesOfKey(XkbDescPtr xkb, int key, int nGroups, unsigned int groups,
-                        int *newTypesIn, XkbMapChangesPtr changes);
 int XkbKeyTypesForCoreSymbols(XkbDescPtr xkb, int map_width, KeySym *core_syms,
                               unsigned int protected, int *types_inout,
                               KeySym *xkb_syms_rtrn);
@@ -236,8 +233,6 @@ void XkbSendNamesNotify(DeviceIntPtr kbd, xkbNamesNotify *ev);
 void XkbSendActionMessage(DeviceIntPtr kbd, xkbActionMessage *ev);
 void XkbSendExtensionDeviceNotify(DeviceIntPtr kbd, ClientPtr client,
                                   xkbExtensionDeviceNotify *ev);
-void XkbSendNotification(DeviceIntPtr kbd, XkbChangesPtr pChanges,
-                         XkbEventCausePtr cause);
 void XkbSendNewKeyboardNotify(DeviceIntPtr kbd, xkbNewKeyboardNotify *pNKN);
 
 /* device lookup */

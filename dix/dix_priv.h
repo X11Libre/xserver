@@ -292,7 +292,6 @@ extern int ScreenSaverBlanking;
 extern int ScreenSaverAllowExposures;
 extern int defaultScreenSaverBlanking;
 extern int defaultScreenSaverAllowExposures;
-extern const char *display;
 extern int displayfd;
 extern Bool explicit_display;
 
