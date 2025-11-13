@@ -62,6 +62,10 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
+#ifndef GBM_BO_USE_FRONT_RENDERING
+#define GBM_BO_USE_FRONT_RENDERING 0
+#endif
+
 static Bool drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height);
 static PixmapPtr drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int height,
                                               int depth, int bitsPerPixel, int devKind,
@@ -1150,10 +1154,6 @@ drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
             format = GBM_FORMAT_ARGB8888;
             break;
         }
-
-#ifndef GBM_BO_USE_FRONT_RENDERING
-#define GBM_BO_USE_FRONT_RENDERING 0
-#endif
 
 #ifdef GBM_BO_WITH_MODIFIERS
         uint32_t num_modifiers;
