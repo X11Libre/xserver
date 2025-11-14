@@ -21,7 +21,6 @@ is" without express or implied warranty.
 #include <xcb/xcb.h>
 
 extern char *xnestDisplayName;
-extern Bool xnestFullGeneration;
 extern int xnestDefaultClass;
 extern Bool xnestUserDefaultClass;
 extern int xnestDefaultDepth;

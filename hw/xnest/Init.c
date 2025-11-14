@@ -109,7 +109,7 @@ InitOutput(int argc, char *argv[])
 
     xnestNumScreens = screenInfo.numScreens;
 
-    xnestDoFullGeneration = xnestFullGeneration;
+    xnestDoFullGeneration = FALSE;
 }
 
 static void
