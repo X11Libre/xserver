@@ -56,7 +56,7 @@ DeliverPropertyEvent(WindowPtr pWin, void *value)
 static void
 RRDeliverPropertyEvent(ScreenPtr pScreen, xEvent *event)
 {
-    if (!(dispatchException & (DE_RESET | DE_TERMINATE)))
+    if (!(dispatchException & (DE_TERMINATE)))
         WalkTree(pScreen, DeliverPropertyEvent, event);
 }
 
