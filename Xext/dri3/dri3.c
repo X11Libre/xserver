@@ -31,8 +31,6 @@
 static int dri3_request;
 DevPrivateKeyRec dri3_screen_private_key;
 
-static x_server_generation_t dri3_screen_generation;
-
 static void dri3_screen_close(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     dri3_screen_priv_ptr screen_priv = dri3_screen_priv(screen);
@@ -53,7 +51,6 @@ Bool
 dri3_screen_init(ScreenPtr screen, const dri3_screen_info_rec *info)
 {
     dri3_screen_priv_ptr screen_priv;
-    dri3_screen_generation = serverGeneration;
 
     if (!dixRegisterPrivateKey(&dri3_screen_private_key, PRIVATE_SCREEN, 0))
         return FALSE;
@@ -102,9 +99,6 @@ dri3_extension_init(void)
     /* If no screens support DRI3, there's no point offering the
      * extension at all
      */
-    if (dri3_screen_generation != serverGeneration)
-        return;
-
     ExtensionEntry *extension = AddExtension(DRI3_NAME, DRI3NumberEvents, DRI3NumberErrors,
                              proc_dri3_dispatch, proc_dri3_dispatch,
                              NULL, StandardMinorOpcode);
