@@ -59,8 +59,6 @@ SOFTWARE.
 #include <X11/Xprotostr.h>
 #include "opaque.h"
 
-#define GuaranteeNothing	0
-#define GuaranteeVisBack	1
 
 #define SameBackground(as, a, bs, b)				\
     ((as) == (bs) && ((as) == None ||				\

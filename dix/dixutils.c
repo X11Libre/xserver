@@ -652,20 +652,6 @@ ClientIsAsleep(ClientPtr client)
 
 /* ===== Private Procedures ===== */
 
-typedef struct _CallbackRec {
-    CallbackProcPtr proc;
-    void *data;
-    Bool deleted;
-    struct _CallbackRec *next;
-} CallbackRec, *CallbackPtr;
-
-typedef struct _CallbackList {
-    int inCallback;
-    Bool deleted;
-    int numDeleted;
-    CallbackPtr list;
-} CallbackListRec;
-
 static size_t numCallbackListsToCleanup = 0;
 static CallbackListPtr **listsToCleanup = NULL;
 

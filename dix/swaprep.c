@@ -48,9 +48,12 @@ SOFTWARE.
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/fonts/fontstruct.h>
+
+#include "dix/dix_priv.h"
+
 #include "misc.h"
 #include "dixstruct.h"
-#include <X11/fonts/fontstruct.h>
 #include "scrnintstr.h"
 #include "swaprep.h"
 #include "globals.h"

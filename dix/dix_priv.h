@@ -761,4 +761,6 @@ static inline int xmitClientEvent(ClientPtr pClient, xEvent ev)
 int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
                   CARD16 *green, CARD16 *blue, CARD32 *pixel);
 
+void ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)  _X_NORETURN;
+
 #endif /* _XSERVER_DIX_PRIV_H */
