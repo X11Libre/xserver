@@ -3199,7 +3199,7 @@ xf86OutputParseKMSTile(const char *tile_data, int tile_length,
 {
     int ret;
 
-    ret = sscanf(tile_data, "%d:%d:%d:%d:%d:%d:%d:%d",
+    ret = sscanf(tile_data, "%u:%u:%u:%u:%u:%u:%u:%u",
                  &tile_info->group_id,
                  &tile_info->flags,
                  &tile_info->num_h_tile,
