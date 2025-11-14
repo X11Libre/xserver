@@ -84,7 +84,6 @@ static DevPrivateKeyRec DRIScreenPrivKeyRec;
 static DevPrivateKeyRec DRIWindowPrivKeyRec;
 
 #define DRIWindowPrivKey (&DRIWindowPrivKeyRec)
-static x_server_generation_t DRIGeneration = 0;
 static unsigned int DRIDrawableValidationStamp = 0;
 
 static RESTYPE DRIDrawablePrivResType;
@@ -415,9 +414,6 @@ DRIScreenInit(ScreenPtr pScreen, DRIInfoPtr pDRIInfo, int *pDRMFD)
         return FALSE;
 
     pDRIEntPriv = DRI_ENT_PRIV(pScrn);
-
-    if (DRIGeneration != serverGeneration)
-        DRIGeneration = serverGeneration;
 
     if (!dixRegisterPrivateKey(&DRIScreenPrivKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
@@ -832,10 +828,6 @@ drmServerInfo DRIDRMServerInfo = {
 Bool
 DRIExtensionInit(void)
 {
-    if (DRIGeneration != serverGeneration) {
-        return FALSE;
-    }
-
     DRIDrawablePrivResType = CreateNewResourceType(DRIDrawablePrivDelete,
                                                    "DRIDrawable");
     DRIContextPrivResType = CreateNewResourceType(DRIContextPrivDelete,

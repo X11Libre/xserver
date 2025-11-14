@@ -149,7 +149,6 @@ xf86OpenConsole(void)
     vtmode_t vtmode;
 #endif
 
-    if (serverGeneration == 1) {
         /* check if we are run with euid==0 */
         if (geteuid() != 0) {
             FatalError("xf86OpenConsole: Server must be suid root");
@@ -268,18 +267,7 @@ xf86OpenConsole(void)
             break;
 #endif
         }
-    }
-    else {
-        /* serverGeneration != 1 */
-#if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-        if (!xf86Info.ShareVTs && xf86Info.autoVTSwitch &&
-            (xf86Info.consType == SYSCONS || xf86Info.consType == PCVT)) {
-            if (ioctl(xf86Info.consoleFd, VT_ACTIVATE, xf86Info.vtno) != 0) {
-                LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_ACTIVATE failed\n");
-            }
-        }
-#endif                          /* SYSCONS_SUPPORT || PCVT_SUPPORT */
-    }
+
     return;
 }
 
