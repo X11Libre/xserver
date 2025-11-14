@@ -98,7 +98,7 @@ from The Open Group.
 
 int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 {
-    prmsg(2,"ConvertAddress(%d,%d,%p)\n",*familyp,*addrlenp,*addrp);
+    prmsg(2,"ConvertAddress(%d,%d,%p)\n",*familyp,*addrlenp,(void*)*addrp);
 
     switch( *familyp )
     {
