@@ -41,7 +41,6 @@ is" without express or implied warranty.
 #include "Color.h"
 #include "XNCursor.h"
 #include "Events.h"
-#include "Init.h"
 #include "mipointer.h"
 #include "Args.h"
 #include "mipointrst.h"
@@ -403,8 +402,6 @@ breakout:
 
 #define POSITION_OFFSET (pScreen->myNum * (xnestGeometry.width + xnestGeometry.height) / 32)
 
-    if (xnestDoFullGeneration) {
-
         xcb_params_cw_t attributes = {
             .back_pixel = xnestUpstreamInfo.screenInfo->white_pixel,
             .event_mask = xnestEventMask,
@@ -506,7 +503,6 @@ breakout:
                               xnestUpstreamInfo.screenInfo->root_visual,
                               valuemask,
                               &attributes);
-    }
 
     if (!xnestCreateDefaultColormap(pScreen))
         return FALSE;
@@ -524,11 +520,5 @@ xnestCloseScreen(ScreenPtr pScreen)
     free(pScreen->allowedDepths);
     free(pScreen->visuals);
     miScreenClose(pScreen);
-
-    /*
-       If xnestDoFullGeneration all x resources will be destroyed upon closing
-       the display connection.  There is no need to generate extra protocol.
-     */
-
     return TRUE;
 }

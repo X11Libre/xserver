@@ -17,6 +17,4 @@ is" without express or implied warranty.
 
 #include <X11/Xdefs.h>
 
-extern Bool xnestDoFullGeneration;
-
 #endif                          /* XNESTINIT_H */
