@@ -52,7 +52,6 @@
 /*
 ** X resources.
 */
-static x_server_generation_t glxGeneration;
 RESTYPE __glXContextRes;
 RESTYPE __glXDrawableRes;
 
@@ -460,7 +459,6 @@ xorgGlxGetDispatchAddress(CARD8 minorOpcode, CARD32 vendorCode)
 static Bool
 xorgGlxServerPreInit(const ExtensionEntry *extEntry)
 {
-    if (glxGeneration != serverGeneration) {
         /* Mesa requires at least one True/DirectColor visual */
         if (!checkScreenVisuals())
             return FALSE;
@@ -486,10 +484,7 @@ xorgGlxServerPreInit(const ExtensionEntry *extEntry)
         __glXregisterPresentCompleteNotify();
 #endif
 
-        glxGeneration = serverGeneration;
-    }
-
-    return glxGeneration == serverGeneration;
+    return TRUE;
 }
 
 static void
