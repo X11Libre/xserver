@@ -50,7 +50,6 @@
 
 DevPrivateKeyRec PictureScreenPrivateKeyRec;
 DevPrivateKeyRec PictureWindowPrivateKeyRec;
-static x_server_generation_t PictureGeneration;
 RESTYPE PictureType;
 RESTYPE PictFormatType;
 RESTYPE GlyphSetType;
@@ -602,7 +601,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     int n;
     CARD32 type, a, r, g, b;
 
-    if (PictureGeneration != serverGeneration) {
+    {
         PictureType = CreateNewResourceType(FreePicture, "PICTURE");
         if (!PictureType)
             return FALSE;
@@ -613,7 +612,6 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
         GlyphSetType = CreateNewResourceType(FreeGlyphSet, "GLYPHSET");
         if (!GlyphSetType)
             return FALSE;
-        PictureGeneration = serverGeneration;
     }
     if (!dixRegisterPrivateKey(&PictureScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
