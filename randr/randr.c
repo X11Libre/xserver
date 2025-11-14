@@ -28,6 +28,8 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
@@ -272,27 +274,30 @@ SRRNotifyEvent(xEvent *from, xEvent *to)
     }
 }
 
-static x_server_generation_t RRGeneration;
+static bool initialized = false;
 
 Bool
 RRInit(void)
 {
-    if (RRGeneration != serverGeneration) {
-        if (!RRModeInit())
-            return FALSE;
-        if (!RRCrtcInit())
-            return FALSE;
-        if (!RROutputInit())
-            return FALSE;
-        if (!RRProviderInit())
-            return FALSE;
-        if (!RRLeaseInit())
-            return FALSE;
-        RRGeneration = serverGeneration;
-    }
+    /* prevent double init attempts */
+    if (initialized)
+        return TRUE;
+
+    if (!RRModeInit())
+        return FALSE;
+    if (!RRCrtcInit())
+        return FALSE;
+    if (!RROutputInit())
+        return FALSE;
+    if (!RRProviderInit())
+        return FALSE;
+    if (!RRLeaseInit())
+        return FALSE;
+
     if (!dixRegisterPrivateKey(&rrPrivKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
 
+    initialized = true;
     return TRUE;
 }
 
