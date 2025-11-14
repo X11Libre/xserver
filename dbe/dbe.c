@@ -1044,7 +1044,6 @@ DbeExtensionInit(void)
         {
             /* We don't have DDX support for DBE anymore */
 
-#ifndef DISABLE_MI_DBE_BY_DEFAULT
             /* Setup DIX. */
             pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
 
@@ -1057,19 +1056,15 @@ DbeExtensionInit(void)
             pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
 
             if (ddxInitSuccess) {
-                /* Hook in our window destructor. The DDX initialization function
-                 * already added WindowPosition hook for us.
-                 */
+               /* Hook in our window destructor. The DDX initialization function
+                * already added WindowPosition hook for us.
+                */
                 dixScreenHookWindowDestroy(walkScreen, miDbeWindowDestroy);
             }
             else {
                 /* DDX initialization failed.  Stub the screen. */
                 DbeStubScreen(pDbeScreenPriv, &nStubbedScreens);
             }
-#else
-            DbeStubScreen(pDbeScreenPriv, &nStubbedScreens);
-#endif
-
         }
     });
 

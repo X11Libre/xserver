@@ -6005,11 +6005,9 @@ ProcRecolorCursor(ClientPtr client)
     pCursor->backBlue = stuff->backBlue;
 
     DIX_FOR_EACH_SCREEN({
-#ifdef XINERAMA
         if (!noPanoramiXExtension)
             displayed = (walkScreen == pSprite->screen);
         else
-#endif /* XINERAMA */
             displayed = (walkScreen == pSprite->hotPhys.pScreen);
         (*walkScreen->RecolorCursor) (PickPointer(client), walkScreen, pCursor,
                                 (pCursor == pSprite->current) && displayed);
