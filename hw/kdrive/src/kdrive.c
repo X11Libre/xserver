@@ -77,7 +77,6 @@ KdDepths kdDepths[] = {
 #define KD_DEFAULT_BUTTONS 5
 
 DevPrivateKeyRec kdScreenPrivateKeyRec;
-x_server_generation_t kdGeneration;
 
 Bool kdVideoTest;
 unsigned long kdVideoTestTime;
@@ -623,20 +622,15 @@ KdOsInit(const KdOsFuncs * pOsFuncs)
 {
     kdOsFuncs = pOsFuncs;
     if (pOsFuncs) {
-        if (serverGeneration == 1) {
-            KdDoSwitchCmd("start");
-            if (pOsFuncs->Init)
-                (*pOsFuncs->Init) ();
-        }
+        KdDoSwitchCmd("start");
+        if (pOsFuncs->Init)
+            (*pOsFuncs->Init) ();
     }
 }
 
 Bool KdAllocatePrivates(ScreenPtr pScreen)
 {
     KdPrivScreenPtr pScreenPriv;
-
-    if (kdGeneration != serverGeneration)
-        kdGeneration = serverGeneration;
 
     if (!dixRegisterPrivateKey(&kdScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
