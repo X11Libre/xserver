@@ -674,7 +674,6 @@ OsVendorFatalError(const char *f, va_list args)
 void
 OsVendorInit(void)
 {
-    if (serverGeneration == 1) {
         char *lf;
         char *home = getenv("HOME");
         assert(home);
@@ -693,7 +692,6 @@ OsVendorInit(void)
         free(lf);
 
         DarwinPrintBanner();
-    }
 }
 
 /*
