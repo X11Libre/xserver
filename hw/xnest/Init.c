@@ -42,7 +42,6 @@ is" without express or implied warranty.
 #include "Keyboard.h"
 #include "Handlers.h"
 #include "Events.h"
-#include "Init.h"
 #include "Args.h"
 #include "Drawable.h"
 #include "XNGC.h"
@@ -50,8 +49,6 @@ is" without express or implied warranty.
 #ifdef DPMSExtension
 #include "dpmsproc.h"
 #endif
-
-Bool xnestDoFullGeneration = TRUE;
 
 /* Xnest doesn't support GLX yet, so we don't link it, but still have
    satisfy DIX's symbol requirements */
@@ -108,8 +105,6 @@ InitOutput(int argc, char *argv[])
         AddScreen(xnestOpenScreen, argc, argv);
 
     xnestNumScreens = screenInfo.numScreens;
-
-    xnestDoFullGeneration = FALSE;
 }
 
 static void
@@ -150,7 +145,6 @@ CloseInput(void)
 void
 ddxGiveUp(enum ExitCode error)
 {
-    xnestDoFullGeneration = TRUE;
     xnestCloseDisplay();
 }
 
