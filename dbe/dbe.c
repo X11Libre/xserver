@@ -996,11 +996,8 @@ DbeExtensionInit(void)
 {
     ExtensionEntry *extEntry;
     DbeScreenPrivPtr pDbeScreenPriv;
-    int nStubbedScreens = 0, disable_mi = 0;
+    int nStubbedScreens = 0;
     Bool ddxInitSuccess;
-#ifdef DISABLE_MI_DBE_BY_DEFAULT
-    disable_mi = 1;
-#endif
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension)
@@ -1047,31 +1044,27 @@ DbeExtensionInit(void)
         {
             /* We don't have DDX support for DBE anymore */
 
-	    if (!disable_mi) {
-            	/* Setup DIX. */
-            	pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
+            /* Setup DIX. */
+            pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
 
-            	/* Setup DDX. */
-            	ddxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
+            /* Setup DDX. */
+            ddxInitSuccess = miDbeInit(walkScreen, pDbeScreenPriv);
 
-            	/* DDX DBE initialization may have the side affect of
-             	* reallocating pDbeScreenPriv, so we need to update it.
-             	*/
-            	pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
+            /* DDX DBE initialization may have the side affect of
+             * reallocating pDbeScreenPriv, so we need to update it.
+             */
+            pDbeScreenPriv = DBE_SCREEN_PRIV(walkScreen);
 
-            	if (ddxInitSuccess) {
-                    /* Hook in our window destructor. The DDX initialization function
-                    * already added WindowPosition hook for us.
-                    */
-                    dixScreenHookWindowDestroy(walkScreen, miDbeWindowDestroy);
-                }
-                else {
-                    /* DDX initialization failed.  Stub the screen. */
-                    DbeStubScreen(pDbeScreenPriv, &nStubbedScreens);
-                }
-	    }
-	    else
+            if (ddxInitSuccess) {
+               /* Hook in our window destructor. The DDX initialization function
+                * already added WindowPosition hook for us.
+                */
+                dixScreenHookWindowDestroy(walkScreen, miDbeWindowDestroy);
+            }
+            else {
+                /* DDX initialization failed.  Stub the screen. */
                 DbeStubScreen(pDbeScreenPriv, &nStubbedScreens);
+            }
         }
     });
 
