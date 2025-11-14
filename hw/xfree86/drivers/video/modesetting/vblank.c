@@ -665,9 +665,8 @@ ms_vblank_screen_init(ScreenPtr screen)
      * feedback on every server generation, so perform the
      * registration within ScreenInit and not PreInit.
      */
-    if (ms_ent->fd_wakeup_registered != serverGeneration) {
+    if (!(ms_ent->fd_wakeup_ref)) {
         SetNotifyFd(ms->fd, ms_drm_socket_handler, X_NOTIFY_READ, screen);
-        ms_ent->fd_wakeup_registered = serverGeneration;
         ms_ent->fd_wakeup_ref = 1;
     } else
         ms_ent->fd_wakeup_ref++;
@@ -684,8 +683,7 @@ ms_vblank_close_screen(ScreenPtr screen)
 
     ms_drm_abort_scrn(scrn);
 
-    if (ms_ent->fd_wakeup_registered == serverGeneration &&
-        !--ms_ent->fd_wakeup_ref) {
+    if (!--ms_ent->fd_wakeup_ref) {
         RemoveNotifyFd(ms->fd);
     }
 }

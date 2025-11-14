@@ -42,8 +42,7 @@ static int acquiredScreen = -1;
 static Bool initDone = FALSE;
 
 /*
- * Close /dev/agpgart.  This frees all associated memory allocated during
- * this server generation.
+ * Close /dev/agpgart.  This frees all associated memory allocated.
  */
 Bool
 xf86GARTCloseScreen(int screenNum)
