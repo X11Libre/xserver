@@ -48,13 +48,7 @@
 
 #define DEFINE_ATOM_HELPER(func, atom_name)                      \
     static Atom func(void) {                                       \
-        static x_server_generation_t generation;                    \
-        static Atom atom;                                           \
-        if (generation != serverGeneration) {                       \
-            generation = serverGeneration;                          \
-            atom = dixAddAtom(atom_name);                           \
-        }                                                           \
-        return atom;                                                \
+        return dixAddAtom(atom_name);                           \
     }
 
 DEFINE_ATOM_HELPER(xa_native_window_id, "_NATIVE_WINDOW_ID")
