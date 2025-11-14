@@ -638,7 +638,8 @@ set_sun_path(const char *port, const char *upath, char *path, int abstract)
 
     if ((ssize_t)(strlen(at) + strlen(upath) + strlen(port)) > maxlen)
 	return -1;
-    snprintf(path, sizeof(s.sun_path), "%s%s%s", at, upath, port);
+
+    asprintf(&path, "%s%s%s", at, upath, port);
     return 0;
 }
 #endif
