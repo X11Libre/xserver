@@ -31,7 +31,6 @@ is" without express or implied warranty.
 #include "xnest-xcb.h"
 
 #include "Display.h"
-#include "Init.h"
 #include "Args.h"
 
 #include "icon"
@@ -49,9 +48,6 @@ void
 xnestOpenDisplay(int argc, char *argv[])
 {
     int i;
-
-    if (!xnestDoFullGeneration)
-        return;
 
     xnestCloseDisplay();
 
@@ -130,13 +126,9 @@ xnestOpenDisplay(int argc, char *argv[])
 void
 xnestCloseDisplay(void)
 {
-    if (!xnestDoFullGeneration || !xnestUpstreamInfo.conn)
+    if (!xnestUpstreamInfo.conn)
         return;
 
-    /*
-       If xnestDoFullGeneration all x resources will be destroyed upon closing
-       the display connection.  There is no need to generate extra protocol.
-     */
     free(xnestVisualMap);
     xnestVisualMap = NULL;
     xnestNumVisualMap = 0;
