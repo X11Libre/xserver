@@ -2922,8 +2922,7 @@ Next, the higher level functions that most drivers would use.
       Prints out warning messages for each option in the list of options
       that isn't marked as used.  This is intended to show options that
       the driver hasn't recognised.  It would normally be called near
-      the end of the <function>ChipScreenInit()</function> function, but only
-      when <code>serverGeneration&nbsp;==&nbsp;1</code>
+      the end of the <function>ChipScreenInit()</function> function
 	  </para>
 	</blockquote></para></blockquote>
 
@@ -8413,10 +8412,7 @@ ZZZScreenInit(ScreenPtr pScreen, int argc, char **argv)
     pScreen-&gt;CloseScreen = ZZZCloseScreen;
     pScreen-&gt;SaveScreen = ZZZSaveScreen;
 
-    /* Report any unused options (only for the first generation) */
-    if (serverGeneration == 1) {
-        xf86ShowUnusedOptions(pScrn-&gt;scrnIndex, pScrn-&gt;options);
-    }
+    xf86ShowUnusedOptions(pScrn-&gt;scrnIndex, pScrn-&gt;options);
 
     /* Done */
     return TRUE;

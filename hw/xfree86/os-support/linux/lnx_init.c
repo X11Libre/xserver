@@ -184,7 +184,6 @@ xf86OpenConsole(void)
     struct vt_mode VT;
     const char *vcs[] = { "/dev/vc/%d", "/dev/tty%d", NULL };
 
-    if (serverGeneration == 1) {
         linux_parse_vt_settings(FALSE);
 
         if (!KeepTty) {
@@ -295,14 +294,6 @@ xf86OpenConsole(void)
             cfsetospeed(&nTty, 9600);
             tcsetattr(xf86Info.consoleFd, TCSANOW, &nTty);
         }
-    }
-    else {                      /* serverGeneration != 1 */
-        if (!xf86Info.ShareVTs && xf86Info.autoVTSwitch) {
-            /* now get the VT */
-            if (!switch_to(xf86Info.vtno, "xf86OpenConsole"))
-                FatalError("xf86OpenConsole: Switching VT failed\n");
-        }
-    }
 }
 
 #pragma GCC diagnostic pop

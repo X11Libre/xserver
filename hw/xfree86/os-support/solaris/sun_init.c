@@ -112,7 +112,6 @@ xf86OpenConsole(void)
     MessageType from = X_PROBED;
 #endif
 
-    if (serverGeneration == 1) {
         /* Check if we're run with euid==0 */
         if (geteuid() != 0)
             FatalError("xf86OpenConsole: Server must be suid root\n");
@@ -250,35 +249,6 @@ xf86OpenConsole(void)
                            consoleDev, strerror(errno));
         }
 #endif
-    }
-    else {                      /* serverGeneration != 1 */
-
-#ifdef HAS_USL_VTS
-        if (vtEnabled && !xf86Info.ShareVTs) {
-            /*
-             * Now re-get the VT
-             */
-            if (xf86Info.autoVTSwitch)
-                switch_to(xf86Info.vtno, "xf86OpenConsole");
-
-#ifdef VT_SET_CONSUSER          /* added in snv_139 */
-            if (strcmp(display, "0") == 0)
-                if (ioctl(xf86Info.consoleFd, VT_SET_CONSUSER) != 0)
-                    LogMessageVerb(X_WARNING, 1,
-                                   "xf86OpenConsole: VT_SET_CONSUSER failed\n");
-#endif
-
-            /*
-             * If the server doesn't have the VT when the reset occurs,
-             * this is to make sure we don't continue until the activate
-             * signal is received.
-             */
-            if (!xf86VTOwner())
-                sleep(5);
-        }
-#endif                          /* HAS_USL_VTS */
-
-    }
 }
 
 void

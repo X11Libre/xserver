@@ -300,7 +300,6 @@ InitOutput(int argc, char **argv)
 
     config_pre_init();
 
-    if (serverGeneration == 1) {
         xf86PrintBanner();
         LogPrintMarkers();
         if (xf86LogFile) {
@@ -566,31 +565,6 @@ InitOutput(int argc, char **argv)
             }
         }
         formatsDone = TRUE;
-    }
-    else {
-        /*
-         * serverGeneration != 1; some OSs have to do things here, too.
-         */
-        if (xorgHWOpenConsole) {
-            if (!seatd_libseat_controls_session()) {
-                xf86OpenConsole();
-            }
-        }
-
-        /*
-           should we reopen it here? We need to deal with an already opened
-           device. We could leave this to the OS layer. For now we simply
-           close it here
-         */
-        if (xf86OSPMClose)
-            xf86OSPMClose();
-        if ((xf86OSPMClose = xf86OSPMOpen()) != NULL)
-            LogMessageVerb(X_INFO, 3, "APM registered successfully\n");
-
-        /* Make sure full I/O access is enabled */
-        if (xorgHWAccess)
-            xf86EnableIO();
-    }
 
     if (xf86Info.vtno >= 0)
         AddCallback(&RootWindowFinalizeCallback, AddVTAtoms, NULL);
@@ -611,18 +585,6 @@ InitOutput(int argc, char **argv)
         screenInfo.formats[i] = formats[i];
 
     /* Make sure the server's VT is active */
-
-    if (serverGeneration != 1) {
-        xf86Resetting = TRUE;
-        /* All screens are in the same state, so just check the first */
-        if (!xf86VTOwner()) {
-#ifdef HAS_USL_VTS
-            ioctl(xf86Info.consoleFd, VT_RELDISP, VT_ACKACQ);
-#endif
-            input_lock();
-            sigio_blocked = TRUE;
-        }
-    }
 
     for (i = 0; i < xf86NumScreens; i++)
         if (!xf86ColormapAllocatePrivates(xf86Screens[i]))

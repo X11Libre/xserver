@@ -66,7 +66,6 @@ xf86VTKeepTtyIsSet(void)
 void
 xf86OpenConsole()
 {
-    if (serverGeneration == 1) {
         kern_return_t err;
         mach_port_t device;
         int fd;
@@ -84,8 +83,6 @@ xf86OpenConsole()
             exit(1);
         }
         xf86Info.consoleFd = fd;
-    }
-    return;
 }
 
 void

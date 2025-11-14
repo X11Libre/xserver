@@ -1228,7 +1228,6 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     pEnt = xf86GetEntityInfo(pScrn->entityList[0]);
 
     ms = modesettingPTR(pScrn);
-    ms->SaveGeneration = -1;
     ms->pEnt = pEnt;
     ms->drmmode.is_secondary = FALSE;
     pScrn->displayWidth = 640;  /* default it */
@@ -2083,7 +2082,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
      * later memory should be bound when allocating, e.g rotate_mem */
     pScrn->vtSema = TRUE;
 
-    if (serverGeneration == 1 && bgNoneRoot && ms->drmmode.glamor) {
+    if (bgNoneRoot && ms->drmmode.glamor) {
         ms->CreateWindow = pScreen->CreateWindow;
         pScreen->CreateWindow = CreateWindow_oneshot;
     }
@@ -2131,8 +2130,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
     }
 #endif
 
-    if (serverGeneration == 1)
-        xf86ShowUnusedOptions(pScrn->scrnIndex, pScrn->options);
+    xf86ShowUnusedOptions(pScrn->scrnIndex, pScrn->options);
 
     if (!ms_vblank_screen_init(pScreen)) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,

@@ -416,10 +416,9 @@ xf86ActivateDevice(InputInfoPtr pInfo)
 
     dev->config_info = xf86SetStrOption(pInfo->options, "config_info", NULL);
 
-    if (serverGeneration == 1)
-        LogMessageVerb(X_INFO, 1,
-                       "XINPUT: Adding extended input device \"%s\" (type: %s, id %d)\n",
-                       pInfo->name, pInfo->type_name, dev->id);
+    LogMessageVerb(X_INFO, 1,
+                   "XINPUT: Adding extended input device \"%s\" (type: %s, id %d)\n",
+                   pInfo->name, pInfo->type_name, dev->id);
 
     return dev;
 }

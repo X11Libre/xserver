@@ -77,7 +77,6 @@ typedef struct {
 
 static DevPrivateKeyRec ms_dri2_client_key;
 static RESTYPE frame_event_client_type, frame_event_drawable_type;
-static x_server_generation_t ms_dri2_server_generation;
 
 struct ms_dri2_resource {
     XID id;
@@ -1046,13 +1045,10 @@ ms_dri2_screen_init(ScreenPtr screen)
                                PRIVATE_CLIENT, sizeof(XID)))
         return FALSE;
 
-    if (serverGeneration != ms_dri2_server_generation) {
-        ms_dri2_server_generation = serverGeneration;
-        if (!ms_dri2_register_frame_event_resource_types()) {
-            xf86DrvMsg(scrn->scrnIndex, X_WARNING,
-                       "Cannot register DRI2 frame event resources\n");
-            return FALSE;
-        }
+    if (!ms_dri2_register_frame_event_resource_types()) {
+        xf86DrvMsg(scrn->scrnIndex, X_WARNING,
+                   "Cannot register DRI2 frame event resources\n");
+        return FALSE;
     }
 
     memset(&info, '\0', sizeof(info));
