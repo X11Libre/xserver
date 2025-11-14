@@ -81,8 +81,6 @@ static Bool xf86RandR12Init12(ScreenPtr pScreen);
 static Bool xf86RandR12CreateScreenResources12(ScreenPtr pScreen);
 #endif
 
-static x_server_generation_t xf86RandR12Generation;
-
 static DevPrivateKeyRec xf86RandR12KeyRec;
 
 #define XF86RANDRINFO(p) ((XF86RandRInfoPtr) \
@@ -860,9 +858,6 @@ xf86RandR12Init(ScreenPtr pScreen)
     }
 #endif /* XINERAMA */
 
-    if (xf86RandR12Generation != serverGeneration)
-        xf86RandR12Generation = serverGeneration;
-
     if (!dixRegisterPrivateKey(&xf86RandR12KeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
 
@@ -968,8 +963,7 @@ xf86RandR12GetOriginalVirtualSize(ScrnInfoPtr pScrn, int *x, int *y)
 {
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
 
-    if (xf86RandR12Generation != serverGeneration ||
-        XF86RANDRINFO(pScreen)->virtualX == -1) {
+    if (XF86RANDRINFO(pScreen)->virtualX == -1) {
         *x = pScrn->virtualX;
         *y = pScrn->virtualY;
     }

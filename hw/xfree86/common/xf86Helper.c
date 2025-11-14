@@ -1508,9 +1508,8 @@ xf86SetBackingStore(ScreenPtr pScreen)
     }
     free(options);
     pScreen->backingStoreSupport = useBS ? WhenMapped : NotUseful;
-    if (serverGeneration == 1)
-        xf86DrvMsg(pScreen->myNum, from, "Backing store %s\n",
-                   useBS ? "enabled" : "disabled");
+    xf86DrvMsg(pScreen->myNum, from, "Backing store %s\n",
+               useBS ? "enabled" : "disabled");
 }
 
 typedef enum {
@@ -1550,9 +1549,8 @@ xf86SetSilkenMouse(ScreenPtr pScreen)
      * Use silken mouse if requested and if we have threaded input
      */
     pScrn->silkenMouse = useSM && InputThreadEnable;
-    if (serverGeneration == 1)
-        xf86DrvMsg(pScreen->myNum, from, "Silken mouse %s\n",
-                   pScrn->silkenMouse ? "enabled" : "disabled");
+    xf86DrvMsg(pScreen->myNum, from, "Silken mouse %s\n",
+               pScrn->silkenMouse ? "enabled" : "disabled");
 }
 
 static void

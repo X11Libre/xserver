@@ -29,7 +29,6 @@
 #include <string.h>
 
 static int counter = 0;
-static x_server_generation_t int10Generation = 0;
 
 static CARD8 read_b(xf86Int10InfoPtr pInt, int addr);
 static CARD16 read_w(xf86Int10InfoPtr pInt, int addr);
@@ -88,10 +87,8 @@ xf86ExtendedInitInt10(int entityIndex, int Flags)
     legacyVGARec vga;
     Bool videoBiosMapped = FALSE;
     ScrnInfoPtr pScrn;
-    if (int10Generation != serverGeneration) {
-        counter = 0;
-        int10Generation = serverGeneration;
-    }
+
+    counter = 0;
 
     pScrn = xf86FindScreenForEntity(entityIndex);
     screen = pScrn->scrnIndex;
