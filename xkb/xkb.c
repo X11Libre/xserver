@@ -241,7 +241,7 @@ ProcXkbSelectEvents(ClientPtr client)
                 CARD16 *c16;
                 CARD32 *c32;
             } from;
-            register unsigned bit, ndx, maskLeft, dataLeft;
+            unsigned bit, ndx, maskLeft, dataLeft;
 
             from.c8 = (CARD8 *) &stuff[1];
             dataLeft = (client->req_len * 4) - sizeof(xkbSelectEventsReq);
@@ -328,7 +328,7 @@ ProcXkbSelectEvents(ClientPtr client)
             CARD16 *c16;
             CARD32 *c32;
         } from, to;
-        register unsigned bit, ndx, maskLeft, dataLeft, size;
+        unsigned bit, ndx, maskLeft, dataLeft, size;
 
         from.c8 = (CARD8 *) &stuff[1];
         dataLeft = (client->req_len * 4) - sizeof(xkbSelectEventsReq);
@@ -1208,7 +1208,7 @@ XkbSizeKeySyms(XkbDescPtr xkb, xkbGetMapReply * rep)
 static int
 XkbSizeVirtualMods(XkbDescPtr xkb, xkbGetMapReply * rep)
 {
-    register unsigned i, nMods, bit;
+    unsigned i, nMods, bit;
 
     if (((rep->present & XkbVirtualModsMask) == 0) || (rep->virtualMods == 0) ||
         (!xkb) || (!xkb->server)) {
@@ -1252,7 +1252,7 @@ static int
 XkbSizeKeyActions(XkbDescPtr xkb, xkbGetMapReply * rep)
 {
     unsigned i, len, nActs;
-    register KeyCode firstKey;
+    KeyCode firstKey;
 
     if (((rep->present & XkbKeyActionsMask) == 0) || (rep->nKeyActs < 1) ||
         (!xkb) || (!xkb->server) || (!xkb->server->key_acts)) {
@@ -1634,9 +1634,9 @@ CheckKeyTypes(ClientPtr client,
               int *nMapsRtrn, CARD8 *mapWidthRtrn, Bool doswap)
 {
     unsigned nMaps;
-    register unsigned i, n;
-    register CARD8 *map;
-    register xkbKeyTypeWireDesc *wire = *wireRtrn;
+    unsigned i, n;
+    CARD8 *map;
+    xkbKeyTypeWireDesc *wire = *wireRtrn;
 
     if (req->firstType > ((unsigned) xkb->map->num_types)) {
         *nMapsRtrn = _XkbErrCode3(0x01, req->firstType, xkb->map->num_types);
@@ -1756,7 +1756,7 @@ CheckKeySyms(ClientPtr client,
              CARD8 *mapWidths,
              CARD16 *symsPerKey, xkbSymMapWireDesc ** wireRtrn, int *errorRtrn, Bool doswap)
 {
-    register unsigned i;
+    unsigned i;
     XkbSymMapPtr map;
     xkbSymMapWireDesc *wire = *wireRtrn;
 
@@ -1766,7 +1766,7 @@ CheckKeySyms(ClientPtr client,
                        0);
     for (i = 0; i < req->nKeySyms; i++) {
         KeySym *pSyms;
-        register unsigned nG;
+        unsigned nG;
 
         if (client->swapped && doswap) {
             swaps(&wire->nSyms);
@@ -1777,7 +1777,7 @@ CheckKeySyms(ClientPtr client,
             return 0;
         }
         if (nG > 0) {
-            register int g, w;
+            int g, w;
 
             for (g = w = 0; g < nG; g++) {
                 if (wire->ktIndex[g] >= (unsigned) nTypes) {
@@ -1811,7 +1811,7 @@ CheckKeySyms(ClientPtr client,
 
     map = &xkb->map->key_sym_map[i];
     for (; i <= (unsigned) xkb->max_key_code; i++, map++) {
-        register int g, nG, w;
+        int g, nG, w;
 
         nG = XkbKeyNumGroups(xkb, i);
         for (w = g = 0; g < nG; g++) {
@@ -1837,7 +1837,7 @@ CheckKeyActions(XkbDescPtr xkb,
 {
     int nActs;
     CARD8 *wire = *wireRtrn;
-    register unsigned i;
+    unsigned i;
 
     if (!(XkbKeyActionsMask & req->present))
         return 1;
@@ -1866,9 +1866,9 @@ CheckKeyBehaviors(XkbDescPtr xkb,
                   xkbSetMapReq * req,
                   xkbBehaviorWireDesc ** wireRtrn, int *errorRtrn)
 {
-    register xkbBehaviorWireDesc *wire = *wireRtrn;
-    register XkbServerMapPtr server = xkb->server;
-    register unsigned i;
+    xkbBehaviorWireDesc *wire = *wireRtrn;
+    XkbServerMapPtr server = xkb->server;
+    unsigned i;
     unsigned first, last;
 
     if (((req->present & XkbKeyBehaviorsMask) == 0) || (req->nKeyBehaviors < 1)) {
@@ -1916,8 +1916,8 @@ static int
 CheckVirtualMods(XkbDescRec * xkb,
                  xkbSetMapReq * req, CARD8 **wireRtrn, int *errorRtrn)
 {
-    register CARD8 *wire = *wireRtrn;
-    register unsigned i, nMods, bit;
+    CARD8 *wire = *wireRtrn;
+    unsigned i, nMods, bit;
 
     if (((req->present & XkbVirtualModsMask) == 0) || (req->virtualMods == 0))
         return 1;
@@ -1933,9 +1933,9 @@ static int
 CheckKeyExplicit(XkbDescPtr xkb,
                  xkbSetMapReq * req, CARD8 **wireRtrn, int *errorRtrn)
 {
-    register CARD8 *wire = *wireRtrn;
+    CARD8 *wire = *wireRtrn;
     CARD8 *start;
-    register unsigned i;
+    unsigned i;
     int first, last;
 
     if (((req->present & XkbExplicitComponentsMask) == 0) ||
@@ -1974,9 +1974,9 @@ static int
 CheckModifierMap(XkbDescPtr xkb, xkbSetMapReq * req, CARD8 **wireRtrn,
                  int *errRtrn)
 {
-    register CARD8 *wire = *wireRtrn;
+    CARD8 *wire = *wireRtrn;
     CARD8 *start;
-    register unsigned i;
+    unsigned i;
     int first, last;
 
     if (((req->present & XkbModifierMapMask) == 0) || (req->nModMapKeys < 1)) {
@@ -2011,8 +2011,8 @@ CheckVirtualModMap(XkbDescPtr xkb,
                    xkbSetMapReq * req,
                    xkbVModMapWireDesc ** wireRtrn, int *errRtrn)
 {
-    register xkbVModMapWireDesc *wire = *wireRtrn;
-    register unsigned i;
+    xkbVModMapWireDesc *wire = *wireRtrn;
+    unsigned i;
     int first, last;
 
     if (((req->present & XkbVirtualModMapMask) == 0) || (req->nVModMapKeys < 1)) {
@@ -2045,7 +2045,7 @@ SetKeyTypes(XkbDescPtr xkb,
             xkbSetMapReq * req,
             xkbKeyTypeWireDesc * wire, XkbChangesPtr changes)
 {
-    register unsigned i;
+    unsigned i;
     unsigned first, last;
     CARD8 *map;
 
@@ -2060,7 +2060,7 @@ SetKeyTypes(XkbDescPtr xkb,
 
     for (i = 0; i < req->nTypes; i++) {
         XkbKeyTypePtr pOld;
-        register unsigned n;
+        unsigned n;
 
         if (XkbResizeKeyType(xkb, i + req->firstType, wire->nMapEntries,
                              wire->preserve, wire->numLevels) != Success) {
@@ -2134,7 +2134,7 @@ SetKeySyms(ClientPtr client,
            xkbSetMapReq * req,
            xkbSymMapWireDesc * wire, XkbChangesPtr changes, DeviceIntPtr dev)
 {
-    register unsigned i, s;
+    unsigned i, s;
     XkbSymMapPtr oldMap;
     KeySym *newSyms;
     KeySym *pSyms;
@@ -2201,7 +2201,7 @@ static char *
 SetKeyActions(XkbDescPtr xkb,
               xkbSetMapReq * req, CARD8 *wire, XkbChangesPtr changes)
 {
-    register unsigned i, first, last;
+    unsigned i, first, last;
     CARD8 *nActs = wire;
     XkbAction *newActs;
 
@@ -2238,7 +2238,7 @@ SetKeyBehaviors(XkbSrvInfoPtr xkbi,
                 xkbSetMapReq * req,
                 xkbBehaviorWireDesc * wire, XkbChangesPtr changes)
 {
-    register unsigned i;
+    unsigned i;
     int maxRG = -1;
     XkbDescPtr xkb = xkbi->desc;
     XkbServerMapPtr server = xkb->server;
@@ -2295,7 +2295,7 @@ static char *
 SetVirtualMods(XkbSrvInfoPtr xkbi, xkbSetMapReq * req, CARD8 *wire,
                XkbChangesPtr changes)
 {
-    register int i, bit, nMods;
+    int i, bit, nMods;
     XkbServerMapPtr srv = xkbi->desc->server;
 
     if (((req->present & XkbVirtualModsMask) == 0) || (req->virtualMods == 0))
@@ -2317,7 +2317,7 @@ static char *
 SetKeyExplicit(XkbSrvInfoPtr xkbi, xkbSetMapReq * req, CARD8 *wire,
                XkbChangesPtr changes)
 {
-    register unsigned i, first, last;
+    unsigned i, first, last;
     XkbServerMapPtr xkb = xkbi->desc->server;
     CARD8 *start;
 
@@ -2350,7 +2350,7 @@ static char *
 SetModifierMap(XkbSrvInfoPtr xkbi,
                xkbSetMapReq * req, CARD8 *wire, XkbChangesPtr changes)
 {
-    register unsigned i, first, last;
+    unsigned i, first, last;
     XkbClientMapPtr xkb = xkbi->desc->map;
     CARD8 *start;
 
@@ -2384,7 +2384,7 @@ SetVirtualModMap(XkbSrvInfoPtr xkbi,
                  xkbSetMapReq * req,
                  xkbVModMapWireDesc * wire, XkbChangesPtr changes)
 {
-    register unsigned i, first, last;
+    unsigned i, first, last;
     XkbServerMapPtr srv = xkbi->desc->server;
 
     first = req->firstVModMapKey;
@@ -2550,7 +2550,7 @@ _XkbSetMapChecks(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req,
 
     map = &xkb->map->key_sym_map[xkb->min_key_code];
     for (i = xkb->min_key_code; i < xkb->max_key_code; i++, map++) {
-        register int g, ng, w;
+        int g, ng, w;
 
         ng = XkbNumGroups(map->group_info);
         for (w = g = 0; g < ng; g++) {
@@ -2852,7 +2852,7 @@ XkbComputeGetCompatMapReplySize(XkbCompatMapPtr compat,
 
     nGroups = 0;
     if (rep->groups != 0) {
-        register int i, bit;
+        int i, bit;
 
         for (i = 0, bit = 1; i < XkbNumKbdGroups; i++, bit <<= 1) {
             if (rep->groups & bit)
@@ -2871,7 +2871,7 @@ XkbAssembleCompatMap(ClientPtr client,
                      xkbGetCompatMapReply rep,
                      x_rpcbuf_t *rpcbuf)
 {
-        register unsigned i, bit;
+        unsigned i, bit;
         XkbSymInterpretPtr sym = &compat->sym_interpret[rep.firstSI];
 
         for (i = 0; i < rep.nSI; i++, sym++) {
@@ -3220,7 +3220,7 @@ static Status
 XkbComputeGetIndicatorMapReplySize(XkbIndicatorPtr indicators,
                                    xkbGetIndicatorMapReply * rep)
 {
-    register int i, bit;
+    int i, bit;
     int nIndicators;
 
     rep->realIndicators = indicators->phys_indicators;
@@ -3239,8 +3239,8 @@ XkbAssembleIndicatorMap(ClientPtr client,
                         xkbGetIndicatorMapReply rep,
                         x_rpcbuf_t *rpcbuf)
 {
-    register int i;
-    register unsigned bit;
+    int i;
+    unsigned bit;
 
     for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
         if (rep.which & bit) {
@@ -3433,7 +3433,7 @@ ProcXkbGetNamedIndicator(ClientPtr client)
     }
 
     DeviceIntPtr dev;
-    register int i = 0;
+    int i = 0;
     XkbSrvLedInfoPtr sli;
     XkbIndicatorMapPtr map = NULL;
 
@@ -3704,8 +3704,8 @@ ProcXkbSetNamedIndicator(ClientPtr client)
 static CARD32
 _XkbCountAtoms(Atom *atoms, int maxAtoms, int *count)
 {
-    register unsigned int i, bit, nAtoms;
-    register CARD32 atomsPresent;
+    unsigned int i, bit, nAtoms;
+    CARD32 atomsPresent;
 
     for (i = nAtoms = atomsPresent = 0, bit = 1; i < maxAtoms; i++, bit <<= 1) {
         if (atoms[i] != None) {
@@ -3729,8 +3729,8 @@ static void __rpcbuf_write_atoms(x_rpcbuf_t *rpcbuf, Atom *atoms, size_t maxAtom
 static Status
 XkbComputeGetNamesReplySize(XkbDescPtr xkb, xkbGetNamesReply * rep)
 {
-    register unsigned which, length;
-    register int i;
+    unsigned which, length;
+    int i;
 
     rep->minKeyCode = xkb->min_key_code;
     rep->maxKeyCode = xkb->max_key_code;
@@ -3847,7 +3847,7 @@ XkbComputeGetNamesReplySize(XkbDescPtr xkb, xkbGetNamesReply * rep)
 static void
 XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, x_rpcbuf_t *rpcbuf)
 {
-    register unsigned i, which;
+    unsigned i, which;
 
     which = rep.which;
 
@@ -3969,7 +3969,7 @@ ProcXkbGetNames(ClientPtr client)
 static CARD32 *
 _XkbCheckAtoms(CARD32 *wire, int nAtoms, int swapped, Atom *pError)
 {
-    register int i;
+    int i;
 
     for (i = 0; i < nAtoms; i++, wire++) {
         if (swapped) {
@@ -3987,7 +3987,7 @@ static CARD32 *
 _XkbCheckMaskedAtoms(CARD32 *wire, int nAtoms, CARD32 present, int swapped,
                      Atom *pError)
 {
-    register unsigned i, bit;
+    unsigned i, bit;
 
     for (i = 0, bit = 1; (i < nAtoms) && (present); i++, bit <<= 1) {
         if ((present & bit) == 0)
@@ -4007,7 +4007,7 @@ _XkbCheckMaskedAtoms(CARD32 *wire, int nAtoms, CARD32 present, int swapped,
 static Atom *
 _XkbCopyMaskedAtoms(Atom *wire, Atom *dest, int nAtoms, CARD32 present)
 {
-    register int i, bit;
+    int i, bit;
 
     for (i = 0, bit = 1; (i < nAtoms) && (present); i++, bit <<= 1) {
         if ((present & bit) == 0)
@@ -4239,8 +4239,8 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
     if (stuff->which & XkbCompatNameMask)
         names->compat = *tmp++;
     if ((stuff->which & XkbKeyTypeNamesMask) && (stuff->nTypes > 0)) {
-        register unsigned i;
-        register XkbKeyTypePtr type;
+        unsigned i;
+        XkbKeyTypePtr type;
 
         type = &xkb->map->types[stuff->firstType];
         for (i = 0; i < stuff->nTypes; i++, type++) {
@@ -4250,8 +4250,8 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
         nn.nTypes = stuff->nTypes;
     }
     if (stuff->which & XkbKTLevelNamesMask) {
-        register XkbKeyTypePtr type;
-        register unsigned i;
+        XkbKeyTypePtr type;
+        unsigned i;
         CARD8 *width;
 
         width = (CARD8 *) tmp;
@@ -4260,7 +4260,7 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
         for (i = 0; i < stuff->nKTLevels; i++, type++) {
             if (width[i] > 0) {
                 if (type->level_names) {
-                    register unsigned n;
+                    unsigned n;
 
                     for (n = 0; n < width[i]; n++) {
                         type->level_names[n] = tmp[n];
@@ -4296,7 +4296,7 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
     }
     if (stuff->which & XkbKeyAliasesMask) {
         if (stuff->nKeyAliases > 0) {
-            register int na = stuff->nKeyAliases;
+            int na = stuff->nKeyAliases;
 
             if (XkbAllocNames(xkb, XkbKeyAliasesMask, 0, na) != Success)
                 return BadAlloc;
@@ -4313,7 +4313,7 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
     }
     if (stuff->which & XkbRGNamesMask) {
         if (stuff->nRadioGroups > 0) {
-            register unsigned i, nrg;
+            unsigned i, nrg;
 
             nrg = stuff->nRadioGroups;
             if (XkbAllocNames(xkb, XkbRGNamesMask, nrg, 0) != Success)
@@ -4339,8 +4339,8 @@ _XkbSetNames(ClientPtr client, DeviceIntPtr dev, xkbSetNamesReq * stuff)
         if (needExtEvent) {
             XkbSrvLedInfoPtr sli;
             xkbExtensionDeviceNotify edev;
-            register int i;
-            register unsigned bit;
+            int i;
+            unsigned bit;
 
             sli = XkbFindSrvLedInfo(dev, XkbDfltXIClass, XkbDfltXIId,
                                     XkbXI_IndicatorsMask);
@@ -4535,7 +4535,7 @@ XkbWriteCountedString(char *wire, const char *str, Bool swap)
 static int
 XkbSizeGeomProperties(XkbGeometryPtr geom)
 {
-    register int i, size;
+    int i, size;
     XkbPropertyPtr prop;
 
     for (size = i = 0, prop = geom->properties; i < geom->num_properties;
@@ -4548,8 +4548,8 @@ XkbSizeGeomProperties(XkbGeometryPtr geom)
 
 static inline void XkbWriteGeomProperties(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
-    register int i;
-    register XkbPropertyPtr prop;
+    int i;
+    XkbPropertyPtr prop;
 
     for (i = 0, prop = geom->properties; i < geom->num_properties; i++, prop++) {
         x_rpcbuf_write_counted_string_pad(rpcbuf, prop->name);
@@ -4573,8 +4573,8 @@ static inline void XkbWriteGeomKeyAliases(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geo
 static int
 XkbSizeGeomColors(XkbGeometryPtr geom)
 {
-    register int i, size;
-    register XkbColorPtr color;
+    int i, size;
+    XkbColorPtr color;
 
     for (i = size = 0, color = geom->colors; i < geom->num_colors; i++, color++) {
         size += XkbSizeCountedString(color->spec);
@@ -4584,8 +4584,8 @@ XkbSizeGeomColors(XkbGeometryPtr geom)
 
 static inline void XkbWriteGeomColors(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
-    register int i;
-    register XkbColorPtr color;
+    int i;
+    XkbColorPtr color;
 
     for (i = 0, color = geom->colors; i < geom->num_colors; i++, color++) {
         x_rpcbuf_write_counted_string_pad(rpcbuf, color->spec);
@@ -4595,12 +4595,12 @@ static inline void XkbWriteGeomColors(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 static int
 XkbSizeGeomShapes(XkbGeometryPtr geom)
 {
-    register int i, size;
-    register XkbShapePtr shape;
+    int i, size;
+    XkbShapePtr shape;
 
     for (i = size = 0, shape = geom->shapes; i < geom->num_shapes; i++, shape++) {
-        register int n;
-        register XkbOutlinePtr ol;
+        int n;
+        XkbOutlinePtr ol;
 
         size += SIZEOF(xkbShapeWireDesc);
         for (n = 0, ol = shape->outlines; n < shape->num_outlines; n++, ol++) {
@@ -4617,7 +4617,7 @@ static void XkbWriteGeomShapes(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
     XkbShapePtr shape;
 
     for (i = 0, shape = geom->shapes; i < geom->num_shapes; i++, shape++) {
-        register int o;
+        int o;
         XkbOutlinePtr ol;
 
         /* write xkbShapeWireDesc */
@@ -4631,7 +4631,7 @@ static void XkbWriteGeomShapes(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
         x_rpcbuf_write_CARD8(rpcbuf, 0); /* pad1 */
 
         for (o = 0, ol = shape->outlines; o < shape->num_outlines; o++, ol++) {
-            register int p;
+            int p;
             XkbPointPtr pt;
 
             /* write xkbOutlineWireDesc */
@@ -4651,7 +4651,7 @@ static void XkbWriteGeomShapes(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 static int
 XkbSizeGeomDoodads(int num_doodads, XkbDoodadPtr doodad)
 {
-    register int i, size;
+    int i, size;
 
     for (i = size = 0; i < num_doodads; i++, doodad++) {
         size += SIZEOF(xkbAnyDoodadWireDesc);
@@ -4668,7 +4668,7 @@ XkbSizeGeomDoodads(int num_doodads, XkbDoodadPtr doodad)
 
 static void XkbWriteGeomDoodads(x_rpcbuf_t *rpcbuf, int num_doodads, XkbDoodadPtr doodad)
 {
-    register int i;
+    int i;
 
     for (i = 0; i < num_doodads; i++, doodad++) {
         /* write xkbAnyDoodadWireDesc head part */
@@ -4725,7 +4725,7 @@ static void XkbWriteGeomDoodads(x_rpcbuf_t *rpcbuf, int num_doodads, XkbDoodadPt
 
 static void XkbWriteGeomOverlay(x_rpcbuf_t *rpcbuf, XkbOverlayPtr ol)
 {
-    register int r;
+    int r;
     XkbOverlayRowPtr row;
 
     /* write xkbOverlayWireDesc */
@@ -4754,7 +4754,7 @@ static void XkbWriteGeomOverlay(x_rpcbuf_t *rpcbuf, XkbOverlayPtr ol)
 static int
 XkbSizeGeomSections(XkbGeometryPtr geom)
 {
-    register int i, size;
+    int i, size;
     XkbSectionPtr section;
 
     for (i = size = 0, section = geom->sections; i < geom->num_sections;
@@ -4793,7 +4793,7 @@ XkbSizeGeomSections(XkbGeometryPtr geom)
 
 static void XkbWriteGeomSections(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
 {
-    register int i;
+    int i;
     XkbSectionPtr section;
 
     for (i = 0, section = geom->sections; i < geom->num_sections;
@@ -4843,7 +4843,7 @@ static void XkbWriteGeomSections(x_rpcbuf_t *rpcbuf, XkbGeometryPtr geom)
             XkbWriteGeomDoodads(rpcbuf, section->num_doodads, section->doodads);
         }
         if (section->overlays) {
-            register int o;
+            int o;
             for (o = 0; o < section->num_overlays; o++) {
                 XkbWriteGeomOverlay(rpcbuf, &section->overlays[o]);
             }
@@ -5131,7 +5131,7 @@ static Status
 _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
                  XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
 {
-    register int r;
+    int r;
     char *wire;
     XkbOverlayPtr ol;
     xkbOverlayWireDesc *olWire;
@@ -5149,7 +5149,7 @@ _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
     ol = XkbAddGeomOverlay(section, olWire->name, olWire->nRows);
     rWire = (xkbOverlayRowWireDesc *) &olWire[1];
     for (r = 0; r < olWire->nRows; r++) {
-        register int k;
+        int k;
         xkbOverlayKeyWireDesc *kWire;
         XkbOverlayRowPtr row;
 
@@ -5187,7 +5187,7 @@ _CheckSetSections(XkbGeometryPtr geom,
                   xkbSetGeometryReq * req, char **wire_inout, ClientPtr client)
 {
     Status status;
-    register int s;
+    int s;
     char *wire;
     xkbSectionWireDesc *sWire;
     XkbSectionPtr section;
@@ -5197,7 +5197,7 @@ _CheckSetSections(XkbGeometryPtr geom,
         return Success;
     sWire = (xkbSectionWireDesc *) wire;
     for (s = 0; s < req->nSections; s++) {
-        register int r;
+        int r;
         xkbRowWireDesc *rWire;
 
         if (!_XkbCheckRequestBounds(client, req, sWire, sWire + 1))
@@ -5224,7 +5224,7 @@ _CheckSetSections(XkbGeometryPtr geom,
         section->angle = sWire->angle;
         rWire = (xkbRowWireDesc *) &sWire[1];
         for (r = 0; r < sWire->nRows; r++) {
-            register int k;
+            int k;
             XkbRowPtr row;
             xkbKeyWireDesc *kWire;
 
@@ -5270,7 +5270,7 @@ _CheckSetSections(XkbGeometryPtr geom,
         }
         wire = (char *) rWire;
         if (sWire->nDoodads > 0) {
-            register int d;
+            int d;
 
             for (d = 0; d < sWire->nDoodads; d++) {
                 status = _CheckSetDoodad(&wire, req, geom, section, client);
@@ -5279,7 +5279,7 @@ _CheckSetSections(XkbGeometryPtr geom,
             }
         }
         if (sWire->nOverlays > 0) {
-            register int o;
+            int o;
 
             for (o = 0; o < sWire->nOverlays; o++) {
                 status = _CheckSetOverlay(&wire, req, geom, section, client);
@@ -5298,7 +5298,7 @@ static Status
 _CheckSetShapes(XkbGeometryPtr geom,
                 xkbSetGeometryReq * req, char **wire_inout, ClientPtr client)
 {
-    register int i;
+    int i;
     char *wire;
 
     wire = *wire_inout;
@@ -5309,7 +5309,7 @@ _CheckSetShapes(XkbGeometryPtr geom,
     else {
         xkbShapeWireDesc *shapeWire;
         XkbShapePtr shape;
-        register int o;
+        int o;
 
         shapeWire = (xkbShapeWireDesc *) wire;
         for (i = 0; i < req->nShapes; i++) {
@@ -5325,7 +5325,7 @@ _CheckSetShapes(XkbGeometryPtr geom,
                 return BadAlloc;
             olWire = (xkbOutlineWireDesc *) (&shapeWire[1]);
             for (o = 0; o < shapeWire->nOutlines; o++) {
-                register int p;
+                int p;
                 XkbPointPtr pt;
                 xkbPointWireDesc *ptWire;
 
@@ -5371,7 +5371,7 @@ _CheckSetShapes(XkbGeometryPtr geom,
 static Status
 _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
 {
-    register int i;
+    int i;
     Status status;
     char *wire;
 
@@ -5617,7 +5617,7 @@ ProcXkbPerClientFlags(ClientPtr client)
                 return BadAlloc;
         }
         if (interest && want) {
-            register unsigned affect;
+            unsigned affect;
 
             affect = stuff->ctrlsToChange;
 
@@ -5672,7 +5672,7 @@ GetComponentSpec(ClientPtr client, xkbGetKbdByNameReq *stuff,
                  unsigned char **pWire, Bool allowExpr, int *errRtrn)
 {
     int len;
-    register int i;
+    int i;
     unsigned char *wire, *str, *tmp, *legal;
 
     if (allowExpr)
@@ -6216,7 +6216,7 @@ ComputeDeviceLedInfoSize(DeviceIntPtr dev,
                          unsigned int what, XkbSrvLedInfoPtr sli)
 {
     int nNames = 0, nMaps = 0;
-    register unsigned n, bit;
+    unsigned n, bit;
 
     if (sli == NULL)
         return 0;
@@ -6325,7 +6325,7 @@ FillDeviceLedInfo(XkbSrvLedInfoPtr sli, x_rpcbuf_t *rpcbuf, ClientPtr client)
     x_rpcbuf_write_CARD32(rpcbuf, sli->effectiveState);
 
     if (sli->namesPresent | sli->mapsPresent) {
-        register unsigned i, bit;
+        unsigned i, bit;
 
         if (sli->namesPresent) {
             for (i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1) {
@@ -6477,7 +6477,7 @@ ProcXkbGetDeviceInfo(ClientPtr client)
             rep.nBtnsWanted = stuff->nBtns;
             if (dev->button->xkb_acts != NULL) {
                 XkbAction *act;
-                register int i;
+                int i;
 
                 rep.firstBtnRtrn = stuff->firstBtn;
                 rep.nBtnsRtrn = stuff->nBtns;
@@ -6590,8 +6590,8 @@ CheckSetDeviceIndicators(char *wire,
         sli = XkbFindSrvLedInfo(dev, ledWire->ledClass, ledWire->ledID,
                                 XkbXI_IndicatorsMask);
         if (sli != NULL) {
-            register int n;
-            register unsigned bit;
+            int n;
+            unsigned bit;
             int nMaps, nNames;
             CARD32 *atomWire;
             xkbIndicatorMapWireDesc *mapWire;
@@ -6671,8 +6671,8 @@ SetDeviceIndicators(char *wire,
     XkbSetCauseXkbReq(&cause, X_kbSetDeviceInfo, client);
     ledWire = (xkbDeviceLedsWireDesc *) wire;
     for (i = 0; i < num; i++) {
-        register int n;
-        register unsigned bit;
+        int n;
+        unsigned bit;
         CARD32 *atomWire;
         xkbIndicatorMapWireDesc *mapWire;
         XkbSrvLedInfoPtr sli;

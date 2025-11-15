@@ -76,7 +76,7 @@ XF86DRIResetProc(ExtensionEntry *extEntry)
 }
 
 static int
-ProcXF86DRIQueryVersion(register ClientPtr client)
+ProcXF86DRIQueryVersion(ClientPtr client)
 {
     xXF86DRIQueryVersionReply rep = {
         .majorVersion = SERVER_XF86DRI_MAJOR_VERSION,
@@ -94,7 +94,7 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
 }
 
 static int
-ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
+ProcXF86DRIQueryDirectRenderingCapable(ClientPtr client)
 {
     Bool isCapable;
 
@@ -127,7 +127,7 @@ ProcXF86DRIQueryDirectRenderingCapable(register ClientPtr client)
 }
 
 static int
-ProcXF86DRIOpenConnection(register ClientPtr client)
+ProcXF86DRIOpenConnection(ClientPtr client)
 {
     drm_handle_t hSAREA;
     char *busIdString;
@@ -167,7 +167,7 @@ ProcXF86DRIOpenConnection(register ClientPtr client)
 }
 
 static int
-ProcXF86DRIAuthConnection(register ClientPtr client)
+ProcXF86DRIAuthConnection(ClientPtr client)
 {
     REQUEST(xXF86DRIAuthConnectionReq);
     REQUEST_SIZE_MATCH(xXF86DRIAuthConnectionReq);
@@ -192,7 +192,7 @@ ProcXF86DRIAuthConnection(register ClientPtr client)
 }
 
 static int
-ProcXF86DRICloseConnection(register ClientPtr client)
+ProcXF86DRICloseConnection(ClientPtr client)
 {
     REQUEST(xXF86DRICloseConnectionReq);
     REQUEST_SIZE_MATCH(xXF86DRICloseConnectionReq);
@@ -208,7 +208,7 @@ ProcXF86DRICloseConnection(register ClientPtr client)
 }
 
 static int
-ProcXF86DRIGetClientDriverName(register ClientPtr client)
+ProcXF86DRIGetClientDriverName(ClientPtr client)
 {
     char *clientDriverName = NULL;
 
@@ -239,7 +239,7 @@ ProcXF86DRIGetClientDriverName(register ClientPtr client)
 }
 
 static int
-ProcXF86DRICreateContext(register ClientPtr client)
+ProcXF86DRICreateContext(ClientPtr client)
 {
     REQUEST(xXF86DRICreateContextReq);
     REQUEST_SIZE_MATCH(xXF86DRICreateContextReq);
@@ -262,7 +262,7 @@ ProcXF86DRICreateContext(register ClientPtr client)
 }
 
 static int
-ProcXF86DRIDestroyContext(register ClientPtr client)
+ProcXF86DRIDestroyContext(ClientPtr client)
 {
     REQUEST(xXF86DRIDestroyContextReq);
     REQUEST_SIZE_MATCH(xXF86DRIDestroyContextReq);
@@ -310,7 +310,7 @@ ProcXF86DRICreateDrawable(ClientPtr client)
 }
 
 static int
-ProcXF86DRIDestroyDrawable(register ClientPtr client)
+ProcXF86DRIDestroyDrawable(ClientPtr client)
 {
     REQUEST(xXF86DRIDestroyDrawableReq);
     DrawablePtr pDrawable;
@@ -338,7 +338,7 @@ ProcXF86DRIDestroyDrawable(register ClientPtr client)
 }
 
 static int
-ProcXF86DRIGetDrawableInfo(register ClientPtr client)
+ProcXF86DRIGetDrawableInfo(ClientPtr client)
 {
     DrawablePtr pDrawable;
     int X, Y, W, H;
@@ -421,7 +421,7 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 }
 
 static int
-ProcXF86DRIGetDeviceInfo(register ClientPtr client)
+ProcXF86DRIGetDeviceInfo(ClientPtr client)
 {
     drm_handle_t hFrameBuffer;
     void *pDevPrivate;
@@ -460,7 +460,7 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
 }
 
 static int
-ProcXF86DRIDispatch(register ClientPtr client)
+ProcXF86DRIDispatch(ClientPtr client)
 {
     REQUEST(xReq);
 

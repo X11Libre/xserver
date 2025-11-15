@@ -395,7 +395,7 @@ RootlessMarkOverlappedWindows(WindowPtr pWin, WindowPtr pFirst,
         //top-level window - mark children ONLY - NO overlaps with sibs (?)
         // This code copied from miMarkOverlappedWindows()
 
-        register WindowPtr pChild;
+        WindowPtr pChild;
         Bool anyMarked = FALSE;
         MarkWindowProcPtr MarkWindow = pScreen->MarkWindow;
 

@@ -93,8 +93,8 @@ xnestModifyPixmapHeader(PixmapPtr pPixmap, int width, int height, int depth,
 RegionPtr
 xnestPixmapToRegion(PixmapPtr pPixmap)
 {
-    register RegionPtr pReg, pTmpReg;
-    register int x, y;
+    RegionPtr pReg, pTmpReg;
+    int x, y;
     unsigned long previousPixel, currentPixel;
     BoxRec Box = { 0, 0, 0, 0 };
     Bool overlap;

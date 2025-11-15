@@ -114,8 +114,8 @@ XkbAtomText(Atom atm, unsigned format)
 char *
 XkbVModIndexText(XkbDescPtr xkb, unsigned ndx, unsigned format)
 {
-    register int len;
-    register Atom *vmodNames;
+    int len;
+    Atom *vmodNames;
     char *rtrn;
     const char *tmp;
     char numBuf[20];
@@ -154,7 +154,7 @@ char *
 XkbVModMaskText(XkbDescPtr xkb,
                 unsigned modMask, unsigned mask, unsigned format)
 {
-    register int i, bit;
+    int i, bit;
     int len;
     char *mm, *rtrn;
     char *str, buf[VMOD_BUFFER_SIZE];
@@ -266,7 +266,7 @@ XkbModIndexText(unsigned ndx, unsigned format)
 char *
 XkbModMaskText(unsigned mask, unsigned format)
 {
-    register int i, bit;
+    int i, bit;
     char buf[64], *rtrn;
 
     if ((mask & 0xff) == 0xff) {
@@ -557,7 +557,7 @@ char *
 XkbStringText(char *str, unsigned format)
 {
     char *buf;
-    register char *in, *out;
+    char *in, *out;
     int len;
     Bool ok;
 
@@ -731,7 +731,7 @@ XkbActionTypeText(unsigned type, unsigned format)
 static int
 TryCopyStr(char *to, const char *from, int *pLeft)
 {
-    register int len;
+    int len;
 
     if (*pLeft > 0) {
         len = strlen(from);
@@ -1327,7 +1327,7 @@ char *
 XkbIndentText(unsigned size)
 {
     static char buf[32];
-    register int i;
+    int i;
 
     if (size > 31)
         size = 31;

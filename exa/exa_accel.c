@@ -781,7 +781,7 @@ exaPolyFillRect(DrawablePtr pDrawable, GCPtr pGC, int nrect, xRectangle *prect)
     PixmapPtr pPixmap = exaGetDrawablePixmap(pDrawable);
 
     ExaPixmapPriv(pPixmap);
-    register BoxPtr pbox;
+    BoxPtr pbox;
     BoxPtr pextent;
     int extentX1, extentX2, extentY1, extentY2;
     int fullX1, fullX2, fullY1, fullY2;

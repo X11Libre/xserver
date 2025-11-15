@@ -106,9 +106,9 @@ static int map_poll_spec
 			  fd_set        *pWriteSet,
 			  fd_set        *pExceptSet)
 {
-    register size_t  i;                      /* loop control */
-    register struct  pollfd *pCur;           /* current array element */
-    register int     max_fd = -1;            /* return value */
+    size_t  i;                      /* loop control */
+    struct  pollfd *pCur;           /* current array element */
+    int     max_fd = -1;            /* return value */
 
     /*
        Map the poll() structures into the file descriptor sets required
@@ -209,8 +209,8 @@ static void map_select_results
 			  fd_set        *pWriteSet,
 			  fd_set        *pExceptSet)
 {
-    register unsigned long  i;                   /* loop control */
-    register struct	    pollfd *pCur;        /* current array element */
+    unsigned long  i;                   /* loop control */
+    struct	    pollfd *pCur;        /* current array element */
 
     for (i = 0, pCur = pArray; i < n_fds; i++, pCur++)
     {

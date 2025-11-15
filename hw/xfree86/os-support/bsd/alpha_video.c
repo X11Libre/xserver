@@ -205,15 +205,15 @@ xf86DisableIO()
 
 #endif                          /* USE_ALPHA_PIO */
 
-extern int readDense8(void *Base, register unsigned long Offset);
-extern int readDense16(void *Base, register unsigned long Offset);
-extern int readDense32(void *Base, register unsigned long Offset);
+extern int readDense8(void *Base, unsigned long Offset);
+extern int readDense16(void *Base, unsigned long Offset);
+extern int readDense32(void *Base, unsigned long Offset);
 extern void
- writeDense8(int Value, void *Base, register unsigned long Offset);
+ writeDense8(int Value, void *Base, unsigned long Offset);
 extern void
- writeDense16(int Value, void *Base, register unsigned long Offset);
+ writeDense16(int Value, void *Base, unsigned long Offset);
 extern void
- writeDense32(int Value, void *Base, register unsigned long Offset);
+ writeDense32(int Value, void *Base, unsigned long Offset);
 
 void (*xf86WriteMmio8) (int Value, void *Base, unsigned long Offset)
     = writeDense8;

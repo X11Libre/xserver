@@ -620,7 +620,7 @@ static void
 VGAarbiterSetSpans(DrawablePtr pDraw,
                    GCPtr pGC,
                    char *pcharsrc,
-                   register DDXPointPtr ppt,
+                   DDXPointPtr ppt,
                    int *pwidth, int nspans, int fSorted)
 {
     ScreenPtr pScreen = pGC->pScreen;

@@ -93,7 +93,7 @@ XkbAllocCompatMap(XkbDescPtr xkb, unsigned which, unsigned nSI)
 void
 XkbFreeCompatMap(XkbDescPtr xkb, unsigned which, Bool freeMap)
 {
-    register XkbCompatMapPtr compat;
+    XkbCompatMapPtr compat;
 
     if ((xkb == NULL) || (xkb->compat == NULL))
         return;
@@ -133,7 +133,7 @@ XkbAllocNames(XkbDescPtr xkb, unsigned which, int nTotalRG, int nTotalAliases)
     names = xkb->names;
     if ((which & XkbKTLevelNamesMask) && (xkb->map != NULL) &&
         (xkb->map->types != NULL)) {
-        register int i;
+        int i;
         XkbKeyTypePtr type;
 
         type = xkb->map->types;
@@ -219,8 +219,8 @@ XkbFreeNames(XkbDescPtr xkb, unsigned which, Bool freeMap)
         XkbClientMapPtr map = xkb->map;
 
         if ((map != NULL) && (map->types != NULL)) {
-            register int i;
-            register XkbKeyTypePtr type;
+            int i;
+            XkbKeyTypePtr type;
 
             type = map->types;
             for (i = 0; i < map->num_types; i++, type++) {

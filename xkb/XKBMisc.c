@@ -270,7 +270,7 @@ static XkbSymInterpretPtr
 _XkbFindMatchingInterp(XkbDescPtr xkb,
                        KeySym sym, unsigned int real_mods, unsigned int level)
 {
-    register unsigned i;
+    unsigned i;
     XkbSymInterpretPtr interp, rtrn;
     CARD8 mods;
 
@@ -522,7 +522,7 @@ XkbChangeTypesOfKey(XkbDescPtr xkb,
                     unsigned groups, int *newTypesIn, XkbMapChangesPtr changes)
 {
     XkbKeyTypePtr pOldType, pNewType;
-    register int i;
+    int i;
     int width, nOldGroups, oldWidth, newTypes[XkbNumKbdGroups];
 
     if ((!xkb) || (!XkbKeycodeInRange(xkb, key)) || (!xkb->map) ||

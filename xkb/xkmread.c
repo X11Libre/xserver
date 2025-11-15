@@ -115,7 +115,7 @@ XkmGetCARD32(FILE * file, int *pNRead)
 static int
 XkmSkipPadding(FILE * file, unsigned pad)
 {
-    register int i, nRead = 0;
+    int i, nRead = 0;
 
     for (i = 0; i < pad; i++) {
         if (getc(file) != EOF)
@@ -162,7 +162,7 @@ XkmGetCountedString(FILE * file, char *str, int max_len)
 static int
 ReadXkmVirtualMods(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 {
-    register unsigned int i, bit;
+    unsigned int i, bit;
     unsigned int bound, named, tmp;
     int nRead = 0;
 
@@ -205,7 +205,7 @@ ReadXkmVirtualMods(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 static int
 ReadXkmKeycodes(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 {
-    register int i;
+    int i;
     unsigned minKC, maxKC, nAl;
     int nRead = 0;
     char name[100];
@@ -272,7 +272,7 @@ ReadXkmKeycodes(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 static int
 ReadXkmKeyTypes(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 {
-    register unsigned i, n;
+    unsigned i, n;
     unsigned num_types;
     int nRead = 0;
     int tmp;
@@ -414,7 +414,7 @@ ReadXkmKeyTypes(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 static int
 ReadXkmCompatMap(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 {
-    register int i;
+    int i;
     unsigned num_si, groups;
     char name[100];
     XkbSymInterpretPtr interp;
@@ -579,7 +579,7 @@ ReadXkmCompatMap(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
         changes->compat.num_si = compat->num_si;
     }
     if (groups) {
-        register unsigned bit;
+        unsigned bit;
 
         for (i = 0, bit = 1; i < XkbNumKbdGroups; i++, bit <<= 1) {
             xkmModsDesc md;
@@ -608,7 +608,7 @@ ReadXkmCompatMap(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 static int
 ReadXkmIndicators(FILE * file, XkbDescPtr xkb, XkbChangesPtr changes)
 {
-    register unsigned nLEDs;
+    unsigned nLEDs;
     xkmIndicatorMapDesc wire;
     char buf[100];
     unsigned tmp;
@@ -668,7 +668,7 @@ FindTypeForKey(XkbDescPtr xkb, Atom name, unsigned width, KeySym * syms)
     if ((!xkb) || (!xkb->map))
         return NULL;
     if (name != None) {
-        register unsigned i;
+        unsigned i;
 
         for (i = 0; i < xkb->map->num_types; i++) {
             if (xkb->map->types[i].name == name) {
@@ -692,7 +692,7 @@ FindTypeForKey(XkbDescPtr xkb, Atom name, unsigned width, KeySym * syms)
 static int
 ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
 {
-    register int i, g, s, totalVModMaps;
+    int i, g, s, totalVModMaps;
     xkmKeySymMapDesc wireMap;
     char buf[100];
     unsigned minKC, maxKC, groupNames, tmp;
@@ -922,7 +922,7 @@ ReadXkmGeomOverlay(FILE * file, XkbGeometryPtr geom, XkbSectionPtr section)
     XkbOverlayRowPtr row;
     xkmOverlayDesc olWire;
     xkmOverlayRowDesc rowWire;
-    register int r;
+    int r;
 
     nRead += XkmGetCountedString(file, buf, 100);
     tmp = fread(&olWire, SIZEOF(xkmOverlayDesc), 1, file);
@@ -955,7 +955,7 @@ ReadXkmGeomOverlay(FILE * file, XkbGeometryPtr geom, XkbSectionPtr section)
 static int
 ReadXkmGeomSection(FILE * file, XkbGeometryPtr geom)
 {
-    register int i;
+    int i;
     XkbSectionPtr section;
     xkmSectionDesc sectionWire;
     unsigned tmp;
@@ -981,7 +981,7 @@ ReadXkmGeomSection(FILE * file, XkbGeometryPtr geom)
     section->angle = sectionWire.angle;
     section->priority = sectionWire.priority;
     if (sectionWire.num_rows > 0) {
-        register int k;
+        int k;
         XkbRowPtr row;
         xkmRowDesc rowWire;
         XkbKeyPtr key;
@@ -1035,7 +1035,7 @@ ReadXkmGeomSection(FILE * file, XkbGeometryPtr geom)
 static int
 ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
 {
-    register int i;
+    int i;
     char buf[100];
     unsigned tmp;
     int nRead = 0;
@@ -1092,7 +1092,7 @@ ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
         Atom nameAtom;
 
         for (i = 0; i < wireGeom.num_shapes; i++) {
-            register int n;
+            int n;
             XkbOutlinePtr ol;
             xkmOutlineDesc olWire;
 
@@ -1106,7 +1106,7 @@ ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
                 return nRead;
             }
             for (n = 0; n < shapeWire.num_outlines; n++) {
-                register int p;
+                int p;
                 xkmPointDesc ptWire;
 
                 tmp = fread(&olWire, SIZEOF(xkmOutlineDesc), 1, file);
@@ -1209,7 +1209,7 @@ XkmReadTOC(FILE * file, xkmFileInfo * file_info, int max_toc,
 unsigned
 XkmReadFile(FILE * file, unsigned need, unsigned want, XkbDescPtr *xkb)
 {
-    register unsigned i;
+    unsigned i;
     xkmSectionInfo toc[MAX_TOC] = { 0 }, tmpTOC = { 0 };
     xkmFileInfo fileInfo;
     unsigned tmp, nRead = 0;

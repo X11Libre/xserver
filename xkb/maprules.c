@@ -379,7 +379,7 @@ CheckLine(InputLine * line,
           RemapSpec * remap, XkbRF_RulePtr rule, XkbRF_GroupPtr group)
 {
     char *str, *tok;
-    register int nread;
+    int nread;
     _Xstrtokparams strtok_buf;
     Bool append = FALSE;
 
@@ -710,7 +710,7 @@ XkbRF_CheckApplyRule(XkbRF_RulePtr rule,
 static void
 XkbRF_ClearPartialMatches(XkbRF_RulesPtr rules)
 {
-    register int i;
+    int i;
     XkbRF_RulePtr rule;
 
     for (i = 0, rule = rules->rules; i < rules->num_rules; i++, rule++) {

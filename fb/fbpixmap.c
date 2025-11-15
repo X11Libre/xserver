@@ -123,16 +123,16 @@ if (((rx1) < (rx2)) && ((ry1) < (ry2)) &&			\
 RegionPtr
 fbPixmapToRegion(PixmapPtr pPix)
 {
-    register RegionPtr pReg;
+    RegionPtr pReg;
     FbBits *pw, w;
-    register int ib;
+    int ib;
     int width, h, base, rx1 = 0, crects;
     FbBits *pwLineEnd;
     int irectPrevStart, irectLineStart;
-    register BoxPtr prectO, prectN;
+    BoxPtr prectO, prectN;
     BoxPtr FirstRect, rects, prectLineStart;
     Bool fInBox, fSame;
-    register FbBits mask0 = FB_ALLONES & ~FbScrRight(FB_ALLONES, 1);
+    FbBits mask0 = FB_ALLONES & ~FbScrRight(FB_ALLONES, 1);
     FbBits *pwLine;
     int nWidth;
 
