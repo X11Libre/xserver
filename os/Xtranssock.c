@@ -640,7 +640,7 @@ set_sun_path(const char *port, const char *upath, char *path, int abstract)
 	return -1;
 
     asprintf(&buf, "%s%s%s", at, upath, port);
-    strncpy(path, buf, sizeof(s.sun_path-1));
+    strncpy(path, buf, sizeof(s.sun_path)-1);
     s.sun_path[sizeof(s.sun_path)-1] = '\0';
     free(buf);
     return 0;
