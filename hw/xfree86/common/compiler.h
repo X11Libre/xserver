@@ -546,7 +546,7 @@ extern _X_EXPORT volatile unsigned char *ioBase;
 static __inline__ unsigned char
 xf86ReadMmio8(__volatile__ void *base, const unsigned long offset)
 {
-    register unsigned char val;
+    unsigned char val;
     __asm__ __volatile__("lbzx %0,%1,%2\n\t" "eieio":"=r"(val)
                          :"b"(base), "r"(offset),
                          "m"(*((volatile unsigned char *) base + offset)));
@@ -556,7 +556,7 @@ xf86ReadMmio8(__volatile__ void *base, const unsigned long offset)
 static __inline__ unsigned short
 xf86ReadMmio16Be(__volatile__ void *base, const unsigned long offset)
 {
-    register unsigned short val;
+    unsigned short val;
     __asm__ __volatile__("lhzx %0,%1,%2\n\t" "eieio":"=r"(val)
                          :"b"(base), "r"(offset),
                          "m"(*((volatile unsigned char *) base + offset)));
@@ -566,7 +566,7 @@ xf86ReadMmio16Be(__volatile__ void *base, const unsigned long offset)
 static __inline__ unsigned short
 xf86ReadMmio16Le(__volatile__ void *base, const unsigned long offset)
 {
-    register unsigned short val;
+    unsigned short val;
     __asm__ __volatile__("lhbrx %0,%1,%2\n\t" "eieio":"=r"(val)
                          :"b"(base), "r"(offset),
                          "m"(*((volatile unsigned char *) base + offset)));
@@ -576,7 +576,7 @@ xf86ReadMmio16Le(__volatile__ void *base, const unsigned long offset)
 static __inline__ unsigned int
 xf86ReadMmio32Be(__volatile__ void *base, const unsigned long offset)
 {
-    register unsigned int val;
+    unsigned int val;
     __asm__ __volatile__("lwzx %0,%1,%2\n\t" "eieio":"=r"(val)
                          :"b"(base), "r"(offset),
                          "m"(*((volatile unsigned char *) base + offset)));
@@ -586,7 +586,7 @@ xf86ReadMmio32Be(__volatile__ void *base, const unsigned long offset)
 static __inline__ unsigned int
 xf86ReadMmio32Le(__volatile__ void *base, const unsigned long offset)
 {
-    register unsigned int val;
+    unsigned int val;
     __asm__ __volatile__("lwbrx %0,%1,%2\n\t" "eieio":"=r"(val)
                          :"b"(base), "r"(offset),
                          "m"(*((volatile unsigned char *) base + offset)));
