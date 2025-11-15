@@ -2517,19 +2517,9 @@ drmmode_populate_cursor_size_hints(drmmode_ptr drmmode, drmmode_crtc_private_ptr
 {
     drmModePropertyBlobRes *blob;
 
-    if (!drmmode_crtc)
-        return;
-
-    if (drmmode_crtc->cursor_probed)
-        return;
-
-    if (!size_hints_blob)
-        return;
-
-    blob = drmModeGetPropertyBlob(drmmode->fd, size_hints_blob);
-
-    if (!blob)
-        return;
+    if (!drmmode_crtc || drmmode_crtc->cursor_probed || !size_hints_blob ||
+	!(blob = drmModeGetPropertyBlob(drmmode->fd, size_hints_blob)))
+	return;
 
     if (!blob->length)
         goto fail;
