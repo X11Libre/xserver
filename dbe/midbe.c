@@ -71,8 +71,8 @@
 static Bool
 miDbeGetVisualInfo(ScreenPtr pScreen, XdbeScreenVisualInfo * pScrVisInfo)
 {
-    register int i, j, k;
-    register int count;
+    int i, j, k;
+    int count;
     DepthPtr pDepth;
     XdbeVisualInfo *visInfo;
 

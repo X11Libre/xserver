@@ -338,7 +338,7 @@ XkbInitRadioGroups(XkbSrvInfoPtr xkbi)
 static Status
 XkbInitCompatStructs(XkbDescPtr xkb)
 {
-    register int i;
+    int i;
     XkbCompatMapPtr compat;
 
     if (xkb->defined & XkmCompatMapMask)

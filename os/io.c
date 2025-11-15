@@ -235,7 +235,7 @@ ReadRequestFromClient(ClientPtr client)
     ConnectionInputPtr oci = oc->input;
     unsigned int gotnow, needed;
     int result;
-    register xReq *request;
+    xReq *request;
     Bool need_header;
     Bool move_header;
 
@@ -568,8 +568,8 @@ ResetCurrentRequest(ClientPtr client)
     if (!oc)
         return;
 
-    register ConnectionInputPtr oci = oc->input;
-    register xReq *request;
+    ConnectionInputPtr oci = oc->input;
+    xReq *request;
     int gotnow, needed;
 
     if (AvailableInput == oc)
@@ -614,7 +614,7 @@ void
 FlushAllOutput(void)
 {
     OsCommPtr oc;
-    register ClientPtr client, tmp;
+    ClientPtr client, tmp;
     Bool newoutput = NewOutputPending;
 
     if (!newoutput)

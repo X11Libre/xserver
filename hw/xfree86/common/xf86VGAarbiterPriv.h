@@ -208,7 +208,7 @@ static void VGAarbiterFillSpans(DrawablePtr pDraw, GCPtr pGC, int nInit,
                                 DDXPointPtr pptInit, int *pwidthInit,
                                 int fSorted);
 static void VGAarbiterSetSpans(DrawablePtr pDraw, GCPtr pGC, char *pcharsrc,
-                               register DDXPointPtr ppt, int *pwidth,
+                               DDXPointPtr ppt, int *pwidth,
                                int nspans, int fSorted);
 static void VGAarbiterPutImage(DrawablePtr pDraw, GCPtr pGC, int depth, int x,
                                int y, int w, int h, int leftPad, int format,

@@ -2230,20 +2230,20 @@ ProcessInputEvents(void)
 
 /* At the moment, absolute/relative is up to the client. */
 int
-SetDeviceMode(register ClientPtr client, DeviceIntPtr pDev, int mode)
+SetDeviceMode(ClientPtr client, DeviceIntPtr pDev, int mode)
 {
     return BadMatch;
 }
 
 int
-SetDeviceValuators(register ClientPtr client, DeviceIntPtr pDev,
+SetDeviceValuators(ClientPtr client, DeviceIntPtr pDev,
                    int *valuators, int first_valuator, int num_valuators)
 {
     return BadMatch;
 }
 
 int
-ChangeDeviceControl(register ClientPtr client, DeviceIntPtr pDev,
+ChangeDeviceControl(ClientPtr client, DeviceIntPtr pDev,
                     xDeviceCtl * control)
 {
     switch (control->control) {

@@ -53,7 +53,7 @@
 static Bool
 WriteXKBVModDecl(FILE * file, XkbDescPtr xkb, int showValue)
 {
-    register int i, nMods;
+    int i, nMods;
     Atom *vmodNames;
 
     if (xkb == NULL)
@@ -107,7 +107,7 @@ XkbWriteXKBKeycodes(FILE * file,
                     Bool showImplicit, XkbFileAddOnFunc addOn, void *priv)
 {
     Atom kcName;
-    register unsigned i;
+    unsigned i;
     const char *alternate;
 
     if ((!xkb) || (!xkb->names) || (!xkb->names->keys)) {
@@ -168,7 +168,7 @@ XkbWriteXKBKeyTypes(FILE * file,
                     Bool topLevel,
                     Bool showImplicit, XkbFileAddOnFunc addOn, void *priv)
 {
-    register unsigned i, n;
+    unsigned i, n;
     XkbKeyTypePtr type;
     XkbKTMapEntryPtr entry;
 
@@ -275,7 +275,7 @@ XkbWriteXKBCompatMap(FILE * file,
                      Bool topLevel,
                      Bool showImplicit, XkbFileAddOnFunc addOn, void *priv)
 {
-    register unsigned i;
+    unsigned i;
     XkbSymInterpretPtr interp;
 
     if ((!xkb) || (!xkb->compat) || (!xkb->compat->sym_interpret)) {
@@ -352,7 +352,7 @@ XkbWriteXKBSymbols(FILE * file,
                    Bool topLevel,
                    Bool showImplicit, XkbFileAddOnFunc addOn, void *priv)
 {
-    register unsigned i, tmp;
+    unsigned i, tmp;
     XkbClientMapPtr map;
     XkbServerMapPtr srv;
     Bool showActions;
@@ -533,7 +533,7 @@ XkbWriteXKBSymbols(FILE * file,
     if (map && map->modmap) {
         for (i = xkb->min_key_code; i <= xkb->max_key_code; i++) {
             if (map->modmap[i] != 0) {
-                register int n, bit;
+                int n, bit;
 
                 for (bit = 1, n = 0; n < XkbNumModifiers; n++, bit <<= 1) {
                     if (map->modmap[i] & bit) {
@@ -559,7 +559,7 @@ WriteXKBOutline(FILE * file,
                 XkbShapePtr shape,
                 XkbOutlinePtr outline, int lastRadius, int first, int indent)
 {
-    register int i;
+    int i;
     XkbPointPtr pt;
     char *iStr;
 
@@ -598,7 +598,7 @@ static Bool
 WriteXKBDoodad(FILE * file,
                unsigned indent, XkbGeometryPtr geom, XkbDoodadPtr doodad)
 {
-    register char *i_str;
+    char *i_str;
     XkbShapePtr shape;
     XkbColorPtr color;
 
@@ -686,7 +686,7 @@ WriteXKBDoodad(FILE * file,
 WriteXKBOverlay(FILE * file,
                 unsigned indent, XkbGeometryPtr geom, XkbOverlayPtr ol)
 {
-    register char *i_str;
+    char *i_str;
     int r, k, nOut;
     XkbOverlayRowPtr row;
     XkbOverlayKeyPtr key;
@@ -720,7 +720,7 @@ WriteXKBOverlay(FILE * file,
 static Bool
 WriteXKBSection(FILE * file, XkbSectionPtr s, XkbGeometryPtr geom)
 {
-    register int i;
+    int i;
     XkbRowPtr row;
     int dfltKeyColor = 0;
 
@@ -752,8 +752,8 @@ WriteXKBSection(FILE * file, XkbSectionPtr s, XkbGeometryPtr geom)
         if (row->vertical)
             fprintf(file, "            vertical;\n");
         if (row->num_keys > 0) {
-            register int k;
-            register XkbKeyPtr key;
+            int k;
+            XkbKeyPtr key;
             int forceNL = 0;
             int nThisLine = 0;
 
@@ -816,7 +816,7 @@ XkbWriteXKBGeometry(FILE * file,
                     Bool topLevel,
                     Bool showImplicit, XkbFileAddOnFunc addOn, void *priv)
 {
-    register unsigned i, n;
+    unsigned i, n;
     XkbGeometryPtr geom;
 
     if ((!xkb) || (!xkb->geom)) {

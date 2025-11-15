@@ -230,8 +230,8 @@ Implements the ADC instruction and side effects.
 u8
 adc_byte(u8 d, u8 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 cc;
+    u32 res;           /* all operands in native machine order */
+    u32 cc;
 
     if (ACCESS_FLAG(F_CF))
         res = 1 + d + s;
@@ -257,8 +257,8 @@ Implements the ADC instruction and side effects.
 u16
 adc_word(u16 d, u16 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 cc;
+    u32 res;           /* all operands in native machine order */
+    u32 cc;
 
     if (ACCESS_FLAG(F_CF))
         res = 1 + d + s;
@@ -284,10 +284,10 @@ Implements the ADC instruction and side effects.
 u32
 adc_long(u32 d, u32 s)
 {
-    register u32 lo;            /* all operands in native machine order */
-    register u32 hi;
-    register u32 res;
-    register u32 cc;
+    u32 lo;            /* all operands in native machine order */
+    u32 hi;
+    u32 res;
+    u32 cc;
 
     if (ACCESS_FLAG(F_CF)) {
         lo = 1 + (d & 0xFFFF) + (s & 0xFFFF);
@@ -318,8 +318,8 @@ Implements the ADD instruction and side effects.
 u8
 add_byte(u8 d, u8 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 cc;
+    u32 res;           /* all operands in native machine order */
+    u32 cc;
 
     res = d + s;
     CONDITIONAL_SET_FLAG(res & 0x100, F_CF);
@@ -341,8 +341,8 @@ Implements the ADD instruction and side effects.
 u16
 add_word(u16 d, u16 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 cc;
+    u32 res;           /* all operands in native machine order */
+    u32 cc;
 
     res = d + s;
     CONDITIONAL_SET_FLAG(res & 0x10000, F_CF);
@@ -364,10 +364,10 @@ Implements the ADD instruction and side effects.
 u32
 add_long(u32 d, u32 s)
 {
-    register u32 lo;            /* all operands in native machine order */
-    register u32 hi;
-    register u32 res;
-    register u32 cc;
+    u32 lo;            /* all operands in native machine order */
+    u32 hi;
+    u32 res;
+    u32 cc;
 
     lo = (d & 0xFFFF) + (s & 0xFFFF);
     res = d + s;
@@ -393,7 +393,7 @@ Implements the AND instruction and side effects.
 u8
 and_byte(u8 d, u8 s)
 {
-    register u8 res;            /* all operands in native machine order */
+    u8 res;            /* all operands in native machine order */
 
     res = d & s;
 
@@ -414,7 +414,7 @@ Implements the AND instruction and side effects.
 u16
 and_word(u16 d, u16 s)
 {
-    register u16 res;           /* all operands in native machine order */
+    u16 res;           /* all operands in native machine order */
 
     res = d & s;
 
@@ -435,7 +435,7 @@ Implements the AND instruction and side effects.
 u32
 and_long(u32 d, u32 s)
 {
-    register u32 res;           /* all operands in native machine order */
+    u32 res;           /* all operands in native machine order */
 
     res = d & s;
 
@@ -456,8 +456,8 @@ Implements the CMP instruction and side effects.
 u8
 cmp_byte(u8 d, u8 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - s;
     CLEAR_FLAG(F_CF);
@@ -480,8 +480,8 @@ Implements the CMP instruction and side effects.
 u16
 cmp_word(u16 d, u16 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - s;
     CONDITIONAL_SET_FLAG(res & 0x8000, F_SF);
@@ -503,8 +503,8 @@ Implements the CMP instruction and side effects.
 u32
 cmp_long(u32 d, u32 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - s;
     CONDITIONAL_SET_FLAG(res & 0x80000000, F_SF);
@@ -570,8 +570,8 @@ Implements the DEC instruction and side effects.
 u8
 dec_byte(u8 d)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - 1;
     CONDITIONAL_SET_FLAG(res & 0x80, F_SF);
@@ -594,8 +594,8 @@ Implements the DEC instruction and side effects.
 u16
 dec_word(u16 d)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - 1;
     CONDITIONAL_SET_FLAG(res & 0x8000, F_SF);
@@ -618,8 +618,8 @@ Implements the DEC instruction and side effects.
 u32
 dec_long(u32 d)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - 1;
 
@@ -642,8 +642,8 @@ Implements the INC instruction and side effects.
 u8
 inc_byte(u8 d)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 cc;
+    u32 res;           /* all operands in native machine order */
+    u32 cc;
 
     res = d + 1;
     CONDITIONAL_SET_FLAG((res & 0xff) == 0, F_ZF);
@@ -664,8 +664,8 @@ Implements the INC instruction and side effects.
 u16
 inc_word(u16 d)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 cc;
+    u32 res;           /* all operands in native machine order */
+    u32 cc;
 
     res = d + 1;
     CONDITIONAL_SET_FLAG((res & 0xffff) == 0, F_ZF);
@@ -686,8 +686,8 @@ Implements the INC instruction and side effects.
 u32
 inc_long(u32 d)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 cc;
+    u32 res;           /* all operands in native machine order */
+    u32 cc;
 
     res = d + 1;
     CONDITIONAL_SET_FLAG((res & 0xffffffff) == 0, F_ZF);
@@ -708,7 +708,7 @@ Implements the OR instruction and side effects.
 u8
 or_byte(u8 d, u8 s)
 {
-    register u8 res;            /* all operands in native machine order */
+    u8 res;            /* all operands in native machine order */
 
     res = d | s;
     CLEAR_FLAG(F_OF);
@@ -727,7 +727,7 @@ Implements the OR instruction and side effects.
 u16
 or_word(u16 d, u16 s)
 {
-    register u16 res;           /* all operands in native machine order */
+    u16 res;           /* all operands in native machine order */
 
     res = d | s;
     /* set the carry flag to be bit 8 */
@@ -747,7 +747,7 @@ Implements the OR instruction and side effects.
 u32
 or_long(u32 d, u32 s)
 {
-    register u32 res;           /* all operands in native machine order */
+    u32 res;           /* all operands in native machine order */
 
     res = d | s;
 
@@ -768,8 +768,8 @@ Implements the OR instruction and side effects.
 u8
 neg_byte(u8 s)
 {
-    register u8 res;
-    register u8 bc;
+    u8 res;
+    u8 bc;
 
     CONDITIONAL_SET_FLAG(s != 0, F_CF);
     res = (u8) - s;
@@ -794,8 +794,8 @@ Implements the OR instruction and side effects.
 u16
 neg_word(u16 s)
 {
-    register u16 res;
-    register u16 bc;
+    u16 res;
+    u16 bc;
 
     CONDITIONAL_SET_FLAG(s != 0, F_CF);
     res = (u16) - s;
@@ -821,8 +821,8 @@ Implements the OR instruction and side effects.
 u32
 neg_long(u32 s)
 {
-    register u32 res;
-    register u32 bc;
+    u32 res;
+    u32 bc;
 
     CONDITIONAL_SET_FLAG(s != 0, F_CF);
     res = (u32) - s;
@@ -878,7 +878,7 @@ Implements the RCL instruction and side effects.
 u8
 rcl_byte(u8 d, u8 s)
 {
-    register unsigned int res, cnt, mask, cf;
+    unsigned int res, cnt, mask, cf;
 
     /* s is the rotate distance.  It varies from 0 - 8. */
     /* have
@@ -951,7 +951,7 @@ Implements the RCL instruction and side effects.
 u16
 rcl_word(u16 d, u8 s)
 {
-    register unsigned int res, cnt, mask, cf;
+    unsigned int res, cnt, mask, cf;
 
     res = d;
     if ((cnt = s % 17) != 0) {
@@ -975,7 +975,7 @@ Implements the RCL instruction and side effects.
 u32
 rcl_long(u32 d, u8 s)
 {
-    register u32 res, cnt, mask, cf;
+    u32 res, cnt, mask, cf;
 
     res = d;
     if ((cnt = s % 33) != 0) {
@@ -1151,7 +1151,7 @@ Implements the ROL instruction and side effects.
 u8
 rol_byte(u8 d, u8 s)
 {
-    register unsigned int res, cnt, mask;
+    unsigned int res, cnt, mask;
 
     /* rotate left */
     /*
@@ -1201,7 +1201,7 @@ Implements the ROL instruction and side effects.
 u16
 rol_word(u16 d, u8 s)
 {
-    register unsigned int res, cnt, mask;
+    unsigned int res, cnt, mask;
 
     res = d;
     if ((cnt = s % 16) != 0) {
@@ -1227,7 +1227,7 @@ Implements the ROL instruction and side effects.
 u32
 rol_long(u32 d, u8 s)
 {
-    register u32 res, cnt, mask;
+    u32 res, cnt, mask;
 
     res = d;
     if ((cnt = s % 32) != 0) {
@@ -1253,7 +1253,7 @@ Implements the ROR instruction and side effects.
 u8
 ror_byte(u8 d, u8 s)
 {
-    register unsigned int res, cnt, mask;
+    unsigned int res, cnt, mask;
 
     /* rotate right */
     /*
@@ -1301,7 +1301,7 @@ Implements the ROR instruction and side effects.
 u16
 ror_word(u16 d, u8 s)
 {
-    register unsigned int res, cnt, mask;
+    unsigned int res, cnt, mask;
 
     res = d;
     if ((cnt = s % 16) != 0) {
@@ -1326,7 +1326,7 @@ Implements the ROR instruction and side effects.
 u32
 ror_long(u32 d, u8 s)
 {
-    register u32 res, cnt, mask;
+    u32 res, cnt, mask;
 
     res = d;
     if ((cnt = s % 32) != 0) {
@@ -1895,8 +1895,8 @@ Implements the SBB instruction and side effects.
 u8
 sbb_byte(u8 d, u8 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     if (ACCESS_FLAG(F_CF))
         res = d - s - 1;
@@ -1921,8 +1921,8 @@ Implements the SBB instruction and side effects.
 u16
 sbb_word(u16 d, u16 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     if (ACCESS_FLAG(F_CF))
         res = d - s - 1;
@@ -1947,8 +1947,8 @@ Implements the SBB instruction and side effects.
 u32
 sbb_long(u32 d, u32 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     if (ACCESS_FLAG(F_CF))
         res = d - s - 1;
@@ -1973,8 +1973,8 @@ Implements the SUB instruction and side effects.
 u8
 sub_byte(u8 d, u8 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - s;
     CONDITIONAL_SET_FLAG(res & 0x80, F_SF);
@@ -1996,8 +1996,8 @@ Implements the SUB instruction and side effects.
 u16
 sub_word(u16 d, u16 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - s;
     CONDITIONAL_SET_FLAG(res & 0x8000, F_SF);
@@ -2019,8 +2019,8 @@ Implements the SUB instruction and side effects.
 u32
 sub_long(u32 d, u32 s)
 {
-    register u32 res;           /* all operands in native machine order */
-    register u32 bc;
+    u32 res;           /* all operands in native machine order */
+    u32 bc;
 
     res = d - s;
     CONDITIONAL_SET_FLAG(res & 0x80000000, F_SF);
@@ -2042,7 +2042,7 @@ Implements the TEST instruction and side effects.
 void
 test_byte(u8 d, u8 s)
 {
-    register u32 res;           /* all operands in native machine order */
+    u32 res;           /* all operands in native machine order */
 
     res = d & s;
 
@@ -2061,7 +2061,7 @@ Implements the TEST instruction and side effects.
 void
 test_word(u16 d, u16 s)
 {
-    register u32 res;           /* all operands in native machine order */
+    u32 res;           /* all operands in native machine order */
 
     res = d & s;
 
@@ -2080,7 +2080,7 @@ Implements the TEST instruction and side effects.
 void
 test_long(u32 d, u32 s)
 {
-    register u32 res;           /* all operands in native machine order */
+    u32 res;           /* all operands in native machine order */
 
     res = d & s;
 
@@ -2099,7 +2099,7 @@ Implements the XOR instruction and side effects.
 u8
 xor_byte(u8 d, u8 s)
 {
-    register u8 res;            /* all operands in native machine order */
+    u8 res;            /* all operands in native machine order */
 
     res = d ^ s;
     CLEAR_FLAG(F_OF);
@@ -2118,7 +2118,7 @@ Implements the XOR instruction and side effects.
 u16
 xor_word(u16 d, u16 s)
 {
-    register u16 res;           /* all operands in native machine order */
+    u16 res;           /* all operands in native machine order */
 
     res = d ^ s;
     CLEAR_FLAG(F_OF);
@@ -2137,7 +2137,7 @@ Implements the XOR instruction and side effects.
 u32
 xor_long(u32 d, u32 s)
 {
-    register u32 res;           /* all operands in native machine order */
+    u32 res;           /* all operands in native machine order */
 
     res = d ^ s;
     CLEAR_FLAG(F_OF);
@@ -2770,7 +2770,7 @@ NOTE: Do not inline this, as (*sys_rdX) is already inline!
 u16
 pop_word(void)
 {
-    register u16 res;
+    u16 res;
 
     DB(if (CHECK_SP_ACCESS())
        x86emu_check_sp_access();)
@@ -2788,7 +2788,7 @@ NOTE: Do not inline this, as (*sys_rdX) is already inline!
 u32
 pop_long(void)
 {
-    register u32 res;
+    u32 res;
 
     DB(if (CHECK_SP_ACCESS())
        x86emu_check_sp_access();)

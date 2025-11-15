@@ -88,7 +88,7 @@ AppleDRIResetProc(ExtensionEntry* extEntry)
 }
 
 static int
-ProcAppleDRIQueryVersion(register ClientPtr client)
+ProcAppleDRIQueryVersion(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xAppleDRIQueryVersionReq);
 
@@ -109,7 +109,7 @@ ProcAppleDRIQueryVersion(register ClientPtr client)
 /* surfaces */
 
 static int
-ProcAppleDRIQueryDirectRenderingCapable(register ClientPtr client)
+ProcAppleDRIQueryDirectRenderingCapable(ClientPtr client)
 {
     REQUEST(xAppleDRIQueryDirectRenderingCapableReq);
     REQUEST_SIZE_MATCH(xAppleDRIQueryDirectRenderingCapableReq);
@@ -140,7 +140,7 @@ ProcAppleDRIQueryDirectRenderingCapable(register ClientPtr client)
 }
 
 static int
-ProcAppleDRIAuthConnection(register ClientPtr client)
+ProcAppleDRIAuthConnection(ClientPtr client)
 {
     REQUEST(xAppleDRIAuthConnectionReq);
     REQUEST_SIZE_MATCH(xAppleDRIAuthConnectionReq);
@@ -232,7 +232,7 @@ ProcAppleDRICreateSurface(ClientPtr client)
 }
 
 static int
-ProcAppleDRIDestroySurface(register ClientPtr client)
+ProcAppleDRIDestroySurface(ClientPtr client)
 {
     REQUEST(xAppleDRIDestroySurfaceReq);
     REQUEST_SIZE_MATCH(xAppleDRIDestroySurfaceReq);
@@ -348,7 +348,7 @@ ProcAppleDRIDestroyPixmap(ClientPtr client)
 /* dispatch */
 
 static int
-ProcAppleDRIDispatch(register ClientPtr client)
+ProcAppleDRIDispatch(ClientPtr client)
 {
     REQUEST(xReq);
 

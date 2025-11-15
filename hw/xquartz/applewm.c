@@ -145,7 +145,7 @@ AppleWMDoReorderWindow(WindowPtr pWin)
 }
 
 static int
-ProcAppleWMQueryVersion(register ClientPtr client)
+ProcAppleWMQueryVersion(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xAppleWMQueryVersionReq);
 
@@ -217,7 +217,7 @@ WMFreeEvents(void *data, XID id)
 }
 
 static int
-ProcAppleWMSelectInput(register ClientPtr client)
+ProcAppleWMSelectInput(ClientPtr client)
 {
     REQUEST(xAppleWMSelectInputReq);
     WMEventPtr pEvent, pNewEvent, *pHead;
@@ -340,7 +340,7 @@ AppleWMSelectedEvents(void)
 /* general utility functions */
 
 static int
-ProcAppleWMDisableUpdate(register ClientPtr client)
+ProcAppleWMDisableUpdate(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xAppleWMDisableUpdateReq);
 
@@ -350,7 +350,7 @@ ProcAppleWMDisableUpdate(register ClientPtr client)
 }
 
 static int
-ProcAppleWMReenableUpdate(register ClientPtr client)
+ProcAppleWMReenableUpdate(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xAppleWMReenableUpdateReq);
 
@@ -362,7 +362,7 @@ ProcAppleWMReenableUpdate(register ClientPtr client)
 /* window functions */
 
 static int
-ProcAppleWMSetWindowMenu(register ClientPtr client)
+ProcAppleWMSetWindowMenu(ClientPtr client)
 {
     const char *bytes;
     int max_len, nitems, i, j;
@@ -411,7 +411,7 @@ ProcAppleWMSetWindowMenu(register ClientPtr client)
 }
 
 static int
-ProcAppleWMSetWindowMenuCheck(register ClientPtr client)
+ProcAppleWMSetWindowMenuCheck(ClientPtr client)
 {
     REQUEST(xAppleWMSetWindowMenuCheckReq);
 
@@ -421,7 +421,7 @@ ProcAppleWMSetWindowMenuCheck(register ClientPtr client)
 }
 
 static int
-ProcAppleWMSetFrontProcess(register ClientPtr client)
+ProcAppleWMSetFrontProcess(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xAppleWMSetFrontProcessReq);
 
@@ -430,7 +430,7 @@ ProcAppleWMSetFrontProcess(register ClientPtr client)
 }
 
 static int
-ProcAppleWMSetWindowLevel(register ClientPtr client)
+ProcAppleWMSetWindowLevel(ClientPtr client)
 {
     REQUEST(xAppleWMSetWindowLevelReq);
     WindowPtr pWin;
@@ -455,7 +455,7 @@ ProcAppleWMSetWindowLevel(register ClientPtr client)
 }
 
 static int
-ProcAppleWMSendPSN(register ClientPtr client)
+ProcAppleWMSendPSN(ClientPtr client)
 {
     REQUEST(xAppleWMSendPSNReq);
     int err;
@@ -474,7 +474,7 @@ ProcAppleWMSendPSN(register ClientPtr client)
 }
 
 static int
-ProcAppleWMAttachTransient(register ClientPtr client)
+ProcAppleWMAttachTransient(ClientPtr client)
 {
     WindowPtr pWinChild, pWinParent;
     REQUEST(xAppleWMAttachTransientReq);
@@ -507,7 +507,7 @@ ProcAppleWMAttachTransient(register ClientPtr client)
 }
 
 static int
-ProcAppleWMSetCanQuit(register ClientPtr client)
+ProcAppleWMSetCanQuit(ClientPtr client)
 {
     REQUEST(xAppleWMSetCanQuitReq);
 
@@ -520,7 +520,7 @@ ProcAppleWMSetCanQuit(register ClientPtr client)
 /* frame functions */
 
 static int
-ProcAppleWMFrameGetRect(register ClientPtr client)
+ProcAppleWMFrameGetRect(ClientPtr client)
 {
     BoxRec ir, or, rr;
     REQUEST(xAppleWMFrameGetRectReq);
@@ -547,7 +547,7 @@ ProcAppleWMFrameGetRect(register ClientPtr client)
 }
 
 static int
-ProcAppleWMFrameHitTest(register ClientPtr client)
+ProcAppleWMFrameHitTest(ClientPtr client)
 {
     BoxRec ir, or;
     int ret;
@@ -571,7 +571,7 @@ ProcAppleWMFrameHitTest(register ClientPtr client)
 }
 
 static int
-ProcAppleWMFrameDraw(register ClientPtr client)
+ProcAppleWMFrameDraw(ClientPtr client)
 {
     BoxRec ir, or;
     unsigned int title_length, title_max;
@@ -609,7 +609,7 @@ ProcAppleWMFrameDraw(register ClientPtr client)
 /* dispatch */
 
 static int
-ProcAppleWMDispatch(register ClientPtr client)
+ProcAppleWMDispatch(ClientPtr client)
 {
     REQUEST(xReq);
 

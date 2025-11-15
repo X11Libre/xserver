@@ -177,7 +177,7 @@ _XkbLookupButtonDevice(DeviceIntPtr *pDev, int id, ClientPtr client,
 void
 XkbSetActionKeyMods(XkbDescPtr xkb, XkbAction *act, unsigned mods)
 {
-    register unsigned tmp;
+    unsigned tmp;
 
     switch (act->type) {
     case XkbSA_SetMods:
@@ -201,8 +201,8 @@ XkbSetActionKeyMods(XkbDescPtr xkb, XkbAction *act, unsigned mods)
 unsigned
 XkbMaskForVMask(XkbDescPtr xkb, unsigned vmask)
 {
-    register int i, bit;
-    register unsigned mask;
+    int i, bit;
+    unsigned mask;
 
     for (mask = i = 0, bit = 1; i < XkbNumVirtualMods; i++, bit <<= 1) {
         if (vmask & bit)
@@ -269,7 +269,7 @@ void
 XkbUpdateDescActions(XkbDescPtr xkb,
                      KeyCode first, CARD8 num, XkbChangesPtr changes)
 {
-    register unsigned key;
+    unsigned key;
 
     for (key = first; key < (first + num); key++) {
         XkbApplyCompatMapToKey(xkb, key, changes);
@@ -277,7 +277,7 @@ XkbUpdateDescActions(XkbDescPtr xkb,
 
     if (changes->map.changed & (XkbVirtualModMapMask | XkbModifierMapMask)) {
         unsigned char newVMods[XkbNumVirtualMods];
-        register unsigned bit, i;
+        unsigned bit, i;
         unsigned present;
 
         memset(newVMods, 0, XkbNumVirtualMods);
@@ -359,7 +359,7 @@ XkbUpdateActions(DeviceIntPtr pXDev,
 KeySymsPtr
 XkbGetCoreMap(DeviceIntPtr keybd)
 {
-    register int key, tmp;
+    int key, tmp;
     int maxSymsPerKey, maxGroup1Width;
     XkbDescPtr xkb;
     KeySymsPtr syms;
@@ -506,7 +506,7 @@ XkbGetCoreMap(DeviceIntPtr keybd)
         }
         pXKB += XkbKeyGroupsWidth(xkb, key);
         for (n = XkbGroup3Index; n < nGroups; n++) {
-            register int s;
+            int s;
 
             groupWidth = XkbKeyGroupWidth(xkb, key, n);
             for (s = 0; s < groupWidth; s++) {
@@ -827,7 +827,7 @@ XkbLookupNamedGeometry(DeviceIntPtr dev, Atom name, Bool *shouldFree)
 }
 
 void
-XkbConvertCase(register KeySym sym, KeySym * lower, KeySym * upper)
+XkbConvertCase(KeySym sym, KeySym * lower, KeySym * upper)
 {
     *lower = sym;
     *upper = sym;

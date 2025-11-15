@@ -206,7 +206,7 @@ XkbSendStateNotify(DeviceIntPtr kbd, xkbStateNotify * pSN)
     XkbStatePtr state;
     XkbInterestPtr interest;
     Time time;
-    register CARD16 changed, bState;
+    CARD16 changed, bState;
 
     interest = kbd->xkb_interest;
     if (!interest || !kbd->key || !kbd->key->xkbInfo)

@@ -187,7 +187,7 @@ ProcPseudoramiXGetState(ClientPtr client)
         swapl(&stuff->window);
 
     WindowPtr pWin;
-    register int rc;
+    int rc;
 
     TRACE;
 
@@ -218,7 +218,7 @@ ProcPseudoramiXGetScreenCount(ClientPtr client)
         swapl(&stuff->window);
 
     WindowPtr pWin;
-    register int rc;
+    int rc;
 
     TRACE;
 
@@ -251,7 +251,7 @@ ProcPseudoramiXGetScreenSize(ClientPtr client)
     }
 
     WindowPtr pWin;
-    register int rc;
+    int rc;
 
     TRACE;
 

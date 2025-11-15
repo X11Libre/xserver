@@ -409,8 +409,8 @@ DefineSelf(int fd)
     int len;
     caddr_t addr;
     int family;
-    register HOST *host;
-    register struct hostent *hp;
+    HOST *host;
+    struct hostent *hp;
 
     union {
         struct sockaddr sa;
@@ -562,7 +562,7 @@ DefineSelf(int fd)
 #ifdef USE_SIOCGLIFCONF
     struct sockaddr_storage buf[16];
     struct lifconf ifc;
-    register struct lifreq *ifr;
+    struct lifreq *ifr;
 
 #ifdef SIOCGLIFNUM
     struct lifnum ifn;
@@ -570,7 +570,7 @@ DefineSelf(int fd)
 #else                           /* !USE_SIOCGLIFCONF */
     char buf[2048];
     struct ifconf ifc;
-    register struct ifreq *ifr;
+    struct ifreq *ifr;
 #endif
     void *bufptr = buf;
 #else                           /* HAVE_GETIFADDRS */
@@ -579,7 +579,7 @@ DefineSelf(int fd)
     int len;
     unsigned char *addr;
     int family;
-    register HOST *host;
+    HOST *host;
 
 #ifndef HAVE_GETIFADDRS
 
@@ -854,7 +854,7 @@ AugmentSelf(void *from, int len)
 {
     int family;
     void *addr;
-    register HOST *host;
+    HOST *host;
 
     family = ConvertAddr(from, &len, (void **) &addr);
     if (family == -1 || family == FamilyLocal)
@@ -891,7 +891,7 @@ AddLocalHosts(void)
 void
 ResetHosts(const char *display)
 {
-    register HOST *host;
+    HOST *host;
     char lhostname[120], ohostname[120];
     char *hostname = ohostname;
     char fname[PATH_MAX + 1];
@@ -1001,7 +1001,7 @@ ResetHosts(const char *display)
 #ifdef XTHREADS_NEEDS_BYNAMEPARAMS
                 _Xgethostbynameparams hparams;
 #endif
-                register struct hostent *hp;
+                struct hostent *hp;
 
                 /* host name */
                 if ((family == FamilyInternet &&
@@ -1039,7 +1039,7 @@ xtransLocalClient(ClientPtr client)
     int alen, family, notused;
     Xtransaddr *from = NULL;
     void *addr;
-    register HOST *host;
+    HOST *host;
     OsCommPtr oc = (OsCommPtr) client->osPrivate;
 
     if (!oc->trans_conn)
@@ -1328,7 +1328,7 @@ ForEachHostInFamily(int family, Bool (*func) (unsigned char *addr,
 static Bool
 NewHost(int family, const void *addr, int len, int addingLocalHosts)
 {
-    register HOST *host;
+    HOST *host;
 
     for (host = validhosts; host; host = host->next) {
         if (addrEqual(family, addr, len, host))
@@ -1360,7 +1360,7 @@ RemoveHost(ClientPtr client, int family, unsigned length,       /* of bytes in p
            void *pAddr)
 {
     int rc, len;
-    register HOST *host, **prev;
+    HOST *host, **prev;
 
     rc = AuthorizedClient(client);
     if (rc != Success)
@@ -1404,9 +1404,9 @@ int
 GetHosts(void **data, int *pnHosts, int *pLen, BOOL * pEnabled)
 {
     int len;
-    register int n = 0;
-    register unsigned char *ptr;
-    register HOST *host;
+    int n = 0;
+    unsigned char *ptr;
+    HOST *host;
     int nHosts = 0;
 
     *pEnabled = AccessEnabled ? EnableAccess : DisableAccess;
@@ -1479,11 +1479,11 @@ CheckAddr(int family, const void *pAddr, unsigned length)
  * Returns 1 if host is invalid, 0 if we've found it. */
 
 int
-InvalidHost(register struct sockaddr *saddr, int len, ClientPtr client)
+InvalidHost(struct sockaddr *saddr, int len, ClientPtr client)
 {
     int family;
     void *addr = NULL;
-    register HOST *selfhost, *host;
+    HOST *selfhost, *host;
 
     if (!AccessEnabled)         /* just let them in */
         return 0;
@@ -1523,7 +1523,7 @@ InvalidHost(register struct sockaddr *saddr, int len, ClientPtr client)
 }
 
 static int
-ConvertAddr(register struct sockaddr *saddr, int *len, void **addr)
+ConvertAddr(struct sockaddr *saddr, int *len, void **addr)
 {
     if (*len == 0)
         return FamilyLocal;
@@ -1804,7 +1804,7 @@ siHostnameAddrMatch(int family, void *addr, int len,
     }
 #else /* getaddrinfo not supported, use gethostbyname instead for IPv4 */
     if (family == FamilyInternet) {
-        register struct hostent *hp;
+        struct hostent *hp;
 
 #ifdef XTHREADS_NEEDS_BYNAMEPARAMS
         _Xgethostbynameparams hparams;

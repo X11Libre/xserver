@@ -52,8 +52,8 @@ __glXMakeBitmapFromGlyph(FontPtr font, CharInfoPtr pci)
     int allocBytes;             /* bytes to allocate to store bitmap */
     int w;                      /* width of glyph in bits */
     int h;                      /* height of glyph */
-    register unsigned char *pglyph;
-    register unsigned char *p;
+    unsigned char *pglyph;
+    unsigned char *p;
     unsigned char *allocbuf;
 
 #define __GL_CHAR_BUF_SIZE 2048

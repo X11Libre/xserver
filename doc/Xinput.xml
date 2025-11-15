@@ -475,7 +475,7 @@ allocated.  Its parameters are:
 <literallayout class="monospaced">
 Bool
 InitButtonClassDeviceStruct(dev, numButtons, map)
-    register DeviceIntPtr dev;
+    DeviceIntPtr dev;
     int numButtons;
     CARD8 *map;
 </literallayout>

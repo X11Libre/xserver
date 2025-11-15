@@ -1903,7 +1903,7 @@ xf86GetClocks(ScrnInfoPtr pScrn, int num, Bool (*ClockFunc) (ScrnInfoPtr, int),
               unsigned long vertsyncreg, int maskval, int knownclkindex,
               int knownclkvalue)
 {
-    register int status = vertsyncreg;
+    int status = vertsyncreg;
     unsigned long i, cnt, rcnt, sync;
     vgaHWPtr hwp = VGAHWPTR(pScrn);
 

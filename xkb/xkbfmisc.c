@@ -362,7 +362,7 @@ XkbWriteXKBKeymapForNames(FILE * file,
 int
 XkbFindKeycodeByName(XkbDescPtr xkb, char *name, Bool use_aliases)
 {
-    register int i;
+    int i;
 
     if ((!xkb) || (!xkb->names) || (!xkb->names->keys))
         return 0;

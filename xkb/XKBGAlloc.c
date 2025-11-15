@@ -84,8 +84,8 @@ _XkbFreeGeomNonLeafElems(Bool freeAll,
                          char **elems,
                          unsigned int elem_sz, ContentsClearFunc freeFunc)
 {
-    register int i;
-    register char *ptr;
+    int i;
+    char *ptr;
 
     if (freeAll) {
         first = 0;
@@ -321,8 +321,8 @@ _XkbClearDoodad(char *doodad_in)
 void
 XkbFreeGeomDoodads(XkbDoodadPtr doodads, int nDoodads, Bool freeAll)
 {
-    register int i;
-    register XkbDoodadPtr doodad;
+    int i;
+    XkbDoodadPtr doodad;
 
     if (doodads) {
         for (i = 0, doodad = doodads; i < nDoodads; i++, doodad++) {
@@ -533,8 +533,8 @@ XkbAllocGeometry(XkbDescPtr xkb, XkbGeometrySizesPtr sizes)
 XkbPropertyPtr
 XkbAddGeomProperty(XkbGeometryPtr geom, char *name, char *value)
 {
-    register int i;
-    register XkbPropertyPtr prop;
+    int i;
+    XkbPropertyPtr prop;
 
     if ((!geom) || (!name) || (!value))
         return NULL;
@@ -566,8 +566,8 @@ XkbAddGeomProperty(XkbGeometryPtr geom, char *name, char *value)
 XkbKeyAliasPtr
 XkbAddGeomKeyAlias(XkbGeometryPtr geom, char *aliasStr, char *realStr)
 {
-    register int i;
-    register XkbKeyAliasPtr alias;
+    int i;
+    XkbKeyAliasPtr alias;
 
     if ((!geom) || (!aliasStr) || (!realStr) || (!aliasStr[0]) || (!realStr[0]))
         return NULL;
@@ -594,8 +594,8 @@ XkbAddGeomKeyAlias(XkbGeometryPtr geom, char *aliasStr, char *realStr)
 XkbColorPtr
 XkbAddGeomColor(XkbGeometryPtr geom, char *spec, unsigned int pixel)
 {
-    register int i;
-    register XkbColorPtr color;
+    int i;
+    XkbColorPtr color;
 
     if ((!geom) || (!spec))
         return NULL;
@@ -641,7 +641,7 @@ XkbShapePtr
 XkbAddGeomShape(XkbGeometryPtr geom, Atom name, int sz_outlines)
 {
     XkbShapePtr shape;
-    register int i;
+    int i;
 
     if ((!geom) || (!name) || (sz_outlines < 0))
         return NULL;
@@ -700,7 +700,7 @@ XkbSectionPtr
 XkbAddGeomSection(XkbGeometryPtr geom,
                   Atom name, int sz_rows, int sz_doodads, int sz_over)
 {
-    register int i;
+    int i;
     XkbSectionPtr section;
 
     if ((!geom) || (name == None) || (sz_rows < 0))
@@ -739,7 +739,7 @@ XkbDoodadPtr
 XkbAddGeomDoodad(XkbGeometryPtr geom, XkbSectionPtr section, Atom name)
 {
     XkbDoodadPtr old, doodad;
-    register int i, nDoodads;
+    int i, nDoodads;
 
     if ((!geom) || (name == None))
         return NULL;
@@ -777,7 +777,7 @@ XkbOverlayKeyPtr
 XkbAddGeomOverlayKey(XkbOverlayPtr overlay,
                      XkbOverlayRowPtr row, char *over, char *under)
 {
-    register int i;
+    int i;
     XkbOverlayKeyPtr key;
     XkbSectionPtr section;
     XkbRowPtr row_under;
@@ -810,7 +810,7 @@ XkbAddGeomOverlayKey(XkbOverlayPtr overlay,
 XkbOverlayRowPtr
 XkbAddGeomOverlayRow(XkbOverlayPtr overlay, int row_under, int sz_keys)
 {
-    register int i;
+    int i;
     XkbOverlayRowPtr row;
 
     if ((!overlay) || (sz_keys < 0))
@@ -842,7 +842,7 @@ XkbAddGeomOverlayRow(XkbOverlayPtr overlay, int row_under, int sz_keys)
 XkbOverlayPtr
 XkbAddGeomOverlay(XkbSectionPtr section, Atom name, int sz_rows)
 {
-    register int i;
+    int i;
     XkbOverlayPtr overlay;
 
     if ((!section) || (name == None) || (sz_rows == 0))

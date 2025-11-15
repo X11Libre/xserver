@@ -132,7 +132,7 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
 {
     int dx, dy;
     RegionRec childUniverse;
-    register WindowPtr pChild;
+    WindowPtr pChild;
     int oldVis, newVis;
     BoxRec borderSize;
     RegionRec childUnion;
@@ -403,8 +403,8 @@ RootlessComputeClips(WindowPtr pParent, ScreenPtr pScreen,
 static void
 RootlessTreeObscured(WindowPtr pParent)
 {
-    register WindowPtr pChild;
-    register int oldVis;
+    WindowPtr pChild;
+    int oldVis;
 
     pChild = pParent;
     while (1) {
@@ -474,8 +474,8 @@ RootlessMiValidateTree(WindowPtr pRoot, /* Parent to validate */
     RegionRec childClip;        /* The new borderClip for the current
                                  * child */
     RegionRec exposed;          /* For intermediate calculations */
-    register ScreenPtr pScreen;
-    register WindowPtr pWin;
+    ScreenPtr pScreen;
+    WindowPtr pWin;
 
     pScreen = pRoot->drawable.pScreen;
     if (pChild == NullWindow)

@@ -6,53 +6,53 @@
 #include "xf86.h"
 #include "compiler.h"
 
-int readDense8(void *Base, register unsigned long Offset);
-int readDense16(void *Base, register unsigned long Offset);
-int readDense32(void *Base, register unsigned long Offset);
+int readDense8(void *Base, unsigned long Offset);
+int readDense16(void *Base, unsigned long Offset);
+int readDense32(void *Base, unsigned long Offset);
 void
- writeDense8(int Value, void *Base, register unsigned long Offset);
+ writeDense8(int Value, void *Base, unsigned long Offset);
 void
- writeDense16(int Value, void *Base, register unsigned long Offset);
+ writeDense16(int Value, void *Base, unsigned long Offset);
 void
- writeDense32(int Value, void *Base, register unsigned long Offset);
+ writeDense32(int Value, void *Base, unsigned long Offset);
 
 int
-readDense8(void *Base, register unsigned long Offset)
+readDense8(void *Base, unsigned long Offset)
 {
     mem_barrier();
     return *(volatile CARD8 *) ((unsigned long) Base + (Offset));
 }
 
 int
-readDense16(void *Base, register unsigned long Offset)
+readDense16(void *Base, unsigned long Offset)
 {
     mem_barrier();
     return *(volatile CARD16 *) ((unsigned long) Base + (Offset));
 }
 
 int
-readDense32(void *Base, register unsigned long Offset)
+readDense32(void *Base, unsigned long Offset)
 {
     mem_barrier();
     return *(volatile CARD32 *) ((unsigned long) Base + (Offset));
 }
 
 void
-writeDense8(int Value, void *Base, register unsigned long Offset)
+writeDense8(int Value, void *Base, unsigned long Offset)
 {
     write_mem_barrier();
     *(volatile CARD8 *) ((unsigned long) Base + (Offset)) = Value;
 }
 
 void
-writeDense16(int Value, void *Base, register unsigned long Offset)
+writeDense16(int Value, void *Base, unsigned long Offset)
 {
     write_mem_barrier();
     *(volatile CARD16 *) ((unsigned long) Base + (Offset)) = Value;
 }
 
 void
-writeDense32(int Value, void *Base, register unsigned long Offset)
+writeDense32(int Value, void *Base, unsigned long Offset)
 {
     write_mem_barrier();
     *(volatile CARD32 *) ((unsigned long) Base + (Offset)) = Value;

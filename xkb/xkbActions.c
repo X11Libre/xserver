@@ -144,8 +144,8 @@ XkbGetKeyAction(XkbSrvInfoPtr xkbi, XkbStatePtr xkbState, CARD8 key)
 
     type = XkbKeyKeyType(xkb, key, effectiveGroup);
     if (type->map != NULL) {
-        register unsigned i, mods;
-        register XkbKTMapEntryPtr entry;
+        unsigned i, mods;
+        XkbKTMapEntryPtr entry;
 
         mods = xkbState->mods & type->mods.mask;
         for (entry = type->map, i = 0; i < type->map_count; i++, entry++) {
@@ -592,7 +592,7 @@ _XkbFilterPointerBtn(XkbSrvInfoPtr xkbi,
             break;
         case XkbSA_PtrBtn:
         {
-            register int i, nClicks;
+            int i, nClicks;
 
             AccessXCancelRepeatKey(xkbi, keycode);
             if (pAction->btn.count > 0) {
@@ -1141,7 +1141,7 @@ _XkbFilterDeviceBtn(XkbSrvInfoPtr xkbi,
 static XkbFilterPtr
 _XkbNextFreeFilter(XkbSrvInfoPtr xkbi)
 {
-    register int i;
+    int i;
 
     if (xkbi->szFilters == 0) {
         xkbi->szFilters = 4;
@@ -1166,7 +1166,7 @@ _XkbNextFreeFilter(XkbSrvInfoPtr xkbi)
 static int
 _XkbApplyFilters(XkbSrvInfoPtr xkbi, unsigned kc, XkbAction *pAction)
 {
-    register int i, send;
+    int i, send;
 
     send = 1;
     for (i = 0; i < xkbi->szFilters; i++) {

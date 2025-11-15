@@ -569,8 +569,8 @@ ProcDbeGetVisualInfo(ClientPtr client)
     DbeScreenPrivPtr pDbeScreenPriv;
     Drawable *drawables;
     DrawablePtr *pDrawables = NULL;
-    register int rc;
-    register int count;         /* number of visual infos in reply */
+    int rc;
+    int count;         /* number of visual infos in reply */
 
     if (stuff->n > UINT32_MAX / sizeof(CARD32))
         return BadLength;

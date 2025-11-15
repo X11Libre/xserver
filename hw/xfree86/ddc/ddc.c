@@ -183,8 +183,8 @@ GetEDID_DDC1(unsigned int *s_ptr)
 
 /* fetch entire EDID record; DDC bit needs to be masked */
 static unsigned int *
-FetchEDID_DDC1(register ScrnInfoPtr pScrn,
-               register unsigned int (*read_DDC) (ScrnInfoPtr))
+FetchEDID_DDC1(ScrnInfoPtr pScrn,
+               unsigned int (*read_DDC) (ScrnInfoPtr))
 {
     int count = NUM;
     unsigned int *ptr, *xp;

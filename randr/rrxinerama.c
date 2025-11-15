@@ -121,7 +121,7 @@ ProcRRXineramaGetState(ClientPtr client)
         swapl(&stuff->window);
 
     WindowPtr pWin;
-    register int rc;
+    int rc;
     ScreenPtr pScreen;
     rrScrPrivPtr pScrPriv;
     Bool active = FALSE;
@@ -169,7 +169,7 @@ ProcRRXineramaGetScreenCount(ClientPtr client)
         swapl(&stuff->window);
 
     WindowPtr pWin;
-    register int rc;
+    int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
@@ -198,7 +198,7 @@ ProcRRXineramaGetScreenSize(ClientPtr client)
 
     WindowPtr pWin, pRoot;
     ScreenPtr pScreen;
-    register int rc;
+    int rc;
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)

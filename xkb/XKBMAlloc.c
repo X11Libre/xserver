@@ -125,7 +125,7 @@ XkbAllocClientMap(XkbDescPtr xkb, unsigned which, unsigned nTotalTypes)
 int
 XkbAllocServerMap(XkbDescPtr xkb, unsigned which, unsigned nNewActions)
 {
-    register int i;
+    int i;
     XkbServerMapPtr map;
 
     if (xkb == NULL)
@@ -253,7 +253,7 @@ XkbCopyKeyType(XkbKeyTypePtr from, XkbKeyTypePtr into)
 int
 XkbCopyKeyTypes(XkbKeyTypePtr from, XkbKeyTypePtr into, int num_types)
 {
-    register int i, rtrn;
+    int i, rtrn;
 
     if ((!from) || (!into) || (num_types < 0))
         return BadMatch;
@@ -361,7 +361,7 @@ XkbResizeKeyType(XkbDescPtr xkb,
         int nTotal;
         KeySym *newSyms;
         int width, match, nResize;
-        register int i, g, nSyms;
+        int i, g, nSyms;
 
         nResize = 0;
         for (nTotal = 1, i = xkb->min_key_code; i <= xkb->max_key_code; i++) {
@@ -423,7 +423,7 @@ XkbResizeKeyType(XkbDescPtr xkb,
     }
     else if (new_num_lvls < type->num_levels) {
         int width, match;
-        register int g, i;
+        int g, i;
 
         for (i = xkb->min_key_code; i <= xkb->max_key_code; i++) {
             width = XkbKeyGroupsWidth(xkb, i);
@@ -440,7 +440,7 @@ XkbResizeKeyType(XkbDescPtr xkb,
     }
     if (nMatchingKeys > 0) {
         int key, firstClear;
-        register int i, g;
+        int i, g;
 
         if (new_num_lvls > type->num_levels)
             firstClear = type->num_levels;
@@ -470,7 +470,7 @@ XkbResizeKeyType(XkbDescPtr xkb,
 KeySym *
 XkbResizeKeySyms(XkbDescPtr xkb, int key, int needed)
 {
-    register int i, nSyms, nKeySyms;
+    int i, nSyms, nKeySyms;
     unsigned nOldSyms;
     KeySym *newSyms;
 
@@ -731,7 +731,7 @@ XkbChangeKeycodeRange(XkbDescPtr xkb,
 XkbAction *
 XkbResizeKeyActions(XkbDescPtr xkb, int key, int needed)
 {
-    register int i, nActs;
+    int i, nActs;
     XkbAction *newActs;
 
     if (needed <= 0) {
@@ -793,7 +793,7 @@ XkbFreeClientMap(XkbDescPtr xkb, unsigned what, Bool freeMap)
     if (what & XkbKeyTypesMask) {
         if (map->types != NULL) {
             if (map->num_types > 0) {
-                register int i;
+                int i;
                 XkbKeyTypePtr type;
 
                 for (i = 0, type = map->types; i < map->num_types; i++, type++) {
