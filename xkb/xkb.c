@@ -5652,7 +5652,7 @@ ProcXkbPerClientFlags(ClientPtr client)
 
 /* all latin-1 alphanumerics, plus parens, minus, underscore, slash */
 /* and wildcards */
-static unsigned char componentSpecLegal[] = {
+static unsigned const char componentSpecLegal[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0xa7, 0xff, 0x87,
     0xfe, 0xff, 0xff, 0x87, 0xfe, 0xff, 0xff, 0x07,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -5660,7 +5660,7 @@ static unsigned char componentSpecLegal[] = {
 };
 
 /* same as above but accepts percent, plus and bar too */
-static unsigned char componentExprLegal[] = {
+static unsigned const char componentExprLegal[] = {
     0x00, 0x00, 0x00, 0x00, 0x20, 0xaf, 0xff, 0x87,
     0xfe, 0xff, 0xff, 0x87, 0xfe, 0xff, 0xff, 0x17,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -5673,7 +5673,8 @@ GetComponentSpec(ClientPtr client, xkbGetKbdByNameReq *stuff,
 {
     int len;
     register int i;
-    unsigned char *wire, *str, *tmp, *legal;
+    unsigned char *wire, *str, *tmp;
+    const unsigned char *legal;
 
     if (allowExpr)
         legal = &componentExprLegal[0];
