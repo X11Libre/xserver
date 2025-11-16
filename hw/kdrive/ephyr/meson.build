@@ -4,7 +4,6 @@ srcs = [
     'ephyrcursor.c',
     'ephyr_draw.c',
     'hostx.c',
-    '../../stubs/ddxBeforeReset.c',
 ]
 
 xephyr_dep = [

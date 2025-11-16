@@ -594,7 +594,9 @@ Dispatch(void)
         }
         dispatchException &= ~DE_PRIORITYCHANGE;
     }
+#if defined(DDXBEFORERESET)
     ddxBeforeReset();
+#endif
     KillAllClients();
     dispatchException &= ~DE_RESET;
     SmartScheduleLatencyLimited = 0;

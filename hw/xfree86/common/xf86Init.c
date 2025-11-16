@@ -284,7 +284,7 @@ xf86EnsureRANDR(ScreenPtr pScreen)
  *      collecting the pixmap formats.
  */
 void
-InitOutput(int argc, char **argv)
+InitOutput(ScreenInfo *unused, int argc, char **argv)
 {
     int i, j, k, scr_index;
     const char **modulelist;
@@ -1323,6 +1323,13 @@ xf86GetBppFromDepth(ScrnInfoPtr pScrn, int depth)
     else
         return 0;
 }
+
+#ifdef DDXBEFORERESET
+void
+ddxBeforeReset(void)
+{
+}
+#endif
 
 #if INPUTTHREAD
 /** This function is called in Xserver/os/inputthread.c when starting

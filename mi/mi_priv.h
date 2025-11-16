@@ -36,7 +36,6 @@ void miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs);
 void miStepDash(int dist, int * pDashIndex, unsigned char * pDash,
                 int numInDashList, int *pDashOffset);
 
-Bool mieqInit(void);
 void mieqFini(void);
 void mieqEnqueue(DeviceIntPtr pDev, InternalEvent *e);
 void mieqSwitchScreen(DeviceIntPtr pDev, ScreenPtr pScreen, Bool set_dequeue_screen);

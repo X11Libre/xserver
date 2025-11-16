@@ -159,6 +159,14 @@ typedef struct _GestureInfo *GestureInfoPtr;
 typedef struct _DDXTouchPointInfo *DDXTouchPointInfoPtr;
 typedef union _GrabMask GrabMask;
 
+struct _ValuatorMask {
+    int8_t last_bit;            /* highest bit set in mask */
+    int8_t has_unaccelerated;
+    uint8_t mask[(MAX_VALUATORS + 7) / 8];
+    double valuators[MAX_VALUATORS];    /* valuator data */
+    double unaccelerated[MAX_VALUATORS];    /* valuator data */
+};
+
 typedef struct _ValuatorMask ValuatorMask;
 
 /* The DIX stores incoming input events in this list */

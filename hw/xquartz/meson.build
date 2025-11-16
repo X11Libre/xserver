@@ -55,7 +55,6 @@ srcs_libxquartz = [
     'quartzRandR.c',
     '../../mi/miinitext.c',
     '../../mi/miinitext.h',
-    '../stubs/ddxBeforeReset.c',
 ]
 
 libxquartz_defs = [

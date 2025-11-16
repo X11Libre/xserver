@@ -271,6 +271,14 @@ OsVendorFatalError(const char *f, va_list args)
 {
 }
 
+#if defined(DDXBEFORERESET)
+void
+ddxBeforeReset(void)
+{
+    return;
+}
+#endif
+
 #if INPUTTHREAD
 /** This function is called in Xserver/os/inputthread.c when starting
     the input thread. */
@@ -1047,7 +1055,7 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
 }                               /* end vfbScreenInit */
 
 void
-InitOutput(int argc, char **argv)
+InitOutput(ScreenInfo *unused, int argc, char **argv)
 {
     int i;
     int NumFormats = 0;

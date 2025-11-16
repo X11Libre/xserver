@@ -276,6 +276,13 @@ _X_ATTRIBUTE_PRINTF(1, 2);
 extern _X_EXPORT void
 xorg_backtrace(void);
 
+/* Logging. */
+typedef enum _LogParameter {
+    XLOG_SYNC,
+    XLOG_VERBOSITY,
+    XLOG_FILE_VERBOSITY
+} LogParameter;
+int LogSetParameter(LogParameter param, int value);
 /* should not be used anymore, just for backwards compat with drivers */
 #define LogVMessageVerbSigSafe(...) LogVMessageVerb(__VA_ARGS__)
 #define LogMessageVerbSigSafe(...) LogMessageVerb(__VA_ARGS__)
@@ -293,5 +300,32 @@ static inline int System(const char* cmdline)
 {
     return system(cmdline);
 }
+
+
+#define CHECK_FOR_REQUIRED_ARGUMENTS(num)  \
+    do if (((i + num) >= argc) || (!argv[i + num])) {                   \
+        UseMsg();                                                       \
+        FatalError("Required argument to %s not specified\n", argv[i]); \
+    } while (0)
+
+
+enum ExitCode {
+    EXIT_NO_ERROR = 0,
+    EXIT_ERR_ABORT = 1,
+    EXIT_ERR_CONFIGURE = 2,
+    EXIT_ERR_DRIVERS = 3,
+};
+
+/* called by ProcessCommandLine, so DDX can catch cmdline args */
+_X_EXPORT int ddxProcessArgument(int argc, char *argv[], int i);
+/* called before server reset */
+_X_EXPORT void ddxBeforeReset(void);
+
+/* print DDX specific usage message */
+_X_EXPORT void ddxUseMsg(void);
+
+_X_EXPORT void ddxGiveUp(enum ExitCode error);
+
+_X_EXPORT void ddxInputThreadInit(void);
 
 #endif                          /* OS_H */

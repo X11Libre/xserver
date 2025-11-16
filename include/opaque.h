@@ -29,6 +29,7 @@ from The Open Group.
 #ifndef OPAQUE_H
 #define OPAQUE_H
 
+#include <X11/Xfuncproto.h>
 #include <X11/Xmd.h>
 
 #include "globals.h"
@@ -39,5 +40,11 @@ extern _X_EXPORT Bool bgNoneRoot;
 
 // needed by libvnc.so from tigervnc
 extern _X_EXPORT char *display;
+extern _X_EXPORT Bool explicit_display;
+_X_EXPORT void UseMsg(void);
+/* bit values for dispatchException */
+#define DE_RESET     1
+#define DE_TERMINATE 2
+#define DE_PRIORITYCHANGE 4     /* set when a client's priority changes */
 
 #endif                          /* OPAQUE_H */

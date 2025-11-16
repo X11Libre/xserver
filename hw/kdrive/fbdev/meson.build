@@ -1,7 +1,6 @@
 srcs = [
     'fbdev.c',
     'fbinit.c',
-    '../../stubs/ddxBeforeReset.c',
 ]
 
 xfbdev_server = executable(

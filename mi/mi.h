@@ -320,5 +320,6 @@ typedef void (*mieqHandler) (int screen, InternalEvent *event,
 
 void _X_EXPORT mieqSetHandler(int event, mieqHandler handler);
 void _X_EXPORT mieqProcessInputEvents(void);
+Bool _X_EXPORT mieqInit(void);
 
 #endif                          /* MI_H */

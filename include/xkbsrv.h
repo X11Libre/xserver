@@ -36,6 +36,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "xkbrules.h"
 #include "inputstr.h"
 #include "events.h"
+#include <X11/extensions/XKB.h>
 
 
 #define XkbChangeTypesOfKey            SrvXkbChangeTypesOfKey
@@ -247,6 +248,15 @@ extern _X_EXPORT Status SrvXkbChangeTypesOfKey(XkbDescPtr /* xkb */ ,
 
 void _X_EXPORT XkbSendNotification(DeviceIntPtr kbd, XkbChangesPtr pChanges,
                          XkbEventCausePtr cause);
+
+#define XkbSetCauseUnknown(c) XkbSetCauseKey(c, 0, 0)
+#define XkbAX_KRGMask    (XkbSlowKeysMask|XkbBounceKeysMask)
+#define XkbAllFilteredEventsMask \
+        (XkbAccessXKeysMask|XkbRepeatKeysMask|XkbMouseKeysAccelMask|XkbAX_KRGMask)
+
+#define XkbSetCauseKey(c,k,e)   { (c)->kc= (k),(c)->event= (e),\
+                                  (c)->mjr= (c)->mnr= 0; \
+                                  (c)->client= NULL; }
 
 #include "xkbstr.h"
 #include "xkbrules.h"
