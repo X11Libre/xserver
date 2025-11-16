@@ -29,6 +29,9 @@
 
 #include <stdint.h>
 
+#define HAVE_DUMB_BO
+
+#ifdef HAVE_DUMB_BO
 struct dumb_bo {
     uint32_t handle;
     uint32_t size;
@@ -41,5 +44,6 @@ struct dumb_bo *dumb_bo_create(int fd, const unsigned width,
 int dumb_bo_map(int fd, struct dumb_bo *bo);
 int dumb_bo_destroy(int fd, struct dumb_bo *bo);
 struct dumb_bo *dumb_get_bo_from_fd(int fd, int handle, int pitch, int size);
+#endif
 
 #endif

@@ -80,11 +80,12 @@ enum drmmode_crtc_property {
 typedef struct {
     uint32_t width;
     uint32_t height;
+#ifdef HAVE_DUMB_BO
     struct dumb_bo *dumb;
+#endif
 #ifdef GLAMOR_HAS_GBM
     Bool used_modifiers;
     struct gbm_bo *gbm;
-    void* map;
 #endif
     void* map;
 } drmmode_bo;

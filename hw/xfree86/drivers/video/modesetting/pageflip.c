@@ -415,7 +415,9 @@ ms_do_pageflip(ScreenPtr screen,
     ms->glamor.block_handler(screen);
 
     new_front_bo.gbm = ms->glamor.gbm_bo_from_pixmap(screen, new_front);
+#ifdef HAVE_DUMB_BO
     new_front_bo.dumb = NULL;
+#endif
 
     if (!new_front_bo.gbm) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
