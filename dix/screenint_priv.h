@@ -40,7 +40,7 @@ static inline ScreenPtr dixGetMasterScreen(void) {
  * @return pointer to idx'th screen or NULL
  */
 static inline ScreenPtr dixGetScreenPtr(unsigned int idx) {
-    if (idx < screenInfo.numScreens)
+    if (idx < (unsigned int)screenInfo.numScreens)
         return screenInfo.screens[idx];
     return NULL;
 }
@@ -52,7 +52,7 @@ static inline ScreenPtr dixGetScreenPtr(unsigned int idx) {
  * @return TRUE if the screen at this index exists
  */
 static inline bool dixScreenExists(unsigned int idx) {
-    return ((idx < screenInfo.numScreens) &&
+    return ((idx < (unsigned int)screenInfo.numScreens) &&
             (screenInfo.screens[idx] != NULL));
 }
 
@@ -65,7 +65,7 @@ static inline bool dixScreenExists(unsigned int idx) {
  */
 #define DIX_FOR_EACH_SCREEN(__LAMBDA__) \
     do { \
-        for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) { \
+        for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numScreens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.screens[walkScreenIdx]; \
             (void)walkScreen; \
             __LAMBDA__; \
@@ -103,7 +103,7 @@ static inline bool dixScreenExists(unsigned int idx) {
  */
 #define DIX_FOR_EACH_GPU_SCREEN(__LAMBDA__) \
     do { \
-        for (unsigned walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) { \
+        for (int walkScreenIdx = 0; walkScreenIdx < screenInfo.numGPUScreens; walkScreenIdx++) { \
             ScreenPtr walkScreen = screenInfo.gpuscreens[walkScreenIdx]; \
             (void)walkScreen; \
             __LAMBDA__; \
