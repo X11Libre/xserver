@@ -1258,6 +1258,10 @@ drmmode_create_cursor_bo(drmmode_ptr drmmode, drmmode_bo *bo,
 
 #ifdef GLAMOR_HAS_GBM
     if (drmmode->gbm) {
+        /**
+         * Assume the depth for the cursor is the same as the bpp,
+         * even if this is not true for the primary plane (e.g., even if bpp is 32, but drmmode->scrn->depth is 24).
+         */
         uint32_t format = drmmode_gbm_format_for_depth(bpp);
 
         bo->gbm = gbm_bo_create(drmmode->gbm, bo->width, bo->height,
@@ -1281,22 +1285,31 @@ drmmode_create_cursor_bo(drmmode_ptr drmmode, drmmode_bo *bo,
 /* XXX Do we really need to do this? XXX */
 static Bool
 drmmode_create_bpp_probe_bo(drmmode_ptr drmmode, drmmode_bo *bo,
-                            unsigned width, unsigned height, unsigned bpp, void **out_gbm_dev)
+                            unsigned width, unsigned height, unsigned depth, unsigned bpp, void **out_gbm_dev)
 {
     *out_gbm_dev = NULL;
 #ifdef GLAMOR_HAS_GBM
     struct gbm_device *gbm_dev = drmmode->gbm;
+    /* There is no way this is set right now, as glamor isn't yet initialized. */
     if (!gbm_dev) {
-        /* There is no way this is set right now, as glamor isn't yet initialized. */
         gbm_dev = gbm_create_device(drmmode->fd);
         *out_gbm_dev = gbm_dev;
     }
 
     if (gbm_dev) {
-        uint32_t format = drmmode_gbm_format_for_depth(bpp);
+        uint32_t format = drmmode_gbm_format_for_depth(depth);
 
+        /* First try writeable buffer */
         bo->gbm = gbm_bo_create(gbm_dev, width, height, format,
                                 GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);
+        if (bo->gbm) {
+            bo->used_modifiers = FALSE;
+            return TRUE;
+        }
+
+        /* Then try non-writeable buffer */
+        bo->gbm = gbm_bo_create(gbm_dev, width, height, format,
+                                GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
         if (bo->gbm) {
             bo->used_modifiers = FALSE;
             return TRUE;
@@ -5143,7 +5156,7 @@ drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int *depth,
     void* free_gbm_device;
 
     /*create a bo */
-    ret = drmmode_create_bpp_probe_bo(drmmode, &bo, mode_res->min_width, mode_res->min_height, 32, &free_gbm_device);
+    ret = drmmode_create_bpp_probe_bo(drmmode, &bo, mode_res->min_width, mode_res->min_height, *depth, 32, &free_gbm_device);
 
     if (!ret) {
         *bpp = 24;

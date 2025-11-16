@@ -29,7 +29,7 @@
 
 #include <stdint.h>
 
-#define HAVE_DUMB_BO
+//#define HAVE_DUMB_BO
 
 #ifdef HAVE_DUMB_BO
 struct dumb_bo {
