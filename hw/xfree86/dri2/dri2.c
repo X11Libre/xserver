@@ -1609,16 +1609,18 @@ DRI2ScreenInit(ScreenPtr pScreen, DRI2InfoPtr info)
         if (info->driverName) {
             ds->driverNames[0] = info->driverName;
         } else {
-            /* FIXME dri2_probe_driver_name() returns a strdup-ed string,
-             * currently this gets leaked */
-            ds->driverNames[0] = ds->driverNames[1] = dri2_probe_driver_name(pScreen, info);
-            if (!ds->driverNames[0])
+            char *driver_name = dri2_probe_driver_name(pScreen, info);
+
+            if (!driver_name)
                 return FALSE;
 
+            ds->driverNames[0] = driver_name;
             /* There is no VDPAU driver for i965, fallback to the generic
              * OpenGL/VAAPI va_gl backend to emulate VDPAU on i965. */
-            if (strcmp(ds->driverNames[0], "i965") == 0)
+            if (strcmp(driver_name, "i965") == 0)
                 ds->driverNames[1] = "va_gl";
+            else
+                ds->driverNames[1] = driver_name;
         }
     }
     else {
