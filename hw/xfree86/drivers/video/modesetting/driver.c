@@ -1690,7 +1690,7 @@ modesetCreateScreenResources(ScreenPtr pScreen)
     if (!ms->drmmode.sw_cursor)
         drmmode_map_cursor_bos(pScrn, &ms->drmmode);
 
-    if (!ms->drmmode.gbm) {
+    if (!ms->drmmode.glamor) {
         pixels = drmmode_map_front_bo(&ms->drmmode);
         if (!pixels)
             return FALSE;

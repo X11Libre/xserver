@@ -1299,17 +1299,10 @@ drmmode_create_bpp_probe_bo(drmmode_ptr drmmode, drmmode_bo *bo,
     if (gbm_dev) {
         uint32_t format = drmmode_gbm_format_for_depth(depth);
 
-        /* First try writeable buffer */
-        bo->gbm = gbm_bo_create(gbm_dev, width, height, format,
+        bo->gbm = gbm_bo_create(gbm_dev, width, height,
+                                /* libgbm expects this for dumb scanout buffers for some reason */
+                                (format == GBM_FORMAT_ARGB8888) ? GBM_FORMAT_XRGB8888 : format,
                                 GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);
-        if (bo->gbm) {
-            bo->used_modifiers = FALSE;
-            return TRUE;
-        }
-
-        /* Then try non-writeable buffer */
-        bo->gbm = gbm_bo_create(gbm_dev, width, height, format,
-                                GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT);
         if (bo->gbm) {
             bo->used_modifiers = FALSE;
             return TRUE;
@@ -1358,8 +1351,20 @@ drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
                 return TRUE;
             }
         }
-    }
+    } else
 #endif
+    if (!drmmode->glamor && drmmode->gbm) {
+        /* We don't need glamor if modifiers aren't used */
+        bo->gbm = gbm_bo_create(drmmode->gbm, width, height,
+                                /* libgbm expects this for dumb scanout buffers for some reason */
+                                (format == GBM_FORMAT_ARGB8888) ? GBM_FORMAT_XRGB8888 : format,
+                                GBM_BO_USE_WRITE | GBM_BO_USE_SCANOUT |
+                                GBM_BO_USE_FRONT_RENDERING);
+        if (bo->gbm) {
+            bo->used_modifiers = FALSE;
+            return TRUE;
+        }
+    }
 
     if (drmmode->gbm) {
         /* We don't need glamor if modifiers aren't used */
