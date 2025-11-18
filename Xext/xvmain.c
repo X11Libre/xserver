@@ -119,9 +119,6 @@ static DevPrivateKeyRec XvScreenKeyRec;
 
 Bool noXvExtension = FALSE;
 
-static x_server_generation_t XvExtensionGeneration = 0;
-static x_server_generation_t XvScreenGeneration = 0;
-
 int XvReqCode;
 static int XvEventBase;
 int XvErrorBase;
@@ -168,39 +165,32 @@ XvExtensionInit(void)
 
     /* Look to see if any screens were initialized; if not then
        init global variables so the extension can function */
-    if (XvScreenGeneration != serverGeneration) {
-        if (!CreateResourceTypes()) {
-            ErrorF("XvExtensionInit: Unable to allocate resource types\n");
-            return;
-        }
+    if (!CreateResourceTypes()) {
+        ErrorF("XvExtensionInit: Unable to allocate resource types\n");
+        return;
+    }
 #ifdef XINERAMA
-        XineramaRegisterConnectionBlockCallback(XineramifyXv);
+    XineramaRegisterConnectionBlockCallback(XineramifyXv);
 #endif /* XINERAMA */
-        XvScreenGeneration = serverGeneration;
+
+    extEntry = AddExtension(XvName, XvNumEvents, XvNumErrors,
+                            ProcXvDispatch, ProcXvDispatch,
+                            XvResetProc, StandardMinorOpcode);
+    if (!extEntry) {
+        FatalError("XvExtensionInit: AddExtensions failed\n");
     }
 
-    if (XvExtensionGeneration != serverGeneration) {
-        XvExtensionGeneration = serverGeneration;
+    XvReqCode = extEntry->base;
+    XvEventBase = extEntry->eventBase;
+    XvErrorBase = extEntry->errorBase;
 
-        extEntry = AddExtension(XvName, XvNumEvents, XvNumErrors,
-                                ProcXvDispatch, ProcXvDispatch,
-                                XvResetProc, StandardMinorOpcode);
-        if (!extEntry) {
-            FatalError("XvExtensionInit: AddExtensions failed\n");
-        }
-
-        XvReqCode = extEntry->base;
-        XvEventBase = extEntry->eventBase;
-        XvErrorBase = extEntry->errorBase;
-
-        EventSwapVector[XvEventBase + XvVideoNotify] =
+    EventSwapVector[XvEventBase + XvVideoNotify] =
             (EventSwapPtr) WriteSwappedVideoNotifyEvent;
-        EventSwapVector[XvEventBase + XvPortNotify] =
+    EventSwapVector[XvEventBase + XvPortNotify] =
             (EventSwapPtr) WriteSwappedPortNotifyEvent;
 
-        SetResourceTypeErrorValue(XvRTPort, _XvBadPort);
-        (void) dixAddAtom(XvName);
-    }
+    SetResourceTypeErrorValue(XvRTPort, _XvBadPort);
+    (void) dixAddAtom(XvName);
 }
 
 static bool resources_initialized = false;
@@ -267,16 +257,13 @@ static void XvPixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, PixmapPtr 
 int
 XvScreenInit(ScreenPtr pScreen)
 {
-    if (XvScreenGeneration != serverGeneration) {
-        if (!CreateResourceTypes()) {
-            ErrorF("XvScreenInit: Unable to allocate resource types\n");
-            return BadAlloc;
-        }
-#ifdef XINERAMA
-        XineramaRegisterConnectionBlockCallback(XineramifyXv);
-#endif /* XINERAMA */
-        XvScreenGeneration = serverGeneration;
+    if (!CreateResourceTypes()) {
+        ErrorF("XvScreenInit: Unable to allocate resource types\n");
+        return BadAlloc;
     }
+#ifdef XINERAMA
+    XineramaRegisterConnectionBlockCallback(XineramifyXv);
+#endif /* XINERAMA */
 
     if (!dixRegisterPrivateKey(&XvScreenKeyRec, PRIVATE_SCREEN, sizeof(XvScreenRec)))
         return BadAlloc;
