@@ -142,7 +142,7 @@ compCreateOverlayWindow(ScreenPtr pScreen)
 #endif /* XINERAMA */
 
     pWin = cs->pOverlayWin =
-        dixCreateWindow(cs->overlayWid, pRoot, x, y, w, h, 0,
+        CreateWindow(cs->overlayWid, pRoot, x, y, w, h, 0,
                      InputOutput, CWBackPixmap | CWOverrideRedirect, &attrs[0],
                      pRoot->drawable.depth,
                      serverClient, pScreen->rootVisual, &result);

@@ -76,6 +76,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "protocol-versions.h"
 #include "inputstr.h"
 #include "misync_priv.h"
+#include "opaque.h"
 
 /*
  * Local Global Variables

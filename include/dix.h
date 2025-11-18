@@ -53,6 +53,7 @@ SOFTWARE.
 #include "input.h"
 #include "cursor.h"
 #include "events.h"
+#include <X11/Xfuncproto.h>
 #include <X11/extensions/XI.h>
 
 #define EARLIER -1
@@ -213,7 +214,7 @@ typedef struct {
 } DeviceEventInfoRec;
 
 extern _X_EXPORT void *lastGLContext;
-
+extern _X_EXPORT char dispatchExceptionAtReset;
 /**
  * @brief get display string for given screen
  *
@@ -224,5 +225,8 @@ extern _X_EXPORT void *lastGLContext;
  * @return pointer to string, valid as long as the pScreen is, owned by DIX.
  */
 _X_EXPORT const char *dixGetDisplayName(ScreenPtr *pScreen);
+
+_X_EXPORT int dix_main(int argc, char *argv[], char *envp[]);
+_X_EXPORT extern volatile char dispatchException;
 
 #endif                          /* DIX_H */

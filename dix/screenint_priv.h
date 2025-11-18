@@ -13,9 +13,6 @@
 #include "include/screenint.h"
 #include "include/scrnintstr.h" /* for screenInfo */
 
-typedef Bool (*ScreenInitProcPtr)(ScreenPtr pScreen, int argc, char **argv);
-
-int AddScreen(ScreenInitProcPtr pfnInit, int argc, char **argv);
 int AddGPUScreen(ScreenInitProcPtr pfnInit, int argc, char **argv);
 
 void RemoveGPUScreen(ScreenPtr pScreen);
@@ -25,8 +22,6 @@ void DetachUnboundGPU(ScreenPtr unbound);
 
 void AttachOffloadGPU(ScreenPtr pScreen, ScreenPtr newScreen);
 void DetachOffloadGPU(ScreenPtr slave);
-
-void InitOutput(int argc, char **argv);
 
 static inline ScreenPtr dixGetMasterScreen(void) {
     return screenInfo.screens[0];

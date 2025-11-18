@@ -63,7 +63,7 @@ InitCard(char *name)
 }
 
 void
-InitOutput(int argc, char **argv)
+InitOutput(ScreenInfo *unused, int argc, char **argv)
 {
     KdInitOutput(argc, argv);
 }
@@ -107,6 +107,13 @@ CloseInput(void)
     the input thread. */
 void
 ddxInputThreadInit(void)
+{
+}
+#endif
+
+#ifdef DDXBEFORERESET
+void
+ddxBeforeReset(void)
 {
 }
 #endif

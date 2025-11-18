@@ -36,6 +36,10 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "xkbrules.h"
 #include "inputstr.h"
 #include "events.h"
+#include <X11/extensions/XKB.h>
+
+
+#define XkbChangeTypesOfKey            SrvXkbChangeTypesOfKey
 
 typedef struct _XkbInterest {
     DeviceIntPtr dev;
@@ -227,6 +231,32 @@ extern _X_EXPORT void XkbFreeRMLVOSet(XkbRMLVOSet * /* rmlvo */ ,
 
 extern _X_EXPORT Bool XkbCopyDeviceKeymap(DeviceIntPtr /* dst */,
 					  DeviceIntPtr /* src */);
+
+extern _X_EXPORT void XkbConvertCase(KeySym /* sym */ ,
+                                     KeySym * /* lower */ ,
+                                     KeySym *   /* upper */
+    );
+
+
+extern _X_EXPORT Status SrvXkbChangeTypesOfKey(XkbDescPtr /* xkb */ ,
+                                            int /* key */ ,
+                                            int /* nGroups */ ,
+                                            unsigned int /* groups */ ,
+                                            int * /* newTypesIn */ ,
+                                            XkbMapChangesPtr    /* changes */
+    );
+
+void _X_EXPORT XkbSendNotification(DeviceIntPtr kbd, XkbChangesPtr pChanges,
+                         XkbEventCausePtr cause);
+
+#define XkbSetCauseUnknown(c) XkbSetCauseKey(c, 0, 0)
+#define XkbAX_KRGMask    (XkbSlowKeysMask|XkbBounceKeysMask)
+#define XkbAllFilteredEventsMask \
+        (XkbAccessXKeysMask|XkbRepeatKeysMask|XkbMouseKeysAccelMask|XkbAX_KRGMask)
+
+#define XkbSetCauseKey(c,k,e)   { (c)->kc= (k),(c)->event= (e),\
+                                  (c)->mjr= (c)->mnr= 0; \
+                                  (c)->client= NULL; }
 
 #include "xkbstr.h"
 #include "xkbrules.h"

@@ -732,4 +732,9 @@ typedef struct _ScreenInfo {
 
 extern _X_EXPORT ScreenInfo screenInfo;
 
+_X_EXPORT void InitOutput(ScreenInfo *unused, int argc, char **argv);
+
+typedef Bool (*ScreenInitProcPtr)(ScreenPtr pScreen, int argc, char **argv);
+extern _X_EXPORT int AddScreen(ScreenInitProcPtr pfnInit, int argc, char **argv);
+
 #endif                          /* SCREENINTSTRUCT_H */

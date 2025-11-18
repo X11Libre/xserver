@@ -18,7 +18,6 @@ srcs = [
     '../../mi/miinitext.h',
     'xcb.c',
     'xkb.c',
-    '../stubs/ddxBeforeReset.c',
 ]
 
 xcb_dep = dependency('xcb', required: true)

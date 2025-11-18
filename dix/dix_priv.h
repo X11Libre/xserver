@@ -48,7 +48,6 @@
 #define MAX_BIG_REQUEST_SIZE 4194303
 extern long maxBigRequestSize;
 
-extern char dispatchExceptionAtReset;
 extern int terminateDelay;
 extern Bool touchEmulatePointer;
 
@@ -135,8 +134,6 @@ Bool CreateConnectionBlock(void);
 void EnableLimitedSchedulingLatency(void);
 
 void DisableLimitedSchedulingLatency(void);
-
-int dix_main(int argc, char *argv[], char *envp[]);
 
 void SetMaskForEvent(int deviceid, Mask mask, int event);
 
@@ -281,20 +278,11 @@ extern Bool whiteRoot;
 
 extern volatile char isItTimeToYield;
 
-/* bit values for dispatchException */
-#define DE_RESET     1
-#define DE_TERMINATE 2
-#define DE_PRIORITYCHANGE 4     /* set when a client's priority changes */
-
-extern volatile char dispatchException;
-
 extern int ScreenSaverBlanking;
 extern int ScreenSaverAllowExposures;
 extern int defaultScreenSaverBlanking;
 extern int defaultScreenSaverAllowExposures;
-extern const char *display;
 extern int displayfd;
-extern Bool explicit_display;
 
 extern Bool disableBackingStore;
 extern Bool enableBackingStore;

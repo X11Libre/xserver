@@ -119,7 +119,7 @@ Equipment Corporation.
 #include "extnsionst.h"
 #include "privates.h"
 #include "exevents.h"
-
+#include "opaque.h"
 #ifdef DPMSExtension
 #include <X11/extensions/dpmsconst.h>
 #include "dpmsproc.h"
@@ -135,7 +135,7 @@ dix_main(int argc, char *argv[], char *envp[])
 {
     HWEventQueueType alwaysCheckForInput[2];
 
-    display = "0";
+    display = (char *)"0";
 
     InitRegions();
 
@@ -195,7 +195,7 @@ dix_main(int argc, char *argv[], char *envp[])
         dixResetRegistry();
         InitFonts();
         InitCallbackManager();
-        InitOutput(argc, argv);
+        InitOutput(NULL, argc, argv);
 
         if (screenInfo.numScreens < 1)
             FatalError("no screens found");

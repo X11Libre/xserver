@@ -222,13 +222,6 @@ static inline size_t x_safe_strlen(const char *str) {
     return (str ? strlen(str) : 0);
 }
 
-enum ExitCode {
-    EXIT_NO_ERROR = 0,
-    EXIT_ERR_ABORT = 1,
-    EXIT_ERR_CONFIGURE = 2,
-    EXIT_ERR_DRIVERS = 3,
-};
-
 extern sig_atomic_t inSignalContext;
 
 /* run timers that are expired at timestamp `now` */
