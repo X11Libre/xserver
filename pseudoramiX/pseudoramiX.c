@@ -83,7 +83,6 @@ typedef struct {
 static PseudoramiXScreenRec *pseudoramiXScreens = NULL;
 static int pseudoramiXScreensAllocated = 0;
 static int pseudoramiXNumScreens = 0;
-static x_server_generation_t pseudoramiXGeneration = 0;
 
 // Add a PseudoramiX screen.
 // The rest of the X server will know nothing about this screen.
@@ -134,19 +133,16 @@ PseudoramiXExtensionInit(void)
     }
 #endif
 
-    if (pseudoramiXGeneration != serverGeneration) {
-        extEntry = AddExtension(PANORAMIX_PROTOCOL_NAME, 0, 0,
-                                ProcPseudoramiXDispatch,
-                                ProcPseudoramiXDispatch,
-                                PseudoramiXResetProc,
-                                StandardMinorOpcode);
-        if (!extEntry) {
-            ErrorF("PseudoramiXExtensionInit(): AddExtension failed\n");
-        }
-        else {
-            pseudoramiXGeneration = serverGeneration;
-            success = TRUE;
-        }
+    extEntry = AddExtension(PANORAMIX_PROTOCOL_NAME, 0, 0,
+                            ProcPseudoramiXDispatch,
+                            ProcPseudoramiXDispatch,
+                            PseudoramiXResetProc,
+                            StandardMinorOpcode);
+    if (!extEntry) {
+        ErrorF("PseudoramiXExtensionInit(): AddExtension failed\n");
+    }
+    else {
+        success = TRUE;
     }
 
     /* Do not allow RRXinerama to initialize if we did */
