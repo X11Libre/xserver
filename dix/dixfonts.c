@@ -58,6 +58,7 @@ Equipment Corporation.
 #include <X11/fonts/libxfont2.h>
 
 #include "dix/dix_priv.h"
+#include "dix/dixfont_priv.h"
 #include "dix/gc_priv.h"
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
@@ -1846,8 +1847,7 @@ get_client_resolutions(int *num)
     return &res;
 }
 
-void
-FreeFonts(void)
+void dixFreeFonts(void)
 {
     if (patternCache) {
         xfont2_free_font_pattern_cache(patternCache);
@@ -2036,7 +2036,7 @@ static const xfont2_client_funcs_rec xfont2_client_funcs = {
 xfont2_pattern_cache_ptr fontPatternCache;
 
 void
-InitFonts(void)
+dixInitFonts(void)
 {
     if (fontPatternCache)
 	xfont2_free_font_pattern_cache(fontPatternCache);
