@@ -28,10 +28,6 @@ SOFTWARE.
 #include <X11/fonts/font.h>
 #include <X11/fonts/fontstruct.h>
 
-#define NullDIXFontProp ((DIXFontPropPtr)0)
-
-typedef struct _DIXFontProp *DIXFontPropPtr;
-
 extern _X_EXPORT Bool SetDefaultFont(const char * /*defaultfontname */ );
 
 extern _X_EXPORT int OpenFont(ClientPtr /*client */ ,
