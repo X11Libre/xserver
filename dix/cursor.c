@@ -51,6 +51,7 @@ SOFTWARE.
 
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/dixfont_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 
