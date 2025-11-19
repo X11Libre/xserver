@@ -123,6 +123,7 @@ Equipment Corporation.
 
 #include "dix/colormap_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/dixfont_priv.h"
 #include "dix/dixgrabs_priv.h"
 #include "dix/gc_priv.h"
 #include "dix/registry_priv.h"
