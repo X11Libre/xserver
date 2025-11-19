@@ -92,6 +92,7 @@ SOFTWARE.
 #endif                          /* WIN32 */
 
 #include "dix/dix_priv.h"
+#include "dix/dixgrabs_priv.h"
 #include "dix/server_priv.h"
 #include "os/audit_priv.h"
 #include "os/auth.h"
