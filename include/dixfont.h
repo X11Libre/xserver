@@ -28,59 +28,6 @@ SOFTWARE.
 #include <X11/fonts/font.h>
 #include <X11/fonts/fontstruct.h>
 
-extern _X_EXPORT Bool SetDefaultFont(const char * /*defaultfontname */ );
-
-extern _X_EXPORT int OpenFont(ClientPtr /*client */ ,
-                              XID /*fid */ ,
-                              Mask /*flags */ ,
-                              unsigned /*lenfname */ ,
-                              const char * /*pfontname */ );
-
-extern _X_EXPORT int CloseFont(void *pfont,
-                               XID fid);
-
-extern _X_EXPORT int ListFonts(ClientPtr /*client */ ,
-                               unsigned char * /*pattern */ ,
-                               unsigned int /*length */ ,
-                               unsigned int /*max_names */ );
-
-extern _X_EXPORT int PolyText(ClientPtr /*client */ ,
-                              DrawablePtr /*pDraw */ ,
-                              GCPtr /*pGC */ ,
-                              unsigned char * /*pElt */ ,
-                              unsigned char * /*endReq */ ,
-                              int /*xorg */ ,
-                              int /*yorg */ ,
-                              int /*reqType */ ,
-                              XID /*did */ );
-
-extern _X_EXPORT int ImageText(ClientPtr /*client */ ,
-                               DrawablePtr /*pDraw */ ,
-                               GCPtr /*pGC */ ,
-                               int /*nChars */ ,
-                               unsigned char * /*data */ ,
-                               int /*xorg */ ,
-                               int /*yorg */ ,
-                               int /*reqType */ ,
-                               XID /*did */ );
-
-extern _X_EXPORT int SetFontPath(ClientPtr /*client */ ,
-                                 int /*npaths */ ,
-                                 unsigned char * /*paths */ );
-
-extern _X_EXPORT int SetDefaultFontPath(const char * /*path */ );
-
-extern _X_EXPORT void DeleteClientFontStuff(ClientPtr /*client */ );
-
-/* Quartz support on Mac OS X pulls in the QuickDraw
-   framework whose InitFonts function conflicts here. */
-#ifdef __APPLE__
-#define InitFonts Darwin_X_InitFonts
-#endif
-extern _X_EXPORT void InitFonts(void);
-
-extern _X_EXPORT void FreeFonts(void);
-
 extern _X_EXPORT void GetGlyphs(FontPtr /*font */ ,
                                 unsigned long /*count */ ,
                                 unsigned char * /*chars */ ,
