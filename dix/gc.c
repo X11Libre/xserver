@@ -51,6 +51,7 @@ SOFTWARE.
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
 
+#include "dix/dixfont_priv.h"
 #include "dix/gc_priv.h"
 #include "os/osdep.h"
 
