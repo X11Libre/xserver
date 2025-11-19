@@ -1064,21 +1064,34 @@ drmmode_bo_get_handle(drmmode_bo *bo)
 static void *
 drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
 {
-    int ret;
+    if (bo->map) {
+        return bo->map;
+    }
 
 #ifdef GLAMOR_HAS_GBM
-    if (bo->gbm)
-        return NULL;
+    if (bo->gbm) {
+        /* We shouldn't read from gpu memory */
+        uint32_t stride;
+        void* unused;
+        void* map = gbm_bo_map(bo->gbm, 0, 0, bo->width, bo->height, GBM_BO_TRANSFER_WRITE, &stride, &unused);
+        if (map) {
+            bo->map = map;
+            return bo->map;
+        }
+    }
 #endif
 
-    if (bo->dumb->ptr)
-        return bo->dumb->ptr;
+    if (bo->dumb) {
+        int ret = dumb_bo_map(drmmode->fd, bo->dumb);
+        if (ret) {
+            return NULL;
+        }
 
-    ret = dumb_bo_map(drmmode->fd, bo->dumb);
-    if (ret)
-        return NULL;
+        bo->map = bo->dumb->ptr;
+        return bo->map;
+    }
 
-    return bo->dumb->ptr;
+    return NULL;
 }
 
 int
