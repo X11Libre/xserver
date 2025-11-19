@@ -682,6 +682,12 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
         m = (char *) module;
     }
 
+    if (is_nvidia_proprietary && !LoaderIgnoreAbi) {
+        /* warn every time this is hit */
+        LogMessage(X_WARNING, "LoadModule: Implicitly ignoring abi mismatch "
+                   "for the nvidia proprierary DDX driver\n");
+    }
+
     /* Backward compatibility, vbe and int10 are merged into int10 now */
     if (!strcmp(m, "vbe"))
         m = name = strdup("int10");
