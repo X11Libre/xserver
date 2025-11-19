@@ -39,6 +39,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "dix/dixgrabs_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
+#include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "xkb/xkbsrv_priv.h"

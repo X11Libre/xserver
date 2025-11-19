@@ -211,8 +211,6 @@ extern _X_EXPORT RegionPtr CreateBoundingShape(WindowPtr /* pWin */ );
 extern _X_EXPORT RegionPtr CreateClipShape(WindowPtr /* pWin */ );
 
 extern _X_EXPORT void SetRootClip(ScreenPtr pScreen, int enable);
-extern _X_EXPORT void PrintWindowTree(void);
-extern _X_EXPORT void PrintPassiveGrabs(void);
 
 extern _X_EXPORT VisualPtr WindowGetVisual(WindowPtr /*pWin*/);
 #endif                          /* WINDOW_H */

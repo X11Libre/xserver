@@ -59,4 +59,7 @@ Bool dixWindowIsRoot(Window window);
  */
 int DoCreateWindowReq(ClientPtr client, xCreateWindowReq *stuff, XID *xids);
 
+void PrintPassiveGrabs(void);
+void PrintWindowTree(void);
+
 #endif /* _XSERVER_DIX_WINDOW_PRIV_H */
