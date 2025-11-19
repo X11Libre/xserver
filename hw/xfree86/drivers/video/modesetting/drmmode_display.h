@@ -85,6 +85,7 @@ typedef struct {
     Bool used_modifiers;
     struct gbm_bo *gbm;
 #endif
+    void* map;
 } drmmode_bo;
 
 typedef struct {
