@@ -70,11 +70,6 @@ extern _X_EXPORT int SetFontPath(ClientPtr /*client */ ,
 
 extern _X_EXPORT int SetDefaultFontPath(const char * /*path */ );
 
-/* not used by any known external driver, so can be removed soon */
-extern _X_EXPORT int GetFontPath(ClientPtr client,
-                                 int *count,
-                                 int *length, unsigned char **result) _X_DEPRECATED;
-
 extern _X_EXPORT void DeleteClientFontStuff(ClientPtr /*client */ );
 
 /* Quartz support on Mac OS X pulls in the QuickDraw
