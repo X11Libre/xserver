@@ -89,6 +89,7 @@ Equipment Corporation.
 #include "dix/callback_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/dixfont_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
 #include "dix/gc_priv.h"
@@ -194,7 +195,7 @@ dix_main(int argc, char *argv[], char *envp[])
         InitEvents();
         xfont2_init_glyph_caching();
         dixResetRegistry();
-        InitFonts();
+        dixInitFonts();
         InitCallbackManager();
         InitOutput(argc, argv);
 
@@ -350,7 +351,7 @@ dix_main(int argc, char *argv[], char *envp[])
 
 	dixFreeRegistry();
 
-        FreeFonts();
+        dixFreeFonts();
 
         FreeAllAtoms();
 
