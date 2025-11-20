@@ -84,19 +84,19 @@ OF THIS SOFTWARE.
 #ifndef MAXSCREENS
 #define MAXSCREENS	16
 #endif
-#ifndef MAXGPUSCREENS
+#ifndef MAXGPUSCREENS // unexport
 #define MAXGPUSCREENS	16
 #endif
-#define MAXFORMATS	8
-#ifndef MAXDEVICES
+#define MAXFORMATS	8 // unexport
+#ifndef MAXDEVICES // unexport
 #define MAXDEVICES	256      /* input devices */
 #endif
 #define GPU_SCREEN_OFFSET 256
 
 /* 128 event opcodes for core + extension events, excluding GE */
-#define MAXEVENTS       128
-#define EXTENSION_EVENT_BASE 64
-#define EXTENSION_BASE 128
+#define MAXEVENTS       128 // unexport
+#define EXTENSION_EVENT_BASE 64 // unexport
+#define EXTENSION_BASE 128 // unexport
 
 typedef uint32_t ATOM;
 
@@ -115,7 +115,7 @@ typedef int XRetCode;
 #define FALSE 0
 #endif
 
-typedef struct _xReq *xReqPtr;
+typedef struct _xReq *xReqPtr; // unexport
 
 #include "os.h"                 /* for ALLOCATE_LOCAL and DEALLOCATE_LOCAL */
 #include <X11/Xfuncs.h>         /* for bcopy, bzero, and bcmp */
@@ -161,16 +161,16 @@ typedef struct _xReq *xReqPtr;
 #endif
 
 /* some macros to help swap requests, replies, and events */
-
+// unexport
 #define LengthRestS(stuff) \
     ((client->req_len << 1) - (sizeof(*stuff) >> 1))
-
+// unexport
 #define LengthRestL(stuff) \
     (client->req_len - (sizeof(*stuff) >> 2))
-
+// keep
 #define SwapRestS(stuff) \
     SwapShorts((short *)(stuff + 1), LengthRestS(stuff))
-
+// unexport
 #define SwapRestL(stuff) \
     SwapLongs((CARD32 *)(stuff + 1), LengthRestL(stuff))
 
@@ -184,6 +184,7 @@ wrong_size(void)
 }
 #endif
 
+// unexport ?
 #if !(defined(__GNUC__))
 static inline int
 __builtin_constant_p(int x)
@@ -205,6 +206,7 @@ bswap_64(uint64_t x)
             ((x & 0x00000000000000FFull) << 56));
 }
 
+// unexport
 #define swapll(x) do { \
 		if (sizeof(*(x)) != 8) \
 			wrong_size(); \
@@ -220,6 +222,7 @@ bswap_32(uint32_t x)
             ((x & 0x000000FF) << 24));
 }
 
+// keep
 #define swapl(x) do { \
 		if (sizeof(*(x)) != 4) \
 			wrong_size(); \
@@ -239,6 +242,7 @@ bswap_16(uint16_t x)
 		*(x) = bswap_16(*(x)); \
 	} while (0)
 
+// unexport
 /* copy 32-bit value from src to dst byteswapping on the way */
 #define cpswapl(src, dst) do { \
 		if (sizeof((src)) != 4 || sizeof((dst)) != 4) \
@@ -246,6 +250,7 @@ bswap_16(uint16_t x)
 		(dst) = bswap_32((src)); \
 	} while (0)
 
+// unexport
 /* copy short from src to dst byteswapping on the way */
 #define cpswaps(src, dst) do { \
 		if (sizeof((src)) != 2 || sizeof((dst)) != 2) \
@@ -253,7 +258,7 @@ bswap_16(uint16_t x)
 		(dst) = bswap_16((src)); \
 	} while (0)
 
-extern _X_EXPORT void SwapLongs(CARD32 *list, unsigned long count);
+void SwapLongs(CARD32 *list, unsigned long count);
 
 extern _X_EXPORT void SwapShorts(short *list, unsigned long count);
 
