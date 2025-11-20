@@ -1,7 +1,7 @@
 project('xserver', 'c',
         default_options: [
             'buildtype=debugoptimized',
-            'c_std=gnu99',
+            'c_std=gnu11',
         ],
         version: '25.0.0.7',
         meson_version: '>= 0.58.0',
@@ -14,7 +14,6 @@ cc = meson.get_compiler('c')
 add_project_arguments('-fno-strict-aliasing', language : 'c')
 add_project_arguments('-fvisibility=hidden', language : 'c')
 add_project_arguments('-Wvla', language: 'c')
-
 add_project_link_arguments('-fvisibility=hidden', language : 'c')
 
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
