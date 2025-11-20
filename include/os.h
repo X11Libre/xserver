@@ -93,7 +93,7 @@ typedef struct _NewClientRec *NewClientPtr;
 #include <stdio.h>
 #include <stdarg.h>
 
-extern _X_EXPORT int ReadFdFromClient(ClientPtr client);
+int ReadFdFromClient(ClientPtr client);
 
 extern _X_EXPORT int WriteToClient(ClientPtr /*who */ , int /*count */ ,
                                    const void * /*buf */ );
@@ -136,6 +136,7 @@ extern _X_EXPORT OsTimerPtr TimerSet(OsTimerPtr timer,
 extern _X_EXPORT void TimerCancel(OsTimerPtr /* pTimer */ );
 extern _X_EXPORT void TimerFree(OsTimerPtr /* pTimer */ );
 
+// FIXME: drop use in sisusb driver!
 extern _X_EXPORT void GiveUp(int /*sig */ );
 
 /*
@@ -188,11 +189,9 @@ typedef int (*OsSigWrapperPtr) (int /* sig */ );
 extern _X_EXPORT OsSigWrapperPtr
 OsRegisterSigWrapper(OsSigWrapperPtr newWrap);
 
-extern _X_EXPORT Bool
-PrivsElevated(void);
+Bool PrivsElevated(void);
 
-extern _X_EXPORT int
-GetClientFd(ClientPtr);
+int GetClientFd(ClientPtr);
 
 /* stuff for FlushCallback */
 extern _X_EXPORT CallbackListPtr FlushCallback;
@@ -226,6 +225,7 @@ extern _X_EXPORT char *
 strndup(const char *str, size_t n);
 #endif
 
+// drop from driver's AC
 #ifndef HAVE_TIMINGSAFE_MEMCMP
 extern _X_EXPORT int
 timingsafe_memcmp(const void *b1, const void *b2, size_t len);
