@@ -12,6 +12,7 @@
 #include "include/dixstruct.h"
 #include "include/misc.h"    /* bytes_to_int32 */
 #include "include/os.h"      /* WriteToClient */
+#include "os/osdep.h"
 
 /*
  * @brief write rpc buffer to client and then clear it

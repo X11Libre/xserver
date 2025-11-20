@@ -44,6 +44,7 @@
 #include "dix/input_priv.h"
 #include "dix/request_priv.h"
 #include "os/bug_priv.h"
+#include "os/osdep.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -51,7 +52,6 @@
 #include "scrnintstr.h"         /* screen structure  */
 #include "extnsionst.h"
 #include "exglobals.h"
-#include "misc.h"
 #include "xace.h"
 #include "xiquerydevice.h"      /* for GetDeviceUse */
 #include "xkbsrv.h"

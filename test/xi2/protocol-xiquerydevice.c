@@ -33,6 +33,7 @@
 #include <X11/Xatom.h>
 
 #include "miext/extinit_priv.h"
+#include "os/osdep.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"

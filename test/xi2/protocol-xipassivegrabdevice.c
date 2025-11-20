@@ -35,6 +35,7 @@
 #include <X11/extensions/XI2proto.h>
 
 #include "dix/exevents_priv.h"
+#include "os/osdep.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"

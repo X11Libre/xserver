@@ -65,6 +65,7 @@ SOFTWARE.
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
 #include "miext/extinit_priv.h"
+#include "os/osdep.h"
 #include "Xext/geext_priv.h"
 
 #include "inputstr.h"
