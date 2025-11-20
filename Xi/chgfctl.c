@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>     /* control constants */
 
 #include "include/inputstr.h"           /* DeviceIntPtr      */
+#include "os/osdep.h"
 #include "Xi/handlers.h"
 
 #define DO_ALL    (-1)
