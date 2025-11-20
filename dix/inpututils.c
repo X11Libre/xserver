@@ -32,6 +32,7 @@
 #include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 #include "os/mathx_priv.h"
+#include "os/osdep.h"
 
 #include "exglobals.h"
 #include "inputstr.h"

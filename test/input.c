@@ -40,6 +40,7 @@
 #include "dix/inpututils_priv.h"
 #include "mi/mi_priv.h"
 #include "os/fmt.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "resource.h"
