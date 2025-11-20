@@ -18,6 +18,7 @@ build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       xlibre-
 build_drv_ac xf86-input-synaptics   $X11L_DRV_GIT/xf86-input-synaptics   xlibre-xf86-input-synaptics-1.10.0.2
 
 build_drv_ac xf86-video-amdgpu      $X11L_DRV_GIT/xf86-video-amdgpu      xlibre-xf86-video-amdgpu-23.0.0.5
+build_drv_ac xf86-video-apm         $X11L_DRV_GIT/xf86-video-apm         xlibre-xf86-video-apm-1.3.0.3
 build_drv_ac xf86-video-ati         $X11L_DRV_GIT/xf86-video-ati         xlibre-xf86-video-ati-22.0.0.3
 build_drv_ac xf86-video-dummy       $X11L_DRV_GIT/xf86-video-dummy       xlibre-xf86-video-dummy-0.4.1.3
 build_drv_ac xf86-video-intel       $X11L_DRV_GIT/xf86-video-intel       xlibre-xf86-video-intel-3.0.0.3
