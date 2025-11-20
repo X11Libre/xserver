@@ -31,6 +31,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/eventconvert.h"
 #include "dix/inpututils_priv.h"
+#include "os/osdep.h"
 
 #include "inputstr.h"
 #include "eventstr.h"

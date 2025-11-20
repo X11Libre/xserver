@@ -8,6 +8,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "os/osdep.h"
 
 static inline Bool __x_rpcbuf_write_bin_pad(
     x_rpcbuf_t *rpcbuf, const char *val, size_t len)

@@ -31,6 +31,7 @@
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
+#include "os/osdep.h"
 
 #include "exglobals.h"
 #include "misc.h"

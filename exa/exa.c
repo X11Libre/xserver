@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "os/osdep.h"
 
 #include "exa_priv.h"
 #include "exa.h"

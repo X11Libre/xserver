@@ -57,6 +57,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "include/inputstr.h"           /* DeviceIntPtr      */
+#include "os/osdep.h"
 #include "Xi/handlers.h"
 
 #define DO_ALL    (-1)

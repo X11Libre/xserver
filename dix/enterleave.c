@@ -40,6 +40,7 @@
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "os/bug_priv.h"
+#include "os/osdep.h"
 
 #include "inputstr.h"
 #include "windowstr.h"
