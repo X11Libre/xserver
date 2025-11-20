@@ -225,4 +225,7 @@ extern _X_EXPORT void *lastGLContext;
  */
 _X_EXPORT const char *dixGetDisplayName(ScreenPtr *pScreen);
 
+/* TRUE if driver should not clear the root window on startup (if supported) */
+extern _X_EXPORT Bool bgNoneRoot;
+
 #endif                          /* DIX_H */
