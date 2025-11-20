@@ -281,40 +281,40 @@ typedef struct _InputAttributes {
 #define KEY_POSTED 2
 #define BUTTON_POSTED 2
 
-extern _X_EXPORT void set_key_down(DeviceIntPtr pDev, int key_code, int type);
-extern _X_EXPORT void set_key_up(DeviceIntPtr pDev, int key_code, int type);
-extern _X_EXPORT int key_is_down(DeviceIntPtr pDev, int key_code, int type);
-extern _X_EXPORT void set_button_down(DeviceIntPtr pDev, int button, int type);
-extern _X_EXPORT void set_button_up(DeviceIntPtr pDev, int button, int type);
-extern _X_EXPORT int button_is_down(DeviceIntPtr pDev, int button, int type);
+void set_key_down(DeviceIntPtr pDev, int key_code, int type);
+void set_key_up(DeviceIntPtr pDev, int key_code, int type);
+int key_is_down(DeviceIntPtr pDev, int key_code, int type);
+void set_button_down(DeviceIntPtr pDev, int button, int type);
+void set_button_up(DeviceIntPtr pDev, int button, int type);
+int button_is_down(DeviceIntPtr pDev, int button, int type);
 
-extern _X_EXPORT DeviceIntPtr AddInputDevice(ClientPtr /*client */ ,
+DeviceIntPtr AddInputDevice(ClientPtr /*client */ ,
                                              DeviceProc /*deviceProc */ ,
                                              Bool /*autoStart */ );
 
-extern _X_EXPORT Bool EnableDevice(DeviceIntPtr /*device */ ,
+Bool EnableDevice(DeviceIntPtr /*device */ ,
                                    BOOL /* sendevent */ );
 
-extern _X_EXPORT Bool ActivateDevice(DeviceIntPtr /*device */ ,
+Bool ActivateDevice(DeviceIntPtr /*device */ ,
                                      BOOL /* sendevent */ );
 
-extern _X_EXPORT Bool DisableDevice(DeviceIntPtr /*device */ ,
+Bool DisableDevice(DeviceIntPtr /*device */ ,
                                     BOOL /* sendevent */ );
 
-extern _X_EXPORT int RemoveDevice(DeviceIntPtr /*dev */ ,
+int RemoveDevice(DeviceIntPtr /*dev */ ,
                                   BOOL /* sendevent */ );
 
-extern _X_EXPORT int NumMotionEvents(void);
+int NumMotionEvents(void);
 
-extern _X_EXPORT int dixLookupDevice(DeviceIntPtr * /* dev */ ,
+int dixLookupDevice(DeviceIntPtr * /* dev */ ,
                                      int /* id */ ,
                                      ClientPtr /* client */ ,
                                      Mask /* access_mode */ );
 
-extern _X_EXPORT void QueryMinMaxKeyCodes(KeyCode * /*minCode */ ,
+void QueryMinMaxKeyCodes(KeyCode * /*minCode */ ,
                                           KeyCode * /*maxCode */ );
 
-extern _X_EXPORT Bool InitButtonClassDeviceStruct(DeviceIntPtr /*device */ ,
+Bool InitButtonClassDeviceStruct(DeviceIntPtr /*device */ ,
                                                   int /*numButtons */ ,
                                                   Atom * /* labels */ ,
                                                   CARD8 * /*map */ );
@@ -325,7 +325,7 @@ extern _X_EXPORT Bool InitValuatorClassDeviceStruct(DeviceIntPtr /*device */ ,
                                                     int /*numMotionEvents */ ,
                                                     int /*mode */ );
 
-extern _X_EXPORT Bool InitPointerAccelerationScheme(DeviceIntPtr /*dev */ ,
+Bool InitPointerAccelerationScheme(DeviceIntPtr /*dev */ ,
                                                     int /*scheme */ );
 
 extern _X_EXPORT Bool InitFocusClassDeviceStruct(DeviceIntPtr /*device */ );
@@ -357,7 +357,7 @@ extern _X_EXPORT Bool InitPtrFeedbackClassDeviceStruct(DeviceIntPtr /*device */
 typedef void (*StringCtrlProcPtr) (DeviceIntPtr /*device */ ,
                                    StringCtrl * /*ctrl */ );
 
-extern _X_EXPORT Bool InitStringFeedbackClassDeviceStruct(DeviceIntPtr
+Bool InitStringFeedbackClassDeviceStruct(DeviceIntPtr
                                                           /*device */ ,
                                                           StringCtrlProcPtr
                                                           /*controlProc */ ,
@@ -371,7 +371,7 @@ extern _X_EXPORT Bool InitStringFeedbackClassDeviceStruct(DeviceIntPtr
 typedef void (*BellCtrlProcPtr) (DeviceIntPtr /*device */ ,
                                  BellCtrl * /*ctrl */ );
 
-extern _X_EXPORT Bool InitBellFeedbackClassDeviceStruct(DeviceIntPtr /*device */
+Bool InitBellFeedbackClassDeviceStruct(DeviceIntPtr /*device */
                                                         ,
                                                         BellProcPtr
                                                         /*bellProc */ ,
@@ -389,7 +389,7 @@ extern _X_EXPORT Bool InitLedFeedbackClassDeviceStruct(DeviceIntPtr /*device */
 typedef void (*IntegerCtrlProcPtr) (DeviceIntPtr /*device */ ,
                                     IntegerCtrl * /*ctrl */ );
 
-extern _X_EXPORT Bool InitIntegerFeedbackClassDeviceStruct(DeviceIntPtr
+Bool InitIntegerFeedbackClassDeviceStruct(DeviceIntPtr
                                                            /*device */ ,
                                                            IntegerCtrlProcPtr
                                                            /*controlProc */ );
@@ -409,44 +409,44 @@ extern _X_EXPORT Bool InitKeyboardDeviceStruct(DeviceIntPtr /*device */ ,
                                                KbdCtrlProcPtr /*controlProc */
                                                );
 
-extern _X_EXPORT Bool InitKeyboardDeviceStructFromString(DeviceIntPtr dev,
+Bool InitKeyboardDeviceStructFromString(DeviceIntPtr dev,
 							 const char *keymap,
 							 int keymap_length,
 							 BellProcPtr bell_func,
 							 KbdCtrlProcPtr ctrl_func);
 
-extern _X_EXPORT void ProcessInputEvents(void);
+void ProcessInputEvents(void);
 
-extern _X_EXPORT void InitInput(int /*argc */ ,
+void InitInput(int /*argc */ ,
                                 char ** /*argv */ );
-extern _X_EXPORT void CloseInput(void);
+void CloseInput(void);
 
-extern _X_EXPORT int GetMaximumEventsNum(void);
+int GetMaximumEventsNum(void);
 
-extern _X_EXPORT InternalEvent *InitEventList(int num_events);
-extern _X_EXPORT void FreeEventList(InternalEvent *list, int num_events);
+InternalEvent *InitEventList(int num_events);
+void FreeEventList(InternalEvent *list, int num_events);
 
-extern _X_EXPORT int GetPointerEvents(InternalEvent *events,
+int GetPointerEvents(InternalEvent *events,
                                       DeviceIntPtr pDev,
                                       int type,
                                       int buttons,
                                       int flags, const ValuatorMask *mask);
 
-extern _X_EXPORT void QueuePointerEvents(DeviceIntPtr pDev,
+void QueuePointerEvents(DeviceIntPtr pDev,
                                          int type,
                                          int buttons,
                                          int flags, const ValuatorMask *mask);
 
-extern _X_EXPORT int GetKeyboardEvents(InternalEvent *events,
+int GetKeyboardEvents(InternalEvent *events,
                                        DeviceIntPtr pDev,
                                        int type,
                                        int key_code);
 
-extern _X_EXPORT void QueueKeyboardEvents(DeviceIntPtr pDev,
+void QueueKeyboardEvents(DeviceIntPtr pDev,
                                           int type,
                                           int key_code);
 
-extern _X_EXPORT int GetProximityEvents(InternalEvent *events,
+int GetProximityEvents(InternalEvent *events,
                                         DeviceIntPtr pDev,
                                         int type, const ValuatorMask *mask);
 
@@ -455,7 +455,7 @@ extern _X_EXPORT void QueueProximityEvents(DeviceIntPtr pDev,
 
 extern _X_EXPORT int GetMotionHistorySize(void);
 
-extern _X_EXPORT void AllocateMotionHistory(DeviceIntPtr pDev);
+void AllocateMotionHistory(DeviceIntPtr pDev);
 
 extern _X_EXPORT int GetMotionHistory(DeviceIntPtr pDev,
                                       xTimecoord ** buff,
@@ -463,10 +463,10 @@ extern _X_EXPORT int GetMotionHistory(DeviceIntPtr pDev,
                                       unsigned long stop,
                                       ScreenPtr pScreen, BOOL core);
 
-extern _X_EXPORT DeviceIntPtr GetPairedDevice(DeviceIntPtr kbd);
-extern _X_EXPORT DeviceIntPtr GetMaster(DeviceIntPtr dev, int type);
+DeviceIntPtr GetPairedDevice(DeviceIntPtr kbd);
+DeviceIntPtr GetMaster(DeviceIntPtr dev, int type);
 
-extern _X_EXPORT int AllocDevicePair(ClientPtr client,
+int AllocDevicePair(ClientPtr client,
                                      const char *name,
                                      DeviceIntPtr *ptr,
                                      DeviceIntPtr *keybd,
@@ -474,7 +474,7 @@ extern _X_EXPORT int AllocDevicePair(ClientPtr client,
                                      DeviceProc keybd_proc, Bool master);
 
 /* Helper functions. */
-extern _X_EXPORT int generate_modkeymap(ClientPtr client, DeviceIntPtr dev,
+int generate_modkeymap(ClientPtr client, DeviceIntPtr dev,
                                         KeyCode **modkeymap,
                                         int *max_keys_per_mod);
 
@@ -511,12 +511,12 @@ extern _X_EXPORT void FreeInputAttributes(InputAttributes * attrs);
 extern _X_EXPORT int NewInputDeviceRequest(InputOption *options,
                                            InputAttributes * attrs,
                                            DeviceIntPtr *dev);
-extern _X_EXPORT void DeleteInputDeviceRequest(DeviceIntPtr dev);
-extern _X_EXPORT void RemoveInputDeviceTraces(const char *config_info);
-extern _X_EXPORT void DDXRingBell(int volume, int pitch, int duration);
+void DeleteInputDeviceRequest(DeviceIntPtr dev);
+void RemoveInputDeviceTraces(const char *config_info);
+void DDXRingBell(int volume, int pitch, int duration);
 extern _X_EXPORT ValuatorMask *valuator_mask_new(int num_valuators);
 extern _X_EXPORT void valuator_mask_free(ValuatorMask **mask);
-extern _X_EXPORT void valuator_mask_set_range(ValuatorMask *mask,
+void valuator_mask_set_range(ValuatorMask *mask,
                                               int first_valuator,
                                               int num_valuators,
                                               const int *valuators);
@@ -536,22 +536,22 @@ extern _X_EXPORT double valuator_mask_get_double(const ValuatorMask *mask,
                                                  int valnum);
 extern _X_EXPORT Bool valuator_mask_fetch(const ValuatorMask *mask,
                                           int valnum, int *val);
-extern _X_EXPORT Bool valuator_mask_fetch_double(const ValuatorMask *mask,
+Bool valuator_mask_fetch_double(const ValuatorMask *mask,
                                                  int valnum, double *val);
-extern _X_EXPORT Bool valuator_mask_has_unaccelerated(const ValuatorMask *mask);
+Bool valuator_mask_has_unaccelerated(const ValuatorMask *mask);
 extern _X_EXPORT void valuator_mask_set_unaccelerated(ValuatorMask *mask,
                                                       int valuator,
                                                       double accel,
                                                       double unaccel);
-extern _X_EXPORT void valuator_mask_set_absolute_unaccelerated(ValuatorMask *mask,
+void valuator_mask_set_absolute_unaccelerated(ValuatorMask *mask,
                                                                int valuator,
                                                                int absolute,
                                                                double unaccel);
-extern _X_EXPORT double valuator_mask_get_accelerated(const ValuatorMask *mask,
+double valuator_mask_get_accelerated(const ValuatorMask *mask,
                                                       int valuator);
-extern _X_EXPORT double valuator_mask_get_unaccelerated(const ValuatorMask *mask,
+double valuator_mask_get_unaccelerated(const ValuatorMask *mask,
                                                         int valuator);
-extern _X_EXPORT Bool valuator_mask_fetch_unaccelerated(const ValuatorMask *mask,
+Bool valuator_mask_fetch_unaccelerated(const ValuatorMask *mask,
                                                         int valuator,
                                                         double *accel,
                                                         double *unaccel);
@@ -560,21 +560,21 @@ extern _X_EXPORT InputOption *input_option_new(InputOption *list,
                                                const char *key,
                                                const char *value);
 extern _X_EXPORT void input_option_free_list(InputOption **opt);
-extern _X_EXPORT InputOption *input_option_free_element(InputOption *opt,
+InputOption *input_option_free_element(InputOption *opt,
                                                         const char *key);
-extern _X_EXPORT InputOption *input_option_find(InputOption *list,
+InputOption *input_option_find(InputOption *list,
                                                 const char *key);
-extern _X_EXPORT const char *input_option_get_key(const InputOption *opt);
-extern _X_EXPORT const char *input_option_get_value(const InputOption *opt);
-extern _X_EXPORT void input_option_set_key(InputOption *opt, const char *key);
-extern _X_EXPORT void input_option_set_value(InputOption *opt,
+const char *input_option_get_key(const InputOption *opt);
+const char *input_option_get_value(const InputOption *opt);
+void input_option_set_key(InputOption *opt, const char *key);
+void input_option_set_value(InputOption *opt,
                                              const char *value);
 
 extern _X_EXPORT void input_lock(void);
 extern _X_EXPORT void input_unlock(void);
-extern _X_EXPORT void input_force_unlock(void);
-extern _X_EXPORT int in_input_thread(void);
+void input_force_unlock(void);
+int in_input_thread(void);
 
-extern _X_EXPORT Bool InputThreadEnable;
+extern Bool InputThreadEnable;
 
 #endif                          /* INPUT_H */

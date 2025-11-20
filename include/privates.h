@@ -9,6 +9,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ******************************************************************/
 
+// FIXME: move out non-exported functions
+
 #ifndef PRIVATES_H
 #define PRIVATES_H 1
 
@@ -255,7 +257,7 @@ dixLookupScreenPrivateAddr(PrivatePtr *privates, const DevScreenPrivateKeyPtr ke
 
 #define HAVE_SCREEN_SPECIFIC_PRIVATE_KEYS       1
 
-extern _X_EXPORT Bool
+Bool
 dixRegisterScreenSpecificPrivateKey(ScreenPtr pScreen, DevPrivateKey key,
                                     DevPrivateType type, unsigned size);
 
@@ -281,7 +283,7 @@ _dixAllocateScreenObjectWithPrivates(ScreenPtr pScreen,
 extern _X_EXPORT int
 dixScreenSpecificPrivatesSize(ScreenPtr pScreen, DevPrivateType type);
 
-extern _X_EXPORT void
+void
 _dixInitScreenPrivates(ScreenPtr pScreen, PrivatePtr *privates, void *addr, DevPrivateType type);
 
 #define dixInitScreenPrivates(s, o, v, type) _dixInitScreenPrivates(s, &(o)->devPrivates, (v), type);
@@ -295,19 +297,20 @@ _dixInitScreenPrivates(ScreenPtr pScreen, PrivatePtr *privates, void *addr, DevP
  * This includes screens, the serverClient, default colormaps and
  * extensions entries.
  */
-extern _X_EXPORT Bool
+Bool
  dixAllocatePrivates(PrivatePtr *privates, DevPrivateType type);
 
 /*
  * Frees separately allocated private data
  */
+// FIXME: intel driver
 extern _X_EXPORT void
  dixFreePrivates(PrivatePtr privates, DevPrivateType type);
 
 /*
  * Initialize privates by zeroing them
  */
-extern _X_EXPORT void
+void
 _dixInitPrivates(PrivatePtr *privates, void *addr, DevPrivateType type);
 
 #define dixInitPrivates(o, v, type) _dixInitPrivates(&(o)->devPrivates, (v), type);
@@ -315,7 +318,7 @@ _dixInitPrivates(PrivatePtr *privates, void *addr, DevPrivateType type);
 /*
  * Clean up privates
  */
-extern _X_EXPORT void
+void
  _dixFiniPrivates(PrivatePtr privates, DevPrivateType type);
 
 #define dixFiniPrivates(o,t)	_dixFiniPrivates((o)->devPrivates,t)
@@ -325,15 +328,14 @@ extern _X_EXPORT void
  * for almost all objects, except for the list described
  * above for dixAllocatePrivates.
  */
-extern _X_EXPORT void *_dixAllocateObjectWithPrivates(unsigned size,
+void *_dixAllocateObjectWithPrivates(unsigned size,
                                                       unsigned clear,
                                                       unsigned offset,
                                                       DevPrivateType type);
 
 #define dixAllocateObjectWithPrivates(t, type) (t *) _dixAllocateObjectWithPrivates(sizeof(t), sizeof(t), offsetof(t, devPrivates), type)
 
-extern _X_EXPORT void
-
+void
 _dixFreeObjectWithPrivates(void *object, PrivatePtr privates,
                            DevPrivateType type);
 
@@ -342,7 +344,7 @@ _dixFreeObjectWithPrivates(void *object, PrivatePtr privates,
 /*
  * Return size of privates for the specified type
  */
-extern _X_EXPORT int
+int
  dixPrivatesSize(DevPrivateType type);
 
 /*
@@ -355,8 +357,7 @@ extern void
  * Resets the privates subsystem.  dixResetPrivates is called from the main loop
  * before each server generation.  This function must only be called by main().
  */
-extern _X_EXPORT void
- dixResetPrivates(void);
+void dixResetPrivates(void);
 
 /*
  * Looks up the offset where the devPrivates field is located.
@@ -366,13 +367,14 @@ extern _X_EXPORT void
  * and calling code might only know the resource type, not the
  * structure definition.
  */
-extern _X_EXPORT int
+int
  dixLookupPrivateOffset(RESTYPE type);
 
 /*
  * Convenience macro for adding an offset to an object pointer
  * when making a call to one of the devPrivates functions
  */
+// unexport
 #define DEVPRIV_AT(ptr, offset) ((PrivatePtr *)((char *)(ptr) + offset))
 
 #endif                          /* PRIVATES_H */

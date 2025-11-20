@@ -91,20 +91,20 @@ extern _X_EXPORT int WalkTree(ScreenPtr pScreen,
                               VisitWindowProcPtr func,
                               void *data);
 
-extern _X_EXPORT Bool CreateRootWindow(ScreenPtr /*pScreen */ );
+Bool CreateRootWindow(ScreenPtr /*pScreen */ );
 
-extern _X_EXPORT void InitRootWindow(WindowPtr /*pWin */ );
+void InitRootWindow(WindowPtr /*pWin */ );
 
 typedef WindowPtr (*RealChildHeadProc) (WindowPtr pWin);
 
-extern _X_EXPORT void RegisterRealChildHeadProc(RealChildHeadProc proc);
+void RegisterRealChildHeadProc(RealChildHeadProc proc);
 
-extern _X_EXPORT WindowPtr RealChildHead(WindowPtr /*pWin */ );
+WindowPtr RealChildHead(WindowPtr /*pWin */ );
 
-extern _X_EXPORT int DeleteWindow(void *pWin,
+int DeleteWindow(void *pWin,
                                   XID wid);
 
-extern _X_EXPORT int DestroySubwindows(WindowPtr /*pWin */ ,
+int DestroySubwindows(WindowPtr /*pWin */ ,
                                        ClientPtr /*client */ );
 
 /* Quartz support on Mac OS X uses the HIToolbox
@@ -117,11 +117,11 @@ extern _X_EXPORT int ChangeWindowAttributes(WindowPtr /*pWin */ ,
                                             XID * /*vlist */ ,
                                             ClientPtr /*client */ );
 
-extern _X_EXPORT int ChangeWindowDeviceCursor(WindowPtr /*pWin */ ,
+int ChangeWindowDeviceCursor(WindowPtr /*pWin */ ,
                                               struct _DeviceIntRec * /*pDev */ ,
                                               struct _Cursor * /*pCursor */ );
 
-extern _X_EXPORT struct _Cursor *WindowGetDeviceCursor(WindowPtr /*pWin */ ,
+struct _Cursor *WindowGetDeviceCursor(WindowPtr /*pWin */ ,
                                                        struct _DeviceIntRec *
                                                        /*pDev */ );
 
@@ -138,7 +138,7 @@ extern _X_EXPORT void GetWindowAttributes(
                                              xGetWindowAttributesReply *
                                              /* wa */ );
 
-extern _X_EXPORT void GravityTranslate(int /*x */ ,
+void GravityTranslate(int /*x */ ,
                                        int /*y */ ,
                                        int /*oldx */ ,
                                        int /*oldy */ ,
@@ -148,71 +148,74 @@ extern _X_EXPORT void GravityTranslate(int /*x */ ,
                                        int * /*destx */ ,
                                        int * /*desty */ );
 
-extern _X_EXPORT int ConfigureWindow(WindowPtr /*pWin */ ,
+int ConfigureWindow(WindowPtr /*pWin */ ,
                                      Mask /*mask */ ,
                                      XID * /*vlist */ ,
                                      ClientPtr /*client */ );
 
-extern _X_EXPORT int CirculateWindow(WindowPtr /*pParent */ ,
+int CirculateWindow(WindowPtr /*pParent */ ,
                                      int /*direction */ ,
                                      ClientPtr /*client */ );
 
+// FIXME
 extern _X_EXPORT int ReparentWindow(WindowPtr /*pWin */ ,
                                     WindowPtr /*pParent */ ,
                                     int /*x */ ,
                                     int /*y */ ,
                                     ClientPtr /*client */ );
 
-extern _X_EXPORT int MapWindow(WindowPtr /*pWin */ ,
+int MapWindow(WindowPtr /*pWin */ ,
                                ClientPtr /*client */ );
 
-extern _X_EXPORT void MapSubwindows(WindowPtr /*pParent */ ,
+void MapSubwindows(WindowPtr /*pParent */ ,
                                     ClientPtr /*client */ );
 
-extern _X_EXPORT int UnmapWindow(WindowPtr /*pWin */ ,
+int UnmapWindow(WindowPtr /*pWin */ ,
                                  Bool /*fromConfigure */ );
 
-extern _X_EXPORT void UnmapSubwindows(WindowPtr /*pWin */ );
+void UnmapSubwindows(WindowPtr /*pWin */ );
 
-extern _X_EXPORT void HandleSaveSet(ClientPtr /*client */ );
+void HandleSaveSet(ClientPtr /*client */ );
 
-extern _X_EXPORT Bool PointInWindowIsVisible(WindowPtr /*pWin */ ,
+Bool PointInWindowIsVisible(WindowPtr /*pWin */ ,
                                              int /*x */ ,
                                              int /*y */ );
 
+// FIXME:intel
 extern _X_EXPORT RegionPtr NotClippedByChildren(WindowPtr /*pWin */ );
 
-extern _X_EXPORT void SendVisibilityNotify(WindowPtr /*pWin */ );
+void SendVisibilityNotify(WindowPtr /*pWin */ );
 
-extern _X_EXPORT int dixSaveScreens(ClientPtr client, int on, int mode);
+int dixSaveScreens(ClientPtr client, int on, int mode);
 
+// fixme: intel
 extern _X_EXPORT int SaveScreens(int on, int mode);
 
 extern _X_EXPORT WindowPtr FindWindowWithOptional(WindowPtr /*w */ );
 
-extern _X_EXPORT void CheckWindowOptionalNeed(WindowPtr /*w */ );
+void CheckWindowOptionalNeed(WindowPtr /*w */ );
 
-extern _X_EXPORT WindowPtr MoveWindowInStack(WindowPtr /*pWin */ ,
+WindowPtr MoveWindowInStack(WindowPtr /*pWin */ ,
                                              WindowPtr /*pNextSib */ );
 
-extern _X_EXPORT void SetWinSize(WindowPtr /*pWin */ );
+void SetWinSize(WindowPtr /*pWin */ );
 
-extern _X_EXPORT void SetBorderSize(WindowPtr /*pWin */ );
+void SetBorderSize(WindowPtr /*pWin */ );
 
-extern _X_EXPORT void ResizeChildrenWinSize(WindowPtr /*pWin */ ,
+void ResizeChildrenWinSize(WindowPtr /*pWin */ ,
                                             int /*dx */ ,
                                             int /*dy */ ,
                                             int /*dw */ ,
                                             int /*dh */ );
 
-extern _X_EXPORT void SendShapeNotify(WindowPtr /* pWin */ ,
+void SendShapeNotify(WindowPtr /* pWin */ ,
                                       int /* which */);
 
-extern _X_EXPORT RegionPtr CreateBoundingShape(WindowPtr /* pWin */ );
+RegionPtr CreateBoundingShape(WindowPtr /* pWin */ );
 
-extern _X_EXPORT RegionPtr CreateClipShape(WindowPtr /* pWin */ );
+RegionPtr CreateClipShape(WindowPtr /* pWin */ );
 
 extern _X_EXPORT void SetRootClip(ScreenPtr pScreen, int enable);
 
-extern _X_EXPORT VisualPtr WindowGetVisual(WindowPtr /*pWin*/);
+VisualPtr WindowGetVisual(WindowPtr /*pWin*/);
 #endif                          /* WINDOW_H */

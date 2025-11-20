@@ -103,17 +103,17 @@ extern _X_EXPORT PixmapPtr GetScratchPixmapHeader(ScreenPtr pScreen,
 
 extern _X_EXPORT void FreeScratchPixmapHeader(PixmapPtr /*pPixmap */ );
 
-extern _X_EXPORT Bool PixmapScreenInit(ScreenPtr /*pScreen */ );
+Bool PixmapScreenInit(ScreenPtr /*pScreen */ );
 
 extern _X_EXPORT PixmapPtr AllocatePixmap(ScreenPtr /*pScreen */ ,
                                           int /*pixDataSize */ );
 
 extern _X_EXPORT void FreePixmap(PixmapPtr /*pPixmap */ );
 
-extern _X_EXPORT PixmapPtr
+PixmapPtr
 PixmapShareToSecondary(PixmapPtr pixmap, ScreenPtr secondary);
 
-extern _X_EXPORT void
+void
 PixmapUnshareSecondaryPixmap(PixmapPtr secondary_pixmap);
 
 #define HAS_DIRTYTRACKING_ROTATION 1
@@ -132,7 +132,7 @@ PixmapStopDirtyTracking(DrawablePtr src, PixmapPtr slave_dst);
 extern _X_EXPORT Bool
 PixmapSyncDirtyHelper(PixmapDirtyUpdatePtr dirty);
 
-extern _X_EXPORT void
+void
 PixmapDirtyCopyArea(PixmapPtr dst, DrawablePtr src,
                     int x, int y, int dst_x, int dst_y,
                     RegionPtr dirty_region);
