@@ -35,6 +35,7 @@
 #include <errno.h>
 
 #include "dix/dix_priv.h"
+#include "dix/pixmap_priv.h"
 #include "os/client_priv.h"
 
 #ifdef WITH_LIBDRM

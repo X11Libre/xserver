@@ -31,6 +31,7 @@ from The Open Group.
 #include <X11/X.h>
 #include <X11/extensions/render.h>
 
+#include "dix/pixmap_priv.h"
 #include "mi/mi_priv.h"
 
 #include "scrnintstr.h"
