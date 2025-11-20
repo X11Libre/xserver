@@ -52,6 +52,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
+#include "os/osdep.h"
 
 #include "misc.h"
 #include "dixstruct.h"

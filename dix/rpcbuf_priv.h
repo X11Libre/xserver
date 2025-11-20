@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 
-#include "include/misc.h"
 #include "include/os.h"
 
 /*
