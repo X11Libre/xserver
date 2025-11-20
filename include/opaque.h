@@ -33,8 +33,6 @@ from The Open Group.
 
 #include "globals.h"
 
-// needed by libglx and libglamor (server modules)
-extern _X_EXPORT Bool enableIndirectGLX;
 extern _X_EXPORT Bool bgNoneRoot;
 
 #endif                          /* OPAQUE_H */
