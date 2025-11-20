@@ -147,22 +147,23 @@ typedef void (*FindTypeSubResources)(void *value,
                                      FindAllRes func,
                                      void *cdata);
 
-extern _X_EXPORT SizeType GetResourceTypeSizeFunc(
+SizeType GetResourceTypeSizeFunc(
     RESTYPE /*type*/);
 
-extern _X_EXPORT void SetResourceTypeFindSubResFunc(
+void SetResourceTypeFindSubResFunc(
     RESTYPE /*type*/, FindTypeSubResources /*findFunc*/);
 
-extern _X_EXPORT void SetResourceTypeSizeFunc(
+void SetResourceTypeSizeFunc(
     RESTYPE /*type*/, SizeType /*sizeFunc*/);
 
-extern _X_EXPORT void SetResourceTypeErrorValue(
+void SetResourceTypeErrorValue(
     RESTYPE /*type*/, int /*errorValue*/);
 
 extern _X_EXPORT RESTYPE CreateNewResourceClass(void);
 
-extern _X_EXPORT Bool InitClientResources(ClientPtr /*client */ );
+Bool InitClientResources(ClientPtr /*client */ );
 
+// FIXME: replace it by dixAllocServerXID()
 extern _X_EXPORT XID FakeClientID(int /*client */ );
 
 /* Quartz support on Mac OS X uses the CarbonCore
@@ -181,7 +182,7 @@ extern _X_EXPORT void FreeResourceByType(XID /*id */ ,
                                          RESTYPE /*type */ ,
                                          Bool /*skipFree */ );
 
-extern _X_EXPORT Bool ChangeResourceValue(XID id,
+Bool ChangeResourceValue(XID id,
                                           RESTYPE rtype,
                                           void *value);
 
@@ -190,7 +191,7 @@ extern _X_EXPORT void FindClientResourcesByType(ClientPtr client,
                                                 FindResType func,
                                                 void *cdata);
 
-extern _X_EXPORT void FindAllClientResources(ClientPtr client,
+void FindAllClientResources(ClientPtr client,
                                              FindAllRes func,
                                              void *cdata);
 
@@ -198,31 +199,34 @@ extern _X_EXPORT void FindAllClientResources(ClientPtr client,
 
     @note The XID argument provided to the FindAllRes function
           may be 0 for subresources that don't have an XID */
-extern _X_EXPORT void FindSubResources(void *resource,
+void FindSubResources(void *resource,
                                        RESTYPE type,
                                        FindAllRes func,
                                        void *cdata);
 
-extern _X_EXPORT void FreeClientNeverRetainResources(ClientPtr /*client */ );
+void FreeClientNeverRetainResources(ClientPtr /*client */ );
 
-extern _X_EXPORT void FreeClientResources(ClientPtr /*client */ );
+void FreeClientResources(ClientPtr /*client */ );
 
-extern _X_EXPORT void FreeAllResources(void);
+void FreeAllResources(void);
 
-extern _X_EXPORT Bool LegalNewID(XID /*id */ ,
+Bool LegalNewID(XID /*id */ ,
                                  ClientPtr /*client */ );
 
+// FIXME intel
 extern _X_EXPORT void *LookupClientResourceComplex(ClientPtr client,
                                                      RESTYPE type,
                                                      FindComplexResType func,
                                                      void *cdata);
 
+// FIXME: intel
 extern _X_EXPORT int dixLookupResourceByType(void **result,
                                              XID id,
                                              RESTYPE rtype,
                                              ClientPtr client,
                                              Mask access_mode);
 
+// Nvidia
 extern _X_EXPORT int dixLookupResourceByClass(void **result,
                                               XID id,
                                               RESTYPE rclass,

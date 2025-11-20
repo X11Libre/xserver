@@ -94,9 +94,9 @@ OF THIS SOFTWARE.
 #define GPU_SCREEN_OFFSET 256
 
 /* 128 event opcodes for core + extension events, excluding GE */
-#define MAXEVENTS       128
-#define EXTENSION_EVENT_BASE 64
-#define EXTENSION_BASE 128
+#define MAXEVENTS       128 // unexport
+#define EXTENSION_EVENT_BASE 64 // unexport
+#define EXTENSION_BASE 128 // unexport
 
 typedef uint32_t ATOM;
 
@@ -157,7 +157,6 @@ typedef int XRetCode;
 #endif
 
 /* some macros to help swap requests, replies, and events */
-
 #define LengthRestS(stuff) \
     ((client->req_len << 1) - (sizeof(*stuff) >> 1))
 
@@ -174,6 +173,7 @@ wrong_size(void)
 }
 #endif
 
+// unexport ?
 #if !(defined(__GNUC__))
 static inline int
 __builtin_constant_p(int x)
@@ -195,6 +195,7 @@ bswap_64(uint64_t x)
             ((x & 0x00000000000000FFull) << 56));
 }
 
+// unexport
 #define swapll(x) do { \
 		if (sizeof(*(x)) != 8) \
 			wrong_size(); \
@@ -210,6 +211,7 @@ bswap_32(uint32_t x)
             ((x & 0x000000FF) << 24));
 }
 
+// keep
 #define swapl(x) do { \
 		if (sizeof(*(x)) != 4) \
 			wrong_size(); \
@@ -229,6 +231,7 @@ bswap_16(uint16_t x)
 		*(x) = bswap_16(*(x)); \
 	} while (0)
 
+// unexport
 /* copy 32-bit value from src to dst byteswapping on the way */
 #define cpswapl(src, dst) do { \
 		if (sizeof((src)) != 4 || sizeof((dst)) != 4) \
@@ -236,6 +239,7 @@ bswap_16(uint16_t x)
 		(dst) = bswap_32((src)); \
 	} while (0)
 
+// unexport
 /* copy short from src to dst byteswapping on the way */
 #define cpswaps(src, dst) do { \
 		if (sizeof((src)) != 2 || sizeof((dst)) != 2) \

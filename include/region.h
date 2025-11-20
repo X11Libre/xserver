@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef REGION_H
 #define REGION_H
 
+// FIXME: remove it
 #include "regionstr.h"
 
 #endif                          /* REGION_H */
