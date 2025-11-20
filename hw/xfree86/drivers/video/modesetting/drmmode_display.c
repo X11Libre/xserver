@@ -35,6 +35,7 @@
 #include <unistd.h>
 
 #include "dix/dix_priv.h"
+#include "dix/pixmap_priv.h"
 #include "os/fmt.h"
 #include "os/mathx_priv.h"
 #include "present/present_priv.h"
