@@ -59,6 +59,7 @@ SOFTWARE.
 #include "dix/exevents_priv.h"
 #include "dix/request_priv.h"
 #include "dix/extension_priv.h"
+#include "os/osdep.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
