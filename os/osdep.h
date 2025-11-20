@@ -91,6 +91,9 @@ extern void FreeOsBuffers(OsCommPtr     /*oc */
 void
 CloseDownFileDescriptor(OsCommPtr oc);
 
+#define MILLI_PER_MIN (1000 * 60)
+#define MILLI_PER_SECOND (1000)
+
 #include "dix.h"
 #include "ospoll.h"
 
