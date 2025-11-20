@@ -71,6 +71,7 @@ struct _Cursor;
 
 typedef struct _BackingStore *BackingStorePtr;
 typedef struct _Window *WindowPtr;
+typedef struct _Property *PropertyPtr;
 
 enum RootClipMode {
     ROOT_CLIP_NONE = 0, /**< resize the root window to 0x0 */
