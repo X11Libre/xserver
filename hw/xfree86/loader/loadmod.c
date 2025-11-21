@@ -227,7 +227,8 @@ LoaderSetPath(const char *driver, const char *path)
     if (item && item->name && (!path || item->paths))
         xorg_list_add(&item->entry, &modulePathLists);
     else {
-        LogMessage(X_ERROR, "Failed to store module search path \"%s\" for module %s\n", path, driver);
+        LogMessage(X_ERROR, "Failed to store module search path \"%s\" for module %s\n",
+            path ? path : "<NULL>", driver);
         if (item) {
             if (item->name) free(item->name);
             if (item->paths) FreeStringList(item->paths);
