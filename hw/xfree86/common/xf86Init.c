@@ -58,6 +58,7 @@
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "randr/randrstr_priv.h"
+#include "render/picturestr_priv.h"
 
 #include "servermd.h"
 #include "windowstr.h"
@@ -82,7 +83,6 @@
 #include "xf86Xinput.h"
 #include "xf86InPriv.h"
 #include "xf86Crtc.h"
-#include "picturestr.h"
 #include "xf86Bus.h"
 #include "globals.h"
 #include "xserver-properties.h"
