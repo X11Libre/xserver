@@ -356,51 +356,14 @@ extern _X_EXPORT PictFormatPtr
 extern _X_EXPORT Bool
  PictureSetSubpixelOrder(ScreenPtr pScreen, int subpixel);
 
-extern _X_EXPORT int
- PictureGetSubpixelOrder(ScreenPtr pScreen);
-
-extern _X_EXPORT PictFormatPtr
-PictureMatchVisual(ScreenPtr pScreen, int depth, VisualPtr pVisual);
-
 extern _X_EXPORT PictFormatPtr
 PictureMatchFormat(ScreenPtr pScreen, int depth, CARD32 format);
-
-extern _X_EXPORT Bool
- PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats);
-
-extern _X_EXPORT int
- PictureGetFilterId(const char *filter, int len, Bool makeit);
 
 extern _X_EXPORT char *PictureGetFilterName(int id);
 
 extern _X_EXPORT int
-PictureAddFilter(ScreenPtr pScreen,
-                 const char *filter,
-                 PictFilterValidateParamsProcPtr ValidateParams,
-                 int width, int height);
-
-extern _X_EXPORT Bool
-PictureSetFilterAlias(ScreenPtr pScreen, const char *filter, const char *alias);
-
-extern _X_EXPORT Bool
- PictureSetDefaultFilters(ScreenPtr pScreen);
-
-extern _X_EXPORT void
- PictureResetFilters(ScreenPtr pScreen);
-
-extern _X_EXPORT PictFilterPtr
-PictureFindFilter(ScreenPtr pScreen, char *name, int len);
-
-extern _X_EXPORT int
 SetPicturePictFilter(PicturePtr pPicture, PictFilterPtr pFilter,
                      xFixed * params, int nparams);
-
-extern _X_EXPORT int
-SetPictureFilter(PicturePtr pPicture, char *name, int len,
-                 xFixed * params, int nparams);
-
-extern _X_EXPORT Bool
- PictureFinishInit(void);
 
 extern _X_EXPORT PicturePtr
 CreatePicture(Picture pid,
@@ -411,15 +374,6 @@ CreatePicture(Picture pid,
 extern _X_EXPORT int
 ChangePicture(PicturePtr pPicture,
               Mask vmask, XID *vlist, DevUnion *ulist, ClientPtr client);
-
-extern _X_EXPORT int
-
-SetPictureClipRects(PicturePtr pPicture,
-                    int xOrigin, int yOrigin, int nRect, xRectangle *rects);
-
-extern _X_EXPORT int
-SetPictureClipRegion(PicturePtr pPicture,
-                     int xOrigin, int yOrigin, RegionPtr pRegion);
 
 extern _X_EXPORT int
  SetPictureTransform(PicturePtr pPicture, PictTransform * transform);
@@ -441,94 +395,14 @@ CompositePicture(CARD8 op,
                  INT16 yMask,
                  INT16 xDst, INT16 yDst, CARD16 width, CARD16 height);
 
-extern _X_EXPORT void
-CompositeGlyphs(CARD8 op,
-                PicturePtr pSrc,
-                PicturePtr pDst,
-                PictFormatPtr maskFormat,
-                INT16 xSrc,
-                INT16 ySrc, int nlist, GlyphListPtr lists, GlyphPtr * glyphs);
-
-extern _X_EXPORT void
-CompositeRects(CARD8 op,
-               PicturePtr pDst,
-               xRenderColor * color, int nRect, xRectangle *rects);
-
-extern _X_EXPORT void
-CompositeTrapezoids(CARD8 op,
-                    PicturePtr pSrc,
-                    PicturePtr pDst,
-                    PictFormatPtr maskFormat,
-                    INT16 xSrc, INT16 ySrc, int ntrap, xTrapezoid * traps);
-
-extern _X_EXPORT void
-CompositeTriangles(CARD8 op,
-                   PicturePtr pSrc,
-                   PicturePtr pDst,
-                   PictFormatPtr maskFormat,
-                   INT16 xSrc,
-                   INT16 ySrc, int ntriangles, xTriangle * triangles);
-
-extern _X_EXPORT void
-CompositeTriStrip(CARD8 op,
-                  PicturePtr pSrc,
-                  PicturePtr pDst,
-                  PictFormatPtr maskFormat,
-                  INT16 xSrc, INT16 ySrc, int npoints, xPointFixed * points);
-
-extern _X_EXPORT void
-CompositeTriFan(CARD8 op,
-                PicturePtr pSrc,
-                PicturePtr pDst,
-                PictFormatPtr maskFormat,
-                INT16 xSrc, INT16 ySrc, int npoints, xPointFixed * points);
-
-extern _X_EXPORT void
-AddTraps(PicturePtr pPicture,
-         INT16 xOff, INT16 yOff, int ntraps, xTrap * traps);
-
 extern _X_EXPORT PicturePtr
 CreateSolidPicture(Picture pid, xRenderColor * color, int *error);
-
-extern _X_EXPORT PicturePtr
-CreateLinearGradientPicture(Picture pid,
-                            xPointFixed * p1,
-                            xPointFixed * p2,
-                            int nStops,
-                            xFixed * stops, xRenderColor * colors, int *error);
-
-extern _X_EXPORT PicturePtr
-CreateRadialGradientPicture(Picture pid,
-                            xPointFixed * inner,
-                            xPointFixed * outer,
-                            xFixed innerRadius,
-                            xFixed outerRadius,
-                            int nStops,
-                            xFixed * stops, xRenderColor * colors, int *error);
-
-extern _X_EXPORT PicturePtr
-CreateConicalGradientPicture(Picture pid,
-                             xPointFixed * center,
-                             xFixed angle,
-                             int nStops,
-                             xFixed * stops, xRenderColor * colors, int *error);
 
 /*
  * matrix.c
  */
 
-extern _X_EXPORT void
-PictTransform_from_xRenderTransform(PictTransformPtr pict,
-                                    xRenderTransform * render);
-
-extern _X_EXPORT void
-xRenderTransform_from_PictTransform(xRenderTransform * render,
-                                    PictTransformPtr pict);
-
 extern _X_EXPORT Bool
  PictureTransformPoint(PictTransformPtr transform, PictVectorPtr vector);
-
-extern _X_EXPORT Bool
- PictureTransformPoint3d(PictTransformPtr transform, PictVectorPtr vector);
 
 #endif                          /* _PICTURESTR_H_ */

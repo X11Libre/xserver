@@ -27,6 +27,7 @@
 #include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 #include "os/xsha1.h"
+#include "render/picturestr_priv.h"
 
 #include "misc.h"
 #include "scrnintstr.h"

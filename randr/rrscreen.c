@@ -26,6 +26,7 @@
 #include "dix/server_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
+#include "render/picturestr_priv.h"
 
 static CARD16
  RR10CurrentSizeID(ScreenPtr pScreen);

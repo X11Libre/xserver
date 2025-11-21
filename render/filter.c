@@ -26,6 +26,7 @@
 #include <X11/keysymdef.h>
 
 #include "dix/screenint_priv.h"
+#include "render/picturestr_priv.h"
 
 #include "misc.h"
 #include "scrnintstr.h"
