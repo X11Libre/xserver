@@ -53,10 +53,9 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/window_priv.h"
+#include "include/regionstr.h"
 #include "mi/mi_priv.h"
 
-#include "regionstr.h"
-#include "region.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
