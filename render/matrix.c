@@ -22,6 +22,8 @@
 
 #include <dix-config.h>
 
+#include "render/picturestr_priv.h"
+
 #include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
