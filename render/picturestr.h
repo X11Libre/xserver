@@ -342,16 +342,13 @@ typedef struct _PictureScreen {
 } PictureScreenRec, *PictureScreenPtr;
 
 extern _X_EXPORT DevPrivateKeyRec PictureScreenPrivateKeyRec;
-#define PictureScreenPrivateKey (&PictureScreenPrivateKeyRec)
-
 extern _X_EXPORT DevPrivateKeyRec PictureWindowPrivateKeyRec;
-#define	PictureWindowPrivateKey (&PictureWindowPrivateKeyRec)
 
-#define GetPictureScreen(s) ((PictureScreenPtr)dixLookupPrivate(&(s)->devPrivates, PictureScreenPrivateKey))
-#define GetPictureScreenIfSet(s) (dixPrivateKeyRegistered(PictureScreenPrivateKey) ? GetPictureScreen(s) : NULL)
-#define SetPictureScreen(s,p) dixSetPrivate(&(s)->devPrivates, PictureScreenPrivateKey, p)
-#define GetPictureWindow(w) ((PicturePtr)dixLookupPrivate(&(w)->devPrivates, PictureWindowPrivateKey))
-#define SetPictureWindow(w,p) dixSetPrivate(&(w)->devPrivates, PictureWindowPrivateKey, p)
+#define GetPictureScreen(s) ((PictureScreenPtr)dixLookupPrivate(&(s)->devPrivates, &PictureScreenPrivateKeyRec))
+#define GetPictureScreenIfSet(s) (dixPrivateKeyRegistered(&PictureScreenPrivateKeyRec) ? GetPictureScreen(s) : NULL)
+#define SetPictureScreen(s,p) dixSetPrivate(&(s)->devPrivates, &PictureScreenPrivateKeyRec, p)
+#define GetPictureWindow(w) ((PicturePtr)dixLookupPrivate(&(w)->devPrivates, &PictureWindowPrivateKeyRec))
+#define SetPictureWindow(w,p) dixSetPrivate(&(w)->devPrivates, &PictureWindowPrivateKeyRec, p)
 
 extern _X_EXPORT PictFormatPtr
  PictureWindowFormat(WindowPtr pWindow);
