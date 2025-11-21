@@ -531,13 +531,4 @@ extern _X_EXPORT Bool
 extern _X_EXPORT Bool
  PictureTransformPoint3d(PictTransformPtr transform, PictVectorPtr vector);
 
-/* only for backwards compat w/ drivers that haven't been updated yet
-   (xf86-video-intel) - don't ever use this in new code
-
-   @todo revise after next stable release
-*/
-
-#define pict_f_vector pixman_f_vector
-#define pict_f_transform pixman_f_transform
-
 #endif                          /* _PICTURESTR_H_ */
