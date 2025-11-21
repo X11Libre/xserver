@@ -60,7 +60,6 @@ SOFTWARE.
 #include "pixmapstr.h"
 #include "dixfontstr.h"
 #include "scrnintstr.h"
-#include "region.h"
 #include "dixstruct.h"
 #include "privates.h"
 #include "dix.h"

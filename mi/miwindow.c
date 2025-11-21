@@ -52,10 +52,9 @@ SOFTWARE.
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "include/regionstr.h"
 #include "mi/mi_priv.h"
 
-#include "regionstr.h"
-#include "region.h"
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
