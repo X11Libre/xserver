@@ -25,10 +25,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "dix/selection_priv.h"
 #include "include/callback.h"
+#include "include/regionstr.h"
 
 #include "extnsionst.h"
 #include "pixmap.h"
-#include "region.h"
 #include "window.h"
 #include "property.h"
 
