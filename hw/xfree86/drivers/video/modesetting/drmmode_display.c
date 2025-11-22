@@ -1012,8 +1012,6 @@ drmmode_crtc_flip(xf86CrtcPtr crtc, uint32_t fb_id, int x, int y,
 void
 drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
 {
-    int ret;
-
 #ifdef GLAMOR_HAS_GBM
     if (bo->gbm) {
         gbm_bo_destroy(bo->gbm);
@@ -1021,47 +1019,89 @@ drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
     }
 #endif
 
+#ifdef HAVE_DUMB_BO
     if (bo->dumb) {
-        ret = dumb_bo_destroy(drmmode->fd, bo->dumb);
-        if (ret == 0)
+        int ret = dumb_bo_destroy(drmmode->fd, bo->dumb);
+        if (ret == 0) {
             bo->dumb = NULL;
+        }
     }
+#endif
 }
 
 uint32_t
 drmmode_bo_get_pitch(drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
-    if (bo->gbm)
+    if (bo->gbm) {
         return gbm_bo_get_stride(bo->gbm);
+    }
 #endif
 
-    return bo->dumb->pitch;
+#ifdef HAVE_DUMB_BO
+    if (bo->dumb) {
+        return bo->dumb->pitch;
+    }
+#endif
+
+    return 0;
 }
+
+static uint32_t
+drmmode_bo_get_size(drmmode_bo *bo)
+{
+#ifdef GLAMOR_HAS_GBM
+    if (bo->gbm) {
+        uint32_t height = gbm_bo_get_height(bo->gbm);
+        uint32_t stride = gbm_bo_get_stride(bo->gbm);
+        return height * stride;
+    }
+#endif
+
+#ifdef HAVE_DUMB_BO
+    if (bo->dumb) {
+        return bo->dumb->size;
+    }
+#endif
+    return 0;
+}
+
 
 static void*
 drmmode_bo_get_bo(drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
-    if (bo->gbm)
+    if (bo->gbm) {
         return bo->gbm;
+    }
 #endif
 
+#ifdef HAVE_DUMB_BO
     return bo->dumb;
+#else
+    return NULL;
+#endif
 }
 
 uint32_t
 drmmode_bo_get_handle(drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
-    if (bo->gbm)
+    if (bo->gbm) {
         return gbm_bo_get_handle(bo->gbm).u32;
+    }
 #endif
 
-    return bo->dumb->handle;
+#ifdef HAVE_DUMB_BO
+    if (bo->dumb) {
+        return bo->dumb->handle;
+    }
+#endif
+
+    return 0;
 }
 
-static void *
+static void*
 drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
 {
     if (bo->map) {
@@ -1081,6 +1121,7 @@ drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
     }
 #endif
 
+#ifdef HAVE_DUMB_BO
     if (bo->dumb) {
         int ret = dumb_bo_map(drmmode->fd, bo->dumb);
         if (ret) {
@@ -1090,8 +1131,52 @@ drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
         bo->map = bo->dumb->ptr;
         return bo->map;
     }
+#endif
 
     return NULL;
+}
+
+#ifdef GLAMOR_HAS_GBM
+static uint32_t drmmode_gbm_format_for_depth(int depth);
+#endif
+
+static void
+drmmode_bo_backing_bo_from_fd(drmmode_ptr drmmode, drmmode_bo *bo, int fd_handle, int pitch, int size)
+{
+    /* pitch == width * cpp */
+    int width = pitch / drmmode->cpp;
+    /* size == pitch * height */
+    int height = size / pitch;
+
+#ifdef GLAMOR_HAS_GBM
+    if (drmmode->gbm) {
+        uint32_t format = drmmode_gbm_format_for_depth(drmmode->kbpp);
+        struct gbm_import_fd_data import_data = {.fd = fd_handle,
+                                                 .width = height,
+                                                 .height = width,
+                                                 .stride = pitch,
+                                                 .format = format,
+                                                };
+        /**
+         * We don't need scanout, since this is a backing bo
+         * We do the same thing in glamor/glamor_egl.c
+         */
+        struct gbm_bo *ret = gbm_bo_import(drmmode->gbm, GBM_BO_IMPORT_FD, &import_data, GBM_BO_USE_RENDERING);
+        if (ret) {
+            bo->width = width;
+            bo->height = height;
+            bo->gbm = ret;
+            bo->used_modifiers = FALSE;
+            return;
+        }
+    }
+#endif
+
+#ifdef HAVE_DUMB_BO
+    bo->width = width;
+    bo->height = height;
+    bo->dumb = dumb_get_bo_from_fd(drmmode->fd, fd_handle, pitch, size);
+#endif
 }
 
 int
@@ -1162,6 +1247,78 @@ drmmode_gbm_format_for_depth(int depth)
 #endif
 
 static Bool
+drmmode_create_cursor_bo(drmmode_ptr drmmode, drmmode_bo *bo,
+                         int width, int height)
+{
+    /* Assume whatever bpp we have for the primary plane, we also have for the cursor plane */
+    int bpp = drmmode->kbpp;
+
+    bo->width = width;
+    bo->height = height;
+
+#ifdef GLAMOR_HAS_GBM
+    if (drmmode->gbm) {
+        /**
+         * Assume the depth for the cursor is the same as the bpp,
+         * even if this is not true for the primary plane (e.g., even if bpp is 32, but drmmode->scrn->depth is 24).
+         */
+        uint32_t format = drmmode_gbm_format_for_depth(bpp);
+
+        bo->gbm = gbm_bo_create(drmmode->gbm, bo->width, bo->height,
+                                format,
+                                GBM_BO_USE_CURSOR | GBM_BO_USE_WRITE);
+        if (bo->gbm) {
+            bo->used_modifiers = FALSE;
+            return TRUE;
+        }
+    }
+#endif
+
+#ifdef HAVE_DUMB_BO
+    bo->dumb = dumb_bo_create(drmmode->fd, bo->width, bo->height, bpp);
+    return bo->dumb != NULL;
+#else
+    return FALSE;
+#endif
+}
+
+/* XXX Do we really need to do this? XXX */
+static Bool
+drmmode_create_bpp_probe_bo(drmmode_ptr drmmode, drmmode_bo *bo,
+                            unsigned width, unsigned height, unsigned depth, unsigned bpp, void **out_gbm_dev)
+{
+    *out_gbm_dev = NULL;
+#ifdef GLAMOR_HAS_GBM
+    struct gbm_device *gbm_dev = drmmode->gbm;
+    /* There is no way this is set right now, as glamor isn't yet initialized. */
+    if (!gbm_dev) {
+        gbm_dev = gbm_create_device(drmmode->fd);
+        *out_gbm_dev = gbm_dev;
+    }
+
+    if (gbm_dev) {
+        uint32_t format = drmmode_gbm_format_for_depth(depth);
+
+        bo->gbm = gbm_bo_create(gbm_dev, width, height,
+                                /* libgbm expects this for dumb scanout buffers for some reason */
+                                (format == GBM_FORMAT_ARGB8888) ? GBM_FORMAT_XRGB8888 : format,
+                                GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);
+        if (bo->gbm) {
+            bo->used_modifiers = FALSE;
+            return TRUE;
+        }
+    }
+#endif
+
+#ifdef HAVE_DUMB_BO
+    bo->dumb = dumb_bo_create(drmmode->fd, width, height, bpp);
+    return bo->dumb != NULL;
+#else
+    return FALSE;
+#endif
+}
+
+static Bool
 drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
                         unsigned width, unsigned height, unsigned bpp)
 {
@@ -1169,10 +1326,10 @@ drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
     bo->height = height;
 
 #ifdef GLAMOR_HAS_GBM
-    if (drmmode->glamor) {
-        uint32_t format = drmmode_gbm_format_for_depth(drmmode->scrn->depth);
+    uint32_t format = drmmode_gbm_format_for_depth(drmmode->scrn->depth);
 
 #ifdef GBM_BO_WITH_MODIFIERS
+    if (drmmode->glamor && drmmode->gbm) {
         uint32_t num_modifiers;
         uint64_t *modifiers = NULL;
         num_modifiers = get_modifiers_set(drmmode->scrn, format, &modifiers,
@@ -1194,18 +1351,39 @@ drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
                 return TRUE;
             }
         }
+    } else
 #endif
+    if (!drmmode->glamor && drmmode->gbm) {
+        /* We don't need glamor if modifiers aren't used */
+        bo->gbm = gbm_bo_create(drmmode->gbm, width, height,
+                                /* libgbm expects this for dumb scanout buffers for some reason */
+                                (format == GBM_FORMAT_ARGB8888) ? GBM_FORMAT_XRGB8888 : format,
+                                GBM_BO_USE_WRITE | GBM_BO_USE_SCANOUT |
+                                GBM_BO_USE_FRONT_RENDERING);
+        if (bo->gbm) {
+            bo->used_modifiers = FALSE;
+            return TRUE;
+        }
+    }
 
+    if (drmmode->gbm) {
+        /* We don't need glamor if modifiers aren't used */
         bo->gbm = gbm_bo_create(drmmode->gbm, width, height, format,
                                 GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT |
                                 GBM_BO_USE_FRONT_RENDERING);
-        bo->used_modifiers = FALSE;
-        return bo->gbm != NULL;
+        if (bo->gbm) {
+            bo->used_modifiers = FALSE;
+            return TRUE;
+        }
     }
 #endif
 
+#ifdef HAVE_DUMB_BO
     bo->dumb = dumb_bo_create(drmmode->fd, width, height, bpp);
     return bo->dumb != NULL;
+#else
+    return FALSE;
+#endif
 }
 
 Bool
@@ -1215,16 +1393,20 @@ drmmode_SetSlaveBO(PixmapPtr ppix,
     msPixmapPrivPtr ppriv = msGetPixmapPriv(drmmode, ppix);
 
     if (fd_handle == -1) {
-        dumb_bo_destroy(drmmode->fd, ppriv->backing_bo);
-        ppriv->backing_bo = NULL;
+        drmmode_bo_destroy(drmmode, &ppriv->backing_bo);
         return TRUE;
     }
 
-    ppriv->backing_bo =
-        dumb_get_bo_from_fd(drmmode->fd, fd_handle, pitch, size);
-    if (!ppriv->backing_bo)
+    memset(&ppriv->backing_bo, 0, sizeof(ppriv->backing_bo));
+    drmmode_bo_backing_bo_from_fd(drmmode, &ppriv->backing_bo, fd_handle, pitch, size);
+    if (!drmmode_bo_get_bo(&ppriv->backing_bo))
         return FALSE;
 
+    /**
+     * bo's imported from dmabuf's are not dependent
+     * on the lifetime of the underlying dmabuf fd,
+     * so we can safely close it
+     */
     close(fd_handle);
     return TRUE;
 }
@@ -1840,7 +2022,7 @@ drmmode_set_cursor(xf86CrtcPtr crtc, int width, int height)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    uint32_t handle = drmmode_crtc->cursor.bo->handle;
+    uint32_t handle = drmmode_bo_get_handle(&drmmode_crtc->cursor.bo);
     CursorPtr cursor = xf86CurrentCursor(crtc->scrn->pScreen);
     int ret = -EINVAL;
 
@@ -1893,15 +2075,15 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
         if (!drmmode_crtc->cursor_pitches) {
             /* we couldn't allocate memory for the cache, so we don't cache the result */
             int ret;
-            struct dumb_bo *bo = dumb_bo_create(drmmode->fd, width, height, drmmode->kbpp);
-            if (!bo) {
+            drmmode_bo bo = {0};
+            if (!drmmode_create_cursor_bo(drmmode, &bo, width, height)) {
                 /* We couldn't allocate a bo, so we try to guess the pitch */
                 return MAX(width, 64);
             }
 
-            ret = bo->pitch / drmmode->cpp;
+            ret = drmmode_bo_get_pitch(&bo) / drmmode->cpp;
 
-            dumb_bo_destroy(drmmode->fd, bo);
+            drmmode_bo_destroy(drmmode, &bo);
             return ret;
         }
     }
@@ -1911,27 +2093,30 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
         return drmmode_crtc->cursor_pitches[idx];
     }
 
-    struct dumb_bo *bo = dumb_bo_create(drmmode->fd, width, height, drmmode->kbpp);
-    if (!bo) {
+    drmmode_bo bo = {0};
+    if (!drmmode_create_cursor_bo(drmmode, &bo, width, height)) {
         /* We couldn't allocate a bo, so we try to guess the pitch */
         return MAX(width, 64);
     }
 
-    drmmode_crtc->cursor_pitches[idx] = bo->pitch / drmmode->cpp;
+    drmmode_crtc->cursor_pitches[idx] = drmmode_bo_get_pitch(&bo) / drmmode->cpp;
 
-    dumb_bo_destroy(drmmode->fd, bo);
+    drmmode_bo_destroy(drmmode, &bo);
     return drmmode_crtc->cursor_pitches[idx];
 }
 
 static void
-drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_width, int cursor_height,
+drmmode_paint_cursor(drmmode_bo *cursor_bo, int cursor_pitch, int cursor_width, int cursor_height,
                      const CARD32 * restrict image, int image_width, int image_height,
-                     drmmode_crtc_private_ptr restrict drmmode_crtc, int glyph_width, int glyph_height)
+                     drmmode_crtc_private_ptr drmmode_crtc, int glyph_width, int glyph_height)
 {
     int width_todo;
     int height_todo;
 
-    CARD32 *cursor = cursor_bo->ptr;
+    drmmode_ptr drmmode = drmmode_crtc->drmmode;
+
+    /* Since this is already mapped, we just get the map */
+    CARD32 *cursor = drmmode_bo_map(drmmode, cursor_bo);
 
     /*
      * The image buffer can be smaller than the cursor buffer.
@@ -1951,7 +2136,8 @@ drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_wid
         /* See: https://github.com/X11Libre/xserver/pull/1234 */
         (drmmode_crtc->old_pitch != cursor_pitch)
        ) {
-        memset(cursor, 0, cursor_bo->size);
+        uint32_t size = drmmode_bo_get_size(cursor_bo);
+        memset(cursor, 0, size);
 
         /* Since we already cleared the buffer, no need to clear it again bellow */
         drmmode_crtc->cursor_glyph_width = 0;
@@ -2022,7 +2208,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     int image_height = ms->cursor_image_height;
 
     /* cursor should be mapped already */
-    drmmode_paint_cursor(drmmode_cursor.bo, cursor_pitch, cursor_width, cursor_height,
+    drmmode_paint_cursor(&drmmode_cursor.bo, cursor_pitch, cursor_width, cursor_height,
                          image, image_width, image_height,
                          drmmode_crtc, cursor->bits->width, cursor->bits->height);
 
@@ -2200,7 +2386,7 @@ drmmode_set_target_scanout_pixmap_cpu(xf86CrtcPtr crtc, PixmapPtr ppix,
                      ppix->drawable.height,
                      ppix->drawable.depth,
                      ppix->drawable.bitsPerPixel,
-                     ppix->devKind, ppriv->backing_bo->handle, &ppriv->fb_id);
+                     ppix->devKind, drmmode_bo_get_handle(&ppriv->backing_bo), &ppriv->fb_id);
     }
     *target = ppix;
     return TRUE;
@@ -4700,7 +4886,7 @@ drmmode_reset_cursor(drmmode_crtc_private_ptr drmmode_crtc)
 static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    uint32_t handle = drmmode_crtc->cursor.bo->handle;
+    uint32_t handle = drmmode_bo_get_handle(&drmmode_crtc->cursor.bo);
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     drmmode_cursor_ptr drmmode_cursor = &drmmode_crtc->cursor;
     int width, height, size;
@@ -4870,14 +5056,13 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         min_width  = MIN(width, min_width);
         min_height = MIN(height, min_height);
 
-        drmmode_crtc->cursor.bo = dumb_bo_create(drmmode->fd, width, height, bpp);
-        if (!drmmode_crtc->cursor.bo) {
+        memset(&drmmode_crtc->cursor.bo, 0, sizeof(drmmode_crtc->cursor.bo));
+        if (!drmmode_create_cursor_bo(drmmode, &drmmode_crtc->cursor.bo, width, height)) {
             drmmode_bo_destroy(drmmode, &drmmode->front_bo);
             for (int j = 0; j < i; j++) {
                 xf86CrtcPtr free_crtc = xf86_config->crtc[j];
                 drmmode_crtc_private_ptr free_drmmode_crtc = free_crtc->driver_private;
-                dumb_bo_destroy(drmmode->fd, free_drmmode_crtc->cursor.bo);
-                free_drmmode_crtc->cursor.bo = NULL;
+                drmmode_bo_destroy(drmmode, &free_drmmode_crtc->cursor.bo);
             }
             return FALSE;
         }
@@ -4898,31 +5083,21 @@ drmmode_map_front_bo(drmmode_ptr drmmode)
 void *
 drmmode_map_secondary_bo(drmmode_ptr drmmode, msPixmapPrivPtr ppriv)
 {
-    int ret;
-
-    if (ppriv->backing_bo->ptr)
-        return ppriv->backing_bo->ptr;
-
-    ret = dumb_bo_map(drmmode->fd, ppriv->backing_bo);
-    if (ret)
-        return NULL;
-
-    return ppriv->backing_bo->ptr;
+    return drmmode_bo_map(drmmode, &ppriv->backing_bo);
 }
 
 Bool
 drmmode_map_cursor_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 {
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    int i, ret;
 
-    for (i = 0; i < xf86_config->num_crtc; i++) {
+    for (int i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 
-        ret = dumb_bo_map(drmmode->fd, drmmode_crtc->cursor.bo);
-        if (ret)
+        if (!drmmode_bo_map(drmmode, &drmmode_crtc->cursor.bo)) {
             return FALSE;
+        }
     }
     return TRUE;
 }
@@ -4944,7 +5119,7 @@ drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         xf86CrtcPtr crtc = xf86_config->crtc[i];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 
-        dumb_bo_destroy(drmmode->fd, drmmode_crtc->cursor.bo);
+        drmmode_bo_destroy(drmmode, &drmmode_crtc->cursor.bo);
         drmmode_destroy_tearfree_shadow(crtc);
     }
 }
@@ -4956,7 +5131,7 @@ drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int *depth,
 {
     drmModeResPtr mode_res;
     uint64_t value;
-    struct dumb_bo *bo;
+    drmmode_bo bo = {0};
     uint32_t fb_id;
     int ret;
 
@@ -4968,6 +5143,8 @@ drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int *depth,
         return;
     }
 
+    /* XXX Why do we not trust the above value if it isn't 16 or 8? XXX */
+
     *depth = 24;
     mode_res = drmModeGetResources(drmmode->fd);
     if (!mode_res)
@@ -4977,28 +5154,42 @@ drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int *depth,
         mode_res->min_width = 1;
     if (mode_res->min_height == 0)
         mode_res->min_height = 1;
+
+    /* We don't have to worry about overriding anything, this is not yet set */
+    drmmode->kbpp = 32;
+
+    void* free_gbm_device;
+
     /*create a bo */
-    bo = dumb_bo_create(drmmode->fd, mode_res->min_width, mode_res->min_height,
-                        32);
-    if (!bo) {
+    ret = drmmode_create_bpp_probe_bo(drmmode, &bo, mode_res->min_width, mode_res->min_height, *depth, 32, &free_gbm_device);
+
+    if (!ret) {
         *bpp = 24;
         goto out;
     }
 
+    uint32_t handle = drmmode_bo_get_handle(&bo);
+    uint32_t pitch  = drmmode_bo_get_pitch(&bo);
+
     ret = drmModeAddFB(drmmode->fd, mode_res->min_width, mode_res->min_height,
-                       24, 32, bo->pitch, bo->handle, &fb_id);
+                       24, 32, pitch, handle, &fb_id);
 
     if (ret) {
         *bpp = 24;
-        dumb_bo_destroy(drmmode->fd, bo);
+        drmmode_bo_destroy(drmmode, &bo);
         goto out;
     }
 
     drmModeRmFB(drmmode->fd, fb_id);
     *bpp = 32;
 
-    dumb_bo_destroy(drmmode->fd, bo);
+    drmmode_bo_destroy(drmmode, &bo);
  out:
+#ifdef GLAMOR_HAS_GBM
+    if (free_gbm_device) {
+        gbm_device_destroy(free_gbm_device);
+    }
+#endif
     drmModeFreeResources(mode_res);
     return;
 }
