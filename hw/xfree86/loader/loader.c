@@ -68,6 +68,10 @@
 extern void *xorg_symbols[];
 #endif
 
+Bool LoaderIgnoreAllABI = FALSE;
+Bool LoaderIgnoreABI = FALSE;
+Bool is_nvidia_proprietary = FALSE;
+
 void
 LoaderInit(void)
 {
@@ -154,22 +158,29 @@ LoaderUnload(const char *name, void *handle)
         dlclose(handle);
 }
 
-Bool LoaderIgnoreAbi = FALSE;
-Bool is_nvidia_proprietary = FALSE;
+void
+LoaderSetIgnoreAllABI(void)
+{
+    LoaderIgnoreAllABI = TRUE;
+}
+
+Bool
+LoaderGetAndFlagIgnoreABI(const char *name)
+{
+    if (LoaderIgnoreAllABI)
+        LoaderIgnoreABI = TRUE;
+    return LoaderIgnoreABI;
+}
 
 void
-LoaderSetIgnoreAbi(void)
+LoaderSetIgnoreABI(const char *name)
 {
-    /* Only used to keep consistency with the loader api */
-    /* This really doesn't have to be a proc */
-    LoaderIgnoreAbi = TRUE;
 }
 
 Bool
 LoaderShouldIgnoreABI(void)
 {
-    /* The nvidia proprietary DDX driver calls this deprecated function */
-    return is_nvidia_proprietary || LoaderIgnoreAbi;
+    return LoaderIgnoreABI;
 }
 
 int
