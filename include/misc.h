@@ -121,8 +121,6 @@ typedef struct _xReq *xReqPtr;
 #include <X11/Xfuncs.h>         /* for bcopy, bzero, and bcmp */
 
 #define NullBox ((BoxPtr)0)
-#define MILLI_PER_MIN (1000 * 60)
-#define MILLI_PER_SECOND (1000)
 
 #undef min
 #undef max
