@@ -19,5 +19,7 @@ extern _X_EXPORT int monitorResolution;
 extern _X_EXPORT int defaultColorVisualClass;
 
 extern _X_EXPORT char *SeatId;
+/* NVidia v.390 proprietary driver needs this */
+extern _X_EXPORT char *ConnectionInfo;
 
 #endif                          /* !_XSERV_GLOBAL_H_ */

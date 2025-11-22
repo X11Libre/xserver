@@ -23,6 +23,4 @@ static inline int dixCallServerAccessCallback(ClientPtr client, Mask access_mode
     return rec.status;
 }
 
-extern char *ConnectionInfo;
-
 #endif /* _XSERVER_DIX_SERVER_PRIV_H */
