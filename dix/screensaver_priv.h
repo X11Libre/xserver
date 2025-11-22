@@ -5,12 +5,14 @@
 #ifndef _XSERVER_DIX_SCREENSAVER_PRIV_H
 #define _XSERVER_DIX_SCREENSAVER_PRIV_H
 
+#include <stdbool.h>
 #include <X11/Xdefs.h>
 #include <X11/Xmd.h>
 
 #include "include/callback.h"
 #include "include/dix.h"
 #include "include/screenint.h"
+#include "include/scrnintstr.h"
 
 extern CARD32 defaultScreenSaverTime;
 extern CARD32 defaultScreenSaverInterval;
@@ -34,6 +36,12 @@ static inline int dixCallScreensaverAccessCallback(ClientPtr client,
     ScreenSaverAccessCallbackParam rec = { client, screen, access_mode, Success };
     CallCallbacks(&ScreenSaverAccessCallback, &rec);
     return rec.status;
+}
+
+extern int screenIsSaved;
+
+static inline bool HasSaverWindow(ScreenPtr pScreen) {
+    return (pScreen->screensaver.pWindow != NullWindow);
 }
 
 #endif /* _XSERVER_DIX_SCREENSAVER_PRIV_H */

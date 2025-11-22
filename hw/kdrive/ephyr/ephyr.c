@@ -32,6 +32,7 @@
 #include "mi/mipointer_priv.h"
 #include "os/client_priv.h"
 #include "os/osdep.h"
+#include "os/serverlock.h"
 
 #include "ephyr.h"
 #include "inputstr.h"
@@ -1253,7 +1254,7 @@ ephyrXcbProcessEvents(Bool queued_only)
              */
             if (xcb_connection_has_error(conn)) {
                 CloseWellKnownConnections();
-                OsCleanup(1);
+                UnlockServer();
                 exit(1);
             }
 

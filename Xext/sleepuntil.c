@@ -53,7 +53,6 @@ typedef struct _Sertafied {
 static SertafiedPtr pPending;
 static RESTYPE SertafiedResType;
 static Bool BlockHandlerRegistered;
-static x_server_generation_t SertafiedGeneration;
 
 static void ClientAwaken(ClientPtr /* client */ ,
                          void *    /* closure */
@@ -74,14 +73,11 @@ ClientSleepUntil(ClientPtr client,
 {
     SertafiedPtr pReq, pPrev;
 
-    if (SertafiedGeneration != serverGeneration) {
-        SertafiedResType = CreateNewResourceType(SertafiedDelete,
-                                                 "ClientSleep");
-        if (!SertafiedResType)
-            return FALSE;
-        SertafiedGeneration = serverGeneration;
-        BlockHandlerRegistered = FALSE;
-    }
+    SertafiedResType = CreateNewResourceType(SertafiedDelete,
+                                             "ClientSleep");
+    if (!SertafiedResType)
+        return FALSE;
+    BlockHandlerRegistered = FALSE;
 
     SertafiedPtr pRequest = calloc(1, sizeof(SertafiedRec));
     if (!pRequest)

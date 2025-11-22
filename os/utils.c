@@ -600,6 +600,12 @@ ProcessCommandLine(int argc, char *argv[])
             else
                 UseMsg();
         }
+        else if (strcmp(argv[i],"-noreset") == 0){
+            ErrorF("Argument -noreset is removed in XLibre (for more context: https://github.com/orgs/X11Libre/discussions/424 )\n");
+        }
+        else if(strcmp(argv[i],"-reset") == 0){
+            ErrorF("Argument -reset is removed in XLibre (for more context: https://github.com/orgs/X11Libre/discussions/424 )\n");
+        }
         else if (strcmp(argv[i], "-p") == 0) {
             if (++i < argc)
                 defaultScreenSaverInterval = ((CARD32) atoi(argv[i])) *
@@ -1462,7 +1468,7 @@ AbortServer(void)
     XF86BigfontCleanup();
 #endif
     CloseWellKnownConnections();
-    OsCleanup(TRUE);
+    UnlockServer();
     AbortDevices();
     ddxGiveUp(EXIT_ERR_ABORT);
     fflush(stderr);

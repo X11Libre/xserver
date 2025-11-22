@@ -1013,13 +1013,7 @@ your server, main() calls the routine
 
         void CreateWellKnownSockets()
 </programlisting></blockquote>
-This routine is called only once, and not called when the server
-is reset.  To recreate any sockets during server resets, the following
-routine is called from the main loop:
-<blockquote><programlisting>
-
-        void ResetWellKnownSockets()
-</programlisting></blockquote>
+This routine is called only once.
 Sample implementations of both of these routines are found in
 Xserver/os/connection.c.
 </para>

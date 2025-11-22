@@ -31,6 +31,7 @@
 
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
+#include "os/serverlock.h"
 
 #include "xf86_priv.h"
 #include "xf86Bus.h"
@@ -592,7 +593,7 @@ GenerateDriverList(void)
 {
     const char **ret;
     static const char *patlist[] = { "(.*)_drv\\.so", NULL };
-    ret = LoaderListDir("drivers", patlist);
+    ret = LoaderListDir(XORG_MODULE_ABI_TAG "/drivers", patlist);
 
     /* fix up the probe order for video drivers */
     if (ret != NULL)
@@ -830,7 +831,7 @@ DoConfigure(void)
     ErrorF("To test the server, run 'X -config %s'\n\n", filename);
 
  bail:
-    OsCleanup(TRUE);
+    UnlockServer();
     ddxGiveUp(EXIT_ERR_CONFIGURE);
     fflush(stderr);
     exit(0);
@@ -883,7 +884,7 @@ DoShowOptions(void)
         }
     }
  bail:
-    OsCleanup(TRUE);
+    UnlockServer();
     ddxGiveUp(EXIT_ERR_DRIVERS);
     fflush(stderr);
     exit(0);

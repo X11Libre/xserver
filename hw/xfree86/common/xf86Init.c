@@ -329,7 +329,7 @@ InitOutput(int argc, char **argv)
         LoaderInit();
 
         /* Tell the loader the default module search path */
-        LoaderSetPath(xf86ModulePath);
+        LoaderSetPath(NULL, xf86ModulePath);
 
         if (xf86Info.ignoreABI) {
             LoaderSetIgnoreAbi();
@@ -749,6 +749,8 @@ CloseInput(void)
 {
     config_fini();
     mieqFini();
+    /* strictly speaking the below is not related to input, but ... */
+    LoaderClose();
 }
 
 /*

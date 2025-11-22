@@ -71,6 +71,7 @@ struct _Cursor;
 
 typedef struct _BackingStore *BackingStorePtr;
 typedef struct _Window *WindowPtr;
+typedef struct _Property *PropertyPtr;
 
 enum RootClipMode {
     ROOT_CLIP_NONE = 0, /**< resize the root window to 0x0 */
@@ -211,8 +212,6 @@ extern _X_EXPORT RegionPtr CreateBoundingShape(WindowPtr /* pWin */ );
 extern _X_EXPORT RegionPtr CreateClipShape(WindowPtr /* pWin */ );
 
 extern _X_EXPORT void SetRootClip(ScreenPtr pScreen, int enable);
-extern _X_EXPORT void PrintWindowTree(void);
-extern _X_EXPORT void PrintPassiveGrabs(void);
 
 extern _X_EXPORT VisualPtr WindowGetVisual(WindowPtr /*pWin*/);
 #endif                          /* WINDOW_H */

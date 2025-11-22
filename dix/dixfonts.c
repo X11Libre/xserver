@@ -91,8 +91,6 @@ static int num_fpes = 0;
 static xfont2_fpe_funcs_rec const **fpe_functions;
 static int num_fpe_types = 0;
 
-static unsigned char *font_path_string;
-
 static int num_slept_fpes = 0;
 static int size_slept_fpes = 0;
 static FontPathElementPtr *slept_fpes = (FontPathElementPtr *) 0;
@@ -1765,44 +1763,6 @@ SetDefaultFontPath(const char *path)
     free(temp_path);
 
     return err;
-}
-
-int
-GetFontPath(ClientPtr client, int *count, int *length, unsigned char **result)
-{
-    int access;
-    unsigned char *c;
-    int len;
-    FontPathElementPtr fpe;
-
-    access = dixCallServerAccessCallback(client, DixGetAttrAccess);
-    if (access != Success)
-        return access;
-
-    len = 0;
-    for (int i = 0; i < num_fpes; i++) {
-        fpe = font_path_elements[i];
-        len += fpe->name_length + 1;
-    }
-    c = realloc(font_path_string, len);
-    if (c == NULL) {
-        free(font_path_string);
-        font_path_string = NULL;
-        return BadAlloc;
-    }
-
-    font_path_string = c;
-    *length = 0;
-    for (int i = 0; i < num_fpes; i++) {
-        fpe = font_path_elements[i];
-        *c = fpe->name_length;
-        *length += *c++;
-        memcpy(c, fpe->name, fpe->name_length);
-        c += fpe->name_length;
-    }
-    *count = num_fpes;
-    *result = font_path_string;
-    return Success;
 }
 
 void

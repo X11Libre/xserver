@@ -1,3 +1,68 @@
+### xlibre-xserver 25.0.0.16
+
+hotfix release xlibre-xserver-25.0.0.16
+xfree86: loader: warn when implicitly ignoring abi mismatch for the nvidia proprietary DDX driver
+xfree86: loader: simplify setting IgnoreABI option
+xfree86: loader: Ignore abi mismatch for the proprietary nvidia DDX This is a proprietary DDX driver made by nvidia. We can't rebuild it against Xlibre, so the abi check would always fail.
+modesetting: Fix leak when disabling hw cursor
+
+### xlibre-xserver 25.0.0.15
+
+hotfix release xlibre-xserver-25.0.0.15
+modesetting: call xf86_cursors_fini during CloseScreen
+xfree86: compat: re-add GEInitEvent() for proprietary nvidia driver
+xfree86: compat: re-add TimeCheck() for proprietary nvidia driver
+
+### xlibre-xserver 25.0.0.14
+
+hotfix release xlibre-xserver-25.0.0.14
+xkb: Prevent overflow in XkbSetCompatMap()
+xkb: Free the XKB resource when freeing XkbInterest
+xkb: Make the RT_XKBCLIENT resource private
+present: Fix use-after-free in present_create_notifies()
+dix: dixFreeScreen call hookPostCreateResources too
+
+### xlibre-xserver 25.0.0.13
+
+hotfix release xlibre-xserver-25.0.0.13
+xfree86: add missing headers to build sun_init.c on Solaris/SPARC
+xfree86: Fix -Wdiscarded-qualifiers warnings in SPARC Sbus probe code
+xfree86: fix meson build on 64-bit Solaris/SPARC systems
+xfree86: xv: fix missed hooking of WindowDestroy
+
+### xlibre-xserver 25.0.0.12
+
+bugfix release 25.0.0.12
+Xext: namespace: fix NULL derefence on client close
+dix: add callback before ClientRec is being destroyed
+render: fix missing include in glyphstr.h
+.github: use our own mirrors of build dependencies
+glx: fix wrong swapped encoding in __glXDisp_QueryExtensionsString()
+.github: ubuntu: drop xtrans dependency
+fb: fix unused function fbInitializeDrawable()
+include: os.h: fix extra ;
+xfree86: x86emu: drop assert() on uninitialized variable
+.github: don't ignore failing tests anymore
+
+### xlibre-xserver 25.0.0.11
+
+bugfix release 25.0.0.11
+.github: fix MacOS build
+
+### xlibre-xserver 25.0.0.10
+
+bugfix release 25.0.0.10
+.github: make release message job depend on builds
+test: allow skipping tests on Xephyr with GLES
+.github: ubuntu: tests: enforce using llvmpipe
+.github: fix tetexec.cfg creation
+test: run various common commands like dpyinfo
+test: make rendercheck triangles optional
+.github: update piglit version
+.github: use a smarter cloning script
+.github: catch piglit results as artifacts
+Xext: xres: fix XResQueryClientResources request
+
 ### xlibre-xserver 25.0.0.9
 
 [25.0] dbe: fix screen cleanup
