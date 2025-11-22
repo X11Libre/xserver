@@ -110,6 +110,9 @@ xfont2_dep = dependency('xfont2', version: '>= 2.0')
 dbus_required = get_option('systemd_logind') == 'true'
 dbus_dep = dependency('dbus-1', version: '>= 1.0', required: dbus_required)
 
+seat_libseat_required = get_option('seatd_libseat') == 'true'
+seat_libseat_dep = dependency('libseat', version: '>= 0.9.1', required: seat_libseat_required)
+
 build_systemd = get_option('systemd_notify') == 'true'
 # libsystemd-daemon was moved into libsystemd in version 209
 libsystemd_daemon_dep = dependency('libsystemd', version: '>= 209', required: false)
@@ -192,10 +195,21 @@ endif
 build_udev = (udev_option != 'false')
 build_udev_kms = (udev_kms_option != 'false')
 
+if get_option('seatd_libseat') == 'auto'
+    build_seatd_libseat = build_udev_kms and seat_libseat_dep.found()
+else
+    build_seatd_libseat = get_option('seatd_libseat') == 'true'
+endif
+
+
 if get_option('systemd_logind') == 'auto'
-    build_systemd_logind = build_udev_kms and dbus_dep.found()
+    build_systemd_logind = build_udev_kms and dbus_dep.found() and not build_seatd_libseat
 else
     build_systemd_logind = get_option('systemd_logind') == 'true'
+endif
+
+if build_systemd_logind and build_seatd_libseat
+    error('Support for systemd-logind and seatd-libseat are mutually exclusive: choose either.')
 endif
 
 with_dtrace = get_option('dtrace')

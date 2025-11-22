@@ -85,6 +85,10 @@ option('systemd_notify', type: 'combo', choices: ['true', 'false', 'auto'], valu
        description: 'Enable systemd-notify support')
 option('systemd_logind', type: 'combo', choices: ['true', 'false', 'auto'], value: 'false',
        description: 'Enable systemd-logind integration')
+
+option('seatd_libseat', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
+       description: 'Enable seatd-libseat integration')
+
 option('vgahw', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Xorg VGA access module')
 option('dpms', type: 'boolean', value: true,
