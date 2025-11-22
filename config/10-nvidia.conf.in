@@ -12,5 +12,6 @@ Section "OutputClass"
 	Module "glx"
 	Module "glxserver_nvidia"
 	Option "AllowEmptyInitialConfiguration"
+	Option "IgnoreABI"
 	ModulePath "@libdir@/nvidia/xorg"
 EndSection
