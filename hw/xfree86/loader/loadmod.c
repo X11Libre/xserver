@@ -415,8 +415,8 @@ FindModule(const char *module, const char *dirname, PatternPtr patterns)
     return name;
 }
 
-const char **
-LoaderListDir(const char *subdir, const char **patternlist)
+static const char **
+_LoaderListDir(const char *subdir, const char **patternlist, int *saved_len)
 {
     char buf[PATH_MAX + 1];
     char **pathlist;
@@ -490,7 +490,48 @@ LoaderListDir(const char *subdir, const char **patternlist)
 
  bail:
     FreePatterns(patterns);
+    *saved_len = ret ? n : 0;
     return (const char **) ret;
+}
+
+const char **
+LoaderListDir(const char *subdir, const char **patternlist)
+{
+    int len = 0;
+    const char **ret = NULL;
+    int subdirlen = strlen(subdir);
+    for (int i = 0; i < sizeof(stdSubdirs) / sizeof(*stdSubdirs); i++) {
+        int prefixsize = sizeof(stdSubdirs[i]);
+        char* dir = malloc(prefixsize + subdirlen);
+        if (!dir) {
+            free(ret);
+            return NULL;
+        }
+        memcpy(dir, stdSubdirs[i], prefixsize - 1);
+        memcpy(dir + prefixsize - 1, subdir, subdirlen + 1);
+
+        int sublen = 0;
+        const char **subret = _LoaderListDir(dir, patternlist, &sublen);
+        free(dir);
+        if (!subret) {
+            continue;
+        }
+
+        int oldlen = len;
+        len += sublen;
+        void *tmp = reallocarray(ret, len + 1, sizeof(*ret));
+        if (!tmp) {
+            free(ret);
+            return NULL;
+        }
+
+        ret = tmp;
+        memcpy(ret + oldlen, subret, sublen);
+    }
+    if (ret) {
+        ret[len] = NULL;
+    }
+    return ret;
 }
 
 static Bool
