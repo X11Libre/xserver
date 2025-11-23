@@ -209,11 +209,18 @@ dix_main(int argc, char *argv[], char *envp[])
                 FatalError("failed to create screen resources");
         });
 
+        /* Let all screens register the necessary privates */
+    
         DIX_FOR_EACH_SCREEN({
             if (!PixmapScreenInit(walkScreen))
                 FatalError("failed to create screen pixmap properties");
             if (!dixScreenRaiseCreateResources(walkScreen))
                 FatalError("failed to create screen resources");
+        });
+
+        /* Then use these privates to initialize root windows etc */
+
+        DIX_FOR_EACH_SCREEN({
             if (!CreateGCperDepth(walkScreen))
                 FatalError("failed to create scratch GCs");
             if (!CreateDefaultStipple(walkScreen))
