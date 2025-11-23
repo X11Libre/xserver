@@ -160,7 +160,6 @@ static const ExtensionModule staticExtensions[] = {
 #endif
 #ifdef XV
     {XvExtensionInit, "XVideo", &noXvExtension},
-    {XvMCExtensionInit, "XVideo-MotionCompensation", &noXvExtension},
 #endif
 #ifdef XSELINUX
     {SELinuxExtensionInit, "SELinux", &noSELinuxExtension},
