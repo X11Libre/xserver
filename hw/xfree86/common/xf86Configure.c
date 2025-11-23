@@ -206,14 +206,17 @@ configureScreenSection(int screennum)
 {
     int i;
     int depths[] = { 1, 4, 8, 15, 16, 24 /*, 32 */  };
-    char *tmp;
+    char *tmp = NULL;
     parsePrologue(XF86ConfScreenPtr, XF86ConfScreenRec);
 
-    XNFasprintf(&tmp, "Screen%d", screennum);
+    if (asprintf(&tmp, "Screen%d", screennum) == -1)
+        return NULL;
     ptr->scrn_identifier = tmp;
-    XNFasprintf(&tmp, "Monitor%d", screennum);
+    if (asprintf(&tmp, "Monitor%d", screennum) == -1)
+        return NULL;
     ptr->scrn_monitor_str = tmp;
-    XNFasprintf(&tmp, "Card%d", screennum);
+    if (asprintf(&tmp, "Card%d", screennum) == -1)
+        return NULL;
     ptr->scrn_device_str = tmp;
 
     for (i = 0; i < ARRAY_SIZE(depths); i++) {
@@ -369,7 +372,7 @@ configureLayoutSection(void)
     }
 
     for (scrnum = 0; scrnum < nDevToConfig; scrnum++) {
-        char *tmp;
+        char *tmp = NULL;
 
         XF86ConfAdjacencyPtr aptr = calloc(1, sizeof(XF86ConfAdjacencyRec));
         assert(aptr);
@@ -377,7 +380,7 @@ configureLayoutSection(void)
         aptr->adj_x = 0;
         aptr->adj_y = 0;
         aptr->adj_scrnum = scrnum;
-        XNFasprintf(&tmp, "Screen%d", scrnum);
+        asprintf(&tmp, "Screen%d", scrnum);
         aptr->adj_screen_str = tmp;
         if (scrnum == 0) {
             aptr->adj_where = CONF_ADJ_ABSOLUTE;
@@ -385,7 +388,8 @@ configureLayoutSection(void)
         }
         else {
             aptr->adj_where = CONF_ADJ_RIGHTOF;
-            XNFasprintf(&tmp, "Screen%d", scrnum - 1);
+            tmp = NULL;
+            asprintf(&tmp, "Screen%d", scrnum - 1);
             aptr->adj_refscreen = tmp;
         }
         ptr->lay_adjacency_lst =
@@ -444,10 +448,11 @@ configureFilesSection(void)
 static XF86ConfMonitorPtr
 configureMonitorSection(int screennum)
 {
-    char *tmp;
+    char *tmp = NULL;
     parsePrologue(XF86ConfMonitorPtr, XF86ConfMonitorRec);
 
-    XNFasprintf(&tmp, "Monitor%d", screennum);
+    if (asprintf(&tmp, "Monitor%d", screennum) == -1)
+        return NULL;
     ptr->mon_identifier = tmp;
     ptr->mon_vendor = XNFstrdup("Monitor Vendor");
     ptr->mon_modelname = XNFstrdup("Monitor Model");
@@ -493,10 +498,12 @@ configureDDCMonitorSection(int screennum)
 
     parsePrologue(XF86ConfMonitorPtr, XF86ConfMonitorRec);
 
-    XNFasprintf(&tmp, "Monitor%d", screennum);
+    if (asprintf(&tmp, "Monitor%d", screennum) == -1)
+        return NULL;
     ptr->mon_identifier = tmp;
     ptr->mon_vendor = XNFstrdup(ConfiguredMonitor->vendor.name);
-    XNFasprintf(&ptr->mon_modelname, "%x", ConfiguredMonitor->vendor.prod_id);
+    if (asprintf(&ptr->mon_modelname, "%x", ConfiguredMonitor->vendor.prod_id) == -1)
+        FatalError("malloc failed\n");
 
     /* features in centimetres, we want millimetres */
     mon_width = 10 * ConfiguredMonitor->features.hsize;
@@ -867,8 +874,11 @@ DoShowOptions(void)
                        xf86DriverList[i]->driverName);
                 continue;
             }
-            XNFasprintf(&pSymbol, "%sModuleData",
-                        xf86DriverList[i]->driverName);
+            if (asprintf(&pSymbol, "%sModuleData",
+                        xf86DriverList[i]->driverName) == -1) {
+                ErrorF("(EE) malloc failed\n");
+                continue;
+            }
             initData = LoaderSymbol(pSymbol);
             if (initData) {
                 XF86ModuleVersionInfo *vers = initData->vers;
