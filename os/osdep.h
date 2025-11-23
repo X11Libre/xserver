@@ -101,9 +101,6 @@ listen_to_client(ClientPtr client);
 
 extern Bool NewOutputPending;
 
-/* in access.c */
-extern Bool ComputeLocalClient(ClientPtr client);
-
 /* for platforms lacking arc4random_buf() libc function */
 #ifndef HAVE_ARC4RANDOM_BUF
 static inline void arc4random_buf(void *buf, size_t nbytes)
