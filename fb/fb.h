@@ -68,9 +68,6 @@
 #define FB_UNIT	    (1 << FB_SHIFT)
 #define FB_MASK	    (FB_UNIT - 1)
 #define FB_ALLONES  ((FbBits) -1)
-#if GLYPHPADBYTES != 4
-#error "GLYPHPADBYTES must be 4"
-#endif
 #define FB_STIP_SHIFT	LOG2_BITMAP_PAD
 #define FB_STIP_UNIT	(1 << FB_STIP_SHIFT)
 #define FB_STIP_MASK	(FB_STIP_UNIT - 1)
