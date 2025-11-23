@@ -2161,14 +2161,15 @@ ProcPutImage(ClientPtr client)
 {
     GCPtr pGC;
     DrawablePtr pDraw;
-    long length;                /* length of scanline server padded */
-    long lengthProto;           /* length of scanline protocol padded */
     char *tmpImage;
 
     REQUEST(xPutImageReq);
 
     REQUEST_AT_LEAST_SIZE(xPutImageReq);
     VALIDATE_DRAWABLE_AND_GC(stuff->drawable, pDraw, DixWriteAccess);
+
+    size_t length;                /* length of scanline server padded */
+
     if (stuff->format == XYBitmap) {
         if ((stuff->depth != 1) ||
             (stuff->leftPad >= (unsigned int) screenInfo.bitmapScanlinePad))
@@ -2193,7 +2194,7 @@ ProcPutImage(ClientPtr client)
     }
 
     tmpImage = (char *) &stuff[1];
-    lengthProto = length;
+    size_t lengthProto = length; /* length of scanline protocol padded */
 
     if (stuff->height != 0 && lengthProto >= (INT32_MAX / stuff->height))
         return BadLength;
@@ -2230,7 +2231,6 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
 
     /* coordinates relative to the bounding drawable */
     int relx, rely;
-    long widthBytesLine, length;
     Mask plane = 0;
     RegionPtr pVisibleRegion = NULL;
 
@@ -2300,6 +2300,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         return BadMatch;
 
     rep.depth = pDraw->depth;
+
+    size_t widthBytesLine, length;
     if (format == ZPixmap) {
         widthBytesLine = PixmapBytePad(width, pDraw->depth);
         length = widthBytesLine * height;
@@ -3097,7 +3099,6 @@ ProcCreateCursor(ClientPtr client)
     PixmapPtr msk;
     unsigned char *srcbits;
     unsigned short width, height;
-    long n;
     CursorMetricRec cm;
     int rc;
 
@@ -3142,7 +3143,8 @@ ProcCreateCursor(ClientPtr client)
     srcbits = calloc(BitmapBytePad(width), height);
     if (!srcbits)
         return BadAlloc;
-    n = BitmapBytePad(width) * height;
+
+    size_t n = BitmapBytePad(width) * height;
 
     unsigned char *mskbits = calloc(1, n);
     if (!mskbits) {
