@@ -30,7 +30,6 @@ extern void SwapColorItem(xColorItem * /* pItem */ );
 
 extern void SwapConnClientPrefix(xConnClientPrefix * /* pCCP */ );
 
-int SProcAllocColor(ClientPtr client);
 int SProcAllocColorCells(ClientPtr client);
 int SProcAllocColorPlanes(ClientPtr client);
 int SProcAllocNamedColor(ClientPtr client);
