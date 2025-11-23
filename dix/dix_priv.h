@@ -63,6 +63,8 @@ extern Bool party_like_its_1989;
 /* needed by libglx and libglamor (server modules) */
 extern _X_EXPORT Bool enableIndirectGLX;
 
+extern const char *defaultFontPath;
+
 /*
  * @brief callback right after one screen's root window has been initialized
  *
