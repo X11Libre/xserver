@@ -862,23 +862,25 @@ glamor_init(ScreenPtr screen, unsigned int flags)
     glamor_priv->saved_procs.bitmap_to_region = screen->BitmapToRegion;
     screen->BitmapToRegion = glamor_bitmap_to_region;
 
-    glamor_priv->saved_procs.composite = ps->Composite;
-    ps->Composite = glamor_composite;
+    if (ps) {
+        glamor_priv->saved_procs.composite = ps->Composite;
+        ps->Composite = glamor_composite;
 
-    glamor_priv->saved_procs.trapezoids = ps->Trapezoids;
-    ps->Trapezoids = glamor_trapezoids;
+        glamor_priv->saved_procs.trapezoids = ps->Trapezoids;
+        ps->Trapezoids = glamor_trapezoids;
 
-    glamor_priv->saved_procs.triangles = ps->Triangles;
-    ps->Triangles = glamor_triangles;
+        glamor_priv->saved_procs.triangles = ps->Triangles;
+        ps->Triangles = glamor_triangles;
 
-    glamor_priv->saved_procs.addtraps = ps->AddTraps;
-    ps->AddTraps = glamor_add_traps;
+        glamor_priv->saved_procs.addtraps = ps->AddTraps;
+        ps->AddTraps = glamor_add_traps;
 
-    glamor_priv->saved_procs.composite_rects = ps->CompositeRects;
-    ps->CompositeRects = glamor_composite_rectangles;
+        glamor_priv->saved_procs.composite_rects = ps->CompositeRects;
+        ps->CompositeRects = glamor_composite_rectangles;
 
-    glamor_priv->saved_procs.glyphs = ps->Glyphs;
-    ps->Glyphs = glamor_composite_glyphs;
+        glamor_priv->saved_procs.glyphs = ps->Glyphs;
+        ps->Glyphs = glamor_composite_glyphs;
+    }
 
     glamor_init_vbo(screen);
 
