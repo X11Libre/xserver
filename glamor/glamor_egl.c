@@ -810,6 +810,7 @@ glamor_get_formats(ScreenPtr screen,
     if (!eglQueryDmaBufFormatsEXT(glamor_egl->display, num,
                                   (EGLint *) *formats, &num)) {
         free(*formats);
+        *formats = NULL;
         return FALSE;
     }
 
