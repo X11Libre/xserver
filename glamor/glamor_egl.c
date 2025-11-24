@@ -850,6 +850,7 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     if (!eglQueryDmaBufModifiersEXT(glamor_egl->display, format, num,
                                     (EGLuint64KHR *) *modifiers, NULL, &num)) {
         free(*modifiers);
+        *modifiers = NULL;
         return FALSE;
     }
 
