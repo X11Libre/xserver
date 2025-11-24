@@ -1012,8 +1012,6 @@ drmmode_crtc_flip(xf86CrtcPtr crtc, uint32_t fb_id, int x, int y,
 void
 drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
 {
-    int ret;
-
 #ifdef GLAMOR_HAS_GBM
     if (bo->gbm) {
         gbm_bo_destroy(bo->gbm);
@@ -1022,9 +1020,10 @@ drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
 #endif
 
     if (bo->dumb) {
-        ret = dumb_bo_destroy(drmmode->fd, bo->dumb);
-        if (ret == 0)
+        int ret = dumb_bo_destroy(drmmode->fd, bo->dumb);
+        if (ret == 0) {
             bo->dumb = NULL;
+        }
     }
 }
 
@@ -1032,36 +1031,47 @@ uint32_t
 drmmode_bo_get_pitch(drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
-    if (bo->gbm)
+    if (bo->gbm) {
         return gbm_bo_get_stride(bo->gbm);
+    }
 #endif
 
-    return bo->dumb->pitch;
+    if (bo->dumb) {
+        return bo->dumb->pitch;
+    }
+
+    return 0;
 }
 
 static void*
 drmmode_bo_get_bo(drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
-    if (bo->gbm)
+    if (bo->gbm) {
         return bo->gbm;
+    }
 #endif
 
     return bo->dumb;
 }
 
-uint32_t
+static uint32_t
 drmmode_bo_get_handle(drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
-    if (bo->gbm)
+    if (bo->gbm) {
         return gbm_bo_get_handle(bo->gbm).u32;
+    }
 #endif
 
-    return bo->dumb->handle;
+    if (bo->dumb) {
+        return bo->dumb->handle;
+    }
+
+    return (uint32_t)-1;
 }
 
-static void *
+static void*
 drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
 {
     if (bo->map) {
