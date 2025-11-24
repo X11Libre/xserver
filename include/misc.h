@@ -81,22 +81,7 @@ OF THIS SOFTWARE.
 #include <stdint.h>
 #include <pthread.h>
 
-#ifndef MAXSCREENS
-#define MAXSCREENS	16
-#endif
-#ifndef MAXGPUSCREENS // unexport
-#define MAXGPUSCREENS	16
-#endif
-#define MAXFORMATS	8 // unexport
-#ifndef MAXDEVICES // unexport
-#define MAXDEVICES	256      /* input devices */
-#endif
 #define GPU_SCREEN_OFFSET 256
-
-/* 128 event opcodes for core + extension events, excluding GE */
-#define MAXEVENTS       128 // unexport
-#define EXTENSION_EVENT_BASE 64 // unexport
-#define EXTENSION_BASE 128 // unexport
 
 typedef uint32_t ATOM;
 

@@ -55,11 +55,13 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "cursorstr.h"
 #include "privates.h"
+#include "scrnintstr.h"
 
 #define BitIsOn(ptr, bit) (!!(((const BYTE *) (ptr))[(bit)>>3] & (1 << ((bit) & 7))))
 #define SetBit(ptr, bit)  (((BYTE *) (ptr))[(bit)>>3] |= (1 << ((bit) & 7)))
 #define ClearBit(ptr, bit) (((BYTE *)(ptr))[(bit)>>3] &= ~(1 << ((bit) & 7)))
 
+#define MAXDEVICES              256      /* input devices */
 #define EMASKSIZE	(MAXDEVICES + 2)
 
 /* This is the last XI2 event supported by the server. If you add

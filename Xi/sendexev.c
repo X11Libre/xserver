@@ -58,6 +58,7 @@ SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
+#include "dix/inpututils_priv.h"
 #include "os/osdep.h"
 #include "Xi/handlers.h"
 

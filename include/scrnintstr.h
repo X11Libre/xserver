@@ -502,6 +502,10 @@ typedef void (*DPMSProcPtr)(ScreenPtr pScreen, int level);
     use dixScreenHookWindowDestroy() instead.
  */
 
+#define MAXSCREENS 16
+#define MAXGPUSCREENS 16
+#define MAXFORMATS 8
+
 #define _SCREEN_HOOK_TYPE(NAME, FUNCTYPE, ARRSIZE) \
     struct { \
         FUNCTYPE func; \
@@ -719,7 +723,7 @@ typedef struct _ScreenInfo {
     int bitmapScanlinePad;
     int bitmapBitOrder;
     int numPixmapFormats;
-     PixmapFormatRec formats[MAXFORMATS];
+    PixmapFormatRec formats[MAXFORMATS];
     int numScreens;
     ScreenPtr screens[MAXSCREENS];
     int numGPUScreens;

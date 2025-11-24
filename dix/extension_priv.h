@@ -9,6 +9,8 @@
 #include "include/extnsionst.h"
 #include "include/misc.h"
 
+#define EXTENSION_BASE 128
+
 #define EXTENSION_MAJOR_APPLE_WM            (EXTENSION_BASE + 0)
 #define EXTENSION_MAJOR_APPLE_DRI           (EXTENSION_BASE + 1)
 #define EXTENSION_MAJOR_BIG_REQUESTS        (EXTENSION_BASE + 2)
