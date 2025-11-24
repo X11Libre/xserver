@@ -765,4 +765,10 @@ int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
 
 void ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)  _X_NORETURN;
 
+/* needed by some internal modules */ _X_EXPORT
+void SwapLongs(CARD32 *list, unsigned long count);
+
+#define SwapRestL(stuff) \
+    SwapLongs((CARD32 *)(stuff + 1), (client->req_len - (sizeof(*stuff) >> 2)))
+
 #endif /* _XSERVER_DIX_PRIV_H */

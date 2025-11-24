@@ -55,6 +55,7 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>     /* control constants */
 
+#include "dix/dix_priv.h"
 #include "include/inputstr.h"           /* DeviceIntPtr      */
 #include "Xi/handlers.h"
 
