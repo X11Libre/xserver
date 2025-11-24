@@ -232,6 +232,9 @@ glamor_create_pixmap(ScreenPtr screen, int w, int h, int depth,
     else
         pixmap = fbCreatePixmap(screen, 0, 0, depth, usage);
 
+    if (!pixmap)
+        return NullPixmap;
+
     pixmap_priv = glamor_get_pixmap_private(pixmap);
     BUG_RETURN_VAL(!pixmap_priv, NULL);
 
