@@ -36,6 +36,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/inpututils_priv.h"
 #include "os/log_priv.h"
 #include "xkb/xkbsrv_priv.h"
 
