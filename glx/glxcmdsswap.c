@@ -31,6 +31,9 @@
 #include <dix-config.h>
 
 #include <string.h>
+
+#include "dix/dix_priv.h"
+
 #include "glxserver.h"
 #include "glxutil.h"
 #include <GL/glxtokens.h>
