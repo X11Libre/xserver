@@ -1584,7 +1584,7 @@ glamor_composite_clipped_region(CARD8 op,
     if (source
         && ((!source->pDrawable
              && (source->pSourcePict->type != SourcePictTypeSolidFill))
-            || (source->pDrawable
+            || (source->pDrawable && source_pixmap
                 && !GLAMOR_PIXMAP_PRIV_HAS_FBO(source_pixmap_priv)
                 && (source_pixmap->drawable.width != width
                     || source_pixmap->drawable.height != height)))) {
