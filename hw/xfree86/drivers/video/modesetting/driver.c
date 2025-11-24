@@ -2148,8 +2148,14 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
                 if (!ms->drmmode.reverse_prime_offload_mode) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                        "Disable reverse prime offload mode for %s.\n", version->name);
+                } else {
+                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                       "Enable reverse prime offload mode for %s.\n", version->name);
                 }
                 drmFreeVersion(version);
+            } else {
+                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
+                           "Reverse prime offload mode enabled.\n");
             }
         }
     }
