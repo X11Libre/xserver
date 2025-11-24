@@ -1798,15 +1798,15 @@ msSetSharedPixmapBacking(PixmapPtr ppix, void *fd_handle)
                                              ppix->devKind,
                                              ppix->drawable.depth,
                                              ppix->drawable.bitsPerPixel);
-        close(ihandle);
+        if (ihandle != -1) {
+            close(ihandle);
+        }
     } else {
         int size = ppix->devKind * ppix->drawable.height;
         ret = drmmode_SetSlaveBO(ppix, &ms->drmmode, ihandle, ppix->devKind, size);
     }
-    if (ret == FALSE)
-        return ret;
 
-    return TRUE;
+    return ret;
 #else
     return FALSE;
 #endif
