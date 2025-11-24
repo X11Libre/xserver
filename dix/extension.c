@@ -51,6 +51,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
+#include "dix/inpututils_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/request_priv.h"
 
@@ -62,6 +63,7 @@ SOFTWARE.
 #include "dispatch.h"
 #include "privates.h"
 #include "xace.h"
+#include "inputstr.h"
 
 #define LAST_ERROR 255
 
