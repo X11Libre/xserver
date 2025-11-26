@@ -117,12 +117,12 @@ Equipment Corporation.
 #include "mi/mi_priv.h"         /* miPaintWindow */
 #include "os/auth.h"
 #include "os/client_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
-#include "misc.h"
 #include "scrnintstr.h"
 #include "os.h"
 #include "regionstr.h"
@@ -207,7 +207,7 @@ get_window_name(WindowPtr pWin)
     for (PropertyPtr prop = pWin->properties; prop; prop = prop->next) {
         if (prop->propertyName == XA_WM_NAME && prop->type == XA_STRING &&
             prop->data) {
-            len = min(prop->size, WINDOW_NAME_BUF_LEN - 1);
+            len = MIN(prop->size, WINDOW_NAME_BUF_LEN - 1);
             memcpy(buf, prop->data, len);
             buf[len] = '\0';
             return buf;
