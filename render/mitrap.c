@@ -23,6 +23,8 @@
 
 #include <dix-config.h>
 
+#include "os/mathx_priv.h"
+
 #include "scrnintstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
@@ -64,7 +66,7 @@ miTrapezoidBounds(int ntrap, xTrapezoid * traps, BoxPtr box)
         if (y2 > box->y2)
             box->y2 = y2;
 
-        x1 = xFixedToInt(min(miLineFixedX(&traps->left, traps->top, FALSE),
+        x1 = xFixedToInt(MIN(miLineFixedX(&traps->left, traps->top, FALSE),
                              miLineFixedX(&traps->left, traps->bottom, FALSE)));
         if (x1 < box->x1)
             box->x1 = x1;

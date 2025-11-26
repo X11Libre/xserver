@@ -30,6 +30,8 @@
 
 #include <string.h>
 
+#include "os/mathx_priv.h"
+
 #include "exa_priv.h"
 #include "exa.h"
 
@@ -164,17 +166,18 @@ exaCopyDirty(ExaMigrationPtr migrate, RegionPtr pValidDst, RegionPtr pValidSrc,
              * destination valid region and the pending damage region.
              */
             if (RegionNumRects(pValidDst) > 10) {
-                BoxRec box;
                 BoxPtr pValidExt, pDamageExt;
                 RegionRec closure;
 
                 pValidExt = RegionExtents(pValidDst);
                 pDamageExt = RegionExtents(pending_damage);
 
-                box.x1 = min(pValidExt->x1, pDamageExt->x1);
-                box.y1 = min(pValidExt->y1, pDamageExt->y1);
-                box.x2 = max(pValidExt->x2, pDamageExt->x2);
-                box.y2 = max(pValidExt->y2, pDamageExt->y2);
+                BoxRec box = {
+                    .x1 = MIN(pValidExt->x1, pDamageExt->x1),
+                    .y1 = MIN(pValidExt->y1, pDamageExt->y1),
+                    .x2 = MAX(pValidExt->x2, pDamageExt->x2),
+                    .y2 = MAX(pValidExt->y2, pDamageExt->y2),
+                };
 
                 RegionInit(&closure, &box, 0);
                 RegionIntersect(&CopyReg, &CopyReg, &closure);
@@ -207,10 +210,10 @@ exaCopyDirty(ExaMigrationPtr migrate, RegionPtr pValidDst, RegionPtr pValidSrc,
     pPixmap->devKind = pExaPixmap->fb_pitch;
 
     while (nbox--) {
-        pBox->x1 = max(pBox->x1, 0);
-        pBox->y1 = max(pBox->y1, 0);
-        pBox->x2 = min(pBox->x2, pPixmap->drawable.width);
-        pBox->y2 = min(pBox->y2, pPixmap->drawable.height);
+        pBox->x1 = MAX(pBox->x1, 0);
+        pBox->y1 = MAX(pBox->y1, 0);
+        pBox->x2 = MIN(pBox->x2, pPixmap->drawable.width);
+        pBox->y2 = MIN(pBox->y2, pPixmap->drawable.height);
 
         if (pBox->x1 >= pBox->x2 || pBox->y1 >= pBox->y2)
             continue;
@@ -566,10 +569,10 @@ exaAssertNotDirty(PixmapPtr pPixmap)
     while (nbox--) {
         int rowbytes;
 
-        pBox->x1 = max(pBox->x1, 0);
-        pBox->y1 = max(pBox->y1, 0);
-        pBox->x2 = min(pBox->x2, pPixmap->drawable.width);
-        pBox->y2 = min(pBox->y2, pPixmap->drawable.height);
+        pBox->x1 = MAX(pBox->x1, 0);
+        pBox->y1 = MAX(pBox->y1, 0);
+        pBox->x2 = MIN(pBox->x2, pPixmap->drawable.width);
+        pBox->y2 = MIN(pBox->y2, pPixmap->drawable.height);
 
         if (pBox->x1 >= pBox->x2 || pBox->y1 >= pBox->y2)
             continue;

@@ -47,6 +47,7 @@ and Jim Haggerty of Metheus.
 #include "dix/screenint_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -1998,7 +1999,7 @@ RecordAllocRanges(GetContextRangeInfoPtr pri, int nRanges)
 
 #define SZINCR 8
 
-    newsize = max(pri->size + SZINCR, nRanges);
+    newsize = MAX(pri->size + SZINCR, nRanges);
     pNewRange = reallocarray(pri->pRanges, newsize, sizeof(xRecordRange));
     if (!pNewRange)
         return BadAlloc;
@@ -2062,7 +2063,7 @@ RecordConvertSetToRanges(RecordSetPtr pSet,
                 return err;
         }
         else
-            pri->nRanges = max(pri->nRanges, nRanges);
+            pri->nRanges = MAX(pri->nRanges, nRanges);
         if (card8) {
             pCARD8 = ((CARD8 *) &pri->pRanges[nRanges - 1]) + byteoffset;
             *pCARD8++ = interval.first;
