@@ -14,7 +14,7 @@ cd $DRV_BUILD_DIR
 build_drv_ac xf86-input-elographics $X11L_DRV_GIT/xf86-input-elographics xlibre-xf86-input-elographics-1.4.4.2
 build_drv_ac xf86-input-evdev       $X11L_DRV_GIT/xf86-input-evdev       xlibre-xf86-input-evdev-2.11.0.2
 build_drv_ac xf86-input-libinput    $X11L_DRV_GIT/xf86-input-libinput    xlibre-xf86-input-libinput-1.5.1.0
-build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       xlibre-xf86-input-mouse-1.9.5.2
+build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       xlibre-xf86-input-mouse-1.9.5.4
 build_drv_ac xf86-input-synaptics   $X11L_DRV_GIT/xf86-input-synaptics   xlibre-xf86-input-synaptics-1.10.0.2
 
 build_drv_ac xf86-video-amdgpu      $X11L_DRV_GIT/xf86-video-amdgpu      xlibre-xf86-video-amdgpu-23.0.0.5
