@@ -67,10 +67,10 @@ SOFTWARE.
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/log_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbsrv_priv.h"
 
-#include "misc.h"
 #include "resource.h"
 #include "windowstr.h"
 #include "inputstr.h"
@@ -2499,7 +2499,7 @@ RecalculateMasterButtons(DeviceIntPtr slave)
             GetMaster(dev, MASTER_ATTACHED) != master || !dev->button)
             continue;
 
-        maxbuttons = max(maxbuttons, dev->button->numButtons);
+        maxbuttons = MAX(maxbuttons, dev->button->numButtons);
     }
 
     if (master->button && master->button->numButtons != maxbuttons) {
