@@ -45,9 +45,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
+#include "os/mathx_priv.h"
 
 #include "xf86.h"
-#include "misc.h"
 #include "dixstruct.h"
 #include "extnsionst.h"
 #include "cursorstr.h"
@@ -393,10 +393,10 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
 
         for (int i = 0; i < reply.numClipRects; i++) {
             /* Clip cliprects to screen dimensions (redirected windows) */
-            CARD16 x1 = max(pClipRects[i].x1, 0);
-            CARD16 y1 = max(pClipRects[i].y1, 0);
-            CARD16 x2 = min(pClipRects[i].x2, pScreen->width);
-            CARD16 y2 = min(pClipRects[i].y2, pScreen->height);
+            CARD16 x1 = MAX(pClipRects[i].x1, 0);
+            CARD16 y1 = MAX(pClipRects[i].y1, 0);
+            CARD16 x2 = MIN(pClipRects[i].x2, pScreen->width);
+            CARD16 y2 = MIN(pClipRects[i].y2, pScreen->height);
 
             /* only write visible ones */
             if (x1 < x2 && y1 < y2) {

@@ -30,6 +30,7 @@
 #include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/extinit.h"
+#include "os/mathx_priv.h"
 
 #include "xf86.h"
 #include "os.h"
@@ -1978,7 +1979,7 @@ xf86RandR12LoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
         reds = greens = blues = pVisual->ColormapEntries;
     }
 
-    palette_size = max(reds, max(greens, blues));
+    palette_size = MAX(reds, MAX(greens, blues));
 
     if (dixPrivateKeyRegistered(rrPrivKey)) {
         XF86RandRInfoPtr randrp = XF86RANDRINFO(pScreen);
@@ -2043,7 +2044,7 @@ xf86RandR12ChangeGamma(ScrnInfoPtr pScrn, Gamma gamma)
     if (!randr_crtc || pScrn->LoadPalette == xf86RandR12LoadPalette)
         return Success;
 
-    size = max(0, randr_crtc->gammaSize);
+    size = MAX(0, randr_crtc->gammaSize);
     if (!size)
         return Success;
 
