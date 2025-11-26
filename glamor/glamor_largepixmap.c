@@ -5,6 +5,7 @@
 #include <stdint.h> /* For INT16_MAX */
 
 #include "os/bug_priv.h"
+#include "os/mathx_priv.h"
 
 #include "glamor_priv.h"
 
@@ -1143,9 +1144,9 @@ glamor_composite_largepixmap_region(CARD8 op,
             return FALSE;
         }
         fixed_block_width =
-            min(fixed_block_width, source_transformed_block_width);
+            MIN(fixed_block_width, source_transformed_block_width);
         fixed_block_height =
-            min(fixed_block_height, source_transformed_block_height);
+            MIN(fixed_block_height, source_transformed_block_height);
         DEBUGF("new source block size %d x %d \n", fixed_block_width,
                fixed_block_height);
     }
@@ -1164,9 +1165,9 @@ glamor_composite_largepixmap_region(CARD8 op,
             return FALSE;
         }
         fixed_block_width =
-            min(fixed_block_width, mask_transformed_block_width);
+            MIN(fixed_block_width, mask_transformed_block_width);
         fixed_block_height =
-            min(fixed_block_height, mask_transformed_block_height);
+            MIN(fixed_block_height, mask_transformed_block_height);
         DEBUGF("new mask block size %d x %d \n", fixed_block_width,
                fixed_block_height);
     }

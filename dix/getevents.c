@@ -48,6 +48,7 @@
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/probes_priv.h"
+#include "os/mathx_priv.h"
 #include "Xext/panoramiX/panoramiX.h"
 #include "Xext/panoramiX/panoramiXsrv.h"
 
@@ -2000,7 +2001,7 @@ GetTouchEvents(InternalEvent *events, DeviceIntPtr dev, uint32_t ddx_touchid,
      * these come from the touchpoint in Absolute mode, or the sprite in
      * Relative. */
     if (t->mode == XIDirectTouch) {
-        for (int i = 0; i < max(valuator_mask_size(&mask), 2); i++) {
+        for (int i = 0; i < MAX(valuator_mask_size(&mask), 2); i++) {
             double val;
 
             if (valuator_mask_fetch_double(&mask, i, &val))

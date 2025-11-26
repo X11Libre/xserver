@@ -37,6 +37,7 @@
 
 #include "dix/colormap_priv.h"
 #include "include/extinit.h"
+#include "os/mathx_priv.h"
 
 #include <windowstr.h>
 #include <os.h>
@@ -227,7 +228,7 @@ initGlxVisual(VisualPtr visual, __GLXconfig * config)
 {
     int maxBits;
 
-    maxBits = max(config->redBits, max(config->greenBits, config->blueBits));
+    maxBits = MAX(config->redBits, MAX(config->greenBits, config->blueBits));
 
     config->visualID = visual->vid;
     visual->class = glxConvertToXVisualType(config->visualType);

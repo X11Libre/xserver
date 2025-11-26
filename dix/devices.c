@@ -69,6 +69,7 @@ SOFTWARE.
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/log_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "Xext/xkeyboard/xkbsrv_priv.h"
 
@@ -2444,7 +2445,7 @@ RecalculateMasterButtons(DeviceIntPtr slave)
             GetMaster(dev, MASTER_ATTACHED) != master || !dev->button)
             continue;
 
-        maxbuttons = max(maxbuttons, dev->button->numButtons);
+        maxbuttons = MAX(maxbuttons, dev->button->numButtons);
     }
 
     if (master->button && master->button->numButtons != maxbuttons) {

@@ -41,6 +41,7 @@
 #include "dix/rpcbuf_priv.h"
 #include "dix/request_priv.h"
 #include "include/misc.h"
+#include "os/mathx_priv.h"
 
 #include "handlers.h"
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -125,7 +126,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     if (!mask.xi2mask)
         return BadAlloc;
 
-    mask_len = min(xi2mask_mask_size(mask.xi2mask), stuff->mask_len * 4);
+    mask_len = MIN(xi2mask_mask_size(mask.xi2mask), stuff->mask_len * 4);
     xi2mask_set_one_mask(mask.xi2mask, stuff->deviceid,
                          (unsigned char *) &stuff[1], mask_len);
 

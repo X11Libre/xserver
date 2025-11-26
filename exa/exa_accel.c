@@ -28,8 +28,12 @@
  */
 
 #include <dix-config.h>
-#include "exa_priv.h"
+
 #include <X11/fonts/fontstruct.h>
+
+#include "os/mathx_priv.h"
+
+#include "exa_priv.h"
 #include "dixfontstr.h"
 #include "exa.h"
 
@@ -1134,7 +1138,7 @@ exaFillRegionTiled(DrawablePtr pDrawable, RegionPtr pRegion, PixmapPtr pTile,
             int tileY;
 
             if (alu == GXcopy)
-                height = min(height, tileHeight);
+                height = MIN(height, tileHeight);
 
             modulus(dstY - yoff - pDrawable->y - pPatOrg->y, tileHeight, tileY);
 
@@ -1145,7 +1149,7 @@ exaFillRegionTiled(DrawablePtr pDrawable, RegionPtr pRegion, PixmapPtr pTile,
                 int h = tileHeight - tileY;
 
                 if (alu == GXcopy)
-                    width = min(width, tileWidth);
+                    width = MIN(width, tileWidth);
 
                 if (h > height)
                     h = height;
@@ -1204,26 +1208,26 @@ exaFillRegionTiled(DrawablePtr pDrawable, RegionPtr pRegion, PixmapPtr pTile,
                 for (i = 0; i < nbox; i++) {
                     int dstX = pBox[i].x1 + tileWidth;
                     int dstY = pBox[i].y1 + tileHeight;
-                    int width = min(pBox[i].x2 - dstX, tileWidth);
-                    int height = min(pBox[i].y2 - pBox[i].y1, tileHeight);
+                    int width = MIN(pBox[i].x2 - dstX, tileWidth);
+                    int height = MIN(pBox[i].y2 - pBox[i].y1, tileHeight);
 
                     while (dstX < pBox[i].x2) {
                         (*pExaScr->info->Copy) (pPixmap, pBox[i].x1, pBox[i].y1,
                                                 dstX, pBox[i].y1, width,
                                                 height);
                         dstX += width;
-                        width = min(pBox[i].x2 - dstX, width * 2);
+                        width = MIN(pBox[i].x2 - dstX, width * 2);
                     }
 
                     width = pBox[i].x2 - pBox[i].x1;
-                    height = min(pBox[i].y2 - dstY, tileHeight);
+                    height = MIN(pBox[i].y2 - dstY, tileHeight);
 
                     while (dstY < pBox[i].y2) {
                         (*pExaScr->info->Copy) (pPixmap, pBox[i].x1, pBox[i].y1,
                                                 pBox[i].x1, dstY, width,
                                                 height);
                         dstY += height;
-                        height = min(pBox[i].y2 - dstY, height * 2);
+                        height = MIN(pBox[i].y2 - dstY, height * 2);
                     }
                 }
 

@@ -50,6 +50,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "include/dix.h"
+#include "os/mathx_priv.h"
 
 typedef struct _builtinColor {
     unsigned char red;
@@ -858,7 +859,7 @@ dixLookupBuiltinColor(char *name,
         int mid = (low + high) / 2;
         const BuiltinColor *c = &BuiltinColors[mid];
         const size_t currentLen = strlen(c->name);
-        const int r = strncasecmp(c->name, name, min(len, currentLen));
+        const int r = strncasecmp(c->name, name, MIN(len, currentLen));
 
         if (r == 0) {
             if (len == currentLen) {

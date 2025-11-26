@@ -42,6 +42,7 @@
 #include "include/colormapst.h"
 #include "include/mipict.h"
 #include "mi/mi_priv.h"
+#include "os/mathx_priv.h"
 
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -194,10 +195,10 @@ RootlessGetImage(DrawablePtr pDrawable, int sx, int sy, int w, int h,
         x1 = x0 + w;
         y1 = y0 + h;
 
-        x0 = max(x0, winRec->x);
-        y0 = max(y0, winRec->y);
-        x1 = min(x1, winRec->x + winRec->width);
-        y1 = min(y1, winRec->y + winRec->height);
+        x0 = MAX(x0, winRec->x);
+        y0 = MAX(y0, winRec->y);
+        x1 = MIN(x1, winRec->x + winRec->width);
+        y1 = MIN(y1, winRec->y + winRec->height);
 
         sx = x0 - pDrawable->x;
         sy = y0 - pDrawable->y;
@@ -344,10 +345,10 @@ RootlessGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
                     x2 = x1 + glyph->info.width;
                     y2 = y1 + glyph->info.height;
 
-                    box.x1 = min(box.x1, x1);
-                    box.y1 = min(box.y1, y1);
-                    box.x2 = max(box.x2, x2);
-                    box.y2 = max(box.y2, y2);
+                    box.x1 = MIN(box.x1, x1);
+                    box.y1 = MIN(box.y1, y1);
+                    box.x2 = MAX(box.x2, x2);
+                    box.y2 = MAX(box.y2, y2);
 
                     x += glyph->info.xOff;
                     y += glyph->info.yOff;

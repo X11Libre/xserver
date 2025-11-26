@@ -23,6 +23,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "os/mathx_priv.h"
 #include "Xext/randr/randrstr_priv.h"
 #include "Xext/randr/rrdispatch_priv.h"
 
@@ -621,7 +622,7 @@ ProcRRGetProviderProperty(ClientPtr client)
         return BadValue;
     }
 
-    len = min(n - ind, 4 * stuff->longLength);
+    len = MIN(n - ind, 4 * stuff->longLength);
 
     reply.bytesAfter = n - (ind + len);
     reply.format = prop_value->format;
