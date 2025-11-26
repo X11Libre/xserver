@@ -115,8 +115,6 @@ typedef int XRetCode;
 #define FALSE 0
 #endif
 
-typedef struct _xReq *xReqPtr;
-
 #include "os.h"                 /* for ALLOCATE_LOCAL and DEALLOCATE_LOCAL */
 #include <X11/Xfuncs.h>         /* for bcopy, bzero, and bcmp */
 
