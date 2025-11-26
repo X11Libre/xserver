@@ -51,8 +51,8 @@ if build_xselinux
 endif
 
 if build_xv
-    srcs_xext += ['xvmain.c', 'xvdisp.c', 'xvmc.c']
-    hdrs_xext += ['xvdix.h', 'xvmcext.h']
+    srcs_xext += ['xvmain.c', 'xvdisp.c' ]
+    hdrs_xext += ['xvdix.h' ]
 endif
 
 libxserver_xext = static_library('xserver_xext',

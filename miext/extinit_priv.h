@@ -58,7 +58,6 @@ void XkbExtensionInit(void);
 void SELinuxExtensionInit(void);
 void XTestExtensionInit(void);
 void XvExtensionInit(void);
-void XvMCExtensionInit(void);
 void dri3_extension_init(void);
 void PseudoramiXExtensionInit(void);
 void present_extension_init(void);
