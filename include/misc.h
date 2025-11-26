@@ -122,7 +122,7 @@ typedef int XRetCode;
 
 #undef min
 #undef max
-
+/* @deprecated */
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 /* abs() is a function, not a macro; include the file declaring
