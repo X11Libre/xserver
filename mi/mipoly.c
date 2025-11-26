@@ -51,6 +51,9 @@ SOFTWARE.
 #include <dix-config.h>
 
 #include <X11/X.h>
+
+#include "os/mathx_priv.h"
+
 #include "windowstr.h"
 #include "gcstruct.h"
 #include "pixmapstr.h"
@@ -224,8 +227,8 @@ miCreateETandAET(int count, DDXPointPtr pts, EdgeTable * ET,
                 return FALSE;
             }
 
-            ET->ymax = max(ET->ymax, PrevPt->y);
-            ET->ymin = min(ET->ymin, PrevPt->y);
+            ET->ymax = MAX(ET->ymax, PrevPt->y);
+            ET->ymin = MIN(ET->ymin, PrevPt->y);
             pETEs++;
         }
 
@@ -475,7 +478,7 @@ miFillConvexPoly(DrawablePtr dst, GCPtr pgc, int count, DDXPointPtr ptsIn)
          *  generate scans to fill while we still have
          *  a right edge as well as a left edge.
          */
-        i = min(ptsIn[nextleft].y, ptsIn[nextright].y) - y;
+        i = MIN(ptsIn[nextleft].y, ptsIn[nextright].y) - y;
         /* in case we're called with non-convex polygon */
         if (i < 0) {
             free(FirstWidth);

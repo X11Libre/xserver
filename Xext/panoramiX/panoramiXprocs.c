@@ -39,6 +39,8 @@ Equipment Corporation.
 #include "dix/window_priv.h"
 #include "include/misc.h"
 #include "os/osdep.h"
+#include "os/mathx_priv.h"
+
 #include "panoramiX.h"
 #include "panoramiXsrv.h"
 
@@ -1166,10 +1168,10 @@ PanoramiXCopyArea(ClientPtr client)
                 dy += masterScreen->y;
             }
 
-            sourceBox.x1 = min(srcx + dx, 0);
-            sourceBox.y1 = min(srcy + dy, 0);
-            sourceBox.x2 = max(sourceBox.x1 + width, 32767);
-            sourceBox.y2 = max(sourceBox.y1 + height, 32767);
+            sourceBox.x1 = MIN(srcx + dx, 0);
+            sourceBox.y1 = MIN(srcy + dy, 0);
+            sourceBox.x2 = MAX(sourceBox.x1 + width, 32767);
+            sourceBox.y2 = MAX(sourceBox.y1 + height, 32767);
 
             RegionInit(&rgn, &sourceBox, 1);
 
@@ -2078,7 +2080,7 @@ PanoramiXGetImage(ClientPtr client)
     else if (format == ZPixmap) {
         linesDone = 0;
         while (h - linesDone > 0) {
-            nlines = min(linesPerBuf, h - linesDone);
+            nlines = MIN(linesPerBuf, h - linesDone);
 
             char *pBuf = x_rpcbuf_reserve(&rpcbuf, nlines * widthBytesLine);
             if (!pBuf)
@@ -2095,7 +2097,7 @@ PanoramiXGetImage(ClientPtr client)
             if (planemask & plane) {
                 linesDone = 0;
                 while (h - linesDone > 0) {
-                    nlines = min(linesPerBuf, h - linesDone);
+                    nlines = MIN(linesPerBuf, h - linesDone);
 
                     char *pBuf = x_rpcbuf_reserve(&rpcbuf, nlines * widthBytesLine);
                     if (!pBuf)

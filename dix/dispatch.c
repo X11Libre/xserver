@@ -125,6 +125,7 @@ Equipment Corporation.
 #include "os/auth.h"
 #include "os/client_priv.h"
 #include "os/ddx_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "os/probes_priv.h"
 #include "os/screensaver.h"
@@ -2338,7 +2339,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     else if (format == ZPixmap) {
         linesDone = 0;
         while (height - linesDone > 0) {
-            size_t nlines = min(linesPerBuf, height - linesDone);
+            size_t nlines = MIN(linesPerBuf, height - linesDone);
 
             char *pBuf = x_rpcbuf_reserve(&rpcbuf, (nlines * widthBytesLine));
             if (!pBuf) {
@@ -2370,7 +2371,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
             if (planemask & plane) {
                 linesDone = 0;
                 while (height - linesDone > 0) {
-                    size_t nlines = min(linesPerBuf, height - linesDone);
+                    size_t nlines = MIN(linesPerBuf, height - linesDone);
 
                     char *pBuf = x_rpcbuf_reserve(&rpcbuf, (nlines * widthBytesLine));
                     if (!pBuf) {

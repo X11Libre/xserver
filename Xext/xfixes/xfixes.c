@@ -48,6 +48,7 @@
 #include "dix/request_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/fmt.h"
+#include "os/mathx_priv.h"
 #include "Xext/xinput/xibarriers.h"
 
 #include "xfixesint.h"
@@ -75,7 +76,7 @@ ProcXFixesQueryVersion(ClientPtr client)
     if (version_compare(stuff->majorVersion, stuff->minorVersion,
                         SERVER_XFIXES_MAJOR_VERSION,
                         SERVER_XFIXES_MINOR_VERSION) < 0) {
-        major = max(pXFixesClient->major_version, stuff->majorVersion);
+        major = MAX(pXFixesClient->major_version, stuff->majorVersion);
         minor = stuff->minorVersion;
     }
     else {
@@ -86,7 +87,7 @@ ProcXFixesQueryVersion(ClientPtr client)
     pXFixesClient->major_version = major;
 
     xXFixesQueryVersionReply reply = {
-        .majorVersion = min(stuff->majorVersion, major),
+        .majorVersion = MIN(stuff->majorVersion, major),
         .minorVersion = minor
     };
 

@@ -50,8 +50,9 @@
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
-#include "handlers.h"
+#include "os/mathx_priv.h"
 
+#include "handlers.h"
 #include "xibarriers.h"
 #include "scrnintstr.h"
 #include "cursorstr.h"
@@ -546,8 +547,8 @@ sort_min_max(INT16 *a, INT16 *b)
         return;
     A = *a;
     B = *b;
-    *a = min(A, B);
-    *b = max(A, B);
+    *a = MIN(A, B);
+    *b = MAX(A, B);
 }
 
 static int

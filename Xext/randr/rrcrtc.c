@@ -28,6 +28,7 @@
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "os/bug_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "Xext/randr/randrstr_priv.h"
 #include "Xext/randr/rrdispatch_priv.h"
@@ -322,10 +323,10 @@ crtcs_adjacent(const RRCrtcPtr a, const RRCrtcPtr b)
     if (!cursor_bounds(b, &bl, &br, &bt, &bb))
 	    return FALSE;
 
-    cl = max(al, bl);
-    cr = min(ar, br);
-    ct = max(at, bt);
-    cb = min(ab, bb);
+    cl = MAX(al, bl);
+    cr = MIN(ar, br);
+    ct = MAX(at, bt);
+    cb = MIN(ab, bb);
 
     return (cl <= cr) && (ct <= cb);
 }

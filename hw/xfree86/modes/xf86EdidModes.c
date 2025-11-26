@@ -29,9 +29,11 @@
  */
 #include <xorg-config.h>
 
+#include "os/mathx_priv.h"
+
+#define _PARSE_EDID_
 #include "xf86.h"
 #include "xf86DDC_priv.h"
-#include <X11/Xatom.h>
 #include "property.h"
 #include "propertyst.h"
 #include "xf86Crtc.h"
@@ -1154,7 +1156,7 @@ handle_detailed_monset(struct detailed_monitor_section *det_mon, void *data)
 
         clock = det_mon->section.ranges.max_clock * 1000;
         if (p->quirks & DDC_QUIRK_DVI_SINGLE_LINK)
-            clock = min(clock, 165000);
+            clock = MIN(clock, 165000);
         if (!p->have_maxpixclock && clock > p->Monitor->maxPixClock)
             p->Monitor->maxPixClock = clock;
 

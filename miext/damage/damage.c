@@ -26,6 +26,7 @@
 
 #include "dix/screen_hooks_priv.h"
 #include "include/mipict.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "Xext/render/glyphstr_priv.h"
 
@@ -597,8 +598,8 @@ damageAddTraps(PicturePtr pPicture,
         x = pPicture->pDrawable->x + x_off;
         y = pPicture->pDrawable->y + y_off;
         for (i = 0; i < ntrap; i++) {
-            pixman_fixed_t l = min(t->top.l, t->bot.l);
-            pixman_fixed_t r = max(t->top.r, t->bot.r);
+            pixman_fixed_t l = MIN(t->top.l, t->bot.l);
+            pixman_fixed_t r = MAX(t->top.r, t->bot.r);
             int x1 = x + pixman_fixed_to_int(l);
             int x2 = x + pixman_fixed_to_int(pixman_fixed_ceil(r));
             int y1 = y + pixman_fixed_to_int(t->top.y);
