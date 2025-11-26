@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "os/bug_priv.h"
+#include "os/mathx_priv.h"
 
 #include "glamor_priv.h"
 #include "glamor_program.h"
@@ -238,7 +239,7 @@ glamor_dash_loop(DrawablePtr drawable, GCPtr gc, glamor_program *prog,
 static int
 glamor_line_length(short x1, short y1, short x2, short y2)
 {
-    return max(abs(x2 - x1), abs(y2 - y1));
+    return MAX(abs(x2 - x1), abs(y2 - y1));
 }
 
 Bool

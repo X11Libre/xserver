@@ -63,15 +63,15 @@ SOFTWARE.
 #include <X11/X.h>
 
 #include "dix/dix_priv.h"
+#include "dix/dixstruct_priv.h"
 #include "dix/screensaver_priv.h"
 #include "os/busfault.h"
 #include "os/client_priv.h"
+#include "os/mathx_priv.h"
+#include "os/osdep.h"
 #include "os/ossock.h"
 #include "os/screensaver.h"
 
-#include "misc.h"
-#include "osdep.h"
-#include "dixstruct_priv.h"
 #include "globals.h"
 #ifdef DPMSExtension
 #include "dpmsproc.h"
@@ -455,7 +455,7 @@ ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
 
     if (timeout < ScreenSaverTime) {
         return nextTimeout > 0 ?
-            min(ScreenSaverTime - timeout, nextTimeout) :
+            MIN(ScreenSaverTime - timeout, nextTimeout) :
             ScreenSaverTime - timeout;
     }
 
@@ -464,7 +464,7 @@ ScreenSaverTimeoutExpire(OsTimerPtr timer, CARD32 now, void *arg)
 
     if (ScreenSaverInterval > 0) {
         nextTimeout = nextTimeout > 0 ?
-            min(ScreenSaverInterval, nextTimeout) : ScreenSaverInterval;
+            MIN(ScreenSaverInterval, nextTimeout) : ScreenSaverInterval;
     }
 
     return nextTimeout;
@@ -504,7 +504,7 @@ SetScreenSaverTimer(void)
 #endif
 
     if (ScreenSaverTime > 0) {
-        timeout = timeout > 0 ? min(ScreenSaverTime, timeout) : ScreenSaverTime;
+        timeout = timeout > 0 ? MIN(ScreenSaverTime, timeout) : ScreenSaverTime;
     }
 
 #ifdef SCREENSAVER

@@ -44,6 +44,7 @@ from The Open Group.
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "os/xhostname.h"
 
@@ -574,7 +575,7 @@ vfbAllocateMmappedFramebuffer(vfbScreenInfoPtr pvfb)
     for (currentFileSize = 0;
          currentFileSize < pvfb->sizeInBytes;
          currentFileSize += writeThisTime) {
-        writeThisTime = min(DUMMY_BUFFER_SIZE,
+        writeThisTime = MIN(DUMMY_BUFFER_SIZE,
                             pvfb->sizeInBytes - currentFileSize);
         if (-1 == write(pvfb->mmap_fd, dummyBuffer, writeThisTime)) {
             perror("write");

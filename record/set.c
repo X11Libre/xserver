@@ -48,6 +48,9 @@ from The Open Group.
 #include <dix-config.h>
 
 #include <string.h>
+#include <stdlib.h>
+
+#include "os/mathx_priv.h"
 
 #include "misc.h"
 #include "set.h"
@@ -58,9 +61,9 @@ from The Open Group.
  * should be a valid assumption on all supported architectures.
  */
 #if defined(__STDC__) && (__STDC_VERSION__ - 0 >= 201112L)
-#define MinSetAlignment(type) max(_Alignof(type), _Alignof(unsigned long))
+#define MinSetAlignment(type) MAX(_Alignof(type), _Alignof(unsigned long))
 #else
-#define MinSetAlignment(type) max(sizeof(void*), sizeof(unsigned long))
+#define MinSetAlignment(type) MAX(sizeof(void*), sizeof(unsigned long))
 #endif
 
 static int
@@ -338,7 +341,7 @@ IntervalListCreateSet(RecordSetInterval * pIntervals, int nIntervals,
                 i++;            /* disjoint intervals */
             }
             else {
-                stackIntervals[i].last = max(stackIntervals[i].last,
+                stackIntervals[i].last = MAX(stackIntervals[i].last,
                                              stackIntervals[i + 1].last);
                 nIntervals--;
                 for (j = i + 1; j < nIntervals; j++)

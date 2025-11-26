@@ -23,6 +23,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
+#include "os/mathx_priv.h"
 #include "randr/randrstr_priv.h"
 #include "randr/rrdispatch_priv.h"
 
@@ -151,10 +152,10 @@ RRMonitorGetGeometry(RRMonitorPtr monitor, RRMonitorGeometryPtr geometry)
                 first = this;
                 *geometry = this;
             } else {
-                geometry->box.x1 = min(this.box.x1, geometry->box.x1);
-                geometry->box.x2 = max(this.box.x2, geometry->box.x2);
-                geometry->box.y1 = min(this.box.y1, geometry->box.y1);
-                geometry->box.y2 = max(this.box.y2, geometry->box.y2);
+                geometry->box.x1 = MIN(this.box.x1, geometry->box.x1);
+                geometry->box.x2 = MAX(this.box.x2, geometry->box.x2);
+                geometry->box.y1 = MIN(this.box.y1, geometry->box.y1);
+                geometry->box.y2 = MAX(this.box.y2, geometry->box.y2);
             }
             active_crtcs++;
         }

@@ -54,8 +54,8 @@ SOFTWARE.
 #include <X11/Xfuncproto.h>
 
 #include "mi/mi_priv.h"
+#include "os/mathx_priv.h"
 
-#include "misc.h"
 #include "gcstruct.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
@@ -941,10 +941,10 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
         xMax = yMax = MINSHORT;
 
         for (i = narcs, parc = parcs; --i >= 0; parc++) {
-            xMin = min(xMin, parc->x);
-            yMin = min(yMin, parc->y);
-            xMax = max(xMax, (parc->x + (int) parc->width));
-            yMax = max(yMax, (parc->y + (int) parc->height));
+            xMin = MIN(xMin, parc->x);
+            yMin = MIN(yMin, parc->y);
+            xMax = MAX(xMax, (parc->x + (int) parc->width));
+            yMax = MAX(yMax, (parc->y + (int) parc->height));
         }
 
         /* expand box to deal with line widths */
@@ -955,10 +955,10 @@ miWideArc(DrawablePtr pDraw, GCPtr pGC, int narcs, xArc * parcs)
         yMax += halfWidth;
 
         /* compute pixmap size; limit it to size of drawable */
-        xOrg = max(xMin, 0);
-        yOrg = max(yMin, 0);
-        pixmapWidth = min(xMax, pDraw->width) - xOrg;
-        pixmapHeight = min(yMax, pDraw->height) - yOrg;
+        xOrg = MAX(xMin, 0);
+        yOrg = MAX(yMin, 0);
+        pixmapWidth = MIN(xMax, pDraw->width) - xOrg;
+        pixmapHeight = MIN(yMax, pDraw->height) - yOrg;
 
         /* if nothing left, return */
         if ((pixmapWidth <= 0) || (pixmapHeight <= 0))
@@ -1228,7 +1228,7 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
             if (dy != 0.0) {
                 ml = (ptsIn[nextleft].x - ptsIn[left].x) / dy;
                 dy = y - (ptsIn[left].y + yFtrans);
-                xl = (ptsIn[left].x + xFtrans) + ml * max(dy, 0);
+                xl = (ptsIn[left].x + xFtrans) + ml * MAX(dy, 0);
             }
         }
 
@@ -1248,7 +1248,7 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
             if (dy != 0.0) {
                 mr = (ptsIn[nextright].x - ptsIn[right].x) / dy;
                 dy = y - (ptsIn[right].y + yFtrans);
-                xr = (ptsIn[right].x + xFtrans) + mr * max(dy, 0);
+                xr = (ptsIn[right].x + xFtrans) + mr * MAX(dy, 0);
             }
         }
 
@@ -1256,7 +1256,7 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
          *  generate scans to fill while we still have
          *  a right edge as well as a left edge.
          */
-        i = (min(ptsIn[nextleft].y, ptsIn[nextright].y) + yFtrans) - y;
+        i = (MIN(ptsIn[nextleft].y, ptsIn[nextright].y) + yFtrans) - y;
 
         if (i < EPSILON) {
             if (Marked[nextleft] && Marked[nextright]) {
@@ -3188,8 +3188,8 @@ newFinalSpan(int y, int xmin, int xmax)
             }
             if (x->min <= xmax && xmin <= x->max) {
                 if (oldx) {
-                    oldx->min = min(x->min, xmin);
-                    oldx->max = max(x->max, xmax);
+                    oldx->min = MIN(x->min, xmin);
+                    oldx->max = MAX(x->max, xmax);
                     if (prev)
                         prev->next = x->next;
                     else
@@ -3197,8 +3197,8 @@ newFinalSpan(int y, int xmin, int xmax)
                     --nspans;
                 }
                 else {
-                    x->min = min(x->min, xmin);
-                    x->max = max(x->max, xmax);
+                    x->min = MIN(x->min, xmin);
+                    x->max = MAX(x->max, xmax);
                     oldx = x;
                 }
                 xmin = oldx->min;
@@ -3295,7 +3295,7 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
             else
                 q0 = a0;
             if (a1 < 360 * 64)
-                q1 = min(a1, 90 * 64);
+                q1 = MIN(a1, 90 * 64);
             else
                 q1 = 90 * 64;
             if (curq == startq && a0 == q0 && rightq < 0) {
@@ -3311,11 +3311,11 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
             if (a1 < 90 * 64)
                 q0 = 0;
             else
-                q0 = 180 * 64 - min(a1, 180 * 64);
+                q0 = 180 * 64 - MIN(a1, 180 * 64);
             if (a0 > 180 * 64)
                 q1 = 90 * 64;
             else
-                q1 = 180 * 64 - max(a0, 90 * 64);
+                q1 = 180 * 64 - MAX(a0, 90 * 64);
             if (curq == startq && 180 * 64 - a0 == q1) {
                 righta = q1;
                 rightq = curq;
@@ -3329,11 +3329,11 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
             if (a0 > 270 * 64)
                 q0 = 0;
             else
-                q0 = max(a0, 180 * 64) - 180 * 64;
+                q0 = MAX(a0, 180 * 64) - 180 * 64;
             if (a1 < 180 * 64)
                 q1 = 90 * 64;
             else
-                q1 = min(a1, 270 * 64) - 180 * 64;
+                q1 = MIN(a1, 270 * 64) - 180 * 64;
             if (curq == startq && a0 - 180 * 64 == q0) {
                 righta = q0;
                 rightq = curq;
@@ -3347,8 +3347,8 @@ drawArc(xArc * tarc, int l, int a0, int a1, miArcFacePtr right,
             if (a1 < 270 * 64)
                 q0 = 0;
             else
-                q0 = 360 * 64 - min(a1, 360 * 64);
-            q1 = 360 * 64 - max(a0, 270 * 64);
+                q0 = 360 * 64 - MIN(a1, 360 * 64);
+            q1 = 360 * 64 - MAX(a0, 270 * 64);
             if (curq == startq && 360 * 64 - a0 == q1) {
                 righta = q1;
                 rightq = curq;
