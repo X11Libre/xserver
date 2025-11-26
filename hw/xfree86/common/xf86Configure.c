@@ -27,6 +27,7 @@
 #include <errno.h>
 
 #include "os/ddx_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "os/serverlock.h"
 
@@ -43,7 +44,6 @@
 #include "xf86Bus.h"
 #include "xf86Sbus.h"
 #endif
-#include "misc.h"
 #include "loaderProcs.h"
 #include "xf86Parser_priv.h"
 
@@ -311,7 +311,7 @@ configureDeviceSection(int screennum)
                 if (asprintf(&optname, "\"%s\"", p->name) == -1)
                     break;
 
-                len += max(20, strlen(optname));
+                len += MAX(20, strlen(optname));
                 len += strlen(opttype);
 
                 ptr->dev_comment = realloc(ptr->dev_comment, len);

@@ -29,15 +29,27 @@
  */
 #include <xorg-config.h>
 
+<<<<<<< HEAD
+=======
+#include <string.h>
+#include <math.h>
+#include <X11/Xatom.h>
+
+#include "os/mathx_priv.h"
+
+#define _PARSE_EDID_
+>>>>>>> 1d55f99a999 ([PR #1490] treewide: replace min/max macros by non-exported MIN/MAX and deprecate them)
 #include "xf86.h"
 #include "xf86DDC_priv.h"
-#include <X11/Xatom.h>
 #include "property.h"
 #include "propertyst.h"
 #include "xf86Crtc.h"
+<<<<<<< HEAD
 #include <string.h>
 #include <math.h>
 #include "edid_priv.h"
+=======
+>>>>>>> 1d55f99a999 ([PR #1490] treewide: replace min/max macros by non-exported MIN/MAX and deprecate them)
 
 static void
 handle_detailed_rblank(struct detailed_monitor_section *det_mon, void *data)
@@ -1154,7 +1166,7 @@ handle_detailed_monset(struct detailed_monitor_section *det_mon, void *data)
 
         clock = det_mon->section.ranges.max_clock * 1000;
         if (p->quirks & DDC_QUIRK_DVI_SINGLE_LINK)
-            clock = min(clock, 165000);
+            clock = MIN(clock, 165000);
         if (!p->have_maxpixclock && clock > p->Monitor->maxPixClock)
             p->Monitor->maxPixClock = clock;
 
