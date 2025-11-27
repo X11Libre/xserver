@@ -150,8 +150,8 @@ translate_eglconfig(ScreenPtr pScreen, struct egl_screen *screen, EGLConfig hc,
     EGLint value;
     bool valid_depth;
     int i;
-    struct egl_config *c = calloc(1, sizeof *c);
 
+    struct egl_config *c = calloc(1, sizeof *c);
     if (!c)
         return chain;
 
