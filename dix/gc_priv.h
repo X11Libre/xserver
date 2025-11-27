@@ -9,6 +9,8 @@
 
 #include "include/gc.h"
 
+#define GCAllBits ((1 << (GCLastBit + 1)) - 1)
+
 int ChangeGCXIDs(ClientPtr client, GCPtr pGC, BITS32 mask, CARD32 * pval);
 
 GCPtr CreateGC(DrawablePtr pDrawable,
