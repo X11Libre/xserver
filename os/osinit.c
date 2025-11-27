@@ -60,6 +60,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "os/busfault.h"
+#include "os/ddx_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 #include "os/serverlock.h"
@@ -225,12 +226,4 @@ OsInit(void)
      */
     LogInit(NULL, NULL);
     SmartScheduleInit();
-}
-
-void
-OsCleanup(Bool terminating)
-{
-    if (terminating) {
-        UnlockServer();
-    }
 }

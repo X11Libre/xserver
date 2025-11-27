@@ -29,6 +29,9 @@
 #include "include/resource.h"
 #include "include/window.h"
 
+/* pad scanline to a longword */
+#define BITMAP_SCANLINE_UNIT    32
+
 #define LEGAL_NEW_RESOURCE(id,client)           \
     do {                                        \
         if (!LegalNewID((id), (client))) {      \
@@ -59,6 +62,9 @@ extern HWEventQueuePtr checkForInput[2];
 
  /* -retro mode */
 extern Bool party_like_its_1989;
+
+/* needed by libglx and libglamor (server modules) */
+extern _X_EXPORT Bool enableIndirectGLX;
 
 /*
  * @brief callback right after one screen's root window has been initialized
@@ -761,5 +767,11 @@ int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
                   CARD16 *green, CARD16 *blue, CARD32 *pixel);
 
 void ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)  _X_NORETURN;
+
+/* needed by some internal modules */ _X_EXPORT
+void SwapLongs(CARD32 *list, unsigned long count);
+
+#define SwapRestL(stuff) \
+    SwapLongs((CARD32 *)(stuff + 1), (client->req_len - (sizeof(*stuff) >> 2)))
 
 #endif /* _XSERVER_DIX_PRIV_H */

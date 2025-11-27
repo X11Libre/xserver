@@ -56,12 +56,13 @@
  * This file contains the external interfaces for the XFree86 configuration
  * file parser.
  */
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #ifndef _xf86Parser_h_
 #define _xf86Parser_h_
+
+#ifdef HAVE_XORG_CONFIG_H
+#include <xorg-config.h>
+#endif
 
 #include <X11/Xdefs.h>
 #include "xf86Optrec.h"
@@ -359,8 +360,10 @@ typedef struct {
     GenericListRec list;
     char *identifier;
     char *driver;
+    char *modules;
     char *modulepath;
     struct xorg_list match_driver;
+    struct xorg_list match_layout;
     XF86OptionPtr option_lst;
     char *comment;
 } XF86ConfOutputClassRec, *XF86ConfOutputClassPtr;

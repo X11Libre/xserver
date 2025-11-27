@@ -295,7 +295,7 @@ int KdAddKeyboard(KdKeyboardInfo * ki);
 void KdRemoveKeyboard(KdKeyboardInfo * ki);
 
 typedef struct _KdOsFuncs {
-    int (*Init) (void); /* Only called when the X server is started, when serverGeneration == 1 */
+    int (*Init) (void);           /* only called when the X server is started */
     void (*Enable) (void);        /* called when screen is enabled */
     void (*Disable) (void);       /* called when screen is disabled */
     Bool (*SpecialKey) (KeySym);
@@ -338,7 +338,6 @@ extern DevPrivateKeyRec kdScreenPrivateKeyRec;
 
 #define kdScreenPrivateKey (&kdScreenPrivateKeyRec)
 
-extern x_server_generation_t kdGeneration;
 extern Bool kdEnabled;
 extern Bool kdSwitchPending;
 extern Bool kdEmulateMiddleButton;

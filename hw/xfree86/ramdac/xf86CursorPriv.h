@@ -1,10 +1,9 @@
+#ifndef _XF86CURSORPRIV_H
+#define _XF86CURSORPRIV_H
 
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
-
-#ifndef _XF86CURSORPRIV_H
-#define _XF86CURSORPRIV_H
 
 #include "xf86Cursor.h"
 #include "mipointrst.h"
@@ -45,8 +44,6 @@ Bool xf86InitHardwareCursor(ScreenPtr pScreen, xf86CursorInfoPtr infoPtr);
 
 Bool xf86CheckHWCursor(ScreenPtr pScreen, CursorPtr cursor, xf86CursorInfoPtr infoPtr);
 extern _X_EXPORT DevPrivateKeyRec xf86CursorScreenKeyRec;
-
-#define xf86CursorScreenKey (&xf86CursorScreenKeyRec)
 
 extern DevScreenPrivateKeyRec xf86ScreenCursorBitsKeyRec;
 

@@ -56,12 +56,14 @@
  * This file contains the Option Record that is passed between the Parser,
  * and Module setup procs.
  */
+
+#ifndef _xf86Optrec_h_
+#define _xf86Optrec_h_
+
 #ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
 #endif
 
-#ifndef _xf86Optrec_h_
-#define _xf86Optrec_h_
 #include <stdio.h>
 #include <string.h>
 #include "xf86Optionstr.h"

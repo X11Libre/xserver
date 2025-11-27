@@ -49,8 +49,6 @@ SOFTWARE.
 
 #include "window.h"
 
-typedef struct _Property *PropertyPtr;
-
 extern _X_EXPORT int dixChangeWindowProperty(ClientPtr pClient,
                                              WindowPtr pWin,
                                              Atom property,
@@ -60,9 +58,5 @@ extern _X_EXPORT int dixChangeWindowProperty(ClientPtr pClient,
                                              unsigned long len,
                                              const void *value,
                                              Bool sendevent);
-
-extern _X_EXPORT int DeleteProperty(ClientPtr /*client */ ,
-                                    WindowPtr /*pWin */ ,
-                                    Atom /*propName */ );
 
 #endif                          /* PROPERTY_H */

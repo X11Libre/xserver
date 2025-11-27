@@ -15,7 +15,7 @@ on:
 jobs:
     xserver-build-ubuntu:
         env:
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
+            MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
             LIBGL_ALWAYS_SOFTWARE: 1
             GALLIUM_DRIVER: llvmpipe
             PIGLIT_PLATFORM: x11_egl
@@ -78,7 +78,7 @@ jobs:
 
     drivers-build-ubuntu:
         env:
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
@@ -235,15 +235,14 @@ jobs:
         runs-on: ubuntu-latest
         env:
             MYTOKEN : ${{ secrets.MYTOKEN }}
-            MYTOKEN2: "value2"
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
             - name: run in freebsd VM
               id: xserver-build
               uses: vmactions/freebsd-vm@v1
               with:
-                  envs: 'MYTOKEN MYTOKEN2 MESON_ARGS'
+                  envs: 'MYTOKEN MESON_ARGS'
                   usesh: true
                   release: "14.3"
                   run:     ./.github/scripts/freebsd/run-xserver-build.sh

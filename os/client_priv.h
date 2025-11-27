@@ -53,7 +53,6 @@ void FlushIfCriticalOutputPending(void);
 void ResetOsBuffers(void);
 void NotifyParentProcess(void);
 void CreateWellKnownSockets(void);
-void ResetWellKnownSockets(void);
 void CloseWellKnownConnections(void);
 
 // exported for nvidia driver

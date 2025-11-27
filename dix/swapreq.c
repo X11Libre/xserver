@@ -50,6 +50,7 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include <X11/Xprotostr.h>
 
+#include "dix/dix_priv.h"
 #include "dix/reqhandlers_priv.h"
 
 #include "misc.h"
@@ -581,18 +582,6 @@ SProcCopyColormapAndFree(ClientPtr client)
     swapl(&stuff->mid);
     swapl(&stuff->srcCmap);
     return ((*ProcVector[X_CopyColormapAndFree]) (client));
-}
-
-int _X_COLD
-SProcAllocColor(ClientPtr client)
-{
-    REQUEST(xAllocColorReq);
-    REQUEST_SIZE_MATCH(xAllocColorReq);
-    swapl(&stuff->cmap);
-    swaps(&stuff->red);
-    swaps(&stuff->green);
-    swaps(&stuff->blue);
-    return ((*ProcVector[X_AllocColor]) (client));
 }
 
 int _X_COLD

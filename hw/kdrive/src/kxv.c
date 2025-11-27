@@ -100,7 +100,6 @@ static DevPrivateKeyRec KdXVWindowKeyRec;
 #define KdXVWindowKey (&KdXVWindowKeyRec)
 static DevPrivateKey KdXvScreenKey;
 static DevPrivateKeyRec KdXVScreenPrivateKey;
-static x_server_generation_t KdXVGeneration = 0;
 static unsigned long PortResource = 0;
 
 #define GET_XV_SCREEN(pScreen) ((XvScreenPtr) \
@@ -118,9 +117,6 @@ KdXVScreenInit(ScreenPtr pScreen, KdVideoAdaptorPtr adaptors, int num)
     KdXVScreenPtr ScreenPriv;
 
 /*   fprintf(stderr,"KdXVScreenInit initializing %d adaptors\n",num); */
-
-    if (KdXVGeneration != serverGeneration)
-        KdXVGeneration = serverGeneration;
 
     if (noXvExtension)
         return FALSE;

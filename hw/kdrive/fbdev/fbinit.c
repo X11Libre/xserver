@@ -56,9 +56,7 @@ ddxInputThreadInit(void)
 void
 InitOutput(int argc, char **argv)
 {
-    if (serverGeneration == 1)
-        ephyrExtensionInit();
-
+    ephyrExtensionInit();
     KdInitOutput(argc, argv);
 }
 

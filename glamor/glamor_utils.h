@@ -25,12 +25,12 @@
  *
  */
 
+#ifndef __GLAMOR_UTILS_H__
+#define __GLAMOR_UTILS_H__
+
 #ifndef GLAMOR_PRIV_H
 #error This file can only be included by glamor_priv.h
 #endif
-
-#ifndef __GLAMOR_UTILS_H__
-#define __GLAMOR_UTILS_H__
 
 #include "os/bug_priv.h"
 

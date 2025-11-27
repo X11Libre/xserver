@@ -37,6 +37,7 @@
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
+#include "dix/property_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
 #include "fb/fb_priv.h"
@@ -61,13 +62,7 @@ extern Bool no_configure_window;
 
 #define DEFINE_ATOM_HELPER(func,atom_name)                      \
   static Atom func (void) {                                     \
-    static x_server_generation_t generation = 0;                \
-    static Atom atom;                                           \
-    if (generation != serverGeneration) {                       \
-      generation = serverGeneration;                            \
-      atom = dixAddAtom(atom_name);                             \
-    }                                                           \
-    return atom;                                                \
+    return dixAddAtom(atom_name);                               \
   }
 
 DEFINE_ATOM_HELPER(xa_native_window_id, "_NATIVE_WINDOW_ID")

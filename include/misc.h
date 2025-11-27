@@ -115,14 +115,10 @@ typedef int XRetCode;
 #define FALSE 0
 #endif
 
-typedef struct _xReq *xReqPtr;
-
 #include "os.h"                 /* for ALLOCATE_LOCAL and DEALLOCATE_LOCAL */
 #include <X11/Xfuncs.h>         /* for bcopy, bzero, and bcmp */
 
 #define NullBox ((BoxPtr)0)
-#define MILLI_PER_MIN (1000 * 60)
-#define MILLI_PER_SECOND (1000)
 
 #undef min
 #undef max
@@ -132,18 +128,8 @@ typedef struct _xReq *xReqPtr;
 /* abs() is a function, not a macro; include the file declaring
  * it in case we haven't done that yet.
  */
-#include <stdlib.h>
-#define sign(x) ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0))
 /* this assumes b > 0 */
 #define modulus(a, b, d)    if (((d) = (a) % (b)) < 0) (d) += (b)
-/*
- * return the least significant bit in x which is set
- *
- * This works on 1's complement and 2's complement machines.
- * If you care about the extra instruction on 2's complement
- * machines, change to ((x) & (-(x)))
- */
-#define lowbit(x) ((x) & (~(x) + 1))
 
 /* XXX Not for modules */
 #include <limits.h>
@@ -222,14 +208,8 @@ padding_for_int32(const int bytes)
 #define LengthRestS(stuff) \
     ((client->req_len << 1) - (sizeof(*stuff) >> 1))
 
-#define LengthRestL(stuff) \
-    (client->req_len - (sizeof(*stuff) >> 2))
-
 #define SwapRestS(stuff) \
     SwapShorts((short *)(stuff + 1), LengthRestS(stuff))
-
-#define SwapRestL(stuff) \
-    SwapLongs((CARD32 *)(stuff + 1), LengthRestL(stuff))
 
 #if defined(__GNUC__) && ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 3))
 void __attribute__ ((error("wrong sized variable passed to swap")))
@@ -309,8 +289,6 @@ bswap_16(uint16_t x)
 			wrong_size(); \
 		(dst) = bswap_16((src)); \
 	} while (0)
-
-extern _X_EXPORT void SwapLongs(CARD32 *list, unsigned long count);
 
 extern _X_EXPORT void SwapShorts(short *list, unsigned long count);
 

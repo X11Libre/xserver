@@ -28,14 +28,10 @@ Equipment Corporation.
 
 /* THIS IS NOT AN X PROJECT TEAM SPECIFICATION */
 
-/*
- *	PanoramiX definitions
- */
-
-#include <dix-config.h>
-
 #ifndef _PANORAMIX_H_
 #define _PANORAMIX_H_
+
+#include <dix-config.h>
 
 #include <X11/Xmd.h>
 #include <X11/extensions/panoramiXproto.h>
@@ -44,6 +40,10 @@ Equipment Corporation.
 
 #include "gcstruct.h"
 #include "dixstruct.h"
+
+/*
+ *	PanoramiX definitions
+ */
 
 typedef struct _PanoramiXInfo {
     XID id;

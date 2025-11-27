@@ -159,7 +159,7 @@ static const OptionInfoRec Options[] = {
 
 int ms_entity_index = -1;
 
-DevPrivateKeyRec asyncFlipPrivateKeyRec;
+static DevPrivateKeyRec asyncFlipPrivateKeyRec;
 
 static MODULESETUPPROTO(Setup);
 

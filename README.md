@@ -45,7 +45,7 @@ You may specify the install `<prefix>` with, for example, `--prefix="$(pwd)/imag
 
 ### Configuring XLibre
 
-To enable loading of the **proprietary Nvidia driver**, please add the following to your X configuration, e.g., `/etc/X11/xorg.conf`:
+To enable loading of the **proprietary Nvidia driver** in the XLibre Xserver up to version 25.0.0.15, please add the following to your X configuration, e.g., `/etc/X11/xorg.conf`:
 
 ```
 Section "ServerFlags"
@@ -53,7 +53,7 @@ Section "ServerFlags"
 EndSection
 ```
 
-Please see the [Compatibility of XLibre (X11Libre/xserver Wiki)](https://github.com/X11Libre/xserver/wiki/Compatibility-of-XLibre) page for [more details on the Nvidia driver](https://github.com/X11Libre/xserver/wiki/Compatibility-of-XLibre#nvidia-proprietary-driver) and compatibility in general.
+Starting with version 25.0.0.16, the proprietary Nvidia driver is autodetected and handled internally without any special configuration. Please see the [Compatibility of XLibre (X11Libre/xserver Wiki)](https://github.com/X11Libre/xserver/wiki/Compatibility-of-XLibre) page for [more details on the Nvidia driver](https://github.com/X11Libre/xserver/wiki/Compatibility-of-XLibre#nvidia-proprietary-driver) and compatibility in general.
 
 Until XLibre releases its own, you can find a detailed description of the configuration on the [Configuration - Xorg (ArchWiki)](https://wiki.archlinux.org/title/Xorg#Configuration) page. If you have built and installed XLibre yourself, then change into the `<prefix>` directory with `cd <prefix>` and create a directory `etc/X11` with a file `xorg.conf` and adjust it accordingly.
 

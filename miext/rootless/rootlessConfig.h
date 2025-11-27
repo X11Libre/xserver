@@ -27,12 +27,12 @@
  * use or other dealings in this Software without prior written authorization.
  */
 
+#ifndef _ROOTLESSCONFIG_H
+#define _ROOTLESSCONFIG_H
+
 #ifdef HAVE_DIX_CONFIG_H
 #include <dix-config.h>
 #endif
-
-#ifndef _ROOTLESSCONFIG_H
-#define _ROOTLESSCONFIG_H
 
 /*# define ROOTLESSDEBUG*/
 
