@@ -3513,7 +3513,7 @@ ProcSetFontPath(ClientPtr client)
 
     REQUEST_AT_LEAST_SIZE(xSetFontPathReq);
 
-    nbytes = (client->req_len << 2) - sizeof(xSetFontPathReq);
+    nbytes = ((unsigned long)client->req_len << 2) - sizeof(xSetFontPathReq);
     total = nbytes;
     ptr = (unsigned char *) &stuff[1];
     nfonts = stuff->nFonts;
@@ -3881,7 +3881,7 @@ SendConnSetup(ClientPtr client, const char *reason)
     if (client->swapped) {
         WriteSConnSetupPrefix(client, lconnSetupPrefix);
         WriteSConnectionInfo(client,
-                             (unsigned long) (lconnSetupPrefix->length << 2),
+                             (unsigned long)lconnSetupPrefix->length << 2,
                              lConnectionInfo);
     }
     else {
