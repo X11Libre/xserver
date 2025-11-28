@@ -2758,7 +2758,7 @@ ProcAllocNamedColor(ClientPtr client)
     xAllocNamedColorReply rep = { 0 };
 
     if (!dixLookupBuiltinColor
-            (pcmp->pScreen->myNum, (char *) &stuff[1], stuff->nbytes,
+            ((char *) &stuff[1], stuff->nbytes,
              &rep.exactRed, &rep.exactGreen, &rep.exactBlue))
         return BadName;
 
@@ -2987,8 +2987,7 @@ ProcStoreNamedColor(ClientPtr client)
     if (rc == Success) {
         xColorItem def;
 
-        if (dixLookupBuiltinColor(pcmp->pScreen->myNum,
-                                  (char *) &stuff[1],
+        if (dixLookupBuiltinColor((char *) &stuff[1],
                                   stuff->nbytes,
                                   &def.red,
                                   &def.green,
@@ -3063,8 +3062,7 @@ ProcLookupColor(ClientPtr client)
     }
 
     CARD16 exactRed, exactGreen, exactBlue;
-    if (!dixLookupBuiltinColor(pcmp->pScreen->myNum,
-                               (char *) &stuff[1],
+    if (!dixLookupBuiltinColor((char *) &stuff[1],
                                stuff->nbytes,
                                &exactRed,
                                &exactGreen,
