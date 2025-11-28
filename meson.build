@@ -1,7 +1,7 @@
 project('xserver', 'c',
         default_options: [
             'buildtype=debugoptimized',
-            'c_std=gnu99',
+            'c_std=gnu11',
         ],
         version: '25.0.0.7',
         meson_version: '>= 0.58.0',
