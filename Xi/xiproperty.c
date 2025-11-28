@@ -38,6 +38,7 @@
 #include "dix/input_priv.h"
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
+#include "os/mathx_priv.h"
 #include "Xi/handlers.h"
 
 #include "dix.h"
@@ -282,7 +283,7 @@ get_property(ClientPtr client, DeviceIntPtr dev, Atom property, Atom type,
         return BadValue;
     }
 
-    len = min(n - ind, 4 * length);
+    len = MIN(n - ind, 4 * length);
 
     *bytes_after = n - (ind + len);
     *format = prop_value->format;

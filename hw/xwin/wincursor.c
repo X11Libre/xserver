@@ -38,6 +38,7 @@
 #include "winmsg.h"
 
 #include "mi/mipointer_priv.h"
+#include "os/mathx_priv.h"
 
 #include <cursorstr.h>
 #include <mipointrst.h>
@@ -191,8 +192,8 @@ winLoadCursor(ScreenPtr pScreen, CursorPtr pCursor, int screen)
         bits_to_bytes(pScreenPriv->cursor.sm_cx) * pScreenPriv->cursor.sm_cy;
 
     /* Get the effective width and height */
-    nCX = min(pScreenPriv->cursor.sm_cx, pCursor->bits->width);
-    nCY = min(pScreenPriv->cursor.sm_cy, pCursor->bits->height);
+    nCX = MIN(pScreenPriv->cursor.sm_cx, pCursor->bits->width);
+    nCY = MIN(pScreenPriv->cursor.sm_cy, pCursor->bits->height);
 
     /* Allocate memory for the bitmaps */
     unsigned char *pAnd = calloc(1, nBytes);

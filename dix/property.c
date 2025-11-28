@@ -55,6 +55,7 @@ SOFTWARE.
 #include "dix/request_priv.h"
 #include "dix/window_priv.h"
 #include "include/extinit.h"
+#include "os/mathx_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -602,7 +603,7 @@ ProcGetProperty(ClientPtr client)
         return BadValue;
     }
 
-    len = min(n - ind, 4 * p.longLength);
+    len = MIN(n - ind, 4 * p.longLength);
 
     xGetPropertyReply rep = {
         .bytesAfter = n - (ind + len),

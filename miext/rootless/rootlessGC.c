@@ -32,6 +32,12 @@
 #include <dix-config.h>
 
 #include <stddef.h>             /* For NULL */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include "os/mathx_priv.h"
+
 #include "mi.h"
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -40,10 +46,6 @@
 #include "dixfontstr.h"
 #include "mivalidate.h"
 #include "fb.h"
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 #include "rootlessCommon.h"
 
@@ -1181,8 +1183,8 @@ RootlessImageText8(DrawablePtr dst, GCPtr pGC,
         int top, bot, Min, Max;
         BoxRec box;
 
-        top = max(FONTMAXBOUNDS(pGC->font, ascent), FONTASCENT(pGC->font));
-        bot = max(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
+        top = MAX(FONTMAXBOUNDS(pGC->font, ascent), FONTASCENT(pGC->font));
+        bot = MAX(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
 
         Min = count * FONTMINBOUNDS(pGC->font, characterWidth);
         if (Min > 0)
@@ -1269,8 +1271,8 @@ RootlessImageText16(DrawablePtr dst, GCPtr pGC,
         int top, bot, Min, Max;
         BoxRec box;
 
-        top = max(FONTMAXBOUNDS(pGC->font, ascent), FONTASCENT(pGC->font));
-        bot = max(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
+        top = MAX(FONTMAXBOUNDS(pGC->font, ascent), FONTASCENT(pGC->font));
+        bot = MAX(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
 
         Min = count * FONTMINBOUNDS(pGC->font, characterWidth);
         if (Min > 0)
@@ -1360,8 +1362,8 @@ RootlessImageGlyphBlt(DrawablePtr dst, GCPtr pGC,
         unsigned int nglyph = nglyphInit;
         CharInfoPtr *ppci = ppciInit;
 
-        top = max(FONTMAXBOUNDS(pGC->font, ascent), FONTASCENT(pGC->font));
-        bot = max(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
+        top = MAX(FONTMAXBOUNDS(pGC->font, ascent), FONTASCENT(pGC->font));
+        bot = MAX(FONTMAXBOUNDS(pGC->font, descent), FONTDESCENT(pGC->font));
 
         box.x1 = ppci[0]->metrics.leftSideBearing;
         if (box.x1 > 0)

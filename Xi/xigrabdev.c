@@ -39,6 +39,7 @@
 #include "dix/inpututils_priv.h"
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
+#include "os/mathx_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -96,7 +97,7 @@ ProcXIGrabDevice(ClientPtr client)
     if (!mask.xi2mask)
         return BadAlloc;
 
-    mask_len = min(xi2mask_mask_size(mask.xi2mask), stuff->mask_len * 4);
+    mask_len = MIN(xi2mask_mask_size(mask.xi2mask), stuff->mask_len * 4);
     /* FIXME: I think the old code was broken here */
     xi2mask_set_one_mask(mask.xi2mask, dev->id, (unsigned char *) &stuff[1],
                          mask_len);
