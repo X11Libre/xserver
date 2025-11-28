@@ -127,11 +127,11 @@ void
 xf86SetModeDefaultName(DisplayModePtr mode)
 {
     Bool interlaced = ! !(mode->Flags & V_INTERLACE);
-    char *tmp;
+    char *tmp = NULL;
 
     free((void *) mode->name);
 
-    XNFasprintf(&tmp, "%dx%d%s", mode->HDisplay, mode->VDisplay,
+    asprintf(&tmp, "%dx%d%s", mode->HDisplay, mode->VDisplay,
                 interlaced ? "i" : "");
     mode->name = tmp;
 }
@@ -804,14 +804,14 @@ xf86CVTMode(int HDisplay, int VDisplay, float VRefresh, Bool Reduced,
 {
     struct libxcvt_mode_info *libxcvt_mode_info;
     DisplayModeRec *Mode = XNFcallocarray(1, sizeof(DisplayModeRec));
-    char *tmp;
+    char *tmp = NULL;
 
     libxcvt_mode_info =
         libxcvt_gen_mode_info(HDisplay, VDisplay, VRefresh, Reduced, Interlaced);
 
-    XNFasprintf(&tmp, "%dx%d", HDisplay, VDisplay);
+    asprintf(&tmp, "%dx%d", HDisplay, VDisplay);
     Mode->name = tmp;
-    
+
     Mode->VDisplay   = libxcvt_mode_info->vdisplay;
     Mode->HDisplay   = libxcvt_mode_info->hdisplay;
     Mode->Clock      = libxcvt_mode_info->dot_clock;
