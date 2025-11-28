@@ -71,8 +71,8 @@ typedef struct _Visual {
     short nplanes;              /* = log2 (ColormapEntries). This does not
                                  * imply that the screen has this many planes.
                                  * it may have more or fewer */
-    unsigned long redMask, greenMask, blueMask;
     int offsetRed, offsetGreen, offsetBlue;
+    unsigned long redMask, greenMask, blueMask;
 } VisualRec;
 
 typedef struct _Depth {
@@ -514,12 +514,13 @@ typedef struct _Screen {
     short x, y, width, height;
     short mmWidth, mmHeight;
     short numDepths;
-    unsigned char rootDepth;
+    short numVisuals;
     DepthPtr allowedDepths;
     unsigned long rootVisual;
     unsigned long defColormap;
-    short minInstalledCmaps, maxInstalledCmaps;
+    unsigned char rootDepth;
     char backingStoreSupport, saveUnderSupport;
+    short minInstalledCmaps, maxInstalledCmaps;
     unsigned long whitePixel, blackPixel;
     GCPtr GCperDepth[MAXFORMATS + 1];
     /* next field is a stipple to use as default in a GC.  we don't build
@@ -529,7 +530,6 @@ typedef struct _Screen {
      */
     PixmapPtr defaultStipple;
     void *devPrivate;
-    short numVisuals;
     VisualPtr visuals;
     WindowPtr root;
     ScreenSaverStuffRec screensaver;
@@ -626,6 +626,7 @@ typedef struct _Screen {
 #endif
 
     unsigned int totalPixmapSize;
+    int output_secondarys;
 
     MarkWindowProcPtr MarkWindow;
     MarkOverlappedWindowsProcPtr MarkOverlappedWindows;
@@ -656,7 +657,6 @@ typedef struct _Screen {
     /* Info on this screen's secondarys (if any) */
     struct xorg_list secondary_list;
     struct xorg_list secondary_head;
-    int output_secondarys;
     /* Info for when this screen is a secondary */
     ScreenPtr current_primary;
     Bool is_output_secondary;
@@ -718,12 +718,12 @@ typedef struct _ScreenInfo {
     int bitmapScanlineUnit;
     int bitmapScanlinePad;
     int bitmapBitOrder;
-    int numPixmapFormats;
-     PixmapFormatRec formats[MAXFORMATS];
-    int numScreens;
     ScreenPtr screens[MAXSCREENS];
-    int numGPUScreens;
     ScreenPtr gpuscreens[MAXGPUSCREENS];
+    PixmapFormatRec formats[MAXFORMATS];
+    uint16_t numScreens;
+    uint16_t numGPUScreens;
+    uint8_t numPixmapFormats;
     int x;                      /* origin */
     int y;                      /* origin */
     int width;                  /* total width of all screens together */

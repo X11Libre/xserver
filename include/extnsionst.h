@@ -55,10 +55,10 @@ SOFTWARE.
 #include "privates.h"
 
 typedef struct _ExtensionEntry {
-    int index;
     void (*CloseDown) (         /* called at server shutdown */
                           struct _ExtensionEntry * /* extension */ );
     const char *name;           /* extension name */
+    int index;
     int base;                   /* base request number */
     int eventBase;
     int eventLast;
