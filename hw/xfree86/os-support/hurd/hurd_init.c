@@ -57,6 +57,12 @@ xf86UseMsg()
     return;
 }
 
+Bool
+xf86VTKeepTtyIsSet(void)
+{
+     return FALSE;
+}
+
 void
 xf86OpenConsole()
 {
