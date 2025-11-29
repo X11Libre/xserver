@@ -42,7 +42,6 @@ subdir('modes')
 subdir('os-support')
 subdir('parser')
 subdir('ramdac')
-subdir('xext')
 subdir('xkb')
 
 srcs_xorg = [

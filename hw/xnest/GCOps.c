@@ -28,6 +28,7 @@ is" without express or implied warranty.
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
+#include "region.h"
 #include "servermd.h"
 
 #include "xnest-xcb.h"

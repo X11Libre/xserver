@@ -150,6 +150,7 @@
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "pixmap.h"
+#include "region.h"
 #include "gcstruct.h"
 #include "colormap.h"
 #include "miscstruct.h"

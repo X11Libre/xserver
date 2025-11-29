@@ -9,7 +9,6 @@
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screensaver_priv.h"
-#include "dix/window_priv.h"
 #include "mi/mi_priv.h"
 
 #include "scrnintstr.h"

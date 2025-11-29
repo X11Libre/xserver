@@ -1395,7 +1395,7 @@ FreePicture(void *value, XID pid)
                 PicturePtr *pPrev;
 
                 for (pPrev = (PicturePtr *) dixLookupPrivateAddr
-                     (&pWindow->devPrivates, &PictureWindowPrivateKeyRec);
+                     (&pWindow->devPrivates, PictureWindowPrivateKey);
                      *pPrev; pPrev = &(*pPrev)->pNext) {
                     if (*pPrev == pPicture) {
                         *pPrev = pPicture->pNext;

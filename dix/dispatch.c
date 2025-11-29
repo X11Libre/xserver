@@ -117,7 +117,6 @@ Equipment Corporation.
 #include "dix/screensaver_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
-#include "dix/settings_priv.h"
 #include "dix/window_priv.h"
 #include "include/resource.h"
 #include "miext/extinit_priv.h"
@@ -2710,13 +2709,6 @@ ProcAllocColor(ClientPtr client)
     REQUEST(xAllocColorReq);
     REQUEST_SIZE_MATCH(xAllocColorReq);
 
-    if (client->swapped) {
-        swapl(&stuff->cmap);
-        swaps(&stuff->red);
-        swaps(&stuff->green);
-        swaps(&stuff->blue);
-    }
-
     xAllocColorReply rep = {
         .red = stuff->red,
         .green = stuff->green,
@@ -2758,7 +2750,7 @@ ProcAllocNamedColor(ClientPtr client)
     xAllocNamedColorReply rep = { 0 };
 
     if (!dixLookupBuiltinColor
-            ((char *) &stuff[1], stuff->nbytes,
+            (pcmp->pScreen->myNum, (char *) &stuff[1], stuff->nbytes,
              &rep.exactRed, &rep.exactGreen, &rep.exactBlue))
         return BadName;
 
@@ -2987,7 +2979,8 @@ ProcStoreNamedColor(ClientPtr client)
     if (rc == Success) {
         xColorItem def;
 
-        if (dixLookupBuiltinColor((char *) &stuff[1],
+        if (dixLookupBuiltinColor(pcmp->pScreen->myNum,
+                                  (char *) &stuff[1],
                                   stuff->nbytes,
                                   &def.red,
                                   &def.green,
@@ -3062,7 +3055,8 @@ ProcLookupColor(ClientPtr client)
     }
 
     CARD16 exactRed, exactGreen, exactBlue;
-    if (!dixLookupBuiltinColor((char *) &stuff[1],
+    if (!dixLookupBuiltinColor(pcmp->pScreen->myNum,
+                               (char *) &stuff[1],
                                stuff->nbytes,
                                &exactRed,
                                &exactGreen,
@@ -3912,7 +3906,7 @@ ProcEstablishConnection(ClientPtr client)
 
     prefix = (xConnClientPrefix *) ((char *) stuff + sz_xReq);
 
-    if (client->swapped && !dixSettingAllowByteSwappedClients) {
+    if (client->swapped && !AllowByteSwappedClients) {
         reason = "Prohibited client endianess, see the Xserver man page ";
     } else if ((client->req_len << 2) != sz_xReq + sz_xConnClientPrefix +
             pad_to_int32(prefix->nbytesAuthProto) +

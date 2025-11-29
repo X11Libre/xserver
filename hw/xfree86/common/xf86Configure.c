@@ -593,7 +593,7 @@ GenerateDriverList(void)
 {
     const char **ret;
     static const char *patlist[] = { "(.*)_drv\\.so", NULL };
-    ret = LoaderListDir("drivers", patlist);
+    ret = LoaderListDir(XORG_MODULE_ABI_TAG "/drivers", patlist);
 
     /* fix up the probe order for video drivers */
     if (ret != NULL)

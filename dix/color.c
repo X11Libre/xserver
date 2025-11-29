@@ -845,7 +845,8 @@ static const BuiltinColor BuiltinColors[] = {
 };
 
 Bool
-dixLookupBuiltinColor(char *name,
+dixLookupBuiltinColor(int screen,
+                      char *name,
                       unsigned int len,
                       unsigned short *pred,
                       unsigned short *pgreen,

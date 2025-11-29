@@ -30,7 +30,7 @@
 #include "scrnintstr.h"
 #include "pixmap.h"
 #include "pixmapstr.h"
-#include "regionstr.h"
+#include "region.h"
 #include "gcstruct.h"
 #include "colormap.h"
 #include "miscstruct.h"

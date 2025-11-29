@@ -32,7 +32,6 @@
 #include "dix/inpututils_priv.h"
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
-#include "dix/window_priv.h"
 #include "Xi/handlers.h"
 
 #include "dixstruct.h"

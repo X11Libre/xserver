@@ -6,7 +6,6 @@
 
 #include <stddef.h>
 
-#include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
 
 static inline Bool __x_rpcbuf_write_bin_pad(

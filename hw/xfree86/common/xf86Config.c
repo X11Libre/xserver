@@ -52,7 +52,6 @@
 
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
-#include "dix/settings_priv.h"
 #include "dix/screensaver_priv.h"
 #include "include/extinit.h"
 #include "os/log_priv.h"
@@ -754,11 +753,8 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
         LogMessageVerb(X_CONFIG, 1, "Ignoring ABI Version\n");
     }
 
-    Bool bv = FALSE;
-    if (xf86GetOptValBool(FlagOptions, FLAG_ALLOW_BYTE_SWAPPED_CLIENTS, &bv)) {
-        dixSettingAllowByteSwappedClients = bv;
-    }
-    if (dixSettingAllowByteSwappedClients) {
+    xf86GetOptValBool(FlagOptions, FLAG_ALLOW_BYTE_SWAPPED_CLIENTS, &AllowByteSwappedClients);
+    if (AllowByteSwappedClients) {
         LogMessageVerb(X_CONFIG, 1, "Allowing byte-swapped clients\n");
     }
 

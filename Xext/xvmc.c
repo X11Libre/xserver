@@ -24,6 +24,12 @@
 #include "servermd.h"
 #include "xvmcext.h"
 
+#ifdef HAS_XVMCSHM
+#include <sys/ipc.h>
+#include <sys/types.h>
+#include <sys/shm.h>
+#endif                          /* HAS_XVMCSHM */
+
 #define SERVER_XVMC_MAJOR_VERSION               1
 #define SERVER_XVMC_MINOR_VERSION               1
 
@@ -31,6 +37,8 @@
 #define DR_BUSID_SIZE 48
 
 static DevPrivateKeyRec XvMCScreenKeyRec;
+
+#define XvMCScreenKey (&XvMCScreenKeyRec)
 static Bool XvMCInUse;
 
 int XvMCReqCode;
@@ -51,7 +59,7 @@ typedef struct {
 } XvMCScreenRec, *XvMCScreenPtr;
 
 #define XVMC_GET_PRIVATE(pScreen) \
-    (XvMCScreenPtr)(dixLookupPrivate(&(pScreen)->devPrivates, &XvMCScreenKeyRec))
+    (XvMCScreenPtr)(dixLookupPrivate(&(pScreen)->devPrivates, XvMCScreenKey))
 
 static int
 XvMCDestroyContextRes(void *data, XID id)
@@ -504,7 +512,7 @@ ProcXvMCListSubpictureTypes(ClientPtr client)
 
     pScreen = pPort->pAdaptor->pScreen;
 
-    if (!dixPrivateKeyRegistered(&XvMCScreenKeyRec))
+    if (!dixPrivateKeyRegistered(XvMCScreenKey))
         return BadMatch;        /* No XvMC adaptors */
 
     if (!(pScreenPriv = XVMC_GET_PRIVATE(pScreen)))
@@ -603,6 +611,10 @@ ProcXvMCGetDRInfo(ClientPtr client)
     ScreenPtr pScreen;
     XvMCScreenPtr pScreenPriv;
 
+#ifdef HAS_XVMCSHM
+    volatile CARD32 *patternP;
+#endif
+
     REQUEST(xvmcGetDRInfoReq);
     REQUEST_SIZE_MATCH(xvmcGetDRInfoReq);
 
@@ -631,6 +643,28 @@ ProcXvMCGetDRInfo(ClientPtr client)
      * Read back to the client what she has put in the shared memory
      * segment she prepared for us.
      */
+
+#ifdef HAS_XVMCSHM
+    patternP = (CARD32 *) shmat(stuff->shmKey, NULL, SHM_RDONLY);
+    if (-1 != (long) patternP) {
+        volatile CARD32 *patternC = patternP;
+        int i;
+        CARD32 magic = stuff->magic;
+
+        reply.isLocal = 1;
+        i = 1024 / sizeof(CARD32);
+
+        while (i--) {
+            if (*patternC++ != magic) {
+                reply.isLocal = 0;
+                break;
+            }
+            magic = ~magic;
+        }
+        shmdt((char *) patternP);
+    }
+#endif                          /* HAS_XVMCSHM */
+
     if (client->swapped) {
         swapl(&reply.major);
         swapl(&reply.minor);
@@ -682,7 +716,7 @@ XvMCExtensionInit(void)
 {
     ExtensionEntry *extEntry;
 
-    if (!dixPrivateKeyRegistered(&XvMCScreenKeyRec))
+    if (!dixPrivateKeyRegistered(XvMCScreenKey))
         return;
 
     if (!(XvMCRTContext = CreateNewResourceType(XvMCDestroyContextRes,
@@ -718,7 +752,7 @@ static void XvMCScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unus
 {
     XvMCScreenPtr pScreenPriv = XVMC_GET_PRIVATE(pScreen);
     free(pScreenPriv);
-    dixSetPrivate(&pScreen->devPrivates, &XvMCScreenKeyRec, NULL);
+    dixSetPrivate(&pScreen->devPrivates, XvMCScreenKey, NULL);
     dixScreenUnhookClose(pScreen, XvMCScreenClose);
 }
 
@@ -733,7 +767,7 @@ XvMCScreenInit(ScreenPtr pScreen, int num, XvMCAdaptorPtr pAdapt)
     if (!(pScreenPriv = calloc(1, sizeof(XvMCScreenRec))))
         return BadAlloc;
 
-    dixSetPrivate(&pScreen->devPrivates, &XvMCScreenKeyRec, pScreenPriv);
+    dixSetPrivate(&pScreen->devPrivates, XvMCScreenKey, pScreenPriv);
 
     dixScreenHookClose(pScreen, XvMCScreenClose);
 
@@ -758,7 +792,7 @@ XvMCFindXvImage(XvPortPtr pPort, CARD32 id)
     XvMCScreenPtr pScreenPriv;
     XvMCAdaptorPtr adaptor = NULL;
 
-    if (!dixPrivateKeyRegistered(&XvMCScreenKeyRec))
+    if (!dixPrivateKeyRegistered(XvMCScreenKey))
         return NULL;
 
     if (!(pScreenPriv = XVMC_GET_PRIVATE(pScreen)))

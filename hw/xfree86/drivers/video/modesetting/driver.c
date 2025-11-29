@@ -159,7 +159,7 @@ static const OptionInfoRec Options[] = {
 
 int ms_entity_index = -1;
 
-static DevPrivateKeyRec asyncFlipPrivateKeyRec;
+DevPrivateKeyRec asyncFlipPrivateKeyRec;
 
 static MODULESETUPPROTO(Setup);
 
@@ -1798,15 +1798,14 @@ msSetSharedPixmapBacking(PixmapPtr ppix, void *fd_handle)
                                              ppix->devKind,
                                              ppix->drawable.depth,
                                              ppix->drawable.bitsPerPixel);
-        if (ihandle != -1) {
-            close(ihandle);
-        }
     } else {
         int size = ppix->devKind * ppix->drawable.height;
         ret = drmmode_SetSlaveBO(ppix, &ms->drmmode, ihandle, ppix->devKind, size);
     }
+    if (ret == FALSE)
+        return ret;
 
-    return ret;
+    return TRUE;
 #else
     return FALSE;
 #endif
@@ -2149,14 +2148,8 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
                 if (!ms->drmmode.reverse_prime_offload_mode) {
                     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                        "Disable reverse prime offload mode for %s.\n", version->name);
-                } else {
-                    xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                       "Enable reverse prime offload mode for %s.\n", version->name);
                 }
                 drmFreeVersion(version);
-            } else {
-                xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                           "Reverse prime offload mode enabled.\n");
             }
         }
     }

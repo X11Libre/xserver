@@ -416,7 +416,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcInstallColormap,
     ProcUninstallColormap,
     ProcListInstalledColormaps,
-    ProcAllocColor,
+    SProcAllocColor,
     SProcAllocNamedColor,               /* 85 */
     SProcAllocColorCells,
     SProcAllocColorPlanes,

@@ -93,7 +93,6 @@ SOFTWARE.
 #include <sys/types.h>
 
 #include "dix/server_priv.h"
-#include "os/io_priv.h"
 #include "os/xhostname.h"
 
 #ifndef WIN32

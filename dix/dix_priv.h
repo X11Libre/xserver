@@ -29,9 +29,6 @@
 #include "include/resource.h"
 #include "include/window.h"
 
-/* pad scanline to a longword */
-#define BITMAP_SCANLINE_UNIT    32
-
 #define LEGAL_NEW_RESOURCE(id,client)           \
     do {                                        \
         if (!LegalNewID((id), (client))) {      \
@@ -103,7 +100,8 @@ void InitClient(ClientPtr client, int i, void *ospriv);
 int FillFontPath(x_rpcbuf_t *rpcbuf);
 
 /* lookup builtin color by name */
-Bool dixLookupBuiltinColor(char *name,
+Bool dixLookupBuiltinColor(int screen,
+                           char *name,
                            unsigned len,
                            unsigned short *pred,
                            unsigned short *pgreen,
@@ -766,11 +764,5 @@ int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
                   CARD16 *green, CARD16 *blue, CARD32 *pixel);
 
 void ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)  _X_NORETURN;
-
-/* needed by some internal modules */ _X_EXPORT
-void SwapLongs(CARD32 *list, unsigned long count);
-
-#define SwapRestL(stuff) \
-    SwapLongs((CARD32 *)(stuff + 1), (client->req_len - (sizeof(*stuff) >> 2)))
 
 #endif /* _XSERVER_DIX_PRIV_H */

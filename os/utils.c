@@ -96,7 +96,6 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
-#include "dix/settings_priv.h"
 #include "dix/screensaver_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/audit_priv.h"
@@ -127,6 +126,8 @@ OR PERFORMANCE OF THIS SOFTWARE.
 Bool CoreDump;
 
 Bool enableIndirectGLX = FALSE;
+
+Bool AllowByteSwappedClients = FALSE;
 
 #ifdef XINERAMA
 Bool PanoramiXExtensionDisabledHack = FALSE;
@@ -458,9 +459,9 @@ ProcessCommandLine(int argc, char *argv[])
                 UseMsg();
         }
         else if (strcmp(argv[i], "-byteswappedclients") == 0) {
-            dixSettingAllowByteSwappedClients = FALSE;
+            AllowByteSwappedClients = FALSE;
         } else if (strcmp(argv[i], "+byteswappedclients") == 0) {
-            dixSettingAllowByteSwappedClients = TRUE;
+            AllowByteSwappedClients = TRUE;
         }
         else if (strcmp(argv[i], "-br") == 0);  /* default */
         else if (strcmp(argv[i], "+bs") == 0)
@@ -598,12 +599,6 @@ ProcessCommandLine(int argc, char *argv[])
             }
             else
                 UseMsg();
-        }
-        else if (strcmp(argv[i],"-noreset") == 0){
-            ErrorF("Argument -noreset is removed in XLibre (for more context: https://github.com/orgs/X11Libre/discussions/424 )\n");
-        }
-        else if(strcmp(argv[i],"-reset") == 0){
-            ErrorF("Argument -reset is removed in XLibre (for more context: https://github.com/orgs/X11Libre/discussions/424 )\n");
         }
         else if (strcmp(argv[i], "-p") == 0) {
             if (++i < argc)

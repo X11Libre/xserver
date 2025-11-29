@@ -47,13 +47,16 @@ SOFTWARE.
 #ifndef GCSTRUCT_H
 #define GCSTRUCT_H
 
-#include <X11/Xprotostr.h>
-
 #include "gc.h"
-#include "pixmap.h"
+
 #include "regionstr.h"
+#include "region.h"
+#include "pixmap.h"
 #include "screenint.h"
 #include "privates.h"
+#include <X11/Xprotostr.h>
+
+#define GCAllBits ((1 << (GCLastBit + 1)) - 1)
 
 #ifndef _XTYPEDEF_CHARINFOPTR
 typedef struct _CharInfo *CharInfoPtr;  /* also in fonts/include/font.h */

@@ -47,11 +47,10 @@ SOFTWARE.
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <X11/Xproto.h>
-
 #include "misc.h"
-#include "regionstr.h"
+#include "region.h"
 #include "screenint.h"
+#include <X11/Xproto.h>
 
 #define TOTALLY_OBSCURED 0
 #define UNOBSCURED 1

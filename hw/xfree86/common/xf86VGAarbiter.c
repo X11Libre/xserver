@@ -61,7 +61,11 @@ static miPointerSpriteFuncRec VGAarbiterSpriteFuncs = {
 };
 
 static DevPrivateKeyRec VGAarbiterScreenKeyRec;
+
+#define VGAarbiterScreenKey (&VGAarbiterScreenKeyRec)
 static DevPrivateKeyRec VGAarbiterGCKeyRec;
+
+#define VGAarbiterGCKey (&VGAarbiterGCKeyRec)
 
 static int vga_no_arb = 0;
 void
@@ -176,7 +180,7 @@ xf86VGAarbiterWrapFunctions(void)
         if (!(pScreenPriv = calloc(1, sizeof(VGAarbiterScreenRec))))
             return FALSE;
 
-        dixSetPrivate(&pScreen->devPrivates, &VGAarbiterScreenKeyRec, pScreenPriv);
+        dixSetPrivate(&pScreen->devPrivates, VGAarbiterScreenKey, pScreenPriv);
 
         WRAP_SCREEN(CloseScreen, VGAarbiterCloseScreen);
         WRAP_SCREEN(SaveScreen, VGAarbiterSaveScreen);
@@ -217,7 +221,7 @@ VGAarbiterCloseScreen(ScreenPtr pScreen)
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               &VGAarbiterScreenKeyRec);
+                                               VGAarbiterScreenKey);
     miPointerScreenPtr PointPriv =
         (miPointerScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
                                               miPointerScreenKey);
@@ -454,7 +458,7 @@ VGAarbiterAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               &VGAarbiterScreenKeyRec);
+                                               VGAarbiterScreenKey);
 
     VGAGet(pScreen);
     (*pScreenPriv->AdjustFrame) (pScrn, x, y);
@@ -468,7 +472,7 @@ VGAarbiterSwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               &VGAarbiterScreenKeyRec);
+                                               VGAarbiterScreenKey);
 
     VGAGet(pScreen);
     val = (*pScreenPriv->SwitchMode) (pScrn, mode);
@@ -483,7 +487,7 @@ VGAarbiterEnterVT(ScrnInfoPtr pScrn)
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               &VGAarbiterScreenKeyRec);
+                                               VGAarbiterScreenKey);
 
     VGAGet(pScreen);
     pScrn->EnterVT = pScreenPriv->EnterVT;
@@ -500,7 +504,7 @@ VGAarbiterLeaveVT(ScrnInfoPtr pScrn)
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               &VGAarbiterScreenKeyRec);
+                                               VGAarbiterScreenKey);
 
     VGAGet(pScreen);
     pScrn->LeaveVT = pScreenPriv->LeaveVT;
@@ -516,7 +520,7 @@ VGAarbiterFreeScreen(ScrnInfoPtr pScrn)
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     VGAarbiterScreenPtr pScreenPriv =
         (VGAarbiterScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               &VGAarbiterScreenKeyRec);
+                                               VGAarbiterScreenKey);
 
     VGAGet(pScreen);
     (*pScreenPriv->FreeScreen) (pScrn);
@@ -528,7 +532,7 @@ VGAarbiterCreateGC(GCPtr pGC)
 {
     ScreenPtr pScreen = pGC->pScreen;
     VGAarbiterGCPtr pGCPriv =
-        (VGAarbiterGCPtr) dixLookupPrivate(&pGC->devPrivates, &VGAarbiterGCKeyRec);
+        (VGAarbiterGCPtr) dixLookupPrivate(&pGC->devPrivates, VGAarbiterGCKey);
     Bool ret;
 
     SCREEN_PROLOG(CreateGC);

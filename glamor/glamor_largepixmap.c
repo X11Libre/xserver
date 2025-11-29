@@ -228,7 +228,6 @@ glamor_compute_clipped_regions_ext(PixmapPtr pixmap,
                                inner_block_h), sizeof(*result_regions));
     if (!result_regions) {
         *n_region = 0;
-        free(clipped_regions);
         return NULL;
     }
 
