@@ -49,7 +49,7 @@
 #include "compint.h"
 
 static Bool
-compScreenUpdate(ClientPtr pClient, void *closure)
+compScreenUpdate(ClientPtr pClient, void *closure) __attribute__((nonnull(1, 2)))
 {
     ScreenPtr pScreen = closure;
     CompScreenPtr cs = GetCompScreen(pScreen);
