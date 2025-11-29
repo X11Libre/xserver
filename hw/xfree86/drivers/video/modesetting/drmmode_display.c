@@ -4794,7 +4794,7 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
      * this doesn't happen, there shouldn't be any issues.
      */
 
-    int num_dimensions = 1;
+    int num_dimensions = !(max_width == max_height);
     if (min_width > min_height) {
         for(int j = min_height; j <= min_width; j *= 2) {
             num_dimensions++;
@@ -4804,6 +4804,10 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
             num_dimensions++;
         }
 
+    }
+
+    for (int j = MAX(min_width, min_height) * 2; j <= MIN(max_width, max_height); j *= 2) {
+        num_dimensions++;
     }
 
     void *tmp = realloc(drmmode_cursor->dimensions, num_dimensions * sizeof(drmmode_cursor_dim_rec));
@@ -4817,20 +4821,26 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
     drmmode_cursor->dimensions = tmp;
     drmmode_cursor->num_dimensions = num_dimensions;
 
+    int idx = 0;
+
     if (min_width > min_height) {
-        int idx = 0;
         for(int j = min_height; j <= min_width; j *= 2) {
             drmmode_cursor->dimensions[idx].width = min_width;
             drmmode_cursor->dimensions[idx].height = j;
             idx++;
         }
     } else {
-        int idx = 0;
         for(int j = min_width; j <= min_height; j *= 2) {
             drmmode_cursor->dimensions[idx].width = j;
             drmmode_cursor->dimensions[idx].height = min_height;
             idx++;
         }
+    }
+
+    for (int j = MAX(min_width, min_height) * 2; j <= MIN(max_width, max_height); j *= 2) {
+        drmmode_cursor->dimensions[idx].width = j;
+        drmmode_cursor->dimensions[idx].height = j;
+        idx++;
     }
 
     /* maximum size */
