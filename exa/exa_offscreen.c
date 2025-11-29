@@ -240,9 +240,9 @@ exaOffscreenAlloc(ScreenPtr pScreen, int size, int align,
     /* save extra space in new area */
     if (real_size < area->size) {
         ExaOffscreenArea *new_area = calloc(1, sizeof(ExaOffscreenArea));
-
         if (!new_area)
             return NULL;
+
         new_area->base_offset = area->base_offset;
 
         new_area->offset = new_area->base_offset;
