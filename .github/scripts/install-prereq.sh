@@ -12,7 +12,7 @@ if [ "$X11_OS" = "Linux" ]; then
 build_meson   drm               https://github.com/X11Libre/drm                          libdrm-2.4.121   -Domap=enabled
 fi
 build_meson   libxcvt           https://github.com/X11Libre/libxcvt                      libxcvt-0.1.0
-build_ac      xorgproto         https://github.com/X11Libre/xorgproto                    xorgproto-2024.1
+build_meson   xorgproto         https://github.com/X11Libre/xorgproto                    xorgproto-2024.1
 if [ "$X11_OS" = "Darwin" ]; then
 build_ac      xset              https://github.com/X11Libre/xset                         xset-1.2.5
 fi

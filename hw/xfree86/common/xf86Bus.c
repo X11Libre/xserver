@@ -293,8 +293,13 @@ StringToBusType(const char *busID, const char **retID)
     if (!xf86NameCmp(p, "usb"))
         ret = BUS_USB;
     if (ret != BUS_NONE)
-        if (retID)
-            *retID = busID + strlen(p) + 1;
+        if (retID) {
+            size_t len = strlen(p);
+            if (busID[len] == ':')
+                *retID = busID + len + 1;
+            else
+                *retID = busID + len; /* Points to the terminating null byte */
+        }
     free(s);
     return ret;
 }

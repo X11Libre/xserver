@@ -47,6 +47,7 @@ in this Software without prior written authorization from The Open Group.
 #include "dix/screenint_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/busfault.h"

@@ -40,6 +40,7 @@
 #include "dix/property_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "fb/fb_priv.h"
 #include "mi/mi_priv.h"
 

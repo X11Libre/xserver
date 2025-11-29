@@ -42,6 +42,7 @@
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "scrnintstr.h"
@@ -1023,8 +1024,8 @@ DbeExtensionInit(void)
         return;
 
     DIX_FOR_EACH_SCREEN({
-        /* For each screen, set up DBE screen privates and init DIX and DDX
-         * interface.
+        /* For each screen, set up DBE screen privates and init DIX
+         * interface (DDX isn't supported anymore).
          */
         if (!(pDbeScreenPriv = calloc(1, sizeof(DbeScreenPrivRec)))) {
             /* If we can not alloc a window or screen private,
@@ -1042,9 +1043,6 @@ DbeExtensionInit(void)
         dixSetPrivate(&walkScreen->devPrivates, &dbeScreenPrivKeyRec, pDbeScreenPriv);
 
         {
-            /* We don't have DDX support for DBE anymore */
-
-#ifndef DISABLE_MI_DBE_BY_DEFAULT
             /* Setup DIX. */
             pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
 
@@ -1066,10 +1064,6 @@ DbeExtensionInit(void)
                 /* DDX initialization failed.  Stub the screen. */
                 DbeStubScreen(pDbeScreenPriv, &nStubbedScreens);
             }
-#else
-            DbeStubScreen(pDbeScreenPriv, &nStubbedScreens);
-#endif
-
         }
     });
 

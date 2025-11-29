@@ -51,7 +51,7 @@
 
 #define UNWRAP_SCREEN(x) pScreen->x = pScreenPriv->x
 
-#define SCREEN_PRIV()   ((VGAarbiterScreenPtr) dixLookupPrivate(&(pScreen)->devPrivates, VGAarbiterScreenKey))
+#define SCREEN_PRIV()   ((VGAarbiterScreenPtr) dixLookupPrivate(&(pScreen)->devPrivates, &VGAarbiterScreenKeyRec))
 
 #define SCREEN_PROLOG(x) (pScreen->x = SCREEN_PRIV()->x)
 
@@ -67,7 +67,7 @@
 
 #define PICTURE_PROLOGUE(field) ps->field = \
     ((VGAarbiterScreenPtr)dixLookupPrivate(&(pScreen)->devPrivates, \
-    VGAarbiterScreenKey))->field
+    &VGAarbiterScreenKeyRec))->field
 
 #define PICTURE_EPILOGUE(field, wrap) ps->field = wrap
 
@@ -82,7 +82,7 @@
     PointPriv = dixLookupPrivate(&pScreen->devPrivates,         \
                                  miPointerScreenKey);           \
     pScreenPriv = dixLookupPrivate(&(pScreen)->devPrivates,     \
-                                   VGAarbiterScreenKey);        \
+                                   &VGAarbiterScreenKeyRec);    \
     PointPriv->spriteFuncs = pScreenPriv->miSprite;             \
 
 #define SPRITE_EPILOG                                   \
@@ -101,7 +101,7 @@
     (x)->funcs = &VGAarbiterGCFuncs;
 
 #define GC_UNWRAP(x) VGAarbiterGCPtr  pGCPriv = \
-    (VGAarbiterGCPtr)dixLookupPrivate(&(x)->devPrivates, VGAarbiterGCKey);\
+    (VGAarbiterGCPtr)dixLookupPrivate(&(x)->devPrivates, &VGAarbiterGCKeyRec);\
     (x)->ops = pGCPriv->wrapOps; (x)->funcs = pGCPriv->wrapFuncs;
 
 static inline void

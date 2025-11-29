@@ -57,6 +57,7 @@ SOFTWARE.
 
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */

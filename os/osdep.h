@@ -70,26 +70,8 @@ SOFTWARE.
 # define __has_builtin(x) 0     /* Compatibility with older compilers */
 #endif
 
-typedef struct _connectionInput *ConnectionInputPtr;
-typedef struct _connectionOutput *ConnectionOutputPtr;
-
-typedef struct _osComm {
-    int fd;
-    ConnectionInputPtr input;
-    ConnectionOutputPtr output;
-    XID auth_id;                /* authorization id */
-    CARD32 conn_time;           /* timestamp if not established, else 0  */
-    struct _XtransConnInfo *trans_conn; /* transport connection object */
-    int flags;
-} OsCommRec, *OsCommPtr;
-
-int FlushClient(ClientPtr who, OsCommPtr oc);
-
-extern void FreeOsBuffers(OsCommPtr     /*oc */
-    );
-
-void
-CloseDownFileDescriptor(OsCommPtr oc);
+#define MILLI_PER_MIN (1000 * 60)
+#define MILLI_PER_SECOND (1000)
 
 #include "dix.h"
 #include "ospoll.h"
@@ -100,9 +82,6 @@ Bool
 listen_to_client(ClientPtr client);
 
 extern Bool NewOutputPending;
-
-/* in access.c */
-extern Bool ComputeLocalClient(ClientPtr client);
 
 /* for platforms lacking arc4random_buf() libc function */
 #ifndef HAVE_ARC4RANDOM_BUF
@@ -157,8 +136,6 @@ typedef void (*OsSigHandlerPtr) (int sig);
 OsSigHandlerPtr OsSignal(int sig, OsSigHandlerPtr handler);
 
 void OsInit(void);
-void OsVendorFatalError(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
-void OsVendorInit(void);
 
 _X_EXPORT /* needed by the int10 module, but should not be used by OOT drivers */
 void OsBlockSignals(void);
@@ -188,7 +165,6 @@ extern Bool PartialNetwork;
 
 extern Bool CoreDump;
 extern Bool NoListenAll;
-extern Bool AllowByteSwappedClients;
 
 /*
  * This function reallocarray(3)s passed buffer, terminating the server if

@@ -600,7 +600,7 @@ are: REQUEST, REQUEST_SIZE_MATCH, REQUEST_AT_LEAST_SIZE,
 REQUEST_FIXED_SIZE, LEGAL_NEW_RESOURCE, and
 VALIDATE_DRAWABLE_AND_GC. Useful byte swapping macros can be found
 in Xserver/include/misc.h: bswap_64, bswap_32, bswap_16, LengthRestS,
-LengthRestL, SwapRestS, SwapRestL, swapl, swaps, cpswapl, and cpswaps.</para>
+SwapRestS, SwapRestL, swapl, swaps, cpswapl, and cpswaps.</para>
 </section>
 </section>
 

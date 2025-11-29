@@ -107,7 +107,6 @@ SOFTWARE.
 #include "inputstr.h"
 #include "windowstr.h"
 #include "miscstruct.h"
-#include "region.h"
 #include "extnsionst.h"
 #include "exglobals.h"
 #include "eventstr.h"
