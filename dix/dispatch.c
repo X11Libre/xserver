@@ -4263,3 +4263,9 @@ DetachOffloadGPU(ScreenPtr secondary)
     secondary->is_offload_secondary = FALSE;
 }
 
+bool dixAnyOtherGrabbed(ClientPtr client)
+{
+    return ((grabState == GrabActive) &&
+            (grabClient != NULL) &&
+            (grabClient != client));
+}

@@ -139,7 +139,7 @@ static pid_t ParentProcess;
 static Bool RunFromSmartParent; /* send SIGUSR1 to parent process */
 #endif
 
-int GrabInProgress = 0;
+static int GrabInProgress = 0;
 
 static void
 EstablishNewConnections(int curconn, int ready, void *data);
