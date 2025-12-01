@@ -48,14 +48,14 @@ static ClientRec client_request;
 static void
 reply_ChangeDeviceControl(ClientPtr client, int len, void *data)
 {
-    xChangeDeviceControlReply *rep = (xChangeDeviceControlReply *) data;
+    xChangeDeviceControlReply *reply = (xChangeDeviceControlReply *) data;
 
     if (client->swapped) {
-        swapl(&rep->length);
-        swaps(&rep->sequenceNumber);
+        swapl(&reply->length);
+        swaps(&reply->sequenceNumber);
     }
 
-    reply_check_defaults(rep, len, ChangeDeviceControl);
+    reply_check_defaults(reply, len, ChangeDeviceControl);
 
     /* XXX: check status code in reply */
 }
