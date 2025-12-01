@@ -2685,9 +2685,9 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
             /* Get the SIZE_HINT dimensions, if supported. */
             int size_hint = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_SIZE_HINTS], props, 0);
             drmmode_populate_cursor_size_hints(drmmode, drmmode_crtc, size_hint);
+#endif
             drmModeFreePlane(kplane);
             drmModeFreeObjectProperties(props);
-#endif
             continue;
         }
         case DRMMODE_PLANE_TYPE_PRIMARY:
