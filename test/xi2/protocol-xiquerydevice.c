@@ -68,27 +68,27 @@ static void reply_XIQueryDevice_data(ClientPtr client, int len, void *data);
 static void
 reply_XIQueryDevice(ClientPtr client, int len, void *data)
 {
-    xXIQueryDeviceReply *reply = (xXIQueryDeviceReply *) data;
-    xXIQueryDeviceReply rep = *reply; /* copy so swapping doesn't touch the real reply */
+    xXIQueryDeviceReply *repptr = (xXIQueryDeviceReply *) data;
+    xXIQueryDeviceReply reply = *repptr; /* copy so swapping doesn't touch the real reply */
 
     assert(len < 0xffff); /* suspicious size, swapping bug */
 
     if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.num_devices);
+        swapl(&reply.length);
+        swaps(&reply.sequenceNumber);
+        swaps(&reply.num_devices);
     }
 
-    reply_check_defaults(&rep, len, XIQueryDevice);
+    reply_check_defaults(&reply, len, XIQueryDevice);
 
     if (test_data.which_device == XIAllDevices)
-        assert(rep.num_devices == devices.num_devices);
+        assert(reply.num_devices == devices.num_devices);
     else if (test_data.which_device == XIAllMasterDevices)
-        assert(rep.num_devices == devices.num_master_devices);
+        assert(reply.num_devices == devices.num_master_devices);
     else
-        assert(rep.num_devices == 1);
+        assert(reply.num_devices == 1);
 
-    test_data.num_devices_in_reply = rep.num_devices;
+    test_data.num_devices_in_reply = reply.num_devices;
 
     wrapped_WriteToClient = reply_XIQueryDevice_data;
 }

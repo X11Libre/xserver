@@ -76,20 +76,20 @@ override_AddResource(XID id, RESTYPE type, void *value)
 static void
 reply_XIGetSelectedEvents(ClientPtr client, int len, void *data)
 {
-    xXIGetSelectedEventsReply *reply = (xXIGetSelectedEventsReply *) data;
-    xXIGetSelectedEventsReply rep = *reply; /* copy so swapping doesn't touch the real reply */
+    xXIGetSelectedEventsReply *repptr = (xXIGetSelectedEventsReply *) data;
+    xXIGetSelectedEventsReply reply = *repptr; /* copy so swapping doesn't touch the real reply */
 
     assert(len < 0xffff); /* suspicious size, swapping bug */
 
     if (client->swapped) {
-        swapl(&rep.length);
-        swaps(&rep.sequenceNumber);
-        swaps(&rep.num_masks);
+        swapl(&reply.length);
+        swaps(&reply.sequenceNumber);
+        swaps(&reply.num_masks);
     }
 
-    reply_check_defaults(&rep, len, XIGetSelectedEvents);
+    reply_check_defaults(&reply, len, XIGetSelectedEvents);
 
-    assert(rep.num_masks == test_data.num_masks_expected);
+    assert(reply.num_masks == test_data.num_masks_expected);
 
     wrapped_WriteToClient = reply_XIGetSelectedEvents_data;
 }
