@@ -690,7 +690,6 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
     if (!compositeUseXinerama)
         return SingleCompositeGetOverlayWindow(client, stuff);
 
-    xCompositeGetOverlayWindowReply rep;
     WindowPtr pWin;
     ScreenPtr pScreen;
     CompOverlayClientPtr pOc;
@@ -766,7 +765,7 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
 
     cs = GetCompScreen(dixGetMasterScreen());
 
-    rep = (xCompositeGetOverlayWindowReply) {
+    xCompositeGetOverlayWindowReply rep = {
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
