@@ -49,7 +49,6 @@ int SProcCopyPlane(ClientPtr client);
 int SProcCreateColormap(ClientPtr client);
 int SProcCreateCursor(ClientPtr client);
 int SProcCreateGC(ClientPtr client);
-int SProcCreateGlyphCursor(ClientPtr client);
 int SProcCreatePixmap(ClientPtr client);
 int SProcCreateWindow(ClientPtr client);
 int SProcFillPoly(ClientPtr client);
