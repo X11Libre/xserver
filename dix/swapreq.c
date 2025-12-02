@@ -147,19 +147,6 @@ SProcConfigureWindow(ClientPtr client)
 }
 
 int _X_COLD
-SProcGetProperty(ClientPtr client)
-{
-    REQUEST(xGetPropertyReq);
-    REQUEST_SIZE_MATCH(xGetPropertyReq);
-    swapl(&stuff->window);
-    swapl(&stuff->property);
-    swapl(&stuff->type);
-    swapl(&stuff->longOffset);
-    swapl(&stuff->longLength);
-    return ((*ProcVector[X_GetProperty]) (client));
-}
-
-int _X_COLD
 SProcConvertSelection(ClientPtr client)
 {
     REQUEST(xConvertSelectionReq);
