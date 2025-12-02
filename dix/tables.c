@@ -360,7 +360,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     SProcSendEvent,                     /* 25 */
     ProcGrabPointer,
     ProcUngrabPointer,
-    SProcGrabButton,
+    ProcGrabButton,
     SProcUngrabButton,
     SProcChangeActivePointerGrab,       /* 30 */
     SProcGrabKeyboard,
