@@ -3290,10 +3290,15 @@ ProcQueryBestSize(ClientPtr client)
 int
 ProcSetScreenSaver(ClientPtr client)
 {
-    int blankingOption, exposureOption;
-
     REQUEST(xSetScreenSaverReq);
     REQUEST_SIZE_MATCH(xSetScreenSaverReq);
+
+    if (client->swapped) {
+        swaps(&stuff->timeout);
+        swaps(&stuff->interval);
+    }
+
+    int blankingOption, exposureOption;
 
     DIX_FOR_EACH_SCREEN({
         int rc = dixCallScreensaverAccessCallback(client, walkScreen, DixSetAttrAccess);

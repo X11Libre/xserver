@@ -787,16 +787,6 @@ SProcChangePointerControl(ClientPtr client)
 }
 
 int _X_COLD
-SProcSetScreenSaver(ClientPtr client)
-{
-    REQUEST(xSetScreenSaverReq);
-    REQUEST_SIZE_MATCH(xSetScreenSaverReq);
-    swaps(&stuff->timeout);
-    swaps(&stuff->interval);
-    return ((*ProcVector[X_SetScreenSaver]) (client));
-}
-
-int _X_COLD
 SProcChangeHosts(ClientPtr client)
 {
     REQUEST(xChangeHostsReq);

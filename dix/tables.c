@@ -439,7 +439,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcBell,
     SProcChangePointerControl,          /* 105 */
     ProcGetPointerControl,
-    SProcSetScreenSaver,
+    ProcSetScreenSaver,
     ProcGetScreenSaver,
     SProcChangeHosts,
     ProcListHosts,                      /* 110 */
