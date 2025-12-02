@@ -3011,12 +3011,17 @@ ProcStoreNamedColor(ClientPtr client)
 int
 ProcQueryColors(ClientPtr client)
 {
+    REQUEST(xQueryColorsReq);
+    REQUEST_AT_LEAST_SIZE(xQueryColorsReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cmap);
+        SwapRestL(stuff);
+    }
+
     ColormapPtr pcmp;
     int rc;
 
-    REQUEST(xQueryColorsReq);
-
-    REQUEST_AT_LEAST_SIZE(xQueryColorsReq);
     rc = dixLookupResourceByType((void **) &pcmp, stuff->cmap, X11_RESTYPE_COLORMAP,
                                  client, DixReadAccess);
     if (rc == Success) {
