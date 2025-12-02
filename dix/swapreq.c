@@ -109,7 +109,7 @@ SProcCreateWindow(ClientPtr client)
     swapl(&stuff->visual);
     swapl(&stuff->mask);
     SwapRestL(stuff);
-    return ((*ProcVector[X_CreateWindow]) (client));
+    return ((*ProcVector[X_CreateWindow]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -120,7 +120,7 @@ SProcChangeWindowAttributes(ClientPtr client)
     swapl(&stuff->window);
     swapl(&stuff->valueMask);
     SwapRestL(stuff);
-    return ((*ProcVector[X_ChangeWindowAttributes]) (client));
+    return ((*ProcVector[X_ChangeWindowAttributes]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -132,7 +132,7 @@ SProcReparentWindow(ClientPtr client)
     swapl(&stuff->parent);
     swaps(&stuff->x);
     swaps(&stuff->y);
-    return ((*ProcVector[X_ReparentWindow]) (client));
+    return ((*ProcVector[X_ReparentWindow]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -143,7 +143,7 @@ SProcConfigureWindow(ClientPtr client)
     swapl(&stuff->window);
     swaps(&stuff->mask);
     SwapRestL(stuff);
-    return ((*ProcVector[X_ConfigureWindow]) (client));
+    return ((*ProcVector[X_ConfigureWindow]) (client)); /* xinerama */
 
 }
 
@@ -259,7 +259,7 @@ SProcTranslateCoords(ClientPtr client)
     swapl(&stuff->dstWid);
     swaps(&stuff->srcX);
     swaps(&stuff->srcY);
-    return ((*ProcVector[X_TranslateCoords]) (client));
+    return ((*ProcVector[X_TranslateCoords]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -336,7 +336,7 @@ SProcCreatePixmap(ClientPtr client)
     swapl(&stuff->drawable);
     swaps(&stuff->width);
     swaps(&stuff->height);
-    return ((*ProcVector[X_CreatePixmap]) (client));
+    return ((*ProcVector[X_CreatePixmap]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -348,7 +348,7 @@ SProcCreateGC(ClientPtr client)
     swapl(&stuff->drawable);
     swapl(&stuff->mask);
     SwapRestL(stuff);
-    return ((*ProcVector[X_CreateGC]) (client));
+    return ((*ProcVector[X_CreateGC]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -359,7 +359,7 @@ SProcChangeGC(ClientPtr client)
     swapl(&stuff->gc);
     swapl(&stuff->mask);
     SwapRestL(stuff);
-    return ((*ProcVector[X_ChangeGC]) (client));
+    return ((*ProcVector[X_ChangeGC]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -370,7 +370,7 @@ SProcCopyGC(ClientPtr client)
     swapl(&stuff->srcGC);
     swapl(&stuff->dstGC);
     swapl(&stuff->mask);
-    return ((*ProcVector[X_CopyGC]) (client));
+    return ((*ProcVector[X_CopyGC]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -381,7 +381,7 @@ SProcSetDashes(ClientPtr client)
     swapl(&stuff->gc);
     swaps(&stuff->dashOffset);
     swaps(&stuff->nDashes);
-    return ((*ProcVector[X_SetDashes]) (client));
+    return ((*ProcVector[X_SetDashes]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -393,7 +393,7 @@ SProcSetClipRectangles(ClientPtr client)
     swaps(&stuff->xOrigin);
     swaps(&stuff->yOrigin);
     SwapRestS(stuff);
-    return ((*ProcVector[X_SetClipRectangles]) (client));
+    return ((*ProcVector[X_SetClipRectangles]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -406,7 +406,7 @@ SProcClearToBackground(ClientPtr client)
     swaps(&stuff->y);
     swaps(&stuff->width);
     swaps(&stuff->height);
-    return ((*ProcVector[X_ClearArea]) (client));
+    return ((*ProcVector[X_ClearArea]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -441,7 +441,7 @@ SProcCopyPlane(ClientPtr client)
     swaps(&stuff->width);
     swaps(&stuff->height);
     swapl(&stuff->bitPlane);
-    return ((*ProcVector[X_CopyPlane]) (client));
+    return ((*ProcVector[X_CopyPlane]) (client)); /* xinerama */
 }
 
 /* cannot use SProcPoly for this one, because xFillPolyReq
@@ -455,7 +455,7 @@ SProcFillPoly(ClientPtr client)
     swapl(&stuff->drawable);
     swapl(&stuff->gc);
     SwapRestS(stuff);
-    return ((*ProcVector[X_FillPoly]) (client));
+    return ((*ProcVector[X_FillPoly]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -470,7 +470,7 @@ SProcPutImage(ClientPtr client)
     swaps(&stuff->dstX);
     swaps(&stuff->dstY);
     /* Image should already be swapped */
-    return ((*ProcVector[X_PutImage]) (client));
+    return ((*ProcVector[X_PutImage]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -484,7 +484,7 @@ SProcGetImage(ClientPtr client)
     swaps(&stuff->width);
     swaps(&stuff->height);
     swapl(&stuff->planeMask);
-    return ((*ProcVector[X_GetImage]) (client));
+    return ((*ProcVector[X_GetImage]) (client)); /* xinerama */
 }
 
 /* ProcImageText used for both ImageText8 and ImageText16 */
@@ -498,7 +498,7 @@ SProcImageText(ClientPtr client)
     swapl(&stuff->gc);
     swaps(&stuff->x);
     swaps(&stuff->y);
-    return ((*ProcVector[stuff->reqType]) (client));
+    return ((*ProcVector[stuff->reqType]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -509,7 +509,7 @@ SProcCreateColormap(ClientPtr client)
     swapl(&stuff->mid);
     swapl(&stuff->window);
     swapl(&stuff->visual);
-    return ((*ProcVector[X_CreateColormap]) (client));
+    return ((*ProcVector[X_CreateColormap]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -519,7 +519,7 @@ SProcCopyColormapAndFree(ClientPtr client)
     REQUEST_SIZE_MATCH(xCopyColormapAndFreeReq);
     swapl(&stuff->mid);
     swapl(&stuff->srcCmap);
-    return ((*ProcVector[X_CopyColormapAndFree]) (client));
+    return ((*ProcVector[X_CopyColormapAndFree]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -529,7 +529,7 @@ SProcAllocNamedColor(ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xAllocNamedColorReq);
     swapl(&stuff->cmap);
     swaps(&stuff->nbytes);
-    return ((*ProcVector[X_AllocNamedColor]) (client));
+    return ((*ProcVector[X_AllocNamedColor]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -540,7 +540,7 @@ SProcAllocColorCells(ClientPtr client)
     swapl(&stuff->cmap);
     swaps(&stuff->colors);
     swaps(&stuff->planes);
-    return ((*ProcVector[X_AllocColorCells]) (client));
+    return ((*ProcVector[X_AllocColorCells]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -553,7 +553,7 @@ SProcAllocColorPlanes(ClientPtr client)
     swaps(&stuff->red);
     swaps(&stuff->green);
     swaps(&stuff->blue);
-    return ((*ProcVector[X_AllocColorPlanes]) (client));
+    return ((*ProcVector[X_AllocColorPlanes]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -564,7 +564,7 @@ SProcFreeColors(ClientPtr client)
     swapl(&stuff->cmap);
     swapl(&stuff->planeMask);
     SwapRestL(stuff);
-    return ((*ProcVector[X_FreeColors]) (client));
+    return ((*ProcVector[X_FreeColors]) (client)); /* xinerama */
 }
 
 void _X_COLD
@@ -587,7 +587,7 @@ SProcStoreColors(ClientPtr client)
     pItem = (xColorItem *) &stuff[1];
     for (long count = ((client->req_len << 2) - sizeof(xStoreColorsReq)) / sizeof(xColorItem); --count >= 0;)
         SwapColorItem(pItem++);
-    return ((*ProcVector[X_StoreColors]) (client));
+    return ((*ProcVector[X_StoreColors]) (client)); /* xinerama */
 }
 
 int _X_COLD
@@ -598,7 +598,7 @@ SProcStoreNamedColor(ClientPtr client)
     swapl(&stuff->cmap);
     swapl(&stuff->pixel);
     swaps(&stuff->nbytes);
-    return ((*ProcVector[X_StoreNamedColor]) (client));
+    return ((*ProcVector[X_StoreNamedColor]) (client)); /* xinerama */
 }
 
 int _X_COLD
