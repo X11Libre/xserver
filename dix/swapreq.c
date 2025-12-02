@@ -743,18 +743,6 @@ SProcChangeHosts(ClientPtr client)
     return ((*ProcVector[X_ChangeHosts]) (client));
 }
 
-int _X_COLD
-SProcRotateProperties(ClientPtr client)
-{
-    REQUEST(xRotatePropertiesReq);
-    REQUEST_AT_LEAST_SIZE(xRotatePropertiesReq);
-    swapl(&stuff->window);
-    swaps(&stuff->nAtoms);
-    swaps(&stuff->nPositions);
-    SwapRestL(stuff);
-    return ((*ProcVector[X_RotateProperties]) (client));
-}
-
 void _X_COLD
 SwapConnClientPrefix(xConnClientPrefix * pCCP)
 {
