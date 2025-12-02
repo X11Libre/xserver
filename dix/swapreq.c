@@ -602,16 +602,6 @@ SProcStoreNamedColor(ClientPtr client)
 }
 
 int _X_COLD
-SProcQueryColors(ClientPtr client)
-{
-    REQUEST(xQueryColorsReq);
-    REQUEST_AT_LEAST_SIZE(xQueryColorsReq);
-    swapl(&stuff->cmap);
-    SwapRestL(stuff);
-    return ((*ProcVector[X_QueryColors]) (client));
-}
-
-int _X_COLD
 SProcCreateCursor(ClientPtr client)
 {
     REQUEST(xCreateCursorReq);
