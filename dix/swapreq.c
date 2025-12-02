@@ -60,30 +60,6 @@ SOFTWARE.
 
 /* Thanks to Jack Palevich for testing and subsequently rewriting all this */
 
-/* Byte swap a list of longs */
-void
-SwapLongs(CARD32 *list, unsigned long count)
-{
-    while (count >= 8) {
-        swapl(list + 0);
-        swapl(list + 1);
-        swapl(list + 2);
-        swapl(list + 3);
-        swapl(list + 4);
-        swapl(list + 5);
-        swapl(list + 6);
-        swapl(list + 7);
-        list += 8;
-        count -= 8;
-    }
-    if (count != 0) {
-        do {
-            swapl(list);
-            list++;
-        } while (--count != 0);
-    }
-}
-
 /* Byte swap a list of shorts */
 void
 SwapShorts(short *list, unsigned long count)

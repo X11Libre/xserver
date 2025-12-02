@@ -767,8 +767,32 @@ int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
 
 void ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)  _X_NORETURN;
 
-/* needed by some internal modules */ _X_EXPORT
-void SwapLongs(CARD32 *list, unsigned long count);
+/*
+ * Byte swap a list of CARD32s
+ *
+ * @param list    pointer to list of clients
+ * @param count   amount of CARD32s to swap
+ */
+static inline void SwapLongs(CARD32 *list, unsigned long count) {
+    while (count >= 8) {
+        swapl(list + 0);
+        swapl(list + 1);
+        swapl(list + 2);
+        swapl(list + 3);
+        swapl(list + 4);
+        swapl(list + 5);
+        swapl(list + 6);
+        swapl(list + 7);
+        list += 8;
+        count -= 8;
+    }
+    if (count != 0) {
+        do {
+            swapl(list);
+            list++;
+        } while (--count != 0);
+    }
+}
 
 #define SwapRestL(stuff) \
     SwapLongs((CARD32 *)(stuff + 1), (client->req_len - (sizeof(*stuff) >> 2)))
