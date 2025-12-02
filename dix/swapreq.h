@@ -58,7 +58,6 @@ int SProcGetMotionEvents(ClientPtr client);
 int SProcImageText(ClientPtr client);
 int SProcListFonts(ClientPtr client);
 int SProcListFontsWithInfo(ClientPtr client);
-int SProcLookupColor(ClientPtr client);
 int SProcOpenFont(ClientPtr client);
 int SProcPutImage(ClientPtr client);
 int SProcQueryBestSize(ClientPtr client);

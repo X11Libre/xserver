@@ -624,16 +624,6 @@ SProcQueryColors(ClientPtr client)
 }
 
 int _X_COLD
-SProcLookupColor(ClientPtr client)
-{
-    REQUEST(xLookupColorReq);
-    REQUEST_AT_LEAST_SIZE(xLookupColorReq);
-    swapl(&stuff->cmap);
-    swaps(&stuff->nbytes);
-    return ((*ProcVector[X_LookupColor]) (client));
-}
-
-int _X_COLD
 SProcCreateCursor(ClientPtr client)
 {
     REQUEST(xCreateCursorReq);
