@@ -705,15 +705,6 @@ SProcQueryBestSize(ClientPtr client)
 }
 
 int _X_COLD
-SProcQueryExtension(ClientPtr client)
-{
-    REQUEST(xQueryExtensionReq);
-    REQUEST_AT_LEAST_SIZE(xQueryExtensionReq);
-    swaps(&stuff->nbytes);
-    return ((*ProcVector[X_QueryExtension]) (client));
-}
-
-int _X_COLD
 SProcChangeKeyboardMapping(ClientPtr client)
 {
     REQUEST(xChangeKeyboardMappingReq);

@@ -430,7 +430,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcFreeCursor,                     /* 95 */
     SProcRecolorCursor,
     SProcQueryBestSize,
-    SProcQueryExtension,
+    ProcQueryExtension,
     ProcListExtensions,
     SProcChangeKeyboardMapping,         /* 100 */
     ProcGetKeyboardMapping,
