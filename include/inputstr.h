@@ -179,9 +179,9 @@ union _GrabMask {
  */
 typedef struct _GrabRec {
     GrabPtr next;               /* for chain of passive grabs */
-    XID resource;
     DeviceIntPtr device;
     WindowPtr window;
+    XID resource;
     unsigned ownerEvents:1;
     unsigned keyboardMode:1;
     unsigned pointerMode:1;
@@ -248,8 +248,8 @@ typedef struct _KeyClassRec {
 } KeyClassRec, *KeyClassPtr;
 
 typedef struct _ScrollInfo {
-    enum ScrollType type;
     double increment;
+    enum ScrollType type;
     int flags;
 } ScrollInfo, *ScrollInfoPtr;
 
@@ -319,8 +319,8 @@ typedef struct _TouchPointInfo {
 } TouchPointInfoRec;
 
 typedef struct _TouchClassRec {
-    int sourceid;
     TouchPointInfoPtr touches;
+    int sourceid;
     unsigned short num_touches; /* number of allocated touches */
     unsigned short max_touches; /* maximum number of touches, may be 0 */
     CARD8 mode;                 /* ::XIDirectTouch, XIDependentTouch */
@@ -342,18 +342,18 @@ typedef struct _GestureListener {
 typedef struct _GestureInfo {
     int sourceid;               /* Source device's ID for this gesture */
     Bool active;                /* whether or not the gesture is active */
+    uint8_t num_touches;        /* The number of touches in the gesture */
     uint8_t type;               /* Gesture type: either ET_GesturePinchBegin or
-                                   ET_GestureSwipeBegin. Valid if active == TRUE */
-    int num_touches;            /* The number of touches in the gesture */
+                           ET_GestureSwipeBegin. Valid if active == TRUE */
+    Bool has_listener;          /* true if listener has been setup already */
     SpriteRec sprite;           /* window trace for delivery */
     GestureListener listener;   /* the listener that will receive events */
-    Bool has_listener;          /* true if listener has been setup already */
 } GestureInfoRec;
 
 typedef struct _GestureClassRec {
     int sourceid;
-    GestureInfoRec gesture;
     unsigned short max_touches; /* maximum number of touches, may be 0 */
+    GestureInfoRec gesture;
 } GestureClassRec;
 
 typedef struct _ButtonClassRec {
@@ -374,8 +374,8 @@ typedef struct _ButtonClassRec {
 } ButtonClassRec, *ButtonClassPtr;
 
 typedef struct _FocusClassRec {
-    int sourceid;
     WindowPtr win;              /* May be set to a int constant (e.g. PointerRootWin)! */
+    int sourceid;
     int revert;
     TimeStamp time;
     WindowPtr *trace;
@@ -527,11 +527,11 @@ typedef struct _SpriteInfoRec {
 typedef struct _DeviceIntRec {
     DeviceRec public;
     DeviceIntPtr next;
+    DeviceProc deviceProc;      /* proc(DevicePtr, DEVICE_xx). It is
+                               used to initialize, turn on, or
+                               turn off the device */
     Bool startup;               /* true if needs to be turned on at
                                    server initialization time */
-    DeviceProc deviceProc;      /* proc(DevicePtr, DEVICE_xx). It is
-                                   used to initialize, turn on, or
-                                   turn off the device */
     Bool inited;                /* TRUE if INIT returns Success */
     Bool enabled;               /* TRUE if ON returns Success */
     Bool coreEvents;            /* TRUE if device also sends core */
@@ -539,7 +539,6 @@ typedef struct _DeviceIntRec {
     int type;                   /* MASTER_POINTER, MASTER_KEYBOARD, SLAVE */
     Atom xinput_type;
     char *name;
-    int id;
     KeyClassPtr key;
     ValuatorClassPtr valuator;
     TouchClassPtr touch;
@@ -553,10 +552,11 @@ typedef struct _DeviceIntRec {
     StringFeedbackPtr stringfeed;
     BellFeedbackPtr bell;
     LedFeedbackPtr leds;
+    int id;
+    int saved_master_id;        /* for slaves while grabbed */
     struct _XkbInterest *xkb_interest;
     char *config_info;          /* used by the hotplug layer */
     ClassesPtr unused_classes;  /* for master devices */
-    int saved_master_id;        /* for slaves while grabbed */
     PrivateRec *devPrivates;
     DeviceUnwrapProc unwrapProc;
     SpriteInfoPtr spriteInfo;
@@ -573,9 +573,9 @@ typedef struct _DeviceIntRec {
     struct {
         double valuators[MAX_VALUATORS];
         int numValuators;
+        int num_touches;        /* size of the touches array */
         DeviceIntPtr slave;
         ValuatorMask *scroll;
-        int num_touches;        /* size of the touches array */
         DDXTouchPointInfoPtr touches;
     } last;
 
@@ -592,11 +592,11 @@ typedef struct _DeviceIntRec {
        [1/scale] . [transform] . [scale]. See DeviceSetTransform */
     struct pixman_f_transform scale_and_transform;
 
-    /* XTest related master device id */
-    int xtest_master_id;
-    DeviceSendEventsProc sendEventsProc;
-
     struct _SyncCounter *idle_counter;
+
+    /* XTest related master device id */
+    DeviceSendEventsProc sendEventsProc;
+    int xtest_master_id;
 
     Bool ignoreXkbActionsBehaviors; /* TRUE if keys don't trigger behaviors and actions */
 } DeviceIntRec;

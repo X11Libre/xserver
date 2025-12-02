@@ -152,12 +152,13 @@ typedef struct _CompScreen {
     Bool pendingScreenUpdate;
 
     int numAlternateVisuals;
+    CloseScreenProcPtr CloseScreen;
     VisualID *alternateVisuals;
-    int numImplicitRedirectExceptions;
     CompImplicitRedirectException *implicitRedirectExceptions;
+    int numImplicitRedirectExceptions;
 
-    WindowPtr pOverlayWin;
     Window overlayWid;
+    WindowPtr pOverlayWin;
     CompOverlayClientPtr pOverlayClients;
 
     SourceValidateProcPtr SourceValidate;

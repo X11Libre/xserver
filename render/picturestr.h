@@ -39,8 +39,8 @@ typedef struct _DirectFormat {
 
 typedef struct _IndexFormat {
     VisualID vid;
-    ColormapPtr pColormap;
     int nvalues;
+    ColormapPtr pColormap;
     xIndexValue *pValues;
     void *devPrivate;
 } IndexFormatRec;
