@@ -1168,7 +1168,7 @@ ProcRRGetCrtcInfo(ClientPtr client)
 
     RRModePtr mode = crtc->mode;
 
-    xRRGetCrtcInfoReply rep = {
+    xRRGetCrtcInfoReply reply = {
         .status = RRSetConfigSuccess,
         .timestamp = pScrPriv->lastSetTime.milliseconds,
         .rotation = crtc->rotation,
@@ -1178,34 +1178,34 @@ ProcRRGetCrtcInfo(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (leased) {
-        rep.rotation = RR_Rotate_0;
-        rep.rotations = RR_Rotate_0;
+        reply.rotation = RR_Rotate_0;
+        reply.rotations = RR_Rotate_0;
     } else {
         BoxRec panned_area;
         if (pScrPriv->rrGetPanning &&
             pScrPriv->rrGetPanning(pScreen, crtc, &panned_area, NULL, NULL) &&
             (panned_area.x2 > panned_area.x1) && (panned_area.y2 > panned_area.y1))
         {
-            rep.x = panned_area.x1;
-            rep.y = panned_area.y1;
-            rep.width = panned_area.x2 - panned_area.x1;
-            rep.height = panned_area.y2 - panned_area.y1;
+            reply.x = panned_area.x1;
+            reply.y = panned_area.y1;
+            reply.width = panned_area.x2 - panned_area.x1;
+            reply.height = panned_area.y2 - panned_area.y1;
         }
         else {
             int width, height;
             RRCrtcGetScanoutSize(crtc, &width, &height);
-            rep.x = crtc->x;
-            rep.y = crtc->y;
-            rep.width = width;
-            rep.height = height;
+            reply.x = crtc->x;
+            reply.y = crtc->y;
+            reply.width = width;
+            reply.height = height;
         }
-        rep.mode = mode ? mode->mode.id : 0;
-        rep.nOutput = crtc->numOutputs;
+        reply.mode = mode ? mode->mode.id : 0;
+        reply.nOutput = crtc->numOutputs;
         for (int i = 0; i < pScrPriv->numOutputs; i++) {
             if (!RROutputIsLeased(pScrPriv->outputs[i])) {
                 for (int j = 0; j < pScrPriv->outputs[i]->numCrtcs; j++)
                     if (pScrPriv->outputs[i]->crtcs[j] == crtc)
-                        rep.nPossibleOutput++;
+                        reply.nPossibleOutput++;
             }
         }
 
@@ -1224,22 +1224,22 @@ ProcRRGetCrtcInfo(ClientPtr client)
     }
 
     if (pScrPriv->rrCrtcGet)
-        pScrPriv->rrCrtcGet(pScreen, crtc, &rep);
+        pScrPriv->rrCrtcGet(pScreen, crtc, &reply);
 
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swapl(&rep.mode);
-        swaps(&rep.rotation);
-        swaps(&rep.rotations);
-        swaps(&rep.nOutput);
-        swaps(&rep.nPossibleOutput);
+        swapl(&reply.timestamp);
+        swaps(&reply.x);
+        swaps(&reply.y);
+        swaps(&reply.width);
+        swaps(&reply.height);
+        swapl(&reply.mode);
+        swaps(&reply.rotation);
+        swaps(&reply.rotations);
+        swaps(&reply.nOutput);
+        swaps(&reply.nPossibleOutput);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -1449,16 +1449,16 @@ ProcRRSetCrtcConfig(ClientPtr client)
  sendReply:
     free(outputs);
 
-    xRRSetCrtcConfigReply rep = {
+    xRRSetCrtcConfigReply reply = {
         .status = status,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds
     };
 
     if (client->swapped) {
-        swapl(&rep.newTimestamp);
+        swapl(&reply.newTimestamp);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1488,43 +1488,43 @@ ProcRRGetPanning(ClientPtr client)
     if (!pScrPriv)
         return RRErrorBase + BadRRCrtc;
 
-    xRRGetPanningReply rep = {
+    xRRGetPanningReply reply = {
         .status = RRSetConfigSuccess,
         .timestamp = pScrPriv->lastSetTime.milliseconds
     };
 
     if (pScrPriv->rrGetPanning &&
         pScrPriv->rrGetPanning(pScreen, crtc, &total, &tracking, border)) {
-        rep.left = total.x1;
-        rep.top = total.y1;
-        rep.width = total.x2 - total.x1;
-        rep.height = total.y2 - total.y1;
-        rep.track_left = tracking.x1;
-        rep.track_top = tracking.y1;
-        rep.track_width = tracking.x2 - tracking.x1;
-        rep.track_height = tracking.y2 - tracking.y1;
-        rep.border_left = border[0];
-        rep.border_top = border[1];
-        rep.border_right = border[2];
-        rep.border_bottom = border[3];
+        reply.left = total.x1;
+        reply.top = total.y1;
+        reply.width = total.x2 - total.x1;
+        reply.height = total.y2 - total.y1;
+        reply.track_left = tracking.x1;
+        reply.track_top = tracking.y1;
+        reply.track_width = tracking.x2 - tracking.x1;
+        reply.track_height = tracking.y2 - tracking.y1;
+        reply.border_left = border[0];
+        reply.border_top = border[1];
+        reply.border_right = border[2];
+        reply.border_bottom = border[3];
     }
 
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swaps(&rep.left);
-        swaps(&rep.top);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.track_left);
-        swaps(&rep.track_top);
-        swaps(&rep.track_width);
-        swaps(&rep.track_height);
-        swaps(&rep.border_left);
-        swaps(&rep.border_top);
-        swaps(&rep.border_right);
-        swaps(&rep.border_bottom);
+        swapl(&reply.timestamp);
+        swaps(&reply.left);
+        swaps(&reply.top);
+        swaps(&reply.width);
+        swaps(&reply.height);
+        swaps(&reply.track_left);
+        swaps(&reply.track_top);
+        swaps(&reply.track_width);
+        swaps(&reply.track_height);
+        swaps(&reply.border_left);
+        swaps(&reply.border_top);
+        swaps(&reply.border_right);
+        swaps(&reply.border_bottom);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1602,15 +1602,15 @@ ProcRRSetPanning(ClientPtr client)
     status = RRSetConfigSuccess;
 
 sendReply: ;
-    xRRSetPanningReply rep = {
+    xRRSetPanningReply reply = {
         .status = status,
         .newTimestamp = pScrPriv->lastSetTime.milliseconds
     };
 
     if (client->swapped) {
-        swapl(&rep.newTimestamp);
+        swapl(&reply.newTimestamp);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1779,37 +1779,37 @@ ProcRRGetCrtcTransform(ClientPtr client)
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    xRRGetCrtcTransformReply rep = {
+    xRRGetCrtcTransformReply reply = {
         .hasTransforms = crtc->transforms,
     };
 
-    xRenderTransform_from_PictTransform(&rep.pendingTransform, &pending->transform);
-    xRenderTransform_from_PictTransform(&rep.currentTransform, &current->transform);
+    xRenderTransform_from_PictTransform(&reply.pendingTransform, &pending->transform);
+    xRenderTransform_from_PictTransform(&reply.currentTransform, &current->transform);
 
     if (pending->filter) {
-        rep.pendingNbytesFilter = strlen(pending->filter->name);
-        rep.pendingNparamsFilter = pending->nparams;
+        reply.pendingNbytesFilter = strlen(pending->filter->name);
+        reply.pendingNparamsFilter = pending->nparams;
         x_rpcbuf_write_string_pad(&rpcbuf, pending->filter->name);
         x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)pending->params, pending->nparams);
     }
 
     if (current->filter) {
-        rep.currentNbytesFilter = strlen(current->filter->name);
-        rep.currentNparamsFilter = current->nparams;
+        reply.currentNbytesFilter = strlen(current->filter->name);
+        reply.currentNparamsFilter = current->nparams;
         x_rpcbuf_write_string_pad(&rpcbuf, current->filter->name);
         x_rpcbuf_write_CARD32s(&rpcbuf, (CARD32*)current->params, current->nparams);
     }
 
     if (client->swapped) {
-        SwapLongs((CARD32 *) &rep.pendingTransform, bytes_to_int32(sizeof(xRenderTransform)));
-        SwapLongs((CARD32 *) &rep.currentTransform, bytes_to_int32(sizeof(xRenderTransform)));
-        swaps(&rep.pendingNbytesFilter);
-        swaps(&rep.currentNbytesFilter);
-        swaps(&rep.pendingNparamsFilter);
-        swaps(&rep.currentNparamsFilter);
+        SwapLongs((CARD32 *) &reply.pendingTransform, bytes_to_int32(sizeof(xRenderTransform)));
+        SwapLongs((CARD32 *) &reply.currentTransform, bytes_to_int32(sizeof(xRenderTransform)));
+        swaps(&reply.pendingNbytesFilter);
+        swaps(&reply.currentNbytesFilter);
+        swaps(&reply.pendingNparamsFilter);
+        swaps(&reply.currentNparamsFilter);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static Bool

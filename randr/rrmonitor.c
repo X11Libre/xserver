@@ -641,19 +641,19 @@ ProcRRGetMonitors(ClientPtr client)
     }
     RRMonitorFreeList(monitors, nmonitors);
 
-    xRRGetMonitorsReply rep = {
+    xRRGetMonitorsReply reply = {
         .timestamp = RRMonitorTimestamp(screen),
         .nmonitors = nmonitors,
         .noutputs = noutputs,
     };
 
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swapl(&rep.nmonitors);
-        swapl(&rep.noutputs);
+        swapl(&reply.timestamp);
+        swapl(&reply.nmonitors);
+        swapl(&reply.noutputs);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int

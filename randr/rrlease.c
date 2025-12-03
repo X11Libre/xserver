@@ -342,11 +342,11 @@ leaseReturned:
 
     RRLeaseChangeState(lease, RRLeaseCreating, RRLeaseRunning);
 
-    xRRCreateLeaseReply rep = {
+    xRRCreateLeaseReply reply = {
         .nfd = 1,
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 
 bail_lease:
     free(lease);

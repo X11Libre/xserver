@@ -92,16 +92,16 @@ ProcRRGetProviders (ClientPtr client)
         ADD_PROVIDER(iter);
     }
 
-    xRRGetProvidersReply rep = {
+    xRRGetProvidersReply reply = {
         .timestamp = pScrPriv->lastSetTime.milliseconds,
         .nProviders = count_providers,
     };
 
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swaps(&rep.nProviders);
+        swapl(&reply.timestamp);
+        swaps(&reply.nProviders);
     }
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -133,7 +133,7 @@ ProcRRGetProviderInfo (ClientPtr client)
     pScreen = provider->pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
 
-    xRRGetProviderInfoReply rep = {
+    xRRGetProviderInfoReply reply = {
         .status = RRSetConfigSuccess,
         .capabilities = provider->capabilities,
         .nameLength = provider->nameLength,
@@ -144,21 +144,21 @@ ProcRRGetProviderInfo (ClientPtr client)
 
     /* count associated providers */
     if (provider->offload_sink)
-        rep.nAssociatedProviders++;
+        reply.nAssociatedProviders++;
     if (provider->output_source &&
             provider->output_source != provider->offload_sink)
-        rep.nAssociatedProviders++;
+        reply.nAssociatedProviders++;
     xorg_list_for_each_entry(provscreen, &pScreen->secondary_list, secondary_head) {
         if (provscreen->is_output_secondary || provscreen->is_offload_secondary)
-            rep.nAssociatedProviders++;
+            reply.nAssociatedProviders++;
     }
 
-    rep.length = (pScrPriv->numCrtcs + pScrPriv->numOutputs +
-                  (rep.nAssociatedProviders * 2) + bytes_to_int32(rep.nameLength));
+    reply.length = (pScrPriv->numCrtcs + pScrPriv->numOutputs +
+                   (reply.nAssociatedProviders * 2) + bytes_to_int32(reply.nameLength));
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    extraLen = rep.length << 2;
+    extraLen = reply.length << 2;
     if (extraLen) {
         extra = x_rpcbuf_reserve(&rpcbuf, extraLen);
         if (!extra)
@@ -168,10 +168,10 @@ ProcRRGetProviderInfo (ClientPtr client)
         extra = NULL;
 
     crtcs = (RRCrtc *)extra;
-    outputs = (RROutput *)(crtcs + rep.nCrtcs);
-    providers = (RRProvider *)(outputs + rep.nOutputs);
-    prov_cap = (unsigned int *)(providers + rep.nAssociatedProviders);
-    name = (char *)(prov_cap + rep.nAssociatedProviders);
+    outputs = (RROutput *)(crtcs + reply.nCrtcs);
+    providers = (RRProvider *)(outputs + reply.nOutputs);
+    prov_cap = (unsigned int *)(providers + reply.nAssociatedProviders);
+    name = (char *)(prov_cap + reply.nAssociatedProviders);
 
     for (i = 0; i < pScrPriv->numCrtcs; i++) {
         crtcs[i] = pScrPriv->crtcs[i]->id;
@@ -221,15 +221,15 @@ ProcRRGetProviderInfo (ClientPtr client)
         i++;
     }
 
-    memcpy(name, provider->name, rep.nameLength);
+    memcpy(name, provider->name, reply.nameLength);
     if (client->swapped) {
-        swapl(&rep.capabilities);
-        swaps(&rep.nCrtcs);
-        swaps(&rep.nOutputs);
-        swaps(&rep.nameLength);
+        swapl(&reply.capabilities);
+        swaps(&reply.nCrtcs);
+        swaps(&reply.nOutputs);
+        swaps(&reply.nameLength);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static void

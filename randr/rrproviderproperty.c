@@ -359,14 +359,14 @@ ProcRRListProviderProperties(ClientPtr client)
         numProps++;
     }
 
-    xRRListProviderPropertiesReply rep = {
+    xRRListProviderPropertiesReply reply = {
         .nAtoms = numProps
     };
 
     if (client->swapped)
-        swaps(&rep.nAtoms);
+        swaps(&reply.nAtoms);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -392,13 +392,13 @@ ProcRRQueryProviderProperty(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_INT32s(&rpcbuf, prop->valid_values, prop->num_valid);
 
-    xRRQueryProviderPropertyReply rep = {
+    xRRQueryProviderPropertyReply reply = {
         .pending = prop->is_pending,
         .range = prop->range,
         .immutable = prop->immutable
     };
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
