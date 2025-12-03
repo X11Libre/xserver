@@ -114,12 +114,12 @@ ProcDbeGetVersion(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xDbeGetVersionReq);
 
-    xDbeGetVersionReply rep = {
+    xDbeGetVersionReply reply = {
         .majorVersion = DBE_MAJOR_VERSION,
         .minorVersion = DBE_MINOR_VERSION
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /******************************************************************************
@@ -640,15 +640,15 @@ ProcDbeGetVisualInfo(ClientPtr client)
         free(visualInfo.visinfo);
     }
 
-    xDbeGetVisualInfoReply rep = {
+    xDbeGetVisualInfoReply reply = {
         .m = count
     };
 
     if (client->swapped) {
-        swapl(&rep.m);
+        swapl(&reply.m);
     }
 
-    rc = X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
 clearRpcBuf:
     x_rpcbuf_clear(&rpcbuf);
@@ -688,20 +688,20 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
                                  dbeWindowPrivResType, client,
                                  DixGetAttrAccess);
 
-    xDbeGetBackBufferAttributesReply rep = { 0 };
+    xDbeGetBackBufferAttributesReply reply = { 0 };
 
     if (rc == Success) {
-        rep.attributes = pDbeWindowPriv->pWindow->drawable.id;
+        reply.attributes = pDbeWindowPriv->pWindow->drawable.id;
     }
     else {
-        rep.attributes = None;
+        reply.attributes = None;
     }
 
     if (client->swapped) {
-        swapl(&rep.attributes);
+        swapl(&reply.attributes);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /******************************************************************************
