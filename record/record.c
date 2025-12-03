@@ -2162,7 +2162,6 @@ ProcRecordGetContext(ClientPtr client)
         swapl(&stuff->context);
 
     RecordContextPtr pContext;
-    xRecordGetContextReply rep;
     RecordClientsAndProtocolPtr pRCAP;
     int nRCAPs = 0;
     GetContextRangeInfoPtr pRangeInfo;
@@ -2275,7 +2274,7 @@ ProcRecordGetContext(ClientPtr client)
         swapl(&reply.length);
         swapl(&reply.nClients);
     }
-    WriteToClient(client, sizeof(xRecordGetContextReply), &rep);
+    WriteToClient(client, sizeof(xRecordGetContextReply), &reply);
 
     /* write all the CLIENT_INFOs */
 
