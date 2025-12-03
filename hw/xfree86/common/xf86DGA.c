@@ -1168,12 +1168,12 @@ ProcXDGAQueryVersion(ClientPtr client)
 {
     REQUEST_SIZE_MATCH(xXDGAQueryVersionReq);
 
-    xXDGAQueryVersionReply rep = {
+    xXDGAQueryVersionReply reply = {
         .majorVersion = SERVER_XDGA_MAJOR_VERSION,
         .minorVersion = SERVER_XDGA_MINOR_VERSION
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -1192,12 +1192,13 @@ ProcXDGAOpenFramebuffer(ClientPtr client)
     if (!DGAAvailable(stuff->screen))
         return DGAErrorBase + XF86DGANoDirectVideoMode;
 
-    xXDGAOpenFramebufferReply rep = { 0 };
+    xXDGAOpenFramebufferReply reply = { 0 };
 
     if (!DGAOpenFramebuffer(stuff->screen, &deviceName,
-                            (unsigned char **) (&rep.mem1),
-                            (int *) &rep.size, (int *) &rep.offset,
-                            (int *) &rep.extra)) {
+                            (unsigned char **) (&reply.mem1),
+                            (int *) &reply.size,
+                            (int *) &reply.offset,
+                            (int *) &reply.extra)) {
         return BadAlloc;
     }
 
@@ -1206,7 +1207,7 @@ ProcXDGAOpenFramebuffer(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)deviceName, nameSize);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -1256,7 +1257,7 @@ ProcXDGAQueryModes(ClientPtr client)
     for (int i = 0; i < num; i++)
         DGAGetModeInfo(stuff->screen, mode + i, i + 1);
 
-    xXDGAQueryModesReply rep = {
+    xXDGAQueryModesReply reply = {
         .number = num
     };
 
@@ -1298,7 +1299,7 @@ ProcXDGAQueryModes(ClientPtr client)
 
     free(mode);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static void
@@ -1348,7 +1349,7 @@ ProcXDGASetMode(ClientPtr client)
     if (owner && owner != client)
         return DGAErrorBase + XF86DGANoDirectVideoMode;
 
-    xXDGASetModeReply rep = { 0 };
+    xXDGASetModeReply reply = { 0 };
 
     if (!stuff->mode) {
         if (owner) {
@@ -1359,7 +1360,7 @@ ProcXDGASetMode(ClientPtr client)
         DGA_SETCLIENT(stuff->screen, NULL);
         DGASelectInput(stuff->screen, NULL, 0);
         DGASetMode(stuff->screen, 0, &mode, &pPix);
-        return X_SEND_REPLY_SIMPLE(client, rep);
+        return X_SEND_REPLY_SIMPLE(client, reply);
     }
 
     if (Success != DGASetMode(stuff->screen, stuff->mode, &mode, &pPix))
@@ -1375,7 +1376,7 @@ ProcXDGASetMode(ClientPtr client)
     if (pPix) {
         if (AddResource(stuff->pid, X11_RESTYPE_PIXMAP, (void *) (pPix))) {
             pPix->drawable.id = (int) stuff->pid;
-            rep.flags = DGA_PIXMAP_AVAILABLE;
+            reply.flags = DGA_PIXMAP_AVAILABLE;
         }
     }
 
@@ -1410,7 +1411,7 @@ ProcXDGASetMode(ClientPtr client)
     x_rpcbuf_write_binary_pad(&rpcbuf, &info, sizeof(info));
     x_rpcbuf_write_string_0t_pad(&rpcbuf, mode.name);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -1556,11 +1557,11 @@ ProcXDGAGetViewportStatus(ClientPtr client)
     if (DGA_GETCLIENT(stuff->screen) != client)
         return DGAErrorBase + XF86DGADirectNotActivated;
 
-    xXDGAGetViewportStatusReply rep = {
+    xXDGAGetViewportStatusReply reply = {
         .status = DGAGetViewportStatus(stuff->screen)
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -1577,10 +1578,10 @@ ProcXDGASync(ClientPtr client)
     if (DGA_GETCLIENT(stuff->screen) != client)
         return DGAErrorBase + XF86DGADirectNotActivated;
 
-    xXDGASyncReply rep = { 0 };
+    xXDGASyncReply reply = { 0 };
     DGASync(stuff->screen);
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -1625,12 +1626,12 @@ ProcXDGAChangePixmapMode(ClientPtr client)
     if (!DGAChangePixmapMode(stuff->screen, &x, &y, stuff->flags))
         return BadMatch;
 
-    xXDGAChangePixmapModeReply rep = {
+    xXDGAChangePixmapModeReply reply = {
         .x = x,
         .y = y
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int

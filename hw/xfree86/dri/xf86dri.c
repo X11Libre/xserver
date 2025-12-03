@@ -78,7 +78,7 @@ XF86DRIResetProc(ExtensionEntry *extEntry)
 static int
 ProcXF86DRIQueryVersion(register ClientPtr client)
 {
-    xXF86DRIQueryVersionReply rep = {
+    xXF86DRIQueryVersionReply reply = {
         .majorVersion = SERVER_XF86DRI_MAJOR_VERSION,
         .minorVersion = SERVER_XF86DRI_MINOR_VERSION,
         .patchVersion = SERVER_XF86DRI_PATCH_VERSION
@@ -86,11 +86,11 @@ ProcXF86DRIQueryVersion(register ClientPtr client)
 
     REQUEST_SIZE_MATCH(xXF86DRIQueryVersionReq);
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
-        swapl(&rep.patchVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
+        swapl(&reply.patchVersion);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -182,11 +182,11 @@ ProcXF86DRIAuthConnection(register ClientPtr client)
         authenticated = 0;
     }
 
-    xXF86DRIAuthConnectionReply rep = {
+    xXF86DRIAuthConnectionReply reply = {
         .authenticated = authenticated
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -219,21 +219,21 @@ ProcXF86DRIGetClientDriverName(register ClientPtr client)
         return BadValue;
     }
 
-    xXF86DRIGetClientDriverNameReply rep = { 0 };
+    xXF86DRIGetClientDriverNameReply reply = { 0 };
 
     DRIGetClientDriverName(pScreen,
-                           (int *) &rep.ddxDriverMajorVersion,
-                           (int *) &rep.ddxDriverMinorVersion,
-                           (int *) &rep.ddxDriverPatchVersion,
+                           (int *) &reply.ddxDriverMajorVersion,
+                           (int *) &reply.ddxDriverMinorVersion,
+                           (int *) &reply.ddxDriverPatchVersion,
                            &clientDriverName);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     if (clientDriverName) {
-        rep.clientDriverNameLength = strlen(clientDriverName);
-        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)clientDriverName, rep.clientDriverNameLength);
+        reply.clientDriverNameLength = strlen(clientDriverName);
+        x_rpcbuf_write_CARD8s(&rpcbuf, (CARD8*)clientDriverName, reply.clientDriverNameLength);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -248,15 +248,16 @@ ProcXF86DRICreateContext(register ClientPtr client)
         return BadValue;
     }
 
-    xXF86DRICreateContextReply rep = { 0 };
+    xXF86DRICreateContextReply reply = { 0 };
 
     if (!DRICreateContext(pScreen,
                           NULL,
-                          stuff->context, (drm_context_t *) &rep.hHWContext)) {
+                          stuff->context,
+                          (drm_context_t *) &reply.hHWContext)) {
         return BadValue;
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -298,13 +299,14 @@ ProcXF86DRICreateDrawable(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xXF86DRICreateDrawableReply rep = { 0 };
+    xXF86DRICreateDrawableReply reply = { 0 };
     if (!DRICreateDrawable(pScreen, client,
-                           pDrawable, (drm_drawable_t *) &rep.hHWDrawable)) {
+                           pDrawable,
+                           (drm_drawable_t *) &reply.hHWDrawable)) {
         return BadValue;
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -358,37 +360,38 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xXF86DRIGetDrawableInfoReply rep = { 0 };
+    xXF86DRIGetDrawableInfoReply reply = { 0 };
 
     if (!DRIGetDrawableInfo(pScreen,
                             pDrawable,
-                            (unsigned int *) &rep.drawableTableIndex,
-                            (unsigned int *) &rep.drawableTableStamp,
+                            (unsigned int *) &reply.drawableTableIndex,
+                            (unsigned int *) &reply.drawableTableStamp,
                             (int *) &X,
                             (int *) &Y,
                             (int *) &W,
                             (int *) &H,
-                            (int *) &rep.numClipRects,
+                            (int *) &reply.numClipRects,
                             &pClipRects,
                             &backX,
                             &backY,
-                            (int *) &rep.numBackClipRects, &pBackClipRects)) {
+                            (int *) &reply.numBackClipRects,
+                            &pBackClipRects)) {
         return BadValue;
     }
 
-    rep.drawableX = X;
-    rep.drawableY = Y;
-    rep.drawableWidth = W;
-    rep.drawableHeight = H;
-    rep.backX = backX;
-    rep.backY = backY;
+    reply.drawableX = X;
+    reply.drawableY = Y;
+    reply.drawableWidth = W;
+    reply.drawableHeight = H;
+    reply.backX = backX;
+    reply.backY = backY;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
-    if (rep.numClipRects) {
+    if (reply.numClipRects) {
         int j = 0;
 
-        for (int i = 0; i < rep.numClipRects; i++) {
+        for (int i = 0; i < reply.numClipRects; i++) {
             /* Clip cliprects to screen dimensions (redirected windows) */
             CARD16 x1 = max(pClipRects[i].x1, 0);
             CARD16 y1 = max(pClipRects[i].y1, 0);
@@ -405,17 +408,17 @@ ProcXF86DRIGetDrawableInfo(register ClientPtr client)
             }
         }
 
-        rep.numClipRects = j;
+        reply.numClipRects = j;
     }
 
-    for (int i = 0; i < rep.numBackClipRects; i++) {
+    for (int i = 0; i < reply.numBackClipRects; i++) {
         x_rpcbuf_write_CARD16(&rpcbuf, pBackClipRects[i].x1);
         x_rpcbuf_write_CARD16(&rpcbuf, pBackClipRects[i].y1);
         x_rpcbuf_write_CARD16(&rpcbuf, pBackClipRects[i].x2);
         x_rpcbuf_write_CARD16(&rpcbuf, pBackClipRects[i].y2);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -433,26 +436,27 @@ ProcXF86DRIGetDeviceInfo(register ClientPtr client)
         return BadValue;
     }
 
-    xXF86DRIGetDeviceInfoReply rep = { 0 };
+    xXF86DRIGetDeviceInfoReply reply = { 0 };
 
     if (!DRIGetDeviceInfo(pScreen,
                           &hFrameBuffer,
-                          (int *) &rep.framebufferOrigin,
-                          (int *) &rep.framebufferSize,
-                          (int *) &rep.framebufferStride,
-                          (int *) &rep.devPrivateSize, &pDevPrivate)) {
+                          (int *) &reply.framebufferOrigin,
+                          (int *) &reply.framebufferSize,
+                          (int *) &reply.framebufferStride,
+                          (int *) &reply.devPrivateSize,
+                          &pDevPrivate)) {
         return BadValue;
     }
 
-    rep.hFrameBufferLow = (CARD32) (hFrameBuffer & 0xffffffff);
+    reply.hFrameBufferLow = (CARD32) (hFrameBuffer & 0xffffffff);
 #if defined(LONG64) && !defined(__linux__)
-    rep.hFrameBufferHigh = (CARD32) (hFrameBuffer >> 32);
+    reply.hFrameBufferHigh = (CARD32) (hFrameBuffer >> 32);
 #endif
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-    x_rpcbuf_write_CARD8s(&rpcbuf, pDevPrivate, rep.devPrivateSize);
+    x_rpcbuf_write_CARD8s(&rpcbuf, pDevPrivate, reply.devPrivateSize);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int

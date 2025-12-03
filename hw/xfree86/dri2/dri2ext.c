@@ -76,7 +76,7 @@ validDrawable(ClientPtr client, XID drawable, Mask access_mode,
 static int
 ProcDRI2QueryVersion(ClientPtr client)
 {
-    xDRI2QueryVersionReply rep = {
+    xDRI2QueryVersionReply reply = {
         .majorVersion = dri2_major,
         .minorVersion = dri2_minor
     };
@@ -84,11 +84,11 @@ ProcDRI2QueryVersion(ClientPtr client)
     REQUEST_SIZE_MATCH(xDRI2QueryVersionReq);
 
     if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -209,7 +209,7 @@ send_buffers_reply(ClientPtr client, DrawablePtr pDrawable,
         }
     }
 
-    rep = (xDRI2GetBuffersReply) {
+    xDRI2GetBuffersReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = (count - skip) * sizeof(xDRI2Buffer) / 4,
@@ -217,7 +217,7 @@ send_buffers_reply(ClientPtr client, DrawablePtr pDrawable,
         .height = height,
         .count = count - skip
     };
-    WriteToClient(client, sizeof(xDRI2GetBuffersReply), &rep);
+    WriteToClient(client, sizeof(xDRI2GetBuffersReply), &reply);
 
     for (i = 0; i < count; i++) {
         xDRI2Buffer buffer;
@@ -465,15 +465,15 @@ ProcDRI2WaitMSC(ClientPtr client)
 int
 ProcDRI2WaitMSCReply(ClientPtr client, CARD64 ust, CARD64 msc, CARD64 sbc)
 {
-    xDRI2MSCReply rep = {
+    xDRI2MSCReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0
     };
 
-    load_msc_reply(&rep, ust, msc, sbc);
+    load_msc_reply(&reply, ust, msc, sbc);
 
-    WriteToClient(client, sizeof(xDRI2MSCReply), &rep);
+    WriteToClient(client, sizeof(xDRI2MSCReply), &reply);
 
     return Success;
 }
@@ -522,7 +522,7 @@ static int
 ProcDRI2GetParam(ClientPtr client)
 {
     REQUEST(xDRI2GetParamReq);
-    xDRI2GetParamReply rep = {
+    xDRI2GetParamReply reply = {
         .type = X_Reply,
         .sequenceNumber = client->sequence,
         .length = 0
@@ -538,14 +538,14 @@ ProcDRI2GetParam(ClientPtr client)
         return status;
 
     status = DRI2GetParam(client, pDrawable, stuff->param,
-                          &rep.is_param_recognized, &value);
-    rep.value_hi = value >> 32;
-    rep.value_lo = value & 0xffffffff;
+                          &reply.is_param_recognized, &value);
+    reply.value_hi = value >> 32;
+    reply.value_lo = value & 0xffffffff;
 
     if (status != Success)
         return status;
 
-    WriteToClient(client, sizeof(xDRI2GetParamReply), &rep);
+    WriteToClient(client, sizeof(xDRI2GetParamReply), &reply);
 
     return status;
 }
