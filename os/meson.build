@@ -16,11 +16,11 @@ srcs_os = [
     'ossock.c',
     'serverlock.c',
     'string.c',
+    'transport.c',
     'utils.c',
     'xdmauth.c',
     'xhostname.c',
     'xsha1.c',
-    'xstrans.c',
     'xprintf.c',
     'log.c',
 ]

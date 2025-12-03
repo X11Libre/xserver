@@ -46,8 +46,10 @@ from The Open Group.
  * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <dix-config.h>
 
 #include <stdlib.h>
+#include <X11/Xfuncproto.h>
 
 #define XTRANS_TRANSPORT_C  /* used to flag Xtransint.h that it's being used
 			       here, not just #included in another file */
