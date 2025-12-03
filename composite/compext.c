@@ -113,25 +113,26 @@ ProcCompositeQueryVersion(ClientPtr client)
 
     CompositeClientPtr pCompositeClient = GetCompositeClient(client);
 
-    xCompositeQueryVersionReply rep = {
+    xCompositeQueryVersionReply reply = {
         .majorVersion = SERVER_COMPOSITE_MAJOR_VERSION,
         .minorVersion = SERVER_COMPOSITE_MINOR_VERSION
     };
 
     /* if client asking for a lower version, use this one */
     if (stuff->majorVersion < SERVER_COMPOSITE_MAJOR_VERSION) {
-        rep.majorVersion = stuff->majorVersion;
-        rep.minorVersion = stuff->minorVersion;
+        reply.majorVersion = stuff->majorVersion;
+        reply.minorVersion = stuff->minorVersion;
     }
 
-    pCompositeClient->major_version = rep.majorVersion;
-    pCompositeClient->minor_version = rep.minorVersion;
+    pCompositeClient->major_version = reply.majorVersion;
+    pCompositeClient->minor_version = reply.minorVersion;
+
     if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 #define VERIFY_WINDOW(pWindow, wid, client, mode)                       \
@@ -306,15 +307,15 @@ SingleCompositeGetOverlayWindow(ClientPtr client, xCompositeGetOverlayWindowReq 
         return rc;
     }
 
-    xCompositeGetOverlayWindowReply rep = {
+    xCompositeGetOverlayWindowReply reply = {
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
     if (client->swapped) {
-        swapl(&rep.overlayWin);
+        swapl(&reply.overlayWin);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -765,15 +766,15 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
 
     cs = GetCompScreen(dixGetMasterScreen());
 
-    xCompositeGetOverlayWindowReply rep = {
+    xCompositeGetOverlayWindowReply reply = {
         .overlayWin = cs->pOverlayWin->drawable.id
     };
 
     if (client->swapped) {
-        swapl(&rep.overlayWin);
+        swapl(&reply.overlayWin);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 #else
     return SingleCompositeGetOverlayWindow(client, stuff);
 #endif /* XINERAMA */
