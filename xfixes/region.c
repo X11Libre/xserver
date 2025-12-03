@@ -479,7 +479,7 @@ ProcXFixesFetchRegion(ClientPtr client)
                             pBox[i].y2 - pBox[i].y1);
     }
 
-    xXFixesFetchRegionReply rep = {
+    xXFixesFetchRegionReply reply = {
         .x = pExtent->x1,
         .y = pExtent->y1,
         .width = pExtent->x2 - pExtent->x1,
@@ -487,15 +487,15 @@ ProcXFixesFetchRegion(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swaps(&reply.x);
+        swaps(&reply.y);
+        swaps(&reply.width);
+        swaps(&reply.height);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 #ifdef XINERAMA

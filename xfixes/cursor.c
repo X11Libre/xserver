@@ -378,7 +378,7 @@ ProcXFixesGetCursorImage(ClientPtr client)
     if (client->swapped)
         SwapLongs(image, npixels);
 
-    xXFixesGetCursorImageReply rep = {
+    xXFixesGetCursorImageReply reply = {
         .width = width,
         .height = height,
         .x = x,
@@ -389,16 +389,16 @@ ProcXFixesGetCursorImage(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.xhot);
-        swaps(&rep.yhot);
-        swapl(&rep.cursorSerial);
+        swaps(&reply.x);
+        swaps(&reply.y);
+        swaps(&reply.width);
+        swaps(&reply.height);
+        swaps(&reply.xhot);
+        swaps(&reply.yhot);
+        swapl(&reply.cursorSerial);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -449,16 +449,16 @@ ProcXFixesGetCursorName(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_string_pad(&rpcbuf, str);
 
-    xXFixesGetCursorNameReply rep = {
+    xXFixesGetCursorNameReply reply = {
         .atom = pCursor->name,
         .nbytes = strlen(str)
     };
     if (client->swapped) {
-        swapl(&rep.atom);
-        swaps(&rep.nbytes);
+        swapl(&reply.atom);
+        swaps(&reply.nbytes);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -500,7 +500,7 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    xXFixesGetCursorImageAndNameReply rep = {
+    xXFixesGetCursorImageAndNameReply reply = {
         .width = width,
         .height = height,
         .x = x,
@@ -513,18 +513,18 @@ ProcXFixesGetCursorImageAndName(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.x);
-        swaps(&rep.y);
-        swaps(&rep.width);
-        swaps(&rep.height);
-        swaps(&rep.xhot);
-        swaps(&rep.yhot);
-        swapl(&rep.cursorSerial);
-        swapl(&rep.cursorName);
-        swaps(&rep.nbytes);
+        swaps(&reply.x);
+        swaps(&reply.y);
+        swaps(&reply.width);
+        swaps(&reply.height);
+        swaps(&reply.xhot);
+        swaps(&reply.yhot);
+        swapl(&reply.cursorSerial);
+        swapl(&reply.cursorName);
+        swaps(&reply.nbytes);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 /*
