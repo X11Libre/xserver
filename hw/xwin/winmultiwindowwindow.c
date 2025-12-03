@@ -1048,7 +1048,6 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
                                  int depth,
                                  int bitsPerPixel, int devKind, void *pPixData)
 {
-    int i;
     winPrivPixmapPtr pPixmapPriv = winGetPixmapPriv(pPixmap);
 
     /* reinitialize everything */
