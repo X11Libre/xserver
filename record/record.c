@@ -1830,17 +1830,17 @@ ProcRecordQueryVersion(ClientPtr client)
         swaps(&stuff->minorVersion);
     }
 
-    xRecordQueryVersionReply rep = {
+    xRecordQueryVersionReply reply = {
         .majorVersion = SERVER_RECORD_MAJOR_VERSION,
         .minorVersion = SERVER_RECORD_MINOR_VERSION
     };
 
     if (client->swapped) {
-        swaps(&rep.majorVersion);
-        swaps(&rep.minorVersion);
+        swaps(&reply.majorVersion);
+        swaps(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int _X_COLD
@@ -2262,7 +2262,7 @@ ProcRecordGetContext(ClientPtr client)
 
     /* write the reply header */
 
-    rep = (xRecordGetContextReply) {
+    xRecordGetContextReply reply = {
         .type = X_Reply,
         .enabled = pContext->pRecordingClient != NULL,
         .sequenceNumber = client->sequence,
@@ -2271,9 +2271,9 @@ ProcRecordGetContext(ClientPtr client)
         .nClients = nClients
     };
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swapl(&rep.nClients);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swapl(&reply.nClients);
     }
     WriteToClient(client, sizeof(xRecordGetContextReply), &rep);
 
