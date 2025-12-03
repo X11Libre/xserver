@@ -2528,21 +2528,21 @@ PanoramiXAllocColor(ClientPtr client)
 
         /* only send out reply for on first screen */
         if (!walkScreenIdx) {
-            xAllocColorReply rep; /* static init would confuse preprocessor */
-            rep.red = red;
-            rep.green = green;
-            rep.blue = blue;
-            rep.pixel = pixel;
+            xAllocColorReply reply; /* static init would confuse preprocessor */
+            reply.red = red;
+            reply.green = green;
+            reply.blue = blue;
+            reply.pixel = pixel;
 
             if (client->swapped) {
-                swaps(&rep.red);
-                swaps(&rep.green);
-                swaps(&rep.blue);
-                swapl(&rep.pixel);
+                swaps(&reply.red);
+                swaps(&reply.green);
+                swaps(&reply.blue);
+                swapl(&reply.pixel);
             }
 
             /* iterating backwards, first screen comes last, so we can return here */
-            return X_SEND_REPLY_SIMPLE(client, rep);
+            return X_SEND_REPLY_SIMPLE(client, reply);
         }
     });
 

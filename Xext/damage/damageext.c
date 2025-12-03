@@ -222,27 +222,27 @@ ProcDamageQueryVersion(ClientPtr client)
 
     DamageClientPtr pDamageClient = GetDamageClient(client);
 
-    xDamageQueryVersionReply rep = { 0 };
+    xDamageQueryVersionReply reply = { 0 };
     if (stuff->majorVersion < SERVER_DAMAGE_MAJOR_VERSION) {
-        rep.majorVersion = stuff->majorVersion;
-        rep.minorVersion = stuff->minorVersion;
+        reply.majorVersion = stuff->majorVersion;
+        reply.minorVersion = stuff->minorVersion;
     }
     else {
-        rep.majorVersion = SERVER_DAMAGE_MAJOR_VERSION;
+        reply.majorVersion = SERVER_DAMAGE_MAJOR_VERSION;
         if (stuff->majorVersion == SERVER_DAMAGE_MAJOR_VERSION &&
             stuff->minorVersion < SERVER_DAMAGE_MINOR_VERSION)
-            rep.minorVersion = stuff->minorVersion;
+            reply.minorVersion = stuff->minorVersion;
         else
-            rep.minorVersion = SERVER_DAMAGE_MINOR_VERSION;
+            reply.minorVersion = SERVER_DAMAGE_MINOR_VERSION;
     }
-    pDamageClient->major_version = rep.majorVersion;
-    pDamageClient->minor_version = rep.minorVersion;
+    pDamageClient->major_version = reply.majorVersion;
+    pDamageClient->minor_version = reply.minorVersion;
     if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void
