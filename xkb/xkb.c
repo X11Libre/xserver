@@ -58,8 +58,6 @@ static CARD32 xkbDebugCtrls = 0;
 
 RESTYPE RT_XKBCLIENT = 0;
 
-/***====================================================================***/
-
 #define	CHK_DEVICE(dev, id, client, access_mode, lf) {\
     int why;\
     int tmprc = lf(&(dev), id, client, access_mode, &why);\
@@ -170,8 +168,6 @@ _XkbCheckRequestBounds(ClientPtr client, void *stuff, void *from, void *to) {
            cto <= cstuff + ((size_t)client->req_len << 2);
 }
 
-/***====================================================================***/
-
 int
 ProcXkbUseExtension(ClientPtr client)
 {
@@ -218,8 +214,6 @@ ProcXkbUseExtension(ClientPtr client)
 
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
-
-/***====================================================================***/
 
 int
 ProcXkbSelectEvents(ClientPtr client)
@@ -450,7 +444,6 @@ ProcXkbSelectEvents(ClientPtr client)
     return BadAlloc;
 }
 
-/***====================================================================***/
 /**
  * Ring a bell on the given device for the given client.
  */
@@ -661,8 +654,6 @@ ProcXkbBell(ClientPtr client)
     return rc;
 }
 
-/***====================================================================***/
-
 int
 ProcXkbGetState(ClientPtr client)
 {
@@ -701,8 +692,6 @@ ProcXkbGetState(ClientPtr client)
 
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
-
-/***====================================================================***/
 
 int
 ProcXkbLatchLockState(ClientPtr client)
@@ -773,8 +762,6 @@ ProcXkbLatchLockState(ClientPtr client)
 
     return Success;
 }
-
-/***====================================================================***/
 
 int
 ProcXkbGetControls(ClientPtr client)
@@ -1097,8 +1084,6 @@ ProcXkbSetControls(ClientPtr client)
 
     return Success;
 }
-
-/***====================================================================***/
 
 static int
 XkbSizeKeyTypes(XkbDescPtr xkb, xkbGetMapReply * rep)
@@ -1623,8 +1608,6 @@ ProcXkbGetMap(ClientPtr client)
 
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
-
-/***====================================================================***/
 
 static int
 CheckKeyTypes(ClientPtr client,
@@ -2842,8 +2825,6 @@ ProcXkbSetMap(ClientPtr client)
     return Success;
 }
 
-/***====================================================================***/
-
 static Status
 XkbComputeGetCompatMapReplySize(XkbCompatMapPtr compat,
                                 xkbGetCompatMapReply * rep)
@@ -3178,8 +3159,6 @@ ProcXkbSetCompatMap(ClientPtr client)
     return Success;
 }
 
-/***====================================================================***/
-
 int
 ProcXkbGetIndicatorState(ClientPtr client)
 {
@@ -3213,8 +3192,6 @@ ProcXkbGetIndicatorState(ClientPtr client)
 
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
-
-/***====================================================================***/
 
 static Status
 XkbComputeGetIndicatorMapReplySize(XkbIndicatorPtr indicators,
@@ -3416,8 +3393,6 @@ ProcXkbSetIndicatorMap(ClientPtr client)
 
     return Success;
 }
-
-/***====================================================================***/
 
 int
 ProcXkbGetNamedIndicator(ClientPtr client)
@@ -3699,8 +3674,6 @@ ProcXkbSetNamedIndicator(ClientPtr client)
     return Success;
 }
 
-/***====================================================================***/
-
 static CARD32
 _XkbCountAtoms(Atom *atoms, int maxAtoms, int *count)
 {
@@ -3963,8 +3936,6 @@ ProcXkbGetNames(ClientPtr client)
 
     return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
 }
-
-/***====================================================================***/
 
 static CARD32 *
 _XkbCheckAtoms(CARD32 *wire, int nAtoms, int swapped, Atom *pError)
@@ -4495,8 +4466,6 @@ ProcXkbSetNames(ClientPtr client)
     return Success;
 }
 
-/***====================================================================***/
-
 #include "xkbgeom.h"
 
 #define	XkbSizeCountedString(s)  ((s)?((((2+strlen(s))+3)/4)*4):4)
@@ -4978,8 +4947,6 @@ free_out:
 
     return status;
 }
-
-/***====================================================================***/
 
 static Status
 _GetCountedString(char **wire_inout, ClientPtr client, char **str)
@@ -5567,8 +5534,6 @@ ProcXkbSetGeometry(ClientPtr client)
     return Success;
 }
 
-/***====================================================================***/
-
 int
 ProcXkbPerClientFlags(ClientPtr client)
 {
@@ -5648,8 +5613,6 @@ ProcXkbPerClientFlags(ClientPtr client)
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
 
-/***====================================================================***/
-
 /* all latin-1 alphanumerics, plus parens, minus, underscore, slash */
 /* and wildcards */
 static unsigned const char componentSpecLegal[] = {
@@ -5718,8 +5681,6 @@ GetComponentSpec(ClientPtr client, xkbGetKbdByNameReq *stuff,
     *pWire = wire;
     return (char *) str;
 }
-
-/***====================================================================***/
 
 int
 ProcXkbListComponents(ClientPtr client)
@@ -5806,7 +5767,6 @@ XkbConvertGetByNameComponents(Bool toXkm, unsigned orig)
     return rtrn;
 }
 
-/***====================================================================***/
 int
 ProcXkbGetKbdByName(ClientPtr client)
 {
@@ -6209,8 +6169,6 @@ ProcXkbGetKbdByName(ClientPtr client)
 
     return status;
 }
-
-/***====================================================================***/
 
 static int
 ComputeDeviceLedInfoSize(DeviceIntPtr dev,
@@ -6912,8 +6870,6 @@ ProcXkbSetDeviceInfo(ClientPtr client)
     return Success;
 }
 
-/***====================================================================***/
-
 int
 ProcXkbSetDebuggingFlags(ClientPtr client)
 {
@@ -6982,8 +6938,6 @@ ProcXkbSetDebuggingFlags(ClientPtr client)
 
     return X_SEND_REPLY_SIMPLE(client, rep);
 }
-
-/***====================================================================***/
 
 static int
 ProcXkbDispatch(ClientPtr client)
