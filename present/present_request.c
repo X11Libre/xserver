@@ -33,7 +33,7 @@ static int
 proc_present_query_version(ClientPtr client)
 {
     REQUEST(xPresentQueryVersionReq);
-    xPresentQueryVersionReply rep = {
+    xPresentQueryVersionReply reply = {
         .majorVersion = SERVER_PRESENT_MAJOR_VERSION,
         .minorVersion = SERVER_PRESENT_MINOR_VERSION
     };
@@ -46,18 +46,18 @@ proc_present_query_version(ClientPtr client)
      * higher than the requested version.
      */
 
-    if (rep.majorVersion > stuff->majorVersion ||
-        rep.minorVersion > stuff->minorVersion) {
-        rep.majorVersion = stuff->majorVersion;
-        rep.minorVersion = stuff->minorVersion;
+    if (reply.majorVersion > stuff->majorVersion ||
+        reply.minorVersion > stuff->minorVersion) {
+        reply.majorVersion = stuff->majorVersion;
+        reply.minorVersion = stuff->minorVersion;
     }
 
     if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 #define VERIFY_FENCE_OR_NONE(fence_ptr, fence_id, client, access) do {  \
@@ -268,14 +268,14 @@ proc_present_query_capabilities (ClientPtr client)
         return r;
     }
 
-    xPresentQueryCapabilitiesReply rep = {
+    xPresentQueryCapabilitiesReply reply = {
         .capabilities = present_query_capabilities(crtc)
     };
 
     if (client->swapped) {
-        swapl(&rep.capabilities);
+        swapl(&reply.capabilities);
     }
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 #ifdef DRI3
