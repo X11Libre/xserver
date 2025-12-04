@@ -109,7 +109,8 @@ xf86parseOutputClassSection(void)
                 Error(QUOTE_MSG, "Module");
             if (ptr->modules) {
                 char *path;
-                XNFasprintf(&path, "%s,%s", ptr->modules, xf86_lex_val.str);
+                if (asprintf(&path, "%s,%s", ptr->modules, xf86_lex_val.str) == -1)
+                    FatalError("Memory allocation for Module option failed\n");
                 free(xf86_lex_val.str);
                 free(ptr->modules);
                 ptr->modules = path;
@@ -122,7 +123,8 @@ xf86parseOutputClassSection(void)
                 Error(QUOTE_MSG, "ModulePath");
             if (ptr->modulepath) {
                 char *path;
-                XNFasprintf(&path, "%s,%s", ptr->modulepath, xf86_lex_val.str);
+                if (asprintf(&path, "%s,%s", ptr->modulepath, xf86_lex_val.str) == -1)
+                    FatalError("Memory allocation for ModulePath option failed\n");
                 free(xf86_lex_val.str);
                 free(ptr->modulepath);
                 ptr->modulepath = path;

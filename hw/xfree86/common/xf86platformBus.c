@@ -305,11 +305,13 @@ xf86platformProbe(void)
                 if (cl->driver) {
                     if (cl->modulepath) {
                         if (*(cl->modulepath)) {
-                            XNFasprintf(&driver_path, "%s,%s", cl->modulepath, xf86ModulePath);
+                            if (asprintf(&driver_path, "%s,%s", cl->modulepath, xf86ModulePath) == -1)
+                                goto asprintf_failed;
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for driver %s overridden with \"%s\"\n",
                                     cl->identifier, cl->driver, driver_path);
                         } else {
-                            XNFasprintf(&driver_path, "%s", xf86ModulePath);
+                            if (asprintf(&driver_path, "%s", xf86ModulePath) == -1)
+                                goto asprintf_failed;
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for driver %s reset to standard \"%s\"\n",
                                     cl->identifier, cl->driver, driver_path);
                         }
@@ -322,7 +324,8 @@ xf86platformProbe(void)
                     if (cl->modules) {
                         LogMessageVerb(X_CONFIG, 1, "    and for modules \"%s\" as well\n",
                                 cl->modules);
-                        XNFasprintf(&copy, "%s", cl->modules);
+                        if (asprintf(&copy, "%s", cl->modules) == -1)
+                            goto asprintf_failed;
                         curr = copy;
                         while ((curr = strtok_r(curr, ",", &next))) {
                             if (*curr) LoaderSetPath(curr, driver_path);
@@ -335,11 +338,13 @@ xf86platformProbe(void)
                 else if (cl->modules) {
                     if (cl->modulepath) {
                         if (*(cl->modulepath)) {
-                            XNFasprintf(&driver_path, "%s,%s", cl->modulepath, xf86ModulePath);
+                            if (asprintf(&driver_path, "%s,%s", cl->modulepath, xf86ModulePath) == -1)
+                                goto asprintf_failed;
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for modules %s overridden with \"%s\"\n",
                                     cl->identifier, cl->modules, driver_path);
                         } else {
-                            XNFasprintf(&driver_path, "%s", xf86ModulePath);
+                            if (asprintf(&driver_path, "%s", xf86ModulePath) == -1)
+                                goto asprintf_failed;
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for modules %s reset to standard \"%s\"\n",
                                     cl->identifier, cl->modules, driver_path);
                         }
@@ -348,7 +353,8 @@ xf86platformProbe(void)
                         LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" ModulePath for modules %s reset to default\n",
                                 cl->identifier, cl->modules);
                     }
-                    XNFasprintf(&copy, "%s", cl->modules);
+                    if (asprintf(&copy, "%s", cl->modules) == -1)
+                        goto asprintf_failed;
                     curr = copy;
                     while ((curr = strtok_r(curr, ",", &next))) {
                         if (*curr) LoaderSetPath(curr, driver_path);
@@ -358,12 +364,13 @@ xf86platformProbe(void)
                 } else {
                         driver_path = path; /* Reuse for temporary storage */
                         if (*(cl->modulepath)) {
-                            XNFasprintf(&path, "%s,%s", cl->modulepath,
-                                    path ? path : xf86ModulePath);
+                            if (asprintf(&path, "%s,%s", cl->modulepath, path ? path : xf86ModulePath) == -1)
+                                goto asprintf_failed;
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" default ModulePath extended to \"%s\"\n",
                                     cl->identifier, path);
                         } else {
-                            XNFasprintf(&path, "%s", xf86ModulePath);
+                            if (asprintf(&path, "%s", xf86ModulePath) == -1)
+                                goto asprintf_failed;
                             LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" default ModulePath reset to standard \"%s\"\n",
                                     cl->identifier, path);
                         }
@@ -379,7 +386,8 @@ xf86platformProbe(void)
                     if (cl->modules) {
                         LogMessageVerb(X_CONFIG, 1, "    and for modules \"%s\" as well\n",
                                 cl->modules);
-                        XNFasprintf(&copy, "%s", cl->modules);
+                        if (asprintf(&copy, "%s", cl->modules) == -1)
+                            goto asprintf_failed;
                         curr = copy;
                         while ((curr = strtok_r(curr, ",", &next))) {
                             if (*curr) LoaderSetIgnoreABI(curr);
@@ -390,7 +398,8 @@ xf86platformProbe(void)
                 } else if (cl->modules) {
                     LogMessageVerb(X_CONFIG, 1, "OutputClass \"%s\" sets modules \"%s\" to ignore ABI for \"%s\" managed by %s\n",
                                cl->identifier, cl->modules, dev->attribs->path, dev->attribs->driver);
-                    XNFasprintf(&copy, "%s", cl->modules);
+                    if (asprintf(&copy, "%s", cl->modules) == -1)
+                        goto asprintf_failed;
                     curr = copy;
                     while ((curr = strtok_r(curr, ",", &next))) {
                         if (*curr) LoaderSetIgnoreABI(curr);
@@ -448,6 +457,10 @@ xf86platformProbe(void)
     }
 
     return 0;
+
+  asprintf_failed:
+    FatalError("Memory allocation for asprintf() in xf86PlatformProbe() failed\n");
+    return 1;
 }
 
 void
