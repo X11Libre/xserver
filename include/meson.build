@@ -8,9 +8,6 @@ release = 1 * 10000000 + major * 100000 + minor * 1000 + patch
 
 dri_dep = dependency('dri', required: build_glx)
 
-conf_data = configuration_data()
-conf_data.set('_DIX_CONFIG_H_', '1')
-
 # For feature macros we're using either false (boolean) or '1', which correspond to the macro being
 # not defined at all and defined to 1. This is to match autotools behavior and thus preserve
 # backwards  compatibility with all the existing code that uses #ifdef to check if feature is
