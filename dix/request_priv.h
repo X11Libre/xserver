@@ -148,8 +148,8 @@ static inline int __write_reply_hdr_simple(
 /* swap CARD16 rest of request (after the struct) - check fixed count */
 #define X_REQUEST_REST_COUNT_CARD16(count) \
     REQUEST_FIXED_SIZE(*stuff, count * sizeof(CARD16)); \
-    CARD32 *request_rest = (CARD16 *) (&stuff[1]); \
-    do { if (client->swapped) SwapShorts(request_rest, count); } while (0)
+    CARD16 *request_rest = (CARD16 *) (&stuff[1]); \
+    do { if (client->swapped) SwapShorts((signed short*)request_rest, count); } while (0)
 
 /* swap CARD32 rest of request (after the struct) - check fixed count */
 #define X_REQUEST_REST_COUNT_CARD32(count) \
