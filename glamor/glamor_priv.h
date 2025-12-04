@@ -27,8 +27,6 @@
 #ifndef GLAMOR_PRIV_H
 #define GLAMOR_PRIV_H
 
-#include "dix-config.h"
-
 #include <X11/Xfuncproto.h>
 
 #include "os/bug_priv.h"
