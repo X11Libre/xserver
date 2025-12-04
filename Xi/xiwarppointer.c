@@ -39,6 +39,7 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "mi/mipointer_priv.h"
 #include "Xi/handlers.h"
 
@@ -59,20 +60,16 @@
 int
 ProcXIWarpPointer(ClientPtr client)
 {
-    REQUEST(xXIWarpPointerReq);
-    REQUEST_SIZE_MATCH(xXIWarpPointerReq);
-
-    if (client->swapped) {
-        swapl(&stuff->src_win);
-        swapl(&stuff->dst_win);
-        swapl(&stuff->src_x);
-        swapl(&stuff->src_y);
-        swaps(&stuff->src_width);
-        swaps(&stuff->src_height);
-        swapl(&stuff->dst_x);
-        swapl(&stuff->dst_y);
-        swaps(&stuff->deviceid);
-    }
+    X_REQUEST_HEAD_STRUCT(xXIWarpPointerReq);
+    X_REQUEST_FIELD_CARD32(src_win);
+    X_REQUEST_FIELD_CARD32(dst_win);
+    X_REQUEST_FIELD_CARD32(src_x);
+    X_REQUEST_FIELD_CARD32(src_y);
+    X_REQUEST_FIELD_CARD16(src_width);
+    X_REQUEST_FIELD_CARD16(src_height);
+    X_REQUEST_FIELD_CARD32(dst_x);
+    X_REQUEST_FIELD_CARD32(dst_y);
+    X_REQUEST_FIELD_CARD16(deviceid);
 
     int rc;
     int x, y;
