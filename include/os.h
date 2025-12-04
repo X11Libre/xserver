@@ -69,6 +69,15 @@ SOFTWARE.
 #define _X_ATTRIBUTE_NONNULL_ARG(...) __attribute__((nonnull(__VA_ARGS__)))
 #endif
 
+#ifndef _X_ATTRIBUTE_VPRINTF
+# if defined(__GNUC__) && (__GNUC__ >= 2)
+#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
+          __attribute__((__format__(gnu_printf, fmt, firstarg)))
+# else
+#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
+# endif
+#endif
+
 #define SCREEN_SAVER_ON   0
 #define SCREEN_SAVER_OFF  1
 #define SCREEN_SAVER_FORCER 2

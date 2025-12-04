@@ -8,11 +8,13 @@
 #include <stdarg.h>
 #include <X11/Xfuncproto.h>
 
+#include "include/os.h"
+
 extern int auditTrailLevel;
 
 void FreeAuditTimer(void);
 
 void AuditF(const char *f, ...) _X_ATTRIBUTE_PRINTF(1, 2);
-void VAuditF(const char *f, va_list args) _X_ATTRIBUTE_PRINTF(1, 0);
+void VAuditF(const char *f, va_list args) _X_ATTRIBUTE_VPRINTF(1, 0);
 
 #endif /* _XSERVER_OS_AUDIT_H */
