@@ -900,13 +900,6 @@ ResetHosts(const char *display)
     FILE *fd;
     char *ptr;
     int i, hostlen;
-
-#if defined(TCPCONN) &&  (!defined(IPv6))
-    union {
-        struct sockaddr sa;
-        struct sockaddr_in in;
-    } saddr;
-#endif
     int family = 0;
     void *addr = NULL;
     int len;
@@ -1008,11 +1001,12 @@ ResetHosts(const char *display)
                 if ((family == FamilyInternet &&
                      ((hp = _XGethostbyname(hostname, hparams)) != 0)) ||
                     ((hp = _XGethostbyname(hostname, hparams)) != 0)) {
-                    saddr.sa.sa_family = hp->h_addrtype;
-                    len = sizeof(saddr.sa);
+                    struct sockaddr sa = {
+                        .sa_family = hp->h_addrtype
+                    };
+                    len = sizeof(sa);
                     if ((family =
-                         ConvertAddr(&saddr.sa, &len,
-                                     (void **) &addr)) != -1) {
+                         ConvertAddr(&sa, &len, (void **) &addr)) != -1) {
 #ifdef h_addr                   /* new 4.3bsd version of gethostent */
                         char **list;
 
