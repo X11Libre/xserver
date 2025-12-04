@@ -18,6 +18,10 @@ add_project_arguments('-fno-common', language: 'c')
 
 add_project_link_arguments('-fvisibility=hidden', language : 'c')
 
+# global config data -- needs to be declared early
+conf_data = configuration_data()
+conf_data.set('_DIX_CONFIG_H_', '1')
+
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     test_wflags = [
         '-Wall',
