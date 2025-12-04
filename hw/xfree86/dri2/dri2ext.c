@@ -330,13 +330,6 @@ ProcDRI2CopyRegion(ClientPtr client)
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
-static void
-load_swap_reply(xDRI2SwapBuffersReply * rep, CARD64 sbc)
-{
-    rep->swap_hi = sbc >> 32;
-    rep->swap_lo = sbc & 0xffffffff;
-}
-
 static CARD64
 vals_to_card64(CARD32 lo, CARD32 hi)
 {
@@ -394,7 +387,8 @@ ProcDRI2SwapBuffers(ClientPtr client)
 
     xDRI2SwapBuffersReply reply = { 0 };
 
-    load_swap_reply(&reply, swap_target);
+    reply.swap_hi = swap_target >> 32;
+    reply.swap_lo = swap_target & 0xffffffff;
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
