@@ -139,7 +139,9 @@ void XwinExtensionInit(void)
     }
 #endif
 
-    LoadExtensionList(xwinExtensions, ARRAY_SIZE(xwinExtensions), TRUE);
+    /* need this to prevent compiler warning */
+    if (ARRAY_SIZE(xwinExtensions) > 0)
+        LoadExtensionList(xwinExtensions, ARRAY_SIZE(xwinExtensions), TRUE);
 }
 
 /*
