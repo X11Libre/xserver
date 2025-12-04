@@ -57,6 +57,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -76,13 +77,9 @@ SOFTWARE.
 int
 ProcXUngrabDeviceButton(ClientPtr client)
 {
-    REQUEST(xUngrabDeviceButtonReq);
-    REQUEST_SIZE_MATCH(xUngrabDeviceButtonReq);
-
-    if (client->swapped) {
-        swapl(&stuff->grabWindow);
-        swaps(&stuff->modifiers);
-    }
+    X_REQUEST_HEAD_STRUCT(xUngrabDeviceButtonReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(modifiers);
 
     DeviceIntPtr dev;
     DeviceIntPtr mdev;

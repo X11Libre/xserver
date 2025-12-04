@@ -59,6 +59,7 @@ SOFTWARE.
 #include "dix/devices_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -74,21 +75,6 @@ SOFTWARE.
 int
 ProcXGrabDeviceButton(ClientPtr client)
 {
-    REQUEST(xGrabDeviceButtonReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceButtonReq);
-
-    if (client->swapped) {
-        swapl(&stuff->grabWindow);
-        swaps(&stuff->modifiers);
-        swaps(&stuff->event_count);
-    }
-
-    REQUEST_FIXED_SIZE(xGrabDeviceButtonReq,
-                       stuff->event_count * sizeof(CARD32));
-
-    if (client->swapped)
-        SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
-
     int ret;
     DeviceIntPtr dev;
     DeviceIntPtr mdev;
@@ -96,9 +82,11 @@ ProcXGrabDeviceButton(ClientPtr client)
     struct tmask tmp[EMASKSIZE];
     GrabMask mask;
 
-    if (client->req_len !=
-        bytes_to_int32(sizeof(xGrabDeviceButtonReq)) + stuff->event_count)
-        return BadLength;
+    X_REQUEST_HEAD_AT_LEAST(xGrabDeviceButtonReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(modifiers);
+    X_REQUEST_FIELD_CARD16(event_count);
+    X_REQUEST_REST_COUNT_CARD32(stuff->event_count);
 
     ret = dixLookupDevice(&dev, stuff->grabbed_device, client, DixGrabAccess);
     if (ret != Success)
