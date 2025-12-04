@@ -191,7 +191,6 @@ static int
 send_buffers_reply(ClientPtr client, DrawablePtr pDrawable,
                    DRI2BufferPtr * buffers, int count, int width, int height)
 {
-    xDRI2GetBuffersReply rep;
     int skip = 0;
     int i;
 
