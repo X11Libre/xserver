@@ -424,8 +424,6 @@ attach_slave(ClientPtr client, xXIAttachSlaveInfo * c, int flags[MAXDEVICES])
     return rc;
 }
 
-#define SWAPIF(cmd) if (client->swapped) { cmd; }
-
 int
 ProcXIChangeHierarchy(ClientPtr client)
 {
@@ -454,8 +452,10 @@ ProcXIChangeHierarchy(ClientPtr client)
             goto unwind;
         }
 
-        SWAPIF(swaps(&any->type));
-        SWAPIF(swaps(&any->length));
+        if (client->swapped) {
+            swaps(&any->type);
+            swaps(&any->length);
+        }
 
         if (len < ((size_t)any->length << 2))
             return BadLength;
@@ -478,7 +478,10 @@ ProcXIChangeHierarchy(ClientPtr client)
                 rc = BadLength;
                 goto unwind;
             }
-            SWAPIF(swaps(&c->name_len));
+
+            if (client->swapped)
+                swaps(&c->name_len);
+
             if (c->name_len > (len - sizeof(xXIAddMasterInfo))) {
                 rc = BadLength;
                 goto unwind;
