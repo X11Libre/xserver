@@ -44,17 +44,13 @@
 int
 ProcXISetFocus(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xXISetFocusReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
+    X_REQUEST_FIELD_CARD32(focus);
+    X_REQUEST_FIELD_CARD32(time);
+
     DeviceIntPtr dev;
     int ret;
-
-    REQUEST(xXISetFocusReq);
-    REQUEST_AT_LEAST_SIZE(xXISetFocusReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceid);
-        swapl(&stuff->focus);
-        swapl(&stuff->time);
-    }
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixSetFocusAccess);
     if (ret != Success)
@@ -69,14 +65,11 @@ ProcXISetFocus(ClientPtr client)
 int
 ProcXIGetFocus(ClientPtr client)
 {
+    X_REQUEST_HEAD_AT_LEAST(xXIGetFocusReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
+
     DeviceIntPtr dev;
     int ret;
-
-    REQUEST(xXIGetFocusReq);
-    REQUEST_AT_LEAST_SIZE(xXIGetFocusReq);
-
-    if (client->swapped)
-        swaps(&stuff->deviceid);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetFocusAccess);
     if (ret != Success)

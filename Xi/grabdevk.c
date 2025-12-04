@@ -59,6 +59,7 @@ SOFTWARE.
 #include "dix/devices_priv.h"
 #include "dix/exevents_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -74,19 +75,11 @@ SOFTWARE.
 int
 ProcXGrabDeviceKey(ClientPtr client)
 {
-    REQUEST(xGrabDeviceKeyReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceKeyReq);
-
-    if (client->swapped) {
-        swapl(&stuff->grabWindow);
-        swaps(&stuff->modifiers);
-        swaps(&stuff->event_count);
-    }
-
-    REQUEST_FIXED_SIZE(xGrabDeviceKeyReq, stuff->event_count * sizeof(CARD32));
-
-    if (client->swapped)
-        SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
+    X_REQUEST_HEAD_AT_LEAST(xGrabDeviceKeyReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD16(modifiers);
+    X_REQUEST_FIELD_CARD16(event_count);
+    X_REQUEST_REST_COUNT_CARD32(stuff->event_count);
 
     int ret;
     DeviceIntPtr dev;

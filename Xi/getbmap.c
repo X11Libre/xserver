@@ -75,8 +75,7 @@ ProcXGetDeviceButtonMapping(ClientPtr client)
     ButtonClassPtr b;
     int rc;
 
-    REQUEST(xGetDeviceButtonMappingReq);
-    REQUEST_SIZE_MATCH(xGetDeviceButtonMappingReq);
+    X_REQUEST_HEAD_STRUCT(xGetDeviceButtonMappingReq);
 
     rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)

@@ -46,6 +46,7 @@
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
@@ -853,11 +854,8 @@ XIDestroyPointerBarrier(ClientPtr client,
 int
 ProcXIBarrierReleasePointer(ClientPtr client)
 {
-    REQUEST(xXIBarrierReleasePointerReq);
-    REQUEST_AT_LEAST_SIZE(xXIBarrierReleasePointerReq);
-
-    if (client->swapped)
-        swapl(&stuff->num_barriers);
+    X_REQUEST_HEAD_AT_LEAST(xXIBarrierReleasePointerReq);
+    X_REQUEST_FIELD_CARD32(num_barriers);
 
     if (stuff->num_barriers > UINT32_MAX / sizeof(xXIBarrierReleasePointerInfo))
         return BadLength;

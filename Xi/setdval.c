@@ -76,8 +76,7 @@ ProcXSetDeviceValuators(ClientPtr client)
     DeviceIntPtr dev;
     int rc;
 
-    REQUEST(xSetDeviceValuatorsReq);
-    REQUEST_AT_LEAST_SIZE(xSetDeviceValuatorsReq);
+    X_REQUEST_HEAD_AT_LEAST(xSetDeviceValuatorsReq);
 
     xSetDeviceValuatorsReply reply = {
         .RepType = X_SetDeviceValuators,

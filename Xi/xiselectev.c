@@ -117,13 +117,11 @@ XICheckInvalidMaskBits(ClientPtr client, unsigned char *mask, int len)
 int
 ProcXISelectEvents(ClientPtr client)
 {
-    REQUEST(xXISelectEventsReq);
-    REQUEST_AT_LEAST_SIZE(xXISelectEventsReq);
+    X_REQUEST_HEAD_AT_LEAST(xXISelectEventsReq);
+    X_REQUEST_FIELD_CARD32(win);
+    X_REQUEST_FIELD_CARD16(num_masks);
 
     if (client->swapped) {
-        swapl(&stuff->win);
-        swaps(&stuff->num_masks);
-
         int len = client->req_len - bytes_to_int32(sizeof(xXISelectEventsReq));
         xXIEventMask *evmask = (xXIEventMask *) &stuff[1];
         for (int i = 0; i < stuff->num_masks; i++) {
@@ -321,11 +319,8 @@ ProcXISelectEvents(ClientPtr client)
 int
 ProcXIGetSelectedEvents(ClientPtr client)
 {
-    REQUEST(xXIGetSelectedEventsReq);
-    REQUEST_SIZE_MATCH(xXIGetSelectedEventsReq);
-
-    if (client->swapped)
-        swapl(&stuff->win);
+    X_REQUEST_HEAD_STRUCT(xXIGetSelectedEventsReq);
+    X_REQUEST_FIELD_CARD32(win);
 
     int rc, i;
     WindowPtr win;
