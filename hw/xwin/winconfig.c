@@ -340,14 +340,15 @@ winConfigKeyboard(DeviceIntPtr pDevice)
                        pLayout->xkbvariant ? pLayout->xkbvariant : "none",
                        pLayout->xkboptions ? pLayout->xkboptions : "none");
 
-                g_winInfo.xkb.model = pLayout->xkbmodel;
-                g_winInfo.xkb.layout = pLayout->xkblayout;
-                g_winInfo.xkb.variant = pLayout->xkbvariant;
-                g_winInfo.xkb.options = pLayout->xkboptions;
+                /* need the typecast to (char*) in order to silence const warning */
+                g_winInfo.xkb.model = (char*)pLayout->xkbmodel;
+                g_winInfo.xkb.layout = (char*)pLayout->xkblayout;
+                g_winInfo.xkb.variant = (char*)pLayout->xkbvariant;
+                g_winInfo.xkb.options = (char*)pLayout->xkboptions;
 
                 if (deviceIdentifier == 0xa000) {
                     winMsg(X_PROBED, "Windows keyboard layout device identifier indicates Macintosh, setting Model = \"macintosh\"");
-                    g_winInfo.xkb.model = "macintosh";
+                    g_winInfo.xkb.model = (char*)"macintosh";
                 }
 
                 break;
