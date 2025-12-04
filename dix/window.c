@@ -1579,7 +1579,7 @@ ProcGetWindowAttributes(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xGetWindowAttributesReply rep = {
+    xGetWindowAttributesReply reply = {
         .bitGravity = pWin->bitGravity,
         .winGravity = pWin->winGravity,
         .backingStore = pWin->backingStore,
@@ -1600,17 +1600,17 @@ ProcGetWindowAttributes(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.visualID);
-        swaps(&rep.class);
-        swapl(&rep.backingBitPlanes);
-        swapl(&rep.backingPixel);
-        swapl(&rep.colormap);
-        swapl(&rep.allEventMasks);
-        swapl(&rep.yourEventMask);
-        swaps(&rep.doNotPropagateMask);
+        swapl(&reply.visualID);
+        swaps(&reply.class);
+        swapl(&reply.backingBitPlanes);
+        swapl(&reply.backingPixel);
+        swapl(&reply.colormap);
+        swapl(&reply.allEventMasks);
+        swapl(&reply.yourEventMask);
+        swaps(&reply.doNotPropagateMask);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 WindowPtr

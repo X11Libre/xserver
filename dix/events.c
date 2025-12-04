@@ -4980,22 +4980,22 @@ ProcGetInputFocus(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xGetInputFocusReply rep = {
+    xGetInputFocusReply reply = {
         .revertTo = focus->revert
     };
 
     if (focus->win == NoneWin)
-        rep.focus = None;
+        reply.focus = None;
     else if (focus->win == PointerRootWin)
-        rep.focus = PointerRoot;
+        reply.focus = PointerRoot;
     else
-        rep.focus = focus->win->drawable.id;
+        reply.focus = focus->win->drawable.id;
 
     if (client->swapped) {
-        swapl(&rep.focus);
+        swapl(&reply.focus);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /**
@@ -5046,11 +5046,11 @@ ProcGrabPointer(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xGrabPointerReply rep = {
+    xGrabPointerReply reply = {
         .status = status,
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /**
@@ -5288,11 +5288,11 @@ ProcGrabKeyboard(ClientPtr client)
     if (result != Success)
         return result;
 
-    xGrabKeyboardReply rep = {
+    xGrabKeyboardReply reply = {
         .status = status,
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /**
@@ -5359,7 +5359,7 @@ ProcQueryPointer(ClientPtr client)
     if (mouse->valuator->motionHintWindow)
         MaybeStopHint(mouse, client);
 
-    xQueryPointerReply rep = {
+    xQueryPointerReply reply = {
         .mask = event_get_corestate(mouse, keyboard),
         .root = (InputDevCurrentRootWindow(mouse))->drawable.id,
         .rootX = pSprite->hot.x,
@@ -5367,51 +5367,51 @@ ProcQueryPointer(ClientPtr client)
         .child = None
     };
     if (pSprite->hot.pScreen == pWin->drawable.pScreen) {
-        rep.sameScreen = xTrue;
-        rep.winX = pSprite->hot.x - pWin->drawable.x;
-        rep.winY = pSprite->hot.y - pWin->drawable.y;
+        reply.sameScreen = xTrue;
+        reply.winX = pSprite->hot.x - pWin->drawable.x;
+        reply.winY = pSprite->hot.y - pWin->drawable.y;
         for (WindowPtr t = pSprite->win; t; t = t->parent)
             if (t->parent == pWin) {
-                rep.child = t->drawable.id;
+                reply.child = t->drawable.id;
                 break;
             }
     }
     else {
-        rep.sameScreen = xFalse;
+        reply.sameScreen = xFalse;
     }
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
         ScreenPtr masterScreen = dixGetMasterScreen();
-        rep.rootX += masterScreen->x;
-        rep.rootY += masterScreen->y;
-        if (stuff->id == rep.root) {
-            rep.winX += masterScreen->x;
-            rep.winY += masterScreen->y;
+        reply.rootX += masterScreen->x;
+        reply.rootY += masterScreen->y;
+        if (stuff->id == reply.root) {
+            reply.winX += masterScreen->x;
+            reply.winY += masterScreen->y;
         }
     }
 #endif /* XINERAMA */
 
     if (rc == BadAccess) {
-        rep.mask = 0;
-        rep.child = None;
-        rep.rootX = 0;
-        rep.rootY = 0;
-        rep.winX = 0;
-        rep.winY = 0;
+        reply.mask = 0;
+        reply.child = None;
+        reply.rootX = 0;
+        reply.rootY = 0;
+        reply.winX = 0;
+        reply.winY = 0;
     }
 
     if (client->swapped) {
-        swapl(&rep.root);
-        swapl(&rep.child);
-        swaps(&rep.rootX);
-        swaps(&rep.rootY);
-        swaps(&rep.winX);
-        swaps(&rep.winY);
-        swaps(&rep.mask);
+        swapl(&reply.root);
+        swapl(&reply.child);
+        swaps(&reply.rootX);
+        swaps(&reply.rootY);
+        swaps(&reply.winX);
+        swaps(&reply.winY);
+        swaps(&reply.mask);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /**

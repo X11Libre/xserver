@@ -731,14 +731,14 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     names = c->names;
     client = c->client;
 
-    xListFontsReply rep = {
+    xListFontsReply reply = {
         .nFonts = names->nnames,
     };
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     for (int i = 0; i < names->nnames; i++) {
         if (names->length[i] > 255)
-            rep.nFonts--;
+            reply.nFonts--;
         else {
             /* write a pascal string */
             x_rpcbuf_write_CARD8(&rpcbuf, names->length[i]);
@@ -752,10 +752,10 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     }
 
     if (client->swapped) {
-        swaps(&rep.nFonts);
+        swaps(&reply.nFonts);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
  bail:
     ClientWakeup(client);
@@ -829,7 +829,6 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     int namelen;
     int numFonts;
     FontInfoRec fontInfo, *pFontInfo;
-    xListFontsWithInfoReply *reply;
     int length;
     xFontProp *pFP;
     int aliascount = 0;
@@ -941,7 +940,7 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
         }
         else if (err == Successful) {
             length = sizeof(xListFontsWithInfoReply) + pFontInfo->nprops * sizeof(xFontProp);
-            reply = c->reply;
+            xListFontsWithInfoReply *reply = c->reply;
             if (c->length < length) {
                 reply = (xListFontsWithInfoReply *) realloc(c->reply, length);
                 if (!reply) {
@@ -1033,8 +1032,8 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     }
  finish: ;
     /* finish it the replies series sending an empty reply */
-    xListFontsWithInfoReply rep = { 0 };
-    X_SEND_REPLY_SIMPLE(client, rep);
+    xListFontsWithInfoReply reply = { 0 };
+    X_SEND_REPLY_SIMPLE(client, reply);
  bail:
     ClientWakeup(client);
     for (int i = 0; i < c->num_fpes; i++)

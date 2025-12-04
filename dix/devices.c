@@ -1746,11 +1746,11 @@ ProcSetModifierMapping(ClientPtr client)
     if (rc != MappingSuccess && rc != MappingFailed && rc != MappingBusy)
         return rc;
 
-    xSetModifierMappingReply rep = {
+    xSetModifierMappingReply reply = {
         .success = rc,
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1880,11 +1880,11 @@ ProcSetPointerMapping(ClientPtr client)
     if (ret != Success && ret != MappingBusy)
         return ret;
 
-    xSetPointerMappingReply rep = {
+    xSetPointerMappingReply reply = {
         .success = (ret == MappingBusy) ? MappingBusy : MappingSuccess,
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -1920,7 +1920,7 @@ ProcGetKeyboardMapping(ClientPtr client)
 
     const int count = syms->mapWidth * stuff->count;
 
-    xGetKeyboardMappingReply rep = {
+    xGetKeyboardMappingReply reply = {
         .keySymsPerKeyCode = syms->mapWidth,
     };
 
@@ -1933,7 +1933,7 @@ ProcGetKeyboardMapping(ClientPtr client)
     free(syms->map);
     free(syms);
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -2195,7 +2195,7 @@ ProcGetKeyboardControl(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xGetKeyboardControlReply rep = {
+    xGetKeyboardControlReply reply = {
         .globalAutoRepeat = ctrl->autoRepeat,
         .ledMask = ctrl->leds,
         .keyClickPercent = ctrl->click,
@@ -2204,15 +2204,15 @@ ProcGetKeyboardControl(ClientPtr client)
         .bellDuration = ctrl->bell_duration
     };
     for (int i = 0; i < 32; i++)
-        rep.map[i] = ctrl->autoRepeats[i];
+        reply.map[i] = ctrl->autoRepeats[i];
 
     if (client->swapped) {
-        swapl(&rep.ledMask);
-        swaps(&rep.bellPitch);
-        swaps(&rep.bellDuration);
+        swapl(&reply.ledMask);
+        swaps(&reply.bellPitch);
+        swaps(&reply.bellDuration);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int
@@ -2350,19 +2350,19 @@ ProcGetPointerControl(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xGetPointerControlReply rep = {
+    xGetPointerControlReply reply = {
         .accelNumerator = ctrl->num,
         .accelDenominator = ctrl->den,
         .threshold = ctrl->threshold
     };
 
     if (client->swapped) {
-        swaps(&rep.accelNumerator);
-        swaps(&rep.accelDenominator);
-        swaps(&rep.threshold);
+        swaps(&reply.accelNumerator);
+        swaps(&reply.accelDenominator);
+        swaps(&reply.threshold);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 void
@@ -2460,7 +2460,7 @@ ProcQueryKeymap(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xReq);
 
-    xQueryKeymapReply rep = { 0 };
+    xQueryKeymapReply reply = { 0 };
 
     rc = dixCallDeviceAccessCallback(client, keybd, DixReadAccess);
     /* If rc is Success, we're allowed to copy out the keymap.
@@ -2468,12 +2468,12 @@ ProcQueryKeymap(ClientPtr client)
      */
     if (rc == Success) {
         for (int i = 0; i < 32; i++)
-            rep.map[i] = down[i];
+            reply.map[i] = down[i];
     }
     else if (rc != BadAccess)
         return rc;
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /**
