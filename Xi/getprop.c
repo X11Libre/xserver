@@ -90,7 +90,7 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     WindowPtr pWin;
     OtherInputMasks *others;
 
-    xGetDeviceDontPropagateListReply rep = {
+    xGetDeviceDontPropagateListReply reply = {
         .RepType = X_GetDeviceDontPropagateList,
     };
 
@@ -104,8 +104,8 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
         for (i = 0; i < EMASKSIZE; i++)
             ClassFromMask(NULL, others->dontPropagateMask[i], i, &count, COUNT);
         if (count) {
-            rep.count = count;
-            buf = calloc(rep.count, sizeof(XEventClass));
+            reply.count = count;
+            buf = calloc(count, sizeof(XEventClass));
             if (!buf)
                 return BadAlloc;
 
@@ -120,10 +120,10 @@ ProcXGetDeviceDontPropagateList(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&rep.count);
+        swaps(&reply.count);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 /***********************************************************************

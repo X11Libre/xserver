@@ -97,7 +97,7 @@ ProcXGrabDevice(ClientPtr client)
     GrabMask mask;
     struct tmask tmp[EMASKSIZE];
 
-    xGrabDeviceReply rep = {
+    xGrabDeviceReply reply = {
         .RepType = X_GrabDevice,
     };
 
@@ -115,12 +115,12 @@ ProcXGrabDevice(ClientPtr client)
     rc = GrabDevice(client, dev, stuff->other_devices_mode,
                     stuff->this_device_mode, stuff->grabWindow,
                     stuff->ownerEvents, stuff->time,
-                    &mask, XI, None, None, &rep.status);
+                    &mask, XI, None, None, &reply.status);
 
     if (rc != Success)
         return rc;
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /***********************************************************************

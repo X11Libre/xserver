@@ -263,33 +263,33 @@ ProcXGetFeedbackControl(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xGetFeedbackControlReply rep = {
+    xGetFeedbackControlReply reply = {
         .RepType = X_GetFeedbackControl,
     };
 
     for (k = dev->kbdfeed; k; k = k->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xKbdFeedbackState);
     }
     for (p = dev->ptrfeed; p; p = p->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xPtrFeedbackState);
     }
     for (s = dev->stringfeed; s; s = s->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xStringFeedbackState) +
             (s->ctrl.num_symbols_supported * sizeof(KeySym));
     }
     for (i = dev->intfeed; i; i = i->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xIntegerFeedbackState);
     }
     for (l = dev->leds; l; l = l->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xLedFeedbackState);
     }
     for (b = dev->bell; b; b = b->next) {
-        rep.num_feedbacks++;
+        reply.num_feedbacks++;
         total_length += sizeof(xBellFeedbackState);
     }
 
@@ -313,7 +313,7 @@ ProcXGetFeedbackControl(ClientPtr client)
         CopySwapBellFeedback(client, b, &buf);
 
     if (client->swapped) {
-        swaps(&rep.num_feedbacks);
+        swaps(&reply.num_feedbacks);
     }
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

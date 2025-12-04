@@ -114,12 +114,12 @@ ProcXIGrabDevice(ClientPtr client)
     if (ret != Success)
         return ret;
 
-    xXIGrabDeviceReply rep = {
+    xXIGrabDeviceReply reply = {
         .RepType = X_XIGrabDevice,
         .status = status
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int

@@ -87,25 +87,25 @@ ProcXGetDeviceFocus(ClientPtr client)
 
     focus = dev->focus;
 
-    xGetDeviceFocusReply rep = {
+    xGetDeviceFocusReply reply = {
         .RepType = X_GetDeviceFocus,
         .time = focus->time.milliseconds,
         .revertTo = focus->revert,
     };
 
     if (focus->win == NoneWin)
-        rep.focus = None;
+        reply.focus = None;
     else if (focus->win == PointerRootWin)
-        rep.focus = PointerRoot;
+        reply.focus = PointerRoot;
     else if (focus->win == FollowKeyboardWin)
-        rep.focus = FollowKeyboard;
+        reply.focus = FollowKeyboard;
     else
-        rep.focus = focus->win->drawable.id;
+        reply.focus = focus->win->drawable.id;
 
     if (client->swapped) {
-        swapl(&rep.focus);
-        swapl(&rep.time);
+        swapl(&reply.focus);
+        swapl(&reply.time);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

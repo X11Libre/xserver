@@ -91,7 +91,7 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     OtherInputMasks *pOthers;
     InputClientsPtr others;
 
-    xGetSelectedExtensionEventsReply rep = {
+    xGetSelectedExtensionEventsReply reply = {
         .RepType = X_GetSelectedExtensionEvents,
     };
 
@@ -105,24 +105,24 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
         for (others = pOthers->inputClients; others; others = others->next)
             for (i = 0; i < EMASKSIZE; i++)
                 ClassFromMask(NULL, others->mask[i], i,
-                              &rep.all_clients_count, COUNT);
+                              &reply.all_clients_count, COUNT);
 
         for (others = pOthers->inputClients; others; others = others->next)
             if (SameClient(others, client)) {
                 for (i = 0; i < EMASKSIZE; i++)
                     ClassFromMask(NULL, others->mask[i], i,
-                                  &rep.this_client_count, COUNT);
+                                  &reply.this_client_count, COUNT);
                 break;
             }
 
-        size_t total_count = rep.all_clients_count + rep.this_client_count;
+        size_t total_count = reply.all_clients_count + reply.this_client_count;
         size_t total_length = total_count * sizeof(XEventClass);
         buf = calloc(1, total_length);
         if (!buf) /* rpcbuf still empty */
             return BadAlloc;
 
         tclient = buf;
-        aclient = buf + rep.this_client_count;
+        aclient = buf + reply.this_client_count;
         if (others)
             for (i = 0; i < EMASKSIZE; i++)
                 tclient =
@@ -138,9 +138,9 @@ ProcXGetSelectedExtensionEvents(ClientPtr client)
     }
 
     if (client->swapped) {
-        swaps(&rep.this_client_count);
-        swaps(&rep.all_clients_count);
+        swaps(&reply.this_client_count);
+        swaps(&reply.all_clients_count);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

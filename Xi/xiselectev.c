@@ -337,7 +337,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xXIGetSelectedEventsReply rep = {
+    xXIGetSelectedEventsReply reply = {
         .RepType = X_XIGetSelectedEvents,
     };
 
@@ -381,7 +381,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
                 CARD8 zero[8] = { 0 };
                 x_rpcbuf_write_CARD8s(&rpcbuf, zero, (mask_len*4) - (j+1));
 
-                rep.num_masks++;
+                reply.num_masks++;
 
                 /* found out the mask size and written it, so break out here */
                 break;
@@ -392,8 +392,8 @@ ProcXIGetSelectedEvents(ClientPtr client)
 finish: ;
 
     if (client->swapped) {
-        swaps(&rep.num_masks);
+        swaps(&reply.num_masks);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

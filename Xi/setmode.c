@@ -80,7 +80,7 @@ ProcXSetDeviceMode(ClientPtr client)
     REQUEST(xSetDeviceModeReq);
     REQUEST_SIZE_MATCH(xSetDeviceModeReq);
 
-    xSetDeviceModeReply rep = {
+    xSetDeviceModeReply reply = {
         .RepType = X_SetDeviceMode,
     };
 
@@ -94,23 +94,23 @@ ProcXSetDeviceMode(ClientPtr client)
         return BadMatch;
 
     if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client))
-        rep.status = AlreadyGrabbed;
+        reply.status = AlreadyGrabbed;
     else
-        rep.status = SetDeviceMode(client, dev, stuff->mode);
+        reply.status = SetDeviceMode(client, dev, stuff->mode);
 
-    if (rep.status == Success)
+    if (reply.status == Success)
         valuator_set_mode(dev, VALUATOR_MODE_ALL_AXES, stuff->mode);
-    else if (rep.status != AlreadyGrabbed) {
-        switch (rep.status) {
+    else if (reply.status != AlreadyGrabbed) {
+        switch (reply.status) {
         case BadMatch:
         case BadImplementation:
         case BadAlloc:
             break;
         default:
-            rep.status = BadMode;
+            reply.status = BadMode;
         }
-        return rep.status;
+        return reply.status;
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

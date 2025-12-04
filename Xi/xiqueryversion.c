@@ -118,16 +118,16 @@ ProcXIQueryVersion(ClientPtr client)
         pXIClient->minor_version = minor;
     }
 
-    xXIQueryVersionReply rep = {
+    xXIQueryVersionReply reply = {
         .RepType = X_XIQueryVersion,
         .major_version = major,
         .minor_version = minor
     };
 
     if (client->swapped) {
-        swaps(&rep.major_version);
-        swaps(&rep.minor_version);
+        swaps(&reply.major_version);
+        swaps(&reply.minor_version);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

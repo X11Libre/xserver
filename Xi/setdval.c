@@ -79,7 +79,7 @@ ProcXSetDeviceValuators(ClientPtr client)
     REQUEST(xSetDeviceValuatorsReq);
     REQUEST_AT_LEAST_SIZE(xSetDeviceValuatorsReq);
 
-    xSetDeviceValuatorsReply rep = {
+    xSetDeviceValuatorsReply reply = {
         .RepType = X_SetDeviceValuators,
         .status = Success
     };
@@ -101,14 +101,14 @@ ProcXSetDeviceValuators(ClientPtr client)
         return BadValue;
 
     if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client))
-        rep.status = AlreadyGrabbed;
+        reply.status = AlreadyGrabbed;
     else
-        rep.status = SetDeviceValuators(client, dev, (int *) &stuff[1],
+        reply.status = SetDeviceValuators(client, dev, (int *) &stuff[1],
                                         stuff->first_valuator,
                                         stuff->num_valuators);
 
-    if (rep.status != Success && rep.status != AlreadyGrabbed)
-        return rep.status;
+    if (reply.status != Success && reply.status != AlreadyGrabbed)
+        return reply.status;
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

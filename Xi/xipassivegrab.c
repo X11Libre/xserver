@@ -74,7 +74,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     }
 
     DeviceIntPtr dev, mod_dev;
-    xXIPassiveGrabDeviceReply rep = {
+    xXIPassiveGrabDeviceReply reply = {
         .repType = X_Reply,
         .RepType = X_XIPassiveGrabDevice,
         .sequenceNumber = client->sequence,
@@ -226,17 +226,17 @@ ProcXIPassiveGrabDevice(ClientPtr client)
             x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad0 */
             x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad1 */
 
-            rep.num_modifiers++;
+            reply.num_modifiers++;
         }
     }
 
     xi2mask_free(&mask.xi2mask);
 
     if (client->swapped) {
-        swaps(&rep.num_modifiers);
+        swaps(&reply.num_modifiers);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
  out:
     xi2mask_free(&mask.xi2mask);

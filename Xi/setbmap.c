@@ -95,10 +95,10 @@ ProcXSetDeviceButtonMapping(ClientPtr client)
     if ((ret != Success) && (ret != MappingBusy))
         return ret;
 
-    xSetDeviceButtonMappingReply rep = {
+    xSetDeviceButtonMappingReply reply = {
         .RepType = X_SetDeviceButtonMapping,
         .status = (ret == Success ? MappingSuccess : MappingBusy),
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

@@ -95,10 +95,10 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     if (ret != MappingSuccess && ret != MappingBusy && ret != MappingFailed)
         return ret;
 
-    xSetDeviceModifierMappingReply rep = {
+    xSetDeviceModifierMappingReply reply = {
         .RepType = X_SetDeviceModifierMapping,
         .success = ret,
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
