@@ -207,7 +207,7 @@ CreateClipShape(WindowPtr pWin)
 static int
 ProcShapeQueryVersion(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xShapeQueryVersionReq);
+    X_REQUEST_HEAD_STRUCT(xShapeQueryVersionReq);
 
     xShapeQueryVersionReply reply = {
         .majorVersion = SERVER_SHAPE_MAJOR_VERSION,
@@ -290,15 +290,11 @@ ShapeRectangles(ClientPtr client, xShapeRectanglesReq *stuff)
 static int
 ProcShapeRectangles(ClientPtr client)
 {
-    REQUEST(xShapeRectanglesReq);
-    REQUEST_AT_LEAST_SIZE(xShapeRectanglesReq);
-
-    if (client->swapped) {
-        swapl(&stuff->dest);
-        swaps(&stuff->xOff);
-        swaps(&stuff->yOff);
-        SwapRestS(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xShapeRectanglesReq);
+    X_REQUEST_FIELD_CARD32(dest);
+    X_REQUEST_FIELD_CARD16(xOff);
+    X_REQUEST_FIELD_CARD16(yOff);
+    X_REQUEST_REST_CARD16();
 
 #ifdef XINERAMA
     if (noPanoramiXExtension)
@@ -395,15 +391,11 @@ ShapeMask(ClientPtr client, xShapeMaskReq *stuff)
 static int
 ProcShapeMask(ClientPtr client)
 {
-    REQUEST(xShapeMaskReq);
-    REQUEST_SIZE_MATCH(xShapeMaskReq);
-
-    if (client->swapped) {
-        swapl(&stuff->dest);
-        swaps(&stuff->xOff);
-        swaps(&stuff->yOff);
-        swapl(&stuff->src);
-    }
+    X_REQUEST_HEAD_STRUCT(xShapeMaskReq);
+    X_REQUEST_FIELD_CARD32(dest);
+    X_REQUEST_FIELD_CARD16(xOff);
+    X_REQUEST_FIELD_CARD16(yOff);
+    X_REQUEST_FIELD_CARD32(src);
 
 #ifdef XINERAMA
     if (noPanoramiXExtension)
@@ -531,15 +523,11 @@ ShapeCombine(ClientPtr client, xShapeCombineReq *stuff)
 static int
 ProcShapeCombine(ClientPtr client)
 {
-    REQUEST(xShapeCombineReq);
-    REQUEST_AT_LEAST_SIZE(xShapeCombineReq);
-
-    if (client->swapped) {
-        swapl(&stuff->dest);
-        swaps(&stuff->xOff);
-        swaps(&stuff->yOff);
-        swapl(&stuff->src);
-    }
+    X_REQUEST_HEAD_STRUCT(xShapeCombineReq);
+    X_REQUEST_FIELD_CARD32(dest);
+    X_REQUEST_FIELD_CARD16(xOff);
+    X_REQUEST_FIELD_CARD16(yOff);
+    X_REQUEST_FIELD_CARD32(src);
 
 #ifdef XINERAMA
     if (noPanoramiXExtension)
@@ -608,14 +596,10 @@ ShapeOffset(ClientPtr client, xShapeOffsetReq *stuff)
 static int
 ProcShapeOffset(ClientPtr client)
 {
-    REQUEST(xShapeOffsetReq);
-    REQUEST_AT_LEAST_SIZE(xShapeOffsetReq);
-
-    if (client->swapped) {
-        swapl(&stuff->dest);
-        swaps(&stuff->xOff);
-        swaps(&stuff->yOff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xShapeOffsetReq);
+    X_REQUEST_FIELD_CARD32(dest);
+    X_REQUEST_FIELD_CARD16(yOff);
+    X_REQUEST_FIELD_CARD16(yOff);
 
 #ifdef XINERAMA
     PanoramiXRes *win;
@@ -645,11 +629,8 @@ ProcShapeOffset(ClientPtr client)
 static int
 ProcShapeQueryExtents(ClientPtr client)
 {
-    REQUEST(xShapeQueryExtentsReq);
-    REQUEST_SIZE_MATCH(xShapeQueryExtentsReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xShapeQueryExtentsReq);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     int rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
@@ -756,16 +737,13 @@ ShapeFreeEvents(void *data, XID id)
 static int
 ProcShapeSelectInput(ClientPtr client)
 {
-    REQUEST(xShapeSelectInputReq);
+    X_REQUEST_HEAD_STRUCT(xShapeSelectInputReq);
+    X_REQUEST_FIELD_CARD32(window);
+
     WindowPtr pWin;
     ShapeEventPtr pShapeEvent, pNewShapeEvent, *pHead;
     XID clientResource;
     int rc;
-
-    REQUEST_SIZE_MATCH(xShapeSelectInputReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (rc != Success)
@@ -931,15 +909,12 @@ SendShapeNotify(WindowPtr pWin, int which)
 static int
 ProcShapeInputSelected(ClientPtr client)
 {
-    REQUEST(xShapeInputSelectedReq);
+    X_REQUEST_HEAD_STRUCT(xShapeInputSelectedReq);
+    X_REQUEST_FIELD_CARD32(window);
+
     WindowPtr pWin;
     ShapeEventPtr pShapeEvent, *pHead;
     int enabled, rc;
-
-    REQUEST_SIZE_MATCH(xShapeInputSelectedReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
@@ -968,15 +943,12 @@ ProcShapeInputSelected(ClientPtr client)
 static int
 ProcShapeGetRectangles(ClientPtr client)
 {
-    REQUEST(xShapeGetRectanglesReq);
+    X_REQUEST_HEAD_STRUCT(xShapeGetRectanglesReq);
+    X_REQUEST_FIELD_CARD32(window);
+
     WindowPtr pWin;
     int nrects, rc;
     RegionPtr region;
-
-    REQUEST_SIZE_MATCH(xShapeGetRectanglesReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
 
     rc = dixLookupWindow(&pWin, stuff->window, client, DixGetAttrAccess);
     if (rc != Success)
