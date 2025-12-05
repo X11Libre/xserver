@@ -59,6 +59,8 @@
 #include "xf86Config.h"
 #include "xf86Crtc.h"
 
+int platformSlotClaimed = 0;
+
 int xf86_num_platform_devices;
 
 struct xf86_platform_device *xf86_platform_devices;
@@ -476,6 +478,7 @@ xf86ClaimPlatformSlot(struct xf86_platform_device * d, DriverPtr drvp,
         p->inUse = FALSE;
         if (dev)
             xf86AddDevToEntity(num, dev);
+        platformSlotClaimed++;
 
         return num;
     }
@@ -494,6 +497,7 @@ xf86UnclaimPlatformSlot(struct xf86_platform_device *d, GDevPtr dev)
         if ((p->bus.type == BUS_PLATFORM) && (p->bus.id.plat == d)) {
             if (dev)
                 xf86RemoveDevFromEntity(i, dev);
+            platformSlotClaimed--;
             p->bus.type = BUS_NONE;
             return 0;
         }
