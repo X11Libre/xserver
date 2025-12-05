@@ -333,9 +333,8 @@ InitOutput(int argc, char **argv)
         /* Tell the loader the default module search path */
         LoaderSetPath(NULL, xf86ModulePath);
 
-        if (xf86Info.ignoreABI) {
-            LoaderSetIgnoreAbi();
-        }
+        if (xf86Info.ignoreABI)
+            LoaderSetIgnoreAllABI();
 
         if (xf86DoShowOptions)
             DoShowOptions();
@@ -975,7 +974,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
     if (!strcmp(argv[i], "-ignoreABI")) {
-        LoaderSetIgnoreAbi();
+        LoaderSetIgnoreAllABI();
         return 1;
     }
     if (!strcmp(argv[i], "-verbose")) {
