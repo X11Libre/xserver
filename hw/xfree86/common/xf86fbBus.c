@@ -44,20 +44,53 @@
 #include "xf86Bus.h"
 #include "xf86_OSproc.h"
 
+int fbSlotClaimed = 0;
+
+static Bool
+xf86_check_fb_slot(GDevPtr dev, const char* driver_name)
+{
+#ifdef XSERVER_LIBPCIACCESS
+
+#define AUTOCONFIGURED_STRING "Autoconfigured Video Device "
+    /* Apparently asan complains is memcmp is used */
+    if ((!dev || !dev->identifier ||
+        !strncmp(dev->identifier, AUTOCONFIGURED_STRING, sizeof(AUTOCONFIGURED_STRING) - 1)) &&
+        (pciSlotClaimed
+#ifdef XSERVER_PLATFORM_BUS
+         || platformSlotClaimed
+#endif
+#if defined(__sparc__) || defined(__sparc)
+         || sbusSlotClaimed
+#endif
+        )) {
+        LogMessageVerb(X_ERROR, 1, "Refusing to use autoconfigured driver: %s in framebuffer mode.\n", driver_name);
+        LogMessageVerb(X_ERROR, 1, "Please write explicit configuration Screen sections for all framebuffer devices.\n");
+        return FALSE;
+    }
+#undef AUTOCONFIGURED_STRING
+#endif
+    return TRUE;
+}
+
 int
 xf86ClaimFbSlot(DriverPtr drvp, int chipset, GDevPtr dev, Bool active)
 {
     EntityPtr p;
     int num;
 
-    num = xf86AllocateEntity();
-    p = xf86Entities[num];
-    p->driver = drvp;
-    p->chipset = 0;
-    p->bus.type = BUS_NONE;
-    p->active = active;
-    p->inUse = FALSE;
-    xf86AddDevToEntity(num, dev);
+    if (xf86_check_fb_slot(dev, drvp->driverName)) {
+        num = xf86AllocateEntity();
+        p = xf86Entities[num];
+        p->driver = drvp;
+        p->chipset = 0;
+        p->bus.type = BUS_NONE;
+        p->active = active;
+        p->inUse = FALSE;
+        xf86AddDevToEntity(num, dev);
 
-    return num;
+        fbSlotClaimed++;
+        return num;
+    } else {
+        return -1;
+    }
 }

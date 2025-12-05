@@ -40,6 +40,8 @@
 #include "xf86sbusBus_priv.h"
 #include "xf86Sbus.h"
 
+int sbusSlotClaimed = 0;
+
 static int xf86nSbusInfo;
 
 static void
@@ -364,6 +366,7 @@ xf86ClaimSbusSlot(sbusDevicePtr psdp, DriverPtr drvp, GDevPtr dev, Bool active)
         p->bus.id.sbus.fbNum = psdp->fbNum;
         p->active = active;
         p->inUse = FALSE;
+        sbusSlotClaimed++;
         return num;
     }
     else
