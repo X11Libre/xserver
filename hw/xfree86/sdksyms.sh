@@ -218,7 +218,6 @@ cat > sdksyms.c << EOF
 #include "closure.h"
 #include "colormap.h"
 #include "colormapst.h"
-#include "client.h"
 #include "cursor.h"
 #include "cursorstr.h"
 #include "dix.h"
