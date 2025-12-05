@@ -762,14 +762,4 @@ typedef void (*InputHandlerProc) (int fd, void *data);
 #define MF_CLEAR_DTR       1
 #define MF_CLEAR_RTS       2
 
-/* Action Events */
-typedef enum {
-    ACTION_TERMINATE = 0,       /* Terminate Server */
-    ACTION_NEXT_MODE = 10,      /* Switch to next video mode */
-    ACTION_PREV_MODE,
-    ACTION_SWITCHSCREEN = 100,  /* VT switch */
-    ACTION_SWITCHSCREEN_NEXT,
-    ACTION_SWITCHSCREEN_PREV,
-} ActionEvent;
-
 #endif                          /* _XF86STR_H */
