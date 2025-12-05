@@ -109,17 +109,14 @@ ProcXGetDeviceControl(ClientPtr client)
 {
     DeviceIntPtr dev;
 
-    REQUEST(xGetDeviceControlReq);
-    REQUEST_SIZE_MATCH(xGetDeviceControlReq);
+    X_REQUEST_HEAD_STRUCT(xGetDeviceControlReq);
+    X_REQUEST_FIELD_CARD16(control);
 
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (rc != Success)
         return rc;
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
-
-    if (rpcbuf.swapped)
-        swaps(&stuff->control);
 
     switch (stuff->control) {
     case DEVICE_RESOLUTION:
