@@ -2685,16 +2685,28 @@ drmmode_crtc_create_planes(xf86CrtcPtr crtc, int num)
             /* Get the SIZE_HINT dimensions, if supported. */
             int size_hint = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_SIZE_HINTS], props, 0);
             drmmode_populate_cursor_size_hints(drmmode, drmmode_crtc, size_hint);
+#endif
             drmModeFreePlane(kplane);
             drmModeFreeObjectProperties(props);
-#endif
             continue;
         }
         case DRMMODE_PLANE_TYPE_PRIMARY:
         {
-            /* If this plane is not on this crtc, skip it */
+            /* Prefer planes that are on this CRTC already */
             if (plane_crtc != drmmode_crtc->mode_crtc->crtc_id) {
-                drmModeFreePlane(kplane);
+                /* If this is the only plane we have, it's the best we have */
+                if (!best_plane) {
+                    best_plane = plane_id;
+                    best_kplane = kplane;
+                    blob_id = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_IN_FORMATS],
+                                                     props, 0);
+                    async_blob_id = drmmode_prop_get_value(&tmp_props[DRMMODE_PLANE_IN_FORMATS_ASYNC],
+                                                           props, 0);
+                    drmmode_prop_info_copy(drmmode_crtc->props_plane, tmp_props,
+                                           DRMMODE_PLANE__COUNT, 1);
+                } else {
+                    drmModeFreePlane(kplane);
+                }
                 drmModeFreeObjectProperties(props);
                 continue;
             }
