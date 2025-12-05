@@ -80,9 +80,6 @@ dri3_screen_priv(ScreenPtr screen)
 int
 proc_dri3_dispatch(ClientPtr client);
 
-int
-sproc_dri3_dispatch(ClientPtr client);
-
 /* DDX interface */
 
 int
