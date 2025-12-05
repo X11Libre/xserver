@@ -101,6 +101,7 @@ SOFTWARE.
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/log_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 #include "xkb/xkbsrv_priv.h"
 
@@ -618,7 +619,7 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
         }
 
         if (from->button->xkb_acts) {
-            size_t maxbuttons = max(to->button->numButtons, from->button->numButtons);
+            size_t maxbuttons = MAX(to->button->numButtons, from->button->numButtons);
             to->button->xkb_acts = XNFreallocarray(to->button->xkb_acts,
                                                    maxbuttons,
                                                    sizeof(XkbAction));
@@ -3343,7 +3344,7 @@ XISetEventMask(DeviceIntPtr dev, WindowPtr win, ClientPtr client,
 
     if (others) {
         xi2mask_zero(others->xi2mask, dev->id);
-        len = min(len, xi2mask_mask_size(others->xi2mask));
+        len = MIN(len, xi2mask_mask_size(others->xi2mask));
     }
 
     if (len) {

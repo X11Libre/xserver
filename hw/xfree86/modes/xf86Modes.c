@@ -31,6 +31,8 @@
 
 #include <libxcvt/libxcvt.h>
 
+#include "os/mathx_priv.h"
+
 #include "xf86_priv.h"
 #include "xf86Config.h"
 #include "xf86Modes.h"
@@ -181,10 +183,10 @@ xf86SetModeCrtc(DisplayModePtr p, int adjustFlags)
         p->CrtcVSyncEnd *= p->VScan;
         p->CrtcVTotal *= p->VScan;
     }
-    p->CrtcVBlankStart = min(p->CrtcVSyncStart, p->CrtcVDisplay);
-    p->CrtcVBlankEnd = max(p->CrtcVSyncEnd, p->CrtcVTotal);
-    p->CrtcHBlankStart = min(p->CrtcHSyncStart, p->CrtcHDisplay);
-    p->CrtcHBlankEnd = max(p->CrtcHSyncEnd, p->CrtcHTotal);
+    p->CrtcVBlankStart = MIN(p->CrtcVSyncStart, p->CrtcVDisplay);
+    p->CrtcVBlankEnd = MAX(p->CrtcVSyncEnd, p->CrtcVTotal);
+    p->CrtcHBlankStart = MIN(p->CrtcHSyncStart, p->CrtcHDisplay);
+    p->CrtcHBlankEnd = MAX(p->CrtcHSyncEnd, p->CrtcHTotal);
 
     p->CrtcHAdjusted = FALSE;
     p->CrtcVAdjusted = FALSE;

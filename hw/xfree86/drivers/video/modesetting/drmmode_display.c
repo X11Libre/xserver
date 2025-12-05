@@ -36,6 +36,7 @@
 
 #include "dix/dix_priv.h"
 #include "os/fmt.h"
+#include "os/mathx_priv.h"
 #include "present/present_priv.h"
 
 #include "dumb_bo.h"
@@ -58,9 +59,6 @@
 #include <X11/extensions/dpmsconst.h>
 
 #include "driver.h"
-
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 #ifndef GBM_BO_USE_FRONT_RENDERING
 #define GBM_BO_USE_FRONT_RENDERING 0
@@ -3172,12 +3170,12 @@ drmmode_output_add_gtf_modes(xf86OutputPtr output, DisplayModePtr Modes)
     for (m = Modes; m; m = m->next) {
         if (m->type & M_T_PREFERRED)
             preferred = m;
-        max_x = max(max_x, m->HDisplay);
-        max_y = max(max_y, m->VDisplay);
-        max_vrefresh = max(max_vrefresh, xf86ModeVRefresh(m));
+        max_x = MAX(max_x, m->HDisplay);
+        max_y = MAX(max_y, m->VDisplay);
+        max_vrefresh = MAX(max_vrefresh, xf86ModeVRefresh(m));
     }
 
-    max_vrefresh = max(max_vrefresh, 60.0);
+    max_vrefresh = MAX(max_vrefresh, 60.0);
     max_vrefresh *= (1 + SYNC_TOLERANCE);
 
     m = xf86GetDefaultModes();

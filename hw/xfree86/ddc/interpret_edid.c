@@ -28,7 +28,8 @@
 #include <xorg-config.h>
 #endif
 
-#include "misc.h"
+#include "os/mathx_priv.h"
+
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #define _PARSE_EDID_
@@ -66,7 +67,7 @@ static void
 find_max_detailed_clock(struct detailed_monitor_section *det, void *ret)
 {
     if (det->type == DT) {
-        *(int *) ret = max(*((int *) ret), det->section.d_timings.clock);
+        *(int *) ret = MAX(*((int *) ret), det->section.d_timings.clock);
     }
 }
 
@@ -118,8 +119,8 @@ handle_detailed_hvsize(struct detailed_monitor_section *det_mon, void *data)
 
         timing_aspect = (float) timing->h_size / timing->v_size;
         if (fabs(1 - (timing_aspect / p->target_aspect)) < 0.05) {
-            p->real_hsize = max(p->real_hsize, timing->h_size);
-            p->real_vsize = max(p->real_vsize, timing->v_size);
+            p->real_hsize = MAX(p->real_hsize, timing->h_size);
+            p->real_vsize = MAX(p->real_vsize, timing->v_size);
         }
     }
 }

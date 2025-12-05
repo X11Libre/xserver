@@ -47,6 +47,7 @@
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
 #include "mi/mi_priv.h"
+#include "os/mathx_priv.h"
 
 #include "xf86.h"
 #include "xf86Priv.h"
@@ -571,10 +572,10 @@ rotate_clip(PixmapPtr pixmap, xf86CrtcPtr crtc, BoxPtr rect, drmModeClip *clip,
         rect->y2 > crtc->y && rect->y1 < crtc->y + h) {
         /* new coordinate of the partial rect on the crtc area
          * + x/y offsets in the framebuffer */
-        x1 = max(rect->x1 - crtc->x, 0) + x;
-        y1 = max(rect->y1 - crtc->y, 0) + y;
-        x2 = min(rect->x2 - crtc->x, w) + x;
-        y2 = min(rect->y2 - crtc->y, h) + y;
+        x1 = MAX(rect->x1 - crtc->x, 0) + x;
+        y1 = MAX(rect->y1 - crtc->y, 0) + y;
+        x2 = MIN(rect->x2 - crtc->x, w) + x;
+        y2 = MIN(rect->y2 - crtc->y, h) + y;
 
         /* coordinate transposing/inversion and offset adjustment */
         if (rotation == RR_Rotate_90) {
@@ -1524,12 +1525,12 @@ msUpdatePacked(ScreenPtr pScreen, shadowBufPtr pBuf)
         nrects = 0;
         for (j = ty2 - 1; j >= ty1; j--) {
             for (i = tx2 - 1; i >= tx1; i--) {
-                BoxRec box;
-
-                box.x1 = max(i * TILE, extents->x1);
-                box.y1 = max(j * TILE, extents->y1);
-                box.x2 = min((i+1) * TILE, extents->x2);
-                box.y2 = min((j+1) * TILE, extents->y2);
+                BoxRec box = {
+                    .x1 = MAX(i * TILE, extents->x1),
+                    .y1 = MAX(j * TILE, extents->y1),
+                    .x2 = MIN((i+1) * TILE, extents->x2),
+                    .y2 = MIN((j+1) * TILE, extents->y2),
+                };
 
                 if (RegionContainsRect(damage, &box) != rgnOUT) {
                     if (msUpdateIntersect(ms, pBuf, &box, prect + nrects)) {
