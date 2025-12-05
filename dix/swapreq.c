@@ -679,25 +679,6 @@ SProcCreateCursor(ClientPtr client)
 }
 
 int _X_COLD
-SProcCreateGlyphCursor(ClientPtr client)
-{
-    REQUEST(xCreateGlyphCursorReq);
-    REQUEST_SIZE_MATCH(xCreateGlyphCursorReq);
-    swapl(&stuff->cid);
-    swapl(&stuff->source);
-    swapl(&stuff->mask);
-    swaps(&stuff->sourceChar);
-    swaps(&stuff->maskChar);
-    swaps(&stuff->foreRed);
-    swaps(&stuff->foreGreen);
-    swaps(&stuff->foreBlue);
-    swaps(&stuff->backRed);
-    swaps(&stuff->backGreen);
-    swaps(&stuff->backBlue);
-    return ((*ProcVector[X_CreateGlyphCursor]) (client));
-}
-
-int _X_COLD
 SProcRecolorCursor(ClientPtr client)
 {
     REQUEST(xRecolorCursorReq);
