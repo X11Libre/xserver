@@ -431,7 +431,6 @@ if build_xorg
         [
             'Xprintf.h',
             'callback.h',
-            'client.h',
             'closure.h',
             'colormap.h',
             'colormapst.h',

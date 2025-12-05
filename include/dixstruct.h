@@ -27,14 +27,15 @@ SOFTWARE.
 #include <X11/Xmd.h>
 
 #include "callback.h"
-
-#include "client.h"
 #include "dix.h"
 #include "resource.h"
 #include "cursor.h"
 #include "gc.h"
 #include "pixmap.h"
 #include "privates.h"
+
+struct _Client;
+typedef struct _ClientId *ClientIdPtr;
 
 /*
  * 	direct-mapped hash table, used by resource manager to store
