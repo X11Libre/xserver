@@ -129,11 +129,8 @@ SDPMSInfoNotifyEvent(xGenericEvent * from,
 static int
 ProcDPMSSelectInput(register ClientPtr client)
 {
-    REQUEST(xDPMSSelectInputReq);
-    REQUEST_SIZE_MATCH(xDPMSSelectInputReq);
-
-    if (client->swapped)
-        swapl(&stuff->eventMask);
+    X_REQUEST_HEAD_STRUCT(xDPMSSelectInputReq);
+    X_REQUEST_FIELD_CARD32(eventMask);
 
     DPMSEventPtr pEvent, pNewEvent, *pHead;
     XID clientResource;
@@ -306,15 +303,8 @@ DPMSSet(ClientPtr client, int level)
 static int
 ProcDPMSGetVersion(ClientPtr client)
 {
-    REQUEST(xDPMSGetVersionReq);
-    REQUEST_SIZE_MATCH(xDPMSGetVersionReq);
+    X_REQUEST_HEAD_STRUCT(xDPMSGetVersionReq);
 
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
-
-    /* REQUEST(xDPMSGetVersionReq); */
     xDPMSGetVersionReply reply = {
         .majorVersion = SERVER_DPMS_MAJOR_VERSION,
         .minorVersion = SERVER_DPMS_MINOR_VERSION
@@ -331,12 +321,11 @@ ProcDPMSGetVersion(ClientPtr client)
 static int
 ProcDPMSCapable(ClientPtr client)
 {
-    /* REQUEST(xDPMSCapableReq); */
+    X_REQUEST_HEAD_STRUCT(xDPMSCapableReq);
+
     xDPMSCapableReply reply = {
         .capable = TRUE
     };
-
-    REQUEST_SIZE_MATCH(xDPMSCapableReq);
 
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
@@ -344,14 +333,13 @@ ProcDPMSCapable(ClientPtr client)
 static int
 ProcDPMSGetTimeouts(ClientPtr client)
 {
-    /* REQUEST(xDPMSGetTimeoutsReq); */
+    X_REQUEST_HEAD_STRUCT(xDPMSGetTimeoutsReq);
+
     xDPMSGetTimeoutsReply reply = {
         .standby = DPMSStandbyTime / MILLI_PER_SECOND,
         .suspend = DPMSSuspendTime / MILLI_PER_SECOND,
         .off = DPMSOffTime / MILLI_PER_SECOND
     };
-
-    REQUEST_SIZE_MATCH(xDPMSGetTimeoutsReq);
 
     if (client->swapped) {
         swaps(&reply.standby);
@@ -365,14 +353,10 @@ ProcDPMSGetTimeouts(ClientPtr client)
 static int
 ProcDPMSSetTimeouts(ClientPtr client)
 {
-    REQUEST(xDPMSSetTimeoutsReq);
-    REQUEST_SIZE_MATCH(xDPMSSetTimeoutsReq);
-
-    if (client->swapped) {
-        swaps(&stuff->standby);
-        swaps(&stuff->suspend);
-        swaps(&stuff->off);
-    }
+    X_REQUEST_HEAD_STRUCT(xDPMSSetTimeoutsReq);
+    X_REQUEST_FIELD_CARD16(standby);
+    X_REQUEST_FIELD_CARD16(suspend);
+    X_REQUEST_FIELD_CARD16(off);
 
     if ((stuff->off != 0) && (stuff->off < stuff->suspend)) {
         client->errorValue = stuff->off;
@@ -394,9 +378,9 @@ ProcDPMSSetTimeouts(ClientPtr client)
 static int
 ProcDPMSEnable(ClientPtr client)
 {
-    Bool was_enabled = DPMSEnabled;
+    X_REQUEST_HEAD_STRUCT(xDPMSEnableReq);
 
-    REQUEST_SIZE_MATCH(xDPMSEnableReq);
+    Bool was_enabled = DPMSEnabled;
 
     DPMSEnabled = TRUE;
     if (!was_enabled) {
@@ -410,11 +394,9 @@ ProcDPMSEnable(ClientPtr client)
 static int
 ProcDPMSDisable(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xDPMSDisableReq);
+
     Bool was_enabled = DPMSEnabled;
-
-    /* REQUEST(xDPMSDisableReq); */
-
-    REQUEST_SIZE_MATCH(xDPMSDisableReq);
 
     DPMSSet(client, DPMSModeOn);
 
@@ -428,15 +410,11 @@ ProcDPMSDisable(ClientPtr client)
 static int
 ProcDPMSForceLevel(ClientPtr client)
 {
-    REQUEST(xDPMSForceLevelReq);
-    REQUEST_SIZE_MATCH(xDPMSForceLevelReq);
+    X_REQUEST_HEAD_STRUCT(xDPMSForceLevelReq);
+    X_REQUEST_FIELD_CARD16(level);
 
     if (!DPMSEnabled)
         return BadMatch;
-
-    if (client->swapped) {
-        swaps(&stuff->level);
-    }
 
     if (stuff->level != DPMSModeOn &&
         stuff->level != DPMSModeStandby &&
@@ -453,13 +431,12 @@ ProcDPMSForceLevel(ClientPtr client)
 static int
 ProcDPMSInfo(ClientPtr client)
 {
-    /* REQUEST(xDPMSInfoReq); */
+    X_REQUEST_HEAD_STRUCT(xDPMSInfoReq);
+
     xDPMSInfoReply reply = {
         .power_level = DPMSPowerLevel,
         .state = DPMSEnabled
     };
-
-    REQUEST_SIZE_MATCH(xDPMSInfoReq);
 
     if (client->swapped) {
         swaps(&reply.power_level);
