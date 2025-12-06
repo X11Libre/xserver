@@ -83,4 +83,5 @@ void xf86RemoveDevFromEntity(int entityIndex, GDevPtr dev);
 
 Bool xf86CallDriverProbe(struct _DriverRec *drv, Bool detect_only);
 
+Bool xf86CheckSlot(const void *ptr, BusType type);
 #endif                          /* _XF86_BUS_H */
