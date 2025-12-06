@@ -956,7 +956,9 @@ FreeResourceByType(XID id, RESTYPE type, Bool skipFree)
 
                 doFreeResource(res, skipFree);
 
-                break;
+                // There can sometimes be more than one (id, type) pair in the resource bucket
+                // so we can not early out from this loop...
+                // break;
             }
             else
                 prev = &res->next;
@@ -1118,7 +1120,7 @@ FreeClientNeverRetainResources(ClientPtr client)
 void
 FreeClientResources(ClientPtr client)
 {
-    ResourcePtr *resources;
+    ResourcePtr *resources, this;
 
     /* This routine shouldn't be called with a null client, but just in
        case ... */
@@ -1139,16 +1141,12 @@ FreeClientResources(ClientPtr client)
            head, just like in FreeResource. I hope that this doesn't slow down
            mass deletion appreciably. PRH */
 
-        ResourcePtr *head;
-
-        head = &resources[j];
-
-        for (ResourcePtr this = *head; this; this = *head) {
+        while ((this = resources[j])) {
 #ifdef XSERVER_DTRACE
             XSERVER_RESOURCE_FREE(this->id, this->type,
                                   this->value, TypeNameString(this->type));
 #endif
-            *head = this->next;
+            resources[j] = resources[j]->next;
             clientTable[client->index].elements--;
 
             doFreeResource(this, FALSE);
