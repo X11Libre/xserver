@@ -40,7 +40,9 @@
 #include <stdbool.h>
 
 #include <X11/Xwindows.h>
+#ifndef __CYGWIN__
 #include <winsock2.h>
+#endif
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_image.h>
