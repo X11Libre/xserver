@@ -101,12 +101,10 @@ void TimerInit(void);
  */
 _X_EXPORT Bool TimerForce(OsTimerPtr);
 
-#ifdef WIN32
+#if defined(WIN32) && ! defined(__CYGWIN__)
 #include <X11/Xwinsock.h>
 
-#if ! defined(__CYGWIN__)
 typedef _sigset_t sigset_t;
-#endif
 
 #undef CreateWindow
 
