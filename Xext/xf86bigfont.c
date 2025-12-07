@@ -65,6 +65,7 @@
 
 #include "misc.h"
 #include "os.h"
+#include "os/osdep.h"
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "dixfontstr.h"
