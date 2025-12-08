@@ -862,6 +862,15 @@ if build_xorg
                                 'pkgconfig'),
     )
 
+    configure_file(
+        input: 'xlibre-server.pc.in',
+        output: 'xlibre-server.pc',
+        configuration: sdkconfig,
+        install_dir: join_paths(get_option('prefix'),
+                                get_option('libdir'),
+                                'pkgconfig'),
+    )
+
     install_data('xorg-server.m4',
                  install_dir: join_paths(get_option('datadir'), 'aclocal'))
 endif
