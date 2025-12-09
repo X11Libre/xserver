@@ -80,30 +80,33 @@ ddxProcessArgument(int argc, char *argv[], int i)
                 xnestUserDefaultClass = TRUE;
                 return 2;
             }
-            else if (!strcmp(argv[i], "GrayScale")) {
-                xnestDefaultClass = GrayScale;
-                xnestUserDefaultClass = TRUE;
-                return 2;
-            }
-            else if (!strcmp(argv[i], "StaticColor")) {
-                xnestDefaultClass = StaticColor;
-                xnestUserDefaultClass = TRUE;
-                return 2;
-            }
-            else if (!strcmp(argv[i], "PseudoColor")) {
-                xnestDefaultClass = PseudoColor;
-                xnestUserDefaultClass = TRUE;
-                return 2;
-            }
-            else if (!strcmp(argv[i], "TrueColor")) {
-                xnestDefaultClass = TrueColor;
-                xnestUserDefaultClass = TRUE;
-                return 2;
-            }
-            else if (!strcmp(argv[i], "DirectColor")) {
-                xnestDefaultClass = DirectColor;
-                xnestUserDefaultClass = TRUE;
-                return 2;
+            else
+            {
+                if (!strcmp(argv[i], "GrayScale")) {
+                    xnestDefaultClass = GrayScale;
+                    xnestUserDefaultClass = TRUE;
+                    return 2;
+                }
+                if (!strcmp(argv[i], "StaticColor")) {
+                    xnestDefaultClass = StaticColor;
+                    xnestUserDefaultClass = TRUE;
+                    return 2;
+                }
+                if (!strcmp(argv[i], "PseudoColor")) {
+                    xnestDefaultClass = PseudoColor;
+                    xnestUserDefaultClass = TRUE;
+                    return 2;
+                }
+                if (!strcmp(argv[i], "TrueColor")) {
+                    xnestDefaultClass = TrueColor;
+                    xnestUserDefaultClass = TRUE;
+                    return 2;
+                }
+                if (!strcmp(argv[i], "DirectColor")) {
+                    xnestDefaultClass = DirectColor;
+                    xnestUserDefaultClass = TRUE;
+                    return 2;
+                }
             }
         }
         return 0;
