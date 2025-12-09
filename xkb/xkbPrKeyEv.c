@@ -73,18 +73,24 @@ XkbProcessKeyboardEvent(DeviceEvent *event, DeviceIntPtr keybd)
         case XkbKB_Default:
             /* Neither of these should happen in practice, but ignore them
                anyway. */
-            if (event->type == ET_KeyPress && !event->key_repeat &&
-                key_is_down(keybd, key, KEY_PROCESSED))
-                return;
-            else if (event->type == ET_KeyRelease &&
-                     !key_is_down(keybd, key, KEY_PROCESSED))
-                return;
+            {
+                /* Neither of these should happen in practice, but ignore them
+               anyway. */
+                if (event->type == ET_KeyPress && !event->key_repeat &&
+                    key_is_down(keybd, key, KEY_PROCESSED))
+                    return;
+                if (event->type == ET_KeyRelease &&
+                    !key_is_down(keybd, key, KEY_PROCESSED))
+                    return;
+            }
             break;
         case XkbKB_Lock:
-            if (event->type == ET_KeyRelease)
-                return;
-            else if (key_is_down(keybd, key, KEY_PROCESSED))
-                event->type = ET_KeyRelease;
+            {
+                if (event->type == ET_KeyRelease)
+                    return;
+                if (key_is_down(keybd, key, KEY_PROCESSED))
+                    event->type = ET_KeyRelease;
+            }
             break;
         case XkbKB_RadioGroup:
             ndx = (behavior.data & (~XkbKB_RGAllowNone));
