@@ -22,7 +22,6 @@
 
 #include <kdrive-config.h>
 #include "kdrive.h"
-#include "os/osdep.h"
 #include <errno.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
@@ -30,6 +29,9 @@
 #include <sys/ioctl.h>
 #include <X11/keysym.h>
 #include <linux/apm_bios.h>
+
+#include "os/osdep.h"
+#include "os/ddx_priv.h"
 
 #ifdef KDRIVE_MOUSE
 extern KdPointerDriver LinuxMouseDriver;
