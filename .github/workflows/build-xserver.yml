@@ -76,6 +76,69 @@ jobs:
             - name: manpage check
               run:  .github/scripts/manpages-check
 
+    xserver-build-no-pciaccess:
+        env:
+            MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false -Dpciaccess=false
+            LIBGL_ALWAYS_SOFTWARE: 1
+            GALLIUM_DRIVER: llvmpipe
+            PIGLIT_PLATFORM: x11_egl
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: prepare build environment
+              run: |
+                MACHINE=`gcc -dumpmachine`
+                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
+                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
+
+            - name: apt cache
+              uses: actions/cache@v4
+              with:
+                path: /var/cache/apt
+                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
+                restore-keys: apt-cache-
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: X11 prereq cache
+              uses: actions/cache@v4
+              with:
+                path: |
+                    ${{ env.X11_PREFIX }}
+                    ${{ env.X11_BUILD_DIR }}/xts
+                    ${{ env.X11_BUILD_DIR }}/piglit
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                restore-keys: ${{ runner.name }}-x11-deps-
+
+            - name: generic prereq
+              run:  .github/scripts/install-prereq.sh
+
+            - name: build
+              run:  .gitlab-ci/meson-build.sh
+
+            - name: tests
+              run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs
+              env:
+                  XTEST_DIR:  ${{ env.X11_BUILD_DIR }}/xts
+                  PIGLIT_DIR: ${{ env.X11_BUILD_DIR }}/piglit
+
+            - name: archive build logs
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-logs
+                  path: |
+                      build/meson-logs/*
+                      build/test/piglit-results/*
+
+            - name: ddx build check
+              run:  .gitlab-ci/check-ddx-build.sh
+            - name: manpage check
+              run:  .gitlab-ci/manpages-check
+
     drivers-build-ubuntu:
         env:
             MESON_ARGS: -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
@@ -348,6 +411,7 @@ jobs:
             - xserver-build-dragonflybsd
             - xserver-build-netbsd
             - xserver-build-cygwin
+            - xserver-build-no-pciaccess
             - check-sign-off
         steps:
             - name: Checkout
