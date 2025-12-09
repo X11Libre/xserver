@@ -6006,7 +6006,7 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         if (childbuf.wpos != (mrep.length * 4))
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch mrep size (%ld // %ld units)\n",
-                       (unsigned long)childbuf.wpos, (unsigned long)mrep.length * 4, mrep.length);
+                       (unsigned long)childbuf.wpos, (unsigned long)mrep.length * 4, (unsigned long)mrep.length);
 
         if (client->swapped) {
             swaps(&mrep.sequenceNumber);
@@ -6027,7 +6027,7 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         if (childbuf.wpos != (crep.length * 4))
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch crep size (%ld // %ld units)\n",
-                       (unsigned long)childbuf.wpos, (unsigned long)crep.length * 4, crep.length);
+                       (unsigned long)childbuf.wpos, (unsigned long)crep.length * 4, (unsigned long)crep.length);
 
         if (client->swapped) {
             swaps(&crep.sequenceNumber);
@@ -6051,7 +6051,7 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         if (childbuf.wpos != (irep.length * 4))
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch irep size (%ld // %ld units)\n",
-                       (unsigned long)childbuf.wpos, (unsigned long)irep.length * 4, irep.length);
+                       (unsigned long)childbuf.wpos, (unsigned long)irep.length * 4, (unsigned long)irep.length);
 
         if (client->swapped) {
             swaps(&irep.sequenceNumber);
@@ -6071,7 +6071,7 @@ ProcXkbGetKbdByName(ClientPtr client)
 
         if (childbuf.wpos != (nrep.length * 4))
             LogMessage(X_WARNING, "ProcXkbGetKbdByName() childbuf size (%ld) mismatch nrep size (%ld // %ld units)\n",
-                       (unsigned long)childbuf.wpos, (unsigned long)nrep.length * 4, nrep.length);
+                       (unsigned long)childbuf.wpos, (unsigned long)nrep.length * 4, (unsigned long)nrep.length);
 
         if (client->swapped) {
             swaps(&nrep.sequenceNumber);
