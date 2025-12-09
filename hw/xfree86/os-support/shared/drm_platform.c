@@ -100,12 +100,16 @@ xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *bu
         if (!pPci)
             return FALSE;
 
+#ifdef XSERVER_LIBPCIACCESS
         if (xf86ComparePciBusString(busid,
                                     ((pPci->domain << 8)
                                      | pPci->bus),
                                     pPci->dev, pPci->func)) {
             return TRUE;
         }
+#else
+        return FALSE;
+#endif /* XSERVER_LIBPCIACCESS */
     }
     else if (bustype == BUS_PLATFORM) {
         /* match on the minimum string */
