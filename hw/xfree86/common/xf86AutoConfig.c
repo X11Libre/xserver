@@ -293,9 +293,8 @@ listPossibleVideoDrivers(XF86MatchedDrivers *md)
     if (sbusDriver)
         xf86AddMatchedDriver(md, sbusDriver);
 #endif
-#ifdef XSERVER_LIBPCIACCESS
+
     xf86PciMatchDriver(md);
-#endif
 
 #if defined(HAVE_MODESETTING_DRIVER)
     xf86AddMatchedDriver(md, "modesetting");

@@ -1151,7 +1151,6 @@ ddxProcessArgument(int argc, char **argv, int i)
         xf86DoShowOptions = TRUE;
         return 1;
     }
-#ifdef XSERVER_LIBPCIACCESS
     if (!strcmp(argv[i], "-isolateDevice")) {
         CHECK_FOR_REQUIRED_ARGUMENTS(1);
         if (strncmp(argv[++i], "PCI:", 4)) {
@@ -1160,7 +1159,6 @@ ddxProcessArgument(int argc, char **argv, int i)
         xf86PciIsolateDevice(argv[i]);
         return 2;
     }
-#endif
     /* Notice cmdline xkbdir, but pass to dix as well */
     if (!strcmp(argv[i], "-xkbdir")) {
         xf86xkbdirFlag = TRUE;
@@ -1243,10 +1241,8 @@ ddxUseMsg(void)
     ErrorF
         ("-allowMouseOpenFail    start server even if the mouse can't be initialized\n");
     ErrorF("-ignoreABI             make module ABI mismatches non-fatal\n");
-#ifdef XSERVER_LIBPCIACCESS
     ErrorF
         ("-isolateDevice bus_id  restrict device resets to bus_id (PCI only)\n");
-#endif
     ErrorF("-version               show the server version\n");
     ErrorF("-showDefaultModulePath show the server default module path\n");
     ErrorF("-showDefaultLibPath    show the server default library path\n");

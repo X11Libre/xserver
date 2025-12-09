@@ -52,9 +52,8 @@
 #include "xf86platformBus_priv.h"
 
 #include "xf86_OSproc.h"
-#ifdef XSERVER_LIBPCIACCESS
 #include "xf86VGAarbiter_priv.h"
-#endif
+
 /* Entity data */
 EntityPtr *xf86Entities = NULL; /* Bus slots claimed by drivers */
 int xf86NumEntities = 0;
@@ -89,7 +88,7 @@ xf86CallDriverProbe(DriverPtr drv, Bool detect_only)
     }
 #endif
 
-#ifdef XSERVER_LIBPCIACCESS
+    /* PCI probing */
     if (!foundScreen && (drv->PciProbe != NULL)) {
         if (xf86DoConfigure && xf86DoConfigurePass1) {
             assert(detect_only);
@@ -100,7 +99,7 @@ xf86CallDriverProbe(DriverPtr drv, Bool detect_only)
             foundScreen = xf86PciProbeDev(drv);
         }
     }
-#endif
+
     if (!foundScreen && (drv->Probe != NULL)) {
         LogMessageVerb(X_WARNING, 1, "Falling back to old probe method for %s\n",
                 drv->driverName);
@@ -249,9 +248,7 @@ xf86BusProbe(void)
     if (ServerIsNotSeat0() && xf86_num_platform_devices > 0)
         return;
 #endif
-#ifdef XSERVER_LIBPCIACCESS
     xf86PciProbe();
-#endif
 #if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
     xf86SbusProbe();
 #endif
@@ -321,11 +318,10 @@ xf86IsEntityPrimary(int entityIndex)
 {
     EntityPtr pEnt = xf86Entities[entityIndex];
 
-#ifdef XSERVER_LIBPCIACCESS
+    /* PCI probing */
     if (primaryBus.type == BUS_PLATFORM && pEnt->bus.type == BUS_PCI)
         if (primaryBus.id.plat->pdev)
             return MATCH_PCI_DEVICES(pEnt->bus.id.pci, primaryBus.id.plat->pdev);
-#endif
 
     if (primaryBus.type != pEnt->bus.type)
         return FALSE;

@@ -73,8 +73,6 @@ option('int10', type: 'combo', choices: ['stub', 'x86emu', 'vm86', 'auto', 'fals
        description: 'Xorg int10 backend (default: usually x86emu)')
 option('suid_wrapper', type: 'boolean', value: false,
        description: 'SUID wrapper for legacy driver support')
-option('pciaccess', type: 'boolean', value: true,
-       description: 'Xorg pciaccess support')
 option('udev', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable udev hotplugging support')
 option('udev_kms', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',

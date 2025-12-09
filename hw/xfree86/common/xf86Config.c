@@ -2310,10 +2310,8 @@ checkInput(serverLayoutPtr layout, Bool implicit_layout)
 ConfigStatus
 xf86HandleConfigFile(Bool autoconfig)
 {
-#ifdef XSERVER_LIBPCIACCESS
     const char *scanptr;
     Bool singlecard = 0;
-#endif
     Bool implicit_layout = FALSE;
     XF86ConfLayoutPtr layout;
 
@@ -2430,7 +2428,7 @@ xf86HandleConfigFile(Bool autoconfig)
     }
 
     xf86ProcessOptions(-1, xf86ConfigLayout.options, LayoutOptions);
-#ifdef XSERVER_LIBPCIACCESS
+
     if ((scanptr = xf86GetOptValString(LayoutOptions, LAYOUT_ISOLATEDEVICE))) {
         ;                       /* IsolateDevice specified; overrides SingleCard */
     }
@@ -2447,7 +2445,7 @@ xf86HandleConfigFile(Bool autoconfig)
         else
             xf86PciIsolateDevice(scanptr);
     }
-#endif
+
     /* Now process everything else */
     configServerFlags(xf86configptr->conf_flags, xf86ConfigLayout.options);
     configFiles(xf86configptr->conf_files);

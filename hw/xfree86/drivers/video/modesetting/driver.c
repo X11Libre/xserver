@@ -67,9 +67,7 @@
 #ifdef XSERVER_PLATFORM_BUS
 #include "xf86platformBus.h"
 #endif
-#ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
-#endif
 
 #ifdef SEATD_LIBSEAT
 #include "seatd-libseat.h"
@@ -91,14 +89,11 @@ static Bool ScreenInit(ScreenPtr pScreen, int argc, char **argv);
 static Bool PreInit(ScrnInfoPtr pScrn, int flags);
 
 static Bool Probe(DriverPtr drv, int flags);
-#ifdef XSERVER_LIBPCIACCESS
 static Bool ms_pci_probe(DriverPtr driver,
                          int entity_num, struct pci_device *device,
                          intptr_t match_data);
-#endif
 static Bool ms_driver_func(ScrnInfoPtr scrn, xorgDriverFuncOp op, void *data);
 
-#ifdef XSERVER_LIBPCIACCESS
 static const struct pci_id_match ms_device_match[] = {
     {
      PCI_MATCH_ANY, PCI_MATCH_ANY, PCI_MATCH_ANY, PCI_MATCH_ANY,
@@ -106,7 +101,6 @@ static const struct pci_id_match ms_device_match[] = {
 
     {0, 0, 0},
 };
-#endif
 
 #ifndef XSERVER_PLATFORM_BUS
 struct xf86_platform_device;
@@ -128,13 +122,8 @@ _X_EXPORT DriverRec modesetting = {
     NULL,
     0,
     ms_driver_func,
-#ifdef XSERVER_LIBPCIACCESS
     ms_device_match,
     ms_pci_probe,
-#else
-    NULL,
-    NULL,
-#endif
 #ifdef XSERVER_PLATFORM_BUS
     ms_platform_probe,
 #endif
@@ -324,7 +313,6 @@ probe_hw(const char *dev, struct xf86_platform_device *platform_dev)
     return FALSE;
 }
 
-#ifdef XSERVER_LIBPCIACCESS
 static char *
 ms_DRICreatePCIBusID(const struct pci_device *dev)
 {
@@ -336,7 +324,6 @@ ms_DRICreatePCIBusID(const struct pci_device *dev)
 
     return busID;
 }
-#endif
 
 static Bool
 probe_hw_pci(const char *dev, struct pci_device *pdev)
@@ -429,7 +416,6 @@ ms_setup_entity(ScrnInfoPtr scrn, int entity_num)
         pPriv->ptr = XNFcallocarray(1, sizeof(modesettingEntRec));
 }
 
-#ifdef XSERVER_LIBPCIACCESS
 static Bool
 ms_pci_probe(DriverPtr driver,
              int entity_num, struct pci_device *dev, intptr_t match_data)
@@ -460,7 +446,6 @@ ms_pci_probe(DriverPtr driver,
     }
     return scrn != NULL;
 }
-#endif
 
 #ifdef XSERVER_PLATFORM_BUS
 static Bool
@@ -1137,9 +1122,7 @@ ms_get_drm_master_fd(ScrnInfoPtr pScrn)
 {
     modesettingPtr ms = modesettingPTR(pScrn);
     modesettingEntPtr ms_ent = ms_ent_priv(pScrn);
-#if defined(XSERVER_PLATFORM_BUS) || defined(XSERVER_LIBPCIACCESS)
     EntityInfoPtr pEnt = ms->pEnt;
-#endif
 
     if (ms_ent->fd) {
         xf86DrvMsg(pScrn->scrnIndex, X_INFO,
@@ -1173,7 +1156,6 @@ ms_get_drm_master_fd(ScrnInfoPtr pScrn)
     }
     else
 #endif
-#ifdef XSERVER_LIBPCIACCESS
     if (pEnt->location.type == BUS_PCI) {
         char *BusID = NULL;
         struct pci_device *PciInfo;
@@ -1187,7 +1169,6 @@ ms_get_drm_master_fd(ScrnInfoPtr pScrn)
         }
     }
     else
-#endif
     {
         const char *devicename;
         devicename = xf86FindOptionValue(ms->pEnt->device->options, "kmsdev");

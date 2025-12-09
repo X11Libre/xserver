@@ -66,7 +66,6 @@ static inline _X_DEPRECATED int xf86BlockSIGIO(void) { input_lock(); return 0; }
 static inline _X_DEPRECATED void xf86UnblockSIGIO(int wasset) { input_unlock(); }
 
 /* PCI related */
-#ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
 extern _X_EXPORT Bool xf86CheckPciSlot(const struct pci_device *);
 extern _X_EXPORT int xf86ClaimPciSlot(struct pci_device *, DriverPtr drvp,
@@ -90,7 +89,6 @@ extern _X_EXPORT ScrnInfoPtr xf86ConfigPciEntity(ScrnInfoPtr pScrn,
                                                  EntityProc enter,
                                                  EntityProc leave,
                                                  void *private);
-#endif
 
 /* xf86Bus.c */
 

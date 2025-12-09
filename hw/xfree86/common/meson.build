@@ -68,12 +68,10 @@ if build_udev
     srcs_xorg_common += 'xf86platformBus.c'
 endif
 
-if get_option('pciaccess')
-    srcs_xorg_common += ['xf86pciBus.c', 'xf86VGAarbiter.c']
+srcs_xorg_common += ['xf86pciBus.c', 'xf86VGAarbiter.c']
 
-    if host_machine.cpu_family() in ['sparc', 'sparc64']
-        srcs_xorg_common += 'xf86sbusBus.c'
-    endif
+if host_machine.cpu_family() in ['sparc', 'sparc64']
+    srcs_xorg_common += 'xf86sbusBus.c'
 endif
 
 srcs_xorg_common += custom_target(
