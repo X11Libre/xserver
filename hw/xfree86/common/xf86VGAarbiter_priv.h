@@ -23,7 +23,7 @@ void xf86VGAarbiterUnlock(ScrnInfoPtr pScrn);
 static inline void xf86VGAarbiterInit() {}
 static inline void xf86VGAarbiterFini() {}
 static inline void xf86VGAarbiterScrnInit(ScrnInfoPtr pScrn) {}
-static inline void xf86VGAarbiterWrapFunctions(void) { return FALSE; }
+static inline void xf86VGAarbiterWrapFunctions(void) {}
 static inline void xf86VGAarbiterLock(ScrnInfoPtr pScrn) {}
 static inline void xf86VGAarbiterUnlock(ScrnInfoPtr pScrn) {}
 
