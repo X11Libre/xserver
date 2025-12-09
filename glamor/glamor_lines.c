@@ -146,10 +146,11 @@ glamor_poly_lines_gl(DrawablePtr drawable, GCPtr gc,
     case LineOnOffDash:
         return glamor_poly_lines_dash_gl(drawable, gc, mode, n, points);
     case LineDoubleDash:
-        if (gc->fillStyle == FillTiled)
-            return glamor_poly_lines_solid_gl(drawable, gc, mode, n, points);
-        else
+        {
+            if (gc->fillStyle == FillTiled)
+                return glamor_poly_lines_solid_gl(drawable, gc, mode, n, points);
             return glamor_poly_lines_dash_gl(drawable, gc, mode, n, points);
+        }
     default:
         return FALSE;
     }
