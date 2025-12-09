@@ -100,6 +100,7 @@ xf86PciProbe(void)
         return;
     }
 
+#ifdef XSERVER_LIBPCIACCESS
     iter = pci_slot_match_iterator_create(&xf86IsolateDevice);
     while ((info = pci_device_next(iter)) != NULL) {
         if (PCIINFOCLASSES(info->device_class)) {
@@ -120,6 +121,7 @@ xf86PciProbe(void)
         }
     }
     free(iter);
+#endif
 
     /* If we haven't found a primary device try a different heuristic */
     if (primaryBus.type == BUS_NONE && num) {
