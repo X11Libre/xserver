@@ -20,10 +20,10 @@ void xf86VGAarbiterUnlock(ScrnInfoPtr pScrn);
 
 #else /* XSERVER_LIBPCIACCESS */
 
-static inline void xf86VGAarbiterInit() {}
-static inline void xf86VGAarbiterFini() {}
+static inline void xf86VGAarbiterInit(void) {}
+static inline void xf86VGAarbiterFini(void) {}
 static inline void xf86VGAarbiterScrnInit(ScrnInfoPtr pScrn) {}
-static inline void xf86VGAarbiterWrapFunctions(void) { return FALSE; }
+static inline void xf86VGAarbiterWrapFunctions(void) {}
 static inline void xf86VGAarbiterLock(ScrnInfoPtr pScrn) {}
 static inline void xf86VGAarbiterUnlock(ScrnInfoPtr pScrn) {}
 
