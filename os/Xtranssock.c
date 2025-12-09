@@ -446,13 +446,13 @@ static XtransConnInfo _XSERVTransSocketReopen (
     size_t portlen = portnamelen;
 #ifdef SOCK_MAXADDRLEN
     if (portlen > (SOCK_MAXADDRLEN + 2)) {
-      prmsg (1, "SocketReopen: invalid portlen %d\n", portlen);
+      prmsg (1, "SocketReopen: invalid portlen %llu\n", (unsigned long long)portlen);
       return NULL;
     }
     if (portlen < 14) portlen = 14;
 #else
     if (portlen > 14) {
-      prmsg (1, "SocketReopen: invalid portlen %ld\n", (unsigned long)portlen);
+      prmsg (1, "SocketReopen: invalid portlen %llu\n", (unsigned long long)portlen);
       return NULL;
     }
 #endif /*SOCK_MAXADDRLEN*/
