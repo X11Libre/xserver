@@ -135,8 +135,7 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         nodeTable[lastAtom] = nd;
         return nd->a;
     }
-    else
-        return None;
+    return None;
 }
 
 Bool
