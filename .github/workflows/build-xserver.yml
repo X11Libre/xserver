@@ -55,7 +55,7 @@ jobs:
               run:  .github/scripts/install-prereq.sh
 
             - name: build
-              run:  .gitlab-ci/meson-build.sh
+              run:  .github/scripts/meson-build.sh
 
             - name: tests
               run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs
@@ -72,9 +72,9 @@ jobs:
                       build/test/piglit-results/*
 
             - name: ddx build check
-              run:  .gitlab-ci/check-ddx-build.sh
+              run:  .github/scripts/check-ddx-build.sh
             - name: manpage check
-              run:  .gitlab-ci/manpages-check
+              run:  .github/scripts/manpages-check
 
     drivers-build-ubuntu:
         env:
@@ -119,7 +119,7 @@ jobs:
                 echo -n > .meson_environment
                 echo "export MESON_BUILDDIR=$MESON_BUILDDIR" >> .meson_environment
                 echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> .meson_environment
-                .gitlab-ci/meson-build.sh --skip-test
+                .github/scripts/meson-build.sh --skip-test
                 sudo meson install --no-rebuild -C "$MESON_BUILDDIR"
                 sudo mkdir -p /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
                 sudo chown -R runner /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
@@ -169,7 +169,7 @@ jobs:
               run: sudo .github/scripts/mingw32/cross-prereqs-build.sh i686-w64-mingw32
 
             - name: build
-              run: .gitlab-ci/meson-build.sh --run-install
+              run: .github/scripts/meson-build.sh --run-install
 
     xserver-build-macos:
         env:
@@ -207,7 +207,7 @@ jobs:
               run:  .github/scripts/macos/install-prereq.sh
 
             - name: build
-              run:  .gitlab-ci/meson-build.sh
+              run:  .github/scripts/meson-build.sh
 
             - name: tests (may fail)
               continue-on-error: true
@@ -225,9 +225,9 @@ jobs:
                       build/test/piglit-results/*
 
             - name: ddx build check
-              run:  .gitlab-ci/check-ddx-build.sh
+              run:  .github/scripts/check-ddx-build.sh
             - name: manpage check
-              run:  .gitlab-ci/manpages-check
+              run:  .github/scripts/manpages-check
 
     xserver-build-freebsd:
         runs-on: ubuntu-latest
