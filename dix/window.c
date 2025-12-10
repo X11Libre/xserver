@@ -2046,20 +2046,23 @@ WhereDoIGoInTheStack(WindowPtr pWin,
     box.y2 = y + (int) h;
     switch (smode) {
     case Above:
-        if (pSib)
-            return pSib;
-        else if (pWin == pFirst)
-            return pWin->nextSib;
-        else
-            return pFirst;
-    case Below:
-        if (pSib)
-            if (pSib->nextSib != pWin)
-                return pSib->nextSib;
-            else
+        {
+            if (pSib)
+                return pSib;
+            if (pWin == pFirst)
                 return pWin->nextSib;
-        else
+            return pFirst;
+        }
+    case Below:
+        {
+            if (pSib)
+            {
+                if (pSib->nextSib != pWin)
+                    return pSib->nextSib;
+                return pWin->nextSib;
+            }
             return NullWindow;
+        }
     case TopIf:
         if ((!pWin->mapped || (pSib && !pSib->mapped)))
             return pWin->nextSib;

@@ -93,19 +93,21 @@ dri3_fds_from_pixmap(PixmapPtr pixmap, int *fds,
     if (info->version >= 2 && info->fds_from_pixmap != NULL) {
         return (*info->fds_from_pixmap)(screen, pixmap, fds, strides, offsets,
                                         modifier);
-    } else if (info->fd_from_pixmap != NULL) {
-        CARD16 stride;
-        CARD32 size;
+    } else
+    {
+        if (info->fd_from_pixmap != NULL) {
+            CARD16 stride;
+            CARD32 size;
 
-        fds[0] = (*info->fd_from_pixmap)(screen, pixmap, &stride, &size);
-        if (fds[0] < 0)
-            return 0;
+            fds[0] = (*info->fd_from_pixmap)(screen, pixmap, &stride, &size);
+            if (fds[0] < 0)
+                return 0;
 
-        strides[0] = stride;
-        offsets[0] = 0;
-        *modifier = DRM_FORMAT_MOD_INVALID;
-        return 1;
-    } else {
+            strides[0] = stride;
+            offsets[0] = 0;
+            *modifier = DRM_FORMAT_MOD_INVALID;
+            return 1;
+        }
         return 0;
     }
 }
