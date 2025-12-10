@@ -887,12 +887,16 @@ if build_docs or build_docs_devel
 endif
 
 # finally write config files. doing that very late, so other subdirs still
-# have a change to add config items
+# have a chance to add config items
 configure_file(output : 'dix-config.h',
                configuration : conf_data)
 
 configure_file(output : 'xorg-server.h',
-               input : 'include/xorg-server.h.meson.in',
+               input : 'hw/xfree86/xorg-server.h.meson.in',
                configuration : conf_data,
                install: build_xorg,
                install_dir: xorgsdkdir)
+
+configure_file(output : 'xorg-config.h',
+               input : 'hw/xfree86/xorg-config.h.meson.in',
+               configuration : xorg_data)

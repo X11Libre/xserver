@@ -400,10 +400,6 @@ elif host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd'
     endif
 endif
 
-configure_file(output : 'xorg-config.h',
-               input : 'xorg-config.h.meson.in',
-               configuration : xorg_data)
-
 xwin_data = configuration_data()
 xwin_data.set_quoted('DEFAULT_LOGDIR', log_dir)
 xwin_data.set('HAS_WINSOCK', host_machine.system() == 'windows' ? '1' : false,
