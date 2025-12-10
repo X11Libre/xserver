@@ -172,3 +172,6 @@ option('test_rendercheck_triangles', type: 'boolean', value: false,
        description: 'testsuite: run rendercheck triangles tests (might fail on Xephyr)')
 option('test_xephyr_gles', type: 'boolean', value: true,
        description: 'testsuite: run gles2/gles3 tests on Xephyr (might fail w/o DRI)')
+
+# xfree86 DDX specific options
+option('xfree86-pci', type: 'boolean', value: true, description: 'xf86 DDX: PCI support (disabling is experimental)')
