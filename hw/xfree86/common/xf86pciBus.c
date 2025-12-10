@@ -411,23 +411,7 @@ xf86CheckPciMemBase(struct pci_device *pPci, memType base)
 Bool
 xf86CheckPciSlot(const struct pci_device *d)
 {
-    int i;
-
-    for (i = 0; i < xf86NumEntities; i++) {
-        const EntityPtr p = xf86Entities[i];
-
-        if ((p->bus.type == BUS_PCI) && (p->bus.id.pci == d)) {
-            return FALSE;
-        }
-#ifdef XSERVER_PLATFORM_BUS
-        if ((p->bus.type == BUS_PLATFORM) && (p->bus.id.plat->pdev)) {
-            struct pci_device *ud = p->bus.id.plat->pdev;
-            if (MATCH_PCI_DEVICES(ud, d))
-                return FALSE;
-        }
-#endif
-    }
-    return TRUE;
+    return xf86CheckSlot(d, BUS_PCI);
 }
 
 #define END_OF_MATCHES(m) \

@@ -156,25 +156,6 @@ platform_find_pci_info(struct xf86_platform_device *pd, char *busid)
 }
 
 static Bool
-xf86_check_platform_slot(const struct xf86_platform_device *pd)
-{
-    int i;
-
-    for (i = 0; i < xf86NumEntities; i++) {
-        const EntityPtr u = xf86Entities[i];
-
-        if (pd->pdev && u->bus.type == BUS_PCI &&
-            MATCH_PCI_DEVICES(pd->pdev, u->bus.id.pci)) {
-            return FALSE;
-        }
-        if ((u->bus.type == BUS_PLATFORM) && (pd == u->bus.id.plat)) {
-            return FALSE;
-        }
-    }
-    return TRUE;
-}
-
-static Bool
 OutputClassMatches(const XF86ConfOutputClassPtr oclass,
                    struct xf86_platform_device *dev)
 {
@@ -465,7 +446,7 @@ xf86ClaimPlatformSlot(struct xf86_platform_device * d, DriverPtr drvp,
     EntityPtr p = NULL;
     int num;
 
-    if (xf86_check_platform_slot(d)) {
+    if (xf86CheckSlot(d, BUS_PLATFORM)) {
         num = xf86AllocateEntity();
         p = xf86Entities[num];
         p->driver = drvp;
@@ -511,27 +492,29 @@ static Bool doPlatformProbe(struct xf86_platform_device *dev, DriverPtr drvp,
     Bool foundScreen = FALSE;
     int entity;
 
-    if (gdev && gdev->screen == 0 && !xf86_check_platform_slot(dev))
-        return FALSE;
-
     entity = xf86ClaimPlatformSlot(dev, drvp, 0,
                                    gdev, gdev ? gdev->active : 0);
 
-    if ((entity == -1) && gdev && (gdev->screen > 0)) {
-        unsigned nent;
+    if ((entity == -1) && gdev) {
+        if (gdev->screen == 0)
+            return FALSE;
+        else { /* gdev->screen > 0 */
+            unsigned nent;
 
-        for (nent = 0; nent < xf86NumEntities; nent++) {
-            EntityPtr pEnt = xf86Entities[nent];
+            for (nent = 0; nent < xf86NumEntities; nent++) {
+                EntityPtr pEnt = xf86Entities[nent];
 
-            if (pEnt->bus.type != BUS_PLATFORM)
-                continue;
-            if (pEnt->bus.id.plat == dev) {
-                entity = nent;
-                xf86AddDevToEntity(nent, gdev);
-                break;
+                if (pEnt->bus.type != BUS_PLATFORM)
+                    continue;
+                if (pEnt->bus.id.plat == dev) {
+                    entity = nent;
+                    xf86AddDevToEntity(nent, gdev);
+                    break;
+                }
             }
         }
     }
+
     if (entity != -1) {
         if ((dev->flags & XF86_PDEV_SERVER_FD) && (!drvp->driverFunc ||
                 !drvp->driverFunc(NULL, SUPPORTS_SERVER_FDS, NULL))) {
