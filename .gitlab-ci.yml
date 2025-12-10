@@ -166,10 +166,10 @@ freebsd-image:
 meson:
     extends: .common-build-and-test
     script:
-        - .gitlab-ci/meson-build.sh --run-test
-        - .gitlab-ci/check-piglit-results.sh
-        - .gitlab-ci/manpages-check
-        - .gitlab-ci/check-ddx-build.sh
+        - .github/scripts/meson-build.sh --run-test
+        - .github/scripts/check-piglit-results.sh
+        - .github/scripts/manpages-check
+        - .github/scripts/check-ddx-build.sh
     variables:
       XTEST_DIR: /root/xts
       PIGLIT_DIR: /root/piglit
@@ -190,7 +190,7 @@ meson-noglamor:
 mingw-cross-build:
     extends: .common-build-and-test
     script:
-        - .gitlab-ci/meson-build.sh --run-install
+        - .github/scripts/meson-build.sh --run-install
     variables:
       MESON_ARGS: --cross-file=.gitlab-ci/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true
 
@@ -212,7 +212,7 @@ freebsd:
       - /app/vmctl exec "pkg update && pkg add libxvmc xcb-util xcb-util-wm"
       # need to install newer xorgproto
       - /app/vmctl exec "cd $CI_PROJECT_NAME/dep.xorgproto && ./autogen.sh --prefix=/usr && make && make install"
-      - /app/vmctl exec "cd $CI_PROJECT_NAME && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" MESON_ARGS=\"$MESON_ARGS\" MESON_BUILDDIR=\"$MESON_BUILDDIR\" .gitlab-ci/meson-build.sh --skip-test" && touch .success
+      - /app/vmctl exec "cd $CI_PROJECT_NAME && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" MESON_ARGS=\"$MESON_ARGS\" MESON_BUILDDIR=\"$MESON_BUILDDIR\" .github/scripts/meson-build.sh --skip-test" && touch .success
       # test not working yet, so skipped
       # - scp -r vm:$CI_PROJECT_NAME/test-results.xml .
       - /app/vmctl stop
@@ -228,10 +228,10 @@ meson-dist:
             - $MESON_BUILDDIR/xserver-*/$MESON_BUILDDIR/meson-logs/
             - xserver-tarball/install/
     script:
-        - .gitlab-ci/meson-build.sh --run-dist
+        - .github/scripts/meson-build.sh --run-dist
         - mkdir xserver-tarball
         - tar xf $MESON_BUILDDIR/meson-dist/xserver-*.tar.xz -C xserver-tarball --strip-components=1
-        - .gitlab-ci/meson-build.sh -C xserver-tarball --skip-test --skip-dist --run-install
+        - .github/scripts/meson-build.sh -C xserver-tarball --skip-test --skip-dist --run-install
     variables:
       MESON_DIST_ARGS: --no-tests
       MESON_EXTRA_ARGS: -Dprefix=$CI_PROJECT_DIR/xserver-tarball/install/
@@ -349,7 +349,7 @@ xf86-driver-build-test:
         - git -C "$DRIVER" checkout "$SHA"
         - |
           if [[ -e "$DRIVER/meson.build" ]] && [[ "$DRIVER" != "xf86-video-intel" ]]; then
-            .gitlab-ci/meson-build.sh -C "$DRIVER" --skip-test
+            .github/scripts/meson-build.sh -C "$DRIVER" --skip-test
           else
              pushd "$DRIVER" || exit 1
              ./autogen.sh && make
