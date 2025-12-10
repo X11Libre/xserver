@@ -71,9 +71,11 @@ SOFTWARE.
 
 #ifndef _X_ATTRIBUTE_VPRINTF
 # if defined(__GNUC__) && (__GNUC__ >= 2) && (!defined(__APPLE__)) && (!defined(__FreeBSD__))
+#  warning "using gnu_printf"
 #  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
           __attribute__((__format__(gnu_printf, fmt, firstarg)))
 # else
+#  warning "not using gnu_printf"
 #  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
 # endif
 #endif
