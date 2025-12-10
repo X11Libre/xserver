@@ -8176,7 +8176,7 @@ ZZZPreInit(ScrnInfoPtr pScrn, int flags)
 static Bool
 ZZZMapMem(ScrnInfoPtr pScrn)
 {
-    /* Call xf86MapPciMem() to map each PCI memory area */
+    /* map each PCI memory area */
     ...
     return TRUE or FALSE;
 }
