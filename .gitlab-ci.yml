@@ -18,7 +18,7 @@
 variables:
     FDO_UPSTREAM_REPO:    'xorg/xserver'
     MESON_BUILDDIR:       'build'
-    REPO_URL_XORGPROTO:   'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git'
+    REPO_URL_XORGPROTO:   'https://github.com/X11Libre/xorgproto.git'
     XORG_DEBIAN_VERSION:  'bullseye-slim'
     XORG_DEBIAN_EXEC:     'env FDO_CI_CONCURRENT=${FDO_CI_CONCURRENT} bash .gitlab-ci/debian-install.sh'
     XORG_DEBIAN_TAG:      '2025-03-07-libdrm.1'
@@ -243,101 +243,101 @@ xf86-driver-build-test:
     stage: drivers
     parallel:
         matrix:
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-elographics
+            - REPO: https://github.com/X11Libre/xf86-input-elographics
               SHA: xf86-input-elographics-1.4.4
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-evdev
+            - REPO: https://github.com/X11Libre/xf86-input-evdev
               SHA: xf86-input-evdev-2.11.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-joystick
+            - REPO: https://github.com/X11Libre/xf86-input-joystick
               SHA: fa296d27fb479107fa6328a7565f665de2de98d3 # 5 commits ahead of 1.6.4
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-libinput
+            - REPO: https://github.com/X11Libre/xf86-input-libinput
               SHA: xf86-input-libinput-1.5.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-mouse
+            - REPO: https://github.com/X11Libre/xf86-input-mouse
               SHA: xf86-input-mouse-1.9.5
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-synaptics
+            - REPO: https://github.com/X11Libre/xf86-input-synaptics
               SHA: xf86-input-synaptics-1.10.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-vmmouse
+            - REPO: https://github.com/X11Libre/xf86-input-vmmouse
               SHA: 3bbcb6a143bb3f53e5b776fb70a4933229c1781a # 2 commits ahead of 13.2.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-input-void
+            - REPO: https://github.com/X11Libre/xf86-input-void
               SHA: b43e11eeb8b96aa87da910991da8b005d9847783 # 4 commits ahead of 1.4.2
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-amdgpu
+            - REPO: https://github.com/X11Libre/xf86-video-amdgpu
               SHA: 2cb59a92de4a19909682a35e4f31f3c02de2899f # 18 commits ahead of 23.0.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-apm
+            - REPO: https://github.com/X11Libre/xf86-video-apm
               SHA: 196784e691b8f8739792439434ffa002e9f5cdfa # 14 commits ahead of 1.3.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ark
+            - REPO: https://github.com/X11Libre/xf86-video-ark
               SHA: 109745d5c7e6982ee0dabbc5a233c1f2667ad5c9 # 9 commits ahead of 0.7.4
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ast
+            - REPO: https://github.com/X11Libre/xf86-video-ast
               SHA: db56de34bdf70f1904dba50d98774aaa950a2ca5 # 10 commits ahead of 1.1.6
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-ati
+            - REPO: https://github.com/X11Libre/xf86-video-ati
               SHA: c610c037369500089baddd86aa3cf8046f3dc48b # 11 commits ahead of 22.0.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-chips
+            - REPO: https://github.com/X11Libre/xf86-video-chips
               SHA: 4503aece04cc8860df18ce946633b5449a0cb47b # 7 commits ahead of 1.5.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-cirrus
+            - REPO: https://github.com/X11Libre/xf86-video-cirrus
               SHA: 15d68316524c593bd67a6ea59b5c746a94c6c1f6 # 10 commits ahead of 1.6.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-dummy
+            - REPO: https://github.com/X11Libre/xf86-video-dummy
               SHA: 3a407a34c4a2b6b263a535b6aa7b49dd70784fdf # 9 commits ahead of 0.4.1
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-fbdev
+            - REPO: https://github.com/X11Libre/xf86-video-fbdev
               SHA: c8d9f3be7e95689d793bb2f45a5dddf409e46811 # 15 commits ahead of 0.5.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-i128
+            - REPO: https://github.com/X11Libre/xf86-video-i128
               SHA: 4fd0309834deca78e5ef6cad5ecba8864a308ba5 # 7 commits ahead of 1.4.1
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-i740
+            - REPO: https://github.com/X11Libre/xf86-video-i740
               SHA: d610334264e82a18477b9a5c3a4095c49c18f47b # 11 commits ahead of 1.4.0
-            - REPO: https://gitlab.freedesktop.org/metux/xf86-video-intel
+            - REPO: https://github.com/X11Libre/xf86-video-intel
               SHA: submit/fixes-for-xserver # temporary
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mach64
+            - REPO: https://github.com/X11Libre/xf86-video-mach64
               SHA: 878048e3aec04c6bb8034f21afdfff37e3528c5f # 20 commits ahead of 6.9.7
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-mga
+            - REPO: https://github.com/X11Libre/xf86-video-mga
               SHA: 66ee371516c48c30b67684317a8e3c24ba7f1f4e # 11 commits ahead of 2.0.1
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-neomagic
+            - REPO: https://github.com/X11Libre/xf86-video-neomagic
               SHA: 69cafdeebf7c338ede076424f9bcb97f26ede7a8 # 8 commits ahead of 1.3.1
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested
+            - REPO: https://github.com/X11Libre/xf86-video-nested
               SHA: 86b6dc3bb6d78f40905ecc63df3635b284214836 # no release yet
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nouveau
+            - REPO: https://github.com/X11Libre/xf86-video-nouveau
               SHA: xf86-video-nouveau-1.0.18
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-nv
+            - REPO: https://github.com/X11Libre/xf86-video-nv
               SHA: a8608636da97fdd880edb1bce919a0d3029f24dd # 15 commits ahead of 2.1.23
-            - REPO: https://gitlab.freedesktop.org/metux/xf86-video-qxl
+            - REPO: https://github.com/X11Libre/xf86-video-qxl
               SHA: incubate # temporary
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-r128
+            - REPO: https://github.com/X11Libre/xf86-video-r128
               SHA: bc21fcdffa623bb8e7150e1da69aeaed6cd7c5d2 # 1 commits ahead of 6.13.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-rendition
+            - REPO: https://github.com/X11Libre/xf86-video-rendition
               SHA: 49d50f1fdeb4dc81895fec81be9fae1dc78e5974 # 14 commits ahead of 4.2.7
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-s3virge
+            - REPO: https://github.com/X11Libre/xf86-video-s3virge
               SHA: 8834f100114ba136d52590e711054ab063306421 # 11 commits ahead of 1.11.1
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-savage
+            - REPO: https://github.com/X11Libre/xf86-video-savage
               SHA: 09f6c06f0a793c7d297f152227b551c128f20875 # 8 commits ahead of 2.4.1
-            - REPO: https://gitlab.freedesktop.org/metux/xf86-video-siliconmotion
+            - REPO: https://github.com/X11Libre/xf86-video-siliconmotion
               SHA: incubate # temporary
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sis
+            - REPO: https://github.com/X11Libre/xf86-video-sis
               SHA: ee451146c0afd735b50488588f82f3f158e9da03 # 68 commits ahead of 0.12.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sisusb
+            - REPO: https://github.com/X11Libre/xf86-video-sisusb
               SHA: ccff93b681968463d00793a9a7c5c2db8301634f # 30 commits ahead of 0.12.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg14
+            - REPO: https://github.com/X11Libre/xf86-video-suncg14
               SHA: 471e04fe84abaf2f868fb85566d99495142692a9 # 9 commits ahead of 1.1.3
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg3
+            - REPO: https://github.com/X11Libre/xf86-video-suncg3
               SHA: 8162844221f6d59e540c3c3a146a9c581d413949 # 9 commits ahead of 1.1.3
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suncg6
+            - REPO: https://github.com/X11Libre/xf86-video-suncg6
               SHA: 37a28d0d9dbb9b0c6631aa7b09d558d5f552c627 # 10 commits ahead of 1.1.3
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sunffb
+            - REPO: https://github.com/X11Libre/xf86-video-sunffb
               SHA: 6100635debdda392ca420e87c5b0d70bd22dfed8 # 14 commits ahead of 1.2.3
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-sunleo
+            - REPO: https://github.com/X11Libre/xf86-video-sunleo
               SHA: 6d56a007f3d47fa43e95f1a0c8619be00b0c1c97 # 10 commits ahead of 1.2.3
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-suntcx
+            - REPO: https://github.com/X11Libre/xf86-video-suntcx
               SHA: c1c0e384b95da18b81793612b90f693891f2e476 # 9 commits ahead of 1.1.3
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-tdfx
+            - REPO: https://github.com/X11Libre/xf86-video-tdfx
               SHA: 5253278119a4db07b5a01856f0de34e576f4dcdd # 9 commits ahead of 1.5.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-trident
+            - REPO: https://github.com/X11Libre/xf86-video-trident
               SHA: fddaa2084b9aac51a845ee1ede8c498cbc9330cf # 13 commits ahead of 1.4.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-v4l
+            - REPO: https://github.com/X11Libre/xf86-video-v4l
               SHA: eb1e55874cbacf7455f70269581a877e88e3bf37 # 15 commits ahead of 0.3.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vbox
+            - REPO: https://github.com/X11Libre/xf86-video-vbox
               SHA: ec4bc6b8e9d1a83526573d27afd099debbd5b86b # 7 commits ahead of 1.0.1
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vesa
+            - REPO: https://github.com/X11Libre/xf86-video-vesa
               SHA: 5b33e95acb831768c52d491de079a1adcae762e0 # 10 commits ahead of 2.6.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-vmware
+            - REPO: https://github.com/X11Libre/xf86-video-vmware
               SHA: 92cc4534146dd84c0d843759cdb30f75abddddd6 # 6 commits ahead 13.4.0
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-voodoo
+            - REPO: https://github.com/X11Libre/xf86-video-voodoo
               SHA: c70353ddf49d557c596a47b835b6b8d8bbe35ebe # 15 commits ahead of 1.2.6
-            - REPO: https://gitlab.freedesktop.org/xorg/driver/xf86-video-xgi
+            - REPO: https://github.com/X11Libre/xf86-video-xgi
               SHA: e73ff14a7f1b7562ff447aad527641cc35f557ae # 49 commits ahead 1.6.1
     script:
         # built xserver is taken from meson-dist job

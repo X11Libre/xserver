@@ -75,34 +75,34 @@ build() {
     rm -rf ${OLDPWD}
 }
 
-build 'https://gitlab.freedesktop.org/pixman/pixman.git' 'pixman-0.38.4'
-build 'https://gitlab.freedesktop.org/xorg/lib/pthread-stubs.git' '0.4'
+build 'https://github.com/X11Libre/pixman.git'                  'pixman-0.38.4'
+build 'https://github.com/X11Libre/pthread-stubs.git'           '0.4'
 # we can't use the xorgproto pkgconfig files from /usr/share/pkgconfig, because
 # these would add -I/usr/include to CFLAGS, which breaks cross-compilation
-build 'https://gitlab.freedesktop.org/xorg/proto/xorgproto.git' 'xorgproto-2024.1' '--datadir=/lib'
-build 'https://gitlab.freedesktop.org/xorg/lib/libXau.git' 'libXau-1.0.9'
-build 'https://gitlab.freedesktop.org/xorg/proto/xcbproto.git'      'xcb-proto-1.17.0'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxcb.git' 'libxcb-1.17.0'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxtrans.git' 'xtrans-1.6.0'
+build 'https://github.com/X11Libre/xorgproto.git'               'xorgproto-2024.1' '--datadir=/lib'
+build 'https://github.com/X11Libre/libXau.git'                  'libXau-1.0.9'
+build 'https://github.com/X11Libre/xcbproto.git'                'xcb-proto-1.17.0'
+build 'https://github.com/X11Libre/libxcb.git'                  'libxcb-1.17.0'
+build 'https://github.com/X11Libre/libxtrans.git'               'xtrans-1.6.0'
 # the default value of keysymdefdir is taken from the includedir variable for
 # xproto, which isn't adjusted by pkg-config for the sysroot
 # Using -fcommon to address build failure when cross-compiling for windows.
 # See discussion at https://gitlab.freedesktop.org/xorg/xserver/-/merge_requests/913
-CFLAGS="-fcommon" build 'https://gitlab.freedesktop.org/xorg/lib/libX11.git' 'libX11-1.6.9' "--with-keysymdefdir=/usr/${HOST}/include/X11"
-build 'https://gitlab.freedesktop.org/xorg/lib/libxkbfile.git' 'libxkbfile-1.1.0'
+CFLAGS="-fcommon" build 'https://github.com/X11Libre/libX11.git' 'libX11-1.6.9' "--with-keysymdefdir=/usr/${HOST}/include/X11"
+build 'https://github.com/X11Libre/libxkbfile.git'              'libxkbfile-1.1.0'
 # freetype needs an explicit --build to know it's cross-compiling
 # disable png as freetype tries to use libpng-config, even when cross-compiling
-build 'https://gitlab.freedesktop.org/freetype/freetype.git' 'VER-2-10-1' "--build=$(cc -dumpmachine) --with-png=no"
-build 'https://gitlab.freedesktop.org/xorg//font/util.git' 'font-util-1.3.2'
-build 'https://gitlab.freedesktop.org/xorg/lib/libfontenc.git' 'libfontenc-1.1.4'
-build 'https://gitlab.freedesktop.org/xorg/lib/libXfont.git'  'libXfont2-2.0.3'
-build 'https://gitlab.freedesktop.org/xorg/lib/libXdmcp.git' 'libXdmcp-1.1.3'
-build 'https://gitlab.freedesktop.org/xorg/lib/libXfixes.git' 'libXfixes-5.0.3'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-util.git' 'xcb-util-0.4.1-gitlab'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-image.git' 'xcb-util-image-0.4.1-gitlab'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-wm.git' 'xcb-util-wm-0.4.2'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-render-util.git' 'master'
-build 'https://gitlab.freedesktop.org/xorg/lib/libxcb-keysyms.git' 'master'
+build 'https://github.com/X11Libre/freetype.git'                'VER-2-10-1' "--build=$(cc -dumpmachine) --with-png=no"
+build 'https://github.com/X11Libre/font-util.git'               'font-util-1.3.2'
+build 'https://github.com/X11Libre/libfontenc.git'              'libfontenc-1.1.4'
+build 'https://github.com/X11Libre/libXfont.git'                'libXfont2-2.0.3'
+build 'https://github.com/X11Libre/libXdmcp.git'                'libXdmcp-1.1.3'
+build 'https://github.com/X11Libre/libXfixes.git'               'libXfixes-5.0.3'
+build 'https://github.com/X11Libre/libxcb-util.git'             'xcb-util-0.4.1-gitlab'
+build 'https://github.com/X11Libre/libxcb-image.git'            'xcb-util-image-0.4.1-gitlab'
+build 'https://github.com/X11Libre/libxcb-wm.git'               'xcb-util-wm-0.4.2'
+build 'https://github.com/X11Libre/libxcb-render-util.git'      'master'
+build 'https://github.com/X11Libre/libxcb-keysyms.git'          'master'
 
 # workaround xcb_windefs.h leaking all Windows API types into X server build
 # (some of which clash which types defined by Xmd.h) XXX: This is a bit of a
