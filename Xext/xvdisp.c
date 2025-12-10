@@ -1014,8 +1014,8 @@ ProcXvListImageFormats(ClientPtr client)
 
     /* use rpc.wpos here, in order to get how much we've really written */
     if (rpcbuf.wpos != (pPort->pAdaptor->nImages*sz_xvImageFormatInfo))
-        LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %ld but shoud be %d\n",
-                   rpcbuf.wpos, (pPort->pAdaptor->nImages*sz_xvImageFormatInfo));
+        LogMessage(X_WARNING, "ProcXvListImageFormats() payload_len mismatch: %llu but shoud be %d\n",
+                   (long long unsigned)rpcbuf.wpos, (pPort->pAdaptor->nImages*sz_xvImageFormatInfo));
 
     xvListImageFormatsReply reply = {
         .num_formats = pPort->pAdaptor->nImages,
