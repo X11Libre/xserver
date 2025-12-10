@@ -13,9 +13,6 @@ build_meson   drm               https://github.com/X11Libre/drm                 
 fi
 build_meson   libxcvt           https://github.com/X11Libre/libxcvt                      libxcvt-0.1.0
 build_meson   xorgproto         https://github.com/X11Libre/xorgproto                    xorgproto-2024.1
-if [ "$X11_OS" = "Darwin" ]; then
-build_ac      xset              https://github.com/X11Libre/xset                         xset-1.2.5
-fi
 
 # really must be build via autoconf instead of meson, otherwise piglit wont find the test programs
 build_ac_xts  xts               https://github.com/X11Libre/xts                          aae51229af810efba24412511f60602fab53eded

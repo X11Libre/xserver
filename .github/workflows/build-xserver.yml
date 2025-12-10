@@ -200,13 +200,11 @@ jobs:
               with:
                 path: |
                     ${{ env.X11_PREFIX }}
-                    ${{ env.X11_BUILD_DIR }}/xts
-                    ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/macos/install-prereq.sh') }}
                 restore-keys: ${{ runner.os }}-x11-deps-
 
             - name: generic prereq
-              run:  .github/scripts/install-prereq.sh
+              run:  .github/scripts/macos/install-prereq.sh
 
             - name: build
               run:  .gitlab-ci/meson-build.sh
@@ -246,6 +244,7 @@ jobs:
                   usesh: true
                   release: "14.3"
                   run:     ./.github/scripts/freebsd/run-xserver-build.sh
+
     xserver-build-dragonflybsd:
         runs-on: ubuntu-latest
         env:
