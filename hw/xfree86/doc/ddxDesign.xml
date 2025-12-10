@@ -633,24 +633,8 @@ Here is what <function>InitOutput()</function> does:
       <para>
     In the case of ix86 machines, this will be a general PCI probe.
     The full information obtained here will be available to the drivers.
-    This information persists for the life of the Xserver.  In the PCI
-    case, the PCI information for all video cards found is available by
-    calling <function>xf86GetPciVideoInfo()</function>.
+    This information persists for the life of the Xserver.
       </para>
-
-      <blockquote><para>
-	  <programlisting>
-    pciVideoPtr *xf86GetPciVideoInfo(void);
-	  </programlisting>
-	  <blockquote><para>
-	returns a pointer to a list of pointers to
-	<structname>pciVideoRec</structname> entries, of which there is one for
-	each detected PCI video card.  The list is terminated with a
-	<constant>NULL</constant> pointer.  If no PCI video cards were
-	detected, the return value is <constant>NULL</constant>.
-
-	    </para></blockquote>
-	</para></blockquote>
 
       <para>
     After the bus probe, the resource broker is initialised.
@@ -7821,15 +7805,13 @@ ZZZProbe(DriverPtr drv, int flags)
      * the details.
      */
     /* test if PCI bus present */
-    if (xf86GetPciVideoInfo()) {
-
-        numUsed = xf86MatchPciInstances(ZZZ_NAME, PCI_VENDOR_ZZZ,
+    numUsed = xf86MatchPciInstances(ZZZ_NAME, PCI_VENDOR_ZZZ,
                             ZZZChipsets, ZZZPciChipsets, devSections,
                             numDevSections, drv, &amp;usedChips);
 
-        for (i = 0; i &lt; numUsed; i++) {
-            ScrnInfoPtr pScrn = NULL;
-            if ((pScrn = xf86ConfigPciEntity(pScrn, flags, usedChips[i],
+    for (i = 0; i &lt; numUsed; i++) {
+        ScrnInfoPtr pScrn = NULL;
+        if ((pScrn = xf86ConfigPciEntity(pScrn, flags, usedChips[i],
                                              ZZZPciChipsets, NULL, NULL,
                                              NULL, NULL, NULL))) {
                /* Allocate a ScrnInfoRec */
@@ -7847,10 +7829,9 @@ ZZZProbe(DriverPtr drv, int flags)
                pScrn-&gt;ValidMode     = ZZZValidMode;
                foundScreen = TRUE;
                /* add screen to entity */
-           }
-        }
-        xfree(usedChips);
+       }
     }
+    xfree(usedChips);
 
     xfree(devSections);
     return foundScreen;
