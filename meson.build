@@ -16,6 +16,7 @@ add_project_arguments('-fvisibility=hidden', language : 'c')
 add_project_arguments('-Wvla', language: 'c')
 add_project_arguments('-fno-common', language: 'c')
 add_project_arguments('-Wshift-negative-value', language: 'c')
+add_project_arguments('-Wchar-subscripts', language: 'c')
 
 add_project_link_arguments('-fvisibility=hidden', language : 'c')
 
@@ -26,6 +27,7 @@ conf_data.set('_DIX_CONFIG_H_', '1')
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     test_wflags = [
         '-Wall',
+        '-Wchar-subscripts',
         '-Wpointer-arith',
         '-Wmissing-declarations',
         '-Wformat=2',
