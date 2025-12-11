@@ -2251,7 +2251,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
         GetProcessName(client_pid, client_name, sizeof(client_name));
 
         if (client_pid > 0 && window_pid > 0 && client_pid != window_pid && !IsWhitelisted(client_name, window_pid)) {
-            char client_name[256], window_name[256];
+            char window_name[256];
             GetProcessName(client_pid, client_name, sizeof(client_name));
             GetProcessName(window_pid, window_name, sizeof(window_name));
 
