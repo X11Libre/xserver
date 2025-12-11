@@ -4,6 +4,7 @@
 
 #include <inttypes.h>
 #include <X11/extensions/XI2proto.h>
+#include <X11/extensions/shmproto.h>
 
 #include "dix/dix_priv.h"
 #include "dix/extension_priv.h"
@@ -73,6 +74,13 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                     // needed by xeyes. we should filter the mask
                     case X_XIQueryPointer:
                         if (subj->ns->allowMouseMotion)
+                            goto pass;
+                }
+            // needed for gimp?
+            case EXTENSION_MAJOR_SHM:
+                switch(client->minorOp) {
+                    case X_ShmCreatePixmap:
+                        if (subj->ns->allowRender)
                             goto pass;
                 }
             // move to somewhere else? WMs need to listen to this.
