@@ -36,6 +36,22 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                 goto pass;
             if (strcmp(evname,LookupEventName(UnmapNotify))==0)
                 goto pass;
+            // tricky types that don't get caught by the switch
+            switch (type)
+                case ConfigureNotify:
+                case CreateNotify:
+                case ReparentNotify:
+                case PropertyNotify:
+                case MapNotify:
+                case ColormapNotify:
+                case ClientMessage:
+                case UnmapNotify:
+                case DestroyNotify:
+                case FocusOut:
+                case FocusIn:
+                case EnterNotify:
+                case LeaveNotify:
+                    goto pass;
         }
 
         switch (type) {
@@ -66,21 +82,6 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                 if ((!subj->ns->allowXInput) || !isRootWin(param->pWin))
                     goto reject;
             continue;
-
-            case ConfigureNotify:
-            case CreateNotify:
-            case ReparentNotify:
-            case PropertyNotify:
-            case MapNotify:
-            case ColormapNotify:
-            case ClientMessage:
-            case UnmapNotify:
-            case DestroyNotify:
-            case FocusOut:
-            case FocusIn:
-            case EnterNotify:
-            case LeaveNotify:
-                goto pass;
 
             default:
                 XNS_HOOK_LOG("BLOCKED event type #%d 0%0x 0%0x %s %s%s\n", i, type, param->events[i].u.u.detail,
