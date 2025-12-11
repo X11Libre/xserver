@@ -88,8 +88,8 @@ static const char **builtinConfig = NULL;
 static int builtinIndex = 0;
 static unsigned int configPos = 0;       /* current readers position */
 static int configLineNo = 0;    /* linenumber */
-static unsigned char *configBuf, *configRBuf;    /* buffer for lines */
-static unsigned char *configSection = NULL;      /* name of current section being parsed */
+static char *configBuf, *configRBuf;    /* buffer for lines */
+static char *configSection = NULL;      /* name of current section being parsed */
 static int numFiles = 0;        /* number of config files */
 static int curFileIndex = 0;    /* index of current config file */
 static int pushToken = LOCK_TOKEN;
@@ -107,13 +107,13 @@ LexRec xf86_lex_val;
  *  support that.
  */
 
-static unsigned char *
+static char *
 xf86getNextLine(void)
 {
     static int configBufLen = CONFIG_BUF_LEN;
-    unsigned char *tmpConfigBuf, *tmpConfigRBuf;
+    char *tmpConfigBuf, *tmpConfigRBuf;
     int c, i, pos = 0, eolFound = 0;
-    unsigned char *ret = NULL;
+    char *ret = NULL;
 
     /*
      * reallocate the string if it was grown last time (i.e., is no
@@ -158,7 +158,7 @@ xf86getNextLine(void)
     /* read in another block of chars */
 
     do {
-        ret = (unsigned char*)fgets((char*)configBuf + pos, configBufLen - pos - 1,
+        ret = fgets(configBuf + pos, configBufLen - pos - 1,
                     configFiles[curFileIndex].file);
 
         if (!ret) {
