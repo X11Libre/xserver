@@ -4619,9 +4619,9 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
     }
  maskSet:
     if ((mask & PointerMotionHintMask) && !(check & PointerMotionHintMask)) {
-        for (DeviceIntPtr dev = inputInfo.devices; dev; dev = dev->next) {
-            if (dev->valuator && dev->valuator->motionHintWindow == pWin)
-                dev->valuator->motionHintWindow = NullWindow;
+        for (DeviceIntPtr device = inputInfo.devices; device; device = device->next) {
+            if (device->valuator && device->valuator->motionHintWindow == pWin)
+                device->valuator->motionHintWindow = NullWindow;
         }
     }
     RecalculateDeliverableEvents(pWin);
