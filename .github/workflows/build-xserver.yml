@@ -248,7 +248,7 @@ jobs:
     xserver-build-dragonflybsd:
         runs-on: ubuntu-latest
         env:
-            MESON_ARGS: -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+            MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
             - name: run in DragonFlyBSD VM
