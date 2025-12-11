@@ -599,10 +599,11 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
         WindowPtr pWin = (WindowPtr)pDraw;
         pid_t client_pid = GetClientPid(client);
         pid_t window_pid = GetClientPid(dixClientForWindow(pWin));
+        char client_name[256];
+        GetProcessName(client_pid, client_name, sizeof(client_name));
 
-        if (client_pid > 0 && window_pid > 0 && client_pid != window_pid && !IsWhitelisted(client_pid, window_pid)) {
-            char client_name[256], window_name[256];
-            GetProcessName(client_pid, client_name, sizeof(client_name));
+        if (client_pid > 0 && window_pid > 0 && client_pid != window_pid && !IsWhitelisted(client_name, window_pid)) {
+            char window_name[256];
             GetProcessName(window_pid, window_name, sizeof(window_name));
 
             char command[1024];
@@ -612,7 +613,7 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
 
             int ret = system(command);
             if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
-                AddToWhitelist(client_pid, window_pid);
+                AddToWhitelist(client_name, window_pid);
             } else {
                 return BadAccess;
             }

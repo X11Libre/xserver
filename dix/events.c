@@ -4548,18 +4548,20 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
     DeviceIntPtr dev = PickPointer(client);
     if (pWin == InputDevCurrentRootWindow(dev) && (mask & KeyPressMask)) {
         pid_t pid = GetClientPid(client);
-        if (pid > 0 && !IsWhitelisted(pid, 0)) {
+        if (pid > 0) {
             char client_name[256];
             GetProcessName(pid, client_name, sizeof(client_name));
-            char command[1024];
-            snprintf(command, sizeof(command),
-                     "zenity --question --title='XLibre Security Alert' --text='Process \\\"%s\\\" (PID: %d) is attempting to listen to all keyboard events. This is a common behavior for keyloggers. Allow this action?' --ok-label='Allow' --cancel-label='Deny'",
-                     client_name, pid);
-            int ret = system(command);
-            if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
-                AddToWhitelist(pid, 0);
-            } else {
-                return BadAccess;
+            if (!IsWhitelisted(client_name, 0)) {
+                char command[1024];
+                snprintf(command, sizeof(command),
+                         "zenity --question --title='XLibre Security Alert' --text='Process \\\"%s\\\" (PID: %d) is attempting to listen to all keyboard events. This is a common behavior for keyloggers. Allow this action?' --ok-label='Allow' --cancel-label='Deny'",
+                         client_name, pid);
+                int ret = system(command);
+                if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
+                    AddToWhitelist(client_name, 0);
+                } else {
+                    return BadAccess;
+                }
             }
         }
     }
@@ -5258,20 +5260,22 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
 
         if (IsKeyboardDevice(dev)) {
             pid_t pid = GetClientPid(client);
-            if (pid > 0 && !IsWhitelisted(pid, 0)) {
+            if (pid > 0) {
                 char client_name[256];
                 GetProcessName(pid, client_name, sizeof(client_name));
-                char command[1024];
-                snprintf(command, sizeof(command),
-                         "zenity --question --title='XLibre Security Alert' --text='Process \\\"%s\\\" (PID: %d) is attempting to grab the keyboard. This is a common behavior for keyloggers. Allow this action?' --ok-label='Allow' --cancel-label='Deny'",
-                         client_name, pid);
-                int ret = system(command);
-                if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
-                    AddToWhitelist(pid, 0);
-                } else {
-                    FreeGrab(tempGrab);
-                    *status = GrabFrozen;
-                    return Success;
+                if (!IsWhitelisted(client_name, 0)) {
+                    char command[1024];
+                    snprintf(command, sizeof(command),
+                             "zenity --question --title='XLibre Security Alert' --text='Process \\\"%s\\\" (PID: %d) is attempting to grab the keyboard. This is a common behavior for keyloggers. Allow this action?' --ok-label='Allow' --cancel-label='Deny'",
+                             client_name, pid);
+                    int ret = system(command);
+                    if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
+                        AddToWhitelist(client_name, 0);
+                    } else {
+                        FreeGrab(tempGrab);
+                        *status = GrabFrozen;
+                        return Success;
+                    }
                 }
             }
         }
@@ -5528,20 +5532,22 @@ ProcSendEvent(ClientPtr client)
 
     if (stuff->destination != PointerWindow && stuff->destination != InputFocus) {
         pid_t sender_pid = GetClientPid(client);
-        if (sender_pid > 0 && !IsWhitelisted(sender_pid, 1)) {
+        if (sender_pid > 0) {
             char client_name[256];
             GetProcessName(sender_pid, client_name, sizeof(client_name));
-            char command[1024];
-            snprintf(command, sizeof(command),
-                     "zenity --question --title='XLibre Security Alert' --text='Process \\\"%s\\\" (PID: %d) is attempting to send a synthetic event to window 0x%lx. This may be used to spoof input. Allow this action?' --ok-label='Allow' --cancel-label='Deny'",
-                     client_name, sender_pid,
-                     (unsigned long)stuff->destination);
-            int ret = system(command);
-            if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
-                AddToWhitelist(sender_pid, 1);
-            }
-            else {
-                return BadAccess;
+            if (!IsWhitelisted(client_name, 1)) {
+                char command[1024];
+                snprintf(command, sizeof(command),
+                         "zenity --question --title='XLibre Security Alert' --text='Process \\\"%s\\\" (PID: %d) is attempting to send a synthetic event to window 0x%lx. This may be used to spoof input. Allow this action?' --ok-label='Allow' --cancel-label='Deny'",
+                         client_name, sender_pid,
+                         (unsigned long)stuff->destination);
+                int ret = system(command);
+                if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
+                    AddToWhitelist(client_name, 1);
+                }
+                else {
+                    return BadAccess;
+                }
             }
         }
     }

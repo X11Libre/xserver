@@ -99,21 +99,37 @@ typedef struct {
 static WhitelistEntry whitelist[MAX_WHITELIST_ENTRIES];
 static int whitelist_count = 0;
 
-Bool IsWhitelisted(pid_t client_pid, pid_t target_pid)
+#define WHITELIST_FILE "/etc/X11/whitelist_actions.conf"
+
+Bool IsWhitelisted(const char *procname, int type)
 {
-    for (int i = 0; i < whitelist_count; i++) {
-        if (whitelist[i].client_pid == client_pid && whitelist[i].target_pid == target_pid)
-            return TRUE;
+    FILE *f = fopen(WHITELIST_FILE, "r");
+    if (f) {
+        char line[512];
+        while (fgets(line, sizeof(line), f)) {
+            char *last_space = strrchr(line, ' ');
+            if (last_space) {
+                *last_space = '\0';
+                int w_type;
+                if (sscanf(last_space + 1, "%d", &w_type) == 1) {
+                    if (w_type == type && strcmp(line, procname) == 0) {
+                        fclose(f);
+                        return TRUE;
+                    }
+                }
+            }
+        }
+        fclose(f);
     }
     return FALSE;
 }
 
-void AddToWhitelist(pid_t client_pid, pid_t target_pid)
+void AddToWhitelist(const char *procname, int type)
 {
-    if (whitelist_count < MAX_WHITELIST_ENTRIES) {
-        whitelist[whitelist_count].client_pid = client_pid;
-        whitelist[whitelist_count].target_pid = target_pid;
-        whitelist_count++;
+    FILE *f = fopen(WHITELIST_FILE, "a");
+    if (f) {
+        fprintf(f, "%s %d\n", procname, type);
+        fclose(f);
     }
 }
 

@@ -55,8 +55,8 @@ void NotifyParentProcess(void);
 void CreateWellKnownSockets(void);
 void CloseWellKnownConnections(void);
 
-Bool IsWhitelisted(pid_t client_pid, pid_t target_pid);
-void AddToWhitelist(pid_t client_pid, pid_t target_pid);
+Bool IsWhitelisted(const char *procname, int type);
+void AddToWhitelist(const char *procname, int type);
 void RemoveFromWhitelist(pid_t pid);
 void GetProcessName(pid_t pid, char *buffer, size_t size);
 
