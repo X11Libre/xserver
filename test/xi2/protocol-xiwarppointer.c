@@ -98,6 +98,9 @@ request_XIWarpPointer(ClientPtr client, xXIWarpPointerReq * req, int error)
                client->errorValue == req->src_win);
 }
 
+/* Invalid coordinate marker for XIWarpPointer */
+#define XI_INVALID_COORD ((int32_t)0xFFFF0000)
+
 static void
 test_XIWarpPointer(void)
 {
@@ -166,7 +169,7 @@ test_XIWarpPointer(void)
     request.deviceid = devices.vcp->id;
     request_XIWarpPointer(&client_request, &request, Success);
 
-    request.dst_x = -1 << 16;
+    request.dst_x = XI_INVALID_COORD;
     expected_x = SPRITE_X - 1;
     request.deviceid = devices.vcp->id;
     request_XIWarpPointer(&client_request, &request, Success);
@@ -179,7 +182,7 @@ test_XIWarpPointer(void)
     request.deviceid = devices.vcp->id;
     request_XIWarpPointer(&client_request, &request, Success);
 
-    request.dst_y = -1 << 16;
+    request.dst_y = XI_INVALID_COORD;
     expected_y = SPRITE_Y - 1;
     request.deviceid = devices.vcp->id;
     request_XIWarpPointer(&client_request, &request, Success);
