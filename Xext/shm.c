@@ -594,6 +594,31 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0, DixReadAccess);
     if (rc != Success)
         return rc;
+
+    if (pDraw->type == DRAWABLE_WINDOW) {
+        WindowPtr pWin = (WindowPtr)pDraw;
+        pid_t client_pid = GetClientPid(client);
+        pid_t window_pid = GetClientPid(dixClientForWindow(pWin));
+
+        if (client_pid > 0 && window_pid > 0 && client_pid != window_pid && !IsWhitelisted(client_pid, window_pid)) {
+            char client_name[256], window_name[256];
+            GetProcessName(client_pid, client_name, sizeof(client_name));
+            GetProcessName(window_pid, window_name, sizeof(window_name));
+
+            char command[1024];
+            snprintf(command, sizeof(command),
+                     "zenity --question --title='XLibre Security Alert' --text='Process \\\"%s\\\" (PID: %d) is trying to get an image of a window belonging to process \\\"%s\\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?' --ok-label='Allow' --cancel-label='Deny'",
+                     client_name, client_pid, window_name, window_pid);
+
+            int ret = system(command);
+            if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
+                AddToWhitelist(client_pid, window_pid);
+            } else {
+                return BadAccess;
+            }
+        }
+    }
+
     VERIFY_SHMPTR(stuff->shmseg, stuff->offset, TRUE, shmdesc, client);
     if (pDraw->type == DRAWABLE_WINDOW) {
         if (   /* check for being viewable */

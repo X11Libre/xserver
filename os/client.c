@@ -89,6 +89,67 @@
 #include "os/auth.h"
 #include "os/log_priv.h"
 
+#define MAX_WHITELIST_ENTRIES 1024
+
+typedef struct {
+    pid_t client_pid;
+    pid_t target_pid;
+} WhitelistEntry;
+
+static WhitelistEntry whitelist[MAX_WHITELIST_ENTRIES];
+static int whitelist_count = 0;
+
+Bool IsWhitelisted(pid_t client_pid, pid_t target_pid)
+{
+    for (int i = 0; i < whitelist_count; i++) {
+        if (whitelist[i].client_pid == client_pid && whitelist[i].target_pid == target_pid)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+void AddToWhitelist(pid_t client_pid, pid_t target_pid)
+{
+    if (whitelist_count < MAX_WHITELIST_ENTRIES) {
+        whitelist[whitelist_count].client_pid = client_pid;
+        whitelist[whitelist_count].target_pid = target_pid;
+        whitelist_count++;
+    }
+}
+
+void RemoveFromWhitelist(pid_t pid)
+{
+    int i = 0;
+    while (i < whitelist_count) {
+        if (whitelist[i].client_pid == pid || whitelist[i].target_pid == pid) {
+            whitelist[i] = whitelist[whitelist_count - 1];
+            whitelist_count--;
+        } else {
+            i++;
+        }
+    }
+}
+
+void GetProcessName(pid_t pid, char *buffer, size_t size)
+{
+    char command[256];
+    FILE *fp;
+
+    snprintf(command, sizeof(command), "ps -p %d -o comm=", pid);
+    fp = popen(command, "r");
+    if (fp) {
+        if (fgets(buffer, size, fp)) {
+            // Remove trailing newline
+            buffer[strcspn(buffer, "\n")] = 0;
+        } else {
+            strncpy(buffer, "unknown", size);
+        }
+        pclose(fp);
+    } else {
+        strncpy(buffer, "unknown", size);
+    }
+}
+
 /**
  * Try to determine a PID for a client from its connection
  * information. This should be called only once when new client has
