@@ -23,11 +23,21 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
     struct XnamespaceClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
 
     // send and receive within same namespace permitted without restrictions
-    if (XnsClientSameNS(subj, obj))
+    if (subj->ns->superPower || XnsClientSameNS(subj, obj))
         goto pass;
 
     for (int i=0; i<param->count; i++) {
         const int type = param->events[i].u.u.type;
+
+        // catch messages for root namespace
+        if (strcmp(obj->ns->name,"root")==0) {
+            const char* evname = LookupEventName(type);
+            if (strcmp(evname,LookupEventName(ClientMessage))==0)
+                goto pass;
+            if (strcmp(evname,LookupEventName(UnmapNotify))==0)
+                goto pass;
+        }
+
         switch (type) {
             case GenericEvent: {
                 xGenericEvent *gev = (xGenericEvent*)&param->events[i].u;
@@ -39,7 +49,9 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                             continue;
                         case XI_RawKeyPress:
                         case XI_RawKeyRelease:
-                            goto reject;
+                            if ((!subj->ns->allowGlobalKeyboard) || !isRootWin(param->pWin))
+                                goto reject;
+                            continue;
                         default:
                             XNS_HOOK_LOG("XI unknown %d\n", gev->evtype);
                             goto reject;
@@ -49,6 +61,26 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                 goto reject;
             }
             break;
+            case XI_ButtonRelease:
+            case XI_ButtonPress:
+                if ((!subj->ns->allowXInput) || !isRootWin(param->pWin))
+                    goto reject;
+            continue;
+
+            case ConfigureNotify:
+            case CreateNotify:
+            case ReparentNotify:
+            case PropertyNotify:
+            case MapNotify:
+            case ColormapNotify:
+            case ClientMessage:
+            case UnmapNotify:
+            case DestroyNotify:
+            case FocusOut:
+            case FocusIn:
+            case EnterNotify:
+            case LeaveNotify:
+                goto pass;
 
             default:
                 XNS_HOOK_LOG("BLOCKED event type #%d 0%0x 0%0x %s %s%s\n", i, type, param->events[i].u.u.detail,

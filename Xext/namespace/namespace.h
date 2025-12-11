@@ -27,6 +27,9 @@ struct Xnamespace {
     Bool allowTransparency;
     Bool allowXInput;
     Bool allowXKeyboard;
+    Bool allowGlobalKeyboard;
+    Bool allowRender;
+    Bool allowRandr;
     Bool superPower;
     struct xorg_list auth_tokens;
     size_t refcnt;

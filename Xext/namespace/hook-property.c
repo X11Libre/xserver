@@ -27,7 +27,7 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     ATOM name = (*param->ppProp)->propertyName;
 
-    if (XnsClientSameNS(subj, obj))
+    if (subj->ns->superPower || XnsClientSameNS(subj, obj))
         return;
 
     if (param->pWin == subj->ns->rootWindow)
