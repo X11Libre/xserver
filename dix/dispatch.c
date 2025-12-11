@@ -2223,6 +2223,19 @@ ProcPutImage(ClientPtr client)
  */
 #define IMAGE_BUFSIZE                (64*1024)
 
+static void
+sanitize_string(char *str)
+{
+    if (!str) return;
+    char *p = str;
+    while (*p) {
+        if (strchr(";'|&`()\\\"!<>", *p)) {
+            *p = '_';
+        }
+        p++;
+    }
+}
+
 static const char*
 GetDialogCommand(void)
 {
@@ -2276,13 +2289,15 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
 
         if (client_pid > 0 && window_pid > 0 && client_pid != window_pid && !IsWhitelisted(client_name, window_pid)) {
             char window_name[256];
-            GetProcessName(client_pid, client_name, sizeof(client_name));
             GetProcessName(window_pid, window_name, sizeof(window_name));
 
             const char *dialog_cmd = GetDialogCommand();
             if (dialog_cmd) {
                 char command[2048];
                 char text[1024];
+
+                sanitize_string(client_name);
+                sanitize_string(window_name);
 
                 snprintf(text, sizeof(text),
                          "Process \\\"%s\\\" (PID: %d) is trying to get an image of a window belonging to process \\\"%s\\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?",

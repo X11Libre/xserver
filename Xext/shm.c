@@ -575,6 +575,19 @@ ShmPutImage(ClientPtr client, xShmPutImageReq *stuff)
     return Success;
 }
 
+static void
+sanitize_string(char *str)
+{
+    if (!str) return;
+    char *p = str;
+    while (*p) {
+        if (strchr(";'|&`()\\\"!<>", *p)) {
+            *p = '_';
+        }
+        p++;
+    }
+}
+
 static const char*
 GetDialogCommand(void)
 {
@@ -631,6 +644,8 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
             if (dialog_cmd) {
                 char command[2048];
                 char text[1024];
+                sanitize_string(client_name);
+                sanitize_string(window_name);
                 snprintf(text, sizeof(text),
                          "Process \\\"%s\\\" (PID: %d) is trying to get an image of a window belonging to process \\\"%s\\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?",
                          client_name, client_pid, window_name, window_pid);

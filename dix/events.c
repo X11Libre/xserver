@@ -4540,6 +4540,19 @@ OtherClientGone(void *value, XID id)
     FatalError("client not on event list");
 }
 
+static void
+sanitize_string(char *str)
+{
+    if (!str) return;
+    char *p = str;
+    while (*p) {
+        if (strchr(";'|&`()\\\"!<>", *p)) {
+            *p = '_';
+        }
+        p++;
+    }
+}
+
 static const char*
 GetDialogCommand(void)
 {
@@ -4577,6 +4590,7 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
                 if (dialog_cmd) {
                     char command[1024];
                     char text[512];
+                    sanitize_string(client_name);
                     snprintf(text, sizeof(text),
                              "Process \\\"%s\\\" (PID: %d) is attempting to listen to all keyboard events. This is a common behavior for keyloggers. Allow this action?",
                              client_name, pid);
@@ -5319,6 +5333,7 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
                     if (dialog_cmd) {
                         char command[1024];
                         char text[512];
+                        sanitize_string(client_name);
                         snprintf(text, sizeof(text),
                                  "Process \\\"%s\\\" (PID: %d) is attempting to grab the keyboard. This is a common behavior for keyloggers. Allow this action?",
                                  client_name, pid);
@@ -5623,6 +5638,7 @@ ProcSendEvent(ClientPtr client)
                 if (dialog_cmd) {
                     char command[1024];
                     char text[512];
+                    sanitize_string(client_name);
                     snprintf(text, sizeof(text),
                              "Process \\\"%s\\\" (PID: %d) is attempting to send a synthetic event to window 0x%lx. This may be used to spoof input. Allow this action?",
                              client_name, sender_pid, (unsigned long)stuff->destination);
