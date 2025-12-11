@@ -2281,8 +2281,8 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
 
             const char *dialog_cmd = GetDialogCommand();
             if (dialog_cmd) {
-                char command[1024];
-                char text[512];
+                char command[2048];
+                char text[1024];
 
                 snprintf(text, sizeof(text),
                          "Process \\\"%s\\\" (PID: %d) is trying to get an image of a window belonging to process \\\"%s\\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?",
