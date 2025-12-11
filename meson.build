@@ -18,6 +18,12 @@ add_project_arguments('-fno-common', language: 'c')
 add_project_arguments('-Wshift-negative-value', language: 'c')
 add_project_arguments('-Wchar-subscripts', language: 'c')
 
+# workaround for mesa bug causing GLsync to be typedef'ed multiple times
+# this is breaking -Werror on FreeBSD
+if host_machine.system() == 'freebsd'
+    add_project_arguments('-Wno-error=typedef-redefinition', language: 'c')
+endif
+
 add_project_link_arguments('-fvisibility=hidden', language : 'c')
 
 # global config data -- needs to be declared early

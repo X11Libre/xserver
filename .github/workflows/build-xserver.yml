@@ -233,7 +233,7 @@ jobs:
         runs-on: ubuntu-latest
         env:
             MYTOKEN : ${{ secrets.MYTOKEN }}
-            MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
             - name: run in freebsd VM
