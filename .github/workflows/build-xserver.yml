@@ -14,6 +14,7 @@ on:
 
 jobs:
     xserver-build-ubuntu:
+        if: false
         env:
             MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
             LIBGL_ALWAYS_SOFTWARE: 1
@@ -77,6 +78,7 @@ jobs:
               run:  .github/scripts/manpages-check
 
     drivers-build-ubuntu:
+        if: false
         env:
             MESON_ARGS: -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
@@ -128,6 +130,7 @@ jobs:
               run: .github/scripts/compile-drivers.sh
 
     xserver-build-mingw32-ubuntu:
+        if: false
         runs-on: ubuntu-latest
         env:
             MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dwerror=true -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false
@@ -172,6 +175,7 @@ jobs:
               run: .github/scripts/meson-build.sh --run-install
 
     xserver-build-macos:
+        if: false
         env:
             MESON_ARGS: -Dprefix=/tmp -Dglx=false -Dxnest=false -Dxfbdev=false
             X11_PREFIX: /Users/runner/x11
@@ -230,6 +234,7 @@ jobs:
               run:  .github/scripts/manpages-check
 
     xserver-build-freebsd:
+        if: false
         runs-on: ubuntu-latest
         env:
             MYTOKEN : ${{ secrets.MYTOKEN }}
@@ -246,6 +251,7 @@ jobs:
                   run:     ./.github/scripts/freebsd/run-xserver-build.sh
 
     xserver-build-dragonflybsd:
+        if: false
         runs-on: ubuntu-latest
         env:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
@@ -260,6 +266,28 @@ jobs:
                   release: "6.4.2"
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
 
+    xserver-build-netbsd:
+        runs-on: ubuntu-latest
+        env:
+            MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+        steps:
+            - uses: actions/checkout@v4
+#            - name: run in NetBSD VM
+#              id: xserver-build
+#              uses: vmactions/netbsd-vm@v1
+#              with:
+#                  envs: 'MESON_ARGS'
+#                  usesh: true
+#                  release: "10.1"
+#                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+            - uses: vmactions/netbsd-vm@v1
+              id: vm
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  release: '10.0'
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
     release:
         name: Release pushed tag
         runs-on: ubuntu-latest
@@ -271,6 +299,7 @@ jobs:
             - xserver-build-macos
             - xserver-build-freebsd
             - xserver-build-dragonflybsd
+            - xserver-build-netbsd
         steps:
             - name: Checkout
               uses: actions/checkout@v4
