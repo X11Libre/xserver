@@ -24,6 +24,8 @@ is" without express or implied warranty.
 #include <X11/extensions/XKB.h>
 #include <xcb/xkb.h>
 
+#include "os/osdep.h"
+
 #include "screenint.h"
 #include "inputstr.h"
 #include "misc.h"
@@ -89,6 +91,10 @@ xnestChangeKeyboardControl(DeviceIntPtr pDev, KeybdCtrl * ctrl)
 #endif
 }
 
+/* make sure that KeySym and xcb_keysym_t are both 32 bit */
+__size_assert(KeySym, 4);
+__size_assert(xcb_keysym_t, 4);
+
 int
 xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
 {
@@ -115,7 +121,8 @@ xnestKeyboardProc(DeviceIntPtr pDev, int onoff)
             .minKeyCode = min_keycode,
             .maxKeyCode = max_keycode,
             .mapWidth = keymap_reply->keysyms_per_keycode,
-            .map = xcb_get_keyboard_mapping_keysyms(keymap_reply),
+            /* mingw32 complains on type mismatch, but we already made sure they're both 32bit */
+            .map = (KeySym*)xcb_get_keyboard_mapping_keysyms(keymap_reply),
         };
 
         xcb_generic_error_t *mod_err = NULL;
