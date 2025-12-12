@@ -24,6 +24,12 @@ if host_machine.system() == 'freebsd'
     add_project_arguments('-Wno-error=typedef-redefinition', language: 'c')
 endif
 
+# workaround for mingw32 bug, which is demanding gnu_print attribute
+# while not actually understanding it
+if host_machine.system() == 'windows'
+    add_project_arguments('-Wno-error=suggest-attribute=format', language: 'c')
+endif
+
 add_project_link_arguments('-fvisibility=hidden', language : 'c')
 
 # global config data -- needs to be declared early
