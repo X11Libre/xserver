@@ -64,9 +64,7 @@ SOFTWARE.
 #error "Too weird to live."
 #endif
 
-#ifndef GLYPHPADBYTES
 #define GLYPHPADBYTES           4
-#endif
 
 #define BITMAP_SCANLINE_PAD  32
 #define LOG2_BITMAP_PAD		5
