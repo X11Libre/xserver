@@ -3201,12 +3201,26 @@ ProcCreateCursor(ClientPtr client)
 int
 ProcCreateGlyphCursor(ClientPtr client)
 {
+    REQUEST(xCreateGlyphCursorReq);
+    REQUEST_SIZE_MATCH(xCreateGlyphCursorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cid);
+        swapl(&stuff->source);
+        swapl(&stuff->mask);
+        swaps(&stuff->sourceChar);
+        swaps(&stuff->maskChar);
+        swaps(&stuff->foreRed);
+        swaps(&stuff->foreGreen);
+        swaps(&stuff->foreBlue);
+        swaps(&stuff->backRed);
+        swaps(&stuff->backGreen);
+        swaps(&stuff->backBlue);
+    }
+
     CursorPtr pCursor;
     int res;
 
-    REQUEST(xCreateGlyphCursorReq);
-
-    REQUEST_SIZE_MATCH(xCreateGlyphCursorReq);
     LEGAL_NEW_RESOURCE(stuff->cid, client);
 
     res = AllocGlyphCursor(stuff->source, stuff->sourceChar,
