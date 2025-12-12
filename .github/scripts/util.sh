@@ -1,6 +1,8 @@
 
 . .github/scripts/conf.sh
 
+[ "$X11_INSTALL_PREFIX" ] || X11_INSTALL_PREFIX="$X11_PREFIX"
+
 SOURCE_DIR=`pwd`
 
 clone_source() {
@@ -41,13 +43,14 @@ build_ac() {
     shift
     shift
     shift || true
+    mkdir -p $X11_PREFIX
     if [ -f $X11_PREFIX/$pkgname.DONE ]; then
         echo "package $pkgname already built"
     else
         clone_source "$pkgname" "$url" "$ref"
         (
             cd $pkgname
-            ./autogen.sh --prefix=$X11_PREFIX
+            ./autogen.sh --prefix=$X11_INSTALL_PREFIX
             make -j${FDO_CI_CONCURRENT:-4} install
         )
         touch $X11_PREFIX/$pkgname.DONE
