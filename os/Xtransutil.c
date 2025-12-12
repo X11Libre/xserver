@@ -240,6 +240,7 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
  * it's not save if the directory has non-root ownership or the sticky
  * bit cannot be set and fail.
  */
+#ifndef WIN32
 static int
 trans_mkdir(const char *path, int mode)
 {
@@ -388,3 +389,4 @@ trans_mkdir(const char *path, int mode)
     /* In all other cases, fail */
     return -1;
 }
+#endif

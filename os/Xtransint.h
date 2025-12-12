@@ -238,10 +238,12 @@ typedef struct _Xtransport_table {
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
+#ifndef WIN32
 static int trans_mkdir (
     const char *,	/* path */
     int			/* mode */
 );
+#endif
 
 #ifdef __clang__
 #pragma clang diagnostic pop
