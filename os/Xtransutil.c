@@ -264,9 +264,6 @@ trans_mkdir(const char *path, int mode)
 		prmsg(1, "mkdir: ERROR: euid != 0,"
 		      "directory %s will not be created.\n",
 		      path);
-#ifdef FAIL_HARD
-		return -1;
-#endif
 	    } else {
 		prmsg(1, "mkdir: Cannot create %s with root ownership\n",
 		      path);
@@ -279,9 +276,6 @@ trans_mkdir(const char *path, int mode)
 	    if (chmod(path, mode)) {
 		prmsg(1, "mkdir: ERROR: Mode of %s should be set to %04o\n",
 		      path, mode);
-#ifdef FAIL_HARD
-		return -1;
-#endif
 	    }
 #else
 	if (mkdir(path) == 0) {
@@ -373,13 +367,6 @@ trans_mkdir(const char *path, int mode)
 #endif
 
 	    if (updateOwner && !updatedOwner) {
-#ifdef FAIL_HARD
-		if (status & FAIL_IF_NOT_ROOT) {
-		    prmsg(1, "mkdir: ERROR: Owner of %s must be set to root\n",
-			  path);
-		    return -1;
-		}
-#endif
 #if !defined(__APPLE_CC__) && !defined(__CYGWIN__)
 		prmsg(1, "mkdir: Owner of %s should be set to root\n",
 		      path);
@@ -387,13 +374,6 @@ trans_mkdir(const char *path, int mode)
 	    }
 
 	    if (updateMode && !updatedMode) {
-#ifdef FAIL_HARD
-		if (status & FAIL_IF_NOMODE) {
-		    prmsg(1, "mkdir: ERROR: Mode of %s must be set to %04o\n",
-			  path, mode);
-		    return -1;
-		}
-#endif
 		prmsg(1, "mkdir: Mode of %s should be set to %04o\n",
 		      path, mode);
 		if (status & WARN_NO_ACCESS) {
