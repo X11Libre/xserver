@@ -62,9 +62,7 @@ from The Open Group.
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
-#if defined(TCPCONN) || defined(UNIXCONN)
 #include "Xtranssock.c"
-#endif
 #include "Xtrans.c"
 #include "Xtransutil.c"
 

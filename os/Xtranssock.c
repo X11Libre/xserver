@@ -78,13 +78,13 @@ from the copyright holders.
 
 #ifndef WIN32
 
-#if defined(TCPCONN) || defined(UNIXCONN)
+#if defined(UNIXCONN)
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
 
-#if defined(TCPCONN) || defined(UNIXCONN)
+#if defined(UNIXCONN)
 #define X_INCLUDE_NETDB_H
 #define XOS_USE_NO_LOCKING
 #include <X11/Xos_r.h>
@@ -186,7 +186,6 @@ typedef struct _Sockettrans2dev {
  *  local   Platform preferred local connection method
  */
 static Sockettrans2dev Sockettrans2devtab[] = {
-#ifdef TCPCONN
     {"inet",AF_INET,SOCK_STREAM,SOCK_DGRAM,0},
 #ifndef IPv6
     {"tcp",AF_INET,SOCK_STREAM,SOCK_DGRAM,0},
@@ -195,7 +194,6 @@ static Sockettrans2dev Sockettrans2devtab[] = {
     {"tcp",AF_INET,SOCK_STREAM,SOCK_DGRAM,0}, /* fallback */
     {"inet6",AF_INET6,SOCK_STREAM,SOCK_DGRAM,0},
 #endif
-#endif /* TCPCONN */
 #ifdef UNIXCONN
     {"unix",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
     {"local",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
@@ -204,9 +202,7 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 
 #define NUMSOCKETFAMILIES (sizeof(Sockettrans2devtab)/sizeof(Sockettrans2dev))
 
-#ifdef TCPCONN
-static int _XSERVTransSocketINETClose (XtransConnInfo ciptr);
-#endif
+
 
 static int
 is_numeric (const char *str)
@@ -713,7 +709,6 @@ static int _XSERVTransSocketCreateListener (XtransConnInfo ciptr,
     return 0;
 }
 
-#ifdef TCPCONN
 static int _XSERVTransSocketINETCreateListener (
     XtransConnInfo ciptr, const char *port, unsigned int flags)
 {
@@ -829,9 +824,6 @@ static int _XSERVTransSocketINETCreateListener (
 
     return 0;
 }
-
-#endif /* TCPCONN */
-
 
 #ifdef UNIXCONN
 
@@ -1018,8 +1010,6 @@ static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
 #endif /* UNIXCONN */
 
 
-#ifdef TCPCONN
-
 static XtransConnInfo _XSERVTransSocketINETAccept (
     XtransConnInfo ciptr)
 {
@@ -1084,9 +1074,6 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
 
     return newciptr;
 }
-
-#endif /* TCPCONN */
-
 
 #ifdef UNIXCONN
 static XtransConnInfo _XSERVTransSocketUNIXAccept (
@@ -1382,15 +1369,6 @@ static int _XSERVTransSocketDisconnect (XtransConnInfo ciptr)
 #endif
 }
 
-#ifdef TCPCONN
-static int _XSERVTransSocketINETClose (XtransConnInfo ciptr)
-{
-    prmsg (2,"SocketINETClose(%p,%d)\n", (void *) ciptr, ciptr->fd);
-    return ossock_close(ciptr->fd);
-}
-
-#endif /* TCPCONN */
-
 #ifdef UNIXCONN
 static int _XSERVTransSocketUNIXClose (XtransConnInfo ciptr)
 {
@@ -1438,8 +1416,12 @@ static int _XSERVTransSocketUNIXCloseForCloning (XtransConnInfo ciptr)
 
 #endif /* UNIXCONN */
 
+static int _XSERVTransSocketINETClose (XtransConnInfo ciptr)
+{
+    prmsg (2,"SocketINETClose(%p,%d)\n", (void *) ciptr, ciptr->fd);
+    return ossock_close(ciptr->fd);
+}
 
-#ifdef TCPCONN
 static const char* tcp_nolisten[] = {
 	"inet",
 #ifdef IPv6
@@ -1515,7 +1497,6 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 	_XSERVTransSocketINETClose,
 };
 #endif /* IPv6 */
-#endif /* TCPCONN */
 
 #ifdef UNIXCONN
 static Xtransport _XSERVTransSocketLocalFuncs = {

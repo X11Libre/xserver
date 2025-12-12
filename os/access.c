@@ -105,9 +105,7 @@ SOFTWARE.
 #include <pwd.h>
 #endif
 
-#if defined(TCPCONN)
 #include <netinet/in.h>
-#endif                          /* TCPCONN */
 
 #ifdef HAVE_GETPEERUCRED
 #include <ucred.h>
@@ -404,9 +402,6 @@ AccessUsingXdmcp(void)
 void
 DefineSelf(int fd)
 {
-#if !defined(TCPCONN) && !defined(UNIXCONN)
-    return;
-#else
     int len;
     caddr_t addr;
     int family;
@@ -519,7 +514,6 @@ DefineSelf(int fd)
             selfhosts = host;
         }
     }
-#endif                          /* !TCPCONN && !UNIXCONN */
 }
 
 #else
@@ -941,7 +935,6 @@ ResetHosts(const char *display)
                 NewHost(family, "", 0, FALSE);
                 LocalHostRequested = TRUE;      /* Fix for XFree86 bug #156 */
             }
-#if defined(TCPCONN)
             else if (!strncmp("inet:", lhostname, 5)) {
                 family = FamilyInternet;
                 hostname = ohostname + 5;
@@ -951,7 +944,6 @@ ResetHosts(const char *display)
                 family = FamilyInternet6;
                 hostname = ohostname + 6;
             }
-#endif
 #endif
             else if (!strncmp("si:", lhostname, 3)) {
                 family = FamilyServerInterpreted;
@@ -966,7 +958,6 @@ ResetHosts(const char *display)
                 }
             }
             else
-#if defined(TCPCONN)
             {
 #if defined(HAVE_GETADDRINFO)
                 if ((family == FamilyInternet) ||
@@ -1021,7 +1012,6 @@ ResetHosts(const char *display)
                 }
 #endif                          /* HAVE_GETADDRINFO */
             }
-#endif                          /* TCPCONN */
             family = FamilyWild;
         }
         fclose(fd);
@@ -1445,7 +1435,6 @@ CheckAddr(int family, const void *pAddr, unsigned length)
     int len;
 
     switch (family) {
-#if defined(TCPCONN)
     case FamilyInternet:
         if (length == sizeof(struct in_addr))
             len = length;
@@ -1459,7 +1448,6 @@ CheckAddr(int family, const void *pAddr, unsigned length)
         else
             len = -1;
         break;
-#endif
 #endif
     case FamilyServerInterpreted:
         len = siCheckAddr(pAddr, length);
@@ -1528,7 +1516,6 @@ ConvertAddr(register struct sockaddr *saddr, int *len, void **addr)
     case AF_UNIX:
 #endif
         return FamilyLocal;
-#if defined(TCPCONN)
     case AF_INET:
 #ifdef WIN32
         if (16777343 == *(long *) &((struct sockaddr_in *) saddr)->sin_addr)
@@ -1553,7 +1540,6 @@ ConvertAddr(register struct sockaddr *saddr, int *len, void **addr)
             return FamilyInternet6;
         }
     }
-#endif
 #endif
     default:
         return -1;

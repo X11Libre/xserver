@@ -88,10 +88,8 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdarg.h>
 #include <stdlib.h>             /* for calloc() */
 
-#if defined(TCPCONN)
 #ifndef WIN32
 #include <netdb.h>
-#endif
 #endif
 
 #include "dix/dix_priv.h"
@@ -783,7 +781,6 @@ int
 set_font_authorizations(char **authorizations, int *authlen, void *client)
 {
 #define AUTHORIZATION_NAME "hp-hostname-1"
-#if defined(TCPCONN)
     static char *result = NULL;
     static char *p = NULL;
 
@@ -845,9 +842,6 @@ set_font_authorizations(char **authorizations, int *authlen, void *client)
     *authlen = p - result;
     *authorizations = result;
     return 1;
-#else                           /* TCPCONN */
-    return 0;
-#endif                          /* TCPCONN */
 }
 
 void

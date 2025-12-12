@@ -79,7 +79,6 @@ SOFTWARE.
 #ifndef WIN32
 #include <sys/socket.h>
 
-#if defined(TCPCONN)
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #ifdef CSRG_BASED
@@ -88,8 +87,9 @@ SOFTWARE.
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #endif
+#ifndef WIN32
 #include <sys/uio.h>
-#endif                          /* WIN32 */
+#endif
 
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
@@ -351,7 +351,6 @@ AuthAudit(ClientPtr client, Bool letin,
 #endif
             strlcpy(addr, "local host", sizeof(addr));
             break;
-#if defined(TCPCONN)
         case AF_INET:{
 #if defined(HAVE_INET_NTOP)
             char ipaddr[INET_ADDRSTRLEN];
@@ -374,7 +373,6 @@ AuthAudit(ClientPtr client, Bool letin,
             snprintf(addr, sizeof(addr), "IP %s", ipaddr);
         }
             break;
-#endif
 #endif
         default:
             strlcpy(addr, "unknown address", sizeof(addr));

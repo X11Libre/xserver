@@ -85,13 +85,11 @@ from The Open Group.
 
 static
 Xtransport_table Xtransports[] = {
-#if defined(TCPCONN)
     { &_XSERVTransSocketTCPFuncs,	TRANS_SOCKET_TCP_INDEX },
 #if defined(IPv6)
     { &_XSERVTransSocketINET6Funcs,	TRANS_SOCKET_INET6_INDEX },
 #endif /* IPv6 */
     { &_XSERVTransSocketINETFuncs,	TRANS_SOCKET_INET_INDEX },
-#endif /* TCPCONN */
 #if defined(UNIXCONN)
     { &_XSERVTransSocketLocalFuncs,	TRANS_SOCKET_LOCAL_INDEX },
     { &_XSERVTransSocketUNIXFuncs,	TRANS_SOCKET_UNIX_INDEX },

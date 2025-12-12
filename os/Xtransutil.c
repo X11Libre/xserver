@@ -102,7 +102,6 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 
     switch( *familyp )
     {
-#if defined(TCPCONN)
     case AF_INET:
     {
 	/*
@@ -165,7 +164,6 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 	break;
     }
 #endif /* IPv6 */
-#endif /* defined(TCPCONN) */
 
 
 #if defined(UNIXCONN)
