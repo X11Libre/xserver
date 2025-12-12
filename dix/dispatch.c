@@ -3055,6 +3055,13 @@ int
 ProcLookupColor(ClientPtr client)
 {
     REQUEST(xLookupColorReq);
+    REQUEST_AT_LEAST_SIZE(xLookupColorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cmap);
+        swaps(&stuff->nbytes);
+    }
+
     REQUEST_FIXED_SIZE(xLookupColorReq, stuff->nbytes);
 
     ColormapPtr pcmp;
