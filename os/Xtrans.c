@@ -674,13 +674,13 @@ int _XSERVTransResetListener (XtransConnInfo ciptr)
 	return TRANS_RESET_NOOP;
 }
 
-XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr, int *status)
+XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr)
 {
     XtransConnInfo	newciptr;
 
     prmsg (2,"Accept(%d)\n", ciptr->fd);
 
-    newciptr = ciptr->transptr->Accept (ciptr, status);
+    newciptr = ciptr->transptr->Accept(ciptr);
 
     if (newciptr)
 	newciptr->transptr = ciptr->transptr;

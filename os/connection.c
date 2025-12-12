@@ -621,7 +621,6 @@ EstablishNewConnections(int curconn, int ready, void *data)
     ClientPtr client;
     OsCommPtr oc;
     XtransConnInfo trans_conn, new_trans_conn;
-    int status;
 
     connect_time = GetTimeInMillis();
     /* kill off stragglers */
@@ -638,7 +637,7 @@ EstablishNewConnections(int curconn, int ready, void *data)
     if ((trans_conn = lookup_trans_conn(curconn)) == NULL)
         return;
 
-    if ((new_trans_conn = _XSERVTransAccept(trans_conn, &status)) == NULL)
+    if ((new_trans_conn = _XSERVTransAccept(trans_conn)) == NULL)
         return;
 
     newconn = _XSERVTransGetConnectionNumber(new_trans_conn);
@@ -1008,7 +1007,6 @@ ListenOnOpenFD(int fd, int noxauth)
     ListenTransCount++;
 }
 
-/* based on _XSERVTransSocketUNIXAccept (XtransConnInfo ciptr, int *status) */
 Bool
 AddClientOnOpenFD(int fd)
 {

@@ -165,10 +165,7 @@ typedef struct _Xtransport {
 	XtransConnInfo		/* connection */
     );
 
-    XtransConnInfo (*Accept)(
-	XtransConnInfo,		/* connection */
-        int *			/* status */
-    );
+    XtransConnInfo (*Accept)(XtransConnInfo ciptr);
 
     int	(*Read)(
 	XtransConnInfo,		/* connection */

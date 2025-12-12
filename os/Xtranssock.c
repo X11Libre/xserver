@@ -1023,7 +1023,7 @@ static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
 #ifdef TCPCONN
 
 static XtransConnInfo _XSERVTransSocketINETAccept (
-    XtransConnInfo ciptr, int *status)
+    XtransConnInfo ciptr)
 {
     XtransConnInfo	newciptr;
     struct sockaddr_in	sockname;
@@ -1034,7 +1034,6 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
     if ((newciptr = calloc (1, sizeof(struct _XtransConnInfo))) == NULL)
     {
 	prmsg (1, "SocketINETAccept: malloc failed\n");
-	*status = TRANS_ACCEPT_BAD_MALLOC;
 	return NULL;
     }
 
@@ -1046,7 +1045,6 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
 #endif
 	prmsg (1, "SocketINETAccept: accept() failed\n");
 	free (newciptr);
-	*status = TRANS_ACCEPT_FAILED;
 	return NULL;
     }
 
@@ -1073,7 +1071,6 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
 	    "SocketINETAccept: ...SocketINETGetAddr() failed:\n");
 	ossock_close(newciptr->fd);
 	free (newciptr);
-	*status = TRANS_ACCEPT_MISC_ERROR;
         return NULL;
     }
 
@@ -1084,11 +1081,8 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
 	ossock_close(newciptr->fd);
 	if (newciptr->addr) free (newciptr->addr);
 	free (newciptr);
-	*status = TRANS_ACCEPT_MISC_ERROR;
         return NULL;
     }
-
-    *status = 0;
 
     return newciptr;
 }
@@ -1098,7 +1092,7 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
 
 #ifdef UNIXCONN
 static XtransConnInfo _XSERVTransSocketUNIXAccept (
-    XtransConnInfo ciptr, int *status)
+    XtransConnInfo ciptr)
 {
     XtransConnInfo	newciptr;
     struct sockaddr_un	sockname;
@@ -1109,7 +1103,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     if ((newciptr = calloc (1, sizeof(struct _XtransConnInfo))) == NULL)
     {
 	prmsg (1, "SocketUNIXAccept: malloc() failed\n");
-	*status = TRANS_ACCEPT_BAD_MALLOC;
 	return NULL;
     }
 
@@ -1118,7 +1111,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     {
 	prmsg (1, "SocketUNIXAccept: accept() failed\n");
 	free (newciptr);
-	*status = TRANS_ACCEPT_FAILED;
 	return NULL;
     }
 
@@ -1134,7 +1126,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
         "SocketUNIXAccept: Can't allocate space for the addr\n");
 	ossock_close(newciptr->fd);
 	free (newciptr);
-	*status = TRANS_ACCEPT_BAD_MALLOC;
         return NULL;
     }
 
@@ -1153,7 +1144,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
 	ossock_close(newciptr->fd);
 	if (newciptr->addr) free (newciptr->addr);
 	free (newciptr);
-	*status = TRANS_ACCEPT_BAD_MALLOC;
         return NULL;
     }
 
@@ -1161,8 +1151,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     memcpy (newciptr->peeraddr, ciptr->addr, newciptr->addrlen);
 
     newciptr->family = AF_UNIX;
-
-    *status = 0;
 
     return newciptr;
 }
