@@ -292,6 +292,11 @@ int
 ProcQueryExtension(ClientPtr client)
 {
     REQUEST(xQueryExtensionReq);
+    REQUEST_AT_LEAST_SIZE(xQueryExtensionReq);
+
+    if (client->swapped)
+        swaps(&stuff->nbytes);
+
     REQUEST_FIXED_SIZE(xQueryExtensionReq, stuff->nbytes);
 
     xQueryExtensionReply reply = { 0 };
