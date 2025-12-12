@@ -33,6 +33,7 @@
 #include <X11/Xproto.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/dix_priv.h"
 #include "mi/mi_priv.h"
 #include "os/bug_priv.h"
 #include "os/osdep.h"
