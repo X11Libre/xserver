@@ -33,6 +33,7 @@
 #endif
 
 #include "os/bug_priv.h"
+#include "os/mathx_priv.h"
 
 #include "glamor_prepare.h"
 #include "mipict.h"
@@ -567,8 +568,6 @@
 #ifndef ALIGN /* FreeBSD already has it */
 #define ALIGN(i,m)	(((i) + (m) - 1) & ~((m) - 1))
 #endif
-#define MIN(a,b)	((a) < (b) ? (a) : (b))
-#define MAX(a,b)	((a) > (b) ? (a) : (b))
 
 #define glamor_check_fbo_size(_glamor_,_w_, _h_)    ((_w_) > 0 && (_h_) > 0 \
                                                     && (_w_) <= _glamor_->max_fbo_size  \
@@ -720,19 +719,19 @@ glamor_start_rendering_bounds(void)
 static inline void
 glamor_bounds_union_rect(BoxPtr bounds, xRectangle *rect)
 {
-    bounds->x1 = min(bounds->x1, rect->x);
-    bounds->y1 = min(bounds->y1, rect->y);
-    bounds->x2 = min(SHRT_MAX, max(bounds->x2, rect->x + rect->width));
-    bounds->y2 = min(SHRT_MAX, max(bounds->y2, rect->y + rect->height));
+    bounds->x1 = MIN(bounds->x1, rect->x);
+    bounds->y1 = MIN(bounds->y1, rect->y);
+    bounds->x2 = MIN(SHRT_MAX, MAX(bounds->x2, rect->x + rect->width));
+    bounds->y2 = MIN(SHRT_MAX, MAX(bounds->y2, rect->y + rect->height));
 }
 
 static inline void
 glamor_bounds_union_box(BoxPtr bounds, BoxPtr box)
 {
-    bounds->x1 = min(bounds->x1, box->x1);
-    bounds->y1 = min(bounds->y1, box->y1);
-    bounds->x2 = max(bounds->x2, box->x2);
-    bounds->y2 = max(bounds->y2, box->y2);
+    bounds->x1 = MIN(bounds->x1, box->x1);
+    bounds->y1 = MIN(bounds->y1, box->y1);
+    bounds->x2 = MAX(bounds->x2, box->x2);
+    bounds->y2 = MAX(bounds->y2, box->y2);
 }
 
 /**

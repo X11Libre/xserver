@@ -47,6 +47,7 @@
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 
 #include "compint.h"
@@ -283,8 +284,8 @@ compAddAlternateVisual(ScreenPtr pScreen, CompScreenPtr cs,
                                visual->greenMask |
                                visual->blueMask | alphaMask);
         /* find widest component */
-        visual->ColormapEntries = (1 << max(Ones(visual->redMask),
-                                            max(Ones(visual->greenMask),
+        visual->ColormapEntries = (1 << MAX(Ones(visual->redMask),
+                                            MAX(Ones(visual->greenMask),
                                                 Ones(visual->blueMask))));
     }
 
