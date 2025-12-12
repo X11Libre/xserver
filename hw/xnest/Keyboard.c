@@ -14,6 +14,7 @@ is" without express or implied warranty.
 #include <dix-config.h>
 
 #ifdef WIN32
+#include <X11/Xwinsock.h>
 #include <X11/Xwindows.h>
 #endif
 
