@@ -198,9 +198,7 @@ static Sockettrans2dev Sockettrans2devtab[] = {
 #endif /* TCPCONN */
 #ifdef UNIXCONN
     {"unix",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
-#if !defined(LOCALCONN)
     {"local",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
-#endif /* !LOCALCONN */
 #endif /* UNIXCONN */
 };
 
@@ -1532,7 +1530,6 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 #endif /* TCPCONN */
 
 #ifdef UNIXCONN
-#if !defined(LOCALCONN)
 static Xtransport _XSERVTransSocketLocalFuncs = {
 	/* Socket Interface */
 	"local",
@@ -1558,24 +1555,18 @@ static Xtransport _XSERVTransSocketLocalFuncs = {
 	_XSERVTransSocketUNIXClose,
 	_XSERVTransSocketUNIXCloseForCloning,
 };
-#endif /* !LOCALCONN */
-#  if !defined(LOCALCONN)
+
 static const char* unix_nolisten[] = { "local" , NULL };
-#  endif
 
 static Xtransport _XSERVTransSocketUNIXFuncs = {
 	/* Socket Interface */
 	"unix",
-#if !defined(LOCALCONN) && !defined(HAVE_ABSTRACT_SOCKETS)
+#if !defined(HAVE_ABSTRACT_SOCKETS)
         TRANS_ALIAS,
 #else
 	0,
 #endif
-#if !defined(LOCALCONN)
 	unix_nolisten,
-#else
-	NULL,
-#endif
 	_XSERVTransSocketOpenCOTSServer,
 	_XSERVTransSocketReopenCOTSServer,
 	_XSERVTransSocketSetOption,

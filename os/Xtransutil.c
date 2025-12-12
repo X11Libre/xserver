@@ -168,13 +168,13 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 #endif /* defined(TCPCONN) */
 
 
-#if defined(UNIXCONN) || defined(LOCALCONN)
+#if defined(UNIXCONN)
     case AF_UNIX:
     {
 	*familyp=FamilyLocal;
 	break;
     }
-#endif /* defined(UNIXCONN) || defined(LOCALCONN) */
+#endif /* defined(UNIXCONN) */
 
 
     default:
