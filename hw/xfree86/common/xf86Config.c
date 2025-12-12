@@ -204,12 +204,12 @@ xf86ValidateFontPath(char *path)
                 continue;
             }
             else {
-                XNFasprintf(&p1, "%s%s", dir_elem, DIR_FILE);
-                flag = stat(p1, &stat_buf);
+                char pbuf1[PATH_MAX] = { 0 };
+                snprintf(pbuf1, sizeof(pbuf1)-1, "%s%s", dir_elem, DIR_FILE);
+                flag = stat(pbuf1, &stat_buf);
                 if (flag == 0)
                     if (!S_ISREG(stat_buf.st_mode))
                         flag = -1;
-                free(p1);
                 if (flag != 0) {
                     LogMessageVerb(X_WARNING, 1,
                                    "`fonts.dir' not found (or not valid) in \"%s\".\n",
