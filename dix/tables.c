@@ -446,7 +446,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcChangeAccessControl,
     ProcChangeCloseDownMode,
     ProcKillClient,
-    SProcRotateProperties,
+    ProcRotateProperties,
     ProcForceScreenSaver,               /* 115 */
     ProcSetPointerMapping,
     ProcGetPointerMapping,
