@@ -543,10 +543,6 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
     pPixmap->screen_x = x;
     pPixmap->screen_y = y;
 
-    if (pWin->backgroundState != None) {
-        return pPixmap;
-    }
-
     /*
      * Copy bits from the parent into the new pixmap so that it will
      * have "reasonable" contents in case for background None areas.
