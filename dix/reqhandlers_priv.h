@@ -57,8 +57,6 @@ XRetCode SProcGrabKey(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 XRetCode SProcGrabKeyboard(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
-XRetCode SProcGrabPointer(ClientPtr pClient)
-    _X_ATTRIBUTE_NONNULL_ARG(1);
 XRetCode SProcRecolorCursor(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 XRetCode SProcSetInputFocus(ClientPtr pClient)

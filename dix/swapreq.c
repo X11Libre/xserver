@@ -201,19 +201,6 @@ SProcSendEvent(ClientPtr client)
 }
 
 int _X_COLD
-SProcGrabPointer(ClientPtr client)
-{
-    REQUEST(xGrabPointerReq);
-    REQUEST_SIZE_MATCH(xGrabPointerReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->eventMask);
-    swapl(&stuff->confineTo);
-    swapl(&stuff->cursor);
-    swapl(&stuff->time);
-    return ((*ProcVector[X_GrabPointer]) (client));
-}
-
-int _X_COLD
 SProcGrabButton(ClientPtr client)
 {
     REQUEST(xGrabButtonReq);

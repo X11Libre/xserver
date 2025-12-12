@@ -358,7 +358,7 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcGetSelectionOwner,
     SProcConvertSelection,
     SProcSendEvent,                     /* 25 */
-    SProcGrabPointer,
+    ProcGrabPointer,
     ProcUngrabPointer,
     SProcGrabButton,
     SProcUngrabButton,
