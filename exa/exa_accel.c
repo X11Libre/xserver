@@ -736,7 +736,7 @@ exaPolySegment(DrawablePtr pDrawable, GCPtr pGC, int nseg, xSegment * pSeg)
         }
     }
 
-    xRectangle *prect = calloc((unsigned int)nseg, sizeof(xRectangle));
+    xRectangle *prect = calloc(1, (unsigned int)nseg * sizeof(xRectangle));
     if (!prect)
         return;
     for (i = 0; i < nseg; i++) {
