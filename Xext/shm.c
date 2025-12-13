@@ -72,6 +72,9 @@ in this Software without prior written authorization from The Open Group.
 #include "xace.h"
 #include "protocol-versions.h"
 
+#include <limits.h>
+#include <sys/wait.h>
+
 /* Needed for Solaris cross-zone shared memory extension */
 #ifdef HAVE_SHMCTL64
 #include <sys/ipc_impl.h>
@@ -588,22 +591,50 @@ sanitize_string(char *str)
     }
 }
 
+static int
+command_exists(const char *command)
+{
+    char *path = getenv("PATH");
+    if (!path)
+        return 0;
+
+    char *path_copy = strdup(path);
+    if (!path_copy)
+        return 0;
+
+    int found = 0;
+    char *saveptr;
+    char *dir = strtok_r(path_copy, ":", &saveptr);
+    while (dir) {
+        char full_path[PATH_MAX];
+        snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
+        if (access(full_path, X_OK) == 0) {
+            found = 1;
+            break;
+        }
+        dir = strtok_r(NULL, ":", &saveptr);
+    }
+
+    free(path_copy);
+    return found;
+}
+
 static const char*
 GetDialogCommand(void)
 {
-    if (system("which zenity > /dev/null 2>&1") == 0) {
+    if (command_exists("zenity")) {
         return "zenity";
     }
-    if (system("which dialog > /dev/null 2>&1") == 0) {
+    if (command_exists("dialog")) {
         return "dialog";
     }
-    if (system("which whiptail > /dev/null 2>&1") == 0) {
+    if (command_exists("whiptail")) {
         return "whiptail";
     }
-    if (system("which yad > /dev/null 2>&1") == 0) {
+    if (command_exists("yad")) {
         return "yad";
     }
-    if (system("which kdialog > /dev/null 2>&1") == 0) {
+    if (command_exists("kdialog")) {
         return "kdialog";
     }
     return NULL;
@@ -642,7 +673,6 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
 
             const char *dialog_cmd = GetDialogCommand();
             if (dialog_cmd) {
-                char command[2048];
                 char text[1024];
                 sanitize_string(client_name);
                 sanitize_string(window_name);
@@ -650,33 +680,35 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
                          "Process \\\"%s\\\" (PID: %d) is trying to get an image of a window belonging to process \\\"%s\\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?",
                          client_name, client_pid, window_name, window_pid);
 
-                if (strcmp(dialog_cmd, "zenity") == 0) {
-                    snprintf(command, sizeof(command),
-                             "zenity --question --title='XLibre Security Alert' --text='%s' --ok-label='Allow' --cancel-label='Deny'",
-                             text);
-                } else if (strcmp(dialog_cmd, "dialog") == 0) {
-                    snprintf(command, sizeof(command),
-                             "dialog --yesno '%s' 10 70",
-                             text);
-                } else if (strcmp(dialog_cmd, "whiptail") == 0) {
-                    snprintf(command, sizeof(command),
-                             "whiptail --yesno '%s' 10 70",
-                             text);
-                } else if (strcmp(dialog_cmd, "yad") == 0) {
-                    snprintf(command, sizeof(command),
-                             "yad --question --title='XLibre Security Alert' --text='%s' --button='Allow:0' --button='Deny:1'",
-                             text);
-                } else if (strcmp(dialog_cmd, "kdialog") == 0) {
-                    snprintf(command, sizeof(command),
-                             "kdialog --yesno '%s' --title 'XLibre Security Alert'",
-                             text);
-                }
-
-                int ret = system(command);
-                if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
-                    AddToWhitelist(client_name, window_pid);
-                } else {
-                    return BadAccess;
+                pid_t pid = fork();
+                if (pid == -1) {
+                    return BadAlloc;
+                } else if (pid == 0) { /* child */
+                    if (strcmp(dialog_cmd, "zenity") == 0) {
+                        char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
+                        execvp(args[0], args);
+                    } else if (strcmp(dialog_cmd, "dialog") == 0) {
+                        char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
+                        execvp(args[0], args);
+                    } else if (strcmp(dialog_cmd, "whiptail") == 0) {
+                        char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
+                        execvp(args[0], args);
+                    } else if (strcmp(dialog_cmd, "yad") == 0) {
+                        char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
+                        execvp(args[0], args);
+                    } else if (strcmp(dialog_cmd, "kdialog") == 0) {
+                        char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
+                        execvp(args[0], args);
+                    }
+                    _exit(127); /* execvp failed */
+                } else { /* parent */
+                    int status;
+                    waitpid(pid, &status, 0);
+                    if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                        AddToWhitelist(client_name, window_pid);
+                    } else {
+                        return BadAccess;
+                    }
                 }
             } else {
                 /* No dialog tool found, deny access */

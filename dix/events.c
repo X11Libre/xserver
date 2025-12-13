@@ -160,6 +160,10 @@ Equipment Corporation.
 #include "enterleave.h"
 #include "mi.h"
 
+#include <limits.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 #define _XkbWantsDetectableAutoRepeat(c) \
         ((c)->xkbClientFlags&XkbPCF_DetectableAutoRepeatMask)
 
@@ -4553,22 +4557,50 @@ sanitize_string(char *str)
     }
 }
 
+static int
+command_exists(const char *command)
+{
+    char *path = getenv("PATH");
+    if (!path)
+        return 0;
+
+    char *path_copy = strdup(path);
+    if (!path_copy)
+        return 0;
+
+    int found = 0;
+    char *saveptr;
+    char *dir = strtok_r(path_copy, ":", &saveptr);
+    while (dir) {
+        char full_path[PATH_MAX];
+        snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
+        if (access(full_path, X_OK) == 0) {
+            found = 1;
+            break;
+        }
+        dir = strtok_r(NULL, ":", &saveptr);
+    }
+
+    free(path_copy);
+    return found;
+}
+
 static const char*
 GetDialogCommand(void)
 {
-    if (system("which zenity > /dev/null 2>&1") == 0) {
+    if (command_exists("zenity")) {
         return "zenity";
     }
-    if (system("which dialog > /dev/null 2>&1") == 0) {
+    if (command_exists("dialog")) {
         return "dialog";
     }
-    if (system("which whiptail > /dev/null 2>&1") == 0) {
+    if (command_exists("whiptail")) {
         return "whiptail";
     }
-    if (system("which yad > /dev/null 2>&1") == 0) {
+    if (command_exists("yad")) {
         return "yad";
     }
-    if (system("which kdialog > /dev/null 2>&1") == 0) {
+    if (command_exists("kdialog")) {
         return "kdialog";
     }
     return NULL;
@@ -4588,40 +4620,41 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
             if (!IsWhitelisted(client_name, 0)) {
                 const char *dialog_cmd = GetDialogCommand();
                 if (dialog_cmd) {
-                    char command[1024];
                     char text[512];
                     sanitize_string(client_name);
                     snprintf(text, sizeof(text),
                              "Process \\\"%s\\\" (PID: %d) is attempting to listen to all keyboard events. This is a common behavior for keyloggers. Allow this action?",
                              client_name, pid);
 
-                    if (strcmp(dialog_cmd, "zenity") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "zenity --question --title='XLibre Security Alert' --text='%s' --ok-label='Allow' --cancel-label='Deny'",
-                                 text);
-                    } else if (strcmp(dialog_cmd, "dialog") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "dialog --yesno '%s' 10 70",
-                                 text);
-                    } else if (strcmp(dialog_cmd, "whiptail") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "whiptail --yesno '%s' 10 70",
-                                 text);
-                    } else if (strcmp(dialog_cmd, "yad") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "yad --question --title='XLibre Security Alert' --text='%s' --button='Allow:0' --button='Deny:1'",
-                                 text);
-                    } else if (strcmp(dialog_cmd, "kdialog") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "kdialog --yesno '%s' --title 'XLibre Security Alert'",
-                                 text);
-                    }
-
-                    int ret = system(command);
-                    if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
-                        AddToWhitelist(client_name, 0);
-                    } else {
-                        return BadAccess;
+                    pid_t pid = fork();
+                    if (pid == -1) {
+                        return BadAlloc;
+                    } else if (pid == 0) { /* child */
+                        if (strcmp(dialog_cmd, "zenity") == 0) {
+                            char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
+                            execvp(args[0], args);
+                        } else if (strcmp(dialog_cmd, "dialog") == 0) {
+                            char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
+                            execvp(args[0], args);
+                        } else if (strcmp(dialog_cmd, "whiptail") == 0) {
+                            char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
+                            execvp(args[0], args);
+                        } else if (strcmp(dialog_cmd, "yad") == 0) {
+                            char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
+                            execvp(args[0], args);
+                        } else if (strcmp(dialog_cmd, "kdialog") == 0) {
+                            char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
+                            execvp(args[0], args);
+                        }
+                        _exit(127); /* execvp failed */
+                    } else { /* parent */
+                        int status;
+                        waitpid(pid, &status, 0);
+                        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                            AddToWhitelist(client_name, 0);
+                        } else {
+                            return BadAccess;
+                        }
                     }
                 } else {
                     /* No dialog tool found, deny access */
@@ -5331,42 +5364,44 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
                 if (!IsWhitelisted(client_name, 0)) {
                     const char *dialog_cmd = GetDialogCommand();
                     if (dialog_cmd) {
-                        char command[1024];
                         char text[512];
                         sanitize_string(client_name);
                         snprintf(text, sizeof(text),
                                  "Process \\\"%s\\\" (PID: %d) is attempting to grab the keyboard. This is a common behavior for keyloggers. Allow this action?",
                                  client_name, pid);
 
-                        if (strcmp(dialog_cmd, "zenity") == 0) {
-                            snprintf(command, sizeof(command),
-                                     "zenity --question --title='XLibre Security Alert' --text='%s' --ok-label='Allow' --cancel-label='Deny'",
-                                     text);
-                        } else if (strcmp(dialog_cmd, "dialog") == 0) {
-                            snprintf(command, sizeof(command),
-                                     "dialog --yesno '%s' 10 70",
-                                     text);
-                        } else if (strcmp(dialog_cmd, "whiptail") == 0) {
-                            snprintf(command, sizeof(command),
-                                     "whiptail --yesno '%s' 10 70",
-                                     text);
-                        } else if (strcmp(dialog_cmd, "yad") == 0) {
-                            snprintf(command, sizeof(command),
-                                     "yad --question --title='XLibre Security Alert' --text='%s' --button='Allow:0' --button='Deny:1'",
-                                     text);
-                        } else if (strcmp(dialog_cmd, "kdialog") == 0) {
-                            snprintf(command, sizeof(command),
-                                     "kdialog --yesno '%s' --title 'XLibre Security Alert'",
-                                     text);
-                        }
-
-                        int ret = system(command);
-                        if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
-                            AddToWhitelist(client_name, 0);
-                        } else {
+                        pid_t pid = fork();
+                        if (pid == -1) {
                             FreeGrab(tempGrab);
-                            *status = GrabFrozen;
-                            return Success;
+                            return BadAlloc;
+                        } else if (pid == 0) { /* child */
+                            if (strcmp(dialog_cmd, "zenity") == 0) {
+                                char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
+                                execvp(args[0], args);
+                            } else if (strcmp(dialog_cmd, "dialog") == 0) {
+                                char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
+                                execvp(args[0], args);
+                            } else if (strcmp(dialog_cmd, "whiptail") == 0) {
+                                char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
+                                execvp(args[0], args);
+                            } else if (strcmp(dialog_cmd, "yad") == 0) {
+                                char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
+                                execvp(args[0], args);
+                            } else if (strcmp(dialog_cmd, "kdialog") == 0) {
+                                char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
+                                execvp(args[0], args);
+                            }
+                            _exit(127); /* execvp failed */
+                        } else { /* parent */
+                            int status;
+                            waitpid(pid, &status, 0);
+                            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                                AddToWhitelist(client_name, 0);
+                            } else {
+                                FreeGrab(tempGrab);
+                                *status = GrabFrozen;
+                                return Success;
+                            }
                         }
                     } else {
                         /* No dialog tool found, deny access */
@@ -5636,40 +5671,41 @@ ProcSendEvent(ClientPtr client)
             if (!IsWhitelisted(client_name, 1)) {
                 const char *dialog_cmd = GetDialogCommand();
                 if (dialog_cmd) {
-                    char command[1024];
                     char text[512];
                     sanitize_string(client_name);
                     snprintf(text, sizeof(text),
                              "Process \\\"%s\\\" (PID: %d) is attempting to send a synthetic event to window 0x%lx. This may be used to spoof input. Allow this action?",
                              client_name, sender_pid, (unsigned long)stuff->destination);
 
-                    if (strcmp(dialog_cmd, "zenity") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "zenity --question --title='XLibre Security Alert' --text='%s' --ok-label='Allow' --cancel-label='Deny'",
-                                 text);
-                    } else if (strcmp(dialog_cmd, "dialog") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "dialog --yesno '%s' 10 70",
-                                 text);
-                    } else if (strcmp(dialog_cmd, "whiptail") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "whiptail --yesno '%s' 10 70",
-                                 text);
-                    } else if (strcmp(dialog_cmd, "yad") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "yad --question --title='XLibre Security Alert' --text='%s' --button='Allow:0' --button='Deny:1'",
-                                 text);
-                    } else if (strcmp(dialog_cmd, "kdialog") == 0) {
-                        snprintf(command, sizeof(command),
-                                 "kdialog --yesno '%s' --title 'XLibre Security Alert'",
-                                 text);
-                    }
-
-                    int ret = system(command);
-                    if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
-                        AddToWhitelist(client_name, 1);
-                    } else {
-                        return BadAccess;
+                    pid_t pid = fork();
+                    if (pid == -1) {
+                        return BadAlloc;
+                    } else if (pid == 0) { /* child */
+                        if (strcmp(dialog_cmd, "zenity") == 0) {
+                            char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
+                            execvp(args[0], args);
+                        } else if (strcmp(dialog_cmd, "dialog") == 0) {
+                            char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
+                            execvp(args[0], args);
+                        } else if (strcmp(dialog_cmd, "whiptail") == 0) {
+                            char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
+                            execvp(args[0], args);
+                        } else if (strcmp(dialog_cmd, "yad") == 0) {
+                            char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
+                            execvp(args[0], args);
+                        } else if (strcmp(dialog_cmd, "kdialog") == 0) {
+                            char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
+                            execvp(args[0], args);
+                        }
+                        _exit(127); /* execvp failed */
+                    } else { /* parent */
+                        int status;
+                        waitpid(pid, &status, 0);
+                        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                            AddToWhitelist(client_name, 1);
+                        } else {
+                            return BadAccess;
+                        }
                     }
                 } else {
                     /* No dialog tool found, deny access */
