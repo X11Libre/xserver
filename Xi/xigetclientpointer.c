@@ -49,14 +49,11 @@
 int
 ProcXIGetClientPointer(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xXIGetClientPointerReq);
+    X_REQUEST_FIELD_CARD32(win);
+
     int rc;
     ClientPtr winclient;
-
-    REQUEST(xXIGetClientPointerReq);
-    REQUEST_SIZE_MATCH(xXIGetClientPointerReq);
-
-    if (client->swapped)
-        swapl(&stuff->win);
 
     if (stuff->win != None) {
         rc = dixLookupResourceOwner(&winclient, stuff->win, client, DixGetAttrAccess);

@@ -54,6 +54,7 @@ SOFTWARE.
 
 #include <X11/extensions/XIproto.h>
 
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "Xi/handlers.h"
 
@@ -69,11 +70,8 @@ SOFTWARE.
 int
 ProcXUngrabDevice(ClientPtr client)
 {
-    REQUEST(xUngrabDeviceReq);
-    REQUEST_SIZE_MATCH(xUngrabDeviceReq);
-
-    if (client->swapped)
-        swapl(&stuff->time);
+    X_REQUEST_HEAD_STRUCT(xUngrabDeviceReq);
+    X_REQUEST_FIELD_CARD32(time);
 
     DeviceIntPtr dev;
     GrabPtr grab;

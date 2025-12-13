@@ -61,11 +61,8 @@ static void SwapDeviceInfo(DeviceIntPtr dev, xXIDeviceInfo * info);
 int
 ProcXIQueryDevice(ClientPtr client)
 {
-    REQUEST(xXIQueryDeviceReq);
-    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
-
-    if (client->swapped)
-        swaps(&stuff->deviceid);
+    X_REQUEST_HEAD_STRUCT(xXIQueryDeviceReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
 
     DeviceIntPtr dev = NULL;
     int rc = Success;
