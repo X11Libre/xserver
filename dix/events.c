@@ -164,6 +164,15 @@ Equipment Corporation.
 #include <sys/wait.h>
 #include <unistd.h>
 
+enum DialogCommand {
+    DIALOG_CMD_NONE,
+    DIALOG_CMD_ZENITY,
+    DIALOG_CMD_DIALOG,
+    DIALOG_CMD_WHIPTAIL,
+    DIALOG_CMD_YAD,
+    DIALOG_CMD_KDIALOG
+};
+
 #define _XkbWantsDetectableAutoRepeat(c) \
         ((c)->xkbClientFlags&XkbPCF_DetectableAutoRepeatMask)
 
@@ -4585,25 +4594,25 @@ command_exists(const char *command)
     return found;
 }
 
-static const char*
+static enum DialogCommand
 GetDialogCommand(void)
 {
     if (command_exists("zenity")) {
-        return "zenity";
+        return DIALOG_CMD_ZENITY;
     }
     if (command_exists("dialog")) {
-        return "dialog";
+        return DIALOG_CMD_DIALOG;
     }
     if (command_exists("whiptail")) {
-        return "whiptail";
+        return DIALOG_CMD_WHIPTAIL;
     }
     if (command_exists("yad")) {
-        return "yad";
+        return DIALOG_CMD_YAD;
     }
     if (command_exists("kdialog")) {
-        return "kdialog";
+        return DIALOG_CMD_KDIALOG;
     }
-    return NULL;
+    return DIALOG_CMD_NONE;
 }
 
 XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
@@ -4618,8 +4627,8 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
             char client_name[256];
             GetProcessName(pid, client_name, sizeof(client_name));
             if (!IsWhitelisted(client_name, 0)) {
-                const char *dialog_cmd = GetDialogCommand();
-                if (dialog_cmd) {
+                enum DialogCommand dialog_cmd = GetDialogCommand();
+                if (dialog_cmd != DIALOG_CMD_NONE) {
                     char text[512];
                     sanitize_string(client_name);
                     snprintf(text, sizeof(text),
@@ -4630,21 +4639,35 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
                     if (pid == -1) {
                         return BadAlloc;
                     } else if (pid == 0) { /* child */
-                        if (strcmp(dialog_cmd, "zenity") == 0) {
+                        switch (dialog_cmd) {
+                        case DIALOG_CMD_ZENITY: {
                             char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
                             execvp(args[0], args);
-                        } else if (strcmp(dialog_cmd, "dialog") == 0) {
+                            break;
+                        }
+                        case DIALOG_CMD_DIALOG: {
                             char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
                             execvp(args[0], args);
-                        } else if (strcmp(dialog_cmd, "whiptail") == 0) {
+                            break;
+                        }
+                        case DIALOG_CMD_WHIPTAIL: {
                             char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
                             execvp(args[0], args);
-                        } else if (strcmp(dialog_cmd, "yad") == 0) {
+                            break;
+                        }
+                        case DIALOG_CMD_YAD: {
                             char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
                             execvp(args[0], args);
-                        } else if (strcmp(dialog_cmd, "kdialog") == 0) {
+                            break;
+                        }
+                        case DIALOG_CMD_KDIALOG: {
                             char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
                             execvp(args[0], args);
+                            break;
+                        }
+                        case DIALOG_CMD_NONE:
+                            /* Should not happen */
+                            break;
                         }
                         _exit(127); /* execvp failed */
                     } else { /* parent */
@@ -5362,8 +5385,8 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
                 char client_name[256];
                 GetProcessName(pid, client_name, sizeof(client_name));
                 if (!IsWhitelisted(client_name, 0)) {
-                    const char *dialog_cmd = GetDialogCommand();
-                    if (dialog_cmd) {
+                    enum DialogCommand dialog_cmd = GetDialogCommand();
+                    if (dialog_cmd != DIALOG_CMD_NONE) {
                         char text[512];
                         sanitize_string(client_name);
                         snprintf(text, sizeof(text),
@@ -5375,21 +5398,35 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
                             FreeGrab(tempGrab);
                             return BadAlloc;
                         } else if (pid == 0) { /* child */
-                            if (strcmp(dialog_cmd, "zenity") == 0) {
+                            switch (dialog_cmd) {
+                            case DIALOG_CMD_ZENITY: {
                                 char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
                                 execvp(args[0], args);
-                            } else if (strcmp(dialog_cmd, "dialog") == 0) {
+                                break;
+                            }
+                            case DIALOG_CMD_DIALOG: {
                                 char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
                                 execvp(args[0], args);
-                            } else if (strcmp(dialog_cmd, "whiptail") == 0) {
+                                break;
+                            }
+                            case DIALOG_CMD_WHIPTAIL: {
                                 char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
                                 execvp(args[0], args);
-                            } else if (strcmp(dialog_cmd, "yad") == 0) {
+                                break;
+                            }
+                            case DIALOG_CMD_YAD: {
                                 char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
                                 execvp(args[0], args);
-                            } else if (strcmp(dialog_cmd, "kdialog") == 0) {
+                                break;
+                            }
+                            case DIALOG_CMD_KDIALOG: {
                                 char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
                                 execvp(args[0], args);
+                                break;
+                            }
+                            case DIALOG_CMD_NONE:
+                                /* Should not happen */
+                                break;
                             }
                             _exit(127); /* execvp failed */
                         } else { /* parent */
@@ -5669,8 +5706,8 @@ ProcSendEvent(ClientPtr client)
             char client_name[256];
             GetProcessName(sender_pid, client_name, sizeof(client_name));
             if (!IsWhitelisted(client_name, 1)) {
-                const char *dialog_cmd = GetDialogCommand();
-                if (dialog_cmd) {
+                enum DialogCommand dialog_cmd = GetDialogCommand();
+                if (dialog_cmd != DIALOG_CMD_NONE) {
                     char text[512];
                     sanitize_string(client_name);
                     snprintf(text, sizeof(text),
@@ -5681,21 +5718,35 @@ ProcSendEvent(ClientPtr client)
                     if (pid == -1) {
                         return BadAlloc;
                     } else if (pid == 0) { /* child */
-                        if (strcmp(dialog_cmd, "zenity") == 0) {
+                        switch (dialog_cmd) {
+                        case DIALOG_CMD_ZENITY: {
                             char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
                             execvp(args[0], args);
-                        } else if (strcmp(dialog_cmd, "dialog") == 0) {
+                            break;
+                        }
+                        case DIALOG_CMD_DIALOG: {
                             char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
                             execvp(args[0], args);
-                        } else if (strcmp(dialog_cmd, "whiptail") == 0) {
+                            break;
+                        }
+                        case DIALOG_CMD_WHIPTAIL: {
                             char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
                             execvp(args[0], args);
-                        } else if (strcmp(dialog_cmd, "yad") == 0) {
+                            break;
+                        }
+                        case DIALOG_CMD_YAD: {
                             char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
                             execvp(args[0], args);
-                        } else if (strcmp(dialog_cmd, "kdialog") == 0) {
+                            break;
+                        }
+                        case DIALOG_CMD_KDIALOG: {
                             char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
                             execvp(args[0], args);
+                            break;
+                        }
+                        case DIALOG_CMD_NONE:
+                            /* Should not happen */
+                            break;
                         }
                         _exit(127); /* execvp failed */
                     } else { /* parent */
