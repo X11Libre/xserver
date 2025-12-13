@@ -211,9 +211,7 @@ static int _XSERVTransSocketINETClose (XtransConnInfo ciptr);
 static int
 is_numeric (const char *str)
 {
-    int i;
-
-    for (i = 0; i < (int) strlen (str); i++)
+    for (unsigned int i = 0; i < (int) strlen (str); i++)
 	if (!isdigit (str[i]))
 	    return (0);
 
