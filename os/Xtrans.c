@@ -90,10 +90,10 @@ Xtransport_table Xtransports[] = {
     { &_XSERVTransSocketINET6Funcs,	TRANS_SOCKET_INET6_INDEX },
 #endif /* IPv6 */
     { &_XSERVTransSocketINETFuncs,	TRANS_SOCKET_INET_INDEX },
-#if defined(UNIXCONN)
+#ifndef WIN32
     { &_XSERVTransSocketLocalFuncs,	TRANS_SOCKET_LOCAL_INDEX },
     { &_XSERVTransSocketUNIXFuncs,	TRANS_SOCKET_UNIX_INDEX },
-#endif /* UNIXCONN */
+#endif /* !WIN32 */
 };
 
 #define NUMTRANS	(sizeof(Xtransports)/sizeof(Xtransport_table))

@@ -346,7 +346,7 @@ AuthAudit(ClientPtr client, Bool letin,
     else
         switch (saddr->sa_family) {
         case AF_UNSPEC:
-#if defined(UNIXCONN)
+#ifndef WIN32
         case AF_UNIX:
 #endif
             strlcpy(addr, "local host", sizeof(addr));

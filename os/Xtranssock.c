@@ -78,22 +78,16 @@ from the copyright holders.
 
 #ifndef WIN32
 
-#if defined(UNIXCONN)
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#endif
 
-#if defined(UNIXCONN)
 #define X_INCLUDE_NETDB_H
 #define XOS_USE_NO_LOCKING
 #include <X11/Xos_r.h>
-#endif
 
-#ifdef UNIXCONN
 #include <sys/un.h>
 #include <sys/stat.h>
-#endif
 
 
 #ifndef NO_TCP_H
@@ -194,10 +188,10 @@ static Sockettrans2dev Sockettrans2devtab[] = {
     {"tcp",AF_INET,SOCK_STREAM,SOCK_DGRAM,0}, /* fallback */
     {"inet6",AF_INET6,SOCK_STREAM,SOCK_DGRAM,0},
 #endif
-#ifdef UNIXCONN
+#ifndef WIN32
     {"unix",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
     {"local",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
-#endif /* UNIXCONN */
+#endif /* !WIN32 */
 };
 
 #define NUMSOCKETFAMILIES (sizeof(Sockettrans2devtab)/sizeof(Sockettrans2dev))
@@ -216,13 +210,13 @@ is_numeric (const char *str)
     return (1);
 }
 
-#ifdef UNIXCONN
+#ifndef WIN32
 
 
 #define UNIX_PATH "/tmp/.X11-unix/X"
 #define UNIX_DIR "/tmp/.X11-unix"
 
-#endif /* UNIXCONN */
+#endif /* !WIN32 */
 
 #define PORTBUFSIZE	32
 
@@ -609,7 +603,7 @@ static int _XSERVTransSocketSetOption (XtransConnInfo ciptr, int option, int arg
     return -1;
 }
 
-#ifdef UNIXCONN
+#ifndef WIN32
 static int
 set_sun_path(const char *port, const char *upath, char *path, int abstract)
 {
@@ -635,7 +629,7 @@ set_sun_path(const char *port, const char *upath, char *path, int abstract)
     snprintf(path, sizeof(s.sun_path), "%s%s%s", at, upath, port);
     return 0;
 }
-#endif
+#endif /* !WIN32 */
 
 static int _XSERVTransSocketCreateListener (XtransConnInfo ciptr,
 			     struct sockaddr *sockname,
@@ -825,7 +819,7 @@ static int _XSERVTransSocketINETCreateListener (
     return 0;
 }
 
-#ifdef UNIXCONN
+#ifndef WIN32
 
 static int _XSERVTransSocketUNIXCreateListener (
     XtransConnInfo ciptr, const char *port, unsigned int flags)
@@ -1007,7 +1001,7 @@ static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
     return status;
 }
 
-#endif /* UNIXCONN */
+#endif /* !WIN32 */
 
 
 static XtransConnInfo _XSERVTransSocketINETAccept (
@@ -1075,7 +1069,7 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
     return newciptr;
 }
 
-#ifdef UNIXCONN
+#ifndef WIN32
 static XtransConnInfo _XSERVTransSocketUNIXAccept (
     XtransConnInfo ciptr)
 {
@@ -1140,7 +1134,7 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     return newciptr;
 }
 
-#endif /* UNIXCONN */
+#endif /* !WIN32 */
 
 #if XTRANS_SEND_FDS
 
@@ -1369,7 +1363,7 @@ static int _XSERVTransSocketDisconnect (XtransConnInfo ciptr)
 #endif
 }
 
-#ifdef UNIXCONN
+#ifndef WIN32
 static int _XSERVTransSocketUNIXClose (XtransConnInfo ciptr)
 {
     /*
@@ -1414,7 +1408,7 @@ static int _XSERVTransSocketUNIXCloseForCloning (XtransConnInfo ciptr)
     return ossock_close(ciptr->fd);
 }
 
-#endif /* UNIXCONN */
+#endif /* !WIN32 */
 
 static int _XSERVTransSocketINETClose (XtransConnInfo ciptr)
 {
@@ -1498,7 +1492,7 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 };
 #endif /* IPv6 */
 
-#ifdef UNIXCONN
+#ifndef WIN32
 static Xtransport _XSERVTransSocketLocalFuncs = {
 	/* Socket Interface */
 	"local",
@@ -1553,4 +1547,4 @@ static Xtransport _XSERVTransSocketUNIXFuncs = {
 	_XSERVTransSocketUNIXCloseForCloning,
 };
 
-#endif /* UNIXCONN */
+#endif /* !WIN32 */

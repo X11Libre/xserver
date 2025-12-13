@@ -1512,7 +1512,7 @@ ConvertAddr(register struct sockaddr *saddr, int *len, void **addr)
         return FamilyLocal;
     switch (saddr->sa_family) {
     case AF_UNSPEC:
-#if defined(UNIXCONN)
+#ifndef WIN32
     case AF_UNIX:
 #endif
         return FamilyLocal;

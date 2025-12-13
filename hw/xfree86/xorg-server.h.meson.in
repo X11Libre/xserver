@@ -88,9 +88,6 @@
 /* Define to 1 on systems derived from System V Release 4 */
 #mesondefine SVR4
 
-/* Support UNIX socket connections */
-#mesondefine UNIXCONN
-
 /* Support XCMisc extension */
 #mesondefine XCMISC
 

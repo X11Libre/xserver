@@ -166,13 +166,13 @@ int _XSERVTransConvertAddress(int *familyp, int *addrlenp, Xtransaddr **addrp)
 #endif /* IPv6 */
 
 
-#if defined(UNIXCONN)
+#ifndef WIN32
     case AF_UNIX:
     {
 	*familyp=FamilyLocal;
 	break;
     }
-#endif /* defined(UNIXCONN) */
+#endif /* !WIN32 */
 
 
     default:
