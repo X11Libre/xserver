@@ -212,7 +212,7 @@ static int
 is_numeric (const char *str)
 {
     for (unsigned int i = 0; i < (int) strlen (str); i++)
-	if (!isdigit (str[i]))
+	if (!isdigit ((unsigned char)(str[i])))
 	    return (0);
 
     return (1);
