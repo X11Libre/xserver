@@ -89,6 +89,83 @@
 #include "os/auth.h"
 #include "os/log_priv.h"
 
+#define MAX_WHITELIST_ENTRIES 1024
+
+typedef struct {
+    pid_t client_pid;
+    pid_t target_pid;
+} WhitelistEntry;
+
+static WhitelistEntry whitelist[MAX_WHITELIST_ENTRIES];
+static int whitelist_count = 0;
+
+#define WHITELIST_FILE "/etc/X11/whitelist_actions.conf"
+
+Bool IsWhitelisted(const char *procname, int type)
+{
+    FILE *f = fopen(WHITELIST_FILE, "r");
+    if (f) {
+        char line[512];
+        while (fgets(line, sizeof(line), f)) {
+            char *last_space = strrchr(line, ' ');
+            if (last_space) {
+                *last_space = '\0';
+                int w_type;
+                if (sscanf(last_space + 1, "%d", &w_type) == 1) {
+                    if (w_type == type && strcmp(line, procname) == 0) {
+                        fclose(f);
+                        return TRUE;
+                    }
+                }
+            }
+        }
+        fclose(f);
+    }
+    return FALSE;
+}
+
+void AddToWhitelist(const char *procname, int type)
+{
+    FILE *f = fopen(WHITELIST_FILE, "a");
+    if (f) {
+        fprintf(f, "%s %d\n", procname, type);
+        fclose(f);
+    }
+}
+
+void RemoveFromWhitelist(pid_t pid)
+{
+    int i = 0;
+    while (i < whitelist_count) {
+        if (whitelist[i].client_pid == pid || whitelist[i].target_pid == pid) {
+            whitelist[i] = whitelist[whitelist_count - 1];
+            whitelist_count--;
+        } else {
+            i++;
+        }
+    }
+}
+
+void GetProcessName(pid_t pid, char *buffer, size_t size)
+{
+    char command[256];
+    FILE *fp;
+
+    snprintf(command, sizeof(command), "ps -p %d -o comm=", pid);
+    fp = popen(command, "r");
+    if (fp) {
+        if (fgets(buffer, size, fp)) {
+            // Remove trailing newline
+            buffer[strcspn(buffer, "\n")] = 0;
+        } else {
+            strncpy(buffer, "unknown", size);
+        }
+        pclose(fp);
+    } else {
+        strncpy(buffer, "unknown", size);
+    }
+}
+
 /**
  * Try to determine a PID for a client from its connection
  * information. This should be called only once when new client has

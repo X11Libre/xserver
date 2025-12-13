@@ -282,6 +282,7 @@ UseMsg(void)
     ErrorF("-fakescreenfps #       fake screen default fps (1-600)\n");
     ErrorF("-fp string             default font path\n");
     ErrorF("-help                  prints message with these options\n");
+    ErrorF("-list-whitelist       list user permissions rules (/etc/X11/whitelist_actions.conf)\n");
     ErrorF("+iglx                  Allow creating indirect GLX contexts\n");
     ErrorF("-iglx                  Prohibit creating indirect GLX contexts (default)\n");
     ErrorF("-I                     ignore all remaining arguments\n");
@@ -543,6 +544,19 @@ ProcessCommandLine(int argc, char *argv[])
         }
         else if (strcmp(argv[i], "-help") == 0) {
             UseMsg();
+            exit(0);
+        }
+        else if (strcmp(argv[i], "-list-whitelist") == 0) {
+            FILE *f = fopen("/etc/X11/whitelist_actions.conf", "r");
+            if (f) {
+                char line[512];
+                while (fgets(line, sizeof(line), f)) {
+                    printf("%s", line);
+                }
+                fclose(f);
+            } else {
+                perror("Failed to open /etc/X11/whitelist_actions.conf");
+            }
             exit(0);
         }
         else if (strcmp(argv[i], "+iglx") == 0)

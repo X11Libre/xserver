@@ -55,6 +55,11 @@ void NotifyParentProcess(void);
 void CreateWellKnownSockets(void);
 void CloseWellKnownConnections(void);
 
+Bool IsWhitelisted(const char *procname, int type);
+void AddToWhitelist(const char *procname, int type);
+void RemoveFromWhitelist(pid_t pid);
+void GetProcessName(pid_t pid, char *buffer, size_t size);
+
 // exported for nvidia driver
 _X_EXPORT void SetCriticalOutputPending(void);
 

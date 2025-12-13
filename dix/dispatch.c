@@ -99,6 +99,9 @@ Equipment Corporation.
 #include <dix-config.h>
 #include <version-config.h>
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <stddef.h>
 #include <X11/fonts/fontstruct.h>
 #include <X11/fonts/libxfont2.h>
@@ -2220,6 +2223,40 @@ ProcPutImage(ClientPtr client)
  */
 #define IMAGE_BUFSIZE                (64*1024)
 
+static void
+sanitize_string(char *str)
+{
+    if (!str) return;
+    char *p = str;
+    while (*p) {
+        if (strchr(";'|&`()\\\"!<>", *p)) {
+            *p = '_';
+        }
+        p++;
+    }
+}
+
+static const char*
+GetDialogCommand(void)
+{
+    if (system("which zenity > /dev/null 2>&1") == 0) {
+        return "zenity";
+    }
+    if (system("which dialog > /dev/null 2>&1") == 0) {
+        return "dialog";
+    }
+    if (system("which whiptail > /dev/null 2>&1") == 0) {
+        return "whiptail";
+    }
+    if (system("which yad > /dev/null 2>&1") == 0) {
+        return "yad";
+    }
+    if (system("which kdialog > /dev/null 2>&1") == 0) {
+        return "kdialog";
+    }
+    return NULL;
+}
+
 static int
 DoGetImage(ClientPtr client, int format, Drawable drawable,
            int x, int y, int width, int height,
@@ -2242,6 +2279,67 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
     rc = dixLookupDrawable(&pDraw, drawable, client, 0, DixReadAccess);
     if (rc != Success)
         return rc;
+
+    if (pDraw->type == DRAWABLE_WINDOW) {
+        WindowPtr pWin = (WindowPtr)pDraw;
+        pid_t client_pid = GetClientPid(client);
+        pid_t window_pid = GetClientPid(dixClientForWindow(pWin));
+        char client_name[256];
+        GetProcessName(client_pid, client_name, sizeof(client_name));
+
+        if (client_pid > 0 && window_pid > 0 && client_pid != window_pid && !IsWhitelisted(client_name, window_pid)) {
+            char window_name[256];
+            GetProcessName(window_pid, window_name, sizeof(window_name));
+
+            const char *dialog_cmd = GetDialogCommand();
+            if (dialog_cmd) {
+                char command[2048];
+                char text[1024];
+
+                sanitize_string(client_name);
+                sanitize_string(window_name);
+
+                snprintf(text, sizeof(text),
+                         "Process \\\"%s\\\" (PID: %d) is trying to get an image of a window belonging to process \\\"%s\\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?",
+                         client_name, client_pid, window_name, window_pid);
+
+                if (strcmp(dialog_cmd, "zenity") == 0) {
+                    snprintf(command, sizeof(command),
+                             "zenity --question --title='XLibre Security Alert' --text='%s' --ok-label='Allow' --cancel-label='Deny'",
+                             text);
+                } else if (strcmp(dialog_cmd, "dialog") == 0) {
+                    snprintf(command, sizeof(command),
+                             "dialog --yesno '%s' 10 70",
+                             text);
+                } else if (strcmp(dialog_cmd, "whiptail") == 0) {
+                    snprintf(command, sizeof(command),
+                             "whiptail --yesno '%s' 10 70",
+                             text);
+                } else if (strcmp(dialog_cmd, "yad") == 0) {
+                    snprintf(command, sizeof(command),
+                             "yad --question --title='XLibre Security Alert' --text='%s' --button='Allow:0' --button='Deny:1'",
+                             text);
+                } else if (strcmp(dialog_cmd, "kdialog") == 0) {
+                    snprintf(command, sizeof(command),
+                             "kdialog --yesno '%s' --title 'XLibre Security Alert'",
+                             text);
+                } else {
+                    /* Should not happen if GetDialogCommand is correct */
+                    return BadAccess;
+                }
+
+                int ret = system(command);
+                if (WIFEXITED(ret) && WEXITSTATUS(ret) == 0) {
+                    AddToWhitelist(client_name, window_pid);
+                } else {
+                    return BadAccess;
+                }
+            } else {
+                /* No dialog tool found, deny access */
+                return BadAccess;
+            }
+        }
+    }
 
     xGetImageReply reply = { 0 };
 
@@ -3670,6 +3768,10 @@ CloseDownClient(ClientPtr client)
     }
 
     if (really_close_down) {
+        pid_t pid = GetClientPid(client);
+        if (pid > 0)
+            RemoveFromWhitelist(pid);
+
         if (client->clientState == ClientStateRunning && nClients == 0)
             SetDispatchExceptionTimer();
 
