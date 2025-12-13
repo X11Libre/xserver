@@ -1,0 +1,70 @@
+WARNING:
+On exit XFree86 restores the old mode but it
+does not disable the secondary card. As a result
+the second card (which has some randonm CRTC timing)
+may produce synch pulses which are wrong for your
+monitor.
+
+If your monitor does not tolerate bad timing I would
+recommend that you don't try Multi-head yet, or at
+least, turn it off *before* leaving X.
+
+
+3.9Nl notice: There is a problem with releasing
+of LBX colormap privates which may cause a seg.
+fault when the server exits. I got a patch from
+Mark Vojkovich which fixes it.
+
+If you have a CL-GD5480 or CL-GD5446 ver. B you
+should be able to try Multi-Head with that
+card as a secondary. The primary card should not
+have any special feature. Some MainBoards may
+not do it right too. I tried it with a 5465 (AGP)
+as a primary and 5446B (PCI) secondary on an
+ABIT LX6 upgraded to the latest bios.
+
+Version A of the 5446 cannot be pure MMIO (The driver 
+requires that it is the primary display adapter).
+You can distinguish between the rel A and rel B by
+running "scanpci -v". Version 1 does not report a
+valid BASE1 address.
+
+The bios upgrade lets me chose if the primary
+display adapter is on PCI on AGP (I chose
+the AGP card as primary). Warning - this setup
+will *NOT* work with XFree86 3.3.2.
+
+The only problem that I found so far is with
+memory configuration initialization. My bios
+does not initialize the secondary display adapter.
+This results in a corrupted display.
+
+Here are the options:
+1. warm booting from Windows 98 may work. I have
+not tried that.
+
+2. Take out the other card and leave the 5446
+(or 5480) as the primary card. Start the server
+and watch it's output. Look for lines like:
+  (--) CIRRUS(0): Memory Config reg 1 is 0x1B
+  (--) CIRRUS(0): Memory Config reg 2 is 0x21
+Remember these values. Now edit XF86Config
+and add to the proper device section the lines:
+  Option "MemCFG1" "0x1B"
+  Option "MemCFG2" "0x21"
+These values are the contents of registers SR0F
+and SR17. (notice: the 5480 driver does not use
+and will not print MemCFG2).
+
+Now you can reinstall the other card (which
+must me set as the the primary display adaptor).
+
+A note about configuring multi-head:
+There should be a separate section for each
+adapter (device), Monitor and Screen. A "ServerLayout"
+section is optional (and recommended). To make it
+easier for XFree86 to relate device sections to
+actual cards, use a BusId line in each device
+section. XFree86 3.9N works properly if the config
+file is for Multi-head but it finds only one
+display adapter.

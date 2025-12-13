@@ -123,8 +123,27 @@ option('agp', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'AGP support')
 option('sha1', type: 'combo', choices: ['libc', 'CommonCrypto', 'CryptoAPI', 'libmd', 'libsha1', 'libnettle', 'libgcrypt', 'libcrypto', 'auto'], value: 'auto',
        description: 'SHA1 implementation')
+
+# xfree86 DDX drivers
 option('xf86-input-inputtest', type: 'boolean', value: true,
        description: 'Test input driver support on Xorg')
+option('xf86-video-apm', type: 'boolean', value: true,
+       description: 'xf86 video driver for APM graphics chips')
+option('xf86-video-ark', type: 'boolean', value: true,
+       description: 'xf86 video driver for ARK graphics chips')
+option('xf86-video-ast', type: 'boolean', value: true,
+       description: 'xf86 video driver for AST graphics chips')
+option('xf86-video-chips', type: 'boolean', value: true,
+       description: 'xf86 video driver for CHIPS graphics chips')
+option('xf86-video-cirrus', type: 'boolean', value: true,
+       description: 'xf86 video driver for CIRRUS graphics chips')
+option('xf86-video-dummy', type: 'boolean', value: true,
+       description: 'xf86 video driver DUMMY')
+option('xf86-video-fbdev', type: 'boolean', value: true,
+       description: 'xf86 video driver for /dev/fb*')
+option('xf86-video-geode', type: 'boolean', value: true,
+       description: 'xf86 video driver for GEODE chips')
+
 option('tests', type: 'boolean', value: true,
        description: 'Build tests for the X server on platforms that support it')
 
