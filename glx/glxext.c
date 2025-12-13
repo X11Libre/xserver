@@ -272,7 +272,12 @@ glxClientCallback(CallbackListPtr *list, void *closure, void *data)
 
 /************************************************************************/
 
-static __GLXprovider *__glXProviderStack = &__glXDRISWRastProvider;
+static __GLXprovider *__glXProviderStack =
+#ifdef HAVE_DRI_INTERFACE
+                                           &__glXDRISWRastProvider;
+#else
+                                           NULL;
+#endif
 
 void
 GlxPushProvider(__GLXprovider * provider)

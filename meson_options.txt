@@ -37,6 +37,9 @@ option('fontrootdir', type: 'string',
 option('serverconfigdir', type: 'string',
         description: 'Miscellaneous server configuration files path. Default: $libdir/xorg')
 
+option('glx_dri', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
+        description: 'Build the dri-based glx backends. Default: true')
+
 option('glx', type: 'boolean', value: true)
 option('xdmcp', type: 'boolean', value: true)
 option('xdm-auth-1', type: 'boolean', value: true)
