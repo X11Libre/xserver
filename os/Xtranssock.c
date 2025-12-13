@@ -77,11 +77,12 @@ from the copyright holders.
 #include "os/ossock.h"
 
 #ifdef UNIXCONN
-#include <sys/un.h>
 #include <sys/stat.h>
 #endif
 
 #ifndef WIN32
+
+#include <sys/un.h>
 
 #if defined(TCPCONN) || defined(UNIXCONN)
 #include <sys/socket.h>
