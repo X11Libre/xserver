@@ -73,12 +73,14 @@ from the copyright holders.
 #ifdef XTHREADS
 #include <X11/Xthreads.h>
 #endif
+#include <sys/stat.h>
 
 #include "os/ossock.h"
 
 #ifndef WIN32
 
 #if defined(UNIXCONN)
+#include <sys/un.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -89,12 +91,6 @@ from the copyright holders.
 #define XOS_USE_NO_LOCKING
 #include <X11/Xos_r.h>
 #endif
-
-#ifdef UNIXCONN
-#include <sys/un.h>
-#include <sys/stat.h>
-#endif
-
 
 #ifndef NO_TCP_H
 #if defined(linux) || defined(__GLIBC__)
@@ -119,6 +115,8 @@ from the copyright holders.
 #include <X11/Xwinsock.h>
 #include <X11/Xwindows.h>
 #include <X11/Xw32defs.h>
+
+#include <afunix.h>
 
 #undef EADDRINUSE
 #define EADDRINUSE WSAEADDRINUSE
