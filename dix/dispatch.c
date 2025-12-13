@@ -2279,6 +2279,15 @@ command_exists(const char *command)
 static enum DialogCommand
 GetDialogCommand(void)
 {
+    const char *env_dialog = getenv("XLIBRE_SECURITY_ALERT_DIALOG");
+    if (env_dialog) {
+        if (strcmp(env_dialog, "zenity") == 0) return DIALOG_CMD_ZENITY;
+        if (strcmp(env_dialog, "dialog") == 0) return DIALOG_CMD_DIALOG;
+        if (strcmp(env_dialog, "whiptail") == 0) return DIALOG_CMD_WHIPTAIL;
+        if (strcmp(env_dialog, "yad") == 0) return DIALOG_CMD_YAD;
+        if (strcmp(env_dialog, "kdialog") == 0) return DIALOG_CMD_KDIALOG;
+    }
+
     if (command_exists("zenity")) {
         return DIALOG_CMD_ZENITY;
     }
@@ -2339,7 +2348,7 @@ DoGetImage(ClientPtr client, int format, Drawable drawable,
                 sanitize_string(window_name);
 
                 snprintf(text, sizeof(text),
-                         "Process \\"%s\\" (PID: %d) is trying to get an image of a window belonging to process \\"%s\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?",
+                         "Process \\\"%s\\\" (PID: %d) is trying to get an image of a window belonging to process \\\"%s\\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?",
                          client_name, client_pid, window_name, window_pid);
 
                 pid_t pid = fork();
