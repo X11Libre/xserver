@@ -76,6 +76,11 @@ from the copyright holders.
 
 #include "os/ossock.h"
 
+#ifdef UNIXCONN
+#include <sys/un.h>
+#include <sys/stat.h>
+#endif
+
 #ifndef WIN32
 
 #if defined(TCPCONN) || defined(UNIXCONN)
@@ -89,12 +94,6 @@ from the copyright holders.
 #define XOS_USE_NO_LOCKING
 #include <X11/Xos_r.h>
 #endif
-
-#ifdef UNIXCONN
-#include <sys/un.h>
-#include <sys/stat.h>
-#endif
-
 
 #ifndef NO_TCP_H
 #if defined(linux) || defined(__GLIBC__)
