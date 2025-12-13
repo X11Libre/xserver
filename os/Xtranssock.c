@@ -120,6 +120,8 @@ from the copyright holders.
 #include <X11/Xwindows.h>
 #include <X11/Xw32defs.h>
 
+#include <afunix.h>
+
 #undef EADDRINUSE
 #define EADDRINUSE WSAEADDRINUSE
 #undef EWOULDBLOCK
