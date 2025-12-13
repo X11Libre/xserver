@@ -31,6 +31,14 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_XFIXES:
         case EXTENSION_MAJOR_XKEYBOARD:
         case EXTENSION_MAJOR_XRESOURCE:
+        case EXTENSION_MAJOR_SHM:
+        case EXTENSION_MAJOR_COMPOSITE:
+        case EXTENSION_MAJOR_GLX:
+        case EXTENSION_MAJOR_DRI2:
+        case EXTENSION_MAJOR_DRI3:
+        case EXTENSION_MAJOR_XINERAMA:
+        case EXTENSION_MAJOR_RENDER:
+        case EXTENSION_MAJOR_RANDR:
             goto pass;
 
         /* really blacklisted */

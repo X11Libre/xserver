@@ -24,12 +24,17 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
     // should be safe to pass for anybody
     switch (client->majorOp) {
         case X_QueryPointer:
+            if (subj->ns->allowMouseMotion)
+                goto pass;
+            goto block;
         case X_GetInputFocus:
         case X_GetKeyboardMapping:
         case X_GetModifierMapping:
         case X_GrabButton: // needed by xterm -- should be safe
             goto pass;
         case EXTENSION_MAJOR_XKEYBOARD:
+            if (subj->ns->allowXKeyboard)
+                goto pass;
             switch(client->minorOp) {
                 case X_kbSelectEvents:      // needed by xterm
                 case X_kbGetMap:            // needed by xterm
@@ -46,8 +51,20 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_XINPUT:
             switch (client->minorOp) {
                 case X_ListInputDevices:
-                case X_XIQueryDevice:
+                case X_XIGetProperty:
                     goto pass;
+                case X_XIQueryPointer:
+                    if (subj->ns->allowMouseMotion)
+                        goto pass;
+                    goto block;
+
+                case X_XIQueryDevice:
+                case X_XIChangeCursor:
+                case X_XIGrabDevice:
+                case X_XIUngrabDevice:
+                    if (subj->ns->allowXInput)
+                        goto pass;
+                goto block;
                 default:
                     XNS_HOOK_LOG("BLOCKED unhandled Xinput request\n");
                     goto block;

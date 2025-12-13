@@ -13,6 +13,9 @@ struct Xnamespace ns_root = {
     .allowTransparency = TRUE,
     .allowXInput = TRUE,
     .allowXKeyboard = TRUE,
+    .allowGlobalKeyboard = TRUE,
+    .allowRender = TRUE,
+    .allowRandr = TRUE,
     .builtin = TRUE,
     .name = NS_NAME_ROOT,
     .refcnt = 1,
@@ -145,6 +148,12 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
                 curr->allowXInput = TRUE;
             else if (strcmp(token, "xkeyboard") == 0)
                 curr->allowXKeyboard = TRUE;
+            else if (strcmp(token, "globalxkeyboard") == 0)
+                curr->allowGlobalKeyboard = TRUE;
+            else if (strcmp(token, "render") == 0)
+                curr->allowRender = TRUE;
+            else if (strcmp(token, "randr") == 0)
+                curr->allowRandr = TRUE;
             else
                 XNS_LOG("unknown allow: %s\n", token);
         }

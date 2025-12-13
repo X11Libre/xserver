@@ -35,6 +35,9 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_PRESENT:
         case EXTENSION_MAJOR_XC_MISC:
         case EXTENSION_MAJOR_XRESOURCE:
+        case EXTENSION_MAJOR_SHM:
+        case EXTENSION_MAJOR_COMPOSITE:
+        case EXTENSION_MAJOR_XINERAMA:
             goto pass;
 
         /* allow several operations */
@@ -54,6 +57,17 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
             XNS_HOOK_LOG("BLOCKED unhandled XKEYBOARD call: %s\n", param->ext->name);
             goto reject;
 
+        case EXTENSION_MAJOR_GLX:
+        case EXTENSION_MAJOR_DRI2:
+        case EXTENSION_MAJOR_DRI3:
+        case EXTENSION_MAJOR_RENDER:
+            if (subj->ns->allowRender)
+                goto pass;
+        break;
+        case EXTENSION_MAJOR_RANDR:
+            if (subj->ns->allowRandr)
+                goto pass;
+        break;
         /* allow if namespace has flag set */
         case EXTENSION_MAJOR_SHAPE:
             if (subj->ns->allowShape)
