@@ -475,6 +475,20 @@ if build_glx
     build_hashtable = true
 endif
 
+dri_dep = dependency('dri', required: false)
+
+glx_dri_opt = get_option('glx_dri')
+build_glx_dri = (glx_dri_opt != 'false')
+if not dri_dep.found()
+    if glx_dri_opt == 'auto'
+        build_glx_dri = false
+    endif
+
+    if glx_dri_opt == 'true'
+        error('DRI glx backends requested, but dri.pc was not found')
+    endif
+endif
+
 libdrm_dep = dependency('libdrm', version: libdrm_req, required: false)
 
 if get_option('dri1') == 'auto'

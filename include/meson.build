@@ -6,8 +6,6 @@ patch = version_split[2].to_int()
 # convert to the old-style 1.x.y version scheme used up to 1.20.x for backwards compatibility
 release = 1 * 10000000 + major * 100000 + minor * 1000 + patch
 
-dri_dep = dependency('dri', required: build_glx)
-
 # For feature macros we're using either false (boolean) or '1', which correspond to the macro being
 # not defined at all and defined to 1. This is to match autotools behavior and thus preserve
 # backwards  compatibility with all the existing code that uses #ifdef to check if feature is
@@ -222,7 +220,10 @@ conf_data.set('DPMSExtension', build_dpms ? '1' : false)
 conf_data.set('DRI2', build_dri2 ? '1' : false)
 conf_data.set('DRI3', build_dri3 ? '1' : false)
 if build_glx
-    conf_data.set_quoted('DRI_DRIVER_PATH', dri_dep.get_variable(pkgconfig : 'dridriverdir'))
+    if build_glx_dri
+        conf_data.set_quoted('DRI_DRIVER_PATH', dri_dep.get_variable(pkgconfig : 'dridriverdir'))
+        conf_data.set('BUILD_GLX_DRI', 1)
+    endif
 endif
 conf_data.set('MITSHM', build_mitshm ? '1' : false)
 conf_data.set('CONFIG_MITSHM', build_mitshm ? '1' : false)
