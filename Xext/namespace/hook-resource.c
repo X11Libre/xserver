@@ -52,13 +52,6 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         if (param->rtype == RREventType) {
             if (subj->ns->allowRandr)
                 goto pass;
-            if (subj->ns->allowRandr) {
-                switch (client->minorOp) {
-                    case X_RRSelectInput:
-                        goto pass;
-                }
-                XNS_HOOK_LOG("unhandled XR operation %d on root ns\n",client->minorOp);
-            }
         }
         switch (client->majorOp) {
             case X_TranslateCoords:
@@ -76,13 +69,10 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                         if (subj->ns->allowMouseMotion)
                             goto pass;
                 }
-            // needed for gimp?
+            // needed for gimp? should be safe.
             case EXTENSION_MAJOR_SHM:
-                switch(client->minorOp) {
-                    case X_ShmCreatePixmap:
-                        if (subj->ns->allowRender)
-                            goto pass;
-                }
+                if (client->minorOp == X_ShmCreatePixmap)
+                    goto pass;
             // move to somewhere else? WMs need to listen to this.
             case X_GetProperty:
                 goto pass;
