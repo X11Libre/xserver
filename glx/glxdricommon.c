@@ -291,7 +291,6 @@ glxProbeDriver(const char *driverName,
                void **coreExt, const char *coreName, int coreVersion,
                void **renderExt, const char *renderName, int renderVersion)
 {
-    int i;
     void *driver;
     char filename[PATH_MAX];
     char *get_extensions_name;
@@ -341,12 +340,12 @@ glxProbeDriver(const char *driverName,
                  __DRI_DRIVER_GET_EXTENSIONS, driverName) != -1) {
         const __DRIextension **(*get_extensions)(void);
 
-        for (i = 0; i < strlen(get_extensions_name); i++) {
+        for (unsigned int i = 0; i < strlen(get_extensions_name); i++) {
             /* Replace all non-alphanumeric characters with underscore,
              * since they are not allowed in C symbol names. That fixes up
              * symbol name for drivers with '-drm' suffix
              */
-            if (!isalnum(get_extensions_name[i]))
+            if (!isalnum((unsigned char)get_extensions_name[i]))
                 get_extensions_name[i] = '_';
         }
 
@@ -364,7 +363,7 @@ glxProbeDriver(const char *driverName,
         goto cleanup_failure;
     }
 
-    for (i = 0; extensions[i]; i++) {
+    for (unsigned int i = 0; extensions[i]; i++) {
         if (strcmp(extensions[i]->name, coreName) == 0 &&
             extensions[i]->version >= coreVersion) {
             *coreExt = (void *) extensions[i];
