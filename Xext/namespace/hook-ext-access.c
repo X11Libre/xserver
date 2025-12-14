@@ -31,7 +31,6 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_XFIXES:
         case EXTENSION_MAJOR_XKEYBOARD:
         case EXTENSION_MAJOR_XRESOURCE:
-        case EXTENSION_MAJOR_SHM:
         case EXTENSION_MAJOR_COMPOSITE:
         case EXTENSION_MAJOR_GLX:
         case EXTENSION_MAJOR_DRI2:
@@ -58,6 +57,10 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         /* only allowed if namespace has flag set */
         case EXTENSION_MAJOR_XINPUT:
             if (subj->ns->allowXInput)
+                goto pass;
+            goto reject;
+        case EXTENSION_MAJOR_SHM:
+            if (subj->ns->allowSHM)
                 goto pass;
             goto reject;
     }

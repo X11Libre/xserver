@@ -31,6 +31,8 @@ struct Xnamespace {
     Bool allowGlobalKeyboard;
     Bool allowRender;
     Bool allowRandr;
+    Bool allowComposite;
+    Bool allowSHM;
     Bool superPower;
     struct xorg_list auth_tokens;
     size_t refcnt;

@@ -35,8 +35,6 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_PRESENT:
         case EXTENSION_MAJOR_XC_MISC:
         case EXTENSION_MAJOR_XRESOURCE:
-        case EXTENSION_MAJOR_SHM:
-        case EXTENSION_MAJOR_COMPOSITE:
         case EXTENSION_MAJOR_XINERAMA:
             goto pass;
 
@@ -66,6 +64,14 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
         break;
         case EXTENSION_MAJOR_RANDR:
             if (subj->ns->allowRandr)
+                goto pass;
+        break;
+        case EXTENSION_MAJOR_COMPOSITE:
+            if (subj->ns->allowComposite)
+                goto pass;
+        break;
+        case EXTENSION_MAJOR_SHM:
+            if (subj->ns->allowSHM)
                 goto pass;
         break;
         /* allow if namespace has flag set */

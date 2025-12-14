@@ -16,6 +16,8 @@ struct Xnamespace ns_root = {
     .allowGlobalKeyboard = TRUE,
     .allowRender = TRUE,
     .allowRandr = TRUE,
+    .allowSHM = TRUE,
+    .allowComposite = TRUE,
     .builtin = TRUE,
     .isRoot = TRUE,
     .name = NS_NAME_ROOT,
@@ -155,6 +157,10 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
                 curr->allowRender = TRUE;
             else if (strcmp(token, "randr") == 0)
                 curr->allowRandr = TRUE;
+            else if (strcmp(token, "shm") == 0)
+                curr->allowSHM = TRUE;
+            else if (strcmp(token, "composite") == 0)
+                curr->allowSHM = TRUE;
             else
                 XNS_LOG("unknown allow: %s\n", token);
         }
