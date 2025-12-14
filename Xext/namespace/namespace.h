@@ -21,6 +21,7 @@ struct auth_token {
 struct Xnamespace {
     struct xorg_list entry;
     const char *name;
+    Bool isRoot; // only ever used by root namespace
     Bool builtin;
     Bool allowMouseMotion;
     Bool allowShape;

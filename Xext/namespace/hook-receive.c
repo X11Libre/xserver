@@ -30,7 +30,7 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
         const int type = param->events[i].u.u.type;
 
         // catch messages for root namespace
-        if (strcmp(obj->ns->name,"root")==0) {
+        if (obj->ns->isRoot) {
             const char* evname = LookupEventName(type);
             if (strcmp(evname,LookupEventName(ClientMessage))==0)
                 goto pass;

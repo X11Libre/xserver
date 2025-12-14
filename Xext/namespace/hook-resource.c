@@ -47,7 +47,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         goto pass;
 
     // whitelist actions to root namespace
-    if (strcmp(obj->ns->name,"root")==0) {
+    if (obj->ns->isRoot) {
         // randr events to root
         if (param->rtype == RREventType) {
             if (subj->ns->allowRandr)

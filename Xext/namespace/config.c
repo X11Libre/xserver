@@ -17,6 +17,7 @@ struct Xnamespace ns_root = {
     .allowRender = TRUE,
     .allowRandr = TRUE,
     .builtin = TRUE,
+    .isRoot = TRUE,
     .name = NS_NAME_ROOT,
     .refcnt = 1,
     .superPower = TRUE,

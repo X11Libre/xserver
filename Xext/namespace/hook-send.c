@@ -39,7 +39,7 @@ void hookSend(CallbackListPtr *pcbl, void *unused, void *calldata)
     for (int i = 0; i < param->count; i++) {
         const int type = param->events[i].u.u.type;
         // catch messages for root namespace
-        if (strcmp(obj->ns->name,"root")==0) {
+        if (obj->ns->isRoot) {
             const char* evname = LookupEventName(type);
             if (strcmp(evname,LookupEventName(ClientMessage))==0)
                 goto pass;
