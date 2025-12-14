@@ -88,9 +88,6 @@
 /* Define to 1 on systems derived from System V Release 4 */
 #mesondefine SVR4
 
-/* Support TCP socket connections */
-#mesondefine TCPCONN
-
 /* Support UNIX socket connections */
 #mesondefine UNIXCONN
 

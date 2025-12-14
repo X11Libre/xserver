@@ -79,7 +79,6 @@ SOFTWARE.
 #ifndef WIN32
 #include <sys/socket.h>
 
-#if defined(TCPCONN)
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #ifdef CSRG_BASED
@@ -88,8 +87,9 @@ SOFTWARE.
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #endif
+#ifndef WIN32
 #include <sys/uio.h>
-#endif                          /* WIN32 */
+#endif
 
 #include "dix/dix_priv.h"
 #include "dix/dixgrabs_priv.h"
@@ -346,12 +346,11 @@ AuthAudit(ClientPtr client, Bool letin,
     else
         switch (saddr->sa_family) {
         case AF_UNSPEC:
-#if defined(UNIXCONN) || defined(LOCALCONN)
+#if defined(UNIXCONN)
         case AF_UNIX:
 #endif
             strlcpy(addr, "local host", sizeof(addr));
             break;
-#if defined(TCPCONN)
         case AF_INET:{
 #if defined(HAVE_INET_NTOP)
             char ipaddr[INET_ADDRSTRLEN];
@@ -374,7 +373,6 @@ AuthAudit(ClientPtr client, Bool letin,
             snprintf(addr, sizeof(addr), "IP %s", ipaddr);
         }
             break;
-#endif
 #endif
         default:
             strlcpy(addr, "unknown address", sizeof(addr));
@@ -621,7 +619,6 @@ EstablishNewConnections(int curconn, int ready, void *data)
     ClientPtr client;
     OsCommPtr oc;
     XtransConnInfo trans_conn, new_trans_conn;
-    int status;
 
     connect_time = GetTimeInMillis();
     /* kill off stragglers */
@@ -638,7 +635,7 @@ EstablishNewConnections(int curconn, int ready, void *data)
     if ((trans_conn = lookup_trans_conn(curconn)) == NULL)
         return;
 
-    if ((new_trans_conn = _XSERVTransAccept(trans_conn, &status)) == NULL)
+    if ((new_trans_conn = _XSERVTransAccept(trans_conn)) == NULL)
         return;
 
     newconn = _XSERVTransGetConnectionNumber(new_trans_conn);
@@ -1008,7 +1005,6 @@ ListenOnOpenFD(int fd, int noxauth)
     ListenTransCount++;
 }
 
-/* based on _XSERVTransSocketUNIXAccept (XtransConnInfo ciptr, int *status) */
 Bool
 AddClientOnOpenFD(int fd)
 {

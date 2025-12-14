@@ -15,6 +15,20 @@ add_project_arguments('-fno-strict-aliasing', language : 'c')
 add_project_arguments('-fvisibility=hidden', language : 'c')
 add_project_arguments('-Wvla', language: 'c')
 add_project_arguments('-fno-common', language: 'c')
+add_project_arguments('-Wshift-negative-value', language: 'c')
+add_project_arguments('-Wchar-subscripts', language: 'c')
+
+# workaround for mesa bug causing GLsync to be typedef'ed multiple times
+# this is breaking -Werror on FreeBSD
+if host_machine.system() == 'freebsd'
+    add_project_arguments('-Wno-error=typedef-redefinition', language: 'c')
+endif
+
+# workaround for mingw32 bug, which is demanding gnu_print attribute
+# while not actually understanding it
+if host_machine.system() == 'windows'
+    add_project_arguments('-Wno-error=suggest-attribute=format', language: 'c')
+endif
 
 add_project_link_arguments('-fvisibility=hidden', language : 'c')
 
@@ -25,6 +39,7 @@ conf_data.set('_DIX_CONFIG_H_', '1')
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     test_wflags = [
         '-Wall',
+        '-Wchar-subscripts',
         '-Wpointer-arith',
         '-Wmissing-declarations',
         '-Wformat=2',

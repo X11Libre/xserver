@@ -85,28 +85,15 @@ from The Open Group.
 
 static
 Xtransport_table Xtransports[] = {
-#if defined(TCPCONN)
     { &_XSERVTransSocketTCPFuncs,	TRANS_SOCKET_TCP_INDEX },
 #if defined(IPv6)
     { &_XSERVTransSocketINET6Funcs,	TRANS_SOCKET_INET6_INDEX },
 #endif /* IPv6 */
     { &_XSERVTransSocketINETFuncs,	TRANS_SOCKET_INET_INDEX },
-#endif /* TCPCONN */
 #if defined(UNIXCONN)
-#if !defined(LOCALCONN)
     { &_XSERVTransSocketLocalFuncs,	TRANS_SOCKET_LOCAL_INDEX },
-#endif /* !LOCALCONN */
     { &_XSERVTransSocketUNIXFuncs,	TRANS_SOCKET_UNIX_INDEX },
 #endif /* UNIXCONN */
-#if defined(LOCALCONN)
-    { &_XSERVTransLocalFuncs,		TRANS_LOCAL_LOCAL_INDEX },
-#if defined(SVR4) || defined(__SVR4)
-    { &_XSERVTransNAMEDFuncs,		TRANS_LOCAL_NAMED_INDEX },
-#endif
-#ifdef __sun
-    { &_XSERVTransPIPEFuncs,		TRANS_LOCAL_PIPE_INDEX },
-#endif /* __sun */
-#endif /* LOCALCONN */
 };
 
 #define NUMTRANS	(sizeof(Xtransports)/sizeof(Xtransport_table))
@@ -674,13 +661,13 @@ int _XSERVTransResetListener (XtransConnInfo ciptr)
 	return TRANS_RESET_NOOP;
 }
 
-XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr, int *status)
+XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr)
 {
     XtransConnInfo	newciptr;
 
     prmsg (2,"Accept(%d)\n", ciptr->fd);
 
-    newciptr = ciptr->transptr->Accept (ciptr, status);
+    newciptr = ciptr->transptr->Accept(ciptr);
 
     if (newciptr)
 	newciptr->transptr = ciptr->transptr;

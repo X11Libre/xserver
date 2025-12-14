@@ -321,11 +321,9 @@ static int launchd_socket_handed_off = 0;
 kern_return_t
 do_request_fd_handoff_socket(mach_port_t port, string_t filename)
 {
-    socket_handoff_t *handoff_data;
-
     launchd_socket_handed_off = 1;
 
-    handoff_data = (socket_handoff_t *)calloc(1, sizeof(socket_handoff_t));
+    socket_handoff_t *handoff_data = calloc(1, sizeof(socket_handoff_t));
     if (!handoff_data) {
         ErrorF("X11.app: Error allocating memory for handoff_data\n");
         return KERN_FAILURE;

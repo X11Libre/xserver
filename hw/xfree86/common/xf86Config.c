@@ -1744,7 +1744,7 @@ configScreen(confScreenPtr screenp, XF86ConfScreenPtr conf_screen, int scrnum,
         screenp->device = NULL;
     }
 
-    if (auto_gpu_device && conf_screen->num_gpu_devices == 0 &&
+    if (xf86Info.autoAddGPU && auto_gpu_device && conf_screen->num_gpu_devices == 0 &&
         xf86configptr->conf_device_lst) {
         /* Loop through the entire device list and skip the primary device
          * assigned to the screen. This is important because there are two
@@ -2390,7 +2390,10 @@ xf86HandleConfigFile(Bool autoconfig)
      * And while we are at it, we'll decode the rest of the stuff as well
      */
 
-    /* First check if a layout section is present, and if it is valid. */
+    /* Global server options should go first, e.g., GPU devices probing depends on this */
+    configServerFlags(xf86configptr->conf_flags, xf86ConfigLayout.options);
+
+    /* Check if a layout section is present, and if it is valid. */
     FIND_SUITABLE(XF86ConfLayoutPtr, xf86configptr->conf_layout_lst, layout);
     if (layout == NULL || xf86ScreenName != NULL) {
         XF86ConfScreenPtr screen;
@@ -2449,7 +2452,6 @@ xf86HandleConfigFile(Bool autoconfig)
     }
 #endif
     /* Now process everything else */
-    configServerFlags(xf86configptr->conf_flags, xf86ConfigLayout.options);
     configFiles(xf86configptr->conf_files);
     configExtensions(xf86configptr->conf_extensions);
     configDRI(xf86configptr->conf_dri);

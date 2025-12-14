@@ -3,6 +3,8 @@
 set -e
 set -o xtrace
 
+. .github/scripts/util.sh
+
 HOST=$1
 
 # Debian's cross-pkg-config wrappers are broken for MinGW targets, since
@@ -45,31 +47,37 @@ build() {
     rm -rf ${OLDPWD}
 }
 
-build 'https://github.com/X11Libre/pixman.git' 'pixman-0.38.4'
-build 'https://github.com/X11Libre/pthread-stubs.git' '0.4'
+build_fdo() {
+    local name="$1"
+    shift
+    build $(fdo_mirror $name) "$@"
+}
+
+build_fdo 'pixman' 'pixman-0.38.4'
+build_fdo 'pthread-stubs' '0.4'
 # we can't use the xorgproto pkgconfig files from /usr/share/pkgconfig, because
 # these would add -I/usr/include to CFLAGS, which breaks cross-compilation
-build 'https://github.com/X11Libre/xorgproto.git' 'xorgproto-2024.1' '--datadir=/lib'
-build 'https://github.com/X11Libre/libXau.git' 'libXau-1.0.9'
-build 'https://github.com/X11Libre/xcbproto.git' 'xcb-proto-1.14.1'
-build 'https://github.com/X11Libre//libxcb.git' 'libxcb-1.14'
+build_fdo 'xorgproto' 'xorgproto-2024.1' '--datadir=/lib'
+build_fdo 'libXau' 'libXau-1.0.9'
+build_fdo 'xcbproto' 'xcb-proto-1.14.1'
+build_fdo 'libxcb' 'libxcb-1.14'
 # the default value of keysymdefdir is taken from the includedir variable for
 # xproto, which isn't adjusted by pkg-config for the sysroot
 # Using -fcommon to address build failure when cross-compiling for windows.
 # See discussion at https://gitlab.freedesktop.org/xorg/xserver/-/merge_requests/913
-CFLAGS="-fcommon" build 'https://github.com/X11Libre/libX11.git' 'libX11-1.6.9' "--with-keysymdefdir=/usr/${HOST}/include/X11"
-build 'https://github.com/X11Libre/libxkbfile.git' 'libxkbfile-1.1.0'
+CFLAGS="-fcommon" build_fdo 'libX11' 'libX11-1.6.9' "--with-keysymdefdir=/usr/${HOST}/include/X11"
+build_fdo 'libxkbfile' 'libxkbfile-1.1.0'
 # freetype needs an explicit --build to know it's cross-compiling
 # disable png as freetype tries to use libpng-config, even when cross-compiling
-build 'git://git.savannah.gnu.org/freetype/freetype2.git' 'VER-2-10-1' "--build=$(cc -dumpmachine) --with-png=no"
-build 'https://github.com/X11Libre/font-util.git' 'font-util-1.3.2'
-build 'https://github.com/X11Libre/libfontenc.git' 'libfontenc-1.1.4'
-build 'https://github.com/X11Libre/libXfont.git' 'libXfont2-2.0.3'
-build 'https://github.com/X11Libre/libXdmcp.git' 'libXdmcp-1.1.3'
-build 'https://github.com/X11Libre/libXfixes.git' 'libXfixes-5.0.3'
-build 'https://github.com/X11Libre/libxcb-util.git' 'xcb-util-0.4.1-gitlab'
-build 'https://github.com/X11Libre/libxcb-image.git' 'xcb-util-image-0.4.1-gitlab'
-build 'https://github.com/X11Libre/libxcb-wm.git' 'xcb-util-wm-0.4.2'
+build_fdo 'freetype' 'VER-2-10-1' "--build=$(cc -dumpmachine) --with-png=no"
+build_fdo 'font-util' 'font-util-1.3.2'
+build_fdo 'libfontenc' 'libfontenc-1.1.4'
+build_fdo 'libXfont' 'libXfont2-2.0.3'
+build_fdo 'libXdmcp' 'libXdmcp-1.1.3'
+build_fdo 'libXfixes' 'libXfixes-5.0.3'
+build_fdo 'libxcb-util' 'xcb-util-0.4.1-gitlab'
+build_fdo 'libxcb-image' 'xcb-util-image-0.4.1-gitlab'
+build_fdo 'libxcb-wm' 'xcb-util-wm-0.4.2'
 
 # workaround xcb_windefs.h leaking all Windows API types into X server build
 # (some of which clash which types defined by Xmd.h) XXX: This is a bit of a

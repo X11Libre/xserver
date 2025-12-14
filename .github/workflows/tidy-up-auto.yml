@@ -40,19 +40,18 @@ jobs:
 
     delete_old_workflow_runs_branches:
         runs-on: ubuntu-latest
+        if: false
         strategy:
             matrix:
                 version:
                     - master
                     - maint-25.0
                     - wip/AllocColor
-                    - wip/ReadRequestFromClient
                     - wip/ReplyNotSwappd
                     - wip/XvPortNotifyPtr
                     - wip/always-pciaccess
                     - wip/build-rootless
-                    - wip/ci
-                    - wip/ci-deps
+                    - wip/char-subscr
                     - wip/clang-tidy
                     - wip/cleanup
                     - wip/cleanup-api-xfree86
@@ -60,16 +59,11 @@ jobs:
                     - wip/cleanup-grabs
                     - wip/cleanup-os-export
                     - wip/client_array
-                    - wip/conflict-notify
                     - wip/conv-warnings
-                    - wip/deps1
                     - wip/dix-config
-                    - wip/dixLookupWindowByXID
                     - wip/dixconf-1
-                    - wip/dixconfig-2
                     - wip/dixgetproperty
-                    - wip/fix-xnest
-                    - wip/fix_347
+                    - wip/fmt
                     - wip/generations
                     - wip/geode
                     - wip/github-build
@@ -85,55 +79,34 @@ jobs:
                     - wip/logging
                     - wip/logging_submitted_1
                     - wip/maint-xnest
-                    - wip/malloc
                     - wip/marshal
                     - wip/matrix-test
                     - wip/meson
                     - wip/misc.h
                     - wip/mpbt
                     - wip/netbsd
-                    - wip/new-cleanups
                     - wip/no-libsystemd
+                    - wip/optional-pci
                     - wip/os-unexport
                     - wip/pciaccess
                     - wip/pedantic
                     - wip/pixmap-lifecycle
-                    - wip/purge-master
                     - wip/reallocarray
-                    - wip/redv
                     - wip/requests
-                    - wip/rootless
-                    - wip/saveset
-                    - wip/screenkey
                     - wip/screenproc
-                    - wip/screenproc-old
                     - wip/screenproc-wrap
-                    - wip/screenproc-wrap-debug
-                    - wip/sdk
                     - wip/swap0
                     - wip/swapping
                     - wip/swapping_new
-                    - wip/troubleshoot-randr
                     - wip/warn-conv
-                    - wip/werror
                     - wip/win32_2
                     - wip/xcb-marshal
-                    - wip/xcb-visuals
-                    - wip/xcb-xnest
                     - wip/xf86_platform_bus_newabi
                     - wip/xf86bigfont
                     - wip/xi-properties
-                    - wip/xnest-multi
                     - wip/xnest-render
                     - wip/xnest-rootless
-                    - wip/xnest-rootless-old
                     - wip/xnest-shm
-                    - wip/xrandr-bug
-                    - wip/xrandr-new-one
-                    - wip/xv-fix
-                    - wip/xv-generation
-                    - wip/xwin
-                    - wip/xwin-2
         steps:
             - uses: actions/checkout@v4
             - name: purge older runs on ${{ github.event.repository.name }} branch

@@ -220,7 +220,7 @@ static int
 ProcAppleWMSelectInput(register ClientPtr client)
 {
     REQUEST(xAppleWMSelectInputReq);
-    WMEventPtr pEvent, pNewEvent, *pHead;
+    WMEventPtr pEvent, *pHead;
     XID clientResource;
     int i;
 
@@ -242,7 +242,7 @@ ProcAppleWMSelectInput(register ClientPtr client)
         }
 
         /* build the entry */
-        pNewEvent = calloc(1, sizeof(WMEventRec));
+        WMEventPtr pNewEvent = calloc(1, sizeof(WMEventRec));
         if (!pNewEvent)
             return BadAlloc;
         pNewEvent->next = 0;
@@ -278,7 +278,7 @@ ProcAppleWMSelectInput(register ClientPtr client)
     else if (stuff->mask == 0) {
         /* delete the interest */
         if (i == Success && pHead) {
-            pNewEvent = 0;
+            WMEventPtr pNewEvent = 0;
             for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
                 if (pEvent->client == client)
                     break;
@@ -371,7 +371,7 @@ ProcAppleWMSetWindowMenu(register ClientPtr client)
     REQUEST_AT_LEAST_SIZE(xAppleWMSetWindowMenuReq);
 
     nitems = stuff->nitems;
-    char **items = calloc(nitems, sizeof(char *));
+    const char **items = calloc(nitems, sizeof(char *));
     char *shortcuts = calloc(nitems, sizeof(char));
 
     if (!items || !shortcuts) {

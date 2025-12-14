@@ -39,8 +39,6 @@
 #include <limits.h>
 #include <stdbool.h>
 
-#include <X11/Xwindows.h>
-#include <winsock2.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_image.h>

@@ -95,3 +95,8 @@ build_ac_xts() {
         echo "::endgroup::"
     fi
 }
+
+fdo_mirror() {
+    local repo="$1"
+    echo -n "https://github.com/X11Libre/mirror.fdo.$1"
+}

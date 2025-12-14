@@ -234,7 +234,7 @@ struct pcvtid {
 #define MAP_FAILED ((void *)-1)
 #endif
 
-#define SYSCALL(call) while(((call) == -1) && (errno == EINTR))
+#define SYSCALL(call) while(((call) == -1) && (errno == EINTR)) {}
 
 #include "xf86_OSproc.h"
 

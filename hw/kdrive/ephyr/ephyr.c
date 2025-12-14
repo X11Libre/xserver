@@ -973,6 +973,9 @@ screen_from_window(Window w)
 }
 
 static void
+ephyrProcessErrorEvent(xcb_generic_event_t *xev) _X_NORETURN;
+
+static void
 ephyrProcessErrorEvent(xcb_generic_event_t *xev)
 {
     xcb_generic_error_t *e = (xcb_generic_error_t *)xev;
