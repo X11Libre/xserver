@@ -189,28 +189,28 @@ ShowSecurityAlertDialog(ClientPtr client, pid_t client_pid, const char *client_n
     } else if (pid == 0) { /* child */
         switch (dialog_cmd) {
             case DIALOG_CMD_ZENITY: {
-                char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_DIALOG: {
-                char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_WHIPTAIL: {
-                char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_YAD: {
-                char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_KDIALOG: {
-                char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
         default: break;
@@ -255,28 +255,28 @@ ShowKeyboardSecurityAlertDialog(ClientPtr client, pid_t client_pid, const char *
     } else if (pid == 0) { /* child */
         switch (dialog_cmd) {
             case DIALOG_CMD_ZENITY: {
-                char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_DIALOG: {
-                char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_WHIPTAIL: {
-                char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_YAD: {
-                char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_KDIALOG: {
-                char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
         default: break;
@@ -321,28 +321,28 @@ ShowSendEventSecurityAlertDialog(ClientPtr client, pid_t client_pid, const char 
     } else if (pid == 0) { /* child */
         switch (dialog_cmd) {
             case DIALOG_CMD_ZENITY: {
-                char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_DIALOG: {
-                char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_WHIPTAIL: {
-                char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_YAD: {
-                char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
             case DIALOG_CMD_KDIALOG: {
-                char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
-                execvp(args[0], args);
+                const char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
+                execvp(args[0], (char *const *)args);
                 break;
             }
         default: break;
