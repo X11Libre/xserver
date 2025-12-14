@@ -132,6 +132,7 @@ Equipment Corporation.
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
+#include "dix/security_alert_priv.h"
 #include "include/extinit.h"
 #include "os/bug_priv.h"
 #include "os/client_priv.h"
@@ -163,15 +164,6 @@ Equipment Corporation.
 #include <limits.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-enum DialogCommand {
-    DIALOG_CMD_NONE,
-    DIALOG_CMD_ZENITY,
-    DIALOG_CMD_DIALOG,
-    DIALOG_CMD_WHIPTAIL,
-    DIALOG_CMD_YAD,
-    DIALOG_CMD_KDIALOG
-};
 
 #define _XkbWantsDetectableAutoRepeat(c) \
         ((c)->xkbClientFlags&XkbPCF_DetectableAutoRepeatMask)
@@ -4553,68 +4545,6 @@ OtherClientGone(void *value, XID id)
     FatalError("client not on event list");
 }
 
-static void
-sanitize_string(char *str)
-{
-    if (!str) return;
-    char *p = str;
-    while (*p) {
-        if (strchr(";'|&`()\\\"!<>", *p)) {
-            *p = '_';
-        }
-        p++;
-    }
-}
-
-static int
-command_exists(const char *command)
-{
-    char *path = getenv("PATH");
-    if (!path)
-        return 0;
-
-    char *path_copy = strdup(path);
-    if (!path_copy)
-        return 0;
-
-    int found = 0;
-    char *saveptr;
-    char *dir = strtok_r(path_copy, ":", &saveptr);
-    while (dir) {
-        char full_path[PATH_MAX];
-        snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
-        if (access(full_path, X_OK) == 0) {
-            found = 1;
-            break;
-        }
-        dir = strtok_r(NULL, ":", &saveptr);
-    }
-
-    free(path_copy);
-    return found;
-}
-
-static enum DialogCommand
-GetDialogCommand(void)
-{
-    if (command_exists("zenity")) {
-        return DIALOG_CMD_ZENITY;
-    }
-    if (command_exists("dialog")) {
-        return DIALOG_CMD_DIALOG;
-    }
-    if (command_exists("whiptail")) {
-        return DIALOG_CMD_WHIPTAIL;
-    }
-    if (command_exists("yad")) {
-        return DIALOG_CMD_YAD;
-    }
-    if (command_exists("kdialog")) {
-        return DIALOG_CMD_KDIALOG;
-    }
-    return DIALOG_CMD_NONE;
-}
-
 XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
 {
     Mask check;
@@ -4622,65 +4552,12 @@ XRetCode EventSelectForWindow(WindowPtr pWin, ClientPtr client, Mask mask)
 
     DeviceIntPtr dev = PickPointer(client);
     if (pWin == InputDevCurrentRootWindow(dev) && (mask & KeyPressMask)) {
-        pid_t pid = GetClientPid(client);
-        if (pid > 0) {
+        pid_t client_pid = GetClientPid(client);
+        if (client_pid > 0) {
             char client_name[256];
-            GetProcessName(pid, client_name, sizeof(client_name));
+            GetProcessName(client_pid, client_name, sizeof(client_name));
             if (!IsWhitelisted(client_name, 0)) {
-                enum DialogCommand dialog_cmd = GetDialogCommand();
-                if (dialog_cmd != DIALOG_CMD_NONE) {
-                    char text[512];
-                    sanitize_string(client_name);
-                    snprintf(text, sizeof(text),
-                             "Process \\\"%s\\\" (PID: %d) is attempting to listen to all keyboard events. This is a common behavior for keyloggers. Allow this action?",
-                             client_name, pid);
-
-                    pid_t pid1 = fork();
-                    if (pid1 == -1) {
-                        return BadAlloc;
-                    } else if (pid1 == 0) { /* child */
-                        switch (dialog_cmd) {
-                        case DIALOG_CMD_ZENITY: {
-                            const char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_DIALOG: {
-                            const char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_WHIPTAIL: {
-                            const char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_YAD: {
-                            const char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_KDIALOG: {
-                            const char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_NONE:
-                            /* Should not happen */
-                            break;
-                        }
-                        _exit(127); /* execvp failed */
-                    } else { /* parent */
-                        int status;
-                        waitpid(pid1, &status, 0);
-                        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-                            AddToWhitelist(client_name, 0);
-                        } else {
-                            return BadAccess;
-                        }
-                    }
-                } else {
-                    /* No dialog tool found, deny access */
+                if (ShowKeyboardSecurityAlertDialog(client, client_pid, client_name) != Success) {
                     return BadAccess;
                 }
             }
@@ -5385,63 +5262,7 @@ GrabDevice(ClientPtr client, DeviceIntPtr dev,
                 char client_name[256];
                 GetProcessName(pid, client_name, sizeof(client_name));
                 if (!IsWhitelisted(client_name, 0)) {
-                    enum DialogCommand dialog_cmd = GetDialogCommand();
-                    if (dialog_cmd != DIALOG_CMD_NONE) {
-                        char text[512];
-                        sanitize_string(client_name);
-                        snprintf(text, sizeof(text),
-                                 "Process \\\"%s\\\" (PID: %d) is attempting to grab the keyboard. This is a common behavior for keyloggers. Allow this action?",
-                                 client_name, pid);
-
-                        pid_t child_pid = fork(); /* Declare child_pid */
-                        if (child_pid == -1) {
-                            FreeGrab(tempGrab);
-                            return BadAlloc;
-                        } else if (child_pid == 0) { /* child */
-                            switch (dialog_cmd) {
-                            case DIALOG_CMD_ZENITY: {
-                                const char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
-                                execvp(args[0], (char *const *)args);
-                                break;
-                            }
-                            case DIALOG_CMD_DIALOG: {
-                                const char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
-                                execvp(args[0], (char *const *)args);
-                                break;
-                            }
-                            case DIALOG_CMD_WHIPTAIL: {
-                                const char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
-                                execvp(args[0], (char *const *)args);
-                                break;
-                            }
-                            case DIALOG_CMD_YAD: {
-                                const char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
-                                execvp(args[0], (char *const *)args);
-                                break;
-                            }
-                            case DIALOG_CMD_KDIALOG: {
-                                const char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
-                                execvp(args[0], (char *const *)args);
-                                break;
-                            }
-                            case DIALOG_CMD_NONE:
-                                /* Should not happen */
-                                break;
-                            }
-                            _exit(127); /* execvp failed */
-                        } else { /* parent */
-                            int wait_status;
-                            waitpid(child_pid, &wait_status, 0);
-                            if (WIFEXITED(wait_status) && WEXITSTATUS(wait_status) == 0) {
-                                AddToWhitelist(client_name, 0);
-                            } else {
-                                FreeGrab(tempGrab);
-                                *status = GrabFrozen;
-                                return Success;
-                            }
-                        }
-                    } else {
-                        /* No dialog tool found, deny access */
+                    if (ShowKeyboardSecurityAlertDialog(client, pid, client_name) != Success) {
                         FreeGrab(tempGrab);
                         *status = GrabFrozen;
                         return Success;
@@ -5706,60 +5527,7 @@ ProcSendEvent(ClientPtr client)
             char client_name[256];
             GetProcessName(sender_pid, client_name, sizeof(client_name));
             if (!IsWhitelisted(client_name, 1)) {
-                enum DialogCommand dialog_cmd = GetDialogCommand();
-                if (dialog_cmd != DIALOG_CMD_NONE) {
-                    char text[512];
-                    sanitize_string(client_name);
-                    snprintf(text, sizeof(text),
-                             "Process \\\"%s\\\" (PID: %d) is attempting to send a synthetic event to window 0x%lx. This may be used to spoof input. Allow this action?",
-                             client_name, sender_pid, (unsigned long)stuff->destination);
-
-                    pid_t pid = fork();
-                    if (pid == -1) {
-                        return BadAlloc;
-                    } else if (pid == 0) { /* child */
-                        switch (dialog_cmd) {
-                        case DIALOG_CMD_ZENITY: {
-                            const char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_DIALOG: {
-                            const char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_WHIPTAIL: {
-                            const char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_YAD: {
-                            const char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_KDIALOG: {
-                            const char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
-                            execvp(args[0], (char *const *)args);
-                            break;
-                        }
-                        case DIALOG_CMD_NONE:
-                            /* Should not happen */
-                            break;
-                        }
-                        _exit(127); /* execvp failed */
-                    } else { /* parent */
-                        int status;
-                        waitpid(pid, &status, 0);
-                        if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-                            AddToWhitelist(client_name, 1);
-                        } else {
-                            return BadAccess;
-                        }
-                    }
-                } else {
-                    /* No dialog tool found, deny access */
+                if (ShowSendEventSecurityAlertDialog(client, sender_pid, client_name, (unsigned long)stuff->destination) != Success) {
                     return BadAccess;
                 }
             }

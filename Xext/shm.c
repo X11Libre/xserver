@@ -57,6 +57,7 @@ in this Software without prior written authorization from The Open Group.
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #include "Xext/shm_priv.h"
+#include "dix/security_alert_priv.h"
 
 #include "misc.h"
 #include "os.h"
@@ -75,14 +76,6 @@ in this Software without prior written authorization from The Open Group.
 #include <limits.h>
 #include <sys/wait.h>
 
-enum DialogCommand {
-    DIALOG_CMD_NONE,
-    DIALOG_CMD_ZENITY,
-    DIALOG_CMD_DIALOG,
-    DIALOG_CMD_WHIPTAIL,
-    DIALOG_CMD_YAD,
-    DIALOG_CMD_KDIALOG
-};
 
 /* Needed for Solaris cross-zone shared memory extension */
 #ifdef HAVE_SHMCTL64
@@ -587,67 +580,6 @@ ShmPutImage(ClientPtr client, xShmPutImageReq *stuff)
     return Success;
 }
 
-static void
-sanitize_string(char *str)
-{
-    if (!str) return;
-    char *p = str;
-    while (*p) {
-        if (strchr(";'|&`()\\\"!<>", *p)) {
-            *p = '_';
-        }
-        p++;
-    }
-}
-
-static int
-command_exists(const char *command)
-{
-    char *path = getenv("PATH");
-    if (!path)
-        return 0;
-
-    char *path_copy = strdup(path);
-    if (!path_copy)
-        return 0;
-
-    int found = 0;
-    char *saveptr;
-    char *dir = strtok_r(path_copy, ":", &saveptr);
-    while (dir) {
-        char full_path[PATH_MAX];
-        snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
-        if (access(full_path, X_OK) == 0) {
-            found = 1;
-            break;
-        }
-        dir = strtok_r(NULL, ":", &saveptr);
-    }
-
-    free(path_copy);
-    return found;
-}
-
-static enum DialogCommand
-GetDialogCommand(void)
-{
-    if (command_exists("zenity")) {
-        return DIALOG_CMD_ZENITY;
-    }
-    if (command_exists("dialog")) {
-        return DIALOG_CMD_DIALOG;
-    }
-    if (command_exists("whiptail")) {
-        return DIALOG_CMD_WHIPTAIL;
-    }
-    if (command_exists("yad")) {
-        return DIALOG_CMD_YAD;
-    }
-    if (command_exists("kdialog")) {
-        return DIALOG_CMD_KDIALOG;
-    }
-    return DIALOG_CMD_NONE;
-}
 
 static int
 ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
@@ -675,67 +607,13 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
         pid_t window_pid = GetClientPid(dixClientForWindow(pWin));
         char client_name[256];
         GetProcessName(client_pid, client_name, sizeof(client_name));
+        char window_name[256];
+        GetProcessName(window_pid, window_name, sizeof(window_name));
 
         if (client_pid > 0 && window_pid > 0 && client_pid != window_pid && !IsWhitelisted(client_name, window_pid)) {
-            char window_name[256];
-            GetProcessName(window_pid, window_name, sizeof(window_name));
-
-            enum DialogCommand dialog_cmd = GetDialogCommand();
-            if (dialog_cmd != DIALOG_CMD_NONE) {
-                char text[1024];
-                sanitize_string(client_name);
-                sanitize_string(window_name);
-                snprintf(text, sizeof(text),
-                         "Process \\\"%s\\\" (PID: %d) is trying to get an image of a window belonging to process \\\"%s\\\" (PID: %d). This could be screen sharing or a malicious application. Allow this interaction?",
-                         client_name, client_pid, window_name, window_pid);
-
-                pid_t pid = fork();
-                if (pid == -1) {
-                    return BadAlloc;
-                } else if (pid == 0) { /* child */
-                    switch (dialog_cmd) {
-                    case DIALOG_CMD_ZENITY: {
-                        char *args[] = {"zenity", "--question", "--title=XLibre Security Alert", "--text", text, "--ok-label=Allow", "--cancel-label=Deny", NULL};
-                        execvp(args[0], args);
-                        break;
-                    }
-                    case DIALOG_CMD_DIALOG: {
-                        char *args[] = {"dialog", "--yesno", text, "10", "70", NULL};
-                        execvp(args[0], args);
-                        break;
-                    }
-                    case DIALOG_CMD_WHIPTAIL: {
-                        char *args[] = {"whiptail", "--yesno", text, "10", "70", NULL};
-                        execvp(args[0], args);
-                        break;
-                    }
-                    case DIALOG_CMD_YAD: {
-                        char *args[] = {"yad", "--question", "--title=XLibre Security Alert", "--text", text, "--button=Allow:0", "--button=Deny:1", NULL};
-                        execvp(args[0], args);
-                        break;
-                    }
-                    case DIALOG_CMD_KDIALOG: {
-                        char *args[] = {"kdialog", "--yesno", text, "--title", "XLibre Security Alert", NULL};
-                        execvp(args[0], args);
-                        break;
-                    }
-                    case DIALOG_CMD_NONE:
-                        /* Should not happen */
-                        break;
-                    }
-                    _exit(127); /* execvp failed */
-                } else { /* parent */
-                    int status;
-                    waitpid(pid, &status, 0);
-                    if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-                        AddToWhitelist(client_name, window_pid);
-                    } else {
-                        return BadAccess;
-                    }
-                }
-            } else {
-                /* No dialog tool found, deny access */
-                return BadAccess;
+            rc = ShowSecurityAlertDialog(client, client_pid, client_name, window_pid, window_name);
+            if (rc != Success) {
+                return rc;
             }
         }
     }

@@ -31,6 +31,7 @@ srcs_dix = [
     'resource.c',
     'rpcbuf.c',
     'screen_hooks.c',
+    'security_alert.c',
     'selection.c',
     'screen.c',
     'settings.c',
