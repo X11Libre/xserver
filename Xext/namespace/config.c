@@ -160,7 +160,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
             else if (strcmp(token, "shm") == 0)
                 curr->allowSHM = TRUE;
             else if (strcmp(token, "composite") == 0)
-                curr->allowSHM = TRUE;
+                curr->allowComposite = TRUE;
             else
                 XNS_LOG("unknown allow: %s\n", token);
         }
