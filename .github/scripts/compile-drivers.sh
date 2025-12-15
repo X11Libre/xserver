@@ -40,5 +40,6 @@ build_xf86drv_ac    video-nv                2.1.23.2
 build_xf86drv_ac    video-omap              0.4.5.2
 build_xf86drv_ac    video-qxl               0.1.6.2
 build_xf86drv_ac    video-r128              6.13.0.2
+build_xf86drv_ac    video-rendition         4.2.7.2
 build_xf86drv_ac    video-vesa              2.6.0.2
 build_xf86drv_ac    video-vmware            13.4.0.3
