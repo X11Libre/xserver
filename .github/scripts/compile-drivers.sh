@@ -23,6 +23,7 @@ build_xf86drv_ac    input-wacom             1.2.3.3
 
 build_xf86drv_ac    video-amdgpu            23.0.0.5
 build_xf86drv_ac    video-apm               1.3.0.3
+build_xf86drv_ac    video-ark               0.7.6.2
 build_xf86drv_ac    video-ati               22.0.0.3
 build_xf86drv_ac    video-dummy             0.4.1.3
 build_xf86drv_ac    video-geode             2.18.1.3
