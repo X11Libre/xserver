@@ -36,6 +36,7 @@ build_xf86drv_ac    video-mga               2.1.0.2
 build_xf86drv_ac    video-neomagic          1.3.1.2
 build_xf86drv_ac    video-nested            1.0.0.2
 build_xf86drv_ac    video-nouveau           1.0.18.3
+build_xf86drv_ac    video-nv                2.1.23.2
 build_xf86drv_ac    video-omap              0.4.5.2
 build_xf86drv_ac    video-qxl               0.1.6.2
 build_xf86drv_ac    video-r128              6.13.0.2
