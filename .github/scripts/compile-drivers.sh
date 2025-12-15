@@ -12,6 +12,7 @@ cd $DRV_BUILD_DIR
 
 build_xf86drv_ac    input-elographics       1.4.4.2
 build_xf86drv_ac    input-evdev             2.11.0.2
+build_xf86drv_ac    input-joystick          1.6.4.2
 build_xf86drv_ac    input-keyboard          2.1.0.2
 build_xf86drv_ac    input-libinput          1.5.1.0
 build_xf86drv_ac    input-mouse             1.9.6
