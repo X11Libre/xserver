@@ -103,3 +103,22 @@ fdo_mirror() {
     local repo="$1"
     echo -n "https://github.com/X11Libre/mirror.fdo.$1"
 }
+
+xl_mirror() {
+    local repo="$1"
+    echo -n "https://github.com/X11Libre/$1"
+}
+
+drv_tag() {
+    local name="$1"
+    local version="$2"
+    echo -n "xlibre-xf86-$name-$version"
+}
+
+build_xf86drv_ac() {
+    local drv_name="$1"
+    local version="$2"
+    local repo_name="xf86-$drv_name"
+    local tag_name="xlibre-xf86-$drv_name-$version"
+    build_drv_ac "xf86-$name" "$(xl_mirror $repo_name)" "$(drv_tag $drv_name $version)"
+}
