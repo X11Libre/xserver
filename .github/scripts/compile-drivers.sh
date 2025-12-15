@@ -28,6 +28,7 @@ build_xf86drv_ac    video-ast               1.2.1
 build_xf86drv_ac    video-ati               22.0.0.3
 build_xf86drv_ac    video-dummy             0.4.1.3
 build_xf86drv_ac    video-geode             2.18.1.3
+build_xf86drv_ac    video-i128              1.4.1.2
 build_xf86drv_ac    video-intel             3.0.0.3
 build_xf86drv_ac    video-nouveau           1.0.18.3
 build_xf86drv_ac    video-omap              0.4.5.2
