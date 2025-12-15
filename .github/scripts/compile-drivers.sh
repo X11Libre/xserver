@@ -13,8 +13,9 @@ cd $DRV_BUILD_DIR
 
 build_drv_ac xf86-input-elographics $X11L_DRV_GIT/xf86-input-elographics xlibre-xf86-input-elographics-1.4.4.2
 build_drv_ac xf86-input-evdev       $X11L_DRV_GIT/xf86-input-evdev       xlibre-xf86-input-evdev-2.11.0.2
+build_drv_ac xf86-input-keyboard    $X11L_DRV_GIT/xf86-input-keyboard    xlibre-xf86-input-keyboard-2.1.0.2
 build_drv_ac xf86-input-libinput    $X11L_DRV_GIT/xf86-input-libinput    xlibre-xf86-input-libinput-1.5.1.0
-build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       xlibre-xf86-input-mouse-1.9.5.4
+build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       xlibre-xf86-input-mouse-1.9.6
 build_drv_ac xf86-input-synaptics   $X11L_DRV_GIT/xf86-input-synaptics   xlibre-xf86-input-synaptics-1.10.0.2
 
 build_drv_ac xf86-video-amdgpu      $X11L_DRV_GIT/xf86-video-amdgpu      xlibre-xf86-video-amdgpu-23.0.0.5
@@ -29,6 +30,3 @@ build_drv_ac xf86-video-qxl         $X11L_DRV_GIT/xf86-video-qxl         xlibre-
 build_drv_ac xf86-video-r128        $X11L_DRV_GIT/xf86-video-r128        xlibre-xf86-video-r128-6.13.0.2
 build_drv_ac xf86-video-vesa        $X11L_DRV_GIT/xf86-video-vesa        xlibre-xf86-video-vesa-2.6.0.2
 build_drv_ac xf86-video-vmware      $X11L_DRV_GIT/xf86-video-vmware      xlibre-xf86-video-vmware-13.4.0.3
-
-build_drv_ac xf86-input-mouse       $X11L_DRV_GIT/xf86-input-mouse       master
-build_drv_ac xf86-input-keyboard    $X11L_DRV_GIT/xf86-input-keyboard    master
