@@ -5,3 +5,7 @@ endif
 if get_option('xf86-input-null')
     subdir('null')
 endif
+
+if get_option('xf86-input-mouse')
+    subdir('mouse')
+endif
