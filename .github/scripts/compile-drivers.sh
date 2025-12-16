@@ -15,7 +15,6 @@ build_xf86drv_ac    input-evdev             25.0.0
 build_xf86drv_ac    input-joystick          25.0.0
 build_xf86drv_ac    input-keyboard          25.0.0
 build_xf86drv_ac    input-libinput          25.0.0
-build_xf86drv_ac    input-mouse             25.0.0
 build_xf86drv_ac    input-synaptics         25.0.0
 build_xf86drv_ac    input-vmmouse           25.0.0
 build_xf86drv_ac    input-void              25.0.0
