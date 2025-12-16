@@ -416,7 +416,6 @@ jobs:
                     - input-joystick:25.0.0
                     - input-keyboard:25.0.0
                     - input-libinput:25.0.0
-                    - input-mouse:25.0.0
                     - input-synaptics:25.0.0
                     - input-vmmouse:25.0.0
                     - input-void:25.0.0
