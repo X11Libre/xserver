@@ -1,0 +1,67 @@
+.\" shorthand for double quote that works everywhere.
+.ds q \N'34'
+.TH VESA 4 2009-01-09 __vendorversion__
+.SH NAME
+vesa \- Generic VESA video driver
+.SH SYNOPSIS
+.nf
+.B "Section \*qDevice\*q"
+.BI "  Identifier \*q"  devname \*q
+.B  "  Driver \*qvesa\*q"
+\ \ ...
+.B EndSection
+.fi
+.SH DESCRIPTION
+.B vesa
+is an
+.B Xorg
+driver for generic VESA video cards.
+It can drive most VESA-compatible video cards, but only makes use of
+the basic standard VESA core that is common to these cards.
+The driver supports depths 8, 15, 16, and 24.
+.SH SUPPORTED HARDWARE
+The
+.B vesa
+driver supports most VESA-compatible video cards.
+There are some known exceptions, and those should be listed here.
+.SH CONFIGURATION DETAILS
+Please refer to
+.BR xorg.conf (5)
+for general configuration details.
+This section only covers configuration details specific to this driver.
+.PP
+The driver auto-detects the presence of VESA-compatible hardware.
+The
+.B ChipSet
+name may optionally be specified in the config file
+.B \*qDevice\*q
+section, and will override the auto-detection:
+.PP
+.RS 4
+"vesa"
+.RE
+.PP
+The following driver
+.B Options
+are supported:
+.TP
+.BI "Option \*qShadowFB\*q \*q" boolean \*q
+Enable or disable use of the shadow framebuffer layer.
+Default: on.
+.IP
+This option is recommended for performance reasons.
+.TP
+.BI "Option \*qModeSetClearScreen\*q \*q" boolean \*q
+Clear the screen on mode set.
+Some BIOSes seem to be broken in the sense
+that the newly set video mode is bogus
+if they are asked to clear the screen during mode setting.
+If you experience problems try to turn this option off.
+Default: on.
+.SH "SEE ALSO"
+.BR Xorg (1),
+.BR Xserver (1),
+.BR xorg.conf (5),
+.BR X (7)
+.SH AUTHORS
+Authors include: Paulo Ce\'sar Pereira de Andrade.
