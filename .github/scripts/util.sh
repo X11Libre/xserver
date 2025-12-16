@@ -120,5 +120,5 @@ build_xf86drv_ac() {
     local version="$2"
     local repo_name="xf86-$drv_name"
     local tag_name="xlibre-xf86-$drv_name-$version"
-    build_drv_ac "xf86-$name" "$(xl_mirror $repo_name)" "$(drv_tag $drv_name $version)"
+    build_drv_ac "$repo_name" "$(xl_mirror $repo_name)" "$(drv_tag $drv_name $version)"
 }
