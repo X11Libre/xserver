@@ -49,3 +49,4 @@ build_xf86drv_ac    video-sis               0.12.0.3
 build_xf86drv_ac    video-sisusb            0.9.7.2
 build_xf86drv_ac    video-vesa              2.6.0.2
 build_xf86drv_ac    video-vmware            13.4.0.3
+build_xf86drv_ac    video-xgi               1.6.1.3
