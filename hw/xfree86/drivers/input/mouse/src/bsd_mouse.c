@@ -26,7 +26,7 @@
  * authorization from the copyright holder(s) and author(s).
  */
 
-#include <xorg-server.h>
+#include <xorg-config.h>
 
 #include <errno.h>
 #include <sys/stat.h>

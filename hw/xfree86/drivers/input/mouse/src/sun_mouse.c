@@ -45,14 +45,7 @@
  * dealings in this Software without prior written authorization from the
  * XFree86 Project.
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <unistd.h> /* for ioctl(2) */
 #include <sys/stropts.h>
@@ -60,7 +53,6 @@
 #include <sys/msio.h>
 #include <fcntl.h>
 #include <errno.h>
-#include "xorg-server.h"
 #include "xf86.h"
 #include "xf86_OSlib.h"
 #include "mouse.h"
