@@ -9,7 +9,7 @@ cd $X11_BUILD_DIR
 
 build_meson   rendercheck       $(fdo_mirror rendercheck)                  rendercheck-1.6
 if [ "$X11_OS" = "Linux" ]; then
-build_meson   drm               $(fdo_mirror drm)                          libdrm-2.4.121   -Domap=enabled
+build_meson   drm               $(fdo_mirror drm)                          libdrm-2.4.121   -Domap=enabled -Dfreedreno=enabled
 fi
 build_meson   libxcvt           $(fdo_mirror libxcvt)                      libxcvt-0.1.0
 build_meson   xorgproto         $(fdo_mirror xorgproto)                    xorgproto-2024.1
