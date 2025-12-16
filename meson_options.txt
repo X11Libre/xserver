@@ -169,3 +169,9 @@ option('test_rendercheck_triangles', type: 'boolean', value: false,
        description: 'testsuite: run rendercheck triangles tests (might fail on Xephyr)')
 option('test_xephyr_gles', type: 'boolean', value: true,
        description: 'testsuite: run gles2/gles3 tests on Xephyr (might fail w/o DRI)')
+
+# xfree86 drivers
+option('xf86-input-inputtest', type: 'boolean', value: true,
+       description: 'Test input driver support on Xorg')
+option('xf86-video-vesa', type: 'boolean', value: true,
+       description: 'VESA driver for xfree86 DDX')
