@@ -43,11 +43,8 @@
  * and to help limited dexterity persons
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include <xorg-config.h>
 
-#include <xorg-server.h>
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
