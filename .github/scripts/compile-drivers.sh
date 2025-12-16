@@ -26,9 +26,10 @@ build_xf86drv_ac    video-apm               1.3.0.3
 build_xf86drv_ac    video-ark               0.7.6.2
 build_xf86drv_ac    video-ast               1.2.1
 build_xf86drv_ac    video-ati               22.0.0.3
-build_xf86drv_ac    video-dummy             0.4.1.3
 build_xf86drv_ac    video-chips             1.5.0.3
 build_xf86drv_ac    video-cirrus            1.6.1
+build_xf86drv_ac    video-dummy             0.4.1.3
+build_xf86drv_ac    video-fbdev             0.5.2
 build_xf86drv_ac    video-geode             2.18.1.3
 build_xf86drv_ac    video-i128              1.4.1.2
 build_xf86drv_ac    video-i740              1.4.0.2
