@@ -27,6 +27,10 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
             if (subj->ns->allowMouseMotion)
                 goto pass;
             goto block;
+        case X_QueryKeymap:
+            if (subj->ns->allowGlobalKeyboard)
+                goto pass;
+            goto block;
         case X_GetInputFocus:
         case X_GetKeyboardMapping:
         case X_GetModifierMapping:
@@ -48,6 +52,20 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
                     XNS_HOOK_LOG("BLOCKED unhandled XKEYBOARD %s\n", LookupRequestName(client->majorOp, client->minorOp));
                     goto block;
             }
+
+        case X_GrabPointer:
+        case X_GetPointerMapping:
+        case X_SetInputFocus:
+        case X_WarpPointer:
+            if (subj->ns->allowXInput)
+                goto pass;
+            goto block;
+        case X_GrabKeyboard:
+        case X_UngrabKeyboard:
+            if (subj->ns->allowXKeyboard)
+                goto pass;
+            goto block;
+
         case EXTENSION_MAJOR_XINPUT:
             switch (client->minorOp) {
                 case X_ListInputDevices:

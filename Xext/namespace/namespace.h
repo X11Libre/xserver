@@ -20,23 +20,23 @@ struct auth_token {
 
 struct Xnamespace {
     struct xorg_list entry;
-    const char *name;
-    Bool isRoot; // only ever used by root namespace
-    Bool builtin;
+    Bool allowComposite;
+    Bool allowGlobalKeyboard;
     Bool allowMouseMotion;
+    Bool allowRandr;
+    Bool allowRender;
+    Bool allowScreen;
     Bool allowShape;
     Bool allowTransparency;
     Bool allowXInput;
     Bool allowXKeyboard;
-    Bool allowGlobalKeyboard;
-    Bool allowRender;
-    Bool allowRandr;
-    Bool allowComposite;
-    Bool allowSHM;
+    Bool builtin;
+    Bool isRoot; // only ever used by root namespace
     Bool superPower;
-    struct xorg_list auth_tokens;
-    size_t refcnt;
     WindowPtr rootWindow;
+    const char *name;
+    size_t refcnt;
+    struct xorg_list auth_tokens;
 };
 
 extern struct xorg_list ns_list;

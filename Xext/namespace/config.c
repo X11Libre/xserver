@@ -8,16 +8,16 @@
 #include "namespace.h"
 
 struct Xnamespace ns_root = {
+    .allowComposite = TRUE,
+    .allowGlobalKeyboard = TRUE,
     .allowMouseMotion = TRUE,
+    .allowRandr = TRUE,
+    .allowRender = TRUE,
     .allowShape = TRUE,
+    .allowScreen = TRUE,
     .allowTransparency = TRUE,
     .allowXInput = TRUE,
     .allowXKeyboard = TRUE,
-    .allowGlobalKeyboard = TRUE,
-    .allowRender = TRUE,
-    .allowRandr = TRUE,
-    .allowSHM = TRUE,
-    .allowComposite = TRUE,
     .builtin = TRUE,
     .isRoot = TRUE,
     .name = NS_NAME_ROOT,
@@ -157,8 +157,8 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
                 curr->allowRender = TRUE;
             else if (strcmp(token, "randr") == 0)
                 curr->allowRandr = TRUE;
-            else if (strcmp(token, "shm") == 0)
-                curr->allowSHM = TRUE;
+            else if (strcmp(token, "screen") == 0)
+                curr->allowScreen = TRUE;
             else if (strcmp(token, "composite") == 0)
                 curr->allowComposite = TRUE;
             else

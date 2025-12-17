@@ -4,10 +4,14 @@
 
 #include <X11/Xmd.h>
 
+#include <X11/extensions/XIproto.h>
+#include <X11/extensions/XI2proto.h>
 #include "dix/extension_priv.h"
 #include "dix/registry_priv.h"
 #include "dix/resource_priv.h"
 #include "Xext/xacestr.h"
+
+#include "present/present_priv.h"
 
 #include "namespace.h"
 #include "hooks.h"
@@ -37,21 +41,41 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
             if (strcmp(evname,LookupEventName(UnmapNotify))==0)
                 goto pass;
             // tricky types that don't get caught by the switch
-            switch (type)
+            switch (type) {
+                case ColormapNotify:
                 case ConfigureNotify:
                 case CreateNotify:
-                case ReparentNotify:
-                case PropertyNotify:
-                case MapNotify:
-                case ColormapNotify:
-                case ClientMessage:
-                case UnmapNotify:
                 case DestroyNotify:
-                case FocusOut:
-                case FocusIn:
+                case MapNotify:
+                case PropertyNotify:
+                case ReparentNotify:
                 case EnterNotify:
+                case FocusIn:
+                case FocusOut:
                 case LeaveNotify:
                     goto pass;
+
+                case GenericEvent: {
+                    xGenericEvent *gev = (xGenericEvent*)&param->events[i].u;
+                    if (gev->extension == EXTENSION_MAJOR_XINPUT) {
+                        switch (gev->evtype) {
+                            case X_InternAtom:
+                                goto pass;
+                            // exposes the entire screen
+                            case X_PresentPixmap:
+                                if (subj->ns->allowScreen)
+                                    goto pass;
+                            // simply allow? seems pointless to deny
+                            case X_ChangeGC:
+                                goto pass;
+                        }
+                    }
+                }
+                // mostly for global keypresses
+                case X_XIQueryDevice:
+                    if (subj->ns->allowGlobalKeyboard)
+                        goto pass;
+            }
         }
 
         switch (type) {
@@ -77,8 +101,9 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                 goto reject;
             }
             break;
-            case XI_ButtonRelease:
+
             case XI_ButtonPress:
+            case XI_ButtonRelease:
                 if ((!subj->ns->allowXInput) || !isRootWin(param->pWin))
                     goto reject;
             continue;

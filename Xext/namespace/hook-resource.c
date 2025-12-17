@@ -12,6 +12,7 @@
 #include "dix/window_priv.h"
 #include "Xext/xacestr.h"
 
+#include "xfixes/xfixesint.h"
 #include "randr/randrstr_priv.h"
 
 #include "namespace.h"
@@ -54,11 +55,20 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                 goto pass;
         }
         switch (client->majorOp) {
+            // should be safe to expose globally from root
+            case X_GetProperty:
             case X_TranslateCoords:
             case X_GetGeometry:
             case X_QueryTree:
+            case X_GetWindowAttributes:
             case X_DestroyWindow:
                 goto pass;
+            case EXTENSION_MAJOR_XFIXES:
+                switch(client->minorOp) {
+                    case X_XFixesGetCursorImage:
+                    case X_XFixesGetCursorImageAndName:
+                        goto pass;
+                }
             case X_QueryPointer:
                 if (subj->ns->allowMouseMotion)
                     goto pass;
@@ -71,11 +81,17 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                 }
             // needed for gimp? should be safe.
             case EXTENSION_MAJOR_SHM:
+                if (subj->ns->allowScreen)
+                    goto pass;
                 if (client->minorOp == X_ShmCreatePixmap)
                     goto pass;
-            // move to somewhere else? WMs need to listen to this.
-            case X_GetProperty:
-                goto pass;
+            case EXTENSION_MAJOR_COMPOSITE:
+                if (subj->ns->allowComposite)
+                    goto pass;
+            case X_GetImage:
+            case X_CopyArea:
+                if (subj->ns->allowScreen)
+                    goto pass;
         }
     }
 
@@ -132,6 +148,9 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                         goto pass;
                     goto reject;
 
+                case X_GrabPointer:
+                    if (subj->ns->allowXInput)
+                        goto pass;
                 case X_SendEvent:
                     /* send hook needs to take care of this */
                     goto pass;

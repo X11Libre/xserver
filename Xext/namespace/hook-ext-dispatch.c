@@ -31,6 +31,7 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_BIG_REQUESTS:
         case EXTENSION_MAJOR_DAMAGE:
         case EXTENSION_MAJOR_DOUBLE_BUFFER:
+        case EXTENSION_MAJOR_DPMS:
         case EXTENSION_MAJOR_GENERIC_EVENT:
         case EXTENSION_MAJOR_PRESENT:
         case EXTENSION_MAJOR_XC_MISC:
@@ -61,24 +62,24 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_RENDER:
             if (subj->ns->allowRender)
                 goto pass;
-        break;
+            goto reject;
         case EXTENSION_MAJOR_RANDR:
             if (subj->ns->allowRandr)
                 goto pass;
-        break;
+            goto reject;
         case EXTENSION_MAJOR_COMPOSITE:
             if (subj->ns->allowComposite)
                 goto pass;
-        break;
+            goto reject;
         case EXTENSION_MAJOR_SHM:
-            if (subj->ns->allowSHM)
+            if (subj->ns->allowScreen)
                 goto pass;
-        break;
+            goto reject;
         /* allow if namespace has flag set */
         case EXTENSION_MAJOR_SHAPE:
             if (subj->ns->allowShape)
                 goto pass;
-        break;
+            goto reject;
         case EXTENSION_MAJOR_XINPUT:
             if (subj->ns->allowXInput)
                 goto pass;
@@ -86,14 +87,18 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
                 case X_ListInputDevices:
                     goto pass;
             }
-        break;
+            goto reject;
 
         case EXTENSION_MAJOR_XFIXES:
             switch (client->minorOp) {
                 case X_XFixesQueryVersion:
                 case X_XFixesCreateRegion:
                 case X_XFixesSetCursorName:
+                case X_XFixesGetCursorImage:
+                case X_XFixesGetCursorImageAndName:
                 case X_XFixesSelectSelectionInput:
+                case X_XFixesDestroyRegion:
+                case X_XFixesSetRegion:
                     goto pass;
             }
             XNS_HOOK_LOG("BLOCKED unhandled XFIXES call: %s\n", param->ext->name);
@@ -101,15 +106,8 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
         break;
 
         case EXTENSION_MAJOR_SYNC:
-            switch (client->minorOp) {
-                case X_SyncCreateCounter:
-                case X_SyncDestroyCounter:
-                case X_SyncInitialize:
-                case X_SyncSetCounter:
+            // should be safe to enable
                     goto pass;
-            }
-            XNS_HOOK_LOG("REJECT unhandled SYNC call: %s\n", param->ext->name);
-            goto reject;
         break;
 
         /* really blacklisted */

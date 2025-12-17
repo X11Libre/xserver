@@ -24,6 +24,7 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_BIG_REQUESTS:
         case EXTENSION_MAJOR_DAMAGE:
         case EXTENSION_MAJOR_DOUBLE_BUFFER:
+        case EXTENSION_MAJOR_DPMS:
         case EXTENSION_MAJOR_GENERIC_EVENT:
         case EXTENSION_MAJOR_PRESENT:
         case EXTENSION_MAJOR_SYNC:
@@ -60,7 +61,7 @@ void hookExtAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                 goto pass;
             goto reject;
         case EXTENSION_MAJOR_SHM:
-            if (subj->ns->allowSHM)
+            if (subj->ns->allowScreen)
                 goto pass;
             goto reject;
     }
