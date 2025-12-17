@@ -74,6 +74,7 @@ apt-get install -y \
 	libxmu-dev \
 	libxmuu-dev \
 	libxpm-dev \
+	libxrandr-dev \
 	libxrender-dev \
 	libxres-dev \
 	libxshmfence-dev \

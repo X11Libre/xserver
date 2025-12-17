@@ -134,7 +134,6 @@ CallbackListPtr PostInitRootWindowCallback = NULL;
 int
 dix_main(int argc, char *argv[], char *envp[])
 {
-    HWEventQueueType alwaysCheckForInput[2];
 
     display = "0";
 
@@ -145,9 +144,6 @@ dix_main(int argc, char *argv[], char *envp[])
     CheckUserAuthorization();
 
     ProcessCommandLine(argc, argv);
-
-    alwaysCheckForInput[0] = 0;
-    alwaysCheckForInput[1] = 1;
 
         ScreenSaverTime = defaultScreenSaverTime;
         ScreenSaverInterval = defaultScreenSaverInterval;
@@ -184,6 +180,7 @@ dix_main(int argc, char *argv[], char *envp[])
         if (!InitClientResources(serverClient)) /* for root resources */
             FatalError("couldn't init server resources");
 
+        HWEventQueueType alwaysCheckForInput[2] = { 0, 1 };
         SetInputCheck(&alwaysCheckForInput[0], &alwaysCheckForInput[1]);
         screenInfo.numScreens = 0;
 

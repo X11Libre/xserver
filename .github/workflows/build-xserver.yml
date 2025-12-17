@@ -260,6 +260,20 @@ jobs:
                   release: "6.4.2"
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
 
+    xserver-build-netbsd:
+        runs-on: ubuntu-latest
+        env:
+            MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+        steps:
+            - uses: actions/checkout@v4
+            - uses: vmactions/netbsd-vm@v1
+              id: vm
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  release: '10.1'
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
     release:
         name: Release pushed tag
         runs-on: ubuntu-latest
@@ -271,6 +285,7 @@ jobs:
             - xserver-build-macos
             - xserver-build-freebsd
             - xserver-build-dragonflybsd
+            - xserver-build-netbsd
         steps:
             - name: Checkout
               uses: actions/checkout@v4

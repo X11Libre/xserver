@@ -13,8 +13,6 @@ srcs_glx = [
     'glxcmds.c',
     'glxcmdsswap.c',
     'glxext.c',
-    'glxdriswrast.c',
-    'glxdricommon.c',
     'glxscreens.c',
     'render2.c',
     'render2swap.c',
@@ -29,6 +27,16 @@ srcs_glx = [
     'swap_interval.c',
     'xfont.c',
 ]
+
+srcs_glxdri2 = []
+if build_glx_dri
+    srcs_glx += 'glx_dri/glxdriswrast.c'
+    srcs_glx += 'glx_dri/glxdricommon.c'
+
+    if build_dri2 or build_dri3
+        srcs_glxdri2 = files('glx_dri/glxdri2.c')
+    endif
+endif
 
 libxserver_glx = []
 if build_glx
@@ -48,11 +56,6 @@ if build_glx
             '-Wno-unused-function',
         ]
     )
-endif
-
-srcs_glxdri2 = []
-if build_dri2 or build_dri3
-    srcs_glxdri2 = files('glxdri2.c')
 endif
 
 srcs_vnd = [

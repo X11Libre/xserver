@@ -268,30 +268,3 @@ xf86DisableIO(void)
 }
 
 #endif
-
-#ifdef __NetBSD__
-/***************************************************************************/
-/* Set TV output mode                                                      */
-/***************************************************************************/
-void
-xf86SetTVOut(int mode)
-{
-    switch (xf86Info.consType) {
-    default:
-        FatalError("Xf86SetTVOut: Unsupported console");
-        break;
-    }
-    return;
-}
-
-void
-xf86SetRGBOut(void)
-{
-    switch (xf86Info.consType) {
-    default:
-        FatalError("Xf86SetTVOut: Unsupported console");
-        break;
-    }
-    return;
-}
-#endif

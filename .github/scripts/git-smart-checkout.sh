@@ -153,7 +153,7 @@ else
     clone_ok=0
     for u in "${URLS[@]}"; do
         log_info "Clone von $u -> $NAME (minimaler Transfer, no-checkout)"
-        clone_cmd=( git clone "--no-checkout" "--origin=origin" "$u" "$NAME" )
+        clone_cmd=( git clone "--recurse-submodules" "--no-checkout" "--origin=origin" "$u" "$NAME" )
         (( USE_PARTIAL )) && clone_cmd+=( "--filter=blob:none" )
         (( FETCH_TAGS == 0 )) && clone_cmd+=( "--no-tags" )
         if git_retry "clone $u" "${clone_cmd[@]}"; then
@@ -258,6 +258,7 @@ log_info "forced checkout (detached) auf $TARGET_COMMIT"
 # Ensure no stray temp ref prevents checkout
 git update-ref -d "refs/tmp/$REF" >/dev/null 2>&1 || true
 git checkout --force --detach "$TARGET_COMMIT"
+git submodule update --init
 
 # Small summary
 log_info "working dir:"
