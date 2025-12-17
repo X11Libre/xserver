@@ -21,9 +21,6 @@
 /* Name of X server. */
 #mesondefine __XSERVERNAME__
 
-/* URL to go to for support. */
-#mesondefine __VENDORDWEBSUPPORT__
-
 /* Built-in output drivers. */
 #mesondefine DRIVERS
 

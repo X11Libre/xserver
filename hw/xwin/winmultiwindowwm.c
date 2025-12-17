@@ -1861,11 +1861,11 @@ winApplyHints(WMInfoPtr pWMInfo, xcb_window_t iWindow, HWND hWnd, HWND * zstyle)
 #define APPLICATION_ID_FORMAT	"%s.xwin.%s"
 #define APPLICATION_ID_UNKNOWN "unknown"
         if (res_class) {
-            asprintf(&application_id, APPLICATION_ID_FORMAT, XVENDORNAME,
+            asprintf(&application_id, APPLICATION_ID_FORMAT, "XLibre",
                      res_class);
         }
         else {
-            asprintf(&application_id, APPLICATION_ID_FORMAT, XVENDORNAME,
+            asprintf(&application_id, APPLICATION_ID_FORMAT, "XLibre",
                      APPLICATION_ID_UNKNOWN);
         }
         winSetAppUserModelID(hWnd, application_id);

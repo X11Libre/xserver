@@ -596,7 +596,7 @@ winAboutDlgProc(HWND hwndDialog, UINT message, WPARAM wParam, LPARAM lParam)
 
         case ID_ABOUT_WEBSITE:
         {
-            const char *pszPath = __VENDORDWEBSUPPORT__;
+            const char *pszPath = "https://www.xlibre.net/";
             INT_PTR iReturn;
 
             iReturn = (INT_PTR) ShellExecute(NULL,

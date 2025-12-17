@@ -273,12 +273,6 @@ conf_data.set('HAVE_ACPI', build_acpi ? '1' : false)
 enable_debugging = get_option('buildtype') == 'debug'
 conf_data.set('DEBUG', enable_debugging ? '1' : false)
 
-conf_data.set_quoted('XVENDORNAME', get_option('vendor_name'))
-conf_data.set_quoted('XVENDORNAMESHORT', get_option('vendor_name_short'))
-conf_data.set_quoted('__VENDORDWEBSUPPORT__', get_option('vendor_web'))
-conf_data.set_quoted('BUILDERADDR', get_option('builder_addr'))
-conf_data.set_quoted('BUILDERSTRING', get_option('builder_string'))
-
 if build_rootless
     conf_data.set('ROOTLESS', build_rootless ? '1' : false)
     conf_data.set('ROOTLESS_WORKAROUND', 1)
@@ -342,9 +336,6 @@ conf_data.set('XSERVER_SCREEN_VRR', '1')
 
 version_data = configuration_data()
 version_data.set('VENDOR_RELEASE', '@0@'.format(release))
-version_data.set_quoted('VENDOR_NAME', get_option('vendor_name'))
-version_data.set_quoted('VENDOR_NAME_SHORT', get_option('vendor_name_short'))
-version_data.set_quoted('VENDOR_WEB', get_option('vendor_web'))
 version_data.set_quoted('VENDOR_MAN_VERSION', 'Version @0@.@1@.@2@'.format(major, minor, patch))
 configure_file(output : 'version-config.h',
                configuration : version_data)

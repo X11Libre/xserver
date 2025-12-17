@@ -24,10 +24,6 @@ option('kdrive_evdev', type: 'boolean', value: true,
 option('kdrive_tslib', type: 'boolean', value: false,
        description: 'Build kdrive tslib touchscreen support')
 
-
-option('builder_addr', type: 'string', description: 'Builder address', value: 'xlibre@freelists.org')
-option('builder_string', type: 'string', description: 'Additional builder string')
-
 option('log_dir', type: 'string')
 option('module_dir', type: 'string', value: 'xorg/modules',
        description: 'X.Org modules directory (absolute or relative to the directory specified by the libdir option)')
@@ -56,10 +52,6 @@ option('xkb_default_variant', type: 'string')
 option('xkb_default_options', type: 'string')
 
 option('fallback_input_driver', type: 'string', value: 'auto')
-
-option('vendor_name', type: 'string', value: 'XLibre')
-option('vendor_name_short', type: 'string', value: 'XLibre')
-option('vendor_web', type: 'string', value: 'https://github.com/X11Libre/xserver')
 
 option('dtrace', type: 'boolean', value: false,
        description: 'Enable dtrace hooks')
