@@ -110,8 +110,6 @@ option('agp', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'AGP support')
 option('sha1', type: 'combo', choices: ['libc', 'CommonCrypto', 'CryptoAPI', 'libmd', 'libsha1', 'libnettle', 'libgcrypt', 'libcrypto', 'auto'], value: 'auto',
        description: 'SHA1 implementation')
-option('xf86-input-inputtest', type: 'boolean', value: true,
-       description: 'Test input driver support on Xorg')
 option('tests', type: 'boolean', value: true,
        description: 'Build tests for the X server on platforms that support it')
 
@@ -147,6 +145,10 @@ option('devel-docs', type: 'combo', choices: ['true', 'false', 'auto'], value: '
         description: 'Build development documentation')
 option('docs-pdf', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
         description: 'Whether to build PDF version of documentation. Setting is ignored if documentation is not built.')
+
+# optional xfree86 DDX drivers
+option('xf86-input-inputtest', type: 'boolean', value: true,
+       description: 'Test input driver support on XLibre')
 
 # legacy nvidia driver quirks
 option('legacy_nvidia_340x', type: 'boolean', value: true,
