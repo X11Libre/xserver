@@ -12,7 +12,10 @@
 
 #define FbBitsStrideToStipStride(s) (((s) << (FB_SHIFT - FB_STIP_SHIFT)))
 
-#define fbGetGCPrivateKey(pGC) (&fbGetScreenPrivate((pGC)->pScreen)->gcPrivateKeyRec)
+/* NVidia v.340 legacy driver needs this symbol */
+extern _X_EXPORT DevPrivateKey
+fbGetGCPrivateKey(GCPtr pGC);
+
 #define fbGetGCPrivate(pGC) ((FbGCPrivPtr)dixLookupPrivate(&(pGC)->devPrivates, fbGetGCPrivateKey(pGC)))
 
 #define fbGetScreenPixmap(s)    ((PixmapPtr) (s)->devPrivate)
