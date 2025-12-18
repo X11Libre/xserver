@@ -32,12 +32,6 @@ fbGetScreenPrivateKey(void)
     return &fbScreenPrivateKeyRec;
 }
 
-DevPrivateKey
-fbGetGCPrivateKey(GCPtr pGC)
-{
-    return &fbGetScreenPrivate((pGC)->pScreen)->gcPrivateKeyRec;
-}
-
 Bool
 fbAllocatePrivates(ScreenPtr pScreen)
 {
