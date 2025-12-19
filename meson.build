@@ -920,8 +920,16 @@ endif
 configure_file(output : 'dix-config.h',
                configuration : conf_data)
 
+# deprecated, but still supported for a while
 configure_file(output : 'xorg-server.h',
-               input : 'hw/xfree86/xorg-server.h.meson.in',
+               input : 'hw/xfree86/xlibre-server.h.meson.in',
+               configuration : conf_data,
+               install: build_xorg,
+               install_dir: xorgsdkdir)
+
+# new config include file for drivers
+configure_file(output : 'xlibre-server.h',
+               input : 'hw/xfree86/xlibre-server.h.meson.in',
                configuration : conf_data,
                install: build_xorg,
                install_dir: xorgsdkdir)

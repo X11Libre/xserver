@@ -821,10 +821,12 @@ xf86CheckSlot(const void *ptr, BusType type)
             if (!strcasecmp(pent->driver->driverName, "modesetting")) {
                 /* Examine the first device only */
                 msOther = xf86FindOptionValue(pent->devices[0]->options, "kmsdev");
-                if ((msOther == NULL) && (pci_other == NULL)) {
+                if (msOther == NULL)
+#ifdef XSERVER_LIBPCIACCESS
+                    if (pci_other == NULL)
+#endif
                     /* Autoconfigured */
                     msOther = "/dev/dri/card0";
-                }
             }
         }
 

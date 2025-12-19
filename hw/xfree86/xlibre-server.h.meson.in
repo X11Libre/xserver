@@ -142,9 +142,6 @@
 /* Support Xv Extension */
 #mesondefine XV
 
-/* Vendor name */
-#mesondefine XVENDORNAME
-
 /* BSD-compliant source */
 #mesondefine _BSD_SOURCE
 
@@ -153,9 +150,6 @@
 
 /* X/Open-compliant source */
 #mesondefine _XOPEN_SOURCE
-
-/* Vendor web address for support */
-#mesondefine __VENDORDWEBSUPPORT__
 
 /* Location of configuration file */
 #mesondefine XCONFIGFILE

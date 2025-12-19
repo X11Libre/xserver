@@ -186,14 +186,8 @@ xf86PrintBanner(void)
         }
     }
 #endif
-#if defined(BUILDERSTRING)
-    xf86ErrorFVerb(0, "%s \n", BUILDERSTRING);
-#endif
     xf86ErrorFVerb(0, "Current version of pixman: %s\n",
                    pixman_version_string());
-    xf86ErrorFVerb(0, "\tBefore reporting problems, check "
-                   "" __VENDORDWEBSUPPORT__ "\n"
-                   "\tto make sure that you have the latest version.\n");
 }
 
 Bool
@@ -869,8 +863,7 @@ ddxGiveUp(enum ExitCode error)
 void
 OsVendorFatalError(const char *f, va_list args)
 {
-    ErrorF("\nPlease consult the " XVENDORNAME " support \n\t at "
-           __VENDORDWEBSUPPORT__ "\n for help. \n");
+    ErrorF("\nPlease consult the XLibre support: https://www.xlibre.net/\n");
     if (xf86LogFile && xf86LogFileWasOpened)
         ErrorF("Please also check the log file at \"%s\" for additional "
                "information.\n", xf86LogFile);

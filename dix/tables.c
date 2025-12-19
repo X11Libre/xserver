@@ -352,13 +352,13 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcGetAtomName,
     ProcChangeProperty,
     ProcDeleteProperty,
-    SProcGetProperty,                   /* 20 */
+    ProcGetProperty,                    /* 20 */
     ProcListProperties,
     ProcSetSelectionOwner,
     ProcGetSelectionOwner,
     SProcConvertSelection,
     SProcSendEvent,                     /* 25 */
-    SProcGrabPointer,
+    ProcGrabPointer,
     ProcUngrabPointer,
     SProcGrabButton,
     SProcUngrabButton,
@@ -424,13 +424,13 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     SProcStoreColors,
     SProcStoreNamedColor,               /* 90 */
     SProcQueryColors,
-    SProcLookupColor,
+    ProcLookupColor,
     SProcCreateCursor,
-    SProcCreateGlyphCursor,
+    ProcCreateGlyphCursor,
     ProcFreeCursor,                     /* 95 */
     SProcRecolorCursor,
     SProcQueryBestSize,
-    SProcQueryExtension,
+    ProcQueryExtension,
     ProcListExtensions,
     SProcChangeKeyboardMapping,         /* 100 */
     ProcGetKeyboardMapping,
@@ -439,14 +439,14 @@ int (*SwappedProcVector[256]) (ClientPtr /* client */) = {
     ProcBell,
     SProcChangePointerControl,          /* 105 */
     ProcGetPointerControl,
-    SProcSetScreenSaver,
+    ProcSetScreenSaver,
     ProcGetScreenSaver,
     SProcChangeHosts,
     ProcListHosts,                      /* 110 */
     ProcChangeAccessControl,
     ProcChangeCloseDownMode,
     ProcKillClient,
-    SProcRotateProperties,
+    ProcRotateProperties,
     ProcForceScreenSaver,               /* 115 */
     ProcSetPointerMapping,
     ProcGetPointerMapping,

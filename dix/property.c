@@ -173,9 +173,17 @@ deliverPropertyNotifyEvent(WindowPtr pWin, int state, PropertyPtr pProp)
 int
 ProcRotateProperties(ClientPtr client)
 {
-    int delta, rc;
-
     REQUEST(xRotatePropertiesReq);
+    REQUEST_AT_LEAST_SIZE(xRotatePropertiesReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swaps(&stuff->nAtoms);
+        swaps(&stuff->nPositions);
+        SwapRestL(stuff);
+    }
+
+    int delta, rc;
     PropertyPtr *props;         /* array of pointer */
     PropertyPtr pProp, saved;
 
@@ -517,13 +525,21 @@ DeleteAllWindowProperties(WindowPtr pWin)
 int
 ProcGetProperty(ClientPtr client)
 {
+    REQUEST(xGetPropertyReq);
+    REQUEST_SIZE_MATCH(xGetPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->property);
+        swapl(&stuff->type);
+        swapl(&stuff->longOffset);
+        swapl(&stuff->longLength);
+    }
+
     PropertyPtr pProp, prevProp;
     unsigned long n, len, ind;
     int rc;
     Mask win_mode = DixGetPropAccess, prop_mode = DixReadAccess;
-
-    REQUEST(xGetPropertyReq);
-    REQUEST_SIZE_MATCH(xGetPropertyReq);
 
     if (!ValidAtom(stuff->property)) {
         client->errorValue = stuff->property;

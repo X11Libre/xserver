@@ -254,8 +254,8 @@ fbGetScreenPrivateKey(void);
 /* private field of a screen */
 typedef struct {
 #ifdef FB_ACCESS_WRAPPER
-    SetupWrapProcPtr setupWrap; /* driver hook to set pixmap access wrapping */
-    FinishWrapProcPtr finishWrap;       /* driver hook to clean up pixmap access wrapping */
+    SetupWrapProcPtr setupWrap;   /* driver hook to set pixmap access wrapping */
+    FinishWrapProcPtr finishWrap; /* driver hook to clean up pixmap access wrapping */
 #endif
     DevPrivateKeyRec    gcPrivateKeyRec;
     DevPrivateKeyRec    winPrivateKeyRec;

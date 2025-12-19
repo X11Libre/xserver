@@ -24,10 +24,6 @@ option('kdrive_evdev', type: 'boolean', value: true,
 option('kdrive_tslib', type: 'boolean', value: false,
        description: 'Build kdrive tslib touchscreen support')
 
-
-option('builder_addr', type: 'string', description: 'Builder address', value: 'xlibre@freelists.org')
-option('builder_string', type: 'string', description: 'Additional builder string')
-
 option('log_dir', type: 'string')
 option('module_dir', type: 'string', value: 'xorg/modules',
        description: 'X.Org modules directory (absolute or relative to the directory specified by the libdir option)')
@@ -56,10 +52,6 @@ option('xkb_default_variant', type: 'string')
 option('xkb_default_options', type: 'string')
 
 option('fallback_input_driver', type: 'string', value: 'auto')
-
-option('vendor_name', type: 'string', value: 'XLibre')
-option('vendor_name_short', type: 'string', value: 'XLibre')
-option('vendor_web', type: 'string', value: 'https://github.com/X11Libre/xserver')
 
 option('dtrace', type: 'boolean', value: false,
        description: 'Enable dtrace hooks')
@@ -126,8 +118,6 @@ option('agp', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'AGP support')
 option('sha1', type: 'combo', choices: ['libc', 'CommonCrypto', 'CryptoAPI', 'libmd', 'libsha1', 'libnettle', 'libgcrypt', 'libcrypto', 'auto'], value: 'auto',
        description: 'SHA1 implementation')
-option('xf86-input-inputtest', type: 'boolean', value: true,
-       description: 'Test input driver support on Xorg')
 option('tests', type: 'boolean', value: true,
        description: 'Build tests for the X server on platforms that support it')
 
@@ -163,6 +153,10 @@ option('devel-docs', type: 'combo', choices: ['true', 'false', 'auto'], value: '
         description: 'Build development documentation')
 option('docs-pdf', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
         description: 'Whether to build PDF version of documentation. Setting is ignored if documentation is not built.')
+
+# optional xfree86 DDX drivers
+option('xf86-input-inputtest', type: 'boolean', value: true,
+       description: 'Test input driver support on XLibre')
 
 # legacy nvidia driver quirks
 option('legacy_nvidia_padding', type: 'boolean', value: false,

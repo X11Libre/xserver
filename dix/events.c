@@ -5007,16 +5007,24 @@ ProcGetInputFocus(ClientPtr client)
 int
 ProcGrabPointer(ClientPtr client)
 {
+    REQUEST(xGrabPointerReq);
+    REQUEST_SIZE_MATCH(xGrabPointerReq);
+
+    if (client->swapped) {
+        swapl(&stuff->grabWindow);
+        swaps(&stuff->eventMask);
+        swapl(&stuff->confineTo);
+        swapl(&stuff->cursor);
+        swapl(&stuff->time);
+    }
+
     DeviceIntPtr device = PickPointer(client);
     GrabPtr grab;
     GrabMask mask;
     WindowPtr confineTo;
     BYTE status;
-
-    REQUEST(xGrabPointerReq);
     int rc;
 
-    REQUEST_SIZE_MATCH(xGrabPointerReq);
     UpdateCurrentTime();
 
     if (stuff->eventMask & ~PointerGrabMask) {

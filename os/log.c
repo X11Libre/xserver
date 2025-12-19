@@ -83,6 +83,7 @@ OR PERFORMANCE OF THIS SOFTWARE.
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>             /* for calloc() */
+#include <string.h>             /* for strerror*() */
 #include <sys/stat.h>
 #include <time.h>
 #include <X11/Xfuncproto.h>
@@ -227,6 +228,73 @@ static void initSyslog(void) {
 #endif
 }
 
+static void
+LogFailedWriteStdout(const void * buf, size_t len)
+{
+        if (write(STDOUT_FILENO, buf, len)==-1)
+        {
+	    /* We can't write to the logfile, stderr, and stdout; something
+	     * bad is probably happening, but we can't really do anything */
+            return;
+        }
+}
+static void
+LogFailedWrite(const void * buf, size_t len)
+{
+    if (write(STDERR_FILENO, buf, len)==-1)
+    {
+	/* We can't even write to stderr, let's try stdout as a last resort. */
+        {
+            char error[]="Can't write to stderr: ";
+            LogFailedWriteStdout(error,sizeof(error));
+        }
+#ifndef __MINGW32__
+        char dsc[256]={0};
+        (void) !strerror_r(errno,dsc,sizeof(dsc));
+#else
+        char * dsc;
+        dsc=strerror(errno);
+#endif
+        LogFailedWriteStdout(dsc,strlen(dsc));
+        LogFailedWriteStdout("\n",1);
+        {
+	    char error[]="Intended to write the following to stderr:\n";
+            LogFailedWriteStdout(error,sizeof(error));
+        }
+        LogFailedWriteStdout(buf,len);
+    }
+}
+
+static void
+LogWrite(int fd, const void * buf, size_t len)
+{
+    if (write(fd, buf, len)==-1)
+    {
+	/* If the write() call fails, we can not log this event to the log file,
+	 * but we still have the stderr.
+         */
+        {
+            char error[]="Can't write to log file: ";
+            LogFailedWrite(error,sizeof(error));
+        }
+#ifndef __MINGW32__
+        char dsc[256]={0};
+        (void) !strerror_r(errno,dsc,sizeof(dsc));
+#else
+        char * dsc;
+        dsc=strerror(errno);
+#endif
+        LogFailedWrite(dsc,strlen(dsc));
+        LogFailedWrite("\n",1);
+        {
+            char error[]="Intended to write the following to log file:\n";
+            LogFailedWrite(error,sizeof(error));
+        }
+        LogFailedWrite(buf,len);
+    }
+
+}
+
 /*
  * LogInit is called to start logging to a file.  It is also called (with
  * NULL arguments) when logging to a file is not wanted.  It must always be
@@ -268,7 +336,7 @@ LogInit(const char *fname, const char *backup)
 
         /* Flush saved log information. */
         if (saveBuffer && bufferSize > 0) {
-            (void)!write(logFileFd, saveBuffer, bufferPos);
+            LogWrite(logFileFd, saveBuffer, bufferPos);
             doLogSync();
         }
     }
@@ -581,52 +649,55 @@ static void
 LogSWrite(int verb, const char *buf, size_t len, Bool end_line)
 {
     static Bool newline = TRUE;
-    int ret;
 
     LogSyslogWrite(verb, buf, len, end_line);
 
-    if (verb < 0 || xorgLogVerbosity >= verb)
-        ret = write(2, buf, len);
+    if (verb < 0 || xorgLogVerbosity >= verb) {
+        LogWrite(2, buf, len);
+    }
 
     if (verb < 0 || xorgLogFileVerbosity >= verb) {
         if (inSignalContext && logFileFd >= 0) {
-            ret = write(logFileFd, buf, len);
-            if (xorgLogSync)
+            LogWrite(logFileFd, buf, len);
+            if (xorgLogSync){
                 doLogSync();
+            }
         }
         else if (!inSignalContext && logFileFd != -1) {
             if (newline) {
                 time_t t = time(NULL);
                 struct tm tm;
                 char fmt_tm[32];
+                size_t fmt_len;
 
                 localtime_r(&t, &tm);
-                strftime(fmt_tm, sizeof(fmt_tm) - 1, "[%Y-%m-%d %H:%M:%S] ", &tm);
-                (void)!write(logFileFd, fmt_tm, strlen(fmt_tm));
+                fmt_len = strftime(
+                                fmt_tm,
+                                sizeof(fmt_tm),
+                                "[%Y-%m-%d %H:%M:%S] ",
+                                &tm);
+                LogWrite(logFileFd, fmt_tm, fmt_len);
             }
             newline = end_line;
-            (void)!write(logFileFd, buf, len);
-            if (xorgLogSync)
+            LogWrite(logFileFd, buf, len);
+            if (xorgLogSync) {
                 doLogSync();
+            }
         }
         else if (!inSignalContext && needBuffer) {
             if (len > bufferUnused) {
                 bufferSize += 1024;
                 bufferUnused += 1024;
                 saveBuffer = realloc(saveBuffer, bufferSize);
-                if (!saveBuffer)
+                if (!saveBuffer) {
                     FatalError("realloc() failed while saving log messages\n");
+                }
             }
             bufferUnused -= len;
             memcpy(saveBuffer + bufferPos, buf, len);
             bufferPos += len;
         }
     }
-
-    /* There's no place to log an error message if the log write
-     * fails...
-     */
-    (void) ret;
 }
 
 /* Returns the Message Type string to prepend to a logging message, or NULL

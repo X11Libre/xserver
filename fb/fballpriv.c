@@ -25,10 +25,17 @@
 #include "fb/fb_priv.h"
 
 static DevPrivateKeyRec fbScreenPrivateKeyRec;
+
 DevPrivateKey
 fbGetScreenPrivateKey(void)
 {
     return &fbScreenPrivateKeyRec;
+}
+
+DevPrivateKey
+fbGetGCPrivateKey(GCPtr pGC)
+{
+    return &fbGetScreenPrivate((pGC)->pScreen)->gcPrivateKeyRec;
 }
 
 Bool

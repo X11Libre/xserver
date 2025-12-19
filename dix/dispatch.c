@@ -611,7 +611,7 @@ CreateConnectionBlock(void)
     unsigned long vid;
     int paddingforint32, lenofblock, sizesofar = 0;
     char *pBuf;
-    const char VendorString[] = VENDOR_NAME;
+    const char VendorString[] = "XLibre";
 
     memset(&setup, 0, sizeof(xConnSetup));
     /* Leave off the ridBase and ridMask, these must be sent with
@@ -3055,6 +3055,13 @@ int
 ProcLookupColor(ClientPtr client)
 {
     REQUEST(xLookupColorReq);
+    REQUEST_AT_LEAST_SIZE(xLookupColorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cmap);
+        swaps(&stuff->nbytes);
+    }
+
     REQUEST_FIXED_SIZE(xLookupColorReq, stuff->nbytes);
 
     ColormapPtr pcmp;
@@ -3201,12 +3208,26 @@ ProcCreateCursor(ClientPtr client)
 int
 ProcCreateGlyphCursor(ClientPtr client)
 {
+    REQUEST(xCreateGlyphCursorReq);
+    REQUEST_SIZE_MATCH(xCreateGlyphCursorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cid);
+        swapl(&stuff->source);
+        swapl(&stuff->mask);
+        swaps(&stuff->sourceChar);
+        swaps(&stuff->maskChar);
+        swaps(&stuff->foreRed);
+        swaps(&stuff->foreGreen);
+        swaps(&stuff->foreBlue);
+        swaps(&stuff->backRed);
+        swaps(&stuff->backGreen);
+        swaps(&stuff->backBlue);
+    }
+
     CursorPtr pCursor;
     int res;
 
-    REQUEST(xCreateGlyphCursorReq);
-
-    REQUEST_SIZE_MATCH(xCreateGlyphCursorReq);
     LEGAL_NEW_RESOURCE(stuff->cid, client);
 
     res = AllocGlyphCursor(stuff->source, stuff->sourceChar,
@@ -3294,10 +3315,15 @@ ProcQueryBestSize(ClientPtr client)
 int
 ProcSetScreenSaver(ClientPtr client)
 {
-    int blankingOption, exposureOption;
-
     REQUEST(xSetScreenSaverReq);
     REQUEST_SIZE_MATCH(xSetScreenSaverReq);
+
+    if (client->swapped) {
+        swaps(&stuff->timeout);
+        swaps(&stuff->interval);
+    }
+
+    int blankingOption, exposureOption;
 
     DIX_FOR_EACH_SCREEN({
         int rc = dixCallScreensaverAccessCallback(client, walkScreen, DixSetAttrAccess);

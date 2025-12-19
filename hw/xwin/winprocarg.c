@@ -1167,8 +1167,7 @@ winLogVersionInfo(void)
         return;
     s_fBeenHere = TRUE;
 
-    ErrorF("Welcome to the XWin X Server\n");
-    ErrorF("Vendor: %s\n", XVENDORNAME);
+    ErrorF("Welcome to the XLibre XWin X Server\n");
     ErrorF("Release: %d.%d.%d.%d\n", XORG_VERSION_MAJOR,
            XORG_VERSION_MINOR, XORG_VERSION_PATCH, XORG_VERSION_SNAP);
 #ifdef HAVE_SYS_UTSNAME_H
@@ -1182,8 +1181,5 @@ winLogVersionInfo(void)
     }
 #endif
     winOS();
-    if (strlen(BUILDERSTRING))
-        ErrorF("%s\n", BUILDERSTRING);
-    ErrorF("Contact: %s\n", BUILDERADDR);
     ErrorF("\n");
 }
