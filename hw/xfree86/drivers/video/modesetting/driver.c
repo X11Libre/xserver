@@ -1440,7 +1440,7 @@ msShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
     stride = (pScrn->displayWidth * ms->drmmode.kbpp) / 8;
     *size = stride;
 
-    return ((uint8_t *) ms->drmmode.front_bo.map + row * stride + offset);
+    return ((uint8_t *) ms->drmmode.front_bo.map_data + row * stride + offset);
 }
 
 /* somewhat arbitrary tile size, in pixels */
