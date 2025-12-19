@@ -5,7 +5,8 @@ includedir=@includedir@
 datarootdir=@datarootdir@
 moduledir=@moduledir@
 sdkdir=@sdkdir@
-sysconfigdir=@sysconfigdir@
+sysconfigdir=@xserverconfigdir@
+xserverconfigdir=@xserverconfigdir@
 
 abi_ansic=@abi_ansic@
 abi_videodrv=@abi_videodrv@
