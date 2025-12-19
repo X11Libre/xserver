@@ -177,10 +177,13 @@ LoaderSetPath(const char *path)
 static const char *stdSubdirs[] = {
     // first try loading from per-ABI subdir
     XORG_MODULE_ABI_TAG "/",
-    XORG_MODULE_ABI_TAG "/input/",
+    XORG_MODULE_ABI_TAG "/input/",                   // deprecated -- dropped in ABI 26
     XORG_MODULE_ABI_TAG "/drivers/",
+    XORG_MODULE_ABI_TAG "/drivers/input/",
+    XORG_MODULE_ABI_TAG "/drivers/video/",
     XORG_MODULE_ABI_TAG "/extensions/",
     // now try loading from legacy / unversioned directories
+    // will be dropped in ABI 26 -- proprietary drivers need some symlink logic
     "",
     "input/",
     "drivers/",
