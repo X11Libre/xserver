@@ -10,6 +10,7 @@
  *  drivers or extension modules. Thus the definitions here are not part of the
  *  Xserver's module API/ABI.
  */
+#include <stdbool.h>
 
 #include <X11/Xdefs.h>
 #include <X11/Xfuncproto.h>
@@ -796,5 +797,20 @@ static inline void SwapLongs(CARD32 *list, unsigned long count) {
 
 #define SwapRestL(stuff) \
     SwapLongs((CARD32 *)(stuff + 1), (client->req_len - (sizeof(*stuff) >> 2)))
+
+/*
+ * retrieve current grab client or NULL (if no grab)
+ *
+ */
+ClientPtr dixGetGrabClient(void);
+
+/*
+ * Check whether any client has grabbed the server and it's not
+ * the given client.
+ *
+ * @param client    the client to check against
+ * @return          TRUE if any client, except the given one, has grabbed
+ */
+bool dixAnyOtherGrabbed(ClientPtr client);
 
 #endif /* _XSERVER_DIX_PRIV_H */
