@@ -1122,7 +1122,9 @@ Fopen(const char *file, const char *type)
     iop = fopen(file, type);
 
     if (seteuid(euid) == -1) {
-        fclose(iop);
+        if (iop) {
+            fclose(iop);
+        }
         return NULL;
     }
     return iop;

@@ -4,8 +4,11 @@ libdir=@libdir@
 includedir=@includedir@
 datarootdir=@datarootdir@
 moduledir=@moduledir@
+input_drivers_dir=@moduledir@/drivers/input
+video_drivers_dir=@moduledir@/drivers/video
 sdkdir=@sdkdir@
-sysconfigdir=@sysconfigdir@
+sysconfigdir=@xserverconfigdir@
+xserverconfigdir=@xserverconfigdir@
 
 abi_ansic=@abi_ansic@
 abi_videodrv=@abi_videodrv@
