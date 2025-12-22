@@ -38,14 +38,16 @@
 #include "os.h"
 #include "xf86.h"
 #include "xf86_priv.h"
+#ifdef XSERVER_PLATFORM_BUS
+#include "xf86platformBus_priv.h"
 #include "xf86platformBus.h"
+#endif
 #include "xf86Xinput.h"
 #include "xf86Xinput_priv.h"
 #include "xf86Priv.h"
 #include "globals.h"
 
 #include "config/hotplug_priv.h"
-#include "xf86platformBus_priv.h"
 
 #include "seatd-libseat.h"
 
@@ -89,7 +91,9 @@ enable_seat(struct libseat *seat, void *userdata)
             }
         }
     xf86InputEnableVTProbe(); /* Add any paused input devices */
+    #ifdef XSERVER_PLATFORM_BUS
     xf86platformVTProbe(); /* Probe for outputs */
+    #endif
 }
 
 /*
