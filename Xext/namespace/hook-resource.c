@@ -36,7 +36,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (param->rtype == X11_RESTYPE_WINDOW) {
         WindowPtr pWindow = (WindowPtr) param->res;
         if (param->access_mode & DixCreateAccess) {
-            if (!subj->ns->allowTransparency) {
+            if (!subj->ns->perms.allowTransparency) {
                 pWindow->forcedBG = TRUE;
             }
         }
@@ -51,7 +51,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (obj->ns->isRoot) {
         // randr events to root
         if (param->rtype == RREventType) {
-            if (subj->ns->allowRandr)
+            if (subj->ns->perms.allowRandr)
                 goto pass;
         }
         switch (client->majorOp) {
@@ -70,27 +70,27 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                         goto pass;
                 }
             case X_QueryPointer:
-                if (subj->ns->allowMouseMotion)
+                if (subj->ns->perms.allowMouseMotion)
                     goto pass;
             case EXTENSION_MAJOR_XINPUT:
                 switch(client->minorOp) {
                     // needed by xeyes. we should filter the mask
                     case X_XIQueryPointer:
-                        if (subj->ns->allowMouseMotion)
+                        if (subj->ns->perms.allowMouseMotion)
                             goto pass;
                 }
             // needed for gimp? should be safe.
             case EXTENSION_MAJOR_SHM:
-                if (subj->ns->allowScreen)
+                if (subj->ns->perms.allowScreen)
                     goto pass;
                 if (client->minorOp == X_ShmCreatePixmap)
                     goto pass;
             case EXTENSION_MAJOR_COMPOSITE:
-                if (subj->ns->allowComposite)
+                if (subj->ns->perms.allowComposite)
                     goto pass;
             case X_GetImage:
             case X_CopyArea:
-                if (subj->ns->allowScreen)
+                if (subj->ns->perms.allowScreen)
                     goto pass;
         }
     }
@@ -144,12 +144,12 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                     goto pass;
                     // needed by many programs. should be safe?
                 case X_QueryPointer:
-                    if (subj->ns->allowMouseMotion)
+                    if (subj->ns->perms.allowMouseMotion)
                         goto pass;
                     goto reject;
 
                 case X_GrabPointer:
-                    if (subj->ns->allowXInput)
+                    if (subj->ns->perms.allowXInput)
                         goto pass;
                 case X_SendEvent:
                     /* send hook needs to take care of this */
@@ -159,7 +159,7 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                     switch(client->minorOp) {
                         // needed by xeyes. we should filter the mask
                         case X_XIQueryPointer:
-                            if (subj->ns->allowXInput)
+                            if (subj->ns->perms.allowXInput)
                                 goto pass;
                             goto reject;
                         case X_XISelectEvents:
@@ -168,14 +168,14 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                     XNS_HOOK_LOG("unhandled XI operation on (real) root window\n");
                     goto reject;
                 case EXTENSION_MAJOR_RANDR:
-                    if (subj->ns->allowRandr)
+                    if (subj->ns->perms.allowRandr)
                         goto pass;
                 goto reject;
                 case EXTENSION_MAJOR_GLX:
                 case EXTENSION_MAJOR_DRI2:
                 case EXTENSION_MAJOR_DRI3:
                 case EXTENSION_MAJOR_RENDER:
-                    if (subj->ns->allowRender)
+                    if (subj->ns->perms.allowRender)
                         goto pass;
                     goto reject;
             }

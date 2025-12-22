@@ -63,7 +63,7 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                                 goto pass;
                             // exposes the entire screen
                             case X_PresentPixmap:
-                                if (subj->ns->allowScreen)
+                                if (subj->ns->perms.allowScreen)
                                     goto pass;
                             // simply allow? seems pointless to deny
                             case X_ChangeGC:
@@ -73,7 +73,7 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                 }
                 // mostly for global keypresses
                 case X_XIQueryDevice:
-                    if (subj->ns->allowGlobalKeyboard)
+                    if (subj->ns->perms.allowGlobalKeyboard)
                         goto pass;
             }
         }
@@ -84,12 +84,12 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                 if (gev->extension == EXTENSION_MAJOR_XINPUT) {
                     switch (gev->evtype) {
                         case XI_RawMotion:
-                            if ((!subj->ns->allowMouseMotion) || !isRootWin(param->pWin))
+                            if ((!subj->ns->perms.allowMouseMotion) || !isRootWin(param->pWin))
                                 goto reject;
                             continue;
                         case XI_RawKeyPress:
                         case XI_RawKeyRelease:
-                            if ((!subj->ns->allowGlobalKeyboard) || !isRootWin(param->pWin))
+                            if ((!subj->ns->perms.allowGlobalKeyboard) || !isRootWin(param->pWin))
                                 goto reject;
                             continue;
                         default:
@@ -104,7 +104,7 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
 
             case XI_ButtonPress:
             case XI_ButtonRelease:
-                if ((!subj->ns->allowXInput) || !isRootWin(param->pWin))
+                if ((!subj->ns->perms.allowXInput) || !isRootWin(param->pWin))
                     goto reject;
             continue;
 

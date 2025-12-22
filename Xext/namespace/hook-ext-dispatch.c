@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <X11/Xdefs.h> // syncproto.h is broken
 #include <X11/Xmd.h>
+#include <X11/extensions/composite.h>
 #include <X11/extensions/syncproto.h>
 #include <X11/extensions/XIproto.h>
 #include <X11/extensions/XKB.h>
@@ -41,7 +42,7 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
 
         /* allow several operations */
         case EXTENSION_MAJOR_XKEYBOARD:
-            if (subj->ns->allowXKeyboard)
+            if (subj->ns->perms.allowXKeyboard)
                 goto pass;
             switch (client->minorOp) {
                 case X_kbUseExtension:
@@ -60,28 +61,36 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
         case EXTENSION_MAJOR_DRI2:
         case EXTENSION_MAJOR_DRI3:
         case EXTENSION_MAJOR_RENDER:
-            if (subj->ns->allowRender)
+            if (subj->ns->perms.allowRender)
                 goto pass;
             goto reject;
         case EXTENSION_MAJOR_RANDR:
-            if (subj->ns->allowRandr)
+            if (subj->ns->perms.allowRandr)
                 goto pass;
+            switch(client->minorOp) {
+                case X_RenderQueryVersion:
+                    goto pass;
+            }
             goto reject;
         case EXTENSION_MAJOR_COMPOSITE:
-            if (subj->ns->allowComposite)
+            if (subj->ns->perms.allowComposite)
                 goto pass;
+            switch(client->minorOp) {
+                case X_CompositeQueryVersion:
+                    goto pass;
+            }
             goto reject;
         case EXTENSION_MAJOR_SHM:
-            if (subj->ns->allowScreen)
+            if (subj->ns->perms.allowScreen)
                 goto pass;
             goto reject;
         /* allow if namespace has flag set */
         case EXTENSION_MAJOR_SHAPE:
-            if (subj->ns->allowShape)
+            if (subj->ns->perms.allowShape)
                 goto pass;
             goto reject;
         case EXTENSION_MAJOR_XINPUT:
-            if (subj->ns->allowXInput)
+            if (subj->ns->perms.allowXInput)
                 goto pass;
             switch (client->minorOp) {
                 case X_ListInputDevices:

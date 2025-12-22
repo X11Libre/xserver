@@ -15,21 +15,51 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     switch (client->clientState) {
     case ClientStateInitial:
-        // better assign *someting* than null -- clients can't do anything yet anyways
-        XnamespaceAssignClient(subj, &ns_anon);
+        // nothing can happen in this state
         break;
 
     case ClientStateRunning:
+
         subj->authId = AuthorizationIDOfClient(client);
 
+        // just get actual name instead of path
+        const char *clientName = basename(GetClientCmdName(client));
+        // check env (XAUTHORITY) first
         short unsigned int name_len = 0, data_len = 0;
         const char * name = NULL;
         char * data = NULL;
         if (AuthorizationFromID(subj->authId, &name_len, &name, &data_len, &data)) {
             XnamespaceAssignClient(subj, XnsFindByAuth(name_len, name, data_len, data));
-        } else {
-            XNS_HOOK_LOG("no auth data - assuming anon\n");
+            return;
         }
+        else if (XnamespaceAssignByClientName(subj,client)==0) {
+            return;
+            // not in client lists
+        } // midpoint - we're not in the client lists nor do we have auth from env
+        else if (ns_default->deny) {
+            XNS_LOG("Deny Connection Request From %s\n",clientName);
+            client->noClientException = -1;
+            return;
+        }
+        else if (!ns_default->builtin) {
+            // "fancy" formatted name
+            int len = snprintf(NULL, 0, "%s%d", clientName, client->index);
+            char *str = malloc(len + 1);
+            snprintf(str, len+1, "%s%d", clientName, client->index);
+
+            struct Xnamespace *new_run_ns = GenerateNewXnamespaceForClient(&ns_anon, str);
+            if (new_run_ns!=NULL) {
+                XnamespaceAssignClient(subj, new_run_ns);}
+            else {
+                XNS_LOG("Failed to assign new namespace, assigning to anon\n");
+                XnamespaceAssignClient(subj,&ns_anon);
+            }
+            return;
+        }
+        XNS_HOOK_LOG("No Auth, Assigning to default %s\n",ns_default->name);
+        // if we end up here, there is no auth - dump to the default
+        XnamespaceAssignClient(subj,ns_default);
+
         break;
 
     case ClientStateRetained:
@@ -49,7 +79,17 @@ void hookClientDestroy(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     if (!subj)
         return; /* no XNS devprivate assigned ? */
-
+    if(!subj->ns->builtin) {
+        if (subj->ns->refcnt==1) {
+            // this was the last client in the (new by default) namespace
+            subj->ns->refcnt--;
+            // Delete function checks for 0 client references
+            if (DeleteXnamespace(subj->ns)!=0)
+                XNS_LOG("Failed to delete namespace\n");
+        } else {
+            // don't delete, clients are still connected
+        }
+    }
     XnamespaceAssignClient(subj, NULL);
     /* the devprivate is embedded, so no free() necessary */
 }

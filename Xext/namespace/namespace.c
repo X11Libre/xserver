@@ -10,9 +10,14 @@
 #include "dix/property_priv.h"
 #include "dix/selection_priv.h"
 #include "dix/server_priv.h"
+#include "dix/window_priv.h"
 #include "include/os.h"
 #include "miext/extinit_priv.h"
 #include "Xext/xacestr.h"
+#include "os/mitauth.h"
+#include "os/client_priv.h"
+
+#include <X11/Xatom.h>
 
 #include "namespace.h"
 #include "hooks.h"
@@ -94,4 +99,135 @@ struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size
 
     // default to anonymous if credentials aren't assigned to specific NS
     return &ns_anon;
+}
+
+XID GenerateAuthForXnamespace(struct Xnamespace *curr) {
+    struct auth_token *gen_token = calloc(1, sizeof(struct auth_token));
+    if (gen_token == NULL)
+        FatalError("Xnamespace: failed allocating token\n");
+    gen_token->authProto = strdup("MIT-MAGIC-COOKIE-1");
+    gen_token->authTokenLen = 16;
+    gen_token->authTokenData = calloc(1, gen_token->authTokenLen);
+
+    // GenerateAuthorization() logic not needed, this is the only important line
+    arc4random_buf(gen_token->authTokenData, gen_token->authTokenLen);
+
+    gen_token->authId = AddAuthorization(strlen(gen_token->authProto),
+                                         gen_token->authProto,
+                                         gen_token->authTokenLen,
+                                         gen_token->authTokenData);
+
+    xorg_list_append_ndup(&gen_token->entry, &curr->auth_tokens);
+
+    XNS_LOG("Generated Auth Token ");
+    for (int i=0; i<gen_token->authTokenLen; i++)
+        printf("%02X", (unsigned char)gen_token->authTokenData[i]);
+    printf(" For %s\n",curr->name);
+    return gen_token->authId;
+}
+
+int RevokeAuthForXnamespace(struct Xnamespace *curr) {
+    struct auth_token *auth_token_walk;
+    xorg_list_for_each_entry(auth_token_walk, &curr->auth_tokens, entry) {
+        XNS_LOG("Revoking key");
+        printf(" auth: \"%s\" \"", auth_token_walk->authProto);
+        for (int i=0; i<auth_token_walk->authTokenLen; i++)
+            printf("%02X", (unsigned char)auth_token_walk->authTokenData[i]);
+        printf("\" for namespace %s\n",curr->name);
+        return RemoveAuthorization(
+            strlen(auth_token_walk->authProto),
+                            auth_token_walk->authProto,
+                            auth_token_walk->authTokenLen,
+                            auth_token_walk->authTokenData
+        );
+    }
+    return 0;
+}
+
+int XnamespaceAssignByClientName(struct XnamespaceClientPriv *subj, ClientPtr client) {
+    struct Xnamespace *walk;
+    struct client_token *c_walk;
+    const char *clientName = basename(GetClientCmdName(client));
+    // no auth from env, walk the client list
+    xorg_list_for_each_entry(walk, &ns_list, entry) {
+        xorg_list_for_each_entry(c_walk, &walk->client_list, entry) {
+            // test for the name if it doesn't exist yet
+            if (strcmp(clientName, c_walk->clientName) == 0) {
+                XNS_LOG("%s matching ns found: %s\n",clientName,walk->name);
+                XnamespaceAssignClient(subj, walk);
+                return Success;
+            }
+        }
+    }
+    return 1;
+}
+
+struct Xnamespace *GenerateNewXnamespaceForClient(struct Xnamespace *copyfrom, const char* newname) {
+    struct Xnamespace *new_run_ns = calloc(1, sizeof(struct Xnamespace));
+    if (new_run_ns==NULL) {
+        XNS_LOG("Failed to alloc new namespace");
+        return NULL;
+    }
+    if (copyfrom!=NULL) {
+        new_run_ns->perms   = copyfrom->perms;}
+    new_run_ns->builtin = FALSE; // just in case
+    // "fancy" formatting for namespace names
+
+    XNS_LOG("New Namespace Creation : %s\n",newname);
+
+    new_run_ns->name = newname;
+
+    NewVirtualRootWindowForXnamespace(ns_root.rootWindow, new_run_ns);
+    GenerateAuthForXnamespace(new_run_ns);
+
+    xorg_list_append_ndup(&new_run_ns->entry, &ns_list);
+    return new_run_ns;
+}
+
+void PrintXnamespaces(void) {
+    struct Xnamespace *walk;
+    XNS_LOG("Namespaces: ");
+    xorg_list_for_each_entry(walk, &ns_list, entry) {
+        printf("%s, ",walk->name);
+    }
+    printf("\n");
+}
+
+int DeleteXnamespace(struct Xnamespace *curr) {
+    if (curr->refcnt==0 && curr->builtin == 0) {
+        // non-critical. auth is optional?
+        if (RevokeAuthForXnamespace(curr)==0) {
+            XNS_LOG("DELETE: No auth or failed to revoke auth\n"); }
+        XNS_LOG("Deleting namespace: %s\n", curr->name);
+        // critical? namespaces should always have windows so this should always pass
+        DeleteWindow(curr->rootWindow, curr->rootWindow->parent->drawable.id);
+        xorg_list_del(&curr->entry);
+        free(curr);
+        return Success;
+    }
+    return 1;
+}
+
+int PruneXnamespaces(void) {
+    struct Xnamespace *walk;
+    struct Xnamespace *hold;
+    xorg_list_for_each_entry_safe(walk, hold, &ns_list, entry) {
+        if (walk->refcnt == 0 && walk->builtin == 0) {
+            XNS_LOG("pruning empty non-retained namespace %s\n",walk->name);
+            if (DeleteXnamespace(walk)!=0) {
+                // this shouldn't fail
+                XNS_LOG("failed to delete namespace %s\n",walk->name);
+            }
+        }
+    }
+    return 0;
+}
+
+struct Xnamespace *XnsFindByName(const char* name) {
+    struct Xnamespace *walk;
+    xorg_list_for_each_entry(walk, &ns_list, entry) {
+        if (strcmp(walk->name, name)==0)
+            return walk;
+    }
+    return NULL;
 }

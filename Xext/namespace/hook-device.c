@@ -24,11 +24,11 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
     // should be safe to pass for anybody
     switch (client->majorOp) {
         case X_QueryPointer:
-            if (subj->ns->allowMouseMotion)
+            if (subj->ns->perms.allowMouseMotion)
                 goto pass;
             goto block;
         case X_QueryKeymap:
-            if (subj->ns->allowGlobalKeyboard)
+            if (subj->ns->perms.allowGlobalKeyboard)
                 goto pass;
             goto block;
         case X_GetInputFocus:
@@ -37,7 +37,7 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
         case X_GrabButton: // needed by xterm -- should be safe
             goto pass;
         case EXTENSION_MAJOR_XKEYBOARD:
-            if (subj->ns->allowXKeyboard)
+            if (subj->ns->perms.allowXKeyboard)
                 goto pass;
             switch(client->minorOp) {
                 case X_kbSelectEvents:      // needed by xterm
@@ -57,12 +57,12 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
         case X_GetPointerMapping:
         case X_SetInputFocus:
         case X_WarpPointer:
-            if (subj->ns->allowXInput)
+            if (subj->ns->perms.allowXInput)
                 goto pass;
             goto block;
         case X_GrabKeyboard:
         case X_UngrabKeyboard:
-            if (subj->ns->allowXKeyboard)
+            if (subj->ns->perms.allowXKeyboard)
                 goto pass;
             goto block;
 
@@ -72,7 +72,7 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
                 case X_XIGetProperty:
                     goto pass;
                 case X_XIQueryPointer:
-                    if (subj->ns->allowMouseMotion)
+                    if (subj->ns->perms.allowMouseMotion)
                         goto pass;
                     goto block;
 
@@ -80,7 +80,7 @@ void hookDevice(CallbackListPtr *pcbl, void *unused, void *calldata)
                 case X_XIChangeCursor:
                 case X_XIGrabDevice:
                 case X_XIUngrabDevice:
-                    if (subj->ns->allowXInput)
+                    if (subj->ns->perms.allowXInput)
                         goto pass;
                 goto block;
                 default:
