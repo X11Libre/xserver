@@ -50,7 +50,17 @@ OR PERFORMANCE OF THIS SOFTWARE.
 
 #include <dix-config.h>
 
-#if defined(WIN32)
+#ifdef __CYGWIN__
+#include <stdlib.h>
+#include <signal.h>
+/*
+   Sigh... We really need a prototype for this to know it is stdcall,
+   but #include-ing <windows.h> here is not a good idea...
+*/
+__stdcall unsigned long GetTickCount(void);
+#endif
+
+#if defined(WIN32) && !defined(__CYGWIN__)
 #include <X11/Xwinsock.h>
 #endif
 #include <X11/Xos.h>
@@ -141,7 +151,7 @@ static clockid_t clockid;
 OsSigHandlerPtr
 OsSignal(int sig, OsSigHandlerPtr handler)
 {
-#if defined(WIN32)
+#if defined(WIN32) && !defined(__CYGWIN__)
     return signal(sig, handler);
 #else
     struct sigaction act, oact;
@@ -187,7 +197,7 @@ ForceClockId(clockid_t forced_clockid)
 }
 #endif
 
-#if (defined WIN32 && defined __MINGW32__)
+#if (defined WIN32 && defined __MINGW32__) || defined(__CYGWIN__)
 CARD32
 GetTimeInMillis(void)
 {
@@ -555,7 +565,7 @@ ProcessCommandLine(int argc, char *argv[])
         }
 #ifdef LOCK_SERVER
         else if (strcmp(argv[i], "-nolock") == 0) {
-#if !defined(WIN32)
+#if !defined(WIN32) && !defined(__CYGWIN__)
             if (getuid() != 0)
                 ErrorF
                     ("Warning: the -nolock option can only be used by root\n");
@@ -990,7 +1000,7 @@ OsAbort(void)
 #ifndef __APPLE__
     OsBlockSignals();
 #endif
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
     /* abort() raises SIGABRT, so we have to stop handling that to prevent
      * recursion
      */
@@ -1430,7 +1440,7 @@ CheckUserAuthorization(void)
 #endif
 }
 
-#if !defined(WIN32)
+#if !defined(WIN32) || defined(__CYGWIN__)
 /* Move a file descriptor out of the way of our select mask; this
  * is useful for file descriptors which will never appear in the
  * select mask to avoid reducing the number of clients that can

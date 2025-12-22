@@ -43,6 +43,9 @@
 #include <errno.h>
 
 #ifdef CONFIG_MITSHM
+# if defined(__CYGWIN__)
+#  include <sys/param.h>
+# endif
 #include <sys/sysmacros.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -62,6 +65,7 @@
 
 #include "misc.h"
 #include "os.h"
+#include "os/osdep.h"
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "dixfontstr.h"
@@ -88,7 +92,7 @@ static unsigned int pagesize;
 
 static Bool badSysCall = FALSE;
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
 
 static void
 SigSysHandler(int signo)
@@ -639,7 +643,7 @@ XFree86BigfontExtensionInit(void)
 
         FontShmdescIndex = xfont2_allocate_font_private_index();
 
-#if !defined(CSRG_BASED)
+#if !defined(CSRG_BASED) && !defined(__CYGWIN__)
         pagesize = SHMLBA;
 #else
 #ifdef _SC_PAGESIZE

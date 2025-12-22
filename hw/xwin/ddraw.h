@@ -1,10 +1,11 @@
-#ifndef __XWIN_DDRAW_H
-#define __XWIN_DDRAW_H
-
 #ifdef __MINGW64_VERSION_MAJOR
 #include_next <ddraw.h>
 #define __XWIN_DDRAW_H
 #endif
+
+#ifndef __XWIN_DDRAW_H
+#define __XWIN_DDRAW_H
+
 
 #include <winnt.h>
 #include <wingdi.h>

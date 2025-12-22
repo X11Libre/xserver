@@ -273,6 +273,51 @@ jobs:
                   usesh: true
                   release: '10.1'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
+    xserver-build-cygwin:
+        runs-on: windows-latest
+        steps:
+            - name: Cygwin packages cache
+              uses: actions/cache@v4
+              with:
+                path: D:\cygwin-packages
+                key: ${{ runner.os }}-packages
+                restore-keys: ${{ runner.os }}-packages
+            - uses: cygwin/cygwin-install-action@master
+              with:
+                  platform: x86_64
+                  packages: >-
+                   binutils, bison, ccache, flex, gcc-core, meson, ninja,
+                   pkg-config, python39, windowsdriproto, xorgproto,
+                   libepoxy-devel, libfontenc-devel, libfreetype-devel,
+                   libGL-devel, libnettle-devel, libpixman1-devel,
+                   libtirpc-devel, libXRes-devel, libXaw-devel, libXdmcp-devel,
+                   libXext-devel, libXfont2-devel, libXi-devel,
+                   libXinerama-devel, libXmu-devel, libXpm-devel,
+                   libXrender-devel, libXtst-devel, libxcb-composite-devel,
+                   libxcb-ewmh-devel, libxcb-icccm-devel, libxcb-image-devel,
+                   libxcb-keysyms-devel, libxcb-randr-devel,
+                   libxcb-render-devel, libxcb-render-util-devel,
+                   libxcb-shape-devel, libxcb-util-devel, libxcb-xkb-devel,
+                   libxcvt-devel, libxkbfile-devel, font-util,
+                   khronos-opengl-registry, python39-lxml, xkbcomp-devel,
+                   xkeyboard-config, git
+
+            - name: Cygwin ccache cache
+              uses: actions/cache@v4
+              with:
+                path: D:\cygwin\home\runneradmin\.ccache
+                key: ${{ runner.os }}-ccache
+                restore-keys: ${{ runner.os }}-ccache
+            - run: git config --global --add safe.directory /cygdrive/d/a/xserver/xserver
+            - uses: actions/checkout@v4
+              with:
+                  # Done above as the builtin would use a path for Windows git.
+                  set-safe-directory: false
+            - run: |
+                  PATH="/usr/bin:$(cygpath "$SYSTEMROOT")/system32"
+              shell: bash --noprofile --norc -e -o igncr '{0}'
+            - run: |
+                  bash ./.github/scripts/Cygwin/build.sh
 
     release:
         name: Release pushed tag
@@ -286,6 +331,7 @@ jobs:
             - xserver-build-freebsd
             - xserver-build-dragonflybsd
             - xserver-build-netbsd
+            - xserver-build-cygwin
         steps:
             - name: Checkout
               uses: actions/checkout@v4

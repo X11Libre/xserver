@@ -3,10 +3,10 @@ project('xserver', 'c',
             'buildtype=debugoptimized',
             'c_std=gnu99',
         ],
-        version: '25.0.0.7',
-        meson_version: '>= 0.58.0',
+        version: '25.1.0',
+        meson_version: '>= 0.61.0',
 )
-release_date = '2025-07-29'
+release_date = '2025-12-21'
 
 add_project_arguments('-DHAVE_DIX_CONFIG_H', language: ['c', 'objc'])
 cc = meson.get_compiler('c')
@@ -254,7 +254,8 @@ build_xnest = get_option('xnest') != 'false'
 
 build_xwin = false
 if get_option('xwin') == 'auto'
-    if host_machine.system() == 'windows'
+    if (host_machine.system() == 'cygwin' or
+        host_machine.system() == 'windows')
             build_xwin = true
     endif
 else
@@ -536,7 +537,8 @@ build_modesetting = libdrm_dep.found() and dri2proto_dep.found()
 build_vgahw = false
 if get_option('vgahw') == 'auto'
     if (host_machine.system() != 'darwin' and
-        host_machine.system() != 'windows')
+        host_machine.system() != 'windows' and
+        host_machine.system() != 'cygwin')
         build_vgahw = true
     endif
 else
@@ -878,7 +880,8 @@ if build_xorg
 
     # On Windows, modules built with the SDK will need to link with server and
     # module implibs to resolve symbols
-    if host_machine.system() == 'windows'
+    if (host_machine.system() == 'cygwin' or
+        host_machine.system() == 'windows')
         sdkconfig.set('XORG_DRIVER_LIBS', '-lXorg.exe -L\${moduledir} -lshadow -no-undefined')
     endif
 

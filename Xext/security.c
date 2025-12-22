@@ -352,18 +352,14 @@ SecurityStartAuthorizationTimer(SecurityAuthorizationPtr pAuth)
 static int
 ProcSecurityQueryVersion(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xSecurityQueryVersionReq);
+    X_REQUEST_FIELD_CARD16(majorVersion);
+    X_REQUEST_FIELD_CARD16(minorVersion);
+
     xSecurityQueryVersionReply reply = {
         .majorVersion = SERVER_SECURITY_MAJOR_VERSION,
         .minorVersion = SERVER_SECURITY_MINOR_VERSION
     };
-
-    REQUEST(xSecurityQueryVersionReq);
-    REQUEST_SIZE_MATCH(xSecurityQueryVersionReq);
-
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
 
     if (client->swapped) {
         swaps(&reply.majorVersion);
@@ -408,7 +404,11 @@ SecurityEventSelectForAuthorization(SecurityAuthorizationPtr pAuth,
 static int
 ProcSecurityGenerateAuthorization(ClientPtr client)
 {
-    REQUEST(xSecurityGenerateAuthorizationReq);
+    X_REQUEST_HEAD_AT_LEAST(xSecurityGenerateAuthorizationReq);
+    X_REQUEST_FIELD_CARD16(nbytesAuthProto);
+    X_REQUEST_FIELD_CARD16(nbytesAuthData);
+    X_REQUEST_FIELD_CARD32(valueMask);
+
     int len;                    /* request length in CARD32s */
     Bool removeAuth = FALSE;    /* if bailout, call RemoveAuthorization? */
     int err;                    /* error to return from this function */
@@ -424,14 +424,6 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
     Mask eventMask;             /* what events on this auth does client want */
 
     /* check request length */
-
-    REQUEST_AT_LEAST_SIZE(xSecurityGenerateAuthorizationReq);
-
-    if (client->swapped) {
-        swaps(&stuff->nbytesAuthProto);
-        swaps(&stuff->nbytesAuthData);
-        swapl(&stuff->valueMask);
-    }
 
     len = bytes_to_int32(SIZEOF(xSecurityGenerateAuthorizationReq));
     len += bytes_to_int32(stuff->nbytesAuthProto);
@@ -587,14 +579,11 @@ ProcSecurityGenerateAuthorization(ClientPtr client)
 static int
 ProcSecurityRevokeAuthorization(ClientPtr client)
 {
-    REQUEST(xSecurityRevokeAuthorizationReq);
+    X_REQUEST_HEAD_STRUCT(xSecurityRevokeAuthorizationReq);
+    X_REQUEST_FIELD_CARD32(authId);
+
     SecurityAuthorizationPtr pAuth;
     int rc;
-
-    REQUEST_SIZE_MATCH(xSecurityRevokeAuthorizationReq);
-    if (client->swapped) {
-        swapl(&stuff->authId);
-    }
 
     rc = dixLookupResourceByType((void **) &pAuth, stuff->authId,
                                  SecurityAuthorizationResType, client,
