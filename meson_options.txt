@@ -127,11 +127,12 @@ option('dri3', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
 option('drm', type: 'boolean', value: true,
         description: 'Build Xorg with libdrm support')
 
+# Xquartz (MacOS) specific options
 option('apple-applications-dir', type: 'string', value: '/Applications/Utilities',
         description: 'Applications directory')
 option('apple-application-name', type: 'string', value: 'X11',
         description: 'Application name')
-option('bundle-id-prefix', type: 'string', value: 'org.x',
+option('bundle-id-prefix', type: 'string', value: 'net.xlibre',
         description: 'RDNS prefix for bundle identifier')
 option('bundle-version', type: 'string', value: 'auto',
         description: 'The CFBundleVersion for the application bundle')
