@@ -28,7 +28,7 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
     case ClientStateRunning:
         XID envauth = AuthorizationIDOfClient(client);
         // only change if uninitialized from client name walk (0)
-        if (subj->ns != NULL && subj->authId!=0) {
+        if (subj->ns != NULL) {
             // optionally override assignment by env
             if (envauth==0)
                 return;
