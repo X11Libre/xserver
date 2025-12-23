@@ -18,25 +18,17 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
     switch (client->clientState) {
     case ClientStateInitial:
         // nothing can happen in this state. auth cookie can't be loaded from env yet
-        // BUT the client name can be grabbed and the client list can be walked
-        if (XnamespaceAssignByClientName(subj,clientName)==0) {
-            return;
-        } // not in client lists
 
         break;
 
     case ClientStateRunning:
-        XID envauth = AuthorizationIDOfClient(client);
+        subj->authId = AuthorizationIDOfClient(client);
         // only change if uninitialized from client name walk (0)
-        if (subj->ns != NULL) {
-            // optionally override assignment by env
-            if (envauth==0)
-                return;
-            XNS_LOG("Overriding auth from env for %s\n",clientName);
+        if (subj->authId==0 && XnamespaceAssignByClientName(subj,clientName)==0) {
+            return;
         }
-        subj->authId = envauth;
 
-        // check env (XAUTHORITY) first
+        // check env (XAUTHORITY)
         short unsigned int name_len = 0, data_len = 0;
         const char * name = NULL;
         char * data = NULL;
