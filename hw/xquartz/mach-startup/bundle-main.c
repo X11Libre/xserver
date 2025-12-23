@@ -318,6 +318,12 @@ create_socket(char *filename_out)
 
 static int launchd_socket_handed_off = 0;
 
+static void socketHandoff_fptr(void *arg) {
+    socket_handoff_t *handoff_data = (socket_handoff_t *)arg;
+    socket_handoff(handoff_data);
+    free(handoff_data);
+}
+
 kern_return_t
 do_request_fd_handoff_socket(mach_port_t port, string_t filename)
 {
@@ -337,10 +343,9 @@ do_request_fd_handoff_socket(mach_port_t port, string_t filename)
 
     strlcpy(filename, handoff_data->filename, STRING_T_SIZE);
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,
-                                             0), ^ {
-                       socket_handoff(handoff_data);
-                   });
+    dispatch_async_f(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                     handoff_data,
+                     socketHandoff_fptr);
 
 #ifdef DEBUG
     ErrorF(
