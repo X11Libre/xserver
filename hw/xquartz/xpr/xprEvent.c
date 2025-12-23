@@ -55,6 +55,13 @@
 #include "rootlessWindow.h"
 #include "xprEvent.h"
 
+static void
+bringAllToFront(void *unused)
+{
+    (void) unused; /* to silence the compiler warning */
+    xp_window_bring_all_to_front();
+}
+
 Bool
 QuartzModeEventHandler(int screenNum, XQuartzEvent *e, DeviceIntPtr dev)
 {
@@ -72,9 +79,9 @@ QuartzModeEventHandler(int screenNum, XQuartzEvent *e, DeviceIntPtr dev)
 
     case kXquartzBringAllToFront:
         DEBUG_LOG("kXquartzBringAllToFront\n");
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            xp_window_bring_all_to_front();
-        });
+        dispatch_async_f(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
+                 NULL,
+                 bringAllToFront);
 
         return TRUE;
 
