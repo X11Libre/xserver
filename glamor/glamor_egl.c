@@ -58,6 +58,7 @@ struct glamor_egl_screen_private {
     struct gbm_device *gbm;
     int fd;
     int dmabuf_capable;
+    int gbm_platform; /* TRUE if we are on EGL_PLATFORM_GBM_{MESA,KHR}, FALSE otherwise */
 
     xf86FreeScreenProc *saved_free_screen;
 };
@@ -114,8 +115,9 @@ glamor_get_flink_name(int fd, int handle, int *name)
 }
 
 static Bool
-glamor_create_texture_from_image(ScreenPtr screen,
-                                 EGLImageKHR image, GLuint * texture)
+glamor_create_texture_from_image_or_mem(ScreenPtr screen,
+                                        EGLImageKHR image, GLuint * texture,
+                                        uint32_t width, uint32_t height, void* mem)
 {
     struct glamor_screen_private *glamor_priv =
         glamor_get_screen_private(screen);
@@ -127,7 +129,12 @@ glamor_create_texture_from_image(ScreenPtr screen,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+    if (!mem) {
+        glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+    } else {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, mem);
+    }
+
     glBindTexture(GL_TEXTURE_2D, 0);
 
     return TRUE;
@@ -278,6 +285,17 @@ glamor_egl_create_textured_pixmap_from_gbm_bo(PixmapPtr pixmap,
         ADD_ATTR(img_attrs, attr_num, EGL_LINUX_DRM_FOURCC_EXT);
         ADD_ATTR(img_attrs, attr_num, gbm_bo_get_format(bo));
 
+
+       if (modifier == DRM_FORMAT_MOD_INVALID) {
+           modifier = DRM_FORMAT_MOD_LINEAR;
+       }
+
+#if 0
+        if (modifier == DRM_FORMAT_MOD_LINEAR) {
+            modifier = (uint64_t)0x03000000004fe010;
+        }
+#endif
+
         for (plane = 0; plane < num_planes; plane++) {
             fds[plane] = gbm_bo_get_fd_for_plane(bo, plane);
             ADD_ATTR(img_attrs, attr_num, planeAttrs[plane][PLANE_FD]);
@@ -317,11 +335,57 @@ glamor_egl_create_textured_pixmap_from_gbm_bo(PixmapPtr pixmap,
         glamor_set_pixmap_type(pixmap, GLAMOR_DRM_ONLY);
         goto done;
     }
-    glamor_create_texture_from_image(screen, image, &texture);
+
+    uint32_t width = gbm_bo_get_width(bo);
+    uint32_t height = gbm_bo_get_height(bo);
+    uint32_t stride = 0;
+    void* unmap_me = NULL;
+
+    void *map = NULL;
+
+    if (!glamor_egl->gbm_platform) {
+        map = gbm_bo_map(bo, 0, 0, width, height, GBM_BO_TRANSFER_READ_WRITE, &stride, &unmap_me);
+    }
+
+    uint32_t blue = 0x000000ff;
+    uint32_t red  = 0x00ff0000;
+
+    uint32_t* ptr = map;
+
+    stride /= 4;
+
+#if 1
+    for (int i = 0; i < height / 2; i++) {
+        for (int j = 0; j < stride; j++) {
+            ptr[i * stride + j] = (i % 2 == 0) ? red : blue;
+        }
+    }
+
+
+    for (int i = height / 2; i < height; i++) {
+        for (int j = 0; j < stride; j++) {
+            ptr[i * stride + j] = red | blue;
+        }
+    }
+#endif
+
+    glamor_create_texture_from_image_or_mem(screen, image, &texture, width, height, modifier ? NULL : map);
     glamor_set_pixmap_type(pixmap, GLAMOR_TEXTURE_DRM);
     glamor_set_pixmap_texture(pixmap, texture);
     glamor_egl_set_pixmap_image(pixmap, image, used_modifiers);
     ret = TRUE;
+
+#if 1
+    for (int i = 0; i < height / 2; i++) {
+        for (int j = 0; j < stride; j++) {
+            ptr[i * stride + j] = red;
+        }
+    }
+#endif
+
+    if (unmap_me) {
+        gbm_bo_unmap(bo, unmap_me);
+    }
 
  done:
     return ret;
@@ -490,6 +554,8 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 static struct gbm_bo *
 glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
 {
+    struct gbm_bo* ret = NULL;
+
     struct glamor_egl_screen_private *glamor_egl =
         glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
     struct glamor_pixmap_private *pixmap_priv =
@@ -500,8 +566,50 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
     if (!pixmap_priv->image)
         return NULL;
 
-    return gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
-                         pixmap_priv->image, GBM_BO_USE_RENDERING);
+    ret = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
+                        pixmap_priv->image, GBM_BO_USE_RENDERING);
+
+    if (ret) {
+        return ret;
+    }
+
+    int fourcc = 0;
+    int num_planes = 0;
+    EGLuint64KHR modifiers[4] = {0}; /* spec says 4 is enough */
+
+    int fds[4] = {-1, -1, -1, -1};
+    int strides[4] = {0};
+    int offsets[4] = {0};
+
+    if (!eglExportDMABUFImageQueryMESA(glamor_egl->display, pixmap_priv->image, &fourcc, &num_planes, modifiers)) {
+        return NULL;
+    }
+
+    if (!eglExportDMABUFImageMESA(glamor_egl->display, pixmap_priv->image, fds, strides, offsets)) {
+        return NULL;
+    }
+
+    struct gbm_import_fd_modifier_data fd_modifier_data =
+    {
+        .width = pixmap->drawable.width,
+        .height = pixmap->drawable.height,
+        .format = fourcc, /* GBM and DRM formats are the same */
+        .num_fds = num_planes,
+        .modifier = modifiers[0],
+    };
+
+    memcpy(fd_modifier_data.fds, fds, sizeof(fds));
+    memcpy(fd_modifier_data.strides, strides, sizeof(strides));
+    memcpy(fd_modifier_data.offsets, offsets, sizeof(strides));
+
+    ret = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD_MODIFIER,
+                        &fd_modifier_data, GBM_BO_USE_RENDERING);
+
+    for (int i = 0; i < 4 && fds[i] != -1; i++) {
+        close(fds[i]);
+    }
+
+    return ret;
 }
 
 struct gbm_bo *
@@ -1065,6 +1173,60 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 #endif
 }
 
+static Bool
+glamor_egl_init_display(struct glamor_egl_screen_private *glamor_egl, int ScrnIdx)
+{
+    glamor_egl->display = glamor_egl_get_display(EGL_PLATFORM_GBM_KHR, glamor_egl->gbm);
+    if (glamor_egl->display == EGL_NO_DISPLAY) {
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglGetDisplay(EGL_PLATFORM_GBM_KHR, <gbm bo>) failed\n");
+    } else {
+        if (eglInitialize(glamor_egl->display, NULL, NULL)) {
+            glamor_egl->gbm_platform = TRUE;
+            return TRUE;
+        }
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglInitialize() failed on EGL_PLATFORM_GBM_KHR\n");
+        glamor_egl->display = EGL_NO_DISPLAY;
+    }
+
+    glamor_egl->display = glamor_egl_get_display(EGL_PLATFORM_GBM_MESA, glamor_egl->gbm);
+    if (glamor_egl->display == EGL_NO_DISPLAY) {
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglGetDisplay(EGL_PLATFORM_GBM_MESA, <gbm bo>) failed\n");
+    } else {
+        if (eglInitialize(glamor_egl->display, NULL, NULL)) {
+            glamor_egl->gbm_platform = TRUE;
+            return TRUE;
+        }
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglInitialize() failed on EGL_PLATFORM_GBM_MESA\n");
+        glamor_egl->display = EGL_NO_DISPLAY;
+    }
+
+    glamor_egl->gbm_platform = FALSE;
+
+    glamor_egl->display = glamor_egl_get_display(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY);
+    if (glamor_egl->display == EGL_NO_DISPLAY) {
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglGetDisplay(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY) failed\n");
+    } else {
+        if (eglInitialize(glamor_egl->display, NULL, NULL)) {
+            return TRUE;
+        }
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglInitialize() failed on EGL_PLATFORM_SURFACELESS_MESA\n");
+        glamor_egl->display = EGL_NO_DISPLAY;
+    }
+
+    glamor_egl->display = glamor_egl_get_display(EGL_PLATFORM_DEVICE_EXT, EGL_DEFAULT_DISPLAY);
+    if (glamor_egl->display == EGL_NO_DISPLAY) {
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglGetDisplay(EGL_PLATFORM_DEVICE_EXT, EGL_DEFAULT_DISPLAY) failed\n");
+    } else {
+        if (eglInitialize(glamor_egl->display, NULL, NULL)) {
+            return TRUE;
+        }
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglInitialize() failed on EGL_PLATFORM_DEVICE_EXT\n");
+        glamor_egl->display = EGL_NO_DISPLAY;
+    }
+
+    return FALSE;
+}
+
 static void glamor_egl_cleanup(struct glamor_egl_screen_private *glamor_egl)
 {
     if (glamor_egl->display != EGL_NO_DISPLAY) {
@@ -1196,6 +1358,24 @@ static const OptionInfoRec GlamorEGLOptions[] = {
     { -1, NULL, OPTV_NONE, {0}, FALSE },
 };
 
+static struct gbm_device*
+gbm_create_device_by_name(int fd, const char* name)
+{
+    struct gbm_device* ret = NULL;
+
+    const char* old_backend = getenv("GBM_BACKEND");
+    setenv("GBM_BACKEND", name, 1);
+
+    ret = gbm_create_device(fd);
+
+    unsetenv("GBM_BACKEND");
+    if (old_backend) {
+        setenv("GBM_BACKEND", old_backend, 1);
+    }
+
+    return ret;
+}
+
 Bool
 glamor_egl_init(ScrnInfoPtr scrn, int fd)
 {
@@ -1233,21 +1413,16 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     scrn->privates[xf86GlamorEGLPrivateIndex].ptr = glamor_egl;
     glamor_egl->fd = fd;
     glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
+    if (!glamor_egl->gbm) {
+        glamor_egl->gbm = gbm_create_device_by_name(glamor_egl->fd, "dumb");
+    }
+
     if (glamor_egl->gbm == NULL) {
         ErrorF("couldn't get display device\n");
         goto error;
     }
 
-    glamor_egl->display = glamor_egl_get_display(EGL_PLATFORM_GBM_MESA,
-                                                 glamor_egl->gbm);
-    if (!glamor_egl->display) {
-        xf86DrvMsg(scrn->scrnIndex, X_ERROR, "eglGetDisplay() failed\n");
-        goto error;
-    }
-
-    if (!eglInitialize(glamor_egl->display, NULL, NULL)) {
-        xf86DrvMsg(scrn->scrnIndex, X_ERROR, "eglInitialize() failed\n");
-        glamor_egl->display = EGL_NO_DISPLAY;
+    if (!glamor_egl_init_display(glamor_egl, scrn->scrnIndex)) {
         goto error;
     }
 
