@@ -94,3 +94,21 @@ default <namespace>
 or
 default <new_ns OR deny>
 ```
+
+Technical Information
+---------------------
+All client connections to the Xorg server are assigned to a
+`XnamespaceClientPriv` containing the `authID` and namespace reference.
+\
+A `namespace` is an `xorg_list` entry into the linked list `ns_list`
+that contains at least `name`, `rootWindow`, `refcnt`, `perms`,
+and `auth_token`.
+\
+When loading the Xnamespace extension, 
+By default, the `ns_root` and `ns_anon` namespaces are made. The server
+window itself is attached to `ns_root`. 
+From there, the config file is parsed and new namespaces are added. 
+A new `rootWindow` is created and linked to each new namespace. This is
+where most of the "sandboxing" happens.
+Upon client connection, a ClientPriv is allcoated for the connection,
+and the `clientstate` hooks begin to assign the ClientPriv to a namespace.
