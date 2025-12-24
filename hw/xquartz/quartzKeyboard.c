@@ -194,6 +194,11 @@ typedef struct darwinKeyboardInfo_struct {
     unsigned char modifierKeycodes[32][2];
 } darwinKeyboardInfo;
 
+typedef struct _KeyboardDataContext {
+    UInt32 kbd_type;
+    const void *chr_data;
+} KeyboardDataContext;
+
 darwinKeyboardInfo keyInfo;
 pthread_mutex_t keyInfo_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -742,39 +747,38 @@ make_dead_key(KeySym in)
     return in;
 }
 
+static void getKeyboardData(void *keyboard_ctx) {
+    KeyboardDataContext *ctx = keyboard_ctx;
+    ctx->kbd_type = LMGetKbdType();
+    TISInputSourceRef currentKeyLayoutRef = TISCopyCurrentKeyboardLayoutInputSource();
+
+    if (currentKeyLayoutRef) {
+        CFDataRef currentKeyLayoutDataRef = (CFDataRef)TISGetInputSourceProperty(currentKeyLayoutRef,
+                                                                                 kTISPropertyUnicodeKeyLayoutData);
+        if (currentKeyLayoutDataRef)
+            ctx->chr_data = CFDataGetBytePtr(currentKeyLayoutDataRef);
+
+        CFRelease(currentKeyLayoutRef);
+    }
+}
+
 static Bool
 QuartzReadSystemKeymap(darwinKeyboardInfo *info)
 {
-    __block const void *chr_data = NULL;
     int num_keycodes = NUM_KEYCODES;
-    __block UInt32 keyboard_type;
+    KeyboardDataContext ctx = { 0 };
     int i, j;
     OSStatus err;
     KeySym *k;
 
-    dispatch_block_t getKeyboardData = ^{
-        keyboard_type = LMGetKbdType();
-
-        TISInputSourceRef currentKeyLayoutRef = TISCopyCurrentKeyboardLayoutInputSource();
-
-        if (currentKeyLayoutRef) {
-            CFDataRef currentKeyLayoutDataRef = (CFDataRef)TISGetInputSourceProperty(currentKeyLayoutRef,
-                                                                                     kTISPropertyUnicodeKeyLayoutData);
-            if (currentKeyLayoutDataRef)
-                chr_data = CFDataGetBytePtr(currentKeyLayoutDataRef);
-
-            CFRelease(currentKeyLayoutRef);
-        }
-    };
-
     /* This is an ugly ant-pattern, but it is more expedient to address the problem right now. */
     if (pthread_main_np()) {
-        getKeyboardData();
+        getKeyboardData(&ctx);
     } else {
-        dispatch_sync(dispatch_get_main_queue(), getKeyboardData);
+        dispatch_sync_f(dispatch_get_main_queue(), &ctx, getKeyboardData);
     }
 
-    if (chr_data == NULL) {
+    if (ctx.chr_data == NULL) {
         ErrorF("Couldn't get uchr or kchr resource\n");
         return FALSE;
     }
@@ -800,16 +804,16 @@ QuartzReadSystemKeymap(darwinKeyboardInfo *info)
             UniCharCount len;
             UInt32 dead_key_state = 0, extra_dead = 0;
 
-            err = UCKeyTranslate(chr_data, i, kUCKeyActionDown,
-                                 mods[j] >> 8, keyboard_type, 0,
+            err = UCKeyTranslate(ctx.chr_data, i, kUCKeyActionDown,
+                                 mods[j] >> 8, ctx.kbd_type, 0,
                                  &dead_key_state, 8, &len, s);
             if (err != noErr) continue;
 
             if (len == 0 && dead_key_state != 0) {
                 /* Found a dead key. Work out which one it is, but
                    remembering that it's dead. */
-                err = UCKeyTranslate(chr_data, i, kUCKeyActionDown,
-                                     mods[j] >> 8, keyboard_type,
+                err = UCKeyTranslate(ctx.chr_data, i, kUCKeyActionDown,
+                                     mods[j] >> 8, ctx.kbd_type,
                                      kUCKeyTranslateNoDeadKeysMask,
                                      &extra_dead, 8, &len, s);
                 if (err != noErr) continue;
