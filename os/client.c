@@ -124,7 +124,7 @@ DetermineClientPid(struct _Client * client)
 
 #ifdef __APPLE__ /* only required on macOS */
 static void
-get_argmax_fptr(void *arg)
+get_argmax_from_kern(void *arg)
 {
     int *argmax = arg;
     int mib[2];
@@ -183,7 +183,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
     {
         static dispatch_once_t once;
         static int argmax;
-        dispatch_once_f(&once, &argmax, get_argmax_fptr);
+        dispatch_once_f(&once, &argmax, get_argmax_from_kern);
 
         int mib[3];
         size_t len = argmax;
