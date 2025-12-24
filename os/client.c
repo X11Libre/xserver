@@ -122,6 +122,25 @@ DetermineClientPid(struct _Client * client)
     return pid;
 }
 
+#ifdef __APPLE__ /* only required on macOS */
+static void
+get_argmax_fptr(void *arg)
+{
+    int *argmax = arg;
+    int mib[2];
+    size_t len;
+
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_ARGMAX;
+
+    len = sizeof(int);
+    if (sysctl(mib, 2, argmax, &len, NULL, 0) == -1) {
+        ErrorF("Unable to dynamically determine kern.argmax, using ARG_MAX (%d)\n", ARG_MAX);
+        *argmax = ARG_MAX;
+    }
+}
+#endif
+
 /**
  * Try to determine a command line string for a client based on its
  * PID. Note that mapping PID to a command hasn't been implemented for
@@ -164,19 +183,7 @@ DetermineClientCmd(pid_t pid, const char **cmdname, const char **cmdargs)
     {
         static dispatch_once_t once;
         static int argmax;
-        dispatch_once(&once, ^{
-            int mib[2];
-            size_t len;
-
-            mib[0] = CTL_KERN;
-            mib[1] = KERN_ARGMAX;
-
-            len = sizeof(argmax);
-            if (sysctl(mib, 2, &argmax, &len, NULL, 0) == -1) {
-                ErrorF("Unable to dynamically determine kern.argmax, using ARG_MAX (%d)\n", ARG_MAX);
-                argmax = ARG_MAX;
-            }
-        });
+        dispatch_once_f(&once, &argmax, get_argmax_fptr);
 
         int mib[3];
         size_t len = argmax;
