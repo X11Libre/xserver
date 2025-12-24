@@ -59,7 +59,7 @@ _pixman_region_init_clipped_rectangles(pixman_region16_t * region,
 
     if (num_rects > ARRAY_SIZE(stack_boxes)) {
         boxes = calloc(num_rects, sizeof(pixman_box16_t));
-        if (boxes == NULL)
+        if (!boxes)
             return FALSE;
     }
 
