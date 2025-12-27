@@ -1462,7 +1462,7 @@ msShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
     stride = (pScrn->displayWidth * ms->drmmode.kbpp) / 8;
     *size = stride;
 
-    return ((uint8_t *) ms->drmmode.front_bo.dumb->ptr + row * stride + offset);
+    return ((uint8_t *) ms->drmmode.front_bo.map_data + row * stride + offset);
 }
 
 /* somewhat arbitrary tile size, in pixels */
@@ -1712,7 +1712,7 @@ modesetCreateScreenResources(ScreenPtr pScreen)
     if (!ms->drmmode.sw_cursor)
         drmmode_map_cursor_bos(pScrn, &ms->drmmode);
 
-    if (!ms->drmmode.gbm) {
+    if (!ms->drmmode.glamor) {
         pixels = drmmode_map_front_bo(&ms->drmmode);
         if (!pixels)
             return FALSE;
@@ -1974,8 +1974,11 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
 
 #ifdef GLAMOR_HAS_GBM
-    if (ms->drmmode.glamor)
+    if (ms->drmmode.glamor) {
         ms->drmmode.gbm = ms->glamor.egl_get_gbm_device(pScreen);
+    } else {
+        ms->drmmode.gbm = gbm_create_device(ms->drmmode.fd);
+    }
 #endif
 
     /* HW dependent - FIXME */
@@ -2305,12 +2308,20 @@ CloseScreen(ScreenPtr pScreen)
 
     drmmode_free_bos(pScrn, &ms->drmmode);
 
+#ifdef GLAMOR_HAS_GBM
+    /* If we didn't get the gbm device from glamor, we have to free it ourserves */
+    if (!ms->drmmode.glamor && ms->drmmode.gbm) {
+        gbm_device_destroy(ms->drmmode.gbm);
+        ms->drmmode.gbm = NULL;
+    }
+#endif
+
     if (ms->drmmode.pageflip) {
         miPointerScreenPtr PointPriv =
             dixLookupPrivate(&pScreen->devPrivates, miPointerScreenKey);
 
         if (PointPriv->spriteFuncs == &drmmode_sprite_funcs)
-            PointPriv->spriteFuncs = ms->SpriteFuncs;        
+            PointPriv->spriteFuncs = ms->SpriteFuncs;
     }
 
     if (pScrn->vtSema) {
