@@ -144,9 +144,12 @@ xf86BusConfigMatch(ScrnInfoPtr scrnInfo, Bool is_gpu) {
 /**
  * @return TRUE if all buses are configured and set up correctly and FALSE
  * otherwise.
+ *
+ * If singleDriver is TRUE, then only the first successfully probed driver adds screens to xf86Screens,
+ * others may add GPU secondary screens only
  */
 Bool
-xf86BusConfig(void)
+xf86BusConfig(Bool singleDriver)
 {
     screenLayoutPtr layout;
     int i;
@@ -160,7 +163,9 @@ xf86BusConfig(void)
      *    xf86Screens[] list for each instance of the hardware found.
      */
     for (i = 0; i < xf86NumDrivers; i++) {
-        xf86CallDriverProbe(xf86DriverList[i], FALSE);
+        /* The order of the && operands below is essential! */
+        if (xf86CallDriverProbe(xf86DriverList[i], FALSE) && singleDriver)
+            break;
     }
 
     /*
@@ -171,7 +176,9 @@ xf86BusConfig(void)
     if (xf86NumScreens == 0) {
         xf86ProbeIgnorePrimary = TRUE;
         for (i = 0; i < xf86NumDrivers && xf86NumScreens == 0; i++) {
-            xf86CallDriverProbe(xf86DriverList[i], FALSE);
+            /* The order of the && operands below is essential! */
+            if (xf86CallDriverProbe(xf86DriverList[i], FALSE) && singleDriver)
+                break;
         }
         xf86ProbeIgnorePrimary = FALSE;
     }

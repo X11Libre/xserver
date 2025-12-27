@@ -77,7 +77,7 @@ Bool xf86IsEntityPrimary(int entityIndex);
 _X_EXPORT /* only for internal int10 module - not supposed to be used by OOT drivers */
 ScrnInfoPtr xf86FindScreenForEntity(int entityIndex);
 
-Bool xf86BusConfig(void);
+Bool xf86BusConfig(Bool singleDriver);
 void xf86ClearEntityListForScreen(ScrnInfoPtr pScrn);
 void xf86RemoveDevFromEntity(int entityIndex, GDevPtr dev);
 

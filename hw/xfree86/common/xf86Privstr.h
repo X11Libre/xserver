@@ -94,6 +94,9 @@ typedef struct {
     Bool autoAddGPU;
     const char *debug;
     Bool autoBindGPU;
+
+    Bool singleDriver;          /* Only the first successfully probed driver adds primary screens,
+                                 * others may add GPU secondary screens only */
 } xf86InfoRec, *xf86InfoPtr;
 
 /* ISC's cc can't handle ~ of UL constants, so explicitly type cast them. */
