@@ -687,6 +687,11 @@ Unset by default.
 .TP 7
 .BI "Option \*qAllowByteSwappedClients\*q  \*q" boolean \*q
 Allow clients with a different byte-order than the server. Disabled by default.
+.TP 7
+.BI "Option \*qSingleDriver\*q  \*q" boolean \*q
+Only the first successfully probed driver is allowed to add screens to the current layout, others may
+add secondary GPU screens only (e.g., if non-primary GPUs are used for offloading).
+Disabled by default.
 .SH "MODULE SECTION"
 The
 .B Module
