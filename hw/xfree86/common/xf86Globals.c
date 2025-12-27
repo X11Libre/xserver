@@ -131,6 +131,7 @@ xf86InfoRec xf86Info = {
     .autoAddGPU = FALSE,
 #endif
     .autoBindGPU = TRUE,
+    .singleDriver = FALSE,
 };
 
 const char *xf86ConfigFile = NULL;
