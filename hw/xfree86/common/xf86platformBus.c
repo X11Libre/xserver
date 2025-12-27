@@ -640,20 +640,18 @@ xf86platformAddGPUDevices(DriverPtr drvp)
     GDevPtr *devList;
     int j;
 
-    if (!drvp->platformProbe)
+    if (!drvp->platformProbe || !xf86Info.autoAddGPU)
         return FALSE;
 
     xf86MatchDevice(drvp->driverName, &devList);
 
     /* if autoaddgpu devices is enabled then go find any unclaimed platform
      * devices and add them as GPU screens */
-    if (xf86Info.autoAddGPU) {
-        for (j = 0; j < xf86_num_platform_devices; j++) {
-            if (probeSingleDevice(&xf86_platform_devices[j], drvp,
-                                  devList ?  devList[0] : NULL,
-                                  PLATFORM_PROBE_GPU_SCREEN))
-                foundScreen = TRUE;
-        }
+    for (j = 0; j < xf86_num_platform_devices; j++) {
+        if (probeSingleDevice(&xf86_platform_devices[j], drvp,
+                              devList ?  devList[0] : NULL,
+                              PLATFORM_PROBE_GPU_SCREEN))
+            foundScreen = TRUE;
     }
 
     free(devList);
