@@ -440,7 +440,7 @@ InitOutput(int argc, char **argv)
 	if (want_hw_access)
 	    xorgHWAccess = xf86EnableIO();
 
-        if (xf86BusConfig() == FALSE)
+        if (xf86BusConfig(xf86Info.singleDriver) == FALSE)
             return;
 
 
