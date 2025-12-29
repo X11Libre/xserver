@@ -1174,6 +1174,8 @@ drmmode_gbm_format_for_depth(int depth)
         return GBM_FORMAT_ARGB1555;
     case 16:
         return GBM_FORMAT_RGB565;
+    case 24:
+        return GBM_FORMAT_XRGB8888;
     case 30:
         /* XXX Is this format right? https://github.com/X11Libre/xserver/pull/1396/files#r2523698616 XXX */
         return GBM_FORMAT_ARGB2101010;
