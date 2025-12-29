@@ -1014,6 +1014,11 @@ drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
 {
 #ifdef GLAMOR_HAS_GBM
     if (bo->gbm) {
+        if (bo->map_addr) {
+            gbm_bo_unmap(bo->gbm, bo->map_addr);
+            bo->map_addr = NULL;
+            bo->map_data = NULL;
+        }
         gbm_bo_destroy(bo->gbm);
         bo->gbm = NULL;
     }
@@ -1022,6 +1027,8 @@ drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
     if (bo->dumb) {
         int ret = dumb_bo_destroy(drmmode->fd, bo->dumb);
         if (ret == 0) {
+            bo->map_addr = NULL;
+            bo->map_data = NULL;
             bo->dumb = NULL;
         }
     }
@@ -1074,19 +1081,20 @@ drmmode_bo_get_handle(drmmode_bo *bo)
 static void*
 drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
 {
-    if (bo->map) {
-        return bo->map;
+    if (bo->map_data) {
+        return bo->map_data;
     }
 
 #ifdef GLAMOR_HAS_GBM
     if (bo->gbm) {
         /* We shouldn't read from gpu memory */
-        uint32_t stride;
-        void* unused;
-        void* map = gbm_bo_map(bo->gbm, 0, 0, bo->width, bo->height, GBM_BO_TRANSFER_WRITE, &stride, &unused);
-        if (map) {
-            bo->map = map;
-            return bo->map;
+        uint32_t stride = 0;
+        void* map_addr = NULL;
+        void* map_data = gbm_bo_map(bo->gbm, 0, 0, bo->width, bo->height, GBM_BO_TRANSFER_WRITE, &stride, &map_addr);
+        if (map_data) {
+            bo->map_data = map_data;
+            bo->map_addr = map_addr;
+            return bo->map_data;
         }
     }
 #endif
@@ -1097,8 +1105,9 @@ drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
             return NULL;
         }
 
-        bo->map = bo->dumb->ptr;
-        return bo->map;
+        bo->map_data = bo->dumb->ptr;
+        bo->map_addr = bo->map_data;
+        return bo->map_data;
     }
 
     return NULL;

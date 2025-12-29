@@ -85,7 +85,8 @@ typedef struct {
     Bool used_modifiers;
     struct gbm_bo *gbm;
 #endif
-    void* map;
+    void* map_data; /* Actual pixel data we are interesed in */
+    void* map_addr; /* Address of the map that we have to unmap */
 } drmmode_bo;
 
 typedef struct {
