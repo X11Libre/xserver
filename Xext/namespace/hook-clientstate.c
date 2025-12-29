@@ -13,7 +13,7 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(NewClientInfoRec);
     // just get actual name instead of path or command flags
-    const char *clientName = strtok(strdup(basename(GetClientCmdName(client))), " ");
+    const char *clientName = strtok(basename(GetClientCmdName(client)), " ");
 
     switch (client->clientState) {
     case ClientStateInitial:
@@ -47,6 +47,7 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
             snprintf(str, len+1, "%s%d", clientName, client->index);
 
             struct Xnamespace *new_run_ns = GenerateNewXnamespaceForClient(&ns_anon, str);
+            free(str);
             if (new_run_ns!=NULL) {
                 subj->authId = GenerateAuthForXnamespace(new_run_ns);
                 XnamespaceAssignClient(subj, new_run_ns);}
@@ -89,6 +90,8 @@ void hookClientDestroy(CallbackListPtr *pcbl, void *unused, void *calldata)
             // Delete function checks for 0 client references
             if (DeleteXnamespace(subj->ns)!=0)
                 XNS_LOG("Failed to delete namespace\n");
+            subj->ns = NULL;
+            return;
         } else {
             // don't delete, clients are still connected
         }

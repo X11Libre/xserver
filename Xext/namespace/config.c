@@ -252,20 +252,21 @@ Bool XnsLoadConfig(void)
         }
     }
 
-    if (strcmp(strdup(default_namespace), "new_ns") == 0) {
+    if (strcmp(default_namespace, "new_ns") == 0) {
         XNS_LOG("Defaulting to NEW Namespace per client\n");
         ns_default->builtin = FALSE;
-    } else if (strcmp(strdup(default_namespace), "deny") == 0) {
+    } else if (strcmp(default_namespace, "deny") == 0) {
         XNS_LOG("Defaulting to DENY connection\n");
         ns_default->deny = TRUE;
-    } else if (strcmp(strdup(default_namespace), "anon") == 0) {
+    } else if (strcmp(default_namespace, "anon") == 0) {
         XNS_LOG("Defaulting to anon connection\n");
-    } else if (XnsFindByName(strdup(default_namespace))) {
+    } else if (XnsFindByName(default_namespace)) {
         XNS_LOG("found default ns %s\n",default_namespace);
-        ns_default = XnsFindByName(strdup(default_namespace));
+        ns_default = XnsFindByName(default_namespace);
     } else {
         XNS_LOG("Incorrect Default, Defaulting to anon\n");
     }
+    free(default_namespace);
 
     return TRUE;
 }

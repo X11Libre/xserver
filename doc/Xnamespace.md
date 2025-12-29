@@ -36,6 +36,7 @@ Namespaces are created in the config file using the `namespace` keyword
 ```
 namespace <name>
 ```
+NOTE: The `<name>` has nothing to do with client assignment.\
 Until the next namespace keyword, following lines will only apply to the
 namespace\
 \
@@ -110,5 +111,12 @@ window itself is attached to `ns_root`.
 From there, the config file is parsed and new namespaces are added. 
 A new `rootWindow` is created and linked to each new namespace. This is
 where most of the "sandboxing" happens.
-Upon client connection, a ClientPriv is allcoated for the connection,
+Upon client connection, a ClientPriv is allocated for the connection,
 and the `clientstate` hooks begin to assign the ClientPriv to a namespace.
+First the pre-assign client list is checked, then the `XAUTHORITY` env
+variable is checked.
+
+Events send and receive, Resource access, all is handled by the various hooks
+which check the different permissions.
+Example: If a namespace is made with `allow transparency` it will be allowed to
+render a transparent segment in a window. 

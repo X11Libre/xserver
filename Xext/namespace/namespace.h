@@ -81,6 +81,7 @@ void NewVirtualRootWindowForXnamespace(WindowPtr rootWindow, struct Xnamespace *
 int DeleteXnamespace(struct Xnamespace *curr);
 void PrintXnamespaces(void);
 int PruneXnamespaces(void);
+char** GetXnamespacesAsCharr (void);
 
 static inline struct XnamespaceClientPriv *XnsClientPriv(ClientPtr client) {
     if (client == NULL) return NULL;

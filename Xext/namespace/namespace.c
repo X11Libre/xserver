@@ -128,19 +128,28 @@ XID GenerateAuthForXnamespace(struct Xnamespace *curr) {
 
 int RevokeAuthForXnamespace(struct Xnamespace *curr) {
     struct auth_token *auth_token_walk;
-    xorg_list_for_each_entry(auth_token_walk, &curr->auth_tokens, entry) {
+    struct auth_token *auth_token_tmp;
+    int k = 0;
+    xorg_list_for_each_entry_safe(auth_token_walk, auth_token_tmp, &curr->auth_tokens, entry) {
         XNS_LOG("Revoking key");
         printf(" auth: \"%s\" \"", auth_token_walk->authProto);
         for (int i=0; i<auth_token_walk->authTokenLen; i++)
             printf("%02X", (unsigned char)auth_token_walk->authTokenData[i]);
         printf("\" for namespace %s\n",curr->name);
-        return RemoveAuthorization(
-            strlen(auth_token_walk->authProto),
-                            auth_token_walk->authProto,
-                            auth_token_walk->authTokenLen,
-                            auth_token_walk->authTokenData
-        );
+        if (RemoveAuthorization(
+                strlen(auth_token_walk->authProto),
+                       auth_token_walk->authProto,
+                       auth_token_walk->authTokenLen,
+                       auth_token_walk->authTokenData)!=0) {
+            xorg_list_del(&auth_token_walk->entry);
+            free(auth_token_walk->authProto);
+            free(auth_token_walk->authTokenData);
+            free(auth_token_walk);
+            k++;
+        }
     }
+    if (k!=0)
+        return k;
     return 0;
 }
 
@@ -180,7 +189,7 @@ struct Xnamespace *GenerateNewXnamespaceForClient(struct Xnamespace *copyfrom, c
 
     XNS_LOG("New Namespace Creation : %s\n",newname);
 
-    new_run_ns->name = newname;
+    new_run_ns->name = strdup(newname);
 
     NewVirtualRootWindowForXnamespace(ns_root.rootWindow, new_run_ns);
 
@@ -204,8 +213,10 @@ int DeleteXnamespace(struct Xnamespace *curr) {
             XNS_LOG("DELETE: No auth or failed to revoke auth\n"); }
         XNS_LOG("Deleting namespace: %s\n", curr->name);
         // critical? namespaces should always have windows so this should always pass
-        DeleteWindow(curr->rootWindow, curr->rootWindow->parent->drawable.id);
+        DeleteWindow(curr->rootWindow, ns_root.rootWindow->drawable.id);
         xorg_list_del(&curr->entry);
+        // no references to this namespace
+        free((char*)curr->name);
         free(curr);
         return Success;
     }
@@ -234,4 +245,16 @@ struct Xnamespace *XnsFindByName(const char* name) {
             return walk;
     }
     return NULL;
+}
+
+char** GetXnamespacesAsCharr (void) {
+    // needs to walk twice since the size of the list isn't stored anywhere
+    int count = 0;
+    struct Xnamespace *walk;
+    xorg_list_for_each_entry(walk, &ns_list, entry) {count++;}
+    char **ns = calloc(1+ count, sizeof(char*));
+    count = 0; // reset
+    xorg_list_for_each_entry(walk, &ns_list, entry) {ns[count++] = strdup(walk->name);}
+    ns[count] = NULL; // null terminated
+    return ns;
 }
