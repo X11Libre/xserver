@@ -253,7 +253,7 @@ jobs:
             - uses: actions/checkout@v4
             - name: run in DragonFlyBSD VM
               id: xserver-build
-              uses: vmactions/dragonflybsd-vm@v1
+              uses: vmactions/dragonflybsd-vm@v1.1.4
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
@@ -266,13 +266,14 @@ jobs:
             MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
-            - uses: vmactions/netbsd-vm@v1
+            - uses: vmactions/netbsd-vm@v1.2.3
               id: vm
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
                   release: '10.1'
                   run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
     xserver-build-cygwin:
         runs-on: windows-latest
         steps:
@@ -284,6 +285,9 @@ jobs:
                 restore-keys: ${{ runner.os }}-packages
             - uses: cygwin/cygwin-install-action@master
               with:
+                  # FIXME: temporary workaround for cygwin mirror problem
+                  # https://github.com/cygwin/cygwin-install-action/issues/39
+                  check-installer-sig: false
                   platform: x86_64
                   packages: >-
                    binutils, bison, ccache, flex, gcc-core, meson, ninja,
@@ -319,6 +323,18 @@ jobs:
             - run: |
                   bash ./.github/scripts/Cygwin/build.sh
 
+    check-sign-off:
+        name: Write comment if unsigned commits found
+        if: github.event_name == 'pull_request'
+        runs-on: ubuntu-latest
+        env:
+            FORCE_COLOR: 1
+            runs-on: ubuntu-latest
+        steps:
+          - uses: live627/check-pr-signoff-action@v1
+            with:
+                token: ${{ secrets.GITHUB_TOKEN }}
+
     release:
         name: Release pushed tag
         runs-on: ubuntu-latest
@@ -332,6 +348,7 @@ jobs:
             - xserver-build-dragonflybsd
             - xserver-build-netbsd
             - xserver-build-cygwin
+            - check-sign-off
         steps:
             - name: Checkout
               uses: actions/checkout@v4
