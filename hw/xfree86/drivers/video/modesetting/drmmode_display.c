@@ -1087,10 +1087,13 @@ drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
 
 #ifdef GLAMOR_HAS_GBM
     if (bo->gbm) {
-        /* We shouldn't read from gpu memory */
+        /**
+         * We shouldn't read from gpu memory, as it's really slow.
+         * We do allow it though, so nothing breaks.
+         */
         uint32_t stride = 0;
         void* map_addr = NULL;
-        void* map_data = gbm_bo_map(bo->gbm, 0, 0, bo->width, bo->height, GBM_BO_TRANSFER_WRITE, &stride, &map_addr);
+        void* map_data = gbm_bo_map(bo->gbm, 0, 0, bo->width, bo->height, GBM_BO_TRANSFER_READ_WRITE, &stride, &map_addr);
         if (map_data) {
             bo->map_data = map_data;
             bo->map_addr = map_addr;
