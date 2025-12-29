@@ -214,7 +214,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 Bool XnsLoadConfig(void)
 {
     // default to anon namespace
-    default_namespace = strdup("anon");
+    default_namespace = (char*)"anon";
     ns_default = &ns_anon;
 
     xorg_list_append_ndup(&ns_root.entry, &ns_list);
