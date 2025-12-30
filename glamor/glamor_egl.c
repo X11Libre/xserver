@@ -819,12 +819,38 @@ glamor_get_formats(ScreenPtr screen,
     return TRUE;
 }
 
+static void
+glamor_filter_modifiers(uint32_t *num_modifiers, uint64_t **modifiers,
+                        EGLBoolean *external_only)
+{
+    uint32_t write_pos = 0;
+    for (uint32_t i = 0; i < *num_modifiers; i++) {
+        if (external_only[i]) {
+            continue;
+        }
+        (*modifiers)[write_pos++] = (*modifiers)[i];
+    }
+
+    if (write_pos == 0) {
+        *num_modifiers = 0;
+        free(*modifiers);
+        *modifiers = NULL;
+    } else if (write_pos != *num_modifiers) {
+        *num_modifiers = write_pos;
+        uint64_t *filtered_modifiers = realloc(*modifiers, write_pos * sizeof(*modifiers));
+        if (filtered_modifiers != NULL) {
+            *modifiers = filtered_modifiers;
+        }
+    }
+}
+
 Bool
 glamor_get_modifiers(ScreenPtr screen, uint32_t format,
                      uint32_t *num_modifiers, uint64_t **modifiers)
 {
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
     struct glamor_egl_screen_private *glamor_egl;
+    EGLBoolean *external_only;
     EGLint num;
 #endif
 
@@ -848,14 +874,24 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     if (*modifiers == NULL)
         return FALSE;
 
+    external_only = calloc(num, sizeof(EGLBoolean));
+    if (!external_only) {
+        free(*modifiers);
+        *modifiers = NULL;
+        return FALSE;
+    }
+
     if (!eglQueryDmaBufModifiersEXT(glamor_egl->display, format, num,
-                                    (EGLuint64KHR *) *modifiers, NULL, &num)) {
+                                    (EGLuint64KHR *) *modifiers, external_only, &num)) {
+        free(external_only);
         free(*modifiers);
         *modifiers = NULL;
         return FALSE;
     }
 
     *num_modifiers = num;
+    glamor_filter_modifiers(num_modifiers, modifiers, external_only);
+    free(external_only);
 #endif
     return TRUE;
 }
