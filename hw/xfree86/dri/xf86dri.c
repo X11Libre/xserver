@@ -53,7 +53,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "cursorstr.h"
 #include "scrnintstr.h"
 #include "servermd.h"
-#define _XF86DRI_SERVER_
 #include <X11/dri/xf86driproto.h>
 #include "swaprep.h"
 #include "xf86str.h"
