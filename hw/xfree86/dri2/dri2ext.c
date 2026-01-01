@@ -209,14 +209,12 @@ send_buffers_reply(ClientPtr client, DrawablePtr pDrawable,
     }
 
     xDRI2GetBuffersReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = (count - skip) * sizeof(xDRI2Buffer) / 4,
         .width = width,
         .height = height,
         .count = count - skip
     };
-    WriteToClient(client, sizeof(xDRI2GetBuffersReply), &reply);
+
+    x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     for (i = 0; i < count; i++) {
         xDRI2Buffer buffer;
@@ -233,9 +231,11 @@ send_buffers_reply(ClientPtr client, DrawablePtr pDrawable,
         buffer.pitch = buffers[i]->pitch;
         buffer.cpp = buffers[i]->cpp;
         buffer.flags = buffers[i]->flags;
-        WriteToClient(client, sizeof(xDRI2Buffer), &buffer);
+
+        x_rpcbuf_write_binary_pad(&rpcbuf, &buffer, sizeof(xDRI2Buffer));
     }
-    return Success;
+
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int
@@ -458,17 +458,11 @@ ProcDRI2WaitMSC(ClientPtr client)
 int
 ProcDRI2WaitMSCReply(ClientPtr client, CARD64 ust, CARD64 msc, CARD64 sbc)
 {
-    xDRI2MSCReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
+    xDRI2MSCReply reply = { 0 };
 
     load_msc_reply(&reply, ust, msc, sbc);
 
-    WriteToClient(client, sizeof(xDRI2MSCReply), &reply);
-
-    return Success;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int
@@ -515,11 +509,6 @@ static int
 ProcDRI2GetParam(ClientPtr client)
 {
     REQUEST(xDRI2GetParamReq);
-    xDRI2GetParamReply reply = {
-        .type = X_Reply,
-        .sequenceNumber = client->sequence,
-        .length = 0
-    };
     DrawablePtr pDrawable;
     CARD64 value;
     int status;
@@ -530,6 +519,8 @@ ProcDRI2GetParam(ClientPtr client)
                        &pDrawable, &status))
         return status;
 
+    xDRI2GetParamReply reply = { 0 };
+
     status = DRI2GetParam(client, pDrawable, stuff->param,
                           &reply.is_param_recognized, &value);
     reply.value_hi = value >> 32;
@@ -538,9 +529,7 @@ ProcDRI2GetParam(ClientPtr client)
     if (status != Success)
         return status;
 
-    WriteToClient(client, sizeof(xDRI2GetParamReply), &reply);
-
-    return status;
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static int

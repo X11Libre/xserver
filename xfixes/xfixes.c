@@ -65,17 +65,12 @@ static DevPrivateKeyRec XFixesClientPrivateKeyRec;
 static int
 ProcXFixesQueryVersion(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xXFixesQueryVersionReq);
+    X_REQUEST_FIELD_CARD32(majorVersion);
+    X_REQUEST_FIELD_CARD32(minorVersion);
+
     int major, minor;
     XFixesClientPtr pXFixesClient = GetXFixesClient(client);
-
-    REQUEST(xXFixesQueryVersionReq);
-    REQUEST_SIZE_MATCH(xXFixesQueryVersionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->majorVersion);
-        swapl(&stuff->minorVersion);
-    }
-
     if (version_compare(stuff->majorVersion, stuff->minorVersion,
                         SERVER_XFIXES_MAJOR_VERSION,
                         SERVER_XFIXES_MINOR_VERSION) < 0) {

@@ -103,13 +103,9 @@ FreeCompositeClientOverlay(void *value, XID ccwid)
 static int
 ProcCompositeQueryVersion(ClientPtr client)
 {
-    REQUEST(xCompositeQueryVersionReq);
-    REQUEST_SIZE_MATCH(xCompositeQueryVersionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->majorVersion);
-        swapl(&stuff->minorVersion);
-    }
+    X_REQUEST_HEAD_STRUCT(xCompositeQueryVersionReq);
+    X_REQUEST_FIELD_CARD32(majorVersion);
+    X_REQUEST_FIELD_CARD32(minorVersion);
 
     CompositeClientPtr pCompositeClient = GetCompositeClient(client);
 
@@ -193,13 +189,9 @@ SingleCompositeUnredirectSubwindows(ClientPtr client, xCompositeUnredirectSubwin
 static int
 ProcCompositeCreateRegionFromBorderClip(ClientPtr client)
 {
-    REQUEST(xCompositeCreateRegionFromBorderClipReq);
-    REQUEST_SIZE_MATCH(xCompositeCreateRegionFromBorderClipReq);
-
-    if (client->swapped) {
-        swapl(&stuff->region);
-        swapl(&stuff->window);
-    }
+    X_REQUEST_HEAD_STRUCT(xCompositeCreateRegionFromBorderClipReq);
+    X_REQUEST_FIELD_CARD32(region);
+    X_REQUEST_FIELD_CARD32(window);
 
     WindowPtr pWin;
     VERIFY_WINDOW(pWin, stuff->window, client, DixGetAttrAccess);
@@ -463,11 +455,8 @@ CompositeExtensionInit(void)
 static int
 ProcCompositeRedirectWindow(ClientPtr client)
 {
-    REQUEST(xCompositeRedirectWindowReq);
-    REQUEST_SIZE_MATCH(xCompositeRedirectWindowReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xCompositeRedirectWindowReq);
+    X_REQUEST_FIELD_CARD32(window);
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -498,11 +487,8 @@ ProcCompositeRedirectWindow(ClientPtr client)
 static int
 ProcCompositeRedirectSubwindows(ClientPtr client)
 {
-    REQUEST(xCompositeRedirectSubwindowsReq);
-    REQUEST_SIZE_MATCH(xCompositeRedirectSubwindowsReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xCompositeRedirectSubwindowsReq);
+    X_REQUEST_FIELD_CARD32(window);
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -533,11 +519,8 @@ ProcCompositeRedirectSubwindows(ClientPtr client)
 static int
 ProcCompositeUnredirectWindow(ClientPtr client)
 {
-    REQUEST(xCompositeUnredirectWindowReq);
-    REQUEST_SIZE_MATCH(xCompositeUnredirectWindowReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xCompositeUnredirectWindowReq);
+    X_REQUEST_FIELD_CARD32(window);
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -568,11 +551,8 @@ ProcCompositeUnredirectWindow(ClientPtr client)
 static int
 ProcCompositeUnredirectSubwindows(ClientPtr client)
 {
-    REQUEST(xCompositeUnredirectSubwindowsReq);
-    REQUEST_SIZE_MATCH(xCompositeUnredirectSubwindowsReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xCompositeUnredirectSubwindowsReq);
+    X_REQUEST_FIELD_CARD32(window);
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -603,13 +583,9 @@ ProcCompositeUnredirectSubwindows(ClientPtr client)
 static int
 ProcCompositeNameWindowPixmap(ClientPtr client)
 {
-    REQUEST(xCompositeNameWindowPixmapReq);
-    REQUEST_SIZE_MATCH(xCompositeNameWindowPixmapReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->pixmap);
-    }
+    X_REQUEST_HEAD_STRUCT(xCompositeNameWindowPixmapReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(pixmap);
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -681,11 +657,8 @@ ProcCompositeNameWindowPixmap(ClientPtr client)
 static int
 ProcCompositeGetOverlayWindow(ClientPtr client)
 {
-    REQUEST(xCompositeGetOverlayWindowReq);
-    REQUEST_SIZE_MATCH(xCompositeGetOverlayWindowReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xCompositeGetOverlayWindowReq);
+    X_REQUEST_FIELD_CARD32(window);
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)
@@ -783,11 +756,8 @@ ProcCompositeGetOverlayWindow(ClientPtr client)
 static int
 ProcCompositeReleaseOverlayWindow(ClientPtr client)
 {
-    REQUEST(xCompositeReleaseOverlayWindowReq);
-    REQUEST_SIZE_MATCH(xCompositeReleaseOverlayWindowReq);
-
-    if (client->swapped)
-        swapl(&stuff->window);
+    X_REQUEST_HEAD_STRUCT(xCompositeReleaseOverlayWindowReq);
+    X_REQUEST_FIELD_CARD32(window);
 
 #ifdef XINERAMA
     if (!compositeUseXinerama)

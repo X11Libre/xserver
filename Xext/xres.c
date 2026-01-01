@@ -201,7 +201,7 @@ ProcXResQueryVersion(ClientPtr client)
 static int
 ProcXResQueryClients(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xXResQueryClientsReq);
+    X_REQUEST_HEAD_STRUCT(xXResQueryClientsReq);
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
@@ -256,11 +256,8 @@ resourceTypeAtom(int i)
 static int
 ProcXResQueryClientResources(ClientPtr client)
 {
-    REQUEST(xXResQueryClientResourcesReq);
-    REQUEST_SIZE_MATCH(xXResQueryClientResourcesReq);
-
-    if (client->swapped)
-        swapl(&stuff->xid);
+    X_REQUEST_HEAD_STRUCT(xXResQueryClientResourcesReq);
+    X_REQUEST_FIELD_CARD32(xid);
 
     ClientPtr resClient = dixClientForXID(stuff->xid);
 
@@ -319,11 +316,8 @@ ResFindResourcePixmaps(void *value, XID id, RESTYPE type, void *cdata)
 static int
 ProcXResQueryClientPixmapBytes(ClientPtr client)
 {
-    REQUEST(xXResQueryClientPixmapBytesReq);
-    REQUEST_SIZE_MATCH(xXResQueryClientPixmapBytesReq);
-
-    if (client->swapped)
-        swapl(&stuff->xid);
+    X_REQUEST_HEAD_STRUCT(xXResQueryClientPixmapBytesReq);
+    X_REQUEST_FIELD_CARD32(xid);
 
     ClientPtr owner = dixClientForXID(stuff->xid);
     if ((!owner) ||
@@ -507,11 +501,8 @@ ConstructClientIds(ClientPtr client,
 static int
 ProcXResQueryClientIds (ClientPtr client)
 {
-    REQUEST(xXResQueryClientIdsReq);
-    REQUEST_AT_LEAST_SIZE(xXResQueryClientIdsReq);
-
-    if (client->swapped)
-        swapl(&stuff->numSpecs);
+    X_REQUEST_HEAD_AT_LEAST(xXResQueryClientIdsReq);
+    X_REQUEST_FIELD_CARD32(numSpecs);
 
     REQUEST_FIXED_SIZE(xXResQueryClientIdsReq,
                        (uint64_t)stuff->numSpecs * sizeof(xXResClientIdSpec));
@@ -878,12 +869,8 @@ ConstructResourceBytes(XID aboutClient,
 static int
 ProcXResQueryResourceBytes (ClientPtr client)
 {
-    REQUEST(xXResQueryResourceBytesReq);
-    REQUEST_AT_LEAST_SIZE(xXResQueryResourceBytesReq);
-
-    if (client->swapped) {
-        swapl(&stuff->numSpecs);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xXResQueryResourceBytesReq);
+    X_REQUEST_FIELD_CARD32(numSpecs);
 
     REQUEST_FIXED_SIZE(xXResQueryResourceBytesReq,
                        ((uint64_t)stuff->numSpecs) * sizeof(xXResResourceIdSpec));

@@ -1175,6 +1175,8 @@ static Bool
 drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
                         unsigned width, unsigned height, unsigned bpp)
 {
+    memset(bo, 0, sizeof(*bo));
+
     bo->width = width;
     bo->height = height;
 

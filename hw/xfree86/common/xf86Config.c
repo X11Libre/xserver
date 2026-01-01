@@ -657,6 +657,7 @@ typedef enum {
     FLAG_IGLX,
     FLAG_DEBUG,
     FLAG_ALLOW_BYTE_SWAPPED_CLIENTS,
+    FLAG_SINGLE_DRIVER,
 } FlagValues;
 
 /**
@@ -717,6 +718,8 @@ static OptionInfoRec FlagOptions[] = {
     {FLAG_DEBUG, "Debug", OPTV_STRING,
      {0}, FALSE},
     {FLAG_ALLOW_BYTE_SWAPPED_CLIENTS, "AllowByteSwappedClients", OPTV_BOOLEAN,
+     {0}, FALSE},
+    {FLAG_SINGLE_DRIVER, "SingleDriver", OPTV_BOOLEAN,
      {0}, FALSE},
     {-1, NULL, OPTV_NONE,
      {0}, FALSE},
@@ -814,6 +817,17 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     }
     LogMessageVerb(from, 1, "%sutomatically binding GPU devices\n",
                    xf86Info.autoBindGPU ? "A" : "Not a");
+
+    if (xf86IsOptionSet(FlagOptions, FLAG_SINGLE_DRIVER)) {
+        xf86GetOptValBool(FlagOptions, FLAG_SINGLE_DRIVER,
+                          &xf86Info.singleDriver);
+        from = X_CONFIG;
+    }
+    else {
+        from = X_DEFAULT;
+    }
+    LogMessageVerb(from, 1, "Allowing %s one driver to add non-GPU screens\n",
+                   xf86Info.singleDriver ? "only" : "more than");
 
     /*
      * Set things up based on the config file information.  Some of these
