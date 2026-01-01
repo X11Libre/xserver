@@ -100,9 +100,6 @@ typedef struct _kdInputFd {
 
 static KdInputFd kdInputFds[KD_MAX_INPUT_FDS];
 static int kdNumInputFds = 0;
-#ifdef KDRIVE_KBD
-static int kdnFds = 0;
-#endif
 
 extern Bool kdRawPointerCoordinates;
 
@@ -111,14 +108,6 @@ extern const char *kdGlobalXkbModel;
 extern const char *kdGlobalXkbLayout;
 extern const char *kdGlobalXkbVariant;
 extern const char *kdGlobalXkbOptions;
-
-#ifdef KDRIVE_KBD
-static void KdSigio(int sig)
-{
-    for (int i = 0; i < kdNumInputFds; i++)
-        (*kdInputFds[i].read) (kdInputFds[i].fd, kdInputFds[i].closure);
-}
-#endif
 
 #ifdef FNONBLOCK
 #define NOBLOCK FNONBLOCK
@@ -137,11 +126,22 @@ KdResetInputMachine(void)
     }
 }
 
-static void KdNonBlockFd(int fd)
+static void
+KdEnableNonBlockFd(int fd)
 {
 #ifndef WIN32
     int flags = fcntl(fd, F_GETFL);
-    flags |= FASYNC | NOBLOCK;
+    flags |= NOBLOCK;
+    fcntl(fd, F_SETFL, flags);
+#endif
+}
+
+static void
+KdDisableNotBlockFd(int fd)
+{
+#ifndef WIN32
+    int flags = fcntl(fd, F_GETFL);
+    flags &= ~NOBLOCK;
     fcntl(fd, F_SETFL, flags);
 #endif
 }
@@ -154,49 +154,16 @@ static void KdNotifyFd(int fd, int ready, void *data)
 
 static void KdAddFd(int fd, int i)
 {
-#ifdef KDRIVE_KBD
-    struct sigaction act;
-
-    sigset_t set;
-
-    kdnFds++;
-    fcntl(fd, F_SETOWN, getpid());
-#endif
-    KdNonBlockFd(fd);
+    KdEnableNonBlockFd(fd);
+    /* AddEnabledDevice(fd); No longer exists */
     InputThreadRegisterDev(fd, KdNotifyFd, (void *) (intptr_t) i);
-#ifdef KDRIVE_KBD
-/*  AddEnabledDevice(fd); */
-    memset(&act, '\0', sizeof act);
-    act.sa_handler = KdSigio;
-
-    sigemptyset(&act.sa_mask);
-    sigaddset(&act.sa_mask, SIGIO);
-    sigaddset(&act.sa_mask, SIGALRM);
-    sigaddset(&act.sa_mask, SIGVTALRM);
-    sigaction(SIGIO, &act, 0);
-    sigemptyset(&set);
-    sigprocmask(SIG_SETMASK, &set, 0);
-#endif
 }
 
 static void KdRemoveFd(int fd)
 {
+    /* RemoveEnabledDevice(fd); No longer exists */
     InputThreadUnregisterDev(fd);
-#ifndef WIN32
-    int flags = fcntl(fd, F_GETFL);
-    flags &= ~(FASYNC | NOBLOCK);
-    fcntl(fd, F_SETFL, flags);
-#endif
-#ifdef KDRIVE_KBD
-    struct sigaction act;
-    kdnFds--;
-    if (kdnFds == 0) {
-        memset(&act, '\0', sizeof act);
-        act.sa_handler = SIG_IGN;
-        sigemptyset(&act.sa_mask);
-        sigaction(SIGIO, &act, 0);
-    }
-#endif
+    KdDisableNotBlockFd(fd);
 }
 
 Bool KdRegisterFd(int fd, void (*read) (int fd, void *closure), void *closure)
