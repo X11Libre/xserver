@@ -325,7 +325,7 @@ LinuxKeyboardInit(KdKeyboardInfo * ki)
     free(ki->name);
     ki->name = strdup("Linux console keyboard");
 
-    ki->maxScanCode = 0;
+    ki->minScanCode = 0;
     ki->maxScanCode = 255;
     return Success;
 }
