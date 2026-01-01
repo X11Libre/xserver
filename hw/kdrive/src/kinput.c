@@ -1853,11 +1853,7 @@ KdReleaseAllKeys(void)
     int key;
     KdKeyboardInfo *ki;
 
-#ifndef KDRIVE_KBD
     input_lock();
-#else
-    KdBlockSigio();
-#endif
 
     for (ki = kdKeyboards; ki; ki = ki->next) {
         for (key = ki->keySyms.minKeyCode; key < ki->keySyms.maxKeyCode; key++) {
@@ -1868,11 +1864,7 @@ KdReleaseAllKeys(void)
         }
     }
 
-#ifndef KDRIVE_KBD
     input_unlock();
-#else
-    KdUnblockSigio();
-#endif
 #endif
 }
 
