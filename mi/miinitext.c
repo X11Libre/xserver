@@ -152,6 +152,9 @@ static const ExtensionModule staticExtensions[] = {
 #ifdef PRESENT
     {present_extension_init, "Present", NULL},
 #endif
+#ifdef DRI2
+    {DRI2ExtensionInit, DRI2_NAME, &noDRI2Extension},
+#endif
 #ifdef DRI3
     {dri3_extension_init, "DRI3", NULL},
 #endif

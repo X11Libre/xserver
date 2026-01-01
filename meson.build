@@ -649,6 +649,7 @@ common_dep = [
 inc = include_directories(
     '.',
     'Xext',
+    'Xext/dri2',
     'Xi',
     'composite',
     'exa',
@@ -810,6 +811,7 @@ libxserver = [
     libxserver_os,
 ]
 
+libxserver += libxserver_dri2
 libxserver += libxserver_dri3
 
 if build_namespace

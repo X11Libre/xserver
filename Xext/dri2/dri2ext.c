@@ -30,9 +30,7 @@
  *   Kristian Høgsberg (krh@redhat.com)
  */
 
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
+#include <dix-config.h>
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -52,9 +50,9 @@
 #include "dri2int.h"
 #include "protocol-versions.h"
 
-/* The only xf86 includes */
-#include "xf86Module.h"
-#include "xf86Extensions.h"
+/* For the static extension loader */
+Bool noDRI2Extension = FALSE;
+void DRI2ExtensionInit(void);
 
 static int DRI2EventBase;
 

@@ -22,7 +22,7 @@
 
 #include <kdrive-config.h>
 #include "fbdev.h"
-#include "miext/extinit_priv.h"
+
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 
@@ -30,18 +30,6 @@ void
 InitCard(char *name)
 {
     KdCardInfoAdd(&fbdevFuncs, 0);
-}
-
-static const ExtensionModule ephyrExtensions[] = {
-#ifdef GLXEXT
- { GlxExtensionInit, "GLX", &noGlxExtension },
-#endif
-};
-
-static
-void ephyrExtensionInit(void)
-{
-    LoadExtensionList(ephyrExtensions, ARRAY_SIZE(ephyrExtensions), TRUE);
 }
 
 #if INPUTTHREAD
@@ -56,7 +44,6 @@ ddxInputThreadInit(void)
 void
 InitOutput(int argc, char **argv)
 {
-    ephyrExtensionInit();
     KdInitOutput(argc, argv);
 }
 

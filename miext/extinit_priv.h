@@ -8,6 +8,12 @@
 
 #include "extinit.h"
 
+#ifdef DRI2
+#include <X11/extensions/dri2proto.h>
+extern Bool noDRI2Extension;
+void DRI2ExtensionInit(void);
+#endif
+
 /* required by: the 470 and 390 nvidia DDX drivers */
 extern _X_EXPORT Bool noDamageExtension;
 

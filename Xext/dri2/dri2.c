@@ -30,9 +30,7 @@
  *   Kristian Høgsberg (krh@redhat.com)
  */
 
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
+#include <dix-config.h>
 
 #include <errno.h>
 
@@ -49,7 +47,17 @@
 #include "dri2_priv.h"
 #include "dri2int.h"
 #include "damage.h"
-#include "xf86.h"
+
+/* needs xf86.h otherwise */
+/* format is treated as part of the varargs to swallow the comma */
+#define xf86DrvMsg(scrnIndex, type, /* format, */ ...) \
+    do { \
+        (void)scrnIndex; \
+        if (type == X_ERROR) { \
+            printf(__VA_ARGS__); \
+        } \
+    } while (0);
+
 
 CARD8 dri2_major;               /* version of DRI2 supported by DDX */
 CARD8 dri2_minor;
