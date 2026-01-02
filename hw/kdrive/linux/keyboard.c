@@ -39,6 +39,8 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
+#include "os/xserver_poll.h"
+
 extern int LinuxConsoleFd;
 
 /*
@@ -257,12 +259,29 @@ LinuxKeyboardRead(int fd, void *closure)
 static int LinuxKbdTrans;
 static struct termios LinuxTermios;
 
+static void
+LinuxKeyboardFlush(int fd)
+{
+    struct pollfd poll_fd;
+    unsigned char buf[256];
+
+    if (tcflush(fd, TCIFLUSH) == 0) {
+        return;
+    }
+
+    poll_fd.fd = fd;
+    poll_fd.events = POLLIN;
+    while (xserver_poll(&poll_fd, 1, 0) > 0) {
+        if (read(fd, &buf, sizeof(buf)) < 1) {
+            return;
+        }
+    }
+}
+
 static Status
 LinuxKeyboardEnable(KdKeyboardInfo * ki)
 {
     struct termios nTty;
-    unsigned char buf[256];
-    int n;
     int fd;
 
     if (!ki)
@@ -287,7 +306,7 @@ LinuxKeyboardEnable(KdKeyboardInfo * ki)
     /*
      * Flush any pending keystrokes
      */
-    while ((n = read(fd, buf, sizeof(buf))) > 0);
+    LinuxKeyboardFlush(fd);
     KdRegisterFd(fd, LinuxKeyboardRead, ki);
     return Success;
 }
