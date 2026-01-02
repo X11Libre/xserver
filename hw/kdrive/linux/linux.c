@@ -246,6 +246,24 @@ LinuxEnable(void)
     enabled = TRUE;
 }
 
+static Bool
+LinuxSpecialKey(KeySym sym)
+{
+    struct vt_stat vts;
+    int con;
+
+    if (XK_F1 <= sym && sym <= XK_F12) {
+        con = sym - XK_F1 + 1;
+        memset(&vts, '\0', sizeof(vts));    /* valgrind */
+        ioctl(LinuxConsoleFd, VT_GETSTATE, &vts);
+        if (con != vts.v_active && (vts.v_state & (1 << con))) {
+            ioctl(LinuxConsoleFd, VT_ACTIVATE, con);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 static void
 LinuxDisable(void)
 {
@@ -345,6 +363,7 @@ LinuxBell(int volume, int pitch, int duration)
 KdOsFuncs LinuxFuncs = {
     .Init = LinuxInit,
     .Enable = LinuxEnable,
+    .SpecialKey = LinuxSpecialKey,
     .Disable = LinuxDisable,
     .Fini = LinuxFini,
     .Bell = LinuxBell,
