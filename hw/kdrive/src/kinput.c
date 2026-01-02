@@ -39,6 +39,7 @@
 #include <X11/extensions/XIproto.h>
 
 #include "config/hotplug_priv.h"
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
@@ -1945,6 +1946,126 @@ KdCheckLock(void)
     }
 }
 
+static KeySym
+KdKeyCodeToKeySym(KdKeyboardInfo *ki, int type, unsigned char key_code)
+{
+    unsigned char scan_code = key_code - KD_MIN_KEYCODE + ki->minScanCode;
+    (void)type;
+
+    /**
+     * XXX This looks really sketchy XXX
+     * Surely there is a way to query this from xkb?
+     * This doesn't work:
+     * return kbd->key->xkbInfo->desc->map->modmap[key_code];
+     *
+     * Scancodes are taken from https://aeb.win.tue.nl/linux/kbd/scancodes-1.html
+     *
+     * Only a few keys we are interested in are listed here.
+     * If we ever need more keys, we can add them later.
+     */
+
+#define KEY_BACKSPACE 0x0E
+#define KEY_F1 0x3B
+#define KEY_F2 0x3C
+#define KEY_F3 0x3D
+#define KEY_F4 0x3E
+#define KEY_F5 0x3F
+#define KEY_F6 0x40
+#define KEY_F7 0x41
+#define KEY_F8 0x42
+#define KEY_F9 0x43
+#define KEY_F10 0x44
+
+/**
+ * The driver doesn't differentiate between E0 53 and 53,
+ * so both are treated as the delete key being pressed
+ */
+#define KEY_DEL 0x53
+
+    switch(scan_code) {
+        case KEY_BACKSPACE:
+            return XK_BackSpace;
+        case KEY_F1:
+            return XK_F1;
+        case KEY_F2:
+            return XK_F2;
+        case KEY_F3:
+            return XK_F3;
+        case KEY_F4:
+            return XK_F4;
+        case KEY_F5:
+            return XK_F5;
+        case KEY_F6:
+            return XK_F6;
+        case KEY_F7:
+            return XK_F7;
+        case KEY_F8:
+            return XK_F8;
+        case KEY_F9:
+            return XK_F9;
+        case KEY_F10:
+            return XK_F10;
+#if 0 /* Doesn't work from my testing */
+        case KEY_DEL:
+            return XK_Delete;
+#endif
+    }
+
+    return XK_VoidSymbol;
+}
+
+static void
+KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
+{
+    KeySym sym;
+
+    /*
+     * Ignore key releases
+     */
+
+    if (type == KeyRelease) {
+        return;
+    }
+
+    /*
+     * Check for control/alt pressed
+     */
+    if ((XkbStateFieldFromRec(&ki->dixdev->key->xkbInfo->state) & (ControlMask | Mod1Mask)) !=
+        (ControlMask | Mod1Mask)) {
+        return;
+    }
+
+    sym = KdKeyCodeToKeySym(ki, type, key_code);
+    if (sym == XK_VoidSymbol) {
+        return;
+    }
+
+    /*
+     * Let OS function see keysym first
+     */
+
+    if (kdOsFuncs->SpecialKey)
+        if ((*kdOsFuncs->SpecialKey) (sym))
+            return;
+
+    /*
+     * Now check for backspace or delete; these signal the
+     * X server to terminate
+     */
+    switch (sym) {
+    case XK_BackSpace:
+    case XK_Delete:
+    case XK_KP_Delete:
+        /*
+         * Set the dispatch exception flag so the server will terminate the
+         * next time through the dispatch loop.
+         */
+        if (kdAllowZap)
+            dispatchException |= DE_TERMINATE;
+        break;
+    }
+}
+
 void
 KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
                        unsigned char scan_code, unsigned char is_up)
@@ -1967,6 +2088,7 @@ KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
             type = KeyPress;
 
         QueueKeyboardEvents(ki->dixdev, type, key_code);
+        KdCheckSpecialKeys(ki, type, key_code);
     }
     else {
         ErrorF("driver %s wanted to post scancode %d outside of [%d, %d]!\n",
