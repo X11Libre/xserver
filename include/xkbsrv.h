@@ -197,6 +197,9 @@ extern _X_EXPORT void XkbFreeKeyboard(XkbDescPtr /* xkb */ ,
                                       Bool      /* freeDesc */
     );
 
+extern _X_EXPORT KeySymsPtr XkbGetCoreMap(DeviceIntPtr  /* keybd */
+    );
+
 extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
                                             KeySymsPtr /* map */ ,
                                             KeyCode /* firstKey */ ,
@@ -208,6 +211,11 @@ extern _X_EXPORT void XkbApplyMappingChange(DeviceIntPtr /* pXDev */ ,
 extern _X_EXPORT void XkbDDXChangeControls(DeviceIntPtr /* dev */ ,
                                            XkbControlsPtr /* old */ ,
                                            XkbControlsPtr       /* new */
+    );
+
+extern _X_EXPORT void XkbSetRepeatKeys(DeviceIntPtr /* pXDev */ ,
+                                       int /* key */ ,
+                                       int      /* onoff */
     );
 
 extern _X_EXPORT void XkbGetRulesDflts(XkbRMLVOSet *    /* rmlvo */
