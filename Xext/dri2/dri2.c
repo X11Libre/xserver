@@ -53,11 +53,8 @@
 #define xf86DrvMsg(scrnIndex, type, /* format, */ ...) \
     do { \
         (void)scrnIndex; \
-        if (type == X_ERROR) { \
-            printf(__VA_ARGS__); \
-        } \
+        LogMessage(type, __VA_ARGS__); \
     } while (0);
-
 
 CARD8 dri2_major;               /* version of DRI2 supported by DDX */
 CARD8 dri2_minor;
