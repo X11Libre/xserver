@@ -392,9 +392,6 @@ static const char *defaultNoListenList[] = {
 #ifndef LISTEN_UNIX
     "unix",
 #endif
-#ifndef LISTEN_LOCAL
-    "local",
-#endif
     NULL
 };
 
