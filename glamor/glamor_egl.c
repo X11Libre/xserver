@@ -389,7 +389,9 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
         uint32_t num_modifiers;
         uint64_t *modifiers = NULL;
 
-        glamor_get_modifiers(screen, format, &num_modifiers, &modifiers);
+        if (!glamor_get_modifiers(screen, format, &num_modifiers, &modifiers)) {
+            return FALSE;
+        }
 
         if (num_modifiers > 0) {
 #ifdef GBM_BO_WITH_MODIFIERS2
@@ -892,6 +894,15 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     *num_modifiers = num;
     glamor_filter_modifiers(num_modifiers, modifiers, external_only);
     free(external_only);
+
+
+    if (num && *num_modifiers == 0) {
+        /**
+         * The api explicitly told us what the supported modifiers are,
+         * but we can't use any of them for our purposes
+         */
+        return FALSE;
+    }
 #endif
     return TRUE;
 }
