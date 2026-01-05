@@ -171,9 +171,17 @@ typedef void (*ModuleTearDownProc) (void *);
 
 #define MODULESETUPPROTO(func) void *func(void *, void *, int*, int*)
 
+/*
+ * Module information header. Every loadable module needs to export a symbol
+ * of that type, so the loader can call into the module for initialization.
+ * The symbol must be named <modulename> + "ModuleData".
+ */
 typedef struct {
+    /* must point to structure with version information */
     XF86ModuleVersionInfo *vers;
+    /* called on module load (if not null) */
     ModuleSetupProc setup;
+    /* called on module teardown with setup()'s result as parameter (if not null) */
     ModuleTearDownProc teardown;
 } XF86ModuleData;
 
