@@ -51,19 +51,15 @@ conf_data.set('_GNU_SOURCE', '1')
 # ifdef for openbsd?
 conf_data.set('HAS_APERTURE_DRV', host_machine.system() == 'openbsd' ? '1' : false)
 
-if get_option('input_thread') == 'false'
-  enable_input_thread = false
-else
   enable_input_thread = cc.has_header_symbol('pthread.h',
 					     'PTHREAD_MUTEX_RECURSIVE')
-  if not enable_input_thread and get_option('input_thread') == 'true'
+  if not enable_input_thread
     error('Input thread enabled and PTHREAD_MUTEX_RECURSIVE not found')
   endif
-  if host_machine.system() == 'windows' and get_option('input_thread') == 'auto'
-      enable_input_thread = false
-  endif
-endif
-conf_data.set('INPUTTHREAD', enable_input_thread ? '1' : false)
+#  if host_machine.system() == 'windows' and get_option('input_thread') == 'auto'
+#      enable_input_thread = false
+#  endif
+conf_data.set('INPUTTHREAD', '1')
 
 if cc.compiles('''
     #define _GNU_SOURCE 1
