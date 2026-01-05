@@ -436,8 +436,8 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 #ifdef GLAMOR_HAS_GBM_LINEAR
                     (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
                      GBM_BO_USE_LINEAR : 0) |
-                     GBM_BO_USE_RENDERING);
 #endif
+                     GBM_BO_USE_RENDERING);
 #if 0
             if (bo) {
                 /* TODO: scanout failed, but regular buffer succeeded, maybe log something? */
