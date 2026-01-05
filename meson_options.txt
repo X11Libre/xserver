@@ -60,8 +60,6 @@ option('listen_tcp', type: 'boolean', value: false,
        description: 'Listen on TCP by default')
 option('listen_unix', type: 'boolean', value: true,
        description: 'Listen on Unix by default')
-option('listen_local', type: 'boolean', value: true,
-       description: 'Listen on local by default')
 
 option('int10', type: 'combo', choices: ['stub', 'x86emu', 'vm86', 'auto', 'false'],
        value: 'auto',
