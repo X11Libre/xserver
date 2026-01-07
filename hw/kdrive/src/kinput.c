@@ -1387,7 +1387,7 @@ KdPointerInfo *KdParsePointer(const char *arg)
 }
 
 void
-kdInitInputPre(void)
+KdAddConfigInputDrivers(void)
 {
     #ifdef KDRIVE_KBD
     if (!kdConfigKeyboards) {
@@ -1400,7 +1400,6 @@ kdInitInputPre(void)
         KdAddConfigPointer("mouse");
     }
     #endif
-    KdInitInput();
 }
 
 void
