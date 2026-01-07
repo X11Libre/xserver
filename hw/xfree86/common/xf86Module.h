@@ -203,4 +203,22 @@ typedef struct {
         .moduleclass  = MOD_CLASS_XINPUT,       \
     };
 
-#endif                          /* _XF86MODULE_H */
+/*
+ * declare module version info structure for an video driver module
+ */
+#define XF86_MODULE_VERSION_VIDEO(_name, _major, _minor, _patchlevel)   \
+    static XF86ModuleVersionInfo modVersion = { \
+        .modname      = _name,                  \
+        .vendor       = MODULEVENDORSTRING,     \
+        ._modinfo1_   = MODINFOSTRING1,         \
+        ._modinfo2_   = MODINFOSTRING2,         \
+        .xf86version  = XORG_VERSION_CURRENT,   \
+        .majorversion = _major,                 \
+        .minorversion = _minor,                 \
+        .patchlevel   = _patchlevel,            \
+        .abiclass     = ABI_CLASS_VIDEODRV,     \
+        .abiversion   = ABI_VIDEODRV_VERSION,   \
+        .moduleclass  = MOD_CLASS_VIDEODRV,     \
+    };
+
+#endif /* _XF86MODULE_H */
