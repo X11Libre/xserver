@@ -483,7 +483,6 @@ if build_xorg_sdk
             'migc.h',
             'mi.h',
             'miline.h',
-            'mioverlay.h',
             'mipointer.h',
             'mipointrst.h',
             'mistruct.h',
