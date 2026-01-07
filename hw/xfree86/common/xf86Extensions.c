@@ -53,7 +53,6 @@
 Bool noXFree86VidModeExtension = FALSE;
 Bool noXFree86DGAExtension = FALSE;
 Bool noXFree86DRIExtension = FALSE;
-Bool noDRI2Extension = FALSE;
 
 /*
  * DDX-specific extensions.
@@ -79,13 +78,6 @@ static const ExtensionModule extensionModules[] = {
         "XFree86-DRI",
         &noXFree86DRIExtension
     },
-#endif
-#ifdef DRI2
-    {
-        DRI2ExtensionInit,
-        DRI2_NAME,
-        &noDRI2Extension
-    }
 #endif
 };
 

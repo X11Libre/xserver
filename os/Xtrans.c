@@ -74,10 +74,7 @@ from The Open Group.
 #define TRANS_SOCKET_LOCAL_INDEX	5
 #define TRANS_SOCKET_INET_INDEX		6
 #define TRANS_SOCKET_TCP_INDEX		7
-#define TRANS_LOCAL_LOCAL_INDEX		9
-#define TRANS_LOCAL_NAMED_INDEX		11
 #define TRANS_SOCKET_INET6_INDEX	14
-#define TRANS_LOCAL_PIPE_INDEX		15
 
 #if defined(IPv6) && !defined(AF_INET6)
 #error "Cannot build IPv6 support without AF_INET6"

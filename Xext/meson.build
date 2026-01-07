@@ -66,3 +66,4 @@ if build_xorg
 endif
 
 subdir('damage')
+subdir('dri2')

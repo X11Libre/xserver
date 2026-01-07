@@ -44,10 +44,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <assert.h>
-#include <pthread.h>
-
-#include "xkb/xkbsrv_priv.h"
 
 #include "quartz.h"
 #include "darwin.h"
@@ -56,6 +52,9 @@
 #include "quartzKeyboard.h"
 
 #include "X11Application.h"
+
+#include <assert.h>
+#include <pthread.h>
 
 #include "xkbsrv.h"
 #include "exevents.h"
