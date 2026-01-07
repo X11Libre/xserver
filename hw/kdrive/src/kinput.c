@@ -1387,6 +1387,23 @@ KdPointerInfo *KdParsePointer(const char *arg)
 }
 
 void
+kdInitInputPre(void)
+{
+    #ifdef KDRIVE_KBD
+    if (!kdConfigKeyboards) {
+        KdAddConfigKeyboard("keyboard");
+    }
+    #endif
+
+    #ifdef KDRIVE_MOUSE
+    if (!kdConfigPointers) {
+        KdAddConfigPointer("mouse");
+    }
+    #endif
+    KdInitInput();
+}
+
+void
 KdInitInput(void)
 {
     KdPointerInfo *pi;
@@ -1401,18 +1418,6 @@ KdInitInput(void)
 #endif
 
     kdInputEnabled = TRUE;
-
-#ifdef KDRIVE_KBD
-    if (!kdConfigKeyboards) {
-        KdAddConfigKeyboard("keyboard");
-    }
-#endif
-
-#ifdef KDRIVE_MOUSE
-    if (!kdConfigPointers) {
-        KdAddConfigPointer("mouse");
-    }
-#endif
 
     for (dev = kdConfigPointers; dev; dev = dev->next) {
         pi = KdParsePointer(dev->line);
