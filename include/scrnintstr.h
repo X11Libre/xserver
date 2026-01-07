@@ -705,6 +705,14 @@ typedef struct _Screen {
     /* additional screen post-close notify hooks (replaces wrapping CloseScreen)
        should NOT be touched outside of DIX core */
     CallbackListPtr hookPostClose;
+
+    /* additional screen UnrealizeWindow notify hooks (replaces wrapping UnrealizeWindow)
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookUnrealizeWindow;
+
+    /* additional screen post-UnrealizeWindow notify hooks (replaces wrapping UnrealizeWindow)
+       should NOT be touched outside of DIX core */
+    CallbackListPtr hookPostUnrealizeWindow;
 } ScreenRec;
 
 static inline RegionPtr

@@ -28,6 +28,10 @@
 #include "include/screenint.h" /* ScreenPtr */
 #include "include/window.h" /* WindowPtr */
 
+typedef void (*ScreenHookWithWindowPtr)(CallbackListPtr *pcbl,
+                                        ScreenPtr pScreen,
+                                        WindowPtr pWindow);
+
 /* prototype of a window destructor */
 typedef void (*XorgScreenWindowDestroyProcPtr)(CallbackListPtr *pcbl,
                                                ScreenPtr pScreen,
@@ -248,5 +252,56 @@ void dixScreenHookPostCreateResources(ScreenPtr pScreen,
 _X_EXPORT
 void dixScreenUnhookPostCreateResources(ScreenPtr pScreen,
                                         XorgScreenPostCreateResourcesProcPtr func);
+
+
+/**
+ * @brief register UnrealizeWindow hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the hook
+ *
+ **/
+_X_EXPORT
+void dixScreenHookUnrealizeWindow(ScreenPtr pScreen,
+                                  ScreenHookWithWindowPtr func);
+
+/**
+ * @brief unregister a UnrealizeWindow hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookUnrealizeWindow
+ **/
+_X_EXPORT
+void dixScreenUnhookUnrealizeWindow(ScreenPtr pScreen,
+                                    ScreenHookWithWindowPtr func);
+
+/**
+ * @brief register post-UnrealizeWindow hook on the given screen
+ *
+ * @param pScreen pointer to the screen to register the notify hook into
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the hook
+ *
+ **/
+_X_EXPORT
+void dixScreenHookPostUnrealizeWindow(ScreenPtr pScreen,
+                                      ScreenHookWithWindowPtr func);
+
+/**
+ * @brief unregister a post-UnrealizeWindow hook on the given screen
+ *
+ * @param pScreen pointer to the screen to unregister the hook from
+ * @param func pointer to the hook function
+ * @param arg opaque pointer passed to the destructor
+ *
+ * @see dixScreenHookPostUnrealizeWindow
+ **/
+_X_EXPORT
+void dixScreenUnhookPostUnrealizeWindow(ScreenPtr pScreen,
+                                        ScreenHookWithWindowPtr func);
 
 #endif /* DIX_SCREEN_HOOKS_H */

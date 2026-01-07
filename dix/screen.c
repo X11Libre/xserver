@@ -30,5 +30,7 @@ void dixFreeScreen(ScreenPtr pScreen)
     DeleteCallbackList(&pScreen->hookPostClose);
     DeleteCallbackList(&pScreen->hookPixmapDestroy);
     DeleteCallbackList(&pScreen->hookPostCreateResources);
+    DeleteCallbackList(&pScreen->hookUnrealizeWindow);
+    DeleteCallbackList(&pScreen->hookPostUnrealizeWindow);
     free(pScreen);
 }
