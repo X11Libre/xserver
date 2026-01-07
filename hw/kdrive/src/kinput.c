@@ -84,6 +84,9 @@ static Bool kdInputEnabled;
 static Bool kdOffScreen;
 static unsigned long kdOffScreenTime;
 
+Bool kdKeyboardInitialized = FALSE;
+Bool kdPointerInitialized = FALSE;
+
 static KdPointerMatrix kdPointerMatrix = {
     {{1, 0, 0},
      {0, 1, 0}}
@@ -884,6 +887,7 @@ KdAddConfigKeyboard(const char *keyboard)
     for (prev = &kdConfigKeyboards; *prev; prev = &(*prev)->next);
     *prev = new;
 
+    kdKeyboardInitialized = TRUE;
     return Success;
 }
 
@@ -948,6 +952,7 @@ KdAddConfigPointer(const char *pointer)
     for (prev = &kdConfigPointers; *prev; prev = &(*prev)->next);
     *prev = new;
 
+    kdPointerInitialized = TRUE;
     return Success;
 }
 
@@ -1320,18 +1325,6 @@ KdInitInput(void)
         InputThreadPreInit();
 
     kdInputEnabled = TRUE;
-
-#ifdef KDRIVE_KBD
-    if (!kdConfigKeyboards) {
-        KdAddConfigKeyboard("keyboard");
-    }
-#endif
-
-#ifdef KDRIVE_MOUSE
-    if (!kdConfigPointers) {
-        KdAddConfigPointer("mouse");
-    }
-#endif
 
     for (dev = kdConfigPointers; dev; dev = dev->next) {
         pi = KdParsePointer(dev->line);

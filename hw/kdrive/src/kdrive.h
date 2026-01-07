@@ -225,6 +225,8 @@ struct _KdPointerInfo {
     struct _KdPointerInfo *next;
 };
 
+extern Bool kdPointerInitialized;
+
 extern int KdCurScreen;
 
 void KdAddPointerDriver(KdPointerDriver * driver);
@@ -285,6 +287,8 @@ struct _KdKeyboardInfo {
     KdKeyboardDriver *driver;
     void *driverPrivate;
 };
+
+extern Bool kdKeyboardInitialized;
 
 void KdAddKeyboardDriver(KdKeyboardDriver * driver);
 void KdRemoveKeyboardDriver(KdKeyboardDriver * driver);

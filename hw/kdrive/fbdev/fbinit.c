@@ -51,6 +51,20 @@ void
 InitInput(int argc, char **argv)
 {
     KdOsAddInputDrivers();
+
+    /* Load default input drivers */
+#ifdef KDRIVE_KBD
+    if (!kdKeyboardInitialized) {
+        KdAddConfigKeyboard("keyboard");
+    }
+#endif
+
+#ifdef KDRIVE_MOUSE
+    if (!kdPointerInitialized) {
+        KdAddConfigPointer("mouse");
+    }
+#endif
+
     KdInitInput();
 }
 
