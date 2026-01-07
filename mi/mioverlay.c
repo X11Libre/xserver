@@ -1698,23 +1698,6 @@ miOverlayComputeCompositeClip(GCPtr pGC, WindowPtr pWin)
     }
 }
 
-Bool
-miOverlayCollectUnderlayRegions(WindowPtr pWin, RegionPtr *region)
-{
-    miOverlayTreePtr pTree = MIOVERLAY_GET_WINDOW_TREE(pWin);
-
-    if (pTree) {
-        *region = &pTree->borderClip;
-        return FALSE;
-    }
-
-    *region = RegionCreate(NullBox, 0);
-
-    CollectUnderlayChildrenRegions(pWin, *region);
-
-    return TRUE;
-}
-
 static miOverlayTreePtr
 DoLeaf(WindowPtr pWin, miOverlayTreePtr parent, miOverlayTreePtr prevSib)
 {
