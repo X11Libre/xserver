@@ -13,9 +13,4 @@ extern _X_EXPORT Bool
 miInitOverlay(ScreenPtr pScreen,
               miOverlayInOverlayFunc inOverlay, miOverlayTransFunc trans);
 
-extern _X_EXPORT Bool
-
-miOverlayGetPrivateClips(WindowPtr pWin,
-                         RegionPtr *borderClip, RegionPtr *clipList);
-
 #endif                          /* __MIOVERLAY_H */
