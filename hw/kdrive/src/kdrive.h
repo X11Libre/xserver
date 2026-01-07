@@ -473,7 +473,7 @@ void
 void
  KdInitInput(void);
  void
- kdInitInputPre(void);
+ KdAddConfigInputDrivers(void);
 void
  KdCloseInput(void);
 
