@@ -33,7 +33,6 @@ hdrs_mi = [
   'migc.h',
   'mi.h',
   'miline.h',
-  'mioverlay.h',
   'mipointer.h',
   'mipointrst.h',
   'mistruct.h',

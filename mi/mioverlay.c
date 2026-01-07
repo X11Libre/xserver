@@ -1,8 +1,24 @@
-
 #include <dix-config.h>
 
 #include "windowstr.h"
-#include "mioverlay.h"
+
+/* this all is just left here for compat with proprietary Nvidia drivers */
+
+typedef void (*miOverlayTransFunc) (ScreenPtr, int, BoxPtr);
+typedef Bool (*miOverlayInOverlayFunc) (WindowPtr);
+
+_X_EXPORT Bool miInitOverlay(ScreenPtr pScreen,
+                             miOverlayInOverlayFunc inOverlay,
+                             miOverlayTransFunc trans);
+
+_X_EXPORT Bool miOverlayGetPrivateClips(WindowPtr pWin,
+                                        RegionPtr *borderClip,
+                                        RegionPtr *clipList);
+
+_X_EXPORT Bool miOverlayCollectUnderlayRegions(WindowPtr, RegionPtr *);
+_X_EXPORT void miOverlayComputeCompositeClip(GCPtr, WindowPtr);
+_X_EXPORT Bool miOverlayCopyUnderlay(ScreenPtr);
+_X_EXPORT void miOverlaySetRootClip(ScreenPtr, Bool);
 
 Bool
 miInitOverlay(ScreenPtr pScreen,
