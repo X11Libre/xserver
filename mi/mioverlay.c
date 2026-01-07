@@ -1636,12 +1636,6 @@ miOverlayGetPrivateClips(WindowPtr pWin,
     return FALSE;
 }
 
-Bool
-miOverlayCopyUnderlay(ScreenPtr pScreen)
-{
-    return MIOVERLAY_GET_SCREEN_PRIVATE(pScreen)->copyUnderlay;
-}
-
 static miOverlayTreePtr
 DoLeaf(WindowPtr pWin, miOverlayTreePtr parent, miOverlayTreePtr prevSib)
 {
