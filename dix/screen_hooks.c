@@ -100,3 +100,13 @@ Bool dixScreenRaiseCreateResources(ScreenPtr pScreen)
     CallCallbacks(&pScreen->hookPostCreateResources, &ret);
     return ret;
 }
+
+void dixScreenRaiseUnrealizeWindow(WindowPtr pWin)
+{
+    if (!pWin)
+        return;
+
+    pWin->realized = FALSE;
+    if (pWin->drawable.pScreen->UnrealizeWindow)
+        pWin->drawable.pScreen->UnrealizeWindow(pWin);
+}

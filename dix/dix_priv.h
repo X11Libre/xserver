@@ -309,6 +309,16 @@ void MakePredeclaredAtoms(void);
 void dixFreeScreen(ScreenPtr pScreen);
 
 /*
+ * @brief call the screen's UnrealizeWindow proc
+ *
+ * Calls the Screen's UnrealizeWindow proc and sets pWin->realized
+ * to FALSE.
+ *
+ * @param pWin the window that's being unrealized
+ */
+void dixScreenRaiseUnrealizeWindow(WindowPtr pWin);
+
+/*
  * @brief call screen's window destructors
  * @see dixScreenHookWindowDestroy
  * @param pWin the window thats being destroyed
