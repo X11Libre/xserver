@@ -1642,62 +1642,6 @@ miOverlayCopyUnderlay(ScreenPtr pScreen)
     return MIOVERLAY_GET_SCREEN_PRIVATE(pScreen)->copyUnderlay;
 }
 
-void
-miOverlayComputeCompositeClip(GCPtr pGC, WindowPtr pWin)
-{
-    miOverlayTreePtr pTree = MIOVERLAY_GET_WINDOW_TREE(pWin);
-    RegionPtr pregWin;
-    Bool freeTmpClip, freeCompClip;
-
-    if (!pTree) {
-        miComputeCompositeClip(pGC, &pWin->drawable);
-        return;
-    }
-
-    if (pGC->subWindowMode == IncludeInferiors) {
-        pregWin = RegionCreate(NullBox, 1);
-        freeTmpClip = TRUE;
-        if (pWin->parent || (screenIsSaved != SCREEN_SAVER_ON) ||
-            !HasSaverWindow(pGC->pScreen)) {
-            RegionIntersect(pregWin, &pTree->borderClip, &pWin->winSize);
-        }
-    }
-    else {
-        pregWin = &pTree->clipList;
-        freeTmpClip = FALSE;
-    }
-    freeCompClip = pGC->freeCompClip;
-    if (!pGC->clientClip) {
-        if (freeCompClip)
-            RegionDestroy(pGC->pCompositeClip);
-        pGC->pCompositeClip = pregWin;
-        pGC->freeCompClip = freeTmpClip;
-    }
-    else {
-        RegionTranslate(pGC->clientClip,
-                        pWin->drawable.x + pGC->clipOrg.x,
-                        pWin->drawable.y + pGC->clipOrg.y);
-
-        if (freeCompClip) {
-            RegionIntersect(pGC->pCompositeClip, pregWin, pGC->clientClip);
-            if (freeTmpClip)
-                RegionDestroy(pregWin);
-        }
-        else if (freeTmpClip) {
-            RegionIntersect(pregWin, pregWin, pGC->clientClip);
-            pGC->pCompositeClip = pregWin;
-        }
-        else {
-            pGC->pCompositeClip = RegionCreate(NullBox, 0);
-            RegionIntersect(pGC->pCompositeClip, pregWin, pGC->clientClip);
-        }
-        pGC->freeCompClip = TRUE;
-        RegionTranslate(pGC->clientClip,
-                        -(pWin->drawable.x + pGC->clipOrg.x),
-                        -(pWin->drawable.y + pGC->clipOrg.y));
-    }
-}
-
 static miOverlayTreePtr
 DoLeaf(WindowPtr pWin, miOverlayTreePtr parent, miOverlayTreePtr prevSib)
 {
