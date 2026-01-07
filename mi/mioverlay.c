@@ -1533,33 +1533,6 @@ miOverlayChangeBorderWidth(WindowPtr pWin, unsigned int width)
         WindowsRestructured();
 }
 
-/*  We need this as an addition since the xf86 common code doesn't
-    know about the second tree which is static to this file.  */
-
-void
-miOverlaySetRootClip(ScreenPtr pScreen, Bool enable)
-{
-    WindowPtr pRoot = pScreen->root;
-    miOverlayTreePtr pTree = MIOVERLAY_GET_WINDOW_TREE(pRoot);
-
-    MARK_UNDERLAY(pRoot);
-
-    if (enable) {
-        BoxRec box;
-
-        box.x1 = 0;
-        box.y1 = 0;
-        box.x2 = pScreen->width;
-        box.y2 = pScreen->height;
-
-        RegionReset(&pTree->borderClip, &box);
-    }
-    else
-        RegionEmpty(&pTree->borderClip);
-
-    RegionBreak(&pTree->clipList);
-}
-
 static void
 miOverlayClearToBackground(WindowPtr pWin,
                            int x, int y, int w, int h, Bool generateExposures)

@@ -18,6 +18,4 @@ extern _X_EXPORT Bool
 miOverlayGetPrivateClips(WindowPtr pWin,
                          RegionPtr *borderClip, RegionPtr *clipList);
 
-extern _X_EXPORT void miOverlaySetRootClip(ScreenPtr, Bool);
-
 #endif                          /* __MIOVERLAY_H */
