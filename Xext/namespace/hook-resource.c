@@ -63,12 +63,6 @@ void hookResourceAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
             case X_GetWindowAttributes:
             case X_DestroyWindow:
                 goto pass;
-            case EXTENSION_MAJOR_XFIXES:
-                switch(client->minorOp) {
-                    case X_XFixesGetCursorImage:
-                    case X_XFixesGetCursorImageAndName:
-                        goto pass;
-                }
             case X_QueryPointer:
                 if (subj->ns->perms.allowMouseMotion)
                     goto pass;
