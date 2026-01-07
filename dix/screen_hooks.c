@@ -32,6 +32,8 @@ DECLARE_HOOK_PROC(PostClose, hookPostClose, XorgScreenCloseProcPtr)
 DECLARE_HOOK_PROC(PixmapDestroy, hookPixmapDestroy, XorgScreenPixmapDestroyProcPtr)
 DECLARE_HOOK_PROC(PostCreateResources, hookPostCreateResources,
                   XorgScreenPostCreateResourcesProcPtr)
+DECLARE_HOOK_PROC(UnrealizeWindow, hookUnrealizeWindow, ScreenHookWithWindowPtr)
+DECLARE_HOOK_PROC(PostUnrealizeWindow, hookPostUnrealizeWindow, ScreenHookWithWindowPtr)
 
 int dixScreenRaiseWindowDestroy(WindowPtr pWin)
 {
@@ -107,6 +109,13 @@ void dixScreenRaiseUnrealizeWindow(WindowPtr pWin)
         return;
 
     pWin->realized = FALSE;
-    if (pWin->drawable.pScreen->UnrealizeWindow)
-        pWin->drawable.pScreen->UnrealizeWindow(pWin);
+
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+
+    CallCallbacks(&pScreen->hookUnrealizeWindow, pWin);
+
+    if (pScreen->UnrealizeWindow)
+        pScreen->UnrealizeWindow(pWin);
+
+    CallCallbacks(&pScreen->hookPostUnrealizeWindow, pWin);
 }
