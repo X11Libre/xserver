@@ -472,6 +472,8 @@ void
 /* kinput.c */
 void
  KdInitInput(void);
+ void
+ kdInitInputPre(void);
 void
  KdCloseInput(void);
 
