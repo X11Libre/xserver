@@ -998,19 +998,20 @@ FreeWindowResources(WindowPtr pWin)
 static void
 CrushTree(WindowPtr pWin)
 {
-    WindowPtr pChild, pSib, pParent;
+    WindowPtr pChild, pSib;
     UnrealizeWindowProcPtr UnrealizeWindow;
 
     if (!(pChild = pWin->firstChild))
         return;
     UnrealizeWindow = pWin->drawable.pScreen->UnrealizeWindow;
     while (1) {
-        if (pChild->firstChild) {
+
+        /* go to a leaf node in the window tree */
+        while (pChild->firstChild)
             pChild = pChild->firstChild;
-            continue;
-        }
+
         while (1) {
-            pParent = pChild->parent;
+            WindowPtr pParent = pChild->parent;
             if (SubStrSend(pChild, pParent)) {
                 xEvent event = { .u.u.type = DestroyNotify };
                 event.u.destroyNotify.window = pChild->drawable.id;
