@@ -9,6 +9,16 @@ video_drivers_dir=@moduledir@/drivers/video
 sdkdir=@sdkdir@
 sysconfigdir=@xserverconfigdir@
 xserverconfigdir=@xserverconfigdir@
+driver_man_dir=@driver_man_dir@
+driver_man_section=@driver_man_section@
+app_man_dir=@app_man_dir@
+app_man_section=@app_man_section@
+misc_man_dir=@misc_man_dir@
+misc_man_section=@misc_man_section@
+file_man_dir=@file_man_dir@
+file_man_section=@file_man_section@
+server_name=@server_name@
+server_config=@server_config@
 
 abi_ansic=@abi_ansic@
 abi_videodrv=@abi_videodrv@
