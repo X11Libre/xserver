@@ -80,6 +80,8 @@ ddxUseMsg(void)
     ErrorF("\nXfbdev Device Usage:\n");
     ErrorF
         ("-fb path         Framebuffer device to use. Defaults to /dev/fb0\n");
+    ErrorF
+        ("-noshadow        Disable the ShadowFB layer if possible\n");
     ErrorF("\n");
 }
 
@@ -93,6 +95,11 @@ ddxProcessArgument(int argc, char **argv, int i)
         }
         UseMsg();
         exit(1);
+    }
+
+    if (!strcmp(argv[i], "-noshadow")) {
+        fbDisableShadow = TRUE;
+        return 1;
     }
 
     return KdProcessArgument(argc, argv, i);
