@@ -1928,7 +1928,11 @@ KdKeyCodeToKeySym(KdKeyboardInfo *ki, int type, unsigned char key_code)
     return XK_VoidSymbol;
 }
 
-static void
+/**
+ * Returns FALSE if we should treat this like a regular keyboard event
+ * Returns TRUE if we should fixup the event
+ */
+static Bool
 KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
 {
     KeySym sym;
@@ -1938,7 +1942,7 @@ KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
      */
 
     if (type == KeyRelease) {
-        return;
+        return FALSE;
     }
 
     /*
@@ -1946,12 +1950,12 @@ KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
      */
     if ((XkbStateFieldFromRec(&ki->dixdev->key->xkbInfo->state) & (ControlMask | Mod1Mask)) !=
         (ControlMask | Mod1Mask)) {
-        return;
+        return FALSE;
     }
 
     sym = KdKeyCodeToKeySym(ki, type, key_code);
     if (sym == XK_VoidSymbol) {
-        return;
+        return FALSE;
     }
 
     /*
@@ -1960,7 +1964,7 @@ KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
 
     if (kdOsFuncs->SpecialKey)
         if ((*kdOsFuncs->SpecialKey) (sym))
-            return;
+            return TRUE;
 
     /*
      * Now check for backspace or delete; these signal the
@@ -1978,6 +1982,8 @@ KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
             dispatchException |= DE_TERMINATE;
         break;
     }
+
+    return FALSE;
 }
 
 void
@@ -2001,8 +2007,56 @@ KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
         else
             type = KeyPress;
 
+        /**
+         * Right now, the only special keys we have
+         * either terminate the server or switch vt.
+         *
+         * We don't really cares what happens if we terminate,
+         * but we do care if we switch vt.
+         *
+         * If we switch vt, the input driver sees the key press
+         * event, but it does't see the key release event.
+         * As such, when we switch back to the original vt,
+         * the server thinks we are still pressing the F* key.
+         *
+         * To mitigate this, we can do one of two things:
+         *
+         * Forge the key release event that the server
+         * doesn't see, and 2 key release events for
+         * the crtl key and the alt key and enqueue them.
+         *
+         * Not enqueue the key press event at all,
+         * and only forge 2 key release events,
+         * one for the crtl key, another for the alt key.
+         *
+         * Below, the latter option is implemented.
+         */
+
+        /* Scancodes are taken from https://aeb.win.tue.nl/linux/kbd/scancodes-1.html */
+
+        #define KEY_CTRL 0x1D
+        #define KEY_ALT 0x38
+
+#if 0 /* First option */
+        Bool ret = KdCheckSpecialKeys(ki, type, key_code);
         QueueKeyboardEvents(ki->dixdev, type, key_code);
-        KdCheckSpecialKeys(ki, type, key_code);
+        if (ret) {
+            unsigned char ctrl_key_code = KEY_CTRL + KD_MIN_KEYCODE - ki->minScanCode;
+            unsigned char alt_key_code = KEY_ALT + KD_MIN_KEYCODE - ki->minScanCode;
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, key_code);
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, ctrl_key_code);
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, alt_key_code);
+        }
+#else /* Second option */
+        if (!KdCheckSpecialKeys(ki, type, key_code)) {
+            QueueKeyboardEvents(ki->dixdev, type, key_code);
+        } else {
+            unsigned char ctrl_key_code = KEY_CTRL + KD_MIN_KEYCODE - ki->minScanCode;
+            unsigned char alt_key_code = KEY_ALT + KD_MIN_KEYCODE - ki->minScanCode;
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, ctrl_key_code);
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, alt_key_code);
+        }
+#endif
     }
     else {
         ErrorF("driver %s wanted to post scancode %d outside of [%d, %d]!\n",
