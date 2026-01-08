@@ -35,6 +35,7 @@
 #endif
 
 const char *fbdevDevicePath = NULL;
+Bool fbDisableShadow = FALSE;
 
 static Bool
 fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
@@ -345,11 +346,14 @@ fbdevMapFramebuffer(KdScreenInfo * screen)
     KdPointerMatrix m;
     FbdevPriv *priv = screen->card->driver;
 
-    if (scrpriv->randr != RR_Rotate_0 ||
-        priv->fix.type != FB_TYPE_PACKED_PIXELS)
+    if (!fbDisableShadow) {
         scrpriv->shadow = TRUE;
-    else
+    } else if (scrpriv->randr != RR_Rotate_0 ||
+        priv->fix.type != FB_TYPE_PACKED_PIXELS) {
+        scrpriv->shadow = TRUE;
+    } else {
         scrpriv->shadow = FALSE;
+    }
 
     KdComputePointerMatrix(&m, scrpriv->randr, screen->width, screen->height);
 

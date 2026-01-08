@@ -50,6 +50,7 @@ typedef struct _fbdevScrPriv {
 
 extern KdCardFuncs fbdevFuncs;
 extern const char *fbdevDevicePath;
+extern Bool fbDisableShadow;
 
 Bool fbdevCardInit(KdCardInfo * card);
 
