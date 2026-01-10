@@ -46,6 +46,7 @@
 #include "include/extinit.h"
 #include "mi/mi_priv.h"
 #include "os/log_priv.h"
+#include "os/mathx_priv.h"
 #include "os/osdep.h"
 
 #include "os.h"
@@ -1365,7 +1366,7 @@ xf86GetVisualName(int visual)
 int
 xf86GetVerbosity(void)
 {
-    return max(xf86Verbose, xf86LogVerbose);
+    return MAX(xf86Verbose, xf86LogVerbose);
 }
 
 Gamma
