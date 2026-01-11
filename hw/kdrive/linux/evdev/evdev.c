@@ -28,6 +28,7 @@
 #include "inputstr.h"
 #include "scrnintstr.h"
 #include "kdrive.h"
+#include "evdev.h"
 
 #define NUM_EVENTS  128
 #define ABS_UNSET   -65535
@@ -183,21 +184,11 @@ EvdevPtrRead(int evdevPort, void *closure)
     }
 }
 
-#define NUM_DEFAULT_EVDEV 32
-
 static Status
 EvdevPtrInit(KdPointerInfo * pi)
 {
     if (!pi->path) {
-        char default_device[] = "/dev/input/eventxx";
-        for (int i = 0; i < NUM_DEFAULT_EVDEV; i++) {
-            sprintf(default_device, "/dev/input/event%d", i);
-            fd = open(default_device, O_RDWR);
-            if (fd >= 0) {
-                pi->path = strdup(default_device);
-                break;
-            }
-        }
+        pi->path = EvdevDefaultPtr();
     }
     else {
         int fd = open(pi->path, O_RDWR);
@@ -364,15 +355,7 @@ static Status
 EvdevKbdInit(KdKeyboardInfo * ki)
 {
     if (!ki->path) {
-        char default_device[] = "/dev/input/eventxx";
-        for (int i = 0; i < NUM_DEFAULT_EVDEV; i++) {
-            sprintf(default_device, "/dev/input/event%d", i);
-            fd = open(default_device, O_RDWR);
-            if (fd >= 0) {
-                ki->path = strdup(default_device);
-                break;
-            }
-        }
+        ki->path = EvdevDefaultKbd();
     }
     else {
         int fd = open(ki->path, O_RDWR);
