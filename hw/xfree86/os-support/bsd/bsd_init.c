@@ -38,7 +38,6 @@
 #include "xf86_OSlib.h"
 #include "xf86_OSproc.h"
 
-#include <sys/utsname.h>
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -152,9 +151,6 @@ xf86OpenConsole(void)
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
     int result;
 
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-    struct utsname uts;
-#endif
     vtmode_t vtmode;
 #endif
 
@@ -207,18 +203,15 @@ xf86OpenConsole(void)
         switch (xf86Info.consType) {
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
         case SYSCONS:
-            /* as of FreeBSD 2.2.8, syscons driver does not need the #1 vt
-             * switching anymore. Here we check for FreeBSD 3.1 and up.
-             * Add cases for other *BSD that behave the same.
+            /*
+             * As of FreeBSD 2.2.8, syscons driver does not need the #1 vt
+             * switching anymore.
              */
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-            uname(&uts);
-            i = atof(uts.release) * 100;
-            if (i >= 310)
-                goto acquire_vt;
-#endif
-            /* otherwise fall through */
+            goto acquire_vt;
         case PCVT:
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+            goto acquire_vt;
+#endif
 #if !(defined(__NetBSD__) && (__NetBSD_Version__ >= 200000000))
             /*
              * First activate the #1 VT.  This is a hack to allow a server
@@ -226,16 +219,13 @@ xf86OpenConsole(void)
              * a better way.
              */
             if (initialVT != 1) {
-
                 if (ioctl(xf86Info.consoleFd, VT_ACTIVATE, 1) != 0) {
                     LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_ACTIVATE failed\n");
                 }
                 sleep(1);
             }
 #endif
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
- acquire_vt:
-#endif
+acquire_vt:
             if (!xf86Info.ShareVTs) {
                 /*
                  * now get the VT
