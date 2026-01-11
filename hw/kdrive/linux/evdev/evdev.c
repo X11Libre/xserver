@@ -188,7 +188,7 @@ static Status
 EvdevPtrInit(KdPointerInfo * pi)
 {
     if (!pi->path) {
-        pi->path = EvdevDefaultPtr();
+        pi->path = EvdevDefaultPtr(&pi->name);
     }
     else {
         int fd = open(pi->path, O_RDWR);
@@ -355,7 +355,7 @@ static Status
 EvdevKbdInit(KdKeyboardInfo * ki)
 {
     if (!ki->path) {
-        ki->path = EvdevDefaultKbd();
+        ki->path = EvdevDefaultKbd(&ki->name);
     }
     else {
         int fd = open(ki->path, O_RDWR);

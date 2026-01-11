@@ -6,7 +6,7 @@
 #ifndef __EVDEH_H__
 #define __EVDEH_H__
 
-char* EvdevDefaultPtr(void);
-char* EvdevDefaultKbd(void);
+char* EvdevDefaultPtr(char **name);
+char* EvdevDefaultKbd(char **name);
 
 #endif /* __EVDEH_H__ */

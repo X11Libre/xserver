@@ -20,6 +20,7 @@
 #define PROC_DEVICES "/proc/bus/input/devices"
 
 #define PHYS_MAX 64 /* Busid + device id */
+#define EVDEV_NAME_MAX 256
 
 #define MOUSE_EV (1 << 2)
 #define KBD_EV 0x120013
@@ -69,10 +70,11 @@ typedef struct {
  * but not across logical devices.
  */
     EvdevOptionalInfo info; /* I: */
- /* char *Name; */ /* N: Name = */
     char Phys[PHYS_MAX]; /* P: Phys = */
  /* char *Sysfs; */ /* S: Sysfs= */
     uint64_t Uniq; /* U: Uniq= */
+
+    char Name[EVDEV_NAME_MAX]; /* N: Name = */
 
     int EventNo; /* H: Handlers=... eventxx ... */
 
@@ -115,6 +117,30 @@ ReadOptInfo(EvdevOptionalInfo *dst, const char* data)
         val += sizeof("Version=") - 1;
         dst->Version = read_val(val);
     }
+}
+
+static inline void
+ReadName(char *dst, const char* data)
+{
+    char *p = dst;
+
+    data = strstr(data, "Name=");
+    if (!data) {
+        return;
+    }
+
+    data = strchr(data, '"');
+    if (!data) {
+        return;
+    }
+    data++;
+
+    while (*data && *data != '"' && p - dst < EVDEV_NAME_MAX - 1) {
+        *p = *data;
+        p++;
+        data++;
+    }
+    *p = '\0';
 }
 
 static inline void
@@ -215,6 +241,9 @@ ReadEvdev(EventDevice *dst, FILE *f)
             case 'I': /* Optional info I: */
                 ReadOptInfo(&dst->info, data);
                 break;
+            case 'N': /* N: Name="..." */
+                ReadName(dst->Name, data);
+                break;
             case 'P': /* P: Phys= */
                 ReadPhys(dst->Phys, data);
                 break;
@@ -270,7 +299,7 @@ EvdevDifferentDevices(EventDevice *a, EventDevice *b)
 }
 
 static char*
-EvdevDefaultDevice(int type)
+EvdevDefaultDevice(char **name, int type)
 {
     char *ret = NULL;
     FILE *f = NULL;
@@ -333,6 +362,15 @@ EvdevDefaultDevice(int type)
             if (asprintf(&ret, EVDEV_FMT, desired->EventNo) < 0) {
                 return FallbackEvdevCheck();
             }
+            if (name && read_dev.Name[0] != '\0') {
+                char *old_name = *name;
+                *name = strdup(read_dev.Name);
+                if (*name) {
+                    free(old_name);
+                } else {
+                    *name = old_name;
+                }
+            }
             return ret;
         }
     }
@@ -343,13 +381,13 @@ EvdevDefaultDevice(int type)
 }
 
 char*
-EvdevDefaultKbd(void)
+EvdevDefaultKbd(char **name)
 {
-    return EvdevDefaultDevice(EVDEV_KEYBOARD);
+    return EvdevDefaultDevice(name, EVDEV_KEYBOARD);
 }
 
 char*
-EvdevDefaultPtr(void)
+EvdevDefaultPtr(char **name)
 {
-    return EvdevDefaultDevice(EVDEV_MOUSE);
+    return EvdevDefaultDevice(name, EVDEV_MOUSE);
 }
