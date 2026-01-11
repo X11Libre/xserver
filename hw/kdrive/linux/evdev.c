@@ -183,39 +183,30 @@ EvdevPtrRead(int evdevPort, void *closure)
     }
 }
 
-const char *kdefaultEvdev[] = {
-    "/dev/input/event0",
-    "/dev/input/event1",
-    "/dev/input/event2",
-    "/dev/input/event3",
-};
-
-#define NUM_DEFAULT_EVDEV    (sizeof (kdefaultEvdev) / sizeof (kdefaultEvdev[0]))
+#define NUM_DEFAULT_EVDEV 32
 
 static Status
 EvdevPtrInit(KdPointerInfo * pi)
 {
-    int i;
-    int fd;
-
     if (!pi->path) {
-        for (i = 0; i < NUM_DEFAULT_EVDEV; i++) {
-            fd = open(kdefaultEvdev[i], 2);
+        char default_device[] = "/dev/input/eventxx";
+        for (int i = 0; i < NUM_DEFAULT_EVDEV; i++) {
+            sprintf(default_device, "/dev/input/event%d", i);
+            fd = open(default_device, O_RDWR);
             if (fd >= 0) {
-                pi->path = strdup(kdefaultEvdev[i]);
+                pi->path = strdup(default_device);
                 break;
             }
         }
     }
     else {
-        fd = open(pi->path, O_RDWR);
+        int fd = open(pi->path, O_RDWR);
         if (fd < 0) {
             ErrorF("Failed to open evdev device %s\n", pi->path);
             return BadMatch;
         }
+        close(fd);
     }
-
-    close(fd);
 
     if (!pi->name)
         pi->name = strdup("Evdev mouse");
@@ -372,21 +363,25 @@ EvdevKbdRead(int evdevPort, void *closure)
 static Status
 EvdevKbdInit(KdKeyboardInfo * ki)
 {
-    int fd;
-
     if (!ki->path) {
-        ErrorF("Couldn't find evdev device path\n");
-        return BadValue;
+        char default_device[] = "/dev/input/eventxx";
+        for (int i = 0; i < NUM_DEFAULT_EVDEV; i++) {
+            sprintf(default_device, "/dev/input/event%d", i);
+            fd = open(default_device, O_RDWR);
+            if (fd >= 0) {
+                ki->path = strdup(default_device);
+                break;
+            }
+        }
     }
     else {
-        fd = open(ki->path, O_RDWR);
+        int fd = open(ki->path, O_RDWR);
         if (fd < 0) {
             ErrorF("Failed to open evdev device %s\n", ki->path);
             return BadMatch;
         }
+        close(fd);
     }
-
-    close(fd);
 
     if (!ki->name)
         ki->name = strdup("Evdev keyboard");
