@@ -54,6 +54,7 @@ in this Software without prior written authorization from The Open Group.
 #include "regionstr.h"
 #include "gcstruct.h"
 #include "protocol-versions.h"
+#include "list.h"
 
 Bool noShapeExtension = FALSE;
 
@@ -74,38 +75,34 @@ static int ShapeEventBase = 0;
 
 /*
  * each window has a list of clients requesting
- * ShapeNotify events.  Each client has a resource
- * for each window it selects ShapeNotify input for,
- * this resource is used to delete the ShapeNotifyRec
- * entry from the per-window queue.
+ * ShapeNotify events.
  */
+typedef struct xorg_list *ShapeEventList;
 
-typedef struct _ShapeEvent *ShapeEventPtr;
-
-typedef struct _ShapeEvent {
-    ShapeEventPtr next;
+struct ShapeEventEntry {
+    struct xorg_list entry;
     ClientPtr client;
-    WindowPtr window;
-} ShapeEventRec;
+};
 
-#define  SHAPE_WINDOW_PRIVADDR(pWin) ((ShapeEventPtr *) \
+#define  SHAPE_WINDOW_EVLIST(pWin) ((ShapeEventList *) \
 dixLookupPrivateAddr(&(pWin)->devPrivates, &ShapeWindowPrivateKeyRec))
 
+/*
+ * delete entry for [client] from the window's event list (if it exists)
+ */
 static int
 ShapeDelClientFromWin(WindowPtr pWin, void *value) {
     ClientPtr client = value;
-    ShapeEventPtr *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
-    ShapeEventPtr *prev = pHead;
-    ShapeEventPtr curr = *pHead;
+    ShapeEventList *pEvList = SHAPE_WINDOW_EVLIST(pWin);
+    if(*pEvList) {
+        struct ShapeEventEntry *curr, *pTemp;
 
-    while (curr) {
-        if (curr->client == client) {
-            *prev = curr->next;
-            free(curr);
-            break;
+        xorg_list_for_each_entry_safe(curr,pTemp,*pEvList,entry) {
+            if(curr->client==client) {
+                xorg_list_del(&curr->entry);
+                free(curr);
+            }
         }
-        prev = &curr->next;
-        curr = curr->next;
     }
     return WT_WALKCHILDREN;
 }
@@ -729,12 +726,15 @@ ProcShapeQueryExtents(ClientPtr client)
     return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
+/*
+ * Effectively the Init function of the extension
+ */
+
 static int
 ProcShapeSelectInput(ClientPtr client)
 {
     REQUEST(xShapeSelectInputReq);
     WindowPtr pWin;
-    ShapeEventPtr pNewShapeEvent;
     int rc;
 
     REQUEST_SIZE_MATCH(xShapeSelectInputReq);
@@ -744,27 +744,31 @@ ProcShapeSelectInput(ClientPtr client)
     rc = dixLookupWindow(&pWin, stuff->window, client, DixReceiveAccess);
     if (rc != Success)
         return rc;
-    ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
+    ShapeEventList *pEvList = SHAPE_WINDOW_EVLIST(pWin);
     switch (stuff->enable) {
-    case xTrue:
-
-        /* check for existing entry. */
-        for (pShapeEvent = *pHead;
-             pShapeEvent; pShapeEvent = pShapeEvent->next) {
-            if (pShapeEvent->client == client) {
-                return Success;
+    case xTrue: {
+        /* check if it exists first, else allocate a new list */
+        if (!*pEvList) {
+            *pEvList = calloc(1, sizeof(struct xorg_list));
+        }
+        else {
+            /* check for existing entry. */
+            struct ShapeEventEntry *curr;
+            xorg_list_for_each_entry(curr,*pEvList,entry) {
+                if(curr->client==client) {
+                    return Success;
+                }
             }
         }
-
         /* Form the event */
-        pNewShapeEvent = calloc(1, sizeof(ShapeEventRec));
+        struct ShapeEventEntry *pNewShapeEvent = calloc(1, sizeof(struct ShapeEventEntry));
         if (!pNewShapeEvent)
             return BadAlloc;
-        pNewShapeEvent->next = *pHead;
         pNewShapeEvent->client = client;
-        pNewShapeEvent->window = pWin;
-        dixSetPrivate(&pWin->devPrivates, &ShapeWindowPrivateKeyRec, pNewShapeEvent);
+        xorg_list_append(&pNewShapeEvent->entry, *pEvList);
+        dixSetPrivate(&pWin->devPrivates, &ShapeWindowPrivateKeyRec, *pEvList);
         break;
+    }
     case xFalse:
         /* remove the events with (client) */
         ShapeDelClientFromWin(pWin,client);
@@ -786,8 +790,12 @@ SendShapeNotify(WindowPtr pWin, int which)
     BoxRec extents;
     RegionPtr region;
     BYTE shaped;
+    struct ShapeEventEntry *pShapeEvent;
 
-    ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
+    ShapeEventList *pEvList = SHAPE_WINDOW_EVLIST(pWin);
+    /* skip if uninitialized */
+    if(!*pEvList)
+        return;
 
     switch (which) {
     case ShapeBounding:
@@ -836,7 +844,10 @@ SendShapeNotify(WindowPtr pWin, int which)
         return;
     }
     UpdateCurrentTimeIf();
-    for (pShapeEvent = *pHead; pShapeEvent; pShapeEvent = pShapeEvent->next) {
+    xorg_list_for_each_entry(pShapeEvent, *pEvList, entry) {
+        /* ask a VERY stupid question */
+        if (pShapeEvent->client->clientState != ClientStateRunning)
+            continue;
         xShapeNotifyEvent se = {
             .type = ShapeNotify + ShapeEventBase,
             .kind = which,
@@ -868,11 +879,12 @@ ProcShapeInputSelected(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    ShapeEventPtr pShapeEvent, *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
+    ShapeEventList *pEvList = SHAPE_WINDOW_EVLIST(pWin);
+    struct ShapeEventEntry *curr, *pTemp;
     enabled = xFalse;
-    if (pHead) {
-        for (pShapeEvent = *pHead; pShapeEvent; pShapeEvent = pShapeEvent->next) {
-            if (pShapeEvent->client == client) {
+    if(*pEvList) {
+        xorg_list_for_each_entry_safe(curr,pTemp,*pEvList,entry) {
+            if(curr->client==client) {
                 enabled = xTrue;
                 break;
             }
@@ -1017,15 +1029,17 @@ static void
 ShapeWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
 {
     /* free the events before the window's devPrivates are free'd by destruction */
-    ShapeEventPtr pShapeEvent, next;
-    ShapeEventPtr *pHead = SHAPE_WINDOW_PRIVADDR(pWin);
+    ShapeEventList *pEvList = SHAPE_WINDOW_EVLIST(pWin);
+    /* List *can* be uninitialized. nothing to do if true */
+    if(!*pEvList)
+        return;
+    struct ShapeEventEntry *curr, *pTemp;
 
-    pShapeEvent = *pHead;
-    while (pShapeEvent) {
-        next = pShapeEvent->next;
-        free(pShapeEvent);
-        pShapeEvent = next;
+    xorg_list_for_each_entry_safe(curr,pTemp,*pEvList,entry) {
+        xorg_list_del(&curr->entry);
+        free(curr);
     }
+    free(*pEvList);
     dixSetPrivate(&pWin->devPrivates, &ShapeWindowPrivateKeyRec, NULL);
 }
 
