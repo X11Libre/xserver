@@ -1066,6 +1066,12 @@ Bool glamor_change_window_attributes(WindowPtr pWin, unsigned long mask);
 
 void glamor_copy_window(WindowPtr window, DDXPointRec old_origin, RegionPtr src_region);
 
+/*
+ * unref a glamor pixmap (specialized form of fbPixmap) and free
+ * if refcnt already had reached 1
+ */
+Bool glamor_destroy_pixmap(PixmapPtr pixmap);
+
 #include "glamor_utils.h"
 
 #if 0
