@@ -42,63 +42,6 @@ typedef enum {
     XF86_GlxVisualsAll,
 } XF86_GlxVisuals;
 
-/*
- * xf86InfoRec contains global parameters which the video drivers never
- * need to access.  Global parameters which the video drivers do need
- * should be individual globals.
- */
-
-typedef struct {
-    int consoleFd;
-    int vtno;
-
-    /* event handler part */
-    int lastEventTime;
-    Bool vtRequestsPending;
-#ifdef __sun
-    int vtPendingNum;
-#endif
-    Bool dontVTSwitch;
-    Bool autoVTSwitch;
-    Bool ShareVTs;
-    Bool dontZap;
-    Bool dontZoom;
-
-    /* graphics part */
-    ScreenPtr currentScreen;
-#if defined(CSRG_BASED) || defined(__FreeBSD_kernel__)
-    int consType;               /* Which console driver? */
-#endif
-
-    /* Other things */
-    Bool allowMouseOpenFail;
-    Bool vidModeEnabled;        /* VidMode extension enabled */
-    Bool vidModeAllowNonLocal;  /* allow non-local VidMode
-                                 * connections */
-    Bool pmFlag;
-    MessageType iglxFrom;
-    XF86_GlxVisuals glxVisuals;
-    MessageType glxVisualsFrom;
-
-    Bool useDefaultFontPath;
-    Bool ignoreABI;
-
-    Bool forceInputDevices;     /* force xorg.conf or built-in input devices */
-    Bool autoAddDevices;        /* Whether to succeed NIDR, or ignore. */
-    Bool autoEnableDevices;     /* Whether to enable, or let the client
-                                 * control. */
-
-    Bool dri2;
-    MessageType dri2From;
-
-    Bool autoAddGPU;
-    const char *debug;
-    Bool autoBindGPU;
-
-    Bool singleDriver;          /* Only the first successfully probed driver adds primary screens,
-                                 * others may add GPU secondary screens only */
-} xf86InfoRec, *xf86InfoPtr;
-
 /* ISC's cc can't handle ~ of UL constants, so explicitly type cast them. */
 #define XLED1   ((unsigned long) 0x00000001)
 #define XLED2   ((unsigned long) 0x00000002)

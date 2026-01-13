@@ -27,6 +27,7 @@
 #include <sys/ioctl.h>
 #include <linux/kd.h>
 
+#include "xf86_priv.h"
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 

@@ -32,7 +32,7 @@
 
 #include "os/osdep.h"
 
-#include "xf86.h"
+#include "xf86_priv.h"
 #include "xf86Parser_priv.h"
 #include "xf86tokens.h"
 #include "xf86Config.h"

@@ -43,7 +43,6 @@ extern _X_EXPORT int xf86Depth;
 
 /* Other parameters */
 
-extern _X_EXPORT xf86InfoRec xf86Info;
 extern _X_EXPORT serverLayoutRec xf86ConfigLayout;
 
 extern _X_EXPORT DriverPtr *xf86DriverList;

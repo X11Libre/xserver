@@ -96,18 +96,14 @@ xf86InfoRec xf86Info = {
     .vtno = -1,
     .lastEventTime = -1,
     .vtRequestsPending = FALSE,
-#ifdef __sun
     .vtPendingNum = -1,
-#endif
     .dontVTSwitch = FALSE,
     .autoVTSwitch = TRUE,
     .ShareVTs = FALSE,
     .dontZap = FALSE,
     .dontZoom = FALSE,
     .currentScreen = NULL,
-#ifdef CSRG_BASED
     .consType = -1,
-#endif
     .allowMouseOpenFail = FALSE,
     .vidModeEnabled = TRUE,
     .vidModeAllowNonLocal = FALSE,
