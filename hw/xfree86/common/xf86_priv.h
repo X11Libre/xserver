@@ -8,6 +8,8 @@
 #include "os/osdep.h"
 #include "xf86.h"
 
+#include "xf86Privstr.h"
+
 extern Bool xf86DoConfigure;
 extern Bool xf86DoConfigurePass1;
 extern Bool xf86ProbeIgnorePrimary;
@@ -101,5 +103,44 @@ void xf86ExtensionInit(void);
 /* xf86Configure.c */
 void DoConfigure(void) _X_NORETURN;
 void DoShowOptions(void) _X_NORETURN;
+
+/*
+ * global parameters only inside DDX itself, not accessible by drivers
+ * (should split them out to separate fields)
+ */
+typedef struct {
+    int             consoleFd;
+    int             vtno;
+    int             lastEventTime;
+    bool            vtRequestsPending;
+    int             vtPendingNum;
+    Bool            dontVTSwitch;
+    bool            autoVTSwitch;
+    bool            ShareVTs;
+    Bool            dontZap;
+    Bool            dontZoom;
+    ScreenPtr       currentScreen;
+    int             consType;
+    bool            allowMouseOpenFail;
+    bool            vidModeEnabled;
+    bool            vidModeAllowNonLocal;
+    bool            pmFlag;
+    MessageType     iglxFrom;
+    XF86_GlxVisuals glxVisuals;
+    MessageType     glxVisualsFrom;
+    bool            useDefaultFontPath;
+    Bool            ignoreABI;
+    bool            forceInputDevices;
+    Bool            autoAddDevices;
+    Bool            autoEnableDevices;
+    bool            dri2;
+    MessageType     dri2From;
+    Bool            autoAddGPU;
+    const char      *debug;
+    Bool            autoBindGPU;
+    Bool            singleDriver;
+} xf86InfoRec;
+
+extern _X_EXPORT /* internal only */ xf86InfoRec xf86Info;
 
 #endif /* _XSERVER_XF86_PRIV_H */
