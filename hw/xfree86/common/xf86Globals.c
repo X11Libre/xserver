@@ -195,3 +195,8 @@ Bool xf86VidModeDisabled = FALSE;
 Bool xf86VidModeAllowNonLocal = FALSE;
 #endif
 Bool xorgHWAccess = FALSE;
+
+int xf86GetConsoleFd(void)
+{
+    return xf86Info.consoleFd;
+}
