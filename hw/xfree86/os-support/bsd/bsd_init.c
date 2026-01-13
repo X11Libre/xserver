@@ -82,18 +82,6 @@ static int initialVT = -1;
 #define CHECK_DRIVER_MSG \
   "Check your kernel's console driver configuration and /dev entries"
 
-static const char *supported_drivers[] = {
-#ifdef SYSCONS_SUPPORT
-    "syscons",
-#endif
-#ifdef PCVT_SUPPORT
-    "pcvt",
-#endif
-#ifdef WSCONS_SUPPORT
-    "wscons",
-#endif
-};
-
 /*
  * Functions to probe for the existence of a supported console driver.
  * Any function returns either a valid file descriptor (driver probed
@@ -101,9 +89,6 @@ static const char *supported_drivers[] = {
  * driver was found but proved to not support the required mode to run
  * an X server.
  */
-
-typedef int (*xf86ConsOpen_t) (void);
-
 #ifdef SYSCONS_SUPPORT
 static int xf86OpenSyscons(void);
 #endif                          /* SYSCONS_SUPPORT */
@@ -116,25 +101,37 @@ static int xf86OpenPcvt(void);
 static int xf86OpenWScons(void);
 #endif
 
+typedef struct console_driver {
+    const char *name;
+    int (*open) (void);
+} console_driver_t;
+
 /*
  * The sequence of the driver probes is important; start with the
  * driver that is best distinguishable, and end with the most generic
  * driver.  (Otherwise, pcvt would also probe as syscons, and either
  * pcvt or syscons might successfully probe as pccons.)
  */
-static xf86ConsOpen_t xf86ConsTab[] = {
-#ifdef PCVT_SUPPORT
-    xf86OpenPcvt,
-#endif
+static console_driver_t console_drivers[] = {
 #ifdef SYSCONS_SUPPORT
-    xf86OpenSyscons,
+    {
+        .name = "syscons",
+        .open = xf86OpenSyscons,
+    },
+#endif
+#ifdef PCVT_SUPPORT
+    {
+        .name = "pcvt",
+        .open = xf86OpenPcvt,
+    },
 #endif
 #ifdef WSCONS_SUPPORT
-    xf86OpenWScons,
+    {
+        .name = "wscons",
+        .open = xf86OpenWScons,
+    },
 #endif
-    (xf86ConsOpen_t) NULL
 };
-
 
 Bool
 xf86VTKeepTtyIsSet(void)
@@ -146,7 +143,6 @@ void
 xf86OpenConsole(void)
 {
     int i, fd = -1;
-    xf86ConsOpen_t *driver;
 
     if (serverGeneration == 1) {
 
@@ -174,19 +170,19 @@ xf86OpenConsole(void)
         }
 
         /* detect which driver we are running on */
-        for (driver = xf86ConsTab; *driver; driver++) {
-            if ((fd = (*driver) ()) >= 0)
+        for (unsigned idx=0; idx < ARRAY_SIZE(console_drivers); idx++) {
+            if ((fd = console_drivers[idx].open()) >= 0)
                 break;
         }
 
         /* Check that a supported console driver was found */
         if (fd < 0) {
             char cons_drivers[80] = { 0, };
-            for (i = 0; i < ARRAY_SIZE(supported_drivers); i++) {
+            for (i = 0; i < ARRAY_SIZE(console_drivers); i++) {
                 if (i) {
                     strcat(cons_drivers, ", ");
                 }
-                strcat(cons_drivers, supported_drivers[i]);
+                strcat(cons_drivers, console_drivers[i].name);
             }
             FatalError
                 ("%s: No console driver found\n\tSupported drivers: %s\n\t%s",
