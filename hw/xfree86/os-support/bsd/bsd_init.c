@@ -142,7 +142,7 @@ xf86VTKeepTtyIsSet(void)
 void
 xf86OpenConsole(void)
 {
-    int i, fd = -1;
+    int i;
 
     if (serverGeneration == 1) {
 
@@ -169,14 +169,16 @@ xf86OpenConsole(void)
             }
         }
 
+        xf86Info.consoleFd = -1;
+
         /* detect which driver we are running on */
         for (unsigned idx=0; idx < ARRAY_SIZE(console_drivers); idx++) {
-            if ((fd = console_drivers[idx].open()) >= 0)
+            if ((xf86Info.consoleFd = console_drivers[idx].open()) >= 0)
                 break;
         }
 
         /* Check that a supported console driver was found */
-        if (fd < 0) {
+        if (xf86Info.consoleFd < 0) {
             char cons_drivers[80] = { 0, };
             for (i = 0; i < ARRAY_SIZE(console_drivers); i++) {
                 if (i) {
@@ -188,7 +190,6 @@ xf86OpenConsole(void)
                 ("%s: No console driver found\n\tSupported drivers: %s\n\t%s",
                  "xf86OpenConsole", cons_drivers, CHECK_DRIVER_MSG);
         }
-        xf86Info.consoleFd = fd;
 
         switch (xf86Info.consType) {
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
