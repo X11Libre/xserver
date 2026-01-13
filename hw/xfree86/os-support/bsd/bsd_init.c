@@ -25,8 +25,12 @@
 #include <xorg-config.h>
 
 #include <X11/X.h>
+#include <sys/ioctl.h>
+#include <stdlib.h>
+#include <errno.h>
 
 #include "os/cmdline.h"
+#include "os/osdep.h"
 
 #include "compiler.h"
 #include "xf86.h"
@@ -35,14 +39,9 @@
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
 #include "xf86_OSproc.h"
-
-#include <sys/ioctl.h>
-#include <stdlib.h>
-#include <errno.h>
-
-#include "os/osdep.h"
-
 #include "seatd-libseat.h"
+
+#include "xf86_bsd_priv.h"
 
 static Bool KeepTty = FALSE;
 
@@ -136,6 +135,47 @@ xf86VTKeepTtyIsSet(void)
      return KeepTty;
 }
 
+void xf86_bsd_acquire_vt(void)
+{
+    if (xf86Info.ShareVTs) {
+        close(xf86Info.consoleFd);
+        return;
+    }
+
+    /*
+     * now get the VT
+     */
+    int result;
+
+    SYSCALL(result = ioctl(xf86Info.consoleFd, VT_ACTIVATE, xf86Info.vtno));
+    if (result != 0)
+        LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_ACTIVATE failed\n");
+
+    SYSCALL(result = ioctl(xf86Info.consoleFd, VT_WAITACTIVE, xf86Info.vtno));
+    if (result != 0)
+        LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_WAITACTIVE failed\n");
+
+    OsSignal(SIGUSR1, xf86VTRequest);
+
+    vtmode_t vtmode = {
+        .mode   = VT_PROCESS,
+        .relsig = SIGUSR1,
+        .acqsig = SIGUSR1,
+        .frsig  = SIGUSR1
+    };
+
+    if (ioctl(xf86Info.consoleFd, VT_SETMODE, &vtmode) < 0)
+        FatalError("xf86OpenConsole: VT_SETMODE VT_PROCESS failed");
+
+#if !defined(__OpenBSD__) && !defined(USE_DEV_IO) && !defined(USE_I386_IOPL)
+    if (ioctl(xf86Info.consoleFd, KDENABIO, 0) < 0)
+        FatalError("xf86OpenConsole: KDENABIO failed (%s)", strerror(errno));
+#endif
+
+    if (ioctl(xf86Info.consoleFd, KDSETMODE, KD_GRAPHICS) < 0)
+        FatalError("xf86OpenConsole: KDSETMODE KD_GRAPHICS failed");
+}
+
 void
 xf86OpenConsole(void)
 {
@@ -195,10 +235,13 @@ xf86OpenConsole(void)
              * As of FreeBSD 2.2.8, syscons driver does not need the #1 vt
              * switching anymore.
              */
-            goto acquire_vt;
+            xf86_bsd_acquire_vt();
+            return;
+
         case PCVT:
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
-            goto acquire_vt;
+            xf86_bsd_acquire_vt();
+            return;
 #endif
 #if !(defined(__NetBSD__) && (__NetBSD_Version__ >= 200000000))
             /*
@@ -213,51 +256,8 @@ xf86OpenConsole(void)
                 sleep(1);
             }
 #endif
-acquire_vt:
-            if (!xf86Info.ShareVTs) {
-                int result;
-                /*
-                 * now get the VT
-                 */
-                SYSCALL(result =
-                        ioctl(xf86Info.consoleFd, VT_ACTIVATE, xf86Info.vtno));
-                if (result != 0) {
-                    LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_ACTIVATE failed\n");
-                }
-                SYSCALL(result =
-                        ioctl(xf86Info.consoleFd, VT_WAITACTIVE,
-                              xf86Info.vtno));
-                if (result != 0) {
-                    LogMessageVerb(X_WARNING, 1,
-                                   "xf86OpenConsole: VT_WAITACTIVE failed\n");
-                }
-
-                OsSignal(SIGUSR1, xf86VTRequest);
-
-                vtmode_t vtmode = {
-                    .mode   = VT_PROCESS,
-                    .relsig = SIGUSR1,
-                    .acqsig = SIGUSR1,
-                    .frsig  = SIGUSR1
-                };
-
-                if (ioctl(xf86Info.consoleFd, VT_SETMODE, &vtmode) < 0) {
-                    FatalError("xf86OpenConsole: VT_SETMODE VT_PROCESS failed");
-                }
-#if !defined(__OpenBSD__) && !defined(USE_DEV_IO) && !defined(USE_I386_IOPL)
-                if (ioctl(xf86Info.consoleFd, KDENABIO, 0) < 0) {
-                    FatalError("xf86OpenConsole: KDENABIO failed (%s)",
-                               strerror(errno));
-                }
-#endif
-                if (ioctl(xf86Info.consoleFd, KDSETMODE, KD_GRAPHICS) < 0) {
-                    FatalError("xf86OpenConsole: KDSETMODE KD_GRAPHICS failed");
-                }
-            }
-            else {              /* xf86Info.ShareVTs */
-                close(xf86Info.consoleFd);
-            }
-            break;
+            xf86_bsd_acquire_vt();
+            return;
 #endif                          /* SYSCONS_SUPPORT || PCVT_SUPPORT */
 #ifdef WSCONS_SUPPORT
         case WSCONS:
@@ -277,7 +277,6 @@ acquire_vt:
         }
 #endif                          /* SYSCONS_SUPPORT || PCVT_SUPPORT */
     }
-    return;
 }
 
 #ifdef SYSCONS_SUPPORT
