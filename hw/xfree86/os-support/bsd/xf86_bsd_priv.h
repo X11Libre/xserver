@@ -19,4 +19,6 @@
 
 #define DEV_APERTURE "/dev/xf86"
 
+void xf86_bsd_acquire_vt(void);
+
 #endif /* _XSERVER_XFREE86_OS_SUPPORT_BSD_PRIV_H */
