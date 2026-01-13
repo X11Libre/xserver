@@ -33,7 +33,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <errno.h>
-#include <xf86.h>
+#include "xf86_priv.h"
 #include <xf86Priv.h>
 #include <xf86drm.h>
 #define EGL_DISPLAY_NO_X_MESA
