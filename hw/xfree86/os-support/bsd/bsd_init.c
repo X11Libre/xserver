@@ -150,7 +150,6 @@ xf86OpenConsole(void)
     xf86ConsOpen_t *driver;
 
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-    int result;
 
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
     struct utsname uts;
@@ -237,6 +236,7 @@ xf86OpenConsole(void)
  acquire_vt:
 #endif
             if (!xf86Info.ShareVTs) {
+                int result;
                 /*
                  * now get the VT
                  */
