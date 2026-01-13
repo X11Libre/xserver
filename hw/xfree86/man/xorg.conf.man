@@ -1347,7 +1347,7 @@ When an output device has been matched to the
 .B OutputClass
 section, any
 .B Option
-entries are applied to the device. Two
+entries are applied to the device. Three
 .B OutputClass
 specific kinds of
 .B Option
@@ -1376,6 +1376,33 @@ If multiple output devices match an
 section with the
 .B HotplugDriver
 option, the first one enumerated becomes the hotplug driver.
+.RE
+.PP
+.TP 7
+.BI "Option \*qIgnoreABI\*q \*q" boolean \*q
+If set, this option makes driver loader ignore module ABI, which may be necessary
+to use legacy proprietary NVidia drivers. If
+.PP
+.RS 7
+.nf
+.B  "Section \*qOutputClass\*q"
+.BI  "    Identifier  \*q" AnyName \*q
+.BI  "    MatchDriver  \*q" drm_driver \*q
+.BI  "    Driver  \*q" X_driver \*q
+.BI  "    Option  \*q" IgnoreABI \*q
+.B  "EndSection
+.fi
+.RE
+.PP
+.RS 7
+appears, and a DRM device with a kernel
+.I drm_driver
+is found, then
+.I X_driver
+for it will be loaded regardless of its ABI version. Please note that this has
+no effect if DRM for a GPU is not enabled. See
+.IR /usr/share/X11/xorg.conf.d/10-nvidia.conf
+for an example.
 .RE
 .PP
 .TP 7
