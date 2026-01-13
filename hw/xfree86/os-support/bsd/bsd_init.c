@@ -148,11 +148,6 @@ xf86OpenConsole(void)
     int i, fd = -1;
     xf86ConsOpen_t *driver;
 
-#if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-
-    vtmode_t vtmode;
-#endif
-
     if (serverGeneration == 1) {
 
         /* If libseat is in control, it handles VT switching. */
@@ -245,10 +240,13 @@ acquire_vt:
 
                 OsSignal(SIGUSR1, xf86VTRequest);
 
-                vtmode.mode = VT_PROCESS;
-                vtmode.relsig = SIGUSR1;
-                vtmode.acqsig = SIGUSR1;
-                vtmode.frsig = SIGUSR1;
+                vtmode_t vtmode = {
+                    .mode   = VT_PROCESS,
+                    .relsig = SIGUSR1,
+                    .acqsig = SIGUSR1,
+                    .frsig  = SIGUSR1
+                };
+
                 if (ioctl(xf86Info.consoleFd, VT_SETMODE, &vtmode) < 0) {
                     FatalError("xf86OpenConsole: VT_SETMODE VT_PROCESS failed");
                 }
