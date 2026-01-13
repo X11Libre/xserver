@@ -282,4 +282,10 @@ extern _X_EXPORT ScreenPtr xf86ScrnToScreen(ScrnInfoPtr pScrn);
 #define xf86MsgVerb LogMessageVerb
 #define xf86Msg(type, ...) LogMessageVerb(type, 1, __VA_ARGS__)
 
+/*
+ * retrieve file descriptor to opened console device.
+ * only for some legacy keyboard drivers (xf86-input-keyboard)
+ */
+_X_EXPORT int xf86GetConsoleFd(void);
+
 #endif                          /* _XF86_H */
