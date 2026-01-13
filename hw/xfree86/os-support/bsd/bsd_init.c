@@ -38,6 +38,7 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include "os/osdep.h"
 
@@ -87,20 +88,20 @@ static int initialVT = -1;
  * an X server.
  */
 #ifdef SYSCONS_SUPPORT
-static int xf86OpenSyscons(void);
+static bool xf86OpenSyscons(void);
 #endif                          /* SYSCONS_SUPPORT */
 
 #ifdef PCVT_SUPPORT
-static int xf86OpenPcvt(void);
+static bool xf86OpenPcvt(void);
 #endif                          /* PCVT_SUPPORT */
 
 #ifdef WSCONS_SUPPORT
-static int xf86OpenWScons(void);
+static bool xf86OpenWScons(void);
 #endif
 
 typedef struct console_driver {
     const char *name;
-    int (*open) (void);
+    bool (*open) (void);
 } console_driver_t;
 
 /*
@@ -207,11 +208,9 @@ xf86OpenConsole(void)
             }
         }
 
-        xf86Info.consoleFd = -1;
-
         /* detect which driver we are running on */
         for (unsigned idx=0; idx < ARRAY_SIZE(console_drivers); idx++) {
-            if ((xf86Info.consoleFd = console_drivers[idx].open()) >= 0)
+            if (console_drivers[idx].open())
                 break;
         }
 
@@ -282,8 +281,7 @@ xf86OpenConsole(void)
 
 #ifdef SYSCONS_SUPPORT
 
-static int
-xf86OpenSyscons(void)
+static bool xf86OpenSyscons(void)
 {
     int fd = -1;
     vtmode_t vtmode;
@@ -381,15 +379,15 @@ xf86OpenSyscons(void)
             fd = -1;
         }
     }
-    return fd;
+    xf86Info.consoleFd = fd;
+    return (fd > 0);
 }
 
 #endif                          /* SYSCONS_SUPPORT */
 
 #ifdef PCVT_SUPPORT
 
-static int
-xf86OpenPcvt(void)
+static bool xf86OpenPcvt(void)
 {
     /* This looks much like syscons, since pcvt is API compatible */
     int fd = -1;
@@ -482,15 +480,15 @@ xf86OpenPcvt(void)
         }
 #endif
     }
-    return fd;
+    xf86Info.consoleFd = fd;
+    return (fd > 0);
 }
 
 #endif                          /* PCVT_SUPPORT */
 
 #ifdef WSCONS_SUPPORT
 
-static int
-xf86OpenWScons(void)
+static bool xf86OpenWScons(void)
 {
     int fd = -1;
     int mode = WSDISPLAYIO_MODE_MAPPED;
@@ -515,7 +513,8 @@ xf86OpenWScons(void)
         xf86Info.consType = WSCONS;
         LogMessageVerb(X_PROBED, 1, "Using wscons driver\n");
     }
-    return fd;
+    xf86Info.consoleFd = fd;
+    return (fd > 0);
 }
 
 #endif                          /* WSCONS_SUPPORT */
