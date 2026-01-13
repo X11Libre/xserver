@@ -226,44 +226,6 @@ xf86OpenConsole(void)
                 ("%s: No console driver found\n\tSupported drivers: %s\n\t%s",
                  "xf86OpenConsole", cons_drivers, CHECK_DRIVER_MSG);
         }
-
-        switch (xf86Info.consType) {
-#if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-        case SYSCONS:
-            /*
-             * As of FreeBSD 2.2.8, syscons driver does not need the #1 vt
-             * switching anymore.
-             */
-            xf86_bsd_acquire_vt();
-            return;
-
-        case PCVT:
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
-            xf86_bsd_acquire_vt();
-            return;
-#endif
-#if !(defined(__NetBSD__) && (__NetBSD_Version__ >= 200000000))
-            /*
-             * First activate the #1 VT.  This is a hack to allow a server
-             * to be started while another one is active.  There should be
-             * a better way.
-             */
-            if (initialVT != 1) {
-                if (ioctl(xf86Info.consoleFd, VT_ACTIVATE, 1) != 0) {
-                    LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_ACTIVATE failed\n");
-                }
-                sleep(1);
-            }
-#endif
-            xf86_bsd_acquire_vt();
-            return;
-#endif                          /* SYSCONS_SUPPORT || PCVT_SUPPORT */
-#ifdef WSCONS_SUPPORT
-        case WSCONS:
-            /* Nothing to do */
-            break;
-#endif
-        }
     }
     else {
         /* serverGeneration != 1 */
@@ -379,6 +341,7 @@ static bool xf86OpenSyscons(void)
         }
     }
     xf86Info.consoleFd = fd;
+    xf86_bsd_acquire_vt();
     return (fd > 0);
 }
 
@@ -480,6 +443,26 @@ static bool xf86OpenPcvt(void)
 #endif
     }
     xf86Info.consoleFd = fd;
+
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
+    goto out;
+#endif
+#if !(defined(__NetBSD__) && (__NetBSD_Version__ >= 200000000))
+    /*
+     * First activate the #1 VT.  This is a hack to allow a server
+     * to be started while another one is active.  There should be
+     * a better way.
+     */
+    if (initialVT != 1) {
+        if (ioctl(xf86Info.consoleFd, VT_ACTIVATE, 1) != 0) {
+            LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_ACTIVATE failed\n");
+        }
+        sleep(1);
+    }
+#endif
+    goto out;
+out:
+    xf86_bsd_acquire_vt();
     return (fd > 0);
 }
 
@@ -513,6 +496,8 @@ static bool xf86OpenWScons(void)
         LogMessageVerb(X_PROBED, 1, "Using wscons driver\n");
     }
     xf86Info.consoleFd = fd;
+
+    /* nothing special to do for acquiring the VT */
     return (fd > 0);
 }
 
