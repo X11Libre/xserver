@@ -485,23 +485,11 @@ xf86OpenPcvt(void)
             }
             xf86Info.consType = PCVT;
 #ifdef WSCONS_SUPPORT
-#ifdef __NetBSD__
-            LogMessageVerb(X_PROBED, 1,
-                           "Using wscons driver on %s in pcvt compatibility mode "
-                           "(version %d.%d)\n", vtname,
-                           pcvt_version.rmajor, pcvt_version.rminor);
-#else
             LogMessageVerb(X_PROBED, 1,
                            "Using wscons driver on %s in pcvt compatibility mode ",
                            vtname);
-#endif
 #else
-# ifdef __NetBSD__
-            LogMessageVerb(X_PROBED, 1, "Using pcvt driver (version %d.%d)\n",
-                           pcvt_version.rmajor, pcvt_version.rminor);
-# else
             LogMessageVerb(X_PROBED, 1, "Using pcvt driver\n");
-# endif
 #endif
 #ifdef __NetBSD__
         }
