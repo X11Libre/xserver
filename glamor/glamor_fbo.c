@@ -104,7 +104,7 @@ glamor_create_fbo_from_tex(glamor_screen_private *glamor_priv,
     glamor_pixmap_fbo *fbo;
 
     fbo = calloc(1, sizeof(*fbo));
-    if (fbo == NULL)
+    if (!fbo)
         return NULL;
 
     fbo->tex = tex;
@@ -194,11 +194,11 @@ glamor_create_fbo_array(glamor_screen_private *glamor_priv,
     block_hcnt = (h + block_h - 1) / block_h;
 
     box_array = calloc(block_wcnt * block_hcnt, sizeof(box_array[0]));
-    if (box_array == NULL)
+    if (!box_array)
         return NULL;
 
     fbo_array = calloc(block_wcnt * block_hcnt, sizeof(glamor_pixmap_fbo *));
-    if (fbo_array == NULL) {
+    if (!fbo_array) {
         free(box_array);
         return FALSE;
     }
