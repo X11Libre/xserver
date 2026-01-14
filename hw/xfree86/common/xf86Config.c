@@ -658,6 +658,7 @@ typedef enum {
     FLAG_DEBUG,
     FLAG_ALLOW_BYTE_SWAPPED_CLIENTS,
     FLAG_SINGLE_DRIVER,
+    FLAG_ISOLATEKEYBOARD,
 } FlagValues;
 
 /**
@@ -721,6 +722,8 @@ static OptionInfoRec FlagOptions[] = {
      {0}, FALSE},
     {FLAG_SINGLE_DRIVER, "SingleDriver", OPTV_BOOLEAN,
      {0}, FALSE},
+    {FLAG_ISOLATEKEYBOARD, "IsolateKeyboard", OPTV_BOOLEAN,
+     {0}, FALSE},
     {-1, NULL, OPTV_NONE,
      {0}, FALSE},
 };
@@ -756,6 +759,9 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     xf86GetOptValBool(FlagOptions, FLAG_DONTVTSWITCH, &xf86Info.dontVTSwitch);
     xf86GetOptValBool(FlagOptions, FLAG_DONTZAP, &xf86Info.dontZap);
     xf86GetOptValBool(FlagOptions, FLAG_DONTZOOM, &xf86Info.dontZoom);
+
+    xf86GetOptValBool(FlagOptions, FLAG_ISOLATEKEYBOARD, &xf86Info.isolateKeyboard);
+    globalIsolateKeyboard = xf86Info.isolateKeyboard;
 
     xf86GetOptValBool(FlagOptions, FLAG_IGNORE_ABI, &xf86Info.ignoreABI);
     if (xf86Info.ignoreABI) {

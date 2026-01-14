@@ -80,6 +80,7 @@ static const xf86ConfigSymTabRec ServerFlagsTab[] = {
     {SUSPENDTIME, "suspendtime"},
     {OFFTIME, "offtime"},
     {DEFAULTLAYOUT, "defaultserverlayout"},
+    {ISOLATEKEYBOARD, "isolatekeyboard"},
     {-1, ""},
 };
 
@@ -127,6 +128,7 @@ xf86parseFlagsSection(XF86ConfFlagsPtr ptr)
         case DISABLEMODINDEV:
         case MODINDEVALLOWNONLOCAL:
         case ALLOWMOUSEOPENFAIL:
+        case ISOLATEKEYBOARD:
         {
             int i = 0;
 
