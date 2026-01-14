@@ -229,14 +229,9 @@ xf86OpenConsole(void)
     }
     else {
         /* serverGeneration != 1 */
-#if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-        if (!xf86Info.ShareVTs && xf86Info.autoVTSwitch &&
-            (xf86Info.consType == SYSCONS || xf86Info.consType == PCVT)) {
-            if (ioctl(xf86Info.consoleFd, VT_ACTIVATE, xf86Info.vtno) != 0) {
-                LogMessageVerb(X_WARNING, 1, "xf86OpenConsole: VT_ACTIVATE failed\n");
-            }
-        }
-#endif                          /* SYSCONS_SUPPORT || PCVT_SUPPORT */
+        if (!xf86Info.ShareVTs && xf86Info.autoVTSwitch
+                               && xf86_console_proc_reactivate)
+            xf86_console_proc_reactivate();
     }
 }
 
@@ -343,6 +338,7 @@ static bool xf86OpenSyscons(void)
     xf86Info.consoleFd = fd;
     xf86_bsd_acquire_vt();
     xf86_console_proc_close = xf86_console_syscons_close;
+    xf86_console_proc_reactivate = xf86_console_syscons_reactivate;
     return (fd > 0);
 }
 
@@ -465,6 +461,7 @@ static bool xf86OpenPcvt(void)
 out:
     xf86_bsd_acquire_vt();
     xf86_console_proc_close = xf86_console_pcvt_close;
+    xf86_console_proc_reactivate = xf86_console_pcvt_reactivate;
     return (fd > 0);
 }
 
