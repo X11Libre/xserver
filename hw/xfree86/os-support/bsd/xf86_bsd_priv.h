@@ -21,4 +21,15 @@
 
 void xf86_bsd_acquire_vt(void);
 
+/* PCVT console driver */
+void xf86_console_pcvt_close(void);
+
+/* SYSCONS console driver */
+void xf86_console_syscons_close(void);
+
+/* WSCONS console driver */
+void xf86_console_wscons_close(void);
+
+extern int initialVT;
+
 #endif /* _XSERVER_XFREE86_OS_SUPPORT_BSD_PRIV_H */
