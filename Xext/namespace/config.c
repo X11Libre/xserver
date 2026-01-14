@@ -8,12 +8,20 @@
 #include "namespace.h"
 
 struct Xnamespace ns_root = {
-    .allowMouseMotion = TRUE,
-    .allowShape = TRUE,
-    .allowTransparency = TRUE,
-    .allowXInput = TRUE,
-    .allowXKeyboard = TRUE,
+    .perms = {
+        .allowComposite = TRUE,
+        .allowGlobalKeyboard = TRUE,
+        .allowMouseMotion = TRUE,
+        .allowRandr = TRUE,
+        .allowRender = TRUE,
+        .allowShape = TRUE,
+        .allowScreen = TRUE,
+        .allowTransparency = TRUE,
+        .allowXInput = TRUE,
+        .allowXKeyboard = TRUE,
+    },
     .builtin = TRUE,
+    .isRoot = TRUE,
     .name = NS_NAME_ROOT,
     .refcnt = 1,
     .superPower = TRUE,
@@ -25,9 +33,14 @@ struct Xnamespace ns_anon = {
     .refcnt = 1,
 };
 
+struct Xnamespace *ns_default;
+
 struct xorg_list ns_list = { 0 };
 
+struct xorg_list client_list = { 0 };
+
 char *namespaceConfigFile = NULL;
+char *default_namespace;
 
 static struct Xnamespace* select_ns(const char* name)
 {
@@ -84,6 +97,17 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
     if (token == NULL)
         return;
 
+    if (strcmp(token, "default") == 0)
+    {
+        if ((token = strtok(NULL, " ")) == NULL)
+        {
+            XNS_LOG("none given, default DENY\n");
+            return;
+        }
+        default_namespace = strdup(token);
+        return;
+    }
+
     /* if no "namespace" statement hasn't been issued yet, use root NS */
     struct Xnamespace * curr = (*walk_ns ? *walk_ns : &ns_root);
 
@@ -97,6 +121,8 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         }
 
         curr = *walk_ns = select_ns(token);
+        // anything made from the config should be retained, this flag will serve dual purpose
+        curr->builtin = TRUE;
         return;
     }
 
@@ -105,6 +131,11 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         token = strtok(NULL, " ");
         if (token == NULL)
             return;
+
+        if (strcmp(token, "generate") == 0) {
+            GenerateAuthForXnamespace(curr);
+            return;
+        }
 
         struct auth_token *new_token = calloc(1, sizeof(struct auth_token));
         if (new_token == NULL)
@@ -131,20 +162,31 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         return;
     }
 
+
     if (strcmp(token, "allow") == 0)
     {
         while ((token = strtok(NULL, " ")) != NULL)
         {
             if (strcmp(token, "mouse-motion") == 0)
-                curr->allowMouseMotion = TRUE;
+                curr->perms.allowMouseMotion = TRUE;
             else if (strcmp(token, "shape") == 0)
-                curr->allowShape = TRUE;
+                curr->perms.allowShape = TRUE;
             else if (strcmp(token, "transparency") == 0)
-                curr->allowTransparency = TRUE;
+                curr->perms.allowTransparency = TRUE;
             else if (strcmp(token, "xinput") == 0)
-                curr->allowXInput = TRUE;
+                curr->perms.allowXInput = TRUE;
             else if (strcmp(token, "xkeyboard") == 0)
-                curr->allowXKeyboard = TRUE;
+                curr->perms.allowXKeyboard = TRUE;
+            else if (strcmp(token, "globalxkeyboard") == 0)
+                curr->perms.allowGlobalKeyboard = TRUE;
+            else if (strcmp(token, "render") == 0)
+                curr->perms.allowRender = TRUE;
+            else if (strcmp(token, "randr") == 0)
+                curr->perms.allowRandr = TRUE;
+            else if (strcmp(token, "screen") == 0)
+                curr->perms.allowScreen = TRUE;
+            else if (strcmp(token, "composite") == 0)
+                curr->perms.allowComposite = TRUE;
             else
                 XNS_LOG("unknown allow: %s\n", token);
         }
@@ -156,12 +198,25 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         curr->superPower = TRUE;
         return;
     }
-
+    if (strcmp(token, "client") == 0)
+    {
+        while ((token = strtok(NULL, " ")) != NULL) {
+            struct client_token *new_token = calloc(1, sizeof(struct client_token));
+            new_token->clientName = strdup(token);
+            new_token->Designation = curr;
+            xorg_list_append_ndup(&new_token->entry, &client_list);
+            XNS_LOG("client %s added for %s\n",new_token->clientName,curr->name);
+        }
+    }
     XNS_LOG("unknown token \"%s\"\n", token);
 }
 
 Bool XnsLoadConfig(void)
 {
+    // default to anon namespace
+    default_namespace = (char*)"anon";
+    ns_default = &ns_anon;
+
     xorg_list_append_ndup(&ns_root.entry, &ns_list);
     xorg_list_append_ndup(&ns_anon.entry, &ns_list);
 
@@ -197,14 +252,21 @@ Bool XnsLoadConfig(void)
         }
     }
 
-    return TRUE;
-}
-
-struct Xnamespace *XnsFindByName(const char* name) {
-    struct Xnamespace *walk;
-    xorg_list_for_each_entry(walk, &ns_list, entry) {
-        if (strcmp(walk->name, name)==0)
-            return walk;
+    if (strcmp(default_namespace, "new_ns") == 0) {
+        XNS_LOG("Defaulting to NEW Namespace per client\n");
+        ns_default->builtin = FALSE;
+    } else if (strcmp(default_namespace, "deny") == 0) {
+        XNS_LOG("Defaulting to DENY connection\n");
+        ns_default->deny = TRUE;
+    } else if (strcmp(default_namespace, "anon") == 0) {
+        XNS_LOG("Defaulting to anon connection\n");
+    } else if (XnsFindByName(default_namespace)) {
+        XNS_LOG("found default ns %s\n",default_namespace);
+        ns_default = XnsFindByName(default_namespace);
+    } else {
+        XNS_LOG("Incorrect Default, Defaulting to anon\n");
     }
-    return NULL;
+    free(default_namespace);
+
+    return TRUE;
 }
