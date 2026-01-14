@@ -47,7 +47,7 @@
 static Bool KeepTty = FALSE;
 
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-static int initialVT = -1;
+int initialVT = -1;
 #endif
 
 #ifdef SYSCONS_SUPPORT
@@ -342,6 +342,7 @@ static bool xf86OpenSyscons(void)
     }
     xf86Info.consoleFd = fd;
     xf86_bsd_acquire_vt();
+    xf86_console_proc_close = xf86_console_syscons_close;
     return (fd > 0);
 }
 
@@ -463,6 +464,7 @@ static bool xf86OpenPcvt(void)
     goto out;
 out:
     xf86_bsd_acquire_vt();
+    xf86_console_proc_close = xf86_console_pcvt_close;
     return (fd > 0);
 }
 
@@ -497,6 +499,8 @@ static bool xf86OpenWScons(void)
     }
     xf86Info.consoleFd = fd;
 
+    xf86_console_proc_close = xf86_console_wscons_close;
+
     /* nothing special to do for acquiring the VT */
     return (fd > 0);
 }
@@ -506,45 +510,13 @@ static bool xf86OpenWScons(void)
 void
 xf86CloseConsole(void)
 {
-#if defined(SYSCONS_SUPPORT) || defined(PCVT_SUPPORT)
-    struct vt_mode VT;
-#endif
-
     if (xf86Info.ShareVTs)
         return;
 
-    switch (xf86Info.consType) {
-#if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-    case SYSCONS:
-    case PCVT:
-        ioctl(xf86Info.consoleFd, KDSETMODE, KD_TEXT);  /* Back to text mode */
-        if (ioctl(xf86Info.consoleFd, VT_GETMODE, &VT) != -1) {
-            VT.mode = VT_AUTO;
-            ioctl(xf86Info.consoleFd, VT_SETMODE, &VT); /* dflt vt handling */
-        }
-#if !defined(__OpenBSD__) && !defined(USE_DEV_IO) && !defined(USE_I386_IOPL)
-        if (ioctl(xf86Info.consoleFd, KDDISABIO, 0) < 0) {
-            xf86FatalError("xf86CloseConsole: KDDISABIO failed (%s)",
-                           strerror(errno));
-        }
-#endif
-        if (xf86Info.autoVTSwitch && initialVT != -1)
-            ioctl(xf86Info.consoleFd, VT_ACTIVATE, initialVT);
-        break;
-#endif                          /* SYSCONS_SUPPORT || PCVT_SUPPORT */
-#ifdef WSCONS_SUPPORT
-    case WSCONS:
-    {
-        int mode = WSDISPLAYIO_MODE_EMUL;
-
-        ioctl(xf86Info.consoleFd, WSDISPLAYIO_SMODE, &mode);
-        break;
-    }
-#endif
-    }
-
-    close(xf86Info.consoleFd);
-    return;
+    if (xf86_console_proc_close)
+        xf86_console_proc_close();
+    else
+        LogMessageVerb(X_WARNING, 1, "no xf86_console_proc_close() installed\n");
 }
 
 int
