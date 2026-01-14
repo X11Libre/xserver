@@ -98,8 +98,11 @@ elif host_machine.system().endswith('bsd') or host_machine.system() == 'dragonfl
         'bsd/bsd_VTsw.c',
         'bsd/bsd_bell.c',
         'bsd/bsd_init.c',
+        'bsd/console_pcvt.c',
+        'bsd/console_syscons.c',
+        'bsd/console_wscons.c',
         'shared/drm_platform.c',
-	'shared/pm_noop.c'
+        'shared/pm_noop.c'
     ]
 
     if host_machine.cpu_family() == 'x86_64'
