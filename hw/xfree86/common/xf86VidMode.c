@@ -42,6 +42,7 @@
 
 #include "dix/screenint_priv.h"
 #include "os/log_priv.h"
+#include "os/mathx_priv.h"
 
 #include "os.h"
 #include "xf86_priv.h"
@@ -222,10 +223,10 @@ xf86VidModeSetViewPort(ScreenPtr pScreen, int x, int y)
     ScrnInfoPtr pScrn;
 
     pScrn = xf86ScreenToScrn(pScreen);
-    pScrn->frameX0 = min(max(x, 0),
+    pScrn->frameX0 = MIN(MAX(x, 0),
                          pScrn->virtualX - pScrn->currentMode->HDisplay);
     pScrn->frameX1 = pScrn->frameX0 + pScrn->currentMode->HDisplay - 1;
-    pScrn->frameY0 = min(max(y, 0),
+    pScrn->frameY0 = MIN(MAX(y, 0),
                          pScrn->virtualY - pScrn->currentMode->VDisplay);
     pScrn->frameY1 = pScrn->frameY0 + pScrn->currentMode->VDisplay - 1;
     if (pScrn->AdjustFrame != NULL)

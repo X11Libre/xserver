@@ -30,6 +30,7 @@
 #include <limits.h>
 #include <math.h>
 
+#include "os/mathx_priv.h"
 #include "os/xserver_poll.h"
 
 #include "xf86.h"
@@ -77,8 +78,8 @@ xf86OSRingBell(int loudness, int pitch, int duration)
     }
 
     freq = pitch;
-    freq = min(freq, (BELL_RATE / 2) - 1);
-    freq = max(freq, 2 * BELL_HZ);
+    freq = MIN(freq, (BELL_RATE / 2) - 1);
+    freq = MAX(freq, 2 * BELL_HZ);
 
     /*
      * Ensure full waves per buffer
@@ -101,10 +102,10 @@ xf86OSRingBell(int loudness, int pitch, int duration)
     }
 
     repeats = (duration + (BELL_MS / 2)) / BELL_MS;
-    repeats = max(repeats, BELL_MIN);
+    repeats = MAX(repeats, BELL_MIN);
 
-    loudness = max(0, loudness);
-    loudness = min(loudness, 100);
+    loudness = MAX(0, loudness);
+    loudness = MIN(loudness, 100);
 
 #ifdef DEBUG
     ErrorF("BELL : freq %d volume %d duration %d repeats %d\n",
@@ -116,7 +117,7 @@ xf86OSRingBell(int loudness, int pitch, int duration)
     audioInfo.play.sample_rate = BELL_RATE;
     audioInfo.play.channels = 2;
     audioInfo.play.precision = 16;
-    audioInfo.play.gain = min(AUDIO_MAX_GAIN, AUDIO_MAX_GAIN * loudness / 100);
+    audioInfo.play.gain = MIN(AUDIO_MAX_GAIN, AUDIO_MAX_GAIN * loudness / 100);
 
     if (ioctl(audioFD, AUDIO_SETINFO, &audioInfo) < 0) {
         LogMessageVerb(X_ERROR, 1,
