@@ -40,4 +40,10 @@ void xf86_console_pcvt_close(void)
     xf86Info.consoleFd = -1;
 }
 
+void xf86_console_pcvt_reactivate(void)
+{
+    if (ioctl(xf86Info.consoleFd, VT_ACTIVATE, xf86Info.vtno) != 0)
+        LogMessageVerb(X_WARNING, 1, "xf86_console_pcvt_reactivate: VT_ACTIVATE failed\n");
+}
+
 #endif /* PCVT_SUPPORT */
