@@ -65,13 +65,9 @@
 int
 ProcXIQueryPointer(ClientPtr client)
 {
-    REQUEST(xXIQueryPointerReq);
-    REQUEST_SIZE_MATCH(xXIQueryPointerReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceid);
-        swapl(&stuff->win);
-    }
+    X_REQUEST_HEAD_STRUCT(xXIQueryPointerReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
+    X_REQUEST_FIELD_CARD32(win);
 
     int rc;
     DeviceIntPtr pDev, kbd;
