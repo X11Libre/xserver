@@ -23,9 +23,11 @@ void xf86_bsd_acquire_vt(void);
 
 /* PCVT console driver */
 void xf86_console_pcvt_close(void);
+void xf86_console_pcvt_reactivate(void);
 
 /* SYSCONS console driver */
 void xf86_console_syscons_close(void);
+void xf86_console_syscons_reactivate(void);
 
 /* WSCONS console driver */
 void xf86_console_wscons_close(void);
