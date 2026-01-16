@@ -1,4 +1,5 @@
 srcs_xorg_common = [
+    'console.c',
     'xf86fbBus.c',
     'xf86noBus.c',
     'xf86Configure.c',
