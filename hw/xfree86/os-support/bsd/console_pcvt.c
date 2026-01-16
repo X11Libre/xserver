@@ -59,6 +59,15 @@ void xf86_console_pcvt_reactivate(void)
         LogMessageVerb(X_WARNING, 1, "xf86_console_pcvt_reactivate: VT_ACTIVATE failed\n");
 }
 
+static void xf86_console_pcvt_bell(int loudness, int pitch, int duration)
+{
+    if (loudness && pitch) {
+        ioctl(xf86Info.consoleFd, KDMKTONE,
+              ((1193190 / pitch) & 0xffff) |
+              (((unsigned long) duration * loudness / 50) << 16));
+    }
+}
+
 bool xf86_console_pcvt_open(void)
 {
     /* This looks much like syscons, since pcvt is API compatible */
@@ -173,6 +182,7 @@ bool xf86_console_pcvt_open(void)
     goto out;
 out:
     xf86_bsd_acquire_vt();
+    xf86_console_proc_bell = xf86_console_pcvt_bell;
     xf86_console_proc_close = xf86_console_pcvt_close;
     xf86_console_proc_reactivate = xf86_console_pcvt_reactivate;
     return (fd > 0);
