@@ -63,21 +63,6 @@ xf86VTSwitchPending(void)
 }
 
 Bool
-xf86VTSwitchAway(void)
-{
-#if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-    if (xf86Info.consType == SYSCONS || xf86Info.consType == PCVT) {
-        xf86Info.vtRequestsPending = FALSE;
-        if (ioctl(xf86Info.consoleFd, VT_RELDISP, 1) < 0)
-            return FALSE;
-        else
-            return TRUE;
-    }
-#endif
-    return FALSE;
-}
-
-Bool
 xf86VTSwitchTo(void)
 {
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
