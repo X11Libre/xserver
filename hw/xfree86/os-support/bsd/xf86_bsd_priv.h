@@ -30,6 +30,7 @@ void xf86_console_pcvt_reactivate(void);
 
 /* SYSCONS console driver */
 void xf86_console_syscons_close(void);
+bool xf86_console_syscons_open(void);
 void xf86_console_syscons_reactivate(void);
 
 /* WSCONS console driver */
