@@ -30,6 +30,7 @@
 
 #include "compiler.h"
 #include "xf86.h"
+#include "xf86_console_priv.h"
 #include "xf86Priv.h"
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
@@ -46,7 +47,6 @@
 static Bool KeepTty = FALSE;
 
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
-static int VTnum = -1;
 static int initialVT = -1;
 #endif
 
@@ -300,7 +300,7 @@ xf86OpenSyscons(void)
                 syscons_version = 0;
             }
 
-            xf86Info.vtno = VTnum;
+            xf86Info.vtno = xf86_console_requested_vt;
             from = X_CMDLINE;
 
 #ifdef VT_GETACTIVE
@@ -424,7 +424,7 @@ xf86OpenPcvt(void)
                            " not supported.", CHECK_DRIVER_MSG);
             }
 
-            xf86Info.vtno = VTnum;
+            xf86Info.vtno = xf86_console_requested_vt;
 
             if (ioctl(fd, VT_GETACTIVE, &initialVT) < 0)
                 initialVT = -1;
@@ -577,11 +577,12 @@ xf86ProcessArgument(int argc, char *argv[], int i)
     }
 #if defined (SYSCONS_SUPPORT) || defined (PCVT_SUPPORT)
     if ((argv[i][0] == 'v') && (argv[i][1] == 't')) {
+        int VTnum = -1;
         if (sscanf(argv[i], "vt%2d", &VTnum) == 0 || VTnum < 1 || VTnum > 12) {
             UseMsg();
-            VTnum = -1;
             return 0;
         }
+        xf86_console_requested_vt = VTnum;
         return 1;
     }
 #endif                          /* SYSCONS_SUPPORT || PCVT_SUPPORT */
