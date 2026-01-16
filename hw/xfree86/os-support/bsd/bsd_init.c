@@ -64,17 +64,6 @@ int initialVT = -1;
 #define CHECK_DRIVER_MSG \
   "Check your kernel's console driver configuration and /dev entries"
 
-/*
- * Functions to probe for the existence of a supported console driver.
- * Any function returns either a valid file descriptor (driver probed
- * successfully), -1 (driver not found), or uses FatalError() if the
- * driver was found but proved to not support the required mode to run
- * an X server.
- */
-#ifdef SYSCONS_SUPPORT
-static bool xf86OpenSyscons(void);
-#endif                          /* SYSCONS_SUPPORT */
-
 typedef struct console_driver {
     const char *name;
     bool (*open) (void);
@@ -90,7 +79,7 @@ static console_driver_t console_drivers[] = {
 #ifdef SYSCONS_SUPPORT
     {
         .name = "syscons",
-        .open = xf86OpenSyscons,
+        .open = xf86_console_syscons_open,
     },
 #endif
 #ifdef PCVT_SUPPORT
@@ -211,115 +200,6 @@ xf86OpenConsole(void)
             xf86_console_proc_reactivate();
     }
 }
-
-#ifdef SYSCONS_SUPPORT
-
-static bool xf86OpenSyscons(void)
-{
-    int fd = -1;
-    vtmode_t vtmode;
-    char vtname[12];
-    long syscons_version;
-    MessageType from;
-
-    /* Check for syscons */
-    if ((fd = open(SYSCONS_CONSOLE_DEV1, SYSCONS_CONSOLE_MODE, 0)) >= 0
-        || (fd = open(SYSCONS_CONSOLE_DEV2, SYSCONS_CONSOLE_MODE, 0)) >= 0) {
-        if (ioctl(fd, VT_GETMODE, &vtmode) >= 0) {
-            /* Get syscons version */
-            if (ioctl(fd, CONS_GETVERS, &syscons_version) < 0) {
-                syscons_version = 0;
-            }
-
-            xf86Info.vtno = xf86_console_requested_vt;
-            from = X_CMDLINE;
-
-#ifdef VT_GETACTIVE
-            if (ioctl(fd, VT_GETACTIVE, &initialVT) < 0)
-                initialVT = -1;
-#endif
-            if (xf86Info.ShareVTs)
-                xf86Info.vtno = initialVT;
-
-            if (xf86Info.vtno == -1) {
-                /*
-                 * For old syscons versions (<0x100), VT_OPENQRY returns
-                 * the current VT rather than the next free VT.  In this
-                 * case, the server gets started on the current VT instead
-                 * of the next free VT.
-                 */
-
-#if 0
-                /* check for the fixed VT_OPENQRY */
-                if (syscons_version >= 0x100) {
-#endif
-                    if (ioctl(fd, VT_OPENQRY, &xf86Info.vtno) < 0) {
-                        /* No free VTs */
-                        xf86Info.vtno = -1;
-                    }
-#if 0
-                }
-#endif
-
-                if (xf86Info.vtno == -1) {
-                    /*
-                     * All VTs are in use.  If initialVT was found, use it.
-                     */
-                    if (initialVT != -1) {
-                        xf86Info.vtno = initialVT;
-                    }
-                    else {
-                        if (syscons_version >= 0x100) {
-                            FatalError("%s: Cannot find a free VT",
-                                       "xf86OpenSyscons");
-                        }
-                        /* Should no longer reach here */
-                        FatalError("%s: %s %s\n\t%s %s",
-                                   "xf86OpenSyscons",
-                                   "syscons versions prior to 1.0 require",
-                                   "either the",
-                                   "server's stdin be a VT",
-                                   "or the use of the vtxx server option");
-                    }
-                }
-                from = X_PROBED;
-            }
-
-            close(fd);
-            snprintf(vtname, sizeof(vtname), "/dev/ttyv%01x",
-                     xf86Info.vtno - 1);
-            if ((fd = open(vtname, SYSCONS_CONSOLE_MODE, 0)) < 0) {
-                FatalError("xf86OpenSyscons: Cannot open %s (%s)",
-                           vtname, strerror(errno));
-            }
-            if (ioctl(fd, VT_GETMODE, &vtmode) < 0) {
-                FatalError("xf86OpenSyscons: VT_GETMODE failed");
-            }
-            xf86Info.consType = SYSCONS;
-            LogMessageVerb(X_PROBED, 1, "Using syscons driver with X support");
-            if (syscons_version >= 0x100) {
-                xf86ErrorF(" (version %ld.%ld)\n", syscons_version >> 8,
-                           syscons_version & 0xFF);
-            }
-            else {
-                xf86ErrorF(" (version 0.x)\n");
-            }
-            LogMessageVerb(from, 1, "using VT number %d\n\n", xf86Info.vtno);
-        }
-        else {
-            /* VT_GETMODE failed, probably not syscons */
-            close(fd);
-            fd = -1;
-        }
-    }
-    xf86Info.consoleFd = fd;
-    xf86_bsd_acquire_vt();
-    xf86_console_proc_close = xf86_console_syscons_close;
-    xf86_console_proc_reactivate = xf86_console_syscons_reactivate;
-    return (fd > 0);
-}
-
-#endif                          /* SYSCONS_SUPPORT */
 
 void
 xf86CloseConsole(void)
