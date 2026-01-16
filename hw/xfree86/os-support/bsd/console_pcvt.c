@@ -68,6 +68,12 @@ static void xf86_console_pcvt_bell(int loudness, int pitch, int duration)
     }
 }
 
+static bool xf86_console_pcvt_switch_away(void)
+{
+    xf86Info.vtRequestsPending = FALSE;
+    return (ioctl(xf86Info.consoleFd, VT_RELDISP, 1) >= 0);
+}
+
 bool xf86_console_pcvt_open(void)
 {
     /* This looks much like syscons, since pcvt is API compatible */
@@ -185,6 +191,7 @@ out:
     xf86_console_proc_bell = xf86_console_pcvt_bell;
     xf86_console_proc_close = xf86_console_pcvt_close;
     xf86_console_proc_reactivate = xf86_console_pcvt_reactivate;
+    xf86_console_proc_switch_away = xf86_console_pcvt_switch_away;
     return (fd > 0);
 }
 
