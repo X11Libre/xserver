@@ -53,6 +53,12 @@ static void xf86_console_syscons_bell(int loudness, int pitch, int duration)
     }
 }
 
+static bool xf86_console_syscons_switch_away(void)
+{
+    xf86Info.vtRequestsPending = FALSE;
+    return (ioctl(xf86Info.consoleFd, VT_RELDISP, 1) >= 0);
+}
+
 /* The FreeBSD 1.1 version syscons driver uses /dev/ttyv0 */
 #define SYSCONS_CONSOLE_DEV1 "/dev/ttyv0"
 #define SYSCONS_CONSOLE_DEV2 "/dev/vga"
@@ -157,6 +163,7 @@ bool xf86_console_syscons_open(void)
     xf86_console_proc_bell = xf86_console_syscons_bell;
     xf86_console_proc_close = xf86_console_syscons_close;
     xf86_console_proc_reactivate = xf86_console_syscons_reactivate;
+    xf86_console_proc_switch_away = xf86_console_syscons_switch_away;
     return (fd > 0);
 }
 
