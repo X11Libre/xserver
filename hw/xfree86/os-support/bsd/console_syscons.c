@@ -44,6 +44,15 @@ void xf86_console_syscons_reactivate(void)
         LogMessageVerb(X_WARNING, 1, "xf86_console_syscons_reactivate: VT_ACTIVATE failed\n");
 }
 
+static void xf86_console_syscons_bell(int loudness, int pitch, int duration)
+{
+    if (loudness && pitch) {
+        ioctl(xf86Info.consoleFd, KDMKTONE,
+              ((1193190 / pitch) & 0xffff) |
+              (((unsigned long) duration * loudness / 50) << 16));
+    }
+}
+
 /* The FreeBSD 1.1 version syscons driver uses /dev/ttyv0 */
 #define SYSCONS_CONSOLE_DEV1 "/dev/ttyv0"
 #define SYSCONS_CONSOLE_DEV2 "/dev/vga"
@@ -145,6 +154,7 @@ bool xf86_console_syscons_open(void)
     }
     xf86Info.consoleFd = fd;
     xf86_bsd_acquire_vt();
+    xf86_console_proc_bell = xf86_console_syscons_bell;
     xf86_console_proc_close = xf86_console_syscons_close;
     xf86_console_proc_reactivate = xf86_console_syscons_reactivate;
     return (fd > 0);

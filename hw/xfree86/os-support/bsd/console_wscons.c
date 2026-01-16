@@ -25,6 +25,19 @@ void xf86_console_wscons_close(void)
     xf86Info.consoleFd = -1;
 }
 
+static void xf86_console_wscons_bell(int loudness, int pitch, int duration)
+{
+    if (loudness && pitch) {
+        struct wskbd_bell_data wsb = {
+            .which = WSKBD_BELL_DOALL,
+            .pitch = pitch,
+            .period = duration,
+            .volume = loudness,
+        };
+        ioctl(xf86Info.consoleFd, WSKBDIO_COMPLEXBELL, &wsb);
+    }
+}
+
 bool xf86_console_wscons_open(void)
 {
     int fd = -1;
@@ -52,6 +65,7 @@ bool xf86_console_wscons_open(void)
     }
     xf86Info.consoleFd = fd;
 
+    xf86_console_proc_bell = xf86_console_wscons_bell;
     xf86_console_proc_close = xf86_console_wscons_close;
 
     /* nothing special to do for acquiring the VT */
