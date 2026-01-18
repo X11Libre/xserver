@@ -60,7 +60,7 @@
  * like mesa will be able to adverise these (even though it can do EGL 1.5).
  */
 static inline EGLDisplay
-glamor_egl_get_display(EGLint type, void *native)
+glamor_egl_get_display2(EGLint type, void *native, int platform_fallback)
 {
     /* In practise any EGL 1.5 implementation would support the EXT extension */
     if (epoxy_has_egl_extension(NULL, "EGL_EXT_platform_base")) {
@@ -71,7 +71,14 @@ glamor_egl_get_display(EGLint type, void *native)
     }
 
     /* Welp, everything is awful. */
-    return eglGetDisplay(native);
+    return platform_fallback ? eglGetDisplay(native) : NULL;
+}
+
+/* Used by Xephyr */
+static inline EGLDisplay
+glamor_egl_get_display(EGLint type, void *native)
+{
+    return glamor_egl_get_display2(type, native, 1);
 }
 
 #endif

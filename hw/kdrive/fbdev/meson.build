@@ -4,6 +4,14 @@ srcs = [
     '../../stubs/ddxBeforeReset.c',
 ]
 
+fbdev_glamor = []
+fbdev_dep = []
+if build_glamor and build_glx
+    srcs += 'fb_glamor.c'
+    fbdev_glamor += glamor
+    fbdev_dep += epoxy_dep
+endif
+
 xfbdev_server = executable(
     'Xfbdev',
     srcs,
@@ -12,9 +20,10 @@ xfbdev_server = executable(
         include_directories('../src'),
         include_directories('../linux'),
     ],
-    dependencies: common_dep,
+    dependencies: [ common_dep, fbdev_dep, ],
     link_with: [
         libxserver_main,
+        fbdev_glamor,
         kdrive,
         linux,
         libxserver_fb,

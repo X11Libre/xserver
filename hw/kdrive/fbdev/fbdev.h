@@ -32,6 +32,10 @@
 #include "randrstr.h"
 #endif
 
+#if defined(GLAMOR) && defined(GLXEXT)
+#include <epoxy/egl.h>
+#endif
+
 typedef struct _fbdevPriv {
     struct fb_var_screeninfo var;
     struct fb_fix_screeninfo fix;
@@ -46,11 +50,21 @@ typedef struct _fbdevPriv {
 typedef struct _fbdevScrPriv {
     Rotation randr;
     Bool shadow;
+#if defined(GLAMOR) && defined(GLXEXT)
+    Bool glamor_initialized;
+    EGLDisplay display;
+    EGLContext ctx;
+    void* glamor_make_current;
+#endif
 } FbdevScrPriv;
 
 extern KdCardFuncs fbdevFuncs;
 extern const char *fbdevDevicePath;
 extern Bool fbDisableShadow;
+
+#if defined(GLAMOR) && defined(GLXEXT)
+extern const char *fbdev_glvnd_provider;
+#endif
 
 Bool fbdevCardInit(KdCardInfo * card);
 
@@ -81,5 +95,15 @@ void fbdevGetColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 void fbdevPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 
 Bool fbdevMapFramebuffer(KdScreenInfo * screen);
+
+#if defined(GLAMOR) && defined(GLXEXT)
+Bool fbdevInitAccel(ScreenPtr screen);
+
+void fbdevEnableAccel(ScreenPtr screen);
+
+void fbdevDisableAccel(ScreenPtr screen);
+
+void fbdevFiniAccel(ScreenPtr screen);
+#endif
 
 #endif                          /* _KDRIVE_FBDEV_H_ */

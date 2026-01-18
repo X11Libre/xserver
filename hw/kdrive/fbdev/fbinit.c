@@ -70,6 +70,8 @@ ddxUseMsg(void)
         ("-fb path         Framebuffer device to use. Defaults to /dev/fb0\n");
     ErrorF
         ("-noshadow        Disable the ShadowFB layer if possible\n");
+    ErrorF
+        ("-glvendor        Suggest what glvnd vendor library should be used\n");
     ErrorF("\n");
 }
 
@@ -90,6 +92,17 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
+#if defined(GLAMOR) && defined(GLXEXT)
+    if (!strcmp(argv[i], "-glvendor")) {
+        if (i + 1 < argc) {
+            fbdev_glvnd_provider = argv[i + 1];
+            return 2;
+        }
+        UseMsg();
+        exit(1);
+    }
+#endif
+
     return KdProcessArgument(argc, argv, i);
 }
 
@@ -107,7 +120,14 @@ KdCardFuncs fbdevFuncs = {
     .scrfini          = fbdevScreenFini,
     .cardfini         = fbdevCardFini,
 
-    /* no cursor or accel funcs */
+    /* no cursor funcs */
+
+#if defined(GLAMOR) && defined(GLXEXT)
+    .initAccel        = fbdevInitAccel,
+    .enableAccel      = fbdevEnableAccel,
+    .disableAccel     = fbdevDisableAccel,
+    .finiAccel        = fbdevFiniAccel,
+#endif
 
     .getColors        = fbdevGetColors,
     .putColors        = fbdevPutColors,
