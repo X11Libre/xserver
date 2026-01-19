@@ -32,6 +32,7 @@ Equipment Corporation.
 #include <X11/Xproto.h>
 #include <X11/extensions/dpmsproto.h>
 
+#include "dix/client_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
@@ -61,30 +62,30 @@ CARD32 DPMSOffTime = -1;
 Bool DPMSEnabled;
 
 static int DPMSReqCode = 0;
-static RESTYPE ClientType;  /* resource types for event masks */
 
-struct xorg_list dpms_listeners = { 0 };
+static struct xorg_list dpms_listeners = { 0 };
 
 typedef struct _DPMSEvent *DPMSEventPtr;
 typedef struct _DPMSEvent {
     struct xorg_list entry;
-    DPMSEventPtr next;
     ClientPtr client;
-    XID clientResource;
     unsigned int mask;
 } DPMSEventRec;
 
- /*ARGSUSED*/ static int
-DPMSFreeClient(void *data, XID id)
+static void DPMSDeleteClient(ClientPtr pClient)
 {
     DPMSEventRec *walk, *tmp;
     xorg_list_for_each_entry_safe(walk, tmp, &dpms_listeners, entry) {
-        if (walk == data) {
+        if (walk->client == pClient) {
             xorg_list_del(&walk->entry);
             free(walk);
         }
     }
-    return 1;
+}
+
+static void DPMSClientDestroyCallback(CallbackListPtr *pcbl, void *unused,
+                                      void *calldata) {
+    DPMSDeleteClient((ClientPtr)calldata);
 }
 
 static void
@@ -126,27 +127,12 @@ ProcDPMSSelectInput(register ClientPtr client)
             return BadAlloc;
         pNewEvent->client = client;
         pNewEvent->mask = stuff->eventMask;
-        /*
-         * add a resource that will be deleted when
-         * the client goes away
-         */
-        XID clientResource = FakeClientID(client->index);
-        pNewEvent->clientResource = clientResource;
-        if (!AddResource(clientResource, ClientType, (void *)pNewEvent))
-            return BadAlloc;
 
         xorg_list_append(&pNewEvent->entry, &dpms_listeners);
     }
     else if (stuff->eventMask == 0) {
-        DPMSEventRec *walk = NULL, *tmp = NULL;
         /* delete the interest */
-        xorg_list_for_each_entry_safe(walk, tmp, &dpms_listeners, entry) {
-            if (walk->client == client) {
-                xorg_list_del(&walk->entry);
-                FreeResource(walk->clientResource, ClientType);
-                free(walk);
-            }
-        }
+        DPMSDeleteClient(client);
     }
     else {
         client->errorValue = stuff->eventMask;
@@ -426,9 +412,10 @@ DPMSCloseDownExtension(ExtensionEntry *e)
 {
     DPMSSet(serverClient, DPMSModeOn);
 
+    DeleteCallback(&ClientDestroyCallback, DPMSClientDestroyCallback, NULL);
+
     DPMSEventRec *walk, *tmp;
     xorg_list_for_each_entry_safe(walk, tmp, &dpms_listeners, entry) {
-        FreeResource(walk->clientResource, ClientType);
         xorg_list_del(&walk->entry);
         free(walk);
     }
@@ -453,13 +440,12 @@ DPMSExtensionInit(void)
     DPMSPowerLevel = DPMSModeOn;
     DPMSEnabled = DPMSSupported();
 
-    ClientType = CreateNewResourceType(DPMSFreeClient, "DPMSClient");
-
-    if (DPMSEnabled && ClientType &&
+    if (DPMSEnabled &&
         (extEntry = AddExtension(DPMSExtensionName, 0, 0,
                                  ProcDPMSDispatch, ProcDPMSDispatch,
                                  DPMSCloseDownExtension, StandardMinorOpcode))) {
         DPMSReqCode = extEntry->base;
         GERegisterExtension(DPMSReqCode, SDPMSInfoNotifyEvent);
+        AddCallback(&ClientDestroyCallback, DPMSClientDestroyCallback, NULL);
     }
 }
