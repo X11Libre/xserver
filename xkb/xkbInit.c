@@ -50,7 +50,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "opaque.h"
 #include "property.h"
 #include "scrnintstr.h"
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 #define      _XKB_RF_NAMES_PROP_ATOM         "_XKB_RULES_NAMES"
 

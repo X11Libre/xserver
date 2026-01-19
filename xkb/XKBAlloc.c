@@ -35,7 +35,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "misc.h"
 #include "inputstr.h"
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 #include <os.h>
 
 #include "xkb/xkbsrv_priv.h"

@@ -41,7 +41,7 @@
 #include "dix.h"
 #include "xkbstr.h"
 #include <xkbsrv.h>
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 /***====================================================================***/
 

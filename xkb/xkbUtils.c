@@ -66,7 +66,7 @@ DEALINGS IN THE SOFTWARE.
 #include "misc.h"
 #include "inputstr.h"
 #include "eventstr.h"
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 /***====================================================================***/
 

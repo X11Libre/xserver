@@ -4465,7 +4465,7 @@ ProcXkbSetNames(ClientPtr client)
     return Success;
 }
 
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 #define	XkbSizeCountedString(s)  ((s)?((((2+strlen(s))+3)/4)*4):4)
 
