@@ -32,11 +32,11 @@
 #include "include/pixmapstr.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
+#include "Xext/damage/damageext_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #include "xfixes/xfixes.h"
 
-#include "damageextint.h"
 #include "damagestr.h"
 #include "protocol-versions.h"
 #include "dixstruct_priv.h"
@@ -201,7 +201,7 @@ DamageExtDestroy(DamagePtr pDamage, void *closure)
 }
 
 void
-DamageExtSetCritical(ClientPtr pClient, Bool critical)
+DamageExtSetCritical(ClientPtr pClient, bool critical)
 {
     DamageClientPtr pDamageClient = GetDamageClient(pClient);
 

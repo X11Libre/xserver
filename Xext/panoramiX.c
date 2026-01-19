@@ -40,6 +40,7 @@ Equipment Corporation.
 #include "dix/server_priv.h"
 #include "miext/extinit_priv.h"
 #include "os/osdep.h"
+#include "Xext/damage/damageext_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 
@@ -59,7 +60,6 @@ Equipment Corporation.
 #include "resource.h"
 #include "picturestr_priv.h"
 #include "xfixesint.h"
-#include "Xext/damage/damageextint.h"
 #include "compint.h"
 #include "protocol-versions.h"
 
