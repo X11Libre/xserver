@@ -43,8 +43,11 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/resource_priv.h"
 #include "os/bug_priv.h"
+#include "Xext/damage/damageext_priv.h"
 
 #include "compint.h"
 
@@ -408,7 +411,7 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
          * tell damage extension that damage events for this client are
          * critical output
          */
-        DamageExtSetCritical(pClient, TRUE);
+        DamageExtSetCritical(pClient, true);
         pWin->inhibitBGPaint = TRUE;
     }
     return Success;
@@ -436,7 +439,7 @@ compFreeClientSubwindows(WindowPtr pWin, XID id)
                  * tell damage extension that damage events for this client are
                  * critical output
                  */
-                DamageExtSetCritical(pClient, FALSE);
+                DamageExtSetCritical(pClient, false);
                 csw->update = CompositeRedirectAutomatic;
                 pWin->inhibitBGPaint = FALSE;
                 if (pWin->mapped)
