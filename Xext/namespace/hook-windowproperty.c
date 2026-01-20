@@ -15,23 +15,26 @@
 void hookWindowProperty(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(PropertyFilterParam);
-
-    // no redirect on super power
-    if (subj->ns->superPower)
-        return;
-
     const ClientPtr owner = dixLookupXIDOwner(param->window);
+    struct XnamespaceClientPriv *obj = XnsClientPriv(owner);
+    // no redirect on super power
+    // whitelist anything that goes to caller's own namespace
+    if (subj->ns->superPower || XnsClientSameNS(subj, obj))
+        return;
+    // skip redirect. these expose a lot of information but WMs hold the info.
+    if (obj->ns->isRoot) {
+        switch(client->majorOp) {
+            case X_GetProperty:
+                return;
+        }
+    }
+
     if (!owner) {
         param->status = BadWindow;
         param->skip = TRUE;
         XNS_HOOK_LOG("owner of window 0x%0llx doesn't exist\n", (unsigned long long)param->window);
         return;
     }
-
-    // whitelist anything that goes to caller's own namespace
-    struct XnamespaceClientPriv *obj = XnsClientPriv(owner);
-    if (XnsClientSameNS(subj, obj))
-        return;
 
     // allow access to namespace virtual root
     if (param->window == subj->ns->rootWindow->drawable.id)
