@@ -71,10 +71,9 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                         }
                     }
                 }
-                // mostly for global keypresses
+                // safe?
                 case X_XIQueryDevice:
-                    if (subj->ns->perms.allowGlobalKeyboard)
-                        goto pass;
+                    goto pass;
             }
         }
 
