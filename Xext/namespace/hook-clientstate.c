@@ -1,6 +1,7 @@
 #define HOOK_NAME "clienstate"
 
 #include <dix-config.h>
+#include <libgen.h>
 
 #include "dix/registry_priv.h"
 #include "os/client_priv.h"
@@ -12,16 +13,16 @@
 void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
 {
     XNS_HOOK_HEAD(NewClientInfoRec);
-    // just get actual name instead of path or command flags
-    const char *clientName = strtok(basename(GetClientCmdName(client)), " ");
 
     switch (client->clientState) {
-    case ClientStateInitial:
+    case ClientStateInitial: {
         // nothing can happen in this state. auth cookie can't be loaded from env yet
         subj->pid = GetClientPid(client);
         break;
-
-    case ClientStateRunning:
+    }
+    case ClientStateRunning: {
+        // just get actual name instead of path or command flags
+        const char *clientName = strtok(basename((char*)GetClientCmdName(client)), " ");
 
         XNS_LOG("pid: %d\n",GetClientPid(client));
 
@@ -75,7 +76,7 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         XnamespaceAssignClient(subj,ns_default);
         XnsRegisterPid(subj);
         break;
-
+    }
     case ClientStateRetained:
         break;
     case ClientStateGone:
