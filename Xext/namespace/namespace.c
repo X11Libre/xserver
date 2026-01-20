@@ -258,3 +258,38 @@ char** GetXnamespacesAsCharr (void) {
     ns[count] = NULL; // null terminated
     return ns;
 }
+
+void XnsRegisterPid(struct XnamespaceClientPriv *subj) {
+    struct xns_pid_entry *pid_entry = calloc(1, sizeof(struct xns_pid_entry));
+    pid_entry->pid = subj->pid;
+    xorg_list_append(&pid_entry->entry, &subj->ns->pids);
+    return;
+}
+void XnsRemovePid(struct XnamespaceClientPriv *subj) {
+    struct xns_pid_entry *pWalk, *pTemp;
+    xorg_list_for_each_entry_safe(pWalk, pTemp, &subj->ns->pids, entry) {
+        if(subj->pid==pWalk->pid) {
+            xorg_list_del(&pWalk->entry);
+            free(pWalk);
+        }
+    }
+}
+int XnsAssignByPid(struct XnamespaceClientPriv *subj) {
+    struct xns_pid_entry *entry_pWalk;
+    struct Xnamespace *pWalk;
+    xorg_list_for_each_entry(pWalk, &ns_list, entry) {
+        xorg_list_for_each_entry(entry_pWalk, &pWalk->pids, entry) {
+            if(subj->pid==entry_pWalk->pid) {
+                XnamespaceAssignClient(subj, pWalk);
+                struct auth_token *auth_token_walk;
+                xorg_list_for_each_entry(auth_token_walk, &pWalk->auth_tokens, entry) {
+                    subj->authId = auth_token_walk->authId;
+                    return Success;
+                }
+                // fallback to simple return
+                return Success;
+            }
+        }
+    }
+    return 1;
+}

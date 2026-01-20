@@ -18,13 +18,17 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
     switch (client->clientState) {
     case ClientStateInitial:
         // nothing can happen in this state. auth cookie can't be loaded from env yet
-
+        subj->pid = GetClientPid(client);
         break;
 
     case ClientStateRunning:
+
+        XNS_LOG("pid: %d\n",GetClientPid(client));
+
         subj->authId = AuthorizationIDOfClient(client);
         // only change if uninitialized from client name walk (0)
         if (subj->authId==0 && XnamespaceAssignByClientName(subj,clientName)==0) {
+            XnsRegisterPid(subj);
             return;
         }
 
@@ -35,9 +39,14 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         if (AuthorizationFromID(subj->authId, &name_len, &name, &data_len, &data)) {
             XnamespaceAssignClient(subj, XnsFindByAuth(name_len, name, data_len, data));
         } // midpoint - we're not in the client lists nor do we have auth from env
+        else if(XnsAssignByPid(subj)==0) {
+            // processes can connect multiple times, keep them together
+            return;
+        }
         else if (ns_default->deny) {
             XNS_LOG("Deny Connection Request From %s\n",clientName);
             client->noClientException = -1;
+            return;
         }
         else if (!ns_default->builtin) {
             // builtin flag should only be unset if the config is set as new_ns
@@ -58,12 +67,13 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         }
         // authId should ONLY be 0 at this point if it's truly unauthorized
         if (subj->authId!=0) {
+            XnsRegisterPid(subj);
             return;
         }
         XNS_HOOK_LOG("No Auth, Assigning to default %s\n",ns_default->name);
         // if we end up here, there is no auth - dump to the default
         XnamespaceAssignClient(subj,ns_default);
-
+        XnsRegisterPid(subj);
         break;
 
     case ClientStateRetained:
@@ -83,6 +93,7 @@ void hookClientDestroy(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     if (!subj)
         return; /* no XNS devprivate assigned ? */
+    XnsRemovePid(subj);
     if(subj->ns->builtin==0) {
         if (subj->ns->refcnt==1) {
             // this was the last client in the (new by default) namespace

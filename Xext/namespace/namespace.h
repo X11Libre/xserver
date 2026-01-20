@@ -37,6 +37,11 @@ struct Xns_perm_list {
     Bool allowXKeyboard;
 };
 
+struct xns_pid_entry {
+    struct xorg_list entry;
+    int pid;
+};
+
 struct Xnamespace {
     struct xorg_list entry;
     Bool builtin;
@@ -48,6 +53,7 @@ struct Xnamespace {
     size_t refcnt;
     struct Xns_perm_list perms;
     struct xorg_list auth_tokens;
+    struct xorg_list pids;
 };
 
 extern struct xorg_list client_list;
@@ -59,6 +65,7 @@ extern struct Xnamespace *ns_default;
 struct XnamespaceClientPriv {
     Bool isServer;
     XID authId;
+    int pid;
     struct Xnamespace* ns;
 };
 
@@ -82,6 +89,9 @@ int DeleteXnamespace(struct Xnamespace *curr);
 void PrintXnamespaces(void);
 int PruneXnamespaces(void);
 char** GetXnamespacesAsCharr (void);
+void XnsRegisterPid(struct XnamespaceClientPriv *subj);
+void XnsRemovePid(struct XnamespaceClientPriv *subj);
+int XnsAssignByPid(struct XnamespaceClientPriv *subj);
 
 static inline struct XnamespaceClientPriv *XnsClientPriv(ClientPtr client) {
     if (client == NULL) return NULL;
