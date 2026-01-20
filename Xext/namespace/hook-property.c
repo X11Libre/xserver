@@ -36,7 +36,7 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     // Whitelisted atoms - potentially a global allow tag?
     if (obj->ns->isRoot) {
         switch (client->majorOp) {
-            case X_GetProperty:
+            case X_GetProperty: {
                 // TODO: turn this mess into a switch? they're mostly xcb atoms - tricky
                 const char* atomNameTest = NameForAtom(name);
                 // can this expose anything?
@@ -63,6 +63,7 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                     goto pass;
                 if (strcmp("_NET_CLIENT_LIST_STACKING", atomNameTest)==0)
                     goto pass;
+            }
         }
     }
 
