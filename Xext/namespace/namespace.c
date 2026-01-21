@@ -97,7 +97,7 @@ struct Xnamespace* XnsFindByAuth(size_t szAuthProto, const char* authProto, size
         }
     }
 
-    // default to anonymous if credentials aren't assigned to specific NS
+    /* default to anonymous if credentials aren't assigned to specific NS */
     return &ns_anon;
 }
 
@@ -109,7 +109,7 @@ XID GenerateAuthForXnamespace(struct Xnamespace *curr) {
     gen_token->authTokenLen = 16;
     gen_token->authTokenData = calloc(1, gen_token->authTokenLen);
 
-    // GenerateAuthorization() logic not needed, this is the only important line
+    /* GenerateAuthorization() logic not needed, this is the only important line */
     arc4random_buf(gen_token->authTokenData, gen_token->authTokenLen);
 
     gen_token->authId = AddAuthorization(strlen(gen_token->authProto),
@@ -158,21 +158,21 @@ int XnamespaceAssignByClientName(struct XnamespaceClientPriv *subj, const char *
     struct auth_token *auth_token_walk;
 
     xorg_list_for_each_entry(c_walk, &client_list, entry) {
-        // test for the name if it doesn't exist yet
+        /* test for the name if it doesn't exist yet */
         if (strcmp(clientName, c_walk->clientName) == 0) {
             XNS_LOG("%s matching ns found: %s\n",clientName,c_walk->Designation->name);
             XnamespaceAssignClient(subj, c_walk->Designation);
-            // assign with first found token
+            /* assign with first found token */
             xorg_list_for_each_entry(auth_token_walk, &c_walk->Designation->auth_tokens, entry) {
                 subj->authId = auth_token_walk->authId;
-                // (at least one) auth found for namespace, pass it on to the priv
+                /* (at least one) auth found for namespace, pass it on to the priv */
                 return Success;
             }
             XNS_LOG("No auth tokens for namespace, client still assigned\n");
             return Success;
         }
     }
-    // failed to find a match
+    /* failed to find a match */
     return 1;
 }
 
@@ -184,8 +184,8 @@ struct Xnamespace *GenerateNewXnamespaceForClient(struct Xnamespace *copyfrom, c
     }
     if (copyfrom!=NULL) {
         new_run_ns->perms   = copyfrom->perms;}
-    new_run_ns->builtin = FALSE; // just in case
-    // "fancy" formatting for namespace names
+    new_run_ns->builtin = FALSE; /* just in case */
+    /* "fancy" formatting for namespace names */
 
     XNS_LOG("New Namespace Creation : %s\n",newname);
 
@@ -208,14 +208,14 @@ void PrintXnamespaces(void) {
 
 int DeleteXnamespace(struct Xnamespace *curr) {
     if (curr->refcnt==0 && curr->builtin == 0) {
-        // non-critical. auth is optional?
+        /* non-critical. auth is optional? */
         if (RevokeAuthForXnamespace(curr)==0) {
             XNS_LOG("DELETE: No auth or failed to revoke auth\n"); }
         XNS_LOG("Deleting namespace: %s\n", curr->name);
-        // critical? namespaces should always have windows so this should always pass
+        /* critical? namespaces should always have windows so this should always pass */
         DeleteWindow(curr->rootWindow, ns_root.rootWindow->drawable.id);
         xorg_list_del(&curr->entry);
-        // no references to this namespace
+        /* no references to this namespace */
         free((char*)curr->name);
         free(curr);
         return Success;
@@ -230,7 +230,7 @@ int PruneXnamespaces(void) {
         if (walk->refcnt == 0 && walk->builtin == 0) {
             XNS_LOG("pruning empty non-retained namespace %s\n",walk->name);
             if (DeleteXnamespace(walk)!=0) {
-                // this shouldn't fail
+                /* this shouldn't fail */
                 XNS_LOG("failed to delete namespace %s\n",walk->name);
             }
         }
@@ -248,14 +248,14 @@ struct Xnamespace *XnsFindByName(const char* name) {
 }
 
 char** GetXnamespacesAsCharr (void) {
-    // needs to walk twice since the size of the list isn't stored anywhere
+    /* needs to walk twice since the size of the list isn't stored anywhere */
     int count = 0;
     struct Xnamespace *walk;
     xorg_list_for_each_entry(walk, &ns_list, entry) {count++;}
     char **ns = calloc(1+ count, sizeof(char*));
-    count = 0; // reset
+    count = 0; /* reset */
     xorg_list_for_each_entry(walk, &ns_list, entry) {ns[count++] = strdup(walk->name);}
-    ns[count] = NULL; // null terminated
+    ns[count] = NULL; /* null terminated */
     return ns;
 }
 
@@ -286,7 +286,7 @@ int XnsAssignByPid(struct XnamespaceClientPriv *subj) {
                     subj->authId = auth_token_walk->authId;
                     return Success;
                 }
-                // fallback to simple return
+                /* fallback to simple return */
                 return Success;
             }
         }

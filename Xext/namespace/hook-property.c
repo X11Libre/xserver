@@ -33,19 +33,19 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (param->pWin == subj->ns->rootWindow)
         goto pass;
 
-    // Whitelisted atoms - potentially a global allow tag?
+    /* Whitelisted atoms - potentially a global allow tag? */
     if (obj->ns->isRoot) {
         switch (client->majorOp) {
             case X_GetProperty: {
-                // TODO: turn this mess into a switch? they're mostly xcb atoms - tricky
+                /* TODO: turn this mess into a switch? they're mostly xcb atoms - tricky */
                 const char* atomNameTest = NameForAtom(name);
-                // can this expose anything?
+                /* can this expose anything? */
                 if (strcmp("_NET_WORKAREA", atomNameTest)==0)
                     goto pass;
-                // questionable
+                /* questionable */
                 if (strcmp("_NET_ACTIVE_WINDOW", atomNameTest)==0)
                     goto pass;
-                // harmless?
+                /* harmless? */
                 if (strcmp("WM_NAME", atomNameTest)==0)
                     goto pass;
                 if (strcmp("_NET_WM_NAME", atomNameTest)==0)
@@ -58,7 +58,7 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                     goto pass;
                 if (strcmp("_NET_SUPPORTED", atomNameTest)==0)
                     goto pass;
-                // we already whitelist X_QueryTree, these do the same thing
+                /* we already whitelist X_QueryTree, these do the same thing */
                 if (strcmp("_NET_CLIENT_LIST", atomNameTest)==0)
                     goto pass;
                 if (strcmp("_NET_CLIENT_LIST_STACKING", atomNameTest)==0)

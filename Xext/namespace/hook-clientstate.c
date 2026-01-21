@@ -16,32 +16,32 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
 
     switch (client->clientState) {
     case ClientStateInitial: {
-        // nothing can happen in this state. auth cookie can't be loaded from env yet
+        /* nothing can happen in this state. auth cookie can't be loaded from env yet */
         subj->pid = GetClientPid(client);
         break;
     }
     case ClientStateRunning: {
-        // just get actual name instead of path or command flags
+        /* just get actual name instead of path or command flags */
         const char *clientName = strtok(basename((char*)GetClientCmdName(client)), " ");
 
         XNS_LOG("pid: %d\n",GetClientPid(client));
 
         subj->authId = AuthorizationIDOfClient(client);
-        // only change if uninitialized from client name walk (0)
+        /* only change if uninitialized from client name walk (0) */
         if (subj->authId==0 && XnamespaceAssignByClientName(subj,clientName)==0) {
             XnsRegisterPid(subj);
             return;
         }
 
-        // check env (XAUTHORITY)
+        /* check env (XAUTHORITY) */
         short unsigned int name_len = 0, data_len = 0;
         const char * name = NULL;
         char * data = NULL;
         if (AuthorizationFromID(subj->authId, &name_len, &name, &data_len, &data)) {
             XnamespaceAssignClient(subj, XnsFindByAuth(name_len, name, data_len, data));
-        } // midpoint - we're not in the client lists nor do we have auth from env
+        } /* midpoint - we're not in the client lists nor do we have auth from env */
         else if(XnsAssignByPid(subj)==0) {
-            // processes can connect multiple times, keep them together
+            /* processes can connect multiple times, keep them together */
             return;
         }
         else if (ns_default->deny) {
@@ -50,8 +50,9 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
             return;
         }
         else if (!ns_default->builtin) {
-            // builtin flag should only be unset if the config is set as new_ns
-            // "fancy" formatted name
+            /* builtin flag should only be unset if the config is set as new_ns
+             * "fancy" formatted name
+             */
             int len = snprintf(NULL, 0, "%s%d", clientName, client->index);
             char *str = malloc(len + 1);
             snprintf(str, len+1, "%s%d", clientName, client->index);
@@ -66,13 +67,13 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
                 XnamespaceAssignClient(subj,&ns_anon);
             }
         }
-        // authId should ONLY be 0 at this point if it's truly unauthorized
+        /* authId should ONLY be 0 at this point if it's truly unauthorized */
         if (subj->authId!=0) {
             XnsRegisterPid(subj);
             return;
         }
         XNS_HOOK_LOG("No Auth, Assigning to default %s\n",ns_default->name);
-        // if we end up here, there is no auth - dump to the default
+        /* if we end up here, there is no auth - dump to the default */
         XnamespaceAssignClient(subj,ns_default);
         XnsRegisterPid(subj);
         break;
@@ -97,15 +98,15 @@ void hookClientDestroy(CallbackListPtr *pcbl, void *unused, void *calldata)
     XnsRemovePid(subj);
     if(subj->ns->builtin==0) {
         if (subj->ns->refcnt==1) {
-            // this was the last client in the (new by default) namespace
+            /* this was the last client in the (new by default) namespace */
             subj->ns->refcnt--;
-            // Delete function checks for 0 client references
+            /* Delete function checks for 0 client references */
             if (DeleteXnamespace(subj->ns)!=0)
                 XNS_LOG("Failed to delete namespace\n");
             subj->ns = NULL;
             return;
         } else {
-            // don't delete, clients are still connected
+            /* don't delete, clients are still connected */
         }
     }
     XnamespaceAssignClient(subj, NULL);

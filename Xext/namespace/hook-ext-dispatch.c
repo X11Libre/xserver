@@ -3,7 +3,7 @@
 #include <dix-config.h>
 
 #include <stdio.h>
-#include <X11/Xdefs.h> // syncproto.h is broken
+#include <X11/Xdefs.h> /* syncproto.h is broken */
 #include <X11/Xmd.h>
 #include <X11/extensions/composite.h>
 #include <X11/extensions/syncproto.h>
@@ -47,7 +47,7 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
             switch (client->minorOp) {
                 case X_kbUseExtension:
                 case X_kbGetMap:
-                case X_kbSelectEvents: // fixme: might need special filtering
+                case X_kbSelectEvents: /* FIXME: might need special filtering */
                 case X_kbGetState:
                 case X_kbGetNames:
                 case X_kbGetControls:
@@ -115,7 +115,7 @@ void hookExtDispatch(CallbackListPtr *pcbl, void *unused, void *calldata)
         break;
 
         case EXTENSION_MAJOR_SYNC:
-            // should be safe to enable
+            /* should be safe to enable */
                     goto pass;
         break;
 

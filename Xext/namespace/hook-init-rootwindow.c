@@ -21,7 +21,7 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
 {
     ScreenPtr pScreen = (ScreenPtr)screen;
 
-    // only act on first screen
+    /* only act on first screen */
     if (pScreen->myNum)
         return;
 
@@ -67,7 +67,7 @@ void NewVirtualRootWindowForXnamespace(WindowPtr rootWindow, struct Xnamespace *
 
     curr->rootWindow = pWin;
 
-    // set window name
+    /* set window name */
     char buf[PATH_MAX] = { 0 };
     snprintf(buf, sizeof(buf)-1, "XNS-ROOT:%s", curr->name);
     setWinStrProp(pWin, XA_WM_NAME, buf);

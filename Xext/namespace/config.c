@@ -40,7 +40,7 @@ struct xorg_list ns_list = { 0 };
 struct xorg_list client_list = { 0 };
 
 char *namespaceConfigFile = NULL;
-char *default_namespace;
+static const char *default_namespace;
 
 static struct Xnamespace* select_ns(const char* name)
 {
@@ -60,7 +60,7 @@ static struct Xnamespace* select_ns(const char* name)
                  'a' <= c && c <= 'f' ? c - 'a' + 10 : \
                  'A' <= c && c <= 'F' ? c - 'A' + 10 : -1)
 
-// warning: no error checking, no buffer clearing
+/* warning: no error checking, no buffer clearing */
 static int hex2bin(const char *in, char *out)
 {
     while (in[0] && in[1]) {
@@ -83,7 +83,7 @@ static int hex2bin(const char *in, char *out)
 */
 static void parseLine(char *line, struct Xnamespace **walk_ns)
 {
-    // trim newline and comments
+    /* trim newline and comments */
     char *c1 = strchr(line, '\n');
     if (c1 != NULL)
         *c1 = 0;
@@ -121,7 +121,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
         }
 
         curr = *walk_ns = select_ns(token);
-        // anything made from the config should be retained, this flag will serve dual purpose
+        /* anything made from the config should be retained, this flag will serve dual purpose */
         curr->builtin = TRUE;
         return;
     }
@@ -213,8 +213,8 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 
 Bool XnsLoadConfig(void)
 {
-    // default to anon namespace
-    default_namespace = (char*)"anon";
+    /* default to anon namespace */
+    default_namespace = "anon";
     ns_default = &ns_anon;
 
     xorg_list_append_ndup(&ns_root.entry, &ns_list);
@@ -266,7 +266,6 @@ Bool XnsLoadConfig(void)
     } else {
         XNS_LOG("Incorrect Default, Defaulting to anon\n");
     }
-    free(default_namespace);
 
     return TRUE;
 }

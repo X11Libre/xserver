@@ -45,8 +45,8 @@ struct xns_pid_entry {
 struct Xnamespace {
     struct xorg_list entry;
     Bool builtin;
-    Bool deny;                      // connection deny flag. should stay unused.
-    Bool isRoot;                    // only ever used by root namespace
+    Bool deny;                      /* connection deny flag. should stay unused. */
+    Bool isRoot;                    /* only ever used by root namespace */
     Bool superPower;
     WindowPtr rootWindow;
     const char *name;

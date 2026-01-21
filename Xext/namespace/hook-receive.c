@@ -26,21 +26,21 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
     XNS_HOOK_HEAD(XaceReceiveAccessRec);
     struct XnamespaceClientPriv *obj = XnsClientPriv(dixClientForWindow(param->pWin));
 
-    // send and receive within same namespace permitted without restrictions
+    /* send and receive within same namespace permitted without restrictions */
     if (subj->ns->superPower || XnsClientSameNS(subj, obj))
         goto pass;
 
     for (int i=0; i<param->count; i++) {
         const int type = param->events[i].u.u.type;
 
-        // catch messages for root namespace
+        /* catch messages for root namespace */
         if (obj->ns->isRoot) {
             const char* evname = LookupEventName(type);
             if (strcmp(evname,LookupEventName(ClientMessage))==0)
                 goto pass;
             if (strcmp(evname,LookupEventName(UnmapNotify))==0)
                 goto pass;
-            // tricky types that don't get caught by the switch
+            /* tricky types that don't get caught by the switch */
             switch (type) {
                 case ColormapNotify:
                 case ConfigureNotify:
@@ -61,17 +61,17 @@ hookReceive(CallbackListPtr *pcbl, void *unused, void *calldata)
                         switch (gev->evtype) {
                             case X_InternAtom:
                                 goto pass;
-                            // exposes the entire screen
+                            /* exposes the entire screen */
                             case X_PresentPixmap:
                                 if (subj->ns->perms.allowScreen)
                                     goto pass;
-                            // simply allow? seems pointless to deny
+                            /* simply allow? seems pointless to deny */
                             case X_ChangeGC:
                                 goto pass;
                         }
                     }
                 }
-                // safe?
+                /* safe? */
                 case X_XIQueryDevice:
                     goto pass;
             }
