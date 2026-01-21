@@ -28,31 +28,33 @@
 #include <xorg-config.h>
 #endif
 
+#include <stdint.h>
+#include <string.h>
+
 #include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #define _PARSE_EDID_
 #include "xf86DDC_priv.h"
-#include <string.h>
 
-static void get_vendor_section(Uchar *, struct vendor *);
-static void get_version_section(Uchar *, struct edid_version *);
-static void get_display_section(Uchar *, struct disp_features *,
+static void get_vendor_section(uint8_t *, struct vendor *);
+static void get_version_section(uint8_t *, struct edid_version *);
+static void get_display_section(uint8_t *, struct disp_features *,
                                 struct edid_version *);
-static void get_established_timing_section(Uchar *,
+static void get_established_timing_section(uint8_t *,
                                            struct established_timings *);
-static void get_std_timing_section(Uchar *, struct std_timings *,
+static void get_std_timing_section(uint8_t *, struct std_timings *,
                                    struct edid_version *);
-static void fetch_detailed_block(Uchar * c, struct edid_version *ver,
+static void fetch_detailed_block(uint8_t * c, struct edid_version *ver,
                                  struct detailed_monitor_section *det_mon);
-static void get_dt_md_section(Uchar *, struct edid_version *,
+static void get_dt_md_section(uint8_t *, struct edid_version *,
                               struct detailed_monitor_section *det_mon);
-static void copy_string(Uchar *, Uchar *);
-static void get_dst_timing_section(Uchar *, struct std_timings *,
+static void copy_string(uint8_t *, uint8_t *);
+static void get_dst_timing_section(uint8_t *, struct std_timings *,
                                    struct edid_version *);
-static void get_monitor_ranges(Uchar *, struct monitor_ranges *);
-static void get_whitepoint_section(Uchar *, struct whitePoints *);
-static void get_detailed_timing_section(Uchar *, struct detailed_timings *);
+static void get_monitor_ranges(uint8_t *, struct monitor_ranges *);
+static void get_whitepoint_section(uint8_t *, struct whitePoints *);
+static void get_detailed_timing_section(uint8_t *, struct detailed_timings *);
 static Bool validate_version(int scrnIndex, struct edid_version *);
 
 static void
@@ -165,7 +167,7 @@ encode_aspect_ratio(xf86MonPtr m)
 }
 
 xf86MonPtr
-xf86InterpretEDID(int scrnIndex, Uchar * block)
+xf86InterpretEDID(int scrnIndex, uint8_t * block)
 {
     xf86MonPtr m;
 
@@ -199,7 +201,7 @@ xf86InterpretEDID(int scrnIndex, Uchar * block)
 }
 
 static int
-get_cea_detail_timing(Uchar * blk, xf86MonPtr mon,
+get_cea_detail_timing(uint8_t * blk, xf86MonPtr mon,
                       struct detailed_monitor_section *det_mon)
 {
     int dt_num;
@@ -221,7 +223,7 @@ get_cea_detail_timing(Uchar * blk, xf86MonPtr mon,
 }
 
 static void
-handle_cea_detail_block(Uchar * ext, xf86MonPtr mon,
+handle_cea_detail_block(uint8_t * ext, xf86MonPtr mon,
                         handle_detailed_fn fn, void *data)
 {
     int i;
@@ -238,7 +240,7 @@ void
 xf86ForEachDetailedBlock(xf86MonPtr mon, handle_detailed_fn fn, void *data)
 {
     int i;
-    Uchar *ext;
+    uint8_t *ext;
 
     if (mon == NULL)
         return;
@@ -262,7 +264,7 @@ xf86ForEachDetailedBlock(xf86MonPtr mon, handle_detailed_fn fn, void *data)
 }
 
 static struct cea_data_block *
-extract_cea_data_block(Uchar * ext, int data_type)
+extract_cea_data_block(uint8_t * ext, int data_type)
 {
     struct cea_ext_body *cea;
     struct cea_data_block *data_collection;
@@ -289,7 +291,7 @@ extract_cea_data_block(Uchar * ext, int data_type)
 }
 
 static void
-handle_cea_video_block(Uchar * ext, handle_video_fn fn, void *data)
+handle_cea_video_block(uint8_t * ext, handle_video_fn fn, void *data)
 {
     struct cea_video_block *video;
     struct cea_video_block *video_end;
@@ -301,7 +303,7 @@ handle_cea_video_block(Uchar * ext, handle_video_fn fn, void *data)
 
     video = &data_collection->u.video;
     video_end = (struct cea_video_block *)
-        ((Uchar *) video + data_collection->len);
+        ((uint8_t *) video + data_collection->len);
 
     for (; video < video_end; video = video + 1) {
         fn(video, data);
@@ -312,7 +314,7 @@ void
 xf86ForEachVideoBlock(xf86MonPtr mon, handle_video_fn fn, void *data)
 {
     int i;
-    Uchar *ext;
+    uint8_t *ext;
 
     if (mon == NULL)
         return;
@@ -333,7 +335,7 @@ xf86ForEachVideoBlock(xf86MonPtr mon, handle_video_fn fn, void *data)
 }
 
 static Bool
-cea_db_offsets(Uchar *cea, int *start, int *end)
+cea_db_offsets(uint8_t *cea, int *start, int *end)
 {
     /* Data block offset in CEA extension block */
     *start = CEA_EXT_MIN_DATA_OFFSET;
@@ -346,18 +348,18 @@ cea_db_offsets(Uchar *cea, int *start, int *end)
 }
 
 static int
-cea_db_len(Uchar *db)
+cea_db_len(uint8_t *db)
 {
     return db[0] & 0x1f;
 }
 
 static int
-cea_db_tag(Uchar *db)
+cea_db_tag(uint8_t *db)
 {
     return db[0] >> 5;
 }
 
-typedef void (*handle_cea_db_fn) (Uchar *, void *);
+typedef void (*handle_cea_db_fn) (uint8_t *, void *);
 
 static void
 cea_for_each_db(xf86MonPtr mon, handle_cea_db_fn fn, void *data)
@@ -378,7 +380,7 @@ cea_for_each_db(xf86MonPtr mon, handle_cea_db_fn fn, void *data)
 
     for (i = 0; i < mon->no_sections; i++) {
         int start, end, offset;
-        Uchar *ext;
+        uint8_t *ext;
 
         ext = mon->rawData + EDID1_LEN * (i + 1);
         if (ext[EXT_TAG] != CEA_EXT)
@@ -398,7 +400,7 @@ struct find_hdmi_block_data {
     struct cea_data_block *hdmi;
 };
 
-static void find_hdmi_block(Uchar *db, void *data)
+static void find_hdmi_block(uint8_t *db, void *data)
 {
     struct find_hdmi_block_data *result = data;
     int oui;
@@ -424,7 +426,7 @@ struct cea_data_block *xf86MonitorFindHDMIBlock(xf86MonPtr mon)
 }
 
 xf86MonPtr
-xf86InterpretEEDID(int scrnIndex, Uchar * block)
+xf86InterpretEEDID(int scrnIndex, uint8_t * block)
 {
     xf86MonPtr m;
 
@@ -438,7 +440,7 @@ xf86InterpretEEDID(int scrnIndex, Uchar * block)
 }
 
 static void
-get_vendor_section(Uchar * c, struct vendor *r)
+get_vendor_section(uint8_t * c, struct vendor *r)
 {
     r->name[0] = L1;
     r->name[1] = L2;
@@ -452,14 +454,14 @@ get_vendor_section(Uchar * c, struct vendor *r)
 }
 
 static void
-get_version_section(Uchar * c, struct edid_version *r)
+get_version_section(uint8_t * c, struct edid_version *r)
 {
     r->version = VERSION;
     r->revision = REVISION;
 }
 
 static void
-get_display_section(Uchar * c, struct disp_features *r, struct edid_version *v)
+get_display_section(uint8_t * c, struct disp_features *r, struct edid_version *v)
 {
     r->input_type = INPUT_TYPE;
     if (!DIGITAL(r->input_type)) {
@@ -491,7 +493,7 @@ get_display_section(Uchar * c, struct disp_features *r, struct edid_version *v)
 }
 
 static void
-get_established_timing_section(Uchar * c, struct established_timings *r)
+get_established_timing_section(uint8_t * c, struct established_timings *r)
 {
     r->t1 = T1;
     r->t2 = T2;
@@ -499,7 +501,7 @@ get_established_timing_section(Uchar * c, struct established_timings *r)
 }
 
 static void
-get_cvt_timing_section(Uchar * c, struct cvt_timings *r)
+get_cvt_timing_section(uint8_t * c, struct cvt_timings *r)
 {
     int i;
 
@@ -544,7 +546,7 @@ get_cvt_timing_section(Uchar * c, struct cvt_timings *r)
 }
 
 static void
-get_std_timing_section(Uchar * c, struct std_timings *r, struct edid_version *v)
+get_std_timing_section(uint8_t * c, struct std_timings *r, struct edid_version *v)
 {
     int i;
 
@@ -565,7 +567,7 @@ get_std_timing_section(Uchar * c, struct std_timings *r, struct edid_version *v)
 static const unsigned char empty_block[18];
 
 static void
-fetch_detailed_block(Uchar * c, struct edid_version *ver,
+fetch_detailed_block(uint8_t * c, struct edid_version *ver,
                      struct detailed_monitor_section *det_mon)
 {
     if (ver->version == 1 && ver->revision >= 1 && IS_MONITOR_DESC) {
@@ -623,7 +625,7 @@ fetch_detailed_block(Uchar * c, struct edid_version *ver,
 }
 
 static void
-get_dt_md_section(Uchar * c, struct edid_version *ver,
+get_dt_md_section(uint8_t * c, struct edid_version *ver,
                   struct detailed_monitor_section *det_mon)
 {
     int i;
@@ -635,7 +637,7 @@ get_dt_md_section(Uchar * c, struct edid_version *ver,
 }
 
 static void
-copy_string(Uchar * c, Uchar * s)
+copy_string(uint8_t * c, uint8_t * s)
 {
     int i;
 
@@ -648,7 +650,7 @@ copy_string(Uchar * c, Uchar * s)
 }
 
 static void
-get_dst_timing_section(Uchar * c, struct std_timings *t, struct edid_version *v)
+get_dst_timing_section(uint8_t * c, struct std_timings *t, struct edid_version *v)
 {
     int j;
 
@@ -663,7 +665,7 @@ get_dst_timing_section(Uchar * c, struct std_timings *t, struct edid_version *v)
 }
 
 static void
-get_monitor_ranges(Uchar * c, struct monitor_ranges *r)
+get_monitor_ranges(uint8_t * c, struct monitor_ranges *r)
 {
     r->min_v = MIN_V;
     r->max_v = MAX_V;
@@ -701,7 +703,7 @@ get_monitor_ranges(Uchar * c, struct monitor_ranges *r)
 }
 
 static void
-get_whitepoint_section(Uchar * c, struct whitePoints *wp)
+get_whitepoint_section(uint8_t * c, struct whitePoints *wp)
 {
     wp[0].white_x = WHITEX1;
     wp[0].white_y = WHITEY1;
@@ -714,7 +716,7 @@ get_whitepoint_section(Uchar * c, struct whitePoints *wp)
 }
 
 static void
-get_detailed_timing_section(Uchar * c, struct detailed_timings *r)
+get_detailed_timing_section(uint8_t * c, struct detailed_timings *r)
 {
     r->clock = PIXEL_CLOCK;
     r->h_active = H_ACTIVE;

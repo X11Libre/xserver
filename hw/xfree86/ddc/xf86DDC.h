@@ -36,9 +36,9 @@ extern _X_EXPORT xf86MonPtr xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool)
 
 extern _X_EXPORT xf86MonPtr xf86PrintEDID(xf86MonPtr monPtr);
 
-extern _X_EXPORT xf86MonPtr xf86InterpretEDID(int screenIndex, Uchar * block);
+extern _X_EXPORT xf86MonPtr xf86InterpretEDID(int screenIndex, uint8_t * block);
 
-extern _X_EXPORT xf86MonPtr xf86InterpretEEDID(int screenIndex, Uchar * block);
+extern _X_EXPORT xf86MonPtr xf86InterpretEEDID(int screenIndex, uint8_t * block);
 
 extern _X_EXPORT Bool xf86SetDDCproperties(ScrnInfoPtr pScreen, xf86MonPtr DDC);
 

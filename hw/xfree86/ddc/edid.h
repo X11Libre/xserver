@@ -12,11 +12,9 @@
 #ifndef _EDID_H_
 #define _EDID_H_
 
+#include <stdint.h>
 #include <X11/Xmd.h>
-
-#ifndef _X_EXPORT
 #include <X11/Xfuncproto.h>
-#endif
 
 /* read complete EDID record */
 #define EDID1_LEN 128
@@ -96,9 +94,9 @@
 #error "EDID1 length != 128!"
 #endif
 
-#define SECTION(x,y) (Uchar *)(x + y)
-#define GET_ARRAY(y) ((Uchar *)(c + y))
-#define GET(y) *(Uchar *)(c + y)
+#define SECTION(x,y) (uint8_t *)(x + y)
+#define GET_ARRAY(y) ((uint8_t *)(c + y))
+#define GET(y) *(uint8_t *)(c + y)
 
 /* extract information from vendor section */
 #define _PROD_ID(x) x[0] + (x[1] << 8);
@@ -392,7 +390,6 @@
 #define IS_LEFT_ON_SYNC(x) IS_LEFT_STEREO(x)
 
 typedef unsigned int Uint;
-typedef unsigned char Uchar;
 
 struct vendor {
     char name[4];
@@ -433,9 +430,9 @@ struct disp_features {
 };
 
 struct established_timings {
-    Uchar t1;
-    Uchar t2;
-    Uchar t_manu;
+    uint8_t t1;
+    uint8_t t2;
+    uint8_t t_manu;
 };
 
 struct std_timings {
@@ -536,15 +533,15 @@ struct detailed_monitor_section {
     int type;
     union {
         struct detailed_timings d_timings;      /* 56 */
-        Uchar serial[13];
-        Uchar ascii_data[13];
-        Uchar name[13];
+        uint8_t serial[13];
+        uint8_t ascii_data[13];
+        uint8_t name[13];
         struct monitor_ranges ranges;   /* 60 */
         struct std_timings std_t[5];    /* 80 */
         struct whitePoints wp[2];       /* 32 */
         /* color management data */
         struct cvt_timings cvt[4];      /* 64 */
-        Uchar est_iii[6];       /* 6 */
+        uint8_t est_iii[6];       /* 6 */
     } section;                  /* max: 80 */
 };
 
@@ -567,7 +564,7 @@ typedef struct {
     struct detailed_monitor_section det_mon[4];
     unsigned long flags;
     int no_sections;
-    Uchar *rawData;
+    uint8_t *rawData;
 } xf86Monitor, *xf86MonPtr;
 
 extern _X_EXPORT xf86MonPtr ConfiguredMonitor;
@@ -600,11 +597,11 @@ extern _X_EXPORT xf86MonPtr ConfiguredMonitor;
 #define HDMI_MAX_TMDS_UNIT   (5000)
 
 struct cea_video_block {
-    Uchar video_code;
+    uint8_t video_code;
 };
 
 struct cea_audio_block_descriptor {
-    Uchar audio_code[3];
+    uint8_t audio_code[3];
 };
 
 struct cea_audio_block {
@@ -612,17 +609,17 @@ struct cea_audio_block {
 };
 
 struct cea_vendor_block_hdmi {
-    Uchar portB:4;
-    Uchar portA:4;
-    Uchar portD:4;
-    Uchar portC:4;
-    Uchar support_flags;
-    Uchar max_tmds_clock;
-    Uchar latency_present;
-    Uchar video_latency;
-    Uchar audio_latency;
-    Uchar interlaced_video_latency;
-    Uchar interlaced_audio_latency;
+    uint8_t portB:4;
+    uint8_t portA:4;
+    uint8_t portD:4;
+    uint8_t portC:4;
+    uint8_t support_flags;
+    uint8_t max_tmds_clock;
+    uint8_t latency_present;
+    uint8_t video_latency;
+    uint8_t audio_latency;
+    uint8_t interlaced_video_latency;
+    uint8_t interlaced_audio_latency;
 };
 
 struct cea_vendor_block {
@@ -634,24 +631,24 @@ struct cea_vendor_block {
 };
 
 struct cea_speaker_block {
-    Uchar FLR:1;
-    Uchar LFE:1;
-    Uchar FC:1;
-    Uchar RLR:1;
-    Uchar RC:1;
-    Uchar FLRC:1;
-    Uchar RLRC:1;
-    Uchar FLRW:1;
-    Uchar FLRH:1;
-    Uchar TC:1;
-    Uchar FCH:1;
-    Uchar Resv:5;
-    Uchar ResvByte;
+    uint8_t FLR:1;
+    uint8_t LFE:1;
+    uint8_t FC:1;
+    uint8_t RLR:1;
+    uint8_t RC:1;
+    uint8_t FLRC:1;
+    uint8_t RLRC:1;
+    uint8_t FLRW:1;
+    uint8_t FLRH:1;
+    uint8_t TC:1;
+    uint8_t FCH:1;
+    uint8_t Resv:5;
+    uint8_t ResvByte;
 };
 
 struct cea_data_block {
-    Uchar len:5;
-    Uchar tag:3;
+    uint8_t len:5;
+    uint8_t tag:3;
     union {
         struct cea_video_block video;
         struct cea_audio_block audio;
@@ -661,10 +658,10 @@ struct cea_data_block {
 };
 
 struct cea_ext_body {
-    Uchar tag;
-    Uchar rev;
-    Uchar dt_offset;
-    Uchar flags;
+    uint8_t tag;
+    uint8_t rev;
+    uint8_t dt_offset;
+    uint8_t flags;
     struct cea_data_block data_collection;
 };
 
