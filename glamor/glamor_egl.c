@@ -1202,7 +1202,7 @@ glamor_egl_try_gles_api(ScrnInfoPtr scrn)
 {
     struct glamor_egl_screen_private *glamor_egl =
         glamor_egl_get_screen_private(scrn);
-        
+
     static const EGLint config_attribs[] = {
         EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
