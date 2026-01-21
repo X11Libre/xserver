@@ -96,7 +96,7 @@ ddxProcessArgument(int argc, char **argv, int i)
         return 1;
     }
 
-#if defined(GLAMOR) && defined(GLXEXT)
+#ifdef GLAMOR
     if (!strcmp(argv[i], "-glvendor")) {
         if (i + 1 < argc) {
             fbdev_glvnd_provider = argv[i + 1];
@@ -136,7 +136,7 @@ KdCardFuncs fbdevFuncs = {
 
     /* no cursor funcs */
 
-#if defined(GLAMOR) && defined(GLXEXT)
+#ifdef GLAMOR
     .initAccel        = fbdevInitAccel,
     .enableAccel      = fbdevEnableAccel,
     .disableAccel     = fbdevDisableAccel,

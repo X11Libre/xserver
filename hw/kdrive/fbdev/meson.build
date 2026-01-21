@@ -6,7 +6,7 @@ srcs = [
 
 fbdev_glamor = []
 fbdev_dep = []
-if build_glamor and build_glx
+if build_glamor
     srcs += 'fb_glamor.c'
     fbdev_glamor += glamor
     fbdev_dep += epoxy_dep
