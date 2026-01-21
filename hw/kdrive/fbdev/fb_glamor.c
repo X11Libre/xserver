@@ -68,7 +68,9 @@ fbdevInitAccel(ScreenPtr pScreen)
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
     FbdevScrPriv *scrpriv = screen->driver;
+#ifdef GLXEXT
     static Bool vendor_initialized = FALSE;
+#endif
 
     if (!fbdev_glamor_egl_init(pScreen)) {
         screen->dumb = TRUE;
@@ -81,10 +83,12 @@ fbdevInitAccel(ScreenPtr pScreen)
         return FALSE;
     }
 
+#ifdef GLXEXT
     if (!vendor_initialized) {
         GlxPushProvider(&glamor_provider);
         vendor_initialized = TRUE;
     }
+#endif
 
     return TRUE;
 }
