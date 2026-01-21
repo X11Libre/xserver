@@ -72,6 +72,10 @@ ddxUseMsg(void)
         ("-noshadow        Disable the ShadowFB layer if possible\n");
     ErrorF
         ("-glvendor        Suggest what glvnd vendor library should be used\n");
+    ErrorF
+        ("-force-gl        Force glamor to only use GL contexts\n");
+    ErrorF
+        ("-force-es        Force glamor to only use GLES contexts\n");
     ErrorF("\n");
 }
 
@@ -100,6 +104,16 @@ ddxProcessArgument(int argc, char **argv, int i)
         }
         UseMsg();
         exit(1);
+    }
+
+    if (!strcmp(argv[i], "-force-gl")) {
+        es_allowed = FALSE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-force-es")) {
+        force_es = TRUE;
+        return 1;
     }
 #endif
 
