@@ -63,10 +63,9 @@ static int hex2bin(const char *in, char *out)
     return 1;
 }
 
-/*
- * loadConfig
- *
- * Load the namespace config
+/**
+ * @brief Parse a single line from the configuration file,
+ * ignoring comments and newlines. Prints a warning if it finds an unknown token.
 */
 static void parseLine(char *line, struct Xnamespace **walk_ns)
 {
