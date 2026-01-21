@@ -84,7 +84,7 @@ unsigned long kdVideoTestTime;
 Bool kdEmulateMiddleButton;
 Bool kdRawPointerCoordinates;
 Bool kdDisableZaphod;
-Bool kdAllowZap;
+Bool kdAllowZap = TRUE;
 Bool kdEnabled;
 int kdSubpixelOrder;
 int kdVirtualTerminal = -1;
@@ -463,7 +463,7 @@ KdUseMsg(void)
     ErrorF
         ("-origin X,Y      Locates the next screen in the virtual screen (Xinerama)\n");
     ErrorF("-switchCmd       Command to execute on vt switch\n");
-    ErrorF("-zap             Terminate server on Ctrl+Alt+Backspace\n");
+    ErrorF("-nozap           Don't terminate server on Ctrl+Alt+Backspace\n");
     ErrorF
         ("vtxx             Use virtual terminal xx instead of the next available\n");
 }
@@ -496,10 +496,18 @@ KdProcessArgument(int argc, char **argv, int i)
         kdDisableZaphod = TRUE;
         return 1;
     }
+
+    /* Kept for Compatibility */
     if (!strcmp(argv[i], "-zap")) {
         kdAllowZap = TRUE;
         return 1;
     }
+
+    if (!strcmp(argv[i], "-nozap")) {
+        kdAllowZap = FALSE;
+        return 1;
+    }
+
     if (!strcmp(argv[i], "-3button")) {
         kdEmulateMiddleButton = FALSE;
         return 1;
