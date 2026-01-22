@@ -18,3 +18,5 @@ meson compile -v -C "$MESON_BUILDDIR" $jobcount $ninja_args
 meson install --no-rebuild  -C "$MESON_BUILDDIR" $MESON_INSTALL_ARGS
 # making trouble w/ git tree copied into the VM
 # meson dist -C "$MESON_BUILDDIR" $MESON_DIST_ARGS
+
+cat /home/runner/work/xserver/xserver/_build/xorg-server.h
