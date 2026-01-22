@@ -83,11 +83,13 @@ elif cc.compiles('''
     conf_data.set('HAVE_PTHREAD_SETNAME_NP_WITHOUT_TID', 1)
 endif
 
-have_timingsafe_memcmp = cc.has_function('timingsafe_memcmp')
+have_timingsafe_memcmp = cc.has_function(
+    'timingsafe_memcmp',
+    prefix : '#include <string.h>'))
 if have_timingsafe_memcmp
-    message('OS has timingsafe_memcmp')
+    message('OS has timingsafe_memcmp in <string.h>')
 else
-    message('OS missing timingsafe_memcmp')
+    message('OS missing timingsafe_memcmp in <string.h>')
 endif
 
 conf_data.set('HAVE_LIBBSD', libbsd_dep.found() ? '1' : false)
