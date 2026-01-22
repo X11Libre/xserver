@@ -83,6 +83,13 @@ elif cc.compiles('''
     conf_data.set('HAVE_PTHREAD_SETNAME_NP_WITHOUT_TID', 1)
 endif
 
+have_timingsafe_memcmp = cc.has_function('timingsafe_memcmp')
+if have_timingsafe_memcmp
+    message('OS has timingsafe_memcmp')
+else
+    message('OS missing timingsafe_memcmp')
+endif
+
 conf_data.set('HAVE_LIBBSD', libbsd_dep.found() ? '1' : false)
 # Note: this symbol is used by libXtrans.
 conf_data.set('HAVE_SYSTEMD_DAEMON', build_systemd ? '1' : false)
@@ -173,7 +180,7 @@ conf_data.set('HAVE_STRLCPY', cc.has_function('strlcpy', dependencies: libbsd_de
 conf_data.set('HAVE_STRNDUP', cc.has_function('strndup') and cc.has_header_symbol('string.h', 'strndup') ? '1' : false)
 # HAVE_STRUCT_SOCKADDR_STORAGE is used by xtrans >= 1.6
 conf_data.set('HAVE_STRUCT_SOCKADDR_STORAGE', cc.has_type('struct sockaddr_storage', prefix: '#include <sys/socket.h>') ? '1' : false)
-conf_data.set('HAVE_TIMINGSAFE_MEMCMP', cc.has_function('timingsafe_memcmp') ? '1' : false)
+conf_data.set('HAVE_TIMINGSAFE_MEMCMP', have_timingsafe_memcmp ? '1' : false)
 conf_data.set('HAVE_VASPRINTF', cc.has_function('vasprintf') ? '1' : false)
 conf_data.set('HAVE_VSNPRINTF', cc.has_function('vsnprintf') ? '1' : false)
 conf_data.set('HAVE_WALKCONTEXT', cc.has_function('walkcontext') ? '1' : false)
