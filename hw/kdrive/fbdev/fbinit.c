@@ -26,6 +26,8 @@
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
 
+#include <string.h>
+
 void
 InitCard(char *name)
 {
@@ -99,7 +101,7 @@ ddxProcessArgument(int argc, char **argv, int i)
 #ifdef GLAMOR
     if (!strcmp(argv[i], "-glvendor")) {
         if (i + 1 < argc) {
-            fbdev_glvnd_provider = argv[i + 1];
+            fbdev_glvnd_provider = strdup(argv[i + 1]);
             return 2;
         }
         UseMsg();
