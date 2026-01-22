@@ -209,4 +209,7 @@
 #define XORG_API_DIX_SCREEN_HOOK_CLOSE 1
 #define XORG_API_DIX_SCREEN_HOOK_PIXMAP_DESTROY 1
 
+/* needed for os.h to prevent redefinition of timingsafe_memcmp in drivers */
+#mesondefine HAVE_TIMINGSAFE_MEMCMP
+
 #endif /* _XORG_SERVER_H_ */
