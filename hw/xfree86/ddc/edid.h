@@ -389,12 +389,10 @@
 #define IS_RIGHT_ON_SYNC(x) IS_RIGHT_STEREO(x)
 #define IS_LEFT_ON_SYNC(x) IS_LEFT_STEREO(x)
 
-typedef unsigned int Uint;
-
 struct vendor {
     char name[4];
     int prod_id;
-    Uint serial;
+    unsigned int serial;
     int week;
     int year;
 };
