@@ -318,8 +318,10 @@ fbdevWindowLinear(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     FbdevPriv *priv = pScreenPriv->card->driver;
 
-    if (!pScreenPriv->enabled)
-        return 0;
+    if (!pScreenPriv->enabled) {
+        *size = 0;
+        return NULL;
+    }
     *size = priv->fix.line_length;
     return (CARD8 *) priv->fb + row * priv->fix.line_length + offset;
 }
@@ -332,8 +334,10 @@ fbdevWindowAfb(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     FbdevPriv *priv = pScreenPriv->card->driver;
 
-    if (!pScreenPriv->enabled)
-        return 0;
+    if (!pScreenPriv->enabled) {
+        *size = 0;
+        return NULL;
+    }
     /* offset to next plane */
     *size = priv->var.yres_virtual * priv->fix.line_length;
     return (CARD8 *) priv->fb + row * priv->fix.line_length + offset;
