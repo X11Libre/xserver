@@ -25,20 +25,19 @@
 
 #include "kdrive.h"
 #include "kxv.h"
-#include "ephyr.h"
 #include "glamor_priv.h"
 
 #include <X11/extensions/Xv.h>
 #include "fourcc.h"
 
-#define NUM_FORMATS 3
+#define NUM_FORMATS 4
 
 static KdVideoFormatRec Formats[NUM_FORMATS] = {
-    {15, TrueColor}, {16, TrueColor}, {24, TrueColor}
+    {15, TrueColor}, {16, TrueColor}, {24, TrueColor}, {30, TrueColor}
 };
 
 static void
-ephyr_glamor_xv_stop_video(KdScreenInfo *screen, void *data, Bool cleanup)
+kd_glamor_xv_stop_video(KdScreenInfo *screen, void *data, Bool cleanup)
 {
     if (!cleanup)
         return;
@@ -47,53 +46,53 @@ ephyr_glamor_xv_stop_video(KdScreenInfo *screen, void *data, Bool cleanup)
 }
 
 static int
-ephyr_glamor_xv_set_port_attribute(KdScreenInfo *screen,
-                                   Atom attribute, int value, void *data)
+kd_glamor_xv_set_port_attribute(KdScreenInfo *screen,
+                                Atom attribute, int value, void *data)
 {
     return glamor_xv_set_port_attribute(data, attribute, (INT32)value);
 }
 
 static int
-ephyr_glamor_xv_get_port_attribute(KdScreenInfo *screen,
-                                   Atom attribute, int *value, void *data)
+kd_glamor_xv_get_port_attribute(KdScreenInfo *screen,
+                                Atom attribute, int *value, void *data)
 {
     return glamor_xv_get_port_attribute(data, attribute, (INT32 *)value);
 }
 
 static void
-ephyr_glamor_xv_query_best_size(KdScreenInfo *screen,
-                                Bool motion,
-                                short vid_w, short vid_h,
-                                short drw_w, short drw_h,
-                                unsigned int *p_w, unsigned int *p_h,
-                                void *data)
+kd_glamor_xv_query_best_size(KdScreenInfo *screen,
+                             Bool motion,
+                             short vid_w, short vid_h,
+                             short drw_w, short drw_h,
+                             unsigned int *p_w, unsigned int *p_h,
+                             void *data)
 {
     *p_w = drw_w;
     *p_h = drw_h;
 }
 
 static int
-ephyr_glamor_xv_query_image_attributes(KdScreenInfo *screen,
-                                       int id,
-                                       unsigned short *w, unsigned short *h,
-                                       int *pitches, int *offsets)
+kd_glamor_xv_query_image_attributes(KdScreenInfo *screen,
+                                    int id,
+                                    unsigned short *w, unsigned short *h,
+                                    int *pitches, int *offsets)
 {
     return glamor_xv_query_image_attributes(id, w, h, pitches, offsets);
 }
 
 static int
-ephyr_glamor_xv_put_image(KdScreenInfo *screen,
-                          DrawablePtr pDrawable,
-                          short src_x, short src_y,
-                          short drw_x, short drw_y,
-                          short src_w, short src_h,
-                          short drw_w, short drw_h,
-                          int id,
-                          unsigned char *buf,
-                          short width,
-                          short height,
-                          Bool sync,
-                          RegionPtr clipBoxes, void *data)
+kd_glamor_xv_put_image(KdScreenInfo *screen,
+                       DrawablePtr pDrawable,
+                       short src_x, short src_y,
+                       short drw_x, short drw_y,
+                       short src_w, short src_h,
+                       short drw_w, short drw_h,
+                       int id,
+                       unsigned char *buf,
+                       short width,
+                       short height,
+                       Bool sync,
+                       RegionPtr clipBoxes, void *data)
 {
     return glamor_xv_put_image(data, pDrawable,
                                src_x, src_y,
@@ -104,26 +103,30 @@ ephyr_glamor_xv_put_image(KdScreenInfo *screen,
 }
 
 void
-ephyr_glamor_xv_init(ScreenPtr screen)
+kd_glamor_xv_init(ScreenPtr screen)
 {
     KdVideoAdaptorRec *adaptor;
     glamor_port_private *port_privates;
+    int i;
+    GLint max_size = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_size);
+    if (max_size <= 0) {
+        /* from glamor_xf86_xv.c */
+        max_size = 8192;
+    }
+
     KdVideoEncodingRec encoding = {
         0,
         "XV_IMAGE",
-        /* These sizes should probably be GL_MAX_TEXTURE_SIZE instead
-         * of 2048, but our context isn't set up yet.
-         */
-        2048, 2048,
+        max_size, max_size,
         {1, 1}
     };
-    int i;
 
     glamor_xv_core_init(screen);
 
     adaptor = XNFcallocarray(1, sizeof(*adaptor));
 
-    adaptor->name = "glamor textured video";
+    adaptor->name = "GLAMOR Textured Video";
     adaptor->type = XvWindowMask | XvInputMask | XvImageMask;
     adaptor->flags = 0;
     adaptor->nEncodings = 1;
@@ -148,12 +151,12 @@ ephyr_glamor_xv_init(ScreenPtr screen)
     adaptor->pImages = glamor_xv_images;
     adaptor->nImages = glamor_xv_num_images;
 
-    adaptor->StopVideo = ephyr_glamor_xv_stop_video;
-    adaptor->SetPortAttribute = ephyr_glamor_xv_set_port_attribute;
-    adaptor->GetPortAttribute = ephyr_glamor_xv_get_port_attribute;
-    adaptor->QueryBestSize = ephyr_glamor_xv_query_best_size;
-    adaptor->PutImage = ephyr_glamor_xv_put_image;
-    adaptor->QueryImageAttributes = ephyr_glamor_xv_query_image_attributes;
+    adaptor->StopVideo = kd_glamor_xv_stop_video;
+    adaptor->SetPortAttribute = kd_glamor_xv_set_port_attribute;
+    adaptor->GetPortAttribute = kd_glamor_xv_get_port_attribute;
+    adaptor->QueryBestSize = kd_glamor_xv_query_best_size;
+    adaptor->PutImage = kd_glamor_xv_put_image;
+    adaptor->QueryImageAttributes = kd_glamor_xv_query_image_attributes;
 
     KdXVScreenInit(screen, adaptor, 1);
 }
