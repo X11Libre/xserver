@@ -68,6 +68,9 @@ extern Bool es_allowed;
 extern Bool force_es;
 extern Bool fbGlamorAllowed;
 extern Bool fbForceGlamor;
+#ifdef XV
+extern Bool fbXVAllowed;
+#endif
 #endif
 
 Bool fbdevCardInit(KdCardInfo * card);

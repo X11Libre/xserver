@@ -16,12 +16,17 @@
 
 #include "fbdev.h"
 
+#ifdef XV
+#include "kxv.h"
+#endif
+
 char *fbdev_glvnd_provider = NULL;
 
 Bool es_allowed = TRUE;
 Bool force_es = FALSE;
 Bool fbGlamorAllowed = TRUE;
 Bool fbForceGlamor = FALSE;
+Bool fbXVAllowed = TRUE;
 
 static void
 fbdev_glamor_egl_cleanup(FbdevScrPriv *scrpriv)
@@ -116,6 +121,12 @@ fbdevInitAccel(ScreenPtr pScreen)
     if (!vendor_initialized) {
         GlxPushProvider(&glamor_provider);
         vendor_initialized = TRUE;
+    }
+#endif
+
+#ifdef XV
+    if (fbXVAllowed) {
+        kd_glamor_xv_init(pScreen);
     }
 #endif
 
