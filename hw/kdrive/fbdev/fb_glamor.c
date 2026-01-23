@@ -20,6 +20,8 @@ char *fbdev_glvnd_provider = NULL;
 
 Bool es_allowed = TRUE;
 Bool force_es = FALSE;
+Bool fbGlamorAllowed = TRUE;
+Bool fbForceGlamor = FALSE;
 
 static void
 fbdev_glamor_egl_cleanup(FbdevScrPriv *scrpriv)
@@ -85,6 +87,17 @@ fbdevInitAccel(ScreenPtr pScreen)
 #ifdef GLXEXT
     static Bool vendor_initialized = FALSE;
 #endif
+    int flags = GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_DRI3;
+    if (!fbGlamorAllowed) {
+        flags |= GLAMOR_NO_RENDER_ACCEL;
+    } else {
+        const char *renderer = (const char*)glGetString(GL_RENDERER);
+        if (!renderer ||
+            strstr(renderer, "softpipe") ||
+            strstr(renderer, "llvmpipe")) {
+            flags |= GLAMOR_NO_RENDER_ACCEL;
+        }
+    }
 
     if (!fbdev_glamor_egl_init(pScreen)) {
         free(fbdev_glvnd_provider);
@@ -92,7 +105,7 @@ fbdevInitAccel(ScreenPtr pScreen)
         return FALSE;
     }
 
-    if (!glamor_init(pScreen, GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_DRI3)) {
+    if (!glamor_init(pScreen, flags)) {
         fbdev_glamor_egl_cleanup(scrpriv);
         return FALSE;
     }
