@@ -1612,34 +1612,18 @@ DRI2ScreenInit(ScreenPtr pScreen, DRI2InfoPtr info)
             goto err_out;
 
         if (info->driverName) {
-            ds->driverNames[0] = strdup(info->driverName);
-            if (!ds->driverNames[0]) {
-                free(ds->driverNames);
-                ds->driverNames = NULL;
-                goto err_out;
-            }
+            ds->driverNames[0] = info->driverName;
         } else {
-            ds->driverNames[0] = dri2_probe_driver_name(pScreen, info);
-            if (!ds->driverNames[0]) {
-                free(ds->driverNames);
-                ds->driverNames = NULL;
-                goto err_out;
-            }
+            /* FIXME dri2_probe_driver_name() returns a strdup-ed string,
+             * currently this gets leaked */
+            ds->driverNames[0] = ds->driverNames[1] = dri2_probe_driver_name(pScreen, info);
+            if (!ds->driverNames[0])
+                return FALSE;
 
             /* There is no VDPAU driver for i965, fallback to the generic
              * OpenGL/VAAPI va_gl backend to emulate VDPAU on i965. */
-            if (strcmp(ds->driverNames[0], "i965") == 0) {
-                ds->driverNames[1] = strdup("va_gl");
-            } else {
-                ds->driverNames[1] = strdup(ds->driverNames[0]);
-            }
-
-            if (!ds->driverNames[1]) {
-                free((void*)ds->driverNames[0]);
-                free(ds->driverNames);
-                ds->driverNames = NULL;
-                goto err_out;
-            }
+            if (strcmp(ds->driverNames[0], "i965") == 0)
+                ds->driverNames[1] = "va_gl";
         }
     }
     else {
@@ -1687,12 +1671,7 @@ DRI2CloseScreen(ScreenPtr pScreen)
 
     if (ds->prime_id)
         prime_id_allocate_bitmask &= ~(1 << ds->prime_id);
-    if (ds->driverNames) {
-        for (int i = 0; i < ds->numDrivers; i++) {
-            free((void*)ds->driverNames[i]);
-        }
-        free(ds->driverNames);
-    }
+    free(ds->driverNames);
     free(ds);
     dixSetPrivate(&pScreen->devPrivates, dri2ScreenPrivateKey, NULL);
 }
