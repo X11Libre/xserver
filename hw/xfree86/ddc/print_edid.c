@@ -64,6 +64,12 @@
 #define IS_LEFT_STEREO(x) (x & 0x02)
 #define IS_4WAY_STEREO(x) (x & 0x03)
 
+/* sync characteristics */
+#define SEP_SYNC(x) (x & 0x08)
+#define COMP_SYNC(x) (x & 0x04)
+#define SYNC_O_GREEN(x) (x & 0x02)
+#define SYNC_SERR(x) (x & 0x01)
+
 static void
 print_vendor(int scrnIndex, struct vendor *c)
 {
