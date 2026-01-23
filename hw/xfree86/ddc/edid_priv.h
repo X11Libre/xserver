@@ -14,6 +14,9 @@
 
 #include "edid.h"
 
+/* read complete EDID record */
+#define EDID1_LEN 128
+
 /* header: 0x00 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0x00  */
 #define HEADER_SECTION 0
 #define HEADER_LENGTH 8

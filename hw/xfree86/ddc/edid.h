@@ -16,9 +16,6 @@
 #include <X11/Xmd.h>
 #include <X11/Xfuncproto.h>
 
-/* read complete EDID record */
-#define EDID1_LEN 128
-
 #define STD_TIMINGS 8
 #define DET_TIMINGS 4
 

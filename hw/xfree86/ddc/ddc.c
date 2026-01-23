@@ -21,6 +21,7 @@
 #include "xf86_OSproc.h"
 #include "xf86DDC.h"
 #include <string.h>
+#include "edid_priv.h"
 
 #define RETRIES 4
 
