@@ -100,75 +100,36 @@
 
 /* extract information from vendor section */
 #define _PROD_ID(x) x[0] + (x[1] << 8);
-#define PROD_ID _PROD_ID(GET_ARRAY(V_PROD_ID))
 #define _SERIAL_NO(x) x[0] + (x[1] << 8) + (x[2] << 16) + (x[3] << 24)
-#define SERIAL_NO _SERIAL_NO(GET_ARRAY(V_SERIAL))
 #define _YEAR(x) (x & 0xFF) + 1990
-#define YEAR _YEAR(GET(V_YEAR))
-#define WEEK GET(V_WEEK) & 0xFF
 #define _L1(x) ((x[0] & 0x7C) >> 2) + '@'
 #define _L2(x) ((x[0] & 0x03) << 3) + ((x[1] & 0xE0) >> 5) + '@'
 #define _L3(x) (x[1] & 0x1F) + '@';
-#define L1 _L1(GET_ARRAY(V_MANUFACTURER))
-#define L2 _L2(GET_ARRAY(V_MANUFACTURER))
-#define L3 _L3(GET_ARRAY(V_MANUFACTURER))
-
-/* extract information from version section */
-#define VERSION GET(V_VERSION)
-#define REVISION GET(V_REVISION)
 
 /* extract information from display section */
 #define _INPUT_TYPE(x) ((x & 0x80) >> 7)
-#define INPUT_TYPE _INPUT_TYPE(GET(D_INPUT))
 #define _INPUT_VOLTAGE(x) ((x & 0x60) >> 5)
-#define INPUT_VOLTAGE _INPUT_VOLTAGE(GET(D_INPUT))
 #define _SETUP(x) ((x & 0x10) >> 4)
-#define SETUP _SETUP(GET(D_INPUT))
 #define _SYNC(x) (x  & 0x0F)
-#define SYNC _SYNC(GET(D_INPUT))
 #define _DFP(x) (x & 0x01)
-#define DFP _DFP(GET(D_INPUT))
 #define _BPC(x) ((x & 0x70) >> 4)
-#define BPC _BPC(GET(D_INPUT))
 #define _DIGITAL_INTERFACE(x) (x & 0x0F)
-#define DIGITAL_INTERFACE _DIGITAL_INTERFACE(GET(D_INPUT))
 #define _GAMMA(x) (x == 0xff ? 0.0 : ((x + 100.0)/100.0))
-#define GAMMA _GAMMA(GET(D_GAMMA))
-#define HSIZE_MAX GET(D_HSIZE)
-#define VSIZE_MAX GET(D_VSIZE)
 #define _DPMS(x) ((x & 0xE0) >> 5)
-#define DPMS _DPMS(GET(FEAT_S))
 #define _DISPLAY_TYPE(x) ((x & 0x18) >> 3)
-#define DISPLAY_TYPE _DISPLAY_TYPE(GET(FEAT_S))
 #define _MSC(x) (x & 0x7)
-#define MSC _MSC(GET(FEAT_S))
 
 /* color characteristics */
 #define CC_L(x,y) ((x & (0x03 << y)) >> y)
 #define CC_H(x) (x << 2)
 #define I_CC(x,y,z) CC_H(y) | CC_L(x,z)
 #define F_CC(x) ((x)/1024.0)
-#define REDX F_CC(I_CC((GET(D_RG_LOW)),(GET(D_REDX)),6))
-#define REDY F_CC(I_CC((GET(D_RG_LOW)),(GET(D_REDY)),4))
-#define GREENX F_CC(I_CC((GET(D_RG_LOW)),(GET(D_GREENX)),2))
-#define GREENY F_CC(I_CC((GET(D_RG_LOW)),(GET(D_GREENY)),0))
-#define BLUEX F_CC(I_CC((GET(D_BW_LOW)),(GET(D_BLUEX)),6))
-#define BLUEY F_CC(I_CC((GET(D_BW_LOW)),(GET(D_BLUEY)),4))
-#define WHITEX F_CC(I_CC((GET(D_BW_LOW)),(GET(D_WHITEX)),2))
-#define WHITEY F_CC(I_CC((GET(D_BW_LOW)),(GET(D_WHITEY)),0))
-
-/* extract information from standard timing section */
-#define T1 GET(E_T1)
-#define T2 GET(E_T2)
-#define T_MANU GET(E_TMANU)
 
 /* extract information from established timing section */
 #define _VALID_TIMING(x) !(((x[0] == 0x01) && (x[1] == 0x01)) \
                         || ((x[0] == 0x00) && (x[1] == 0x00)) \
                         || ((x[0] == 0x20) && (x[1] == 0x20)) )
-#define VALID_TIMING _VALID_TIMING(c)
 #define _HSIZE1(x) ((x[0] + 31) * 8)
-#define HSIZE1 _HSIZE1(c)
 #define RATIO(x) ((x[1] & 0xC0) >> 6)
 #define RATIO1_1 0
 /* EDID Ver. 1.3 redefined this */
@@ -183,16 +144,13 @@
   case RATIO5_4: y = _HSIZE1(x) * 4 / 5; break; \
   case RATIO16_9: y = _HSIZE1(x) * 9 / 16; break; \
   }
-#define VSIZE1(x) _VSIZE1(c,x,v)
 #define _REFRESH_R(x) (x[1] & 0x3F) + 60
-#define REFRESH_R  _REFRESH_R(c)
 #define _ID_LOW(x) x[0]
 #define ID_LOW _ID_LOW(c)
 #define _ID_HIGH(x) (x[1] << 8)
 #define ID_HIGH _ID_HIGH(c)
 #define STD_TIMING_ID (ID_LOW | ID_HIGH)
 #define _NEXT_STD_TIMING(x)  (x = (x + STD_TIMING_INFO_LEN))
-#define NEXT_STD_TIMING _NEXT_STD_TIMING(c)
 
 /* EDID Ver. >= 1.2 */
 /**
@@ -203,7 +161,6 @@
  * broken empty ASCII strings.  Only the first two bytes are reliable.
  */
 #define _IS_MONITOR_DESC(x) (x[0] == 0 && x[1] == 0)
-#define IS_MONITOR_DESC _IS_MONITOR_DESC(c)
 #define _PIXEL_CLOCK(x) (x[0] + (x[1] << 8)) * 10000
 #define PIXEL_CLOCK _PIXEL_CLOCK(c)
 #define _H_ACTIVE(x) (x[2] + ((x[4] & 0xF0) << 4))
@@ -242,7 +199,6 @@
 #define MISC _MISC(c)
 
 #define _MONITOR_DESC_TYPE(x) x[3]
-#define MONITOR_DESC_TYPE _MONITOR_DESC_TYPE(c)
 #define SERIAL_NUMBER 0xFF
 #define ASCII_STR 0xFE
 #define MONITOR_RANGES 0xFD

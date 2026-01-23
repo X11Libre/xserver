@@ -442,62 +442,62 @@ xf86InterpretEEDID(int scrnIndex, uint8_t * block)
 static void
 get_vendor_section(uint8_t * c, struct vendor *r)
 {
-    r->name[0] = L1;
-    r->name[1] = L2;
-    r->name[2] = L3;
+    r->name[0] = _L1(GET_ARRAY(V_MANUFACTURER));
+    r->name[1] = _L2(GET_ARRAY(V_MANUFACTURER));
+    r->name[2] = _L3(GET_ARRAY(V_MANUFACTURER));
     r->name[3] = '\0';
 
-    r->prod_id = PROD_ID;
-    r->serial = SERIAL_NO;
-    r->week = WEEK;
-    r->year = YEAR;
+    r->prod_id = _PROD_ID(GET_ARRAY(V_PROD_ID));
+    r->serial = _SERIAL_NO(GET_ARRAY(V_SERIAL));
+    r->week = _YEAR(GET(V_YEAR));
+    r->year = GET(V_WEEK) & 0xFF;
 }
 
 static void
 get_version_section(uint8_t * c, struct edid_version *r)
 {
-    r->version = VERSION;
-    r->revision = REVISION;
+    r->version = GET(V_VERSION);
+    r->revision = GET(V_REVISION);
 }
 
 static void
 get_display_section(uint8_t * c, struct disp_features *r, struct edid_version *v)
 {
-    r->input_type = INPUT_TYPE;
+    r->input_type = _INPUT_TYPE(GET(D_INPUT));
     if (!DIGITAL(r->input_type)) {
-        r->input_voltage = INPUT_VOLTAGE;
-        r->input_setup = SETUP;
-        r->input_sync = SYNC;
+        r->input_voltage = _INPUT_VOLTAGE(GET(D_INPUT));
+        r->input_setup = _SETUP(GET(D_INPUT));
+        r->input_sync = _SYNC(GET(D_INPUT));
     }
     else if (v->revision == 2 || v->revision == 3) {
-        r->input_dfp = DFP;
+        r->input_dfp = _DFP(GET(D_INPUT));
     }
     else if (v->revision >= 4) {
-        r->input_bpc = BPC;
-        r->input_interface = DIGITAL_INTERFACE;
+        r->input_bpc = _BPC(GET(D_INPUT));
+        r->input_interface = _DIGITAL_INTERFACE(GET(D_INPUT));
     }
-    r->hsize = HSIZE_MAX;
-    r->vsize = VSIZE_MAX;
-    r->gamma = GAMMA;
-    r->dpms = DPMS;
-    r->display_type = DISPLAY_TYPE;
-    r->msc = MSC;
-    r->redx = REDX;
-    r->redy = REDY;
-    r->greenx = GREENX;
-    r->greeny = GREENY;
-    r->bluex = BLUEX;
-    r->bluey = BLUEY;
-    r->whitex = WHITEX;
-    r->whitey = WHITEY;
+    r->hsize = GET(D_HSIZE);
+    r->vsize = GET(D_VSIZE);
+    r->gamma = _GAMMA(GET(D_GAMMA));
+    r->dpms = _DPMS(GET(FEAT_S));
+    r->display_type = _DISPLAY_TYPE(GET(FEAT_S));
+    r->msc = _MSC(GET(FEAT_S));
+    r->redx = F_CC(I_CC((GET(D_RG_LOW)),(GET(D_REDX)),6));
+    r->redy = F_CC(I_CC((GET(D_RG_LOW)),(GET(D_REDY)),4));
+    r->greenx = F_CC(I_CC((GET(D_RG_LOW)),(GET(D_GREENX)),2));
+    r->greeny = F_CC(I_CC((GET(D_RG_LOW)),(GET(D_GREENY)),0));
+    r->bluex = F_CC(I_CC((GET(D_BW_LOW)),(GET(D_BLUEX)),6));
+    r->bluey = F_CC(I_CC((GET(D_BW_LOW)),(GET(D_BLUEY)),4));
+    r->whitex = F_CC(I_CC((GET(D_BW_LOW)),(GET(D_WHITEX)),2));
+    r->whitey = F_CC(I_CC((GET(D_BW_LOW)),(GET(D_WHITEY)),0));
 }
 
 static void
 get_established_timing_section(uint8_t * c, struct established_timings *r)
 {
-    r->t1 = T1;
-    r->t2 = T2;
-    r->t_manu = T_MANU;
+    r->t1 = GET(E_T1);
+    r->t2 = GET(E_T2);
+    r->t_manu = GET(E_TMANU);
 }
 
 static void
@@ -551,16 +551,16 @@ get_std_timing_section(uint8_t * c, struct std_timings *r, struct edid_version *
     int i;
 
     for (i = 0; i < STD_TIMINGS; i++) {
-        if (VALID_TIMING) {
-            r[i].hsize = HSIZE1;
-            VSIZE1(r[i].vsize);
-            r[i].refresh = REFRESH_R;
+        if (_VALID_TIMING(c)) {
+            r[i].hsize = _HSIZE1(c);
+            _VSIZE1(c,r[i].vsize,v);
+            r[i].refresh = _REFRESH_R(c);
             r[i].id = STD_TIMING_ID;
         }
         else {
             r[i].hsize = r[i].vsize = r[i].refresh = r[i].id = 0;
         }
-        NEXT_STD_TIMING;
+        _NEXT_STD_TIMING(c);
     }
 }
 
@@ -570,8 +570,8 @@ static void
 fetch_detailed_block(uint8_t * c, struct edid_version *ver,
                      struct detailed_monitor_section *det_mon)
 {
-    if (ver->version == 1 && ver->revision >= 1 && IS_MONITOR_DESC) {
-        switch (MONITOR_DESC_TYPE) {
+    if (ver->version == 1 && ver->revision >= 1 && _IS_MONITOR_DESC(c)) {
+        switch (_MONITOR_DESC_TYPE(c)) {
         case SERIAL_NUMBER:
             det_mon->type = DS_SERIAL;
             copy_string(c, det_mon->section.serial);
@@ -656,11 +656,11 @@ get_dst_timing_section(uint8_t * c, struct std_timings *t, struct edid_version *
 
     c = c + 5;
     for (j = 0; j < 5; j++) {
-        t[j].hsize = HSIZE1;
-        VSIZE1(t[j].vsize);
-        t[j].refresh = REFRESH_R;
+        t[j].hsize = _HSIZE1(c);
+        _VSIZE1(c,t[j].vsize,v);
+        t[j].refresh = _REFRESH_R(c);
         t[j].id = STD_TIMING_ID;
-        NEXT_STD_TIMING;
+        _NEXT_STD_TIMING(c);
     }
 }
 
