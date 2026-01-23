@@ -31,10 +31,11 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "edid_priv.h"
+
 #include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#define _PARSE_EDID_
 #include "xf86DDC_priv.h"
 
 struct cea_ext_body {

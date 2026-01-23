@@ -28,14 +28,11 @@
 #include <xorg-config.h>
 #endif
 
-/* XXX kinda gross */
-#define _PARSE_EDID_
-
 #include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86DDC_priv.h"
-#include "edid.h"
+#include "edid_priv.h"
 
 /* display type, analog */
 #define DISP_MONO 0
