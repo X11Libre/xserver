@@ -277,6 +277,9 @@ struct _KdKeyboardInfo {
     int minScanCode;
     int maxScanCode;
 
+    /* Not set by the input driver */
+    int last_scan_code;
+
     int leds;
     int bellPitch;
     int bellDuration;
