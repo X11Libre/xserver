@@ -1309,18 +1309,34 @@ KdPointerInfo *KdParsePointer(const char *arg)
     return pi;
 }
 
+#ifdef KDRIVE_KBD
+#define DEFAULT_KEYBOARD "keyboard"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_KEYBOARD "evdev"
+#endif
+#endif
+
+#ifdef KDRIVE_MOUSE
+#define DEFAULT_MOUSE "mouse"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_MOUSE "evdev"
+#endif
+#endif
+
 void
 KdAddConfigInputDrivers(void)
 {
-    #ifdef KDRIVE_KBD
+    #ifdef DEFAULT_KEYBOARD
     if (!kdConfigKeyboards) {
-        KdAddConfigKeyboard("keyboard");
+        KdAddConfigKeyboard(DEFAULT_KEYBOARD);
     }
     #endif
 
-    #ifdef KDRIVE_MOUSE
+    #ifdef DEFAULT_MOUSE
     if (!kdConfigPointers) {
-        KdAddConfigPointer("mouse");
+        KdAddConfigPointer(DEFAULT_MOUSE);
     }
     #endif
 }
