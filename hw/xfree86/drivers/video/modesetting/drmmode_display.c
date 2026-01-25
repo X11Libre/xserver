@@ -2013,7 +2013,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     drmmode_cursor_rec drmmode_cursor = drmmode_crtc->cursor;
 
     /* Find the most compatiable size. */
-    for (i = 0; i < drmmode_cursor.num_dimensions; i++)
+    for (i = 0; i < drmmode_cursor.num_dimensions - 1; i++)
     {
         drmmode_cursor_dim_rec dimensions = drmmode_cursor.dimensions[i];
 
