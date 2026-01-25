@@ -193,6 +193,7 @@ typedef struct {
 
 typedef struct {
     uint16_t num_dimensions;
+    Bool up;
 
     /* Sorted from smallest to largest. */
     drmmode_cursor_dim_rec* dimensions;
@@ -205,7 +206,6 @@ typedef struct {
     uint32_t vblank_pipe;
     int dpms_mode;
     drmmode_cursor_rec cursor;
-    Bool cursor_up;
     uint16_t lut_r[256], lut_g[256], lut_b[256];
 
     drmmode_prop_info_rec props[DRMMODE_CRTC__COUNT];
