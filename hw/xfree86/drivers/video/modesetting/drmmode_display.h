@@ -257,6 +257,7 @@ typedef struct {
     int old_pitch;
 
     Bool cursor_probed;
+    Bool cursor_dim_fallback_warned;
 
     int* cursor_pitches;
 } drmmode_crtc_private_rec, *drmmode_crtc_private_ptr;
