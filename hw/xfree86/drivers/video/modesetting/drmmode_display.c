@@ -2001,7 +2001,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     modesettingPtr ms = modesettingPTR(crtc->scrn);
     CursorPtr cursor = xf86CurrentCursor(crtc->scrn->pScreen);
-    int i;
+    int idx;
 
     if (drmmode_crtc->cursor_up) {
         /* we probe the cursor so late, because we want to make sure that
@@ -2013,9 +2013,9 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     drmmode_cursor_rec drmmode_cursor = drmmode_crtc->cursor;
 
     /* Find the most compatiable size. */
-    for (i = 0; i < drmmode_cursor.num_dimensions - 1; i++)
+    for (idx = 0; idx < drmmode_cursor.num_dimensions - 1; idx++)
     {
-        drmmode_cursor_dim_rec dimensions = drmmode_cursor.dimensions[i];
+        drmmode_cursor_dim_rec dimensions = drmmode_cursor.dimensions[idx];
 
         if (dimensions.width >= cursor->bits->width &&
             dimensions.height >= cursor->bits->height) {
@@ -2023,11 +2023,11 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
         }
     }
 
-    const int cursor_pitch = drmmode_cursor_get_pitch(drmmode_crtc, i);
+    const int cursor_pitch = drmmode_cursor_get_pitch(drmmode_crtc, idx);
 
     /* Get the resolution of the cursor. */
-    int cursor_width  = drmmode_cursor.dimensions[i].width;
-    int cursor_height = drmmode_cursor.dimensions[i].height;
+    int cursor_width  = drmmode_cursor.dimensions[idx].width;
+    int cursor_height = drmmode_cursor.dimensions[idx].height;
 
     /* Get the size of the cursor image buffer */
     int image_width  = ms->cursor_image_width;
