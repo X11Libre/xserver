@@ -112,7 +112,14 @@ xl_mirror() {
 drv_tag() {
     local name="$1"
     local version="$2"
-    echo -n "xlibre-xf86-$name-$version"
+    case "$2" in
+        refs/*)
+            echo -n "$2"
+        ;;
+        *)
+            echo -n "xlibre-xf86-$name-$version"
+        ;;
+    esac
 }
 
 build_xf86drv_ac() {
