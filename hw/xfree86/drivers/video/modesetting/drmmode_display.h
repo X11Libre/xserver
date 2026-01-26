@@ -255,6 +255,9 @@ typedef struct {
     uint32_t cursor_glyph_width;
     uint32_t cursor_glyph_height;
     int old_pitch;
+    int cursor_rotation;
+    int cursor_src_x;
+    int cursor_src_y;
 
     Bool cursor_probed;
     Bool cursor_dim_fallback_warned;
