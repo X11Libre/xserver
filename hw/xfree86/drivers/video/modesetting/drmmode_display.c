@@ -1963,9 +1963,10 @@ drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_wid
         (drmmode_crtc->cursor_glyph_width == 0 &&
          drmmode_crtc->cursor_glyph_height == 0) ||
 
-        /* Sanity check so we don't read from the image out of bounds */
-        (drmmode_crtc->cursor_glyph_width > image_width ||
-         drmmode_crtc->cursor_glyph_height > image_height) ||
+        /* If cached glyph dimensions exceed the current crop window, force a full clear */
+        (src_x < 0 || src_y < 0 ||
+         drmmode_crtc->cursor_glyph_width > image_width - src_x ||
+         drmmode_crtc->cursor_glyph_height > image_height - src_y) ||
 
         /* If the pitch changed, the memory layout of the cursor data changed, so the buffer is dirty */
         /* See: https://github.com/X11Libre/xserver/pull/1234 */
@@ -1976,7 +1977,7 @@ drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_wid
        ) {
         memset(cursor, 0, cursor_bo->size);
 
-        /* Since we already cleared the buffer, no need to clear it again bellow */
+        /* Since we already cleared the buffer, no need to clear it again below */
         drmmode_crtc->cursor_glyph_width = 0;
         drmmode_crtc->cursor_glyph_height = 0;
     }
@@ -1987,6 +1988,12 @@ drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_wid
     /* Paint only what we need to */
     width_todo = MAX(drmmode_crtc->cursor_glyph_width, glyph_width);
     height_todo = MAX(drmmode_crtc->cursor_glyph_height, glyph_height);
+
+    /* Clamp to the source image bounds to avoid OOB reads. */
+    src_x = MIN(MAX(src_x, 0), image_width);
+    src_y = MIN(MAX(src_y, 0), image_height);
+    width_todo = MIN(width_todo, image_width - src_x);
+    height_todo = MIN(height_todo, image_height - src_y);
 
     /* remember the size of the current cursor glyph */
     drmmode_crtc->cursor_glyph_width = glyph_width;
