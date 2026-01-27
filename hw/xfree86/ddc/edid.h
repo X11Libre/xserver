@@ -326,7 +326,6 @@
 #define STD_COLOR_SPACE(x) (x & 0x4)
 #define PREFERRED_TIMING_MODE(x) (x & 0x2)
 #define GFT_SUPPORTED(x) (x & 0x1)
-#define GTF_SUPPORTED(x) (x & 0x1)
 #define CVT_SUPPORTED(x) (x & 0x1)
 
 /* detailed timing misc */
