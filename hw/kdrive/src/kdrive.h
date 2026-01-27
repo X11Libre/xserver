@@ -235,12 +235,6 @@ int KdAddPointer(KdPointerInfo * ki);
 int KdAddConfigPointer(const char *pointer);
 void KdRemovePointer(KdPointerInfo * ki);
 
-#define KD_KEY_COUNT 248
-#define KD_MIN_KEYCODE  8
-#define KD_MAX_KEYCODE  255
-#define KD_MAX_WIDTH    4
-#define KD_MAX_LENGTH   (KD_MAX_KEYCODE - KD_MIN_KEYCODE + 1)
-
 typedef struct {
     KeySym modsym;
     int modbit;
