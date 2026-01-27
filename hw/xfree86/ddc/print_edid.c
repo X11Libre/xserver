@@ -131,7 +131,7 @@ print_input_features(int scrnIndex, struct disp_features *c,
         default:
             xf86ErrorF("undefined\n");
         }
-        if (SIG_SETUP(c->input_setup))
+        if (c->input_setup)
             xf86DrvMsg(scrnIndex, X_INFO, "Signal levels configurable\n");
         xf86DrvMsg(scrnIndex, X_INFO, "Sync:");
         if (SEP_SYNC(c->input_sync))

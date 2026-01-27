@@ -293,9 +293,6 @@
 /* input type */
 #define DIGITAL(x) x
 
-/* Signal level setup */
-#define SIG_SETUP(x) (x)
-
 /* sync characteristics */
 #define SEP_SYNC(x) (x & 0x08)
 #define COMP_SYNC(x) (x & 0x04)
