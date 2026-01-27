@@ -32,7 +32,7 @@
 #include "randrstr.h"
 #endif
 
-#if defined(GLAMOR) && defined(GLXEXT)
+#ifdef GLAMOR
 #include <epoxy/egl.h>
 #endif
 
@@ -50,7 +50,7 @@ typedef struct _fbdevPriv {
 typedef struct _fbdevScrPriv {
     Rotation randr;
     Bool shadow;
-#if defined(GLAMOR) && defined(GLXEXT)
+#ifdef GLAMOR
     Bool glamor_initialized;
     EGLDisplay display;
     EGLContext ctx;
@@ -62,7 +62,7 @@ extern KdCardFuncs fbdevFuncs;
 extern const char *fbdevDevicePath;
 extern Bool fbDisableShadow;
 
-#if defined(GLAMOR) && defined(GLXEXT)
+#ifdef GLAMOR
 extern const char *fbdev_glvnd_provider;
 extern Bool es_allowed;
 extern Bool force_es;
@@ -98,7 +98,7 @@ void fbdevPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 
 Bool fbdevMapFramebuffer(KdScreenInfo * screen);
 
-#if defined(GLAMOR) && defined(GLXEXT)
+#ifdef GLAMOR
 Bool fbdevInitAccel(ScreenPtr screen);
 
 void fbdevEnableAccel(ScreenPtr screen);
