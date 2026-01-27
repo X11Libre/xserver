@@ -34,7 +34,7 @@ build_xf86drv_ac    video-freedreno         25.0.0
 build_xf86drv_ac    video-geode             25.0.0
 build_xf86drv_ac    video-i128              25.0.0
 build_xf86drv_ac    video-i740              25.0.0
-build_xf86drv_ac    video-intel             25.0.0
+build_xf86drv_ac    video-intel             25.0.1
 build_xf86drv_ac    video-mach64            25.0.0
 build_xf86drv_ac    video-mga               25.0.0
 build_xf86drv_ac    video-neomagic          25.0.0
