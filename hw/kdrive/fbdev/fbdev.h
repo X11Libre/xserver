@@ -64,6 +64,8 @@ extern Bool fbDisableShadow;
 
 #if defined(GLAMOR) && defined(GLXEXT)
 extern const char *fbdev_glvnd_provider;
+extern Bool es_allowed;
+extern Bool force_es;
 #endif
 
 Bool fbdevCardInit(KdCardInfo * card);

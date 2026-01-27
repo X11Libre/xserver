@@ -18,6 +18,9 @@
 
 const char *fbdev_glvnd_provider = "mesa";
 
+Bool es_allowed = TRUE;
+Bool force_es = FALSE;
+
 static void
 fbdev_glamor_egl_cleanup(FbdevScrPriv *scrpriv)
 {
@@ -310,11 +313,11 @@ fbdev_glamor_egl_try_gles_api(FbdevScrPriv *scrpriv)
 static Bool
 fbdev_glamor_bind_gl_api(FbdevScrPriv *scrpriv)
 {
-    if (fbdev_glamor_egl_try_big_gl_api(scrpriv)) {
+    if (!force_es && fbdev_glamor_egl_try_big_gl_api(scrpriv)) {
         return TRUE;
     }
 
-    return fbdev_glamor_egl_try_gles_api(scrpriv);
+    return es_allowed && fbdev_glamor_egl_try_gles_api(scrpriv);
 }
 
 static Bool
