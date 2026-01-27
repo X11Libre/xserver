@@ -37,6 +37,15 @@
 #include "xf86DDC_priv.h"
 #include "edid.h"
 
+/* display type, analog */
+#define DISP_MONO 0
+#define DISP_RGB 1
+#define DISP_MULTCOLOR 2
+
+/* display color encodings, digital */
+#define DISP_YCRCB444 0x01
+#define DISP_YCRCB422 0x02
+
 #define EDID_WIDTH	16
 
 static void

@@ -313,15 +313,6 @@
 #define DPMS_SUSPEND(x) (x & 0x02)
 #define DPMS_OFF(x) (x & 0x01)
 
-/* display type, analog */
-#define DISP_MONO 0
-#define DISP_RGB 1
-#define DISP_MULTCOLOR 2
-
-/* display color encodings, digital */
-#define DISP_YCRCB444 0x01
-#define DISP_YCRCB422 0x02
-
 /* Msc stuff EDID Ver > 1.1 */
 #define STD_COLOR_SPACE(x) (x & 0x4)
 #define PREFERRED_TIMING_MODE(x) (x & 0x2)
