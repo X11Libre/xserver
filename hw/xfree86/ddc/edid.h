@@ -308,11 +308,6 @@
 #define SYNC_O_GREEN(x) (x & 0x02)
 #define SYNC_SERR(x) (x & 0x01)
 
-/* DPMS features */
-#define DPMS_STANDBY(x) (x & 0x04)
-#define DPMS_SUSPEND(x) (x & 0x02)
-#define DPMS_OFF(x) (x & 0x01)
-
 /* Msc stuff EDID Ver > 1.1 */
 #define PREFERRED_TIMING_MODE(x) (x & 0x2)
 #define GTF_SUPPORTED(x) (x & 0x1)

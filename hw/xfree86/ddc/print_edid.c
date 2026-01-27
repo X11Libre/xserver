@@ -46,6 +46,11 @@
 #define DISP_YCRCB444 0x01
 #define DISP_YCRCB422 0x02
 
+/* DPMS features */
+#define DPMS_STANDBY(x) (x & 0x04)
+#define DPMS_SUSPEND(x) (x & 0x02)
+#define DPMS_OFF(x) (x & 0x01)
+
 #define STD_COLOR_SPACE(x) (x & 0x4)
 #define GFT_SUPPORTED(x) (x & 0x1)
 
