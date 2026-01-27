@@ -178,9 +178,9 @@ fbdev_glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
 }
 
 static inline Bool
-fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, Bool strict)
+fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, int strict)
 {
-    if (!strict) {
+    if (strict <= 0) {
         return TRUE;
     }
 /**
@@ -202,6 +202,10 @@ fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, Bool strict)
 
     if (!strcmp(driver_name, fbdev_glvnd_provider)) {
         return TRUE;
+    }
+
+    if (strict >= 2) {
+        return FALSE;
     }
 
     /**
@@ -233,19 +237,18 @@ fbdev_glamor_egl_init_display(FbdevScrPriv *scrpriv)
     }
 
     if (fbdev_glamor_query_devices_ext(&devices, &num_devices)) {
-        /* Try a strict match first */
-        for (uint32_t i = 0; i < num_devices; i++) {
-            if (fbdev_glamor_egl_device_matches_config(devices[i], TRUE)) {
-                GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, devices[i], TRUE);
-            }
+#define GLAMOR_EGL_TRY_PLATFORM_DEVICE(strict) \
+        for (uint32_t i = 0; i < num_devices; i++) { \
+            if (fbdev_glamor_egl_device_matches_config(devices[i], strict)) { \
+                GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, devices[i], TRUE); \
+            } \
         }
 
-        /* Try a try a less strict match now */
-        for (uint32_t i = 0; i < num_devices; i++) {
-            if (fbdev_glamor_egl_device_matches_config(devices[i], FALSE)) {
-                GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, devices[i], TRUE);
-            }
-        }
+        GLAMOR_EGL_TRY_PLATFORM_DEVICE(2);
+        GLAMOR_EGL_TRY_PLATFORM_DEVICE(1);
+        GLAMOR_EGL_TRY_PLATFORM_DEVICE(0);
+
+#undef GLAMOR_EGL_TRY_PLATFORM_DEVICE
     }
 
     GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, FALSE);
@@ -266,6 +269,7 @@ fbdev_glamor_egl_init_display(FbdevScrPriv *scrpriv)
 
 #undef GLAMOR_EGL_TRY_PLATFORM
 
+    free(devices);
     return FALSE;
 }
 
