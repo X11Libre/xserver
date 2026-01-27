@@ -25,7 +25,6 @@
 
 /* Msc stuff EDID Ver > 1.1 */
 #define PREFERRED_TIMING_MODE(x) (x & 0x2)
-#define GTF_SUPPORTED(x) (x & 0x1)
 
 struct vendor {
     char name[4];
