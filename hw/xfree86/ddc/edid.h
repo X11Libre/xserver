@@ -611,12 +611,4 @@ struct cea_data_block {
     } u;
 };
 
-struct cea_ext_body {
-    uint8_t tag;
-    uint8_t rev;
-    uint8_t dt_offset;
-    uint8_t flags;
-    struct cea_data_block data_collection;
-};
-
 #endif                          /* _EDID_H_ */

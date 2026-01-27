@@ -37,6 +37,14 @@
 #define _PARSE_EDID_
 #include "xf86DDC_priv.h"
 
+struct cea_ext_body {
+    uint8_t tag;
+    uint8_t rev;
+    uint8_t dt_offset;
+    uint8_t flags;
+    struct cea_data_block data_collection;
+};
+
 static void get_vendor_section(uint8_t *, struct vendor *);
 static void get_version_section(uint8_t *, struct edid_version *);
 static void get_display_section(uint8_t *, struct disp_features *,
