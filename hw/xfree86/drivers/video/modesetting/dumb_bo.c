@@ -37,6 +37,7 @@
 #include <unistd.h>
 #include <xf86drm.h>
 
+#ifdef HAVE_DUMB_BO
 struct dumb_bo *
 dumb_bo_create(int fd,
                const unsigned width, const unsigned height, const unsigned bpp)
@@ -134,3 +135,4 @@ dumb_get_bo_from_fd(int fd, int handle, int pitch, int size)
     bo->size = size;
     return bo;
 }
+#endif

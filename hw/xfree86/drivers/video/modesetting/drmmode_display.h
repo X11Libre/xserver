@@ -80,12 +80,15 @@ enum drmmode_crtc_property {
 typedef struct {
     uint32_t width;
     uint32_t height;
+#ifdef HAVE_DUMB_BO
     struct dumb_bo *dumb;
+#endif
 #ifdef GLAMOR_HAS_GBM
     Bool used_modifiers;
     struct gbm_bo *gbm;
 #endif
-    void* map;
+    void* map_addr;
+    void* map_data;
 } drmmode_bo;
 
 typedef struct {
@@ -196,7 +199,7 @@ typedef struct {
 
     /* Sorted from smallest to largest. */
     drmmode_cursor_dim_rec* dimensions;
-    struct dumb_bo *bo;
+    drmmode_bo bo;
 } drmmode_cursor_rec, *drmmode_cursor_ptr;
 
 typedef struct {
@@ -293,7 +296,7 @@ typedef struct {
 
 typedef struct _msPixmapPriv {
     uint32_t fb_id;
-    struct dumb_bo *backing_bo; /* if this pixmap is backed by a dumb bo */
+    drmmode_bo backing_bo; /* backing bo for this pixmap, if there is one */
 
     DamagePtr secondary_damage;
 
