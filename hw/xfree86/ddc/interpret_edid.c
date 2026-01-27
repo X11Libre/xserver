@@ -25,6 +25,7 @@
  */
 #include <xorg-config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -188,15 +189,18 @@ encode_aspect_ratio(xf86MonPtr m)
     }
 }
 
-xf86MonPtr
-xf86InterpretEDID(int scrnIndex, uint8_t * block)
+static xf86MonPtr parseEDID(int scrnIndex, uint8_t *block, size_t size, bool copy)
 {
-    xf86MonPtr m;
+    xf86MonPtr m = calloc(1, sizeof(xf86Monitor) + (copy ? size : 0));
+    if (!m)
+        return NULL;
 
-    if (!block)
-        return NULL;
-    if (!(m = XNFcallocarray(1, sizeof(xf86Monitor))))
-        return NULL;
+    /* make a copy of the EDID block for later reference */
+    if (copy) {
+        memcpy(&(m[1]), block, size);
+        block = (uint8_t*)&m[1];
+    }
+
     m->scrnIndex = scrnIndex;
     m->rawData = block;
 
@@ -215,11 +219,34 @@ xf86InterpretEDID(int scrnIndex, uint8_t * block)
     handle_edid_quirks(m);
     encode_aspect_ratio(m);
 
+    if (size > 128)
+        m->flags |= EDID_COMPLETE_RAWDATA;
+
+    /* possibly add more extended parsing here, eg. HDR information */
+
     return m;
 
  error:
     free(m);
     return NULL;
+}
+
+/* new entry point, should be used whenever possible */
+xf86MonPtr xf86ParseEDID(ScrnInfoPtr pScrn, uint8_t *block, size_t size)
+{
+    if (!pScrn || !block || !size)
+        return NULL;
+
+    return parseEDID(pScrn->scrnIndex, block, size, true);
+}
+
+/* old entry point, deprecated but still needed for backwards compat */
+xf86MonPtr xf86InterpretEDID(int scrnIndex, uint8_t *block)
+{
+    if (!block)
+        return NULL;
+
+    return parseEDID(scrnIndex, block, EDID1_LEN, false);
 }
 
 static int
