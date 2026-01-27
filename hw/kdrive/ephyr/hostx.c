@@ -70,6 +70,11 @@
 #include "glamor_glx_provider.h"
 #include "ephyr_glamor.h"
 #include "glamor/glamor_priv.h"
+
+#ifdef XV
+#include "kxv.h"
+#endif
+
 #endif
 #include "ephyrlog.h"
 #include "ephyr.h"
@@ -110,6 +115,7 @@ char *ephyrResName = NULL;
 int ephyrResNameFromCmd = 0;
 char *ephyrTitle = NULL;
 Bool ephyr_glamor = FALSE;
+extern Bool ephyrNoXV;
 extern Bool ephyr_glamor_skip_present;
 
 Bool
@@ -1630,6 +1636,12 @@ ephyr_glamor_init(ScreenPtr screen)
     free(hostx_glx_exts);
 
     GlxPushProvider(&glamor_provider);
+
+#ifdef XV
+    if (!ephyrNoXV) {
+        kd_glamor_xv_init(screen);
+    }
+#endif /*XV*/
 
     return TRUE;
 }

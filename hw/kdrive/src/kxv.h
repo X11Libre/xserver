@@ -192,4 +192,9 @@ typedef struct _KdXVWindowRec {
     struct _KdXVWindowRec *next;
 } KdXVWindowRec, *KdXVWindowPtr;
 
+#ifdef GLAMOR
+/* Must not be called before glamor is fully initialized */
+void kd_glamor_xv_init(ScreenPtr screen);
+#endif
+
 #endif                          /* _XVDIX_H_ */
