@@ -57,16 +57,15 @@ xf86VTSwitchPending(void)
     return xf86Info.vtRequestsPending ? TRUE : FALSE;
 }
 
-Bool
-xf86VTSwitchAway(void)
+bool xf86VTSwitchAway(void)
 {
     xf86Info.vtRequestsPending = FALSE;
     if (seatd_libseat_controls_session())
-        return TRUE;
+        return true;
     if (ioctl(xf86Info.consoleFd, VT_RELDISP, 1) < 0)
-        return FALSE;
+        return false;
     else
-        return TRUE;
+        return true;
 }
 
 Bool

@@ -39,10 +39,9 @@ xf86VTSwitchPending(void)
     return FALSE;
 }
 
-Bool
-xf86VTSwitchAway(void)
+bool xf86VTSwitchAway(void)
 {
-    return FALSE;
+    return false;
 }
 
 Bool
