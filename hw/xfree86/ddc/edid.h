@@ -216,8 +216,6 @@
 #define MAX_H (_MAX_H(c) + _MAX_H_OFFSET(c))
 #define _MAX_CLOCK(x) x[9]
 #define MAX_CLOCK _MAX_CLOCK(c)
-#define _DEFAULT_GTF(x) (x[10] == 0x00)
-#define DEFAULT_GTF _DEFAULT_GTF(c)
 #define _HAVE_2ND_GTF(x) (x[10] == 0x02)
 #define HAVE_2ND_GTF _HAVE_2ND_GTF(c)
 #define _F_2ND_GTF(x) (x[12] * 2)
