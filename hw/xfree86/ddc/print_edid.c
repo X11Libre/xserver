@@ -46,6 +46,9 @@
 #define DISP_YCRCB444 0x01
 #define DISP_YCRCB422 0x02
 
+#define STD_COLOR_SPACE(x) (x & 0x4)
+#define GFT_SUPPORTED(x) (x & 0x1)
+
 #define EDID_WIDTH	16
 
 static void
