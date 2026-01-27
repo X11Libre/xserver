@@ -437,8 +437,6 @@ void KdOsInit(const KdOsFuncs * pOsFuncs);
 void
  KdOsAddInputDrivers(void);
 
-Bool KdAllocatePrivates(ScreenPtr pScreen);
-
 Bool KdCreateScreenResources(ScreenPtr pScreen);
 
 Bool KdSaveScreen(ScreenPtr pScreen, int on);

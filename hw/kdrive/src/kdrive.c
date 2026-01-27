@@ -22,6 +22,8 @@
 
 #include <kdrive-config.h>
 
+#include <stdio.h>
+
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
@@ -637,18 +639,18 @@ KdOsInit(const KdOsFuncs * pOsFuncs)
     }
 }
 
-Bool KdAllocatePrivates(ScreenPtr pScreen)
+static bool KdAllocatePrivates(ScreenPtr pScreen)
 {
     KdPrivScreenPtr pScreenPriv;
 
     if (!dixRegisterPrivateKey(&kdScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+        return false;
 
     pScreenPriv = calloc(1, sizeof(*pScreenPriv));
     if (!pScreenPriv)
-        return FALSE;
+        return false;
     KdSetScreenPriv(pScreen, pScreenPriv);
-    return TRUE;
+    return true;
 }
 
 Bool KdCreateScreenResources(ScreenPtr pScreen)
@@ -843,7 +845,8 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     Bool rotated = (screen->randr & (RR_Rotate_90 | RR_Rotate_270)) != 0;
     int width, height, *width_mmp, *height_mmp;
 
-    KdAllocatePrivates(pScreen);
+    if (!KdAllocatePrivates(pScreen))
+        return FALSE;
 
     pScreenPriv = KdGetScreenPriv(pScreen);
 
