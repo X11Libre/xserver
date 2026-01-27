@@ -286,7 +286,6 @@
 #define ADD_DUMMY 0x10
 
 #define _NEXT_DT_MD_SECTION(x) (x = (x + DET_TIMING_INFO_LEN))
-#define NEXT_DT_MD_SECTION _NEXT_DT_MD_SECTION(c)
 
 #endif                          /* _PARSE_EDID_ */
 

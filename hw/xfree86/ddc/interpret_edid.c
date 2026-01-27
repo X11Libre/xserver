@@ -640,7 +640,7 @@ get_dt_md_section(uint8_t * c, struct edid_version *ver,
 
     for (i = 0; i < DET_TIMINGS; i++) {
         fetch_detailed_block(c, ver, det_mon + i);
-        NEXT_DT_MD_SECTION;
+        _NEXT_DT_MD_SECTION(c);
     }
 }
 
