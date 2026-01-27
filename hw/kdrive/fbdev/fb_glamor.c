@@ -20,7 +20,7 @@
 #include "kxv.h"
 #endif
 
-const char *fbdev_glvnd_provider = "mesa";
+char *fbdev_glvnd_provider = NULL;
 
 Bool es_allowed = TRUE;
 Bool force_es = FALSE;
@@ -44,6 +44,9 @@ fbdev_glamor_egl_cleanup(FbdevScrPriv *scrpriv)
         eglTerminate(scrpriv->display);
         scrpriv->display = EGL_NO_DISPLAY;
     }
+
+    free(fbdev_glvnd_provider);
+    fbdev_glvnd_provider = NULL;
 }
 
 static void
@@ -89,6 +92,8 @@ fbdevInitAccel(ScreenPtr pScreen)
 #endif
 
     if (!fbdev_glamor_egl_init(pScreen)) {
+        free(fbdev_glvnd_provider);
+        fbdev_glvnd_provider = NULL;
         return FALSE;
     }
 
@@ -178,12 +183,26 @@ fbdev_glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
     return TRUE;
 }
 
+/**
+ * Find the desired EGLDevice for our config.
+ *
+ * If strict == 2, we are looking for EGLDevices with names and,
+ * if a glvnd vendor was passed, an exact match between the
+ * device's name, and the desired vendor.
+ *
+ * If strict == 1, we are looking for EGLDevices with names and,
+ * if a glvnd vendor was passed, a match between the gl vendor library
+ * provider and the desired vendor's library.
+ *
+ * If strict == 0, we accept all devices, even those with no names.
+ *
+ * Regardless of success/failure, and regardless of strictness level,
+ * we save the statically allocated string with the EGLDevice's name
+ * in *driver_name, even if that name is NULL.
+ */
 static inline Bool
-fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, int strict)
+fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, int strict, const char** driver_name)
 {
-    if (strict <= 0) {
-        return TRUE;
-    }
 /**
  * For some reason, this isn't part of the epoxy headers.
  * It is part of EGL/eglext.h, but we can't include that
@@ -197,13 +216,22 @@ fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, int strict)
 #endif
 
     const char *dev_ext = eglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
-    const char *driver_name = (dev_ext && strstr(dev_ext, "EGL_EXT_device_persistent_id")) ?
-                              eglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT) : NULL;
-    if (!driver_name) {
+    *driver_name = (dev_ext && strstr(dev_ext, "EGL_EXT_device_persistent_id")) ?
+                   eglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT) : NULL;
+
+    if (strict <= 0) {
+        return TRUE;
+    }
+
+    if (*driver_name == NULL) {
         return FALSE;
     }
 
-    if (!strcmp(driver_name, fbdev_glvnd_provider)) {
+    if (!fbdev_glvnd_provider) {
+        return TRUE;
+    }
+
+    if (!strcmp(*driver_name, fbdev_glvnd_provider)) {
         return TRUE;
     }
 
@@ -216,7 +244,7 @@ fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, int strict)
      * but I don't know of any gl library vendors
      * other than mesa and nvidia
      */
-    Bool device_is_nvidia = !!strstr(driver_name, "nvidia");
+    Bool device_is_nvidia = !!strstr(*driver_name, "nvidia");
     Bool config_is_nvidia = !!strstr(fbdev_glvnd_provider, "nvidia");
 
     return device_is_nvidia == config_is_nvidia;
@@ -227,11 +255,19 @@ fbdev_glamor_egl_init_display(FbdevScrPriv *scrpriv)
 {
     EGLDeviceEXT *devices = NULL;
     EGLint num_devices = 0;
+    const char *driver_name = NULL;
 
+    /**
+     * If the user didn't give us a GL driver/library name,
+     * we populate it with what we queried
+     */
 #define GLAMOR_EGL_TRY_PLATFORM(platform, native, platform_fallback) \
     scrpriv->display = glamor_egl_get_display2(platform, native, platform_fallback); \
     if (scrpriv->display != EGL_NO_DISPLAY) { \
         if (eglInitialize(scrpriv->display, NULL, NULL)) { \
+            if (!fbdev_glvnd_provider && driver_name) { \
+                fbdev_glvnd_provider = strdup(driver_name); \
+            } \
             free(devices); \
             return TRUE; \
         } \
@@ -242,7 +278,7 @@ fbdev_glamor_egl_init_display(FbdevScrPriv *scrpriv)
     if (fbdev_glamor_query_devices_ext(&devices, &num_devices)) {
 #define GLAMOR_EGL_TRY_PLATFORM_DEVICE(strict) \
         for (uint32_t i = 0; i < num_devices; i++) { \
-            if (fbdev_glamor_egl_device_matches_config(devices[i], strict)) { \
+            if (fbdev_glamor_egl_device_matches_config(devices[i], strict, &driver_name)) { \
                 GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, devices[i], TRUE); \
             } \
         }
@@ -253,6 +289,7 @@ fbdev_glamor_egl_init_display(FbdevScrPriv *scrpriv)
 
 #undef GLAMOR_EGL_TRY_PLATFORM_DEVICE
     }
+    driver_name = NULL;
 
     GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, FALSE);
 
@@ -361,13 +398,11 @@ fbdev_glamor_egl_init(ScreenPtr pScreen)
     FbdevScrPriv *scrpriv = screen->driver;
 
     if (!fbdev_glamor_egl_init_display(scrpriv)) {
-        screen->dumb = TRUE;
         return FALSE;
     }
 
     if (!fbdev_glamor_bind_gl_api(scrpriv)) {
         fbdev_glamor_egl_cleanup(scrpriv);
-        screen->dumb = TRUE;
         return FALSE;
     }
 
