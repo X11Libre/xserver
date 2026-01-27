@@ -145,8 +145,9 @@ fbdev_glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
     *devices = NULL;
     *num_devices = 0;
 
-    if (!epoxy_has_egl_extension(NULL, "EGL_EXT_device_query") ||
-        !epoxy_has_egl_extension(NULL, "EGL_EXT_device_enumeration")) {
+    if (!epoxy_has_egl_extension(NULL, "EGL_EXT_device_base") &&
+        !(epoxy_has_egl_extension(NULL, "EGL_EXT_device_query") &&
+          epoxy_has_egl_extension(NULL, "EGL_EXT_device_enumeration"))) {
         return FALSE;
     }
 
@@ -195,7 +196,9 @@ fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, int strict)
 #define EGL_DRIVER_NAME_EXT 0x335E
 #endif
 
-    const char *driver_name = eglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT);
+    const char *dev_ext = eglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
+    const char *driver_name = (dev_ext && strstr(dev_ext, "EGL_EXT_device_persistent_id")) ?
+                              eglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT) : NULL;
     if (!driver_name) {
         return FALSE;
     }
