@@ -166,6 +166,7 @@ ProcXvQueryEncodings(ClientPtr client)
         x_rpcbuf_write_CARD16(&rpcbuf, nameSize);
         x_rpcbuf_write_CARD16(&rpcbuf, pe->width);
         x_rpcbuf_write_CARD16(&rpcbuf, pe->height);
+        x_rpcbuf_write_CARD16(&rpcbuf, 0); /* padding */
         x_rpcbuf_write_CARD32(&rpcbuf, pe->rate.numerator);
         x_rpcbuf_write_CARD32(&rpcbuf, pe->rate.denominator);
         x_rpcbuf_write_string_pad(&rpcbuf, pe->name);
