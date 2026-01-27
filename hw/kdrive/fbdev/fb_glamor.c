@@ -60,6 +60,17 @@ glamor_egl_make_current(struct glamor_context *glamor_ctx)
     }
 }
 
+static inline void
+fbdev_glamor_set_glvnd_vendor(ScreenPtr screen)
+{
+    if (fbdev_glvnd_provider &&
+        strstr(fbdev_glvnd_provider, "nvidia")) {
+        glamor_set_glvnd_vendor(screen, "nvidia");
+    } else {
+        glamor_set_glvnd_vendor(screen, "mesa");
+    }
+}
+
 static Bool fbdev_glamor_egl_init(ScreenPtr screen);
 
 Bool
@@ -73,15 +84,15 @@ fbdevInitAccel(ScreenPtr pScreen)
 #endif
 
     if (!fbdev_glamor_egl_init(pScreen)) {
-        screen->dumb = TRUE;
         return FALSE;
     }
 
     if (!glamor_init(pScreen, GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_DRI3)) {
         fbdev_glamor_egl_cleanup(scrpriv);
-        screen->dumb = TRUE;
         return FALSE;
     }
+
+    fbdev_glamor_set_glvnd_vendor(pScreen);
 
 #ifdef GLXEXT
     if (!vendor_initialized) {
