@@ -73,6 +73,10 @@ ddxUseMsg(void)
     ErrorF
         ("-noshadow        Disable the ShadowFB layer if possible\n");
     ErrorF
+        ("-glamor          Force enable glamor render acceleration if possible\n");
+    ErrorF
+        ("-noglamor        Force disable glamor render acceleration\n");
+    ErrorF
         ("-glvendor        Suggest what glvnd vendor library should be used\n");
     ErrorF
         ("-force-gl        Force glamor to only use GL contexts\n");
@@ -101,6 +105,16 @@ ddxProcessArgument(int argc, char **argv, int i)
     }
 
 #ifdef GLAMOR
+    if (!strcmp(argv[i], "-glamor")) {
+        fbForceGlamor = TRUE;
+        return 1;
+    }
+
+    if (!strcmp(argv[i], "-noglamor")) {
+        fbGlamorAllowed = FALSE;
+        return 1;
+    }
+
     if (!strcmp(argv[i], "-glvendor")) {
         if (i + 1 < argc) {
             fbdev_glvnd_provider = strdup(argv[i + 1]);

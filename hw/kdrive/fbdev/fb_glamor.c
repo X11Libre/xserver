@@ -24,6 +24,8 @@ char *fbdev_glvnd_provider = NULL;
 
 Bool es_allowed = TRUE;
 Bool force_es = FALSE;
+Bool fbGlamorAllowed = TRUE;
+Bool fbForceGlamor = FALSE;
 Bool fbXVAllowed = TRUE;
 
 static void
@@ -97,7 +99,19 @@ fbdevInitAccel(ScreenPtr pScreen)
         return FALSE;
     }
 
-    if (!glamor_init(pScreen, GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_DRI3)) {
+    int flags = GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_DRI3;
+    if (!fbGlamorAllowed) {
+        flags |= GLAMOR_NO_RENDER_ACCEL;
+    } else if (!fbForceGlamor){
+        const char *renderer = (const char*)glGetString(GL_RENDERER);
+        if (!renderer ||
+            strstr(renderer, "softpipe") ||
+            strstr(renderer, "llvmpipe")) {
+            flags |= GLAMOR_NO_RENDER_ACCEL;
+        }
+    }
+
+    if (!glamor_init(pScreen, flags)) {
         fbdev_glamor_egl_cleanup(scrpriv);
         return FALSE;
     }
@@ -112,7 +126,8 @@ fbdevInitAccel(ScreenPtr pScreen)
 #endif
 
 #ifdef XV
-    if (fbXVAllowed) {
+    /* X-Video needs glamor render accel */
+    if (fbXVAllowed && !(flags & GLAMOR_NO_RENDER_ACCEL)) {
         kd_glamor_xv_init(pScreen);
     }
 #endif
