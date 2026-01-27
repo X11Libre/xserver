@@ -182,13 +182,10 @@ extern _X_EXPORT void vgaHWProtect(ScrnInfoPtr pScrn, Bool on);
 extern _X_EXPORT Bool vgaHWSaveScreen(ScreenPtr pScreen, int mode);
 extern _X_EXPORT void vgaHWBlankScreen(ScrnInfoPtr pScrn, Bool on);
 extern _X_EXPORT void vgaHWSeqReset(vgaHWPtr hwp, Bool start);
-extern _X_EXPORT void vgaHWRestoreFonts(ScrnInfoPtr scrninfp,
-                                        vgaRegPtr restore);
-extern _X_EXPORT void vgaHWRestore(ScrnInfoPtr scrninfp, vgaRegPtr restore,
-                                   int flags);
-extern _X_EXPORT void vgaHWSaveFonts(ScrnInfoPtr scrninfp, vgaRegPtr save);
-extern _X_EXPORT void vgaHWSave(ScrnInfoPtr scrninfp, vgaRegPtr save,
-                                int flags);
+_X_EXPORT void vgaHWRestoreFonts(ScrnInfoPtr pScrnInfo, vgaRegPtr restore);
+_X_EXPORT void vgaHWRestore(ScrnInfoPtr pScrnInfo, vgaRegPtr restore, int flags);
+_X_EXPORT void vgaHWSaveFonts(ScrnInfoPtr pScrnInfo, vgaRegPtr save);
+_X_EXPORT void vgaHWSave(ScrnInfoPtr pScrnInfo, vgaRegPtr save, int flags);
 extern _X_EXPORT Bool vgaHWInit(ScrnInfoPtr scrnp, DisplayModePtr mode);
 extern _X_EXPORT Bool vgaHWCopyReg(vgaRegPtr dst, vgaRegPtr src);
 extern _X_EXPORT Bool vgaHWGetHWRec(ScrnInfoPtr scrp);
