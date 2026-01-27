@@ -450,15 +450,7 @@ struct cea_data_block *xf86MonitorFindHDMIBlock(xf86MonPtr mon)
 xf86MonPtr
 xf86InterpretEEDID(int scrnIndex, uint8_t * block)
 {
-    xf86MonPtr m;
-
-    m = xf86InterpretEDID(scrnIndex, block);
-    if (!m)
-        return NULL;
-
-    /* extension parse */
-
-    return m;
+    return xf86InterpretEDID(scrnIndex, block);
 }
 
 static void
