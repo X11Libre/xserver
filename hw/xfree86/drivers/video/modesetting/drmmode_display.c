@@ -2001,16 +2001,16 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     modesettingPtr ms = modesettingPTR(crtc->scrn);
     CursorPtr cursor = xf86CurrentCursor(crtc->scrn->pScreen);
+    drmmode_cursor_rec drmmode_cursor = drmmode_crtc->cursor;
     int i;
 
-    if (drmmode_crtc->cursor_up) {
+    if (drmmode_cursor.up) {
         /* we probe the cursor so late, because we want to make sure that
            the screen is fully initialized and something is already drawn on it.
            Otherwise, we can't get reliable results with the probe. */
         drmmode_probe_cursor_size(crtc);
     }
 
-    drmmode_cursor_rec drmmode_cursor = drmmode_crtc->cursor;
 
     /* Find the most compatiable size. */
     for (i = 0; i < drmmode_cursor.num_dimensions; i++)
@@ -2042,7 +2042,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
     drmmode_crtc->cursor_width  = cursor_width;
     drmmode_crtc->cursor_height = cursor_height;
 
-    return drmmode_crtc->cursor_up ? drmmode_set_cursor(crtc, cursor_width, cursor_height) : TRUE;
+    return drmmode_cursor.up ? drmmode_set_cursor(crtc, cursor_width, cursor_height) : TRUE;
 }
 
 static void
@@ -2051,7 +2051,7 @@ drmmode_hide_cursor(xf86CrtcPtr crtc)
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
 
-    drmmode_crtc->cursor_up = FALSE;
+    drmmode_crtc->cursor.up = FALSE;
     drmModeSetCursor(drmmode->fd, drmmode_crtc->mode_crtc->crtc_id, 0,
                      drmmode_crtc->cursor_width, drmmode_crtc->cursor_height);
 }
@@ -2060,7 +2060,7 @@ static Bool
 drmmode_show_cursor(xf86CrtcPtr crtc)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    drmmode_crtc->cursor_up = TRUE;
+    drmmode_crtc->cursor.up = TRUE;
     return drmmode_set_cursor(crtc, drmmode_crtc->cursor_width, drmmode_crtc->cursor_height);
 }
 
