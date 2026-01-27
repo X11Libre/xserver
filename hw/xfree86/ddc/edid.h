@@ -337,8 +337,6 @@
 #define IS_RIGHT_STEREO(x) (x & 0x01)
 #define IS_LEFT_STEREO(x) (x & 0x02)
 #define IS_4WAY_STEREO(x) (x & 0x03)
-#define IS_RIGHT_ON_SYNC(x) IS_RIGHT_STEREO(x)
-#define IS_LEFT_ON_SYNC(x) IS_LEFT_STEREO(x)
 
 struct vendor {
     char name[4];
