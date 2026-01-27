@@ -71,13 +71,22 @@ fbdev_glamor_egl_make_current(struct glamor_context *glamor_ctx)
 }
 
 static inline void
-fbdev_glamor_set_glvnd_vendor(ScreenPtr screen)
+fbdev_glamor_set_glvnd_vendor(ScreenPtr screen, const char* renderer, const char* vendor)
 {
-    if (fbdev_glvnd_provider &&
-        strstr(fbdev_glvnd_provider, "nvidia")) {
-        glamor_set_glvnd_vendor(screen, "nvidia");
+    if (!fbdev_glvnd_provider) {
+        if (renderer && strstr(renderer, "NVIDIA")) {
+            glamor_set_glvnd_vendor(screen, "nvidia");
+        } else if (vendor && strstr(vendor, "NVIDIA")) {
+            glamor_set_glvnd_vendor(screen, "nvidia");
+        } else {
+            glamor_set_glvnd_vendor(screen, "mesa");
+        }
     } else {
-        glamor_set_glvnd_vendor(screen, "mesa");
+        if (strstr(fbdev_glvnd_provider, "nvidia")) {
+            glamor_set_glvnd_vendor(screen, "nvidia");
+        } else {
+            glamor_set_glvnd_vendor(screen, "mesa");
+        }
     }
 }
 
@@ -99,11 +108,13 @@ fbdevInitAccel(ScreenPtr pScreen)
         return FALSE;
     }
 
+    const char *vendor = (const char*)glGetString(GL_VENDOR);
+    const char *renderer = (const char*)glGetString(GL_RENDERER);
+
     int flags = GLAMOR_USE_EGL_SCREEN | GLAMOR_NO_DRI3;
     if (!fbGlamorAllowed) {
         flags |= GLAMOR_NO_RENDER_ACCEL;
     } else if (!fbForceGlamor){
-        const char *renderer = (const char*)glGetString(GL_RENDERER);
         if (!renderer ||
             strstr(renderer, "softpipe") ||
             strstr(renderer, "llvmpipe")) {
@@ -116,7 +127,7 @@ fbdevInitAccel(ScreenPtr pScreen)
         return FALSE;
     }
 
-    fbdev_glamor_set_glvnd_vendor(pScreen);
+    fbdev_glamor_set_glvnd_vendor(pScreen, renderer, vendor);
 
 #ifdef GLXEXT
     if (!vendor_initialized) {
@@ -198,6 +209,79 @@ fbdev_glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
     return TRUE;
 }
 
+static inline Bool
+fbdev_egl_device_has_extension(const char *dev_ext, const char *ext)
+{
+    if (!dev_ext) {
+        return FALSE;
+    }
+
+    int len = strlen(ext);
+
+    for (;;) {
+        dev_ext = strstr(dev_ext, ext);
+        if (!dev_ext) {
+            return FALSE;
+        }
+        if (dev_ext[len] == '\0' ||
+            dev_ext[len] == ' ') {
+            return TRUE;
+        }
+    }
+
+    /* Unreachable */
+    return FALSE;
+}
+
+static inline const char*
+fbdev_egl_device_get_name(EGLDeviceEXT device)
+{
+/**
+ * For some reason, this isn't part of the epoxy headers.
+ * It is part of EGL/eglext.h, but we can't include that
+ * alongside the epoxy headers.
+ *
+ * See: https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_device_persistent_id.txt
+ * for the spec where this is defined
+ */
+#ifndef EGL_DRIVER_NAME_EXT
+#define EGL_DRIVER_NAME_EXT 0x335E
+#endif
+
+/**
+ * Same for this one
+ *
+ * See: https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_device_query_name.txt
+ * for the spec where this is defined
+ */
+#ifndef EGL_RENDERER_EXT
+#define EGL_RENDERER_EXT 0x335F
+#endif
+
+    const char *dev_ext = eglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
+
+    const char *driver_name = fbdev_egl_device_has_extension(dev_ext, "EGL_EXT_device_persistent_id") ?
+                              eglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT) : NULL;
+
+    if (driver_name) {
+        return driver_name;
+    }
+
+    /* This might seem like overkill, but it's actually needed for the nvidia 470 driver */
+    if (fbdev_egl_device_has_extension(dev_ext, "EGL_EXT_device_query_name")) {
+        const char *egl_renderer = eglQueryDeviceStringEXT(device, EGL_RENDERER_EXT);
+        if (egl_renderer) {
+            return strstr(egl_renderer, "NVIDIA") ? "nvidia" : "mesa";
+        }
+        const char *egl_vendor = eglQueryDeviceStringEXT(device, EGL_VENDOR);
+        if (egl_vendor) {
+            return strstr(egl_vendor, "NVIDIA") ? "nvidia" : "mesa";
+        }
+    }
+
+    return NULL;
+}
+
 /**
  * Find the desired EGLDevice for our config.
  *
@@ -218,21 +302,7 @@ fbdev_glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
 static inline Bool
 fbdev_glamor_egl_device_matches_config(EGLDeviceEXT device, int strict, const char** driver_name)
 {
-/**
- * For some reason, this isn't part of the epoxy headers.
- * It is part of EGL/eglext.h, but we can't include that
- * alongside the expoxy headers.
- *
- * See: https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_device_persistent_id.txt
- * for the spec where this is defined
- */
-#ifndef EGL_DRIVER_NAME_EXT
-#define EGL_DRIVER_NAME_EXT 0x335E
-#endif
-
-    const char *dev_ext = eglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
-    *driver_name = (dev_ext && strstr(dev_ext, "EGL_EXT_device_persistent_id")) ?
-                   eglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT) : NULL;
+    *driver_name = fbdev_egl_device_get_name(device);
 
     if (strict <= 0) {
         return TRUE;
@@ -331,43 +401,52 @@ fbdev_glamor_egl_init_display(FbdevScrPriv *scrpriv)
 static Bool
 fbdev_glamor_egl_try_big_gl_api(FbdevScrPriv *scrpriv)
 {
-    if (eglBindAPI(EGL_OPENGL_API)) {
-        static const EGLint config_attribs_core[] = {
-            EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
-            EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
-            EGL_CONTEXT_MAJOR_VERSION_KHR,
-            GLAMOR_GL_CORE_VER_MAJOR,
-            EGL_CONTEXT_MINOR_VERSION_KHR,
-            GLAMOR_GL_CORE_VER_MINOR,
-            EGL_NONE
-        };
-        static const EGLint config_attribs[] = {
-            EGL_NONE
-        };
+    static const EGLint config_attribs_core[] = {
+        EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
+        EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
+        EGL_CONTEXT_MAJOR_VERSION_KHR,
+        GLAMOR_GL_CORE_VER_MAJOR,
+        EGL_CONTEXT_MINOR_VERSION_KHR,
+        GLAMOR_GL_CORE_VER_MINOR,
+        EGL_NONE
+    };
+    static const EGLint config_attribs[] = {
+        EGL_NONE
+    };
 
+    if (!eglBindAPI(EGL_OPENGL_API)) {
+        return FALSE;
+    }
+
+    scrpriv->ctx = eglCreateContext(scrpriv->display,
+                                    EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT,
+                                    config_attribs_core);
+
+    if (scrpriv->ctx == EGL_NO_CONTEXT) {
         scrpriv->ctx = eglCreateContext(scrpriv->display,
-                                        EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT,
-                                        config_attribs_core);
-
-        if (scrpriv->ctx == EGL_NO_CONTEXT)
-            scrpriv->ctx = eglCreateContext(scrpriv->display,
-                                            EGL_NO_CONFIG_KHR,
-                                            EGL_NO_CONTEXT,
-                                            config_attribs);
+                                        EGL_NO_CONFIG_KHR,
+                                        EGL_NO_CONTEXT,
+                                        config_attribs);
     }
 
-    if (scrpriv->ctx != EGL_NO_CONTEXT) {
-        if (!eglMakeCurrent(scrpriv->display,
-                            EGL_NO_SURFACE, EGL_NO_SURFACE, scrpriv->ctx)) {
-            return FALSE;
-        }
-
-        if (epoxy_gl_version() < 21) {
-            /* Ignoring GL < 2.1, falling back to GLES */
-            eglDestroyContext(scrpriv->display, scrpriv->ctx);
-            scrpriv->ctx = EGL_NO_CONTEXT;
-        }
+    if (scrpriv->ctx == EGL_NO_CONTEXT) {
+        return FALSE;
     }
+
+    if (!eglMakeCurrent(scrpriv->display,
+                        EGL_NO_SURFACE, EGL_NO_SURFACE, scrpriv->ctx)) {
+        eglDestroyContext(scrpriv->display, scrpriv->ctx);
+        scrpriv->ctx = EGL_NO_CONTEXT;
+        return FALSE;
+    }
+
+    if (epoxy_gl_version() < 21) {
+        /* Ignoring GL < 2.1, falling back to GLES */
+        eglDestroyContext(scrpriv->display, scrpriv->ctx);
+        scrpriv->ctx = EGL_NO_CONTEXT;
+        return FALSE;
+    }
+
     return TRUE;
 }
 
@@ -386,12 +465,17 @@ fbdev_glamor_egl_try_gles_api(FbdevScrPriv *scrpriv)
                                     EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT,
                                     config_attribs);
 
-    if (scrpriv->ctx != EGL_NO_CONTEXT) {
-        if (!eglMakeCurrent(scrpriv->display,
-                            EGL_NO_SURFACE, EGL_NO_SURFACE, scrpriv->ctx)) {
-            return FALSE;
-        }
+    if (scrpriv->ctx == EGL_NO_CONTEXT) {
+        return FALSE;
     }
+
+    if (!eglMakeCurrent(scrpriv->display,
+                        EGL_NO_SURFACE, EGL_NO_SURFACE, scrpriv->ctx)) {
+        eglDestroyContext(scrpriv->display, scrpriv->ctx);
+        scrpriv->ctx = EGL_NO_CONTEXT;
+        return FALSE;
+    }
+
     return TRUE;
 }
 
