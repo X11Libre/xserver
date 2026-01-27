@@ -71,7 +71,7 @@ print_input_features(int scrnIndex, struct disp_features *c,
     if (DIGITAL(c->input_type)) {
         xf86DrvMsg(scrnIndex, X_INFO, "Digital Display Input\n");
         if (v->revision == 2 || v->revision == 3) {
-            if (DFP1(c->input_dfp))
+            if (c->input_dfp)
                 xf86DrvMsg(scrnIndex, X_INFO, "DFP 1.x compatible TMDS\n");
         }
         else if (v->revision >= 4) {
