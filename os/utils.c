@@ -231,11 +231,11 @@ GetTimeInMillis(void)
             clockid = ~0L;
     }
     if (clockid != ~0L && clock_gettime(clockid, &tp) == 0)
-        return (tp.tv_sec * 1000) + (tp.tv_nsec / 1000000L);
+        return ((CARD64)tp.tv_sec * 1000) + (tp.tv_nsec / 1000000L);
 #endif
 
     X_GETTIMEOFDAY(&tv);
-    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+    return ((CARD64)tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 }
 
 CARD64
