@@ -51,6 +51,12 @@
 #define DPMS_SUSPEND(x) (x & 0x02)
 #define DPMS_OFF(x) (x & 0x01)
 
+/* input voltage level */
+#define V070 0                  /* 0.700V/0.300V */
+#define V071 1                  /* 0.714V/0.286V */
+#define V100 2                  /* 1.000V/0.400V */
+#define V007 3                  /* 0.700V/0.000V */
+
 #define STD_COLOR_SPACE(x) (x & 0x4)
 #define GFT_SUPPORTED(x) (x & 0x1)
 

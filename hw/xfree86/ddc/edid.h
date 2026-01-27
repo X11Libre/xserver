@@ -293,12 +293,6 @@
 /* input type */
 #define DIGITAL(x) x
 
-/* input voltage level */
-#define V070 0                  /* 0.700V/0.300V */
-#define V071 1                  /* 0.714V/0.286V */
-#define V100 2                  /* 1.000V/0.400V */
-#define V007 3                  /* 0.700V/0.000V */
-
 /* Signal level setup */
 #define SIG_SETUP(x) (x)
 
