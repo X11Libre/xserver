@@ -218,8 +218,6 @@
 #define MAX_CLOCK _MAX_CLOCK(c)
 #define _DEFAULT_GTF(x) (x[10] == 0x00)
 #define DEFAULT_GTF _DEFAULT_GTF(c)
-#define _RANGE_LIMITS_ONLY(x) (x[10] == 0x01)
-#define RANGE_LIMITS_ONLY _RANGE_LIMITS_ONLY(c)
 #define _HAVE_2ND_GTF(x) (x[10] == 0x02)
 #define HAVE_2ND_GTF _HAVE_2ND_GTF(c)
 #define _F_2ND_GTF(x) (x[12] * 2)
