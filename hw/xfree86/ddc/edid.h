@@ -522,11 +522,6 @@ extern _X_EXPORT xf86MonPtr ConfiguredMonitor;
 #define CEA_VENDOR_BLK  3
 #define CEA_SPEAKER_ALLOC_BLK 4
 #define CEA_VESA_DTC_BLK 5
-#define VENDOR_SUPPORT_AI(x) ((x) >> 7)
-#define VENDOR_SUPPORT_DC_48bit(x)  ( ( (x) >> 6) & 0x01)
-#define VENDOR_SUPPORT_DC_36bit(x)  ( ( (x) >> 5) & 0x01)
-#define VENDOR_SUPPORT_DC_30bit(x)  ( ( (x) >> 4) & 0x01)
-#define VENDOR_SUPPORT_DC_Y444(x)   ( ( (x) >> 3) & 0x01)
 #define VENDOR_LATENCY_PRESENT(x)     ( (x) >> 7)
 #define VENDOR_LATENCY_PRESENT_I(x) ( ( (x) >> 6) & 0x01)
 #define HDMI_MAX_TMDS_UNIT   (5000)
