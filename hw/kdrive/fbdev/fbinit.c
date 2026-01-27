@@ -76,6 +76,8 @@ ddxUseMsg(void)
         ("-force-gl        Force glamor to only use GL contexts\n");
     ErrorF
         ("-force-es        Force glamor to only use GLES contexts\n");
+    ErrorF
+        ("-noxv            Disable X-Video support\n");
     ErrorF("\n");
 }
 
@@ -115,6 +117,13 @@ ddxProcessArgument(int argc, char **argv, int i)
         force_es = TRUE;
         return 1;
     }
+
+#ifdef XV
+    if (!strcmp(argv[i], "-noxv")) {
+        fbXVAllowed = FALSE;
+        return 1;
+    }
+#endif
 #endif
 
     return KdProcessArgument(argc, argv, i);

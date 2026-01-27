@@ -66,6 +66,9 @@ extern Bool fbDisableShadow;
 extern const char *fbdev_glvnd_provider;
 extern Bool es_allowed;
 extern Bool force_es;
+#ifdef XV
+extern Bool fbXVAllowed;
+#endif
 #endif
 
 Bool fbdevCardInit(KdCardInfo * card);
