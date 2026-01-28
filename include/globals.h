@@ -12,4 +12,6 @@ extern _X_EXPORT int defaultColorVisualClass;
 
 extern _X_EXPORT char *SeatId;
 
+extern _X_EXPORT Bool globalIsolateKeyboard;
+
 #endif                          /* !_XSERV_GLOBAL_H_ */
