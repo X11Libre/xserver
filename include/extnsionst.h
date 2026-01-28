@@ -79,10 +79,6 @@ typedef void (*EventSwapPtr) (xEvent *, xEvent *);
 
 extern _X_EXPORT EventSwapPtr EventSwapVector[128];
 
-extern _X_EXPORT void
-NotImplemented(                 /* FIXME: this may move to another file... */
-                  xEvent *, xEvent *) _X_NORETURN;
-
 extern _X_EXPORT ExtensionEntry *
 AddExtension(const char * /*name */ ,
              int /*NumEvents */ ,
@@ -95,7 +91,5 @@ AddExtension(const char * /*name */ ,
 
 extern _X_EXPORT ExtensionEntry *
 CheckExtension(const char *extname);
-extern _X_EXPORT ExtensionEntry *
-GetExtensionEntry(int major);
 
 #endif                          /* EXTENSIONSTRUCT_H */
