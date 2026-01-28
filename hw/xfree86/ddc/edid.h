@@ -18,9 +18,6 @@
 
 /* read complete EDID record */
 #define EDID1_LEN 128
-#define BITS_PER_BYTE 9
-#define NUM BITS_PER_BYTE*EDID1_LEN
-#define HEADER 6
 
 #define STD_TIMINGS 8
 #define DET_TIMINGS 4

@@ -24,6 +24,10 @@
 
 #define RETRIES 4
 
+#define HEADER 6
+#define BITS_PER_BYTE 9
+#define NUM BITS_PER_BYTE*EDID1_LEN
+
 typedef enum {
     DDCOPT_NODDC1,
     DDCOPT_NODDC2,
