@@ -36,11 +36,6 @@
 #define GTF_SUPPORTED(x) (x & 0x1)
 #define CVT_SUPPORTED(x) (x & 0x1)
 
-/* detailed timing misc */
-#define IS_RIGHT_STEREO(x) (x & 0x01)
-#define IS_LEFT_STEREO(x) (x & 0x02)
-#define IS_4WAY_STEREO(x) (x & 0x03)
-
 struct vendor {
     char name[4];
     int prod_id;

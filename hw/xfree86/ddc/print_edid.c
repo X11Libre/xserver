@@ -59,6 +59,11 @@
 
 #define EDID_WIDTH	16
 
+/* detailed timing misc */
+#define IS_RIGHT_STEREO(x) (x & 0x01)
+#define IS_LEFT_STEREO(x) (x & 0x02)
+#define IS_4WAY_STEREO(x) (x & 0x03)
+
 static void
 print_vendor(int scrnIndex, struct vendor *c)
 {
