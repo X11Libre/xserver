@@ -65,24 +65,6 @@ SOFTWARE.
 #define N2dChars(pfont)	(N1dChars(pfont) * \
 			 (FONTLASTROW(pfont) - FONTFIRSTROW(pfont) + 1))
 
-#ifndef GLYPHPADBYTES
-#define GLYPHPADBYTES -1
-#endif
-
-#if GLYPHPADBYTES == 0 || GLYPHPADBYTES == 1
-#define	GLYPHWIDTHBYTESPADDED(pci)	(GLYPHWIDTHBYTES(pci))
-#endif
-
-#if GLYPHPADBYTES == 2
-#define	GLYPHWIDTHBYTESPADDED(pci)	((GLYPHWIDTHBYTES(pci)+1) & ~0x1)
-#endif
-
-#if GLYPHPADBYTES == 4
 #define	GLYPHWIDTHBYTESPADDED(pci)	((GLYPHWIDTHBYTES(pci)+3) & ~0x3)
-#endif
-
-#if GLYPHPADBYTES == 8          /* for a cray? */
-#define	GLYPHWIDTHBYTESPADDED(pci)	((GLYPHWIDTHBYTES(pci)+7) & ~0x7)
-#endif
 
 #endif                          /* DIXFONTSTRUCT_H */
