@@ -158,6 +158,8 @@ option('docs-pdf', type: 'combo', choices: ['true', 'false', 'auto'], value: 'au
 # optional xfree86 DDX drivers
 option('xf86-input-inputtest', type: 'boolean', value: true,
        description: 'Test input driver support on XLibre')
+option('xf86-input-null', type: 'boolean', value: true,
+       description: 'Null input driver')
 
 # legacy nvidia driver quirks
 option('legacy_nvidia_padding', type: 'boolean', value: false,
