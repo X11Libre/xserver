@@ -77,8 +77,7 @@ ProcXSetDeviceMode(ClientPtr client)
     DeviceIntPtr dev;
     int rc;
 
-    REQUEST(xSetDeviceModeReq);
-    REQUEST_SIZE_MATCH(xSetDeviceModeReq);
+    X_REQUEST_HEAD_STRUCT(xSetDeviceModeReq);
 
     xSetDeviceModeReply reply = {
         .RepType = X_SetDeviceMode,

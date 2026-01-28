@@ -88,8 +88,7 @@ ProcXOpenDevice(ClientPtr client)
     int status = Success;
     DeviceIntPtr dev;
 
-    REQUEST(xOpenDeviceReq);
-    REQUEST_SIZE_MATCH(xOpenDeviceReq);
+    X_REQUEST_HEAD_STRUCT(xOpenDeviceReq);
 
     status = dixLookupDevice(&dev, stuff->deviceid, client, DixUseAccess);
 

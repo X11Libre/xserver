@@ -58,6 +58,7 @@ SOFTWARE.
 
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 /***********************************************************************
@@ -69,11 +70,8 @@ SOFTWARE.
 int
 ProcXAllowDeviceEvents(ClientPtr client)
 {
-    REQUEST(xAllowDeviceEventsReq);
-    REQUEST_SIZE_MATCH(xAllowDeviceEventsReq);
-
-    if (client->swapped)
-        swapl(&stuff->time);
+    X_REQUEST_HEAD_STRUCT(xAllowDeviceEventsReq);
+    X_REQUEST_FIELD_CARD32(time);
 
     TimeStamp time;
     DeviceIntPtr thisdev;
