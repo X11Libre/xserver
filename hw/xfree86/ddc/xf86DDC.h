@@ -42,4 +42,17 @@ extern _X_EXPORT xf86MonPtr xf86InterpretEEDID(int screenIndex, uint8_t * block)
 
 extern _X_EXPORT Bool xf86SetDDCproperties(ScrnInfoPtr pScreen, xf86MonPtr DDC);
 
+/*
+ * parse EDID block and return a newly allocated xf86Monitor
+ *
+ * the data block will be copied into the structure (actually right after the struct)
+ * and thus automatically be freed when the returned struct is freed.
+ *
+ * @param screenIndex   index of the screen, will be recorded in the xf86Monitor
+ * @param block         the EDID block to parse
+ * @param size          size of the EDID block (128 or larger for extended types)
+ * @return              newly allocated xf86MonRec or NULL on failure
+ */
+_X_EXPORT xf86MonPtr xf86ParseEDID(ScrnInfoPtr pScreen, uint8_t *block, size_t size);
+
 #endif
