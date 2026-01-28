@@ -211,18 +211,6 @@ typedef struct {
 
 extern _X_EXPORT xf86MonPtr ConfiguredMonitor;
 
-#define EXT_TAG 0
-#define EXT_REV 1
-#define CEA_EXT   0x02
-#define VTB_EXT   0x10
-#define DI_EXT    0x40
-#define LS_EXT    0x50
-#define MI_EXT    0x60
-
-#define CEA_EXT_MIN_DATA_OFFSET 4
-#define CEA_EXT_MAX_DATA_OFFSET 127
-#define CEA_EXT_DET_TIMING_NUM 6
-
 #define IEEE_ID_HDMI    0x000C03
 #define CEA_AUDIO_BLK   1
 #define CEA_VIDEO_BLK   2
