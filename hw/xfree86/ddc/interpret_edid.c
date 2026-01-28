@@ -38,6 +38,18 @@
 #include "xf86_OSproc.h"
 #include "xf86DDC_priv.h"
 
+#define EXT_TAG   0x00
+#define EXT_REV   0x01
+#define CEA_EXT   0x02
+#define VTB_EXT   0x10
+#define DI_EXT    0x40
+#define LS_EXT    0x50
+#define MI_EXT    0x60
+
+#define CEA_EXT_MIN_DATA_OFFSET 4
+#define CEA_EXT_MAX_DATA_OFFSET 127
+#define CEA_EXT_DET_TIMING_NUM 6
+
 struct cea_ext_body {
     uint8_t tag;
     uint8_t rev;
