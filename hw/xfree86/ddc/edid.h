@@ -22,12 +22,6 @@
 /* input type */
 #define DIGITAL(x) x
 
-/* sync characteristics */
-#define SEP_SYNC(x) (x & 0x08)
-#define COMP_SYNC(x) (x & 0x04)
-#define SYNC_O_GREEN(x) (x & 0x02)
-#define SYNC_SERR(x) (x & 0x01)
-
 /* Msc stuff EDID Ver > 1.1 */
 #define PREFERRED_TIMING_MODE(x) (x & 0x2)
 #define GTF_SUPPORTED(x) (x & 0x1)
