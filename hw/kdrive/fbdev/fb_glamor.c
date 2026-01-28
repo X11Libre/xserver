@@ -28,6 +28,8 @@ Bool fbGlamorAllowed = TRUE;
 Bool fbForceGlamor = FALSE;
 Bool fbXVAllowed = TRUE;
 
+#define ARR_SIZE(x) (sizeof(x) / sizeof(*(x)))
+
 static void
 fbdev_glamor_egl_cleanup(FbdevScrPriv *scrpriv)
 {
@@ -191,7 +193,7 @@ fbdev_glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
          return FALSE;
     }
 
-    if (!eglQueryDevicesEXT(max_devices, *devices, num_devices)) {
+    if (!eglQueryDevicesEXT(max_devices, *devices, num_devices) || *num_devices == 0) {
          free(*devices);
          *devices = NULL;
          *num_devices = 0;
@@ -398,6 +400,70 @@ fbdev_glamor_egl_init_display(FbdevScrPriv *scrpriv)
     return FALSE;
 }
 
+static EGLContext
+fbdev_glamor_egl_create_context(EGLDisplay display,
+                                EGLConfig *configs, int num_configs,
+                                const EGLint **attrib_lists, int num_attr_lists)
+{
+    EGLConfig no_config = EGL_NO_CONFIG_KHR;
+    EGLContext ctx = EGL_NO_CONTEXT;
+
+    if (!configs || !num_configs) {
+        configs = &no_config;
+        num_configs = 1;
+    }
+
+    for (int i = 0; i < num_configs; i++) {
+        for (int j = 0; j < num_attr_lists; j++) {
+            ctx = eglCreateContext(display, configs[i],
+                                   EGL_NO_CONTEXT, attrib_lists[j]);
+            if (ctx != EGL_NO_CONTEXT) {
+                return ctx;
+            }
+        }
+    }
+
+    return EGL_NO_CONTEXT;
+}
+
+static void
+fbdev_glamor_egl_chose_configs(EGLDisplay display, const EGLint *attrib_list,
+                               EGLConfig **configs, EGLint *num_configs)
+{
+    EGLint max_configs = 0;
+
+    *configs = NULL;
+    *num_configs = 0;
+
+    if (!eglChooseConfig(display, attrib_list, NULL, 0, &max_configs)) {
+        return;
+    }
+
+    *configs = calloc(max_configs + 1, sizeof(EGLConfig));
+    if (*configs == NULL) {
+        return;
+    }
+
+    (*configs)[0] = EGL_NO_CONFIG_KHR;
+
+    if (!eglChooseConfig(display, attrib_list, &(*configs)[1], max_configs, num_configs) || *num_configs == 0) {
+        free(*configs);
+        *configs = NULL;
+        *num_configs = 0;
+    }
+
+    (*num_configs)++;
+    max_configs++;
+
+    if (*num_configs < max_configs) {
+        /* Shouldn't happen */
+        void *tmp = realloc(*configs, *num_configs * sizeof(EGLConfig));
+        if (tmp) {
+            *configs = tmp;
+        }
+    }
+}
+
 static Bool
 fbdev_glamor_egl_try_big_gl_api(FbdevScrPriv *scrpriv)
 {
@@ -414,20 +480,34 @@ fbdev_glamor_egl_try_big_gl_api(FbdevScrPriv *scrpriv)
         EGL_NONE
     };
 
+    static const EGLint* ctx_attrib_lists[] =
+        { config_attribs_core, config_attribs };
+
+    static const EGLint config_attrib_list[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+        EGL_CONFORMANT, EGL_OPENGL_BIT,
+        EGL_SURFACE_TYPE, EGL_DONT_CARE,
+        EGL_NONE
+    };
+
+    EGLConfig *configs = NULL;
+    EGLint num_configs = 0;
+
     if (!eglBindAPI(EGL_OPENGL_API)) {
         return FALSE;
     }
 
-    scrpriv->ctx = eglCreateContext(scrpriv->display,
-                                    EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT,
-                                    config_attribs_core);
+    fbdev_glamor_egl_chose_configs(scrpriv->display, config_attrib_list,
+                                   &configs, &num_configs);
 
-    if (scrpriv->ctx == EGL_NO_CONTEXT) {
-        scrpriv->ctx = eglCreateContext(scrpriv->display,
-                                        EGL_NO_CONFIG_KHR,
-                                        EGL_NO_CONTEXT,
-                                        config_attribs);
-    }
+    scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
+                                                   configs, num_configs,
+                                                   ctx_attrib_lists,
+                                                   ARR_SIZE(ctx_attrib_lists));
+
+    free(configs);
+    configs = NULL;
+    num_configs = 0;
 
     if (scrpriv->ctx == EGL_NO_CONTEXT) {
         return FALSE;
@@ -457,13 +537,35 @@ fbdev_glamor_egl_try_gles_api(FbdevScrPriv *scrpriv)
         EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
     };
+
+    static const EGLint* ctx_attrib_lists[] =
+        { config_attribs };
+
+    static const EGLint config_attrib_list[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
+        EGL_SURFACE_TYPE, EGL_DONT_CARE,
+        EGL_NONE
+    };
+
     if (!eglBindAPI(EGL_OPENGL_ES_API)) {
         return FALSE;
     }
 
-    scrpriv->ctx = eglCreateContext(scrpriv->display,
-                                    EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT,
-                                    config_attribs);
+    EGLConfig *configs = NULL;
+    EGLint num_configs = 0;
+
+    fbdev_glamor_egl_chose_configs(scrpriv->display, config_attrib_list,
+                                   &configs, &num_configs);
+
+    scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
+                                                   configs, num_configs,
+                                                   ctx_attrib_lists,
+                                                   ARR_SIZE(ctx_attrib_lists));
+
+    free(configs);
+    configs = NULL;
+    num_configs = 0;
 
     if (scrpriv->ctx == EGL_NO_CONTEXT) {
         return FALSE;
