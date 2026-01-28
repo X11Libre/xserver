@@ -277,4 +277,7 @@
 
 #define _NEXT_DT_MD_SECTION(x) (x = (x + DET_TIMING_INFO_LEN))
 
+/* Msc stuff EDID Ver > 1.1 */
+#define CVT_SUPPORTED(x) (x & 0x1)
+
 #endif /* _XFREE86_EDID_PRIV_H_ */
