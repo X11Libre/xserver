@@ -363,7 +363,7 @@ print_detailed_timings(int scrnIndex, struct detailed_timings *t)
                    t->v_sync_off + t->v_sync_width + t->v_active,
                    t->v_active + t->v_blanking);
         xf86ErrorF("v_border: %i\n", t->v_border);
-        if (IS_STEREO(t->stereo)) {
+        if (t->stereo) {
             xf86DrvMsg(scrnIndex, X_INFO, "Stereo: ");
             if (IS_RIGHT_STEREO(t->stereo)) {
                 if (!t->stereo_1)

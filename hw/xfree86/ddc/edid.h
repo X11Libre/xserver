@@ -40,7 +40,6 @@
 #define CVT_SUPPORTED(x) (x & 0x1)
 
 /* detailed timing misc */
-#define IS_STEREO(x)  (x)
 #define IS_RIGHT_STEREO(x) (x & 0x01)
 #define IS_LEFT_STEREO(x) (x & 0x02)
 #define IS_4WAY_STEREO(x) (x & 0x03)
