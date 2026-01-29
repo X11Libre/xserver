@@ -23,10 +23,7 @@
  *
  * print_edid.c: print out all information retrieved from display device
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "misc.h"
 #include "xf86.h"

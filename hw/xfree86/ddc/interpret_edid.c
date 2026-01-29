@@ -23,10 +23,7 @@
  *
  * interpret_edid.c: interpret a primary EDID block
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <stdint.h>
 #include <string.h>

@@ -9,10 +9,7 @@
  * introduces extension blocks.  EDID is the old display identification
  * block, DisplayID is the new one.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "os/osdep.h"
 
