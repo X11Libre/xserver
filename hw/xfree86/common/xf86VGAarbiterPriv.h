@@ -23,13 +23,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-
 #ifndef XSERVER_XFREE86_XF86VGAARBITERPRIV_H
 #define XSERVER_XFREE86_XF86VGAARBITERPRIV_H
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #include "misc.h"
 #include "xf86.h"

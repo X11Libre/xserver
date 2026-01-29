@@ -41,10 +41,7 @@
  *      Egbert Eich <eich@XFree86.Org>
  *      ... and others
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <sys/stat.h>
 #include <sys/types.h>

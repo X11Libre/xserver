@@ -22,10 +22,7 @@
  * Author:  Alan Hourihane, alanh@fairlite.demon.co.uk
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <errno.h>
 

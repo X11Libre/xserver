@@ -25,10 +25,7 @@
 /*
  * This file contains the interfaces to the bus-specific code
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #ifdef XSERVER_PLATFORM_BUS
 #include <errno.h>

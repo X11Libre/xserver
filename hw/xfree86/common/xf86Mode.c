@@ -79,10 +79,7 @@
  *
  * This file includes helper functions for mode related things.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/X.h>
 

@@ -33,10 +33,7 @@
  * This file includes the helper functions that the server provides for
  * different drivers.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <sys/stat.h>
 #include <X11/X.h>

@@ -24,13 +24,10 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
 /*
  * This file contains the interfaces to the bus-specific code
  */
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <ctype.h>
 #include <stdlib.h>

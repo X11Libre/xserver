@@ -30,13 +30,8 @@
  * Everything contained here is private to xf86Bus.c.  In particular the
  * video drivers must not include this file.
  */
-
 #ifndef _XF86_BUS_H
 #define _XF86_BUS_H
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #include "xf86pciBus.h"
 #if defined(__sparc__) || defined(__sparc)
@@ -84,4 +79,5 @@ void xf86RemoveDevFromEntity(int entityIndex, GDevPtr dev);
 Bool xf86CallDriverProbe(struct _DriverRec *drv, Bool detect_only);
 
 Bool xf86CheckSlot(const void *ptr, BusType type);
+
 #endif                          /* _XF86_BUS_H */

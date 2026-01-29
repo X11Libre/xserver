@@ -35,19 +35,11 @@
 #ifndef _XF86_H
 #define _XF86_H
 
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#elif HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #include "xf86str.h"
 #include "xf86Opt.h"
 #include <X11/Xfuncproto.h>
 #include <stdarg.h>
-#ifdef RANDR
 #include <X11/extensions/randr.h>
-#endif
 
 /* General parameters */
 extern _X_EXPORT Bool xorgHWAccess;
