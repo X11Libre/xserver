@@ -400,32 +400,6 @@ fbdev_glamor_egl_init_display(FbdevScrPriv *scrpriv)
     return FALSE;
 }
 
-static EGLContext
-fbdev_glamor_egl_create_context(EGLDisplay display,
-                                EGLConfig *configs, int num_configs,
-                                const EGLint **attrib_lists, int num_attr_lists)
-{
-    EGLConfig no_config = EGL_NO_CONFIG_KHR;
-    EGLContext ctx = EGL_NO_CONTEXT;
-
-    if (!configs || !num_configs) {
-        configs = &no_config;
-        num_configs = 1;
-    }
-
-    for (int i = 0; i < num_configs; i++) {
-        for (int j = 0; j < num_attr_lists; j++) {
-            ctx = eglCreateContext(display, configs[i],
-                                   EGL_NO_CONTEXT, attrib_lists[j]);
-            if (ctx != EGL_NO_CONTEXT) {
-                return ctx;
-            }
-        }
-    }
-
-    return EGL_NO_CONTEXT;
-}
-
 static void
 fbdev_glamor_egl_chose_configs(EGLDisplay display, const EGLint *attrib_list,
                                EGLConfig **configs, EGLint *num_configs)
@@ -459,6 +433,44 @@ fbdev_glamor_egl_chose_configs(EGLDisplay display, const EGLint *attrib_list,
     }
 }
 
+static EGLContext
+fbdev_glamor_egl_create_context(EGLDisplay display,
+                                const EGLint *config_attrib_list,
+                                const EGLint **ctx_attrib_lists, int num_attr_lists)
+{
+    EGLConfig *configs = NULL;
+    EGLint num_configs = 0;
+
+    EGLContext ctx = EGL_NO_CONTEXT;
+
+    /* Try creating a no-config context, maybe we can skip all the config stuff */
+    /* if (epoxy_has_egl_extension(display, "EGL_KHR_no_config_context")) */
+    for (int j = 0; j < num_attr_lists; j++) {
+        ctx = eglCreateContext(display, EGL_NO_CONFIG_KHR,
+                               EGL_NO_CONTEXT, ctx_attrib_lists[j]);
+        if (ctx != EGL_NO_CONTEXT) {
+            return ctx;
+        }
+    }
+
+    fbdev_glamor_egl_chose_configs(display, config_attrib_list,
+                                   &configs, &num_configs);
+
+    for (int i = 0; i < num_configs; i++) {
+        for (int j = 0; j < num_attr_lists; j++) {
+            ctx = eglCreateContext(display, configs[i],
+                                   EGL_NO_CONTEXT, ctx_attrib_lists[j]);
+            if (ctx != EGL_NO_CONTEXT) {
+                free(configs);
+                return ctx;
+            }
+        }
+    }
+
+    free(configs);
+    return EGL_NO_CONTEXT;
+}
+
 static Bool
 fbdev_glamor_egl_try_big_gl_api(FbdevScrPriv *scrpriv)
 {
@@ -485,31 +497,14 @@ fbdev_glamor_egl_try_big_gl_api(FbdevScrPriv *scrpriv)
         EGL_NONE
     };
 
-    EGLConfig *configs = NULL;
-    EGLint num_configs = 0;
-
     if (!eglBindAPI(EGL_OPENGL_API)) {
         return FALSE;
     }
 
-    /* Try creating a no-config context, maybe we can skip all the config stuff */
     scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
-                                                   NULL, 0,
+                                                   config_attrib_list,
                                                    ctx_attrib_lists,
                                                    ARR_SIZE(ctx_attrib_lists));
-    if (scrpriv->ctx == EGL_NO_CONTEXT) {
-        fbdev_glamor_egl_chose_configs(scrpriv->display, config_attrib_list,
-                                       &configs, &num_configs);
-
-        scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
-                                                       configs, num_configs,
-                                                       ctx_attrib_lists,
-                                                       ARR_SIZE(ctx_attrib_lists));
-    }
-
-    free(configs);
-    configs = NULL;
-    num_configs = 0;
 
     if (scrpriv->ctx == EGL_NO_CONTEXT) {
         return FALSE;
@@ -554,28 +549,10 @@ fbdev_glamor_egl_try_gles_api(FbdevScrPriv *scrpriv)
         return FALSE;
     }
 
-    EGLConfig *configs = NULL;
-    EGLint num_configs = 0;
-
-    /* Try creating a no-config context, maybe we can skip all the config stuff */
     scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
-                                                   NULL, 0,
+                                                   config_attrib_list,
                                                    ctx_attrib_lists,
                                                    ARR_SIZE(ctx_attrib_lists));
-
-    if (scrpriv->ctx == EGL_NO_CONTEXT) {
-        fbdev_glamor_egl_chose_configs(scrpriv->display, config_attrib_list,
-                                       &configs, &num_configs);
-
-        scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
-                                                       configs, num_configs,
-                                                       ctx_attrib_lists,
-                                                       ARR_SIZE(ctx_attrib_lists));
-    }
-
-    free(configs);
-    configs = NULL;
-    num_configs = 0;
 
     if (scrpriv->ctx == EGL_NO_CONTEXT) {
         return FALSE;
