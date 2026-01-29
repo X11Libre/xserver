@@ -3,13 +3,8 @@
  *   execute BIOS int 10h calls in x86 real mode environment
  *                 Copyright 1999 Egbert Eich
  */
-
 #ifndef XF86X86EMU_H_
 #define XF86X86EMU_H_
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #include <x86emu.h>
 
