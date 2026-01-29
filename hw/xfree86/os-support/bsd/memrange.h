@@ -5,10 +5,6 @@
 #ifndef _MEMRANGE_H
 #define _MEMRANGE_H
 
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
-
 /* Memory range attributes */
 #define MDF_UNCACHEABLE		(1<<0)  /* region not cached */
 #define MDF_WRITECOMBINE	(1<<1)  /* region supports "write combine"

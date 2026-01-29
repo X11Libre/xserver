@@ -23,10 +23,7 @@
  * Authors: Mark Hindley <mark@hindley.org.uk>
  *          Ralph Ronnquist <ralph.ronnquist@gmail.com>
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <stdio.h>
 #include <string.h>

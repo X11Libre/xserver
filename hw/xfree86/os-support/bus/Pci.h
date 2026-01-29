@@ -103,9 +103,7 @@
 #ifndef _PCI_H
 #define _PCI_H 1
 
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/Xdefs.h>
 

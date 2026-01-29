@@ -28,10 +28,6 @@
 #ifndef _INT10DEFINES_H_
 #define _INT10DEFINES_H_ 1
 
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
-
 #ifdef _VM86_LINUX
 
 #include <asm/vm86.h>
