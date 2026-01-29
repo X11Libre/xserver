@@ -226,26 +226,4 @@ struct cea_audio_block {
     struct cea_audio_block_descriptor descriptor[10];
 };
 
-struct cea_vendor_block_hdmi {
-    uint8_t portB:4;
-    uint8_t portA:4;
-    uint8_t portD:4;
-    uint8_t portC:4;
-    uint8_t support_flags;
-    uint8_t max_tmds_clock;
-    uint8_t latency_present;
-    uint8_t video_latency;
-    uint8_t audio_latency;
-    uint8_t interlaced_video_latency;
-    uint8_t interlaced_audio_latency;
-};
-
-struct cea_vendor_block {
-    unsigned char ieee_id[3];
-    union {
-        struct cea_vendor_block_hdmi hdmi;
-        /* any other vendor blocks we know about */
-    };
-};
-
 #endif                          /* _EDID_H_ */

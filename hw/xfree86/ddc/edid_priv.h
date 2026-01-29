@@ -296,6 +296,28 @@ struct cea_speaker_block {
     uint8_t ResvByte;
 };
 
+struct cea_vendor_block_hdmi {
+    uint8_t portB:4;
+    uint8_t portA:4;
+    uint8_t portD:4;
+    uint8_t portC:4;
+    uint8_t support_flags;
+    uint8_t max_tmds_clock;
+    uint8_t latency_present;
+    uint8_t video_latency;
+    uint8_t audio_latency;
+    uint8_t interlaced_video_latency;
+    uint8_t interlaced_audio_latency;
+};
+
+struct cea_vendor_block {
+    unsigned char ieee_id[3];
+    union {
+        struct cea_vendor_block_hdmi hdmi;
+        /* any other vendor blocks we know about */
+    };
+};
+
 struct cea_data_block {
     uint8_t len:5;
     uint8_t tag:3;
