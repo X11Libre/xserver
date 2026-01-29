@@ -27,9 +27,7 @@
  * information into a list of modes, including applying monitor-specific
  * quirks to fix broken EDID data.
  */
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "xf86.h"
 #include "xf86DDC_priv.h"
