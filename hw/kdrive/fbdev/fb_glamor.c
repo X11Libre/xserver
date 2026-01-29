@@ -435,25 +435,20 @@ fbdev_glamor_egl_chose_configs(EGLDisplay display, const EGLint *attrib_list,
     *configs = NULL;
     *num_configs = 0;
 
-    if (!eglChooseConfig(display, attrib_list, NULL, 0, &max_configs)) {
+    if (!eglChooseConfig(display, attrib_list, NULL, 0, &max_configs) || max_configs == 0) {
         return;
     }
 
-    *configs = calloc(max_configs + 1, sizeof(EGLConfig));
+    *configs = calloc(max_configs, sizeof(EGLConfig));
     if (*configs == NULL) {
         return;
     }
 
-    (*configs)[0] = EGL_NO_CONFIG_KHR;
-
-    if (!eglChooseConfig(display, attrib_list, &(*configs)[1], max_configs, num_configs) || *num_configs == 0) {
+    if (!eglChooseConfig(display, attrib_list, *configs, max_configs, num_configs) || *num_configs == 0) {
         free(*configs);
         *configs = NULL;
         *num_configs = 0;
     }
-
-    (*num_configs)++;
-    max_configs++;
 
     if (*num_configs < max_configs) {
         /* Shouldn't happen */
@@ -499,7 +494,7 @@ fbdev_glamor_egl_try_big_gl_api(FbdevScrPriv *scrpriv)
 
     /* Try creating a no-config context, maybe we can skip all the config stuff */
     scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
-                                                   NULL, 1,
+                                                   NULL, 0,
                                                    ctx_attrib_lists,
                                                    ARR_SIZE(ctx_attrib_lists));
     if (scrpriv->ctx == EGL_NO_CONTEXT) {
@@ -564,7 +559,7 @@ fbdev_glamor_egl_try_gles_api(FbdevScrPriv *scrpriv)
 
     /* Try creating a no-config context, maybe we can skip all the config stuff */
     scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
-                                                   NULL, 1,
+                                                   NULL, 0,
                                                    ctx_attrib_lists,
                                                    ARR_SIZE(ctx_attrib_lists));
 
