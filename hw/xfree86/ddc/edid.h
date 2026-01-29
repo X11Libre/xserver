@@ -264,15 +264,4 @@ struct cea_speaker_block {
     uint8_t ResvByte;
 };
 
-struct cea_data_block {
-    uint8_t len:5;
-    uint8_t tag:3;
-    union {
-        struct cea_video_block video;
-        struct cea_audio_block audio;
-        struct cea_vendor_block vendor;
-        struct cea_speaker_block speaker;
-    } u;
-};
-
 #endif                          /* _EDID_H_ */

@@ -280,4 +280,15 @@
 /* Msc stuff EDID Ver > 1.1 */
 #define CVT_SUPPORTED(x) (x & 0x1)
 
+struct cea_data_block {
+    uint8_t len:5;
+    uint8_t tag:3;
+    union {
+        struct cea_video_block video;
+        struct cea_audio_block audio;
+        struct cea_vendor_block vendor;
+        struct cea_speaker_block speaker;
+    } u;
+};
+
 #endif /* _XFREE86_EDID_PRIV_H_ */
