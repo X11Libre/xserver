@@ -7,6 +7,7 @@
 #define _XSERVER_XF86_DDC_PRIV_H
 
 #include "xf86DDC.h"
+#include "edid_priv.h"
 
 /*
  * Quirks to work around broken EDID data from various monitors.

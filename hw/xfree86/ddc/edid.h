@@ -214,16 +214,4 @@ extern _X_EXPORT xf86MonPtr ConfiguredMonitor;
 #define VENDOR_LATENCY_PRESENT_I(x) ( ( (x) >> 6) & 0x01)
 #define HDMI_MAX_TMDS_UNIT   (5000)
 
-struct cea_video_block {
-    uint8_t video_code;
-};
-
-struct cea_audio_block_descriptor {
-    uint8_t audio_code[3];
-};
-
-struct cea_audio_block {
-    struct cea_audio_block_descriptor descriptor[10];
-};
-
 #endif                          /* _EDID_H_ */

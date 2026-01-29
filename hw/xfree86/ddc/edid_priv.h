@@ -318,6 +318,18 @@ struct cea_vendor_block {
     };
 };
 
+struct cea_video_block {
+    uint8_t video_code;
+};
+
+struct cea_audio_block_descriptor {
+    uint8_t audio_code[3];
+};
+
+struct cea_audio_block {
+    struct cea_audio_block_descriptor descriptor[10];
+};
+
 struct cea_data_block {
     uint8_t len:5;
     uint8_t tag:3;
