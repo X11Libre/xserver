@@ -204,14 +204,4 @@ typedef struct {
 
 extern _X_EXPORT xf86MonPtr ConfiguredMonitor;
 
-#define IEEE_ID_HDMI    0x000C03
-#define CEA_AUDIO_BLK   1
-#define CEA_VIDEO_BLK   2
-#define CEA_VENDOR_BLK  3
-#define CEA_SPEAKER_ALLOC_BLK 4
-#define CEA_VESA_DTC_BLK 5
-#define VENDOR_LATENCY_PRESENT(x)     ( (x) >> 7)
-#define VENDOR_LATENCY_PRESENT_I(x) ( ( (x) >> 6) & 0x01)
-#define HDMI_MAX_TMDS_UNIT   (5000)
-
 #endif                          /* _EDID_H_ */

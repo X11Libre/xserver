@@ -50,6 +50,10 @@
 #define CEA_EXT_MAX_DATA_OFFSET 127
 #define CEA_EXT_DET_TIMING_NUM 6
 
+#define IEEE_ID_HDMI    0x000C03
+#define CEA_VIDEO_BLK   2
+#define CEA_VENDOR_BLK  3
+
 struct cea_ext_body {
     uint8_t tag;
     uint8_t rev;
