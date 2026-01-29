@@ -248,20 +248,4 @@ struct cea_vendor_block {
     };
 };
 
-struct cea_speaker_block {
-    uint8_t FLR:1;
-    uint8_t LFE:1;
-    uint8_t FC:1;
-    uint8_t RLR:1;
-    uint8_t RC:1;
-    uint8_t FLRC:1;
-    uint8_t RLRC:1;
-    uint8_t FLRW:1;
-    uint8_t FLRH:1;
-    uint8_t TC:1;
-    uint8_t FCH:1;
-    uint8_t Resv:5;
-    uint8_t ResvByte;
-};
-
 #endif                          /* _EDID_H_ */
