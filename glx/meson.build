@@ -80,6 +80,7 @@ if build_glx
             dependency('glproto', version: '>= 1.4.17'),
             dependency('gl', version: '>= 1.2'),
         ],
+        link_with: [libxht],
     )
 
     if build_xorg

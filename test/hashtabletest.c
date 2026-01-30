@@ -3,60 +3,38 @@
 #include <misc.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "hashtable.h"
+#include <libxht/xht.h>
 #include "resource.h"
 
 #include "tests-common.h"
 
 static void
-print_xid(void* ptr, void* v)
-{
-    XID *x = v;
-    dbg("%ld", (long)(*x));
-}
-
-static void
-print_int(void* ptr, void* v)
-{
-    int *x = v;
-    dbg("%d", *x);
-}
-
-static void
 test1(void)
 {
-    HashTable h;
+    xht_t *h;
     int c;
     int ok = 1;
     const int numKeys = 420;
 
     dbg("test1\n");
-    h = ht_create(sizeof(XID), sizeof(int), ht_resourceid_hash, ht_resourceid_compare, NULL);
+    h = xht_create_int_table(numKeys);
 
     for (c = 0; c < numKeys; ++c) {
-      int *dest;
+      /* Start with 1 to avoid storing NULL */
+      int val = 2 * c + 1;
       XID id = c;
-      dest = ht_add(h, &id);
-      if (dest) {
-        *dest = 2 * c;
-      }
-    }
-
-    if (verbose) {
-      dbg("Distribution after insertion\n");
-      ht_dump_distribution(h);
-      ht_dump_contents(h, print_xid, print_int, NULL);
+      xht_set_int(h, id, (void *)(uintptr_t)val);
     }
 
     for (c = 0; c < numKeys; ++c) {
       XID id = c;
-      int* v = ht_find(h, &id);
-      if (v) {
-        if (*v == 2 * c) {
-          // ok
-        } else {
+      void *p = xht_get_int(h, id);
+      int expected = 2 * c + 1;
+      if (p) {
+        int v = (int)(uintptr_t)p;
+        if (v != expected) {
           dbg("Key %d doesn't have expected value %d but has %d instead\n",
-                 c, 2 * c, *v);
+                 c, expected, v);
           ok = 0;
         }
       } else {
@@ -70,16 +48,11 @@ test1(void)
 
       for (c = 0; c < numKeys; ++c) {
         XID id = c;
-        ht_remove(h, &id);
-      }
-
-      if (verbose) {
-        dbg("Distribution after deletion\n");
-        ht_dump_distribution(h);
+        xht_delete_int(h, id);
       }
     }
 
-    ht_destroy(h);
+    xht_destroy_int_table(h);
 
     assert(ok);
 }
@@ -87,22 +60,22 @@ test1(void)
 static void
 test2(void)
 {
-    HashTable h;
+    xht_t *h;
     int c;
     int ok = 1;
     const int numKeys = 420;
 
     dbg("test2\n");
-    h = ht_create(sizeof(XID), 0, ht_resourceid_hash, ht_resourceid_compare, NULL);
+    h = xht_create_int_table(numKeys);
 
     for (c = 0; c < numKeys; ++c) {
       XID id = c;
-      ht_add(h, &id);
+      xht_set_int(h, id, (void *)(uintptr_t)1);
     }
 
     for (c = 0; c < numKeys; ++c) {
       XID id = c;
-      if (!ht_find(h, &id)) {
+      if (!xht_get_int(h, id)) {
         ok = 0;
         dbg("Cannot find key %d\n", c);
       }
@@ -110,13 +83,13 @@ test2(void)
 
     {
         XID id = c + 1;
-        if (ht_find(h, &id)) {
+        if (xht_get_int(h, id)) {
             ok = 0;
             dbg("Could find a key that shouldn't be there\n");
         }
     }
 
-    ht_destroy(h);
+    xht_destroy_int_table(h);
 
     if (ok) {
         dbg("Test with empty keys OK\n");
@@ -131,30 +104,22 @@ static void
 test3(void)
 {
     int ok = 1;
-    HtGenericHashSetupRec hashSetup = {
-        .keySize = 4
-    };
-    HashTable h;
+    xht_t *h;
     dbg("test3\n");
-    h = ht_create(4, 0, ht_generic_hash, ht_generic_compare, &hashSetup);
+    h = xht_create_string_table(2, false);
 
-    if (!ht_add(h, "helo") ||
-        !ht_add(h, "wrld")) {
+    if (!xht_set_string(h, "helo", (void *)(uintptr_t)1) ||
+        !xht_set_string(h, "wrld", (void *)(uintptr_t)1)) {
         dbg("Could not insert keys\n");
     }
 
-    if (!ht_find(h, "helo") ||
-        !ht_find(h, "wrld")) {
+    if (!xht_get_string(h, "helo") ||
+        !xht_get_string(h, "wrld")) {
         ok = 0;
         dbg("Could not find inserted keys\n");
     }
 
-    if (verbose) {
-       dbg("Hash distribution with two strings\n");
-       ht_dump_distribution(h);
-    }
-
-    ht_destroy(h);
+    xht_destroy_string_table(h);
 
     assert(ok);
 }

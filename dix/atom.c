@@ -57,86 +57,43 @@ SOFTWARE.
 #include "misc.h"
 #include "resource.h"
 #include "dix.h"
+#include <libxht/xht.h>
 
 #define InitialTableSize 256
 
-typedef struct _Node {
-    struct _Node *left, *right;
-    Atom a;
-    unsigned int fingerPrint;
-    const char *string;
-} NodeRec, *NodePtr;
-
 static Atom lastAtom = None;
-static NodePtr atomRoot = NULL;
-static unsigned long tableLength;
-static NodePtr *nodeTable;
+static xht_2way_t *atom_table;
 
 Atom
 MakeAtom(const char *string, unsigned len, Bool makeit)
 {
-    NodePtr *np;
-    int comp;
-    unsigned int fp = 0;
+    char *str;
+    uint64_t atom_id;
 
-    np = &atomRoot;
-    for (unsigned int i = 0; i < (len + 1) / 2; i++) {
-        fp = fp * 27 + (unsigned int)string[i];
-        fp = fp * 27 + (unsigned int)string[len - 1 - i];
-    }
-    while (*np != NULL) {
-        if (fp < (*np)->fingerPrint)
-            np = &((*np)->left);
-        else if (fp > (*np)->fingerPrint)
-            np = &((*np)->right);
-        else {                  /* now start testing the strings */
-            comp = strncmp(string, (*np)->string, len);
-            if ((comp < 0) || ((comp == 0) && (len < strlen((*np)->string))))
-                np = &((*np)->left);
-            else if (comp > 0)
-                np = &((*np)->right);
-            else
-                return (*np)->a;
-        }
-    }
-    if (makeit) {
-        NodePtr nd = calloc(1, sizeof(NodeRec));
-        if (!nd)
-            return BAD_RESOURCE;
-        if (lastAtom < XA_LAST_PREDEFINED) {
-            nd->string = string;
-        }
-        else {
-            nd->string = strndup(string, len);
-            if (!nd->string) {
-                free(nd);
-                return BAD_RESOURCE;
-            }
-        }
-        if ((lastAtom + 1) >= tableLength) {
-            NodePtr *table;
+    /* The X protocol limits atom names to US-ASCII characters */
+    str = strndup(string, len);
+    if (!str)
+        return BAD_RESOURCE;
 
-            table = reallocarray(nodeTable, tableLength, 2 * sizeof(NodePtr));
-            if (!table) {
-                if (nd->string != string) {
-                    /* nd->string has been strdup'ed */
-                    free((char *) nd->string);
-                }
-                free(nd);
-                return BAD_RESOURCE;
-            }
-            tableLength <<= 1;
-            nodeTable = table;
-        }
-        *np = nd;
-        nd->left = nd->right = NULL;
-        nd->fingerPrint = fp;
-        nd->a = ++lastAtom;
-        nodeTable[lastAtom] = nd;
-        return nd->a;
+    atom_id = xht_atom_table_get_id(atom_table, str);
+    if (atom_id != 0) { // 0 is None
+        free(str);
+        return (Atom)atom_id;
     }
-    else
+
+    if (!makeit) {
+        free(str);
         return None;
+    }
+
+    lastAtom++;
+    if (!xht_atom_table_set(atom_table, str, lastAtom)) {
+        free(str); // Free str if set fails
+        return BAD_RESOURCE;
+    }
+    free(str); // Free str after successful set, as xht_atom_table_set copies it.
+
+    return lastAtom;
 }
 
 Bool
@@ -148,41 +105,19 @@ ValidAtom(Atom atom)
 const char *
 NameForAtom(Atom atom)
 {
-    NodePtr node;
-
     if (atom > lastAtom)
-        return 0;
-    if ((node = nodeTable[atom]) == NULL)
-        return 0;
-    return node->string;
-}
-
-static void
-FreeAtom(NodePtr patom)
-{
-    if (patom->left)
-        FreeAtom(patom->left);
-    if (patom->right)
-        FreeAtom(patom->right);
-    if (patom->a > XA_LAST_PREDEFINED) {
-        /*
-         * All strings above XA_LAST_PREDEFINED are strdup'ed, so it's safe to
-         * cast here
-         */
-        free((char *) patom->string);
-    }
-    free(patom);
+        return NULL;
+    return xht_atom_table_get_string(atom_table, atom);
 }
 
 void
 FreeAllAtoms(void)
 {
-    if (atomRoot == NULL)
+    if (!atom_table)
         return;
-    FreeAtom(atomRoot);
-    atomRoot = NULL;
-    free(nodeTable);
-    nodeTable = NULL;
+
+    xht_atom_table_destroy(atom_table);
+    atom_table = NULL;
     lastAtom = None;
 }
 
@@ -190,11 +125,10 @@ void
 InitAtoms(void)
 {
     FreeAllAtoms();
-    tableLength = InitialTableSize;
-    nodeTable = calloc(InitialTableSize, sizeof(NodePtr));
-    if (!nodeTable)
+    atom_table = xht_atom_table_create(InitialTableSize);
+    if (!atom_table)
         FatalError("creating atom table");
-    nodeTable[None] = NULL;
+
     MakePredeclaredAtoms();
     if (lastAtom != XA_LAST_PREDEFINED)
         FatalError("builtin atom number mismatch");

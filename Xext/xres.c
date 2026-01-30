@@ -31,7 +31,7 @@
 #include "protocol-versions.h"
 #include "list.h"
 #include "misc.h"
-#include "hashtable.h"
+#include <libxht/xht.h>
 #include "picturestr.h"
 #include "compint.h"
 
@@ -72,11 +72,11 @@ typedef struct {
     int           status;
     long          numSpecs;
     xXResResourceIdSpec *specs;
-    HashTable     visitedResources;
+    xht_t     *visitedResources;
 
     /* Used by AddSubResourceSizeSpec when AddResourceSizeValue is
        handling cross-references */
-    HashTable     visitedSubResources;
+    xht_t     *visitedSubResources;
 
     /* used when ConstructResourceBytesCtx is passed to
        AddResourceSizeValue2 via FindClientResourcesByType */
@@ -162,9 +162,7 @@ InitConstructResourceBytesCtx(ConstructResourceBytesCtx *ctx,
     ctx->status = Success;
     ctx->numSpecs = numSpecs;
     ctx->specs = specs;
-    ctx->visitedResources = ht_create(sizeof(XID), 0,
-                                      ht_resourceid_hash, ht_resourceid_compare,
-                                      NULL);
+    ctx->visitedResources = xht_create_int_table(64);
 
     if (!ctx->visitedResources) {
         return FALSE;
@@ -177,7 +175,7 @@ static void
 DestroyConstructResourceBytesCtx(ConstructResourceBytesCtx *ctx)
 {
     DestroyFragments(&ctx->response);
-    ht_destroy(ctx->visitedResources);
+    xht_destroy_int_table(ctx->visitedResources);
 }
 
 static int
@@ -608,19 +606,15 @@ AddSubResourceSizeSpec(void *value,
 
     if (ctx->status == Success) {
         xXResResourceSizeSpec **prevCrossRef =
-          ht_find(ctx->visitedSubResources, &value);
+          xht_get_int(ctx->visitedSubResources, (uint64_t)(uintptr_t)value);
         if (!prevCrossRef) {
             Bool ok = TRUE;
             xXResResourceSizeSpec *crossRef =
                 AddFragment(&ctx->response, sizeof(xXResResourceSizeSpec));
             ok = ok && crossRef != NULL;
             if (ok) {
-                xXResResourceSizeSpec **p;
-                p = ht_add(ctx->visitedSubResources, &value);
-                if (!p) {
+                if (!xht_set_int(ctx->visitedSubResources, (uint64_t)(uintptr_t)value, crossRef)) {
                     ok = FALSE;
-                } else {
-                    *p = crossRef;
                 }
             }
             if (!ok) {
@@ -668,12 +662,9 @@ AddResourceSizeValue(void *ptr, XID id, RESTYPE type, void *cdata)
 {
     ConstructResourceBytesCtx *ctx = cdata;
     if (ctx->status == Success &&
-        !ht_find(ctx->visitedResources, &id)) {
+        !xht_get_int(ctx->visitedResources, id)) {
         Bool ok = TRUE;
-        HashTable ht;
-        HtGenericHashSetupRec htSetup = {
-            .keySize = sizeof(void*)
-        };
+        xht_t *ht;
 
         /* it doesn't matter that we don't undo the work done here
          * immediately. All but ht_init will be undone at the end
@@ -686,12 +677,11 @@ AddResourceSizeValue(void *ptr, XID id, RESTYPE type, void *cdata)
         if (!value) {
             ok = FALSE;
         }
-        ok = ok && ht_add(ctx->visitedResources, &id);
+        if (ok && !xht_set_int(ctx->visitedResources, id, NULL)) {
+             ok = FALSE;
+        }
         if (ok) {
-            ht = ht_create(htSetup.keySize,
-                           sizeof(xXResResourceSizeSpec*),
-                           ht_generic_hash, ht_generic_compare,
-                           &htSetup);
+            ht = xht_create_int_table(64);
             ok = ok && ht;
         }
 
@@ -719,7 +709,7 @@ AddResourceSizeValue(void *ptr, XID id, RESTYPE type, void *cdata)
             ctx->resultBytes += sizeof(*value);
             ++ctx->numSizes;
 
-            ht_destroy(ht);
+            xht_destroy_int_table(ht);
         }
     }
 }

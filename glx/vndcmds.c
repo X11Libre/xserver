@@ -31,7 +31,7 @@
 
 #include "dix/request_priv.h"
 
-#include "hashtable.h"
+#include <libxht/xht.h>
 #include "vndserver_priv.h"
 #include "vndservervendor.h"
 
@@ -46,14 +46,10 @@
 typedef struct GlxVendorPrivDispatchRec {
     CARD32 vendorCode;
     GlxServerDispatchProc proc;
-    HashTable hh;
 } GlxVendorPrivDispatch;
 
 static GlxServerDispatchProc dispatchFuncs[OPCODE_ARRAY_LEN] = { 0 };
-static HashTable vendorPrivHash = NULL;
-static HtGenericHashSetupRec vendorPrivSetup = {
-    .keySize = sizeof(CARD32)
-};
+static xht_t *vendorPrivHash = NULL;
 
 static int DispatchBadRequest(ClientPtr client)
 {
@@ -64,11 +60,13 @@ static GlxVendorPrivDispatch *LookupVendorPrivDispatch(CARD32 vendorCode, Bool c
 {
     GlxVendorPrivDispatch *disp = NULL;
 
-    disp = ht_find(vendorPrivHash, &vendorCode);
+    disp = xht_get_int(vendorPrivHash, vendorCode);
     if (disp == NULL && create) {
-        if ((disp = ht_add(vendorPrivHash, &vendorCode))) {
-            disp->vendorCode = vendorCode;
-            disp->proc = NULL;
+        GlxVendorPrivDispatch newDisp;
+        newDisp.vendorCode = vendorCode;
+        newDisp.proc = NULL;
+        if (xht_set_int(vendorPrivHash, vendorCode, &newDisp)) {
+            disp = xht_get_int(vendorPrivHash, vendorCode);
         }
     }
 
@@ -388,9 +386,7 @@ Bool GlxDispatchInit(void)
 {
     GlxVendorPrivDispatch *disp;
 
-    vendorPrivHash = ht_create(sizeof(CARD32), sizeof(GlxVendorPrivDispatch),
-                               ht_generic_hash, ht_generic_compare,
-                               (void *) &vendorPrivSetup);
+    vendorPrivHash = xht_create_int_table(64);
     if (!vendorPrivHash) {
         return FALSE;
     }
@@ -451,7 +447,7 @@ void GlxDispatchReset(void)
 {
     memset(dispatchFuncs, 0, sizeof(dispatchFuncs));
 
-    ht_destroy(vendorPrivHash);
+    xht_destroy_int_table(vendorPrivHash);
     vendorPrivHash = NULL;
 }
 

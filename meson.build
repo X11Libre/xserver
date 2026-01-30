@@ -749,6 +749,8 @@ if build_docs or build_docs_devel
     ]
 endif
 
+subdir('libxht')
+
 # Include must come first, as it sets up dix-config.h
 subdir('include')
 
@@ -791,6 +793,7 @@ subdir('doc')
 
 # Common static libraries of all X servers
 libxserver = [
+    libxht,
     libxserver_mi,
     libxserver_dix,
 

@@ -1,0 +1,9 @@
+prefix=@prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libxht
+Description: X server hashtable library
+Version: @VERSION@
+Cflags: -I${includedir}
+Libs: -L${libdir} -lxht
