@@ -45,6 +45,7 @@
 #include "os.h"
 #include "../os-support/linux/systemd-logind.h"
 
+#include "xf86_pci_priv.h"
 #include "loaderProcs.h"
 #include "xf86_priv.h"
 #include "xf86_os_support.h"

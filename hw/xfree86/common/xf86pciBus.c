@@ -33,6 +33,7 @@
 #endif
 
 #include <ctype.h>
+#include <dirent.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pciaccess.h>
@@ -41,11 +42,11 @@
 #include "os/log_priv.h"
 #include "os/osdep.h"
 
+#include "xf86_pci_priv.h"
 #include "os.h"
 #include "Pci.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
-#include "dirent.h"             /* DIR, FILE type definitions */
 
 /* Bus-specific headers */
 #include "xf86Bus.h"
