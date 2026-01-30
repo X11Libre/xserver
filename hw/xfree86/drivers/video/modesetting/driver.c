@@ -65,7 +65,7 @@
 #include "xf86xv.h"
 #include <xorg-config.h>
 #ifdef XSERVER_PLATFORM_BUS
-#include "xf86platformBus.h"
+#include "xf86platformBus_priv.h"
 #endif
 #ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>

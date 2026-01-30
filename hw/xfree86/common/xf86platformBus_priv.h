@@ -19,6 +19,12 @@ xf86_platform_odev_attributes(int index)
     return device->attribs;
 }
 
+static inline struct OdevAttributes *
+xf86_platform_device_odev_attributes(struct xf86_platform_device *device)
+{
+    return device->attribs;
+}
+
 int xf86platformProbe(void);
 int xf86platformProbeDev(DriverPtr drvp);
 int xf86platformAddGPUDevices(DriverPtr drvp);

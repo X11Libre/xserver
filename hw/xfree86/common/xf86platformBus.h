@@ -37,11 +37,6 @@ struct xf86_platform_device {
 #define XF86_PDEV_PAUSED        0x04
 
 #ifdef XSERVER_PLATFORM_BUS
-static inline struct OdevAttributes *
-xf86_platform_device_odev_attributes(struct xf86_platform_device *device)
-{
-    return device->attribs;
-}
 
 /*
  * Define the legacy API only for external builds
