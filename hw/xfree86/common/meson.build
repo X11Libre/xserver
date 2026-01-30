@@ -30,7 +30,6 @@ xorg_sdk_headers = [
     'xf86.h',
     'xf86Module.h',
     'xf86Opt.h',
-    'xf86PciInfo.h',
     'xf86Priv.h',
     'xf86Privstr.h',
     'xf86cmap.h',

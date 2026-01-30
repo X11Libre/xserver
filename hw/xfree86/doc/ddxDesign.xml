@@ -7375,13 +7375,6 @@ visible symbols.
       </para>
 
       <para>
-  Drivers that need to access PCI vendor/device definitions need this:
-	<literallayout><filename>
-    "xf86PciInfo.h"
-	  </filename></literallayout>
-      </para>
-
-      <para>
   Drivers that need to access the PCI config space need this:
 	<literallayout><filename>
     "xf86Pci.h"
