@@ -332,6 +332,24 @@ ms_present_check_flip(RRCrtcPtr crtc,
     if (ms->drmmode.pending_modeset)
         goto no_flip;
 
+    /**
+     * Does the window match the pixmap exactly?
+     *
+     * We need to check here too, despite also
+     * checking in the generic present check_flip,
+     * because we need to be able to give info
+     * about tearfree, even if we can't flip.
+     *
+     * See: https://github.com/X11Libre/xserver/issues/1812
+     * See: https://github.com/X11Libre/xserver/issues/1754
+     */
+    if (window->drawable.x != 0 || window->drawable.y != 0 ||
+        window->drawable.x != pixmap->screen_x || window->drawable.y != pixmap->screen_y ||
+        window->drawable.width != pixmap->drawable.width ||
+        window->drawable.height != pixmap->drawable.height) {
+        goto no_flip;
+    }
+
     if (!ms_present_check_unflip(crtc, window, pixmap, sync_flip, reason)) {
         if (reason && *reason == PRESENT_FLIP_REASON_BUFFER_FORMAT)
             ms_window_update_async_flip(window, async_flip);
