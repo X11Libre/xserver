@@ -598,19 +598,27 @@ CheckVersion(const char *module, XF86ModuleVersionInfo * data,
             vermaj = GET_ABI_MAJOR(ver);
             vermin = GET_ABI_MINOR(ver);
             if (abimaj != vermaj) {
-                LogMessageVerb(LoaderIgnoreAbi ? X_WARNING : X_ERROR, 0,
-                               "%s: module ABI major version (%d) "
+                MessageType errtype;
+                if (LoaderIgnoreABI)
+                    errtype = X_WARNING;
+                else
+                    errtype = X_ERROR;
+                LogMessageVerb(errtype, 0, "%s: module ABI major version (%d) "
                                "doesn't match the server's version (%d)\n",
                                module, abimaj, vermaj);
-                if (!LoaderIgnoreAbi)
+                if (!LoaderIgnoreABI)
                     return FALSE;
             }
             else if (abimin > vermin) {
-                LogMessageVerb(LoaderIgnoreAbi ? X_WARNING : X_ERROR, 0,
-                               "%s: module ABI minor version (%d) "
+                MessageType errtype;
+                if (LoaderIgnoreABI)
+                    errtype = X_WARNING;
+                else
+                    errtype = X_ERROR;
+                LogMessageVerb(errtype, 0, "%s: module ABI minor version (%d) "
                                "is newer than the server's version (%d)\n",
                                module, abimin, vermin);
-                if (!LoaderIgnoreAbi)
+                if (!LoaderIgnoreABI)
                     return FALSE;
             }
         }
@@ -834,14 +842,9 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
                               "between the new X server abi and the one these "
                               "old drivers are compiled against.\n");
         LogMessage(X_WARNING, "LoadModule: If you are using one of the maintained "
-                              "branches of the nvidia nvidia kernel drivers,\n");
+                              "branches of the nvidia kernel drivers,\n");
         LogMessage(X_WARNING, "LoadModule: you can try using the in-tree, open-source modesetting "
                               "DDX driver instead of the proprietary nvidia DDX driver.\n");
-        if (!LoaderIgnoreAbi) {
-            /* warn every time this is hit */
-            LogMessage(X_WARNING, "LoadModule: Implicitly ignoring abi mismatch "
-                       "for the nvidia proprierary DDX driver\n");
-        }
     }
 
     /* Backward compatibility, vbe and int10 are merged into int10 now */
@@ -934,6 +937,9 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
         vers = initdata->vers;
         setup = initdata->setup;
         teardown = initdata->teardown;
+
+        if (LoaderGetAndFlagIgnoreABI(name))
+            LogMessageVerb(X_INFO, 3, "ABI ignored for module \"%s\"\n", name);
 
         if (vers) {
             if (!CheckVersion(module, vers, modreq)) {
