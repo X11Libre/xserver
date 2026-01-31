@@ -227,6 +227,28 @@ typedef struct _colorResource {
     int client;
 } colorResource;
 
+static colorResource *freeColorResources = NULL;
+
+static colorResource *
+AllocColorResource(void)
+{
+    colorResource *res;
+
+    if (freeColorResources) {
+        res = freeColorResources;
+        freeColorResources = (colorResource *) (long)res->mid; /* next */
+        return res;
+    }
+    return calloc(1, sizeof(colorResource));
+}
+
+static void
+FreeColorResource(colorResource *res)
+{
+    res->mid = (Colormap) (long) freeColorResources; /* next */
+    freeColorResources = res;
+}
+
 /* Invariants:
  * refcnt == 0 means entry is empty
  * refcnt > 0 means entry is useable by many clients, so it can't be changed
@@ -1087,7 +1109,7 @@ AllocColor(ColormapPtr pmap,
     if ((pmap->numPixelsRed[client] == 1) &&
         (dixClientIdForXID(pmap->mid) != client) && !(pmap->flags & CM_BeingCreated)) {
 
-        colorResource *pcr = calloc(1, sizeof(colorResource));
+        colorResource *pcr = AllocColorResource();
         if (!pcr) {
             (void) FreeColors(pmap, client, 1, pPix, (Pixel) 0);
             return BadAlloc;
@@ -1488,7 +1510,7 @@ FreeClientPixels(void *value, XID fakeid)
                                  DixRemoveAccess);
     if (rc == Success)
         FreePixels((ColormapPtr) pmap, pcr->client);
-    free(pcr);
+    FreeColorResource(pcr);
     return Success;
 }
 
@@ -1510,7 +1532,7 @@ AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
     if (pmap->class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
     if (!oldcount && (dixClientIdForXID(pmap->mid) != client)) {
-        pcr = calloc(1, sizeof(colorResource));
+        pcr = AllocColorResource();
         if (!pcr)
             return BadAlloc;
     }
@@ -1551,8 +1573,8 @@ AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
         if (!AddResource(FakeClientID(client), X11_RESTYPE_CMAPENTRY, (void *) pcr))
             ok = BadAlloc;
     }
-    else
-        free(pcr);
+    else if (pcr)
+        FreeColorResource(pcr);
 
     return ok;
 }
@@ -1576,7 +1598,7 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
     if (class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
     if (!oldcount && (dixClientIdForXID(pmap->mid) != client)) {
-        pcr = calloc(1, sizeof(colorResource));
+        pcr = AllocColorResource();
         if (!pcr)
             return BadAlloc;
     }
@@ -1632,8 +1654,8 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
         if (!AddResource(FakeClientID(client), X11_RESTYPE_CMAPENTRY, (void *) pcr))
             ok = BadAlloc;
     }
-    else
-        free(pcr);
+    else if (pcr)
+        FreeColorResource(pcr);
 
     return ok;
 }
