@@ -515,7 +515,7 @@ static OptionInfoRec xf86DeviceOptions[] = {
 static void
 xf86OutputSetMonitor(xf86OutputPtr output)
 {
-    char *option_name;
+    char *option_name = NULL;
     const char *monitor;
 
     if (!output->name)
@@ -526,7 +526,7 @@ xf86OutputSetMonitor(xf86OutputPtr output)
     output->options = XNFalloc(sizeof(xf86OutputOptions));
     memcpy(output->options, xf86OutputOptions, sizeof(xf86OutputOptions));
 
-    XNFasprintf(&option_name, "monitor-%s", output->name);
+    asprintf(&option_name, "monitor-%s", output->name);
     monitor = xf86findOptionValue(output->scrn->options, option_name);
     if (!monitor)
         monitor = output->name;
