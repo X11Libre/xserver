@@ -56,6 +56,7 @@ SOFTWARE.
 #include <X11/extensions/XIproto.h>     /* Request macro     */
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/request_priv.h"
 #include "Xi/handlers.h"
@@ -75,8 +76,7 @@ ProcXGetDeviceModifierMapping(ClientPtr client)
     KeyCode *modkeymap = NULL;
     int ret, max_keys_per_mod;
 
-    REQUEST(xGetDeviceModifierMappingReq);
-    REQUEST_SIZE_MATCH(xGetDeviceModifierMappingReq);
+    X_REQUEST_HEAD_STRUCT(xGetDeviceModifierMappingReq);
 
     ret = dixLookupDevice(&dev, stuff->deviceid, client, DixGetAttrAccess);
     if (ret != Success)

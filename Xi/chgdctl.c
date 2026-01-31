@@ -75,11 +75,11 @@ SOFTWARE.
 int
 ProcXChangeDeviceControl(ClientPtr client)
 {
-    REQUEST(xChangeDeviceControlReq);
+    X_REQUEST_HEAD_AT_LEAST(xChangeDeviceControlReq);
     REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
+    X_REQUEST_FIELD_CARD16(control);
 
     if (client->swapped) {
-        swaps(&stuff->control);
         xDeviceCtl *ctl = (xDeviceCtl *) &stuff[1];
         swaps(&ctl->control);
         swaps(&ctl->length);
