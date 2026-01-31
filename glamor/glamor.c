@@ -835,74 +835,76 @@ glamor_init(ScreenPtr screen, unsigned int flags)
     if (!glamor_font_init(screen))
         goto fail;
 
-    glamor_priv->saved_procs.block_handler = screen->BlockHandler;
-    screen->BlockHandler = _glamor_block_handler;
+    if (!(flags & GLAMOR_NO_RENDER_ACCEL)) {
+        glamor_priv->saved_procs.block_handler = screen->BlockHandler;
+        screen->BlockHandler = _glamor_block_handler;
 
-    if (!glamor_composite_glyphs_init(screen)) {
-        ErrorF("Failed to initialize composite masks\n");
-        goto fail;
+        if (!glamor_composite_glyphs_init(screen)) {
+            ErrorF("Failed to initialize composite masks\n");
+            goto fail;
+        }
+
+        glamor_priv->saved_procs.create_gc = screen->CreateGC;
+        screen->CreateGC = glamor_create_gc;
+
+        glamor_priv->saved_procs.create_pixmap = screen->CreatePixmap;
+        screen->CreatePixmap = glamor_create_pixmap;
+
+        glamor_priv->saved_procs.get_spans = screen->GetSpans;
+        screen->GetSpans = glamor_get_spans;
+
+        glamor_priv->saved_procs.get_image = screen->GetImage;
+        screen->GetImage = glamor_get_image;
+
+        glamor_priv->saved_procs.change_window_attributes =
+            screen->ChangeWindowAttributes;
+        screen->ChangeWindowAttributes = glamor_change_window_attributes;
+
+        glamor_priv->saved_procs.copy_window = screen->CopyWindow;
+        screen->CopyWindow = glamor_copy_window;
+
+        glamor_priv->saved_procs.bitmap_to_region = screen->BitmapToRegion;
+        screen->BitmapToRegion = glamor_bitmap_to_region;
+
+        if (ps) {
+            glamor_priv->saved_procs.composite = ps->Composite;
+            ps->Composite = glamor_composite;
+
+            glamor_priv->saved_procs.trapezoids = ps->Trapezoids;
+            ps->Trapezoids = glamor_trapezoids;
+
+            glamor_priv->saved_procs.triangles = ps->Triangles;
+            ps->Triangles = glamor_triangles;
+
+            glamor_priv->saved_procs.addtraps = ps->AddTraps;
+            ps->AddTraps = glamor_add_traps;
+
+            glamor_priv->saved_procs.composite_rects = ps->CompositeRects;
+            ps->CompositeRects = glamor_composite_rectangles;
+
+            glamor_priv->saved_procs.glyphs = ps->Glyphs;
+            ps->Glyphs = glamor_composite_glyphs;
+        }
+
+        glamor_init_vbo(screen);
+
+        glamor_priv->enable_gradient_shader = TRUE;
+
+        if (!glamor_init_gradient_shader(screen)) {
+            LogMessage(X_WARNING,
+                       "glamor%d: Cannot initialize gradient shader, falling back to software rendering for gradients\n",
+                       screen->myNum);
+            glamor_priv->enable_gradient_shader = FALSE;
+        }
+
+        glamor_pixmap_init(screen);
+        glamor_sync_init(screen);
+
+        glamor_priv->screen = screen;
+
+        dixScreenHookClose(screen, glamor_close_screen);
+        dixScreenHookPixmapDestroy(screen, glamor_pixmap_destroy);
     }
-
-    glamor_priv->saved_procs.create_gc = screen->CreateGC;
-    screen->CreateGC = glamor_create_gc;
-
-    glamor_priv->saved_procs.create_pixmap = screen->CreatePixmap;
-    screen->CreatePixmap = glamor_create_pixmap;
-
-    glamor_priv->saved_procs.get_spans = screen->GetSpans;
-    screen->GetSpans = glamor_get_spans;
-
-    glamor_priv->saved_procs.get_image = screen->GetImage;
-    screen->GetImage = glamor_get_image;
-
-    glamor_priv->saved_procs.change_window_attributes =
-        screen->ChangeWindowAttributes;
-    screen->ChangeWindowAttributes = glamor_change_window_attributes;
-
-    glamor_priv->saved_procs.copy_window = screen->CopyWindow;
-    screen->CopyWindow = glamor_copy_window;
-
-    glamor_priv->saved_procs.bitmap_to_region = screen->BitmapToRegion;
-    screen->BitmapToRegion = glamor_bitmap_to_region;
-
-    if (ps) {
-        glamor_priv->saved_procs.composite = ps->Composite;
-        ps->Composite = glamor_composite;
-
-        glamor_priv->saved_procs.trapezoids = ps->Trapezoids;
-        ps->Trapezoids = glamor_trapezoids;
-
-        glamor_priv->saved_procs.triangles = ps->Triangles;
-        ps->Triangles = glamor_triangles;
-
-        glamor_priv->saved_procs.addtraps = ps->AddTraps;
-        ps->AddTraps = glamor_add_traps;
-
-        glamor_priv->saved_procs.composite_rects = ps->CompositeRects;
-        ps->CompositeRects = glamor_composite_rectangles;
-
-        glamor_priv->saved_procs.glyphs = ps->Glyphs;
-        ps->Glyphs = glamor_composite_glyphs;
-    }
-
-    glamor_init_vbo(screen);
-
-    glamor_priv->enable_gradient_shader = TRUE;
-
-    if (!glamor_init_gradient_shader(screen)) {
-        LogMessage(X_WARNING,
-                   "glamor%d: Cannot initialize gradient shader, falling back to software rendering for gradients\n",
-                   screen->myNum);
-        glamor_priv->enable_gradient_shader = FALSE;
-    }
-
-    glamor_pixmap_init(screen);
-    glamor_sync_init(screen);
-
-    glamor_priv->screen = screen;
-
-    dixScreenHookClose(screen, glamor_close_screen);
-    dixScreenHookPixmapDestroy(screen, glamor_pixmap_destroy);
 
     return TRUE;
 
@@ -931,33 +933,38 @@ static void glamor_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *u
     PixmapPtr screen_pixmap;
 
     glamor_priv = glamor_get_screen_private(screen);
-    glamor_sync_close(screen);
-    glamor_composite_glyphs_fini(screen);
-    glamor_set_glvnd_vendor(screen, NULL);
-
-    dixScreenUnhookClose(screen, glamor_close_screen);
-    dixScreenUnhookPixmapDestroy(screen, glamor_pixmap_destroy);
-
-    screen->CreateGC = glamor_priv->saved_procs.create_gc;
-    screen->CreatePixmap = glamor_priv->saved_procs.create_pixmap;
-    screen->GetSpans = glamor_priv->saved_procs.get_spans;
-    screen->ChangeWindowAttributes =
-        glamor_priv->saved_procs.change_window_attributes;
-    screen->CopyWindow = glamor_priv->saved_procs.copy_window;
-    screen->BitmapToRegion = glamor_priv->saved_procs.bitmap_to_region;
-    screen->BlockHandler = glamor_priv->saved_procs.block_handler;
-
-    PictureScreenPtr ps = GetPictureScreenIfSet(screen);
-    if (ps) {
-        ps->Composite = glamor_priv->saved_procs.composite;
-        ps->Trapezoids = glamor_priv->saved_procs.trapezoids;
-        ps->Triangles = glamor_priv->saved_procs.triangles;
-        ps->CompositeRects = glamor_priv->saved_procs.composite_rects;
-        ps->Glyphs = glamor_priv->saved_procs.glyphs;
+    if (!(glamor_priv->flags & GLAMOR_NO_RENDER_ACCEL)) {
+        glamor_sync_close(screen);
+        glamor_composite_glyphs_fini(screen);
     }
 
-    screen_pixmap = screen->GetScreenPixmap(screen);
-    glamor_pixmap_destroy_fbo(screen_pixmap);
+    glamor_set_glvnd_vendor(screen, NULL);
+
+    if (!(glamor_priv->flags & GLAMOR_NO_RENDER_ACCEL)) {
+        dixScreenUnhookClose(screen, glamor_close_screen);
+        dixScreenUnhookPixmapDestroy(screen, glamor_pixmap_destroy);
+
+        screen->CreateGC = glamor_priv->saved_procs.create_gc;
+        screen->CreatePixmap = glamor_priv->saved_procs.create_pixmap;
+        screen->GetSpans = glamor_priv->saved_procs.get_spans;
+        screen->ChangeWindowAttributes =
+            glamor_priv->saved_procs.change_window_attributes;
+        screen->CopyWindow = glamor_priv->saved_procs.copy_window;
+        screen->BitmapToRegion = glamor_priv->saved_procs.bitmap_to_region;
+        screen->BlockHandler = glamor_priv->saved_procs.block_handler;
+
+        PictureScreenPtr ps = GetPictureScreenIfSet(screen);
+        if (ps) {
+            ps->Composite = glamor_priv->saved_procs.composite;
+            ps->Trapezoids = glamor_priv->saved_procs.trapezoids;
+            ps->Triangles = glamor_priv->saved_procs.triangles;
+            ps->CompositeRects = glamor_priv->saved_procs.composite_rects;
+            ps->Glyphs = glamor_priv->saved_procs.glyphs;
+        }
+
+        screen_pixmap = screen->GetScreenPixmap(screen);
+        glamor_pixmap_destroy_fbo(screen_pixmap);
+    }
 
     glamor_release_screen_priv(screen);
 }
