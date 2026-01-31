@@ -1214,7 +1214,7 @@ EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
 
     eventlen = sizeof(InternalEvent);
 
-    QdEventPtr qe = alloca(sizeof(QdEventRec) + eventlen);
+    QdEventPtr qe = calloc(1, sizeof(QdEventRec) + eventlen);
     if (!qe)
         return;
     xorg_list_init(&qe->next);
@@ -2166,10 +2166,9 @@ ActivateImplicitGrab(DeviceIntPtr dev, ClientPtr client, WindowPtr win,
     else
         return FALSE;
 
-    tempGrab = alloca(sizeof(GrabRec));
+    tempGrab = AllocGrab(NULL);
     if (!tempGrab)
         return FALSE;
-    memset(tempGrab, 0, sizeof(GrabRec));
     tempGrab->next = NULL;
     tempGrab->device = dev;
     tempGrab->resource = client->clientAsMask;
@@ -2192,6 +2191,7 @@ ActivateImplicitGrab(DeviceIntPtr dev, ClientPtr client, WindowPtr win,
 
     (*dev->deviceGrab.ActivateGrab) (dev, tempGrab,
                                      currentTime, TRUE | ImplicitGrabMask);
+    FreeGrab(tempGrab);
     return TRUE;
 }
 
