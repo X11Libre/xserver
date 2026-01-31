@@ -22,6 +22,7 @@
 #include <dix-config.h>
 
 #include "randr/randrstr_priv.h"
+#include "render/picturestr_priv.h"
 
 #ifdef RANDR_10_INTERFACE
 static RRModePtr

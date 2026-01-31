@@ -49,6 +49,7 @@
 #include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "os/osdep.h"
+#include "render/picturestr_priv.h"
 #include "Xext/panoramiXsrv.h"
 
 #include "compint.h"
