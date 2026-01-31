@@ -241,9 +241,10 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
     int rc;
 
     *ppCurs = NULL;
-    pCurs = (CursorPtr) calloc(CURSOR_REC_SIZE + CURSOR_BITS_SIZE, 1);
+    pCurs = alloca(CURSOR_REC_SIZE + CURSOR_BITS_SIZE);
     if (!pCurs)
         return BadAlloc;
+    memset(pCurs, 0, CURSOR_REC_SIZE + CURSOR_BITS_SIZE);
 
     bits = (CursorBitsPtr) ((char *) pCurs + CURSOR_REC_SIZE);
     dixInitPrivates(pCurs, pCurs + 1, PRIVATE_CURSOR);
@@ -311,7 +312,6 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
  error:
     FreeCursorBits(bits);
     dixFiniPrivates(pCurs, PRIVATE_CURSOR);
-    free(pCurs);
 
     return rc;
 }
