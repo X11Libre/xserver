@@ -4870,6 +4870,40 @@ drmmode_reset_cursor(drmmode_crtc_private_ptr drmmode_crtc)
     drmmode_crtc->cursor_pitches = NULL;
 }
 
+/**
+ * Some setups have different requirements for the
+ * cursor pitch compared to intel and nvidia.
+ *
+ * See: https://github.com/X11Libre/xserver/issues/1816
+ *
+ * This function detects whether we are running in a vm,
+ * or on bare metal.
+ *
+ * Driver names are taken from https://drmdb.emersion.fr/drivers
+ */
+static inline Bool
+drmmode_legacy_cursor_probe_allowed(drmmode_ptr drmmode)
+{
+    drmVersionPtr version = drmGetVersion(drmmode->fd);
+    if (!version) {
+        return FALSE;
+    }
+
+    if (!version->name ||
+        strstr(version->name, "bochs-drm") ||
+        strstr(version->name, "evdi") ||
+        strstr(version->name, "vboxvideo") ||
+        strstr(version->name, "virtio_gpu") ||
+        strstr(version->name, "vkms") ||
+        strstr(version->name, "vmwgfx")) {
+        drmFreeVersion(version);
+        return FALSE;
+    }
+
+    drmFreeVersion(version);
+    return TRUE;
+}
+
 /*
  * This is the old probe method for the minimum cursor size.
  * This is only used if the SIZE_HINTS probe fails.
@@ -4889,6 +4923,10 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
     }
 
     drmmode_crtc->cursor_probed = TRUE;
+
+    if (!drmmode_legacy_cursor_probe_allowed(drmmode)) {
+        return;
+    }
 
     xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
                "Probing the cursor size using the old method\n");
