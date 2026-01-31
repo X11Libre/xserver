@@ -489,28 +489,92 @@ static Bool doPlatformProbe(struct xf86_platform_device *dev, DriverPtr drvp,
                             GDevPtr gdev, int flags, intptr_t match_data)
 {
     Bool foundScreen = FALSE;
-    int entity;
+    int entity = -1;
+    struct pci_device *pPci;
+    const char *isGPUscreen = (flags & PLATFORM_PROBE_GPU_SCREEN) ? "GPU " : "";
 
-    entity = xf86ClaimPlatformSlot(dev, drvp, 0,
+    pPci = dev->pdev;
+    if (gdev) {
+        if (pPci)
+            LogMessageVerb(X_INFO, 1,
+                "%s: platform %sdevice \"%s\" screen %d at %d:%d:%d is requested by \"%s\"\n",
+                drvp->driverName, isGPUscreen, dev->attribs->path, gdev->screen,
+                pPci->bus, pPci->dev, pPci->func, gdev->identifier);
+        else
+            LogMessageVerb(X_INFO, 1,
+                "%s: platform %sdevice  \"%s\" screen %d is requested by \"%s\"\n",
+                drvp->driverName, isGPUscreen, dev->attribs->path, gdev->screen, gdev->identifier);
+    }
+    else {
+        if (pPci)
+            LogMessageVerb(X_INFO, 1,
+                "%s: platform %sdevice \"%s\" at %d:%d:%d is requested\n",
+                drvp->driverName, isGPUscreen, dev->attribs->path,
+                pPci->bus, pPci->dev, pPci->func);
+        else
+            LogMessageVerb(X_INFO, 1,
+                "%s: platform %sdevice  \"%s\" is requested\n",
+                drvp->driverName, isGPUscreen, dev->attribs->path);
+    }
+
+    /* Allow the same entity to be used more than once for
+     * devices with multiple screens (CRTs) per entity. A primary
+     * CRT (screen == 0) must be claimed first.
+     *
+     * It is checked that two different drivers don't
+     * claim the same screen.
+     */
+    if (!gdev || (gdev->screen == 0)) {
+        /* Allocate an entry in the lists to be returned */
+        entity = xf86ClaimPlatformSlot(dev, drvp, 0,
                                    gdev, gdev ? gdev->active : 0);
+        if (gdev && (entity != -1)) {
+            LogMessageVerb(X_INFO, 1,
+                "Adding \"%s\" primary screen to \"%s\"\n",
+                dev->attribs->path, gdev->identifier);
+        }
+    }
+    else { /* gdev && (gdev->screen > 0) */
+        unsigned nent;
 
-    if ((entity == -1) && gdev) {
-        if (gdev->screen == 0)
-            return FALSE;
-        else { /* gdev->screen > 0 */
-            unsigned nent;
+        for (nent = 0; nent < xf86NumEntities; nent++) {
+            EntityPtr pEnt = xf86Entities[nent];
+            int l;
 
-            for (nent = 0; nent < xf86NumEntities; nent++) {
-                EntityPtr pEnt = xf86Entities[nent];
+            if (pEnt->numInstances <= 0) /* Unclaimed */
+                continue;
+            if (pEnt->bus.type != BUS_PLATFORM)
+                continue;
+            if (pEnt->bus.id.plat != dev)
+                continue;
+            entity = nent;
 
-                if (pEnt->bus.type != BUS_PLATFORM)
-                    continue;
-                if (pEnt->bus.id.plat == dev) {
-                    entity = nent;
-                    xf86AddDevToEntity(nent, gdev);
+            if (strcasecmp(drvp->driverName, pEnt->driver->driverName)) {
+                LogMessageVerb(X_INFO, 1,
+                    "Driver \"%s\" is required for screen %d"
+                    " but  \"%s\" is driven by \"%s\", skipping\n",
+                    drvp->driverName, gdev->screen,
+                    dev->attribs->path, pEnt->driver->driverName);
+                entity = -1;
+                break;
+            }
+
+            for (l = 0; l < pEnt->numInstances; l++) {
+                if (pEnt->devices[l]->screen == gdev->screen) {
+                    LogMessageVerb(X_INFO, 1,
+                        "Screen %d for \"%s\" has already been claimed by \"%s\", skipping\n",
+                        gdev->screen, dev->attribs->path, pEnt->devices[l]->identifier);
+                    entity = -1;
                     break;
                 }
             }
+
+            LogMessageVerb(X_INFO, 1,
+                "Adding \"%s\" screen %d to \"%s\"\n",
+                dev->attribs->path, gdev->screen, pEnt->devices[0]->identifier);
+            xf86AddDevToEntity(nent, gdev);
+
+            break;
         }
     }
 
@@ -524,8 +588,12 @@ static Bool doPlatformProbe(struct xf86_platform_device *dev, DriverPtr drvp,
 
         if (drvp->platformProbe(drvp, entity, flags, dev, match_data))
             foundScreen = TRUE;
-        else
+        else {
+            LogMessageVerb(X_INFO, 1,
+                "Probe for \"%s\" and \"%s\" failed, unclaiming platform slot\n",
+                drvp->driverName, dev->attribs->path);
             xf86UnclaimPlatformSlot(dev, gdev);
+        }
     }
     return foundScreen;
 }
