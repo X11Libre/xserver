@@ -8,7 +8,6 @@
 
 extern _X_EXPORT const char *defaultFontPath;
 extern _X_EXPORT int monitorResolution;
-extern _X_EXPORT int defaultColorVisualClass;
 
 extern _X_EXPORT char *SeatId;
 
