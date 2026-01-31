@@ -1214,7 +1214,7 @@ EnqueueEvent(InternalEvent *ev, DeviceIntPtr device)
 
     eventlen = sizeof(InternalEvent);
 
-    QdEventPtr qe = calloc(1, sizeof(QdEventRec) + eventlen);
+    QdEventPtr qe = alloca(sizeof(QdEventRec) + eventlen);
     if (!qe)
         return;
     xorg_list_init(&qe->next);
@@ -2166,9 +2166,10 @@ ActivateImplicitGrab(DeviceIntPtr dev, ClientPtr client, WindowPtr win,
     else
         return FALSE;
 
-    tempGrab = AllocGrab(NULL);
+    tempGrab = alloca(sizeof(GrabRec));
     if (!tempGrab)
         return FALSE;
+    memset(tempGrab, 0, sizeof(GrabRec));
     tempGrab->next = NULL;
     tempGrab->device = dev;
     tempGrab->resource = client->clientAsMask;
@@ -2191,7 +2192,6 @@ ActivateImplicitGrab(DeviceIntPtr dev, ClientPtr client, WindowPtr win,
 
     (*dev->deviceGrab.ActivateGrab) (dev, tempGrab,
                                      currentTime, TRUE | ImplicitGrabMask);
-    FreeGrab(tempGrab);
     return TRUE;
 }
 
@@ -5613,9 +5613,10 @@ ProcUngrabKey(ClientPtr client)
         client->errorValue = stuff->modifiers;
         return BadValue;
     }
-    tempGrab = AllocGrab(NULL);
+    tempGrab = alloca(sizeof(GrabRec));
     if (!tempGrab)
         return BadAlloc;
+    memset(tempGrab, 0, sizeof(GrabRec));
     tempGrab->resource = client->clientAsMask;
     tempGrab->device = keybd;
     tempGrab->window = pWin;
@@ -5630,8 +5631,6 @@ ProcUngrabKey(ClientPtr client)
 
     if (!DeletePassiveGrabFromList(tempGrab))
         rc = BadAlloc;
-
-    FreeGrab(tempGrab);
 
     return rc;
 }
@@ -5809,9 +5808,10 @@ ProcUngrabButton(ClientPtr client)
 
     ptr = PickPointer(client);
 
-    tempGrab = AllocGrab(NULL);
+    tempGrab = alloca(sizeof(GrabRec));
     if (!tempGrab)
         return BadAlloc;
+    memset(tempGrab, 0, sizeof(GrabRec));
     tempGrab->resource = client->clientAsMask;
     tempGrab->device = ptr;
     tempGrab->window = pWin;
@@ -5827,7 +5827,6 @@ ProcUngrabButton(ClientPtr client)
     if (!DeletePassiveGrabFromList(tempGrab))
         rc = BadAlloc;
 
-    FreeGrab(tempGrab);
     return rc;
 }
 
