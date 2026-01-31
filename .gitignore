@@ -2,3 +2,5 @@
 *.swp
 *.patch
 tags
+.vscode/*
+!.vscode/tasks.json
