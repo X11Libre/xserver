@@ -34,6 +34,10 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#ifdef GLAMOR_HAS_EGL
+#include <epoxy/egl.h>
+#endif
+
 #include "dix/dix_priv.h"
 #include "os/fmt.h"
 #include "present/present_priv.h"
@@ -4889,6 +4893,26 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
     }
 
     drmmode_crtc->cursor_probed = TRUE;
+
+#ifdef GLAMOR_HAS_EGL
+    const char* renderer = (const char*)glGetString(GL_RENDERER);
+    const char* vendor = (const char*)glGetString(GL_VENDOR);
+
+#define CHECK_GL_NAME(name) ((renderer && strstr(renderer, name)) || (vendor && strstr(vendor, name)))
+
+    /**
+     * Some setups have different requirements for the
+     * cursor pitch compared to intel and nvidia.
+     *
+     * See: https://github.com/X11Libre/xserver/issues/1816
+     */
+    if (!(CHECK_GL_NAME("Intel") ||
+          CHECK_GL_NAME("NVIDIA"))) {
+        return;
+    }
+
+#undef CHECK_GL_NAME
+#endif
 
     xf86DrvMsg(crtc->scrn->scrnIndex, X_WARNING,
                "Probing the cursor size using the old method\n");
