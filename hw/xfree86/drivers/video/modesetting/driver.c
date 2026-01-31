@@ -40,10 +40,6 @@
 #include <X11/extensions/randr.h>
 #include <X11/extensions/Xv.h>
 
-#ifdef GLAMOR_HAS_EGL
-#include <epoxy/egl.h>
-#endif
-
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
 #include "mi/mi_priv.h"
@@ -1923,42 +1919,35 @@ CreateWindow_oneshot(WindowPtr pWin)
     return ret;
 }
 
+/**
+ * Driver names are taken from https://drmdb.emersion.fr/drivers
+ */
 static int
-modesetting_get_cursor_interleave(int scrnIndex)
+modesetting_get_cursor_interleave(int fd)
 {
-#ifdef GLAMOR_HAS_EGL
-    const char* renderer = (const char*)glGetString(GL_RENDERER);
-    if (!renderer) {
-        /* Something went really wrong */
-        xf86DrvMsg(scrnIndex, X_WARNING,
-                   "glGetString(GL_RENDERER) returned NULL, your GL is broken or not initialized\n");
-    }
-
-    const char* vendor = (const char*)glGetString(GL_VENDOR);
-    if (!vendor) {
-        /* Something went really wrong */
-        xf86DrvMsg(scrnIndex, X_WARNING,
-                   "glGetString(GL_VENDOR) returned NULL, your GL is broken or not initialized\n");
-    }
-
-#define CHECK_GL_NAME(name) ((renderer && strstr(renderer, name)) || (vendor && strstr(vendor, name)))
-
-    if (CHECK_GL_NAME("Intel")) {
+    drmVersionPtr version = drmGetVersion(fd);
+    int ret = HARDWARE_CURSOR_SOURCE_MASK_NOT_INTERLEAVED;
+    if (version == NULL || version->name == NULL) {
+        /* no operation */
+    } else if (strstr(version->name, "gma500") ||
+               strstr(version->name, "i915") ||
+               strstr(version->name, "xe")) {
         /* from xf86-video-intel */
-        return HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64;
-    }
-    if (CHECK_GL_NAME("NVIDIA")) {
+        ret = HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_64;
+    } else if (strstr(version->name, "nouveau") ||
+               strstr(version->name, "nvidia-drm") ||
+               strstr(version->name, "tegra")) {
         /* from xf86-video-{nouveau,nv} */
-        return HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32;
-    }
-    if (CHECK_GL_NAME("AMD")) {
+        ret =  HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_32;
+    } else if (strstr(version->name, "amdgpu")) {
         /* from xf86-video-{amdgpu,ati} */
-        return HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1;
+        ret = HARDWARE_CURSOR_SOURCE_MASK_INTERLEAVE_1;
     }
 
-#undef CHECK_GL_NAME
-#endif
-    return HARDWARE_CURSOR_SOURCE_MASK_NOT_INTERLEAVED;
+    if (version) {
+        drmFreeVersion(version);
+    }
+    return ret;
 }
 
 static Bool
@@ -2071,7 +2060,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
     /* Need to extend HWcursor support to handle mask interleave */
     if (!ms->drmmode.sw_cursor) {
         /* XXX Is there any spec that says we should interleave the cursor bits? XXX */
-        int interleave = modesetting_get_cursor_interleave(pScrn->scrnIndex);
+        int interleave = modesetting_get_cursor_interleave(ms->drmmode.fd);
 
         xf86_cursors_init(pScreen, ms->cursor_image_width, ms->cursor_image_height,
                           interleave |

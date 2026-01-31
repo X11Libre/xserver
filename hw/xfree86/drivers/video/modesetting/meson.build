@@ -8,12 +8,6 @@ modesetting_srcs = [
     'vblank.c',
 ]
 
-if epoxy_dep.found()
-    egl_dep = epoxy_dep
-else
-    egl_dep = disabler()
-endif
-
 shared_module(
     'modesetting_drv',
     modesetting_srcs,
@@ -23,7 +17,6 @@ shared_module(
     c_args: xorg_c_args,
     dependencies: [
         common_dep,
-        egl_dep,
         udev_dep,
         libdrm_dep,
         gbm_dep,
