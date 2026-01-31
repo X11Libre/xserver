@@ -66,6 +66,12 @@
 
 #define AtomFromName(x) MakeAtom(x, strlen(x), 1)
 
+#define KD_KEY_COUNT    248
+#define KD_MIN_KEYCODE  8
+#define KD_MAX_KEYCODE  255
+#define KD_MAX_WIDTH    4
+#define KD_MAX_LENGTH   (KD_MAX_KEYCODE - KD_MIN_KEYCODE + 1)
+
 struct KdConfigDevice {
     char *line;
     struct KdConfigDevice *next;
