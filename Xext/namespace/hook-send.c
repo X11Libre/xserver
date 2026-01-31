@@ -36,8 +36,18 @@ void hookSend(CallbackListPtr *pcbl, void *unused, void *calldata)
     if (clientAllowedOnClient(client, targetClient))
         goto pass;
 
-    XNS_HOOK_LOG("BLOCK target @ %s\n", obj->ns->name);
     for (int i = 0; i < param->count; i++) {
+        const int type = param->events[i].u.u.type;
+        /* catch messages for root namespace */
+        if (obj->ns->isRoot) {
+            const char* evname = LookupEventName(type);
+            if (strcmp(evname,LookupEventName(ClientMessage))==0)
+                goto pass;
+            if (strcmp(evname,LookupEventName(UnmapNotify))==0)
+                goto pass;
+        }
+
+        XNS_HOOK_LOG("BLOCK target @ %s\n", obj->ns->name);
         XNS_HOOK_LOG("sending event of type %s to window 0x%lx of client %d\n",
             LookupEventName(param->events[i].u.u.type),
             (unsigned long)param->pWin->drawable.id,
