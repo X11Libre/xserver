@@ -4757,9 +4757,8 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
     btlen = bytes_to_int32(btlen);
     len = sizeof(xXIEnterEvent) + btlen * 4;
 
-    xXIEnterEvent *event = calloc(1, len);
-    if (!event)
-        return;
+    xXIEnterEvent *event = alloca(len);
+    memset(event, 0, len);
 
     event->type = GenericEvent;
     event->extension = EXTENSION_MAJOR_XINPUT;
@@ -4813,7 +4812,7 @@ DeviceEnterLeaveEvent(DeviceIntPtr mouse,
     }
 
  out:
-    free(event);
+    ;
 }
 
 void
@@ -5593,7 +5592,7 @@ ProcUngrabKey(ClientPtr client)
 {
     REQUEST(xUngrabKeyReq);
     WindowPtr pWin;
-    GrabPtr tempGrab;
+    GrabRec tempGrab;
     DeviceIntPtr keybd = PickKeyboard(client);
     int rc;
 
@@ -5613,25 +5612,20 @@ ProcUngrabKey(ClientPtr client)
         client->errorValue = stuff->modifiers;
         return BadValue;
     }
-    tempGrab = AllocGrab(NULL);
-    if (!tempGrab)
-        return BadAlloc;
-    tempGrab->resource = client->clientAsMask;
-    tempGrab->device = keybd;
-    tempGrab->window = pWin;
-    tempGrab->modifiersDetail.exact = stuff->modifiers;
-    tempGrab->modifiersDetail.pMask = NULL;
-    tempGrab->modifierDevice = keybd;
-    tempGrab->type = KeyPress;
-    tempGrab->grabtype = CORE;
-    tempGrab->detail.exact = stuff->key;
-    tempGrab->detail.pMask = NULL;
-    tempGrab->next = NULL;
+    tempGrab.resource = client->clientAsMask;
+    tempGrab.device = keybd;
+    tempGrab.window = pWin;
+    tempGrab.modifiersDetail.exact = stuff->modifiers;
+    tempGrab.modifiersDetail.pMask = NULL;
+    tempGrab.modifierDevice = keybd;
+    tempGrab.type = KeyPress;
+    tempGrab.grabtype = CORE;
+    tempGrab.detail.exact = stuff->key;
+    tempGrab.detail.pMask = NULL;
+    tempGrab.next = NULL;
 
-    if (!DeletePassiveGrabFromList(tempGrab))
+    if (!DeletePassiveGrabFromList(&tempGrab))
         rc = BadAlloc;
-
-    FreeGrab(tempGrab);
 
     return rc;
 }
@@ -5817,9 +5811,10 @@ ProcUngrabButton(ClientPtr client)
 
     ptr = PickPointer(client);
 
-    tempGrab = AllocGrab(NULL);
+    tempGrab = alloca(sizeof(GrabRec));
     if (!tempGrab)
         return BadAlloc;
+    memset(tempGrab, 0, sizeof(GrabRec));
     tempGrab->resource = client->clientAsMask;
     tempGrab->device = ptr;
     tempGrab->window = pWin;
@@ -5835,7 +5830,6 @@ ProcUngrabButton(ClientPtr client)
     if (!DeletePassiveGrabFromList(tempGrab))
         rc = BadAlloc;
 
-    FreeGrab(tempGrab);
     return rc;
 }
 
