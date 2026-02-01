@@ -527,6 +527,15 @@ compUnredirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
     return Success;
 }
 
+static unsigned
+compGetBackgroundState(WindowPtr pWin)
+{
+    while (pWin->backgroundState == ParentRelative)
+        pWin = pWin->parent;
+
+    return pWin->backgroundState;
+}
+
 static PixmapPtr
 compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
 {
@@ -542,10 +551,6 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
 
     pPixmap->screen_x = x;
     pPixmap->screen_y = y;
-
-    if (pWin->backgroundState != None) {
-        return pPixmap;
-    }
 
     /*
      * Copy bits from the parent into the new pixmap so that it will
@@ -572,7 +577,7 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
             FreeScratchGC(pGC);
         }
     }
-    else {
+    else if (compGetBackgroundState(pWin) == None) {
         PictFormatPtr pSrcFormat = PictureWindowFormat(pParent);
         PictFormatPtr pDstFormat = PictureWindowFormat(pWin);
         XID inferiors = IncludeInferiors;
