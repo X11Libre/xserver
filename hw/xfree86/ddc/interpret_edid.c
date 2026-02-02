@@ -801,3 +801,11 @@ gtf_supported(xf86MonPtr mon)
 
     return FALSE;
 }
+
+bool xf86Monitor_gtf_supported(xf86MonPtr monitor)
+{
+    if (!monitor)
+        return false;
+
+    return GTF_SUPPORTED(monitor->features.msc);
+}

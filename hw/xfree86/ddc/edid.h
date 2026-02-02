@@ -12,6 +12,7 @@
 #ifndef _EDID_H_
 #define _EDID_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <X11/Xmd.h>
 #include <X11/Xfuncproto.h>
@@ -203,5 +204,13 @@ typedef struct {
 } xf86Monitor, *xf86MonPtr;
 
 extern _X_EXPORT xf86MonPtr ConfiguredMonitor;
+
+/*
+ * check whether monitor supports Generalized Timing Formula
+ *
+ * @param  monitor the monitor information structure to check
+ * @return true if GTF is supported by the monitor
+ */
+_X_EXPORT bool xf86Monitor_gtf_supported(xf86MonPtr monitor);
 
 #endif                          /* _EDID_H_ */
