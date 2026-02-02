@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include "config/config-udev.h"
 #include "config/hotplug_priv.h"
 #include "os/fmt.h"
 
