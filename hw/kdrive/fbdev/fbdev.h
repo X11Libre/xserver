@@ -22,6 +22,7 @@
 
 #ifndef _KDRIVE_FBDEV_H_
 #define _KDRIVE_FBDEV_H_
+#include <stdbool.h>
 #include <stdio.h>
 #include <linux/fb.h>
 #include <unistd.h>
@@ -51,7 +52,6 @@ typedef struct _fbdevScrPriv {
     Rotation randr;
     Bool shadow;
 #ifdef GLAMOR
-    Bool glamor_initialized;
     EGLDisplay display;
     EGLContext ctx;
     void* glamor_make_current;
@@ -64,12 +64,12 @@ extern Bool fbDisableShadow;
 
 #ifdef GLAMOR
 extern char *fbdev_glvnd_provider;
-extern Bool es_allowed;
-extern Bool force_es;
-extern Bool fbGlamorAllowed;
-extern Bool fbForceGlamor;
+extern bool es_allowed;
+extern bool force_es;
+extern bool fbGlamorAllowed;
+extern bool fbForceGlamor;
 #ifdef XV
-extern Bool fbXVAllowed;
+extern bool fbXVAllowed;
 #endif
 #endif
 

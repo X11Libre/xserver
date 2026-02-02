@@ -22,11 +22,11 @@
 
 char *fbdev_glvnd_provider = NULL;
 
-Bool es_allowed = TRUE;
-Bool force_es = FALSE;
-Bool fbGlamorAllowed = TRUE;
-Bool fbForceGlamor = FALSE;
-Bool fbXVAllowed = TRUE;
+bool es_allowed = TRUE;
+bool force_es = FALSE;
+bool fbGlamorAllowed = TRUE;
+bool fbForceGlamor = FALSE;
+bool fbXVAllowed = TRUE;
 
 #define ARR_SIZE(x) (sizeof(x) / sizeof(*(x)))
 
