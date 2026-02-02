@@ -12,6 +12,7 @@
 #ifndef _EDID_H_
 #define _EDID_H_
 
+#include <stdbool.h>
 #include <X11/Xmd.h>
 
 #ifndef _X_EXPORT
@@ -667,5 +668,13 @@ struct cea_ext_body {
     Uchar flags;
     struct cea_data_block data_collection;
 };
+
+/*
+ * check whether monitor supports Generalized Timing Formula
+ *
+ * @param  monitor the monitor information structure to check
+ * @return true if GTF is supported by the monitor
+ */
+_X_EXPORT bool xf86Monitor_gtf_supported(xf86MonPtr monitor);
 
 #endif                          /* _EDID_H_ */
