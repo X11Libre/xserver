@@ -8,6 +8,7 @@
 #include <X11/Xfuncproto.h>
 
 #include <epoxy/egl.h>
+#include "dix.h"
 #include "scrnintstr.h"
 #include "glamor_priv.h"
 #include "glamor_egl.h"
@@ -27,8 +28,6 @@ bool force_es = FALSE;
 bool fbGlamorAllowed = TRUE;
 bool fbForceGlamor = FALSE;
 bool fbXVAllowed = TRUE;
-
-#define ARR_SIZE(x) (sizeof(x) / sizeof(*(x)))
 
 static void
 fbdev_glamor_egl_cleanup(FbdevScrPriv *scrpriv)
@@ -504,7 +503,7 @@ fbdev_glamor_egl_try_big_gl_api(FbdevScrPriv *scrpriv)
     scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
                                                    config_attrib_list,
                                                    ctx_attrib_lists,
-                                                   ARR_SIZE(ctx_attrib_lists));
+                                                   ARRAY_SIZE(ctx_attrib_lists));
 
     if (scrpriv->ctx == EGL_NO_CONTEXT) {
         return FALSE;
@@ -552,7 +551,7 @@ fbdev_glamor_egl_try_gles_api(FbdevScrPriv *scrpriv)
     scrpriv->ctx = fbdev_glamor_egl_create_context(scrpriv->display,
                                                    config_attrib_list,
                                                    ctx_attrib_lists,
-                                                   ARR_SIZE(ctx_attrib_lists));
+                                                   ARRAY_SIZE(ctx_attrib_lists));
 
     if (scrpriv->ctx == EGL_NO_CONTEXT) {
         return FALSE;
