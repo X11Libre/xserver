@@ -49,9 +49,6 @@
 int _X_COLD
 SProcXIPassiveGrabDevice(ClientPtr client)
 {
-    int i;
-    uint32_t *mods;
-
     REQUEST(xXIPassiveGrabDeviceReq);
     REQUEST_AT_LEAST_SIZE(xXIPassiveGrabDeviceReq);
 
@@ -65,11 +62,8 @@ SProcXIPassiveGrabDevice(ClientPtr client)
 
     REQUEST_FIXED_SIZE(xXIPassiveGrabDeviceReq,
         ((uint32_t) stuff->mask_len + stuff->num_modifiers) *4);
-    mods = (uint32_t *) &stuff[1] + stuff->mask_len;
 
-    for (i = 0; i < stuff->num_modifiers; i++, mods++) {
-        swapl(mods);
-    }
+    SwapLongs((CARD32*)&stuff[1], stuff->num_modifiers + stuff->mask_len);
 
     return ProcXIPassiveGrabDevice(client);
 }
