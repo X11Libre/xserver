@@ -68,9 +68,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         ((uint32_t) stuff->mask_len + stuff->num_modifiers) *4);
 
     if (client->swapped) {
-        uint32_t *mods = (uint32_t *) &stuff[1] + stuff->mask_len;
-        for (int i = 0; i < stuff->num_modifiers; i++, mods++)
-            swapl(mods);
+        SwapLongs((CARD32*)&stuff[1], stuff->num_modifiers + stuff->mask_len);
     }
 
     DeviceIntPtr dev, mod_dev;
