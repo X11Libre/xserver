@@ -324,7 +324,7 @@ jobs:
                   bash ./.github/scripts/Cygwin/build.sh
 
     check-sign-off:
-        name: Write comment if unsigned commits found
+        name: Check Signed-Off-By
         if: github.event_name == 'pull_request'
         runs-on: ubuntu-latest
         env:
