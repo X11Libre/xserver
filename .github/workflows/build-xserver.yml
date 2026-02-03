@@ -283,7 +283,7 @@ jobs:
                 path: D:\cygwin-packages
                 key: ${{ runner.os }}-packages
                 restore-keys: ${{ runner.os }}-packages
-            - uses: cygwin/cygwin-install-action@master
+            - uses: cygwin/cygwin-install-action@v6
               with:
                   # FIXME: temporary workaround for cygwin mirror problem
                   # https://github.com/cygwin/cygwin-install-action/issues/39
