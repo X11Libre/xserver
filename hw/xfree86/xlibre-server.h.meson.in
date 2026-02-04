@@ -212,4 +212,7 @@
 /* needed for os.h to prevent redefinition of timingsafe_memcmp in drivers */
 #mesondefine HAVE_TIMINGSAFE_MEMCMP
 
+/* Xserver has xf86ParseEDID() et al (since 25.2) */
+#define XLIBRE_API_EDID_PARSE_v1 1
+
 #endif /* _XORG_SERVER_H_ */
