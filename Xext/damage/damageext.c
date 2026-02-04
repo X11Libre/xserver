@@ -375,17 +375,16 @@ DamageExtSubtractWindowClip(DamageExtPtr pDamageExt)
         return NULL;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
-        ScreenPtr screen;
         if (Success != dixLookupWindow(&win, res->info[walkScreenIdx].id, serverClient,
                                        DixReadAccess))
             goto out;
 
-        screen = win->drawable.pScreen;
+        ScreenPtr pScreen = win->drawable.pScreen;
 
-        RegionTranslate(ret, -screen->x, -screen->y);
+        RegionTranslate(ret, -pScreen->x, -pScreen->y);
         if (!RegionUnion(ret, ret, &win->borderClip))
             goto out;
-        RegionTranslate(ret, screen->x, screen->y);
+        RegionTranslate(ret, pScreen->x, pScreen->y);
     });
 
     return ret;
