@@ -50,9 +50,7 @@
 
 #include "rootlessCommon.h"
 
-#ifdef DAMAGE
 #include "damage.h"
-#endif
 
 /* 10.4's deferred update makes X slower.. have to live with the tearing
  * for now.. */
