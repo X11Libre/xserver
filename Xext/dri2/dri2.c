@@ -163,12 +163,10 @@ dri2WakeClient(ClientPtr client, void *closure)
 static Bool
 dri2WakeAll(ClientPtr client, DRI2DrawablePtr pPriv, enum DRI2WakeType t)
 {
-    int count;
-
     if (!pPriv->blocked[t])
         return FALSE;
 
-    count = ClientSignalAll(client, dri2WakeClient, Wake(pPriv, t));
+    int count = ClientSignalAll(client, dri2WakeClient, Wake(pPriv, t));
     pPriv->blocked[t] -= count;
     return count;
 }
