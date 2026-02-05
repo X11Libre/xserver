@@ -720,13 +720,13 @@ static void
 DRI2InvalidateDrawable(DrawablePtr pDraw)
 {
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
-    DRI2DrawableRefPtr ref;
 
     if (!pPriv || !pPriv->needInvalidate)
         return;
 
     pPriv->needInvalidate = FALSE;
 
+    DRI2DrawableRefPtr ref;
     xorg_list_for_each_entry(ref, &pPriv->reference_list, link)
         ref->invalidate(pDraw, ref->priv, ref->id);
 }
