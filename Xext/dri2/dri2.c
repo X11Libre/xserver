@@ -484,13 +484,11 @@ destroy_buffer(DrawablePtr pDraw, DRI2BufferPtr buffer, int prime_id)
 static int
 find_attachment(DRI2DrawablePtr pPriv, unsigned attachment)
 {
-    int i;
-
     if (pPriv->buffers == NULL) {
         return -1;
     }
 
-    for (i = 0; i < pPriv->bufferCount; i++) {
+    for (int i = 0; i < pPriv->bufferCount; i++) {
         if ((pPriv->buffers[i] != NULL)
             && (pPriv->buffers[i]->attachment == attachment)) {
             return i;
