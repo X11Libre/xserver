@@ -190,17 +190,15 @@ DRI2GetScreen(ScreenPtr pScreen)
 static ScreenPtr
 GetScreenPrime(ScreenPtr primary, int prime_id)
 {
-    ScreenPtr secondary;
-    if (prime_id == 0) {
+    if (prime_id == 0)
         return primary;
-    }
-    xorg_list_for_each_entry(secondary, &primary->secondary_list, secondary_head) {
-        DRI2ScreenPtr ds;
 
+    ScreenPtr secondary;
+    xorg_list_for_each_entry(secondary, &primary->secondary_list, secondary_head) {
         if (!secondary->is_offload_secondary)
             continue;
 
-        ds = DRI2GetScreen(secondary);
+        DRI2ScreenPtr ds = DRI2GetScreen(secondary);
         if (ds == NULL)
             continue;
 
