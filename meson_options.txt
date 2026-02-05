@@ -14,7 +14,7 @@ option('xwin', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable XWin X server')
 option('xquartz', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable Xquartz X server')
-option('numa', type: 'boolean', value: true, description: 'Enable NUMA support')
+option('numa', type: 'boolean', value: false, description: 'Enable NUMA support')
 
 option('kdrive_kbd', type: 'boolean', value: true,
        description: 'Build kbd driver for kdrive')
