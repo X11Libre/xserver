@@ -46,6 +46,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <grp.h>
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
@@ -181,6 +184,11 @@ xf86ValidateFontPath(char *path)
     int flag;
     int dirlen;
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        tmp_path = numa_alloc_interleaved(strlen(path) + 1);
+    else
+#endif
     tmp_path = calloc(1, strlen(path) + 1);
     out_pnt = tmp_path;
     path_elem = NULL;
