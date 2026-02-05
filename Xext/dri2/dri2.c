@@ -741,9 +741,7 @@ DRI2InvalidateDrawable(DrawablePtr pDraw)
 Bool
 DRI2ThrottleClient(ClientPtr client, DrawablePtr pDraw)
 {
-    DRI2DrawablePtr pPriv;
-
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL)
         return FALSE;
 
