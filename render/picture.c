@@ -900,6 +900,7 @@ CreateLinearGradientPicture(Picture pid, xPointFixed * p1, xPointFixed * p2,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
@@ -945,6 +946,7 @@ CreateRadialGradientPicture(Picture pid, xPointFixed * inner,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
@@ -983,6 +985,7 @@ CreateConicalGradientPicture(Picture pid, xPointFixed * center, xFixed angle,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
