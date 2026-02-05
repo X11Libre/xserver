@@ -112,7 +112,7 @@ typedef struct _DRI2Drawable {
 } DRI2DrawableRec, *DRI2DrawablePtr;
 
 typedef struct _DRI2Screen {
-    ScreenPtr screen;
+    ScreenPtr pScreen;
     int refcnt;
     unsigned int numDrivers;
     const char **driverNames;
@@ -1534,7 +1534,7 @@ DRI2ScreenInit(ScreenPtr pScreen, DRI2InfoPtr info)
     if (!ds)
         return FALSE;
 
-    ds->screen = pScreen;
+    ds->pScreen = pScreen;
     ds->fd = info->fd;
     ds->deviceName = info->deviceName;
     dri2_major = 1;
