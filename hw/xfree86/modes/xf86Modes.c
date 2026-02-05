@@ -36,10 +36,10 @@
 /**
  * Calculates the horizontal sync rate of a mode.
  */
-double
+float
 xf86ModeHSync(const DisplayModeRec * mode)
 {
-    double hsync = 0.0;
+    float hsync = 0.0f;
 
     if (mode->HSync > 0.0)
         hsync = mode->HSync;
@@ -52,19 +52,19 @@ xf86ModeHSync(const DisplayModeRec * mode)
 /**
  * Calculates the vertical refresh rate of a mode.
  */
-double
+float
 xf86ModeVRefresh(const DisplayModeRec * mode)
 {
-    double refresh = 0.0;
+    float refresh = 0.0f;
 
     if (mode->VRefresh > 0.0)
         refresh = mode->VRefresh;
     else if (mode->HTotal > 0 && mode->VTotal > 0) {
-        refresh = mode->Clock * 1000.0 / mode->HTotal / mode->VTotal;
+        refresh = mode->Clock * 1000.0f / mode->HTotal / mode->VTotal;
         if (mode->Flags & V_INTERLACE)
-            refresh *= 2.0;
+            refresh *= 2.0f;
         if (mode->Flags & V_DBLSCAN)
-            refresh /= 2.0;
+            refresh /= 2.0f;
         if (mode->VScan > 1)
             refresh /= (float) (mode->VScan);
     }
