@@ -481,10 +481,8 @@ create_buffer(DRI2ScreenPtr ds, DrawablePtr pDraw,
 static void
 destroy_buffer(DrawablePtr pDraw, DRI2BufferPtr buffer, int prime_id)
 {
-    ScreenPtr primeScreen;
-    DRI2ScreenPtr ds;
-    primeScreen = GetScreenPrime(pDraw->pScreen, prime_id);
-    ds = DRI2GetScreen(primeScreen);
+    ScreenPtr primeScreen = GetScreenPrime(pDraw->pScreen, prime_id);
+    DRI2ScreenPtr ds = DRI2GetScreen(primeScreen);
     if (ds->DestroyBuffer2)
         (*ds->DestroyBuffer2)(primeScreen, pDraw, buffer);
     else
