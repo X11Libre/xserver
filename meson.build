@@ -687,6 +687,20 @@ if get_option('xselinux') != 'false'
     endif
 endif
 
+numa_dep = dependency('numa', required: get_option('numa'))
+if get_option('numa')
+    if numa_dep.found()
+        conf_data.set('HAVE_NUMA', 1)
+        common_dep += numa_dep
+        message('NUMA support: YES')
+    else
+        if get_option('numa')
+            error('NUMA support requested but libnuma not found')
+        endif
+        message('NUMA support: NO')
+    endif
+endif
+
 socket_dep = []
 if host_machine.system() == 'windows'
     socket_dep = meson.get_compiler('c').find_library('ws2_32')

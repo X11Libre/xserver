@@ -122,6 +122,10 @@ SOFTWARE.
 #include "xdmcp.h"
 #endif
 
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
+
 #define MAX_CONNECTIONS (1<<16)
 
 #define OS_COMM_GRAB_IMPERVIOUS 1
@@ -279,6 +283,11 @@ CreateWellKnownSockets(void)
         return; // mostly to keep GCC from complaining about too large alloc
     }
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        ListenTransFds = numa_alloc_interleaved(ListenTransCount * sizeof(int));
+    else
+#endif
     ListenTransFds = calloc(ListenTransCount, sizeof(int));
     if (ListenTransFds == NULL)
         FatalError ("Failed to create listening socket array");
@@ -575,14 +584,25 @@ static ClientPtr
 AllocNewConnection(XtransConnInfo trans_conn, int fd, CARD32 conn_time)
 {
     ClientPtr client;
+    OsCommPtr oc;
 
-    OsCommPtr oc = calloc(1, sizeof(OsCommRec));
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        oc = numa_alloc_interleaved(sizeof(OsCommRec));
+    else
+#endif
+    oc = calloc(1, sizeof(OsCommRec));
     if (!oc)
         return NULL;
     oc->trans_conn = trans_conn;
     oc->fd = fd;
     oc->conn_time = conn_time;
     if (!(client = NextAvailableClient((void *) oc))) {
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(oc, sizeof(OsCommRec));
+        else
+#endif
         free(oc);
         return NULL;
     }
@@ -737,6 +757,11 @@ CloseDownConnection(ClientPtr client)
 	FlushClient(client, oc);
     CloseDownFileDescriptor(oc);
     FreeOsBuffers(oc);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        numa_free(client->osPrivate, sizeof(OsCommRec));
+    else
+#endif
     free(client->osPrivate);
     client->osPrivate = (void *) NULL;
     if (auditTrailLevel > 1)
@@ -778,6 +803,11 @@ SetNotifyFd(int fd, NotifyFdProcPtr notify, int mask, void *data)
         if (mask == 0)
             return TRUE;
 
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            n = numa_alloc_interleaved(sizeof(struct notify_fd));
+        else
+#endif
         n = calloc(1, sizeof (struct notify_fd));
         if (!n)
             return FALSE;
@@ -789,6 +819,11 @@ SetNotifyFd(int fd, NotifyFdProcPtr notify, int mask, void *data)
 
     if (mask == 0) {
         ospoll_remove(server_poll, fd);
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(n, sizeof(struct notify_fd));
+        else
+#endif
         free(n);
     } else {
         int listen = mask & ~n->mask;
