@@ -251,7 +251,7 @@ typedef Bool (*RRProviderSetPropertyProcPtr) (ScreenPtr pScreen,
                                               RRPropertyValuePtr value);
 
 typedef Bool (*RRGetInfoProcPtr) (ScreenPtr pScreen, Rotation * rotations);
-typedef Bool (*RRCloseScreenProcPtr) (ScreenPtr pscreen);
+typedef Bool (*RRCloseScreenProcPtr) (ScreenPtr pScreen);
 
 typedef Bool (*RRProviderSetOutputSourceProcPtr)(ScreenPtr pScreen,
                                           RRProviderPtr provider,
