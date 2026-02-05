@@ -347,17 +347,12 @@ DRI2CreateDrawable2(ClientPtr client, DrawablePtr pDraw, XID id,
                     DRI2InvalidateProcPtr invalidate, void *priv,
                     XID *dri2_id_out)
 {
-    DRI2DrawablePtr pPriv;
-    DRI2ClientPtr  dri2_client;
-    XID dri2_id;
-    int rc;
-
     if (!dixPrivateKeyRegistered(&dri2ScreenPrivateKeyRec))
         return BadValue;
 
-    dri2_client = dri2ClientPrivate(client);
+    DRI2ClientPtr dri2_client = dri2ClientPrivate(client);
 
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL)
         pPriv = DRI2AllocateDrawable(pDraw);
     if (pPriv == NULL)
@@ -365,8 +360,8 @@ DRI2CreateDrawable2(ClientPtr client, DrawablePtr pDraw, XID id,
 
     pPriv->prime_id = dri2_client->prime_id;
 
-    dri2_id = FakeClientID(client->index);
-    rc = DRI2AddDrawableRef(pPriv, id, dri2_id, invalidate, priv);
+    XID dri2_id = FakeClientID(client->index);
+    int rc = DRI2AddDrawableRef(pPriv, id, dri2_id, invalidate, priv);
     if (rc != Success)
         return rc;
 
