@@ -387,12 +387,8 @@ static int
 DRI2DrawableGone(void *p, XID id)
 {
     DRI2DrawablePtr pPriv = p;
-    DRI2DrawableRefPtr ref, next;
-    WindowPtr pWin;
-    PixmapPtr pPixmap;
-    DrawablePtr pDraw;
-    int i;
 
+    DRI2DrawableRefPtr ref, next;
     xorg_list_for_each_entry_safe(ref, next, &pPriv->reference_list, link) {
         if (ref->dri2_id == id) {
             xorg_list_del(&ref->link);
@@ -414,13 +410,13 @@ DRI2DrawableGone(void *p, XID id)
     if (!xorg_list_is_empty(&pPriv->reference_list))
         return Success;
 
-    pDraw = pPriv->drawable;
+    DrawablePtr pDraw = pPriv->drawable;
     if (pDraw->type == DRAWABLE_WINDOW) {
-        pWin = (WindowPtr) pDraw;
+        WindowPtr pWin = (WindowPtr) pDraw;
         dixSetPrivate(&pWin->devPrivates, &dri2WindowPrivateKeyRec, NULL);
     }
     else {
-        pPixmap = (PixmapPtr) pDraw;
+        PixmapPtr pPixmap = (PixmapPtr) pDraw;
         dixSetPrivate(&pPixmap->devPrivates, &dri2PixmapPrivateKeyRec, NULL);
     }
 
@@ -430,9 +426,8 @@ DRI2DrawableGone(void *p, XID id)
     }
 
     if (pPriv->buffers != NULL) {
-        for (i = 0; i < pPriv->bufferCount; i++)
+        for (int i = 0; i < pPriv->bufferCount; i++)
             destroy_buffer(pDraw, pPriv->buffers[i], pPriv->prime_id);
-
         free(pPriv->buffers);
     }
 
