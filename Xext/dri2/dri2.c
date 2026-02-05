@@ -209,15 +209,12 @@ DRI2GetScreenPrime(ScreenPtr primary, int prime_id)
 static DRI2DrawablePtr
 DRI2GetDrawable(DrawablePtr pDraw)
 {
-    WindowPtr pWin;
-    PixmapPtr pPixmap;
-
     switch (pDraw->type) {
     case DRAWABLE_WINDOW:
-        pWin = (WindowPtr) pDraw;
+        WindowPtr pWin = (WindowPtr) pDraw;
         return dixLookupPrivate(&pWin->devPrivates, &dri2WindowPrivateKeyRec);
     case DRAWABLE_PIXMAP:
-        pPixmap = (PixmapPtr) pDraw;
+        PixmapPtr pPixmap = (PixmapPtr) pDraw;
         return dixLookupPrivate(&pPixmap->devPrivates, &dri2PixmapPrivateKeyRec);
     default:
         return NULL;
