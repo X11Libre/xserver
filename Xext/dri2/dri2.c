@@ -227,14 +227,11 @@ DRI2GetDrawable(DrawablePtr pDraw)
 static DRI2DrawablePtr
 DRI2AllocateDrawable(DrawablePtr pDraw)
 {
-    DRI2ScreenPtr ds = DRI2GetScreen(pDraw->pScreen);
-    CARD64 ust;
-    WindowPtr pWin;
-    PixmapPtr pPixmap;
-
     DRI2DrawablePtr pPriv = calloc(1, sizeof *pPriv);
     if (pPriv == NULL)
         return NULL;
+
+    DRI2ScreenPtr ds = DRI2GetScreen(pDraw->pScreen);
 
     pPriv->dri2_screen = ds;
     pPriv->drawable = pDraw;
@@ -246,7 +243,9 @@ DRI2AllocateDrawable(DrawablePtr pDraw)
     pPriv->swap_count = 0;
     pPriv->target_sbc = -1;
     pPriv->swap_interval = 1;
+
     /* Initialize last swap target from DDX if possible */
+    CARD64 ust;
     if (!ds->GetMSC || !(*ds->GetMSC) (pDraw, &ust, &pPriv->last_swap_target))
         pPriv->last_swap_target = 0;
 
@@ -259,11 +258,11 @@ DRI2AllocateDrawable(DrawablePtr pDraw)
     pPriv->redirectpixmap = NULL;
     pPriv->prime_secondary_pixmap = NULL;
     if (pDraw->type == DRAWABLE_WINDOW) {
-        pWin = (WindowPtr) pDraw;
+        WindowPtr pWin = (WindowPtr) pDraw;
         dixSetPrivate(&pWin->devPrivates, &dri2WindowPrivateKeyRec, pPriv);
     }
     else {
-        pPixmap = (PixmapPtr) pDraw;
+        PixmapPtr pPixmap = (PixmapPtr) pDraw;
         dixSetPrivate(&pPixmap->devPrivates, &dri2PixmapPrivateKeyRec, pPriv);
     }
 
