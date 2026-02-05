@@ -29,6 +29,9 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 #include "glamor/glamor_priv.h"
 #include "os/bug_priv.h"
@@ -44,6 +47,11 @@ glamor_destroy_fbo(glamor_screen_private *glamor_priv,
     if (fbo->tex)
         glDeleteTextures(1, &fbo->tex);
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        numa_free(fbo, sizeof(*fbo));
+    else
+#endif
     free(fbo);
 }
 
@@ -103,6 +111,11 @@ glamor_create_fbo_from_tex(glamor_screen_private *glamor_priv,
     const struct glamor_format *f = glamor_format_for_pixmap(pixmap);
     glamor_pixmap_fbo *fbo;
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        fbo = numa_alloc_interleaved(sizeof(*fbo));
+    else
+#endif
     fbo = calloc(1, sizeof(*fbo));
     if (fbo == NULL)
         return NULL;
@@ -193,12 +206,27 @@ glamor_create_fbo_array(glamor_screen_private *glamor_priv,
     block_wcnt = (w + block_w - 1) / block_w;
     block_hcnt = (h + block_h - 1) / block_h;
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1) {
+        box_array = numa_alloc_interleaved(block_wcnt * block_hcnt * sizeof(box_array[0]));
+        fbo_array = numa_alloc_interleaved(block_wcnt * block_hcnt * sizeof(glamor_pixmap_fbo *));
+    }
+    else {
+#endif
     box_array = calloc(block_wcnt * block_hcnt, sizeof(box_array[0]));
+    fbo_array = calloc(block_wcnt * block_hcnt, sizeof(glamor_pixmap_fbo *));
+#ifdef HAVE_NUMA
+    }
+#endif
     if (box_array == NULL)
         return NULL;
 
-    fbo_array = calloc(block_wcnt * block_hcnt, sizeof(glamor_pixmap_fbo *));
     if (fbo_array == NULL) {
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(box_array, block_wcnt * block_hcnt * sizeof(box_array[0]));
+        else
+#endif
         free(box_array);
         return FALSE;
     }
@@ -239,8 +267,18 @@ glamor_create_fbo_array(glamor_screen_private *glamor_priv,
     for (i = 0; i < block_wcnt * block_hcnt; i++)
         if (fbo_array[i])
             glamor_destroy_fbo(glamor_priv, fbo_array[i]);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1) {
+        numa_free(box_array, block_wcnt * block_hcnt * sizeof(box_array[0]));
+        numa_free(fbo_array, block_wcnt * block_hcnt * sizeof(glamor_pixmap_fbo *));
+    }
+    else {
+#endif
     free(box_array);
     free(fbo_array);
+#ifdef HAVE_NUMA
+    }
+#endif
     return NULL;
 }
 
@@ -317,6 +355,11 @@ glamor_pixmap_destroy_fbo(PixmapPtr pixmap)
 
         for (i = 0; i < priv->block_wcnt * priv->block_hcnt; i++)
             glamor_destroy_fbo(glamor_priv, priv->fbo_array[i]);
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(priv->fbo_array, priv->block_wcnt * priv->block_hcnt * sizeof(glamor_pixmap_fbo *));
+        else
+#endif
         free(priv->fbo_array);
         priv->fbo_array = NULL;
     }
