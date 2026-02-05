@@ -822,12 +822,8 @@ DRI2InvalidateDrawableAll(DrawablePtr pDraw)
 DrawablePtr DRI2UpdatePrime(DrawablePtr pDraw, DRI2BufferPtr pDest)
 {
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
-    PixmapPtr spix;
     PixmapPtr mpix = GetDrawablePixmap(pDraw);
-    ScreenPtr primary, secondary;
-    Bool ret;
-
-    primary = mpix->drawable.pScreen;
+    ScreenPtr primary = mpix->drawable.pScreen;
 
     if (pDraw->type == DRAWABLE_WINDOW) {
         WindowPtr pWin = (WindowPtr)pDraw;
@@ -846,8 +842,7 @@ DrawablePtr DRI2UpdatePrime(DrawablePtr pDraw, DRI2BufferPtr pDest)
                     if (!mpix)
                         return NULL;
 
-                    ret = (*primary->ReplaceScanoutPixmap)(pDraw, mpix, TRUE);
-                    if (ret == FALSE) {
+                    if (!(primary->ReplaceScanoutPixmap(pDraw, mpix, TRUE))) {
                         dixDestroyPixmap(mpix, 0);
                         return NULL;
                     }
@@ -862,7 +857,7 @@ DrawablePtr DRI2UpdatePrime(DrawablePtr pDraw, DRI2BufferPtr pDest)
         }
     }
 
-    secondary = GetScreenPrime(pDraw->pScreen, pPriv->prime_id);
+    ScreenPtr secondary = GetScreenPrime(pDraw->pScreen, pPriv->prime_id);
 
     /* check if the pixmap is still fine */
     if (pPriv->prime_secondary_pixmap) {
@@ -876,7 +871,7 @@ DrawablePtr DRI2UpdatePrime(DrawablePtr pDraw, DRI2BufferPtr pDest)
         }
     }
 
-    spix = PixmapShareToSecondary(mpix, secondary);
+    PixmapPtr spix = PixmapShareToSecondary(mpix, secondary);
     if (!spix)
         return NULL;
 
