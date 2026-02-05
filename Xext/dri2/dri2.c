@@ -210,11 +210,10 @@ GetScreenPrime(ScreenPtr primary, int prime_id)
     return primary;
 }
 
-static DRI2ScreenPtr
+static inline DRI2ScreenPtr
 DRI2GetScreenPrime(ScreenPtr primary, int prime_id)
 {
-    ScreenPtr secondary = GetScreenPrime(primary, prime_id);
-    return DRI2GetScreen(secondary);
+    return DRI2GetScreen(GetScreenPrime(primary, prime_id));
 }
 
 static DRI2DrawablePtr
