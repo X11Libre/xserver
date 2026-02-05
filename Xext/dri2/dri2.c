@@ -62,27 +62,19 @@ CARD8 dri2_minor;
 uint32_t prime_id_allocate_bitmask;
 
 static DevPrivateKeyRec dri2ScreenPrivateKeyRec;
-
-#define dri2ScreenPrivateKey (&dri2ScreenPrivateKeyRec)
-
 static DevPrivateKeyRec dri2WindowPrivateKeyRec;
-
-#define dri2WindowPrivateKey (&dri2WindowPrivateKeyRec)
-
 static DevPrivateKeyRec dri2PixmapPrivateKeyRec;
-
-#define dri2PixmapPrivateKey (&dri2PixmapPrivateKeyRec)
-
 static DevPrivateKeyRec dri2ClientPrivateKeyRec;
-
-#define dri2ClientPrivateKey (&dri2ClientPrivateKeyRec)
-
-#define dri2ClientPrivate(_pClient) (dixLookupPrivate(&(_pClient)->devPrivates, \
-                                                      dri2ClientPrivateKey))
 
 typedef struct _DRI2Client {
     int prime_id;
 } DRI2ClientRec, *DRI2ClientPtr;
+
+static inline DRI2ClientPtr dri2ClientPrivate(ClientPtr pClient) {
+    return (DRI2ClientPtr) dixLookupPrivate(
+        &pClient->devPrivates,
+        &dri2ClientPrivateKeyRec);
+}
 
 static RESTYPE dri2DrawableRes;
 
@@ -186,7 +178,7 @@ dri2Sleep(ClientPtr client, DRI2DrawablePtr pPriv, enum DRI2WakeType t)
 static DRI2ScreenPtr
 DRI2GetScreen(ScreenPtr pScreen)
 {
-    return dixLookupPrivate(&pScreen->devPrivates, dri2ScreenPrivateKey);
+    return dixLookupPrivate(&pScreen->devPrivates, &dri2ScreenPrivateKeyRec);
 }
 
 static ScreenPtr
@@ -228,10 +220,10 @@ DRI2GetDrawable(DrawablePtr pDraw)
     switch (pDraw->type) {
     case DRAWABLE_WINDOW:
         pWin = (WindowPtr) pDraw;
-        return dixLookupPrivate(&pWin->devPrivates, dri2WindowPrivateKey);
+        return dixLookupPrivate(&pWin->devPrivates, &dri2WindowPrivateKeyRec);
     case DRAWABLE_PIXMAP:
         pPixmap = (PixmapPtr) pDraw;
-        return dixLookupPrivate(&pPixmap->devPrivates, dri2PixmapPrivateKey);
+        return dixLookupPrivate(&pPixmap->devPrivates, &dri2PixmapPrivateKeyRec);
     default:
         return NULL;
     }
@@ -273,11 +265,11 @@ DRI2AllocateDrawable(DrawablePtr pDraw)
     pPriv->prime_secondary_pixmap = NULL;
     if (pDraw->type == DRAWABLE_WINDOW) {
         pWin = (WindowPtr) pDraw;
-        dixSetPrivate(&pWin->devPrivates, dri2WindowPrivateKey, pPriv);
+        dixSetPrivate(&pWin->devPrivates, &dri2WindowPrivateKeyRec, pPriv);
     }
     else {
         pPixmap = (PixmapPtr) pDraw;
-        dixSetPrivate(&pPixmap->devPrivates, dri2PixmapPrivateKey, pPriv);
+        dixSetPrivate(&pPixmap->devPrivates, &dri2PixmapPrivateKeyRec, pPriv);
     }
 
     return pPriv;
@@ -362,11 +354,11 @@ DRI2CreateDrawable2(ClientPtr client, DrawablePtr pDraw, XID id,
                     XID *dri2_id_out)
 {
     DRI2DrawablePtr pPriv;
-    DRI2ClientPtr dri2_client;
+    DRI2ClientPtr  dri2_client;
     XID dri2_id;
     int rc;
 
-    if (!dixPrivateKeyRegistered(dri2ScreenPrivateKey))
+    if (!dixPrivateKeyRegistered(&dri2ScreenPrivateKeyRec))
         return BadValue;
 
     dri2_client = dri2ClientPrivate(client);
@@ -431,11 +423,11 @@ DRI2DrawableGone(void *p, XID id)
     pDraw = pPriv->drawable;
     if (pDraw->type == DRAWABLE_WINDOW) {
         pWin = (WindowPtr) pDraw;
-        dixSetPrivate(&pWin->devPrivates, dri2WindowPrivateKey, NULL);
+        dixSetPrivate(&pWin->devPrivates, &dri2WindowPrivateKeyRec, NULL);
     }
     else {
         pPixmap = (PixmapPtr) pDraw;
-        dixSetPrivate(&pPixmap->devPrivates, dri2PixmapPrivateKey, NULL);
+        dixSetPrivate(&pPixmap->devPrivates, &dri2PixmapPrivateKeyRec, NULL);
     }
 
     if (pPriv->prime_secondary_pixmap) {
@@ -1331,7 +1323,7 @@ DRI2Connect(ClientPtr client, ScreenPtr pScreen,
     uint32_t prime_id = DRI2DriverPrimeId(driverType);
     uint32_t driver_id = driverType & 0xffff;
 
-    if (!dixPrivateKeyRegistered(dri2ScreenPrivateKey))
+    if (!dixPrivateKeyRegistered(&dri2ScreenPrivateKeyRec))
         return FALSE;
 
     ds = DRI2GetScreenPrime(pScreen, prime_id);
@@ -1372,7 +1364,7 @@ DRI2Authenticate(ClientPtr client, ScreenPtr pScreen, uint32_t magic)
     DRI2ClientPtr dri2_client;
     ScreenPtr primescreen;
 
-    if (!dixPrivateKeyRegistered(dri2ScreenPrivateKey))
+    if (!dixPrivateKeyRegistered(&dri2ScreenPrivateKeyRec))
         return FALSE;
 
     dri2_client = dri2ClientPrivate(client);
@@ -1635,7 +1627,7 @@ DRI2ScreenInit(ScreenPtr pScreen, DRI2InfoPtr info)
                info->numDrivers * sizeof(*ds->driverNames));
     }
 
-    dixSetPrivate(&pScreen->devPrivates, dri2ScreenPrivateKey, ds);
+    dixSetPrivate(&pScreen->devPrivates, &dri2ScreenPrivateKeyRec, ds);
 
     ds->ConfigNotify = pScreen->ConfigNotify;
     pScreen->ConfigNotify = DRI2ConfigNotify;
@@ -1673,7 +1665,7 @@ DRI2CloseScreen(ScreenPtr pScreen)
         prime_id_allocate_bitmask &= ~(1 << ds->prime_id);
     free(ds->driverNames);
     free(ds);
-    dixSetPrivate(&pScreen->devPrivates, dri2ScreenPrivateKey, NULL);
+    dixSetPrivate(&pScreen->devPrivates, &dri2ScreenPrivateKeyRec, NULL);
 }
 
 /* Called by InitExtensions() */
