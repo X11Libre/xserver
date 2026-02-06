@@ -84,7 +84,7 @@ struct PointerBarrierDevice {
 
 struct PointerBarrierClient {
     XID id;
-    ScreenPtr screen;
+    ScreenPtr pScreen;
     Window window;
     struct PointerBarrier barrier;
     struct xorg_list entry;
@@ -393,14 +393,14 @@ barrier_clamp_to_barrier(struct PointerBarrier *barrier, int dir, int *x,
 }
 
 void
-input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
+input_constrain_cursor(DeviceIntPtr dev, ScreenPtr pScreen,
                        int current_x, int current_y,
                        int dest_x, int dest_y,
                        int *out_x, int *out_y,
                        int *nevents, InternalEvent* events)
 {
     /* Clamped coordinates here refer to screen edge clamping. */
-    BarrierScreenPtr cs = GetBarrierScreen(screen);
+    BarrierScreenPtr cs = GetBarrierScreen(pScreen);
     int x = dest_x,
         y = dest_y;
     int dir;
@@ -416,7 +416,7 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
         .sourceid = dev->id,
         .dx = dest_x - current_x,
         .dy = dest_y - current_y,
-        .root = screen->root->drawable.id,
+        .root = pScreen->root->drawable.id,
     };
     InternalEvent *barrier_events = events;
     DeviceIntPtr master;
@@ -556,7 +556,6 @@ CreatePointerBarrierClient(ClientPtr client,
                            PointerBarrierClientPtr *client_out)
 {
     WindowPtr pWin;
-    ScreenPtr screen;
     BarrierScreenPtr cs;
     int err;
     int i;
@@ -578,10 +577,10 @@ CreatePointerBarrierClient(ClientPtr client,
         goto error;
     }
 
-    screen = pWin->drawable.pScreen;
-    cs = GetBarrierScreen(screen);
+    ScreenPtr pScreen = pWin->drawable.pScreen;
+    cs = GetBarrierScreen(pScreen);
 
-    ret->screen = screen;
+    ret->pScreen = pScreen;
     ret->window = stuff->window;
     ret->num_devices = stuff->num_devices;
     if (ret->num_devices > 0)
@@ -660,10 +659,9 @@ BarrierFreeBarrier(void *data, XID id)
     struct PointerBarrierClient *c;
     Time ms = GetTimeInMillis();
     DeviceIntPtr dev = NULL;
-    ScreenPtr screen;
 
     c = container_of(data, struct PointerBarrierClient, barrier);
-    screen = c->screen;
+    ScreenPtr pScreen = c->pScreen;
 
     for (dev = inputInfo.devices; dev; dev = dev->next) {
         struct PointerBarrierDevice *pbd;
@@ -677,7 +675,7 @@ BarrierFreeBarrier(void *data, XID id)
             .sourceid = 0,
             .barrierid = c->id,
             .window = c->window,
-            .root = screen->root->drawable.id,
+            .root = pScreen->root->drawable.id,
             .dx = 0,
             .dy = 0,
             /* .root_x */
@@ -767,7 +765,7 @@ static void remove_master_func(void *res, XID id, void *devid)
             .sourceid = 0,
             .dx = 0,
             .dy = 0,
-            .root = barrier->screen->root->drawable.id,
+            .root = barrier->pScreen->root->drawable.id,
             .window = barrier->window,
             .dt = ms - pbd->last_timestamp,
             .flags = XIBarrierPointerReleased,
