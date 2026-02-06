@@ -2361,7 +2361,7 @@ drmmode_shadow_fb_create(xf86CrtcPtr crtc, void *data, int width, int height,
         return NULL;
     }
 
-    pPixData = drmmode_bo_map(drmmode, bo);
+    pPixData = gbm_bo_get_map(bo->gbm);
     pitch = gbm_bo_get_stride(bo->gbm);
 
     pixmap = drmmode_create_pixmap_header(scrn->pScreen,
@@ -4009,9 +4009,7 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     scrn->displayWidth = pitch / kcpp;
 
     if (!drmmode->glamor) {
-        new_pixels = drmmode_map_front_bo(drmmode);
-        if (!new_pixels)
-            goto fail;
+        new_pixels = gbm_bo_get_map(drmmode->front_bo.gbm);
     }
 
     if (drmmode->shadow_enable) {

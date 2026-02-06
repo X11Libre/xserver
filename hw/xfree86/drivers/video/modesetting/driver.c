@@ -73,6 +73,7 @@
 #endif
 
 #include "driver.h"
+#include "drmmode_bo.h"
 
 static void AdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 static Bool CloseScreen(ScreenPtr pScreen);
@@ -1707,9 +1708,7 @@ modesetCreateScreenResources(ScreenPtr pScreen)
     drmmode_uevent_init(pScrn, &ms->drmmode);
 
     if (!ms->drmmode.glamor) {
-        pixels = drmmode_map_front_bo(&ms->drmmode);
-        if (!pixels)
-            return FALSE;
+        pixels = gbm_bo_get_map(ms->drmmode.front_bo.gbm);
     }
 
     rootPixmap = pScreen->GetScreenPixmap(pScreen);
