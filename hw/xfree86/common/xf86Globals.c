@@ -128,6 +128,7 @@ xf86InfoRec xf86Info = {
 #endif
     .autoBindGPU = TRUE,
     .singleDriver = FALSE,
+    .isolateKeyboard = FALSE,
 };
 
 const char *xf86ConfigFile = NULL;
