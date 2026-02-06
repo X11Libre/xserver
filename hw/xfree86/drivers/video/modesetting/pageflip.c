@@ -78,7 +78,7 @@ ms_drain_drm_events(ScreenPtr screen)
         ms_flush_drm_events_timeout(screen, -1);
 }
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
 
 /*
  * Event data for an in progress flip.

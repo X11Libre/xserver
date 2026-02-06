@@ -106,8 +106,6 @@ conf_data.set('GLAMOR_HAS_EGL_QUERY_DRIVER',
 conf_data.set('GLXEXT', build_glx ? '1' : false)
 conf_data.set('GLAMOR', build_glamor ? '1' : false)
 conf_data.set('GLAMOR_HAS_GBM', gbm_dep.found() ? '1' : false)
-conf_data.set('GLAMOR_HAS_GBM_LINEAR',
-              build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 10.6') ? '1' : false)
 conf_data.set('GBM_BO_WITH_MODIFIERS',
               build_glamor and gbm_dep.found() and gbm_dep.version().version_compare('>= 17.1') ? '1' : false)
 conf_data.set('GBM_BO_FD_FOR_PLANE',
