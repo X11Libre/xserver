@@ -1172,14 +1172,12 @@ drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
     bo->height = height;
 
 #ifdef GLAMOR_HAS_GBM
-    if (drmmode->glamor) {
-        bo->gbm = gbm_create_best_bo(drmmode, FALSE, width, height, DRMMODE_FRONT_BO);
-        return bo->gbm != NULL;
-    }
+    bo->gbm = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
+    return !!bo->gbm;
+#else
+    bo->gbm = gbm_create_best_bo(drmmode, TRUE, width, height, DRMMODE_FRONT_BO);
+    return !!bo->gbm;
 #endif
-
-    bo->dumb = dumb_bo_create(drmmode->fd, width, height, bpp);
-    return bo->dumb != NULL;
 }
 
 Bool
