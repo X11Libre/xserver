@@ -539,15 +539,12 @@ update_dri2_drawable_buffers(DRI2DrawablePtr pPriv, DrawablePtr pDraw,
                              DRI2BufferPtr * buffers, int out_count, int *width,
                              int *height)
 {
-    int i;
-
     if (pPriv->buffers != NULL) {
-        for (i = 0; i < pPriv->bufferCount; i++) {
+        for (int i = 0; i < pPriv->bufferCount; i++) {
             if (pPriv->buffers[i] != NULL) {
                 destroy_buffer(pDraw, pPriv->buffers[i], pPriv->prime_id);
             }
         }
-
         free(pPriv->buffers);
     }
 
