@@ -407,11 +407,7 @@ ProcessCommandLine(int argc, char *argv[])
 
     defaultKeyboardControl.autoRepeat = TRUE;
 
-#ifdef NO_PART_NET
-    PartialNetwork = FALSE;
-#else
     PartialNetwork = TRUE;
-#endif
 
     for (i = 0; defaultNoListenList[i] != NULL; i++) {
         if (_XSERVTransNoListen(defaultNoListenList[i]))
