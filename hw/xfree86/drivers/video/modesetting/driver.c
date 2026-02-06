@@ -35,6 +35,7 @@
 #include "dix-config.h"
 
 #include <errno.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <X11/extensions/randr.h>
@@ -1708,7 +1709,7 @@ modesetCreateScreenResources(ScreenPtr pScreen)
     if (!ms->drmmode.sw_cursor)
         drmmode_map_cursor_bos(pScrn, &ms->drmmode);
 
-    if (!ms->drmmode.gbm) {
+    if (!ms->drmmode.glamor) {
         pixels = drmmode_map_front_bo(&ms->drmmode);
         if (!pixels)
             return FALSE;
@@ -1950,6 +1951,22 @@ modesetting_get_cursor_interleave(int fd)
     return ret;
 }
 
+#ifdef GLAMOR_HAS_GBM
+static struct gbm_device*
+gbm_create_device_by_name(int fd, const char* name)
+{
+    struct gbm_device* ret = NULL;
+    const char* old_backend = getenv("GBM_BACKEND");
+    setenv("GBM_BACKEND", name, 1);
+    ret = gbm_create_device(fd);
+    unsetenv("GBM_BACKEND");
+    if (old_backend) {
+        setenv("GBM_BACKEND", old_backend, 1);
+    }
+    return ret;
+}
+#endif
+
 static Bool
 ScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
@@ -1963,8 +1980,14 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
 
 #ifdef GLAMOR_HAS_GBM
-    if (ms->drmmode.glamor)
+    if (ms->drmmode.glamor) {
         ms->drmmode.gbm = ms->glamor.egl_get_gbm_device(pScreen);
+    } else {
+        ms->drmmode.gbm = gbm_create_device(ms->drmmode.fd);
+        if (!ms->drmmode.gbm) {
+            ms->drmmode.gbm = gbm_create_device_by_name(ms->drmmode.fd, "dumb");
+        }
+    }
 #endif
 
     /* HW dependent - FIXME */
@@ -2293,6 +2316,14 @@ CloseScreen(ScreenPtr pScreen)
     drmmode_uevent_fini(pScrn, &ms->drmmode);
 
     drmmode_free_bos(pScrn, &ms->drmmode);
+
+#ifdef GLAMOR_HAS_GBM
+    /* If we didn't get the gbm device from glamor, we have to free it ourserves */
+    if (!ms->drmmode.glamor && ms->drmmode.gbm) {
+        gbm_device_destroy(ms->drmmode.gbm);
+        ms->drmmode.gbm = NULL;
+    }
+#endif
 
     if (ms->drmmode.pageflip) {
         miPointerScreenPtr PointPriv =
