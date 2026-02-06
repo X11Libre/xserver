@@ -11,6 +11,9 @@ srcs_kdrive = [
 
 if build_xv
     srcs_kdrive += 'kxv.c'
+    if build_glamor
+        srcs_kdrive += 'kd_glamor_xv.c'
+    endif
 endif
 
 kdrive_data = configuration_data()
