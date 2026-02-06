@@ -1,0 +1,16 @@
+Checks: >
+  clang-analyzer-core.*,
+  clang-analyzer-deadcode.*,
+  clang-analyzer-security.*,
+  clang-analyzer-unix.*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-implicit-widening-of-multiplication-result,
+  performance-*,
+  -performance-avoid-endl,
+  readability-braces-around-statements,
+  readability-redundant-control-flow,
+  -clang-analyzer-optin.*
+
+HeaderFilterRegex: '.*'
+WarningsAsErrors: ''
