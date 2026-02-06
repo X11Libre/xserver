@@ -1189,13 +1189,12 @@ drmmode_SetSlaveBO(PixmapPtr ppix,
     msPixmapPrivPtr ppriv = msGetPixmapPriv(drmmode, ppix);
 
     if (fd_handle == -1) {
-        dumb_bo_destroy(drmmode->fd, ppriv->backing_bo);
+        gbm_bo_destroy(ppriv->backing_bo);
         ppriv->backing_bo = NULL;
         return TRUE;
     }
 
-    ppriv->backing_bo =
-        dumb_get_bo_from_fd(drmmode->fd, fd_handle, pitch, size);
+    ppriv->backing_bo = gbm_back_bo_from_fd(drmmode, TRUE, fd_handle, pitch, size);
     if (!ppriv->backing_bo)
         return FALSE;
 
@@ -2285,7 +2284,6 @@ drmmode_set_target_scanout_pixmap_cpu(xf86CrtcPtr crtc, PixmapPtr ppix,
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     msPixmapPrivPtr ppriv;
-    void *ptr;
 
     if (*target) {
         ppriv = msGetPixmapPriv(drmmode, *target);
@@ -2309,8 +2307,7 @@ drmmode_set_target_scanout_pixmap_cpu(xf86CrtcPtr crtc, PixmapPtr ppix,
                                            crtc->randr_crtc->pScreen,
                                            NULL);
     }
-    ptr = drmmode_map_secondary_bo(drmmode, ppriv);
-    ppix->devPrivate.ptr = ptr;
+    ppix->devPrivate.ptr = gbm_bo_get_map(ppriv->backing_bo);
     DamageRegister(&ppix->drawable, ppriv->secondary_damage);
 
     if (ppriv->fb_id == 0) {
@@ -2318,7 +2315,7 @@ drmmode_set_target_scanout_pixmap_cpu(xf86CrtcPtr crtc, PixmapPtr ppix,
                      ppix->drawable.height,
                      ppix->drawable.depth,
                      ppix->drawable.bitsPerPixel,
-                     ppix->devKind, ppriv->backing_bo->handle, &ppriv->fb_id);
+                     ppix->devKind, gbm_bo_get_handle(ppriv->backing_bo).s32, &ppriv->fb_id);
     }
     *target = ppix;
     return TRUE;
@@ -5071,21 +5068,6 @@ void *
 drmmode_map_front_bo(drmmode_ptr drmmode)
 {
     return drmmode_bo_map(drmmode, &drmmode->front_bo);
-}
-
-void *
-drmmode_map_secondary_bo(drmmode_ptr drmmode, msPixmapPrivPtr ppriv)
-{
-    int ret;
-
-    if (ppriv->backing_bo->ptr)
-        return ppriv->backing_bo->ptr;
-
-    ret = dumb_bo_map(drmmode->fd, ppriv->backing_bo);
-    if (ret)
-        return NULL;
-
-    return ppriv->backing_bo->ptr;
 }
 
 void

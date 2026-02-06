@@ -298,7 +298,7 @@ typedef struct {
 
 typedef struct _msPixmapPriv {
     uint32_t fb_id;
-    struct dumb_bo *backing_bo; /* if this pixmap is backed by a dumb bo */
+    struct gbm_bo *backing_bo; /* if this pixmap is backed by a gbm bo */
 
     DamagePtr secondary_damage;
 
