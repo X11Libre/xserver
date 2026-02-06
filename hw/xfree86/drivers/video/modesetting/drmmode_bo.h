@@ -12,7 +12,6 @@
 enum {
     DRMMODE_FRONT_BO = 1 << 0,
     DRMMODE_CURSOR_BO = 1 << 1,
-    DRMMODE_SHADOW_BO = 1 << 2,
 };
 
 void*
