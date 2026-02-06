@@ -923,17 +923,13 @@ int
 DRI2CopyRegion(DrawablePtr pDraw, RegionPtr pRegion,
                unsigned int dest, unsigned int src)
 {
-    DRI2DrawablePtr pPriv;
-    DRI2BufferPtr pDestBuffer, pSrcBuffer;
-    int i;
-
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL)
         return BadDrawable;
 
-    pDestBuffer = NULL;
-    pSrcBuffer = NULL;
-    for (i = 0; i < pPriv->bufferCount; i++) {
+    DRI2BufferPtr pDestBuffer = NULL;
+    DRI2BufferPtr pSrcBuffer = NULL;
+    for (int i = 0; i < pPriv->bufferCount; i++) {
         if (pPriv->buffers[i]->attachment == dest)
             pDestBuffer = (DRI2BufferPtr) pPriv->buffers[i];
         if (pPriv->buffers[i]->attachment == src)
