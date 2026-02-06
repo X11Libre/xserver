@@ -1219,10 +1219,8 @@ DRI2GetMSC(DrawablePtr pDraw, CARD64 * ust, CARD64 * msc, CARD64 * sbc)
 {
     ScreenPtr pScreen = pDraw->pScreen;
     DRI2ScreenPtr ds = DRI2GetScreen(pDraw->pScreen);
-    DRI2DrawablePtr pPriv;
-    Bool ret;
 
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
                    "[DRI2] %s: bad drawable\n", __func__);
@@ -1241,8 +1239,7 @@ DRI2GetMSC(DrawablePtr pDraw, CARD64 * ust, CARD64 * msc, CARD64 * sbc)
      * drawables
      */
 
-    ret = (*ds->GetMSC) (pDraw, ust, msc);
-    if (!ret)
+    if (!(ds->GetMSC(pDraw, ust, msc)))
         return BadDrawable;
 
     *sbc = pPriv->swap_count;
@@ -1255,23 +1252,17 @@ DRI2WaitMSC(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
             CARD64 divisor, CARD64 remainder)
 {
     DRI2ScreenPtr ds = DRI2GetScreen(pDraw->pScreen);
-    DRI2DrawablePtr pPriv;
-    Bool ret;
-
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL)
         return BadDrawable;
 
     /* Old DDX just completes immediately */
     if (!ds->ScheduleWaitMSC) {
         DRI2WaitMSCComplete(client, pDraw, target_msc, 0, 0);
-
         return Success;
     }
 
-    ret =
-        (*ds->ScheduleWaitMSC) (client, pDraw, target_msc, divisor, remainder);
-    if (!ret)
+    if (!(ds->ScheduleWaitMSC(client, pDraw, target_msc, divisor, remainder)))
         return BadDrawable;
 
     return Success;
@@ -1280,9 +1271,7 @@ DRI2WaitMSC(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
 int
 DRI2WaitSBC(ClientPtr client, DrawablePtr pDraw, CARD64 target_sbc)
 {
-    DRI2DrawablePtr pPriv;
-
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL)
         return BadDrawable;
 
