@@ -48,14 +48,6 @@
 #include "dri2int.h"
 #include "damage.h"
 
-/* needs xf86.h otherwise */
-/* format is treated as part of the varargs to swallow the comma */
-#define xf86DrvMsg(scrnIndex, type, /* format, */ ...) \
-    do { \
-        (void)scrnIndex; \
-        LogMessage(type, __VA_ARGS__); \
-    } while (0);
-
 CARD8 dri2_major;               /* version of DRI2 supported by DDX */
 CARD8 dri2_minor;
 
@@ -945,11 +937,9 @@ static void
 DRI2WakeClient(ClientPtr client, DrawablePtr pDraw, int frame,
                unsigned int tv_sec, unsigned int tv_usec)
 {
-    ScreenPtr pScreen = pDraw->pScreen;
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[DRI2] %s: bad drawable\n", __func__);
+        LogMessage(X_ERROR, "[DRI2] %s: bad drawable\n", __func__);
         return;
     }
 
@@ -977,12 +967,9 @@ DRI2SwapComplete(ClientPtr client, DrawablePtr pDraw, int frame,
                  unsigned int tv_sec, unsigned int tv_usec, int type,
                  DRI2SwapEventPtr swap_complete, void *swap_data)
 {
-    ScreenPtr pScreen = pDraw->pScreen;
-
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[DRI2] %s: bad drawable\n", __func__);
+        LogMessage(X_ERROR, "[DRI2] %s: bad drawable\n", __func__);
         return;
     }
 
@@ -1033,13 +1020,11 @@ DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
                 CARD64 divisor, CARD64 remainder, CARD64 * swap_target,
                 DRI2SwapEventPtr func, void *data)
 {
-    ScreenPtr pScreen = pDraw->pScreen;
     DRI2ScreenPtr ds = DRI2GetScreen(pDraw->pScreen);
 
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[DRI2] %s: bad drawable\n", __func__);
+        LogMessage(X_ERROR, "[DRI2] %s: bad drawable\n", __func__);
         return BadDrawable;
     }
 
@@ -1059,8 +1044,7 @@ DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
             pSrcBuffer = (DRI2BufferPtr) pPriv->buffers[i];
     }
     if (pSrcBuffer == NULL || pDestBuffer == NULL) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[DRI2] %s: drawable has no back or front?\n", __func__);
+        LogMessage(X_ERROR, "[DRI2] %s: drawable has no back or front?\n", __func__);
         return BadDrawable;
     }
 
@@ -1118,8 +1102,7 @@ DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
                                &target_msc, divisor, remainder, func, data);
     if (!ret) {
         pPriv->swapsPending--;  /* didn't schedule */
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[DRI2] %s: driver failed to schedule swap\n", __func__);
+        LogMessage(X_ERROR, "[DRI2] %s: driver failed to schedule swap\n", __func__);
         return BadDrawable;
     }
 
@@ -1133,12 +1116,10 @@ DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
 void
 DRI2SwapInterval(DrawablePtr pDrawable, int interval)
 {
-    ScreenPtr pScreen = pDrawable->pScreen;
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDrawable);
 
     if (pPriv == NULL) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[DRI2] %s: bad drawable\n", __func__);
+        LogMessage(X_ERROR, "[DRI2] %s: bad drawable\n", __func__);
         return;
     }
 
@@ -1149,13 +1130,11 @@ DRI2SwapInterval(DrawablePtr pDrawable, int interval)
 int
 DRI2GetMSC(DrawablePtr pDraw, CARD64 * ust, CARD64 * msc, CARD64 * sbc)
 {
-    ScreenPtr pScreen = pDraw->pScreen;
     DRI2ScreenPtr ds = DRI2GetScreen(pDraw->pScreen);
 
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL) {
-        xf86DrvMsg(pScreen->myNum, X_ERROR,
-                   "[DRI2] %s: bad drawable\n", __func__);
+        LogMessage(X_ERROR, "[DRI2] %s: bad drawable\n", __func__);
         return BadDrawable;
     }
 
@@ -1376,8 +1355,7 @@ dri2_probe_driver_name(ScreenPtr pScreen, DRI2InfoPtr info)
         drmVersionPtr version = drmGetVersion(info->fd);
 
         if (!version) {
-            xf86DrvMsg(pScreen->myNum, X_ERROR,
-                       "[DRI2] Couldn't drmGetVersion() on non-PCI device, "
+            LogMessage(X_ERROR, "[DRI2] Couldn't drmGetVersion() on non-PCI device, "
                        "no driver name found.\n");
             return NULL;
         }
@@ -1404,7 +1382,7 @@ dri2_probe_driver_name(ScreenPtr pScreen, DRI2InfoPtr info)
         }
     }
 
-    xf86DrvMsg(pScreen->myNum, X_ERROR,
+    LogMessage(X_ERROR,
                "[DRI2] No driver mapping found for PCI device "
                "0x%04x / 0x%04x\n",
                dev->deviceinfo.pci->vendor_id, dev->deviceinfo.pci->device_id);
@@ -1552,10 +1530,10 @@ DRI2ScreenInit(ScreenPtr pScreen, DRI2InfoPtr info)
     ds->SetWindowPixmap = pScreen->SetWindowPixmap;
     pScreen->SetWindowPixmap = DRI2SetWindowPixmap;
 
-    xf86DrvMsg(pScreen->myNum, X_INFO, "[DRI2] Setup complete\n");
+    LogMessage(X_INFO, "[DRI2] Setup complete\n");
     for (int i = 0; i < ARRAY_SIZE(driverTypeNames); i++) {
         if (i < ds->numDrivers && ds->driverNames[i]) {
-            xf86DrvMsg(pScreen->myNum, X_INFO, "[DRI2]   %s driver: %s\n",
+            LogMessage(X_INFO, "[DRI2]   %s driver: %s\n",
                        driverTypeNames[i], ds->driverNames[i]);
         }
     }
@@ -1563,7 +1541,7 @@ DRI2ScreenInit(ScreenPtr pScreen, DRI2InfoPtr info)
     return TRUE;
 
  err_out:
-    xf86DrvMsg(pScreen->myNum, X_WARNING,
+    LogMessage(X_WARNING,
                "[DRI2] Initialization failed for info version %d.\n",
                info->version);
     free(ds);
