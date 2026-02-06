@@ -48,6 +48,10 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
+
 #include <X11/Xdefs.h>
 
 #include <limits.h>
@@ -135,6 +139,7 @@ typedef void (*OsSigHandlerPtr) (int sig);
 OsSigHandlerPtr OsSignal(int sig, OsSigHandlerPtr handler);
 
 void OsInit(void);
+void OsNumaInit(void);
 
 _X_EXPORT /* needed by the int10 module, but should not be used by OOT drivers */
 void OsBlockSignals(void);
