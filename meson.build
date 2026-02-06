@@ -365,10 +365,9 @@ else
     build_glamor = glamor_option == 'true'
 endif
 
-gbm_dep = dependency('', required: false)
+gbm_dep = dependency('gbm', version: gbm_req, required: false)
 epoxy_dep = dependency('', required: false)
 if build_glamor
-    gbm_dep = dependency('gbm', version: gbm_req, required: false)
     epoxy_dep = dependency('epoxy', required: false)
 endif
 
@@ -532,7 +531,7 @@ if not libdrm_dep.found() and libdrm_required
     error('DRI requested, but LIBDRM not found')
 endif
 
-build_modesetting = libdrm_dep.found() and dri2proto_dep.found()
+build_modesetting = libdrm_dep.found() and dri2proto_dep.found() and gbm_dep.found()
 
 build_vgahw = false
 if get_option('vgahw') == 'auto'
