@@ -1986,6 +1986,10 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
     }
 #endif
 
+    if (!ms->drmmode.gbm) {
+        return FALSE;
+    }
+
     /* HW dependent - FIXME */
     pScrn->displayWidth = pScrn->virtualX;
     if (!drmmode_create_initial_bos(pScrn, &ms->drmmode))
@@ -2315,7 +2319,7 @@ CloseScreen(ScreenPtr pScreen)
 
 #ifdef GLAMOR_HAS_GBM
     /* If we didn't get the gbm device from glamor, we have to free it ourserves */
-    if (!ms->drmmode.glamor && ms->drmmode.gbm) {
+    if (!ms->drmmode.glamor) {
         gbm_device_destroy(ms->drmmode.gbm);
         ms->drmmode.gbm = NULL;
     }
