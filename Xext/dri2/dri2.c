@@ -1325,14 +1325,13 @@ DRI2Connect(ClientPtr client, ScreenPtr pScreen,
             unsigned int driverType, int *fd,
             const char **driverName, const char **deviceName)
 {
-    DRI2ScreenPtr ds;
     uint32_t prime_id = DRI2DriverPrimeId(driverType);
     uint32_t driver_id = driverType & 0xffff;
 
     if (!dixPrivateKeyRegistered(dri2ScreenPrivateKey))
         return FALSE;
 
-    ds = DRI2GetScreenPrime(pScreen, prime_id);
+    DRI2ScreenPtr ds = DRI2GetScreenPrime(pScreen, prime_id);
     if (ds == NULL)
         return FALSE;
 
