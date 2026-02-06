@@ -466,14 +466,12 @@ static DRI2BufferPtr
 create_buffer(DRI2ScreenPtr ds, DrawablePtr pDraw,
               unsigned int attachment, unsigned int format)
 {
-    DRI2BufferPtr buffer;
     if (ds->CreateBuffer2)
-        buffer = (*ds->CreateBuffer2)(GetScreenPrime(pDraw->pScreen,
-                                                     DRI2GetDrawable(pDraw)->prime_id),
-                                      pDraw, attachment, format);
+        return ds->CreateBuffer2(GetScreenPrime(pDraw->pScreen,
+                                                 DRI2GetDrawable(pDraw)->prime_id),
+                                 pDraw, attachment, format);
     else
-        buffer = (*ds->CreateBuffer)(pDraw, attachment, format);
-    return buffer;
+        return ds->CreateBuffer(pDraw, attachment, format);
 }
 
 static void
