@@ -277,7 +277,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
      * the kms driver is atomic_modeset_capable.
      */
     if (!ms->atomic_modeset_capable &&
-        pixmap->devKind != drmmode_bo_get_pitch(&ms->drmmode.front_bo))
+        pixmap->devKind != gbm_bo_get_stride(ms->drmmode.front_bo.gbm))
         return FALSE;
 
     if (!ms->drmmode.glamor)

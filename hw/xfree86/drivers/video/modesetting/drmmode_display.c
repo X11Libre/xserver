@@ -1034,50 +1034,6 @@ drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
     }
 }
 
-uint32_t
-drmmode_bo_get_pitch(drmmode_bo *bo)
-{
-#ifdef GLAMOR_HAS_GBM
-    if (bo->gbm) {
-        return gbm_bo_get_stride(bo->gbm);
-    }
-#endif
-
-    if (bo->dumb) {
-        return bo->dumb->pitch;
-    }
-
-    return 0;
-}
-
-static void*
-drmmode_bo_get_bo(drmmode_bo *bo)
-{
-#ifdef GLAMOR_HAS_GBM
-    if (bo->gbm) {
-        return bo->gbm;
-    }
-#endif
-
-    return bo->dumb;
-}
-
-static uint32_t
-drmmode_bo_get_handle(drmmode_bo *bo)
-{
-#ifdef GLAMOR_HAS_GBM
-    if (bo->gbm) {
-        return gbm_bo_get_handle(bo->gbm).u32;
-    }
-#endif
-
-    if (bo->dumb) {
-        return bo->dumb->handle;
-    }
-
-    return (uint32_t)-1;
-}
-
 static void*
 drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
 {
@@ -2344,7 +2300,7 @@ drmmode_shadow_fb_allocate(xf86CrtcPtr crtc, int width, int height,
         return NULL;
     }
 
-    return drmmode_bo_get_bo(bo);
+    return bo->gbm;
 }
 
 static void *
@@ -2399,14 +2355,14 @@ drmmode_shadow_fb_create(xf86CrtcPtr crtc, void *data, int width, int height,
         }
     }
 
-    if (!drmmode_bo_get_bo(bo)) {
+    if (!bo->gbm) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                    "Couldn't allocate shadow pixmap for CRTC\n");
         return NULL;
     }
 
     pPixData = drmmode_bo_map(drmmode, bo);
-    pitch = drmmode_bo_get_pitch(bo);
+    pitch = gbm_bo_get_stride(bo->gbm);
 
     pixmap = drmmode_create_pixmap_header(scrn->pScreen,
                                           width, height,
@@ -4037,7 +3993,7 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 
     old_width = scrn->virtualX;
     old_height = scrn->virtualY;
-    old_pitch = drmmode_bo_get_pitch(&drmmode->front_bo);
+    old_pitch = gbm_bo_get_stride(drmmode->front_bo.gbm);
     old_front = drmmode->front_bo;
     old_fb_id = drmmode->fb_id;
     drmmode->fb_id = 0;
@@ -4046,7 +4002,7 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
                                  width, height, drmmode->kbpp))
         goto fail;
 
-    pitch = drmmode_bo_get_pitch(&drmmode->front_bo);
+    pitch = gbm_bo_get_stride(drmmode->front_bo.gbm);
 
     scrn->virtualX = width;
     scrn->virtualY = height;
@@ -4977,7 +4933,7 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 
     if (!drmmode_create_front_bo(drmmode, &drmmode->front_bo, width, height, bpp))
         return FALSE;
-    pScrn->displayWidth = drmmode_bo_get_pitch(&drmmode->front_bo) / cpp;
+    pScrn->displayWidth = gbm_bo_get_stride(drmmode->front_bo.gbm) / cpp;
 
     for (int i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
