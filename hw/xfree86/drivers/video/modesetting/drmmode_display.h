@@ -373,4 +373,11 @@ Bool drmmode_crtc_get_fb_id(xf86CrtcPtr crtc, uint32_t *fb_id, int *x, int *y);
 
 void drmmode_set_dpms(ScrnInfoPtr scrn, int PowerManagementMode, int flags);
 void drmmode_crtc_set_vrr(xf86CrtcPtr crtc, Bool enabled);
+
+#ifdef GBM_BO_WITH_MODIFIERS
+uint32_t
+get_modifiers_set(ScrnInfoPtr scrn, uint32_t format, uint64_t **modifiers,
+                  Bool enabled_crtc_only, Bool exclude_multiplane, Bool async_flip);
 #endif
+#endif
+

@@ -51,7 +51,7 @@
 
 #include <xf86drm.h>
 #include "xf86Crtc.h"
-#include "drmmode_display.h"
+#include "drmmode_bo.h"
 
 #include <cursorstr.h>
 
@@ -183,7 +183,7 @@ drmmode_is_format_supported(ScrnInfoPtr scrn, uint32_t format,
 }
 
 #ifdef GBM_BO_WITH_MODIFIERS
-static uint32_t
+uint32_t
 get_modifiers_set(ScrnInfoPtr scrn, uint32_t format, uint64_t **modifiers,
                   Bool enabled_crtc_only, Bool exclude_multiplane, Bool async_flip)
 {
@@ -1161,29 +1161,6 @@ drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
                         drmmode_bo_get_pitch(bo),
                         drmmode_bo_get_handle(bo), fb_id);
 }
-
-#ifdef GLAMOR_HAS_GBM
-/* formats taken from glamor/glamor_egl.c */
-static inline uint32_t
-drmmode_gbm_format_for_depth(int depth)
-{
-    switch (depth) {
-    case 8:
-        return GBM_FORMAT_R8;
-    case 15:
-        return GBM_FORMAT_ARGB1555;
-    case 16:
-        return GBM_FORMAT_RGB565;
-    case 24:
-        return GBM_FORMAT_XRGB8888;
-    case 30:
-        /* XXX Is this format right? https://github.com/X11Libre/xserver/pull/1396/files#r2523698616 XXX */
-        return GBM_FORMAT_ARGB2101010;
-    default:
-        return GBM_FORMAT_ARGB8888;
-    }
-}
-#endif
 
 static Bool
 drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
