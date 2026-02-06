@@ -2405,8 +2405,7 @@ drmmode_shadow_fb_destroy(xf86CrtcPtr crtc, PixmapPtr pixmap,
         drmModeRmFB(drmmode->fd, *fb_id);
         *fb_id = 0;
 
-        drmmode_bo_destroy(drmmode, bo);
-        memset(bo, 0, sizeof(*bo));
+        gbm_bo_destroy(bo->gbm);
     }
 }
 
@@ -4049,12 +4048,12 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     if (old_fb_id)
         drmModeRmFB(drmmode->fd, old_fb_id);
 
-    drmmode_bo_destroy(drmmode, &old_front);
+    gbm_bo_destroy(old_front.gbm);
 
     return TRUE;
 
  fail:
-    drmmode_bo_destroy(drmmode, &drmmode->front_bo);
+    gbm_bo_destroy(drmmode->front_bo.gbm);
     drmmode->front_bo = old_front;
     scrn->virtualX = old_width;
     scrn->virtualY = old_height;
@@ -4954,7 +4953,7 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 
         drmmode_crtc->cursor.bo = gbm_create_best_bo(drmmode, TRUE, width, height, DRMMODE_CURSOR_BO);
         if (!drmmode_crtc->cursor.bo) {
-            drmmode_bo_destroy(drmmode, &drmmode->front_bo);
+            gbm_bo_destroy(drmmode->front_bo.gbm);
             for (int j = 0; j < i; j++) {
                 xf86CrtcPtr free_crtc = xf86_config->crtc[j];
                 drmmode_crtc_private_ptr free_drmmode_crtc = free_crtc->driver_private;
@@ -4988,7 +4987,7 @@ drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         drmmode->fb_id = 0;
     }
 
-    drmmode_bo_destroy(drmmode, &drmmode->front_bo);
+    gbm_bo_destroy(drmmode->front_bo.gbm);
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
