@@ -1460,7 +1460,7 @@ msShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
     stride = (pScrn->displayWidth * ms->drmmode.kbpp) / 8;
     *size = stride;
 
-    return ((uint8_t *) gbm_bo_get_map(ms->drmmode.front_bo.gbm) + row * stride + offset);
+    return ((uint8_t *) gbm_bo_get_map(ms->drmmode.front_bo) + row * stride + offset);
 }
 
 /* somewhat arbitrary tile size, in pixels */
@@ -1708,7 +1708,7 @@ modesetCreateScreenResources(ScreenPtr pScreen)
     drmmode_uevent_init(pScrn, &ms->drmmode);
 
     if (!ms->drmmode.glamor) {
-        pixels = gbm_bo_get_map(ms->drmmode.front_bo.gbm);
+        pixels = gbm_bo_get_map(ms->drmmode.front_bo);
     }
 
     rootPixmap = pScreen->GetScreenPixmap(pScreen);

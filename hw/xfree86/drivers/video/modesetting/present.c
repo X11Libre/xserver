@@ -261,7 +261,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
         drmmode_crtc_private_ptr drmmode_crtc = config->crtc[i]->driver_private;
 
         /* Don't do pageflipping if CRTCs are rotated. */
-        if (drmmode_crtc->rotate_bo.gbm)
+        if (drmmode_crtc->rotate_bo)
             return FALSE;
 
         if (xf86_crtc_on(config->crtc[i]))
@@ -277,7 +277,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
      * the kms driver is atomic_modeset_capable.
      */
     if (!ms->atomic_modeset_capable &&
-        pixmap->devKind != gbm_bo_get_stride(ms->drmmode.front_bo.gbm))
+        pixmap->devKind != gbm_bo_get_stride(ms->drmmode.front_bo))
         return FALSE;
 
     if (!ms->drmmode.glamor)

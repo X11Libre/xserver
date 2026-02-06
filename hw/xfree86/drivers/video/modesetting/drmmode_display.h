@@ -34,7 +34,7 @@
 #include "libudev.h"
 #endif
 
-struct gbm_device;
+#include <gbm.h>
 
 enum drmmode_plane_property {
     DRMMODE_PLANE_TYPE = 0,
@@ -76,10 +76,6 @@ enum drmmode_crtc_property {
 };
 
 typedef struct {
-    struct gbm_bo *gbm;
-} drmmode_bo;
-
-typedef struct {
     int fd;
     unsigned fb_id;
     drmModeFBPtr mode_fb;
@@ -94,7 +90,7 @@ typedef struct {
     InputHandlerProc uevent_handler;
 #endif
     drmEventContext event_context;
-    drmmode_bo front_bo;
+    struct gbm_bo *front_bo;
     Bool sw_cursor;
     Bool set_cursor_failed;
 
@@ -165,7 +161,7 @@ typedef struct {
 } drmmode_format_rec, *drmmode_format_ptr;
 
 typedef struct {
-    drmmode_bo bo;
+    struct gbm_bo *bo;
     uint32_t fb_id;
     PixmapPtr px;
     RegionRec dmg;
@@ -207,7 +203,7 @@ typedef struct {
     drmmode_format_rec *formats;
     drmmode_format_rec *formats_async;
 
-    drmmode_bo rotate_bo;
+    struct gbm_bo *rotate_bo;
     unsigned rotate_fb_id;
     drmmode_tearfree_rec tearfree;
 
@@ -316,7 +312,6 @@ extern miPointerSpriteFuncRec drmmode_sprite_funcs;
 
 Bool drmmode_is_format_supported(ScrnInfoPtr scrn, uint32_t format,
                                  uint64_t modifier, Bool async_flip);
-void drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo);
 Bool drmmode_glamor_handle_new_screen_pixmap(drmmode_ptr drmmode);
 void *drmmode_map_secondary_bo(drmmode_ptr drmmode, msPixmapPrivPtr ppriv);
 Bool drmmode_SetSlaveBO(PixmapPtr ppix,

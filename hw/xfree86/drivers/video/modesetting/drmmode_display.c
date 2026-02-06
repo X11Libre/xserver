@@ -686,7 +686,7 @@ drmmode_crtc_get_fb_id(xf86CrtcPtr crtc, uint32_t *fb_id, int *x, int *y)
     }
 
     if (*fb_id == 0) {
-        ret = drmmode_bo_import(drmmode, drmmode->front_bo.gbm,
+        ret = drmmode_bo_import(drmmode, drmmode->front_bo,
                                 &drmmode->fb_id);
         if (ret < 0) {
             ErrorF("failed to add fb %d\n", ret);
@@ -1006,19 +1006,6 @@ drmmode_crtc_flip(xf86CrtcPtr crtc, uint32_t fb_id, int x, int y,
 
     return drmModePageFlip(ms->fd, drmmode_crtc->mode_crtc->crtc_id,
                            fb_id, flags, data);
-}
-
-static Bool
-drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
-                        unsigned width, unsigned height, unsigned bpp)
-{
-#ifdef GLAMOR_HAS_GBM
-    bo->gbm = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
-    return !!bo->gbm;
-#else
-    bo->gbm = gbm_create_best_bo(drmmode, TRUE, width, height, DRMMODE_FRONT_BO);
-    return !!bo->gbm;
-#endif
 }
 
 Bool
@@ -1463,7 +1450,7 @@ drmmode_copy_damage(xf86CrtcPtr crtc, PixmapPtr dst, RegionPtr dmg, Bool empty)
 
 static void
 drmmode_shadow_fb_destroy(xf86CrtcPtr crtc, PixmapPtr pixmap,
-                          void *data, drmmode_bo *bo, uint32_t *fb_id);
+                          void *data, struct gbm_bo **bo, uint32_t *fb_id);
 static void
 drmmode_destroy_tearfree_shadow(xf86CrtcPtr crtc)
 {
@@ -1486,7 +1473,7 @@ drmmode_destroy_tearfree_shadow(xf86CrtcPtr crtc)
 
 static PixmapPtr
 drmmode_shadow_fb_create(xf86CrtcPtr crtc, void *data, int width, int height,
-                         drmmode_bo *bo, uint32_t *fb_id);
+                         struct gbm_bo **bo, uint32_t *fb_id);
 static Bool
 drmmode_create_tearfree_shadow(xf86CrtcPtr crtc)
 {
@@ -2209,29 +2196,30 @@ drmmode_clear_pixmap(PixmapPtr pixmap)
 
 static void *
 drmmode_shadow_fb_allocate(xf86CrtcPtr crtc, int width, int height,
-                           drmmode_bo *bo, uint32_t *fb_id)
+                           struct gbm_bo **bo, uint32_t *fb_id)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     int ret;
 
     /* If we're using shadow fb, we're not using glamor, so no gbm bo's */
-    if (!drmmode_create_front_bo(drmmode, bo, width, height, drmmode->kbpp)) {
+    *bo = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
+    if (*bo == NULL) {
         xf86DrvMsg(crtc->scrn->scrnIndex, X_ERROR,
                "Couldn't allocate shadow memory for rotated CRTC\n");
         return NULL;
     }
 
-    ret = drmmode_bo_import(drmmode, bo->gbm, fb_id);
+    ret = drmmode_bo_import(drmmode, *bo, fb_id);
 
     if (ret) {
         ErrorF("failed to add rotate fb\n");
-        gbm_bo_destroy(bo->gbm);
-        memset(bo, 0, sizeof(*bo));
+        gbm_bo_destroy(*bo);
+        *bo = NULL;
         return NULL;
     }
 
-    return bo->gbm;
+    return *bo;
 }
 
 static void *
@@ -2264,11 +2252,11 @@ drmmode_create_pixmap_header(ScreenPtr pScreen, int width, int height,
 }
 
 static Bool
-drmmode_set_pixmap_bo(drmmode_ptr drmmode, PixmapPtr pixmap, drmmode_bo *bo);
+drmmode_set_pixmap_bo(drmmode_ptr drmmode, PixmapPtr pixmap, struct gbm_bo **bo);
 
 static PixmapPtr
 drmmode_shadow_fb_create(xf86CrtcPtr crtc, void *data, int width, int height,
-                         drmmode_bo *bo, uint32_t *fb_id)
+                         struct gbm_bo **bo, uint32_t *fb_id)
 {
     ScrnInfoPtr scrn = crtc->scrn;
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
@@ -2286,14 +2274,14 @@ drmmode_shadow_fb_create(xf86CrtcPtr crtc, void *data, int width, int height,
         }
     }
 
-    if (!bo->gbm) {
+    if (*bo == NULL) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                    "Couldn't allocate shadow pixmap for CRTC\n");
         return NULL;
     }
 
-    pPixData = gbm_bo_get_map(bo->gbm);
-    pitch = gbm_bo_get_stride(bo->gbm);
+    pPixData = gbm_bo_get_map(*bo);
+    pitch = gbm_bo_get_stride(*bo);
 
     pixmap = drmmode_create_pixmap_header(scrn->pScreen,
                                           width, height,
@@ -2325,7 +2313,7 @@ drmmode_shadow_create(xf86CrtcPtr crtc, void *data, int width, int height)
 
 static void
 drmmode_shadow_fb_destroy(xf86CrtcPtr crtc, PixmapPtr pixmap,
-                          void *data, drmmode_bo *bo, uint32_t *fb_id)
+                          void *data, struct gbm_bo **bo, uint32_t *fb_id)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
@@ -2336,7 +2324,7 @@ drmmode_shadow_fb_destroy(xf86CrtcPtr crtc, PixmapPtr pixmap,
         drmModeRmFB(drmmode->fd, *fb_id);
         *fb_id = 0;
 
-        gbm_bo_destroy(bo->gbm);
+        gbm_bo_destroy(*bo);
     }
 }
 
@@ -3869,7 +3857,7 @@ drmmode_clones_init(ScrnInfoPtr scrn, drmmode_ptr drmmode, drmModeResPtr mode_re
 }
 
 static Bool
-drmmode_set_pixmap_bo(drmmode_ptr drmmode, PixmapPtr pixmap, drmmode_bo *bo)
+drmmode_set_pixmap_bo(drmmode_ptr drmmode, PixmapPtr pixmap, struct gbm_bo **bo)
 {
 #ifdef GLAMOR_HAS_GBM
     ScrnInfoPtr scrn = drmmode->scrn;
@@ -3878,8 +3866,8 @@ drmmode_set_pixmap_bo(drmmode_ptr drmmode, PixmapPtr pixmap, drmmode_bo *bo)
     if (!drmmode->glamor)
         return TRUE;
 
-    if (!ms->glamor.egl_create_textured_pixmap_from_gbm_bo(pixmap, bo->gbm,
-                                                           gbm_bo_get_used_modifiers(bo->gbm))) {
+    if (!ms->glamor.egl_create_textured_pixmap_from_gbm_bo(pixmap, *bo,
+                                                           gbm_bo_get_used_modifiers(*bo))) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR, "Failed to create pixmap\n");
         return FALSE;
     }
@@ -3906,7 +3894,7 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
     modesettingPtr ms = modesettingPTR(scrn);
     drmmode_ptr drmmode = &ms->drmmode;
-    drmmode_bo old_front;
+    struct gbm_bo *old_front;
     ScreenPtr screen = xf86ScrnToScreen(scrn);
     uint32_t old_fb_id;
     int i, pitch, old_width, old_height, old_pitch;
@@ -3923,23 +3911,23 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
 
     old_width = scrn->virtualX;
     old_height = scrn->virtualY;
-    old_pitch = gbm_bo_get_stride(drmmode->front_bo.gbm);
+    old_pitch = gbm_bo_get_stride(drmmode->front_bo);
     old_front = drmmode->front_bo;
     old_fb_id = drmmode->fb_id;
     drmmode->fb_id = 0;
 
-    if (!drmmode_create_front_bo(drmmode, &drmmode->front_bo,
-                                 width, height, drmmode->kbpp))
+    drmmode->front_bo = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
+    if (!drmmode->front_bo)
         goto fail;
 
-    pitch = gbm_bo_get_stride(drmmode->front_bo.gbm);
+    pitch = gbm_bo_get_stride(drmmode->front_bo);
 
     scrn->virtualX = width;
     scrn->virtualY = height;
     scrn->displayWidth = pitch / kcpp;
 
     if (!drmmode->glamor) {
-        new_pixels = gbm_bo_get_map(drmmode->front_bo.gbm);
+        new_pixels = gbm_bo_get_map(drmmode->front_bo);
     }
 
     if (drmmode->shadow_enable) {
@@ -3979,12 +3967,12 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     if (old_fb_id)
         drmModeRmFB(drmmode->fd, old_fb_id);
 
-    gbm_bo_destroy(old_front.gbm);
+    gbm_bo_destroy(old_front);
 
     return TRUE;
 
  fail:
-    gbm_bo_destroy(drmmode->front_bo.gbm);
+    gbm_bo_destroy(drmmode->front_bo);
     drmmode->front_bo = old_front;
     scrn->virtualX = old_width;
     scrn->virtualY = old_height;
@@ -4859,9 +4847,12 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     width = pScrn->virtualX;
     height = pScrn->virtualY;
 
-    if (!drmmode_create_front_bo(drmmode, &drmmode->front_bo, width, height, bpp))
+    drmmode->front_bo = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
+    if (!drmmode->front_bo) {
         return FALSE;
-    pScrn->displayWidth = gbm_bo_get_stride(drmmode->front_bo.gbm) / cpp;
+    }
+
+    pScrn->displayWidth = gbm_bo_get_stride(drmmode->front_bo) / cpp;
 
     for (int i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
@@ -4884,7 +4875,7 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 
         drmmode_crtc->cursor.bo = gbm_create_best_bo(drmmode, TRUE, width, height, DRMMODE_CURSOR_BO);
         if (!drmmode_crtc->cursor.bo) {
-            gbm_bo_destroy(drmmode->front_bo.gbm);
+            gbm_bo_destroy(drmmode->front_bo);
             for (int j = 0; j < i; j++) {
                 xf86CrtcPtr free_crtc = xf86_config->crtc[j];
                 drmmode_crtc_private_ptr free_drmmode_crtc = free_crtc->driver_private;
@@ -4912,7 +4903,7 @@ drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         drmmode->fb_id = 0;
     }
 
-    gbm_bo_destroy(drmmode->front_bo.gbm);
+    gbm_bo_destroy(drmmode->front_bo);
 
     for (i = 0; i < xf86_config->num_crtc; i++) {
         xf86CrtcPtr crtc = xf86_config->crtc[i];
