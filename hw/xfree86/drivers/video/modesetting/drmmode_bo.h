@@ -34,9 +34,8 @@ gbm_back_bo_from_fd(drmmode_ptr drmmode, Bool do_map,
 
 /* A bit of a misnomer, this is a dmabuf export */
 int
-drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
+drmmode_bo_import(drmmode_ptr drmmode, struct gbm_bo *bo,
                   uint32_t *fb_id);
-
 
 static inline uint32_t
 drmmode_gbm_format_for_depth(int depth)

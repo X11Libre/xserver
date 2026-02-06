@@ -687,7 +687,7 @@ drmmode_crtc_get_fb_id(xf86CrtcPtr crtc, uint32_t *fb_id, int *x, int *y)
     }
 
     if (*fb_id == 0) {
-        ret = drmmode_bo_import(drmmode, &drmmode->front_bo,
+        ret = drmmode_bo_import(drmmode, drmmode->front_bo.gbm,
                                 &drmmode->fb_id);
         if (ret < 0) {
             ErrorF("failed to add fb %d\n", ret);
@@ -2335,11 +2335,12 @@ drmmode_shadow_fb_allocate(xf86CrtcPtr crtc, int width, int height,
         return NULL;
     }
 
-    ret = drmmode_bo_import(drmmode, bo, fb_id);
+    ret = drmmode_bo_import(drmmode, bo->gbm, fb_id);
 
     if (ret) {
         ErrorF("failed to add rotate fb\n");
-        drmmode_bo_destroy(drmmode, bo);
+        gbm_bo_destroy(bo->gbm);
+        memset(bo, 0, sizeof(*bo));
         return NULL;
     }
 

@@ -35,6 +35,10 @@ typedef struct {
 #define GBM_BO_USE_FRONT_RENDERING 0
 #endif
 
+#ifndef GBM_MAX_PLANES
+#define GBM_MAX_PLANES 4
+#endif
+
 /**
  * Thin wrapper around gbm_bo_{create,map,unmap}
  * that creates and maps (if necessary) the "best"
@@ -332,19 +336,19 @@ gbm_back_bo_from_fd(drmmode_ptr drmmode, Bool do_map, int fd_handle, uint32_t pi
 
 /* A bit of a misnomer, this is a dmabuf export */
 int
-drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
+drmmode_bo_import(drmmode_ptr drmmode, struct gbm_bo *bo,
                   uint32_t *fb_id)
 {
-    uint32_t width = gbm_bo_get_width(bo->gbm);
-    uint32_t height = gbm_bo_get_height(bo->gbm);
+    uint32_t width = gbm_bo_get_width(bo);
+    uint32_t height = gbm_bo_get_height(bo);
 
 #ifdef GBM_BO_WITH_MODIFIERS
     modesettingPtr ms = modesettingPTR(drmmode->scrn);
-    if (bo->gbm && ms->kms_has_modifiers &&
-        gbm_bo_get_modifier(bo->gbm) != DRM_FORMAT_MOD_INVALID) {
+    if (bo && ms->kms_has_modifiers &&
+        gbm_bo_get_modifier(bo) != DRM_FORMAT_MOD_INVALID) {
         int num_fds;
 
-        num_fds = gbm_bo_get_plane_count(bo->gbm);
+        num_fds = gbm_bo_get_plane_count(bo);
         if (num_fds > 0) {
             int i;
             uint32_t format;
@@ -353,13 +357,13 @@ drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
             uint32_t offsets[GBM_MAX_PLANES] = {0};
             uint64_t modifiers[GBM_MAX_PLANES] = {0};
 
-            format = gbm_bo_get_format(bo->gbm);
+            format = gbm_bo_get_format(bo);
             format = get_opaque_format(format);
             for (i = 0; i < num_fds; i++) {
-                handles[i] = gbm_bo_get_handle_for_plane(bo->gbm, i).u32;
-                strides[i] = gbm_bo_get_stride_for_plane(bo->gbm, i);
-                offsets[i] = gbm_bo_get_offset(bo->gbm, i);
-                modifiers[i] = gbm_bo_get_modifier(bo->gbm);
+                handles[i] = gbm_bo_get_handle_for_plane(bo, i).u32;
+                strides[i] = gbm_bo_get_stride_for_plane(bo, i);
+                offsets[i] = gbm_bo_get_offset(bo, i);
+                modifiers[i] = gbm_bo_get_modifier(bo);
             }
 
             return drmModeAddFB2WithModifiers(drmmode->fd, width, height,
@@ -371,6 +375,6 @@ drmmode_bo_import(drmmode_ptr drmmode, drmmode_bo *bo,
 #endif
     return drmModeAddFB(drmmode->fd, width, height,
                         drmmode->scrn->depth, drmmode->kbpp,
-                        gbm_bo_get_stride(bo->gbm),
-                        gbm_bo_get_handle(bo->gbm).u32, fb_id);
+                        gbm_bo_get_stride(bo),
+                        gbm_bo_get_handle(bo).u32, fb_id);
 }

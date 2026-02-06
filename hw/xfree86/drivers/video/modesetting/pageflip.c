@@ -393,7 +393,7 @@ ms_do_pageflip(ScreenPtr screen,
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
     xf86CrtcConfigPtr config = XF86_CRTC_CONFIG_PTR(scrn);
-    drmmode_bo new_front_bo;
+    struct gbm_bo *new_front_bo;
     uint32_t flags;
     int i;
     struct ms_flipdata *flipdata;
@@ -415,10 +415,9 @@ ms_do_pageflip(ScreenPtr screen,
 
     ms->glamor.block_handler(screen);
 
-    memset(&new_front_bo,0,sizeof(new_front_bo));
-    new_front_bo.gbm = ms->glamor.gbm_bo_from_pixmap(screen, new_front);
+    new_front_bo = ms->glamor.gbm_bo_from_pixmap(screen, new_front);
 
-    if (!new_front_bo.gbm) {
+    if (!new_front_bo) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                    "%s: Failed to get GBM BO for flip to new front.\n",
                    log_prefix);
@@ -427,7 +426,7 @@ ms_do_pageflip(ScreenPtr screen,
 
     flipdata = calloc(1, sizeof(struct ms_flipdata));
     if (!flipdata) {
-        drmmode_bo_destroy(&ms->drmmode, &new_front_bo);
+        gbm_bo_destroy(new_front_bo);
         xf86DrvMsg(scrn->scrnIndex, X_ERROR,
                    "%s: Failed to allocate flipdata.\n", log_prefix);
         goto error_free_event;
@@ -450,9 +449,7 @@ ms_do_pageflip(ScreenPtr screen,
     /* Create a new handle for the back buffer */
     flipdata->old_fb_id = ms->drmmode.fb_id;
 
-    new_front_bo.width = new_front->drawable.width;
-    new_front_bo.height = new_front->drawable.height;
-    if (drmmode_bo_import(&ms->drmmode, &new_front_bo,
+    if (drmmode_bo_import(&ms->drmmode, new_front_bo,
                           &ms->drmmode.fb_id)) {
         if (!ms->drmmode.flip_bo_import_failed) {
             xf86DrvMsg(scrn->scrnIndex, X_WARNING, "%s: Import BO failed: %s\n",
@@ -523,7 +520,7 @@ ms_do_pageflip(ScreenPtr screen,
         }
     }
 
-    drmmode_bo_destroy(&ms->drmmode, &new_front_bo);
+    gbm_bo_destroy(new_front_bo);
 
     /*
      * Do we have more than our local reference,
@@ -548,7 +545,7 @@ error_undo:
     }
 
 error_out:
-    drmmode_bo_destroy(&ms->drmmode, &new_front_bo);
+    gbm_bo_destroy(new_front_bo);
     /* if only the local reference - free the structure,
      * else drop the local reference and return */
     if (flipdata->flip_count == 1) {
