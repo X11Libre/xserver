@@ -1301,20 +1301,16 @@ DRI2AuthMagic (ScreenPtr pScreen, uint32_t magic)
 Bool
 DRI2Authenticate(ClientPtr client, ScreenPtr pScreen, uint32_t magic)
 {
-    DRI2ScreenPtr ds;
-    DRI2ClientPtr dri2_client;
-    ScreenPtr primescreen;
-
     if (!dixPrivateKeyRegistered(&dri2ScreenPrivateKeyRec))
         return FALSE;
 
-    dri2_client = dri2ClientPrivate(client);
+    DRI2ClientPtr dri2_client = dri2ClientPrivate(client);
 
-    ds = DRI2GetScreenPrime(pScreen, dri2_client->prime_id);
+    DRI2ScreenPtr ds = DRI2GetScreenPrime(pScreen, dri2_client->prime_id);
     if (ds == NULL)
         return FALSE;
 
-    primescreen = GetScreenPrime(pScreen, dri2_client->prime_id);
+    ScreenPtr primescreen = GetScreenPrime(pScreen, dri2_client->prime_id);
     if ((*ds->AuthMagic)(primescreen, magic))
         return FALSE;
     return TRUE;
