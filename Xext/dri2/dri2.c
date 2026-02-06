@@ -1006,9 +1006,7 @@ DRI2WakeClient(ClientPtr client, DrawablePtr pDraw, int frame,
                unsigned int tv_sec, unsigned int tv_usec)
 {
     ScreenPtr pScreen = pDraw->pScreen;
-    DRI2DrawablePtr pPriv;
-
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
                    "[DRI2] %s: bad drawable\n", __func__);
