@@ -1173,36 +1173,7 @@ drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
 
 #ifdef GLAMOR_HAS_GBM
     if (drmmode->glamor) {
-        uint32_t format = drmmode_gbm_format_for_depth(drmmode->scrn->depth);
-
-#ifdef GBM_BO_WITH_MODIFIERS
-        uint32_t num_modifiers;
-        uint64_t *modifiers = NULL;
-        num_modifiers = get_modifiers_set(drmmode->scrn, format, &modifiers,
-                                          FALSE, TRUE, TRUE);
-        if (num_modifiers) {
-#ifdef GBM_BO_WITH_MODIFIERS2
-            bo->gbm = gbm_bo_create_with_modifiers2(drmmode->gbm, width, height,
-                                                    format, modifiers, num_modifiers,
-                                                    GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT |
-                                                    GBM_BO_USE_FRONT_RENDERING);
-#else
-            bo->gbm = gbm_bo_create_with_modifiers(drmmode->gbm, width, height,
-                                                   format, modifiers,
-                                                   num_modifiers);
-#endif
-            free(modifiers);
-            if (bo->gbm) {
-                bo->used_modifiers = TRUE;
-                return TRUE;
-            }
-        }
-#endif
-
-        bo->gbm = gbm_bo_create(drmmode->gbm, width, height, format,
-                                GBM_BO_USE_RENDERING | GBM_BO_USE_SCANOUT |
-                                GBM_BO_USE_FRONT_RENDERING);
-        bo->used_modifiers = FALSE;
+        bo->gbm = gbm_create_best_bo(drmmode, FALSE, width, height, DRMMODE_FRONT_BO);
         return bo->gbm != NULL;
     }
 #endif
