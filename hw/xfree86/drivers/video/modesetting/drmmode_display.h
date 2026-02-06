@@ -197,7 +197,7 @@ typedef struct {
 
     /* Sorted from smallest to largest. */
     drmmode_cursor_dim_rec* dimensions;
-    struct dumb_bo *bo;
+    struct gbm_bo *bo;
 } drmmode_cursor_rec, *drmmode_cursor_ptr;
 
 typedef struct {
@@ -357,7 +357,6 @@ extern void drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode);
 
 Bool drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
 void *drmmode_map_front_bo(drmmode_ptr drmmode);
-Bool drmmode_map_cursor_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
 void drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
 void drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmmode,
                              int *depth, int *bpp);

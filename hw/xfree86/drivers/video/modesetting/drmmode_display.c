@@ -1818,7 +1818,7 @@ drmmode_set_cursor(xf86CrtcPtr crtc, int width, int height)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
-    uint32_t handle = drmmode_crtc->cursor.bo->handle;
+    uint32_t handle = gbm_bo_get_handle(drmmode_crtc->cursor.bo).u32;
     CursorPtr cursor = xf86CurrentCursor(crtc->scrn->pScreen);
     int ret = -EINVAL;
 
@@ -1855,8 +1855,8 @@ drmmode_set_cursor(xf86CrtcPtr crtc, int width, int height)
     return TRUE;
 }
 
-static int
-drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
+static inline Bool
+drmmode_cursor_get_pitch_slow(drmmode_crtc_private_ptr drmmode_crtc, int idx, int *pitch)
 {
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     drmmode_cursor_ptr drmmode_cursor = &drmmode_crtc->cursor;
@@ -1864,22 +1864,30 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
     int width  = drmmode_cursor->dimensions[idx].width;
     int height = drmmode_cursor->dimensions[idx].height;
 
-    int num_pitches = drmmode_cursor->num_dimensions;
+    struct gbm_bo *bo = gbm_create_best_bo(drmmode, FALSE, width, height, DRMMODE_CURSOR_BO);
+    if (!bo) {
+        /* We couldn't allocate a bo, so we try to guess the pitch */
+        *pitch = MAX(width, 64);
+        return FALSE;
+    }
+
+    *pitch = gbm_bo_get_stride(bo) / drmmode->cpp;
+
+    gbm_bo_destroy(bo);
+    return TRUE;
+}
+
+static int
+drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
+{
+    int ret = 0;
 
     if (!drmmode_crtc->cursor_pitches) {
+        int num_pitches = drmmode_crtc->cursor.num_dimensions;
         drmmode_crtc->cursor_pitches = calloc(num_pitches, sizeof(int));
         if (!drmmode_crtc->cursor_pitches) {
             /* we couldn't allocate memory for the cache, so we don't cache the result */
-            int ret;
-            struct dumb_bo *bo = dumb_bo_create(drmmode->fd, width, height, drmmode->kbpp);
-            if (!bo) {
-                /* We couldn't allocate a bo, so we try to guess the pitch */
-                return MAX(width, 64);
-            }
-
-            ret = bo->pitch / drmmode->cpp;
-
-            dumb_bo_destroy(drmmode->fd, bo);
+            drmmode_cursor_get_pitch_slow(drmmode_crtc, idx, &ret);
             return ret;
         }
     }
@@ -1889,16 +1897,11 @@ drmmode_cursor_get_pitch(drmmode_crtc_private_ptr drmmode_crtc, int idx)
         return drmmode_crtc->cursor_pitches[idx];
     }
 
-    struct dumb_bo *bo = dumb_bo_create(drmmode->fd, width, height, drmmode->kbpp);
-    if (!bo) {
-        /* We couldn't allocate a bo, so we try to guess the pitch */
-        return MAX(width, 64);
+    if (drmmode_cursor_get_pitch_slow(drmmode_crtc, idx, &ret)) {
+        drmmode_crtc->cursor_pitches[idx] = ret;
     }
 
-    drmmode_crtc->cursor_pitches[idx] = bo->pitch / drmmode->cpp;
-
-    dumb_bo_destroy(drmmode->fd, bo);
-    return drmmode_crtc->cursor_pitches[idx];
+    return ret;
 }
 
 /*
@@ -1995,7 +1998,7 @@ drmmode_transform_box_back(Rotation rotation, int image_width, int image_height,
 }
 
 static void
-drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_width, int cursor_height,
+drmmode_paint_cursor(struct gbm_bo *cursor_bo, int cursor_pitch, int cursor_width, int cursor_height,
                      const CARD32 * restrict image, int image_width, int image_height,
                      drmmode_crtc_private_ptr restrict drmmode_crtc, int glyph_width, int glyph_height,
                      int rotation, int src_x, int src_y)
@@ -2003,7 +2006,7 @@ drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_wid
     int width_todo;
     int height_todo;
 
-    CARD32 *cursor = cursor_bo->ptr;
+    CARD32 *cursor = gbm_bo_get_map(cursor_bo);
 
     /* Clamp to the source image bounds to avoid pointer UB and OOB reads. */
     src_x = MAX(MIN(src_x, image_width - 1), 0);
@@ -2030,7 +2033,9 @@ drmmode_paint_cursor(struct dumb_bo *cursor_bo, int cursor_pitch, int cursor_wid
         /* If rotation changed, the glyph moves to a different region */
         (drmmode_crtc->cursor_rotation != rotation)
        ) {
-        memset(cursor, 0, cursor_bo->size);
+        int pitch = gbm_bo_get_stride(cursor_bo);
+        int height = gbm_bo_get_height(cursor_bo);
+        memset(cursor, 0, pitch * height);
 
         /* Since we already cleared the buffer, no need to clear it again below */
         drmmode_crtc->cursor_glyph_width = 0;
@@ -4859,7 +4864,7 @@ drmmode_legacy_cursor_probe_allowed(drmmode_ptr drmmode)
 static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
 {
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-    uint32_t handle = drmmode_crtc->cursor.bo->handle;
+    uint32_t handle = gbm_bo_get_handle(drmmode_crtc->cursor.bo).u32;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
     drmmode_cursor_ptr drmmode_cursor = &drmmode_crtc->cursor;
     int width, height, size;
@@ -5043,13 +5048,13 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         min_width  = MIN(width, min_width);
         min_height = MIN(height, min_height);
 
-        drmmode_crtc->cursor.bo = dumb_bo_create(drmmode->fd, width, height, bpp);
+        drmmode_crtc->cursor.bo = gbm_create_best_bo(drmmode, TRUE, width, height, DRMMODE_CURSOR_BO);
         if (!drmmode_crtc->cursor.bo) {
             drmmode_bo_destroy(drmmode, &drmmode->front_bo);
             for (int j = 0; j < i; j++) {
                 xf86CrtcPtr free_crtc = xf86_config->crtc[j];
                 drmmode_crtc_private_ptr free_drmmode_crtc = free_crtc->driver_private;
-                dumb_bo_destroy(drmmode->fd, free_drmmode_crtc->cursor.bo);
+                gbm_bo_destroy(free_drmmode_crtc->cursor.bo);
                 free_drmmode_crtc->cursor.bo = NULL;
             }
             return FALSE;
@@ -5083,23 +5088,6 @@ drmmode_map_secondary_bo(drmmode_ptr drmmode, msPixmapPrivPtr ppriv)
     return ppriv->backing_bo->ptr;
 }
 
-Bool
-drmmode_map_cursor_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
-{
-    xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
-    int i, ret;
-
-    for (i = 0; i < xf86_config->num_crtc; i++) {
-        xf86CrtcPtr crtc = xf86_config->crtc[i];
-        drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
-
-        ret = dumb_bo_map(drmmode->fd, drmmode_crtc->cursor.bo);
-        if (ret)
-            return FALSE;
-    }
-    return TRUE;
-}
-
 void
 drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
 {
@@ -5117,7 +5105,7 @@ drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
         xf86CrtcPtr crtc = xf86_config->crtc[i];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
 
-        dumb_bo_destroy(drmmode->fd, drmmode_crtc->cursor.bo);
+        gbm_bo_destroy(drmmode_crtc->cursor.bo);
         drmmode_destroy_tearfree_shadow(crtc);
     }
 }
