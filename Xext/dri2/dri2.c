@@ -565,15 +565,6 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
                int has_format)
 {
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
-    DRI2ScreenPtr ds;
-    DRI2BufferPtr *buffers;
-    int need_real_front = 0;
-    int need_fake_front = 0;
-    int have_fake_front = 0;
-    int front_format = 0;
-    int dimensions_match;
-    int buffers_changed = 0;
-    int i;
 
     if (!pPriv) {
         *width = pDraw->width;
@@ -582,15 +573,21 @@ do_get_buffers(DrawablePtr pDraw, int *width, int *height,
         return NULL;
     }
 
-    ds = DRI2GetScreenPrime(pDraw->pScreen, pPriv->prime_id);
+    DRI2ScreenPtr ds = DRI2GetScreenPrime(pDraw->pScreen, pPriv->prime_id);
 
-    dimensions_match = (pDraw->width == pPriv->width)
+    int dimensions_match = (pDraw->width == pPriv->width)
         && (pDraw->height == pPriv->height);
 
-    buffers = calloc((count + 1), sizeof(buffers[0]));
+    DRI2BufferPtr *buffers = calloc((count + 1), sizeof(buffers[0]));
     if (!buffers)
         goto err_out;
 
+    int need_real_front = 0;
+    int need_fake_front = 0;
+    int have_fake_front = 0;
+    int front_format = 0;
+    int buffers_changed = 0;
+    int i;
     for (i = 0; i < count; i++) {
         const unsigned attachment = *(attachments++);
         const unsigned format = (has_format) ? *(attachments++) : 0;
