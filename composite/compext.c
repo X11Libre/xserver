@@ -383,8 +383,8 @@ GetCompositeWindowBytes(void *value, XID id, ResourceSizePtr size)
     {
         SizeType pixmapSizeFunc = GetResourceTypeSizeFunc(X11_RESTYPE_PIXMAP);
         ResourceSizeRec pixmapSize = { 0, 0 };
-        ScreenPtr screen = window->drawable.pScreen;
-        PixmapPtr pixmap = screen->GetWindowPixmap(window);
+        ScreenPtr pScreen = window->drawable.pScreen;
+        PixmapPtr pixmap = pScreen->GetWindowPixmap(window);
         pixmapSizeFunc(pixmap, pixmap->drawable.id, &pixmapSize);
         size->pixmapRefSize += pixmapSize.pixmapRefSize;
     }
