@@ -285,12 +285,11 @@ Bool
 DRI2SwapLimit(DrawablePtr pDraw, int swap_limit)
 {
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
-    DRI2ScreenPtr ds;
 
     if (!pPriv)
         return FALSE;
 
-    ds = pPriv->dri2_screen;
+    DRI2ScreenPtr ds = pPriv->dri2_screen;
 
     if (!ds->SwapLimitValidate || !ds->SwapLimitValidate(pDraw, swap_limit))
         return FALSE;
