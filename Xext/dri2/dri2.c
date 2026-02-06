@@ -952,17 +952,15 @@ Bool
 DRI2CanFlip(DrawablePtr pDraw)
 {
     ScreenPtr pScreen = pDraw->pScreen;
-    WindowPtr pWin, pRoot;
-    PixmapPtr pWinPixmap, pRootPixmap;
 
     if (pDraw->type == DRAWABLE_PIXMAP)
         return TRUE;
 
-    pRoot = pScreen->root;
-    pRootPixmap = pScreen->GetWindowPixmap(pRoot);
+    WindowPtr pRoot = pScreen->root;
+    PixmapPtr pRootPixmap = pScreen->GetWindowPixmap(pRoot);
 
-    pWin = (WindowPtr) pDraw;
-    pWinPixmap = pScreen->GetWindowPixmap(pWin);
+    WindowPtr pWin = (WindowPtr) pDraw;
+    PixmapPtr pWinPixmap = pScreen->GetWindowPixmap(pWin);
     if (pRootPixmap != pWinPixmap)
         return FALSE;
     if (!RegionEqual(&pWin->clipList, &pRoot->winSize))
