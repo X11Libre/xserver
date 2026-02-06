@@ -1393,12 +1393,11 @@ DRI2ConfigNotify(WindowPtr pWin, int x, int y, int w, int h, int bw,
     ScreenPtr pScreen = pDraw->pScreen;
     DRI2ScreenPtr ds = DRI2GetScreen(pScreen);
     DRI2DrawablePtr dd = DRI2GetDrawable(pDraw);
-    int ret;
 
     if (ds->ConfigNotify) {
         pScreen->ConfigNotify = ds->ConfigNotify;
 
-        ret = (*pScreen->ConfigNotify) (pWin, x, y, w, h, bw, pSib);
+        int ret = pScreen->ConfigNotify(pWin, x, y, w, h, bw, pSib);
 
         ds->ConfigNotify = pScreen->ConfigNotify;
         pScreen->ConfigNotify = DRI2ConfigNotify;
