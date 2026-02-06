@@ -360,4 +360,3 @@ get_modifiers_set(ScrnInfoPtr scrn, uint32_t format, uint64_t **modifiers,
                   Bool enabled_crtc_only, Bool exclude_multiplane, Bool async_flip);
 #endif
 #endif
-
