@@ -157,9 +157,9 @@ dix_main(int argc, char *argv[], char *envp[])
             CreateWellKnownSockets();
             for (int i = 1; i < LimitClients; i++)
                 clients[i] = NULL;
-            serverClient = calloc(1, sizeof(ClientRec));
-            if (!serverClient)
-                FatalError("couldn't create server client");
+            ClientRec serverClientRec;
+            serverClient = &serverClientRec;
+            memset(serverClient, 0, sizeof(ClientRec));
             InitClient(serverClient, 0, (void *) NULL);
 
         clients[0] = serverClient;
