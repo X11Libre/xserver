@@ -892,11 +892,8 @@ static void dri2_copy_region(DrawablePtr pDraw, RegionPtr pRegion,
                              DRI2BufferPtr pDest, DRI2BufferPtr pSrc)
 {
     DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
-    DRI2ScreenPtr ds;
-    ScreenPtr primeScreen;
-
-    primeScreen = GetScreenPrime(pDraw->pScreen, pPriv->prime_id);
-    ds = DRI2GetScreen(primeScreen);
+    ScreenPtr primeScreen = GetScreenPrime(pDraw->pScreen, pPriv->prime_id);
+    DRI2ScreenPtr ds = DRI2GetScreen(primeScreen);
 
     if (ds->CopyRegion2)
         (*ds->CopyRegion2)(primeScreen, pDraw, pRegion, pDest, pSrc);
@@ -905,17 +902,16 @@ static void dri2_copy_region(DrawablePtr pDraw, RegionPtr pRegion,
 
     /* cause damage to the box */
     if (pPriv->prime_id) {
-       BoxRec box;
-       RegionRec region;
-       box.x1 = 0;
-       box.x2 = box.x1 + pDraw->width;
-       box.y1 = 0;
-       box.y2 = box.y1 + pDraw->height;
-       RegionInit(&region, &box, 1);
-       RegionTranslate(&region, pDraw->x, pDraw->y);
-       DamageRegionAppend(pDraw, &region);
-       DamageRegionProcessPending(pDraw);
-       RegionUninit(&region);
+        BoxRec box = {
+            .x2 = pDraw->width,
+            .y2 = pDraw->height,
+        };
+        RegionRec region;
+        RegionInit(&region, &box, 1);
+        RegionTranslate(&region, pDraw->x, pDraw->y);
+        DamageRegionAppend(pDraw, &region);
+        DamageRegionProcessPending(pDraw);
+        RegionUninit(&region);
     }
 }
 
