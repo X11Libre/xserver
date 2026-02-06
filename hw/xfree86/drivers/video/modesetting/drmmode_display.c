@@ -5110,6 +5110,29 @@ drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     }
 }
 
+/* XXX Do we really need to do this? XXX */
+static struct gbm_bo*
+drmmode_create_bpp_probe_bo(drmmode_ptr drmmode,
+                            unsigned width, unsigned height, unsigned depth,
+                            unsigned bpp, struct gbm_device **out_gbm_dev)
+{
+    uint32_t format = drmmode_gbm_format_for_depth(depth);
+    struct gbm_device *gbm_dev = drmmode->gbm;
+
+    *out_gbm_dev = NULL;
+    if (!gbm_dev) {
+        gbm_dev = gbm_create_device(drmmode->fd);
+        if (!gbm_dev) {
+            return NULL;
+        }
+
+        *out_gbm_dev = gbm_dev;
+    }
+
+    return gbm_bo_create(gbm_dev, width, height,
+                         format, GBM_BO_USE_SCANOUT | GBM_BO_USE_WRITE);
+}
+
 /* ugly workaround to see if we can create 32bpp */
 void
 drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int *depth,
@@ -5117,7 +5140,8 @@ drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int *depth,
 {
     drmModeResPtr mode_res;
     uint64_t value;
-    struct dumb_bo *bo;
+    struct gbm_device *free_me = NULL;
+    struct gbm_bo *bo = NULL;
     uint32_t fb_id;
     int ret;
 
@@ -5130,6 +5154,7 @@ drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int *depth,
     }
 
     *depth = 24;
+    *bpp = 32;
     mode_res = drmModeGetResources(drmmode->fd);
     if (!mode_res)
         return;
@@ -5139,27 +5164,32 @@ drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmode, int *depth,
     if (mode_res->min_height == 0)
         mode_res->min_height = 1;
     /*create a bo */
-    bo = dumb_bo_create(drmmode->fd, mode_res->min_width, mode_res->min_height,
-                        32);
+    bo = drmmode_create_bpp_probe_bo(drmmode, mode_res->min_width, mode_res->min_height,
+                                     *depth, *bpp, &free_me);
+
     if (!bo) {
         *bpp = 24;
         goto out;
     }
 
     ret = drmModeAddFB(drmmode->fd, mode_res->min_width, mode_res->min_height,
-                       24, 32, bo->pitch, bo->handle, &fb_id);
+                       *depth, *bpp, gbm_bo_get_stride(bo), gbm_bo_get_handle(bo).s32, &fb_id);
 
     if (ret) {
         *bpp = 24;
-        dumb_bo_destroy(drmmode->fd, bo);
         goto out;
     }
 
     drmModeRmFB(drmmode->fd, fb_id);
-    *bpp = 32;
 
-    dumb_bo_destroy(drmmode->fd, bo);
- out:
+out:
+    if (bo) {
+        gbm_bo_destroy(bo);
+    }
+
+    if (free_me) {
+        gbm_device_destroy(free_me);
+    }
     drmModeFreeResources(mode_res);
     return;
 }
