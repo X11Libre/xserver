@@ -989,9 +989,7 @@ void
 DRI2WaitMSCComplete(ClientPtr client, DrawablePtr pDraw, int frame,
                     unsigned int tv_sec, unsigned int tv_usec)
 {
-    DRI2DrawablePtr pPriv;
-
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL)
         return;
 
