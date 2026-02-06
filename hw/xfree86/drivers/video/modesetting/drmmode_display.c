@@ -38,7 +38,6 @@
 #include "os/fmt.h"
 #include "present/present_priv.h"
 
-#include "dumb_bo.h"
 #include "inputstr.h"
 #include "xf86str.h"
 #include "X11/Xatom.h"
@@ -1009,78 +1008,10 @@ drmmode_crtc_flip(xf86CrtcPtr crtc, uint32_t fb_id, int x, int y,
                            fb_id, flags, data);
 }
 
-void
-drmmode_bo_destroy(drmmode_ptr drmmode, drmmode_bo *bo)
-{
-#ifdef GLAMOR_HAS_GBM
-    if (bo->gbm) {
-        if (bo->map_addr) {
-            gbm_bo_unmap(bo->gbm, bo->map_addr);
-            bo->map_addr = NULL;
-            bo->map_data = NULL;
-        }
-        gbm_bo_destroy(bo->gbm);
-        bo->gbm = NULL;
-    }
-#endif
-
-    if (bo->dumb) {
-        int ret = dumb_bo_destroy(drmmode->fd, bo->dumb);
-        if (ret == 0) {
-            bo->map_addr = NULL;
-            bo->map_data = NULL;
-            bo->dumb = NULL;
-        }
-    }
-}
-
-static void*
-drmmode_bo_map(drmmode_ptr drmmode, drmmode_bo *bo)
-{
-    if (bo->map_data) {
-        return bo->map_data;
-    }
-
-#ifdef GLAMOR_HAS_GBM
-    if (bo->gbm) {
-        /**
-         * We shouldn't read from gpu memory, as it's really slow.
-         * We do allow it though, so nothing breaks.
-         */
-        uint32_t stride = 0;
-        void* map_addr = NULL;
-        void* map_data = gbm_bo_map(bo->gbm, 0, 0, bo->width, bo->height, GBM_BO_TRANSFER_READ_WRITE, &stride, &map_addr);
-        if (map_data) {
-            bo->map_data = map_data;
-            bo->map_addr = map_addr;
-            return bo->map_data;
-        }
-    }
-#endif
-
-    if (bo->dumb) {
-        int ret = dumb_bo_map(drmmode->fd, bo->dumb);
-        if (ret) {
-            return NULL;
-        }
-
-        bo->map_data = bo->dumb->ptr;
-        bo->map_addr = bo->map_data;
-        return bo->map_data;
-    }
-
-    return NULL;
-}
-
 static Bool
 drmmode_create_front_bo(drmmode_ptr drmmode, drmmode_bo *bo,
                         unsigned width, unsigned height, unsigned bpp)
 {
-    memset(bo, 0, sizeof(*bo));
-
-    bo->width = width;
-    bo->height = height;
-
 #ifdef GLAMOR_HAS_GBM
     bo->gbm = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
     return !!bo->gbm;
@@ -3948,7 +3879,7 @@ drmmode_set_pixmap_bo(drmmode_ptr drmmode, PixmapPtr pixmap, drmmode_bo *bo)
         return TRUE;
 
     if (!ms->glamor.egl_create_textured_pixmap_from_gbm_bo(pixmap, bo->gbm,
-                                                           bo->used_modifiers)) {
+                                                           gbm_bo_get_used_modifiers(bo->gbm))) {
         xf86DrvMsg(scrn->scrnIndex, X_ERROR, "Failed to create pixmap\n");
         return FALSE;
     }
@@ -4968,12 +4899,6 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     ms->cursor_image_height = min_height;
 
     return TRUE;
-}
-
-void *
-drmmode_map_front_bo(drmmode_ptr drmmode)
-{
-    return drmmode_bo_map(drmmode, &drmmode->front_bo);
 }
 
 void

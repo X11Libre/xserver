@@ -34,8 +34,6 @@
 #include "libudev.h"
 #endif
 
-#include "dumb_bo.h"
-
 struct gbm_device;
 
 enum drmmode_plane_property {
@@ -78,15 +76,7 @@ enum drmmode_crtc_property {
 };
 
 typedef struct {
-    uint32_t width;
-    uint32_t height;
-    struct dumb_bo *dumb;
-#ifdef GLAMOR_HAS_GBM
-    Bool used_modifiers;
     struct gbm_bo *gbm;
-#endif
-    void* map_data; /* Actual pixel data we are interesed in */
-    void* map_addr; /* Address of the map that we have to unmap */
 } drmmode_bo;
 
 typedef struct {
@@ -353,7 +343,6 @@ extern void drmmode_uevent_init(ScrnInfoPtr scrn, drmmode_ptr drmmode);
 extern void drmmode_uevent_fini(ScrnInfoPtr scrn, drmmode_ptr drmmode);
 
 Bool drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
-void *drmmode_map_front_bo(drmmode_ptr drmmode);
 void drmmode_free_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode);
 void drmmode_get_default_bpp(ScrnInfoPtr pScrn, drmmode_ptr drmmmode,
                              int *depth, int *bpp);
