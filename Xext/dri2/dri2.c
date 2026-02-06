@@ -1053,8 +1053,6 @@ DRI2WaitSwap(ClientPtr client, DrawablePtr pDrawable)
     return FALSE;
 }
 
-
-
 int
 DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
                 CARD64 divisor, CARD64 remainder, CARD64 * swap_target,
@@ -1062,12 +1060,8 @@ DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
 {
     ScreenPtr pScreen = pDraw->pScreen;
     DRI2ScreenPtr ds = DRI2GetScreen(pDraw->pScreen);
-    DRI2DrawablePtr pPriv;
-    DRI2BufferPtr pDestBuffer = NULL, pSrcBuffer = NULL;
-    int ret, i;
-    CARD64 ust, current_msc;
 
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
                    "[DRI2] %s: bad drawable\n", __func__);
@@ -1082,7 +1076,8 @@ DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
      */
     *swap_target = pPriv->swap_count + pPriv->swapsPending + 1;
 
-    for (i = 0; i < pPriv->bufferCount; i++) {
+    DRI2BufferPtr pDestBuffer = NULL, pSrcBuffer = NULL;
+    for (int i = 0; i < pPriv->bufferCount; i++) {
         if (pPriv->buffers[i]->attachment == DRI2BufferFrontLeft)
             pDestBuffer = (DRI2BufferPtr) pPriv->buffers[i];
         if (pPriv->buffers[i]->attachment == DRI2BufferBackLeft)
@@ -1126,12 +1121,12 @@ DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
          * got enabled.
          */
         if (ds->GetMSC) {
+            CARD64 current_msc, ust;
             if (!(*ds->GetMSC) (pDraw, &ust, &current_msc))
                 pPriv->last_swap_target = 0;
 
             if (current_msc < pPriv->last_swap_target)
                 pPriv->last_swap_target = current_msc;
-
         }
 
         /*
@@ -1144,8 +1139,8 @@ DRI2SwapBuffers(ClientPtr client, DrawablePtr pDraw, CARD64 target_msc,
     }
 
     pPriv->swapsPending++;
-    ret = (*ds->ScheduleSwap) (client, pDraw, pDestBuffer, pSrcBuffer,
-                               &target_msc, divisor, remainder, func, data);
+    int ret = (*ds->ScheduleSwap) (client, pDraw, pDestBuffer, pSrcBuffer,
+                                   &target_msc, divisor, remainder, func, data);
     if (!ret) {
         pPriv->swapsPending--;  /* didn't schedule */
         xf86DrvMsg(pScreen->myNum, X_ERROR,
