@@ -49,6 +49,18 @@ dri3_screen_can_one_point_four(ScreenPtr screen)
 }
 
 static Bool
+dri3_screen_can_one_point_one(ScreenPtr screen)
+{
+    dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
+
+    if (dri3 && dri3->info && dri3->info->version >= 1 &&
+        dri3->info->fd_from_pixmap)
+        return TRUE;
+
+    return FALSE;
+}
+
+static Bool
 dri3_screen_can_one_point_two(ScreenPtr screen)
 {
     dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
@@ -75,8 +87,12 @@ proc_dri3_query_version(ClientPtr client)
     };
 
     DIX_FOR_EACH_SCREEN({
-        if (!dri3_screen_can_one_point_two(walkScreen)) {
+        if (!dri3_screen_can_one_point_one(walkScreen)) {
             reply.minorVersion = 0;
+            break;
+        }
+        if (!dri3_screen_can_one_point_two(walkScreen)) {
+            reply.minorVersion = 1;
             break;
         }
         if (!dri3_screen_can_one_point_four(walkScreen)) {
@@ -86,8 +102,12 @@ proc_dri3_query_version(ClientPtr client)
     });
 
     DIX_FOR_EACH_GPU_SCREEN({
-        if (!dri3_screen_can_one_point_two(walkScreen)) {
+        if (!dri3_screen_can_one_point_one(walkScreen)) {
             reply.minorVersion = 0;
+            break;
+        }
+        if (!dri3_screen_can_one_point_two(walkScreen)) {
+            reply.minorVersion = 1;
             break;
         }
         if (!dri3_screen_can_one_point_four(walkScreen)) {
