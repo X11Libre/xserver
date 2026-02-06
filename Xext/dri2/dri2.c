@@ -1040,12 +1040,8 @@ DRI2SwapComplete(ClientPtr client, DrawablePtr pDraw, int frame,
                  DRI2SwapEventPtr swap_complete, void *swap_data)
 {
     ScreenPtr pScreen = pDraw->pScreen;
-    DRI2DrawablePtr pPriv;
-    CARD64 ust = 0;
-    BoxRec box;
-    RegionRec region;
 
-    pPriv = DRI2GetDrawable(pDraw);
+    DRI2DrawablePtr pPriv = DRI2GetDrawable(pDraw);
     if (pPriv == NULL) {
         xf86DrvMsg(pScreen->myNum, X_ERROR,
                    "[DRI2] %s: bad drawable\n", __func__);
@@ -1055,15 +1051,18 @@ DRI2SwapComplete(ClientPtr client, DrawablePtr pDraw, int frame,
     pPriv->swapsPending--;
     pPriv->swap_count++;
 
-    box.x1 = 0;
-    box.y1 = 0;
-    box.x2 = pDraw->width;
-    box.y2 = pDraw->height;
+    BoxRec box = {
+        .x2 = pDraw->width,
+        .y2 = pDraw->height,
+    };
+
+    RegionRec region;
     RegionInit(&region, &box, 0);
+
     DRI2CopyRegion(pDraw, &region, DRI2BufferFakeFrontLeft,
                    DRI2BufferFrontLeft);
 
-    ust = ((CARD64) tv_sec * 1000000) + tv_usec;
+    CARD64 ust = ((CARD64) tv_sec * 1000000) + tv_usec;
     if (swap_complete)
         swap_complete(client, swap_data, type, ust, frame, pPriv->swap_count);
 
