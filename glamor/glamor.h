@@ -65,10 +65,12 @@ typedef Bool (*GetDrawableModifiersFuncPtr) (DrawablePtr draw,
                                              uint64_t **modifiers);
 
 #define GLAMOR_EGL_EXTERNAL_BUFFER 3
-#define GLAMOR_USE_EGL_SCREEN		(1 << 0)
-#define GLAMOR_NO_DRI3			(1 << 1)
+#define GLAMOR_USE_EGL_SCREEN           (1 << 0)
+#define GLAMOR_NO_DRI3                  (1 << 1)
+#define GLAMOR_NO_RENDER_ACCEL          (1 << 2)
 #define GLAMOR_VALID_FLAGS      (GLAMOR_USE_EGL_SCREEN                \
-                                 | GLAMOR_NO_DRI3)
+                                 | GLAMOR_NO_DRI3                     \
+                                 | GLAMOR_NO_RENDER_ACCEL)
 
 /* until we need geometry shaders GL3.1 should suffice. */
 #define GLAMOR_GL_CORE_VER_MAJOR 3
