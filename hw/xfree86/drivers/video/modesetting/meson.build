@@ -1,8 +1,8 @@
 modesetting_srcs = [
     'dri2.c',
     'driver.c',
+    'drmmode_bo.c',
     'drmmode_display.c',
-    'dumb_bo.c',
     'pageflip.c',
     'present.c',
     'vblank.c',
@@ -34,7 +34,7 @@ symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libshadow.so')
 if build_glx
   symbol_test_args += join_paths(xorg_build_root, 'dixmods', 'libglx.so')
 endif
-if gbm_dep.found()
+if build_glamor
     symbol_test_args += join_paths(xorg_build_root, 'glamor_egl', 'libglamoregl.so')
 endif
 symbol_test_args += join_paths(xorg_build_root, 'drivers', 'video', 'modesetting', 'modesetting_drv.so')

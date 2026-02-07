@@ -163,7 +163,7 @@ ms_present_abort_vblank(RRCrtcPtr crtc, uint64_t event_id, uint64_t msc)
 {
     ScreenPtr screen = crtc->pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     xf86CrtcPtr xf86_crtc = crtc->devPrivate;
 
     /* Check if this is a fake flip routed through TearFree and abort it */
@@ -180,7 +180,7 @@ ms_present_abort_vblank(RRCrtcPtr crtc, uint64_t event_id, uint64_t msc)
 static void
 ms_present_flush(WindowPtr window)
 {
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     ScreenPtr screen = window->drawable.pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
@@ -190,7 +190,7 @@ ms_present_flush(WindowPtr window)
 #endif
 }
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
 
 /**
  * Callback for the DRM event queue when a flip has completed on all pipes
@@ -261,7 +261,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
         drmmode_crtc_private_ptr drmmode_crtc = config->crtc[i]->driver_private;
 
         /* Don't do pageflipping if CRTCs are rotated. */
-        if (drmmode_crtc->rotate_bo.gbm)
+        if (drmmode_crtc->rotate_bo)
             return FALSE;
 
         if (xf86_crtc_on(config->crtc[i]))
@@ -277,7 +277,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
      * the kms driver is atomic_modeset_capable.
      */
     if (!ms->atomic_modeset_capable &&
-        pixmap->devKind != drmmode_bo_get_pitch(&ms->drmmode.front_bo))
+        pixmap->devKind != gbm_bo_get_stride(ms->drmmode.front_bo))
         return FALSE;
 
     if (!ms->drmmode.glamor)
@@ -517,7 +517,7 @@ static present_screen_info_rec ms_present_screen_info = {
     .flush = ms_present_flush,
 
     .capabilities = PresentCapabilityNone,
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     .check_flip = NULL,
     .check_flip2 = ms_present_check_flip,
     .flip = ms_present_flip,

@@ -118,7 +118,7 @@ xserver_exec = executable(
 subdir('dixmods')
 subdir('exa')
 subdir('fbdevhw')
-if gbm_dep.found()
+if build_glamor and gbm_dep.found()
     subdir('glamor_egl')
 endif
 if int10 != 'false'

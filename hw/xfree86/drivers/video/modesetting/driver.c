@@ -35,6 +35,7 @@
 #include "dix-config.h"
 
 #include <errno.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <X11/extensions/randr.h>
@@ -72,6 +73,7 @@
 #endif
 
 #include "driver.h"
+#include "drmmode_bo.h"
 
 static void AdjustFrame(ScrnInfoPtr pScrn, int x, int y);
 static Bool CloseScreen(ScreenPtr pScreen);
@@ -284,7 +286,7 @@ check_outputs(int fd, int *count)
         *count = res->count_connectors;
 
     ret = res->count_connectors > 0;
-#if defined(GLAMOR_HAS_GBM_LINEAR)
+#if defined(GLAMOR) && defined(GBM_BO_USE_LINEAR)
     if (ret == FALSE) {
         uint64_t value = 0;
         if (drmGetCap(fd, DRM_CAP_PRIME, &value) == 0 &&
@@ -705,7 +707,7 @@ ms_tearfree_update_damages(ScreenPtr pScreen)
 static void
 ms_tearfree_do_flips(ScreenPtr pScreen)
 {
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     ScrnInfoPtr scrn = xf86ScreenToScrn(pScreen);
     xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(scrn);
     modesettingPtr ms = modesettingPTR(scrn);
@@ -822,7 +824,7 @@ redisplay_dirty(ScreenPtr screen, PixmapDirtyUpdatePtr dirty, int *timeout)
     PixmapSyncDirtyHelper(dirty);
 
     if (!screen->isGPU) {
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
         modesettingPtr ms = modesettingPTR(xf86ScreenToScrn(screen));
         /*
          * When copying from the primary framebuffer to the shared pixmap,
@@ -1020,7 +1022,7 @@ FreeScreen(ScrnInfoPtr pScrn)
 
 }
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
 
 static Bool
 load_glamor(ScrnInfoPtr pScrn)
@@ -1065,7 +1067,7 @@ try_enable_glamor(ScrnInfoPtr pScrn)
 
     ms->drmmode.glamor = FALSE;
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     if (ms->drmmode.force_24_32) {
         xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "Cannot use glamor with 24bpp packed fb\n");
         return;
@@ -1347,7 +1349,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
             if (ms->drmmode.glamor)
                 pScrn->capabilities |= RR_Capability_SinkOffload;
         }
-#ifdef GLAMOR_HAS_GBM_LINEAR
+#if defined(GLAMOR) && defined(GBM_BO_USE_LINEAR)
         if (value & DRM_PRIME_CAP_EXPORT && ms->drmmode.glamor)
             pScrn->capabilities |= RR_Capability_SourceOutput | RR_Capability_SourceOffload;
 #endif
@@ -1458,7 +1460,7 @@ msShadowWindow(ScreenPtr screen, CARD32 row, CARD32 offset, int mode,
     stride = (pScrn->displayWidth * ms->drmmode.kbpp) / 8;
     *size = stride;
 
-    return ((uint8_t *) ms->drmmode.front_bo.dumb->ptr + row * stride + offset);
+    return ((uint8_t *) gbm_bo_get_map(ms->drmmode.front_bo) + row * stride + offset);
 }
 
 /* somewhat arbitrary tile size, in pixels */
@@ -1705,13 +1707,8 @@ modesetCreateScreenResources(ScreenPtr pScreen)
 
     drmmode_uevent_init(pScrn, &ms->drmmode);
 
-    if (!ms->drmmode.sw_cursor)
-        drmmode_map_cursor_bos(pScrn, &ms->drmmode);
-
-    if (!ms->drmmode.gbm) {
-        pixels = drmmode_map_front_bo(&ms->drmmode);
-        if (!pixels)
-            return FALSE;
+    if (!ms->drmmode.glamor) {
+        pixels = gbm_bo_get_map(ms->drmmode.front_bo);
     }
 
     rootPixmap = pScreen->GetScreenPixmap(pScreen);
@@ -1778,7 +1775,7 @@ modesetCreateScreenResources(ScreenPtr pScreen)
 static Bool
 msSharePixmapBacking(PixmapPtr ppix, ScreenPtr secondary, void **handle)
 {
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     modesettingPtr ms =
         modesettingPTR(xf86ScreenToScrn(ppix->drawable.pScreen));
     int ret;
@@ -1798,7 +1795,7 @@ msSharePixmapBacking(PixmapPtr ppix, ScreenPtr secondary, void **handle)
 static Bool
 msSetSharedPixmapBacking(PixmapPtr ppix, void *fd_handle)
 {
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     ScreenPtr screen = ppix->drawable.pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
@@ -1950,6 +1947,20 @@ modesetting_get_cursor_interleave(int fd)
     return ret;
 }
 
+static struct gbm_device*
+gbm_create_device_by_name(int fd, const char* name)
+{
+    struct gbm_device* ret = NULL;
+    const char* old_backend = getenv("GBM_BACKEND");
+    setenv("GBM_BACKEND", name, 1);
+    ret = gbm_create_device(fd);
+    unsetenv("GBM_BACKEND");
+    if (old_backend) {
+        setenv("GBM_BACKEND", old_backend, 1);
+    }
+    return ret;
+}
+
 static Bool
 ScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
@@ -1962,10 +1973,21 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
     if (!SetMaster(pScrn))
         return FALSE;
 
-#ifdef GLAMOR_HAS_GBM
-    if (ms->drmmode.glamor)
+#ifdef GLAMOR
+    if (ms->drmmode.glamor) {
         ms->drmmode.gbm = ms->glamor.egl_get_gbm_device(pScreen);
+    } else
 #endif
+    {
+        ms->drmmode.gbm = gbm_create_device(ms->drmmode.fd);
+        if (!ms->drmmode.gbm) {
+            ms->drmmode.gbm = gbm_create_device_by_name(ms->drmmode.fd, "dumb");
+        }
+    }
+
+    if (!ms->drmmode.gbm) {
+        return FALSE;
+    }
 
     /* HW dependent - FIXME */
     pScrn->displayWidth = pScrn->virtualX;
@@ -2107,7 +2129,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
     else
         xf86DPMSInit(pScreen, xf86DPMSSet, 0);
 
-#ifdef GLAMOR_HAS_GBM
+#if defined(GLAMOR) && defined(XV)
     if (ms->drmmode.glamor) {
         XF86VideoAdaptorPtr     glamor_adaptor;
 
@@ -2129,7 +2151,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         return FALSE;
     }
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     if (ms->drmmode.glamor) {
         if (!(ms->drmmode.dri2_enable = ms_dri2_screen_init(pScreen))) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -2264,7 +2286,7 @@ CloseScreen(ScreenPtr pScreen)
     /* Clear mask of assigned crtc's in this generation */
     ms_ent->assigned_crtcs = 0;
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     if (ms->drmmode.dri2_enable) {
         ms_dri2_close_screen(pScreen);
     }
@@ -2294,12 +2316,21 @@ CloseScreen(ScreenPtr pScreen)
 
     drmmode_free_bos(pScrn, &ms->drmmode);
 
+#ifdef GLAMOR
+    /* If we didn't get the gbm device from glamor, we have to free it ourserves */
+    if (!ms->drmmode.glamor)
+#endif
+    {
+        gbm_device_destroy(ms->drmmode.gbm);
+        ms->drmmode.gbm = NULL;
+    }
+
     if (ms->drmmode.pageflip) {
         miPointerScreenPtr PointPriv =
             dixLookupPrivate(&pScreen->devPrivates, miPointerScreenKey);
 
         if (PointPriv->spriteFuncs == &drmmode_sprite_funcs)
-            PointPriv->spriteFuncs = ms->SpriteFuncs;        
+            PointPriv->spriteFuncs = ms->SpriteFuncs;
     }
 
     if (pScrn->vtSema) {
