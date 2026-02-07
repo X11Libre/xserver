@@ -236,7 +236,9 @@ gbm_create_cursor_bo(drmmode_ptr drmmode, Bool do_map,
                      uint32_t width, uint32_t height)
 {
     static const uint32_t cursor_flag_list[] = { /* best flags */
+#if 0 /* Seems to have issues for now */
                                                  GBM_BO_USE_CURSOR,
+#endif
 
 #if 0 /* Use these ones too if we ever need to */
                                                  GBM_BO_USE_CURSOR | GBM_BO_USE_LINEAR,
