@@ -47,11 +47,6 @@ SOFTWARE.
 #ifndef SERVERMD_H
 #define SERVERMD_H 1
 
-#if !defined(_DIX_CONFIG_H_) && !defined(_XORG_SERVER_H_)
-#error Drivers must include xorg-server.h before any other xserver headers
-#error xserver code must include dix-config.h before any other headers
-#endif
-
 #include <X11/Xarch.h>		/* for X_LITTLE_ENDIAN/X_BIG_ENDIAN */
 
 #if X_BYTE_ORDER == X_LITTLE_ENDIAN
