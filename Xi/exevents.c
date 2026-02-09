@@ -1443,8 +1443,7 @@ RetrieveTouchDeliveryData(DeviceIntPtr dev, TouchPointInfoPtr ti,
 static int
 DeliverTouchEmulatedEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
                           InternalEvent *ev, TouchListener * listener,
-                          ClientPtr client, WindowPtr win, GrabPtr grab,
-                          XI2Mask *xi2mask)
+                          WindowPtr win, GrabPtr grab)
 {
     InternalEvent motion, button;
     InternalEvent *ptrev = &motion;
@@ -1454,11 +1453,7 @@ DeliverTouchEmulatedEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
     /* There may be a pointer grab on the device */
     if (!grab) {
         grab = dev->deviceGrab.grab;
-        if (grab) {
-            win = grab->window;
-            xi2mask = grab->xi2mask;
-            client = dixClientForGrab(grab);
-        }
+        if (grab) win = grab->window;
     }
 
     /* We don't deliver pointer events to non-owners */
@@ -1590,8 +1585,7 @@ DeliverEmulatedMotionEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
                                        &mask))
             return;
 
-        DeliverTouchEmulatedEvent(dev, ti, &motion, &ti->listeners[0], client,
-                                  win, grab, mask);
+        DeliverTouchEmulatedEvent(dev, ti, &motion, &ti->listeners[0], win, grab);
     }
     else {
         InternalEvent button;
@@ -2032,8 +2026,7 @@ DeliverTouchBeginEvent(DeviceIntPtr dev, TouchPointInfoPtr ti,
 
     if (listener->type == TOUCH_LISTENER_POINTER_REGULAR ||
         listener->type == TOUCH_LISTENER_POINTER_GRAB) {
-        rc = DeliverTouchEmulatedEvent(dev, ti, ev, listener, client, win,
-                                       grab, xi2mask);
+        rc = DeliverTouchEmulatedEvent(dev, ti, ev, listener, win, grab);
         if (rc == Success) {
             listener->state = TOUCH_LISTENER_IS_OWNER;
             /* async grabs cannot replay, so automatically accept this touch */
@@ -2086,8 +2079,7 @@ DeliverTouchEndEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, InternalEvent *ev,
          * This is part two of the hack in DeactivatePointerGrab
          */
         if (listener->state != TOUCH_LISTENER_HAS_END) {
-            rc = DeliverTouchEmulatedEvent(dev, ti, ev, listener, client, win,
-                                           grab, xi2mask);
+            rc = DeliverTouchEmulatedEvent(dev, ti, ev, listener, win, grab);
 
              /* Once we send a TouchEnd to a legacy listener, we're already well
               * past the accepting/rejecting stage (can only happen on
@@ -2165,8 +2157,7 @@ DeliverTouchEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, InternalEvent *ev,
     else if (ev->any.type == ET_TouchUpdate) {
         if (listener->type == TOUCH_LISTENER_POINTER_REGULAR ||
             listener->type == TOUCH_LISTENER_POINTER_GRAB)
-            DeliverTouchEmulatedEvent(dev, ti, ev, listener, client, win, grab,
-                                      xi2mask);
+            DeliverTouchEmulatedEvent(dev, ti, ev, listener, win, grab);
         else if (TouchResourceIsOwner(ti, listener->listener) ||
                  has_ownershipmask)
             rc = DeliverOneTouchEvent(client, dev, ti, grab, win, ev);
