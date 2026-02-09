@@ -10,7 +10,6 @@ xwin_clipboard = static_library(
     'XWinclipboard',
     srcs_windows_clipboard,
     include_directories: inc,
-    c_args: '-DHAVE_XWIN_CONFIG_H',
     dependencies: [
         dependency('xcb'),
         dependency('xcb-aux'),

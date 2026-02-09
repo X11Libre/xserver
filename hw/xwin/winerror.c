@@ -27,10 +27,7 @@
  *
  * Authors:	Harold L Hunt II
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"

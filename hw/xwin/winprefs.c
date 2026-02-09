@@ -29,10 +29,8 @@
  * Authors:     Earle F. Philhower, III
  *              Colin Harrison
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef __CYGWIN__

@@ -32,9 +32,8 @@
  */
 /* $XFree86: $ */
 
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #define _STDLIB_H 1 /* bison checks this to know if stdlib has been included */

@@ -28,10 +28,7 @@
  * Authors:	Harold L Hunt II
  *		Kensuke Matsuzaki
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "dix/window_priv.h"
 #include "mi/mi_priv.h"

@@ -27,10 +27,7 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "win.h"
 

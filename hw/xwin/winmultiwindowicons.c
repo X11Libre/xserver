@@ -27,10 +27,7 @@
  *
  * Authors:	Earle F. Philhower, III
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #ifndef WINVER
 #define WINVER 0x0500

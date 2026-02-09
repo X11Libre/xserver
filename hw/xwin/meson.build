@@ -15,7 +15,6 @@ else
 endif
 
 xwin_c_args = []
-xwin_c_args += '-DHAVE_XWIN_CONFIG_H'
 xwin_c_args += '-Wno-bad-function-cast'
 
 # mingw lacking setenv(), so we need to do it on our own

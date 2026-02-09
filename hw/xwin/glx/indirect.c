@@ -73,10 +73,7 @@
   is used to make no context current
 
 */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "glwindows.h"
 #include <glx/glxserver.h>
