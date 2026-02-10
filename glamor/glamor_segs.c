@@ -74,7 +74,7 @@ glamor_poly_segment_solid_gl(DrawablePtr drawable, GCPtr gc,
 
     glEnableVertexAttribArray(GLAMOR_VERTEX_POS);
     glVertexAttribPointer(GLAMOR_VERTEX_POS, 2, GL_SHORT, GL_FALSE,
-                          sizeof(DDXPointRec), vbo_offset);
+                          sizeof(xPoint), vbo_offset);
 
     if (add_last) {
         int i, j;

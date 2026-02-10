@@ -776,7 +776,7 @@ glamor_copy_plane(DrawablePtr src, DrawablePtr dst, GCPtr gc,
 }
 
 void
-glamor_copy_window(WindowPtr window, DDXPointRec old_origin, RegionPtr src_region)
+glamor_copy_window(WindowPtr window, xPoint old_origin, RegionPtr src_region)
 {
     PixmapPtr pixmap = glamor_get_drawable_pixmap(&window->drawable);
     DrawablePtr drawable = &pixmap->drawable;
