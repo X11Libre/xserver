@@ -310,7 +310,7 @@ RegionPtr
  compGetRedirectBorderClip(WindowPtr pWin);
 
 void
- compCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc);
+ compCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 
 void
  compPaintChildrenToWindow(WindowPtr pWin);
