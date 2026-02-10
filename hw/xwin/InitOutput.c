@@ -725,12 +725,6 @@ winUseMsg(void)
            "\tX window, so window contents which are occluded show correctly in\n"
            "\ttask bar and task switcher previews.\n");
 
-#ifdef XWIN_XF86CONFIG
-    ErrorF("-config\n" "\tSpecify a configuration file.\n");
-
-    ErrorF("-configdir\n" "\tSpecify a configuration directory.\n");
-#endif
-
     ErrorF("-depth bits_per_pixel\n"
            "\tSpecify an optional bitdepth to use in fullscreen mode\n"
            "\twith a DirectDraw engine.\n");
@@ -762,11 +756,6 @@ winUseMsg(void)
     ErrorF("-icon icon_specifier\n" "\tSet screen window icon in windowed mode.\n");
 
     ErrorF("-ignoreinput\n" "\tIgnore keyboard and mouse input.\n");
-
-#ifdef XWIN_XF86CONFIG
-    ErrorF("-keyboard\n"
-           "\tSpecify a keyboard device from the configuration file.\n");
-#endif
 
     ErrorF("-[no]keyhook\n"
            "\tGrab special Windows keypresses like Alt-Tab or the Menu "
@@ -912,16 +901,7 @@ InitOutput(int argc, char *argv[])
                    "Exiting.\n");
     }
 
-#ifdef XWIN_XF86CONFIG
-    /* Try to read the xorg.conf-style configuration file */
-    if (!winReadConfigfile())
-        winErrorFVerb(1, "InitOutput - Error reading config file\n");
-#else
-    winMsg(X_INFO, "xorg.conf is not supported\n");
-    winMsg(X_INFO, "See http://x.cygwin.com/docs/faq/cygwin-x-faq.html "
-           "for more information\n");
     winConfigFiles();
-#endif
 
     /* Load preferences from XWinrc file */
     LoadPreferences();

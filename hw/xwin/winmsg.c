@@ -38,29 +38,6 @@
 #endif
 #include <stdarg.h>
 
-#ifdef XWIN_XF86CONFIG
-void
-winDrvMsg(int scrnIndex, MessageType type, const char *format, ...)
-{
-    va_list ap;
-
-    va_start(ap, format);
-    LogVMessageVerb(type, 0, format, ap);
-    va_end(ap);
-}
-
-void
-winDrvMsgVerb(int scrnIndex, MessageType type, int verb, const char *format,
-              ...)
-{
-    va_list ap;
-
-    va_start(ap, format);
-    LogVMessageVerb(type, verb, format, ap);
-    va_end(ap);
-}
-#endif
-
 void
 winErrorFVerb(int verb, const char *format, ...)
 {
