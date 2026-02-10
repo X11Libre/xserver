@@ -131,8 +131,7 @@ typedef struct {
                          DRIContextType writeContextType,
                          void *writeContextStore);
     void (*InitBuffers) (WindowPtr pWin, RegionPtr prgn, CARD32 indx);
-    void (*MoveBuffers) (WindowPtr pWin,
-                         DDXPointRec ptOldOrg, RegionPtr prgnSrc, CARD32 indx);
+    void (*MoveBuffers) (WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc, CARD32 indx);
     void (*TransitionTo3d) (ScreenPtr pScreen);
     void (*TransitionTo2d) (ScreenPtr pScreen);
 
@@ -277,7 +276,7 @@ extern _X_EXPORT void *DRIGetContextStore(DRIContextPrivPtr context);
 extern _X_EXPORT void DRIWindowExposures(WindowPtr pWin, RegionPtr prgn);
 
 extern _X_EXPORT void DRICopyWindow(WindowPtr pWin,
-                                    DDXPointRec ptOldOrg, RegionPtr prgnSrc);
+                                    xPoint ptOldOrg, RegionPtr prgnSrc);
 
 extern _X_EXPORT void DRIClipNotify(WindowPtr pWin, int dx, int dy);
 

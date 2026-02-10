@@ -53,7 +53,7 @@ typedef struct _xf86EdgeRec {
     short screen;
     short start;
     short end;
-    DDXPointRec offset;
+    xPoint offset;
     struct _xf86EdgeRec *next;
 } xf86EdgeRec, *xf86EdgePtr;
 

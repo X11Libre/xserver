@@ -318,7 +318,7 @@ VGAarbiterSourceValidate(DrawablePtr pDrawable,
 }
 
 static void
-VGAarbiterCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+VGAarbiterCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
 

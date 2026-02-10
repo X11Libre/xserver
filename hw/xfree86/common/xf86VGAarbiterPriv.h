@@ -160,8 +160,7 @@ static void VGAarbiterGetSpans(DrawablePtr pDrawable, int wMax, DDXPointPtr ppt,
 static void VGAarbiterSourceValidate(DrawablePtr pDrawable, int x, int y,
                                      int width, int height,
                                      unsigned int subWindowMode);
-static void VGAarbiterCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg,
-                                 RegionPtr prgnSrc);
+static void VGAarbiterCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 static void VGAarbiterClearToBackground(WindowPtr pWin, int x, int y, int w,
                                         int h, Bool generateExposures);
 static PixmapPtr VGAarbiterCreatePixmap(ScreenPtr pScreen, int w, int h,
