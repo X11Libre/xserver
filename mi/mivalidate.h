@@ -29,10 +29,6 @@ from The Open Group.
 #ifndef MIVALIDATE_H
 #define MIVALIDATE_H
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #include "regionstr.h"
 
 typedef union _Validate {
