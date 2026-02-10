@@ -91,7 +91,7 @@ int miExpandDirectColors(ColormapPtr, int, xColorItem *, xColorItem *);
 
 typedef union _MiValidate {
     struct BeforeValidate {
-        DDXPointRec oldAbsCorner;       /* old window position */
+        xPoint oldAbsCorner;       /* old window position */
         RegionPtr borderVisible;        /* visible region of border, */
         /* non-null when size changes */
         Bool resized;           /* unclipped winSize has changed */

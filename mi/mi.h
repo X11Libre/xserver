@@ -288,21 +288,8 @@ extern _X_EXPORT void miZeroPolyArc(DrawablePtr /*pDraw */ ,
                                     xArc *      /*parcs */
     );
 
-/* mizerline.c */
-
-extern _X_EXPORT void miZeroLine(DrawablePtr /*dst */ ,
-                                 GCPtr /*pgc */ ,
-                                 int /*mode */ ,
-                                 int /*nptInit */ ,
-                                 DDXPointRec *  /*pptInit */
-    );
-
-extern _X_EXPORT void miZeroDashLine(DrawablePtr /*dst */ ,
-                                     GCPtr /*pgc */ ,
-                                     int /*mode */ ,
-                                     int /*nptInit */ ,
-                                     DDXPointRec *      /*pptInit */
-    );
+_X_EXPORT void miZeroLine(DrawablePtr dst, GCPtr gc, int mode, int nptInit, xPoint* pptInit);
+_X_EXPORT void miZeroDashLine(DrawablePtr dst, GCPtr pgc, int mode, int nptInit, xPoint *pptInit);
 
 extern _X_EXPORT void miPolyFillArc(DrawablePtr /*pDraw */ ,
                                     GCPtr /*pGC */ ,

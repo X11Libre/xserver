@@ -52,7 +52,7 @@ SOFTWARE.
 
 /* information about dashes */
 typedef struct _miDash {
-    DDXPointRec pt;
+    xPoint pt;
     int e1, e2;                 /* keep these, so we don't have to do it again */
     int e;                      /* bresenham error term for this point on line */
     int which;

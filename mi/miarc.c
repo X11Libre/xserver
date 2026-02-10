@@ -779,7 +779,7 @@ miFillWideEllipse(DrawablePtr pDraw, GCPtr pGC, xArc * parc)
 
     yorgu = parc->height + pGC->lineWidth;
     n = (sizeof(int) * 2) * yorgu;
-    int *widths = calloc(1, n + (sizeof(DDXPointRec) * 2) * yorgu);
+    int *widths = calloc(1, n + (sizeof(xPoint) * 2) * yorgu);
     if (!widths)
         return;
     points = (DDXPointPtr) ((char *) widths + n);
@@ -1191,7 +1191,7 @@ miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */
     y = ymax - ymin + 1;
     if ((count < 3) || (y <= 0))
         return;
-    ptsOut = FirstPoint = calloc(y, sizeof(DDXPointRec));
+    ptsOut = FirstPoint = calloc(y, sizeof(xPoint));
     width = FirstWidth = calloc(y, sizeof(int));
     Marked = calloc(count, sizeof(int));
 
@@ -3083,7 +3083,7 @@ fillSpans(DrawablePtr pDrawable, GCPtr pGC)
 
     if (nspans == 0)
         return;
-    xSpan = xSpans = calloc(nspans, sizeof(DDXPointRec));
+    xSpan = xSpans = calloc(nspans, sizeof(xPoint));
     xWidth = xWidths = calloc(nspans, sizeof(int));
     if (xSpans && xWidths) {
         i = 0;

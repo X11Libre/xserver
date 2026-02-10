@@ -27,7 +27,7 @@ typedef struct {
     RegionRec exposed;
     RegionRec borderExposed;
     RegionPtr borderVisible;
-    DDXPointRec oldAbsCorner;
+    xPoint oldAbsCorner;
 } miOverlayValDataRec, *miOverlayValDataPtr;
 
 typedef struct _TreeRec {
@@ -919,7 +919,7 @@ miOverlayMoveWindow(WindowPtr pWin,
     Bool WasViewable = (Bool) (pWin->viewable);
     short bw;
     RegionRec overReg, underReg;
-    DDXPointRec oldpt;
+    xPoint oldpt;
 
     if (!(pParent = pWin->parent))
         return;
@@ -1077,7 +1077,7 @@ miOverlayResizeWindow(WindowPtr pWin,
     short oldy = pWin->drawable.y;
     int bw = wBorderWidth(pWin);
     short dw, dh;
-    DDXPointRec oldpt;
+    xPoint oldpt;
     RegionPtr oldRegion = NULL, oldRegion2 = NULL;
     WindowPtr pFirstChange;
     WindowPtr pChild;

@@ -194,7 +194,7 @@ static void miSpriteSourceValidate(DrawablePtr pDrawable, int x, int y,
                                    int width, int height,
                                    unsigned int subWindowMode);
 static void miSpriteCopyWindow(WindowPtr pWindow,
-                               DDXPointRec ptOldOrg, RegionPtr prgnSrc);
+                               xPoint ptOldOrg, RegionPtr prgnSrc);
 static void miSpriteBlockHandler(ScreenPtr pScreen, void *timeout);
 static void miSpriteInstallColormap(ColormapPtr pMap);
 static void miSpriteStoreColors(ColormapPtr pMap, int ndef, xColorItem * pdef);
@@ -393,7 +393,7 @@ miSpriteSourceValidate(DrawablePtr pDrawable, int x, int y, int width,
 }
 
 static void
-miSpriteCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+miSpriteCopyWindow(WindowPtr pWindow, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWindow->drawable.pScreen;
     DeviceIntPtr pDev;
