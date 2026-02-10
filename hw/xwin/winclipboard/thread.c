@@ -32,8 +32,6 @@
 
 #ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#else
-#define HAS_WINSOCK 1
 #endif
 
 #include <assert.h>
@@ -42,16 +40,12 @@
 #include <pthread.h>
 #include <sys/param.h> // for MAX() macro
 
-#ifdef HAS_WINSOCK
-#include <X11/Xwinsock.h>
-#else
-#include <errno.h>
-#endif
-
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xfixes.h>
+
+#include "os/ossock.h"
 
 #include "winclipboard.h"
 #include "internal.h"
@@ -119,7 +113,6 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
     int iMaxDescriptor;
     xcb_connection_t *conn;
     xcb_window_t iWindow = XCB_NONE;
-    int iSelectError;
     BOOL fShutdown = FALSE;
     ClipboardConversionData data;
     int screen;
@@ -291,18 +284,8 @@ winClipboardProc(char *szDisplay, xcb_auth_info_t *auth_info)
 #endif
             );
 
-#ifndef HAS_WINSOCK
-        iSelectError = errno;
-#else
-        iSelectError = WSAGetLastError();
-#endif
-
         if (iReturn < 0) {
-#ifndef HAS_WINSOCK
-            if (iSelectError == EINTR)
-#else
-            if (iSelectError == WSAEINTR)
-#endif
+            if (ossock_eintr(ossock_errno()))
                 continue;
 
             ErrorF("winClipboardProc - Call to select () failed: %d.  "

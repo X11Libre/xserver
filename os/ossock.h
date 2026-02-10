@@ -6,6 +6,7 @@
 #define _XSERVER_OS_OSSOCK_H_
 
 #include <errno.h>
+#include <stdbool.h>
 
 /*
  * os specific initialization of the socket layer
@@ -26,5 +27,16 @@ int ossock_close(int fd);
  * os specific check for errno indicating operation would block
  */
 int ossock_wouldblock(int err);
+
+/*
+ * os specific check for errno indicating operation interrupted
+ */
+bool ossock_eintr(int err);
+
+/*
+ * os specific retrieval of last socket operation error
+ * on Unix: errno, on Win32: GetWSALastError()
+ */
+int ossock_errno(void);
 
 #endif /* _XSERVER_OS_OSSOCK_H_ */
