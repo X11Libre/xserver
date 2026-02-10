@@ -168,7 +168,7 @@ typedef void (*PaintWindowProcPtr) (WindowPtr /*pWindow*/,
                                     int /*what*/);
 
 typedef void (*CopyWindowProcPtr) (WindowPtr /*pWindow */ ,
-                                   DDXPointRec /*ptOldOrg */ ,
+                                   xPoint /*ptOldOrg */ ,
                                    RegionPtr /*prgnSrc */ );
 
 typedef void (*ClearToBackgroundProcPtr) (WindowPtr /*pWindow */ ,

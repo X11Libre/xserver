@@ -127,7 +127,7 @@ typedef struct _Window {
     union _Validate *valdata;
     RegionRec winSize;
     RegionRec borderSize;
-    DDXPointRec origin;         /* position relative to parent */
+    xPoint origin;         /* position relative to parent */
     unsigned short borderWidth;
     unsigned short deliverableEvents;   /* all masks from all clients */
     Mask eventMask;             /* mask from the creating client */
