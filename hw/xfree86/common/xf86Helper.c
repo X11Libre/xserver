@@ -61,7 +61,6 @@
 #include "xf86Xinput_priv.h"
 #include "xf86InPriv.h"
 #include "xf86Config.h"
-#include "mivalidate.h"
 #include "xf86Module_priv.h"
 
 /* For xf86GetClocks */

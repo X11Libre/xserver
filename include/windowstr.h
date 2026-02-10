@@ -124,7 +124,7 @@ typedef struct _Window {
     WindowPtr lastChild;        /* bottom-most child */
     RegionRec clipList;         /* clipping rectangle for output */
     RegionRec borderClip;       /* NotClippedByChildren + border */
-    union _Validate *valdata;
+    union _MiValidate *valdata;
     RegionRec winSize;
     RegionRec borderSize;
     xPoint origin;         /* position relative to parent */

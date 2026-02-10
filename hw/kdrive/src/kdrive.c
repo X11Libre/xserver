@@ -34,7 +34,6 @@
 #include "os/osdep.h"
 
 #include "kdrive.h"
-#include <mivalidate.h>
 #include <dixstruct.h>
 #include "privates.h"
 

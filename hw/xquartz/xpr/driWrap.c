@@ -36,7 +36,6 @@
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "dixfontstr.h"
-#include "mivalidate.h"
 #include "driWrap.h"
 #include "dri.h"
 

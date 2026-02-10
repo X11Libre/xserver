@@ -89,4 +89,17 @@ WindowPtr miXYToWindow(ScreenPtr pScreen, SpritePtr pSprite, int x, int y);
 _X_EXPORT /* used by in-tree libwfb.so module */
 int miExpandDirectColors(ColormapPtr, int, xColorItem *, xColorItem *);
 
+typedef union _MiValidate {
+    struct BeforeValidate {
+        DDXPointRec oldAbsCorner;       /* old window position */
+        RegionPtr borderVisible;        /* visible region of border, */
+        /* non-null when size changes */
+        Bool resized;           /* unclipped winSize has changed */
+    } before;
+    struct AfterValidate {
+        RegionRec exposed;      /* exposed regions, absolute pos */
+        RegionRec borderExposed;
+    } after;
+} MiValidateRec;
+
 #endif /* _XSERVER_MI_PRIV_H */

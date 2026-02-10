@@ -45,7 +45,6 @@
 #include "regionstr.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "mivalidate.h"
 #include "validate.h"
 #include "resource.h"
 #include "gcstruct.h"

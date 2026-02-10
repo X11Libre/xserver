@@ -38,7 +38,6 @@
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "dixfontstr.h"
-#include "mivalidate.h"
 #include "fb.h"
 
 #include <sys/types.h>
