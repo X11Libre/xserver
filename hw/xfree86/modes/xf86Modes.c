@@ -128,8 +128,10 @@ xf86SetModeDefaultName(DisplayModePtr mode)
 
     free((void *) mode->name);
 
-    asprintf(&tmp, "%dx%d%s", mode->HDisplay, mode->VDisplay,
-                interlaced ? "i" : "");
+    if (asprintf(&tmp, "%dx%d%s", mode->HDisplay, mode->VDisplay,
+                   interlaced ? "i" : "") == -1)
+        LogMessage(X_ERROR, "xf86SetModeDefaultName() failed to allocate memory\n");
+
     mode->name = tmp;
 }
 
@@ -806,7 +808,8 @@ xf86CVTMode(int HDisplay, int VDisplay, float VRefresh, Bool Reduced,
     libxcvt_mode_info =
         libxcvt_gen_mode_info(HDisplay, VDisplay, VRefresh, Reduced, Interlaced);
 
-    asprintf(&tmp, "%dx%d", HDisplay, VDisplay);
+    if (asprintf(&tmp, "%dx%d", HDisplay, VDisplay) == -1)
+        return NULL;
     Mode->name = tmp;
 
     Mode->VDisplay   = libxcvt_mode_info->vdisplay;
