@@ -194,7 +194,6 @@ cat > sdksyms.c << EOF
 #include "mizerarc.h"
 #include "micoord.h"
 #include "mistruct.h"
-#include "mioverlay.h"
 
 
 /* randr/Makefile.am */
