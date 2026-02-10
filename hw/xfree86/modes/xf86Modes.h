@@ -37,8 +37,8 @@
 #include "edid.h"
 #include "xf86Parser.h"
 
-extern _X_EXPORT double xf86ModeHSync(const DisplayModeRec * mode);
-extern _X_EXPORT double xf86ModeVRefresh(const DisplayModeRec * mode);
+extern _X_EXPORT float xf86ModeHSync(const DisplayModeRec * mode);
+extern _X_EXPORT float xf86ModeVRefresh(const DisplayModeRec * mode);
 extern _X_EXPORT unsigned int xf86ModeBandwidth(DisplayModePtr mode, int depth);
 
 extern _X_EXPORT int

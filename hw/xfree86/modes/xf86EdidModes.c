@@ -484,7 +484,7 @@ DDCModesFromStandardTiming(DisplayModePtr pool, struct std_timings *timing,
         /* If we already have a detailed timing for this size, don't add more */
         for (p = pool; p; p = p->next) {
             if (p->HDisplay == hsize && p->VDisplay == vsize &&
-                refresh == round(xf86ModeVRefresh(p)))
+                refresh == roundf(xf86ModeVRefresh(p)))
                 break;
         }
         if (p)
@@ -893,10 +893,10 @@ xf86DDCSetPreferredRefresh(int scrnIndex, DisplayModePtr modes,
             continue;
         }
         if (mode->HDisplay * mode->VDisplay == best->HDisplay * best->VDisplay) {
-            double mode_refresh = xf86ModeVRefresh(mode);
-            double best_refresh = xf86ModeVRefresh(best);
-            double mode_dist = fabs(mode_refresh - target_refresh);
-            double best_dist = fabs(best_refresh - target_refresh);
+            float mode_refresh = xf86ModeVRefresh(mode);
+            float best_refresh = xf86ModeVRefresh(best);
+            float mode_dist = fabsf(mode_refresh - target_refresh);
+            float best_dist = fabsf(best_refresh - target_refresh);
 
             if (mode_dist < best_dist) {
                 best = mode;
