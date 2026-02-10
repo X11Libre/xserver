@@ -139,9 +139,9 @@ typedef struct _Picture {
     PicturePtr pNext;           /* chain on same drawable */
 
     PicturePtr alphaMap;
-    DDXPointRec alphaOrigin;
+    xPoint alphaOrigin;
 
-    DDXPointRec clipOrigin;
+    xPoint clipOrigin;
     RegionPtr clientClip;
 
     unsigned long serialNumber;
