@@ -175,7 +175,7 @@ typedef struct {
     DrawablePtr pDraw;
     unsigned char type;
     unsigned int subWindowMode;
-    DDXPointRec clipOrg;
+    xPoint clipOrg;
     RegionPtr clientClip;
     RegionPtr pCompositeClip;
     Bool FreeCompositeClip;

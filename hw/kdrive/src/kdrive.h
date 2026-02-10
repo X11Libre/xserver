@@ -103,7 +103,7 @@ typedef struct _KdScreenInfo {
     Bool dumb;
     Bool softCursor;
     int mynum;
-    DDXPointRec origin;
+    xPoint origin;
     KdFrameBuffer fb;
 } KdScreenInfo;
 

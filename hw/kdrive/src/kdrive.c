@@ -92,7 +92,7 @@ int kdSubpixelOrder;
 int kdVirtualTerminal = -1;
 Bool kdSwitchPending;
 char *kdSwitchCmd;
-DDXPointRec kdOrigin;
+xPoint kdOrigin;
 Bool kdHasPointer = FALSE;
 Bool kdHasKbd = FALSE;
 const char *kdGlobalXkbRules = NULL;
