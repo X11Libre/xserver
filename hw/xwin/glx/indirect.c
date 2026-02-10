@@ -373,7 +373,7 @@ static __GLXdrawable *glxWinCreateDrawable(ClientPtr client,
                                            int type,
                                            XID glxDrawId, __GLXconfig * conf);
 
-static void glxWinCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg,
+static void glxWinCopyWindow(WindowPtr pWindow, xPoint ptOldOrg,
                              RegionPtr prgnSrc);
 static Bool glxWinSetPixelFormat(HDC hdc, int bppOverride, int drawableTypeOverride,
                                  __GLXscreen *screen, __GLXconfig *config);
@@ -725,7 +725,7 @@ glxWinScreenProbe(ScreenPtr pScreen)
  */
 
 static void
-glxWinCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+glxWinCopyWindow(WindowPtr pWindow, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     __GLXWinDrawable *pGlxDraw;
     ScreenPtr pScreen = pWindow->drawable.pScreen;
