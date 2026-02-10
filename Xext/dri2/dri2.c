@@ -203,11 +203,15 @@ DRI2GetDrawable(DrawablePtr pDraw)
 {
     switch (pDraw->type) {
     case DRAWABLE_WINDOW:
+    {
         WindowPtr pWin = (WindowPtr) pDraw;
         return dixLookupPrivate(&pWin->devPrivates, &dri2WindowPrivateKeyRec);
+    }
     case DRAWABLE_PIXMAP:
+    {
         PixmapPtr pPixmap = (PixmapPtr) pDraw;
         return dixLookupPrivate(&pPixmap->devPrivates, &dri2PixmapPrivateKeyRec);
+    }
     default:
         return NULL;
     }
