@@ -416,7 +416,7 @@ ExaCheckPushPixels(GCPtr pGC, PixmapPtr pBitmap,
                    DrawablePtr pDrawable, int w, int h, int x, int y);
 
 void
- ExaCheckCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc);
+ ExaCheckCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 
 void
 
@@ -447,7 +447,7 @@ exaGCReadsDestination(DrawablePtr pDrawable, unsigned long planemask,
 }
 
 void
- exaCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc);
+ exaCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 
 Bool
 
