@@ -101,8 +101,7 @@ DRIDrawablePrivDelete(void *pResource, XID id);
 extern DRIWrappedFuncsRec *
 DRIGetWrappedFuncs(ScreenPtr pScreen);
 
-extern void
-DRICopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc);
+void DRICopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 
 extern void
 DRIClipNotify(WindowPtr pWin, int dx, int dy);
