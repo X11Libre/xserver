@@ -111,8 +111,8 @@ static DevPrivateKeyRec PanoramiXGCKeyRec;
 static DevPrivateKeyRec PanoramiXScreenKeyRec;
 
 typedef struct {
-    DDXPointRec clipOrg;
-    DDXPointRec patOrg;
+    xPoint clipOrg;
+    xPoint patOrg;
     const GCFuncs *wrapFuncs;
 } PanoramiXGCRec, *PanoramiXGCPtr;
 

@@ -1764,15 +1764,15 @@ PanoramiXFillPoly(ClientPtr client)
 
     count = bytes_to_int32((client->req_len << 2) - sizeof(xFillPolyReq));
     if (count > 0) {
-        DDXPointPtr locPts = calloc(count, sizeof(DDXPointRec));
+        DDXPointPtr locPts = calloc(count, sizeof(xPoint));
         if (!locPts)
             return BadAlloc;
         memcpy((char *) locPts, (char *) &stuff[1],
-               count * sizeof(DDXPointRec));
+               count * sizeof(xPoint));
 
         XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip screen #0 */
-                memcpy(&stuff[1], locPts, count * sizeof(DDXPointRec));
+                memcpy(&stuff[1], locPts, count * sizeof(xPoint));
 
             if (isRoot) {
                 int x_off = walkScreen->x;
