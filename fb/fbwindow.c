@@ -98,7 +98,7 @@ fbCopyWindowProc(DrawablePtr pSrcDrawable,
 }
 
 void
-fbCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+fbCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     RegionRec rgnDst;
     int dx, dy;

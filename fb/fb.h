@@ -1000,8 +1000,7 @@ fbCopyWindowProc(DrawablePtr pSrcDrawable,
                  int dy,
                  Bool reverse, Bool upsidedown, Pixel bitplane, void *closure);
 
-extern _X_EXPORT void
- fbCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc);
+_X_EXPORT void fbCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 
 extern _X_EXPORT Bool
  fbChangeWindowAttributes(WindowPtr pWin, unsigned long mask);
