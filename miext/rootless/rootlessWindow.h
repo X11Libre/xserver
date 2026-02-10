@@ -48,8 +48,7 @@ void RootlessWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreen
 Bool RootlessRealizeWindow(WindowPtr pWin);
 Bool RootlessUnrealizeWindow(WindowPtr pWin);
 void RootlessRestackWindow(WindowPtr pWin, WindowPtr pOldNextSib);
-void RootlessCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg,
-                        RegionPtr prgnSrc);
+void RootlessCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 void RootlessPaintWindow(WindowPtr pWin, RegionPtr prgn, int what);
 void RootlessMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pSib,
                         VTKind kind);

@@ -615,7 +615,7 @@ static CopyWindowProcPtr gResizeOldCopyWindowProc = NULL;
  *  top-level windows.
  */
 static void
-RootlessNoCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+RootlessNoCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     // some code expects the region to be translated
     int dx = ptOldOrg.x - pWin->drawable.x;
@@ -634,7 +634,7 @@ RootlessNoCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
  *  Instead, draw on the parent window's pixmap.
  */
 void
-RootlessCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+RootlessCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     RegionRec rgnDst;
