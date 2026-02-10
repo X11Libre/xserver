@@ -2108,7 +2108,7 @@ glxWinCreateConfigsExt(HDC hdc, glxWinScreen * screen, PixelFormatRejectStats * 
 
     /* fill in configs */
     for (i = 0; i < numConfigs; i++) {
-        int values[num_attrs];
+        int values[ARRAY_SIZE(attrs)];
         GLXWinConfig temp;
         GLXWinConfig *c = &temp;
         GLXWinConfig *work;
