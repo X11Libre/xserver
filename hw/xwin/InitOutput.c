@@ -30,6 +30,7 @@ from The Open Group.
 #include <xwin-config.h>
 
 #include "win.h"
+#include "os-compat.h"
 
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
@@ -556,35 +557,26 @@ winFixupPaths(void)
 #ifdef RELOCATE_PROJECTROOT
     if (getenv("XKEYSYMDB") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XKEYSYMDB=%s\\XKeysymDB", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\XKeysymDB", basedir);
+        setenv("XKEYSYMDB", buffer, 1);
     }
     if (getenv("XERRORDB") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XERRORDB=%s\\XErrorDB", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\XErrorDB", basedir);
+        setenv("XERRORDB", buffer, 1);
     }
     if (getenv("XLOCALEDIR") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XLOCALEDIR=%s\\locale", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\locale", basedir);
+        setenv("XLOCALEDIR", buffer, 1);
     }
     if (getenv("HOME") == NULL) {
-        char buffer[MAX_PATH + 5] = {0};
-
-        strncpy(buffer, "HOME=", 6);
+        char buffer[MAX_PATH] = {0};
 
         /* query appdata directory */
         if (SHGetFolderPathA
-            (NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0,
-             buffer + 5) == 0) {
-            putenv(buffer);
+            (NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0, buffer) == 0) {
+            setenv("HOME", buffer, 1);
         }
         else {
             winMsg(X_ERROR, "Can not determine HOME directory\n");
