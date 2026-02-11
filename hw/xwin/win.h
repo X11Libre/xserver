@@ -120,6 +120,7 @@
 
 #define WIN_MAX_KEYS_PER_KEY	4
 
+/* needed for windows headers compatibility with GCC */
 #define NONAMELESSUNION
 
 #include <sys/types.h>
