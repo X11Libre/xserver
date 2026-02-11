@@ -31,8 +31,6 @@
 #ifndef X11CONTROLLER_H
 #define X11CONTROLLER_H 1
 
-#include <dix-config.h>
-
 #if __OBJC__
 
 #include "sanitizedCocoa.h"
