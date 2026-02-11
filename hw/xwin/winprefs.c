@@ -44,6 +44,7 @@
 #include <X11/Xwindows.h>
 #include <shellapi.h>
 
+#include "os-compat.h"
 #include "winprefs.h"
 #include "windisplay.h"
 #include "winmultiwindowclass.h"
@@ -710,7 +711,6 @@ LoadPreferences(void)
     char *home;
     char fname[PATH_MAX + NAME_MAX + 2];
     char szDisplay[512];
-    char *szEnvDisplay;
     int i, j;
     char param[PARAM_MAX + 1];
     char *srcParam, *dstParam;
@@ -748,14 +748,8 @@ LoadPreferences(void)
             ("LoadPreferences: See \"man XWinrc\" to customize the XWin menu.\n");
     }
 
-    /* Setup a DISPLAY environment variable, need to allocate on heap */
-    /* because putenv doesn't copy the argument... */
     winGetDisplayName(szDisplay, 0);
-    szEnvDisplay = calloc(1, strlen(szDisplay) + strlen("DISPLAY=") + 1);
-    if (szEnvDisplay) {
-        snprintf(szEnvDisplay, 512, "DISPLAY=%s", szDisplay);
-        putenv(szEnvDisplay);
-    }
+    setenv("DISPLAY", szDisplay, 1);
 
     /* Replace any "%display%" in menu commands with display string */
     for (i = 0; i < pref.menuItems; i++) {
