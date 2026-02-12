@@ -53,6 +53,7 @@
 
 #include <X11/Xfuncproto.h>
 
+#include "xlibre_ptrtypes.h"
 #include "xf86.h"
 #include "xf86str.h"
 #include "inputstr.h"

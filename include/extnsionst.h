@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef EXTENSIONSTRUCT_H
 #define EXTENSIONSTRUCT_H
 
+#include "xlibre_ptrtypes.h"
 #include "dix.h"
 #include "misc.h"
 #include "screenint.h"

@@ -35,6 +35,7 @@
 #ifndef _XF86PRIV_H
 #define _XF86PRIV_H
 
+#include "xlibre_ptrtypes.h"
 #include "xf86Privstr.h"
 #include "input.h"
 

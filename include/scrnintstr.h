@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef SCREENINTSTRUCT_H
 #define SCREENINTSTRUCT_H
 
+#include "xlibre_ptrtypes.h"
 #include "screenint.h"
 #include "regionstr.h"
 #include "colormap.h"

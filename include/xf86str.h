@@ -34,6 +34,7 @@
 #ifndef _XF86STR_H
 #define _XF86STR_H
 
+#include "xlibre_ptrtypes.h"
 #include "misc.h"
 #include "input.h"
 #include "scrnintstr.h"
@@ -160,7 +161,6 @@ typedef struct x_ClockRange {
  * FALSE. pointer can be used to pass arguments to the function or
  * to return data to the caller.
  */
-typedef struct _ScrnInfoRec *ScrnInfoPtr;
 
 /* do not change order */
 typedef enum {
@@ -564,8 +564,7 @@ typedef void xf86ModeSetProc(ScrnInfoPtr);
  * There is one of these for each screen, and it holds all the screen-specific
  * information.  Note: No fields are to be dependent on compile-time defines.
  */
-
-typedef struct _ScrnInfoRec {
+struct _ScrnInfoRec {
     int driverVersion;
     const char *driverName;     /* canonical name used in */
     /* the config file */
@@ -691,7 +690,7 @@ typedef struct _ScrnInfoRec {
     int reservedInt[NUM_RESERVED_INTS];
     void *reservedPtr[NUM_RESERVED_POINTERS];
     funcPointer reservedFuncs[NUM_RESERVED_FUNCS];
-} ScrnInfoRec;
+};
 
 typedef struct {
     Bool (*OpenFramebuffer) (ScrnInfoPtr pScrn,

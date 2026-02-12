@@ -518,6 +518,7 @@ if build_xorg
             'Xprintf.h',
             'xf86sbusBus.h',
             'xserver-properties.h',
+            'xlibre_ptrtypes.h',
         ],
         install_dir: xorgsdkdir,
     )
