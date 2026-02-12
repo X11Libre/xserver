@@ -7,8 +7,8 @@
 
 #include <X11/Xdefs.h>
 
+#include "include/fb.h"
 #include "include/scrnintstr.h"
-#include "fb/fb.h"
 
 #define FbBitsStrideToStipStride(s) (((s) << (FB_SHIFT - FB_STIP_SHIFT)))
 
