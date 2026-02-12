@@ -65,10 +65,6 @@ srcs_vnd = [
     'vndservervendor.c',
 ]
 
-hdrs_vnd = [
-    'vndserver.h',
-]
-
 libglxvnd = []
 if build_glx
     libglxvnd = static_library('glxvnd',
@@ -81,8 +77,4 @@ if build_glx
             dependency('gl', version: '>= 1.2'),
         ],
     )
-
-    if build_xorg
-        install_data(hdrs_vnd, install_dir : xorgsdkdir)
-    endif
 endif

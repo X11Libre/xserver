@@ -459,6 +459,7 @@ if build_xorg
             'servermd.h',
             'validate.h',
             'displaymode.h',
+            'vndserver.h',
             'window.h',
             'windowstr.h',
             'xkbsrv.h',
