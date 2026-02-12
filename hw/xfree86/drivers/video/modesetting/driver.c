@@ -43,6 +43,7 @@
 
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
+#include "include/edid.h"
 #include "include/xorgVersion.h"
 #include "mi/mi_priv.h"
 
@@ -55,7 +56,6 @@
 #include "mipointrst.h"
 #include "micmap.h"
 #include "fb.h"
-#include "edid.h"
 #include "xf86i2c.h"
 #include "xf86Crtc.h"
 #include "miscstruct.h"

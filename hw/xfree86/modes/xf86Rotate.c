@@ -30,10 +30,10 @@
 #include <X11/extensions/dpmsconst.h>
 
 #include "dix/dix_priv.h"
+#include "include/xf86DDC.h"
 #include "mi/mi_priv.h"
 
 #include "xf86.h"
-#include "xf86DDC.h"
 #include "windowstr.h"
 #include "xf86Crtc.h"
 #include "xf86Modes.h"

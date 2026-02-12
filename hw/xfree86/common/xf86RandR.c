@@ -27,13 +27,13 @@
 #include "dix/input_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
+#include "include/xf86DDC.h"
 
 #include "os.h"
 #include "globals.h"
 #include "xf86_priv.h"
 #include "xf86str.h"
 #include "xf86Priv.h"
-#include "xf86DDC.h"
 #include "mipointer.h"
 #include <randrstr.h>
 #include "inputstr.h"

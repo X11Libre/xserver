@@ -12,7 +12,7 @@
 #ifndef _XFREE86_EDID_PRIV_H_
 #define _XFREE86_EDID_PRIV_H_
 
-#include "edid.h"
+#include "include/edid.h"
 
 /* read complete EDID record */
 #define EDID1_LEN 128

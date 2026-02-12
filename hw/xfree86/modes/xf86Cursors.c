@@ -27,15 +27,17 @@
 #include <stdio.h>
 
 #include <X11/Xarch.h>
+#include <X11/Xatom.h>
+#include <X11/extensions/render.h>
+#include <X11/extensions/dpmsconst.h>
+
+#include "include/xf86DDC.h"
+
 #include "xf86.h"
-#include "xf86DDC.h"
 #include "xf86Crtc.h"
 #include "xf86Modes.h"
 #include "xf86RandR12.h"
 #include "xf86CursorPriv.h"
-#include "X11/extensions/render.h"
-#include "X11/extensions/dpmsconst.h"
-#include "X11/Xatom.h"
 #include "picturestr.h"
 #include "cursorstr.h"
 #include "inputstr.h"

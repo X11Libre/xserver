@@ -83,6 +83,7 @@
 
 #include <X11/X.h>
 
+#include "include/edid.h"
 #include "include/extinit.h"
 #include "os/log_priv.h"
 
@@ -93,7 +94,6 @@
 #include "globals.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
-#include "edid.h"
 
 static void
 printModeRejectMessage(int index, DisplayModePtr p, int status)
