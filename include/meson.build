@@ -509,6 +509,7 @@ if build_xorg
             'xaarop.h',
             'xf86.h',
             'xf86cmap.h',
+            'xf86Cursor.h',
             'xf86DDC.h',
             'xf86fbman.h',
             'xf86Opt.h',
