@@ -458,6 +458,7 @@ if build_xorg
             'screenint.h',
             'scrnintstr.h',
             'servermd.h',
+            'shadow.h',
             'validate.h',
             'displaymode.h',
             'window.h',
