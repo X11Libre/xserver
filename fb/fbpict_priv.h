@@ -8,7 +8,7 @@
 #include <X11/extensions/renderproto.h>
 
 #include "include/fbpict.h"
-#include "render/picture.h"
+#include "include/picture.h"
 
 void fbRasterizeTrapezoid(PicturePtr alpha, xTrapezoid *trap,
                           int x_off, int y_off);
