@@ -511,6 +511,8 @@ if build_xorg
             'xf86Opt.h',
             'xf86Optionstr.h',
             'xf86platformBus.h',
+            'xf86Parser.h',
+            'xf86Optrec.h',
             'xf86Priv.h',
             'xf86Privstr.h',
             'xf86str.h',
