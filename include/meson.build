@@ -435,6 +435,7 @@ if build_xorg
             'fourcc.h',
             'gc.h',
             'gcstruct.h',
+            'glamor.h',
             'globals.h',
             'glxvndabi.h',
             'input.h',
