@@ -418,6 +418,7 @@ if build_xorg
             'closure.h',
             'colormap.h',
             'colormapst.h',
+            'compiler.h',
             'compositeext.h',
             'cursor.h',
             'cursorstr.h',
@@ -477,12 +478,35 @@ if build_xorg
             'vndserver.h',
             'window.h',
             'windowstr.h',
+            'xaarop.h',
+            'xf86.h',
+            'xf86cmap.h',
+            'xf86fbman.h',
+            'xf86Opt.h',
+            'xf86Optionstr.h',
+            'xf86platformBus.h',
+            'xf86Priv.h',
+            'xf86Privstr.h',
+            'xf86str.h',
+            'xf86Module.h',
+            'xf86Xinput.h',
+            'xisb.h',
             'xkbsrv.h',
             'xkbstr.h',
             'xkbrules.h',
+            'xorgVersion.h',
             'Xprintf.h',
+            'xf86sbusBus.h',
             'xserver-properties.h',
         ],
         install_dir: xorgsdkdir,
     )
+
+    if build_dga
+        install_data(['dgaproc.h'], install_dir: xorgsdkdir)
+    endif
+
+    if build_xv
+        install_data(['xf86xv.h', 'xf86xvmc.h'], install_dir: xorgsdkdir)
+    endif
 endif

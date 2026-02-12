@@ -43,6 +43,7 @@
 
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
+#include "include/xorgVersion.h"
 #include "mi/mi_priv.h"
 
 #include "xf86.h"

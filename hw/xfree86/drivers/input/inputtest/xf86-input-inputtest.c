@@ -26,20 +26,22 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/un.h>
+#include <stdbool.h>
+
+#include <X11/Xatom.h>
+
+#include "include/xorgVersion.h"
+
 #include <exevents.h>
 #include <input.h>
 #include <xkbsrv.h>
 #include <xf86.h>
 #include <xf86Xinput_priv.h>
-#include "xorgVersion.h"
 #include <xserver-properties.h>
 #include <os.h>
-#include <X11/Xatom.h>
-
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/un.h>
-#include <stdbool.h>
 
 #include "xf86-input-inputtest-protocol.h"
 

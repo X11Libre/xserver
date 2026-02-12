@@ -25,25 +25,6 @@ srcs_xorg_common = [
     '../../stubs/ddxBeforeReset.c',
 ]
 
-xorg_sdk_headers = [
-    'compiler.h',
-    'xf86.h',
-    'xf86Module.h',
-    'xf86Opt.h',
-    'xf86Priv.h',
-    'xf86Privstr.h',
-    'xf86cmap.h',
-    'xf86fbman.h',
-    'xf86str.h',
-    'xf86Xinput.h',
-    'xisb.h',
-    'xorgVersion.h',
-    'xf86sbusBus.h',
-    'xf86Optionstr.h',
-    'xf86platformBus.h',
-    'xaarop.h',
-]
-
 fallback_driver = get_option('fallback_input_driver')
 if fallback_driver == 'auto'
     if host_machine.system() == 'linux'
@@ -55,12 +36,10 @@ endif
 
 if build_dga
     srcs_xorg_common += 'xf86DGA.c'
-    xorg_sdk_headers += 'dgaproc.h'
 endif
 
 if build_xv
     srcs_xorg_common += ['xf86xv.c', 'xf86xvmc.c']
-    xorg_sdk_headers += ['xf86xv.h', 'xf86xvmc.h']
 endif
 
 if build_udev
@@ -97,5 +76,3 @@ xorg_common = static_library('xorg_common',
         '-DFALLBACK_INPUT_DRIVER="@0@"'.format(fallback_driver)
     ],
 )
-
-install_data(xorg_sdk_headers, install_dir: xorgsdkdir)

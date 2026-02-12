@@ -1,6 +1,9 @@
 #include <xorg-config.h>
 
 #include <X11/X.h>
+
+#include "include/xorgVersion.h"
+
 #include "os.h"
 #include "servermd.h"
 #include "pixmapstr.h"
@@ -10,7 +13,6 @@
 #include "loaderProcs.h"
 #include "xf86.h"
 #include "xf86Priv.h"
-#include "xorgVersion.h"
 
 CARD32
 xorgGetVersion(void)

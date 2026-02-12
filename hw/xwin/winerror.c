@@ -33,7 +33,7 @@
 #include "os/log_priv.h"
 #include "os/osdep.h"
 
-#include <../xfree86/common/xorgVersion.h>
+#include "include/xorgVersion.h"
 #include "win.h"
 
 #include "dix/input_priv.h"
