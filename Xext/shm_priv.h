@@ -7,7 +7,7 @@
 #define _XSERVER_XEXT_SHM_PRIV_H
 
 #include "include/resource.h"
-#include "Xext/shmint.h"
+#include "include/shmint.h"
 
 typedef struct _ShmDesc {
     struct _ShmDesc *next;

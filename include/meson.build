@@ -495,6 +495,7 @@ if build_xorg
             'scrnintstr.h',
             'servermd.h',
             'shadow.h',
+            'syncsdk.h',
             'validate.h',
             'displaymode.h',
             'vndserver.h',
@@ -513,13 +514,15 @@ if build_xorg
             'xf86str.h',
             'xf86Module.h',
             'xf86Xinput.h',
+            'xf86sbusBus.h',
             'xisb.h',
             'xkbsrv.h',
             'xkbstr.h',
             'xkbrules.h',
             'xorgVersion.h',
             'Xprintf.h',
-            'xf86sbusBus.h',
+            'xvdix.h',
+            'xvmcext.h',
             'xserver-properties.h',
             'xlibre_ptrtypes.h',
         ],
@@ -532,5 +535,9 @@ if build_xorg
 
     if build_xv
         install_data(['xf86xv.h', 'xf86xvmc.h'], install_dir: xorgsdkdir)
+    endif
+
+    if build_mitshm
+        install_data(['shmint.h'], install_dir: xorgsdkdir)
     endif
 endif

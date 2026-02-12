@@ -23,6 +23,8 @@
 #ifndef _MISYNC_H_
 #define _MISYNC_H_
 
+#include "screenint.h"
+
 typedef struct _SyncObject SyncObject;
 typedef struct _SyncFence SyncFence;
 typedef struct _SyncTrigger SyncTrigger;

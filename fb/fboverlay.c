@@ -26,11 +26,11 @@
 
 #include <stdlib.h>
 
+#include "include/shmint.h"
 #include "mi/mi_priv.h"
 
 #include "fb.h"
 #include "fboverlay.h"
-#include "shmint.h"
 
 static DevPrivateKeyRec fbOverlayScreenPrivateKeyRec;
 

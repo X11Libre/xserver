@@ -26,12 +26,12 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/syncsdk.h"
 #include "os/client_priv.h"
 
 #include "dri3_priv.h"
 #include <syncsrv.h>
 #include <xace.h>
-#include "../Xext/syncsdk.h"
 #include <protocol-versions.h>
 #include <drm_fourcc.h>
 #include "randrstr_priv.h"

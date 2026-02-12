@@ -29,11 +29,14 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvproto.h>
+#include <X11/extensions/shmproto.h>
 
 #include "dix/dix_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/shmint.h"
+#include "include/xvmcext.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #include "Xext/shm_priv.h"
@@ -47,10 +50,6 @@ SOFTWARE.
 #include "dixstruct.h"
 #include "resource.h"
 #include "opaque.h"
-#ifdef CONFIG_MITSHM
-#include <X11/extensions/shmproto.h>
-#include "shmint.h"
-#endif
 
 #include "xvdisp.h"
 
@@ -823,10 +822,6 @@ ProcXvShmPutImage(ClientPtr client)
     return BadImplementation;
 #endif /* CONFIG_MITSHM */
 }
-
-#ifdef XvMCExtension
-#include "xvmcext.h"
-#endif
 
 __size_assert(int, sizeof(INT32));
 

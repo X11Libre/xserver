@@ -74,12 +74,10 @@
 #define NO_CFPLUGIN
 #include <IOKit/hidsystem/IOHIDLib.h>
 
+#include "include/shmint.h"
+
 #include "input_priv.h"
 #include "screenint_priv.h"
-
-#ifdef CONFIG_MITSHM
-#include "shmint.h"
-#endif /* CONFIG_MITSHM */
 
 #include "darwin.h"
 #include "darwinEvents.h"

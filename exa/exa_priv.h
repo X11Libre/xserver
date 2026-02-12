@@ -30,9 +30,9 @@
 
 #include <X11/X.h>
 #include <X11/Xproto.h>
-#ifdef CONFIG_MITSHM
-#include "shmint.h"
-#endif /* CONFIG_MITSHM */
+
+#include "include/shmint.h"
+
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "windowstr.h"
