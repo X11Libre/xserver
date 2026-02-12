@@ -522,6 +522,9 @@ if build_xorg
             'xf86sbusBus.h',
             'xserver-properties.h',
             'xlibre_ptrtypes.h',
+            'xf86Crtc.h',
+            'xf86Modes.h',
+            'xf86RandR12.h',
         ],
         install_dir: xorgsdkdir,
     )
