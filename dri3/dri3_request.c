@@ -38,17 +38,6 @@
 #include "dixstruct_priv.h"
 
 static Bool
-dri3_screen_can_one_point_four(ScreenPtr screen)
-{
-    dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
-
-    return dri3 &&
-        dri3->info &&
-        dri3->info->version >= 4 &&
-        dri3->info->import_syncobj;
-}
-
-static Bool
 dri3_screen_can_one_point_one(ScreenPtr screen)
 {
     dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
@@ -72,6 +61,17 @@ dri3_screen_can_one_point_two(ScreenPtr screen)
         return TRUE;
 
     return FALSE;
+}
+
+static Bool
+dri3_screen_can_one_point_four(ScreenPtr screen)
+{
+    dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
+
+    return dri3 &&
+        dri3->info &&
+        dri3->info->version >= 4 &&
+        dri3->info->import_syncobj;
 }
 
 static int
@@ -98,6 +98,9 @@ proc_dri3_query_version(ClientPtr client)
         if (!dri3_screen_can_one_point_four(walkScreen)) {
             reply.minorVersion = 2;
             break;
+        } else {
+            reply.minorVersion = 4;
+            break;
         }
     });
 
@@ -112,6 +115,9 @@ proc_dri3_query_version(ClientPtr client)
         }
         if (!dri3_screen_can_one_point_four(walkScreen)) {
             reply.minorVersion = 2;
+            break;
+        } else {
+            reply.minorVersion = 4;
             break;
         }
     });
