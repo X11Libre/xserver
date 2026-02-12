@@ -517,6 +517,10 @@ if build_xorg
             'xf86Module.h',
             'xf86Xinput.h',
             'xf86sbusBus.h',
+            'xf86Sbus.h',
+            'xf86Pci.h',
+            'xf86_OSlib.h',
+            'xf86_OSproc.h',
             'xisb.h',
             'xkbsrv.h',
             'xkbstr.h',
@@ -545,4 +549,9 @@ if build_xorg
     if build_mitshm
         install_data(['shmint.h'], install_dir: xorgsdkdir)
     endif
+
+    if get_option('pciaccess') and host_machine.cpu_family() in ['sparc', 'sparc64']
+        install_data('xf86Sbus.h', install_dir: xorgsdkdir)
+    endif
+
 endif
