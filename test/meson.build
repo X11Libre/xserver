@@ -174,7 +174,7 @@ if build_xorg
      '../mi/miinitext.c',
      '../mi/miinitext.h',
      '../mi/micmap.c',
-     '../mi/micmap.h',
+     '../include/micmap.h',
      'fixes.c',
      'input.c',
      'list.c',
