@@ -556,4 +556,7 @@ if build_xorg
         install_data('xf86Sbus.h', install_dir: xorgsdkdir)
     endif
 
+    if int10 != 'false'
+        install_data(['xf86int10.h', 'vbe.h', 'vbeModes.h'], install_dir: xorgsdkdir)
+    endif
 endif
