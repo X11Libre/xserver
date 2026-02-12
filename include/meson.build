@@ -410,7 +410,7 @@ if with_dtrace
     dtrace_hdr += dtrace_header.process(dtrace_tmpl)
 endif
 
-if build_xorg
+if build_xorg_sdk
     install_data(
         [
             'Xprintf.h',

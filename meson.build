@@ -236,6 +236,8 @@ if with_dtrace
     dtrace = find_program('dtrace', required: true)
 endif
 
+build_xorg_sdk = get_option('xorg-sdk')
+
 build_xorg = false
 if (host_machine.system() != 'windows')
     if get_option('xorg') == 'auto'
@@ -245,6 +247,11 @@ if (host_machine.system() != 'windows')
         build_xorg = get_option('xorg') == 'true'
     endif
 endif
+
+if build_xorg
+    build_xorg_sdk = true
+endif
+
 xorgsdkdir = join_paths(get_option('prefix'), get_option('includedir'), 'xorg')
 libxcvt_dep = dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: build_xorg)
 
@@ -937,14 +944,14 @@ configure_file(output : 'dix-config.h',
 configure_file(output : 'xorg-server.h',
                input : 'hw/xfree86/xlibre-server.h.meson.in',
                configuration : conf_data,
-               install: build_xorg,
+               install: build_xorg_sdk,
                install_dir: xorgsdkdir)
 
 # new config include file for drivers
 configure_file(output : 'xlibre-server.h',
                input : 'hw/xfree86/xlibre-server.h.meson.in',
                configuration : conf_data,
-               install: build_xorg,
+               install: build_xorg_sdk,
                install_dir: xorgsdkdir)
 
 configure_file(output : 'xorg-config.h',

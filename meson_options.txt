@@ -1,5 +1,7 @@
 option('xorg', type: 'combo', choices: ['true', 'false', 'auto'], value: 'auto',
        description: 'Enable Xorg X Server')
+option('xorg-sdk', type: 'boolean', value: 'false',
+       description: 'Enable Xorg X Server SDK (enabled with xorg)')
 option('xephyr', type: 'boolean', value: false,
        description: 'Enable Xephyr nested X server')
 option('xfbdev', type: 'boolean', value: false,
