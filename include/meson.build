@@ -496,6 +496,7 @@ if build_xorg
             'scrnintstr.h',
             'servermd.h',
             'shadow.h',
+            'shadowfb.h',
             'syncsdk.h',
             'validate.h',
             'displaymode.h',
