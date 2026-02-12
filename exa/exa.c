@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include "dix/screen_hooks_priv.h"
+#include "os/mathx_priv.h"
 
 #include "exa_priv.h"
 #include "exa.h"
@@ -127,13 +128,14 @@ exaGetDrawableDeltas(DrawablePtr pDrawable, PixmapPtr pPixmap, int *xp, int *yp)
 void
 exaPixmapDirty(PixmapPtr pPix, int x1, int y1, int x2, int y2)
 {
-    BoxRec box;
     RegionRec region;
 
-    box.x1 = max(x1, 0);
-    box.y1 = max(y1, 0);
-    box.x2 = min(x2, pPix->drawable.width);
-    box.y2 = min(y2, pPix->drawable.height);
+    BoxRec box = {
+        .x1 = MAX(x1, 0),
+        .y1 = MAX(y1, 0),
+        .x2 = MIN(x2, pPix->drawable.width),
+        .y2 = MIN(y2, pPix->drawable.height),
+    };
 
     if (box.x1 >= box.x2 || box.y1 >= box.y2)
         return;
@@ -677,7 +679,7 @@ ExaBlockHandler(ScreenPtr pScreen, void *pTimeout)
         CARD32 now = GetTimeInMillis();
 
         pExaScr->nextDefragment = now +
-            max(100, (INT32) (pExaScr->lastDefragment + 1000 - now));
+            MAX(100, (INT32) (pExaScr->lastDefragment + 1000 - now));
         AdjustWaitForDelay(pTimeout, pExaScr->nextDefragment - now);
     }
 }

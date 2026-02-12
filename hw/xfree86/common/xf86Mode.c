@@ -85,6 +85,7 @@
 
 #include "include/extinit.h"
 #include "os/log_priv.h"
+#include "os/mathx_priv.h"
 
 #include "xf86Modes.h"
 #include "xf86Crtc.h"
@@ -256,8 +257,8 @@ xf86ShowClockRanges(ScrnInfoPtr scrp, ClockRangePtr clockRanges)
     int scaledClock;
 
     for (cp = clockRanges; cp != NULL; cp = cp->next) {
-        DivFactor = max(1, cp->ClockDivFactor);
-        MulFactor = max(1, cp->ClockMulFactor);
+        DivFactor = MAX(1, cp->ClockDivFactor);
+        MulFactor = MAX(1, cp->ClockMulFactor);
         if (scrp->progClock) {
             if (cp->minClock) {
                 if (cp->maxClock) {
@@ -497,8 +498,8 @@ xf86LookupMode(ScrnInfoPtr scrp, DisplayModePtr modep,
     }
     for (cp = clockRanges; cp != NULL; cp = cp->next) {
         /* DivFactor and MulFactor must be > 0 */
-        cp->ClockDivFactor = max(1, cp->ClockDivFactor);
-        cp->ClockMulFactor = max(1, cp->ClockMulFactor);
+        cp->ClockDivFactor = MAX(1, cp->ClockDivFactor);
+        cp->ClockMulFactor = MAX(1, cp->ClockMulFactor);
     }
 
     /* Scan the mode pool for matching names */
@@ -1019,8 +1020,8 @@ xf86CheckModeForDriver(ScrnInfoPtr scrp, DisplayModePtr mode, int flags)
 
     for (cp = scrp->clockRanges; cp != NULL; cp = cp->next) {
         /* DivFactor and MulFactor must be > 0 */
-        cp->ClockDivFactor = max(1, cp->ClockDivFactor);
-        cp->ClockMulFactor = max(1, cp->ClockMulFactor);
+        cp->ClockDivFactor = MAX(1, cp->ClockDivFactor);
+        cp->ClockMulFactor = MAX(1, cp->ClockMulFactor);
     }
 
     if (scrp->progClock) {

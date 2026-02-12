@@ -31,9 +31,9 @@
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
+#include "os/mathx_priv.h"
 
 #include "exglobals.h"
-#include "misc.h"
 #include "inputstr.h"
 #include "xkbsrv.h"
 #include "xkbstr.h"
@@ -452,7 +452,7 @@ valuator_mask_set_range(ValuatorMask *mask, int first_valuator,
     valuator_mask_zero(mask);
 
     for (int i = first_valuator;
-         i < min(first_valuator + num_valuators, MAX_VALUATORS); i++)
+         i < MIN(first_valuator + num_valuators, MAX_VALUATORS); i++)
         valuator_mask_set(mask, i, valuators[i - first_valuator]);
 }
 
@@ -482,7 +482,7 @@ valuator_mask_size(const ValuatorMask *mask)
 int
 valuator_mask_num_valuators(const ValuatorMask *mask)
 {
-    return CountBits(mask->mask, min(mask->last_bit + 1, MAX_VALUATORS));
+    return CountBits(mask->mask, MIN(mask->last_bit + 1, MAX_VALUATORS));
 }
 
 /**
@@ -497,7 +497,7 @@ valuator_mask_isset(const ValuatorMask *mask, int valuator)
 static inline void
 _valuator_mask_set_double(ValuatorMask *mask, int valuator, double data)
 {
-    mask->last_bit = max(valuator, mask->last_bit);
+    mask->last_bit = MAX(valuator, mask->last_bit);
     SetBit(mask->mask, valuator);
     mask->valuators[valuator] = data;
 }
@@ -595,7 +595,7 @@ valuator_mask_unset(ValuatorMask *mask, int valuator)
 
         for (int i = 0; i <= mask->last_bit; i++)
             if (valuator_mask_isset(mask, i))
-                lastbit = max(lastbit, i);
+                lastbit = MAX(lastbit, i);
         mask->last_bit = lastbit;
 
         if (mask->last_bit == -1)
@@ -843,10 +843,10 @@ update_desktop_dimensions(void)
     int x2 = INT_MIN, y2 = INT_MIN;     /* bottom-right */
 
     DIX_FOR_EACH_SCREEN({
-        x1 = min(x1, walkScreen->x);
-        y1 = min(y1, walkScreen->y);
-        x2 = max(x2, walkScreen->x + walkScreen->width);
-        y2 = max(y2, walkScreen->y + walkScreen->height);
+        x1 = MIN(x1, walkScreen->x);
+        y1 = MIN(y1, walkScreen->y);
+        x2 = MAX(x2, walkScreen->x + walkScreen->width);
+        y2 = MAX(y2, walkScreen->y + walkScreen->height);
     });
 
     screenInfo.x = x1;
@@ -1174,8 +1174,8 @@ xi2mask_zero(XI2Mask *mask, int deviceid)
 void
 xi2mask_merge(XI2Mask *dest, const XI2Mask *source)
 {
-    for (int i = 0; i < min(dest->nmasks, source->nmasks); i++)
-        for (int j = 0; j < min(dest->mask_size, source->mask_size); j++)
+    for (int i = 0; i < MIN(dest->nmasks, source->nmasks); i++)
+        for (int j = 0; j < MIN(dest->mask_size, source->mask_size); j++)
             dest->masks[i][j] |= source->masks[i][j];
 }
 
@@ -1209,7 +1209,7 @@ xi2mask_set_one_mask(XI2Mask *xi2mask, int deviceid, const unsigned char *mask,
     BUG_WARN(deviceid < 0);
     BUG_WARN(deviceid >= xi2mask->nmasks);
 
-    memcpy(xi2mask->masks[deviceid], mask, min(xi2mask->mask_size, mask_size));
+    memcpy(xi2mask->masks[deviceid], mask, MIN(xi2mask->mask_size, mask_size));
 }
 
 /**

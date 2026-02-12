@@ -44,6 +44,7 @@
 
 #include "dix/exevents_priv.h"
 #include "miext/extinit_priv.h"            /* for XInputExtensionInit */
+#include "os/mathx_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"
@@ -193,7 +194,7 @@ test_XIGetSelectedEvents(void)
     /* devices 6 - MAXDEVICES don't exist, they mustn't be included in the
      * reply even if a mask is set */
     for (j = 0; j < MAXDEVICES; j++) {
-        test_data.num_masks_expected = min(j + 1, devices.num_devices + 2);
+        test_data.num_masks_expected = MIN(j + 1, devices.num_devices + 2);
         dev.id = j;
         mask = test_data.mask[j];
         /* bits one-by-one */
