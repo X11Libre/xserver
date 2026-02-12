@@ -421,6 +421,8 @@ if build_xorg
             'compositeext.h',
             'cursor.h',
             'cursorstr.h',
+            'damage.h',
+            'damagestr.h',
             'dix.h',
             'dixaccess.h',
             'dixfont.h',
