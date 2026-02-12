@@ -289,6 +289,15 @@ jobs:
                   # https://github.com/cygwin/cygwin-install-action/issues/39
                   check-installer-sig: false
                   platform: x86_64
+                  site: |
+                    https://mirror.wisegs.com/cygwin/
+                    https://mirrors.sonic.net/cygwin/
+                    https://mirror.cpsc.ucalgary.ca/mirror/cygwin.com/
+                    https://muug.ca/mirror/cygwin/
+                    https://mirror.csclub.uwaterloo.ca/cygwin/
+                    https://cygwin.mirror.gtcomm.net/
+                    http://cygwin.mirror.rafal.ca/
+
                   packages: >-
                    binutils, bison, ccache, flex, gcc-core, meson, ninja,
                    pkg-config, python39, windowsdriproto, xorgproto,
