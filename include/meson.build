@@ -418,6 +418,7 @@ if build_xorg
             'closure.h',
             'colormap.h',
             'colormapst.h',
+            'compositeext.h',
             'cursor.h',
             'cursorstr.h',
             'dix.h',
