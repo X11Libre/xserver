@@ -42,7 +42,7 @@
 #include "pseudoramiX.h"
 #include "darwinEvents.h"
 #include "rootless.h"
-#include "dri.h"
+#include "xpr_dri.h"
 #include "globals.h"
 #include <Xplugin.h>
 #include "applewmExt.h"

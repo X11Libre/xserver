@@ -34,6 +34,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef DRI_STRUCT_H
 #define DRI_STRUCT_H
 
+#include "dri.h"
+#include "sarea.h"
 #include "xf86drm.h"
 #include "xf86Crtc.h"
 

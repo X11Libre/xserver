@@ -37,7 +37,7 @@
 #include "windowstr.h"
 #include "dixfontstr.h"
 #include "driWrap.h"
-#include "dri.h"
+#include "xpr_dri.h"
 
 #include <OpenGL/OpenGL.h>
 

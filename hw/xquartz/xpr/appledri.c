@@ -54,7 +54,7 @@
 #define _APPLEDRI_SERVER_
 #include "appledristr.h"
 #include "swaprep.h"
-#include "dri.h"
+#include "xpr_dri.h"
 #include "dristruct.h"
 #include "xpr.h"
 #include "x-hash.h"
