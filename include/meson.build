@@ -459,6 +459,7 @@ if build_xorg
             'opaque.h',
             'optionstr.h',
             'os.h',
+            'present.h',
             'pixmap.h',
             'pixmapstr.h',
             'privates.h',

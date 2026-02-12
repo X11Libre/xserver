@@ -24,6 +24,7 @@
 #define _PRESENT_H_
 
 #include <X11/Xfuncproto.h>
+#include <X11/Xmd.h>
 #include <X11/extensions/presentproto.h>
 
 #include "randrstr.h"

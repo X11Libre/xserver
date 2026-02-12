@@ -34,11 +34,12 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include "include/present.h"
+
 #include <xf86.h>
 #include <xf86Crtc.h>
 #include <xf86drm.h>
 #include <xf86str.h>
-#include <present.h>
 
 #include "driver.h"
 #include "drmmode_display.h"

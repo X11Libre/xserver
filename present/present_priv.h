@@ -26,7 +26,7 @@
 #include <X11/X.h>
 #include <X11/Xmd.h>
 
-#include "present/present.h"
+#include "include/present.h"
 
 #include "scrnintstr.h"
 #include "misc.h"

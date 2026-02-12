@@ -2473,8 +2473,6 @@ __glXpresentCompleteNotify(WindowPtr window, CARD8 present_kind, CARD8 present_m
     __glXsendSwapEvent(drawable, glx_type, ust, msc, serial);
 }
 
-#include <present.h>
-
 void
 __glXregisterPresentCompleteNotify(void)
 {
