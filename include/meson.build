@@ -453,6 +453,8 @@ if build_xorg
             'glamor.h',
             'globals.h',
             'glxvndabi.h',
+            'xf86i2c.h',
+            'i2c_def.h',
             'input.h',
             'inputstr.h',
             'list.h',
