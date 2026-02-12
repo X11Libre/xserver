@@ -29,6 +29,7 @@
 #ifndef _XF86XVMC_H
 #define _XF86XVMC_H
 
+#include "xlibre_ptrtypes.h"
 #include "xvmcext.h"
 #include "xf86xv.h"
 

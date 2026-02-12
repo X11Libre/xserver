@@ -24,6 +24,8 @@
 #define _MISYNCSTR_H_
 
 #include <stdint.h>
+
+#include "xlibre_ptrtypes.h"
 #include "dix.h"
 #include "misync.h"
 #include "scrnintstr.h"

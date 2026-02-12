@@ -29,6 +29,7 @@
 #ifndef _XF86XV_H_
 #define _XF86XV_H_
 
+#include "xlibre_ptrtypes.h"
 #include "xvdix.h"
 #include "xf86str.h"
 

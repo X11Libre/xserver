@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef WINDOWSTRUCT_H
 #define WINDOWSTRUCT_H
 
+#include "xlibre_ptrtypes.h"
 #include "window.h"
 #include "pixmapstr.h"
 #include "regionstr.h"
@@ -114,7 +115,7 @@ typedef struct _WindowOpt {
 #define RedirectDrawAutomatic	1
 #define RedirectDrawManual	2
 
-typedef struct _Window {
+struct _Window {
     DrawableRec drawable;
     PrivateRec *devPrivates;
     WindowPtr parent;           /* ancestor chain */
@@ -154,7 +155,7 @@ typedef struct _Window {
     unsigned inhibitBGPaint:1;  /* paint the background? */
 
     PropertyPtr properties;     /* default: NULL */
-} WindowRec;
+};
 
 extern _X_EXPORT Mask DontPropagateMasks[];
 

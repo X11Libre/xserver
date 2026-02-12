@@ -35,6 +35,7 @@
 #ifndef _XF86_H
 #define _XF86_H
 
+#include "xlibre_ptrtypes.h"
 #include "xf86str.h"
 #include "xf86Opt.h"
 #include <X11/Xfuncproto.h>

@@ -29,6 +29,7 @@
 #ifndef _XF86CMAP_H
 #define _XF86CMAP_H
 
+#include "xlibre_ptrtypes.h"
 #include "xf86str.h"
 
 #define CMAP_PALETTED_TRUECOLOR		0x0000001

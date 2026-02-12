@@ -59,6 +59,8 @@
 #ifndef GLXVENDORABI_H
 #define GLXVENDORABI_H
 
+#include "xlibre_ptrtypes.h"
+
 #include <scrnintstr.h>
 #include <extnsionst.h>
 #include <GL/glxproto.h>

@@ -26,6 +26,8 @@ SOFTWARE.
 
 #include <X11/Xmd.h>
 
+#include "xlibre_ptrtypes.h"
+
 #include "callback.h"
 #include "dix.h"
 #include "resource.h"
@@ -33,9 +35,6 @@ SOFTWARE.
 #include "gc.h"
 #include "pixmap.h"
 #include "privates.h"
-
-struct _Client;
-typedef struct _ClientId *ClientIdPtr;
 
 /*
  * 	direct-mapped hash table, used by resource manager to store
@@ -72,9 +71,7 @@ typedef struct _saveSet {
 #define SaveSetAssignToRoot(ss,tr)  ((ss).toRoot = (tr))
 #define SaveSetAssignMap(ss,m)      ((ss).map = (m))
 
-struct _ClientId;
-
-typedef struct _Client {
+struct _Client {
     void *requestBuffer;
     void *osPrivate;             /* for OS layer, including scheduler */
     struct xorg_list ready;      /* List of clients ready to run */
@@ -112,7 +109,7 @@ typedef struct _Client {
     DeviceIntPtr clientPtr;
     struct _ClientId *clientIds;
     int req_fds;
-} ClientRec;
+};
 
 extern _X_EXPORT TimeStamp currentTime;
 
