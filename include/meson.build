@@ -464,6 +464,8 @@ if build_xorg
             'privates.h',
             'property.h',
             'ptrveloc.h',
+            'randrstr.h',
+            'rrtransform.h',
             'region.h',
             'regionstr.h',
             'resource.h',
