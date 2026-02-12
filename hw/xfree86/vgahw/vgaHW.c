@@ -17,20 +17,16 @@
 
 #include <X11/X.h>
 
+#include "include/vgaHW.h"
 #include "os/log_priv.h"
 
 #include "misc.h"
-
 #include "xf86_priv.h"
 #include "xf86_OSproc.h"
 #include "xf86Opt_priv.h"
 #include "xf86Priv.h"
-#include "vgaHW.h"
-
 #include "compiler.h"
-
 #include "xf86cmap.h"
-
 #include "Pci.h"
 
 #ifndef SAVE_FONT1

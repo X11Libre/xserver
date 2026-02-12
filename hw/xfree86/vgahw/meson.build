@@ -6,5 +6,3 @@ shared_module('vgahw',
     install: true,
     install_dir: module_abi_dir,
 )
-
-install_data('vgaHW.h', install_dir: xorgsdkdir)

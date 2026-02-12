@@ -493,6 +493,7 @@ if build_xorg
             'vndserver.h',
             'window.h',
             'windowstr.h',
+            'vgaHW.h',
             'xaarop.h',
             'xf86.h',
             'xf86cmap.h',
