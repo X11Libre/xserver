@@ -250,10 +250,10 @@ endif
 
 if build_xorg
     build_xorg_sdk = true
+    libxcvt_dep = dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: build_xorg)
 endif
 
 xorgsdkdir = join_paths(get_option('prefix'), get_option('includedir'), 'xorg')
-libxcvt_dep = dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: build_xorg)
 
 ## configure Xnest - nesting X server
 build_xnest = get_option('xnest') != 'false'

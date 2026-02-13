@@ -78,7 +78,7 @@ jobs:
 
     drivers-build-ubuntu:
         env:
-            MESON_ARGS: -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/usr -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
@@ -112,7 +112,7 @@ jobs:
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: generic prereq
-              run:  .github/scripts/install-prereq.sh
+              run:  .github/scripts/install-prereq-drivers.sh
 
             - name: build xserver sdk
               run:  |
