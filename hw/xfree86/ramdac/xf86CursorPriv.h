@@ -1,9 +1,7 @@
 #ifndef _XF86CURSORPRIV_H
 #define _XF86CURSORPRIV_H
 
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "xf86Cursor.h"
 #include "mipointrst.h"
