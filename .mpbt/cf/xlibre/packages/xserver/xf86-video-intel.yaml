@@ -1,0 +1,16 @@
+sources:
+    git:
+        url:    ${@SOLUTION::xlibre_git}/${@basename}.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/xlibre-${@basename}-*:refs/tags/xlibre-${@basename}-*
+
+buildsystem: autotools
+
+build-depends:
+    - x11/xserver-sdk
+    - 3rdparty/util-macros
+
+version: 25.0.1
+ref: xlibre-${@basename}-${version}

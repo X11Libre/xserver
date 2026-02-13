@@ -99,3 +99,6 @@ apt-get install -y \
 	git \
 	golang-go \
 	sudo
+
+# only pull them into apt cache -- for mingw32 build
+apt-get install -d -y mingw-w64-tools gcc-mingw-w64 gcc-mingw-w64-i686 libz-mingw-w64-dev
