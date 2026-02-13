@@ -1,0 +1,11 @@
+provides: x11/util-macros
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xlibre_git}/mirror.fdo.xorg-macros.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/*:refs/tags/*
+buildsystem: autotools
+ref: util-macros-1.20.2
