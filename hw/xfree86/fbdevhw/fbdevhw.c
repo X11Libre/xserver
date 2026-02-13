@@ -1,7 +1,4 @@
-/* all drivers need this */
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <fcntl.h>
 #include <errno.h>
