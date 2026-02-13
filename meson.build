@@ -288,6 +288,13 @@ build_xephyr = get_option('xephyr')
 
 build_xfbdev = get_option('xfbdev')
 
+build_xserver = (build_xorg or
+                 build_xnest or
+                 build_xvfb or
+                 build_xquartz or
+                 build_xephyr or
+                 build_xfbdev)
+
 summary({
         'Xorg': build_xorg,
         'Xnest': build_xnest,
@@ -761,77 +768,74 @@ endif
 # Include must come first, as it sets up dix-config.h
 subdir('include')
 
-# X server core
-subdir('config')
-subdir('dix')
-subdir('dri3')
-subdir('glx')
-subdir('fb')
-subdir('mi')
-subdir('os')
-# X extensions
-subdir('composite')
-subdir('dbe')
-subdir('miext/damage')
-subdir('miext/shadow')
-subdir('miext/sync')
-if build_rootless
-    subdir('miext/rootless')
-endif
-subdir('present')
-if build_xwin or build_xquartz
-    subdir('pseudoramiX')
-endif
-subdir('randr')
-subdir('record')
-subdir('render')
-subdir('xfixes')
-subdir('xkb')
-subdir('Xext')
-subdir('Xi')
-# other
-if build_glamor
-    subdir('glamor')
-endif
-if build_xorg or get_option('xephyr')
-    subdir('exa')
-endif
 subdir('doc')
 
-# Common static libraries of all X servers
-libxserver = [
-    libxserver_mi,
-    libxserver_dix,
+# X server core
+if build_xserver
+    subdir('config')
+    subdir('dix')
+    subdir('dri3')
+    subdir('glx')
+    subdir('fb')
+    subdir('mi')
+    subdir('os')
+    subdir('composite')
+    subdir('dbe')
+    subdir('miext/damage')
+    subdir('miext/shadow')
+    subdir('miext/sync')
+    if build_rootless
+        subdir('miext/rootless')
+    endif
+    subdir('present')
+    if build_xwin or build_xquartz
+        subdir('pseudoramiX')
+    endif
+    subdir('randr')
+    subdir('record')
+    subdir('render')
+    subdir('xfixes')
+    subdir('xkb')
+    subdir('Xext')
+    subdir('Xi')
+    if build_glamor
+        subdir('glamor')
+    endif
+    if build_xorg or get_option('xephyr')
+        subdir('exa')
+    endif
 
-    libxserver_composite,
-    libxserver_damageext,
-    libxserver_dbe,
-    libxserver_randr,
-    libxserver_miext_damage,
-    libxserver_render,
-    libxserver_present,
-    libxserver_xext,
-    libxserver_miext_sync,
-    libxserver_xfixes,
-    libxserver_xi,
-    libxserver_xkb,
-    libxserver_record,
+    # Common static libraries of all X servers
+    libxserver = [
+        libxserver_mi,
+        libxserver_dix,
+        libxserver_composite,
+        libxserver_damageext,
+        libxserver_dbe,
+        libxserver_randr,
+        libxserver_miext_damage,
+        libxserver_render,
+        libxserver_present,
+        libxserver_xext,
+        libxserver_miext_sync,
+        libxserver_xfixes,
+        libxserver_xi,
+        libxserver_xkb,
+        libxserver_record,
+        libxserver_os,
+        libxserver_dri2,
+        libxserver_dri3
+    ]
 
-    libxserver_os,
-]
-
-libxserver += libxserver_dri2
-libxserver += libxserver_dri3
-
-if build_namespace
-    subdir('Xext/namespace')
-    libxserver += libxserver_namespace
+    if build_namespace
+        subdir('Xext/namespace')
+        libxserver += libxserver_namespace
+    endif
 endif
 
 subdir('hw')
 
-build_tests = get_option('tests') and host_machine.system() != 'windows'
-if build_tests
+if (get_option('tests') and host_machine.system() != 'windows' and build_xserver)
     subdir('test')
 endif
 
