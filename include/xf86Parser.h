@@ -56,13 +56,8 @@
  * This file contains the external interfaces for the XFree86 configuration
  * file parser.
  */
-
 #ifndef _xf86Parser_h_
 #define _xf86Parser_h_
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #include <X11/Xdefs.h>
 #include "xf86Optrec.h"

@@ -23,8 +23,6 @@
 #ifndef _XF86_SBUS_H
 #define _XF86_SBUS_H
 
-#include <xorg-config.h>
-
 #if defined(__linux__)
 #include <asm/types.h>
 #include <linux/fb.h>
