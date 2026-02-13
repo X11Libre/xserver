@@ -277,14 +277,18 @@ endif
 
 build_xvfb = get_option('xvfb')
 
+build_xephyr = get_option('xephyr')
+
+build_xfbdev = get_option('xfbdev')
+
 summary({
         'Xorg': build_xorg,
         'Xnest': build_xnest,
         'Xvfb': build_xvfb,
         'Xwin': build_xwin,
         'Xquartz': build_xquartz,
-        'Xephyr': get_option('xephyr'),
-        'Xfbdev': get_option('xfbdev'),
+        'Xephyr': build_xephyr,
+        'Xfbdev': build_xfbdev,
     },
     section: 'DDX',
     bool_yn: true,

@@ -1,5 +1,3 @@
-build_xfbdev = get_option('xfbdev')
-build_xephyr = get_option('xephyr')
 build_kdrive = build_xephyr or build_xfbdev
 
 build_kdrive_kbd = false
