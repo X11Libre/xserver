@@ -35,7 +35,7 @@
 #include "xf86Bus.h"
 
 #include "xf86sbusBus_priv.h"
-#include "xf86Sbus.h"
+#include "xf86Sbus_priv.h"
 
 static int xf86nSbusInfo;
 

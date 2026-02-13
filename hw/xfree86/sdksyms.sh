@@ -164,10 +164,6 @@ cat > sdksyms.c << EOF
 #ifdef XSERVER_LIBPCIACCESS
 # include "xf86Pci.h"
 #endif
-#if defined(__sparc__) || defined(__sparc)
-# include "xf86Sbus.h"
-#endif
-
 
 /* hw/xfree86/parser/Makefile.am */
 #include "xf86Parser.h"
