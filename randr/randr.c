@@ -325,12 +325,10 @@ RRScreenInit(ScreenPtr pScreen)
     pScrPriv->height = pScreen->height;
     pScrPriv->mmWidth = pScreen->mmWidth;
     pScrPriv->mmHeight = pScreen->mmHeight;
-#if RANDR_10_INTERFACE
     pScrPriv->rotations = RR_Rotate_0;
     pScrPriv->reqWidth = pScreen->width;
     pScrPriv->reqHeight = pScreen->height;
     pScrPriv->rotation = RR_Rotate_0;
-#endif
 
     /*
      * This value doesn't really matter -- any client must call

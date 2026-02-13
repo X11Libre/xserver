@@ -814,7 +814,6 @@ RRCrtcSet(RRCrtcPtr crtc,
         else
 #endif
         {
-#if RANDR_10_INTERFACE
             if (pScrPriv->rrSetConfig) {
                 RRScreenSize size;
                 RRScreenRate rate;
@@ -850,7 +849,6 @@ RRCrtcSet(RRCrtcPtr crtc,
                     }
                 }
             }
-#endif
         }
         if (ret) {
 

@@ -300,13 +300,9 @@ typedef struct _rrScreenSize {
     RRScreenRatePtr pRates;
 } RRScreenSize, *RRScreenSizePtr;
 
-#ifdef RANDR_10_INTERFACE
-
 typedef Bool (*RRSetConfigProcPtr) (ScreenPtr pScreen,
                                     Rotation rotation,
                                     int rate, RRScreenSizePtr pSize);
-
-#endif
 
 typedef Bool (*RRCrtcSetScanoutPixmapProcPtr)(RRCrtcPtr crtc, PixmapPtr pixmap);
 
@@ -328,9 +324,7 @@ typedef struct _rrScrPriv {
      * 'public' part of the structure; DDXen fill this in
      * as they initialize
      */
-#if RANDR_10_INTERFACE
     RRSetConfigProcPtr rrSetConfig;
-#endif
     RRGetInfoProcPtr rrGetInfo;
 #if RANDR_12_INTERFACE
     RRScreenSetSizeProcPtr rrScreenSetSize;
@@ -389,7 +383,6 @@ typedef struct _rrScrPriv {
     /* Last known pointer position */
     RRCrtcPtr pointerCrtc;
 
-#ifdef RANDR_10_INTERFACE
     /*
      * Configuration information
      */
@@ -402,7 +395,7 @@ typedef struct _rrScrPriv {
     Rotation rotation;
     int rate;
     int size;
-#endif
+
     Bool discontiguous;
 
     RRProviderPtr provider;
@@ -514,7 +507,6 @@ extern _X_EXPORT Bool RRScreenInit(ScreenPtr pScreen);
 
 extern _X_EXPORT RROutputPtr RRFirstOutput(ScreenPtr pScreen);
 
-#ifdef RANDR_10_INTERFACE
 /*
  * This is the old interface, deprecated but left
  * around for compatibility
@@ -539,8 +531,6 @@ extern _X_EXPORT void
 
 RRSetCurrentConfig(ScreenPtr pScreen,
                    Rotation rotation, int rate, RRScreenSizePtr pSize);
-
-#endif
 
 /* rrcrtc.c */
 
