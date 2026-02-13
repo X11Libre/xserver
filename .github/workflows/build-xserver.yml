@@ -352,3 +352,80 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   tag: ${{ github.ref_name }}
               run: .github/scripts/github/make-release
+
+    xserver-and-drivers-mpbt:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                package:
+                    - input-elographics
+                    - input-evdev
+                    - input-joystick
+                    - input-keyboard
+                    - input-libinput
+                    - input-mouse
+                    - input-synaptics
+                    - input-vmmouse
+                    - input-void
+                    - input-wacom
+                    - video-amdgpu
+                    - video-apm
+                    - video-ark
+                    - video-ast
+                    - video-ati
+                    - video-chips
+                    - video-cirrus
+                    - video-dummy
+                    - video-fbdev
+                    - video-freedreno
+                    - video-geode
+                    - video-i128
+                    - video-i740
+                    - video-intel
+                    - video-mach64
+                    - video-mga
+                    - video-neomagic
+                    - video-nested
+                    - video-nouveau
+                    - video-nv
+                    - video-omap
+                    - video-qxl
+                    - video-r128
+                    - video-rendition
+                    - video-s3virge
+                    - video-savage
+                    - video-siliconmotion
+                    - video-sisusb
+                    - video-sis
+                    - video-suncg14
+                    - video-suncg3
+                    - video-suncg6
+                    - video-sunffb
+                    - video-sunleo
+                    - video-suntcx
+                    - video-tdfx
+                    - video-trident
+                    - video-v4l
+                    - video-vbox
+                    - video-vesa
+                    - video-vmware
+                    - video-voodoo
+                    - video-xgi
+        name: Driver ${{ matrix.package }} (MPBT)
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: install mpbt package
+              run: go install github.com/metux/mpbt/cmd/mpbt-builder@v0.1.2
+
+            - name: build driver ${{ matrix.package }}
+              run: |
+                    ~/go/bin/mpbt-builder \
+                        -root . \
+                        -solution .mpbt/cf/xlibre/solutions/github-ubuntu-drivers.yaml \
+                        -solution-define build=xserver/xf86-${{ matrix.package }} \
+                        build
