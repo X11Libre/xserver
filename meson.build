@@ -765,6 +765,8 @@ if build_docs or build_docs_devel
     ]
 endif
 
+module_abi_tag = 'xlibre-25'
+
 # Include must come first, as it sets up dix-config.h
 subdir('include')
 
@@ -839,7 +841,7 @@ if (get_option('tests') and host_machine.system() != 'windows' and build_xserver
     subdir('test')
 endif
 
-if build_xorg
+if build_xorg_sdk
     sdkconfig = configuration_data()
     awk = find_program('awk')
 
