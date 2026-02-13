@@ -7,9 +7,7 @@
  *   Copyright 1990,91 by Thomas Roell, Dinkelscherben, Germany.
  *
  */
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <stdlib.h>
 #include <string.h>
