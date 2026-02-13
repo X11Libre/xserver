@@ -45,13 +45,10 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
 #ifndef _LOADERPROCS_H
 #define _LOADERPROCS_H
 
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "xf86Module.h"
 
