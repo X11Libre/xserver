@@ -1066,6 +1066,7 @@ try_enable_glamor(ScrnInfoPtr pScrn)
     Bool do_glamor = (!accel_method_str ||
                       strcmp(accel_method_str, "glamor") == 0);
 
+    ms->drmmode.glamor_base = FALSE;
     ms->drmmode.glamor = FALSE;
 
 #ifdef GLAMOR
@@ -1080,12 +1081,13 @@ try_enable_glamor(ScrnInfoPtr pScrn)
     }
 
     if (load_glamor(pScrn)) {
+        ms->drmmode.glamor_base = TRUE;
         if (ms->glamor.egl_init(pScrn, ms->fd)) {
-            xf86DrvMsg(pScrn->scrnIndex, X_INFO, "glamor initialized\n");
+            xf86DrvMsg(pScrn->scrnIndex, X_INFO, "glamor dri initialized\n");
             ms->drmmode.glamor = TRUE;
         } else {
             xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-                       "glamor initialization failed\n");
+                       "glamor dri initialization failed\n");
         }
     } else {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
@@ -2131,7 +2133,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
         xf86DPMSInit(pScreen, xf86DPMSSet, 0);
 
 #if defined(GLAMOR) && defined(XV)
-    if (ms->drmmode.glamor) {
+    if (ms->drmmode.glamor_base) {
         XF86VideoAdaptorPtr     glamor_adaptor;
 
         glamor_adaptor = ms->glamor.xv_init(pScreen, 16);

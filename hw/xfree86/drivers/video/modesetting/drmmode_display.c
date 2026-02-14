@@ -4189,14 +4189,17 @@ drmmode_init(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     ScreenPtr pScreen = xf86ScrnToScreen(pScrn);
     modesettingPtr ms = modesettingPTR(pScrn);
 
-    if (drmmode->glamor) {
-        if (!ms->glamor.init(pScreen, GLAMOR_USE_EGL_SCREEN)) {
+    if (drmmode->glamor_base && !ms->glamor.init(pScreen, GLAMOR_USE_EGL_SCREEN)) {
+        if (drmmode->glamor) {
             return FALSE;
         }
-#ifdef GBM_BO_WITH_MODIFIERS
-        ms->glamor.set_drawable_modifiers_func(pScreen, get_drawable_modifiers);
-#endif
     }
+
+#ifdef GBM_BO_WITH_MODIFIERS
+    if (drmmode->glamor) {
+        ms->glamor.set_drawable_modifiers_func(pScreen, get_drawable_modifiers);
+    }
+#endif
 #endif
 
     return TRUE;
