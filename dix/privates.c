@@ -53,10 +53,10 @@ from The Open Group.
 #include <stddef.h>
 
 #include "dix/colormap_priv.h"
+#include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 
 #include "windowstr.h"
-#include "resource.h"
 #include "privates.h"
 #include "gcstruct.h"
 #include "cursorstr.h"
