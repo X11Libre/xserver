@@ -97,6 +97,8 @@ typedef struct {
 
     Bool singleDriver;          /* Only the first successfully probed driver adds primary screens,
                                  * others may add GPU secondary screens only */
+
+    Bool isolateKeyboard;
 } xf86InfoRec, *xf86InfoPtr;
 
 /* ISC's cc can't handle ~ of UL constants, so explicitly type cast them. */
