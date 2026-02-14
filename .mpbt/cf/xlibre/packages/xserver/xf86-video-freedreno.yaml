@@ -12,6 +12,5 @@ buildsystem: autotools
 build-depends:
     - x11/xserver-sdk
     - 3rdparty/util-macros
-    - sys/libdrm
 
 ref: origin/master
