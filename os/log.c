@@ -153,14 +153,6 @@ asm(".desc ___crashreporter_info__, 0x10");
 #define X_DEBUG_STRING			"(DB)"
 #define X_NONE_STRING			""
 
-static size_t
-strlen_sigsafe(const char *s)
-{
-    size_t len;
-    for (len = 0; s[len]; len++);
-    return len;
-}
-
 /*
  * LogFilePrep is called to setup files for logging, including getting
  * an old file out of the way, but it doesn't actually open the file,
@@ -459,7 +451,7 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
 {
     int f_idx = 0;
     int s_idx = 0;
-    int f_len = strlen_sigsafe(f);
+    int f_len = strlen(f);
     char *string_arg;
     char number[21];
     int p_len;
@@ -542,7 +534,7 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
                 ui = va_arg(args, unsigned);
 
             FormatUInt64(ui, number);
-            p_len = strlen_sigsafe(number);
+            p_len = strlen(number);
 
             for (i = 0; i < p_len && s_idx < size - 1; i++)
                 string[s_idx++] = number[i];
@@ -559,7 +551,7 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
                 si = va_arg(args, int);
 
             FormatInt64(si, number);
-            p_len = strlen_sigsafe(number);
+            p_len = strlen(number);
 
             for (i = 0; i < p_len && s_idx < size - 1; i++)
                 string[s_idx++] = number[i];
@@ -571,7 +563,7 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
                 string[s_idx++] = 'x';
             ui = (uintptr_t)va_arg(args, void*);
             FormatUInt64Hex(ui, number);
-            p_len = strlen_sigsafe(number);
+            p_len = strlen(number);
 
             for (i = 0; i < p_len && s_idx < size - 1; i++)
                 string[s_idx++] = number[i];
@@ -589,7 +581,7 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
                 ui = va_arg(args, unsigned);
 
             FormatUInt64Hex(ui, number);
-            p_len = strlen_sigsafe(number);
+            p_len = strlen(number);
 
             for (i = 0; i < p_len && s_idx < size - 1; i++)
                 string[s_idx++] = number[i];
@@ -598,7 +590,7 @@ vpnprintf(char *string, int size_in, const char *f, va_list args)
             {
                 double d = va_arg(args, double);
                 FormatDouble(d, number);
-                p_len = strlen_sigsafe(number);
+                p_len = strlen(number);
 
                 for (i = 0; i < p_len && s_idx < size - 1; i++)
                     string[s_idx++] = number[i];
@@ -749,7 +741,7 @@ static ssize_t prepMsgHdr(MessageType type, int verb, char *buf)
     if (!type_str)
         return -1;
 
-    size_t prefixLen = strlen_sigsafe(type_str);
+    size_t prefixLen = strlen(type_str);
     if (prefixLen) {
         memcpy(buf, type_str, prefixLen + 1); // rely on buffer being big enough
         buf[prefixLen] = ' ';
