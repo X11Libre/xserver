@@ -58,6 +58,7 @@ struct glamor_egl_screen_private {
     struct gbm_device *gbm;
     int fd;
     int dmabuf_capable;
+    int linear_only; /* TRUE if only linear buffers can be created by the gbm backend */
 
     xf86FreeScreenProc *saved_free_screen;
 };
@@ -492,6 +493,8 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
 static struct gbm_bo *
 glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
 {
+    struct gbm_bo* ret = NULL;
+
     struct glamor_egl_screen_private *glamor_egl =
         glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
     struct glamor_pixmap_private *pixmap_priv =
@@ -502,8 +505,61 @@ glamor_gbm_bo_from_pixmap_internal(ScreenPtr screen, PixmapPtr pixmap)
     if (!pixmap_priv->image)
         return NULL;
 
-    return gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
-                         pixmap_priv->image, GBM_BO_USE_RENDERING);
+    ret = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_EGL_IMAGE,
+                        pixmap_priv->image, GBM_BO_USE_RENDERING);
+
+    if (ret) {
+        return ret;
+    }
+
+#ifndef GBM_MAX_PLANES
+/* This is the actual value, and what the spec says it should be */
+#define GBM_MAX_PLANES 4
+#endif
+
+    int fourcc = 0;
+    int num_planes = 0;
+
+    EGLuint64KHR modifiers[GBM_MAX_PLANES] = {0};
+
+    if (!eglExportDMABUFImageQueryMESA(glamor_egl->display, pixmap_priv->image, &fourcc, &num_planes, modifiers)) {
+        return NULL;
+    }
+
+    assert(num_planes <= GBM_MAX_PLANES);
+
+    struct gbm_import_fd_modifier_data fd_modifier_data =
+    {
+        .width = pixmap->drawable.width,
+        .height = pixmap->drawable.height,
+        .format = fourcc, /* GBM and DRM formats are the same */
+        .num_fds = num_planes,
+        .modifier = modifiers[0],
+        .fds = {-1, -1, -1, -1},
+        .strides = {0},
+        .offsets = {0},
+    };
+
+/* If the spec somehow changes in the future */
+#if GBM_MAX_PLANES != 4
+    memset(fd_modifier_data.fds, -1, sizeof(fd_modifier_data));
+#endif
+
+    if (eglExportDMABUFImageMESA(glamor_egl->display, pixmap_priv->image,
+                                 fd_modifier_data.fds,
+                                 fd_modifier_data.strides,
+                                 fd_modifier_data.offsets)) {
+        ret = gbm_bo_import(glamor_egl->gbm, GBM_BO_IMPORT_FD_MODIFIER,
+                            &fd_modifier_data, GBM_BO_USE_RENDERING);
+    }
+
+    for (int i = 0; i < num_planes; i++) {
+        if (fd_modifier_data.fds[i] != -1) {
+            close(fd_modifier_data.fds[i]);
+        }
+    }
+
+    return ret;
 }
 
 struct gbm_bo *
@@ -781,21 +837,20 @@ glamor_pixmap_from_fd(ScreenPtr screen,
     return pixmap;
 }
 
-Bool
-glamor_get_formats(ScreenPtr screen,
-                   CARD32 *num_formats, CARD32 **formats)
+static Bool
+glamor_get_formats_internal(struct glamor_egl_screen_private *glamor_egl,
+                            CARD32 *num_formats, CARD32 **formats)
 {
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    struct glamor_egl_screen_private *glamor_egl;
     EGLint num;
+#else
+    (void)glamor_egl;
 #endif
 
     /* Explicitly zero the count and formats as the caller may ignore the return value */
     *num_formats = 0;
     *formats = NULL;
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
-
     if (!glamor_egl->dmabuf_capable)
         return TRUE;
 
@@ -821,15 +876,31 @@ glamor_get_formats(ScreenPtr screen,
     return TRUE;
 }
 
+Bool
+glamor_get_formats(ScreenPtr screen,
+                   CARD32 *num_formats, CARD32 **formats)
+{
+    struct glamor_egl_screen_private *glamor_egl;
+    glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
+    return glamor_get_formats_internal(glamor_egl, num_formats, formats);
+}
+
 static void
 glamor_filter_modifiers(uint32_t *num_modifiers, uint64_t **modifiers,
-                        EGLBoolean *external_only)
+                        EGLBoolean *external_only, int linear_only)
 {
     uint32_t write_pos = 0;
     for (uint32_t i = 0; i < *num_modifiers; i++) {
         if (external_only[i]) {
             continue;
         }
+
+        if (linear_only &&
+            ((*modifiers)[i] != DRM_FORMAT_MOD_LINEAR) &&
+            ((*modifiers)[i] != DRM_FORMAT_MOD_INVALID)) {
+            continue;
+        }
+
         (*modifiers)[write_pos++] = (*modifiers)[i];
     }
 
@@ -846,22 +917,21 @@ glamor_filter_modifiers(uint32_t *num_modifiers, uint64_t **modifiers,
     }
 }
 
-Bool
-glamor_get_modifiers(ScreenPtr screen, uint32_t format,
-                     uint32_t *num_modifiers, uint64_t **modifiers)
+static Bool
+glamor_get_modifiers_internal(struct glamor_egl_screen_private *glamor_egl, uint32_t format,
+                              uint32_t *num_modifiers, uint64_t **modifiers)
 {
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    struct glamor_egl_screen_private *glamor_egl;
     EGLBoolean *external_only;
     EGLint num;
+#else
+    (void)glamor_egl;
 #endif
 
     /* Explicitly zero the count and modifiers as the caller may ignore the return value */
     *num_modifiers = 0;
     *modifiers = NULL;
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
-
     if (!glamor_egl->dmabuf_capable)
         return FALSE;
 
@@ -892,9 +962,8 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     }
 
     *num_modifiers = num;
-    glamor_filter_modifiers(num_modifiers, modifiers, external_only);
+    glamor_filter_modifiers(num_modifiers, modifiers, external_only, glamor_egl->linear_only);
     free(external_only);
-
 
     if (num && *num_modifiers == 0) {
         /**
@@ -905,6 +974,15 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     }
 #endif
     return TRUE;
+}
+
+Bool
+glamor_get_modifiers(ScreenPtr screen, uint32_t format,
+                     uint32_t *num_modifiers, uint64_t **modifiers)
+{
+    struct glamor_egl_screen_private *glamor_egl;
+    glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
+    return glamor_get_modifiers_internal(glamor_egl, format, num_modifiers, modifiers);
 }
 
 const char *
@@ -1112,6 +1190,170 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 #endif
 }
 
+static Bool
+glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
+{
+    EGLint max_devices = 0;
+
+    *devices = NULL;
+    *num_devices = 0;
+
+    if (!epoxy_has_egl_extension(NULL, "EGL_EXT_device_query") ||
+        !epoxy_has_egl_extension(NULL, "EGL_EXT_device_enumeration")) {
+        return FALSE;
+    }
+
+    if (!eglQueryDevicesEXT(0, NULL, &max_devices)) {
+         return FALSE;
+    }
+
+    *devices = calloc(sizeof(EGLDeviceEXT), max_devices);
+    if (*devices == NULL) {
+         return FALSE;
+    }
+
+    if (!eglQueryDevicesEXT(max_devices, *devices, num_devices)) {
+         free(*devices);
+         *devices = NULL;
+         *num_devices = 0;
+         return FALSE;
+    }
+
+    if (*num_devices < max_devices) {
+         /* Shouldn't happen */
+         void *tmp = realloc(*devices, *num_devices * sizeof(EGLDeviceEXT));
+         if (tmp) {
+             *devices = tmp;
+         }
+    }
+
+    return TRUE;
+}
+
+static inline Bool
+glamor_egl_device_matches_fd(EGLDeviceEXT device, int fd)
+{
+    const char *dev_file = eglQueryDeviceStringEXT(device, EGL_DRM_DEVICE_FILE_EXT);
+    if (!dev_file) {
+        return FALSE;
+    }
+
+    int dev_fd = open(dev_file, O_RDWR);
+    if (dev_fd == -1) {
+        return FALSE;
+    }
+
+    /**
+     * From https://pubs.opengroup.org/onlinepubs/009696699/basedefs/sys/stat.h.html
+     *
+     * The st_ino and st_dev fields taken together uniquely identify the file within the system.
+     */
+    struct stat stat1, stat2;
+    if(fstat(fd, &stat1) < 0) {
+        close(dev_fd);
+        return FALSE;
+    }
+    if(fstat(dev_fd, &stat2) < 0) {
+        close(dev_fd);
+        return FALSE;
+    }
+
+    Bool ret = (stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino);
+    close(dev_fd);
+    return ret;
+}
+
+static inline Bool
+glamor_egl_device_matches_config(EGLDeviceEXT device,
+                                 struct glamor_egl_screen_private *glamor_egl,
+                                 Bool strict)
+{
+    if (!glamor_egl_device_matches_fd(device, glamor_egl->fd)) {
+        return FALSE;
+    }
+
+    if (!strict || !glamor_egl->glvnd_vendor) {
+        return TRUE;
+    }
+
+/**
+ * For some reason, this isn't part of the epoxy headers.
+ * It is part of EGL/eglext.h, but we can't include that
+ * alongside the expoxy headers.
+ *
+ * See: https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_device_persistent_id.txt
+ * for the spec where this is defined
+ */
+#ifndef EGL_DRIVER_NAME_EXT
+#define EGL_DRIVER_NAME_EXT 0x335E
+#endif
+
+    const char *driver_name = eglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT);
+    if (!driver_name) {
+        return FALSE;
+    }
+
+    /**
+     * This is not specific to nvidia,
+     * but I don't know of any gl library vendors
+     * other than mesa and nvidia
+     */
+    Bool device_is_nvidia = !!strstr(driver_name, "nvidia");
+    Bool config_is_nvidia = !!strstr(glamor_egl->glvnd_vendor, "nvidia");
+
+    return device_is_nvidia == config_is_nvidia;
+}
+
+static Bool
+glamor_egl_init_display(struct glamor_egl_screen_private *glamor_egl, int ScrnIdx)
+{
+    EGLDeviceEXT *devices = NULL;
+    EGLint num_devices = 0;
+
+#define GLAMOR_EGL_TRY_PLATFORM(platform, native, platform_fallback) \
+    glamor_egl->display = glamor_egl_get_display2(platform, native, platform_fallback); \
+    if (glamor_egl->display == EGL_NO_DISPLAY) { \
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglGetDisplay(" #platform ", " #native ") failed\n"); \
+    } else { \
+        if (eglInitialize(glamor_egl->display, NULL, NULL)) { \
+            xf86DrvMsg(ScrnIdx, X_INFO, "eglInitialize() succeeded on " #platform "\n"); \
+            free(devices); \
+            return TRUE; \
+        } \
+        xf86DrvMsg(ScrnIdx, X_ERROR, "eglInitialize() failed on " #platform "\n"); \
+        eglTerminate(glamor_egl->display); \
+        glamor_egl->display = EGL_NO_DISPLAY; \
+    }
+
+    GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_KHR, glamor_egl->gbm, FALSE);
+    GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_MESA, glamor_egl->gbm, TRUE);
+
+    if (glamor_query_devices_ext(&devices, &num_devices)) {
+        /* Try a strict match first */
+        for (uint32_t i = 0; i < num_devices; i++) {
+            if (glamor_egl_device_matches_config(devices[i], glamor_egl, TRUE)) {
+                GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, devices[i], TRUE);
+            }
+        }
+
+        /* Try a try a less strict match now */
+        for (uint32_t i = 0; i < num_devices; i++) {
+            if (glamor_egl_device_matches_config(devices[i], glamor_egl, FALSE)) {
+                GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, devices[i], TRUE);
+            }
+        }
+    }
+
+#if 0 /* We can't specify the device we want, which can break in multi-card setups */
+    GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, FALSE);
+    GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, EGL_DEFAULT_DISPLAY, TRUE);
+#endif
+
+#undef GLAMOR_EGL_TRY_PLATFORM
+
+    return FALSE;
+}
+
 static void glamor_egl_cleanup(struct glamor_egl_screen_private *glamor_egl)
 {
     if (glamor_egl->display != EGL_NO_DISPLAY) {
@@ -1243,6 +1485,24 @@ static const OptionInfoRec GlamorEGLOptions[] = {
     { -1, NULL, OPTV_NONE, {0}, FALSE },
 };
 
+static struct gbm_device*
+gbm_create_device_by_name(int fd, const char* name)
+{
+    struct gbm_device* ret = NULL;
+
+    const char* old_backend = getenv("GBM_BACKEND");
+    setenv("GBM_BACKEND", name, 1);
+
+    ret = gbm_create_device(fd);
+
+    unsetenv("GBM_BACKEND");
+    if (old_backend) {
+        setenv("GBM_BACKEND", old_backend, 1);
+    }
+
+    return ret;
+}
+
 Bool
 glamor_egl_init(ScrnInfoPtr scrn, int fd)
 {
@@ -1280,21 +1540,22 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     scrn->privates[xf86GlamorEGLPrivateIndex].ptr = glamor_egl;
     glamor_egl->fd = fd;
     glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
+
+    if (!glamor_egl->gbm) {
+        glamor_egl->gbm = gbm_create_device_by_name(glamor_egl->fd, "dumb");
+    }
+
     if (glamor_egl->gbm == NULL) {
         ErrorF("couldn't get display device\n");
         goto error;
     }
 
-    glamor_egl->display = glamor_egl_get_display(EGL_PLATFORM_GBM_MESA,
-                                                 glamor_egl->gbm);
-    if (!glamor_egl->display) {
-        xf86DrvMsg(scrn->scrnIndex, X_ERROR, "eglGetDisplay() failed\n");
-        goto error;
+    const char* gbm_backend = gbm_device_get_backend_name(glamor_egl->gbm);
+    if (gbm_backend && !strcmp(gbm_backend, "dumb")) {
+        glamor_egl->linear_only = TRUE;
     }
 
-    if (!eglInitialize(glamor_egl->display, NULL, NULL)) {
-        xf86DrvMsg(scrn->scrnIndex, X_ERROR, "eglInitialize() failed\n");
-        glamor_egl->display = EGL_NO_DISPLAY;
+    if (!glamor_egl_init_display(glamor_egl, scrn->scrnIndex)) {
         goto error;
     }
 
@@ -1388,9 +1649,43 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
 
     glamor_egl->saved_free_screen = scrn->FreeScreen;
     scrn->FreeScreen = glamor_egl_free_screen;
+
+    /* Check if at least one combination of format + modifier is supported */
+    CARD32 *formats = NULL;
+    CARD32 num_formats = 0;
+    Bool found = FALSE;
+    if (!glamor_get_formats_internal(glamor_egl, &num_formats, &formats)) {
+        goto error;
+    }
+
+    if (num_formats == 0) {
+        return TRUE;
+    }
+
+    for (uint32_t i = 0; i < num_formats; i++) {
+        uint64_t *modifiers = NULL;
+        uint32_t num_modifiers = 0;
+        if (glamor_get_modifiers_internal(glamor_egl, formats[i],
+                                          &num_modifiers, &modifiers)) {
+            found = TRUE;
+            free(modifiers);
+            break;
+        }
+    }
+    free(formats);
+
+    if (!found) {
+        xf86DrvMsg(scrn->scrnIndex, X_ERROR,
+                   "glamor: No combination of format + modifier is supported\n");
+        goto error;
+    }
+
     return TRUE;
 
 error:
+    if (glamor_egl->saved_free_screen) {
+        scrn->FreeScreen = glamor_egl->saved_free_screen;
+    }
     glamor_egl_cleanup(glamor_egl);
     return FALSE;
 }
