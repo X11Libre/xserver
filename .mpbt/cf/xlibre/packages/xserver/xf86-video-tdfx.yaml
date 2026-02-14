@@ -1,6 +1,6 @@
 sources:
     git:
-        url:    ${@SOLUTION::xlibre_git}/xf86-video-tdfx.git
+        url:    ${@SOLUTION::xlibre_git}/${@basename}.git
         ref:    ${ref}
         depth:  1
         fetch:
