@@ -781,21 +781,20 @@ glamor_pixmap_from_fd(ScreenPtr screen,
     return pixmap;
 }
 
-Bool
-glamor_get_formats(ScreenPtr screen,
-                   CARD32 *num_formats, CARD32 **formats)
+static Bool
+glamor_get_formats_internal(struct glamor_egl_screen_private *glamor_egl,
+                            CARD32 *num_formats, CARD32 **formats)
 {
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    struct glamor_egl_screen_private *glamor_egl;
     EGLint num;
+#else
+    (void)glamor_egl;
 #endif
 
     /* Explicitly zero the count and formats as the caller may ignore the return value */
     *num_formats = 0;
     *formats = NULL;
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
-
     if (!glamor_egl->dmabuf_capable)
         return TRUE;
 
@@ -819,6 +818,15 @@ glamor_get_formats(ScreenPtr screen,
     *num_formats = num;
 #endif
     return TRUE;
+}
+
+Bool
+glamor_get_formats(ScreenPtr screen,
+                   CARD32 *num_formats, CARD32 **formats)
+{
+    struct glamor_egl_screen_private *glamor_egl;
+    glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
+    return glamor_get_formats_internal(glamor_egl, num_formats, formats);
 }
 
 static void
@@ -846,22 +854,21 @@ glamor_filter_modifiers(uint32_t *num_modifiers, uint64_t **modifiers,
     }
 }
 
-Bool
-glamor_get_modifiers(ScreenPtr screen, uint32_t format,
-                     uint32_t *num_modifiers, uint64_t **modifiers)
+static Bool
+glamor_get_modifiers_internal(struct glamor_egl_screen_private *glamor_egl, uint32_t format,
+                              uint32_t *num_modifiers, uint64_t **modifiers)
 {
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    struct glamor_egl_screen_private *glamor_egl;
     EGLBoolean *external_only;
     EGLint num;
+#else
+    (void)glamor_egl;
 #endif
 
     /* Explicitly zero the count and modifiers as the caller may ignore the return value */
     *num_modifiers = 0;
     *modifiers = NULL;
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
-    glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
-
     if (!glamor_egl->dmabuf_capable)
         return FALSE;
 
@@ -905,6 +912,15 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     }
 #endif
     return TRUE;
+}
+
+Bool
+glamor_get_modifiers(ScreenPtr screen, uint32_t format,
+                     uint32_t *num_modifiers, uint64_t **modifiers)
+{
+    struct glamor_egl_screen_private *glamor_egl;
+    glamor_egl = glamor_egl_get_screen_private(xf86ScreenToScrn(screen));
+    return glamor_get_modifiers_internal(glamor_egl, format, num_modifiers, modifiers);
 }
 
 const char *
@@ -1388,9 +1404,43 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
 
     glamor_egl->saved_free_screen = scrn->FreeScreen;
     scrn->FreeScreen = glamor_egl_free_screen;
+
+    /* Check if at least one combination of format + modifier is supported */
+    CARD32 *formats = NULL;
+    CARD32 num_formats = 0;
+    Bool found = FALSE;
+    if (!glamor_get_formats_internal(glamor_egl, &num_formats, &formats)) {
+        goto error;
+    }
+
+    if (num_formats == 0) {
+        return TRUE;
+    }
+
+    for (uint32_t i = 0; i < num_formats; i++) {
+        uint64_t *modifiers = NULL;
+        uint32_t num_modifiers = 0;
+        if (glamor_get_modifiers_internal(glamor_egl, formats[i],
+                                          &num_modifiers, &modifiers)) {
+            found = TRUE;
+            free(modifiers);
+            break;
+        }
+    }
+    free(formats);
+
+    if (!found) {
+        xf86DrvMsg(scrn->scrnIndex, X_ERROR,
+                   "glamor: No combination of format + modifier is supported\n");
+        goto error;
+    }
+
     return TRUE;
 
 error:
+    if (glamor_egl->saved_free_screen) {
+        scrn->FreeScreen = glamor_egl->saved_free_screen;
+    }
     glamor_egl_cleanup(glamor_egl);
     return FALSE;
 }
