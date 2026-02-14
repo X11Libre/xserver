@@ -44,6 +44,9 @@
 #include <dix-config.h>
 
 #include <stdbool.h>
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 #include "dix/resource_priv.h"
 #include "os/bug_priv.h"
@@ -146,6 +149,7 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
     WindowPtr pLayerWin;
     Bool anyMarked = FALSE;
     int status = Success;
+    CompClientWindowPtr ccw;
 
     if (pWin == cs->pOverlayWin) {
         return Success;
@@ -158,7 +162,7 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
      * Only one Manual update is allowed
      */
     if (cw && update == CompositeRedirectManual)
-        for (CompClientWindowPtr ccw = cw->clients; ccw; ccw = ccw->next)
+        for (ccw = cw->clients; ccw; ccw = ccw->next)
             if (ccw->update == CompositeRedirectManual)
                 return BadAccess;
 
@@ -167,7 +171,12 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
      * The client *could* allocate multiple, but while supported,
      * it is not expected to be common
      */
-    CompClientWindowPtr ccw = calloc(1, sizeof(CompClientWindowRec));
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        ccw = numa_alloc_interleaved(sizeof(CompClientWindowRec));
+    else
+#endif
+    ccw = calloc(1, sizeof(CompClientWindowRec));
     if (!ccw)
         return BadAlloc;
     ccw->id = FakeClientID(pClient->index);
@@ -176,8 +185,18 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
      * Now make sure there's a per-window structure to hang this from
      */
     if (!cw) {
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            cw = numa_alloc_interleaved(sizeof(CompWindowRec));
+        else
+#endif
         cw = calloc(1, sizeof(CompWindowRec));
         if (!cw) {
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                numa_free(ccw, sizeof(CompClientWindowRec));
+            else
+#endif
             free(ccw);
             return BadAlloc;
         }
@@ -186,8 +205,18 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
                                   DamageReportNonEmpty,
                                   FALSE, pWin->drawable.pScreen, pWin);
         if (!cw->damage) {
+#ifdef HAVE_NUMA
+            if (numa_available() != -1) {
+                numa_free(ccw, sizeof(CompClientWindowRec));
+                numa_free(cw, sizeof(CompWindowRec));
+            }
+            else {
+#endif
             free(ccw);
             free(cw);
+#ifdef HAVE_NUMA
+            }
+#endif
             return BadAlloc;
         }
 
@@ -281,6 +310,11 @@ compFreeClientWindow(WindowPtr pWin, XID id)
             *prev = ccw->next;
             if (ccw->update == CompositeRedirectManual)
                 cw->update = CompositeRedirectAutomatic;
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                numa_free(ccw, sizeof(CompClientWindowRec));
+            else
+#endif
             free(ccw);
             break;
         }
@@ -299,6 +333,11 @@ compFreeClientWindow(WindowPtr pWin, XID id)
         RegionUninit(&cw->borderClip);
 
         dixSetPrivate(&pWin->devPrivates, CompWindowPrivateKey, NULL);
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(cw, sizeof(CompWindowRec));
+        else
+#endif
         free(cw);
     }
     else if (cw->update == CompositeRedirectAutomatic &&
@@ -350,12 +389,13 @@ int
 compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
 {
     CompSubwindowsPtr csw = GetCompSubwindows(pWin);
+    CompClientWindowPtr ccw;
 
     /*
      * Only one Manual update is allowed
      */
     if (csw && update == CompositeRedirectManual)
-        for (CompClientWindowPtr ccw = csw->clients; ccw; ccw = ccw->next)
+        for (ccw = csw->clients; ccw; ccw = ccw->next)
             if (ccw->update == CompositeRedirectManual)
                 return BadAccess;
     /*
@@ -363,7 +403,12 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
      * The client *could* allocate multiple, but while supported,
      * it is not expected to be common
      */
-    CompClientWindowPtr ccw = calloc(1, sizeof(CompClientWindowRec));
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        ccw = numa_alloc_interleaved(sizeof(CompClientWindowRec));
+    else
+#endif
+    ccw = calloc(1, sizeof(CompClientWindowRec));
     if (!ccw)
         return BadAlloc;
     ccw->id = FakeClientID(pClient->index);
@@ -372,8 +417,18 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
      * Now make sure there's a per-window structure to hang this from
      */
     if (!csw) {
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            csw = numa_alloc_interleaved(sizeof(CompSubwindowsRec));
+        else
+#endif
         csw = calloc(1, sizeof(CompSubwindowsRec));
         if (!csw) {
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                numa_free(ccw, sizeof(CompClientWindowRec));
+            else
+#endif
             free(ccw);
             return BadAlloc;
         }
@@ -391,9 +446,19 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
             for (WindowPtr pSib = pChild->nextSib; pSib; pSib = pSib->nextSib)
                 (void) compUnredirectWindow(pClient, pSib, update);
             if (!csw->clients) {
+#ifdef HAVE_NUMA
+                if (numa_available() != -1)
+                    numa_free(csw, sizeof(CompSubwindowsRec));
+                else
+#endif
                 free(csw);
                 dixSetPrivate(&pWin->devPrivates, CompSubwindowsPrivateKey, 0);
             }
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                numa_free(ccw, sizeof(CompClientWindowRec));
+            else
+#endif
             free(ccw);
             return ret;
         }
@@ -454,6 +519,11 @@ compFreeClientSubwindows(WindowPtr pWin, XID id)
                     pChild; pChild = pChild->prevSib)
                 (void) compUnredirectWindow(pClient, pChild, ccw->update);
 
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                numa_free(ccw, sizeof(CompClientWindowRec));
+            else
+#endif
             free(ccw);
             break;
         }
@@ -464,6 +534,11 @@ compFreeClientSubwindows(WindowPtr pWin, XID id)
      */
     if (!csw->clients) {
         dixSetPrivate(&pWin->devPrivates, CompSubwindowsPrivateKey, NULL);
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(csw, sizeof(CompSubwindowsRec));
+        else
+#endif
         free(csw);
     }
 }

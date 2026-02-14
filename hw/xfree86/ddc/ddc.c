@@ -13,6 +13,9 @@
 
 #include "include/xf86DDC.h"
 #include "os/osdep.h"
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 #include "misc.h"
 #include "xf86.h"
@@ -97,13 +100,19 @@ resort(unsigned char *s_block)
 {
     unsigned char *d_ptr, *d_end, *s_ptr, *s_end;
     unsigned char tmp;
+    unsigned char *d_new;
 
     s_ptr = find_header(s_block);
     if (!s_ptr)
         return NULL;
     s_end = s_block + EDID1_LEN;
 
-    unsigned char *d_new = calloc(1, EDID1_LEN);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        d_new = numa_alloc_interleaved(EDID1_LEN);
+    else
+#endif
+    d_new = calloc(1, EDID1_LEN);
     if (!d_new)
         return NULL;
     d_end = d_new + EDID1_LEN;
@@ -156,6 +165,11 @@ GetEDID_DDC1(unsigned int *s_ptr)
         return NULL;
     s_end = s_ptr + NUM;
     s_pos = s_ptr + s_start;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        d_block = numa_alloc_interleaved(EDID1_LEN);
+    else
+#endif
     d_block = calloc(1, EDID1_LEN);
     if (!d_block)
         return NULL;
@@ -191,7 +205,13 @@ FetchEDID_DDC1(register ScrnInfoPtr pScrn,
     int count = NUM;
     unsigned int *ptr, *xp;
 
-    ptr = xp = calloc(NUM, sizeof(int));
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        ptr = numa_alloc_interleaved(NUM * sizeof(int));
+    else
+#endif
+    ptr = calloc(NUM, sizeof(int));
+    xp = ptr;
 
     if (!ptr)
         return NULL;
@@ -276,6 +296,11 @@ xf86DoEDID_DDC1(ScrnInfoPtr pScrn, DDC1SetSpeedProc DDC1SetSpeed,
     Bool noddc = FALSE, noddc1 = FALSE;
     OptionInfoPtr options;
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        options = numa_alloc_interleaved(sizeof(DDCOptions));
+    else
+#endif
     options = XNFalloc(sizeof(DDCOptions));
     (void) memcpy(options, DDCOptions, sizeof(DDCOptions));
     xf86ProcessOptions(pScrn->scrnIndex, pScrn->options, options);
@@ -418,7 +443,13 @@ xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool complete)
 
     /* Default DDC and DDC2 to enabled. */
     Bool noddc = FALSE, noddc2 = FALSE;
-    OptionInfoPtr options = calloc(1, sizeof(DDCOptions));
+    OptionInfoPtr options;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        options = numa_alloc_interleaved(sizeof(DDCOptions));
+    else
+#endif
+    options = calloc(1, sizeof(DDCOptions));
     if (!options)
         return NULL;
     memcpy(options, DDCOptions, sizeof(DDCOptions));
@@ -434,6 +465,11 @@ xf86DoEEDID(ScrnInfoPtr pScrn, I2CBusPtr pBus, Bool complete)
     if (!(dev = DDC2Init(pBus)))
         return NULL;
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        EDID_block = numa_alloc_interleaved(EDID1_LEN);
+    else
+#endif
     EDID_block = calloc(1, EDID1_LEN);
     if (!EDID_block)
         return NULL;

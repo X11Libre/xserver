@@ -43,6 +43,9 @@
 #include "xf86Parser.h"
 #include "xf86platformBus_priv.h"
 #include "optionstr.h"
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 static Bool ParseOptionValue(int scrnIndex, XF86OptionPtr options,
                              OptionInfoPtr p, Bool markUsed);
@@ -843,11 +846,17 @@ xf86NormalizeName(const char *s)
 {
     char *q;
     const char *p;
+    char *ret;
 
     if (s == NULL)
         return NULL;
 
-    char *ret = calloc(1, strlen(s) + 1);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        ret = numa_alloc_interleaved(strlen(s) + 1);
+    else
+#endif
+    ret = calloc(1, strlen(s) + 1);
     if (!ret)
         return NULL;
     for (p = s, q = ret; *p != 0; p++) {
