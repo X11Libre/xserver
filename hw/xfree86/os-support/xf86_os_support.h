@@ -8,6 +8,7 @@
 #ifndef _XSERVER_XF86_OS_SUPPORT
 #define _XSERVER_XF86_OS_SUPPORT
 
+#include <stdbool.h>
 #include <X11/Xdefs.h>
 
 #include "os.h"
@@ -38,7 +39,7 @@ Bool xf86VTKeepTtyIsSet(void);
 
 Bool xf86VTActivate(int vtno);
 Bool xf86VTSwitchPending(void);
-Bool xf86VTSwitchAway(void);
+bool xf86VTSwitchAway(void);
 Bool xf86VTSwitchTo(void);
 void xf86VTRequest(int sig);
 int xf86ProcessArgument(int argc, char **argv, int i);
