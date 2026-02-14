@@ -437,7 +437,7 @@ jobs:
               run:  sudo apt-get install golang-go
 
             - name: install mpbt package
-              run: go install github.com/metux/mpbt/cmd/mpbt-builder@latest
+              run: go install github.com/metux/mpbt/cmd/mpbt-builder@v0.1.1
 
             - name: build driver ${{ matrix.package }}
               run: |
