@@ -3,6 +3,6 @@
 ~/go/bin/mpbt-builder \
     -root . \
     -solution .mpbt/cf/xlibre/solutions/github-drivers.yaml \
-    -solution-define build=xserver/xf86-input-evdev \
+    -solution-define build=xserver/xf86-input-elographics \
     -workdir _WORK_ \
     build

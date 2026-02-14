@@ -1,11 +1,11 @@
 sources:
     git:
-        url:    ${@SOLUTION::xlibre_git}/xf86-input-elographics.git
+        url:    ${@SOLUTION::xlibre_git}/${@basename}.git
         ref:    ${ref}
         depth:  1
         fetch:
           - refs/heads/*:refs/remotes/origin/*
-          - refs/tags/*:refs/tags/*
+          - refs/tags/xlibre-${@basename}-*:refs/tags/xlibre-${@basename}-*
 
 buildsystem: autotools
 

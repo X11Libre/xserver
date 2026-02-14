@@ -5,7 +5,7 @@ sources:
         depth:  1
         fetch:
           - refs/heads/*:refs/remotes/origin/*
-          - refs/tags/*:refs/tags/*
+          - refs/tags/xlibre-${@basename}-*:refs/tags/xlibre-${@basename}-*
 
 buildsystem: autotools
 
