@@ -366,3 +366,83 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   tag: ${{ github.ref_name }}
               run: .github/scripts/github/make-release
+
+    xserver-and-drivers-mpbt:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                package:
+                    - xserver/xf86-input-elographics
+                    - xserver/xf86-input-evdev
+                    - xserver/xf86-input-joystick
+                    - xserver/xf86-input-keyboard
+                    - xserver/xf86-input-libinput
+                    - xserver/xf86-input-mouse
+                    - xserver/xf86-input-synaptics
+                    - xserver/xf86-input-vmmouse
+                    - xserver/xf86-input-void
+                    - xserver/xf86-input-wacom
+                    - xserver/xf86-video-amdgpu
+                    - xserver/xf86-video-apm
+                    - xserver/xf86-video-ark
+                    - xserver/xf86-video-ast
+                    - xserver/xf86-video-ati
+                    - xserver/xf86-video-chips
+                    - xserver/xf86-video-cirrus
+                    - xserver/xf86-video-dummy
+                    - xserver/xf86-video-fbdev
+                    - xserver/xf86-video-freedreno
+                    - xserver/xf86-video-geode
+                    - xserver/xf86-video-i128
+                    - xserver/xf86-video-i740
+                    - xserver/xf86-video-intel
+                    - xserver/xf86-video-mach64
+                    - xserver/xf86-video-mga
+                    - xserver/xf86-video-neomagic
+                    - xserver/xf86-video-nested
+                    - xserver/xf86-video-nouveau
+                    - xserver/xf86-video-nv
+                    - xserver/xf86-video-omap
+                    - xserver/xf86-video-qxl
+                    - xserver/xf86-video-r128
+                    - xserver/xf86-video-rendition
+                    - xserver/xf86-video-s3virge
+                    - xserver/xf86-video-savage
+                    - xserver/xf86-video-siliconmotion
+                    - xserver/xf86-video-sisusb
+                    - xserver/xf86-video-sis
+                    - xserver/xf86-video-suncg14
+                    - xserver/xf86-video-suncg3
+                    - xserver/xf86-video-suncg6
+                    - xserver/xf86-video-sunffb
+                    - xserver/xf86-video-sunleo
+                    - xserver/xf86-video-suntcx
+                    - xserver/xf86-video-tdfx
+                    - xserver/xf86-video-trident
+                    - xserver/xf86-video-v4l
+                    - xserver/xf86-video-vbox
+                    - xserver/xf86-video-vesa
+                    - xserver/xf86-video-vmware
+                    - xserver/xf86-video-voodoo
+                    - xserver/xf86-video-xgi
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: install golang
+              run:  sudo apt-get install golang-go
+
+            - name: install mpbt package
+              run: go install github.com/metux/mpbt/cmd/mpbt-builder@latest
+
+            - name: build driver ${{ matrix.package }}
+              run: |
+                    pwd
+                    ~/go/bin/mpbt-builder \
+                        -root . \
+                        -solution .mpbt/cf/xlibre/solutions/github-drivers.yaml \
+                        -solution-define build=${{ matrix.package }} \
+                        build

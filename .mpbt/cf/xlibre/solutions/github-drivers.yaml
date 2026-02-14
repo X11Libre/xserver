@@ -1,0 +1,175 @@
+# needed by several sources
+xlibre_git:     https://github.com/X11Libre
+
+install-prefix: ${@PROJECT::@homedir}/.usr/xlibre
+
+# tell which actual packages for resolving `provides`
+package-mapping:
+    x11/font-util:        os-installed/font-util
+    sys/libdrm:           3rdparty/libdrm
+    x11/libxcb:           os-installed/libxcb
+    x11/libxcb-util:      os-installed/libxcb-util
+    x11/libxcb-wm:        os-installed/libxcb-wm
+    x11/libxcvt:          os-installed/libxcvt
+    x11/libx11:           os-installed/libx11
+    x11/util-macros:      3rdparty/util-macros
+    x11/xcb-proto:        3rdparty/xcb-proto
+    x11/xfree86-type1:    os-installed/xfree86-type1
+    x11/xorgproto:        3rdparty/xorgproto
+    x11/xkbcomp:          os-installed/xkbcomp
+
+# per package configuration
+package-config:
+    # minimal xserver build, just enough to compile drivers
+    # 2do: we should have a SDK-only build that's just installing headers
+    xserver/xlibre-xserver:
+        meson-extra-args:
+            - -Dc_args="-fno-common"
+            - -Dxephyr=false
+            - -Dxnest=false
+            - -Dxvfb=false
+            - -Dxorg=false
+            - -Dxorg-sdk=true
+            - -Dglamor=true
+            - -Dxselinux=false
+            - -Dxf86bigfont=false
+            - -Dxcsecurity=false
+            - -Dxfbdev=false
+            - -Dxdmcp=false
+            - -Dxdm-auth-1=false
+            - -Dipv6=false
+            - -Dsuid_wrapper=false
+            - -Dsystemd_notify=false
+            - -Dsystemd_logind=false
+            - -Dseatd_libseat=false
+            - -Dscreensaver=false
+            - -Dxres=false
+            - -Dnamespace=false
+            - -Dxcsecurity=false
+            - -Dmitshm=false
+            - -Dxf86-input-inputtest=false
+            - -Ddri2=true
+            - -Ddri3=true
+
+    3rdparty/libdrm:
+        meson-extra-args:
+            - -Domap=enabled
+            - -Dfreedreno=enabled
+    3rdparty/xcb-proto:
+        ref: xcb-proto-1.17.0
+
+    xserver/xf86-input-elographics:
+        ref: xlibre-xf86-input-elographics-25.0.0
+    xserver/xf86-input-evdev:
+        ref: xlibre-xf86-input-evdev-25.0.0
+    xserver/xf86-input-joystick:
+        ref: xlibre-xf86-input-joystick-25.0.0
+    xserver/xf86-input-keyboard:
+        ref: xlibre-xf86-input-keyboard-25.0.0
+    xserver/xf86-input-libinput:
+        ref: xlibre-xf86-input-libinput-25.0.0
+    xserver/xf86-input-mouse:
+        ref: xlibre-xf86-input-mouse-25.0.0
+    xserver/xf86-input-synaptics:
+        ref: xlibre-xf86-input-synaptics-25.0.0
+    xserver/xf86-input-vmmouse:
+        ref: xlibre-xf86-input-vmmouse-25.0.0
+    xserver/xf86-input-void:
+        ref: xlibre-xf86-input-void-25.0.0
+    xserver/xf86-input-wacom:
+        ref: xlibre-xf86-input-wacom-25.0.0
+
+    xserver/xf86-video-amdgpu:
+        ref: xlibre-xf86-video-amdgpu-25.0.0
+    xserver/xf86-video-apm:
+        ref: xlibre-xf86-video-apm-25.0.0
+    xserver/xf86-video-ark:
+        ref: xlibre-xf86-video-ark-25.0.0
+    xserver/xf86-video-ast:
+        ref: xlibre-xf86-video-ast-25.0.0
+    xserver/xf86-video-ati:
+        ref: xlibre-xf86-video-ati-25.0.0
+    xserver/xf86-video-chips:
+        ref: xlibre-xf86-video-chips-25.0.0
+    xserver/xf86-video-cirrus:
+        ref: xlibre-xf86-video-cirrus-25.0.0
+    xserver/xf86-video-dummy:
+        ref: xlibre-xf86-video-dummy-25.0.0
+    xserver/xf86-video-fbdev:
+        ref: xlibre-xf86-video-fbdev-25.0.0
+    xserver/xf86-video-freedreno:
+        ref: xlibre-xf86-video-freedreno-25.0.0
+    xserver/xf86-video-geode:
+        ref: xlibre-xf86-video-geode-25.0.0
+    xserver/xf86-video-i128:
+        ref: xlibre-xf86-video-i128-25.0.0
+    xserver/xf86-video-i740:
+        ref: xlibre-xf86-video-i740-25.0.0
+    xserver/xf86-video-intel:
+        ref: xlibre-xf86-video-intel-25.0.1
+    xserver/xf86-video-mach64:
+        ref: xlibre-xf86-video-mach64-25.0.0
+    xserver/xf86-video-mga:
+        ref: xlibre-xf86-video-mga-25.0.0
+    xserver/xf86-video-neomagic:
+        ref: xlibre-xf86-video-neomagic-25.0.0
+    xserver/xf86-video-nested:
+        ref: xlibre-xf86-video-nested-25.0.0
+    xserver/xf86-video-nouveau:
+        ref: xlibre-xf86-video-nouveau-25.0.0
+    xserver/xf86-video-nv:
+        ref: xlibre-xf86-video-nv-25.0.0
+    xserver/xf86-video-omap:
+        ref: xlibre-xf86-video-omap-25.0.0
+    xserver/xf86-video-qxl:
+        ref: xlibre-xf86-video-qxl-25.0.0
+    xserver/xf86-video-r128:
+        ref: xlibre-xf86-video-r128-25.0.0
+    xserver/xf86-video-rendition:
+        ref: xlibre-xf86-video-rendition-25.0.0
+    xserver/xf86-video-s3virge:
+        ref: xlibre-xf86-video-s3virge-25.0.0
+    xserver/xf86-video-savage:
+        ref: xlibre-xf86-video-savage-25.0.0
+    xserver/xf86-video-siliconmotion:
+        ref: xlibre-xf86-video-siliconmotion-25.0.0
+    xserver/xf86-video-sis:
+        ref: xlibre-xf86-video-sis-25.0.0
+    xserver/xf86-video-sisusb:
+        ref: xlibre-xf86-video-sisusb-25.0.0
+    xserver/xf86-video-suncg14:
+        ref: xlibre-xf86-video-suncg14-25.0.0
+    xserver/xf86-video-suncg3:
+        ref: xlibre-xf86-video-suncg3-25.0.0
+    xserver/xf86-video-suncg6:
+        ref: xlibre-xf86-video-suncg6-25.0.0
+    xserver/xf86-video-sunffb:
+        ref: xlibre-xf86-video-sunffb-25.0.0
+    xserver/xf86-video-sunleo:
+        ref: xlibre-xf86-video-sunleo-25.0.0
+    xserver/xf86-video-tdfx:
+        ref: xlibre-xf86-video-tdfx-25.0.0
+    xserver/xf86-video-trident:
+        ref: xlibre-xf86-video-trident-25.0.0
+    xserver/xf86-video-v4l:
+        ref: xlibre-xf86-video-v4l-25.0.1
+    xserver/xf86-video-vbox:
+        ref: xlibre-xf86-video-vbox-25.0.0
+    xserver/xf86-video-vesa:
+        ref: xlibre-xf86-video-vesa-25.0.0
+    xserver/xf86-video-vmware:
+        ref: xlibre-xf86-video-vmware-25.0.0
+    xserver/xf86-video-voodoo:
+        ref: xlibre-xf86-video-voodoo-25.0.0
+    xserver/xf86-video-xgi:
+        ref: xlibre-xf86-video-xgi-25.0.0
+
+# intentionally have no "build" section - caller needs to set it explicitly
+
+# extra environment variables
+env:
+    PKG_CONFIG_PATH: ${install-prefix}/share/pkgconfig:${install-prefix}/lib/pkgconfig:${install-prefix}/lib/${@PROJECT::@machine}/pkgconfig/
+    ACLOCAL_PATH: ${install-prefix}/share/aclocal
+
+packages:
+    - ${@PROJECT::@rootdir}/.mpbt/cf/xlibre/packages
