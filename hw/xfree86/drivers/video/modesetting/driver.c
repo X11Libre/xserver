@@ -1375,15 +1375,19 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
                "Atomic modesetting %sabled\n", ms->atomic_modeset ? "en" : "dis");
 
+    /* Atomic modesetting implicitly enables universal planes */
+    Bool cap_universal_planes = ms->atomic_modeset;
+    if (!cap_universal_planes) {
+        cap_universal_planes = !drmSetClientCap(ms->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
+    }
+
     /* TearFree requires glamor and, if PageFlip is enabled, universal planes */
     if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_TEARFREE, TRUE)) {
         if (pScrn->is_gpu) {
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                        "TearFree cannot synchronize PRIME; use 'PRIME Synchronization' instead\n");
         } else if (ms->drmmode.glamor) {
-            /* Atomic modesetting implicitly enables universal planes */
-            if (!ms->drmmode.pageflip || ms->atomic_modeset ||
-                !drmSetClientCap(ms->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1)) {
+            if (!ms->drmmode.pageflip || cap_universal_planes) {
                 ms->drmmode.tearfree_enable = TRUE;
                 xf86DrvMsg(pScrn->scrnIndex, X_INFO, "TearFree: enabled\n");
             } else {
@@ -1401,6 +1405,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     if (ret == 0 && value != 0)
         ms->kms_has_modifiers = TRUE;
 
+    /* Must be called after attempting to enable universal planes */
     if (drmmode_pre_init(pScrn, &ms->drmmode, pScrn->bitsPerPixel / 8) == FALSE) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "KMS setup failed\n");
         goto fail;
