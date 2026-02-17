@@ -88,7 +88,11 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
+<<<<<<< HEAD
                 key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/ubuntu/install-prereq.sh') }}
+=======
+                key: ${{ runner.name }}-x11-deps-mpbt
+>>>>>>> 9d5552caab (.github: ubuntu: build and test Xserver via MPBT)
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: build and test

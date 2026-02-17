@@ -20,7 +20,14 @@ export PIGLIT_DIR="$X11_BUILD_DIR/piglit"
 
 .github/scripts/ubuntu/install-prereq.sh
 
-.github/scripts/meson-build.sh
+go install github.com/metux/mpbt/cmd/mpbt-builder@v0.1.2
+
+~/go/bin/mpbt-builder \
+    -root . \
+    -solution .mpbt/cf/xlibre/solutions/github-ubuntu-xserver.yaml \
+    build
+
+( cd $X11_BUILD_DIR/xts && xvfb-run make tetexec.cfg )
 
 echo '[xts]' > $X11_BUILD_DIR/piglit/piglit.conf
 echo "path=$X11_BUILD_DIR/xts" >> $X11_BUILD_DIR/piglit/piglit.conf
