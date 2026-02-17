@@ -48,7 +48,7 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                key: ${{ runner.name }}-x11-deps-mpbt
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: build and test
