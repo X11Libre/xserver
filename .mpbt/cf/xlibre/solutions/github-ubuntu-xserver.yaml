@@ -1,0 +1,46 @@
+# needed by several sources
+xlibre_git:     https://github.com/X11Libre
+
+install-prefix: ${@PROJECT::@homedir}/.usr/xlibre
+
+# tell which actual packages for resolving `provides`
+package-mapping:
+    x11/font-util:        os-installed/font-util
+    sys/libdrm:           3rdparty/libdrm
+    x11/libxcb:           os-installed/libxcb
+    x11/libxcb-util:      os-installed/libxcb-util
+    x11/libxcb-wm:        os-installed/libxcb-wm
+    x11/libxcvt:          os-installed/libxcvt
+    x11/libx11:           os-installed/libx11
+    x11/util-macros:      3rdparty/util-macros
+    x11/xcb-proto:        3rdparty/xcb-proto
+    x11/xorgproto:        3rdparty/xorgproto
+
+package-config:
+    xserver/xlibre-xserver-local:
+        meson-extra-args:
+            - -Dxephyr=true
+            - -Dxnest=true
+            - -Dxvfb=true
+            - -Dxfbdev=true
+            - -Dxorg=true
+            - -Dxorg-sdk=true
+            - -Dsuid_wrapper=true
+            - -Dxf86-input-inputtest=true
+            - -Dtest_xephyr_gles=false
+
+    3rdparty/xcb-proto:
+        ref: xcb-proto-1.17.0
+
+build:
+    - 3rdparty/piglit
+    - 3rdparty/xts
+    - xserver/xlibre-xserver-local
+
+env:
+    PKG_CONFIG_PATH: ${install-prefix}/share/pkgconfig:${install-prefix}/lib/pkgconfig:${install-prefix}/lib/${@PROJECT::@machine}/pkgconfig/
+    ACLOCAL_PATH: ${install-prefix}/share/aclocal
+    ACLOCAL_FLAGS: -I ${install-prefix}/share/aclocal
+
+packages:
+    - ${@PROJECT::@rootdir}/.mpbt/cf/xlibre/packages
