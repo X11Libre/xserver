@@ -51,14 +51,8 @@ jobs:
                 key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
                 restore-keys: ${{ runner.name }}-x11-deps-
 
-            - name: generic prereq
-              run:  .github/scripts/install-prereq.sh
-
             - name: build and test
-              run:  .github/scripts/run-xserver-build-and-test.sh
-              env:
-                  XTEST_DIR:  ${{ env.X11_BUILD_DIR }}/xts
-                  PIGLIT_DIR: ${{ env.X11_BUILD_DIR }}/piglit
+              run:  .github/scripts/ubuntu/run-xserver-build-and-test.sh
 
             - name: archive build logs
               uses: actions/upload-artifact@v4
@@ -67,11 +61,6 @@ jobs:
                   path: |
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
-
-            - name: ddx build check
-              run:  .github/scripts/check-ddx-build.sh
-            - name: manpage check
-              run:  .github/scripts/manpages-check
 
     drivers-build-ubuntu:
         env:
