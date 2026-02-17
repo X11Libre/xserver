@@ -4,7 +4,7 @@ permissions:
     contents: write
 
 env:
-    MESON_BUILDDIR:  "build"
+    MESON_BUILDDIR:  "__BUILD"
     X11_PREFIX:      /home/runner/x11
     X11_BUILD_DIR:   /home/runner/build-deps
 
@@ -68,8 +68,8 @@ jobs:
               with:
                   name: build-logs
                   path: |
-                      build/meson-logs/*
-                      build/test/piglit-results/*
+                      __BUILD/meson-logs/*
+                      __BUILD/test/piglit-results/*
 
             - name: ddx build check
               run:  .github/scripts/check-ddx-build.sh
@@ -221,8 +221,8 @@ jobs:
               with:
                   name: build-logs-macos
                   path: |
-                      build/meson-logs/*
-                      build/test/piglit-results/*
+                      __BUILD/meson-logs/*
+                      __BUILD/test/piglit-results/*
 
             - name: ddx build check
               run:  .github/scripts/check-ddx-build.sh
