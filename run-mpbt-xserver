@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+#~/go/bin/mpbt-builder \
+#    -root . \
+#    -solution .mpbt/cf/xlibre/solutions/github-xserver.yaml \
+#    -workdir _WORK_ \
+#    build
+
+./.github/scripts/run-xserver-test.sh
