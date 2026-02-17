@@ -6,7 +6,7 @@ permissions:
 env:
     MESON_BUILDDIR:  "__BUILD"
     X11_PREFIX:      /home/runner/x11
-    X11_BUILD_DIR:   /home/runner/build-deps
+    X11_BUILD_DIR:   /home/runner/work/xserver/xserver/WORK/sources/3rdparty
 
 on:
     push:
