@@ -18,6 +18,3 @@ build_meson   xorgproto         $(fdo_mirror xorgproto)                    xorgp
 build_ac_xts  xts               $(fdo_mirror xts)                          6cf94400a09abecd6b86e4eb6441741acecd51f6
 
 clone_source piglit             $(fdo_mirror piglit)                       59111996534f875ca88bce51f21fa2e6564895da
-
-echo '[xts]' > piglit/piglit.conf
-echo "path=$X11_BUILD_DIR/xts" >> piglit/piglit.conf

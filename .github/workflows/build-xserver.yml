@@ -54,11 +54,8 @@ jobs:
             - name: generic prereq
               run:  .github/scripts/install-prereq.sh
 
-            - name: build
-              run:  .github/scripts/meson-build.sh
-
-            - name: tests
-              run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs
+            - name: build and test
+              run:  .github/scripts/run-xserver-build-and-test.sh
               env:
                   XTEST_DIR:  ${{ env.X11_BUILD_DIR }}/xts
                   PIGLIT_DIR: ${{ env.X11_BUILD_DIR }}/piglit
