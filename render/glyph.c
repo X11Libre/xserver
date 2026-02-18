@@ -27,6 +27,9 @@
 #include "dix/screenint_priv.h"
 #include "os/bug_priv.h"
 #include "os/xsha1.h"
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 #include "misc.h"
 #include "scrnintstr.h"
@@ -342,10 +345,16 @@ AllocateGlyph(xGlyphInfo * gi, int fdepth)
 {
     int size;
     int head_size;
+    GlyphPtr glyph;
 
     head_size = sizeof(GlyphRec) + screenInfo.numScreens * sizeof(PicturePtr);
     size = (head_size + dixPrivatesSize(PRIVATE_GLYPH));
-    GlyphPtr glyph = calloc(1, size);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        glyph = numa_alloc_interleaved(size);
+    else
+#endif
+    glyph = calloc(1, size);
     if (!glyph)
         return 0;
     glyph->refcnt = 1;
@@ -383,6 +392,11 @@ static Bool
 AllocateGlyphHash(GlyphHashPtr hash, GlyphHashSetPtr hashSet)
 {
     assert(hashSet);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        hash->table = numa_alloc_interleaved(hashSet->size * sizeof(GlyphRefRec));
+    else
+#endif
     hash->table = calloc(hashSet->size, sizeof(GlyphRefRec));
     if (!hash->table)
         return FALSE;
@@ -424,6 +438,11 @@ ResizeGlyphHash(GlyphHashPtr hash, CARD32 change, Bool global)
                 ++newHash.tableEntries;
             }
         }
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(hash->table, oldSize * sizeof(GlyphRefRec));
+        else
+#endif
         free(hash->table);
     }
     *hash = newHash;
@@ -479,12 +498,22 @@ FreeGlyphSet(void *value, XID gid)
                 FreeGlyph(glyph, glyphSet->fdepth);
         }
         if (!globalGlyphs[glyphSet->fdepth].tableEntries) {
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                numa_free(globalGlyphs[glyphSet->fdepth].table, globalGlyphs[glyphSet->fdepth].hashSet->size * sizeof(GlyphRefRec));
+            else
+#endif
             free(globalGlyphs[glyphSet->fdepth].table);
             globalGlyphs[glyphSet->fdepth].table = 0;
             globalGlyphs[glyphSet->fdepth].hashSet = 0;
         }
         else
             ResizeGlyphHash(&globalGlyphs[glyphSet->fdepth], 0, TRUE);
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(table, tableSize * sizeof(GlyphRefRec));
+        else
+#endif
         free(table);
         dixFreeObjectWithPrivates(glyphSet, PRIVATE_GLYPHSET);
     }

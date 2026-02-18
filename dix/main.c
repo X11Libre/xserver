@@ -153,6 +153,7 @@ dix_main(int argc, char *argv[], char *envp[])
         InitBlockAndWakeupHandlers();
         /* Perform any operating system dependent initializations you'd like */
         OsInit();
+        OsNumaInit();
 
             CreateWellKnownSockets();
             for (int i = 1; i < LimitClients; i++)

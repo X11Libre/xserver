@@ -35,6 +35,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 #include "dix/screen_hooks_priv.h"
 #include "os/bug_priv.h"
@@ -649,6 +652,11 @@ glamor_init(ScreenPtr screen, unsigned int flags)
         ErrorF("glamor_init: Invalid flags %x\n", flags);
         return FALSE;
     }
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        glamor_priv = numa_alloc_interleaved(sizeof(*glamor_priv));
+    else
+#endif
     glamor_priv = calloc(1, sizeof(*glamor_priv));
     if (glamor_priv == NULL)
         return FALSE;
@@ -909,6 +917,11 @@ glamor_init(ScreenPtr screen, unsigned int flags)
     return TRUE;
 
 fail:
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        numa_free(glamor_priv, sizeof(*glamor_priv));
+    else
+#endif
     free(glamor_priv);
     glamor_set_screen_private(screen, NULL);
     return FALSE;
@@ -922,6 +935,11 @@ glamor_release_screen_priv(ScreenPtr screen)
     glamor_priv = glamor_get_screen_private(screen);
     glamor_fini_vbo(screen);
     glamor_pixmap_fini(screen);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        numa_free(glamor_priv, sizeof(*glamor_priv));
+    else
+#endif
     free(glamor_priv);
 
     glamor_set_screen_private(screen, NULL);

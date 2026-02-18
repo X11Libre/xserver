@@ -146,6 +146,17 @@ sig_atomic_t inSignalContext = FALSE;
 static clockid_t clockid;
 #endif
 
+void
+OsNumaInit(void)
+{
+#ifdef HAVE_NUMA
+    if (numa_available() != -1) {
+        numa_set_interleave_mask(numa_all_nodes_ptr);
+        numa_set_localalloc();
+    }
+#endif
+}
+
 OsSigHandlerPtr
 OsSignal(int sig, OsSigHandlerPtr handler)
 {

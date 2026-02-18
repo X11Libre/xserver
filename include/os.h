@@ -190,6 +190,8 @@ Xstrdup(const char *s);
 extern _X_EXPORT char *
 XNFstrdup(const char *s);
 
+extern _X_EXPORT void Xfree(void *ptr);
+
 /* Include new X*asprintf API */
 #include "Xprintf.h"
 

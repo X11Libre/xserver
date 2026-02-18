@@ -28,6 +28,9 @@
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
 #include "os/osdep.h"
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 #include "misc.h"
 #include "scrnintstr.h"
@@ -87,8 +90,18 @@ static void PictureScreenClose(CallbackListPtr *pcbl, ScreenPtr pScreen, void *u
             (*ps->CloseIndexed) (pScreen, &ps->formats[n]);
     GlyphUninit(pScreen);
     SetPictureScreen(pScreen, 0);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1) {
+        numa_free(ps->formats, ps->nformats * sizeof(PictFormatRec));
+        numa_free(ps, sizeof(PictureScreenRec));
+    }
+    else {
+#endif
     free(ps->formats);
     free(ps);
+#ifdef HAVE_NUMA
+    }
+#endif
     dixScreenUnhookPostClose(pScreen, PictureScreenClose);
 }
 
@@ -284,6 +297,11 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
         }
     }
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        pFormats = numa_alloc_interleaved(nformats * sizeof(PictFormatRec));
+    else
+#endif
     pFormats = calloc(nformats, sizeof(PictFormatRec));
     if (!pFormats)
         return 0;
@@ -634,6 +652,11 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
             int i;
             for (i = 0; i < n; i++)
                 FreeResource(formats[i].id, X11_RESTYPE_NONE);
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                numa_free(formats, nformats * sizeof(PictFormatRec));
+            else
+#endif
             free(formats);
             return FALSE;
         }
@@ -663,8 +686,19 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
         }
         formats[n].format = PIXMAN_FORMAT(0, type, a, r, g, b);
     }
-    PictureScreenPtr ps = calloc(1, sizeof(PictureScreenRec));
+    PictureScreenPtr ps;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        ps = numa_alloc_interleaved(sizeof(PictureScreenRec));
+    else
+#endif
+    ps = calloc(1, sizeof(PictureScreenRec));
     if (!ps) {
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(formats, nformats * sizeof(PictFormatRec));
+        else
+#endif
         free(formats);
         return FALSE;
     }
@@ -690,8 +724,18 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
     if (!PictureSetDefaultFilters(pScreen)) {
         PictureResetFilters(pScreen);
         SetPictureScreen(pScreen, 0);
+#ifdef HAVE_NUMA
+        if (numa_available() != -1) {
+            numa_free(formats, nformats * sizeof(PictFormatRec));
+            numa_free(ps, sizeof(PictureScreenRec));
+        }
+        else {
+#endif
         free(formats);
         free(ps);
+#ifdef HAVE_NUMA
+        }
+#endif
         return FALSE;
     }
 
@@ -813,6 +857,11 @@ initGradient(SourcePictPtr pGradient, int stopCount,
         dpos = stopPoints[i];
     }
 
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        pGradient->gradient.stops = numa_alloc_interleaved(stopCount * sizeof(PictGradientStop));
+    else
+#endif
     pGradient->gradient.stops = calloc(stopCount, sizeof(PictGradientStop));
     if (!pGradient->gradient.stops) {
         *error = BadAlloc;
@@ -858,6 +907,11 @@ CreateSolidPicture(Picture pid, xRenderColor * color, int *error)
     }
 
     pPicture->id = pid;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        pPicture->pSourcePict = numa_alloc_interleaved(sizeof(SourcePict));
+    else
+#endif
     pPicture->pSourcePict = calloc(1, sizeof(SourcePict));
     if (!pPicture->pSourcePict) {
         *error = BadAlloc;
@@ -889,6 +943,11 @@ CreateLinearGradientPicture(Picture pid, xPointFixed * p1, xPointFixed * p2,
     }
 
     pPicture->id = pid;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        pPicture->pSourcePict = numa_alloc_interleaved(sizeof(SourcePict));
+    else
+#endif
     pPicture->pSourcePict = calloc(1, sizeof(SourcePict));
     if (!pPicture->pSourcePict) {
         *error = BadAlloc;
@@ -929,6 +988,11 @@ CreateRadialGradientPicture(Picture pid, xPointFixed * inner,
     }
 
     pPicture->id = pid;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        pPicture->pSourcePict = numa_alloc_interleaved(sizeof(SourcePict));
+    else
+#endif
     pPicture->pSourcePict = calloc(1, sizeof(SourcePict));
     if (!pPicture->pSourcePict) {
         *error = BadAlloc;
@@ -972,6 +1036,11 @@ CreateConicalGradientPicture(Picture pid, xPointFixed * center, xFixed angle,
     }
 
     pPicture->id = pid;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        pPicture->pSourcePict = numa_alloc_interleaved(sizeof(SourcePict));
+    else
+#endif
     pPicture->pSourcePict = calloc(1, sizeof(SourcePict));
     if (!pPicture->pSourcePict) {
         *error = BadAlloc;
@@ -1323,6 +1392,11 @@ SetPictureTransform(PicturePtr pPicture, PictTransform * transform)
 
     if (transform) {
         if (!pPicture->transform) {
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                pPicture->transform = numa_alloc_interleaved(sizeof(PictTransform));
+            else
+#endif
             pPicture->transform = calloc(1, sizeof(PictTransform));
             if (!pPicture->transform)
                 return BadAlloc;
@@ -1330,6 +1404,11 @@ SetPictureTransform(PicturePtr pPicture, PictTransform * transform)
         *pPicture->transform = *transform;
     }
     else {
+#ifdef HAVE_NUMA
+        if (numa_available() != -1)
+            numa_free(pPicture->transform, sizeof(PictTransform));
+        else
+#endif
         free(pPicture->transform);
         pPicture->transform = NULL;
     }
@@ -1374,13 +1453,35 @@ FreePicture(void *value, XID pid)
     PicturePtr pPicture = (PicturePtr) value;
 
     if (--pPicture->refcnt == 0) {
+#ifdef HAVE_NUMA
+        if (numa_available() != -1) {
+            if (pPicture->transform)
+                numa_free(pPicture->transform, sizeof(PictTransform));
+            if (pPicture->filter_params)
+                numa_free(pPicture->filter_params, pPicture->filter_nparams * sizeof(xFixed));
+        }
+        else {
+#endif
         free(pPicture->transform);
         free(pPicture->filter_params);
+#ifdef HAVE_NUMA
+        }
+#endif
 
         if (pPicture->pSourcePict) {
             if (pPicture->pSourcePict->type != SourcePictTypeSolidFill)
+#ifdef HAVE_NUMA
+                if (numa_available() != -1)
+                    numa_free(pPicture->pSourcePict->linear.stops, pPicture->pSourcePict->linear.nstops * sizeof(PictGradientStop));
+                else
+#endif
                 free(pPicture->pSourcePict->linear.stops);
 
+#ifdef HAVE_NUMA
+            if (numa_available() != -1)
+                numa_free(pPicture->pSourcePict, sizeof(SourcePict));
+            else
+#endif
             free(pPicture->pSourcePict);
         }
 
