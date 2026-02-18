@@ -35,6 +35,14 @@
 #include <unistd.h>
 #include <X11/X.h>
 
+#ifdef WITH_LIBDRM
+#include <xf86drm.h>
+#endif
+
+#ifdef SEATD_LIBSEAT
+#include "seatd-libseat.h"
+#endif
+
 #include "config/hotplug_priv.h"
 #include "os/osdep.h"
 
@@ -659,6 +667,86 @@ xf86GetEntityPrivate(int entityIndex, int privIndex)
     return &(xf86Entities[entityIndex]->entityPrivates[privIndex]);
 }
 
+#if defined(XSERVER_LIBPCIACCESS) && defined(WITH_LIBDRM)
+static Bool
+getBusidFromDriPath(const char *path, struct pci_device *pd)
+{
+    int fd = open(path, O_RDWR | O_CLOEXEC, 0);
+    drmSetVersion sv;
+    Bool ret = FALSE;
+#ifdef SEATD_LIBSEAT
+    /* try to open dev node via libseat */
+    if (fd == -1) {
+        fd = seatd_libseat_open_graphics(path);
+    }
+#endif
+    if (fd == -1) {
+        LogMessageVerb(X_INFO, 1,
+            " Cannot open DRI path \"%s\".\n",
+            path);
+        return ret;
+    }
+
+    sv.drm_di_major = 1;
+    sv.drm_di_minor = 4;
+    sv.drm_dd_major = -1; /* Don't care */
+    sv.drm_dd_minor = -1; /* Don't care */
+
+    if (drmSetInterfaceVersion(fd, &sv)) {
+        sv.drm_di_major = 1;
+        sv.drm_di_minor = 1;
+        sv.drm_dd_major = -1; /* Don't care */
+        sv.drm_dd_minor = -1; /* Don't care */
+        ret = !drmSetInterfaceVersion(fd, &sv);
+    }
+    else ret = TRUE;
+
+    if (ret) {
+        char *id = drmGetBusid(fd);
+        if (id) {
+            char *c = id;
+            int dm, bs, dv, fn = 0;
+            ret = FALSE;
+            if (strncmp(id, "pci:", 4))
+                goto out;
+            else
+                c += 4;
+            if (!isdigit(*c))
+                goto out;
+            dm = atoi(c);       /* domain */
+            c = strchr(++c, ':');
+            if (c == NULL || !isdigit(*(++c)))
+                goto out;
+            bs = atoi(c);      /* bus */
+            c = strchr(++c, ':');
+            if (c == NULL || !isdigit(*(++c)))
+                goto out;
+            dv = atoi(c);      /* device */
+            c = strchr(++c, '.');
+            if (c != NULL && isdigit(*(++c)))
+                fn = atoi(c);  /* function */
+            pd->domain = (uint32_t)dm;
+            pd->bus    = (uint8_t)bs;
+            pd->dev    = (uint8_t)dv;
+            pd->func   = (uint8_t)fn;
+            ret = TRUE;
+          out:
+            if (!ret)
+                LogMessageVerb(X_INFO, 1,
+                    " Got bus id string \"%s\", unable to deduce PCI address.\n",
+                    id);
+            free(id);
+        }
+    } else {
+        LogMessageVerb(X_INFO, 1,
+            " Failed to set interface version.\n");
+    }
+
+    close(fd);
+    return ret;
+}
+#endif
+
 /*
  * Check if the slot requested is free.  If it is already in use, return FALSE.
  */
@@ -671,6 +759,9 @@ xf86CheckSlot(const void *ptr, BusType type)
 #ifdef XSERVER_LIBPCIACCESS
     const struct pci_device *pci_ptr = (type == BUS_PCI ?
              (const struct pci_device *)ptr : NULL);
+#ifdef WITH_LIBDRM
+    struct pci_device pci_fake;
+#endif
 #endif
 
 #ifdef XSERVER_PLATFORM_BUS
@@ -710,6 +801,16 @@ xf86CheckSlot(const void *ptr, BusType type)
                 /* Autoconfigured */
                 msPath = "/dev/dri/card0";
             }
+#if defined(XSERVER_LIBPCIACCESS) && defined(WITH_LIBDRM)
+            if (getBusidFromDriPath(msPath, &pci_fake)) {
+                    pci_ptr = &pci_fake;
+            } else {
+                LogMessageVerb(X_INFO, 1,
+                    "  Skipping PCI bus id check for DRI path \"%s\".\n",
+                    msPath);
+                /* return FALSE; */
+            }
+#endif
         }
         else
         if (!strcasecmp(fb_ptr->driver, "fbdev")) {
@@ -752,7 +853,7 @@ xf86CheckSlot(const void *ptr, BusType type)
             return FALSE;
         }
 
-#ifdef XSERVER_LIBPCIACCESS 
+#ifdef XSERVER_LIBPCIACCESS
         pci_other = xf86GetPciInfoForEntity(i);
         /* First compare PCI addresses */
         if (pci_ptr && pci_other) {
@@ -760,8 +861,8 @@ xf86CheckSlot(const void *ptr, BusType type)
             /* This PCI slot has been claimed, fail */
                 if (msPath) {
                     LogMessageVerb(X_INFO, 1,
-                        " Platform device \"%s\" skipped because\n",
-                        msPath);
+                        " %s device \"%s\" skipped because\n",
+                        type == BUS_NONE ? "Modesetting driven" : "Platform", msPath);
                 }
                 else {
                     LogMessageVerb(X_INFO, 1,
@@ -769,7 +870,7 @@ xf86CheckSlot(const void *ptr, BusType type)
                 }
                 LogMessageVerb(X_INFO, 1,
                     "  PCI bus id %u@%u:%u:%u has already been claimed by \"%s\".\n",
-                    pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func, 
+                    pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func,
                     pent->devices[0]->identifier);
                 return FALSE;
             }
@@ -823,6 +924,9 @@ xf86CheckSlot(const void *ptr, BusType type)
 #endif
         if (pent->bus.type == BUS_NONE) {
             if (!strcasecmp(pent->driver->driverName, "modesetting")) {
+#if defined(XSERVER_LIBPCIACCESS) && defined(WITH_LIBDRM)
+                struct pci_device pci_ms;
+#endif
                 /* Examine the first device only */
                 msOther = xf86FindOptionValue(pent->devices[0]->options, "kmsdev");
                 if (msOther == NULL)
@@ -831,17 +935,35 @@ xf86CheckSlot(const void *ptr, BusType type)
 #endif
                     /* Autoconfigured */
                     msOther = "/dev/dri/card0";
+#if defined(XSERVER_LIBPCIACCESS) && defined(WITH_LIBDRM)
+                if (pci_ptr &&
+                    getBusidFromDriPath(msOther, &pci_ms)) {
+                    if (MATCH_PCI_DEVICES(&pci_ms, pci_ptr)) {
+                    /* PCI bus id has been claimed already by modesetting */
+                        LogMessageVerb(X_INFO, 1,
+                            " Modesetting driven device \"%s\" with the required PCI bus id %u@%u:%u:%u has already been claimed by \"%s\".\n",
+                            msOther, pci_ms.domain, pci_ms.bus, pci_ms.dev, pci_ms.func,
+                            pent->devices[0]->identifier);
+                        return FALSE;
+                    }
+                    else
+                    /* This is another device, skip */
+                        continue;
+                }
+#endif
             }
         }
 
         if ((msPath != NULL) && (msOther != NULL) && !strcmp(msPath, msOther)) {
             /* This DRI device has been claimed already */
-                    LogMessageVerb(X_INFO, 1,
-                        " DRI device \"%s\" has already been claimed by \"%s\".\n",
-                        msPath, pent->devices[0]->identifier);
+            LogMessageVerb(X_INFO, 1,
+                " DRI device \"%s\" has already been claimed by \"%s\".\n",
+                msPath, pent->devices[0]->identifier);
             return FALSE;
         }
     }
+
+    /* No conflicts found, accept */
 
 #ifdef XSERVER_PLATFORM_BUS
     if (type == BUS_PLATFORM) {
