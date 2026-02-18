@@ -75,6 +75,7 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <string.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
@@ -120,7 +121,6 @@ Bool noXvExtension = FALSE;
 
 static x_server_generation_t XvExtensionGeneration = 0;
 static x_server_generation_t XvScreenGeneration = 0;
-static x_server_generation_t XvResourceGeneration = 0;
 
 int XvReqCode;
 static int XvEventBase;
@@ -203,14 +203,14 @@ XvExtensionInit(void)
     }
 }
 
+static bool resources_initialized = false;
+
+/* can be called from different angles */
 static Bool
 CreateResourceTypes(void)
 {
-
-    if (XvResourceGeneration == serverGeneration)
+    if (resources_initialized)
         return TRUE;
-
-    XvResourceGeneration = serverGeneration;
 
     if (!(XvRTPort = CreateNewResourceType(XvdiDestroyPort, "XvRTPort"))) {
         ErrorF("CreateResourceTypes: failed to allocate port resource.\n");
@@ -252,7 +252,6 @@ CreateResourceTypes(void)
     }
 
     return TRUE;
-
 }
 
 static void XvWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr pWin)
