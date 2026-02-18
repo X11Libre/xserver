@@ -1928,8 +1928,8 @@ CheckKeyExplicit(XkbDescPtr xkb,
 }
 
 static int
-CheckModifierMap(XkbDescPtr xkb, xkbSetMapReq * req, CARD8 **wireRtrn,
-                 int *errRtrn)
+CheckModifierMap(ClientPtr client, XkbDescPtr xkb, xkbSetMapReq * req,
+                 CARD8 **wireRtrn, int *errRtrn)
 {
     register CARD8 *wire = *wireRtrn;
     CARD8 *start;
@@ -1953,6 +1953,10 @@ CheckModifierMap(XkbDescPtr xkb, xkbSetMapReq * req, CARD8 **wireRtrn,
     }
     start = wire;
     for (i = 0; i < req->totalModMapKeys; i++, wire += 2) {
+        if (!_XkbCheckRequestBounds(client, req, wire, wire + 2)) {
+            *errRtrn = _XkbErrCode3(0x64, req->totalModMapKeys, i);
+            return 0;
+        }
         if ((wire[0] < first) || (wire[0] > last)) {
             *errRtrn = _XkbErrCode4(0x63, first, last, wire[0]);
             return 0;
@@ -2553,7 +2557,7 @@ _XkbSetMapChecks(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req,
         return BadValue;
     }
     if ((req->present & XkbModifierMapMask) &&
-        (!CheckModifierMap(xkb, req, (CARD8 **) &values, &error))) {
+        (!CheckModifierMap(client, xkb, req, (CARD8 **) &values, &error))) {
         client->errorValue = error;
         return BadValue;
     }
