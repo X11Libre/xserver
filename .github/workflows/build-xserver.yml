@@ -48,7 +48,7 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                key: ${{ runner.name }}-x11-deps-mpbt
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: build and test
@@ -61,57 +61,6 @@ jobs:
                   path: |
                       __BUILD/meson-logs/*
                       __BUILD/test/piglit-results/*
-
-    drivers-build-ubuntu:
-        env:
-            MESON_ARGS: -Dprefix=/usr -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
-        runs-on: ubuntu-latest
-        steps:
-            - name: Check out repository code
-              uses: actions/checkout@v4
-
-            - name: prepare build environment
-              run: |
-                MACHINE=`gcc -dumpmachine`
-                echo "MACHINE=$MACHINE" >> "$GITHUB_ENV"
-                echo "PKG_CONFIG_PATH=$X11_PREFIX/share/pkgconfig:$X11_PREFIX/lib/$MACHINE/pkgconfig:$X11_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
-                sudo chown root /bin/tar && sudo chmod u+s /bin/tar
-
-            - name: apt cache
-              uses: actions/cache@v4
-              with:
-                path: /var/cache/apt
-                key: apt-cache-${{ hashFiles('.github/scripts/ubuntu/install-pkg.sh') }}
-                restore-keys: apt-cache-
-
-            - name: pkg install
-              run:  sudo .github/scripts/ubuntu/install-pkg.sh
-
-            - name: X11 prereq cache
-              uses: actions/cache@v4
-              with:
-                path: |
-                    ${{ env.X11_PREFIX }}
-                    ${{ env.X11_BUILD_DIR }}/xts
-                    ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
-                restore-keys: ${{ runner.name }}-x11-deps-
-
-            - name: generic prereq
-              run:  .github/scripts/install-prereq-drivers.sh
-
-            - name: build xserver sdk
-              run:  |
-                echo -n > .meson_environment
-                echo "export MESON_BUILDDIR=$MESON_BUILDDIR" >> .meson_environment
-                echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> .meson_environment
-                .github/scripts/meson-build.sh --skip-test
-                sudo meson install --no-rebuild -C "$MESON_BUILDDIR"
-                sudo mkdir -p /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
-                sudo chown -R runner /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
-
-            - name: compile drivers
-              run: .github/scripts/compile-drivers.sh
 
     xserver-build-mingw32-ubuntu:
         runs-on: ubuntu-latest
@@ -336,7 +285,7 @@ jobs:
         if: ${{ startsWith(github.ref, 'refs/tags/xlibre-xserver-') }}
         needs:
             - xserver-build-ubuntu
-            - drivers-build-ubuntu
+            - xserver-and-drivers-mpbt
             - xserver-build-mingw32-ubuntu
             - xserver-build-macos
             - xserver-build-freebsd
@@ -352,3 +301,80 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   tag: ${{ github.ref_name }}
               run: .github/scripts/github/make-release
+
+    xserver-and-drivers-mpbt:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                package:
+                    - input-elographics
+                    - input-evdev
+                    - input-joystick
+                    - input-keyboard
+                    - input-libinput
+                    - input-mouse
+                    - input-synaptics
+                    - input-vmmouse
+                    - input-void
+                    - input-wacom
+                    - video-amdgpu
+                    - video-apm
+                    - video-ark
+                    - video-ast
+                    - video-ati
+                    - video-chips
+                    - video-cirrus
+                    - video-dummy
+                    - video-fbdev
+                    - video-freedreno
+                    - video-geode
+                    - video-i128
+                    - video-i740
+                    - video-intel
+                    - video-mach64
+                    - video-mga
+                    - video-neomagic
+                    - video-nested
+                    - video-nouveau
+                    - video-nv
+                    - video-omap
+                    - video-qxl
+                    - video-r128
+                    - video-rendition
+                    - video-s3virge
+                    - video-savage
+                    - video-siliconmotion
+                    - video-sisusb
+                    - video-sis
+                    - video-suncg14
+                    - video-suncg3
+                    - video-suncg6
+                    - video-sunffb
+                    - video-sunleo
+                    - video-suntcx
+                    - video-tdfx
+                    - video-trident
+                    - video-v4l
+                    - video-vbox
+                    - video-vesa
+                    - video-vmware
+                    - video-voodoo
+                    - video-xgi
+        name: Driver ${{ matrix.package }} (MPBT)
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: pkg install
+              run:  sudo .github/scripts/ubuntu/install-pkg.sh
+
+            - name: install mpbt package
+              run: go install github.com/metux/mpbt/cmd/mpbt-builder@v0.1.2
+
+            - name: build driver ${{ matrix.package }}
+              run: |
+                    ~/go/bin/mpbt-builder \
+                        -root . \
+                        -solution .mpbt/cf/xlibre/solutions/github-ubuntu-drivers.yaml \
+                        -solution-define build=xserver/xf86-${{ matrix.package }} \
+                        build

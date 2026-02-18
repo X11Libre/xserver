@@ -1,0 +1,12 @@
+provides: x11/xcb-proto
+type: bundle
+sources:
+    git:
+        url:    ${@SOLUTION::xlibre_git}/mirror.fdo.xcbproto.git
+        ref:    ${ref}
+        depth:  1
+        fetch:
+          - refs/tags/${ref}:refs/tags/${ref}
+buildsystem: autotools
+version: 1.17.0
+ref: ${@basename}-${version}

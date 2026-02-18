@@ -1,0 +1,2 @@
+provides: x11/libx11
+type: system
