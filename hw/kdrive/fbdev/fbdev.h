@@ -70,6 +70,7 @@ extern bool fbGlamorAllowed;
 extern bool fbForceGlamor;
 #ifdef XV
 extern bool fbXVAllowed;
+extern bool fbTearFree;
 #endif
 #endif
 

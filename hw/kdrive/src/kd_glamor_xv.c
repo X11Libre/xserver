@@ -103,7 +103,7 @@ kd_glamor_xv_put_image(KdScreenInfo *screen,
 }
 
 void
-kd_glamor_xv_init(ScreenPtr screen)
+kd_glamor_xv_init(ScreenPtr screen, PutImageFuncPtr PutImage)
 {
     KdVideoAdaptorRec *adaptor;
     glamor_port_private *port_privates;
@@ -155,7 +155,7 @@ kd_glamor_xv_init(ScreenPtr screen)
     adaptor->SetPortAttribute = kd_glamor_xv_set_port_attribute;
     adaptor->GetPortAttribute = kd_glamor_xv_get_port_attribute;
     adaptor->QueryBestSize = kd_glamor_xv_query_best_size;
-    adaptor->PutImage = kd_glamor_xv_put_image;
+    adaptor->PutImage = PutImage ? PutImage : kd_glamor_xv_put_image;
     adaptor->QueryImageAttributes = kd_glamor_xv_query_image_attributes;
 
     KdXVScreenInit(screen, adaptor, 1);

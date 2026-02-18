@@ -193,7 +193,7 @@ typedef struct _KdXVWindowRec {
 
 #ifdef GLAMOR
 /* Must not be called before glamor is fully initialized */
-void kd_glamor_xv_init(ScreenPtr screen);
+void kd_glamor_xv_init(ScreenPtr screen, PutImageFuncPtr PutImage);
 #endif
 
 #endif                          /* _XVDIX_H_ */
