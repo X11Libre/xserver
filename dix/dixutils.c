@@ -474,10 +474,31 @@ typedef struct _WorkQueue {
     Bool (*function) (ClientPtr pClient, void *closure);
     ClientPtr client;
     void *closure;
-} *WorkQueuePtr;
+} WorkQueueRec, *WorkQueuePtr;
 
 WorkQueuePtr workQueue;
 static WorkQueuePtr *workQueueLast = &workQueue;
+static WorkQueuePtr freeWorkQueueRecs = NULL;
+
+static WorkQueuePtr
+AllocWorkQueueRec(void)
+{
+    WorkQueuePtr q;
+
+    if (freeWorkQueueRecs) {
+        q = freeWorkQueueRecs;
+        freeWorkQueueRecs = q->next;
+        return q;
+    }
+    return calloc(1, sizeof(WorkQueueRec));
+}
+
+static void
+FreeWorkQueueRec(WorkQueuePtr q)
+{
+    q->next = freeWorkQueueRecs;
+    freeWorkQueueRecs = q;
+}
 
 void
 ClearWorkQueue(void)
@@ -487,7 +508,7 @@ ClearWorkQueue(void)
     p = &workQueue;
     while ((q = *p)) {
         *p = q->next;
-        free(q);
+        FreeWorkQueueRec(q);
     }
     workQueueLast = p;
 }
@@ -512,7 +533,7 @@ ProcessWorkQueue(void)
         if ((*q->function) (q->client, q->closure)) {
             /* remove q from the list */
             *p = q->next;       /* don't fetch until after func called */
-            free(q);
+            FreeWorkQueueRec(q);
         }
         else {
             p = &q->next;       /* don't fetch until after func called */
@@ -532,7 +553,7 @@ ProcessWorkQueueZombies(void)
             (void) (*q->function) (q->client, q->closure);
             /* remove q from the list */
             *p = q->next;       /* don't fetch until after func called */
-            free(q);
+            FreeWorkQueueRec(q);
         }
         else {
             p = &q->next;       /* don't fetch until after func called */
@@ -545,7 +566,7 @@ Bool
 QueueWorkProc(Bool (*function) (ClientPtr pClient, void *closure),
               ClientPtr client, void *closure)
 {
-    WorkQueuePtr q = calloc(1, sizeof *q);
+    WorkQueuePtr q = AllocWorkQueueRec();
     if (!q)
         return FALSE;
     q->function = function;
@@ -573,11 +594,32 @@ typedef struct _SleepQueue {
 } SleepQueueRec, *SleepQueuePtr;
 
 static SleepQueuePtr sleepQueue = NULL;
+static SleepQueuePtr freeSleepQueueRecs = NULL;
+
+static SleepQueuePtr
+AllocSleepQueueRec(void)
+{
+    SleepQueuePtr q;
+
+    if (freeSleepQueueRecs) {
+        q = freeSleepQueueRecs;
+        freeSleepQueueRecs = q->next;
+        return q;
+    }
+    return calloc(1, sizeof(SleepQueueRec));
+}
+
+static void
+FreeSleepQueueRec(SleepQueuePtr q)
+{
+    q->next = freeSleepQueueRecs;
+    freeSleepQueueRecs = q;
+}
 
 Bool
 ClientSleep(ClientPtr client, ClientSleepProcPtr function, void *closure)
 {
-    SleepQueuePtr q = calloc(1, sizeof *q);
+    SleepQueuePtr q = AllocSleepQueueRec();
     if (!q)
         return FALSE;
 
@@ -629,7 +671,7 @@ ClientWakeup(ClientPtr client)
     while ((q = *prev)) {
         if (q->client == client) {
             *prev = q->next;
-            free(q);
+            FreeSleepQueueRec(q);
             AttendClient(client);
             break;
         }
@@ -654,11 +696,32 @@ ClientIsAsleep(ClientPtr client)
 
 static size_t numCallbackListsToCleanup = 0;
 static CallbackListPtr **listsToCleanup = NULL;
+static CallbackPtr freeCallbackRecs = NULL;
+
+static CallbackPtr
+AllocCallbackRec(void)
+{
+    CallbackPtr cbr;
+
+    if (freeCallbackRecs) {
+        cbr = freeCallbackRecs;
+        freeCallbackRecs = cbr->next;
+        return cbr;
+    }
+    return calloc(1, sizeof(CallbackRec));
+}
+
+static void
+FreeCallbackRec(CallbackPtr cbr)
+{
+    cbr->next = freeCallbackRecs;
+    freeCallbackRecs = cbr;
+}
 
 static Bool
 _AddCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
 {
-    CallbackPtr cbr = calloc(1, sizeof(CallbackRec));
+    CallbackPtr cbr = AllocCallbackRec();
     if (!cbr)
         return FALSE;
     cbr->proc = callback;
@@ -689,7 +752,7 @@ _DeleteCallback(CallbackListPtr *pcbl, CallbackProcPtr callback, void *data)
                 cbl->list = cbr->next;
             else
                 pcbr->next = cbr->next;
-            free(cbr);
+            FreeCallbackRec(cbr);
         }
         return TRUE;
     }
@@ -727,12 +790,12 @@ _CallCallbacks(CallbackListPtr *pcbl, void *call_data)
             if (cbr->deleted) {
                 if (pcbr) {
                     cbr = cbr->next;
-                    free(pcbr->next);
+                    FreeCallbackRec(pcbr->next);
                     pcbr->next = cbr;
                 }
                 else {
                     cbr = cbr->next;
-                    free(cbl->list);
+                    FreeCallbackRec(cbl->list);
                     cbl->list = cbr;
                 }
                 cbl->numDeleted--;
@@ -767,7 +830,7 @@ void DeleteCallbackList(CallbackListPtr *pcbl)
 
     for (CallbackPtr cbr = cbl->list, nextcbr; cbr != NULL; cbr = nextcbr) {
         nextcbr = cbr->next;
-        free(cbr);
+        FreeCallbackRec(cbr);
     }
     free(cbl);
     *pcbl = NULL;

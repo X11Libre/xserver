@@ -208,8 +208,8 @@ ProcRotateProperties(ClientPtr client)
     if (rc != Success || stuff->nAtoms <= 0)
         return rc;
 
-    props = calloc(p.nAtoms, sizeof(PropertyPtr));
-    saved = calloc(p.nAtoms, sizeof(PropertyRec));
+    props = alloca(p.nAtoms * sizeof(PropertyPtr));
+    saved = alloca(p.nAtoms * sizeof(PropertyRec));
     if (!props || !saved) {
         rc = BadAlloc;
         goto out;
@@ -257,8 +257,6 @@ ProcRotateProperties(ClientPtr client)
         }
     }
  out:
-    free(saved);
-    free(props);
     return rc;
 }
 

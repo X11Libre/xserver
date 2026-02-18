@@ -1155,6 +1155,8 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
     BoxPtr riBox;               /* Last box in ri[j].reg                */
     RegionPtr hreg;             /* ri[j_half].reg                        */
     Bool ret = TRUE;
+    RegionInfo ri_stack[4];
+    RegionInfo *ri = ri_stack;
 
     *pOverlap = FALSE;
     if (!badreg->data) {
@@ -1187,10 +1189,8 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
 
     /* Set up the first region to be the first rectangle in badreg */
     /* Note that step 2 code will never overflow the ri[0].reg rects array */
-    RegionInfo *ri = calloc(4, sizeof(RegionInfo));
-    if (!ri)
-        return RegionBreak(badreg);
     sizeRI = 4;
+    memset(ri, 0, sizeof(ri_stack));
     numRI = 1;
     ri[0].prevBand = 0;
     ri[0].curBand = 0;
@@ -1249,9 +1249,12 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
         if (sizeRI == numRI) {
             /* Oops, allocate space for new region information */
             sizeRI <<= 1;
-            rit = (RegionInfo *) reallocarray(ri, sizeRI, sizeof(RegionInfo));
+            rit = calloc(sizeRI, sizeof(RegionInfo));
             if (!rit)
                 goto bail;
+            memcpy(rit, ri, numRI * sizeof(RegionInfo));
+            if (ri != ri_stack)
+                free(ri);
             ri = rit;
             rit = &ri[numRI];
         }
@@ -1304,13 +1307,15 @@ RegionValidate(RegionPtr badreg, Bool *pOverlap)
         numRI -= half;
     }
     *badreg = ri[0].reg;
-    free(ri);
+    if (ri != ri_stack)
+        free(ri);
     good(badreg);
     return ret;
  bail:
     for (int i = 0; i < numRI; i++)
         xfreeData(&ri[i].reg);
-    free(ri);
+    if (ri != ri_stack)
+        free(ri);
     return RegionBreak(badreg);
 }
 

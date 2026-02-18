@@ -227,6 +227,28 @@ typedef struct _colorResource {
     int client;
 } colorResource;
 
+static colorResource *freeColorResources = NULL;
+
+static colorResource *
+AllocColorResource(void)
+{
+    colorResource *res;
+
+    if (freeColorResources) {
+        res = freeColorResources;
+        freeColorResources = (colorResource *) (long)res->mid; /* next */
+        return res;
+    }
+    return calloc(1, sizeof(colorResource));
+}
+
+static void
+FreeColorResource(colorResource *res)
+{
+    res->mid = (Colormap) (long) freeColorResources; /* next */
+    freeColorResources = res;
+}
+
 /* Invariants:
  * refcnt == 0 means entry is empty
  * refcnt > 0 means entry is useable by many clients, so it can't be changed
@@ -712,7 +734,7 @@ doUpdateColors(ColormapPtr pmap)
 
     pVisual = pmap->pVisual;
     size = pVisual->ColormapEntries;
-    defs = calloc(size, sizeof(xColorItem));
+    defs = alloca(size * sizeof(xColorItem));
     if (!defs)
         return;
     n = 0;
@@ -756,7 +778,6 @@ doUpdateColors(ColormapPtr pmap)
     }
     if (n)
         (*pmap->pScreen->StoreColors) (pmap, n, defs);
-    free(defs);
 }
 
 /* Tries to find a color in pmap that exactly matches the one requested in prgb
@@ -1087,7 +1108,7 @@ AllocColor(ColormapPtr pmap,
     if ((pmap->numPixelsRed[client] == 1) &&
         (dixClientIdForXID(pmap->mid) != client) && !(pmap->flags & CM_BeingCreated)) {
 
-        colorResource *pcr = calloc(1, sizeof(colorResource));
+        colorResource *pcr = AllocColorResource();
         if (!pcr) {
             (void) FreeColors(pmap, client, 1, pPix, (Pixel) 0);
             return BadAlloc;
@@ -1488,7 +1509,7 @@ FreeClientPixels(void *value, XID fakeid)
                                  DixRemoveAccess);
     if (rc == Success)
         FreePixels((ColormapPtr) pmap, pcr->client);
-    free(pcr);
+    FreeColorResource(pcr);
     return Success;
 }
 
@@ -1510,7 +1531,7 @@ AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
     if (pmap->class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
     if (!oldcount && (dixClientIdForXID(pmap->mid) != client)) {
-        pcr = calloc(1, sizeof(colorResource));
+        pcr = AllocColorResource();
         if (!pcr)
             return BadAlloc;
     }
@@ -1551,8 +1572,8 @@ AllocColorCells(ClientPtr pClient, ColormapPtr pmap, int colors, int planes,
         if (!AddResource(FakeClientID(client), X11_RESTYPE_CMAPENTRY, (void *) pcr))
             ok = BadAlloc;
     }
-    else
-        free(pcr);
+    else if (pcr)
+        FreeColorResource(pcr);
 
     return ok;
 }
@@ -1576,7 +1597,7 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
     if (class == DirectColor)
         oldcount += pmap->numPixelsGreen[client] + pmap->numPixelsBlue[client];
     if (!oldcount && (dixClientIdForXID(pmap->mid) != client)) {
-        pcr = calloc(1, sizeof(colorResource));
+        pcr = AllocColorResource();
         if (!pcr)
             return BadAlloc;
     }
@@ -1632,8 +1653,8 @@ AllocColorPlanes(int client, ColormapPtr pmap, int colors,
         if (!AddResource(FakeClientID(client), X11_RESTYPE_CMAPENTRY, (void *) pcr))
             ok = BadAlloc;
     }
-    else
-        free(pcr);
+    else if (pcr)
+        FreeColorResource(pcr);
 
     return ok;
 }
@@ -1662,13 +1683,10 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     for (Pixel *p = pixels; p < pixels + c; p++)
         *p = 0;
 
-    ppixRed = calloc(npixR, sizeof(Pixel));
-    ppixGreen = calloc(npixG, sizeof(Pixel));
-    ppixBlue = calloc(npixB, sizeof(Pixel));
+    ppixRed = alloca(npixR * sizeof(Pixel));
+    ppixGreen = alloca(npixG * sizeof(Pixel));
+    ppixBlue = alloca(npixB * sizeof(Pixel));
     if (!ppixRed || !ppixGreen || !ppixBlue) {
-        free(ppixBlue);
-        free(ppixGreen);
-        free(ppixRed);
         return BadAlloc;
     }
 
@@ -1710,9 +1728,6 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
             for (int npix = npixB; --npix >= 0; ppix++)
                 pmap->blue[*ppix].refcnt = 0;
         }
-        free(ppixBlue);
-        free(ppixGreen);
-        free(ppixRed);
         return BadAlloc;
     }
 
@@ -1750,10 +1765,6 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     for (Pixel *pDst = pixels; pDst < pixels + c; pDst++)
         *pDst |= ALPHAMASK(pmap->pVisual);
 
-    free(ppixBlue);
-    free(ppixGreen);
-    free(ppixRed);
-
     return Success;
 }
 
@@ -1768,7 +1779,7 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
     npix = c << r;
     if ((r >= 32) || (npix > pmap->freeRed) || (npix < c))
         return BadAlloc;
-    if (!(ppixTemp = calloc(npix, sizeof(Pixel))))
+    if (!(ppixTemp = alloca(npix * sizeof(Pixel))))
         return BadAlloc;
     ok = AllocCP(pmap, pmap->red, c, r, contig, ppixTemp, pmask);
 
@@ -1781,7 +1792,6 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         if (!ppix) {
             for (Pixel *p = ppixTemp; p < ppixTemp + npix; p++)
                 pmap->red[*p].refcnt = 0;
-            free(ppixTemp);
             return BadAlloc;
         }
         pmap->clientPixelsRed[client] = ppix;
@@ -1796,7 +1806,6 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         pmap->numPixelsRed[client] += npix;
         pmap->freeRed -= npix;
     }
-    free(ppixTemp);
     return ok ? Success : BadAlloc;
 }
 
@@ -1980,15 +1989,12 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
 
     npixClientNew = c << (r + g + b);
     npixShared = (c << r) + (c << g) + (c << b);
-    psharedList = calloc(npixShared, sizeof(SHAREDCOLOR *));
+    psharedList = alloca(npixShared * sizeof(SHAREDCOLOR *));
     if (!psharedList)
         return FALSE;
     ppshared = psharedList;
     for (int z = npixShared; --z >= 0;) {
-        if (!(ppshared[z] = calloc(1, sizeof(SHAREDCOLOR)))) {
-            for (z++; z < npixShared; z++)
-                free(ppshared[z]);
-            free(psharedList);
+        if (!(ppshared[z] = alloca(sizeof(SHAREDCOLOR)))) {
             return FALSE;
         }
     }
@@ -2077,7 +2083,6 @@ AllocShared(ColormapPtr pmap, Pixel * ppix, int c, int r, int g, int b,
             }
         }
     }
-    free(psharedList);
     return TRUE;
 }
 
@@ -2497,7 +2502,7 @@ IsMapInstalled(Colormap map, WindowPtr pWin)
     Colormap *pmaps;
     int nummaps, found;
 
-    pmaps = calloc(pWin->drawable.pScreen->maxInstalledCmaps,
+    pmaps = alloca(pWin->drawable.pScreen->maxInstalledCmaps *
                    sizeof(Colormap));
     if (!pmaps)
         return FALSE;
@@ -2510,7 +2515,6 @@ IsMapInstalled(Colormap map, WindowPtr pWin)
             break;
         }
     }
-    free(pmaps);
     return found;
 }
 
