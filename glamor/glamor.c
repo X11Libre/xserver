@@ -457,6 +457,19 @@ glamor_add_format(ScreenPtr screen, int depth, CARD32 render_format,
     struct glamor_format *f = &glamor_priv->formats[depth];
     Bool texture_only = FALSE;
 
+    /**
+     * If this ever causes problems, we can fix this code then.
+     *
+     * The "error case" that this code is trying to prevent happens
+     * even when using GL contexts.
+     *
+     * From my testing, all this code does is forbid GLES contexts,
+     * which work just fine without this filter.
+     *
+     * See: https://gitlab.freedesktop.org/xorg/xserver/-/commit/8702c938b33b9ec180d64754eb922515c7c4a98b
+     * for the commit that introduced this code.
+     */
+#if 0
     /* If we're trying to run on GLES, make sure that we get the read
      * formats that we're expecting, since glamor_transfer relies on
      * them matching to get data back out.  To avoid this limitation, we
@@ -515,6 +528,7 @@ glamor_add_format(ScreenPtr screen, int depth, CARD32 render_format,
             texture_only = TRUE;
         }
     }
+#endif
 
     f->depth = depth;
     f->render_format = render_format;
