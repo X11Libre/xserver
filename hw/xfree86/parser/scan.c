@@ -52,6 +52,8 @@
  */
 #include <xorg-config.h>
 
+#include "xf86.h"        /* for xf86Msg() */
+#include <string.h>      /* for strlcpy() */
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,6 +105,18 @@ LexRec xf86_lex_val;
  *  newline; we need to grow configBuf and configRBuf as needed to
  *  support that.
  */
+static char *SafeCopyBuiltinConfig(const char *src, char *dest, int index) {
+    if (!src) {
+        xf86Msg(X_WARNING, "builtinConfig[%d] is NULL\n", index);
+        return NULL;
+    }
+    if (!dest) {
+        xf86Msg(X_WARNING, "configBuf is NULL while copying builtinConfig[%d]\n", index);
+        return NULL;
+    }
+    strlcpy(dest, src, CONFIG_BUF_LEN);
+    return dest;
+}
 
 static char *
 xf86getNextLine(void)
@@ -281,11 +295,10 @@ xf86getToken(const xf86ConfigSymTabRec * tab)
                 if (builtinConfig[builtinIndex] == NULL)
                     ret = NULL;
                 else {
-                    strlcpy(configBuf,
-                            builtinConfig[builtinIndex], CONFIG_BUF_LEN);
-                    ret = configBuf;
+                ret = SafeCopyBuiltinConfig(builtinConfig[builtinIndex], configBuf, builtinIndex);
+                if (ret != NULL) {
                     builtinIndex++;
-                }
+            	}
             }
             if (ret == NULL) {
                 /*
