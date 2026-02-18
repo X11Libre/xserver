@@ -61,11 +61,13 @@ CARD32 DPMSOffTime = -1;
 Bool DPMSEnabled;
 
 static int DPMSReqCode = 0;
-static RESTYPE ClientType, DPMSEventType;  /* resource types for event masks */
-static XID eventResource;
+static RESTYPE ClientType;  /* resource types for event masks */
+
+struct xorg_list dpms_listeners = { 0 };
 
 typedef struct _DPMSEvent *DPMSEventPtr;
 typedef struct _DPMSEvent {
+    struct xorg_list entry;
     DPMSEventPtr next;
     ClientPtr client;
     XID clientResource;
@@ -75,39 +77,13 @@ typedef struct _DPMSEvent {
  /*ARGSUSED*/ static int
 DPMSFreeClient(void *data, XID id)
 {
-    DPMSEventPtr pEvent;
-    DPMSEventPtr *pHead, pCur, pPrev;
-
-    pEvent = (DPMSEventPtr) data;
-    dixLookupResourceByType((void *) &pHead, eventResource, DPMSEventType,
-                            NULL, DixUnknownAccess);
-    if (pHead) {
-        pPrev = 0;
-        for (pCur = *pHead; pCur && pCur != pEvent; pCur = pCur->next)
-            pPrev = pCur;
-        if (pCur) {
-            if (pPrev)
-                pPrev->next = pEvent->next;
-            else
-                *pHead = pEvent->next;
+    DPMSEventRec *walk, *tmp;
+    xorg_list_for_each_entry_safe(walk, tmp, &dpms_listeners, entry) {
+        if (walk == data) {
+            xorg_list_del(&walk->entry);
+            free(walk);
         }
     }
-    free((void *) pEvent);
-    return 1;
-}
-
- /*ARGSUSED*/ static int
-DPMSFreeEvents(void *data, XID id)
-{
-    DPMSEventPtr *pHead, pCur, pNext;
-
-    pHead = (DPMSEventPtr *) data;
-    for (pCur = *pHead; pCur; pCur = pNext) {
-        pNext = pCur->next;
-        FreeResource(pCur->clientResource, ClientType);
-        free((void *) pCur);
-    }
-    free((void *) pHead);
     return 1;
 }
 
@@ -132,26 +108,20 @@ ProcDPMSSelectInput(register ClientPtr client)
     X_REQUEST_HEAD_STRUCT(xDPMSSelectInputReq);
     X_REQUEST_FIELD_CARD32(eventMask);
 
-    DPMSEventPtr pEvent, pNewEvent, *pHead;
-    XID clientResource;
-    int i;
+    __xorg_list_autoinit(&dpms_listeners);
 
-    i = dixLookupResourceByType((void **)&pHead, eventResource, DPMSEventType,
-                                client,
-                                DixWriteAccess);
     if (stuff->eventMask == DPMSInfoNotifyMask) {
-        if (i == Success && pHead) {
-            /* check for existing entry. */
-            for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
-                if (pEvent->client == client) {
-                    pEvent->mask = stuff->eventMask;
-                    return Success;
-                }
+        DPMSEventPtr walk = NULL;
+        /* do we already have an entry for this client ? */
+        xorg_list_for_each_entry(walk, &dpms_listeners, entry) {
+            if (walk->client == client) {
+                walk->mask = stuff->eventMask;
+                return Success;
             }
         }
 
         /* build the entry */
-        pNewEvent = calloc(1, sizeof(DPMSEventRec));
+        DPMSEventPtr pNewEvent = calloc(1, sizeof(DPMSEventRec));
         if (!pNewEvent)
             return BadAlloc;
         pNewEvent->client = client;
@@ -160,42 +130,21 @@ ProcDPMSSelectInput(register ClientPtr client)
          * add a resource that will be deleted when
          * the client goes away
          */
-        clientResource = FakeClientID(client->index);
+        XID clientResource = FakeClientID(client->index);
         pNewEvent->clientResource = clientResource;
         if (!AddResource(clientResource, ClientType, (void *)pNewEvent))
             return BadAlloc;
-        /*
-         * create a resource to contain a pointer to the list
-         * of clients selecting input
-         */
-        if (i != Success || !pHead) {
-            pHead = calloc(1, sizeof(DPMSEventPtr));
-            if (!pHead ||
-                    !AddResource(eventResource, DPMSEventType, (void *)pHead)) {
-                FreeResource(clientResource, X11_RESTYPE_NONE);
-                return BadAlloc;
-            }
-            *pHead = 0;
-        }
-        pNewEvent->next = *pHead;
-        *pHead = pNewEvent;
+
+        xorg_list_append(&pNewEvent->entry, &dpms_listeners);
     }
     else if (stuff->eventMask == 0) {
+        DPMSEventRec *walk = NULL, *tmp = NULL;
         /* delete the interest */
-        if (i == Success && pHead) {
-            pNewEvent = 0;
-            for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
-                if (pEvent->client == client)
-                    break;
-                pNewEvent = pEvent;
-            }
-            if (pEvent) {
-                FreeResource(pEvent->clientResource, ClientType);
-                if (pNewEvent)
-                    pNewEvent->next = pEvent->next;
-                else
-                    *pHead = pEvent->next;
-                free(pEvent);
+        xorg_list_for_each_entry_safe(walk, tmp, &dpms_listeners, entry) {
+            if (walk->client == client) {
+                xorg_list_del(&walk->entry);
+                FreeResource(walk->clientResource, ClientType);
+                free(walk);
             }
         }
     }
@@ -209,16 +158,10 @@ ProcDPMSSelectInput(register ClientPtr client)
 static void
 SendDPMSInfoNotify(void)
 {
-    DPMSEventPtr *pHead, pEvent;
     xDPMSInfoNotifyEvent se;
-    int i;
 
-    i = dixLookupResourceByType((void **)&pHead, eventResource, DPMSEventType,
-                                serverClient,
-                                DixReadAccess);
-    if (i != Success || !pHead)
-        return;
-    for (pEvent = *pHead; pEvent; pEvent = pEvent->next) {
+    DPMSEventRec *pEvent;
+    xorg_list_for_each_entry(pEvent, &dpms_listeners, entry) {
         if ((pEvent->mask & DPMSInfoNotifyMask) == 0)
             continue;
         se.type = GenericEvent;
@@ -479,6 +422,13 @@ static void
 DPMSCloseDownExtension(ExtensionEntry *e)
 {
     DPMSSet(serverClient, DPMSModeOn);
+
+    DPMSEventRec *walk, *tmp;
+    xorg_list_for_each_entry_safe(walk, tmp, &dpms_listeners, entry) {
+        FreeResource(walk->clientResource, ClientType);
+        xorg_list_del(&walk->entry);
+        free(walk);
+    }
 }
 
 void
@@ -491,6 +441,8 @@ DPMSExtensionInit(void)
         _timeout_value_ = ScreenSaverTime;                      \
     }
 
+    xorg_list_init(&dpms_listeners);
+
     CONDITIONALLY_SET_DPMS_TIMEOUT(DPMSStandbyTime)
     CONDITIONALLY_SET_DPMS_TIMEOUT(DPMSSuspendTime)
     CONDITIONALLY_SET_DPMS_TIMEOUT(DPMSOffTime)
@@ -499,10 +451,8 @@ DPMSExtensionInit(void)
     DPMSEnabled = DPMSSupported();
 
     ClientType = CreateNewResourceType(DPMSFreeClient, "DPMSClient");
-    DPMSEventType = CreateNewResourceType(DPMSFreeEvents, "DPMSEvent");
-    eventResource = dixAllocServerXID();
 
-    if (DPMSEnabled && ClientType && DPMSEventType &&
+    if (DPMSEnabled && ClientType &&
         (extEntry = AddExtension(DPMSExtensionName, 0, 0,
                                  ProcDPMSDispatch, ProcDPMSDispatch,
                                  DPMSCloseDownExtension, StandardMinorOpcode))) {
