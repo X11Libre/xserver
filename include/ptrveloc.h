@@ -67,6 +67,11 @@ typedef struct _DeviceVelocityRec {
     double corr_mul;            /* config: multiply this into velocity */
     double const_acceleration;  /* config: (recipr.) const deceleration */
     double min_acceleration;    /* config: minimum acceleration */
+    /**
+     * config: Mic-E-Mouse protection threshold. Any movement smaller than
+     * this threshold will be discarded. Set to 0.0 to disable.
+     */
+    float micemouse_threshold;
     short reset_time;           /* config: reset non-visible state after # ms */
     short use_softening;        /* config: use softening of mouse values */
     double max_rel_diff;        /* config: max. relative difference */
