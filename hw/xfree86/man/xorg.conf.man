@@ -997,6 +997,10 @@ Allows to actually decelerate the pointer when going slow. At most, it will be
 .B adaptive deceleration
 times slower. Enables precise pointer placement without sacrificing speed.
 .TP 7
+.BI "Option \*qMicemouseProtection\*q  \*q" real \*q
+Sets the threshold for Mic-E-Mouse protection. Any movement smaller than this
+threshold will be discarded. Default: 0.0 (disabled).
+.TP 7
 .BI "Option \*qAccelerationScheme\*q  \*q" string \*q
 Selects the scheme, which is the underlying algorithm.
 .PP
