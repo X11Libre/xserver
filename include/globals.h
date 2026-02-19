@@ -9,5 +9,6 @@
 extern _X_EXPORT const char *defaultFontPath;
 extern _X_EXPORT int monitorResolution;
 extern _X_EXPORT int defaultColorVisualClass;
+extern _X_EXPORT Bool globalIsolateKeyboard;
 
 #endif                          /* !_XSERV_GLOBAL_H_ */
