@@ -1145,6 +1145,9 @@ DoCreateGLXDrawable(ClientPtr client, __GLXscreen * pGlxScreen,
     if (pGlxScreen->pScreen != pDraw->pScreen)
         return BadMatch;
 
+    LEGAL_NEW_RESOURCE(glxDrawableId, client);
+    LEGAL_NEW_RESOURCE(pDraw->id, client);
+
     pGlxDraw = pGlxScreen->createDrawable(client, pGlxScreen, pDraw,
                                           drawableId, type,
                                           glxDrawableId, config);
