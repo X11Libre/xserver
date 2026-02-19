@@ -258,6 +258,9 @@ static bool xf86ScreenInit(ScreenPtr pScreen, int argc, char **argv, void *closu
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
 
+    if (pScrn->xDpi == 0 || pScrn->yDpi == 0)
+        xf86SetDpi(pScrn, 0, 0);
+
     pScrn->pScreen = pScreen;
     return pScrn->ScreenInit (pScreen, argc, argv);
 }

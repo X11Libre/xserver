@@ -106,12 +106,36 @@ xfree86_add_comment(void)
     free(current);
 }
 
+static void
+xfree86_parse_dpi(void)
+{
+    int x = 0, y = 0;
+
+    assert(!xf86ParseDpi(NULL, &x, &y));
+    assert(!xf86ParseDpi("", &x, &y));
+    assert(!xf86ParseDpi("0", &x, &y));
+    assert(!xf86ParseDpi("-96", &x, &y));
+    assert(!xf86ParseDpi("invalid", &x, &y));
+    assert(!xf86ParseDpi("96x0", &x, &y));
+    assert(!xf86ParseDpi("96x-10", &x, &y));
+
+    assert(xf86ParseDpi("96", &x, &y) && x == 96 && y == 96);
+    assert(xf86ParseDpi("  96  ", &x, &y) && x == 96 && y == 96);
+    assert(xf86ParseDpi("96 120", &x, &y) && x == 96 && y == 120);
+    assert(xf86ParseDpi("96x120", &x, &y) && x == 96 && y == 120);
+    assert(xf86ParseDpi("96X120", &x, &y) && x == 96 && y == 120);
+    assert(xf86ParseDpi("96,120", &x, &y) && x == 96 && y == 120);
+    assert(xf86ParseDpi("96, 120", &x, &y) && x == 96 && y == 120);
+    assert(xf86ParseDpi("96/120", &x, &y) && x == 96 && y == 120);
+}
+
 const testfunc_t*
 xfree86_test(void)
 {
     static const testfunc_t testfuncs[] = {
         xfree86_option_list_duplicate,
         xfree86_add_comment,
+        xfree86_parse_dpi,
         NULL,
     };
     return testfuncs;
