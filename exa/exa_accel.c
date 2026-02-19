@@ -384,37 +384,38 @@ exaHWCopyNtoN(DrawablePtr pSrcDrawable,
     exaGetDrawableDeltas(pDstDrawable, pDstPixmap, &dst_off_x, &dst_off_y);
 
     xRectangle *rects = calloc(nbox, sizeof(xRectangle));
-    if (rects) {
-        int i;
-        int ordering;
+    if (!rects)
+        return FALSE;
 
-        for (i = 0; i < nbox; i++) {
-            rects[i].x = pbox[i].x1 + dx + src_off_x;
-            rects[i].y = pbox[i].y1 + dy + src_off_y;
-            rects[i].width = pbox[i].x2 - pbox[i].x1;
-            rects[i].height = pbox[i].y2 - pbox[i].y1;
-        }
+    int i;
+    int ordering;
 
-        /* This must match the RegionCopy() logic for reversing rect order */
-        if (nbox == 1 || (dx > 0 && dy > 0) ||
-            (pDstDrawable != pSrcDrawable &&
-             (pDstDrawable->type != DRAWABLE_WINDOW ||
-              pSrcDrawable->type != DRAWABLE_WINDOW)))
-            ordering = CT_YXBANDED;
-        else
-            ordering = CT_UNSORTED;
+    for (i = 0; i < nbox; i++) {
+        rects[i].x = pbox[i].x1 + dx + src_off_x;
+        rects[i].y = pbox[i].y1 + dy + src_off_y;
+        rects[i].width = pbox[i].x2 - pbox[i].x1;
+        rects[i].height = pbox[i].y2 - pbox[i].y1;
+    }
 
-        srcregion = RegionFromRects(nbox, rects, ordering);
-        free(rects);
+    /* This must match the RegionCopy() logic for reversing rect order */
+    if (nbox == 1 || (dx > 0 && dy > 0) ||
+        (pDstDrawable != pSrcDrawable &&
+         (pDstDrawable->type != DRAWABLE_WINDOW ||
+          pSrcDrawable->type != DRAWABLE_WINDOW)))
+        ordering = CT_YXBANDED;
+    else
+        ordering = CT_UNSORTED;
 
-        if (!pGC || !exaGCReadsDestination(pDstDrawable, pGC->planemask,
-                                           pGC->fillStyle, pGC->alu,
-                                           pGC->clientClip != NULL)) {
-            dstregion = RegionCreate(NullBox, 0);
-            RegionCopy(dstregion, srcregion);
-            RegionTranslate(dstregion, dst_off_x - dx - src_off_x,
-                            dst_off_y - dy - src_off_y);
-        }
+    srcregion = RegionFromRects(nbox, rects, ordering);
+    free(rects);
+
+    if (!pGC || !exaGCReadsDestination(pDstDrawable, pGC->planemask,
+                                       pGC->fillStyle, pGC->alu,
+                                       pGC->clientClip != NULL)) {
+        dstregion = RegionCreate(NullBox, 0);
+        RegionCopy(dstregion, srcregion);
+        RegionTranslate(dstregion, dst_off_x - dx - src_off_x,
+                        dst_off_y - dy - src_off_y);
     }
 
     pSrcExaPixmap = ExaGetPixmapPriv(pSrcPixmap);

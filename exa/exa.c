@@ -765,7 +765,13 @@ static void exaCloseScreen(CallbackListPtr *pcbl, ScreenPtr pScreen, void *unuse
 ExaDriverPtr
 exaDriverAlloc(void)
 {
-    return calloc(1, sizeof(ExaDriverRec));
+    ExaDriverPtr pDriver = calloc(1, sizeof(ExaDriverRec));
+    if (!pDriver) {
+        LogMessage(X_WARNING, "EXA(1): Failed to allocate Exa Driver\n");
+        return NULL;
+    }
+
+    return pDriver;
 }
 
 /**
