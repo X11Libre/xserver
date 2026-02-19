@@ -650,7 +650,7 @@ glamor_init(ScreenPtr screen, unsigned int flags)
         return FALSE;
     }
     glamor_priv = calloc(1, sizeof(*glamor_priv));
-    if (glamor_priv == NULL)
+    if (!glamor_priv)
         return FALSE;
 
     glamor_priv->flags = flags;

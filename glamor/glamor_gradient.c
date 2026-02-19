@@ -996,13 +996,13 @@ glamor_generate_radial_gradient_picture(ScreenPtr screen,
     /* Set all the stops and colors to shader. */
     if (stops_count > RADIAL_SMALL_STOPS) {
         stop_colors = calloc(stops_count, 4 * sizeof(float));
-        if (stop_colors == NULL) {
+        if (!stop_colors) {
             ErrorF("Failed to allocate stop_colors memory.\n");
             goto GRADIENT_FAIL;
         }
 
         n_stops = calloc(stops_count, sizeof(float));
-        if (n_stops == NULL) {
+        if (!n_stops) {
             ErrorF("Failed to allocate n_stops memory.\n");
             goto GRADIENT_FAIL;
         }
@@ -1334,13 +1334,13 @@ glamor_generate_linear_gradient_picture(ScreenPtr screen,
     /* Set all the stops and colors to shader. */
     if (stops_count > LINEAR_SMALL_STOPS) {
         stop_colors = calloc(stops_count, 4 * sizeof(float));
-        if (stop_colors == NULL) {
+        if (!stop_colors) {
             ErrorF("Failed to allocate stop_colors memory.\n");
             goto GRADIENT_FAIL;
         }
 
         n_stops = calloc(stops_count, sizeof(float));
-        if (n_stops == NULL) {
+        if (!n_stops) {
             ErrorF("Failed to allocate n_stops memory.\n");
             goto GRADIENT_FAIL;
         }
