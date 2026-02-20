@@ -200,9 +200,9 @@ xf86parseDeviceSection(void)
             break;
 
         case CLOCKS:
+            ptr->dev_clocks = 0;
             token = xf86getSubToken(&(ptr->dev_comment));
-            for (i = ptr->dev_clocks;
-                 token == NUMBER && i < CONF_MAXCLOCKS; i++) {
+            for (i = 0; token == NUMBER && i < CONF_MAXCLOCKS; i++) {
                 ptr->dev_clock[i] = (int) (xf86_lex_val.realnum * 1000.0 + 0.5);
                 token = xf86getSubToken(&(ptr->dev_comment));
             }
