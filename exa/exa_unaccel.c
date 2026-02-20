@@ -367,7 +367,7 @@ ExaCheckPushPixels(GCPtr pGC, PixmapPtr pBitmap,
 }
 
 void
-ExaCheckCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+ExaCheckCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     DrawablePtr pDrawable = &pWin->drawable;
     ScreenPtr pScreen = pDrawable->pScreen;

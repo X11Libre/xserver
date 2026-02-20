@@ -24,15 +24,13 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
 /*
  * This file contains the interfaces to the bus-specific code
  */
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <ctype.h>
+#include <dirent.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pciaccess.h>
@@ -41,11 +39,11 @@
 #include "os/log_priv.h"
 #include "os/osdep.h"
 
+#include "xf86_pci_priv.h"
 #include "os.h"
 #include "Pci.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
-#include "dirent.h"             /* DIR, FILE type definitions */
 
 /* Bus-specific headers */
 #include "xf86Bus.h"
@@ -111,7 +109,8 @@ xf86PciProbe(void)
             xf86PciVideoInfo[num - 1] = info;
 
             pci_device_probe(info);
-            if (primaryBus.type == BUS_NONE && pci_device_is_boot_vga(info)) {
+            if (primaryBus.type == BUS_NONE && (pci_device_is_boot_vga(info) ||
+                                                pci_device_is_boot_display(info))) {
                 primaryBus.type = BUS_PCI;
                 primaryBus.id.pci = info;
             }

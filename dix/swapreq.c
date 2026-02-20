@@ -188,19 +188,6 @@ SProcSendEvent(ClientPtr client)
 }
 
 int _X_COLD
-SProcGrabButton(ClientPtr client)
-{
-    REQUEST(xGrabButtonReq);
-    REQUEST_SIZE_MATCH(xGrabButtonReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->eventMask);
-    swapl(&stuff->confineTo);
-    swapl(&stuff->cursor);
-    swaps(&stuff->modifiers);
-    return ((*ProcVector[X_GrabButton]) (client));
-}
-
-int _X_COLD
 SProcUngrabButton(ClientPtr client)
 {
     REQUEST(xUngrabButtonReq);
@@ -611,16 +598,6 @@ SProcStoreNamedColor(ClientPtr client)
     swapl(&stuff->pixel);
     swaps(&stuff->nbytes);
     return ((*ProcVector[X_StoreNamedColor]) (client));
-}
-
-int _X_COLD
-SProcQueryColors(ClientPtr client)
-{
-    REQUEST(xQueryColorsReq);
-    REQUEST_AT_LEAST_SIZE(xQueryColorsReq);
-    swapl(&stuff->cmap);
-    SwapRestL(stuff);
-    return ((*ProcVector[X_QueryColors]) (client));
 }
 
 int _X_COLD

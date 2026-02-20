@@ -22,17 +22,18 @@
 
 #include <kdrive-config.h>
 
+#include <stdio.h>
+
 #include "config/hotplug_priv.h"
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/settings_priv.h"
+#include "mi/mi_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
-
-#include "mi/mi_priv.h"
 #include "os/osdep.h"
 
 #include "kdrive.h"
-#include <mivalidate.h>
 #include <dixstruct.h>
 #include "privates.h"
 
@@ -84,13 +85,13 @@ unsigned long kdVideoTestTime;
 Bool kdEmulateMiddleButton;
 Bool kdRawPointerCoordinates;
 Bool kdDisableZaphod;
-Bool kdAllowZap;
+Bool kdAllowZap = TRUE;
 Bool kdEnabled;
 int kdSubpixelOrder;
 int kdVirtualTerminal = -1;
 Bool kdSwitchPending;
 char *kdSwitchCmd;
-DDXPointRec kdOrigin;
+xPoint kdOrigin;
 Bool kdHasPointer = FALSE;
 Bool kdHasKbd = FALSE;
 const char *kdGlobalXkbRules = NULL;
@@ -463,7 +464,7 @@ KdUseMsg(void)
     ErrorF
         ("-origin X,Y      Locates the next screen in the virtual screen (Xinerama)\n");
     ErrorF("-switchCmd       Command to execute on vt switch\n");
-    ErrorF("-zap             Terminate server on Ctrl+Alt+Backspace\n");
+    ErrorF("-nozap           Don't terminate server on Ctrl+Alt+Backspace\n");
     ErrorF
         ("vtxx             Use virtual terminal xx instead of the next available\n");
 }
@@ -496,10 +497,18 @@ KdProcessArgument(int argc, char **argv, int i)
         kdDisableZaphod = TRUE;
         return 1;
     }
+
+    /* Kept for Compatibility */
     if (!strcmp(argv[i], "-zap")) {
         kdAllowZap = TRUE;
         return 1;
     }
+
+    if (!strcmp(argv[i], "-nozap")) {
+        kdAllowZap = FALSE;
+        return 1;
+    }
+
     if (!strcmp(argv[i], "-3button")) {
         kdEmulateMiddleButton = FALSE;
         return 1;
@@ -629,18 +638,18 @@ KdOsInit(const KdOsFuncs * pOsFuncs)
     }
 }
 
-Bool KdAllocatePrivates(ScreenPtr pScreen)
+static bool KdAllocatePrivates(ScreenPtr pScreen)
 {
     KdPrivScreenPtr pScreenPriv;
 
     if (!dixRegisterPrivateKey(&kdScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
-        return FALSE;
+        return false;
 
     pScreenPriv = calloc(1, sizeof(*pScreenPriv));
     if (!pScreenPriv)
-        return FALSE;
+        return false;
     KdSetScreenPriv(pScreen, pScreenPriv);
-    return TRUE;
+    return true;
 }
 
 Bool KdCreateScreenResources(ScreenPtr pScreen)
@@ -835,7 +844,8 @@ Bool KdScreenInit(ScreenPtr pScreen, int argc, char **argv)
     Bool rotated = (screen->randr & (RR_Rotate_90 | RR_Rotate_270)) != 0;
     int width, height, *width_mmp, *height_mmp;
 
-    KdAllocatePrivates(pScreen);
+    if (!KdAllocatePrivates(pScreen))
+        return FALSE;
 
     pScreenPriv = KdGetScreenPriv(pScreen);
 
@@ -1129,7 +1139,7 @@ KdInitOutput(int argc, char **argv)
     xorgGlxCreateVendor();
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-    if (SeatId) /* Enable input hot-plugging */
+    if (dixSettingSeatId) /* Enable input hot-plugging */
         config_pre_init();
 #endif
 }

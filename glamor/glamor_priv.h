@@ -1064,7 +1064,7 @@ void glamor_egl_screen_init(ScreenPtr screen,
 
 Bool glamor_change_window_attributes(WindowPtr pWin, unsigned long mask);
 
-void glamor_copy_window(WindowPtr window, DDXPointRec old_origin, RegionPtr src_region);
+void glamor_copy_window(WindowPtr window, xPoint old_origin, RegionPtr src_region);
 
 #include "glamor_utils.h"
 

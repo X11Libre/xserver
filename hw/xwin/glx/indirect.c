@@ -73,10 +73,7 @@
   is used to make no context current
 
 */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "glwindows.h"
 #include <glx/glxserver.h>
@@ -373,7 +370,7 @@ static __GLXdrawable *glxWinCreateDrawable(ClientPtr client,
                                            int type,
                                            XID glxDrawId, __GLXconfig * conf);
 
-static void glxWinCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg,
+static void glxWinCopyWindow(WindowPtr pWindow, xPoint ptOldOrg,
                              RegionPtr prgnSrc);
 static Bool glxWinSetPixelFormat(HDC hdc, int bppOverride, int drawableTypeOverride,
                                  __GLXscreen *screen, __GLXconfig *config);
@@ -725,7 +722,7 @@ glxWinScreenProbe(ScreenPtr pScreen)
  */
 
 static void
-glxWinCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+glxWinCopyWindow(WindowPtr pWindow, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     __GLXWinDrawable *pGlxDraw;
     ScreenPtr pScreen = pWindow->drawable.pScreen;
@@ -2108,7 +2105,7 @@ glxWinCreateConfigsExt(HDC hdc, glxWinScreen * screen, PixelFormatRejectStats * 
 
     /* fill in configs */
     for (i = 0; i < numConfigs; i++) {
-        int values[num_attrs];
+        int values[ARRAY_SIZE(attrs)];
         GLXWinConfig temp;
         GLXWinConfig *c = &temp;
         GLXWinConfig *work;

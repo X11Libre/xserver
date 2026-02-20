@@ -25,17 +25,13 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
-
 /*
  * Authors:
  *   Jens Owen <jens@tungstengraphics.com>
  *   Rickard E. (Rik) Faith <faith@valinux.com>
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <errno.h>
 #include <stdio.h>
@@ -46,11 +42,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/X.h>
 #include <X11/Xfuncproto.h>
 #include <X11/Xproto.h>
+#include <X11/dri/xf86driproto.h>
 
 #include "dix/dix_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/dristruct.h"
 #include "include/extinit.h"
+#include "include/sarea.h"
 
 #include "xf86.h"
 #include "xf86drm.h"
@@ -61,12 +60,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "scrnintstr.h"
 #include "windowstr.h"
 #include "servermd.h"
-#include <X11/dri/xf86driproto.h>
 #include "swaprep.h"
 #include "xf86str.h"
 #include "dri_priv.h"
-#include "sarea.h"
-#include "dristruct.h"
 #include "mi.h"
 #include "mipointer.h"
 #include "xf86_os_support.h"
@@ -1988,7 +1984,7 @@ static void DRIWindowDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, WindowPtr
 }
 
 void
-DRICopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+DRICopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     DRIScreenPrivPtr pDRIPriv = DRI_SCREEN_PRIV(pScreen);

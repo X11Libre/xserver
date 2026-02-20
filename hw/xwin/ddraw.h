@@ -11,10 +11,6 @@
 #include <wingdi.h>
 #include <objbase.h>
 
-#if defined(NONAMELESSUNION) && !defined(DUMMYUNIONNAME1)
-#define DUMMYUNIONNAME1 u1
-#endif
-
 #define ICOM_CALL_( xfn, p, args) (p)->lpVtbl->xfn args
 
 #ifdef UNICODE
@@ -740,33 +736,33 @@ extern "C" {
             DWORD dwAlphaBitDepth;      /* C: how many bits for alpha channels */
             DWORD dwLuminanceBitCount;
             DWORD dwBumpBitCount;
-        } DUMMYUNIONNAME1;
+        } u1;
         union {
             DWORD dwRBitMask;   /* 10: mask for red bit */
             DWORD dwYBitMask;   /* 10: mask for Y bits */
             DWORD dwStencilBitDepth;
             DWORD dwLuminanceBitMask;
             DWORD dwBumpDuBitMask;
-        } DUMMYUNIONNAME2;
+        } u2;
         union {
             DWORD dwGBitMask;   /* 14: mask for green bits */
             DWORD dwUBitMask;   /* 14: mask for U bits */
             DWORD dwZBitMask;
             DWORD dwBumpDvBitMask;
-        } DUMMYUNIONNAME3;
+        } u3;
         union {
             DWORD dwBBitMask;   /* 18: mask for blue bits */
             DWORD dwVBitMask;   /* 18: mask for V bits */
             DWORD dwStencilBitMask;
             DWORD dwBumpLuminanceBitMask;
-        } DUMMYUNIONNAME4;
+        } u4;
         union {
             DWORD dwRGBAlphaBitMask;    /* 1C: mask for alpha channel */
             DWORD dwYUVAlphaBitMask;    /* 1C: mask for alpha channel */
             DWORD dwLuminanceAlphaBitMask;
             DWORD dwRGBZBitMask;        /* 1C: mask for Z channel */
             DWORD dwYUVZBitMask;        /* 1C: mask for Z channel */
-        } DUMMYUNIONNAME5;
+        } u5;
         /* 20: next structure */
     } DDPIXELFORMAT, *LPDDPIXELFORMAT;
 
@@ -966,13 +962,13 @@ extern "C" {
         union {
             LONG lPitch;        /* 10: distance to start of next line (return value only) */
             DWORD dwLinearSize;
-        } DUMMYUNIONNAME1;
+        } u1;
         DWORD dwBackBufferCount;        /* 14: number of back buffers requested */
         union {
             DWORD dwMipMapCount;        /* 18:number of mip-map levels requested */
             DWORD dwZBufferBitDepth;    /*18: depth of Z buffer requested */
             DWORD dwRefreshRate;        /* 18:refresh rate (used when display mode is described) */
-        } DUMMYUNIONNAME2;
+        } u2;
         DWORD dwAlphaBitDepth;  /* 1C:depth of alpha buffer requested */
         DWORD dwReserved;       /* 20:reserved */
         LPVOID lpSurface;       /* 24:pointer to the associated surface memory */
@@ -992,20 +988,20 @@ extern "C" {
         union {
             LONG lPitch;        /*10: distance to start of next line (return value only) */
             DWORD dwLinearSize; /*10: formless late-allocated optimized surface size */
-        } DUMMYUNIONNAME1;
+        } u1;
         DWORD dwBackBufferCount;        /* 14: number of back buffers requested */
         union {
             DWORD dwMipMapCount;        /* 18:number of mip-map levels requested */
             DWORD dwRefreshRate;        /* 18:refresh rate (used when display mode is described) */
             DWORD dwSrcVBHandle;        /* 18:source used in VB::Optimize */
-        } DUMMYUNIONNAME2;
+        } u2;
         DWORD dwAlphaBitDepth;  /* 1C:depth of alpha buffer requested */
         DWORD dwReserved;       /* 20:reserved */
         LPVOID lpSurface;       /* 24:pointer to the associated surface memory */
         union {
             DDCOLORKEY ddckCKDestOverlay;       /* 28: CK for dest overlay use */
             DWORD dwEmptyFaceColor;     /* 28: color for empty cubemap faces */
-        } DUMMYUNIONNAME3;
+        } u3;
         DDCOLORKEY ddckCKDestBlt;       /* 30: CK for destination blt use */
         DDCOLORKEY ddckCKSrcOverlay;    /* 38: CK for source overlay use */
         DDCOLORKEY ddckCKSrcBlt;        /* 40: CK for source blt use */
@@ -1013,7 +1009,7 @@ extern "C" {
         union {
             DDPIXELFORMAT ddpfPixelFormat;      /* 48: pixel format description of the surface */
             DWORD dwFVF;        /* 48: vertex format description of vertex buffers */
-        } DUMMYUNIONNAME4;
+        } u4;
         DDSCAPS2 ddsCaps;       /* 68: DDraw surface caps */
         DWORD dwTextureStage;   /* 78: stage in multitexture cascade */
     } DDSURFACEDESC2, *LPDDSURFACEDESC2;
@@ -1098,12 +1094,12 @@ extern "C" {
         union {
             DWORD dwZDestConst; /* Constant to use as Z buffer for dest */
             LPDIRECTDRAWSURFACE lpDDSZBufferDest;       /* Surface to use as Z buffer for dest */
-        } DUMMYUNIONNAME1;
+        } u1;
         DWORD dwZSrcConstBitDepth;      /* Bit depth used to specify Z constant for source */
         union {
             DWORD dwZSrcConst;  /* Constant to use as Z buffer for src */
             LPDIRECTDRAWSURFACE lpDDSZBufferSrc;        /* Surface to use as Z buffer for src */
-        } DUMMYUNIONNAME2;
+        } u2;
         DWORD dwAlphaEdgeBlendBitDepth; /* Bit depth used to specify constant for alpha edge blend */
         DWORD dwAlphaEdgeBlend; /* Alpha for edge blending */
         DWORD dwReserved;
@@ -1111,18 +1107,18 @@ extern "C" {
         union {
             DWORD dwAlphaDestConst;     /* Constant to use as Alpha Channel */
             LPDIRECTDRAWSURFACE lpDDSAlphaDest; /* Surface to use as Alpha Channel */
-        } DUMMYUNIONNAME3;
+        } u3;
         DWORD dwAlphaSrcConstBitDepth;  /* Bit depth used to specify alpha constant for source */
         union {
             DWORD dwAlphaSrcConst;      /* Constant to use as Alpha Channel */
             LPDIRECTDRAWSURFACE lpDDSAlphaSrc;  /* Surface to use as Alpha Channel */
-        } DUMMYUNIONNAME4;
+        } u4;
         union {
             DWORD dwFillColor;  /* color in RGB or Palettized */
             DWORD dwFillDepth;  /* depth value for z-buffer */
             DWORD dwFillPixel;  /* pixel val for RGBA or RGBZ */
             LPDIRECTDRAWSURFACE lpDDSPattern;   /* Surface to use as pattern */
-        } DUMMYUNIONNAME5;
+        } u5;
         DDCOLORKEY ddckDestColorkey;    /* DestColorkey override */
         DDCOLORKEY ddckSrcColorkey;     /* SrcColorkey override */
     } DDBLTFX, *LPDDBLTFX;
@@ -1156,12 +1152,12 @@ extern "C" {
         union {
             DWORD dwAlphaDestConst;     /* Constant to use as alpha channel for dest */
             LPDIRECTDRAWSURFACE lpDDSAlphaDest; /* Surface to use as alpha channel for dest */
-        } DUMMYUNIONNAME1;
+        } u1;
         DWORD dwAlphaSrcConstBitDepth;  /* Bit depth used to specify alpha constant for source */
         union {
             DWORD dwAlphaSrcConst;      /* Constant to use as alpha channel for src */
             LPDIRECTDRAWSURFACE lpDDSAlphaSrc;  /* Surface to use as alpha channel for src */
-        } DUMMYUNIONNAME2;
+        } u2;
         DDCOLORKEY dckDestColorkey;     /* DestColorkey override */
         DDCOLORKEY dckSrcColorkey;      /* DestColorkey override */
         DWORD dwDDFX;           /* Overlay FX */

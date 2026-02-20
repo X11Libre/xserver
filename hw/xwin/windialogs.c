@@ -1,3 +1,4 @@
+
 /*
  *Copyright (C) 2003-2004 Harold L Hunt II All Rights Reserved.
  *
@@ -28,10 +29,8 @@
  * Authors:	Harold L Hunt II
  *              Earle F. Philhower III
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include "win.h"
 #include <shellapi.h>
 #include "winprefs.h"

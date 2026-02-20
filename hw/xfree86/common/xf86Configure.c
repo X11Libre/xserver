@@ -22,10 +22,7 @@
  * Author:  Alan Hourihane, alanh@fairlite.demon.co.uk
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <errno.h>
 
@@ -44,7 +41,7 @@
 #include "xf86pciBus.h"
 #if (defined(__sparc__) || defined(__sparc)) && !defined(__OpenBSD__)
 #include "xf86Bus.h"
-#include "xf86Sbus.h"
+#include "xf86Sbus_priv.h"
 #endif
 #include "misc.h"
 #include "loaderProcs.h"

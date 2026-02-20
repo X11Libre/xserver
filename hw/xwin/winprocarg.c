@@ -26,10 +26,7 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #ifdef HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
@@ -39,7 +36,7 @@ from The Open Group.
 #include "os/osdep.h"
 #include "os/ddx_priv.h"
 
-#include <../xfree86/common/xorgVersion.h>
+#include "include/xorgVersion.h"
 #include "win.h"
 #include "winconfig.h"
 #include "winmsg.h"
@@ -928,55 +925,6 @@ ddxProcessArgument(int argc, char *argv[], int i)
         || IS_OPTION("-broadcast")) {
         g_fXdmcpEnabled = TRUE;
         return 0;               /* Let DIX parse this again */
-    }
-
-    /*
-     * Look for the '-config' argument
-     */
-    if (IS_OPTION("-config")
-        || IS_OPTION("-xf86config")) {
-        CHECK_ARGS(1);
-#ifdef XWIN_XF86CONFIG
-        g_cmdline.configFile = argv[++i];
-#else
-        winMessageBoxF("The %s option is not supported in this "
-                       "release.\n"
-                       "Ignoring this option and continuing.\n",
-                       MB_ICONINFORMATION, argv[i]);
-#endif
-        return 2;
-    }
-
-    /*
-     * Look for the '-configdir' argument
-     */
-    if (IS_OPTION("-configdir")) {
-        CHECK_ARGS(1);
-#ifdef XWIN_XF86CONFIG
-        g_cmdline.configDir = argv[++i];
-#else
-        winMessageBoxF("The %s option is not supported in this "
-                       "release.\n"
-                       "Ignoring this option and continuing.\n",
-                       MB_ICONINFORMATION, argv[i]);
-#endif
-        return 2;
-    }
-
-    /*
-     * Look for the '-keyboard' argument
-     */
-    if (IS_OPTION("-keyboard")) {
-#ifdef XWIN_XF86CONFIG
-        CHECK_ARGS(1);
-        g_cmdline.keyboard = argv[++i];
-#else
-        winMessageBoxF("The -keyboard option is not supported in this "
-                       "release.\n"
-                       "Ignoring this option and continuing.\n",
-                       MB_ICONINFORMATION);
-#endif
-        return 2;
     }
 
     /*

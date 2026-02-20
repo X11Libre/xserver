@@ -8,7 +8,6 @@ project('xserver', 'c',
 )
 release_date = '2025-12-21'
 
-add_project_arguments('-DHAVE_DIX_CONFIG_H', language: ['c', 'objc'])
 cc = meson.get_compiler('c')
 
 add_project_arguments('-fno-strict-aliasing', language : 'c')
@@ -237,6 +236,8 @@ if with_dtrace
     dtrace = find_program('dtrace', required: true)
 endif
 
+build_xorg_sdk = get_option('xorg-sdk')
+
 build_xorg = false
 if (host_machine.system() != 'windows')
     if get_option('xorg') == 'auto'
@@ -246,8 +247,13 @@ if (host_machine.system() != 'windows')
         build_xorg = get_option('xorg') == 'true'
     endif
 endif
+
+if build_xorg
+    build_xorg_sdk = true
+    libxcvt_dep = dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: build_xorg)
+endif
+
 xorgsdkdir = join_paths(get_option('prefix'), get_option('includedir'), 'xorg')
-libxcvt_dep = dependency('libxcvt', fallback: ['libxcvt', 'libxcvt_dep'], required: build_xorg)
 
 ## configure Xnest - nesting X server
 build_xnest = get_option('xnest') != 'false'
@@ -278,14 +284,25 @@ endif
 
 build_xvfb = get_option('xvfb')
 
+build_xephyr = get_option('xephyr')
+
+build_xfbdev = get_option('xfbdev')
+
+build_xserver = (build_xorg or
+                 build_xnest or
+                 build_xvfb or
+                 build_xquartz or
+                 build_xephyr or
+                 build_xfbdev)
+
 summary({
         'Xorg': build_xorg,
         'Xnest': build_xnest,
         'Xvfb': build_xvfb,
         'Xwin': build_xwin,
         'Xquartz': build_xquartz,
-        'Xephyr': get_option('xephyr'),
-        'Xfbdev': get_option('xfbdev'),
+        'Xephyr': build_xephyr,
+        'Xfbdev': build_xfbdev,
     },
     section: 'DDX',
     bool_yn: true,
@@ -365,10 +382,9 @@ else
     build_glamor = glamor_option == 'true'
 endif
 
-gbm_dep = dependency('', required: false)
+gbm_dep = dependency('gbm', version: gbm_req, required: false)
 epoxy_dep = dependency('', required: false)
 if build_glamor
-    gbm_dep = dependency('gbm', version: gbm_req, required: false)
     epoxy_dep = dependency('epoxy', required: false)
 endif
 
@@ -532,7 +548,7 @@ if not libdrm_dep.found() and libdrm_required
     error('DRI requested, but LIBDRM not found')
 endif
 
-build_modesetting = libdrm_dep.found() and dri2proto_dep.found()
+build_modesetting = libdrm_dep.found() and dri2proto_dep.found() and gbm_dep.found()
 
 build_vgahw = false
 if get_option('vgahw') == 'auto'
@@ -749,84 +765,83 @@ if build_docs or build_docs_devel
     ]
 endif
 
+module_abi_tag = 'xlibre-25'
+
 # Include must come first, as it sets up dix-config.h
 subdir('include')
 
-# X server core
-subdir('config')
-subdir('dix')
-subdir('dri3')
-subdir('glx')
-subdir('fb')
-subdir('mi')
-subdir('os')
-# X extensions
-subdir('composite')
-subdir('dbe')
-subdir('miext/damage')
-subdir('miext/shadow')
-subdir('miext/sync')
-if build_rootless
-    subdir('miext/rootless')
-endif
-subdir('present')
-if build_xwin or build_xquartz
-    subdir('pseudoramiX')
-endif
-subdir('randr')
-subdir('record')
-subdir('render')
-subdir('xfixes')
-subdir('xkb')
-subdir('Xext')
-subdir('Xi')
-# other
-if build_glamor
-    subdir('glamor')
-endif
-if build_xorg or get_option('xephyr')
-    subdir('exa')
-endif
 subdir('doc')
 
-# Common static libraries of all X servers
-libxserver = [
-    libxserver_mi,
-    libxserver_dix,
+# X server core
+if build_xserver
+    subdir('config')
+    subdir('dix')
+    subdir('dri3')
+    subdir('glx')
+    subdir('fb')
+    subdir('mi')
+    subdir('os')
+    subdir('composite')
+    subdir('dbe')
+    subdir('miext/damage')
+    subdir('miext/shadow')
+    subdir('miext/sync')
+    if build_rootless
+        subdir('miext/rootless')
+    endif
+    subdir('present')
+    if build_xwin or build_xquartz
+        subdir('pseudoramiX')
+    endif
+    subdir('randr')
+    subdir('record')
+    subdir('render')
+    subdir('xfixes')
+    subdir('xkb')
+    subdir('Xext')
+    subdir('Xi')
+    if build_glamor
+        subdir('glamor')
+    endif
+    if build_xorg or get_option('xephyr')
+        subdir('exa')
+    endif
 
-    libxserver_composite,
-    libxserver_damageext,
-    libxserver_dbe,
-    libxserver_randr,
-    libxserver_miext_damage,
-    libxserver_render,
-    libxserver_present,
-    libxserver_xext,
-    libxserver_miext_sync,
-    libxserver_xfixes,
-    libxserver_xi,
-    libxserver_xkb,
-    libxserver_record,
+    # Common static libraries of all X servers
+    libxserver = [
+        libxserver_mi,
+        libxserver_dix,
+        libxserver_composite,
+        libxserver_damageext,
+        libxserver_dbe,
+        libxserver_randr,
+        libxserver_miext_damage,
+        libxserver_render,
+        libxserver_present,
+        libxserver_xext,
+        libxserver_miext_sync,
+        libxserver_xfixes,
+        libxserver_xi,
+        libxserver_xkb,
+        libxserver_record,
+        libxserver_os,
+        libxserver_dri2,
+        libxserver_dri3
+    ]
 
-    libxserver_os,
-]
-
-libxserver += libxserver_dri2
-libxserver += libxserver_dri3
-
-if build_namespace
-    subdir('Xext/namespace')
-    libxserver += libxserver_namespace
+    if build_namespace
+        subdir('Xext/namespace')
+        libxserver += libxserver_namespace
+    endif
 endif
 
 subdir('hw')
 
-build_tests = get_option('tests') and host_machine.system() != 'windows'
-if build_tests
+if (get_option('tests') and host_machine.system() != 'windows' and build_xserver)
     subdir('test')
 endif
 
-if build_xorg
+if build_xorg_sdk
     sdkconfig = configuration_data()
     awk = find_program('awk')
 
@@ -842,28 +857,28 @@ if build_xorg
     sdkconfig.set('abi_ansic',
         run_command(awk, '-F', '[(,)]',
                     '/^#define ABI_ANSIC.*SET/ { printf "%d.%d", $2, $3 }',
-                    files('hw/xfree86/common/xf86Module.h'),
+                    files('include/xf86Module.h'),
                     check: false
         ).stdout()
     )
     sdkconfig.set('abi_videodrv',
         run_command(awk, '-F', '[(,)]',
                     '/^#define ABI_VIDEODRV.*SET/ { printf "%d.%d", $2, $3 }',
-                    files('hw/xfree86/common/xf86Module.h'),
+                    files('include/xf86Module.h'),
                     check: false
         ).stdout()
     )
     sdkconfig.set('abi_xinput',
         run_command(awk, '-F', '[(,)]',
                     '/^#define ABI_XINPUT.*SET/ { printf "%d.%d", $2, $3 }',
-                    files('hw/xfree86/common/xf86Module.h'),
+                    files('include/xf86Module.h'),
                     check: false
         ).stdout()
     )
     sdkconfig.set('abi_extension',
         run_command(awk, '-F', '[(,)]',
                     '/^#define ABI_EXTENSION.*SET/ { printf "%d.%d", $2, $3 }',
-                    files('hw/xfree86/common/xf86Module.h'),
+                    files('include/xf86Module.h'),
                     check: false
         ).stdout()
     )
@@ -939,14 +954,14 @@ configure_file(output : 'dix-config.h',
 configure_file(output : 'xorg-server.h',
                input : 'hw/xfree86/xlibre-server.h.meson.in',
                configuration : conf_data,
-               install: build_xorg,
+               install: build_xorg_sdk,
                install_dir: xorgsdkdir)
 
 # new config include file for drivers
 configure_file(output : 'xlibre-server.h',
                input : 'hw/xfree86/xlibre-server.h.meson.in',
                configuration : conf_data,
-               install: build_xorg,
+               install: build_xorg_sdk,
                install_dir: xorgsdkdir)
 
 configure_file(output : 'xorg-config.h',

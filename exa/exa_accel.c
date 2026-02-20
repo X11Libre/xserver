@@ -948,7 +948,7 @@ const GCOps exaOps = {
 };
 
 void
-exaCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+exaCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     RegionRec rgnDst;
     int dx, dy;

@@ -12,12 +12,3 @@ xorg_dri = static_library('xorg_dri',
     ],
     c_args: xorg_c_args,
 )
-
-install_data(
-    [
-        'dri.h',
-        'sarea.h',
-        'dristruct.h',
-    ],
-    install_dir: xorgsdkdir,
-)

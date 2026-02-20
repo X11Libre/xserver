@@ -22,6 +22,7 @@
 
 #ifndef _KDRIVE_FBDEV_H_
 #define _KDRIVE_FBDEV_H_
+#include <stdbool.h>
 #include <stdio.h>
 #include <linux/fb.h>
 #include <unistd.h>
@@ -30,6 +31,10 @@
 
 #ifdef RANDR
 #include "randrstr.h"
+#endif
+
+#ifdef GLAMOR
+#include <epoxy/egl.h>
 #endif
 
 typedef struct _fbdevPriv {
@@ -46,11 +51,27 @@ typedef struct _fbdevPriv {
 typedef struct _fbdevScrPriv {
     Rotation randr;
     Bool shadow;
+#ifdef GLAMOR
+    EGLDisplay display;
+    EGLContext ctx;
+    void* glamor_make_current;
+#endif
 } FbdevScrPriv;
 
 extern KdCardFuncs fbdevFuncs;
 extern const char *fbdevDevicePath;
 extern Bool fbDisableShadow;
+
+#ifdef GLAMOR
+extern char *fbdev_glvnd_provider;
+extern bool es_allowed;
+extern bool force_es;
+extern bool fbGlamorAllowed;
+extern bool fbForceGlamor;
+#ifdef XV
+extern bool fbXVAllowed;
+#endif
+#endif
 
 Bool fbdevCardInit(KdCardInfo * card);
 
@@ -81,5 +102,15 @@ void fbdevGetColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 void fbdevPutColors(ScreenPtr pScreen, int n, xColorItem * pdefs);
 
 Bool fbdevMapFramebuffer(KdScreenInfo * screen);
+
+#ifdef GLAMOR
+Bool fbdevInitAccel(ScreenPtr screen);
+
+void fbdevEnableAccel(ScreenPtr screen);
+
+void fbdevDisableAccel(ScreenPtr screen);
+
+void fbdevFiniAccel(ScreenPtr screen);
+#endif
 
 #endif                          /* _KDRIVE_FBDEV_H_ */

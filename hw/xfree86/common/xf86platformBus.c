@@ -25,10 +25,7 @@
 /*
  * This file contains the interfaces to the bus-specific code
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #ifdef XSERVER_PLATFORM_BUS
 #include <errno.h>
@@ -45,6 +42,7 @@
 #include "os.h"
 #include "../os-support/linux/systemd-logind.h"
 
+#include "xf86_pci_priv.h"
 #include "loaderProcs.h"
 #include "xf86_priv.h"
 #include "xf86_os_support.h"
@@ -378,7 +376,7 @@ xf86platformProbe(void)
         }
     }
 
-    /* Then check for pci_device_is_boot_vga() */
+    /* Then check for pci_device_is_boot_vga()/pci_device_is_boot_display() */
     for (i = 0; i < xf86_num_platform_devices; i++) {
         struct xf86_platform_device *dev = &xf86_platform_devices[i];
 
@@ -386,7 +384,8 @@ xf86platformProbe(void)
             continue;
 
         pci_device_probe(dev->pdev);
-        if (pci_device_is_boot_vga(dev->pdev)) {
+        if (pci_device_is_boot_display(dev->pdev) ||
+            pci_device_is_boot_vga(dev->pdev)) {
             primaryBus.type = BUS_PLATFORM;
             primaryBus.id.plat = dev;
         }

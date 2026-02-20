@@ -24,6 +24,8 @@ SOFTWARE.
 #ifndef DIXFONT_H
 #define DIXFONT_H 1
 
+#include "xlibre_ptrtypes.h"
+
 #include "dix.h"
 #include <X11/fonts/font.h>
 #include <X11/fonts/fontstruct.h>

@@ -49,6 +49,7 @@ SOFTWARE.
 
 #include <X11/Xproto.h>
 
+#include "xlibre_ptrtypes.h"
 #include "misc.h"
 #include "regionstr.h"
 #include "screenint.h"

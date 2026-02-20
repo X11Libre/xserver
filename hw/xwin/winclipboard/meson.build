@@ -10,7 +10,6 @@ xwin_clipboard = static_library(
     'XWinclipboard',
     srcs_windows_clipboard,
     include_directories: inc,
-    c_args: '-DHAVE_XWIN_CONFIG_H',
     dependencies: [
         dependency('xcb'),
         dependency('xcb-aux'),
@@ -23,12 +22,14 @@ xwin_clipboard = static_library(
 srcs_xwinclip = [
     'xwinclip.c',
     'debug.c',
+    '../../../os/ossock.c',
 ]
 
 executable(
     'xwinclip',
     srcs_xwinclip,
     dependencies: dependency('xcb'),
+    include_directories: inc,
     link_with: xwin_clipboard,
     link_args: ['-lgdi32', '-lpthread'],
     install: true,

@@ -271,8 +271,8 @@ typedef struct _GC {
      */
     PixUnion tile;
     PixmapPtr stipple;
-    DDXPointRec patOrg;         /* origin for (tile, stipple) */
-    DDXPointRec clipOrg;
+    xPoint patOrg;         /* origin for (tile, stipple) */
+    xPoint clipOrg;
     struct _Font *font;
     RegionPtr clientClip;
     unsigned int stateChanges; /* masked with GC_<kind> */

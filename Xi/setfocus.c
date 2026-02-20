@@ -59,6 +59,7 @@ SOFTWARE.
 #include "inputstr.h"           /* DeviceIntPtr      */
 
 #include "dix/dix_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "exglobals.h"
@@ -72,13 +73,9 @@ SOFTWARE.
 int
 ProcXSetDeviceFocus(ClientPtr client)
 {
-    REQUEST(xSetDeviceFocusReq);
-    REQUEST_SIZE_MATCH(xSetDeviceFocusReq);
-
-    if (client->swapped) {
-        swapl(&stuff->focus);
-        swapl(&stuff->time);
-    }
+    X_REQUEST_HEAD_STRUCT(xSetDeviceFocusReq);
+    X_REQUEST_FIELD_CARD32(focus);
+    X_REQUEST_FIELD_CARD32(time);
 
     int ret;
     DeviceIntPtr dev;

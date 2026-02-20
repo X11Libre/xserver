@@ -26,13 +26,8 @@
  * holders shall not be used in advertising or otherwise to promote the sale,
  * use or other dealings in this Software without prior written authorization.
  */
-
 #ifndef _ROOTLESSWINDOW_H
 #define _ROOTLESSWINDOW_H
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
 
 #include "dix/screen_hooks_priv.h"
 
@@ -48,8 +43,7 @@ void RootlessWindowPosition(CallbackListPtr *pcbl, ScreenPtr pScreen, XorgScreen
 Bool RootlessRealizeWindow(WindowPtr pWin);
 Bool RootlessUnrealizeWindow(WindowPtr pWin);
 void RootlessRestackWindow(WindowPtr pWin, WindowPtr pOldNextSib);
-void RootlessCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg,
-                        RegionPtr prgnSrc);
+void RootlessCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 void RootlessPaintWindow(WindowPtr pWin, RegionPtr prgn, int what);
 void RootlessMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pSib,
                         VTKind kind);

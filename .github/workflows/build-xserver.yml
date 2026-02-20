@@ -4,9 +4,9 @@ permissions:
     contents: write
 
 env:
-    MESON_BUILDDIR:  "build"
+    MESON_BUILDDIR:  "__BUILD"
     X11_PREFIX:      /home/runner/x11
-    X11_BUILD_DIR:   /home/runner/build-deps
+    X11_BUILD_DIR:   /home/runner/work/xserver/xserver/WORK/sources/3rdparty
 
 on:
     push:
@@ -51,34 +51,20 @@ jobs:
                 key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
                 restore-keys: ${{ runner.name }}-x11-deps-
 
-            - name: generic prereq
-              run:  .github/scripts/install-prereq.sh
-
-            - name: build
-              run:  .github/scripts/meson-build.sh
-
-            - name: tests
-              run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs
-              env:
-                  XTEST_DIR:  ${{ env.X11_BUILD_DIR }}/xts
-                  PIGLIT_DIR: ${{ env.X11_BUILD_DIR }}/piglit
+            - name: build and test
+              run:  .github/scripts/ubuntu/run-xserver-build-and-test.sh
 
             - name: archive build logs
               uses: actions/upload-artifact@v4
               with:
                   name: build-logs
                   path: |
-                      build/meson-logs/*
-                      build/test/piglit-results/*
-
-            - name: ddx build check
-              run:  .github/scripts/check-ddx-build.sh
-            - name: manpage check
-              run:  .github/scripts/manpages-check
+                      __BUILD/meson-logs/*
+                      __BUILD/test/piglit-results/*
 
     drivers-build-ubuntu:
         env:
-            MESON_ARGS: -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/usr -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
@@ -112,7 +98,7 @@ jobs:
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: generic prereq
-              run:  .github/scripts/install-prereq.sh
+              run:  .github/scripts/install-prereq-drivers.sh
 
             - name: build xserver sdk
               run:  |
@@ -221,8 +207,8 @@ jobs:
               with:
                   name: build-logs-macos
                   path: |
-                      build/meson-logs/*
-                      build/test/piglit-results/*
+                      __BUILD/meson-logs/*
+                      __BUILD/test/piglit-results/*
 
             - name: ddx build check
               run:  .github/scripts/check-ddx-build.sh
@@ -289,6 +275,15 @@ jobs:
                   # https://github.com/cygwin/cygwin-install-action/issues/39
                   check-installer-sig: false
                   platform: x86_64
+                  site: |
+                    https://mirror.wisegs.com/cygwin/
+                    https://mirrors.sonic.net/cygwin/
+                    https://mirror.cpsc.ucalgary.ca/mirror/cygwin.com/
+                    https://muug.ca/mirror/cygwin/
+                    https://mirror.csclub.uwaterloo.ca/cygwin/
+                    https://cygwin.mirror.gtcomm.net/
+                    http://cygwin.mirror.rafal.ca/
+
                   packages: >-
                    binutils, bison, ccache, flex, gcc-core, meson, ninja,
                    pkg-config, python39, windowsdriproto, xorgproto,
@@ -324,7 +319,7 @@ jobs:
                   bash ./.github/scripts/Cygwin/build.sh
 
     check-sign-off:
-        name: Write comment if unsigned commits found
+        name: Check Signed-Off-By
         if: github.event_name == 'pull_request'
         runs-on: ubuntu-latest
         env:

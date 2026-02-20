@@ -8,5 +8,3 @@ xorg_i2c = static_library('xorg_i2c',
     dependencies: common_dep,
     c_args: xorg_c_args,
 )
-
-install_data(['xf86i2c.h', 'i2c_def.h'], install_dir: xorgsdkdir)

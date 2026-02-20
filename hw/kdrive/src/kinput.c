@@ -43,6 +43,7 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/settings_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
@@ -65,6 +66,12 @@
 #endif
 
 #define AtomFromName(x) MakeAtom(x, strlen(x), 1)
+
+#define KD_KEY_COUNT    248
+#define KD_MIN_KEYCODE  8
+#define KD_MAX_KEYCODE  255
+#define KD_MAX_WIDTH    4
+#define KD_MAX_LENGTH   (KD_MAX_KEYCODE - KD_MIN_KEYCODE + 1)
 
 struct KdConfigDevice {
     char *line;
@@ -216,6 +223,26 @@ KdDisableInput(void)
     input_lock();
 
     for (ki = kdKeyboards; ki; ki = ki->next) {
+        if (ki->last_scan_code != -1) {
+            /**
+             * When we're doing something that causes a vt switch,
+             * if that action is a key press, the X server doesn't see
+             * the key release event.
+             *
+             * For example, if we start an X server from a terminal
+             * running inside another X server, the "host" server
+             * sees the "enter" key press, but not the key release.
+             *
+             * With this, we forge the key release event that the
+             * X server doesn't see, so that it doesn't misinterpret
+             * the missing key release as a long key press.
+             *
+             * Doesn't really matter what the value of the
+             * third argument is, as long as it is non-zero.
+             * This is what the linux keyboard driver sends.
+             */
+            KdEnqueueKeyboardEvent(ki, ki->last_scan_code, 0x80);
+        }
         if (ki->driver && ki->driver->Disable)
             (*ki->driver->Disable) (ki);
     }
@@ -1309,18 +1336,34 @@ KdPointerInfo *KdParsePointer(const char *arg)
     return pi;
 }
 
+#ifdef KDRIVE_KBD
+#define DEFAULT_KEYBOARD "keyboard"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_KEYBOARD "evdev"
+#endif
+#endif
+
+#ifdef KDRIVE_MOUSE
+#define DEFAULT_MOUSE "mouse"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_MOUSE "evdev"
+#endif
+#endif
+
 void
 KdAddConfigInputDrivers(void)
 {
-    #ifdef KDRIVE_KBD
+    #ifdef DEFAULT_KEYBOARD
     if (!kdConfigKeyboards) {
-        KdAddConfigKeyboard("keyboard");
+        KdAddConfigKeyboard(DEFAULT_KEYBOARD);
     }
     #endif
 
-    #ifdef KDRIVE_MOUSE
+    #ifdef DEFAULT_MOUSE
     if (!kdConfigPointers) {
-        KdAddConfigPointer("mouse");
+        KdAddConfigPointer(DEFAULT_MOUSE);
     }
     #endif
 }
@@ -1355,7 +1398,7 @@ KdInitInput(void)
     mieqInit();
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-    if (SeatId) /* Enable input hot-plugging */
+    if (dixSettingSeatId) /* Enable input hot-plugging */
         config_init();
 #endif
 }
@@ -1364,7 +1407,7 @@ void
 KdCloseInput(void)
 {
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-    if (SeatId) /* Input hot-plugging is enabled */
+    if (dixSettingSeatId) /* Input hot-plugging is enabled */
         config_fini();
 #endif
 
@@ -2002,10 +2045,13 @@ KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
         /*
          * Set up this event -- the type may be modified below
          */
-        if (is_up)
+        if (is_up) {
             type = KeyRelease;
-        else
+            ki->last_scan_code = -1;
+        } else {
             type = KeyPress;
+            ki->last_scan_code = scan_code;
+        }
 
         /**
          * Right now, the only special keys we have
@@ -2046,6 +2092,7 @@ KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
             QueueKeyboardEvents(ki->dixdev, KeyRelease, key_code);
             QueueKeyboardEvents(ki->dixdev, KeyRelease, ctrl_key_code);
             QueueKeyboardEvents(ki->dixdev, KeyRelease, alt_key_code);
+            ki->last_scan_code = -1; /* No need to fix this scancode up again */
         }
 #else /* Second option */
         if (!KdCheckSpecialKeys(ki, type, key_code)) {
@@ -2055,6 +2102,7 @@ KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
             unsigned char alt_key_code = KEY_ALT + KD_MIN_KEYCODE - ki->minScanCode;
             QueueKeyboardEvents(ki->dixdev, KeyRelease, ctrl_key_code);
             QueueKeyboardEvents(ki->dixdev, KeyRelease, alt_key_code);
+            ki->last_scan_code = -1; /* No need to fix this scancode up again */
         }
 #endif
     }
@@ -2375,7 +2423,7 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
 #ifdef CONFIG_HAL
         else if (strcmp(key, "_source") == 0 &&
                  strcmp(value, "server/hal") == 0) {
-            if (SeatId) {
+            if (dixSettingSeatId) {
                 /* Input hot-plugging is enabled */
                 if (attrs->flags & ATTR_POINTER) {
                     pi = KdNewPointer();
@@ -2402,7 +2450,7 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
 #ifdef CONFIG_UDEV
         else if (strcmp(key, "_source") == 0 &&
                  strcmp(value, "server/udev") == 0) {
-            if (SeatId) {
+            if (dixSettingSeatId) {
                 /* Input hot-plugging is enabled */
                 if (attrs->flags & ATTR_POINTER) {
                     pi = KdNewPointer();

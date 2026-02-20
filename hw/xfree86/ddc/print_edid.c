@@ -23,21 +23,49 @@
  *
  * print_edid.c: print out all information retrieved from display device
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
-
-/* XXX kinda gross */
-#define _PARSE_EDID_
 
 #include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
 #include "xf86DDC_priv.h"
-#include "edid.h"
+#include "edid_priv.h"
+
+/* display type, analog */
+#define DISP_MONO 0
+#define DISP_RGB 1
+#define DISP_MULTCOLOR 2
+
+/* display color encodings, digital */
+#define DISP_YCRCB444 0x01
+#define DISP_YCRCB422 0x02
+
+/* DPMS features */
+#define DPMS_STANDBY(x) (x & 0x04)
+#define DPMS_SUSPEND(x) (x & 0x02)
+#define DPMS_OFF(x) (x & 0x01)
+
+/* input voltage level */
+#define V070 0                  /* 0.700V/0.300V */
+#define V071 1                  /* 0.714V/0.286V */
+#define V100 2                  /* 1.000V/0.400V */
+#define V007 3                  /* 0.700V/0.000V */
+
+#define STD_COLOR_SPACE(x) (x & 0x4)
+#define GFT_SUPPORTED(x) (x & 0x1)
 
 #define EDID_WIDTH	16
+
+/* detailed timing misc */
+#define IS_RIGHT_STEREO(x) (x & 0x01)
+#define IS_LEFT_STEREO(x) (x & 0x02)
+#define IS_4WAY_STEREO(x) (x & 0x03)
+
+/* sync characteristics */
+#define SEP_SYNC(x) (x & 0x08)
+#define COMP_SYNC(x) (x & 0x04)
+#define SYNC_O_GREEN(x) (x & 0x02)
+#define SYNC_SERR(x) (x & 0x01)
 
 static void
 print_vendor(int scrnIndex, struct vendor *c)
@@ -71,7 +99,7 @@ print_input_features(int scrnIndex, struct disp_features *c,
     if (DIGITAL(c->input_type)) {
         xf86DrvMsg(scrnIndex, X_INFO, "Digital Display Input\n");
         if (v->revision == 2 || v->revision == 3) {
-            if (DFP1(c->input_dfp))
+            if (c->input_dfp)
                 xf86DrvMsg(scrnIndex, X_INFO, "DFP 1.x compatible TMDS\n");
         }
         else if (v->revision >= 4) {
@@ -108,7 +136,7 @@ print_input_features(int scrnIndex, struct disp_features *c,
         default:
             xf86ErrorF("undefined\n");
         }
-        if (SIG_SETUP(c->input_setup))
+        if (c->input_setup)
             xf86DrvMsg(scrnIndex, X_INFO, "Signal levels configurable\n");
         xf86DrvMsg(scrnIndex, X_INFO, "Sync:");
         if (SEP_SYNC(c->input_sync))
@@ -343,7 +371,7 @@ print_detailed_timings(int scrnIndex, struct detailed_timings *t)
                    t->v_sync_off + t->v_sync_width + t->v_active,
                    t->v_active + t->v_blanking);
         xf86ErrorF("v_border: %i\n", t->v_border);
-        if (IS_STEREO(t->stereo)) {
+        if (t->stereo) {
             xf86DrvMsg(scrnIndex, X_INFO, "Stereo: ");
             if (IS_RIGHT_STEREO(t->stereo)) {
                 if (!t->stereo_1)

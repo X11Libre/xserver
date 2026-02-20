@@ -103,7 +103,7 @@ typedef struct _KdScreenInfo {
     Bool dumb;
     Bool softCursor;
     int mynum;
-    DDXPointRec origin;
+    xPoint origin;
     KdFrameBuffer fb;
 } KdScreenInfo;
 
@@ -235,12 +235,6 @@ int KdAddPointer(KdPointerInfo * ki);
 int KdAddConfigPointer(const char *pointer);
 void KdRemovePointer(KdPointerInfo * ki);
 
-#define KD_KEY_COUNT 248
-#define KD_MIN_KEYCODE  8
-#define KD_MAX_KEYCODE  255
-#define KD_MAX_WIDTH    4
-#define KD_MAX_LENGTH   (KD_MAX_KEYCODE - KD_MIN_KEYCODE + 1)
-
 typedef struct {
     KeySym modsym;
     int modbit;
@@ -276,6 +270,9 @@ struct _KdKeyboardInfo {
 
     int minScanCode;
     int maxScanCode;
+
+    /* Not set by the input driver */
+    int last_scan_code;
 
     int leds;
     int bellPitch;
@@ -436,8 +433,6 @@ void KdOsInit(const KdOsFuncs * pOsFuncs);
 
 void
  KdOsAddInputDrivers(void);
-
-Bool KdAllocatePrivates(ScreenPtr pScreen);
 
 Bool KdCreateScreenResources(ScreenPtr pScreen);
 

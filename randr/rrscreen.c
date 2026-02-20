@@ -178,11 +178,9 @@ RRScreenSizeSet(ScreenPtr pScreen,
                                              width, height, mmWidth, mmHeight);
     }
 #endif
-#if RANDR_10_INTERFACE
     if (pScrPriv->rrSetConfig) {
         return TRUE;            /* can't set size separately */
     }
-#endif
     return FALSE;
 }
 

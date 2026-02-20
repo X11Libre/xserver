@@ -21,14 +21,16 @@
  */
 #include <dix-config.h>
 
+#include <assert.h>
+#include <drm_fourcc.h>
+#include <unistd.h>
+
+#include "include/syncsdk.h"
+
 #include "dri3_priv.h"
-#include <syncsdk.h>
 #include <misync.h>
 #include <misyncshm.h>
 #include <randrstr.h>
-#include <drm_fourcc.h>
-#include <unistd.h>
-#include <assert.h>
 
 int
 dri3_open(ClientPtr client, ScreenPtr screen, RRProviderPtr provider, int *fd)

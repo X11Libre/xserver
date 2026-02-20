@@ -23,10 +23,7 @@
  * dealings in this Software without prior written authorization from the
  * XFree86 Project.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "xf86Module.h"
 #include "fb.h"

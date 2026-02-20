@@ -25,13 +25,8 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
-
 #ifndef SCANFILLINCLUDED
 #define SCANFILLINCLUDED
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
 
 /*
  *     scanfill.h

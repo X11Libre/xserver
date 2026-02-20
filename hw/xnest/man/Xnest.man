@@ -74,20 +74,6 @@ This is a useful option for debugging, but it will slow down
 performance considerably.
 It should not be used unless absolutely necessary.
 .TP
-.B \-full
-This option tells
-.B Xnest
-to utilize full regeneration of real server objects and reopen a new connection
-to the real server each time the nested server regenerates.
-The sample server implementation regenerates all objects in the server when the
-last client of this server terminates.
-When this happens,
-.B Xnest
-by default maintains the same top-level window and the same real server
-connection in each new generation.
-If the user selects full regeneration, even the top-level window and the
-connection to the real server will be regenerated for each server generation.
-.TP
 .BI "\-class " string
 This option specifies the default visual class of the nested server.
 It is similar to the

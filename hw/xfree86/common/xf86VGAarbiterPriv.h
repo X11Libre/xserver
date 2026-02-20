@@ -23,13 +23,8 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  *
  */
-
 #ifndef XSERVER_XFREE86_XF86VGAARBITERPRIV_H
 #define XSERVER_XFREE86_XF86VGAARBITERPRIV_H
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #include "misc.h"
 #include "xf86.h"
@@ -165,8 +160,7 @@ static void VGAarbiterGetSpans(DrawablePtr pDrawable, int wMax, DDXPointPtr ppt,
 static void VGAarbiterSourceValidate(DrawablePtr pDrawable, int x, int y,
                                      int width, int height,
                                      unsigned int subWindowMode);
-static void VGAarbiterCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg,
-                                 RegionPtr prgnSrc);
+static void VGAarbiterCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc);
 static void VGAarbiterClearToBackground(WindowPtr pWin, int x, int y, int w,
                                         int h, Bool generateExposures);
 static PixmapPtr VGAarbiterCreatePixmap(ScreenPtr pScreen, int w, int h,

@@ -28,10 +28,7 @@
  *
  * Author: David Dawes <dawes@XFree86.Org>.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "os/osdep.h"
 

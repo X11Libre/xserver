@@ -120,6 +120,7 @@
 
 #define WIN_MAX_KEYS_PER_KEY	4
 
+/* needed for windows headers compatibility with GCC */
 #define NONAMELESSUNION
 
 #include <sys/types.h>
@@ -130,13 +131,6 @@
 #define HANDLE void *
 #include <pthread.h>
 #undef HANDLE
-
-#ifdef HAVE_MMAP
-#include <sys/mman.h>
-#ifndef MAP_FILE
-#define MAP_FILE 0
-#endif                          /* MAP_FILE */
-#endif                          /* HAVE_MMAP */
 
 #include <X11/X.h>
 #include <X11/Xfuncproto.h>

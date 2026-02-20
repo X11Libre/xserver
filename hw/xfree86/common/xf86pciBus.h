@@ -24,13 +24,8 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
 #ifndef _XF86_PCI_BUS_H
 #define _XF86_PCI_BUS_H
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
 
 #include "xf86MatchDrivers.h"
 
@@ -53,4 +48,5 @@ xf86MatchDriverFromFiles(uint16_t match_vendor, uint16_t match_chip,
                          XF86MatchedDrivers *md);
 void
 xf86VideoPtrToDriverList(struct pci_device *dev, XF86MatchedDrivers *md);
+
 #endif                          /* _XF86_PCI_BUS_H */

@@ -32,6 +32,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <X11/Xdefs.h>
 #include <X11/extensions/XKBproto.h>
 
+#include "xlibre_ptrtypes.h"
 #include "xkbstr.h"
 #include "xkbrules.h"
 #include "inputstr.h"

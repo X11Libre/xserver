@@ -33,10 +33,7 @@
  * This file includes the helper functions that the server provides for
  * different drivers.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <sys/stat.h>
 #include <X11/X.h>
@@ -44,6 +41,7 @@
 #include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "include/extinit.h"
+#include "include/xf86DDC.h"
 #include "mi/mi_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
@@ -60,11 +58,9 @@
 #include "xf86_OSlib.h"
 #include "micmap.h"
 #include "xf86Bus.h"
-#include "xf86DDC.h"
 #include "xf86Xinput_priv.h"
 #include "xf86InPriv.h"
 #include "xf86Config.h"
-#include "mivalidate.h"
 #include "xf86Module_priv.h"
 
 /* For xf86GetClocks */

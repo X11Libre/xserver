@@ -59,7 +59,6 @@ SOFTWARE.
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "pixmapstr.h"
-#include "mivalidate.h"
 #include "inputstr.h"
 
 void
@@ -123,11 +122,13 @@ miClearToBackground(WindowPtr pWin,
 void
 miMarkWindow(WindowPtr pWin)
 {
-    ValidatePtr val;
-
     if (pWin->valdata)
         return;
-    val = (ValidatePtr) XNFalloc(sizeof(ValidateRec));
+
+    ValidatePtr val = (ValidatePtr) calloc(1, sizeof(MiValidateRec));
+    if (!val)
+        return;
+
     val->before.oldAbsCorner.x = pWin->drawable.x;
     val->before.oldAbsCorner.y = pWin->drawable.y;
     val->before.borderVisible = NullRegion;
@@ -250,7 +251,7 @@ miMoveWindow(WindowPtr pWin, int x, int y, WindowPtr pNextSib, VTKind kind)
     Bool WasViewable = (Bool) (pWin->viewable);
     short bw;
     RegionPtr oldRegion = NULL;
-    DDXPointRec oldpt;
+    xPoint oldpt;
     Bool anyMarked = FALSE;
     ScreenPtr pScreen;
     WindowPtr windowToValidate;
@@ -349,7 +350,7 @@ miResizeWindow(WindowPtr pWin, int x, int y, unsigned int w, unsigned int h,
     short oldx = pWin->drawable.x, oldy = pWin->drawable.y;
     int bw = wBorderWidth(pWin);
     short dw, dh;
-    DDXPointRec oldpt;
+    xPoint oldpt;
     RegionPtr oldRegion = NULL;
     Bool anyMarked = FALSE;
     ScreenPtr pScreen;

@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef SCREENINTSTRUCT_H
 #define SCREENINTSTRUCT_H
 
+#include "xlibre_ptrtypes.h"
 #include "screenint.h"
 #include "regionstr.h"
 #include "colormap.h"
@@ -168,7 +169,7 @@ typedef void (*PaintWindowProcPtr) (WindowPtr /*pWindow*/,
                                     int /*what*/);
 
 typedef void (*CopyWindowProcPtr) (WindowPtr /*pWindow */ ,
-                                   DDXPointRec /*ptOldOrg */ ,
+                                   xPoint /*ptOldOrg */ ,
                                    RegionPtr /*prgnSrc */ );
 
 typedef void (*ClearToBackgroundProcPtr) (WindowPtr /*pWindow */ ,

@@ -36,10 +36,7 @@
  * someone actually cares about DGA, it'd be nice to clean this up.  But trust
  * me, I am not that person.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <string.h>
 #include <X11/X.h>

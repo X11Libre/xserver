@@ -2598,8 +2598,6 @@ ReleaseButtonsAndKeys(DeviceIntPtr dev)
 int
 AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
 {
-    ScreenPtr screen;
-
     if (!dev || InputDevIsMaster(dev))
         return BadDevice;
 
@@ -2614,8 +2612,8 @@ AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
 
     /* free the existing sprite. */
     if (InputDevIsFloating(dev) && dev->spriteInfo->paired == dev) {
-        screen = miPointerGetScreen(dev);
-        screen->DeviceCursorCleanup(dev, screen);
+        ScreenPtr pScreen = miPointerGetScreen(dev);
+        pScreen->DeviceCursorCleanup(dev, pScreen);
         free(dev->spriteInfo->sprite);
         dev->spriteInfo->sprite = NULL;
     }
@@ -2637,8 +2635,8 @@ AttachDevice(ClientPtr client, DeviceIntPtr dev, DeviceIntPtr master)
             currentRoot = dixGetMasterScreen()->root;
 
         /* we need to init a fake sprite */
-        screen = currentRoot->drawable.pScreen;
-        screen->DeviceCursorInitialize(dev, screen);
+        ScreenPtr pScreen = currentRoot->drawable.pScreen;
+        pScreen->DeviceCursorInitialize(dev, pScreen);
         dev->spriteInfo->sprite = NULL;
         InitializeSprite(dev, currentRoot);
         dev->spriteInfo->spriteOwner = FALSE;

@@ -24,10 +24,7 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include <opaque.h>             // for display
 #include "dix/dix_priv.h"       // for display

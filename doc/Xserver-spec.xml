@@ -3387,7 +3387,7 @@ The sample server implementation is in Xserver/mi/miwindow.c.</para>
 
         void pScreen->CopyWindow(pWin, oldpt, oldRegion);
                 WindowPtr pWin;
-                DDXPointRec oldpt;
+                xPoint oldpt;
                 RegionPtr oldRegion;
 
 </programlisting></blockquote>

@@ -74,12 +74,10 @@
 #define NO_CFPLUGIN
 #include <IOKit/hidsystem/IOHIDLib.h>
 
+#include "include/shmint.h"
+
 #include "input_priv.h"
 #include "screenint_priv.h"
-
-#ifdef CONFIG_MITSHM
-#include "shmint.h"
-#endif /* CONFIG_MITSHM */
 
 #include "darwin.h"
 #include "darwinEvents.h"
@@ -674,7 +672,6 @@ OsVendorFatalError(const char *f, va_list args)
 void
 OsVendorInit(void)
 {
-    if (serverGeneration == 1) {
         char *lf;
         char *home = getenv("HOME");
         assert(home);
@@ -693,7 +690,6 @@ OsVendorInit(void)
         free(lf);
 
         DarwinPrintBanner();
-    }
 }
 
 /*

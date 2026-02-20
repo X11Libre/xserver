@@ -15,5 +15,6 @@
  */
 
 extern bool dixSettingAllowByteSwappedClients;
+extern char *dixSettingSeatId;
 
 #endif

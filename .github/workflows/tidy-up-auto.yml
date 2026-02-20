@@ -46,6 +46,8 @@ jobs:
                 version:
                     - master
                     - maint-25.0
+                    - release/25.0
+                    - release/25.1
                     - wip/AllocColor
                     - wip/ReplyNotSwappd
                     - wip/XvPortNotifyPtr

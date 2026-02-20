@@ -20,23 +20,20 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/X.h>
 
 #include "dix/input_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "include/extinit.h"
+#include "include/xf86DDC.h"
 
 #include "os.h"
 #include "globals.h"
 #include "xf86_priv.h"
 #include "xf86str.h"
 #include "xf86Priv.h"
-#include "xf86DDC.h"
 #include "mipointer.h"
 #include <randrstr.h>
 #include "inputstr.h"

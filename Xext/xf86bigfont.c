@@ -55,7 +55,7 @@
 #include <X11/X.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/xf86bigfproto.h>
-#include <X11/fonts/fontstruct.h>
+#include <X11/fonts/fontstruct.h> // libxfont2.h missed to include that
 #include <X11/fonts/libxfont2.h>
 
 #include "dix/dix_priv.h"

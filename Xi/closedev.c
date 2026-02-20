@@ -55,6 +55,7 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/request_priv.h"
 #include "dix/resource_priv.h"
 #include "dix/screenint_priv.h"
 #include "dix/window_priv.h"
@@ -124,8 +125,7 @@ ProcXCloseDevice(ClientPtr client)
     int rc;
     DeviceIntPtr d;
 
-    REQUEST(xCloseDeviceReq);
-    REQUEST_SIZE_MATCH(xCloseDeviceReq);
+    X_REQUEST_HEAD_STRUCT(xCloseDeviceReq);
 
     rc = dixLookupDevice(&d, stuff->deviceid, client, DixUseAccess);
     if (rc != Success)

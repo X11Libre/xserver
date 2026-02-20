@@ -42,6 +42,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "os/bug_priv.h"
 #include "Xi/handlers.h"
 
@@ -437,8 +438,7 @@ ProcXIChangeHierarchy(ClientPtr client)
         CHANGED,
     } changes = NO_CHANGE;
 
-    REQUEST(xXIChangeHierarchyReq);
-    REQUEST_AT_LEAST_SIZE(xXIChangeHierarchyReq);
+    X_REQUEST_HEAD_AT_LEAST(xXIChangeHierarchyReq);
 
     if (!stuff->num_changes)
         return rc;

@@ -99,7 +99,6 @@ Equipment Corporation.
 #include    "validate.h"
 #include    "windowstr.h"
 #include    "regionstr.h"
-#include    "mivalidate.h"
 #include    "globals.h"
 #include    "compint.h"
 

@@ -32,11 +32,11 @@
 #include "include/pixmapstr.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
+#include "Xext/damage/damageext_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #include "xfixes/xfixes.h"
 
-#include "damageextint.h"
 #include "damagestr.h"
 #include "protocol-versions.h"
 #include "dixstruct_priv.h"
@@ -201,7 +201,7 @@ DamageExtDestroy(DamagePtr pDamage, void *closure)
 }
 
 void
-DamageExtSetCritical(ClientPtr pClient, Bool critical)
+DamageExtSetCritical(ClientPtr pClient, bool critical)
 {
     DamageClientPtr pDamageClient = GetDamageClient(pClient);
 
@@ -375,17 +375,16 @@ DamageExtSubtractWindowClip(DamageExtPtr pDamageExt)
         return NULL;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
-        ScreenPtr screen;
         if (Success != dixLookupWindow(&win, res->info[walkScreenIdx].id, serverClient,
                                        DixReadAccess))
             goto out;
 
-        screen = win->drawable.pScreen;
+        ScreenPtr pScreen = win->drawable.pScreen;
 
-        RegionTranslate(ret, -screen->x, -screen->y);
+        RegionTranslate(ret, -pScreen->x, -pScreen->y);
         if (!RegionUnion(ret, ret, &win->borderClip))
             goto out;
-        RegionTranslate(ret, screen->x, screen->y);
+        RegionTranslate(ret, pScreen->x, pScreen->y);
     });
 
     return ret;

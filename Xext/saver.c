@@ -113,7 +113,7 @@ typedef struct _ScreenSaverEvent *ScreenSaverEventPtr;
 typedef struct _ScreenSaverEvent {
     ScreenSaverEventPtr next;
     ClientPtr client;
-    ScreenPtr screen;
+    ScreenPtr pScreen;
     XID resource;
     CARD32 mask;
 } ScreenSaverEventRec;
@@ -135,7 +135,7 @@ static unsigned long getEventMask(ScreenPtr     pScreen,
 static RESTYPE AttrType;        /* resource type for attributes */
 
 typedef struct _ScreenSaverAttr {
-    ScreenPtr screen;
+    ScreenPtr pScreen;
     ClientPtr client;
     XID resource;
     short x, y;
@@ -261,7 +261,7 @@ setEventMask(ScreenPtr pScreen, ClientPtr client, unsigned long mask)
             *pPrev = pEv;
             pEv->next = NULL;
             pEv->client = client;
-            pEv->screen = pScreen;
+            pEv->pScreen = pScreen;
             pEv->resource = FakeClientID(client->index);
             if (!AddResource(pEv->resource, SaverEventType, (void *) pEv))
                 return FALSE;
@@ -294,7 +294,7 @@ static int
 ScreenSaverFreeEvents(void *value, XID id)
 {
     ScreenSaverEventPtr pOld = (ScreenSaverEventPtr) value;
-    ScreenPtr pScreen = pOld->screen;
+    ScreenPtr pScreen = pOld->pScreen;
 
     SetupScreen(pScreen);
     ScreenSaverEventPtr pEv, *pPrev;
@@ -316,7 +316,7 @@ static int
 ScreenSaverFreeAttr(void *value, XID id)
 {
     ScreenSaverAttrPtr pOldAttr = (ScreenSaverAttrPtr) value;
-    ScreenPtr pScreen = pOldAttr->screen;
+    ScreenPtr pScreen = pOldAttr->pScreen;
 
     SetupScreen(pScreen);
 
@@ -823,7 +823,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
         ret = BadAlloc;
         goto bail;
     }
-    pAttr->screen = pScreen;
+    pAttr->pScreen = pScreen;
     pAttr->client = client;
     pAttr->x = stuff->x;
     pAttr->y = stuff->y;

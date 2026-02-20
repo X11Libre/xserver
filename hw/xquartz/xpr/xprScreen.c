@@ -42,7 +42,7 @@
 #include "pseudoramiX.h"
 #include "darwinEvents.h"
 #include "rootless.h"
-#include "dri.h"
+#include "xpr_dri.h"
 #include "globals.h"
 #include <Xplugin.h>
 #include "applewmExt.h"
@@ -50,9 +50,7 @@
 
 #include "rootlessCommon.h"
 
-#ifdef DAMAGE
 #include "damage.h"
-#endif
 
 /* 10.4's deferred update makes X slower.. have to live with the tearing
  * for now.. */

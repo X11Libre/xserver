@@ -26,26 +26,27 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/syncsdk.h"
 #include "os/client_priv.h"
 
 #include "dri3_priv.h"
 #include <syncsrv.h>
 #include <xace.h>
-#include "../Xext/syncsdk.h"
 #include <protocol-versions.h>
 #include <drm_fourcc.h>
 #include "randrstr_priv.h"
 #include "dixstruct_priv.h"
 
 static Bool
-dri3_screen_can_one_point_four(ScreenPtr screen)
+dri3_screen_can_one_point_one(ScreenPtr screen)
 {
     dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
 
-    return dri3 &&
-        dri3->info &&
-        dri3->info->version >= 4 &&
-        dri3->info->import_syncobj;
+    if (dri3 && dri3->info && dri3->info->version >= 1 &&
+        dri3->info->fd_from_pixmap)
+        return TRUE;
+
+    return FALSE;
 }
 
 static Bool
@@ -62,6 +63,17 @@ dri3_screen_can_one_point_two(ScreenPtr screen)
     return FALSE;
 }
 
+static Bool
+dri3_screen_can_one_point_four(ScreenPtr screen)
+{
+    dri3_screen_priv_ptr dri3 = dri3_screen_priv(screen);
+
+    return dri3 &&
+        dri3->info &&
+        dri3->info->version >= 4 &&
+        dri3->info->import_syncobj;
+}
+
 static int
 proc_dri3_query_version(ClientPtr client)
 {
@@ -75,23 +87,37 @@ proc_dri3_query_version(ClientPtr client)
     };
 
     DIX_FOR_EACH_SCREEN({
-        if (!dri3_screen_can_one_point_two(walkScreen)) {
+        if (!dri3_screen_can_one_point_one(walkScreen)) {
             reply.minorVersion = 0;
+            break;
+        }
+        if (!dri3_screen_can_one_point_two(walkScreen)) {
+            reply.minorVersion = 1;
             break;
         }
         if (!dri3_screen_can_one_point_four(walkScreen)) {
             reply.minorVersion = 2;
+            break;
+        } else {
+            reply.minorVersion = 4;
             break;
         }
     });
 
     DIX_FOR_EACH_GPU_SCREEN({
-        if (!dri3_screen_can_one_point_two(walkScreen)) {
+        if (!dri3_screen_can_one_point_one(walkScreen)) {
             reply.minorVersion = 0;
+            break;
+        }
+        if (!dri3_screen_can_one_point_two(walkScreen)) {
+            reply.minorVersion = 1;
             break;
         }
         if (!dri3_screen_can_one_point_four(walkScreen)) {
             reply.minorVersion = 2;
+            break;
+        } else {
+            reply.minorVersion = 4;
             break;
         }
     });

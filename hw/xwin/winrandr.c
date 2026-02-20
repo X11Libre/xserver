@@ -29,10 +29,8 @@
  * Authors:	Harold L Hunt II
  *              Jon TURNEY
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include "win.h"
 
 #include "randr/randrstr_priv.h"

@@ -9,20 +9,22 @@
  * introduces extension blocks.  EDID is the old display identification
  * block, DisplayID is the new one.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
+#include "include/xf86DDC.h"
 #include "os/osdep.h"
 
 #include "misc.h"
 #include "xf86.h"
 #include "xf86_OSproc.h"
-#include "xf86DDC.h"
 #include <string.h>
+#include "edid_priv.h"
 
 #define RETRIES 4
+
+#define HEADER 6
+#define BITS_PER_BYTE 9
+#define NUM BITS_PER_BYTE*EDID1_LEN
 
 typedef enum {
     DDCOPT_NODDC1,

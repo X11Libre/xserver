@@ -34,11 +34,12 @@
 #include <sys/types.h>
 #include <time.h>
 
+#include "include/present.h"
+
 #include <xf86.h>
 #include <xf86Crtc.h>
 #include <xf86drm.h>
 #include <xf86str.h>
-#include <present.h>
 
 #include "driver.h"
 #include "drmmode_display.h"
@@ -163,7 +164,7 @@ ms_present_abort_vblank(RRCrtcPtr crtc, uint64_t event_id, uint64_t msc)
 {
     ScreenPtr screen = crtc->pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     xf86CrtcPtr xf86_crtc = crtc->devPrivate;
 
     /* Check if this is a fake flip routed through TearFree and abort it */
@@ -180,7 +181,7 @@ ms_present_abort_vblank(RRCrtcPtr crtc, uint64_t event_id, uint64_t msc)
 static void
 ms_present_flush(WindowPtr window)
 {
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     ScreenPtr screen = window->drawable.pScreen;
     ScrnInfoPtr scrn = xf86ScreenToScrn(screen);
     modesettingPtr ms = modesettingPTR(scrn);
@@ -190,7 +191,7 @@ ms_present_flush(WindowPtr window)
 #endif
 }
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
 
 /**
  * Callback for the DRM event queue when a flip has completed on all pipes
@@ -261,7 +262,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
         drmmode_crtc_private_ptr drmmode_crtc = config->crtc[i]->driver_private;
 
         /* Don't do pageflipping if CRTCs are rotated. */
-        if (drmmode_crtc->rotate_bo.gbm)
+        if (drmmode_crtc->rotate_bo)
             return FALSE;
 
         if (xf86_crtc_on(config->crtc[i]))
@@ -277,7 +278,7 @@ ms_present_check_unflip(RRCrtcPtr crtc,
      * the kms driver is atomic_modeset_capable.
      */
     if (!ms->atomic_modeset_capable &&
-        pixmap->devKind != drmmode_bo_get_pitch(&ms->drmmode.front_bo))
+        pixmap->devKind != gbm_bo_get_stride(ms->drmmode.front_bo))
         return FALSE;
 
     if (!ms->drmmode.glamor)
@@ -323,11 +324,32 @@ ms_present_check_flip(RRCrtcPtr crtc,
     modesettingPtr ms = modesettingPTR(scrn);
     Bool async_flip = !sync_flip;
 
+    if (reason)
+        *reason = PRESENT_FLIP_REASON_UNKNOWN;
+
     if (ms->drmmode.sprites_visible > 0)
         goto no_flip;
 
     if (ms->drmmode.pending_modeset)
         goto no_flip;
+
+    /**
+     * Does the window match the pixmap exactly?
+     *
+     * We need to check here too, despite also
+     * checking in the generic present check_flip,
+     * because we need to be able to give info
+     * about tearfree, even if we can't flip.
+     *
+     * See: https://github.com/X11Libre/xserver/issues/1812
+     * See: https://github.com/X11Libre/xserver/issues/1754
+     */
+    if (window->drawable.x != 0 || window->drawable.y != 0 ||
+        window->drawable.x != pixmap->screen_x || window->drawable.y != pixmap->screen_y ||
+        window->drawable.width != pixmap->drawable.width ||
+        window->drawable.height != pixmap->drawable.height) {
+        goto no_flip;
+    }
 
     if (!ms_present_check_unflip(crtc, window, pixmap, sync_flip, reason)) {
         if (reason && *reason == PRESENT_FLIP_REASON_BUFFER_FORMAT)
@@ -496,7 +518,7 @@ static present_screen_info_rec ms_present_screen_info = {
     .flush = ms_present_flush,
 
     .capabilities = PresentCapabilityNone,
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
     .check_flip = NULL,
     .check_flip2 = ms_present_check_flip,
     .flip = ms_present_flip,

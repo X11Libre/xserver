@@ -1,4 +1,3 @@
-module_abi_tag = 'xlibre-25'
 module_abi_dir = join_paths(module_dir, module_abi_tag)
 
 xorg_inc = include_directories(
@@ -118,7 +117,7 @@ xserver_exec = executable(
 subdir('dixmods')
 subdir('exa')
 subdir('fbdevhw')
-if gbm_dep.found()
+if build_glamor and gbm_dep.found()
     subdir('glamor_egl')
 endif
 if int10 != 'false'

@@ -98,7 +98,7 @@ miPushPixels(GCPtr pGC, PixmapPtr pBitMap, DrawablePtr pDrawable,
     int ib, w;
     int ipt;                    /* index into above arrays */
     Bool fInBox;
-    DDXPointRec pt[NPT], ptThisLine;
+    xPoint pt[NPT], ptThisLine;
     int width[NPT];
 
 #if 1

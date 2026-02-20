@@ -19,10 +19,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/extensions/render.h>
 
@@ -30,13 +27,13 @@
 #include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
 #include "include/extinit.h"
+#include "include/xf86DDC.h"
 
 #include "xf86.h"
 #include "os.h"
 #include "globals.h"
 #include "xf86Modes.h"
 #include "xf86Priv.h"
-#include "xf86DDC.h"
 #include "mipointer.h"
 #include "windowstr.h"
 #include "inputstr.h"

@@ -24,10 +24,7 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/X.h>
 #include <X11/Xmd.h>
@@ -56,7 +53,7 @@ typedef struct _xf86EdgeRec {
     short screen;
     short start;
     short end;
-    DDXPointRec offset;
+    xPoint offset;
     struct _xf86EdgeRec *next;
 } xf86EdgeRec, *xf86EdgePtr;
 

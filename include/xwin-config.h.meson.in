@@ -10,9 +10,6 @@
 
 #include <dix-config.h>
 
-/* Winsock networking */
-#mesondefine HAS_WINSOCK
-
 /* Cygwin has /dev/windows for signaling new win32 messages */
 #mesondefine HAS_DEVWINDOWS
 

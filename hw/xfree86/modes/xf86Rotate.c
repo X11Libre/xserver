@@ -20,10 +20,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <stddef.h>
 #include <string.h>
@@ -33,10 +30,10 @@
 #include <X11/extensions/dpmsconst.h>
 
 #include "dix/dix_priv.h"
+#include "include/xf86DDC.h"
 #include "mi/mi_priv.h"
 
 #include "xf86.h"
-#include "xf86DDC.h"
 #include "windowstr.h"
 #include "xf86Crtc.h"
 #include "xf86Modes.h"

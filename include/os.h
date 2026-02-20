@@ -47,9 +47,6 @@ SOFTWARE.
 #ifndef OS_H
 #define OS_H
 
-#include "callback.h"
-#include "misc.h"
-
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -59,6 +56,10 @@ SOFTWARE.
 #endif
 
 #include <X11/Xfuncproto.h>
+
+#include "xlibre_ptrtypes.h"
+#include "callback.h"
+#include "misc.h"
 
 /*
  * @brief macro for specifying non-null arguments

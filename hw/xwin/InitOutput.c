@@ -27,12 +27,10 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "win.h"
+#include "os-compat.h"
 
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
@@ -559,35 +557,26 @@ winFixupPaths(void)
 #ifdef RELOCATE_PROJECTROOT
     if (getenv("XKEYSYMDB") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XKEYSYMDB=%s\\XKeysymDB", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\XKeysymDB", basedir);
+        setenv("XKEYSYMDB", buffer, 1);
     }
     if (getenv("XERRORDB") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XERRORDB=%s\\XErrorDB", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\XErrorDB", basedir);
+        setenv("XERRORDB", buffer, 1);
     }
     if (getenv("XLOCALEDIR") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XLOCALEDIR=%s\\locale", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\locale", basedir);
+        setenv("XLOCALEDIR", buffer, 1);
     }
     if (getenv("HOME") == NULL) {
-        char buffer[MAX_PATH + 5] = {0};
-
-        strncpy(buffer, "HOME=", 6);
+        char buffer[MAX_PATH] = {0};
 
         /* query appdata directory */
         if (SHGetFolderPathA
-            (NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0,
-             buffer + 5) == 0) {
-            putenv(buffer);
+            (NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0, buffer) == 0) {
+            setenv("HOME", buffer, 1);
         }
         else {
             winMsg(X_ERROR, "Can not determine HOME directory\n");
@@ -725,12 +714,6 @@ winUseMsg(void)
            "\tX window, so window contents which are occluded show correctly in\n"
            "\ttask bar and task switcher previews.\n");
 
-#ifdef XWIN_XF86CONFIG
-    ErrorF("-config\n" "\tSpecify a configuration file.\n");
-
-    ErrorF("-configdir\n" "\tSpecify a configuration directory.\n");
-#endif
-
     ErrorF("-depth bits_per_pixel\n"
            "\tSpecify an optional bitdepth to use in fullscreen mode\n"
            "\twith a DirectDraw engine.\n");
@@ -762,11 +745,6 @@ winUseMsg(void)
     ErrorF("-icon icon_specifier\n" "\tSet screen window icon in windowed mode.\n");
 
     ErrorF("-ignoreinput\n" "\tIgnore keyboard and mouse input.\n");
-
-#ifdef XWIN_XF86CONFIG
-    ErrorF("-keyboard\n"
-           "\tSpecify a keyboard device from the configuration file.\n");
-#endif
 
     ErrorF("-[no]keyhook\n"
            "\tGrab special Windows keypresses like Alt-Tab or the Menu "
@@ -912,16 +890,7 @@ InitOutput(int argc, char *argv[])
                    "Exiting.\n");
     }
 
-#ifdef XWIN_XF86CONFIG
-    /* Try to read the xorg.conf-style configuration file */
-    if (!winReadConfigfile())
-        winErrorFVerb(1, "InitOutput - Error reading config file\n");
-#else
-    winMsg(X_INFO, "xorg.conf is not supported\n");
-    winMsg(X_INFO, "See http://x.cygwin.com/docs/faq/cygwin-x-faq.html "
-           "for more information\n");
     winConfigFiles();
-#endif
 
     /* Load preferences from XWinrc file */
     LoadPreferences();

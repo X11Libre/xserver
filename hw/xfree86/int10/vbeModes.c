@@ -28,10 +28,7 @@
  * Authors: David Dawes <dawes@xfree86.org>
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <stdio.h>
 #include <string.h>

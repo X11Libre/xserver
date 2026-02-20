@@ -27,16 +27,13 @@
  *
  * Authors:	Harold L Hunt II
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "os/ddx_priv.h"
 #include "os/log_priv.h"
 #include "os/osdep.h"
 
-#include <../xfree86/common/xorgVersion.h>
+#include "include/xorgVersion.h"
 #include "win.h"
 
 #include "dix/input_priv.h"

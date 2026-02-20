@@ -25,7 +25,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
-
 /*
  * Authors:
  *   Kevin E. Martin <martin@valinux.com>
@@ -33,18 +32,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *   Rickard E. (Rik) Faith <faith@valinux.com>
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <string.h>
 #include <X11/X.h>
 #include <X11/Xproto.h>
+#include <X11/dri/xf86driproto.h>
 
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/dristruct.h"
+#include "include/sarea.h"
 
 #include "xf86.h"
 #include "misc.h"
@@ -53,12 +52,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "cursorstr.h"
 #include "scrnintstr.h"
 #include "servermd.h"
-#include <X11/dri/xf86driproto.h>
 #include "swaprep.h"
 #include "xf86str.h"
 #include "dri_priv.h"
-#include "sarea.h"
-#include "dristruct.h"
 #include "xf86drm.h"
 #include "protocol-versions.h"
 #include "xf86Extensions.h"

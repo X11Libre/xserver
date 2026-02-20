@@ -12,6 +12,7 @@
 #include "dix/dix_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "include/xvmcext.h"
 #include "miext/extinit_priv.h"
 #include "Xext/xvdix_priv.h"
 
@@ -22,7 +23,6 @@
 #include "scrnintstr.h"
 #include "extnsionst.h"
 #include "servermd.h"
-#include "xvmcext.h"
 
 #define SERVER_XVMC_MAJOR_VERSION               1
 #define SERVER_XVMC_MINOR_VERSION               1

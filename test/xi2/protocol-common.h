@@ -24,10 +24,6 @@
 #ifndef PROTOCOL_COMMON_H
 #define PROTOCOL_COMMON_H
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #include "dix/resource_priv.h"
 
 #include "scrnintstr.h"

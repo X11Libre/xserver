@@ -135,7 +135,6 @@ Equipment Corporation.
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "servermd.h"
-#include "mivalidate.h"
 #include "globals.h"
 #include "compint.h"
 #include "privates.h"

@@ -51,8 +51,6 @@ XRetCode ProcWarpPointer(ClientPtr pClient)
 
 XRetCode SProcChangeActivePointerGrab(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
-XRetCode SProcGrabButton(ClientPtr pClient)
-    _X_ATTRIBUTE_NONNULL_ARG(1);
 XRetCode SProcGrabKey(ClientPtr pClient)
     _X_ATTRIBUTE_NONNULL_ARG(1);
 XRetCode SProcGrabKeyboard(ClientPtr pClient)

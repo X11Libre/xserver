@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef PROPERTY_H
 #define PROPERTY_H
 
+#include "xlibre_ptrtypes.h"
 #include "window.h"
 
 extern _X_EXPORT int dixChangeWindowProperty(ClientPtr pClient,

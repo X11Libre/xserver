@@ -1,7 +1,4 @@
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
