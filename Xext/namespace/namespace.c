@@ -131,8 +131,7 @@ int RevokeAuthForXnamespace(struct Xnamespace *curr) {
     struct auth_token *auth_token_tmp;
     int k = 0;
     xorg_list_for_each_entry_safe(auth_token_walk, auth_token_tmp, &curr->auth_tokens, entry) {
-        XNS_LOG("Revoking key");
-        printf(" auth: \"%s\" \"", auth_token_walk->authProto);
+        XNS_LOG("Revoking key auth: \"%s\" \"", auth_token_walk->authProto);
         for (int i=0; i<auth_token_walk->authTokenLen; i++)
             printf("%02X", (unsigned char)auth_token_walk->authTokenData[i]);
         printf("\" for namespace %s\n",curr->name);
@@ -156,20 +155,40 @@ int RevokeAuthForXnamespace(struct Xnamespace *curr) {
 int XnamespaceAssignByClientName(struct XnamespaceClientPriv *subj, const char *clientName) {
     struct client_token *c_walk;
     struct auth_token *auth_token_walk;
+    char *clientBasename = basename(clientName);
+    struct Xnamespace *xns_walk;
 
-    xorg_list_for_each_entry(c_walk, &client_list, entry) {
-        /* test for the name if it doesn't exist yet */
-        if (strcmp(clientName, c_walk->clientName) == 0) {
-            XNS_LOG("%s matching ns found: %s\n",clientName,c_walk->Designation->name);
-            XnamespaceAssignClient(subj, c_walk->Designation);
-            /* assign with first found token */
-            xorg_list_for_each_entry(auth_token_walk, &c_walk->Designation->auth_tokens, entry) {
-                subj->authId = auth_token_walk->authId;
-                /* (at least one) auth found for namespace, pass it on to the priv */
+    xorg_list_for_each_entry(xns_walk, &ns_list, entry) {
+        /* walk path list first */
+        xorg_list_for_each_entry(c_walk, &xns_walk->client_path_list, entry) {
+            if (strcmp(clientName, c_walk->clientName) == 0) {
+                XNS_LOG("%s matching ns found: %s\n",clientName,xns_walk->name);
+                XnamespaceAssignClient(subj, xns_walk);
+                /* assign with first found token */
+                xorg_list_for_each_entry(auth_token_walk, &xns_walk->auth_tokens, entry) {
+                    subj->authId = auth_token_walk->authId;
+                    /* (at least one) auth found for namespace, pass it on to the priv */
+                    return Success;
+                }
+                XNS_LOG("No auth tokens for namespace, client still assigned\n");
                 return Success;
             }
-            XNS_LOG("No auth tokens for namespace, client still assigned\n");
-            return Success;
+        }
+        /* not in the path list, check (base)name list */
+        xorg_list_for_each_entry(c_walk, &xns_walk->client_list, entry) {
+            /* test for the name if it doesn't exist yet */
+            if (strcmp(clientBasename, c_walk->clientName) == 0) {
+                XNS_LOG("%s matching ns found: %s\n",clientBasename,xns_walk->name);
+                XnamespaceAssignClient(subj, xns_walk);
+                /* assign with first found token */
+                xorg_list_for_each_entry(auth_token_walk, &xns_walk->auth_tokens, entry) {
+                    subj->authId = auth_token_walk->authId;
+                    /* (at least one) auth found for namespace, pass it on to the priv */
+                    return Success;
+                }
+                XNS_LOG("No auth tokens for namespace, client still assigned\n");
+                return Success;
+            }
         }
     }
     /* failed to find a match */
@@ -195,15 +214,6 @@ struct Xnamespace *GenerateNewXnamespaceForClient(struct Xnamespace *copyfrom, c
 
     xorg_list_append_ndup(&new_run_ns->entry, &ns_list);
     return new_run_ns;
-}
-
-void PrintXnamespaces(void) {
-    struct Xnamespace *walk;
-    XNS_LOG("Namespaces: ");
-    xorg_list_for_each_entry(walk, &ns_list, entry) {
-        printf("%s, ",walk->name);
-    }
-    printf("\n");
 }
 
 int DeleteXnamespace(struct Xnamespace *curr) {

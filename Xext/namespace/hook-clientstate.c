@@ -21,8 +21,9 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
         break;
     }
     case ClientStateRunning: {
-        /* just get actual name instead of path or command flags */
-        const char *clientName = strtok(basename((char*)GetClientCmdName(client)), " ");
+        /* just get path without command flags */
+        const char *clientName = strtok((char*)GetClientCmdName(client), " ");
+        char *clientBasename = basename((char*)clientName);
 
         XNS_LOG("pid: %d\n",GetClientPid(client));
 
@@ -45,7 +46,7 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
             return;
         }
         else if (ns_default->deny) {
-            XNS_LOG("Deny Connection Request From %s\n",clientName);
+            XNS_LOG("Deny Connection Request From %s\n",clientBasename);
             client->noClientException = -1;
             return;
         }
@@ -53,9 +54,9 @@ void hookClientState(CallbackListPtr *pcbl, void *unused, void *calldata)
             /* builtin flag should only be unset if the config is set as new_ns
              * "fancy" formatted name
              */
-            int len = snprintf(NULL, 0, "%s%d", clientName, client->index);
+            int len = snprintf(NULL, 0, "%s%d", clientBasename, client->index);
             char *str = malloc(len + 1);
-            snprintf(str, len+1, "%s%d", clientName, client->index);
+            snprintf(str, len+1, "%s%d", clientBasename, client->index);
 
             struct Xnamespace *new_run_ns = GenerateNewXnamespaceForClient(&ns_anon, str);
             free(str);

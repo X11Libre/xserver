@@ -45,6 +45,10 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                 /* questionable */
                 if (strcmp("_NET_ACTIVE_WINDOW", atomNameTest)==0)
                     goto pass;
+                if (strcmp("_NET_DESKTOP_GEOMETRY", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_DESKTOP_VIEWPORT", atomNameTest)==0)
+                    goto pass;
                 /* harmless? */
                 if (strcmp("WM_NAME", atomNameTest)==0)
                     goto pass;
@@ -57,6 +61,14 @@ void hookPropertyAccess(CallbackListPtr *pcbl, void *unused, void *calldata)
                 if (strcmp("_NET_SUPPORTING_WM_CHECK", atomNameTest)==0)
                     goto pass;
                 if (strcmp("_NET_SUPPORTED", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_NUMBER_OF_DESKTOPS", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_DESKTOP_NAMES", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_SHOWING_DESKTOP", atomNameTest)==0)
+                    goto pass;
+                if (strcmp("_NET_CURRENT_DESKTOP", atomNameTest)==0)
                     goto pass;
                 /* we already whitelist X_QueryTree, these do the same thing */
                 if (strcmp("_NET_CLIENT_LIST", atomNameTest)==0)

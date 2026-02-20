@@ -37,8 +37,6 @@ struct Xnamespace *ns_default;
 
 struct xorg_list ns_list = { 0 };
 
-struct xorg_list client_list = { 0 };
-
 char *namespaceConfigFile = NULL;
 static const char *default_namespace;
 
@@ -98,7 +96,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
 
     if (strcmp(token, "default") == 0)
     {
-        if ((token = strtok(NULL, " ")) == NULL)
+        if ((token = strtok(NULL, " \t")) == NULL)
         {
             XNS_LOG("none given, default DENY\n");
             return;
@@ -113,7 +111,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
     if ((strcmp(token, "namespace") == 0) ||
         (strcmp(token, "container") == 0)) /* "container" is deprecated ! */
     {
-        if ((token = strtok(NULL, " ")) == NULL)
+        if ((token = strtok(NULL, " \t")) == NULL)
         {
             XNS_LOG("namespace missing id\n");
             return;
@@ -141,7 +139,7 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
             FatalError("Xnamespace: failed allocating token\n");
 
         new_token->authProto = strdup(token);
-        token = strtok(NULL, " ");
+        token = strtok(NULL, " \t");
 
         new_token->authTokenLen = strlen(token)/2;
         new_token->authTokenData = calloc(1, new_token->authTokenLen);
@@ -199,13 +197,23 @@ static void parseLine(char *line, struct Xnamespace **walk_ns)
     }
     if (strcmp(token, "client") == 0)
     {
-        while ((token = strtok(NULL, " ")) != NULL) {
+        while ((token = strtok(NULL, " \t")) != NULL) {
             struct client_token *new_token = calloc(1, sizeof(struct client_token));
             new_token->clientName = strdup(token);
-            new_token->Designation = curr;
-            xorg_list_append_ndup(&new_token->entry, &client_list);
+            xorg_list_append_ndup(&new_token->entry, &curr->client_list);
             XNS_LOG("client %s added for %s\n",new_token->clientName,curr->name);
         }
+        return;
+    }
+    if (strcmp(token, "client_by_path") == 0)
+    {
+        while ((token = strtok(NULL, " \t")) != NULL) {
+            struct client_token *new_token = calloc(1, sizeof(struct client_token));
+            new_token->clientName = strdup(token);
+            xorg_list_append_ndup(&new_token->entry, &curr->client_path_list);
+            XNS_LOG("client %s added for %s\n",new_token->clientName,curr->name);
+        }
+        return;
     }
     XNS_LOG("unknown token \"%s\"\n", token);
 }

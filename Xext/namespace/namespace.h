@@ -21,7 +21,6 @@ struct auth_token {
 struct client_token {
     struct xorg_list entry;
     char *clientName;
-    struct Xnamespace *Designation;
 };
 
 struct Xns_perm_list {
@@ -54,9 +53,10 @@ struct Xnamespace {
     struct Xns_perm_list perms;
     struct xorg_list auth_tokens;
     struct xorg_list pids;
+    struct xorg_list client_list;
+    struct xorg_list client_path_list;
 };
 
-extern struct xorg_list client_list;
 extern struct xorg_list ns_list;
 extern struct Xnamespace ns_root;
 extern struct Xnamespace ns_anon;
@@ -86,7 +86,6 @@ int XnamespaceAssignByClientName(struct XnamespaceClientPriv *subj, const char *
 struct Xnamespace *GenerateNewXnamespaceForClient(struct Xnamespace *copyfrom, const char* newname);
 void NewVirtualRootWindowForXnamespace(WindowPtr rootWindow, struct Xnamespace *curr);
 int DeleteXnamespace(struct Xnamespace *curr);
-void PrintXnamespaces(void);
 int PruneXnamespaces(void);
 char** GetXnamespacesAsCharr (void);
 void XnsRegisterPid(struct XnamespaceClientPriv *subj);
