@@ -21,7 +21,7 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
 {
     ScreenPtr pScreen = (ScreenPtr)screen;
 
-    // only act on first screen
+    /* only act on first screen */
     if (pScreen->myNum)
         return;
 
@@ -39,34 +39,38 @@ void hookInitRootWindow(CallbackListPtr *pcbl, void *data, void *screen)
             continue;
         }
 
-        int rc = 0;
-        WindowPtr pWin = dixCreateWindow(
-            FakeClientID(0), realRoot, 0, 0, 23, 23,
-            0, /* bw */
-            InputOutput,
-            0, /* vmask */
-            NULL, /* vlist */
-            0, /* depth */
-            serverClient,
-            wVisual(realRoot), /* visual */
-            &rc);
-
-        if (!pWin)
-            FatalError("hookInitRootWindow: cant create per-namespace root window for %s\n", walk->name);
-
-        Mask mask = pWin->eventMask;
-        pWin->eventMask = 0;    /* subterfuge in case AddResource fails */
-        if (!AddResource(pWin->drawable.id, X11_RESTYPE_WINDOW, (void *) pWin))
-            FatalError("hookInitRootWindow: cant add per-namespace root window as resource\n");
-        pWin->eventMask = mask;
-
-        walk->rootWindow = pWin;
-
-        // set window name
-        char buf[PATH_MAX] = { 0 };
-        snprintf(buf, sizeof(buf)-1, "XNS-ROOT:%s", walk->name);
-        setWinStrProp(pWin, XA_WM_NAME, buf);
-
-        XNS_LOG("<%s> virtual root 0x%0llx\n", walk->name, (unsigned long long)walk->rootWindow->drawable.id);
+        NewVirtualRootWindowForXnamespace(realRoot, walk);
     }
+}
+
+void NewVirtualRootWindowForXnamespace(WindowPtr rootWindow, struct Xnamespace *curr) {
+    int rc = 0;
+    WindowPtr pWin = dixCreateWindow(
+        FakeClientID(0), rootWindow, 0, 0, 23, 23,
+                                     0, /* bw */
+                                     InputOutput,
+                                     0, /* vmask */
+                                     NULL, /* vlist */
+                                     0, /* depth */
+                                     serverClient,
+                                     wVisual(rootWindow), /* visual */
+                                     &rc);
+
+    if (!pWin)
+        FatalError("hookInitRootWindow: cant create per-namespace root window for %s\n", curr->name);
+
+    Mask mask = pWin->eventMask;
+    pWin->eventMask = 0;    /* subterfuge in case AddResource fails */
+    if (!AddResource(pWin->drawable.id, X11_RESTYPE_WINDOW, (void *) pWin))
+        FatalError("hookInitRootWindow: cant add per-namespace root window as resource\n");
+    pWin->eventMask = mask;
+
+    curr->rootWindow = pWin;
+
+    /* set window name */
+    char buf[PATH_MAX] = { 0 };
+    snprintf(buf, sizeof(buf)-1, "XNS-ROOT:%s", curr->name);
+    setWinStrProp(pWin, XA_WM_NAME, buf);
+
+    XNS_LOG("<%s> virtual root 0x%0llx\n", curr->name, (unsigned long long)curr->rootWindow->drawable.id);
 }

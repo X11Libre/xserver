@@ -1,18 +1,20 @@
-
 # auth <proto> <hex-key>
-  auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b0
   auth MIT-MAGIC-COOKIE-1 56f8e62b78e58962de0ceefc05ad90b0
 
-# namespace <name> <parent_name>
-namespace xeyes root
-  auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b8
+# namespace <name>
+namespace xeyes
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90a8
+# allow <perm> ...
   allow mouse-motion
   allow shape
-  allow xinput
+  allow xinput xkeyboard
+# client <prog> ...
+  client xeyes
 
-namespace xclock root
-  auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad90b7
-  auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad91b7
-  auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad92b7
+namespace xterm
   auth MIT-MAGIC-COOKIE-1 46f8e62b78e58962de0ceefc05ad93b7
+# (optional) superpower
+  superpower
+  client xterm uxterm
+# default <namespace>
+default anon
