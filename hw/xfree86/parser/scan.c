@@ -848,8 +848,15 @@ xf86initConfigFiles(void)
     configLineNo = 0;
     pushToken = LOCK_TOKEN;
 
-    configBuf = calloc(1, CONFIG_BUF_LEN);
-    configRBuf = calloc(1, CONFIG_BUF_LEN);
+    if (!(configBuf = calloc(1, CONFIG_BUF_LEN))) {
+        ErrorF("xf86initConfigFiles: cannot allocate configBuf\n");
+        return;
+    }
+    if (!(configRBuf = calloc(1, CONFIG_BUF_LEN))) {
+        free(configBuf);
+        ErrorF("xf86initConfigFiles: cannot allocate configRBuf\n");
+        return;
+    }
     configBuf[0] = '\0';        /* sanity ... */
 }
 
