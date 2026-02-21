@@ -42,7 +42,6 @@ apt-get install -y \
 	libpciaccess-dev \
 	libpixman-1-dev \
 	libspice-protocol-dev \
-	libsystemd-dev \
 	libudev-dev \
 	libunwind-dev \
 	libx11-dev \
