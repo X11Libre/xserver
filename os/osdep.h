@@ -135,6 +135,7 @@ typedef void (*OsSigHandlerPtr) (int sig);
 OsSigHandlerPtr OsSignal(int sig, OsSigHandlerPtr handler);
 
 void OsInit(void);
+void OsSeccompInit(void);
 
 _X_EXPORT /* needed by the int10 module, but should not be used by OOT drivers */
 void OsBlockSignals(void);
