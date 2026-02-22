@@ -1471,6 +1471,10 @@ InvalidHost(register struct sockaddr *saddr, int len, ClientPtr client)
     if (!AccessEnabled)         /* just let them in */
         return 0;
     family = ConvertAddr(saddr, &len, (void **) &addr);
+#ifdef HAVE_SECCOMP
+    if (family != FamilyLocal)
+        return 1;
+#endif
     if (family == -1)
         return 1;
     if (family == FamilyLocal) {
