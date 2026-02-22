@@ -27,6 +27,14 @@ struct Xnamespace ns_anon = {
 
 struct xorg_list ns_list = { 0 };
 
+/**
+ * @brief Path to the namespace configuration file.
+ *
+ * @details
+ * If this is null, it disables the namespace extension.
+ *
+ * @see os/utils.c#701
+ */
 char *namespaceConfigFile = NULL;
 
 static struct Xnamespace* select_ns(const char* name)
