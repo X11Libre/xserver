@@ -932,7 +932,7 @@ ProcShapeGetRectangles(ClientPtr client)
                 .height = boxes[i].y2 - boxes[i].y1,
             };
             x_rpcbuf_write_CARD16s(&rpcbuf, (CARD16*)&rect, 4);
-        };
+        }
     }
 
     xShapeGetRectanglesReply reply = {

@@ -753,14 +753,13 @@ ResizeWeighting(int oldX1, int oldY1, int oldX2, int oldY2, int oldBW,
 
     if (newX1 == oldX1 && newY1 == oldY1)
         return RL_GRAVITY_NORTH_WEST;
-    else if (newX1 == oldX1 && newY2 == oldY2)
+    if (newX1 == oldX1 && newY2 == oldY2)
         return RL_GRAVITY_SOUTH_WEST;
-    else if (newX2 == oldX2 && newY2 == oldY2)
+    if (newX2 == oldX2 && newY2 == oldY2)
         return RL_GRAVITY_SOUTH_EAST;
-    else if (newX2 == oldX2 && newY1 == oldY1)
+    if (newX2 == oldX2 && newY1 == oldY1)
         return RL_GRAVITY_NORTH_EAST;
-    else
-        return RL_GRAVITY_NORTH_WEST;
+    return RL_GRAVITY_NORTH_WEST;
 }
 
 /*
