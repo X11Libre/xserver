@@ -1627,6 +1627,10 @@ CheckKeyTypes(ClientPtr client,
     for (i = 0; i < req->nTypes; i++) {
         unsigned width;
 
+        if (!_XkbCheckRequestBounds(client, req, wire, wire + 1)) {
+            *nMapsRtrn = _XkbErrCode3(0x0b, req->nTypes, i);
+            return 0;
+        }
         if (client->swapped && doswap) {
             swaps(&wire->virtualMods);
         }
@@ -1652,7 +1656,18 @@ CheckKeyTypes(ClientPtr client,
             xkbModsWireDesc *preWire;
 
             mapWire = (xkbKTSetMapEntryWireDesc *) &wire[1];
+            if (!_XkbCheckRequestBounds(client, req, mapWire,
+                                        &mapWire[wire->nMapEntries])) {
+                *nMapsRtrn = _XkbErrCode3(0x0c, i, wire->nMapEntries);
+                return 0;
+            }
             preWire = (xkbModsWireDesc *) &mapWire[wire->nMapEntries];
+            if (wire->preserve &&
+                !_XkbCheckRequestBounds(client, req, preWire,
+                                        &preWire[wire->nMapEntries])) {
+                *nMapsRtrn = _XkbErrCode3(0x0d, i, wire->nMapEntries);
+                return 0;
+            }
             for (n = 0; n < wire->nMapEntries; n++) {
                 if (client->swapped && doswap) {
                     swaps(&mapWire[n].virtualMods);
