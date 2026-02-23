@@ -319,6 +319,7 @@ UseMsg(void)
     ErrorF("ttyxx                  server started from init on /dev/ttyxx\n");
     ErrorF("v                      video blanking for screen-saver\n");
     ErrorF("-v                     screen-saver without video blanking\n");
+    ErrorF("-verbose [n]           verbose startup messages\n");
     ErrorF("-wr                    create root window with white background\n");
     ErrorF("-maxbigreqsize         set maximal bigrequest size \n");
 #ifdef XINERAMA
@@ -409,6 +410,7 @@ void
 ProcessCommandLine(int argc, char *argv[])
 {
     int i, skip;
+    int verbosity = 0;
 
     defaultKeyboardControl.autoRepeat = TRUE;
 
@@ -669,6 +671,21 @@ ProcessCommandLine(int argc, char *argv[])
             defaultScreenSaverBlanking = PreferBlanking;
         else if (strcmp(argv[i], "-v") == 0)
             defaultScreenSaverBlanking = DontPreferBlanking;
+        else if (strcmp(argv[i], "-verbose") == 0) {
+            int n = i + 1; /* next argument */
+            verbosity++;
+            if (n < argc && argv[n] && argv[n][0] != '-') {
+                char *end;
+                long val;
+
+                val = strtol(argv[n], &end, 0);
+                if (*end == '\0') {
+                    verbosity = val;
+                    i = n;
+                }
+            }
+            LogSetParameter(XLOG_VERBOSITY, verbosity);
+        }
         else if (strcmp(argv[i], "-wr") == 0)
             whiteRoot = TRUE;
         else if (strcmp(argv[i], "-background") == 0) {

@@ -288,10 +288,14 @@ ddxProcessArgument(int argc, char **argv, int i)
         ephyrFuncs.finiAccel = ephyrDrawFini;
         return 1;
     }
+    /* Xephyr adopted a different spelling before the common -verbose option
+     *  was added, so it's been left for compatibility */
     else if (!strcmp(argv[i], "-verbosity")) {
         if (i + 1 < argc && argv[i + 1][0] != '-') {
-            xorgLogVerbosity = atoi(argv[i + 1]);
-            EPHYR_LOG("set verbosiry to %d\n", xorgLogVerbosity);
+            int verbosity = atoi(argv[i + 1]);
+
+            LogSetParameter(XLOG_VERBOSITY, verbosity);
+            EPHYR_LOG("set verbosity to %d\n", verbosity);
             return 2;
         }
         else {
