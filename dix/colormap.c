@@ -1645,6 +1645,8 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
 {
     Pixel *ppixRed, *ppixGreen, *ppixBlue;
     Pixel *ppix;
+    Pixel *p;      /* loop iterator for the pixel arrays */
+    Pixel *pDst;   /* write pointer into `pixels[]` */
     int npixR, npixG, npixB;
     Bool okR, okG, okB;
     Pixel *rpix = 0, *gpix = 0, *bpix = 0;
@@ -1721,28 +1723,28 @@ AllocDirect(int client, ColormapPtr pmap, int c, int r, int g, int b,
     *pbmask <<= pmap->pVisual->offsetBlue;
 
     ppix = rpix + pmap->numPixelsRed[client];
-    for (Pixel *pDst = pixels, *p = ppixRed; p < ppixRed + npixR; p++) {
-        *ppix++ = *p;
-        if (p < ppixRed + c)
-            *pDst++ |= *p << pmap->pVisual->offsetRed;
+    memcpy(ppix, ppixRed, npixR * sizeof(Pixel));
+    for (pDst = pixels, p = ppixRed; (size_t)(p - ppixRed) < npixR; p++) {
+         if ((size_t)(p - ppixRed) < c)
+             *pDst++ |= *p << pmap->pVisual->offsetRed;
     }
     pmap->numPixelsRed[client] += npixR;
     pmap->freeRed -= npixR;
 
     ppix = gpix + pmap->numPixelsGreen[client];
-    for (Pixel *pDst = pixels, *p = ppixGreen; p < ppixGreen + npixG; p++) {
-        *ppix++ = *p;
-        if (p < ppixGreen + c)
+    memcpy(ppix, ppixGreen, npixG * sizeof(Pixel));
+    for (pDst = pixels, p = ppixGreen; (size_t)(p - ppixGreen) < npixG; p++) {
+        if ((size_t)(p - ppixGreen) < c)
             *pDst++ |= *p << pmap->pVisual->offsetGreen;
     }
     pmap->numPixelsGreen[client] += npixG;
     pmap->freeGreen -= npixG;
 
     ppix = bpix + pmap->numPixelsBlue[client];
-    for (Pixel *pDst = pixels, *p = ppixBlue; p < ppixBlue + npixB; p++) {
-        *ppix++ = *p;
-        if (p < ppixBlue + c)
-            *pDst++ |= *p << pmap->pVisual->offsetBlue;
+    memcpy(ppix, ppixBlue, npixB * sizeof(Pixel));
+    for (pDst = pixels, p = ppixBlue;(size_t)(p - ppixBlue) < npixB; p++) {
+        if ((size_t)(p - ppixBlue) < c)
+             *pDst++ |= *p << pmap->pVisual->offsetBlue;
     }
     pmap->numPixelsBlue[client] += npixB;
     pmap->freeBlue -= npixB;
@@ -1788,8 +1790,11 @@ AllocPseudo(int client, ColormapPtr pmap, int c, int r, Bool contig,
         ppix += pmap->numPixelsRed[client];
         *pppixFirst = ppix;
         pDst = pixels;
+        /* bulk-copy all temporary pixels into the clientPixelsRed array */
+        memcpy(ppix, ppixTemp, npix * sizeof(Pixel));
+        ppix += npix;
+
         for (Pixel *p = ppixTemp; p < ppixTemp + npix; p++) {
-            *ppix++ = *p;
             if (p < ppixTemp + c)
                 *pDst++ = *p;
         }
