@@ -1766,6 +1766,11 @@ CheckKeySyms(ClientPtr client,
         KeySym *pSyms;
         register unsigned nG;
 
+        /* Check we received enough data to read the next xkbSymMapWireDesc */
+        if (!_XkbCheckRequestBounds(client, req, wire, wire + 1)) {
+            *errorRtrn = _XkbErrCode3(0x18, i + req->firstKeySym, i);
+            return 0;
+        }
         if (client->swapped && doswap) {
             swaps(&wire->nSyms);
         }
@@ -1804,6 +1809,12 @@ CheckKeySyms(ClientPtr client,
             return 0;
         }
         pSyms = (KeySym *) &wire[1];
+        if (wire->nSyms != 0) {
+            if (!_XkbCheckRequestBounds(client, req, pSyms, &pSyms[wire->nSyms])) {
+                *errorRtrn = _XkbErrCode3(0x19, i + req->firstKeySym, wire->nSyms);
+                return 0;
+            }
+        }
         wire = (xkbSymMapWireDesc *) &pSyms[wire->nSyms];
     }
 
@@ -1827,11 +1838,12 @@ CheckKeySyms(ClientPtr client,
 }
 
 static int
-CheckKeyActions(XkbDescPtr xkb,
-                xkbSetMapReq * req,
-                int nTypes,
-                CARD8 *mapWidths,
-                CARD16 *symsPerKey, CARD8 **wireRtrn, int *nActsRtrn)
+CheckKeyActions(ClientPtr client,
+               XkbDescPtr xkb,
+               xkbSetMapReq * req,
+               int nTypes,
+               CARD8 *mapWidths,
+               CARD16 *symsPerKey, CARD8 **wireRtrn, int *nActsRtrn)
 {
     int nActs;
     CARD8 *wire = *wireRtrn;
@@ -1842,6 +1854,11 @@ CheckKeyActions(XkbDescPtr xkb,
     CHK_REQ_KEY_RANGE2(0x21, req->firstKeyAct, req->nKeyActs, req, (*nActsRtrn),
                        0);
     for (nActs = i = 0; i < req->nKeyActs; i++) {
+        /* Check we received enough data to read the next byte on the wire */
+        if (!_XkbCheckRequestBounds(client, req, wire, wire + 1)) {
+            *nActsRtrn = _XkbErrCode3(0x24, i + req->firstKeyAct, i);
+            return 0;
+        }
         if (wire[0] != 0) {
             if (wire[0] == symsPerKey[i + req->firstKeyAct])
                 nActs += wire[0];
@@ -1860,7 +1877,8 @@ CheckKeyActions(XkbDescPtr xkb,
 }
 
 static int
-CheckKeyBehaviors(XkbDescPtr xkb,
+CheckKeyBehaviors(ClientPtr client,
+                  XkbDescPtr xkb,
                   xkbSetMapReq * req,
                   xkbBehaviorWireDesc ** wireRtrn, int *errorRtrn)
 {
@@ -1886,6 +1904,11 @@ CheckKeyBehaviors(XkbDescPtr xkb,
     }
 
     for (i = 0; i < req->totalKeyBehaviors; i++, wire++) {
+        /* Check we received enough data to read the next behavior */
+        if (!_XkbCheckRequestBounds(client, req, wire, wire + 1)) {
+            *errorRtrn = _XkbErrCode3(0x36, first, i);
+            return 0;
+        }
         if ((wire->key < first) || (wire->key > last)) {
             *errorRtrn = _XkbErrCode4(0x33, first, last, wire->key);
             return 0;
@@ -1911,7 +1934,8 @@ CheckKeyBehaviors(XkbDescPtr xkb,
 }
 
 static int
-CheckVirtualMods(XkbDescRec * xkb,
+CheckVirtualMods(ClientPtr client,
+                 XkbDescRec * xkb,
                  xkbSetMapReq * req, CARD8 **wireRtrn, int *errorRtrn)
 {
     register CARD8 *wire = *wireRtrn;
@@ -1923,12 +1947,18 @@ CheckVirtualMods(XkbDescRec * xkb,
         if (req->virtualMods & bit)
             nMods++;
     }
+    /* Check we received enough data for the number of virtual mods expected */
+    if (!_XkbCheckRequestBounds(client, req, wire, wire + XkbPaddedSize(nMods))) {
+        *errorRtrn = _XkbErrCode3(0x37, nMods, i);
+        return 0;
+    }
     *wireRtrn = (wire + XkbPaddedSize(nMods));
     return 1;
 }
 
 static int
-CheckKeyExplicit(XkbDescPtr xkb,
+CheckKeyExplicit(ClientPtr client,
+                 XkbDescPtr xkb,
                  xkbSetMapReq * req, CARD8 **wireRtrn, int *errorRtrn)
 {
     register CARD8 *wire = *wireRtrn;
@@ -1954,6 +1984,11 @@ CheckKeyExplicit(XkbDescPtr xkb,
     }
     start = wire;
     for (i = 0; i < req->totalKeyExplicit; i++, wire += 2) {
+        /* Check we received enough data to read the next two bytes */
+        if (!_XkbCheckRequestBounds(client, req, wire, wire + 2)) {
+            *errorRtrn = _XkbErrCode4(0x54, first, last, i);
+            return 0;
+        }
         if ((wire[0] < first) || (wire[0] > last)) {
             *errorRtrn = _XkbErrCode4(0x53, first, last, wire[0]);
             return 0;
@@ -2009,7 +2044,8 @@ CheckModifierMap(ClientPtr client, XkbDescPtr xkb, xkbSetMapReq * req,
 }
 
 static int
-CheckVirtualModMap(XkbDescPtr xkb,
+CheckVirtualModMap(ClientPtr client,
+                   XkbDescPtr xkb,
                    xkbSetMapReq * req,
                    xkbVModMapWireDesc ** wireRtrn, int *errRtrn)
 {
@@ -2033,6 +2069,11 @@ CheckVirtualModMap(XkbDescPtr xkb,
         return 0;
     }
     for (i = 0; i < req->totalVModMapKeys; i++, wire++) {
+        /* Check we received enough data to read the next virtual mod map key */
+        if (!_XkbCheckRequestBounds(client, req, wire, wire + 1)) {
+            *errRtrn = _XkbErrCode3(0x74, first, i);
+            return 0;
+        }
         if ((wire->key < first) || (wire->key > last)) {
             *errRtrn = _XkbErrCode4(0x73, first, last, wire->key);
             return 0;
@@ -2574,7 +2615,7 @@ _XkbSetMapChecks(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req,
     }
 
     if ((req->present & XkbKeyActionsMask) &&
-        (!CheckKeyActions(xkb, req, nTypes, mapWidths, symsPerKey,
+        (!CheckKeyActions(client, xkb, req, nTypes, mapWidths, symsPerKey,
                           (CARD8 **) &values, &nActions))) {
         client->errorValue = nActions;
         return BadValue;
@@ -2582,18 +2623,18 @@ _XkbSetMapChecks(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req,
 
     if ((req->present & XkbKeyBehaviorsMask) &&
         (!CheckKeyBehaviors
-         (xkb, req, (xkbBehaviorWireDesc **) &values, &error))) {
+         (client, xkb, req, (xkbBehaviorWireDesc **) &values, &error))) {
         client->errorValue = error;
         return BadValue;
     }
 
     if ((req->present & XkbVirtualModsMask) &&
-        (!CheckVirtualMods(xkb, req, (CARD8 **) &values, &error))) {
+        (!CheckVirtualMods(client, xkb, req, (CARD8 **) &values, &error))) {
         client->errorValue = error;
         return BadValue;
     }
     if ((req->present & XkbExplicitComponentsMask) &&
-        (!CheckKeyExplicit(xkb, req, (CARD8 **) &values, &error))) {
+        (!CheckKeyExplicit(client, xkb, req, (CARD8 **) &values, &error))) {
         client->errorValue = error;
         return BadValue;
     }
@@ -2604,7 +2645,7 @@ _XkbSetMapChecks(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req,
     }
     if ((req->present & XkbVirtualModMapMask) &&
         (!CheckVirtualModMap
-         (xkb, req, (xkbVModMapWireDesc **) &values, &error))) {
+         (client, xkb, req, (xkbVModMapWireDesc **) &values, &error))) {
         client->errorValue = error;
         return BadValue;
     }
