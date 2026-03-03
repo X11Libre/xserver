@@ -856,7 +856,7 @@ and RemoveEnabledDevice are in Xserver/os/connection.c.
 <para>
 Similarly, the X server or an extension may need to wait for some timeout.
 Early X releases implemented this functionality using block and wakeup handlers,
-but this has been rewritten to use a general timer facilty, and the
+but this has been rewritten to use a general timer facility, and the
 internal screen saver facilities reimplemented to use Timers.
 These functions are TimerInit, TimerForce, TimerSet, TimerCancel,
 and TimerFree, as defined in Xserver/include/os.h. A callback function will be called

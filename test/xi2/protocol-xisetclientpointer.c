@@ -76,7 +76,7 @@ request_XISetClientPointer(xXISetClientPointerReq * req, int error)
        client->req_len (see above). We previously had to swap it here, so
        that ProcXIPassiveGrabDevice() will swap it back. Since that's gone
        now, still swapping itself would break if this function is called
-       again and writing back a errornously swapped value
+       again and writing back a erroneously swapped value
     */
 
     swapl(&req->win);

@@ -100,7 +100,7 @@ cause some tearing on these displays, but it prevents a permanent or periodic
 slowdown or irritating judder of animations if not all video outputs are running
 synchronized with each other and with the same refresh rate. There is no perfect
 solution apart from perfectly synchronized outputs, but this option may give
-preferrable results if the displays in a multi-display setup mirror or clone
+preferable results if the displays in a multi-display setup mirror or clone
 each other.  The default is
 .B off.
 .TP

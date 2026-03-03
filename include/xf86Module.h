@@ -144,7 +144,7 @@ typedef struct {
  */
 typedef struct {
     CARD8 majorversion;         /* module-specific major version */
-    CARD8 minorversion;         /* moudle-specific minor version */
+    CARD8 minorversion;         /* module-specific minor version */
     CARD16 patchlevel;          /* module-specific patch level */
     const char *abiclass;       /* ABI class that the module uses */
     CARD32 abiversion;          /* ABI version */

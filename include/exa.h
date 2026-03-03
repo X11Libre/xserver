@@ -585,7 +585,7 @@ typedef struct _ExaDriver {
      * @return TRUE if PrepareAccess() successfully prepared the pixmap for CPU
      * drawing.
      * @return FALSE if PrepareAccess() is unsuccessful and EXA should use
-     * DownloadFromScreen() to migate the pixmap out.
+     * DownloadFromScreen() to mitigate the pixmap out.
      */
     Bool (*PrepareAccess) (PixmapPtr pPix, int index);
 

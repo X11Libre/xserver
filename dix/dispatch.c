@@ -3948,7 +3948,7 @@ ProcEstablishConnection(ClientPtr client)
     prefix = (xConnClientPrefix *) ((char *) stuff + sz_xReq);
 
     if (client->swapped && !dixSettingAllowByteSwappedClients) {
-        reason = "Prohibited client endianess, see the Xserver man page ";
+        reason = "Prohibited client endianness, see the Xserver man page ";
     } else if ((client->req_len << 2) != sz_xReq + sz_xConnClientPrefix +
             pad_to_int32(prefix->nbytesAuthProto) +
             pad_to_int32(prefix->nbytesAuthString))

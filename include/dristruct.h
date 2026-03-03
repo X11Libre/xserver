@@ -79,7 +79,7 @@ typedef struct _DRIScreenPrivRec {
     DRIContextPrivPtr myContextPriv;    /* Pointer to server's private area   */
     DRIContextPrivPtr lastPartial3DContext;     /* last one partially saved  */
     void **hiddenContextStore;  /* hidden X context          */
-    void **partial3DContextStore;       /* parital 3D context        */
+    void **partial3DContextStore;       /* partial 3D context        */
     DRIInfoPtr pDriverInfo;
     int nrWindows;
     int nrWindowsVisible;

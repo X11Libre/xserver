@@ -442,7 +442,7 @@ InitOutput(int argc, char **argv)
 
 
         /*
-         * Sort the drivers to match the requested ording.  Using a slow
+         * Sort the drivers to match the requested ordering.  Using a slow
          * bubble sort.
          */
         for (j = 0; j < xf86NumScreens - 1; j++) {

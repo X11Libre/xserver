@@ -134,7 +134,7 @@ enable as much hardware as possible using some fairly simple heuristics.
 
 The 'canGrow' parameter indicates that the frame buffer does not have a fixed
 size. When the frame buffer has a fixed size, the configuration selects a
-'reasonablely large' frame buffer so that common reconfiguration options are
+'reasonably large' frame buffer so that common reconfiguration options are
 possible. For resizable frame buffers, the frame buffer is set to the smallest
 size that encloses the desired configuration.
     

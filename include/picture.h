@@ -123,7 +123,7 @@ typedef pixman_format_code_t PictFormatShort;
  *  256		PolicyColor (only on PseudoColor)
  *
  * The actual allocation code lives in miindex.c, and so is
- * austensibly server dependent, but that code does:
+ * ostensibly server dependent, but that code does:
  *
  * PolicyMono	    Allocate no additional colors, use black and white
  * PolicyGray	    Allocate 13 gray levels (11 cells used)
