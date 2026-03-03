@@ -495,7 +495,7 @@ xf86DestroyCursorInfoRec(xf86CursorInfoPtr infoPtr)
 }
 
 /**
- * New cursor has been created. Do your initalizations here.
+ * New cursor has been created. Do your initializations here.
  */
 static Bool
 xf86DeviceCursorInitialize(DeviceIntPtr pDev, ScreenPtr pScreen)

@@ -125,11 +125,11 @@ This is the default unless \-retro or \-wr is specified.
 disables backing store support on all screens.
 .TP 8
 .B +byteswappedclients
-Allow connections from clients with an endianess different to that of the
+Allow connections from clients with an endianness different to that of the
 server.
 .TP 8
 .B \-byteswappedclients
-Prohibit connections from clients with an endianess different to that of the
+Prohibit connections from clients with an endianness different to that of the
 server.
 This is the default unless \fB+byteswappedclients\fP is specified.
 .TP 8

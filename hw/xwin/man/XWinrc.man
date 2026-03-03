@@ -86,7 +86,7 @@ this may be useful if you want no dialogs.
 .br
 .B }
 .br
-This instruction defines a menu and asigns a \fIMenu_Name\fP to it.
+This instruction defines a menu and assigns a \fIMenu_Name\fP to it.
 \fIMenu_Item_Line\fP are lines  of any of the following types:
 .TP 8
 .B SEPARATOR

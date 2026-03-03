@@ -40,7 +40,7 @@
  * BadValue for num_masks < 0
  * BadWindow for invalid windows
  * BadDevice for non-existing devices
- * BadImplemenation for devices >= 0xFF
+ * BadImplementation for devices >= 0xFF
  * BadValue if HierarchyChanged bit is set for devices other than
  *          XIAllDevices
  * BadValue for invalid mask bits
@@ -116,7 +116,7 @@ request_XISelectEvent(xXISelectEventsReq * req, int error)
        client->req_len (see above). We previously had to swap it here, so
        that SProcXIPassiveGrabDevice() will swap it back. Since that's gone
        now, still swapping itself would break if this function is called
-       again and writing back a errornously swapped value
+       again and writing back a erroneously swapped value
     */
 
     swapl(&req->win);
