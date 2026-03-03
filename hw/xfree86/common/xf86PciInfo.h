@@ -362,7 +362,7 @@
 /* ASPEED Technology (AST) */
 #define PCI_CHIP_AST2000		0x2000
 
-/* Advance Logic */
+/* Avance Logic */
 #define PCI_CHIP_ALG2064		0x2064
 #define PCI_CHIP_ALG2301		0x2301
 #define PCI_CHIP_ALG2501		0x2501
