@@ -248,7 +248,7 @@ typedef void (*CursorWarpedToProcPtr) (DeviceIntPtr /* pDev */ ,
                                        int /*x */ ,
                                        int /*y */ );
 
-typedef void (*CurserConfinedToProcPtr) (DeviceIntPtr /* pDev */ ,
+typedef void (*CursorConfinedToProcPtr) (DeviceIntPtr /* pDev */ ,
                                          ScreenPtr /*pScreen */ ,
                                          WindowPtr /*pWindow */ );
 
@@ -583,7 +583,7 @@ typedef struct _Screen {
     RecolorCursorProcPtr RecolorCursor;
     SetCursorPositionProcPtr SetCursorPosition;
     CursorWarpedToProcPtr CursorWarpedTo;
-    CurserConfinedToProcPtr CursorConfinedTo;
+    CursorConfinedToProcPtr CursorConfinedTo;
 
     /* GC procedures */
 
