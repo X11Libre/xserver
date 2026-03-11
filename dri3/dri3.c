@@ -55,10 +55,11 @@ dri3_screen_init(ScreenPtr screen, const dri3_screen_info_rec *info)
 
         dixScreenHookClose(screen, dri3_screen_close);
 
-        screen_priv->info = info;
-
         dixSetPrivate(&screen->devPrivates, &dri3_screen_private_key, screen_priv);
     }
+
+    if (info)
+        dri3_screen_priv(screen)->info = info;
 
     return TRUE;
 }
