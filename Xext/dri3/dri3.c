@@ -70,14 +70,13 @@ dri3_screen_init(ScreenPtr screen, const dri3_screen_info_rec *info)
         dixSetPrivate(&screen->devPrivates, &dri3_screen_private_key, screen_priv);
     }
 
-    if (info) {
-        void *ptr = realloc(screen_priv->info, sizeof(*info));
-        if (!ptr) {
-            return FALSE;
-        }
-        screen_priv->info = ptr;
-        *screen_priv->info = *info;
-    }
+<<<<<<< HEAD:Xext/dri3/dri3.c
+    if (info)
+        dri3_screen_priv(screen)->info = info;
+=======
+    if (info)
+        dri3_screen_priv(screen)->info = info;
+>>>>>>> 2caa0ac21e (fix DRI3 version detection):dri3/dri3.c
 
     return TRUE;
 }
