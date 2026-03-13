@@ -307,7 +307,7 @@ listPossibleVideoDrivers(XF86MatchedDrivers *md)
 #endif
 
     /* Fallback to platform default hardware */
-#if defined(__i386__) || defined(__amd64__) || defined(__hurd__)
+#if defined(__i386__) || defined(__amd64__) || defined(__GNU__)
     xf86AddMatchedDriver(md, "vesa");
 #elif defined(__sparc__) && !defined(__sun)
     xf86AddMatchedDriver(md, "sunffb");

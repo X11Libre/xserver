@@ -148,6 +148,7 @@ else
         'stub/stub_bell.c',
         'stub/stub_init.c',
         'stub/stub_video.c',
+        'misc/SlowBcopy.c',
     ]
 endif
 
