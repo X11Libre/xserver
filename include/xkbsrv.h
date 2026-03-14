@@ -198,6 +198,20 @@ extern _X_EXPORT void XkbFreeKeyboard(XkbDescPtr /* xkb */ ,
                                       Bool      /* freeDesc */
     );
 
+/**
+ * @brief get the current keysym map
+ *
+ * This call might be used after a keyboard mapping has been reloaded
+ * with InitKeyboardDeviceStruct() to get the information needed to
+ * pass to XkbApplyMappingChange()
+ *
+ * The returned value is dynamically allocated, and must be
+ * freed after use.
+ *
+ * @param keybd  Keyboard to use to get the map
+ *
+ * @return keysym map, or NULL if an error occurs
+ */
 extern _X_EXPORT KeySymsPtr XkbGetCoreMap(DeviceIntPtr  /* keybd */
     );
 
@@ -214,6 +228,25 @@ extern _X_EXPORT void XkbDDXChangeControls(DeviceIntPtr /* dev */ ,
                                            XkbControlsPtr       /* new */
     );
 
+/**
+ * @brief Set global autorepeat / sync core protocol repeat flags
+ *
+ * This call performs one of two actions, depending on whether
+ * key is set to -1 or not.
+ *
+ * If the key is set to -1, the global autorepeat setting is
+ * set to the value specified in the onoff parameter.
+ *
+ * If the key is a keycode, the XKB repeat setting for the key is
+ * synchronised from the core protocol setting, and the onoff
+ * parameter is ignored.
+ *
+ * @param pxDev Keyboard to use
+ * @param key   Keycode, or -1
+ * @param onoff One of { AutoRepeatModeOff, AutoRepeatModeOn }
+ *              Used only if key == -1
+ *
+ */
 extern _X_EXPORT void XkbSetRepeatKeys(DeviceIntPtr /* pXDev */ ,
                                        int /* key */ ,
                                        int      /* onoff */
