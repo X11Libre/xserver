@@ -3794,7 +3794,8 @@ XkbAssembleNames(ClientPtr client, XkbDescPtr xkb, xkbGetNamesReply rep, x_rpcbu
             XkbKeyTypePtr type = xkb->map->types;
 
             for (i = 0; i < rep.nTypes; i++, type++) {
-                x_rpcbuf_write_CARD8(rpcbuf, type->num_levels);
+                /* Either no name or all of them, even empty ones */
+                x_rpcbuf_write_CARD8(rpcbuf, type->level_names ? type->num_levels : 0);
             }
             x_rpcbuf_pad(rpcbuf);
 
