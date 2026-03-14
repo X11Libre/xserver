@@ -481,6 +481,8 @@ ms_present_unflip(ScreenPtr screen, uint64_t event_id)
         }
     }
 
+    ms->drmmode.present_flipping = FALSE;
+
     for (i = 0; i < config->num_crtc; i++) {
         xf86CrtcPtr crtc = config->crtc[i];
         drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
@@ -504,7 +506,6 @@ ms_present_unflip(ScreenPtr screen, uint64_t event_id)
     }
 
     present_event_notify(event_id, 0, 0);
-    ms->drmmode.present_flipping = FALSE;
 }
 #endif
 
