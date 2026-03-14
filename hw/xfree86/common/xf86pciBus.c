@@ -1154,7 +1154,16 @@ xf86VideoPtrToDriverList(struct pci_device *dev, XF86MatchedDrivers *md)
 		case 0x0bef:
 			/* Use fbdev/vesa driver on Oaktrail, Medfield, CDV */
 			break;
-		default:
+		/* Default to intel only on pre-gen3 chips */
+		case 0x7121:
+		case 0x7123:
+		case 0x7125:
+		case 0x1132:
+		case 0x3577:
+		case 0x2562:
+		case 0x3582:
+		case 0x358e:
+		case 0x2572:
 			driverList[0] = "intel";
 			break;
         }
