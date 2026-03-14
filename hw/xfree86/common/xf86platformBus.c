@@ -616,6 +616,9 @@ xf86platformProbeDev(DriverPtr drvp)
                     /* Accept the device if the driver is simpledrm */
                     if (strcmp(xf86_platform_devices[j].attribs->driver, "simpledrm") == 0)
                         break;
+                    /* Accept the device if the driver is vesadrm */
+                    if (strcmp(xf86_platform_devices[j].attribs->driver, "vesadrm") == 0)
+                        break;
                 }
 
                 if (xf86IsPrimaryPlatform(&xf86_platform_devices[j]))
