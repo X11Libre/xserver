@@ -306,6 +306,15 @@ sets video-off screen-saver preference.
 .B \-v
 sets video-on screen-saver preference.
 .TP 8
+.BR \-verbose " [\fIn\fP]"
+Sets the verbosity level for information printed on stderr.  If the
+.I n
+value isn't supplied, each occurrence of this option increments the
+verbosity level.  When the
+.I n
+value is supplied, the verbosity level is set to that value.  The default
+verbosity level is 0.
+.TP 8
 .B \-wr
 sets the default root window to solid white instead of the standard root weave
 pattern.
