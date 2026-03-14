@@ -604,6 +604,9 @@ xf86platformProbeDev(DriverPtr drvp)
                 if (ServerIsNotSeat0()) {
                     break;
                 } else {
+                    /* Accept the device if the driver is efidrm */
+                    if (strcmp(xf86_platform_devices[j].attribs->driver, "efidrm") == 0)
+                        break;
                     /* Accept the device if the driver is hyperv_drm */
                     if (strcmp(xf86_platform_devices[j].attribs->driver, "hyperv_drm") == 0)
                         break;
