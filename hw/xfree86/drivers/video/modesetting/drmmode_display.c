@@ -667,8 +667,10 @@ drmmode_crtc_get_fb_id(xf86CrtcPtr crtc, uint32_t *fb_id, int *x, int *y)
                 msGetPixmapPriv(drmmode, drmmode_crtc->prime_pixmap);
             *fb_id = ppriv->fb_id;
             *x = 0;
-        } else
+        } else {
+            *fb_id = drmmode->fb_id;
             *x = drmmode_crtc->prime_pixmap_x;
+        }
         *y = 0;
     }
     else if (trf->buf[trf->back_idx ^ 1].px) {
