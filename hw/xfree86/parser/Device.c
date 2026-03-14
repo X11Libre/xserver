@@ -206,6 +206,8 @@ xf86parseDeviceSection(void)
                 ptr->dev_clock[i] = (int) (xf86_lex_val.realnum * 1000.0 + 0.5);
                 token = xf86getSubToken(&(ptr->dev_comment));
             }
+            if (token == NUMBER && i >= CONF_MAXCLOCKS)
+                Error(CLOCKS_TOO_MANY, CONF_MAXCLOCKS);
             ptr->dev_clocks = i;
             xf86unGetToken(token);
             break;

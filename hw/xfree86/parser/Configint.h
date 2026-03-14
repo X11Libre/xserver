@@ -203,6 +203,8 @@ else\
 "The number \"%d\" given in this section must be in octal (0xxx) format."
 #define GPU_DEVICE_TOO_MANY \
 "More than %d GPU devices defined."
+#define CLOCKS_TOO_MANY \
+"More than %d Clocks defined."
 
 /* Warning messages */
 #define OBSOLETE_MSG \
