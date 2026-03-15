@@ -68,7 +68,7 @@ I2CUDelay(I2CBusPtr b, int usec)
  * ================================================================
  *
  * It is assumed that there is just one master on the I2C bus, therefore
- * there is no explicit test for conflits.
+ * there is no explicit test for conflicts.
  */
 
 #define RISEFALLTIME 2          /* usec, actually 300 to 1000 ns according to the i2c specs */

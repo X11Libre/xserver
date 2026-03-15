@@ -354,7 +354,7 @@ ScreenSaverFreeSuspend(void *value, XID id)
         screenSaverSuspended = FALSE;
 
         /* The screensaver could be active, since suspending it (by design)
-           doesn't prevent it from being forceably activated */
+           doesn't prevent it from being forcibly activated */
 #ifdef DPMSExtension
         if (screenIsSaved != SCREEN_SAVER_ON && DPMSPowerLevel == DPMSModeOn)
 #else

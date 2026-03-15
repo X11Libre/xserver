@@ -378,7 +378,7 @@ glamor_xv_query_image_attributes(int id,
         size *= *h;
         break;
     case FOURCC_UYVY:
-        /* UYVU is single-plane really, all tranformation is processed inside a shader */
+        /* UYVU is single-plane really, all transformation is processed inside a shader */
         size = ALIGN(*w, 2) * 2;
         if (pitches)
             pitches[0] = size;

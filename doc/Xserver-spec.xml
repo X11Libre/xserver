@@ -1087,7 +1087,7 @@ the current request.
 InsertFakeRequest() must insert the specified number of bytes of data
 into the head of the input buffer for the client.  This may be a
 complete request, or it might be a partial request.  For example,
-NextAvailableCient() will insert a partial request in order to read
+NextAvailableClient() will insert a partial request in order to read
 the initial connection data sent by the client.  The routine returns FALSE
 if memory could not be allocated.  ResetCurrentRequest()
 should "back up" the input buffer so that the currently executing request

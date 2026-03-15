@@ -250,7 +250,7 @@ ephyrMapFramebuffer(KdScreenInfo * screen)
         /* Rotated/Reflected so we need to use shadow fb */
         scrpriv->shadow = TRUE;
 
-        EPHYR_LOG("allocing shadow");
+        EPHYR_LOG("allocating shadow");
 
         KdShadowFbAlloc(screen,
                         scrpriv->randr & (RR_Rotate_90 | RR_Rotate_270));

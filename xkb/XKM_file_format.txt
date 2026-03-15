@@ -110,7 +110,7 @@ the level names and the section names ("complete", "evdev(inet)", etc.)
 	version:		CARD8
 	identifier1:		'm'
 	identifier2:		'k'
-	idenfifier3:		'x'
+	identifier3:		'x'
 └───
 
 The XKM file format has a 4 byte header identifying the file and the XKM
@@ -183,7 +183,7 @@ modifiers change to a particular level.
 	virt_mods:		CARD16
 	num_map_entries: 	CARD8
 	num_level_names: 	CARD8
-	perserve:	 	CARD8
+	preserve:	 	CARD8
 	pad:			CARD8
 	map_entries:		LISTofXKMKTMapEntry
 	name:			XKMCountedString

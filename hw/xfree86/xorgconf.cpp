@@ -395,7 +395,7 @@ Section "Device"
 # section can only match up with the primary video device.  For PCI
 # devices a line like the following could be used.  This line should not
 # normally be included unless there is more than one video device
-# intalled.
+# installed.
 
 #    BusID	"PCI:0:10:0"
 

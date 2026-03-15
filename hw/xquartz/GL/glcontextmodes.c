@@ -408,7 +408,7 @@ _gl_get_context_mode_data(const __GLcontextModes *mode, int attribute,
  *          structure in libGL is the same, then the meaning of each byte in
  *          the structure is the same in both places.  \b Be \b careful!
  *          Basically this means that fields have to be added in libGL and
- *          then propagated to drivers.  Drivers should \b never arbitrarilly
+ *          then propagated to drivers.  Drivers should \b never arbitrarily
  *          extend the \c __GLcontextModes data-structure.
  */
 __GLcontextModes *

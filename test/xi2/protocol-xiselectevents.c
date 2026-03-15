@@ -40,7 +40,7 @@
  * BadValue for num_masks < 0
  * BadWindow for invalid windows
  * BadDevice for non-existing devices
- * BadImplemenation for devices >= 0xFF
+ * BadImplementation for devices >= 0xFF
  * BadValue if HierarchyChanged bit is set for devices other than
  *          XIAllDevices
  * BadValue for invalid mask bits

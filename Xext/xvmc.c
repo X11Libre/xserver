@@ -219,7 +219,7 @@ ProcXvMCCreateContext(ClientPtr client)
         }
     }
 
-    /* adaptor doesn't support this suface_type_id */
+    /* adaptor doesn't support this surface_type_id */
     if (!surface)
         return BadMatch;
 

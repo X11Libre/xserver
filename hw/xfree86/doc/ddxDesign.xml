@@ -6748,7 +6748,7 @@ programming the standard VGA registers, and for handling VGA colourmaps.
       non-default <structfield>MapPhys</structfield> or <structfield>MapSize</structfield>
       settings (the physical location and size of the VGA memory window)
       then those fields of the <structname>vgaHWRec</structname> must be initialised
-      before calling this function.  Otherwise, this function initialiases
+      before calling this function.  Otherwise, this function initialises
       the default values of <constant>0xA0000</constant> for
       <structfield>MapPhys</structfield> and <code>(64&nbsp;*&nbsp;1024)</code> for
       <structfield>MapSize</structfield>.  This function must be called before

@@ -1448,7 +1448,7 @@ KdCloseInput(void)
  *	v1  -> (hold) (settimeout) button_1_pend
  *	^1  -> (deliver) start
  *	v2  -> (deliver) button_2_down
- *	^2  -> (deliever) start
+ *	^2  -> (deliver) start
  *	v3  -> (hold) (settimeout) button_3_pend
  *	^3  -> (deliver) start
  *	vo  -> (deliver) start

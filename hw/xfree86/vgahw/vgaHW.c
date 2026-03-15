@@ -355,7 +355,7 @@ vgaHWSetStdFuncs(vgaHWPtr hwp)
 /*
  * MMIO versions of the register access functions.  These require
  * hwp->MemBase to be set in such a way that when the standard VGA port
- * adderss is added the correct memory address results.
+ * address is added the correct memory address results.
  */
 
 #define minb(p) MMIO_IN8(hwp->MMIOBase, (hwp->MMIOOffset + (p)))

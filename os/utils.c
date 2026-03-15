@@ -270,8 +270,8 @@ UseMsg(void)
     ErrorF("-br                    create root window with black background\n");
     ErrorF("+bs                    enable any backing store support\n");
     ErrorF("-bs                    disable any backing store support\n");
-    ErrorF("+byteswappedclients    Allow clients with endianess different to that of the server\n");
-    ErrorF("-byteswappedclients    Prohibit clients with endianess different to that of the server\n");
+    ErrorF("+byteswappedclients    Allow clients with endianness different to that of the server\n");
+    ErrorF("-byteswappedclients    Prohibit clients with endianness different to that of the server\n");
     ErrorF("-c                     turns off key-click\n");
     ErrorF("c #                    key-click volume (0-100)\n");
     ErrorF("-cc int                default color visual class\n");

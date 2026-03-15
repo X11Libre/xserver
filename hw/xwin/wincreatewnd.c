@@ -360,7 +360,7 @@ winCreateBoundingWindowWindowed(ScreenPtr pScreen)
      * size of the window area minus the space the caption, borders, and
      * scrollbars (if any) occupy, and the range is the size of the
      * underlying X visual.  Notice that, contrary to what some of the
-     * MSDN Library arcticles lead you to believe, the windows
+     * MSDN Library articles lead you to believe, the windows
      * ``client area'' size does not include the scrollbars.  In other words,
      * the whole client area size that is reported to you is drawable by
      * you; you do not have to subtract the size of the scrollbars from

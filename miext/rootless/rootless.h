@@ -200,7 +200,7 @@ typedef void (*RootlessStopDrawingProc)
  *  Drawing is stopped before this is called.
  *
  *  wid         Frame id
- *  pDamage     Region containing all the changed pixels in frame-lcoal
+ *  pDamage     Region containing all the changed pixels in frame-local
  *              coordinates. This is clipped to the window's clip.
  */
 typedef void (*RootlessUpdateRegionProc)

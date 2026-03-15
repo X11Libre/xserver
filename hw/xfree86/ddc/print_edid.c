@@ -395,7 +395,7 @@ print_detailed_timings(int scrnIndex, struct detailed_timings *t)
     }
 }
 
-/* This function handle all detailed patchs,
+/* This function handles all detailed patches,
  * including EDID and EDID-extension
  */
 struct det_print_parameter {

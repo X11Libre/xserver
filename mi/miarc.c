@@ -1153,7 +1153,7 @@ GetFPolyYBounds(SppPointPtr pts, int n, double yFtrans, int *by, int *ty)
  *	edge list and a right edge list.  The algorithm used
  *	to traverse each edge is digital differencing analyzer
  *	line algorithm with y as the major axis. There's some funny linear
- *	interpolation involved because of the subpixel postioning.
+ *	interpolation involved because of the subpixel positioning.
  */
 static void
 miFillSppPoly(DrawablePtr dst, GCPtr pgc, int count,    /* number of points */

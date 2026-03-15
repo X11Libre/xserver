@@ -43,7 +43,7 @@
 #define FB_AUX_TEXT_MDA		0       /* Monochrome text */
 #define FB_AUX_TEXT_CGA		1       /* CGA/EGA/VGA Color text */
 #define FB_AUX_TEXT_S3_MMIO	2       /* S3 MMIO fasttext */
-#define FB_AUX_TEXT_MGA_STEP16	3       /* MGA Millenium I: text, attr, 14 reserved bytes */
+#define FB_AUX_TEXT_MGA_STEP16	3       /* MGA Millennium I: text, attr, 14 reserved bytes */
 #define FB_AUX_TEXT_MGA_STEP8	4       /* other MGAs:      text, attr,  6 reserved bytes */
 
 #define FB_VISUAL_MONO01		0       /* Monochr. 1=Black 0=White */
@@ -69,10 +69,10 @@
 #define FB_ACCEL_SUN_LEO	13      /* Sun leo/zx                   */
 #define FB_ACCEL_IMS_TWINTURBO	14      /* IMS Twin Turbo               */
 #define FB_ACCEL_3DLABS_PERMEDIA2 15    /* 3Dlabs Permedia 2            */
-#define FB_ACCEL_MATROX_MGA2064W 16     /* Matrox MGA2064W (Millenium)  */
+#define FB_ACCEL_MATROX_MGA2064W 16     /* Matrox MGA2064W (Millennium)  */
 #define FB_ACCEL_MATROX_MGA1064SG 17    /* Matrox MGA1064SG (Mystique)  */
-#define FB_ACCEL_MATROX_MGA2164W 18     /* Matrox MGA2164W (Millenium II) */
-#define FB_ACCEL_MATROX_MGA2164W_AGP 19 /* Matrox MGA2164W (Millenium II) */
+#define FB_ACCEL_MATROX_MGA2164W 18     /* Matrox MGA2164W (Millennium II) */
+#define FB_ACCEL_MATROX_MGA2164W_AGP 19 /* Matrox MGA2164W (Millennium II) */
 #define FB_ACCEL_MATROX_MGAG100	20      /* Matrox G100 (Productiva G100) */
 #define FB_ACCEL_MATROX_MGAG200	21      /* Matrox G200 (Myst, Mill, ...) */
 #define FB_ACCEL_SUN_CG14	22      /* Sun cgfourteen                */

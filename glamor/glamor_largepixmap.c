@@ -460,8 +460,8 @@ _glamor_compute_clipped_regions(PixmapPtr pixmap,
      *
      * For the other cases, just need to start
      * from a proper shiftx/shifty, and then increase
-     * y by tile_height each time to walk trhough the
-     * target block and then walk trhough the target
+     * y by tile_height each time to walk through the
+     * target block and then walk through the target
      * at x direction by increate tile_width each time.
      *
      * This way, we can consolidate all the sub blocks

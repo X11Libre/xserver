@@ -555,7 +555,7 @@ XkbCheckIndicatorMaps(DeviceIntPtr dev, XkbSrvLedInfoPtr sli, unsigned which)
          * 'kf' or 'lf' on the keyboard specified by 'dev.'
          *
          * If 'needed_parts' is non-zero, this function makes sure that any
-         * of the parts speicified therein are allocated.
+         * of the parts specified therein are allocated.
          */
 XkbSrvLedInfoPtr
 XkbAllocSrvLedInfo(DeviceIntPtr dev,

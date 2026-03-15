@@ -359,7 +359,7 @@ ProcXF86BigfontQueryFont(ClientPtr client)
 
     if (dixLookupFontable(&pFont, stuff->id, client, DixGetAttrAccess) !=
         Success)
-        return BadFont;         /* procotol spec says only error is BadFont */
+        return BadFont;         /* protocol spec says only error is BadFont */
 
     pmax = FONTINKMAX(pFont);
     pmin = FONTINKMIN(pFont);

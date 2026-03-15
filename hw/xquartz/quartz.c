@@ -73,7 +73,7 @@
 
 // These are vended by the Objective-C runtime, but they are unfortunately
 // not available as API in the macOS SDK.  We are following suit with swift
-// and clang in declaring them inline here.  They canot be removed or changed
+// and clang in declaring them inline here.  They cannot be removed or changed
 // in the OS without major bincompat ramifications.
 //
 // These were added in macOS 10.7.

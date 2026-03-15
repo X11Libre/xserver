@@ -163,7 +163,7 @@ winReleasePrimarySurfaceShadowDDNL(ScreenPtr pScreen)
     if (pScreenPriv->pddsPrimary4) {
         /*
          * Detach the clipper from the primary surface.
-         * NOTE: We do this explicity for clarity.  The Clipper is not released.
+         * NOTE: We do this explicitly for clarity.  The Clipper is not released.
          */
         IDirectDrawSurface4_SetClipper(pScreenPriv->pddsPrimary4, NULL);
 
