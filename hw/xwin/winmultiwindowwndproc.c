@@ -799,6 +799,16 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         /* Add the keyboard hook if possible */
         if (g_fKeyboardHookLL)
             g_fKeyboardHookLL = winInstallKeyboardHookLL();
+
+        /* Tell our Window Manager thread to activate the window */
+        if (fWMMsgInitialized)
+            {
+                wmMsg.msg = WM_WM_ACTIVATE;
+                /* don't focus override redirect windows (e.g. menus) */
+                if (!pWin || !pWin->overrideRedirect)
+                    winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
+            }
+
         return 0;
 
     case WM_KILLFOCUS:
@@ -898,21 +908,6 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         /* Pass the message to the root window */
         SendMessage(hwndScreen, message, wParam, lParam);
 
-        if (LOWORD(wParam) != WA_INACTIVE) {
-            /* Raise the window to the top in Z order */
-            /* ago: Activate does not mean putting it to front! */
-            /*
-               wmMsg.msg = WM_WM_RAISE;
-               if (fWMMsgInitialized)
-               winSendMessageToWM (s_pScreenPriv->pWMInfo, &wmMsg);
-             */
-
-            /* Tell our Window Manager thread to activate the window */
-            wmMsg.msg = WM_WM_ACTIVATE;
-            if (fWMMsgInitialized)
-                if (!pWin || !pWin->overrideRedirect)   /* for OOo menus */
-                    winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
-        }
         /* Prevent the mouse wheel from stalling when another window is minimized */
         if (HIWORD(wParam) == 0 && LOWORD(wParam) == WA_ACTIVE &&
             (HWND) lParam != NULL && (HWND) lParam != GetParent(hwnd))
