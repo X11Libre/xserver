@@ -68,6 +68,9 @@ window. By default, the Xephyr window has a fixed size.
 .B \-no\-host\-grab
 Disable grabbing the keyboard and mouse.
 .TP 8
+.BI \-name " name"
+Set the name in the WM_CLASS property.
+.TP 8
 .BI \-title " title"
 Set the window title in the WM_NAME property.
 .TP 8
