@@ -808,9 +808,13 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         /* Remove our keyboard hook if it is installed */
         winRemoveKeyboardHookLL();
 
-        /* Revert the X focus as well, but only if the Windows focus is going to another window */
-        if (!wParam && pWin)
-            DeleteWindowFromAnyEvents(pWin, FALSE);
+        /* Revert the X focus as well */
+        if (fWMMsgInitialized)
+            {
+                wmMsg.msg = WM_WM_ACTIVATE;
+                wmMsg.iWindow = 0;
+                winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
+            }
 
         return 0;
 
