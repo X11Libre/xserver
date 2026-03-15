@@ -1141,12 +1141,12 @@ xf86LogInit(void)
     if (xf86LogFileFrom == X_DEFAULT) {
         /* When not running as root, we won't be able to write to /var/log */
         if (geteuid() != 0) {
-            if ((env = getenv("XDG_DATA_HOME")))
+            if ((env = getenv("XDG_STATE_HOME")))
                 snprintf(buf, sizeof(buf), "%s/%s", env,
-                         DEFAULT_XDG_DATA_HOME_LOGDIR);
+                         DEFAULT_XDG_STATE_HOME_LOGDIR);
             else if ((env = getenv("HOME")))
                 snprintf(buf, sizeof(buf), "%s/%s/%s", env,
-                         DEFAULT_XDG_DATA_HOME, DEFAULT_XDG_DATA_HOME_LOGDIR);
+                         DEFAULT_XDG_STATE_HOME, DEFAULT_XDG_STATE_HOME_LOGDIR);
 
             if (env) {
                 xf86_mkdir_p(buf);
