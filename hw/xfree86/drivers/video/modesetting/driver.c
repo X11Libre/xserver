@@ -237,6 +237,27 @@ get_passed_fd(void)
 }
 
 static int
+ms_try_open(const char *dev)
+{
+    int fd = -1;
+
+    if (!dev) {
+        return -1;
+    }
+
+    fd = open(dev, O_RDWR | O_CLOEXEC, 0);
+    if (fd >= 0) {
+        return fd;
+    }
+
+#ifdef SEATD_LIBSEAT
+    return seatd_libseat_open_graphics(dev);
+#else
+    return -1;
+#endif
+}
+
+static int
 open_hw(const char *dev)
 {
     int fd;
@@ -245,23 +266,27 @@ open_hw(const char *dev)
         return fd;
 
     if (dev){
-        fd = open(dev, O_RDWR | O_CLOEXEC, 0);
-	#ifdef SEATD_LIBSEAT
-	/* try to open dev node via libseat */
-	if (fd == -1) {
-	    fd = seatd_libseat_open_graphics(dev);
-	}
-	#endif
+        fd = ms_try_open(dev);
     } else {
         dev = getenv("KMSDEVICE");
-        if ((NULL == dev) || ((fd = open(dev, O_RDWR | O_CLOEXEC, 0)) == -1)) {
-            dev = "/dev/dri/card0";
-            fd = open(dev, O_RDWR | O_CLOEXEC, 0);
-	    #ifdef SEATD_LIBSEAT
-	    if (fd == -1){
-                fd = seatd_libseat_open_graphics(dev);
-	    }
-	    #endif
+        if ((NULL == dev) || ((fd = ms_try_open(dev)) < 0)) {
+            int i;
+            char buf[] = "/dev/dri/cardxx";
+
+            for (i = 0; i < 32; i++) {
+                sprintf(buf, "/dev/dri/card%d", i);
+
+                if ((fd = ms_try_open(buf)) >= 0) {
+                    uint64_t check_dumb = 0;
+
+                    if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &check_dumb) >= 0 && check_dumb) {
+                        break;
+                    }
+
+                    close(fd);
+                    fd = -1;
+                }
+            }
         }
     }
     if (fd == -1) {
