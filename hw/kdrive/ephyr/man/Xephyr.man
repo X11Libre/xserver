@@ -68,6 +68,9 @@ window. By default, the Xephyr window has a fixed size.
 .B \-no\-host\-grab
 Disable grabbing the keyboard and mouse.
 .TP 8
+.BI \-title " title"
+Set the window title in the WM_NAME property.
+.TP 8
 .BI \-host\-grab " keys"
 Set the keyboard shortcut for Xephyr to grab keyboard and mouse
 input. Possible values for mod-keys are: ctrl, shift, lock,
