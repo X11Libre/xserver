@@ -437,7 +437,7 @@ foreach t : test_sha1
             sha1_dep = libsha1_dep
         endif
     elif t == 'libnettle'
-        nettle_dep = dependency('nettle', required: false)
+        nettle_dep = dependency('nettle', version: '>= 2.6', required: false)
         if nettle_dep.found()
             sha1_found = true
             sha1_dep = nettle_dep
