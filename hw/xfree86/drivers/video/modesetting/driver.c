@@ -781,6 +781,8 @@ dispatch_dirty(ScreenPtr pScreen)
             return;
         }
     }
+
+    DamageEmpty(ms->damage);
 }
 
 static void
@@ -792,6 +794,8 @@ dispatch_dirty_pixmap(ScrnInfoPtr scrn, xf86CrtcPtr crtc, PixmapPtr ppix)
     int fb_id = ppriv->fb_id;
 
     dispatch_dirty_region(scrn, crtc, ppix, damage, fb_id, 0, 0);
+    if (damage)
+        DamageEmpty(damage);
 }
 
 static void
