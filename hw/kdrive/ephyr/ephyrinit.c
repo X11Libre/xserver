@@ -133,9 +133,9 @@ ddxUseMsg(void)
         ("-fakexa              Simulate acceleration using software rendering\n");
     ErrorF("-verbosity <level>   Set log verbosity level\n");
     ErrorF("-noxv                do not use XV\n");
-    ErrorF("-name [name]         define the name in the WM_CLASS property\n");
+    ErrorF("-name <name>         define the name in the WM_CLASS property\n");
     ErrorF
-        ("-title [title]       set the window title in the WM_NAME property\n");
+        ("-title <title>       set the window title in the WM_NAME property\n");
     ErrorF("-no-host-grab        Disable grabbing the keyboard and mouse.\n");
     ErrorF
         ("-host-grab [keys]    set shortcut to grab the keyboard and mouse (default: ctrl+shift)\n");
