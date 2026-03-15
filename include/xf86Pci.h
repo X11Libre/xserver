@@ -156,7 +156,7 @@
 #define PCI_CLASS_I2O			0x0e
 #define PCI_CLASS_SATELLITE		0x0f
 #define PCI_CLASS_CRYPT			0x10
-#define PCI_CLASS_DATA_ACQUISTION	0x11
+#define PCI_CLASS_DATA_ACQUISITION	0x11
 #define PCI_CLASS_UNDEFINED		0xff
 
 /* sub class */

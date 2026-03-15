@@ -622,7 +622,7 @@ AccessXFilterReleaseEvent(DeviceEvent *event, DeviceIntPtr keybd)
 
     /* Don't transmit the KeyRelease if SlowKeys is turned on and
      * the user didn't hold the key long enough.  We know we passed
-     * the key if the down bit was set by CoreProcessKeyboadEvent.
+     * the key if the down bit was set by CoreProcessKeyboardEvent.
      */
     if (ctrls->enabled_ctrls & XkbSlowKeysMask) {
         xkbAccessXNotify ev;

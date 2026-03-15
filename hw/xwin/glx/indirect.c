@@ -1125,7 +1125,7 @@ glxWinSetPixelFormat(HDC hdc, int bppOverride, int drawableTypeOverride,
        and see if we can find a suitable one...
      */
     ErrorF
-        ("glxWinSetPixelFormat: having second thoughts: cColorbits %d, bppOveride %d; config->drawableType %d, drawableTypeOverride %d\n",
+        ("glxWinSetPixelFormat: having second thoughts: cColorbits %d, bppOverride %d; config->drawableType %d, drawableTypeOverride %d\n",
          (config->redBits + config->greenBits + config->blueBits), bppOverride,
          config->drawableType, drawableTypeOverride);
 

@@ -1509,7 +1509,7 @@ CurrentOrOldMasterKeyboard(DeviceIntPtr dev)
         if (!kbd)
             return NULL;
         /* if dev is a pointer the saved master is a master pointer,
-         * we want the keybard */
+         * we want the keyboard */
         return GetMaster(kbd, MASTER_KEYBOARD);
     }
 
