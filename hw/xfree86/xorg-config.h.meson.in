@@ -42,9 +42,6 @@
 /* Path to installed libraries. */
 #mesondefine DEFAULT_LIBRARY_PATH
 
-/* Default log location */
-#mesondefine DEFAULT_LOGDIR
-
 /* Default logfile prefix */
 #mesondefine DEFAULT_LOGPREFIX
 

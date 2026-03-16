@@ -330,6 +330,8 @@ conf_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
 conf_data.set('XSERVER_PLATFORM_BUS', build_udev_kms ? '1' : false)
 conf_data.set('XSERVER_SCREEN_VRR', '1')
 
+conf_data.set_quoted('DEFAULT_LOGDIR', log_dir)
+
 version_data = configuration_data()
 version_data.set('VENDOR_RELEASE', '@0@'.format(release))
 version_data.set_quoted('VENDOR_MAN_VERSION', 'Version @0@.@1@.@2@'.format(major, minor, patch))
@@ -359,7 +361,6 @@ xorg_data.set_quoted('XCONFIGFILE', 'xorg.conf')
 xorg_data.set_quoted('XCONFIGDIR', 'xorg.conf.d')
 xorg_data.set_quoted('DEFAULT_XDG_DATA_HOME', '.local/share')
 xorg_data.set_quoted('DEFAULT_XDG_DATA_HOME_LOGDIR', 'xorg')
-xorg_data.set_quoted('DEFAULT_LOGDIR', log_dir)
 xorg_data.set_quoted('DEFAULT_LOGPREFIX', 'Xorg.')
 xorg_data.set_quoted('DEFAULT_MODULE_PATH', join_paths(get_option('prefix'), module_dir))
 xorg_data.set_quoted('DEFAULT_LIBRARY_PATH', join_paths(get_option('prefix'), get_option('libdir')))
@@ -388,7 +389,6 @@ elif host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd'
 endif
 
 xwin_data = configuration_data()
-xwin_data.set_quoted('DEFAULT_LOGDIR', log_dir)
 xwin_data.set('HAS_DEVWINDOWS', host_machine.system() == 'cygwin' ? '1' : false,
               description: 'Has /dev/windows for signaling new win32 messages')
 xwin_data.set('RELOCATE_PROJECTROOT', host_machine.system() == 'windows' ? '1' : false,
