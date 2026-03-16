@@ -218,7 +218,7 @@ static inline void doLogSync(void) {
 
 static void initSyslog(void) {
 #ifdef CONFIG_SYSLOG
-    char buffer[4096];
+    static char buffer[4096];
     strcpy(buffer, xorgSyslogIdent);
 
     snprintf(buffer, sizeof(buffer), "%s :%s", xorgSyslogIdent, (display ? display : "<>"));
