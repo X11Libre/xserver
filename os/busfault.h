@@ -29,11 +29,11 @@
 
 #include "misc.h"                         /* for TRUE/FALSE */
 
+typedef void (*busfault_notify_ptr) (void *context);
+
 #ifdef HAVE_SIGACTION
 
 #include <sys/types.h>
-
-typedef void (*busfault_notify_ptr) (void *context);
 
 struct busfault *
 busfault_register_mmap(void *addr, size_t size, busfault_notify_ptr notify, void *context);
@@ -48,6 +48,24 @@ Bool
 busfault_init(void);
 
 #else
+
+struct busfault;
+
+static inline struct busfault *
+busfault_register_mmap(void *addr, size_t size, busfault_notify_ptr notify, void *context)
+{
+    (void) addr;
+    (void) size;
+    (void) notify;
+    (void) context;
+    return NULL;
+}
+
+static inline void
+busfault_unregister(struct busfault *busfault)
+{
+    (void) busfault;
+}
 
 static inline void busfault_check(void) {}
 static inline Bool busfault_init(void) { return FALSE; }
