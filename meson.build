@@ -35,6 +35,20 @@ add_project_link_arguments('-fvisibility=hidden', language : 'c')
 conf_data = configuration_data()
 conf_data.set('_DIX_CONFIG_H_', '1')
 
+if get_option('mimalloc')
+    mimalloc_dep = dependency('mimalloc', required: true)
+    conf_data.set('HAVE_MIMALLOC', 1)
+    add_project_arguments('-Dmalloc=mi_malloc', language: 'c')
+    add_project_arguments('-Dcalloc=mi_calloc', language: 'c')
+    add_project_arguments('-Drealloc=mi_realloc', language: 'c')
+    add_project_arguments('-Dfree=mi_free', language: 'c')
+    add_project_arguments('-Dposix_memalign=mi_posix_memalign', language: 'c')
+    add_project_arguments('-Dstrdup=mi_strdup', language: 'c')
+    add_project_arguments('-Dstrndup=mi_strndup', language: 'c')
+else
+    mimalloc_dep = dependency('', required: false)
+endif
+
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     test_wflags = [
         '-Wall',
@@ -660,6 +674,7 @@ common_dep = [
     xkbfile_dep,
     xfont2_dep,
     xdmcp_dep,
+    mimalloc_dep,
 ]
 
 inc = include_directories(
