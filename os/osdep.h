@@ -48,6 +48,10 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#ifdef HAVE_MIMALLOC
+#include <mimalloc.h>
+#endif
+
 #include <X11/Xdefs.h>
 
 #include <limits.h>
