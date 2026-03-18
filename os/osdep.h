@@ -52,6 +52,10 @@ SOFTWARE.
 #include <mimalloc.h>
 #endif
 
+#ifdef HAVE_TCMALLOC
+#include <gperftools/tcmalloc.h>
+#endif
+
 #include <X11/Xdefs.h>
 
 #include <limits.h>

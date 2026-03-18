@@ -94,6 +94,7 @@ xorg_deps = [
     config_dep,
     libdrm_dep,
     mimalloc_dep,
+    tcmalloc_dep,
 ]
 
 if get_option('suid_wrapper')
