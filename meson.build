@@ -35,7 +35,9 @@ add_project_link_arguments('-fvisibility=hidden', language : 'c')
 conf_data = configuration_data()
 conf_data.set('_DIX_CONFIG_H_', '1')
 
-if get_option('mimalloc')
+if get_option('mimalloc') and get_option('tcmalloc')
+    error('mimalloc and tcmalloc are mutually exclusive. Please enable only one.')
+elif get_option('mimalloc')
     mimalloc_dep = dependency('mimalloc', required: true)
     conf_data.set('HAVE_MIMALLOC', 1)
     add_project_arguments('-Dmalloc=mi_malloc', language: 'c')
@@ -45,8 +47,21 @@ if get_option('mimalloc')
     add_project_arguments('-Dposix_memalign=mi_posix_memalign', language: 'c')
     add_project_arguments('-Dstrdup=mi_strdup', language: 'c')
     add_project_arguments('-Dstrndup=mi_strndup', language: 'c')
+    tcmalloc_dep = dependency('', required: false)
+elif get_option('tcmalloc')
+    tcmalloc_dep = dependency('libtcmalloc_minimal', required: true)
+    conf_data.set('HAVE_TCMALLOC', 1)
+    add_project_arguments('-Dmalloc=tc_malloc', language: 'c')
+    add_project_arguments('-Dcalloc=tc_calloc', language: 'c')
+    add_project_arguments('-Drealloc=tc_realloc', language: 'c')
+    add_project_arguments('-Dfree=tc_free', language: 'c')
+    add_project_arguments('-Dposix_memalign=tc_posix_memalign', language: 'c')
+    add_project_arguments('-Dstrdup=tc_strdup', language: 'c')
+    add_project_arguments('-Dstrndup=tc_strndup', language: 'c')
+    mimalloc_dep = dependency('', required: false)
 else
     mimalloc_dep = dependency('', required: false)
+    tcmalloc_dep = dependency('', required: false)
 endif
 
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
@@ -675,6 +690,7 @@ common_dep = [
     xfont2_dep,
     xdmcp_dep,
     mimalloc_dep,
+    tcmalloc_dep,
 ]
 
 inc = include_directories(

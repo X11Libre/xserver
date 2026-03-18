@@ -176,3 +176,5 @@ option('test_xephyr_gles', type: 'boolean', value: true,
 # Memory allocators specific options
 option('mimalloc', type: 'boolean', value: false,
        description: 'Use mimalloc instead default glibc allocator')
+option('tcmalloc', type: 'boolean', value: true,
+       description: 'Use tcmalloc instead default glibc allocator')
