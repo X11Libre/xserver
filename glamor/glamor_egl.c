@@ -81,7 +81,7 @@ glamor_egl_make_current(struct glamor_context *glamor_ctx)
                    EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
     if (!eglMakeCurrent(glamor_ctx->display,
-                        EGL_NO_SURFACE, EGL_NO_SURFACE,
+                        glamor_ctx->surface, glamor_ctx->surface,
                         glamor_ctx->ctx)) {
         FatalError("Failed to make EGL context current\n");
     }
