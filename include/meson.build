@@ -327,6 +327,11 @@ conf_data.set('PCVT_SUPPORT', supports_pcvt ? '1' : false)
 conf_data.set('SYSCONS_SUPPORT', supports_syscons ? '1' : false)
 conf_data.set('WSCONS_SUPPORT', supports_wscons ? '1' : false)
 conf_data.set('XSERVER_LIBPCIACCESS', get_option('pciaccess') ? '1' : false)
+if get_option('pciaccess')
+    pciaccess_dep = dependency('pciaccess', required: build_xorg)
+    conf_data.set('HAVE_PCI_DEVICE_IS_BOOT_DISPLAY',
+                  cc.has_function('pci_device_is_boot_display', dependencies: pciaccess_dep) ? '1' : false)
+endif
 conf_data.set('XSERVER_PLATFORM_BUS', build_udev_kms ? '1' : false)
 conf_data.set('XSERVER_SCREEN_VRR', '1')
 

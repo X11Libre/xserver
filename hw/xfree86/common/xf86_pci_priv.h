@@ -18,7 +18,7 @@ struct pci_device;
  * callee code is already prepared for using it, but for the time being
  * we need a dummy - until the actual one is really there.
  */
-#ifndef pci_device_is_boot_display
+#ifndef HAVE_PCI_DEVICE_IS_BOOT_DISPLAY
 static inline int pci_device_is_boot_display(struct pci_device *dev)
 {
     return 0;
