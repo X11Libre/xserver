@@ -10,7 +10,7 @@
 #include <xf86Priv.h>
 
 #include "glamor.h"
-#include "../../glamor/glamor_egl.h"
+#include "glamor_egl.h"
 
 enum {
     GLAMOREGLOPT_RENDERING_API,
@@ -45,7 +45,7 @@ glamor_xf86_egl_free_screen(ScrnInfoPtr scrn)
 
     glamor_egl = glamor_xf86_egl_get_scrn_private(scrn);
     if (glamor_egl != NULL) {
-        scrn->FreeScreen = glamor_egl->saved_free_screen;
+        scrn->FreeScreen = glamor_egl->server_private;
         glamor_egl_cleanup(glamor_egl);
         free(glamor_egl);
         scrn->FreeScreen(scrn);
@@ -59,10 +59,14 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     OptionInfoPtr options;
     const char *api = NULL;
     const char *glvnd_vendor = NULL;
+    glamor_egl_conf_t glamor_egl_conf = {.fd = fd};
 
     glamor_egl = calloc(1, sizeof(*glamor_egl));
     if (glamor_egl == NULL)
         return FALSE;
+
+    glamor_egl_conf.glamor_egl_priv = glamor_egl;
+
     if (xf86GlamorEGLPrivateIndex == -1)
         xf86GlamorEGLPrivateIndex = xf86AllocateScrnInfoPrivateIndex();
 
@@ -71,34 +75,34 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
     xf86ProcessOptions(scrn->scrnIndex, scrn->options, options);
     glvnd_vendor = xf86GetOptValString(options, GLAMOREGLOPT_VENDOR_LIBRARY);
     if (glvnd_vendor) {
-        glamor_egl->glvnd_vendor = strdup(glvnd_vendor);
-        if (!glamor_egl->glvnd_vendor) {
+        glamor_egl_conf.glvnd_vendor = strdup(glvnd_vendor);
+        if (!glamor_egl_conf.glvnd_vendor) {
             LogMessage(X_WARNING, "Couldn't set gl vendor to: %s\n", glvnd_vendor);
-        } else {
-            glamor_egl->exact_glvnd_vendor = TRUE;
         }
     }
     api = xf86GetOptValString(options, GLAMOREGLOPT_RENDERING_API);
     if (api && !strncasecmp(api, "es", 2))
-        glamor_egl->force_es = TRUE;
+        glamor_egl_conf.force_es = TRUE;
     else if (api && !strncasecmp(api, "gl", 2))
-        glamor_egl->es_disallowed = TRUE;
+        glamor_egl_conf.es_disallowed = TRUE;
     free(options);
 
-    glamor_egl->GLAMOR_EGL_PRIV_PROC = glamor_xf86_egl_get_screen_private;
+    glamor_egl_conf.GLAMOR_EGL_PRIV_PROC = glamor_xf86_egl_get_screen_private;
 
     scrn->privates[xf86GlamorEGLPrivateIndex].ptr = glamor_egl;
 
-    glamor_egl->fd = fd;
-
-    if (xf86Info.debug != NULL)
-        glamor_egl->dmabuf_capable = !!strstr(xf86Info.debug,
-                                              "dmabuf_capable");
+    if (xf86Info.debug != NULL) {
+        glamor_egl_conf.dmabuf_forced = TRUE;
+        glamor_egl_conf.dmabuf_capable = !!strstr(xf86Info.debug,
+                                                   "dmabuf_capable");
+    }
 
     Bool compat_ret = TRUE;
 
-    if (glamor_egl_init_internal(glamor_egl, &compat_ret)) {
-        glamor_egl->saved_free_screen = scrn->FreeScreen;
+    glamor_egl_conf.llvmpipe_allowed = !!scrn->confScreen->num_gpu_devices;
+
+    glamor_egl_conf.server_private = scrn->FreeScreen;
+    if (glamor_egl_init_internal(&glamor_egl_conf, &compat_ret)) {
         scrn->FreeScreen = glamor_xf86_egl_free_screen;
         return compat_ret;
     }
