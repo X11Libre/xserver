@@ -862,7 +862,7 @@ redisplay_dirty(ScreenPtr screen, PixmapDirtyUpdatePtr dirty, int *timeout)
          * copy to its own framebuffer (some secondarys scanout directly from
          * the shared pixmap, but not all).
          */
-        if (ms->drmmode.glamor)
+        if (ms->drmmode.glamor_gbm)
             ms->glamor.finish(screen);
 #endif
         /* Ensure the secondary processes the damage immediately */
@@ -1070,7 +1070,7 @@ load_glamor(ScrnInfoPtr pScrn)
     ms->glamor.egl_create_textured_pixmap_from_gbm_bo = LoaderSymbolFromModule(mod, "glamor_egl_create_textured_pixmap_from_gbm_bo");
     ms->glamor.egl_exchange_buffers = LoaderSymbolFromModule(mod, "glamor_egl_exchange_buffers");
     ms->glamor.egl_get_gbm_device = LoaderSymbolFromModule(mod, "glamor_egl_get_gbm_device");
-    ms->glamor.egl_init = LoaderSymbolFromModule(mod, "glamor_egl_init");
+    ms->glamor.egl_init2 = LoaderSymbolFromModule(mod, "glamor_egl_init2");
     ms->glamor.finish = LoaderSymbolFromModule(mod, "glamor_finish");
     ms->glamor.gbm_bo_from_pixmap = LoaderSymbolFromModule(mod, "glamor_gbm_bo_from_pixmap");
     ms->glamor.init = LoaderSymbolFromModule(mod, "glamor_init");
@@ -1096,6 +1096,7 @@ try_enable_glamor(ScrnInfoPtr pScrn)
                       strcmp(accel_method_str, "glamor") == 0);
 
     ms->drmmode.glamor = FALSE;
+    ms->drmmode.glamor_gbm = FALSE;
 
 #ifdef GLAMOR
     if (ms->drmmode.force_24_32) {
@@ -1109,7 +1110,9 @@ try_enable_glamor(ScrnInfoPtr pScrn)
     }
 
     if (load_glamor(pScrn)) {
-        if (ms->glamor.egl_init(pScrn, ms->fd)) {
+        int caps = GLAMOR_EGL_CAP_NONE;
+        if (ms->glamor.egl_init2(pScrn, ms->fd, &caps, 0)) {
+            ms->drmmode.glamor_gbm = !!(caps & GLAMOR_EGL_CAP_TEXTURE_GBM_BO);
             xf86DrvMsg(pScrn->scrnIndex, X_INFO, "glamor initialized\n");
             ms->drmmode.glamor = TRUE;
         } else {
@@ -1329,7 +1332,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
 
     try_enable_glamor(pScrn);
 
-    if (!ms->drmmode.glamor) {
+    if (!ms->drmmode.glamor_gbm) {
         Bool prefer_shadow = TRUE;
 
         if (ms->drmmode.force_24_32) {
@@ -1376,11 +1379,11 @@ PreInit(ScrnInfoPtr pScrn, int flags)
     if (ret == 0) {
         if (connector_count && (value & DRM_PRIME_CAP_IMPORT)) {
             pScrn->capabilities |= RR_Capability_SinkOutput;
-            if (ms->drmmode.glamor)
+            if (ms->drmmode.glamor_gbm)
                 pScrn->capabilities |= RR_Capability_SinkOffload;
         }
 #if defined(GLAMOR) && defined(GBM_HAVE_BO_USE_LINEAR)
-        if (value & DRM_PRIME_CAP_EXPORT && ms->drmmode.glamor)
+        if (value & DRM_PRIME_CAP_EXPORT && ms->drmmode.glamor_gbm)
             pScrn->capabilities |= RR_Capability_SourceOutput | RR_Capability_SourceOffload;
 #endif
     }
@@ -1409,7 +1412,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
         if (pScrn->is_gpu) {
             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
                        "TearFree cannot synchronize PRIME; use 'PRIME Synchronization' instead\n");
-        } else if (ms->drmmode.glamor) {
+        } else if (ms->drmmode.glamor_gbm) {
             /* Atomic modesetting implicitly enables universal planes */
             if (!ms->drmmode.pageflip || ms->atomic_modeset ||
                 !drmSetClientCap(ms->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1)) {
@@ -1737,7 +1740,7 @@ modesetCreateScreenResources(ScreenPtr pScreen)
 
     drmmode_uevent_init(pScrn, &ms->drmmode);
 
-    if (!ms->drmmode.glamor) {
+    if (!ms->drmmode.glamor_gbm) {
         pixels = gbm_bo_get_map(ms->drmmode.front_bo);
     }
 
@@ -2005,10 +2008,12 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
 
 #ifdef GLAMOR
     if (ms->drmmode.glamor) {
+        ms->drmmode.glamor_gbm_device = TRUE;
         ms->drmmode.gbm = ms->glamor.egl_get_gbm_device(pScreen);
-    } else
+    }
 #endif
-    {
+    if (!ms->drmmode.gbm) {
+        ms->drmmode.glamor_gbm_device = FALSE;
         ms->drmmode.gbm = gbm_create_device(ms->drmmode.fd);
         if (!ms->drmmode.gbm) {
             ms->drmmode.gbm = gbm_create_device_by_name(ms->drmmode.fd, "dumb");
@@ -2124,7 +2129,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
      * later memory should be bound when allocating, e.g rotate_mem */
     pScrn->vtSema = TRUE;
 
-    if (serverGeneration == 1 && bgNoneRoot && ms->drmmode.glamor) {
+    if (serverGeneration == 1 && bgNoneRoot && ms->drmmode.glamor_gbm) {
         ms->CreateWindow = pScreen->CreateWindow;
         pScreen->CreateWindow = CreateWindow_oneshot;
     }
@@ -2182,7 +2187,7 @@ ScreenInit(ScreenPtr pScreen, int argc, char **argv)
     }
 
 #ifdef GLAMOR
-    if (ms->drmmode.glamor) {
+    if (ms->drmmode.glamor_gbm) {
         if (!(ms->drmmode.dri2_enable = ms_dri2_screen_init(pScreen))) {
             xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                        "Failed to initialize the DRI2 extension.\n");
@@ -2348,7 +2353,7 @@ CloseScreen(ScreenPtr pScreen)
 
 #ifdef GLAMOR
     /* If we didn't get the gbm device from glamor, we have to free it ourserves */
-    if (!ms->drmmode.glamor)
+    if (!ms->drmmode.glamor_gbm_device)
 #endif
     {
         gbm_device_destroy(ms->drmmode.gbm);
