@@ -1124,6 +1124,53 @@ static const dri3_screen_info_rec glamor_dri3_info = {
 };
 #endif /* DRI3 */
 
+static inline void
+glamor_egl_set_glvnd_vendor(ScreenPtr screen)
+{
+    glamor_egl_priv_t *glamor_egl =
+        glamor_egl_get_screen_private(screen);
+
+    /* Should we make sure the vendor is valid? (nvidia, mesa, ???) */
+    if (glamor_egl->exact_glvnd_vendor) {
+        glamor_set_glvnd_vendor(screen, glamor_egl->glvnd_vendor);
+        return;
+    }
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->fd >= 0) {
+        const char *gbm_backend_name;
+        gbm_backend_name = gbm_device_get_backend_name(glamor_egl->gbm);
+        if (gbm_backend_name) {
+            if (!strncmp(gbm_backend_name, "nvidia", sizeof("nvidia") - 1)) {
+                 glamor_set_glvnd_vendor(screen, "nvidia");
+            } else {
+                 glamor_set_glvnd_vendor(screen, "mesa");
+            }
+            return;
+        }
+    }
+#endif
+
+    const char *vendor = (const char*)glGetString(GL_VENDOR);
+    const char *renderer = (const char*)glGetString(GL_RENDERER);
+
+    if (!glamor_egl->glvnd_vendor) {
+        if (renderer && strstr(renderer, "NVIDIA")) {
+            glamor_set_glvnd_vendor(screen, "nvidia");
+        } else if (vendor && strstr(vendor, "NVIDIA")) {
+            glamor_set_glvnd_vendor(screen, "nvidia");
+        } else {
+            glamor_set_glvnd_vendor(screen, "mesa");
+        }
+    } else {
+        if (strstr(glamor_egl->glvnd_vendor, "nvidia")) {
+            glamor_set_glvnd_vendor(screen, "nvidia");
+        } else {
+            glamor_set_glvnd_vendor(screen, "mesa");
+        }
+    }
+}
+
 void
 glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 {
@@ -1135,7 +1182,6 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 #ifdef GLXEXT
     static Bool vendor_initialized = FALSE;
 #endif
-    const char *gbm_backend_name;
 
     dixScreenHookClose(screen, glamor_egl_close_screen);
     dixScreenHookPostClose(screen, glamor_egl_post_close_screen);
@@ -1148,18 +1194,7 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 
     glamor_ctx->make_current = glamor_egl_make_current;
 
-#ifdef GLAMOR_HAS_GBM
-    /* Use dynamic logic only if vendor is not forced via xorg.conf */
-    if (!glamor_egl->glvnd_vendor) {
-        gbm_backend_name = gbm_device_get_backend_name(glamor_egl->gbm);
-        /* Mesa uses "drm" as backend name, in that case, just do nothing */
-        if (gbm_backend_name && strcmp(gbm_backend_name, "drm") != 0)
-            glamor_set_glvnd_vendor(screen, gbm_backend_name);
-    } else
-#endif
-    {
-        glamor_set_glvnd_vendor(screen, glamor_egl->glvnd_vendor);
-    }
+    glamor_egl_set_glvnd_vendor(screen);
 #ifdef DRI3
     /* Tell the core that we have the interfaces for import/export
      * of pixmaps.

@@ -74,6 +74,8 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
         glamor_egl->glvnd_vendor = strdup(glvnd_vendor);
         if (!glamor_egl->glvnd_vendor) {
             LogMessage(X_WARNING, "Couldn't set gl vendor to: %s\n", glvnd_vendor);
+        } else {
+            glamor_egl->exact_glvnd_vendor = TRUE;
         }
     }
     api = xf86GetOptValString(options, GLAMOREGLOPT_RENDERING_API);

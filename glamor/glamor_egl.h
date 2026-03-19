@@ -44,6 +44,7 @@ typedef struct glamor_egl_screen_private {
     EGLContext context;
     char *device_path;
     char *glvnd_vendor; /* GLVND vendor if forced from options or NULL otherwise */
+    int exact_glvnd_vendor; /* If the glvnd vendor should be assumed valid with no checks */
 
 #ifdef GLAMOR_HAS_GBM
     struct gbm_device *gbm;
