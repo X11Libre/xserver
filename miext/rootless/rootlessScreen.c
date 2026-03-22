@@ -38,7 +38,9 @@
 
 #include "dix/colormap_priv.h"
 #include "dix/screen_hooks_priv.h"
+#include "include/colormapst.h"
 #include "mi/mi_priv.h"
+#include "render/mipict.h"
 
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -328,6 +330,135 @@ RootlessGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
             list++;
         }
     }
+}
+
+static void
+RootlessTrapezoids(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                   PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                   int ntrap, xTrapezoid *traps)
+{
+    ScreenPtr pScreen = pDst->pDrawable->pScreen;
+    PictureScreenPtr ps = GetPictureScreen(pScreen);
+    WindowPtr srcWin, dstWin;
+
+    srcWin = (pSrc->pDrawable && pSrc->pDrawable->type == DRAWABLE_WINDOW) ?
+        (WindowPtr) pSrc->pDrawable : NULL;
+    dstWin = (pDst->pDrawable->type == DRAWABLE_WINDOW) ?
+        (WindowPtr) pDst->pDrawable : NULL;
+
+    ps->Trapezoids = SCREENREC(pScreen)->Trapezoids;
+
+    if (srcWin && IsFramedWindow(srcWin))
+        RootlessStartDrawing(srcWin);
+    if (dstWin && IsFramedWindow(dstWin))
+        RootlessStartDrawing(dstWin);
+
+    ps->Trapezoids(op, pSrc, pDst, maskFormat, xSrc, ySrc, ntrap, traps);
+
+    if (dstWin && IsFramedWindow(dstWin) && ntrap > 0) {
+        BoxRec box;
+
+        miTrapezoidBounds(ntrap, traps, &box);
+
+        if (box.x1 < box.x2 && box.y1 < box.y2) {
+            box.x1 += dstWin->drawable.x;
+            box.y1 += dstWin->drawable.y;
+            box.x2 += dstWin->drawable.x;
+            box.y2 += dstWin->drawable.y;
+            RootlessDamageBox(dstWin, &box);
+        }
+    }
+
+    ps->Trapezoids = RootlessTrapezoids;
+}
+
+static void
+RootlessTriangles(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
+                  PictFormatPtr maskFormat, INT16 xSrc, INT16 ySrc,
+                  int ntri, xTriangle *tris)
+{
+    ScreenPtr pScreen = pDst->pDrawable->pScreen;
+    PictureScreenPtr ps = GetPictureScreen(pScreen);
+    WindowPtr srcWin, dstWin;
+
+    srcWin = (pSrc->pDrawable && pSrc->pDrawable->type == DRAWABLE_WINDOW) ?
+        (WindowPtr) pSrc->pDrawable : NULL;
+    dstWin = (pDst->pDrawable->type == DRAWABLE_WINDOW) ?
+        (WindowPtr) pDst->pDrawable : NULL;
+
+    ps->Triangles = SCREENREC(pScreen)->Triangles;
+
+    if (srcWin && IsFramedWindow(srcWin))
+        RootlessStartDrawing(srcWin);
+    if (dstWin && IsFramedWindow(dstWin))
+        RootlessStartDrawing(dstWin);
+
+    ps->Triangles(op, pSrc, pDst, maskFormat, xSrc, ySrc, ntri, tris);
+
+    if (dstWin && IsFramedWindow(dstWin) && ntri > 0) {
+        BoxRec box;
+
+        miTriangleBounds(ntri, tris, &box);
+
+        if (box.x1 < box.x2 && box.y1 < box.y2) {
+            box.x1 += dstWin->drawable.x;
+            box.y1 += dstWin->drawable.y;
+            box.x2 += dstWin->drawable.x;
+            box.y2 += dstWin->drawable.y;
+            RootlessDamageBox(dstWin, &box);
+        }
+    }
+
+    ps->Triangles = RootlessTriangles;
+}
+
+static void
+RootlessCompositeRects(CARD8 op, PicturePtr pDst, xRenderColor *color,
+                       int nRect, xRectangle *rects)
+{
+    ScreenPtr pScreen = pDst->pDrawable->pScreen;
+    PictureScreenPtr ps = GetPictureScreen(pScreen);
+    WindowPtr dstWin;
+
+    dstWin = (pDst->pDrawable->type == DRAWABLE_WINDOW) ?
+        (WindowPtr) pDst->pDrawable : NULL;
+
+    ps->CompositeRects = SCREENREC(pScreen)->CompositeRects;
+
+    if (dstWin && IsFramedWindow(dstWin))
+        RootlessStartDrawing(dstWin);
+
+    ps->CompositeRects(op, pDst, color, nRect, rects);
+
+    if (dstWin && IsFramedWindow(dstWin) && nRect > 0) {
+        int i;
+        BoxRec box;
+
+        box.x1 = rects[0].x;
+        box.y1 = rects[0].y;
+        box.x2 = rects[0].x + rects[0].width;
+        box.y2 = rects[0].y + rects[0].height;
+
+        for (i = 1; i < nRect; i++) {
+            short x1 = rects[i].x;
+            short y1 = rects[i].y;
+            short x2 = x1 + rects[i].width;
+            short y2 = y1 + rects[i].height;
+
+            if (x1 < box.x1) box.x1 = x1;
+            if (y1 < box.y1) box.y1 = y1;
+            if (x2 > box.x2) box.x2 = x2;
+            if (y2 > box.y2) box.y2 = y2;
+        }
+
+        if (box.x1 < box.x2 && box.y1 < box.y2) {
+            RootlessDamageRect(dstWin,
+                               box.x1, box.y1,
+                               box.x2 - box.x1, box.y2 - box.y1);
+        }
+    }
+
+    ps->CompositeRects = RootlessCompositeRects;
 }
 
 /*
@@ -660,13 +791,19 @@ RootlessWrap(ScreenPtr pScreen)
     WRAP(SetShape);
 
     {
-        // Composite and Glyphs don't use normal screen wrapping
+        // PictureScreen procs don't use normal screen wrapping
         PictureScreenPtr ps = GetPictureScreen(pScreen);
 
         s->Composite = ps->Composite;
         ps->Composite = RootlessComposite;
         s->Glyphs = ps->Glyphs;
         ps->Glyphs = RootlessGlyphs;
+        s->Trapezoids = ps->Trapezoids;
+        ps->Trapezoids = RootlessTrapezoids;
+        s->Triangles = ps->Triangles;
+        ps->Triangles = RootlessTriangles;
+        s->CompositeRects = ps->CompositeRects;
+        ps->CompositeRects = RootlessCompositeRects;
     }
 
     // WRAP(ClearToBackground); fixme put this back? useful for shaped wins?
