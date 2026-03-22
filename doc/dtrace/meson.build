@@ -17,6 +17,7 @@ if build_docs
         build_by_default: true,
         install: true,
         install_dir: join_paths(get_option('datadir'), 'doc/xorg-server'),
+        install_tag: 'doc',
     )
 
     if build_docs_pdf
@@ -36,6 +37,7 @@ if build_docs
                 build_by_default: true,
                 install: true,
                 install_dir: join_paths(get_option('datadir'), 'doc/xorg-server'),
+                install_tag: 'doc',
             )
         endforeach
     endif
@@ -59,6 +61,7 @@ if build_docs
             build_by_default: true,
             install: true,
             install_dir: join_paths(get_option('datadir'), 'doc/xorg-server'),
+            install_tag: 'doc',
         )
     endforeach
 endif

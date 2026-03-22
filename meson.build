@@ -4,7 +4,7 @@ project('xserver', 'c',
             'c_std=gnu99',
         ],
         version: '25.0.0.21',
-        meson_version: '>= 0.58.0',
+        meson_version: '>= 0.60.0',
 )
 release_date = '2026-02-10'
 
@@ -865,6 +865,7 @@ if build_xorg
                                 'pkgconfig'),
     )
 
+<<<<<<< HEAD
     configure_file(
         input: 'xlibre-server.pc.in',
         output: 'xlibre-server.pc',
@@ -876,6 +877,13 @@ if build_xorg
 
     install_data('xorg-server.m4',
                  install_dir: join_paths(get_option('datadir'), 'aclocal'))
+=======
+    install_data(
+        'xorg-server.m4',
+        install_dir: join_paths(get_option('datadir'), 'aclocal'),
+        install_tag: 'devel',
+    )
+>>>>>>> 16ca2c7a1 (meson: add install_tags to files meson couldnt guess on its own)
 endif
 
 if build_docs or build_docs_devel

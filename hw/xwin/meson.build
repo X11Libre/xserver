@@ -166,7 +166,8 @@ executable(
 
 install_data(
     'system.XWinrc',
-    install_dir: join_paths(get_option('sysconfdir'), 'X11')
+    install_dir: join_paths(get_option('sysconfdir'), 'X11'),
+    install_tag: 'runtime',
 )
 
 xwin_man = configure_file(

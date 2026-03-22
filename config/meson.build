@@ -24,8 +24,11 @@ if host_machine.system() == 'netbsd' or host_machine.system() == 'openbsd'
 endif
 
 if build_xorg
-    install_data('10-quirks.conf',
-                 install_dir: join_paths(get_option('datadir'), 'X11/xorg.conf.d'))
+    install_data(
+      '10-quirks.conf',
+      install_dir: join_paths(get_option('datadir'), 'X11/xorg.conf.d'),
+      install_tag: 'runtime',
+    )
 endif
 
 libxserver_config = static_library('xserver_config',

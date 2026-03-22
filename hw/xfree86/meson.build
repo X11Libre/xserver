@@ -148,7 +148,9 @@ meson.add_install_script(
     'sh', '-c',
     'ln -fs Xorg @0@@1@'.format(
         '${DESTDIR}',
-        join_paths(get_option('prefix'), get_option('bindir'), 'X')))
+        join_paths(get_option('prefix'), get_option('bindir'), 'X')),
+    install_tag: 'runtime',
+)
 
 if get_option('suid_wrapper')
     executable('Xorg.wrap',
