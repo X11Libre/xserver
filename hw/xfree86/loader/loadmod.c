@@ -45,10 +45,7 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "dix.h"
 #include "os.h"
@@ -100,6 +97,32 @@ FreeStringList(char **paths)
 }
 
 static char **defaultPathList = NULL;
+
+typedef struct {
+    struct xorg_list entry;
+    char *name;
+    char **paths;
+} LoaderModulePathListItem;
+
+struct xorg_list modulePathLists;
+
+void LoaderInitPath(void) {
+    /* defaultPathList is already set in xf86Init */
+    xorg_list_init(&modulePathLists);
+}
+
+void LoaderClosePath(void) {
+    LoaderModulePathListItem *item, *next;
+    xorg_list_for_each_entry_safe(item, next, &modulePathLists, entry) {
+        xorg_list_del(&item->entry);
+        free(item->name);
+        if (item->paths)
+            FreeStringList(item->paths);
+        free(item);
+    }
+    xorg_list_del(&modulePathLists);
+    FreeStringList(defaultPathList);
+}
 
 static Bool
 PathIsAbsolute(const char *path)
@@ -163,14 +186,73 @@ InitPathList(const char *path)
     return list;
 }
 
+/*
+ * Set a default search path or a search path for a specific driver
+ */
 void
-LoaderSetPath(const char *path)
+LoaderSetPath(const char *driver, const char *path)
 {
-    if (!path)
-        return;
+    LoaderModulePathListItem *item;
 
-    FreeStringList(defaultPathList);
-    defaultPathList = InitPathList(path);
+    if (!driver) {
+        if (path) {
+            FreeStringList(defaultPathList);
+            defaultPathList = InitPathList(path);
+        }
+        return;
+    }
+
+    xorg_list_for_each_entry(item, &modulePathLists, entry) {
+        if (!strcmp(item->name, driver)) {
+            FreeStringList(item->paths);
+            if (path)
+                item->paths = InitPathList(path);
+            else
+                item->paths = NULL;
+            return;
+        }
+    }
+
+    item = malloc(sizeof(LoaderModulePathListItem));
+    if (item) {
+        item->name = strdup(driver);
+        if (path)
+            item->paths = InitPathList(path);
+        else
+            item->paths = NULL;
+    }
+    if (item && item->name && (!path || item->paths))
+        xorg_list_add(&item->entry, &modulePathLists);
+    else {
+        LogMessage(X_ERROR, "Failed to store module search path \"%s\" for module %s\n",
+            path ? path : "<NULL>", driver);
+        if (item) {
+            if (item->name) free(item->name);
+            if (item->paths) FreeStringList(item->paths);
+            free(item);
+        }
+    }
+}
+
+/*
+ * Get a default search path or a search path for a specific driver
+ * and make it effective
+ */
+static char **
+LoaderGetPath(const char *module)
+{
+    LoaderModulePathListItem *item;
+
+    xorg_list_for_each_entry(item, &modulePathLists, entry) {
+        if (!strcmp(item->name, module)) {
+            if (item->paths)
+                return item->paths;
+            else
+                return defaultPathList;
+        }
+    }
+
+    return defaultPathList;
 }
 
 /* Standard set of module subdirectories to search, in order of preference */
@@ -194,9 +276,15 @@ static const char *stdSubdirs[] = {
  * to port this DDX to, say, Darwin, we'll need to fix this.
  */
 static PatternRec stdPatterns[] = {
+#ifdef __CYGWIN__
+    {"^cyg(.*)\\.dll$",},
+    {"(.*)_drv\\.dll$",},
+    {"(.*)\\.dll$",},
+#else
     {"^lib(.*)\\.so$",},
     {"(.*)_drv\\.so$",},
     {"(.*)\\.so$",},
+#endif
     {NULL,}
 };
 
@@ -285,21 +373,33 @@ FindModuleInSubdir(const char *dirpath, const char *module)
             continue;
         }
 
+#ifdef __CYGWIN__
+        snprintf(tmpBuf, PATH_MAX, "cyg%s.dll", module);
+#else
         snprintf(tmpBuf, PATH_MAX, "lib%s.so", module);
+#endif
         if (strcmp(direntry->d_name, tmpBuf) == 0) {
             if (asprintf(&ret, "%s%s", dirpath, tmpBuf) == -1)
                 ret = NULL;
             break;
         }
 
+#ifdef __CYGWIN__
+        snprintf(tmpBuf, PATH_MAX, "%s_drv.dll", module);
+#else
         snprintf(tmpBuf, PATH_MAX, "%s_drv.so", module);
+#endif
         if (strcmp(direntry->d_name, tmpBuf) == 0) {
             if (asprintf(&ret, "%s%s", dirpath, tmpBuf) == -1)
                 ret = NULL;
             break;
         }
 
+#ifdef __CYGWIN__
+        snprintf(tmpBuf, PATH_MAX, "%s.dll", module);
+#else
         snprintf(tmpBuf, PATH_MAX, "%s.so", module);
+#endif
         if (strcmp(direntry->d_name, tmpBuf) == 0) {
             if (asprintf(&ret, "%s%s", dirpath, tmpBuf) == -1)
                 ret = NULL;
@@ -330,8 +430,8 @@ FindModule(const char *module, const char *dirname, PatternPtr patterns)
     return name;
 }
 
-const char **
-LoaderListDir(const char *subdir, const char **patternlist)
+static const char **
+_LoaderListDir(const char *subdir, const char **patternlist, int *saved_len)
 {
     char buf[PATH_MAX + 1];
     char **pathlist;
@@ -405,7 +505,48 @@ LoaderListDir(const char *subdir, const char **patternlist)
 
  bail:
     FreePatterns(patterns);
+    *saved_len = ret ? n : 0;
     return (const char **) ret;
+}
+
+const char **
+LoaderListDir(const char *subdir, const char **patternlist)
+{
+    int len = 0;
+    const char **ret = NULL;
+    int subdirlen = strlen(subdir);
+    for (int i = 0; i < sizeof(stdSubdirs) / sizeof(*stdSubdirs); i++) {
+        int prefixsize = sizeof(stdSubdirs[i]);
+        char* dir = malloc(prefixsize + subdirlen);
+        if (!dir) {
+            free(ret);
+            return NULL;
+        }
+        memcpy(dir, stdSubdirs[i], prefixsize - 1);
+        memcpy(dir + prefixsize - 1, subdir, subdirlen + 1);
+
+        int sublen = 0;
+        const char **subret = _LoaderListDir(dir, patternlist, &sublen);
+        free(dir);
+        if (!subret) {
+            continue;
+        }
+
+        int oldlen = len;
+        len += sublen;
+        void *tmp = reallocarray(ret, len + 1, sizeof(*ret));
+        if (!tmp) {
+            free(ret);
+            return NULL;
+        }
+
+        ret = tmp;
+        memcpy(ret + oldlen, subret, sublen);
+    }
+    if (ret) {
+        ret[len] = NULL;
+    }
+    return ret;
 }
 
 static Bool
@@ -662,7 +803,7 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
     LogMessageVerb(X_INFO, 3, "LoadModule: \"%s\"", module);
 
     /* Ignore abi check for the nvidia proprietary DDX driver */
-    is_nvidia_proprietary = !memcmp(module, "nvidia", sizeof("nvidia"));
+    is_nvidia_proprietary = !strcmp(module, "nvidia");
 
     patterns = InitPatterns(NULL);
     name = LoaderGetCanonicalName(module, patterns);
@@ -725,7 +866,7 @@ LoadModule(const char *module, void *options, const XF86ModReqInfo *modreq,
         goto LoadModule_fail;
     }
 
-    pathlist = defaultPathList;
+    pathlist = LoaderGetPath(name);
     if (!pathlist) {
         /* This could be a calloc failure too */
         if (errmaj)

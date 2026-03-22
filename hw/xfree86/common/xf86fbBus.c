@@ -28,10 +28,7 @@
 /*
  * This file contains the interfaces to the bus-specific code
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -50,14 +47,18 @@ xf86ClaimFbSlot(DriverPtr drvp, int chipset, GDevPtr dev, Bool active)
     EntityPtr p;
     int num;
 
-    num = xf86AllocateEntity();
-    p = xf86Entities[num];
-    p->driver = drvp;
-    p->chipset = 0;
-    p->bus.type = BUS_NONE;
-    p->active = active;
-    p->inUse = FALSE;
-    xf86AddDevToEntity(num, dev);
+    if (xf86CheckSlot(dev, BUS_NONE)) {
+        num = xf86AllocateEntity();
+        p = xf86Entities[num];
+        p->driver = drvp;
+        p->chipset = 0;
+        p->bus.type = BUS_NONE;
+        p->active = active;
+        p->inUse = FALSE;
+        xf86AddDevToEntity(num, dev);
 
-    return num;
+        return num;
+    } else {
+        return -1;
+    }
 }

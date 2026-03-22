@@ -32,6 +32,7 @@
 #include <dix-config.h>
 
 #include "dix/screenint_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "inputstr.h"
 #include "quartz.h"
@@ -41,7 +42,7 @@
 #include "pseudoramiX.h"
 #include "darwinEvents.h"
 #include "rootless.h"
-#include "dri.h"
+#include "xpr_dri.h"
 #include "globals.h"
 #include <Xplugin.h>
 #include "applewmExt.h"
@@ -49,12 +50,7 @@
 
 #include "rootlessCommon.h"
 
-#ifdef DAMAGE
 #include "damage.h"
-#endif
-
-#include "nonsdk_extinit.h"
-#include "miext/extinit_priv.h"
 
 /* 10.4's deferred update makes X slower.. have to live with the tearing
  * for now.. */

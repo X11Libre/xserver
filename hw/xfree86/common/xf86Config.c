@@ -41,16 +41,15 @@
  *      Egbert Eich <eich@XFree86.Org>
  *      ... and others
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <grp.h>
 
+#include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/settings_priv.h"
 #include "dix/screensaver_priv.h"
 #include "include/extinit.h"
 #include "os/log_priv.h"
@@ -120,6 +119,11 @@
 static ModuleDefault ModuleDefaults[] = {
 #ifdef GLXEXT
     {.name = "glx",.toLoad = TRUE,.load_opt = NULL},
+#endif
+#ifdef __CYGWIN__
+    /* load DIX modules used by drivers first */
+    {.name = "fb",.toLoad = TRUE,.load_opt = NULL},
+    {.name = "shadow",.toLoad = TRUE,.load_opt = NULL},
 #endif
     {.name = NULL,.toLoad = FALSE,.load_opt = NULL}
 };
@@ -238,7 +242,7 @@ xf86ValidateFontPath(char *path)
         pointertype _l, _p;                                                                  \
                                                                                              \
         for (_l = (listhead), _p = NULL; !_p && _l; _l = (pointertype)_l->list.next) {       \
-            if (!_l->match_seat || (SeatId && xf86nameCompare(_l->match_seat, SeatId) == 0)) \
+            if (!_l->match_seat || (dixSettingSeatId && xf86nameCompare(_l->match_seat, dixSettingSeatId) == 0)) \
                 _p = _l;                                                                     \
         }                                                                                    \
                                                                                              \
@@ -650,6 +654,7 @@ typedef enum {
     FLAG_IGLX,
     FLAG_DEBUG,
     FLAG_ALLOW_BYTE_SWAPPED_CLIENTS,
+    FLAG_SINGLE_DRIVER,
 } FlagValues;
 
 /**
@@ -711,6 +716,8 @@ static OptionInfoRec FlagOptions[] = {
      {0}, FALSE},
     {FLAG_ALLOW_BYTE_SWAPPED_CLIENTS, "AllowByteSwappedClients", OPTV_BOOLEAN,
      {0}, FALSE},
+    {FLAG_SINGLE_DRIVER, "SingleDriver", OPTV_BOOLEAN,
+     {0}, FALSE},
     {-1, NULL, OPTV_NONE,
      {0}, FALSE},
 };
@@ -752,8 +759,11 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
         LogMessageVerb(X_CONFIG, 1, "Ignoring ABI Version\n");
     }
 
-    xf86GetOptValBool(FlagOptions, FLAG_ALLOW_BYTE_SWAPPED_CLIENTS, &AllowByteSwappedClients);
-    if (AllowByteSwappedClients) {
+    Bool bv = FALSE;
+    if (xf86GetOptValBool(FlagOptions, FLAG_ALLOW_BYTE_SWAPPED_CLIENTS, &bv)) {
+        dixSettingAllowByteSwappedClients = bv;
+    }
+    if (dixSettingAllowByteSwappedClients) {
         LogMessageVerb(X_CONFIG, 1, "Allowing byte-swapped clients\n");
     }
 
@@ -804,6 +814,17 @@ configServerFlags(XF86ConfFlagsPtr flagsconf, XF86OptionPtr layoutopts)
     }
     LogMessageVerb(from, 1, "%sutomatically binding GPU devices\n",
                    xf86Info.autoBindGPU ? "A" : "Not a");
+
+    if (xf86IsOptionSet(FlagOptions, FLAG_SINGLE_DRIVER)) {
+        xf86GetOptValBool(FlagOptions, FLAG_SINGLE_DRIVER,
+                          &xf86Info.singleDriver);
+        from = X_CONFIG;
+    }
+    else {
+        from = X_DEFAULT;
+    }
+    LogMessageVerb(from, 1, "Allowing %s one driver to add non-GPU screens\n",
+                   xf86Info.singleDriver ? "only" : "more than");
 
     /*
      * Set things up based on the config file information.  Some of these
@@ -1739,7 +1760,7 @@ configScreen(confScreenPtr screenp, XF86ConfScreenPtr conf_screen, int scrnum,
         screenp->device = NULL;
     }
 
-    if (auto_gpu_device && conf_screen->num_gpu_devices == 0 &&
+    if (xf86Info.autoAddGPU && auto_gpu_device && conf_screen->num_gpu_devices == 0 &&
         xf86configptr->conf_device_lst) {
         /* Loop through the entire device list and skip the primary device
          * assigned to the screen. This is important because there are two
@@ -2385,7 +2406,10 @@ xf86HandleConfigFile(Bool autoconfig)
      * And while we are at it, we'll decode the rest of the stuff as well
      */
 
-    /* First check if a layout section is present, and if it is valid. */
+    /* Global server options should go first, e.g., GPU devices probing depends on this */
+    configServerFlags(xf86configptr->conf_flags, xf86ConfigLayout.options);
+
+    /* Check if a layout section is present, and if it is valid. */
     FIND_SUITABLE(XF86ConfLayoutPtr, xf86configptr->conf_layout_lst, layout);
     if (layout == NULL || xf86ScreenName != NULL) {
         XF86ConfScreenPtr screen;
@@ -2444,7 +2468,6 @@ xf86HandleConfigFile(Bool autoconfig)
     }
 #endif
     /* Now process everything else */
-    configServerFlags(xf86configptr->conf_flags, xf86ConfigLayout.options);
     configFiles(xf86configptr->conf_files);
     configExtensions(xf86configptr->conf_extensions);
     configDRI(xf86configptr->conf_dri);

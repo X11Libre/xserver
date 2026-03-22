@@ -1490,7 +1490,7 @@ static void damagePixmapDestroy(CallbackListPtr *pcbl, ScreenPtr pScreen, Pixmap
 }
 
 static void
-damageCopyWindow(WindowPtr pWindow, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+damageCopyWindow(WindowPtr pWindow, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWindow->drawable.pScreen;
 

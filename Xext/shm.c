@@ -47,6 +47,8 @@ in this Software without prior written authorization from The Open Group.
 #include "dix/screenint_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
+#include "include/shmint.h"
 #include "miext/extinit_priv.h"
 #include "os/auth.h"
 #include "os/busfault.h"
@@ -67,7 +69,6 @@ in this Software without prior written authorization from The Open Group.
 #include "gcstruct.h"
 #include "extnsionst.h"
 #include "servermd.h"
-#include "shmint.h"
 #include "xace.h"
 #include "protocol-versions.h"
 
@@ -159,7 +160,7 @@ static ShmFuncs fbFuncs = { fbShmCreatePixmap, NULL };
     } \
 }
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__CYGWIN__) || defined(__DragonFly__)
 
 static Bool badSysCall = FALSE;
 
@@ -237,6 +238,8 @@ ShmRegisterFbFuncs(ScreenPtr pScreen)
 static int
 ProcShmQueryVersion(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xShmQueryVersionReq);
+
     xShmQueryVersionReply reply = {
         .sharedPixmaps = sharedPixmaps,
         .majorVersion = SERVER_SHM_MAJOR_VERSION,
@@ -245,8 +248,6 @@ ProcShmQueryVersion(ClientPtr client)
         .gid = getegid(),
         .pixmapFormat = sharedPixmaps ? ZPixmap : 0
     };
-
-    REQUEST_SIZE_MATCH(xShmQueryVersionReq);
 
     if (client->swapped) {
         swaps(&reply.majorVersion);
@@ -327,8 +328,9 @@ shm_access(ClientPtr client, SHMPERM_TYPE * perm, int readonly)
 static int
 ProcShmAttach(ClientPtr client)
 {
-    REQUEST(xShmAttachReq);
-    REQUEST_SIZE_MATCH(xShmAttachReq);
+    X_REQUEST_HEAD_STRUCT(xShmAttachReq);
+    X_REQUEST_FIELD_CARD32(shmseg);
+    X_REQUEST_FIELD_CARD32(shmid);
 
     if (!client->local)
         return BadRequest;
@@ -415,8 +417,8 @@ ShmDetachSegment(void *value, /* must conform to DeleteType */
 static int
 ProcShmDetach(ClientPtr client)
 {
-    REQUEST(xShmDetachReq);
-    REQUEST_SIZE_MATCH(xShmDetachReq);
+    X_REQUEST_HEAD_STRUCT(xShmDetachReq);
+    X_REQUEST_FIELD_CARD32(shmseg);
 
     if (!client->local)
         return BadRequest;
@@ -687,8 +689,19 @@ ShmGetImage(ClientPtr client, xShmGetImageReq *stuff)
 static int
 ProcShmPutImage(ClientPtr client)
 {
-    REQUEST(xShmPutImageReq);
-    REQUEST_SIZE_MATCH(xShmPutImageReq);
+    X_REQUEST_HEAD_STRUCT(xShmPutImageReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(gc);
+    X_REQUEST_FIELD_CARD16(totalWidth);
+    X_REQUEST_FIELD_CARD16(totalHeight);
+    X_REQUEST_FIELD_CARD16(srcX);
+    X_REQUEST_FIELD_CARD16(srcY);
+    X_REQUEST_FIELD_CARD16(srcWidth);
+    X_REQUEST_FIELD_CARD16(srcHeight);
+    X_REQUEST_FIELD_CARD16(dstX);
+    X_REQUEST_FIELD_CARD16(dstY);
+    X_REQUEST_FIELD_CARD32(shmseg);
+    X_REQUEST_FIELD_CARD32(offset);
 
     if (!client->local)
         return BadRequest;
@@ -741,8 +754,15 @@ ProcShmPutImage(ClientPtr client)
 static int
 ProcShmGetImage(ClientPtr client)
 {
-    REQUEST(xShmGetImageReq);
-    REQUEST_SIZE_MATCH(xShmGetImageReq);
+    X_REQUEST_HEAD_STRUCT(xShmGetImageReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD32(planeMask);
+    X_REQUEST_FIELD_CARD32(shmseg);
+    X_REQUEST_FIELD_CARD32(offset);
 
     if (!client->local)
         return BadRequest;
@@ -886,8 +906,13 @@ ProcShmGetImage(ClientPtr client)
 static int
 ProcShmCreatePixmap(ClientPtr client)
 {
-    REQUEST(xShmCreatePixmapReq);
-    REQUEST_SIZE_MATCH(xShmCreatePixmapReq);
+    X_REQUEST_HEAD_STRUCT(xShmCreatePixmapReq);
+    X_REQUEST_FIELD_CARD32(pid);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD32(shmseg);
+    X_REQUEST_FIELD_CARD32(offset);
 
     if (!client->local)
         return BadRequest;
@@ -1118,8 +1143,8 @@ ShmBusfaultNotify(void *context)
 static int
 ProcShmAttachFd(ClientPtr client)
 {
-    REQUEST(xShmAttachFdReq);
-    REQUEST_SIZE_MATCH(xShmAttachFdReq);
+    X_REQUEST_HEAD_STRUCT(xShmAttachFdReq);
+    X_REQUEST_FIELD_CARD32(shmseg);
 
     if (!client->local)
         return BadRequest;
@@ -1237,8 +1262,9 @@ shm_tmpfile(void)
 static int
 ProcShmCreateSegment(ClientPtr client)
 {
-    REQUEST(xShmCreateSegmentReq);
-    REQUEST_SIZE_MATCH(xShmCreateSegmentReq);
+    X_REQUEST_HEAD_STRUCT(xShmCreateSegmentReq);
+    X_REQUEST_FIELD_CARD32(shmseg);
+    X_REQUEST_FIELD_CARD32(size);
 
     if (!client->local)
         return BadRequest;

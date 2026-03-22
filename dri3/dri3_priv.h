@@ -23,7 +23,6 @@
 #ifndef _DRI3PRIV_H_
 #define _DRI3PRIV_H_
 
-#include "dix-config.h"
 #include <X11/X.h>
 #include "scrnintstr.h"
 #include "misc.h"
@@ -80,9 +79,6 @@ dri3_screen_priv(ScreenPtr screen)
 
 int
 proc_dri3_dispatch(ClientPtr client);
-
-int
-sproc_dri3_dispatch(ClientPtr client);
 
 /* DDX interface */
 

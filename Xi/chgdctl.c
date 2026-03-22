@@ -75,11 +75,11 @@ SOFTWARE.
 int
 ProcXChangeDeviceControl(ClientPtr client)
 {
-    REQUEST(xChangeDeviceControlReq);
+    X_REQUEST_HEAD_AT_LEAST(xChangeDeviceControlReq);
     REQUEST_AT_LEAST_EXTRA_SIZE(xChangeDeviceControlReq, sizeof(xDeviceCtl));
+    X_REQUEST_FIELD_CARD16(control);
 
     if (client->swapped) {
-        swaps(&stuff->control);
         xDeviceCtl *ctl = (xDeviceCtl *) &stuff[1];
         swaps(&ctl->control);
         swaps(&ctl->length);
@@ -104,7 +104,7 @@ ProcXChangeDeviceControl(ClientPtr client)
         goto out;
     }
 
-    xChangeDeviceControlReply rep = {
+    xChangeDeviceControlReply reply = {
         .RepType = X_ChangeDeviceControl,
         .status = Success,
     };
@@ -123,7 +123,7 @@ ProcXChangeDeviceControl(ClientPtr client)
             goto out;
         }
         if ((dev->deviceGrab.grab) && !SameClient(dev->deviceGrab.grab, client)) {
-            rep.status = AlreadyGrabbed;
+            reply.status = AlreadyGrabbed;
             ret = Success;
             goto out;
         }
@@ -145,7 +145,7 @@ ProcXChangeDeviceControl(ClientPtr client)
             ret = Success;
         }
         else if (status == DeviceBusy) {
-            rep.status = DeviceBusy;
+            reply.status = DeviceBusy;
             ret = Success;
         }
         else {
@@ -183,7 +183,7 @@ ProcXChangeDeviceControl(ClientPtr client)
             ret = Success;
         }
         else if (status == DeviceBusy) {
-            rep.status = DeviceBusy;
+            reply.status = DeviceBusy;
             ret = Success;
         }
         else {
@@ -207,7 +207,7 @@ ProcXChangeDeviceControl(ClientPtr client)
         SendEventToAllWindows(dev, DevicePresenceNotifyMask,
                               (xEvent *) &dpn, 1);
 
-        ret = X_SEND_REPLY_SIMPLE(client, rep);
+        ret = X_SEND_REPLY_SIMPLE(client, reply);
     }
 
     return ret;

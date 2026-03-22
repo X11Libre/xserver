@@ -67,15 +67,11 @@ static void SGEGenericEvent(xEvent *from, xEvent *to);
 static int
 ProcGEQueryVersion(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xGEQueryVersionReq);
+    X_REQUEST_FIELD_CARD16(majorVersion);
+    X_REQUEST_FIELD_CARD16(minorVersion);
+
     GEClientInfoPtr pGEClient = GEGetClient(client);
-
-    REQUEST(xGEQueryVersionReq);
-    REQUEST_SIZE_MATCH(xGEQueryVersionReq);
-
-    if (client->swapped) {
-        swaps(&stuff->majorVersion);
-        swaps(&stuff->minorVersion);
-    }
 
     xGEQueryVersionReply reply = {
         .RepType = X_GEQueryVersion,

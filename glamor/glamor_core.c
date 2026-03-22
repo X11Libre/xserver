@@ -207,6 +207,8 @@ glamor_validate_gc(GCPtr gc, unsigned long changes, DrawablePtr drawable)
      */
     if (changes & GCTile) {
         if (!gc->tileIsPixel) {
+            assert(gc->tile.pixmap != NullPixmap);
+
             glamor_pixmap_private *pixmap_priv =
                 glamor_get_pixmap_private(gc->tile.pixmap);
             if ((!GLAMOR_PIXMAP_PRIV_HAS_FBO(pixmap_priv))

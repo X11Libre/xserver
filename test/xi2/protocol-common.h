@@ -21,9 +21,8 @@
  *  DEALINGS IN THE SOFTWARE.
  */
 
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
+#ifndef PROTOCOL_COMMON_H
+#define PROTOCOL_COMMON_H
 
 #include "dix/resource_priv.h"
 
@@ -33,9 +32,6 @@
 #include <assert.h>
 
 #include "tests.h"
-
-#ifndef PROTOCOL_COMMON_H
-#define PROTOCOL_COMMON_H
 
 /* Check default values in a reply */
 #define reply_check_defaults(rep, len, type) \

@@ -91,8 +91,6 @@ static int num_fpes = 0;
 static xfont2_fpe_funcs_rec const **fpe_functions;
 static int num_fpe_types = 0;
 
-static unsigned char *font_path_string;
-
 static int num_slept_fpes = 0;
 static int size_slept_fpes = 0;
 static FontPathElementPtr *slept_fpes = (FontPathElementPtr *) 0;
@@ -632,9 +630,8 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
                 }
                 if (err == FontNameAlias) {
                     free(resolved);
-                    resolved = calloc(1, resolvedlen + 1);
-                    if (resolved)
-                        memcpy(resolved, tmpname, resolvedlen + 1);
+                    resolved = XNFalloc(resolvedlen + 1);
+                    memcpy(resolved, tmpname, resolvedlen + 1);
                 }
             }
 
@@ -733,14 +730,14 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     names = c->names;
     client = c->client;
 
-    xListFontsReply rep = {
+    xListFontsReply reply = {
         .nFonts = names->nnames,
     };
 
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     for (int i = 0; i < names->nnames; i++) {
         if (names->length[i] > 255)
-            rep.nFonts--;
+            reply.nFonts--;
         else {
             /* write a pascal string */
             x_rpcbuf_write_CARD8(&rpcbuf, names->length[i]);
@@ -754,10 +751,10 @@ doListFontsAndAliases(ClientPtr client, LFclosurePtr c)
     }
 
     if (client->swapped) {
-        swaps(&rep.nFonts);
+        swaps(&reply.nFonts);
     }
 
-    X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
  bail:
     ClientWakeup(client);
@@ -831,7 +828,6 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     int namelen;
     int numFonts;
     FontInfoRec fontInfo, *pFontInfo;
-    xListFontsWithInfoReply *reply;
     int length;
     xFontProp *pFP;
     int aliascount = 0;
@@ -943,7 +939,7 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
         }
         else if (err == Successful) {
             length = sizeof(xListFontsWithInfoReply) + pFontInfo->nprops * sizeof(xFontProp);
-            reply = c->reply;
+            xListFontsWithInfoReply *reply = c->reply;
             if (c->length < length) {
                 reply = (xListFontsWithInfoReply *) realloc(c->reply, length);
                 if (!reply) {
@@ -1035,8 +1031,8 @@ doListFontsWithInfo(ClientPtr client, LFWIclosurePtr c)
     }
  finish: ;
     /* finish it the replies series sending an empty reply */
-    xListFontsWithInfoReply rep = { 0 };
-    X_SEND_REPLY_SIMPLE(client, rep);
+    xListFontsWithInfoReply reply = { 0 };
+    X_SEND_REPLY_SIMPLE(client, reply);
  bail:
     ClientWakeup(client);
     for (int i = 0; i < c->num_fpes; i++)
@@ -1765,44 +1761,6 @@ SetDefaultFontPath(const char *path)
     free(temp_path);
 
     return err;
-}
-
-int
-GetFontPath(ClientPtr client, int *count, int *length, unsigned char **result)
-{
-    int access;
-    unsigned char *c;
-    int len;
-    FontPathElementPtr fpe;
-
-    access = dixCallServerAccessCallback(client, DixGetAttrAccess);
-    if (access != Success)
-        return access;
-
-    len = 0;
-    for (int i = 0; i < num_fpes; i++) {
-        fpe = font_path_elements[i];
-        len += fpe->name_length + 1;
-    }
-    c = realloc(font_path_string, len);
-    if (c == NULL) {
-        free(font_path_string);
-        font_path_string = NULL;
-        return BadAlloc;
-    }
-
-    font_path_string = c;
-    *length = 0;
-    for (int i = 0; i < num_fpes; i++) {
-        fpe = font_path_elements[i];
-        *c = fpe->name_length;
-        *length += *c++;
-        memcpy(c, fpe->name, fpe->name_length);
-        c += fpe->name_length;
-    }
-    *count = num_fpes;
-    *result = font_path_string;
-    return Success;
 }
 
 void

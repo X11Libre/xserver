@@ -25,10 +25,7 @@
   from The Open Group.
 
 */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "mi/mi_priv.h"
 
@@ -74,6 +71,18 @@ DDXRingBell(int volume, int pitch, int duration)
     /* winKeybdBell is used instead */
     return;
 }
+
+
+#ifdef HAS_DEVWINDOWS
+static void
+xwinDevWindowsHandlerNotify(int fd, int ready, void *data)
+{
+    /* This should process Windows messages, but instead all of that is delayed
+     * until the wakeup handler is called.
+     */
+    ;
+}
+#endif
 
 /* See Porting Layer Definition - p. 17 */
 void

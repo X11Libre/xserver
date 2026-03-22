@@ -99,4 +99,6 @@ int dixLookupProperty(PropertyPtr *result, WindowPtr pWin, Atom proprty,
 
 void DeleteAllWindowProperties(WindowPtr pWin);
 
+int DeleteProperty(ClientPtr client, WindowPtr pWin, Atom propName);
+
 #endif /* _XSERVER_PROPERTY_PRIV_H */

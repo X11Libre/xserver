@@ -1764,15 +1764,15 @@ PanoramiXFillPoly(ClientPtr client)
 
     count = bytes_to_int32((client->req_len << 2) - sizeof(xFillPolyReq));
     if (count > 0) {
-        DDXPointPtr locPts = calloc(count, sizeof(DDXPointRec));
+        DDXPointPtr locPts = calloc(count, sizeof(xPoint));
         if (!locPts)
             return BadAlloc;
         memcpy((char *) locPts, (char *) &stuff[1],
-               count * sizeof(DDXPointRec));
+               count * sizeof(xPoint));
 
         XINERAMA_FOR_EACH_SCREEN_FORWARD({
             if (walkScreenIdx) /* skip screen #0 */
-                memcpy(&stuff[1], locPts, count * sizeof(DDXPointRec));
+                memcpy(&stuff[1], locPts, count * sizeof(xPoint));
 
             if (isRoot) {
                 int x_off = walkScreen->x;
@@ -2498,8 +2498,14 @@ PanoramiXAllocColor(ClientPtr client)
     PanoramiXRes *cmap;
 
     REQUEST(xAllocColorReq);
-
     REQUEST_SIZE_MATCH(xAllocColorReq);
+
+    if (client->swapped) {
+        swapl(&stuff->cmap);
+        swaps(&stuff->red);
+        swaps(&stuff->green);
+        swaps(&stuff->blue);
+    }
 
     client->errorValue = stuff->cmap;
 
@@ -2522,21 +2528,21 @@ PanoramiXAllocColor(ClientPtr client)
 
         /* only send out reply for on first screen */
         if (!walkScreenIdx) {
-            xAllocColorReply rep; /* static init would confuse preprocessor */
-            rep.red = red;
-            rep.green = green;
-            rep.blue = blue;
-            rep.pixel = pixel;
+            xAllocColorReply reply; /* static init would confuse preprocessor */
+            reply.red = red;
+            reply.green = green;
+            reply.blue = blue;
+            reply.pixel = pixel;
 
             if (client->swapped) {
-                swaps(&rep.red);
-                swaps(&rep.green);
-                swaps(&rep.blue);
-                swapl(&rep.pixel);
+                swaps(&reply.red);
+                swaps(&reply.green);
+                swaps(&reply.blue);
+                swapl(&reply.pixel);
             }
 
             /* iterating backwards, first screen comes last, so we can return here */
-            return X_SEND_REPLY_SIMPLE(client, rep);
+            return X_SEND_REPLY_SIMPLE(client, reply);
         }
     });
 

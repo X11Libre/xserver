@@ -389,7 +389,9 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
         uint32_t num_modifiers;
         uint64_t *modifiers = NULL;
 
-        glamor_get_modifiers(screen, format, &num_modifiers, &modifiers);
+        if (!glamor_get_modifiers(screen, format, &num_modifiers, &modifiers)) {
+            return FALSE;
+        }
 
         if (num_modifiers > 0) {
 #ifdef GBM_BO_WITH_MODIFIERS2
@@ -425,7 +427,7 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
     {
         /* TODO: Is scanout ever used? If so, where? */
         bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
-#ifdef GLAMOR_HAS_GBM_LINEAR
+#ifdef GBM_BO_USE_LINEAR
                 (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
                  GBM_BO_USE_LINEAR : 0) |
 #endif
@@ -433,11 +435,11 @@ glamor_make_pixmap_exportable(PixmapPtr pixmap, Bool modifiers_ok)
         if (!bo) {
             /* something failed, try again without GBM_BO_USE_SCANOUT */
             bo = gbm_bo_create(glamor_egl->gbm, width, height, format,
-#ifdef GLAMOR_HAS_GBM_LINEAR
+#ifdef GBM_BO_USE_LINEAR
                     (pixmap->usage_hint == CREATE_PIXMAP_USAGE_SHARED ?
                      GBM_BO_USE_LINEAR : 0) |
-                     GBM_BO_USE_RENDERING);
 #endif
+                     GBM_BO_USE_RENDERING);
 #if 0
             if (bo) {
                 /* TODO: scanout failed, but regular buffer succeeded, maybe log something? */
@@ -810,6 +812,7 @@ glamor_get_formats(ScreenPtr screen,
     if (!eglQueryDmaBufFormatsEXT(glamor_egl->display, num,
                                   (EGLint *) *formats, &num)) {
         free(*formats);
+        *formats = NULL;
         return FALSE;
     }
 
@@ -818,12 +821,38 @@ glamor_get_formats(ScreenPtr screen,
     return TRUE;
 }
 
+static void
+glamor_filter_modifiers(uint32_t *num_modifiers, uint64_t **modifiers,
+                        EGLBoolean *external_only)
+{
+    uint32_t write_pos = 0;
+    for (uint32_t i = 0; i < *num_modifiers; i++) {
+        if (external_only[i]) {
+            continue;
+        }
+        (*modifiers)[write_pos++] = (*modifiers)[i];
+    }
+
+    if (write_pos == 0) {
+        *num_modifiers = 0;
+        free(*modifiers);
+        *modifiers = NULL;
+    } else if (write_pos != *num_modifiers) {
+        *num_modifiers = write_pos;
+        uint64_t *filtered_modifiers = realloc(*modifiers, write_pos * sizeof(*modifiers));
+        if (filtered_modifiers != NULL) {
+            *modifiers = filtered_modifiers;
+        }
+    }
+}
+
 Bool
 glamor_get_modifiers(ScreenPtr screen, uint32_t format,
                      uint32_t *num_modifiers, uint64_t **modifiers)
 {
 #ifdef GLAMOR_HAS_EGL_QUERY_DMABUF
     struct glamor_egl_screen_private *glamor_egl;
+    EGLBoolean *external_only;
     EGLint num;
 #endif
 
@@ -847,13 +876,33 @@ glamor_get_modifiers(ScreenPtr screen, uint32_t format,
     if (*modifiers == NULL)
         return FALSE;
 
-    if (!eglQueryDmaBufModifiersEXT(glamor_egl->display, format, num,
-                                    (EGLuint64KHR *) *modifiers, NULL, &num)) {
+    external_only = calloc(num, sizeof(EGLBoolean));
+    if (!external_only) {
         free(*modifiers);
+        *modifiers = NULL;
+        return FALSE;
+    }
+
+    if (!eglQueryDmaBufModifiersEXT(glamor_egl->display, format, num,
+                                    (EGLuint64KHR *) *modifiers, external_only, &num)) {
+        free(external_only);
+        free(*modifiers);
+        *modifiers = NULL;
         return FALSE;
     }
 
     *num_modifiers = num;
+    glamor_filter_modifiers(num_modifiers, modifiers, external_only);
+    free(external_only);
+
+
+    if (num && *num_modifiers == 0) {
+        /**
+         * The api explicitly told us what the supported modifiers are,
+         * but we can't use any of them for our purposes
+         */
+        return FALSE;
+    }
 #endif
     return TRUE;
 }
@@ -1153,7 +1202,7 @@ glamor_egl_try_gles_api(ScrnInfoPtr scrn)
 {
     struct glamor_egl_screen_private *glamor_egl =
         glamor_egl_get_screen_private(scrn);
-        
+
     static const EGLint config_attribs[] = {
         EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
@@ -1331,6 +1380,8 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
         else if (strstr((const char *)renderer, "zink"))
             glamor_egl->dmabuf_capable = TRUE;
         else if (strstr((const char *)renderer, "NVIDIA"))
+            glamor_egl->dmabuf_capable = TRUE;
+        else if (strstr((const char *)renderer, "radeonsi"))
             glamor_egl->dmabuf_capable = TRUE;
         else
             glamor_egl->dmabuf_capable = FALSE;

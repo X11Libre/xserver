@@ -333,7 +333,7 @@ ProcRRCreateMode(ClientPtr client)
     if (!mode)
         return error;
 
-    xRRCreateModeReply rep = {
+    xRRCreateModeReply reply = {
         .mode = mode->mode.id
     };
 
@@ -341,10 +341,10 @@ ProcRRCreateMode(ClientPtr client)
     RRModeDestroy(mode);
 
     if (client->swapped) {
-        swapl(&rep.mode);
+        swapl(&reply.mode);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int

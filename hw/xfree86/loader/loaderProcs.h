@@ -45,13 +45,10 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
-#include <xorg-config.h>
-#endif
-
 #ifndef _LOADERPROCS_H
 #define _LOADERPROCS_H
+
+#include <xorg-config.h>
 
 #include "xf86Module.h"
 
@@ -69,11 +66,15 @@ typedef struct module_desc {
 /* External API for the loader */
 
 void LoaderInit(void);
+void LoaderClose(void);
 
 ModuleDescPtr LoadModule(const char *, void *, const XF86ModReqInfo *, int *);
 ModuleDescPtr DuplicateModule(ModuleDescPtr mod, ModuleDescPtr parent);
 void UnloadDriver(ModuleDescPtr);
-void LoaderSetPath(const char *path);
+
+void LoaderSetPath(const char *driver, const char *path);
+void LoaderInitPath(void);
+void LoaderClosePath(void);
 
 void LoaderUnload(const char *, void *);
 unsigned long LoaderGetModuleVersion(ModuleDescPtr mod);

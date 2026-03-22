@@ -18,7 +18,3 @@ libxserver_exa = static_library('xserver_exa',
     dependencies: common_dep,
     c_args: '-DHAVE_XORG_CONFIG_H'
 )
-
-if build_xorg
-    install_data('exa.h', install_dir: xorgsdkdir)
-endif

@@ -26,14 +26,14 @@
 #include <X11/X.h>
 #include <X11/Xmd.h>
 
-#include "present/present.h"
+#include "include/present.h"
+#include "include/syncsdk.h"
 
 #include "scrnintstr.h"
 #include "misc.h"
 #include "list.h"
 #include "windowstr.h"
 #include "dixstruct.h"
-#include <syncsdk.h>
 #include <syncsrv.h>
 #include <xfixes.h>
 #include <randrstr.h>

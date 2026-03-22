@@ -29,6 +29,9 @@
 #include "include/resource.h"
 #include "include/window.h"
 
+/* pad scanline to a longword */
+#define BITMAP_SCANLINE_UNIT    32
+
 #define LEGAL_NEW_RESOURCE(id,client)           \
     do {                                        \
         if (!LegalNewID((id), (client))) {      \
@@ -59,6 +62,9 @@ extern HWEventQueuePtr checkForInput[2];
 
  /* -retro mode */
 extern Bool party_like_its_1989;
+
+/* needed by libglx and libglamor (server modules) */
+extern _X_EXPORT Bool enableIndirectGLX;
 
 /*
  * @brief callback right after one screen's root window has been initialized
@@ -97,8 +103,7 @@ void InitClient(ClientPtr client, int i, void *ospriv);
 int FillFontPath(x_rpcbuf_t *rpcbuf);
 
 /* lookup builtin color by name */
-Bool dixLookupBuiltinColor(int screen,
-                           char *name,
+Bool dixLookupBuiltinColor(char *name,
                            unsigned len,
                            unsigned short *pred,
                            unsigned short *pgreen,
@@ -302,6 +307,16 @@ extern Bool enableBackingStore;
 void MakePredeclaredAtoms(void);
 
 void dixFreeScreen(ScreenPtr pScreen);
+
+/*
+ * @brief call the screen's UnrealizeWindow proc
+ *
+ * Calls the Screen's UnrealizeWindow proc and sets pWin->realized
+ * to FALSE.
+ *
+ * @param pWin the window that's being unrealized
+ */
+void dixScreenRaiseUnrealizeWindow(WindowPtr pWin);
 
 /*
  * @brief call screen's window destructors
@@ -761,5 +776,35 @@ int dixAllocColor(ClientPtr client, Colormap cmap, CARD16 *red,
                   CARD16 *green, CARD16 *blue, CARD32 *pixel);
 
 void ReplyNotSwappd(ClientPtr pClient, int size, void *pbuf)  _X_NORETURN;
+
+/*
+ * Byte swap a list of CARD32s
+ *
+ * @param list    pointer to list of clients
+ * @param count   amount of CARD32s to swap
+ */
+static inline void SwapLongs(CARD32 *list, unsigned long count) {
+    while (count >= 8) {
+        swapl(list + 0);
+        swapl(list + 1);
+        swapl(list + 2);
+        swapl(list + 3);
+        swapl(list + 4);
+        swapl(list + 5);
+        swapl(list + 6);
+        swapl(list + 7);
+        list += 8;
+        count -= 8;
+    }
+    if (count != 0) {
+        do {
+            swapl(list);
+            list++;
+        } while (--count != 0);
+    }
+}
+
+#define SwapRestL(stuff) \
+    SwapLongs((CARD32 *)(stuff + 1), (client->req_len - (sizeof(*stuff) >> 2)))
 
 #endif /* _XSERVER_DIX_PRIV_H */

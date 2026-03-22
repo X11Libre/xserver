@@ -40,6 +40,7 @@
 #include "dix/request_priv.h"
 #include "dix/rpcbuf_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "os/bug_priv.h"
 #include "present/present_priv.h"
 
@@ -2471,8 +2472,6 @@ __glXpresentCompleteNotify(WindowPtr window, CARD8 present_kind, CARD8 present_m
 
     __glXsendSwapEvent(drawable, glx_type, ust, msc, serial);
 }
-
-#include <present.h>
 
 void
 __glXregisterPresentCompleteNotify(void)

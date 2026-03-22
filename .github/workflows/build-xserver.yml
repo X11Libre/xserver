@@ -4,9 +4,9 @@ permissions:
     contents: write
 
 env:
-    MESON_BUILDDIR:  "build"
+    MESON_BUILDDIR:  "__BUILD"
     X11_PREFIX:      /home/runner/x11
-    X11_BUILD_DIR:   /home/runner/build-deps
+    X11_BUILD_DIR:   /home/runner/work/xserver/xserver/WORK/sources/3rdparty
 
 on:
     push:
@@ -15,7 +15,7 @@ on:
 jobs:
     xserver-build-ubuntu:
         env:
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
+            MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=true -Dtest_xephyr_gles=false
             LIBGL_ALWAYS_SOFTWARE: 1
             GALLIUM_DRIVER: llvmpipe
             PIGLIT_PLATFORM: x11_egl
@@ -51,34 +51,20 @@ jobs:
                 key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
                 restore-keys: ${{ runner.name }}-x11-deps-
 
-            - name: generic prereq
-              run:  .github/scripts/install-prereq.sh
-
-            - name: build
-              run:  .gitlab-ci/meson-build.sh
-
-            - name: tests
-              run:  meson test -C "${{ env.MESON_BUILDDIR }}" --print-errorlogs
-              env:
-                  XTEST_DIR:  ${{ env.X11_BUILD_DIR }}/xts
-                  PIGLIT_DIR: ${{ env.X11_BUILD_DIR }}/piglit
+            - name: build and test
+              run:  .github/scripts/ubuntu/run-xserver-build-and-test.sh
 
             - name: archive build logs
               uses: actions/upload-artifact@v4
               with:
                   name: build-logs
                   path: |
-                      build/meson-logs/*
-                      build/test/piglit-results/*
-
-            - name: ddx build check
-              run:  .gitlab-ci/check-ddx-build.sh
-            - name: manpage check
-              run:  .gitlab-ci/manpages-check
+                      __BUILD/meson-logs/*
+                      __BUILD/test/piglit-results/*
 
     drivers-build-ubuntu:
         env:
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/usr -Dxorg-sdk=true -Dxorg=false -Dxephyr=false -Dwerror=false -Dxcsecurity=false -Dxorg=true -Dxvfb=false -Dxnest=false -Dxfbdev=false
         runs-on: ubuntu-latest
         steps:
             - name: Check out repository code
@@ -112,14 +98,14 @@ jobs:
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: generic prereq
-              run:  .github/scripts/install-prereq.sh
+              run:  .github/scripts/install-prereq-drivers.sh
 
             - name: build xserver sdk
               run:  |
                 echo -n > .meson_environment
                 echo "export MESON_BUILDDIR=$MESON_BUILDDIR" >> .meson_environment
                 echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> .meson_environment
-                .gitlab-ci/meson-build.sh --skip-test
+                .github/scripts/meson-build.sh --skip-test
                 sudo meson install --no-rebuild -C "$MESON_BUILDDIR"
                 sudo mkdir -p /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
                 sudo chown -R runner /usr/local/lib/$MACHINE/xorg/modules # /home/runner/x11/lib/xorg/modules
@@ -130,7 +116,7 @@ jobs:
     xserver-build-mingw32-ubuntu:
         runs-on: ubuntu-latest
         env:
-            MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/home/runner/x11 --cross-file=.github/scripts/mingw32/cross-i686-w64-mingw32.txt -Dwerror=true -Dglx=false -Dlisten_tcp=true -Dxvmc=true -Dxv=true -Dxvfb=true -Dxnest=true -Dxephyr=true -Dxfbdev=false
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
@@ -159,7 +145,7 @@ jobs:
                     ${{ env.X11_PREFIX }}
                     ${{ env.X11_BUILD_DIR }}/xts
                     ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                key: ${{ runner.name }}-x11-deps-${{ hashFiles('.github/scripts/mingw32/cross-prereqs-build.sh') }}
                 restore-keys: ${{ runner.name }}-x11-deps-
 
             - name: install crosscompiler
@@ -169,7 +155,7 @@ jobs:
               run: sudo .github/scripts/mingw32/cross-prereqs-build.sh i686-w64-mingw32
 
             - name: build
-              run: .gitlab-ci/meson-build.sh --run-install
+              run: .github/scripts/meson-build.sh --run-install
 
     xserver-build-macos:
         env:
@@ -200,16 +186,14 @@ jobs:
               with:
                 path: |
                     ${{ env.X11_PREFIX }}
-                    ${{ env.X11_BUILD_DIR }}/xts
-                    ${{ env.X11_BUILD_DIR }}/piglit
-                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/install-prereq.sh') }}
+                key: ${{ runner.os }}-x11-deps-${{ hashFiles('.github/scripts/macos/install-prereq.sh') }}
                 restore-keys: ${{ runner.os }}-x11-deps-
 
             - name: generic prereq
-              run:  .github/scripts/install-prereq.sh
+              run:  .github/scripts/macos/install-prereq.sh
 
             - name: build
-              run:  .gitlab-ci/meson-build.sh
+              run:  .github/scripts/meson-build.sh
 
             - name: tests (may fail)
               continue-on-error: true
@@ -223,44 +207,128 @@ jobs:
               with:
                   name: build-logs-macos
                   path: |
-                      build/meson-logs/*
-                      build/test/piglit-results/*
+                      __BUILD/meson-logs/*
+                      __BUILD/test/piglit-results/*
 
             - name: ddx build check
-              run:  .gitlab-ci/check-ddx-build.sh
+              run:  .github/scripts/check-ddx-build.sh
             - name: manpage check
-              run:  .gitlab-ci/manpages-check
+              run:  .github/scripts/manpages-check
 
     xserver-build-freebsd:
         runs-on: ubuntu-latest
         env:
             MYTOKEN : ${{ secrets.MYTOKEN }}
-            MYTOKEN2: "value2"
-            MESON_ARGS: -Dc_args="-fno-common" -Dprefix=/usr -Dxephyr=true -Dwerror=false -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+            MESON_ARGS: -Dprefix=/usr -Dxephyr=true -Dwerror=true -Dxcsecurity=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
             - name: run in freebsd VM
               id: xserver-build
               uses: vmactions/freebsd-vm@v1
               with:
-                  envs: 'MYTOKEN MYTOKEN2 MESON_ARGS'
+                  envs: 'MYTOKEN MESON_ARGS'
                   usesh: true
                   release: "14.3"
                   run:     ./.github/scripts/freebsd/run-xserver-build.sh
+
     xserver-build-dragonflybsd:
         runs-on: ubuntu-latest
         env:
-            MESON_ARGS: -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+            MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
         steps:
             - uses: actions/checkout@v4
             - name: run in DragonFlyBSD VM
               id: xserver-build
-              uses: vmactions/dragonflybsd-vm@v1
+              uses: vmactions/dragonflybsd-vm@v1.1.4
               with:
                   envs: 'MESON_ARGS'
                   usesh: true
                   release: "6.4.2"
                   run:     ./.github/scripts/DragonFlyBSD/run-xserver-build.sh
+
+    xserver-build-netbsd:
+        runs-on: ubuntu-latest
+        env:
+            MESON_ARGS: -Dwerror=true -Dxephyr=true -Dxorg=true -Dxvfb=true -Dxnest=true -Dxfbdev=false
+        steps:
+            - uses: actions/checkout@v4
+            - uses: vmactions/netbsd-vm@v1.2.3
+              id: vm
+              with:
+                  envs: 'MESON_ARGS'
+                  usesh: true
+                  release: '10.1'
+                  run:     ./.github/scripts/netbsd/run-xserver-build.sh
+
+    xserver-build-cygwin:
+        runs-on: windows-latest
+        steps:
+            - name: Cygwin packages cache
+              uses: actions/cache@v4
+              with:
+                path: D:\cygwin-packages
+                key: ${{ runner.os }}-packages
+                restore-keys: ${{ runner.os }}-packages
+            - uses: cygwin/cygwin-install-action@master
+              with:
+                  # FIXME: temporary workaround for cygwin mirror problem
+                  # https://github.com/cygwin/cygwin-install-action/issues/39
+                  check-installer-sig: false
+                  platform: x86_64
+                  site: |
+                    https://mirror.wisegs.com/cygwin/
+                    https://mirrors.sonic.net/cygwin/
+                    https://mirror.cpsc.ucalgary.ca/mirror/cygwin.com/
+                    https://muug.ca/mirror/cygwin/
+                    https://mirror.csclub.uwaterloo.ca/cygwin/
+                    https://cygwin.mirror.gtcomm.net/
+                    http://cygwin.mirror.rafal.ca/
+
+                  packages: >-
+                   binutils, bison, ccache, flex, gcc-core, meson, ninja,
+                   pkg-config, python39, windowsdriproto, xorgproto,
+                   libepoxy-devel, libfontenc-devel, libfreetype-devel,
+                   libGL-devel, libnettle-devel, libpixman1-devel,
+                   libtirpc-devel, libXRes-devel, libXaw-devel, libXdmcp-devel,
+                   libXext-devel, libXfont2-devel, libXi-devel,
+                   libXinerama-devel, libXmu-devel, libXpm-devel,
+                   libXrender-devel, libXtst-devel, libxcb-composite-devel,
+                   libxcb-ewmh-devel, libxcb-icccm-devel, libxcb-image-devel,
+                   libxcb-keysyms-devel, libxcb-randr-devel,
+                   libxcb-render-devel, libxcb-render-util-devel,
+                   libxcb-shape-devel, libxcb-util-devel, libxcb-xkb-devel,
+                   libxcvt-devel, libxkbfile-devel, font-util,
+                   khronos-opengl-registry, python39-lxml, xkbcomp-devel,
+                   xkeyboard-config, git
+
+            - name: Cygwin ccache cache
+              uses: actions/cache@v4
+              with:
+                path: D:\cygwin\home\runneradmin\.ccache
+                key: ${{ runner.os }}-ccache
+                restore-keys: ${{ runner.os }}-ccache
+            - run: git config --global --add safe.directory /cygdrive/d/a/xserver/xserver
+            - uses: actions/checkout@v4
+              with:
+                  # Done above as the builtin would use a path for Windows git.
+                  set-safe-directory: false
+            - run: |
+                  PATH="/usr/bin:$(cygpath "$SYSTEMROOT")/system32"
+              shell: bash --noprofile --norc -e -o igncr '{0}'
+            - run: |
+                  bash ./.github/scripts/Cygwin/build.sh
+
+    check-sign-off:
+        name: Check Signed-Off-By
+        if: github.event_name == 'pull_request'
+        runs-on: ubuntu-latest
+        env:
+            FORCE_COLOR: 1
+            runs-on: ubuntu-latest
+        steps:
+          - uses: live627/check-pr-signoff-action@v1
+            with:
+                token: ${{ secrets.GITHUB_TOKEN }}
 
     release:
         name: Release pushed tag
@@ -273,6 +341,9 @@ jobs:
             - xserver-build-macos
             - xserver-build-freebsd
             - xserver-build-dragonflybsd
+            - xserver-build-netbsd
+            - xserver-build-cygwin
+            - check-sign-off
         steps:
             - name: Checkout
               uses: actions/checkout@v4

@@ -22,7 +22,6 @@
 
 #include <kdrive-config.h>
 #include "kdrive.h"
-#include "os/osdep.h"
 #include <errno.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
@@ -30,6 +29,10 @@
 #include <sys/ioctl.h>
 #include <X11/keysym.h>
 #include <linux/apm_bios.h>
+
+#include "os/osdep.h"
+#include "os/ddx_priv.h"
+#include "os/log_priv.h"
 
 #ifdef KDRIVE_MOUSE
 extern KdPointerDriver LinuxMouseDriver;
@@ -64,14 +67,12 @@ static void
 LinuxCheckChown(const char *file)
 {
     struct stat st;
-    __uid_t u;
-    __gid_t g;
     int r;
 
     if (stat(file, &st) < 0)
         return;
-    u = getuid();
-    g = getgid();
+    uid_t u = getuid();
+    gid_t g = getgid();
     if (st.st_uid != u || st.st_gid != g) {
         r = chown(file, u, g);
         (void) r;
@@ -135,7 +136,6 @@ LinuxInit(void)
 static void
 LinuxSetSwitchMode(int mode)
 {
-    struct sigaction act;
     struct vt_mode VT;
 
     if (ioctl(LinuxConsoleFd, VT_GETMODE, &VT) < 0) {
@@ -143,20 +143,14 @@ LinuxSetSwitchMode(int mode)
     }
 
     if (mode == VT_PROCESS) {
-        act.sa_handler = LinuxVTRequest;
-        sigemptyset(&act.sa_mask);
-        act.sa_flags = 0;
-        sigaction(SIGUSR1, &act, 0);
+        OsSignal(SIGUSR1, LinuxVTRequest);
 
         VT.mode = mode;
         VT.relsig = SIGUSR1;
         VT.acqsig = SIGUSR1;
     }
     else {
-        act.sa_handler = SIG_IGN;
-        sigemptyset(&act.sa_mask);
-        act.sa_flags = 0;
-        sigaction(SIGUSR1, &act, 0);
+        OsSignal(SIGUSR1, SIG_IGN);
 
         VT.mode = mode;
         VT.relsig = 0;
@@ -249,6 +243,24 @@ LinuxEnable(void)
         FatalError("LinuxInit: KDSETMODE KD_GRAPHICS failed\n");
     }
     enabled = TRUE;
+}
+
+static Bool
+LinuxSpecialKey(KeySym sym)
+{
+    struct vt_stat vts;
+    int con;
+
+    if (XK_F1 <= sym && sym <= XK_F12) {
+        con = sym - XK_F1 + 1;
+        memset(&vts, '\0', sizeof(vts));    /* valgrind */
+        ioctl(LinuxConsoleFd, VT_GETSTATE, &vts);
+        if (con != vts.v_active && (vts.v_state & (1 << con))) {
+            ioctl(LinuxConsoleFd, VT_ACTIVATE, con);
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 static void
@@ -350,6 +362,7 @@ LinuxBell(int volume, int pitch, int duration)
 KdOsFuncs LinuxFuncs = {
     .Init = LinuxInit,
     .Enable = LinuxEnable,
+    .SpecialKey = LinuxSpecialKey,
     .Disable = LinuxDisable,
     .Fini = LinuxFini,
     .Bell = LinuxBell,
@@ -358,5 +371,6 @@ KdOsFuncs LinuxFuncs = {
 void
 OsVendorInit(void)
 {
+    LogInit(DEFAULT_LOGDIR "/Xkdrive.log", ".old");
     KdOsInit(&LinuxFuncs);
 }

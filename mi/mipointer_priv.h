@@ -9,7 +9,7 @@
 
 #include "dix/screenint_priv.h"
 #include "include/input.h"
-#include "mi/mipointer.h"
+#include "include/mipointer.h"
 
 void miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y);
 void miPointerSetScreen(DeviceIntPtr pDev, int screen_num, int x, int y);

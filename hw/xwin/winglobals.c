@@ -29,10 +29,8 @@
  * Authors:	Harold L Hunt II
  *              Colin Harrison
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include "win.h"
 
 /*
@@ -42,6 +40,9 @@
 int g_iNumScreens = 0;
 winScreenInfo *g_ScreenInfo = 0;
 
+#ifdef HAS_DEVWINDOWS
+int g_fdMessageQueue = WIN_FD_INVALID;
+#endif
 DevPrivateKeyRec g_iScreenPrivateKeyRec;
 DevPrivateKeyRec g_iCmapPrivateKeyRec;
 DevPrivateKeyRec g_iGCPrivateKeyRec;

@@ -32,6 +32,7 @@
 #include "dix/inpututils_priv.h"
 #include "dix/request_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/window_priv.h"
 #include "Xi/handlers.h"
 
 #include "dixstruct.h"
@@ -116,13 +117,11 @@ XICheckInvalidMaskBits(ClientPtr client, unsigned char *mask, int len)
 int
 ProcXISelectEvents(ClientPtr client)
 {
-    REQUEST(xXISelectEventsReq);
-    REQUEST_AT_LEAST_SIZE(xXISelectEventsReq);
+    X_REQUEST_HEAD_AT_LEAST(xXISelectEventsReq);
+    X_REQUEST_FIELD_CARD32(win);
+    X_REQUEST_FIELD_CARD16(num_masks);
 
     if (client->swapped) {
-        swapl(&stuff->win);
-        swaps(&stuff->num_masks);
-
         int len = client->req_len - bytes_to_int32(sizeof(xXISelectEventsReq));
         xXIEventMask *evmask = (xXIEventMask *) &stuff[1];
         for (int i = 0; i < stuff->num_masks; i++) {
@@ -320,11 +319,8 @@ ProcXISelectEvents(ClientPtr client)
 int
 ProcXIGetSelectedEvents(ClientPtr client)
 {
-    REQUEST(xXIGetSelectedEventsReq);
-    REQUEST_SIZE_MATCH(xXIGetSelectedEventsReq);
-
-    if (client->swapped)
-        swapl(&stuff->win);
+    X_REQUEST_HEAD_STRUCT(xXIGetSelectedEventsReq);
+    X_REQUEST_FIELD_CARD32(win);
 
     int rc, i;
     WindowPtr win;
@@ -336,7 +332,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xXIGetSelectedEventsReply rep = {
+    xXIGetSelectedEventsReply reply = {
         .RepType = X_XIGetSelectedEvents,
     };
 
@@ -380,7 +376,7 @@ ProcXIGetSelectedEvents(ClientPtr client)
                 CARD8 zero[8] = { 0 };
                 x_rpcbuf_write_CARD8s(&rpcbuf, zero, (mask_len*4) - (j+1));
 
-                rep.num_masks++;
+                reply.num_masks++;
 
                 /* found out the mask size and written it, so break out here */
                 break;
@@ -391,8 +387,8 @@ ProcXIGetSelectedEvents(ClientPtr client)
 finish: ;
 
     if (client->swapped) {
-        swaps(&rep.num_masks);
+        swaps(&reply.num_masks);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

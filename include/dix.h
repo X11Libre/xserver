@@ -47,13 +47,16 @@ SOFTWARE.
 #ifndef DIX_H
 #define DIX_H
 
+#include <X11/extensions/XI.h>
+
+#include "xlibre_ptrtypes.h"
+
 #include "callback.h"
 #include "gc.h"
 #include "window.h"
 #include "input.h"
 #include "cursor.h"
 #include "events.h"
-#include <X11/extensions/XI.h>
 
 #define EARLIER -1
 #define SAMETIME 0
@@ -92,13 +95,7 @@ SOFTWARE.
 
 typedef struct _TimeStamp *TimeStampPtr;
 
-#ifndef _XTYPEDEF_CLIENTPTR
-typedef struct _Client *ClientPtr;
-
-#define _XTYPEDEF_CLIENTPTR
-#endif
-
-extern _X_EXPORT ClientPtr clients[MAXCLIENTS];
+extern _X_EXPORT ClientPtr clients[];
 extern _X_EXPORT ClientPtr serverClient;
 extern _X_EXPORT int currentMaxClients;
 

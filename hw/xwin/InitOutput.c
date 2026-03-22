@@ -27,12 +27,10 @@ other dealings in this Software without prior written authorization
 from The Open Group.
 
 */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "win.h"
+#include "os-compat.h"
 
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
@@ -48,6 +46,9 @@ from The Open Group.
 #ifdef DPMSExtension
 #include "dpmsproc.h"
 #endif
+#ifdef __CYGWIN__
+#include <mntent.h>
+#endif
 #ifdef RELOCATE_PROJECTROOT
 #pragma push_macro("Status")
 #undef Status
@@ -61,7 +62,6 @@ typedef WINAPI HRESULT(*SHGETFOLDERPATHPROC) (HWND hwndOwner,
 #endif
 
 #include "winmonitors.h"
-#include "nonsdk_extinit.h"
 #include "pseudoramiX/pseudoramiX.h"
 
 #include "glx_extinit.h"
@@ -140,7 +140,9 @@ void XwinExtensionInit(void)
     }
 #endif
 
-    LoadExtensionList(xwinExtensions, ARRAY_SIZE(xwinExtensions), TRUE);
+    /* need this to prevent compiler warning */
+    if (ARRAY_SIZE(xwinExtensions) > 0)
+        LoadExtensionList(xwinExtensions, ARRAY_SIZE(xwinExtensions), TRUE);
 }
 
 /*
@@ -206,6 +208,17 @@ ddxGiveUp(enum ExitCode error)
     /* Notify the worker threads we're exiting */
     winDeinitMultiWindowWM();
 
+#ifdef HAS_DEVWINDOWS
+    /* Close our handle to our message queue */
+    if (g_fdMessageQueue != WIN_FD_INVALID) {
+        /* Close /dev/windows */
+        close(g_fdMessageQueue);
+
+        /* Set the file handle to invalid */
+        g_fdMessageQueue = WIN_FD_INVALID;
+    }
+#endif
+
     if (!g_fLogInited) {
         g_pszLogFile = LogInit(g_pszLogFile, ".old");
         g_fLogInited = TRUE;
@@ -241,6 +254,95 @@ ddxGiveUp(enum ExitCode error)
 
     winDebug("ddxGiveUp - End\n");
 }
+
+#ifdef __CYGWIN__
+/* hasmntopt is currently not implemented for cygwin */
+static const char *
+winCheckMntOpt(const struct mntent *mnt, const char *opt)
+{
+    const char *s;
+    size_t len;
+
+    if (mnt == NULL)
+        return NULL;
+    if (opt == NULL)
+        return NULL;
+    if (mnt->mnt_opts == NULL)
+        return NULL;
+
+    len = strlen(opt);
+    s = strstr(mnt->mnt_opts, opt);
+    if (s == NULL)
+        return NULL;
+    if ((s == mnt->mnt_opts || *(s - 1) == ',') &&
+        (s[len] == 0 || s[len] == ','))
+        return (char *) opt;
+    return NULL;
+}
+
+static void
+winCheckMount(void)
+{
+    FILE *mnt;
+    struct mntent *ent;
+
+    enum { none = 0, sys_root, user_root, sys_tmp, user_tmp }
+        level = none, curlevel;
+    BOOL binary = TRUE;
+
+    mnt = setmntent("/etc/mtab", "r");
+    if (mnt == NULL) {
+        ErrorF("setmntent failed");
+        return;
+    }
+
+    while ((ent = getmntent(mnt)) != NULL) {
+        BOOL sys = (winCheckMntOpt(ent, "user") != NULL);
+        BOOL root = (strcmp(ent->mnt_dir, "/") == 0);
+        BOOL tmp = (strcmp(ent->mnt_dir, "/tmp") == 0);
+
+        if (sys) {
+            if (root)
+                curlevel = sys_root;
+            else if (tmp)
+                curlevel = sys_tmp;
+            else
+                continue;
+        }
+        else {
+            if (root)
+                curlevel = user_root;
+            else if (tmp)
+                curlevel = user_tmp;
+            else
+                continue;
+        }
+
+        if (curlevel <= level)
+            continue;
+        level = curlevel;
+
+        if ((winCheckMntOpt(ent, "binary") == NULL) &&
+            (winCheckMntOpt(ent, "binmode") == NULL))
+            binary = FALSE;
+        else
+            binary = TRUE;
+    }
+
+    if (endmntent(mnt) != 1) {
+        ErrorF("endmntent failed");
+        return;
+    }
+
+    if (!binary)
+        winMsg(X_WARNING, "/tmp mounted in textmode\n");
+}
+#else
+static void
+winCheckMount(void)
+{
+}
+#endif
 
 #ifdef RELOCATE_PROJECTROOT
 const char *
@@ -455,35 +557,26 @@ winFixupPaths(void)
 #ifdef RELOCATE_PROJECTROOT
     if (getenv("XKEYSYMDB") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XKEYSYMDB=%s\\XKeysymDB", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\XKeysymDB", basedir);
+        setenv("XKEYSYMDB", buffer, 1);
     }
     if (getenv("XERRORDB") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XERRORDB=%s\\XErrorDB", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\XErrorDB", basedir);
+        setenv("XERRORDB", buffer, 1);
     }
     if (getenv("XLOCALEDIR") == NULL) {
         char buffer[MAX_PATH];
-
-        snprintf(buffer, sizeof(buffer), "XLOCALEDIR=%s\\locale", basedir);
-        buffer[sizeof(buffer) - 1] = 0;
-        putenv(buffer);
+        snprintf(buffer, sizeof(buffer), "%s\\locale", basedir);
+        setenv("XLOCALEDIR", buffer, 1);
     }
     if (getenv("HOME") == NULL) {
-        char buffer[MAX_PATH + 5] = {0};
-
-        strncpy(buffer, "HOME=", 6);
+        char buffer[MAX_PATH] = {0};
 
         /* query appdata directory */
         if (SHGetFolderPathA
-            (NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0,
-             buffer + 5) == 0) {
-            putenv(buffer);
+            (NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0, buffer) == 0) {
+            setenv("HOME", buffer, 1);
         }
         else {
             winMsg(X_ERROR, "Can not determine HOME directory\n");
@@ -537,6 +630,8 @@ OsVendorInit(void)
     /* Log the version information */
     if (serverGeneration == 1)
         winLogVersionInfo();
+
+    winCheckMount();
 
     /* Add a default screen if no screens were specified */
     if (g_iNumScreens == 0) {
@@ -619,12 +714,6 @@ winUseMsg(void)
            "\tX window, so window contents which are occluded show correctly in\n"
            "\ttask bar and task switcher previews.\n");
 
-#ifdef XWIN_XF86CONFIG
-    ErrorF("-config\n" "\tSpecify a configuration file.\n");
-
-    ErrorF("-configdir\n" "\tSpecify a configuration directory.\n");
-#endif
-
     ErrorF("-depth bits_per_pixel\n"
            "\tSpecify an optional bitdepth to use in fullscreen mode\n"
            "\twith a DirectDraw engine.\n");
@@ -656,11 +745,6 @@ winUseMsg(void)
     ErrorF("-icon icon_specifier\n" "\tSet screen window icon in windowed mode.\n");
 
     ErrorF("-ignoreinput\n" "\tIgnore keyboard and mouse input.\n");
-
-#ifdef XWIN_XF86CONFIG
-    ErrorF("-keyboard\n"
-           "\tSpecify a keyboard device from the configuration file.\n");
-#endif
 
     ErrorF("-[no]keyhook\n"
            "\tGrab special Windows keypresses like Alt-Tab or the Menu "
@@ -806,16 +890,7 @@ InitOutput(int argc, char *argv[])
                    "Exiting.\n");
     }
 
-#ifdef XWIN_XF86CONFIG
-    /* Try to read the xorg.conf-style configuration file */
-    if (!winReadConfigfile())
-        winErrorFVerb(1, "InitOutput - Error reading config file\n");
-#else
-    winMsg(X_INFO, "xorg.conf is not supported\n");
-    winMsg(X_INFO, "See http://x.cygwin.com/docs/faq/cygwin-x-faq.html "
-           "for more information\n");
     winConfigFiles();
-#endif
 
     /* Load preferences from XWinrc file */
     LoadPreferences();

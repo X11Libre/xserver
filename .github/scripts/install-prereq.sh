@@ -7,20 +7,14 @@ set -e
 mkdir -p $X11_BUILD_DIR
 cd $X11_BUILD_DIR
 
-build_meson   rendercheck       https://github.com/X11Libre/rendercheck                  rendercheck-1.6
+build_meson   rendercheck       $(fdo_mirror rendercheck)                  rendercheck-1.6
 if [ "$X11_OS" = "Linux" ]; then
-build_meson   drm               https://github.com/X11Libre/drm                          libdrm-2.4.121   -Domap=enabled
+build_meson   drm               $(fdo_mirror drm)                          libdrm-2.4.121   -Domap=enabled -Dfreedreno=enabled
 fi
-build_meson   libxcvt           https://github.com/X11Libre/libxcvt                      libxcvt-0.1.0
-build_ac      xorgproto         https://github.com/X11Libre/xorgproto                    xorgproto-2024.1
-if [ "$X11_OS" = "Darwin" ]; then
-build_ac      xset              https://github.com/X11Libre/xset                         xset-1.2.5
-fi
+build_meson   libxcvt           $(fdo_mirror libxcvt)                      libxcvt-0.1.0
+build_meson   xorgproto         $(fdo_mirror xorgproto)                    xorgproto-2024.1
 
 # really must be build via autoconf instead of meson, otherwise piglit wont find the test programs
-build_ac_xts  xts               https://github.com/X11Libre/xts                          aae51229af810efba24412511f60602fab53eded
+build_ac_xts  xts               $(fdo_mirror xts)                          6cf94400a09abecd6b86e4eb6441741acecd51f6
 
-clone_source piglit             https://github.com/X11Libre/piglit                       28d1349844eacda869f0f82f551bcd4ac0c4edfe
-
-echo '[xts]' > piglit/piglit.conf
-echo "path=$X11_BUILD_DIR/xts" >> piglit/piglit.conf
+clone_source piglit             $(fdo_mirror piglit)                       59111996534f875ca88bce51f21fa2e6564895da

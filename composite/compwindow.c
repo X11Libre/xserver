@@ -45,6 +45,8 @@
 
 #include "dix/dix_priv.h"
 #include "dix/resource_priv.h"
+#include "dix/screensaver_priv.h"
+#include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "os/osdep.h"
 #include "Xext/panoramiXsrv.h"
@@ -472,7 +474,7 @@ compReparentWindow(WindowPtr pWin, WindowPtr pPriorParent)
 }
 
 void
-compCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+compCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     CompScreenPtr cs = GetCompScreen(pScreen);

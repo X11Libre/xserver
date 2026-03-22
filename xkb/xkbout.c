@@ -44,7 +44,7 @@
 #include "inputstr.h"
 #include "dix.h"
 #include "xkbstr.h"
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 #define	VMOD_HIDE_VALUE	0
 #define	VMOD_SHOW_VALUE	1

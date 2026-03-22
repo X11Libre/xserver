@@ -76,8 +76,7 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     int ret;
     DeviceIntPtr dev;
 
-    REQUEST(xSetDeviceModifierMappingReq);
-    REQUEST_AT_LEAST_SIZE(xSetDeviceModifierMappingReq);
+    X_REQUEST_HEAD_AT_LEAST(xSetDeviceModifierMappingReq);
 
     if (client->req_len != bytes_to_int32(sizeof(xSetDeviceModifierMappingReq)) +
         (stuff->numKeyPerModifier << 1))
@@ -95,10 +94,10 @@ ProcXSetDeviceModifierMapping(ClientPtr client)
     if (ret != MappingSuccess && ret != MappingBusy && ret != MappingFailed)
         return ret;
 
-    xSetDeviceModifierMappingReply rep = {
+    xSetDeviceModifierMappingReply reply = {
         .RepType = X_SetDeviceModifierMapping,
         .success = ret,
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

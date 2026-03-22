@@ -50,7 +50,3 @@ glamor = static_library('glamor',
         epoxy_dep,
     ],
 )
-
-if build_xorg
-    install_data('glamor.h', install_dir: xorgsdkdir)
-endif

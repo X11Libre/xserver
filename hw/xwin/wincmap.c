@@ -1,3 +1,4 @@
+
 /*
  *Copyright (C) 1994-2000 The XFree86 Project, Inc. All Rights Reserved.
  *
@@ -30,10 +31,8 @@
  *		Peter Busch
  *		Harold L Hunt II
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
+
 #include "win.h"
 
 #include "dix/colormap_priv.h"

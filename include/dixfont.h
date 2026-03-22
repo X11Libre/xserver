@@ -24,13 +24,11 @@ SOFTWARE.
 #ifndef DIXFONT_H
 #define DIXFONT_H 1
 
+#include "xlibre_ptrtypes.h"
+
 #include "dix.h"
 #include <X11/fonts/font.h>
 #include <X11/fonts/fontstruct.h>
-
-#define NullDIXFontProp ((DIXFontPropPtr)0)
-
-typedef struct _DIXFontProp *DIXFontPropPtr;
 
 extern _X_EXPORT Bool SetDefaultFont(const char * /*defaultfontname */ );
 
@@ -73,11 +71,6 @@ extern _X_EXPORT int SetFontPath(ClientPtr /*client */ ,
                                  unsigned char * /*paths */ );
 
 extern _X_EXPORT int SetDefaultFontPath(const char * /*path */ );
-
-/* not used by any known external driver, so can be removed soon */
-extern _X_EXPORT int GetFontPath(ClientPtr client,
-                                 int *count,
-                                 int *length, unsigned char **result) _X_DEPRECATED;
 
 extern _X_EXPORT void DeleteClientFontStuff(ClientPtr /*client */ );
 

@@ -129,7 +129,7 @@ apt-get install -y \
 cd /root
 
 # drm 2.4.116 for drmSyncobjEventfd
-git clone https://gitlab.freedesktop.org/mesa/drm --depth 1 --branch=libdrm-2.4.121
+git clone https://github.com/X11Libre/drm --depth 1 --branch=libdrm-2.4.121
 cd drm
 meson _build
 ninja -C _build -j${FDO_CI_CONCURRENT:-4} install
@@ -137,7 +137,7 @@ cd ..
 rm -rf drm
 
 # xserver requires libxcvt
-git clone https://gitlab.freedesktop.org/xorg/lib/libxcvt.git --depth 1 --branch=libxcvt-0.1.0
+git clone https://github.com/X11Libre/libxcvt.git --depth 1 --branch=libxcvt-0.1.0
 cd libxcvt
 meson _build
 ninja -C _build -j${FDO_CI_CONCURRENT:-4} install
@@ -145,26 +145,26 @@ cd ..
 rm -rf libxcvt
 
 # xserver requires xorgproto >= 2024.1
-git clone https://gitlab.freedesktop.org/xorg/proto/xorgproto.git --depth 1 --branch=xorgproto-2024.1
+git clone https://github.com/X11Libre/xorgproto.git --depth 1 --branch=xorgproto-2024.1
 pushd xorgproto
 ./autogen.sh
 make -j${FDO_CI_CONCURRENT:-4} install
 popd
 rm -rf xorgproto
 
-git clone https://gitlab.freedesktop.org/mesa/piglit.git
+git clone https://github.com/X11Libre/piglit.git
 cd piglit
 git checkout 265896c86f90cb72e8f218ba6a3617fca8b9a1e3
 cd ..
 
-git clone https://gitlab.freedesktop.org/xorg/test/xts
+git clone https://github.com/X11Libre/xts.git
 cd xts
 git checkout 12a887c2c72c4258962b56ced7b0aec782f1ffed
 ./autogen.sh
 xvfb-run make -j${FDO_CI_CONCURRENT:-4}
 cd ..
 
-git clone https://gitlab.freedesktop.org/xorg/test/rendercheck
+git clone https://github.com/X11Libre/rendercheck
 cd rendercheck
 git checkout 67a820621b1475ebfcf3d4f9d7f03a5fc3b9769a
 meson build

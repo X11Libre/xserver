@@ -20,7 +20,7 @@ see Xkdrive(1).
 .SH KEYBOARD
 To be written.
 .SH SEE ALSO
-X(__miscmansuffix__), Xserver(1), Xkdrive(1), xdm(1), xinit(1).
+X(@miscmansuffix@), Xserver(1), Xkdrive(1), xdm(1), xinit(1).
 .SH AUTHORS
 The
 .B Xfbdev

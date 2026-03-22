@@ -43,8 +43,11 @@
 
 #include <dix-config.h>
 
+#include <stdbool.h>
+
 #include "dix/resource_priv.h"
 #include "os/bug_priv.h"
+#include "Xext/damage/damageext_priv.h"
 
 #include "compint.h"
 
@@ -408,7 +411,7 @@ compRedirectSubwindows(ClientPtr pClient, WindowPtr pWin, int update)
          * tell damage extension that damage events for this client are
          * critical output
          */
-        DamageExtSetCritical(pClient, TRUE);
+        DamageExtSetCritical(pClient, true);
         pWin->inhibitBGPaint = TRUE;
     }
     return Success;
@@ -436,7 +439,7 @@ compFreeClientSubwindows(WindowPtr pWin, XID id)
                  * tell damage extension that damage events for this client are
                  * critical output
                  */
-                DamageExtSetCritical(pClient, FALSE);
+                DamageExtSetCritical(pClient, false);
                 csw->update = CompositeRedirectAutomatic;
                 pWin->inhibitBGPaint = FALSE;
                 if (pWin->mapped)
@@ -524,6 +527,15 @@ compUnredirectOneSubwindow(WindowPtr pParent, WindowPtr pWin)
     return Success;
 }
 
+static unsigned
+compGetBackgroundState(WindowPtr pWin)
+{
+    while (pWin->backgroundState == ParentRelative)
+        pWin = pWin->parent;
+
+    return pWin->backgroundState;
+}
+
 static PixmapPtr
 compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
 {
@@ -539,10 +551,6 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
 
     pPixmap->screen_x = x;
     pPixmap->screen_y = y;
-
-    if (pWin->backgroundState != None) {
-        return pPixmap;
-    }
 
     /*
      * Copy bits from the parent into the new pixmap so that it will
@@ -569,7 +577,7 @@ compNewPixmap(WindowPtr pWin, int x, int y, int w, int h)
             FreeScratchGC(pGC);
         }
     }
-    else {
+    else if (compGetBackgroundState(pWin) == None) {
         PictFormatPtr pSrcFormat = PictureWindowFormat(pParent);
         PictFormatPtr pDstFormat = PictureWindowFormat(pWin);
         XID inferiors = IncludeInferiors;

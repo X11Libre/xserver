@@ -76,28 +76,18 @@ extern int ExtEventIndex;
 int
 ProcXGrabDevice(ClientPtr client)
 {
-    REQUEST(xGrabDeviceReq);
-    REQUEST_AT_LEAST_SIZE(xGrabDeviceReq);
-
-    if (client->swapped) {
-        swapl(&stuff->grabWindow);
-        swapl(&stuff->time);
-        swaps(&stuff->event_count);
-    }
-
-    if (client->req_len !=
-        bytes_to_int32(sizeof(xGrabDeviceReq)) + stuff->event_count)
-        return BadLength;
-
-    if (client->swapped)
-        SwapLongs((CARD32 *) (&stuff[1]), stuff->event_count);
+    X_REQUEST_HEAD_AT_LEAST(xGrabDeviceReq);
+    X_REQUEST_FIELD_CARD32(grabWindow);
+    X_REQUEST_FIELD_CARD32(time);
+    X_REQUEST_FIELD_CARD16(event_count);
+    X_REQUEST_REST_COUNT_CARD32(stuff->event_count);
 
     int rc;
     DeviceIntPtr dev;
     GrabMask mask;
     struct tmask tmp[EMASKSIZE];
 
-    xGrabDeviceReply rep = {
+    xGrabDeviceReply reply = {
         .RepType = X_GrabDevice,
     };
 
@@ -115,12 +105,12 @@ ProcXGrabDevice(ClientPtr client)
     rc = GrabDevice(client, dev, stuff->other_devices_mode,
                     stuff->this_device_mode, stuff->grabWindow,
                     stuff->ownerEvents, stuff->time,
-                    &mask, XI, None, None, &rep.status);
+                    &mask, XI, None, None, &reply.status);
 
     if (rc != Success)
         return rc;
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /***********************************************************************

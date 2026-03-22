@@ -862,7 +862,7 @@ PowerProfile(DeviceIntPtr dev,
 {
     double vel_dist;
 
-    acc = (acc - 1.0) * 0.1 + 1.0;     /* without this, acc of 2 is unuseable */
+    acc = (acc - 1.0) * 0.1 + 1.0;     /* without this, acc of 2 is unusable */
 
     if (velocity <= threshold)
         return vel->min_acceleration;

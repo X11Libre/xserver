@@ -33,9 +33,6 @@
 #include "indirect_reqsize.h"
 #include "misc.h"
 
-#if defined(__MINGW32__)
-#undef HAVE_ALIAS
-#endif
 #ifdef HAVE_ALIAS
 #define ALIAS2(from,to) \
     GLint __glX ## from ## ReqSize( const GLbyte * pc, Bool swap, int reqlen ) \

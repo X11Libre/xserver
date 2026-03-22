@@ -42,7 +42,7 @@
 #include "misc.h"
 #include "inputstr.h"
 #include "xkbstr.h"
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 static Atom
 XkbInternAtom(char *str, Bool only_if_exists)

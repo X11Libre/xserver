@@ -61,11 +61,8 @@ static void SwapDeviceInfo(DeviceIntPtr dev, xXIDeviceInfo * info);
 int
 ProcXIQueryDevice(ClientPtr client)
 {
-    REQUEST(xXIQueryDeviceReq);
-    REQUEST_SIZE_MATCH(xXIQueryDeviceReq);
-
-    if (client->swapped)
-        swaps(&stuff->deviceid);
+    X_REQUEST_HEAD_STRUCT(xXIQueryDeviceReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
 
     DeviceIntPtr dev = NULL;
     int rc = Success;
@@ -108,7 +105,7 @@ ProcXIQueryDevice(ClientPtr client)
         return BadAlloc;
     }
 
-    xXIQueryDeviceReply rep = {
+    xXIQueryDeviceReply reply = {
         .RepType = X_XIQueryDevice,
     };
 
@@ -117,7 +114,7 @@ ProcXIQueryDevice(ClientPtr client)
         if (client->swapped)
             SwapDeviceInfo(dev, (xXIDeviceInfo *) info);
         info += len;
-        rep.num_devices = 1;
+        reply.num_devices = 1;
     }
     else {
         i = 0;
@@ -127,7 +124,7 @@ ProcXIQueryDevice(ClientPtr client)
                 if (client->swapped)
                     SwapDeviceInfo(dev, (xXIDeviceInfo *) info);
                 info += len;
-                rep.num_devices++;
+                reply.num_devices++;
             }
         }
 
@@ -137,7 +134,7 @@ ProcXIQueryDevice(ClientPtr client)
                 if (client->swapped)
                     SwapDeviceInfo(dev, (xXIDeviceInfo *) info);
                 info += len;
-                rep.num_devices++;
+                reply.num_devices++;
             }
         }
     }
@@ -145,10 +142,10 @@ ProcXIQueryDevice(ClientPtr client)
     free(skip);
 
     if (client->swapped) {
-        swaps(&rep.num_devices);
+        swaps(&reply.num_devices);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 /**

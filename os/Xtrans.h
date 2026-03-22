@@ -123,15 +123,6 @@ typedef struct _XtransConnInfo *XtransConnInfo;
 
 
 /*
- * Return values of Accept (0 is success)
- */
-
-#define TRANS_ACCEPT_BAD_MALLOC			-1
-#define TRANS_ACCEPT_FAILED 			-2
-#define TRANS_ACCEPT_MISC_ERROR			-3
-
-
-/*
  * ResetListener return values
  */
 
@@ -192,10 +183,7 @@ int _XSERVTransResetListener (
     XtransConnInfo	/* ciptr */
 );
 
-XtransConnInfo _XSERVTransAccept (
-    XtransConnInfo,	/* ciptr */
-    int *		/* status */
-);
+XtransConnInfo _XSERVTransAccept (XtransConnInfo ciptr);
 
 int _XSERVTransRead (
     XtransConnInfo,	/* ciptr */

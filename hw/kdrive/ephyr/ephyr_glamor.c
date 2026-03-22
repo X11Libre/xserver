@@ -25,6 +25,8 @@
  *
  * Glamor support and EGL setup.
  */
+#include <dix-config.h>
+
 #define MESA_EGL_NO_X11_HEADERS
 #define EGL_NO_X11
 
@@ -241,7 +243,7 @@ ephyr_glamor_connect(void)
     }
 
     if (epoxy_has_egl_extension(EGL_NO_DISPLAY, "EGL_EXT_platform_x11") ||
-        epoxy_has_egl_extension(EGL_NO_DISPLAY, "EGL_KHR_platform_x11)")) {
+        epoxy_has_egl_extension(EGL_NO_DISPLAY, "EGL_KHR_platform_x11")) {
         void *lib = NULL;
         xcb_connection_t *ret = NULL;
         void *(*x_open_display)(void *) =

@@ -44,7 +44,7 @@
 #include "inputstr.h"
 #include "opaque.h"
 #include "property.h"
-#include "../xkb/xkbgeom.h"
+#include "../xkb/xkbgeom_priv.h"
 #include <X11/extensions/XKMformat.h>
 #include <assert.h>
 

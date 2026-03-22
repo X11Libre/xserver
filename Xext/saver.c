@@ -36,6 +36,7 @@ in this Software without prior written authorization from the X Consortium.
 #include "dix/colormap_priv.h"
 #include "dix/cursor_priv.h"
 #include "dix/dix_priv.h"
+#include "dix/dixgrabs_priv.h"
 #include "dix/request_priv.h"
 #include "dix/screensaver_priv.h"
 #include "dix/window_priv.h"
@@ -112,7 +113,7 @@ typedef struct _ScreenSaverEvent *ScreenSaverEventPtr;
 typedef struct _ScreenSaverEvent {
     ScreenSaverEventPtr next;
     ClientPtr client;
-    ScreenPtr screen;
+    ScreenPtr pScreen;
     XID resource;
     CARD32 mask;
 } ScreenSaverEventRec;
@@ -134,7 +135,7 @@ static unsigned long getEventMask(ScreenPtr     pScreen,
 static RESTYPE AttrType;        /* resource type for attributes */
 
 typedef struct _ScreenSaverAttr {
-    ScreenPtr screen;
+    ScreenPtr pScreen;
     ClientPtr client;
     XID resource;
     short x, y;
@@ -260,7 +261,7 @@ setEventMask(ScreenPtr pScreen, ClientPtr client, unsigned long mask)
             *pPrev = pEv;
             pEv->next = NULL;
             pEv->client = client;
-            pEv->screen = pScreen;
+            pEv->pScreen = pScreen;
             pEv->resource = FakeClientID(client->index);
             if (!AddResource(pEv->resource, SaverEventType, (void *) pEv))
                 return FALSE;
@@ -293,7 +294,7 @@ static int
 ScreenSaverFreeEvents(void *value, XID id)
 {
     ScreenSaverEventPtr pOld = (ScreenSaverEventPtr) value;
-    ScreenPtr pScreen = pOld->screen;
+    ScreenPtr pScreen = pOld->pScreen;
 
     SetupScreen(pScreen);
     ScreenSaverEventPtr pEv, *pPrev;
@@ -315,7 +316,7 @@ static int
 ScreenSaverFreeAttr(void *value, XID id)
 {
     ScreenSaverAttrPtr pOldAttr = (ScreenSaverAttrPtr) value;
-    ScreenPtr pScreen = pOldAttr->screen;
+    ScreenPtr pScreen = pOldAttr->pScreen;
 
     SetupScreen(pScreen);
 
@@ -353,7 +354,7 @@ ScreenSaverFreeSuspend(void *value, XID id)
         screenSaverSuspended = FALSE;
 
         /* The screensaver could be active, since suspending it (by design)
-           doesn't prevent it from being forceably activated */
+           doesn't prevent it from being forcibly activated */
 #ifdef DPMSExtension
         if (screenIsSaved != SCREEN_SAVER_ON && DPMSPowerLevel == DPMSModeOn)
 #else
@@ -590,12 +591,12 @@ ScreenSaverHandle(ScreenPtr pScreen, int xstate, Bool force)
 static int
 ProcScreenSaverQueryVersion(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xScreenSaverQueryVersionReq);
+
     xScreenSaverQueryVersionReply reply = {
         .majorVersion = SERVER_SAVER_MAJOR_VERSION,
         .minorVersion = SERVER_SAVER_MINOR_VERSION
     };
-
-    REQUEST_SIZE_MATCH(xScreenSaverQueryVersionReq);
 
     if (client->swapped) {
         swaps(&reply.majorVersion);
@@ -608,11 +609,8 @@ ProcScreenSaverQueryVersion(ClientPtr client)
 static int
 ProcScreenSaverQueryInfo(ClientPtr client)
 {
-    REQUEST(xScreenSaverQueryInfoReq);
-    REQUEST_SIZE_MATCH(xScreenSaverQueryInfoReq);
-
-    if (client->swapped)
-        swapl(&stuff->drawable);
+    X_REQUEST_HEAD_STRUCT(xScreenSaverQueryInfoReq);
+    X_REQUEST_FIELD_CARD32(drawable);
 
     int rc;
     ScreenSaverStuffPtr pSaver;
@@ -673,17 +671,12 @@ ProcScreenSaverQueryInfo(ClientPtr client)
 static int
 ProcScreenSaverSelectInput(ClientPtr client)
 {
-    REQUEST(xScreenSaverSelectInputReq);
+    X_REQUEST_HEAD_STRUCT(xScreenSaverSelectInputReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(eventMask);
+
     DrawablePtr pDraw;
     int rc;
-
-    REQUEST_SIZE_MATCH(xScreenSaverSelectInputReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->eventMask);
-    }
-
     rc = dixLookupDrawable(&pDraw, stuff->drawable, client, 0,
                            DixGetAttrAccess);
     if (rc != Success)
@@ -830,7 +823,7 @@ ScreenSaverSetAttributes(ClientPtr client, xScreenSaverSetAttributesReq *stuff)
         ret = BadAlloc;
         goto bail;
     }
-    pAttr->screen = pScreen;
+    pAttr->pScreen = pScreen;
     pAttr->client = client;
     pAttr->x = stuff->x;
     pAttr->y = stuff->y;
@@ -1061,20 +1054,16 @@ ScreenSaverUnsetAttributes(ClientPtr client, Drawable drawable)
 static int
 ProcScreenSaverSetAttributes(ClientPtr client)
 {
-    REQUEST(xScreenSaverSetAttributesReq);
-    REQUEST_AT_LEAST_SIZE(xScreenSaverSetAttributesReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swaps(&stuff->x);
-        swaps(&stuff->y);
-        swaps(&stuff->width);
-        swaps(&stuff->height);
-        swaps(&stuff->borderWidth);
-        swapl(&stuff->visualID);
-        swapl(&stuff->mask);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xScreenSaverSetAttributesReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD16(x);
+    X_REQUEST_FIELD_CARD16(y);
+    X_REQUEST_FIELD_CARD16(width);
+    X_REQUEST_FIELD_CARD16(height);
+    X_REQUEST_FIELD_CARD16(borderWidth);
+    X_REQUEST_FIELD_CARD32(visualID);
+    X_REQUEST_FIELD_CARD32(mask);
+    X_REQUEST_REST_CARD32();
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
@@ -1160,11 +1149,8 @@ ProcScreenSaverSetAttributes(ClientPtr client)
 static int
 ProcScreenSaverUnsetAttributes(ClientPtr client)
 {
-    REQUEST(xScreenSaverUnsetAttributesReq);
-    REQUEST_SIZE_MATCH(xScreenSaverUnsetAttributesReq);
-
-    if (client->swapped)
-        swapl(&stuff->drawable);
+    X_REQUEST_HEAD_STRUCT(xScreenSaverUnsetAttributesReq);
+    X_REQUEST_FIELD_CARD32(drawable);
 
 #ifdef XINERAMA
     if (!noPanoramiXExtension) {
@@ -1191,15 +1177,11 @@ ProcScreenSaverUnsetAttributes(ClientPtr client)
 static int
 ProcScreenSaverSuspend(ClientPtr client)
 {
+    X_REQUEST_HEAD_STRUCT(xScreenSaverSuspendReq);
+    X_REQUEST_FIELD_CARD32(suspend);
+
     ScreenSaverSuspensionPtr *prev, this;
     BOOL suspend;
-
-    REQUEST(xScreenSaverSuspendReq);
-    REQUEST_SIZE_MATCH(xScreenSaverSuspendReq);
-
-    if (client->swapped)
-        swapl(&stuff->suspend);
-
     /*
      * Old versions of XCB encode suspend as 1 byte followed by three
      * pad bytes (which are always cleared), instead of a 4 byte

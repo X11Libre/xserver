@@ -948,7 +948,7 @@ exaComposite(CARD8 op,
 
             if (pSrc->repeat && pSrc->repeatType == RepeatNormal &&
                 pSrc->pDrawable->type == DRAWABLE_PIXMAP) {
-                DDXPointRec patOrg;
+                xPoint patOrg;
 
                 /* Let's see if the driver can do the repeat in one go */
                 if (pExaScr->info->PrepareComposite && !pSrc->alphaMap &&

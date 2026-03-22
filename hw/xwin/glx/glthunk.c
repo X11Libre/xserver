@@ -27,9 +27,7 @@
 // so our generated wrappers will correctly link with the functions in opengl32.dll
 #define USE_OPENGL32
 
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include <X11/Xwindows.h>
 

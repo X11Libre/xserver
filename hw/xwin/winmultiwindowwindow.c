@@ -31,10 +31,7 @@
  *		Harold L Hunt II
  *              Colin Harrison
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "dix/resource_priv.h"
 #include "mi/mi_priv.h"
@@ -1048,7 +1045,6 @@ winModifyPixmapHeaderMultiwindow(PixmapPtr pPixmap,
                                  int depth,
                                  int bitsPerPixel, int devKind, void *pPixData)
 {
-    int i;
     winPrivPixmapPtr pPixmapPriv = winGetPixmapPriv(pPixmap);
 
     /* reinitialize everything */

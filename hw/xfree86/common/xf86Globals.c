@@ -25,14 +25,10 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
 /*
  * This file contains all the XFree86 global variables.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/X.h>
 #include "os.h"
@@ -131,6 +127,7 @@ xf86InfoRec xf86Info = {
     .autoAddGPU = FALSE,
 #endif
     .autoBindGPU = TRUE,
+    .singleDriver = FALSE,
 };
 
 const char *xf86ConfigFile = NULL;
@@ -195,3 +192,8 @@ Bool xf86VidModeDisabled = FALSE;
 Bool xf86VidModeAllowNonLocal = FALSE;
 #endif
 Bool xorgHWAccess = FALSE;
+
+int xf86GetConsoleFd(void)
+{
+    return xf86Info.consoleFd;
+}

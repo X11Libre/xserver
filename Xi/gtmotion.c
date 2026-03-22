@@ -72,13 +72,9 @@ SOFTWARE.
 int
 ProcXGetDeviceMotionEvents(ClientPtr client)
 {
-    REQUEST(xGetDeviceMotionEventsReq);
-    REQUEST_SIZE_MATCH(xGetDeviceMotionEventsReq);
-
-    if (client->swapped) {
-        swapl(&stuff->start);
-        swapl(&stuff->stop);
-    }
+    X_REQUEST_HEAD_STRUCT(xGetDeviceMotionEventsReq);
+    X_REQUEST_FIELD_CARD32(start);
+    X_REQUEST_FIELD_CARD32(stop);
 
     DeviceIntPtr dev;
     int rc = dixLookupDevice(&dev, stuff->deviceid, client, DixReadAccess);
@@ -92,7 +88,7 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
     if (dev->valuator->motionHintWindow)
         MaybeStopDeviceHint(dev, client);
 
-    xGetDeviceMotionEventsReply rep = {
+    xGetDeviceMotionEventsReply reply = {
         .RepType = X_GetDeviceMotionEvents,
         .axes = v->numAxes,
         .mode = Absolute        /* XXX we don't do relative at the moment */
@@ -110,17 +106,17 @@ ProcXGetDeviceMotionEvents(ClientPtr client)
         if (v->numMotionEvents) {
             const int size = sizeof(Time) + (v->numAxes * sizeof(INT32));
             INT32 *coords = NULL;
-            rep.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
+            reply.nEvents = GetMotionHistory(dev, (xTimecoord **) &coords,   /* XXX */
                                            start.milliseconds, stop.milliseconds,
                                            (ScreenPtr) NULL, FALSE);
-            x_rpcbuf_write_INT32s(&rpcbuf, coords, bytes_to_int32(rep.nEvents * size));
+            x_rpcbuf_write_INT32s(&rpcbuf, coords, bytes_to_int32(reply.nEvents * size));
             free(coords);
         }
     }
 
     if (client->swapped) {
-        swapl(&rep.nEvents);
+        swapl(&reply.nEvents);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }

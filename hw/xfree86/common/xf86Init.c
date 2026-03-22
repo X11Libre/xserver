@@ -29,10 +29,7 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <stdlib.h>
 #include <errno.h>
@@ -55,6 +52,8 @@
 #include "config/hotplug_priv.h"
 #include "dix/input_priv.h"
 #include "dix/screenint_priv.h"
+#include "include/xf86DDC.h"
+#include "include/xorgVersion.h"
 #include "mi/mi_priv.h"
 #include "os/cmdline.h"
 #include "os/ddx_priv.h"
@@ -66,6 +65,8 @@
 #include "windowstr.h"
 #include "scrnintstr.h"
 #include "../os-support/linux/systemd-logind.h"
+#include "seatd-libseat.h"
+
 #include "xf86VGAarbiter_priv.h"
 #include "loaderProcs.h"
 
@@ -76,10 +77,8 @@
 #include "xf86_os_support.h"
 #include "xf86_OSlib.h"
 #include "xf86cmap.h"
-#include "xorgVersion.h"
 #include "mipointer.h"
 #include "xf86Extensions.h"
-#include "xf86DDC.h"
 #include "xf86Xinput.h"
 #include "xf86InPriv.h"
 #include "xf86Crtc.h"
@@ -184,14 +183,8 @@ xf86PrintBanner(void)
         }
     }
 #endif
-#if defined(BUILDERSTRING)
-    xf86ErrorFVerb(0, "%s \n", BUILDERSTRING);
-#endif
     xf86ErrorFVerb(0, "Current version of pixman: %s\n",
                    pixman_version_string());
-    xf86ErrorFVerb(0, "\tBefore reporting problems, check "
-                   "" __VENDORDWEBSUPPORT__ "\n"
-                   "\tto make sure that you have the latest version.\n");
 }
 
 Bool
@@ -329,7 +322,7 @@ InitOutput(int argc, char **argv)
         LoaderInit();
 
         /* Tell the loader the default module search path */
-        LoaderSetPath(xf86ModulePath);
+        LoaderSetPath(NULL, xf86ModulePath);
 
         if (xf86Info.ignoreABI) {
             LoaderSetIgnoreAbi();
@@ -339,6 +332,7 @@ InitOutput(int argc, char **argv)
             DoShowOptions();
 
         dbus_core_init();
+        seatd_libseat_init(xf86VTKeepTtyIsSet());
         systemd_logind_init();
 
         /* Do a general bus probe.  This will be a PCI probe for x86 platforms */
@@ -432,16 +426,18 @@ InitOutput(int argc, char **argv)
                 xorgHWOpenConsole = TRUE;
         }
 
-        if (xorgHWOpenConsole)
-            xf86OpenConsole();
-        else
+        if (xorgHWOpenConsole) {
+            if (!seatd_libseat_controls_session()) {
+                xf86OpenConsole();
+            }
+        } else
             xf86Info.dontVTSwitch = TRUE;
 
 	/* Enable full I/O access */
 	if (want_hw_access)
 	    xorgHWAccess = xf86EnableIO();
 
-        if (xf86BusConfig() == FALSE)
+        if (xf86BusConfig(xf86Info.singleDriver) == FALSE)
             return;
 
 
@@ -566,8 +562,11 @@ InitOutput(int argc, char **argv)
         /*
          * serverGeneration != 1; some OSs have to do things here, too.
          */
-        if (xorgHWOpenConsole)
-            xf86OpenConsole();
+        if (xorgHWOpenConsole) {
+            if (!seatd_libseat_controls_session()) {
+                xf86OpenConsole();
+            }
+        }
 
         /*
            should we reopen it here? We need to deal with an already opened
@@ -587,8 +586,8 @@ InitOutput(int argc, char **argv)
     if (xf86Info.vtno >= 0)
         AddCallback(&RootWindowFinalizeCallback, AddVTAtoms, NULL);
 
-    if (SeatId)
-        AddCallback(&RootWindowFinalizeCallback, AddSeatId, SeatId);
+    if (dixSettingSeatId)
+        AddCallback(&RootWindowFinalizeCallback, AddSeatId, dixSettingSeatId);
 
     /*
      * Use the previously collected parts to setup screenInfo
@@ -749,6 +748,8 @@ CloseInput(void)
 {
     config_fini();
     mieqFini();
+    /* strictly speaking the below is not related to input, but ... */
+    LoaderClose();
 }
 
 /*
@@ -843,9 +844,13 @@ ddxGiveUp(enum ExitCode error)
         xf86Screens[i]->vtSema = FALSE;
     }
 
-    if (xorgHWOpenConsole)
-        xf86CloseConsole();
+    if (xorgHWOpenConsole) {
+        if (!seatd_libseat_controls_session()) {
+            xf86CloseConsole();
+        }
+    }
 
+    seatd_libseat_fini();
     systemd_logind_fini();
     dbus_core_fini();
 
@@ -855,8 +860,7 @@ ddxGiveUp(enum ExitCode error)
 void
 OsVendorFatalError(const char *f, va_list args)
 {
-    ErrorF("\nPlease consult the " XVENDORNAME " support \n\t at "
-           __VENDORDWEBSUPPORT__ "\n for help. \n");
+    ErrorF("\nPlease consult the XLibre support: https://www.xlibre.net/\n");
     if (xf86LogFile && xf86LogFileWasOpened)
         ErrorF("Please also check the log file at \"%s\" for additional "
                "information.\n", xf86LogFile);

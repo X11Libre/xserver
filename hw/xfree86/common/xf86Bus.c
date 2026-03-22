@@ -28,10 +28,7 @@
 /*
  * This file contains the interfaces to the bus-specific code
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -52,9 +49,8 @@
 #include "xf86platformBus_priv.h"
 
 #include "xf86_OSproc.h"
-#ifdef XSERVER_LIBPCIACCESS
 #include "xf86VGAarbiter_priv.h"
-#endif
+
 /* Entity data */
 EntityPtr *xf86Entities = NULL; /* Bus slots claimed by drivers */
 int xf86NumEntities = 0;
@@ -145,9 +141,12 @@ xf86BusConfigMatch(ScrnInfoPtr scrnInfo, Bool is_gpu) {
 /**
  * @return TRUE if all buses are configured and set up correctly and FALSE
  * otherwise.
+ *
+ * If singleDriver is TRUE, then only the first successfully probed driver adds screens to xf86Screens,
+ * others may add GPU secondary screens only
  */
 Bool
-xf86BusConfig(void)
+xf86BusConfig(Bool singleDriver)
 {
     screenLayoutPtr layout;
     int i;
@@ -161,7 +160,9 @@ xf86BusConfig(void)
      *    xf86Screens[] list for each instance of the hardware found.
      */
     for (i = 0; i < xf86NumDrivers; i++) {
-        xf86CallDriverProbe(xf86DriverList[i], FALSE);
+        /* The order of the && operands below is essential! */
+        if (xf86CallDriverProbe(xf86DriverList[i], FALSE) && singleDriver)
+            break;
     }
 
     /*
@@ -172,7 +173,9 @@ xf86BusConfig(void)
     if (xf86NumScreens == 0) {
         xf86ProbeIgnorePrimary = TRUE;
         for (i = 0; i < xf86NumDrivers && xf86NumScreens == 0; i++) {
-            xf86CallDriverProbe(xf86DriverList[i], FALSE);
+            /* The order of the && operands below is essential! */
+            if (xf86CallDriverProbe(xf86DriverList[i], FALSE) && singleDriver)
+                break;
         }
         xf86ProbeIgnorePrimary = FALSE;
     }
@@ -293,8 +296,13 @@ StringToBusType(const char *busID, const char **retID)
     if (!xf86NameCmp(p, "usb"))
         ret = BUS_USB;
     if (ret != BUS_NONE)
-        if (retID)
-            *retID = busID + strlen(p) + 1;
+        if (retID) {
+            size_t len = strlen(p);
+            if (busID[len] == ':')
+                *retID = busID + len + 1;
+            else
+                *retID = busID + len; /* Points to the terminating null byte */
+        }
     free(s);
     return ret;
 }
@@ -649,4 +657,228 @@ xf86GetEntityPrivate(int entityIndex, int privIndex)
         return NULL;
 
     return &(xf86Entities[entityIndex]->entityPrivates[privIndex]);
+}
+
+/*
+ * Check if the slot requested is free.  If it is already in use, return FALSE.
+ */
+
+Bool
+xf86CheckSlot(const void *ptr, BusType type)
+{
+    int i;
+
+#ifdef XSERVER_LIBPCIACCESS
+    const struct pci_device *pci_ptr = (type == BUS_PCI ?
+             (const struct pci_device *)ptr : NULL);
+#endif
+
+#ifdef XSERVER_PLATFORM_BUS
+    const struct xf86_platform_device *plat_ptr = (type == BUS_PLATFORM ?
+             (const struct xf86_platform_device *)ptr : NULL);
+#endif
+
+    GDevPtr fb_ptr = (type == BUS_NONE ?
+             (GDevPtr)ptr : NULL);
+    const char *msPath = NULL;
+    const char *fbPath = NULL;
+
+    if (ptr == NULL) {
+        return FALSE;
+    }
+
+#ifdef XSERVER_PLATFORM_BUS
+    /* XSERVER_PLATFORM_BUS assumes XSERVER_LIBPCIACCESS */
+    if (plat_ptr) {
+        pci_ptr = plat_ptr->pdev;
+        msPath = plat_ptr->attribs->path;
+    }
+#endif
+
+    if (type == BUS_NONE) {
+        if (!strcasecmp(fb_ptr->driver, "modesetting")) {
+   /*
+    * If xf86ClaimFbSlot() is called by modesetting driver,
+    * busID has not been set and the device name was not specified
+    * via "kmsdev" option, the default "/dev/dri/card0" is used.
+    *
+    * We have to check whether a platform device has previously
+    * grabbed the device we are going to claim.
+    */
+            msPath = xf86FindOptionValue(fb_ptr->options, "kmsdev");
+            if (msPath == NULL) {
+                /* Autoconfigured */
+                msPath = "/dev/dri/card0";
+            }
+        }
+        else
+        if (!strcasecmp(fb_ptr->driver, "fbdev")) {
+   /*
+    * fbdev driver can also call xf86ClaimFbSlot() for
+    * an autoconfigured device, or the device name can be set
+    * via "fbdev" option.
+    */
+            fbPath = xf86FindOptionValue(fb_ptr->options, "fbdev");
+            if (fbPath == NULL) {
+                /* Autoconfigured */
+                fbPath = "";
+            }
+        }
+    }
+
+   /*
+    * Having prepared all data about a candidate, we walk
+    * through all previous entities to check for a collision.
+    */
+
+    for (i = 0; i < xf86NumEntities; i++) {
+        const EntityPtr pent = xf86Entities[i];
+#ifdef XSERVER_LIBPCIACCESS
+        struct pci_device *pci_other;
+#endif
+        const char *msOther = NULL;
+        const char *fbOther = NULL;
+
+        if (pent->numInstances <= 0) {
+        /* All devices are unclaimed, ignore this entity */
+            continue;
+        }
+
+        if ((fbPath != NULL) && (*fbPath == '\0')) {
+            /* Autoconfigured fbdev device is incompatible with anything */
+            LogMessageVerb(X_INFO, 1,
+                "\"%s\" must be the only device, but \"%s\" is present.\n",
+                fb_ptr->identifier, pent->devices[0]->identifier);
+            return FALSE;
+        }
+
+#ifdef XSERVER_LIBPCIACCESS 
+        pci_other = xf86GetPciInfoForEntity(i);
+        /* First compare PCI addresses */
+        if (pci_ptr && pci_other) {
+            if (MATCH_PCI_DEVICES(pci_other, pci_ptr)) {
+            /* This PCI slot has been claimed, fail */
+                if (msPath) {
+                    LogMessageVerb(X_INFO, 1,
+                        " Platform device \"%s\" skipped because\n",
+                        msPath);
+                }
+                else {
+                    LogMessageVerb(X_INFO, 1,
+                        " PCI device skipped because\n");
+                }
+                LogMessageVerb(X_INFO, 1,
+                    "  PCI bus id %u@%u:%u:%u has already been claimed by \"%s\".\n",
+                    pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func, 
+                    pent->devices[0]->identifier);
+                return FALSE;
+            }
+            else
+            /* This is another device, skip */
+                continue;
+        }
+
+        if (pent->bus.type == BUS_PCI) {
+            /* No other means to compare, accept */
+            continue;
+        }
+#endif
+
+        if (pent->bus.type == BUS_NONE) {
+            if (!strcasecmp(pent->driver->driverName, "fbdev")) {
+                if ((type != BUS_NONE) || (fbPath == NULL)) {
+                    /* fbdev without busID is incompatible with other types */
+                    LogMessageVerb(X_INFO, 1,
+                        " Only fbdev without PCI bus id can be claimed after \"%s\".\n",
+                        pent->devices[0]->identifier);
+                    return FALSE;
+                }
+                /* Examine the first device only */
+                fbOther = xf86FindOptionValue(pent->devices[0]->options, "fbdev");
+                if (fbOther == NULL) {
+                    /* Autoconfigured, reject */
+                    LogMessageVerb(X_INFO, 1,
+                        " Can\'t claim anything after \"%s\".\n",
+                        pent->devices[0]->identifier);
+                    return FALSE;
+                }
+                if (strcmp(fbPath, fbOther)) {
+                    /* No conflict */
+                    continue;
+                }
+                else {
+                    /* This framebuffer device has been claimed already */
+                    LogMessageVerb(X_INFO, 1,
+                        " Framebuffer device \"%s\" has already been claimed by \"%s\".\n",
+                        fbPath, pent->devices[0]->identifier);
+                    return FALSE;
+                }
+            }
+        }
+
+#ifdef XSERVER_PLATFORM_BUS
+        if (pent->bus.type == BUS_PLATFORM) {
+            msOther = pent->bus.id.plat->attribs->path;
+        } else
+#endif
+        if (pent->bus.type == BUS_NONE) {
+            if (!strcasecmp(pent->driver->driverName, "modesetting")) {
+                /* Examine the first device only */
+                msOther = xf86FindOptionValue(pent->devices[0]->options, "kmsdev");
+                if (msOther == NULL)
+#ifdef XSERVER_LIBPCIACCESS
+                    if (pci_other == NULL)
+#endif
+                    /* Autoconfigured */
+                    msOther = "/dev/dri/card0";
+            }
+        }
+
+        if ((msPath != NULL) && (msOther != NULL) && !strcmp(msPath, msOther)) {
+            /* This DRI device has been claimed already */
+                    LogMessageVerb(X_INFO, 1,
+                        " DRI device \"%s\" has already been claimed by \"%s\".\n",
+                        msPath, pent->devices[0]->identifier);
+            return FALSE;
+        }
+    }
+
+#ifdef XSERVER_PLATFORM_BUS
+    if (type == BUS_PLATFORM) {
+        if (pci_ptr)
+            LogMessageVerb(X_INFO, 1,
+                " Platform device \"%s\" at %u@%u:%u:%u can be claimed.\n",
+                msPath, pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func);
+        else
+            LogMessageVerb(X_INFO, 1,
+                " Platform device \"%s\" can be claimed.\n",
+                 msPath);
+    }
+    else
+#endif
+#ifdef XSERVER_LIBPCIACCESS 
+    if (type == BUS_PCI) {
+        LogMessageVerb(X_INFO, 1,
+            " PCI device %u@%u:%u:%u can be claimed.\n",
+            pci_ptr->domain, pci_ptr->bus, pci_ptr->dev, pci_ptr->func);
+    }
+    else
+#endif
+    if (type == BUS_NONE) {
+        if (msPath)
+            LogMessageVerb(X_INFO, 1,
+                "\"%s\" can be claimed by modesetting driver as \"%s\".\n",
+                msPath, fb_ptr->identifier);
+        else
+        if (fbPath)
+            LogMessageVerb(X_INFO, 1,
+                "\"%s\" can be claimed by fbdev driver as \"%s\".\n",
+                fbPath, fb_ptr->identifier);
+        else
+            LogMessageVerb(X_INFO, 1,
+                "\"%s\" can be claimed.\n",
+                 fb_ptr->identifier);
+    }
+
+    return TRUE;
 }

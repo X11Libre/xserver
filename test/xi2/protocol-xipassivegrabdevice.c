@@ -81,24 +81,24 @@ override_GrabButton(ClientPtr client, DeviceIntPtr dev,
 static void
 reply_XIPassiveGrabDevice(ClientPtr client, int len, void *data)
 {
-    xXIPassiveGrabDeviceReply *reply = (xXIPassiveGrabDeviceReply *) data;
-    xXIPassiveGrabDeviceReply rep = *reply; /* copy so swapping doesn't touch the real reply */
+    xXIPassiveGrabDeviceReply *repptr = (xXIPassiveGrabDeviceReply *) data;
+    xXIPassiveGrabDeviceReply reply = *repptr; /* copy so swapping doesn't touch the real reply */
 
     assert(len < 0xffff); /* suspicious size, swapping bug */
 
     if (client->swapped) {
-        swaps(&rep.sequenceNumber);
-        swapl(&rep.length);
-        swaps(&rep.num_modifiers);
+        swaps(&reply.sequenceNumber);
+        swapl(&reply.length);
+        swaps(&reply.num_modifiers);
 
-        testdata.num_modifiers = rep.num_modifiers;
+        testdata.num_modifiers = reply.num_modifiers;
     }
 
-    reply_check_defaults(&rep, len, XIPassiveGrabDevice);
+    reply_check_defaults(&reply, len, XIPassiveGrabDevice);
 
     /* ProcXIPassiveGrabDevice sends the data in two batches, let the second
      * handler handle the modifier data */
-    if (rep.num_modifiers > 0)
+    if (reply.num_modifiers > 0)
         wrapped_WriteToClient = reply_XIPassiveGrabDevice_data;
 }
 

@@ -22,7 +22,6 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-
 /*
  * The ARM32 code here carries the following copyright:
  *
@@ -55,17 +54,14 @@
  *    if advised of the possibility of such damage.
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <errno.h>
 #include <sys/mman.h>
 #include <X11/X.h>
 
 #include "xf86.h"
-#include "xf86_os_support."
+#include "xf86_os_support.h"
 #include "xf86Priv.h"
 #include "xf86_OSlib.h"
 #include "compiler.h"

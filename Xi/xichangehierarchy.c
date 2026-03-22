@@ -42,6 +42,7 @@
 #include "dix/exevents_priv.h"
 #include "dix/extension_priv.h"
 #include "dix/input_priv.h"
+#include "dix/request_priv.h"
 #include "os/bug_priv.h"
 #include "Xi/handlers.h"
 
@@ -424,8 +425,6 @@ attach_slave(ClientPtr client, xXIAttachSlaveInfo * c, int flags[MAXDEVICES])
     return rc;
 }
 
-#define SWAPIF(cmd) if (client->swapped) { cmd; }
-
 int
 ProcXIChangeHierarchy(ClientPtr client)
 {
@@ -439,8 +438,7 @@ ProcXIChangeHierarchy(ClientPtr client)
         CHANGED,
     } changes = NO_CHANGE;
 
-    REQUEST(xXIChangeHierarchyReq);
-    REQUEST_AT_LEAST_SIZE(xXIChangeHierarchyReq);
+    X_REQUEST_HEAD_AT_LEAST(xXIChangeHierarchyReq);
 
     if (!stuff->num_changes)
         return rc;
@@ -454,8 +452,10 @@ ProcXIChangeHierarchy(ClientPtr client)
             goto unwind;
         }
 
-        SWAPIF(swaps(&any->type));
-        SWAPIF(swaps(&any->length));
+        if (client->swapped) {
+            swaps(&any->type);
+            swaps(&any->length);
+        }
 
         if (len < ((size_t)any->length << 2))
             return BadLength;
@@ -478,7 +478,10 @@ ProcXIChangeHierarchy(ClientPtr client)
                 rc = BadLength;
                 goto unwind;
             }
-            SWAPIF(swaps(&c->name_len));
+
+            if (client->swapped)
+                swaps(&c->name_len);
+
             if (c->name_len > (len - sizeof(xXIAddMasterInfo))) {
                 rc = BadLength;
                 goto unwind;

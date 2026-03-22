@@ -73,17 +73,14 @@ XExtensionVersion XIVersion;
 int
 ProcXGetExtensionVersion(ClientPtr client)
 {
-    REQUEST(xGetExtensionVersionReq);
-    REQUEST_AT_LEAST_SIZE(xGetExtensionVersionReq);
-
-    if (client->swapped)
-        swaps(&stuff->nbytes);
+    X_REQUEST_HEAD_AT_LEAST(xGetExtensionVersionReq);
+    X_REQUEST_FIELD_CARD16(nbytes);
 
     if (client->req_len != bytes_to_int32(sizeof(xGetExtensionVersionReq) +
                                         stuff->nbytes))
         return BadLength;
 
-    xGetExtensionVersionReply rep = {
+    xGetExtensionVersionReply reply = {
         .RepType = X_GetExtensionVersion,
         .major_version = XIVersion.major_version,
         .minor_version = XIVersion.minor_version,
@@ -91,9 +88,9 @@ ProcXGetExtensionVersion(ClientPtr client)
     };
 
     if (client->swapped) {
-        swaps(&rep.major_version);
-        swaps(&rep.minor_version);
+        swaps(&reply.major_version);
+        swaps(&reply.minor_version);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

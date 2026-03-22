@@ -37,17 +37,6 @@
 /*
  * Function prototypes
  */
-
-#ifdef XWIN_XF86CONFIG
-void
-winDrvMsgVerb(int scrnIndex,
-              MessageType type, int verb, const char *format, ...)
-_X_ATTRIBUTE_PRINTF(4, 5);
-void
-winDrvMsg(int scrnIndex, MessageType type, const char *format, ...)
-_X_ATTRIBUTE_PRINTF(3, 4);
-#endif
-
 #define winMsg LogMessage
 
 void

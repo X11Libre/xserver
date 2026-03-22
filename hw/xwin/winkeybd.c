@@ -30,10 +30,7 @@
  *		Peter Busch
  *		Harold L Hunt II
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "dix/screenint_priv.h"
 #include "mi/mi_priv.h"
@@ -470,6 +467,12 @@ void
 winKeybdReleaseKeys(void)
 {
     int i;
+
+#ifdef HAS_DEVWINDOWS
+    /* Verify that the mi input system has been initialized */
+    if (g_fdMessageQueue == WIN_FD_INVALID)
+        return;
+#endif
 
     /* Loop through all keys */
     for (i = 0; i < NUM_KEYCODES; ++i) {

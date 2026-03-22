@@ -31,10 +31,7 @@
  *		Harold L Hunt II
  *              Colin Harrison
  */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #include "win.h"
 
@@ -802,6 +799,16 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         /* Add the keyboard hook if possible */
         if (g_fKeyboardHookLL)
             g_fKeyboardHookLL = winInstallKeyboardHookLL();
+
+        /* Tell our Window Manager thread to activate the window */
+        if (fWMMsgInitialized)
+            {
+                wmMsg.msg = WM_WM_ACTIVATE;
+                /* don't focus override redirect windows (e.g. menus) */
+                if (!pWin || !pWin->overrideRedirect)
+                    winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
+            }
+
         return 0;
 
     case WM_KILLFOCUS:
@@ -811,9 +818,13 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         /* Remove our keyboard hook if it is installed */
         winRemoveKeyboardHookLL();
 
-        /* Revert the X focus as well, but only if the Windows focus is going to another window */
-        if (!wParam && pWin)
-            DeleteWindowFromAnyEvents(pWin, FALSE);
+        /* Revert the X focus as well */
+        if (fWMMsgInitialized)
+            {
+                wmMsg.msg = WM_WM_ACTIVATE;
+                wmMsg.iWindow = 0;
+                winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
+            }
 
         return 0;
 
@@ -897,26 +908,8 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         /* Pass the message to the root window */
         SendMessage(hwndScreen, message, wParam, lParam);
 
-        if (LOWORD(wParam) != WA_INACTIVE) {
-            /* Raise the window to the top in Z order */
-            /* ago: Activate does not mean putting it to front! */
-            /*
-               wmMsg.msg = WM_WM_RAISE;
-               if (fWMMsgInitialized)
-               winSendMessageToWM (s_pScreenPriv->pWMInfo, &wmMsg);
-             */
-
-            /* Tell our Window Manager thread to activate the window */
-            wmMsg.msg = WM_WM_ACTIVATE;
-            if (fWMMsgInitialized)
-                if (!pWin || !pWin->overrideRedirect)   /* for OOo menus */
-                    winSendMessageToWM(s_pScreenPriv->pWMInfo, &wmMsg);
-        }
-        /* Prevent the mouse wheel from stalling when another window is minimized */
-        if (HIWORD(wParam) == 0 && LOWORD(wParam) == WA_ACTIVE &&
-            (HWND) lParam != NULL && (HWND) lParam != GetParent(hwnd))
-            SetFocus(hwnd);
-        return 0;
+        /* Allow DefWindowProc to SetFocus() as needed */
+        break;
 
     case WM_ACTIVATEAPP:
         /*
@@ -1242,7 +1235,7 @@ winTopLevelWindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     ret = DefWindowProc(hwnd, message, wParam, lParam);
     /*
-     * If the window was minized we get the stack change before the window is restored
+     * If the window was minimized we get the stack change before the window is restored
      * and so it gets lost. Ensure there stacking order is correct.
      */
     if (needRestack)

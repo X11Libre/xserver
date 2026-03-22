@@ -1,0 +1,34 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+datarootdir=@datarootdir@
+moduledir=@moduledir@
+input_drivers_dir=@moduledir@/drivers/input
+video_drivers_dir=@moduledir@/drivers/video
+sdkdir=@sdkdir@
+sysconfigdir=@xserverconfigdir@
+xserverconfigdir=@xserverconfigdir@
+driver_man_dir=@driver_man_dir@
+driver_man_section=@driver_man_section@
+app_man_dir=@app_man_dir@
+app_man_section=@app_man_section@
+misc_man_dir=@misc_man_dir@
+misc_man_section=@misc_man_section@
+file_man_dir=@file_man_dir@
+file_man_section=@file_man_section@
+server_name=@server_name@
+server_config=@server_config@
+
+abi_ansic=@abi_ansic@
+abi_videodrv=@abi_videodrv@
+abi_xinput=@abi_xinput@
+abi_extension=@abi_extension@
+
+Name: xlibre-server
+Description: Modular XLibre X Server
+URL: https://github.com/X11Libre/xserver/
+Version: @PACKAGE_VERSION@
+Requires.private: @SDK_REQUIRED_MODULES@
+Cflags: -I${sdkdir} @symbol_visibility@
+Libs: -L${libdir} @XORG_DRIVER_LIBS@

@@ -38,17 +38,16 @@ of the copyright holder.
 #ifndef _XVDIX_H_
 #define _XVDIX_H_
 
+#include "include/xvdix.h"
+
 #include "scrnintstr.h"
 #include "regionstr.h"
 #include "windowstr.h"
 #include "pixmapstr.h"
-#include "mivalidate.h"
 #include "validate.h"
 #include "resource.h"
 #include "gcstruct.h"
 #include "dixstruct.h"
-
-#include "../../Xext/xvdix.h"
 
 #define VIDEO_OVERLAID_IMAGES			0x00000004
 #define VIDEO_OVERLAID_STILLS			0x00000008
@@ -175,7 +174,7 @@ typedef struct {
     DrawablePtr pDraw;
     unsigned char type;
     unsigned int subWindowMode;
-    DDXPointRec clipOrg;
+    xPoint clipOrg;
     RegionPtr clientClip;
     RegionPtr pCompositeClip;
     Bool FreeCompositeClip;
@@ -191,5 +190,10 @@ typedef struct _KdXVWindowRec {
     XvPortRecPrivatePtr PortRec;
     struct _KdXVWindowRec *next;
 } KdXVWindowRec, *KdXVWindowPtr;
+
+#ifdef GLAMOR
+/* Must not be called before glamor is fully initialized */
+void kd_glamor_xv_init(ScreenPtr screen);
+#endif
 
 #endif                          /* _XVDIX_H_ */

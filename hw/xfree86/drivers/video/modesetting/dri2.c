@@ -44,7 +44,7 @@
 #include "driver.h"
 #include "dri2.h"
 
-#ifdef GLAMOR_HAS_GBM
+#ifdef GLAMOR
 
 enum ms_dri2_frame_event_type {
     MS_DRI2_QUEUE_SWAP,
@@ -544,7 +544,7 @@ can_exchange(ScrnInfoPtr scrn, DrawablePtr draw,
         drmmode_crtc_private_ptr drmmode_crtc = config->crtc[i]->driver_private;
 
         /* Don't do pageflipping if CRTCs are rotated. */
-        if (drmmode_crtc->rotate_bo.gbm)
+        if (drmmode_crtc->rotate_bo)
             return FALSE;
 
         if (xf86_crtc_on(config->crtc[i]))
@@ -1107,4 +1107,4 @@ ms_dri2_close_screen(ScreenPtr screen)
     DRI2CloseScreen(screen);
 }
 
-#endif /* GLAMOR_HAS_GBM */
+#endif /* GLAMOR */

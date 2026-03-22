@@ -37,6 +37,7 @@
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "include/extinit.h"
 #include "os/bug_priv.h"
 
@@ -774,8 +775,7 @@ DeviceFocusEvent(DeviceIntPtr dev, int type, int mode, int detail,
     len = sizeof(xXIFocusInEvent) + btlen * 4;
 
     xXIFocusInEvent *xi2event = calloc(1, len);
-    if (!xi2event)
-        return;
+    BUG_RETURN(xi2event == NULL);
 
     xi2event->type = GenericEvent;
     xi2event->extension = EXTENSION_MAJOR_XINPUT;

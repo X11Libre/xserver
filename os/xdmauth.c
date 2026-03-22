@@ -39,6 +39,7 @@ from The Open Group.
 #include <X11/X.h>
 
 #include "os/auth.h"
+#include "os/io_priv.h"
 #include "os/Xtrans.h"
 
 #include "os.h"
@@ -281,7 +282,6 @@ XdmAuthorizationValidate(unsigned char *plain, int length,
         if (_XSERVTransGetPeerAddr(((OsCommPtr) xclient->osPrivate)->trans_conn,
                                    &family, &addr_len, &addr) == 0
             && _XSERVTransConvertAddress(&family, &addr_len, &addr) == 0) {
-#if defined(TCPCONN)
             if (family == FamilyInternet &&
                 memcmp((char *) addr, client->client, 4) != 0) {
                 free(client);
@@ -292,7 +292,6 @@ XdmAuthorizationValidate(unsigned char *plain, int length,
                 return NULL;
 
             }
-#endif
             free(addr);
         }
     }

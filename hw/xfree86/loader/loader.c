@@ -45,10 +45,7 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <string.h>
 #include "os.h"
@@ -87,6 +84,14 @@ LoaderInit(void)
     LogMessageVerb(X_NONE, 2, "\t%s : %d.%d\n", ABI_CLASS_EXTENSION,
                    GET_ABI_MAJOR(LoaderVersionInfo.extensionVersion),
                    GET_ABI_MINOR(LoaderVersionInfo.extensionVersion));
+
+    LoaderInitPath();
+}
+
+void
+LoaderClose(void)
+{
+    LoaderClosePath();
 }
 
 /* Public Interface to the loader. */

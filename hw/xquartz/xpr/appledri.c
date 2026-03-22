@@ -54,7 +54,7 @@
 #define _APPLEDRI_SERVER_
 #include "appledristr.h"
 #include "swaprep.h"
-#include "dri.h"
+#include "xpr_dri.h"
 #include "dristruct.h"
 #include "xpr.h"
 #include "x-hash.h"
@@ -301,7 +301,7 @@ ProcAppleDRICreatePixmap(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
     x_rpcbuf_write_CARD8s(&rpcbuf, path, stringLength);
 
-    xAppleDRICreatePixmapReply rep = {
+    xAppleDRICreatePixmapReply reply = {
         .stringLength = stringLength,
         .width = width,
         .height = height,
@@ -311,15 +311,15 @@ ProcAppleDRICreatePixmap(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.stringLength);
-        swapl(&rep.width);
-        swapl(&rep.height);
-        swapl(&rep.pitch);
-        swapl(&rep.bpp);
-        swapl(&rep.size);
+        swapl(&reply.stringLength);
+        swapl(&reply.width);
+        swapl(&reply.height);
+        swapl(&reply.pitch);
+        swapl(&reply.bpp);
+        swapl(&reply.size);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static int

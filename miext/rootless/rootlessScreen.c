@@ -46,7 +46,6 @@
 #include "pixmapstr.h"
 #include "windowstr.h"
 #include "propertyst.h"
-#include "mivalidate.h"
 #include "picturestr.h"
 
 #include "rootlessCommon.h"

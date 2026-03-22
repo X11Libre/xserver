@@ -39,9 +39,11 @@
 #include <X11/extensions/XIproto.h>
 
 #include "config/hotplug_priv.h"
+#include "dix/dix_priv.h"
 #include "dix/input_priv.h"
 #include "dix/inpututils_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/settings_priv.h"
 #include "mi/mi_priv.h"
 #include "mi/mipointer_priv.h"
 #include "os/cmdline.h"
@@ -55,7 +57,7 @@
 #include "optionstr.h"
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-#include "hotplug.h"
+#include "config/hotplug_priv.h"
 #endif
 
 #ifdef KDRIVE_EVDEV
@@ -64,6 +66,12 @@
 #endif
 
 #define AtomFromName(x) MakeAtom(x, strlen(x), 1)
+
+#define KD_KEY_COUNT    248
+#define KD_MIN_KEYCODE  8
+#define KD_MAX_KEYCODE  255
+#define KD_MAX_WIDTH    4
+#define KD_MAX_LENGTH   (KD_MAX_KEYCODE - KD_MIN_KEYCODE + 1)
 
 struct KdConfigDevice {
     char *line;
@@ -100,9 +108,6 @@ typedef struct _kdInputFd {
 
 static KdInputFd kdInputFds[KD_MAX_INPUT_FDS];
 static int kdNumInputFds = 0;
-#ifdef KDRIVE_KBD
-static int kdnFds = 0;
-#endif
 
 extern Bool kdRawPointerCoordinates;
 
@@ -111,51 +116,6 @@ extern const char *kdGlobalXkbModel;
 extern const char *kdGlobalXkbLayout;
 extern const char *kdGlobalXkbVariant;
 extern const char *kdGlobalXkbOptions;
-
-#ifdef KDRIVE_KBD
-static void KdSigio(int sig)
-{
-    for (int i = 0; i < kdNumInputFds; i++)
-        (*kdInputFds[i].read) (kdInputFds[i].fd, kdInputFds[i].closure);
-}
-
-static void KdBlockSigio(void)
-{
-    sigset_t set;
-
-    sigemptyset(&set);
-    sigaddset(&set, SIGIO);
-    sigprocmask(SIG_BLOCK, &set, 0);
-}
-
-static void KdUnblockSigio(void)
-{
-    sigset_t set;
-
-    sigemptyset(&set);
-    sigaddset(&set, SIGIO);
-    sigprocmask(SIG_UNBLOCK, &set, 0);
-}
-
-#undef VERIFY_SIGIO
-#ifdef VERIFY_SIGIO
-
-void KdAssertSigioBlocked(char *where)
-{
-    sigset_t set, old;
-
-    sigemptyset(&set);
-    sigprocmask(SIG_BLOCK, &set, &old);
-    if (!sigismember(&old, SIGIO))
-        ErrorF("SIGIO not blocked at %s\n", where);
-}
-
-#else
-
-#define KdAssertSigioBlocked(s)
-
-#endif
-#endif
 
 #ifdef FNONBLOCK
 #define NOBLOCK FNONBLOCK
@@ -174,11 +134,22 @@ KdResetInputMachine(void)
     }
 }
 
-static void KdNonBlockFd(int fd)
+static void
+KdEnableNonBlockFd(int fd)
 {
 #ifndef WIN32
     int flags = fcntl(fd, F_GETFL);
-    flags |= FASYNC | NOBLOCK;
+    flags |= NOBLOCK;
+    fcntl(fd, F_SETFL, flags);
+#endif
+}
+
+static void
+KdDisableNotBlockFd(int fd)
+{
+#ifndef WIN32
+    int flags = fcntl(fd, F_GETFL);
+    flags &= ~NOBLOCK;
     fcntl(fd, F_SETFL, flags);
 #endif
 }
@@ -191,49 +162,16 @@ static void KdNotifyFd(int fd, int ready, void *data)
 
 static void KdAddFd(int fd, int i)
 {
-#ifdef KDRIVE_KBD
-    struct sigaction act;
-
-    sigset_t set;
-
-    kdnFds++;
-    fcntl(fd, F_SETOWN, getpid());
-#endif
-    KdNonBlockFd(fd);
+    KdEnableNonBlockFd(fd);
+    /* AddEnabledDevice(fd); No longer exists */
     InputThreadRegisterDev(fd, KdNotifyFd, (void *) (intptr_t) i);
-#ifdef KDRIVE_KBD
-/*  AddEnabledDevice(fd); */
-    memset(&act, '\0', sizeof act);
-    act.sa_handler = KdSigio;
-
-    sigemptyset(&act.sa_mask);
-    sigaddset(&act.sa_mask, SIGIO);
-    sigaddset(&act.sa_mask, SIGALRM);
-    sigaddset(&act.sa_mask, SIGVTALRM);
-    sigaction(SIGIO, &act, 0);
-    sigemptyset(&set);
-    sigprocmask(SIG_SETMASK, &set, 0);
-#endif
 }
 
 static void KdRemoveFd(int fd)
 {
+    /* RemoveEnabledDevice(fd); No longer exists */
     InputThreadUnregisterDev(fd);
-#ifndef WIN32
-    int flags = fcntl(fd, F_GETFL);
-    flags &= ~(FASYNC | NOBLOCK);
-    fcntl(fd, F_SETFL, flags);
-#endif
-#ifdef KDRIVE_KBD
-    struct sigaction act;
-    kdnFds--;
-    if (kdnFds == 0) {
-        memset(&act, '\0', sizeof act);
-        act.sa_handler = SIG_IGN;
-        sigemptyset(&act.sa_mask);
-        sigaction(SIGIO, &act, 0);
-    }
-#endif
+    KdDisableNotBlockFd(fd);
 }
 
 Bool KdRegisterFd(int fd, void (*read) (int fd, void *closure), void *closure)
@@ -282,13 +220,29 @@ KdDisableInput(void)
     KdPointerInfo *pi;
     int found = 0, i = 0;
 
-#ifndef KDRIVE_KBD
     input_lock();
-#else
-    KdBlockSigio();
-#endif
 
     for (ki = kdKeyboards; ki; ki = ki->next) {
+        if (ki->last_scan_code != -1) {
+            /**
+             * When we're doing something that causes a vt switch,
+             * if that action is a key press, the X server doesn't see
+             * the key release event.
+             *
+             * For example, if we start an X server from a terminal
+             * running inside another X server, the "host" server
+             * sees the "enter" key press, but not the key release.
+             *
+             * With this, we forge the key release event that the
+             * X server doesn't see, so that it doesn't misinterpret
+             * the missing key release as a long key press.
+             *
+             * Doesn't really matter what the value of the
+             * third argument is, as long as it is non-zero.
+             * This is what the linux keyboard driver sends.
+             */
+            KdEnqueueKeyboardEvent(ki, ki->last_scan_code, 0x80);
+        }
         if (ki->driver && ki->driver->Disable)
             (*ki->driver->Disable) (ki);
     }
@@ -369,11 +323,7 @@ KdEnableInput(void)
         NoticeEventTime (&ev, pi->dixdev);
     }
 
-#ifndef KDRIVE_KBD
     input_unlock();
-#else
-    KdUnblockSigio();
-#endif
 }
 
 static KdKeyboardDriver *
@@ -1386,6 +1336,38 @@ KdPointerInfo *KdParsePointer(const char *arg)
     return pi;
 }
 
+#ifdef KDRIVE_KBD
+#define DEFAULT_KEYBOARD "keyboard"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_KEYBOARD "evdev"
+#endif
+#endif
+
+#ifdef KDRIVE_MOUSE
+#define DEFAULT_MOUSE "mouse"
+#else
+#ifdef KDRIVE_EVDEV
+#define DEFAULT_MOUSE "evdev"
+#endif
+#endif
+
+void
+KdAddConfigInputDrivers(void)
+{
+    #ifdef DEFAULT_KEYBOARD
+    if (!kdConfigKeyboards) {
+        KdAddConfigKeyboard(DEFAULT_KEYBOARD);
+    }
+    #endif
+
+    #ifdef DEFAULT_MOUSE
+    if (!kdConfigPointers) {
+        KdAddConfigPointer(DEFAULT_MOUSE);
+    }
+    #endif
+}
+
 void
 KdInitInput(void)
 {
@@ -1393,26 +1375,10 @@ KdInitInput(void)
     KdKeyboardInfo *ki;
     struct KdConfigDevice *dev;
 
-#ifndef KDRIVE_KBD
     if (kdConfigPointers || kdConfigKeyboards)
         InputThreadPreInit();
-#else
-    InputThreadEnable = FALSE;
-#endif
 
     kdInputEnabled = TRUE;
-
-#ifdef KDRIVE_KBD
-    if (!kdConfigKeyboards) {
-        KdAddConfigKeyboard("keyboard");
-    }
-#endif
-
-#ifdef KDRIVE_MOUSE
-    if (!kdConfigPointers) {
-        KdAddConfigPointer("mouse");
-    }
-#endif
 
     for (dev = kdConfigPointers; dev; dev = dev->next) {
         pi = KdParsePointer(dev->line);
@@ -1432,7 +1398,7 @@ KdInitInput(void)
     mieqInit();
 
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-    if (SeatId) /* Enable input hot-plugging */
+    if (dixSettingSeatId) /* Enable input hot-plugging */
         config_init();
 #endif
 }
@@ -1441,7 +1407,7 @@ void
 KdCloseInput(void)
 {
 #if defined(CONFIG_UDEV) || defined(CONFIG_HAL)
-    if (SeatId) /* Input hot-plugging is enabled */
+    if (dixSettingSeatId) /* Input hot-plugging is enabled */
         config_fini();
 #endif
 
@@ -1482,7 +1448,7 @@ KdCloseInput(void)
  *	v1  -> (hold) (settimeout) button_1_pend
  *	^1  -> (deliver) start
  *	v2  -> (deliver) button_2_down
- *	^2  -> (deliever) start
+ *	^2  -> (deliver) start
  *	v3  -> (hold) (settimeout) button_3_pend
  *	^3  -> (deliver) start
  *	vo  -> (deliver) start
@@ -1902,11 +1868,7 @@ KdReleaseAllKeys(void)
     int key;
     KdKeyboardInfo *ki;
 
-#ifndef KDRIVE_KBD
     input_lock();
-#else
-    KdBlockSigio();
-#endif
 
     for (ki = kdKeyboards; ki; ki = ki->next) {
         for (key = ki->keySyms.minKeyCode; key < ki->keySyms.maxKeyCode; key++) {
@@ -1917,11 +1879,7 @@ KdReleaseAllKeys(void)
         }
     }
 
-#ifndef KDRIVE_KBD
     input_unlock();
-#else
-    KdUnblockSigio();
-#endif
 #endif
 }
 
@@ -1945,6 +1903,132 @@ KdCheckLock(void)
     }
 }
 
+static KeySym
+KdKeyCodeToKeySym(KdKeyboardInfo *ki, int type, unsigned char key_code)
+{
+    unsigned char scan_code = key_code - KD_MIN_KEYCODE + ki->minScanCode;
+    (void)type;
+
+    /**
+     * XXX This looks really sketchy XXX
+     * Surely there is a way to query this from xkb?
+     * This doesn't work:
+     * return kbd->key->xkbInfo->desc->map->modmap[key_code];
+     *
+     * Scancodes are taken from https://aeb.win.tue.nl/linux/kbd/scancodes-1.html
+     *
+     * Only a few keys we are interested in are listed here.
+     * If we ever need more keys, we can add them later.
+     */
+
+#define KEY_BACKSPACE 0x0E
+#define KEY_F1 0x3B
+#define KEY_F2 0x3C
+#define KEY_F3 0x3D
+#define KEY_F4 0x3E
+#define KEY_F5 0x3F
+#define KEY_F6 0x40
+#define KEY_F7 0x41
+#define KEY_F8 0x42
+#define KEY_F9 0x43
+#define KEY_F10 0x44
+
+/**
+ * The driver doesn't differentiate between E0 53 and 53,
+ * so both are treated as the delete key being pressed
+ */
+#define KEY_DEL 0x53
+
+    switch(scan_code) {
+        case KEY_BACKSPACE:
+            return XK_BackSpace;
+        case KEY_F1:
+            return XK_F1;
+        case KEY_F2:
+            return XK_F2;
+        case KEY_F3:
+            return XK_F3;
+        case KEY_F4:
+            return XK_F4;
+        case KEY_F5:
+            return XK_F5;
+        case KEY_F6:
+            return XK_F6;
+        case KEY_F7:
+            return XK_F7;
+        case KEY_F8:
+            return XK_F8;
+        case KEY_F9:
+            return XK_F9;
+        case KEY_F10:
+            return XK_F10;
+#if 0 /* Doesn't work from my testing */
+        case KEY_DEL:
+            return XK_Delete;
+#endif
+    }
+
+    return XK_VoidSymbol;
+}
+
+/**
+ * Returns FALSE if we should treat this like a regular keyboard event
+ * Returns TRUE if we should fixup the event
+ */
+static Bool
+KdCheckSpecialKeys(KdKeyboardInfo *ki, int type, unsigned char key_code)
+{
+    KeySym sym;
+
+    /*
+     * Ignore key releases
+     */
+
+    if (type == KeyRelease) {
+        return FALSE;
+    }
+
+    /*
+     * Check for control/alt pressed
+     */
+    if ((XkbStateFieldFromRec(&ki->dixdev->key->xkbInfo->state) & (ControlMask | Mod1Mask)) !=
+        (ControlMask | Mod1Mask)) {
+        return FALSE;
+    }
+
+    sym = KdKeyCodeToKeySym(ki, type, key_code);
+    if (sym == XK_VoidSymbol) {
+        return FALSE;
+    }
+
+    /*
+     * Let OS function see keysym first
+     */
+
+    if (kdOsFuncs->SpecialKey)
+        if ((*kdOsFuncs->SpecialKey) (sym))
+            return TRUE;
+
+    /*
+     * Now check for backspace or delete; these signal the
+     * X server to terminate
+     */
+    switch (sym) {
+    case XK_BackSpace:
+    case XK_Delete:
+    case XK_KP_Delete:
+        /*
+         * Set the dispatch exception flag so the server will terminate the
+         * next time through the dispatch loop.
+         */
+        if (kdAllowZap)
+            dispatchException |= DE_TERMINATE;
+        break;
+    }
+
+    return FALSE;
+}
+
 void
 KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
                        unsigned char scan_code, unsigned char is_up)
@@ -1961,12 +2045,66 @@ KdEnqueueKeyboardEvent(KdKeyboardInfo * ki,
         /*
          * Set up this event -- the type may be modified below
          */
-        if (is_up)
+        if (is_up) {
             type = KeyRelease;
-        else
+            ki->last_scan_code = -1;
+        } else {
             type = KeyPress;
+            ki->last_scan_code = scan_code;
+        }
 
+        /**
+         * Right now, the only special keys we have
+         * either terminate the server or switch vt.
+         *
+         * We don't really cares what happens if we terminate,
+         * but we do care if we switch vt.
+         *
+         * If we switch vt, the input driver sees the key press
+         * event, but it does't see the key release event.
+         * As such, when we switch back to the original vt,
+         * the server thinks we are still pressing the F* key.
+         *
+         * To mitigate this, we can do one of two things:
+         *
+         * Forge the key release event that the server
+         * doesn't see, and 2 key release events for
+         * the crtl key and the alt key and enqueue them.
+         *
+         * Not enqueue the key press event at all,
+         * and only forge 2 key release events,
+         * one for the crtl key, another for the alt key.
+         *
+         * Below, the latter option is implemented.
+         */
+
+        /* Scancodes are taken from https://aeb.win.tue.nl/linux/kbd/scancodes-1.html */
+
+        #define KEY_CTRL 0x1D
+        #define KEY_ALT 0x38
+
+#if 0 /* First option */
+        Bool ret = KdCheckSpecialKeys(ki, type, key_code);
         QueueKeyboardEvents(ki->dixdev, type, key_code);
+        if (ret) {
+            unsigned char ctrl_key_code = KEY_CTRL + KD_MIN_KEYCODE - ki->minScanCode;
+            unsigned char alt_key_code = KEY_ALT + KD_MIN_KEYCODE - ki->minScanCode;
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, key_code);
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, ctrl_key_code);
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, alt_key_code);
+            ki->last_scan_code = -1; /* No need to fix this scancode up again */
+        }
+#else /* Second option */
+        if (!KdCheckSpecialKeys(ki, type, key_code)) {
+            QueueKeyboardEvents(ki->dixdev, type, key_code);
+        } else {
+            unsigned char ctrl_key_code = KEY_CTRL + KD_MIN_KEYCODE - ki->minScanCode;
+            unsigned char alt_key_code = KEY_ALT + KD_MIN_KEYCODE - ki->minScanCode;
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, ctrl_key_code);
+            QueueKeyboardEvents(ki->dixdev, KeyRelease, alt_key_code);
+            ki->last_scan_code = -1; /* No need to fix this scancode up again */
+        }
+#endif
     }
     else {
         ErrorF("driver %s wanted to post scancode %d outside of [%d, %d]!\n",
@@ -2093,17 +2231,9 @@ KdWakeupHandler(ScreenPtr pScreen, int result)
         if (pi->timeoutPending) {
             if ((long) (GetTimeInMillis() - pi->emulationTimeout) >= 0) {
                 pi->timeoutPending = FALSE;
-#ifndef KDRIVE_KBD
                 input_lock();
-#else
-                KdBlockSigio();
-#endif
                 KdReceiveTimeout(pi);
-#ifndef KDRIVE_KBD
                 input_unlock();
-#else
-                KdUnblockSigio();
-#endif
             }
         }
     }
@@ -2199,18 +2329,9 @@ int KdCurScreen;                /* current event screen */
 static void
 KdWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
 {
-#ifndef KDRIVE_KBD
     input_lock();
-#else
-    KdBlockSigio();
-#endif
-    KdCurScreen = pScreen->myNum;
     miPointerWarpCursor(pDev, pScreen, x, y);
-#ifndef KDRIVE_KBD
     input_unlock();
-#else
-    KdUnblockSigio();
-#endif
 }
 
 miPointerScreenFuncRec kdPointerScreenFuncs = {
@@ -2302,7 +2423,7 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
 #ifdef CONFIG_HAL
         else if (strcmp(key, "_source") == 0 &&
                  strcmp(value, "server/hal") == 0) {
-            if (SeatId) {
+            if (dixSettingSeatId) {
                 /* Input hot-plugging is enabled */
                 if (attrs->flags & ATTR_POINTER) {
                     pi = KdNewPointer();
@@ -2329,7 +2450,7 @@ NewInputDeviceRequest(InputOption *options, InputAttributes * attrs,
 #ifdef CONFIG_UDEV
         else if (strcmp(key, "_source") == 0 &&
                  strcmp(value, "server/udev") == 0) {
-            if (SeatId) {
+            if (dixSettingSeatId) {
                 /* Input hot-plugging is enabled */
                 if (attrs->flags & ATTR_POINTER) {
                     pi = KdNewPointer();

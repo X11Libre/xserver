@@ -366,15 +366,11 @@ AllocGlyphCursor(Font source, unsigned short sourceChar, Font mask, unsigned sho
             return BadValue;
         }
         if (!maskfont) {
-            long n;
-            unsigned char *mskptr;
-
-            n = BitmapBytePad(cm.width) * (long) cm.height;
-            mskptr = mskbits = calloc(1, n);
-            if (!mskptr)
+            size_t n = BitmapBytePad(cm.width) * (long) cm.height;
+            mskbits = calloc(1, n);
+            if (!mskbits)
                 return BadAlloc;
-            while (--n >= 0)
-                *mskptr++ = (unsigned char)~0U;
+            memset(mskbits, 0xFF, n);
         }
         else {
             if (!CursorMetricsFromGlyph(maskfont, maskChar, &cm)) {

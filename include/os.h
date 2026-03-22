@@ -47,9 +47,6 @@ SOFTWARE.
 #ifndef OS_H
 #define OS_H
 
-#include "callback.h"
-#include "misc.h"
-
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -60,6 +57,10 @@ SOFTWARE.
 
 #include <X11/Xfuncproto.h>
 
+#include "xlibre_ptrtypes.h"
+#include "callback.h"
+#include "misc.h"
+
 /*
  * @brief macro for specifying non-null arguments
  *
@@ -67,6 +68,15 @@ SOFTWARE.
  */
 #ifndef _X_ATTRIBUTE_NONNULL_ARG
 #define _X_ATTRIBUTE_NONNULL_ARG(...) __attribute__((nonnull(__VA_ARGS__)))
+#endif
+
+#ifndef _X_ATTRIBUTE_VPRINTF
+# if defined(__GNUC__) && (__GNUC__ >= 2) && (!defined(__APPLE__)) && (!defined(__FreeBSD__))
+#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) \
+          __attribute__((__format__(gnu_printf, fmt, firstarg)))
+# else
+#  define _X_ATTRIBUTE_VPRINTF(fmt, firstarg) _X_ATTRIBUTE_PRINTF(fmt,firstarg)
+# endif
 #endif
 
 #define SCREEN_SAVER_ON   0

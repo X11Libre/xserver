@@ -30,10 +30,7 @@
    GL calls can be directed to mesa cygGL-1.dll, or cygnativeGLthunk.dll
    (which contains cdecl-to-stdcall thunks to the native openGL32.dll)
 */
-
-#ifdef HAVE_XWIN_CONFIG_H
 #include <xwin-config.h>
-#endif
 
 #define GL_GLEXT_LEGACY
 #define GL_GLEXT_PROTOTYPES

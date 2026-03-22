@@ -271,21 +271,21 @@ ProcGetSelectionOwner(ClientPtr client)
         goto out;
     }
 
-    xGetSelectionOwnerReply rep = { 0 };
+    xGetSelectionOwnerReply reply = { 0 };
 
     param.status = dixLookupSelection(&pSel, param.selection, param.client, DixGetAttrAccess);
     if (param.status == Success)
-        rep.owner = pSel->window;
+        reply.owner = pSel->window;
     else if (param.status == BadMatch)
-        rep.owner = None;
+        reply.owner = None;
     else
         goto out;
 
     if (client->swapped) {
-        swapl(&rep.owner);
+        swapl(&reply.owner);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 
 out:
     if (param.status != Success)

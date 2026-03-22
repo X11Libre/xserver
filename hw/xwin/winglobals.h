@@ -22,13 +22,8 @@
   DEALINGS IN THE SOFTWARE.
 
 */
-
 #ifndef WINGLOBALS_H
 #define WINGLOBALS_H
-
-#ifdef HAVE_XWIN_CONFIG_H
-#include <xwin-config.h>
-#endif
 
 #include <pthread.h>
 

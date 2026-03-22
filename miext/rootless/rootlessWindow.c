@@ -37,8 +37,10 @@
 #include <X11/Xatom.h>
 
 #include "dix/dix_priv.h"
+#include "dix/property_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "fb/fb_priv.h"
 #include "mi/mi_priv.h"
 
@@ -61,13 +63,7 @@ extern Bool no_configure_window;
 
 #define DEFINE_ATOM_HELPER(func,atom_name)                      \
   static Atom func (void) {                                     \
-    static x_server_generation_t generation = 0;                \
-    static Atom atom;                                           \
-    if (generation != serverGeneration) {                       \
-      generation = serverGeneration;                            \
-      atom = dixAddAtom(atom_name);                             \
-    }                                                           \
-    return atom;                                                \
+    return dixAddAtom(atom_name);                               \
   }
 
 DEFINE_ATOM_HELPER(xa_native_window_id, "_NATIVE_WINDOW_ID")
@@ -619,7 +615,7 @@ static CopyWindowProcPtr gResizeOldCopyWindowProc = NULL;
  *  top-level windows.
  */
 static void
-RootlessNoCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+RootlessNoCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     // some code expects the region to be translated
     int dx = ptOldOrg.x - pWin->drawable.x;
@@ -638,7 +634,7 @@ RootlessNoCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
  *  Instead, draw on the parent window's pixmap.
  */
 void
-RootlessCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
+RootlessCopyWindow(WindowPtr pWin, xPoint ptOldOrg, RegionPtr prgnSrc)
 {
     ScreenPtr pScreen = pWin->drawable.pScreen;
     RegionRec rgnDst;

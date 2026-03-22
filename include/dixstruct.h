@@ -26,9 +26,9 @@ SOFTWARE.
 
 #include <X11/Xmd.h>
 
-#include "callback.h"
+#include "xlibre_ptrtypes.h"
 
-#include "client.h"
+#include "callback.h"
 #include "dix.h"
 #include "resource.h"
 #include "cursor.h"
@@ -71,9 +71,7 @@ typedef struct _saveSet {
 #define SaveSetAssignToRoot(ss,tr)  ((ss).toRoot = (tr))
 #define SaveSetAssignMap(ss,m)      ((ss).map = (m))
 
-struct _ClientId;
-
-typedef struct _Client {
+struct _Client {
     void *requestBuffer;
     void *osPrivate;             /* for OS layer, including scheduler */
     struct xorg_list ready;      /* List of clients ready to run */
@@ -111,7 +109,7 @@ typedef struct _Client {
     DeviceIntPtr clientPtr;
     struct _ClientId *clientIds;
     int req_fds;
-} ClientRec;
+};
 
 extern _X_EXPORT TimeStamp currentTime;
 

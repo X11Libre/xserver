@@ -32,11 +32,11 @@
 #include "include/pixmapstr.h"
 #include "miext/extinit_priv.h"
 #include "os/client_priv.h"
+#include "Xext/damage/damageext_priv.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
 #include "xfixes/xfixes.h"
 
-#include "damageextint.h"
 #include "damagestr.h"
 #include "protocol-versions.h"
 #include "dixstruct_priv.h"
@@ -201,7 +201,7 @@ DamageExtDestroy(DamagePtr pDamage, void *closure)
 }
 
 void
-DamageExtSetCritical(ClientPtr pClient, Bool critical)
+DamageExtSetCritical(ClientPtr pClient, bool critical)
 {
     DamageClientPtr pDamageClient = GetDamageClient(pClient);
 
@@ -212,37 +212,33 @@ DamageExtSetCritical(ClientPtr pClient, Bool critical)
 static int
 ProcDamageQueryVersion(ClientPtr client)
 {
-    REQUEST(xDamageQueryVersionReq);
-    REQUEST_SIZE_MATCH(xDamageQueryVersionReq);
-
-    if (client->swapped) {
-        swapl(&stuff->majorVersion);
-        swapl(&stuff->minorVersion);
-    }
+    X_REQUEST_HEAD_STRUCT(xDamageQueryVersionReq);
+    X_REQUEST_FIELD_CARD32(majorVersion);
+    X_REQUEST_FIELD_CARD32(minorVersion);
 
     DamageClientPtr pDamageClient = GetDamageClient(client);
 
-    xDamageQueryVersionReply rep = { 0 };
+    xDamageQueryVersionReply reply = { 0 };
     if (stuff->majorVersion < SERVER_DAMAGE_MAJOR_VERSION) {
-        rep.majorVersion = stuff->majorVersion;
-        rep.minorVersion = stuff->minorVersion;
+        reply.majorVersion = stuff->majorVersion;
+        reply.minorVersion = stuff->minorVersion;
     }
     else {
-        rep.majorVersion = SERVER_DAMAGE_MAJOR_VERSION;
+        reply.majorVersion = SERVER_DAMAGE_MAJOR_VERSION;
         if (stuff->majorVersion == SERVER_DAMAGE_MAJOR_VERSION &&
             stuff->minorVersion < SERVER_DAMAGE_MINOR_VERSION)
-            rep.minorVersion = stuff->minorVersion;
+            reply.minorVersion = stuff->minorVersion;
         else
-            rep.minorVersion = SERVER_DAMAGE_MINOR_VERSION;
+            reply.minorVersion = SERVER_DAMAGE_MINOR_VERSION;
     }
-    pDamageClient->major_version = rep.majorVersion;
-    pDamageClient->minor_version = rep.minorVersion;
+    pDamageClient->major_version = reply.majorVersion;
+    pDamageClient->minor_version = reply.minorVersion;
     if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 static void
@@ -330,13 +326,9 @@ doDamageCreate(ClientPtr client, int *rc, xDamageCreateReq *stuff)
 static int
 ProcDamageCreate(ClientPtr client)
 {
-    REQUEST(xDamageCreateReq);
-    REQUEST_SIZE_MATCH(xDamageCreateReq);
-
-    if (client->swapped) {
-        swapl(&stuff->damage);
-        swapl(&stuff->drawable);
-    }
+    X_REQUEST_HEAD_STRUCT(xDamageCreateReq);
+    X_REQUEST_FIELD_CARD32(damage);
+    X_REQUEST_FIELD_CARD32(drawable);
 
     int rc;
 
@@ -353,11 +345,8 @@ ProcDamageCreate(ClientPtr client)
 static int
 ProcDamageDestroy(ClientPtr client)
 {
-    REQUEST(xDamageDestroyReq);
-    REQUEST_SIZE_MATCH(xDamageDestroyReq);
-
-    if (client->swapped)
-        swapl(&stuff->damage);
+    X_REQUEST_HEAD_STRUCT(xDamageDestroyReq);
+    X_REQUEST_FIELD_CARD32(damage);
 
     DamageExtPtr pDamageExt;
     VERIFY_DAMAGEEXT(pDamageExt, stuff->damage, client, DixDestroyAccess);
@@ -386,17 +375,16 @@ DamageExtSubtractWindowClip(DamageExtPtr pDamageExt)
         return NULL;
 
     XINERAMA_FOR_EACH_SCREEN_FORWARD({
-        ScreenPtr screen;
         if (Success != dixLookupWindow(&win, res->info[walkScreenIdx].id, serverClient,
                                        DixReadAccess))
             goto out;
 
-        screen = win->drawable.pScreen;
+        ScreenPtr pScreen = win->drawable.pScreen;
 
-        RegionTranslate(ret, -screen->x, -screen->y);
+        RegionTranslate(ret, -pScreen->x, -pScreen->y);
         if (!RegionUnion(ret, ret, &win->borderClip))
             goto out;
-        RegionTranslate(ret, screen->x, screen->y);
+        RegionTranslate(ret, pScreen->x, pScreen->y);
     });
 
     return ret;
@@ -449,14 +437,10 @@ DamageExtSubtract(DamageExtPtr pDamageExt, const RegionPtr pRegion)
 static int
 ProcDamageSubtract(ClientPtr client)
 {
-    REQUEST(xDamageSubtractReq);
-    REQUEST_SIZE_MATCH(xDamageSubtractReq);
-
-    if (client->swapped) {
-        swapl(&stuff->damage);
-        swapl(&stuff->repair);
-        swapl(&stuff->parts);
-    }
+    X_REQUEST_HEAD_STRUCT(xDamageSubtractReq);
+    X_REQUEST_FIELD_CARD32(damage);
+    X_REQUEST_FIELD_CARD32(repair);
+    X_REQUEST_FIELD_CARD32(parts);
 
     DamageExtPtr pDamageExt;
     RegionPtr pRepair;
@@ -489,13 +473,9 @@ ProcDamageSubtract(ClientPtr client)
 static int
 ProcDamageAdd(ClientPtr client)
 {
-    REQUEST(xDamageAddReq);
-    REQUEST_SIZE_MATCH(xDamageSubtractReq);
-
-    if (client->swapped) {
-        swapl(&stuff->drawable);
-        swapl(&stuff->region);
-    }
+    X_REQUEST_HEAD_STRUCT(xDamageAddReq);
+    X_REQUEST_FIELD_CARD32(drawable);
+    X_REQUEST_FIELD_CARD32(region);
 
     DrawablePtr pDrawable;
     RegionPtr pRegion;

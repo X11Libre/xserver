@@ -50,7 +50,6 @@
 
 DevPrivateKeyRec PictureScreenPrivateKeyRec;
 DevPrivateKeyRec PictureWindowPrivateKeyRec;
-static x_server_generation_t PictureGeneration;
 RESTYPE PictureType;
 RESTYPE PictFormatType;
 RESTYPE GlyphSetType;
@@ -596,13 +595,16 @@ FreePictFormat(void *pPictFormat, XID pid)
     return Success;
 }
 
+static bool picture_resources_initialized = false;
+
 Bool
 PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
 {
     int n;
     CARD32 type, a, r, g, b;
 
-    if (PictureGeneration != serverGeneration) {
+    if (!picture_resources_initialized)
+    {
         PictureType = CreateNewResourceType(FreePicture, "PICTURE");
         if (!PictureType)
             return FALSE;
@@ -613,7 +615,7 @@ PictureInit(ScreenPtr pScreen, PictFormatPtr formats, int nformats)
         GlyphSetType = CreateNewResourceType(FreeGlyphSet, "GLYPHSET");
         if (!GlyphSetType)
             return FALSE;
-        PictureGeneration = serverGeneration;
+        picture_resources_initialized = true;
     }
     if (!dixRegisterPrivateKey(&PictureScreenPrivateKeyRec, PRIVATE_SCREEN, 0))
         return FALSE;
@@ -900,6 +902,7 @@ CreateLinearGradientPicture(Picture pid, xPointFixed * p1, xPointFixed * p2,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
@@ -945,6 +948,7 @@ CreateRadialGradientPicture(Picture pid, xPointFixed * inner,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
@@ -983,6 +987,7 @@ CreateConicalGradientPicture(Picture pid, xPointFixed * center, xFixed angle,
 
     initGradient(pPicture->pSourcePict, nStops, stops, colors, error);
     if (*error) {
+        free(pPicture->pSourcePict);
         free(pPicture);
         return 0;
     }
@@ -1395,7 +1400,7 @@ FreePicture(void *value, XID pid)
                 PicturePtr *pPrev;
 
                 for (pPrev = (PicturePtr *) dixLookupPrivateAddr
-                     (&pWindow->devPrivates, PictureWindowPrivateKey);
+                     (&pWindow->devPrivates, &PictureWindowPrivateKeyRec);
                      *pPrev; pPrev = &(*pPrev)->pNext) {
                     if (*pPrev == pPicture) {
                         *pPrev = pPicture->pNext;

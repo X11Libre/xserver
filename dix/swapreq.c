@@ -50,6 +50,7 @@ SOFTWARE.
 #include <X11/Xproto.h>
 #include <X11/Xprotostr.h>
 
+#include "dix/dix_priv.h"
 #include "dix/reqhandlers_priv.h"
 
 #include "misc.h"
@@ -58,30 +59,6 @@ SOFTWARE.
 #include "swapreq.h"
 
 /* Thanks to Jack Palevich for testing and subsequently rewriting all this */
-
-/* Byte swap a list of longs */
-void
-SwapLongs(CARD32 *list, unsigned long count)
-{
-    while (count >= 8) {
-        swapl(list + 0);
-        swapl(list + 1);
-        swapl(list + 2);
-        swapl(list + 3);
-        swapl(list + 4);
-        swapl(list + 5);
-        swapl(list + 6);
-        swapl(list + 7);
-        list += 8;
-        count -= 8;
-    }
-    if (count != 0) {
-        do {
-            swapl(list);
-            list++;
-        } while (--count != 0);
-    }
-}
 
 /* Byte swap a list of shorts */
 void
@@ -170,19 +147,6 @@ SProcConfigureWindow(ClientPtr client)
 }
 
 int _X_COLD
-SProcGetProperty(ClientPtr client)
-{
-    REQUEST(xGetPropertyReq);
-    REQUEST_SIZE_MATCH(xGetPropertyReq);
-    swapl(&stuff->window);
-    swapl(&stuff->property);
-    swapl(&stuff->type);
-    swapl(&stuff->longOffset);
-    swapl(&stuff->longLength);
-    return ((*ProcVector[X_GetProperty]) (client));
-}
-
-int _X_COLD
 SProcConvertSelection(ClientPtr client)
 {
     REQUEST(xConvertSelectionReq);
@@ -221,32 +185,6 @@ SProcSendEvent(ClientPtr client)
     stuff->event = eventT;
 
     return ((*ProcVector[X_SendEvent]) (client));
-}
-
-int _X_COLD
-SProcGrabPointer(ClientPtr client)
-{
-    REQUEST(xGrabPointerReq);
-    REQUEST_SIZE_MATCH(xGrabPointerReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->eventMask);
-    swapl(&stuff->confineTo);
-    swapl(&stuff->cursor);
-    swapl(&stuff->time);
-    return ((*ProcVector[X_GrabPointer]) (client));
-}
-
-int _X_COLD
-SProcGrabButton(ClientPtr client)
-{
-    REQUEST(xGrabButtonReq);
-    REQUEST_SIZE_MATCH(xGrabButtonReq);
-    swapl(&stuff->grabWindow);
-    swaps(&stuff->eventMask);
-    swapl(&stuff->confineTo);
-    swapl(&stuff->cursor);
-    swaps(&stuff->modifiers);
-    return ((*ProcVector[X_GrabButton]) (client));
 }
 
 int _X_COLD
@@ -584,18 +522,6 @@ SProcCopyColormapAndFree(ClientPtr client)
 }
 
 int _X_COLD
-SProcAllocColor(ClientPtr client)
-{
-    REQUEST(xAllocColorReq);
-    REQUEST_SIZE_MATCH(xAllocColorReq);
-    swapl(&stuff->cmap);
-    swaps(&stuff->red);
-    swaps(&stuff->green);
-    swaps(&stuff->blue);
-    return ((*ProcVector[X_AllocColor]) (client));
-}
-
-int _X_COLD
 SProcAllocNamedColor(ClientPtr client)
 {
     REQUEST(xAllocNamedColorReq);
@@ -675,26 +601,6 @@ SProcStoreNamedColor(ClientPtr client)
 }
 
 int _X_COLD
-SProcQueryColors(ClientPtr client)
-{
-    REQUEST(xQueryColorsReq);
-    REQUEST_AT_LEAST_SIZE(xQueryColorsReq);
-    swapl(&stuff->cmap);
-    SwapRestL(stuff);
-    return ((*ProcVector[X_QueryColors]) (client));
-}
-
-int _X_COLD
-SProcLookupColor(ClientPtr client)
-{
-    REQUEST(xLookupColorReq);
-    REQUEST_AT_LEAST_SIZE(xLookupColorReq);
-    swapl(&stuff->cmap);
-    swaps(&stuff->nbytes);
-    return ((*ProcVector[X_LookupColor]) (client));
-}
-
-int _X_COLD
 SProcCreateCursor(ClientPtr client)
 {
     REQUEST(xCreateCursorReq);
@@ -711,25 +617,6 @@ SProcCreateCursor(ClientPtr client)
     swaps(&stuff->x);
     swaps(&stuff->y);
     return ((*ProcVector[X_CreateCursor]) (client));
-}
-
-int _X_COLD
-SProcCreateGlyphCursor(ClientPtr client)
-{
-    REQUEST(xCreateGlyphCursorReq);
-    REQUEST_SIZE_MATCH(xCreateGlyphCursorReq);
-    swapl(&stuff->cid);
-    swapl(&stuff->source);
-    swapl(&stuff->mask);
-    swaps(&stuff->sourceChar);
-    swaps(&stuff->maskChar);
-    swaps(&stuff->foreRed);
-    swaps(&stuff->foreGreen);
-    swaps(&stuff->foreBlue);
-    swaps(&stuff->backRed);
-    swaps(&stuff->backGreen);
-    swaps(&stuff->backBlue);
-    return ((*ProcVector[X_CreateGlyphCursor]) (client));
 }
 
 int _X_COLD
@@ -756,15 +643,6 @@ SProcQueryBestSize(ClientPtr client)
     swaps(&stuff->width);
     swaps(&stuff->height);
     return ((*ProcVector[X_QueryBestSize]) (client));
-}
-
-int _X_COLD
-SProcQueryExtension(ClientPtr client)
-{
-    REQUEST(xQueryExtensionReq);
-    REQUEST_AT_LEAST_SIZE(xQueryExtensionReq);
-    swaps(&stuff->nbytes);
-    return ((*ProcVector[X_QueryExtension]) (client));
 }
 
 int _X_COLD
@@ -798,34 +676,12 @@ SProcChangePointerControl(ClientPtr client)
 }
 
 int _X_COLD
-SProcSetScreenSaver(ClientPtr client)
-{
-    REQUEST(xSetScreenSaverReq);
-    REQUEST_SIZE_MATCH(xSetScreenSaverReq);
-    swaps(&stuff->timeout);
-    swaps(&stuff->interval);
-    return ((*ProcVector[X_SetScreenSaver]) (client));
-}
-
-int _X_COLD
 SProcChangeHosts(ClientPtr client)
 {
     REQUEST(xChangeHostsReq);
     REQUEST_AT_LEAST_SIZE(xChangeHostsReq);
     swaps(&stuff->hostLength);
     return ((*ProcVector[X_ChangeHosts]) (client));
-}
-
-int _X_COLD
-SProcRotateProperties(ClientPtr client)
-{
-    REQUEST(xRotatePropertiesReq);
-    REQUEST_AT_LEAST_SIZE(xRotatePropertiesReq);
-    swapl(&stuff->window);
-    swaps(&stuff->nAtoms);
-    swaps(&stuff->nPositions);
-    SwapRestL(stuff);
-    return ((*ProcVector[X_RotateProperties]) (client));
 }
 
 void _X_COLD

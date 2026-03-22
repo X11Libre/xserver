@@ -73,28 +73,24 @@ from the copyright holders.
 #ifdef XTHREADS
 #include <X11/Xthreads.h>
 #endif
+#include <sys/stat.h>
 
 #include "os/ossock.h"
 
 #ifndef WIN32
 
-#if defined(TCPCONN) || defined(UNIXCONN)
+#if defined(UNIXCONN)
+#include <sys/un.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
 
-#if defined(TCPCONN) || defined(UNIXCONN)
+#if defined(UNIXCONN)
 #define X_INCLUDE_NETDB_H
 #define XOS_USE_NO_LOCKING
 #include <X11/Xos_r.h>
 #endif
-
-#ifdef UNIXCONN
-#include <sys/un.h>
-#include <sys/stat.h>
-#endif
-
 
 #ifndef NO_TCP_H
 #if defined(linux) || defined(__GLIBC__)
@@ -119,6 +115,8 @@ from the copyright holders.
 #include <X11/Xwinsock.h>
 #include <X11/Xwindows.h>
 #include <X11/Xw32defs.h>
+
+#include <afunix.h>
 
 #undef EADDRINUSE
 #define EADDRINUSE WSAEADDRINUSE
@@ -186,7 +184,6 @@ typedef struct _Sockettrans2dev {
  *  local   Platform preferred local connection method
  */
 static Sockettrans2dev Sockettrans2devtab[] = {
-#ifdef TCPCONN
     {"inet",AF_INET,SOCK_STREAM,SOCK_DGRAM,0},
 #ifndef IPv6
     {"tcp",AF_INET,SOCK_STREAM,SOCK_DGRAM,0},
@@ -195,28 +192,21 @@ static Sockettrans2dev Sockettrans2devtab[] = {
     {"tcp",AF_INET,SOCK_STREAM,SOCK_DGRAM,0}, /* fallback */
     {"inet6",AF_INET6,SOCK_STREAM,SOCK_DGRAM,0},
 #endif
-#endif /* TCPCONN */
 #ifdef UNIXCONN
     {"unix",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
-#if !defined(LOCALCONN)
     {"local",AF_UNIX,SOCK_STREAM,SOCK_DGRAM,0},
-#endif /* !LOCALCONN */
 #endif /* UNIXCONN */
 };
 
 #define NUMSOCKETFAMILIES (sizeof(Sockettrans2devtab)/sizeof(Sockettrans2dev))
 
-#ifdef TCPCONN
-static int _XSERVTransSocketINETClose (XtransConnInfo ciptr);
-#endif
+
 
 static int
 is_numeric (const char *str)
 {
-    int i;
-
-    for (i = 0; i < (int) strlen (str); i++)
-	if (!isdigit (str[i]))
+    for (unsigned int i = 0; i < (int) strlen (str); i++)
+	if (!isdigit ((unsigned char)(str[i])))
 	    return (0);
 
     return (1);
@@ -446,13 +436,13 @@ static XtransConnInfo _XSERVTransSocketReopen (
     size_t portlen = portnamelen;
 #ifdef SOCK_MAXADDRLEN
     if (portlen > (SOCK_MAXADDRLEN + 2)) {
-      prmsg (1, "SocketReopen: invalid portlen %d\n", portlen);
+      prmsg (1, "SocketReopen: invalid portlen %llu\n", (unsigned long long)portlen);
       return NULL;
     }
     if (portlen < 14) portlen = 14;
 #else
     if (portlen > 14) {
-      prmsg (1, "SocketReopen: invalid portlen %ld\n", (unsigned long)portlen);
+      prmsg (1, "SocketReopen: invalid portlen %llu\n", (unsigned long long)portlen);
       return NULL;
     }
 #endif /*SOCK_MAXADDRLEN*/
@@ -715,7 +705,6 @@ static int _XSERVTransSocketCreateListener (XtransConnInfo ciptr,
     return 0;
 }
 
-#ifdef TCPCONN
 static int _XSERVTransSocketINETCreateListener (
     XtransConnInfo ciptr, const char *port, unsigned int flags)
 {
@@ -831,9 +820,6 @@ static int _XSERVTransSocketINETCreateListener (
 
     return 0;
 }
-
-#endif /* TCPCONN */
-
 
 #ifdef UNIXCONN
 
@@ -1020,10 +1006,8 @@ static int _XSERVTransSocketUNIXResetListener (XtransConnInfo ciptr)
 #endif /* UNIXCONN */
 
 
-#ifdef TCPCONN
-
 static XtransConnInfo _XSERVTransSocketINETAccept (
-    XtransConnInfo ciptr, int *status)
+    XtransConnInfo ciptr)
 {
     XtransConnInfo	newciptr;
     struct sockaddr_in	sockname;
@@ -1034,7 +1018,6 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
     if ((newciptr = calloc (1, sizeof(struct _XtransConnInfo))) == NULL)
     {
 	prmsg (1, "SocketINETAccept: malloc failed\n");
-	*status = TRANS_ACCEPT_BAD_MALLOC;
 	return NULL;
     }
 
@@ -1046,7 +1029,6 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
 #endif
 	prmsg (1, "SocketINETAccept: accept() failed\n");
 	free (newciptr);
-	*status = TRANS_ACCEPT_FAILED;
 	return NULL;
     }
 
@@ -1073,7 +1055,6 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
 	    "SocketINETAccept: ...SocketINETGetAddr() failed:\n");
 	ossock_close(newciptr->fd);
 	free (newciptr);
-	*status = TRANS_ACCEPT_MISC_ERROR;
         return NULL;
     }
 
@@ -1084,21 +1065,15 @@ static XtransConnInfo _XSERVTransSocketINETAccept (
 	ossock_close(newciptr->fd);
 	if (newciptr->addr) free (newciptr->addr);
 	free (newciptr);
-	*status = TRANS_ACCEPT_MISC_ERROR;
         return NULL;
     }
-
-    *status = 0;
 
     return newciptr;
 }
 
-#endif /* TCPCONN */
-
-
 #ifdef UNIXCONN
 static XtransConnInfo _XSERVTransSocketUNIXAccept (
-    XtransConnInfo ciptr, int *status)
+    XtransConnInfo ciptr)
 {
     XtransConnInfo	newciptr;
     struct sockaddr_un	sockname;
@@ -1109,7 +1084,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     if ((newciptr = calloc (1, sizeof(struct _XtransConnInfo))) == NULL)
     {
 	prmsg (1, "SocketUNIXAccept: malloc() failed\n");
-	*status = TRANS_ACCEPT_BAD_MALLOC;
 	return NULL;
     }
 
@@ -1118,7 +1092,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     {
 	prmsg (1, "SocketUNIXAccept: accept() failed\n");
 	free (newciptr);
-	*status = TRANS_ACCEPT_FAILED;
 	return NULL;
     }
 
@@ -1134,7 +1107,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
         "SocketUNIXAccept: Can't allocate space for the addr\n");
 	ossock_close(newciptr->fd);
 	free (newciptr);
-	*status = TRANS_ACCEPT_BAD_MALLOC;
         return NULL;
     }
 
@@ -1153,7 +1125,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
 	ossock_close(newciptr->fd);
 	if (newciptr->addr) free (newciptr->addr);
 	free (newciptr);
-	*status = TRANS_ACCEPT_BAD_MALLOC;
         return NULL;
     }
 
@@ -1161,8 +1132,6 @@ static XtransConnInfo _XSERVTransSocketUNIXAccept (
     memcpy (newciptr->peeraddr, ciptr->addr, newciptr->addrlen);
 
     newciptr->family = AF_UNIX;
-
-    *status = 0;
 
     return newciptr;
 }
@@ -1396,15 +1365,6 @@ static int _XSERVTransSocketDisconnect (XtransConnInfo ciptr)
 #endif
 }
 
-#ifdef TCPCONN
-static int _XSERVTransSocketINETClose (XtransConnInfo ciptr)
-{
-    prmsg (2,"SocketINETClose(%p,%d)\n", (void *) ciptr, ciptr->fd);
-    return ossock_close(ciptr->fd);
-}
-
-#endif /* TCPCONN */
-
 #ifdef UNIXCONN
 static int _XSERVTransSocketUNIXClose (XtransConnInfo ciptr)
 {
@@ -1452,8 +1412,12 @@ static int _XSERVTransSocketUNIXCloseForCloning (XtransConnInfo ciptr)
 
 #endif /* UNIXCONN */
 
+static int _XSERVTransSocketINETClose (XtransConnInfo ciptr)
+{
+    prmsg (2,"SocketINETClose(%p,%d)\n", (void *) ciptr, ciptr->fd);
+    return ossock_close(ciptr->fd);
+}
 
-#ifdef TCPCONN
 static const char* tcp_nolisten[] = {
 	"inet",
 #ifdef IPv6
@@ -1529,10 +1493,8 @@ static Xtransport _XSERVTransSocketINET6Funcs = {
 	_XSERVTransSocketINETClose,
 };
 #endif /* IPv6 */
-#endif /* TCPCONN */
 
 #ifdef UNIXCONN
-#if !defined(LOCALCONN)
 static Xtransport _XSERVTransSocketLocalFuncs = {
 	/* Socket Interface */
 	"local",
@@ -1558,24 +1520,18 @@ static Xtransport _XSERVTransSocketLocalFuncs = {
 	_XSERVTransSocketUNIXClose,
 	_XSERVTransSocketUNIXCloseForCloning,
 };
-#endif /* !LOCALCONN */
-#  if !defined(LOCALCONN)
+
 static const char* unix_nolisten[] = { "local" , NULL };
-#  endif
 
 static Xtransport _XSERVTransSocketUNIXFuncs = {
 	/* Socket Interface */
 	"unix",
-#if !defined(LOCALCONN) && !defined(HAVE_ABSTRACT_SOCKETS)
+#if !defined(HAVE_ABSTRACT_SOCKETS)
         TRANS_ALIAS,
 #else
 	0,
 #endif
-#if !defined(LOCALCONN)
 	unix_nolisten,
-#else
-	NULL,
-#endif
 	_XSERVTransSocketOpenCOTSServer,
 	_XSERVTransSocketReopenCOTSServer,
 	_XSERVTransSocketSetOption,

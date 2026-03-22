@@ -35,6 +35,7 @@
 
 #include "dix/dix_priv.h"
 #include "dix/screenint_priv.h"
+#include "miext/extinit_priv.h"
 
 #include "quartzRandR.h"
 #include "inputstr.h"
@@ -43,7 +44,6 @@
 #include "darwinEvents.h"
 #include "pseudoramiX.h"
 #include "extension.h"
-#include "nonsdk_extinit.h"
 #include "glx_extinit.h"
 #define _APPLEWM_SERVER_
 #include "applewmExt.h"
@@ -73,7 +73,7 @@
 
 // These are vended by the Objective-C runtime, but they are unfortunately
 // not available as API in the macOS SDK.  We are following suit with swift
-// and clang in declaring them inline here.  They canot be removed or changed
+// and clang in declaring them inline here.  They cannot be removed or changed
 // in the OS without major bincompat ramifications.
 //
 // These were added in macOS 10.7.

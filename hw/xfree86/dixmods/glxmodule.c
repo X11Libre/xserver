@@ -24,16 +24,12 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
-
 /*
  * Authors:
  *   Kevin E. Martin <kevin@precisioninsight.com>
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include "xf86Module.h"
 #include "xf86Priv.h"

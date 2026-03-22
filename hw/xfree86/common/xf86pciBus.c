@@ -24,15 +24,13 @@
  * the sale, use or other dealings in this Software without prior written
  * authorization from the copyright holder(s) and author(s).
  */
-
 /*
  * This file contains the interfaces to the bus-specific code
  */
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <ctype.h>
+#include <dirent.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pciaccess.h>
@@ -41,11 +39,11 @@
 #include "os/log_priv.h"
 #include "os/osdep.h"
 
+#include "xf86_pci_priv.h"
 #include "os.h"
 #include "Pci.h"
 #include "xf86_priv.h"
 #include "xf86Priv.h"
-#include "dirent.h"             /* DIR, FILE type definitions */
 
 /* Bus-specific headers */
 #include "xf86Bus.h"
@@ -111,7 +109,8 @@ xf86PciProbe(void)
             xf86PciVideoInfo[num - 1] = info;
 
             pci_device_probe(info);
-            if (primaryBus.type == BUS_NONE && pci_device_is_boot_vga(info)) {
+            if (primaryBus.type == BUS_NONE && (pci_device_is_boot_vga(info) ||
+                                                pci_device_is_boot_display(info))) {
                 primaryBus.type = BUS_PCI;
                 primaryBus.id.pci = info;
             }
@@ -411,23 +410,7 @@ xf86CheckPciMemBase(struct pci_device *pPci, memType base)
 Bool
 xf86CheckPciSlot(const struct pci_device *d)
 {
-    int i;
-
-    for (i = 0; i < xf86NumEntities; i++) {
-        const EntityPtr p = xf86Entities[i];
-
-        if ((p->bus.type == BUS_PCI) && (p->bus.id.pci == d)) {
-            return FALSE;
-        }
-#ifdef XSERVER_PLATFORM_BUS
-        if ((p->bus.type == BUS_PLATFORM) && (p->bus.id.plat->pdev)) {
-            struct pci_device *ud = p->bus.id.plat->pdev;
-            if (MATCH_PCI_DEVICES(ud, d))
-                return FALSE;
-        }
-#endif
-    }
-    return TRUE;
+    return xf86CheckSlot(d, BUS_PCI);
 }
 
 #define END_OF_MATCHES(m) \
@@ -1171,7 +1154,16 @@ xf86VideoPtrToDriverList(struct pci_device *dev, XF86MatchedDrivers *md)
 		case 0x0bef:
 			/* Use fbdev/vesa driver on Oaktrail, Medfield, CDV */
 			break;
-		default:
+		/* Default to intel only on pre-gen3 chips */
+		case 0x7121:
+		case 0x7123:
+		case 0x7125:
+		case 0x1132:
+		case 0x3577:
+		case 0x2562:
+		case 0x3582:
+		case 0x358e:
+		case 0x2572:
 			driverList[0] = "intel";
 			break;
         }

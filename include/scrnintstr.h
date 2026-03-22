@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef SCREENINTSTRUCT_H
 #define SCREENINTSTRUCT_H
 
+#include "xlibre_ptrtypes.h"
 #include "screenint.h"
 #include "regionstr.h"
 #include "colormap.h"
@@ -88,7 +89,7 @@ typedef struct _ScreenSaverStuff {
     Bool (*ExternalScreenSaver) (ScreenPtr /*pScreen */ ,
                                  int /*xstate */ ,
                                  Bool /*force */ );
-} ScreenSaverStuffRec;
+} ScreenSaverStuffRec, *ScreenSaverStuffPtr;
 
 typedef enum {
     WINDOW_VRR_DISABLED = 0,
@@ -168,7 +169,7 @@ typedef void (*PaintWindowProcPtr) (WindowPtr /*pWindow*/,
                                     int /*what*/);
 
 typedef void (*CopyWindowProcPtr) (WindowPtr /*pWindow */ ,
-                                   DDXPointRec /*ptOldOrg */ ,
+                                   xPoint /*ptOldOrg */ ,
                                    RegionPtr /*prgnSrc */ );
 
 typedef void (*ClearToBackgroundProcPtr) (WindowPtr /*pWindow */ ,
@@ -248,7 +249,7 @@ typedef void (*CursorWarpedToProcPtr) (DeviceIntPtr /* pDev */ ,
                                        int /*x */ ,
                                        int /*y */ );
 
-typedef void (*CurserConfinedToProcPtr) (DeviceIntPtr /* pDev */ ,
+typedef void (*CursorConfinedToProcPtr) (DeviceIntPtr /* pDev */ ,
                                          ScreenPtr /*pScreen */ ,
                                          WindowPtr /*pWindow */ );
 
@@ -583,7 +584,7 @@ typedef struct _Screen {
     RecolorCursorProcPtr RecolorCursor;
     SetCursorPositionProcPtr SetCursorPosition;
     CursorWarpedToProcPtr CursorWarpedTo;
-    CurserConfinedToProcPtr CursorConfinedTo;
+    CursorConfinedToProcPtr CursorConfinedTo;
 
     /* GC procedures */
 
@@ -719,7 +720,7 @@ typedef struct _ScreenInfo {
     int bitmapScanlinePad;
     int bitmapBitOrder;
     int numPixmapFormats;
-     PixmapFormatRec formats[MAXFORMATS];
+    PixmapFormatRec formats[MAXFORMATS];
     int numScreens;
     ScreenPtr screens[MAXSCREENS];
     int numGPUScreens;

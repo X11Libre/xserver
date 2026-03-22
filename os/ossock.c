@@ -5,6 +5,7 @@
 #include <dix-config.h>
 
 #include <unistd.h>
+#include <stdbool.h>
 
 #ifdef WIN32
 #include <X11/Xwinsock.h>
@@ -53,5 +54,23 @@ int ossock_wouldblock(int err)
     return ((err == EAGAIN) || (err == WSAEWOULDBLOCK));
 #else
     return ((err == EAGAIN) || (err == EWOULDBLOCK));
+#endif
+}
+
+bool ossock_eintr(int err)
+{
+#ifdef WIN32
+    return (err == WSAEINTR);
+#else
+    return (err == EINTR);
+#endif
+}
+
+int ossock_errno(void)
+{
+#ifdef WIN32
+    return WSAGetLastError();
+#else
+    return errno;
 #endif
 }

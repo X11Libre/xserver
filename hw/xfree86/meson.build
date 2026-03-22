@@ -1,10 +1,8 @@
-module_abi_tag = 'xlibre-25'
 module_abi_dir = join_paths(module_dir, module_abi_tag)
 
 xorg_inc = include_directories(
     'common',
     'ddc',
-    'dri2',
     'i2c',
     'int10',
     'loader',
@@ -33,15 +31,13 @@ subdir('ddc')
 if build_dri1
     subdir('dri')
 endif
-if build_dri2
-    subdir('dri2')
-endif
 subdir('i2c')
 subdir('loader')
 subdir('modes')
 subdir('os-support')
 subdir('parser')
 subdir('ramdac')
+subdir('xext')
 subdir('xkb')
 
 srcs_xorg = [
@@ -75,11 +71,8 @@ xorg_link = [
 if build_dri1
     xorg_link += xorg_dri
 endif
-if build_dri2
-    xorg_link += xorg_dri2
-endif
 
-if host_machine.system() == 'windows'
+if host_machine.system() == 'cygwin' or host_machine.system() == 'windows'
     linker_export_flags = '-Wl,--export-all-symbols'
 elif host_machine.system() == 'sunos' or host_machine.system() == 'darwin'
     linker_export_flags = []
@@ -107,7 +100,7 @@ else
     xorg_install_dir = get_option('bindir')
 endif
 
-e = executable(
+xserver_exec = executable(
     'Xorg',
     srcs_xorg,
     include_directories: [inc, xorg_inc],
@@ -124,7 +117,7 @@ e = executable(
 subdir('dixmods')
 subdir('exa')
 subdir('fbdevhw')
-if gbm_dep.found()
+if build_glamor and gbm_dep.found()
     subdir('glamor_egl')
 endif
 if int10 != 'false'
@@ -140,11 +133,11 @@ endif
 
 subdir('drivers')
 
-meson.add_install_script(
-    'sh', '-c',
-    'ln -fs Xorg @0@@1@'.format(
-        '${DESTDIR}',
-        join_paths(get_option('prefix'), get_option('bindir'), 'X')))
+install_symlink(
+    'X',
+    pointing_to: xserver_exec.name(),
+    install_dir: join_paths(get_option('prefix'), get_option('bindir'))
+    )
 
 if get_option('suid_wrapper')
     executable('Xorg.wrap',
@@ -169,7 +162,7 @@ if get_option('suid_wrapper')
         xorg_sh,
         install_mode: 'rwxr-xr-x',
         install_dir: join_paths(get_option('prefix'), get_option('bindir')),
-        rename: ['Xorg']
+        rename: [xserver_exec.name()]
     )
 endif
 

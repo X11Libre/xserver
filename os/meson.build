@@ -16,16 +16,22 @@ srcs_os = [
     'ossock.c',
     'serverlock.c',
     'string.c',
+    'transport.c',
     'utils.c',
     'xdmauth.c',
     'xhostname.c',
     'xsha1.c',
-    'xstrans.c',
     'xprintf.c',
     'log.c',
 ]
 
 conf_data.set('CONFIG_SYSLOG', cc.has_header('syslog.h') ? '1' : false)
+
+have_strlcpy = cc.has_function('strlcpy', dependencies: libbsd_dep)
+have_strlcat = cc.has_function('strlcat', dependencies: libbsd_dep)
+
+conf_data.set('HAVE_STRLCAT', have_strlcat ? '1' : false)
+conf_data.set('HAVE_STRLCPY', have_strlcpy ? '1' : false)
 
 # Wrapper code for missing C library functions. Note that conf_data contains either '1' or false.
 srcs_libc = []
@@ -35,10 +41,10 @@ endif
 if conf_data.get('HAVE_STRCASESTR').to_int() == 0
     srcs_libc += 'strcasestr.c'
 endif
-if conf_data.get('HAVE_STRLCAT').to_int() == 0
+if not have_strlcat
     srcs_libc += 'strlcat.c'
 endif
-if conf_data.get('HAVE_STRLCPY').to_int() == 0
+if not have_strlcpy
     srcs_libc += 'strlcpy.c'
 endif
 if conf_data.get('HAVE_STRNDUP').to_int() == 0

@@ -51,30 +51,20 @@
 int
 ProcXIPassiveGrabDevice(ClientPtr client)
 {
-    REQUEST(xXIPassiveGrabDeviceReq);
-    REQUEST_AT_LEAST_SIZE(xXIPassiveGrabDeviceReq);
-
-    if (client->swapped) {
-        swaps(&stuff->deviceid);
-        swapl(&stuff->grab_window);
-        swapl(&stuff->cursor);
-        swapl(&stuff->time);
-        swapl(&stuff->detail);
-        swaps(&stuff->mask_len);
-        swaps(&stuff->num_modifiers);
-    }
-
+    X_REQUEST_HEAD_AT_LEAST(xXIPassiveGrabDeviceReq);
+    X_REQUEST_FIELD_CARD16(deviceid);
+    X_REQUEST_FIELD_CARD32(grab_window);
+    X_REQUEST_FIELD_CARD32(cursor);
+    X_REQUEST_FIELD_CARD32(time);
+    X_REQUEST_FIELD_CARD32(detail);
+    X_REQUEST_FIELD_CARD16(mask_len);
+    X_REQUEST_FIELD_CARD16(num_modifiers);
     REQUEST_FIXED_SIZE(xXIPassiveGrabDeviceReq,
         ((uint32_t) stuff->mask_len + stuff->num_modifiers) *4);
-
-    if (client->swapped) {
-        uint32_t *mods = (uint32_t *) &stuff[1] + stuff->mask_len;
-        for (int i = 0; i < stuff->num_modifiers; i++, mods++)
-            swapl(mods);
-    }
+    X_REQUEST_REST_CARD32(); /* event mask and modifiers list */
 
     DeviceIntPtr dev, mod_dev;
-    xXIPassiveGrabDeviceReply rep = {
+    xXIPassiveGrabDeviceReply reply = {
         .repType = X_Reply,
         .RepType = X_XIPassiveGrabDevice,
         .sequenceNumber = client->sequence,
@@ -226,17 +216,17 @@ ProcXIPassiveGrabDevice(ClientPtr client)
             x_rpcbuf_write_CARD8(&rpcbuf, 0); /* pad0 */
             x_rpcbuf_write_CARD16(&rpcbuf, 0); /* pad1 */
 
-            rep.num_modifiers++;
+            reply.num_modifiers++;
         }
     }
 
     xi2mask_free(&mask.xi2mask);
 
     if (client->swapped) {
-        swaps(&rep.num_modifiers);
+        swaps(&reply.num_modifiers);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
  out:
     xi2mask_free(&mask.xi2mask);
@@ -247,24 +237,14 @@ ProcXIPassiveGrabDevice(ClientPtr client)
 int
 ProcXIPassiveUngrabDevice(ClientPtr client)
 {
-    REQUEST(xXIPassiveUngrabDeviceReq);
-    REQUEST_AT_LEAST_SIZE(xXIPassiveUngrabDeviceReq);
-
-    if (client->swapped) {
-        swapl(&stuff->grab_window);
-        swaps(&stuff->deviceid);
-        swapl(&stuff->detail);
-        swaps(&stuff->num_modifiers);
-    }
-
+    X_REQUEST_HEAD_AT_LEAST(xXIPassiveUngrabDeviceReq);
+    X_REQUEST_FIELD_CARD32(grab_window);
+    X_REQUEST_FIELD_CARD16(deviceid);
+    X_REQUEST_FIELD_CARD32(detail);
+    X_REQUEST_FIELD_CARD16(num_modifiers);
     REQUEST_FIXED_SIZE(xXIPassiveUngrabDeviceReq,
                        ((uint32_t) stuff->num_modifiers) << 2);
-
-    if (client->swapped) {
-        uint32_t *modifiers = (uint32_t *) &stuff[1];
-        for (int i = 0; i < stuff->num_modifiers; i++, modifiers++)
-            swapl(modifiers);
-    }
+    X_REQUEST_REST_CARD32(); /* modifiers list */
 
     DeviceIntPtr dev, mod_dev;
     WindowPtr win;

@@ -209,9 +209,9 @@ _glamor_create_radial_gradient_program(ScreenPtr screen, int stops_count,
      *
      *     The problem is given the two circles of c1 and c2 with the radius of r1 and
      *     r1, we need to calculate the t, which is used to do interpolate with stops,
-     *     using the fomula:
+     *     using the formula:
      *     length((1-t)*c1 + t*c2 - p) = (1-t)*r1 + t*r2
-     *     expand the fomula with xy coond, get the following:
+     *     expand the formula with xy coond, get the following:
      *     sqrt(sqr((1-t)*c1.x + t*c2.x - p.x) + sqr((1-t)*c1.y + t*c2.y - p.y))
      *           = (1-t)r1 + t*r2
      *     <====> At*t- 2Bt + C = 0
@@ -219,7 +219,7 @@ _glamor_create_radial_gradient_program(ScreenPtr screen, int stops_count,
      *           B = (p.x - c1.x)*(c2.x - c1.x) + (p.y - c1.y)*(c2.y - c1.y) + r1*(r2 -r1)
      *           C = sqr(p.x - c1.x) + sqr(p.y - c1.y) - r1*r1
      *
-     *     solve the fomula and we get the result of
+     *     solve the formula and we get the result of
      *     t = (B + sqrt(B*B - A*C)) / A  or
      *     t = (B - sqrt(B*B - A*C)) / A  (quadratic equation have two solutions)
      *
@@ -447,7 +447,7 @@ _glamor_create_linear_gradient_program(ScreenPtr screen, int stops_count,
      *              to make it in the range of [0, (p2d - p1d)].
      *
      *      step 3: compare the percentage to every stop and find the stpos just
-     *              before and after it. Use the interpolation fomula to compute RGBA.
+     *              before and after it. Use the interpolation formula to compute RGBA.
      */
 
 #define gradient_fs_template	\
@@ -604,7 +604,7 @@ _glamor_gradient_convert_trans_matrix(PictTransform *from, float to[3][3],
      * T: The transform matrix.
      * v: point vector in width X height space.
      *
-     * result is OK if we use this fomula. But for every point in width X height space,
+     * result is OK if we use this formula. But for every point in width X height space,
      * we can just use their normalized point vector in shader, namely we can just
      * use the result of A*v in shader. So we have no chance to insert T in A*v.
      * We can just convert v_s = A*T*v to v_s = A*T*inv(A)*A*v, where inv(A) is the
@@ -626,7 +626,7 @@ _glamor_gradient_convert_trans_matrix(PictTransform *from, float to[3][3],
      *       | w*t31    h*t32    t33  |
      *       --                      --
      *
-     * Because GLES2 cannot do trasposed mat by spec, we did transposing inside this function
+     * Because GLES2 cannot do transposed mat by spec, we did transposing inside this function
      * already, and matrix becoming look like this:
      *       --                      --
      *       | t11      w*t21/h  t31*w|

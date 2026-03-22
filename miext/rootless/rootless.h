@@ -27,11 +27,6 @@
  * holders shall not be used in advertising or otherwise to promote the sale,
  * use or other dealings in this Software without prior written authorization.
  */
-
-#ifdef HAVE_DIX_CONFIG_H
-#include <dix-config.h>
-#endif
-
 #ifndef _ROOTLESS_H
 #define _ROOTLESS_H
 
@@ -205,7 +200,7 @@ typedef void (*RootlessStopDrawingProc)
  *  Drawing is stopped before this is called.
  *
  *  wid         Frame id
- *  pDamage     Region containing all the changed pixels in frame-lcoal
+ *  pDamage     Region containing all the changed pixels in frame-local
  *              coordinates. This is clipped to the window's clip.
  */
 typedef void (*RootlessUpdateRegionProc)

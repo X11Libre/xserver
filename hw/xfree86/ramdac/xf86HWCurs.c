@@ -1,7 +1,4 @@
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <string.h>
 #include <X11/X.h>
@@ -156,7 +153,7 @@ xf86CheckHWCursor(ScreenPtr pScreen, CursorPtr cursor, xf86CursorInfoPtr infoPtr
         if (!RRHasScanoutPixmap(pSlave))
             continue;
 
-        sPriv = dixLookupPrivate(&pSlave->devPrivates, xf86CursorScreenKey);
+        sPriv = dixLookupPrivate(&pSlave->devPrivates, &xf86CursorScreenKeyRec);
         if (!sPriv) { /* NULL if Option "SWCursor", possibly other conditions */
             use_hw_cursor = FALSE;
 	    break;
@@ -180,7 +177,7 @@ xf86ScreenSetCursor(ScreenPtr pScreen, CursorPtr pCurs, int x, int y)
 {
     xf86CursorScreenPtr ScreenPriv =
         (xf86CursorScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               xf86CursorScreenKey);
+                                               &xf86CursorScreenKeyRec);
 
     xf86CursorInfoPtr infoPtr;
     unsigned char *bits;
@@ -240,7 +237,7 @@ xf86SetCursor(ScreenPtr pScreen, CursorPtr pCurs, int x, int y)
 {
     xf86CursorScreenPtr ScreenPriv =
         (xf86CursorScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               xf86CursorScreenKey);
+                                               &xf86CursorScreenKeyRec);
     ScreenPtr pSlave;
     Bool ret = FALSE;
 
@@ -278,7 +275,7 @@ xf86SetTransparentCursor(ScreenPtr pScreen)
 {
     xf86CursorScreenPtr ScreenPriv =
         (xf86CursorScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               xf86CursorScreenKey);
+                                               &xf86CursorScreenKeyRec);
     xf86CursorInfoPtr infoPtr = ScreenPriv->CursorInfoPtr;
 
     input_lock();
@@ -304,7 +301,7 @@ xf86ScreenMoveCursor(ScreenPtr pScreen, int x, int y)
 {
     xf86CursorScreenPtr ScreenPriv =
         (xf86CursorScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               xf86CursorScreenKey);
+                                               &xf86CursorScreenKeyRec);
     xf86CursorInfoPtr infoPtr = ScreenPriv->CursorInfoPtr;
 
     x -= infoPtr->pScrn->frameX0;
@@ -318,7 +315,7 @@ xf86MoveCursor(ScreenPtr pScreen, int x, int y)
 {
     xf86CursorScreenPtr ScreenPriv =
         (xf86CursorScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               xf86CursorScreenKey);
+                                               &xf86CursorScreenKeyRec);
     ScreenPtr pSlave;
 
     input_lock();
@@ -386,7 +383,7 @@ xf86RecolorCursor(ScreenPtr pScreen, CursorPtr pCurs, Bool displayed)
 {
     xf86CursorScreenPtr ScreenPriv =
         (xf86CursorScreenPtr) dixLookupPrivate(&pScreen->devPrivates,
-                                               xf86CursorScreenKey);
+                                               &xf86CursorScreenKeyRec);
 
     input_lock();
     xf86RecolorCursor_locked (ScreenPriv, pCurs);

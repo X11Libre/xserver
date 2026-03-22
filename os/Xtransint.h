@@ -165,10 +165,7 @@ typedef struct _Xtransport {
 	XtransConnInfo		/* connection */
     );
 
-    XtransConnInfo (*Accept)(
-	XtransConnInfo,		/* connection */
-        int *			/* status */
-    );
+    XtransConnInfo (*Accept)(XtransConnInfo ciptr);
 
     int	(*Read)(
 	XtransConnInfo,		/* connection */
@@ -238,10 +235,12 @@ typedef struct _Xtransport_table {
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
+#ifdef UNIXCONN
 static int trans_mkdir (
     const char *,	/* path */
     int			/* mode */
 );
+#endif /* UNIXCONN */
 
 #ifdef __clang__
 #pragma clang diagnostic pop

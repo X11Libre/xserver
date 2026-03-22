@@ -55,7 +55,9 @@ SOFTWARE.
 #include <X11/extensions/XI.h>
 #include <X11/extensions/XIproto.h>
 
+#include "dix/dix_priv.h"
 #include "dix/exevents_priv.h"
+#include "dix/request_priv.h"
 #include "Xi/handlers.h"
 
 #include "inputstr.h"           /* DeviceIntPtr      */
@@ -70,14 +72,9 @@ SOFTWARE.
 int
 ProcXChangeDeviceKeyMapping(ClientPtr client)
 {
-    REQUEST(xChangeDeviceKeyMappingReq);
-    REQUEST_AT_LEAST_SIZE(xChangeDeviceKeyMappingReq);
-
+    X_REQUEST_HEAD_AT_LEAST(xChangeDeviceKeyMappingReq);
     unsigned count = stuff->keyCodes * stuff->keySymsPerKeyCode;
-    REQUEST_FIXED_SIZE(xChangeDeviceKeyMappingReq, count * sizeof(CARD32));
-
-    if (client->swapped)
-        SwapLongs((CARD32 *) (&stuff[1]), count);
+    X_REQUEST_REST_COUNT_CARD32(count);
 
     int ret;
     unsigned len;

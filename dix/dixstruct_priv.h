@@ -6,7 +6,8 @@
 #ifndef _XSERVER_DIXSTRUCT_PRIV_H
 #define _XSERVER_DIXSTRUCT_PRIV_H
 
-#include "client.h"
+#include <X11/Xmd.h>
+
 #include "dix.h"
 #include "resource.h"
 #include "cursor.h"
@@ -14,7 +15,6 @@
 #include "pixmap.h"
 #include "privates.h"
 #include "dixstruct.h"
-#include <X11/Xmd.h>
 
 static inline void
 SetReqFds(ClientPtr client, int req_fds) {

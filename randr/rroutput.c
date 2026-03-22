@@ -372,6 +372,8 @@ RROutputDestroyResource(void *value, XID pid)
 {
     RROutputPtr output = (RROutputPtr) value;
     ScreenPtr pScreen = output->pScreen;
+    ScreenPtr primary;
+    rrScrPrivPtr primarysp;
     int m;
 
     if (pScreen) {
@@ -391,6 +393,15 @@ RROutputDestroyResource(void *value, XID pid)
 
         if (pScrPriv->primaryOutput == output)
             pScrPriv->primaryOutput = NULL;
+
+        if (pScreen->isGPU) {
+            primary = pScreen->current_primary;
+            if (primary) {
+                primarysp = rrGetScrPriv(primary);
+                if (primarysp->primaryOutput == output)
+                    primarysp->primaryOutput = NULL;
+            }
+        }
 
         for (i = 0; i < pScrPriv->numOutputs; i++) {
             if (pScrPriv->outputs[i] == output) {
@@ -466,7 +477,7 @@ ProcRRGetOutputInfo(ClientPtr client)
     pScreen = output->pScreen;
     pScrPriv = rrGetScrPriv(pScreen);
 
-    xRRGetOutputInfoReply rep = {
+    xRRGetOutputInfoReply reply = {
         .status = RRSetConfigSuccess,
         .timestamp = pScrPriv->lastSetTime.milliseconds,
         .nameLength = output->nameLength,
@@ -475,18 +486,18 @@ ProcRRGetOutputInfo(ClientPtr client)
     x_rpcbuf_t rpcbuf = { .swapped = client->swapped, .err_clear = TRUE };
 
     if (leased) {
-        rep.connection = RR_Disconnected;
-        rep.subpixelOrder = SubPixelUnknown;
+        reply.connection = RR_Disconnected;
+        reply.subpixelOrder = SubPixelUnknown;
     } else {
-        rep.crtc = output->crtc ? output->crtc->id : None;
-        rep.mmWidth = output->mmWidth;
-        rep.mmHeight = output->mmHeight;
-        rep.connection = output->nonDesktop ? RR_Disconnected : output->connection;
-        rep.subpixelOrder = output->subpixelOrder;
-        rep.nCrtcs = output->numCrtcs;
-        rep.nModes = output->numModes + output->numUserModes;
-        rep.nPreferred = output->numPreferred;
-        rep.nClones = output->numClones;
+        reply.crtc = output->crtc ? output->crtc->id : None;
+        reply.mmWidth = output->mmWidth;
+        reply.mmHeight = output->mmHeight;
+        reply.connection = output->nonDesktop ? RR_Disconnected : output->connection;
+        reply.subpixelOrder = output->subpixelOrder;
+        reply.nCrtcs = output->numCrtcs;
+        reply.nModes = output->numModes + output->numUserModes;
+        reply.nPreferred = output->numPreferred;
+        reply.nClones = output->numClones;
 
         for (i = 0; i < output->numCrtcs; i++)
             x_rpcbuf_write_CARD32(&rpcbuf, output->crtcs[i]->id);
@@ -505,18 +516,18 @@ ProcRRGetOutputInfo(ClientPtr client)
     x_rpcbuf_write_string_pad(&rpcbuf, output->name); /* indeed 0-terminated */
 
     if (client->swapped) {
-        swapl(&rep.timestamp);
-        swapl(&rep.crtc);
-        swapl(&rep.mmWidth);
-        swapl(&rep.mmHeight);
-        swaps(&rep.nCrtcs);
-        swaps(&rep.nModes);
-        swaps(&rep.nPreferred);
-        swaps(&rep.nClones);
-        swaps(&rep.nameLength);
+        swapl(&reply.timestamp);
+        swapl(&reply.crtc);
+        swapl(&reply.mmWidth);
+        swapl(&reply.mmHeight);
+        swaps(&reply.nCrtcs);
+        swaps(&reply.nModes);
+        swaps(&reply.nPreferred);
+        swaps(&reply.nClones);
+        swaps(&reply.nameLength);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 static void
@@ -617,13 +628,13 @@ ProcRRGetOutputPrimary(ClientPtr client)
     if (pScrPriv)
         primary = pScrPriv->primaryOutput;
 
-    xRRGetOutputPrimaryReply rep = {
+    xRRGetOutputPrimaryReply reply = {
         .output = primary ? primary->id : None
     };
 
     if (client->swapped) {
-        swapl(&rep.output);
+        swapl(&reply.output);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }

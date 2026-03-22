@@ -20,15 +20,12 @@
  * PERFORMANCE OF THIS SOFTWARE.
  *
  */
-
 /*
  * Some platforms don't bother with I/O permissions,
  * or the permissions are implicit with opening/enabling the console.
  */
 
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <X11/X.h>
 #include "xf86.h"

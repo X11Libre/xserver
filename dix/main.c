@@ -103,6 +103,7 @@ Equipment Corporation.
 #include "os/ddx_priv.h"
 #include "os/osdep.h"
 #include "os/screensaver.h"
+#include "os/serverlock.h"
 #include "Xext/panoramiXsrv.h"
 
 #include "scrnintstr.h"
@@ -133,7 +134,6 @@ CallbackListPtr PostInitRootWindowCallback = NULL;
 int
 dix_main(int argc, char *argv[], char *envp[])
 {
-    HWEventQueueType alwaysCheckForInput[2];
 
     display = "0";
 
@@ -144,9 +144,6 @@ dix_main(int argc, char *argv[], char *envp[])
     CheckUserAuthorization();
 
     ProcessCommandLine(argc, argv);
-
-    alwaysCheckForInput[0] = 0;
-    alwaysCheckForInput[1] = 1;
 
         ScreenSaverTime = defaultScreenSaverTime;
         ScreenSaverInterval = defaultScreenSaverInterval;
@@ -183,6 +180,7 @@ dix_main(int argc, char *argv[], char *envp[])
         if (!InitClientResources(serverClient)) /* for root resources */
             FatalError("couldn't init server resources");
 
+        HWEventQueueType alwaysCheckForInput[2] = { 0, 1 };
         SetInputCheck(&alwaysCheckForInput[0], &alwaysCheckForInput[1]);
         screenInfo.numScreens = 0;
 
@@ -208,11 +206,18 @@ dix_main(int argc, char *argv[], char *envp[])
                 FatalError("failed to create screen resources");
         });
 
+        /* Let all screens register the necessary privates */
+    
         DIX_FOR_EACH_SCREEN({
             if (!PixmapScreenInit(walkScreen))
                 FatalError("failed to create screen pixmap properties");
             if (!dixScreenRaiseCreateResources(walkScreen))
                 FatalError("failed to create screen resources");
+        });
+
+        /* Then use these privates to initialize root windows etc */
+
+        DIX_FOR_EACH_SCREEN({
             if (!CreateGCperDepth(walkScreen))
                 FatalError("failed to create scratch GCs");
             if (!CreateDefaultStipple(walkScreen))
@@ -350,7 +355,7 @@ dix_main(int argc, char *argv[], char *envp[])
         ClearWorkQueue();
 
         CloseWellKnownConnections();
-        OsCleanup(TRUE);
+        UnlockServer();
 
         ddxGiveUp(EXIT_NO_ERROR);
 

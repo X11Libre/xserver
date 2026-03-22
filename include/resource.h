@@ -47,8 +47,9 @@ SOFTWARE.
 #ifndef RESOURCE_H
 #define RESOURCE_H 1
 
-#include "callback.h"
+#include "xlibre_ptrtypes.h"
 
+#include "callback.h"
 #include "misc.h"
 #include "dixaccess.h"
 

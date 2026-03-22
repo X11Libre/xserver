@@ -23,6 +23,7 @@ static inline int dixCallServerAccessCallback(ClientPtr client, Mask access_mode
     return rec.status;
 }
 
-extern char *ConnectionInfo;
+/* NVidia v.390 proprietary driver needs this */
+extern _X_EXPORT char *ConnectionInfo;
 
 #endif /* _XSERVER_DIX_SERVER_PRIV_H */

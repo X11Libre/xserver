@@ -20,10 +20,7 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <stddef.h>
 #include <string.h>
@@ -33,6 +30,7 @@
 #include "dix/screen_hooks_priv.h"
 #include "randr/randrstr_priv.h"
 
+#include "edid_priv.h"
 #include "xf86_priv.h"
 #include "xf86DDC_priv.h"
 #include "xf86Config.h"
@@ -517,9 +515,6 @@ static OptionInfoRec xf86DeviceOptions[] = {
 static void
 xf86OutputSetMonitor(xf86OutputPtr output)
 {
-    char *option_name;
-    const char *monitor;
-
     if (!output->name)
         return;
 
@@ -528,8 +523,11 @@ xf86OutputSetMonitor(xf86OutputPtr output)
     output->options = XNFalloc(sizeof(xf86OutputOptions));
     memcpy(output->options, xf86OutputOptions, sizeof(xf86OutputOptions));
 
-    XNFasprintf(&option_name, "monitor-%s", output->name);
-    monitor = xf86findOptionValue(output->scrn->options, option_name);
+    const char *monitor = NULL;
+    char *option_name = NULL;
+    if (asprintf(&option_name, "monitor-%s", output->name) != -1)
+        monitor = xf86findOptionValue(output->scrn->options, option_name);
+
     if (!monitor)
         monitor = output->name;
     else

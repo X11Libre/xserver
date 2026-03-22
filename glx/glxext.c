@@ -52,7 +52,6 @@
 /*
 ** X resources.
 */
-static x_server_generation_t glxGeneration;
 RESTYPE __glXContextRes;
 RESTYPE __glXDrawableRes;
 
@@ -127,7 +126,7 @@ DrawableGone(__GLXdrawable * glxPriv, XID xid)
 
     /* drop our reference to any backing pixmap */
     if (glxPriv->type == GLX_DRAWABLE_PIXMAP)
-        glxPriv->pDraw->pScreen->DestroyPixmap((PixmapPtr) glxPriv->pDraw);
+        dixDestroyPixmap((PixmapPtr)glxPriv->pDraw, 0);
 
     glxPriv->destroy(glxPriv);
 
@@ -273,7 +272,12 @@ glxClientCallback(CallbackListPtr *list, void *closure, void *data)
 
 /************************************************************************/
 
-static __GLXprovider *__glXProviderStack = &__glXDRISWRastProvider;
+static __GLXprovider *__glXProviderStack =
+#ifdef BUILD_GLX_DRI
+                                           &__glXDRISWRastProvider;
+#else
+                                           NULL;
+#endif
 
 void
 GlxPushProvider(__GLXprovider * provider)
@@ -460,7 +464,6 @@ xorgGlxGetDispatchAddress(CARD8 minorOpcode, CARD32 vendorCode)
 static Bool
 xorgGlxServerPreInit(const ExtensionEntry *extEntry)
 {
-    if (glxGeneration != serverGeneration) {
         /* Mesa requires at least one True/DirectColor visual */
         if (!checkScreenVisuals())
             return FALSE;
@@ -486,10 +489,7 @@ xorgGlxServerPreInit(const ExtensionEntry *extEntry)
         __glXregisterPresentCompleteNotify();
 #endif
 
-        glxGeneration = serverGeneration;
-    }
-
-    return glxGeneration == serverGeneration;
+    return TRUE;
 }
 
 static void

@@ -51,10 +51,7 @@
  * in this Software without prior written authorization from Metro Link.
  *
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
 
 #include <errno.h>
 #include <X11/X.h>

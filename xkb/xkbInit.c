@@ -50,7 +50,7 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "opaque.h"
 #include "property.h"
 #include "scrnintstr.h"
-#include "xkbgeom.h"
+#include "xkbgeom_priv.h"
 
 #define      _XKB_RF_NAMES_PROP_ATOM         "_XKB_RULES_NAMES"
 
@@ -738,7 +738,7 @@ XkbProcessArguments(int argc, char *argv[], int i)
 {
     if (strncmp(argv[i], "-xkbdir", 7) == 0) {
         if (++i < argc) {
-#if !defined(WIN32)
+#if !defined(WIN32) && !defined(__CYGWIN__)
             if (getuid() != geteuid()) {
                 LogMessage(X_WARNING,
                            "-xkbdir is not available for setuid X servers\n");

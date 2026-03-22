@@ -42,6 +42,7 @@
 #include "dix/rpcbuf_priv.h"
 #include "dix/screen_hooks_priv.h"
 #include "dix/screenint_priv.h"
+#include "dix/window_priv.h"
 #include "miext/extinit_priv.h"
 
 #include "scrnintstr.h"
@@ -111,14 +112,14 @@ DbeStubScreen(DbeScreenPrivPtr pDbeScreenPriv, int *nStubbedScreens)
 static int
 ProcDbeGetVersion(ClientPtr client)
 {
-    REQUEST_SIZE_MATCH(xDbeGetVersionReq);
+    X_REQUEST_HEAD_STRUCT(xDbeGetVersionReq);
 
-    xDbeGetVersionReply rep = {
+    xDbeGetVersionReply reply = {
         .majorVersion = DBE_MAJOR_VERSION,
         .minorVersion = DBE_MINOR_VERSION
     };
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /******************************************************************************
@@ -147,13 +148,9 @@ ProcDbeGetVersion(ClientPtr client)
 static int
 ProcDbeAllocateBackBufferName(ClientPtr client)
 {
-    REQUEST(xDbeAllocateBackBufferNameReq);
-    REQUEST_SIZE_MATCH(xDbeAllocateBackBufferNameReq);
-
-    if (client->swapped) {
-        swapl(&stuff->window);
-        swapl(&stuff->buffer);
-    }
+    X_REQUEST_HEAD_STRUCT(xDbeAllocateBackBufferNameReq);
+    X_REQUEST_FIELD_CARD32(window);
+    X_REQUEST_FIELD_CARD32(buffer);
 
     /* The window must be valid. */
     WindowPtr pWin;
@@ -354,11 +351,8 @@ ProcDbeAllocateBackBufferName(ClientPtr client)
 static int
 ProcDbeDeallocateBackBufferName(ClientPtr client)
 {
-    REQUEST(xDbeDeallocateBackBufferNameReq);
-    REQUEST_SIZE_MATCH(xDbeDeallocateBackBufferNameReq);
-
-    if (client->swapped)
-        swapl(&stuff->buffer);
+    X_REQUEST_HEAD_STRUCT(xDbeDeallocateBackBufferNameReq);
+    X_REQUEST_FIELD_CARD32(buffer);
 
     DbeWindowPrivPtr pDbeWindowPriv;
 
@@ -425,17 +419,18 @@ ProcDbeDeallocateBackBufferName(ClientPtr client)
 static int
 ProcDbeSwapBuffers(ClientPtr client)
 {
-    REQUEST(xDbeSwapBuffersReq);
-    REQUEST_AT_LEAST_SIZE(xDbeSwapBuffersReq);
+    X_REQUEST_HEAD_AT_LEAST(xDbeSwapBuffersReq);
+    X_REQUEST_FIELD_CARD32(n);
+
+    if (stuff->n == 0)
+        return Success;
+
+    if (stuff->n > UINT32_MAX / sizeof(DbeSwapInfoRec))
+        return BadLength;
+    REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
 
     if (client->swapped) {
         xDbeSwapInfo *pSwapInfo;
-
-        swapl(&stuff->n);
-        if (stuff->n > UINT32_MAX / sizeof(DbeSwapInfoRec))
-            return BadLength;
-        REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, stuff->n * sizeof(xDbeSwapInfo));
-
         if (stuff->n != 0) {
             pSwapInfo = (xDbeSwapInfo *) stuff + 1;
 
@@ -451,15 +446,6 @@ ProcDbeSwapBuffers(ClientPtr client)
     int error = Success;
 
     unsigned int nStuff = stuff->n; /* use local variable for performance. */
-
-    if (nStuff == 0) {
-        REQUEST_SIZE_MATCH(xDbeSwapBuffersReq);
-        return Success;
-    }
-
-    if (nStuff > UINT32_MAX / sizeof(DbeSwapInfoRec))
-        return BadAlloc;
-    REQUEST_FIXED_SIZE(xDbeSwapBuffersReq, nStuff * sizeof(xDbeSwapInfo));
 
     /* Get to the swap info appended to the end of the request. */
     xDbeSwapInfo* dbeSwapInfo = (xDbeSwapInfo *) &stuff[1];
@@ -558,13 +544,9 @@ ProcDbeSwapBuffers(ClientPtr client)
 static int
 ProcDbeGetVisualInfo(ClientPtr client)
 {
-    REQUEST(xDbeGetVisualInfoReq);
-    REQUEST_AT_LEAST_SIZE(xDbeGetVisualInfoReq);
-
-    if (client->swapped) {
-        swapl(&stuff->n);
-        SwapRestL(stuff);
-    }
+    X_REQUEST_HEAD_AT_LEAST(xDbeGetVisualInfoReq);
+    X_REQUEST_FIELD_CARD32(n);
+    X_REQUEST_REST_CARD32();
 
     DbeScreenPrivPtr pDbeScreenPriv;
     Drawable *drawables;
@@ -639,15 +621,15 @@ ProcDbeGetVisualInfo(ClientPtr client)
         free(visualInfo.visinfo);
     }
 
-    xDbeGetVisualInfoReply rep = {
+    xDbeGetVisualInfoReply reply = {
         .m = count
     };
 
     if (client->swapped) {
-        swapl(&rep.m);
+        swapl(&reply.m);
     }
 
-    rc = X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    rc = X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 
 clearRpcBuf:
     x_rpcbuf_clear(&rpcbuf);
@@ -674,11 +656,8 @@ clearRpcBuf:
 static int
 ProcDbeGetBackBufferAttributes(ClientPtr client)
 {
-    REQUEST(xDbeGetBackBufferAttributesReq);
-    REQUEST_SIZE_MATCH(xDbeGetBackBufferAttributesReq);
-
-    if (client->swapped)
-        swapl(&stuff->buffer);
+    X_REQUEST_HEAD_STRUCT(xDbeGetBackBufferAttributesReq);
+    X_REQUEST_FIELD_CARD32(buffer);
 
     DbeWindowPrivPtr pDbeWindowPriv;
     int rc;
@@ -687,20 +666,20 @@ ProcDbeGetBackBufferAttributes(ClientPtr client)
                                  dbeWindowPrivResType, client,
                                  DixGetAttrAccess);
 
-    xDbeGetBackBufferAttributesReply rep = { 0 };
+    xDbeGetBackBufferAttributesReply reply = { 0 };
 
     if (rc == Success) {
-        rep.attributes = pDbeWindowPriv->pWindow->drawable.id;
+        reply.attributes = pDbeWindowPriv->pWindow->drawable.id;
     }
     else {
-        rep.attributes = None;
+        reply.attributes = None;
     }
 
     if (client->swapped) {
-        swapl(&rep.attributes);
+        swapl(&reply.attributes);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 /******************************************************************************
@@ -1023,8 +1002,8 @@ DbeExtensionInit(void)
         return;
 
     DIX_FOR_EACH_SCREEN({
-        /* For each screen, set up DBE screen privates and init DIX and DDX
-         * interface.
+        /* For each screen, set up DBE screen privates and init DIX
+         * interface (DDX isn't supported anymore).
          */
         if (!(pDbeScreenPriv = calloc(1, sizeof(DbeScreenPrivRec)))) {
             /* If we can not alloc a window or screen private,
@@ -1042,9 +1021,6 @@ DbeExtensionInit(void)
         dixSetPrivate(&walkScreen->devPrivates, &dbeScreenPrivKeyRec, pDbeScreenPriv);
 
         {
-            /* We don't have DDX support for DBE anymore */
-
-#ifndef DISABLE_MI_DBE_BY_DEFAULT
             /* Setup DIX. */
             pDbeScreenPriv->SetupBackgroundPainter = DbeSetupBackgroundPainter;
 
@@ -1066,10 +1042,6 @@ DbeExtensionInit(void)
                 /* DDX initialization failed.  Stub the screen. */
                 DbeStubScreen(pDbeScreenPriv, &nStubbedScreens);
             }
-#else
-            DbeStubScreen(pDbeScreenPriv, &nStubbedScreens);
-#endif
-
         }
     });
 

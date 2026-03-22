@@ -27,8 +27,6 @@
 #ifndef GLAMOR_PRIV_H
 #define GLAMOR_PRIV_H
 
-#include "dix-config.h"
-
 #include <X11/Xfuncproto.h>
 
 #include "os/bug_priv.h"
@@ -1066,7 +1064,7 @@ void glamor_egl_screen_init(ScreenPtr screen,
 
 Bool glamor_change_window_attributes(WindowPtr pWin, unsigned long mask);
 
-void glamor_copy_window(WindowPtr window, DDXPointRec old_origin, RegionPtr src_region);
+void glamor_copy_window(WindowPtr window, xPoint old_origin, RegionPtr src_region);
 
 #include "glamor_utils.h"
 

@@ -120,6 +120,7 @@
 
 #define WIN_MAX_KEYS_PER_KEY	4
 
+/* needed for windows headers compatibility with GCC */
 #define NONAMELESSUNION
 
 #include <sys/types.h>
@@ -130,13 +131,6 @@
 #define HANDLE void *
 #include <pthread.h>
 #undef HANDLE
-
-#ifdef HAVE_MMAP
-#include <sys/mman.h>
-#ifndef MAP_FILE
-#define MAP_FILE 0
-#endif                          /* MAP_FILE */
-#endif                          /* HAVE_MMAP */
 
 #include <X11/X.h>
 #include <X11/Xfuncproto.h>
@@ -150,7 +144,6 @@
 #include "scrnintstr.h"
 #include "pixmapstr.h"
 #include "pixmap.h"
-#include "region.h"
 #include "gcstruct.h"
 #include "colormap.h"
 #include "miscstruct.h"
@@ -429,8 +422,6 @@ typedef struct _winPrivScreenRec {
 
     int iConnectedClients;
 
-    CloseScreenProcPtr CloseScreen;
-
     DWORD dwRedMask;
     DWORD dwGreenMask;
     DWORD dwBlueMask;
@@ -523,6 +514,9 @@ extern winScreenInfo *g_ScreenInfo;
 extern miPointerScreenFuncRec g_winPointerCursorFuncs;
 extern DWORD g_dwEvents;
 
+#ifdef HAS_DEVWINDOWS
+extern int g_fdMessageQueue;
+#endif
 extern DevPrivateKeyRec g_iScreenPrivateKeyRec;
 
 #define g_iScreenPrivateKey  	(&g_iScreenPrivateKeyRec)

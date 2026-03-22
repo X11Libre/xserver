@@ -18,12 +18,3 @@ xorg_modes = static_library('xorg_modes',
     dependencies: [ common_dep, libxcvt_dep ],
     c_args: xorg_c_args,
 )
-
-install_data(
-    [
-        'xf86Crtc.h',
-        'xf86Modes.h',
-        'xf86RandR12.h',
-    ],
-    install_dir: xorgsdkdir,
-)

@@ -19,13 +19,11 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-
-#ifdef HAVE_XORG_CONFIG_H
 #include <xorg-config.h>
-#endif
+
+#include "include/xf86DDC.h"
 
 #include "xf86.h"
-#include "xf86DDC.h"
 #include "xf86_OSproc.h"
 #include "dgaproc.h"
 #include "dgaproc_priv.h"

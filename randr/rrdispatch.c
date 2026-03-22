@@ -54,7 +54,7 @@ ProcRRQueryVersion(ClientPtr client)
     pRRClient->major_version = stuff->majorVersion;
     pRRClient->minor_version = stuff->minorVersion;
 
-    xRRQueryVersionReply rep = {
+    xRRQueryVersionReply reply = {
         .majorVersion = SERVER_RANDR_MAJOR_VERSION,
         .minorVersion = SERVER_RANDR_MINOR_VERSION
     };
@@ -62,16 +62,16 @@ ProcRRQueryVersion(ClientPtr client)
     if (version_compare(stuff->majorVersion, stuff->minorVersion,
                         SERVER_RANDR_MAJOR_VERSION,
                         SERVER_RANDR_MINOR_VERSION) < 0) {
-        rep.majorVersion = stuff->majorVersion;
-        rep.minorVersion = stuff->minorVersion;
+        reply.majorVersion = stuff->majorVersion;
+        reply.minorVersion = stuff->minorVersion;
     }
 
     if (client->swapped) {
-        swapl(&rep.majorVersion);
-        swapl(&rep.minorVersion);
+        swapl(&reply.majorVersion);
+        swapl(&reply.minorVersion);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 int

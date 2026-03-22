@@ -74,6 +74,7 @@ apt-get install -y \
 	libxmu-dev \
 	libxmuu-dev \
 	libxpm-dev \
+	libxrandr-dev \
 	libxrender-dev \
 	libxres-dev \
 	libxshmfence-dev \
@@ -90,4 +91,5 @@ apt-get install -y \
 	xkb-data \
 	xutils-dev \
 	libxaw7-dev \
-	python3-mako
+	python3-mako \
+	libxcvt-dev

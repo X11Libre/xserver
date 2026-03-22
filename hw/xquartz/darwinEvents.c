@@ -200,7 +200,7 @@ DarwinUpdateModifiers(int pressed,                    // KeyPress or KeyRelease
         }
 }
 
-/* Generic handler for Xquartz-specifc events.  When possible, these should
+/* Generic handler for Xquartz-specific events.  When possible, these should
    be moved into their own individual functions and set as handlers using
    mieqSetHandler. */
 

@@ -14,7 +14,7 @@ shared_module(
     install: true,
     install_dir: join_paths(module_abi_dir, 'input'),
 
-    link_with: e,
+    link_with: xserver_exec,
 )
 
 install_man(configure_file(

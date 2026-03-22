@@ -117,6 +117,7 @@ Equipment Corporation.
 #include "mi/mi_priv.h"         /* miPaintWindow */
 #include "os/auth.h"
 #include "os/client_priv.h"
+#include "os/osdep.h"
 #include "os/screensaver.h"
 #include "Xext/panoramiX.h"
 #include "Xext/panoramiXsrv.h"
@@ -134,7 +135,6 @@ Equipment Corporation.
 #include "dixstruct.h"
 #include "gcstruct.h"
 #include "servermd.h"
-#include "mivalidate.h"
 #include "globals.h"
 #include "compint.h"
 #include "privates.h"
@@ -997,19 +997,18 @@ FreeWindowResources(WindowPtr pWin)
 static void
 CrushTree(WindowPtr pWin)
 {
-    WindowPtr pChild, pSib, pParent;
-    UnrealizeWindowProcPtr UnrealizeWindow;
+    WindowPtr pChild, pSib;
 
     if (!(pChild = pWin->firstChild))
         return;
-    UnrealizeWindow = pWin->drawable.pScreen->UnrealizeWindow;
     while (1) {
-        if (pChild->firstChild) {
+
+        /* go to a leaf node in the window tree */
+        while (pChild->firstChild)
             pChild = pChild->firstChild;
-            continue;
-        }
+
         while (1) {
-            pParent = pChild->parent;
+            WindowPtr pParent = pChild->parent;
             if (SubStrSend(pChild, pParent)) {
                 xEvent event = { .u.u.type = DestroyNotify };
                 event.u.destroyNotify.window = pChild->drawable.id;
@@ -1019,8 +1018,7 @@ CrushTree(WindowPtr pWin)
             pSib = pChild->nextSib;
             pChild->viewable = FALSE;
             if (pChild->realized) {
-                pChild->realized = FALSE;
-                (*UnrealizeWindow) (pChild);
+                dixScreenRaiseUnrealizeWindow(pChild);
             }
             FreeWindowResources(pChild);
             dixFreeObjectWithPrivates(pChild, PRIVATE_WINDOW);
@@ -1578,7 +1576,7 @@ ProcGetWindowAttributes(ClientPtr client)
     if (rc != Success)
         return rc;
 
-    xGetWindowAttributesReply rep = {
+    xGetWindowAttributesReply reply = {
         .bitGravity = pWin->bitGravity,
         .winGravity = pWin->winGravity,
         .backingStore = pWin->backingStore,
@@ -1599,17 +1597,17 @@ ProcGetWindowAttributes(ClientPtr client)
     };
 
     if (client->swapped) {
-        swapl(&rep.visualID);
-        swaps(&rep.class);
-        swapl(&rep.backingBitPlanes);
-        swapl(&rep.backingPixel);
-        swapl(&rep.colormap);
-        swapl(&rep.allEventMasks);
-        swapl(&rep.yourEventMask);
-        swaps(&rep.doNotPropagateMask);
+        swapl(&reply.visualID);
+        swaps(&reply.class);
+        swapl(&reply.backingBitPlanes);
+        swapl(&reply.backingPixel);
+        swapl(&reply.colormap);
+        swapl(&reply.allEventMasks);
+        swapl(&reply.yourEventMask);
+        swaps(&reply.doNotPropagateMask);
     }
 
-    return X_SEND_REPLY_SIMPLE(client, rep);
+    return X_SEND_REPLY_SIMPLE(client, reply);
 }
 
 WindowPtr
@@ -2759,15 +2757,12 @@ static void
 UnrealizeTree(WindowPtr pWin, Bool fromConfigure)
 {
     WindowPtr pChild;
-    UnrealizeWindowProcPtr Unrealize;
     MarkUnrealizedWindowProcPtr MarkUnrealizedWindow;
 
-    Unrealize = pWin->drawable.pScreen->UnrealizeWindow;
     MarkUnrealizedWindow = pWin->drawable.pScreen->MarkUnrealizedWindow;
     pChild = pWin;
     while (1) {
         if (pChild->realized) {
-            pChild->realized = FALSE;
             pChild->visibility = VisibilityNotViewable;
 #ifdef XINERAMA
             if (!noPanoramiXExtension && !pChild->drawable.pScreen->myNum) {
@@ -2781,7 +2776,7 @@ UnrealizeTree(WindowPtr pWin, Bool fromConfigure)
                     win->u.win.visibility = VisibilityNotViewable;
             }
 #endif /* XINERAMA */
-            (*Unrealize) (pChild);
+            dixScreenRaiseUnrealizeWindow(pChild);
             DeleteWindowFromAnyEvents(pChild, FALSE);
             if (pChild->viewable) {
                 pChild->viewable = FALSE;

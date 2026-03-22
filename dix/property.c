@@ -173,9 +173,17 @@ deliverPropertyNotifyEvent(WindowPtr pWin, int state, PropertyPtr pProp)
 int
 ProcRotateProperties(ClientPtr client)
 {
-    int delta, rc;
-
     REQUEST(xRotatePropertiesReq);
+    REQUEST_AT_LEAST_SIZE(xRotatePropertiesReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swaps(&stuff->nAtoms);
+        swaps(&stuff->nPositions);
+        SwapRestL(stuff);
+    }
+
+    int delta, rc;
     PropertyPtr *props;         /* array of pointer */
     PropertyPtr pProp, saved;
 
@@ -517,13 +525,21 @@ DeleteAllWindowProperties(WindowPtr pWin)
 int
 ProcGetProperty(ClientPtr client)
 {
+    REQUEST(xGetPropertyReq);
+    REQUEST_SIZE_MATCH(xGetPropertyReq);
+
+    if (client->swapped) {
+        swapl(&stuff->window);
+        swapl(&stuff->property);
+        swapl(&stuff->type);
+        swapl(&stuff->longOffset);
+        swapl(&stuff->longLength);
+    }
+
     PropertyPtr pProp, prevProp;
     unsigned long n, len, ind;
     int rc;
     Mask win_mode = DixGetPropAccess, prop_mode = DixReadAccess;
-
-    REQUEST(xGetPropertyReq);
-    REQUEST_SIZE_MATCH(xGetPropertyReq);
 
     if (!ValidAtom(stuff->property)) {
         client->errorValue = stuff->property;
@@ -566,8 +582,8 @@ ProcGetProperty(ClientPtr client)
 
     rc = dixLookupProperty(&pProp, pWin, p.property, p.client, prop_mode);
     if (rc == BadMatch) {
-        xGetPropertyReply rep = { 0 };
-        return X_SEND_REPLY_SIMPLE(client, rep);
+        xGetPropertyReply reply = { 0 };
+        return X_SEND_REPLY_SIMPLE(client, reply);
     }
     else if (rc != Success)
         return rc;
@@ -576,16 +592,16 @@ ProcGetProperty(ClientPtr client)
        property information, but not the data. */
 
     if (((p.type != pProp->type) && (p.type != AnyPropertyType))) {
-        xGetPropertyReply rep = {
+        xGetPropertyReply reply = {
             .bytesAfter = pProp->size,
             .format = pProp->format,
             .propertyType = pProp->type
         };
         if (client->swapped) {
-            swapl(&rep.propertyType);
-            swapl(&rep.bytesAfter);
+            swapl(&reply.propertyType);
+            swapl(&reply.bytesAfter);
         }
-        return X_SEND_REPLY_SIMPLE(client, rep);
+        return X_SEND_REPLY_SIMPLE(client, reply);
     }
 
 /*
@@ -604,14 +620,14 @@ ProcGetProperty(ClientPtr client)
 
     len = min(n - ind, 4 * p.longLength);
 
-    xGetPropertyReply rep = {
+    xGetPropertyReply reply = {
         .bytesAfter = n - (ind + len),
         .format = pProp->format,
         .nItems = len / (pProp->format / 8),
         .propertyType = pProp->type
     };
 
-    if (p.delete && (rep.bytesAfter == 0)) {
+    if (p.delete && (reply.bytesAfter == 0)) {
         deliverPropertyNotifyEvent(pWin, PropertyDelete, pProp);
         notifyVRRMode(client, pWin, PropertyDelete, pProp);
     }
@@ -635,7 +651,7 @@ ProcGetProperty(ClientPtr client)
     if (rpcbuf.error)
         return BadAlloc;
 
-    if (p.delete && (rep.bytesAfter == 0)) {
+    if (p.delete && (reply.bytesAfter == 0)) {
         /* Delete the Property */
         if (pWin->properties == pProp) {
             /* Takes care of head */
@@ -655,12 +671,12 @@ ProcGetProperty(ClientPtr client)
     }
 
     if (client->swapped) {
-        swapl(&rep.propertyType);
-        swapl(&rep.bytesAfter);
-        swapl(&rep.nItems);
+        swapl(&reply.propertyType);
+        swapl(&reply.bytesAfter);
+        swapl(&reply.nItems);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int
@@ -690,15 +706,15 @@ ProcListProperties(ClientPtr client)
         }
     }
 
-    xListPropertiesReply rep = {
+    xListPropertiesReply reply = {
         .nProperties = numProps
     };
 
     if (client->swapped) {
-        swaps(&rep.nProperties);
+        swaps(&reply.nProperties);
     }
 
-    return X_SEND_REPLY_WITH_RPCBUF(client, rep, rpcbuf);
+    return X_SEND_REPLY_WITH_RPCBUF(client, reply, rpcbuf);
 }
 
 int

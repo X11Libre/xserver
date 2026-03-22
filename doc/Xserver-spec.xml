@@ -600,7 +600,7 @@ are: REQUEST, REQUEST_SIZE_MATCH, REQUEST_AT_LEAST_SIZE,
 REQUEST_FIXED_SIZE, LEGAL_NEW_RESOURCE, and
 VALIDATE_DRAWABLE_AND_GC. Useful byte swapping macros can be found
 in Xserver/include/misc.h: bswap_64, bswap_32, bswap_16, LengthRestS,
-LengthRestL, SwapRestS, SwapRestL, swapl, swaps, cpswapl, and cpswaps.</para>
+SwapRestS, SwapRestL, swapl, swaps, cpswapl, and cpswaps.</para>
 </section>
 </section>
 
@@ -1013,13 +1013,7 @@ your server, main() calls the routine
 
         void CreateWellKnownSockets()
 </programlisting></blockquote>
-This routine is called only once, and not called when the server
-is reset.  To recreate any sockets during server resets, the following
-routine is called from the main loop:
-<blockquote><programlisting>
-
-        void ResetWellKnownSockets()
-</programlisting></blockquote>
+This routine is called only once.
 Sample implementations of both of these routines are found in
 Xserver/os/connection.c.
 </para>
@@ -1093,7 +1087,7 @@ the current request.
 InsertFakeRequest() must insert the specified number of bytes of data
 into the head of the input buffer for the client.  This may be a
 complete request, or it might be a partial request.  For example,
-NextAvailableCient() will insert a partial request in order to read
+NextAvailableClient() will insert a partial request in order to read
 the initial connection data sent by the client.  The routine returns FALSE
 if memory could not be allocated.  ResetCurrentRequest()
 should "back up" the input buffer so that the currently executing request
@@ -3393,7 +3387,7 @@ The sample server implementation is in Xserver/mi/miwindow.c.</para>
 
         void pScreen->CopyWindow(pWin, oldpt, oldRegion);
                 WindowPtr pWin;
-                DDXPointRec oldpt;
+                xPoint oldpt;
                 RegionPtr oldRegion;
 
 </programlisting></blockquote>

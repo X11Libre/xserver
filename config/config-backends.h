@@ -26,8 +26,6 @@
 #ifndef XSERVER_CONFIG_BACKENDS_H
 #define XSERVER_CONFIG_BACKENDS_H
 
-#include <dix-config.h>
-
 #include "input.h"
 #include "list.h"
 

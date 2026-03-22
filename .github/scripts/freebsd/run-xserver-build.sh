@@ -7,6 +7,8 @@ set -e
 echo "--> running xserver build ...."
 export MESON_BUILDDIR=_build
 
+CFLAGS="$CFLAGS -Wno-typedef-redefinition"
+
 rm -rf "$MESON_BUILDDIR"
 meson setup "$MESON_BUILDDIR" $MESON_ARGS
 meson configure "$MESON_BUILDDIR"

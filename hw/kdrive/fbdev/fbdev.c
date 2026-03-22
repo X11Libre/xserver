@@ -21,17 +21,21 @@
  */
 
 #include <kdrive-config.h>
-#include "fbdev.h"
-#include "fb/fb_priv.h"
-#include <sys/ioctl.h>
 
+#include <sys/ioctl.h>
 #include <errno.h>
+
+#include "fb/fb_priv.h"
+#include "os/osdep.h"
+
+#include "fbdev.h"
 
 #ifndef xallocarray
 #define xallocarray(num, size) reallocarray(NULL, (num), (size))
 #endif
 
 const char *fbdevDevicePath = NULL;
+Bool fbDisableShadow = FALSE;
 
 static Bool
 fbdevInitialize(KdCardInfo * card, FbdevPriv * priv)
@@ -314,8 +318,10 @@ fbdevWindowLinear(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     FbdevPriv *priv = pScreenPriv->card->driver;
 
-    if (!pScreenPriv->enabled)
-        return 0;
+    if (!pScreenPriv->enabled) {
+        *size = 0;
+        return NULL;
+    }
     *size = priv->fix.line_length;
     return (CARD8 *) priv->fb + row * priv->fix.line_length + offset;
 }
@@ -328,8 +334,10 @@ fbdevWindowAfb(ScreenPtr pScreen,
     KdScreenPriv(pScreen);
     FbdevPriv *priv = pScreenPriv->card->driver;
 
-    if (!pScreenPriv->enabled)
-        return 0;
+    if (!pScreenPriv->enabled) {
+        *size = 0;
+        return NULL;
+    }
     /* offset to next plane */
     *size = priv->var.yres_virtual * priv->fix.line_length;
     return (CARD8 *) priv->fb + row * priv->fix.line_length + offset;
@@ -342,11 +350,14 @@ fbdevMapFramebuffer(KdScreenInfo * screen)
     KdPointerMatrix m;
     FbdevPriv *priv = screen->card->driver;
 
-    if (scrpriv->randr != RR_Rotate_0 ||
-        priv->fix.type != FB_TYPE_PACKED_PIXELS)
+    if (!fbDisableShadow) {
         scrpriv->shadow = TRUE;
-    else
+    } else if (scrpriv->randr != RR_Rotate_0 ||
+        priv->fix.type != FB_TYPE_PACKED_PIXELS) {
+        scrpriv->shadow = TRUE;
+    } else {
         scrpriv->shadow = FALSE;
+    }
 
     KdComputePointerMatrix(&m, scrpriv->randr, screen->width, screen->height);
 

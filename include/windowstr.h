@@ -47,6 +47,7 @@ SOFTWARE.
 #ifndef WINDOWSTRUCT_H
 #define WINDOWSTRUCT_H
 
+#include "xlibre_ptrtypes.h"
 #include "window.h"
 #include "pixmapstr.h"
 #include "regionstr.h"
@@ -59,14 +60,6 @@ SOFTWARE.
 #include <X11/Xprotostr.h>
 #include "opaque.h"
 
-
-#define SameBackground(as, a, bs, b)				\
-    ((as) == (bs) && ((as) == None ||				\
-		      (as) == ParentRelative ||			\
- 		      SamePixUnion(a,b,as == BackgroundPixel)))
-
-#define SameBorder(as, a, bs, b)				\
-    EqualPixUnion(as, a, bs, b)
 
 /* used as NULL-terminated list */
 typedef struct _DevCursorNode {
@@ -122,7 +115,7 @@ typedef struct _WindowOpt {
 #define RedirectDrawAutomatic	1
 #define RedirectDrawManual	2
 
-typedef struct _Window {
+struct _Window {
     DrawableRec drawable;
     PrivateRec *devPrivates;
     WindowPtr parent;           /* ancestor chain */
@@ -132,10 +125,10 @@ typedef struct _Window {
     WindowPtr lastChild;        /* bottom-most child */
     RegionRec clipList;         /* clipping rectangle for output */
     RegionRec borderClip;       /* NotClippedByChildren + border */
-    union _Validate *valdata;
+    union _MiValidate *valdata;
     RegionRec winSize;
     RegionRec borderSize;
-    DDXPointRec origin;         /* position relative to parent */
+    xPoint origin;         /* position relative to parent */
     unsigned short borderWidth;
     unsigned short deliverableEvents;   /* all masks from all clients */
     Mask eventMask;             /* mask from the creating client */
@@ -162,35 +155,10 @@ typedef struct _Window {
     unsigned inhibitBGPaint:1;  /* paint the background? */
 
     PropertyPtr properties;     /* default: NULL */
-} WindowRec;
-
-/*
- * Ok, a bunch of macros for accessing the optional record
- * fields (or filling the appropriate default value)
- */
+};
 
 extern _X_EXPORT Mask DontPropagateMasks[];
 
-#define wTrackParent(w,field)	((w)->optional ? \
-				    (w)->optional->field \
- 				 : FindWindowWithOptional(w)->optional->field)
-#define wUseDefault(w,field,def)	((w)->optional ? \
-				    (w)->optional->field \
-				 : def)
-
-#define wVisual(w)		wTrackParent(w, visual)
-#define wCursor(w)		((w)->cursorIsNone ? None : wTrackParent(w, cursor))
-#define wColormap(w)		((w)->drawable.class == InputOnly ? None : wTrackParent(w, colormap))
-#define wDontPropagateMask(w)	wUseDefault(w, dontPropagateMask, DontPropagateMasks[(w)->dontPropagate])
-#define wOtherEventMasks(w)	wUseDefault(w, otherEventMasks, 0)
-#define wOtherClients(w)	wUseDefault(w, otherClients, NULL)
-#define wOtherInputMasks(w)	wUseDefault(w, inputMasks, NULL)
-#define wPassiveGrabs(w)	wUseDefault(w, passiveGrabs, NULL)
-#define wBackingBitPlanes(w)	wUseDefault(w, backingBitPlanes, ~0L)
-#define wBackingPixel(w)	wUseDefault(w, backingPixel, 0)
-#define wBoundingShape(w)	wUseDefault(w, boundingShape, NULL)
-#define wClipShape(w)		wUseDefault(w, clipShape, NULL)
-#define wInputShape(w)          wUseDefault(w, inputShape, NULL)
 #define wBorderWidth(w)		((int) (w)->borderWidth)
 
 static inline PropertyPtr wUserProps(WindowPtr pWin) { return pWin->properties; }
@@ -199,15 +167,9 @@ static inline PropertyPtr wUserProps(WindowPtr pWin) { return pWin->properties; 
 
 #define HasBorder(w)	((w)->borderWidth || wClipShape(w))
 
-typedef struct _ScreenSaverStuff *ScreenSaverStuffPtr;
-
 #define SCREEN_IS_BLANKED   0
 #define SCREEN_ISNT_SAVED   1
 #define SCREEN_IS_TILED     2
 #define SCREEN_IS_BLACK	    3
-
-#define HasSaverWindow(pScreen)   (pScreen->screensaver.pWindow != NullWindow)
-
-extern _X_EXPORT int screenIsSaved;
 
 #endif                          /* WINDOWSTRUCT_H */
