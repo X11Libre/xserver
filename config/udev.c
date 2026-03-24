@@ -482,7 +482,7 @@ static char *strrstr(const char *haystack, const char *needle)
 {
     char *prev, *last, *tmp;
 
-    prev = strstr(haystack, needle);
+    prev = (char *) strstr(haystack, needle);
     if (!prev)
         return NULL;
 
