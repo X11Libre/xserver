@@ -911,7 +911,9 @@ if build_xorg_sdk
         host_machine.system() == 'windows')
         sdkconfig.set('XORG_DRIVER_LIBS', '-lXorg.exe -L\${moduledir} -lshadow -no-undefined')
     endif
+endif
 
+if build_xorg_sdk
     configure_file(
         input: 'xorg-server.pc.in',
         output: 'xorg-server.pc',

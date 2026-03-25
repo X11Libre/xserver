@@ -1,0 +1,2 @@
+provides: sys/pciaccess
+type: system
