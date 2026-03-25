@@ -66,8 +66,7 @@ xf86VTSwitchPending(void)
     return xf86Info.vtRequestsPending ? TRUE : FALSE;
 }
 
-Bool
-xf86VTSwitchAway(void)
+bool xf86VTSwitchAway(void)
 {
     int door_fd;
     vt_cmd_arg_t vt_door_arg;
@@ -78,7 +77,7 @@ xf86VTSwitchAway(void)
     if (xf86VTPruneDoor) {
         xf86VTPruneDoor = 0;
         ioctl(xf86Info.consoleFd, VT_RELDISP, 1);
-        return TRUE;
+        return true;
     }
 
     vt_door_arg.vt_ev = VT_EV_HOTKEYS;
@@ -91,11 +90,11 @@ xf86VTSwitchAway(void)
     door_arg.desc_num = 0;
 
     if ((door_fd = open(VT_DAEMON_DOOR_FILE, O_RDONLY)) < 0)
-        return FALSE;
+        return false;
 
     if (door_call(door_fd, &door_arg) != 0) {
         close(door_fd);
-        return FALSE;
+        return false;
     }
 
     close(door_fd);
