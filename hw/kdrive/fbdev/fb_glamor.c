@@ -17,7 +17,15 @@
 
 #include "fbdev.h"
 
+/**
+ * Other that the tearfree X-Video PutImage,
+ * this code is device-independent
+ */
 #ifdef XV
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <linux/fb.h>
+
 #include "kxv.h"
 #endif
 
@@ -27,7 +35,11 @@ bool es_allowed = TRUE;
 bool force_es = FALSE;
 bool fbGlamorAllowed = TRUE;
 bool fbForceGlamor = FALSE;
+
+#ifdef XV
 bool fbXVAllowed = TRUE;
+bool fbTearFree = TRUE;
+#endif
 
 static void
 fbdev_glamor_egl_cleanup(FbdevScrPriv *scrpriv)
@@ -91,6 +103,35 @@ fbdev_glamor_set_glvnd_vendor(ScreenPtr screen, const char* renderer, const char
     }
 }
 
+#ifdef XV
+static int
+fbdev_glamor_xv_put_image_tearfree(KdScreenInfo *screen,
+                                   DrawablePtr pDrawable,
+                                   short src_x, short src_y,
+                                   short drw_x, short drw_y,
+                                   short src_w, short src_h,
+                                   short drw_w, short drw_h,
+                                   int id,
+                                   unsigned char *buf,
+                                   short width,
+                                   short height,
+                                   Bool sync,
+                                   RegionPtr clipBoxes, void *data)
+{
+    FbdevPriv *priv = screen->card->driver;
+    uint64_t zero_arg = 0;
+
+    ioctl(priv->fd, FBIO_WAITFORVSYNC, &zero_arg);
+
+    return glamor_xv_put_image(data, pDrawable,
+                               src_x, src_y,
+                               drw_x, drw_y,
+                               src_w, src_h,
+                               drw_w, drw_h,
+                               id, buf, width, height, sync, clipBoxes);
+}
+#endif
+
 static Bool fbdev_glamor_egl_init(ScreenPtr screen);
 
 Bool
@@ -140,7 +181,8 @@ fbdevInitAccel(ScreenPtr pScreen)
 #ifdef XV
     /* X-Video needs glamor render accel */
     if (fbXVAllowed && !(flags & GLAMOR_NO_RENDER_ACCEL)) {
-        kd_glamor_xv_init(pScreen);
+        kd_glamor_xv_init(pScreen, fbTearFree ?
+                          fbdev_glamor_xv_put_image_tearfree : NULL);
     }
 #endif
 

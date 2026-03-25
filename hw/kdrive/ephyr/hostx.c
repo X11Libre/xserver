@@ -1639,7 +1639,7 @@ ephyr_glamor_init(ScreenPtr screen)
 
 #ifdef XV
     if (!ephyrNoXV) {
-        kd_glamor_xv_init(screen);
+        kd_glamor_xv_init(screen, NULL);
     }
 #endif /*XV*/
 
