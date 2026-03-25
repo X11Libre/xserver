@@ -2243,7 +2243,7 @@ GetClientsForDelivery(DeviceIntPtr dev, WindowPtr win,
         OtherInputMasks *inputMasks = wOtherInputMasks(win);
 
         /* Has any client selected for the event? */
-        if (!WindowXI2MaskIsset(dev, win, events))
+        if (!inputMasks || !WindowXI2MaskIsset(dev, win, events))
             goto out;
         *iclients = inputMasks->inputClients;
     }
@@ -5494,6 +5494,8 @@ ProcSendEvent(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xSendEventReq);
 
+    xEvent event = stuff->event;
+
     /* libXext and other extension libraries may set the bit indicating
      * that this event came from a SendEvent request so remove it
      * since otherwise the event type may fail the range checks
@@ -5502,28 +5504,28 @@ ProcSendEvent(ClientPtr client)
      * This is safe to do since we later add the SendEvent bit (0x80)
      * back in once we send the event to the client */
 
-    stuff->event.u.u.type &= ~(SEND_EVENT_BIT);
+    event.u.u.type &= ~(SEND_EVENT_BIT);
 
     /* The client's event type must be a core event type or one defined by an
        extension. */
 
-    if (!((stuff->event.u.u.type > X_Reply &&
-           stuff->event.u.u.type < LASTEvent) ||
-          (stuff->event.u.u.type >= EXTENSION_EVENT_BASE &&
-           stuff->event.u.u.type < (unsigned) lastEvent))) {
-        client->errorValue = stuff->event.u.u.type;
+    if (!((event.u.u.type > X_Reply &&
+           event.u.u.type < LASTEvent) ||
+          (event.u.u.type >= EXTENSION_EVENT_BASE &&
+           event.u.u.type < (unsigned) lastEvent))) {
+        client->errorValue = event.u.u.type;
         return BadValue;
     }
     /* Generic events can have variable size, but SendEvent request holds
        exactly 32B of event data. */
-    if (stuff->event.u.u.type == GenericEvent) {
-        client->errorValue = stuff->event.u.u.type;
+    if (event.u.u.type == GenericEvent) {
+        client->errorValue = event.u.u.type;
         return BadValue;
     }
-    if (stuff->event.u.u.type == ClientMessage &&
-        stuff->event.u.u.detail != 8 &&
-        stuff->event.u.u.detail != 16 && stuff->event.u.u.detail != 32) {
-        client->errorValue = stuff->event.u.u.detail;
+    if (event.u.u.type == ClientMessage &&
+        event.u.u.detail != 8 &&
+        event.u.u.detail != 16 && event.u.u.detail != 32) {
+        client->errorValue = event.u.u.detail;
         return BadValue;
     }
     if (stuff->eventMask & ~AllEventMasks) {
@@ -5560,13 +5562,13 @@ ProcSendEvent(ClientPtr client)
         client->errorValue = stuff->propagate;
         return BadValue;
     }
-    stuff->event.u.u.type |= SEND_EVENT_BIT;
+    event.u.u.type |= SEND_EVENT_BIT;
     if (stuff->propagate) {
         for (; pWin; pWin = pWin->parent) {
-            if (XaceHookSendAccess(client, NULL, pWin, &stuff->event, 1))
+            if (XaceHookSendAccess(client, NULL, pWin, &event, 1))
                 return Success;
             if (DeliverEventsToWindow(dev, pWin,
-                                      &stuff->event, 1, stuff->eventMask,
+                                      &event, 1, stuff->eventMask,
                                       NullGrab))
                 return Success;
             if (pWin == effectiveFocus)
@@ -5576,8 +5578,8 @@ ProcSendEvent(ClientPtr client)
                 break;
         }
     }
-    else if (!XaceHookSendAccess(client, NULL, pWin, &stuff->event, 1))
-        DeliverEventsToWindow(dev, pWin, &stuff->event,
+    else if (!XaceHookSendAccess(client, NULL, pWin, &event, 1))
+        DeliverEventsToWindow(dev, pWin, &event,
                               1, stuff->eventMask, NullGrab);
     return Success;
 }
