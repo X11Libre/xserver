@@ -194,19 +194,29 @@ UngrabAllDevices(Bool kill_client)
 
 static Bool CopyGrab(GrabPtr dst, const GrabPtr src);
 
+static GrabPtr freeGrabRecs = NULL;
+
 GrabPtr
 AllocGrab(const GrabPtr src)
 {
-    GrabPtr grab = calloc(1, sizeof(GrabRec));
+    GrabPtr grab;
+
+    if (freeGrabRecs) {
+        grab = freeGrabRecs;
+        freeGrabRecs = grab->next;
+    } else {
+        grab = calloc(1, sizeof(GrabRec));
+    }
 
     if (grab) {
+        memset(grab, 0, sizeof(GrabRec));
         grab->xi2mask = xi2mask_new();
         if (!grab->xi2mask) {
             free(grab);
             grab = NULL;
         }
         else if (src && !CopyGrab(grab, src)) {
-            free(grab->xi2mask);
+            xi2mask_free(&grab->xi2mask);
             free(grab);
             grab = NULL;
         }
@@ -267,7 +277,9 @@ FreeGrab(GrabPtr pGrab)
         FreeCursor(pGrab->cursor, (Cursor) 0);
 
     xi2mask_free(&pGrab->xi2mask);
-    free(pGrab);
+
+    pGrab->next = freeGrabRecs;
+    freeGrabRecs = pGrab;
 }
 
 static Bool

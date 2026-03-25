@@ -811,6 +811,28 @@ FakeClientID(int client)
     return id;
 }
 
+static ResourcePtr freeResourceRecs = NULL;
+
+static ResourcePtr
+AllocResourceRec(void)
+{
+    ResourcePtr res;
+
+    if (freeResourceRecs) {
+        res = freeResourceRecs;
+        freeResourceRecs = res->next;
+        return res;
+    }
+    return calloc(1, sizeof(ResourceRec));
+}
+
+static void
+FreeResourceRec(ResourcePtr res)
+{
+    res->next = freeResourceRecs;
+    freeResourceRecs = res;
+}
+
 Bool
 AddResource(XID id, RESTYPE type, void *value)
 {
@@ -831,7 +853,7 @@ AddResource(XID id, RESTYPE type, void *value)
     if ((rrec->elements >= 4 * rrec->buckets) && (rrec->hashsize < MAXHASHSIZE))
         RebuildTable(client);
     head = &rrec->resources[HashResourceID(id, clientTable[client].hashsize)];
-    ResourcePtr res = calloc(1, sizeof(ResourceRec));
+    ResourcePtr res = AllocResourceRec();
     if (!res) {
         (*resourceTypes[type & TypeMask].deleteFunc) (value, id);
         return FALSE;
@@ -895,7 +917,7 @@ doFreeResource(ResourcePtr res, Bool skip)
     if (!skip)
         resourceTypes[res->type & TypeMask].deleteFunc(res->value, res->id);
 
-    free(res);
+    FreeResourceRec(res);
 }
 
 void

@@ -3222,11 +3222,9 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
     cm.height = 16;
     cm.xhot = 8;
     cm.yhot = 8;
-    unsigned char *srcbits = calloc(16, BitmapBytePad(32));
-    unsigned char *mskbits = calloc(16, BitmapBytePad(32));
+    unsigned char *srcbits = alloca(BitmapBytePad(32) * 16);
+    unsigned char *mskbits = alloca(BitmapBytePad(32) * 16);
     if (!srcbits || !mskbits) {
-        free(srcbits);
-        free(mskbits);
         cursor = 0;
     }
     else {
@@ -3242,10 +3240,6 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
             }
             else
                 cursor = 0;
-        }
-        else {
-            free(srcbits);
-            free(mskbits);
         }
     }
 

@@ -422,9 +422,8 @@ GetMotionHistory(DeviceIntPtr pDev, xTimecoord ** buff, unsigned long start,
     else
         size = (sizeof(INT32) * pDev->valuator->numAxes) + sizeof(Time);
 
-    *buff = calloc(size, pDev->valuator->numMotionEvents);
-    if (!(*buff))
-        return 0;
+    *buff = alloca(size * pDev->valuator->numMotionEvents);
+    memset(*buff, 0, size * pDev->valuator->numMotionEvents);
     obuff = (char *) *buff;
 
     for (int i = pDev->valuator->first_motion;
