@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 
+#include "dix/region_priv.h"
 #include "fb/fb_priv.h"
 
 #ifdef FB_DEBUG
