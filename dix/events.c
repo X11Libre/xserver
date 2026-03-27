@@ -6019,17 +6019,22 @@ ProcRecolorCursor(ClientPtr client)
     pCursor->backRed = stuff->backRed;
     pCursor->backGreen = stuff->backGreen;
     pCursor->backBlue = stuff->backBlue;
-
-    DIX_FOR_EACH_SCREEN({
 #ifdef XINERAMA
+    DIX_FOR_EACH_SCREEN({
         if (!noPanoramiXExtension)
             displayed = (walkScreen == pSprite->screen);
         else
-#endif /* XINERAMA */
             displayed = (walkScreen == pSprite->hotPhys.pScreen);
         (*walkScreen->RecolorCursor) (PickPointer(client), walkScreen, pCursor,
                                 (pCursor == pSprite->current) && displayed);
     });
+#else
+    DIX_FOR_EACH_SCREEN({
+	displayed = (walkScreen == pSprite->hotPhys.pScreen);
+	(*walkScreen->RecolorCursor) (PickPointer(client), walkScreen, pCursor,
+                                (pCursor == pSprite->current) && displayed);
+    });
+#endif
     return Success;
 }
 
