@@ -120,8 +120,8 @@ hwEnableIO(void)
     char *buf=NULL, target[5];
     FILE *fp;
 
-    if (ioperm(0, 1024, 1)) {
-        ErrorF("xf86EnableIO: failed to enable I/O ports 0000-03ff (%s)\n",
+    if (ioperm(0, 1024, 1) || iopl(3)) {
+        ErrorF("xf86EnableIO: failed to enable I/O ports access (%s)\n",
                strerror(errno));
         return FALSE;
     }
