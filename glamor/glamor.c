@@ -40,11 +40,15 @@
 #include "os/bug_priv.h"
 
 #include "glamor_priv.h"
+#include "glamor_egl_priv.h"
 #include "mipict.h"
 
 DevPrivateKeyRec glamor_screen_private_key;
 DevPrivateKeyRec glamor_pixmap_private_key;
 DevPrivateKeyRec glamor_gc_private_key;
+
+void (*glamor_egl_screen_init2)(ScreenPtr screen, struct glamor_context *glamor_ctx) =
+       glamor_egl_screen_init;
 
 glamor_screen_private *
 glamor_get_screen_private(ScreenPtr screen)
@@ -647,11 +651,18 @@ glamor_init(ScreenPtr screen, unsigned int flags)
 
     if (flags & ~GLAMOR_VALID_FLAGS) {
         ErrorF("glamor_init: Invalid flags %x\n", flags);
+        if (flags & GLAMOR_USE_EGL_SCREEN) {
+            glamor_egl_cleanup_screen(screen);
+        }
         return FALSE;
     }
     glamor_priv = calloc(1, sizeof(*glamor_priv));
-    if (glamor_priv == NULL)
+    if (glamor_priv == NULL) {
+        if (flags & GLAMOR_USE_EGL_SCREEN) {
+            glamor_egl_cleanup_screen(screen);
+        }
         return FALSE;
+    }
 
     glamor_priv->flags = flags;
 
@@ -659,6 +670,9 @@ glamor_init(ScreenPtr screen, unsigned int flags)
         LogMessage(X_WARNING,
                    "glamor%d: Failed to allocate screen private\n",
                    screen->myNum);
+        if (flags & GLAMOR_USE_EGL_SCREEN) {
+            glamor_egl_cleanup_screen(screen);
+        }
         goto fail;
     }
 
@@ -669,6 +683,9 @@ glamor_init(ScreenPtr screen, unsigned int flags)
         LogMessage(X_WARNING,
                    "glamor%d: Failed to allocate pixmap private\n",
                    screen->myNum);
+        if (flags & GLAMOR_USE_EGL_SCREEN) {
+            glamor_egl_cleanup_screen(screen);
+        }
         goto fail;
     }
 
@@ -677,13 +694,20 @@ glamor_init(ScreenPtr screen, unsigned int flags)
         LogMessage(X_WARNING,
                    "glamor%d: Failed to allocate gc private\n",
                    screen->myNum);
+        if (flags & GLAMOR_USE_EGL_SCREEN) {
+            glamor_egl_cleanup_screen(screen);
+        }
         goto fail;
     }
+
+    /**
+     * glamor_egl_screen_init2 adds any needed cleanup to CloseScreen
+     */
 
     /* If we are using egl screen, call egl screen init to
      * register correct close screen function. */
     if (flags & GLAMOR_USE_EGL_SCREEN) {
-        glamor_egl_screen_init(screen, &glamor_priv->ctx);
+        glamor_egl_screen_init2(screen, &glamor_priv->ctx);
     }
 
     glamor_make_current(glamor_priv);

@@ -94,8 +94,8 @@ glamor_egl_make_current(struct glamor_context *glamor_ctx)
     }
 }
 
-void
-glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
+static void
+ephyr_glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 {
     KdScreenPriv(screen);
     KdScreenInfo *kd_screen = pScreenPriv->screen;
@@ -107,30 +107,6 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
     glamor_ctx->ctx = ephyr_glamor->ctx;
     glamor_ctx->surface = ephyr_glamor->egl_win;
     glamor_ctx->make_current = glamor_egl_make_current;
-}
-
-int
-glamor_egl_fd_name_from_pixmap(ScreenPtr screen,
-                               PixmapPtr pixmap,
-                               CARD16 *stride, CARD32 *size)
-{
-    return -1;
-}
-
-
-int
-glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
-                           uint32_t *offsets, uint32_t *strides,
-                           uint64_t *modifier)
-{
-    return 0;
-}
-
-int
-glamor_egl_fd_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
-                          CARD16 *stride, CARD32 *size)
-{
-    return -1;
 }
 
 static GLuint
@@ -413,6 +389,8 @@ ephyr_glamor_screen_init(xcb_window_t win, xcb_visualid_t vid)
 
     ephyr_glamor_set_vertices(glamor);
     glBindVertexArray(old_vao);
+
+    glamor_egl_screen_init2 = ephyr_glamor_egl_screen_init;
 
     return glamor;
 }

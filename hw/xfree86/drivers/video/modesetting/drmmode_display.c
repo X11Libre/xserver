@@ -862,7 +862,7 @@ drmmode_crtc_set_mode(xf86CrtcPtr crtc, Bool test_only)
 
 #ifdef GLAMOR
     /* Make sure any pending drawing will be visible in a new scanout buffer */
-    if (drmmode->glamor)
+    if (drmmode->glamor_dri)
         glamor_finish(crtc->scrn->pScreen);
 #endif
 
@@ -2184,7 +2184,7 @@ drmmode_clear_pixmap(PixmapPtr pixmap)
 #ifdef GLAMOR
     modesettingPtr ms = modesettingPTR(xf86ScreenToScrn(screen));
 
-    if (ms->drmmode.glamor) {
+    if (ms->drmmode.glamor_dri) {
         ms->glamor.clear_pixmap(pixmap);
         return;
     }
@@ -2204,7 +2204,7 @@ drmmode_shadow_fb_allocate(xf86CrtcPtr crtc, int width, int height,
     drmmode_crtc_private_ptr drmmode_crtc = crtc->driver_private;
     drmmode_ptr drmmode = drmmode_crtc->drmmode;
 
-    struct gbm_bo *ret = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
+    struct gbm_bo *ret = gbm_create_best_bo(drmmode, !drmmode->glamor_dri, width, height, DRMMODE_FRONT_BO);
     if (ret == NULL) {
         xf86DrvMsg(crtc->scrn->scrnIndex, X_ERROR,
                "Couldn't allocate shadow memory for rotated CRTC\n");
@@ -3864,7 +3864,7 @@ drmmode_set_pixmap_bo(drmmode_ptr drmmode, PixmapPtr pixmap, struct gbm_bo *bo)
     ScrnInfoPtr scrn = drmmode->scrn;
     modesettingPtr ms = modesettingPTR(scrn);
 
-    if (!drmmode->glamor)
+    if (!drmmode->glamor_dri)
         return TRUE;
 
     if (!ms->glamor.egl_create_textured_pixmap_from_gbm_bo(pixmap, bo,
@@ -3917,7 +3917,7 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     old_fb_id = drmmode->fb_id;
     drmmode->fb_id = 0;
 
-    drmmode->front_bo = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
+    drmmode->front_bo = gbm_create_best_bo(drmmode, !drmmode->glamor_dri, width, height, DRMMODE_FRONT_BO);
     if (!drmmode->front_bo)
         goto fail;
 
@@ -3927,7 +3927,7 @@ drmmode_xf86crtc_resize(ScrnInfoPtr scrn, int width, int height)
     scrn->virtualY = height;
     scrn->displayWidth = pitch / kcpp;
 
-    if (!drmmode->glamor) {
+    if (!drmmode->glamor_dri) {
         new_pixels = gbm_bo_get_map(drmmode->front_bo);
     }
 
@@ -4848,7 +4848,7 @@ drmmode_create_initial_bos(ScrnInfoPtr pScrn, drmmode_ptr drmmode)
     width = pScrn->virtualX;
     height = pScrn->virtualY;
 
-    drmmode->front_bo = gbm_create_best_bo(drmmode, !drmmode->glamor, width, height, DRMMODE_FRONT_BO);
+    drmmode->front_bo = gbm_create_best_bo(drmmode, !drmmode->glamor_dri, width, height, DRMMODE_FRONT_BO);
     if (!drmmode->front_bo) {
         return FALSE;
     }

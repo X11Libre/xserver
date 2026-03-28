@@ -277,6 +277,25 @@ extern _X_EXPORT void glamor_set_drawable_modifiers_func(ScreenPtr screen,
  * */
 extern _X_EXPORT Bool glamor_egl_init(ScrnInfoPtr scrn, int fd);
 
+/* @glamor_egl_init2: Initialize EGL environment.
+ *
+ * @scrn:        Current screen info pointer.
+ * @fd:          Current drm fd.
+ * @dri_support: If glamor was able to use dri
+ *
+ * This function creates and initializes EGL contexts.
+ * Should be called from DDX's preInit function.
+ * Return TRUE if success, otherwise return FALSE.
+ *
+ * Unlike glamor_egl_init, this function returns true
+ * even if glamor dri acceleration cannot initialize,
+ * but non-dri glamor can initialize.
+ *
+ * If dri_support is not NULL, it is set to the what
+ * glamor_egl_init would have returned.
+ * */
+extern _X_EXPORT Bool glamor_egl_init2(ScrnInfoPtr scrn, int fd, Bool *dri_support);
+
 extern _X_EXPORT Bool glamor_egl_init_textured_pixmap(ScreenPtr screen);
 
 /*

@@ -176,7 +176,7 @@ typedef struct _modesettingRec {
                                                        Bool);
         void (*egl_exchange_buffers)(PixmapPtr, PixmapPtr);
         struct gbm_device *(*egl_get_gbm_device)(ScreenPtr);
-        Bool (*egl_init)(ScrnInfoPtr, int);
+        Bool (*egl_init)(ScrnInfoPtr, int, Bool*);
         void (*finish)(ScreenPtr);
         struct gbm_bo *(*gbm_bo_from_pixmap)(ScreenPtr, PixmapPtr);
         Bool (*init)(ScreenPtr, unsigned int);
