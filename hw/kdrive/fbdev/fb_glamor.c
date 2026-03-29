@@ -93,6 +93,8 @@ fbdev_glamor_set_glvnd_vendor(ScreenPtr screen, const char* renderer, const char
 
 static Bool fbdev_glamor_egl_init(ScreenPtr screen);
 
+void fbdev_glamor_egl_screen_init(ScreenPtr pScreen, struct glamor_context *glamor_ctx);
+
 Bool
 fbdevInitAccel(ScreenPtr pScreen)
 {
@@ -122,6 +124,8 @@ fbdevInitAccel(ScreenPtr pScreen)
             flags |= GLAMOR_NO_RENDER_ACCEL;
         }
     }
+
+    glamor_egl_screen_init2 = fbdev_glamor_egl_screen_init;
 
     if (!glamor_init(pScreen, flags)) {
         fbdev_glamor_egl_cleanup(scrpriv);
@@ -596,9 +600,8 @@ fbdev_glamor_egl_init(ScreenPtr pScreen)
     return TRUE;
 }
 
-/* Actual glamor functionality */
 void
-glamor_egl_screen_init(ScreenPtr pScreen, struct glamor_context *glamor_ctx)
+fbdev_glamor_egl_screen_init(ScreenPtr pScreen, struct glamor_context *glamor_ctx)
 {
     KdScreenPriv(pScreen);
     KdScreenInfo *screen = pScreenPriv->screen;
@@ -610,44 +613,4 @@ glamor_egl_screen_init(ScreenPtr pScreen, struct glamor_context *glamor_ctx)
     glamor_ctx->ctx = scrpriv->ctx;
     glamor_ctx->surface = EGL_NO_SURFACE;
     glamor_ctx->make_current = fbdev_glamor_egl_make_current;
-}
-
-/* Stubs for glamor */
-#define SET(ptr, val) if(ptr) { *ptr = val; }
-int
-glamor_egl_fd_name_from_pixmap(ScreenPtr screen,
-                               PixmapPtr pixmap,
-                               CARD16 *stride, CARD32 *size)
-{
-    (void)screen;
-    (void)pixmap;
-    SET(stride, 0);
-    SET(size, 0);
-    return -1;
-}
-
-
-int
-glamor_egl_fds_from_pixmap(ScreenPtr screen, PixmapPtr pixmap, int *fds,
-                           uint32_t *offsets, uint32_t *strides,
-                           uint64_t *modifier)
-{
-    (void)screen;
-    (void)pixmap;
-    (void)fds;
-    (void)offsets;
-    (void)strides;
-    (void)modifier;
-    return 0;
-}
-
-int
-glamor_egl_fd_from_pixmap(ScreenPtr screen, PixmapPtr pixmap,
-                          CARD16 *stride, CARD32 *size)
-{
-    (void)screen;
-    (void)pixmap;
-    SET(stride, 0);
-    SET(size, 0);
-    return -1;
 }

@@ -350,6 +350,9 @@ typedef struct glamor_screen_private {
     struct glamor_context ctx;
 } glamor_screen_private;
 
+/* Allow overriding the default glamor screen init proc */
+extern void (*glamor_egl_screen_init2)(ScreenPtr screen, struct glamor_context *glamor_ctx);
+
 typedef enum glamor_access {
     GLAMOR_ACCESS_RO,
     GLAMOR_ACCESS_RW,
