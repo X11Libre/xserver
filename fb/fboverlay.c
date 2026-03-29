@@ -24,6 +24,7 @@
 
 #include <dix-config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include "mi/mi_priv.h"
@@ -210,6 +211,7 @@ fbOverlayCopyWindow(WindowPtr pWin, DDXPointRec ptOldOrg, RegionPtr prgnSrc)
     /*
      * Compute the portion of each fb affected by this copy
      */
+    assert(pScrPriv->nlayers <= FB_OVERLAY_MAX);
     for (i = 0; i < pScrPriv->nlayers; i++) {
         RegionNull(&layerRgn[i]);
         RegionIntersect(&layerRgn[i], &rgnDst,
