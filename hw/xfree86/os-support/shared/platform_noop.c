@@ -3,8 +3,6 @@
 #include <xorg-config.h>
 #endif
 
-#include "config/hotplug_priv.h"
-
 #ifdef XSERVER_PLATFORM_BUS
 /* noop platform device support */
 #include "xf86_OSproc.h"
@@ -12,6 +10,8 @@
 #include "xf86.h"
 #include "xf86_os_support.h"
 #include "xf86platformBus.h"
+
+#include "hotplug.h"
 
 Bool
 xf86PlatformDeviceCheckBusID(struct xf86_platform_device *device, const char *busid)
