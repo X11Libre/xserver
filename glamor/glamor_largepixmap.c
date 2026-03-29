@@ -183,7 +183,7 @@ glamor_compute_clipped_regions_ext(PixmapPtr pixmap,
 
     if (glamor_pixmap_priv_is_small(pixmap_priv)) {
         clipped_regions = calloc(1, sizeof(*clipped_regions));
-        if (clipped_regions == NULL) {
+        if (!clipped_regions) {
             *n_region = 0;
             return NULL;
         }
@@ -471,7 +471,7 @@ _glamor_compute_clipped_regions(PixmapPtr pixmap,
     m = 0;
     clipped_regions = calloc(priv->block_wcnt * priv->block_hcnt,
                              sizeof(*clipped_regions));
-    if (clipped_regions == NULL) {
+    if (!clipped_regions) {
         *n_region = 0;
         return NULL;
     }
