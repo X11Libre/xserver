@@ -480,17 +480,20 @@ vfbInstallColormap(ColormapPtr pmap)
         if (!ppix || !prgb || !defs)
             goto out;
 
-        for (i = 0; i < entries; i++)
-            ppix[i] = i;
-        /* XXX truecolor */
-        QueryColors(pmap, entries, ppix, prgb, serverClient);
+        if (ppix && prgb && defs) {
+            for (i = 0; i < entries; i++)
+                ppix[i] = i;
+            /* XXX truecolor */
+            QueryColors(pmap, entries, ppix, prgb, serverClient);
 
-        for (i = 0; i < entries; i++) { /* convert xrgbs to xColorItems */
-            defs[i].pixel = ppix[i] & 0xff;     /* change pixel to index */
-            defs[i].red = prgb[i].red;
-            defs[i].green = prgb[i].green;
-            defs[i].blue = prgb[i].blue;
-            defs[i].flags = DoRed | DoGreen | DoBlue;
+            for (i = 0; i < entries; i++) { /* convert xrgbs to xColorItems */
+                defs[i].pixel = ppix[i] & 0xff;     /* change pixel to index */
+                defs[i].red = prgb[i].red;
+                defs[i].green = prgb[i].green;
+                defs[i].blue = prgb[i].blue;
+                defs[i].flags = DoRed | DoGreen | DoBlue;
+            }
+            (*pmap->pScreen->StoreColors) (pmap, entries, defs);
         }
         (*pmap->pScreen->StoreColors) (pmap, entries, defs);
 
