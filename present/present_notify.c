@@ -78,6 +78,13 @@ present_create_notifies(ClientPtr client, int num_notifies, xPresentNotify *x_no
     int                 added = 0;
     int                 status;
 
+    if (num_notifies <= 0) {
+        if (num_notifies == 0)
+            return Success;
+        else
+            return BadLength;
+    }
+
     notifies = calloc (num_notifies, sizeof (present_notify_rec));
     if (!notifies)
         return BadAlloc;
