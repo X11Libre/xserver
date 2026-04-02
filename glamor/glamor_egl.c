@@ -1823,13 +1823,13 @@ glamor_egl_init_display(glamor_egl_priv_t *glamor_egl)
 }
 
 Bool
-glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, Bool *compat_ret)
+glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, int *caps)
 {
     const GLubyte *renderer;
     glamor_egl_priv_t* glamor_egl = NULL;
 
-    if (compat_ret) {
-        *compat_ret = TRUE;
+    if (caps) {
+        *caps = GLAMOR_EGL_CAP_NONE;
     }
 
     if (glamor_egl_conf->GLAMOR_EGL_PRIV_PROC) {
@@ -1861,9 +1861,6 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, Bool *compat_ret)
         if (glamor_egl->gbm == NULL) {
             ErrorF("couldn't create gbm device\n");
             glamor_egl->fd = -1;
-            if (compat_ret) {
-                *compat_ret = FALSE;
-            }
         }
 
         const char* gbm_backend = glamor_egl->gbm ?
@@ -1998,6 +1995,10 @@ glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, Bool *compat_ret)
         goto glamor_no_dri;
     }
 
+    if (caps) {
+        *caps |= GLAMOR_EGL_DEFAULT_CAPS;
+    }
+
     LogMessage(X_INFO, "glamor dri X acceleration enabled on %s\n",
                renderer);
     return TRUE;
@@ -2010,9 +2011,6 @@ error:
 glamor_no_dri:
     glamor_egl->fd = -1;
 
-    if (compat_ret) {
-        *compat_ret = FALSE;
-    }
     LogMessage(X_WARNING, "glamor X acceleration enabled without dri support on %s\n",
                renderer);
     return TRUE;
