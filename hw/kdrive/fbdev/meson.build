@@ -5,11 +5,9 @@ srcs = [
 ]
 
 fbdev_glamor = []
-fbdev_dep = []
 if build_glamor
     srcs += 'fb_glamor.c'
     fbdev_glamor += glamor
-    fbdev_dep += epoxy_dep
 endif
 
 xfbdev_server = executable(
@@ -20,7 +18,7 @@ xfbdev_server = executable(
         include_directories('../src'),
         include_directories('../linux'),
     ],
-    dependencies: [ common_dep, fbdev_dep, ],
+    dependencies: [ common_dep ],
     link_with: [
         libxserver_main,
         fbdev_glamor,
