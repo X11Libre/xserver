@@ -36,33 +36,20 @@
 
 #include "scrnintstr.h"
 
-#ifdef GLAMOR_HAS_GBM
-#include <gbm.h>
-#endif
-
-typedef struct glamor_egl_screen_private {
-    EGLDisplay display;
-    EGLContext context;
-    char *device_path;
-    char *glvnd_vendor; /* glvnd vendor library name or driver name */
-    int exact_glvnd_vendor; /* If the glvnd vendor should be assumed valid with no checks */
-    void* server_private;
-
-#ifdef GLAMOR_HAS_GBM
-    struct gbm_device *gbm;
-#endif
-    int fd;
-    int dmabuf_capable;
-    int linear_only; /* When using gbm, this means that only linear buffers can be created */
-} glamor_egl_priv_t;
+typedef struct glamor_egl_screen_private glamor_egl_priv_t;
 
 typedef struct {
     void* server_private; /* Data the X server might want to map to a screen */
 
-    /* Pointer to a server-allocated glamor_egl_priv_t, that the server maps to a screen */
+    /* Either Optional 1 or 2 must be non-NULL */
+
+    /* Optional 1 pointer to a screen */
+    ScreenPtr screen;
+
+    /* Optional 2 pointer to a server-allocated glamor_egl_priv_t, that the server maps to a screen */
     glamor_egl_priv_t *glamor_egl_priv;
 
-    /* Function that maps a glamor_egl_priv_t to each screen*/
+    /* Optional 2 function that maps a glamor_egl_priv_t to each screen*/
     glamor_egl_priv_t* (*GLAMOR_EGL_PRIV_PROC)(ScreenPtr screen);
 
     char *glvnd_vendor; /* glvnd vendor library or driver name */
@@ -86,15 +73,6 @@ typedef struct {
  * for compatibility with xf86 drivers.
  */
 Bool glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, Bool *compat_ret);
-
-/**
- * Deinitialize an egl context created by glamor egl
- * and free associated resources.
- *
- * glamor_egl is the pointer passed to glamor_egl_init2
- * in glamor_egl_conf->glamor_egl_priv;
- */
-void glamor_egl_cleanup(glamor_egl_priv_t *glamor_egl);
 
 /*
  * Create an EGLDisplay from a native display type. This is a little quirky

@@ -11,6 +11,7 @@
 
 #include "glamor.h"
 #include "glamor_egl.h"
+#include "glamor_egl_priv.h"
 
 enum {
     GLAMOREGLOPT_RENDERING_API,
