@@ -105,7 +105,7 @@ glamor_composite_rectangles(CARD8 op,
                             int num_rects, xRectangle *rects)
 {
     PixmapPtr pixmap;
-    struct glamor_pixmap_private *priv;
+    glamor_pixmap_private *priv;
     pixman_region16_t region;
     pixman_box16_t *boxes;
     int num_boxes;
