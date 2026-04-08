@@ -56,6 +56,10 @@ SOFTWARE.
 #include <gperftools/tcmalloc.h>
 #endif
 
+#ifdef HAVE_JEMALLOC
+#include <jemalloc/jemalloc.h>
+#endif
+
 #include <X11/Xdefs.h>
 
 #include <limits.h>
