@@ -920,7 +920,7 @@ winBltExposedRegionsShadowDDNL(ScreenPtr pScreen)
             /* Loop around to try the blit one more time */
             continue;
         }
-        else if (FAILED(ddrval)) {
+        if (FAILED(ddrval)) {
             fReturn = FALSE;
             winErrorFVerb(1, "winBltExposedRegionsShadowDDNL - "
                           "IDirectDrawSurface4_Blt failed, but surface not "
@@ -928,10 +928,8 @@ winBltExposedRegionsShadowDDNL(ScreenPtr pScreen)
                           (unsigned int) ddrval, (int) ddrval);
             goto winBltExposedRegionsShadowDDNL_Exit;
         }
-        else {
-            /* Success, stop looping */
-            break;
-        }
+        /* Success, stop looping */
+        break;
     }
 
  winBltExposedRegionsShadowDDNL_Exit:
