@@ -27,11 +27,11 @@ typedef struct {
     Bool used_modifiers;
 } bo_priv_t;
 
-#ifndef GBM_BO_USE_LINEAR
+#ifndef GBM_HAVE_BO_USE_LINEAR
 #define GBM_BO_USE_LINEAR 0
 #endif
 
-#ifndef GBM_BO_USE_FRONT_RENDERING
+#ifndef GBM_HAVE_BO_USE_FRONT_RENDERING
 #define GBM_BO_USE_FRONT_RENDERING 0
 #endif
 
