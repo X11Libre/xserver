@@ -1,13 +1,13 @@
-# This xorg.conf.d configuration snippet configures the X server to
-# automatically load the nvidia X driver and nvidia GLX libraries
+# This xorg.conf.d configuration snippet is a supplement to 
+# 10-nvidia.conf that sets module paths for nvidia GLX libraries
 # when it detects a device driven by nvidia-drm.ko kernel module.
 # Please note that this works on Linux kernels version 6.12 or higher
 # with CONFIG_DRM enabled, and only if the nvidia-drm.ko kernel module
 # is loaded before the X server is started.
 
 Section "OutputClass"
-	Identifier "NVidia"
-	MatchDriver "nvidia-drm"
-	Driver "nvidia"
-	Option "AllowEmptyInitialConfiguration"
+        Identifier "NVidia-modules"
+        MatchDriver "nvidia-drm"
+        Module "glx"
+        Module "glxserver_nvidia"
 EndSection
