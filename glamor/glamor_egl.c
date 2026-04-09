@@ -1196,27 +1196,29 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 
     glamor_egl_set_glvnd_vendor(screen);
 #ifdef DRI3
-    /* Tell the core that we have the interfaces for import/export
-     * of pixmaps.
-     */
-    glamor_enable_dri3(screen);
-
-    /* If the driver wants to do its own auth dance (e.g. Xwayland
-     * on pre-3.15 kernels that don't have render nodes and thus
-     * has the wayland compositor as a master), then it needs us
-     * to stay out of the way and let it init DRI3 on its own.
-     */
-    if (!(glamor_priv->flags & GLAMOR_NO_DRI3)) {
-        /* To do DRI3 device FD generation, we need to open a new fd
-         * to the same device we were handed in originally.
+    if (glamor_egl->fd >= 0) {
+        /* Tell the core that we have the interfaces for import/export
+         * of pixmaps.
          */
-        glamor_egl->device_path = drmGetRenderDeviceNameFromFd(glamor_egl->fd);
-        if (!glamor_egl->device_path)
-            glamor_egl->device_path = drmGetDeviceNameFromFd2(glamor_egl->fd);
+        glamor_enable_dri3(screen);
 
-        if (!dri3_screen_init(screen, &glamor_dri3_info)) {
-            LogMessage(X_ERROR,
-                       "Failed to initialize DRI3.\n");
+        /* If the driver wants to do its own auth dance (e.g. Xwayland
+         * on pre-3.15 kernels that don't have render nodes and thus
+         * has the wayland compositor as a master), then it needs us
+         * to stay out of the way and let it init DRI3 on its own.
+         */
+        if (!(glamor_priv->flags & GLAMOR_NO_DRI3)) {
+            /* To do DRI3 device FD generation, we need to open a new fd
+             * to the same device we were handed in originally.
+             */
+            glamor_egl->device_path = drmGetRenderDeviceNameFromFd(glamor_egl->fd);
+            if (!glamor_egl->device_path)
+                glamor_egl->device_path = drmGetDeviceNameFromFd2(glamor_egl->fd);
+
+            if (!dri3_screen_init(screen, &glamor_dri3_info)) {
+                LogMessage(X_ERROR,
+                           "Failed to initialize DRI3.\n");
+            }
         }
     }
 #endif
@@ -1357,10 +1359,13 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
     glamor_egl_get_screen_private = glamor_egl->GLAMOR_EGL_PRIV_PROC;
 
 #ifdef GLAMOR_HAS_GBM
-    glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
-    if (glamor_egl->gbm == NULL) {
-        ErrorF("couldn't create gbm device\n");
-        goto error;
+    if (glamor_egl->fd >= 0) {
+        glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
+
+        if (glamor_egl->gbm == NULL) {
+            ErrorF("couldn't create gbm device\n");
+            goto error;
+        }
     }
 #endif
 
