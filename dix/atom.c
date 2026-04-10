@@ -72,6 +72,28 @@ static NodePtr atomRoot = NULL;
 static unsigned long tableLength;
 static NodePtr *nodeTable;
 
+static NodePtr freeNodeRecs = NULL;
+
+static NodePtr
+AllocNodeRec(void)
+{
+    NodePtr node;
+
+    if (freeNodeRecs) {
+        node = freeNodeRecs;
+        freeNodeRecs = node->left;
+        return node;
+    }
+    return calloc(1, sizeof(NodeRec));
+}
+
+static void
+FreeNodeRec(NodePtr node)
+{
+    node->left = freeNodeRecs;
+    freeNodeRecs = node;
+}
+
 Atom
 MakeAtom(const char *string, unsigned len, Bool makeit)
 {
@@ -100,7 +122,7 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         }
     }
     if (makeit) {
-        NodePtr nd = calloc(1, sizeof(NodeRec));
+        NodePtr nd = AllocNodeRec();
         if (!nd)
             return BAD_RESOURCE;
         if (lastAtom < XA_LAST_PREDEFINED) {
@@ -109,7 +131,7 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
         else {
             nd->string = strndup(string, len);
             if (!nd->string) {
-                free(nd);
+                FreeNodeRec(nd);
                 return BAD_RESOURCE;
             }
         }
@@ -122,7 +144,7 @@ MakeAtom(const char *string, unsigned len, Bool makeit)
                     /* nd->string has been strdup'ed */
                     free((char *) nd->string);
                 }
-                free(nd);
+                FreeNodeRec(nd);
                 return BAD_RESOURCE;
             }
             tableLength <<= 1;
@@ -171,7 +193,7 @@ FreeAtom(NodePtr patom)
          */
         free((char *) patom->string);
     }
-    free(patom);
+    FreeNodeRec(patom);
 }
 
 void
