@@ -17,7 +17,7 @@ if [ "$X11_OS" = "Darwin" ]; then
 build_ac      xset              $(fdo_mirror xset)                         xset-1.2.5
 fi
 # really must be build via autoconf instead of meson, otherwise piglit wont find the test programs
-build_ac_xts  xts               $(fdo_mirror xts)                          12a887c2c72c4258962b56ced7b0aec782f1ffed
+build_ac_xts  xts               $(fdo_mirror xts)                          hotfix/for-macos-and-25.0
 
 clone_source piglit             $(fdo_mirror piglit)                       28d1349844eacda869f0f82f551bcd4ac0c4edfe
 
