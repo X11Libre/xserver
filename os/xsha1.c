@@ -152,7 +152,8 @@ x_sha1_final(void *ctx, unsigned char result[20])
 
 #elif defined(HAVE_SHA1_IN_LIBNETTLE)   /* Use libnettle for SHA1 */
 
-#include <nettle/sha.h>
+#include <nettle/sha1.h>
+#include <nettle/version.h>
 
 void *
 x_sha1_init(void)
@@ -175,7 +176,11 @@ x_sha1_update(void *ctx, void *data, int size)
 int
 x_sha1_final(void *ctx, unsigned char result[20])
 {
+#if NETTLE_VERSION_MAJOR < 4
     sha1_digest(ctx, 20, result);
+#else
+    sha1_digest(ctx, result);
+#endif
     free(ctx);
     return 1;
 }
