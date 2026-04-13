@@ -740,8 +740,8 @@ vfbWriteXWDFileHeader(ScreenPtr pScreen)
     struct xhostname hn;
     xhostname(&hn);
     hn.name[XWD_WINDOW_NAME_LEN - 1] = 0;
-    sprintf((char *) (pXWDHeader + 1), "Xvfb %s:%s.%d", hn.name, display,
-            pScreen->myNum);
+    snprintf((char *)(pXWDHeader + 1), XWD_WINDOW_NAME_LEN,
+         "Xvfb %.40s:%.10s.%d", hn.name, display, pScreen->myNum);
 
     /* write colormap pixel slot values */
 
