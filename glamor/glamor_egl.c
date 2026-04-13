@@ -866,11 +866,22 @@ glamor_get_formats(ScreenPtr screen,
 
 static void
 glamor_filter_modifiers(uint32_t *num_modifiers, uint64_t **modifiers,
-                        EGLBoolean *external_only)
+                        EGLBoolean *external_only, int linear_only)
 {
     uint32_t write_pos = 0;
     for (uint32_t i = 0; i < *num_modifiers; i++) {
         if (external_only[i]) {
+            continue;
+        }
+
+        if (linear_only &&
+#ifdef WITH_LIBDRM
+            ((*modifiers)[i] != DRM_FORMAT_MOD_LINEAR) &&
+            ((*modifiers)[i] != DRM_FORMAT_MOD_INVALID))
+#else
+            (*modifiers)[i] != 0) /* DRM_FORMAT_MOD_LINEAR */
+#endif
+        {
             continue;
         }
 
@@ -935,7 +946,7 @@ glamor_get_modifiers_internal(glamor_egl_priv_t *glamor_egl, uint32_t format,
     }
 
     *num_modifiers = num;
-    glamor_filter_modifiers(num_modifiers, modifiers, external_only);
+    glamor_filter_modifiers(num_modifiers, modifiers, external_only, glamor_egl->linear_only);
     free(external_only);
 
 
@@ -1351,6 +1362,22 @@ glamor_egl_try_gles_api(glamor_egl_priv_t *glamor_egl)
     return TRUE;
 }
 
+#ifdef GLAMOR_HAS_GBM
+static inline struct gbm_device*
+gbm_create_device_by_name(int fd, const char* name)
+{
+    struct gbm_device* ret = NULL;
+    const char* old_backend = getenv("GBM_BACKEND");
+    setenv("GBM_BACKEND", name, 1);
+    ret = gbm_create_device(fd);
+    unsetenv("GBM_BACKEND");
+    if (old_backend) {
+        setenv("GBM_BACKEND", old_backend, 1);
+    }
+    return ret;
+}
+#endif
+
 Bool
 glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
 {
@@ -1361,10 +1388,18 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
 #ifdef GLAMOR_HAS_GBM
     if (glamor_egl->fd >= 0) {
         glamor_egl->gbm = gbm_create_device(glamor_egl->fd);
+        if (!glamor_egl->gbm) {
+            glamor_egl->gbm = gbm_create_device_by_name(glamor_egl->fd, "dumb");
+        }
 
         if (glamor_egl->gbm == NULL) {
             ErrorF("couldn't create gbm device\n");
             goto error;
+        }
+
+        const char* gbm_backend = gbm_device_get_backend_name(glamor_egl->gbm);
+        if (gbm_backend && !strcmp(gbm_backend, "dumb")) {
+            glamor_egl->linear_only = TRUE;
         }
     }
 #endif

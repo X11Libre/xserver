@@ -51,6 +51,7 @@ typedef struct glamor_egl_screen_private {
 #endif
     int fd;
     int dmabuf_capable;
+    int linear_only;
 
     int es_disallowed; /* If using GLES contexts is forbidden */
     int force_es; /* If glamor should only use GLES contexts */
