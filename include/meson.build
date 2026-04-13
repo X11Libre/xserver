@@ -198,6 +198,16 @@ if conf_data.get('HAVE_GETPEEREID').to_int() == 0 and conf_data.get('HAVE_GETPEE
     endif
 endif
 
+conf_data.set(
+  'BSD44SOCKETS',
+  cc.has_member(
+     'struct sockaddr_in', 'sin_len',
+     prefix: ['#include <sys/types.h>', '#include <sys/socket.h>',
+              '#include <netinet/in.h>'],
+  )  ? '1' : false,
+  description: 'Define to 1 if `struct sockaddr_in\' has a `sin_len\' member',
+)
+
 conf_data.set('UNIXCONN', '1')
 conf_data.set('IPv6', build_ipv6 ? '1' : false)
 
