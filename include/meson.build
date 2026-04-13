@@ -200,8 +200,19 @@ if conf_data.get('HAVE_GETPEEREID').to_int() == 0 and conf_data.get('HAVE_GETPEE
     endif
 endif
 
+conf_data.set(
+  'BSD44SOCKETS',
+  cc.has_member(
+     'struct sockaddr_in', 'sin_len',
+     prefix: ['#include <sys/types.h>', '#include <sys/socket.h>',
+              '#include <netinet/in.h>'],
+  )  ? '1' : false,
+  description: 'Define to 1 if `struct sockaddr_in\' has a `sin_len\' member',
+)
+
 conf_data.set('TCPCONN', '1')
 conf_data.set('UNIXCONN', host_machine.system() != 'windows' ? '1' : false)
+conf_data.set('LOCALCONN', host_machine.system() == 'sunos' ? '1' : false)
 conf_data.set('IPv6', build_ipv6 ? '1' : false)
 
 # potentially tunable - needed also in places that cannot include misc.h
