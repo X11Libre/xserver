@@ -6,6 +6,7 @@ project('xserver', 'c',
         version: '25.1.0',
         meson_version: '>= 0.61.0',
 )
+
 release_date = '2025-12-21'
 
 cc = meson.get_compiler('c')
