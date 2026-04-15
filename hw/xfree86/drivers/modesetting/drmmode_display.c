@@ -1880,7 +1880,7 @@ drmmode_load_cursor_argb_check(xf86CrtcPtr crtc, CARD32 *image)
             ptr[i++] = image[y * ms->max_cursor_width + x];      // cpu_to_le32(image[i]);
     }
     /* clear the remainder for good measure */
-    for (; i < ms->max_cursor_width * ms->max_cursor_height; i++)
+    while (i < ms->max_cursor_width * ms->max_cursor_height)
         ptr[i++] = 0;
 
     if (drmmode_crtc->cursor_up)
