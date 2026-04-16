@@ -36,8 +36,16 @@ static x_server_generation_t dri3_screen_generation;
 static void dri3_screen_close(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     dri3_screen_priv_ptr screen_priv = dri3_screen_priv(screen);
-    dixScreenUnhookClose(screen, dri3_screen_close);
+
+    if (screen_priv && screen_priv->formats && screen_priv->formats_cached) {
+        for (int i = 0; i < screen_priv->num_formats; i++) {
+            free(screen_priv->formats[i].modifiers);
+        }
+        free(screen_priv->formats);
+    }
     free(screen_priv);
+
+    dixScreenUnhookClose(screen, dri3_screen_close);
 }
 
 Bool
