@@ -761,8 +761,10 @@ ProcCompositeNameWindowPixmap(ClientPtr client)
             return BadMatch;
         }
 
-        if (!AddResource(newPix->info[i].id, X11_RESTYPE_PIXMAP, (void *) pPixmap))
+        if (!AddResource(newPix->info[i].id, X11_RESTYPE_PIXMAP, (void *) pPixmap)) {
+            free(newPix);
             return BadAlloc;
+        }
 
         ++pPixmap->refcnt;
     }
