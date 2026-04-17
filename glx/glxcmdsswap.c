@@ -576,7 +576,7 @@ __glXDispSwap_BindTexImageEXT(__GLXclientState * cl, GLbyte * pc)
     swapl(buffer);
     swapl(num_attribs);
 
-    return __glXDisp_BindTexImageEXT(cl, (GLbyte *) pc);
+    return __glXDisp_BindTexImageEXT(cl, (GLbyte *) req);
 }
 
 int
@@ -599,7 +599,7 @@ __glXDispSwap_ReleaseTexImageEXT(__GLXclientState * cl, GLbyte * pc)
     swapl(drawId);
     swapl(buffer);
 
-    return __glXDisp_ReleaseTexImageEXT(cl, (GLbyte *) pc);
+    return __glXDisp_ReleaseTexImageEXT(cl, (GLbyte *) req);
 }
 
 int
@@ -625,7 +625,7 @@ __glXDispSwap_CopySubBufferMESA(__GLXclientState * cl, GLbyte * pc)
     swapl((CARD32*)(pc + 12));
     swapl((CARD32*)(pc + 16));
 
-    return __glXDisp_CopySubBufferMESA(cl, pc);
+    return __glXDisp_CopySubBufferMESA(cl, (GLbyte *) req);
 
 }
 
