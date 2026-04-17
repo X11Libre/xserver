@@ -1492,7 +1492,7 @@ DRI2ScreenInit(ScreenPtr pScreen, DRI2InfoPtr info)
 #endif
     }
 
-    /* Initialize minor if needed and set to minimum provied by DDX */
+    /* Initialize minor if needed and set to minimum provided by DDX */
     if (!dri2_minor || dri2_minor > cur_minor)
         dri2_minor = cur_minor;
 
