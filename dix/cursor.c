@@ -226,7 +226,9 @@ RealizeCursorAllScreens(CursorPtr pCurs)
 
 /**
  * does nothing about the resource table, just creates the data structure.
- * does not copy the src and mask bits
+ *
+ * Takes ownership of \p psrcbits, \p pmaskbits, and \p argb -- all three
+ * are freed on error, the caller must not free them after calling this.
  *
  *  \param psrcbits  server-defined padding
  *  \param pmaskbits server-defined padding
@@ -242,8 +244,12 @@ AllocARGBCursor(unsigned char *psrcbits, unsigned char *pmaskbits,
     *ppCurs = NULL;
 
     CursorPtr pCurs = (CursorPtr) calloc(CURSOR_REC_SIZE + CURSOR_BITS_SIZE, 1);
-    if (!pCurs)
+    if (!pCurs) {
+        free(psrcbits);
+        free(pmaskbits);
+        free(argb);
         return BadAlloc;
+    }
 
     CursorBitsPtr bits = (CursorBitsPtr) ((char *) pCurs + CURSOR_REC_SIZE);
     dixInitPrivates(pCurs, pCurs + 1, PRIVATE_CURSOR);
