@@ -1230,7 +1230,7 @@ void
 AssignTypeAndName(DeviceIntPtr dev, Atom type, const char *name)
 {
     dev->xinput_type = type;
-    dev->name = strdup(name);
+    dev->name = XNFstrdup(name);
 }
 
 /***********************************************************************
@@ -1379,9 +1379,9 @@ XInputExtensionInit(void)
         memset(&xi_all_devices, 0, sizeof(xi_all_devices));
         memset(&xi_all_master_devices, 0, sizeof(xi_all_master_devices));
         xi_all_devices.id = XIAllDevices;
-        xi_all_devices.name = strdup("XIAllDevices");
+        xi_all_devices.name = XNFstrdup("XIAllDevices");
         xi_all_master_devices.id = XIAllMasterDevices;
-        xi_all_master_devices.name = strdup("XIAllMasterDevices");
+        xi_all_master_devices.name = XNFstrdup("XIAllMasterDevices");
 
         inputInfo.all_devices = &xi_all_devices;
         inputInfo.all_master_devices = &xi_all_master_devices;
