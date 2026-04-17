@@ -1296,7 +1296,7 @@ FindColorInRootCmap(ColormapPtr pmap, EntryPtr pentFirst, int size,
 
     if ((pixel = *pPixel) >= size)
         pixel = 0;
-    for (pent = pentFirst + pixel, count = size; --count >= 0; pent++, pixel++) {
+    for (pent = pentFirst + pixel, count = size; --count >= 0;) {
         if (pent->refcnt > 0 && (*comp) (pent, prgb)) {
             switch (channel) {
             case REDMAP:
@@ -1313,6 +1313,13 @@ FindColorInRootCmap(ColormapPtr pmap, EntryPtr pentFirst, int size,
             }
             *pPixel = pixel;
         }
+        pixel++;
+        if (pixel >= size) {
+            pent = pentFirst;
+            pixel = 0;
+        }
+        else
+            pent++;
     }
 }
 
