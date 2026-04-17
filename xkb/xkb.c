@@ -5393,10 +5393,22 @@ _CheckSetShapes(XkbGeometryPtr geom,
                 ol->num_points = olWire->nPoints;
                 olWire = (xkbOutlineWireDesc *)ptWire;
             }
-            if (shapeWire->primaryNdx != XkbNoShape)
+            if (shapeWire->primaryNdx != XkbNoShape) {
+                if (shapeWire->primaryNdx >= shapeWire->nOutlines) {
+                    client->errorValue = _XkbErrCode3(0x08, shapeWire->primaryNdx,
+                                                      shapeWire->nOutlines);
+                    return BadValue;
+                }
                 shape->primary = &shape->outlines[shapeWire->primaryNdx];
-            if (shapeWire->approxNdx != XkbNoShape)
+            }
+            if (shapeWire->approxNdx != XkbNoShape) {
+                if (shapeWire->approxNdx >= shapeWire->nOutlines) {
+                    client->errorValue = _XkbErrCode3(0x08, shapeWire->approxNdx,
+                                                      shapeWire->nOutlines);
+                    return BadValue;
+                }
                 shape->approx = &shape->outlines[shapeWire->approxNdx];
+            }
             shapeWire = (xkbShapeWireDesc *) olWire;
         }
         wire = (char *) shapeWire;
