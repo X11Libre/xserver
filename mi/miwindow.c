@@ -772,10 +772,16 @@ miSpriteTrace(SpritePtr pSprite, int x, int y)
              */
             && !pWin->unhittable) {
             if (pSprite->spriteTraceGood >= pSprite->spriteTraceSize) {
-                pSprite->spriteTraceSize += 10;
-                pSprite->spriteTrace = reallocarray(pSprite->spriteTrace,
-                                                    pSprite->spriteTraceSize,
-                                                    sizeof(WindowPtr));
+                WindowPtr *newTrace;
+                int newSize = pSprite->spriteTraceSize + 10;
+
+                newTrace = reallocarray(pSprite->spriteTrace,
+                                        newSize,
+                                        sizeof(WindowPtr));
+                if (!newTrace)
+                    return DeepestSpriteWin(pSprite);
+                pSprite->spriteTraceSize = newSize;
+                pSprite->spriteTrace = newTrace;
             }
             pSprite->spriteTrace[pSprite->spriteTraceGood++] = pWin;
             pWin = pWin->firstChild;
