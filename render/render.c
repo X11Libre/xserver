@@ -929,8 +929,10 @@ ProcRenderCreateGlyphSet(ClientPtr client)
     /* security creation/labeling check */
     rc = XaceHookResourceAccess(client, stuff->gsid, GlyphSetType,
                   glyphSet, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (rc != Success)
+    if (rc != Success) {
+        FreeGlyphSet(glyphSet, (XID) 0);
         return rc;
+    }
     if (!AddResource(stuff->gsid, GlyphSetType, (void *) glyphSet))
         return BadAlloc;
     return Success;
@@ -1867,8 +1869,10 @@ ProcRenderCreateSolidFill(ClientPtr client)
     /* security creation/labeling check */
     error = XaceHookResourceAccess(client, stuff->pid, PictureType,
                      pPicture, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (error != Success)
+    if (error != Success) {
+        FreePicture(pPicture, (XID) 0);
         return error;
+    }
     if (!AddResource(stuff->pid, PictureType, (void *) pPicture))
         return BadAlloc;
     return Success;
@@ -1906,8 +1910,10 @@ ProcRenderCreateLinearGradient(ClientPtr client)
     /* security creation/labeling check */
     error = XaceHookResourceAccess(client, stuff->pid, PictureType,
                      pPicture, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (error != Success)
+    if (error != Success) {
+        FreePicture(pPicture, (XID) 0);
         return error;
+    }
     if (!AddResource(stuff->pid, PictureType, (void *) pPicture))
         return BadAlloc;
     return Success;
@@ -1946,8 +1952,10 @@ ProcRenderCreateRadialGradient(ClientPtr client)
     /* security creation/labeling check */
     error = XaceHookResourceAccess(client, stuff->pid, PictureType,
                      pPicture, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (error != Success)
+    if (error != Success) {
+        FreePicture(pPicture, (XID) 0);
         return error;
+    }
     if (!AddResource(stuff->pid, PictureType, (void *) pPicture))
         return BadAlloc;
     return Success;
@@ -1985,8 +1993,10 @@ ProcRenderCreateConicalGradient(ClientPtr client)
     /* security creation/labeling check */
     error = XaceHookResourceAccess(client, stuff->pid, PictureType,
                      pPicture, X11_RESTYPE_NONE, NULL, DixCreateAccess);
-    if (error != Success)
+    if (error != Success) {
+        FreePicture(pPicture, (XID) 0);
         return error;
+    }
     if (!AddResource(stuff->pid, PictureType, (void *) pPicture))
         return BadAlloc;
     return Success;
