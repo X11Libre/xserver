@@ -2402,11 +2402,24 @@ SProcRenderQueryFilters(ClientPtr client)
 static int _X_COLD
 SProcRenderSetPictureFilter(ClientPtr client)
 {
+    int nparams;
+    char *name;
+    xFixed *params;
+
     REQUEST(xRenderSetPictureFilterReq);
     REQUEST_AT_LEAST_SIZE(xRenderSetPictureFilterReq);
 
     swapl(&stuff->picture);
     swaps(&stuff->nbytes);
+
+    name = (char *) (stuff + 1);
+    params = (xFixed *) (name + pad_to_int32(stuff->nbytes));
+    nparams = ((xFixed *) stuff + client->req_len) - params;
+    if (nparams < 0)
+        return BadLength;
+
+    SwapLongs((CARD32*)params, nparams);
+
     return (*ProcRenderVector[stuff->renderReqType]) (client);
 }
 
