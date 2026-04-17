@@ -148,9 +148,22 @@ GenerateRandomData(int len, char *buf)
     arc4random_buf(buf, len);
 #else
     int fd;
+    int ret;
+    int pos = 0;
 
     fd = open("/dev/urandom", O_RDONLY);
-    read(fd, buf, len);
+    if (fd < 0)
+        FatalError("Cannot open /dev/urandom for random data generation\n");
+    while (pos < len) {
+        ret = read(fd, buf + pos, len - pos);
+        if (ret <= 0) {
+            if (ret < 0 && errno == EINTR)
+                continue;
+            close(fd);
+            FatalError("Cannot read random data from /dev/urandom\n");
+        }
+        pos += ret;
+    }
     close(fd);
 #endif
 }
