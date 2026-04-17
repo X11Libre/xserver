@@ -456,8 +456,10 @@ ProcXIChangeHierarchy(ClientPtr client)
         SWAPIF(swaps(&any->type));
         SWAPIF(swaps(&any->length));
 
-        if (len < ((size_t)any->length << 2))
-            return BadLength;
+        if (any->length == 0 || len < ((size_t)any->length << 2)) {
+            rc = BadLength;
+            goto unwind;
+        }
 
 #define CHANGE_SIZE_MATCH(type) \
     do { \
