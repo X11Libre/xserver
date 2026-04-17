@@ -1133,9 +1133,11 @@ ReadXkmGeometry(FILE * file, XkbDescPtr xkb)
                         shape->bounds.y2 = ptWire.y;
                 }
             }
-            if (shapeWire.primary_ndx != XkbNoShape)
+            if (shapeWire.primary_ndx != XkbNoShape &&
+                shapeWire.primary_ndx < shapeWire.num_outlines)
                 shape->primary = &shape->outlines[shapeWire.primary_ndx];
-            if (shapeWire.approx_ndx != XkbNoShape)
+            if (shapeWire.approx_ndx != XkbNoShape &&
+                shapeWire.approx_ndx < shapeWire.num_outlines)
                 shape->approx = &shape->outlines[shapeWire.approx_ndx];
         }
     }
