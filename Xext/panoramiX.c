@@ -756,16 +756,16 @@ PanoramiXMaybeAddVisual(VisualPtr pVisual)
     /* found a matching visual on all screens, add it to the subset list */
     int j = PanoramiXNumVisuals;
     PanoramiXNumVisuals++;
-    PanoramiXVisuals = reallocarray(PanoramiXVisuals,
-                                    PanoramiXNumVisuals, sizeof(VisualRec));
+    PanoramiXVisuals = XNFreallocarray(PanoramiXVisuals,
+                                       PanoramiXNumVisuals, sizeof(VisualRec));
 
     memcpy(&PanoramiXVisuals[j], pVisual, sizeof(VisualRec));
 
     for (k = 0; k < PanoramiXNumDepths; k++) {
         if (PanoramiXDepths[k].depth == pVisual->nplanes) {
-            PanoramiXDepths[k].vids = reallocarray(PanoramiXDepths[k].vids,
-                                                   PanoramiXDepths[k].numVids + 1,
-                                                   sizeof(VisualID));
+            PanoramiXDepths[k].vids = XNFreallocarray(PanoramiXDepths[k].vids,
+                                                      PanoramiXDepths[k].numVids + 1,
+                                                      sizeof(VisualID));
             PanoramiXDepths[k].vids[PanoramiXDepths[k].numVids] = pVisual->vid;
             PanoramiXDepths[k].numVids++;
             break;
