@@ -611,7 +611,7 @@ _XkbFilterPointerBtn(XkbSrvInfoPtr xkbi,
         {
             XkbControlsPtr ctrls = xkbi->desc->ctrls;
             XkbControlsRec old;
-            xkbControlsNotify cn;
+            xkbControlsNotify cn = { 0 };
 
             old = *ctrls;
             AccessXCancelRepeatKey(xkbi, keycode);
@@ -705,7 +705,7 @@ _XkbFilterControls(XkbSrvInfoPtr xkbi,
         }
 
         if (change) {
-            xkbControlsNotify cn;
+            xkbControlsNotify cn = { 0 };
             XkbSrvLedInfoPtr sli;
 
             ctrls->enabled_ctrls |= change;
@@ -734,7 +734,7 @@ _XkbFilterControls(XkbSrvInfoPtr xkbi,
     else if (filter->keycode == keycode) {
         change = filter->priv;
         if (change) {
-            xkbControlsNotify cn;
+            xkbControlsNotify cn = { 0 };
             XkbSrvLedInfoPtr sli;
 
             ctrls->enabled_ctrls &= ~change;
@@ -793,7 +793,7 @@ _XkbFilterActionMessage(XkbSrvInfoPtr xkbi,
             filter->upAction = *pAction;
         }
         if (pMsg->flags & XkbSA_MessageOnPress) {
-            xkbActionMessage msg;
+            xkbActionMessage msg = { 0 };
 
             msg.keycode = keycode;
             msg.press = 1;

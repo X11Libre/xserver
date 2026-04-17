@@ -2642,7 +2642,7 @@ _XkbSetMap(ClientPtr client, DeviceIntPtr dev, xkbSetMapReq * req, char *values)
     if ((xkb->min_key_code != req->minKeyCode) ||
         (xkb->max_key_code != req->maxKeyCode)) {
         Status status;
-        xkbNewKeyboardNotify nkn;
+        xkbNewKeyboardNotify nkn = { 0 };
 
         nkn.deviceID = nkn.oldDeviceID = dev->id;
         nkn.oldMinKeyCode = xkb->min_key_code;
