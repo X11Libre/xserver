@@ -227,8 +227,8 @@ miAppendSpans(SpanGroup * spanGroup, SpanGroup * otherGroup, Spans * spans)
     if (spansCount > 0) {
         if (spanGroup->size == spanGroup->count) {
             spanGroup->size = (spanGroup->size + 8) * 2;
-            spanGroup->group =
-                reallocarray(spanGroup->group, sizeof(Spans), spanGroup->size);
+            spanGroup->group = XNFreallocarray(spanGroup->group,
+                                               sizeof(Spans), spanGroup->size);
         }
 
         spanGroup->group[spanGroup->count] = *spans;
