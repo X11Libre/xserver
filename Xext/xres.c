@@ -427,11 +427,11 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
         if (pid != -1) {
             void *ptr = AddFragment(&ctx->response,
                                     sizeof(reply) + sizeof(CARD32));
-            CARD32 *value = (void*) ((char*) ptr + sizeof(reply));
-
             if (!ptr) {
                 return FALSE;
             }
+
+            CARD32 *value = (void*) ((char*) ptr + sizeof(reply));
 
             reply.spec.mask = X_XResLocalClientPIDMask;
             reply.length = 4;
