@@ -400,7 +400,7 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
         .spec.client = client->clientAsMask,
     };
 
-    if (client->swapped) {
+    if (sendClient->swapped) {
         swapl (&reply.spec.client);
     }
 
