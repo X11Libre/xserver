@@ -910,7 +910,7 @@ UpdateDeviceState(DeviceIntPtr device, DeviceEvent *event)
                        "Ignoring event.\n", device->name);
                 return DONT_PROCESS;
             }
-            else if (v->numAxes < i) {
+            else if (v->numAxes <= i) {
                 ErrorF("[Xi] Too many valuators reported for device '%s'. "
                        "Ignoring event.\n", device->name);
                 return DONT_PROCESS;
