@@ -521,6 +521,9 @@ SProcRRChangeProviderProperty(ClientPtr client)
     case 32:
         SwapRestL(stuff);
         break;
+    default:
+        client->errorValue = stuff->format;
+        return BadValue;
     }
     return ProcRRChangeProviderProperty(client);
 }
