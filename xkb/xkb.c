@@ -1873,6 +1873,11 @@ CheckKeyActions(ClientPtr client,
     if (req->nKeyActs % 4)
         wire += 4 - (req->nKeyActs % 4);
     *wireRtrn = (CARD8 *) (((XkbAnyAction *) wire) + nActs);
+    if (nActs > 0 &&
+        !_XkbCheckRequestBounds(client, req, wire, *wireRtrn)) {
+        *nActsRtrn = _XkbErrCode2(0x25, nActs);
+        return 0;
+    }
     *nActsRtrn = nActs;
     return 1;
 }
