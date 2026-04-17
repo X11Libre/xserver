@@ -3192,17 +3192,11 @@ ProcCreateCursor(ClientPtr client)
                          &pCursor, client, stuff->cid);
 
     if (rc != Success)
-        goto bail;
-    if (!AddResource(stuff->cid, X11_RESTYPE_CURSOR, (void *) pCursor)) {
-        rc = BadAlloc;
-        goto bail;
-    }
+        return rc;
+    if (!AddResource(stuff->cid, X11_RESTYPE_CURSOR, (void *) pCursor))
+        return BadAlloc;
 
     return Success;
- bail:
-    free(srcbits);
-    free(mskbits);
-    return rc;
 }
 
 int
