@@ -659,7 +659,7 @@ ProcDbeGetVisualInfo(ClientPtr client)
 
         /* Now send off visual info items. */
         for (j = 0; j < pScrVisInfo[i].count; j++) {
-            xDbeVisInfo visInfo;
+            xDbeVisInfo visInfo = { 0 };
 
             /* Copy the data in the client data structure to a protocol
              * data structure.  We will send data to the client from the

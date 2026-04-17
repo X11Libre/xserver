@@ -319,7 +319,7 @@ static int
 ProcXvQueryAdaptors(ClientPtr client)
 {
     xvFormat format;
-    xvAdaptorInfo ainfo;
+    xvAdaptorInfo ainfo = { 0 };
     int totalSize, na, nf, rc;
     int nameSize;
     XvAdaptorPtr pa;
@@ -401,7 +401,7 @@ ProcXvQueryAdaptors(ClientPtr client)
 static int
 ProcXvQueryEncodings(ClientPtr client)
 {
-    xvEncodingInfo einfo;
+    xvEncodingInfo einfo = { 0 };
     int totalSize;
     int nameSize;
     XvPortPtr pPort;
@@ -1083,7 +1083,7 @@ ProcXvListImageFormats(ClientPtr client)
     XvPortPtr pPort;
     XvImagePtr pImage;
     int i;
-    xvImageFormatInfo info;
+    xvImageFormatInfo info = { 0 };
 
     REQUEST(xvListImageFormatsReq);
 
