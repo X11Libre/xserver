@@ -5490,12 +5490,12 @@ _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
         client->errorValue = _XkbErrCode3(0x01, 2, req->nColors);
         return BadValue;
     }
-    if (req->baseColorNdx > req->nColors) {
+    if (req->baseColorNdx >= req->nColors) {
         client->errorValue =
             _XkbErrCode3(0x03, req->nColors, req->baseColorNdx);
         return BadMatch;
     }
-    if (req->labelColorNdx > req->nColors) {
+    if (req->labelColorNdx >= req->nColors) {
         client->errorValue =
             _XkbErrCode3(0x03, req->nColors, req->labelColorNdx);
         return BadMatch;
