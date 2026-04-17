@@ -60,6 +60,7 @@ SProcRRSetScreenConfig(ClientPtr client)
 
     swapl(&stuff->drawable);
     swapl(&stuff->timestamp);
+    swapl(&stuff->configTimestamp);
     swaps(&stuff->sizeID);
     swaps(&stuff->rotation);
     return ProcRRSetScreenConfig(client);
@@ -233,6 +234,7 @@ SProcRRCreateMode(ClientPtr client)
     swaps(&modeinfo->hSyncStart);
     swaps(&modeinfo->hSyncEnd);
     swaps(&modeinfo->hTotal);
+    swaps(&modeinfo->hSkew);
     swaps(&modeinfo->vSyncStart);
     swaps(&modeinfo->vSyncEnd);
     swaps(&modeinfo->vTotal);
@@ -589,6 +591,7 @@ SProcRRCreateLease(ClientPtr client) {
 
     REQUEST_AT_LEAST_SIZE(xRRCreateLeaseReq);
     swapl(&stuff->window);
+    swapl(&stuff->lid);
     swaps(&stuff->nCrtcs);
     swaps(&stuff->nOutputs);
     SwapRestL(stuff);
