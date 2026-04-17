@@ -5233,6 +5233,8 @@ _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
     }
     CHK_ATOM_ONLY(olWire->name);
     ol = XkbAddGeomOverlay(section, olWire->name, olWire->nRows);
+    if (!ol)
+        return BadAlloc;
     rWire = (xkbOverlayRowWireDesc *) &olWire[1];
     for (r = 0; r < olWire->nRows; r++) {
         register int k;
@@ -5242,12 +5244,14 @@ _CheckSetOverlay(char **wire_inout, xkbSetGeometryReq *req,
         if (!_XkbCheckRequestBounds(client, req, rWire, rWire + 1))
             return BadLength;
 
-        if (rWire->rowUnder > section->num_rows) {
+        if (rWire->rowUnder >= section->num_rows) {
             client->errorValue = _XkbErrCode4(0x20, r, section->num_rows,
                                               rWire->rowUnder);
             return BadMatch;
         }
         row = XkbAddGeomOverlayRow(ol, rWire->rowUnder, rWire->nKeys);
+        if (!row)
+            return BadAlloc;
         kWire = (xkbOverlayKeyWireDesc *) &rWire[1];
         for (k = 0; k < rWire->nKeys; k++, kWire++) {
             if (!_XkbCheckRequestBounds(client, req, kWire, kWire + 1))
