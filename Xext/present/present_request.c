@@ -364,6 +364,7 @@ sproc_present_pixmap(ClientPtr client)
     swapll(&stuff->divisor);
     swapll(&stuff->remainder);
     swapl(&stuff->idle_fence);
+    SwapRestL(stuff);
     return proc_present_pixmap(client);
 }
 
