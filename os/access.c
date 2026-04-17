@@ -1872,7 +1872,7 @@ siHostnameCheckAddr(const char *valueString, int length, void *typePriv)
                     dotAllowed = FALSE;
                 }
             }
-            else if (((c >= 0x30) && (c <= 0x3A)) /* 0-9 */ ||
+            else if (((c >= 0x30) && (c <= 0x39)) /* 0-9 */ ||
                      ((c >= 0x61) && (c <= 0x7A)) /* a-z */ ||
                      ((c >= 0x41) && (c <= 0x5A)) /* A-Z */ ) {
                 dotAllowed = TRUE;
