@@ -562,7 +562,7 @@ static int _X_COLD
 SProcRRSetMonitor(ClientPtr client) {
     REQUEST(xRRSetMonitorReq);
 
-    REQUEST_AT_LEAST_SIZE(xRRGetMonitorsReq);
+    REQUEST_AT_LEAST_SIZE(xRRSetMonitorReq);
     swapl(&stuff->window);
     swapl(&stuff->monitor.name);
     swaps(&stuff->monitor.noutput);
@@ -570,6 +570,8 @@ SProcRRSetMonitor(ClientPtr client) {
     swaps(&stuff->monitor.y);
     swaps(&stuff->monitor.width);
     swaps(&stuff->monitor.height);
+    swapl(&stuff->monitor.widthInMillimeters);
+    swapl(&stuff->monitor.heightInMillimeters);
     SwapRestL(stuff);
     return ProcRRSetMonitor(client);
 }
