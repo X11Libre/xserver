@@ -24,6 +24,9 @@
 #include <dix-config.h>
 
 #include "os/osdep.h"
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
 
 #include "scrnintstr.h"
 #include "gcstruct.h"
@@ -508,6 +511,11 @@ miTriStrip(CARD8 op,
     int ntri;
 
     ntri = npoints - 2;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        tris = numa_alloc_interleaved(ntri * sizeof(xTriangle));
+    else
+#endif
     tris = calloc(ntri, sizeof(xTriangle));
     if (!tris)
         return;
@@ -518,6 +526,11 @@ miTriStrip(CARD8 op,
         tri->p3 = points[2];
     }
     CompositeTriangles(op, pSrc, pDst, maskFormat, xSrc, ySrc, ntri, tris);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        numa_free(tris, ntri * sizeof(xTriangle));
+    else
+#endif
     free(tris);
 }
 
@@ -533,6 +546,11 @@ miTriFan(CARD8 op,
     int ntri;
 
     ntri = npoints - 2;
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        tris = numa_alloc_interleaved(ntri * sizeof(xTriangle));
+    else
+#endif
     tris = calloc(ntri, sizeof(xTriangle));
     if (!tris)
         return;
@@ -544,6 +562,11 @@ miTriFan(CARD8 op,
         tri->p3 = points[1];
     }
     CompositeTriangles(op, pSrc, pDst, maskFormat, xSrc, ySrc, ntri, tris);
+#ifdef HAVE_NUMA
+    if (numa_available() != -1)
+        numa_free(tris, ntri * sizeof(xTriangle));
+    else
+#endif
     free(tris);
 }
 
