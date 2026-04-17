@@ -1064,6 +1064,9 @@ TouchSendOwnershipEvent(DeviceIntPtr dev, TouchPointInfoPtr ti, int reason,
     int nev, i;
     InternalEvent *tel = InitEventList(GetMaximumEventsNum());
 
+    if (!tel)
+        return;
+
     nev = GetTouchOwnershipEvents(tel, dev, ti, reason, resource, 0);
     for (i = 0; i < nev; i++)
         mieqProcessDeviceEvent(dev, tel + i, NULL);
