@@ -111,11 +111,11 @@ static Bool XkbWantRulesProp = XKB_DFLT_RULES_PROP;
 void
 XkbGetRulesDflts(XkbRMLVOSet * rmlvo)
 {
-    rmlvo->rules = strdup(XkbRulesDflt ? XkbRulesDflt : XKB_DFLT_RULES);
-    rmlvo->model = strdup(XkbModelDflt ? XkbModelDflt : XKB_DFLT_MODEL);
-    rmlvo->layout = strdup(XkbLayoutDflt ? XkbLayoutDflt : XKB_DFLT_LAYOUT);
-    rmlvo->variant = strdup(XkbVariantDflt ? XkbVariantDflt : XKB_DFLT_VARIANT);
-    rmlvo->options = strdup(XkbOptionsDflt ? XkbOptionsDflt : XKB_DFLT_OPTIONS);
+    rmlvo->rules = XNFstrdup(XkbRulesDflt ? XkbRulesDflt : XKB_DFLT_RULES);
+    rmlvo->model = XNFstrdup(XkbModelDflt ? XkbModelDflt : XKB_DFLT_MODEL);
+    rmlvo->layout = XNFstrdup(XkbLayoutDflt ? XkbLayoutDflt : XKB_DFLT_LAYOUT);
+    rmlvo->variant = XNFstrdup(XkbVariantDflt ? XkbVariantDflt : XKB_DFLT_VARIANT);
+    rmlvo->options = XNFstrdup(XkbOptionsDflt ? XkbOptionsDflt : XKB_DFLT_OPTIONS);
 }
 
 void
