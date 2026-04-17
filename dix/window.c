@@ -3257,10 +3257,6 @@ TileScreenSaver(ScreenPtr pScreen, int kind)
             else
                 cursor = 0;
         }
-        else {
-            free(srcbits);
-            free(mskbits);
-        }
     }
 
     pWin = pScreen->screensaver.pWindow =
