@@ -117,7 +117,6 @@ SProcRRGetScreenResourcesCurrent(ClientPtr client)
     REQUEST(xRRGetScreenResourcesCurrentReq);
 
     REQUEST_SIZE_MATCH(xRRGetScreenResourcesCurrentReq);
-    swaps(&stuff->length);
     swapl(&stuff->window);
     return ProcRRGetScreenResourcesCurrent(client);
 }
