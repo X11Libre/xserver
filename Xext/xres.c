@@ -432,6 +432,7 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
             }
 
             CARD32 *value = (void*) ((char*) ptr + sizeof(reply));
+            *value = pid;
 
             reply.spec.mask = X_XResLocalClientPIDMask;
             reply.length = 4;
@@ -442,7 +443,6 @@ ConstructClientIdValue(ClientPtr sendClient, ClientPtr client, CARD32 mask,
                 swapl (value);
             }
             memcpy(ptr, &reply, sizeof(reply));
-            *value = pid;
 
             ctx->resultBytes += sizeof(reply) + sizeof(CARD32);
             ++ctx->numIds;
