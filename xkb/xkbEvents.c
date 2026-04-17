@@ -474,7 +474,7 @@ XkbHandleBell(BOOL force,
               void *pCtrl,
               CARD8 class, Atom name, WindowPtr pWin, ClientPtr pClient)
 {
-    xkbBellNotify bn;
+    xkbBellNotify bn = { 0 };
     int initialized;
     XkbSrvInfoPtr xkbi;
     XkbInterestPtr interest;
