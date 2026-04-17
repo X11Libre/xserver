@@ -166,6 +166,7 @@ subdir('bigreq')
 subdir('damage')
 subdir('sync')
 subdir('bugs')
+subdir('pyxtest')
 
 if build_xorg
 # Tests that require at least some DDX functions in order to fully link
