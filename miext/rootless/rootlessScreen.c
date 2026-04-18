@@ -314,8 +314,8 @@ RootlessGlyphs(CARD8 op, PicturePtr pSrc, PicturePtr pDst,
                     x2 = x1 + glyph->info.width;
                     y2 = y1 + glyph->info.height;
 
-                    box.x1 = max(box.x1, x1);
-                    box.y1 = max(box.y1, y1);
+                    box.x1 = min(box.x1, x1);
+                    box.y1 = min(box.y1, y1);
                     box.x2 = max(box.x2, x2);
                     box.y2 = max(box.y2, y2);
 
