@@ -120,10 +120,20 @@ hwEnableIO(void)
     char *buf=NULL, target[5];
     FILE *fp;
 
-    if (ioperm(0, 1024, 1)) {
-        ErrorF("xf86EnableIO: failed to enable I/O ports 0000-03ff (%s)\n",
+    /* xf86-video-vesa and others (at least mach64) need access to all I/O ports */
+    if (iopl(3)) {
+        ErrorF("xf86EnableIO: failed to set I/O privilege level to 3 (%s)\n",
+           strerror(errno));
+        /* Since Linux 2.6.8, 65,536 I/O ports can be specified */
+        if (ioperm(0, 65536, 1)) {
+            ErrorF("xf86EnableIO: failed to enable I/O ports 0000-ffff (%s)\n",
                strerror(errno));
-        return FALSE;
+            if (ioperm(0, 1024, 1)) {
+                ErrorF("xf86EnableIO: failed to enable I/O ports 0000-03ff (%s)\n",
+                   strerror(errno));
+                return FALSE;
+            }
+        }
     }
 
 #if !defined(__alpha__)
