@@ -536,7 +536,7 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
     dev->key = calloc(1, sizeof(*dev->key));
     if (!dev->key) {
         ErrorF("XKB: Failed to allocate key class\n");
-        return FALSE;
+        goto unwind_rmlvo;
     }
     dev->key->sourceid = dev->id;
 
@@ -655,6 +655,8 @@ InitKeyboardDeviceStructInternal(DeviceIntPtr dev, XkbRMLVOSet * rmlvo,
  unwind_key:
     free(dev->key);
     dev->key = NULL;
+ unwind_rmlvo:
+    XkbFreeRMLVOSet(&rmlvo_dflts, FALSE);
     return FALSE;
 }
 
