@@ -111,7 +111,8 @@ xf86PciProbe(void)
             xf86PciVideoInfo[num - 1] = info;
 
             pci_device_probe(info);
-            if (primaryBus.type == BUS_NONE && pci_device_is_boot_vga(info)) {
+            if (primaryBus.type == BUS_NONE && (pci_device_is_boot_vga(info) ||
+                                                pci_device_is_boot_display(info))) {
                 primaryBus.type = BUS_PCI;
                 primaryBus.id.pci = info;
             }
