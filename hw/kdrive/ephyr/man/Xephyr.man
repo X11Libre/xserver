@@ -98,6 +98,8 @@ at the end is interpreted as the ascii character '+')
 .I a
 key is pressed)
 .RE
+.BI \-title " title"
+Set the window title in the WM_NAME property.
 .SH "SIGNALS"
 Send a SIGUSR1 to the server (e.g. pkill \-USR1 Xephyr) to
 toggle the debugging mode.
