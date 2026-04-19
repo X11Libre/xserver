@@ -756,7 +756,7 @@ XkbAddGeomDoodad(XkbGeometryPtr geom, XkbSectionPtr section, Atom name)
             return doodad;
     }
     if (section) {
-        if ((section->num_doodads >= geom->sz_doodads) &&
+        if ((section->num_doodads >= section->sz_doodads) &&
             (_XkbAllocDoodads(section, 1) != Success)) {
             return NULL;
         }
