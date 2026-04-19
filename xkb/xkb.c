@@ -2966,7 +2966,7 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
                 return BadAlloc;
             }
         }
-        else if (req->truncateSI) {
+        else if (req->truncateSI || req->firstSI + req->nSI > compat->num_si) {
             compat->num_si = req->firstSI + req->nSI;
         }
         sym = &compat->sym_interpret[req->firstSI];
