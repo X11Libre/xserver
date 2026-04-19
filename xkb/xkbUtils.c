@@ -1046,7 +1046,7 @@ _XkbCopyClientMap(XkbDescPtr src, XkbDescPtr dst)
                     if (dtype->num_levels && dtype->level_names &&
                         i < dst->map->num_types)
                         free(dtype->level_names);
-                    dtype->num_levels = 0;
+                    dtype->num_levels = stype->num_levels;
                     dtype->level_names = NULL;
                 }
 
