@@ -278,7 +278,8 @@ ProcRRSetScreenSize(ClientPtr client)
             };
             pixman_f_transform_bounds(&crtc->f_transform, &display_box);
 
-            if (display_box.x2 > stuff->width || display_box.y2 > stuff->height)
+            if (crtc->x + mode->mode.width > stuff->width ||
+                crtc->y + mode->mode.height > stuff->height)
                 return BadMatch;
         }
     }
