@@ -4775,20 +4775,13 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
      * this doesn't happen, there shouldn't be any issues.
      */
 
-    int num_dimensions = !(max_width == max_height);
-    if (min_width > min_height) {
-        for(int j = min_height; j <= min_width; j *= 2) {
-            num_dimensions++;
-        }
-    } else {
-        for(int j = min_width; j <= min_height; j *= 2) {
-            num_dimensions++;
-        }
-
-    }
-
-    for (int j = MAX(min_width, min_height) * 2; j <= MIN(max_width, max_height); j *= 2) {
+    int num_dimensions = 0;
+    for (int i = MIN(min_width, min_height), max = MAX(max_width, max_height); ; i *= 2) {
+        i = MIN(i, max); /* handle not power of 2 */
         num_dimensions++;
+        if (i >= max) {
+            break;
+        }
     }
 
     void *tmp = realloc(drmmode_cursor->dimensions, num_dimensions * sizeof(drmmode_cursor_dim_rec));
@@ -4800,33 +4793,21 @@ static void drmmode_probe_cursor_size(xf86CrtcPtr crtc)
     }
 
     drmmode_cursor->dimensions = tmp;
-    drmmode_cursor->num_dimensions = num_dimensions;
+    drmmode_cursor->num_dimensions = 0;
 
-    int idx = 0;
+#define CLAMP(val,a,b) MAX((a), MIN((b), (val)))
 
-    if (min_width > min_height) {
-        for(int j = min_height; j <= min_width; j *= 2) {
-            drmmode_cursor->dimensions[idx].width = min_width;
-            drmmode_cursor->dimensions[idx].height = j;
-            idx++;
-        }
-    } else {
-        for(int j = min_width; j <= min_height; j *= 2) {
-            drmmode_cursor->dimensions[idx].width = j;
-            drmmode_cursor->dimensions[idx].height = min_height;
-            idx++;
+    for (int i = MIN(min_width, min_height), max = MAX(max_width, max_height); ; i *= 2) {
+        i = MIN(i, max); /* handle not power of 2 */
+        drmmode_cursor->dimensions[drmmode_cursor->num_dimensions].width  = CLAMP(i, min_width, max_width);
+        drmmode_cursor->dimensions[drmmode_cursor->num_dimensions].height = CLAMP(i, min_height, max_height);
+        drmmode_cursor->num_dimensions++;
+        if (i >= max) {
+            break;
         }
     }
 
-    for (int j = MAX(min_width, min_height) * 2; j <= MIN(max_width, max_height); j *= 2) {
-        drmmode_cursor->dimensions[idx].width = j;
-        drmmode_cursor->dimensions[idx].height = j;
-        idx++;
-    }
-
-    /* maximum size */
-    drmmode_cursor->dimensions[num_dimensions - 1].width = max_width;
-    drmmode_cursor->dimensions[num_dimensions - 1].height = max_height;
+#undef CLAMP
 
     xf86DrvMsgVerb(crtc->scrn->scrnIndex, X_INFO, MS_LOGLEVEL_DEBUG,
                    "Minimum cursor size: %dx%d\n",
