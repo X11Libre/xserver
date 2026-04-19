@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <errno.h>
 
 #ifdef WITH_LIBDRM
@@ -51,8 +52,31 @@
 
 #include "glamor.h"
 #include "glamor_egl.h"
+#include "glamor_egl_ext.h"
+#include "glamor_egl_priv.h"
 #include "glamor_glx_provider.h"
 #include "dri3.h"
+
+static DevPrivateKeyRec glamor_egl_screen_private_key;
+
+static inline Bool
+glamor_egl_init_screen_private(ScreenPtr screen)
+{
+    if (!dixRegisterPrivateKey(&glamor_egl_screen_private_key, PRIVATE_SCREEN, sizeof(glamor_egl_priv_t))) {
+        LogMessage(X_ERROR,
+                   "glamor%d: Failed to allocate screen private\n",
+                   screen->myNum);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static glamor_egl_priv_t*
+_glamor_egl_get_screen_private(ScreenPtr screen)
+{
+    return dixLookupPrivate(&screen->devPrivates, &glamor_egl_screen_private_key);
+}
 
 /**
  * Hack to not break xf86 drivers.
@@ -66,7 +90,7 @@
  */
 
 static glamor_egl_priv_t*
-(*glamor_egl_get_screen_private)(ScreenPtr screen) = NULL;
+(*glamor_egl_get_screen_private)(ScreenPtr screen) = _glamor_egl_get_screen_private;
 
 static void
 glamor_egl_make_current(struct glamor_context *glamor_ctx)
@@ -997,8 +1021,10 @@ static void glamor_egl_pixmap_destroy(CallbackListPtr *pcbl, ScreenPtr pScreen, 
 
     BUG_RETURN(!pixmap_priv);
 
-    if (pixmap_priv->image)
+    if (pixmap_priv->image) {
         eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
+        pixmap_priv->image = NULL;
+    }
 }
 #endif
 
@@ -1033,7 +1059,8 @@ glamor_egl_exchange_buffers(PixmapPtr front, PixmapPtr back)
 
 static void glamor_egl_pre_close_screen_cleanup(glamor_egl_priv_t *glamor_egl);
 
-static void glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
+static void
+glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, void *unused)
 {
     glamor_egl_priv_t *glamor_egl;
 #ifdef GLAMOR_HAS_GBM
@@ -1046,10 +1073,11 @@ static void glamor_egl_close_screen(CallbackListPtr *pcbl, ScreenPtr screen, voi
     screen_pixmap = screen->GetScreenPixmap(screen);
 
     pixmap_priv = glamor_get_pixmap_private(screen_pixmap);
-    BUG_RETURN(!pixmap_priv);
 
-    eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
-    pixmap_priv->image = NULL;
+    if (pixmap_priv && pixmap_priv->image) {
+        eglDestroyImageKHR(glamor_egl->display, pixmap_priv->image);
+        pixmap_priv->image = NULL;
+    }
 #endif
 
     glamor_egl_pre_close_screen_cleanup(glamor_egl);
@@ -1242,6 +1270,218 @@ glamor_egl_screen_init(ScreenPtr screen, struct glamor_context *glamor_ctx)
 #endif
 }
 
+static Bool
+glamor_query_devices_ext(EGLDeviceEXT **devices, EGLint *num_devices)
+{
+    EGLint max_devices = 0;
+
+    *devices = NULL;
+    *num_devices = 0;
+
+    if (!epoxy_has_egl_extension(NULL, "EGL_EXT_device_base") &&
+        !(epoxy_has_egl_extension(NULL, "EGL_EXT_device_query") &&
+          epoxy_has_egl_extension(NULL, "EGL_EXT_device_enumeration"))) {
+        return FALSE;
+    }
+
+    if (!eglQueryDevicesEXT(0, NULL, &max_devices)) {
+         return FALSE;
+    }
+
+    *devices = calloc(max_devices, sizeof(**devices));
+    if (*devices == NULL) {
+         return FALSE;
+    }
+
+    if (!eglQueryDevicesEXT(max_devices, *devices, num_devices)) {
+         free(*devices);
+         *devices = NULL;
+         *num_devices = 0;
+         return FALSE;
+    }
+
+    if (*num_devices < max_devices) {
+         /* Shouldn't happen */
+         void *tmp = realloc(*devices, *num_devices * sizeof(**devices));
+         if (tmp) {
+             *devices = tmp;
+         }
+    }
+
+    return TRUE;
+}
+
+static inline Bool
+glamor_egl_device_matches_fd(EGLDeviceEXT device, int fd)
+{
+    const char *dev_file = eglQueryDeviceStringEXT(device, EGL_DRM_DEVICE_FILE_EXT);
+    if (!dev_file) {
+        return FALSE;
+    }
+
+    int dev_fd = open(dev_file, O_RDWR);
+    if (dev_fd < 0) {
+        return FALSE;
+    }
+
+    /**
+     * From https://pubs.opengroup.org/onlinepubs/009696699/basedefs/sys/stat.h.html
+     *
+     * The st_ino and st_dev fields taken together uniquely identify the file within the system.
+     */
+    struct stat stat1, stat2;
+    if(fstat(dev_fd, &stat2) < 0) {
+        close(dev_fd);
+        return FALSE;
+    }
+
+    close(dev_fd);
+
+    if(fstat(fd, &stat1) < 0) {
+        return FALSE;
+    }
+
+    return (stat1.st_dev == stat2.st_dev) && (stat1.st_ino == stat2.st_ino);
+}
+
+
+/**
+ * generic egl extension parser
+ */
+static inline Bool
+glamor_egl_device_has_extension(const char *dev_ext, const char *ext)
+{
+    if (!dev_ext) {
+        return FALSE;
+    }
+
+    int len = strlen(ext);
+
+    for (;;) {
+        dev_ext = strstr(dev_ext, ext);
+        if (!dev_ext) {
+            return FALSE;
+        }
+        if (dev_ext[len] == '\0' ||
+            dev_ext[len] == ' ') {
+            return TRUE;
+        }
+    }
+
+    /* Unreachable */
+    return FALSE;
+}
+
+static inline const char*
+glamor_egl_device_get_name(EGLDeviceEXT device)
+{
+/**
+ * For some reason, this isn't part of the epoxy headers.
+ * It is part of EGL/eglext.h, but we can't include that
+ * alongside the epoxy headers.
+ *
+ * See: https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_device_persistent_id.txt
+ * for the spec where this is defined
+ */
+#ifndef EGL_DRIVER_NAME_EXT
+#define EGL_DRIVER_NAME_EXT 0x335E
+#endif
+
+/**
+ * Same for this one
+ *
+ * See: https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_device_query_name.txt
+ * for the spec where this is defined
+ */
+#ifndef EGL_RENDERER_EXT
+#define EGL_RENDERER_EXT 0x335F
+#endif
+
+    const char *dev_ext = eglQueryDeviceStringEXT(device, EGL_EXTENSIONS);
+
+    const char *driver_name = glamor_egl_device_has_extension(dev_ext, "EGL_EXT_device_persistent_id") ?
+                              eglQueryDeviceStringEXT(device, EGL_DRIVER_NAME_EXT) : NULL;
+
+    if (driver_name) {
+        return driver_name;
+    }
+
+    /* This might seem like overkill, but it's actually needed for the nvidia 470 driver */
+    if (glamor_egl_device_has_extension(dev_ext, "EGL_EXT_device_query_name")) {
+        const char *egl_renderer = eglQueryDeviceStringEXT(device, EGL_RENDERER_EXT);
+        if (egl_renderer) {
+            return strstr(egl_renderer, "NVIDIA") ? "nvidia" : "mesa";
+        }
+        const char *egl_vendor = eglQueryDeviceStringEXT(device, EGL_VENDOR);
+        if (egl_vendor) {
+            return strstr(egl_vendor, "NVIDIA") ? "nvidia" : "mesa";
+        }
+    }
+
+    return NULL;
+}
+
+/**
+ * Find the desired EGLDevice for our config.
+ *
+ * If strict == 2, we are looking for EGLDevices with names and,
+ * if a glvnd vendor was passed, an exact match between the
+ * device's name, and the desired vendor.
+ *
+ * If strict == 1, we are looking for EGLDevices with names and,
+ * if a glvnd vendor was passed, a match between the gl vendor library
+ * provider and the desired vendor's library.
+ *
+ * If strict == 0, we accept all devices, even those with no names.
+ *
+ * Regardless of success/failure, and regardless of strictness level,
+ * we save the statically allocated string with the EGLDevice's name
+ * in *driver_name, even if that name is NULL.
+ */
+static inline Bool
+glamor_egl_device_matches_config(EGLDeviceEXT device,
+                                 glamor_egl_priv_t *glamor_egl,
+                                 int strict,
+                                 const char** driver_name)
+{
+    *driver_name = glamor_egl_device_get_name(device);
+
+    if (glamor_egl->fd >= 0 &&
+        !glamor_egl_device_matches_fd(device, glamor_egl->fd)) {
+        return FALSE;
+    }
+
+    if (strict <= 0) {
+        return TRUE;
+    }
+
+    if (*driver_name == NULL) {
+        return FALSE;
+    }
+
+    if (!glamor_egl->glvnd_vendor) {
+        return TRUE;
+    }
+
+    if (!strcmp(*driver_name, glamor_egl->glvnd_vendor)) {
+        return TRUE;
+    }
+
+    if (strict >= 2) {
+        return FALSE;
+    }
+
+    /**
+     * This is not specific to nvidia,
+     * but I don't know of any gl library vendors
+     * other than mesa and nvidia
+     */
+    Bool device_is_nvidia = !!strstr(*driver_name, "nvidia");
+    Bool config_is_nvidia = !!strstr(glamor_egl->glvnd_vendor, "nvidia");
+
+    return device_is_nvidia == config_is_nvidia;
+}
+
 static void
 glamor_egl_pre_close_screen_cleanup(glamor_egl_priv_t *glamor_egl)
 {
@@ -1280,53 +1520,133 @@ void glamor_egl_cleanup(glamor_egl_priv_t *glamor_egl)
 #endif
 }
 
+void glamor_egl_cleanup_screen(ScreenPtr screen)
+{
+    glamor_egl_cleanup(glamor_egl_get_screen_private(screen));
+}
+
+static void
+glamor_egl_chose_configs(EGLDisplay display, const EGLint *attrib_list,
+                         EGLConfig **configs, EGLint *num_configs)
+{
+    EGLint max_configs = 0;
+    *configs = NULL;
+    *num_configs = 0;
+    if (!eglChooseConfig(display, attrib_list, NULL, 0, &max_configs) || max_configs == 0) {
+        return;
+    }
+    *configs = calloc(max_configs, sizeof(EGLConfig));
+    if (*configs == NULL) {
+        return;
+    }
+    if (!eglChooseConfig(display, attrib_list, *configs, max_configs, num_configs) || *num_configs == 0) {
+        free(*configs);
+        *configs = NULL;
+        *num_configs = 0;
+    }
+    if (*num_configs < max_configs) {
+        /* Shouldn't happen */
+        void *tmp = realloc(*configs, *num_configs * sizeof(EGLConfig));
+        if (tmp) {
+            *configs = tmp;
+        }
+    }
+}
+static EGLContext
+glamor_egl_create_context(EGLDisplay display,
+                          const EGLint *config_attrib_list,
+                          const EGLint **ctx_attrib_lists, int num_attr_lists)
+{
+    EGLConfig *configs = NULL;
+    EGLint num_configs = 0;
+    EGLContext ctx = EGL_NO_CONTEXT;
+    /* Try creating a no-config context, maybe we can skip all the config stuff */
+    /* if (epoxy_has_egl_extension(display, "EGL_KHR_no_config_context")) */
+    for (int j = 0; j < num_attr_lists; j++) {
+        ctx = eglCreateContext(display, EGL_NO_CONFIG_KHR,
+                               EGL_NO_CONTEXT, ctx_attrib_lists[j]);
+        if (ctx != EGL_NO_CONTEXT) {
+            return ctx;
+        }
+    }
+    glamor_egl_chose_configs(display, config_attrib_list,
+                             &configs, &num_configs);
+    for (int i = 0; i < num_configs; i++) {
+        for (int j = 0; j < num_attr_lists; j++) {
+            ctx = eglCreateContext(display, configs[i],
+                                   EGL_NO_CONTEXT, ctx_attrib_lists[j]);
+            if (ctx != EGL_NO_CONTEXT) {
+                free(configs);
+                return ctx;
+            }
+        }
+    }
+    free(configs);
+    return EGL_NO_CONTEXT;
+}
+
 static Bool
 glamor_egl_try_big_gl_api(glamor_egl_priv_t *glamor_egl)
 {
-    if (eglBindAPI(EGL_OPENGL_API)) {
-        static const EGLint config_attribs_core[] = {
-            EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
-            EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
-            EGL_CONTEXT_MAJOR_VERSION_KHR,
-            GLAMOR_GL_CORE_VER_MAJOR,
-            EGL_CONTEXT_MINOR_VERSION_KHR,
-            GLAMOR_GL_CORE_VER_MINOR,
-            EGL_NONE
-        };
-        static const EGLint config_attribs[] = {
-            EGL_NONE
-        };
+    static const EGLint config_attribs_core[] = {
+        EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
+        EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
+        EGL_CONTEXT_MAJOR_VERSION_KHR,
+        GLAMOR_GL_CORE_VER_MAJOR,
+        EGL_CONTEXT_MINOR_VERSION_KHR,
+        GLAMOR_GL_CORE_VER_MINOR,
+        EGL_NONE
+    };
+    static const EGLint config_attribs[] = {
+        EGL_NONE
+    };
 
-        glamor_egl->context = eglCreateContext(glamor_egl->display,
-                                               EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT,
-                                               config_attribs_core);
+    static const EGLint* ctx_attrib_lists[] =
+        { config_attribs_core, config_attribs };
 
-        if (glamor_egl->context == EGL_NO_CONTEXT)
-            glamor_egl->context = eglCreateContext(glamor_egl->display,
-                                                   EGL_NO_CONFIG_KHR,
-                                                   EGL_NO_CONTEXT,
-                                                   config_attribs);
+    static const EGLint config_attrib_list[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+        EGL_CONFORMANT, EGL_OPENGL_BIT,
+        EGL_SURFACE_TYPE, EGL_DONT_CARE,
+        EGL_NONE
+    };
+
+    if (!eglBindAPI(EGL_OPENGL_API)) {
+        LogMessage(X_ERROR, "glamor: Failed to bind GL API.\n");
+        return FALSE;
     }
 
-    if (glamor_egl->context != EGL_NO_CONTEXT) {
-        if (!eglMakeCurrent(glamor_egl->display,
-                            EGL_NO_SURFACE, EGL_NO_SURFACE, glamor_egl->context)) {
-            LogMessage(X_ERROR,
-                       "Failed to make GL context current\n");
-            return FALSE;
-        }
+    glamor_egl->context = glamor_egl_create_context(glamor_egl->display,
+                                                    config_attrib_list,
+                                                    ctx_attrib_lists,
+                                                    ARRAY_SIZE(ctx_attrib_lists));
 
-        if (epoxy_gl_version() < 21) {
-            LogMessage(X_INFO,
-                       "glamor: Ignoring GL < 2.1, falling back to GLES.\n");
-            eglDestroyContext(glamor_egl->display, glamor_egl->context);
-            glamor_egl->context = EGL_NO_CONTEXT;
-        }
-        LogMessage(X_INFO,
-            "glamor: Using OpenGL %d.%d context.\n",
-            epoxy_gl_version() / 10,
-            epoxy_gl_version() % 10);
+    if (glamor_egl->context == EGL_NO_CONTEXT) {
+        LogMessage(X_ERROR, "Failed to create GL context\n");
+        return FALSE;
     }
+
+    if (!eglMakeCurrent(glamor_egl->display,
+                        EGL_NO_SURFACE, EGL_NO_SURFACE, glamor_egl->context)) {
+        LogMessage(X_ERROR, "Failed to make GL context current\n");
+
+        eglDestroyContext(glamor_egl->display, glamor_egl->context);
+        glamor_egl->context = EGL_NO_CONTEXT;
+        return FALSE;
+    }
+    if (epoxy_gl_version() < 21) {
+        LogMessage(X_INFO, "glamor: Ignoring GL < 2.1, falling back to GLES.\n");
+
+        eglDestroyContext(glamor_egl->display, glamor_egl->context);
+        glamor_egl->context = EGL_NO_CONTEXT;
+        return FALSE;
+    }
+
+    LogMessage(X_INFO,
+        "glamor: Using OpenGL %d.%d context.\n",
+        epoxy_gl_version() / 10,
+        epoxy_gl_version() % 10);
+
     return TRUE;
 }
 
@@ -1337,28 +1657,45 @@ glamor_egl_try_gles_api(glamor_egl_priv_t *glamor_egl)
         EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
     };
+
+    static const EGLint* ctx_attrib_lists[] =
+        { config_attribs };
+
+    static const EGLint config_attrib_list[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_CONFORMANT, EGL_OPENGL_ES2_BIT,
+        EGL_SURFACE_TYPE, EGL_DONT_CARE,
+        EGL_NONE
+    };
+
+
     if (!eglBindAPI(EGL_OPENGL_ES_API)) {
-        LogMessage(X_ERROR,
-                    "glamor: Failed to bind GLES API.\n");
+        LogMessage(X_ERROR, "glamor: Failed to bind GLES API.\n");
         return FALSE;
     }
 
-    glamor_egl->context = eglCreateContext(glamor_egl->display,
-                                            EGL_NO_CONFIG_KHR, EGL_NO_CONTEXT,
-                                            config_attribs);
+    glamor_egl->context = glamor_egl_create_context(glamor_egl->display,
+                                                    config_attrib_list,
+                                                    ctx_attrib_lists,
+                                                    ARRAY_SIZE(ctx_attrib_lists));
 
-    if (glamor_egl->context != EGL_NO_CONTEXT) {
-        if (!eglMakeCurrent(glamor_egl->display,
-                            EGL_NO_SURFACE, EGL_NO_SURFACE, glamor_egl->context)) {
-            LogMessage(X_ERROR,
-                       "Failed to make GLES context current\n");
-            return FALSE;
-        }
-        LogMessage(X_INFO,
-                "glamor: Using OpenGL ES %d.%d context.\n",
-                epoxy_gl_version() / 10,
-                epoxy_gl_version() % 10);
+    if (glamor_egl->context == EGL_NO_CONTEXT) {
+        LogMessage(X_ERROR, "Failed to create GLES context\n");
+        return FALSE;
     }
+    if (!eglMakeCurrent(glamor_egl->display,
+                        EGL_NO_SURFACE, EGL_NO_SURFACE, glamor_egl->context)) {
+        eglDestroyContext(glamor_egl->display, glamor_egl->context);
+        glamor_egl->display = EGL_NO_CONTEXT;
+        LogMessage(X_ERROR, "Failed to make GLES context current\n");
+        return FALSE;
+    }
+
+    LogMessage(X_INFO,
+               "glamor: Using OpenGL ES %d.%d context.\n",
+               epoxy_gl_version() / 10,
+               epoxy_gl_version() % 10);
+
     return TRUE;
 }
 
@@ -1378,12 +1715,133 @@ gbm_create_device_by_name(int fd, const char* name)
 }
 #endif
 
+static Bool
+glamor_egl_init_display(glamor_egl_priv_t *glamor_egl)
+{
+    EGLDeviceEXT *devices = NULL;
+    EGLint num_devices = 0;
+    const char *driver_name = NULL;
+    /**
+     * If the user didn't give us a GL driver/library name,
+     * we populate it with what we queried
+     */
+#define GLAMOR_EGL_TRY_PLATFORM(platform, native, platform_fallback) \
+    glamor_egl->display = glamor_egl_get_display2(platform, native, platform_fallback); \
+    if (glamor_egl->display == EGL_NO_DISPLAY) { \
+        LogMessage(X_ERROR, "glamor: eglGetDisplay(" #platform ", " #native ") failed\n"); \
+    } else { \
+        if (eglInitialize(glamor_egl->display, NULL, NULL)) { \
+            if (!glamor_egl->glvnd_vendor && driver_name) { \
+                glamor_egl->glvnd_vendor = strdup(driver_name); \
+            } \
+            LogMessage(X_INFO, "glamor: eglInitialize() succeeded on " #platform "\n"); \
+            free(devices); \
+            return TRUE; \
+        } \
+        LogMessage(X_ERROR, "glamor: eglInitialize() failed on " #platform "\n"); \
+        eglTerminate(glamor_egl->display); \
+        glamor_egl->display = EGL_NO_DISPLAY; \
+    }
+
+#ifdef GLAMOR_HAS_GBM
+    if (glamor_egl->fd >= 0) {
+        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_KHR, glamor_egl->gbm, FALSE);
+        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_MESA, glamor_egl->gbm, TRUE);
+    }
+#endif
+
+    if (glamor_query_devices_ext(&devices, &num_devices)) {
+#define GLAMOR_EGL_TRY_PLATFORM_DEVICE(strict) \
+        for (uint32_t i = 0; i < num_devices; i++) { \
+            if (glamor_egl_device_matches_config(devices[i], glamor_egl, strict, &driver_name)) { \
+                GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, devices[i], TRUE); \
+            } \
+        }
+
+        GLAMOR_EGL_TRY_PLATFORM_DEVICE(2);
+        GLAMOR_EGL_TRY_PLATFORM_DEVICE(1);
+        GLAMOR_EGL_TRY_PLATFORM_DEVICE(0);
+
+#undef GLAMOR_EGL_TRY_PLATFORM_DEVICE
+    }
+    driver_name = NULL;
+
+    /**
+     * We only try these falbacks if we don't have an fd passed, since we
+     * have to do some guessing anyway to find the desired gpu.
+     *
+     * Trying these in multi-card setups risks a screen driven by one card
+     * being mapped a, EGLDisplay backed by a different card, which can break.
+     *
+     * We actualy can specify the device using EGL_EXT_explicit_device:
+     * https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_explicit_device.txt
+     *
+     * However, it doesn't seem worth it to implement this fallback, given
+     * we're already trying the device platform, and the extension is
+     * relatively new (2022), which means that it will be missing on a lot of cards.
+     */
+    if (glamor_egl->fd < 0) {
+        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, FALSE);
+
+        /**
+         * From https://registry.khronos.org/EGL/extensions/KHR/EGL_KHR_platform_gbm.txt
+         *
+         * If <native_display> is EGL_DEFAULT_DISPLAY,
+         * then the resultant EGLDisplay will be backed by some
+         * implementation-chosen GBM device.
+         */
+        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_KHR, EGL_DEFAULT_DISPLAY, FALSE);
+        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_GBM_MESA, EGL_DEFAULT_DISPLAY, FALSE);
+
+        /**
+         * According to https://registry.khronos.org/EGL/extensions/EXT/EGL_EXT_platform_device.txt :
+         *
+         * When <platform> is EGL_PLATFORM_DEVICE_EXT, <native_display> must
+         * be an EGLDeviceEXT object.  Platform-specific extensions may
+         * define other valid values for <platform>.
+         *
+         * As far as I know, this is the relevant standard, and it has not been superceeded in this regard.
+         * However, some vendors do allow passing EGL_DEFAULT_DISPLAY as the <native_display> argument.
+         * So, while this is incorrect according to the standard, it doesn't hurt, and it actually does
+         * something with some vendors (notably intel from my testing).
+         */
+        GLAMOR_EGL_TRY_PLATFORM(EGL_PLATFORM_DEVICE_EXT, EGL_DEFAULT_DISPLAY, TRUE);
+    }
+
+#undef GLAMOR_EGL_TRY_PLATFORM
+
+    free(devices);
+    return FALSE;
+}
+
 Bool
-glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
+glamor_egl_init_internal(glamor_egl_conf_t* glamor_egl_conf, Bool *compat_ret)
 {
     const GLubyte *renderer;
+    glamor_egl_priv_t* glamor_egl = NULL;
 
-    glamor_egl_get_screen_private = glamor_egl->GLAMOR_EGL_PRIV_PROC;
+    if (compat_ret) {
+        *compat_ret = TRUE;
+    }
+
+    if (glamor_egl_conf->GLAMOR_EGL_PRIV_PROC) {
+        glamor_egl_get_screen_private = glamor_egl_conf->GLAMOR_EGL_PRIV_PROC;
+        glamor_egl = glamor_egl_conf->glamor_egl_priv;
+    } else {
+        if (!glamor_egl_conf->screen ||
+            !glamor_egl_init_screen_private(glamor_egl_conf->screen)) {
+            goto error;
+        }
+        glamor_egl = glamor_egl_get_screen_private(glamor_egl_conf->screen);
+    }
+
+    memset(glamor_egl, 0, sizeof(*glamor_egl));
+
+    if (glamor_egl_conf->glvnd_vendor) {
+        glamor_egl->glvnd_vendor = glamor_egl_conf->glvnd_vendor;
+        glamor_egl->exact_glvnd_vendor = TRUE;
+    }
+    glamor_egl->fd = glamor_egl_conf->fd;
 
 #ifdef GLAMOR_HAS_GBM
     if (glamor_egl->fd >= 0) {
@@ -1394,26 +1852,21 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
 
         if (glamor_egl->gbm == NULL) {
             ErrorF("couldn't create gbm device\n");
-            goto error;
+            glamor_egl->fd = -1;
+            if (compat_ret) {
+                *compat_ret = FALSE;
+            }
         }
 
-        const char* gbm_backend = gbm_device_get_backend_name(glamor_egl->gbm);
+        const char* gbm_backend = glamor_egl->gbm ?
+                                  gbm_device_get_backend_name(glamor_egl->gbm) : NULL;
         if (gbm_backend && !strcmp(gbm_backend, "dumb")) {
             glamor_egl->linear_only = TRUE;
         }
     }
 #endif
 
-    glamor_egl->display = glamor_egl_get_display(EGL_PLATFORM_GBM_MESA,
-                                                 glamor_egl->gbm);
-    if (!glamor_egl->display) {
-        LogMessage(X_ERROR, "eglGetDisplay() failed\n");
-        goto error;
-    }
-
-    if (!eglInitialize(glamor_egl->display, NULL, NULL)) {
-        LogMessage(X_ERROR, "eglInitialize() failed\n");
-        glamor_egl->display = EGL_NO_DISPLAY;
+    if (!glamor_egl_init_display(glamor_egl)) {
         goto error;
     }
 
@@ -1423,51 +1876,46 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
 		goto error;  \
 	}
 
-#define GLAMOR_CHECK_EGL_EXTENSIONS(EXT1, EXT2)	 \
-	if (!epoxy_has_egl_extension(glamor_egl->display, "EGL_" #EXT1) &&  \
-	    !epoxy_has_egl_extension(glamor_egl->display, "EGL_" #EXT2)) {  \
-		ErrorF("EGL_" #EXT1 " or EGL_" #EXT2 " required.\n");  \
-		goto error;  \
-	}
-
     GLAMOR_CHECK_EGL_EXTENSION(KHR_surfaceless_context);
-    GLAMOR_CHECK_EGL_EXTENSION(KHR_no_config_context);
 
-    if (!glamor_egl->force_es) {
+    if (!glamor_egl_conf->force_es) {
         if(!glamor_egl_try_big_gl_api(glamor_egl))
             goto error;
     }
 
-    if (glamor_egl->context == EGL_NO_CONTEXT && !glamor_egl->es_disallowed) {
+    if (glamor_egl->context == EGL_NO_CONTEXT && !glamor_egl_conf->es_disallowed) {
         if(!glamor_egl_try_gles_api(glamor_egl))
             goto error;
     }
 
     if (glamor_egl->context == EGL_NO_CONTEXT) {
         LogMessage(X_ERROR,
-                    "glamor: Failed to create GL or GLES2 contexts\n");
+                   "glamor: Failed to create GL or GLES2 contexts\n");
         goto error;
     }
 
     renderer = glGetString(GL_RENDERER);
-    if (!renderer) {
-        LogMessage(X_ERROR,
-                   "glGetString() returned NULL, your GL is broken\n");
-        goto error;
-    }
-    if (strstr((const char *)renderer, "softpipe")) {
-        LogMessage(X_INFO,
-                   "Refusing to try glamor on softpipe\n");
-        goto error;
-    }
-    if (!strncmp("llvmpipe", (const char *)renderer, strlen("llvmpipe"))) {
-        if (glamor_egl->llvmpipe_allowed)
-            LogMessage(X_INFO,
-                       "Allowing glamor on llvmpipe for PRIME\n");
-        else {
-            LogMessage(X_INFO,
-                       "Refusing to try glamor on llvmpipe\n");
+
+    if (!glamor_egl_conf->force_glamor) {
+        if (!renderer) {
+            LogMessage(X_ERROR,
+                       "glGetString() returned NULL, your GL is broken\n");
             goto error;
+        }
+       if (strstr((const char *)renderer, "softpipe")) {
+            LogMessage(X_INFO,
+                       "Refusing to try glamor on softpipe\n");
+            goto error;
+        }
+        if (!strncmp("llvmpipe", (const char *)renderer, sizeof("llvmpipe") - 1)) {
+            if (glamor_egl_conf->llvmpipe_allowed)
+                LogMessage(X_INFO,
+                           "Allowing glamor on llvmpipe for PRIME\n");
+            else {
+                LogMessage(X_INFO,
+                           "Refusing to try glamor on llvmpipe\n");
+                 goto error;
+            }
         }
     }
 
@@ -1477,14 +1925,17 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
      */
     lastGLContext = NULL;
 
-    if (!epoxy_has_gl_extension("GL_OES_EGL_image")) {
-        LogMessage(X_ERROR,
-                   "glamor acceleration requires GL_OES_EGL_image\n");
-        goto error;
+    /* XXX From here on, glamor initalization should not fail completely XXX */
+
+    if (glamor_egl->fd < 0) {
+        goto glamor_no_dri;
     }
 
-    LogMessage(X_INFO, "glamor X acceleration enabled on %s\n",
-               renderer);
+    if (!epoxy_has_gl_extension("GL_OES_EGL_image")) {
+        LogMessage(X_ERROR,
+                   "glamor dri acceleration requires GL_OES_EGL_image\n");
+        goto glamor_no_dri;
+    }
 
 #ifdef GBM_BO_WITH_MODIFIERS
     if (epoxy_has_egl_extension(glamor_egl->display,
@@ -1492,7 +1943,11 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
         epoxy_has_egl_extension(glamor_egl->display,
                                 "EGL_EXT_image_dma_buf_import_modifiers")) {
 
-        if (strstr((const char *)renderer, "Intel"))
+        if (glamor_egl_conf->dmabuf_forced)
+            glamor_egl->dmabuf_capable = glamor_egl_conf->dmabuf_capable;
+        else if (!renderer)
+            glamor_egl->dmabuf_capable = FALSE;
+        else if (strstr((const char *)renderer, "Intel"))
             glamor_egl->dmabuf_capable = TRUE;
         else if (strstr((const char *)renderer, "zink"))
             glamor_egl->dmabuf_capable = TRUE;
@@ -1501,7 +1956,7 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
         else if (strstr((const char *)renderer, "radeonsi"))
             glamor_egl->dmabuf_capable = TRUE;
         else
-            glamor_egl->dmabuf_capable = (glamor_egl->dmabuf_capable == TRUE);
+            glamor_egl->dmabuf_capable = FALSE;
     }
 #endif
 
@@ -1510,11 +1965,11 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
     CARD32 num_formats = 0;
     Bool found = FALSE;
     if (!glamor_get_formats_internal(glamor_egl, &num_formats, &formats)) {
-        goto error;
+        goto glamor_no_dri;
     }
 
     if (num_formats == 0) {
-        return TRUE;
+        found = TRUE;
     }
 
     for (uint32_t i = 0; i < num_formats; i++) {
@@ -1532,12 +1987,27 @@ glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl)
     if (!found) {
         LogMessage(X_ERROR,
                    "glamor: No combination of format + modifier is supported\n");
-        goto error;
+        goto glamor_no_dri;
     }
 
+    LogMessage(X_INFO, "glamor dri X acceleration enabled on %s\n",
+               renderer);
     return TRUE;
 
 error:
-    glamor_egl_cleanup(glamor_egl);
+    LogMessage(X_ERROR, "glamor X acceleration failed to initialize\n");
+    if (glamor_egl) {
+        glamor_egl_cleanup(glamor_egl);
+    }
     return FALSE;
+
+glamor_no_dri:
+    glamor_egl->fd = -1;
+
+    if (compat_ret) {
+        *compat_ret = FALSE;
+    }
+    LogMessage(X_WARNING, "glamor X acceleration enabled without dri support on %s\n",
+               renderer);
+    return TRUE;
 }
