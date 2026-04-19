@@ -240,21 +240,41 @@ static int
 ms_try_open(const char *dev)
 {
     int fd = -1;
+    uint64_t check_dumb = 0;
+    int is_master = 0;
 
     if (!dev) {
         return -1;
     }
 
     fd = open(dev, O_RDWR | O_CLOEXEC, 0);
-    if (fd >= 0) {
+
+#ifdef SEATD_LIBSEAT
+    if (fd < 0) {
+        fd = seatd_libseat_open_graphics(dev);
+    }
+#endif
+
+    if (fd < 0) {
         return fd;
     }
 
-#ifdef SEATD_LIBSEAT
-    return seatd_libseat_open_graphics(dev);
-#else
-    return -1;
-#endif
+    if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &check_dumb) < 0 || !check_dumb) {
+        close(fd);
+        return -1;
+    }
+
+    is_master = drmIsMaster(fd);
+    if (drmSetMaster(fd)) {
+        close(fd);
+        return -1;
+    }
+
+    if (!is_master) {
+        drmDropMaster(fd);
+    }
+
+    return fd;
 }
 
 static int
@@ -277,22 +297,25 @@ open_hw(const char *dev)
                 sprintf(buf, "/dev/dri/card%d", i);
 
                 if ((fd = ms_try_open(buf)) >= 0) {
-                    uint64_t check_dumb = 0;
-
-                    if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &check_dumb) >= 0 && check_dumb) {
-                        break;
-                    }
-
-                    close(fd);
-                    fd = -1;
+                    break;
                 }
             }
         }
     }
     if (fd == -1) {
-        xf86DrvMsg(-1, X_ERROR, "open %s: %s\n", dev, strerror(errno));
+        if (dev) {
+            xf86DrvMsg(-1, X_ERROR, "open %s: %s\n", dev, strerror(errno));
+        } else {
+            xf86DrvMsg(-1, X_ERROR, "failed to open /dev/dri/card[0-31]\n");
+        }
     } else if (fd < -1) {
-        xf86DrvMsg(-1, X_ERROR, "open %s: failed to open, tried seatd_libseat_open_graphics and opening node directly",dev);
+        if (dev) {
+            xf86DrvMsg(-1, X_ERROR, "open %s: failed to open, "
+                       "tried seatd_libseat_open_graphics and opening node directly", dev);
+        } else {
+            xf86DrvMsg(-1, X_ERROR, "failed to open /dev/dri/card[0-31], "
+                       "tried seatd_libseat_open_graphics and opening node directly");
+        }
 	fd = -1;
     }
 
