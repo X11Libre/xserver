@@ -841,8 +841,14 @@ set_font_authorizations(char **authorizations, int *authlen, void *client)
 
         len = strlen(hnameptr) + 1;
         result = calloc(1, len + sizeof(AUTHORIZATION_NAME) + 4);
-        if (!result)
+        if (result == NULL) {
+#if defined(HAVE_GETADDRINFO)
+            if (ai) {
+                freeaddrinfo(ai);
+            }
+#endif
             return 0;
+        }
 
         p = result;
         *p++ = sizeof(AUTHORIZATION_NAME) >> 8;
