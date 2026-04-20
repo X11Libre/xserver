@@ -31,7 +31,6 @@
 #define EGL_NO_X11
 #include <epoxy/gl.h>
 #include <epoxy/egl.h>
-#include <glamor_egl_ext.h>
 
 #include "scrnintstr.h"
 
@@ -67,7 +66,7 @@ typedef struct glamor_egl_screen_private {
 void glamor_egl_cleanup(glamor_egl_priv_t *glamor_egl);
 
 /* Initialize an egl context suitable to be used by glamor. */
-Bool glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl);
+Bool glamor_egl_init_internal(glamor_egl_priv_t* glamor_egl, Bool *compat_ret);
 
 /*
  * Create an EGLDisplay from a native display type. This is a little quirky
