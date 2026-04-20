@@ -45,6 +45,20 @@ def randr_xclient(xclient):
     return xclient, ext.opcode, output_id
 
 
+@pytest.fixture
+def randr_xclient_swapped(xclient_swapped):
+    """Provide a byte-swapped xclient with RandR initialized."""
+    ext = xclient_swapped.query_extension(Extension.RANDR)
+    if not ext:
+        pytest.skip("RANDR extension not available")
+
+    req = randr.QueryVersionRequest(opcode=ext.opcode)
+    xclient_swapped.send_request(req.to_bytes(">"))
+    xclient_swapped.recv_response(timeout=5.0)
+
+    return xclient_swapped, ext.opcode
+
+
 class TestRandROutputProperty:
     """Tests for RRChangeOutputProperty vulnerabilities."""
 
@@ -169,3 +183,128 @@ class TestRandROutputProperty:
             f"Expected BadLength (16), got error code {resp.error_code} - "
             f"integer truncation not caught by length check"
         )
+
+
+class TestRandRSetScreenConfig:
+    @pytest.mark.swapped_client
+    def test_set_screen_config_config_timestamp_swapped(
+        self, xserver, randr_xclient_swapped
+    ):
+        """
+        SProcRRSetScreenConfig was missing swapl(&stuff->configTimestamp).
+
+        First query the server's configTimestamp via GetScreenResources,
+        then send it back in SetScreenConfig.  Without the fix, the
+        unswapped configTimestamp won't match → the reply has
+        status=RRSetConfigInvalidConfigTime (1) instead of
+        RRSetConfigSuccess (0).
+
+        Fixed in commit ac45f9b29e3a ("randr: add missing byte swapping
+        for various fields").
+        """
+        conn, opcode = randr_xclient_swapped
+
+        # Get screen resources to obtain the configTimestamp
+        req = randr.GetScreenResourcesCurrentRequest(
+            opcode=opcode,
+            window=conn.root_window,
+        )
+        conn.send_request(req.to_bytes(">"))
+        resp = conn.recv_response(timeout=5.0)
+
+        assert isinstance(resp, X11Reply), f"Expected reply, got {resp}"
+        assert len(resp.data) >= 32, "Reply too short"
+
+        # xRRGetScreenResourcesReply:
+        #   [8]  timestamp(4)
+        #   [12] configTimestamp(4)
+        config_ts = struct.unpack_from(">I", resp.data, 12)[0]
+
+        req = randr.SetScreenConfigRequest(
+            opcode=opcode,
+            drawable=conn.root_window,
+            timestamp=0,  # CurrentTime
+            config_timestamp=config_ts,
+            size_id=0,
+            rotation=1,
+        )
+        conn.send_request(req.to_bytes(">"))
+        resp = conn.recv_response(timeout=5.0)
+
+        assert xserver.is_alive, "Server crashed"
+        assert isinstance(resp, X11Reply), f"Expected reply, got {resp}"
+
+        # xRRSetScreenConfigReply:
+        #   [1] status
+        # RRSetConfigSuccess = 0
+        # RRSetConfigInvalidConfigTime = 1
+        # RRSetConfigInvalidTime = 2
+        # RRSetConfigFailed = 3
+        #
+        # Without the fix, the unswapped configTimestamp fails
+        # the equality check → status 1 (RRSetConfigInvalidConfigTime).
+        status = resp.data[1]
+        assert status != 1, (
+            "SetScreenConfig status = 1 "
+            "(RRSetConfigInvalidConfigTime) - configTimestamp "
+            "was not byte-swapped correctly."
+        )
+
+
+class TestRandRCreateLease:
+    @pytest.mark.swapped_client
+    def test_create_lease_lid_swapped(self, xserver, randr_xclient_swapped):
+        """
+        SProcRRCreateLease was missing swapl(&stuff->lid).
+        Without the swap, the garbled lid fails LEGAL_NEW_RESOURCE
+        → BadIDChoice error (error code 14).
+
+        With the fix, the request should succeed far enough to reach
+        the crtc/output validation (possibly returning BadValue for
+        the empty lists, but NOT BadIDChoice).
+
+        Fixed in commit ac45f9b29e3a ("randr: add missing byte swapping
+        for various fields").
+        """
+        conn, opcode = randr_xclient_swapped
+
+        lid = conn.alloc_id()
+
+        # Get screen resources to find a crtc and output
+        req = randr.GetScreenResourcesCurrentRequest(
+            opcode=opcode,
+            window=conn.root_window,
+        )
+        conn.send_request(req.to_bytes(">"))
+        resp = conn.recv_response(timeout=5.0)
+        assert isinstance(resp, X11Reply), f"Expected reply, got {resp}"
+
+        n_crtcs = struct.unpack_from(">H", resp.data, 16)[0]
+        n_outputs = struct.unpack_from(">H", resp.data, 18)[0]
+
+        crtcs = []
+        outputs = []
+        if n_crtcs > 0:
+            crtcs = [struct.unpack_from(">I", resp.data, 32)[0]]
+        if n_outputs > 0:
+            offset = 32 + n_crtcs * 4
+            outputs = [struct.unpack_from(">I", resp.data, offset)[0]]
+
+        req = randr.CreateLeaseRequest(
+            opcode=opcode,
+            window=conn.root_window,
+            lid=lid,
+            crtcs=crtcs,
+            outputs=outputs,
+        )
+        conn.send_request(req.to_bytes(">"))
+        resp = conn.recv_response(timeout=5.0)
+
+        assert xserver.is_alive, "Server crashed"
+
+        # Without the fix: BadIDChoice (error code 14).
+        # With the fix: either success or some other error.
+        if isinstance(resp, X11Error):
+            assert resp.error_code != 14, (
+                "CreateLease returned BadIDChoice (error 14) - lid not byte-swapped"
+            )

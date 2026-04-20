@@ -236,3 +236,64 @@ class TestXIChangeProperty:
         assert values == (1, 2, 10, 20, 30), (
             f"Expected (1, 2, 10, 20, 30), got {values}"
         )
+
+
+class TestXIChangeDeviceControl:
+    @pytest.mark.swapped_client
+    @pytest.mark.xorg_only
+    def test_change_device_control_resolution_values_swapped(
+        self, xserver, xclient_swapped
+    ):
+        """
+        SProcXChangeDeviceControl did not byte-swap the resolution
+        values array for DEVICE_RESOLUTION.
+
+        Send a ChangeDeviceControl/DEVICE_RESOLUTION with a resolution
+        value that is valid in native byte order but out-of-range when
+        byte-reversed (e.g. 1000 = 0x000003E8 → 0xE8030000 reversed).
+
+        Without the fix: the garbled value exceeds max_resolution →
+        BadValue error.
+        With the fix: the correct value is in range → success reply
+        (or BadMatch if the device doesn't support it, but not BadValue).
+
+        Fixed in commit e24bd73e9d6f ("Xi: add missing byte-swap of
+        resolution values in SProcXChangeDeviceControl").
+        """
+        conn = xclient_swapped
+
+        ext = conn.query_extension(Extension.XI)
+        if not ext:
+            pytest.skip("XInput extension not available")
+
+        req = xi.XIQueryVersionRequest(opcode=ext.opcode)
+        conn.send_request(req.to_bytes(">"))
+        conn.recv_response(timeout=5.0)
+
+        ctl = xi.DeviceResolutionCtl(
+            first_valuator=0,
+            num_valuators=1,
+            resolutions=[1000],
+        )
+        ctl_bytes = ctl.to_bytes(">")
+
+        req = xi.XChangeDeviceControlRequest(
+            opcode=ext.opcode,
+            control=xi.DEVICE_RESOLUTION,
+            deviceid=xi.VirtualCorePointer,
+            control_data=ctl_bytes,
+        )
+        conn.send_request(req.to_bytes(">"))
+        resp = conn.recv_response(timeout=2.0)
+
+        assert xserver.is_alive, "Server crashed"
+
+        # Without the fix: BadValue (error code 2) because the
+        # byte-reversed resolution 0xE8030000 exceeds max_resolution.
+        # With the fix: either a reply (success) or BadMatch (device
+        # doesn't support resolution control), but NOT BadValue.
+        if isinstance(resp, X11Error):
+            assert resp.error_code != 2, (
+                "ChangeDeviceControl returned BadValue (error 2) - "
+                "resolution values not byte-swapped"
+            )

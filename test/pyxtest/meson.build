@@ -55,11 +55,17 @@ if pytest.found()
 
     # This needs to be kept in sync with the test_foo.py files in the tree
     tests_pyxtest = [
+        'test_present.py',
         'test_randr.py',
         'test_record.py',
+        'test_render.py',
         'test_screensaver.py',
+        'test_shm.py',
+        'test_vidmode.py',
+        'test_xinerama.py',
         'test_xi.py',
         'test_xkb.py',
+        'test_xres.py',
     ]
 
     test_list_data = configuration_data()

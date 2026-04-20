@@ -5,6 +5,9 @@
 import struct
 from dataclasses import dataclass
 
+# XI (v1) minor opcodes
+XChangeDeviceControl = 35
+
 # XI2 minor opcodes
 XIQueryVersion = 47
 XIPassiveGrabDevice = 54
@@ -42,6 +45,13 @@ PropModeAppend = 2
 # Virtual core device IDs (always present)
 VirtualCorePointer = 2
 VirtualCoreKeyboard = 3
+
+# Device control types (for XChangeDeviceControl)
+DEVICE_RESOLUTION = 1
+DEVICE_ABS_CALIB = 2
+DEVICE_ABS_AREA = 3
+DEVICE_CORE = 4
+DEVICE_ENABLE = 5
 
 
 @dataclass
@@ -225,3 +235,64 @@ class XIGetPropertyRequest:
             self.offset,
             self.length,
         )
+
+
+@dataclass
+class XChangeDeviceControlRequest:
+    """XChangeDeviceControl request (XI v1, minor opcode 35).
+
+    The request header is 8 bytes (xChangeDeviceControlReq), followed by
+    a device control structure that depends on the control type.
+    For DEVICE_RESOLUTION, the control is xDeviceResolutionCtl (12 bytes)
+    followed by num_valuators CARD32 values.
+    """
+
+    opcode: int
+    control: int
+    deviceid: int
+    control_data: bytes = b""
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        total = 8 + len(self.control_data)
+        pad_len = (4 - total % 4) % 4
+        length = (total + pad_len) // 4
+
+        header = struct.pack(
+            f"{byte_order}BBH HBx",
+            self.opcode,
+            XChangeDeviceControl,
+            length,
+            self.control,
+            self.deviceid,
+        )
+        return header + self.control_data + b"\x00" * pad_len
+
+
+@dataclass
+class DeviceResolutionCtl:
+    """xDeviceResolutionCtl structure (8 bytes + valuator values).
+
+    control(2) + length(2) + first_valuator(1) + num_valuators(1) + pad(2)
+    followed by num_valuators CARD32 resolution values.
+    """
+
+    first_valuator: int = 0
+    num_valuators: int = 0
+    resolutions: list[int] | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        vals = self.resolutions if self.resolutions is not None else []
+        val_data = b""
+        for v in vals:
+            val_data += struct.pack(f"{byte_order}I", v)
+
+        ctl_length = (8 + len(val_data)) // 4
+
+        header = struct.pack(
+            f"{byte_order}HH BB xx",
+            DEVICE_RESOLUTION,
+            ctl_length,
+            self.first_valuator,
+            self.num_valuators,
+        )
+        return header + val_data
