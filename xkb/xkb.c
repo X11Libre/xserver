@@ -1622,7 +1622,7 @@ CheckKeyTypes(ClientPtr client,
         }
         n = i + req->firstType;
         width = wire->numLevels;
-        if (width < 1) {
+        if (width < 1 || width > XkbMaxShiftLevel) {
             *nMapsRtrn = _XkbErrCode3(0x04, n, width);
             return 0;
         }
