@@ -55,6 +55,7 @@ if pytest.found()
 
     # This needs to be kept in sync with the test_foo.py files in the tree
     tests_pyxtest = [
+        'test_randr.py',
         'test_xi.py',
     ]
 
