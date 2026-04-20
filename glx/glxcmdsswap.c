@@ -234,7 +234,7 @@ __glXDispSwap_GetFBConfigsSGIX(__GLXclientState * cl, GLbyte * pc)
 
     __GLX_DECLARE_SWAP_VARIABLES;
 
-    REQUEST_AT_LEAST_SIZE(xGLXGetFBConfigsSGIXReq);
+    REQUEST_SIZE_MATCH(xGLXGetFBConfigsSGIXReq);
 
     __GLX_SWAP_INT(&req->screen);
     return __glXDisp_GetFBConfigsSGIX(cl, pc);
@@ -326,7 +326,7 @@ __glXDispSwap_DestroyPixmap(__GLXclientState * cl, GLbyte * pc)
 
     __GLX_DECLARE_SWAP_VARIABLES;
 
-    REQUEST_AT_LEAST_SIZE(xGLXDestroyGLXPixmapReq);
+    REQUEST_SIZE_MATCH(xGLXDestroyGLXPixmapReq);
 
     __GLX_SWAP_SHORT(&req->length);
     __GLX_SWAP_INT(&req->glxpixmap);
@@ -439,9 +439,7 @@ __glXDispSwap_ChangeDrawableAttributes(__GLXclientState * cl, GLbyte * pc)
         client->errorValue = req->numAttribs;
         return BadValue;
     }
-    if (((sizeof(xGLXChangeDrawableAttributesReq) +
-          (req->numAttribs << 3)) >> 2) < client->req_len)
-        return BadLength;
+    REQUEST_FIXED_SIZE(xGLXChangeDrawableAttributesReq, req->numAttribs << 3);
 
     attribs = (CARD32 *) (req + 1);
     __GLX_SWAP_INT_ARRAY(attribs, req->numAttribs << 1);
@@ -513,7 +511,7 @@ __glXDispSwap_DestroyWindow(__GLXclientState * cl, GLbyte * pc)
 
     __GLX_DECLARE_SWAP_VARIABLES;
 
-    REQUEST_AT_LEAST_SIZE(xGLXDestroyWindowReq);
+    REQUEST_SIZE_MATCH(xGLXDestroyWindowReq);
 
     __GLX_SWAP_INT(&req->glxwindow);
 
@@ -722,7 +720,7 @@ __glXDispSwap_GetDrawableAttributes(__GLXclientState * cl, GLbyte * pc)
 
     __GLX_DECLARE_SWAP_VARIABLES;
 
-    REQUEST_AT_LEAST_SIZE(xGLXGetDrawableAttributesReq);
+    REQUEST_SIZE_MATCH(xGLXGetDrawableAttributesReq);
 
     __GLX_SWAP_SHORT(&req->length);
     __GLX_SWAP_INT(&req->drawable);
