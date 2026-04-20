@@ -2,6 +2,7 @@
 #
 # Security tests for XKB extension vulnerabilities.
 
+import logging
 import struct
 import time
 
@@ -490,3 +491,182 @@ class TestXkbSetNames:
         time.sleep(0.5)
 
         assert xserver.is_alive, "Server crashed - truncated atoms in SetNames"
+
+
+class TestXkbSetMapNumLevels:
+    """Tests for XKB SetMap num_levels validation."""
+
+    @pytest.mark.asan
+    def test_num_levels_exceeds_max_shift_level(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-30160: CheckKeyTypes did not enforce an upper bound on
+        numLevels for non-canonical key types. A client could set
+        numLevels up to 255 via XkbSetMap. When ChangeKeyboardMapping
+        later triggers XkbUpdateKeyTypesFromCore, the function
+        XkbKeyTypesForCoreSymbols uses num_levels as groupsWidth and
+        indexes into tsyms[], a stack buffer of XkbMaxSymsPerKey (252)
+        entries. With num_levels=255, indices reach up to 1019,
+        overflowing the 252-element stack buffer.
+
+        Fixed by rejecting numLevels > XkbMaxShiftLevel (63) in
+        CheckKeyTypes alongside the existing check for numLevels < 1.
+        """
+        EVIL_NUM_LEVELS = 255
+
+        xclient, opcode = xkb_xclient
+
+        # Step 1: Get the full XKB map to discover types and key mappings.
+        map_reply = xclient.xkb_get_map(opcode, full=xkb.XkbAllMapComponentsMask)
+        assert map_reply is not None, "XkbGetMap failed"
+
+        types = map_reply.types
+        sym_maps = map_reply.sym_maps
+        explicit_map = map_reply.explicit_map
+
+        logging.debug(
+            f"We have {len(types)} types, keycodes are {map_reply.min_key_code}-{map_reply.max_key_code}"
+        )
+        logging.debug("Types:")
+        for idx, t in enumerate(types):
+            logging.debug(
+                f"type[{idx:02d}]: num_levels={t.num_levels} {'canonical' if idx < 4 else ''}"
+            )
+
+        # Step 2: Find a key with a non-canonical type (kt_index >= 4).
+        # Prefer one that already has the explicit flag set.
+        target_key = -1
+        target_type = -1
+        target_group = -1
+        has_explicit = False
+
+        logging.debug("Scanning keys for non-canonical type with explicit flag")
+        for i, sm in enumerate(sym_maps):
+            keycode = map_reply.first_key_sym + i
+            n_groups = sm.group_info & 0x0F
+            expl = explicit_map.get(keycode, 0)
+
+            for g in range(min(n_groups, 4)):
+                kt = sm.kt_index[g]
+                if kt >= 4 and (expl & (1 << g)):
+                    logging.debug(
+                        f"FOUND: key={keycode} group={g} kt_index={kt} num_levels={types[kt].num_levels} explicit=0x{expl:02x}"
+                    )
+                    # Found a key with explicit flag already set.
+                    if not has_explicit:
+                        target_key = keycode
+                        target_type = kt
+                        target_group = g
+                        has_explicit = True
+
+        # If none found with explicit flag, find any key using type >= 4.
+        if target_key < 0:
+            logging.debug(
+                "No key with explicit + non-canonical type found. Scanning for any type >=4"
+            )
+            for i, sm in enumerate(sym_maps):
+                keycode = map_reply.first_key_sym + i
+                n_groups = sm.group_info & 0x0F
+                for g in range(min(n_groups, 4)):
+                    kt = sm.kt_index[g]
+                    if kt >= 4:
+                        logging.debug(
+                            f"FOUND: key={keycode} group={g} type={kt} num_levels={types[kt].num_levels}"
+                        )
+                        target_key = keycode
+                        target_type = kt
+                        target_group = g
+                        break
+                if target_key >= 0:
+                    break
+
+        if target_key < 0:
+            pytest.skip("No key using non-canonical type found")
+
+        logging.debug(
+            f"Target: key={target_key} group={target_group} type={target_type}"
+        )
+
+        # Step 2b: Set the explicit flag on the target key if needed.
+        if not has_explicit:
+            expl_flags = explicit_map.get(target_key, 0)
+            expl_flags |= 1 << target_group
+            # Build explicit component payload: (keycode, flags) pairs
+            # for all keys that have non-zero explicit, plus our target.
+            explicit_map[target_key] = expl_flags
+            expl_payload = b""
+            for kc in sorted(explicit_map):
+                expl_payload += bytes([kc, explicit_map[kc]])
+            pad_len = (4 - len(expl_payload) % 4) % 4
+            expl_payload += b"\x00" * pad_len
+
+            req = xkb.SetMapRequest(
+                opcode=opcode,
+                present=xkb.XkbExplicitComponentsMask,
+                first_key_explicit=map_reply.first_key_explicit,
+                n_key_explicit=map_reply.n_key_explicit,
+                total_key_explicit=len(explicit_map),
+                min_key_code=map_reply.min_key_code,
+                max_key_code=map_reply.max_key_code,
+                payload=expl_payload,
+            )
+            xclient.send_request(req.to_bytes())
+            resps = xclient.flush_responses(timeout=0.5)
+            errors = [r for r in resps if isinstance(r, X11Error)]
+            assert not errors, f"SetMap(explicit) failed: {errors}"
+
+        # Step 3: Modify the target type's num_levels to 255 via
+        # XkbSetMap with XkbKeyTypesMask.  Send all types (like Xlib
+        # does), with the target type's num_levels changed.
+        # Note: GetMap and SetMap use different wire formats for map entries
+        # (8-byte xkbKTMapEntryWireDesc vs 4-byte xkbKTSetMapEntryWireDesc),
+        # so we must convert via to_set_map_wire().
+        types_payload = b""
+        for i, t in enumerate(types):
+            if i == target_type:
+                logging.debug(
+                    f"Modifying key type {i} to have num_levels {EVIL_NUM_LEVELS}"
+                )
+                types_payload += t.to_set_map_wire(num_levels=EVIL_NUM_LEVELS)
+            else:
+                types_payload += t.to_set_map_wire()
+
+        req = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask,
+            first_type=0,
+            n_types=len(types),
+            min_key_code=map_reply.min_key_code,
+            max_key_code=map_reply.max_key_code,
+            payload=types_payload,
+        )
+        xclient.send_request(req.to_bytes())
+        resps = xclient.flush_responses(timeout=0.5)
+        errors = [r for r in resps if isinstance(r, X11Error)]
+
+        # On a patched server, CheckKeyTypes rejects numLevels > XkbMaxShiftLevel (63).
+        # The SetMap must fail with an error.
+        assert errors, (
+            f"SetMap with num_levels={EVIL_NUM_LEVELS} was accepted - "
+            "server is missing the numLevels upper bound check (ZDI-CAN-30160)"
+        )
+        logging.debug(f"SetMap correctly rejected: {errors}")
+
+        # Step 4: Trigger via ChangeKeyboardMapping on the target key.
+        # On an unpatched server where the evil num_levels was accepted,
+        # XkbUpdateKeyTypesFromCore would use it as groupsWidth,
+        # overflowing the stack-allocated tsyms[252] buffer.
+        # On a patched server the SetMap was rejected above, so this
+        # is harmless — but we send it anyway to confirm the server
+        # stays alive regardless.
+        keysyms = [0x41414141 + i for i in range(8)]
+        xclient.change_keyboard_mapping(
+            first_keycode=target_key,
+            keysyms_per_keycode=8,
+            keycodes=1,
+            keysyms=keysyms,
+        )
+        time.sleep(0.5)
+
+        assert xserver.is_alive, (
+            "Server crashed - numLevels > XkbMaxShiftLevel (ZDI-CAN-30160)"
+        )

@@ -57,6 +57,19 @@ XkbNumRequiredTypes = 4
 XkbMaxLegalKeyCode = 255
 XkbNoShape = 0xFF
 
+# XkbAllMapComponentsMask
+XkbAllClientInfoMask = XkbKeyTypesMask | XkbKeySymsMask | XkbModifierMapMask
+XkbAllServerInfoMask = (
+    XkbExplicitComponentsMask
+    | XkbKeyActionsMask
+    | XkbKeyBehaviorsMask
+    | XkbVirtualModsMask
+    | XkbVirtualModMapMask
+)
+XkbAllMapComponentsMask = XkbAllClientInfoMask | XkbAllServerInfoMask
+
+XkbNumKbdGroups = 4
+
 
 @dataclass
 class UseExtensionRequest:
@@ -137,6 +150,300 @@ class GetMapRequest:
             self.n_vmod_map_keys,
             0,  # pad
         )
+
+
+@dataclass
+class GetMapReply:
+    """Parsed xkbGetMapReply (40-byte header + variable-length payload)."""
+
+    device_id: int = 0
+    min_key_code: int = 0
+    max_key_code: int = 0
+    present: int = 0
+    first_type: int = 0
+    n_types: int = 0
+    total_types: int = 0
+    first_key_sym: int = 0
+    total_syms: int = 0
+    n_key_syms: int = 0
+    first_key_act: int = 0
+    total_acts: int = 0
+    n_key_acts: int = 0
+    first_key_behavior: int = 0
+    n_key_behaviors: int = 0
+    total_key_behaviors: int = 0
+    first_key_explicit: int = 0
+    n_key_explicit: int = 0
+    total_key_explicit: int = 0
+    first_mod_map_key: int = 0
+    n_mod_map_keys: int = 0
+    total_mod_map_keys: int = 0
+    first_vmod_map_key: int = 0
+    n_vmod_map_keys: int = 0
+    total_vmod_map_keys: int = 0
+    virtual_mods: int = 0
+
+    # Parsed variable-length payload sections.
+    types: list["ParsedKeyType"] | None = None
+    sym_maps: list["ParsedSymMap"] | None = None
+    explicit_map: dict[int, int] | None = None
+
+    @classmethod
+    def from_bytes(cls, header_data: bytes, extra_data: bytes) -> "GetMapReply":
+        """Parse from a 32-byte reply header + extra data.
+
+        The standard X11 reply header is 32 bytes.  The xkbGetMapReply
+        is 40 bytes, so bytes 32-39 spill into extra_data.  After the
+        40-byte header the variable-length component data follows in a
+        fixed order: types, syms, actions, behaviors, virtual mods,
+        explicit, modifier map, virtual mod map.
+        """
+        if len(header_data) < 32:
+            raise ValueError(f"Header too short: {len(header_data)}")
+
+        # Parse the first 28 bytes (bytes 0-27 of the 40-byte reply)
+        (
+            _type,
+            device_id,
+            _seq,
+            _length,
+            min_key_code,
+            max_key_code,
+            present,
+            first_type,
+            n_types,
+            total_types,
+            first_key_sym,
+            total_syms,
+            n_key_syms,
+            first_key_act,
+            total_acts,
+            n_key_acts,
+            first_key_behavior,
+            n_key_behaviors,
+            total_key_behaviors,
+        ) = struct.unpack_from("<BBHI xxBB H BBB B H B B H B BBB", header_data, 0)
+
+        # Parse bytes 28-39 (remaining 12 bytes of the 40-byte reply header)
+        # These are at header_data[28:32] + extra_data[0:8]
+        remaining = header_data[28:32] + extra_data[:8]
+        (
+            first_key_explicit,
+            n_key_explicit,
+            total_key_explicit,
+            first_mod_map_key,
+            n_mod_map_keys,
+            total_mod_map_keys,
+            first_vmod_map_key,
+            n_vmod_map_keys,
+            total_vmod_map_keys,
+            virtual_mods,
+        ) = struct.unpack_from("<BBB BBB BBB x H", remaining, 0)
+
+        # Variable-length data starts after the 8 header bytes that
+        # spilled into extra_data.
+        data = extra_data[8:]
+        offset = 0
+
+        # 1. Key types
+        types, consumed = parse_key_types(data[offset:], n_types)
+        offset += consumed
+
+        # 2. Key sym maps
+        sym_maps, consumed = parse_sym_maps(data[offset:], n_key_syms)
+        offset += consumed
+
+        # 3. Key actions (skip)
+        if n_key_acts > 0:
+            acts_counts_size = (n_key_acts + 3) & ~3
+            offset += acts_counts_size + total_acts * 8
+
+        # 4. Key behaviors (skip)
+        if total_key_behaviors > 0:
+            offset += total_key_behaviors * 4
+
+        # 5. Virtual mods (skip)
+        if virtual_mods:
+            n_vmods = bin(virtual_mods).count("1")
+            offset += (n_vmods + 3) & ~3
+
+        # 6. Explicit components
+        explicit_map, consumed = parse_explicit_map(data[offset:], total_key_explicit)
+        offset += consumed
+
+        return cls(
+            device_id=device_id,
+            min_key_code=min_key_code,
+            max_key_code=max_key_code,
+            present=present,
+            first_type=first_type,
+            n_types=n_types,
+            total_types=total_types,
+            first_key_sym=first_key_sym,
+            total_syms=total_syms,
+            n_key_syms=n_key_syms,
+            first_key_act=first_key_act,
+            total_acts=total_acts,
+            n_key_acts=n_key_acts,
+            first_key_behavior=first_key_behavior,
+            n_key_behaviors=n_key_behaviors,
+            total_key_behaviors=total_key_behaviors,
+            first_key_explicit=first_key_explicit,
+            n_key_explicit=n_key_explicit,
+            total_key_explicit=total_key_explicit,
+            first_mod_map_key=first_mod_map_key,
+            n_mod_map_keys=n_mod_map_keys,
+            total_mod_map_keys=total_mod_map_keys,
+            first_vmod_map_key=first_vmod_map_key,
+            n_vmod_map_keys=n_vmod_map_keys,
+            total_vmod_map_keys=total_vmod_map_keys,
+            virtual_mods=virtual_mods,
+            types=types,
+            sym_maps=sym_maps,
+            explicit_map=explicit_map,
+        )
+
+
+@dataclass
+class ParsedKeyType:
+    """A parsed key type from XkbGetMap reply data."""
+
+    mask: int
+    real_mods: int
+    virtual_mods: int
+    num_levels: int
+    n_map_entries: int
+    has_preserve: bool
+    raw_wire: bytes  # The complete wire data (header + entries + preserve)
+
+    def to_set_map_wire(self, num_levels: int | None = None) -> bytes:
+        """Convert to SetMap wire format.
+
+        GetMap uses xkbKTMapEntryWireDesc (8 bytes per entry):
+            active(1), mask(1), level(1), realMods(1), virtualMods(2), pad(2)
+        SetMap uses xkbKTSetMapEntryWireDesc (4 bytes per entry):
+            level(1), realMods(1), virtualMods(2)
+        Preserve entries (xkbModsWireDesc, 4 bytes) are the same in both.
+        """
+        if num_levels is None:
+            num_levels = self.num_levels
+        # Rebuild the 8-byte header with the (possibly new) num_levels
+        header = struct.pack(
+            "<BBH BBBB",
+            self.mask,
+            self.real_mods,
+            self.virtual_mods,
+            num_levels,
+            self.n_map_entries,
+            1 if self.has_preserve else 0,
+            0,  # pad
+        )
+        # Convert each 8-byte GetMap entry to 4-byte SetMap entry
+        set_entries = b""
+        for i in range(self.n_map_entries):
+            entry_offset = 8 + i * 8  # 8-byte header + 8 bytes per GetMap entry
+            # GetMap entry: active(1), mask(1), level(1), realMods(1), virtualMods(2), pad(2)
+            _active, _mask, level, real_mods, virtual_mods, _pad = struct.unpack_from(
+                "<BB BB H H", self.raw_wire, entry_offset
+            )
+            # SetMap entry: level(1), realMods(1), virtualMods(2)
+            set_entries += struct.pack("<BBH", level, real_mods, virtual_mods)
+        # Preserve entries are already 4 bytes each (xkbModsWireDesc), same format
+        preserve_data = b""
+        if self.has_preserve:
+            preserve_offset = 8 + self.n_map_entries * 8
+            preserve_data = self.raw_wire[
+                preserve_offset : preserve_offset + self.n_map_entries * 4
+            ]
+        return header + set_entries + preserve_data
+
+
+@dataclass
+class ParsedSymMap:
+    """A parsed xkbSymMapWireDesc from XkbGetMap reply data."""
+
+    kt_index: list[int]  # 4 entries, one per group
+    group_info: int
+    width: int
+    n_syms: int
+
+
+def parse_key_types(data: bytes, n_types: int) -> tuple[list[ParsedKeyType], int]:
+    """Parse n_types key type records from wire data.
+
+    Returns (list of ParsedKeyType, bytes consumed).
+    """
+    types = []
+    offset = 0
+    for _ in range(n_types):
+        if offset + 8 > len(data):
+            break
+        mask, real_mods, virtual_mods, num_levels, n_map_entries, preserve, _pad = (
+            struct.unpack_from("<BBH BBBB", data, offset)
+        )
+        entry_size = 8 * n_map_entries
+        preserve_size = 4 * n_map_entries if preserve else 0
+        total = 8 + entry_size + preserve_size
+        raw_wire = data[offset : offset + total]
+        types.append(
+            ParsedKeyType(
+                mask=mask,
+                real_mods=real_mods,
+                virtual_mods=virtual_mods,
+                num_levels=num_levels,
+                n_map_entries=n_map_entries,
+                has_preserve=bool(preserve),
+                raw_wire=raw_wire,
+            )
+        )
+        offset += total
+    return types, offset
+
+
+def parse_sym_maps(data: bytes, n_key_syms: int) -> tuple[list[ParsedSymMap], int]:
+    """Parse n_key_syms sym map records from wire data.
+
+    Returns (list of ParsedSymMap, bytes consumed).
+    """
+    maps = []
+    offset = 0
+    for _ in range(n_key_syms):
+        if offset + 8 > len(data):
+            break
+        kt0, kt1, kt2, kt3, group_info, width, n_syms = struct.unpack_from(
+            "<BBBB BBH", data, offset
+        )
+        maps.append(
+            ParsedSymMap(
+                kt_index=[kt0, kt1, kt2, kt3],
+                group_info=group_info,
+                width=width,
+                n_syms=n_syms,
+            )
+        )
+        offset += 8 + n_syms * 4  # Skip the header + KeySym data
+    return maps, offset
+
+
+def parse_explicit_map(
+    data: bytes, total_key_explicit: int
+) -> tuple[dict[int, int], int]:
+    """Parse explicit component (keycode, explicit) byte pairs.
+
+    Returns (dict mapping keycode -> explicit flags, bytes consumed).
+    """
+    explicit = {}
+    offset = 0
+    for _ in range(total_key_explicit):
+        if offset + 2 > len(data):
+            break
+        keycode = data[offset]
+        flags = data[offset + 1]
+        explicit[keycode] = flags
+        offset += 2
+    # Pad to 4-byte boundary
+    padded = (offset + 3) & ~3
+    return explicit, padded
 
 
 @dataclass

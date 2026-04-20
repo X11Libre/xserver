@@ -12,6 +12,7 @@ from typing import Protocol, runtime_checkable
 
 from proto.bigrequests import BigRequestsEnableRequest
 from proto.x11 import (
+    ChangeKeyboardMappingRequest,
     CreatePixmapRequest,
     CreateWindowRequest,
     InternAtomRequest,
@@ -462,6 +463,36 @@ class RawX11Connection:
         if len(resp.data) >= 12:
             return struct.unpack_from(f"{self._byte_order}I", resp.data, 8)[0]
         return 0
+
+    def xkb_get_map(
+        self, opcode: int, full: int = 0, partial: int = 0, **kwargs
+    ) -> xkb.GetMapReply | None:
+        """Send XkbGetMap and return the parsed reply."""
+        req = xkb.GetMapRequest(opcode=opcode, full=full, partial=partial, **kwargs)
+        self.send_request(req.to_bytes(self._byte_order))
+        resp = self.recv_response(timeout=5.0)
+        if isinstance(resp, X11Error) or resp is None:
+            return None
+        # resp.data is the full reply: 32 standard header + extra
+        header_data = resp.data[:32]
+        extra_data = resp.data[32:]
+        return xkb.GetMapReply.from_bytes(header_data, extra_data)
+
+    def change_keyboard_mapping(
+        self,
+        first_keycode: int,
+        keysyms_per_keycode: int,
+        keycodes: int = 1,
+        keysyms: list[int] | None = None,
+    ) -> None:
+        """Send ChangeKeyboardMapping request."""
+        req = ChangeKeyboardMappingRequest(
+            first_keycode=first_keycode,
+            keysyms_per_keycode=keysyms_per_keycode,
+            keycodes=keycodes,
+            keysyms=keysyms,
+        )
+        self.send_request(req.to_bytes(self._byte_order))
 
     def get_fd(self) -> int:
         assert self.sock

@@ -10,6 +10,7 @@ CreateWindow = 1
 CreatePixmap = 53
 InternAtom = 16
 QueryExtension = 98
+ChangeKeyboardMapping = 100
 ForceScreenSaverOpcode = 115
 
 
@@ -121,6 +122,38 @@ class QueryExtensionRequest:
             )
             + padded
         )
+
+
+@dataclass
+class ChangeKeyboardMappingRequest:
+    """X11 ChangeKeyboardMapping request (opcode 100).
+
+    Followed by keyCodes * keySymsPerKeyCode KeySym (CARD32) values.
+    """
+
+    first_keycode: int
+    keysyms_per_keycode: int
+    keycodes: int = 1
+    keysyms: list[int] | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        if self.keysyms is None:
+            syms = [0] * (self.keycodes * self.keysyms_per_keycode)
+        else:
+            syms = self.keysyms
+
+        n_syms = len(syms)
+        req_len = 2 + n_syms  # 8 bytes header = 2 words, plus 1 word per KeySym
+        header = struct.pack(
+            f"{byte_order}BBH BB xx",
+            ChangeKeyboardMapping,
+            self.keycodes,
+            req_len,
+            self.first_keycode,
+            self.keysyms_per_keycode,
+        )
+        sym_data = b"".join(struct.pack(f"{byte_order}I", s) for s in syms)
+        return header + sym_data
 
 
 @dataclass
