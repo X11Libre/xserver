@@ -401,3 +401,84 @@ class TestFreeCounter:
             )
         finally:
             client_b.close()
+
+
+class TestSyncChangeCounter:
+    """Tests for SyncChangeCounter use-after-free via trigger list."""
+
+    @pytest.mark.asan
+    def test_set_counter_multi_trigger_uaf(self, xserver, sync_xclient):
+        """
+        ZDI-CAN-30164: SyncChangeCounter iterates the counter's trigger
+        list with a saved pnext pointer. When a trigger fires via
+        SyncAwaitTriggerFired, the resulting FreeResource -> FreeAwait
+        call invokes SyncDeleteTriggerFromSyncObject for all triggers in
+        the same Await group (since beingDestroyed is FALSE). This
+        unlinks and frees trigger list nodes, including the one pnext
+        points to. The next loop iteration dereferences freed memory.
+
+        Attack: Client A creates counter=0 and SyncAwait with two
+        conditions on the same counter (wait for >= 1). Client B calls
+        SetCounter(100), triggering SyncChangeCounter. The first trigger
+        fires and FreeAwait frees both trigger list nodes. The saved
+        pnext then dangles.
+
+        Fixed by restarting iteration from the list head after
+        TriggerFired, matching the pattern used by miSyncTriggerFence().
+        """
+        client_a, opcode = sync_xclient
+
+        # Create a counter with value 0
+        counter_id = client_a.alloc_id()
+        req = sync.CreateCounterRequest(
+            opcode=opcode,
+            counter_id=counter_id,
+            initial_value_hi=0,
+            initial_value_lo=0,
+        )
+        client_a.send_request(req.to_bytes())
+        client_a.flush_responses(timeout=0.5)
+
+        # SyncAwait with 2 conditions on the SAME counter.
+        # Both wait for counter >= 1. Client A blocks because counter=0.
+        cond = (
+            counter_id,
+            sync.SyncAbsolute,
+            0,  # wait_value_hi
+            1,  # wait_value_lo
+            sync.SyncPositiveComparison,
+            0,  # event_threshold_hi
+            0,  # event_threshold_lo
+        )
+        req = sync.AwaitRequest(
+            opcode=opcode,
+            conditions=[cond, cond],
+        )
+        client_a.send_request(req.to_bytes())
+        time.sleep(0.3)
+
+        # Client B sets the counter to 100, satisfying both conditions.
+        # SyncChangeCounter fires the first trigger, which frees both
+        # trigger list nodes via FreeAwait. The saved pnext dangles.
+        client_b = RawX11Connection(xserver.display_num)
+        try:
+            ext_b = client_b.query_extension(Extension.SYNC)
+            assert ext_b is not None
+            req = sync.InitializeRequest(opcode=ext_b.opcode)
+            client_b.send_request(req.to_bytes())
+            client_b.recv_response(timeout=5.0)
+
+            req = sync.SetCounterRequest(
+                opcode=ext_b.opcode,
+                counter_id=counter_id,
+                value_hi=0,
+                value_lo=100,
+            )
+            client_b.send_request(req.to_bytes())
+            time.sleep(0.5)
+
+            assert xserver.is_alive, (
+                "Server crashed - SyncChangeCounter UAF (ZDI-CAN-30164)"
+            )
+        finally:
+            client_b.close()
