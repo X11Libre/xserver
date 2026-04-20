@@ -62,6 +62,7 @@ if pytest.found()
         'test_render.py',
         'test_screensaver.py',
         'test_shm.py',
+        'test_sync.py',
         'test_vidmode.py',
         'test_xinerama.py',
         'test_xi.py',
