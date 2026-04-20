@@ -113,10 +113,14 @@ miSyncDestroyFence(SyncFence * pFence)
         SyncScreenPrivPtr pScreenPriv = SYNC_SCREEN_PRIV(pScreen);
         SyncTriggerList *ptl, *pNext;
 
-        /* tell all the fence's triggers that the counter has been destroyed */
-        for (ptl = pFence->sync.pTriglist; ptl; ptl = pNext) {
-            (*ptl->pTrigger->CounterDestroyed) (ptl->pTrigger);
-            pNext = ptl->next;
+        /* tell all the fence's triggers that the fence has been destroyed.
+         * Update pTriglist before each callback and free so that FreeAwait
+         * sees a valid list head when scanning for triggers to NULL out.
+         */
+        nt_list_for_each_entry_safe(ptl, pNext, pFence->sync.pTriglist, next) {
+            pFence->sync.pTriglist = pNext;
+            if (ptl->pTrigger)
+                (*ptl->pTrigger->CounterDestroyed) (ptl->pTrigger);
             free(ptl); /* destroy the trigger list as we go */
         }
 
