@@ -130,12 +130,6 @@ ProcXIPassiveGrabDevice(ClientPtr client)
         return BadValue;
     }
 
-    /* XI2 allows 32-bit keycodes but thanks to XKB we can never
-     * implement this. Just return an error for all keycodes that
-     * cannot work anyway, same for buttons > 255. */
-    if (stuff->detail > 255)
-        return XIAlreadyGrabbed;
-
     if (XICheckInvalidMaskBits(client, (unsigned char *) &stuff[1],
                                stuff->mask_len * 4) != Success)
         return BadValue;
@@ -195,6 +189,14 @@ ProcXIPassiveGrabDevice(ClientPtr client)
     for (i = 0; i < stuff->num_modifiers; i++, modifiers++) {
         uint8_t status = Success;
 
+        /* XI2 allows 32-bit keycodes but thanks to XKB we can never
+         * implement this. Pretend that all keycodes above 255 are
+         * already grabbed, same for buttons > 255. */
+        if (stuff->detail > 255) {
+            status = XIAlreadyGrabbed;
+            goto modifier_done;
+        }
+
         param.modifiers = *modifiers;
         ret = CheckGrabValues(client, &param);
         if (ret != Success)
@@ -227,6 +229,7 @@ ProcXIPassiveGrabDevice(ClientPtr client)
             break;
         }
 
+modifier_done:
         if (status != GrabSuccess) {
             xXIGrabModifierInfo *info = modifiers_failed + rep.num_modifiers;
 
