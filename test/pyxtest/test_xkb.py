@@ -670,3 +670,82 @@ class TestXkbSetMapNumLevels:
         assert xserver.is_alive, (
             "Server crashed - numLevels > XkbMaxShiftLevel (ZDI-CAN-30160)"
         )
+
+
+class TestXkbSetMapMapWidths:
+    """Tests for XKB SetMap mapWidths stack buffer overflow."""
+
+    @pytest.mark.asan
+    def test_mapwidths_stack_oob_write(self, xserver, xkb_xclient):
+        """
+        ZDI-CAN-30161: CheckKeyTypes computes nMaps = firstType + nTypes
+        from client-controlled fields when XkbSetMapResizeTypes is set.
+        mapWidths[] is a stack-allocated CARD8 array of 256 elements.
+        No upper bound was enforced on nMaps.
+
+        Attack: First, SetMap(firstType=0, nTypes=255, ResizeTypes)
+        sets num_types to 255. Then SetMap(firstType=255, nTypes=10,
+        ResizeTypes) passes the check firstType > num_types (255 > 255
+        is false) and computes nMaps=265. The loop then writes
+        mapWidths[255..264], overflowing 9 bytes past the stack buffer.
+
+        Fixed by rejecting requests where firstType + nTypes exceeds
+        the mapWidths buffer size (XkbMaxLegalKeyCode + 1 = 256).
+        """
+        xclient, opcode = xkb_xclient
+
+        # Step 1: SetMap with firstType=0, nTypes=255 to set num_types=255.
+        # All types must have valid numLevels.
+        types_payload = b""
+        # Type 0: numLevels=1
+        types_payload += xkb.KeyTypeWire(num_levels=1).to_bytes()
+        # Types 1-3: numLevels=2
+        for _ in range(3):
+            types_payload += xkb.KeyTypeWire(num_levels=2).to_bytes()
+        # Types 4-254: numLevels=1
+        for _ in range(251):
+            types_payload += xkb.KeyTypeWire(num_levels=1).to_bytes()
+
+        req = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask,
+            flags=xkb.XkbSetMapResizeTypes,
+            first_type=0,
+            n_types=255,
+            min_key_code=8,
+            max_key_code=255,
+            payload=types_payload,
+        )
+        xclient.send_request(req.to_bytes())
+        xclient.flush_responses(timeout=0.5)
+
+        # Step 2: SetMap with firstType=255, nTypes=10, ResizeTypes.
+        # nMaps = 255 + 10 = 265, which exceeds mapWidths[256].
+        # Without the fix, this writes past the stack buffer.
+        types_payload2 = b""
+        for _ in range(10):
+            types_payload2 += xkb.KeyTypeWire(num_levels=1).to_bytes()
+
+        req = xkb.SetMapRequest(
+            opcode=opcode,
+            present=xkb.XkbKeyTypesMask,
+            flags=xkb.XkbSetMapResizeTypes,
+            first_type=255,
+            n_types=10,
+            min_key_code=8,
+            max_key_code=255,
+            payload=types_payload2,
+        )
+        xclient.send_request(req.to_bytes())
+        resps = xclient.flush_responses(timeout=0.5)
+        errors = [r for r in resps if isinstance(r, X11Error)]
+
+        # On a patched server, CheckKeyTypes rejects nMaps > XkbMaxLegalKeyCode + 1.
+        assert errors, (
+            "SetMap with firstType=255 nTypes=10 was accepted - "
+            "server is missing the nMaps upper bound check (ZDI-CAN-30161)"
+        )
+
+        assert xserver.is_alive, (
+            "Server crashed - mapWidths stack OOB write (ZDI-CAN-30161)"
+        )
