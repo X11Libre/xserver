@@ -1632,6 +1632,11 @@ CheckKeyTypes(ClientPtr client,
             *nMapsRtrn = _XkbErrCode4(0x02, req->firstType, req->nTypes, 4);
             return 0;
         }
+        if (nMaps > XkbMaxLegalKeyCode + 1) {
+            *nMapsRtrn = _XkbErrCode4(0x02, req->firstType, req->nTypes,
+                                      XkbMaxLegalKeyCode + 1);
+            return 0;
+        }
     }
     else if (req->present & XkbKeyTypesMask) {
         nMaps = xkb->map->num_types;
