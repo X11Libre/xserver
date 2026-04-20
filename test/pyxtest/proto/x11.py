@@ -10,6 +10,11 @@ CreateWindow = 1
 CreatePixmap = 53
 InternAtom = 16
 QueryExtension = 98
+ForceScreenSaverOpcode = 115
+
+
+ScreenSaverReset = 0
+ScreenSaverActive = 1
 
 
 def _pad(data: bytes) -> bytes:
@@ -115,4 +120,19 @@ class QueryExtensionRequest:
                 f"{byte_order}BBHHxx", QueryExtension, 0, req_len, len(name_bytes)
             )
             + padded
+        )
+
+
+@dataclass
+class ForceScreenSaver:
+    """X11 ForceScreenSaver request."""
+
+    mode: int
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        return struct.pack(
+            f"{byte_order}BBH",
+            ForceScreenSaverOpcode,
+            self.mode,
+            1,  # length = 1 word
         )
