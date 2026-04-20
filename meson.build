@@ -35,6 +35,61 @@ add_project_link_arguments('-fvisibility=hidden', language : 'c')
 conf_data = configuration_data()
 conf_data.set('_DIX_CONFIG_H_', '1')
 
+allocator_count = 0
+if get_option('mimalloc')
+    allocator_count += 1
+endif
+if get_option('tcmalloc')
+    allocator_count += 1
+endif
+if get_option('jemalloc')
+    allocator_count += 1
+endif
+
+if allocator_count > 1
+    error('Only one memory allocator (mimalloc, tcmalloc, jemalloc) can be enabled at a time.')
+elif get_option('mimalloc')
+    mimalloc_dep = dependency('mimalloc', required: true)
+    conf_data.set('HAVE_MIMALLOC', 1)
+    add_project_arguments('-Dmalloc=mi_malloc', language: 'c')
+    add_project_arguments('-Dcalloc=mi_calloc', language: 'c')
+    add_project_arguments('-Drealloc=mi_realloc', language: 'c')
+    add_project_arguments('-Dfree=mi_free', language: 'c')
+    add_project_arguments('-Dposix_memalign=mi_posix_memalign', language: 'c')
+    add_project_arguments('-Dstrdup=mi_strdup', language: 'c')
+    add_project_arguments('-Dstrndup=mi_strndup', language: 'c')
+    tcmalloc_dep = dependency('', required: false)
+    jemalloc_dep = dependency('', required: false)
+elif get_option('tcmalloc')
+    tcmalloc_dep = dependency('libtcmalloc_minimal', required: true)
+    conf_data.set('HAVE_TCMALLOC', 1)
+    add_project_arguments('-Dmalloc=tc_malloc', language: 'c')
+    add_project_arguments('-Dcalloc=tc_calloc', language: 'c')
+    add_project_arguments('-Drealloc=tc_realloc', language: 'c')
+    add_project_arguments('-Dfree=tc_free', language: 'c')
+    add_project_arguments('-Dposix_memalign=tc_posix_memalign', language: 'c')
+    add_project_arguments('-Dstrdup=tc_strdup', language: 'c')
+    add_project_arguments('-Dstrndup=tc_strndup', language: 'c')
+    mimalloc_dep = dependency('', required: false)
+    jemalloc_dep = dependency('', required: false)
+elif get_option('jemalloc')
+    jemalloc_dep = dependency('jemalloc', required: true)
+    conf_data.set('HAVE_JEMALLOC', 1)
+    add_project_arguments('-Dmalloc=je_malloc', language: 'c')
+    add_project_arguments('-Dcalloc=je_calloc', language: 'c')
+    add_project_arguments('-Drealloc=je_realloc', language: 'c')
+    add_project_arguments('-Dfree=je_free', language: 'c')
+    add_project_arguments('-Dposix_memalign=je_posix_memalign', language: 'c')
+    add_project_arguments('-Dstrdup=je_strdup', language: 'c')
+    add_project_arguments('-Dstrndup=je_strndup', language: 'c')
+    mimalloc_dep = dependency('', required: false)
+    tcmalloc_dep = dependency('', required: false)
+else
+    mimalloc_dep = dependency('', required: false)
+    tcmalloc_dep = dependency('', required: false)
+    jemalloc_dep = dependency('', required: false)
+endif
+
 if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
     test_wflags = [
         '-Wall',
@@ -660,6 +715,9 @@ common_dep = [
     xkbfile_dep,
     xfont2_dep,
     xdmcp_dep,
+    mimalloc_dep,
+    tcmalloc_dep,
+    jemalloc_dep,
 ]
 
 inc = include_directories(
