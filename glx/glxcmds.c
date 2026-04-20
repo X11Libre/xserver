@@ -2495,6 +2495,8 @@ __glXDisp_ClientInfo(__GLXclientState * cl, GLbyte * pc)
 
     free(cl->GLClientextensions);
     cl->GLClientextensions = strdup(buf);
+    if (!cl->GLClientextensions)
+        return BadAlloc;
 
     return Success;
 }
