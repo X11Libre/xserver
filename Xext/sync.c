@@ -1213,9 +1213,12 @@ FreeCounter(void *env, XID id)
         SyncTriggerList *ptl, *pnext;
 
         /* tell all the counter's triggers that counter has been destroyed */
-        for (ptl = pCounter->sync.pTriglist; ptl; ptl = pnext) {
-            (*ptl->pTrigger->CounterDestroyed) (ptl->pTrigger);
-            pnext = ptl->next;
+        nt_list_for_each_entry_safe(ptl, pnext, pCounter->sync.pTriglist, next) {
+            /* Remove it from the list first so CounterDestroyed
+             * callbacks have a valid list to iterate */
+            pCounter->sync.pTriglist = pnext;
+            if (ptl->pTrigger)
+                (*ptl->pTrigger->CounterDestroyed) (ptl->pTrigger);
             free(ptl); /* destroy the trigger list as we go */
         }
         if (IsSystemCounter(pCounter) && pCounter->pSysCounterInfo) {
@@ -1247,13 +1250,28 @@ FreeAwait(void *addr, XID id)
 
     for (numwaits = pAwaitUnion->header.num_waitconditions; numwaits;
          numwaits--, pAwait++) {
-        /* If the counter is being destroyed, FreeCounter will delete
-         * the trigger list itself, so don't do it here.
+        /* If the counter is being destroyed, FreeCounter/miSyncDestroyFence
+         * will delete the trigger list itself, so don't do it here.
+         * However, we must NULL out the pTrigger pointer in the trigger list
+         * node so the destroy loop knows not to dereference it - the backing
+         * SyncAwait memory is about to be freed below.
          */
         SyncObject *pSync = pAwait->trigger.pSync;
 
-        if (pSync && !pSync->beingDestroyed)
-            SyncDeleteTriggerFromSyncObject(&pAwait->trigger);
+        if (pSync) {
+            if (!pSync->beingDestroyed) {
+                SyncDeleteTriggerFromSyncObject(&pAwait->trigger);
+            } else {
+                SyncTriggerList *ptl;
+
+                nt_list_for_each_entry(ptl, pSync->pTriglist, next) {
+                    if (ptl->pTrigger == &pAwait->trigger) {
+                        ptl->pTrigger = NULL;
+                        break;
+                    }
+                }
+            }
+        }
     }
     free(pAwaitUnion);
     return Success;
