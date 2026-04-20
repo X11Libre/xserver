@@ -328,6 +328,9 @@ ScreenSaverFreeAttr(void *value, XID id)
         dixSaveScreens(serverClient, SCREEN_SAVER_FORCER, ScreenSaverActive);
     }
     CheckScreenPrivate(pScreen);
+    /* CheckScreenPrivate may have freed pPriv (same pattern as
+     * CreateSaverWindow fix for ZDI-CAN-30168). */
+    pPriv = NULL;
     return TRUE;
 }
 
@@ -459,6 +462,8 @@ CreateSaverWindow(ScreenPtr pScreen)
             UninstallSaverColormap(pScreen);
             pPriv->hasWindow = FALSE;
             CheckScreenPrivate(pScreen);
+            /* Re-fetch pPriv since CheckScreenPrivate may have freed it */
+            pPriv = GetScreenPrivate(pScreen);
         }
     }
 
