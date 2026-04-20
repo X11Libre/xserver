@@ -68,10 +68,10 @@ class UseExtensionRequest:
 
     def to_bytes(self, byte_order: str = "<") -> bytes:
         return struct.pack(
-            f"{byte_order}BBHHH xx",
+            f"{byte_order}BBHHH",
             self.opcode,
             XkbUseExtension,
-            3,  # 12 bytes = 3 words
+            2,  # 8 bytes = 2 words
             self.major,
             self.minor,
         )
@@ -368,17 +368,23 @@ def build_counted_string(s: str | bytes, byte_order: str = "<") -> bytes:
 @dataclass
 class ShapeWire:
     """
-    xkbShapeWireDesc (4 bytes) + outline data.
-    Each outline: header(4 bytes) + nPoints * point(4 bytes).
+    xkbShapeWireDesc (8 bytes) + outline data.
+
+    Wire layout:
+      name(4 Atom) + nOutlines(1) + primaryNdx(1) + approxNdx(1) + pad(1)
+    Each outline: header(4 bytes: nPoints(1) + cornerRadius(1) + pad(2))
+                  + nPoints * point(4 bytes: x(2) + y(2)).
     """
 
+    name: int = 0  # Atom
     n_outlines: int = 1
     primary_ndx: int = 0
     approx_ndx: int = 0
 
     def to_bytes(self, byte_order: str = "<") -> bytes:
         header = struct.pack(
-            f"{byte_order}BBBx",
+            f"{byte_order}IBBBx",
+            self.name,
             self.n_outlines,
             self.primary_ndx,
             self.approx_ndx,
@@ -395,6 +401,7 @@ class ShapeWire:
 class SectionWire:
     """xkbSectionWireDesc (20 bytes) + row data."""
 
+    name: int = 0  # Atom
     n_rows: int = 1
     n_doodads: int = 0
     n_overlays: int = 0
@@ -402,7 +409,7 @@ class SectionWire:
     def to_bytes(self, byte_order: str = "<") -> bytes:
         header = struct.pack(
             f"{byte_order}I hh HH h BBBBxx",
-            0,  # name (Atom)
+            self.name,  # name (Atom)
             0,
             0,  # top, left
             100,
@@ -423,11 +430,12 @@ class SectionWire:
 class OverlayWire:
     """xkbOverlayWireDesc + overlay rows."""
 
+    name: int = 0  # Atom
     n_rows: int = 1
     rows_under: list[int] | None = None
 
     def to_bytes(self, byte_order: str = "<") -> bytes:
-        header = struct.pack(f"{byte_order}IBxxx", 0, self.n_rows)
+        header = struct.pack(f"{byte_order}IBxxx", self.name, self.n_rows)
         rows_under = (
             self.rows_under if self.rows_under is not None else list(range(self.n_rows))
         )
@@ -469,5 +477,190 @@ class GetKbdByNameRequest:
             self.need,
             self.want,
             self.load,
+        )
+        return header + self.payload + b"\x00" * pad_len
+
+
+# XkbSetNames 'which' flags
+XkbKeycodesNameMask = 1 << 0
+XkbGeometryNameMask = 1 << 1
+XkbSymbolsNameMask = 1 << 2
+XkbPhysSymbolsNameMask = 1 << 3
+XkbTypesNameMask = 1 << 4
+XkbCompatNameMask = 1 << 5
+XkbKeyTypeNamesMask = 1 << 6
+XkbKTLevelNamesMask = 1 << 7
+XkbIndicatorNamesMask = 1 << 8
+XkbKeyNamesMask = 1 << 9
+XkbKeyAliasesMask = 1 << 10
+XkbVirtualModNamesMask = 1 << 11
+XkbGroupNamesMask = 1 << 12
+XkbRGNamesMask = 1 << 13
+
+# XkbSetDeviceInfo 'change' flags
+XkbXI_ButtonActionsMask = 1 << 0
+XkbXI_IndicatorNamesMask = 1 << 1
+XkbXI_IndicatorMapsMask = 1 << 2
+XkbXI_IndicatorStateMask = 1 << 3
+XkbXI_IndicatorsMask = 0x0E  # Names | Maps | State
+
+
+@dataclass
+class SetNamesRequest:
+    """xkbSetNamesReq (minor opcode 18). Header is 28 bytes."""
+
+    opcode: int
+    device_spec: int = XkbUseCoreKbd
+    virtual_mods: int = 0
+    which: int = 0
+    first_type: int = 0
+    n_types: int = 0
+    first_kt_level: int = 0
+    n_kt_levels: int = 0
+    indicators: int = 0
+    group_names: int = 0
+    n_radio_groups: int = 0
+    first_key: int = 8
+    n_keys: int = 0
+    n_key_aliases: int = 0
+    total_kt_level_names: int = 0
+    payload: bytes = b""
+    length_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        total_bytes = 28 + len(self.payload)
+        pad_len = (4 - total_bytes % 4) % 4
+        total_bytes += pad_len
+
+        length = (
+            self.length_override
+            if self.length_override is not None
+            else total_bytes // 4
+        )
+
+        header = struct.pack(
+            f"{byte_order}BBH"  # reqType, xkbReqType, length
+            f"HH"  # deviceSpec, virtualMods
+            f"I"  # which
+            f"BBBB"  # firstType, nTypes, firstKTLevel, nKTLevels
+            f"I"  # indicators
+            f"BB"  # groupNames, nRadioGroups
+            f"BB"  # firstKey, nKeys
+            f"Bx"  # nKeyAliases, pad
+            f"H",  # totalKTLevelNames
+            self.opcode,
+            XkbSetNames,
+            length,
+            self.device_spec,
+            self.virtual_mods,
+            self.which,
+            self.first_type,
+            self.n_types,
+            self.first_kt_level,
+            self.n_kt_levels,
+            self.indicators,
+            self.group_names,
+            self.n_radio_groups,
+            self.first_key,
+            self.n_keys,
+            self.n_key_aliases,
+            self.total_kt_level_names,
+        )
+        return header + self.payload + b"\x00" * pad_len
+
+
+@dataclass
+class SetDeviceInfoRequest:
+    """xkbSetDeviceInfoReq (minor opcode 25). Header is 12 bytes."""
+
+    opcode: int
+    device_spec: int = XkbUseCoreKbd
+    first_btn: int = 0
+    n_btns: int = 0
+    change: int = 0
+    n_device_led_fbs: int = 0
+    payload: bytes = b""
+    length_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        total_bytes = 12 + len(self.payload)
+        pad_len = (4 - total_bytes % 4) % 4
+        total_bytes += pad_len
+
+        length = (
+            self.length_override
+            if self.length_override is not None
+            else total_bytes // 4
+        )
+
+        header = struct.pack(
+            f"{byte_order}BBH HBB HH",
+            self.opcode,
+            XkbSetDeviceInfo,
+            length,
+            self.device_spec,
+            self.first_btn,
+            self.n_btns,
+            self.change,
+            self.n_device_led_fbs,
+        )
+        return header + self.payload + b"\x00" * pad_len
+
+
+# XkbSelectEvents event mask bits
+XkbNewKeyboardNotifyMask = 1 << 0
+XkbMapNotifyMask = 1 << 1
+XkbStateNotifyMask = 1 << 2
+XkbControlsNotifyMask = 1 << 3
+XkbIndicatorStateNotifyMask = 1 << 4
+XkbIndicatorMapNotifyMask = 1 << 5
+XkbNamesNotifyMask = 1 << 6
+XkbCompatMapNotifyMask = 1 << 7
+XkbBellNotifyMask = 1 << 8
+XkbActionMessageMask = 1 << 9
+XkbAccessXNotifyMask = 1 << 10
+XkbExtensionDeviceNotifyMask = 1 << 11
+
+
+@dataclass
+class SelectEventsRequest:
+    """xkbSelectEventsReq (minor opcode 1). Header is 16 bytes.
+
+    The header is followed by per-event affect/detail masks for any
+    event types set in affectWhich that are NOT in selectAll or clear.
+    """
+
+    opcode: int
+    device_spec: int = XkbUseCoreKbd
+    affect_which: int = 0
+    clear: int = 0
+    select_all: int = 0
+    affect_map: int = 0
+    map: int = 0
+    payload: bytes = b""
+    length_override: int | None = None
+
+    def to_bytes(self, byte_order: str = "<") -> bytes:
+        total_bytes = 16 + len(self.payload)
+        pad_len = (4 - total_bytes % 4) % 4
+        total_bytes += pad_len
+
+        length = (
+            self.length_override
+            if self.length_override is not None
+            else total_bytes // 4
+        )
+
+        header = struct.pack(
+            f"{byte_order}BBH HH HH HH",
+            self.opcode,
+            XkbSelectEvents,
+            length,
+            self.device_spec,
+            self.affect_which,
+            self.clear,
+            self.select_all,
+            self.affect_map,
+            self.map,
         )
         return header + self.payload + b"\x00" * pad_len
