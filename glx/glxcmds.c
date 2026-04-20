@@ -1144,8 +1144,7 @@ __glXDisp_GetFBConfigsSGIX(__GLXclientState * cl, GLbyte * pc)
     ClientPtr client = cl->client;
     xGLXGetFBConfigsSGIXReq *req = (xGLXGetFBConfigsSGIXReq *) pc;
 
-    /* work around mesa bug, don't use REQUEST_SIZE_MATCH */
-    REQUEST_AT_LEAST_SIZE(xGLXGetFBConfigsSGIXReq);
+    REQUEST_SIZE_MATCH(xGLXGetFBConfigsSGIXReq);
     return DoGetFBConfigs(cl, req->screen);
 }
 
@@ -1366,9 +1365,7 @@ __glXDisp_DestroyPixmap(__GLXclientState * cl, GLbyte * pc)
     ClientPtr client = cl->client;
     xGLXDestroyPixmapReq *req = (xGLXDestroyPixmapReq *) pc;
 
-    /* should be REQUEST_SIZE_MATCH, but mesa's glXDestroyPixmap used to set
-     * length to 3 instead of 2 */
-    REQUEST_AT_LEAST_SIZE(xGLXDestroyPixmapReq);
+    REQUEST_SIZE_MATCH(xGLXDestroyPixmapReq);
 
     return DoDestroyDrawable(cl, req->glxpixmap, GLX_DRAWABLE_PIXMAP);
 }
@@ -1524,14 +1521,8 @@ __glXDisp_ChangeDrawableAttributes(__GLXclientState * cl, GLbyte * pc)
         client->errorValue = req->numAttribs;
         return BadValue;
     }
-#if 0
-    /* mesa sends an additional 8 bytes */
+
     REQUEST_FIXED_SIZE(xGLXChangeDrawableAttributesReq, req->numAttribs << 3);
-#else
-    if (((sizeof(xGLXChangeDrawableAttributesReq) +
-          (req->numAttribs << 3)) >> 2) < client->req_len)
-        return BadLength;
-#endif
 
     return DoChangeDrawableAttributes(cl->client, req->drawable,
                                       req->numAttribs, (CARD32 *) (req + 1));
@@ -1598,8 +1589,7 @@ __glXDisp_DestroyWindow(__GLXclientState * cl, GLbyte * pc)
     ClientPtr client = cl->client;
     xGLXDestroyWindowReq *req = (xGLXDestroyWindowReq *) pc;
 
-    /* mesa's glXDestroyWindow used to set length to 3 instead of 2 */
-    REQUEST_AT_LEAST_SIZE(xGLXDestroyWindowReq);
+    REQUEST_SIZE_MATCH(xGLXDestroyWindowReq);
 
     return DoDestroyDrawable(cl, req->glxwindow, GLX_DRAWABLE_WINDOW);
 }
@@ -1952,8 +1942,7 @@ __glXDisp_GetDrawableAttributes(__GLXclientState * cl, GLbyte * pc)
     ClientPtr client = cl->client;
     xGLXGetDrawableAttributesReq *req = (xGLXGetDrawableAttributesReq *) pc;
 
-    /* this should be REQUEST_SIZE_MATCH, but mesa sends an additional 4 bytes */
-    REQUEST_AT_LEAST_SIZE(xGLXGetDrawableAttributesReq);
+    REQUEST_SIZE_MATCH(xGLXGetDrawableAttributesReq);
 
     return DoGetDrawableAttributes(cl, req->drawable);
 }
