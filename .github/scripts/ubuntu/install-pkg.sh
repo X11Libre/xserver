@@ -93,4 +93,5 @@ apt-get install -y \
 	xutils-dev \
 	libxaw7-dev \
 	python3-mako \
-	libxcvt-dev
+	libxcvt-dev \
+	golang-go
