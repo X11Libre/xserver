@@ -117,7 +117,7 @@ Together we'll make X great again!
 
 ## Contact
 
-[XLibre Discussions at GitHub](https://github.com/orgs/X11Libre/discussions) | [XLibre mailing list at FreeLists](https://www.freelists.org/list/xlibre) | [@x11dev channel at Telegram](https://t.me/x11dev) | [#xlibre room at Matrix](https://matrix.to/#/#xlibre:matrix.org) | [XLibre security contact at GitHub](https://github.com/X11Libre/xserver/security/policy)
+[XLibre Discussions at GitHub](https://github.com/orgs/X11Libre/discussions) | [XLibre mailing list at FreeLists](https://www.freelists.org/list/xlibre) | [@x11dev channel at Telegram](https://t.me/x11dev) | [#general:xlibre.space on Matrix](https://matrix.to/#/#general:xlibre.space) | [XLibre security contact at GitHub](https://github.com/X11Libre/xserver/security/policy)
 
 [Interview: Meet Enrico Weigelt, the maintainer of the new XLibre fork - Felipe Contreras](https://felipec.wordpress.com/2025/06/11/enrico-weigelt/)
 
