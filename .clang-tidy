@@ -1,5 +1,5 @@
 # .clang-tidy
-Checks: '-*,readability-braces-around-statements'
+Checks: '-*,readability-braces-around-statements,-modernize-use-bool-literals'
 CheckOptions:
   - key: readability-braces-around-statements.ShortStatementLines
     value: 0
