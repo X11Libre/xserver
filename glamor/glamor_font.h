@@ -19,9 +19,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-
 #ifndef _GLAMOR_FONT_H_
 #define _GLAMOR_FONT_H_
+
+#include <X11/Xdefs.h>
 
 typedef struct {
     Bool        realized;
