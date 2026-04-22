@@ -6,8 +6,12 @@
 #ifndef DRMMODE_BO_H
 #define DRMMODE_BO_H
 
-#include <gbm.h>
+/* Forward declarations so we don't have to include gbm.h*/
+struct gbm_bo;
+struct gbm_device;
+
 #include "drmmode_display.h"
+#include "dri3_util_priv.h"
 
 enum {
     DRMMODE_FRONT_BO = 1 << 0,
@@ -39,24 +43,8 @@ drmmode_bo_import(drmmode_ptr drmmode, struct gbm_bo *bo,
 static inline uint32_t
 drmmode_gbm_format_for_depth(int depth)
 {
-    switch (depth) {
-    case 8:
-        return GBM_FORMAT_R8;
-    case 15:
-        return GBM_FORMAT_ARGB1555;
-    case 16:
-        return GBM_FORMAT_RGB565;
-    case 24:
-        return GBM_FORMAT_XRGB8888;
-    case 30:
-        /* XXX Is this format right? https://github.com/X11Libre/xserver/pull/1396/files#r2523698616 XXX */
-        return GBM_FORMAT_ARGB2101010;
-    case 32:
-        return GBM_FORMAT_ARGB8888;
-    }
-
-    /* Unsupported depth */
-    return GBM_FORMAT_ARGB8888;
+    /* For modesetting, we usually want alpha only if the depth is explicitly 32 */
+    return dri3_gbm_format_for_depth(depth, (depth + 7) & ~7, depth == 32 || depth == 30);
 }
 
 #endif /* DRMMODE_BO_H */

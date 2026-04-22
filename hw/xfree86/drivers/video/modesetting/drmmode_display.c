@@ -48,6 +48,8 @@
 #include <drm_fourcc.h>
 #include <drm_mode.h>
 
+#include "dri3_util_priv.h"
+
 #include <xf86drm.h>
 #include "xf86Crtc.h"
 #include "drmmode_bo.h"
@@ -111,14 +113,22 @@ modifiers_ptr(struct drm_format_modifier_blob *blob)
 static uint32_t
 get_opaque_format(uint32_t format)
 {
-    switch (format) {
-    case DRM_FORMAT_ARGB8888:
-        return DRM_FORMAT_XRGB8888;
-    case DRM_FORMAT_ARGB2101010:
-        return DRM_FORMAT_XRGB2101010;
-    default:
-        return format;
-    }
+    /* Get the bit depth and bpp for the current format */
+    int bpp = dri3_bpp_for_fourcc(format);
+    
+    /* * To get the opaque version, we find the depth.
+     * If it's 32bpp, the opaque depth is usually 24.
+     * If it's 30 (for 10-bit), we keep it 30 but specify no alpha.
+     */
+    int depth = (bpp == 32) ? 24 : bpp;
+    if (format == DRM_FORMAT_ARGB2101010 || format == DRM_FORMAT_XRGB2101010)
+        depth = 30;
+
+    /* Query for the version without explicit alpha */
+    uint32_t opaque = dri3_fourcc_for_depth(depth, bpp, FALSE);
+
+    /* Fallback to original format if the utility doesn't have a mapping */
+    return opaque ? opaque : format;
 }
 
 static drmmode_format_ptr

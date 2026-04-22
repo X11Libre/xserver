@@ -26,6 +26,7 @@
 #include "miext/extinit_priv.h"
 
 #include "dri3_priv.h"
+#include "dri3_util_priv.h"
 #include <drm_fourcc.h>
 
 static int dri3_request;
@@ -119,21 +120,4 @@ dri3_extension_init(void)
 
 bail:
     FatalError("Cannot initialize DRI3 extension");
-}
-
-uint32_t
-drm_format_for_depth(uint32_t depth, uint32_t bpp)
-{
-    switch (bpp) {
-        case 16:
-            return DRM_FORMAT_RGB565;
-        case 24:
-            return DRM_FORMAT_XRGB8888;
-        case 30:
-            return DRM_FORMAT_XRGB2101010;
-        case 32:
-            return DRM_FORMAT_ARGB8888;
-        default:
-            return 0;
-    }
 }
