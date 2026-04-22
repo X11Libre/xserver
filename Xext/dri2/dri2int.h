@@ -26,6 +26,8 @@
 #ifndef XSERVER_XFREE86_DRI2INT_H
 #define XSERVER_XFREE86_DRI2INT_H
 
+#include <X11/Xdefs.h>
+
 extern Bool DRI2ModuleSetup(void);
 
 #endif /* XSERVER_XFREE86_DRI2INT_H */
