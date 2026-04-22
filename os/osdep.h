@@ -48,6 +48,18 @@ SOFTWARE.
 
 #include <dix-config.h>
 
+#ifdef HAVE_MIMALLOC
+#include <mimalloc.h>
+#endif
+
+#ifdef HAVE_TCMALLOC
+#include <gperftools/tcmalloc.h>
+#endif
+
+#ifdef HAVE_JEMALLOC
+#include <jemalloc/jemalloc.h>
+#endif
+
 #include <X11/Xdefs.h>
 
 #include <limits.h>
