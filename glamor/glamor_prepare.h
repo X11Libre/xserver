@@ -19,9 +19,10 @@
  * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
-
 #ifndef _GLAMOR_PREPARE_H_
 #define _GLAMOR_PREPARE_H_
+
+#include <X11/Xdefs.h>
 
 Bool
 glamor_prepare_access(DrawablePtr drawable, glamor_access_t access);
