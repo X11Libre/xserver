@@ -14,6 +14,7 @@ add_project_arguments('-fno-strict-aliasing', language : 'c')
 add_project_arguments('-fvisibility=hidden', language : 'c')
 add_project_arguments('-fno-common', language: 'c')
 add_project_arguments('-Wchar-subscripts', language: 'c')
+add_project_arguments('-Wmissing-braces', language: 'c')
 
 # workaround for mesa bug causing GLsync to be typedef'ed multiple times
 # this is breaking -Werror on FreeBSD
