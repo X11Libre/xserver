@@ -26,6 +26,7 @@
 #define WINGLOBALS_H
 
 #include <pthread.h>
+#include <stdbool.h>
 
 /*
  * References to external symbols
@@ -34,29 +35,29 @@
 extern int g_iNumScreens;
 extern int g_iLastScreen;
 extern char *g_pszCommandLine;
-extern Bool g_fSilentFatalError;
+extern bool g_fSilentFatalError;
 extern const char *g_pszLogFile;
 
 #ifdef RELOCATE_PROJECTROOT
-extern Bool g_fLogFileChanged;
+extern bool g_fLogFileChanged;
 #endif
 extern int g_iLogVerbose;
-extern Bool g_fLogInited;
+extern bool g_fLogInited;
 
-extern Bool g_fAuthEnabled;
-extern Bool g_fXdmcpEnabled;
-extern Bool g_fCompositeAlpha;
+extern bool g_fAuthEnabled;
+extern bool g_fXdmcpEnabled;
+extern bool g_fCompositeAlpha;
 
-extern Bool g_fNoHelpMessageBox;
-extern Bool g_fNativeGl;
-extern Bool g_fHostInTitle;
+extern bool g_fNoHelpMessageBox;
+extern bool g_fNativeGl;
+extern bool g_fHostInTitle;
 
 extern HWND g_hDlgDepthChange;
 extern HWND g_hDlgExit;
 extern HWND g_hDlgAbout;
 
-extern Bool g_fSoftwareCursor;
-extern Bool g_fCursor;
+extern bool g_fSoftwareCursor;
+extern bool g_fCursor;
 
 /* Typedef for DIX wrapper functions */
 typedef int (*winDispatchProcPtr) (ClientPtr);
@@ -65,8 +66,8 @@ typedef int (*winDispatchProcPtr) (ClientPtr);
  * Wrapped DIX functions
  */
 extern winDispatchProcPtr winProcEstablishConnectionOrig;
-extern Bool g_fClipboard;
-extern Bool g_fClipboardStarted;
+extern bool g_fClipboard;
+extern bool g_fClipboardStarted;
 
 /* The global X default icons */
 extern HICON g_hIconX;
@@ -74,8 +75,8 @@ extern HICON g_hSmallIconX;
 
 extern DWORD g_dwCurrentThreadID;
 
-extern Bool g_fKeyboardHookLL;
-extern Bool g_fButton[3];
+extern bool g_fKeyboardHookLL;
+extern bool g_fButton[3];
 
 extern pthread_mutex_t g_pmTerminating;
 
