@@ -36,12 +36,6 @@ DarwinEQInit(void);
 void
 DarwinEQFini(void);
 void
-DarwinEQEnqueue(const xEventPtr e);
-void
-DarwinEQPointerPost(DeviceIntPtr pDev, xEventPtr e);
-void
-DarwinEQSwitchScreen(ScreenPtr pScreen, Bool fromDIX);
-void
 DarwinInputReleaseButtonsAndKeys(DeviceIntPtr pDev);
 void
 DarwinSendTabletEvents(DeviceIntPtr pDev, int ev_type, int ev_button,
