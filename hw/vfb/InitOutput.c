@@ -205,12 +205,11 @@ vfbBitsPerPixel(int depth)
 {
     if (depth == 1)
         return 1;
-    else if (depth <= 8)
+    if (depth <= 8)
         return 8;
-    else if (depth <= 16)
+    if (depth <= 16)
         return 16;
-    else
-        return 32;
+    return 32;
 }
 
 static void
