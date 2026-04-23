@@ -5,6 +5,8 @@
 #ifndef XSERVER_PANORAMIXH_H
 #define XSERVER_PANORAMIXH_H
 
+#include "dix.h"
+
 int PanoramiXCreateWindow(ClientPtr client);
 int PanoramiXChangeWindowAttributes(ClientPtr client);
 int PanoramiXDestroyWindow(ClientPtr client);
