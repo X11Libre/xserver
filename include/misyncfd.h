@@ -23,6 +23,8 @@
 #ifndef _MISYNCFD_H_
 #define _MISYNCFD_H_
 
+#include <X11/Xdefs.h>
+
 typedef int (*SyncScreenCreateFenceFromFdFunc) (ScreenPtr screen,
                                                 SyncFence *fence,
                                                 int fd,
