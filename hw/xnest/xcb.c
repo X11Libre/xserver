@@ -4,6 +4,7 @@
  */
 #include <dix-config.h>
 
+#include <stdbool.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_aux.h>
 #include <xcb/xcb_icccm.h>
@@ -25,7 +26,7 @@ struct xnest_upstream_info xnestUpstreamInfo = { 0 };
 xnest_visual_t *xnestVisualMap;
 int xnestNumVisualMap;
 
-Bool xnest_upstream_setup(const char* displayName)
+bool xnest_upstream_setup(const char* displayName)
 {
     xnestUpstreamInfo.conn = xcb_connect(displayName, &xnestUpstreamInfo.screenId);
     if (!xnestUpstreamInfo.conn)
